@@ -4,6 +4,11 @@
 
 namespace Insight
 {
+	namespace Module
+	{
+		class ModuleManager;
+	}
+
 	class IS_API Application
 	{
 	public:
@@ -11,6 +16,11 @@ namespace Insight
 		virtual ~Application();
 
 		void Run();
+
+	private:
+
+
+		class Module::ModuleManager* m_moduleManager;
 
 	};
 

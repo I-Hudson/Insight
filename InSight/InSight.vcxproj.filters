@@ -4,6 +4,9 @@
     <Filter Include="Insight">
       <UniqueIdentifier>{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Module">
+      <UniqueIdentifier>{B060289B-9C2E-1CA1-85C2-8CC7712FF805}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
@@ -19,6 +22,18 @@
     <ClInclude Include="src\Insight\Log.h">
       <Filter>Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Module\LogModule.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Module\Module.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Module\ModuleManager.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Module\WindowModule.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -26,6 +41,15 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>Insight</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\LogModule.cpp">
+      <Filter>Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\ModuleManager.cpp">
+      <Filter>Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\WindowModule.cpp">
+      <Filter>Insight\Module</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

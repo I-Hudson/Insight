@@ -13,6 +13,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["spdlog"] = "$(SolutionDir)/Insight/vendor/spdlog/include"
+IncludeDir["GLFW"] = "$(SolutionDir)/Insight/vendor/GLFW/include"
+
+group "Dependencies"
+	include "Insight/vendor/GLFW"
+
+group ""
 
 project "Insight"
     location "Insight"
@@ -32,8 +38,14 @@ project "Insight"
 
     includedirs 
 	{
+		"$(ProjectDir)src",
 		"%{IncludeDir.spdlog}",
-		"$(ProjectDir)src"
+        "%{IncludeDir.GLFW}"
+	}
+
+    links 
+	{ 
+		"GLFW",
 	}
 
     filter "system:windows"
@@ -83,8 +95,8 @@ project "Sandbox"
 
     includedirs
     {
-        "%{IncludeDir.spdlog}",
-        "$(SolutionDir)Insight/src"
+        "$(SolutionDir)Insight/src",
+        "%{IncludeDir.spdlog}"
 	}
 
     links
