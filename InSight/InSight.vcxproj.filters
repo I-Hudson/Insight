@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{45127c6a-2cfe-4f1e-88c7-a9e4f9b13bb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\InSight">
+      <UniqueIdentifier>{634748f5-1406-477e-83ec-484aa528ac46}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Vulkan\Core.h">
+      <Filter>src\InSight</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>src\InSight</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\InSight.h">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp">
+      <Filter>src\InSight</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
