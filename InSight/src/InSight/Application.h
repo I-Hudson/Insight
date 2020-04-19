@@ -7,6 +7,12 @@ namespace Insight
 	namespace Module
 	{
 		class ModuleManager;
+		class WindowModule;
+	}
+
+	namespace Memory
+	{
+		class MemoryManager;
 	}
 
 	class IS_API Application
@@ -19,9 +25,10 @@ namespace Insight
 
 	private:
 
+		Memory::MemoryManager* m_memoryManager;
 
-		class Module::ModuleManager* m_moduleManager;
-
+		Module::ModuleManager* m_moduleManager;
+		Module::WindowModule* m_windowModule;
 	};
 
 	Application* CreateApplication();

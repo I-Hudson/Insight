@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Module
 	{
-		struct ModuleStartupData 
+		struct IS_API ModuleStartupData
 		{
 			bool ManuallUpdate = false;
 		};

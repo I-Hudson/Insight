@@ -76,7 +76,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -93,10 +94,15 @@
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -121,7 +127,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -148,18 +155,29 @@
     <ClInclude Include="src\Insight\Application.h" />
     <ClInclude Include="src\Insight\Core.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
+    <ClInclude Include="src\Insight\InsightAlias.h" />
     <ClInclude Include="src\Insight\Log.h" />
-    <ClInclude Include="src\Insight\Module\LogModule.h" />
+    <ClInclude Include="src\Insight\Memory\FreeListAllocator.h" />
+    <ClInclude Include="src\Insight\Memory\MemoryManager.h" />
+    <ClInclude Include="src\Insight\Memory\MemoryUtils.h" />
+    <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h" />
+    <ClInclude Include="src\Insight\Memory\StackAllocator.h" />
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\ispch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
-    <ClCompile Include="src\Insight\Module\LogModule.cpp" />
+    <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
+    <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
+    <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
+    <ClCompile Include="src\ispch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

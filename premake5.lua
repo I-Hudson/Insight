@@ -30,6 +30,9 @@ project "Insight"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+    pchheader "ispch.h"
+    pchsource "Insight/src/ispch.cpp"
+
     files
 	{
 		"%{prj.name}/src/**.h",

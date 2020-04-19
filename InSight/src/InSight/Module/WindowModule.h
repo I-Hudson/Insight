@@ -3,13 +3,11 @@
 #include "Insight/Core.h"
 #include "Insight/Module/Module.h"
 
-#include <string_view>
-
 struct GLFWwindow;
 
 namespace Insight
 {
-	class Window
+	class IS_API Window
 	{
 	public:
 		static const int& GetWidth();

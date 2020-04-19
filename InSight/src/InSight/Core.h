@@ -3,6 +3,8 @@
 #ifdef  IS_PLATFORM_WINDOWS
 	#ifdef IS_BUILD_DLL
 		#define IS_API __declspec(dllexport)
+
+#pragma warning( disable : 4251 )
 	#else 
 		#define IS_API __declspec(dllimport)
 	#endif // IS_BUILD_DLL

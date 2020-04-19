@@ -1,3 +1,5 @@
+#include "ispch.h"
+
 #include "ModuleManager.h"
 
 namespace Insight
@@ -18,10 +20,13 @@ namespace Insight
 
 		void ModuleManager::Shutdown()
 		{
-			for (auto mod : m_modules)
+			for (std::unordered_map<const char*, Module*>::iterator it = m_modules.end(); it != m_modules.begin();)
 			{
-				delete mod.second;
+				--it;
+				Module* m = it->second;
+				Memory::MemoryManager::DeleteOnStack((Size)m);
 			}
+			// No need to call delete as all modules are placed on the stack.
 			m_modules.clear();
 		}
 

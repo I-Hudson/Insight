@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Insight/Core.h"
+#include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/Module.h"
-
-#include <typeinfo>
-#include <unordered_map>
 
 namespace Insight
 {
@@ -21,7 +19,7 @@ namespace Insight
 			virtual void Update(const float& deltaTime) override;
 
 			template <typename T>
-			void AddModule(ModuleStartupData& moduleData = ModuleStartupData());
+			T* AddModule(ModuleStartupData& moduleData = ModuleStartupData());
 			template <typename T>
 			void RemoveModule();
 
@@ -37,11 +35,11 @@ namespace Insight
 
 
 		template<typename T>
-		inline void ModuleManager::AddModule(ModuleStartupData& moduleData)
+		inline T* ModuleManager::AddModule(ModuleStartupData& moduleData)
 		{
 			if (!Exists(typeid(T).name()))
 			{
-				T* newModule = new T();
+				T* newModule = Memory::MemoryManager::NewOnStack<T>();
 				auto castModule = static_cast<Module*>(newModule);
 
 				if (castModule != nullptr)
@@ -51,7 +49,10 @@ namespace Insight
 				}
 
 				m_modules.insert(std::pair<const char*, Module*>(typeid(T).name(), newModule));
+
+				return newModule;
 			}
+			return static_cast<T*>(m_modules[typeid(T).name()]);
 		}
 
 		template<typename T>

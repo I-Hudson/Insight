@@ -4,6 +4,9 @@
     <Filter Include="Insight">
       <UniqueIdentifier>{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Memory">
+      <UniqueIdentifier>{6342789A-4F10-6CA0-38A4-DCC624114805}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Insight\Module">
       <UniqueIdentifier>{B060289B-9C2E-1CA1-85C2-8CC7712FF805}</UniqueIdentifier>
     </Filter>
@@ -22,8 +25,8 @@
     <ClInclude Include="src\Insight\Log.h">
       <Filter>Insight</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Module\LogModule.h">
-      <Filter>Insight\Module</Filter>
+    <ClInclude Include="src\Insight\Memory\MemoryManager.h">
+      <Filter>Insight\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\Module.h">
       <Filter>Insight\Module</Filter>
@@ -34,6 +37,22 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\ispch.h" />
+    <ClInclude Include="src\Insight\Memory\StackAllocator.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\InsightAlias.h">
+      <Filter>Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\MemoryUtils.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\FreeListAllocator.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -42,14 +61,21 @@
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>Insight</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Module\LogModule.cpp">
-      <Filter>Insight\Module</Filter>
+    <ClCompile Include="src\Insight\Memory\MemoryManager.cpp">
+      <Filter>Insight\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp">
       <Filter>Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ispch.cpp" />
+    <ClCompile Include="src\Insight\Memory\StackAllocator.cpp">
+      <Filter>Insight\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp">
+      <Filter>Insight\Memory</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
