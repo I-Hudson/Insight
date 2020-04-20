@@ -24,7 +24,7 @@ namespace Insight
 #define IS_CORE_WARN(...)    ::Insight::Log::GetCoreLogger()->warn(__VA_ARGS__)
 #define IS_CORE_ERROR(...)   ::Insight::Log::GetCoreLogger()->error(__VA_ARGS__)
 #define IS_CORE_FATEL(...)   ::Insight::Log::GetCoreLogger()->critical(__VA_ARGS__)
-#define IS_CORE_ASSERT(...)  assert(__VA_ARGS__)		
+#define IS_CORE_ASSERT(...)  assert(__VA_ARGS__)
 
 #define IS_TRACE(...)		 ::Insight::Log::GetClientLogger()->trace(__VA_ARGS__)
 #define IS_INFO(...)		 ::Insight::Log::GetClientLogger()->info(__VA_ARGS__)

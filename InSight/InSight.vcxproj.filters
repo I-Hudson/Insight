@@ -4,6 +4,9 @@
     <Filter Include="Insight">
       <UniqueIdentifier>{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Maths">
+      <UniqueIdentifier>{079820D6-7358-9C0C-3C93-E589A812E1E8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Insight\Memory">
       <UniqueIdentifier>{6342789A-4F10-6CA0-38A4-DCC624114805}</UniqueIdentifier>
     </Filter>
@@ -22,10 +25,40 @@
     <ClInclude Include="src\Insight\EntryPoint.h">
       <Filter>Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\InsightAlias.h">
+      <Filter>Insight</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Log.h">
       <Filter>Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Maths\Matrix3.h">
+      <Filter>Insight\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Maths\Matrix4.h">
+      <Filter>Insight\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Maths\Vector2.h">
+      <Filter>Insight\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Maths\Vector3.h">
+      <Filter>Insight\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Maths\Vector4.h">
+      <Filter>Insight\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\FreeListAllocator.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Memory\MemoryManager.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\MemoryUtils.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h">
+      <Filter>Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Memory\StackAllocator.h">
       <Filter>Insight\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\Module.h">
@@ -38,21 +71,6 @@
       <Filter>Insight\Module</Filter>
     </ClInclude>
     <ClInclude Include="src\ispch.h" />
-    <ClInclude Include="src\Insight\Memory\StackAllocator.h">
-      <Filter>Insight\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\InsightAlias.h">
-      <Filter>Insight</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Memory\MemoryUtils.h">
-      <Filter>Insight\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Memory\FreeListAllocator.h">
-      <Filter>Insight\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h">
-      <Filter>Insight\Memory</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -61,7 +79,28 @@
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>Insight</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Maths\Matrix3.cpp">
+      <Filter>Insight\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Maths\Matrix4.cpp">
+      <Filter>Insight\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Maths\Vector2.cpp">
+      <Filter>Insight\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Maths\Vector3.cpp">
+      <Filter>Insight\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Maths\Vector4.cpp">
+      <Filter>Insight\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp">
+      <Filter>Insight\Memory</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp">
+      <Filter>Insight\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Memory\StackAllocator.cpp">
       <Filter>Insight\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp">
@@ -71,11 +110,5 @@
       <Filter>Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\ispch.cpp" />
-    <ClCompile Include="src\Insight\Memory\StackAllocator.cpp">
-      <Filter>Insight\Memory</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp">
-      <Filter>Insight\Memory</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

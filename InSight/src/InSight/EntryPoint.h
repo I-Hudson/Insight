@@ -7,6 +7,8 @@ extern Insight::Application* Insight::CreateApplication();
 
 int main(int argc, char** argv)
 {
+	Insight::Log::Init();
+
 	auto app = Insight::CreateApplication();
 	app->Run();
 	delete app;

@@ -33,6 +33,7 @@ namespace Insight
 			if (newTop > m_totalSize)
 			{
 				IS_CORE_FATEL("StackAllocator: Alloc => Not engough memory.");
+				IS_CORE_ASSERT(true, "StackAllocator: Alloc => Not engough memory.");
 			}
 			m_top = newTop;
 

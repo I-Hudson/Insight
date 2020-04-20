@@ -1,5 +1,6 @@
 workspace "Insight"
     architecture "x64"
+    startproject "Sandbox"
 
     configurations
     {
@@ -62,7 +63,8 @@ project "Insight"
 
         postbuildcommands 
         { 
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox"),
+            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
         }
 
     filter "configurations:Debug"
@@ -131,3 +133,44 @@ project "Sandbox"
 
         filter { "system:windows", "configurations:Release" }
             buildoptions "/MT"
+
+project "UnitTests"
+    location "UnitTests"
+     kind "SharedLib"
+    language "C++"
+    cppdialect "C++17"
+	staticruntime "on"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+    includedirs
+    {
+        "$(SolutionDir)Insight/src",
+        "%{IncludeDir.spdlog}"
+	}
+
+    links
+    {
+        "Insight"
+	}
+
+    filter "system:windows"
+        cppdialect "C++17"
+        staticruntime "On"
+        systemversion "latest"
+
+        defines 
+        { 
+            "IS_PLATFORM_WINDOWS" 
+        }
+
+    filter "configurations:Debug"
+        defines "IS_DEBUG"
+        symbols "On"

@@ -1,4 +1,6 @@
-#include <InSight.h>
+#include <Insight.h>
+
+using namespace Insight::Maths;
 
 class Sandbox : public Insight::Application
 {

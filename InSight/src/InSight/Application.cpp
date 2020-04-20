@@ -23,8 +23,6 @@ namespace Insight
 	
 	void Application::Run()
 	{
-		Insight::Log::Init();
-
 		m_memoryManager = new Memory::MemoryManager();
 
 		m_moduleManager = Memory::MemoryManager::NewOnStack<Module::ModuleManager>();
@@ -34,19 +32,8 @@ namespace Insight
 		windowData.ManuallUpdate = true;
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);
 
-		//int* i = Memory::MemoryManager::NewOnFreeList<int>();
-
-		int* ints = Memory::MemoryManager::NewArrOnFreeList<int>(500);
-		int* ints1 = Memory::MemoryManager::NewArrOnFreeList<int>(4);
-
-		Memory::MemoryManager::DeleteArrOnFreeList<int>(2, ints1);
-		Memory::MemoryManager::DeleteArrOnFreeList<int>(2, ints);
-
-
-		for (int i = 0; i < 100; i++)
-		{
-			ints[i] = i;
-		}
+		int* ints = Memory::MemoryManager::NewArrOnFreeList<int>(10);
+		Memory::MemoryManager::DeleteArrOnFreeList<int>(10, ints);
 
 		bool isRunning = false;
 

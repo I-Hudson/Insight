@@ -4,6 +4,7 @@
 
 namespace Insight
 {
+
 	namespace Module
 	{
 		class ModuleManager;

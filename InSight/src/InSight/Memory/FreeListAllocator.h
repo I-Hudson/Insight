@@ -57,9 +57,9 @@ namespace Insight
 
 			void Reset();
 
+			Size m_totalSize;
+			Size m_sizeUsed;
 #if _DEBUG
-			Size m_totalSize{ 0 };
-			Size m_sizeUsed{ 0 };
 			Size m_numOfNews{ 0 };
 			Size m_numOfDeletes{ 0 };
 			Size m_numOfArrNews{ 0 };
@@ -89,7 +89,7 @@ namespace Insight
 
 			return ret;
 #else
-			return new (Alloc(sizeof(T), MemUtil::ALIGNMENT)) T(args...);
+			return new (Alloc(sizeof(T), MemoryUtlis::Alignment)) T(args...);
 #endif
 		}
 

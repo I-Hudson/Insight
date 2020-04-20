@@ -5,6 +5,13 @@
 #include "InSight/Application.h"
 #include "InSight/Log.h"
 
+// --Maths--------------------------
+#include "Insight/Maths/Vector2.h"
+#include "Insight/Maths/Vector3.h"
+#include "Insight/Maths/Vector4.h"
+#include "Insight/Maths/Matrix3.h"
+#include "Insight/Maths/Matrix4.h"
+
 // --Entry Point--------------------------
 #include "InSight/EntryPoint.h"
 // --Entry Point--------------------------

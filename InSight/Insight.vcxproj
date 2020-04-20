@@ -92,12 +92,9 @@
       <ImportLibrary>..\bin\Debug-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.dll ..\bin\Debug-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -122,7 +119,8 @@
       <ImportLibrary>..\bin\Release-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.dll ..\bin\Release-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -147,7 +145,8 @@
       <ImportLibrary>..\bin\Dist-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
+      <Command>IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.dll ..\bin\Dist-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -157,6 +156,11 @@
     <ClInclude Include="src\Insight\EntryPoint.h" />
     <ClInclude Include="src\Insight\InsightAlias.h" />
     <ClInclude Include="src\Insight\Log.h" />
+    <ClInclude Include="src\Insight\Maths\Matrix3.h" />
+    <ClInclude Include="src\Insight\Maths\Matrix4.h" />
+    <ClInclude Include="src\Insight\Maths\Vector2.h" />
+    <ClInclude Include="src\Insight\Maths\Vector3.h" />
+    <ClInclude Include="src\Insight\Maths\Vector4.h" />
     <ClInclude Include="src\Insight\Memory\FreeListAllocator.h" />
     <ClInclude Include="src\Insight\Memory\MemoryManager.h" />
     <ClInclude Include="src\Insight\Memory\MemoryUtils.h" />
@@ -170,6 +174,11 @@
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
+    <ClCompile Include="src\Insight\Maths\Matrix3.cpp" />
+    <ClCompile Include="src\Insight\Maths\Matrix4.cpp" />
+    <ClCompile Include="src\Insight\Maths\Vector2.cpp" />
+    <ClCompile Include="src\Insight\Maths\Vector3.cpp" />
+    <ClCompile Include="src\Insight\Maths\Vector4.cpp" />
     <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />

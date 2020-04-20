@@ -16,9 +16,7 @@ namespace Insight
 			m_startPtr = malloc(size);
 			m_startAddress = reinterpret_cast<PtrInt>(m_startPtr);
 			Reset();
-#if _DEBUG
 			m_totalSize += size;
-#endif
 		}
 
 		FreeListAllocator::~FreeListAllocator()
@@ -132,6 +130,7 @@ namespace Insight
 
 			// Merge contiguous nodes
 			Coalescence(itPrev, freeNode);
+
 #if _DEBUG
 			//sizeUsed -= allocHeader->size;
 			if (m_monitorPureAlloc)
