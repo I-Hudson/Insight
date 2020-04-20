@@ -19,6 +19,7 @@ namespace Insight
 	};
 }
 
+#if IS_DEBUG
 #define IS_CORE_TRACE(...)   ::Insight::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define IS_CORE_INFO(...)    ::Insight::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define IS_CORE_WARN(...)    ::Insight::Log::GetCoreLogger()->warn(__VA_ARGS__)
@@ -32,3 +33,18 @@ namespace Insight
 #define IS_ERROR(...)		 ::Insight::Log::GetClientLogger()->error(__VA_ARGS__)
 #define IS_FATEL(...)		 ::Insight::Log::GetClientLogger()->critical(__VA_ARGS__)
 #define IS_ASSERT(...)		 assert(__VA_ARGS__)		
+#else 
+#define IS_CORE_TRACE(...)
+#define IS_CORE_INFO(...)
+#define IS_CORE_WARN(...)
+#define IS_CORE_ERROR(...)
+#define IS_CORE_FATEL(...)
+#define IS_CORE_ASSERT(...)
+
+#define IS_TRACE(...)
+#define IS_INFO(...)
+#define IS_WARN(...)
+#define IS_ERROR(...)
+#define IS_FATEL(...)
+#define IS_ASSERT(...)
+#endif

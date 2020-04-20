@@ -22,7 +22,7 @@ namespace Insight
 			template<typename T, typename... Args>
 			T* New(Args...);
 
-			template<typename T, typename... Args>
+			template<typename T>
 			T* NewArr(Size length, Byte align = MemoryUtlis::Alignment);
 
 			void PrintUsed();
@@ -37,8 +37,13 @@ namespace Insight
 		private:
 			Marker m_top;
 			Size m_totalSize;
-			void* m_bottom;
-			PtrInt m_bottomAddress;
+			void* m_startPtr;
+			PtrInt m_startAddress;
+
+			struct AllocHeader
+			{
+				char Padding;
+			};
 		};
 
 		template<typename T, typename... Args>
@@ -48,12 +53,10 @@ namespace Insight
 			return new (mem) T(argList...);
 		}
 
-		template<typename T, typename ...Args>
+		template<typename T>
 		inline T* StackAllocator::NewArr(Size length, Byte align)
 		{
 			void* alloc = Alloc(sizeof(T) * length, align);
-			char* allocAddress = static_cast<char*>(alloc);
-			for (int i = 0; i < length; ++i) new (allocAddress + i * sizeof(T)) T;
 			return static_cast<T*>(alloc);
 		}
 

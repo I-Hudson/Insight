@@ -20,6 +20,11 @@ namespace Insight
 			static T* NewOnStack(Args&&...);
 
 			template<typename T, typename... Args>
+			static T* NewArrOnStack(Size length, U8 alignment = MemoryUtlis::Alignment);
+
+			static void DeleteOnStack(const Size marker);
+
+			template<typename T, typename... Args>
 			static T* NewOnFreeList(Args&& ...);
 			template<typename T>
 			static void DeleteOnFreeList(T* ptrToDelete);
@@ -32,7 +37,7 @@ namespace Insight
 
 			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
 
-			static void DeleteOnStack(const Size marker);
+
 
 			static MemoryManager* GetInstance();
 
@@ -47,6 +52,12 @@ namespace Insight
 		inline T* MemoryManager::NewOnStack(Args&&... argList)
 		{
 			return GetInstance()->m_stackAllocator.New<T>(std::forward<Args>(argList)...);
+		}
+
+		template<typename T, typename ...Args>
+		inline T* MemoryManager::NewArrOnStack(Size length, U8 alignment)
+		{
+			return GetInstance()->m_stackAllocator.NewArr<T>(length, alignment);
 		}
 
 		template<typename T, typename ...Args>

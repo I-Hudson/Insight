@@ -10,34 +10,38 @@ namespace Insight
 		StackAllocator::StackAllocator(Size stackSize)
 			:m_top(0), m_totalSize(stackSize)
 		{
-			m_bottom = malloc(stackSize);
-			m_bottomAddress = reinterpret_cast<PtrInt>(m_bottom);
+			m_startPtr = malloc(stackSize);
+			m_startAddress = reinterpret_cast<PtrInt>(m_startPtr);
 		}
 
 		StackAllocator::~StackAllocator()
 		{
-			free(m_bottom);
+			free(m_startPtr);
 		}
 
 		void* StackAllocator::Alloc(Size size, Byte alignment)
 		{
-			PtrInt rawAddress = m_bottomAddress + m_top;
-			PtrInt misAllign = rawAddress & (alignment - 1);
-			PtrDiff adjustment = alignment - misAllign;
-			// For the special case when misAlignment = 0
-			// make sure we don't shift the address by its alignment
-			adjustment = adjustment & (alignment - 1);
-			PtrInt alignedAddress = rawAddress + adjustment;
-			Marker newTop = m_top + size + adjustment;
+			const Size currentAddress = (std::size_t)m_startPtr + m_top;
 
-			if (newTop > m_totalSize)
+			std::size_t padding = MemoryUtlis::CalculatePaddingWithHeader(currentAddress, alignment, sizeof(AllocHeader));
+
+			if (m_top + padding + size > m_totalSize) 
 			{
-				IS_CORE_FATEL("StackAllocator: Alloc => Not engough memory.");
-				IS_CORE_ASSERT(true, "StackAllocator: Alloc => Not engough memory.");
+				IS_CORE_ASSERT("StackAllocator: => Not engough memory.", true);
 			}
-			m_top = newTop;
+			m_top += padding;
 
-			return reinterpret_cast<void*>(alignedAddress);
+			const Size nextAddress = currentAddress + padding;
+			const Size headerAddress = nextAddress - sizeof(AllocHeader);
+			AllocHeader allocationHeader{ padding };
+			AllocHeader* headerPtr = (AllocHeader*)headerAddress;
+			headerPtr = &allocationHeader;
+
+			m_top += size;
+
+			IS_CORE_INFO("A \t@C {0} \t@R {1} \t0 {2} \tP {3}", (void*)currentAddress, (void*)nextAddress, m_top, padding);
+
+			return (void*)nextAddress;
 		}
 
 		void StackAllocator::PrintUsed()
@@ -47,10 +51,16 @@ namespace Insight
 
 		void StackAllocator::FreeToMarker(const Marker marker)
 		{
-			PtrInt markerPtr = marker;
-			markerPtr -= m_bottomAddress;
+			// Move offset back to clear address
+			const Size currentAddress = (Size) marker;
+			const Size headerAddress = currentAddress - sizeof(AllocHeader);
+			const AllocHeader* allocationHeader{ (AllocHeader*)headerAddress };
 
-			m_top = markerPtr;
+			m_top = currentAddress - allocationHeader->Padding - (Size) m_startPtr;
+
+#ifdef _DEBUG
+			IS_CORE_INFO("F\t@C {0}, \t@F {1} \tO {2} ", (void*)currentAddress, (void*)((char*)m_startPtr + m_top), m_top);
+#endif
 		}
 	}
 }

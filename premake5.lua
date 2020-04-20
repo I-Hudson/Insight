@@ -68,7 +68,7 @@ project "Insight"
         }
 
     filter "configurations:Debug"
-        defines "IS_RELEASE"
+        defines "IS_DEBUG"
         symbols "on"
 
     filter "configurations:Release"

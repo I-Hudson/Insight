@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -169,6 +169,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\Insight\Time\Stopwatch.h" />
+    <ClInclude Include="src\Insight\Time\Time.h" />
     <ClInclude Include="src\ispch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +186,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
+    <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
+    <ClCompile Include="src\Insight\Time\Time.cpp" />
     <ClCompile Include="src\ispch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

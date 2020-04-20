@@ -13,6 +13,9 @@
     <Filter Include="Insight\Module">
       <UniqueIdentifier>{B060289B-9C2E-1CA1-85C2-8CC7712FF805}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Time">
+      <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
@@ -70,7 +73,13 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Time\Stopwatch.h">
+      <Filter>Insight\Time</Filter>
+    </ClInclude>
     <ClInclude Include="src\ispch.h" />
+    <ClInclude Include="src\Insight\Time\Time.h">
+      <Filter>Insight\Time</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -109,6 +118,12 @@
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>Insight\Module</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
+      <Filter>Insight\Time</Filter>
+    </ClCompile>
     <ClCompile Include="src\ispch.cpp" />
+    <ClCompile Include="src\Insight\Time\Time.cpp">
+      <Filter>Insight\Time</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
