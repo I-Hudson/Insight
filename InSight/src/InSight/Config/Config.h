@@ -3,6 +3,7 @@
 #include "Insight/Core.h"
 #include "ConfigRegistry.h"
 #include "Insight/Module/WindowModule.h"
+#include "Insight/Module/GraphicsModule.h"
 
 #include <string>
 
@@ -25,6 +26,7 @@ namespace Insight
 		}
 
 		Module::WindowModule::WindowConfig WindowConfig;
+		Module::GraphicsModule::GraphicsConfig GraphicsConfig;
 
 	private:
 		const std::string GetKey(const std::string& line, const int delimiterPos);

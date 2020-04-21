@@ -15,9 +15,10 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["spdlog"] = "$(SolutionDir)/Insight/vendor/spdlog/include"
 IncludeDir["GLFW"] = "$(SolutionDir)/Insight/vendor/GLFW/include"
+IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
 
 group "Dependencies"
-	include "Insight/vendor/GLFW"
+    include "Insight/vendor/GLFW"
 
 group ""
 
@@ -44,12 +45,14 @@ project "Insight"
 	{
 		"$(ProjectDir)src",
 		"%{IncludeDir.spdlog}",
-        "%{IncludeDir.GLFW}"
+        "%{IncludeDir.GLFW}",
+        "%{IncludeDir.Vulkan}"
 	}
 
     links 
 	{ 
-		"GLFW",
+        "GLFW",
+        "C:/VulkanSDK/1.1.130.0/Lib/vulkan-1.lib"
 	}
 
     filter "system:windows"

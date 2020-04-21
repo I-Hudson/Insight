@@ -16,6 +16,11 @@ namespace Insight
 
 		StackAllocator::~StackAllocator()
 		{
+			if (m_top > 0)
+			{
+				IS_CORE_ASSERT("StackAllocator: Memory leak.", true);
+			}
+
 			free(m_startPtr);
 		}
 

@@ -6,24 +6,18 @@ namespace Insight
 {
 	namespace Module
 	{
-		ModuleManager::ModuleManager()
+		ModuleManager::ModuleManager(ModuleStartupData& startupData)
+			: Module(startupData)
 		{
 		}
 
 		ModuleManager::~ModuleManager()
 		{
-		}
-
-		void ModuleManager::Startup(ModuleStartupData startupData)
-		{
-		}
-
-		void ModuleManager::Shutdown()
-		{
 			for (std::unordered_map<const char*, Module*>::iterator it = m_modules.end(); it != m_modules.begin();)
 			{
 				--it;
 				Module* m = it->second;
+				m->~Module();
 				Memory::MemoryManager::DeleteOnStack((Size)m);
 			}
 			// No need to call delete as all modules are placed on the stack.

@@ -21,7 +21,7 @@ namespace Insight
 
 	Application::~Application()
 	{
-		m_moduleManager->Shutdown();
+		m_moduleManager->~ModuleManager();
 		Memory::MemoryManager::DeleteOnStack((Size)m_moduleManager);
 
 		delete m_memoryManager;
@@ -29,7 +29,7 @@ namespace Insight
 	
 	void AlloBench()
 	{
-		const int size = 512_KB;
+		const Size size = 512_KB;
 		int* ints;
 		constexpr int loopCount = 100;
 
@@ -83,7 +83,6 @@ namespace Insight
 		//AlloBench();
 
 		m_moduleManager = Memory::MemoryManager::NewOnStack<Module::ModuleManager>();
-		m_moduleManager->Startup();
 
 		Module::ModuleStartupData windowData;
 		windowData.ManuallUpdate = true;
@@ -91,6 +90,7 @@ namespace Insight
 
 		Module::GraphicsModuleStartupData graphicsData;
 		graphicsData.WindowModule = m_windowModule;
+		graphicsData.ManuallUpdate = true;
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
 
 		bool isRunning = false;
@@ -98,10 +98,12 @@ namespace Insight
 		do
 		{
 			Time::UpdateTime();
-			m_moduleManager->Update(0.0f);
+			m_moduleManager->Update(Time::GetDeltaTime());
+
+			m_graphicsModule->Update(Time::GetDeltaTime());
 
 			isRunning = !m_windowModule->GetWindow()->ShouldClose();
-			m_windowModule->Update(0.0f);
+			m_windowModule->Update(Time::GetDeltaTime());
 		} while (isRunning);
 	}
 }

@@ -14,16 +14,12 @@ namespace Insight
 		class IS_API Module
 		{
 		public:
-			Module() { }
+			Module(ModuleStartupData& startupData = ModuleStartupData()) { m_manuallUpdate = startupData.ManuallUpdate; }
 			virtual ~Module() { }
 
-			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) = 0;
-			virtual void Shutdown() = 0;
 			virtual void Update(const float& deltaTime) = 0;
 
 			const bool ShouldManuallUpate() const { return m_manuallUpdate; }
-
-			friend class ModuleManager;
 
 		protected:
 			bool m_manuallUpdate;

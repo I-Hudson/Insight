@@ -49,15 +49,8 @@ namespace Insight
 	{
 		Window* WindowModule::m_window;
 
-		WindowModule::WindowModule()
-		{
-		}
-
-		WindowModule::~WindowModule()
-		{
-		}
-
-		void WindowModule::Startup(ModuleStartupData startupData)
+		WindowModule::WindowModule(ModuleStartupData& startupData)
+			: Module(startupData)
 		{
 			m_window = new Window();
 
@@ -67,12 +60,12 @@ namespace Insight
 			glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 			m_window->m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
-												  CONFIG_VAL(Config::WindowConfig.WindowHeight),
-												  CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
-													nullptr, nullptr);
+				CONFIG_VAL(Config::WindowConfig.WindowHeight),
+				CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
+				nullptr, nullptr);
 		}
 
-		void WindowModule::Shutdown()
+		WindowModule::~WindowModule()
 		{
 			glfwDestroyWindow(m_window->m_window);
 			glfwTerminate();

@@ -17,9 +17,9 @@ namespace Insight
 				{
 					continue;
 				}
-				auto delimiterPos = line.find('=');
-				auto key = GetKey(line, delimiterPos);
-				auto val = GetVal(line, delimiterPos);
+				int delimiterPos = static_cast<int>(line.find('='));
+				std::string key = GetKey(line, delimiterPos);
+				std::string val = GetVal(line, delimiterPos);
 				SetConfigVal(key, val);
 			}
 			cFile.close();
@@ -47,8 +47,8 @@ namespace Insight
 					continue;
 				}
 
-				auto delimiterPos = line.find('=');
-				auto fileKey = GetKey(line, delimiterPos);
+				int delimiterPos = static_cast<int>(line.find('='));
+				std::string fileKey = GetKey(line, delimiterPos);
 				if (fileKey == key)
 				{
 					std::stringstream newLine;

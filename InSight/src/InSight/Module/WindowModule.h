@@ -28,11 +28,9 @@ namespace Insight
 		class IS_API WindowModule : public Module
 		{
 		public:
-			WindowModule();
+			WindowModule(ModuleStartupData& startupData = ModuleStartupData());
 			virtual ~WindowModule() override;
 
-			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) override;
-			virtual void Shutdown() override;
 			virtual void Update(const float& deltaTime) override;
 
 			static const Window* GetWindow() { return m_window; }

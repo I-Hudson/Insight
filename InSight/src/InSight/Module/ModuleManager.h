@@ -11,11 +11,9 @@ namespace Insight
 		class IS_API ModuleManager : public Module
 		{
 		public:
-			ModuleManager();
+			ModuleManager(ModuleStartupData& startupData = ModuleStartupData());
 			virtual ~ModuleManager() override;
 
-			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) override;
-			virtual void Shutdown() override;
 			virtual void Update(const float& deltaTime) override;
 
 			template <typename T>
@@ -39,14 +37,7 @@ namespace Insight
 		{
 			if (!Exists(typeid(T).name()))
 			{
-				T* newModule = Memory::MemoryManager::NewOnStack<T>();
-				auto castModule = static_cast<Module*>(newModule);
-
-				if (castModule != nullptr)
-				{
-					castModule->Startup(moduleData);
-					castModule->m_manuallUpdate = moduleData.ManuallUpdate;
-				}
+				T* newModule = Memory::MemoryManager::NewOnStack<T>(moduleData);
 
 				m_modules.insert(std::pair<const char*, Module*>(typeid(T).name(), newModule));
 

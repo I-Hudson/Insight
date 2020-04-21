@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;C:\VulkanSDK\1.1.130.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -89,6 +89,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>C:\VulkanSDK\1.1.130.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\bin\Debug-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -102,7 +103,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;C:\VulkanSDK\1.1.130.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -116,6 +117,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>C:\VulkanSDK\1.1.130.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\bin\Release-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -129,7 +131,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I .
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;IS_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;C:\VulkanSDK\1.1.130.0\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -142,6 +144,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I .
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>C:\VulkanSDK\1.1.130.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>..\bin\Dist-windows-x86_64\Insight\Insight.lib</ImportLibrary>
     </Link>
     <PostBuildEvent>
@@ -152,9 +155,9 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
     <ClInclude Include="src\Insight\Application.h" />
+    <ClInclude Include="src\Insight\Config\CVar.h" />
     <ClInclude Include="src\Insight\Config\Config.h" />
     <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
-    <ClInclude Include="src\Insight\Config\CVar.h" />
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
@@ -174,14 +177,18 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\Insight\Renderer\Renderer.h" />
+    <ClInclude Include="src\Insight\Renderer\Vulkan.h" />
+    <ClInclude Include="src\Insight\Renderer\VulkanInits.h" />
+    <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
     <ClInclude Include="src\ispch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp" />
-    <ClCompile Include="src\Insight\Config\Config.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
+    <ClCompile Include="src\Insight\Config\Config.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix3.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix4.cpp" />
@@ -194,6 +201,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp" />
     <ClCompile Include="src\ispch.cpp">

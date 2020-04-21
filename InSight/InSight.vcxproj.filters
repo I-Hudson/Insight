@@ -4,6 +4,9 @@
     <Filter Include="Insight">
       <UniqueIdentifier>{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Config">
+      <UniqueIdentifier>{0006DA83-ECD3-CD89-D567-3EB0C1D4A9EE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Insight\Maths">
       <UniqueIdentifier>{079820D6-7358-9C0C-3C93-E589A812E1E8}</UniqueIdentifier>
     </Filter>
@@ -13,17 +16,29 @@
     <Filter Include="Insight\Module">
       <UniqueIdentifier>{B060289B-9C2E-1CA1-85C2-8CC7712FF805}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Renderer">
+      <UniqueIdentifier>{617962B8-4D72-810A-76A4-668F62FC6016}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Insight\Time">
       <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Insight\Config">
-      <UniqueIdentifier>{be0549a0-10c7-4e9d-9133-871f9e5c8df8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
     <ClInclude Include="src\Insight\Application.h">
       <Filter>Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\CVar.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\Config.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\ConfigRegistry.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\ICVar.h">
+      <Filter>Insight\Config</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core.h">
       <Filter>Insight</Filter>
@@ -67,6 +82,9 @@
     <ClInclude Include="src\Insight\Memory\StackAllocator.h">
       <Filter>Insight\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Module\GraphicsModule.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Module\Module.h">
       <Filter>Insight\Module</Filter>
     </ClInclude>
@@ -76,32 +94,35 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Renderer.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Vulkan.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Time\Stopwatch.h">
       <Filter>Insight\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\ispch.h" />
     <ClInclude Include="src\Insight\Time\Time.h">
       <Filter>Insight\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Module\GraphicsModule.h">
-      <Filter>Insight\Module</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Config\ICVar.h">
-      <Filter>Insight\Config</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Config\CVar.h">
-      <Filter>Insight\Config</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Config\ConfigRegistry.h">
-      <Filter>Insight\Config</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Config\Config.h">
-      <Filter>Insight\Config</Filter>
+    <ClInclude Include="src\ispch.h" />
+    <ClInclude Include="src\Insight\Renderer\VulkanInits.h">
+      <Filter>Insight\Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
       <Filter>Insight</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Config\CVar.cpp">
+      <Filter>Insight\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Config\Config.cpp">
+      <Filter>Insight\Config</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>Insight</Filter>
@@ -130,27 +151,27 @@
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp">
       <Filter>Insight\Memory</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
+      <Filter>Insight\Module</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp">
       <Filter>Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>Insight\Module</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Renderer.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
       <Filter>Insight\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\ispch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp">
       <Filter>Insight\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
-      <Filter>Insight\Module</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Config\CVar.cpp">
-      <Filter>Insight\Config</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Config\Config.cpp">
-      <Filter>Insight\Config</Filter>
-    </ClCompile>
+    <ClCompile Include="src\ispch.cpp" />
   </ItemGroup>
 </Project>

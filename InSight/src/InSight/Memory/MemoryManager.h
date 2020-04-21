@@ -69,7 +69,7 @@ namespace Insight
 		template<typename T>
 		inline void MemoryManager::DeleteOnFreeList(T* ptrToDelete)
 		{
-			GetInstance()->m_freeListAllocator.Delete(T* ptrToDelete)
+			GetInstance()->m_freeListAllocator.Delete<T>(ptrToDelete);
 		}
 
 		template<typename T>

@@ -29,7 +29,7 @@ namespace Insight
 			template <typename T, typename... Args>
 			T* New(Args... args);
 			template <typename T>
-			void Delete(T* t);
+			void Delete(T* ptr);
 			template <typename T>
 			T* NewArr(const Size length, const Byte alignment);
 			template <typename T>
@@ -94,7 +94,7 @@ namespace Insight
 		}
 
 		template<typename T>
-		inline void FreeListAllocator::Delete(T* t)
+		inline void FreeListAllocator::Delete(T* ptr)
 		{
 #if _DEBUG
 			m_numOfDeletes++;
@@ -102,7 +102,7 @@ namespace Insight
 
 			if (std::is_base_of<class Component, T>::value) 
 			{
-				U64 vPointer = *reinterpret_cast<U64*>(t);
+				U64 vPointer = *reinterpret_cast<U64*>(ptr);
 				name = m_vtableToNameMap.find(vPointer)->second;
 			}
 			else 
@@ -110,10 +110,10 @@ namespace Insight
 				name = typeid(T).name();
 			}
 
-			t->~T();
+			ptr->~T();
 
 			m_monitorPureAlloc = false;
-			Free(static_cast<void*>(t));
+			Free(static_cast<void*>(ptr));
 			m_monitorPureAlloc = true;
 #else
 			t->~T();
