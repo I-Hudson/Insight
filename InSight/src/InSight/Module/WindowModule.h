@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Module/Module.h"
+#include "Insight/Config/CVar.h"
 
 struct GLFWwindow;
 
@@ -24,17 +25,24 @@ namespace Insight
 
 	namespace Module
 	{
-		class IS_API WindowModule :public Module
+		class IS_API WindowModule : public Module
 		{
 		public:
 			WindowModule();
 			virtual ~WindowModule() override;
 
-			virtual void Startup(const ModuleStartupData& startupData = ModuleStartupData()) override;
+			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) override;
 			virtual void Shutdown() override;
 			virtual void Update(const float& deltaTime) override;
 
 			static const Window* GetWindow() { return m_window; }
+
+			struct WindowConfig
+			{
+				CVar<int> WindowWidth{ "window_width", 1024 };
+				CVar<int> WindowHeight{ "window_height", 720 };
+				CVarString WindowTitle{ "window_title", "Test Window" };
+			};
 
 		private:
 			static Window* m_window;

@@ -14,7 +14,7 @@ namespace Insight
 		{
 		}
 
-		void ModuleManager::Startup(const ModuleStartupData& startupData)
+		void ModuleManager::Startup(ModuleStartupData startupData)
 		{
 		}
 

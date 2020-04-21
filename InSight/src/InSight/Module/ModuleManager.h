@@ -14,7 +14,7 @@ namespace Insight
 			ModuleManager();
 			virtual ~ModuleManager() override;
 
-			virtual void Startup(const ModuleStartupData& startupData = ModuleStartupData()) override;
+			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) override;
 			virtual void Shutdown() override;
 			virtual void Update(const float& deltaTime) override;
 

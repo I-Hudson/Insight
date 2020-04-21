@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Module
 	{
-		struct IS_API ModuleStartupData
+		struct ModuleStartupData
 		{
 			bool ManuallUpdate = false;
 		};
@@ -17,7 +17,7 @@ namespace Insight
 			Module() { }
 			virtual ~Module() { }
 
-			virtual void Startup(const ModuleStartupData& startupData = ModuleStartupData()) = 0;
+			virtual void Startup(ModuleStartupData startupData = ModuleStartupData()) = 0;
 			virtual void Shutdown() = 0;
 			virtual void Update(const float& deltaTime) = 0;
 

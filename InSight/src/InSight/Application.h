@@ -9,6 +9,7 @@ namespace Insight
 	{
 		class ModuleManager;
 		class WindowModule;
+		class GraphicsModule;
 	}
 
 	namespace Memory
@@ -30,6 +31,7 @@ namespace Insight
 
 		Module::ModuleManager* m_moduleManager;
 		Module::WindowModule* m_windowModule;
+		Module::GraphicsModule* m_graphicsModule;
 	};
 
 	Application* CreateApplication();

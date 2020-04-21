@@ -2,10 +2,12 @@
 
 #include "Application.h"
 #include "Log.h"
+#include "Config/Config.h"
 
 #include "Memory/MemoryManager.h"
 #include "Module/ModuleManager.h"
 #include "Module/WindowModule.h"
+#include "Module/GraphicsModule.h"
 
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
@@ -14,6 +16,7 @@ namespace Insight
 {
 	Application::Application()
 	{
+		Config::GetInstance().Parse("config.txt");
 	}
 
 	Application::~Application()
@@ -85,6 +88,10 @@ namespace Insight
 		Module::ModuleStartupData windowData;
 		windowData.ManuallUpdate = true;
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);
+
+		Module::GraphicsModuleStartupData graphicsData;
+		graphicsData.WindowModule = m_windowModule;
+		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
 
 		bool isRunning = false;
 

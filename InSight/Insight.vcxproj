@@ -152,6 +152,10 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
     <ClInclude Include="src\Insight\Application.h" />
+    <ClInclude Include="src\Insight\Config\Config.h" />
+    <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
+    <ClInclude Include="src\Insight\Config\CVar.h" />
+    <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
     <ClInclude Include="src\Insight\InsightAlias.h" />
@@ -166,6 +170,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Memory\MemoryUtils.h" />
     <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h" />
     <ClInclude Include="src\Insight\Memory\StackAllocator.h" />
+    <ClInclude Include="src\Insight\Module\GraphicsModule.h" />
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
@@ -175,6 +180,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp" />
+    <ClCompile Include="src\Insight\Config\Config.cpp" />
+    <ClCompile Include="src\Insight\Config\CVar.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix3.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix4.cpp" />
@@ -184,6 +191,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
+    <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />

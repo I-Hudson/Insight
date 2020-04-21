@@ -1,11 +1,13 @@
 #pragma once
 
+#include "Insight/Core.h"
+
 namespace Insight
 {
 	namespace Memory
 	{
 		template <class T>
-		class SinglyLinkedList
+		class IS_API SinglyLinkedList
 		{
 		public:
 			struct Node

@@ -1,6 +1,7 @@
 #include "ispch.h"
 
 #include "WindowModule.h"
+#include "Insight/Config/Config.h"
 
 #include "GLFW/glfw3.h"
 
@@ -56,7 +57,7 @@ namespace Insight
 		{
 		}
 
-		void WindowModule::Startup(const ModuleStartupData& startupData)
+		void WindowModule::Startup(ModuleStartupData startupData)
 		{
 			m_window = new Window();
 
@@ -65,7 +66,10 @@ namespace Insight
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-			m_window->m_window = glfwCreateWindow(1280, 720, "Test Window", nullptr, nullptr);
+			m_window->m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
+												  CONFIG_VAL(Config::WindowConfig.WindowHeight),
+												  CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
+													nullptr, nullptr);
 		}
 
 		void WindowModule::Shutdown()

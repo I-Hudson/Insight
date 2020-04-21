@@ -16,6 +16,9 @@
     <Filter Include="Insight\Time">
       <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Config">
+      <UniqueIdentifier>{be0549a0-10c7-4e9d-9133-871f9e5c8df8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
@@ -80,6 +83,21 @@
     <ClInclude Include="src\Insight\Time\Time.h">
       <Filter>Insight\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Module\GraphicsModule.h">
+      <Filter>Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\ICVar.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\CVar.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\ConfigRegistry.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Config\Config.h">
+      <Filter>Insight\Config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -124,6 +142,15 @@
     <ClCompile Include="src\ispch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp">
       <Filter>Insight\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
+      <Filter>Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Config\CVar.cpp">
+      <Filter>Insight\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Config\Config.cpp">
+      <Filter>Insight\Config</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
