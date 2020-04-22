@@ -22,6 +22,9 @@
     <Filter Include="Insight\Time">
       <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Renderer\LowLevel">
+      <UniqueIdentifier>{2ec743b0-2d45-474a-a5cd-3b34c6b9bd6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
@@ -113,6 +116,18 @@
     <ClInclude Include="src\Insight\Renderer\VulkanInits.h">
       <Filter>Insight\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Device.h">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Queue.h">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\QueueFamily.h">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Swapchain.h">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -173,5 +188,17 @@
       <Filter>Insight\Time</Filter>
     </ClCompile>
     <ClCompile Include="src\ispch.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Device.cpp">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Queue.cpp">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\QueueFamily.cpp">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Swapchain.cpp">
+      <Filter>Insight\Renderer\LowLevel</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

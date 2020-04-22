@@ -29,7 +29,7 @@ namespace Insight
 		}
 
 		MemoryManager::MemoryManager()
-			:m_stackAllocator(512_KB), m_freeListAllocator(512_KB, Memory::FreeListAllocator::PlacementPolicy::FIND_BEST)
+			:m_stackAllocator(512_KB), m_freeListAllocator(512_KB, Memory::FreeListAllocator::PlacementPolicy::FIND_FIRST)
 		{
 			s_instance = this;
 		}
