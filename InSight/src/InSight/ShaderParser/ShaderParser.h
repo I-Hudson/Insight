@@ -46,7 +46,7 @@ namespace Insight
 
 	struct ShaderUniformBlock
 	{
-		std::vector<ShaderAttributes> Attributes;
+		std::vector<ShaderUniform> Uniforms;
 		std::string Name;
 		int Binding;
 		int Size;
@@ -56,6 +56,7 @@ namespace Insight
 	{
 		ShaderAttributeBlock InAttri;
 		ShaderAttributeBlock OutAttri;
+		std::vector<ShaderUniformBlock>UniformBlocks;
 	};
 
 	struct KeywordFind
@@ -88,11 +89,16 @@ namespace Insight
 	private:
 
 		static void GetAttribute(const KeywordFind& keyword, ShaderData& data);
+		static void CreateUniformBlock(std::string& line, ShaderData& data);
 		static void GetUniformStruct(const std::string line, ShaderData& data);
 
 		static KeywordFind FindKeyword(std::string& line);
 
 		static ShaderAttributeType GetType(const std::string& line);
+		static std::string GetName(const std::string& line, const bool& removeLastCharacter);
+
+		static void GetUniformSize(ShaderUniformBlock& data);
+		static int GetShaderAttributeTypeSize(const ShaderAttributeType& type);
 
 		static std::vector<const char*> m_keywords;
 		static std::vector<const char*> m_dataTypes;

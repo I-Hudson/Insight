@@ -31,6 +31,11 @@ namespace Insight
 			std::string line;
 			while (std::getline(cFile, line))
 			{
+				if (line[0] == '/' || line.empty())
+				{
+					continue;
+				}
+
 				IS_CORE_INFO("{0}", line.c_str());
 
 				KeywordFind k = FindKeyword(line);
@@ -42,10 +47,9 @@ namespace Insight
 					}
 					else if (k.Keyword == "uniform")
 					{
-
+						CreateUniformBlock(line, data);
 						m_recordUniform = true;
 					}
-					IS_CORE_WARN("Pos: {0}, Word: {1}, Length {2}", k.Loc, k.Keyword, k.KeywordLength);
 				}
 
 				if (m_recordUniform)
@@ -81,29 +85,8 @@ namespace Insight
 			}
 		}
 
-		std::string name;
-		for (auto it = line.rbegin(); it != line.rend(); ++it)
-		{
-			if (isspace(*it))
-			{
-				break;
-			}
-			else
-			{
-				name += *it;
-			}
-		}
-		name.erase(name.begin(), name.begin() + 1);
-
-		// Swap character starting from two 
-		// corners 
-		for (int i = 0; i < name.length() / 2; i++)
-		{
-			std::swap(name[i], name[name.length() - i - 1]);
-		}
-
 		attri.Location = std::stoi(attiLocation);
-		attri.Name = name;
+		attri.Name = GetName(line, true);
 		attri.Type = GetType(line);
 
 		if (keyword.Keyword == "in")
@@ -116,9 +99,52 @@ namespace Insight
 		}
 	}
 
+	void ShaderParser::CreateUniformBlock(std::string& line, ShaderData& data)
+	{
+		ShaderUniformBlock uniformBlock;
+
+		std::string sValue = "binding = ";
+		Size sLoc = line.find(sValue);
+		sLoc += sValue.length();
+
+		std::string returnValue;
+		for (auto it = line.begin() + sLoc; it != line.end(); ++it)
+		{
+			char c = *it;
+			if (c >= '0' && c <= '9')
+			{
+				returnValue += c;
+			}
+			else
+			{
+				break;
+			}
+		}
+		uniformBlock.Binding = std::stoi(returnValue);
+
+		uniformBlock.Name = GetName(line, false);
+
+		data.UniformBlocks.push_back(uniformBlock);
+	}
+
 	void ShaderParser::GetUniformStruct(const std::string line, ShaderData& data)
 	{
 		ShaderAttributeType type = GetType(line);
+
+		if (type != ShaderAttributeType::None)
+		{
+			ShaderUniform uniform;
+			uniform.Name = GetName(line, true);
+			uniform.Type = type;
+
+			data.UniformBlocks[data.UniformBlocks.size() - 1].Uniforms.push_back(uniform);
+		}
+
+		if (line.find('}') != line.npos)
+		{
+			GetUniformSize(data.UniformBlocks[data.UniformBlocks.size() - 1]);
+			m_recordUniform = false;
+		}
 	}
 
 	KeywordFind ShaderParser::FindKeyword(std::string& line)
@@ -154,10 +180,68 @@ namespace Insight
 		{
 			if (line.find(*it) != line.npos)
 			{
-				return (ShaderAttributeType)index;
+				return (ShaderAttributeType)(index + 1);
 			}
 			++index;
 		}
 		return ShaderAttributeType::None;
+	}
+
+	std::string ShaderParser::GetName(const std::string& line, const bool& removeLastCharacter)
+	{
+		std::string sValue;
+		for (auto it = line.rbegin(); it != line.rend(); ++it)
+		{
+			if (isspace(*it))
+			{
+				break;
+			}
+			else
+			{
+				sValue += *it;
+			}
+		}
+
+		if (removeLastCharacter)
+		{
+			sValue.erase(sValue.begin(), sValue.begin() + 1);
+		}
+
+		// Swap character starting from two 
+		// corners 
+		for (int i = 0; i < sValue.length() / 2; i++)
+		{
+			std::swap(sValue[i], sValue[sValue.length() - i - 1]);
+		}
+
+		return sValue;
+	}
+	
+	void ShaderParser::GetUniformSize(ShaderUniformBlock& data)
+	{
+		int totalSize = 0;
+		for (auto it = data.Uniforms.begin(); it != data.Uniforms.end(); ++it)
+		{
+			totalSize += GetShaderAttributeTypeSize((*it).Type);
+		}
+		data.Size = totalSize;
+	}
+
+	int ShaderParser::GetShaderAttributeTypeSize(const ShaderAttributeType& type)
+	{
+		switch(type)
+		{
+			case ShaderAttributeType::Int: return 4;
+			case ShaderAttributeType::Float: return 4;
+
+			case ShaderAttributeType::Vec2: return 4 * 2;
+			case ShaderAttributeType::Vec3: return 4 * 3;
+			case ShaderAttributeType::Vec4: return 4 * 4;
+
+			case ShaderAttributeType::Mat2: return 4 * 2 * 2;
+			case ShaderAttributeType::Mat3: return 4 * 3 * 3;
+			case ShaderAttributeType::Mat4: return 4 * 4 * 4;
+		}
+		return 0;
 	}
 }
