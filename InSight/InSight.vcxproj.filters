@@ -19,11 +19,11 @@
     <Filter Include="Insight\Renderer">
       <UniqueIdentifier>{617962B8-4D72-810A-76A4-668F62FC6016}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\ShaderParser">
+      <UniqueIdentifier>{6EE46208-5A73-ECD1-0392-00CDEFFFFC77}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Insight\Time">
       <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Insight\Renderer\LowLevel">
-      <UniqueIdentifier>{2ec743b0-2d45-474a-a5cd-3b34c6b9bd6f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -97,14 +97,35 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Device.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Queue.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\QueueFamily.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Renderer.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Swapchain.h">
       <Filter>Insight\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Vulkan.h">
       <Filter>Insight\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\VulkanInits.h">
+      <Filter>Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h">
       <Filter>Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
+      <Filter>Insight\ShaderParser</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Stopwatch.h">
       <Filter>Insight\Time</Filter>
@@ -113,21 +134,6 @@
       <Filter>Insight\Time</Filter>
     </ClInclude>
     <ClInclude Include="src\ispch.h" />
-    <ClInclude Include="src\Insight\Renderer\VulkanInits.h">
-      <Filter>Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Device.h">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Queue.h">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\QueueFamily.h">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Swapchain.h">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -175,11 +181,29 @@
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>Insight\Module</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Device.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Queue.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\QueueFamily.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp">
+      <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Swapchain.cpp">
       <Filter>Insight\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp">
       <Filter>Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp">
+      <Filter>Insight\ShaderParser</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
       <Filter>Insight\Time</Filter>
@@ -188,17 +212,5 @@
       <Filter>Insight\Time</Filter>
     </ClCompile>
     <ClCompile Include="src\ispch.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Device.cpp">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Queue.cpp">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\QueueFamily.cpp">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Swapchain.cpp">
-      <Filter>Insight\Renderer\LowLevel</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

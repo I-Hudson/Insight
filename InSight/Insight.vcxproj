@@ -181,10 +181,12 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Queue.h" />
     <ClInclude Include="src\Insight\Renderer\QueueFamily.h" />
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
+    <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h" />
     <ClInclude Include="src\Insight\Renderer\Swapchain.h" />
     <ClInclude Include="src\Insight\Renderer\Vulkan.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanInits.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h" />
+    <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
     <ClInclude Include="src\ispch.h" />
@@ -209,8 +211,10 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Queue.cpp" />
     <ClCompile Include="src\Insight\Renderer\QueueFamily.cpp" />
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp" />
     <ClCompile Include="src\Insight\Renderer\Swapchain.cpp" />
     <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp" />
+    <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp" />
     <ClCompile Include="src\ispch.cpp">
