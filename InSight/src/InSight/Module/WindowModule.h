@@ -11,8 +11,8 @@ namespace Insight
 	class IS_API Window
 	{
 	public:
-		static const int& GetWidth();
-		static const int& GetHeight();
+		static const int GetWidth();
+		static const int GetHeight();
 
 		static void SetTitle(const std::string_view& title);
 		static void SetFullscreen(const bool& fullscreen = true);

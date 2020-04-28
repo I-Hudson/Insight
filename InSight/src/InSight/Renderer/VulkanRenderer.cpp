@@ -2,7 +2,7 @@
 #include "Insight/Renderer/Vulkan.h"
 #include "Insight/Renderer/VulkanRenderer.h"
 #include "Insight/Renderer/VulkanInits.h"
-#include "Insight/Renderer/QueueFamily.h"
+#include "Insight/Renderer/Lowlevel/QueueFamily.h"
 
 #include "Insight/Log.h"
 
@@ -53,6 +53,7 @@ namespace Insight
 
 		VulkanRenderer::~VulkanRenderer()
 		{
+			m_device->WaitForIdle();
 			Memory::MemoryManager::DeleteOnFreeList(m_swapchain);
 			Memory::MemoryManager::DeleteOnFreeList(m_device);
 		}
@@ -63,10 +64,12 @@ namespace Insight
 
 		void VulkanRenderer::Render()
 		{
+			m_swapchain->Draw();
 		}
 
 		void VulkanRenderer::Present()
 		{
+			m_swapchain->Present();
 		}
 
 		bool VulkanRenderer::CheckDeviceExtensionSupport(VkPhysicalDevice device)

@@ -15,7 +15,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["spdlog"] = "$(SolutionDir)/Insight/vendor/spdlog/include"
 IncludeDir["GLFW"] = "$(SolutionDir)/Insight/vendor/GLFW/include"
+IncludeDir["shaderc"] = "$(SolutionDir)/Insight/vendor/shaderc/include"
 IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
+
+-- Lib directories relative to root folder (solution directory)
+LibDirs = {}
+LibDirs["shaderc"] = "C:/VulkanSDK/1.1.130.0/lib"
 
 group "Dependencies"
     include "Insight/vendor/GLFW"
@@ -31,6 +36,7 @@ project "Insight"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("bin/" .. outputdir .. "/%{prj.name}")
 
     pchheader "ispch.h"
     pchsource "Insight/src/ispch.cpp"
@@ -46,12 +52,19 @@ project "Insight"
 		"$(ProjectDir)src",
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.GLFW}",
+        "%{IncludeDir.shaderc}",
         "%{IncludeDir.Vulkan}"
 	}
+
+    libdirs
+    {
+        "%{LibDirs.shaderc}/%{cfg.buildcfg}"
+    }
 
     links 
 	{ 
         "GLFW",
+        "shaderc_combined",
         "C:/VulkanSDK/1.1.130.0/Lib/vulkan-1.lib"
 	}
 
@@ -74,9 +87,11 @@ project "Insight"
         defines "IS_DEBUG"
         symbols "on"
 
+
     filter "configurations:Release"
         defines "IS_RELEASE"
         optimize "on"
+
 
     filter "configurations:Dist"
         defines "IS_DIST"
@@ -94,6 +109,7 @@ project "Sandbox"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("bin/" .. outputdir .. "/%{prj.name}")
 
     files
 	{

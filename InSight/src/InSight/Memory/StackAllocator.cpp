@@ -38,7 +38,7 @@ namespace Insight
 
 			const Size nextAddress = currentAddress + padding;
 			const Size headerAddress = nextAddress - sizeof(AllocHeader);
-			AllocHeader allocationHeader{ padding };
+			AllocHeader allocationHeader{ static_cast<char>(padding) };
 			AllocHeader* headerPtr = (AllocHeader*)headerAddress;
 			headerPtr = &allocationHeader;
 

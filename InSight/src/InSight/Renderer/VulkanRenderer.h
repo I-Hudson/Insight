@@ -4,8 +4,9 @@
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
 
-#include "Device.h"
-#include "Swapchain.h"
+#include "Insight/Renderer/Lowlevel/Device.h"
+#include "Insight/Renderer/Lowlevel/Swapchain.h"
+#include "Insight/Renderer/Lowlevel/ShaderModule.h"
 
 #include "Vulkan.h"
 
@@ -53,6 +54,10 @@ namespace Insight
 			// Vulkan objects
 			Device* m_device;
 			Swapchain* m_swapchain;
+
+			Renderpass* m_renderpass;
+			std::vector<Framebuffer*> m_swapchainFramebuffers;
+			Shader* m_swapchainShader;
 
 			VkSurfaceKHR m_surface;
 

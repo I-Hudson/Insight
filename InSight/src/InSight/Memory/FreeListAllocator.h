@@ -116,8 +116,8 @@ namespace Insight
 			Free(static_cast<void*>(ptr));
 			m_monitorPureAlloc = true;
 #else
-			t->~T();
-			Free(static_cast<void*>(t));
+			ptr->~T();
+			Free(static_cast<void*>(ptr));
 #endif
 		}
 

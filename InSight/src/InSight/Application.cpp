@@ -9,8 +9,6 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 
-#include "ShaderParser/ShaderParser.h"
-
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
 
@@ -94,8 +92,6 @@ namespace Insight
 		graphicsData.WindowModule = m_windowModule;
 		graphicsData.ManuallUpdate = true;
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
-
-		ShaderParser::ParseShader("shader.vert");
 
 		bool isRunning = false;
 

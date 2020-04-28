@@ -2,9 +2,9 @@
 
 #include "Insight/Core.h"
 
-#include "Vulkan.h"
-#include "Insight/Renderer/QueueFamily.h"
-#include "Insight/Renderer/Queue.h"
+#include "Insight/Renderer/Vulkan.h"
+#include "Insight/Renderer/Lowlevel/QueueFamily.h"
+#include "Insight/Renderer/Lowlevel/Queue.h"
 
 #include <vector>
 #include <set>
@@ -38,7 +38,9 @@ namespace Insight
 			const VkPhysicalDevice& GetPhysicalDevice() const { return m_physicalDevice; }
 
 			const QueueFamily& GetQueueFamily(const QueueFamilyType type) const;
-			const Queue& GetQueue(const QueueFamilyType type) const;
+			Queue& GetQueue(const QueueFamilyType type);
+
+			void WaitForIdle();
 
 			void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 

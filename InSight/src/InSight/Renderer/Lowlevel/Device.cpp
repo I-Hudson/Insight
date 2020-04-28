@@ -1,14 +1,14 @@
 #include "ispch.h"
 #include "Device.h"
-#include "Insight/Renderer/Queue.h"
-#include "Insight/Renderer/QueueFamily.h"
+#include "Insight/Renderer/Lowlevel/Queue.h"
+#include "Insight/Renderer/Lowlevel/QueueFamily.h"
 
 #include "Insight/Module/WindowModule.h"
 
-#include "VulkanInits.h"
+#include "Insight/Renderer/VulkanInits.h"
 #include "Insight/Config/Config.h"
 
-#include "Vulkan.h"
+#include "Insight/Renderer/Vulkan.h"
 
 namespace Insight
 {
@@ -87,15 +87,20 @@ namespace Insight
 			}
 		}
 
-		const Queue& Device::GetQueue(const QueueFamilyType type) const
+		Queue& Device::GetQueue(const QueueFamilyType type)
 		{
-			for (auto& queue : m_queues)
+			for (auto it = m_queues.begin(); it != m_queues.end(); ++it)
 			{
-				if (queue.GetType() == type)
+				if ((*it).GetType() == type)
 				{
-					return queue;
+					return (*it);
 				}
 			}
+		}
+
+		void Device::WaitForIdle()
+		{
+			vkDeviceWaitIdle(m_device);
 		}
 
 		void Device::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
@@ -223,9 +228,11 @@ namespace Insight
 			ThrowIfFailed(vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device));
 			IS_CORE_INFO("Vulkan logical device completed.");
 
+			m_queues.emplace_back(this, GetQueueFamily(QueueFamilyType::Graphics));
+			m_queues.emplace_back(this, GetQueueFamily(QueueFamilyType::Present));
 
-			//vkGetDeviceQueue(GetDevice(), GetQueueFamily(QueueFamilyType::Graphics).GetValue(), 0, &m_graphicsQueue);
-			//vkGetDeviceQueue(GetDevice(), GetQueueFamily(QueueFamilyType::Present).GetValue(), 0, &m_presentQueue);
+			vkGetDeviceQueue(GetDevice(), GetQueueFamily(QueueFamilyType::Graphics).GetValue(), 0, &m_queues[0].GetQueue());
+			vkGetDeviceQueue(GetDevice(), GetQueueFamily(QueueFamilyType::Present).GetValue(), 0, &m_queues[1].GetQueue());
 		}
 	}
 }

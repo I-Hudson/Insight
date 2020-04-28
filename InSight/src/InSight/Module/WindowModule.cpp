@@ -9,14 +9,14 @@ namespace Insight
 {
 	GLFWwindow* Window::m_window;
 
-	const int& Window::GetWidth()
+	const int Window::GetWidth()
 	{
 		int width;
 		glfwGetWindowSize(m_window, &width, nullptr);
 		return width;
 	}
 
-	const int& Window::GetHeight()
+	const int Window::GetHeight()
 	{
 		int height;
 		glfwGetWindowSize(m_window, nullptr, &height);
