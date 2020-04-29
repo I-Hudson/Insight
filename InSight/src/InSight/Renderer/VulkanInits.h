@@ -183,14 +183,14 @@ namespace Insight
 				return createInfo;
 			}
 
-			static VkPipelineColorBlendStateCreateInfo PipelineColourBlendInfo(const VkPipelineColorBlendAttachmentState& colourBlendState)
+			static VkPipelineColorBlendStateCreateInfo PipelineColourBlendInfo(const std::vector<VkPipelineColorBlendAttachmentState>& colourBlendStates)
 			{
 				VkPipelineColorBlendStateCreateInfo colorBlending{};
 				colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 				colorBlending.logicOpEnable = VK_FALSE;
 				colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
-				colorBlending.attachmentCount = 1;
-				colorBlending.pAttachments = &colourBlendState;
+				colorBlending.attachmentCount = static_cast<uint32_t>(colourBlendStates.size());
+				colorBlending.pAttachments = colourBlendStates.data();
 				colorBlending.blendConstants[0] = 0.0f; // Optional
 				colorBlending.blendConstants[1] = 0.0f; // Optional
 				colorBlending.blendConstants[2] = 0.0f; // Optional

@@ -29,6 +29,9 @@ namespace Insight
 			void Bind(CommandBuffer* commandBuffers);
 
 		private:
+			ShaderModuleBase& GetShaderModule(const ShaderType& type, std::vector<ShaderModuleBase>& modules);
+
+		private:
 			const Device* m_device;
 			VkPipeline m_pipeline;
 

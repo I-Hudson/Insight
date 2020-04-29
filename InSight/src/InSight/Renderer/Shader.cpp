@@ -18,7 +18,7 @@ namespace Insight
 			for (auto it = data.Modules.begin(); it != data.Modules.end(); ++it)
 			{
 				VkPipelineShaderStageCreateInfo info = VulkanInits::ShaderPipelineInfo();
-				info.stage = (*it).GetShaderType();
+				info.stage = (*it).GetShaderStageBit();
 				info.module = (*it).GetModule();
 
 				auto uniforms = (*it).GetPipelineLayoutCreateInfo();
@@ -39,7 +39,12 @@ namespace Insight
 			VkPipelineRasterizationStateCreateInfo rasterizationInfo = VulkanInits::PipelineRasterizationInfo();
 			VkPipelineMultisampleStateCreateInfo multisampleInfo = VulkanInits::PipelineMutisampleInfo();
 			VkPipelineColorBlendAttachmentState colourBlendAttachState = VulkanInits::PipelineColourBlendState();
-			VkPipelineColorBlendStateCreateInfo colourBlendAttachInfo = VulkanInits::PipelineColourBlendInfo(colourBlendAttachState);
+			std::vector<VkPipelineColorBlendAttachmentState> colourBlendAttachStates;
+			for (int i = 0; i < GetShaderModule(ShaderType::Fragment, data.Modules).GetData().OutAttri.Attributes.size(); ++i)
+			{
+				colourBlendAttachStates.push_back(VulkanInits::PipelineColourBlendState());
+			}
+			VkPipelineColorBlendStateCreateInfo colourBlendAttachInfo = VulkanInits::PipelineColourBlendInfo(colourBlendAttachStates);
 			VkPipelineDynamicStateCreateInfo dynamicInfo = VulkanInits::PipelineDynamicState({ VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_LINE_WIDTH });
 			VkDescriptorSetLayoutCreateInfo descriptorLayoutInfo = VulkanInits::DescriptorSetLayoutCreateInfo(shaderDescriptorLayouts);
 			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VulkanInits::PipelineLayoutInfo({ });
@@ -67,6 +72,17 @@ namespace Insight
 		void Shader::Bind(CommandBuffer* commandBuffers)
 		{
 			vkCmdBindPipeline(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+		}
+
+		ShaderModuleBase& Shader::GetShaderModule(const ShaderType& type, std::vector<ShaderModuleBase>& modules)
+		{
+			for (auto it = modules.begin(); it != modules.end(); ++it)
+			{
+				if ((*it).GetShaderType() == type)
+				{
+					return *it;
+				}
+			}
 		}
 	}
 }

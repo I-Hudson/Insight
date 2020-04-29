@@ -51,7 +51,7 @@ namespace Insight
 
 			std::vector<ShaderModuleBase> shaderModules =
 			{ VertexShader(m_device, "shader - Copy.vert"),
-			  FragmentShader(m_device, "shader.frag")
+			  FragmentShader(m_device, "shader - Copy.frag")
 			};
 			ShaderData data
 			{

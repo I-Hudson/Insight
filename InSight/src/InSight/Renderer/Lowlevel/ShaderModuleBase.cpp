@@ -30,7 +30,7 @@ namespace Insight
 			vkDestroyShaderModule(m_device->GetDevice(), m_shaderModule, nullptr);
 		}
 
-		VkShaderStageFlagBits ShaderModuleBase::GetShaderType() const
+		VkShaderStageFlagBits ShaderModuleBase::GetShaderStageBit() const
 		{
 			switch (m_type)
 			{
@@ -40,6 +40,11 @@ namespace Insight
 			case Insight::Render::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
 			case Insight::Render::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
+		}
+
+		ShaderType ShaderModuleBase::GetShaderType() const
+		{
+			return m_type;
 		}
 
 		VkPipelineVertexInputStateCreateInfo ShaderModuleBase::GetVertexInputCreateInfo()
@@ -62,7 +67,7 @@ namespace Insight
 			for (auto it = m_shaderData.UniformBlocks.begin();  it != m_shaderData.UniformBlocks.end(); ++it)
 			{
 				auto desc = VulkanInits::DescriptorSetLayoutBinding((*it).Binding, m_shaderData.UniformBlocks.size());
-				desc.stageFlags = GetShaderType();
+				desc.stageFlags = GetShaderStageBit();
 				createInfos.push_back(desc);
 			}
 

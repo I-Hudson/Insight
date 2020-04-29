@@ -91,7 +91,8 @@ namespace Insight
 
 			const VkShaderModule GetModule() const { return m_shaderModule; }
 			const ParsedShadeData& GetData() const { return m_shaderData; }
-			VkShaderStageFlagBits GetShaderType() const;
+			VkShaderStageFlagBits GetShaderStageBit() const;
+			ShaderType GetShaderType() const;
 
 			VkPipelineVertexInputStateCreateInfo GetVertexInputCreateInfo();
 			std::vector<VkDescriptorSetLayoutBinding> GetPipelineLayoutCreateInfo();
