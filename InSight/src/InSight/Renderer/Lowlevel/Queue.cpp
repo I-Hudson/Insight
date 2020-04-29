@@ -32,8 +32,15 @@ namespace Insight
 			{
 			case QueueFamilyType::Graphics:
 					GraphicsQueueInfo graphicsInfo = static_cast<GraphicsQueueInfo&>(queueInfo);
-					graphicsInfo.SyncFence->SetInUse();
-					ThrowIfFailed(vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, graphicsInfo.SyncFence->GetFence()));
+					if (graphicsInfo.SyncFence != nullptr || graphicsInfo.SyncFence != VK_NULL_HANDLE)
+					{
+						graphicsInfo.SyncFence->SetInUse();
+						ThrowIfFailed(vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, graphicsInfo.SyncFence->GetFence()));
+					}
+					else
+					{
+						ThrowIfFailed(vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo,VK_NULL_HANDLE));
+					}
 					break;
 
 			case QueueFamilyType::Present:

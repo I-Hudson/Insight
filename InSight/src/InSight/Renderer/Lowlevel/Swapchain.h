@@ -44,8 +44,10 @@ namespace Insight
 			VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 			
 			void AcquireNextImage();
-			void Draw();
+			void Submit(Semaphore* waitSemaphore);
+			void Draw(Semaphore* waitSemaphore);
 			void Present();
+			Semaphore* GetCurrentFinishedFrame();
 
 			void CreateSwapChain();
 
@@ -55,7 +57,6 @@ namespace Insight
 			SwapchainSettings m_swapchainSettings;
 
 			Shader* m_swapchainShader;
-			Shader* m_swapchainTestShader;
 			CommandPool* m_drawCommandPool;
 			std::vector<CommandBuffer*> m_drawCommandBuffers;
 
@@ -66,9 +67,6 @@ namespace Insight
 
 			uint32_t m_currentFrame = 0;
 			uint32_t m_imageIndex;
-			Semaphore* m_imageAvaliable;
-			Semaphore* m_renderFinished;
-			Renderpass* m_renderpass;
 			SwapChainSupportDetails m_swapChainDetails;
 			VkSwapchainKHR m_swapchain;
 			std::vector<Framebuffer*> m_swapchainFramebuffers;

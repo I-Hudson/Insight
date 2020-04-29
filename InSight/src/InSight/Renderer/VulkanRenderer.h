@@ -34,8 +34,6 @@ namespace Insight
 			const VkPhysicalDevice& GetPhysicalDevice() const { return m_device->GetPhysicalDevice(); }
 
 			const VkSurfaceKHR& GetSurface() const { return m_surface; }
-			//const VkSurfaceFormatKHR& GetSurfaceFormat() const { return m_surfaceFormat; }
-			//const VkSurfaceCapabilitiesKHR GetSurfaceCaps() const { return m_surfaceCaps; }
 
 			Queue GetGraphicsQueue() const { return m_device->GetQueue(QueueFamilyType::Graphics); }
 			Queue GetPresentQueue() const { return m_device->GetQueue(QueueFamilyType::Present); }
@@ -55,9 +53,10 @@ namespace Insight
 			Device* m_device;
 			Swapchain* m_swapchain;
 
-			Renderpass* m_renderpass;
-			std::vector<Framebuffer*> m_swapchainFramebuffers;
-			Shader* m_swapchainShader;
+			CommandPool* m_commandPool;
+			CommandBuffer* m_commandBuffer;
+			Shader* m_shader;
+			Framebuffer* m_framebuffer;
 
 			VkSurfaceKHR m_surface;
 

@@ -76,11 +76,35 @@ namespace Insight
 				return createInfo;
 			}
 
+			static VkImageCreateInfo ImageCreateInfo(const VkFormat& format, const VkExtent2D& extent, const VkImageUsageFlags& usage)
+			{
+				VkImageCreateInfo image{};
+				image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+				image.imageType = VK_IMAGE_TYPE_2D;
+				image.format = format;
+				image.extent.width = extent.width;
+				image.extent.height = extent.height;
+				image.extent.depth = 1;
+				image.mipLevels = 1;
+				image.arrayLayers = 1;
+				image.samples = VK_SAMPLE_COUNT_1_BIT;
+				image.tiling = VK_IMAGE_TILING_OPTIMAL;
+				image.usage = usage | VK_IMAGE_USAGE_SAMPLED_BIT;
+				return image;
+			}
+
 			static VkImageViewCreateInfo ImageViewInfo()
 			{
 				VkImageViewCreateInfo createInfo{};
 				createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 				return createInfo;
+			}
+
+			static VkMemoryAllocateInfo MemoryAllocInfo()
+			{
+				VkMemoryAllocateInfo info{};
+				info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+				return info;
 			}
 
 			static VkShaderModuleCreateInfo ShaderModuleInfo(const std::vector<uint32_t>& code)
@@ -270,14 +294,14 @@ namespace Insight
 				return renderPassInfo;
 			}
 
-			static VkFramebufferCreateInfo FramebufferInfo(const VkRenderPass& renderpass, const int& imageViewsCount, const VkImageView imageViews[], 
+			static VkFramebufferCreateInfo FramebufferInfo(const VkRenderPass& renderpass, const std::vector<VkImageView>& imageViews, 
 														   const int& width, const int& height, const int& layers = 1)
 			{
 				VkFramebufferCreateInfo framebufferInfo{};
 				framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 				framebufferInfo.renderPass = renderpass;
-				framebufferInfo.attachmentCount = imageViewsCount;
-				framebufferInfo.pAttachments = imageViews;
+				framebufferInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
+				framebufferInfo.pAttachments = imageViews.data();
 				framebufferInfo.width = static_cast<uint32_t>(width);
 				framebufferInfo.height = static_cast<uint32_t>(height);
 				framebufferInfo.layers = layers;
@@ -352,7 +376,7 @@ namespace Insight
 			}
 
 			static VkRenderPassBeginInfo RenderPassBeginInfo(const VkRenderPass& renderpass, const VkFramebuffer& framebuffer, const VkExtent2D extent, 
-				const VkClearValue& clearcolour)
+				const std::vector<VkClearValue>& clearColours)
 			{
 				VkRenderPassBeginInfo renderPassInfo{};
 				renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -360,8 +384,8 @@ namespace Insight
 				renderPassInfo.framebuffer = framebuffer;
 				renderPassInfo.renderArea.offset = { 0, 0 };
 				renderPassInfo.renderArea.extent = extent;
-				renderPassInfo.clearValueCount = 1;
-				renderPassInfo.pClearValues = &clearcolour;
+				renderPassInfo.clearValueCount = static_cast<uint32_t>(clearColours.size());
+				renderPassInfo.pClearValues = clearColours.data();
 				return renderPassInfo;
 			}
 

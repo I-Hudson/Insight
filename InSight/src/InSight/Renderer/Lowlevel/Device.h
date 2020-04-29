@@ -40,6 +40,8 @@ namespace Insight
 			const QueueFamily& GetQueueFamily(const QueueFamilyType type) const;
 			Queue& GetQueue(const QueueFamilyType type);
 
+			uint32_t GetMemoryType(const uint32_t& memoryType, const VkMemoryPropertyFlags& memProb);
+
 			void WaitForIdle();
 
 			void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);

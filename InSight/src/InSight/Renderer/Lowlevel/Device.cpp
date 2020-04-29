@@ -98,6 +98,21 @@ namespace Insight
 			}
 		}
 
+		uint32_t Device::GetMemoryType(const uint32_t& memoryType, const VkMemoryPropertyFlags& memProb)
+		{
+			VkPhysicalDeviceMemoryProperties memProperties;
+			vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
+
+			for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+			{
+				if ((memoryType & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & memProb) == memProb) 
+				{
+					return i;
+				}
+			}
+
+		}
+
 		void Device::WaitForIdle()
 		{
 			vkDeviceWaitIdle(m_device);
