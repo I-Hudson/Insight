@@ -10,6 +10,8 @@
 
 #include "Insight/Renderer/Lowlevel/ShaderModule.h"
 
+#include "Insight/Event/EventManager.h"
+
 namespace Insight
 {
 	namespace Render
@@ -17,16 +19,14 @@ namespace Insight
 		Swapchain::Swapchain(const SwapchainSettings swapchainSettings)
 			: m_swapchainSettings(swapchainSettings)
 		{
+			EventManager::Bind(EventType::WindowResize, typeid(Swapchain).name(), BIND_FUNC(Swapchain::RecreateSwapchain, this));
+
 			CreateSwapChain();
 
-			std::vector<ShaderModuleBase> shaderModules =
-			{ VertexShader(m_swapchainSettings.Device, "shader.vert"), 
-			  FragmentShader(m_swapchainSettings.Device, "shader.frag") 
-			};
 			ShaderData data
 			{
 				m_swapchainSettings.Device,
-				shaderModules,
+				{"shader.vert", "shader.frag"},
 				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
@@ -40,6 +40,8 @@ namespace Insight
 
 		Swapchain::~Swapchain()
 		{
+			EventManager::Unbind(EventType::WindowResize, typeid(Swapchain).name());
+
 			Memory::MemoryManager::DeleteOnFreeList(m_drawCommandPool);
 
 			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
@@ -122,19 +124,27 @@ namespace Insight
 
 		void Swapchain::AcquireNextImage()
 		{
-			m_swapchainFramebuffers[m_currentFrame]->GetFence()->Wait();
+			m_inFlightFences[m_currentFrame]->Wait();
 
-			vkAcquireNextImageKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, U64_MAX, 
-								  m_swapchainFramebuffers[m_currentFrame]->GetAvailbleSem()->GetSemaphore(),
+			uint32_t prevIndex = m_imageIndex;
+			VkResult result = vkAcquireNextImageKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, U64_MAX, 
+													m_swapchainFramebuffers[m_currentFrame]->GetAvailbleSem()->GetSemaphore(),
 								  VK_NULL_HANDLE, &m_imageIndex);
+
+			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+			{
+				EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(640, 480));
+			}
+
+			if (m_imagesInFlight[m_imageIndex] != VK_NULL_HANDLE)
+			{
+				m_imagesInFlight[m_imageIndex]->Wait();
+			}
 		}
 
 		void Swapchain::Submit(Semaphore* waitSemaphore)
 		{
-			if (m_swapchainFramebuffers[m_imageIndex]->GetFence()->GetInUse())
-			{
-				m_swapchainFramebuffers[m_imageIndex]->GetFence()->Wait();
-			}
+			m_imagesInFlight[m_imageIndex] = m_inFlightFences[m_currentFrame];
 
 			std::vector<VkSemaphore> waitSemaphores = { waitSemaphore->GetSemaphore() };
 			std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
@@ -142,11 +152,11 @@ namespace Insight
 			std::vector<VkSemaphore> signalSemaphore = { m_swapchainFramebuffers[m_currentFrame]->GetFinishedSem()->GetSemaphore() };
 			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
 
-			m_swapchainFramebuffers[m_imageIndex]->GetFence()->Reset();
+			m_inFlightFences[m_currentFrame]->Reset();
 
 			GraphicsQueueInfo info;
 			info.SubmitInfo = &submitInfo;
-			info.SyncFence = m_swapchainFramebuffers[m_currentFrame]->GetFence();
+			info.SyncFence = m_inFlightFences[m_currentFrame];
 			m_swapchainSettings.Device->GetQueue(QueueFamilyType::Graphics).Submit(info);
 		}
 
@@ -157,9 +167,7 @@ namespace Insight
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
 			{
 				(*it)->StartRecord();
-
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
-
 				m_swapchainShader->Bind(*it);
 
 				vkCmdDraw((*it)->GetBuffer(), 3, 1, 0, 0);
@@ -185,9 +193,9 @@ namespace Insight
 			m_currentFrame = (m_currentFrame + 1) % MaxFramesInFlight;
 		}
 
-		Semaphore* Swapchain::GetCurrentFinishedFrame()
+		Semaphore* Swapchain::GetAcquireNextImageSemaphore()
 		{
-			return m_swapchainFramebuffers[m_imageIndex]->GetAvailbleSem();
+			return m_swapchainFramebuffers[m_currentFrame]->GetAvailbleSem();
 		}
 
 		void Swapchain::CreateSwapChain()
@@ -249,12 +257,18 @@ namespace Insight
 
 			IS_CORE_INFO("Swapchain images completed.");
 
+			m_inFlightFences.resize(imageCount);
+			m_imagesInFlight.resize(imageCount);
+
 			for (size_t i = 0; i < imageCount; i++)
 			{
 				Framebuffer* fb = Memory::MemoryManager::NewOnFreeList<Framebuffer>(m_swapchainSettings.Device, extent);
 				fb->AttachImage(&swapChainImages[i], surfaceFormat.format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 				fb->CompileFrameBuffer();
 				m_swapchainFramebuffers.push_back(std::move(fb));
+
+				m_inFlightFences[i] = fb->GetFence();
+				m_imagesInFlight[i] = VK_NULL_HANDLE;
 			}
 		}
 
@@ -262,6 +276,29 @@ namespace Insight
 		const VkSwapchainKHR& Swapchain::GetSwapchain() const
 		{
 			return m_swapchain;
+		}
+
+		void Swapchain::RecreateSwapchain(const Event& event)
+		{
+			for (size_t i = 0; i < m_swapchainFramebuffers.size(); i++)
+			{
+				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);
+			}
+			m_swapchainFramebuffers.clear();
+			m_drawCommandPool->FreeCommandBuffers();
+			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
+			vkDestroySwapchainKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, nullptr);
+
+			m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
+			CreateSwapChain();
+			ShaderData data
+			{
+				m_swapchainSettings.Device,
+				{"shader.vert", "shader.frag"},
+				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
+				m_swapchainFramebuffers[0]->GetRenderpass()
+			};
+			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<Shader>(data);
 		}
 	}
 }

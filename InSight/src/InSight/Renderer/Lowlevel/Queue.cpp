@@ -28,6 +28,8 @@ namespace Insight
 
 		void Queue::Submit(QueueInfo& queueInfo)
 		{
+			VkResult result{};
+
 			switch (m_queueFamily.GetType())
 			{
 			case QueueFamilyType::Graphics:
@@ -35,17 +37,26 @@ namespace Insight
 					if (graphicsInfo.SyncFence != nullptr || graphicsInfo.SyncFence != VK_NULL_HANDLE)
 					{
 						graphicsInfo.SyncFence->SetInUse();
-						ThrowIfFailed(vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, graphicsInfo.SyncFence->GetFence()));
+						ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, graphicsInfo.SyncFence->GetFence()));
 					}
 					else
 					{
-						ThrowIfFailed(vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo,VK_NULL_HANDLE));
+						ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo,VK_NULL_HANDLE));
+					}
+
+					if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+					{
+						IS_CORE_INFO("Swapchain is out of date");
 					}
 					break;
 
 			case QueueFamilyType::Present:
 				PresentQueueInfo presentInfo = static_cast<PresentQueueInfo&>(queueInfo);
 				ThrowIfFailed(vkQueuePresentKHR(m_queue, presentInfo.PresentInfo));
+				if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+				{
+					IS_CORE_INFO("Swapchain is out of date");
+				}
 				break;
 			}
 		}

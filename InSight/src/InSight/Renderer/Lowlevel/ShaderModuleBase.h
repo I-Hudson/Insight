@@ -84,6 +84,7 @@ namespace Insight
 		class IS_API ShaderModuleBase
 		{
 		public:
+			ShaderModuleBase(const Device* device, const std::string& filepath);
 			ShaderModuleBase(const Device* device, const std::string& filepath, const ShaderType& type);
 			~ShaderModuleBase();
 
@@ -106,7 +107,7 @@ namespace Insight
 
 			std::string PreprocessShader(const std::string& source_name, shaderc_shader_kind kind, const std::string& source, bool optimize = false);
 			std::vector<uint32_t> ComplieToRaw(const std::string& source_name, shaderc_shader_kind kind, const std::string& source, bool optimize = false);
-
+			ShaderType GetShaderTypeFromPath(const std::string& string);
 
 			std::string GetFilePath(const std::string& filePath);
 			std::string GetSuffix(const std::string& name);

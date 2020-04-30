@@ -42,6 +42,8 @@ namespace Insight
 			void UnbindBuffer(CommandBuffer* commandBuffers);
 			void SetRenderPass(Renderpass* renderpass);
 
+			void Resize(int width, int height);
+
 			Renderpass* GetRenderpass() const { return m_renderpass; }
 			Semaphore* GetAvailbleSem() const { return m_imageAvailableSem; }
 			Semaphore* GetFinishedSem() const { return m_imageFinishedSem; }

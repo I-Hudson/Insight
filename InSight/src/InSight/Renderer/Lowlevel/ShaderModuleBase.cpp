@@ -10,6 +10,18 @@ namespace Insight
 {
 	namespace Render
 	{
+		ShaderModuleBase::ShaderModuleBase(const Device* device, const std::string& filepath)
+			: m_device(device), m_type(GetShaderTypeFromPath(GetSuffix(filepath))), m_shaderModule(VK_NULL_HANDLE)
+		{
+			m_shaderData = ShaderParser::ParseShader(filepath, m_type);
+
+			auto spirvData = CompileGLSL(filepath);
+
+			VkShaderModuleCreateInfo createInfo = VulkanInits::ShaderModuleInfo(spirvData);
+
+			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
+		}
+
 		ShaderModuleBase::ShaderModuleBase(const Device* device, const std::string& filepath, const ShaderType& type)
 			: m_device(device), m_type(type), m_shaderModule(VK_NULL_HANDLE)
 		{
@@ -168,6 +180,35 @@ namespace Insight
 			}
 
 			return { module.cbegin(), module.cend() };
+		}
+
+		ShaderType ShaderModuleBase::GetShaderTypeFromPath(const std::string& string)
+		{
+			if (string == "vert")
+			{
+				return ShaderType::Vertex;
+			}
+			else if (string == "tesc")
+			{
+				return ShaderType::Vertex;
+			}
+			else if (string == "tese")
+			{
+				return ShaderType::Vertex;
+			}
+			else if (string == "geom")
+			{
+				return ShaderType::Geometry;
+			}
+			else if (string == "frag")
+			{
+				return ShaderType::Fragment;
+			}
+			else if (string == "comp")
+			{
+				return ShaderType::Compute;
+			}
+			return ShaderType::None;
 		}
 
 		std::string ShaderModuleBase::GetFilePath(const std::string& filePath)

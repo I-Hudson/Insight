@@ -23,8 +23,11 @@ namespace Insight
 			~Renderpass();
 
 			const VkRenderPass& GetRenderpass() const { return m_renderPass; }
+			void Recreate(const std::vector<FrameBufferAttachment>& fbAttachments);
 
 		private:
+			void Create(const std::vector<FrameBufferAttachment>& fbAttachments);
+
 			std::vector<VkAttachmentDescription> GetAttachments(const std::vector<FrameBufferAttachment>& attachments);
 			std::vector<VkAttachmentReference> GetAttachmentReferences(const std::vector<FrameBufferAttachment>& attachments, const VkImageLayout& mask);
 

@@ -164,6 +164,9 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
+    <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
+    <ClInclude Include="src\Insight\Event\Event.h" />
+    <ClInclude Include="src\Insight\Event\EventManager.h" />
     <ClInclude Include="src\Insight\InsightAlias.h" />
     <ClInclude Include="src\Insight\Log.h" />
     <ClInclude Include="src\Insight\Maths\Matrix3.h" />
@@ -206,6 +209,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Application.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
     <ClCompile Include="src\Insight\Config\Config.cpp" />
+    <ClCompile Include="src\Insight\Event\EventManager.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix3.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix4.cpp" />

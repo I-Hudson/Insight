@@ -15,7 +15,7 @@ namespace Insight
 		struct ShaderData
 		{
 			const Device* Device;
-			std::vector<ShaderModuleBase>& Modules;
+			const std::vector<std::string> ModuleNames;
 			VkExtent2D Extent;
 			const Renderpass* Renderpass;
 		};
@@ -28,13 +28,16 @@ namespace Insight
 
 			void Bind(CommandBuffer* commandBuffers);
 
+			void Resize(int width, int height);
+
 		private:
+			void Create(ShaderData& data);
 			ShaderModuleBase& GetShaderModule(const ShaderType& type, std::vector<ShaderModuleBase>& modules);
 
 		private:
 			const Device* m_device;
 			VkPipeline m_pipeline;
-
+			ShaderData m_shaderData;
 			VkPipelineLayout m_pipelineLayout;
 		};
 	}

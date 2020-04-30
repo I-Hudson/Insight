@@ -26,6 +26,22 @@ namespace Insight
 			}
 		}
 
+		void CommandPool::FreeCommandBuffers()
+		{
+			std::vector<VkCommandBuffer> buffers;
+			for (auto it = m_commandBuffers.begin(); it != m_commandBuffers.end(); ++it)
+			{
+				buffers.push_back((*it)->GetBuffer());
+			}
+			vkFreeCommandBuffers(m_device->GetDevice(), m_pool, buffers.size(), buffers.data());
+
+			for (auto it = m_commandBuffers.begin(); it != m_commandBuffers.end(); ++it)
+			{
+				Memory::MemoryManager::DeleteOnFreeList(*it);
+			}
+			m_commandBuffers.clear();
+		}
+
 		std::vector<CommandBuffer*> CommandPool::AllocCommandBuffers(const int& count)
 		{
 			VkCommandBufferAllocateInfo info = VulkanInits::CommandBufferAllocInfo(m_pool, count);

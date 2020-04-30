@@ -49,14 +49,10 @@ namespace Insight
 											VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			m_framebuffer->CompileFrameBuffer();
 
-			std::vector<ShaderModuleBase> shaderModules =
-			{ VertexShader(m_device, "shader - Copy.vert"),
-			  FragmentShader(m_device, "shader - Copy.frag")
-			};
 			ShaderData data
 			{
 				m_device,
-				shaderModules,
+				{"shader - Copy.vert", "shader - Copy.frag"},
 				VkExtent2D{ static_cast<uint32_t>(m_windowModule->GetWindow()->GetWidth()), static_cast<uint32_t>(m_windowModule->GetWindow()->GetHeight())},
 				m_framebuffer->GetRenderpass()
 			};
@@ -96,18 +92,20 @@ namespace Insight
 			m_swapchain->AcquireNextImage();
 
 			m_commandBuffer->StartRecord();
+			
 			m_framebuffer->BindBuffer(m_commandBuffer);
 			m_shader->Bind(m_commandBuffer);
+			
 			vkCmdDraw(m_commandBuffer->GetBuffer(), 3, 1, 0, 0);
 			m_framebuffer->UnbindBuffer(m_commandBuffer);
 			m_commandBuffer->EndRecord();
-
-			std::vector<VkSemaphore> waitSemaphores = { m_swapchain->GetCurrentFinishedFrame()->GetSemaphore() };
+			
+			std::vector<VkSemaphore> waitSemaphores = { m_swapchain->GetAcquireNextImageSemaphore()->GetSemaphore() };
 			std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 			std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
 			std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
 			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
-
+			
 			GraphicsQueueInfo info;
 			info.SubmitInfo = &submitInfo;
 			info.SyncFence = VK_NULL_HANDLE;

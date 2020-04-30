@@ -28,6 +28,9 @@
     <Filter Include="Insight\Time">
       <UniqueIdentifier>{D9ECE599-C54F-753E-6ED5-ADF45A1741C1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Insight\Events">
+      <UniqueIdentifier>{f8c8fd9e-b561-4197-bcb9-de85cd8ed92b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
@@ -161,6 +164,15 @@
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Fence.h">
       <Filter>Insight\Renderer\Lowlevel</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Event\Event.h">
+      <Filter>Insight\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Event\ApplicationEvent.h">
+      <Filter>Insight\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Event\EventManager.h">
+      <Filter>Insight\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -259,6 +271,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Fence.cpp">
       <Filter>Insight\Renderer\Lowlevel</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Event\EventManager.cpp">
+      <Filter>Insight\Events</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

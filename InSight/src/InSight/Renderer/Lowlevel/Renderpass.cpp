@@ -11,6 +11,22 @@ namespace Insight
 		Renderpass::Renderpass(const Device* device, const std::vector<FrameBufferAttachment>& fbAttachments)
 			: m_device(device)
 		{
+			Create(fbAttachments);
+		}
+
+		Renderpass::~Renderpass()
+		{
+			vkDestroyRenderPass(m_device->GetDevice(), m_renderPass, nullptr);
+		}
+
+		void Renderpass::Recreate(const std::vector<FrameBufferAttachment>& fbAttachments)
+		{
+			vkDestroyRenderPass(m_device->GetDevice(), m_renderPass, nullptr);
+			Create(fbAttachments);
+		}
+
+		void Renderpass::Create(const std::vector<FrameBufferAttachment>& fbAttachments)
+		{
 			VkSubpassDependency dependency{};
 			dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 			dependency.dstSubpass = 0;
@@ -28,11 +44,6 @@ namespace Insight
 			VkRenderPassCreateInfo renderPassCreateInfo = VulkanInits::RenderPassInfo(attachments, subpass, dependecies);
 
 			ThrowIfFailed(vkCreateRenderPass(m_device->GetDevice(), &renderPassCreateInfo, nullptr, &m_renderPass));
-		}
-
-		Renderpass::~Renderpass()
-		{
-			vkDestroyRenderPass(m_device->GetDevice(), m_renderPass, nullptr);
 		}
 
 		std::vector<VkAttachmentDescription> Renderpass::GetAttachments(const std::vector<FrameBufferAttachment>& attachments)

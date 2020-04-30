@@ -134,14 +134,14 @@ namespace Insight
 				return inputAssembly;
 			}
 
-			static VkPipelineViewportStateCreateInfo PipelineViewportInfo(const VkViewport& viewport, const VkRect2D& scissor)
+			static VkPipelineViewportStateCreateInfo PipelineViewportInfo(const VkViewport* viewport, const VkRect2D* scissor)
 			{
 				VkPipelineViewportStateCreateInfo viewportState{};
 				viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 				viewportState.viewportCount = 1;
-				viewportState.pViewports = &viewport;
+				viewportState.pViewports = viewport;
 				viewportState.scissorCount = 1;
-				viewportState.pScissors = &scissor;
+				viewportState.pScissors = scissor;
 
 				return viewportState;
 			}
@@ -220,7 +220,7 @@ namespace Insight
 				return colorBlendAttachment;
 			}
 
-			static VkPipelineDynamicStateCreateInfo PipelineDynamicState(const std::vector<VkDynamicState> dynamicStates)
+			static VkPipelineDynamicStateCreateInfo PipelineDynamicState(const std::vector<VkDynamicState>& dynamicStates)
 			{
 				VkPipelineDynamicStateCreateInfo dynamicState{};
 				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;

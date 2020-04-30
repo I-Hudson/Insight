@@ -2,7 +2,8 @@
 
 #include "WindowModule.h"
 #include "Insight/Config/Config.h"
-
+#include "Insight/Event/EventManager.h"
+#include "Insight/Event/ApplicationEvent.h"
 #include "GLFW/glfw3.h"
 
 namespace Insight
@@ -57,12 +58,18 @@ namespace Insight
 			glfwInit();
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+			//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 			m_window->m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
 				CONFIG_VAL(Config::WindowConfig.WindowHeight),
 				CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
 				nullptr, nullptr);
+
+
+			glfwSetWindowSizeCallback(m_window->m_window, [](GLFWwindow* window, int width, int height)
+				{
+					EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));
+				});
 		}
 
 		WindowModule::~WindowModule()

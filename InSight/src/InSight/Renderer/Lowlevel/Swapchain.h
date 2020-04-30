@@ -10,6 +10,8 @@
 #include "Insight/Renderer/Lowlevel/CommandBuffer.h"
 #include "Insight/Renderer/Lowlevel/Semaphore.h"
 
+#include "Insight/Event/ApplicationEvent.h"
+
 namespace Insight
 {
 	class Window;
@@ -47,11 +49,14 @@ namespace Insight
 			void Submit(Semaphore* waitSemaphore);
 			void Draw(Semaphore* waitSemaphore);
 			void Present();
-			Semaphore* GetCurrentFinishedFrame();
+			Semaphore* GetAcquireNextImageSemaphore();
 
 			void CreateSwapChain();
 
 			const VkSwapchainKHR& GetSwapchain() const;
+
+		private:
+			void RecreateSwapchain(const Event& event);
 
 		private:
 			SwapchainSettings m_swapchainSettings;
@@ -59,6 +64,8 @@ namespace Insight
 			Shader* m_swapchainShader;
 			CommandPool* m_drawCommandPool;
 			std::vector<CommandBuffer*> m_drawCommandBuffers;
+			std::vector<Fence*> m_inFlightFences;
+			std::vector<Fence*> m_imagesInFlight;
 
 			const uint32_t MaxFramesInFlight = 3;
 

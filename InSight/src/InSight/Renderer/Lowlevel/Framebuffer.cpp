@@ -5,12 +5,14 @@
 #include "Insight/Renderer/VulkanInits.h"
 #include "Insight/Memory/MemoryManager.h"
 
+#include "Insight/Event/EventManager.h"
+
 namespace Insight
 {
 	namespace Render
 	{
 		Framebuffer::Framebuffer(Device* device, const int& width, const int& height)
-			: m_device(device), m_extent(VkExtent2D{static_cast<uint32_t>(width), static_cast<uint32_t>(height)})
+			: m_device(device), m_extent(VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) })
 		{
 			m_imageAvailableSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
 			m_imageFinishedSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
@@ -60,13 +62,13 @@ namespace Insight
 		void Framebuffer::CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout)
 		{
 			VkImageAspectFlags aspectMask = 0;
-			
+
 			FrameBufferAttachment attachment;
 			attachment.Format = format;
 			attachment.ImageLayout = imageLayout;
 			attachment.FinalLayout = finalLayout;
 			attachment.DeleteImage = true;
-			
+
 			if (usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
 			{
 				aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -77,7 +79,7 @@ namespace Insight
 			}
 			VkImageCreateInfo imageCreateInfo = VulkanInits::ImageCreateInfo(attachment.Format, m_extent, usage);
 			ThrowIfFailed(vkCreateImage(m_device->GetDevice(), &imageCreateInfo, nullptr, &attachment.Image));
-			
+
 			VkMemoryAllocateInfo allocInfo = VulkanInits::MemoryAllocInfo();
 			VkMemoryRequirements memReq;
 			vkGetImageMemoryRequirements(m_device->GetDevice(), attachment.Image, &memReq);
@@ -85,7 +87,7 @@ namespace Insight
 			allocInfo.memoryTypeIndex = m_device->GetMemoryType(memReq.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			ThrowIfFailed(vkAllocateMemory(m_device->GetDevice(), &allocInfo, nullptr, &attachment.Mem));
 			ThrowIfFailed(vkBindImageMemory(m_device->GetDevice(), attachment.Image, attachment.Mem, 0));
-			
+
 			VkImageViewCreateInfo createInfo = VulkanInits::ImageViewInfo();
 			createInfo.image = attachment.Image;
 			createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -95,9 +97,9 @@ namespace Insight
 			createInfo.subresourceRange.levelCount = 1;
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
-			
+
 			ThrowIfFailed(vkCreateImageView(m_device->GetDevice(), &createInfo, nullptr, &attachment.View));
-			
+
 			m_attachments.push_back(attachment);
 		}
 
@@ -163,6 +165,11 @@ namespace Insight
 		void Framebuffer::SetRenderPass(Renderpass* renderpass)
 		{
 			m_renderpass = renderpass;
+		}
+
+		void Framebuffer::Resize(int width, int height)
+		{
+			m_renderpass->Recreate(m_attachments);
 		}
 	}
 }
