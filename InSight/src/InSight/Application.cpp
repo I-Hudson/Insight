@@ -8,9 +8,11 @@
 #include "Module/ModuleManager.h"
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
+#include "Module/InputModule.h"
 
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
+#include "Input/Input.h"
 
 namespace Insight
 {
@@ -93,6 +95,11 @@ namespace Insight
 		graphicsData.ManuallUpdate = true;
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
 
+		Module::InputModuleData inputData;
+		inputData.WindowModule = m_windowModule;
+		inputData.ManuallUpdate = true;
+		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(inputData);
+
 		bool isRunning = false;
 
 		do
@@ -100,8 +107,17 @@ namespace Insight
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
 
+			if (Input::KeyDown(KEY_SPACE))
+			{
+				IS_CORE_INFO("Space was pressed.");
+			}
+
+			Update(Time::GetDeltaTime());
+			Draw();
+
 			m_graphicsModule->Update(Time::GetDeltaTime());
 
+			m_inputModule->Update(Time::GetDeltaTime());
 			isRunning = !m_windowModule->GetWindow()->ShouldClose();
 			m_windowModule->Update(Time::GetDeltaTime());
 		} while (isRunning);

@@ -20,6 +20,8 @@ namespace Insight
 			VkImageView View;
 			VkDeviceMemory Mem;
 			VkFormat Format;
+			VkImageUsageFlags ImageUsage;
+			VkImageAspectFlags ImageViewAspect;
 			VkImageLayout ImageLayout;
 			VkImageLayout FinalLayout;
 			bool DeleteImage;
@@ -48,6 +50,11 @@ namespace Insight
 			Semaphore* GetAvailbleSem() const { return m_imageAvailableSem; }
 			Semaphore* GetFinishedSem() const { return m_imageFinishedSem; }
 			Fence* GetFence() const { return m_fence; }
+
+		private:
+			void CreateImage(FrameBufferAttachment& attachment);
+			void CreateImageView(FrameBufferAttachment& attachment);
+			void CreateMemory(FrameBufferAttachment& attachment);
 
 		private:
 			Device* m_device;

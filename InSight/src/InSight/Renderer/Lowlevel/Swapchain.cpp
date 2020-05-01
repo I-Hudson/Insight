@@ -280,6 +280,17 @@ namespace Insight
 
 		void Swapchain::RecreateSwapchain(const Event& event)
 		{
+			WindowResizeEvent e = static_cast<const WindowResizeEvent&>(event);
+			unsigned int width = e.m_width;
+			unsigned int height = e.m_height;
+
+			while (width == 0 || height == 0)
+			{
+				width = m_swapchainSettings.Window->GetWidth();
+				height = m_swapchainSettings.Window->GetHeight();
+				m_swapchainSettings.Window->WaitForEvents();
+			}
+
 			for (size_t i = 0; i < m_swapchainFramebuffers.size(); i++)
 			{
 				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);

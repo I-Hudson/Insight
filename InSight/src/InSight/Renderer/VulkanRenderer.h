@@ -41,6 +41,8 @@ namespace Insight
 
 		private:
 
+			void RecreateFramebuffers(const Event& event);
+
 			bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 
 			bool CheckValidationLayerSupport(const std::vector<const char*>& validationLayers);

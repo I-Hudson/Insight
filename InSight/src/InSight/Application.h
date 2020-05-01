@@ -10,6 +10,7 @@ namespace Insight
 		class ModuleManager;
 		class WindowModule;
 		class GraphicsModule;
+		class InputModule;
 	}
 
 	namespace Memory
@@ -23,6 +24,9 @@ namespace Insight
 		Application();
 		virtual ~Application();
 
+		virtual void Update(const float deltaTime) = 0;
+		virtual void Draw() = 0;
+
 		void Run();
 
 	private:
@@ -32,6 +36,7 @@ namespace Insight
 		Module::ModuleManager* m_moduleManager;
 		Module::WindowModule* m_windowModule;
 		Module::GraphicsModule* m_graphicsModule;
+		Module::InputModule* m_inputModule;
 	};
 
 	Application* CreateApplication();

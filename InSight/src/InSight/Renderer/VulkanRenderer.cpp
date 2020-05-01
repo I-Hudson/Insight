@@ -8,6 +8,7 @@
 #include "Insight/Log.h"
 
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Event/EventManager.h"
 
 #include "Insight/Config/Config.h"
 
@@ -68,12 +69,16 @@ namespace Insight
 			};
 			m_swapchain = Memory::MemoryManager::NewOnFreeList<Swapchain>(swapchainSettings);
 
+			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
+
 			IS_CORE_INFO("Vulkan Setup Complete.");
 		}
 
 		VulkanRenderer::~VulkanRenderer()
 		{
 			m_device->WaitForIdle();
+
+			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
 
 			Memory::MemoryManager::DeleteOnFreeList(m_shader);
 			Memory::MemoryManager::DeleteOnFreeList(m_framebuffer);
@@ -117,6 +122,15 @@ namespace Insight
 		void VulkanRenderer::Present()
 		{
 			m_swapchain->Present();
+		}
+
+		void VulkanRenderer::RecreateFramebuffers(const Event& event)
+		{
+			m_commandPool->FreeCommandBuffers();
+			m_commandBuffer = m_commandPool->AllocCommandBuffer();
+
+			m_framebuffer->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
+			m_shader->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 		}
 
 		bool VulkanRenderer::CheckDeviceExtensionSupport(VkPhysicalDevice device)

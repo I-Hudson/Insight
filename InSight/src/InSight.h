@@ -5,6 +5,7 @@
 #include "InSight/Application.h"
 #include "InSight/Log.h"
 #include "Insight/Time/Stopwatch.h"
+#include "Insight/Input/Input.h"
 
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"

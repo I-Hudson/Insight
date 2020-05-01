@@ -39,7 +39,7 @@ namespace Insight
 			ss << "Window Resize Event: " << m_width << ", " << m_height << "\n";
 			return ss.str();
 		}
-	private:
+	//private:
 		unsigned int m_width, m_height;
 	};
 }

@@ -18,6 +18,7 @@ namespace Insight
 		static void SetFullscreen(const bool& fullscreen = true);
 		static bool IsFullscreen();
 
+		static void WaitForEvents();
 		static bool ShouldClose();
 
 		static GLFWwindow* m_window;

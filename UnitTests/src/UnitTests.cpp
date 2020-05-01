@@ -95,6 +95,16 @@ public:
 
 	}
 
+	virtual void Update(const float deltaTime) override
+	{
+
+	}
+
+	virtual void Draw() override
+	{
+
+	}
+
 	~UnitTest()
 	{
 

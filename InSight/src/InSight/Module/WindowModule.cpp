@@ -41,6 +41,11 @@ namespace Insight
 		return false;
 	}
 
+	void Window::WaitForEvents()
+	{
+		glfwWaitEvents();
+	}
+
 	bool Window::ShouldClose()
 	{
 		return glfwWindowShouldClose(m_window);

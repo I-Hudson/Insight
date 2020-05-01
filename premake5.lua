@@ -7,6 +7,11 @@ workspace "Insight"
         "Debug",
         "Release",
         "Dist"
+    }
+    
+    flags
+	{
+		"MultiProcessorCompile"
 	}
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -17,6 +22,7 @@ IncludeDir["spdlog"] = "$(SolutionDir)/Insight/vendor/spdlog/include"
 IncludeDir["GLFW"] = "$(SolutionDir)/Insight/vendor/GLFW/include"
 IncludeDir["shaderc"] = "$(SolutionDir)/Insight/vendor/shaderc/include"
 IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
+IncludeDir["glm"] = "$(SolutionDir)/Insight/vendor/glm"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
@@ -44,7 +50,9 @@ project "Insight"
     files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+        "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl",
 	}
 
     includedirs 
@@ -53,7 +61,8 @@ project "Insight"
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.shaderc}",
-        "%{IncludeDir.Vulkan}"
+        "%{IncludeDir.Vulkan}",
+        "%{IncludeDir.glm}"
 	}
 
     libdirs
@@ -74,7 +83,8 @@ project "Insight"
         defines 
         {  
             "IS_PLATFORM_WINDOWS", 
-            "IS_BUILD_DLL" 
+            "IS_BUILD_DLL" ,
+            "GLM_FORCE_SWIZZLE"
         }
 
         postbuildcommands 
