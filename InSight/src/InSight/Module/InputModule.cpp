@@ -9,6 +9,8 @@ namespace Insight
 	namespace Module
 	{
 		std::unordered_map<int, int> InputModule::m_inputStates;
+		double InputModule::m_mouseX;
+		double InputModule::m_mouseY;
 
 		InputModule::InputModule(ModuleStartupData& startupData)
 			: Module(startupData)
@@ -17,7 +19,8 @@ namespace Insight
 			m_windowModule = data.WindowModule;
 
 			glfwSetKeyCallback(m_windowModule->GetWindow()->m_window, KeybordCallback);
-			glfwSetMouseButtonCallback(m_windowModule->GetWindow()->m_window, MouseCallback);
+			glfwSetMouseButtonCallback(m_windowModule->GetWindow()->m_window, MouseButtonCallback);
+			glfwSetCursorPosCallback(m_windowModule->GetWindow()->m_window, MousePositionCallback);
 		}
 
 		InputModule::~InputModule()
@@ -35,7 +38,13 @@ namespace Insight
 			m_inputStates[key] = action;
 		}
 
-		void InputModule::MouseCallback(GLFWwindow* window, int button, int action, int mod)
+		void InputModule::MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY)
+		{
+			m_mouseX = mouseX;
+			m_mouseY = mouseY;
+		}
+
+		void InputModule::MouseButtonCallback(GLFWwindow* window, int button, int action, int mod)
 		{
 			m_inputStates[button] = action;
 		}

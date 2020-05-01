@@ -29,10 +29,13 @@ namespace Insight
 
 		private:
 			static void KeybordCallback(GLFWwindow* window, int key, int scanCode, int action, int mod);
-			static void MouseCallback(GLFWwindow* window, int button, int action, int mod);
+			static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mod);
+			static void MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY);
 
 		private:
 			static std::unordered_map<int, int> m_inputStates;
+			static double m_mouseX;
+			static double m_mouseY;
 
 			WindowModule* m_windowModule;
 

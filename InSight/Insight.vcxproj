@@ -105,7 +105,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.dll\ (xcopy /Q /E /Y /I ..\
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_ENABLE_EXPERIMENTAL;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)\Insight\vendor\spdlog\include;$(SolutionDir)\Insight\vendor\GLFW\include;$(SolutionDir)\Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)\Insight\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>

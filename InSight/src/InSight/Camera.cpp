@@ -2,13 +2,10 @@
 
 #include "Camera.h"
 
+#include "Input/Input.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
-
-#include <GLFW/glfw3.h>
-
-#include "Application.h"
-#include <iostream>
 
 namespace Framework
 {
@@ -46,38 +43,36 @@ namespace Framework
 
 	void Camera::Update(float a_deltaTime)
 	{
-		GLFWwindow* window = nullptr;//static_cast<GLFWwindow*>(Application::Get().GetWindow()->GetNativeWindow());
-
 		// Get the camera's forward, right, up, and location vectors
 		glm::vec4 vForward = m_viewMatrix[2];
 		glm::vec4 vRight = m_viewMatrix[0];
 		glm::vec4 vUp = m_viewMatrix[1];
 		glm::vec4 vTranslation = m_viewMatrix[3];
 
-		float frameSpeed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ? a_deltaTime * 5 * 2 : a_deltaTime * 5;
+		float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * 5 * 2 : a_deltaTime * 5;
 
 		// Translate camera
-		if (glfwGetKey(window, 'W') == GLFW_PRESS)
+		if (Input::KeyDown('w'))
 		{
 			vTranslation -= vForward * frameSpeed;
 		}
-		if (glfwGetKey(window, 'S') == GLFW_PRESS)
+		if (Input::KeyDown('S'))
 		{
 			vTranslation += vForward * frameSpeed;
 		}
-		if (glfwGetKey(window, 'D') == GLFW_PRESS)
+		if (Input::KeyDown('d'))
 		{
 			vTranslation += vRight * frameSpeed;
 		}
-		if (glfwGetKey(window, 'A') == GLFW_PRESS)
+		if (Input::KeyDown('a'))
 		{
 			vTranslation -= vRight * frameSpeed;
 		}
-		if (glfwGetKey(window, 'Q') == GLFW_PRESS)
+		if (Input::KeyDown('q'))
 		{
 			vTranslation += vUp * frameSpeed;
 		}
-		if (glfwGetKey(window, 'E') == GLFW_PRESS)
+		if (Input::KeyDown('e'))
 		{
 			vTranslation -= vUp * frameSpeed;
 		}
@@ -86,7 +81,7 @@ namespace Framework
 
 		// check for camera rotation
 		static bool sbMouseButtonDown = false;
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS)
+		if (Input::KeyDown(MOUSE_BUTTON_RIGHT))
 		{
 			static double siPrevMouseX = 0;
 			static double siPrevMouseY = 0;
@@ -94,11 +89,11 @@ namespace Framework
 			if (sbMouseButtonDown == false)
 			{
 				sbMouseButtonDown = true;
-				glfwGetCursorPos(window, &siPrevMouseX, &siPrevMouseY);
+				Input::GetMousePosition(&siPrevMouseX, &siPrevMouseY);
 			}
 
 			double mouseX = 0, mouseY = 0;
-			glfwGetCursorPos(window, &mouseX, &mouseY);
+			Input::GetMousePosition(&mouseX, &mouseY);
 
 			double iDeltaX = mouseX - siPrevMouseX;
 			double iDeltaY = mouseY - siPrevMouseY;

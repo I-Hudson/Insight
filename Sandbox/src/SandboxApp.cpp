@@ -12,15 +12,10 @@ public:
 
 	virtual void Update(const float deltaTime) override
 	{
-		if (Input::KeyUp(KEY_H))
-		{
-			IS_INFO("H was released.");
-		}
+		double x, y;
+		Input::GetMousePosition(&x, &y);
 
-		if (Input::KeyHeld(KEY_A))
-		{
-			IS_INFO("A is held.");
-		}
+		IS_CORE_INFO("MouseX: {0}, MouseY: {1}", x, y);
 	}
 
 	virtual void Draw() override

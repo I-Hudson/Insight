@@ -10,8 +10,13 @@ class IS_API Input
 public:
 
 	static bool KeyDown(int keycode);
+	static bool KeyDown(char keycode);
 	static bool KeyUp(int keycode);
+	static bool KeyUp(char keycode);
 	static bool KeyHeld(int keycode);
+	static bool KeyHeld(char keycode);
+
+	static void GetMousePosition(double* mouseX, double* mouseY);
 
 private:
 	static bool KeyCodeExits(int keycode);
