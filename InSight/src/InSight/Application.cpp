@@ -9,6 +9,7 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
+#include "Module/EntityModule.h"
 
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
@@ -19,6 +20,26 @@ namespace Insight
 	Application::Application()
 	{
 		Config::GetInstance().Parse("config.txt");
+
+		m_memoryManager = new Memory::MemoryManager();
+	
+		m_moduleManager = Memory::MemoryManager::NewOnStack<Module::ModuleManager>();
+
+		Module::ModuleStartupData windowData;
+		windowData.ManuallUpdate = true;
+		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);
+
+		Module::GraphicsModuleStartupData graphicsData;
+		graphicsData.WindowModule = m_windowModule;
+		graphicsData.ManuallUpdate = true;
+		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
+
+		Module::InputModuleData inputData;
+		inputData.WindowModule = m_windowModule;
+		inputData.ManuallUpdate = true;
+		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(inputData);
+
+		m_moduleManager->AddModule<Module::EntityModule>();
 	}
 
 	Application::~Application()
@@ -80,25 +101,7 @@ namespace Insight
 
 	void Application::Run()
 	{
-		m_memoryManager = new Memory::MemoryManager();
-
 		//AlloBench();
-
-		m_moduleManager = Memory::MemoryManager::NewOnStack<Module::ModuleManager>();
-
-		Module::ModuleStartupData windowData;
-		windowData.ManuallUpdate = true;
-		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);
-
-		Module::GraphicsModuleStartupData graphicsData;
-		graphicsData.WindowModule = m_windowModule;
-		graphicsData.ManuallUpdate = true;
-		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
-
-		Module::InputModuleData inputData;
-		inputData.WindowModule = m_windowModule;
-		inputData.ManuallUpdate = true;
-		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(inputData);
 
 		bool isRunning = false;
 
@@ -107,7 +110,7 @@ namespace Insight
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
 
-			if (Input::KeyDown(KEY_SPACE))
+			if (Input::KeyHeld(KEY_SPACE))
 			{
 				IS_CORE_INFO("Space was pressed.");
 			}

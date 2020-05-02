@@ -5,7 +5,7 @@ using namespace Insight::Module;
 
 bool Input::KeyDown(int keycode)
 {
-	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode] == KEY_PRESS;
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyPressed & 1;
 }
 
 bool Input::KeyDown(char keycode)
@@ -15,7 +15,7 @@ bool Input::KeyDown(char keycode)
 
 bool Input::KeyUp(int keycode)
 {
-	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode] == KEY_RELEASE;
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyReleased & 1;
 }
 
 bool Input::KeyUp(char keycode)
@@ -25,7 +25,7 @@ bool Input::KeyUp(char keycode)
 
 bool Input::KeyHeld(int keycode)
 {
-	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode] == KEY_REPEAT;
+	return KeyCodeExits(keycode) && (InputModule::m_inputStates[keycode].KeyHeld & 1 || KeyDown(keycode));
 }
 
 bool Input::KeyHeld(char keycode)

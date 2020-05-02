@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 #define GLM_FORCE_SWIZZLE
 #include <glm/glm.hpp>
 
@@ -8,7 +10,7 @@ namespace Framework
 	///
 	// BASE CAMERA
 	///	
-	class Camera
+	class IS_API Camera
 	{
 	public:
 		Camera();

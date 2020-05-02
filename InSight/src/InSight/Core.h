@@ -14,12 +14,14 @@
 
 #endif // IS_DEBUG
 
-	#ifdef IS_BUILD_DLL
-		#define IS_API __declspec(dllexport)
+#define BIT(x) (1 << x)
+
+#ifdef IS_BUILD_DLL
+	#define IS_API //__declspec(dllexport)
 
 #pragma warning( disable : 4251 )
 	#else 
-		#define IS_API __declspec(dllimport)
+		#define IS_API //__declspec(dllimport)
 	#endif // IS_BUILD_DLL
 #else 
 	#error InSight only supports Windows!

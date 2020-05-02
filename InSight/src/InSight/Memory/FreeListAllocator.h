@@ -98,17 +98,6 @@ namespace Insight
 		{
 #if _DEBUG
 			m_numOfDeletes++;
-			std::string name;
-
-			if (std::is_base_of<class Component, T>::value) 
-			{
-				U64 vPointer = *reinterpret_cast<U64*>(ptr);
-				name = m_vtableToNameMap.find(vPointer)->second;
-			}
-			else 
-			{
-				name = typeid(T).name();
-			}
 
 			ptr->~T();
 

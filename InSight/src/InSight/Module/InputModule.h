@@ -33,7 +33,16 @@ namespace Insight
 			static void MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY);
 
 		private:
-			static std::unordered_map<int, int> m_inputStates;
+			struct KeyStates
+			{
+				unsigned int KeyPressed : 1;
+				unsigned int KeyReleased : 1;
+				unsigned int KeyHeld : 1;
+				unsigned int MouseButtonPressed : 1;
+				unsigned int MouseButtonReleased : 1;
+			};
+
+			static std::unordered_map<int, KeyStates> m_inputStates;
 			static double m_mouseX;
 			static double m_mouseY;
 

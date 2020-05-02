@@ -7,11 +7,20 @@
     <Filter Include="src\Insight">
       <UniqueIdentifier>{72BF4809-DE74-C1FE-6769-BBD5D31DB802}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Component">
+      <UniqueIdentifier>{540EBE50-C07A-794B-896E-11A9F5999BB3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Config">
       <UniqueIdentifier>{3726BEE1-230A-7F37-8C6A-798A786D69B9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Entitiy">
+      <UniqueIdentifier>{A7A590B1-1307-6EBF-9C74-B47108D5A47E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Event">
       <UniqueIdentifier>{438ED04C-AFA4-CEE2-F81B-5A0464719F6A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Input">
+      <UniqueIdentifier>{F1BC144D-5DD3-12E3-A64A-9E0412A0E36A}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Maths">
       <UniqueIdentifier>{5E0D564D-CA23-54E3-139B-DF047FF0246B}</UniqueIdentifier>
@@ -55,9 +64,6 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Insight\Input">
-      <UniqueIdentifier>{16abfdec-7e47-4fba-9680-d7d04c167d92}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h">
@@ -68,6 +74,12 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Camera.h">
       <Filter>src\Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Component\Component.h">
+      <Filter>src\Insight\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Component\TransformComponent.h">
+      <Filter>src\Insight\Component</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Config\CVar.h">
       <Filter>src\Insight\Config</Filter>
@@ -84,6 +96,9 @@
     <ClInclude Include="src\Insight\Core.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Entitiy\Entity.h">
+      <Filter>src\Insight\Entitiy</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\EntryPoint.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
@@ -95,6 +110,12 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Event\EventManager.h">
       <Filter>src\Insight\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Input\Input.h">
+      <Filter>src\Insight\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Input\InsightKeyCodes.h">
+      <Filter>src\Insight\Input</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\InsightAlias.h">
       <Filter>src\Insight</Filter>
@@ -135,7 +156,13 @@
     <ClInclude Include="src\Insight\Memory\StackAllocator.h">
       <Filter>src\Insight\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Module\EntityModule.h">
+      <Filter>src\Insight\Module</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Module\GraphicsModule.h">
+      <Filter>src\Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Module\InputModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\Module.h">
@@ -206,6 +233,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Time.h">
       <Filter>src\Insight\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\UUID.h">
+      <Filter>src\Insight</Filter>
     </ClInclude>
     <ClInclude Include="src\ispch.h">
       <Filter>src</Filter>
@@ -1434,15 +1464,6 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Input\InsightKeyCodes.h">
-      <Filter>src\Insight\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Module\InputModule.h">
-      <Filter>src\Insight\Module</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Input\Input.h">
-      <Filter>src\Insight\Input</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1451,14 +1472,23 @@
     <ClCompile Include="src\Insight\Camera.cpp">
       <Filter>src\Insight</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Component\TransformComponent.cpp">
+      <Filter>src\Insight\Component</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Config\CVar.cpp">
       <Filter>src\Insight\Config</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Config\Config.cpp">
       <Filter>src\Insight\Config</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Entitiy\Entity.cpp">
+      <Filter>src\Insight\Entitiy</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Event\EventManager.cpp">
       <Filter>src\Insight\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Input\Input.cpp">
+      <Filter>src\Insight\Input</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>src\Insight</Filter>
@@ -1487,7 +1517,13 @@
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp">
       <Filter>src\Insight\Memory</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Module\EntityModule.cpp">
+      <Filter>src\Insight\Module</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
+      <Filter>src\Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\InputModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp">
@@ -1549,12 +1585,6 @@
     </ClCompile>
     <ClCompile Include="src\ispch.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Module\InputModule.cpp">
-      <Filter>src\Insight\Module</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Input\Input.cpp">
-      <Filter>src\Insight\Input</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

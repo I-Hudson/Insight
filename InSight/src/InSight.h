@@ -7,6 +7,9 @@
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Input/Input.h"
 
+#include "Insight/Entitiy/Entity.h"
+#include "Insight/Component/TransformComponent.h"
+
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"
 #include "Insight/Maths/Vector3.h"

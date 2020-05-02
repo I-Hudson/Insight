@@ -7,7 +7,7 @@ namespace Insight
 	namespace Memory
 	{
 		template <class T>
-		class IS_API SinglyLinkedList
+		class SinglyLinkedList
 		{
 		public:
 			struct Node

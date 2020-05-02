@@ -35,7 +35,7 @@ group ""
 
 project "Insight"
     location "Insight"
-    kind "SharedLib"
+    kind "StaticLib"
     language "C++"
     cppdialect "C++17"
 	staticruntime "on"
