@@ -18,15 +18,18 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["spdlog"] = "$(SolutionDir)/Insight/vendor/spdlog/include"
-IncludeDir["GLFW"] = "$(SolutionDir)/Insight/vendor/GLFW/include"
-IncludeDir["shaderc"] = "$(SolutionDir)/Insight/vendor/shaderc/include"
+IncludeDir["spdlog"] = "$(SolutionDir)Insight/vendor/spdlog/include"
+IncludeDir["GLFW"] = "$(SolutionDir)Insight/vendor/GLFW/include"
+IncludeDir["assimp"] = "$(SolutionDir)Insight/vendor/assimp/include"
+IncludeDir["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/include"
 IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
-IncludeDir["glm"] = "$(SolutionDir)/Insight/vendor/glm"
+IncludeDir["glm"] = "$(SolutionDir)Insight/vendor/glm"
+IncludeDir["stb_image"] = "$(SolutionDir)Insight/vendor/stb_image"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
 LibDirs["shaderc"] = "C:/VulkanSDK/1.1.130.0/lib"
+LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/lib"
 
 group "Dependencies"
     include "Insight/vendor/GLFW"
@@ -51,28 +54,39 @@ project "Insight"
 	{
 		"%{prj.name}/src/**.h",
         "%{prj.name}/src/**.cpp",
+        "%{prj.name}/vendor/stb_image/**.h",
+		"%{prj.name}/vendor/stb_image/**.cpp",
         "%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
 	}
 
     includedirs 
-	{
+    {
 		"$(ProjectDir)src",
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.GLFW}",
+        "%{IncludeDir.assimp}",
         "%{IncludeDir.shaderc}",
         "%{IncludeDir.Vulkan}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb_image}",
+	}
+
+    sysincludedirs 
+    {
+        "%{IncludeDir.glm}",
 	}
 
     libdirs
     {
-        "%{LibDirs.shaderc}/%{cfg.buildcfg}"
+        "%{LibDirs.shaderc}/%{cfg.buildcfg}",
+        "%{LibDirs.assimp}"
     }
 
     links 
 	{ 
         "GLFW",
+        "assimp",
         "shaderc_combined",
         "C:/VulkanSDK/1.1.130.0/Lib/vulkan-1.lib"
 	}
@@ -130,7 +144,13 @@ project "Sandbox"
     includedirs
     {
         "$(SolutionDir)Insight/src",
-        "%{IncludeDir.spdlog}"
+        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.assimp}",
+	}
+
+    sysincludedirs 
+    {
+        "%{IncludeDir.glm}",
 	}
 
     links

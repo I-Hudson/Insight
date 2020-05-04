@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include <assert.h>
 #include "spdlog/spdlog.h"
 
 namespace Insight

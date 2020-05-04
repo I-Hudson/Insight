@@ -9,6 +9,9 @@
 
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/TransformComponent.h"
+#include "Insight/Component/MeshComponent.h"
+#include "Insight/Assimp/Model.h"
+#include "Insight/Assimp/Mesh.h"
 
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"

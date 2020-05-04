@@ -16,17 +16,14 @@ enum class ComponentType
 	TRANSFORM
 };
 
-class IS_API Component
+class IS_API Component : public Insight::UUID
 {
 public:
 	Component(Entity* owner, const ComponentType type)
-		: m_owner(owner), m_type(type)
-	{
-		m_uuid = Insight::GenUUID();
-	}
+		: Insight::UUID(), m_owner(owner), m_type(type)
+	{ }
 	virtual ~Component() {}
 
-	const std::string& GetUUID() const { return m_uuid; }
 
 private:
 	Entity* m_owner;

@@ -7,6 +7,9 @@
     <Filter Include="src\Insight">
       <UniqueIdentifier>{72BF4809-DE74-C1FE-6769-BBD5D31DB802}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Assimp">
+      <UniqueIdentifier>{2E025FDD-1AE6-1F33-8346-1A866F490AB5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Component">
       <UniqueIdentifier>{540EBE50-C07A-794B-896E-11A9F5999BB3}</UniqueIdentifier>
     </Filter>
@@ -64,6 +67,9 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\stb_image">
+      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h">
@@ -72,10 +78,19 @@
     <ClInclude Include="src\Insight\Application.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Assimp\Mesh.h">
+      <Filter>src\Insight\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Assimp\Model.h">
+      <Filter>src\Insight\Assimp</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Camera.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Component\Component.h">
+      <Filter>src\Insight\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Component\MeshComponent.h">
       <Filter>src\Insight\Component</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Component\TransformComponent.h">
@@ -1464,13 +1479,25 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\stb_image\stb_image.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
       <Filter>src\Insight</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Assimp\Mesh.cpp">
+      <Filter>src\Insight\Assimp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Assimp\Model.cpp">
+      <Filter>src\Insight\Assimp</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Camera.cpp">
       <Filter>src\Insight</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Component\MeshComponent.cpp">
+      <Filter>src\Insight\Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Component\TransformComponent.cpp">
       <Filter>src\Insight\Component</Filter>
@@ -1585,6 +1612,9 @@
     </ClCompile>
     <ClCompile Include="src\ispch.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\stb_image\stb_image.cpp">
+      <Filter>vendor\stb_image</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

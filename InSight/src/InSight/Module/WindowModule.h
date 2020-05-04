@@ -15,6 +15,7 @@ namespace Insight
 		static const int GetHeight();
 
 		static void SetTitle(const std::string_view& title);
+		static void SetIcon(const std::vector<std::string>& iconPaths);
 		static void SetFullscreen(const bool& fullscreen = true);
 		static bool IsFullscreen();
 
@@ -40,6 +41,7 @@ namespace Insight
 			{
 				CVar<int> WindowWidth{ "window_width", 1024 };
 				CVar<int> WindowHeight{ "window_height", 720 };
+				CVarString WindowIcon{ "window_icon", "testIcon.png" };
 				CVarString WindowTitle{ "window_title", "Test Window" };
 			};
 

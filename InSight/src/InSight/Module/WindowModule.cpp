@@ -4,6 +4,8 @@
 #include "Insight/Config/Config.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Event/ApplicationEvent.h"
+
+#include "stb_image.h"
 #include "GLFW/glfw3.h"
 
 namespace Insight
@@ -27,6 +29,30 @@ namespace Insight
 	void Window::SetTitle(const std::string_view& title)
 	{
 		glfwSetWindowTitle(m_window, title.data());
+	}
+
+	void Window::SetIcon(const std::vector<std::string>& iconPaths)
+	{
+		std::vector<GLFWimage> images;
+		for (auto it = iconPaths.begin(); it != iconPaths.end(); ++it )
+		{
+			int width, height, channelsInFile;
+			unsigned char* data = stbi_load((*it).c_str(), &width, &height, &channelsInFile, 4);
+			if (data != nullptr)
+			{
+				GLFWimage newImage;
+				newImage.width = width;
+				newImage.height = height;
+				newImage.pixels = data;
+				images.push_back(newImage);
+			}
+		}
+		glfwSetWindowIcon(m_window, iconPaths.size(), images.data());
+
+		for (auto it = images.begin(); it != images.end(); ++it)
+		{
+			stbi_image_free((*it).pixels);
+		}
 	}
 
 	void Window::SetFullscreen(const bool& fullscreen)
@@ -70,7 +96,7 @@ namespace Insight
 				CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
 				nullptr, nullptr);
 
-
+			m_window->SetIcon({ CONFIG_VAL(Config::WindowConfig.WindowIcon), CONFIG_VAL(Config::WindowConfig.WindowIcon) });
 			glfwSetWindowSizeCallback(m_window->m_window, [](GLFWwindow* window, int width, int height)
 				{
 					EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));

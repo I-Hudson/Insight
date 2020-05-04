@@ -6,6 +6,8 @@
 
 #include "Insight/Renderer/Renderer.h"
 
+class MeshComponent;
+
 namespace Insight
 {
 	namespace Module
@@ -32,8 +34,11 @@ namespace Insight
 
 		private:
 			WindowModule* m_windowModule;
-
 			Renderer* m_renderer;
+
+			static std::vector<MeshComponent*> m_meshs;
+
+			friend MeshComponent;
 		};
 	}
 }

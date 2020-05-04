@@ -2,18 +2,21 @@
 
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/UUID.h"
 
-#include<string>
+#include <string>
 #include <vector>
 #include <bitset>
 
 class Component;
+class Entity;
 const size_t MaxComponents = 32;
 
 struct EntityData
 {
-	std::string UUID;
 	std::string Name;
+	Entity* Parent;
+	std::vector<Entity*> Children;
 	std::vector<Component*> Components;
 	std::bitset<MaxComponents> ComponetBitset;
 	bool IsActive;
@@ -33,7 +36,7 @@ inline ComponentID GetComponentID() noexcept
 	return typeID;
 }
 
-class IS_API Entity
+class IS_API Entity : public Insight::UUID
 {
 public:
 	Entity();
@@ -44,7 +47,13 @@ public:
 	const std::string& GetID() const;
 
 	bool IsActive() const { return m_data.IsActive; }
-	const std::string& GetUUID() const { return m_data.UUID; }
+
+	void SetParent(Entity* parent) { m_data.Parent = parent; }
+	const Entity* GetParent() const { return m_data.Parent; }
+
+	void AddChild(Entity* child);
+	Entity* GetChild(int childIndex);
+	void RemoveChild(Entity* child);
 
 	const std::vector<Component*>* GetAllComponents()
 	{

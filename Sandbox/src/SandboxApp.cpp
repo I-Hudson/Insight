@@ -13,6 +13,18 @@ public:
 	{
 		e = Insight::Memory::MemoryManager::NewOnFreeList<Entity>();
 		tc = e->AddComponent<TransformComponent>();
+		e->AddComponent<MeshComponent>();
+
+		for (size_t i = 0; i < 10; i++)
+		{
+			e->AddChild(Insight::Memory::MemoryManager::NewOnFreeList<Entity>(std::to_string(i)));
+		}
+
+		Entity* e8 = e->GetChild(8);
+		IS_INFO("Entity name: {0}", e8->GetID());
+	
+	
+		Model model = Model("./models/Survival_BackPack_2/Survival_BackPack_2.fbx");
 	}
 
 	virtual void Update(const float deltaTime) override

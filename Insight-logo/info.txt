@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: Rex Bold
+font link: https://www.fontsquirrel.com/license/rex
+font author: Fontfabric
+font author site: http://www.fontfabric.com/
+
+
+icon designer: Ryan Beck
+icon designer link: /Ryaaaan
+        
+{"bg-gradient-0":"#E90DDA","bg-gradient-1":"#15CFF1","icon":"#ffffff","font":"#ffffff","slogan":"#ffffff"}
+      

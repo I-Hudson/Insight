@@ -5,8 +5,10 @@
 
 #ifdef IS_DEBUG
 
-#define IS_TODO(...)  printf("\033[0;35m"); \
-					  printf(__VA_ARGS__); \
+#define IS_TODO(x) IS_TODO_CORE(x, __FILE__, __FUNCTION__, __LINE__)
+#define IS_TODO_CORE(x, file, func, line)  \
+					  printf("\033[01;33m"); \
+					  printf("%s: %s: %d: %s", file, func, line, x); \
 					  printf("\033[0m \n");
 #else 
 

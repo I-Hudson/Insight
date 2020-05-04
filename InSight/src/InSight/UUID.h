@@ -10,8 +10,8 @@ namespace Insight
     static std::uniform_int_distribution<> dis(0, 15);
     static std::uniform_int_distribution<> dis2(8, 11);
 
-	static std::string GenUUID()
-	{
+    static std::string GenUUID()
+    {
         std::stringstream ss;
         int i;
         ss << std::hex;
@@ -36,5 +36,16 @@ namespace Insight
             ss << dis(gen);
         };
         return ss.str();
-	}
+    }
+
+    class IS_API UUID
+    {
+    public:
+        UUID() : m_uuid(GenUUID())
+        { }
+        const std::string& GetUUID() const { return m_uuid; }
+
+    private:
+        std::string m_uuid;
+    };
 }

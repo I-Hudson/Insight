@@ -3,12 +3,16 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"
 
+#include "Insight/Component/MeshComponent.h"
+
 #include "Insight/Log.h"
 
 namespace Insight
 {
 	namespace Module
 	{
+		std::vector<MeshComponent*> GraphicsModule::m_meshs;
+
 		GraphicsModule::GraphicsModule(ModuleStartupData& startupData) 
 			: Module(startupData)
 		{
