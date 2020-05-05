@@ -2,12 +2,11 @@
 
 #include "Insight/Core.h"
 
+class MeshComponent;
 namespace Insight
 {
 	namespace Module
-	{
-		class WindowModule;
-	}
+	{ class WindowModule; }
 
 	struct RendererStartUpData
 	{
@@ -26,7 +25,7 @@ namespace Insight
 		virtual ~Renderer() { }
 
 		virtual void Clear() = 0;
-		virtual void Render() = 0;
+		virtual void Render(std::vector<MeshComponent*> meshes) = 0;
 		virtual void Present() = 0;
 
 		static Renderer* Create(RendererStartUpData& startupData);

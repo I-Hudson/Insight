@@ -8,23 +8,23 @@ class Sandbox : public Insight::Application
 public:
 	Entity* e;
 	TransformComponent* tc;
+	Model* testModel;
 
 	Sandbox() : Insight::Application()
 	{
+		testModel = Insight::Memory::MemoryManager::NewOnFreeList<Model>("./models/Survival_BackPack_2/Survival_BackPack_2.fbx");
+
 		e = Insight::Memory::MemoryManager::NewOnFreeList<Entity>();
 		tc = e->AddComponent<TransformComponent>();
 		e->AddComponent<MeshComponent>();
+		e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
 
-		for (size_t i = 0; i < 10; i++)
+		for (size_t i = 1; i < testModel->GetSubMeshCount(); i++)
 		{
 			e->AddChild(Insight::Memory::MemoryManager::NewOnFreeList<Entity>(std::to_string(i)));
-		}
-
-		Entity* e8 = e->GetChild(8);
-		IS_INFO("Entity name: {0}", e8->GetID());
-	
-	
-		Model model = Model("./models/Survival_BackPack_2/Survival_BackPack_2.fbx");
+			auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
+			mesh->SetMesh(testModel->GetSubMesh(i));
+		}	
 	}
 
 	virtual void Update(const float deltaTime) override
@@ -63,7 +63,7 @@ public:
 
 	~Sandbox()
 	{
-
+		Insight::Memory::MemoryManager::DeleteOnFreeList(testModel);
 	}
 };
 

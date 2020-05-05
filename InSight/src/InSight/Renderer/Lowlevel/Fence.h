@@ -20,7 +20,7 @@ namespace Insight
 			void SetInUse() { m_inUse = true; }
 			const bool& GetInUse() const { return m_inUse; }
 			void Wait() const;
-			void Reset() const;
+			void Reset();
 
 		private:
 			const Device* m_device;

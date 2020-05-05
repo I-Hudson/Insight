@@ -202,6 +202,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\Insight\Renderer\Buffer.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\CommandBuffer.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\CommandPool.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Device.h" />
@@ -217,6 +218,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
     <ClInclude Include="src\Insight\Renderer\Shader.h" />
     <ClInclude Include="src\Insight\Renderer\Vulkan.h" />
+    <ClInclude Include="src\Insight\Renderer\VulkanBuffers.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanInits.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
@@ -660,6 +662,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\CommandBuffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\CommandPool.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Device.cpp" />
@@ -673,6 +676,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Swapchain.cpp" />
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Shader.cpp" />
+    <ClCompile Include="src\Insight\Renderer\VulkanBuffers.cpp" />
     <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />

@@ -9,6 +9,8 @@
 
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Event/EventManager.h"
+#include "Insight/Renderer/VulkanBuffers.h"
+#include "Insight/Component/MeshComponent.h"
 
 #include "Insight/Config/Config.h"
 
@@ -18,6 +20,10 @@ namespace Insight
 	{
 		VulkanRenderer::VulkanRenderer(RendererStartUpData& startupData)
 		{
+			Render::VulkanVertexBuffer::s_Renderer = this;
+			Render::VulkanIndexBuffer::s_Renderer = this;
+
+
 			m_windowModule = startupData.WindowModule;
 
 			m_validationLayers =
@@ -44,9 +50,9 @@ namespace Insight
 			m_device = Memory::MemoryManager::NewOnFreeList<Device>(deviceSettings);
 
 			m_framebuffer = Memory::MemoryManager::NewOnFreeList<Framebuffer>(m_device, m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
-			m_framebuffer->CreateAttachment(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 
+			m_framebuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 											VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			m_framebuffer->CreateAttachment(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+			m_framebuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 											VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			m_framebuffer->CompileFrameBuffer();
 
@@ -92,16 +98,29 @@ namespace Insight
 		{
 		}
 
-		void VulkanRenderer::Render()
+		void VulkanRenderer::Render(std::vector<MeshComponent*> meshes)
 		{
 			m_swapchain->AcquireNextImage();
 
+			m_framebuffer->GetFence()->Wait();
+
 			m_commandBuffer->StartRecord();
-			
 			m_framebuffer->BindBuffer(m_commandBuffer);
 			m_shader->Bind(m_commandBuffer);
 			
-			vkCmdDraw(m_commandBuffer->GetBuffer(), 3, 1, 0, 0);
+			for (auto it = meshes.begin(); it != meshes.end(); ++it)
+			{
+				if ((*it)->GetMesh() == nullptr)
+				{
+					continue;
+				}
+
+				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
+
+				vkCmdDraw(m_commandBuffer->GetBuffer(), (*it)->GetMesh()->GetVertexCount(), 1, 0, 0);
+			}
 			m_framebuffer->UnbindBuffer(m_commandBuffer);
 			m_commandBuffer->EndRecord();
 			
@@ -110,10 +129,12 @@ namespace Insight
 			std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
 			std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
 			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
-			
+
+			m_framebuffer->GetFence()->Reset();
+
 			GraphicsQueueInfo info;
 			info.SubmitInfo = &submitInfo;
-			info.SyncFence = VK_NULL_HANDLE;
+			info.SyncFence = m_framebuffer->GetFence();
 			m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
 
 			m_swapchain->Draw(m_framebuffer->GetFinishedSem());

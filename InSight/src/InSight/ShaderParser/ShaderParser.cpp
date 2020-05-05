@@ -43,11 +43,11 @@ namespace Insight
 					KeywordFind k = FindKeyword(line);
 					if (k != KeywordFind())
 					{
-						if (k.Keyword == "in" && shaderType == Render::Vertex)
+						if (k.Keyword == "in" && shaderType == Render::VertexShader)
 						{
 							GetAttribute(k, data);
 						}
-						else if (k.Keyword == "out" && shaderType == Render::Fragment)
+						else if (k.Keyword == "out" && shaderType == Render::FragmentShader)
 						{
 							GetAttribute(k, data);
 						}

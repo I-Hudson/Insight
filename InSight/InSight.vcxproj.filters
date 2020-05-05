@@ -189,6 +189,9 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Buffer.h">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Lowlevel\CommandBuffer.h">
       <Filter>src\Insight\Renderer\Lowlevel</Filter>
     </ClInclude>
@@ -232,6 +235,9 @@
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Vulkan.h">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\VulkanBuffers.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\VulkanInits.h">
@@ -1559,6 +1565,9 @@
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Buffer.cpp">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Lowlevel\CommandBuffer.cpp">
       <Filter>src\Insight\Renderer\Lowlevel</Filter>
     </ClCompile>
@@ -1596,6 +1605,9 @@
       <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Shader.cpp">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\VulkanBuffers.cpp">
       <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp">

@@ -99,6 +99,16 @@ namespace Insight
 #if _DEBUG
 			m_numOfDeletes++;
 
+			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it) 
+			{
+				U64 vPointer = *reinterpret_cast<U64*>(ptr);
+				if ((*it).first == vPointer)
+				{
+					m_vtableToNameMap.erase(it);
+					break;
+				}
+			}
+
 			ptr->~T();
 
 			m_monitorPureAlloc = false;

@@ -21,13 +21,16 @@ namespace Insight
 
 		void Fence::Wait() const
 		{
-			vkWaitForFences(m_device->GetDevice(), 1, &m_fence, VK_TRUE, UINT64_MAX);
+			if (m_inUse)
+			{
+				vkWaitForFences(m_device->GetDevice(), 1, &m_fence, VK_TRUE, UINT64_MAX);
+			}
 		}
 
-		void Fence::Reset() const
+		void Fence::Reset()
 		{
 			vkResetFences(m_device->GetDevice(), 1, &m_fence);
-
+			m_inUse = false;
 		}
 	}
 }

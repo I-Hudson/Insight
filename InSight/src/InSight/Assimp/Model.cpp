@@ -3,6 +3,7 @@
 
 #include "stb_image.h"
 #include "Insight/Log.h"
+#include "Insight/Memory/MemoryManager.h"
 
 Model::Model(const std::string& filePath)
 {
@@ -11,6 +12,20 @@ Model::Model(const std::string& filePath)
 
 Model::~Model()
 {
+	for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
+	{
+		Insight::Memory::MemoryManager::DeleteOnFreeList(*it);
+	}
+}
+
+Mesh* Model::GetSubMesh(int index)
+{
+	if (index < 0 && index >= m_meshes.size())
+	{
+		IS_ASSERT("Model: GetSubMesh: Out of range.", index >= m_meshes.size());
+		return nullptr;
+	}
+	return m_meshes[index];
 }
 
 void Model::LoadMesh(const std::string& filePath)
@@ -43,7 +58,7 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -61,6 +76,10 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		vertex.Position = position;
 
 		glm::vec4 colour = glm::vec4();
+		colour.r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.a = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		vertex.Colour = colour;
 
 		glm::vec4 normal;
@@ -109,7 +128,7 @@ Mesh Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return Mesh(vertices, indices, textures);
+	return Insight::Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, textures);
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

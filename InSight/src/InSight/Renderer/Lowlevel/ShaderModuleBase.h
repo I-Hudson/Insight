@@ -73,10 +73,10 @@ namespace Insight
 		enum ShaderType
 		{
 			None = 0,
-			Vertex,
-			Geometry,
-			Fragment,
-			Compute
+			VertexShader = 1,
+			GeometryShader = 2,
+			FragmentShader = 3,
+			ComputeShader = 4
 		};
 
 		class Device;
@@ -95,12 +95,11 @@ namespace Insight
 			VkShaderStageFlagBits GetShaderStageBit() const;
 			ShaderType GetShaderType() const;
 
-			VkPipelineVertexInputStateCreateInfo GetVertexInputCreateInfo();
+			std::vector<VkVertexInputBindingDescription> GetVertexBindingDesc();
+			std::vector<VkVertexInputAttributeDescription> GetAttributes();
 			std::vector<VkDescriptorSetLayoutBinding> GetPipelineLayoutCreateInfo();
 
 		private:
-			VkVertexInputBindingDescription GetVertexBindingDesc();
-			std::vector<VkVertexInputAttributeDescription> GetAttributes();
 			VkFormat GetVertexFormat(const ShaderAttributeType& type);
 
 			const std::vector<uint32_t> CompileGLSL(const std::string& filePath);

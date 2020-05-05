@@ -19,6 +19,7 @@ namespace Insight
 			CommandPool(const Device* device, const VkCommandPoolCreateFlags& createFlags = 0);
 			~CommandPool();
 
+			VkCommandPool& GetCommandPool() { return m_pool; }
 			void FreeCommandBuffers();
 
 			std::vector<CommandBuffer*> AllocCommandBuffers(const int& count);

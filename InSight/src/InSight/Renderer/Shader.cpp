@@ -61,7 +61,9 @@ namespace Insight
 				shaderStages.push_back(info);
 			}
 
-			VkPipelineVertexInputStateCreateInfo vertexCreateInfo = GetShaderModule(ShaderType::Vertex, modules).GetVertexInputCreateInfo();
+			auto vertexInputBindingsDescs = GetShaderModule(ShaderType::VertexShader, modules).GetVertexBindingDesc();
+			auto vertexInputAttribBindings = GetShaderModule(ShaderType::VertexShader, modules).GetAttributes();
+			VkPipelineVertexInputStateCreateInfo vertexCreateInfo = VulkanInits::VertexInputInfo(vertexInputBindingsDescs, vertexInputAttribBindings);
 			VkPipelineInputAssemblyStateCreateInfo inputAssembly = VulkanInits::PipelineInputAssemblyInfo();
 
 			VkViewport viewPort
@@ -74,7 +76,7 @@ namespace Insight
 			VkPipelineColorBlendAttachmentState colourBlendAttachState = VulkanInits::PipelineColourBlendState();
 
 			std::vector<VkPipelineColorBlendAttachmentState> colourBlendAttachStates;
-			for (int i = 0; i < GetShaderModule(ShaderType::Fragment, modules).GetData().OutAttri.Attributes.size(); ++i)
+			for (int i = 0; i < GetShaderModule(ShaderType::FragmentShader, modules).GetData().OutAttri.Attributes.size(); ++i)
 			{
 				colourBlendAttachStates.push_back(VulkanInits::PipelineColourBlendState());
 			}

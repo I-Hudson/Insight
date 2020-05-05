@@ -53,7 +53,11 @@ void Entity::AddChild(Entity* child)
 
 Entity* Entity::GetChild(int childIndex)
 {
-	assert("Entity: GetChild: Out of range!", childIndex >= m_data.Children.size());
+	if (childIndex < 0 || childIndex >= m_data.Children.size())
+	{
+		IS_ASSERT("Entity: GetChild: Out of range.", true);
+		return nullptr;
+	}
 	return m_data.Children[childIndex];
 }
 

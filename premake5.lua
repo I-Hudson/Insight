@@ -146,6 +146,7 @@ project "Sandbox"
         "$(SolutionDir)Insight/src",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.glm}",
 	}
 
     sysincludedirs 

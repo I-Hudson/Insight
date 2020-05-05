@@ -25,15 +25,15 @@ namespace Insight
 			virtual ~VulkanRenderer() override;
 
 			virtual void Clear() override;
-			virtual void Render() override;
+			virtual void Render(std::vector<MeshComponent*> meshes) override;
 			virtual void Present() override;
 
 
 			const VkInstance& GetInstance() { return m_device->GetInstance(); }
 			const VkDevice& GetDevice() { return m_device->GetDevice(); }
 			const VkPhysicalDevice& GetPhysicalDevice() const { return m_device->GetPhysicalDevice(); }
-
 			const VkSurfaceKHR& GetSurface() const { return m_surface; }
+			Device* GetDeviceWrapper() const { return m_device; }
 
 			Queue GetGraphicsQueue() const { return m_device->GetQueue(QueueFamilyType::Graphics); }
 			Queue GetPresentQueue() const { return m_device->GetQueue(QueueFamilyType::Present); }
@@ -55,6 +55,7 @@ namespace Insight
 			Device* m_device;
 			Swapchain* m_swapchain;
 
+			Fence* m_commndFence;
 			CommandPool* m_commandPool;
 			CommandBuffer* m_commandBuffer;
 			Shader* m_shader;

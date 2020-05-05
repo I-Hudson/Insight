@@ -3,7 +3,7 @@
 #include "Insight/Component/Component.h"
 #include "Insight/Assimp/Mesh.h"
 
-#include <glm/glm.hpp>
+#include <../vendor/glm/glm/glm.hpp>
 
 class IS_API MeshComponent : public Component
 {

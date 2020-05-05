@@ -47,30 +47,16 @@ namespace Insight
 			switch (m_type)
 			{
 			case Insight::Render::None: break;
-			case Insight::Render::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-			case Insight::Render::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
-			case Insight::Render::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
-			case Insight::Render::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+			case Insight::Render::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
+			case Insight::Render::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
+			case Insight::Render::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
+			case Insight::Render::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
 		}
 
 		ShaderType ShaderModuleBase::GetShaderType() const
 		{
 			return m_type;
-		}
-
-		VkPipelineVertexInputStateCreateInfo ShaderModuleBase::GetVertexInputCreateInfo()
-		{
-			auto desc = GetVertexBindingDesc();
-			auto attributes = GetAttributes();
-
-			VkPipelineVertexInputStateCreateInfo createInfo = VulkanInits::VertexInputInfo();
-			createInfo.vertexBindingDescriptionCount = desc.stride != 0 ? 1 : 0;
-			createInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributes.size());
-			createInfo.pVertexBindingDescriptions = desc.stride != 0 ? &desc : nullptr;
-			createInfo.pVertexAttributeDescriptions = attributes.data();
-
-			return createInfo;
 		}
 
 		std::vector<VkDescriptorSetLayoutBinding> ShaderModuleBase::GetPipelineLayoutCreateInfo()
@@ -86,14 +72,20 @@ namespace Insight
 			return createInfos;
 		}
 
-		VkVertexInputBindingDescription ShaderModuleBase::GetVertexBindingDesc()
+		std::vector<VkVertexInputBindingDescription> ShaderModuleBase::GetVertexBindingDesc()
 		{
-			VkVertexInputBindingDescription bindingDesc;
-			bindingDesc.binding = 0;
-			bindingDesc.stride = m_shaderData.InAttri.Size;
-			bindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			std::vector<VkVertexInputBindingDescription> inputDescs;
 
-			return bindingDesc;
+			if (m_shaderData.InAttri.Size > 0)
+			{
+				VkVertexInputBindingDescription bindingDesc;
+				bindingDesc.binding = 0;
+				bindingDesc.stride = m_shaderData.InAttri.Size;
+				bindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+				inputDescs.push_back(bindingDesc);
+			}
+
+			return inputDescs;
 		}
 
 		std::vector<VkVertexInputAttributeDescription> ShaderModuleBase::GetAttributes()
@@ -186,27 +178,27 @@ namespace Insight
 		{
 			if (string == "vert")
 			{
-				return ShaderType::Vertex;
+				return ShaderType::VertexShader;
 			}
 			else if (string == "tesc")
 			{
-				return ShaderType::Vertex;
+				return ShaderType::VertexShader;
 			}
 			else if (string == "tese")
 			{
-				return ShaderType::Vertex;
+				return ShaderType::VertexShader;
 			}
 			else if (string == "geom")
 			{
-				return ShaderType::Geometry;
+				return ShaderType::GeometryShader;
 			}
 			else if (string == "frag")
 			{
-				return ShaderType::Fragment;
+				return ShaderType::FragmentShader;
 			}
 			else if (string == "comp")
 			{
-				return ShaderType::Compute;
+				return ShaderType::ComputeShader;
 			}
 			return ShaderType::None;
 		}

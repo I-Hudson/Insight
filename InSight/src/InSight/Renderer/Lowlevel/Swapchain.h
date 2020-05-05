@@ -9,6 +9,7 @@
 #include "Insight/Renderer/Lowlevel/CommandPool.h"
 #include "Insight/Renderer/Lowlevel/CommandBuffer.h"
 #include "Insight/Renderer/Lowlevel/Semaphore.h"
+#include "Insight/Assimp/Mesh.h"
 
 #include "Insight/Event/ApplicationEvent.h"
 
@@ -60,6 +61,7 @@ namespace Insight
 
 		private:
 			SwapchainSettings m_swapchainSettings;
+			Mesh* m_fullscreenQuad;
 
 			Shader* m_swapchainShader;
 			CommandPool* m_drawCommandPool;

@@ -9,6 +9,8 @@
 #include "Insight/Memory/MemoryManager.h"
 
 #include "Insight/Renderer/Lowlevel/ShaderModule.h"
+#include "Insight/Renderer/VulkanBuffers.h"
+#include "Insight/Renderer/Buffer.h"
 
 #include "Insight/Event/EventManager.h"
 
@@ -35,12 +37,29 @@ namespace Insight
 			m_drawCommandPool = Memory::MemoryManager::NewOnFreeList<CommandPool>(m_swapchainSettings.Device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 			m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
 
+				// Position				  // Colour				   // Normal				//UV1
+			std::vector<Vertex> vertices =
+			{
+				{{1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+			};
+
+			std::vector<unsigned int> indices =
+			{
+				0,1,2, 2, 3, 0
+			};
+			m_fullscreenQuad = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>());
+
 			IS_CORE_INFO("SwapChain completed.");
 		}
 
 		Swapchain::~Swapchain()
 		{
 			EventManager::Unbind(EventType::WindowResize, typeid(Swapchain).name());
+
+			Memory::MemoryManager::DeleteOnFreeList<Mesh>(m_fullscreenQuad);
 
 			Memory::MemoryManager::DeleteOnFreeList(m_drawCommandPool);
 
@@ -115,8 +134,8 @@ namespace Insight
 				uint32_t height = static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight());
 				VkExtent2D actualExtent = { width, height };
 
-				actualExtent.width = max(capabilities.minImageExtent.width, min(capabilities.maxImageExtent.width, actualExtent.width));
-				actualExtent.height = max(capabilities.minImageExtent.height, min(capabilities.maxImageExtent.height, actualExtent.height));
+				actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
+				actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
 
 				return actualExtent;
 			}
@@ -170,7 +189,13 @@ namespace Insight
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
 				m_swapchainShader->Bind(*it);
 
-				vkCmdDraw((*it)->GetBuffer(), 3, 1, 0, 0);
+				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers((*it)->GetBuffer(), 0, 1, vertexBuffers, offsets);
+
+				vkCmdBindIndexBuffer((*it)->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+				vkCmdDrawIndexed((*it)->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
 				
 				m_swapchainFramebuffers[i]->UnbindBuffer(*it);
 			
@@ -263,7 +288,7 @@ namespace Insight
 			for (size_t i = 0; i < imageCount; i++)
 			{
 				Framebuffer* fb = Memory::MemoryManager::NewOnFreeList<Framebuffer>(m_swapchainSettings.Device, extent);
-				fb->AttachImage(&swapChainImages[i], surfaceFormat.format, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+				fb->AttachImage(&swapChainImages[i], VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 				fb->CompileFrameBuffer();
 				m_swapchainFramebuffers.push_back(std::move(fb));
 

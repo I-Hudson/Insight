@@ -3,7 +3,7 @@
 #include "Core.h"
 
 #define GLM_FORCE_SWIZZLE
-#include <glm/glm.hpp>
+#include <../vendor/glm/glm/glm.hpp>
 
 namespace Framework
 {

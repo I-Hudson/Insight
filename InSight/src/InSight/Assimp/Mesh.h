@@ -2,18 +2,11 @@
 
 #include "Insight/Core.h"
 #include "Insight/UUID.h"
+#include "Insight/Renderer/Buffer.h"
 
 #include <vector>
 #include <string>
-#include <glm/glm.hpp>
-
-struct Vertex
-{
-	glm::vec4 Position;
-	glm::vec4 Colour;
-	glm::vec4 Normal;
-	glm::vec2 UV1;
-};
+#include <../vendor/glm/glm/glm.hpp>
 
 struct Texture
 {
@@ -22,11 +15,16 @@ struct Texture
 	std::string Path;
 };
 
+using namespace Insight::Render;
+
 class IS_API Mesh : public Insight::UUID
 {
 public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~Mesh();
+
+	unsigned int GetVertexCount() { return m_vertices.size(); }
+	unsigned int GetIndicesCount() { return m_indices.size(); }
 
 	// Returns a new array of vertices.
 	std::vector<glm::vec3> GetVertices();
@@ -40,8 +38,18 @@ public:
 	std::vector<glm::vec2> GetUVs();
 
 private:
+	Insight::Render::VertexBuffer* GetVertexBuffer() { return m_vertexBuffer; }
+	Insight::Render::IndexBuffer* GetIndexBuffer() { return m_indexBuffer; }
+
+private:
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
 	std::vector<Texture> m_textures;
+
+	Insight::Render::VertexBuffer* m_vertexBuffer;
+	Insight::Render::IndexBuffer* m_indexBuffer;
+
+	friend Insight::Render::VulkanRenderer;
+	friend Insight::Render::Swapchain;
 };
 

@@ -35,7 +35,7 @@ namespace Insight
 		{
 			m_renderer->Clear();
 
-			m_renderer->Render();
+			m_renderer->Render(m_meshs);
 
 			m_renderer->Present();
 		}

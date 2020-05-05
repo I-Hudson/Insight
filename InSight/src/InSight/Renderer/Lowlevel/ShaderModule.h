@@ -19,9 +19,9 @@ namespace Insight
 			{ }
 		};
 	}
-	using VertexShader = Render::ShaderModule<Render::ShaderType::Vertex>;
-	using GemetryShader = Render::ShaderModule<Render::ShaderType::Geometry>;
-	using FragmentShader = Render::ShaderModule<Render::ShaderType::Fragment>;
+	using VertexShader = Render::ShaderModule<Render::ShaderType::VertexShader>;
+	using GemetryShader = Render::ShaderModule<Render::ShaderType::GeometryShader>;
+	using FragmentShader = Render::ShaderModule<Render::ShaderType::FragmentShader>;
 
-	using ComputeShader = Render::ShaderModule<Render::ShaderType::Compute>;
+	using ComputeShader = Render::ShaderModule<Render::ShaderType::ComputeShader>;
 }

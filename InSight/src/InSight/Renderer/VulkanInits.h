@@ -229,10 +229,15 @@ namespace Insight
 				return dynamicState;
 			}
 
-			static VkPipelineVertexInputStateCreateInfo VertexInputInfo()
+			static VkPipelineVertexInputStateCreateInfo VertexInputInfo(const std::vector<VkVertexInputBindingDescription>& inputBindingDescs, 
+				const std::vector<VkVertexInputAttributeDescription>& vertexBindingDescs)
 			{
 				VkPipelineVertexInputStateCreateInfo createInfo{};
 				createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+				createInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(inputBindingDescs.size());
+				createInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexBindingDescs.size());
+				createInfo.pVertexBindingDescriptions = inputBindingDescs.data();
+				createInfo.pVertexAttributeDescriptions = vertexBindingDescs.data();
 				return createInfo;
 			}
 
@@ -431,6 +436,13 @@ namespace Insight
 				presentInfo.pResults = nullptr; // Optional
 
 				return presentInfo;
+			}
+
+			static VkBufferCreateInfo BufferInfo()
+			{
+				VkBufferCreateInfo bufferInfo{};
+				bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+				return bufferInfo;
 			}
 
 			static VkDebugUtilsMessengerCreateInfoEXT DebugCreateInfoEXT(PFN_vkDebugUtilsMessengerCallbackEXT callback)

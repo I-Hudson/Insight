@@ -3,7 +3,7 @@
 #include "Insight/Core.h"
 #include "Insight/Component/Component.h"
 
-#include <glm/glm.hpp>
+#include <../vendor/glm/glm/glm.hpp>
 
 class IS_API TransformComponent : public Component
 {
