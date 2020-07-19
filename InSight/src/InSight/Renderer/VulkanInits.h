@@ -155,7 +155,7 @@ namespace Insight
 				rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 				rasterizer.lineWidth = 1.0f;
 				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-				rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+				rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 				rasterizer.depthBiasEnable = VK_FALSE;
 				rasterizer.depthBiasConstantFactor = 0.0f; // Optional
 				rasterizer.depthBiasClamp = 0.0f; // Optional
@@ -313,7 +313,7 @@ namespace Insight
 				return framebufferInfo;
 			}
 
-			static VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo(const std::vector<VkDescriptorSetLayoutBinding> bindings)
+			static VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo(const std::vector<VkDescriptorSetLayoutBinding>& bindings)
 			{
 				VkDescriptorSetLayoutCreateInfo layoutInfo{};
 				layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -327,7 +327,8 @@ namespace Insight
 				VkDescriptorSetLayoutBinding uboLayoutBinding{};
 				uboLayoutBinding.binding = binding;
 				uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				uboLayoutBinding.descriptorCount = count;
+				uboLayoutBinding.descriptorCount = 1;
+				uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 				return uboLayoutBinding;
 			}
 
@@ -349,6 +350,33 @@ namespace Insight
 				poolInfo.maxSets = maxSets;
 
 				return poolInfo;
+			}
+
+			static VkDescriptorSetAllocateInfo DescriptorSetAllocInfo(const VkDescriptorPool* pool, const int& setCount, 
+				const std::vector<VkDescriptorSetLayout>& layouts)
+			{
+				VkDescriptorSetAllocateInfo allocInfo{};
+				allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+				allocInfo.descriptorPool = *pool;
+				allocInfo.descriptorSetCount = static_cast<uint32_t>(setCount);
+				allocInfo.pSetLayouts = layouts.data();
+				return allocInfo;
+			}
+
+			static VkWriteDescriptorSet WriteDescriptorSet(const VkDescriptorSet& descriptorSets, const int& binding, const int& arrayElement,
+				const VkDescriptorType type, const int& descriptorCount, const VkDescriptorBufferInfo* bufferInfo)
+			{
+				VkWriteDescriptorSet descriptorWrite{};
+				descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+				descriptorWrite.dstSet = descriptorSets;
+				descriptorWrite.dstBinding = binding;
+				descriptorWrite.dstArrayElement = arrayElement;
+				descriptorWrite.descriptorType = type;
+				descriptorWrite.descriptorCount = descriptorCount;
+				descriptorWrite.pBufferInfo = bufferInfo;
+				descriptorWrite.pImageInfo = nullptr; // Optional
+				descriptorWrite.pTexelBufferView = nullptr; // Optional
+				return descriptorWrite;
 			}
 
 			static VkCommandPoolCreateInfo CommandPoolInfo(const VkCommandPoolCreateFlags& createFlag, const int& queueFailyIndex)

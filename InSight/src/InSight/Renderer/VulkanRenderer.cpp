@@ -10,6 +10,7 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Renderer/VulkanBuffers.h"
+#include "Insight/Renderer/VulkanMaterial.h"
 #include "Insight/Component/MeshComponent.h"
 
 #include "Insight/Config/Config.h"
@@ -22,6 +23,7 @@ namespace Insight
 		{
 			Render::VulkanVertexBuffer::s_Renderer = this;
 			Render::VulkanIndexBuffer::s_Renderer = this;
+			Render::VulkanMaterial::s_Renderer = this;
 
 
 			m_windowModule = startupData.WindowModule;
@@ -59,11 +61,14 @@ namespace Insight
 			ShaderData data
 			{
 				m_device,
-				{"shader - Copy.vert", "shader - Copy.frag"},
+				{"offscreen_shader.vert", "offscreen_shader.frag"},
 				VkExtent2D{ static_cast<uint32_t>(m_windowModule->GetWindow()->GetWidth()), static_cast<uint32_t>(m_windowModule->GetWindow()->GetHeight())},
 				m_framebuffer->GetRenderpass()
 			};
 			m_shader = Memory::MemoryManager::NewOnFreeList<Shader>(data);
+			
+			m_material = Material::Create();
+			m_material->SetShader(m_shader);
 
 			m_commandPool = Memory::MemoryManager::NewOnFreeList<CommandPool>(m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 			m_commandBuffer = m_commandPool->AllocCommandBuffer();
@@ -87,6 +92,7 @@ namespace Insight
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
 
 			Memory::MemoryManager::DeleteOnFreeList(m_shader);
+			Memory::MemoryManager::DeleteOnFreeList(m_material);
 			Memory::MemoryManager::DeleteOnFreeList(m_framebuffer);
 			Memory::MemoryManager::DeleteOnFreeList(m_commandPool);
 
@@ -98,6 +104,12 @@ namespace Insight
 		{
 		}
 
+
+		struct ColorUniform
+		{
+			glm::vec4 Colour1;
+		};
+
 		void VulkanRenderer::Render(std::vector<MeshComponent*> meshes)
 		{
 			m_swapchain->AcquireNextImage();
@@ -106,7 +118,7 @@ namespace Insight
 
 			m_commandBuffer->StartRecord();
 			m_framebuffer->BindBuffer(m_commandBuffer);
-			m_shader->Bind(m_commandBuffer);
+			static_cast<VulkanMaterial*>(m_material)->Bind(m_commandBuffer);
 			
 			for (auto it = meshes.begin(); it != meshes.end(); ++it)
 			{

@@ -50,6 +50,7 @@ public:
 		}
 
 
+
 		//IS_CORE_INFO("MouseX: {0}, MouseY: {1}", x, y);
 		//IS_CORE_INFO("{0}", 1.0f / deltaTime);
 		glm::vec3 p = e->GetComponent<TransformComponent>()->GetPostion();

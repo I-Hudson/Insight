@@ -2,6 +2,7 @@
 #include "Insight/Core.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Assimp/Mesh.h"
+#include "Insight/Renderer/Material.h"
 
 #include <../vendor/glm/glm/glm.hpp>
 
@@ -13,6 +14,9 @@ public:
 
 	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
 	Mesh* GetMesh() const { return m_mesh; }
+
+	void SetMaterial(Material* material) { m_materal = material; }
+	Material* GeMaterial() const { return m_materal; }
 
 	// Returns a new array of vertices.
 	std::vector<glm::vec3> GetVertices() const { return m_mesh->GetVertices(); }
@@ -27,5 +31,6 @@ public:
 
 private:
 	Mesh* m_mesh;
+	Material* m_materal;
 };
 

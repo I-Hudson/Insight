@@ -205,6 +205,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\CommandBuffer.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\CommandPool.h" />
+    <ClInclude Include="src\Insight\Renderer\Lowlevel\DescriptorPool.h" />
+    <ClInclude Include="src\Insight\Renderer\Lowlevel\DescriptorSet.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Device.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Fence.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Framebuffer.h" />
@@ -215,11 +217,13 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Lowlevel\ShaderModule.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\ShaderModuleBase.h" />
     <ClInclude Include="src\Insight\Renderer\Lowlevel\Swapchain.h" />
+    <ClInclude Include="src\Insight\Renderer\Material.h" />
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
     <ClInclude Include="src\Insight\Renderer\Shader.h" />
     <ClInclude Include="src\Insight\Renderer\Vulkan.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanBuffers.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanInits.h" />
+    <ClInclude Include="src\Insight\Renderer\VulkanMaterial.h" />
     <ClInclude Include="src\Insight\Renderer\VulkanRenderer.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
@@ -665,6 +669,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\CommandBuffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\CommandPool.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Lowlevel\DescriptorPool.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Lowlevel\DescriptorSet.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Device.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Fence.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Framebuffer.cpp" />
@@ -674,9 +680,11 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Semaphore.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\ShaderModuleBase.cpp" />
     <ClCompile Include="src\Insight\Renderer\Lowlevel\Swapchain.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Material.cpp" />
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Shader.cpp" />
     <ClCompile Include="src\Insight\Renderer\VulkanBuffers.cpp" />
+    <ClCompile Include="src\Insight\Renderer\VulkanMaterial.cpp" />
     <ClCompile Include="src\Insight\Renderer\VulkanRenderer.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
@@ -694,4 +702,4 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project> 
+</Project>

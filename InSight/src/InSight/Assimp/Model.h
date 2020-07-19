@@ -17,7 +17,7 @@ public:
 	~Model();
 
 	Mesh* GetSubMesh(int index);
-	unsigned int GetSubMeshCount() { return m_meshes.size(); }
+	unsigned int GetSubMeshCount() { return static_cast<unsigned int>(m_meshes.size()); }
 
 private:
 	void LoadMesh(const std::string& filePath);

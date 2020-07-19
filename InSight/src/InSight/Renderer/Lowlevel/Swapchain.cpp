@@ -10,6 +10,7 @@
 
 #include "Insight/Renderer/Lowlevel/ShaderModule.h"
 #include "Insight/Renderer/VulkanBuffers.h"
+#include "Insight/Renderer/VulkanMaterial.h"
 #include "Insight/Renderer/Buffer.h"
 
 #include "Insight/Event/EventManager.h"
@@ -28,11 +29,18 @@ namespace Insight
 			ShaderData data
 			{
 				m_swapchainSettings.Device,
-				{"shader.vert", "shader.frag"},
+				{"swapchain_shader.vert", "swapchain_shader.frag"},
 				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
 			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<Shader>(data);
+
+			for (int i = 0; i < 3; i++)
+			{
+				Material* mat = Material::Create();
+				mat->SetShader(m_swapchainShader);
+				m_materials.push_back(mat);
+			}
 
 			m_drawCommandPool = Memory::MemoryManager::NewOnFreeList<CommandPool>(m_swapchainSettings.Device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 			m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
@@ -60,11 +68,13 @@ namespace Insight
 			EventManager::Unbind(EventType::WindowResize, typeid(Swapchain).name());
 
 			Memory::MemoryManager::DeleteOnFreeList<Mesh>(m_fullscreenQuad);
-
 			Memory::MemoryManager::DeleteOnFreeList(m_drawCommandPool);
-
 			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
 
+			for (auto it = m_materials.begin(); it != m_materials.end(); ++it)
+			{
+				Memory::MemoryManager::DeleteOnFreeList(*it);
+			}
 			for (size_t i = 0; i < m_swapchainFramebuffers.size(); i++)
 			{
 				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);
@@ -179,15 +189,27 @@ namespace Insight
 			m_swapchainSettings.Device->GetQueue(QueueFamilyType::Graphics).Submit(info);
 		}
 
+		struct ColorUniform
+		{
+			glm::vec4 Colour1;
+		};
+
 		void Swapchain::Draw(Semaphore* waitSemaphore)
 		{
+			ColorUniform uniform;
+			uniform.Colour1 = glm::vec4(0.0f, 1.0f, 0.0f, 1);
+
+			m_materials[m_imageIndex]->UpdateLoadUniforms();
+			m_materials[m_imageIndex]->UpdateLoadUniforms("Colours", &uniform, sizeof(uniform), 1, 0);
+			m_materials[m_imageIndex]->UpdateUniforms();
+
 			int i = 0;
 			++tempShader;
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
 			{
 				(*it)->StartRecord();
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
-				m_swapchainShader->Bind(*it);
+				static_cast<VulkanMaterial*>(m_materials[i])->Bind(*it);
 
 				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
 				VkDeviceSize offsets[] = { 0 };
@@ -316,17 +338,18 @@ namespace Insight
 				m_swapchainSettings.Window->WaitForEvents();
 			}
 
-			for (size_t i = 0; i < m_swapchainFramebuffers.size(); i++)
+			m_drawCommandPool->FreeCommandBuffers();
+			m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
+
+			for (size_t i = 0; i < m_swapchainFramebuffers.size(); ++i)
 			{
 				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);
 			}
 			m_swapchainFramebuffers.clear();
-			m_drawCommandPool->FreeCommandBuffers();
-			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
 			vkDestroySwapchainKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, nullptr);
-
-			m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
 			CreateSwapChain();
+
+			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
 			ShaderData data
 			{
 				m_swapchainSettings.Device,
@@ -335,6 +358,10 @@ namespace Insight
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
 			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<Shader>(data);
+			for (auto it = m_materials.begin(); it != m_materials.end(); ++it)
+			{
+				(*it)->SetShader(m_swapchainShader);
+			}
 		}
 	}
 }

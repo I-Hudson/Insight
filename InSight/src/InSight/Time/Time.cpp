@@ -16,10 +16,9 @@ namespace Insight
 	{
 		m_tpCurrentTime = clock.now();
 		m_currentTime = std::chrono::duration<double>(m_tpCurrentTime.time_since_epoch()).count();
-
 		m_deltaTime = m_currentTime - m_prevTime;
-
 		m_prevTime = m_currentTime;
+		m_totalTime += m_deltaTime / 100;
 	}
 
 	const float Time::GetDeltaTime()

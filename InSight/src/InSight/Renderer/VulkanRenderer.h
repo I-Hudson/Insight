@@ -7,6 +7,7 @@
 #include "Insight/Renderer/Lowlevel/Device.h"
 #include "Insight/Renderer/Lowlevel/Swapchain.h"
 #include "Insight/Renderer/Lowlevel/ShaderModule.h"
+#include "Insight/Renderer/Material.h"
 
 #include "Vulkan.h"
 
@@ -17,7 +18,8 @@ namespace Insight
 {
 	namespace Render
 	{
-		
+		class VulkanMaterial;
+
 		class IS_API VulkanRenderer : public Renderer
 		{
 		public:
@@ -59,6 +61,7 @@ namespace Insight
 			CommandPool* m_commandPool;
 			CommandBuffer* m_commandBuffer;
 			Shader* m_shader;
+			Material* m_material;
 			Framebuffer* m_framebuffer;
 
 			VkSurfaceKHR m_surface;
@@ -69,6 +72,8 @@ namespace Insight
 			std::vector<const char*> m_deviceExtensions;
 
 			Module::WindowModule* m_windowModule;
+
+			friend VulkanMaterial;
 		};
 	}
 }

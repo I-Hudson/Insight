@@ -10,6 +10,7 @@
 #include "Insight/Renderer/Lowlevel/CommandBuffer.h"
 #include "Insight/Renderer/Lowlevel/Semaphore.h"
 #include "Insight/Assimp/Mesh.h"
+#include "Insight/Renderer/Material.h"
 
 #include "Insight/Event/ApplicationEvent.h"
 
@@ -20,6 +21,7 @@ namespace Insight
 	namespace Render
 	{
 		class Device;
+		class VulkanMaterial;
 
 		struct SwapChainSupportDetails
 		{
@@ -64,6 +66,7 @@ namespace Insight
 			Mesh* m_fullscreenQuad;
 
 			Shader* m_swapchainShader;
+			std::vector<Material*> m_materials;
 			CommandPool* m_drawCommandPool;
 			std::vector<CommandBuffer*> m_drawCommandBuffers;
 			std::vector<Fence*> m_inFlightFences;

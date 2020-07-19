@@ -81,11 +81,8 @@ namespace Insight
 			T* ret = new (Alloc(sizeof(T), MemoryUtlis::Alignment)) T(args...);
 			m_monitorPureAlloc = true;
 			std::string name = typeid(T).name();
-			//if (std::is_base_of<class std:, T>::value)
-			{
-				U64 vPointer = *reinterpret_cast<U64*>(ret);
-				m_vtableToNameMap.insert({ vPointer, name });
-			}
+			U64 vPointer = *reinterpret_cast<U64*>(ret);
+			m_vtableToNameMap.insert({ vPointer, name });
 
 			return ret;
 #else

@@ -27,8 +27,12 @@ namespace Insight
 			~Shader();
 
 			void Bind(CommandBuffer* commandBuffers);
-
 			void Resize(int width, int height);
+
+			const ShaderData GetData() { return m_shaderData; }
+			const std::vector<ParsedShadeData> GetMetaData() { return m_shaderMetaData; }
+			VkDescriptorSetLayout GetDescLayout() { return m_descSetLayout; }
+			VkPipelineLayout GetPipelineLayout() { return m_pipelineLayout; }
 
 		private:
 			void Create(ShaderData& data);
@@ -38,7 +42,9 @@ namespace Insight
 			const Device* m_device;
 			VkPipeline m_pipeline;
 			ShaderData m_shaderData;
+			std::vector<ParsedShadeData> m_shaderMetaData;
 			VkPipelineLayout m_pipelineLayout;
+			VkDescriptorSetLayout m_descSetLayout;
 		};
 	}
 }

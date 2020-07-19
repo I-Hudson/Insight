@@ -23,8 +23,8 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~Mesh();
 
-	unsigned int GetVertexCount() { return m_vertices.size(); }
-	unsigned int GetIndicesCount() { return m_indices.size(); }
+	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
+	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
 
 	// Returns a new array of vertices.
 	std::vector<glm::vec3> GetVertices();

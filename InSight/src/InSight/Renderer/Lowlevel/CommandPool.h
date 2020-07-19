@@ -13,7 +13,7 @@ namespace Insight
 	{
 		class Device;
 
-		class IS_API CommandPool
+		class CommandPool
 		{
 		public:
 			CommandPool(const Device* device, const VkCommandPoolCreateFlags& createFlags = 0);

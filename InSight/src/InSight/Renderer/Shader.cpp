@@ -17,6 +17,7 @@ namespace Insight
 
 		Shader::~Shader()
 		{
+			vkDestroyDescriptorSetLayout(m_device->GetDevice(), m_descSetLayout, nullptr);
 			vkDestroyPipeline(m_device->GetDevice(), m_pipeline, nullptr);
 			vkDestroyPipelineLayout(m_device->GetDevice(), m_pipelineLayout, nullptr);
 		}
@@ -45,6 +46,7 @@ namespace Insight
 			for (auto it = data.ModuleNames.begin(); it != data.ModuleNames.end(); ++it)
 			{
 				modules.push_back(ShaderModuleBase(m_device, (*it)));
+				m_shaderMetaData.push_back(modules[modules.size() - 1].GetData());
 			}
 
 			for (auto it = modules.begin(); it != modules.end(); ++it)
@@ -86,7 +88,10 @@ namespace Insight
 			VkPipelineDynamicStateCreateInfo dynamicInfo = VulkanInits::PipelineDynamicState(dynamicStats);
 
 			VkDescriptorSetLayoutCreateInfo descriptorLayoutInfo = VulkanInits::DescriptorSetLayoutCreateInfo(shaderDescriptorLayouts);
-			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VulkanInits::PipelineLayoutInfo({ });
+			ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->GetDevice(), &descriptorLayoutInfo, nullptr, &m_descSetLayout));
+
+			std::vector<VkDescriptorSetLayout> layouts = { m_descSetLayout };
+			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VulkanInits::PipelineLayoutInfo(layouts);
 			ThrowIfFailed(vkCreatePipelineLayout(m_device->GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout));
 
 			VkGraphicsPipelineCreateInfo graphicsInfo = VulkanInits::GraphicsPipelineInfo(&shaderStages, &vertexCreateInfo, &inputAssembly, &viewportInfo,
