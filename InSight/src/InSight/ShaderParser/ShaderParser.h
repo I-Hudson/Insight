@@ -41,7 +41,7 @@ namespace Insight
 
 			static void GetAttribute(const KeywordFind& keyword, ParsedShadeData& data);
 			static void CreateUniformBlock(std::string& line, ParsedShadeData& data);
-			static void GetUniformStruct(const std::string line, ParsedShadeData& data);
+			static void GetUniformStruct(const std::string line, ParsedShadeData& data, const bool& startUniform);
 
 			static KeywordFind FindKeyword(std::string& line);
 

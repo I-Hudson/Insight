@@ -27,6 +27,8 @@ namespace Insight
 		ParsedShadeData ShaderParser::ParseShader(const std::string& filePath, const Render::ShaderType shaderType)
 		{
 			ParsedShadeData data;
+			data.ShaderType = shaderType;
+
 			std::ifstream cFile(filePath);
 			if (cFile.is_open())
 			{
@@ -39,6 +41,8 @@ namespace Insight
 					}
 
 					IS_CORE_INFO("{0}", line.c_str());
+
+					bool startUniform = false;
 
 					KeywordFind k = FindKeyword(line);
 					if (k != KeywordFind())
@@ -54,13 +58,14 @@ namespace Insight
 						else if (k.Keyword == "uniform")
 						{
 							CreateUniformBlock(line, data);
+							startUniform = true;
 							m_recordUniform = true;
 						}
 					}
 
 					if (m_recordUniform)
 					{
-						GetUniformStruct(line, data);
+						GetUniformStruct(line, data, startUniform);
 					}
 				}
 
@@ -133,12 +138,13 @@ namespace Insight
 			}
 			uniformBlock.Binding = std::stoi(returnValue);
 
-			uniformBlock.Name = GetName(line, false);
+			uniformBlock.Type = GetType(line);;
 
+			uniformBlock.Name = GetName(line, false);
 			data.UniformBlocks.push_back(uniformBlock);
 		}
 
-		void ShaderParser::GetUniformStruct(const std::string line, ParsedShadeData& data)
+		void ShaderParser::GetUniformStruct(const std::string line, ParsedShadeData& data, const bool& startUniform)
 		{
 			ShaderAttributeType type = GetType(line);
 
@@ -149,6 +155,12 @@ namespace Insight
 				uniform.Type = type;
 
 				data.UniformBlocks[data.UniformBlocks.size() - 1].Uniforms.push_back(uniform);
+			}
+
+			if (startUniform && line.find(';') != line.npos)
+			{
+				m_recordUniform = false;
+				return;
 			}
 
 			if (line.find('}') != line.npos)

@@ -47,6 +47,7 @@ namespace Insight
 			void Resize(int width, int height);
 
 			Renderpass* GetRenderpass() const { return m_renderpass; }
+			const VkSampler* GetSampler() { return &m_sampler; }
 			Semaphore* GetAvailbleSem() const { return m_imageAvailableSem; }
 			Semaphore* GetFinishedSem() const { return m_imageFinishedSem; }
 			Fence* GetFence() const { return m_fence; }
@@ -55,6 +56,7 @@ namespace Insight
 			void CreateImage(FrameBufferAttachment& attachment);
 			void CreateImageView(FrameBufferAttachment& attachment);
 			void CreateMemory(FrameBufferAttachment& attachment);
+			void CreateSampler();
 
 		private:
 			Device* m_device;
@@ -62,6 +64,7 @@ namespace Insight
 			std::vector<FrameBufferAttachment> m_attachments;
 			VkExtent2D m_extent;
 			VkFramebuffer m_frameBuffer;
+			VkSampler m_sampler;
 			Render::Renderpass* m_renderpass;
 
 			CommandBuffer* m_commandBuffer;

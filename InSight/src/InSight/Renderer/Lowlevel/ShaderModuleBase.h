@@ -28,6 +28,15 @@ namespace Insight
 			Sampler2D
 		};
 
+		enum ShaderType
+		{
+			None = 0,
+			VertexShader = 1,
+			GeometryShader = 2,
+			FragmentShader = 3,
+			ComputeShader = 4
+		};
+
 		struct ShaderAttributes
 		{
 			int Location;
@@ -53,30 +62,27 @@ namespace Insight
 		{
 			std::vector<ShaderUniform> Uniforms;
 			std::string Name;
+			ShaderAttributeType Type;
 			int Binding;
 			int Size;
+
+			ShaderUniformBlock()
+				: Size(0)
+			{ }
 		};
 
 		struct ParsedShadeData
 		{
 			ShaderAttributeBlock InAttri;
 			ShaderAttributeBlock OutAttri;
-			std::vector<ShaderUniformBlock>UniformBlocks;
+			std::vector<ShaderUniformBlock> UniformBlocks;
+			ShaderType ShaderType;
 
 			ParsedShadeData()
 			{
 				InAttri.Size = 0;
 				OutAttri.Size = 0;
 			}
-		};
-
-		enum ShaderType
-		{
-			None = 0,
-			VertexShader = 1,
-			GeometryShader = 2,
-			FragmentShader = 3,
-			ComputeShader = 4
 		};
 
 		class Device;
@@ -93,6 +99,7 @@ namespace Insight
 			const VkShaderModule GetModule() const { return m_shaderModule; }
 			const ParsedShadeData& GetData() const { return m_shaderData; }
 			VkShaderStageFlagBits GetShaderStageBit() const;
+			VkDescriptorType GetShaderDescriptorType(const ShaderAttributeType& type) const;
 			ShaderType GetShaderType() const;
 
 			std::vector<VkVertexInputBindingDescription> GetVertexBindingDesc();

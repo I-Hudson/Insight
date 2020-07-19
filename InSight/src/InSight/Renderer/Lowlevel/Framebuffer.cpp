@@ -58,6 +58,7 @@ namespace Insight
 					vkFreeMemory(m_device->GetDevice(), (*it).Mem, nullptr);
 				}
 			}
+			vkDestroySampler(m_device->GetDevice(), m_sampler, nullptr);
 		}
 
 		void Framebuffer::CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout)
@@ -91,6 +92,7 @@ namespace Insight
 				CreateImage(*it);
 				CreateMemory(*it);
 				CreateImageView(*it);
+				CreateSampler();
 
 				views.push_back((*it).View);
 			}
@@ -150,6 +152,8 @@ namespace Insight
 				}
 			}
 
+			vkDestroySampler(m_device->GetDevice(), m_sampler, nullptr);
+
 			m_extent = VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
 			std::vector<VkImageView> views;
@@ -158,6 +162,7 @@ namespace Insight
 				CreateImage(*it);
 				CreateMemory(*it);
 				CreateImageView(*it);
+				CreateSampler();
 
 				views.push_back((*it).View);
 			}
@@ -204,6 +209,23 @@ namespace Insight
 				ThrowIfFailed(vkAllocateMemory(m_device->GetDevice(), &allocInfo, nullptr, &attachment.Mem));
 				ThrowIfFailed(vkBindImageMemory(m_device->GetDevice(), attachment.Image, attachment.Mem, 0));
 			}
+		}
+		void Framebuffer::CreateSampler()
+		{
+			// Create sampler to sample from the color attachments
+			VkSamplerCreateInfo sampler = VulkanInits::Sampler();
+			sampler.magFilter = VK_FILTER_NEAREST;
+			sampler.minFilter = VK_FILTER_NEAREST;
+			sampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			sampler.addressModeV = sampler.addressModeU;
+			sampler.addressModeW = sampler.addressModeU;
+			sampler.mipLodBias = 0.0f;
+			sampler.maxAnisotropy = 1.0f;
+			sampler.minLod = 0.0f;
+			sampler.maxLod = 1.0f;
+			sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+			ThrowIfFailed(vkCreateSampler(m_device->GetDevice(), &sampler, nullptr, &m_sampler));
 		}
 	}
 }

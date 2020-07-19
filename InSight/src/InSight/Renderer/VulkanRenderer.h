@@ -66,6 +66,8 @@ namespace Insight
 
 			VkSurfaceKHR m_surface;
 
+			Mesh* m_testMesh;
+
 			bool m_enableValidationLayers = true;
 			std::vector<const char*> m_validationLayers;
 

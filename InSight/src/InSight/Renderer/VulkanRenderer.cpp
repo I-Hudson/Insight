@@ -69,6 +69,7 @@ namespace Insight
 			
 			m_material = Material::Create();
 			m_material->SetShader(m_shader);
+			m_material->UpdateLoadUniforms();
 
 			m_commandPool = Memory::MemoryManager::NewOnFreeList<CommandPool>(m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 			m_commandBuffer = m_commandPool->AllocCommandBuffer();
@@ -80,6 +81,21 @@ namespace Insight
 			};
 			m_swapchain = Memory::MemoryManager::NewOnFreeList<Swapchain>(swapchainSettings);
 
+			// Position				  // Colour				   // Normal				//UV1
+			std::vector<Vertex> vertices =
+			{
+				{{1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+				{{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
+			};
+
+			std::vector<unsigned int> indices =
+			{
+				0,1,2, 2, 3, 0
+			};
+			m_testMesh = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>());
+
 			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
 
 			IS_CORE_INFO("Vulkan Setup Complete.");
@@ -90,6 +106,8 @@ namespace Insight
 			m_device->WaitForIdle();
 
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
+
+			Memory::MemoryManager::DeleteOnFreeList<Mesh>(m_testMesh);
 
 			Memory::MemoryManager::DeleteOnFreeList(m_shader);
 			Memory::MemoryManager::DeleteOnFreeList(m_material);
@@ -120,18 +138,21 @@ namespace Insight
 			m_framebuffer->BindBuffer(m_commandBuffer);
 			static_cast<VulkanMaterial*>(m_material)->Bind(m_commandBuffer);
 			
-			for (auto it = meshes.begin(); it != meshes.end(); ++it)
+			//for (auto it = meshes.begin(); it != meshes.end(); ++it)
 			{
-				if ((*it)->GetMesh() == nullptr)
-				{
-					continue;
-				}
+				//if ((*it)->GetMesh() == nullptr)
+				//{
+				//	continue;
+				//}
 
-				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
+				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(/*(*it)->GetMesh()*/m_testMesh->GetVertexBuffer())->GetBuffer() };
+				VkBuffer indexBuffer = static_cast<VulkanIndexBuffer*>(/*(*it)->GetMesh()*/m_testMesh->GetIndexBuffer())->GetBuffer();
 				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
 
-				vkCmdDraw(m_commandBuffer->GetBuffer(), (*it)->GetMesh()->GetVertexCount(), 1, 0, 0);
+				vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
+				vkCmdBindIndexBuffer(m_commandBuffer->GetBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+				vkCmdDrawIndexed(m_commandBuffer->GetBuffer(), static_cast<uint32_t>(/*(*it)->GetMesh()*/m_testMesh->GetIndicesCount()), 1, 0, 0, 0);
 			}
 			m_framebuffer->UnbindBuffer(m_commandBuffer);
 			m_commandBuffer->EndRecord();

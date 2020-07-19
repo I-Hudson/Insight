@@ -322,13 +322,9 @@ namespace Insight
 				return layoutInfo;
 			}
 
-			static VkDescriptorSetLayoutBinding DescriptorSetLayoutBinding(const int& binding, const int& count)
+			static VkDescriptorSetLayoutBinding DescriptorSetLayoutBinding()
 			{
 				VkDescriptorSetLayoutBinding uboLayoutBinding{};
-				uboLayoutBinding.binding = binding;
-				uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				uboLayoutBinding.descriptorCount = 1;
-				uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 				return uboLayoutBinding;
 			}
 
@@ -483,6 +479,14 @@ namespace Insight
 				createInfo.pUserData = nullptr; // Optional
 
 				return createInfo;
+			}
+
+			static VkSamplerCreateInfo Sampler()
+			{
+				VkSamplerCreateInfo samplerCreateInfo{};
+				samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+				samplerCreateInfo.maxAnisotropy = 1.0f;
+				return samplerCreateInfo;
 			}
 		};
 	}

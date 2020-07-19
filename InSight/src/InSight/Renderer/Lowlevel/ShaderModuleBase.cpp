@@ -46,11 +46,20 @@ namespace Insight
 		{
 			switch (m_type)
 			{
-			case Insight::Render::None: break;
-			case Insight::Render::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
-			case Insight::Render::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
-			case Insight::Render::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
-			case Insight::Render::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+				case Insight::Render::None: break;
+				case Insight::Render::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
+				case Insight::Render::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
+				case Insight::Render::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
+				case Insight::Render::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+			}
+		}
+
+		VkDescriptorType ShaderModuleBase::GetShaderDescriptorType(const ShaderAttributeType& type) const
+		{
+			switch (type)
+			{
+				case Insight::Render::ShaderAttributeType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+				default: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			}
 		}
 
@@ -64,7 +73,10 @@ namespace Insight
 			std::vector<VkDescriptorSetLayoutBinding> createInfos{};
 			for (auto it = m_shaderData.UniformBlocks.begin();  it != m_shaderData.UniformBlocks.end(); ++it)
 			{
-				auto desc = VulkanInits::DescriptorSetLayoutBinding((*it).Binding, m_shaderData.UniformBlocks.size());
+				auto desc = VulkanInits::DescriptorSetLayoutBinding();
+				desc.binding = (*it).Binding;
+				desc.descriptorType = GetShaderDescriptorType((*it).Type);;
+				desc.descriptorCount = 1;
 				desc.stageFlags = GetShaderStageBit();
 				createInfos.push_back(desc);
 			}
