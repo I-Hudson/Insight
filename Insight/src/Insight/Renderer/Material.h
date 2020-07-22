@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Insight/Core.h"
+#include "../vendor/glm/glm/glm.hpp"
 
 namespace Insight
 {
@@ -17,9 +18,10 @@ public:
 
 	virtual void SetShader(Insight::Render::Shader* shader) = 0;
 	virtual const Insight::Render::Shader* GetShader() = 0;
-	virtual void UpdateUniforms() = 0;
-	virtual void UpdateLoadUniforms() = 0;
-	virtual void UpdateLoadUniforms(const std::string& key, void* uniformData, size_t size, int binding, int index) = 0;
+	virtual void SetUniforms() = 0;
+	virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) = 0;
+	virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) = 0;
+	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
 
 	static Material* Create();
 };

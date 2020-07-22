@@ -1,50 +1,30 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/Renderer/Lowlevel/ShaderModuleBase.h"
-#include "Insight/Renderer/Lowlevel/Renderpass.h"
-#include "Insight/Renderer/Vulkan.h"
-#include "Insight/Renderer/Lowlevel/CommandBuffer.h"
+#include "Insight/Renderer/ShaderModuleBase.h"
 
 namespace Insight
 {
 	namespace Render
 	{
 		class Device;
-
-		struct ShaderData
-		{
-			const Device* Device;
-			const std::vector<std::string> ModuleNames;
-			VkExtent2D Extent;
-			const Renderpass* Renderpass;
-		};
+		struct ShaderData;
 
 		class IS_API Shader
 		{
 		public:
-			Shader(ShaderData& data);
-			~Shader();
+			virtual ~Shader() { };
 
-			void Bind(CommandBuffer* commandBuffers);
-			void Resize(int width, int height);
+			virtual void Bind(void* context) = 0;
+			virtual void Resize(int width, int height) = 0;
 
-			const ShaderData GetData() { return m_shaderData; }
-			const std::vector<ParsedShadeData> GetMetaData() { return m_shaderMetaData; }
-			VkDescriptorSetLayout GetDescLayout() { return m_descSetLayout; }
-			VkPipelineLayout GetPipelineLayout() { return m_pipelineLayout; }
+			virtual const ShaderData& GetData() const = 0;
+			const std::vector<ParsedShadeData>& GetMetaData() const { return m_shaderMetaData; }
 
-		private:
-			void Create(ShaderData& data);
-			ShaderModuleBase& GetShaderModule(const ShaderType& type, std::vector<ShaderModuleBase>& modules);
+		protected:
+			virtual ShaderModuleBase& GetShaderModule(const ShaderType& type, std::vector<ShaderModuleBase>& modules);
 
-		private:
-			const Device* m_device;
-			VkPipeline m_pipeline;
-			ShaderData m_shaderData;
 			std::vector<ParsedShadeData> m_shaderMetaData;
-			VkPipelineLayout m_pipelineLayout;
-			VkDescriptorSetLayout m_descSetLayout;
 		};
 	}
 }

@@ -2,10 +2,7 @@
 
 #include "Insight/Core.h"
 
-#include "Insight/Renderer/Lowlevel/ShaderModuleBase.h"
-
-#include <string>
-#include <vector>
+#include "Insight/Renderer/ShaderModuleBase.h"
 
 namespace Insight
 {

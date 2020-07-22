@@ -5,8 +5,14 @@
 #define GLM_FORCE_SWIZZLE
 #include <../vendor/glm/glm/glm.hpp>
 
-namespace Framework
+namespace Insight
 {
+	enum CameraAspect
+	{
+		A_4x3,
+		A_16x9
+	};
+
 	///
 	// BASE CAMERA
 	///	
@@ -20,7 +26,7 @@ namespace Framework
 		void SetViewMatrix(const glm::mat4& a_value);
 		//Set the projection matrix for the camera
 		void SetProjMatrix(const glm::mat4& a_value);
-		void SetProjMatrix(const float& a_fov, const float& a_aspect, const float& a_near, const float& a_far);
+		void SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far);
 
 		//Set the position for the camera
 		void SetPosition(const glm::vec3& a_value);
@@ -31,6 +37,8 @@ namespace Framework
 		const glm::mat4& GetProjViewMatrix() const;
 		const glm::mat4& GetProjMatrix() const;
 		const glm::mat4& GetViewMatrix() const;
+
+		const float GetCamerAspect(const CameraAspect& cameraAspect);
 
 	private:
 

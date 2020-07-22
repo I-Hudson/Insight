@@ -3,11 +3,13 @@
 #include "Camera.h"
 
 #include "Input/Input.h"
+#include "InSight/Log.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
+#include <../vendor/glm/glm/gtx/string_cast.hpp>
 
-namespace Framework
+namespace Insight
 {
 	Camera::Camera()
 		: m_viewMatrix(glm::mat4(1.0f)), m_projectionMatrix(glm::mat4(1.0f))
@@ -30,9 +32,9 @@ namespace Framework
 		SetProjectionViewMatrix();
 	}
 
-	void Camera::SetProjMatrix(const float& a_fov, const float& a_aspect, const float& a_near, const float& a_far)
+	void Camera::SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far)
 	{
-		m_projectionMatrix = glm::perspective(a_fov, a_aspect, a_near, a_far);
+		m_projectionMatrix = glm::perspective(a_fov, GetCamerAspect(a_aspect), a_near, a_far);
 		SetProjectionViewMatrix();
 	}
 
@@ -52,19 +54,19 @@ namespace Framework
 		float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * 5 * 2 : a_deltaTime * 5;
 
 		// Translate camera
-		if (Input::KeyDown('w'))
+		if (Input::KeyDown(KEY_W))
 		{
 			vTranslation -= vForward * frameSpeed;
 		}
-		if (Input::KeyDown('S'))
+		if (Input::KeyDown(KEY_S))
 		{
 			vTranslation += vForward * frameSpeed;
 		}
-		if (Input::KeyDown('d'))
+		if (Input::KeyDown(KEY_D))
 		{
 			vTranslation += vRight * frameSpeed;
 		}
-		if (Input::KeyDown('a'))
+		if (Input::KeyDown(KEY_A))
 		{
 			vTranslation -= vRight * frameSpeed;
 		}
@@ -78,10 +80,12 @@ namespace Framework
 		}
 
 		m_viewMatrix[3] = vTranslation;
+		vTranslation[3] = 1.0f;
 
 		// check for camera rotation
 		static bool sbMouseButtonDown = false;
-		if (Input::KeyDown(MOUSE_BUTTON_RIGHT))
+		bool mouseDown = Input::KeyDown(KEY_SPACE);
+		if (mouseDown)
 		{
 			static double siPrevMouseX = 0;
 			static double siPrevMouseY = 0;
@@ -145,6 +149,17 @@ namespace Framework
 	const glm::mat4& Camera::GetViewMatrix() const
 	{
 		return m_viewMatrix;
+	}
+
+	const float Camera::GetCamerAspect(const CameraAspect& cameraAspect)
+	{
+		switch (cameraAspect)
+		{
+		case CameraAspect::A_4x3: return 4.0f / 3.0f;
+		case CameraAspect::A_16x9: return 16.0f / 9.0f;
+
+		default: return 1.0f;
+		}
 	}
 
 	void Camera::SetProjectionViewMatrix()

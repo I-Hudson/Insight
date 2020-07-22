@@ -10,7 +10,7 @@ bool Input::KeyDown(int keycode)
 
 bool Input::KeyDown(char keycode)
 {
-	return KeyDown((int)keycode);
+	return KeyDown(toupper(keycode));
 }
 
 bool Input::KeyUp(int keycode)

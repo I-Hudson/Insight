@@ -2,10 +2,16 @@
 #include "Material.h"
 
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Renderer/VulkanMaterial.h"
 
+#ifdef IS_VULKAN
+#include "Insight/Renderer/Vulkan/VulkanMaterial.h"
+typedef Insight::Render::VulkanMaterial PlatformMaterial;
+#elif defined(IS_OPENGL)
+#include "Insight/Renderer/OpenGL/OpenGLMaterial.h"
+typedef Insight::Render::OpenGLMaterial PlatformMaterial;
+#endif
 
 Material* Material::Create()
 {
-	return Insight::Memory::MemoryManager::NewOnFreeList<Insight::Render::VulkanMaterial>();
+	return Insight::Memory::MemoryManager::NewOnFreeList<PlatformMaterial>();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include <memory>
 
 namespace Insight
 {
@@ -12,6 +13,8 @@ namespace Insight
 		class GraphicsModule;
 		class InputModule;
 	}
+
+	class Camera;
 
 	namespace Memory
 	{
@@ -37,6 +40,8 @@ namespace Insight
 		Module::WindowModule* m_windowModule;
 		Module::GraphicsModule* m_graphicsModule;
 		Module::InputModule* m_inputModule;
+
+		std::unique_ptr<Camera> m_mainCamera;
 	};
 
 	Application* CreateApplication();

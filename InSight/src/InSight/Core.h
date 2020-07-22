@@ -13,8 +13,15 @@
 #else 
 
 #define IS_TODO(...)
+#define IS_TODO_CORE(...)
 
 #endif // IS_DEBUG
+
+#define NEW_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
+#define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
+
+#define DELETE_ON_HEAP(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
+#define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
 
 #define BIT(x) (1 << x)
 

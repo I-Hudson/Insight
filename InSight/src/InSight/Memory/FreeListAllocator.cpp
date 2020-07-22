@@ -59,14 +59,13 @@ namespace Insight
 		void* FreeListAllocator::Alloc(const Size size, const Byte alignment)
 		{
 			const Size allocationHeaderSize = sizeof(FreeListAllocator::AllocHeader);
-			//assert("Allocation size must be bigger" && size >= sizeof(Node));
-			assert("Alignment must be 8 at least" && alignment >= 8);
+			IS_CORE_ASSERT(alignment >= 8, "Alignment must be 8 or greater");
 
 			// Search through the free list for a free block that has enough space to allocate our data
 			Size padding;
 			Node* affectedNode, * previousNode;
 			Find(size, alignment, padding, previousNode, affectedNode);
-			IS_CORE_ASSERT(affectedNode != nullptr && "Not enough memory");
+			IS_CORE_ASSERT(affectedNode != nullptr, "Not enough memory");
 
 			const Byte alignmentPadding = static_cast<Byte>(padding - allocationHeaderSize);
 			const Size requiredSize = size + padding;

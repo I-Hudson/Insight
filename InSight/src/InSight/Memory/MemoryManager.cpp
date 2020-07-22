@@ -15,6 +15,30 @@ namespace Insight
 			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
+		void MemoryManager::TrackObject(void* ptr)
+		{
+			if (!GetInstance()->m_trackingObjects.count(ptr))
+			{
+				GetInstance()->m_trackingObjects.insert(ptr);
+			}
+			else
+			{
+				IS_CORE_ERROR("Object is already being tracked: {0}!", ptr);
+			}
+		}
+
+		void MemoryManager::UnTrackObject(void* ptr)
+		{
+			if (GetInstance()->m_trackingObjects.count(ptr))
+			{
+				GetInstance()->m_trackingObjects.erase(ptr);
+			}
+			else
+			{
+				IS_CORE_ERROR("Object has already being untracked: {0}!", ptr);
+			}
+		}
+
 		MemoryManager* MemoryManager::GetInstance()
 		{
 			if (s_instance != nullptr)
@@ -36,6 +60,10 @@ namespace Insight
 
 		MemoryManager::~MemoryManager()
 		{
+			for (auto it = m_trackingObjects.begin(); it != m_trackingObjects.end(); ++it)
+			{
+				IS_CORE_ERROR("Tracking object has not been destroyed {0}", (*it));
+			}
 		}
 	}
 }

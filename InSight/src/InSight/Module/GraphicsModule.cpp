@@ -11,6 +11,7 @@ namespace Insight
 {
 	namespace Module
 	{
+		Camera* GraphicsModule::m_mainCamera;
 		std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
 		GraphicsModule::GraphicsModule(ModuleStartupData& startupData) 
@@ -35,9 +36,14 @@ namespace Insight
 		{
 			m_renderer->Clear();
 
-			m_renderer->Render(m_meshs);
+			m_renderer->Render(m_mainCamera, m_meshs);
 
 			m_renderer->Present();
+		}
+
+		void GraphicsModule::SetMainCamera(Camera* camera)
+		{
+			m_mainCamera = camera;
 		}
 	}
 }

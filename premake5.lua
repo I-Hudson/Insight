@@ -4,7 +4,8 @@ workspace "Insight"
 
     configurations
     {
-        "Debug",
+        "Debug_VULKAN",
+        "Debug_OPENGL",
         "Release",
         "Dist"
     }
@@ -25,6 +26,7 @@ IncludeDir["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/include"
 IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
 IncludeDir["glm"] = "$(SolutionDir)Insight/vendor/glm"
 IncludeDir["stb_image"] = "$(SolutionDir)Insight/vendor/stb_image"
+IncludeDir["glad"] = "$(SolutionDir)Insight/vendor/glad/include"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
@@ -58,6 +60,7 @@ project "Insight"
 		"%{prj.name}/vendor/stb_image/**.cpp",
         "%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/glad/src/**.cpp",
 	}
 
     includedirs 
@@ -70,6 +73,7 @@ project "Insight"
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
+        "%{IncludeDir.glad}",
 	}
 
     sysincludedirs 
@@ -79,7 +83,7 @@ project "Insight"
 
     libdirs
     {
-        "%{LibDirs.shaderc}/%{cfg.buildcfg}",
+        "%{LibDirs.shaderc}/Debug",
         "%{LibDirs.assimp}"
     }
 
@@ -101,14 +105,23 @@ project "Insight"
             "GLM_FORCE_SWIZZLE"
         }
 
+        prebuildcommands
+        {
+            ("{COPY} ../PBC/ ../bin/" .. outputdir .. "/Sandbox")
+		}
+
         postbuildcommands 
         { 
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox"),
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
         }
 
-    filter "configurations:Debug"
-        defines "IS_DEBUG"
+    filter "configurations:Debug_Vulkan"
+        defines { "IS_DEBUG", "IS_VULKAN" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL"
+        defines { "IS_DEBUG", "IS_OPENGL" }
         symbols "on"
 
 
@@ -169,9 +182,14 @@ project "Sandbox"
             "IS_PLATFORM_WINDOWS" 
         }
 
-    filter "configurations:Debug"
-        defines "IS_DEBUG"
-        symbols "On"
+
+    filter "configurations:Debug_Vulkan"
+        defines { "IS_DEBUG", "IS_VULKAN" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL"
+        defines { "IS_DEBUG", "IS_OPENGL" }
+        symbols "on"
 
     filter "configurations:Release"
         defines "IS_RELEASE"
@@ -203,7 +221,14 @@ project "UnitTests"
     includedirs
     {
         "$(SolutionDir)Insight/src",
-        "%{IncludeDir.spdlog}"
+        "%{IncludeDir.spdlog}",
+        "%{IncludeDir.assimp}",
+        "%{IncludeDir.glm}",
+	}
+
+    sysincludedirs 
+    {
+        "%{IncludeDir.glm}",
 	}
 
     links
@@ -221,6 +246,10 @@ project "UnitTests"
             "IS_PLATFORM_WINDOWS" 
         }
 
-    filter "configurations:Debug"
-        defines "IS_DEBUG"
-        symbols "On"
+    filter "configurations:Debug_Vulkan"
+        defines { "IS_DEBUG", "IS_VULKAN" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL"
+        defines { "IS_DEBUG", "IS_OPENGL" }
+        symbols "on"

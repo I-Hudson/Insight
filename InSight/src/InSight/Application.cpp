@@ -11,9 +11,12 @@
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
 
+#include "Insight/Camera.h"
+
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
 #include "Input/Input.h"
+#include <glm\ext\matrix_transform.hpp>
 
 namespace Insight
 {
@@ -40,6 +43,12 @@ namespace Insight
 		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(inputData);
 
 		m_moduleManager->AddModule<Module::EntityModule>();
+
+		m_mainCamera = std::make_unique<Camera>();
+		m_mainCamera->SetProjMatrix(glm::radians(90.0f), CameraAspect::A_16x9, 0.1f, 1000.0f);
+		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+
+		m_graphicsModule->SetMainCamera(m_mainCamera.get());
 	}
 
 	Application::~Application()
@@ -110,17 +119,14 @@ namespace Insight
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
 
-			if (Input::KeyHeld(KEY_SPACE))
-			{
-				IS_CORE_INFO("Space was pressed.");
-			}
-
 			Update(Time::GetDeltaTime());
 			Draw();
 
+			m_inputModule->Update(Time::GetDeltaTime());
+			m_mainCamera->Update(Time::GetDeltaTime());
+
 			m_graphicsModule->Update(Time::GetDeltaTime());
 
-			m_inputModule->Update(Time::GetDeltaTime());
 			isRunning = !m_windowModule->GetWindow()->ShouldClose();
 			m_windowModule->Update(Time::GetDeltaTime());
 		} while (isRunning);

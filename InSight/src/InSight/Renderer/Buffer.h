@@ -4,7 +4,6 @@
 #include "Insight/UUID.h"
 
 #include <../vendor/glm/glm/glm.hpp>
-#include <vector>
 
 struct Vertex
 {

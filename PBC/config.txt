@@ -1,0 +1,5 @@
+#WindowSettings
+window_width=1920
+window_height=1080
+window_title=Window Title 1
+window_icon=InsightProfile.png

@@ -20,11 +20,7 @@ Model::~Model()
 
 Mesh* Model::GetSubMesh(int index)
 {
-	if (index < 0 && index >= m_meshes.size())
-	{
-		IS_ASSERT("Model: GetSubMesh: Out of range.", index >= m_meshes.size());
-		return nullptr;
-	}
+	IS_ASSERT(index >= 0 && index < m_meshes.size(), "Model: GetSubMesh: Out of range.");
 	return m_meshes[index];
 }
 

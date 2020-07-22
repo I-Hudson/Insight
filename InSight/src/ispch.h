@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <functional>
 #include <typeinfo>
+#include <optional>
 
 #include <math.h>
 
@@ -17,6 +18,7 @@
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
+#include <set>
 
 #ifdef  IS_PLATFORM_WINDOWS
 	#include <Windows.h>
