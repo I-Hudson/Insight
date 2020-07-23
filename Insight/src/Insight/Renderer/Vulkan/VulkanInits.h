@@ -241,14 +241,15 @@ namespace Insight
 				return createInfo;
 			}
 
-			static VkPipelineLayoutCreateInfo PipelineLayoutInfo(const std::vector<VkDescriptorSetLayout>& descriptorSetLayout)
+			static VkPipelineLayoutCreateInfo PipelineLayoutInfo(const std::vector<VkDescriptorSetLayout>& descriptorSetLayout,
+				const std::vector< VkPushConstantRange>& pushConstants)
 			{
 				VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 				pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 				pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayout.size());
 				pipelineLayoutInfo.pSetLayouts = pipelineLayoutInfo.setLayoutCount > 0 ? descriptorSetLayout.data() : nullptr;
-				pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-				pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+				pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size()); // Optional
+				pipelineLayoutInfo.pPushConstantRanges = pipelineLayoutInfo.pushConstantRangeCount > 0 ? pushConstants.data() : nullptr;; // Optional
 				return pipelineLayoutInfo;
 			}
 
@@ -487,6 +488,15 @@ namespace Insight
 				samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 				samplerCreateInfo.maxAnisotropy = 1.0f;
 				return samplerCreateInfo;
+			}
+
+			static VkPushConstantRange PushConstantRange( VkShaderStageFlags stageFlags, uint32_t size, uint32_t offset)
+			{
+				VkPushConstantRange pushConstantRange{};
+				pushConstantRange.stageFlags = stageFlags;
+				pushConstantRange.offset = offset;
+				pushConstantRange.size = size;
+				return pushConstantRange;
 			}
 		};
 	}

@@ -58,7 +58,7 @@ namespace Insight
 			CommandPool* m_commandPool;
 			CommandBuffer* m_commandBuffer;
 			Shader* m_shader;
-			Material* m_material;
+			VulkanMaterial* m_material;
 			VulkanFramebuffer* m_framebuffer;
 
 			VkSurfaceKHR m_surface;

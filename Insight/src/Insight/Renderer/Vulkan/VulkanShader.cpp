@@ -44,6 +44,7 @@ namespace Insight
 		{
 			std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 			std::vector<VkDescriptorSetLayoutBinding > shaderDescriptorLayouts;
+			std::vector<VkPushConstantRange> pushContants;
 
 			std::vector<ShaderModuleBase> modules;
 			for (auto it = data.ModuleNames.begin(); it != data.ModuleNames.end(); ++it)
@@ -63,6 +64,13 @@ namespace Insight
 				{
 					shaderDescriptorLayouts.push_back(*it);
 				}
+
+				auto pushContantsFromModule = (*it).GetPushContants();
+				for (auto it = pushContantsFromModule.begin(); it != pushContantsFromModule.end(); ++it)
+				{
+					pushContants.push_back(*it);
+				}
+
 				shaderStages.push_back(info);
 			}
 
@@ -94,7 +102,7 @@ namespace Insight
 			ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->GetDevice(), &descriptorLayoutInfo, nullptr, &m_descSetLayout));
 
 			std::vector<VkDescriptorSetLayout> layouts = { m_descSetLayout };
-			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VulkanInits::PipelineLayoutInfo(layouts);
+			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = VulkanInits::PipelineLayoutInfo(layouts, pushContants);
 			ThrowIfFailed(vkCreatePipelineLayout(m_device->GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout));
 
 			VkGraphicsPipelineCreateInfo graphicsInfo = VulkanInits::GraphicsPipelineInfo(&shaderStages, &vertexCreateInfo, &inputAssembly, &viewportInfo,

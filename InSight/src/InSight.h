@@ -2,6 +2,7 @@
 
 // For use by apps only not InSight
 
+#include "Insight/Core.h"
 #include "InSight/Application.h"
 #include "InSight/Log.h"
 #include "Insight/Time/Stopwatch.h"

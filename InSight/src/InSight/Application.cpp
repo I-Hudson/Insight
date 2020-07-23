@@ -45,7 +45,7 @@ namespace Insight
 		m_moduleManager->AddModule<Module::EntityModule>();
 
 		m_mainCamera = std::make_unique<Camera>();
-		m_mainCamera->SetProjMatrix(glm::radians(90.0f), CameraAspect::A_16x9, 0.1f, 1000.0f);
+		m_mainCamera->SetProjMatrix(45.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 		m_graphicsModule->SetMainCamera(m_mainCamera.get());

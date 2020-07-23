@@ -5,6 +5,8 @@
 #include "Input/Input.h"
 #include "InSight/Log.h"
 
+#include "Insight/Module/WindowModule.h"
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <../vendor/glm/glm/gtx/string_cast.hpp>
@@ -12,7 +14,8 @@
 namespace Insight
 {
 	Camera::Camera()
-		: m_viewMatrix(glm::mat4(1.0f)), m_projectionMatrix(glm::mat4(1.0f))
+		: m_viewMatrix(glm::mat4(1.0f))
+		, m_projectionMatrix(glm::mat4(1.0f))
 	{
 	}
 
@@ -26,15 +29,9 @@ namespace Insight
 		SetProjectionViewMatrix();
 	}
 
-	void Camera::SetProjMatrix(const glm::mat4& a_value)
-	{
-		m_projectionMatrix = a_value;
-		SetProjectionViewMatrix();
-	}
-
 	void Camera::SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far)
 	{
-		m_projectionMatrix = glm::perspective(a_fov, GetCamerAspect(a_aspect), a_near, a_far);
+		m_projectionMatrix = glm::perspective(glm::radians(45.0f), GetCamerAspect(a_aspect), a_near, a_far);
 		SetProjectionViewMatrix();
 	}
 
@@ -70,17 +67,16 @@ namespace Insight
 		{
 			vTranslation -= vRight * frameSpeed;
 		}
-		if (Input::KeyDown('q'))
+		if (Input::KeyDown('Q'))
 		{
 			vTranslation += vUp * frameSpeed;
 		}
-		if (Input::KeyDown('e'))
+		if (Input::KeyDown('E'))
 		{
 			vTranslation -= vUp * frameSpeed;
 		}
 
 		m_viewMatrix[3] = vTranslation;
-		vTranslation[3] = 1.0f;
 
 		// check for camera rotation
 		static bool sbMouseButtonDown = false;
@@ -157,6 +153,8 @@ namespace Insight
 		{
 		case CameraAspect::A_4x3: return 4.0f / 3.0f;
 		case CameraAspect::A_16x9: return 16.0f / 9.0f;
+		case CameraAspect::CurrentWindowSize: return (float)Insight::Module::WindowModule::GetWindow()->GetWidth() /
+														(float)Insight::Module::WindowModule::GetWindow()->GetHeight();
 
 		default: return 1.0f;
 		}

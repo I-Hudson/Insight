@@ -17,7 +17,7 @@ namespace Insight
 			"int", "float",
 			"vec2", "vec3", "vec4",
 			"mat2", "mat3", "mat4",
-			"sampler2D"
+			"sampler2D", "push_constant"
 		};
 
 		bool ShaderParser::m_recordUniform = false;
@@ -134,10 +134,12 @@ namespace Insight
 					break;
 				}
 			}
-			uniformBlock.Binding = std::stoi(returnValue);
 
-			uniformBlock.Type = GetType(line);;
-
+			if (!returnValue.empty())
+			{
+				uniformBlock.Binding = std::stoi(returnValue);
+			}
+			uniformBlock.Type = GetType(line);
 			uniformBlock.Name = GetName(line, false);
 			data.UniformBlocks.push_back(uniformBlock);
 		}
@@ -211,14 +213,20 @@ namespace Insight
 		std::string ShaderParser::GetName(const std::string& line, const bool& removeLastCharacter)
 		{
 			std::string sValue;
+			bool wordStart = false;
 			for (auto it = line.rbegin(); it != line.rend(); ++it)
 			{
 				if (isspace(*it))
 				{
-					break;
+					if (wordStart)
+					{
+						break;
+					}
+					continue;
 				}
 				else
 				{
+					wordStart = true;
 					sValue += *it;
 				}
 			}

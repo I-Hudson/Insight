@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Module/Module.h"
+#include "Insight/Templates/TSingleton.h"
 #include "Insight/Config/CVar.h"
 
 struct GLFWwindow;

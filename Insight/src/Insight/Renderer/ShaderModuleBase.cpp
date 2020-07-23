@@ -94,7 +94,7 @@ namespace Insight
 		{
 			switch (type)
 			{
-				case Insight::Render::ShaderAttributeType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			case Insight::Render::ShaderAttributeType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 				default: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			}
 		}
@@ -104,6 +104,11 @@ namespace Insight
 			std::vector<VkDescriptorSetLayoutBinding> createInfos{};
 			for (auto it = m_shaderData.UniformBlocks.begin(); it != m_shaderData.UniformBlocks.end(); ++it)
 			{
+				if ((*it).Type == ShaderAttributeType::Push_Constant)
+				{
+					continue;
+				}
+
 				auto desc = VulkanInits::DescriptorSetLayoutBinding();
 				desc.binding = (*it).Binding;
 				desc.descriptorType = GetShaderDescriptorType((*it).Type);;
@@ -147,6 +152,21 @@ namespace Insight
 			}
 
 			return attributes;
+		}
+
+		std::vector<VkPushConstantRange> ShaderModuleBase::GetPushContants()
+		{
+			std::vector<VkPushConstantRange> createInfos{};
+			for (auto it = m_shaderData.UniformBlocks.begin(); it != m_shaderData.UniformBlocks.end(); ++it)
+			{
+				if ((*it).Type == ShaderAttributeType::Push_Constant)
+				{
+					auto pushContant = VulkanInits::PushConstantRange(GetShaderStageBit(), (*it).Size, 0);
+					createInfos.push_back(pushContant);
+				}
+			}
+
+			return createInfos;
 		}
 
 		VkFormat ShaderModuleBase::GetVertexFormat(const ShaderAttributeType& type)
@@ -236,8 +256,6 @@ namespace Insight
 		{
 			return ComplieToRaw(filePath, GetShaderStage(GetSuffix(filePath)), GetSource(filePath));
 		}
-
-#elif defined(IS_OPENGL)
 #endif
 
 		ShaderType ShaderModuleBase::GetShaderType() const

@@ -27,7 +27,7 @@ namespace Insight
 			ShaderData data
 			{
 				m_swapchainSettings.Device,
-				{"swapchain_shader.vert", "swapchain_shader.frag"},
+				{"vulkan/swapchain_shader.vert", "vulkan/swapchain_shader.frag"},
 				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
@@ -47,9 +47,9 @@ namespace Insight
 			std::vector<Vertex> vertices =
 			{
 				{{-1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
-				{{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 0.0f,}},
+				{{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f,}},
 				{{1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 1.0f,}},
-				{{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 1.0f,}},
+				{{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 0.0f,}},
 			};
 
 			std::vector<unsigned int> indices =
@@ -156,7 +156,7 @@ namespace Insight
 			uint32_t prevIndex = m_imageIndex;
 			VkResult result = vkAcquireNextImageKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, U64_MAX, 
 													m_swapchainFramebuffers[m_currentFrame]->GetAvailbleSem()->GetSemaphore(),
-								  VK_NULL_HANDLE, &m_imageIndex);
+													VK_NULL_HANDLE, &m_imageIndex);
 
 			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
 			{

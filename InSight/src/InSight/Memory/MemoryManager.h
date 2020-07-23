@@ -34,7 +34,7 @@ namespace Insight
 			template <typename T>
 			static void DeleteArrOnFreeList(Size length, T* ptrToDelete);
 
-			static void TrackObject(void* ptr);
+			static void TrackObject(void* ptr, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
 
 			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
@@ -43,8 +43,15 @@ namespace Insight
 
 		private:
 
+			struct TrackingObjectRecord
+			{
+				void* Ptr;
+				std::string File;
+				unsigned int Line;
+			};
+
 			static MemoryManager* s_instance;
-			std::set<void*> m_trackingObjects;
+			std::unordered_map<void*, TrackingObjectRecord> m_trackingObjects;
 			StackAllocator m_stackAllocator;
 			FreeListAllocator m_freeListAllocator;
 		};

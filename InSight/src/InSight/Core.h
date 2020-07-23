@@ -23,6 +23,9 @@
 #define DELETE_ON_HEAP(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
 #define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
 
+#define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, __FILE__, __LINE__);
+#define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
+
 #define BIT(x) (1 << x)
 
 #ifdef IS_BUILD_DLL

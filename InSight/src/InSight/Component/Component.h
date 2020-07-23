@@ -24,6 +24,7 @@ public:
 	{ }
 	virtual ~Component() {}
 
+	const Entity* GetEntity() const { return m_owner; }
 
 private:
 	Entity* m_owner;

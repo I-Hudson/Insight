@@ -11,6 +11,7 @@ public:
 	TransformComponent(Entity* owner);
 	virtual ~TransformComponent() override;
 
+	const glm::mat4& GetTransform() const;
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 

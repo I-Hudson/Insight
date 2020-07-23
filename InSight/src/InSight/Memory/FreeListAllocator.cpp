@@ -97,7 +97,6 @@ namespace Insight
 			IS_CORE_INFO("\t@H {0} \tD@ {1} \tS {2} \tAP {3} \tP {4}, \tU {5} \tR {6}", (void*)headerAddress, (void*)dataAddress, ((FreeListAllocator::AllocHeader*) headerAddress)->BlockSize,
 				alignmentPadding, padding, m_sizeUsed, rest);
 #endif
-
 			return (void*)dataAddress;
 		}
 

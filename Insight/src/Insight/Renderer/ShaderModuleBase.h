@@ -27,7 +27,8 @@ namespace Insight
 			Mat3,
 			Mat4,
 
-			Sampler2D
+			Sampler2D,
+			Push_Constant
 		};
 
 		enum ShaderType
@@ -115,6 +116,7 @@ namespace Insight
 			std::vector<VkDescriptorSetLayoutBinding> GetPipelineLayoutCreateInfo();
 			std::vector<VkVertexInputBindingDescription> GetVertexBindingDesc();
 			std::vector<VkVertexInputAttributeDescription> GetAttributes();
+			std::vector<VkPushConstantRange> GetPushContants();
 #endif
 
 		private:

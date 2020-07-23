@@ -33,6 +33,16 @@ bool Input::KeyHeld(char keycode)
 	return KeyHeld((int)keycode);
 }
 
+bool Input::MouseButtonDown(int keycode)
+{
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonPressed & 1;
+}
+
+bool Input::MouseButtonUp(int keycode)
+{
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonReleased & 1;
+}
+
 void Input::GetMousePosition(double* mouseX, double* mouseY)
 {
 	*mouseX = InputModule::m_mouseX;

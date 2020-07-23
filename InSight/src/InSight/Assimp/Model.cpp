@@ -27,7 +27,7 @@ Mesh* Model::GetSubMesh(int index)
 void Model::LoadMesh(const std::string& filePath)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs| aiProcess_GenNormals);
+	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{

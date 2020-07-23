@@ -88,7 +88,7 @@ namespace Insight
 			SetUniforms();
 		}
 
-		const Shader* VulkanMaterial::GetShader()
+		Shader* VulkanMaterial::GetShader()
 		{
 			return m_shader;
 		}
@@ -109,29 +109,27 @@ namespace Insight
 		}
 
 		MVPUniformBuffer m_mvp;
-		static int temp = 0;
 		void VulkanMaterial::UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model)
 		{
 			UniformData data;
 
 			if (m_uniformData.find("MVP") == m_uniformData.end())
 			{
-				data.Size = sizeof(m_mvp);
+				data.Size = sizeof(MVPUniformBuffer);
 				data.Binding = 0;
-				MapNewBufferMem(data);
+				CreateUniformBufferMem(data);
 				m_uniformData["MVP"] = data;
 			}
 			data = m_uniformData["MVP"];
 
 			m_mvp.u_model = model;
-
-			m_mvp.u_model = model;
-			m_mvp.u_view = view;//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-			m_mvp.u_proj = proj;//glm::perspective(glm::radians(45.0f),
-				//(float)s_Renderer->m_windowModule->GetWindow()->GetWidth() / (float)s_Renderer->m_windowModule->GetWindow()->GetHeight(), 0.1f, 10.0f);
+			m_mvp.u_view = view;
+			m_mvp.u_proj = proj;
 			m_mvp.u_proj[1][1] *= -1;
 
-			memcpy(data.Data, &m_mvp, sizeof(m_mvp));
+			MapBufferMem(data);
+			memcpy(data.Data, &m_mvp, sizeof(MVPUniformBuffer));
+			UnMapBufferMem(data);
 		}
 
 		void VulkanMaterial::UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding)
@@ -142,12 +140,14 @@ namespace Insight
 			{
 				data.Size = size;
 				data.Binding = binding;
-				MapNewBufferMem(data);
+				CreateUniformBufferMem(data);
 				m_uniformData[key] = data;
 			}
 			data = m_uniformData[key];
 
+			MapBufferMem(data);
 			memcpy(data.Data, uniformData, data.Size);
+			UnMapBufferMem(data);
 		}
 
 		void VulkanMaterial::UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding)
@@ -180,12 +180,20 @@ namespace Insight
 			}
 		}
 
-		void VulkanMaterial::MapNewBufferMem(UniformData& uniformData)
+		void VulkanMaterial::CreateUniformBufferMem(UniformData& uniformData)
 		{
 			CreateBufferMat(s_Renderer->GetDeviceWrapper(), uniformData.Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformData.Buffer, uniformData.BufferMem);
+		}
 
+		void VulkanMaterial::MapBufferMem(UniformData& uniformData)
+		{
 			vkMapMemory(s_Renderer->GetDevice(), uniformData.BufferMem, 0, uniformData.Size, 0, &uniformData.Data);
+		}
+
+		void VulkanMaterial::UnMapBufferMem(UniformData& uniformData)
+		{
+			vkUnmapMemory(s_Renderer->GetDevice(), uniformData.BufferMem);
 		}
 	}
 }

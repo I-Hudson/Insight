@@ -13,38 +13,38 @@ namespace Insight
 		VulkanFramebuffer::VulkanFramebuffer(Device* device, const int& width, const int& height)
 			: m_device(device), m_extent(VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) })
 		{
-			m_imageAvailableSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
-			m_imageFinishedSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
+			m_imageAvailableSem = NEW_ON_HEAP(Semaphore, m_device);
+			m_imageFinishedSem = NEW_ON_HEAP(Semaphore, m_device);
 
-			m_fence = Memory::MemoryManager::NewOnFreeList<Fence>(m_device);
+			m_fence = NEW_ON_HEAP(Fence, m_device);
 		}
 
 		VulkanFramebuffer::VulkanFramebuffer(Device* device, VkExtent2D extent)
 			: m_device(device), m_extent(extent)
 		{
-			m_imageAvailableSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
-			m_imageFinishedSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
+			m_imageAvailableSem = NEW_ON_HEAP(Semaphore, m_device);
+			m_imageFinishedSem = NEW_ON_HEAP(Semaphore, m_device);
 
-			m_fence = Memory::MemoryManager::NewOnFreeList<Fence>(m_device);
+			m_fence = NEW_ON_HEAP(Fence, m_device);
 		}
 
 		VulkanFramebuffer::VulkanFramebuffer(Device* device, VkImage* image, VkFormat format, VkExtent2D extent)
 			: m_device(device), m_extent(extent)
 		{
-			m_imageAvailableSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
-			m_imageFinishedSem = Memory::MemoryManager::NewOnFreeList<Semaphore>(m_device);
+			m_imageAvailableSem = NEW_ON_HEAP(Semaphore, m_device);
+			m_imageFinishedSem = NEW_ON_HEAP(Semaphore, m_device);
 
-			m_fence = Memory::MemoryManager::NewOnFreeList<Fence>(m_device);
+			m_fence = NEW_ON_HEAP(Fence, m_device);
 		}
 
 		VulkanFramebuffer::~VulkanFramebuffer()
 		{
-			Memory::MemoryManager::DeleteOnFreeList(m_fence);
+			DELETE_ON_HEAP(m_fence);
 
-			Memory::MemoryManager::DeleteOnFreeList(m_imageAvailableSem);
-			Memory::MemoryManager::DeleteOnFreeList(m_imageFinishedSem);
+			DELETE_ON_HEAP(m_imageAvailableSem);
+			DELETE_ON_HEAP(m_imageFinishedSem);
 
-			Memory::MemoryManager::DeleteOnFreeList(m_renderpass);
+			DELETE_ON_HEAP(m_renderpass);
 
 			vkDestroyFramebuffer(m_device->GetDevice(), m_frameBuffer, nullptr);
 
@@ -58,6 +58,7 @@ namespace Insight
 				}
 			}
 			vkDestroySampler(m_device->GetDevice(), m_sampler, nullptr);
+			//UNTRACK_OBJECT(m_sampler);
 		}
 
 		void VulkanFramebuffer::CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout)
@@ -91,11 +92,11 @@ namespace Insight
 				CreateImage(*it);
 				CreateMemory(*it);
 				CreateImageView(*it);
-				CreateSampler();
 
 				views.push_back((*it).View);
 			}
 
+			CreateSampler();
 			m_renderpass = Memory::MemoryManager::NewOnFreeList<Renderpass>(m_device, m_attachments);
 
 			VkFramebufferCreateInfo framebufferCreateInfo = VulkanInits::FramebufferInfo(m_renderpass->GetRenderpass(), views, m_extent.width, m_extent.height);
@@ -157,6 +158,7 @@ namespace Insight
 			}
 
 			vkDestroySampler(m_device->GetDevice(), m_sampler, nullptr);
+			UNTRACK_OBJECT(m_sampler);
 
 			m_extent = VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
@@ -166,11 +168,11 @@ namespace Insight
 				CreateImage(*it);
 				CreateMemory(*it);
 				CreateImageView(*it);
-				CreateSampler();
 
 				views.push_back((*it).View);
 			}
 
+			CreateSampler();
 			m_renderpass->Recreate(m_attachments);
 
 			VkFramebufferCreateInfo framebufferCreateInfo = VulkanInits::FramebufferInfo(m_renderpass->GetRenderpass(), views, m_extent.width, m_extent.height);
@@ -230,6 +232,7 @@ namespace Insight
 			sampler.maxLod = 1.0f;
 			sampler.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
 			ThrowIfFailed(vkCreateSampler(m_device->GetDevice(), &sampler, nullptr, &m_sampler));
+			TRACK_OBJECT(m_sampler);
 		}
 	}
 }

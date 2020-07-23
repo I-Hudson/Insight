@@ -10,6 +10,11 @@ TransformComponent::~TransformComponent()
 {
 }
 
+const glm::mat4& TransformComponent::GetTransform() const
+{
+	return m_transform;
+}
+
 const glm::vec3 TransformComponent::GetPostion()
 {
 	return m_transform[3].xyz();

@@ -6,11 +6,9 @@ namespace Insight
     class TSingleton
     {
     public:
-        virtual ~T() { }
-
         static T& Instance()
         {
-            T instnace;
+            static T instnace;
             return instnace;
         }
     };

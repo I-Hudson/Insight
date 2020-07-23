@@ -10,7 +10,9 @@ namespace Insight
 	enum CameraAspect
 	{
 		A_4x3,
-		A_16x9
+		A_16x9,
+
+		CurrentWindowSize
 	};
 
 	///
@@ -25,7 +27,6 @@ namespace Insight
 		//Set the view matrix for the camera
 		void SetViewMatrix(const glm::mat4& a_value);
 		//Set the projection matrix for the camera
-		void SetProjMatrix(const glm::mat4& a_value);
 		void SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far);
 
 		//Set the position for the camera

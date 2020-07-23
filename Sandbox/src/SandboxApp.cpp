@@ -12,9 +12,9 @@ public:
 
 	Sandbox() : Insight::Application()
 	{
-		testModel = Insight::Memory::MemoryManager::NewOnFreeList<Model>("./models/Survival_BackPack_2/Survival_BackPack_2.fbx");
+		testModel = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
 
-		e = Insight::Memory::MemoryManager::NewOnFreeList<Entity>();
+		e = NEW_ON_HEAP(Entity);
 		tc = e->AddComponent<TransformComponent>();
 		e->AddComponent<MeshComponent>();
 		e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));

@@ -50,7 +50,7 @@ namespace Insight
 			virtual ~VulkanMaterial() override;
 
 			virtual void SetShader(Shader* shader) override;
-			virtual const Shader* GetShader() override;
+			virtual Shader* GetShader() override;
 			virtual void SetUniforms() override;
 			virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
 			virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
@@ -60,7 +60,9 @@ namespace Insight
 
 		private:
 			void DestroyUniformBuffers();
-			void MapNewBufferMem(UniformData& uniformData);
+			void CreateUniformBufferMem(UniformData& uniformData);
+			void MapBufferMem(UniformData& uniformData);
+			void UnMapBufferMem(UniformData& uniformData);
 
 		private:
 			VulkanShader* m_shader;
