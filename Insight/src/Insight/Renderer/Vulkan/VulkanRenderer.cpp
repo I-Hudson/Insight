@@ -190,6 +190,7 @@ namespace Insight
 
 			m_framebuffer->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 			m_shader->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
+			m_material->Resize();
 		}
 
 		bool VulkanRenderer::CheckDeviceExtensionSupport(VkPhysicalDevice device)

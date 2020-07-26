@@ -56,8 +56,8 @@ namespace Insight
 
 			enum MemoryType { B, KB, MB, GB, TB };
 
+			MemoryType StringToMemoryType(const std::string& string);
 			Size GetConfigMemorySize(const Size& size, const std::string& type);
-			void ClearTypeInfoCache();
 
 			struct TrackingObjectRecord
 			{

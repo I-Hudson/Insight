@@ -14,7 +14,7 @@ Model::~Model()
 {
 	for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
 	{
-		Insight::Memory::MemoryManager::DeleteOnFreeList(*it);
+		DELETE_ON_HEAP(*it);
 	}
 }
 
@@ -124,7 +124,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return Insight::Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, textures);
+	return NEW_ON_HEAP(Mesh, vertices, indices, textures);
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

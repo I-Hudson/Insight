@@ -27,6 +27,7 @@ namespace Insight
 		Application();
 		virtual ~Application();
 
+		virtual void Create() = 0;
 		virtual void Update(const float deltaTime) = 0;
 		virtual void Draw() = 0;
 
@@ -41,7 +42,7 @@ namespace Insight
 		Module::GraphicsModule* m_graphicsModule;
 		Module::InputModule* m_inputModule;
 
-		std::unique_ptr<Camera> m_mainCamera;
+		UniquePtr<Camera> m_mainCamera;
 	};
 
 	Application* CreateApplication();

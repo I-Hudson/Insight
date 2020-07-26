@@ -34,6 +34,7 @@ namespace Insight
 		{
 			vkDestroyPipeline(m_device->GetDevice(), m_pipeline, nullptr);
 			vkDestroyPipelineLayout(m_device->GetDevice(), m_pipelineLayout, nullptr);
+			vkDestroyDescriptorSetLayout(m_device->GetDevice(), m_descSetLayout, nullptr);
 
 			m_shaderData.Extent = VkExtent2D{ static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 

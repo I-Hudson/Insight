@@ -12,25 +12,34 @@ Entity::Entity()
 	: Insight::UUID()
 {
 	m_data.Name = "Default";
-	EntityModule::m_entities.push_back(this);
 }
 
 Entity::Entity(const std::string& id)
 	: Insight::UUID()
 {
 	m_data.Name = id;
-	EntityModule::m_entities.push_back(this);
 }
 
 Entity::~Entity()
 {
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
-		Insight::Memory::MemoryManager::DeleteOnFreeList(*it);
+		DELETE_ON_HEAP(*it);
 	}
 	m_data.Components.clear();
+}
 
-	EntityModule::m_entities.erase(std::find(EntityModule::m_entities.begin(), EntityModule::m_entities.end(), this));
+Entity* Entity::Create(const std::string& id)
+{
+	return EntityModule::GetInstance()->Create(id);
+}
+
+void Entity::Delete()
+{
+	if (this != nullptr)
+	{
+		EntityModule::GetInstance()->Delete(this);
+	}
 }
 
 void Entity::SetID(const std::string& id)
@@ -41,6 +50,13 @@ void Entity::SetID(const std::string& id)
 const std::string& Entity::GetID() const
 {
 	return m_data.Name;
+}
+
+Entity* Entity::AddChild(const std::string& childId)
+{
+	Entity* e = EntityModule::GetInstance()->Create(childId);
+	AddChild(e);
+	return e;
 }
 
 void Entity::AddChild(Entity* child)

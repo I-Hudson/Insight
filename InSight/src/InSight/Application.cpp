@@ -44,7 +44,7 @@ namespace Insight
 		
 		m_moduleManager->AddModule<Module::EntityModule>();
 		
-		m_mainCamera = std::make_unique<Camera>();
+		m_mainCamera = CreateUniquePtr<Camera>();
 		m_mainCamera->SetProjMatrix(90.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		
@@ -56,13 +56,18 @@ namespace Insight
 		Module::ModuleManager::Destroy();
 
 		Memory::MemoryManager::DestroyWithoutMemoryManager();
+
+		while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
+		{
+			free(entry);
+		}
 	}
 	
-	void AlloBench()
+	void AllcoBench()
 	{
 		const Size size = 512_KB;
 		int* ints;
-		constexpr int loopCount = 100;
+		constexpr int loopCount = 1000;
 
 		Stopwatch s;
 		s.Start();
@@ -105,11 +110,40 @@ namespace Insight
 		std::cout << "Mil: {0}" << sNewDelete.Mill() << '\n';
 		std::cout << "Nan: {0}" << sNewDelete.Nano() << '\n';
 		std::cout << "New/Delete-----------------\n";
+
+		Stopwatch sFreeSingle;
+		sFreeSingle.Start();
+		for (size_t i = 0; i < loopCount; ++i)
+		{
+			int* in = NEW_ON_HEAP(int);
+			DELETE_ON_HEAP(in);
+		}
+		sFreeSingle.End();
+		std::cout << "New/Delete-----------------\n";
+		std::cout << "Sec: {0}" << sFreeSingle.Sec() << '\n';
+		std::cout << "Mil: {0}" << sFreeSingle.Mill() << '\n';
+		std::cout << "Nan: {0}" << sFreeSingle.Nano() << '\n';
+		std::cout << "New/Delete-----------------\n";
+
+		Stopwatch sNewDeleteSingle;
+		sNewDeleteSingle.Start();
+		for (size_t i = 0; i < loopCount; ++i)
+		{
+			int* in = new int;
+			delete in;
+		}
+		sNewDeleteSingle.End();
+		std::cout << "New/Delete-----------------\n";
+		std::cout << "Sec: {0}" << sNewDeleteSingle.Sec() << '\n';
+		std::cout << "Mil: {0}" << sNewDeleteSingle.Mill() << '\n';
+		std::cout << "Nan: {0}" << sNewDeleteSingle.Nano() << '\n';
+		std::cout << "New/Delete-----------------\n";
 	}
 
 	void Application::Run()
 	{
-		//AlloBench();
+		//AllcoBench();
+		Create();
 
 		bool isRunning = false;
 

@@ -7,7 +7,6 @@ layout(location = 2) in vec4 inNormal;
 layout(location = 3) in vec2 InUV1;
 
 layout(location = 0) out vec3 fragColor;
-
 layout(set = 0, binding = 0) uniform MVPUniformBuffer
 {
     mat4 u_model;
@@ -17,5 +16,5 @@ layout(set = 0, binding = 0) uniform MVPUniformBuffer
 
 void main() {
     gl_Position = mvp.u_proj * inverse(mvp.u_view) * mvp.u_model * vec4(inPosition.xyz, 1.0);
-    fragColor = (mvp.u_model * vec4(inPosition.xyz, 1.0)).xyz;
+    fragColor =  inColor.xyz;
 }

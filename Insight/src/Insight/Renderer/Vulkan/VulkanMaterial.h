@@ -56,6 +56,7 @@ namespace Insight
 			virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
 			virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) override;
 
+			void Resize();
 			void Bind(CommandBuffer* commandBuffers);
 
 		private:

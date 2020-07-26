@@ -75,12 +75,12 @@ namespace Insight
 		template<typename T, typename ...Args>
 		inline T* FreeListAllocator::New(Args... args)
 		{
-#if _DEBUG
+#ifdef IS_DEBUG
 			m_numOfNews++;
 			m_monitorPureAlloc = false;
 			T* ret = new (Alloc(sizeof(T), MemoryUtlis::Alignment)) T(args...);
 			m_monitorPureAlloc = true;
-			std::string name = typeid(T).name();
+			std::string name = std::string(typeid(T).name());
 			U64 vPointer = *reinterpret_cast<U64*>(ret);
 			m_vtableToNameMap.insert({ vPointer, name });
 
@@ -93,7 +93,7 @@ namespace Insight
 		template<typename T>
 		inline void FreeListAllocator::Delete(T* ptr)
 		{
-#if _DEBUG
+#ifdef IS_DEBUG
 			m_numOfDeletes++;
 
 			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it) 
@@ -120,13 +120,13 @@ namespace Insight
 		template<typename T>
 		inline T* FreeListAllocator::NewArr(const Size length, Byte alignment)
 		{
-#if _DEBUG
+#ifdef IS_DEBUG
 			m_monitorPureAlloc = false;
 			void* alloc = Alloc(sizeof(T) * length, alignment);
 			m_monitorPureAlloc = true;
 
 			m_numOfArrNews++;
-			std::string name = typeid(T).name();
+			std::string name = std::string(typeid(T).name());
 			if (std::is_base_of<class Component, T>::value) 
 			{
 				U64 vPointer = *reinterpret_cast<U64*>(alloc);
@@ -148,7 +148,7 @@ namespace Insight
 		template<typename T>
 		inline void FreeListAllocator::DeleteArr(const Size length, T* ptrToDelete)
 		{
-#if _DEBUG
+#ifdef IS_DEBUG
 			m_numOfArrDeletes++;
 			std::string name;
 

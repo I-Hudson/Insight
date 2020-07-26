@@ -8,6 +8,6 @@ window_icon=InsightProfile.png
 stack_alloc_amount=512
 stack_alloc_type=KB
 free_list_alloc_amount=512
-free_list_alloc_type=KB
+free_list_alloc_type=MB
 placement_policy=0
 smart_pointers=true

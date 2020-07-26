@@ -12,9 +12,8 @@ int main(int argc, char** argv)
 {
 	{
 		Insight::Log::Init();
-
 		auto app = Insight::CreateApplication();
-		//app->Run();
+		app->Run();
 		delete app;
 	}
 

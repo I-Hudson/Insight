@@ -26,8 +26,8 @@ namespace Insight
 
 			virtual void Bind(void* context) override;
 			virtual void Resize(int width, int height) override;
-
 			virtual const ShaderData& GetData() const override { return m_shaderData; }
+			
 			VkDescriptorSetLayout GetDescLayout() { return m_descSetLayout; }
 			VkPipelineLayout GetPipelineLayout() { return m_pipelineLayout; }
 

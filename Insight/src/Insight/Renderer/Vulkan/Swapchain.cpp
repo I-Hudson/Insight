@@ -341,18 +341,10 @@ namespace Insight
 			vkDestroySwapchainKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, nullptr);
 			CreateSwapChain();
 
-			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
-			ShaderData data
+			m_swapchainShader->Resize(m_swapchainSettings.Window->GetWidth(), m_swapchainSettings.Window->GetHeight());
+			for (size_t i = 0; i < m_materials.size(); ++i)
 			{
-				m_swapchainSettings.Device,
-				{"shader.vert", "shader.frag"},
-				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
-				m_swapchainFramebuffers[0]->GetRenderpass()
-			};
-			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<VulkanShader>(data);
-			for (auto it = m_materials.begin(); it != m_materials.end(); ++it)
-			{
-				(*it)->SetShader(m_swapchainShader);
+				m_materials[i]->Resize();
 			}
 		}
 	}

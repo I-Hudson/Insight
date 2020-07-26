@@ -95,6 +95,11 @@ public:
 
 	}
 
+	virtual void Create() override
+	{
+
+	}
+
 	virtual void Update(const float deltaTime) override
 	{
 

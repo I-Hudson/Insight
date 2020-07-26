@@ -11,20 +11,23 @@ public:
 	Model* testModel = nullptr;
 
 	Sandbox() : Insight::Application()
+	{ }
+
+	virtual void Create() override
 	{
 		testModel = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
+
+		e = Entity::Create();
+		tc = e->AddComponent<TransformComponent>();
+		e->AddComponent<MeshComponent>();
+		e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
 		
-		e = NEW_ON_HEAP(Entity);
-		//tc = e->AddComponent<TransformComponent>();
-		//e->AddComponent<MeshComponent>();
-		//e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
-		//
-		//for (UINT i = 1; i < testModel->GetSubMeshCount(); i++)
-		//{
-		//	e->AddChild(Insight::Memory::MemoryManager::NewOnFreeList<Entity>(std::to_string(i)));
-		//	auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
-		//	mesh->SetMesh(testModel->GetSubMesh(i));
-		//}	
+		for (UINT i = 1; i < testModel->GetSubMeshCount(); i++)
+		{
+			e->AddChild(std::to_string(i));
+			auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
+			mesh->SetMesh(testModel->GetSubMesh(i));
+		}
 	}
 
 	virtual void Update(const float deltaTime) override
@@ -58,7 +61,7 @@ public:
 	~Sandbox()
 	{
 		DELETE_ON_HEAP(testModel);
-		//DELETE_ON_HEAP(e)
+		e->Delete();
 	}
 };
 

@@ -43,19 +43,41 @@ namespace Insight
 			}
 		}
 
-		Size MemoryManager::GetConfigMemorySize(const Size& size, const std::string& type)
+		MemoryManager::MemoryType MemoryManager::StringToMemoryType(const std::string& string)
 		{
-			const unsigned int KBSize = 1024;
-
-
-			return size * pow(KBSize, 1);
+			if (string == "B")
+			{
+				return MemoryType::B;
+			}
+			else if (string == "KB")
+			{
+				return MemoryType::KB;
+			}
+			else if (string == "MB")
+			{
+				return MemoryType::MB;
+			}
+			else if (string == "GB")
+			{
+				return MemoryType::GB;
+			}
+			else if (string == "TB")
+			{
+				return MemoryType::TB;
+			}
 		}
 
-		void MemoryManager::ClearTypeInfoCache()
+		Size MemoryManager::GetConfigMemorySize(const Size& size, const std::string& type)
 		{
-			while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
+			MemoryType memoryType = StringToMemoryType(type);
+
+			if (memoryType == MemoryManager::MemoryType::B)
 			{
-				free(entry);
+				return size;
+			}
+			else
+			{
+				return size * pow(1024, (int)memoryType);
 			}
 		}
 
@@ -71,11 +93,9 @@ namespace Insight
 		{
 			for (auto it = m_trackingObjects.begin(); it != m_trackingObjects.end(); ++it)
 			{
-				IS_CORE_ERROR("Tracking object has not been destroyed or untracked. => Ptr: {0}, File: {1}, Line: {2}", 
+				IS_CORE_ERROR("Tracking object has not been destroyed or untracked. => Ptr: {0}, File: {1}, Line: {2}",
 					(*it).second.Ptr, (*it).second.File, (*it).second.Line);
 			}
-
-			ClearTypeInfoCache();
 		}
 	}
 }

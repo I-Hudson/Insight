@@ -43,6 +43,9 @@ public:
 	Entity(const std::string& id);
 	~Entity();
 
+	static Entity* Create(const std::string& id = "");
+	void Delete();
+
 	void SetID(const std::string& id);
 	const std::string& GetID() const;
 
@@ -51,6 +54,7 @@ public:
 	void SetParent(Entity* parent) { m_data.Parent = parent; }
 	const Entity* GetParent() const { return m_data.Parent; }
 
+	Entity* AddChild(const std::string& childId = "");
 	void AddChild(Entity* child);
 	Entity* GetChild(int childIndex);
 	void RemoveChild(Entity* child);

@@ -54,6 +54,12 @@ namespace Insight
             s_instance = instance;
         }
 
+        static void ClearPtr()
+        {
+            IS_CORE_ASSERT(s_instance != nullptr, "[TSingleton::SetInstancePtr] Instance is already null.");
+            s_instance = nullptr;
+        }
+
     private:
         static T* s_instance;
     };

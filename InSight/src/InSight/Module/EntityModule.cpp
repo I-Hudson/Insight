@@ -10,16 +10,38 @@ namespace Insight
 	{
 		std::vector<Entity*> EntityModule::m_entities;
 
+		EntityModule::EntityModule(ModuleStartupData& startupData)
+		{
+			TSingleton::SetInstancePtr(this);
+			m_manuallUpdate = startupData.ManuallUpdate;
+		}
+
 		EntityModule::~EntityModule()
 		{
 			while(m_entities.size() > 0)
 			{
-				Memory::MemoryManager::DeleteOnFreeList(*m_entities.begin());
+				Delete(*m_entities.begin());
 			}
 			m_entities.clear();
+			TSingleton::ClearPtr();
 		}
 
 		void EntityModule::Update(const float& deltaTime)
 		{ }
+
+		Entity* EntityModule::Create(const std::string & id)
+		{
+			Entity* e = NEW_ON_HEAP(Entity, id);
+			m_entities.push_back(e);
+			return e;
+		}
+
+		void EntityModule::Delete(Entity* ptr)
+		{
+			auto it = std::find(m_entities.begin(), m_entities.end(), ptr);
+			DELETE_ON_HEAP((*it));
+
+			m_entities.erase(it);
+		}
 	}
 }

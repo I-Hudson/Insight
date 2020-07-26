@@ -80,7 +80,7 @@ namespace Insight
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_uniformBuffers, m_uniformBuffersMem);
 			}
 
-			m_descPool = Memory::MemoryManager::NewOnFreeList<DescriptorPool>(s_Renderer->GetDeviceWrapper(), metaData,
+			m_descPool = NEW_ON_HEAP(DescriptorPool, s_Renderer->GetDeviceWrapper(), metaData,
 				VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
 			m_updatedDesc = false;
 			m_descPool->FreeDescriptorSets();
@@ -158,6 +158,12 @@ namespace Insight
 			data.Binding = binding;
 
 			m_samplerData[key] = data;
+		}
+
+		void VulkanMaterial::Resize()
+		{
+			m_descPool->FreeDescriptorSets();
+			m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
 		}
 
 		void VulkanMaterial::Bind(CommandBuffer* commandBuffers)
