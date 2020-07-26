@@ -38,8 +38,8 @@ namespace Insight
 
 
 			auto attachments = GetAttachments(fbAttachments);
-			auto cAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-			auto dAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+			auto cAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 0);
+			auto dAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, cAttachmentRefs.size());
 			auto subpass = GetSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS, cAttachmentRefs, dAttachmentRefs);
 			std::vector<VkSubpassDependency> dependecies = { dependency };
 			VkRenderPassCreateInfo renderPassCreateInfo = VulkanInits::RenderPassInfo(attachments, subpass, dependecies);
@@ -69,14 +69,14 @@ namespace Insight
 			return attachs;
 		}
 
-		std::vector<VkAttachmentReference> Renderpass::GetAttachmentReferences(const std::vector<FrameBufferAttachment>& attachments, const VkImageLayout& mask)
+		std::vector<VkAttachmentReference> Renderpass::GetAttachmentReferences(const std::vector<FrameBufferAttachment>& attachments, const VkImageLayout& mask, const int& offset)
 		{
 			std::vector<VkAttachmentReference> attachs{};
 
-			int index = 0;
+			int index = offset;
 			for (auto it = attachments.begin(); it != attachments.end(); ++it)
 			{
-				if ((*it).ImageLayout == mask)
+				if ((*it).ImageLayout == mask || (*it).FinalLayout == mask)
 				{
 					VkAttachmentReference attachmentRef{};
 					attachmentRef.attachment = index++;

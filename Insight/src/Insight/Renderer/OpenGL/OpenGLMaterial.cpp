@@ -25,7 +25,7 @@ namespace Insight
 			
 		}
 
-		const Shader* OpenGLMaterial::GetShader()
+		Shader* OpenGLMaterial::GetShader()
 		{
 			return m_shader;
 		}

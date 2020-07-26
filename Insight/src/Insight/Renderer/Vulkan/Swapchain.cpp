@@ -35,7 +35,7 @@ namespace Insight
 
 			for (int i = 0; i < 3; i++)
 			{
-				Material* mat = Material::Create();
+				VulkanMaterial* mat = static_cast<VulkanMaterial*>(Material::Create());
 				mat->SetShader(m_swapchainShader);
 				m_materials.push_back(mat);
 			}
@@ -189,19 +189,19 @@ namespace Insight
 
 		void Swapchain::Draw(Semaphore* waitSemaphore, VulkanFramebuffer* offscreenFB)
 		{
-			if (offscreenFB != nullptr)
-			{
-				m_materials[m_imageIndex]->UpdateSampler2D("OffScreenTexture", &offscreenFB->GetAttachment(0).View, offscreenFB->GetSampler(), 0);
-			}
-			m_materials[m_imageIndex]->SetUniforms();
-
 			int i = 0;
 			++tempShader;
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
 			{
 				(*it)->StartRecord();
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
-				static_cast<VulkanMaterial*>(m_materials[i])->Bind(*it);
+				m_materials[i]->Bind(*it);
+
+				if (offscreenFB != nullptr)
+				{
+					m_materials[i]->UpdateSampler2D("OffScreenTexture", &offscreenFB->GetAttachment(0).View, offscreenFB->GetSampler(), 0);
+				}
+				m_materials[i]->SetUniforms();
 
 				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
 				VkDeviceSize offsets[] = { 0 };

@@ -13,5 +13,5 @@ typedef Insight::Render::OpenGLMaterial PlatformMaterial;
 
 Material* Material::Create()
 {
-	return Insight::Memory::MemoryManager::NewOnFreeList<PlatformMaterial>();
+	return NEW_ON_HEAP(PlatformMaterial);
 }

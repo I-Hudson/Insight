@@ -58,7 +58,7 @@ namespace Insight
 				}
 			}
 			vkDestroySampler(m_device->GetDevice(), m_sampler, nullptr);
-			//UNTRACK_OBJECT(m_sampler);
+			UNTRACK_OBJECT(m_sampler);
 		}
 
 		void VulkanFramebuffer::CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout)
@@ -78,7 +78,7 @@ namespace Insight
 			}
 			if (attachment.ImageUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
 			{
-				attachment.ImageViewAspect = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+				attachment.ImageViewAspect = VK_IMAGE_ASPECT_DEPTH_BIT;
 			}
 
 			m_attachments.push_back(attachment);
@@ -97,7 +97,7 @@ namespace Insight
 			}
 
 			CreateSampler();
-			m_renderpass = Memory::MemoryManager::NewOnFreeList<Renderpass>(m_device, m_attachments);
+			m_renderpass = NEW_ON_HEAP(Renderpass, m_device, m_attachments);
 
 			VkFramebufferCreateInfo framebufferCreateInfo = VulkanInits::FramebufferInfo(m_renderpass->GetRenderpass(), views, m_extent.width, m_extent.height);
 			ThrowIfFailed(vkCreateFramebuffer(m_device->GetDevice(), &framebufferCreateInfo, nullptr, &m_frameBuffer));
@@ -126,7 +126,18 @@ namespace Insight
 			std::vector<VkClearValue> clearColours;
 			for (auto it = m_attachments.begin(); it != m_attachments.end(); ++it)
 			{
-				clearColours.push_back(VkClearValue{ 0.0f, 0.0f, 0.0f, 0.0f });
+				if ((*it).Format == VK_FORMAT_D32_SFLOAT)
+				{
+					VkClearValue clearValue;
+					clearValue.depthStencil = { static_cast<uint32_t>(1.0f), static_cast<uint32_t>(0.0f) };
+					clearColours.push_back(clearValue);
+				}
+				else
+				{
+					VkClearValue clearValue;
+					clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+					clearColours.push_back(clearValue);
+				}
 			}
 			VkRenderPassBeginInfo renderpassInfo = VulkanInits::RenderPassBeginInfo(m_renderpass->GetRenderpass(), m_frameBuffer, m_extent, clearColours);
 

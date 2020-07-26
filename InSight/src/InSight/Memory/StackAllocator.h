@@ -13,8 +13,8 @@ namespace Insight
 		public:
 			typedef Size Marker;
 
-			StackAllocator() = delete;
-			explicit StackAllocator(Size stackSize);
+			StackAllocator() {}
+			StackAllocator(Size stackSize);
 			~StackAllocator();
 
 			void* Alloc(Size size, Byte alignment = MemoryUtlis::Alignment);

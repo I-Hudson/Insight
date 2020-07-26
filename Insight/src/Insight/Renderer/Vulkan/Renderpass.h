@@ -23,7 +23,7 @@ namespace Insight
 			void Create(const std::vector<FrameBufferAttachment>& fbAttachments);
 
 			std::vector<VkAttachmentDescription> GetAttachments(const std::vector<FrameBufferAttachment>& attachments);
-			std::vector<VkAttachmentReference> GetAttachmentReferences(const std::vector<FrameBufferAttachment>& attachments, const VkImageLayout& mask);
+			std::vector<VkAttachmentReference> GetAttachmentReferences(const std::vector<FrameBufferAttachment>& attachments, const VkImageLayout& mask, const int& offset);
 
 			VkSubpassDescription GetSubpass(const VkPipelineBindPoint& bindPoint, const std::vector<VkAttachmentReference>& colourAttachmentRefs,
 				const std::vector<VkAttachmentReference>& depthAttachmentRefs);

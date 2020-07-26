@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "ConfigRegistry.h"
+#include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Module/GraphicsModule.h"
 
@@ -25,6 +26,7 @@ namespace Insight
 			return instnace;
 		}
 
+		Memory::MemoryManager::MemoryConfig MemoryConfig;
 		Module::WindowModule::WindowConfig WindowConfig;
 		Module::GraphicsModule::GraphicsConfig GraphicsConfig;
 

@@ -19,8 +19,8 @@ namespace Insight
 				FIND_BEST
 			};
 
-			FreeListAllocator() = delete;
-			explicit FreeListAllocator(const Size size, const PlacementPolicy policy);
+			FreeListAllocator() {}
+			FreeListAllocator(const Size size, const PlacementPolicy policy);
 			~FreeListAllocator();
 
 			void* Alloc(const Size size, const Byte alignment);

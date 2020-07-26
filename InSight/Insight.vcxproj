@@ -5,8 +5,16 @@
       <Configuration>Debug_VULKAN</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug_Vulkan_SP|x64">
+      <Configuration>Debug_Vulkan_SP</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug_OPENGL|x64">
       <Configuration>Debug_OPENGL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug_OPENGL_SP|x64">
+      <Configuration>Debug_OPENGL_SP</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
@@ -32,7 +40,19 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Vulkan_SP|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL_SP|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
@@ -56,7 +76,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_VULKAN|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_Vulkan_SP|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL_SP|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -73,9 +99,23 @@
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Vulkan_SP|x64'">
+    <OutDir>..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\</OutDir>
+    <IntDir>..\bin-int\Debug_Vulkan_SP-windows-x86_64\Insight\</IntDir>
+    <TargetName>Insight</TargetName>
+    <TargetExt>.lib</TargetExt>
+    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL|x64'">
     <OutDir>..\bin\Debug_OPENGL-windows-x86_64\Insight\</OutDir>
     <IntDir>..\bin-int\Debug_OPENGL-windows-x86_64\Insight\</IntDir>
+    <TargetName>Insight</TargetName>
+    <TargetExt>.lib</TargetExt>
+    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL_SP|x64'">
+    <OutDir>..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\</OutDir>
+    <IntDir>..\bin-int\Debug_OPENGL_SP-windows-x86_64\Insight\</IntDir>
     <TargetName>Insight</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
@@ -124,6 +164,36 @@
 IF EXIST ..\bin\Debug_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_VULKAN-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_VULKAN-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_Vulkan_SP|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;C:\VulkanSDK\1.1.130.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_Vulkan_SP-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_Vulkan_SP-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_Vulkan_SP-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_Vulkan_SP-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_Vulkan_SP-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_Vulkan_SP-windows-x86_64\UnitTests &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -152,6 +222,36 @@ IF EXIST ..\bin\Debug_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL-windows-x86_64\UnitTests &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_OPENGL_SP|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;C:\VulkanSDK\1.1.130.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_OPENGL_SP-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_OPENGL_SP-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL_SP-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL_SP-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL_SP-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_OPENGL_SP-windows-x86_64\Insight\Insight.lib ..\bin\Debug_OPENGL_SP-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

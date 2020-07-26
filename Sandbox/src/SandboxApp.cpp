@@ -6,25 +6,25 @@ using namespace Insight::Maths;
 class Sandbox : public Insight::Application
 {
 public:
-	Entity* e;
-	TransformComponent* tc;
-	Model* testModel;
+	Entity* e = nullptr;
+	TransformComponent* tc = nullptr;
+	Model* testModel = nullptr;
 
 	Sandbox() : Insight::Application()
 	{
 		testModel = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
-
+		
 		e = NEW_ON_HEAP(Entity);
-		tc = e->AddComponent<TransformComponent>();
-		e->AddComponent<MeshComponent>();
-		e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
-
-		for (UINT i = 1; i < testModel->GetSubMeshCount(); i++)
-		{
-			e->AddChild(Insight::Memory::MemoryManager::NewOnFreeList<Entity>(std::to_string(i)));
-			auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
-			mesh->SetMesh(testModel->GetSubMesh(i));
-		}	
+		//tc = e->AddComponent<TransformComponent>();
+		//e->AddComponent<MeshComponent>();
+		//e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
+		//
+		//for (UINT i = 1; i < testModel->GetSubMeshCount(); i++)
+		//{
+		//	e->AddChild(Insight::Memory::MemoryManager::NewOnFreeList<Entity>(std::to_string(i)));
+		//	auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
+		//	mesh->SetMesh(testModel->GetSubMesh(i));
+		//}	
 	}
 
 	virtual void Update(const float deltaTime) override
@@ -32,29 +32,22 @@ public:
 		double x, y;
 		Input::GetMousePosition(&x, &y);
 
-		if (Input::KeyHeld(KEY_W))
+		if (Input::KeyHeld(KEY_UP))
 		{
-			//tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, 1));
+			tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, 1));
 		}
-		if (Input::KeyHeld(KEY_S))
+		if (Input::KeyHeld(KEY_DOWN))
 		{
-			//tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, -1));
+			tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, -1));
 		}
-		if (Input::KeyHeld(KEY_A))
+		if (Input::KeyHeld(KEY_LEFT))
 		{
-			//tc->SetPosition(tc->GetPostion() + glm::vec3(-1, 0, 1));
+			tc->SetPosition(tc->GetPostion() + glm::vec3(-1, 0, 1));
 		}
-		if (Input::KeyHeld(KEY_D))
+		if (Input::KeyHeld(KEY_RIGHT))
 		{
-			//tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1));
+			tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1));
 		}
-
-
-
-		//IS_CORE_INFO("MouseX: {0}, MouseY: {1}", x, y);
-		//IS_CORE_INFO("{0}", 1.0f / deltaTime);
-		glm::vec3 p = e->GetComponent<TransformComponent>()->GetPostion();
-		//IS_CORE_INFO("Transform {0}", glm::to_string(p));
 	}
 
 	virtual void Draw() override
@@ -64,7 +57,8 @@ public:
 
 	~Sandbox()
 	{
-		Insight::Memory::MemoryManager::DeleteOnFreeList(testModel);
+		DELETE_ON_HEAP(testModel);
+		//DELETE_ON_HEAP(e)
 	}
 };
 

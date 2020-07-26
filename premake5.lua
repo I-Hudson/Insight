@@ -5,7 +5,9 @@ workspace "Insight"
     configurations
     {
         "Debug_VULKAN",
+        "Debug_Vulkan_SP",
         "Debug_OPENGL",
+        "Debug_OPENGL_SP",
         "Release",
         "Dist"
     }
@@ -124,6 +126,14 @@ project "Insight"
         defines { "IS_DEBUG", "IS_OPENGL" }
         symbols "on"
 
+    filter "configurations:Debug_Vulkan_SP"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL_SP"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
+        symbols "on"
+
 
     filter "configurations:Release"
         defines "IS_RELEASE"
@@ -189,6 +199,14 @@ project "Sandbox"
 
     filter "configurations:Debug_OpenGL"
         defines { "IS_DEBUG", "IS_OPENGL" }
+        symbols "on"   
+        
+    filter "configurations:Debug_Vulkan_SP"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL_SP"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
         symbols "on"
 
     filter "configurations:Release"
@@ -252,4 +270,12 @@ project "UnitTests"
 
     filter "configurations:Debug_OpenGL"
         defines { "IS_DEBUG", "IS_OPENGL" }
+        symbols "on"
+
+    filter "configurations:Debug_Vulkan_SP"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
+        symbols "on"
+
+    filter "configurations:Debug_OpenGL_SP"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
         symbols "on"

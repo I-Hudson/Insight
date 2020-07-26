@@ -3,6 +3,8 @@
 
 #ifdef  IS_PLATFORM_WINDOWS
 
+#include "InsightAlias.h"
+
 #ifdef IS_DEBUG
 
 #define IS_TODO(x) IS_TODO_CORE(x, __FILE__, __FUNCTION__, __LINE__)
@@ -17,11 +19,23 @@
 
 #endif // IS_DEBUG
 
+#ifndef IS_SMART_POINTERS_IN_USE
 #define NEW_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
 #define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
 
 #define DELETE_ON_HEAP(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
-#define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
+#define DELETE_ARR_ON_HEAP(ptr, size) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(size, ptr); ptr = nullptr; }
+
+#define NEW_ON_STACK(type, ...) Insight::Memory::MemoryManager::NewOnStack<type>(__VA_ARGS__)
+#define DELETE_ON_STACK(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnStack((uint64_t)ptr); ptr = nullptr; }
+
+#else 
+
+#define NEW_ON_HEAP(type, ...) Insight::CreateSharedPtr<type>(__VA_ARGS__);
+#define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
+
+#endif // SMART_POINTERS_IN_USE
+
 
 #define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, __FILE__, __LINE__);
 #define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);

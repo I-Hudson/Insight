@@ -65,7 +65,7 @@ namespace Insight
 			Mesh* m_fullscreenQuad;
 
 			Shader* m_swapchainShader;
-			std::vector<Material*> m_materials;
+			std::vector<VulkanMaterial*> m_materials;
 			CommandPool* m_drawCommandPool;
 			std::vector<CommandBuffer*> m_drawCommandBuffers;
 			std::vector<Fence*> m_inFlightFences;

@@ -18,7 +18,7 @@ namespace Insight
 				--it;
 				Module* m = it->second;
 				m->~Module();
-				Memory::MemoryManager::DeleteOnStack((Size)m);
+				DELETE_ON_STACK(m);
 			}
 			// No need to call delete as all modules are placed on the stack.
 			m_modules.clear();

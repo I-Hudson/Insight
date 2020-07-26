@@ -95,6 +95,8 @@ namespace Insight
 			}
 			VkPipelineColorBlendStateCreateInfo colourBlendAttachInfo = VulkanInits::PipelineColourBlendInfo(colourBlendAttachStates);
 
+			VkPipelineDepthStencilStateCreateInfo depthSteniclCreateInfo = VulkanInits::PipelineDepthStencilInfo();
+
 			std::vector<VkDynamicState> dynamicStats = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
 			VkPipelineDynamicStateCreateInfo dynamicInfo = VulkanInits::PipelineDynamicState(dynamicStats);
 
@@ -106,7 +108,7 @@ namespace Insight
 			ThrowIfFailed(vkCreatePipelineLayout(m_device->GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout));
 
 			VkGraphicsPipelineCreateInfo graphicsInfo = VulkanInits::GraphicsPipelineInfo(&shaderStages, &vertexCreateInfo, &inputAssembly, &viewportInfo,
-				&rasterizationInfo, &multisampleInfo, nullptr, &colourBlendAttachInfo,
+				&rasterizationInfo, &multisampleInfo, &depthSteniclCreateInfo, &colourBlendAttachInfo,
 				nullptr, m_pipelineLayout,
 				data.Renderpass->GetRenderpass(), 0);
 

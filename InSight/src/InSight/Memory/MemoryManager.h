@@ -2,6 +2,8 @@
 
 #include "Insight/Core.h"
 
+#include "Insight/Config/CVar.h"
+#include "Insight/Templates/TSingleton.h"
 #include "Insight/InsightAlias.h"
 #include "FreeListAllocator.h"
 #include "StackAllocator.h"
@@ -10,12 +12,13 @@ namespace Insight
 {
 	namespace Memory
 	{
-		class IS_API MemoryManager
+		class IS_API MemoryManager : public TSingleton<MemoryManager>
 		{
 		public:
 			MemoryManager();
 			~MemoryManager();
 
+#ifndef IS_SMART_POINTERS_IN_USE
 			template <typename T, typename... Args>
 			static T* NewOnStack(Args&&...);
 
@@ -33,15 +36,28 @@ namespace Insight
 			static T* NewArrOnFreeList(Size length, U8 alignment = MemoryUtlis::Alignment);
 			template <typename T>
 			static void DeleteArrOnFreeList(Size length, T* ptrToDelete);
+#endif
 
 			static void TrackObject(void* ptr, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
 
 			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
 
-			static MemoryManager* GetInstance();
+			struct MemoryConfig
+			{
+				CVar<unsigned int>	StackAllocAmount		{ "stack_alloc_amount", 512 };
+				CVarString			StackAllocType			{ "stack_alloc_type", "KB" };
+				CVar<unsigned int>	FreeListAllocAmount		{ "free_list_alloc_amount", 512 };
+				CVarString			FreeListAllocType		{ "free_list_alloc_type", "KB" };
+				CVar<unsigned int>	PlacementPolicy			{ "placement_policy", 0 };
+			};
 
 		private:
+
+			enum MemoryType { B, KB, MB, GB, TB };
+
+			Size GetConfigMemorySize(const Size& size, const std::string& type);
+			void ClearTypeInfoCache();
 
 			struct TrackingObjectRecord
 			{
@@ -50,12 +66,13 @@ namespace Insight
 				unsigned int Line;
 			};
 
-			static MemoryManager* s_instance;
 			std::unordered_map<void*, TrackingObjectRecord> m_trackingObjects;
 			StackAllocator m_stackAllocator;
 			FreeListAllocator m_freeListAllocator;
+			bool m_smartPointersInUse;
 		};
 
+#ifndef IS_SMART_POINTERS_IN_USE
 		template<typename T, typename ...Args>
 		inline T* MemoryManager::NewOnStack(Args&&... argList)
 		{
@@ -91,6 +108,7 @@ namespace Insight
 		{
 			GetInstance()->m_freeListAllocator.DeleteArr<T>(length, ptrToDelete);
 		}
+#endif
 	}
 }
 

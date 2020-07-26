@@ -23,40 +23,39 @@ namespace Insight
 	Application::Application()
 	{
 		Config::GetInstance().Parse("config.txt");
-
-		m_memoryManager = new Memory::MemoryManager();
-	
-		m_moduleManager = Memory::MemoryManager::NewOnStack<Module::ModuleManager>();
-
+		
+		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
+		
+		m_moduleManager = Module::ModuleManager::Create();
+		
 		Module::ModuleStartupData windowData;
 		windowData.ManuallUpdate = true;
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);
-
+		
 		Module::GraphicsModuleStartupData graphicsData;
 		graphicsData.WindowModule = m_windowModule;
 		graphicsData.ManuallUpdate = true;
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(graphicsData);
-
+		
 		Module::InputModuleData inputData;
 		inputData.WindowModule = m_windowModule;
 		inputData.ManuallUpdate = true;
 		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(inputData);
-
+		
 		m_moduleManager->AddModule<Module::EntityModule>();
-
+		
 		m_mainCamera = std::make_unique<Camera>();
-		m_mainCamera->SetProjMatrix(45.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
+		m_mainCamera->SetProjMatrix(90.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-
+		
 		m_graphicsModule->SetMainCamera(m_mainCamera.get());
 	}
 
 	Application::~Application()
 	{
-		m_moduleManager->~ModuleManager();
-		Memory::MemoryManager::DeleteOnStack((Size)m_moduleManager);
+		Module::ModuleManager::Destroy();
 
-		delete m_memoryManager;
+		Memory::MemoryManager::DestroyWithoutMemoryManager();
 	}
 	
 	void AlloBench()

@@ -87,6 +87,8 @@ namespace Insight
 				case Insight::Render::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
 				case Insight::Render::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
 				case Insight::Render::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+
+				default: return VK_SHADER_STAGE_ALL;
 			}
 		}
 
@@ -233,6 +235,9 @@ namespace Insight
 
 		std::vector<uint32_t> ShaderModuleBase::ComplieToRaw(const std::string& source_name, shaderc_shader_kind kind, const std::string& source, bool optimize)
 		{
+			/*
+				Function has been removed from deleaker due to shaderc::Compiler(3rd lib) leaking.
+			*/
 			shaderc::Compiler compiler;
 			shaderc::CompileOptions options;
 

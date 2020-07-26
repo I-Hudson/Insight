@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Insight/Core.h"
+#include "Insight/Templates/TSingleton.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/Module.h"
 
@@ -8,7 +9,7 @@ namespace Insight
 {
 	namespace Module
 	{
-		class IS_API ModuleManager : public Module
+		class IS_API ModuleManager : public TSingleton<ModuleManager>, public Module
 		{
 		public:
 			ModuleManager(ModuleStartupData& startupData = ModuleStartupData());
@@ -37,7 +38,7 @@ namespace Insight
 		{
 			if (!Exists(typeid(T).name()))
 			{
-				T* newModule = Memory::MemoryManager::NewOnStack<T>(moduleData);
+				T* newModule = NEW_ON_STACK(T, moduleData);
 
 				m_modules.insert(std::pair<const char*, Module*>(typeid(T).name(), newModule));
 

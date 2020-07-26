@@ -20,8 +20,11 @@ using namespace Insight::Render;
 class IS_API Mesh : public Insight::UUID
 {
 public:
+	Mesh();
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~Mesh();
+
+	void Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
 	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
@@ -37,6 +40,8 @@ public:
 	// Returns a new array of uvs.
 	std::vector<glm::vec2> GetUVs();
 
+	std::vector<Texture> GetTextures();
+
 private:
 	Insight::Render::VertexBuffer* GetVertexBuffer() { return m_vertexBuffer; }
 	Insight::Render::IndexBuffer* GetIndexBuffer() { return m_indexBuffer; }
@@ -48,6 +53,8 @@ private:
 
 	Insight::Render::VertexBuffer* m_vertexBuffer;
 	Insight::Render::IndexBuffer* m_indexBuffer;
+
+	bool m_created;
 
 	friend Insight::Render::VulkanRenderer;
 	friend Insight::Render::Swapchain;

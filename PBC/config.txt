@@ -3,3 +3,11 @@ window_width=1920
 window_height=1080
 window_title=Window Title 1
 window_icon=InsightProfile.png
+
+#MemorySettings
+stack_alloc_amount=512
+stack_alloc_type=KB
+free_list_alloc_amount=512
+free_list_alloc_type=KB
+placement_policy=0
+smart_pointers=true

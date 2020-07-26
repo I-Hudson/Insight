@@ -1,15 +1,14 @@
 #include "ispch.h"
 
 #include "MemoryManager.h"
+#include "Insight/Config/Config.h"
 #include "Insight/Log.h"
-
+#include <typeinfo>
 
 namespace Insight
 {
 	namespace Memory
 	{
-		MemoryManager* Memory::MemoryManager::s_instance;
-
 		void MemoryManager::DeleteOnStack(const Size marker)
 		{
 			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
@@ -44,24 +43,29 @@ namespace Insight
 			}
 		}
 
-		MemoryManager* MemoryManager::GetInstance()
+		Size MemoryManager::GetConfigMemorySize(const Size& size, const std::string& type)
 		{
-			if (s_instance != nullptr)
+			const unsigned int KBSize = 1024;
+
+
+			return size * pow(KBSize, 1);
+		}
+
+		void MemoryManager::ClearTypeInfoCache()
+		{
+			while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
 			{
-				return s_instance;
+				free(entry);
 			}
-			else
-			{
-				IS_CORE_ERROR("MemoryManager: GetInstance => instnace does not exists.");
-			}
-			return nullptr;
 		}
 
 		MemoryManager::MemoryManager()
-			:m_stackAllocator(512_KB), m_freeListAllocator(512_KB, Memory::FreeListAllocator::PlacementPolicy::FIND_FIRST)
-		{
-			s_instance = this;
-		}
+#ifndef IS_SMART_POINTERS_IN_USE
+			:m_stackAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.StackAllocAmount), CONFIG_VAL(Config::MemoryConfig.StackAllocType)))
+			, m_freeListAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.FreeListAllocAmount), CONFIG_VAL(Config::MemoryConfig.FreeListAllocType))
+				,(Insight::Memory::FreeListAllocator::PlacementPolicy)CONFIG_VAL(Config::MemoryConfig.PlacementPolicy))
+#endif
+		{ }
 
 		MemoryManager::~MemoryManager()
 		{
@@ -70,6 +74,8 @@ namespace Insight
 				IS_CORE_ERROR("Tracking object has not been destroyed or untracked. => Ptr: {0}, File: {1}, Line: {2}", 
 					(*it).second.Ptr, (*it).second.File, (*it).second.Line);
 			}
+
+			ClearTypeInfoCache();
 		}
 	}
 }

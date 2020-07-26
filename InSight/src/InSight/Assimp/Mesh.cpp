@@ -2,21 +2,41 @@
 #include "Mesh.h"
 #include "Insight/Memory/MemoryManager.h"
 
+Mesh::Mesh()
+	: Insight::UUID()
+	, m_created(false)
+{ }
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 	: Insight::UUID()
+	, m_created(false)
 {
-	m_vertices = vertices;
-	m_indices = indices;
-	m_textures = textures;
-
-	m_vertexBuffer = VertexBuffer::Create(m_vertices);
-	m_indexBuffer = IndexBuffer::Create(indices);
+	Create(vertices, indices, textures);
 }
 
 Mesh::~Mesh()
 {
 	Insight::Memory::MemoryManager::DeleteOnFreeList(m_vertexBuffer);
 	Insight::Memory::MemoryManager::DeleteOnFreeList(m_indexBuffer);
+
+	m_vertices.clear();
+	m_indices.clear();
+	m_textures.clear();
+}
+
+void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+{
+	if (!m_created)
+	{
+		m_created = true;
+
+		m_vertices = vertices;
+		m_indices = indices;
+		m_textures = textures;
+
+		m_vertexBuffer = VertexBuffer::Create(m_vertices);
+		m_indexBuffer = IndexBuffer::Create(indices);
+	}
 }
 
 std::vector<glm::vec3> Mesh::GetVertices()
@@ -62,4 +82,9 @@ std::vector<glm::vec2> Mesh::GetUVs()
 		uvs.push_back((*it).UV1);
 	}
 	return uvs;
+}
+
+std::vector<Texture> Mesh::GetTextures()
+{
+	return m_textures;
 }

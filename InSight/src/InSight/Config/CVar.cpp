@@ -7,6 +7,7 @@ namespace Insight
 	// Declare template classes for CVar.
 	template class IS_API CVar<float>;
 	template class IS_API CVar<int>;
+	template class IS_API CVar<unsigned int>;
 	std::unordered_map<std::string, ICVar*> ConfigRegistry::m_values;
 
 	template<typename T>

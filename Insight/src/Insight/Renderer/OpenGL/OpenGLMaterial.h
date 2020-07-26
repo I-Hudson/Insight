@@ -42,7 +42,7 @@ namespace Insight
 			virtual ~OpenGLMaterial() override;
 
 			virtual void SetShader(Shader* shader) override;
-			virtual const Shader* GetShader() override;
+			virtual Shader* GetShader() override;
 			virtual void SetUniforms() override;
 			virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
 			virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;

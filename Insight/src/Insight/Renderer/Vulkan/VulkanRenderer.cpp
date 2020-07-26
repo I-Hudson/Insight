@@ -49,13 +49,14 @@ namespace Insight
 				m_deviceExtensions,
 				GetRequiredExtensions()
 			};
-			m_device = Memory::MemoryManager::NewOnFreeList<Device>(deviceSettings);
+			m_device = NEW_ON_HEAP(Device, deviceSettings);
 
-			m_framebuffer = Memory::MemoryManager::NewOnFreeList<VulkanFramebuffer>(m_device, m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
+			m_framebuffer = NEW_ON_HEAP(VulkanFramebuffer, m_device, m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 			m_framebuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 											VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-			m_framebuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-											VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_framebuffer->CreateAttachment(VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
+											VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+											VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 			m_framebuffer->CompileFrameBuffer();
 
 			ShaderData data
@@ -65,12 +66,12 @@ namespace Insight
 				VkExtent2D{ static_cast<uint32_t>(m_windowModule->GetWindow()->GetWidth()), static_cast<uint32_t>(m_windowModule->GetWindow()->GetHeight())},
 				m_framebuffer->GetRenderpass()
 			};
-			m_shader = Memory::MemoryManager::NewOnFreeList<VulkanShader>(data);
+			m_shader = NEW_ON_HEAP(VulkanShader, data);
 			
 			m_material = static_cast<VulkanMaterial*>(Material::Create());
 			m_material->SetShader(m_shader);
 
-			m_commandPool = Memory::MemoryManager::NewOnFreeList<CommandPool>(m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+			m_commandPool = NEW_ON_HEAP(CommandPool, m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 			m_commandBuffer = m_commandPool->AllocCommandBuffer();
 
 			SwapchainSettings swapchainSettings
@@ -78,7 +79,7 @@ namespace Insight
 				m_windowModule->GetWindow(),
 				m_device
 			};
-			m_swapchain = Memory::MemoryManager::NewOnFreeList<Swapchain>(swapchainSettings);
+			m_swapchain = NEW_ON_HEAP(Swapchain, swapchainSettings);
 
 			// Position				  // Colour				   // Normal				//UV1
 			std::vector<Vertex> vertices =
@@ -93,7 +94,7 @@ namespace Insight
 			{
 				0,1,2, 2, 3, 0
 			};
-			m_testMesh = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>());
+			m_testMesh = NEW_ON_HEAP(Mesh, vertices, indices, std::vector<Texture>());
 
 			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
 
@@ -106,15 +107,15 @@ namespace Insight
 
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
 
-			Memory::MemoryManager::DeleteOnFreeList<Mesh>(m_testMesh);
+			DELETE_ON_HEAP(m_testMesh);
 
-			Memory::MemoryManager::DeleteOnFreeList(m_shader);
-			Memory::MemoryManager::DeleteOnFreeList(m_material);
-			Memory::MemoryManager::DeleteOnFreeList(m_framebuffer);
-			Memory::MemoryManager::DeleteOnFreeList(m_commandPool);
-
-			Memory::MemoryManager::DeleteOnFreeList(m_swapchain);
-			Memory::MemoryManager::DeleteOnFreeList(m_device);
+			DELETE_ON_HEAP(m_shader);
+			DELETE_ON_HEAP(m_material);
+			DELETE_ON_HEAP(m_framebuffer);
+			DELETE_ON_HEAP(m_commandPool);
+			
+			DELETE_ON_HEAP(m_swapchain);
+			DELETE_ON_HEAP(m_device);
 		}
 
 		void VulkanRenderer::Clear()
