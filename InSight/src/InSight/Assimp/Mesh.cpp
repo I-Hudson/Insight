@@ -1,21 +1,27 @@
 #include "ispch.h"
 #include "Mesh.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 Mesh::Mesh()
 	: Insight::UUID()
 	, m_created(false)
 { }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, const std::string& meshName)
 	: Insight::UUID()
 	, m_created(false)
 {
+	IS_PROFILE_FUNCTION();
+
+	m_meshName = meshName;
 	Create(vertices, indices, textures);
 }
 
 Mesh::~Mesh()
 {
+	IS_PROFILE_FUNCTION();
+
 	Insight::Memory::MemoryManager::DeleteOnFreeList(m_vertexBuffer);
 	Insight::Memory::MemoryManager::DeleteOnFreeList(m_indexBuffer);
 
@@ -26,6 +32,8 @@ Mesh::~Mesh()
 
 void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
+	IS_PROFILE_FUNCTION();
+
 	if (!m_created)
 	{
 		m_created = true;
@@ -37,6 +45,11 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_vertexBuffer = VertexBuffer::Create(m_vertices);
 		m_indexBuffer = IndexBuffer::Create(indices);
 	}
+}
+
+std::string& Mesh::GetName()
+{
+	return m_meshName;
 }
 
 std::vector<glm::vec3> Mesh::GetVertices()

@@ -36,6 +36,8 @@ inline ComponentID GetComponentID() noexcept
 	return typeID;
 }
 
+class Model;
+
 class IS_API Entity : public Insight::UUID
 {
 public:
@@ -44,6 +46,7 @@ public:
 	~Entity();
 
 	static Entity* Create(const std::string& id = "");
+	static Entity* CreateFromModel(Model* model);
 	void Delete();
 
 	void SetID(const std::string& id);
@@ -79,6 +82,8 @@ public:
 	T* GetComponent(const std::string& uuid) const;
 
 private:
+	void RemoveAllComponenets();
+
 	EntityData m_data;
 };
 
@@ -93,7 +98,7 @@ inline T* Entity::AddComponent()
 {
 	if (m_data.Components.size() < MaxComponents && !HasComponent<T>())
 	{
-		T* c = Insight::Memory::MemoryManager::NewOnFreeList<T>(this);
+		T* c = NEW_ON_HEAP(T, this);
 		m_data.Components.push_back(c);
 		m_data.ComponetBitset[GetComponentID<T>()] = true;
 
@@ -112,7 +117,7 @@ inline void Entity::RemoveComponent()
 			T* tempPtr = dynamic_cast<T*>(*it);
 			if (tempPtr != nullptr)
 			{
-				Insight::Memory::MemoryManager::DeleteOnFreeList(*it);
+				DELETE_ON_HEAP((*it));
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
 				break;
@@ -130,7 +135,7 @@ inline void Entity::RemoveComponent(const std::string& uuid)
 		{
 			if ((*it)->GetUUID() == uuid)
 			{
-				Insight::Memory::MemoryManager::DeleteOnFreeList(*it);
+				DELETE_ON_HEAP((*it));
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
 				break;

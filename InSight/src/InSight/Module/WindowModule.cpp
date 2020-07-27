@@ -4,6 +4,7 @@
 #include "Insight/Config/Config.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Event/ApplicationEvent.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 #include "stb_image.h"
 #ifdef IS_OPENGL
@@ -134,6 +135,8 @@ namespace Insight
 
 		void WindowModule::Update(const float& deltaTime)
 		{
+			IS_PROFILE_FUNCTION();
+
 			glfwPollEvents();
 		}
 	}

@@ -2,7 +2,7 @@
 #include "GraphicsModule.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"
-
+#include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Component/MeshComponent.h"
 
 #include "Insight/Log.h"
@@ -34,6 +34,8 @@ namespace Insight
 
 		void GraphicsModule::Update(const float& deltaTime)
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_renderer->Clear();
 
 			m_renderer->Render(m_mainCamera, m_meshs);

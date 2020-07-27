@@ -16,5 +16,5 @@ layout(set = 0, binding = 0) uniform MVPUniformBuffer
 
 void main() {
     gl_Position = mvp.u_proj * inverse(mvp.u_view) * mvp.u_model * vec4(inPosition.xyz, 1.0);
-    fragColor =  inColor.xyz;
+    fragColor =  (mvp.u_model * vec4(inPosition.xyz, 1.0)).xyz;
 }

@@ -52,5 +52,3 @@
 #else 
 	#error InSight only supports Windows!
 #endif //  IS_PLATFORM_WINDOWS
-
-

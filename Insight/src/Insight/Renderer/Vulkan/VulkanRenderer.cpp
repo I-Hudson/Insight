@@ -14,6 +14,7 @@
 
 #include "Insight/Time/Time.h"
 #include "Insight/Config/Config.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -130,6 +131,8 @@ namespace Insight
 
 		void VulkanRenderer::Render(Camera* mainCamera, std::vector<MeshComponent*> meshes)
 		{
+			IS_PROFILE_FUNCTION();
+
 			glm::mat4 model(1.0f);
 
 			m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix(), model);
@@ -180,6 +183,8 @@ namespace Insight
 
 		void VulkanRenderer::Present()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_swapchain->Present();
 		}
 

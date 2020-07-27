@@ -139,7 +139,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -169,7 +169,7 @@ IF EXIST ..\bin\Debug_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_SMART_POINTERS_IN_USE;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -199,7 +199,7 @@ IF EXIST ..\bin\Debug_Vulkan_SP-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -229,7 +229,7 @@ IF EXIST ..\bin\Debug_OPENGL-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_SMART_POINTERS_IN_USE;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -343,6 +343,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Input\Input.h" />
     <ClInclude Include="src\Insight\Input\InsightKeyCodes.h" />
     <ClInclude Include="src\Insight\InsightAlias.h" />
+    <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h" />
     <ClInclude Include="src\Insight\Log.h" />
     <ClInclude Include="src\Insight\Maths\InsightMaths.h" />
     <ClInclude Include="src\Insight\Maths\Matrix3.h" />
@@ -392,6 +393,10 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Vulkan\VulkanRenderer.h" />
     <ClInclude Include="src\Insight\Renderer\Vulkan\VulkanShader.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
+    <ClInclude Include="src\Insight\Tasks\TaskManager.h" />
+    <ClInclude Include="src\Insight\Tasks\TaskState.h" />
+    <ClInclude Include="src\Insight\Tasks\TaskSystemWorker.h" />
+    <ClInclude Include="src\Insight\Tasks\TasksGlobal.h" />
     <ClInclude Include="src\Insight\Templates\TSingleton.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
@@ -860,11 +865,14 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanRenderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanShader.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
+    <ClCompile Include="src\Insight\Tasks\TaskState.cpp" />
+    <ClCompile Include="src\Insight\Tasks\TaskSystemWorker.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp" />
     <ClCompile Include="src\ispch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TaskManager.cpp" />
     <ClCompile Include="vendor\glad\src\glad.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>

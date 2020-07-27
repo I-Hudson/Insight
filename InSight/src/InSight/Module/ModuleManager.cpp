@@ -1,6 +1,7 @@
 #include "ispch.h"
 
 #include "ModuleManager.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -26,6 +27,8 @@ namespace Insight
 
 		void ModuleManager::Update(const float& deltaTime)
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (auto mod : m_modules)
 			{
 				if (!mod.second->ShouldManuallUpate())

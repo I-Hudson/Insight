@@ -1,11 +1,12 @@
 #pragma once
 
-// For use by apps only not InSight
+// For use by apps only. No core system should directly be here.
 
 #include "Insight/Core.h"
 #include "InSight/Application.h"
 #include "InSight/Log.h"
 #include "Insight/Time/Stopwatch.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Input/Input.h"
 
 #include "Insight/Entitiy/Entity.h"

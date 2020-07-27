@@ -4,6 +4,7 @@
 #include "stb_image.h"
 #include "Insight/Log.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 Model::Model(const std::string& filePath)
 {
@@ -24,8 +25,15 @@ Mesh* Model::GetSubMesh(int index)
 	return m_meshes[index];
 }
 
+const std::string& Model::GetName() const
+{
+	return m_modelName;
+}
+
 void Model::LoadMesh(const std::string& filePath)
 {
+	IS_PROFILE_FUNCTION();
+
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
@@ -35,12 +43,15 @@ void Model::LoadMesh(const std::string& filePath)
 		return;
 	}
 
+	m_modelName = filePath.substr(filePath.find_last_of('/'));
 	m_directory = filePath.substr(0, filePath.find_last_of('/'));
 	ProcessNode(scene->mRootNode, scene);
 }
 
 void Model::ProcessNode(aiNode* node, const aiScene* scene)
 {
+	IS_PROFILE_FUNCTION();
+
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
@@ -56,6 +67,8 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 
 Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
+	IS_PROFILE_FUNCTION();
+
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
@@ -124,11 +137,13 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return NEW_ON_HEAP(Mesh, vertices, indices, textures);
+	return NEW_ON_HEAP(Mesh, vertices, indices, textures, mesh->mName.C_Str());
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 {
+	IS_PROFILE_FUNCTION();
+
 	std::vector<Texture> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{

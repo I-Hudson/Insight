@@ -144,7 +144,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -162,7 +162,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_SMART_POINTERS_IN_USE;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -180,7 +180,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_OPENGL;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -198,7 +198,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_OPENGL;IS_SMART_POINTERS_IN_USE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_OPENGL;IS_SMART_POINTERS_IN_USE;IS_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>

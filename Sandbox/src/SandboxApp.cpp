@@ -15,18 +15,10 @@ public:
 
 	virtual void Create() override
 	{
-		testModel = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
-
-		e = Entity::Create();
-		tc = e->AddComponent<TransformComponent>();
-		e->AddComponent<MeshComponent>();
-		e->GetComponent<MeshComponent>()->SetMesh(testModel->GetSubMesh(0));
-		
-		for (UINT i = 1; i < testModel->GetSubMeshCount(); i++)
+		testModel = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
+		for (size_t i = 0; i < 20; ++i)
 		{
-			e->AddChild(std::to_string(i));
-			auto mesh = e->GetChild(i - 1)->AddComponent<MeshComponent>();
-			mesh->SetMesh(testModel->GetSubMesh(i));
+			Entity::CreateFromModel(testModel);
 		}
 	}
 

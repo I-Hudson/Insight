@@ -3,6 +3,7 @@
 
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Entitiy/Entity.h"
+#include "Insight/Component/TransformComponent.h"
 
 namespace Insight
 {
@@ -32,6 +33,8 @@ namespace Insight
 		Entity* EntityModule::Create(const std::string & id)
 		{
 			Entity* e = NEW_ON_HEAP(Entity, id);
+			e->AddComponent<TransformComponent>();
+
 			m_entities.push_back(e);
 			return e;
 		}

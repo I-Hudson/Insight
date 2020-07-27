@@ -119,19 +119,19 @@ project "Insight"
         }
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
         symbols "on"
 
 
@@ -194,19 +194,19 @@ project "Sandbox"
 
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE" }
         symbols "on"   
         
     filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
         symbols "on"
 
     filter "configurations:Release"

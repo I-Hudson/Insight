@@ -25,6 +25,9 @@
     <Filter Include="src\Insight\Input">
       <UniqueIdentifier>{F1BC144D-5DD3-12E3-A64A-9E0412A0E36A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Instrumentor">
+      <UniqueIdentifier>{FB450404-E76A-5384-10B6-3814FC3952A2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Maths">
       <UniqueIdentifier>{5E0D564D-CA23-54E3-139B-DF047FF0246B}</UniqueIdentifier>
     </Filter>
@@ -45,6 +48,9 @@
     </Filter>
     <Filter Include="src\Insight\ShaderParser">
       <UniqueIdentifier>{E511A212-D136-F192-FA81-D622E605F0B0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Tasks">
+      <UniqueIdentifier>{07B5D44D-73CB-D2E3-BC42-5E052898A36B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Templates">
       <UniqueIdentifier>{D01232D2-3C7F-EDCC-0573-852A719E0F35}</UniqueIdentifier>
@@ -146,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\InsightAlias.h">
       <Filter>src\Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h">
+      <Filter>src\Insight\Instrumentor</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Log.h">
       <Filter>src\Insight</Filter>
@@ -293,6 +302,18 @@
     </ClInclude>
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
       <Filter>src\Insight\ShaderParser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Tasks\TaskManager.h">
+      <Filter>src\Insight\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Tasks\TaskState.h">
+      <Filter>src\Insight\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Tasks\TaskSystemWorker.h">
+      <Filter>src\Insight\Tasks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Tasks\TasksGlobal.h">
+      <Filter>src\Insight\Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Templates\TSingleton.h">
       <Filter>src\Insight\Templates</Filter>
@@ -1694,6 +1715,12 @@
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Tasks\TaskState.cpp">
+      <Filter>src\Insight\Tasks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Tasks\TaskSystemWorker.cpp">
+      <Filter>src\Insight\Tasks</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
       <Filter>src\Insight\Time</Filter>
     </ClCompile>
@@ -1708,6 +1735,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="TaskManager.cpp">
+      <Filter>src\Insight\Tasks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

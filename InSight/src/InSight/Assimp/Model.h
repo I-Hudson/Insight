@@ -19,6 +19,8 @@ public:
 	Mesh* GetSubMesh(int index);
 	unsigned int GetSubMeshCount() { return static_cast<unsigned int>(m_meshes.size()); }
 
+	const std::string& GetName() const;
+
 private:
 	void LoadMesh(const std::string& filePath);
 	void ProcessNode(aiNode* node, const aiScene* scene);
@@ -30,5 +32,6 @@ private:
 	std::vector<Mesh*> m_meshes;
 	std::vector<Texture> m_texturesLoaded;
 	std::string m_directory;
+	std::string m_modelName;
 };
 
