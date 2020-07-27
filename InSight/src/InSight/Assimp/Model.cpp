@@ -8,6 +8,7 @@
 
 Model::Model(const std::string& filePath)
 {
+	IS_INFO("Loading model");
 	LoadMesh(filePath);
 }
 

@@ -13,6 +13,7 @@
 class IS_API Model
 {
 public:
+	Model() { LoadMesh("./models/Survival_BackPack_2/backpack.obj"); }
 	Model(const std::string& filePath);
 	~Model();
 

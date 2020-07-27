@@ -11,9 +11,8 @@
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
 #include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Tasks/TaskManager.h"
-#include "Insight/Tasks/TaskSystemWorker.h"
-#include "Insight/Tasks/TaskState.h"
+
+#include <taskflow.hpp>
 
 #include "Insight/Camera.h"
 
@@ -26,6 +25,8 @@ namespace Insight
 {
 	void PrintFunction()
 	{
+		IS_PROFILE_FUNCTION();
+
 		IS_CORE_INFO("TEST");
 	}
 
@@ -60,42 +61,6 @@ namespace Insight
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		
 		m_graphicsModule->SetMainCamera(m_mainCamera.get());
-
-
-
-		Tasks::TaskManagerDescriptor taskManagerDesc;
-		taskManagerDesc.m_workers.emplace_back("worker1");
-		taskManagerDesc.m_workers.emplace_back("worker2");
-		taskManagerDesc.m_workers.emplace_back("worker3");
-		taskManagerDesc.m_workers.emplace_back("worker4");
-		taskManagerDesc.m_workers.emplace_back("worker5");
-		taskManagerDesc.m_workers.emplace_back("worker6");
-		taskManagerDesc.m_workers.emplace_back("worker7");
-		taskManagerDesc.m_workers.emplace_back("worker8");
-
-		Tasks::TaskManager taskManager;
-		if (!taskManager.Create(taskManagerDesc))
-		{
-			IS_CORE_INFO("Task manager failed");
-		}
-
-		Tasks::TaskChainBuilder builder(taskManager);
-		builder.Do(PrintFunction)
-			.Then()
-			.Do(PrintFunction)
-			.Then()
-			.Together();
-
-		// Run 1k jobs in parallel.
-		for (size_t i = 0; i < 1000; ++i)
-		{
-			builder.Do(PrintFunction);
-		}
-
-		// Run the jobs and assist until complete.
-		builder
-			.Go()
-			.AssistAndWaitForAll();
 
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}

@@ -16,6 +16,7 @@ public:
 	virtual void Create() override
 	{
 		testModel = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
+
 		for (size_t i = 0; i < 20; ++i)
 		{
 			Entity::CreateFromModel(testModel);

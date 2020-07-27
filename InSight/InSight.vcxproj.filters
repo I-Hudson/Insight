@@ -303,16 +303,7 @@
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Tasks\TaskManager.h">
-      <Filter>src\Insight\Tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Tasks\TaskState.h">
-      <Filter>src\Insight\Tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Tasks\TaskSystemWorker.h">
-      <Filter>src\Insight\Tasks</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Tasks\TasksGlobal.h">
+    <ClInclude Include="src\Insight\Tasks\Tasks.h">
       <Filter>src\Insight\Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Templates\TSingleton.h">
@@ -1715,12 +1706,6 @@
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Tasks\TaskState.cpp">
-      <Filter>src\Insight\Tasks</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Tasks\TaskSystemWorker.cpp">
-      <Filter>src\Insight\Tasks</Filter>
-    </ClCompile>
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
       <Filter>src\Insight\Time</Filter>
     </ClCompile>
@@ -1736,7 +1721,7 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="TaskManager.cpp">
+    <ClCompile Include="src\Insight\Tasks\Tasks.cpp">
       <Filter>src\Insight\Tasks</Filter>
     </ClCompile>
   </ItemGroup>

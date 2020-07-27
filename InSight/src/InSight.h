@@ -15,6 +15,8 @@
 #include "Insight/Assimp/Model.h"
 #include "Insight/Assimp/Mesh.h"
 
+#include "Insight/Tasks/TaskManager.h"
+
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"
 #include "Insight/Maths/Vector3.h"
