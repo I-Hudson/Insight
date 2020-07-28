@@ -5,36 +5,12 @@
 
 namespace Insight
 {
+    class Application;
+
     template<class T>
     class IS_API TSingleton
     {
     public:
-
-        template<typename... Args>
-        static T* Create(Args... args)
-        {
-            SetInstancePtr(NEW_ON_HEAP(T, std::forward<Args>(args)...));
-
-            return GetInstance();
-        }
-
-        template<typename... Args>
-        static T* CreateWithoutMemoryManager(Args... args)
-        {
-            SetInstancePtr(new T(std::forward<Args>(args)...));
-
-            return GetInstance();
-        }
-
-        static void Destroy()
-        {
-            DELETE_ON_HEAP(s_instance);
-        }
-
-        static void DestroyWithoutMemoryManager()
-        {
-            delete s_instance;
-        }
 
         static T* GetInstance()
         {
@@ -61,7 +37,35 @@ namespace Insight
         }
 
     private:
+        template<typename... Args>
+        static T* Create(Args... args)
+        {
+            SetInstancePtr(NEW_ON_HEAP(T, std::forward<Args>(args)...));
+
+            return GetInstance();
+        }
+
+        template<typename... Args>
+        static T* CreateWithoutMemoryManager(Args... args)
+        {
+            SetInstancePtr(new T(std::forward<Args>(args)...));
+
+            return GetInstance();
+        }
+
+        static void Destroy()
+        {
+            DELETE_ON_HEAP(s_instance);
+        }
+
+        static void DestroyWithoutMemoryManager()
+        {
+            delete s_instance;
+        }
+
         static T* s_instance;
+
+        friend Application;
     };
 }
 

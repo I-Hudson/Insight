@@ -17,10 +17,15 @@ public:
 	{
 		testModel = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
 
-		for (size_t i = 0; i < 20; ++i)
-		{
-			Entity::CreateFromModel(testModel);
-		}
+		using namespace Insight::Library;
+
+		Library<Model> modelLibrary;
+		Model* m = modelLibrary.GetInstance()->AddAsset(testModel->GetUUID(), testModel);
+
+		//for (size_t i = 0; i < 20; ++i)
+		//{
+		//	Entity::CreateFromModel(testModel);
+		//}
 	}
 
 	virtual void Update(const float deltaTime) override

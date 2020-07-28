@@ -12,6 +12,8 @@
 #include "Module/EntityModule.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
+#include <ppltasks.h>
+
 #include <taskflow.hpp>
 
 #include "Insight/Camera.h"
@@ -61,6 +63,8 @@ namespace Insight
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		
 		m_graphicsModule->SetMainCamera(m_mainCamera.get());
+
+		Concurrency::create_task([]() {IS_CORE_INFO("Thread for task"); }).wait();
 
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}

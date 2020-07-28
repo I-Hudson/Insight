@@ -7,6 +7,7 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 
 Model::Model(const std::string& filePath)
+	: Insight::UUID()
 {
 	IS_INFO("Loading model");
 	LoadMesh(filePath);

@@ -53,5 +53,5 @@ namespace Insight
 	template<typename T, typename ... Args>
 	constexpr SharedPtr<T> CreateSharedPtr(Args&& ... args)
 	{
-		return std::shared_ptr<T>(std::forward<Args>(args)...);
+		return std::make_shared<T>(std::forward<Args>(args)...);
 	}

@@ -28,6 +28,9 @@
     <Filter Include="src\Insight\Instrumentor">
       <UniqueIdentifier>{FB450404-E76A-5384-10B6-3814FC3952A2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Library">
+      <UniqueIdentifier>{766A7DBF-E2CB-5ACD-6B39-A17FD799918C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Maths">
       <UniqueIdentifier>{5E0D564D-CA23-54E3-139B-DF047FF0246B}</UniqueIdentifier>
     </Filter>
@@ -48,9 +51,6 @@
     </Filter>
     <Filter Include="src\Insight\ShaderParser">
       <UniqueIdentifier>{E511A212-D136-F192-FA81-D622E605F0B0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\Tasks">
-      <UniqueIdentifier>{07B5D44D-73CB-D2E3-BC42-5E052898A36B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Templates">
       <UniqueIdentifier>{D01232D2-3C7F-EDCC-0573-852A719E0F35}</UniqueIdentifier>
@@ -156,6 +156,9 @@
     <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h">
       <Filter>src\Insight\Instrumentor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Library\Library.h">
+      <Filter>src\Insight\Library</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Log.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
@@ -191,6 +194,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Memory\StackAllocator.h">
       <Filter>src\Insight\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Module\AssetModule.h">
+      <Filter>src\Insight\Module</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\EntityModule.h">
       <Filter>src\Insight\Module</Filter>
@@ -302,9 +308,6 @@
     </ClInclude>
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
       <Filter>src\Insight\ShaderParser</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Tasks\Tasks.h">
-      <Filter>src\Insight\Tasks</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Templates\TSingleton.h">
       <Filter>src\Insight\Templates</Filter>
@@ -1720,9 +1723,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Tasks\Tasks.cpp">
-      <Filter>src\Insight\Tasks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

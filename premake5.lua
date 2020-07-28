@@ -121,11 +121,11 @@ project "Insight"
         }
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
 
     filter "configurations:Debug_Vulkan_SP"
@@ -197,11 +197,11 @@ project "Sandbox"
 
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX" }
         symbols "on"   
         
     filter "configurations:Debug_Vulkan_SP"
