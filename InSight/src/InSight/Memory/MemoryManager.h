@@ -38,7 +38,7 @@ namespace Insight
 			static void DeleteArrOnFreeList(Size length, T* ptrToDelete);
 #endif
 
-			static void TrackObject(void* ptr, const std::string& file, const unsigned int& line);
+			static void TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
 
 			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
@@ -62,6 +62,7 @@ namespace Insight
 			struct TrackingObjectRecord
 			{
 				void* Ptr;
+				std::string Str;
 				std::string File;
 				unsigned int Line;
 			};

@@ -14,10 +14,9 @@ namespace Insight
 
 		ModuleManager::~ModuleManager()
 		{
-			for (std::unordered_map<const char*, Module*>::iterator it = m_modules.end(); it != m_modules.begin();)
+			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
 			{
-				--it;
-				Module* m = it->second;
+				Module* m = *it;
 				m->~Module();
 				DELETE_ON_STACK(m);
 			}
@@ -31,16 +30,23 @@ namespace Insight
 
 			for (auto mod : m_modules)
 			{
-				if (!mod.second->ShouldManuallUpate())
+				if (!mod->ShouldManuallUpate())
 				{
-					mod.second->Update(deltaTime);
+					mod->Update(deltaTime);
 				}
 			}
 		}
 
 		bool ModuleManager::Exists(const char* moduleName)
 		{
-			return m_modules.find(moduleName) != m_modules.end();
+			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
+			{
+				if (typeid(*it).name() == moduleName)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 }

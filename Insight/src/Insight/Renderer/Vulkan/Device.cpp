@@ -168,7 +168,7 @@ namespace Insight
 
 			if (deviceCount == 0)
 			{
-				IS_CORE_ASSERT("failed to find GPUs with Vulkan support!", true);
+				IS_CORE_ASSERT(true, "Failed to find GPUs with Vulkan support!");
 			}
 
 			std::vector<VkPhysicalDevice> devices(deviceCount);

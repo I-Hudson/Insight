@@ -5,6 +5,7 @@
 #include "Insight/Renderer/Vulkan/Device.h"
 #include "Insight/Renderer/Vulkan/Queue.h"
 
+#include "Insight/Library/Library.h"
 #include "Insight/Renderer/ShaderModule.h"
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
@@ -32,6 +33,7 @@ namespace Insight
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
 			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<VulkanShader>(data);
+			ShaderLibrary::GetInstance()->AddAsset(m_swapchainShader->GetUUID(), m_swapchainShader);
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -65,17 +67,16 @@ namespace Insight
 		{
 			EventManager::Unbind(EventType::WindowResize, typeid(Swapchain).name());
 
-			Memory::MemoryManager::DeleteOnFreeList<Mesh>(m_fullscreenQuad);
-			Memory::MemoryManager::DeleteOnFreeList(m_drawCommandPool);
-			Memory::MemoryManager::DeleteOnFreeList(m_swapchainShader);
+			DELETE_ON_HEAP(m_fullscreenQuad);
+			DELETE_ON_HEAP(m_drawCommandPool);
 
 			for (auto it = m_materials.begin(); it != m_materials.end(); ++it)
 			{
-				Memory::MemoryManager::DeleteOnFreeList(*it);
+				DELETE_ON_HEAP(*it);
 			}
 			for (size_t i = 0; i < m_swapchainFramebuffers.size(); i++)
 			{
-				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);
+				DELETE_ON_HEAP(m_swapchainFramebuffers[i]);
 			}
 			vkDestroySwapchainKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, nullptr);
 		}
@@ -335,7 +336,7 @@ namespace Insight
 
 			for (size_t i = 0; i < m_swapchainFramebuffers.size(); ++i)
 			{
-				Memory::MemoryManager::DeleteOnFreeList(m_swapchainFramebuffers[i]);
+				DELETE_ON_HEAP(m_swapchainFramebuffers[i]);
 			}
 			m_swapchainFramebuffers.clear();
 			vkDestroySwapchainKHR(m_swapchainSettings.Device->GetDevice(), m_swapchain, nullptr);

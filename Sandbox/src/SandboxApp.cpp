@@ -15,17 +15,15 @@ public:
 
 	virtual void Create() override
 	{
-		testModel = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
+		Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
+		Entity* testModel = Entity::CreateFromModel(m);
 
-		using namespace Insight::Library;
+		int* i1 = new int;
+		*i1 = 1;
+		int* i2 = i1;
 
-		Library<Model> modelLibrary;
-		Model* m = modelLibrary.GetInstance()->AddAsset(testModel->GetUUID(), testModel);
-
-		//for (size_t i = 0; i < 20; ++i)
-		//{
-		//	Entity::CreateFromModel(testModel);
-		//}
+		delete i1;
+		IS_INFO(*i2);
 	}
 
 	virtual void Update(const float deltaTime) override

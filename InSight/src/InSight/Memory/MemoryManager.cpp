@@ -14,13 +14,14 @@ namespace Insight
 			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
-		void MemoryManager::TrackObject(void* ptr, const std::string& file, const const unsigned int& line)
+		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const const unsigned int& line)
 		{
 			if (!GetInstance()->m_trackingObjects.count(ptr))
 			{
 				GetInstance()->m_trackingObjects[ptr] = TrackingObjectRecord
 				{
 					ptr,
+					str,
 					file,
 					line
 				};
@@ -93,8 +94,8 @@ namespace Insight
 		{
 			for (auto it = m_trackingObjects.begin(); it != m_trackingObjects.end(); ++it)
 			{
-				IS_CORE_ERROR("Tracking object has not been destroyed or untracked. => Ptr: {0}, File: {1}, Line: {2}",
-					(*it).second.Ptr, (*it).second.File, (*it).second.Line);
+				IS_CORE_ERROR("Tracking {0} has not been destroyed or untracked. => Ptr: {1}, File: {2}, Line: {3}",
+					(*it).second.Str, (*it).second.Ptr, (*it).second.File, (*it).second.Line);
 			}
 		}
 	}

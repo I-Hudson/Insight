@@ -6,6 +6,8 @@ namespace Insight
 {
 	namespace Module
 	{
+		class ModuleManager;
+
 		struct ModuleStartupData
 		{
 			bool ManuallUpdate = false;
@@ -23,6 +25,9 @@ namespace Insight
 
 		protected:
 			bool m_manuallUpdate;
+			int m_addedIndex;
+
+			friend ModuleManager;
 		};
 	}
 }

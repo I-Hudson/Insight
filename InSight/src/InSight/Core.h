@@ -36,8 +36,10 @@
 
 #endif // SMART_POINTERS_IN_USE
 
+#define TRACK_CLASS() Insight::Memory::MemoryManager::TrackObject(this, "Class", __FILE__, __LINE__);
+#define UNTRACK_CLASS() Insight::Memory::MemoryManager::UnTrackObject(this);
 
-#define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, __FILE__, __LINE__);
+#define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, "Object (Ptr/Ref)", __FILE__, __LINE__);
 #define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
 
 #define BIT(x) (1 << x)

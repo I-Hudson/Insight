@@ -6,6 +6,7 @@
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
 
+#include "Insight/Library/Library.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Component/TransformComponent.h"
@@ -68,7 +69,8 @@ namespace Insight
 				m_framebuffer->GetRenderpass()
 			};
 			m_shader = NEW_ON_HEAP(VulkanShader, data);
-			
+			ShaderLibrary::GetInstance()->AddAsset(m_shader->GetUUID(), m_shader);
+
 			m_material = static_cast<VulkanMaterial*>(Material::Create());
 			m_material->SetShader(m_shader);
 
@@ -110,7 +112,6 @@ namespace Insight
 
 			DELETE_ON_HEAP(m_testMesh);
 
-			DELETE_ON_HEAP(m_shader);
 			DELETE_ON_HEAP(m_material);
 			DELETE_ON_HEAP(m_framebuffer);
 			DELETE_ON_HEAP(m_commandPool);

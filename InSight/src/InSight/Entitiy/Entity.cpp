@@ -96,7 +96,7 @@ Entity* Entity::GetChild(int childIndex)
 {
 	if (childIndex < 0 || childIndex >= m_data.Children.size())
 	{
-		IS_ASSERT("Entity: GetChild: Out of range.", true);
+		IS_ASSERT(true, "Entity: GetChild: Out of range.");
 		return nullptr;
 	}
 	return m_data.Children[childIndex];

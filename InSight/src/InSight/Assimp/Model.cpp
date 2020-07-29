@@ -4,14 +4,12 @@
 #include "stb_image.h"
 #include "Insight/Log.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Library/Library.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
-Model::Model(const std::string& filePath)
+Model::Model()
 	: Insight::UUID()
-{
-	IS_INFO("Loading model");
-	LoadMesh(filePath);
-}
+{ }
 
 Model::~Model()
 {
@@ -19,6 +17,18 @@ Model::~Model()
 	{
 		DELETE_ON_HEAP(*it);
 	}
+}
+
+Model* Model::Create(const std::string& filepath)
+{
+	Model* m = Insight::Library::Library<Model>::GetInstance()->AddAsset();
+
+	if (!filepath.empty())
+	{
+		IS_INFO("Loading model");
+		m->LoadMesh(filepath);
+	}
+	return m;
 }
 
 Mesh* Model::GetSubMesh(int index)

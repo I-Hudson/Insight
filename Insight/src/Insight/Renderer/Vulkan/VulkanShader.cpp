@@ -12,7 +12,8 @@ namespace Insight
 	namespace Render
 	{
 		VulkanShader::VulkanShader(ShaderData& data)
-			: m_device(data.Device) 
+			: Shader()
+			, m_device(data.Device) 
 			, m_shaderData(data)
 		{
 			Create(data);

@@ -60,7 +60,7 @@ namespace Insight
 
 		float& Vector4::operator[](const int& a_index)
 		{
-			IS_CORE_ASSERT("Vector4: Index was out of range '{0}'.", a_index >= 0 && a_index < 4);
+			IS_CORE_ASSERT(a_index >= 0 && a_index < 4, "Vector4: Index was out of range '{0}'.");
 			return i[a_index];
 		}
 

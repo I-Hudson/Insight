@@ -14,12 +14,13 @@
 class IS_API Model : public Insight::UUID
 {
 public:
-	Model(const std::string& filePath);
+	Model();
 	~Model();
+
+	static Model* Create(const std::string& filepath);
 
 	Mesh* GetSubMesh(int index);
 	unsigned int GetSubMeshCount() { return static_cast<unsigned int>(m_meshes.size()); }
-
 	const std::string& GetName() const;
 
 private:

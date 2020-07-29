@@ -8,7 +8,8 @@ namespace Insight
 	namespace Render
 	{
 		OpenGLShader::OpenGLShader(ShaderData& data)
-			: m_shaderData(data)
+			: Shader()
+			, m_shaderData(data)
 		{
 			Create(m_shaderData);
 		}

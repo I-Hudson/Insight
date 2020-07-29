@@ -5,6 +5,8 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/Module.h"
 
+#include <type_traits>
+
 namespace Insight
 {
 	namespace Module
@@ -29,7 +31,7 @@ namespace Insight
 			bool Exists(const char* moduleName);
 
 		private:
-			std::unordered_map<const char*, Module*> m_modules;
+			std::set<Module*> m_modules;
 		};
 
 
@@ -40,11 +42,21 @@ namespace Insight
 			{
 				T* newModule = NEW_ON_STACK(T, moduleData);
 
-				m_modules.insert(std::pair<const char*, Module*>(typeid(T).name(), newModule));
+				m_modules.insert(newModule);
 
 				return newModule;
 			}
-			return static_cast<T*>(m_modules[typeid(T).name()]);
+
+			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
+			{
+				if (typeid(*it).name() == typeid(T).name())
+				{
+					Module* m = *it;
+					return static_cast<T*>(m);
+				}
+			}
+
+			return nullptr;
 		}
 
 		template<typename T>
@@ -52,9 +64,15 @@ namespace Insight
 		{
 			if (Exists(typeid(T).name()))
 			{
-				auto it = m_modules.find(typeid(T).name());
-				delete it->second;
-
+				auto it = m_modules.begin();
+				for (; it < m_modules.end(); ++it)
+				{
+					if (typeid(T).name() == typeid((*it)).name())
+					{
+						break;
+					}
+				}
+				DELETE_ON_STACK(*it);
 				m_modules.erase(it);
 			}
 		}
@@ -64,7 +82,7 @@ namespace Insight
 		{
 			if (Exists(typeid(T).name()))
 			{
-				return m_modules.find(typeid(T).name())->second;
+				return m_modules.find(typeid(T).name());
 			}
 		}
 	}

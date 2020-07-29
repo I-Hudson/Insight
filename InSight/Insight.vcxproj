@@ -831,6 +831,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
+    <ClCompile Include="src\Insight\Module\AssetModule.cpp" />
     <ClCompile Include="src\Insight\Module\EntityModule.cpp" />
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />

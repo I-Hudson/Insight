@@ -6,15 +6,15 @@
 
 #include "Memory/MemoryManager.h"
 #include "Module/ModuleManager.h"
+#include "Module/AssetModule.h"
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
+
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #include <ppltasks.h>
-
-#include <taskflow.hpp>
 
 #include "Insight/Camera.h"
 
@@ -42,6 +42,8 @@ namespace Insight
 		
 		m_moduleManager = Module::ModuleManager::Create();
 		
+		m_moduleManager->AddModule<Module::AssetModule>();
+
 		Module::ModuleStartupData windowData;
 		windowData.ManuallUpdate = true;
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>(windowData);

@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
+#include "Insight/UUID.h"
 
 namespace Insight
 {
@@ -12,9 +13,10 @@ namespace Insight
 		{
 		public:
 			Library() { SetInstancePtr(this); }
-			~Library() { ClearPtr(); }
+			~Library();
 
 			T* AddAsset(const std::string& uuid, T* asset);
+			T* AddAsset();
 			T* GetAsset(const std::string& uuid);
 			void RemoveAsset(const std::string& uuid);
 
@@ -23,6 +25,17 @@ namespace Insight
 
 			std::unordered_map<std::string, T*> m_assets;
 		};
+
+		template<typename T>
+		inline Library<T>::~Library()
+		{
+			for (auto it = GetInstance()->m_assets.begin(); it != GetInstance()->m_assets.end(); ++it)
+			{
+				DELETE_ON_HEAP((*it).second);
+			}
+			GetInstance()->m_assets.clear();
+			ClearPtr();
+		}
 
 		template<typename T>
 		inline T* Library<T>::AddAsset(const std::string& uuid, T* asset)
@@ -34,6 +47,14 @@ namespace Insight
 
 			GetInstance()->m_assets[uuid] = asset;
 			return asset;
+		}
+
+		template<typename T>
+		inline T* Library<T>::AddAsset()
+		{
+			T* t = NEW_ON_HEAP(T);
+			Insight::UUID* uuid = static_cast<Insight::UUID*>(t);
+			return AddAsset(uuid->GetUUID(), t);
 		}
 
 		template<typename T>
@@ -53,3 +74,15 @@ namespace Insight
 		}
 	}
 }
+
+class Model;
+namespace Insight
+{
+	namespace Render
+	{
+		class Shader;
+	}
+}
+
+typedef Insight::Library::Library<Model> ModelLibrary;
+typedef Insight::Library::Library<Insight::Render::Shader> ShaderLibrary;

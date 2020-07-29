@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Renderer/ShaderModuleBase.h"
+#include "Insight/UUID.h"
 
 namespace Insight
 {
@@ -10,10 +11,11 @@ namespace Insight
 		class Device;
 		struct ShaderData;
 
-		class IS_API Shader
+		class IS_API Shader : public Insight::UUID
 		{
 		public:
-			virtual ~Shader() { };
+			Shader() : Insight::UUID() { TRACK_CLASS(); }
+			virtual ~Shader() { UNTRACK_CLASS(); };
 
 			virtual void Bind(void* context) = 0;
 			virtual void Resize(int width, int height) = 0;

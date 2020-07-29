@@ -12,6 +12,7 @@ namespace Insight
 		class WindowModule;
 		class GraphicsModule;
 		class InputModule;
+		class AssetModule;
 	}
 
 	class Camera;

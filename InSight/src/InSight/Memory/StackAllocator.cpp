@@ -18,7 +18,7 @@ namespace Insight
 		{
 			if (m_top > 0)
 			{
-				IS_CORE_ASSERT("StackAllocator: Memory leak.", true);
+				IS_CORE_ASSERT(true, "StackAllocator: Memory leak.");
 			}
 
 			free(m_startPtr);
@@ -32,7 +32,7 @@ namespace Insight
 
 			if (m_top + padding + size > m_totalSize) 
 			{
-				IS_CORE_ASSERT("StackAllocator: => Not engough memory.", true);
+				IS_CORE_ASSERT(true, "StackAllocator: => Not engough memory.");
 			}
 			m_top += padding;
 
