@@ -31,7 +31,7 @@ namespace Insight
 		class IS_API WindowModule : public Module
 		{
 		public:
-			WindowModule(ModuleStartupData& startupData = ModuleStartupData());
+			WindowModule();
 			virtual ~WindowModule() override;
 
 			virtual void Update(const float& deltaTime) override;

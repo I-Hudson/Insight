@@ -85,8 +85,7 @@ namespace Insight
 	{
 		Window* WindowModule::m_window;
 
-		WindowModule::WindowModule(ModuleStartupData& startupData)
-			: Module(startupData)
+		WindowModule::WindowModule()
 		{
 			m_window = new Window();
 

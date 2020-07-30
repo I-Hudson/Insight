@@ -14,15 +14,10 @@ namespace Insight
 	{
 		class WindowModule;
 
-		struct GraphicsModuleStartupData : public ModuleStartupData
-		{
-			WindowModule* WindowModule;
-		};
-
 		class IS_API GraphicsModule : public Module
 		{
 		public:
-			GraphicsModule(ModuleStartupData& startupData = ModuleStartupData());
+			GraphicsModule(WindowModule* windowModule);
 			virtual ~GraphicsModule() override;
 
 			virtual void Update(const float& deltaTime) override;

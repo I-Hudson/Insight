@@ -14,11 +14,9 @@ namespace Insight
 		Camera* GraphicsModule::m_mainCamera;
 		std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
-		GraphicsModule::GraphicsModule(ModuleStartupData& startupData) 
-			: Module(startupData)
+		GraphicsModule::GraphicsModule(WindowModule* windowModule) 
 		{
-			GraphicsModuleStartupData data = static_cast<GraphicsModuleStartupData&>(startupData);
-			m_windowModule = data.WindowModule;
+			m_windowModule = windowModule;
 
 			IS_CORE_INFO("{0}", m_windowModule->GetWindow()->GetHeight());
 

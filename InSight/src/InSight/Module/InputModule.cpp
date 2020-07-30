@@ -12,11 +12,9 @@ namespace Insight
 		double InputModule::m_mouseX;
 		double InputModule::m_mouseY;
 
-		InputModule::InputModule(ModuleStartupData& startupData)
-			: Module(startupData)
+		InputModule::InputModule(WindowModule* windowModule)
 		{
-			InputModuleData data = static_cast<InputModuleData&>(startupData);
-			m_windowModule = data.WindowModule;
+			m_windowModule = windowModule;
 
 			glfwSetKeyCallback(m_windowModule->GetWindow()->m_window, KeybordCallback);
 			glfwSetMouseButtonCallback(m_windowModule->GetWindow()->m_window, MouseButtonCallback);

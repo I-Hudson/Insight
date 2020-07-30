@@ -15,7 +15,7 @@ namespace Insight
 		class IS_API AssetModule : public TSingleton<AssetModule>, public Module
 		{
 		public:
-			AssetModule(ModuleStartupData& startupData = ModuleStartupData());
+			AssetModule();
 			virtual ~AssetModule();
 
 			virtual void Update(const float& deltaTime) override;

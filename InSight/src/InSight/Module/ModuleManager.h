@@ -14,13 +14,13 @@ namespace Insight
 		class IS_API ModuleManager : public TSingleton<ModuleManager>, public Module
 		{
 		public:
-			ModuleManager(ModuleStartupData& startupData = ModuleStartupData());
+			ModuleManager();
 			virtual ~ModuleManager() override;
 
 			virtual void Update(const float& deltaTime) override;
 
-			template <typename T>
-			T* AddModule(ModuleStartupData& moduleData = ModuleStartupData());
+			template <typename T, typename... Args>
+			T* AddModule(Args... args);
 			template <typename T>
 			void RemoveModule();
 
@@ -28,51 +28,35 @@ namespace Insight
 			Module* GetModule();
 
 		private:
-			bool Exists(const char* moduleName);
+			bool Exists(const std::string& moduleName);
 
 		private:
-			std::set<Module*> m_modules;
+			std::unordered_map<std::string, Module* > m_modules;
 		};
 
-
-		template<typename T>
-		inline T* ModuleManager::AddModule(ModuleStartupData& moduleData)
+		template<typename T, typename ...Args>
+		inline T* ModuleManager::AddModule(Args... args)
 		{
-			if (!Exists(typeid(T).name()))
+			std::string typeId = typeid(T).name();
+			if (!Exists(typeId))
 			{
-				T* newModule = NEW_ON_STACK(T, moduleData);
+				T* newModule = NEW_ON_HEAP(T, std::forward<Args>(args)...);
 
-				m_modules.insert(newModule);
+				m_modules[typeId] = newModule;
 
 				return newModule;
 			}
-
-			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
-			{
-				if (typeid(*it).name() == typeid(T).name())
-				{
-					Module* m = *it;
-					return static_cast<T*>(m);
-				}
-			}
-
-			return nullptr;
+			return dynamic_cast<T*>(m_modules[typeId]);
 		}
 
 		template<typename T>
 		inline void ModuleManager::RemoveModule()
 		{
-			if (Exists(typeid(T).name()))
+			std::string typeId = typeid(T).name();
+			if (Exists(typeId))
 			{
-				auto it = m_modules.begin();
-				for (; it < m_modules.end(); ++it)
-				{
-					if (typeid(T).name() == typeid((*it)).name())
-					{
-						break;
-					}
-				}
-				DELETE_ON_STACK(*it);
+				auto it = m_modules[typeId];
+				DELETE_ON_HEAP(*it);
 				m_modules.erase(it);
 			}
 		}
@@ -80,9 +64,10 @@ namespace Insight
 		template<typename T>
 		inline Module* ModuleManager::GetModule()
 		{
-			if (Exists(typeid(T).name()))
+			std::string typeId = typeid(T).name();
+			if (Exists(typeId))
 			{
-				return m_modules.find(typeid(T).name());
+				return m_modules[typeId];
 			}
 		}
 	}

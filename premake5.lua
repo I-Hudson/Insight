@@ -29,7 +29,7 @@ IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
 IncludeDir["glm"] = "$(SolutionDir)Insight/vendor/glm"
 IncludeDir["stb_image"] = "$(SolutionDir)Insight/vendor/stb_image"
 IncludeDir["glad"] = "$(SolutionDir)Insight/vendor/glad/include"
-IncludeDir["taskflow"] = "$(SolutionDir)Insight/vendor/taskflow/taskflow"
+IncludeDir["imgui"] = "$(SolutionDir)Insight/vendor/imgui/"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
@@ -64,6 +64,7 @@ project "Insight"
         "%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
 		"%{prj.name}/vendor/glad/src/**.cpp",
+		"%{prj.name}/vendor/imgui/**.h",
 	}
 
     includedirs 
@@ -77,7 +78,7 @@ project "Insight"
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.glad}",
-        "%{IncludeDir.taskflow}",
+        "%{IncludeDir.imgui}",
 	}
 
     sysincludedirs 
@@ -172,7 +173,7 @@ project "Sandbox"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.glm}",
-        "%{IncludeDir.taskflow}",
+        "%{IncludeDir.imgui}",
 	}
 
     sysincludedirs 

@@ -15,7 +15,7 @@ namespace Insight
 		class EntityModule : public TSingleton<EntityModule>, public Module
 		{
 		public:
-			EntityModule(ModuleStartupData& startupData = ModuleStartupData());
+			EntityModule();
 			virtual ~EntityModule();
 
 			virtual void Update(const float& deltaTime) override;

@@ -7,8 +7,7 @@ namespace Insight
 {
 	namespace Module
 	{
-		ModuleManager::ModuleManager(ModuleStartupData& startupData)
-			: Module(startupData)
+		ModuleManager::ModuleManager()
 		{
 		}
 
@@ -16,11 +15,13 @@ namespace Insight
 		{
 			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
 			{
-				Module* m = *it;
-				m->~Module();
-				DELETE_ON_STACK(m);
+				if (it->second != nullptr && it->second->GetDependenciesCount() != 0)
+				{
+					Module* m = it->second;
+					m->~Module();
+					DELETE_ON_HEAP(m);
+				}
 			}
-			// No need to call delete as all modules are placed on the stack.
 			m_modules.clear();
 		}
 
@@ -30,23 +31,16 @@ namespace Insight
 
 			for (auto mod : m_modules)
 			{
-				if (!mod->ShouldManuallUpate())
+				if (!mod.second->ShouldManuallUpate())
 				{
-					mod->Update(deltaTime);
+					mod.second->Update(deltaTime);
 				}
 			}
 		}
 
-		bool ModuleManager::Exists(const char* moduleName)
+		bool ModuleManager::Exists(const std::string& moduleName)
 		{
-			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
-			{
-				if (typeid(*it).name() == moduleName)
-				{
-					return true;
-				}
-			}
-			return false;
+			return m_modules.find(moduleName) != m_modules.end();
 		}
 	}
 }

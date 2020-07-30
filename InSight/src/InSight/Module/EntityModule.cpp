@@ -11,10 +11,9 @@ namespace Insight
 	{
 		std::vector<Entity*> EntityModule::m_entities;
 
-		EntityModule::EntityModule(ModuleStartupData& startupData)
+		EntityModule::EntityModule()
 		{
 			TSingleton::SetInstancePtr(this);
-			m_manuallUpdate = startupData.ManuallUpdate;
 		}
 
 		EntityModule::~EntityModule()
