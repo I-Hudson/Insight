@@ -65,6 +65,7 @@ project "Insight"
 		"%{prj.name}/vendor/glm/glm/**.inl",
 		"%{prj.name}/vendor/glad/src/**.cpp",
 		"%{prj.name}/vendor/imgui/**.h",
+		"%{prj.name}/vendor/imgui/**.cpp",
 	}
 
     includedirs 

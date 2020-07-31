@@ -10,6 +10,7 @@
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
+#include "Insight/Renderer/ImGuiRenderer.h"
 
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Event/EventManager.h"
@@ -212,6 +213,8 @@ namespace Insight
 
 				vkCmdDrawIndexed((*it)->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
 				
+				ImGuiRenderer::GetInstance()->Render(*it);
+
 				m_swapchainFramebuffers[i]->UnbindBuffer(*it);
 			
 				(*it)->EndRecord();

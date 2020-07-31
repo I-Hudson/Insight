@@ -28,6 +28,11 @@ namespace Insight
 			return m_queue;
 		}
 
+		QueueFamily& Queue::GetQueueFamily()
+		{
+			return m_queueFamily;
+		}
+
 		void Queue::Submit(QueueInfo& queueInfo)
 		{
 			VkResult result{};

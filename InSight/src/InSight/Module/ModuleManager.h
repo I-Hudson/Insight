@@ -25,7 +25,7 @@ namespace Insight
 			void RemoveModule();
 
 			template<typename T>
-			Module* GetModule();
+			T* GetModule();
 
 		private:
 			bool Exists(const std::string& moduleName);
@@ -62,12 +62,12 @@ namespace Insight
 		}
 
 		template<typename T>
-		inline Module* ModuleManager::GetModule()
+		inline T* ModuleManager::GetModule()
 		{
 			std::string typeId = typeid(T).name();
 			if (Exists(typeId))
 			{
-				return m_modules[typeId];
+				return dynamic_cast<T*>(m_modules[typeId]);
 			}
 		}
 	}

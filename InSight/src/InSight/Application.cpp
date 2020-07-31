@@ -12,6 +12,8 @@
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
 
+#include "Insight/Renderer/ImGuiRenderer.h"
+
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #include <ppltasks.h>
@@ -45,13 +47,13 @@ namespace Insight
 		m_moduleManager->AddModule<Module::AssetModule>();
 
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
-		m_windowModule->SetManuallyUpdate(false);
+		m_windowModule->SetManuallyUpdate(true);
 
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(m_windowModule);
-		m_graphicsModule->SetManuallyUpdate(false);
+		m_graphicsModule->SetManuallyUpdate(true);
 
 		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(m_windowModule);
-		m_inputModule->SetManuallyUpdate(false);
+		m_inputModule->SetManuallyUpdate(true);
 
 		m_moduleManager->AddModule<Module::EntityModule>();
 
@@ -170,6 +172,21 @@ namespace Insight
 		{
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
+
+			ImGuiRenderer::GetInstance()->NewFrame();
+
+			static float f = 0.0f;
+			static int counter = 0;
+
+			bool show_demo_window = true;
+			bool show_another_window = true;
+
+			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+			ImGui::SliderFloat("Main Camera FOV: ", &m_mainCamera->GetFov(), 0.1f, 120.0f);
+
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
 
 			Update(Time::GetDeltaTime());
 			Draw();

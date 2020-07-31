@@ -59,6 +59,8 @@ namespace Insight
 			void Resize();
 			void Bind(CommandBuffer* commandBuffers);
 
+			DescriptorPool* GetDescPool() { return m_descPool; }
+
 		private:
 			void DestroyUniformBuffers();
 			void CreateUniformBufferMem(UniformData& uniformData);

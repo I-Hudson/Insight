@@ -32,6 +32,7 @@ namespace Insight
 
 			const QueueFamilyType GetType() const;
 			VkQueue& GetQueue();
+			QueueFamily& GetQueueFamily();
 
 			void Submit(QueueInfo& queueInfo);
 			void Wait() const;

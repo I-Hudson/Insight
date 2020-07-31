@@ -21,6 +21,7 @@ namespace Insight
 	{
 		class Device;
 		class VulkanMaterial;
+		class ImGuiRenderer;
 
 		struct SwapChainSupportDetails
 		{
@@ -59,6 +60,7 @@ namespace Insight
 
 		private:
 			void RecreateSwapchain(const Event& event);
+			void DrawUI();
 
 		private:
 			SwapchainSettings m_swapchainSettings;
@@ -81,6 +83,8 @@ namespace Insight
 			SwapChainSupportDetails m_swapChainDetails;
 			VkSwapchainKHR m_swapchain;
 			std::vector<VulkanFramebuffer*> m_swapchainFramebuffers;
+
+			friend ImGuiRenderer;
 		};
 	}
 }

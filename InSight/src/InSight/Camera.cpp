@@ -31,7 +31,12 @@ namespace Insight
 
 	void Camera::SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far)
 	{
-		m_projectionMatrix = glm::perspective(glm::radians(45.0f), GetCamerAspect(a_aspect), a_near, a_far);
+		m_fov = a_fov;
+		m_cameraAspect = a_aspect;
+		m_nearPlane = a_near;
+		m_farPlane = a_far;
+
+		m_projectionMatrix = glm::perspective(glm::radians(m_fov), GetCamerAspect(a_aspect), a_near, a_far);
 		SetProjectionViewMatrix();
 	}
 
@@ -40,8 +45,16 @@ namespace Insight
 		SetProjectionViewMatrix();
 	}
 
+	void Camera::SetFov(const float& fov)
+	{
+		m_fov = fov;
+		SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
+	}
+
 	void Camera::Update(float a_deltaTime)
 	{
+		SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
+
 		// Get the camera's forward, right, up, and location vectors
 		glm::vec4 vForward = m_viewMatrix[2];
 		glm::vec4 vRight = m_viewMatrix[0];

@@ -99,6 +99,8 @@ namespace Insight
 			};
 			m_testMesh = NEW_ON_HEAP(Mesh, vertices, indices, std::vector<Texture>());
 
+			m_imguiRenderer = NEW_ON_HEAP(ImGuiRenderer, this);
+
 			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
 
 			IS_CORE_INFO("Vulkan Setup Complete.");
@@ -111,6 +113,8 @@ namespace Insight
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
 
 			DELETE_ON_HEAP(m_testMesh);
+
+			DELETE_ON_HEAP(m_imguiRenderer);
 
 			DELETE_ON_HEAP(m_material);
 			DELETE_ON_HEAP(m_framebuffer);

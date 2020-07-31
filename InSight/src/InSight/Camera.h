@@ -31,7 +31,8 @@ namespace Insight
 
 		//Set the position for the camera
 		void SetPosition(const glm::vec3& a_value);
-
+		void SetFov(const float& fov);
+		float& GetFov() { return m_fov; }
 		void Update(float a_deltaTime);
 
 		//Get the projection view matrix
@@ -44,6 +45,11 @@ namespace Insight
 	private:
 
 		void SetProjectionViewMatrix();
+
+		float m_fov;
+		CameraAspect m_cameraAspect;
+		float m_nearPlane;
+		float m_farPlane;
 
 		glm::mat4 m_projectionViewMatrix;
 		glm::mat4 m_projectionMatrix;

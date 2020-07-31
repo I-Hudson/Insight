@@ -9,6 +9,7 @@
 #include "Insight/Renderer/Vulkan/Queue.h"
 #include "Insight/Renderer/Vulkan/Swapchain.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
+#include "Insight/Renderer/ImGuiRenderer.h"
 
 
 namespace Insight
@@ -37,7 +38,6 @@ namespace Insight
 			Queue GetGraphicsQueue() const { return m_device->GetQueue(QueueFamilyType::Graphics); }
 			Queue GetPresentQueue() const { return m_device->GetQueue(QueueFamilyType::Present); }
 
-
 		private:
 
 			void RecreateFramebuffers(const Event& event);
@@ -49,6 +49,8 @@ namespace Insight
 			void VulkanEnumExtProps();
 
 		private:
+
+			ImGuiRenderer* m_imguiRenderer;
 
 			// Vulkan objects
 			Device* m_device;
