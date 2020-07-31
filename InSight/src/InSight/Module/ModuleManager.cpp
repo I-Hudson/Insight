@@ -13,13 +13,25 @@ namespace Insight
 
 		ModuleManager::~ModuleManager()
 		{
-			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
+			auto it = m_modules.begin();
+			while(!m_modules.empty())
 			{
-				if (it->second != nullptr && it->second->GetDependenciesCount() != 0)
+				if (it->second != nullptr && it->second->GetDependenciesCount() == 0)
 				{
 					Module* m = it->second;
 					m->~Module();
 					DELETE_ON_HEAP(m);
+
+					m_modules.erase(it);
+					it = m_modules.begin();
+				}
+				else if (it != m_modules.end())
+				{
+					++it;
+				}
+				else
+				{
+					IS_CORE_ASSERT(false, "Not all modules have been removed.");
 				}
 			}
 			m_modules.clear();
