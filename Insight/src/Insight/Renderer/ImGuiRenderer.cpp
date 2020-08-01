@@ -7,6 +7,7 @@
 #include "Insight/Module/GraphicsModule.h"
 #include "Insight/Library/Library.h"
 #include "Insight/Event/EventManager.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 #ifdef IS_VULKAN
 #include "Insight/Renderer/Vulkan/VulkanRenderer.h"
@@ -105,6 +106,7 @@ namespace Insight
 		ImGuiRenderer::~ImGuiRenderer()
 		{
 #ifdef IS_VULKAN
+			EventManager::Unbind(EventType::WindowResize, typeid(ImGuiRenderer).name());
 			DELETE_ON_HEAP(m_framebuffer);
 			DELETE_ON_HEAP(m_commandPool);
 
@@ -131,7 +133,7 @@ namespace Insight
 
 		void ImGuiRenderer::Render(CommandBuffer* commandBuffer)
 		{
-			m_framebuffer->GetFence()->Wait();
+			IS_PROFILE_FUNCTION();
 
 			ImGui::Render();
 			ImDrawData* draw_data = ImGui::GetDrawData();
@@ -139,23 +141,13 @@ namespace Insight
 #ifdef IS_VULKAN
 			// Record dear imgui primitives into command buffer
 			ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer->GetBuffer());
-
-			//std::vector<VkSemaphore> waitSemaphores = { fb->GetFinishedSem()->GetSemaphore() };
-			//std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			//std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
-			//std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
-			//VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
-			//m_framebuffer->GetFence()->Reset();
-
-			//GraphicsQueueInfo info;
-			//info.SubmitInfo = &submitInfo;
-			//info.SyncFence = m_framebuffer->GetFence();
-			//m_vulkanRenderer->GetDeviceWrapper()->GetQueue(QueueFamilyType::Graphics).Submit(info);
 #endif
 		}
 
 		void ImGuiRenderer::WindowResize(const Event& event)
 		{
+			const WindowResizeEvent e = static_cast<const WindowResizeEvent&>(event);
+			m_framebuffer->Resize(e.m_width, e.m_height);
 		}
 
 #ifdef IS_VULKAN

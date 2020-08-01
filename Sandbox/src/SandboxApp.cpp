@@ -15,19 +15,30 @@ public:
 
 	virtual void Create() override
 	{
+		IS_PROFILE_FUNCTION();
+
 		Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
-		Entity* testModel = Entity::CreateFromModel(m);
+		Model* n = Model::Create("./models/nano/nanosuit.fbx");
 
-		int* i1 = new int;
-		*i1 = 1;
-		int* i2 = i1;
-
-		delete i1;
-		IS_INFO(*i2);
+		for (size_t i = 0; i < 20; i++)
+		{
+			if (i % 2 == 0)
+			{
+				Entity* testModel = Entity::CreateFromModel(m);
+				testModel->GetComponent<TransformComponent>()->SetPosition(glm::vec3(2 * i, 0, 2 * i));
+			}
+			else
+			{
+				Entity* testModel = Entity::CreateFromModel(n);
+				testModel->GetComponent<TransformComponent>()->SetPosition(glm::vec3(2 * i, 0, 2 * i));
+			}
+		}
 	}
 
 	virtual void Update(const float deltaTime) override
 	{
+		IS_PROFILE_FUNCTION();
+
 		double x, y;
 		Input::GetMousePosition(&x, &y);
 
@@ -56,6 +67,8 @@ public:
 
 	~Sandbox()
 	{
+		IS_PROFILE_FUNCTION();
+
 		DELETE_ON_HEAP(testModel);
 		e->Delete();
 	}

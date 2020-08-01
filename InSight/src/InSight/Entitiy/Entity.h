@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Serialization/Serializable.h"
 #include "Insight/UUID.h"
 
 #include <string>
@@ -39,11 +40,12 @@ inline ComponentID GetComponentID() noexcept
 class Model;
 
 class IS_API Entity : public Insight::UUID
+					, public Insight::Serialization::Serializable
 {
 public:
 	Entity();
 	Entity(const std::string& id);
-	~Entity();
+	virtual ~Entity() override;
 
 	static Entity* Create(const std::string& id = "");
 	static Entity* CreateFromModel(Model* model);
@@ -81,10 +83,15 @@ public:
 	template<typename T>
 	T* GetComponent(const std::string& uuid) const;
 
+	virtual void Serialize(std::ostream& out) override;
+	virtual void Deserialize(std::istream& in) override;
+
 private:
 	void RemoveAllComponenets();
 
 	EntityData m_data;
+
+	REGISTER_DEC_TYPE(Entity);
 };
 
 template<typename T>

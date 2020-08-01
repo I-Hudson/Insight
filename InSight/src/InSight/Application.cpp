@@ -11,10 +11,10 @@
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
-
 #include "Insight/Renderer/ImGuiRenderer.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Insight/Serialization/Serializable.h"
 
 #include <ppltasks.h>
 
@@ -161,6 +161,25 @@ namespace Insight
 		std::cout << "New/Delete-----------------\n";
 	}
 
+	void TestFunc(Camera* cam)
+	{
+		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+		ImGui::SliderFloat("Main Camera FOV: ", &cam->GetFov(), 0.1f, 120.0f);
+
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::End();
+
+		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_S))
+		{
+			Serialization::SerializableRegistry::SerializeAll();
+		}
+		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
+		{
+			Serialization::SerializableRegistry::DeserializeAll();
+		}
+	}
+
 	void Application::Run()
 	{
 		//AllcoBench();
@@ -170,6 +189,8 @@ namespace Insight
 
 		do
 		{
+			IS_PROFILE_FUNCTION();
+
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
 
@@ -181,13 +202,8 @@ namespace Insight
 			bool show_demo_window = true;
 			bool show_another_window = true;
 
-			ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-			ImGui::SliderFloat("Main Camera FOV: ", &m_mainCamera->GetFov(), 0.1f, 120.0f);
-
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			ImGui::End();
-
+			TestFunc(m_mainCamera.get());
+			
 			Update(Time::GetDeltaTime());
 			Draw();
 

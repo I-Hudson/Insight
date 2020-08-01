@@ -33,6 +33,14 @@ namespace Insight
 			vkBindBufferMemory(device->GetDevice(), buffer, bufferMemory, 0);
 		}
 
+		void alignedFree(void* data)
+		{
+#if	defined(_MSC_VER) || defined(__MINGW32__)
+			_aligned_free(data);
+#else
+			free(data);
+#endif
+		}
 		VulkanMaterial::VulkanMaterial()
 		{
 		}
@@ -51,8 +59,15 @@ namespace Insight
 
 			for (auto it = m_uniformData.begin(); it != m_uniformData.end(); ++it )
 			{
+				UnMapBufferMem(it->second);
 				vkDestroyBuffer(s_Renderer->GetDevice(), (*it).second.Buffer, nullptr);
 				vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
+				if (it->second.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+				{
+					//alignedFree(it->second.Data);
+					DELETE_ARR_ON_HEAP(it->second.Data, it->second.Size);
+				}
+
 			}
 
 			Memory::MemoryManager::DeleteOnFreeList(m_descPool);
@@ -95,6 +110,11 @@ namespace Insight
 
 		void VulkanMaterial::SetUniforms()
 		{
+			if (m_isDirty)
+			{
+
+			}
+
 			std::vector<UniformData*> uniformData;
 			std::vector<SamplerData*> samplerData;
 			for (auto it = m_uniformData.begin(); it != m_uniformData.end(); ++it)
@@ -115,21 +135,21 @@ namespace Insight
 
 			if (m_uniformData.find("MVP") == m_uniformData.end())
 			{
-				data.Size = sizeof(MVPUniformBuffer);
+				data.TypeSize = sizeof(MVPUniformBuffer);
+				data.Size = data.TypeSize;
 				data.Binding = 0;
+				data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				CreateUniformBufferMem(data);
+				MapBufferMem(data);
 				m_uniformData["MVP"] = data;
 			}
 			data = m_uniformData["MVP"];
 
-			m_mvp.u_model = model;
 			m_mvp.u_view = view;
 			m_mvp.u_proj = proj;
 			m_mvp.u_proj[1][1] *= -1;
 
-			MapBufferMem(data);
 			memcpy(data.Data, &m_mvp, sizeof(MVPUniformBuffer));
-			UnMapBufferMem(data);
 		}
 
 		void VulkanMaterial::UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding)
@@ -140,6 +160,7 @@ namespace Insight
 			{
 				data.Size = size;
 				data.Binding = binding;
+				data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				CreateUniformBufferMem(data);
 				m_uniformData[key] = data;
 			}
@@ -166,11 +187,21 @@ namespace Insight
 			m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
 		}
 
-		void VulkanMaterial::Bind(CommandBuffer* commandBuffers)
+		void VulkanMaterial::Bind(CommandBuffer* commandBuffers, int drawIndex)
 		{
 			m_shader->Bind(commandBuffers);
 
-			vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 0, nullptr);
+			// One dynamic offset per dynamic descriptor to offset into the ubo containing all model matrices
+			uint32_t dynamicOffset = drawIndex * static_cast<uint32_t>(m_dynamicOffset);
+
+			if (m_dynamicOffset > 0)
+			{
+				vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 1, &dynamicOffset);
+			}
+			else
+			{
+				vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 0, nullptr);
+			}
 		}
 
 		void VulkanMaterial::DestroyUniformBuffers()

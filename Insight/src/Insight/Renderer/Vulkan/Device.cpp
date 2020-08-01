@@ -179,6 +179,7 @@ namespace Insight
 				if (IsDeviceSuitable(device))
 				{
 					m_physicalDevice = device;
+					vkGetPhysicalDeviceProperties(m_physicalDevice, &m_deviceProperties);
 
 					std::vector<QueueFamily> families
 					{

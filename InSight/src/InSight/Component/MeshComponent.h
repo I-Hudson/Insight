@@ -9,14 +9,18 @@
 class IS_API MeshComponent : public Component
 {
 public:
+	MeshComponent();
 	MeshComponent(Entity* owner);
 	virtual ~MeshComponent() override;
 
 	void SetMesh(Mesh* mesh) { m_mesh = mesh; }
 	Mesh* GetMesh() const { return m_mesh; }
 
-	void SetMaterial(Material* material) { m_materal = material; }
+	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
+
+	virtual void Serialize(std::ostream& out) override;
+	virtual void Deserialize(std::istream& in) override;
 
 	// Returns a new array of vertices.
 	std::vector<glm::vec3> GetVertices() const { return m_mesh->GetVertices(); }

@@ -36,6 +36,8 @@ namespace Insight
 
 			uint32_t GetMemoryType(const uint32_t& memoryType, const VkMemoryPropertyFlags& memProb);
 
+			VkPhysicalDeviceProperties GetDeviceProperties() { return m_deviceProperties; }
+
 			void WaitForIdle();
 
 			void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
@@ -53,6 +55,7 @@ namespace Insight
 			VkSurfaceKHR m_surface;
 			VkDevice m_device;
 			VkPhysicalDevice m_physicalDevice;
+			VkPhysicalDeviceProperties m_deviceProperties;
 
 			DeviceSettings m_deviceSettings;
 

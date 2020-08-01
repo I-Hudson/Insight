@@ -3,6 +3,7 @@
 #include "Insight/Renderer/Vulkan/Vulkan.h"
 #include "Insight/Renderer/Vulkan/Fence.h"
 #include "Insight/Renderer/Vulkan/Device.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -21,6 +22,8 @@ namespace Insight
 
 		void Fence::Wait() const
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_inUse)
 			{
 				vkWaitForFences(m_device->GetDevice(), 1, &m_fence, VK_TRUE, UINT64_MAX);

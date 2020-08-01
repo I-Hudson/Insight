@@ -49,6 +49,12 @@
     <Filter Include="src\Insight\Renderer\Vulkan">
       <UniqueIdentifier>{D85D8E3A-446B-BC20-CD51-B80B395E88D7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Scene">
+      <UniqueIdentifier>{0F7AC34D-7B90-C1E3-C407-4D05305D926B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Serialization">
+      <UniqueIdentifier>{7F377825-EBF9-ABAF-34AA-3A3CA0AB848D}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\ShaderParser">
       <UniqueIdentifier>{E511A212-D136-F192-FA81-D622E605F0B0}</UniqueIdentifier>
     </Filter>
@@ -314,6 +320,12 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Vulkan\VulkanShader.h">
       <Filter>src\Insight\Renderer\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Scene\Scene.h">
+      <Filter>src\Insight\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Serialization\Serializable.h">
+      <Filter>src\Insight\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
       <Filter>src\Insight\ShaderParser</Filter>
@@ -1786,6 +1798,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Serialization\Serializable.cpp">
+      <Filter>src\Insight\Serialization</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

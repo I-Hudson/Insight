@@ -8,6 +8,7 @@
 class IS_API TransformComponent : public Component
 {
 public:
+	TransformComponent();
 	TransformComponent(Entity* owner);
 	virtual ~TransformComponent() override;
 
@@ -15,6 +16,11 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
+	virtual void Serialize(std::ostream& out) override;
+	virtual void Deserialize(std::istream& in) override;
+
 private:
 	glm::mat4 m_transform;
+
+	REGISTER_DEC_TYPE(TransformComponent);
 };

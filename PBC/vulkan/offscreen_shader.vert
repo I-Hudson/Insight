@@ -9,12 +9,16 @@ layout(location = 3) in vec2 InUV1;
 layout(location = 0) out vec3 fragColor;
 layout(set = 0, binding = 0) uniform MVPUniformBuffer
 {
-    mat4 u_model;
     mat4 u_view;
     mat4 u_proj;
 } mvp;
 
+layout(set = 0, binding = 1) uniform ModelUniformBuffer //#dynamic
+{
+    mat4 u_model;
+} model;
+
 void main() {
-    gl_Position = mvp.u_proj * inverse(mvp.u_view) * mvp.u_model * vec4(inPosition.xyz, 1.0);
-    fragColor =  (mvp.u_model * vec4(inPosition.xyz, 1.0)).xyz;
+    gl_Position = mvp.u_proj * inverse(mvp.u_view) * model.u_model * vec4(inPosition.xyz, 1.0);
+    fragColor =  (model.u_model * vec4(inPosition.xyz, 1.0)).xyz;
 }

@@ -38,9 +38,13 @@ namespace Insight
 
 		struct MVPUniformBuffer
 		{
-			glm::mat4 u_model;
 			glm::mat4 u_view;
 			glm::mat4 u_proj;
+		};
+
+		struct ModelUniformBuffer
+		{
+			glm::mat4* u_model = nullptr;
 		};
 
 		class VulkanMaterial : public Material
@@ -79,6 +83,8 @@ namespace Insight
 
 			std::unordered_map<std::string, UniformData> m_uniformData;
 			std::unordered_map<std::string, SamplerData> m_samplerData;
+
+			ModelUniformBuffer m_modelUniform;
 
 			static VulkanRenderer* s_Renderer;
 			friend VulkanRenderer;

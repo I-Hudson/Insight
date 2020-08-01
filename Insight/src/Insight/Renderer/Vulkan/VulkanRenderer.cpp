@@ -21,6 +21,24 @@ namespace Insight
 {
 	namespace Render
 	{
+		std::string GetFormatInt(uint64_t i)
+		{
+			std::string iStr = std::to_string(i);
+			std::string returnStr;
+
+			int cIndex = 0;
+			for (int ii = iStr.size() - 1; ii >= 0; --ii)
+			{
+				if (cIndex % 3 == 0 && ii != iStr.size() - 1)
+				{
+					returnStr.insert(0, ",");
+				}
+				cIndex++;
+				returnStr.insert(0, std::string(1, iStr[ii]));
+			}
+			return returnStr;
+		}
+
 		VulkanRenderer::VulkanRenderer(RendererStartUpData& startupData)
 		{
 			Render::VulkanVertexBuffer::s_Renderer = this;
@@ -151,12 +169,20 @@ namespace Insight
 			m_framebuffer->BindBuffer(m_commandBuffer);
 			m_material->Bind(m_commandBuffer);
 			
+			uint64_t vertexCount = 0;
+			uint64_t triCount = 0;
+			uint64_t meshCount = 0;
+
 			for (auto it = meshes.begin(); it != meshes.end(); ++it)
 			{
 				if ((*it)->GetMesh() == nullptr)
 				{
 					continue;
 				}
+
+				vertexCount += (*it)->GetMesh()->GetVertexCount();
+				triCount += (*it)->GetMesh()->GetIndicesCount();
+				meshCount++;
 
 				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
 				VkBuffer indexBuffer = static_cast<VulkanIndexBuffer*>((*it)->GetMesh()->GetIndexBuffer())->GetBuffer();
@@ -182,6 +208,15 @@ namespace Insight
 			info.SubmitInfo = &submitInfo;
 			info.SyncFence = m_framebuffer->GetFence();
 			m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
+			
+			std::string vStr = GetFormatInt(vertexCount);
+			std::string tStr = GetFormatInt(triCount);
+		
+			ImGui::Begin("Renderer");
+			ImGui::Text("Vertex Count: %s", vStr.c_str());
+			ImGui::Text("Tri Count: %s", tStr.c_str());
+			ImGui::Text("Mesh Count: %d", meshCount);
+			ImGui::End();
 
 			m_swapchain->Draw(m_framebuffer->GetFinishedSem(), m_framebuffer);
 		}

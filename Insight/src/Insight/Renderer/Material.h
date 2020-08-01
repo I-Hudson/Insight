@@ -11,6 +11,8 @@ namespace Insight
 	}
 }
 
+class MeshComponent;
+
 class IS_API Material
 {
 public:
@@ -24,5 +26,11 @@ public:
 	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
 
 	static Material* Create();
+
+protected:
+	UINT m_useageCount;
+	bool m_isDirty;
+
+	friend MeshComponent;
 };
 

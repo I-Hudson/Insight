@@ -5,6 +5,7 @@
 #include "Insight/Renderer/Vulkan/Device.h"
 #include "Insight/Renderer/Vulkan/Queue.h"
 
+#include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Library/Library.h"
 #include "Insight/Renderer/ShaderModule.h"
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
@@ -153,6 +154,8 @@ namespace Insight
 
 		void Swapchain::AcquireNextImage()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_inFlightFences[m_currentFrame]->Wait();
 
 			uint32_t prevIndex = m_imageIndex;
@@ -173,6 +176,8 @@ namespace Insight
 
 		void Swapchain::Submit(Semaphore* waitSemaphore)
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_imagesInFlight[m_imageIndex] = m_inFlightFences[m_currentFrame];
 
 			std::vector<VkSemaphore> waitSemaphores = { waitSemaphore->GetSemaphore() };
@@ -191,6 +196,8 @@ namespace Insight
 
 		void Swapchain::Draw(Semaphore* waitSemaphore, VulkanFramebuffer* offscreenFB)
 		{
+			IS_PROFILE_FUNCTION();
+
 			int i = 0;
 			++tempShader;
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
@@ -225,6 +232,8 @@ namespace Insight
 
 		void Swapchain::Present()
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::vector<VkSemaphore> signalSemaphore = { m_swapchainFramebuffers[m_currentFrame]->GetFinishedSem()->GetSemaphore() };
 			std::vector<VkSwapchainKHR>swapchains = { m_swapchain };
 			VkPresentInfoKHR presentInfo = VulkanInits::PresnetInfo(signalSemaphore, swapchains, m_imageIndex);

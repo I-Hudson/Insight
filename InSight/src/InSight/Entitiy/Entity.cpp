@@ -11,14 +11,18 @@
 
 using namespace Insight::Module;
 
+REGISTER_DEF_TYPE(Entity);
+
 Entity::Entity()
 	: Insight::UUID()
+	, Serializable(this, false)
 {
 	m_data.Name = "Default";
 }
 
 Entity::Entity(const std::string& id)
 	: Insight::UUID()
+	, Serializable(this, false)
 {
 	m_data.Name = id;
 }
@@ -110,6 +114,25 @@ void Entity::RemoveChild(Entity* child)
 		m_data.Children.erase(it);
 		child->SetParent(nullptr);
 	}
+}
+
+void Entity::Serialize(std::ostream& out)
+{
+	out << "Entity: " << GetUUID() ENDL;
+	out <<  "Name: " << m_data.Name ENDL;
+	out << "Components: " ENDL;
+	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	{
+		(*it)->Serialize(out);
+	}
+}
+
+void Entity::Deserialize(std::istream& in)
+{
+	std::string result;
+	std::getline(in, result);
+
+	IS_INFO("{0}", result);
 }
 
 void Entity::RemoveAllComponenets()
