@@ -6,6 +6,7 @@
 #include "InSight/Application.h"
 #include "InSight/Log.h"
 #include "Insight/Time/Stopwatch.h"
+#include "Insight/Time/Time.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Input/Input.h"
 #include "Insight/Library/Library.h"

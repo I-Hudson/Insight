@@ -62,12 +62,6 @@ namespace Insight
 				UnMapBufferMem(it->second);
 				vkDestroyBuffer(s_Renderer->GetDevice(), (*it).second.Buffer, nullptr);
 				vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
-				if (it->second.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
-				{
-					//alignedFree(it->second.Data);
-					DELETE_ARR_ON_HEAP(it->second.Data, it->second.Size);
-				}
-
 			}
 
 			Memory::MemoryManager::DeleteOnFreeList(m_descPool);
@@ -149,7 +143,7 @@ namespace Insight
 			m_mvp.u_proj = proj;
 			m_mvp.u_proj[1][1] *= -1;
 
-			memcpy(data.Data, &m_mvp, sizeof(MVPUniformBuffer));
+			memcpy(data.DataMapped, &m_mvp, sizeof(MVPUniformBuffer));
 		}
 
 		void VulkanMaterial::UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding)
@@ -167,7 +161,7 @@ namespace Insight
 			data = m_uniformData[key];
 
 			MapBufferMem(data);
-			memcpy(data.Data, uniformData, data.Size);
+			memcpy(data.DataMapped, uniformData, data.Size);
 			UnMapBufferMem(data);
 		}
 
@@ -225,7 +219,7 @@ namespace Insight
 
 		void VulkanMaterial::MapBufferMem(UniformData& uniformData)
 		{
-			vkMapMemory(s_Renderer->GetDevice(), uniformData.BufferMem, 0, uniformData.Size, 0, &uniformData.Data);
+			vkMapMemory(s_Renderer->GetDevice(), uniformData.BufferMem, 0, uniformData.Size, 0, &uniformData.DataMapped);
 		}
 
 		void VulkanMaterial::UnMapBufferMem(UniformData& uniformData)

@@ -3,6 +3,7 @@
 
 #include "Insight/Renderer/Vulkan/Vulkan.h"
 #include "Insight/Renderer/Vulkan/CommandBuffer.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -19,6 +20,7 @@ namespace Insight
 		void CommandBuffer::StartRecord(const VkCommandBufferUsageFlags& usageFlags,
 										const VkCommandBufferInheritanceInfo* inheritanceInfo)
 		{
+			IS_PROFILE_FUNCTION();
 			VkCommandBufferBeginInfo beginInfo = VulkanInits::CommandBufferBeginInfo(usageFlags, inheritanceInfo);
 
 			ThrowIfFailed(vkBeginCommandBuffer(m_commandBuffer, &beginInfo));
@@ -26,6 +28,7 @@ namespace Insight
 
 		void CommandBuffer::EndRecord()
 		{
+			IS_PROFILE_FUNCTION();
 			ThrowIfFailed(vkEndCommandBuffer(m_commandBuffer));
 		}
 	}

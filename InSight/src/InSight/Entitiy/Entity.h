@@ -16,7 +16,7 @@ const size_t MaxComponents = 32;
 struct EntityData
 {
 	std::string Name;
-	Entity* Parent;
+	Entity* Parent = nullptr;
 	std::vector<Entity*> Children;
 	std::vector<Component*> Components;
 	std::bitset<MaxComponents> ComponetBitset;
@@ -62,6 +62,7 @@ public:
 	Entity* AddChild(const std::string& childId = "");
 	void AddChild(Entity* child);
 	Entity* GetChild(int childIndex);
+	unsigned int GetChildCount() { return m_data.Children.size(); }
 	void RemoveChild(Entity* child);
 
 	const std::vector<Component*>* GetAllComponents()

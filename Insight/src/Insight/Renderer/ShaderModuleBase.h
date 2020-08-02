@@ -28,7 +28,8 @@ namespace Insight
 			Mat4,
 
 			Sampler2D,
-			Push_Constant
+			Push_Constant,
+			UniformDynamic
 		};
 
 		enum ShaderType
@@ -68,9 +69,11 @@ namespace Insight
 			ShaderAttributeType Type;
 			int Binding;
 			int Size;
+			bool IsDynamic;
 
 			ShaderUniformBlock()
 				: Size(0)
+				, IsDynamic(false)
 			{ }
 		};
 

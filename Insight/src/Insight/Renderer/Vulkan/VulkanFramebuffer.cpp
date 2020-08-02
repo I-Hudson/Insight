@@ -4,6 +4,7 @@
 #include "Insight/Renderer/Vulkan/VulkanFramebuffer.h"
 #include "Insight/Renderer/Vulkan/Device.h"
 
+#include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Event/EventManager.h"
 
 namespace Insight
@@ -123,6 +124,7 @@ namespace Insight
 
 		void VulkanFramebuffer::BindBuffer(CommandBuffer* commandBuffers, const VkSubpassContents& subpassContents)
 		{
+			IS_PROFILE_FUNCTION();
 			std::vector<VkClearValue> clearColours;
 			for (auto it = m_attachments.begin(); it != m_attachments.end(); ++it)
 			{
@@ -146,6 +148,7 @@ namespace Insight
 
 		void VulkanFramebuffer::UnbindBuffer(CommandBuffer* commandBuffers)
 		{
+			IS_PROFILE_FUNCTION();
 			vkCmdEndRenderPass(commandBuffers->GetBuffer());
 		}
 

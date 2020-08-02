@@ -139,8 +139,21 @@ namespace Insight
 			{
 				uniformBlock.Binding = std::stoi(returnValue);
 			}
+
 			uniformBlock.Type = GetType(line);
 			uniformBlock.Name = GetName(line, false);
+
+			sLoc = line.find("//");
+			sLoc += 2;
+			if (line[sLoc] == '#')
+			{
+				if (line.substr(sLoc + 1) == "dynamic")
+				{
+					uniformBlock.IsDynamic = true;
+					uniformBlock.Type = ShaderAttributeType::UniformDynamic;
+				}
+			}
+
 			data.UniformBlocks.push_back(uniformBlock);
 		}
 

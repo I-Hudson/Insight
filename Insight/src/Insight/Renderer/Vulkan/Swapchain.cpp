@@ -204,7 +204,7 @@ namespace Insight
 			{
 				(*it)->StartRecord();
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
-				m_materials[i]->Bind(*it);
+				m_materials[i]->Bind(*it, i);
 
 				if (offscreenFB != nullptr)
 				{
@@ -219,11 +219,11 @@ namespace Insight
 				vkCmdBindIndexBuffer((*it)->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
 				vkCmdDrawIndexed((*it)->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
-				
+
 				ImGuiRenderer::GetInstance()->Render(*it);
 
 				m_swapchainFramebuffers[i]->UnbindBuffer(*it);
-			
+
 				(*it)->EndRecord();
 				i++;
 			}

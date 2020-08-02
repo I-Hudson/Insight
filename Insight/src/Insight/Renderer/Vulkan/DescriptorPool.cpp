@@ -34,7 +34,7 @@ namespace Insight
 				pools.push_back(pool);
 			}
 
-			VkDescriptorPoolCreateInfo descPoolInfo = VulkanInits::DescPoolCreateInfo(pools.size(), pools, 1);
+			VkDescriptorPoolCreateInfo descPoolInfo = VulkanInits::DescPoolCreateInfo(pools.size(), pools, pools.size());
 			descPoolInfo.flags = createFlags;
 			ThrowIfFailed(vkCreateDescriptorPool(m_device->GetDevice(), &descPoolInfo, nullptr, &m_pool));
 		}

@@ -47,6 +47,7 @@ namespace Insight
 
 
 			m_windowModule = startupData.WindowModule;
+			m_recordCommandBuffers = true;
 
 			m_validationLayers =
 			{
@@ -152,6 +153,7 @@ namespace Insight
 			glm::vec4 Colour1;
 		};
 
+
 		void VulkanRenderer::Render(Camera* mainCamera, std::vector<MeshComponent*> meshes)
 		{
 			IS_PROFILE_FUNCTION();
@@ -159,56 +161,83 @@ namespace Insight
 			glm::mat4 model(1.0f);
 
 			m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix(), model);
-			m_material->SetUniforms();
+			std::vector<glm::mat4> objectsMatrix;
+			{
+				IS_PROFILE_SCOPE("Object matrixs");
+				for (auto it = meshes.begin(); it != meshes.end(); ++it)
+				{
+					objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
+				}
+				m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
+			}
 
 			m_swapchain->AcquireNextImage();
 
 			m_framebuffer->GetFence()->Wait();
-
-			m_commandBuffer->StartRecord();
-			m_framebuffer->BindBuffer(m_commandBuffer);
-			m_material->Bind(m_commandBuffer);
 			
 			uint64_t vertexCount = 0;
 			uint64_t triCount = 0;
 			uint64_t meshCount = 0;
 
-			for (auto it = meshes.begin(); it != meshes.end(); ++it)
+			if (m_recordCommandBuffers)
 			{
-				if ((*it)->GetMesh() == nullptr)
+				m_recordCommandBuffers = false;
 				{
-					continue;
+					IS_PROFILE_SCOPE("All Draw");
+
+					m_material->SetUniforms();
+
+					m_commandBuffer->StartRecord();
+					m_framebuffer->BindBuffer(m_commandBuffer);
+
+					int drawIndex = 0;
+					for (auto it = meshes.begin(); it != meshes.end(); ++it)
+					{
+						IS_PROFILE_SCOPE("Single Darw");
+
+						if ((*it)->GetMesh() == nullptr)
+						{
+							continue;
+						}
+
+						m_material->Bind(m_commandBuffer, drawIndex);
+						drawIndex++;
+
+						vertexCount += (*it)->GetMesh()->GetVertexCount();
+						triCount += (*it)->GetMesh()->GetIndicesCount();
+						meshCount++;
+
+						VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
+						VkBuffer indexBuffer = static_cast<VulkanIndexBuffer*>((*it)->GetMesh()->GetIndexBuffer())->GetBuffer();
+						VkDeviceSize offsets[] = { 0 };
+
+						vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
+						vkCmdBindIndexBuffer(m_commandBuffer->GetBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
+						vkCmdDrawIndexed(m_commandBuffer->GetBuffer(), static_cast<uint32_t>((*it)->GetMesh()->GetIndicesCount()), 1, 0, 0, 0);
+					}
 				}
-
-				vertexCount += (*it)->GetMesh()->GetVertexCount();
-				triCount += (*it)->GetMesh()->GetIndicesCount();
-				meshCount++;
-
-				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
-				VkBuffer indexBuffer = static_cast<VulkanIndexBuffer*>((*it)->GetMesh()->GetIndexBuffer())->GetBuffer();
-				VkDeviceSize offsets[] = { 0 };
-
-				vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
-				vkCmdBindIndexBuffer(m_commandBuffer->GetBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-				vkCmdDrawIndexed(m_commandBuffer->GetBuffer(), static_cast<uint32_t>((*it)->GetMesh()->GetIndicesCount()), 1, 0, 0, 0);
+				m_framebuffer->UnbindBuffer(m_commandBuffer);
+				m_commandBuffer->EndRecord();
 			}
-			m_framebuffer->UnbindBuffer(m_commandBuffer);
-			m_commandBuffer->EndRecord();
 			
-			std::vector<VkSemaphore> waitSemaphores = { m_swapchain->GetAcquireNextImageSemaphore()->GetSemaphore() };
-			std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
-			std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
-			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
+			{
+				IS_PROFILE_SCOPE("Submit for draw");
 
-			m_framebuffer->GetFence()->Reset();
+				std::vector<VkSemaphore> waitSemaphores = { m_swapchain->GetAcquireNextImageSemaphore()->GetSemaphore() };
+				std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+				std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
+				std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
+				VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
 
-			GraphicsQueueInfo info;
-			info.SubmitInfo = &submitInfo;
-			info.SyncFence = m_framebuffer->GetFence();
-			m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
-			
+				m_framebuffer->GetFence()->Reset();
+
+				GraphicsQueueInfo info;
+				info.SubmitInfo = &submitInfo;
+				info.SyncFence = m_framebuffer->GetFence();
+				m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
+
+			}
 			std::string vStr = GetFormatInt(vertexCount);
 			std::string tStr = GetFormatInt(triCount);
 		

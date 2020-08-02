@@ -97,6 +97,7 @@ namespace Insight
 			switch (type)
 			{
 			case Insight::Render::ShaderAttributeType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			case Insight::Render::ShaderAttributeType::UniformDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 				default: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			}
 		}

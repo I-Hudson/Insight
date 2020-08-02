@@ -4,6 +4,7 @@
 
 #include "Insight/Renderer/Vulkan/Queue.h"
 #include "Insight/Renderer/Vulkan/Device.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -35,6 +36,8 @@ namespace Insight
 
 		void Queue::Submit(QueueInfo& queueInfo)
 		{
+			IS_PROFILE_FUNCTION();
+
 			VkResult result{};
 
 			switch (m_queueFamily.GetType())

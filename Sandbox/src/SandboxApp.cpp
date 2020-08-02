@@ -2,12 +2,13 @@
 #include <../vendor/glm/glm/gtx/string_cast.hpp>
 
 using namespace Insight::Maths;
+using namespace Insight;
 
 class Sandbox : public Insight::Application
 {
 public:
 	Entity* e = nullptr;
-	TransformComponent* tc = nullptr;
+	std::vector<TransformComponent*> transformComponents;
 	Model* testModel = nullptr;
 
 	Sandbox() : Insight::Application()
@@ -17,21 +18,28 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
+		//Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
+		Model* m = Model::Create("./models/Test/TestCube.fbx");
 		Model* n = Model::Create("./models/nano/nanosuit.fbx");
 
-		for (size_t i = 0; i < 20; i++)
+		for (size_t i = 0; i < 10; ++i)
 		{
-			if (i % 2 == 0)
+			//if (i % 2 == 0)
 			{
 				Entity* testModel = Entity::CreateFromModel(m);
-				testModel->GetComponent<TransformComponent>()->SetPosition(glm::vec3(2 * i, 0, 2 * i));
+				glm::vec3 pos = glm::vec3((i % 10) * 5, 0, (i / 10) * 5);
+				testModel->GetComponent<TransformComponent>()->SetPosition(pos);
+				transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 			}
-			else
-			{
-				Entity* testModel = Entity::CreateFromModel(n);
-				testModel->GetComponent<TransformComponent>()->SetPosition(glm::vec3(2 * i, 0, 2 * i));
-			}
+			//else
+			//{
+			//	Entity* testModel = Entity::CreateFromModel(n);
+			//	glm::vec3 pos;
+			//	pos.x = -10 * i;
+			//	pos.y = 0;
+			//	pos.z = -10 * i;
+			//	testModel->GetComponent<TransformComponent>()->SetPosition(pos);
+			//}
 		}
 	}
 
@@ -42,21 +50,25 @@ public:
 		double x, y;
 		Input::GetMousePosition(&x, &y);
 
-		if (Input::KeyHeld(KEY_UP))
+		for (size_t i = 0; i < transformComponents.size(); ++i)
 		{
-			tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, 1));
-		}
-		if (Input::KeyHeld(KEY_DOWN))
-		{
-			tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, -1));
-		}
-		if (Input::KeyHeld(KEY_LEFT))
-		{
-			tc->SetPosition(tc->GetPostion() + glm::vec3(-1, 0, 1));
-		}
-		if (Input::KeyHeld(KEY_RIGHT))
-		{
-			tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1));
+			TransformComponent* tc = transformComponents[i];
+			if (Input::KeyHeld(KEY_UP))
+			{
+				tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, 1) * Time::GetDeltaTime());
+			}
+			if (Input::KeyHeld(KEY_DOWN))
+			{
+				tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, -1) * Time::GetDeltaTime());
+			}
+			if (Input::KeyHeld(KEY_LEFT))
+			{
+				tc->SetPosition(tc->GetPostion() + glm::vec3(-1, 0, 1) * Time::GetDeltaTime());
+			}
+			if (Input::KeyHeld(KEY_RIGHT))
+			{
+				tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1) * Time::GetDeltaTime());
+			}
 		}
 	}
 

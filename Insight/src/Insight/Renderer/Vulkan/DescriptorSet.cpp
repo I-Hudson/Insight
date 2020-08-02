@@ -26,10 +26,18 @@ namespace Insight
 			for (auto it = uniformDatas.begin(); it != uniformDatas.end(); ++it)
 			{
 				VkDescriptorBufferInfo bufferInfo{};
-				bufferInfo.buffer = (*it)->Buffer;
-				bufferInfo.offset = 0;
-				bufferInfo.range = (*it)->Size;
-
+				if ((*it)->Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				{
+					bufferInfo.buffer = (*it)->Buffer;
+					bufferInfo.offset = 0;
+					bufferInfo.range = (*it)->Size;
+				}
+				else
+				{
+					bufferInfo.buffer = (*it)->Buffer;
+					bufferInfo.offset = 0;
+					bufferInfo.range = VK_WHOLE_SIZE;
+				}
 				bufferInfos.push_back(bufferInfo);
 			}
 			for (auto it = samplerDatas.begin(); it != samplerDatas.end(); ++it)
@@ -45,7 +53,7 @@ namespace Insight
 			for (UINT i = 0; i < uniformDatas.size(); ++i)
 			{
 				VkWriteDescriptorSet descriptorWrite = VulkanInits::WriteDescriptorSet(m_descSet, uniformDatas[i]->Binding, 0,
-					VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1, &bufferInfos[i], nullptr);
+					uniformDatas[i]->Type, 1, &bufferInfos[i], nullptr);
 				writeDescriptorSets.push_back(descriptorWrite);
 			}
 			for (UINT i = 0; i < samplerDatas.size(); ++i)

@@ -51,6 +51,7 @@ namespace Insight
 		private:
 
 			ImGuiRenderer* m_imguiRenderer;
+			bool m_recordCommandBuffers;
 
 			// Vulkan objects
 			Device* m_device;

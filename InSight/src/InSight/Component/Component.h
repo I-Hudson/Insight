@@ -33,7 +33,7 @@ public:
 	virtual ~Component() {}
 
 	void SetEntity(Entity* entity) { m_owner = entity; }
-	const Entity* GetEntity() const { return m_owner; }
+	Entity* GetEntity() const { return m_owner; }
 
 private:
 	Entity* m_owner;
