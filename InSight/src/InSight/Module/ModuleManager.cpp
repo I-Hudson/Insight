@@ -2,6 +2,7 @@
 
 #include "ModuleManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Insight/Renderer/ImGuiRenderer.h"
 
 namespace Insight
 {

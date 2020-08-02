@@ -57,7 +57,6 @@ namespace Insight
 			}
 
 			const int& GetDependenciesCount() const { return m_dependencies; }
-
 			void SetManuallyUpdate(const bool& state) { m_manuallUpdate = state; }
 
 		protected:

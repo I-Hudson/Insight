@@ -5,6 +5,8 @@
 #define GLM_FORCE_SWIZZLE
 #include <../vendor/glm/glm/glm.hpp>
 
+class MeshComponent;
+
 namespace Insight
 {
 	enum CameraAspect
@@ -39,6 +41,8 @@ namespace Insight
 		const glm::mat4& GetProjViewMatrix() const;
 		const glm::mat4& GetProjMatrix() const;
 		const glm::mat4& GetViewMatrix() const;
+
+		bool MeshInFrustrum(MeshComponent& meshCom);
 
 		const float GetCamerAspect(const CameraAspect& cameraAspect);
 

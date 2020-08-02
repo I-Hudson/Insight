@@ -160,6 +160,11 @@ namespace Insight
 		return m_viewMatrix;
 	}
 
+	bool Camera::MeshInFrustrum(MeshComponent& meshCom)
+	{
+		return false;
+	}
+
 	const float Camera::GetCamerAspect(const CameraAspect& cameraAspect)
 	{
 		switch (cameraAspect)

@@ -94,6 +94,7 @@ void Entity::AddChild(Entity* child)
 	{
 		m_data.Children.push_back(child);
 	}
+	child->SetParent(this);
 }
 
 Entity* Entity::GetChild(int childIndex)

@@ -18,8 +18,8 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		//Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
-		Model* m = Model::Create("./models/Test/TestCube.fbx");
+		Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
+		//Model* m = Model::Create("./models/Test/TestCube.fbx");
 		Model* n = Model::Create("./models/nano/nanosuit.fbx");
 
 		for (size_t i = 0; i < 10; ++i)
@@ -27,7 +27,7 @@ public:
 			//if (i % 2 == 0)
 			{
 				Entity* testModel = Entity::CreateFromModel(m);
-				glm::vec3 pos = glm::vec3((i % 10) * 5, 0, (i / 10) * 5);
+				glm::vec3 pos = glm::vec3((i % 10) * 10, 0, (i / 10) * 10);
 				testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 				transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 			}

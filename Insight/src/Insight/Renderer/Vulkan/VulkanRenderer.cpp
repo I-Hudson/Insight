@@ -164,7 +164,7 @@ namespace Insight
 			std::vector<glm::mat4> objectsMatrix;
 			{
 				IS_PROFILE_SCOPE("Object matrixs");
-				for (auto it = meshes.begin(); it != meshes.end(); ++it)
+				for (auto it = meshes.begin(); it != meshes.end(); it += 79)
 				{
 					objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
 				}
@@ -175,10 +175,6 @@ namespace Insight
 
 			m_framebuffer->GetFence()->Wait();
 			
-			uint64_t vertexCount = 0;
-			uint64_t triCount = 0;
-			uint64_t meshCount = 0;
-
 			if (m_recordCommandBuffers)
 			{
 				m_recordCommandBuffers = false;
@@ -200,7 +196,7 @@ namespace Insight
 							continue;
 						}
 
-						m_material->Bind(m_commandBuffer, drawIndex);
+						m_material->Bind(m_commandBuffer, drawIndex / 79);
 						drawIndex++;
 
 						vertexCount += (*it)->GetMesh()->GetVertexCount();
@@ -265,6 +261,8 @@ namespace Insight
 			m_framebuffer->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 			m_shader->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 			m_material->Resize();
+
+			m_recordCommandBuffers = true;
 		}
 
 		bool VulkanRenderer::CheckDeviceExtensionSupport(VkPhysicalDevice device)

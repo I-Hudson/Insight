@@ -27,11 +27,13 @@ namespace Insight
 			template<typename T>
 			T* GetModule();
 
+			const std::unordered_map<std::string, Module*>& GetModules() const { return m_modules; }
+
 		private:
 			bool Exists(const std::string& moduleName);
 
 		private:
-			std::unordered_map<std::string, Module* > m_modules;
+			std::unordered_map<std::string, Module*> m_modules;
 		};
 
 		template<typename T, typename ...Args>
