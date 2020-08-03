@@ -24,11 +24,11 @@ class IS_API Component :
 public:
 	Component()
 		: Insight::UUID()
-		, Insight::Serialization::Serializable(this, true)
+		, Insight::Serialization::Serializable(this, false)
 	{ }
 	Component(Entity* owner, const ComponentType type)
 		: Insight::UUID(), m_owner(owner), m_type(type)
-		, Insight::Serialization::Serializable(this, true)
+		, Insight::Serialization::Serializable(this, false)
 	{ }
 	virtual ~Component() {}
 

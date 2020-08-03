@@ -66,7 +66,6 @@ namespace Insight
 
 			VkSurfaceKHR m_surface;
 
-			Mesh* m_testMesh;
 			uint64_t vertexCount = 0;
 			uint64_t triCount = 0;
 			uint64_t meshCount = 0;

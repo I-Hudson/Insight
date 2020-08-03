@@ -103,21 +103,6 @@ namespace Insight
 			};
 			m_swapchain = NEW_ON_HEAP(Swapchain, swapchainSettings);
 
-			// Position				  // Colour				   // Normal				//UV1
-			std::vector<Vertex> vertices =
-			{
-				{{1.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
-				{{-1.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
-				{{-1.0f, -1.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
-				{{1.0f, -1.0f, 0.0f, 1.0f}, {1.0f, 1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, {0.0f, 0.0f,}},
-			};
-
-			std::vector<unsigned int> indices =
-			{
-				0,1,2, 2, 3, 0
-			};
-			m_testMesh = NEW_ON_HEAP(Mesh, vertices, indices, std::vector<Texture>());
-
 			m_imguiRenderer = NEW_ON_HEAP(ImGuiRenderer, this);
 
 			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
@@ -130,8 +115,6 @@ namespace Insight
 			m_device->WaitForIdle();
 
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
-
-			DELETE_ON_HEAP(m_testMesh);
 
 			DELETE_ON_HEAP(m_imguiRenderer);
 

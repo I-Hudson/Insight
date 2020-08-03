@@ -21,12 +21,15 @@ class IS_API Mesh : public Insight::UUID
 {
 public:
 	Mesh();
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, const std::string& meshName = "");
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures,
+		unsigned int subMeshIndex, const std::string& modelUUID, const std::string& meshName);
 	~Mesh();
 
 	void Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
 	std::string& GetName();
+	const std::string& GetModelUUID() const { return m_modelUUID; }
+	const unsigned int GetSubMeshIndex() const { return m_subMeshIndex; }
 
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
 	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
@@ -56,7 +59,9 @@ private:
 	Insight::Render::VertexBuffer* m_vertexBuffer;
 	Insight::Render::IndexBuffer* m_indexBuffer;
 
+	std::string m_modelUUID;
 	std::string m_meshName;
+	unsigned int m_subMeshIndex;
 	bool m_created;
 
 	friend Insight::Render::VulkanRenderer;

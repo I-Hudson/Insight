@@ -60,7 +60,7 @@ namespace Insight
 			{
 				0,1,2, 0,2,3
 			};
-			m_fullscreenQuad = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>());
+			m_fullscreenQuad = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>(), 0, "", "");
 
 			IS_CORE_INFO("SwapChain completed.");
 		}
@@ -202,6 +202,8 @@ namespace Insight
 			++tempShader;
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
 			{
+				IS_PROFILE_SCOPE("Swapchain Draw");
+
 				(*it)->StartRecord();
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
 				m_materials[i]->Bind(*it, i);

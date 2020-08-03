@@ -6,6 +6,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
+#include <json.hpp>
 
 #include <ostream>
 #include <istream>
@@ -20,6 +21,9 @@
 #define START_SER << "\\" << '\n'
 #define END_SER << "//" << '\n'
 #define ENDL << '\n'
+
+// for convenience
+using json = nlohmann::json;
 
 namespace Insight
 {
@@ -40,9 +44,11 @@ namespace Insight
 		{
 			TypeRegister(const std::string& s)
 			{
-				SerializableRegistry::GetTypes().insert(std::pair(s, &Serializable::CreateInstance<T>));
+				SerializableRegistry::GetTypes().insert(std::pair(s, &Serializable::CreateInstance<T>));;
 			}
 		};
+
+		struct SerializableRegistry;
 
 		class Serializable
 		{
@@ -65,8 +71,8 @@ namespace Insight
 				}
 			}
 
-			virtual void Serialize(std::ostream& out) = 0;
-			virtual void Deserialize(std::istream& in) = 0;
+			virtual void Serialize(json& data) = 0;
+			virtual void Deserialize(json data) = 0;
 
 			template<typename T> 
 			static Serializable* CreateInstance()
@@ -75,6 +81,9 @@ namespace Insight
 			}
 
 			static std::vector<Serializable*> m_serializableObjects;
+
+		private:
+			friend SerializableRegistry;
 		};
 
 		struct SerializableRegistry
@@ -91,42 +100,64 @@ namespace Insight
 			static void SerializeAll()
 			{
 				std::ofstream out;
-				out.open("serializeData.txt");
+				out.open("serializeData.json");
 
+				std::vector<json> sceneItems;
 				for (auto it = Serializable::m_serializableObjects.begin(); it != Serializable::m_serializableObjects.end(); ++it)
 				{
-					out START_SER;
-					(*it)->Serialize(out);
-					out END_SER;
+					json data;
+					(*it)->Serialize(data);
+					sceneItems.push_back(data);
 				}
+
+				json data;
+				for (size_t i = 0; i < sceneItems.size(); ++i)
+				{
+					data[sceneItems[i]["UUID"].get<std::string>()] = sceneItems[i];
+				}
+				out << data.dump(4);
 				out.close();
 			}
 
 			static void DeserializeAll()
 			{
 				std::ifstream in;
-				in.open("serializeData.txt");
+				in.open("serializeData.json");
 
-				std::vector<std::string> data;
-				bool record = false;
+				json data;
+				in >> data;
 
-				std::string line;
-				while (std::getline(in, line))
-				{
-					if (line == "\\")
-					{
-						record = true;
-					}
-					else if (line == "//")
-					{
-
-						record = false;
-					}
-					else
-					{
-						data.push_back(line);
-					}
-				}
+				//std::vector<std::string> data;
+				//bool record = false;
+				//
+				//std::string line;
+				//Serializable* s = nullptr;
+				//while (std::getline(in, line))
+				//{
+				//	if (line == "\\")
+				//	{
+				//		record = true;
+				//	}
+				//	else if (line == "//")
+				//	{
+				//		DELETE_ON_HEAP(s);
+				//		record = false;
+				//	}
+				//	else
+				//	{
+				//
+				//		std::string type = line.substr(0, line.find_first_of(':'));
+				//		MapTypes::iterator it = GetTypes().find(type);
+				//		if (it != GetTypes().end())
+				//		{ 
+				//			s = it->second();
+				//		}
+				//		else
+				//		{
+				//			data.push_back(line);
+				//		}
+				//	}
+				//}
 
 				in.close();
 			}

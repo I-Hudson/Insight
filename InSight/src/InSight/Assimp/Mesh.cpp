@@ -8,13 +8,16 @@ Mesh::Mesh()
 	, m_created(false)
 { }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, const std::string& meshName)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, 
+	unsigned int subMeshIndex, const std::string& modelUUID, const std::string& meshName)
 	: Insight::UUID()
 	, m_created(false)
+	, m_modelUUID(modelUUID)
+	, m_meshName(meshName)
+	, m_subMeshIndex(subMeshIndex)
 {
 	IS_PROFILE_FUNCTION();
 
-	m_meshName = meshName;
 	Create(vertices, indices, textures);
 }
 

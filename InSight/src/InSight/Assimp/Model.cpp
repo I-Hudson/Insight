@@ -149,7 +149,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return NEW_ON_HEAP(Mesh, vertices, indices, textures, mesh->mName.C_Str());
+	return NEW_ON_HEAP(Mesh, vertices, indices, textures, m_meshes.size(), GetUUID(), mesh->mName.C_Str());
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

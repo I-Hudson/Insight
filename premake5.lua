@@ -30,6 +30,7 @@ IncludeDir["glm"] = "$(SolutionDir)Insight/vendor/glm"
 IncludeDir["stb_image"] = "$(SolutionDir)Insight/vendor/stb_image"
 IncludeDir["glad"] = "$(SolutionDir)Insight/vendor/glad/include"
 IncludeDir["imgui"] = "$(SolutionDir)Insight/vendor/imgui/"
+IncludeDir["json"] = "$(SolutionDir)Insight/vendor/nlohmann/include"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
@@ -80,6 +81,7 @@ project "Insight"
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.glad}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.json}",
 	}
 
     sysincludedirs 
@@ -175,6 +177,7 @@ project "Sandbox"
         "%{IncludeDir.assimp}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.json}",
 	}
 
     sysincludedirs 
@@ -247,6 +250,7 @@ project "UnitTests"
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.glm}",
+        "%{IncludeDir.json}",
 	}
 
     sysincludedirs 

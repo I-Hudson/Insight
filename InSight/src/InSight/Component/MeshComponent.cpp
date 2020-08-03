@@ -75,13 +75,16 @@ void MeshComponent::SetMaterial(Material* material)
 	}
 }
 
-void MeshComponent::Serialize(std::ostream& out)
+void MeshComponent::Serialize(json& out)
 {
-	out << "MeshComponent: " << GetUUID() ENDL;
-	out << "MeshName:" << m_mesh->GetName() ENDL;
+	out["UUID"] = GetUUID();
+	out["Type"] = "MeshComponent";
+	out["MeshName"] = m_mesh->GetName();
+	out["ModelUUID"] = m_mesh->GetModelUUID();
+	out["SubMeshIndex"] = m_mesh->GetSubMeshIndex();
 }
 
-void MeshComponent::Deserialize(std::istream& in)
+void MeshComponent::Deserialize(json in)
 {
 
 }

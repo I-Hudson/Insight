@@ -16,8 +16,8 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
-	virtual void Serialize(std::ostream& out) override;
-	virtual void Deserialize(std::istream& in) override;
+	virtual void Serialize(json& out) override;
+	virtual void Deserialize(json in) override;
 
 private:
 	glm::mat4 m_transform;

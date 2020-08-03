@@ -18,6 +18,7 @@ Entity::Entity()
 	, Serializable(this, false)
 {
 	m_data.Name = "Default";
+	EntityModule::GetInstance()->m_entities.push_back(this);
 }
 
 Entity::Entity(const std::string& id)
@@ -25,6 +26,7 @@ Entity::Entity(const std::string& id)
 	, Serializable(this, false)
 {
 	m_data.Name = id;
+	EntityModule::GetInstance()->m_entities.push_back(this);
 }
 
 Entity::~Entity()
@@ -117,23 +119,22 @@ void Entity::RemoveChild(Entity* child)
 	}
 }
 
-void Entity::Serialize(std::ostream& out)
+void Entity::Serialize(json& out)
 {
-	out << "Entity: " << GetUUID() ENDL;
-	out <<  "Name: " << m_data.Name ENDL;
-	out << "Components: " ENDL;
+	out["UUID"] = GetUUID().c_str();
+	out["Type"] = "Entity";
+	out["Name"] = m_data.Name;
+
+	int index = 0;
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
-		(*it)->Serialize(out);
+		out["Components"][std::to_string(index++)] = (*it)->GetUUID();
 	}
+
 }
 
-void Entity::Deserialize(std::istream& in)
+void Entity::Deserialize(json in)
 {
-	std::string result;
-	std::getline(in, result);
-
-	IS_INFO("{0}", result);
 }
 
 void Entity::RemoveAllComponenets()

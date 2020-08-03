@@ -44,29 +44,19 @@ const glm::vec3 TransformComponent::GetPostion()
 void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	m_transform[3] = glm::vec4(position, 1.0f);
-
-	//Entity* e = GetEntity();
-	//for (size_t i = 0; i < e->GetChildCount(); ++i)
-	//{
-	//	Entity* c = e->GetChild(i);
-	//	if (c->HasComponent<TransformComponent>())
-	//	{
-	//		glm::vec3 cPos = c->GetComponent<TransformComponent>()->GetPostion();
-	//		c->GetComponent<TransformComponent>()->SetPosition(position);
-	//		cPos = c->GetComponent<TransformComponent>()->GetPostion();
-	//
-	//		IS_INFO("");
-	//	}
-	//}
 }
 
-void TransformComponent::Serialize(std::ostream& out)
+void TransformComponent::Serialize(json& out)
 {
-	out << "TransformComponent: " << GetUUID() ENDL;
-	out << "ViewMatrix:" << glm::to_string(m_transform) ENDL;
+	out["UUID"] = GetUUID();
+	out["Type"] = "TransformComponent";
+	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z };
+	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z };
+	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z };
+	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z };
 }
 
-void TransformComponent::Deserialize(std::istream& in)
+void TransformComponent::Deserialize(json in)
 {
 }
 

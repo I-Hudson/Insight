@@ -19,8 +19,8 @@ public:
 	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
-	virtual void Serialize(std::ostream& out) override;
-	virtual void Deserialize(std::istream& in) override;
+	virtual void Serialize(json& out) override;
+	virtual void Deserialize(json in) override;
 
 	// Returns a new array of vertices.
 	std::vector<glm::vec3> GetVertices() const { return m_mesh->GetVertices(); }

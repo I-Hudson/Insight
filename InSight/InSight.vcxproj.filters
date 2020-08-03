@@ -1760,6 +1760,9 @@
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanShader.cpp">
       <Filter>src\Insight\Renderer\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Serialization\Serializable.cpp">
+      <Filter>src\Insight\Serialization</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClCompile>
@@ -1798,9 +1801,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Serialization\Serializable.cpp">
-      <Filter>src\Insight\Serialization</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
