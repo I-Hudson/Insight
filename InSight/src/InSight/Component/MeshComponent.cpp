@@ -2,11 +2,16 @@
 #include "MeshComponent.h"
 
 #include "Insight/Module/GraphicsModule.h"
+#include "Insight/Library/ModelLibrary.h"
+#include "Insight/Assimp/Model.h"
+
+REGISTER_DEF_TYPE(MeshComponent);
 
 MeshComponent::MeshComponent()
 	: Component(nullptr, ComponentType::MESH)
 	, m_mesh(nullptr)
 {
+	Insight::Module::GraphicsModule::m_meshs.push_back(this);
 }
 
 MeshComponent::MeshComponent(Entity* owner)
@@ -86,5 +91,8 @@ void MeshComponent::Serialize(json& out)
 
 void MeshComponent::Deserialize(json in)
 {
+	using namespace Insight::Library;
 
+	SetUUID(in["UUID"]);
+	SetMesh(ModelLibrary::GetInstance()->GetAsset(in["ModelUUID"])->GetSubMesh(in["SubMeshIndex"]));
 }

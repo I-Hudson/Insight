@@ -4,6 +4,7 @@
 #include "Insight/Module/Module.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/Library/Library.h"
+#include "Insight/Library/ModelLibrary.h"
 
 #include "Insight/Assimp/Model.h"
 #include "Insight/Renderer/Shader.h"
@@ -21,7 +22,7 @@ namespace Insight
 			virtual void Update(const float& deltaTime) override;
 
 		private:
-			ModelLibrary* m_modelLibrary;
+			Insight::Library::ModelLibrary* m_modelLibrary;
 			ShaderLibrary* m_shaderLibrary;
 		};
 	}

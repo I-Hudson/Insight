@@ -9,7 +9,7 @@ namespace Insight
 	{
 		AssetModule::AssetModule()
 		{
-			m_modelLibrary = NEW_ON_HEAP(ModelLibrary);
+			m_modelLibrary = NEW_ON_HEAP(Insight::Library::ModelLibrary);
 			m_shaderLibrary = NEW_ON_HEAP(ShaderLibrary);
 		}
 

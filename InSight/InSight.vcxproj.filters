@@ -1599,6 +1599,9 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Library\ModelLibrary.h">
+      <Filter>src\Insight\Library</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1801,6 +1804,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Library\ModelLibrary.cpp">
+      <Filter>src\Insight\Library</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

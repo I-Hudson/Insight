@@ -151,7 +151,10 @@ namespace Insight
 				{
 					objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
 				}
-				m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
+				if (objectsMatrix.size() > 0)
+				{
+					m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
+				}
 			}
 
 			m_swapchain->AcquireNextImage();

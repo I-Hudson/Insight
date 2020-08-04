@@ -128,13 +128,26 @@ void Entity::Serialize(json& out)
 	int index = 0;
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
-		out["Components"][std::to_string(index++)] = (*it)->GetUUID();
+		(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
 	}
 
 }
 
 void Entity::Deserialize(json in)
 {
+	SetUUID(in["UUID"]);
+	m_data.Name = in["Name"];
+	int index = 0;
+	for (auto it = in["Components"].begin(); it != in["Components"].end(); ++it)
+	{
+		std::string type = (*it)["Type"];
+		Serializable* s = Insight::Serialization::SerializableRegistry::GetTypes().find(type)->second();
+		if (s != nullptr)
+		{
+			s->Deserialize(*it);
+			m_data.Components.push_back(dynamic_cast<Component*>(s));
+		}
+	}
 }
 
 void Entity::RemoveAllComponenets()

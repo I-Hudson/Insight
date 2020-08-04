@@ -345,6 +345,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\InsightAlias.h" />
     <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h" />
     <ClInclude Include="src\Insight\Library\Library.h" />
+    <ClInclude Include="src\Insight\Library\ModelLibrary.h" />
     <ClInclude Include="src\Insight\Log.h" />
     <ClInclude Include="src\Insight\Maths\InsightMaths.h" />
     <ClInclude Include="src\Insight\Maths\Matrix3.h" />
@@ -834,6 +835,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
     <ClCompile Include="src\Insight\Event\EventManager.cpp" />
     <ClCompile Include="src\Insight\Input\Input.cpp" />
+    <ClCompile Include="src\Insight\Library\ModelLibrary.cpp" />
     <ClCompile Include="src\Insight\Log.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix3.cpp" />
     <ClCompile Include="src\Insight\Maths\Matrix4.cpp" />

@@ -54,12 +54,13 @@ namespace Insight
 		{
 		public:
 
-			Serializable(Serializable* obj, bool isSubObject)
+			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "")
 			{
 				if (!isSubObject)
 				{
 					m_serializableObjects.push_back(obj);
 				}
+				m_fileName = filePath;
 			}
 
 			virtual ~Serializable()
@@ -82,6 +83,9 @@ namespace Insight
 
 			static std::vector<Serializable*> m_serializableObjects;
 
+		protected:
+			std::string m_fileName;
+
 		private:
 			friend SerializableRegistry;
 		};
@@ -103,11 +107,28 @@ namespace Insight
 				out.open("serializeData.json");
 
 				std::vector<json> sceneItems;
+				int i = 0;
 				for (auto it = Serializable::m_serializableObjects.begin(); it != Serializable::m_serializableObjects.end(); ++it)
 				{
 					json data;
-					(*it)->Serialize(data);
-					sceneItems.push_back(data);
+					if ((*it)->m_fileName.empty())
+					{
+						(*it)->Serialize(data);
+						sceneItems.push_back(data);
+					}
+					else
+					{
+						std::ofstream o;
+						o.open((*it)->m_fileName);
+						if (o.is_open())
+						{
+							json data;
+							(*it)->Serialize(data);
+							o << data.dump(4);
+							o.close();
+						}
+					}
+					i++;
 				}
 
 				json data;
@@ -126,6 +147,13 @@ namespace Insight
 
 				json data;
 				in >> data;
+
+				for (auto it  = data.begin(); it != data.end(); ++it)
+				{
+					std::string type = (*it)["Type"];
+					Serializable* s = GetTypes().find(type)->second();
+					s->Deserialize(*it);
+				}
 
 				//std::vector<std::string> data;
 				//bool record = false;

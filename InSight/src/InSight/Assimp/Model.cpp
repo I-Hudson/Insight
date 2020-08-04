@@ -4,12 +4,23 @@
 #include "stb_image.h"
 #include "Insight/Log.h"
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Library/Library.h"
+#include "Insight/Library/ModelLibrary.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
 Model::Model()
 	: Insight::UUID()
-{ }
+{
+	Insight::Library::ModelLibrary::GetInstance()->AddAsset(GetUUID(), this);
+}
+
+Model::Model(const std::string& filePath)
+	: Insight::UUID()
+	, m_path(filePath)
+{
+	Insight::Library::ModelLibrary::GetInstance()->AddAsset(GetUUID(), this);
+
+	Create(filePath);
+}
 
 Model::~Model()
 {
@@ -21,14 +32,12 @@ Model::~Model()
 
 Model* Model::Create(const std::string& filepath)
 {
-	Model* m = Insight::Library::Library<Model>::GetInstance()->AddAsset();
-
 	if (!filepath.empty())
 	{
 		IS_INFO("Loading model");
-		m->LoadMesh(filepath);
+		LoadMesh(filepath);
 	}
-	return m;
+	return this;
 }
 
 Mesh* Model::GetSubMesh(int index)
@@ -40,6 +49,11 @@ Mesh* Model::GetSubMesh(int index)
 const std::string& Model::GetName() const
 {
 	return m_modelName;
+}
+
+const std::string& Model::GetFilePath() const
+{
+	return m_path;
 }
 
 void Model::LoadMesh(const std::string& filePath)

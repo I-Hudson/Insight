@@ -12,6 +12,10 @@ namespace Insight
     static std::uniform_int_distribution<> dis(0, 15);
     static std::uniform_int_distribution<> dis2(8, 11);
 
+    namespace Serialization
+    {
+        class Serializable;
+    }
 
     class IS_API UUID
     {
@@ -21,6 +25,7 @@ namespace Insight
         const std::string& GetUUID() const { return m_uuid; }
 
     private:
+
         static std::string GenUUID()
         {
             std::stringstream ss;
@@ -54,7 +59,12 @@ namespace Insight
             return ss.str();
         }
 
+    protected:
+        void SetUUID(const std::string uuid) { m_uuid = uuid; }
+
     private:
         std::string m_uuid;
+
+        friend class Serializable;
     };
 }

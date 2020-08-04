@@ -20,7 +20,7 @@ namespace Insight
 			T* GetAsset(const std::string& uuid);
 			void RemoveAsset(const std::string& uuid);
 
-		private:
+		protected:
 			bool Exists(const std::string& uuid);
 
 			std::unordered_map<std::string, T*> m_assets;
@@ -75,7 +75,6 @@ namespace Insight
 	}
 }
 
-class Model;
 namespace Insight
 {
 	namespace Render
@@ -84,5 +83,4 @@ namespace Insight
 	}
 }
 
-typedef Insight::Library::Library<Model> ModelLibrary;
 typedef Insight::Library::Library<Insight::Render::Shader> ShaderLibrary;

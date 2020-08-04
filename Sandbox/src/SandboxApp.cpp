@@ -18,28 +18,33 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		Model* m = Model::Create("./models/Survival_BackPack_2/backpack.obj");
-		//Model* m = Model::Create("./models/Test/TestCube.fbx");
-		Model* n = Model::Create("./models/nano/nanosuit.fbx");
+		bool test = true;
 
-		for (size_t i = 0; i < 10; ++i)
+		if (test)
 		{
-			//if (i % 2 == 0)
+			Model* m = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
+			//Model* m = Model::Create("./models/Test/TestCube.fbx");
+			Model* n = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
+
+			for (size_t i = 0; i < 10; ++i)
 			{
-				Entity* testModel = Entity::CreateFromModel(m);
-				glm::vec3 pos = glm::vec3((i % 10) * 10, 0, (i / 10) * 10);
-				testModel->GetComponent<TransformComponent>()->SetPosition(pos);
-				transformComponents.push_back(testModel->GetComponent<TransformComponent>());
+				//if (i % 2 == 0)
+				{
+					Entity* testModel = Entity::CreateFromModel(m);
+					glm::vec3 pos = glm::vec3(rand() % 500, 0, rand() % 500);
+					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
+					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
+				}
+				//else
+				//{
+				//	Entity* testModel = Entity::CreateFromModel(n);
+				//	glm::vec3 pos;
+				//	pos.x = -10 * i;
+				//	pos.y = 0;
+				//	pos.z = -10 * i;
+				//	testModel->GetComponent<TransformComponent>()->SetPosition(pos);
+				//}
 			}
-			//else
-			//{
-			//	Entity* testModel = Entity::CreateFromModel(n);
-			//	glm::vec3 pos;
-			//	pos.x = -10 * i;
-			//	pos.y = 0;
-			//	pos.z = -10 * i;
-			//	testModel->GetComponent<TransformComponent>()->SetPosition(pos);
-			//}
 		}
 	}
 

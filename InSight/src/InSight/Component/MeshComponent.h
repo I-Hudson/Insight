@@ -90,5 +90,7 @@ private:
 	BoundingBox m_boundingBox;
 	Mesh* m_mesh;
 	Material* m_materal;
+
+	REGISTER_DEC_TYPE(MeshComponent);
 };
 

@@ -15,13 +15,15 @@ class IS_API Model : public Insight::UUID
 {
 public:
 	Model();
+	Model(const std::string& filePath);
 	~Model();
 
-	static Model* Create(const std::string& filepath);
+	Model* Create(const std::string& filepath);
 
 	Mesh* GetSubMesh(int index);
 	unsigned int GetSubMeshCount() { return static_cast<unsigned int>(m_meshes.size()); }
 	const std::string& GetName() const;
+	const std::string& GetFilePath() const;
 
 private:
 	void LoadMesh(const std::string& filePath);
@@ -35,5 +37,6 @@ private:
 	std::vector<Texture> m_texturesLoaded;
 	std::string m_directory;
 	std::string m_modelName;
+	std::string m_path;
 };
 
