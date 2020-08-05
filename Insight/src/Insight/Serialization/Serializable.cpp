@@ -9,9 +9,9 @@ namespace Insight
 		std::vector<Serializable*> Serializable::m_serializableObjects;
 		bool SerializableRegistry::m_inUse = false;
 		
-		Serializable::Serializable(Serializable* obj, bool isSubObject, const std::string& filePath)
+		Serializable::Serializable(Serializable* obj, bool autoSeralizable, const std::string& filePath)
 		{
-			if (!isSubObject)
+			if (!autoSeralizable)
 			{
 				m_serializableObjects.push_back(obj);
 			}

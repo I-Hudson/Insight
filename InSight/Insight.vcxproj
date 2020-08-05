@@ -360,7 +360,6 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h" />
     <ClInclude Include="src\Insight\Memory\StackAllocator.h" />
     <ClInclude Include="src\Insight\Module\AssetModule.h" />
-    <ClInclude Include="src\Insight\Module\EntityModule.h" />
     <ClInclude Include="src\Insight\Module\GraphicsModule.h" />
     <ClInclude Include="src\Insight\Module\InputModule.h" />
     <ClInclude Include="src\Insight\Module\Module.h" />
@@ -848,7 +847,6 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
     <ClCompile Include="src\Insight\Module\AssetModule.cpp" />
-    <ClCompile Include="src\Insight\Module\EntityModule.cpp" />
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
@@ -880,6 +878,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanMaterial.cpp" />
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanRenderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanShader.cpp" />
+    <ClCompile Include="src\Insight\Scene\Scene.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />

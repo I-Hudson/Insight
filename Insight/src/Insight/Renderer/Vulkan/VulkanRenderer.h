@@ -28,7 +28,6 @@ namespace Insight
 			virtual void Render(Camera* mainCamera, std::vector<MeshComponent*> meshes) override;
 			virtual void Present() override;
 
-
 			const VkInstance& GetInstance() { return m_device->GetInstance(); }
 			const VkDevice& GetDevice() { return m_device->GetDevice(); }
 			const VkPhysicalDevice& GetPhysicalDevice() const { return m_device->GetPhysicalDevice(); }

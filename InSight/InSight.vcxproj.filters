@@ -210,9 +210,6 @@
     <ClInclude Include="src\Insight\Module\AssetModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Module\EntityModule.h">
-      <Filter>src\Insight\Module</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Module\GraphicsModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
@@ -1670,9 +1667,6 @@
     <ClCompile Include="src\Insight\Module\AssetModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Module\EntityModule.cpp">
-      <Filter>src\Insight\Module</Filter>
-    </ClCompile>
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
@@ -1813,6 +1807,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp">
       <Filter>src\Insight\Library</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Scene\Scene.cpp">
+      <Filter>src\Insight\Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

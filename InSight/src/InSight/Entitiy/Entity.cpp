@@ -1,15 +1,13 @@
 #include "ispch.h"
 #include "Entity.h"
 
-#include "Insight/Module/EntityModule.h"
+#include "Insight/Scene/Scene.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Assimp/Model.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #include "Insight/Log.h"
-
-using namespace Insight::Module;
 
 REGISTER_DEF_TYPE(Entity);
 
@@ -18,7 +16,7 @@ Entity::Entity()
 	, Serializable(this, false)
 {
 	m_data.Name = "Default";
-	EntityModule::GetInstance()->m_entities.push_back(this);
+	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
 }
 
 Entity::Entity(const std::string& id)
@@ -26,7 +24,7 @@ Entity::Entity(const std::string& id)
 	, Serializable(this, false)
 {
 	m_data.Name = id;
-	EntityModule::GetInstance()->m_entities.push_back(this);
+	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
 }
 
 Entity::~Entity()
@@ -36,7 +34,7 @@ Entity::~Entity()
 
 Entity* Entity::Create(const std::string& id)
 {
-	return EntityModule::GetInstance()->Create(id);
+	return Insight::Scene::s_CurrentScene->CreateEntity(id);
 }
 
 Entity* Entity::CreateFromModel(Model* model)
@@ -67,9 +65,17 @@ void Entity::Delete()
 	{
 		for (int i = 0; i < m_data.Children.size(); ++i)
 		{
-			EntityModule::GetInstance()->Delete(m_data.Children[i]);
+			Insight::Scene::s_CurrentScene->DeleteEntiy(m_data.Children[i]);
 		}
-		EntityModule::GetInstance()->Delete(this);
+		Insight::Scene::s_CurrentScene->DeleteEntiy(this);
+	}
+}
+
+void Entity::OnUpdate(const float deltaTime)
+{
+	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	{
+		(*it)->OnUpdate(deltaTime);
 	}
 }
 
@@ -85,7 +91,7 @@ const std::string& Entity::GetID() const
 
 Entity* Entity::AddChild(const std::string& childId)
 {
-	Entity* e = EntityModule::GetInstance()->Create(childId);
+	Entity* e = Insight::Scene::s_CurrentScene->CreateEntity(childId);
 	AddChild(e);
 	return e;
 }

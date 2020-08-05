@@ -17,6 +17,7 @@
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Assimp/Model.h"
 #include "Insight/Assimp/Mesh.h"
+#include "Insight/Scene/Scene.h"
 
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"

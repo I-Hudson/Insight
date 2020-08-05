@@ -43,6 +43,7 @@ namespace Insight
 		}
 		VulkanMaterial::VulkanMaterial()
 		{
+			m_usageCount = 0;
 		}
 
 		VulkanMaterial::~VulkanMaterial()
@@ -173,6 +174,17 @@ namespace Insight
 			data.Binding = binding;
 
 			m_samplerData[key] = data;
+		}
+
+		void VulkanMaterial::IncermentUsageCount()
+		{
+			++m_usageCount;
+
+		}
+
+		void VulkanMaterial::DecermentUsageCount()
+		{
+			--m_usageCount;
 		}
 
 		void VulkanMaterial::Resize()

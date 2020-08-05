@@ -10,7 +10,6 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
-#include "Module/EntityModule.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Event/EventManager.h"
 
@@ -55,8 +54,6 @@ namespace Insight
 
 		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(m_windowModule);
 		m_inputModule->SetManuallyUpdate(true);
-
-		m_moduleManager->AddModule<Module::EntityModule>();
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
 
@@ -172,16 +169,6 @@ namespace Insight
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
-
-		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_S))
-		{
-			Serialization::SerializableRegistry::SerializeAll();
-		}
-		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
-		{
-			Serialization::SerializableRegistry::DeserializeAll();
-			EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
-		}
 	}
 
 	void Application::Run()

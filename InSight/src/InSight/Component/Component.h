@@ -35,6 +35,8 @@ public:
 	void SetEntity(Entity* entity) { m_owner = entity; }
 	Entity* GetEntity() const { return m_owner; }
 
+	virtual void OnUpdate(const float& deltaTime) { }
+
 private:
 	Entity* m_owner;
 	ComponentType m_type;

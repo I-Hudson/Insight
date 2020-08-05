@@ -169,6 +169,9 @@ namespace Insight
 			if (m_recordCommandBuffers)
 			{
 				m_recordCommandBuffers = false;
+				vertexCount = 0;
+				triCount = 0;
+				meshCount = 0;
 				{
 					IS_PROFILE_SCOPE("All Draw");
 
@@ -242,6 +245,15 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			m_swapchain->Present();
+		}
+
+		void VulkanRenderer::IncermentUseageCount()
+		{
+			m_usage
+		}
+
+		void VulkanRenderer::DecermentUseageCount()
+		{
 		}
 
 		void VulkanRenderer::RecreateFramebuffers(const Event& event)

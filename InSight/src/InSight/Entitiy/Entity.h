@@ -51,6 +51,8 @@ public:
 	static Entity* CreateFromModel(Model* model);
 	void Delete();
 
+	void OnUpdate(const float deltaTime);
+
 	void SetID(const std::string& id);
 	const std::string& GetID() const;
 
@@ -62,7 +64,7 @@ public:
 	Entity* AddChild(const std::string& childId = "");
 	void AddChild(Entity* child);
 	Entity* GetChild(int childIndex);
-	unsigned int GetChildCount() { return m_data.Children.size(); }
+	unsigned int GetChildCount() { return static_cast<unsigned int>(m_data.Children.size()); }
 	void RemoveChild(Entity* child);
 
 	const std::vector<Component*>* GetAllComponents()

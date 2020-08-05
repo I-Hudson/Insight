@@ -28,7 +28,7 @@ public:
 	static Material* Create();
 
 protected:
-	UINT m_useageCount;
+	UINT m_usageCount;
 	bool m_isDirty;
 
 	friend MeshComponent;

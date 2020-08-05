@@ -1,15 +1,14 @@
 #include <Insight.h>
 #include <../vendor/glm/glm/gtx/string_cast.hpp>
 
-using namespace Insight::Maths;
 using namespace Insight;
 
 class Sandbox : public Insight::Application
 {
 public:
-	Entity* e = nullptr;
 	std::vector<TransformComponent*> transformComponents;
-	Model* testModel = nullptr;
+	Scene* m_sandboxScene;
+
 
 	Sandbox() : Insight::Application()
 	{ }
@@ -18,20 +17,23 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		bool test = false;
+		m_sandboxScene = NEW_ON_HEAP(Scene, "Sandbox");
+		m_sandboxScene->SetActiveScene();
 
-			Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
-			//Model* m = Model::Create("./models/Test/TestCube.fbx");
-			//Model* n = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/nano/nanosuit.fbx");
+		bool test = true;
+
+		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
+		//Model* m = Model::Create("./models/Test/TestCube.fbx");
+		//Model* n = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/nano/nanosuit.fbx");
 
 		if (test)
 		{
-			for (size_t i = 0; i < 50; ++i)
+			for (size_t i = 0; i < 1; ++i)
 			{
 				//if (i % 2 == 0)
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
-					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
+					glm::vec3 pos = glm::vec3(rand() % 5, 0, rand() % 5);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}
@@ -75,6 +77,16 @@ public:
 				tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1) * Time::GetDeltaTime());
 			}
 		}
+
+		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_S))
+		{
+			Scene::ActiveScene()->Serialize();
+		}
+
+		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
+		{
+			Scene::ActiveScene()->Deserialize("sandbox.json");
+		}
 	}
 
 	virtual void Draw() override
@@ -86,8 +98,7 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		DELETE_ON_HEAP(testModel);
-		e->Delete();
+		DELETE_ON_HEAP(m_sandboxScene);
 	}
 };
 
