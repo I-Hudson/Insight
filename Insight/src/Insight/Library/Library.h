@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/Templates/TSingleton.h"
 #include "Insight/UUID.h"
 
 namespace Insight
@@ -9,11 +8,11 @@ namespace Insight
 	namespace Library
 	{
 		template<typename T>
-		class Library : public TSingleton<Library<T>>
+		class Library
 		{
 		public:
-			Library() { SetInstancePtr(this); }
-			~Library();
+			Library() { }
+			virtual ~Library();
 
 			T* AddAsset(const std::string& uuid, T* asset);
 			T* AddAsset();
@@ -29,12 +28,11 @@ namespace Insight
 		template<typename T>
 		inline Library<T>::~Library()
 		{
-			for (auto it = GetInstance()->m_assets.begin(); it != GetInstance()->m_assets.end(); ++it)
+			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			{
 				DELETE_ON_HEAP((*it).second);
 			}
-			GetInstance()->m_assets.clear();
-			ClearPtr();
+			m_assets.clear();
 		}
 
 		template<typename T>
@@ -45,7 +43,7 @@ namespace Insight
 				return asset;
 			}
 
-			GetInstance()->m_assets[uuid] = asset;
+			m_assets[uuid] = asset;
 			return asset;
 		}
 
@@ -62,7 +60,7 @@ namespace Insight
 		{
 			if (Exists(uuid))
 			{
-				return GetInstance()->m_assets[uuid];
+				return m_assets[uuid];
 			}
 			return nullptr;
 		}
@@ -70,17 +68,7 @@ namespace Insight
 		template<typename T>
 		inline bool Library<T>::Exists(const std::string& uuid)
 		{
-			return GetInstance()->m_assets.find(uuid) != GetInstance()->m_assets.end();
+			return m_assets.find(uuid) != m_assets.end();
 		}
 	}
 }
-
-namespace Insight
-{
-	namespace Render
-	{
-		class Shader;
-	}
-}
-
-typedef Insight::Library::Library<Insight::Render::Shader> ShaderLibrary;

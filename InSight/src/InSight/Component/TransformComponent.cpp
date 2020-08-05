@@ -46,17 +46,41 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_transform[3] = glm::vec4(position, 1.0f);
 }
 
-void TransformComponent::Serialize(json& out)
+void TransformComponent::Serialize(json& out, bool force)
 {
 	out["UUID"] = GetUUID();
 	out["Type"] = "TransformComponent";
-	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z };
-	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z };
-	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z };
-	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z };
+
+	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z,  m_transform[0].w };
+	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z,  m_transform[1].w };
+	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z,  m_transform[2].w };
+	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z,  m_transform[3].w };
 }
 
-void TransformComponent::Deserialize(json in)
+void TransformComponent::Deserialize(json in, bool force)
 {
+	SetUUID(in["UUID"]);
+
+	DeserializeTransform(m_transform[0], in["ViewMatrix"]["X"]);
+	DeserializeTransform(m_transform[1], in["ViewMatrix"]["Y"]);
+	DeserializeTransform(m_transform[2], in["ViewMatrix"]["Z"]);
+	DeserializeTransform(m_transform[3], in["ViewMatrix"]["W"]);
+}
+
+void TransformComponent::DeserializeTransform(glm::vec4& vector, json data)
+{
+	int i = 0;
+	float values[4];
+
+	for (auto it = data.begin(); it != data.end(); ++it)
+	{
+		values[i] = (*it).get<float>();
+		++i;
+	}
+
+	vector.x = values[0];
+	vector.y = values[1];
+	vector.z = values[2];
+	vector.w = values[3];
 }
 

@@ -12,6 +12,7 @@
 #include "Module/InputModule.h"
 #include "Module/EntityModule.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
+#include "Insight/Event/EventManager.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Serialization/Serializable.h"
@@ -64,6 +65,8 @@ namespace Insight
 		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		
 		m_graphicsModule->SetMainCamera(m_mainCamera.get());
+
+		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
 		Concurrency::create_task([]() {IS_CORE_INFO("Thread for task"); }).wait();
 
@@ -177,6 +180,7 @@ namespace Insight
 		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
 		{
 			Serialization::SerializableRegistry::DeserializeAll();
+			EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
 		}
 	}
 
@@ -194,7 +198,7 @@ namespace Insight
 			Time::UpdateTime();
 			m_moduleManager->Update(Time::GetDeltaTime());
 
-			ImGuiRenderer::GetInstance()->NewFrame();
+			Render::ImGuiRenderer::GetInstance()->NewFrame();
 
 			static float f = 0.0f;
 			static int counter = 0;

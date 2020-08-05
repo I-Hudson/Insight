@@ -41,6 +41,7 @@ namespace Insight
 		private:
 
 			void RecreateFramebuffers(const Event& event);
+			void DeserializeFromFile(const Event& event);
 
 			bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
 

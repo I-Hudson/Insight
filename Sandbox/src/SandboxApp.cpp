@@ -18,20 +18,20 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		bool test = true;
+		bool test = false;
+
+			Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
+			//Model* m = Model::Create("./models/Test/TestCube.fbx");
+			//Model* n = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/nano/nanosuit.fbx");
 
 		if (test)
 		{
-			Model* m = NEW_ON_HEAP(Model, "./models/Survival_BackPack_2/backpack.obj");
-			//Model* m = Model::Create("./models/Test/TestCube.fbx");
-			Model* n = NEW_ON_HEAP(Model, "./models/nano/nanosuit.fbx");
-
-			for (size_t i = 0; i < 10; ++i)
+			for (size_t i = 0; i < 50; ++i)
 			{
 				//if (i % 2 == 0)
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
-					glm::vec3 pos = glm::vec3(rand() % 500, 0, rand() % 500);
+					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}

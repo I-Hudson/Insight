@@ -80,7 +80,7 @@ void MeshComponent::SetMaterial(Material* material)
 	}
 }
 
-void MeshComponent::Serialize(json& out)
+void MeshComponent::Serialize(json& out, bool force)
 {
 	out["UUID"] = GetUUID();
 	out["Type"] = "MeshComponent";
@@ -89,7 +89,7 @@ void MeshComponent::Serialize(json& out)
 	out["SubMeshIndex"] = m_mesh->GetSubMeshIndex();
 }
 
-void MeshComponent::Deserialize(json in)
+void MeshComponent::Deserialize(json in, bool force)
 {
 	using namespace Insight::Library;
 

@@ -2,7 +2,6 @@
 
 #include "Insight/Library/ModelLibrary.h"
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Assimp/Model.h"
 
 #include <filesystem>
 
@@ -14,10 +13,28 @@ namespace Insight
 			: Library()
 			, Serializable(this, false, "ModelLibrary.json")
 		{
+			SetInstancePtr(this);
 		}
 
 		ModelLibrary::~ModelLibrary()
 		{
+			ClearPtr();
+		}
+
+		Model* ModelLibrary::GetAssetFromPath(const std::string& filePath)
+		{
+			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
+			{
+				if ((*it).second->GetFilePath() == filePath)
+				{
+					return it->second;
+				}
+			}
+
+			Model* m = NEW_ON_HEAP(Model, filePath);
+			AddAsset(m->GetUUID(), m);
+
+			return m;
 		}
 
 		void ModelLibrary::LoadAssetsFromFolder(const std::string& folderName, const bool& lookInChildren)
@@ -33,23 +50,29 @@ namespace Insight
 				if (exIt != m_extensions.end())
 				{
 					Model* m = NEW_ON_HEAP(Model, entry.path().u8string());
-					Insight::UUID* uuid = static_cast<Insight::UUID*>(m);
-					AddAsset(uuid->GetUUID(), m);
+					AddAsset(m->GetUUID(), m);
 				}
 			}
 		}
 
-		void ModelLibrary::Serialize(json& data)
+		void ModelLibrary::Serialize(json& data, bool force)
 		{
 			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			{
-				data["Models"][it->second->GetUUID()] = it->second->GetFilePath();
+				data["Models"][it->second->GetUUID()]["UUID"] = it->second->GetUUID();
+				data["Models"][it->second->GetUUID()]["FilePath"] = it->second->GetFilePath();
 			}
 		}
 
-		void ModelLibrary::Deserialize(json data)
+		void ModelLibrary::Deserialize(json data, bool force)
 		{
-
+			for (auto it = data["Models"].begin(); it != data["Models"].end(); ++it)
+			{
+				json j = *it;
+				std::string uuid = (*it)["UUID"];
+				Model* m = NEW_ON_HEAP(Model, (*it)["FilePath"], uuid);
+				AddAsset(m->GetUUID(), m);
+			}
 		}
 	}
 }

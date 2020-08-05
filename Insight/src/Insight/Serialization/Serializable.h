@@ -29,16 +29,6 @@ namespace Insight
 {
 	namespace Serialization
 	{
-		struct SerializeData
-		{
-			std::string SerializeString;
-
-			void AddData(const std::string& type, const std::string& data)
-			{
-
-			}
-		};
-
 		template<typename T>
 		struct TypeRegister
 		{
@@ -54,31 +44,27 @@ namespace Insight
 		{
 		public:
 
-			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "")
-			{
-				if (!isSubObject)
-				{
-					m_serializableObjects.push_back(obj);
-				}
-				m_fileName = filePath;
-			}
+			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
+			virtual ~Serializable();
 
-			virtual ~Serializable()
-			{
-				auto it = std::find(m_serializableObjects.begin(), m_serializableObjects.end(), this);
-				if (it != m_serializableObjects.end())
-				{
-					m_serializableObjects.erase(it);
-				}
-			}
-
-			virtual void Serialize(json& data) = 0;
-			virtual void Deserialize(json data) = 0;
+			virtual void Serialize(json& data, bool force = false) = 0;
+			virtual void Deserialize(json data, bool force = false) = 0;
 
 			template<typename T> 
 			static Serializable* CreateInstance()
 			{ 
 				return NEW_ON_HEAP(T); 
+			}
+
+			template<typename T>
+			static Serializable* CreateInstanceFromType(const std::string& type)
+			{
+				auto t = SerializableRegistry::GetTypes().find(type);
+				if (t != SerializableRegistry::GetTypes().end())
+				{
+					return t->second();
+				}
+				return nullptr;
 			}
 
 			static std::vector<Serializable*> m_serializableObjects;
@@ -103,92 +89,75 @@ namespace Insight
 
 			static void SerializeAll()
 			{
-				std::ofstream out;
-				out.open("serializeData.json");
-
-				std::vector<json> sceneItems;
-				int i = 0;
-				for (auto it = Serializable::m_serializableObjects.begin(); it != Serializable::m_serializableObjects.end(); ++it)
+				if (!m_inUse)
 				{
-					json data;
-					if ((*it)->m_fileName.empty())
+					m_inUse = true;
+					std::ofstream out;
+					out.open("serializeData.json");
+
+					std::vector<json> sceneItems;
+					int i = 0;
+					for (auto it = Serializable::m_serializableObjects.begin(); it != Serializable::m_serializableObjects.end(); ++it)
 					{
-						(*it)->Serialize(data);
-						sceneItems.push_back(data);
-					}
-					else
-					{
-						std::ofstream o;
-						o.open((*it)->m_fileName);
-						if (o.is_open())
+						json data;
+						if ((*it)->m_fileName.empty())
 						{
-							json data;
 							(*it)->Serialize(data);
-							o << data.dump(4);
-							o.close();
+							if (!data.empty())
+							{
+								sceneItems.push_back(data);
+							}
 						}
+						else
+						{
+							std::ofstream o;
+							o.open((*it)->m_fileName);
+							if (o.is_open())
+							{
+								json data;
+								(*it)->Serialize(data);
+								o << data.dump(4);
+								o.close();
+							}
+						}
+						i++;
 					}
-					i++;
-				}
 
-				json data;
-				for (size_t i = 0; i < sceneItems.size(); ++i)
-				{
-					data[sceneItems[i]["UUID"].get<std::string>()] = sceneItems[i];
+					json data;
+					for (size_t i = 0; i < sceneItems.size(); ++i)
+					{
+						data[sceneItems[i]["UUID"].get<std::string>()] = sceneItems[i];
+					}
+					out << data.dump(4);
+					out.close();
+					m_inUse = false;
 				}
-				out << data.dump(4);
-				out.close();
 			}
 
 			static void DeserializeAll()
 			{
-				std::ifstream in;
-				in.open("serializeData.json");
-
-				json data;
-				in >> data;
-
-				for (auto it  = data.begin(); it != data.end(); ++it)
+				if (!m_inUse)
 				{
-					std::string type = (*it)["Type"];
-					Serializable* s = GetTypes().find(type)->second();
-					s->Deserialize(*it);
+					m_inUse = true;
+					std::ifstream in;
+					in.open("serializeData.json");
+
+					json data;
+					in >> data;
+
+					for (auto it = data.begin(); it != data.end(); ++it)
+					{
+						std::string type = (*it)["Type"];
+						Serializable* s = GetTypes().find(type)->second();
+						s->Deserialize(*it);
+					}
+					in.close();
+					m_inUse = false;
 				}
-
-				//std::vector<std::string> data;
-				//bool record = false;
-				//
-				//std::string line;
-				//Serializable* s = nullptr;
-				//while (std::getline(in, line))
-				//{
-				//	if (line == "\\")
-				//	{
-				//		record = true;
-				//	}
-				//	else if (line == "//")
-				//	{
-				//		DELETE_ON_HEAP(s);
-				//		record = false;
-				//	}
-				//	else
-				//	{
-				//
-				//		std::string type = line.substr(0, line.find_first_of(':'));
-				//		MapTypes::iterator it = GetTypes().find(type);
-				//		if (it != GetTypes().end())
-				//		{ 
-				//			s = it->second();
-				//		}
-				//		else
-				//		{
-				//			data.push_back(line);
-				//		}
-				//	}
-				//}
-
-				in.close();
 			}
+
+		private:
+			static bool m_inUse;
 		};
 	}
 }

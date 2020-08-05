@@ -10,14 +10,16 @@
 Model::Model()
 	: Insight::UUID()
 {
-	Insight::Library::ModelLibrary::GetInstance()->AddAsset(GetUUID(), this);
 }
 
-Model::Model(const std::string& filePath)
+Model::Model(const std::string& filePath, const std::string& uuid)
 	: Insight::UUID()
 	, m_path(filePath)
 {
-	Insight::Library::ModelLibrary::GetInstance()->AddAsset(GetUUID(), this);
+	if (!uuid.empty())
+	{
+		SetUUID(uuid);
+	}
 
 	Create(filePath);
 }

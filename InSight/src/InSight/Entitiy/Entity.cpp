@@ -119,29 +119,46 @@ void Entity::RemoveChild(Entity* child)
 	}
 }
 
-void Entity::Serialize(json& out)
+void Entity::Serialize(json& out, bool force)
 {
-	out["UUID"] = GetUUID().c_str();
-	out["Type"] = "Entity";
-	out["Name"] = m_data.Name;
-
-	int index = 0;
-	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	if (GetParent() == nullptr || force)
 	{
-		(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
-	}
+		out["UUID"] = GetUUID().c_str();
+		out["Type"] = "Entity";
+		out["Name"] = m_data.Name;
 
+		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
+		{
+			(*it)->Serialize(out["Children"][(*it)->GetUUID()], true);
+		}
+
+		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+		{
+			(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
+		}
+	}
 }
 
-void Entity::Deserialize(json in)
+void Entity::Deserialize(json in, bool force)
 {
 	SetUUID(in["UUID"]);
 	m_data.Name = in["Name"];
-	int index = 0;
+
+	for (auto it = in["Children"].begin(); it != in["Children"].end(); ++it)
+	{
+		Serializable* s = CreateInstanceFromType<Serializable>((*it)["Type"]);
+		dynamic_cast<Entity*>(s)->SetParent(this);
+		if (s != nullptr)
+		{
+			s->Deserialize(*it);
+			m_data.Children.push_back(dynamic_cast<Entity*>(s));
+		}
+	}
+
 	for (auto it = in["Components"].begin(); it != in["Components"].end(); ++it)
 	{
-		std::string type = (*it)["Type"];
-		Serializable* s = Insight::Serialization::SerializableRegistry::GetTypes().find(type)->second();
+		Serializable* s = CreateInstanceFromType<Serializable>((*it)["Type"]);
+		dynamic_cast<Component*>(s)->SetEntity(this);
 		if (s != nullptr)
 		{
 			s->Deserialize(*it);

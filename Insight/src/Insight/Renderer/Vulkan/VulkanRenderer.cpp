@@ -6,7 +6,7 @@
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
 
-#include "Insight/Library/Library.h"
+#include "Insight/Library/ShaderLibrary.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Component/TransformComponent.h"
@@ -88,7 +88,7 @@ namespace Insight
 				m_framebuffer->GetRenderpass()
 			};
 			m_shader = NEW_ON_HEAP(VulkanShader, data);
-			ShaderLibrary::GetInstance()->AddAsset(m_shader->GetUUID(), m_shader);
+			Library::ShaderLibrary::GetInstance()->AddAsset(m_shader->GetUUID(), m_shader);
 
 			m_material = static_cast<VulkanMaterial*>(Material::Create());
 			m_material->SetShader(m_shader);
@@ -106,6 +106,7 @@ namespace Insight
 			m_imguiRenderer = NEW_ON_HEAP(ImGuiRenderer, this);
 
 			EventManager::Bind(EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
+			EventManager::Bind(EventType::Deserialize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::DeserializeFromFile, this));
 
 			IS_CORE_INFO("Vulkan Setup Complete.");
 		}
@@ -115,6 +116,7 @@ namespace Insight
 			m_device->WaitForIdle();
 
 			EventManager::Unbind(EventType::WindowResize, typeid(VulkanRenderer).name());
+			EventManager::Unbind(EventType::Deserialize, typeid(VulkanRenderer).name());
 
 			DELETE_ON_HEAP(m_imguiRenderer);
 
@@ -146,14 +148,17 @@ namespace Insight
 			m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix(), model);
 			std::vector<glm::mat4> objectsMatrix;
 			{
-				IS_PROFILE_SCOPE("Object matrixs");
-				for (auto it = meshes.begin(); it != meshes.end(); it += 79)
+				if (meshes.size() > 0)
 				{
-					objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
-				}
-				if (objectsMatrix.size() > 0)
-				{
-					m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
+					IS_PROFILE_SCOPE("Object matrixs");
+					for (auto it = meshes.begin(); it != meshes.end(); it += 79)
+					{
+						objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
+					}
+					if (objectsMatrix.size() > 0)
+					{
+						m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
+					}
 				}
 			}
 
@@ -248,6 +253,11 @@ namespace Insight
 			m_shader->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
 			m_material->Resize();
 
+			m_recordCommandBuffers = true;
+		}
+
+		void VulkanRenderer::DeserializeFromFile(const Event& event)
+		{
 			m_recordCommandBuffers = true;
 		}
 

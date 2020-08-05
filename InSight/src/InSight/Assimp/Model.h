@@ -15,7 +15,7 @@ class IS_API Model : public Insight::UUID
 {
 public:
 	Model();
-	Model(const std::string& filePath);
+	Model(const std::string& filePath, const std::string& uuid = "");
 	~Model();
 
 	Model* Create(const std::string& filepath);

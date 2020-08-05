@@ -17,6 +17,8 @@ namespace Insight
 		AppTick, AppUpdate, AppRender,
 		KeyPressed, KeyReleased, KeyTyped,
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
+
+		Serialize, Deserialize,
 	};
 
 	static std::string EventTypeToString(const EventType& type)
@@ -39,6 +41,8 @@ namespace Insight
 			case EventType::MouseButtonReleased: return "MouseButtonReleased";
 			case EventType::MouseMoved: return "MouseMoved";
 			case EventType::MouseScrolled: return "MouseScrolled";
+			case EventType::Serialize: return "Serialize";
+			case EventType::Deserialize: return "Deserialize";
 			default: return "Type is unknow.";
 		}
 	}

@@ -3,11 +3,8 @@
 #include "Insight/Core.h"
 #include "Insight/Module/Module.h"
 #include "Insight/Templates/TSingleton.h"
-#include "Insight/Library/Library.h"
 #include "Insight/Library/ModelLibrary.h"
-
-#include "Insight/Assimp/Model.h"
-#include "Insight/Renderer/Shader.h"
+#include "Insight/Library/ShaderLibrary.h"
 
 namespace Insight
 {
@@ -21,9 +18,13 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
+			void Deserialize();
+
 		private:
+			bool m_deserlizaed;
+
 			Insight::Library::ModelLibrary* m_modelLibrary;
-			ShaderLibrary* m_shaderLibrary;
+			Insight::Library::ShaderLibrary* m_shaderLibrary;
 		};
 	}
 }

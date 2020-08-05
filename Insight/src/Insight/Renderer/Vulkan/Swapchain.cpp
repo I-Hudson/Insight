@@ -6,7 +6,7 @@
 #include "Insight/Renderer/Vulkan/Queue.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Library/Library.h"
+#include "Insight/Library/ShaderLibrary.h"
 #include "Insight/Renderer/ShaderModule.h"
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
@@ -35,7 +35,7 @@ namespace Insight
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
 			m_swapchainShader = Memory::MemoryManager::NewOnFreeList<VulkanShader>(data);
-			ShaderLibrary::GetInstance()->AddAsset(m_swapchainShader->GetUUID(), m_swapchainShader);
+			Library::ShaderLibrary::GetInstance()->AddAsset(m_swapchainShader->GetUUID(), m_swapchainShader);
 
 			for (int i = 0; i < 3; i++)
 			{
