@@ -247,13 +247,9 @@ namespace Insight
 			m_swapchain->Present();
 		}
 
-		void VulkanRenderer::IncermentUseageCount()
+		Material* VulkanRenderer::GetDefaultMaterial()
 		{
-			m_usage
-		}
-
-		void VulkanRenderer::DecermentUseageCount()
-		{
+			return m_material;
 		}
 
 		void VulkanRenderer::RecreateFramebuffers(const Event& event)

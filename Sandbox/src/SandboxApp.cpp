@@ -20,7 +20,7 @@ public:
 		m_sandboxScene = NEW_ON_HEAP(Scene, "Sandbox");
 		m_sandboxScene->SetActiveScene();
 
-		bool test = true;
+		bool test = false;
 
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
 		//Model* m = Model::Create("./models/Test/TestCube.fbx");
@@ -28,12 +28,12 @@ public:
 
 		if (test)
 		{
-			for (size_t i = 0; i < 1; ++i)
+			for (size_t i = 0; i < 50; ++i)
 			{
 				//if (i % 2 == 0)
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
-					glm::vec3 pos = glm::vec3(rand() % 5, 0, rand() % 5);
+					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}

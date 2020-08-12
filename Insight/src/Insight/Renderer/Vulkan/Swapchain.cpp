@@ -12,6 +12,7 @@
 #include "Insight/Renderer/Vulkan/VulkanMaterial.h"
 #include "Insight/Renderer/Vulkan/VulkanBuffers.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
+#include "examples/imgui_impl_vulkan.h"
 
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Event/EventManager.h"
@@ -30,7 +31,11 @@ namespace Insight
 			ShaderData data
 			{
 				m_swapchainSettings.Device,
+#ifdef IS_EDITOR
+				{"vulkan/editor/swapchain_shader.vert", "vulkan/editor/swapchain_shader.frag"},
+#else
 				{"vulkan/swapchain_shader.vert", "vulkan/swapchain_shader.frag"},
+#endif
 				VkExtent2D{ static_cast<uint32_t>(m_swapchainSettings.Window->GetWidth()), static_cast<uint32_t>(m_swapchainSettings.Window->GetHeight())},
 				m_swapchainFramebuffers[0]->GetRenderpass()
 			};
@@ -61,6 +66,16 @@ namespace Insight
 				0,1,2, 0,2,3
 			};
 			m_fullscreenQuad = Memory::MemoryManager::NewOnFreeList<Mesh>(vertices, indices, std::vector<Texture>(), 0, "", "");
+
+#ifdef IS_EDITOR
+			//m_editorFrameBuffer = NEW_ON_HEAP(VulkanFramebuffer, m_swapchainSettings.Device, m_swapchainSettings.Window->GetWidth(), m_swapchainSettings.Window->GetHeight());
+			//m_editorFrameBuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+			//	VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			//m_editorFrameBuffer->CompileFrameBuffer();
+			//
+			//m_editorCommandPool = NEW_ON_HEAP(CommandPool, m_swapchainSettings.Device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
+			//m_editorCommandBuffer = m_editorCommandPool->AllocCommandBuffer();
+#endif
 
 			IS_CORE_INFO("SwapChain completed.");
 		}
@@ -198,6 +213,19 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+#ifdef IS_EDITOR
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+			ImGui::Begin("ViewPort");
+			ImVec2 viewPortSize = ImGui::GetContentRegionAvail();
+			if (m_sceneTexture == nullptr)
+			{
+				m_sceneTexture = (ImTextureID)ImGui_ImplVulkan_AddTexture(*offscreenFB->GetSampler(), offscreenFB->GetAttachment(0).View, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			}
+			ImGui::Image(m_sceneTexture, viewPortSize);
+			ImGui::End();
+			ImGui::PopStyleVar();
+#endif
+
 			int i = 0;
 			++tempShader;
 			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
@@ -205,14 +233,18 @@ namespace Insight
 				IS_PROFILE_SCOPE("Swapchain Draw");
 
 				(*it)->StartRecord();
+
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
+
 				m_materials[i]->Bind(*it, i);
 
+#ifndef IS_EDITOR
 				if (offscreenFB != nullptr)
 				{
 					m_materials[i]->UpdateSampler2D("OffScreenTexture", &offscreenFB->GetAttachment(0).View, offscreenFB->GetSampler(), 0);
 				}
 				m_materials[i]->SetUniforms();
+#endif
 
 				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
 				VkDeviceSize offsets[] = { 0 };
@@ -229,6 +261,8 @@ namespace Insight
 				(*it)->EndRecord();
 				i++;
 			}
+			ImGuiRenderer::GetInstance()->EndFrame();
+
 			Submit(waitSemaphore);
 		}
 

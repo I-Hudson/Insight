@@ -25,6 +25,9 @@ public:
 	virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) = 0;
 	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
 
+	virtual void IncrementUsageCount() { }
+	virtual void DecrementUsageCount() { }
+
 	static Material* Create();
 
 protected:

@@ -16,6 +16,8 @@ namespace Insight
 
 		GraphicsModule::GraphicsModule(WindowModule* windowModule) 
 		{
+			SetInstancePtr(this);
+
 			m_windowModule = windowModule;
 
 			IS_CORE_INFO("{0}", m_windowModule->GetWindow()->GetHeight());
@@ -28,6 +30,8 @@ namespace Insight
 		{
 			Memory::MemoryManager::DeleteOnFreeList(m_renderer);
 			m_windowModule = nullptr;
+			
+			ClearPtr();
 		}
 
 		void GraphicsModule::Update(const float& deltaTime)
@@ -44,6 +48,11 @@ namespace Insight
 		void GraphicsModule::SetMainCamera(Camera* camera)
 		{
 			m_mainCamera = camera;
+		}
+
+		Material* GraphicsModule::GetDefaultMaterial()
+		{
+			return GraphicsModule::GetInstance()->m_renderer->GetDefaultMaterial();
 		}
 	}
 }

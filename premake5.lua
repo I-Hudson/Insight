@@ -8,7 +8,7 @@ workspace "Insight"
         "Debug_Vulkan_SP",
         "Debug_OPENGL",
         "Debug_OPENGL_SP",
-        "Release",
+        "Debug_VULKAN_NO_EDITOR",
         "Dist"
     }
     
@@ -125,25 +125,25 @@ project "Insight"
         }
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"
 
     filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
         symbols "on"
 
 
-    filter "configurations:Release"
-        defines "IS_RELEASE"
-        optimize "on"
+    filter "configurations:Debug_VULKAN_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+        symbols "on"
 
 
     filter "configurations:Dist"
@@ -202,24 +202,24 @@ project "Sandbox"
 
 
     filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"   
         
     filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
         symbols "on"
 
     filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
         symbols "on"
 
-    filter "configurations:Release"
-        defines "IS_RELEASE"
-        optimize "On"
+    filter "configurations:Debug_VULKAN_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+        symbols "on"
 
     filter "configurations:Dist"
         defines "IS_DIST"
@@ -287,4 +287,8 @@ project "UnitTests"
 
     filter "configurations:Debug_OpenGL_SP"
         defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
+        symbols "on"
+
+    filter "configurations:Debug_VULKAN_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"

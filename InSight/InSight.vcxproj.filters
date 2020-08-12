@@ -171,6 +171,12 @@
     <ClInclude Include="src\Insight\Library\Library.h">
       <Filter>src\Insight\Library</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Library\ModelLibrary.h">
+      <Filter>src\Insight\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Library\ShaderLibrary.h">
+      <Filter>src\Insight\Library</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Log.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
@@ -1596,12 +1602,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Library\ModelLibrary.h">
-      <Filter>src\Insight\Library</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Library\ShaderLibrary.h">
-      <Filter>src\Insight\Library</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1636,6 +1636,12 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Input\Input.cpp">
       <Filter>src\Insight\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Library\ModelLibrary.cpp">
+      <Filter>src\Insight\Library</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp">
+      <Filter>src\Insight\Library</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>src\Insight</Filter>
@@ -1760,6 +1766,9 @@
     <ClCompile Include="src\Insight\Renderer\Vulkan\VulkanShader.cpp">
       <Filter>src\Insight\Renderer\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Scene\Scene.cpp">
+      <Filter>src\Insight\Scene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp">
       <Filter>src\Insight\Serialization</Filter>
     </ClCompile>
@@ -1801,15 +1810,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Library\ModelLibrary.cpp">
-      <Filter>src\Insight\Library</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp">
-      <Filter>src\Insight\Library</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Scene\Scene.cpp">
-      <Filter>src\Insight\Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

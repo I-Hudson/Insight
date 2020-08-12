@@ -63,7 +63,7 @@ namespace Insight
 
 			m_top = currentAddress - allocationHeader->Padding - (Size) m_startPtr;
 
-#ifdef _DEBUG
+#ifdef IS_DEBUG
 			IS_CORE_INFO("F\t@C {0}, \t@F {1} \tO {2} ", (void*)currentAddress, (void*)((char*)m_startPtr + m_top), m_top);
 #endif
 		}

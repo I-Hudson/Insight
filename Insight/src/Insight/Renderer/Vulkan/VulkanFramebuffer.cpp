@@ -137,7 +137,7 @@ namespace Insight
 				else
 				{
 					VkClearValue clearValue;
-					clearValue.color = { 0.0f, 0.0f, 0.0f, 0.0f };
+					clearValue.color = { 0.0f, 0.0f, 0.0f, 1.0f };
 					clearColours.push_back(clearValue);
 				}
 			}

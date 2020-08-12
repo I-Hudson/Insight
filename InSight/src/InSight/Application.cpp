@@ -182,10 +182,11 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			Time::UpdateTime();
-			m_moduleManager->Update(Time::GetDeltaTime());
-
 			Render::ImGuiRenderer::GetInstance()->NewFrame();
+			
+			Time::UpdateTime();
+
+			m_moduleManager->Update(Time::GetDeltaTime());
 
 			static float f = 0.0f;
 			static int counter = 0;

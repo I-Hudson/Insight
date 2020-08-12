@@ -34,12 +34,14 @@ namespace Insight
 			IMGUI_CHECKVERSION();
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;			// Docking
+			//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;			// Viewport
 
 			// Setup Dear ImGui style
-			//ImGui::StyleColorsDark();
-			ImGui::StyleColorsClassic();
+			ImGui::StyleColorsDark();
+			//ImGui::StyleColorsClassic();
 
 #ifdef IS_VULKAN
 			m_vulkanRenderer = dynamic_cast<VulkanRenderer*>(renderer);
@@ -67,7 +69,7 @@ namespace Insight
             init_info.DescriptorPool = m_descPool;
 			init_info.Allocator = nullptr;
 			init_info.MinImageCount = 2;
-			init_info.ImageCount = 2;
+			init_info.ImageCount = 3;
 			init_info.CheckVkResultFn = [](VkResult err)
 			{
 				if (err == 0)
@@ -129,15 +131,56 @@ namespace Insight
 
 #endif // IS_VULKAN
 			ImGui::NewFrame();
+
+#ifdef IS_EDITOR
+			// Place all of this into a layer stack system.
+			ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->GetWorkPos());
+			ImGui::SetNextWindowSize(viewport->GetWorkSize());
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("DockSpace Demo", 0, window_flags);
+			ImGui::PopStyleVar();
+
+			ImGui::PopStyleVar(2);
+
+			ImGuiIO& io = ImGui::GetIO();
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f));
+
+			ImGui::End();
+#endif
+		}
+
+		void ImGuiRenderer::EndFrame()
+		{
+			//ImGuiIO& io = ImGui::GetIO();
+			//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			//{
+			//	GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			//	ImGui::UpdatePlatformWindows();
+			//	ImGui::RenderPlatformWindowsDefault();
+			//	glfwMakeContextCurrent(backup_current_context);
+			//}
 		}
 
 		void ImGuiRenderer::Render(CommandBuffer* commandBuffer)
 		{
 			IS_PROFILE_FUNCTION();
 
+			ImGui::EndFrame();
+
+			ImGuiIO& io = ImGui::GetIO();
+			io.DisplaySize = ImVec2((float)Module::WindowModule::GetWindow()->GetWidth(), (float)Module::WindowModule::GetWindow()->GetHeight());
+
 			ImGui::Render();
 			ImDrawData* draw_data = ImGui::GetDrawData();
-
 #ifdef IS_VULKAN
 			// Record dear imgui primitives into command buffer
 			ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer->GetBuffer());

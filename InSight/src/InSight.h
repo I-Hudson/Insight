@@ -11,6 +11,7 @@
 #include "Insight/Input/Input.h"
 #include "Insight/Library/Library.h"
 #include "Insight/Library/ModelLibrary.h"
+#include "../vendor/imgui/imgui.h"
 
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/TransformComponent.h"

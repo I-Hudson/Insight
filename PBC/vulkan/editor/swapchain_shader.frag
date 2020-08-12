@@ -6,10 +6,7 @@ layout(location = 1) in vec2 FragUV;
 
 layout(location = 0) out vec4 outColor;
 
-layout(set = 0, binding = 0) uniform sampler2D offscreenTexture;
-//layout(set = 0, binding = 1) uniform sampler2D uiTexture;
-
 void main() 
 {
-    outColor = texture(offscreenTexture, FragUV);
+	outColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

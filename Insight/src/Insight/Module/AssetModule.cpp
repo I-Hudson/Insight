@@ -32,10 +32,13 @@ namespace Insight
 			m_deserlizaed = true;
 			std::ifstream in;
 			in.open("ModelLibrary.json");
-			json j;
-			in >> j;
-			m_modelLibrary->Deserialize(j);
-			in.close();
+			if (in.is_open())
+			{
+				json j;
+				in >> j;
+				m_modelLibrary->Deserialize(j);
+				in.close();
+			}
 		}
 	}
 }

@@ -31,6 +31,7 @@ namespace Insight
 			~ImGuiRenderer();
 
 			void NewFrame();
+			void EndFrame();
 			void Render(CommandBuffer* commandBuffer);
 
 		private:

@@ -65,18 +65,21 @@ namespace Insight
 				vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
 			}
 
-			Memory::MemoryManager::DeleteOnFreeList(m_descPool);
+			DELETE_ON_HEAP(m_descPool);
 		}
 
 		void VulkanMaterial::SetShader(Shader* shader)
 		{
 			m_shader = static_cast<VulkanShader*>(shader);
-		
+
 			auto metaData = m_shader->GetMetaData();
 			VkDeviceSize bufferSize = 0;
-			for (auto it = metaData[0].UniformBlocks.begin(); it != metaData[0].UniformBlocks.end(); ++it)
+			for (size_t i = 0; i < metaData.size(); ++i)
 			{
-				bufferSize += (*it).Size;
+				for (auto it = metaData[i].UniformBlocks.begin(); it != metaData[i].UniformBlocks.end(); ++it)
+				{
+					bufferSize += (*it).Size;
+				}
 			}
 
 			if (m_uniformBuffers != VK_NULL_HANDLE)
@@ -90,12 +93,20 @@ namespace Insight
 					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_uniformBuffers, m_uniformBuffersMem);
 			}
 
-			m_descPool = NEW_ON_HEAP(DescriptorPool, s_Renderer->GetDeviceWrapper(), metaData,
-				VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
-			m_updatedDesc = false;
-			m_descPool->FreeDescriptorSets();
-			m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
-			SetUniforms();
+			if (bufferSize > 0)
+			{
+				m_descPool = NEW_ON_HEAP(DescriptorPool, s_Renderer->GetDeviceWrapper(), metaData,
+					VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
+				m_updatedDesc = false;
+				m_descPool->FreeDescriptorSets();
+				m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
+				SetUniforms();
+			}
+			else
+			{
+				m_descPool = nullptr;
+				m_descSet = nullptr;
+			}
 		}
 
 		Shader* VulkanMaterial::GetShader()
@@ -105,6 +116,11 @@ namespace Insight
 
 		void VulkanMaterial::SetUniforms()
 		{
+			if (m_descSet == nullptr)
+			{
+				return;
+			}
+
 			if (m_isDirty)
 			{
 
@@ -176,13 +192,30 @@ namespace Insight
 			m_samplerData[key] = data;
 		}
 
-		void VulkanMaterial::IncermentUsageCount()
+		void VulkanMaterial::IncrementUsageCount()
 		{
 			++m_usageCount;
 
+			std::vector< std::unordered_map<std::string, UniformData>::iterator> removeIts;
+
+			for (auto it = m_uniformData.begin(); it != m_uniformData.end(); ++it)
+			{
+				if ((*it).second.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+				{
+					UnMapBufferMem(it->second);
+					vkDestroyBuffer(s_Renderer->GetDevice(), (*it).second.Buffer, nullptr);
+					vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
+					removeIts.push_back(it);
+				}
+			}
+
+			for (size_t i = 0; i < removeIts.size(); ++i)
+			{
+				m_uniformData.erase(removeIts[i]);
+			}
 		}
 
-		void VulkanMaterial::DecermentUsageCount()
+		void VulkanMaterial::DecrementUsageCount()
 		{
 			--m_usageCount;
 		}
@@ -199,6 +232,11 @@ namespace Insight
 
 			// One dynamic offset per dynamic descriptor to offset into the ubo containing all model matrices
 			uint32_t dynamicOffset = drawIndex * static_cast<uint32_t>(m_dynamicOffset);
+
+			if (m_descSet == nullptr)
+			{
+				return;
+			}
 
 			if (m_dynamicOffset > 0)
 			{

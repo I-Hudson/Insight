@@ -59,7 +59,7 @@ namespace Insight
 
 			Size m_totalSize;
 			Size m_sizeUsed;
-#if _DEBUG
+#if IS_DEBUG
 			Size m_numOfNews{ 0 };
 			Size m_numOfDeletes{ 0 };
 			Size m_numOfArrNews{ 0 };

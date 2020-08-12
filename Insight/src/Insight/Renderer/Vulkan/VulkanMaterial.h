@@ -65,8 +65,8 @@ namespace Insight
 			template<typename T>
 			void UpdateDynamicUniforms(const std::string& key, void* uniformData, int numOfObjects, int binding);
 
-			void IncermentUsageCount();
-			void DecermentUsageCount();
+			virtual void IncrementUsageCount() override;
+			virtual void DecrementUsageCount() override;
 
 			void Resize();
 			void Bind(CommandBuffer* commandBuffers, int drawIndex);

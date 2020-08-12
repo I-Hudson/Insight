@@ -10,15 +10,19 @@ REGISTER_DEF_TYPE(MeshComponent);
 MeshComponent::MeshComponent()
 	: Component(nullptr, ComponentType::MESH)
 	, m_mesh(nullptr)
+	, m_materal(nullptr)
 {
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
+	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 }
 
 MeshComponent::MeshComponent(Entity* owner)
 	: Component(owner, ComponentType::MESH)
 	, m_mesh(nullptr)
+	, m_materal(nullptr)
 {
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
+	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 }
 
 MeshComponent::~MeshComponent()
@@ -64,9 +68,9 @@ void MeshComponent::SetMesh(Mesh* mesh)
 
 void MeshComponent::SetMaterial(Material* material)
 {
-	if (m_materal != nullptr)
+	if (m_materal != nullptr && m_materal != material)
 	{
-		--m_materal->m_useageCount;
+		m_materal->DecrementUsageCount();
 		m_materal->m_isDirty = true;
 	}
 
@@ -74,7 +78,7 @@ void MeshComponent::SetMaterial(Material* material)
 
 	if (m_materal != nullptr)
 	{
-		++m_materal->m_useageCount;
+		m_materal->IncrementUsageCount();
 		m_materal->m_isDirty = true;
 
 	}

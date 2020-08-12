@@ -78,6 +78,13 @@ namespace Insight
 			int tempShader = 0;
 			int shaderIndex = 0;
 
+#ifdef IS_EDITOR
+			CommandBuffer* m_editorCommandBuffer;
+			CommandPool* m_editorCommandPool;
+			VulkanFramebuffer* m_editorFrameBuffer;
+
+			void* m_sceneTexture = nullptr;
+#endif
 			uint32_t m_currentFrame = 0;
 			uint32_t m_imageIndex;
 			SwapChainSupportDetails m_swapChainDetails;

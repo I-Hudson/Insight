@@ -2,11 +2,13 @@
 
 #include "Insight/Core.h"
 #include "Insight/Module/Module.h"
+#include "Insight/Templates/TSingleton.h"
 #include "Insight/Config/CVar.h"
 
 #include "Insight/Renderer/Renderer.h"
 
 class MeshComponent;
+class Material;
 
 namespace Insight
 {
@@ -15,6 +17,7 @@ namespace Insight
 		class WindowModule;
 
 		class IS_API GraphicsModule : public Module
+			, public TSingleton<GraphicsModule>
 		{
 		public:
 			GraphicsModule(WindowModule* windowModule);
@@ -24,6 +27,7 @@ namespace Insight
 
 			static void SetMainCamera(Camera* camera);
 
+			static Material* GetDefaultMaterial();
 
 			struct GraphicsConfig
 			{
