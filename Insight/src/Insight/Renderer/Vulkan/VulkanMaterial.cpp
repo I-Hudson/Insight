@@ -9,6 +9,7 @@
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Time/Time.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 namespace Insight
 {
@@ -357,6 +358,8 @@ namespace Insight
 
 		void VulkanMaterial::Bind(CommandBuffer* commandBuffers, const MeshComponent* meshBeingDrawn)
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_shader->Bind(commandBuffers);
 
 			int index = 0;

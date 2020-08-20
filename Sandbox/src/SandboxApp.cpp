@@ -28,7 +28,7 @@ public:
 
 		if (test)
 		{
-			for (size_t i = 0; i < 50; ++i)
+			for (size_t i = 0; i < 1; ++i)
 			{
 				//if (i % 2 == 0)
 				{

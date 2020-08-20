@@ -226,17 +226,18 @@ namespace Insight
 			ImGui::PopStyleVar();
 #endif
 
-			int i = 0;
+			auto dcb = m_drawCommandBuffers[m_imageIndex];
+			int i = m_imageIndex;
 			++tempShader;
-			for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
+			//for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
 			{
 				IS_PROFILE_SCOPE("Swapchain Draw");
 
-				(*it)->StartRecord();
+				dcb->StartRecord();
 
-				m_swapchainFramebuffers[i]->BindBuffer(*it);
+				m_swapchainFramebuffers[i]->BindBuffer(dcb);
 
-				m_materials[i]->Bind(*it, nullptr);
+				m_materials[i]->Bind(dcb, nullptr);
 
 #ifndef IS_EDITOR
 				if (offscreenFB != nullptr)
@@ -248,18 +249,17 @@ namespace Insight
 
 				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
 				VkDeviceSize offsets[] = { 0 };
-				vkCmdBindVertexBuffers((*it)->GetBuffer(), 0, 1, vertexBuffers, offsets);
+				vkCmdBindVertexBuffers(dcb->GetBuffer(), 0, 1, vertexBuffers, offsets);
 
-				vkCmdBindIndexBuffer((*it)->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+				vkCmdBindIndexBuffer(dcb->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-				vkCmdDrawIndexed((*it)->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
+				vkCmdDrawIndexed(dcb->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
 
-				ImGuiRenderer::GetInstance()->Render(*it);
+				ImGuiRenderer::GetInstance()->Render(dcb);
 
-				m_swapchainFramebuffers[i]->UnbindBuffer(*it);
+				m_swapchainFramebuffers[i]->UnbindBuffer(dcb);
 
-				(*it)->EndRecord();
-				i++;
+				dcb->EndRecord();
 			}
 			ImGuiRenderer::GetInstance()->EndFrame();
 
