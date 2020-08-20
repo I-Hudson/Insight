@@ -7,6 +7,7 @@ namespace Insight
 	namespace Render
 	{
 		struct UniformData;
+		struct UniformDyanmicData;
 		struct SamplerData;
 
 		class DescriptorSet

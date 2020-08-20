@@ -207,6 +207,8 @@ namespace Insight
 			isRunning = !m_windowModule->GetWindow()->ShouldClose();
 			m_windowModule->Update(Time::GetDeltaTime());
 
+			OnFrameEnd();
+
 		} while (isRunning);
 	}
 }

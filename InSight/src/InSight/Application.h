@@ -31,6 +31,7 @@ namespace Insight
 		virtual void Create() = 0;
 		virtual void Update(const float deltaTime) = 0;
 		virtual void Draw() = 0;
+		virtual void OnFrameEnd() { }
 
 		void Run();
 

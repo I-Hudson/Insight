@@ -37,6 +37,11 @@ inline ComponentID GetComponentID() noexcept
 	return typeID;
 }
 
+namespace Insight
+{
+	class Scene;
+}
+
 class Model;
 
 class IS_API Entity : public Insight::UUID
@@ -93,6 +98,8 @@ private:
 	void RemoveAllComponenets();
 
 	EntityData m_data;
+
+	friend Insight::Scene;
 
 	REGISTER_DEC_TYPE(Entity);
 };

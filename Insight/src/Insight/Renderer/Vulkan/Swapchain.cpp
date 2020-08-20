@@ -236,7 +236,7 @@ namespace Insight
 
 				m_swapchainFramebuffers[i]->BindBuffer(*it);
 
-				m_materials[i]->Bind(*it, i);
+				m_materials[i]->Bind(*it, nullptr);
 
 #ifndef IS_EDITOR
 				if (offscreenFB != nullptr)

@@ -22,21 +22,47 @@ namespace Insight
 
 		struct UniformData
 		{
-			void* Data;
 			void* DataMapped;
 			VkBuffer Buffer;
 			VkDeviceMemory BufferMem;
 			int Size;
-			int Binding;
 			int TypeSize;
+			int Binding;
 			VkDescriptorType Type;
+
+			UniformData()
+				: DataMapped(nullptr)
+				, Buffer(VK_NULL_HANDLE)
+				, BufferMem(VK_NULL_HANDLE)
+				, Size(0)
+				, TypeSize(0)
+				, Binding(0)
+				, Type(VK_DESCRIPTOR_TYPE_SAMPLER)
+			{ }
 		};
 
-		struct SamplerData
+		struct UniformObjectsData : UniformData
+		{
+			glm::mat4 Data;
+			int Offset;
+			std::vector<MeshComponent*> Owners;
+		};
+
+		struct UniformDyanmicData : UniformData
+		{
+			void* Data;
+			std::vector<void*> Owners;
+		};
+
+		struct UniformDynamicDataContainer : UniformData
+		{
+			std::vector<UniformObjectsData> Positions;
+		};
+
+		struct SamplerData : UniformData
 		{
 			VkImageView* ImageView;
 			VkSampler* Sampler;
-			int Binding;
 		};
 
 		struct MVPUniformBuffer
@@ -60,16 +86,16 @@ namespace Insight
 			virtual Shader* GetShader() override;
 			virtual void SetUniforms() override;
 			virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
+			void UpdateObjectsUniforms();
+			
 			virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
 			virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) override;
-			template<typename T>
-			void UpdateDynamicUniforms(const std::string& key, void* uniformData, int numOfObjects, int binding);
 
-			virtual void IncrementUsageCount() override;
-			virtual void DecrementUsageCount() override;
+			virtual void IncrementUsageCount(const MeshComponent* meshComponent) override;
+			virtual void DecrementUsageCount(const MeshComponent* meshComponent) override;
 
 			void Resize();
-			void Bind(CommandBuffer* commandBuffers, int drawIndex);
+			void Bind(CommandBuffer* commandBuffers, const MeshComponent* meshBeingDrawn);
 
 			DescriptorPool* GetDescPool() { return m_descPool; }
 
@@ -77,7 +103,7 @@ namespace Insight
 			void DestroyUniformBuffers();
 			void CreateUniformBufferMem(UniformData& uniformData);
 			void MapBufferMem(UniformData& uniformData);
-			void UnMapBufferMem(UniformData& uniformData);
+			void UnMapBufferMem(UniformData& uniformData);			
 
 		private:
 			VulkanShader* m_shader;
@@ -92,6 +118,8 @@ namespace Insight
 			VkDeviceMemory m_uniformBuffersMem = VK_NULL_HANDLE;
 
 			std::unordered_map<std::string, UniformData> m_uniformData;
+			UniformDynamicDataContainer m_uniformObjectsData;
+			std::unordered_map<std::string, UniformDyanmicData> m_uniformDynamicData;
 			std::unordered_map<std::string, SamplerData> m_samplerData;
 
 			ModelUniformBuffer m_modelUniform;
@@ -112,45 +140,6 @@ namespace Insight
 				data = nullptr;
 #endif
 			return data;
-		}
-
-		template<typename T>
-		inline void VulkanMaterial::UpdateDynamicUniforms(const std::string& key, void* uniformData, int numOfObjects, int binding)
-		{
-			UniformData data;
-			if (m_uniformData.find(key) == m_uniformData.end())
-			{
-				// Calculate required alignment based on minimum device offset alignment
-				size_t minUboAlignment = s_Renderer->GetDeviceWrapper()->GetDeviceProperties().limits.minUniformBufferOffsetAlignment;
-				int dynamicAlignment = sizeof(T);
-				if (minUboAlignment > 0)
-				{
-					dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
-				}
-
-				data.TypeSize = sizeof(T);
-				data.Size = data.TypeSize * numOfObjects;
-				data.Binding = binding;
-				data.Type = data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-				CreateUniformBufferMem(data);
-				MapBufferMem(data);
-
-				m_dynamicOffset = dynamicAlignment;
-
-				m_uniformData[key] = data;
-			}
-			data = m_uniformData[key];
-
-			memcpy(data.DataMapped, uniformData, data.Size);
-
-			VkMappedMemoryRange mappedMemoryRange{};
-			mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-
-			// Flush to make changes visible to the host
-			VkMappedMemoryRange memoryRange = mappedMemoryRange;
-			memoryRange.memory = data.BufferMem;
-			memoryRange.size = data.Size;
-			vkFlushMappedMemoryRanges(s_Renderer->GetDevice(), 1, &memoryRange);
 		}
 	}
 }

@@ -25,8 +25,8 @@ public:
 	virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) = 0;
 	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
 
-	virtual void IncrementUsageCount() { }
-	virtual void DecrementUsageCount() { }
+	virtual void IncrementUsageCount(const MeshComponent* meshComponent) { }
+	virtual void DecrementUsageCount(const MeshComponent* meshComponent) { }
 
 	static Material* Create();
 

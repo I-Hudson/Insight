@@ -151,14 +151,14 @@ namespace Insight
 				if (meshes.size() > 0)
 				{
 					IS_PROFILE_SCOPE("Object matrixs");
-					for (auto it = meshes.begin(); it != meshes.end(); it += 79)
-					{
-						objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
-					}
-					if (objectsMatrix.size() > 0)
-					{
-						m_material->UpdateDynamicUniforms<glm::mat4>("ModelMatrix", objectsMatrix.data(), objectsMatrix.size(), 1);
-					}
+					//for (auto it = meshes.begin(); it != meshes.end(); ++it)
+					//{
+					//	objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
+					//}
+					//if (objectsMatrix.size() > 0)
+					//{
+						m_material->UpdateObjectsUniforms();
+					//}
 				}
 			}
 
@@ -190,7 +190,7 @@ namespace Insight
 							continue;
 						}
 
-						m_material->Bind(m_commandBuffer, drawIndex / 79);
+						m_material->Bind(m_commandBuffer, *it);
 						drawIndex++;
 
 						vertexCount += (*it)->GetMesh()->GetVertexCount();

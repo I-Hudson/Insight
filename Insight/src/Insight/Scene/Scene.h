@@ -4,6 +4,7 @@
 #include "Insight/Serialization/Serializable.h"
 
 class Entity;
+class Component;
 
 namespace Insight
 {
@@ -23,13 +24,17 @@ namespace Insight
 		void Serialize();
 		void Deserialize(const std::string& file);
 
-		void OnUpdate(float deltaTime);
+		void OnUpdate(const float& deltaTime);
 		void OnViewportResize(uint32_t width, uint32_t height);
+		void Clean();
 
 	private:
 		std::vector<Entity*> m_registry;
+		std::vector<Component*> m_updateComponents;
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		std::string m_sceneName;
+
+		bool m_isPlaying;
 
 		static Scene* s_CurrentScene;
 

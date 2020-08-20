@@ -70,7 +70,7 @@ void MeshComponent::SetMaterial(Material* material)
 {
 	if (m_materal != nullptr && m_materal != material)
 	{
-		m_materal->DecrementUsageCount();
+		m_materal->DecrementUsageCount(this);
 		m_materal->m_isDirty = true;
 	}
 
@@ -78,7 +78,7 @@ void MeshComponent::SetMaterial(Material* material)
 
 	if (m_materal != nullptr)
 	{
-		m_materal->IncrementUsageCount();
+		m_materal->IncrementUsageCount(this);
 		m_materal->m_isDirty = true;
 
 	}

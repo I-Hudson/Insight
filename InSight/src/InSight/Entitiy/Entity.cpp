@@ -73,6 +73,8 @@ void Entity::Delete()
 
 void Entity::OnUpdate(const float deltaTime)
 {
+	IS_PROFILE_FUNCTION();
+
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
 		(*it)->OnUpdate(deltaTime);

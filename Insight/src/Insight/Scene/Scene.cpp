@@ -2,11 +2,14 @@
 
 #include "Insight/Scene/Scene.h"
 #include "Insight/Entitiy/Entity.h"
+#include "Insight/Component/Component.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Event/ApplicationEvent.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
+#include <ppltasks.h>
 #include <ostream>
 
 namespace Insight
@@ -15,6 +18,7 @@ namespace Insight
 
 	Scene::Scene(const std::string& sceneName)
 		: m_sceneName(sceneName)
+		, m_isPlaying(false)
 	{ }
 
 	Scene::~Scene()
@@ -124,9 +128,16 @@ namespace Insight
 		}
 	}
 
-	void Scene::OnUpdate(float deltaTime)
+	void Scene::OnUpdate(const float& deltaTime)
 	{
-		for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
+		IS_PROFILE_FUNCTION();
+
+		if (!m_isPlaying)
+		{
+			return;
+		}
+
+		for (auto it = m_updateComponents.begin(); it != m_updateComponents.end(); ++it)
 		{
 			(*it)->OnUpdate(deltaTime);
 		}
@@ -135,5 +146,20 @@ namespace Insight
 	void Scene::OnViewportResize(uint32_t width, uint32_t height)
 	{
 
+	}
+
+	void Scene::Clean()
+	{
+		IS_PROFILE_FUNCTION();
+
+		if (!m_isPlaying)
+		{
+			return;
+		}
+
+		for (auto it = m_updateComponents.begin(); it != m_updateComponents.end(); ++it)
+		{
+			(*it)->Clean();
+		}
 	}
 }

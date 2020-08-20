@@ -44,6 +44,7 @@ const glm::vec3 TransformComponent::GetPostion()
 void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	m_transform[3] = glm::vec4(position, 1.0f);
+	m_isDirty = true;
 }
 
 void TransformComponent::Serialize(json& out, bool force)

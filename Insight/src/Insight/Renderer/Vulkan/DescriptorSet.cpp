@@ -26,20 +26,12 @@ namespace Insight
 			for (auto it = uniformDatas.begin(); it != uniformDatas.end(); ++it)
 			{
 				VkDescriptorBufferInfo bufferInfo{};
-				if ((*it)->Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-				{
-					bufferInfo.buffer = (*it)->Buffer;
-					bufferInfo.offset = 0;
-					bufferInfo.range = (*it)->Size;
-				}
-				else
-				{
-					bufferInfo.buffer = (*it)->Buffer;
-					bufferInfo.offset = 0;
-					bufferInfo.range = VK_WHOLE_SIZE;
-				}
+				bufferInfo.buffer = (*it)->Buffer;
+				bufferInfo.offset = 0;
+				bufferInfo.range = (*it)->Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER ? (*it)->Size : VK_WHOLE_SIZE;
 				bufferInfos.push_back(bufferInfo);
 			}
+
 			for (auto it = samplerDatas.begin(); it != samplerDatas.end(); ++it)
 			{
 				VkDescriptorImageInfo imageInfo;

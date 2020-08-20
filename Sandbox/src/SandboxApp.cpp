@@ -20,7 +20,7 @@ public:
 		m_sandboxScene = NEW_ON_HEAP(Scene, "Sandbox");
 		m_sandboxScene->SetActiveScene();
 
-		bool test = false;
+		bool test = true;
 
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
 		//Model* m = Model::Create("./models/Test/TestCube.fbx");
@@ -87,11 +87,18 @@ public:
 		{
 			Scene::ActiveScene()->Deserialize("sandbox.json");
 		}
+
+		Scene::ActiveScene()->OnUpdate(deltaTime);
 	}
 
 	virtual void Draw() override
 	{
 
+	}
+
+	virtual void OnFrameEnd() override
+	{
+		Scene::ActiveScene()->Clean();
 	}
 
 	~Sandbox()
