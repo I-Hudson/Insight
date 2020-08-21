@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <bitset>
+#include <type_traits>
 
 class Component;
 class Entity;
@@ -95,6 +96,8 @@ public:
 	virtual void Deserialize(json in, bool force = false) override;
 
 private:
+
+	void AddComponent(Component* component);
 	void RemoveAllComponenets();
 
 	EntityData m_data;
@@ -107,17 +110,30 @@ private:
 template<typename T>
 inline bool Entity::HasComponent()
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	return m_data.ComponetBitset[GetComponentID<T>()];
 }
 
 template<typename T>
-inline T* Entity::AddComponent() 
+inline T* Entity::AddComponent()
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	if (m_data.Components.size() < MaxComponents && !HasComponent<T>())
 	{
 		T* c = NEW_ON_HEAP(T, this);
+		static_cast<Component*>(c)->OnCreate();
+		
 		m_data.Components.push_back(c);
 		m_data.ComponetBitset[GetComponentID<T>()] = true;
+
+		if (static_cast<Component*>(c)->m_updateEveryFarme)
+		{
+			Insight::Scene::ActiveScene()->m_updateComponents.push_back(c);
+		}
 
 		return c;
 	}
@@ -127,6 +143,9 @@ inline T* Entity::AddComponent()
 template<typename T>
 inline void Entity::RemoveComponent()
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	if (HasComponent<T>())
 	{
 		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
@@ -134,9 +153,15 @@ inline void Entity::RemoveComponent()
 			T* tempPtr = dynamic_cast<T*>(*it);
 			if (tempPtr != nullptr)
 			{
+				(*it)->OnDestroy();
 				DELETE_ON_HEAP((*it));
+
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
+
+				Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
+					Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+
 				break;
 			}
 		}
@@ -146,15 +171,24 @@ inline void Entity::RemoveComponent()
 template<typename T>
 inline void Entity::RemoveComponent(const std::string& uuid)
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	if (HasComponent<T>())
 	{
 		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 		{
 			if ((*it)->GetUUID() == uuid)
 			{
+				(*it)->OnDestroy();
 				DELETE_ON_HEAP((*it));
+
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
+
+				Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
+					Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+
 				break;
 			}
 		}
@@ -164,6 +198,9 @@ inline void Entity::RemoveComponent(const std::string& uuid)
 template<typename T>
 inline T* Entity::GetComponent() const
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
 		T* tempT = dynamic_cast<T*>(*it);
@@ -178,6 +215,9 @@ inline T* Entity::GetComponent() const
 template<typename T>
 inline T* Entity::GetComponent(const std::string& uuid) const
 {
+	const bool result = std::is_base_of<Component, T>::value;
+	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
+
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
 		if ((*it)->GetUUID() == uuid)

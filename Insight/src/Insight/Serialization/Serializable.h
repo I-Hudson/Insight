@@ -47,8 +47,8 @@ namespace Insight
 			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
 			virtual ~Serializable();
 
-			virtual void Serialize(json& data, bool force = false) = 0;
-			virtual void Deserialize(json data, bool force = false) = 0;
+			virtual void Serialize(json& data, bool force = false) { }
+			virtual void Deserialize(json data, bool force = false) { }
 
 			template<typename T> 
 			static Serializable* CreateInstance()

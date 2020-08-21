@@ -13,6 +13,8 @@ public:
 	MeshComponent(Entity* owner);
 	virtual ~MeshComponent() override;
 
+	virtual void OnCreate() override;
+
 	void SetMesh(Mesh* mesh);
 	Mesh* GetMesh() const { return m_mesh; }
 

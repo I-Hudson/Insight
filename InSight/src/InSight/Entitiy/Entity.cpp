@@ -166,12 +166,25 @@ void Entity::Deserialize(json in, bool force)
 	for (auto it = in["Components"].begin(); it != in["Components"].end(); ++it)
 	{
 		Serializable* s = CreateInstanceFromType<Serializable>((*it)["Type"]);
-		dynamic_cast<Component*>(s)->SetEntity(this);
+		AddComponent(static_cast<Component*>(s));
+
 		if (s != nullptr)
 		{
 			s->Deserialize(*it);
-			m_data.Components.push_back(dynamic_cast<Component*>(s));
 		}
+	}
+}
+
+void Entity::AddComponent(Component* component)
+{
+	m_data.Components.push_back(component);
+
+	component->SetEntity(this);
+	m_data.ComponetBitset[component->m_componentId] = true;
+
+	if (component->m_updateEveryFarme)
+	{
+		Insight::Scene::ActiveScene()->m_updateComponents.push_back(component);
 	}
 }
 

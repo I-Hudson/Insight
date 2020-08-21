@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef IMGUI_ENABLED
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/Event/ApplicationEvent.h"
@@ -58,3 +59,4 @@ namespace Insight
 		};
 	}
 }
+#endif

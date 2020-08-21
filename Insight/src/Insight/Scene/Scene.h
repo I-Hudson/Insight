@@ -21,6 +21,10 @@ namespace Insight
 		void SetActiveScene();
 		static Scene* ActiveScene();
 
+		void Load(const std::string& file);
+		void Save();
+		void Unload();
+
 		void Serialize();
 		void Deserialize(const std::string& file);
 
@@ -31,6 +35,7 @@ namespace Insight
 	private:
 		std::vector<Entity*> m_registry;
 		std::vector<Component*> m_updateComponents;
+
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		std::string m_sceneName;
 

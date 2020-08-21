@@ -8,26 +8,33 @@
 REGISTER_DEF_TYPE(MeshComponent);
 
 MeshComponent::MeshComponent()
-	: Component(nullptr, ComponentType::MESH)
+	: Component(nullptr)
 	, m_mesh(nullptr)
 	, m_materal(nullptr)
 {
-	Insight::Module::GraphicsModule::m_meshs.push_back(this);
-	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
+	m_updateEveryFarme = false;
+	m_componentId = GetComponentID<MeshComponent>();
 }
 
 MeshComponent::MeshComponent(Entity* owner)
-	: Component(owner, ComponentType::MESH)
+	: Component(owner)
 	, m_mesh(nullptr)
 	, m_materal(nullptr)
 {
-	Insight::Module::GraphicsModule::m_meshs.push_back(this);
-	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
+	m_updateEveryFarme = false;
+	m_componentId = GetComponentID<MeshComponent>();
 }
 
 MeshComponent::~MeshComponent()
 {
 	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
+}
+
+void MeshComponent::OnCreate()
+{
+	Insight::Module::GraphicsModule::m_meshs.push_back(this);
+	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
+	m_updateEveryFarme = false;
 }
 
 float GetMin(float& f1, float& f2)
@@ -86,7 +93,7 @@ void MeshComponent::SetMaterial(Material* material)
 
 void MeshComponent::Serialize(json& out, bool force)
 {
-	out["UUID"] = GetUUID();
+	__super::Serialize(out);
 	out["Type"] = "MeshComponent";
 	out["MeshName"] = m_mesh->GetName();
 	out["ModelUUID"] = m_mesh->GetModelUUID();
@@ -97,6 +104,6 @@ void MeshComponent::Deserialize(json in, bool force)
 {
 	using namespace Insight::Library;
 
-	SetUUID(in["UUID"]);
+	__super::Deserialize(in);
 	SetMesh(ModelLibrary::GetInstance()->GetAsset(in["ModelUUID"])->GetSubMesh(in["SubMeshIndex"]));
 }

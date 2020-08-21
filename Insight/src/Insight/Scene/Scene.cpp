@@ -9,7 +9,10 @@
 #include "Insight/Event/ApplicationEvent.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
-#include <ppltasks.h>
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+#include "imgui.h"
+#endif
+
 #include <ostream>
 
 namespace Insight
@@ -18,16 +21,16 @@ namespace Insight
 
 	Scene::Scene(const std::string& sceneName)
 		: m_sceneName(sceneName)
+#ifdef IS_EDITOR
 		, m_isPlaying(false)
+#else 
+		, m_isPlaying(true)
+#endif
 	{ }
 
 	Scene::~Scene()
 	{
-		while (m_registry.size() > 0)
-		{
-			DeleteEntiy(*m_registry.begin());
-		}
-		m_registry.clear();
+		Unload();
 	}
 
 	Entity* Scene::CreateEntity(const std::string& name)
@@ -76,6 +79,26 @@ namespace Insight
 		return s_CurrentScene;
 	}
 
+	void Scene::Load(const std::string& file)
+	{
+		Unload();
+		Deserialize(file);
+	}
+
+	void Scene::Save()
+	{
+		Serialize();
+	}
+
+	void Scene::Unload()
+	{
+		while (m_registry.size() > 0)
+		{
+			DeleteEntiy(*m_registry.begin());
+		}
+		m_registry.clear();
+	}
+
 	void Scene::Serialize()
 	{
 		std::ofstream out;
@@ -117,12 +140,28 @@ namespace Insight
 	
 			m_sceneName = data["SceneName"];
 			json objects = data["Objects"];
-			for (auto it = objects.begin(); it != objects.end(); ++it)
 			{
-				std::string type = (*it)["Type"];
-				Serialization::Serializable* s = Serialization::SerializableRegistry::GetTypes().find(type)->second();
-				s->Deserialize(*it);
+				IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
+				for (auto it = objects.begin(); it != objects.end(); ++it)
+				{
+					std::string type = (*it)["Type"];
+					Serialization::Serializable* s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
+					s->Deserialize(*it);
+				}
 			}
+
+			{
+				IS_PROFILE_SCOPE("[Scene::Deserialize] 'OnCreate' all scene components");
+				for (auto itE = m_registry.begin(); itE != m_registry.end(); ++itE)
+				{
+					auto components = (*itE)->GetAllComponents();
+					for (auto itC = components->begin(); itC != components->end(); ++itC)
+					{
+						(*itC)->OnCreate();
+					}
+				}
+			}
+
 			in.close();
 			EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
 		}
@@ -131,6 +170,12 @@ namespace Insight
 	void Scene::OnUpdate(const float& deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
+
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+		ImGui::Begin("Scene");
+		ImGui::Checkbox("Scene playing", &m_isPlaying);
+		ImGui::End();
+#endif
 
 		if (!m_isPlaying)
 		{

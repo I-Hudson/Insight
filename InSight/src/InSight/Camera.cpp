@@ -93,7 +93,7 @@ namespace Insight
 
 		// check for camera rotation
 		static bool sbMouseButtonDown = false;
-		bool mouseDown = Input::KeyDown(KEY_SPACE);
+		bool mouseDown = Input::MouseButtonDown(MOUSE_BUTTON_RIGHT);
 		if (mouseDown)
 		{
 			static double siPrevMouseX = 0;

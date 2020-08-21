@@ -65,6 +65,6 @@ namespace Insight
     private:
         std::string m_uuid;
 
-        friend class Serializable;
+        friend class Insight::Serialization::Serializable;
     };
 }

@@ -7,15 +7,19 @@
 REGISTER_DEF_TYPE(TransformComponent);
 
 TransformComponent::TransformComponent()
-	: Component(nullptr, ComponentType::TRANSFORM)
+	: Component(nullptr)
 	, m_transform(glm::mat4(1.0f))
 {
+	m_updateEveryFarme = false;
+	m_componentId = GetComponentID<TransformComponent>();
 }
 
 TransformComponent::TransformComponent(Entity* owner)
-	: Component(owner, ComponentType::TRANSFORM)
+	: Component(owner)
 	, m_transform(glm::mat4(1.0f))
 {
+	m_updateEveryFarme = false;
+	m_componentId = GetComponentID<TransformComponent>();
 }
 
 TransformComponent::~TransformComponent()
@@ -49,7 +53,7 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 
 void TransformComponent::Serialize(json& out, bool force)
 {
-	out["UUID"] = GetUUID();
+	__super::Serialize(out);
 	out["Type"] = "TransformComponent";
 
 	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z,  m_transform[0].w };
@@ -60,7 +64,7 @@ void TransformComponent::Serialize(json& out, bool force)
 
 void TransformComponent::Deserialize(json in, bool force)
 {
-	SetUUID(in["UUID"]);
+	__super::Deserialize(in);
 
 	DeserializeTransform(m_transform[0], in["ViewMatrix"]["X"]);
 	DeserializeTransform(m_transform[1], in["ViewMatrix"]["Y"]);

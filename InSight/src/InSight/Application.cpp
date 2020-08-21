@@ -65,8 +65,6 @@ namespace Insight
 
 		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
-		Concurrency::create_task([]() {IS_CORE_INFO("Thread for task"); }).wait();
-
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}
 
@@ -163,12 +161,14 @@ namespace Insight
 
 	void TestFunc(Camera* cam)
 	{
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
 		ImGui::SliderFloat("Main Camera FOV: ", &cam->GetFov(), 0.1f, 120.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
+#endif
 	}
 
 	void Application::Run()
@@ -182,8 +182,10 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			Render::ImGuiRenderer::GetInstance()->NewFrame();
-			
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+			Render::ImGuiRenderer::GetInstance()->NewFrame();	
+#endif
+
 			Time::UpdateTime();
 
 			m_moduleManager->Update(Time::GetDeltaTime());

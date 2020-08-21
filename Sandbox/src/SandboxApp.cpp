@@ -1,5 +1,6 @@
 #include <Insight.h>
-#include <../vendor/glm/glm/gtx/string_cast.hpp>
+
+#include "PlayerController.h"
 
 using namespace Insight;
 
@@ -33,6 +34,7 @@ public:
 				//if (i % 2 == 0)
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
+ 					testModel->AddComponent<PlayerController>();
 					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
@@ -54,38 +56,14 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		double x, y;
-		Input::GetMousePosition(&x, &y);
-
-		for (size_t i = 0; i < transformComponents.size(); ++i)
-		{
-			TransformComponent* tc = transformComponents[i];
-			if (Input::KeyHeld(KEY_UP))
-			{
-				tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, 1) * Time::GetDeltaTime());
-			}
-			if (Input::KeyHeld(KEY_DOWN))
-			{
-				tc->SetPosition(tc->GetPostion() + glm::vec3(0, 0, -1) * Time::GetDeltaTime());
-			}
-			if (Input::KeyHeld(KEY_LEFT))
-			{
-				tc->SetPosition(tc->GetPostion() + glm::vec3(-1, 0, 1) * Time::GetDeltaTime());
-			}
-			if (Input::KeyHeld(KEY_RIGHT))
-			{
-				tc->SetPosition(tc->GetPostion() + glm::vec3(1, 0, 1) * Time::GetDeltaTime());
-			}
-		}
-
 		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_S))
 		{
-			Scene::ActiveScene()->Serialize();
+			Scene::ActiveScene()->Save();
 		}
 
 		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
 		{
-			Scene::ActiveScene()->Deserialize("sandbox.json");
+			Scene::ActiveScene()->Load("sandbox.json");
 		}
 
 		Scene::ActiveScene()->OnUpdate(deltaTime);

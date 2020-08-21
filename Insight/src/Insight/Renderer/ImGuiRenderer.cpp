@@ -1,5 +1,6 @@
 #include "ispch.h"
 
+#ifdef IMGUI_ENABLED
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/ModuleManager.h"
@@ -222,3 +223,4 @@ namespace Insight
 #endif
 	}
 }
+#endif
