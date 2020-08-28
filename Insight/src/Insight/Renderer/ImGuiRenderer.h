@@ -4,7 +4,6 @@
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/Event/ApplicationEvent.h"
-#include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 
 #ifdef IS_VULKAN
@@ -24,39 +23,47 @@ namespace Insight
 		class VulkanMaterial;
 		class CommandPool;
 		class CommandBuffer;
-
-		class ImGuiRenderer : public TSingleton<ImGuiRenderer>
-		{
-		public:
-			ImGuiRenderer(Renderer* renderer);
-			~ImGuiRenderer();
-
-			void NewFrame();
-			void EndFrame();
-			void Render(CommandBuffer* commandBuffer);
-
-		private:
-			void WindowResize(const Event& event);
-
-#ifdef IS_VULKAN
-			void CreateDescPool();
-
-			VkDescriptorPool m_descPool;
-			VulkanRenderer* m_vulkanRenderer;
-			CommandPool* m_commandPool;
-			CommandBuffer* m_commandBuffer;
-			VulkanFramebuffer* m_framebuffer;
-
-			VkImage m_fontImage;
-			VkImageView m_fontImageView;
-			VkSampler m_fontSampler;
-			VkDeviceMemory m_fontMemory;
-
-			VkDeviceSize m_bufferMemoryAlignment = 256;
-			VkDeviceMemory m_uploadBufferMemory = VK_NULL_HANDLE;
-			VkBuffer m_uploadBuffer = VK_NULL_HANDLE;
-#endif
-		};
 	}
 }
+
+namespace Platform
+{
+	class VulkanRenderer;
+	class CommandPool;
+	class CommandBuffer;
+	class VulkanFramebuffer;
+}
+
+class ImGuiRenderer : public Insight::TSingleton<ImGuiRenderer>
+{
+public:
+	ImGuiRenderer(Insight::Renderer* renderer);
+	~ImGuiRenderer();
+
+	void NewFrame();
+	void EndFrame();
+	void Render(Platform::CommandBuffer* commandBuffer);
+
+private:
+	void WindowResize(const Insight::Event& event);
+
+#ifdef IS_VULKAN
+	void CreateDescPool();
+
+	VkDescriptorPool m_descPool;
+	Platform::VulkanRenderer* m_vulkanRenderer;
+	Platform::CommandPool* m_commandPool;
+	Platform::CommandBuffer* m_commandBuffer;
+	Platform::VulkanFramebuffer* m_framebuffer;
+
+	VkImage m_fontImage;
+	VkImageView m_fontImageView;
+	VkSampler m_fontSampler;
+	VkDeviceMemory m_fontMemory;
+
+	VkDeviceSize m_bufferMemoryAlignment = 256;
+	VkDeviceMemory m_uploadBufferMemory = VK_NULL_HANDLE;
+	VkBuffer m_uploadBuffer = VK_NULL_HANDLE;
+#endif
+};
 #endif

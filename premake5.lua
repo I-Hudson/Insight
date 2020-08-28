@@ -4,11 +4,11 @@ workspace "Insight"
 
     configurations
     {
-        "Debug_VULKAN",
-        "Debug_Vulkan_SP",
-        "Debug_OPENGL",
-        "Debug_OPENGL_SP",
-        "Debug_VULKAN_NO_EDITOR",
+        "Debug",
+        "Debug_NO_EDITOR",
+        "Release",
+        "Relese_NO_EDITOR",
+
         "Dist"
     }
     
@@ -89,18 +89,28 @@ project "Insight"
         "%{IncludeDir.glm}",
 	}
 
-    libdirs
-    {
-        "%{LibDirs.shaderc}/Debug",
-        "%{LibDirs.assimp}"
-    }
+    filter "configurations:Debug"
+        libdirs
+        {
+            "%{LibDirs.shaderc}/Debug",
+            "%{LibDirs.shaderc}",
+            "%{LibDirs.assimp}"
+        }
+
+    filter "configurations:Release"
+        libdirs
+        {
+            "%{LibDirs.shaderc}/Release",
+            "%{LibDirs.shaderc}",
+            "%{LibDirs.assimp}"
+        }
 
     links 
 	{ 
         "GLFW",
         "assimp",
         "shaderc_combined",
-        "C:/VulkanSDK/1.1.130.0/Lib/vulkan-1.lib"
+        "vulkan-1.lib"
 	}
 
     filter "system:windows"
@@ -124,27 +134,21 @@ project "Insight"
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
         }
 
-    filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
+    filter "configurations:Debug"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
 
-    filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
+    filter "configurations:DebugNO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
 
-    filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
+    filter "configurations:Release"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        optimize "on"
+
+    filter "configurations:Relese_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
-
-    filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
-        symbols "on"
-
-
-    filter "configurations:Debug_VULKAN_NO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
-        symbols "on"
-
 
     filter "configurations:Dist"
         defines "IS_DIST"
@@ -201,31 +205,27 @@ project "Sandbox"
         }
 
 
-    filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
+    filter "configurations:Debug"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
         symbols "on"
 
-    filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
-        symbols "on"   
-        
-    filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
+    filter "configurations:DebugNO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
 
-    filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE", "IS_PROFILE", "IS_EDITOR" }
-        symbols "on"
+    filter "configurations:Release"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        optimize "on"
 
-    filter "configurations:Debug_VULKAN_NO_EDITOR"
+    filter "configurations:Relese_NO_EDITOR"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
 
     filter "configurations:Dist"
         defines "IS_DIST"
-        optimize "On"
+        optimize "on"
 
-        filter { "system:windows", "configurations:Release" }
+    filter { "system:windows", "configurations:Release" }
             buildoptions "/MT"
 
 project "UnitTests"
@@ -273,22 +273,22 @@ project "UnitTests"
             "IS_PLATFORM_WINDOWS" 
         }
 
-    filter "configurations:Debug_Vulkan"
-        defines { "IS_DEBUG", "IS_VULKAN" }
+    filter "configurations:Debug"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
         symbols "on"
 
-    filter "configurations:Debug_OpenGL"
-        defines { "IS_DEBUG", "IS_OPENGL" }
-        symbols "on"
-
-    filter "configurations:Debug_Vulkan_SP"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_SMART_POINTERS_IN_USE" }
-        symbols "on"
-
-    filter "configurations:Debug_OpenGL_SP"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_SMART_POINTERS_IN_USE" }
-        symbols "on"
-
-    filter "configurations:Debug_VULKAN_NO_EDITOR"
+    filter "configurations:DebugNO_EDITOR"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
         symbols "on"
+
+    filter "configurations:Release"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        optimize "on"
+
+    filter "configurations:Relese_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+        symbols "on"
+
+    filter "configurations:Dist"
+        defines "IS_DIST"
+        optimize "on"

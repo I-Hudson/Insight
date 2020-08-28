@@ -183,7 +183,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-			Render::ImGuiRenderer::GetInstance()->NewFrame();	
+			ImGuiRenderer::GetInstance()->NewFrame();	
 #endif
 
 			Time::UpdateTime();

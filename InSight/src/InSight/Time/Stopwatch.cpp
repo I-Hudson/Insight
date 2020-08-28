@@ -17,17 +17,17 @@ namespace Insight
 
 	float Stopwatch::Sec() const
 	{
-		return std::chrono::duration<double>(m_endTime - m_startTime).count();
+		return static_cast<float>(std::chrono::duration<double>(m_endTime - m_startTime).count());
 	}
 
 	float Stopwatch::Mill() const
 	{
-		return std::chrono::duration<double, std::milli>(m_endTime - m_startTime).count();
+		return static_cast<float>(std::chrono::duration<double, std::milli>(m_endTime - m_startTime).count());
 	}
 
 	U64 Stopwatch::Nano() const
 	{
-		return std::chrono::duration<double, std::nano>(m_endTime - m_startTime).count();
+		return static_cast<U64>(std::chrono::duration<double, std::nano>(m_endTime - m_startTime).count());
 
 	}
 }

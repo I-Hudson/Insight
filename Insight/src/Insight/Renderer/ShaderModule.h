@@ -4,6 +4,11 @@
 
 #include "Insight/Renderer/ShaderModuleBase.h"
 
+namespace Platform
+{
+	class Device;
+}
+
 namespace Insight
 {
 	namespace Render
@@ -14,7 +19,7 @@ namespace Insight
 		public:
 			ShaderModule() = delete;
 
-			ShaderModule(const Device* device, const std::string& filepath)
+			ShaderModule(const Platform::Device* device, const std::string& filepath)
 				: ShaderModuleBase(device, filepath, type)
 			{ }
 		};

@@ -3,8 +3,8 @@
 #include "Insight/ShaderParser/ShaderParser.h"
 
 #ifdef IS_VULKAN
-#include "Insight/Renderer/Vulkan/Vulkan.h"
-#include "Insight/Renderer/Vulkan/Device.h"
+#include "Platform/Vulkan/VulkanInits.h"
+#include "Platform/Vulkan/Device.h"
 #elif defined(IS_OPENGL)
 #endif
 
@@ -13,7 +13,7 @@ namespace Insight
 	namespace Render
 	{
 #ifdef IS_VULKAN
-		ShaderModuleBase::ShaderModuleBase(const Device* device, const std::string& filepath)
+		ShaderModuleBase::ShaderModuleBase(const Platform::Device* device, const std::string& filepath)
 			: m_device(device), m_type(GetShaderTypeFromPath(GetSuffix(filepath))), 
 			m_shaderModule(0)
 		{
@@ -21,18 +21,18 @@ namespace Insight
 
 
 			auto spirvData = CompileGLSL(filepath);
-			VkShaderModuleCreateInfo createInfo = VulkanInits::ShaderModuleInfo(spirvData);
+			VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
 			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
 		}
 
-		ShaderModuleBase::ShaderModuleBase(const Device* device, const std::string& filepath, const ShaderType& type)
+		ShaderModuleBase::ShaderModuleBase(const Platform::Device* device, const std::string& filepath, const ShaderType& type)
 			: m_device(device), m_type(type), 
 			m_shaderModule(0)
 		{
 			m_shaderData = ShaderParser::ParseShader(filepath, type);
 
 			auto spirvData = CompileGLSL(filepath);
-			VkShaderModuleCreateInfo createInfo = VulkanInits::ShaderModuleInfo(spirvData);
+			VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
 			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
 		}
 #elif defined(IS_OPENGL)
@@ -112,7 +112,7 @@ namespace Insight
 					continue;
 				}
 
-				auto desc = VulkanInits::DescriptorSetLayoutBinding();
+				auto desc = Platform::VulkanInits::DescriptorSetLayoutBinding();
 				desc.binding = (*it).Binding;
 				desc.descriptorType = GetShaderDescriptorType((*it).Type);;
 				desc.descriptorCount = 1;
@@ -164,7 +164,7 @@ namespace Insight
 			{
 				if ((*it).Type == ShaderAttributeType::Push_Constant)
 				{
-					auto pushContant = VulkanInits::PushConstantRange(GetShaderStageBit(), (*it).Size, 0);
+					auto pushContant = Platform::VulkanInits::PushConstantRange(GetShaderStageBit(), (*it).Size, 0);
 					createInfos.push_back(pushContant);
 				}
 			}

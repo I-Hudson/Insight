@@ -1,8 +1,9 @@
 #include "ispch.h"
+#include "Insight/Memory/MemoryManager.h"
 
 #ifdef IS_VULKAN
-#include "Insight/Renderer/Vulkan/VulkanRenderer.h"
-typedef Insight::Render::VulkanRenderer PlatformRenderer;
+#include "Platform/Vulkan/VulkanRenderer.h"
+typedef Platform::VulkanRenderer PlatformRenderer;
 #elif defined(IS_OPENGL)
 #include "Insight/Renderer/OpenGL/OpenGLRenderer.h"
 typedef Insight::Render::OpenGLRenderer PlatformRenderer;
@@ -16,6 +17,6 @@ namespace Insight
 {
 	Renderer* Renderer::Create(RendererStartUpData& startupData)
 	{
-		return Memory::MemoryManager::NewOnFreeList<PlatformRenderer>(startupData);
+		return NEW_ON_HEAP(PlatformRenderer);
 	}
 }

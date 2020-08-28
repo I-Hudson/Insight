@@ -20,7 +20,6 @@ namespace Insight
 			virtual void Bind(void* context) = 0;
 			virtual void Resize(int width, int height) = 0;
 
-			virtual const ShaderData& GetData() const = 0;
 			const std::vector<ParsedShadeData>& GetMetaData() const { return m_shaderMetaData; }
 
 		protected:

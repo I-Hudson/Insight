@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Insight/Renderer/Buffer.h"
 
 Mesh::Mesh()
 	: Insight::UUID()
@@ -45,8 +46,8 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_indices = indices;
 		m_textures = textures;
 
-		m_vertexBuffer = VertexBuffer::Create(m_vertices);
-		m_indexBuffer = IndexBuffer::Create(indices);
+		m_vertexBuffer = Insight::Render::VertexBuffer::Create(m_vertices);
+		m_indexBuffer = Insight::Render::IndexBuffer::Create(indices);
 	}
 }
 

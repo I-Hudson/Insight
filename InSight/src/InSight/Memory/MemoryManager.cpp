@@ -14,7 +14,7 @@ namespace Insight
 			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
-		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const const unsigned int& line)
+		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line)
 		{
 			if (!GetInstance()->m_trackingObjects.count(ptr))
 			{
@@ -66,6 +66,8 @@ namespace Insight
 			{
 				return MemoryType::TB;
 			}
+
+			return MemoryType::MB;
 		}
 
 		Size MemoryManager::GetConfigMemorySize(const Size& size, const std::string& type)
@@ -78,7 +80,7 @@ namespace Insight
 			}
 			else
 			{
-				return size * pow(1024, (int)memoryType);
+				return static_cast<Size>(size * pow(1024, (int)memoryType));
 			}
 		}
 

@@ -68,9 +68,9 @@ void MeshComponent::SetMesh(Mesh* mesh)
 		zMin = GetMin((*it).z, zMin);
 		zMax = GetMax((*it).z, zMax);
 	}
-	m_boundingBox.Half_size.x = glm::abs(xMax - xMin) * 0.5;
-	m_boundingBox.Half_size.y = glm::abs(yMax - yMin) * 0.5;
-	m_boundingBox.Half_size.z = glm::abs(zMax - zMin) * 0.5;
+	m_boundingBox.Half_size.x = static_cast<float>(glm::abs(xMax - xMin) * 0.5);
+	m_boundingBox.Half_size.y = static_cast<float>(glm::abs(yMax - yMin) * 0.5);
+	m_boundingBox.Half_size.z = static_cast<float>(glm::abs(zMax - zMin) * 0.5);
 }
 
 void MeshComponent::SetMaterial(Material* material)

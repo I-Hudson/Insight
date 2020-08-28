@@ -3,10 +3,15 @@
 #include "Insight/Core.h"
 
 #ifdef IS_VULKAN
-#include "Insight/Renderer/Vulkan/Vulkan.h"
+#include "Platform/Vulkan/Vulkan.h"
 #include <shaderc/shaderc.hpp>
 #elif defined(IS_OPENGL)
 #endif
+
+namespace Platform
+{
+	class Device;
+}
 
 namespace Insight
 {
@@ -93,14 +98,12 @@ namespace Insight
 			}
 		};
 
-		class Device;
-
 		class IS_API ShaderModuleBase
 		{
 		public:
 #ifdef IS_VULKAN
-			ShaderModuleBase(const Device* device, const std::string& filepath);
-			ShaderModuleBase(const Device* device, const std::string& filepath, const ShaderType& type);
+			ShaderModuleBase(const Platform::Device* device, const std::string& filepath);
+			ShaderModuleBase(const Platform::Device* device, const std::string& filepath, const ShaderType& type);
 #elif defined(IS_OPENGL)
 			ShaderModuleBase(const std::string& filepath);
 			ShaderModuleBase(const std::string& filepath, const ShaderType& type); 
@@ -142,7 +145,7 @@ namespace Insight
 			ParsedShadeData m_shaderData;
 
 #ifdef IS_VULKAN
-			const Device* m_device;
+			const Platform::Device* m_device;
 			VkShaderModule m_shaderModule;
 #endif
 		};

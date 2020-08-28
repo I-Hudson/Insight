@@ -15,7 +15,11 @@ struct Texture
 	std::string Path;
 };
 
-using namespace Insight::Render;
+namespace Platform
+{
+	class VulkanRenderer;
+	class Swapchain;
+}
 
 class IS_API Mesh : public Insight::UUID
 {
@@ -64,7 +68,7 @@ private:
 	unsigned int m_subMeshIndex;
 	bool m_created;
 
-	friend Insight::Render::VulkanRenderer;
-	friend Insight::Render::Swapchain;
+	friend Platform::VulkanRenderer;
+	friend Platform::Swapchain;
 };
 

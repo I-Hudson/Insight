@@ -23,22 +23,22 @@ namespace Insight
 
 	const float Time::GetDeltaTime()
 	{
-		return (float)m_deltaTime * m_timeScale;
+		return static_cast<float>(m_deltaTime * m_timeScale);
 	}
 
 	const float Time::GetDeltaTimeRaw()
 	{
-		return (float)m_deltaTime;
+		return static_cast<float>(m_deltaTime);
 	}
 
 	const float Time::GetTotalTime()
 	{
-		return (float)m_totalTime;
+		return static_cast<float>(m_totalTime);
 	}
 
 	const float Time::GetTimeScale()
 	{
-		return (float)m_timeScale;
+		return static_cast<float>(m_timeScale);
 	}
 
 	void Time::SetTimeScale(const float& timeScale)

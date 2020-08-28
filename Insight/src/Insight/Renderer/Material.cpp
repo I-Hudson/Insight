@@ -4,8 +4,8 @@
 #include "Insight/Memory/MemoryManager.h"
 
 #ifdef IS_VULKAN
-#include "Insight/Renderer/Vulkan/VulkanMaterial.h"
-typedef Insight::Render::VulkanMaterial PlatformMaterial;
+#include "Platform/Vulkan/VulkanMaterial.h"
+typedef Platform::VulkanMaterial PlatformMaterial;
 #elif defined(IS_OPENGL)
 #include "Insight/Renderer/OpenGL/OpenGLMaterial.h"
 typedef Insight::Render::OpenGLMaterial PlatformMaterial;

@@ -71,6 +71,7 @@ namespace Insight
 			{
 				return dynamic_cast<T*>(m_modules[typeId]);
 			}
+			return nullptr;
 		}
 	}
 }

@@ -12,12 +12,12 @@ namespace Insight
 	{
 		VertexBuffer* VertexBuffer::Create(const std::vector<Vertex>& vertices)
 		{
-			return Memory::MemoryManager::NewOnFreeList<VulkanBuffers>(vertices);
+			return Memory::MemoryManager::NewOnFreeList<Platform::VulkanVertexBuffer>(vertices);
 		}
 
 		IndexBuffer* IndexBuffer::Create(const std::vector<unsigned int>& indices)
 		{
-			return Memory::MemoryManager::NewOnFreeList<VulkanBuffers>(indices);
+			return Memory::MemoryManager::NewOnFreeList<Platform::VulkanIndexBuffer>(indices);
 		}
 	}
 }
