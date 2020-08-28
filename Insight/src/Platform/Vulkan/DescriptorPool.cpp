@@ -12,6 +12,7 @@ namespace Platform
 	DescriptorPool::DescriptorPool(const Device* device, const std::vector<Insight::Render::ParsedShadeData>& shaderData,
 		const VkDescriptorPoolCreateFlags& createFlags)
 		: m_device(device)
+		, m_sets(std::vector<DescriptorSet*>())
 	{
 		std::set<Insight::Render::ShaderAttributeType> shaderTypes;
 		for (auto it = shaderData.begin(); it != shaderData.end(); ++it)
@@ -45,6 +46,7 @@ namespace Platform
 		{
 			DELETE_ON_HEAP((*it));
 		}
+		m_sets.clear();
 	}
 
 	void DescriptorPool::FreeDescriptorSets()

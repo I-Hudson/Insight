@@ -1,6 +1,5 @@
 #pragma once
 
-#ifdef IMGUI_ENABLED
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/Event/ApplicationEvent.h"
@@ -66,4 +65,3 @@ private:
 	VkBuffer m_uploadBuffer = VK_NULL_HANDLE;
 #endif
 };
-#endif

@@ -7,7 +7,7 @@ workspace "Insight"
         "Debug",
         "Debug_NO_EDITOR",
         "Release",
-        "Relese_NO_EDITOR",
+        "Release_NO_EDITOR",
 
         "Dist"
     }
@@ -34,7 +34,7 @@ IncludeDir["json"] = "$(SolutionDir)Insight/vendor/nlohmann/include"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
-LibDirs["shaderc"] = "C:/VulkanSDK/1.1.130.0/lib"
+LibDirs["Vulkan"] = "C:/VulkanSDK/1.1.130.0/lib"
 LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/lib"
 
 group "Dependencies"
@@ -89,28 +89,19 @@ project "Insight"
         "%{IncludeDir.glm}",
 	}
 
-    filter "configurations:Debug"
-        libdirs
-        {
-            "%{LibDirs.shaderc}/Debug",
-            "%{LibDirs.shaderc}",
-            "%{LibDirs.assimp}"
-        }
-
-    filter "configurations:Release"
-        libdirs
-        {
-            "%{LibDirs.shaderc}/Release",
-            "%{LibDirs.shaderc}",
-            "%{LibDirs.assimp}"
-        }
+    libdirs
+    {
+        "%{LibDirs.Vulkan}",
+        "%{LibDirs.assimp}"
+	}
 
     links 
 	{ 
         "GLFW",
         "assimp",
         "shaderc_combined",
-        "vulkan-1.lib"
+        "vulkan-1",
+        "opengl32"
 	}
 
     filter "system:windows"
@@ -137,29 +128,51 @@ project "Insight"
     filter "configurations:Debug"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        libdirs
+        {
+            "%{LibDirs.Vulkan}/Debug"
+        }
 
-    filter "configurations:DebugNO_EDITOR"
+    filter "configurations:Debug_NO_EDITOR"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        libdirs
+        {
+            "%{LibDirs.Vulkan}/Debug"
+        }
 
     filter "configurations:Release"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
+        libdirs
+        {
+            "%{LibDirs.Vulkan}/Release"
 
-    filter "configurations:Relese_NO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
-        symbols "on"
+        }
+
+    filter "configurations:Release_NO_EDITOR"
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        optimize "on"
+        libdirs
+        {
+            "%{LibDirs.Vulkan}/Release"
+
+        }
 
     filter "configurations:Dist"
-        defines "IS_DIST"
-        optimize "on"
+        defines { "IS_DIST", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        optimize "full"
+        libdirs
+        {
+            "%{LibDirs.Vulkan}/Release"
 
-        filter { "system:windows", "configurations:Release" }
-            buildoptions "/MT"
+        }
+
+    filter { "system:windows", "configurations:Release" }
+        buildoptions "/MT"
 
 project "Sandbox"
     location "Sandbox"
-    kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
 	staticruntime "on"
@@ -206,26 +219,31 @@ project "Sandbox"
 
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        kind "ConsoleApp"
 
-    filter "configurations:DebugNO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+    filter "configurations:Debug_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        kind "ConsoleApp"
 
     filter "configurations:Release"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
+        kind "WindowedApp"
 
-    filter "configurations:Relese_NO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
-        symbols "on"
+    filter "configurations:Release_NO_EDITOR"
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        optimize "on"
+        kind "WindowedApp"
 
     filter "configurations:Dist"
-        defines "IS_DIST"
-        optimize "on"
+        defines { "IS_DIST", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        optimize "full"
+        kind "WindowedApp"
 
-    filter { "system:windows", "configurations:Release" }
+        filter { "system:windows", "configurations:Release" }
             buildoptions "/MT"
 
 project "UnitTests"
@@ -274,21 +292,9 @@ project "UnitTests"
         }
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
 
-    filter "configurations:DebugNO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
+    filter "configurations:Debug_NO_EDITOR"
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
-
-    filter "configurations:Release"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
-        optimize "on"
-
-    filter "configurations:Relese_NO_EDITOR"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX" }
-        symbols "on"
-
-    filter "configurations:Dist"
-        defines "IS_DIST"
-        optimize "on"

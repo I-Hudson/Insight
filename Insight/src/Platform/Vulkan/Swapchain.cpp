@@ -211,7 +211,7 @@ namespace Platform
 	{
 		IS_PROFILE_FUNCTION();
 
-#ifdef IS_EDITOR
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("ViewPort");
 		ImVec2 viewPortSize = ImGui::GetContentRegionAvail();
@@ -393,6 +393,10 @@ namespace Platform
 		{
 			m_materials[i]->Resize();
 		}
+
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+		m_sceneTexture = nullptr;
+#endif
 	}
 }
 #endif

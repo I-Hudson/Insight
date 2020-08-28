@@ -13,8 +13,8 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Relese_NO_EDITOR|x64">
-      <Configuration>Relese_NO_EDITOR</Configuration>
+    <ProjectConfiguration Include="Release_NO_EDITOR|x64">
+      <Configuration>Release_NO_EDITOR</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Dist|x64">
@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -48,9 +48,9 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Relese_NO_EDITOR|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
+    <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
@@ -72,7 +72,7 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Relese_NO_EDITOR|x64'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -103,10 +103,10 @@
     <TargetExt>.exe</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Relese_NO_EDITOR|x64'">
-    <LinkIncremental>true</LinkIncremental>
-    <OutDir>..\bin\Relese_NO_EDITOR-windows-x86_64\Sandbox\</OutDir>
-    <IntDir>..\bin-int\Relese_NO_EDITOR-windows-x86_64\Sandbox\</IntDir>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox\</OutDir>
+    <IntDir>..\bin-int\Release_NO_EDITOR-windows-x86_64\Sandbox\</IntDir>
     <TargetName>Sandbox</TargetName>
     <TargetExt>.exe</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
@@ -123,7 +123,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -135,30 +135,31 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -171,34 +172,16 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Relese_NO_EDITOR|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <Optimization>Disabled</Optimization>
-      <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -210,7 +193,28 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_DIST;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

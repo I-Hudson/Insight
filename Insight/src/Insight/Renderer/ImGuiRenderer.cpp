@@ -1,7 +1,7 @@
 #include "ispch.h"
 
-#ifdef IMGUI_ENABLED
 #include "Insight/Renderer/ImGuiRenderer.h"
+#ifdef IMGUI_ENABLED
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/ModuleManager.h"
 #include "Insight/Module/WindowModule.h"
@@ -11,6 +11,7 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #ifdef IS_VULKAN
+#include "Platform/Vulkan/Vulkan.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
 #include "Platform/Vulkan/VulkanMaterial.h"
@@ -20,9 +21,11 @@
 #elif 
 
 #endif
+#endif
 
 ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 {
+#ifdef IMGUI_ENABLED
 	SetInstancePtr(this);
 
 	Insight::EventManager::Bind(Insight::EventType::WindowResize, typeid(ImGuiRenderer).name(), BIND_FUNC(ImGuiRenderer::WindowResize, this));
@@ -99,11 +102,12 @@ ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 #elif defined(IS_OPENGL)
 
 #endif // IS_VULKAN
-
+#endif
 }
 
 ImGuiRenderer::~ImGuiRenderer()
 {
+#ifdef IMGUI_ENABLED
 #ifdef IS_VULKAN
 	Insight::EventManager::Unbind(Insight::EventType::WindowResize, typeid(ImGuiRenderer).name());
 	DELETE_ON_HEAP(m_framebuffer);
@@ -155,10 +159,12 @@ void ImGuiRenderer::NewFrame()
 
 	ImGui::End();
 #endif
+#endif
 }
 
 void ImGuiRenderer::EndFrame()
 {
+#ifdef IMGUI_ENABLED
 	//ImGuiIO& io = ImGui::GetIO();
 	//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 	//{
@@ -167,10 +173,12 @@ void ImGuiRenderer::EndFrame()
 	//	ImGui::RenderPlatformWindowsDefault();
 	//	glfwMakeContextCurrent(backup_current_context);
 	//}
+#endif
 }
 
 void ImGuiRenderer::Render(Platform::CommandBuffer* commandBuffer)
 {
+#ifdef IMGUI_ENABLED
 	IS_PROFILE_FUNCTION();
 
 	ImGui::EndFrame();
@@ -184,18 +192,22 @@ void ImGuiRenderer::Render(Platform::CommandBuffer* commandBuffer)
 	// Record dear imgui primitives into command buffer
 	ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer->GetBuffer());
 #endif
+#endif
 }
 
 void ImGuiRenderer::WindowResize(const Insight::Event& event)
 {
+#ifdef IMGUI_ENABLED
 	const Insight::WindowResizeEvent e = static_cast<const Insight::WindowResizeEvent&>(event);
 	m_framebuffer->Resize(e.m_width, e.m_height);
+#endif
 }
 
 #ifdef IS_VULKAN
 
 void ImGuiRenderer::CreateDescPool()
 {
+#ifdef IMGUI_ENABLED
 	VkDescriptorPoolSize pool_sizes[] =
 	{
 		{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -217,6 +229,6 @@ void ImGuiRenderer::CreateDescPool()
 	pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
 	pool_info.pPoolSizes = pool_sizes;
 	ThrowIfFailed(vkCreateDescriptorPool(m_vulkanRenderer->GetDevice(), &pool_info, nullptr, &m_descPool));
-}
 #endif
+}
 #endif

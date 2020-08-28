@@ -202,7 +202,6 @@ namespace Insight
 		}
 	}
 }
-#ifdef IS_PROFILE
 
 #ifdef IS_DEBUG
 // Resolve which function signature macro will be used. Note that this only
@@ -233,11 +232,11 @@ namespace Insight
 #define IS_PROFILE_SCOPE_LINE(name, line) IS_PROFILE_SCOPE_LINE2(name, line)
 #define IS_PROFILE_SCOPE(name) IS_PROFILE_SCOPE_LINE(name, __LINE__)
 #define IS_PROFILE_FUNCTION() IS_PROFILE_SCOPE(IS_FUNC_SIG)
-#endif
 
 #else
 #define IS_PROFILE_BEGIN_SESSION(name, filepath)
 #define IS_PROFILE_END_SESSION()
 #define IS_PROFILE_SCOPE(name)
 #define IS_PROFILE_FUNCTION()
+
 #endif

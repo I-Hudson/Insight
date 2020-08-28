@@ -68,8 +68,6 @@ namespace Insight
 				m_inputStates[button].MouseButtonPressed = !m_inputStates[button].MouseButtonReleased;
 				break;
 			}
-
-			IS_CORE_INFO("{0}", m_inputStates[button].MouseButtonPressed);
 		}
 	}
 }

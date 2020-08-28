@@ -3,8 +3,11 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 extern Insight::Application* Insight::CreateApplication();
-
+#ifdef IS_DEBUG
 int main(int argc, char** argv)
+#else
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+#endif
 {
 	{
 		Insight::Log::Init();
@@ -17,5 +20,4 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
 #endif // IS_PLATFORM_WINDOWS

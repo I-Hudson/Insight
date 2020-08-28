@@ -27,7 +27,7 @@ namespace Platform
 		std::string returnStr;
 
 		int cIndex = 0;
-		for (size_t ii = iStr.size() - 1; ii >= 0; --ii)
+		for (size_t ii = iStr.size() - 1; ii > 0; --ii)
 		{
 			if (cIndex % 3 == 0 && ii != iStr.size() - 1)
 			{
@@ -36,6 +36,7 @@ namespace Platform
 			cIndex++;
 			returnStr.insert(0, std::string(1, iStr[ii]));
 		}
+		returnStr.insert(0, std::string(1, iStr[0]));
 		return returnStr;
 	}
 
@@ -215,12 +216,13 @@ namespace Platform
 		std::string vStr = GetFormatInt(vertexCount);
 		std::string tStr = GetFormatInt(triCount);
 
+#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		ImGui::Begin("Renderer");
 		ImGui::Text("Vertex Count: %s", vStr.c_str());
 		ImGui::Text("Tri Count: %s", tStr.c_str());
 		ImGui::Text("Mesh Count: %d", meshCount);
 		ImGui::End();
-
+#endif
 		m_swapchain->Draw(m_framebuffer->GetFinishedSem(), m_framebuffer);
 	}
 

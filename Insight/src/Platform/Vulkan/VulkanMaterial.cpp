@@ -349,8 +349,11 @@ namespace Platform
 
 	void VulkanMaterial::Resize()
 	{
-		m_descPool->FreeDescriptorSets();
-		m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
+		if (m_descPool != nullptr)
+		{
+			m_descPool->FreeDescriptorSets();
+			m_descSet = m_descPool->AllocDescriptorSet(m_shader->GetDescLayout());
+		}
 	}
 
 	void VulkanMaterial::Bind(CommandBuffer* commandBuffers, const MeshComponent* meshBeingDrawn)

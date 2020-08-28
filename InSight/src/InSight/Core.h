@@ -19,7 +19,7 @@
 
 #endif // IS_DEBUG
 
-#ifndef IS_SMART_POINTERS_IN_USE
+
 #define NEW_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
 #define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
 
@@ -28,13 +28,6 @@
 
 #define NEW_ON_STACK(type, ...) Insight::Memory::MemoryManager::NewOnStack<type>(__VA_ARGS__)
 #define DELETE_ON_STACK(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnStack((uint64_t)ptr); ptr = nullptr; }
-
-#else 
-
-#define NEW_ON_HEAP(type, ...) Insight::CreateSharedPtr<type>(__VA_ARGS__);
-#define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
-
-#endif // SMART_POINTERS_IN_USE
 
 #define TRACK_CLASS() Insight::Memory::MemoryManager::TrackObject(this, "Class", __FILE__, __LINE__);
 #define UNTRACK_CLASS() Insight::Memory::MemoryManager::UnTrackObject(this);
