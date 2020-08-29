@@ -5,20 +5,8 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NO_EDITOR|x64">
-      <Configuration>Debug_NO_EDITOR</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_NO_EDITOR|x64">
-      <Configuration>Release_NO_EDITOR</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Dist|x64">
-      <Configuration>Dist</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -36,25 +24,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
@@ -66,16 +36,7 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -84,35 +45,14 @@
     <IntDir>..\bin-int\Debug-windows-x86_64\Insight\</IntDir>
     <TargetName>Insight</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <OutDir>..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Debug_NO_EDITOR-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
+    <IncludePath>..\vendor\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\bin\Release-windows-x86_64\Insight\</OutDir>
     <IntDir>..\bin-int\Release-windows-x86_64\Insight\</IntDir>
     <TargetName>Insight</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
-    <OutDir>..\bin\Release_NO_EDITOR-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Release_NO_EDITOR-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
-    <OutDir>..\bin\Dist-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Dist-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
+    <IncludePath>..\vendor\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -120,7 +60,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;..\vendor\GLFW\include;..\vendor\glm;..\vendor\stb_image;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -144,43 +84,13 @@
 IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <Optimization>Disabled</Optimization>
-      <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;..\vendor\GLFW\include;..\vendor\glm;..\vendor\stb_image;..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -206,72 +116,6 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>Full</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <MinimalRebuild>false</MinimalRebuild>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DIST;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>Full</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <MinimalRebuild>false</MinimalRebuild>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -765,15 +609,39 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="vendor\glm\glm\vec3.hpp" />
     <ClInclude Include="vendor\glm\glm\vec4.hpp" />
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp" />
+    <ClInclude Include="vendor\imgui\examples\example_allegro5\imconfig_allegro5.h" />
+    <ClInclude Include="vendor\imgui\examples\example_apple_metal\Shared\AppDelegate.h" />
+    <ClInclude Include="vendor\imgui\examples\example_apple_metal\Shared\Renderer.h" />
+    <ClInclude Include="vendor\imgui\examples\example_apple_metal\Shared\ViewController.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_allegro5.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_dx10.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_dx11.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_dx12.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_dx9.h" />
     <ClInclude Include="vendor\imgui\examples\imgui_impl_glfw.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_glut.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_marmalade.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_metal.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_opengl2.h" />
     <ClInclude Include="vendor\imgui\examples\imgui_impl_opengl3.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_osx.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_sdl.h" />
     <ClInclude Include="vendor\imgui\examples\imgui_impl_vulkan.h" />
+    <ClInclude Include="vendor\imgui\examples\imgui_impl_win32.h" />
+    <ClInclude Include="vendor\imgui\examples\libs\gl3w\GL\gl3w.h" />
+    <ClInclude Include="vendor\imgui\examples\libs\gl3w\GL\glcorearb.h" />
+    <ClInclude Include="vendor\imgui\examples\libs\glfw\include\GLFW\glfw3.h" />
+    <ClInclude Include="vendor\imgui\examples\libs\glfw\include\GLFW\glfw3native.h" />
+    <ClInclude Include="vendor\imgui\examples\libs\usynergy\uSynergy.h" />
     <ClInclude Include="vendor\imgui\imconfig.h" />
     <ClInclude Include="vendor\imgui\imgui.h" />
     <ClInclude Include="vendor\imgui\imgui_internal.h" />
     <ClInclude Include="vendor\imgui\imstb_rectpack.h" />
     <ClInclude Include="vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="vendor\imgui\misc\cpp\imgui_stdlib.h" />
+    <ClInclude Include="vendor\imgui\misc\freetype\imgui_freetype.h" />
+    <ClInclude Include="vendor\imgui\misc\single_file\imgui_single_file.h" />
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -840,17 +708,76 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="vendor\glad\src\glad.cpp" />
+    <ClCompile Include="vendor\imgui\examples\example_allegro5\main.cpp" />
+    <ClCompile Include="vendor\imgui\examples\example_emscripten\main.cpp">
+      <ObjectFileName>$(IntDir)\main1.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_glfw_opengl2\main.cpp">
+      <ObjectFileName>$(IntDir)\main2.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_glfw_opengl3\main.cpp">
+      <ObjectFileName>$(IntDir)\main3.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_glfw_vulkan\main.cpp">
+      <ObjectFileName>$(IntDir)\main4.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_glut_opengl2\main.cpp">
+      <ObjectFileName>$(IntDir)\main5.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_marmalade\main.cpp">
+      <ObjectFileName>$(IntDir)\main6.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_null\main.cpp">
+      <ObjectFileName>$(IntDir)\main7.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_sdl_directx11\main.cpp">
+      <ObjectFileName>$(IntDir)\main8.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_sdl_opengl2\main.cpp">
+      <ObjectFileName>$(IntDir)\main9.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_sdl_opengl3\main.cpp">
+      <ObjectFileName>$(IntDir)\main10.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_sdl_vulkan\main.cpp">
+      <ObjectFileName>$(IntDir)\main11.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_win32_directx10\main.cpp">
+      <ObjectFileName>$(IntDir)\main12.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_win32_directx11\main.cpp">
+      <ObjectFileName>$(IntDir)\main13.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_win32_directx12\main.cpp">
+      <ObjectFileName>$(IntDir)\main14.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\example_win32_directx9\main.cpp">
+      <ObjectFileName>$(IntDir)\main15.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_allegro5.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_dx10.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_dx11.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_dx12.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_dx9.cpp" />
     <ClCompile Include="vendor\imgui\examples\imgui_impl_glfw.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_glut.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_marmalade.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_opengl2.cpp" />
     <ClCompile Include="vendor\imgui\examples\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_sdl.cpp" />
     <ClCompile Include="vendor\imgui\examples\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="vendor\imgui\examples\imgui_impl_win32.cpp" />
     <ClCompile Include="vendor\imgui\imgui.cpp" />
     <ClCompile Include="vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="vendor\imgui\imgui_draw.cpp" />
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="vendor\imgui\misc\cpp\imgui_stdlib.cpp" />
+    <ClCompile Include="vendor\imgui\misc\fonts\binary_to_compressed_c.cpp" />
+    <ClCompile Include="vendor\imgui\misc\freetype\imgui_freetype.cpp" />
     <ClCompile Include="vendor\stb_image\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">
+    <ProjectReference Include="vendor\GLFW\OpenGL-Core\vendor\GLFW\GLFW.vcxproj">
       <Project>{154B857C-0182-860D-AA6E-6C109684020F}</Project>
     </ProjectReference>
   </ItemGroup>

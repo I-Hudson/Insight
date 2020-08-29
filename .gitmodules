@@ -13,3 +13,6 @@
 [submodule "imgui"]
 	path = Insight/vendor/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "Insight/vendor/GLFW"]
+	path = Insight/vendor/GLFW
+	url = https://github.com/TheCherno/OpenGL
