@@ -4,6 +4,5 @@ bin/
 bin-int/
 Insight/vendor/assimp/
 
-
 # Files
 *.user
