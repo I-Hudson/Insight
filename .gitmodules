@@ -1,19 +1,6 @@
-[submodule "Insight/vendor/glm"]
-	path = Insight/vendor/glm
-	url = https://github.com/g-truc/glm
 [submodule "spdlog"]
-	path = Insight/vendor/spdlog
-	url = https://github.com/gabime/spdlog
-[submodule "Insight/vendor/spdlog"]
 	path = Insight/vendor/spdlog
 	url = https://github.com/gabime/spdlog
 [submodule "Insight/vendor/assimp"]
 	path = Insight/vendor/assimp
 	url = https://github.com/assimp/assimp
-[submodule "imgui"]
-	path = Insight/vendor/imgui
-	url = https://github.com/ocornut/imgui
-
-[submodule "Insight/vendor/GLFW"]
-	path = Insight/vendor/GLFW
-	url = https://github.com/TheCherno/glfw
