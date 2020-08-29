@@ -100,12 +100,6 @@
     <Filter Include="vendor\imgui\examples">
       <UniqueIdentifier>{ABA16F5A-170E-2B55-E001-C3B24C2D4DBD}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vendor\imgui\examples\example_glfw_opengl3">
-      <UniqueIdentifier>{ACE1D8D8-9849-9FA6-01B5-B3BCED3BB692}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\imgui\examples\example_glfw_vulkan">
-      <UniqueIdentifier>{6576C826-D190-2BC8-1AB3-3B5C860C53CF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vendor\stb_image">
       <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
     </Filter>
@@ -1796,12 +1790,6 @@
     <ClCompile Include="vendor\glad\src\glad.cpp">
       <Filter>vendor\glad\src</Filter>
     </ClCompile>
-    <ClCompile Include="vendor\imgui\examples\example_glfw_opengl3\main.cpp">
-      <Filter>vendor\imgui\examples\example_glfw_opengl3</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\examples\example_glfw_vulkan\main.cpp">
-      <Filter>vendor\imgui\examples\example_glfw_vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="vendor\imgui\examples\imgui_impl_glfw.cpp">
       <Filter>vendor\imgui\examples</Filter>
     </ClCompile>
@@ -1815,6 +1803,9 @@
       <Filter>vendor\imgui</Filter>
     </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_demo.cpp">
+      <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_draw.cpp">
       <Filter>vendor\imgui</Filter>
     </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp">

@@ -76,7 +76,6 @@ project "Insight"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",
-        "%{IncludeDir.shaderc}",
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
