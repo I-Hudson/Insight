@@ -1,0 +1,104 @@
+#include "ispch.h"
+
+#include "MemoryManager.h"
+#include "Insight/Config/Config.h"
+#include "Insight/Log.h"
+#include <typeinfo>
+
+namespace Insight
+{
+	namespace Memory
+	{
+		void MemoryManager::DeleteOnStack(const Size marker)
+		{
+			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
+		}
+
+		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line)
+		{
+			if (!GetInstance()->m_trackingObjects.count(ptr))
+			{
+				GetInstance()->m_trackingObjects[ptr] = TrackingObjectRecord
+				{
+					ptr,
+					str,
+					file,
+					line
+				};
+			}
+			else
+			{
+				IS_CORE_WARN("Object is already being tracked: {0}!", ptr);
+			}
+		}
+
+		void MemoryManager::UnTrackObject(void* ptr)
+		{
+			if (GetInstance()->m_trackingObjects.count(ptr))
+			{
+				GetInstance()->m_trackingObjects.erase(ptr);
+			}
+			else
+			{
+				IS_CORE_WARN("Object has already being untracked: {0}!", ptr);
+			}
+		}
+
+		MemoryManager::MemoryType MemoryManager::StringToMemoryType(const std::string& string)
+		{
+			if (string == "B")
+			{
+				return MemoryType::B;
+			}
+			else if (string == "KB")
+			{
+				return MemoryType::KB;
+			}
+			else if (string == "MB")
+			{
+				return MemoryType::MB;
+			}
+			else if (string == "GB")
+			{
+				return MemoryType::GB;
+			}
+			else if (string == "TB")
+			{
+				return MemoryType::TB;
+			}
+
+			return MemoryType::MB;
+		}
+
+		Size MemoryManager::GetConfigMemorySize(const Size& size, const std::string& type)
+		{
+			MemoryType memoryType = StringToMemoryType(type);
+
+			if (memoryType == MemoryManager::MemoryType::B)
+			{
+				return size;
+			}
+			else
+			{
+				return static_cast<Size>(size * pow(1024, (int)memoryType));
+			}
+		}
+
+		MemoryManager::MemoryManager()
+#ifndef IS_SMART_POINTERS_IN_USE
+			:m_stackAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.StackAllocAmount), CONFIG_VAL(Config::MemoryConfig.StackAllocType)))
+			, m_freeListAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.FreeListAllocAmount), CONFIG_VAL(Config::MemoryConfig.FreeListAllocType))
+				,(Insight::Memory::FreeListAllocator::PlacementPolicy)CONFIG_VAL(Config::MemoryConfig.PlacementPolicy))
+#endif
+		{ }
+
+		MemoryManager::~MemoryManager()
+		{
+			for (auto it = m_trackingObjects.begin(); it != m_trackingObjects.end(); ++it)
+			{
+				IS_CORE_ERROR("Tracking {0} has not been destroyed or untracked. => Ptr: {1}, File: {2}, Line: {3}",
+					(*it).second.Str, (*it).second.Ptr, (*it).second.File, (*it).second.Line);
+			}
+		}
+	}
+}
