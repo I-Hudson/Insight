@@ -24,6 +24,7 @@ IncludeDir = {}
 IncludeDir["spdlog"] = "$(SolutionDir)Insight/vendor/spdlog/include"
 IncludeDir["GLFW"] = "$(SolutionDir)Insight/vendor/GLFW/include"
 IncludeDir["assimp"] = "$(SolutionDir)Insight/vendor/assimp/include"
+IncludeDir["assimp_gen"] = "$(SolutionDir)Insight/vendor/assimp/BINARIES/x64/Include"
 IncludeDir["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/include"
 IncludeDir["Vulkan"] = "C:/VulkanSDK/1.1.130.0/Include"
 IncludeDir["glm"] = "$(SolutionDir)Insight/vendor/glm"
@@ -35,7 +36,7 @@ IncludeDir["json"] = "$(SolutionDir)Insight/vendor/nlohmann/include"
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
 LibDirs["Vulkan"] = "C:/VulkanSDK/1.1.130.0/lib"
-LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/lib"
+LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/BINARIES/x64/lib"
 
 group "Dependencies"
     include "Insight/vendor/GLFW"
@@ -75,6 +76,7 @@ project "Insight"
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.shaderc}",
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glm}",
@@ -91,14 +93,12 @@ project "Insight"
 
     libdirs
     {
-        "%{LibDirs.Vulkan}",
-        "%{LibDirs.assimp}"
+        "%{LibDirs.Vulkan}"
 	}
 
     links 
 	{ 
         "GLFW",
-        "assimp",
         "shaderc_combined",
         "vulkan-1",
         "opengl32"
@@ -128,44 +128,66 @@ project "Insight"
     filter "configurations:Debug"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        links 
+        {
+            "assimp-vc141-mtd"
+	    }
         libdirs
         {
-            "%{LibDirs.Vulkan}/Debug"
+            "%{LibDirs.Vulkan}/Debug",
+            "%{LibDirs.assimp}/Debug"
         }
 
     filter "configurations:Debug_NO_EDITOR"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
+        links 
+        {
+            "assimp-vc141-mtd"
+	    }
         libdirs
         {
-            "%{LibDirs.Vulkan}/Debug"
+            "%{LibDirs.Vulkan}/Debug",
+            "%{LibDirs.assimp}/Debug"
         }
 
     filter "configurations:Release"
         defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
+        links 
+        {
+            "assimp-vc141-mt"
+	    }
         libdirs
         {
-            "%{LibDirs.Vulkan}/Release"
-
+            "%{LibDirs.Vulkan}/Release",
+            "%{LibDirs.assimp}/Release"
         }
 
     filter "configurations:Release_NO_EDITOR"
         defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
+        links 
+        {
+            "assimp-vc141-mt"
+	    }
         libdirs
         {
-            "%{LibDirs.Vulkan}/Release"
-
+            "%{LibDirs.Vulkan}/Release",
+            "%{LibDirs.assimp}/Release"
         }
 
     filter "configurations:Dist"
         defines { "IS_DIST", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         optimize "full"
+        links 
+        {
+            "assimp-vc141-mt"
+	    }
         libdirs
         {
-            "%{LibDirs.Vulkan}/Release"
-
+            "%{LibDirs.Vulkan}/Release",
+            "%{LibDirs.assimp}/Release"
         }
 
     filter { "system:windows", "configurations:Release" }

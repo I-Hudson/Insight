@@ -120,7 +120,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -133,8 +133,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;vulkan-1.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -150,7 +150,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -163,8 +163,8 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;vulkan-1.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -180,7 +180,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -197,8 +197,8 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;vulkan-1.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\lib;C:\VulkanSDK\1.1.130.0\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -214,7 +214,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -230,8 +230,8 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;vulkan-1.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\lib;C:\VulkanSDK\1.1.130.0\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -247,7 +247,7 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DIST;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\shaderc\include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -263,8 +263,8 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp.lib;shaderc_combined.lib;vulkan-1.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\lib;C:\VulkanSDK\1.1.130.0\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>

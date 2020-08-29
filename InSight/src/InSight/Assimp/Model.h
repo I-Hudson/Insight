@@ -4,7 +4,7 @@
 #include "Insight/Assimp/Mesh.h"
 #include "Insight/UUID.h"
 
-#include "Importer.hpp"
+#include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 
