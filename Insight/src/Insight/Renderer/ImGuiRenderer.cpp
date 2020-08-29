@@ -25,9 +25,9 @@
 
 ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 {
-#ifdef IMGUI_ENABLED
 	SetInstancePtr(this);
 
+#ifdef IMGUI_ENABLED
 	Insight::EventManager::Bind(Insight::EventType::WindowResize, typeid(ImGuiRenderer).name(), BIND_FUNC(ImGuiRenderer::WindowResize, this));
 
 	// Setup Dear ImGui context
@@ -121,12 +121,13 @@ ImGuiRenderer::~ImGuiRenderer()
 	ImGui::DestroyContext();
 
 	using namespace Insight;
-
+#endif
 	ClearPtr();
 }
 
 void ImGuiRenderer::NewFrame()
 {
+#ifdef IMGUI_ENABLED
 #ifdef IS_VULKAN
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();

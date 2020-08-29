@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/InsightAlias.h"
 #include <chrono>
 
 namespace Insight

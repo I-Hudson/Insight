@@ -80,6 +80,7 @@ namespace Platform
 				return queue;
 			}
 		}
+		IS_CORE_ASSERT(false, "[Device::GetQueueFamily] Queue family does not exists");
 	}
 
 	Queue& Device::GetQueue(const QueueFamilyType type)
@@ -91,6 +92,8 @@ namespace Platform
 				return (*it);
 			}
 		}
+		IS_CORE_ASSERT(false, "[Device::GetQueue] Queue type not found");
+		return GetQueue(QueueFamilyType::Graphics);
 	}
 
 	uint32_t Device::GetMemoryType(const uint32_t& memoryType, const VkMemoryPropertyFlags& memProb)
@@ -105,7 +108,7 @@ namespace Platform
 				return i;
 			}
 		}
-
+		return 0;
 	}
 
 	void Device::WaitForIdle()

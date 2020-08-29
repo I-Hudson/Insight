@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#define GLM_FORCE_SWIZZLE
 #include <../vendor/glm/glm/glm.hpp>
 
 class MeshComponent;

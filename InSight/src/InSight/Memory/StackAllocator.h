@@ -13,7 +13,7 @@ namespace Insight
 		public:
 			typedef Size Marker;
 
-			StackAllocator() {}
+			StackAllocator() = delete;
 			StackAllocator(Size stackSize);
 			~StackAllocator();
 

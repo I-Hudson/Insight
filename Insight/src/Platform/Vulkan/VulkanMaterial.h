@@ -109,6 +109,7 @@ namespace Platform
 		DescriptorSet* m_descSet;
 		bool m_updatedDesc = false;
 
+		bool m_hasDynamicUniform = false;
 		int m_dynamicOffset = 0;
 
 		VkBuffer m_uniformBuffers = VK_NULL_HANDLE;

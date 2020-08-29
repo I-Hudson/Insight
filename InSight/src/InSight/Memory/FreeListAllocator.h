@@ -19,7 +19,7 @@ namespace Insight
 				FIND_BEST
 			};
 
-			FreeListAllocator() {}
+			FreeListAllocator() = delete;
 			FreeListAllocator(const Size size, const PlacementPolicy policy);
 			~FreeListAllocator();
 

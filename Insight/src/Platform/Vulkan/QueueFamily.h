@@ -15,7 +15,7 @@ namespace Platform
 	class IS_API QueueFamily
 	{
 	public:
-		QueueFamily() { }
+		QueueFamily() = delete;
 		QueueFamily(const QueueFamilyType type, const VkPhysicalDevice device, const VkSurfaceKHR surface);
 		~QueueFamily();
 

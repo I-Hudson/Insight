@@ -214,7 +214,7 @@ namespace Platform
 
 		}
 		std::string vStr = GetFormatInt(vertexCount);
-		std::string tStr = GetFormatInt(triCount);
+		std::string tStr = GetFormatInt(triCount / 3);
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		ImGui::Begin("Renderer");

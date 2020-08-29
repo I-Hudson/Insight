@@ -51,7 +51,7 @@ namespace Platform
 		int dynamicAlignment = sizeof(glm::mat4);
 		if (minUboAlignment > 0)
 		{
-			dynamicAlignment = (dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
+			dynamicAlignment = static_cast<int>((dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1));
 		}
 		m_dynamicOffset = dynamicAlignment;
 	}
@@ -98,11 +98,18 @@ namespace Platform
 
 		auto metaData = m_shader->GetMetaData();
 		VkDeviceSize bufferSize = 0;
+		bool createDesc = false;
 		for (size_t i = 0; i < metaData.size(); ++i)
 		{
 			for (auto it = metaData[i].UniformBlocks.begin(); it != metaData[i].UniformBlocks.end(); ++it)
 			{
 				bufferSize += (*it).Size;
+				createDesc = true;
+			
+				if (!m_hasDynamicUniform)
+				{
+					m_hasDynamicUniform = Insight::Render::ShaderModuleBase::GetShaderDescriptorType((*it).Type) == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+				}
 			}
 		}
 
@@ -117,7 +124,7 @@ namespace Platform
 				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_uniformBuffers, m_uniformBuffersMem);
 		}
 
-		if (bufferSize > 0)
+		if (createDesc)
 		{
 			m_descPool = NEW_ON_HEAP(DescriptorPool, s_Renderer->GetDeviceWrapper(), metaData,
 				VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
@@ -217,7 +224,7 @@ namespace Platform
 
 		if (m_uniformData.find(key) == m_uniformData.end())
 		{
-			data.Size = size;
+			data.Size = static_cast<int>(size);
 			data.Binding = binding;
 			data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			CreateUniformBufferMem(data);
@@ -299,13 +306,13 @@ namespace Platform
 		m_uniformObjectsData.Binding = 1;
 		m_uniformObjectsData.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
-		m_uniformObjectsData.Size = m_uniformObjectsData.Positions.size() * sizeof(glm::mat4);
+		m_uniformObjectsData.Size = static_cast<int>(m_uniformObjectsData.Positions.size() * sizeof(glm::mat4));
 		CreateUniformBufferMem(m_uniformObjectsData);
 		MapBufferMem(m_uniformObjectsData);
 
 		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
 		{
-			m_uniformObjectsData.Positions[i].Offset = i * 64;
+			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * 64);
 		}
 	}
 
@@ -390,7 +397,7 @@ namespace Platform
 			return;
 		}
 
-		if (m_dynamicOffset > 0)
+		if (m_dynamicOffset > 0 && m_hasDynamicUniform)
 		{
 			vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 1, &dynamicOffset);
 		}

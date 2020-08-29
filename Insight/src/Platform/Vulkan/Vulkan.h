@@ -6,7 +6,6 @@
 #include "Insight/Log.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "VulkanInits.h"
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #else
 #define VK_USE_PLATFORM_XCB_KHR

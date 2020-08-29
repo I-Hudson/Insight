@@ -27,6 +27,7 @@ namespace Insight
 
 		template<class T>
 		inline SinglyLinkedList<T>::SinglyLinkedList()
+			: Head(nullptr)
 		{
 
 		}

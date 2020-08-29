@@ -35,7 +35,10 @@ public:
 	// Returns a new array of uvs.
 	std::vector<glm::vec2> GetUVs() const { return m_mesh->GetUVs(); }
 
+private:
 	struct BoundingBox;
+
+public:
 	BoundingBox GetBoundingBox() { return m_boundingBox; }
 
 private:

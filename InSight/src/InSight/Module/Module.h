@@ -60,7 +60,7 @@ namespace Insight
 			void SetManuallyUpdate(const bool& state) { m_manuallUpdate = state; }
 
 		protected:
-			bool m_manuallUpdate;
+			bool m_manuallUpdate = false;
 			ModulePriority m_modulePriority;
 			std::vector<Module*> m_dependentUpon;
 			int m_dependencies = 0;
