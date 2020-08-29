@@ -11,3 +11,6 @@
 	path = Insight/vendor/imgui
 	url = https://github.com/ocornut/imgui
 	branch = master
+[submodule "Insight\\vendor\\assimp"]
+	path = Insight\\vendor\\assimp
+	url = https://github.com/assimp/assimp.git
