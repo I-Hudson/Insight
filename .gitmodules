@@ -1,4 +1,4 @@
-[submodule "InSight/vendor/spdlog"]
+[submodule "Insight/vendor/spdlog"]
 	path = InSight/vendor/spdlog
 	url = https://github.com/gabime/spdlog
 [submodule "Insight/vendor/GLFW"]
