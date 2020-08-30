@@ -9,40 +9,37 @@
 #include "Insight/Renderer/Material.h"
 #include "Insight/Assimp/Mesh.h"
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	class OpenGLMaterial;
+	class OpenGLShader;
+
+	class IS_API OpenGLRenderer : public Insight::Renderer
 	{
-		class OpenGLMaterial;
-		class OpenGLShader;
+	public:
+		OpenGLRenderer();
+		virtual ~OpenGLRenderer() override;
 
-		class IS_API OpenGLRenderer : public Renderer
-		{
-		public:
-			OpenGLRenderer(RendererStartUpData& startupData);
-			virtual ~OpenGLRenderer() override;
+		virtual void Clear() override;
+		virtual void Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes) override;
+		virtual void Present() override;
 
-			virtual void Clear() override;
-			virtual void Render(Camera* mainCamera, std::vector<MeshComponent*> meshes) override;
-			virtual void Present() override;
+	private:
+		void RecreateFramebuffers(const Insight::Event& event);
 
-		private:
-			void RecreateFramebuffers(const Event& event);
+	private:
 
-		private:
+		Mesh* m_testMesh;
+		OpenGLShader* m_shader;
 
-			Mesh* m_testMesh;
-			OpenGLShader* m_shader;
+		bool m_enableValidationLayers = true;
+		std::vector<const char*> m_validationLayers;
 
-			bool m_enableValidationLayers = true;
-			std::vector<const char*> m_validationLayers;
+		std::vector<const char*> m_deviceExtensions;
 
-			std::vector<const char*> m_deviceExtensions;
+		Insight::Module::WindowModule* m_windowModule;
 
-			Module::WindowModule* m_windowModule;
-
-			friend OpenGLMaterial;
-		};
-	}
+		friend OpenGLMaterial;
+	};
 }
 #endif

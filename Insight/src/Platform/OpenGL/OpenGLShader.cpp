@@ -3,130 +3,128 @@
 #include "Platform/OpenGL/OpenGL.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	OpenGLShader::OpenGLShader(const std::vector<std::string>& shaders, glm::ivec2 extent)
+		: Shader()
+		, m_shaderPaths(shaders)
+		, m_extent(extent)
 	{
-		OpenGLShader::OpenGLShader(ShaderData& data)
-			: Shader()
-			, m_shaderData(data)
-		{
-			Create(m_shaderData);
-		}
+		Create();
+	}
 
-		OpenGLShader::~OpenGLShader()
-		{
-			glDeleteProgram(m_id);
-			UNTRACK_OBJECT(&m_id);
-		}
+	OpenGLShader::~OpenGLShader()
+	{
+		glDeleteProgram(m_id);
+		UNTRACK_OBJECT(&m_id);
+	}
 
-		void OpenGLShader::Bind(void* context)
-		{
-			glUseProgram(m_id);
-		}
+	void OpenGLShader::Bind(void* context)
+	{
+		glUseProgram(m_id);
+	}
 
-		void OpenGLShader::Resize(int width, int height)
-		{
+	void OpenGLShader::Resize(int width, int height)
+	{
 
-		}
+	}
 
-		void OpenGLShader::Create(ShaderData& data)
+	void OpenGLShader::Create()
+	{
+		std::vector<unsigned int> shaders;
+		for (auto it = m_shaderPaths.begin(); it != m_shaderPaths.end(); ++it)
 		{
-			std::vector<unsigned int> shaders;
-			for (auto it = data.ModuleNames.begin(); it != data.ModuleNames.end(); ++it)
+			Insight::Render::ShaderModuleBase shaderModule((*it).c_str());
+			unsigned int shader = CreateShader(shaderModule.GetData().RawSource.c_str(), shaderModule.GetShaderType());
+			if (shader == GL_FALSE)
 			{
-				ShaderModuleBase shaderModule((*it).c_str());
-				unsigned int shader = CreateShader(shaderModule.GetData().RawSource.c_str(), shaderModule.GetShaderType());
-				if (shader == GL_FALSE)
-				{
-					Cleanup(shaders);
-					return;
-				}
-
-				shaders.push_back(shader);
-				m_shaderMetaData.push_back(shaderModule.GetData());
-			}
-
-			m_id = glCreateProgram();
-			TRACK_OBJECT(&m_id);
-
-			for (auto it = shaders.begin(); it != shaders.end(); ++it)
-			{
-				glAttachShader(m_id, (*it));
-			}
-
-			glLinkProgram(m_id);
-
-			int success;
-			glGetProgramiv(m_id, GL_LINK_STATUS, &success);
-			if (!success) 
-			{
-				GLint maxLength = 0;
-				glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &maxLength);
-
-				// The maxLength includes the NULL character
-				std::vector<GLchar> infoLog(maxLength);
-				glGetProgramInfoLog(m_id, maxLength, &maxLength, &infoLog[0]);
-
 				Cleanup(shaders);
-
-				IS_CORE_ERROR("{0}", infoLog.data());
-				IS_CORE_ASSERT(false, "OpenGL Program failed to compile!");
-
 				return;
 			}
 
+			shaders.push_back(shader);
+			m_shaderMetaData.push_back(shaderModule.GetData());
+		}
+
+		m_id = glCreateProgram();
+		TRACK_OBJECT(&m_id);
+
+		for (auto it = shaders.begin(); it != shaders.end(); ++it)
+		{
+			glAttachShader(m_id, (*it));
+		}
+
+		glLinkProgram(m_id);
+
+		int success;
+		glGetProgramiv(m_id, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			GLint maxLength = 0;
+			glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &maxLength);
+
+			// The maxLength includes the NULL character
+			std::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(m_id, maxLength, &maxLength, &infoLog[0]);
+
 			Cleanup(shaders);
+
+			IS_CORE_ERROR("{0}", infoLog.data());
+			IS_CORE_ASSERT(false, "OpenGL Program failed to compile!");
+
+			return;
 		}
 
-		unsigned int OpenGLShader::CreateShader(const char* shaderSource, const ShaderType& type)
+		Cleanup(shaders);
+	}
+
+	unsigned int OpenGLShader::CreateShader(const char* shaderSource, const Insight::Render::ShaderType& type)
+	{
+		unsigned int shaderType = ShaderTypeToGLShaderType(type);
+
+		unsigned int shader = glCreateShader(shaderType);
+		glShaderSource(shader, 1, &shaderSource, 0);
+
+		glCompileShader(shader);
+
+		int isCompiled;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
+		if (isCompiled == GL_FALSE)
 		{
-			unsigned int shaderType = ShaderTypeToGLShaderType(type);
+			GLint maxLength = 0;
+			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
 
-			unsigned int shader = glCreateShader(shaderType);
-			glShaderSource(shader, 1, &shaderSource, 0);
+			// The maxLength includes the NULL character
+			std::vector<GLchar> infoLog(maxLength);
+			glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
 
-			glCompileShader(shader);
+			glDeleteShader(shader);
 
-			int isCompiled;
-			glGetShaderiv(shader, GL_COMPILE_STATUS, &isCompiled);
-			if (isCompiled == GL_FALSE)
-			{
-				GLint maxLength = 0;
-				glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+			IS_CORE_ERROR("{0}", infoLog.data());
+			IS_CORE_ASSERT(false, "Vertex BaseShader compilation failure!");
 
-				// The maxLength includes the NULL character
-				std::vector<GLchar> infoLog(maxLength);
-				glGetShaderInfoLog(shader, maxLength, &maxLength, &infoLog[0]);
-
-				glDeleteShader(shader);
-
-				IS_CORE_ERROR("{0}", infoLog.data());
-				IS_CORE_ASSERT(false, "Vertex BaseShader compilation failure!");
-
-				return GL_FALSE;
-			}
-			return shader;
+			return GL_FALSE;
 		}
+		return shader;
+	}
 
-		void OpenGLShader::Cleanup(const std::vector<unsigned int>& shaders)
+	void OpenGLShader::Cleanup(const std::vector<unsigned int>& shaders)
+	{
+		for (auto it = shaders.begin(); it != shaders.end(); ++it)
 		{
-			for (auto it = shaders.begin(); it != shaders.end(); ++it)
-			{
-				glDeleteShader((*it));
-			}
+			glDeleteShader((*it));
 		}
+	}
 
-		unsigned int OpenGLShader::ShaderTypeToGLShaderType(const ShaderType& type)
+	unsigned int OpenGLShader::ShaderTypeToGLShaderType(const Insight::Render::ShaderType& type)
+	{
+		switch (type)
 		{
-			switch (type)
-			{
-			case ShaderType::VertexShader:  return GL_VERTEX_SHADER;
-			case ShaderType::FragmentShader:  return GL_FRAGMENT_SHADER;
-			case ShaderType::GeometryShader:  return GL_GEOMETRY_SHADER;
-			case ShaderType::ComputeShader:  return GL_COMPUTE_SHADER;
-			default: return 0;
-			}
+		case Insight::Render::ShaderType::VertexShader:  return GL_VERTEX_SHADER;
+		case Insight::Render::ShaderType::FragmentShader:  return GL_FRAGMENT_SHADER;
+		case Insight::Render::ShaderType::GeometryShader:  return GL_GEOMETRY_SHADER;
+		case Insight::Render::ShaderType::ComputeShader:  return GL_COMPUTE_SHADER;
+		default: return 0;
 		}
 	}
 }

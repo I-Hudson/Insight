@@ -11,11 +11,6 @@ namespace Insight
 	{ class WindowModule; }
 	class Camera;
 
-	struct RendererStartUpData
-	{
-		Module::WindowModule* WindowModule;
-	};
-
 	enum class GraphicsAPI
 	{
 		None = 0,
@@ -34,7 +29,7 @@ namespace Insight
 
 		virtual Material* GetDefaultMaterial() { return nullptr; }
 
-		static Renderer* Create(RendererStartUpData& startupData);
+		static Renderer* Create();
 	};
 }
 

@@ -3,10 +3,8 @@
 
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/VulkanRenderer.h"
-typedef Platform::VulkanRenderer PlatformRenderer;
 #elif defined(IS_OPENGL)
-//#include "Insight/Renderer/OpenGL/OpenGLRenderer.h"
-//typedef Insight::Render::OpenGLRenderer PlatformRenderer;
+#include "Platform/OpenGL/OpenGLRenderer.h"
 #endif
 
 #include "Insight/Renderer/Renderer.h"
@@ -15,13 +13,12 @@ typedef Platform::VulkanRenderer PlatformRenderer;
 
 namespace Insight
 {
-	Renderer* Renderer::Create(RendererStartUpData& startupData)
+	Renderer* Renderer::Create()
 	{
 #if defined(IS_VULKAN) && !defined(IS_OPENGL)
-		return NEW_ON_HEAP(PlatformRenderer);
+		return NEW_ON_HEAP(OpenGLRenderer::VulkanRenderer);
 #elif defined(IS_OPENGL) && !defined(IS_VULKAN)
-		IS_IMPLERMENT("Opengl renderer missing.");
-		return nullptr;
+		return NEW_ON_HEAP(Platform::OpenGLRenderer);
 #else
 		return nullptr;
 #endif

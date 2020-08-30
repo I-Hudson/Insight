@@ -5,36 +5,28 @@
 
 #include "glm/glm.hpp"
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	class IS_API OpenGLShader : public Insight::Render::Shader
 	{
-		struct ShaderData
-		{
-			const std::vector<std::string> ModuleNames;
-			glm::vec2 Extent;
-		};
+	public:
+		OpenGLShader(const std::vector<std::string>& shaders, glm::ivec2 extent);
+		virtual ~OpenGLShader() override;
 
-		class IS_API OpenGLShader : public Shader
-		{
-		public:
-			OpenGLShader(ShaderData& data);
-			virtual ~OpenGLShader() override;
+		virtual void Bind(void* context) override;
+		virtual void Resize(int width, int height) override;
 
-			virtual void Bind(void* context) override;
-			virtual void Resize(int width, int height) override;
+	private:
+		void Create();
+		unsigned int CreateShader(const char* shaderSource, const Insight::Render::ShaderType& type);
+		void Cleanup(const std::vector<unsigned int>& shaders);
 
-		private:
-			void Create(ShaderData& data);
-			unsigned int CreateShader(const char* shaderSource, const ShaderType& type);
-			void Cleanup(const std::vector<unsigned int>& shaders);
+		unsigned int ShaderTypeToGLShaderType(const Insight::Render::ShaderType& type);
 
-			unsigned int ShaderTypeToGLShaderType(const ShaderType& type);
-
-		private:
-			ShaderData m_shaderData;
-			unsigned int m_id;
-		};
-	}
+	private:
+		std::vector<std::string> m_shaderPaths;
+		glm::ivec2 m_extent;
+		unsigned int m_id;
+	};
 }
 #endif

@@ -23,8 +23,7 @@ namespace Insight
 
 			IS_CORE_INFO("{0}", m_windowModule->GetWindow()->GetHeight());
 
-			RendererStartUpData renderData{ m_windowModule };
-			m_renderer = Renderer::Create(renderData);
+			m_renderer = Renderer::Create();
 
 			NEW_ON_HEAP(ImGuiRenderer, m_renderer);
 		}

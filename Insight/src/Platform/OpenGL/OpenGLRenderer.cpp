@@ -6,6 +6,7 @@
 #include "Platform/OpenGL/OpenGLRenderer.h"
 #include "Insight/Module/WindowModule.h"
 
+#include "Insight/Module/ModuleManager.h"
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/MeshComponent.h"
@@ -15,44 +16,39 @@
 
 
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	OpenGLRenderer::OpenGLRenderer()
 	{
-		OpenGLRenderer::OpenGLRenderer(RendererStartUpData& startupData)
-			: m_windowModule(startupData.WindowModule)
-		{
-			ShaderData data 
-			{ 
-				{ "opengl_shaders/vertex.vert", "opengl_shaders/frag.frag" },
-				glm::vec2(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight())
-			};
-			m_shader = NEW_ON_HEAP(OpenGLShader, data);
-		}
+		m_windowModule = Insight::Module::ModuleManager::GetInstance()->GetModule<Insight::Module::WindowModule>();
 
-		OpenGLRenderer::~OpenGLRenderer()
-		{
-			DELETE_ON_HEAP(m_shader);
-		}
+		std::vector<std::string> shaderPaths = { "opengl_shaders/vertex.vert", "opengl_shaders/frag.frag" };
+		glm::ivec2 extent = glm::ivec2(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
+		m_shader = NEW_ON_HEAP(OpenGLShader, shaderPaths, extent);
+	}
 
-		void OpenGLRenderer::Clear()
-		{
-			glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		}
+	OpenGLRenderer::~OpenGLRenderer()
+	{
+		DELETE_ON_HEAP(m_shader);
+	}
 
-		void OpenGLRenderer::Render(Camera* mainCamera, std::vector<MeshComponent*> meshes)
-		{
-		}
+	void OpenGLRenderer::Clear()
+	{
+		glClearColor(0.45f, 0.0f, 0.75f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
 
-		void OpenGLRenderer::Present()
-		{
-			glfwSwapBuffers(m_windowModule->GetWindow()->m_window);
-		}
+	void OpenGLRenderer::Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes)
+	{
+	}
 
-		void OpenGLRenderer::RecreateFramebuffers(const Event& event)
-		{
-		}
+	void OpenGLRenderer::Present()
+	{
+		glfwSwapBuffers(m_windowModule->GetWindow()->m_window);
+	}
+
+	void OpenGLRenderer::RecreateFramebuffers(const Insight::Event& event)
+	{
 	}
 }
 #endif
