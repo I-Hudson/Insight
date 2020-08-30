@@ -26,8 +26,8 @@ Mesh::~Mesh()
 {
 	IS_PROFILE_FUNCTION();
 
-	Insight::Memory::MemoryManager::DeleteOnFreeList(m_vertexBuffer);
-	Insight::Memory::MemoryManager::DeleteOnFreeList(m_indexBuffer);
+	DELETE_ON_HEAP(m_vertexBuffer);
+	DELETE_ON_HEAP(m_indexBuffer);
 
 	m_vertices.clear();
 	m_indices.clear();

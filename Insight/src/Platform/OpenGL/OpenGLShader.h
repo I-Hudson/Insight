@@ -24,8 +24,6 @@ namespace Insight
 			virtual void Bind(void* context) override;
 			virtual void Resize(int width, int height) override;
 
-			virtual const ShaderData& GetData() const override { return m_shaderData; }
-
 		private:
 			void Create(ShaderData& data);
 			unsigned int CreateShader(const char* shaderSource, const ShaderType& type);

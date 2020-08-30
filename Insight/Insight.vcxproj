@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug_NO_VULKAN|x64">
+      <Configuration>Debug_NO_VULKAN</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug_NO_EDITOR|x64">
       <Configuration>Debug_NO_EDITOR</Configuration>
       <Platform>x64</Platform>
@@ -31,6 +35,12 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
@@ -66,6 +76,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -82,6 +95,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>..\bin\Debug-windows-x86_64\Insight\</OutDir>
     <IntDir>..\bin-int\Debug-windows-x86_64\Insight\</IntDir>
+    <TargetName>Insight</TargetName>
+    <TargetExt>.lib</TargetExt>
+    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
+    <OutDir>..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\</OutDir>
+    <IntDir>..\bin-int\Debug_NO_VULKAN-windows-x86_64\Insight\</IntDir>
     <TargetName>Insight</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
@@ -133,7 +153,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc141-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -142,6 +162,36 @@
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_PROFILE;NOMINMAX;IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\nlohmann\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>assimp-vc141-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <PreBuildEvent>
+      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)
+IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
@@ -163,7 +213,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc141-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -197,7 +247,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -230,7 +280,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -263,7 +313,7 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>shaderc_combined.lib;vulkan-1.lib;opengl32.lib;assimp-vc141-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>

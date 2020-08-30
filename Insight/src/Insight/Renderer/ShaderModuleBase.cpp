@@ -6,6 +6,7 @@
 #include "Platform/Vulkan/VulkanInits.h"
 #include "Platform/Vulkan/Device.h"
 #elif defined(IS_OPENGL)
+
 #endif
 
 namespace Insight

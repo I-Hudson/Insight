@@ -88,8 +88,6 @@ namespace Platform
 
 		m_swapchain = NEW_ON_HEAP(Swapchain, m_device);
 
-		m_imguiRenderer = NEW_ON_HEAP(ImGuiRenderer, this);
-
 		Insight::EventManager::Bind(Insight::EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
 		Insight::EventManager::Bind(Insight::EventType::Deserialize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::DeserializeFromFile, this));
 
@@ -102,8 +100,6 @@ namespace Platform
 
 		Insight::EventManager::Unbind(Insight::EventType::WindowResize, typeid(VulkanRenderer).name());
 		Insight::EventManager::Unbind(Insight::EventType::Deserialize, typeid(VulkanRenderer).name());
-
-		DELETE_ON_HEAP(m_imguiRenderer);
 
 		DELETE_ON_HEAP(m_material);
 		DELETE_ON_HEAP(m_framebuffer);

@@ -10,6 +10,8 @@
 #include "Insight/Event/EventManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
+#include "Insight/Renderer/Framebuffer.h"
+
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/Vulkan.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
@@ -18,7 +20,7 @@
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/CommandPool.h"
 #include "Platform/Vulkan/CommandBuffer.h"
-#elif 
+#elif defined(IS_OPENGL)
 
 #endif
 #endif

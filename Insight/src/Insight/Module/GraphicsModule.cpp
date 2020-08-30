@@ -4,6 +4,7 @@
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Component/MeshComponent.h"
+#include "Insight/Renderer/ImGuiRenderer.h"
 
 #include "Insight/Log.h"
 
@@ -24,13 +25,18 @@ namespace Insight
 
 			RendererStartUpData renderData{ m_windowModule };
 			m_renderer = Renderer::Create(renderData);
+
+			NEW_ON_HEAP(ImGuiRenderer, m_renderer);
 		}
 
 		GraphicsModule::~GraphicsModule()
 		{
-			Memory::MemoryManager::DeleteOnFreeList(m_renderer);
+			DELETE_ON_HEAP(m_renderer);
 			m_windowModule = nullptr;
 			
+			ImGuiRenderer* imguiRenderer = ImGuiRenderer::GetInstance();
+			DELETE_ON_HEAP(imguiRenderer);
+
 			ClearPtr();
 		}
 
@@ -38,11 +44,18 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			m_renderer->Clear();
+			if (m_renderer != nullptr)
+			{
+				m_renderer->Clear();
 
-			m_renderer->Render(m_mainCamera, m_meshs);
+				m_renderer->Render(m_mainCamera, m_meshs);
 
-			m_renderer->Present();
+				m_renderer->Present();
+			}
+			else
+			{
+				IS_CORE_ERROR("[GraphicsModule::Update] No renderer setup.");
+			}
 		}
 
 		void GraphicsModule::SetMainCamera(Camera* camera)

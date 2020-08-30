@@ -5,6 +5,7 @@ workspace "Insight"
     configurations
     {
         "Debug",
+        "Debug_NO_VULKAN",
         "Debug_NO_EDITOR",
         "Release",
         "Release_NO_EDITOR",
@@ -96,10 +97,7 @@ project "Insight"
 
     links 
 	{ 
-        "GLFW",
-        "shaderc_combined",
-        "vulkan-1",
-        "opengl32"
+        "GLFW"
 	}
 
     filter "system:windows"
@@ -123,12 +121,27 @@ project "Insight"
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
         }
 
+    filter "configurations:Debug_NO_VULKAN"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }--, "IMGUI_ENABLED" }
+        symbols "on"
+        links 
+        {
+            "assimp-vc141-mtd",
+            "opengl32"
+	    }
+        libdirs
+        {
+            "%{LibDirs.assimp}/Debug"
+        }
+
     filter "configurations:Debug"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
         links 
         {
-            "assimp-vc141-mtd"
+            "assimp-vc141-mtd",
+            "shaderc_combined",
+            "vulkan-1",
 	    }
         libdirs
         {
@@ -141,7 +154,9 @@ project "Insight"
         symbols "on"
         links 
         {
-            "assimp-vc141-mtd"
+            "assimp-vc141-mtd",
+            "shaderc_combined",
+            "vulkan-1",
 	    }
         libdirs
         {
@@ -154,7 +169,9 @@ project "Insight"
         optimize "on"
         links 
         {
-            "assimp-vc141-mt"
+            "assimp-vc141-mt",
+            "shaderc_combined",
+            "vulkan-1",
 	    }
         libdirs
         {
@@ -167,7 +184,9 @@ project "Insight"
         optimize "on"
         links 
         {
-            "assimp-vc141-mt"
+            "assimp-vc141-mt",
+            "shaderc_combined",
+            "vulkan-1",
 	    }
         libdirs
         {
@@ -180,7 +199,9 @@ project "Insight"
         optimize "full"
         links 
         {
-            "assimp-vc141-mt"
+            "assimp-vc141-mt",
+            "shaderc_combined",
+            "vulkan-1",
 	    }
         libdirs
         {
@@ -212,6 +233,7 @@ project "Sandbox"
         "$(SolutionDir)Insight/src",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.json}",
@@ -240,6 +262,11 @@ project "Sandbox"
 
     filter "configurations:Debug"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        symbols "on"
+        kind "ConsoleApp"
+
+    filter "configurations:Debug_NO_VULKAN"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }--, "IMGUI_ENABLED" }
         symbols "on"
         kind "ConsoleApp"
 
@@ -287,6 +314,7 @@ project "UnitTests"
         "$(SolutionDir)Insight/src",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
+        "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.json}",
 	}
@@ -317,4 +345,8 @@ project "UnitTests"
 
     filter "configurations:Debug_NO_EDITOR"
         defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        symbols "on"
+
+    filter "configurations:Debug_NO_VULKAN"
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
         symbols "on"

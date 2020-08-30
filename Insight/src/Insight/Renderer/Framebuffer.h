@@ -10,7 +10,10 @@ namespace Insight
 	{
 		class Device;
 
-		struct FrameBufferAttachment;
+		struct FrameBufferAttachment
+		{
+
+		};
 
 		class IS_API Framebuffer
 		{

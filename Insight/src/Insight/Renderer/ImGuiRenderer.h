@@ -16,10 +16,8 @@ namespace Insight
 
 	namespace Render
 	{
-		class VulkanFramebuffer;
-		class VulkanRenderer;
 		class Shader;
-		class VulkanMaterial;
+		class Framebuffer;
 		class CommandPool;
 		class CommandBuffer;
 	}
@@ -46,6 +44,8 @@ public:
 private:
 	void WindowResize(const Insight::Event& event);
 
+	Insight::Render::Framebuffer* m_framebuffer;
+
 #ifdef IS_VULKAN
 	void CreateDescPool();
 
@@ -53,7 +53,6 @@ private:
 	Platform::VulkanRenderer* m_vulkanRenderer;
 	Platform::CommandPool* m_commandPool;
 	Platform::CommandBuffer* m_commandBuffer;
-	Platform::VulkanFramebuffer* m_framebuffer;
 
 	VkImage m_fontImage;
 	VkImageView m_fontImageView;

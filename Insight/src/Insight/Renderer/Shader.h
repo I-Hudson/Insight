@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Renderer/ShaderModuleBase.h"
+#include "Insight/Memory/MemoryManager.h"
 #include "Insight/UUID.h"
 
 namespace Insight

@@ -1,4 +1,5 @@
 #include "ispch.h"
+#ifdef IS_VULKAN
 // dear imgui: Renderer for Vulkan
 // This needs to be used along with a Platform Binding (e.g. GLFW, SDL, Win32, custom..)
 
@@ -1486,3 +1487,4 @@ ImTextureID ImGui_ImplVulkan_AddTexture(VkSampler sampler, VkImageView image_vie
 
     return (ImTextureID)descriptor_set;
 }
+#endif

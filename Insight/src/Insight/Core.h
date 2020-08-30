@@ -12,6 +12,15 @@
 					  printf("\033[01;33m"); \
 					  printf("%s: %s: %d: %s", file, func, line, x); \
 					  printf("\033[0m \n");
+
+#define IS_IMPLERMENT(x) IS_IMPLERMENT_CORE(x, __FILE__, __FUNCTION__, __LINE__)
+#define IS_IMPLERMENT_CORE(x, file, func, line) \
+					 printf("//------------------------------------------------ \n"); \
+					 printf("Missing IMPLEREMNT: %s  \n", x); \
+					 printf("%s, %d, %s  \n", func, line, file); \
+					 printf("//------------------------------------------------ \n");
+
+
 #else 
 
 #define IS_TODO(...)
