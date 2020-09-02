@@ -69,6 +69,16 @@ namespace Insight
 		m_registry.erase(it);
 	}
 
+	const std::string& Scene::GetSceneName() const
+	{
+		return m_sceneName;
+	}
+
+	void Scene::SetSceneName(const std::string& sceneName)
+	{
+		m_sceneName = sceneName;
+	}
+
 	void Scene::SetActiveScene()
 	{
 		s_CurrentScene = this;
@@ -101,69 +111,76 @@ namespace Insight
 
 	void Scene::Serialize()
 	{
-		std::ofstream out;
-		std::string fileName(m_sceneName);
-		fileName += ".json";
-		out.open(fileName);
-		if (out.is_open())
-		{			
-			std::vector<json> objects;
+		{
+			IS_PROFILE_SCOPE("XML Parse");
+			using namespace tinyxml2;
+			tinyxml2::XMLDocument doc;
+			XMLNode* root = doc.NewElement("Scene");
+			doc.InsertFirstChild(root);
+
 			for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
 			{
-				json data;
-				(*it)->Serialize(data);
-				if (!data.empty())
+				XMLNode* entityNode = doc.NewElement("Entity");
+				(*it)->Serialize(entityNode, &doc);
+				if (!entityNode->NoChildren())
 				{
-					objects.push_back(data);
+					root->InsertEndChild(entityNode);
 				}
 			}
 
-			json data;
-			data["SceneName"] = m_sceneName;
-			for (size_t i = 0; i < objects.size(); ++i)
+			if (doc.SaveFile((DEFAULT_SAVE_PATH + m_sceneName + ".xml").c_str()) != XML_SUCCESS)
 			{
-				data["Objects"][objects[i]["UUID"].get<std::string>()] = objects[i];
+				IS_CORE_ASSERT(false, "");
 			}
-			out << data.dump(4);
-			out.close();
 		}
 	}
 
 	void Scene::Deserialize(const std::string& file)
 	{
-		std::ifstream in;
-		in.open(file);
-		if (in.is_open())
 		{
-			json data;
-			in >> data;
-	
-			m_sceneName = data["SceneName"];
-			json objects = data["Objects"];
+			IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
+
+			std::string filePath = file;
+			if (filePath.find_last_of('.') == SIZE_MAX)
 			{
-				IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
-				for (auto it = objects.begin(); it != objects.end(); ++it)
-				{
-					std::string type = (*it)["Type"];
-					Serialization::Serializable* s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
-					s->Deserialize(*it);
-				}
+				filePath.append(".xml");
 			}
 
+			tinyxml2::XMLDocument doc;
+			tinyxml2::XMLError eResult = doc.LoadFile((DEFAULT_SAVE_PATH + filePath).c_str());
+			if (eResult == tinyxml2::XML_SUCCESS)
 			{
-				IS_PROFILE_SCOPE("[Scene::Deserialize] 'OnCreate' all scene components");
-				for (auto itE = m_registry.begin(); itE != m_registry.end(); ++itE)
+				tinyxml2::XMLNode* root = doc.FirstChild();
+				tinyxml2::XMLNode* c = root->FirstChild();
+				if (c != nullptr)
 				{
-					auto components = (*itE)->GetAllComponents();
-					for (auto itC = components->begin(); itC != components->end(); ++itC)
+					do
 					{
-						(*itC)->OnCreate();
-					}
+						std::string type = c->FirstChildElement("Type")->ToElement()->GetText();
+						Serialization::Serializable* s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
+						s->Deserialize(c);
+						c = c->NextSibling();
+					} while (c != nullptr);
+
+					EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
 				}
 			}
+			else
+			{
+				IS_CORE_INFO("{0}", doc.ErrorIDToName(doc.ErrorID()));
+			}
+		}
 
-			in.close();
-			EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
+		{
+			IS_PROFILE_SCOPE("[Scene::Deserialize] 'OnCreate' all scene components");
+			for (auto itE = m_registry.begin(); itE != m_registry.end(); ++itE)
+			{
+				auto components = (*itE)->GetAllComponents();
+				for (auto itC = components->begin(); itC != components->end(); ++itC)
+				{
+					(*itC)->OnCreate();
+				}
+			}
 		}
 	}
 

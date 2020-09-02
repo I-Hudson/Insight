@@ -132,14 +132,7 @@ namespace Platform
 			if (meshes.size() > 0)
 			{
 				IS_PROFILE_SCOPE("Object matrixs");
-				//for (auto it = meshes.begin(); it != meshes.end(); ++it)
-				//{
-				//	objectsMatrix.push_back((*it)->GetEntity()->GetComponent<TransformComponent>()->GetTransform());
-				//}
-				//if (objectsMatrix.size() > 0)
-				//{
 				m_material->UpdateObjectsUniforms();
-				//}
 			}
 		}
 

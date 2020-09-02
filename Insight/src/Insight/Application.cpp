@@ -12,6 +12,7 @@
 #include "Module/InputModule.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Event/EventManager.h"
+#include "Insight/Scene/Scene.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Serialization/Serializable.h"
@@ -19,11 +20,11 @@
 #include <ppltasks.h>
 
 #include "Insight/Camera.h"
-
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
 #include "Input/Input.h"
 #include <glm\ext\matrix_transform.hpp>
+#include "misc/cpp/imgui_stdlib.h"
 
 namespace Insight
 {
@@ -184,6 +185,39 @@ namespace Insight
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 			ImGuiRenderer::GetInstance()->NewFrame();	
+
+			std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
+			ImGui::Begin("Scene");
+			ImGui::InputText("Scene Name", &sceneFileName);
+			ImGui::End();
+
+			Scene::ActiveScene()->SetSceneName(sceneFileName);
+
+			ImGui::BeginMainMenuBar();
+
+			if (ImGui::BeginMenu("Scene"))
+			{
+				if (ImGui::MenuItem("Save Scene"))
+				{
+					Scene::ActiveScene()->Save();
+				}
+
+				if (ImGui::MenuItem("Load Scene"))
+				{
+					Scene::ActiveScene()->Load(sceneFileName);
+				}
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::MenuItem("Save Model Library"))
+			{
+				tinyxml2::XMLDocument doc;
+				tinyxml2::XMLNode* models = doc.NewElement("Models");
+				Insight::Library::ModelLibrary::GetInstance()->Serialize(models, &doc);
+				doc.InsertEndChild(models);
+				doc.SaveFile("ModelLibrary.xml");
+			}
+			ImGui::EndMainMenuBar();
 #endif
 
 			Time::UpdateTime();

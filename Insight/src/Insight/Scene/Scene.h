@@ -6,6 +6,8 @@
 class Entity;
 class Component;
 
+const std::string DEFAULT_SAVE_PATH = "scenes/";
+
 namespace Insight
 {
 	class Scene
@@ -17,6 +19,9 @@ namespace Insight
 		Entity* CreateEntity(const std::string& name = std::string());
 		void DeleteEntiy(const std::string uuid);
 		void DeleteEntiy(Entity* ptr);
+
+		const std::string& GetSceneName() const;
+		void SetSceneName(const std::string& sceneName);
 
 		void SetActiveScene();
 		static Scene* ActiveScene();

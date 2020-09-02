@@ -89,13 +89,13 @@ namespace Insight
 			vTranslation -= vUp * frameSpeed;
 		}
 
-		m_viewMatrix[3] = vTranslation;
-
 		// check for camera rotation
 		static bool sbMouseButtonDown = false;
 		bool mouseDown = Input::MouseButtonDown(MOUSE_BUTTON_RIGHT);
 		if (mouseDown)
 		{
+			m_viewMatrix[3] = vTranslation;
+
 			static double siPrevMouseX = 0;
 			static double siPrevMouseY = 0;
 

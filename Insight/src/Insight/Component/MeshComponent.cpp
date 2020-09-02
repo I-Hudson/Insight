@@ -27,6 +27,7 @@ MeshComponent::MeshComponent(Entity* owner)
 
 MeshComponent::~MeshComponent()
 {
+	SetMaterial(nullptr);
 	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
 }
 
@@ -91,19 +92,27 @@ void MeshComponent::SetMaterial(Material* material)
 	}
 }
 
-void MeshComponent::Serialize(json& out, bool force)
+void MeshComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 {
-	__super::Serialize(out);
-	out["Type"] = "MeshComponent";
-	out["MeshName"] = m_mesh->GetName();
-	out["ModelUUID"] = m_mesh->GetModelUUID();
-	out["SubMeshIndex"] = m_mesh->GetSubMeshIndex();
+	tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	Type->SetText("MeshComponent");
+	out->InsertEndChild(Type);
+
+	tinyxml2::XMLElement* MeshName = doc->NewElement("MeshName");
+	MeshName->SetText(m_mesh->GetName().c_str());
+	out->InsertEndChild(MeshName);
+
+	tinyxml2::XMLElement* ModelUUID = doc->NewElement("ModelUUID");
+	ModelUUID->SetText(m_mesh->GetModelUUID().c_str());
+	out->InsertEndChild(ModelUUID);
+
+	tinyxml2::XMLElement* SubMeshIndex = doc->NewElement("SubMeshIndex");
+	SubMeshIndex->SetText(m_mesh->GetSubMeshIndex());
+	out->InsertEndChild(SubMeshIndex);
 }
 
-void MeshComponent::Deserialize(json in, bool force)
+void MeshComponent::Deserialize(tinyxml2::XMLNode* in, bool force)
 {
 	using namespace Insight::Library;
-
-	__super::Deserialize(in);
-	SetMesh(ModelLibrary::GetInstance()->GetAsset(in["ModelUUID"])->GetSubMesh(in["SubMeshIndex"]));
+	SetMesh(ModelLibrary::GetInstance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

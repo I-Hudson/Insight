@@ -3,6 +3,7 @@
 #include "Insight/Log.h"
 #include "WindowModule.h"
 #include "GLFW/glfw3.h"
+#include "examples/imgui_impl_glfw.h"
 
 namespace Insight
 {
@@ -17,6 +18,7 @@ namespace Insight
 			m_windowModule = windowModule;
 
 			glfwSetKeyCallback(m_windowModule->GetWindow()->m_window, KeybordCallback);
+			glfwSetCharCallback(m_windowModule->GetWindow()->m_window, CharCallback);
 			glfwSetMouseButtonCallback(m_windowModule->GetWindow()->m_window, MouseButtonCallback);
 			glfwSetCursorPosCallback(m_windowModule->GetWindow()->m_window, MousePositionCallback);
 		}
@@ -47,6 +49,13 @@ namespace Insight
 				m_inputStates[key].KeyHeld = !m_inputStates[key].KeyHeld;
 				break;
 			}
+
+			ImGui_ImplGlfw_KeyCallback(window, key, scanCode, action, mod);
+		}
+
+		void InputModule::CharCallback(GLFWwindow* window, unsigned int c)
+		{
+			ImGui_ImplGlfw_CharCallback(window, c);
 		}
 
 		void InputModule::MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY)

@@ -4,7 +4,6 @@
 #include "Insight/Module/InputModule.h"
 #include "Insight/Input/InsightKeyCodes.h"
 
-
 class IS_API Input
 {
 public:

@@ -24,14 +24,11 @@ public:
 		bool test = true;
 
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
-		//Model* m = Model::Create("./models/Test/TestCube.fbx");
-		//Model* n = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/nano/nanosuit.fbx");
 
 		if (test)
 		{
-			for (size_t i = 0; i < 0; ++i)
+			for (size_t i = 0; i < 10; ++i)
 			{
-				//if (i % 2 == 0)
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
  					testModel->AddComponent<PlayerController>();
@@ -39,15 +36,6 @@ public:
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}
-				//else
-				//{
-				//	Entity* testModel = Entity::CreateFromModel(n);
-				//	glm::vec3 pos;
-				//	pos.x = -10 * i;
-				//	pos.y = 0;
-				//	pos.z = -10 * i;
-				//	testModel->GetComponent<TransformComponent>()->SetPosition(pos);
-				//}
 			}
 		}
 	}
@@ -63,7 +51,7 @@ public:
 
 		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
 		{
-			Scene::ActiveScene()->Load("sandbox.json");
+			Scene::ActiveScene()->Load("Sandbox.xml");
 		}
 
 		Scene::ActiveScene()->OnUpdate(deltaTime);

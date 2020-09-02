@@ -70,6 +70,9 @@
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\TinyXML2">
+      <UniqueIdentifier>{496EA29A-B5F9-0F5F-BE0A-93532A156C5F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\glad">
       <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
     </Filter>
@@ -99,6 +102,12 @@
     </Filter>
     <Filter Include="vendor\imgui\examples">
       <UniqueIdentifier>{ABA16F5A-170E-2B55-E001-C3B24C2D4DBD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\misc">
+      <UniqueIdentifier>{58F0AC6F-C406-AB05-0D7E-362779D37B8D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\imgui\misc\cpp">
+      <UniqueIdentifier>{2AD6F862-9642-B45D-5F36-4CBBCB61D6C5}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor\stb_image">
       <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
@@ -350,6 +359,9 @@
     </ClInclude>
     <ClInclude Include="src\ispch.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\TinyXML2\tinyxml2.h">
+      <Filter>vendor\TinyXML2</Filter>
     </ClInclude>
     <ClInclude Include="vendor\glm\glm\common.hpp">
       <Filter>vendor\glm\glm</Filter>
@@ -1602,6 +1614,9 @@
     <ClInclude Include="vendor\imgui\imstb_truetype.h">
       <Filter>vendor\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\imgui\misc\cpp\imgui_stdlib.h">
+      <Filter>vendor\imgui\misc\cpp</Filter>
+    </ClInclude>
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
@@ -1787,6 +1802,9 @@
     <ClCompile Include="src\ispch.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="vendor\TinyXML2\tinyxml2.cpp">
+      <Filter>vendor\TinyXML2</Filter>
+    </ClCompile>
     <ClCompile Include="vendor\glad\src\glad.cpp">
       <Filter>vendor\glad\src</Filter>
     </ClCompile>
@@ -1810,6 +1828,9 @@
     </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_widgets.cpp">
       <Filter>vendor\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>vendor\imgui\misc\cpp</Filter>
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>

@@ -127,51 +127,111 @@ void Entity::RemoveChild(Entity* child)
 	}
 }
 
-void Entity::Serialize(json& out, bool force)
+//void Entity::Serialize(json& out, bool force)
+//{
+//	if (GetParent() == nullptr || force)
+//	{
+//		out["UUID"] = GetUUID().c_str();
+//		out["Type"] = "Entity";
+//		out["Name"] = m_data.Name;
+//
+//		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
+//		{
+//			(*it)->Serialize(out["Children"][(*it)->GetUUID()], true);
+//		}
+//
+//		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+//		{
+//			(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
+//		}
+//	}
+//}
+
+void Entity::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 {
 	if (GetParent() == nullptr || force)
 	{
-		out["UUID"] = GetUUID().c_str();
-		out["Type"] = "Entity";
-		out["Name"] = m_data.Name;
+		tinyxml2::XMLElement* Uuid = doc->NewElement("UUID");
+		Uuid->SetText(GetUUID().c_str());
+		out->InsertEndChild(Uuid);
 
-		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
+		tinyxml2::XMLElement* Type = doc->NewElement("Type");
+		Type->SetText("Entity");
+		out->InsertEndChild(Type);
+
+		tinyxml2::XMLElement* Name = doc->NewElement("Name");
+		Name->SetText(m_data.Name.c_str());
+		out->InsertEndChild(Name);
+
+		if (m_data.Children.size() > 0)
 		{
-			(*it)->Serialize(out["Children"][(*it)->GetUUID()], true);
+			tinyxml2::XMLNode* childrenNode = doc->NewElement("Children");
+			for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
+			{
+				tinyxml2::XMLNode* childNode = doc->NewElement("Entity");
+				(*it)->Serialize(childNode, doc, true);
+				childrenNode->InsertEndChild(childNode);
+			}
+			out->InsertEndChild(childrenNode);
 		}
 
-		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+		if (m_data.Components.size() > 0)
 		{
-			(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
+			tinyxml2::XMLNode* componentNodes = doc->NewElement("Components");
+			for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+			{
+				tinyxml2::XMLNode* componentNode = doc->NewElement("Component");
+				(*it)->Serialize(componentNode, doc);
+				componentNodes->InsertEndChild(componentNode);
+			}
+			out->InsertEndChild(componentNodes);
 		}
 	}
 }
 
-void Entity::Deserialize(json in, bool force)
+void Entity::Deserialize(tinyxml2::XMLNode* in, bool force)
 {
-	SetUUID(in["UUID"]);
-	m_data.Name = in["Name"];
-
-	for (auto it = in["Children"].begin(); it != in["Children"].end(); ++it)
+	if (auto uuid = in->FirstChildElement("UUID"))
 	{
-		Serializable* s = CreateInstanceFromType<Serializable>((*it)["Type"]);
-		dynamic_cast<Entity*>(s)->SetParent(this);
-		if (s != nullptr)
-		{
-			s->Deserialize(*it);
-			m_data.Children.push_back(dynamic_cast<Entity*>(s));
-		}
+		SetUUID(uuid->GetText());
+	}
+	if (auto name = in->FirstChildElement("Name"))
+	{
+		m_data.Name = name->GetText() != 0 ? name->GetText() : "Defualt";
 	}
 
-	for (auto it = in["Components"].begin(); it != in["Components"].end(); ++it)
+	tinyxml2::XMLNode* children = in->FirstChildElement("Children");
+	if (children != nullptr)
 	{
-		Serializable* s = CreateInstanceFromType<Serializable>((*it)["Type"]);
-		AddComponent(static_cast<Component*>(s));
-
-		if (s != nullptr)
+		tinyxml2::XMLNode* child = children->FirstChild();
+		do
 		{
-			s->Deserialize(*it);
-		}
+			Serializable* s = CreateInstanceFromType<Serializable>(child->FirstChildElement("Type")->GetText());
+			dynamic_cast<Entity*>(s)->SetParent(this);
+			if (s != nullptr)
+			{
+				s->Deserialize(child);
+				m_data.Children.push_back(dynamic_cast<Entity*>(s));
+			}
+
+			child = child->NextSibling();
+		} while (child != nullptr);
+	}
+
+	tinyxml2::XMLNode* components = in->FirstChildElement("Components");
+	if (components != nullptr)
+	{
+		tinyxml2::XMLNode* c = components->FirstChild();
+		do
+		{
+			Serializable* s = CreateInstanceFromType<Serializable>(c->FirstChildElement("Type")->GetText());
+			if (s != nullptr)
+			{
+				AddComponent(dynamic_cast<Component*>(s));
+				s->Deserialize(c);
+			}
+			c = c->NextSibling();
+		} while (c != nullptr);
 	}
 }
 

@@ -37,7 +37,7 @@ namespace Platform
 
 		auto attachments = GetAttachments(fbAttachments);
 		auto cAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 0);
-		auto dAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, cAttachmentRefs.size());
+		auto dAttachmentRefs = GetAttachmentReferences(fbAttachments, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, (int)cAttachmentRefs.size());
 		auto subpass = GetSubpass(VK_PIPELINE_BIND_POINT_GRAPHICS, cAttachmentRefs, dAttachmentRefs);
 		std::vector<VkSubpassDependency> dependecies = { dependency };
 		VkRenderPassCreateInfo renderPassCreateInfo = VulkanInits::RenderPassInfo(attachments, subpass, dependecies);

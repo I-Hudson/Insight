@@ -26,8 +26,7 @@
 #define IS_TODO(...)
 #define IS_TODO_CORE(...)
 
-#endif // IS_DEBUG
-
+#endif // IS_DEBUG 
 
 #define NEW_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
 #define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)

@@ -40,7 +40,7 @@ namespace Platform
 
 	struct UniformObjectsData : UniformData
 	{
-		glm::mat4 Data;
+		void* Data;
 		int Offset;
 		std::vector<MeshComponent*> Owners;
 	};

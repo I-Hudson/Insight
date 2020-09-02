@@ -205,7 +205,7 @@ namespace Platform
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
 			UniformObjectsData data = *it;
-			memcpy((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &data.Data, data.Size);
+			memcpy((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &((TransformComponent*)data.Data)->GetTransform(), data.Size);
 		}
 
 		VkMappedMemoryRange mappedMemoryRange{};
@@ -270,10 +270,10 @@ namespace Platform
 
 		UniformObjectsData data;
 		bool foundData = false;
-		glm::mat4 meshTransform = meshComponent->GetEntity()->GetComponent<TransformComponent>()->GetTransform();
+		TransformComponent* meshTransform = meshComponent->GetEntity()->GetComponent<TransformComponent>();
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
-			if (it->Data == meshTransform)
+			if (((TransformComponent*)it->Data) == meshTransform)
 			{
 				it->Owners.push_back(const_cast<MeshComponent*>(meshComponent));
 				foundData = true;
@@ -322,10 +322,10 @@ namespace Platform
 		m_isDirty = true;
 
 		UniformObjectsData data;
-		glm::mat4 meshTransform = meshComponent->GetEntity()->GetComponent<TransformComponent>()->GetTransform();
+		TransformComponent* meshTransform = meshComponent->GetEntity()->GetComponent<TransformComponent>();
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
-			if (it->Data == meshTransform)
+			if (((TransformComponent*)it->Data) == meshTransform)
 			{
 				it->Owners.erase(std::find(it->Owners.begin(), it->Owners.end(), meshComponent));
 				break;

@@ -55,24 +55,47 @@ namespace Insight
 			}
 		}
 
-		void ModelLibrary::Serialize(json& data, bool force)
+		void ModelLibrary::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 		{
 			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			{
-				data["Models"][it->second->GetUUID()]["UUID"] = it->second->GetUUID();
-				data["Models"][it->second->GetUUID()]["FilePath"] = it->second->GetFilePath();
+				tinyxml2::XMLNode* model = doc->NewElement("Model");
+				
+				tinyxml2::XMLElement* uuid = doc->NewElement("UUID");
+				uuid->SetText(it->second->GetUUID().c_str());
+				model->InsertEndChild(uuid);
+
+				tinyxml2::XMLElement* filePath = doc->NewElement("FilePath");
+				filePath->SetText(it->second->GetFilePath().c_str());
+				model->InsertEndChild(filePath);
+
+				out->InsertEndChild(model);
 			}
 		}
 
-		void ModelLibrary::Deserialize(json data, bool force)
+		void ModelLibrary::Deserialize(tinyxml2::XMLNode* data, bool force)
 		{
-			for (auto it = data["Models"].begin(); it != data["Models"].end(); ++it)
+			tinyxml2::XMLNode* model = data->FirstChild();
+			do
 			{
-				json j = *it;
-				std::string uuid = (*it)["UUID"];
-				Model* m = NEW_ON_HEAP(Model, (*it)["FilePath"], uuid);
+				std::string uuid = model->FirstChildElement("UUID")->GetText();
+				std::string filePath = model->FirstChildElement("FilePath")->GetText();
+				Model* m = NEW_ON_HEAP(Model, filePath, uuid);
 				AddAsset(m->GetUUID(), m);
-			}
+
+				model = model->NextSibling();
+			} while (model != nullptr);
 		}
+
+		//void ModelLibrary::Deserialize(json data, bool force)
+		//{
+		//	for (auto it = data["Models"].begin(); it != data["Models"].end(); ++it)
+		//	{
+		//		json j = *it;
+		//		std::string uuid = (*it)["UUID"];
+		//		Model* m = NEW_ON_HEAP(Model, (*it)["FilePath"], uuid);
+		//		AddAsset(m->GetUUID(), m);
+		//	}
+		//}
 	}
 }

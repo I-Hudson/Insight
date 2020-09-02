@@ -2,6 +2,7 @@
 #ifdef IS_VULKAN
 #include "Insight/Core.h"
 #include "Vulkan.h"
+#include "Insight/Renderer/Framebuffer.h"
 #include "Renderpass.h"
 #include "CommandBuffer.h"
 #include "Semaphore.h"
@@ -24,7 +25,7 @@ namespace Platform
 		bool DeleteImage;
 	};
 
-	class IS_API VulkanFramebuffer
+	class IS_API VulkanFramebuffer : public Insight::Render::Framebuffer
 	{
 	public:
 		VulkanFramebuffer(Device* device, const int& width, const int& height);
@@ -32,9 +33,9 @@ namespace Platform
 		VulkanFramebuffer(Device* device, VkImage* image, VkFormat format, VkExtent2D extent);
 		~VulkanFramebuffer();
 
-		void CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout);
-		void CompileFrameBuffer();
-		FrameBufferAttachment& GetAttachment(const int& index);
+		virtual void CreateAttachment(const uint32_t& format, const uint32_t& usage, const uint32_t& imageLayout, const uint32_t& finalLayout) override;
+		virtual void CompileFrameBuffer() override;
+		virtual FrameBufferAttachment& GetAttachment(const int& index) override;
 
 		void AttachImage(VkImage* image, VkFormat format, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout);
 

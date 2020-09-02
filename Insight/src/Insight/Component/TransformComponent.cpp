@@ -51,41 +51,54 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_isDirty = true;
 }
 
-void TransformComponent::Serialize(json& out, bool force)
-{
-	__super::Serialize(out);
-	out["Type"] = "TransformComponent";
+//void TransformComponent::Serialize(json& out, bool force)
+//{
+//	__super::Serialize(out);
+//	out["Type"] = "TransformComponent";
+//
+//	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z,  m_transform[0].w };
+//	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z,  m_transform[1].w };
+//	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z,  m_transform[2].w };
+//	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z,  m_transform[3].w };
+//}
 
-	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z,  m_transform[0].w };
-	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z,  m_transform[1].w };
-	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z,  m_transform[2].w };
-	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z,  m_transform[3].w };
+void TransformComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+{
+	tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	Type->SetText("TransformComponent");
+	out->InsertEndChild(Type);
+
+	tinyxml2::XMLElement* ViewMatrixX = doc->NewElement("ViewMatrixX");
+	ViewMatrixX->SetAttribute("x", m_transform[0].x); ViewMatrixX->SetAttribute("y", m_transform[0].y); ViewMatrixX->SetAttribute("z", m_transform[0].z); ViewMatrixX->SetAttribute("w", m_transform[0].w);
+	out->InsertEndChild(ViewMatrixX);
+
+	tinyxml2::XMLElement* ViewMatrixY = doc->NewElement("ViewMatrixY");
+	ViewMatrixY->SetAttribute("x", m_transform[1].x); ViewMatrixY->SetAttribute("y", m_transform[1].y); ViewMatrixY->SetAttribute("z", m_transform[1].z); ViewMatrixY->SetAttribute("w", m_transform[1].w);
+	out->InsertEndChild(ViewMatrixY);
+
+	tinyxml2::XMLElement* ViewMatrixZ = doc->NewElement("ViewMatrixZ");
+	ViewMatrixZ->SetAttribute("x", m_transform[2].x); ViewMatrixZ->SetAttribute("y", m_transform[2].y); ViewMatrixZ->SetAttribute("z", m_transform[2].z); ViewMatrixZ->SetAttribute("w", m_transform[2].w);
+	out->InsertEndChild(ViewMatrixZ);
+
+	tinyxml2::XMLElement* ViewMatrixW = doc->NewElement("ViewMatrixW");
+	ViewMatrixW->SetAttribute("x", m_transform[3].x); ViewMatrixW->SetAttribute("y", m_transform[3].y); ViewMatrixW->SetAttribute("z", m_transform[3].z); ViewMatrixW->SetAttribute("w", m_transform[3].w);
+	out->InsertEndChild(ViewMatrixW);
+
 }
 
-void TransformComponent::Deserialize(json in, bool force)
+void TransformComponent::Deserialize(tinyxml2::XMLNode* in, bool force)
 {
-	__super::Deserialize(in);
-
-	DeserializeTransform(m_transform[0], in["ViewMatrix"]["X"]);
-	DeserializeTransform(m_transform[1], in["ViewMatrix"]["Y"]);
-	DeserializeTransform(m_transform[2], in["ViewMatrix"]["Z"]);
-	DeserializeTransform(m_transform[3], in["ViewMatrix"]["W"]);
+	DeserializeTransform(m_transform[0], in->FirstChildElement("ViewMatrixX"));
+	DeserializeTransform(m_transform[1], in->FirstChildElement("ViewMatrixY"));
+	DeserializeTransform(m_transform[2], in->FirstChildElement("ViewMatrixZ"));
+	DeserializeTransform(m_transform[3], in->FirstChildElement("ViewMatrixW"));
 }
 
-void TransformComponent::DeserializeTransform(glm::vec4& vector, json data)
+void TransformComponent::DeserializeTransform(glm::vec4& vector, tinyxml2::XMLElement* data)
 {
-	int i = 0;
-	float values[4];
-
-	for (auto it = data.begin(); it != data.end(); ++it)
-	{
-		values[i] = (*it).get<float>();
-		++i;
-	}
-
-	vector.x = values[0];
-	vector.y = values[1];
-	vector.z = values[2];
-	vector.w = values[3];
+	vector.x = data->FloatAttribute("x");
+	vector.y = data->FloatAttribute("y");
+	vector.z = data->FloatAttribute("z");
+	vector.w = data->FloatAttribute("w");
 }
 

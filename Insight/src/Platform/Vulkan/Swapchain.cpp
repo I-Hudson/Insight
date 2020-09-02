@@ -14,6 +14,7 @@
 
 #include "glm/glm.hpp"
 #include "Insight/Renderer/ImGuiRenderer.h"
+#include "examples/imgui_impl_vulkan.h"
 
 namespace Platform
 {

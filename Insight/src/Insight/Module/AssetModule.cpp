@@ -30,14 +30,10 @@ namespace Insight
 		void AssetModule::Deserialize()
 		{
 			m_deserlizaed = true;
-			std::ifstream in;
-			in.open("ModelLibrary.json");
-			if (in.is_open())
+			tinyxml2::XMLDocument doc;
+			if (doc.LoadFile("ModelLibrary.xml") == tinyxml2::XML_SUCCESS)
 			{
-				json j;
-				in >> j;
-				m_modelLibrary->Deserialize(j);
-				in.close();
+				m_modelLibrary->Deserialize(doc.FirstChild());
 			}
 		}
 	}

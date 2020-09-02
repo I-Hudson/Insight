@@ -6,9 +6,8 @@
 #include "examples/imgui_impl_glfw.h"
 
 #ifdef IS_VULKAN
-#include "examples/imgui_impl_vulkan.h"
-#endif // IS_VULKAN
-
+#include "Platform/Vulkan/Vulkan.h"
+#endif
 
 namespace Insight
 {
@@ -60,7 +59,7 @@ private:
 	VkDeviceMemory m_fontMemory;
 
 	VkDeviceSize m_bufferMemoryAlignment = 256;
-	VkDeviceMemory m_uploadBufferMemory = VK_NULL_HANDLE;
-	VkBuffer m_uploadBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory m_uploadBufferMemory = 0;
+	VkBuffer m_uploadBuffer = 0;
 #endif
 };

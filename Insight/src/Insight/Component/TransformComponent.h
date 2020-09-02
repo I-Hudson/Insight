@@ -16,11 +16,11 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
-	virtual void Serialize(json& out, bool force = false) override;
-	virtual void Deserialize(json in, bool force = false) override;
+	virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;
+	virtual void Deserialize(tinyxml2::XMLNode* in, bool force = false) override;
 
 private:
-	void DeserializeTransform(glm::vec4& vector, json data);
+	void DeserializeTransform(glm::vec4& vector, tinyxml2::XMLElement* data);
 
 	glm::mat4 m_transform;
 

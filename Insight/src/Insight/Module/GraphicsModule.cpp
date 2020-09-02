@@ -30,11 +30,11 @@ namespace Insight
 
 		GraphicsModule::~GraphicsModule()
 		{
-			DELETE_ON_HEAP(m_renderer);
-			m_windowModule = nullptr;
-			
 			ImGuiRenderer* imguiRenderer = ImGuiRenderer::GetInstance();
 			DELETE_ON_HEAP(imguiRenderer);
+
+			DELETE_ON_HEAP(m_renderer);
+			m_windowModule = nullptr;
 
 			ClearPtr();
 		}

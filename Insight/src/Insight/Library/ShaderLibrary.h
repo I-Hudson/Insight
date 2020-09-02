@@ -17,8 +17,8 @@ namespace Insight
 			ShaderLibrary();
 			virtual ~ShaderLibrary() override;
 
-			virtual void Serialize(json& data, bool force = false) override;
-			virtual void Deserialize(json data, bool force = false) override;
+			virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;
+			virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) override;
 		};
 	}
 }

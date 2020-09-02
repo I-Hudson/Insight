@@ -13,7 +13,7 @@
 #include "Insight/Renderer/Framebuffer.h"
 
 #ifdef IS_VULKAN
-#include "Platform/Vulkan/Vulkan.h"
+#include "examples/imgui_impl_vulkan.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanFramebuffer.h"
 #include "Platform/Vulkan/VulkanMaterial.h"
@@ -60,7 +60,7 @@ ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 	CreateDescPool();
 
 	// Setup Platform/Renderer bindings
-	ImGui_ImplGlfw_InitForVulkan(Insight::Module::WindowModule::GetWindow()->m_window, true);
+	ImGui_ImplGlfw_InitForVulkan(Insight::Module::WindowModule::GetWindow()->m_window, false);
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	init_info.Instance = m_vulkanRenderer->GetInstance();
 	init_info.PhysicalDevice = m_vulkanRenderer->GetPhysicalDevice();
@@ -84,7 +84,8 @@ ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 			abort();
 		}
 	};
-	ImGui_ImplVulkan_Init(&init_info, m_framebuffer->GetRenderpass()->GetRenderpass());
+	Platform::VulkanFramebuffer* vkFramebuffer = dynamic_cast<Platform::VulkanFramebuffer*>(m_framebuffer);
+	ImGui_ImplVulkan_Init(&init_info, vkFramebuffer->GetRenderpass()->GetRenderpass());
 
 	m_commandBuffer->StartRecord();
 

@@ -41,13 +41,14 @@ void PlayerController::OnUpdate(const float& deltaTime)
 	}
 }
 
-void PlayerController::Serialize(json& out, bool force)
+
+void PlayerController::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 {
-	__super::Serialize(out);
-	out["Type"] = "PlayerController";
+	tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	Type->SetText("PlayerController");
+	out->InsertEndChild(Type);
 }
 
-void PlayerController::Deserialize(json in, bool force)
+void PlayerController::Deserialize(tinyxml2::XMLNode* data, bool force)
 {
-	__super::Deserialize(in);
 }

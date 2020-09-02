@@ -59,14 +59,14 @@ namespace Platform
 		UNTRACK_OBJECT(m_sampler);
 	}
 
-	void VulkanFramebuffer::CreateAttachment(VkFormat format, VkImageUsageFlags usage, const VkImageLayout& imageLayout, const VkImageLayout& finalLayout)
+	void VulkanFramebuffer::CreateAttachment(const uint32_t& format, const uint32_t& usage, const uint32_t& imageLayout, const uint32_t& finalLayout)
 	{
 		VkImageAspectFlags aspectMask = 0;
 
 		FrameBufferAttachment attachment;
-		attachment.Format = format;
-		attachment.ImageLayout = imageLayout;
-		attachment.FinalLayout = finalLayout;
+		attachment.Format = (VkFormat)format;
+		attachment.ImageLayout = (VkImageLayout)imageLayout;
+		attachment.FinalLayout = (VkImageLayout)finalLayout;
 		attachment.DeleteImage = true;
 		attachment.ImageUsage = usage;
 

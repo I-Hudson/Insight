@@ -6,8 +6,8 @@
 
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
-#include <json.hpp>
-
+#include "Insight/Log.h"
+#include "../vendor/TinyXML2/tinyxml2.h"
 #include <ostream>
 #include <istream>
 #include <map>
@@ -17,13 +17,6 @@
 
 #define REGISTER_DEF_TYPE(NAME) \
     Insight::Serialization::TypeRegister<NAME> NAME::reg(#NAME)
-
-#define START_SER << "\\" << '\n'
-#define END_SER << "//" << '\n'
-#define ENDL << '\n'
-
-// for convenience
-using json = nlohmann::json;
 
 namespace Insight
 {
@@ -47,8 +40,8 @@ namespace Insight
 			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
 			virtual ~Serializable();
 
-			virtual void Serialize(json& data, bool force = false) { }
-			virtual void Deserialize(json data, bool force = false) { }
+			virtual void Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force = false) { }
+			virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) { }
 
 			template<typename T> 
 			static Serializable* CreateInstance()

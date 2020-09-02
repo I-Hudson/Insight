@@ -17,11 +17,11 @@ namespace Insight
 			ClearPtr();
 		}
 
-		void ShaderLibrary::Serialize(json& data, bool force)
+		void ShaderLibrary::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 		{
 		}
 
-		void ShaderLibrary::Deserialize(json data, bool force)
+		void ShaderLibrary::Deserialize(tinyxml2::XMLNode* data, bool force)
 		{
 		}
 	}

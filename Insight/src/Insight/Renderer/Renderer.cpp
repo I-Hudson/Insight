@@ -16,7 +16,7 @@ namespace Insight
 	Renderer* Renderer::Create()
 	{
 #if defined(IS_VULKAN) && !defined(IS_OPENGL)
-		return NEW_ON_HEAP(OpenGLRenderer::VulkanRenderer);
+		return NEW_ON_HEAP(Platform::VulkanRenderer);
 #elif defined(IS_OPENGL) && !defined(IS_VULKAN)
 		return NEW_ON_HEAP(Platform::OpenGLRenderer);
 #else
