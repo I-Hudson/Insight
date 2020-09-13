@@ -21,6 +21,9 @@ public:
 		m_sandboxScene = NEW_ON_HEAP(Scene, "Sandbox");
 		m_sandboxScene->SetActiveScene();
 
+		Entity* mainCamera = Entity::Create("MainCamera");
+		mainCamera->AddComponent<CameraComponent>();
+
 		bool test = true;
 
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");

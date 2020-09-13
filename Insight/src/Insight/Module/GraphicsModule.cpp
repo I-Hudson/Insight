@@ -12,7 +12,7 @@ namespace Insight
 {
 	namespace Module
 	{
-		Camera* GraphicsModule::m_mainCamera;
+		CameraComponent* GraphicsModule::m_mainCamera;
 		std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
 		GraphicsModule::GraphicsModule(WindowModule* windowModule) 
@@ -57,9 +57,19 @@ namespace Insight
 			}
 		}
 
-		void GraphicsModule::SetMainCamera(Camera* camera)
+		void GraphicsModule::SetMainCamera(CameraComponent* camera)
 		{
 			m_mainCamera = camera;
+		}
+
+		const bool GraphicsModule::HasMainCamera()
+		{
+			return m_mainCamera != nullptr;
+		}
+
+		const bool GraphicsModule::IsThisMainCamera(CameraComponent* camera)
+		{
+			return camera == m_mainCamera;
 		}
 
 		Material* GraphicsModule::GetDefaultMaterial()

@@ -14,6 +14,8 @@
 #include "Insight/Assimp/Mesh.h"
 #include "Insight/Event/ApplicationEvent.h"
 
+#include "Insight/Renderer/FrameGraph/FrameGraph.h"
+
 namespace Insight
 {
 	class Event;
@@ -90,6 +92,8 @@ namespace Platform
 		SwapChainSupportDetails m_swapChainDetails;
 		VkSwapchainKHR m_swapchain;
 		std::vector<VulkanFramebuffer*> m_swapchainFramebuffers;
+
+		Insight::FrameGraph::FrameGraph m_frameGraph;
 
 		friend ImGuiRenderer;
 	};

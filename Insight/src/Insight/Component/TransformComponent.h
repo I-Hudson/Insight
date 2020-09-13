@@ -13,6 +13,8 @@ public:
 	virtual ~TransformComponent() override;
 
 	glm::mat4 GetTransform() const;
+	void SetTransform(const glm::mat4& mat4);
+
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
@@ -20,8 +22,6 @@ public:
 	virtual void Deserialize(tinyxml2::XMLNode* in, bool force = false) override;
 
 private:
-	void DeserializeTransform(glm::vec4& vector, tinyxml2::XMLElement* data);
-
 	glm::mat4 m_transform;
 
 	REGISTER_DEC_TYPE(TransformComponent);

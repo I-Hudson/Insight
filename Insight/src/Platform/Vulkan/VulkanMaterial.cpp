@@ -290,7 +290,6 @@ namespace Platform
 			data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 			data.Owners.push_back(const_cast<MeshComponent*>(meshComponent));
 
-
 			m_uniformObjectsData.Positions.push_back(data);
 		}
 

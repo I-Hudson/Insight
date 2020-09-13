@@ -12,7 +12,7 @@
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Entitiy/Entity.h"
-#include "Insight/Camera.h"
+#include "Insight/Component/CameraComponent.h"
 
 #include "Insight/Time/Time.h"
 #include "Insight/Config/Config.h"
@@ -47,7 +47,7 @@ namespace Platform
 		VulkanMaterial::s_Renderer = this;
 
 
-		m_windowModule = Insight::Module::ModuleManager::GetInstance()->GetModule < Insight::Module::WindowModule>();
+		m_windowModule = Insight::Module::ModuleManager::GetInstance()->GetModule<Insight::Module::WindowModule>();
 		m_recordCommandBuffers = true;
 
 		m_validationLayers =
@@ -120,13 +120,20 @@ namespace Platform
 	};
 
 
-	void VulkanRenderer::Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes)
+	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
-		glm::mat4 model(1.0f);
+		if (mainCamera != nullptr)
+		{
+			m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix());
+		}
+		else
+		{
+			m_material->UpdateMVPUniform(glm::mat4(), glm::mat4());
 
-		m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix(), model);
+		}
+
 		std::vector<glm::mat4> objectsMatrix;
 		{
 			if (meshes.size() > 0)
@@ -142,7 +149,7 @@ namespace Platform
 
 		if (m_recordCommandBuffers)
 		{
-			m_recordCommandBuffers = false;
+			m_recordCommandBuffers = true;
 			vertexCount = 0;
 			triCount = 0;
 			meshCount = 0;
@@ -200,7 +207,6 @@ namespace Platform
 			info.SubmitInfo = &submitInfo;
 			info.SyncFence = m_framebuffer->GetFence();
 			m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
-
 		}
 		std::string vStr = GetFormatInt(vertexCount);
 		std::string tStr = GetFormatInt(triCount / 3);

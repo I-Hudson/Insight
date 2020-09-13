@@ -14,11 +14,13 @@
 #include "../vendor/imgui/imgui.h"
 
 #include "Insight/Entitiy/Entity.h"
-#include "Insight/Component/TransformComponent.h"
-#include "Insight/Component/MeshComponent.h"
 #include "Insight/Assimp/Model.h"
 #include "Insight/Assimp/Mesh.h"
 #include "Insight/Scene/Scene.h"
+
+#include "Insight/Component/TransformComponent.h"
+#include "Insight/Component/MeshComponent.h"
+#include "Insight/Component/CameraComponent.h"
 
 // --Maths--------------------------
 #include "Insight/Maths/Vector2.h"

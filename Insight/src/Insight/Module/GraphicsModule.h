@@ -8,6 +8,7 @@
 #include "Insight/Renderer/Renderer.h"
 
 class MeshComponent;
+class CameraComponent;
 class Material;
 
 namespace Insight
@@ -25,7 +26,9 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
-			static void SetMainCamera(Camera* camera);
+			void SetMainCamera(CameraComponent* camera);
+			const bool HasMainCamera();
+			const bool IsThisMainCamera(CameraComponent* camera);
 
 			static Material* GetDefaultMaterial();
 
@@ -38,7 +41,7 @@ namespace Insight
 			WindowModule* m_windowModule;
 			Renderer* m_renderer;
 
-			static Camera* m_mainCamera;
+			static CameraComponent* m_mainCamera;
 			static std::vector<MeshComponent*> m_meshs;
 
 			friend MeshComponent;

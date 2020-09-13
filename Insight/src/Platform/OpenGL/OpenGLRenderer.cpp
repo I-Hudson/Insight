@@ -38,7 +38,7 @@ namespace Platform
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLRenderer::Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes)
+	void OpenGLRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
 	{
 	}
 

@@ -76,6 +76,41 @@ namespace Platform
 		//m_editorCommandBuffer = m_editorCommandPool->AllocCommandBuffer();
 #endif
 
+		m_frameGraph.Create();
+		m_frameGraph.PrintToConsole();
+
+		m_frameGraph.AddNode(nullptr, [&]()
+			{
+				auto dcb = m_drawCommandBuffers[0];
+				dcb->StartRecord();
+			}, m_drawCommandBuffers[0], "SwapChain", "Start command buffer Record");
+
+		m_frameGraph.AddNode(m_drawCommandBuffers[0], [&]()
+			{
+			}, this, "SwapChain", "Bind framebuffer");
+
+		m_frameGraph.AddNode(m_drawCommandBuffers[0], [&]()
+			{
+			}, this, "SwapChain", "Update texture");
+
+		m_frameGraph.AddNode(m_drawCommandBuffers[0], [&]()
+			{
+			}, this, "SwapChain", "Render a single model");
+
+		m_frameGraph.AddNode(m_drawCommandBuffers[0], [&]()
+			{
+			}, this, "SwapChain", "Render a single model");
+
+		m_frameGraph.AddNode(nullptr, [&]()
+			{
+				auto dcb = m_drawCommandBuffers[0];
+				dcb->EndRecord();
+			}, m_drawCommandBuffers[0], "SwapChain", false, "Stop command buffer Record");
+
+		m_frameGraph.PrintToConsole();
+
+		m_frameGraph.Execute();
+
 		IS_CORE_INFO("SwapChain completed.");
 	}
 
@@ -95,6 +130,8 @@ namespace Platform
 			DELETE_ON_HEAP(m_swapchainFramebuffers[i]);
 		}
 		vkDestroySwapchainKHR(m_device->GetDevice(), m_swapchain, nullptr);
+
+		m_frameGraph.Destroy();
 	}
 
 	SwapChainSupportDetails Swapchain::QuerySwapChainSupport(VkPhysicalDevice device)

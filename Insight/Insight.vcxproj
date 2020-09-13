@@ -329,7 +329,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Application.h" />
     <ClInclude Include="src\Insight\Assimp\Mesh.h" />
     <ClInclude Include="src\Insight\Assimp\Model.h" />
-    <ClInclude Include="src\Insight\Camera.h" />
+    <ClInclude Include="src\Insight\Component\CameraComponent.h" />
     <ClInclude Include="src\Insight\Component\Component.h" />
     <ClInclude Include="src\Insight\Component\MeshComponent.h" />
     <ClInclude Include="src\Insight\Component\TransformComponent.h" />
@@ -369,6 +369,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
+    <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h" />
     <ClInclude Include="src\Insight\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Insight\Renderer\ImGuiRenderer.h" />
     <ClInclude Include="src\Insight\Renderer\Material.h" />
@@ -378,6 +379,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h" />
     <ClInclude Include="src\Insight\Scene\Scene.h" />
     <ClInclude Include="src\Insight\Serialization\Serializable.h" />
+    <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
     <ClInclude Include="src\Insight\Templates\TSingleton.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
@@ -832,7 +834,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Application.cpp" />
     <ClCompile Include="src\Insight\Assimp\Mesh.cpp" />
     <ClCompile Include="src\Insight\Assimp\Model.cpp" />
-    <ClCompile Include="src\Insight\Camera.cpp" />
+    <ClCompile Include="src\Insight\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Insight\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Insight\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
@@ -857,6 +859,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
+    <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp" />
     <ClCompile Include="src\Insight\Renderer\Framebuffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\ImGuiRenderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Material.cpp" />

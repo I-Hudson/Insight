@@ -82,7 +82,7 @@ namespace Platform
 		virtual void SetShader(Insight::Render::Shader* shader) override;
 		virtual Insight::Render::Shader* GetShader() override;
 		virtual void SetUniforms() override;
-		virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
+		virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model = glm::mat4()) override;
 		void UpdateObjectsUniforms();
 
 		virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;

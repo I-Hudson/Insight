@@ -2,8 +2,8 @@
 
 #include "Insight/Core.h"
 #include "Insight/Serialization/Serializable.h"
+#include "Insight/Entitiy/Entity.h"
 
-class Entity;
 class Component;
 
 const std::string DEFAULT_SAVE_PATH = "scenes/";
@@ -37,6 +37,9 @@ namespace Insight
 		void OnViewportResize(uint32_t width, uint32_t height);
 		void Clean();
 
+		template<typename T>
+		T* FindFirstComponent();
+
 	private:
 		std::vector<Entity*> m_registry;
 		std::vector<Component*> m_updateComponents;
@@ -50,4 +53,18 @@ namespace Insight
 
 		friend class Entity;
 	};
+
+	template<typename T>
+	inline T* Scene::FindFirstComponent()
+	{
+		for (auto it = m_registry.begin(); it != m_registry.end(); ++it) 
+		{
+			if ((*it)->HasComponent<T>())
+			{
+				return (*it)->GetComponent<T>();
+			}
+		}
+
+		return nullptr;
+	}
 }

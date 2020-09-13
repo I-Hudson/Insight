@@ -8,6 +8,7 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Log.h"
 #include "../vendor/TinyXML2/tinyxml2.h"
+#include "SerializeHelper.h"
 #include <ostream>
 #include <istream>
 #include <map>

@@ -43,6 +43,9 @@
     <Filter Include="src\Insight\Renderer">
       <UniqueIdentifier>{5883CF1F-4412-59E9-ED30-6DE4D99E698F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Renderer\FrameGraph">
+      <UniqueIdentifier>{248E8E4F-9071-9D8F-9974-CBCB05D763E0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Scene">
       <UniqueIdentifier>{0F7AC34D-7B90-C1E3-C407-4D05305D926B}</UniqueIdentifier>
     </Filter>
@@ -126,8 +129,8 @@
     <ClInclude Include="src\Insight\Assimp\Model.h">
       <Filter>src\Insight\Assimp</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Camera.h">
-      <Filter>src\Insight</Filter>
+    <ClInclude Include="src\Insight\Component\CameraComponent.h">
+      <Filter>src\Insight\Component</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Component\Component.h">
       <Filter>src\Insight\Component</Filter>
@@ -245,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Buffer.h">
       <Filter>src\Insight\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h">
+      <Filter>src\Insight\Renderer\FrameGraph</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Framebuffer.h">
       <Filter>src\Insight\Renderer</Filter>
@@ -1620,6 +1626,9 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Serialization\SerializeHelper.h">
+      <Filter>src\Insight\Serialization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1631,8 +1640,8 @@
     <ClCompile Include="src\Insight\Assimp\Model.cpp">
       <Filter>src\Insight\Assimp</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Camera.cpp">
-      <Filter>src\Insight</Filter>
+    <ClCompile Include="src\Insight\Component\CameraComponent.cpp">
+      <Filter>src\Insight\Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Component\MeshComponent.cpp">
       <Filter>src\Insight\Component</Filter>
@@ -1705,6 +1714,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp">
       <Filter>src\Insight\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp">
+      <Filter>src\Insight\Renderer\FrameGraph</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Framebuffer.cpp">
       <Filter>src\Insight\Renderer</Filter>

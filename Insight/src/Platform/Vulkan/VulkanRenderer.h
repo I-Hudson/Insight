@@ -11,9 +11,10 @@
 #include "VulkanMaterial.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 
+class CameraComponent;
+
 namespace Insight
 {
-	class Camera;
 	class Event;
 }
 
@@ -28,7 +29,7 @@ namespace Platform
 		virtual ~VulkanRenderer() override;
 
 		virtual void Clear() override;
-		virtual void Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes) override;
+		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) override;
 		virtual void Present() override;
 
 		virtual Material* GetDefaultMaterial() override;

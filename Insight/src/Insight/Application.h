@@ -15,8 +15,6 @@ namespace Insight
 		class AssetModule;
 	}
 
-	class Camera;
-
 	namespace Memory
 	{
 		class MemoryManager;
@@ -43,8 +41,6 @@ namespace Insight
 		Module::WindowModule* m_windowModule;
 		Module::GraphicsModule* m_graphicsModule;
 		Module::InputModule* m_inputModule;
-
-		UniquePtr<Camera> m_mainCamera;
 	};
 
 	Application* CreateApplication();

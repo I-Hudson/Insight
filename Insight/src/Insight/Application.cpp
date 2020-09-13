@@ -17,9 +17,7 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Serialization/Serializable.h"
 
-#include <ppltasks.h>
-
-#include "Insight/Camera.h"
+#include "Insight/Component/CameraComponent.h"
 #include "Time/Stopwatch.h"
 #include "Time/Time.h"
 #include "Input/Input.h"
@@ -57,13 +55,7 @@ namespace Insight
 		m_inputModule->SetManuallyUpdate(true);
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
-
-		m_mainCamera = CreateUniquePtr<Camera>();
-		m_mainCamera->SetProjMatrix(90.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
-		m_mainCamera->SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		
-		m_graphicsModule->SetMainCamera(m_mainCamera.get());
-
 		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
@@ -160,12 +152,19 @@ namespace Insight
 		std::cout << "New/Delete-----------------\n";
 	}
 
-	void TestFunc(Camera* cam)
+	void TestFunc(CameraComponent* cam)
 	{
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-		ImGui::SliderFloat("Main Camera FOV: ", &cam->GetFov(), 0.1f, 120.0f);
+		float cameraFOV = cam != nullptr ? cam->GetFov() : 0;
+		if (ImGui::SliderFloat("Main Camera FOV: ", &cameraFOV, 0.1f, 120.0f))
+		{
+			if (cam != nullptr)
+			{
+				cam->SetFov(cameraFOV);
+			}
+		}
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::End();
@@ -230,13 +229,12 @@ namespace Insight
 			bool show_demo_window = true;
 			bool show_another_window = true;
 
-			TestFunc(m_mainCamera.get());
+			TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 			
 			Update(Time::GetDeltaTime());
 			Draw();
 
 			m_inputModule->Update(Time::GetDeltaTime());
-			m_mainCamera->Update(Time::GetDeltaTime());
 
 			m_graphicsModule->Update(Time::GetDeltaTime());
 

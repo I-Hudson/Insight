@@ -9,6 +9,8 @@
 #include "Insight/Renderer/Material.h"
 #include "Insight/Assimp/Mesh.h"
 
+class CameraComponent;
+
 namespace Platform
 {
 	class OpenGLMaterial;
@@ -21,7 +23,7 @@ namespace Platform
 		virtual ~OpenGLRenderer() override;
 
 		virtual void Clear() override;
-		virtual void Render(Insight::Camera* mainCamera, std::vector<MeshComponent*> meshes) override;
+		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) override;
 		virtual void Present() override;
 
 	private:

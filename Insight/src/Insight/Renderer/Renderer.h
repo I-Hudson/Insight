@@ -3,13 +3,13 @@
 #include "Insight/Core.h"
 
 class MeshComponent;
+class CameraComponent;
 class Material;
 
 namespace Insight
 {
 	namespace Module
 	{ class WindowModule; }
-	class Camera;
 
 	enum class GraphicsAPI
 	{
@@ -24,7 +24,7 @@ namespace Insight
 		virtual ~Renderer() { }
 
 		virtual void Clear() = 0;
-		virtual void Render(Camera* mainCamera, std::vector<MeshComponent*> meshes) = 0;
+		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) = 0;
 		virtual void Present() = 0;
 
 		virtual Material* GetDefaultMaterial() { return nullptr; }
