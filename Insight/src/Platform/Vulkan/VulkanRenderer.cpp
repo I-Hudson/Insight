@@ -113,13 +113,6 @@ namespace Platform
 	{
 	}
 
-
-	struct ColorUniform
-	{
-		glm::vec4 Colour1;
-	};
-
-
 	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
 	{
 		IS_PROFILE_FUNCTION();
@@ -134,7 +127,6 @@ namespace Platform
 
 		}
 
-		std::vector<glm::mat4> objectsMatrix;
 		{
 			if (meshes.size() > 0)
 			{

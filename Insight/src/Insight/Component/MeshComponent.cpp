@@ -74,8 +74,10 @@ void MeshComponent::SetMesh(Mesh* mesh)
 	m_boundingBox.Half_size.z = static_cast<float>(glm::abs(zMax - zMin) * 0.5);
 }
 
-void MeshComponent::SetMaterial(Material* material)
+MaterialRenderData MeshComponent::SetMaterial(Material* material)
 {
+	MaterialRenderData materialRenderData;
+
 	if (m_materal != nullptr && m_materal != material)
 	{
 		m_materal->DecrementUsageCount(this);
@@ -86,10 +88,11 @@ void MeshComponent::SetMaterial(Material* material)
 
 	if (m_materal != nullptr)
 	{
-		m_materal->IncrementUsageCount(this);
+		materialRenderData = m_materal->IncrementUsageCount(this);
 		m_materal->m_isDirty = true;
-
 	}
+
+	return materialRenderData;
 }
 
 void MeshComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)

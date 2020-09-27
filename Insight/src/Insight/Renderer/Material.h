@@ -10,8 +10,18 @@ namespace Insight
 		class Shader;
 	}
 }
-
 class MeshComponent;
+
+enum MaterialRenderDataState
+{
+	Invalid,
+	Valid
+};
+
+struct MaterialRenderData
+{
+	MaterialRenderDataState State = MaterialRenderDataState::Invalid;
+};
 
 class IS_API Material
 {
@@ -25,8 +35,8 @@ public:
 	virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) = 0;
 	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
 
-	virtual void IncrementUsageCount(const MeshComponent* meshComponent) { }
-	virtual void DecrementUsageCount(const MeshComponent* meshComponent) { }
+	virtual MaterialRenderData IncrementUsageCount(const MeshComponent* meshComponent) = 0;
+	virtual void DecrementUsageCount(const MeshComponent* meshComponent) = 0;
 
 	static Material* Create();
 

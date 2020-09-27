@@ -30,7 +30,7 @@ public:
 
 		if (test)
 		{
-			for (size_t i = 0; i < 10; ++i)
+			for (size_t i = 0; i < 2; ++i)
 			{
 				{
 					Entity* testModel = Entity::CreateFromModel(m);

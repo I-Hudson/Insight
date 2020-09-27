@@ -53,7 +53,7 @@ namespace Platform
 		{
 			dynamicAlignment = static_cast<int>((dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1));
 		}
-		m_dynamicOffset = dynamicAlignment;
+		m_minDynamicOffset = dynamicAlignment;
 	}
 
 	VulkanMaterial::~VulkanMaterial()
@@ -202,11 +202,18 @@ namespace Platform
 
 	void VulkanMaterial::UpdateObjectsUniforms()
 	{
+		using namespace Insight;
+
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
-			UniformObjectsData data = *it;
-			memcpy((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &((TransformComponent*)data.Data)->GetTransform(), data.Size);
+			UniformObjectsData data = *it;//m_uniformObjectsData.Positions[0];
+			glm::mat4 model = ((TransformComponent*)data.Data)->GetTransform();
+			memcpy((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &model, data.Size);
 		}
+
+		glm::mat4 p1, p2;
+		memcpy(&p1, m_uniformObjectsData.DataMapped, 64);
+		memcpy(&p2, (void*)((int*)m_uniformObjectsData.DataMapped + 64), 64);
 
 		VkMappedMemoryRange mappedMemoryRange{};
 		mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -248,50 +255,22 @@ namespace Platform
 		m_samplerData[key] = data;
 	}
 
-	void VulkanMaterial::IncrementUsageCount(const MeshComponent* meshComponent)
+	MaterialRenderData VulkanMaterial::IncrementUsageCount(const MeshComponent* meshComponent)
 	{
 		++m_usageCount;
 		m_isDirty = true;
 
-		std::vector<std::unordered_map<std::string, UniformDyanmicData>::iterator> removeIts;
-
-		for (auto it = m_uniformDynamicData.begin(); it != m_uniformDynamicData.end(); ++it)
-		{
-			UnMapBufferMem(it->second);
-			vkDestroyBuffer(s_Renderer->GetDevice(), (*it).second.Buffer, nullptr);
-			vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
-			removeIts.push_back(it);
-		}
-
-		for (size_t i = 0; i < removeIts.size(); ++i)
-		{
-			m_uniformDynamicData.erase(removeIts[i]);
-		}
+		VKMaterialRenderData materialRendererData;
 
 		UniformObjectsData data;
-		bool foundData = false;
-		TransformComponent* meshTransform = meshComponent->GetEntity()->GetComponent<TransformComponent>();
-		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
-		{
-			if (((TransformComponent*)it->Data) == meshTransform)
-			{
-				it->Owners.push_back(const_cast<MeshComponent*>(meshComponent));
-				foundData = true;
-				break;
-			}
-		}
+		data.Data = meshComponent->GetEntity()->GetComponent<TransformComponent>();
+		data.TypeSize = sizeof(glm::mat4);
+		data.Size = data.TypeSize;
+		data.Binding = 1;
+		data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		data.Owners.push_back(const_cast<MeshComponent*>(meshComponent));
 
-		if (!foundData)
-		{
-			data.Data = meshTransform;
-			data.TypeSize = sizeof(glm::mat4);
-			data.Size = data.TypeSize;
-			data.Binding = 1;
-			data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-			data.Owners.push_back(const_cast<MeshComponent*>(meshComponent));
-
-			m_uniformObjectsData.Positions.push_back(data);
-		}
+		m_uniformObjectsData.Positions.push_back(data);
 
 		if (m_uniformObjectsData.Size > 0)
 		{
@@ -306,13 +285,23 @@ namespace Platform
 		m_uniformObjectsData.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 		m_uniformObjectsData.Size = static_cast<int>(m_uniformObjectsData.Positions.size() * sizeof(glm::mat4));
+		if (m_uniformObjectsData.Size < m_minDynamicOffset)
+		{
+			m_uniformObjectsData.Size = m_minDynamicOffset;
+		}
+
 		CreateUniformBufferMem(m_uniformObjectsData);
 		MapBufferMem(m_uniformObjectsData);
 
 		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
 		{
-			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * 64);
+			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * m_uniformObjectsData.TypeSize);
 		}
+
+		materialRendererData.State = MaterialRenderDataState::Valid;
+		materialRendererData.PositionDynamicUniformOffset = m_uniformObjectsData.Positions.size() - 1;
+
+		return materialRendererData;
 	}
 
 	void VulkanMaterial::DecrementUsageCount(const MeshComponent* meshComponent)
@@ -389,14 +378,14 @@ namespace Platform
 		}
 
 		// One dynamic offset per dynamic descriptor to offset into the ubo containing all model matrices
-		uint32_t dynamicOffset = index * static_cast<uint32_t>(m_dynamicOffset);
+		uint32_t dynamicOffset = index * static_cast<uint32_t>(64);
 
 		if (m_descSet == nullptr)
 		{
 			return;
 		}
 
-		if (m_dynamicOffset > 0 && m_hasDynamicUniform)
+		if (m_hasDynamicUniform)
 		{
 			vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 1, &dynamicOffset);
 		}

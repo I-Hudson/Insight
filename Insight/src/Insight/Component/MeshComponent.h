@@ -18,7 +18,7 @@ public:
 	void SetMesh(Mesh* mesh);
 	Mesh* GetMesh() const { return m_mesh; }
 
-	void SetMaterial(Material* material);
+	MaterialRenderData SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
 	virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;

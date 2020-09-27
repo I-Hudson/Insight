@@ -13,6 +13,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <map>
 
+struct VKMaterialRenderData : public MaterialRenderData
+{
+	int PositionDynamicUniformOffset;
+};
+
 namespace Platform
 {
 	class VulkanRenderer;
@@ -88,7 +93,7 @@ namespace Platform
 		virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
 		virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) override;
 
-		virtual void IncrementUsageCount(const MeshComponent* meshComponent) override;
+		virtual MaterialRenderData IncrementUsageCount(const MeshComponent* meshComponent) override;
 		virtual void DecrementUsageCount(const MeshComponent* meshComponent) override;
 
 		void Resize();
@@ -110,7 +115,7 @@ namespace Platform
 		bool m_updatedDesc = false;
 
 		bool m_hasDynamicUniform = false;
-		int m_dynamicOffset = 0;
+		int m_minDynamicOffset = 0;
 
 		VkBuffer m_uniformBuffers = VK_NULL_HANDLE;
 		VkDeviceMemory m_uniformBuffersMem = VK_NULL_HANDLE;

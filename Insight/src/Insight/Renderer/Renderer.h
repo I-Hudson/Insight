@@ -5,6 +5,7 @@
 class MeshComponent;
 class CameraComponent;
 class Material;
+struct RendererData;
 
 namespace Insight
 {
