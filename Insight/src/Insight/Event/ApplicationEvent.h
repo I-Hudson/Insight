@@ -43,6 +43,24 @@ namespace Insight
 		unsigned int m_width, m_height;
 	};
 
+	class SerializeEvent : public Event
+	{
+	public:
+
+		SerializeEvent()
+		{ }
+
+		EVENT_CLASS_TYPE(Serialize)
+			EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+			std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "Serialize" << '\n';
+			return ss.str();
+		}
+	};
+
 	class DeserializeEvent : public Event
 	{
 	public:

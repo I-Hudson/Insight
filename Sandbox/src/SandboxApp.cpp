@@ -24,7 +24,7 @@ public:
 		Entity* mainCamera = Entity::Create("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 
-		bool test = true;
+		bool test = false;
 
 		Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models\\Test\\testCube.fbx");//"./models/Survival_BackPack_2/backpack.obj");
@@ -38,7 +38,7 @@ public:
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
  					testModel->AddComponent<PlayerController>();
-					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
+					glm::vec3 pos = glm::vec3(/*rand() % 50*/0, 0, /*rand() % 50*/0);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}

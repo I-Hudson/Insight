@@ -13,6 +13,7 @@ public:
 	virtual ~TransformComponent() override;
 
 	virtual void OnCreate() override;
+	virtual void OnDestroy() override;
 
 	glm::mat4 GetTransform() const;
 	void SetTransform(const glm::mat4& mat4);

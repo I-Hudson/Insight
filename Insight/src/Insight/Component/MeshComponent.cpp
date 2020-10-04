@@ -27,8 +27,6 @@ MeshComponent::MeshComponent(Entity* owner)
 
 MeshComponent::~MeshComponent()
 {
-	SetMaterial(nullptr);
-	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
 }
 
 void MeshComponent::OnCreate()
@@ -38,6 +36,12 @@ void MeshComponent::OnCreate()
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
 	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
+}
+
+void MeshComponent::OnDestroy()
+{
+	SetMaterial(nullptr);
+	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
 }
 
 float GetMin(float& f1, float& f2)

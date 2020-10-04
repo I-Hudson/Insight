@@ -14,6 +14,7 @@ namespace Insight
 			~RTTI();
 
 			void RTTI::RegisterProperty(void* ownerObject, void* objectPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags);
+			void RTTI::UnregisterProperty(void* ownerObject, void* objectPtr);
 			RTTIProperty* GetProperty(void* ownerPtr, const std::string& propertyName);
 			std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const RTTIPropertyEditorFlags& editorFlags);
 
@@ -23,8 +24,11 @@ namespace Insight
 	}
 }
 
-#define IS_PROPERTY(type, ptr, propertyName, editorFlags) \
+#define IS_REGISTER_PROPERTY(type, ptr, propertyName, editorFlags) \
 	Insight::RTTI::RTTI::GetInstance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name(), editorFlags);
+
+#define IS_UNREGISTER_PROPERTY(ptr) \
+	Insight::RTTI::RTTI::GetInstance()->UnregisterProperty(this, (void*)(&ptr));
 
 #define IS_GET_PROPERTY(propertyName) \
 	Insight::RTTI::RTTI::GetInstance()->GetProperty(this, propertyName);

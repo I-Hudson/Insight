@@ -14,6 +14,7 @@ public:
 	virtual ~MeshComponent() override;
 
 	virtual void OnCreate() override;
+	virtual void OnDestroy() override;
 
 	void SetMesh(Mesh* mesh);
 	Mesh* GetMesh() const { return m_mesh; }

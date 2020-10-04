@@ -4,6 +4,7 @@
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Input/Input.h"
+#include "Insight/Event/EventManager.h"
 
 #include "Insight/Editor/RTTIToImGUI.h"
 #include "imgui.h"

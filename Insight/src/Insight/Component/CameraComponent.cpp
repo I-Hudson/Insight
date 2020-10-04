@@ -28,19 +28,15 @@ CameraComponent::CameraComponent(Entity* owner)
 
 CameraComponent::~CameraComponent()
 {
-	if (Insight::Module::GraphicsModule::GetInstance()->IsThisMainCamera(this))
-	{
-		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(nullptr);
-	}
 }
 
 void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
-	IS_PROPERTY(float, m_fov, "FOV", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
-	IS_PROPERTY(float, m_nearPlane, "Near Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
-	IS_PROPERTY(float, m_farPlane, "Far Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+	IS_REGISTER_PROPERTY(float, m_fov, "FOV", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+	IS_REGISTER_PROPERTY(float, m_nearPlane, "Near Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
+	IS_REGISTER_PROPERTY(float, m_farPlane, "Far Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
 
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -49,6 +45,18 @@ void CameraComponent::OnCreate()
 	{
 		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(this);
 	}
+}
+
+void CameraComponent::OnDestroy()
+{
+	if (Insight::Module::GraphicsModule::GetInstance()->IsThisMainCamera(this))
+	{
+		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(nullptr);
+	}
+
+	IS_UNREGISTER_PROPERTY(m_fov);
+	IS_UNREGISTER_PROPERTY(m_nearPlane);
+	IS_UNREGISTER_PROPERTY(m_farPlane);
 }
 
 void CameraComponent::Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force)

@@ -21,7 +21,7 @@ public:
 	virtual ~CameraComponent() override;
 
 	virtual void OnCreate() override;
-
+	virtual void OnDestroy() override;
 
 	virtual void Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force = false) override;
 	virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) override;

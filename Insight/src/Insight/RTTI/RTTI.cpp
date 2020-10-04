@@ -76,5 +76,28 @@ namespace Insight
 			float f = *(float*)rttiType->GetObjectPtr();
 			int i = rttiType->GetPropertyValue<int>();
 		}
+
+		void RTTI::UnregisterProperty(void* ownerObject, void* objectPtr)
+		{
+			std::vector<RTTIProperty*>& properties = m_RTTITypes[ownerObject];
+			auto typeIT = std::find_if(properties.begin(), properties.end(), [&objectPtr](RTTIProperty* rttiType)
+				{
+					if (rttiType->GetObjectPtr() == objectPtr)
+					{
+						return rttiType;
+					}
+				});
+
+			if (typeIT != properties.end())
+			{
+				DELETE_ON_HEAP(*typeIT);
+				properties.erase(typeIT);
+
+				if (properties.size() == 0)
+				{
+					m_RTTITypes.erase(ownerObject);
+				}
+			}
+		}
 	}
 }

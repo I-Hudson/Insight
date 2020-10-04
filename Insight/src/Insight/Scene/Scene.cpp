@@ -107,6 +107,7 @@ namespace Insight
 			DeleteEntiy(*m_registry.begin());
 		}
 		m_registry.clear();
+		m_updateComponents.clear();
 	}
 
 	void Scene::Serialize()
@@ -132,6 +133,8 @@ namespace Insight
 			{
 				IS_CORE_ASSERT(false, "");
 			}
+
+			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
 		}
 	}
 
@@ -161,8 +164,6 @@ namespace Insight
 						s->Deserialize(c);
 						c = c->NextSibling();
 					} while (c != nullptr);
-
-					EventManager::Dispatch(EventType::Deserialize, DeserializeEvent());
 				}
 			}
 			else
@@ -182,6 +183,8 @@ namespace Insight
 				}
 			}
 		}
+
+		Insight::EventManager::Dispatch<DeserializeEvent>(EventType::Deserialize, DeserializeEvent());
 	}
 
 	void Scene::OnUpdate(const float& deltaTime)

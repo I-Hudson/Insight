@@ -57,7 +57,7 @@ namespace Platform
 	{
 		void* Data;
 		int Offset;
-		std::vector<MeshComponent*> Owners;
+		MeshComponent* MeshCompoentPtr;
 	};
 
 	struct UniformDyanmicData : UniformData

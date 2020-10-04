@@ -265,8 +265,14 @@ void Entity::RemoveAllComponenets()
 
 	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 	{
-		DELETE_ON_HEAP((*it));
+		(*it)->OnDestroy();
 	}
+
+	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	{
+		DELETE_ON_HEAP(*it);
+	}
+
 	m_data.Components.clear();
 	m_data.ComponetBitset.reset();
 }

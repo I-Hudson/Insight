@@ -82,7 +82,7 @@ namespace Platform
 			vkFreeMemory(s_Renderer->GetDevice(), (*it).second.BufferMem, nullptr);
 		}
 
-		if (m_uniformObjectsData.Buffer != nullptr)
+		if (m_uniformObjectsData.Buffer != VK_NULL_HANDLE)
 		{
 			DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
 			UnMapBufferMem(m_uniformObjectsData);
@@ -275,7 +275,7 @@ namespace Platform
 		data.Size = data.TypeSize;
 		data.Binding = 1;
 		data.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-		data.Owners.push_back(const_cast<MeshComponent*>(meshComponent));
+		data.MeshCompoentPtr = const_cast<MeshComponent*>(meshComponent);
 
 		m_uniformObjectsData.Positions.push_back(data);
 
@@ -285,6 +285,9 @@ namespace Platform
 			UnMapBufferMem(m_uniformObjectsData);
 			vkDestroyBuffer(s_Renderer->GetDevice(), m_uniformObjectsData.Buffer, nullptr);
 			vkFreeMemory(s_Renderer->GetDevice(), m_uniformObjectsData.BufferMem, nullptr);
+			DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
+
+			m_uniformObjectsData.Buffer = VK_NULL_HANDLE;
 		}
 
 		m_uniformObjectsData.TypeSize = sizeof(glm::mat4);
@@ -292,24 +295,30 @@ namespace Platform
 		m_uniformObjectsData.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 		m_uniformObjectsData.Size = static_cast<int>(m_uniformObjectsData.Positions.size() * sizeof(glm::mat4));
-		if (m_uniformObjectsData.Size < m_minDynamicOffset)
+		if (m_uniformObjectsData.Size < m_minDynamicOffset && m_uniformObjectsData.Positions.size() > 1)
 		{
 			m_uniformObjectsData.Size = m_minDynamicOffset;
 		}
 
-		CreateUniformBufferMem(m_uniformObjectsData);
-		MapBufferMem(m_uniformObjectsData);
-
-		DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
-		m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
-
-		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
+		if (m_uniformObjectsData.Size > 0)
 		{
-			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * m_uniformObjectsData.TypeSize);
-		}
+			CreateUniformBufferMem(m_uniformObjectsData);
+			MapBufferMem(m_uniformObjectsData);
+
+			m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
+
+			for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
+			{
+				m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * m_uniformObjectsData.TypeSize);
+			}
 
 		materialRendererData.State = MaterialRenderDataState::Valid;
 		materialRendererData.PositionDynamicUniformOffset = (int)m_uniformObjectsData.Positions.size() - 1;
+		}
+		else
+		{
+			materialRendererData.State = MaterialRenderDataState::Invalid;
+		}
 
 		return materialRendererData;
 	}
@@ -325,7 +334,7 @@ namespace Platform
 		{
 			if (((TransformComponent*)it->Data) == meshTransform)
 			{
-				it->Owners.erase(std::find(it->Owners.begin(), it->Owners.end(), meshComponent));
+				m_uniformObjectsData.Positions.erase(it);
 				break;
 			}
 		}
@@ -336,6 +345,9 @@ namespace Platform
 			UnMapBufferMem(m_uniformObjectsData);
 			vkDestroyBuffer(s_Renderer->GetDevice(), m_uniformObjectsData.Buffer, nullptr);
 			vkFreeMemory(s_Renderer->GetDevice(), m_uniformObjectsData.BufferMem, nullptr);
+			DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
+
+			m_uniformObjectsData.Buffer = VK_NULL_HANDLE;
 		}
 
 		m_uniformObjectsData.TypeSize = sizeof(glm::mat4);
@@ -343,20 +355,22 @@ namespace Platform
 		m_uniformObjectsData.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 		m_uniformObjectsData.Size = static_cast<int>(m_uniformObjectsData.Positions.size() * sizeof(glm::mat4));
-		if (m_uniformObjectsData.Size < m_minDynamicOffset)
+		if (m_uniformObjectsData.Size < m_minDynamicOffset && m_uniformObjectsData.Positions.size() > 1)
 		{
 			m_uniformObjectsData.Size = m_minDynamicOffset;
 		}
 
-		CreateUniformBufferMem(m_uniformObjectsData);
-		MapBufferMem(m_uniformObjectsData);
-
-		DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
-		m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
-
-		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
+		if (m_uniformObjectsData.Size > 0)
 		{
-			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * 64);
+			CreateUniformBufferMem(m_uniformObjectsData);
+			MapBufferMem(m_uniformObjectsData);
+
+			m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
+			
+			for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
+			{
+				m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * 64);
+			}
 		}
 	}
 
@@ -379,14 +393,11 @@ namespace Platform
 		bool shouldBreak = false;
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
-			for (auto itt = it->Owners.begin(); itt != it->Owners.end(); ++itt)
+			if ((*it).MeshCompoentPtr == meshBeingDrawn)
 			{
-				if (*itt == meshBeingDrawn)
-				{
-					index = static_cast<int>(it - m_uniformObjectsData.Positions.begin());
-					shouldBreak = true;
-					break;
-				}
+				index = static_cast<int>(it - m_uniformObjectsData.Positions.begin());
+				shouldBreak = true;
+				break;
 			}
 		
 			if (shouldBreak)
