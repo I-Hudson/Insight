@@ -26,6 +26,12 @@ TransformComponent::~TransformComponent()
 {
 }
 
+void TransformComponent::OnCreate()
+{
+	__super::OnCreate();
+	IS_PROPERTY(glm::mat4, m_transform, "Transform", RTTIPropertyEditorFlags_ShowInEditor);
+}
+
 glm::mat4 TransformComponent::GetTransform() const
 {
 	glm::mat4 m = m_transform;
@@ -55,17 +61,6 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_transform[3] = glm::vec4(position, 1.0f);
 	m_isDirty = true;
 }
-
-//void TransformComponent::Serialize(json& out, bool force)
-//{
-//	__super::Serialize(out);
-//	out["Type"] = "TransformComponent";
-//
-//	out["ViewMatrix"]["X"] = { m_transform[0].x, m_transform[0].y, m_transform[0].z,  m_transform[0].w };
-//	out["ViewMatrix"]["Y"] = { m_transform[1].x, m_transform[1].y, m_transform[1].z,  m_transform[1].w };
-//	out["ViewMatrix"]["Z"] = { m_transform[2].x, m_transform[2].y, m_transform[2].z,  m_transform[2].w };
-//	out["ViewMatrix"]["W"] = { m_transform[3].x, m_transform[3].y, m_transform[3].z,  m_transform[3].w };
-//}
 
 void TransformComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
 {

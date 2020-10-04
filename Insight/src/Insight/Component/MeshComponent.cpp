@@ -33,6 +33,8 @@ MeshComponent::~MeshComponent()
 
 void MeshComponent::OnCreate()
 {
+	__super::OnCreate();
+
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
 	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;

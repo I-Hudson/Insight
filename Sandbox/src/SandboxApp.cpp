@@ -29,9 +29,11 @@ public:
 		Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
 		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models\\Test\\testCube.fbx");//"./models/Survival_BackPack_2/backpack.obj");
 
+		Entity::Create("Root Entity")->AddChild("child_1");
+
 		if (test)
 		{
-			for (size_t i = 0; i < 50; ++i)
+			for (size_t i = 0; i < 1; ++i)
 			{
 				{
 					Entity* testModel = Entity::CreateFromModel(m);

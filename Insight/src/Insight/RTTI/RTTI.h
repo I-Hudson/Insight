@@ -3,8 +3,6 @@
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/RTTI/RTTITypes.h"
 
-#include <map>
-
 namespace Insight
 {
 	namespace RTTI
@@ -15,45 +13,21 @@ namespace Insight
 			RTTI();
 			~RTTI();
 
-			template<typename T>
-			T* GetProperty(void* ownerPtr, const std::string& propertyName);
-			void RTTI::RegisterProperty(void* ownerObject, void* objectPtr, const std::string& propertyName, const std::string& typeName);
+			void RTTI::RegisterProperty(void* ownerObject, void* objectPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags);
+			RTTIProperty* GetProperty(void* ownerPtr, const std::string& propertyName);
+			std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const RTTIPropertyEditorFlags& editorFlags);
 
 		private:
-			IRTTIType* GetNewRTTIType(void* objectPtr, const std::string& propertyName, const std::string& typeName);
-
-			static std::map<void*, std::vector<IRTTIType*>> m_RTTITypes;
+			std::unordered_map<void*, std::vector<RTTIProperty*>> m_RTTITypes;
 		};
-
-		template<typename T>
-		inline T* RTTI::GetProperty(void* ownerPtr, const std::string& propertyName)
-		{
-			auto properties = m_RTTITypes[ownerPtr];
-			if (!properties.empty())
-			{
-				auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyName](IRTTIType* rttiType)
-					{
-						if (rttiType->GetPropertyName() == propertyName)
-						{
-							return rttiType;
-						}
-					});
-
-				IRTTIType* type = *typeIT;
-
-				if (type)
-				{
-					return (T*)type;
-				}
-			}
-
-			return nullptr;
-		}
 	}
 }
 
 #define IS_PROPERTY(type, ptr, propertyName, editorFlags) \
-	Insight::RTTI::RTTI::GetInstance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name());
+	Insight::RTTI::RTTI::GetInstance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name(), editorFlags);
 
-#define IS_GET_PROPERTY(type, propertyName) \
-	Insight::RTTI::RTTI::GetInstance()->GetProperty<type>(this, propertyName);
+#define IS_GET_PROPERTY(propertyName) \
+	Insight::RTTI::RTTI::GetInstance()->GetProperty(this, propertyName);
+
+#define IS_GET_ALL_PROPERTIES(ownerPtr, edtiroFlags) \
+	Insight::RTTI::RTTI::GetInstance()->GetAllProperties(ownerPtr, edtiroFlags);

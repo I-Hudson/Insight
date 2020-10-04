@@ -97,7 +97,7 @@ void Entity::SetID(const std::string& id)
 	m_data.Name = id;
 }
 
-const std::string& Entity::GetID() const
+std::string& Entity::GetID()
 {
 	return m_data.Name;
 }

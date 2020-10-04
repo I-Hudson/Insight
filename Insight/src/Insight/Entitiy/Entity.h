@@ -22,6 +22,7 @@ struct EntityData
 	std::vector<Component*> Components;
 	std::bitset<MaxComponents> ComponetBitset;
 	bool IsActive;
+	bool ShowDebugInfo;
 };
 
 using ComponentID = size_t;
@@ -60,9 +61,10 @@ public:
 	void OnUpdate(const float deltaTime);
 
 	void SetID(const std::string& id);
-	const std::string& GetID() const;
+	std::string& GetID();
 
-	bool IsActive() const { return m_data.IsActive; }
+	bool& IsActive() { return m_data.IsActive; }
+	bool& ShowDebugInfo() { return m_data.ShowDebugInfo; }
 
 	void SetParent(Entity* parent) { m_data.Parent = parent; }
 	const Entity* GetParent() const { return m_data.Parent; }

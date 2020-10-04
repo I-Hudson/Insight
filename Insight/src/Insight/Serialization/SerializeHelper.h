@@ -10,7 +10,7 @@ public:
 	static void SerializeFloat(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, const std::string& id, const float& value)
 	{
 		tinyxml2::XMLElement* floatElement = doc->NewElement(id.c_str());
-		floatElement->FloatText(value);
+		floatElement->SetText(value);
 		out->InsertEndChild(floatElement);
 	}
 

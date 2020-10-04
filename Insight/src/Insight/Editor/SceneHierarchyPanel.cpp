@@ -2,11 +2,17 @@
 #include "Insight/Editor/SceneHierarchyPanel.h"
 #include "Insight/Scene/Scene.h"
 #include "Insight/Entitiy/Entity.h"
+#include "Insight/Component/Component.h"
+#include "Insight/Input/Input.h"
+
+#include "Insight/Editor/RTTIToImGUI.h"
+#include "imgui.h"
 
 namespace Insight
 {
 	SceneHierarchyPanel::SceneHierarchyPanel(const Module::EditorModule* editorModule)
 		: EditorPanel(editorModule)
+		, m_selectedEntity(nullptr)
 	{
 		SET_PANEL_NAME(SceneHierarchyPanel);
 	}
@@ -17,13 +23,109 @@ namespace Insight
 
 	void SceneHierarchyPanel::Update(const float& deltaTime)
 	{
+		ImGui::Begin("Scene Hierarchy Panel");
+		bool titleBarHovered = ImGui::IsItemHovered();
+
+		ImGui::TreePush("Entites");
+		bool newEntitySelected = false;
 		auto entites = Scene::ActiveScene()->GetEntites();
 
-		for (auto it = entites.begin(); it != entites.end(); ++it)
+		for (auto entitesIT = entites.begin(); entitesIT != entites.end(); ++entitesIT)
 		{
-			auto components = (*it)->GetAllComponents();
+			if ((*entitesIT)->GetParent() == nullptr)
+			{
+				if (ImGui::TreeNodeEx((*entitesIT), GetTreeNodeFlags(*entitesIT), (*entitesIT)->GetID().c_str()))
+				{
+					DrawEntityTreeView((*entitesIT), newEntitySelected);
+					ImGui::TreePop();
+				}
 
-
+				if (ImGui::IsItemClicked() && !newEntitySelected)
+				{
+					m_selectedEntity = *entitesIT;
+					newEntitySelected = true;
+				}
+			}
 		}
+		ImGui::TreePop();
+
+		if (!titleBarHovered && ImGui::IsWindowHovered() && Input::MouseButtonDown(MOUSE_BUTTON_LEFT) && !newEntitySelected)
+		{
+			m_selectedEntity = nullptr;
+		}
+
+		ImGui::End();
+
+		DrawCompoentPanel(m_selectedEntity);
+	}
+
+	void SceneHierarchyPanel::DrawEntityTreeView(Entity* entity, bool& newEntitySelected)
+	{
+		for (int i = 0; i < entity->GetChildCount(); ++i)
+		{
+			Entity* currentEntity = entity->GetChild(i);
+			if (ImGui::TreeNodeEx(currentEntity, GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
+			{
+				DrawEntityTreeView(currentEntity, newEntitySelected);
+				ImGui::TreePop();
+			}
+
+			if (ImGui::IsItemClicked() && !newEntitySelected)
+			{
+				m_selectedEntity = currentEntity;
+				newEntitySelected = true;
+			}
+		}
+	}
+
+	int SceneHierarchyPanel::GetTreeNodeFlags(Entity* entity)
+	{
+		ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed |*/ ImGuiTreeNodeFlags_OpenOnArrow;
+		if (entity->GetChildCount() == 0)
+		{
+			flags |= ImGuiTreeNodeFlags_Leaf;
+		}
+
+		if (m_selectedEntity == entity)
+		{
+			flags |= ImGuiTreeNodeFlags_Selected;
+		}
+
+		return flags;
+	}
+
+	void SceneHierarchyPanel::DrawCompoentPanel(Entity* entity)
+	{
+		//IS_TODO("Remove this and place in it's own class!!!");
+
+		ImGui::Begin("Components Panel");
+
+		if (entity != nullptr)
+		{
+			ImGui::InputText(":Name", &entity->GetID());
+			ImGui::Checkbox(":Active", &entity->IsActive());
+			ImGui::Checkbox(":Debug", &entity->ShowDebugInfo());
+
+			if (entity->ShowDebugInfo())
+			{
+				ImGui::LabelText(":UUID", entity->GetUUID().c_str());
+			}
+
+			ImGui::NewLine();
+
+			auto components = entity->GetAllComponents();
+
+			for (auto componentsIT = components->begin(); componentsIT != components->end(); ++componentsIT)
+			{
+				auto properties = IS_GET_ALL_PROPERTIES(*componentsIT, RTTIPropertyEditorFlags_ShowInEditor);
+
+				for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
+				{
+					RTTIToImGUI_Input((*propertyIT)->GetObjectPtr(), (*propertyIT)->GetType(), (*propertyIT)->GetPropertyName(), (*propertyIT)->GetPropertyEditorFlags());
+				}
+			}
+		}
+
+		ImGui::End();
 	}
 }

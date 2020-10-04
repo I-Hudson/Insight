@@ -2,6 +2,8 @@
 #include "Insight/Core.h"
 #include "Insight/Editor/EditorPanel.h"
 
+class Entity;
+
 namespace Insight
 {
 	class SceneHierarchyPanel : public EditorPanel
@@ -12,7 +14,13 @@ namespace Insight
 
 		virtual void Update(const float& deltaTime) override;
 
-	private:
 
+	private:
+		void DrawEntityTreeView(Entity* entity, bool& newEntitySelected);
+		int GetTreeNodeFlags(Entity* entity);
+
+		void DrawCompoentPanel(Entity* entity);
+
+		Entity* m_selectedEntity;
 	};
 }

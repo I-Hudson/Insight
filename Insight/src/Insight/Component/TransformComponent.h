@@ -12,6 +12,8 @@ public:
 	TransformComponent(Entity* owner);
 	virtual ~TransformComponent() override;
 
+	virtual void OnCreate() override;
+
 	glm::mat4 GetTransform() const;
 	void SetTransform(const glm::mat4& mat4);
 

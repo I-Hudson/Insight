@@ -2,23 +2,45 @@
 #include "Insight/Core.h"
 #include <map>
 
-class IRTTIType
+typedef int RTTIPropertyEditorFlags;
+
+enum RTTIPropertyEditorFlags_
+{
+	RTTIPropertyEditorFlags_None			= 0,
+	RTTIPropertyEditorFlags_ShowInEditor	= 1 << 1,
+	RTTIPropertyEditorFlags_ClampZero		= 1 << 2,
+	RTTIPropertyEditorFlags_ReadOnly		= 1 << 3,
+};
+
+class RTTIProperty
 {
 public:
-	IRTTIType(const std::string& typeName, const std::string propertyName, void* objectPtr)
+	RTTIProperty(const std::string& typeName, const std::string propertyName, const RTTIPropertyEditorFlags& editorFlags, void* objectPtr)
 		: m_typeName(typeName)
 		, m_propertyName(propertyName)
+		, m_editorFlags(editorFlags)
 		, m_objectPtr(objectPtr)
 	{  }
 
-	~IRTTIType()
+	~RTTIProperty()
 	{
 		m_objectPtr = nullptr;
 	}
 
-	const void* GetObjectPtr()
+	void* GetObjectPtr()
 	{
 		return m_objectPtr;
+	}
+
+	template<typename T>
+	T& GetPropertyValue()
+	{
+		return *static_cast<T*>(m_objectPtr);
+	}
+
+	const RTTIPropertyEditorFlags GetPropertyEditorFlags()
+	{
+		return m_editorFlags;
 	}
 
 	const std::string GetPropertyName()
@@ -34,56 +56,6 @@ public:
 protected:
 	std::string m_typeName;
 	std::string m_propertyName;
+	RTTIPropertyEditorFlags m_editorFlags;
 	void* m_objectPtr;
-};
-
-class RTTIBoolType : public IRTTIType
-{
-public:
-	RTTIBoolType(const std::string& typeName, const std::string propertyName, void* objectPtr)
-		: IRTTIType(typeName, propertyName, objectPtr)
-	{ }
-
-	int GetValue()
-	{
-		return *static_cast<bool*>(m_objectPtr);
-	}
-};
-class RTTIIntType : public IRTTIType
-{
-public:
-	RTTIIntType(const std::string& typeName, const std::string propertyName, void* objectPtr)
-		: IRTTIType(typeName, propertyName, objectPtr)
-	{ }
-
-	int GetValue()
-	{
-		return *static_cast<int*>(m_objectPtr);
-	}
-};
-
-class RTTIFloatType : public IRTTIType
-{
-public:
-	RTTIFloatType(const std::string& typeName, const std::string propertyName, void* objectPtr)
-		: IRTTIType(typeName, propertyName, objectPtr)
-	{ }
-
-	float GetValue()
-	{
-		return *static_cast<float*>(m_objectPtr);
-	}
-};
-
-class RTTIStringType : public IRTTIType
-{
-public:
-	RTTIStringType(const std::string& typeName, const std::string propertyName, void* objectPtr)
-		: IRTTIType(typeName, propertyName, objectPtr)
-	{ }
-
-	std::string GetValue()
-	{
-		return *static_cast<std::string*>(m_objectPtr);
-	}
 };

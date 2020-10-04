@@ -1650,6 +1650,9 @@
     <ClInclude Include="src\Insight\RTTI\RTTITypes.h">
       <Filter>src\Insight\RTTI</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h">
+      <Filter>src\Insight\Editor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">

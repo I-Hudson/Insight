@@ -339,6 +339,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
     <ClInclude Include="src\Insight\Editor\EditorPanel.h" />
+    <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h" />
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Insight\Entitiy\Entity.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />

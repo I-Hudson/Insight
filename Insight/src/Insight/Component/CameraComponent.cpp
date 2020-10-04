@@ -36,13 +36,11 @@ CameraComponent::~CameraComponent()
 
 void CameraComponent::OnCreate()
 {
-	m_fov = 45;
-	IS_PROPERTY(float, m_fov, "FOV", 0);
+	__super::OnCreate();
 
-	RTTIFloatType* fovFloat = IS_GET_PROPERTY(RTTIFloatType, "FOV");
-	IS_INFO("{0}", fovFloat->GetValue());
-	*(float*)fovFloat->GetObjectPtr() = 99;
-	IS_INFO("{0}", *(float*)fovFloat->GetObjectPtr());
+	IS_PROPERTY(float, m_fov, "FOV", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+	IS_PROPERTY(float, m_nearPlane, "Near Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
+	IS_PROPERTY(float, m_farPlane, "Far Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
 
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -62,12 +60,13 @@ void CameraComponent::Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* 
 	SerializeHelper::SerializeFloat(data, doc, "FOV", m_fov);
 	SerializeHelper::SerializeFloat(data, doc, "NearPlane", m_nearPlane);
 	SerializeHelper::SerializeFloat(data, doc, "FarPlane", m_farPlane);
-	SerializeHelper::SerializeMat4(data, doc, "CameraViewMatrix", GetEntity()->GetComponent<TransformComponent>()->GetTransform());
 }
 
 void CameraComponent::Deserialize(tinyxml2::XMLNode* data, bool force)
 {
-
+	m_fov = data->FirstChildElement("FOV")->FloatText();
+	m_nearPlane = data->FirstChildElement("NearPlane")->FloatText();
+	m_farPlane = data->FirstChildElement("FarPlane")->FloatText();
 }
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)
