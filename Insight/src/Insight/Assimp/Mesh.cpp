@@ -56,14 +56,9 @@ std::string& Mesh::GetName()
 	return m_meshName;
 }
 
-std::vector<glm::vec3> Mesh::GetVertices()
+std::vector<Vertex> Mesh::GetVertices()
 {
-	std::vector<glm::vec3> vertices;
-	for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
-	{
-		vertices.push_back((*it).Position);
-	}
-	return vertices;
+	return m_vertices;
 }
 
 std::vector<glm::vec3> Mesh::GetColours()

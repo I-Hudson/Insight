@@ -88,9 +88,8 @@ namespace Insight
 				case Insight::Render::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
 				case Insight::Render::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
 				case Insight::Render::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
-
-				default: return VK_SHADER_STAGE_ALL;
 			}
+			return VK_SHADER_STAGE_ALL;
 		}
 
 		VkDescriptorType ShaderModuleBase::GetShaderDescriptorType(const ShaderAttributeType& type)
@@ -184,6 +183,7 @@ namespace Insight
 			case ShaderAttributeType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
 			case ShaderAttributeType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
 			}
+			return VK_FORMAT_R8_UINT;
 		}
 
 		shaderc_shader_kind ShaderModuleBase::GetShaderStage(const std::string& stage)
@@ -212,6 +212,7 @@ namespace Insight
 			{
 				return shaderc_shader_kind::shaderc_glsl_compute_shader;
 			}
+			return shaderc_glsl_vertex_shader;
 		}
 
 		std::string ShaderModuleBase::PreprocessShader(const std::string& source_name, shaderc_shader_kind kind, const std::string& source, bool optimize)

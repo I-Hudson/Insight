@@ -18,14 +18,16 @@ public:
 	void SetMesh(Mesh* mesh);
 	Mesh* GetMesh() const { return m_mesh; }
 
-	MaterialRenderData SetMaterial(Material* material);
+	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
 	virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;
 	virtual void Deserialize(tinyxml2::XMLNode* in, bool force = false) override;
 
+	MaterialRenderData GetMaterialRendererData() { return m_materialRendererData; }
+
 	// Returns a new array of vertices.
-	std::vector<glm::vec3> GetVertices() const { return m_mesh->GetVertices(); }
+	std::vector<Vertex> GetVertices() const { return m_mesh->GetVertices(); }
 	// Returns a new array of colours.
 	std::vector<glm::vec3> GetColours() const { return m_mesh->GetColours(); }
 	// Returns a new array of normals.
@@ -95,6 +97,7 @@ private:
 	BoundingBox m_boundingBox;
 	Mesh* m_mesh;
 	Material* m_materal;
+	MaterialRenderData m_materialRendererData;
 
 	REGISTER_DEC_TYPE(MeshComponent);
 };

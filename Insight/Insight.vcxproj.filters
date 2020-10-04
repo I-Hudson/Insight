@@ -16,6 +16,9 @@
     <Filter Include="src\Insight\Config">
       <UniqueIdentifier>{3726BEE1-230A-7F37-8C6A-798A786D69B9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Editor">
+      <UniqueIdentifier>{68E89EE5-54CC-5F3B-BD2C-5A8EA92F4ABD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Entitiy">
       <UniqueIdentifier>{A7A590B1-1307-6EBF-9C74-B47108D5A47E}</UniqueIdentifier>
     </Filter>
@@ -39,6 +42,9 @@
     </Filter>
     <Filter Include="src\Insight\Module">
       <UniqueIdentifier>{E7800CF9-D364-CD4E-3CC5-C7A128C8B7D0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\RTTI">
+      <UniqueIdentifier>{E41D05AD-D016-24FF-F948-0984E5A0030B}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Renderer">
       <UniqueIdentifier>{5883CF1F-4412-59E9-ED30-6DE4D99E698F}</UniqueIdentifier>
@@ -156,6 +162,9 @@
     <ClInclude Include="src\Insight\Core.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Editor\EditorPanel.h">
+      <Filter>src\Insight\Editor</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Entitiy\Entity.h">
       <Filter>src\Insight\Entitiy</Filter>
     </ClInclude>
@@ -231,6 +240,9 @@
     <ClInclude Include="src\Insight\Module\AssetModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Module\EditorModule.h">
+      <Filter>src\Insight\Module</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Module\GraphicsModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
@@ -245,6 +257,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>src\Insight\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\RTTI\RTTI.h">
+      <Filter>src\Insight\RTTI</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Buffer.h">
       <Filter>src\Insight\Renderer</Filter>
@@ -277,6 +292,9 @@
       <Filter>src\Insight\Scene</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Serialization\Serializable.h">
+      <Filter>src\Insight\Serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Serialization\SerializeHelper.h">
       <Filter>src\Insight\Serialization</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
@@ -1626,8 +1644,11 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Serialization\SerializeHelper.h">
-      <Filter>src\Insight\Serialization</Filter>
+    <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h">
+      <Filter>src\Insight\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\RTTI\RTTITypes.h">
+      <Filter>src\Insight\RTTI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1698,6 +1719,9 @@
       <Filter>src\Insight\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\AssetModule.cpp">
+      <Filter>src\Insight\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Module\EditorModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">
@@ -1846,6 +1870,12 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp">
+      <Filter>src\Insight\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\RTTI\RTTI.cpp">
+      <Filter>src\Insight\RTTI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

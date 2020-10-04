@@ -8,6 +8,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
 
+#include "Insight/RTTI/RTTI.h"
+
 REGISTER_DEF_TYPE(CameraComponent);
 
 CameraComponent::CameraComponent()
@@ -34,6 +36,14 @@ CameraComponent::~CameraComponent()
 
 void CameraComponent::OnCreate()
 {
+	m_fov = 45;
+	IS_PROPERTY(float, m_fov, "FOV", 0);
+
+	RTTIFloatType* fovFloat = IS_GET_PROPERTY(RTTIFloatType, "FOV");
+	IS_INFO("{0}", fovFloat->GetValue());
+	*(float*)fovFloat->GetObjectPtr() = 99;
+	IS_INFO("{0}", *(float*)fovFloat->GetObjectPtr());
+
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 

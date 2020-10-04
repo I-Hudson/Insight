@@ -1,5 +1,6 @@
 #pragma once
 
+#pragma warning (disable : 4005)
 
 #ifdef  IS_PLATFORM_WINDOWS
 

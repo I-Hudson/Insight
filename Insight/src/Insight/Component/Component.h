@@ -4,6 +4,7 @@
 #include "Insight/UUID.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Entitiy/Entity.h"
+#include "Insight/RTTI/RTTI.h"
 
 class Entity;
 

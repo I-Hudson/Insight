@@ -39,7 +39,7 @@ public:
 	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
 
 	// Returns a new array of vertices.
-	std::vector<glm::vec3> GetVertices();
+	std::vector<Vertex> GetVertices();
 	// Returns a new array of colours.
 	std::vector<glm::vec3> GetColours();
 	// Returns a new array of normals.

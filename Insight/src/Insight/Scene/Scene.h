@@ -25,6 +25,7 @@ namespace Insight
 
 		void SetActiveScene();
 		static Scene* ActiveScene();
+		const std::vector<Entity*>& GetEntites() { return m_registry; }
 
 		void Load(const std::string& file);
 		void Save();

@@ -26,11 +26,12 @@ public:
 
 		bool test = true;
 
-		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
+		Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
+		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models\\Test\\testCube.fbx");//"./models/Survival_BackPack_2/backpack.obj");
 
 		if (test)
 		{
-			for (size_t i = 0; i < 2; ++i)
+			for (size_t i = 0; i < 50; ++i)
 			{
 				{
 					Entity* testModel = Entity::CreateFromModel(m);

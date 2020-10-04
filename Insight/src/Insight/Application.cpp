@@ -10,9 +10,12 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
+#include "Module/EditorModule.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Scene/Scene.h"
+
+#include "Insight/RTTI/RTTI.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Serialization/Serializable.h"
@@ -40,6 +43,8 @@ namespace Insight
 		Config::GetInstance().Parse("config.txt");
 		
 		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
+
+		RTTI::RTTI::Create();
 		
 		m_moduleManager = Module::ModuleManager::Create();
 		
@@ -58,6 +63,8 @@ namespace Insight
 		
 		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
+		m_moduleManager->AddModule<Module::EditorModule>();
+
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}
 
@@ -66,6 +73,8 @@ namespace Insight
 		IS_PROFILE_FUNCTION();
 
 		Module::ModuleManager::Destroy();
+
+		RTTI::RTTI::Destroy();
 
 		Memory::MemoryManager::DestroyWithoutMemoryManager();
 

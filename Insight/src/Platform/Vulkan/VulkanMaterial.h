@@ -18,6 +18,16 @@ struct VKMaterialRenderData : public MaterialRenderData
 	int PositionDynamicUniformOffset;
 };
 
+namespace Insight
+{
+	namespace Render
+	{
+		class VertexBuffer;
+		class IndexBuffer;
+	}
+}
+
+
 namespace Platform
 {
 	class VulkanRenderer;
@@ -58,6 +68,7 @@ namespace Platform
 
 	struct UniformDynamicDataContainer : UniformData
 	{
+		void* Data = nullptr;
 		std::vector<UniformObjectsData> Positions;
 	};
 
@@ -97,7 +108,7 @@ namespace Platform
 		virtual void DecrementUsageCount(const MeshComponent* meshComponent) override;
 
 		void Resize();
-		void Bind(CommandBuffer* commandBuffers, const MeshComponent* meshBeingDrawn);
+		void Bind(CommandBuffer* commandBuffers, MeshComponent* meshBeingDrawn);
 
 		DescriptorPool* GetDescPool() { return m_descPool; }
 
@@ -126,6 +137,9 @@ namespace Platform
 		std::unordered_map<std::string, SamplerData> m_samplerData;
 
 		ModelUniformBuffer m_modelUniform;
+
+		Insight::Render::VertexBuffer* m_vBatchBuffer;
+		Insight::Render::IndexBuffer* m_iBatchBuffer;
 
 		static VulkanRenderer* s_Renderer;
 		friend VulkanRenderer;

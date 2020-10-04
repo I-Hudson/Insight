@@ -62,22 +62,20 @@ void MeshComponent::SetMesh(Mesh* mesh)
 	auto vertices = mesh->GetVertices();
 	for (auto it = vertices.begin(); it != vertices.end(); ++it)
 	{
-		xMin = GetMin((*it).x, xMin);
-		xMax = GetMax((*it).x, xMax);
-		yMin = GetMin((*it).y, yMin);
-		yMax = GetMax((*it).y, yMax);
-		zMin = GetMin((*it).z, zMin);
-		zMax = GetMax((*it).z, zMax);
+		xMin = GetMin((*it).Position.x, xMin);
+		xMax = GetMax((*it).Position.x, xMax);
+		yMin = GetMin((*it).Position.y, yMin);
+		yMax = GetMax((*it).Position.y, yMax);
+		zMin = GetMin((*it).Position.z, zMin);
+		zMax = GetMax((*it).Position.z, zMax);
 	}
 	m_boundingBox.Half_size.x = static_cast<float>(glm::abs(xMax - xMin) * 0.5);
 	m_boundingBox.Half_size.y = static_cast<float>(glm::abs(yMax - yMin) * 0.5);
 	m_boundingBox.Half_size.z = static_cast<float>(glm::abs(zMax - zMin) * 0.5);
 }
 
-MaterialRenderData MeshComponent::SetMaterial(Material* material)
+void MeshComponent::SetMaterial(Material* material)
 {
-	MaterialRenderData materialRenderData;
-
 	if (m_materal != nullptr && m_materal != material)
 	{
 		m_materal->DecrementUsageCount(this);
@@ -88,11 +86,9 @@ MaterialRenderData MeshComponent::SetMaterial(Material* material)
 
 	if (m_materal != nullptr)
 	{
-		materialRenderData = m_materal->IncrementUsageCount(this);
+		m_materialRendererData = m_materal->IncrementUsageCount(this);
 		m_materal->m_isDirty = true;
 	}
-
-	return materialRenderData;
 }
 
 void MeshComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)

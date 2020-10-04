@@ -56,7 +56,7 @@ namespace Insight
 			m_startAddress = 0;
 		}
 
-		void* FreeListAllocator::Alloc(const Size size, const Byte alignment)
+		void* FreeListAllocator::Alloc(const Size size, const Byte TypeSize, const Byte alignment)
 		{
 			const Size allocationHeaderSize = sizeof(FreeListAllocator::AllocHeader);
 			IS_CORE_ASSERT(alignment >= 8, "Alignment must be 8 or greater");
@@ -89,6 +89,7 @@ namespace Insight
 			FreeListAllocator::AllocHeader* allocHeader = (FreeListAllocator::AllocHeader*) headerAddress;
 			PtrInt paddingAddress = (PtrInt)&allocHeader->AlignmentPadding;
 			allocHeader->BlockSize = requiredSize;
+			allocHeader->TypeSize = TypeSize;
 			allocHeader->AlignmentPadding = alignmentPadding;
 
 			m_sizeUsed += requiredSize;
@@ -130,13 +131,10 @@ namespace Insight
 			Coalescence(itPrev, freeNode);
 
 #ifdef IS_DEBUG
-			//sizeUsed -= allocHeader->size;
-			if (m_monitorPureAlloc)
-			{
-				m_numOfFrees++;
-			}
+			m_numOfFrees++;
 #endif
 		}
+
 		void FreeListAllocator::Coalescence(Node* previousNode, Node* freeNode)
 		{
 			if (freeNode->next != nullptr &&

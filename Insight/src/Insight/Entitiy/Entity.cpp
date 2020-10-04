@@ -45,13 +45,24 @@ Entity* Entity::CreateFromModel(Model* model)
 	Entity* e = Entity::Create(modelName);
 
 	unsigned int meshCount = model->GetSubMeshCount();
-	for (unsigned int i = 0; i < meshCount; ++i)
+	if (meshCount > 1)
 	{
-		Mesh* subMesh = model->GetSubMesh(i);
-		Entity* childEntity = Entity::Create(subMesh->GetName());
-		childEntity->AddComponent<MeshComponent>()->SetMesh(subMesh);
+		for (unsigned int i = 0; i < meshCount; ++i)
+		{
+			Mesh* subMesh = model->GetSubMesh(i);
+			Entity* childEntity = Entity::Create(subMesh->GetName());
+			childEntity->AddComponent<MeshComponent>()->SetMesh(subMesh);
 
-		e->AddChild(childEntity);
+			e->AddChild(childEntity);
+		}
+	}
+	else if (meshCount == 1)
+	{
+		e->AddComponent<MeshComponent>()->SetMesh(model->GetSubMesh(0));
+	}
+	else
+	{
+		IS_CORE_ERROR("");
 	}
 
 	return e;

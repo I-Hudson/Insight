@@ -338,6 +338,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
+    <ClInclude Include="src\Insight\Editor\EditorPanel.h" />
+    <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Insight\Entitiy\Entity.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
     <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
@@ -363,11 +365,13 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h" />
     <ClInclude Include="src\Insight\Memory\StackAllocator.h" />
     <ClInclude Include="src\Insight\Module\AssetModule.h" />
+    <ClInclude Include="src\Insight\Module\EditorModule.h" />
     <ClInclude Include="src\Insight\Module\GraphicsModule.h" />
     <ClInclude Include="src\Insight\Module\InputModule.h" />
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\Insight\RTTI\RTTI.h" />
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
     <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h" />
     <ClInclude Include="src\Insight\Renderer\Framebuffer.h" />
@@ -377,6 +381,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Shader.h" />
     <ClInclude Include="src\Insight\Renderer\ShaderModule.h" />
     <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h" />
+    <ClInclude Include="src\Insight\RTTI\RTTITypes.h" />
     <ClInclude Include="src\Insight\Scene\Scene.h" />
     <ClInclude Include="src\Insight\Serialization\Serializable.h" />
     <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
@@ -839,6 +844,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
     <ClCompile Include="src\Insight\Config\Config.cpp" />
+    <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
     <ClCompile Include="src\Insight\Event\EventManager.cpp" />
     <ClCompile Include="src\Insight\Input\Input.cpp" />
@@ -854,6 +860,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
     <ClCompile Include="src\Insight\Module\AssetModule.cpp" />
+    <ClCompile Include="src\Insight\Module\EditorModule.cpp" />
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
@@ -866,6 +873,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Shader.cpp" />
     <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp" />
+    <ClCompile Include="src\Insight\RTTI\RTTI.cpp" />
     <ClCompile Include="src\Insight\Scene\Scene.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />

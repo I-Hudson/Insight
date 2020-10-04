@@ -9,6 +9,10 @@
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Time/Time.h"
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Insight/Renderer/Buffer.h"
+
+#define BATCH_RENDERING false
+#define USE_MEMCPY false
 
 namespace Platform
 {
@@ -42,7 +46,10 @@ namespace Platform
 		free(data);
 #endif
 	}
+
 	VulkanMaterial::VulkanMaterial()
+		: m_vBatchBuffer(nullptr)
+		, m_iBatchBuffer(nullptr)
 	{
 		m_usageCount = 0;
 
@@ -77,6 +84,7 @@ namespace Platform
 
 		if (m_uniformObjectsData.Buffer != nullptr)
 		{
+			DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
 			UnMapBufferMem(m_uniformObjectsData);
 			vkDestroyBuffer(s_Renderer->GetDevice(), m_uniformObjectsData.Buffer, nullptr);
 			vkFreeMemory(s_Renderer->GetDevice(), m_uniformObjectsData.BufferMem, nullptr);
@@ -204,16 +212,15 @@ namespace Platform
 	{
 		using namespace Insight;
 
+		int index = 0;
 		for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
 		{
 			UniformObjectsData data = *it;//m_uniformObjectsData.Positions[0];
 			glm::mat4 model = ((TransformComponent*)data.Data)->GetTransform();
-			memcpy((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &model, data.Size);
+			((glm::mat4*)m_uniformObjectsData.Data)[index++] = model;
+			//((void*)((int*)m_uniformObjectsData.DataMapped + data.Offset), &model, data.Size);
 		}
-
-		glm::mat4 p1, p2;
-		memcpy(&p1, m_uniformObjectsData.DataMapped, 64);
-		memcpy(&p2, (void*)((int*)m_uniformObjectsData.DataMapped + 64), 64);
+		memcpy_s(m_uniformObjectsData.DataMapped, m_uniformObjectsData.Size, m_uniformObjectsData.Data, m_uniformObjectsData.Size);
 
 		VkMappedMemoryRange mappedMemoryRange{};
 		mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -293,13 +300,16 @@ namespace Platform
 		CreateUniformBufferMem(m_uniformObjectsData);
 		MapBufferMem(m_uniformObjectsData);
 
+		DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
+		m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
+
 		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
 		{
 			m_uniformObjectsData.Positions[i].Offset = static_cast<int>(i * m_uniformObjectsData.TypeSize);
 		}
 
 		materialRendererData.State = MaterialRenderDataState::Valid;
-		materialRendererData.PositionDynamicUniformOffset = m_uniformObjectsData.Positions.size() - 1;
+		materialRendererData.PositionDynamicUniformOffset = (int)m_uniformObjectsData.Positions.size() - 1;
 
 		return materialRendererData;
 	}
@@ -333,8 +343,16 @@ namespace Platform
 		m_uniformObjectsData.Type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
 
 		m_uniformObjectsData.Size = static_cast<int>(m_uniformObjectsData.Positions.size() * sizeof(glm::mat4));
+		if (m_uniformObjectsData.Size < m_minDynamicOffset)
+		{
+			m_uniformObjectsData.Size = m_minDynamicOffset;
+		}
+
 		CreateUniformBufferMem(m_uniformObjectsData);
 		MapBufferMem(m_uniformObjectsData);
+
+		DELETE_ARR_ON_HEAP(m_uniformObjectsData.Data, m_uniformObjectsData.Size);
+		m_uniformObjectsData.Data = NEW_ARR_ON_HEAP(glm::mat4, m_uniformObjectsData.Positions.size());
 
 		for (size_t i = 0; i < m_uniformObjectsData.Positions.size(); ++i)
 		{
@@ -351,7 +369,7 @@ namespace Platform
 		}
 	}
 
-	void VulkanMaterial::Bind(CommandBuffer* commandBuffers, const MeshComponent* meshBeingDrawn)
+	void VulkanMaterial::Bind(CommandBuffer* commandBuffers, MeshComponent* meshBeingDrawn)
 	{
 		IS_PROFILE_FUNCTION();
 
@@ -370,7 +388,7 @@ namespace Platform
 					break;
 				}
 			}
-
+		
 			if (shouldBreak)
 			{
 				break;
@@ -378,6 +396,8 @@ namespace Platform
 		}
 
 		// One dynamic offset per dynamic descriptor to offset into the ubo containing all model matrices
+		//MaterialRenderData materialRendererData = meshBeingDrawn->GetMaterialRendererData();
+		//VKMaterialRenderData vkMaterialRendererData = (VKMaterialRenderData)materialRendererData; // Didn't work
 		uint32_t dynamicOffset = index * static_cast<uint32_t>(64);
 
 		if (m_descSet == nullptr)
@@ -392,6 +412,46 @@ namespace Platform
 		else
 		{
 			vkCmdBindDescriptorSets(commandBuffers->GetBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_shader->GetPipelineLayout(), 0, 1, m_descSet->GetSet(), 0, nullptr);
+		}
+
+		if (BATCH_RENDERING)
+		{
+			IS_PROFILE_SCOPE("Batch render buffers");
+
+			DELETE_ON_HEAP(m_vBatchBuffer);
+			DELETE_ON_HEAP(m_iBatchBuffer);
+
+			// 740.11 ms
+			if (m_vBatchBuffer == nullptr && m_iBatchBuffer == nullptr && !USE_MEMCPY)
+			{
+				std::vector<Vertex> vertices;
+				std::vector<unsigned int> indices;
+
+				{
+					IS_PROFILE_SCOPE("Batch Vertices");
+					for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
+					{
+						auto meshVertices = ((TransformComponent*)(*it).Data)->GetComponent<MeshComponent>()->GetVertices();
+						vertices.insert(vertices.end(), meshVertices.begin(), meshVertices.end());
+					}
+				}
+
+				{
+					IS_PROFILE_SCOPE("Batch Indices");
+					for (auto it = m_uniformObjectsData.Positions.begin(); it != m_uniformObjectsData.Positions.end(); ++it)
+					{
+						auto meshIndices = ((TransformComponent*)(*it).Data)->GetComponent<MeshComponent>()->GetIndices();
+						indices.insert(indices.end(), meshIndices.begin(), meshIndices.end());
+					}
+				}
+			
+				m_vBatchBuffer = Insight::Render::VertexBuffer::Create(vertices);
+				m_iBatchBuffer = Insight::Render::IndexBuffer::Create(indices);
+			}
+			else
+			{
+
+			}
 		}
 	}
 
