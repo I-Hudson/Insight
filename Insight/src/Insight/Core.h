@@ -5,6 +5,7 @@
 #ifdef  IS_PLATFORM_WINDOWS
 
 #include "InsightAlias.h"
+#include "Insight/Instrumentor/Instrumentor.h"
 
 #ifdef IS_DEBUG
 
@@ -43,6 +44,8 @@
 
 #define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, "Object (Ptr/Ref)", __FILE__, __LINE__);
 #define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
+
+#define GET_ALLOCATION_OF_TYPE(ptr) Insight::Memory::MemoryManager::GetInstance()->GetAllocationOfType(ptr);
 
 #define BIT(x) (1 << x)
 

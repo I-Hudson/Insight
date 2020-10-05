@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/UUID.h"
+#include "Insight/Object.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/RTTI/RTTI.h"
@@ -14,20 +14,22 @@ namespace Insight
 }
 
 class IS_API Component : 
-	public Insight::UUID
+	public Insight::Object
 	, public Insight::Serialization::Serializable
 {
 public:
 	Component()
-		: Insight::UUID()
+		: Insight::Object()
 		, Insight::Serialization::Serializable(this, true)
 		, m_isDirty(true)
 		, m_updateEveryFarme(true)
 		, m_componentId(-1)
 	{ }
+
 	Component(Entity* owner)
-		: Insight::UUID(), m_owner(owner)
+		: Insight::Object()
 		, Insight::Serialization::Serializable(this, true)
+		, m_owner(owner)
 		, m_isDirty(true)
 		, m_updateEveryFarme(true)
 		, m_componentId(-1)

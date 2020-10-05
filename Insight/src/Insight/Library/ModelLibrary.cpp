@@ -3,6 +3,8 @@
 #include "Insight/Library/ModelLibrary.h"
 #include "Insight/Memory/MemoryManager.h"
 
+#include <ppl.h>
+#include <concurrent_vector.h>
 #include <filesystem>
 
 namespace Insight
@@ -75,27 +77,45 @@ namespace Insight
 
 		void ModelLibrary::Deserialize(tinyxml2::XMLNode* data, bool force)
 		{
+			IS_PROFILE_FUNCTION();
+
+			// TODO remove/clean. The thread code is for testing.
+
+			//auto loadModelFunc = [&](const std::string& filePath, const std::string& uuid)
+			//{
+			//	Model* m = NEW_ON_HEAP(Model, filePath, uuid);
+			//
+			//	AddAsset(m->GetUUID(), m);
+			//	IS_CORE_INFO("THREAD SPAWNED!!!");
+			//};
+			//
+			//std::vector<std::pair<std::string, std::string>> modelsInFile;
+
 			tinyxml2::XMLNode* model = data->FirstChild();
 			do
 			{
 				std::string uuid = model->FirstChildElement("UUID")->GetText();
 				std::string filePath = model->FirstChildElement("FilePath")->GetText();
+				//modelsInFile.push_back(std::pair<std::string, std::string>(filePath, uuid));
 				Model* m = NEW_ON_HEAP(Model, filePath, uuid);
 				AddAsset(m->GetUUID(), m);
 
 				model = model->NextSibling();
 			} while (model != nullptr);
-		}
 
-		//void ModelLibrary::Deserialize(json data, bool force)
-		//{
-		//	for (auto it = data["Models"].begin(); it != data["Models"].end(); ++it)
-		//	{
-		//		json j = *it;
-		//		std::string uuid = (*it)["UUID"];
-		//		Model* m = NEW_ON_HEAP(Model, (*it)["FilePath"], uuid);
-		//		AddAsset(m->GetUUID(), m);
-		//	}
-		//}
+			//concurrency::concurrent_vector<Model*> loadedMeshes;
+			//
+			//concurrency::parallel_for(0, (int)modelsInFile.size(), [&](int i)
+			//	{
+			//		Model* m = NEW_ON_HEAP(Model, modelsInFile[i].first, modelsInFile[i].second);
+			//		loadedMeshes.push_back(m);
+			//		IS_CORE_INFO("NEW MDOEL LOADED: '{0}'", m->GetFilePath());
+			//	});
+			//
+			//for (size_t i = 0; i < loadedMeshes.size(); ++i)
+			//{
+			//	AddAsset(loadedMeshes[i]->GetUUID(), loadedMeshes[i]);
+			//}
+		}
 	}
 }

@@ -3,6 +3,7 @@
 #include "Insight/RTTI/RTTI.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Log.h"
+#include "Insight/Object.h"
 
 namespace Insight
 {
@@ -62,9 +63,9 @@ namespace Insight
 			return properties;
 		}
 
-		void RTTI::RegisterProperty(void* ownerObject, void* objectPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags)
+		void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags)
 		{
-			RTTIProperty* rttiType = NEW_ON_HEAP(RTTIProperty, typeName, propertyName, editorFlags, objectPtr);
+			RTTIProperty* rttiType = NEW_ON_HEAP(RTTIProperty, typeName, propertyName, editorFlags, propertyPtr);
 			if (rttiType == nullptr)
 			{
 				IS_CORE_ERROR("[RTTI::RegisterProperty] Can't not find RTTIType.");
@@ -73,16 +74,20 @@ namespace Insight
 
 			m_RTTITypes[ownerObject].push_back(rttiType);
 
-			float f = *(float*)rttiType->GetObjectPtr();
-			int i = rttiType->GetPropertyValue<int>();
+			// Register remove from RTTI when object is destroyed.
+			ownerObject->RegisterOnDestroyCallback(this, [&](Object* objectPtr)
+				{
+					objectPtr->UnregisterOnDestroyCallback(this);
+					RTTI::GetInstance()->UnregisterAllProperty(objectPtr);
+				});
 		}
 
-		void RTTI::UnregisterProperty(void* ownerObject, void* objectPtr)
+		void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr)
 		{
 			std::vector<RTTIProperty*>& properties = m_RTTITypes[ownerObject];
-			auto typeIT = std::find_if(properties.begin(), properties.end(), [&objectPtr](RTTIProperty* rttiType)
+			auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyPtr](RTTIProperty* rttiType)
 				{
-					if (rttiType->GetObjectPtr() == objectPtr)
+					if (rttiType->GetObjectPtr() == propertyPtr)
 					{
 						return rttiType;
 					}
@@ -96,7 +101,22 @@ namespace Insight
 				if (properties.size() == 0)
 				{
 					m_RTTITypes.erase(ownerObject);
+					return;
 				}
+			}
+		}
+
+		void RTTI::UnregisterAllProperty(void* ownerObject)
+		{
+			if (m_RTTITypes.find(ownerObject) != m_RTTITypes.end())
+			{
+				std::vector<RTTIProperty*>& properties = m_RTTITypes[ownerObject];
+				for (auto it = properties.begin(); it != properties.end(); ++it)
+				{
+					DELETE_ON_HEAP(*it);
+				}
+				properties.clear();
+				m_RTTITypes.erase(ownerObject);
 			}
 		}
 	}

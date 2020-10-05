@@ -24,6 +24,8 @@ namespace Insight
 
 	void SceneHierarchyPanel::Update(const float& deltaTime)
 	{
+		IS_PROFILE_FUNCTION();
+
 		ImGui::Begin("Scene Hierarchy Panel");
 		bool titleBarHovered = ImGui::IsItemHovered();
 
@@ -62,7 +64,7 @@ namespace Insight
 
 	void SceneHierarchyPanel::DrawEntityTreeView(Entity* entity, bool& newEntitySelected)
 	{
-		for (int i = 0; i < entity->GetChildCount(); ++i)
+		for (unsigned int i = 0; i < entity->GetChildCount(); ++i)
 		{
 			Entity* currentEntity = entity->GetChild(i);
 			if (ImGui::TreeNodeEx(currentEntity, GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
@@ -99,6 +101,8 @@ namespace Insight
 	{
 		//IS_TODO("Remove this and place in it's own class!!!");
 
+		IS_PROFILE_FUNCTION();
+
 		ImGui::Begin("Components Panel");
 
 		if (entity != nullptr)
@@ -118,13 +122,18 @@ namespace Insight
 
 			for (auto componentsIT = components->begin(); componentsIT != components->end(); ++componentsIT)
 			{
+				IS_PROFILE_SCOPE("Draw Properties");
 				auto properties = IS_GET_ALL_PROPERTIES(*componentsIT, RTTIPropertyEditorFlags_ShowInEditor);
+
+				ImGui::Separator();
 
 				for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
 				{
 					RTTIToImGUI_Input((*propertyIT)->GetObjectPtr(), (*propertyIT)->GetType(), (*propertyIT)->GetPropertyName(), (*propertyIT)->GetPropertyEditorFlags());
+					ImGui::Spacing();
 				}
 			}
+			ImGui::Separator();
 		}
 
 		ImGui::End();

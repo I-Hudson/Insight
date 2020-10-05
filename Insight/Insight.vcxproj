@@ -372,6 +372,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
+    <ClInclude Include="src\Insight\Object.h" />
     <ClInclude Include="src\Insight\RTTI\RTTI.h" />
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
     <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h" />
@@ -387,6 +388,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Serialization\Serializable.h" />
     <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
+    <ClInclude Include="src\Insight\Templates\TSafePtr.h" />
     <ClInclude Include="src\Insight\Templates\TSingleton.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
@@ -866,6 +868,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
+    <ClCompile Include="src\Insight\Object.cpp" />
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp" />
     <ClCompile Include="src\Insight\Renderer\Framebuffer.cpp" />

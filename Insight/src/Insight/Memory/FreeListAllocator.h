@@ -23,7 +23,7 @@ namespace Insight
 			FreeListAllocator(const Size size, const PlacementPolicy policy);
 			~FreeListAllocator();
 
-			void* Alloc(const Size size, const Byte TypeSize, const Byte alignment);
+			void* Alloc(const Size size, const Byte TypeSize, const std::string& type, const Byte alignment);
 			void Free(void* ptr);
 
 			template <typename T, typename... Args>
@@ -35,11 +35,15 @@ namespace Insight
 			template <typename T>
 			void DeleteArr(const Size length, T* ptrToDelete);
 
+			std::string GetAllocationOfType(void* ptr);
+
 		private:
+			const static int AllocHeader_TypeNameLength = 64;
 			struct AllocHeader 
 			{
 				Size BlockSize;
 				Byte TypeSize;
+				char TypeName[AllocHeader_TypeNameLength];
 				Byte AlignmentPadding;
 			};
 
@@ -55,6 +59,7 @@ namespace Insight
 			void Find(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
 			void FindBest(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
 			void FindFirst(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
+			std::string PrepareTypeName(const std::string& fullTypeName);
 
 			void Reset();
 
@@ -75,7 +80,7 @@ namespace Insight
 		template<typename T, typename ...Args>
 		inline T* FreeListAllocator::New(Args... args)
 		{
-			T* ptr = new (Alloc(sizeof(T), (Byte)sizeof(T), MemoryUtlis::Alignment)) T(args...);
+			T* ptr = new (Alloc((Size)sizeof(T), (Byte)sizeof(T), typeid(T).name(), MemoryUtlis::Alignment)) T(args...);
 #ifdef IS_DEBUG
 			m_numOfNews++;
 			std::string name = std::string(typeid(T).name());
@@ -108,7 +113,7 @@ namespace Insight
 		template<typename T>
 		inline T* FreeListAllocator::NewArr(const Size length, Byte alignment)
 		{
-			void* alloc = Alloc(sizeof(T) * length, sizeof(T), alignment);
+			void* alloc = Alloc(sizeof(T) * length, sizeof(T), typeid(T).name(), alignment);
 #ifdef IS_DEBUG
 			m_numOfArrNews++;
 			std::string name = std::string(typeid(T).name());

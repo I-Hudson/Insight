@@ -3,7 +3,7 @@
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Serialization/Serializable.h"
-#include "Insight/UUID.h"
+#include "Insight/Object.h"
 
 #include <string>
 #include <vector>
@@ -46,7 +46,7 @@ namespace Insight
 
 class Model;
 
-class IS_API Entity : public Insight::UUID
+class IS_API Entity : public Insight::Object
 					, public Insight::Serialization::Serializable
 {
 public:

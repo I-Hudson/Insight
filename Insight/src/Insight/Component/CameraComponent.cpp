@@ -53,10 +53,6 @@ void CameraComponent::OnDestroy()
 	{
 		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(nullptr);
 	}
-
-	IS_UNREGISTER_PROPERTY(m_fov);
-	IS_UNREGISTER_PROPERTY(m_nearPlane);
-	IS_UNREGISTER_PROPERTY(m_farPlane);
 }
 
 void CameraComponent::Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force)

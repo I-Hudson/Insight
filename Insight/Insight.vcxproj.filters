@@ -1653,6 +1653,12 @@
     <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h">
       <Filter>src\Insight\Editor</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Object.h">
+      <Filter>src\Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Templates\TSafePtr.h">
+      <Filter>src\Insight\Templates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1879,6 +1885,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\RTTI\RTTI.cpp">
       <Filter>src\Insight\RTTI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Object.cpp">
+      <Filter>src\Insight</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -2,6 +2,9 @@
 
 #include "ispch.h"
 
+// TODO: (ian) move this and TSafePtr into a Util class.
+#include "Insight/Log.h"
+
 #include <memory>
 
 namespace Insight
@@ -37,7 +40,6 @@ namespace Insight
 	inline auto operator""_KB(Size const x) { return 1024 * x; }
 	inline auto operator""_MB(Size const x) { return 1024 * 1024 * x; }
 	inline auto operator""_GB(Size const x) { return 1024 * 1024 * 1024 * x; }
-
 }
 
 	template<typename T>

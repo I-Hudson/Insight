@@ -33,6 +33,8 @@ void MeshComponent::OnCreate()
 {
 	__super::OnCreate();
 
+	IS_REGISTER_PROPERTY(std::string, m_meshName, "Mesh Name", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
 	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
@@ -57,6 +59,7 @@ float GetMax(float& f1, float& f2)
 void MeshComponent::SetMesh(Mesh* mesh)
 {
 	m_mesh = mesh;
+	m_meshName = m_mesh->GetName();
 
 	float xMin = 0;
 	float xMax = 0;

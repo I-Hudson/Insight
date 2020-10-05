@@ -44,6 +44,18 @@ namespace Insight
 			}
 		}
 
+		std::string MemoryManager::GetAllocationOfType(void* ptr)
+		{
+			std::string type;
+			type = m_freeListAllocator.GetAllocationOfType(ptr);
+			if (type.empty())
+			{
+
+			}
+
+			return type;
+		}
+
 		MemoryManager::MemoryType MemoryManager::StringToMemoryType(const std::string& string)
 		{
 			if (string == "B")

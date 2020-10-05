@@ -18,7 +18,6 @@ namespace Insight
 			MemoryManager();
 			~MemoryManager();
 
-#ifndef IS_SMART_POINTERS_IN_USE
 			template <typename T, typename... Args>
 			static T* NewOnStack(Args&&...);
 
@@ -36,10 +35,11 @@ namespace Insight
 			static T* NewArrOnFreeList(Size length, U8 alignment = MemoryUtlis::Alignment);
 			template<typename T>
 			static void DeleteArrOnFreeList(Size length, T* ptrToDelete);
-#endif
 
 			static void TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
+
+			std::string GetAllocationOfType(void* ptr);
 
 			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
 
@@ -73,7 +73,6 @@ namespace Insight
 			bool m_smartPointersInUse;
 		};
 
-#ifndef IS_SMART_POINTERS_IN_USE
 		template<typename T, typename ...Args>
 		inline T* MemoryManager::NewOnStack(Args&&... argList)
 		{
@@ -109,7 +108,6 @@ namespace Insight
 		{
 			GetInstance()->m_freeListAllocator.DeleteArr<T>(length, ptrToDelete);
 		}
-#endif
 	}
 }
 

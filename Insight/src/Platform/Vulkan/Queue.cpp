@@ -69,6 +69,8 @@ namespace Platform
 
 	void Queue::Wait() const
 	{
+		IS_PROFILE_FUNCTION();
+
 		switch (m_queueFamily.GetType())
 		{
 		case QueueFamilyType::Graphics:

@@ -1,13 +1,12 @@
 #pragma once
 
-#include "Core.h"
 #include <assert.h>
 #include <stdexcept>
 #include "spdlog/spdlog.h"
 
 namespace Insight
 {
-	class IS_API Log
+	class Log
 	{
 	public:
 		static void Init();
@@ -55,6 +54,7 @@ inline void __assert(const char* expr_str, bool expr, const char* file, int line
 #define IS_CORE_ERROR(...)
 #define IS_CORE_FATEL(...)
 #define IS_CORE_ASSERT(...)
+#define IS_CORE_STATIC_ASSERT(base, derived, msg)	static_assert(std::is_base_of<base, derived>::value, msg);
 
 #define IS_TRACE(...)
 #define IS_INFO(...)

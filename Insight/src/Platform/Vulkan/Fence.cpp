@@ -29,6 +29,8 @@ namespace Platform
 
 	void Fence::Reset()
 	{
+		IS_PROFILE_FUNCTION();
+
 		vkResetFences(m_device->GetDevice(), 1, &m_fence);
 		m_inUse = false;
 	}

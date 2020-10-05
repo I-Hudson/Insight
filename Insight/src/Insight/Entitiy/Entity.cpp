@@ -12,16 +12,14 @@
 REGISTER_DEF_TYPE(Entity);
 
 Entity::Entity()
-	: Insight::UUID()
-	, Serializable(this, false)
+	: Serializable(this, false)
 {
 	m_data.Name = "Default";
 	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
 }
 
 Entity::Entity(const std::string& id)
-	: Insight::UUID()
-	, Serializable(this, false)
+	: Serializable(this, false)
 {
 	m_data.Name = id;
 	Insight::Scene::s_CurrentScene->m_registry.push_back(this);

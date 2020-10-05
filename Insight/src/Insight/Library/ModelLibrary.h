@@ -30,6 +30,8 @@ namespace Insight
 			{
 				".fbx", ".obj",
 			};
+
+			std::mutex m_lock;
 		};
 	}
 }

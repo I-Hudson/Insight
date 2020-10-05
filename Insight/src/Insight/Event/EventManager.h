@@ -33,7 +33,7 @@ namespace Insight
 			size_t Hascode;
 		};
 
-		std::unordered_map<EventType,std::vector<Listener>> m_listeners;
+		std::unordered_map<EventType, std::vector<Listener>> m_listeners;
 	};
 
 	template<typename T>

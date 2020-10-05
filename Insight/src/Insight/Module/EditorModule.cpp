@@ -25,6 +25,8 @@ namespace Insight
 
 		void EditorModule::Update(const float& deltaTime)
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (auto it = m_editorPanels.begin(); it != m_editorPanels.end(); ++it)
 			{
 				it->second->Update(deltaTime);

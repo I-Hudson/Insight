@@ -18,6 +18,16 @@ PlayerController::PlayerController(Entity* owner)
 	m_componentId = GetComponentID<PlayerController>();
 }
 
+void PlayerController::OnCreate()
+{
+	__super::OnCreate();
+	mat2 = glm::mat2();
+	mat3 = glm::mat3();
+
+	IS_REGISTER_PROPERTY(glm::mat2, mat2, "Test Matrix 2", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
+	IS_REGISTER_PROPERTY(glm::mat3, mat3, "Test Matrix 4", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+}
+
 void PlayerController::OnUpdate(const float& deltaTime)
 {
 	if (Input::KeyDown(KEY_UP))

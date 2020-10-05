@@ -34,7 +34,6 @@ void TransformComponent::OnCreate()
 
 void TransformComponent::OnDestroy()
 {
-	IS_UNREGISTER_PROPERTY(m_transform);
 }
 
 glm::mat4 TransformComponent::GetTransform() const

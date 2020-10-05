@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Insight/Core.h"
 #include "Insight/Log.h"
 
 #include <chrono>

@@ -63,7 +63,9 @@ namespace Insight
 		
 		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
+#ifdef IS_EDITOR
 		m_moduleManager->AddModule<Module::EditorModule>();
+#endif
 
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}

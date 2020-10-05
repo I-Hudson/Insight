@@ -100,6 +100,8 @@ private:
 	Material* m_materal;
 	MaterialRenderData m_materialRendererData;
 
+	std::string m_meshName;
+
 	REGISTER_DEC_TYPE(MeshComponent);
 };
 

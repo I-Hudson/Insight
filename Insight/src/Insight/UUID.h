@@ -17,7 +17,7 @@ namespace Insight
         class Serializable;
     }
 
-    class IS_API UUID
+    class UUID
     {
     public:
         UUID() : m_uuid(GenUUID())
