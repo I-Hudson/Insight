@@ -262,6 +262,8 @@ namespace Platform
 		ImGui::PopStyleVar();
 #endif
 
+		ImGuiRenderer::GetInstance()->EndFrame();
+
 		auto dcb = m_drawCommandBuffers[m_imageIndex];
 		int i = m_imageIndex;
 		++tempShader;
@@ -297,7 +299,6 @@ namespace Platform
 
 			dcb->EndRecord();
 		}
-		ImGuiRenderer::GetInstance()->EndFrame();
 
 		Submit(waitSemaphore);
 	}

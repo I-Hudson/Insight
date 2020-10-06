@@ -177,6 +177,7 @@ void ImGuiRenderer::EndFrame()
 	//	ImGui::RenderPlatformWindowsDefault();
 	//	glfwMakeContextCurrent(backup_current_context);
 	//}
+	ImGui::EndFrame();
 #endif
 }
 
@@ -184,8 +185,6 @@ void ImGuiRenderer::Render(Platform::CommandBuffer* commandBuffer)
 {
 #ifdef IMGUI_ENABLED
 	IS_PROFILE_FUNCTION();
-
-	ImGui::EndFrame();
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize = ImVec2((float)Insight::Module::WindowModule::GetWindow()->GetWidth(), (float)Insight::Module::WindowModule::GetWindow()->GetHeight());
