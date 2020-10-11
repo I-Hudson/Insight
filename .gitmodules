@@ -1,3 +1,6 @@
 [submodule "Insight/vendor/assimp"]
 	path = Insight/vendor/assimp
 	url = https://github.com/assimp/assimp
+[submodule "Insight/vendor/FrameGraph"]
+	path = Insight/vendor/FrameGraph
+	url = https://github.com/azhirnov/FrameGraph
