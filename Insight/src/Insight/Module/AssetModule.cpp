@@ -3,7 +3,7 @@
 #include "Insight/Module/AssetModule.h"
 #include "Insight/Memory/MemoryManager.h"
 
-#include "Insight/Assimp/Model.h"
+#include "Insight/Model/Model.h"
 #include "Insight/Renderer/Shader.h"
 
 namespace Insight

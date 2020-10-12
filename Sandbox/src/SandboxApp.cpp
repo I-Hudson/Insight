@@ -1,5 +1,4 @@
 #include <Insight.h>
-
 #include "PlayerController.h"
 
 using namespace Insight;
@@ -8,7 +7,7 @@ class Sandbox : public Insight::Application
 {
 public:
 	std::vector<TransformComponent*> transformComponents;
-	Scene* m_sandboxScene;
+	Insight::Scene* m_sandboxScene;
 
 
 	Sandbox() : Insight::Application()

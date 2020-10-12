@@ -3,8 +3,8 @@
 // For use by apps only. No core system should directly be here.
 
 #include "Insight/Core.h"
-#include "InSight/Application.h"
-#include "InSight/Log.h"
+#include "Insight/Application.h"
+#include "Insight/Log.h"
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Time/Time.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -14,8 +14,8 @@
 #include "../vendor/imgui/imgui.h"
 
 #include "Insight/Entitiy/Entity.h"
-#include "Insight/Assimp/Model.h"
-#include "Insight/Assimp/Mesh.h"
+#include "Insight/Model/Model.h"
+#include "Insight/Model/Mesh.h"
 #include "Insight/Scene/Scene.h"
 
 #include "Insight/Component/TransformComponent.h"

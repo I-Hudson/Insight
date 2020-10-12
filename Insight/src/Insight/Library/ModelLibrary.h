@@ -3,7 +3,7 @@
 #include "Insight/Core.h"
 #include "Insight/Library/Library.h"
 #include "Insight/Serialization/Serializable.h"
-#include "Insight/Assimp/Model.h"
+#include "Insight/Model/Model.h"
 
 class Model;
 

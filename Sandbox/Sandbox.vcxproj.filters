@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="F:\Users\Documents\SourceControl\Github\C++ Porjects\Vulkan\Sandbox\src\PlayerController.cpp">
+      <Filter>Sandbox\src</Filter>
+    </ClCompile>
+    <ClCompile Include="F:\Users\Documents\SourceControl\Github\C++ Porjects\Vulkan\Sandbox\src\SandboxApp.cpp">
+      <Filter>Sandbox\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="F:\Users\Documents\SourceControl\Github\C++ Porjects\Vulkan\Sandbox\src\PlayerController.h">
+      <Filter>Sandbox\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\Users\Documents\SourceControl\Github\C++ Porjects\Vulkan\Sandbox\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Sandbox">
+      <UniqueIdentifier>{F780AC7C-600F-3C11-9FEC-392FD1B9269F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sandbox\src">
+      <UniqueIdentifier>{6351CB58-5B3B-3549-8E4A-366D7144A3E2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
