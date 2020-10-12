@@ -11,6 +11,9 @@ endforeach()
 
 add_compile_definitions(IS_PLATFORM_WINDOWS)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DIS_DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DIS_RELEASE")
+
 add_executable(Sandbox ${_source_list})
 
 target_link_libraries(Sandbox PRIVATE Insight)
