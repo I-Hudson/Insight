@@ -4,7 +4,7 @@
 #include "Insight/Scene/Scene.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Component/MeshComponent.h"
-#include "Insight/Assimp/Model.h"
+#include "Insight/Model/Model.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #include "Insight/Log.h"

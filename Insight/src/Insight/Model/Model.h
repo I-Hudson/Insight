@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/Assimp/Mesh.h"
+#include "Insight/Model/Mesh.h"
 #include "Insight/UUID.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
+#include "Assimp/mesh.h"
 #include "assimp/postprocess.h"
 
 #include <string>

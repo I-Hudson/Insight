@@ -3,7 +3,7 @@
 
 #include "Insight/Module/GraphicsModule.h"
 #include "Insight/Library/ModelLibrary.h"
-#include "Insight/Assimp/Model.h"
+#include "Insight/Model/Model.h"
 
 REGISTER_DEF_TYPE(MeshComponent);
 
