@@ -1,7 +1,7 @@
 #pragma once
 #include "Insight/Core.h"
 #include "Insight/Component/Component.h"
-#include "Insight/Assimp/Mesh.h"
+#include "Insight/Model/Mesh.h"
 #include "Insight/Renderer/Material.h"
 
 #include <../vendor/glm/glm/glm.hpp>

@@ -3,6 +3,7 @@
 #include "Insight/Core.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Entitiy/Entity.h"
+#include <string>
 
 class Component;
 

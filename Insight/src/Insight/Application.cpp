@@ -29,13 +29,6 @@
 
 namespace Insight
 {
-	void PrintFunction()
-	{
-		IS_PROFILE_FUNCTION();
-
-		IS_CORE_INFO("TEST");
-	}
-
 	Application::Application()
 	{
 		IS_PROFILE_FUNCTION();

@@ -11,7 +11,7 @@
 #include "Semaphore.h"
 #include "VulkanMaterial.h"
 
-#include "Insight/Assimp/Mesh.h"
+#include "Insight/Model/Mesh.h"
 #include "Insight/Event/ApplicationEvent.h"
 
 #include "Insight/Renderer/FrameGraph/FrameGraph.h"
