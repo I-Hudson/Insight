@@ -1,10 +1,8 @@
 #pragma once
 #ifdef IS_VULKAN
 #include "Insight/Core.h"
-
+#include "Vulkan/Vulkan.h"
 #include "Insight/Renderer/Buffer.h"
-
-#include <GLFW/glfw3.h>
 
 namespace Platform
 {

@@ -122,13 +122,12 @@ project "Insight"
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox"),
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
         }
-
     filter "configurations:Debug_NO_VULKAN"
         defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }--, "IMGUI_ENABLED" }
         symbols "on"
         links 
         {
-            "assimp-vc141-mtd",
+            "assimp-vc142-mtd",
             "opengl32"
 	    }
         libdirs
@@ -141,7 +140,7 @@ project "Insight"
         symbols "on"
         links 
         {
-            "assimp-vc141-mtd",
+            "assimp-vc142-mtd",
             "shaderc_combined",
             "vulkan-1",
 	    }
@@ -156,7 +155,7 @@ project "Insight"
         symbols "on"
         links 
         {
-            "assimp-vc141-mtd",
+            "assimp-vc142-mtd",
             "shaderc_combined",
             "vulkan-1",
 	    }

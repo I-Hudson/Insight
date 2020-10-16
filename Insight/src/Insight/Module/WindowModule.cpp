@@ -51,7 +51,11 @@ namespace Insight
 				images.push_back(newImage);
 			}
 		}
-		glfwSetWindowIcon(m_window, (int)iconPaths.size(), images.data());
+
+		if (images.size() > 0)
+		{
+			glfwSetWindowIcon(m_window, (int)iconPaths.size(), images.data());
+		}
 
 		for (auto it = images.begin(); it != images.end(); ++it)
 		{

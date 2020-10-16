@@ -20,6 +20,7 @@ add_library(Insight ${_source_list})
 add_compile_definitions(IS_PLATFORM_WINDOWS)
 add_compile_definitions(IS_BUILD_DLL)
 add_compile_definitions(GLM_FORCE_SWIZZLE)
+add_compile_definitions(IS_VULKAN)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DIS_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DIS_RELEASE")

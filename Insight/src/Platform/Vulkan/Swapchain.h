@@ -64,14 +64,19 @@ namespace Platform
 		void RecreateSwapchain(const Insight::Event& event);
 		void DrawUI();
 
+		void PrepSwapchainCommandBuffer();
+
 	private:
 		Device* m_device;
 		Mesh* m_fullscreenQuad;
 
 		Insight::Render::Shader* m_swapchainShader;
 		std::vector<VulkanMaterial*> m_materials;
+
 		CommandPool* m_drawCommandPool;
 		std::vector<CommandBuffer*> m_drawCommandBuffers;
+		std::vector<CommandBuffer*> m_imguiCommandBuffers;
+
 		std::vector<Fence*> m_inFlightFences;
 		std::vector<Fence*> m_imagesInFlight;
 
@@ -92,8 +97,6 @@ namespace Platform
 		SwapChainSupportDetails m_swapChainDetails;
 		VkSwapchainKHR m_swapchain;
 		std::vector<VulkanFramebuffer*> m_swapchainFramebuffers;
-
-		Insight::FrameGraph::FrameGraph m_frameGraph;
 
 		friend ImGuiRenderer;
 	};

@@ -50,6 +50,7 @@ namespace Platform
 
 		m_drawCommandPool = NEW_ON_HEAP(CommandPool, m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 		m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
+		m_imguiCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
 
 		// Position				  // Colour				   // Normal				//UV1
 		std::vector<Vertex> vertices =
@@ -66,6 +67,8 @@ namespace Platform
 		};
 		m_fullscreenQuad = NEW_ON_HEAP(Mesh, vertices, indices, std::vector<Texture>(), 0, "", "");
 
+		PrepSwapchainCommandBuffer();
+
 #ifdef IS_EDITOR
 		//m_editorFrameBuffer = NEW_ON_HEAP(VulkanFramebuffer, m_swapchainSettings.Device, m_swapchainSettings.Window->GetWidth(), m_swapchainSettings.Window->GetHeight());
 		//m_editorFrameBuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
@@ -76,7 +79,7 @@ namespace Platform
 		//m_editorCommandBuffer = m_editorCommandPool->AllocCommandBuffer();
 #endif
 
-		m_frameGraph.Create();
+		/*m_frameGraph.Create();
 		m_frameGraph.PrintToConsole();
 
 		m_frameGraph.AddNode(nullptr, [&]()
@@ -109,7 +112,7 @@ namespace Platform
 
 		m_frameGraph.PrintToConsole();
 
-		m_frameGraph.Execute();
+		m_frameGraph.Execute();*/
 
 		IS_CORE_INFO("SwapChain completed.");
 	}
@@ -130,8 +133,6 @@ namespace Platform
 			DELETE_ON_HEAP(m_swapchainFramebuffers[i]);
 		}
 		vkDestroySwapchainKHR(m_device->GetDevice(), m_swapchain, nullptr);
-
-		m_frameGraph.Destroy();
 	}
 
 	SwapChainSupportDetails Swapchain::QuerySwapChainSupport(VkPhysicalDevice device)
@@ -233,7 +234,7 @@ namespace Platform
 
 		std::vector<VkSemaphore> waitSemaphores = { waitSemaphore->GetSemaphore() };
 		std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-		std::vector<VkCommandBuffer> commandBuffers = { m_drawCommandBuffers[m_imageIndex]->GetBuffer() };
+		std::vector<VkCommandBuffer> commandBuffers = { m_drawCommandBuffers[m_imageIndex]->GetBuffer(), m_imguiCommandBuffers[m_imageIndex]->GetBuffer() };
 		std::vector<VkSemaphore> signalSemaphore = { m_swapchainFramebuffers[m_currentFrame]->GetFinishedSem()->GetSemaphore() };
 		VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
 
@@ -264,41 +265,12 @@ namespace Platform
 
 		ImGuiRenderer::GetInstance()->EndFrame();
 
-		auto dcb = m_drawCommandBuffers[m_imageIndex];
-		int i = m_imageIndex;
-		++tempShader;
-		//for (auto it = m_drawCommandBuffers.begin(); it != m_drawCommandBuffers.end(); ++it)
-		{
-			IS_PROFILE_SCOPE("Swapchain Draw");
-
-			dcb->StartRecord();
-
-			m_swapchainFramebuffers[i]->BindBuffer(dcb);
-
-			m_materials[i]->Bind(dcb, nullptr);
-
-#ifndef IS_EDITOR
-			if (offscreenFB != nullptr)
-			{
-				m_materials[i]->UpdateSampler2D("OffScreenTexture", &offscreenFB->GetAttachment(0).View, offscreenFB->GetSampler(), 0);
-			}
-			m_materials[i]->SetUniforms();
-#endif
-
-			VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(dcb->GetBuffer(), 0, 1, vertexBuffers, offsets);
-
-			vkCmdBindIndexBuffer(dcb->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
-
-			vkCmdDrawIndexed(dcb->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
-
-			ImGuiRenderer::GetInstance()->Render(dcb);
-
-			m_swapchainFramebuffers[i]->UnbindBuffer(dcb);
-
-			dcb->EndRecord();
-		}
+		m_imguiCommandBuffers[m_currentFrame]->StartRecord();
+		m_swapchainFramebuffers[m_currentFrame]->BindBuffer(m_imguiCommandBuffers[m_currentFrame]);
+		m_materials[m_currentFrame]->Bind(m_imguiCommandBuffers[m_currentFrame], nullptr);
+		ImGuiRenderer::GetInstance()->Render(m_imguiCommandBuffers[m_currentFrame]);
+		m_swapchainFramebuffers[m_currentFrame]->UnbindBuffer(m_imguiCommandBuffers[m_currentFrame]);
+		m_imguiCommandBuffers[m_currentFrame]->EndRecord();
 
 		Submit(waitSemaphore);
 	}
@@ -313,7 +285,7 @@ namespace Platform
 		PresentQueueInfo presentQueueInfo;
 		presentQueueInfo.PresentInfo = &presentInfo;
 		m_device->GetQueue(QueueFamilyType::Present).Submit(presentQueueInfo);
-		m_device->GetQueue(QueueFamilyType::Present).Wait();
+//		m_device->GetQueue(QueueFamilyType::Present).Wait();
 
 		m_currentFrame = (m_currentFrame + 1) % MaxFramesInFlight;
 	}
@@ -436,6 +408,42 @@ namespace Platform
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 		m_sceneTexture = nullptr;
 #endif
+	}
+
+	void Swapchain::PrepSwapchainCommandBuffer()
+	{
+		for (size_t i = 0; i < m_drawCommandBuffers.size(); ++i)
+		{
+			{
+				IS_PROFILE_SCOPE("Swapchain Draw");
+				auto dcb = m_drawCommandBuffers[i];
+
+				dcb->StartRecord();
+
+				m_swapchainFramebuffers[i]->BindBuffer(dcb);
+				m_materials[m_currentFrame]->Bind(dcb, nullptr);
+
+#ifndef IS_EDITOR
+				if (offscreenFB != nullptr)
+				{
+					m_materials[i]->UpdateSampler2D("OffScreenTexture", &offscreenFB->GetAttachment(0).View, offscreenFB->GetSampler(), 0);
+				}
+				m_materials[i]->SetUniforms();
+#endif
+
+				VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>(m_fullscreenQuad->GetVertexBuffer())->GetBuffer() };
+				VkDeviceSize offsets[] = { 0 };
+				vkCmdBindVertexBuffers(dcb->GetBuffer(), 0, 1, vertexBuffers, offsets);
+
+				vkCmdBindIndexBuffer(dcb->GetBuffer(), static_cast<VulkanIndexBuffer*>(m_fullscreenQuad->GetIndexBuffer())->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
+
+				vkCmdDrawIndexed(dcb->GetBuffer(), static_cast<uint32_t>(m_fullscreenQuad->GetIndicesCount()), 1, 0, 0, 0);
+
+				m_swapchainFramebuffers[i]->UnbindBuffer(dcb);
+
+				dcb->EndRecord();
+			}
+		}
 	}
 }
 #endif
