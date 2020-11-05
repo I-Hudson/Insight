@@ -240,10 +240,8 @@ namespace Platform
 
 		m_inFlightFences[m_currentFrame]->Reset();
 
-		GraphicsQueueInfo info;
-		info.SubmitInfo = &submitInfo;
-		info.SyncFence = m_inFlightFences[m_currentFrame];
-		m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
+		m_device->GetQueue(QueueFamilyType::Graphics).Submit(submitInfo, m_inFlightFences[m_currentFrame]->GetFence());
+
 	}
 
 	void Swapchain::Draw(Semaphore* waitSemaphore, VulkanFramebuffer* offscreenFB)
@@ -265,7 +263,7 @@ namespace Platform
 
 		ImGuiRenderer::GetInstance()->EndFrame();
 
-		m_imguiCommandBuffers[m_currentFrame]->StartRecord();
+		m_imguiCommandBuffers[m_currentFrame]->StartRecord(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
 		m_swapchainFramebuffers[m_currentFrame]->BindBuffer(m_imguiCommandBuffers[m_currentFrame]);
 		m_materials[m_currentFrame]->Bind(m_imguiCommandBuffers[m_currentFrame], nullptr);
 		ImGuiRenderer::GetInstance()->Render(m_imguiCommandBuffers[m_currentFrame]);
@@ -282,10 +280,8 @@ namespace Platform
 		std::vector<VkSemaphore> signalSemaphore = { m_swapchainFramebuffers[m_currentFrame]->GetFinishedSem()->GetSemaphore() };
 		std::vector<VkSwapchainKHR>swapchains = { m_swapchain };
 		VkPresentInfoKHR presentInfo = VulkanInits::PresnetInfo(signalSemaphore, swapchains, m_imageIndex);
-		PresentQueueInfo presentQueueInfo;
-		presentQueueInfo.PresentInfo = &presentInfo;
-		m_device->GetQueue(QueueFamilyType::Present).Submit(presentQueueInfo);
-//		m_device->GetQueue(QueueFamilyType::Present).Wait();
+		m_device->GetQueue(QueueFamilyType::Present).Presnet(presentInfo);
+		m_device->GetQueue(QueueFamilyType::Present).Wait();
 
 		m_currentFrame = (m_currentFrame + 1) % MaxFramesInFlight;
 	}

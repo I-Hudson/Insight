@@ -14,8 +14,11 @@ namespace Insight
 			typedef Size Marker;
 
 			StackAllocator() = delete;
+			StackAllocator(void* ptr, Size stackSize);
 			StackAllocator(Size stackSize);
 			~StackAllocator();
+
+			void IsSubAllocatiom(const bool& subAllocation);
 
 			void* Alloc(Size size, Byte alignment = MemoryUtlis::Alignment);
 
@@ -32,13 +35,14 @@ namespace Insight
 
 			void FreeAll() { m_top = 0; }
 
-			const Marker GetMarker() const { return m_top; }
+			Marker GetMarker() { return m_top; }
 
 		private:
 			Marker m_top;
 			Size m_totalSize;
 			void* m_startPtr;
 			PtrInt m_startAddress;
+			bool m_subAllocation;
 
 			struct AllocHeader
 			{

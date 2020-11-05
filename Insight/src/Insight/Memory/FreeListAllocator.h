@@ -33,7 +33,7 @@ namespace Insight
 			template <typename T>
 			T* NewArr(const Size length, const Byte alignment);
 			template <typename T>
-			void DeleteArr(const Size length, T* ptrToDelete);
+			void DeleteArr(T* ptrToDelete);
 
 			std::string GetAllocationOfType(void* ptr);
 
@@ -129,7 +129,7 @@ namespace Insight
 		}
 
 		template<typename T>
-		inline void FreeListAllocator::DeleteArr(const Size length, T* ptrToDelete)
+		inline void FreeListAllocator::DeleteArr(T* ptrToDelete)
 		{
 #ifdef IS_DEBUG
 			m_numOfArrDeletes++;
@@ -147,6 +147,8 @@ namespace Insight
 #endif
 			PtrInt headerAddress = (Size)ptrToDelete - sizeof(FreeListAllocator::AllocHeader);
 			FreeListAllocator::AllocHeader* allocHeader = (FreeListAllocator::AllocHeader*) headerAddress;
+			int length = allocHeader->BlockSize - allocHeader->AlignmentPadding - sizeof(FreeListAllocator::AllocHeader);
+			length /= allocHeader->TypeSize;
 
 			for (Size i = 0; i < length; ++i)
 			{

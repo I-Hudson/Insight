@@ -34,7 +34,7 @@ namespace Insight
 			template <typename T>
 			static T* NewArrOnFreeList(Size length, U8 alignment = MemoryUtlis::Alignment);
 			template<typename T>
-			static void DeleteArrOnFreeList(Size length, T* ptrToDelete);
+			static void DeleteArrOnFreeList(T* ptrToDelete);
 
 			static void TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
@@ -104,9 +104,9 @@ namespace Insight
 		}
 
 		template<typename T>
-		inline void MemoryManager::DeleteArrOnFreeList(Size length, T* ptrToDelete)
+		inline void MemoryManager::DeleteArrOnFreeList(T* ptrToDelete)
 		{
-			GetInstance()->m_freeListAllocator.DeleteArr<T>(length, ptrToDelete);
+			GetInstance()->m_freeListAllocator.DeleteArr<T>(ptrToDelete);
 		}
 	}
 }

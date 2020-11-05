@@ -192,13 +192,10 @@ namespace Platform
 			std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
 			std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
 			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
-
+			
 			m_framebuffer->GetFence()->Reset();
-
-			GraphicsQueueInfo info;
-			info.SubmitInfo = &submitInfo;
-			info.SyncFence = m_framebuffer->GetFence();
-			m_device->GetQueue(QueueFamilyType::Graphics).Submit(info);
+			
+			m_device->GetQueue(QueueFamilyType::Graphics).Submit(submitInfo, m_framebuffer->GetFence()->GetFence());
 		}
 		std::string vStr = GetFormatInt(vertexCount);
 		std::string tStr = GetFormatInt(triCount / 3);

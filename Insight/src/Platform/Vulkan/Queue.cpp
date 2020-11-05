@@ -30,41 +30,28 @@ namespace Platform
 		return m_queueFamily;
 	}
 
-	void Queue::Submit(QueueInfo& queueInfo)
+	VkResult Queue::Submit(const VkSubmitInfo& queueInfo, VkFence fence)
 	{
 		IS_PROFILE_FUNCTION();
 
-		VkResult result{};
-
-		switch (m_queueFamily.GetType())
+		VkResult result;
+		if (fence != VK_NULL_HANDLE)
 		{
-		case QueueFamilyType::Graphics:
-			GraphicsQueueInfo graphicsInfo = static_cast<GraphicsQueueInfo&>(queueInfo);
-			if (graphicsInfo.SyncFence != nullptr || graphicsInfo.SyncFence != VK_NULL_HANDLE)
-			{
-				graphicsInfo.SyncFence->SetInUse();
-				ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, graphicsInfo.SyncFence->GetFence()));
-			}
-			else
-			{
-				ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, graphicsInfo.SubmitInfo, VK_NULL_HANDLE));
-			}
-
-			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-			{
-				IS_CORE_INFO("Swapchain is out of date");
-			}
-			break;
-
-		case QueueFamilyType::Present:
-			PresentQueueInfo presentInfo = static_cast<PresentQueueInfo&>(queueInfo);
-			ThrowIfFailed(vkQueuePresentKHR(m_queue, presentInfo.PresentInfo));
-			if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
-			{
-				IS_CORE_INFO("Swapchain is out of date");
-			}
-			break;
+			//queueInfo.SyncFence->SetInUse();
+			ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, &queueInfo, fence));
 		}
+		else
+		{
+			ThrowIfFailed(result = vkQueueSubmit(m_queue, 1, &queueInfo, VK_NULL_HANDLE));
+		}
+		return result;
+	}
+
+	VkResult Queue::Presnet(const VkPresentInfoKHR& presentInfo)
+	{
+		VkResult result;
+		ThrowIfFailed(result = vkQueuePresentKHR(m_queue, &presentInfo));
+		return result;
 	}
 
 	void Queue::Wait() const

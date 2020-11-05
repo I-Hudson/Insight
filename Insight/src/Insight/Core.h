@@ -34,7 +34,7 @@
 #define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
 
 #define DELETE_ON_HEAP(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
-#define DELETE_ARR_ON_HEAP(ptr, size) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(size, ptr); ptr = nullptr; }
+#define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
 
 #define NEW_ON_STACK(type, ...) Insight::Memory::MemoryManager::NewOnStack<type>(__VA_ARGS__)
 #define DELETE_ON_STACK(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnStack((uint64_t)ptr); ptr = nullptr; }

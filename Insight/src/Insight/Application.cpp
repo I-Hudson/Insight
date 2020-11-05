@@ -78,83 +78,6 @@ namespace Insight
 			free(entry);
 		}
 	}
-	
-	void AllcoBench()
-	{
-		const Size size = 512_KB;
-		int* ints;
-		constexpr int loopCount = 1000;
-
-		Stopwatch s;
-		s.Start();
-		for (size_t i = 0; i < loopCount; ++i)
-		{
-			ints = Memory::MemoryManager::NewArrOnStack<int>(size);
-			Memory::MemoryManager::DeleteOnStack((Size)ints);
-		}
-		s.End();
-		std::cout << "Stack -----------------\n";
-		std::cout << "Sec: {0}" << s.Sec() << '\n';
-		std::cout << "Mil: {0}" << s.Mill() << '\n';
-		std::cout << "Nan: {0}" << s.Nano() << '\n';
-		std::cout << "Stack -----------------\n";
-
-		Stopwatch sFreeList;
-		sFreeList.Start();
-		for (size_t i = 0; i < loopCount; ++i)
-		{
-			ints = Memory::MemoryManager::NewArrOnFreeList<int>(size);
-			Memory::MemoryManager::DeleteArrOnFreeList(size, ints);
-		}
-		sFreeList.End();
-		std::cout << "FreeList-----------------\n";
-		std::cout << "Sec: {0}" << sFreeList.Sec() << '\n';
-		std::cout << "Mil: {0}" << sFreeList.Mill() << '\n';
-		std::cout << "Nan: {0}" << sFreeList.Nano() << '\n';
-		std::cout << "FreeList-----------------\n";
-
-		Stopwatch sNewDelete;
-		sNewDelete.Start();
-		for (size_t i = 0; i < loopCount; ++i)
-		{
-			ints = new int[size];
-			delete[] ints;
-		}
-		sNewDelete.End();
-		std::cout << "New/Delete-----------------\n";
-		std::cout << "Sec: {0}" << sNewDelete.Sec() << '\n';
-		std::cout << "Mil: {0}" << sNewDelete.Mill() << '\n';
-		std::cout << "Nan: {0}" << sNewDelete.Nano() << '\n';
-		std::cout << "New/Delete-----------------\n";
-
-		Stopwatch sFreeSingle;
-		sFreeSingle.Start();
-		for (size_t i = 0; i < loopCount; ++i)
-		{
-			int* in = NEW_ON_HEAP(int);
-			DELETE_ON_HEAP(in);
-		}
-		sFreeSingle.End();
-		std::cout << "New/Delete-----------------\n";
-		std::cout << "Sec: {0}" << sFreeSingle.Sec() << '\n';
-		std::cout << "Mil: {0}" << sFreeSingle.Mill() << '\n';
-		std::cout << "Nan: {0}" << sFreeSingle.Nano() << '\n';
-		std::cout << "New/Delete-----------------\n";
-
-		Stopwatch sNewDeleteSingle;
-		sNewDeleteSingle.Start();
-		for (size_t i = 0; i < loopCount; ++i)
-		{
-			int* in = new int;
-			delete in;
-		}
-		sNewDeleteSingle.End();
-		std::cout << "New/Delete-----------------\n";
-		std::cout << "Sec: {0}" << sNewDeleteSingle.Sec() << '\n';
-		std::cout << "Mil: {0}" << sNewDeleteSingle.Mill() << '\n';
-		std::cout << "Nan: {0}" << sNewDeleteSingle.Nano() << '\n';
-		std::cout << "New/Delete-----------------\n";
-	}
 
 	void TestFunc(CameraComponent* cam)
 	{
@@ -185,6 +108,11 @@ namespace Insight
 		do
 		{
 			IS_PROFILE_FUNCTION();
+
+			Time::UpdateTime();
+
+			IS_CORE_INFO("FPS: {0}", 1.0f / Time::GetDeltaTime());
+			IS_CORE_INFO("Frame Time: {0}", Time::GetDeltaTime());
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 			ImGuiRenderer::GetInstance()->NewFrame();	
@@ -222,9 +150,6 @@ namespace Insight
 			}
 			ImGui::EndMainMenuBar();
 #endif
-
-			Time::UpdateTime();
-
 			m_moduleManager->Update(Time::GetDeltaTime());
 
 			static float f = 0.0f;

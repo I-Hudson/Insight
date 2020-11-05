@@ -7,6 +7,13 @@ namespace Insight
 {
 	namespace Memory
 	{
+		StackAllocator::StackAllocator(void* ptr, Size stackSize)
+			:m_top(0), m_totalSize(stackSize)
+		{
+			m_startPtr = ptr;
+			m_startAddress = reinterpret_cast<PtrInt>(m_startPtr);
+		}
+
 		StackAllocator::StackAllocator(Size stackSize)
 			:m_top(0), m_totalSize(stackSize)
 		{
@@ -21,7 +28,17 @@ namespace Insight
 				IS_CORE_ASSERT(true, "StackAllocator: Memory leak.");
 			}
 
-			free(m_startPtr);
+			// If this is false then this stack has been given memory from another memeory manager
+			// more than likly a free list allocator.
+			if (!m_subAllocation)
+			{
+				free(m_startPtr);
+			}
+		}
+
+		void StackAllocator::IsSubAllocatiom(const bool& subAllocation)
+		{
+			m_subAllocation = subAllocation;
 		}
 
 		void* StackAllocator::Alloc(Size size, Byte alignment)

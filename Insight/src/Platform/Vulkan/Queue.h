@@ -9,19 +9,6 @@ namespace Platform
 {
 	class Device;
 
-	struct QueueInfo
-	{ };
-
-	struct GraphicsQueueInfo : public QueueInfo
-	{
-		VkSubmitInfo* SubmitInfo;
-		Fence* SyncFence;
-	};
-
-	struct PresentQueueInfo : public QueueInfo
-	{
-		VkPresentInfoKHR* PresentInfo;
-	};
 
 	class IS_API Queue
 	{
@@ -33,7 +20,8 @@ namespace Platform
 		VkQueue& GetQueue();
 		QueueFamily& GetQueueFamily();
 
-		void Submit(QueueInfo& queueInfo);
+		VkResult Submit(const VkSubmitInfo& queueInfo, VkFence fence);
+		VkResult Presnet(const VkPresentInfoKHR& presentInfo);
 		void Wait() const;
 
 		VkSemaphore SubmitSem();

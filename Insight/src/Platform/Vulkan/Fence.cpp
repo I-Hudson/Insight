@@ -20,11 +20,8 @@ namespace Platform
 	void Fence::Wait() const
 	{
 		IS_PROFILE_FUNCTION();
-
-		if (m_inUse)
-		{
-			vkWaitForFences(m_device->GetDevice(), 1, &m_fence, VK_TRUE, UINT64_MAX);
-		}
+		
+		vkWaitForFences(m_device->GetDevice(), 1, &m_fence, VK_TRUE, UINT64_MAX);
 	}
 
 	void Fence::Reset()
