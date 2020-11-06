@@ -7,6 +7,7 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "VulkanInits.h"
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
 #else
 #define VK_USE_PLATFORM_XCB_KHR
 #include <vulkan/vk_sdk_platform.h>

@@ -140,7 +140,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -170,7 +170,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_PROFILE;NOMINMAX;IS_EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -200,7 +200,7 @@ IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -230,7 +230,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -264,7 +264,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -297,7 +297,7 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DIST;IS_VULKAN;IS_PROFILE;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.1.130.0\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -373,7 +373,6 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
     <ClInclude Include="src\Insight\Object.h" />
-    <ClInclude Include="src\Insight\Renderer\Texture.h" />
     <ClInclude Include="src\Insight\RTTI\RTTI.h" />
     <ClInclude Include="src\Insight\RTTI\RTTITypes.h" />
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
@@ -385,6 +384,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Shader.h" />
     <ClInclude Include="src\Insight\Renderer\ShaderModule.h" />
     <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h" />
+    <ClInclude Include="src\Insight\Renderer\Texture.h" />
     <ClInclude Include="src\Insight\Scene\Scene.h" />
     <ClInclude Include="src\Insight\Serialization\Serializable.h" />
     <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
@@ -870,7 +870,6 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
     <ClCompile Include="src\Insight\Object.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
     <ClCompile Include="src\Insight\RTTI\RTTI.cpp" />
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp" />
@@ -880,6 +879,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Shader.cpp" />
     <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp" />
+    <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
     <ClCompile Include="src\Insight\Scene\Scene.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />

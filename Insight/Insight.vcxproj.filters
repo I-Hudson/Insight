@@ -300,6 +300,9 @@
     <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\Texture.h">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Scene\Scene.h">
       <Filter>src\Insight\Scene</Filter>
     </ClInclude>
@@ -1659,7 +1662,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1779,6 +1781,9 @@
     <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp">
       <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Renderer\Texture.cpp">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Scene\Scene.cpp">
       <Filter>src\Insight\Scene</Filter>
     </ClCompile>
@@ -1890,6 +1895,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
   </ItemGroup>
 </Project>
