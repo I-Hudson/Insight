@@ -1,6 +1,4 @@
 [submodule "Insight/vendor/assimp"]
 	path = Insight/vendor/assimp
 	url = https://github.com/assimp/assimp
-[submodule "Insight/vendor/Vulkan-Hpp"]
-	path = Insight/vendor/Vulkan-Hpp
-	url = https://github.com/KhronosGroup/Vulkan-Hpp
+
