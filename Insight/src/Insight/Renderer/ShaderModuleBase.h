@@ -5,7 +5,6 @@
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/Vulkan.h"
 #include <shaderc/shaderc.hpp>
-#elif defined(IS_OPENGL)
 #endif
 
 namespace Platform
@@ -104,10 +103,9 @@ namespace Insight
 #ifdef IS_VULKAN
 			ShaderModuleBase(const Platform::Device* device, const std::string& filepath);
 			ShaderModuleBase(const Platform::Device* device, const std::string& filepath, const ShaderType& type);
-#elif defined(IS_OPENGL)
+#endif
 			ShaderModuleBase(const std::string& filepath);
 			ShaderModuleBase(const std::string& filepath, const ShaderType& type); 
-#endif
 			~ShaderModuleBase();
 
 			void Destroy();

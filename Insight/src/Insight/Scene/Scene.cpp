@@ -129,9 +129,9 @@ namespace Insight
 				}
 			}
 
-			if (doc.SaveFile((DEFAULT_SAVE_PATH + m_sceneName + ".xml").c_str()) != XML_SUCCESS)
+			if (XMLError err = doc.SaveFile((DEFAULT_SAVE_PATH + m_sceneName + ".xml").c_str()))
 			{
-				IS_CORE_ASSERT(false, "");
+				IS_CORE_ASSERT(false, doc.ErrorIDToName(err));
 			}
 
 			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());

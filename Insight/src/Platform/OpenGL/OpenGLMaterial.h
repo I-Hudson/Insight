@@ -1,5 +1,5 @@
 #pragma once
-#ifdef  IS_OPENGL
+
 #include "Insight/Core.h"
 #include "Insight/Renderer/Shader.h"
 #include "Insight/Renderer/Material.h"
@@ -10,58 +10,57 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <unordered_map>
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	class OpenGLRenderer;
+
+	struct UniformDataOpenGL
 	{
-		class OpenGLRenderer;
+		void* Data;
+		int Size;
+		int Binding;
+	};
 
-		struct UniformData
-		{
-			void* Data;
-			int Size;
-			int Binding;
-		};
+	struct SamplerDataOpenGL
+	{
+		int Binding;
+	};
 
-		struct SamplerData
-		{
-			int Binding;
-		};
+	struct MVPUniformBufferOpenGL
+	{
+		glm::mat4 u_model;
+		glm::mat4 u_view;
+		glm::mat4 u_proj;
+	};
 
-		struct MVPUniformBuffer
-		{
-			glm::mat4 u_model;
-			glm::mat4 u_view;
-			glm::mat4 u_proj;
-		};
+	class OpenGLMaterial : public Material
+	{
+	public:
+		OpenGLMaterial();
+		virtual ~OpenGLMaterial() override;
 
-		class OpenGLMaterial : public Material
-		{
-		public:
-			OpenGLMaterial();
-			virtual ~OpenGLMaterial() override;
+		virtual void SetShader(Insight::Render::Shader* shader) override;
+		virtual Insight::Render::Shader* GetShader() override;
+		virtual void SetUniforms() override;
+		virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
+		virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
+		virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) override;
 
-			virtual void SetShader(Shader* shader) override;
-			virtual Shader* GetShader() override;
-			virtual void SetUniforms() override;
-			virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model) override;
-			virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) override;
-			virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) override;
+		virtual MaterialRenderData IncrementUsageCount(const MeshComponent* meshComponent) override;
+		virtual void DecrementUsageCount(const MeshComponent* meshComponent) override;
 
-			void Bind();
+		void Bind();
 
-		private:
-			void DestroyUniformBuffers();
+	private:
+		void DestroyUniformBuffers();
 
-		private:
-			Shader* m_shader;
+	private:
+		Insight::Render::Shader* m_shader;
 
-			std::unordered_map<std::string, UniformData> m_uniformData;
-			std::unordered_map<std::string, SamplerData> m_samplerData;
+		std::unordered_map<std::string, UniformDataOpenGL> m_uniformData;
+		std::unordered_map<std::string, SamplerDataOpenGL> m_samplerData;
 
-			static OpenGLRenderer* s_Renderer;
-			friend OpenGLRenderer;
-		};
-	}
+		static OpenGLRenderer* s_Renderer;
+		friend OpenGLRenderer;
+	};
 }
-#endif // IS_OPENGL

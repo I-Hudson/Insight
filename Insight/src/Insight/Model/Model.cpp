@@ -8,13 +8,11 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 
 Model::Model()
-	: Insight::UUID()
 {
 }
 
 Model::Model(const std::string& filePath, const std::string& uuid)
-	: Insight::UUID()
-	, m_path(filePath)
+	: m_path(filePath)
 {
 	if (!uuid.empty())
 	{

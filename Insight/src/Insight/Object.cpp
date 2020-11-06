@@ -83,6 +83,11 @@ namespace Insight
 		--m_refCount;
 	}
 
+	void Object::CreateHash(std::string const & str)
+	{
+		m_hash = std::hash<std::string>{}(str);
+	}
+
 	void Object::operator delete(void* ptr)
 	{
 		IS_CORE_ERROR("Object of type '{0}' can not use delete operator.", static_cast<Object*>(ptr)->GetType());

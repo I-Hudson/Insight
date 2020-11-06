@@ -1,5 +1,5 @@
 #pragma once
-#ifdef IS_OPENGL
+
 #include "Insight/Core.h"
 #include "Insight/Renderer/Shader.h"
 
@@ -29,4 +29,3 @@ namespace Platform
 		unsigned int m_id;
 	};
 }
-#endif

@@ -18,19 +18,19 @@ namespace Platform
 	{
 		if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT)
 		{
-			IS_CORE_INFO("Validation layer : {0}", pCallbackData->pMessage);
+			IS_CORE_INFO("Validation layer : {0}\n", pCallbackData->pMessage);
 		}
 		else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 		{
-			IS_CORE_WARN("Validation layer : {0}", pCallbackData->pMessage);
+			IS_CORE_WARN("Validation layer : {0}\n", pCallbackData->pMessage);
 		}
 		else if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 		{
-			IS_CORE_ERROR("Validation layer : {0}", pCallbackData->pMessage);
+			IS_CORE_ERROR("Validation layer : {0}\n", pCallbackData->pMessage);
 		}
 		else
 		{
-			IS_CORE_TRACE("Validation layer : {0}", pCallbackData->pMessage);
+			IS_CORE_TRACE("Validation layer : {0}\n", pCallbackData->pMessage);
 		}
 
 		return VK_FALSE;
@@ -42,7 +42,8 @@ namespace Platform
 		if (func != nullptr) {
 			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
 		}
-		else {
+		else
+		{
 			return VK_ERROR_EXTENSION_NOT_PRESENT;
 		}
 	}

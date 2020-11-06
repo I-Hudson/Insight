@@ -5,8 +5,6 @@
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/VulkanInits.h"
 #include "Platform/Vulkan/Device.h"
-#elif defined(IS_OPENGL)
-
 #endif
 
 namespace Insight
@@ -36,7 +34,8 @@ namespace Insight
 			VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
 			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
 		}
-#elif defined(IS_OPENGL)
+#endif
+
 		ShaderModuleBase::ShaderModuleBase(const std::string& filepath)
 			: m_type(GetShaderTypeFromPath(GetSuffix(filepath)))
 		{
@@ -50,7 +49,6 @@ namespace Insight
 			m_shaderData = ShaderParser::ParseShader(filepath, type);
 			GetSource(filepath);
 		}
-#endif
 
 		ShaderModuleBase::~ShaderModuleBase()
 		{ }

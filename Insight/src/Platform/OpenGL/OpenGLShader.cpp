@@ -1,5 +1,5 @@
 #include "ispch.h"
-#ifdef IS_OPENGL
+
 #include "Platform/OpenGL/OpenGL.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
@@ -128,4 +128,3 @@ namespace Platform
 		}
 	}
 }
-#endif

@@ -2,23 +2,21 @@
 #include "Material.h"
 
 #include "Insight/Memory/MemoryManager.h"
+#include "Renderer.h"
 
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/VulkanMaterial.h"
-typedef Platform::VulkanMaterial PlatformMaterial;
-#elif defined(IS_OPENGL)
-//#include "Insight/Renderer/OpenGL/OpenGLMaterial.h"
-//typedef Insight::Render::OpenGLMaterial PlatformMaterial;
 #endif
+#include "Platform/OpenGL/OpenGLMaterial.h"
 
 Material* Material::Create()
 {
-#if defined(IS_VULKAN) && !defined(IS_OPENGL)
-	return NEW_ON_HEAP(PlatformMaterial);
-#elif defined(IS_OPENGL) && !defined(IS_VULKAN)
-	IS_IMPLERMENT("Opengl material missing.");
-	return nullptr;
-#else
-	return nullptr;
+	switch (Insight::Renderer::s_API)
+	{
+#if defined(IS_VULKAN)
+	case Insight::GraphicsAPI::Vulkan: return NEW_ON_HEAP(Platform::VulkanMaterial);
 #endif
+	case Insight::GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
+	}
+	return nullptr;
 }

@@ -20,8 +20,6 @@
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/CommandPool.h"
 #include "Platform/Vulkan/CommandBuffer.h"
-#elif defined(IS_OPENGL)
-
 #endif
 #endif
 
@@ -101,9 +99,6 @@ ImGuiRenderer::ImGuiRenderer(Insight::Renderer* renderer)
 	ThrowIfFailed(vkDeviceWaitIdle(m_vulkanRenderer->GetDevice()));
 
 	ImGui_ImplVulkan_DestroyFontUploadObjects();
-
-#elif defined(IS_OPENGL)
-
 #endif // IS_VULKAN
 #endif
 }
@@ -134,8 +129,6 @@ void ImGuiRenderer::NewFrame()
 #ifdef IS_VULKAN
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
-#elif defined(IS_OPENGL)
-
 #endif // IS_VULKAN
 	ImGui::NewFrame();
 

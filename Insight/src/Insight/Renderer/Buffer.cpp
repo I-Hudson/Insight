@@ -12,26 +12,20 @@ namespace Insight
 	{
 		VertexBuffer* VertexBuffer::Create(const std::vector<Vertex>& vertices)
 		{
-#if defined(IS_VULKAN) && !defined(IS_OPENGL)
+#if defined(IS_VULKAN)
 			return Memory::MemoryManager::NewOnFreeList<Platform::VulkanVertexBuffer>(vertices);
-#elif defined(IS_OPENGL) && !defined(IS_VULKAN)
+#endif
 			IS_IMPLERMENT("Opengl vertex buffer missing.");
 			return nullptr;
-#else
-			return nullptr;
-#endif
 		}
 
 		IndexBuffer* IndexBuffer::Create(const std::vector<unsigned int>& indices)
 		{
-#if defined(IS_VULKAN) && !defined(IS_OPENGL)
+#if defined(IS_VULKAN)
 			return Memory::MemoryManager::NewOnFreeList<Platform::VulkanIndexBuffer>(indices);
-#elif defined(IS_OPENGL) && !defined(IS_VULKAN)
+#endif
 			IS_IMPLERMENT("Opengl index buffer missing.");
 			return nullptr;
-#else
-			return nullptr;
-#endif
 		}
 	}
 }
