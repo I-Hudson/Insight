@@ -51,7 +51,9 @@ namespace Insight
 				auto exIt = std::find(m_extensions.begin(), m_extensions.end(), extension);
 				if (exIt != m_extensions.end())
 				{
-					Model* m = NEW_ON_HEAP(Model, entry.path().u8string());
+					std::string formattedFilePath = entry.path().u8string();
+					std::replace(formattedFilePath.begin(), formattedFilePath.end(), '\\', '/');
+					Model* m = NEW_ON_HEAP(Model, formattedFilePath);
 					AddAsset(m->GetUUID(), m);
 				}
 			}

@@ -25,12 +25,14 @@ namespace Insight
 		inline void AddRef();
 		inline void Release();
 
+		void CreateHash(std::string const& str);
+
 		void operator delete(void* ptr);
-	
+
 	private:
 		long m_refCount;
 		std::string m_typeName;
-
+		uint64_t m_hash;
 		std::unordered_map<void*, ObjectCallback> m_onDestroyCallbacks;
 	};
 }

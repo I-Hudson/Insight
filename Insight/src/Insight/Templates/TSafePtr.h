@@ -31,8 +31,11 @@ public:
 	// Release this safe ptr container.
 	void Release()
 	{
-		static_cast<Insight::Object*>(m_ptr)->Release();
-		m_ptr = nullptr;
+		if (m_ptr != nullptr)
+		{
+			static_cast<Insight::Object*>(m_ptr)->Release();
+			m_ptr = nullptr;
+		}
 	}
 
 	T* operator ->() const { return m_ptr; }

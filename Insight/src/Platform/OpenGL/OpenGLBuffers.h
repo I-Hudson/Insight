@@ -1,46 +1,42 @@
 #pragma once
-#ifdef IS_OPENGL
+
 #include "Insight/Core.h"
 
 #include "Insight/Renderer/Buffer.h"
 
 #include <GLFW/glfw3.h>
 
-namespace Insight
+namespace Platform
 {
-	namespace Render
+	class OpenGLRenderer;
+
+	class IS_API OpenGLVertexBuffer : public Insight::Render::VertexBuffer
 	{
-		class OpenGLRenderer;
+	public:
+		OpenGLVertexBuffer(const std::vector<Vertex>& vertices);
+		virtual ~OpenGLVertexBuffer() override;
 
-		class IS_API OpenGLVertexBuffer : public VertexBuffer
-		{
-		public:
-			OpenGLVertexBuffer(const std::vector<Vertex>& vertices);
-			virtual ~OpenGLVertexBuffer() override;
+		unsigned int GetBuffer() const { return m_buffer; }
 
-			unsigned int GetBuffer() const { return m_buffer; }
+	private:
+		unsigned int m_buffer;
 
-		private:
-			unsigned int m_buffer;
+		static OpenGLRenderer* s_Renderer;
+		friend OpenGLRenderer;
+	};
 
-			static OpenGLRenderer* s_Renderer;
-			friend OpenGLRenderer;
-		};
+	class OpenGLIndexBuffer : public Insight::Render::IndexBuffer
+	{
+	public:
+		OpenGLIndexBuffer(const std::vector<unsigned int>& indices);
+		virtual ~OpenGLIndexBuffer() override;
 
-		class OpenGLIndexBuffer : public IndexBuffer
-		{
-		public:
-			OpenGLIndexBuffer(const std::vector<unsigned int>& indices);
-			virtual ~OpenGLIndexBuffer() override;
+		unsigned int  GetBuffer() const { return m_buffer; }
 
-			unsigned int  GetBuffer() const { return m_buffer; }
+	private:
+		unsigned int m_buffer;
 
-		private:
-			unsigned int m_buffer;
-
-			static OpenGLRenderer* s_Renderer;
-			friend OpenGLRenderer;
-		};
-	}
+		static OpenGLRenderer* s_Renderer;
+		friend OpenGLRenderer;
+	};
 }
-#endif

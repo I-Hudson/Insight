@@ -31,6 +31,8 @@ namespace Insight
 		virtual Material* GetDefaultMaterial() { return nullptr; }
 
 		static Renderer* Create();
+
+		static GraphicsAPI s_API;
 	};
 }
 

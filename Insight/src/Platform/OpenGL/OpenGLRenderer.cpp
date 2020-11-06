@@ -1,5 +1,5 @@
 #include "ispch.h"
-#ifdef IS_OPENGL
+
 #include "Platform/OpenGL/OpenGL.h"
 #include "Platform/OpenGL/OpenGLMaterial.h"
 #include "Platform/OpenGL/OpenGLShader.h"
@@ -10,7 +10,7 @@
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/MeshComponent.h"
-#include "Insight/Camera.h"
+#include "Insight/Component/CameraComponent.h"
 
 #include "Insight/Config/Config.h"
 
@@ -51,4 +51,3 @@ namespace Platform
 	{
 	}
 }
-#endif

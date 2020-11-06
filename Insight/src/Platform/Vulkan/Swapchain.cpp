@@ -263,7 +263,7 @@ namespace Platform
 
 		ImGuiRenderer::GetInstance()->EndFrame();
 
-		m_imguiCommandBuffers[m_currentFrame]->StartRecord(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
+		m_imguiCommandBuffers[m_currentFrame]->StartRecord(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 		m_swapchainFramebuffers[m_currentFrame]->BindBuffer(m_imguiCommandBuffers[m_currentFrame]);
 		m_materials[m_currentFrame]->Bind(m_imguiCommandBuffers[m_currentFrame], nullptr);
 		ImGuiRenderer::GetInstance()->Render(m_imguiCommandBuffers[m_currentFrame]);
@@ -386,6 +386,7 @@ namespace Platform
 
 		m_drawCommandPool->FreeCommandBuffers();
 		m_drawCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
+		m_imguiCommandBuffers = m_drawCommandPool->AllocCommandBuffers(3);
 
 		for (size_t i = 0; i < m_swapchainFramebuffers.size(); ++i)
 		{

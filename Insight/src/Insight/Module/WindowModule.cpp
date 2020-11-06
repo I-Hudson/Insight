@@ -7,9 +7,7 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #include "stb_image.h"
-#ifdef IS_OPENGL
 #include <glad/glad.h>
-#endif
 #include "GLFW/glfw3.h"
 
 namespace Insight
@@ -96,12 +94,17 @@ namespace Insight
 			glfwInit();
 
 #ifdef IS_VULKAN
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-			//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-#elif defined(IS_OPENGL)
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+			if (Renderer::s_API == GraphicsAPI::Vulkan)
+			{
+				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+				//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+			}
+			else if (Renderer::s_API == GraphicsAPI::OpenGL)
+			{
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+			}
 #endif // IS_VULKAN
 
 
@@ -116,16 +119,17 @@ namespace Insight
 					EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));
 				});
 
-#ifdef IS_OPENGL
-			glfwMakeContextCurrent(m_window->m_window);
-
-			if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+			if (Renderer::s_API == GraphicsAPI::OpenGL)
 			{
-				IS_CORE_ERROR("Failed to initialize GLAD");
+				glfwMakeContextCurrent(m_window->m_window);
 
-				glViewport(0, 0, CONFIG_VAL(Config::WindowConfig.WindowWidth), CONFIG_VAL(Config::WindowConfig.WindowHeight));
+				if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+				{
+					IS_CORE_ERROR("Failed to initialize GLAD");
+
+					glViewport(0, 0, CONFIG_VAL(Config::WindowConfig.WindowWidth), CONFIG_VAL(Config::WindowConfig.WindowHeight));
+				}
 			}
-#endif
 		}
 
 		WindowModule::~WindowModule()

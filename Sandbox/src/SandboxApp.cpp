@@ -23,21 +23,21 @@ public:
 		Entity* mainCamera = Entity::Create("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 
-		bool test = false;
+		bool test = true;
 
 		Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
-		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Survival_BackPack_2/backpack.obj");
+		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 
 		Entity::Create("Root Entity")->AddChild("child_1");
 
 		if (test)
 		{
-			for (size_t i = 0; i < 5; ++i)
+			for (size_t i = 0; i < 50; ++i)
 			{
 				{
 					Entity* testModel = Entity::CreateFromModel(m);
  					testModel->AddComponent<PlayerController>();
-					glm::vec3 pos = glm::vec3(/*rand() % 50*/0, 0, /*rand() % 50*/0);
+					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
 					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}

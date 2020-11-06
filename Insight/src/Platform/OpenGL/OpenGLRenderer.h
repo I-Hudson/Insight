@@ -1,5 +1,5 @@
 #pragma once
-#ifdef IS_OPENGL
+
 #include "Insight/Core.h"
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
@@ -44,4 +44,3 @@ namespace Platform
 		friend OpenGLMaterial;
 	};
 }
-#endif

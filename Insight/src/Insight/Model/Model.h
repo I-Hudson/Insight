@@ -2,7 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Model/Mesh.h"
-#include "Insight/UUID.h"
+#include "Insight/Object.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-class IS_API Model : public Insight::UUID
+class IS_API Model : public Insight::Object
 {
 public:
 	Model();
