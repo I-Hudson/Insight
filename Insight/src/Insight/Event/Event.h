@@ -19,6 +19,8 @@ namespace Insight
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled,
 
 		Serialize, Deserialize,
+
+		VulkanWindowResize,
 	};
 
 	static std::string EventTypeToString(const EventType& type)

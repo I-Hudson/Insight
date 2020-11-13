@@ -14,6 +14,7 @@ namespace Insight
 			: m_sizeUsed(0), m_totalSize(size), m_policy(policy)
 		{
 			m_startPtr = malloc(size);
+			memset(m_startPtr, 0, size);
 			m_startAddress = reinterpret_cast<PtrInt>(m_startPtr);
 			Reset();
 			m_totalSize += size;
@@ -235,12 +236,15 @@ namespace Insight
 			IS_CORE_ASSERT(fullTypeName.length() <= AllocHeader_TypeNameLength, "[FreeListAllocator::Alloc] 'type' is longer then allowed. Shortten the 'type' name in this function.");
 
 			// Remove "Class ", from type name;
-			std::string typeName = fullTypeName.substr(6);
-			if (size_t offset = typeName.find_last_of(':'))
+			std::string typeName = fullTypeName;
+			if (typeName.find("class") != std::string::npos)
 			{
-				typeName = typeName.substr(offset + 1);
+				typeName = fullTypeName.substr(6);
+				if (size_t offset = typeName.find_last_of(':'))
+				{
+					typeName = typeName.substr(offset + 1);
+				}
 			}
-
 			return typeName;
 		}
 

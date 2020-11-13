@@ -19,7 +19,7 @@ namespace Insight
 		OpenGL = 2
 	};
 
-	class IS_API Renderer
+	class IS_API Renderer : public Object
 	{
 	public:
 		virtual ~Renderer() { }
@@ -31,6 +31,12 @@ namespace Insight
 		virtual Material* GetDefaultMaterial() { return nullptr; }
 
 		static Renderer* Create();
+
+		struct RendererConfig
+		{
+			CVar<int> VSync			{ "vsync", 0 };
+			CVar<int> Validation	{ "validation", 1 };
+		};
 
 		static GraphicsAPI s_API;
 	};

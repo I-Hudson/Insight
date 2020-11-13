@@ -2,10 +2,10 @@
 
 #include "Core.h"
 #include <memory>
+#include <thread>
 
 namespace Insight
 {
-
 	namespace Module
 	{
 		class ModuleManager;
@@ -20,6 +20,13 @@ namespace Insight
 		class MemoryManager;
 	}
 
+	enum UpdateThreadState
+	{
+		SAME_FRMAE = 0,
+		ONE_FRAME_AHEAD,
+		TWO_FRAME_AHEAD
+	};
+
 	class IS_API Application
 	{
 	public:
@@ -32,8 +39,19 @@ namespace Insight
 		virtual void OnFrameEnd() { }
 
 		void Run();
+		void RenderLoop();
 
 	private:
+
+		std::mutex m_mutex;
+		std::thread m_updateThread;
+		std::thread m_renderThread;
+
+		UpdateThreadState m_updateThreadState;
+
+		bool m_isRunning = true;
+		bool m_triggerRender = true;
+		bool m_renderComplete = true;
 
 		Memory::MemoryManager* m_memoryManager;
 

@@ -23,15 +23,14 @@ public:
 		Entity* mainCamera = Entity::Create("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 
-		bool test = true;
-
-		Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
-		Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
+		bool test = false;
 
 		Entity::Create("Root Entity")->AddChild("child_1");
 
 		if (test)
 		{
+			Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
+			Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 			for (size_t i = 0; i < 50; ++i)
 			{
 				{

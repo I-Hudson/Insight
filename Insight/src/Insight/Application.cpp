@@ -25,7 +25,13 @@
 #include "Time/Time.h"
 #include "Input/Input.h"
 #include <glm\ext\matrix_transform.hpp>
+
+#include <imgui.h>
 #include "misc/cpp/imgui_stdlib.h"
+
+#include "Threading/TThreadSafe.h"
+
+//#define THREADS
 
 namespace Insight
 {
@@ -60,6 +66,11 @@ namespace Insight
 		m_moduleManager->AddModule<Module::EditorModule>();
 #endif
 
+		TThreadSafe<int> testInt;
+		testInt = 0;
+		++testInt;
+		IS_CORE_INFO("{0}", testInt.GetValue());
+
 		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}
 
@@ -81,20 +92,21 @@ namespace Insight
 
 	void TestFunc(CameraComponent* cam)
 	{
+		IS_PROFILE_FUNCTION();
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-		ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+		//ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
-		float cameraFOV = cam != nullptr ? cam->GetFov() : 0;
-		if (ImGui::SliderFloat("Main Camera FOV: ", &cameraFOV, 0.1f, 120.0f))
-		{
-			if (cam != nullptr)
-			{
-				cam->SetFov(cameraFOV);
-			}
-		}
+		//float cameraFOV = cam != nullptr ? cam->GetFov() : 0;
+		//if (ImGui::SliderFloat("Main Camera FOV: ", &cameraFOV, 0.1f, 120.0f))
+		//{
+		//	if (cam != nullptr)
+		//	{
+		//		cam->SetFov(cameraFOV);
+		//	}
+		//}
 
-		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::End();
+		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		//ImGui::End();
 #endif
 	}
 
@@ -103,75 +115,144 @@ namespace Insight
 		//AllcoBench();
 		Create();
 
-		bool isRunning = false;
+#ifdef THREADS
+			m_updateThreadState = UpdateThreadState::SAME_FRMAE;
+			m_renderThread = std::thread(&Application::RenderLoop, this);
+#endif
 
-		do
+		uint32_t m_loopCount = 0;
+		uint32_t m_frameCount = 0;
+		float deltaTime = 0.0f;
+
+		while (m_isRunning)
 		{
-			IS_PROFILE_FUNCTION();
+			IS_PROFILE_SCOPE("UPDATE_LOOP");
+			{
+				IS_PROFILE_SCOPE("UPDATE_LOOP_START");
+			}
+#ifdef THREADS
+			if (m_updateThreadState == UpdateThreadState::SAME_FRMAE || m_updateThreadState == UpdateThreadState::ONE_FRAME_AHEAD)
+#endif
+			{
+#ifdef THREADS
+				m_mutex.lock();
+				m_triggerRender = false;
+				m_mutex.unlock();
+#endif
 
-			Time::UpdateTime();
+				Time::UpdateTime();
+				deltaTime = Time::GetDeltaTime();
 
-			IS_CORE_INFO("FPS: {0}", 1.0f / Time::GetDeltaTime());
-			IS_CORE_INFO("Frame Time: {0}", Time::GetDeltaTime());
+				m_inputModule->Update(deltaTime);
+
+				IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
+				IS_CORE_INFO("Frame Time: {0}", deltaTime);
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-			ImGuiRenderer::GetInstance()->NewFrame();	
+				Insight::ImGuiRenderer::GetInstance()->NewFrame();
+				/*
+				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
+				ImGui::Begin("Scene");
+				ImGui::InputText("Scene Name", &sceneFileName);
+				ImGui::End();
 
-			std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
-			ImGui::Begin("Scene");
-			ImGui::InputText("Scene Name", &sceneFileName);
-			ImGui::End();
+				Scene::ActiveScene()->SetSceneName(sceneFileName);
 
-			Scene::ActiveScene()->SetSceneName(sceneFileName);
+				ImGui::BeginMainMenuBar();
 
-			ImGui::BeginMainMenuBar();
-
-			if (ImGui::BeginMenu("Scene"))
-			{
-				if (ImGui::MenuItem("Save Scene"))
+				if (ImGui::BeginMenu("Scene"))
 				{
-					Scene::ActiveScene()->Save();
+					if (ImGui::MenuItem("Save Scene"))
+					{
+						Scene::ActiveScene()->Save();
+					}
+
+					if (ImGui::MenuItem("Load Scene"))
+					{
+						Scene::ActiveScene()->Load(sceneFileName);
+					}
+					ImGui::EndMenu();
 				}
 
-				if (ImGui::MenuItem("Load Scene"))
+				if (ImGui::MenuItem("Save Model Library"))
 				{
-					Scene::ActiveScene()->Load(sceneFileName);
+					tinyxml2::XMLDocument doc;
+					tinyxml2::XMLNode* models = doc.NewElement("Models");
+					Insight::Library::ModelLibrary::GetInstance()->Serialize(models, &doc);
+					doc.InsertEndChild(models);
+					doc.SaveFile("ModelLibrary.xml");
 				}
-				ImGui::EndMenu();
-			}
-
-			if (ImGui::MenuItem("Save Model Library"))
-			{
-				tinyxml2::XMLDocument doc;
-				tinyxml2::XMLNode* models = doc.NewElement("Models");
-				Insight::Library::ModelLibrary::GetInstance()->Serialize(models, &doc);
-				doc.InsertEndChild(models);
-				doc.SaveFile("ModelLibrary.xml");
-			}
-			ImGui::EndMainMenuBar();
+				ImGui::EndMainMenuBar();*/
 #endif
-			m_moduleManager->Update(Time::GetDeltaTime());
+				//m_moduleManager->Update(deltaTime);
 
-			static float f = 0.0f;
-			static int counter = 0;
+				//TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 
-			bool show_demo_window = true;
-			bool show_another_window = true;
+				//Update(deltaTime);
+				//Draw();
+#ifndef THREADS
+				m_graphicsModule->Update(deltaTime);
 
-			TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
-			
-			Update(Time::GetDeltaTime());
-			Draw();
+				m_windowModule->Update(deltaTime);
+#endif
 
-			m_inputModule->Update(Time::GetDeltaTime());
+#ifdef THREADS
+				m_mutex.lock();
+#endif
+				m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
+#ifdef THREADS
+				m_renderComplete = false;
+				m_triggerRender = true;
+				m_updateThreadState = (UpdateThreadState)((int)m_updateThreadState + 1);
+				// Transfer all data to render thread.
+				m_mutex.unlock();
+#endif	
+				OnFrameEnd();
+				++m_frameCount;
+			}
+			++m_loopCount;
+			{
+				IS_PROFILE_SCOPE("UPDATE_LOOP_END");
+			}
+		};
 
-			m_graphicsModule->Update(Time::GetDeltaTime());
+#ifdef THREADS
+		m_renderThread.join();
+#endif
 
-			isRunning = !m_windowModule->GetWindow()->ShouldClose();
-			m_windowModule->Update(Time::GetDeltaTime());
+		IS_CORE_INFO("UPDATE LOOP COUNT: {0}", m_loopCount);
+		IS_CORE_INFO("UPDATE FRAME COUNT: {0}", m_frameCount);
+	}
 
-			OnFrameEnd();
+	void Application::RenderLoop()
+	{
+		uint32_t m_loopCount = 0;
+		uint32_t m_frameCount = 0;
 
-		} while (isRunning);
+		while (m_isRunning)
+		{
+			IS_PROFILE_SCOPE("RENDER_LOOP");
+			{
+				IS_PROFILE_SCOPE("RENDER_LOOP_START");
+			}
+
+			if (m_triggerRender)
+			{
+				m_graphicsModule->Update(Time::GetDeltaTime());
+				m_mutex.lock();
+				m_renderComplete = true;
+				m_triggerRender = false;
+				m_updateThreadState = UpdateThreadState::SAME_FRMAE;
+				m_mutex.unlock();
+				++m_frameCount;
+			}
+			++m_loopCount;
+			{
+				IS_PROFILE_SCOPE("RENDER_LOOP_END");
+			}
+		}
+
+		IS_CORE_INFO("RENDER LOOP COUNT: {0}", m_loopCount);
+		IS_CORE_INFO("RENDER FRAME COUNT: {0}", m_frameCount);
 	}
 }

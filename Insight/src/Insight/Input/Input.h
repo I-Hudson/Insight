@@ -18,6 +18,8 @@ public:
 	static bool MouseButtonDown(int keycode);
 	static bool MouseButtonUp(int keycode);
 	static void GetMousePosition(double* mouseX, double* mouseY);
+	static void GetMousePosition(float* mouseX, float* mouseY);
+	static void GetMousePosition(int* mouseX, int* mouseY);
 
 private:
 	static bool KeyCodeExits(int keycode);

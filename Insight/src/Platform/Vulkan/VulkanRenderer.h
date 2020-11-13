@@ -5,11 +5,10 @@
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Renderer/ShaderModule.h"
 
-#include "Device.h"
-#include "Queue.h"
+#include "VulkanDevice.h"
 #include "Swapchain.h"
-#include "VulkanMaterial.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
+#include "Insight/Threading/Threadpool.h"
 
 class CameraComponent;
 
@@ -18,72 +17,184 @@ namespace Insight
 	class Event;
 }
 
-namespace Platform
+namespace vks
 {
-	class VulkanMaterial;
-
 	class IS_API VulkanRenderer : public Insight::Renderer
 	{
 	public:
 		VulkanRenderer();
 		virtual ~VulkanRenderer() override;
 
+		void InitVulkan();
+
 		virtual void Clear() override;
 		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) override;
 		virtual void Present() override;
 
-		virtual Material* GetDefaultMaterial() override;
-
-		const VkInstance& GetInstance() { return m_device->GetInstance(); }
-		const VkDevice& GetDevice() { return m_device->GetDevice(); }
-		const VkPhysicalDevice& GetPhysicalDevice() const { return m_device->GetPhysicalDevice(); }
-		const VkSurfaceKHR& GetSurface() const { return m_surface; }
-		Device* GetDeviceWrapper() const { return m_device; }
-
-		Queue GetGraphicsQueue() const { return m_device->GetQueue(QueueFamilyType::Graphics); }
-		Queue GetPresentQueue() const { return m_device->GetQueue(QueueFamilyType::Present); }
-
-	private:
-
-		void RecreateFramebuffers(const Insight::Event& event);
-		void DeserializeFromFile(const Insight::Event& event);
-
-		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
-
-		bool CheckValidationLayerSupport(const std::vector<const char*>& validationLayers);
-		std::vector<const char*> GetRequiredExtensions();
-		void VulkanEnumExtProps();
+		/** @brief Return our instance */
+		VkInstance GetInstance() { return m_instance; }
+		/** @brief Return our device wrapper */
+		vks::VulkanDevice* GetDevice() { return m_vulkanDevice; }
+		/** @brief Return our physical device */
+		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
+		/** @brief Return the graphics queue */
+		VkQueue GetQueue() { return m_queue; }
+		/** @brief Return the default render pass */
+		VkRenderPass GetRenderPass() { return m_renderPass; }
+		/** @brief Return the default descriptor pool */
+		VkDescriptorPool GetDescriptorPool() { return m_descriptorPool; }
 
 	private:
+		void Prepare();
+		void InitSwapchain();
+		void SetupSwapchain();
+		void CreateCommandBuffers();
+		void CreatePipelineCache();
+		void DestroyCommandBuffers();
+		void CreateCommandPool();
+		void CreateDescriptorPool();
+		void CreateSynchronizationPrimitives();
 
-		ImGuiRenderer* m_imguiRenderer;
+		/** @brief (Virtual) Creates the application wide Vulkan instance */
+		virtual VkResult CreateInstance(bool enableValidation);
+		/** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
+		virtual void BuildCommandBuffers();
+		/** @brief (Virtual) Setup default depth and stencil views */
+		virtual void SetupDepthStencil();
+		/** @brief (Virtual) Setup default framebuffers for all requested swapchain images */
+		virtual void SetupFrameBuffer();
+		/** @brief (Virtual) Setup a default renderpass */
+		virtual void SetupRenderPass();
+		/** @brief (Virtual) Called after the physical device features have been read, can be used to set features to enable on the device */
+		virtual void GetEnabledFeatures();
+
+		float rnd(float range);
+		void PrepareMultiThreadedRenderer();
+		void UpdateSecondaryCommandBuffers(VkCommandBufferInheritanceInfo inheritanceInfo);
+		void UpdateCommandBuffer(VkFramebuffer frameBuffer);
+
+		void ThreadRenderCode(int32_t threadIndex, uint32_t cmdBufferIndex, VkCommandBufferInheritanceInfo inheritanceInfo);
+
+		void WindowResizeEvent(const Insight::Event& event);
+
+		// Use push constants to update shader
+		// parameters on a per-thread base
+		struct ThreadPushConstantBlock
+		{
+			glm::mat4 mvp;
+			glm::vec3 color;
+		};
+
+		struct ObjectData
+		{
+			glm::mat4 model;
+			glm::vec3 pos;
+			glm::vec3 rotation;
+			float rotationDir;
+			float rotationSpeed;
+			float scale;
+			float deltaT;
+			float stateT = 0;
+			bool visible = false;
+		};
+
+		struct ThreadData
+		{
+			VkCommandPool commandPool;
+			// One command buffer per render object
+			std::vector<VkCommandBuffer> commandBuffer;
+			// One push constant block per render object
+			std::vector<ThreadPushConstantBlock> pushConstBlock;
+			// Per object information (position, rotation, etc.)
+			std::vector<ObjectData> objectData;
+		};
+
+	private:
 		bool m_recordCommandBuffers;
 
+		std::vector<ThreadData> m_threadData;
+		// Multi threaded stuff
+		// Max. number of concurrent threads
+		uint32_t m_numThreads;
+		Insight::ThreadPool m_threadPool;
+		uint32_t m_numObjectsPerThread;
+
+		std::default_random_engine m_rndEngine;
+
 		// Vulkan objects
-		Device* m_device;
-		Swapchain* m_swapchain;
+		Swapchain m_swapchain;
 
-		Fence* m_commndFence;
-		CommandPool* m_commandPool;
-		CommandBuffer* m_commandBuffer;
-		Insight::Render::Shader* m_shader;
-		VulkanMaterial* m_material;
-		VulkanFramebuffer* m_framebuffer;
+		VkClearColorValue m_clearColor;
 
-		VkSurfaceKHR m_surface;
+		struct
+		{
+			// Swap chain image presentation
+			VkSemaphore PresentComplete;
+			// Command buffer submission and execution
+			VkSemaphore RenderComplete;
+		}m_semaphores;
 
-		uint64_t vertexCount = 0;
-		uint64_t triCount = 0;
-		uint64_t meshCount = 0;
+		struct
+		{
+			VkImage Image;
+			VkDeviceMemory Mem;
+			VkImageView View;
+		} m_depthStencil;
 
-		bool m_enableValidationLayers = true;
-		std::vector<const char*> m_validationLayers;
+		// Vulkan instance, stores all per-application states
+		VkInstance m_instance;
+		std::vector<std::string> m_supportedInstanceExtensions;
+		// Physical device (GPU) that Vulkan will use
+		VkPhysicalDevice m_physicalDevice;
+		// Stores physical device properties (for e.g. checking device limits)
+		VkPhysicalDeviceProperties m_deviceProperties;
+		// Stores the features available on the selected physical device (for e.g. checking if a feature is available)
+		VkPhysicalDeviceFeatures m_deviceFeatures;
+		// Stores all available memory (type) properties for the physical device
+		VkPhysicalDeviceMemoryProperties m_deviceMemoryProperties;
+		/** @brief Set of physical device features to be enabled for this example (must be set in the derived constructor) */
+		VkPhysicalDeviceFeatures m_enabledFeatures{};
+		/** @brief Set of device extensions to be enabled for this example (must be set in the derived constructor) */
+		std::vector<const char*> m_enabledDeviceExtensions;
+		std::vector<const char*> m_enabledInstanceExtensions;
+		/** @brief Optional pNext structure for passing extension structures to device creation */
+		void* m_deviceCreatepNextChain = nullptr;
 
-		std::vector<const char*> m_deviceExtensions;
+		/** @brief Encapsulated physical and logical vulkan device */
+		vks::VulkanDevice* m_vulkanDevice;
 
-		Insight::Module::WindowModule* m_windowModule;
+		/** @brief Logical device, application's view of the physical device (GPU) */
+		VkDevice m_device;
+		// Handle to the device graphics queue that command buffers are submitted to
+		VkQueue m_queue;
+		// Depth buffer format (selected during Vulkan initialization)
+		VkFormat m_depthFormat;
+		// Command buffer pool
+		VkCommandPool m_cmdPool;
+		/** @brief Pipeline stages used to wait at for graphics queue submissions */
+		VkPipelineStageFlags m_submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		// Contains command buffers and semaphores to be presented to the queue
+		VkSubmitInfo m_submitInfo;
+		// Pirmary Command buffers used for rendering
+		VkCommandBuffer m_primaryCommandBuffer;
+		struct
+		{
+			VkCommandBuffer UI;
+		} m_secondaryCommandBuffers;
+		// Global render pass for frame buffer writes
+		VkRenderPass m_renderPass;
+		// List of available frame buffers (same as number of swap chain images)
+		std::vector<VkFramebuffer> m_frameBuffers;
+		// Active frame buffer index
+		uint32_t m_currentBuffer = 0;
+		// Descriptor set pool
+		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
+		// List of shader modules created (stored for cleanup)
+		std::vector<VkShaderModule> m_shaderModules;
+		// Pipeline cache object
+		VkPipelineCache m_pipelineCache;
 
-		friend VulkanMaterial;
+		std::vector<VkFence> m_waitFences;
 	};
 }
 #endif

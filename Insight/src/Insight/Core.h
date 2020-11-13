@@ -5,6 +5,7 @@
 #ifdef  IS_PLATFORM_WINDOWS
 
 #include "InsightAlias.h"
+#include "Insight/Object.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #ifdef IS_DEBUG
@@ -27,6 +28,8 @@
 
 #define IS_TODO(...)
 #define IS_TODO_CORE(...)
+#define IS_IMPLERMENT(...)
+#define IS_IMPLERMENT_CORE(...)
 
 #endif // IS_DEBUG 
 

@@ -29,8 +29,7 @@ namespace Insight
 		}
 
 		void InputModule::Update(const float& deltaTime)
-		{
-		}
+		{ }
 
 		void InputModule::KeybordCallback(GLFWwindow* window, int key, int scanCode, int action, int mod)
 		{
@@ -50,18 +49,27 @@ namespace Insight
 				break;
 			}
 
+#ifdef IMGUI_ENABLED
 			ImGui_ImplGlfw_KeyCallback(window, key, scanCode, action, mod);
+#endif
 		}
 
 		void InputModule::CharCallback(GLFWwindow* window, unsigned int c)
 		{
+#ifdef IMGUI_ENABLED
 			ImGui_ImplGlfw_CharCallback(window, c);
+#endif
 		}
 
 		void InputModule::MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY)
 		{
 			m_mouseX = mouseX;
 			m_mouseY = mouseY;
+
+#ifdef IMGUI_ENABLED
+			ImGuiIO io = ImGui::GetIO();
+			io.MousePos = ImVec2(m_mouseX, m_mouseY);
+#endif
 		}
 
 		void InputModule::MouseButtonCallback(GLFWwindow* window, int button, int action, int mod)
@@ -77,6 +85,10 @@ namespace Insight
 				m_inputStates[button].MouseButtonPressed = !m_inputStates[button].MouseButtonReleased;
 				break;
 			}
+
+#ifdef IMGUI_ENABLED
+			ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mod);
+#endif
 		}
 	}
 }

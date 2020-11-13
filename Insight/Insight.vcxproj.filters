@@ -64,6 +64,9 @@
     <Filter Include="src\Insight\Templates">
       <UniqueIdentifier>{D01232D2-3C7F-EDCC-0573-852A719E0F35}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Threading">
+      <UniqueIdentifier>{376C6CFD-A3D8-27F8-6CCC-BF55D8F74960}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Time">
       <UniqueIdentifier>{509306AD-3C8C-25FF-65BE-0A845116050B}</UniqueIdentifier>
     </Filter>
@@ -155,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Core.h">
       <Filter>src\Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Editor\Diagnostic.h">
+      <Filter>src\Insight\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Editor\EditorPanel.h">
       <Filter>src\Insight\Editor</Filter>
@@ -288,6 +294,9 @@
     <ClInclude Include="src\Insight\Renderer\Material.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Renderer\RenderPass.h">
+      <Filter>src\Insight\Renderer</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Renderer.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
@@ -321,6 +330,12 @@
     <ClInclude Include="src\Insight\Templates\TSingleton.h">
       <Filter>src\Insight\Templates</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Threading\TThreadSafe.h">
+      <Filter>src\Insight\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Threading\Threadpool.h">
+      <Filter>src\Insight\Threading</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Time\Stopwatch.h">
       <Filter>src\Insight\Time</Filter>
     </ClInclude>
@@ -345,58 +360,28 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
       <Filter>src\Platform\OpenGL</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\CommandBuffer.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\CommandPool.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\DescriptorPool.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\DescriptorSet.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Device.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Fence.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Queue.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\QueueFamily.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Renderpass.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Semaphore.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Vulkan.h">
+    <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanBuffers.h">
+    <ClInclude Include="src\Platform\Vulkan\VulkanDebug.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanFramebuffer.h">
+    <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanInits.h">
+    <ClInclude Include="src\Platform\Vulkan\VulkanHeader.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanMaterial.h">
+    <ClInclude Include="src\Platform\Vulkan\VulkanImGUIRenderer.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanInitializers.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanRenderer.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanShader.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\ispch.h">
@@ -1793,6 +1778,9 @@
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Threading\TThreadSafe.cpp">
+      <Filter>src\Insight\Threading</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp">
       <Filter>src\Insight\Time</Filter>
     </ClCompile>
@@ -1811,52 +1799,25 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
       <Filter>src\Platform\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\CommandBuffer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\CommandPool.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\DescriptorPool.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\DescriptorSet.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Device.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Fence.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Queue.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\QueueFamily.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Renderpass.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Semaphore.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanBuffers.cpp">
+    <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanFramebuffer.cpp">
+    <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanMaterial.cpp">
+    <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanShader.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\ispch.cpp">

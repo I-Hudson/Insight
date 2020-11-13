@@ -1,25 +1,23 @@
 #include "ispch.h"
 #ifdef IS_VULKAN
-#include "Vulkan.h"
+#include "VulkanHeader.h"
 #include "VulkanRenderer.h"
-#include "QueueFamily.h"
-#include "VulkanBuffers.h"
-#include "VulkanMaterial.h"
+#include "VulkanDebug.h"
 
-#include "Insight/Module/ModuleManager.h"
-#include "Insight/Library/ShaderLibrary.h"
+#include "VulkanImGUIRenderer.h"
+
+#include <glm/gtc/constants.hpp>
+
+#include "Insight/Config/Config.h"
 #include "Insight/Event/EventManager.h"
-#include "Insight/Component/MeshComponent.h"
-#include "Insight/Component/TransformComponent.h"
-#include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/CameraComponent.h"
 
-#include "Insight/Time/Time.h"
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Insight/Time/Time.h"
 
 
-namespace Platform
+namespace vks
 {
 	std::string GetFormatInt(uint64_t i)
 	{
@@ -42,293 +40,927 @@ namespace Platform
 
 	VulkanRenderer::VulkanRenderer()
 	{
-		VulkanVertexBuffer::s_Renderer = this;
-		VulkanIndexBuffer::s_Renderer = this;
-		VulkanMaterial::s_Renderer = this;
+		REG_EVENT_HANDLE(Insight::EventType::WindowResize, VulkanRenderer::WindowResizeEvent);
 
+		m_numThreads = std::thread::hardware_concurrency();
+		IS_CORE_ASSERT(m_numThreads > 0, "Number of threads has to be greater than 0.");
+		IS_CORE_INFO("numThreads = {0}", m_numThreads);
+#endif
+		m_threadPool.setThreadCount(m_numThreads);
+		m_numObjectsPerThread = 512 / m_numThreads;
 
-		m_windowModule = Insight::Module::ModuleManager::GetInstance()->GetModule<Insight::Module::WindowModule>();
-		m_recordCommandBuffers = true;
+		m_rndEngine.seed((unsigned)time(nullptr));
 
-		m_validationLayers =
-		{
-			"VK_LAYER_KHRONOS_validation"
-		};
-
-		m_deviceExtensions =
-		{
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
-		};
-
-		if (!CheckValidationLayerSupport(m_validationLayers))
-		{
-			m_validationLayers.clear();
-		}
-
-		m_device = NEW_ON_HEAP(Device, m_validationLayers, m_deviceExtensions, GetRequiredExtensions());
-
-		m_framebuffer = NEW_ON_HEAP(VulkanFramebuffer, m_device, m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
-		m_framebuffer->CreateAttachment(VK_FORMAT_B8G8R8A8_SRGB, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-		m_framebuffer->CreateAttachment(VK_FORMAT_D32_SFLOAT, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-		m_framebuffer->CompileFrameBuffer();
-
-		std::vector<std::string> shaderPaths = { "vulkan/offscreen_shader.vert", "vulkan/offscreen_shader.frag" };
-		glm::ivec2 extent = glm::ivec2(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
-		m_shader = NEW_ON_HEAP(VulkanShader, m_device, shaderPaths, extent, m_framebuffer->GetRenderpass());
-		Insight::Library::ShaderLibrary::GetInstance()->AddAsset(m_shader->GetUUID(), m_shader);
-
-		m_material = static_cast<VulkanMaterial*>(Material::Create());
-		m_material->SetShader(m_shader);
-
-		m_commandPool = NEW_ON_HEAP(CommandPool, m_device, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-		m_commandBuffer = m_commandPool->AllocCommandBuffer();
-
-		m_swapchain = NEW_ON_HEAP(Swapchain, m_device);
-
-		Insight::EventManager::Bind(Insight::EventType::WindowResize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::RecreateFramebuffers, this));
-		Insight::EventManager::Bind(Insight::EventType::Deserialize, typeid(VulkanRenderer).name(), BIND_FUNC(VulkanRenderer::DeserializeFromFile, this));
-
+		InitVulkan();
 		IS_CORE_INFO("Vulkan Setup Complete.");
 	}
 
 	VulkanRenderer::~VulkanRenderer()
 	{
-		m_device->WaitForIdle();
+		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
+		m_vulkanDevice->WaitForIdle();
 
-		Insight::EventManager::Unbind(Insight::EventType::WindowResize, typeid(VulkanRenderer).name());
-		Insight::EventManager::Unbind(Insight::EventType::Deserialize, typeid(VulkanRenderer).name());
+		// Clean up Vulkan resources
+		m_swapchain.CleanUp();
+		if (m_descriptorPool != VK_NULL_HANDLE)
+		{
+			vkDestroyDescriptorPool(m_device, m_descriptorPool, nullptr);
+		}
+		DestroyCommandBuffers();
+		vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		{
+			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
+		}
 
-		DELETE_ON_HEAP(m_material);
-		DELETE_ON_HEAP(m_framebuffer);
-		DELETE_ON_HEAP(m_commandPool);
+		for (auto& shaderModule : m_shaderModules)
+		{
+			vkDestroyShaderModule(m_device, shaderModule, nullptr);
+		}
+		vkDestroyImageView(m_device, m_depthStencil.View, nullptr);
+		vkDestroyImage(m_device, m_depthStencil.Image, nullptr);
+		vkFreeMemory(m_device, m_depthStencil.Mem, nullptr);
 
-		DELETE_ON_HEAP(m_swapchain);
-		DELETE_ON_HEAP(m_device);
+		vkDestroyPipelineCache(m_device, m_pipelineCache, nullptr);
+
+		vkDestroyCommandPool(m_device, m_cmdPool, nullptr);
+
+		vkDestroySemaphore(m_device, m_semaphores.PresentComplete, nullptr);
+		vkDestroySemaphore(m_device, m_semaphores.RenderComplete, nullptr);
+		for (auto& fence : m_waitFences)
+		{
+			vkDestroyFence(m_device, fence, nullptr);
+		}
+
+		for (auto& thread : m_threadData)
+		{
+			vkFreeCommandBuffers(m_device, thread.commandPool, thread.commandBuffer.size(), thread.commandBuffer.data());
+			vkDestroyCommandPool(m_device, thread.commandPool, nullptr);
+		}
+
+		DELETE_ON_HEAP(m_vulkanDevice);
+
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		{
+			vks::Debug::FreeDebugCallback(m_instance);
+		}
+
+		vkDestroyInstance(m_instance, nullptr);
+
+	}
+
+	void VulkanRenderer::InitVulkan()
+	{
+		VkResult err;
+
+		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
+
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		{
+			// The report flags determine what type of messages for the layers will be displayed
+			// For validating (debugging) an application the error and warning bits should suffice
+			VkDebugReportFlagsEXT debugReportFlags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+			// Additional flags include performance info, loader and layer debug messages, etc.
+			vks::Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
+		}
+
+		// Physical device
+		uint32_t gpuCount = 0;
+		// Get number of available physical devices
+		ThrowIfFailed(vkEnumeratePhysicalDevices(m_instance, &gpuCount, nullptr));
+		assert(gpuCount > 0);
+		// Enumerate devices
+		std::vector<VkPhysicalDevice> physicalDevices(gpuCount);
+		err = vkEnumeratePhysicalDevices(m_instance, &gpuCount, physicalDevices.data());
+		if (err)
+		{
+			IS_CORE_ASSERT(false, "Could not enumerate physical devices : {0}", vks::errorString(err), err);
+		}
+		// GPU selection
+
+		// Select physical device to be used for the Vulkan example
+		// Defaults to the first device unless specified by command line
+		uint32_t selectedDevice = 0;
+		gpuCount = 0;
+		ThrowIfFailed(vkEnumeratePhysicalDevices(m_instance, &gpuCount, nullptr));
+		if (gpuCount == 0)
+		{
+			std::cerr << "No Vulkan devices found!" << "\n";
+		}
+		else
+		{
+			// Enumerate devices
+			std::cout << "Available Vulkan devices" << "\n";
+			std::vector<VkPhysicalDevice> devices(gpuCount);
+			ThrowIfFailed(vkEnumeratePhysicalDevices(m_instance, &gpuCount, devices.data()));
+			for (uint32_t j = 0; j < gpuCount; j++)
+			{
+				VkPhysicalDeviceProperties deviceProperties;
+				vkGetPhysicalDeviceProperties(devices[j], &deviceProperties);
+				IS_CORE_INFO("Device [{0}] : {1}", j, deviceProperties.deviceName);
+				IS_CORE_INFO(" Type: {0}", vks::physicalDeviceTypeString(deviceProperties.deviceType));
+				IS_CORE_INFO(" API: {0}.{1}.{2}", (deviceProperties.apiVersion >> 22), ((deviceProperties.apiVersion >> 12) & 0x3ff), (deviceProperties.apiVersion & 0xfff));
+			}
+		}
+
+		m_physicalDevice = physicalDevices[selectedDevice];
+
+		// Store properties (including limits), features and memory properties of the physical device (so that examples can check against them)
+		vkGetPhysicalDeviceProperties(m_physicalDevice, &m_deviceProperties);
+		vkGetPhysicalDeviceFeatures(m_physicalDevice, &m_deviceFeatures);
+		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &m_deviceMemoryProperties);
+
+		// Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
+		GetEnabledFeatures();
+
+		// Vulkan device creation
+		// This is handled by a separate class that gets a logical device representation
+		// and encapsulates functions related to a device
+		m_vulkanDevice = NEW_ON_HEAP(vks::VulkanDevice, m_physicalDevice);
+		VkResult res = m_vulkanDevice->CreateLogicalDevice(m_enabledFeatures, m_enabledDeviceExtensions, m_deviceCreatepNextChain);
+		if (res != VK_SUCCESS)
+		{
+			IS_CORE_FATEL("Could not create Vulkan device: {0}", vks::errorString(res), res);
+		}
+		m_device = m_vulkanDevice->m_logicalDevice;
+
+		// Get a graphics queue from the device
+		vkGetDeviceQueue(m_device, m_vulkanDevice->m_queueFamilyIndices.graphics, 0, &m_queue);
+
+		// Find a suitable depth format
+		VkBool32 validDepthFormat = vks::getSupportedDepthFormat(m_physicalDevice, &m_depthFormat);
+		assert(validDepthFormat);
+
+		m_swapchain.Connect(m_instance, m_physicalDevice, m_device);
+
+		// Create synchronization objects
+		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
+		// Create a semaphore used to synchronize image presentation
+		// Ensures that the image is displayed before we start submitting new commands to the queue
+		ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.PresentComplete));
+		// Create a semaphore used to synchronize command submission
+		// Ensures that the image is not presented until all commands have been submitted and executed
+		ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.RenderComplete));
+
+		// Set up submit info structure
+		// Semaphores will stay the same during application lifetime
+		// Command buffer submission info is set by each example
+		m_submitInfo = vks::initializers::submitInfo();
+		m_submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
+		m_submitInfo.waitSemaphoreCount = 1;
+		m_submitInfo.pWaitSemaphores = &m_semaphores.PresentComplete;
+		m_submitInfo.signalSemaphoreCount = 1;
+		m_submitInfo.pSignalSemaphores = &m_semaphores.RenderComplete;
+
+		Prepare();
+
+		m_clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
 	}
 
 	void VulkanRenderer::Clear()
 	{
+		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.PresentComplete, &m_currentBuffer);
+		if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR))
+		{
+			WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
+		}
+		else
+		{
+			ThrowIfFailed(result);
+		}
 	}
 
+	// This should be moved to a submodule for every type of rendering we are doing.
 	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
-		if (mainCamera != nullptr)
+		VkResult fenceRes;
+		do
 		{
-			m_material->UpdateMVPUniform(mainCamera->GetProjMatrix(), mainCamera->GetViewMatrix());
+			fenceRes = vkWaitForFences(m_device, 1, &m_waitFences[0], VK_TRUE, 100000000);
+		} while (fenceRes == VK_TIMEOUT);
+		ThrowIfFailed(fenceRes);
+		vkResetFences(m_device, 1, & m_waitFences[0]);
+
+		Clear();
+
+		float lerpSpeed = 0.5f;
+		if (m_clearColor.float32[0] < 1.0f)
+		{
+			m_clearColor.float32[0] += lerpSpeed * Insight::Time::GetDeltaTime();
+		}
+		else if (m_clearColor.float32[1] < 1.0f)
+		{
+			m_clearColor.float32[0] = 1.0f;
+			m_clearColor.float32[1] += lerpSpeed * Insight::Time::GetDeltaTime();
+		}
+		else if (m_clearColor.float32[2] < 1.0f)
+		{
+			m_clearColor.float32[1] = 1.0f;
+			m_clearColor.float32[2] += lerpSpeed * Insight::Time::GetDeltaTime();
 		}
 		else
 		{
-			m_material->UpdateMVPUniform(glm::mat4(), glm::mat4());
-
+			m_clearColor.float32[0] = 0.0f;
+			m_clearColor.float32[1] = 0.0f;
+			m_clearColor.float32[2] = 0.0f;
 		}
 
+		if (false)
 		{
-			if (meshes.size() > 0)
-			{
-				IS_PROFILE_SCOPE("Object matrixs");
-				m_material->UpdateObjectsUniforms();
-			}
+			BuildCommandBuffers();
 		}
-
-		m_swapchain->AcquireNextImage();
-
-		m_framebuffer->GetFence()->Wait();
-
-		if (m_recordCommandBuffers)
+		else
 		{
-			m_recordCommandBuffers = true;
-			vertexCount = 0;
-			triCount = 0;
-			meshCount = 0;
-			{
-				IS_PROFILE_SCOPE("All Draw");
-
-				m_material->SetUniforms();
-
-				m_commandBuffer->StartRecord();
-				m_framebuffer->BindBuffer(m_commandBuffer);
-
-				int drawIndex = 0;
-				for (auto it = meshes.begin(); it != meshes.end(); ++it)
-				{
-					IS_PROFILE_SCOPE("Single Darw");
-
-					if ((*it)->GetMesh() == nullptr)
-					{
-						continue;
-					}
-
-					m_material->Bind(m_commandBuffer, *it);
-					drawIndex++;
-
-					vertexCount += (*it)->GetMesh()->GetVertexCount();
-					triCount += (*it)->GetMesh()->GetIndicesCount();
-					meshCount++;
-
-					VkBuffer vertexBuffers[] = { static_cast<VulkanVertexBuffer*>((*it)->GetMesh()->GetVertexBuffer())->GetBuffer() };
-					VkBuffer indexBuffer = static_cast<VulkanIndexBuffer*>((*it)->GetMesh()->GetIndexBuffer())->GetBuffer();
-					VkDeviceSize offsets[] = { 0 };
-
-					vkCmdBindVertexBuffers(m_commandBuffer->GetBuffer(), 0, 1, vertexBuffers, offsets);
-					vkCmdBindIndexBuffer(m_commandBuffer->GetBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-
-					vkCmdDrawIndexed(m_commandBuffer->GetBuffer(), static_cast<uint32_t>((*it)->GetMesh()->GetIndicesCount()), 1, 0, 0, 0);
-				}
-			}
-			m_framebuffer->UnbindBuffer(m_commandBuffer);
-			m_commandBuffer->EndRecord();
+			UpdateCommandBuffer(m_frameBuffers[m_currentBuffer]);
+			//Update submodule rendering.
+			// offscreen
+			m_submitInfo.commandBufferCount = 1;
+			m_submitInfo.pCommandBuffers = &m_primaryCommandBuffer;
+			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &m_submitInfo, m_waitFences[0]));
 		}
-
-		{
-			IS_PROFILE_SCOPE("Submit for draw");
-
-			std::vector<VkSemaphore> waitSemaphores = { m_swapchain->GetAcquireNextImageSemaphore()->GetSemaphore() };
-			std::vector<VkPipelineStageFlags> stageFlags = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
-			std::vector<VkCommandBuffer> commandBuffers = { m_commandBuffer->GetBuffer() };
-			std::vector<VkSemaphore> signalSemaphore = { m_framebuffer->GetFinishedSem()->GetSemaphore() };
-			VkSubmitInfo submitInfo = VulkanInits::SubmitInfo(waitSemaphores, stageFlags, commandBuffers, signalSemaphore);
-			
-			m_framebuffer->GetFence()->Reset();
-			
-			m_device->GetQueue(QueueFamilyType::Graphics).Submit(submitInfo, m_framebuffer->GetFence()->GetFence());
-		}
-		std::string vStr = GetFormatInt(vertexCount);
-		std::string tStr = GetFormatInt(triCount / 3);
-
-#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-		ImGui::Begin("Renderer");
-		ImGui::Text("Vertex Count: %s", vStr.c_str());
-		ImGui::Text("Tri Count: %s", tStr.c_str());
-		ImGui::Text("Mesh Count: %d", meshCount);
-		ImGui::End();
-#endif
-		m_swapchain->Draw(m_framebuffer->GetFinishedSem(), m_framebuffer);
+		Present();
 	}
 
 	void VulkanRenderer::Present()
 	{
 		IS_PROFILE_FUNCTION();
 
-		m_swapchain->Present();
-	}
-
-	Material* VulkanRenderer::GetDefaultMaterial()
-	{
-		return m_material;
-	}
-
-	void VulkanRenderer::RecreateFramebuffers(const Insight::Event& event)
-	{
-		m_commandPool->FreeCommandBuffers();
-		m_commandBuffer = m_commandPool->AllocCommandBuffer();
-
-		m_framebuffer->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
-		m_shader->Resize(m_windowModule->GetWindow()->GetWidth(), m_windowModule->GetWindow()->GetHeight());
-		m_material->Resize();
-
-		m_recordCommandBuffers = true;
-	}
-
-	void VulkanRenderer::DeserializeFromFile(const Insight::Event& event)
-	{
-		m_recordCommandBuffers = true;
-	}
-
-	bool VulkanRenderer::CheckDeviceExtensionSupport(VkPhysicalDevice device)
-	{
-		uint32_t extensionCount;
-		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
-		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
-		std::set<std::string> requiredExtensions(m_deviceExtensions.begin(), m_deviceExtensions.end());
-
-		for (const auto& extension : availableExtensions) {
-			requiredExtensions.erase(extension.extensionName);
-		}
-
-		return requiredExtensions.empty();
-	}
-
-	bool VulkanRenderer::CheckValidationLayerSupport(const std::vector<const char*>& validationLayers)
-	{
-		uint32_t layerCount;
-		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-		std::vector<VkLayerProperties> availableLayers(layerCount);
-		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-		for (const char* layerName : validationLayers) {
-			bool layerFound = false;
-
-			for (const auto& layerProperties : availableLayers) {
-				if (strcmp(layerName, layerProperties.layerName) == 0) {
-					layerFound = true;
-					break;
-				}
-			}
-
-			if (!layerFound) {
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	std::vector<const char*> VulkanRenderer::GetRequiredExtensions()
-	{
-		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions;
-		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-		std::vector<const char*> extensionVector(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
-		if (m_enableValidationLayers)
+		VkResult result = m_swapchain.QueuePresent(m_queue, m_currentBuffer, m_semaphores.RenderComplete);
+		if (!((result == VK_SUCCESS) || (result == VK_SUBOPTIMAL_KHR)))
 		{
-			extensionVector.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-		}
-
-		return extensionVector;
-	}
-
-	void VulkanRenderer::VulkanEnumExtProps()
-	{
-		UINT numExt = 0;
-		ThrowIfFailed(vkEnumerateInstanceExtensionProperties(nullptr, &numExt, nullptr));
-
-
-		printf("Found %d extensions \n", numExt);
-		std::vector<VkExtensionProperties> props;
-		props.resize(numExt);
-
-		ThrowIfFailed(vkEnumerateInstanceExtensionProperties(NULL, &numExt, &props[0]));
-
-		uint32_t extensionCompleted = 0;
-		std::vector<const char*> extensions = GetRequiredExtensions();
-
-		for (UINT i = 0; i < numExt; ++i)
-		{
-			printf("Instance extension %d - %s\n", i, props[i].extensionName);
-
-			for (size_t j = 0; j < extensions.size(); ++j)
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
 			{
-				const char* reqEx = extensions[j];
-				if (strcmp(props[i].extensionName, reqEx) == 0)
+				// Swap chain is no longer compatible with the surface and needs to be recreated
+				WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
+				return;
+			}
+			else
+			{
+				ThrowIfFailed(result);
+			}
+		}
+		ThrowIfFailed(vkQueueWaitIdle(m_queue));
+	}
+
+	void VulkanRenderer::Prepare()
+	{
+		IS_PROFILE_FUNCTION();
+
+		if (m_vulkanDevice->m_enableDebugMarkers)
+		{
+			vks::DebugMarker::Setup(m_device);
+		}
+
+		InitSwapchain();
+		CreateCommandPool();
+		SetupSwapchain();
+		CreateCommandBuffers();
+		CreateDescriptorPool();
+		CreateSynchronizationPrimitives();
+		SetupDepthStencil();
+		SetupRenderPass();
+		CreatePipelineCache();
+		SetupFrameBuffer();
+		PrepareMultiThreadedRenderer();
+	}
+
+	void VulkanRenderer::InitSwapchain()
+	{
+		IS_PROFILE_FUNCTION();
+		m_swapchain.InitSurface(Insight::Window::m_window);
+	}
+
+	void VulkanRenderer::SetupSwapchain()
+	{
+		IS_PROFILE_FUNCTION();
+		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync));
+	}
+
+	void VulkanRenderer::CreateCommandBuffers()
+	{
+		IS_PROFILE_FUNCTION();
+		// Create one command buffer for each swap chain image and reuse for rendering
+		//m_drawCmdBuffers.resize(m_swapchain.GetImageCount());
+
+		//VkCommandBufferAllocateInfo cmdBufAllocateInfo =
+		//	vks::initializers::commandBufferAllocateInfo(
+		//		m_cmdPool,
+		//		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		//		static_cast<uint32_t>(m_drawCmdBuffers.size()));
+		//
+		//ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
+	}
+
+	void VulkanRenderer::CreatePipelineCache()
+	{
+		IS_PROFILE_FUNCTION();
+		VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+		pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+		ThrowIfFailed(vkCreatePipelineCache(m_device, &pipelineCacheCreateInfo, nullptr, &m_pipelineCache));
+	}
+
+	void VulkanRenderer::DestroyCommandBuffers()
+	{
+		IS_PROFILE_FUNCTION();
+		//vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
+	}
+
+	void VulkanRenderer::CreateCommandPool()
+	{
+		IS_PROFILE_FUNCTION();
+		VkCommandPoolCreateInfo cmdPoolInfo = {};
+		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		cmdPoolInfo.queueFamilyIndex = m_swapchain.GetQueuNodeIndex();
+		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		ThrowIfFailed(vkCreateCommandPool(m_device, &cmdPoolInfo, nullptr, &m_cmdPool));
+	}
+
+	void VulkanRenderer::CreateDescriptorPool()
+	{
+		VkDescriptorPoolSize pool_sizes[] =
+		{
+			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+		};
+
+		VkDescriptorPoolCreateInfo pool_info = {};
+		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+		pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
+		pool_info.pPoolSizes = pool_sizes;
+		ThrowIfFailed(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_descriptorPool));
+	}
+
+	void VulkanRenderer::CreateSynchronizationPrimitives()
+	{
+		IS_PROFILE_FUNCTION();
+		// Wait fences to sync command buffer access
+		VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
+		//m_waitFences.resize(m_drawCmdBuffers.size());
+		//for (auto& fence : m_waitFences)
+		//{
+		//	ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence));
+		//}
+		m_waitFences.resize(1);
+		ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_waitFences[0]));
+	}
+
+	VkResult VulkanRenderer::CreateInstance(bool enableValidation)
+	{
+		IS_PROFILE_FUNCTION();
+		VkApplicationInfo appInfo = {};
+		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName = "Debug";
+		appInfo.pEngineName = "Insight";
+		appInfo.apiVersion = VK_API_VERSION_1_0;
+
+		std::vector<const char*> instanceExtensions;
+
+		// Get extensions supported by the instance and store for later use
+		uint32_t extCount = 0;
+		vkEnumerateInstanceExtensionProperties(nullptr, &extCount, nullptr);
+		if (extCount > 0)
+		{
+			std::vector<VkExtensionProperties> extensions(extCount);
+			if (vkEnumerateInstanceExtensionProperties(nullptr, &extCount, &extensions.front()) == VK_SUCCESS)
+			{
+				for (VkExtensionProperties extension : extensions)
 				{
-					extensionCompleted++;
-					break;
+					m_supportedInstanceExtensions.push_back(extension.extensionName);
 				}
 			}
 		}
 
-		IS_CORE_INFO("Required extensions found: {0}", extensionCompleted == extensions.size());
+		// Enabled requested instance extensions
+		if (m_enabledInstanceExtensions.size() > 0)
+		{
+			for (const char* enabledExtension : m_enabledInstanceExtensions)
+			{
+				// Output message if requested extension is not available
+				if (std::find(m_supportedInstanceExtensions.begin(), m_supportedInstanceExtensions.end(), enabledExtension) == m_supportedInstanceExtensions.end())
+				{
+					std::cerr << "Enabled instance extension \"" << enabledExtension << "\" is not present at instance level\n";
+				}
+				instanceExtensions.push_back(enabledExtension);
+			}
+		}
+
+		VkInstanceCreateInfo instanceCreateInfo = {};
+		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		instanceCreateInfo.pNext = NULL;
+		instanceCreateInfo.pApplicationInfo = &appInfo;
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		{
+			uint32_t glfwExtensionCount = 0;
+			const char** glfwExtensions;
+			glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+			std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+			for (size_t i = 0; i < glfwExtensionCount; ++i)
+			{
+				instanceExtensions.push_back(extensions[i]);
+			}
+
+			instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		}
+		instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
+		instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
+
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		{
+			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
+			// Note that on Android this layer requires at least NDK r20
+			const char* validationLayerName = "VK_LAYER_KHRONOS_validation";
+			// Check if this layer is available at instance level
+			uint32_t instanceLayerCount;
+			vkEnumerateInstanceLayerProperties(&instanceLayerCount, nullptr);
+			std::vector<VkLayerProperties> instanceLayerProperties(instanceLayerCount);
+			vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayerProperties.data());
+			bool validationLayerPresent = false;
+			for (VkLayerProperties layer : instanceLayerProperties)
+			{
+				if (strcmp(layer.layerName, validationLayerName) == 0)
+				{
+					validationLayerPresent = true;
+					break;
+				}
+			}
+			if (validationLayerPresent)
+			{
+				instanceCreateInfo.ppEnabledLayerNames = &validationLayerName;
+				instanceCreateInfo.enabledLayerCount = 1;
+			}
+			else
+			{
+				std::cerr << "Validation layer VK_LAYER_KHRONOS_validation not present, validation is disabled";
+			}
+		}
+		return vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance);
+	}
+
+	void VulkanRenderer::BuildCommandBuffers()
+	{
+		IS_PROFILE_FUNCTION();
+
+		uint32_t width = (uint32_t)Insight::Window::GetWidth();
+		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+
+		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+
+		VkClearValue clearValues[2];
+		clearValues[0].color = m_clearColor;
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+		renderPassBeginInfo.renderPass = m_renderPass;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent.width = width;
+		renderPassBeginInfo.renderArea.extent.height = height;
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
+
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::GetInstance());
+		imgui->EndFrame();
+
+		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
+		//{
+		//	// Set target frame buffer
+		//	renderPassBeginInfo.framebuffer = m_frameBuffers[i];
+		//
+		//	ThrowIfFailed(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
+		//
+		//	vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		//
+		//	VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
+		//	vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+		//
+		//	VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+		//	vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+		//
+		//	imgui->Render(m_drawCmdBuffers[i]);
+		//
+		//	vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+		//
+		//	ThrowIfFailed(vkEndCommandBuffer(m_drawCmdBuffers[i]));
+		//}
+	}
+
+	void VulkanRenderer::SetupDepthStencil()
+	{
+		IS_PROFILE_FUNCTION();
+		VkImageCreateInfo imageCI{};
+		imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageCI.imageType = VK_IMAGE_TYPE_2D;
+		imageCI.format = m_depthFormat;
+		imageCI.extent = { (uint32_t)Insight::Window::GetWidth(), (uint32_t)Insight::Window::GetHeight(), 1 };
+		imageCI.mipLevels = 1;
+		imageCI.arrayLayers = 1;
+		imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCI.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageCI.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+
+		ThrowIfFailed(vkCreateImage(m_device, &imageCI, nullptr, &m_depthStencil.Image));
+		VkMemoryRequirements memReqs{};
+		vkGetImageMemoryRequirements(m_device, m_depthStencil.Image, &memReqs);
+
+		VkMemoryAllocateInfo memAllloc{};
+		memAllloc.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		memAllloc.allocationSize = memReqs.size;
+		memAllloc.memoryTypeIndex = m_vulkanDevice->GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		ThrowIfFailed(vkAllocateMemory(m_device, &memAllloc, nullptr, &m_depthStencil.Mem));
+		ThrowIfFailed(vkBindImageMemory(m_device, m_depthStencil.Image, m_depthStencil.Mem, 0));
+
+		VkImageViewCreateInfo imageViewCI{};
+		imageViewCI.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		imageViewCI.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageViewCI.image = m_depthStencil.Image;
+		imageViewCI.format = m_depthFormat;
+		imageViewCI.subresourceRange.baseMipLevel = 0;
+		imageViewCI.subresourceRange.levelCount = 1;
+		imageViewCI.subresourceRange.baseArrayLayer = 0;
+		imageViewCI.subresourceRange.layerCount = 1;
+		imageViewCI.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+		// Stencil aspect should only be set on depth + stencil formats (VK_FORMAT_D16_UNORM_S8_UINT..VK_FORMAT_D32_SFLOAT_S8_UINT
+		if (m_depthFormat >= VK_FORMAT_D16_UNORM_S8_UINT)
+		{
+			imageViewCI.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+		}
+		ThrowIfFailed(vkCreateImageView(m_device, &imageViewCI, nullptr, &m_depthStencil.View));
+	}
+
+	void VulkanRenderer::SetupFrameBuffer()
+	{
+		IS_PROFILE_FUNCTION();
+		VkImageView attachments[2];
+
+		// Depth/Stencil attachment is the same for all frame buffers
+		attachments[1] = m_depthStencil.View;
+
+		VkFramebufferCreateInfo frameBufferCreateInfo = {};
+		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		frameBufferCreateInfo.pNext = NULL;
+		frameBufferCreateInfo.renderPass = m_renderPass;
+		frameBufferCreateInfo.attachmentCount = 2;
+		frameBufferCreateInfo.pAttachments = attachments;
+		frameBufferCreateInfo.width = (uint32_t)Insight::Window::GetWidth();
+		frameBufferCreateInfo.height = (uint32_t)Insight::Window::GetHeight();
+		frameBufferCreateInfo.layers = 1;
+
+		// Create frame buffers for every swap chain image
+		m_frameBuffers.resize(m_swapchain.GetImageCount());
+		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		{
+			attachments[0] = m_swapchain.GetImageView(i);
+			ThrowIfFailed(vkCreateFramebuffer(m_device, &frameBufferCreateInfo, nullptr, &m_frameBuffers[i]));
+		}
+	}
+
+	void VulkanRenderer::SetupRenderPass()
+	{
+		IS_PROFILE_FUNCTION();
+		std::array<VkAttachmentDescription, 2> attachments = {};
+		// Color attachment
+		attachments[0].format = m_swapchain.GetColorFormat();
+		attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
+		attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachments[0].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		// Depth attachment
+		attachments[1].format = m_depthFormat;
+		attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
+		attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+		attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference colorReference = {};
+		colorReference.attachment = 0;
+		colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depthReference = {};
+		depthReference.attachment = 1;
+		depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkSubpassDescription subpassDescription = {};
+		subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+		subpassDescription.colorAttachmentCount = 1;
+		subpassDescription.pColorAttachments = &colorReference;
+		subpassDescription.pDepthStencilAttachment = &depthReference;
+		subpassDescription.inputAttachmentCount = 0;
+		subpassDescription.pInputAttachments = nullptr;
+		subpassDescription.preserveAttachmentCount = 0;
+		subpassDescription.pPreserveAttachments = nullptr;
+		subpassDescription.pResolveAttachments = nullptr;
+
+		// Subpass dependencies for layout transitions
+		std::array<VkSubpassDependency, 2> dependencies;
+
+		dependencies[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[0].dstSubpass = 0;
+		dependencies[0].srcStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencies[0].dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencies[0].srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencies[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies[0].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+		dependencies[1].srcSubpass = 0;
+		dependencies[1].dstSubpass = VK_SUBPASS_EXTERNAL;
+		dependencies[1].srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependencies[1].dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		dependencies[1].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+
+		VkRenderPassCreateInfo renderPassInfo = {};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		renderPassInfo.pAttachments = attachments.data();
+		renderPassInfo.subpassCount = 1;
+		renderPassInfo.pSubpasses = &subpassDescription;
+		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
+		renderPassInfo.pDependencies = dependencies.data();
+
+		ThrowIfFailed(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass));
+	}
+
+	void VulkanRenderer::GetEnabledFeatures()
+	{
+	}
+
+	float VulkanRenderer::rnd(float range)
+	{
+		std::uniform_real_distribution<float> rndDist(0.0f, range);
+		return rndDist(m_rndEngine);
+	}
+
+	void VulkanRenderer::PrepareMultiThreadedRenderer()
+	{
+		IS_PROFILE_FUNCTION();
+		// Since this demo updates the command buffers on each frame
+		// we don't use the per-framebuffer command buffers from the
+		// base class, and create a single primary command buffer instead
+		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
+			vks::initializers::commandBufferAllocateInfo(
+				m_cmdPool,
+				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+				1);
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_primaryCommandBuffer));
+
+		// Create additional secondary CBs for background and ui
+		cmdBufAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_secondaryCommandBuffers.UI));
+
+		m_threadData.resize(m_numThreads);
+
+		float maxX = std::floor(std::sqrt(m_numThreads * m_numObjectsPerThread));
+		uint32_t posX = 0;
+		uint32_t posZ = 0;
+
+		for (uint32_t i = 0; i < m_numThreads; i++)
+		{
+			ThreadData* thread = &m_threadData[i];
+
+			// Create one command pool for each thread
+			VkCommandPoolCreateInfo cmdPoolInfo = vks::initializers::commandPoolCreateInfo();
+			cmdPoolInfo.queueFamilyIndex = m_swapchain.GetQueuNodeIndex();
+			cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			ThrowIfFailed(vkCreateCommandPool(m_device, &cmdPoolInfo, nullptr, &thread->commandPool));
+
+			// One secondary command buffer per object that is updated by this thread
+			thread->commandBuffer.resize(m_numObjectsPerThread);
+			// Generate secondary command buffers for each thread
+			VkCommandBufferAllocateInfo secondaryCmdBufAllocateInfo =
+				vks::initializers::commandBufferAllocateInfo(
+					thread->commandPool,
+					VK_COMMAND_BUFFER_LEVEL_SECONDARY,
+					thread->commandBuffer.size());
+			ThrowIfFailed(vkAllocateCommandBuffers(m_device, &secondaryCmdBufAllocateInfo, thread->commandBuffer.data()));
+
+			thread->pushConstBlock.resize(m_numObjectsPerThread);
+			thread->objectData.resize(m_numObjectsPerThread);
+
+			for (uint32_t j = 0; j < m_numObjectsPerThread; j++)
+			{
+				float theta = 2.0f * glm::pi<float>() * rnd(1.0f);
+				float phi = acos(1.0f - 2.0f * rnd(1.0f));
+				thread->objectData[j].pos = glm::vec3(sin(phi) * cos(theta), 0.0f, cos(phi)) * 35.0f;
+
+				thread->objectData[j].rotation = glm::vec3(0.0f, rnd(360.0f), 0.0f);
+				thread->objectData[j].deltaT = rnd(1.0f);
+				thread->objectData[j].rotationDir = (rnd(100.0f) < 50.0f) ? 1.0f : -1.0f;
+				thread->objectData[j].rotationSpeed = (2.0f + rnd(4.0f)) * thread->objectData[j].rotationDir;
+				thread->objectData[j].scale = 0.75f + rnd(0.5f);
+
+				thread->pushConstBlock[j].color = glm::vec3(rnd(1.0f), rnd(1.0f), rnd(1.0f));
+			}
+		}
+	}
+
+	void VulkanRenderer::UpdateSecondaryCommandBuffers(VkCommandBufferInheritanceInfo inheritanceInfo)
+	{
+		IS_PROFILE_FUNCTION();
+		// Secondary command buffer for the sky sphere
+		VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::commandBufferBeginInfo();
+		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+		commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
+
+		/*
+			User interface
+			With VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS, the primary command buffer's content has to be defined
+			by secondary command buffers, which also applies to the UI overlay command buffer
+		*/
+
+		uint32_t width = (uint32_t)Insight::Window::GetWidth();
+		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+
+		ThrowIfFailed(vkBeginCommandBuffer(m_secondaryCommandBuffers.UI, &commandBufferBeginInfo));
+
+		VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
+		vkCmdSetViewport(m_secondaryCommandBuffers.UI, 0, 1, &viewport);
+
+		VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+		vkCmdSetScissor(m_secondaryCommandBuffers.UI, 0, 1, &scissor);
+
+		//vkCmdBindPipeline(m_secondaryCommandBuffers.UI, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
+
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::GetInstance());
+		imgui->EndFrame();
+		imgui->Render(m_secondaryCommandBuffers.UI);
+
+		ThrowIfFailed(vkEndCommandBuffer(m_secondaryCommandBuffers.UI));
+	}
+
+	void VulkanRenderer::UpdateCommandBuffer(VkFramebuffer frameBuffer)
+	{
+		IS_PROFILE_FUNCTION();
+		// Contains the list of secondary command buffers to be submitted
+		std::vector<VkCommandBuffer> commandBuffers;
+
+		uint32_t width = (uint32_t)Insight::Window::GetWidth();
+		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+
+		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+
+		VkClearValue clearValues[2];
+		clearValues[0].color = m_clearColor;
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
+		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+		renderPassBeginInfo.renderPass = m_renderPass;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent.width = width;
+		renderPassBeginInfo.renderArea.extent.height = height;
+		renderPassBeginInfo.clearValueCount = 2;
+		renderPassBeginInfo.pClearValues = clearValues;
+		renderPassBeginInfo.framebuffer = frameBuffer;
+
+		// Set target frame buffer
+
+		ThrowIfFailed(vkBeginCommandBuffer(m_primaryCommandBuffer, &cmdBufInfo));
+
+		// The primary command buffer does not contain any rendering commands
+		// These are stored (and retrieved) from the secondary command buffers
+		vkCmdBeginRenderPass(m_primaryCommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS);
+
+		// Inheritance info for the secondary command buffers
+		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::commandBufferInheritanceInfo();
+		inheritanceInfo.renderPass = m_renderPass;
+		// Secondary command buffer also use the currently active framebuffer
+		inheritanceInfo.framebuffer = frameBuffer;
+
+		// Update secondary sene command buffers
+		UpdateSecondaryCommandBuffers(inheritanceInfo);
+
+		// Add a job to the thread's queue for each object to be rendered
+		for (uint32_t t = 0; t < m_numThreads; t++)
+		{
+			for (uint32_t i = 0; i < m_numObjectsPerThread; i++)
+			{
+				if (m_threadData[t].objectData[i].visible)
+				{
+					m_threadPool.threads[t]->addJob([=] { ThreadRenderCode(t, i, inheritanceInfo); });
+				}
+			}
+		}
+
+		{
+			IS_PROFILE_SCOPE("WAIT FOR ALL THREADS");
+			m_threadPool.wait();
+		}
+
+		// Only submit if object is within the current view frustum
+		for (uint32_t t = 0; t < m_numThreads; t++)
+		{
+			for (uint32_t i = 0; i < m_numObjectsPerThread; i++)
+			{
+				if (m_threadData[t].objectData[i].visible)
+				{
+					commandBuffers.push_back(m_threadData[t].commandBuffer[i]);
+				}
+			}
+		}
+
+		commandBuffers.push_back(m_secondaryCommandBuffers.UI);
+
+		// Execute render commands from the secondary command buffer
+		vkCmdExecuteCommands(m_primaryCommandBuffer, commandBuffers.size(), commandBuffers.data());
+
+		vkCmdEndRenderPass(m_primaryCommandBuffer);
+
+		ThrowIfFailed(vkEndCommandBuffer(m_primaryCommandBuffer));
+	}
+
+	void VulkanRenderer::ThreadRenderCode(int32_t threadIndex, uint32_t cmdBufferIndex, VkCommandBufferInheritanceInfo inheritanceInfo)
+	{
+		IS_PROFILE_FUNCTION();
+		ThreadData* thread = &m_threadData[threadIndex];
+		ObjectData* objectData = &thread->objectData[cmdBufferIndex];
+
+		// Check visibility against view frustum using a simple sphere check based on the radius of the mesh
+		//objectData->visible = frustum.checkSphere(objectData->pos, models.ufo.dimensions.radius * 0.5f);
+
+		if (!objectData->visible)
+		{
+			return;
+		}
+
+		uint32_t width = (uint32_t)Insight::Window::GetWidth();
+		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+
+		VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::commandBufferBeginInfo();
+		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
+		commandBufferBeginInfo.pInheritanceInfo = &inheritanceInfo;
+
+		VkCommandBuffer cmdBuffer = thread->commandBuffer[cmdBufferIndex];
+
+		ThrowIfFailed(vkBeginCommandBuffer(cmdBuffer, &commandBufferBeginInfo));
+
+		VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
+		vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
+
+		VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+		vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+		// Fill in models data or have a render function ptr to 
+		// a render function for objects in a model class.
+
+		ThrowIfFailed(vkEndCommandBuffer(cmdBuffer));
+	}
+
+	void VulkanRenderer::WindowResizeEvent(const Insight::Event& event)
+	{
+		IS_PROFILE_FUNCTION();
+		Insight::WindowResizeEvent resizeEvent = static_cast<const Insight::WindowResizeEvent&>(event);
+		IS_CORE_INFO("{0}", resizeEvent.ToString());
+
+		m_vulkanDevice->WaitForIdle();
+
+		int width = 0, height = 0;
+		glfwGetFramebufferSize(Insight::Window::m_window, &width, &height);
+		while (width == 0 && height == 0)
+		{
+			glfwGetFramebufferSize(Insight::Window::m_window, &width, &height);
+			glfwWaitEvents();
+		}
+
+		SetupSwapchain();
+
+		// Recreate the frame buffers
+		vkDestroyImageView(m_device, m_depthStencil.View, nullptr);
+		vkDestroyImage(m_device, m_depthStencil.Image, nullptr);
+		vkFreeMemory(m_device, m_depthStencil.Mem, nullptr);
+		SetupDepthStencil();
+		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		{
+			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
+		}
+		SetupFrameBuffer();
+
+		// Command buffers need to be recreated as they may store
+		// references to the recreated frame buffer
+		DestroyCommandBuffers();
+		CreateCommandBuffers();
+
+		EVENT_DISPATCH(Insight::EventType::VulkanWindowResize, Insight::VulkanResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
 	}
 }
-#endif

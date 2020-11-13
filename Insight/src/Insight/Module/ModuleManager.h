@@ -34,6 +34,7 @@ namespace Insight
 
 		private:
 			std::unordered_map<std::string, Module*> m_modules;
+			Memory::StackAllocator m_moduleAlloc;
 		};
 
 		template<typename T, typename ...Args>
@@ -42,7 +43,7 @@ namespace Insight
 			std::string typeId = typeid(T).name();
 			if (!Exists(typeId))
 			{
-				T* newModule = NEW_ON_HEAP(T, std::forward<Args>(args)...);
+				T* newModule = m_moduleAlloc.New<T>(std::forward<Args>(args)...);
 
 				m_modules[typeId] = newModule;
 

@@ -29,6 +29,7 @@ namespace Insight
 		Memory::MemoryManager::MemoryConfig MemoryConfig;
 		Module::WindowModule::WindowConfig WindowConfig;
 		Module::GraphicsModule::GraphicsConfig GraphicsConfig;
+		Renderer::RendererConfig RendererConfig;
 
 	private:
 		const std::string GetKey(const std::string& line, const int delimiterPos);

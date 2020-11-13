@@ -85,12 +85,10 @@ namespace Insight
 
 	namespace Module
 	{
-		Window* WindowModule::m_window;
+		Window WindowModule::m_window;
 
 		WindowModule::WindowModule()
 		{
-			m_window = new Window();
-
 			glfwInit();
 
 #ifdef IS_VULKAN
@@ -108,20 +106,20 @@ namespace Insight
 #endif // IS_VULKAN
 
 
-			m_window->m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
+			m_window.m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
 				CONFIG_VAL(Config::WindowConfig.WindowHeight),
 				CONFIG_VAL(Config::WindowConfig.WindowTitle).c_str(),
 				nullptr, nullptr);
 
-			m_window->SetIcon({ CONFIG_VAL(Config::WindowConfig.WindowIcon), CONFIG_VAL(Config::WindowConfig.WindowIcon) });
-			glfwSetWindowSizeCallback(m_window->m_window, [](GLFWwindow* window, int width, int height)
+			m_window.SetIcon({ CONFIG_VAL(Config::WindowConfig.WindowIcon), CONFIG_VAL(Config::WindowConfig.WindowIcon) });
+			glfwSetFramebufferSizeCallback(m_window.m_window, [](GLFWwindow* window, int width, int height)
 				{
 					EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));
 				});
 
 			if (Renderer::s_API == GraphicsAPI::OpenGL)
 			{
-				glfwMakeContextCurrent(m_window->m_window);
+				glfwMakeContextCurrent(m_window.m_window);
 
 				if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 				{
@@ -134,10 +132,8 @@ namespace Insight
 
 		WindowModule::~WindowModule()
 		{
-			glfwDestroyWindow(m_window->m_window);
+			glfwDestroyWindow(m_window.m_window);
 			glfwTerminate();
-
-			delete m_window;
 		}
 
 		void WindowModule::Update(const float& deltaTime)
@@ -145,6 +141,10 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			glfwPollEvents();
+
+			std::stringstream ss;
+			ss << "FPS: " << 1.0 / deltaTime;
+			m_window.SetTitle(ss.str());
 		}
 	}
 }

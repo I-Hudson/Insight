@@ -139,7 +139,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -229,7 +229,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;IS_PROFILE;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -247,7 +247,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -280,7 +280,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -313,7 +313,7 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp-vc141-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
@@ -336,6 +336,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
+    <ClInclude Include="src\Insight\Editor\Diagnostic.h" />
     <ClInclude Include="src\Insight\Editor\EditorPanel.h" />
     <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h" />
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
@@ -380,6 +381,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Insight\Renderer\ImGuiRenderer.h" />
     <ClInclude Include="src\Insight\Renderer\Material.h" />
+    <ClInclude Include="src\Insight\Renderer\RenderPass.h" />
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
     <ClInclude Include="src\Insight\Renderer\Shader.h" />
     <ClInclude Include="src\Insight\Renderer\ShaderModule.h" />
@@ -391,6 +393,8 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
     <ClInclude Include="src\Insight\Templates\TSafePtr.h" />
     <ClInclude Include="src\Insight\Templates\TSingleton.h" />
+    <ClInclude Include="src\Insight\Threading\TThreadSafe.h" />
+    <ClInclude Include="src\Insight\Threading\Threadpool.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
     <ClInclude Include="src\Insight\UUID.h" />
@@ -399,24 +403,14 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Platform\OpenGL\OpenGLMaterial.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRenderer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
-    <ClInclude Include="src\Platform\Vulkan\CommandBuffer.h" />
-    <ClInclude Include="src\Platform\Vulkan\CommandPool.h" />
-    <ClInclude Include="src\Platform\Vulkan\DescriptorPool.h" />
-    <ClInclude Include="src\Platform\Vulkan\DescriptorSet.h" />
-    <ClInclude Include="src\Platform\Vulkan\Device.h" />
-    <ClInclude Include="src\Platform\Vulkan\Fence.h" />
-    <ClInclude Include="src\Platform\Vulkan\Queue.h" />
-    <ClInclude Include="src\Platform\Vulkan\QueueFamily.h" />
-    <ClInclude Include="src\Platform\Vulkan\Renderpass.h" />
-    <ClInclude Include="src\Platform\Vulkan\Semaphore.h" />
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h" />
-    <ClInclude Include="src\Platform\Vulkan\Vulkan.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanBuffers.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanFramebuffer.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanInits.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanMaterial.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanDebug.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanHeader.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanImGUIRenderer.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanInitializers.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanRenderer.h" />
-    <ClInclude Include="src\Platform\Vulkan\VulkanShader.h" />
     <ClInclude Include="src\ispch.h" />
     <ClInclude Include="vendor\TinyXML2\tinyxml2.h" />
     <ClInclude Include="vendor\glm\glm\common.hpp" />
@@ -883,28 +877,20 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClCompile Include="src\Insight\Scene\Scene.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
+    <ClCompile Include="src\Insight\Threading\TThreadSafe.cpp" />
     <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Insight\Time\Time.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffers.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLMaterial.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRenderer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\CommandBuffer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\CommandPool.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\DescriptorPool.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\DescriptorSet.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Device.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Fence.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Queue.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\QueueFamily.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Renderpass.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Semaphore.cpp" />
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanBuffers.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanFramebuffer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanMaterial.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanShader.cpp" />
     <ClCompile Include="src\ispch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

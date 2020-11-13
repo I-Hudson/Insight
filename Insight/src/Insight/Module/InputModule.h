@@ -29,6 +29,9 @@ namespace Insight
 			static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mod);
 			static void MousePositionCallback(GLFWwindow* window, double mouseX, double mouseY);
 
+			void PollMousePosition();
+			void PollMouseButton();
+
 		private:
 			struct KeyStates
 			{

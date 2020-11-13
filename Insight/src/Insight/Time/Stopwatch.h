@@ -13,8 +13,8 @@ namespace Insight
 		void Start();
 		float End();
 
-		float Sec() const;
-		float Mill() const;
+		double Sec() const;
+		double Mill() const;
 		U64 Nano() const;
 
 	private:

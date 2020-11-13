@@ -136,7 +136,7 @@ project "Insight"
         }
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN", "IMGUI_ENABLED" }
         symbols "on"
         links 
         {
@@ -166,11 +166,11 @@ project "Insight"
         }
 
     filter "configurations:Release"
-        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
         links 
         {
-            "assimp-vc141-mt",
+            "assimp-vc142-mt",
             "shaderc_combined",
             "vulkan-1",
 	    }
@@ -185,7 +185,7 @@ project "Insight"
         optimize "on"
         links 
         {
-            "assimp-vc141-mt",
+            "assimp-vc142-mt",
             "shaderc_combined",
             "vulkan-1",
 	    }
@@ -200,7 +200,7 @@ project "Insight"
         optimize "full"
         links 
         {
-            "assimp-vc141-mt",
+            "assimp-vc142-mt",
             "shaderc_combined",
             "vulkan-1",
 	    }
@@ -261,12 +261,12 @@ project "Sandbox"
 
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
         kind "ConsoleApp"
 
     filter "configurations:Debug_NO_VULKAN"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }--, "IMGUI_ENABLED" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"
         kind "ConsoleApp"
 
@@ -276,7 +276,7 @@ project "Sandbox"
         kind "ConsoleApp"
 
     filter "configurations:Release"
-        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_RELEASE", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN" }
         optimize "on"
         kind "WindowedApp"
 
@@ -286,7 +286,7 @@ project "Sandbox"
         kind "WindowedApp"
 
     filter "configurations:Dist"
-        defines { "IS_DIST", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_DIST", "IS_VULKAN", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
         optimize "full"
         kind "WindowedApp"
 
@@ -340,7 +340,7 @@ project "UnitTests"
         }
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_DEBUG", "IS_VULKAN", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN" }
         symbols "on"
 
     filter "configurations:Debug_NO_EDITOR"
@@ -348,5 +348,5 @@ project "UnitTests"
         symbols "on"
 
     filter "configurations:Debug_NO_VULKAN"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED" }
+        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR" }
         symbols "on"

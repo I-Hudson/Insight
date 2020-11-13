@@ -11,3 +11,7 @@ free_list_alloc_amount=1
 free_list_alloc_type=MB
 placement_policy=0
 smart_pointers=true
+
+Renderer
+vsync=0
+validation=1

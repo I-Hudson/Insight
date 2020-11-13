@@ -78,4 +78,26 @@ namespace Insight
 			return ss.str();
 		}
 	};
+
+	class VulkanResizeEvent : public Event
+	{
+	public:
+
+		VulkanResizeEvent(unsigned int a_width, unsigned int a_height)
+			: m_width(a_width), m_height(a_height)
+		{
+		}
+
+		EVENT_CLASS_TYPE(VulkanWindowResize)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+
+			std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "Window Resize Event: " << m_width << ", " << m_height << "\n";
+			return ss.str();
+		}
+		//private:
+		unsigned int m_width, m_height;
+	};
 }

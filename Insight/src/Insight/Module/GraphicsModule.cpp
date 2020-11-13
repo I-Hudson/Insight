@@ -6,6 +6,7 @@
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 
+#include "Insight/Time/Stopwatch.h"
 #include "Insight/Log.h"
 
 namespace Insight
@@ -21,11 +22,10 @@ namespace Insight
 
 			m_windowModule = windowModule;
 
-			IS_CORE_INFO("{0}", m_windowModule->GetWindow()->GetHeight());
-
 			m_renderer = Renderer::Create();
 
-			NEW_ON_HEAP(ImGuiRenderer, m_renderer);
+			ImGuiRenderer::Create();
+			ImGuiRenderer::GetInstance()->Init(m_renderer);
 		}
 
 		GraphicsModule::~GraphicsModule()
@@ -45,11 +45,21 @@ namespace Insight
 
 			if (m_renderer != nullptr)
 			{
-				m_renderer->Clear();
+				//m_renderer->Clear();
 
+				Insight::Stopwatch stopwatch;
+
+				stopwatch.Start();
 				m_renderer->Render(m_mainCamera, m_meshs);
+				stopwatch.End();
 
-				m_renderer->Present();
+				std::stringstream ss;
+				double fps = 1.0 / stopwatch.Sec();
+				ss << "FPS: " << fps;
+				Insight::Window::SetTitle(ss.str());
+
+
+				//m_renderer->Present();
 			}
 			else
 			{

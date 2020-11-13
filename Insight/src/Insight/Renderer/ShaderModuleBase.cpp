@@ -3,8 +3,8 @@
 #include "Insight/ShaderParser/ShaderParser.h"
 
 #ifdef IS_VULKAN
-#include "Platform/Vulkan/VulkanInits.h"
-#include "Platform/Vulkan/Device.h"
+#include "Platform/Vulkan/VulkanHeader.h"
+#include "Platform/Vulkan/VulkanDevice.h"
 #endif
 
 namespace Insight
@@ -20,8 +20,8 @@ namespace Insight
 
 
 			auto spirvData = CompileGLSL(filepath);
-			VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
-			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
+			//VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
+			//ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
 		}
 
 		ShaderModuleBase::ShaderModuleBase(const Platform::Device* device, const std::string& filepath, const ShaderType& type)
@@ -31,8 +31,8 @@ namespace Insight
 			m_shaderData = ShaderParser::ParseShader(filepath, type);
 
 			auto spirvData = CompileGLSL(filepath);
-			VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
-			ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
+			//VkShaderModuleCreateInfo createInfo = Platform::VulkanInits::ShaderModuleInfo(spirvData);
+			//ThrowIfFailed(vkCreateShaderModule(device->GetDevice(), &createInfo, nullptr, &m_shaderModule));
 		}
 #endif
 
@@ -56,7 +56,7 @@ namespace Insight
 		void ShaderModuleBase::Destroy()
 		{
 #ifdef IS_VULKAN
-			vkDestroyShaderModule(m_device->GetDevice(), m_shaderModule, nullptr);
+			//vkDestroyShaderModule(m_device(), m_shaderModule, nullptr);
 #endif
 		}
 
@@ -110,12 +110,12 @@ namespace Insight
 					continue;
 				}
 
-				auto desc = Platform::VulkanInits::DescriptorSetLayoutBinding();
-				desc.binding = (*it).Binding;
-				desc.descriptorType = GetShaderDescriptorType((*it).Type);;
-				desc.descriptorCount = 1;
-				desc.stageFlags = GetShaderStageBit();
-				createInfos.push_back(desc);
+				//auto desc = Platform::VulkanInits::DescriptorSetLayoutBinding();
+				//desc.binding = (*it).Binding;
+				//desc.descriptorType = GetShaderDescriptorType((*it).Type);;
+				//desc.descriptorCount = 1;
+				//desc.stageFlags = GetShaderStageBit();
+				//createInfos.push_back(desc);
 			}
 
 			return createInfos;
@@ -162,8 +162,8 @@ namespace Insight
 			{
 				if ((*it).Type == ShaderAttributeType::Push_Constant)
 				{
-					auto pushContant = Platform::VulkanInits::PushConstantRange(GetShaderStageBit(), (*it).Size, 0);
-					createInfos.push_back(pushContant);
+					//auto pushContant = Platform::VulkanInits::PushConstantRange(GetShaderStageBit(), (*it).Size, 0);
+					//createInfos.push_back(pushContant);
 				}
 			}
 

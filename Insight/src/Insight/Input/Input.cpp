@@ -49,6 +49,18 @@ void Input::GetMousePosition(double* mouseX, double* mouseY)
 	*mouseY = InputModule::m_mouseY;
 }
 
+void Input::GetMousePosition(float* mouseX, float* mouseY)
+{
+	*mouseX = (float)InputModule::m_mouseX;
+	*mouseY = (float)InputModule::m_mouseY;
+}
+
+void Input::GetMousePosition(int* mouseX, int* mouseY)
+{
+	*mouseX = (int)InputModule::m_mouseX;
+	*mouseY = (int)InputModule::m_mouseY;
+}
+
 bool Input::KeyCodeExits(int keycode)
 {
 	return InputModule::m_inputStates.find(keycode) != InputModule::m_inputStates.end();

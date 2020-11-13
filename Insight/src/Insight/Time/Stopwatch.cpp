@@ -15,14 +15,14 @@ namespace Insight
 		return Sec();
 	}
 
-	float Stopwatch::Sec() const
+	double Stopwatch::Sec() const
 	{
-		return static_cast<float>(std::chrono::duration<double>(m_endTime - m_startTime).count());
+		return std::chrono::duration<double>(m_endTime - m_startTime).count();
 	}
 
-	float Stopwatch::Mill() const
+	double Stopwatch::Mill() const
 	{
-		return static_cast<float>(std::chrono::duration<double, std::milli>(m_endTime - m_startTime).count());
+		return std::chrono::duration<double, std::milli>(m_endTime - m_startTime).count();
 	}
 
 	U64 Stopwatch::Nano() const

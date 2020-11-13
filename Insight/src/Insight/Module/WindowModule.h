@@ -36,7 +36,7 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
-			static const Window* GetWindow() { return m_window; }
+			static const Window* GetWindow() { return &m_window; }
 
 			struct WindowConfig
 			{
@@ -47,7 +47,7 @@ namespace Insight
 			};
 
 		private:
-			static Window* m_window;
+			static Window m_window;
 		};
 	}
 }

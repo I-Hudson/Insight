@@ -1,15 +1,7 @@
 #pragma once
 #ifdef IS_VULKAN
 #include "Insight/Core.h"
-#include "Vulkan.h"
-
-#include "VulkanShader.h"
-#include "VulkanFramebuffer.h"
-#include "Renderpass.h"
-#include "CommandPool.h"
-#include "CommandBuffer.h"
-#include "Semaphore.h"
-#include "VulkanMaterial.h"
+#include "VulkanHeader.h"
 
 #include "Insight/Model/Mesh.h"
 #include "Insight/Event/ApplicationEvent.h"
@@ -19,17 +11,17 @@
 namespace Insight
 {
 	class Event;
+	class ImGuiRenderer;
 }
 
-class ImGuiRenderer;
 
-namespace Platform
+namespace vks
 {
-	class Window;
-
-	class Fence;
-	class Device;
-	class VulkanMaterial;
+	typedef struct _SwapChainBuffers
+	{
+		VkImage image;
+		VkImageView view;
+	} SwapChainBuffer;
 
 	struct SwapChainSupportDetails
 	{
@@ -38,67 +30,47 @@ namespace Platform
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
-	class IS_API Swapchain
+	class IS_API Swapchain : public Insight::Object
 	{
 	public:
-		Swapchain(const Device* device);
-		~Swapchain();
 
-		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+		void Create(uint32_t width, uint32_t height, bool vsync = false);
+		void InitSurface(void* platformWindow);
+		void Connect(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device);
+		VkResult AcquireNextImage(VkSemaphore presentCompleteSem, uint32_t* imageIndex);
+		VkResult QueuePresent(VkQueue queue, uint32_t imageIndex, VkSemaphore waitSemaphore = VK_NULL_HANDLE);
+		void CleanUp();
 
-		VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
-		VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-		void AcquireNextImage();
-		void Submit(Semaphore* waitSemaphore);
-		void Draw(Semaphore* waitSemaphore, VulkanFramebuffer* offscreenFB = nullptr);
-		void Present();
-		Semaphore* GetAcquireNextImageSemaphore();
-
-		void CreateSwapChain();
-
-		const VkSwapchainKHR& GetSwapchain() const;
+		uint32_t GetImageCount() { return m_imageCount; }
+		uint32_t GetQueuNodeIndex() { return m_queueNodeIndex; }
+		VkImageView GetImageView(uint32_t index) { return m_buffers[index].view; }
+		VkFormat GetColorFormat() { return m_colorFormat; }
 
 	private:
-		void RecreateSwapchain(const Insight::Event& event);
-		void DrawUI();
-
-		void PrepSwapchainCommandBuffer();
-
-	private:
-		Device* m_device;
 		Mesh* m_fullscreenQuad;
 
-		Insight::Render::Shader* m_swapchainShader;
-		std::vector<VulkanMaterial*> m_materials;
+		VkFormat m_colorFormat;
+		VkColorSpaceKHR m_colorSpace;
+		VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
+		uint32_t m_imageCount;
+		std::vector<VkImage> m_images;
+		std::vector<SwapChainBuffer> m_buffers;
+		uint32_t m_queueNodeIndex = UINT32_MAX;
 
-		CommandPool* m_drawCommandPool;
-		std::vector<CommandBuffer*> m_drawCommandBuffers;
-		std::vector<CommandBuffer*> m_imguiCommandBuffers;
-
-		std::vector<Fence*> m_inFlightFences;
-		std::vector<Fence*> m_imagesInFlight;
-
-		const uint32_t MaxFramesInFlight = 3;
-
-		int tempShader = 0;
-		int shaderIndex = 0;
-
-#ifdef IS_EDITOR
-		CommandBuffer* m_editorCommandBuffer;
-		CommandPool* m_editorCommandPool;
-		VulkanFramebuffer* m_editorFrameBuffer;
-
-		void* m_sceneTexture = nullptr;
-#endif
-		uint32_t m_currentFrame = 0;
-		uint32_t m_imageIndex;
-		SwapChainSupportDetails m_swapChainDetails;
-		VkSwapchainKHR m_swapchain;
-		std::vector<VulkanFramebuffer*> m_swapchainFramebuffers;
-
-		friend ImGuiRenderer;
+		VkInstance m_instance;
+		VkDevice m_device;
+		VkPhysicalDevice m_physicalDevice;
+		VkSurfaceKHR m_surface;
+		// Function pointers
+		PFN_vkGetPhysicalDeviceSurfaceSupportKHR fpGetPhysicalDeviceSurfaceSupportKHR;
+		PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR fpGetPhysicalDeviceSurfaceCapabilitiesKHR;
+		PFN_vkGetPhysicalDeviceSurfaceFormatsKHR fpGetPhysicalDeviceSurfaceFormatsKHR;
+		PFN_vkGetPhysicalDeviceSurfacePresentModesKHR fpGetPhysicalDeviceSurfacePresentModesKHR;
+		PFN_vkCreateSwapchainKHR fpCreateSwapchainKHR;
+		PFN_vkDestroySwapchainKHR fpDestroySwapchainKHR;
+		PFN_vkGetSwapchainImagesKHR fpGetSwapchainImagesKHR;
+		PFN_vkAcquireNextImageKHR fpAcquireNextImageKHR;
+		PFN_vkQueuePresentKHR fpQueuePresentKHR;
 	};
 }
 #endif

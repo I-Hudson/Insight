@@ -3,7 +3,7 @@
 #include "Insight/Core.h"
 
 #ifdef IS_VULKAN
-#include "Platform/Vulkan/Vulkan.h"
+#include "Platform/Vulkan/VulkanHeader.h"
 #include <shaderc/shaderc.hpp>
 #endif
 
