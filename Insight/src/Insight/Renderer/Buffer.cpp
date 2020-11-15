@@ -2,9 +2,6 @@
 #include "Insight/Renderer/Buffer.h"
 #include "Insight/Memory/MemoryManager.h"
 
-//#include "Platform/Vulkan/VulkanBuffers.h"
-#include "Platform/OpenGL/OpenGLBuffers.h"
-
 
 namespace Insight
 {

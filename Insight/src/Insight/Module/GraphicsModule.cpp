@@ -30,7 +30,9 @@ namespace Insight
 
 		GraphicsModule::~GraphicsModule()
 		{
-			ImGuiRenderer* imguiRenderer = ImGuiRenderer::GetInstance();
+			m_renderer->WaitForIdle();
+
+			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::GetInstance();
 			DELETE_ON_HEAP(imguiRenderer);
 
 			DELETE_ON_HEAP(m_renderer);
@@ -56,7 +58,7 @@ namespace Insight
 				std::stringstream ss;
 				double fps = 1.0 / stopwatch.Sec();
 				ss << "FPS: " << fps;
-				Insight::Window::SetTitle(ss.str());
+				//Insight::Window::SetTitle(ss.str());
 
 
 				//m_renderer->Present();

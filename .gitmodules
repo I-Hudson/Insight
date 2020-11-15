@@ -1,4 +1,9 @@
 [submodule "Insight/vendor/assimp"]
 	path = Insight/vendor/assimp
 	url = https://github.com/assimp/assimp
-
+[submodule "Insight/vendor/optick"]
+	path = Insight/vendor/optick
+	url = https://github.com/bombomby/optick.git
+[submodule "Insight/vendor/shaderc"]
+	path = Insight/vendor/shaderc
+	url = https://github.com/google/shaderc

@@ -73,9 +73,6 @@
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Platform\OpenGL">
-      <UniqueIdentifier>{35A49437-A105-7245-2A73-B8F796D3A804}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Platform\Vulkan">
       <UniqueIdentifier>{81084748-ED69-2456-76D7-6A08E2375B15}</UniqueIdentifier>
     </Filter>
@@ -300,15 +297,6 @@
     <ClInclude Include="src\Insight\Renderer\Renderer.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Shader.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\ShaderModule.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\ShaderModuleBase.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Texture.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
@@ -345,21 +333,6 @@
     <ClInclude Include="src\Insight\UUID.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGL.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLBuffers.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLMaterial.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLRenderer.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
@@ -379,6 +352,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanInitializers.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanRenderer.h">
@@ -1760,12 +1736,6 @@
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp">
       <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Shader.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\ShaderModuleBase.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="src\Insight\Renderer\Texture.cpp">
       <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
@@ -1787,18 +1757,6 @@
     <ClCompile Include="src\Insight\Time\Time.cpp">
       <Filter>src\Insight\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLBuffers.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLMaterial.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLRenderer.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp">
-      <Filter>src\Platform\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
@@ -1815,6 +1773,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanPipeline.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp">

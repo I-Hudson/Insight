@@ -3,9 +3,10 @@
 
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Library/ShaderLibrary.h"
-#include "Insight/Renderer/ShaderModule.h"
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Event/EventManager.h"
+
+#include "Insight/Config/Config.h"
 
 #include "glm/glm.hpp"
 #include "Insight/Renderer/ImGuiRenderer.h"
@@ -13,7 +14,7 @@
 
 namespace vks
 {
-	void Swapchain::Create(uint32_t width, uint32_t height, bool vsync)
+	void Swapchain::Create(uint32_t width, uint32_t height, bool vsync, bool gsync)
 	{
 		IS_PROFILE_FUNCTION();
 		VkSwapchainKHR oldSwapchain = m_swapChain;
@@ -60,11 +61,15 @@ namespace vks
 		{
 			for (size_t i = 0; i < presentModeCount; i++)
 			{
-				if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+				if (gsync)
 				{
-					swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-					break;
+					if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+					{
+						swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+						break;
+					}
 				}
+
 				if ((swapchainPresentMode != VK_PRESENT_MODE_MAILBOX_KHR) && (presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR))
 				{
 					swapchainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
@@ -342,6 +347,8 @@ namespace vks
 			presentInfo.pWaitSemaphores = &waitSemaphore;
 			presentInfo.waitSemaphoreCount = 1;
 		}
+
+		IS_PROFILE_GPU_FLIP(&m_swapChain);
 		return fpQueuePresentKHR(queue, &presentInfo);
 	}
 

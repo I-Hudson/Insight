@@ -20,7 +20,7 @@ namespace Insight
 	};
 }
 
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 #define IS_CORE_TRACE(...)							::Insight::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define IS_CORE_INFO(...)							::Insight::Log::GetCoreLogger()->info(__VA_ARGS__)
 #define IS_CORE_WARN(...)							::Insight::Log::GetCoreLogger()->warn(__VA_ARGS__)

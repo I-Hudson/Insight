@@ -3,7 +3,7 @@
 
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/VulkanRenderer.h"
-#include "Platform/OpenGL/OpenGLRenderer.h"
+
 #endif
 
 #include "Insight/Renderer/Renderer.h"
@@ -19,7 +19,7 @@ namespace Insight
 		switch (s_API)
 		{
 		case GraphicsAPI::Vulkan: return NEW_ON_HEAP(vks::VulkanRenderer);
-		case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
+		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
 		}
 		return nullptr;
 	}

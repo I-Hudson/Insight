@@ -23,7 +23,7 @@ namespace Insight
 		FreeListAllocator::~FreeListAllocator()
 		{
 
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 			if (m_sizeUsed > 0)
 			{
 				IS_CORE_WARN(
@@ -96,7 +96,7 @@ namespace Insight
 
 			m_sizeUsed += requiredSize;
 
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 			IS_CORE_INFO("\t@H {0} \tD@ {1} \tS {2} \tAP {3} \tP {4}, \tU {5} \tR {6}", (void*)headerAddress, (void*)dataAddress, ((FreeListAllocator::AllocHeader*) headerAddress)->BlockSize,
 				alignmentPadding, padding, m_sizeUsed, rest);
 #endif
@@ -131,7 +131,7 @@ namespace Insight
 
 			// Merge contiguous nodes
 			Coalescence(itPrev, freeNode);
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 			m_numOfFrees++;
 #endif
 		}
@@ -157,7 +157,7 @@ namespace Insight
 			{
 				freeNode->data.BlockSize += freeNode->next->data.BlockSize;
 				m_freeList.Remove(freeNode, freeNode->next);
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 				IS_CORE_INFO("\tMerging(n) {0} % {1} \ts {2}", (void*)freeNode, (void*)freeNode->next, freeNode->data.BlockSize);
 #endif
 			}
@@ -167,7 +167,7 @@ namespace Insight
 			{
 				previousNode->data.BlockSize += freeNode->data.BlockSize;
 				m_freeList.Remove(previousNode, freeNode);
-#ifdef IS_DEBUG
+#if defined(IS_DEBUG)
 				IS_CORE_INFO("\tMerging(p) {0} & {1} \ts {2}", (void*)previousNode, (void*)freeNode, previousNode->data.BlockSize);
 #endif
 			}

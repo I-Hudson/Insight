@@ -24,7 +24,7 @@ namespace Insight
 			bool m_deserlizaed;
 
 			Insight::Library::ModelLibrary* m_modelLibrary;
-			Insight::Library::ShaderLibrary* m_shaderLibrary;
+			//Insight::Library::ShaderLibrary* m_shaderLibrary;
 		};
 	}
 }

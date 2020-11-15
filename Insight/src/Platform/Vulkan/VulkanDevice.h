@@ -14,7 +14,8 @@ namespace vks
 		explicit VulkanDevice(VkPhysicalDevice m_physicalDevice);
 		~VulkanDevice();
 		uint32_t        GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags m_properties, VkBool32* memTypeFound = nullptr) const;
-		uint32_t        GetQueueFamilyIndex(VkQueueFlagBits queueFlags) const;
+		uint32_t&		GetQueueFamilyIndex(VkQueueFlagBits queueFlags);
+		uint32_t        QueryQueueFamilyIndex(VkQueueFlagBits queueFlags) const;
 		VkResult        CreateLogicalDevice(VkPhysicalDeviceFeatures m_enabledFeatures, std::vector<const char*> enabledExtensions, void* pNextChain, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
 		VkResult        CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = nullptr);
 		VkResult        CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vks::VulkanBuffer* buffer, VkDeviceSize size, void* data = nullptr);
@@ -29,6 +30,7 @@ namespace vks
 		VkFormat        GetSupportedDepthFormat(bool checkSamplingSupport);
 
 		VkQueue			GetQueue(VkQueueFlags queue);
+		VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
 
 		VkResult WaitForIdle();
 
@@ -56,6 +58,8 @@ namespace vks
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 		/** @brief Set to true when the debug marker extension is detected */
 		bool m_enableDebugMarkers = false;
+
+		VkPipelineCache m_pipelineCache;
 
 		/** @brief Contains queue family indices */
 		struct

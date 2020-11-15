@@ -317,7 +317,40 @@ namespace vks
 		return shaderModule;
 	}
 #else
-	VkShaderModule loadShader(const char* fileName, VkDevice device)
+	std::vector<uint32_t> loadShaderBinary(const std::string& fileName)
+	{
+		// open the file:
+		std::basic_ifstream<uint32_t> file(fileName, std::ios::binary);
+
+		if (!file.is_open())
+		{
+			IS_CORE_ERROR("Unable to read file '{0}'.", fileName);
+			return std::vector<uint32_t>();
+		}
+
+		// read the data:
+		return std::vector<uint32_t>((std::istreambuf_iterator<uint32_t>(file)),
+									  std::istreambuf_iterator<uint32_t>());
+	}
+
+	std::string loadShaderString(const std::string& fileName)
+	{
+		std::ifstream file(fileName);
+		if (file.is_open())
+		{
+			std::string inputString((std::istreambuf_iterator<char>(file)),
+								  std::istreambuf_iterator<char>());
+
+			return inputString;
+		}
+		else
+		{
+			IS_CORE_ASSERT(false, "Unable to load shader.");
+		}
+		return std::string();
+	}
+
+	VkShaderModule loadShader(const std::string& fileName, VkDevice device)
 	{
 		std::ifstream is(fileName, std::ios::binary | std::ios::in | std::ios::ate);
 

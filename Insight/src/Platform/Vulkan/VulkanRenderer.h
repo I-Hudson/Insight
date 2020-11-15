@@ -3,7 +3,6 @@
 #include "Insight/Core.h"
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
-#include "Insight/Renderer/ShaderModule.h"
 
 #include "VulkanDevice.h"
 #include "Swapchain.h"
@@ -16,6 +15,8 @@ namespace Insight
 {
 	class Event;
 }
+
+const int MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace vks
 {
@@ -30,6 +31,7 @@ namespace vks
 		virtual void Clear() override;
 		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) override;
 		virtual void Present() override;
+		virtual void WaitForIdle() override;
 
 		/** @brief Return our instance */
 		VkInstance GetInstance() { return m_instance; }
@@ -67,6 +69,8 @@ namespace vks
 		virtual void SetupRenderPass();
 		/** @brief (Virtual) Called after the physical device features have been read, can be used to set features to enable on the device */
 		virtual void GetEnabledFeatures();
+
+		VkSubmitInfo GetSubmitInfo();
 
 		float rnd(float range);
 		void PrepareMultiThreadedRenderer();
@@ -129,9 +133,9 @@ namespace vks
 		struct
 		{
 			// Swap chain image presentation
-			VkSemaphore PresentComplete;
+			VkSemaphore ImageAquired[MAX_FRAMES_IN_FLIGHT];
 			// Command buffer submission and execution
-			VkSemaphore RenderComplete;
+			VkSemaphore RenderComplete[MAX_FRAMES_IN_FLIGHT];
 		}m_semaphores;
 
 		struct
@@ -175,6 +179,7 @@ namespace vks
 		VkPipelineStageFlags m_submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		// Contains command buffers and semaphores to be presented to the queue
 		VkSubmitInfo m_submitInfo;
+		std::vector<VkCommandBuffer> m_drawCmdBuffers;
 		// Pirmary Command buffers used for rendering
 		VkCommandBuffer m_primaryCommandBuffer;
 		struct
@@ -185,8 +190,8 @@ namespace vks
 		VkRenderPass m_renderPass;
 		// List of available frame buffers (same as number of swap chain images)
 		std::vector<VkFramebuffer> m_frameBuffers;
-		// Active frame buffer index
-		uint32_t m_currentBuffer = 0;
+		uint32_t m_imageIndex = 0;
+		uint32_t m_currentFrame = 0;
 		// Descriptor set pool
 		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 		// List of shader modules created (stored for cleanup)
@@ -194,7 +199,8 @@ namespace vks
 		// Pipeline cache object
 		VkPipelineCache m_pipelineCache;
 
-		std::vector<VkFence> m_waitFences;
+		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
+		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 	};
 }
 #endif

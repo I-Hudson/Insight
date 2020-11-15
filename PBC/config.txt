@@ -14,4 +14,5 @@ smart_pointers=true
 
 Renderer
 vsync=0
+gsync=0
 validation=1

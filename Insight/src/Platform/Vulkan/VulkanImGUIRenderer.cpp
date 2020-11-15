@@ -44,7 +44,6 @@ namespace vks
 #if defined(IMGUI_ENABLED)
 		ImGui::Render();
 		ImGui::UpdatePlatformWindows();
-		UpdateBuffers();
 #endif
 	}
 
@@ -52,6 +51,7 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 #if defined(IMGUI_ENABLED)
+		//OPTICK_GPU_EVENT("ImGui Draw");
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
 #endif
 	}
@@ -104,16 +104,14 @@ namespace vks
 #endif
 	}
 
-	void VulkanImGUIRenderer::UpdateBuffers()
-	{
-	}
-
 	void VulkanImGUIRenderer::WindowResize(Insight::Event const& event)
 	{
+#if defined(IMGUI_ENABLED)
 		Insight::VulkanResizeEvent resizeEvent = static_cast<const Insight::VulkanResizeEvent&>(event);
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(resizeEvent.m_width, resizeEvent.m_height);
 		ImGui_ImplVulkan_SetMinImageCount(2);
+#endif
 	}
 }

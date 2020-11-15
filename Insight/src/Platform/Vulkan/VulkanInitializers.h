@@ -282,6 +282,19 @@ namespace vks
 		}
 
 		inline VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo(
+			std::vector<VkDescriptorSetLayout>& setLayouts,
+			std::vector<VkPushConstantRange>& pushConstants)
+		{
+			VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+			pipelineLayoutCreateInfo.setLayoutCount = static_cast<uint32_t>(setLayouts.size());
+			pipelineLayoutCreateInfo.pSetLayouts = setLayouts.data();
+			pipelineLayoutCreateInfo.pushConstantRangeCount = static_cast<uint32_t>(pushConstants.size());
+			pipelineLayoutCreateInfo.pPushConstantRanges = pushConstants.data();
+			return pipelineLayoutCreateInfo;
+		}
+
+		inline VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo(
 			const VkDescriptorSetLayout* pSetLayouts,
 			uint32_t setLayoutCount = 1)
 		{
@@ -559,6 +572,15 @@ namespace vks
 			computePipelineCreateInfo.layout = layout;
 			computePipelineCreateInfo.flags = flags;
 			return computePipelineCreateInfo;
+		}
+
+		inline VkPipelineCacheCreateInfo pipelineCacheCreateInfo()
+		{
+			VkPipelineCacheCreateInfo pipelineCacheCreateInfo{};
+			pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+			pipelineCacheCreateInfo.pInitialData = 0;
+			pipelineCacheCreateInfo.initialDataSize = 0;
+			return pipelineCacheCreateInfo;
 		}
 
 		inline VkPushConstantRange pushConstantRange(

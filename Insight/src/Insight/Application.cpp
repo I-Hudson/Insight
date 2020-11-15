@@ -60,7 +60,7 @@ namespace Insight
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
 		
-		m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
+		//m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
 
 #ifdef IS_EDITOR
 		m_moduleManager->AddModule<Module::EditorModule>();
@@ -126,6 +126,8 @@ namespace Insight
 
 		while (m_isRunning)
 		{
+			OPTICK_FRAME("MainThread");
+
 			IS_PROFILE_SCOPE("UPDATE_LOOP");
 			{
 				IS_PROFILE_SCOPE("UPDATE_LOOP_START");
@@ -139,18 +141,17 @@ namespace Insight
 				m_triggerRender = false;
 				m_mutex.unlock();
 #endif
-
 				Time::UpdateTime();
 				deltaTime = Time::GetDeltaTime();
 
-				m_inputModule->Update(deltaTime);
+				m_windowModule->Update(deltaTime);
 
 				IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
 				IS_CORE_INFO("Frame Time: {0}", deltaTime);
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 				Insight::ImGuiRenderer::GetInstance()->NewFrame();
-				/*
+				
 				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
 				ImGui::Begin("Scene");
 				ImGui::InputText("Scene Name", &sceneFileName);
@@ -182,24 +183,26 @@ namespace Insight
 					doc.InsertEndChild(models);
 					doc.SaveFile("ModelLibrary.xml");
 				}
-				ImGui::EndMainMenuBar();*/
+				ImGui::EndMainMenuBar();
 #endif
 				//m_moduleManager->Update(deltaTime);
 
 				//TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 
-				//Update(deltaTime);
-				//Draw();
+				Update(deltaTime);
+				Draw();
 #ifndef THREADS
 				m_graphicsModule->Update(deltaTime);
-
-				m_windowModule->Update(deltaTime);
 #endif
 
 #ifdef THREADS
 				m_mutex.lock();
 #endif
 				m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
+				//if (m_windowModule->GetWindow()->ShouldClose())
+				//{
+				//	break;
+				//}
 #ifdef THREADS
 				m_renderComplete = false;
 				m_triggerRender = true;
@@ -229,13 +232,12 @@ namespace Insight
 		uint32_t m_loopCount = 0;
 		uint32_t m_frameCount = 0;
 
+		IS_PROFILE_THREAD("Render Thread");
+		Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Insight::Category::AI);
+
 		while (m_isRunning)
 		{
-			IS_PROFILE_SCOPE("RENDER_LOOP");
-			{
-				IS_PROFILE_SCOPE("RENDER_LOOP_START");
-			}
-
+			IS_PROFILE_FUNCTION();
 			if (m_triggerRender)
 			{
 				m_graphicsModule->Update(Time::GetDeltaTime());
@@ -247,9 +249,6 @@ namespace Insight
 				++m_frameCount;
 			}
 			++m_loopCount;
-			{
-				IS_PROFILE_SCOPE("RENDER_LOOP_END");
-			}
 		}
 
 		IS_CORE_INFO("RENDER LOOP COUNT: {0}", m_loopCount);

@@ -8,6 +8,7 @@
 #include "VulkanBuffer.h"
 #include <imgui.h>
 #include <glm/glm.hpp>
+#include "Insight/Threading/TThreadSafe.h"
 
 namespace vks
 {
@@ -21,18 +22,9 @@ namespace vks
 		virtual void EndFrame() override;
 		void Render(VkCommandBuffer commandBuffer);
 
-		// UI params are set via push constants
-		struct PushConstBlock
-		{
-			glm::vec2 scale;
-			glm::vec2 translate;
-		} pushConstBlock;
-
 	private:
 		virtual void Init(Insight::Renderer* renderer) override;
 		void InitResources();
-
-		void UpdateBuffers();
 
 		void WindowResize(Insight::Event const& event);
 

@@ -27,6 +27,7 @@ namespace Insight
 		virtual void Clear() = 0;
 		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) = 0;
 		virtual void Present() = 0;
+		virtual void WaitForIdle() = 0;
 
 		virtual Material* GetDefaultMaterial() { return nullptr; }
 
@@ -35,6 +36,7 @@ namespace Insight
 		struct RendererConfig
 		{
 			CVar<int> VSync			{ "vsync", 0 };
+			CVar<int> GSync			{ "gsync", 0 };
 			CVar<int> Validation	{ "validation", 1 };
 		};
 

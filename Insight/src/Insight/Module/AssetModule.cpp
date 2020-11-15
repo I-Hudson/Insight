@@ -4,7 +4,6 @@
 #include "Insight/Memory/MemoryManager.h"
 
 #include "Insight/Model/Model.h"
-#include "Insight/Renderer/Shader.h"
 
 namespace Insight
 {
@@ -14,13 +13,13 @@ namespace Insight
 			: m_deserlizaed(false)
 		{
 			m_modelLibrary = NEW_ON_HEAP(Insight::Library::ModelLibrary);
-			m_shaderLibrary = NEW_ON_HEAP(Insight::Library::ShaderLibrary);
+			//m_shaderLibrary = NEW_ON_HEAP(Insight::Library::ShaderLibrary);
 		}
 
 		AssetModule::~AssetModule()
 		{
 			DELETE_ON_HEAP(m_modelLibrary);
-			DELETE_ON_HEAP(m_shaderLibrary);
+			//DELETE_ON_HEAP(m_shaderLibrary);
 		}
 
 		void AssetModule::Update(const float& deltaTime)

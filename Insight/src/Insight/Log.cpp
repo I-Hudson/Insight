@@ -14,15 +14,15 @@ namespace Insight
 		spdlog::set_pattern("%^[%T] %n: %v%$");
 
 		s_CoreLogger = spdlog::stdout_color_mt("INSIGHT");
-		/*s_CoreLogger->set_error_handler([](const std::string& msg)
+		s_CoreLogger->set_error_handler([](const std::string& msg)
 			{
 				throw std::runtime_error(msg);
-			});*/
+			});
 
 		s_ClientLogger = spdlog::stdout_color_mt("APP");
-		/*s_ClientLogger->set_error_handler([](const std::string& msg)
+		s_ClientLogger->set_error_handler([](const std::string& msg)
 			{
 				throw std::runtime_error(msg);
-			});*/
+			});
 	}
 }

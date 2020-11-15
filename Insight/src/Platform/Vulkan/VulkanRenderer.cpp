@@ -15,7 +15,9 @@
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Time/Time.h"
+#include <Insight\Renderer\ImGuiRenderer.cpp>
 
+#include "VulkanPipeline.h"
 
 namespace vks
 {
@@ -58,9 +60,7 @@ namespace vks
 	VulkanRenderer::~VulkanRenderer()
 	{
 		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
-		m_vulkanDevice->WaitForIdle();
 
-		// Clean up Vulkan resources
 		m_swapchain.CleanUp();
 		if (m_descriptorPool != VK_NULL_HANDLE)
 		{
@@ -72,7 +72,7 @@ namespace vks
 		{
 			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
 		}
-
+		
 		for (auto& shaderModule : m_shaderModules)
 		{
 			vkDestroyShaderModule(m_device, shaderModule, nullptr);
@@ -80,23 +80,27 @@ namespace vks
 		vkDestroyImageView(m_device, m_depthStencil.View, nullptr);
 		vkDestroyImage(m_device, m_depthStencil.Image, nullptr);
 		vkFreeMemory(m_device, m_depthStencil.Mem, nullptr);
-
+		
 		vkDestroyPipelineCache(m_device, m_pipelineCache, nullptr);
-
+		
 		vkDestroyCommandPool(m_device, m_cmdPool, nullptr);
-
-		vkDestroySemaphore(m_device, m_semaphores.PresentComplete, nullptr);
-		vkDestroySemaphore(m_device, m_semaphores.RenderComplete, nullptr);
-		for (auto& fence : m_waitFences)
+		
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			vkDestroyFence(m_device, fence, nullptr);
+			vkDestroySemaphore(m_device, m_semaphores.ImageAquired[i], nullptr);
+			vkDestroySemaphore(m_device, m_semaphores.RenderComplete[i], nullptr);
+		
+			vkDestroyFence(m_device, m_waitFences[i], nullptr);
+			m_waitImagesFences[i] = VK_NULL_HANDLE;
 		}
-
+		
 		for (auto& thread : m_threadData)
 		{
 			vkFreeCommandBuffers(m_device, thread.commandPool, thread.commandBuffer.size(), thread.commandBuffer.data());
 			vkDestroyCommandPool(m_device, thread.commandPool, nullptr);
 		}
+
+		IS_PROFILE_GPUI_SHUTDOWN();
 
 		DELETE_ON_HEAP(m_vulkanDevice);
 
@@ -195,23 +199,16 @@ namespace vks
 
 		// Create synchronization objects
 		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		// Create a semaphore used to synchronize image presentation
-		// Ensures that the image is displayed before we start submitting new commands to the queue
-		ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.PresentComplete));
-		// Create a semaphore used to synchronize command submission
-		// Ensures that the image is not presented until all commands have been submitted and executed
-		ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.RenderComplete));
-
-		// Set up submit info structure
-		// Semaphores will stay the same during application lifetime
-		// Command buffer submission info is set by each example
-		m_submitInfo = vks::initializers::submitInfo();
-		m_submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
-		m_submitInfo.waitSemaphoreCount = 1;
-		m_submitInfo.pWaitSemaphores = &m_semaphores.PresentComplete;
-		m_submitInfo.signalSemaphoreCount = 1;
-		m_submitInfo.pSignalSemaphores = &m_semaphores.RenderComplete;
-
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+		{
+			// Create a semaphore used to synchronize image presentation
+			// Ensures that the image is displayed before we start submitting new commands to the queue
+			ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.ImageAquired[i]));
+			// Create a semaphore used to synchronize command submission
+			// Ensures that the image is not presented until all commands have been submitted and executed
+			ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &m_semaphores.RenderComplete[i]));
+		}
+		m_submitInfo = GetSubmitInfo();
 		Prepare();
 
 		m_clearColor = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -219,7 +216,11 @@ namespace vks
 
 	void VulkanRenderer::Clear()
 	{
-		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.PresentComplete, &m_currentBuffer);
+		IS_PROFILE_FUNCTION();
+
+		vkWaitForFences(m_device, 1, &m_waitFences[m_currentFrame], VK_TRUE, UINT64_MAX);
+
+		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.ImageAquired[m_currentFrame], &m_imageIndex);
 		if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR))
 		{
 			WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
@@ -228,20 +229,21 @@ namespace vks
 		{
 			ThrowIfFailed(result);
 		}
+
+		if (m_waitImagesFences[m_imageIndex] != VK_NULL_HANDLE)
+		{
+			vkWaitForFences(m_device, 1, &m_waitImagesFences[m_imageIndex], VK_TRUE, UINT64_MAX);
+		}
+
+		m_waitImagesFences[m_imageIndex] = m_waitFences[m_currentFrame];
+
+		vkResetFences(m_device, 1, &m_waitFences[m_currentFrame]);
 	}
 
 	// This should be moved to a submodule for every type of rendering we are doing.
 	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
 	{
 		IS_PROFILE_FUNCTION();
-
-		VkResult fenceRes;
-		do
-		{
-			fenceRes = vkWaitForFences(m_device, 1, &m_waitFences[0], VK_TRUE, 100000000);
-		} while (fenceRes == VK_TIMEOUT);
-		ThrowIfFailed(fenceRes);
-		vkResetFences(m_device, 1, & m_waitFences[0]);
 
 		Clear();
 
@@ -267,18 +269,44 @@ namespace vks
 			m_clearColor.float32[2] = 0.0f;
 		}
 
-		if (false)
+		if (true)
 		{
 			BuildCommandBuffers();
+			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+		
+			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
+		
+			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
+			submitInfo.pWaitSemaphores = waitSemahores;
+			submitInfo.waitSemaphoreCount = 1;
+		
+			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
+			submitInfo.pSignalSemaphores = signalSemahores;
+			submitInfo.signalSemaphoreCount = 1;
+		
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &m_drawCmdBuffers[m_imageIndex];
+		
+			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
 		}
 		else
 		{
-			UpdateCommandBuffer(m_frameBuffers[m_currentBuffer]);
-			//Update submodule rendering.
-			// offscreen
-			m_submitInfo.commandBufferCount = 1;
-			m_submitInfo.pCommandBuffers = &m_primaryCommandBuffer;
-			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &m_submitInfo, m_waitFences[0]));
+			UpdateCommandBuffer(m_frameBuffers[m_imageIndex]);
+			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+		
+			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
+		
+			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
+			submitInfo.pWaitSemaphores = waitSemahores;
+			submitInfo.waitSemaphoreCount = 1;
+		
+			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
+			submitInfo.pSignalSemaphores = signalSemahores;
+			submitInfo.signalSemaphoreCount = 1;
+		
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &m_primaryCommandBuffer;
+			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
 		}
 		Present();
 	}
@@ -287,7 +315,7 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		VkResult result = m_swapchain.QueuePresent(m_queue, m_currentBuffer, m_semaphores.RenderComplete);
+		VkResult result = m_swapchain.QueuePresent(m_queue, m_imageIndex, m_semaphores.RenderComplete[m_currentFrame]);
 		if (!((result == VK_SUCCESS) || (result == VK_SUBOPTIMAL_KHR)))
 		{
 			if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -301,7 +329,12 @@ namespace vks
 				ThrowIfFailed(result);
 			}
 		}
-		ThrowIfFailed(vkQueueWaitIdle(m_queue));
+		m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	}
+
+	void VulkanRenderer::WaitForIdle()
+	{
+		ThrowIfFailed(vkDeviceWaitIdle(m_device));
 	}
 
 	void VulkanRenderer::Prepare()
@@ -314,8 +347,8 @@ namespace vks
 		}
 
 		InitSwapchain();
-		CreateCommandPool();
 		SetupSwapchain();
+		CreateCommandPool();
 		CreateCommandBuffers();
 		CreateDescriptorPool();
 		CreateSynchronizationPrimitives();
@@ -324,6 +357,11 @@ namespace vks
 		CreatePipelineCache();
 		SetupFrameBuffer();
 		PrepareMultiThreadedRenderer();
+
+		std::vector<std::string> shaders = { "./data/shaders/vulkan/imgui/ui.vert",  "./data/shaders/vulkan/imgui/ui.frag" };
+		VulkanPipeline testPipeline(*m_vulkanDevice, shaders, m_renderPass);
+
+		IS_PROFILE_GPU_INIT_VULKAN(&m_device, &m_physicalDevice, &m_queue, &m_vulkanDevice->m_queueFamilyIndices.graphics, 1, nullptr);
 	}
 
 	void VulkanRenderer::InitSwapchain()
@@ -335,22 +373,22 @@ namespace vks
 	void VulkanRenderer::SetupSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync));
+		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
 	}
 
 	void VulkanRenderer::CreateCommandBuffers()
 	{
 		IS_PROFILE_FUNCTION();
 		// Create one command buffer for each swap chain image and reuse for rendering
-		//m_drawCmdBuffers.resize(m_swapchain.GetImageCount());
+		m_drawCmdBuffers.resize(m_swapchain.GetImageCount());
 
-		//VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-		//	vks::initializers::commandBufferAllocateInfo(
-		//		m_cmdPool,
-		//		VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-		//		static_cast<uint32_t>(m_drawCmdBuffers.size()));
-		//
-		//ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
+		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
+			vks::initializers::commandBufferAllocateInfo(
+				m_cmdPool,
+				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+				static_cast<uint32_t>(m_drawCmdBuffers.size()));
+		
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
 	}
 
 	void VulkanRenderer::CreatePipelineCache()
@@ -364,7 +402,8 @@ namespace vks
 	void VulkanRenderer::DestroyCommandBuffers()
 	{
 		IS_PROFILE_FUNCTION();
-		//vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
+		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
+		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_primaryCommandBuffer);
 	}
 
 	void VulkanRenderer::CreateCommandPool()
@@ -408,13 +447,11 @@ namespace vks
 		IS_PROFILE_FUNCTION();
 		// Wait fences to sync command buffer access
 		VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
-		//m_waitFences.resize(m_drawCmdBuffers.size());
-		//for (auto& fence : m_waitFences)
-		//{
-		//	ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence));
-		//}
-		m_waitFences.resize(1);
-		ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_waitFences[0]));
+		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+		{
+			ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_waitFences[i]));
+			m_waitImagesFences[i] = VK_NULL_HANDLE;
+		}
 	}
 
 	VkResult VulkanRenderer::CreateInstance(bool enableValidation)
@@ -536,27 +573,28 @@ namespace vks
 		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::GetInstance());
 		imgui->EndFrame();
 
+		int i = m_imageIndex;
 		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
-		//{
-		//	// Set target frame buffer
-		//	renderPassBeginInfo.framebuffer = m_frameBuffers[i];
-		//
-		//	ThrowIfFailed(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
-		//
-		//	vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		//
-		//	VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-		//	vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
-		//
-		//	VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-		//	vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
-		//
-		//	imgui->Render(m_drawCmdBuffers[i]);
-		//
-		//	vkCmdEndRenderPass(m_drawCmdBuffers[i]);
-		//
-		//	ThrowIfFailed(vkEndCommandBuffer(m_drawCmdBuffers[i]));
-		//}
+		{
+			// Set target frame buffer
+			renderPassBeginInfo.framebuffer = m_frameBuffers[i];
+		
+			ThrowIfFailed(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
+		
+			vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		
+			VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
+			vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+		
+			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
+			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+		
+			imgui->Render(m_drawCmdBuffers[i]);
+		
+			vkCmdEndRenderPass(m_drawCmdBuffers[i]);
+		
+			ThrowIfFailed(vkEndCommandBuffer(m_drawCmdBuffers[i]));
+		}
 	}
 
 	void VulkanRenderer::SetupDepthStencil()
@@ -704,6 +742,26 @@ namespace vks
 
 	void VulkanRenderer::GetEnabledFeatures()
 	{
+	}
+
+	VkSubmitInfo VulkanRenderer::GetSubmitInfo()
+	{
+		// Set up submit info structure
+		// Semaphores will stay the same during application lifetime
+		// Command buffer submission info is set by each example
+		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+
+		submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
+
+		VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
+		submitInfo.pWaitSemaphores = waitSemahores;
+		submitInfo.waitSemaphoreCount = 1;
+
+		VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
+		submitInfo.pSignalSemaphores = signalSemahores;
+		submitInfo.signalSemaphoreCount = 1;
+
+		return submitInfo;
 	}
 
 	float VulkanRenderer::rnd(float range)

@@ -58,6 +58,10 @@ namespace vks
 		{
 			vkDestroyCommandPool(m_logicalDevice, m_commandPool, nullptr);
 		}
+		if (m_pipelineCache)
+		{
+			vkDestroyPipelineCache(m_logicalDevice, m_pipelineCache, nullptr);
+		}
 		if (m_logicalDevice)
 		{
 			vkDestroyDevice(m_logicalDevice, nullptr);
@@ -104,6 +108,17 @@ namespace vks
 		}
 	}
 
+	uint32_t& VulkanDevice::GetQueueFamilyIndex(VkQueueFlagBits queueFlags)
+	{
+		switch (queueFlags)
+		{
+			case VK_QUEUE_GRAPHICS_BIT: return m_queueFamilyIndices.graphics;
+			case VK_QUEUE_COMPUTE_BIT:  return m_queueFamilyIndices.graphics;
+			case VK_QUEUE_TRANSFER_BIT:  return m_queueFamilyIndices.transfer;
+		}
+		return m_queueFamilyIndices.graphics;
+	}
+
 	/**
 	* Get the index of a queue family that supports the requested queue flags
 	*
@@ -113,7 +128,7 @@ namespace vks
 	*
 	* @throw Throws an exception if no queue family index could be found that supports the requested flags
 	*/
-	uint32_t VulkanDevice::GetQueueFamilyIndex(VkQueueFlagBits queueFlags) const
+	uint32_t VulkanDevice::QueryQueueFamilyIndex(VkQueueFlagBits queueFlags) const
 	{
 		// Dedicated queue for compute
 		// Try to find a queue family index that supports compute but not graphics
@@ -179,7 +194,7 @@ namespace vks
 		// Graphics queue
 		if (requestedQueueTypes & VK_QUEUE_GRAPHICS_BIT)
 		{
-			m_queueFamilyIndices.graphics = GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
+			m_queueFamilyIndices.graphics = QueryQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
 			VkDeviceQueueCreateInfo queueInfo{};
 			queueInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			queueInfo.queueFamilyIndex = m_queueFamilyIndices.graphics;
@@ -195,7 +210,7 @@ namespace vks
 		// Dedicated compute queue
 		if (requestedQueueTypes & VK_QUEUE_COMPUTE_BIT)
 		{
-			m_queueFamilyIndices.compute = GetQueueFamilyIndex(VK_QUEUE_COMPUTE_BIT);
+			m_queueFamilyIndices.compute = QueryQueueFamilyIndex(VK_QUEUE_COMPUTE_BIT);
 			if (m_queueFamilyIndices.compute != m_queueFamilyIndices.graphics)
 			{
 				// If compute family index differs, we need an additional queue create info for the compute queue
@@ -216,7 +231,7 @@ namespace vks
 		// Dedicated transfer queue
 		if (requestedQueueTypes & VK_QUEUE_TRANSFER_BIT)
 		{
-			m_queueFamilyIndices.transfer = GetQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT);
+			m_queueFamilyIndices.transfer = QueryQueueFamilyIndex(VK_QUEUE_TRANSFER_BIT);
 			if ((m_queueFamilyIndices.transfer != m_queueFamilyIndices.graphics) && (m_queueFamilyIndices.transfer != m_queueFamilyIndices.compute))
 			{
 				// If compute family index differs, we need an additional queue create info for the compute queue
@@ -294,6 +309,9 @@ namespace vks
 
 		// Create a default command pool for graphics command buffers
 		m_commandPool = CreateCommandPool(m_queueFamilyIndices.graphics);
+
+
+		m_pipelineCache = vkCreatePipelineCache(m_logicalDevice, &vks::initializers::pipelineCacheCreateInfo(), nullptr, &m_pipelineCache);
 
 		return result;
 	}
@@ -542,7 +560,7 @@ namespace vks
 
 	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, bool free)
 	{
-		return FlushCommandBuffer(commandBuffer, queue, m_commandPool, free);
+		return FlushCommandBuffer(commandBuffer, queue, m_commandPool, true);
 	}
 
 	/**

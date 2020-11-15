@@ -79,6 +79,8 @@ namespace vks
 #if defined(__ANDROID__)
 	VkShaderModule loadShader(AAssetManager* assetManager, const char* fileName, VkDevice device);
 #else
+	std::vector<uint32_t> loadShaderBinary(const std::string& fileName);
+	std::string loadShaderString(const std::string& fileName);
 	VkShaderModule loadShader(const std::string& fileName, VkDevice device);
 	VkPipelineShaderStageCreateInfo  loadShader(const std::string& fileName, VkDevice device, VkShaderStageFlagBits stage);
 #endif

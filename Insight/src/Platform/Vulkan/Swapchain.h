@@ -34,7 +34,7 @@ namespace vks
 	{
 	public:
 
-		void Create(uint32_t width, uint32_t height, bool vsync = false);
+		void Create(uint32_t width, uint32_t height, bool vsync = false, bool gsync = false);
 		void InitSurface(void* platformWindow);
 		void Connect(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device);
 		VkResult AcquireNextImage(VkSemaphore presentCompleteSem, uint32_t* imageIndex);

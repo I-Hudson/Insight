@@ -4,10 +4,6 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Renderer.h"
 
-#ifdef IS_VULKAN
-//#include "Platform/Vulkan/VulkanMaterial.h"
-#endif
-#include "Platform/OpenGL/OpenGLMaterial.h"
 
 Material* Material::Create()
 {
@@ -16,7 +12,7 @@ Material* Material::Create()
 #if defined(IS_VULKAN)
 	//case Insight::GraphicsAPI::Vulkan: return NEW_ON_HEAP(Platform::VulkanMaterial);
 #endif
-	case Insight::GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
+	//case Insight::GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
 	}
 	return nullptr;
 }
