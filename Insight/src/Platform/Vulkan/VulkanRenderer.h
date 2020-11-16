@@ -6,8 +6,12 @@
 
 #include "VulkanDevice.h"
 #include "Swapchain.h"
+#include "VulkanPipeline.h"
+
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Threading/Threadpool.h"
+
+#include <glm/glm.hpp>
 
 class CameraComponent;
 
@@ -45,6 +49,10 @@ namespace vks
 		VkRenderPass GetRenderPass() { return m_renderPass; }
 		/** @brief Return the default descriptor pool */
 		VkDescriptorPool GetDescriptorPool() { return m_descriptorPool; }
+		/** @brief Return the default view port */
+		VkViewport GetViewPort() { return m_viewPort; }
+		/** @brief Return the default view port */
+		VkRect2D GetScissor() { return m_scissor; }
 
 	private:
 		void Prepare();
@@ -198,9 +206,14 @@ namespace vks
 		std::vector<VkShaderModule> m_shaderModules;
 		// Pipeline cache object
 		VkPipelineCache m_pipelineCache;
+		// Default viewport and scissor
+		VkViewport m_viewPort;
+		VkRect2D m_scissor;
 
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
+
+		VulkanPipeline m_defaultPipeline{ *m_vulkanDevice };
 	};
 }
 #endif

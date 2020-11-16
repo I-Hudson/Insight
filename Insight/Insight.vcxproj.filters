@@ -291,9 +291,6 @@
     <ClInclude Include="src\Insight\Renderer\Material.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\RenderPass.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Renderer\Renderer.h">
       <Filter>src\Insight\Renderer</Filter>
     </ClInclude>

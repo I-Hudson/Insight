@@ -383,6 +383,26 @@ namespace vks
 		}
 	}
 
+	VkPipelineShaderStageCreateInfo  loadShaderFromSPIRV(const std::vector<uint32_t> shader, VkDevice device, VkShaderStageFlagBits stage)
+	{
+		VkPipelineShaderStageCreateInfo shaderStage = {};
+		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		shaderStage.stage = stage;
+#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+		shaderStage.module = vks::loadShader(androidApp->activity->assetManager, fileName.c_str(), device);
+#else
+		VkShaderModuleCreateInfo moduleCreateInfo{};
+		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+		moduleCreateInfo.codeSize = shader.size() * sizeof(uint32_t);
+		moduleCreateInfo.pCode = shader.data();
+
+		ThrowIfFailed(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &shaderStage.module));
+#endif
+		shaderStage.pName = "main";
+		assert(shaderStage.module != VK_NULL_HANDLE);
+		return shaderStage;
+	}
+
 	VkPipelineShaderStageCreateInfo  loadShader(const std::string& fileName, VkDevice device, VkShaderStageFlagBits stage)
 	{
 		VkPipelineShaderStageCreateInfo shaderStage = {};

@@ -311,7 +311,7 @@ namespace vks
 		m_commandPool = CreateCommandPool(m_queueFamilyIndices.graphics);
 
 
-		m_pipelineCache = vkCreatePipelineCache(m_logicalDevice, &vks::initializers::pipelineCacheCreateInfo(), nullptr, &m_pipelineCache);
+		ThrowIfFailed(vkCreatePipelineCache(m_logicalDevice, &vks::initializers::pipelineCacheCreateInfo(), nullptr, &m_pipelineCache));
 
 		return result;
 	}

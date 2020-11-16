@@ -3,7 +3,6 @@
 #include "Insight/Core.h"
 #include "VulkanHeader.h"
 
-#include "Insight/Model/Mesh.h"
 #include "Insight/Event/ApplicationEvent.h"
 
 #include "Insight/Renderer/FrameGraph/FrameGraph.h"
@@ -13,7 +12,6 @@ namespace Insight
 	class Event;
 	class ImGuiRenderer;
 }
-
 
 namespace vks
 {
@@ -47,8 +45,6 @@ namespace vks
 		VkFormat GetColorFormat() { return m_colorFormat; }
 
 	private:
-		Mesh* m_fullscreenQuad;
-
 		VkFormat m_colorFormat;
 		VkColorSpaceKHR m_colorSpace;
 		VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;

@@ -12,10 +12,10 @@ namespace Insight
 
 	std::vector<const char*> ShaderParser::m_dataTypes
 	{
-		"int", "float",
+		"int", "float", "double",
 		"vec2", "vec3", "vec4",
-		"mat2", "mat3", "mat4",
-		"sampler2D", "push_constant"
+		"ivec2", "ivec3", "ivec4",
+		"sampler2D"
 	};
 
 	bool ShaderParser::m_recordUniform = false;
@@ -66,7 +66,6 @@ namespace Insight
 							startUniform = true;
 							m_recordUniform = true;
 						}
-						continue;
 					}
 				}
 
@@ -132,6 +131,10 @@ namespace Insight
 		UniformBufferBlock uniformBlock;
 
 		uniformBlock.Type = ShaderUniformBlockType::UniformBuffer;
+		if (line.find("sampler2D") != std::string::npos)
+		{
+			uniformBlock.Type = ShaderUniformBlockType::Sampler2D;
+		}
 
 		std::string sValue = "binding = ";
 		Size sLoc = line.find(sValue);

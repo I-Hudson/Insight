@@ -26,16 +26,22 @@ namespace Insight
 		}
 	};
 
+#define SHADERATTRIBUTETYPE_TO_STRING(x) return ##x;
 	enum class ShaderAttributeType
 	{
 		None,
 
 		Int,
 		Float,
+		Double,
 
 		Vec2,
 		Vec3,
 		Vec4,
+
+		IVec2,
+		IVec3,
+		IVec4,
 
 		Mat2,
 		Mat3,
@@ -46,6 +52,7 @@ namespace Insight
 
 	enum class ShaderUniformBlockType
 	{
+		Sampler2D,
 		UniformBuffer,
 		UniformBufferDynamic,
 		PushConstant,
@@ -53,7 +60,7 @@ namespace Insight
 		StorageBufferDynamic
 	};
 
-	enum ShaderType
+	enum class ShaderType
 	{
 		None = 0,
 		VertexShader = 1,
@@ -108,7 +115,21 @@ namespace Insight
 
 		virtual VkDescriptorType GetVulkanType() override
 		{
-			return IsDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			if (IsDynamic)
+			{
+				return Type == ShaderUniformBlockType::UniformBufferDynamic ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+			}
+			else
+			{
+				switch (Type)
+				{
+					case Insight::ShaderUniformBlockType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+					case Insight::ShaderUniformBlockType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					case Insight::ShaderUniformBlockType::UniformBufferDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+					case Insight::ShaderUniformBlockType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+					case Insight::ShaderUniformBlockType::StorageBufferDynamic: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+				}
+			}
 		}
 	};
 
@@ -137,16 +158,51 @@ namespace Insight
 			OutAttri.Size = 0;
 		}
 
-		VkShaderStageFlags GetVulkanShaderStage()
+		VkShaderStageFlagBits GetVulkanShaderStage()
 		{
 			switch (ShaderType)
 			{
-				case Insight::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
-				case Insight::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
-				case Insight::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
-				case Insight::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+				case Insight::ShaderType::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
+				case Insight::ShaderType::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
+				case Insight::ShaderType::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
+				case Insight::ShaderType::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
 			return VK_SHADER_STAGE_ALL;
+		}
+
+		VkFormat GetVulkanFormatType(ShaderAttributeType& type)
+		{
+			switch (type)
+			{
+				case ShaderAttributeType::Int: return VK_FORMAT_R32_SINT;
+				case ShaderAttributeType::Float: return VK_FORMAT_R32_SFLOAT;
+				case ShaderAttributeType::Double: return VK_FORMAT_R32_SFLOAT;
+				case ShaderAttributeType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
+				case ShaderAttributeType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
+				case ShaderAttributeType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+				case ShaderAttributeType::IVec2: return VK_FORMAT_R32G32_SINT;
+				case ShaderAttributeType::IVec3: return VK_FORMAT_R32G32B32_SINT;
+				case ShaderAttributeType::IVec4: return VK_FORMAT_R32G32B32A32_SINT;
+			}
+		}
+
+		std::vector<VkVertexInputBindingDescription> VertexInputBinding;
+		std::vector<VkVertexInputAttributeDescription> VertexInputAttribute;
+		VkPipelineVertexInputStateCreateInfo GetVertexInputState()
+		{
+			VkVertexInputBindingDescription inputBinding;
+			inputBinding.binding = 0;
+			inputBinding.stride = InAttri.Size;
+			inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			VertexInputBinding.push_back(inputBinding);
+
+			int location = 0;
+			for (auto& in : InAttri.Attributes)
+			{
+				VertexInputAttribute.push_back(vks::initializers::vertexInputAttributeDescription(0, in.Location, GetVulkanFormatType(in.Type), in.Stride));
+			}
+
+			return vks::initializers::pipelineVertexInputStateCreateInfo(VertexInputBinding, VertexInputAttribute);
 		}
 	};
 

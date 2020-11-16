@@ -140,7 +140,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -153,8 +153,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -170,7 +170,7 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -183,8 +183,8 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;shaderc_combined.lib;assimp-vc142-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -200,7 +200,7 @@ IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -213,8 +213,8 @@ IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -230,7 +230,7 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -247,8 +247,8 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -264,7 +264,7 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -280,8 +280,8 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -297,7 +297,7 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DIST;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\shaderc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -313,8 +313,8 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalDependencies>OptickCore.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\shaderc\build\libshaderc\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <PreBuildEvent>
       <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
@@ -381,7 +381,6 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Renderer\Framebuffer.h" />
     <ClInclude Include="src\Insight\Renderer\ImGuiRenderer.h" />
     <ClInclude Include="src\Insight\Renderer\Material.h" />
-    <ClInclude Include="src\Insight\Renderer\RenderPass.h" />
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
     <ClInclude Include="src\Insight\Renderer\Texture.h" />
     <ClInclude Include="src\Insight\Scene\Scene.h" />

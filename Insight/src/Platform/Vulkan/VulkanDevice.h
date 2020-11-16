@@ -31,6 +31,7 @@ namespace vks
 
 		VkQueue			GetQueue(VkQueueFlags queue);
 		VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
+		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 
 		VkResult WaitForIdle();
 

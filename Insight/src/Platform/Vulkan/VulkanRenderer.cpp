@@ -17,8 +17,6 @@
 #include "Insight/Time/Time.h"
 #include <Insight\Renderer\ImGuiRenderer.cpp>
 
-#include "VulkanPipeline.h"
-
 namespace vks
 {
 	std::string GetFormatInt(uint64_t i)
@@ -358,8 +356,9 @@ namespace vks
 		SetupFrameBuffer();
 		PrepareMultiThreadedRenderer();
 
-		std::vector<std::string> shaders = { "./data/shaders/vulkan/imgui/ui.vert",  "./data/shaders/vulkan/imgui/ui.frag" };
-		VulkanPipeline testPipeline(*m_vulkanDevice, shaders, m_renderPass);
+		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert",  "./data/shaders/vulkan/default.frag" };
+		m_defaultPipeline.Create(*m_vulkanDevice, shaders, m_renderPass, m_viewPort, m_scissor);
+
 
 		IS_PROFILE_GPU_INIT_VULKAN(&m_device, &m_physicalDevice, &m_queue, &m_vulkanDevice->m_queueFamilyIndices.graphics, 1, nullptr);
 	}
@@ -588,7 +587,7 @@ namespace vks
 		
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
-		
+
 			imgui->Render(m_drawCmdBuffers[i]);
 		
 			vkCmdEndRenderPass(m_drawCmdBuffers[i]);

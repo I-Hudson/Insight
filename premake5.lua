@@ -33,14 +33,15 @@ IncludeDir["glad"] = "$(SolutionDir)Insight/vendor/glad/include"
 IncludeDir["imgui"] = "$(SolutionDir)Insight/vendor/imgui/"
 IncludeDir["TinyXML2"] = "$(SolutionDir)Insight/vendor/TinyXML2"
 IncludeDir["optick"] = "$(SolutionDir)Insight/vendor/optick/src"
-IncludeDir["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc"
+IncludeDir["tinygltf"] = "$(SolutionDir)Insight/vendor/tinygltf"
+IncludeDir["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/include"
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
 LibDirs["Vulkan"] = "C:/VulkanSDK/1.1.130.0/lib"
 LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/BINARIES/x64/lib"
 LibDirs["optick"] = "$(SolutionDir)Insight/vendor/optick/bin/vs2019/x64/Debug"
-LibDirs["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/build/libshaderc/$(Configuration)"
+LibDirs["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/build/$(Configuration)"
 
 
 group "Dependencies"
@@ -91,7 +92,8 @@ project "Insight"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.TinyXML2}",
         "%{IncludeDir.optick}",
-        "%{IncludeDir.shaderc}",
+        "%{IncludeDir.tinygltf}",
+        "%{IncludeDir.ktx}",
 	}
 
     sysincludedirs 
@@ -103,14 +105,14 @@ project "Insight"
     {
         "%{LibDirs.Vulkan}",
         "%{LibDirs.optick}",
-        "%{LibDirs.shaderc}",
+        "%{LibDirs.ktx}",
 	}
 
     links 
 	{ 
         "GLFW",
         "OptickCore",
-        "shaderc_combined",
+        "ktx",
 	}
 
     filter "system:windows"

@@ -82,6 +82,7 @@ namespace vks
 	std::vector<uint32_t> loadShaderBinary(const std::string& fileName);
 	std::string loadShaderString(const std::string& fileName);
 	VkShaderModule loadShader(const std::string& fileName, VkDevice device);
+	VkPipelineShaderStageCreateInfo  loadShaderFromSPIRV(const std::vector<uint32_t> shader, VkDevice device, VkShaderStageFlagBits stage);
 	VkPipelineShaderStageCreateInfo  loadShader(const std::string& fileName, VkDevice device, VkShaderStageFlagBits stage);
 #endif
 
