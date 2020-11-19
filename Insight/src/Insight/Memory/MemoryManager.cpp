@@ -11,14 +11,14 @@ namespace Insight
 	{
 		void MemoryManager::DeleteOnStack(const Size marker)
 		{
-			return GetInstance()->m_stackAllocator.FreeToMarker(marker);
+			return Instance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
 		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line)
 		{
-			if (!GetInstance()->m_trackingObjects.count(ptr))
+			if (!Instance()->m_trackingObjects.count(ptr))
 			{
-				GetInstance()->m_trackingObjects[ptr] = TrackingObjectRecord
+				Instance()->m_trackingObjects[ptr] = TrackingObjectRecord
 				{
 					ptr,
 					str,
@@ -34,9 +34,9 @@ namespace Insight
 
 		void MemoryManager::UnTrackObject(void* ptr)
 		{
-			if (GetInstance()->m_trackingObjects.count(ptr))
+			if (Instance()->m_trackingObjects.count(ptr))
 			{
-				GetInstance()->m_trackingObjects.erase(ptr);
+				Instance()->m_trackingObjects.erase(ptr);
 			}
 			else
 			{

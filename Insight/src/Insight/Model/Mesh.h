@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Insight/Core.h"
+#include "Platform/Vulkan/VulkanHeader.h"
 #include "Insight/UUID.h"
 #include "Insight/Renderer/Buffer.h"
 
@@ -15,24 +16,22 @@ struct Texture
 	std::string Path;
 };
 
-namespace Platform
-{
-	class VulkanRenderer;
-	class Swapchain;
-}
+class Model;
 
 class IS_API Mesh : public Insight::UUID
 {
 public:
 	Mesh();
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures,
-		unsigned int subMeshIndex, const std::string& modelUUID, const std::string& meshName);
+		 U16 firstIndex, U16 indexCount, unsigned int subMeshIndex, Model* modelUUID, const std::string& meshName);
 	~Mesh();
 
 	void Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
+	void Draw(VkCommandBuffer commandBuffer);
+
 	std::string& GetName();
-	const std::string& GetModelUUID() const { return m_modelUUID; }
+	const std::string& GetModelUUID() const;
 	const unsigned int GetSubMeshIndex() const { return m_subMeshIndex; }
 
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
@@ -52,23 +51,18 @@ public:
 	std::vector<Texture> GetTextures();
 
 private:
-	Insight::Render::VertexBuffer* GetVertexBuffer() { return m_vertexBuffer; }
-	Insight::Render::IndexBuffer* GetIndexBuffer() { return m_indexBuffer; }
 
 private:
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
 	std::vector<Texture> m_textures;
 
-	Insight::Render::VertexBuffer* m_vertexBuffer;
-	Insight::Render::IndexBuffer* m_indexBuffer;
+	U32 m_firstIndex;
+	U32 m_indexCount;
 
-	std::string m_modelUUID;
+	Model* m_parentModel;
 	std::string m_meshName;
 	unsigned int m_subMeshIndex;
 	bool m_created;
-
-	friend Platform::VulkanRenderer;
-	friend Platform::Swapchain;
 };
 

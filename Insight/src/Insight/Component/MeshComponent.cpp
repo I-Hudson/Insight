@@ -122,5 +122,5 @@ void MeshComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc
 void MeshComponent::Deserialize(tinyxml2::XMLNode* in, bool force)
 {
 	using namespace Insight::Library;
-	SetMesh(ModelLibrary::GetInstance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
+	SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

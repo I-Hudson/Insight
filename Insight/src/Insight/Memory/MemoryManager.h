@@ -41,7 +41,7 @@ namespace Insight
 
 			std::string GetAllocationOfType(void* ptr);
 
-			static void PrintStackAllocatorUsed() { GetInstance()->m_stackAllocator.PrintUsed(); }
+			static void PrintStackAllocatorUsed() { Instance()->m_stackAllocator.PrintUsed(); }
 
 			struct MemoryConfig
 			{
@@ -76,37 +76,37 @@ namespace Insight
 		template<typename T, typename ...Args>
 		inline T* MemoryManager::NewOnStack(Args&&... argList)
 		{
-			return GetInstance()->m_stackAllocator.New<T>(std::forward<Args>(argList)...);
+			return Instance()->m_stackAllocator.New<T>(std::forward<Args>(argList)...);
 		}
 
 		template<typename T, typename ...Args>
 		inline T* MemoryManager::NewArrOnStack(Size length, U8 alignment)
 		{
-			return GetInstance()->m_stackAllocator.NewArr<T>(length, alignment);
+			return Instance()->m_stackAllocator.NewArr<T>(length, alignment);
 		}
 
 		template<typename T, typename ...Args>
 		inline T* MemoryManager::NewOnFreeList(Args&& ... argList)
 		{
-			return GetInstance()->m_freeListAllocator.New<T>(std::forward<Args>(argList)...);
+			return Instance()->m_freeListAllocator.New<T>(std::forward<Args>(argList)...);
 		}
 
 		template<typename T>
 		inline void MemoryManager::DeleteOnFreeList(T* ptrToDelete)
 		{
-			GetInstance()->m_freeListAllocator.Delete<T>(ptrToDelete);
+			Instance()->m_freeListAllocator.Delete<T>(ptrToDelete);
 		}
 
 		template<typename T>
 		inline T* MemoryManager::NewArrOnFreeList(Size length, U8 alignment)
 		{
-			return GetInstance()->m_freeListAllocator.NewArr<T>(length, alignment);
+			return Instance()->m_freeListAllocator.NewArr<T>(length, alignment);
 		}
 
 		template<typename T>
 		inline void MemoryManager::DeleteArrOnFreeList(T* ptrToDelete)
 		{
-			GetInstance()->m_freeListAllocator.DeleteArr<T>(ptrToDelete);
+			Instance()->m_freeListAllocator.DeleteArr<T>(ptrToDelete);
 		}
 	}
 }

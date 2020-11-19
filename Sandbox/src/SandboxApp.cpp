@@ -29,8 +29,8 @@ public:
 
 		if (test)
 		{
-			Library::ModelLibrary::GetInstance()->LoadAssetsFromFolder("./models", true);
-			Model* m = Library::ModelLibrary::GetInstance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
+			Library::ModelLibrary::Instance()->LoadAssetsFromFolder("./models", true);
+			Model* m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 			for (size_t i = 0; i < 50; ++i)
 			{
 				{

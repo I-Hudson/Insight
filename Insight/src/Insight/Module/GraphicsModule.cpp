@@ -25,14 +25,14 @@ namespace Insight
 			m_renderer = Renderer::Create();
 
 			ImGuiRenderer::Create();
-			ImGuiRenderer::GetInstance()->Init(m_renderer);
+			ImGuiRenderer::Instance()->Init(m_renderer);
 		}
 
 		GraphicsModule::~GraphicsModule()
 		{
 			m_renderer->WaitForIdle();
 
-			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::GetInstance();
+			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::Instance();
 			DELETE_ON_HEAP(imguiRenderer);
 
 			DELETE_ON_HEAP(m_renderer);
@@ -86,7 +86,7 @@ namespace Insight
 
 		Material* GraphicsModule::GetDefaultMaterial()
 		{
-			return GraphicsModule::GetInstance()->m_renderer->GetDefaultMaterial();
+			return GraphicsModule::Instance()->m_renderer->GetDefaultMaterial();
 		}
 	}
 }

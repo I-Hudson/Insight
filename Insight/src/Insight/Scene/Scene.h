@@ -2,9 +2,9 @@
 
 #include "Insight/Core.h"
 #include "Insight/Serialization/Serializable.h"
-#include "Insight/Entitiy/Entity.h"
 #include <string>
 
+class Entity;
 class Component;
 
 const std::string DEFAULT_SAVE_PATH = "scenes/";

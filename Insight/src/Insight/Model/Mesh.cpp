@@ -4,16 +4,20 @@
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Renderer/Buffer.h"
 
+#include "Platform/Vulkan/VulkanMaterial.h"
+#include "Insight/Model/Model.h"
+
 Mesh::Mesh()
 	: Insight::UUID()
 	, m_created(false)
 { }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, 
-	unsigned int subMeshIndex, const std::string& modelUUID, const std::string& meshName)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, U16 firstIndex, U16 indexCount, unsigned int subMeshIndex, Model* parentModel, const std::string & meshName)
 	: Insight::UUID()
 	, m_created(false)
-	, m_modelUUID(modelUUID)
+	, m_firstIndex(firstIndex)
+	, m_indexCount(indexCount)
+	, m_parentModel(parentModel)
 	, m_meshName(meshName)
 	, m_subMeshIndex(subMeshIndex)
 {
@@ -25,9 +29,6 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 Mesh::~Mesh()
 {
 	IS_PROFILE_FUNCTION();
-
-	DELETE_ON_HEAP(m_vertexBuffer);
-	DELETE_ON_HEAP(m_indexBuffer);
 
 	m_vertices.clear();
 	m_indices.clear();
@@ -45,15 +46,26 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_vertices = vertices;
 		m_indices = indices;
 		m_textures = textures;
-
-		m_vertexBuffer = Insight::Render::VertexBuffer::Create(m_vertices);
-		m_indexBuffer = Insight::Render::IndexBuffer::Create(indices);
 	}
+}
+
+void Mesh::Draw(VkCommandBuffer commandBuffer)
+{
+	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, m_firstIndex, 0, 0);
 }
 
 std::string& Mesh::GetName()
 {
 	return m_meshName;
+}
+
+const std::string& Mesh::GetModelUUID() const
+{
+	if (m_parentModel)
+	{
+		return m_parentModel->GetUUID();
+	}
+	return "INVALID";
 }
 
 std::vector<Vertex> Mesh::GetVertices()

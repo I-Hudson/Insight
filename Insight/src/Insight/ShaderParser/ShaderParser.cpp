@@ -15,6 +15,7 @@ namespace Insight
 		"int", "float", "double",
 		"vec2", "vec3", "vec4",
 		"ivec2", "ivec3", "ivec4",
+		"mat2", "mat3", "mat4",
 		"sampler2D"
 	};
 
@@ -321,6 +322,10 @@ namespace Insight
 			case ShaderAttributeType::Vec2: return 4 * 2;
 			case ShaderAttributeType::Vec3: return 4 * 3;
 			case ShaderAttributeType::Vec4: return 4 * 4;
+
+			case ShaderAttributeType::IVec2: return 4 * 2;
+			case ShaderAttributeType::IVec3: return 4 * 3;
+			case ShaderAttributeType::IVec4: return 4 * 4;
 
 			case ShaderAttributeType::Mat2: return 4 * 2 * 2;
 			case ShaderAttributeType::Mat3: return 4 * 3 * 3;

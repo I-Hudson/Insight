@@ -48,9 +48,10 @@
 #define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, "Object (Ptr/Ref)", __FILE__, __LINE__);
 #define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
 
-#define GET_ALLOCATION_OF_TYPE(ptr) Insight::Memory::MemoryManager::GetInstance()->GetAllocationOfType(ptr);
+#define GET_ALLOCATION_OF_TYPE(ptr) Insight::Memory::MemoryManager::Instance()->GetAllocationOfType(ptr);
 
 #define BIT(x) (1 << x)
+#define ARRAY_SIZEOF(ARR) ((int)(sizeof(ARR) / sizeof(*(ARR))))
 
 #ifdef IS_BUILD_DLL
 	#define IS_API //__declspec(dllexport)

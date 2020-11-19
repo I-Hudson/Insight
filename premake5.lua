@@ -251,6 +251,8 @@ project "Sandbox"
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.optick}",
+        "%{IncludeDir.Vulkan}",
+
 	}
 
     sysincludedirs 

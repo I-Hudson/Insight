@@ -4,13 +4,18 @@
 #include "VulkanRenderer.h"
 #include "VulkanDebug.h"
 
+#include <GLFW/glfw3.h>
+
 #include "VulkanImGUIRenderer.h"
 
 #include <glm/gtc/constants.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "Insight/Config/Config.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/CameraComponent.h"
+#include "Insight/Component/TransformComponent.h"
+#include "Insight/Model/Model.h"
 
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -40,6 +45,8 @@ namespace vks
 
 	VulkanRenderer::VulkanRenderer()
 	{
+		SetInstancePtr(this);
+
 		REG_EVENT_HANDLE(Insight::EventType::WindowResize, VulkanRenderer::WindowResizeEvent);
 
 		m_numThreads = std::thread::hardware_concurrency();
@@ -59,13 +66,17 @@ namespace vks
 	{
 		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
 
+		DELETE_ON_HEAP(m_editorEntity);
+		DELETE_ON_HEAP(m_testModel);
+
 		m_swapchain.CleanUp();
-		if (m_descriptorPool != VK_NULL_HANDLE)
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			vkDestroyDescriptorPool(m_device, m_descriptorPool, nullptr);
+			m_defaultMaterial[i].Destroy();
 		}
+
 		DestroyCommandBuffers();
-		vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+
 		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
 		{
 			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
@@ -78,8 +89,6 @@ namespace vks
 		vkDestroyImageView(m_device, m_depthStencil.View, nullptr);
 		vkDestroyImage(m_device, m_depthStencil.Image, nullptr);
 		vkFreeMemory(m_device, m_depthStencil.Mem, nullptr);
-		
-		vkDestroyPipelineCache(m_device, m_pipelineCache, nullptr);
 		
 		vkDestroyCommandPool(m_device, m_cmdPool, nullptr);
 		
@@ -94,7 +103,7 @@ namespace vks
 		
 		for (auto& thread : m_threadData)
 		{
-			vkFreeCommandBuffers(m_device, thread.commandPool, thread.commandBuffer.size(), thread.commandBuffer.data());
+			vkFreeCommandBuffers(m_device, thread.commandPool, static_cast<uint32_t>(thread.commandBuffer.size()), thread.commandBuffer.data());
 			vkDestroyCommandPool(m_device, thread.commandPool, nullptr);
 		}
 
@@ -109,6 +118,7 @@ namespace vks
 
 		vkDestroyInstance(m_instance, nullptr);
 
+		ClearPtr();
 	}
 
 	void VulkanRenderer::InitVulkan()
@@ -136,7 +146,7 @@ namespace vks
 		err = vkEnumeratePhysicalDevices(m_instance, &gpuCount, physicalDevices.data());
 		if (err)
 		{
-			IS_CORE_ASSERT(false, "Could not enumerate physical devices : {0}", vks::errorString(err), err);
+			IS_CORE_ASSERT(false, "Could not enumerate physical devices : " + vks::errorString(err));
 		}
 		// GPU selection
 
@@ -307,6 +317,17 @@ namespace vks
 			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
 		}
 		Present();
+
+		m_editorEntity->OnUpdate(Insight::Time::GetDeltaTime());
+		IS_CORE_INFO("{0}", glm::to_string<glm::mat4>(m_editorCamera->GetProjViewMatrix()));
+
+		MVP mvp;
+		mvp.proj = m_editorCamera->GetProjViewMatrix();
+		mvp.model = glm::mat4(1.0f);
+		mvp.lightPos = glm::vec4(3, 3, 3, 1);
+		mvp.proj[1][1] *= -1;
+
+		m_defaultMaterial[m_imageIndex].UploadUniform("UBO", mvp);
 	}
 
 	void VulkanRenderer::Present()
@@ -348,17 +369,25 @@ namespace vks
 		SetupSwapchain();
 		CreateCommandPool();
 		CreateCommandBuffers();
-		CreateDescriptorPool();
 		CreateSynchronizationPrimitives();
 		SetupDepthStencil();
 		SetupRenderPass();
-		CreatePipelineCache();
 		SetupFrameBuffer();
 		PrepareMultiThreadedRenderer();
 
 		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert",  "./data/shaders/vulkan/default.frag" };
-		m_defaultPipeline.Create(*m_vulkanDevice, shaders, m_renderPass, m_viewPort, m_scissor);
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_defaultMaterial[i].Create(m_vulkanDevice, shaders, m_vulkanDevice->GetRenderPass());
+		}
 
+		m_editorEntity = NEW_ON_HEAP(Entity, "Editor entity", false);
+		m_editorEntity->AddComponent<TransformComponent>();
+		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
+		m_editorCamera->SetViewMatrix(glm::lookAt(glm::vec3(0,0,5), glm::vec3(0,0,0), glm::vec3(0,1,0)));
+		m_editorCamera->SetProjMatrix(70.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
+
+		m_testModel = NEW_ON_HEAP(Model, "./data/models/Test/testCube.fbx");
 
 		IS_PROFILE_GPU_INIT_VULKAN(&m_device, &m_physicalDevice, &m_queue, &m_vulkanDevice->m_queueFamilyIndices.graphics, 1, nullptr);
 	}
@@ -390,14 +419,6 @@ namespace vks
 		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
 	}
 
-	void VulkanRenderer::CreatePipelineCache()
-	{
-		IS_PROFILE_FUNCTION();
-		VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-		pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-		ThrowIfFailed(vkCreatePipelineCache(m_device, &pipelineCacheCreateInfo, nullptr, &m_pipelineCache));
-	}
-
 	void VulkanRenderer::DestroyCommandBuffers()
 	{
 		IS_PROFILE_FUNCTION();
@@ -413,32 +434,6 @@ namespace vks
 		cmdPoolInfo.queueFamilyIndex = m_swapchain.GetQueuNodeIndex();
 		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		ThrowIfFailed(vkCreateCommandPool(m_device, &cmdPoolInfo, nullptr, &m_cmdPool));
-	}
-
-	void VulkanRenderer::CreateDescriptorPool()
-	{
-		VkDescriptorPoolSize pool_sizes[] =
-		{
-			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-			{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-		};
-
-		VkDescriptorPoolCreateInfo pool_info = {};
-		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-		pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-		pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-		pool_info.pPoolSizes = pool_sizes;
-		ThrowIfFailed(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_descriptorPool));
 	}
 
 	void VulkanRenderer::CreateSynchronizationPrimitives()
@@ -557,11 +552,11 @@ namespace vks
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
 		VkClearValue clearValues[2];
-		clearValues[0].color = m_clearColor;
+		clearValues[0].color = VkClearColorValue{ 0.0f, 0.0f, 0.0f, 1.0f };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-		renderPassBeginInfo.renderPass = m_renderPass;
+		renderPassBeginInfo.renderPass = m_vulkanDevice->GetRenderPass();
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = width;
@@ -569,10 +564,11 @@ namespace vks
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::GetInstance());
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::Instance());
 		imgui->EndFrame();
 
 		int i = m_imageIndex;
+		//m_defaultMaterial[i].Update();
 		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
 		{
 			// Set target frame buffer
@@ -587,6 +583,9 @@ namespace vks
 		
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+
+			m_defaultMaterial[i].Bind(m_drawCmdBuffers[i]);
+			m_testModel->Draw(m_drawCmdBuffers[i]);
 
 			imgui->Render(m_drawCmdBuffers[i]);
 		
@@ -650,7 +649,7 @@ namespace vks
 		VkFramebufferCreateInfo frameBufferCreateInfo = {};
 		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frameBufferCreateInfo.pNext = NULL;
-		frameBufferCreateInfo.renderPass = m_renderPass;
+		frameBufferCreateInfo.renderPass = m_vulkanDevice->GetRenderPass();
 		frameBufferCreateInfo.attachmentCount = 2;
 		frameBufferCreateInfo.pAttachments = attachments;
 		frameBufferCreateInfo.width = (uint32_t)Insight::Window::GetWidth();
@@ -736,7 +735,7 @@ namespace vks
 		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 		renderPassInfo.pDependencies = dependencies.data();
 
-		ThrowIfFailed(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass));
+		ThrowIfFailed(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_vulkanDevice->GetRenderPass()));
 	}
 
 	void VulkanRenderer::GetEnabledFeatures()
@@ -788,7 +787,7 @@ namespace vks
 
 		m_threadData.resize(m_numThreads);
 
-		float maxX = std::floor(std::sqrt(m_numThreads * m_numObjectsPerThread));
+		float maxX = std::floor(std::sqrt((double)m_numThreads * (double)m_numObjectsPerThread));
 		uint32_t posX = 0;
 		uint32_t posZ = 0;
 
@@ -809,7 +808,7 @@ namespace vks
 				vks::initializers::commandBufferAllocateInfo(
 					thread->commandPool,
 					VK_COMMAND_BUFFER_LEVEL_SECONDARY,
-					thread->commandBuffer.size());
+					static_cast<uint32_t>(thread->commandBuffer.size()));
 			ThrowIfFailed(vkAllocateCommandBuffers(m_device, &secondaryCmdBufAllocateInfo, thread->commandBuffer.data()));
 
 			thread->pushConstBlock.resize(m_numObjectsPerThread);
@@ -859,7 +858,7 @@ namespace vks
 
 		//vkCmdBindPipeline(m_secondaryCommandBuffers.UI, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::GetInstance());
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::Instance());
 		imgui->EndFrame();
 		imgui->Render(m_secondaryCommandBuffers.UI);
 
@@ -882,7 +881,7 @@ namespace vks
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-		renderPassBeginInfo.renderPass = m_renderPass;
+		renderPassBeginInfo.renderPass = m_vulkanDevice->GetRenderPass();
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = width;
@@ -901,7 +900,7 @@ namespace vks
 
 		// Inheritance info for the secondary command buffers
 		VkCommandBufferInheritanceInfo inheritanceInfo = vks::initializers::commandBufferInheritanceInfo();
-		inheritanceInfo.renderPass = m_renderPass;
+		inheritanceInfo.renderPass = m_vulkanDevice->GetRenderPass();
 		// Secondary command buffer also use the currently active framebuffer
 		inheritanceInfo.framebuffer = frameBuffer;
 
@@ -940,7 +939,7 @@ namespace vks
 		commandBuffers.push_back(m_secondaryCommandBuffers.UI);
 
 		// Execute render commands from the secondary command buffer
-		vkCmdExecuteCommands(m_primaryCommandBuffer, commandBuffers.size(), commandBuffers.data());
+		vkCmdExecuteCommands(m_primaryCommandBuffer, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 
 		vkCmdEndRenderPass(m_primaryCommandBuffer);
 

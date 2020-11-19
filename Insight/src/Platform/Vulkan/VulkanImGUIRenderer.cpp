@@ -85,11 +85,11 @@ namespace vks
 		init_info.QueueFamily = device->GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
 		init_info.Queue = m_renderer->GetQueue();
 		init_info.PipelineCache = nullptr;
-		init_info.DescriptorPool = m_renderer->GetDescriptorPool();
+		init_info.DescriptorPool = device->GetDescriptorPool();
 		init_info.Allocator = nullptr;
 		init_info.MinImageCount = 2;
 		init_info.ImageCount = 3;
-		ImGui_ImplVulkan_Init(&init_info, m_renderer->GetRenderPass());
+		ImGui_ImplVulkan_Init(&init_info, device->GetRenderPass());
 
 		InitResources();
 #endif
@@ -110,7 +110,7 @@ namespace vks
 		Insight::VulkanResizeEvent resizeEvent = static_cast<const Insight::VulkanResizeEvent&>(event);
 
 		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2(resizeEvent.m_width, resizeEvent.m_height);
+		io.DisplaySize = ImVec2((float)resizeEvent.m_width, (float)resizeEvent.m_height);
 		ImGui_ImplVulkan_SetMinImageCount(2);
 #endif
 	}

@@ -22,28 +22,28 @@ namespace vks
 	class VulkanPipeline
 	{
 	public:
-		VulkanPipeline(VulkanDevice& device);
-		VulkanPipeline(VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor);
+		VulkanPipeline();
+		VulkanPipeline(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass);
 		~VulkanPipeline();
 
-		void Create(VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor);
+		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData);
 		void Destroy();
 
 		void Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint);
 
-		VkDescriptorSetLayout GetDescriptorLayout() { return m_descriptorLayout; }
-		VkPipelineLayout GetPipelineLayout() { return m_pipelineLayout; }
-		VkPipeline GetPipeline() { return m_pipeline; }
+		VkDescriptorSetLayout& GetDescriptorLayout() { return m_descriptorLayout; }
+		VkPipelineLayout& GetPipelineLayout() { return m_pipelineLayout; }
+		VkPipeline& GetPipeline() { return m_pipeline; }
 
 	private:
-		void CreateDescriptorSetLayout(vks::VulkanDevice& device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
-		void CreatePipelineLayout(vks::VulkanDevice& device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
-		void CreatePipeline(vks::VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor, std::vector<Insight::ParsedShadeData>& shaderData);
+		void CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
+		void CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
+		void CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData);
 
 		std::vector<uint32_t> CompileGLSL(const std::string& fileName);
 
 	private:
-		VulkanDevice& m_vulkanDevice;
+		VulkanDevice* m_vulkanDevice;
 
 		VkDescriptorSet m_descriptorSet;
 		VkDescriptorSetLayout m_descriptorLayout;

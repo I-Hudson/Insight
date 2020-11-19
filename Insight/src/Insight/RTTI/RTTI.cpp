@@ -78,7 +78,7 @@ namespace Insight
 			ownerObject->RegisterOnDestroyCallback(this, [&](Object* objectPtr)
 				{
 					objectPtr->UnregisterOnDestroyCallback(this);
-					RTTI::GetInstance()->UnregisterAllProperty(objectPtr);
+					RTTI::Instance()->UnregisterAllProperty(objectPtr);
 				});
 		}
 

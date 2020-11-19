@@ -12,7 +12,7 @@ namespace Insight
     {
     public:
 
-        static T* GetInstance()
+        static T* Instance()
         {
             IS_CORE_ASSERT(s_instance != nullptr, "[TSingleton::GetInstance] Usage of before SetInstancePtr is called!");
             return s_instance;
@@ -42,7 +42,7 @@ namespace Insight
         {
             SetInstancePtr(NEW_ON_HEAP(T, std::forward<Args>(args)...));
 
-            return GetInstance();
+            return Instance();
         }
 
         template<typename... Args>
@@ -50,7 +50,7 @@ namespace Insight
         {
             SetInstancePtr(new T(std::forward<Args>(args)...));
 
-            return GetInstance();
+            return Instance();
         }
 
         static void Destroy()

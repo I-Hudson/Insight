@@ -7,6 +7,8 @@
 #include "Insight/Library/ModelLibrary.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
+#include "Platform/Vulkan/VulkanRenderer.h"
+
 Model::Model()
 {
 }
@@ -28,6 +30,9 @@ Model::~Model()
 	{
 		DELETE_ON_HEAP(*it);
 	}
+
+	m_vertexBuffer.Destroy();
+	m_indexBuffer.Destroy();
 }
 
 Model* Model::Create(const std::string& filepath)
@@ -36,8 +41,27 @@ Model* Model::Create(const std::string& filepath)
 	{
 		IS_INFO("Loading model");
 		LoadMesh(filepath);
+		m_buffersBound = false;
 	}
 	return this;
+}
+
+void Model::Draw(VkCommandBuffer commandBuffer)
+{
+	if (!m_buffersBound)
+	{
+		const VkDeviceSize offsets[1] = { 0 };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, &m_vertexBuffer.buffer, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
+		m_buffersBound = true;
+	}
+
+	for (auto& mesh : m_meshes)
+	{
+		mesh->Draw(commandBuffer);
+	}
+
+	m_buffersBound = false;
 }
 
 Mesh* Model::GetSubMesh(int index)
@@ -72,6 +96,64 @@ void Model::LoadMesh(const std::string& filePath)
 	m_modelName = filePath.substr(filePath.find_last_of('/'));
 	m_directory = filePath.substr(0, filePath.find_last_of('/'));
 	ProcessNode(scene->mRootNode, scene);
+
+	size_t vertexBufferSize = m_vertices.size() * sizeof(Vertex);
+	size_t indexBufferSize = m_indices.size() * sizeof(uint32_t);
+	size_t indicesCount = static_cast<uint32_t>(m_vertices.size());
+	size_t verticesCount = static_cast<uint32_t>(m_indices.size());
+
+	struct StagingBuffer
+	{
+		VkBuffer buffer;
+		VkDeviceMemory memory;
+	} vertexStaging, indexStaging;
+
+	// Create staging buffers
+	// Vertex data
+	vks::VulkanRenderer::Instance()->GetDevice()->CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+															   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+															   vertexBufferSize,
+															   &vertexStaging.buffer,
+															   &vertexStaging.memory,
+															   m_vertices.data());
+	// Index data
+	vks::VulkanRenderer::Instance()->GetDevice()->CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+															   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+															   indexBufferSize,
+															   &indexStaging.buffer,
+															   &indexStaging.memory,
+															   m_indices.data());
+
+	// Create device local buffers
+	// Vertex buffer
+	vks::VulkanRenderer::Instance()->GetDevice()->CreateBuffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+															   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+															   vertexBufferSize,
+															   &m_vertexBuffer);
+	// Index buffer
+	vks::VulkanRenderer::Instance()->GetDevice()->CreateBuffer(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+															   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+															   indexBufferSize,
+															   &m_indexBuffer);
+
+	// Copy from staging buffers
+	VkCommandBuffer copyCmd = vks::VulkanRenderer::Instance()->GetDevice()->CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+
+	VkBufferCopy copyRegion = {};
+
+	copyRegion.size = vertexBufferSize;
+	vkCmdCopyBuffer(copyCmd, vertexStaging.buffer, m_vertexBuffer.buffer, 1, &copyRegion);
+
+	copyRegion.size = indexBufferSize;
+	vkCmdCopyBuffer(copyCmd, indexStaging.buffer, m_indexBuffer.buffer, 1, &copyRegion);
+
+	vks::VulkanRenderer::Instance()->GetDevice()->FlushCommandBuffer(copyCmd, vks::VulkanRenderer::Instance()->GetDevice()->GetQueue(VK_QUEUE_TRANSFER_BIT), true);
+
+	vkDestroyBuffer(*vks::VulkanRenderer::Instance()->GetDevice(), vertexStaging.buffer, nullptr);
+	vkFreeMemory(*vks::VulkanRenderer::Instance()->GetDevice(), vertexStaging.memory, nullptr);
+	vkDestroyBuffer(*vks::VulkanRenderer::Instance()->GetDevice(), indexStaging.buffer, nullptr);
+	vkFreeMemory(*vks::VulkanRenderer::Instance()->GetDevice(), indexStaging.memory, nullptr);
+
 }
 
 void Model::ProcessNode(aiNode* node, const aiScene* scene)
@@ -99,31 +181,32 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<unsigned int> indices;
 	std::vector<Texture> textures;
 
+	U32 firstIndex = m_indices.size();
+	U32 indexCount = 0;
+
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
 		// process vertex positions, normals and texture coordinates
-		glm::vec4 position;
+		glm::vec3 position;
 		position.x = mesh->mVertices[i].x;
 		position.y = mesh->mVertices[i].y;
 		position.z = mesh->mVertices[i].z;
-		position.w = 1.0f;
 		vertex.Position = position;
 
 		glm::vec4 colour = glm::vec4();
-		colour.r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		colour.g = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		colour.b = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		colour.a = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.r = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.g = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.b = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.a = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 		vertex.Colour = colour;
 
-		glm::vec4 normal;
+		glm::vec3 normal;
 		if (mesh->mNormals != nullptr)
 		{
 			normal.x = mesh->mNormals[i].x;
 			normal.y = mesh->mNormals[i].y;
 			normal.z = mesh->mNormals[i].z;
-			normal.w = 0.0f;
 		}
 		vertex.Normal = normal;
 
@@ -141,6 +224,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		vertex.UV1 = uv;
 
 		vertices.push_back(vertex);
+		m_vertices.push_back(vertex);
 	}
 
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
@@ -149,6 +233,8 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 		{
 			indices.push_back(face.mIndices[j]);
+			m_indices.push_back(face.mIndices[j]);
+			++indexCount;
 		}
 	}
 
@@ -158,12 +244,14 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		std::vector<Texture> diffuseMaps = LoadMaterialTextures(material,
 			aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		m_textures.insert(m_textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		std::vector<Texture> specularMaps = LoadMaterialTextures(material,
 			aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		m_textures.insert(m_textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return NEW_ON_HEAP(Mesh, vertices, indices, textures, (unsigned int)m_meshes.size(), GetUUID(), mesh->mName.C_Str());
+	return NEW_ON_HEAP(Mesh, vertices, indices, textures, firstIndex, indexCount, (unsigned int)m_meshes.size(), this, mesh->mName.C_Str());
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

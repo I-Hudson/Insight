@@ -25,6 +25,13 @@ Entity::Entity(const std::string& id)
 	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
 }
 
+Entity::Entity(const std::string& id, bool attachToScene)
+	: Serializable(this, false)
+{
+	m_data.Name = id;
+	m_data.AttachedToScene = false;
+}
+
 Entity::~Entity()
 {
 	RemoveAllComponenets();

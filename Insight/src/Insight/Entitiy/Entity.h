@@ -3,6 +3,7 @@
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Serialization/Serializable.h"
+#include "Insight/Scene/Scene.h"
 #include "Insight/Object.h"
 
 #include <string>
@@ -23,6 +24,7 @@ struct EntityData
 	std::bitset<MaxComponents> ComponetBitset;
 	bool IsActive;
 	bool ShowDebugInfo;
+	bool AttachedToScene = true;
 };
 
 using ComponentID = size_t;
@@ -52,6 +54,7 @@ class IS_API Entity : public Insight::Object
 public:
 	Entity();
 	Entity(const std::string& id);
+	Entity(const std::string& id, bool attachToScene);
 	virtual ~Entity() override;
 
 	static Entity* Create(const std::string& id = "");
@@ -134,7 +137,10 @@ inline T* Entity::AddComponent()
 
 		if (static_cast<Component*>(c)->m_updateEveryFarme)
 		{
-			Insight::Scene::ActiveScene()->m_updateComponents.push_back(c);
+			if (m_data.AttachedToScene)
+			{
+				Insight::Scene::ActiveScene()->m_updateComponents.push_back(c);
+			}
 		}
 
 		return c;
@@ -161,8 +167,11 @@ inline void Entity::RemoveComponent()
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
 
-				Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
-					Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+				if (m_data.AttachedToScene)
+				{
+					Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
+																					  Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+				}
 
 				break;
 			}
@@ -188,9 +197,11 @@ inline void Entity::RemoveComponent(const std::string& uuid)
 				m_data.ComponetBitset[GetComponentID<T>()] = false;
 				m_data.Components.erase(it);
 
-				Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
-					Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
-
+				if (m_data.AttachedToScene)
+				{
+					Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
+																					  Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+				}
 				break;
 			}
 		}

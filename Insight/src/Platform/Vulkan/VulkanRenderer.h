@@ -6,14 +6,16 @@
 
 #include "VulkanDevice.h"
 #include "Swapchain.h"
-#include "VulkanPipeline.h"
+#include "VulkanMaterial.h"
 
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Threading/Threadpool.h"
 
 #include <glm/glm.hpp>
 
+class Model;
 class CameraComponent;
+class Entity;
 
 namespace Insight
 {
@@ -24,7 +26,7 @@ const int MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace vks
 {
-	class IS_API VulkanRenderer : public Insight::Renderer
+	class IS_API VulkanRenderer : public Insight::Renderer, public Insight::TSingleton<VulkanRenderer>
 	{
 	public:
 		VulkanRenderer();
@@ -45,10 +47,6 @@ namespace vks
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 		/** @brief Return the graphics queue */
 		VkQueue GetQueue() { return m_queue; }
-		/** @brief Return the default render pass */
-		VkRenderPass GetRenderPass() { return m_renderPass; }
-		/** @brief Return the default descriptor pool */
-		VkDescriptorPool GetDescriptorPool() { return m_descriptorPool; }
 		/** @brief Return the default view port */
 		VkViewport GetViewPort() { return m_viewPort; }
 		/** @brief Return the default view port */
@@ -59,10 +57,9 @@ namespace vks
 		void InitSwapchain();
 		void SetupSwapchain();
 		void CreateCommandBuffers();
-		void CreatePipelineCache();
 		void DestroyCommandBuffers();
 		void CreateCommandPool();
-		void CreateDescriptorPool();
+
 		void CreateSynchronizationPrimitives();
 
 		/** @brief (Virtual) Creates the application wide Vulkan instance */
@@ -194,18 +191,12 @@ namespace vks
 		{
 			VkCommandBuffer UI;
 		} m_secondaryCommandBuffers;
-		// Global render pass for frame buffer writes
-		VkRenderPass m_renderPass;
 		// List of available frame buffers (same as number of swap chain images)
 		std::vector<VkFramebuffer> m_frameBuffers;
 		uint32_t m_imageIndex = 0;
 		uint32_t m_currentFrame = 0;
-		// Descriptor set pool
-		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 		// List of shader modules created (stored for cleanup)
 		std::vector<VkShaderModule> m_shaderModules;
-		// Pipeline cache object
-		VkPipelineCache m_pipelineCache;
 		// Default viewport and scissor
 		VkViewport m_viewPort;
 		VkRect2D m_scissor;
@@ -213,7 +204,17 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-		VulkanPipeline m_defaultPipeline{ *m_vulkanDevice };
+		VulkanMaterial m_defaultMaterial[3];
+		Entity* m_editorEntity;
+		CameraComponent* m_editorCamera;
+
+		struct MVP
+		{
+			glm::mat4 proj;
+			glm::mat4 model;
+			glm::vec4 lightPos;
+		};
+		Model* m_testModel;
 	};
 }
 #endif

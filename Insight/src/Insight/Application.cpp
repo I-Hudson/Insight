@@ -150,7 +150,7 @@ namespace Insight
 				IS_CORE_INFO("Frame Time: {0}", deltaTime);
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-				Insight::ImGuiRenderer::GetInstance()->NewFrame();
+				Insight::ImGuiRenderer::Instance()->NewFrame();
 				
 				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
 				ImGui::Begin("Scene");
@@ -179,7 +179,7 @@ namespace Insight
 				{
 					tinyxml2::XMLDocument doc;
 					tinyxml2::XMLNode* models = doc.NewElement("Models");
-					Insight::Library::ModelLibrary::GetInstance()->Serialize(models, &doc);
+					Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
 					doc.InsertEndChild(models);
 					doc.SaveFile("ModelLibrary.xml");
 				}

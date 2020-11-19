@@ -7,9 +7,9 @@
 
 struct Vertex
 {
-	glm::vec4 Position;
+	glm::vec3 Position;
+	glm::vec3 Normal;
 	glm::vec4 Colour;
-	glm::vec4 Normal;
 	glm::vec2 UV1;
 };
 

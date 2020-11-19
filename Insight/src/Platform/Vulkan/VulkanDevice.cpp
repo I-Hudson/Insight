@@ -62,6 +62,11 @@ namespace vks
 		{
 			vkDestroyPipelineCache(m_logicalDevice, m_pipelineCache, nullptr);
 		}
+		if (m_descriptorPool != VK_NULL_HANDLE)
+		{
+			vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
+		}
+		vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 		if (m_logicalDevice)
 		{
 			vkDestroyDevice(m_logicalDevice, nullptr);
@@ -312,6 +317,7 @@ namespace vks
 
 
 		ThrowIfFailed(vkCreatePipelineCache(m_logicalDevice, &vks::initializers::pipelineCacheCreateInfo(), nullptr, &m_pipelineCache));
+		CreateDescriptorPool();
 
 		return result;
 	}
@@ -387,7 +393,7 @@ namespace vks
 	*
 	* @return VK_SUCCESS if buffer handle and memory have been created and (optionally passed) data has been copied
 	*/
-	VkResult VulkanDevice::CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vks::VulkanBuffer* buffer, VkDeviceSize size, void* data)
+	VkResult VulkanDevice::CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, vks::VulkanBuffer* buffer, void* data)
 	{
 		buffer->device = m_logicalDevice;
 
@@ -622,5 +628,35 @@ namespace vks
 	VkResult VulkanDevice::WaitForIdle()
 	{
 		return vkDeviceWaitIdle(m_logicalDevice);
+	}
+
+	void VulkanDevice::CreateRenderpass()
+	{
+	}
+
+	void VulkanDevice::CreateDescriptorPool()
+	{
+		VkDescriptorPoolSize pool_sizes[] =
+		{
+			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+		};
+
+		VkDescriptorPoolCreateInfo pool_info = {};
+		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		pool_info.maxSets = 1000 * ARRAY_SIZEOF(pool_sizes);
+		pool_info.poolSizeCount = (uint32_t)ARRAY_SIZEOF(pool_sizes);
+		pool_info.pPoolSizes = pool_sizes;
+		ThrowIfFailed(vkCreateDescriptorPool(m_logicalDevice, &pool_info, nullptr, &m_descriptorPool));
 	}
 }

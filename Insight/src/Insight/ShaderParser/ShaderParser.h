@@ -130,6 +130,7 @@ namespace Insight
 					case Insight::ShaderUniformBlockType::StorageBufferDynamic: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
 				}
 			}
+			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		}
 	};
 
@@ -184,6 +185,7 @@ namespace Insight
 				case ShaderAttributeType::IVec3: return VK_FORMAT_R32G32B32_SINT;
 				case ShaderAttributeType::IVec4: return VK_FORMAT_R32G32B32A32_SINT;
 			}
+			return VK_FORMAT_R32G32B32A32_SFLOAT;
 		}
 
 		std::vector<VkVertexInputBindingDescription> VertexInputBinding;

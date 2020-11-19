@@ -41,17 +41,17 @@ void CameraComponent::OnCreate()
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
-	if (!Insight::Module::GraphicsModule::GetInstance()->HasMainCamera())
+	if (!Insight::Module::GraphicsModule::Instance()->HasMainCamera())
 	{
-		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(this);
+		Insight::Module::GraphicsModule::Instance()->SetMainCamera(this);
 	}
 }
 
 void CameraComponent::OnDestroy()
 {
-	if (Insight::Module::GraphicsModule::GetInstance()->IsThisMainCamera(this))
+	if (Insight::Module::GraphicsModule::Instance()->IsThisMainCamera(this))
 	{
-		Insight::Module::GraphicsModule::GetInstance()->SetMainCamera(nullptr);
+		Insight::Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
 	}
 }
 

@@ -157,13 +157,12 @@ namespace vks
 
 	bool VulkanPipeline::s_glslInit = false;
 
-	VulkanPipeline::VulkanPipeline(VulkanDevice& device)
-		: m_vulkanDevice(device)
-	{
 
+	VulkanPipeline::VulkanPipeline()
+	{
 	}
 
-	VulkanPipeline::VulkanPipeline(VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor)
+	VulkanPipeline::VulkanPipeline(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass)
 		: m_vulkanDevice(device)
 	{
 
@@ -175,7 +174,7 @@ namespace vks
 
 		CreateDescriptorSetLayout(device, shaders, shaderData);
 		CreatePipelineLayout(device, shaders, shaderData);
-		CreatePipeline(device, shaders, renderPass, viewport, scissor, shaderData);
+		CreatePipeline(device, shaders, renderPass, shaderData);
 	}
 
 	VulkanPipeline::~VulkanPipeline()
@@ -187,32 +186,28 @@ namespace vks
 		}
 	}
 
-	void VulkanPipeline::Create(VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor)
+	void VulkanPipeline::Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData)
 	{
-		std::vector<Insight::ParsedShadeData> shaderData;
-		for (size_t i = 0; i < shaders.size(); ++i)
-		{
-			shaderData.push_back(Insight::ShaderParser::ParseShader(shaders[i]));
-		}
+		m_vulkanDevice = device;
 
 		CreateDescriptorSetLayout(device, shaders, shaderData);
 		CreatePipelineLayout(device, shaders, shaderData);
-		CreatePipeline(device, shaders, renderPass, viewport, scissor, shaderData);
+		CreatePipeline(device, shaders, renderPass, shaderData);
 	}
 
 	void VulkanPipeline::Destroy()
 	{
-		vkDestroyDescriptorSetLayout(m_vulkanDevice, m_descriptorLayout, nullptr);
-		vkDestroyPipelineLayout(m_vulkanDevice, m_pipelineLayout, nullptr);
-		vkDestroyPipeline(m_vulkanDevice, m_pipeline, nullptr);
+		vkDestroyDescriptorSetLayout(*m_vulkanDevice, m_descriptorLayout, nullptr);
+		vkDestroyPipelineLayout(*m_vulkanDevice, m_pipelineLayout, nullptr);
+		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
 	}
 
 	void VulkanPipeline::Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint)
 	{
-		
+		vkCmdBindPipeline(commandBuffer, bindPoint, m_pipeline);
 	}
 
-	void VulkanPipeline::CreateDescriptorSetLayout(vks::VulkanDevice& device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
+	void VulkanPipeline::CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
 	{
 		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
 
@@ -232,10 +227,10 @@ namespace vks
 		}
 
 		auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);
-		ThrowIfFailed(vkCreateDescriptorSetLayout(device, &createInfo, nullptr, &m_descriptorLayout));
+		ThrowIfFailed(vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &m_descriptorLayout));
 	}
 
-	void VulkanPipeline::CreatePipelineLayout(vks::VulkanDevice& device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
+	void VulkanPipeline::CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
 	{
 		std::vector<VkPushConstantRange> pushConstants;
 
@@ -248,10 +243,10 @@ namespace vks
 		}
 
 		std::vector<VkDescriptorSetLayout> setLayouts = { m_descriptorLayout };
-		ThrowIfFailed(vkCreatePipelineLayout(device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_pipelineLayout));
+		ThrowIfFailed(vkCreatePipelineLayout(*device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_pipelineLayout));
 	}
 
-	void VulkanPipeline::CreatePipeline(vks::VulkanDevice& device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, VkViewport& viewport, VkRect2D& scissor, std::vector<Insight::ParsedShadeData>& shaderData)
+	void VulkanPipeline::CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData)
 	{
 		Insight::ParsedShadeData vertexShaderData;
 		std::vector<std::vector<uint32_t>> compiledShaders;
@@ -260,7 +255,7 @@ namespace vks
 		{
 			//TODO check for shader with spirv prefix. No need to compile shader if it's already done.
 			compiledShaders.push_back(CompileGLSL(shaders[i]));
-			shaderStages.push_back(loadShaderFromSPIRV(compiledShaders[i], device, shaderData[i].GetVulkanShaderStage()));
+			shaderStages.push_back(loadShaderFromSPIRV(compiledShaders[i], *device, shaderData[i].GetVulkanShaderStage()));
 
 			if (shaderData[i].GetVulkanShaderStage() == VK_SHADER_STAGE_VERTEX_BIT)
 			{
@@ -288,15 +283,15 @@ namespace vks
 		pipelineCreateInfo.pViewportState = &viewportState;
 		pipelineCreateInfo.pDepthStencilState = &depthStencilState;
 		pipelineCreateInfo.pDynamicState = &dynamicState;
-		pipelineCreateInfo.stageCount = shaderStages.size();
+		pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
 		pipelineCreateInfo.pStages = shaderStages.data();
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 
-		ThrowIfFailed(vkCreateGraphicsPipelines(device, device.GetPipelineCache(), 1, &pipelineCreateInfo, nullptr, &m_pipeline));
+		ThrowIfFailed(vkCreateGraphicsPipelines(*device, device->GetPipelineCache(), 1, &pipelineCreateInfo, nullptr, &m_pipeline));
 
 		for (auto shaderModule : shaderStages)
 		{
-			vkDestroyShaderModule(device, shaderModule.module, nullptr);
+			vkDestroyShaderModule(*device, shaderModule.module, nullptr);
 		}
 	}
 

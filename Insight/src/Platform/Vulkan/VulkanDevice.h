@@ -18,7 +18,7 @@ namespace vks
 		uint32_t        QueryQueueFamilyIndex(VkQueueFlagBits queueFlags) const;
 		VkResult        CreateLogicalDevice(VkPhysicalDeviceFeatures m_enabledFeatures, std::vector<const char*> enabledExtensions, void* pNextChain, bool useSwapChain = true, VkQueueFlags requestedQueueTypes = VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT);
 		VkResult        CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data = nullptr);
-		VkResult        CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, vks::VulkanBuffer* buffer, VkDeviceSize size, void* data = nullptr);
+		VkResult        CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, vks::VulkanBuffer* buffer, void* data = nullptr);
 		void            CopyBuffer(vks::VulkanBuffer* src, vks::VulkanBuffer* dst, VkQueue queue, VkBufferCopy* copyRegion = nullptr);
 		VkCommandPool   CreateCommandPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags createFlags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
 		VkCommandBuffer CreateCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin = false, VkCommandBufferUsageFlags usage = 0);
@@ -35,8 +35,17 @@ namespace vks
 
 		VkResult WaitForIdle();
 
+		/** @brief Return the default render pass */
+		VkRenderPass& GetRenderPass() { return m_renderPass; }
+		/** @brief Return the default descriptor pool */
+		VkDescriptorPool& GetDescriptorPool() { return m_descriptorPool; }
+
 		VkDevice operator* () {return m_logicalDevice; }
 		operator VkDevice() const { return m_logicalDevice; };
+
+	private:
+		void CreateRenderpass();
+		void CreateDescriptorPool();
 
 	private:
 		/** @brief Physical device representation */
@@ -59,6 +68,11 @@ namespace vks
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 		/** @brief Set to true when the debug marker extension is detected */
 		bool m_enableDebugMarkers = false;
+
+		// Global render pass for frame buffer writes
+		VkRenderPass m_renderPass;
+		// Descriptor set pool
+		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 
 		VkPipelineCache m_pipelineCache;
 
