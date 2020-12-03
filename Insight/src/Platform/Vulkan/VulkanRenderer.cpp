@@ -255,6 +255,20 @@ namespace vks
 
 		Clear();
 
+		ImGui::Begin("Debug");
+		if (ImGui::Checkbox("Debug overlay", &debugOverlay))
+		{
+		}
+
+		const char* items[] = { "Normal", "Colour" };
+		static int item_current = m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
+		ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
+
+		m_debugOverlay.debugOptions[0] = 0;
+		m_debugOverlay.debugOptions[1] = 0;
+		m_debugOverlay.debugOptions[item_current] = 1;
+		ImGui::End();
+
 		float lerpSpeed = 0.5f;
 		if (m_clearColor.float32[0] < 1.0f)
 		{
@@ -281,37 +295,37 @@ namespace vks
 		{
 			BuildCommandBuffers();
 			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
-		
+
 			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
-		
+
 			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
 			submitInfo.pWaitSemaphores = waitSemahores;
 			submitInfo.waitSemaphoreCount = 1;
-		
+
 			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
 			submitInfo.pSignalSemaphores = signalSemahores;
 			submitInfo.signalSemaphoreCount = 1;
-		
+
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &m_drawCmdBuffers[m_imageIndex];
-		
+
 			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
 		}
 		else
 		{
 			UpdateCommandBuffer(m_frameBuffers[m_imageIndex]);
 			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
-		
+
 			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
-		
+
 			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
 			submitInfo.pWaitSemaphores = waitSemahores;
 			submitInfo.waitSemaphoreCount = 1;
-		
+
 			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
 			submitInfo.pSignalSemaphores = signalSemahores;
 			submitInfo.signalSemaphoreCount = 1;
-		
+
 			submitInfo.commandBufferCount = 1;
 			submitInfo.pCommandBuffers = &m_primaryCommandBuffer;
 			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
@@ -319,15 +333,23 @@ namespace vks
 		Present();
 
 		m_editorEntity->OnUpdate(Insight::Time::GetDeltaTime());
-		IS_CORE_INFO("{0}", glm::to_string<glm::mat4>(m_editorCamera->GetProjViewMatrix()));
 
 		MVP mvp;
-		mvp.proj = m_editorCamera->GetProjViewMatrix();
-		mvp.model = glm::mat4(1.0f);
-		mvp.lightPos = glm::vec4(3, 3, 3, 1);
+		mvp.proj = m_editorCamera->GetProjMatrix();
 		mvp.proj[1][1] *= -1;
+		mvp.view = m_editorCamera->GetViewMatrix();
+		glm::mat4 modelMat(1.0f);
+		mvp.model = modelMat;
 
+		m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
+		m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
+		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
+
+		mvp.lightPos = m_lightPos;
 		m_defaultMaterial[m_imageIndex].UploadUniform("UBO", mvp);
+
+		m_debugOverlay.debugOverlay = (int)debugOverlay;
+		m_defaultMaterial[m_imageIndex].UploadUniform("DEBUGINFO", m_debugOverlay);
 	}
 
 	void VulkanRenderer::Present()
@@ -384,10 +406,11 @@ namespace vks
 		m_editorEntity = NEW_ON_HEAP(Entity, "Editor entity", false);
 		m_editorEntity->AddComponent<TransformComponent>();
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
-		m_editorCamera->SetViewMatrix(glm::lookAt(glm::vec3(0,0,5), glm::vec3(0,0,0), glm::vec3(0,1,0)));
-		m_editorCamera->SetProjMatrix(70.0f, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
 
-		m_testModel = NEW_ON_HEAP(Model, "./data/models/Test/testCube.fbx");
+		m_testModel = NEW_ON_HEAP(Model, "./data/models/sponza/sponza.obj");
+
+		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);
+		m_lightPosAngle = 0.0f;
 
 		IS_PROFILE_GPU_INIT_VULKAN(&m_device, &m_physicalDevice, &m_queue, &m_vulkanDevice->m_queueFamilyIndices.graphics, 1, nullptr);
 	}
@@ -552,7 +575,7 @@ namespace vks
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
 		VkClearValue clearValues[2];
-		clearValues[0].color = VkClearColorValue{ 0.0f, 0.0f, 0.0f, 1.0f };
+		clearValues[0].color = VkClearColorValue{ 0.15f, 0.15f, 0.15f, 1.0f };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
@@ -568,6 +591,7 @@ namespace vks
 		imgui->EndFrame();
 
 		int i = m_imageIndex;
+		m_defaultMaterial[i].Update();
 		//m_defaultMaterial[i].Update();
 		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
 		{

@@ -5,6 +5,7 @@
 #include "Insight/Renderer/Buffer.h"
 
 #include "Platform/Vulkan/VulkanMaterial.h"
+#include "Platform/Vulkan/VulkanDevice.h"
 #include "Insight/Model/Model.h"
 
 Mesh::Mesh()
@@ -12,11 +13,9 @@ Mesh::Mesh()
 	, m_created(false)
 { }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, U16 firstIndex, U16 indexCount, unsigned int subMeshIndex, Model* parentModel, const std::string & meshName)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int subMeshIndex, Model* parentModel, const std::string & meshName)
 	: Insight::UUID()
 	, m_created(false)
-	, m_firstIndex(firstIndex)
-	, m_indexCount(indexCount)
 	, m_parentModel(parentModel)
 	, m_meshName(meshName)
 	, m_subMeshIndex(subMeshIndex)
@@ -33,6 +32,12 @@ Mesh::~Mesh()
 	m_vertices.clear();
 	m_indices.clear();
 	m_textures.clear();
+
+	m_vertexBuffer->Destroy();
+	m_indexBuffer->Destroy();
+
+	DELETE_ON_HEAP(m_vertexBuffer);
+	DELETE_ON_HEAP(m_indexBuffer);
 }
 
 void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
@@ -47,11 +52,21 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_indices = indices;
 		m_textures = textures;
 	}
+
+	m_vertexBuffer = NEW_ON_HEAP(vks::VulkanBuffer);
+	m_indexBuffer = NEW_ON_HEAP(vks::VulkanBuffer);
+
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer, m_vertices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer, m_indices.data());
 }
 
 void Mesh::Draw(VkCommandBuffer commandBuffer)
 {
-	vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, m_firstIndex, 0, 0);
+	VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &(m_vertexBuffer->buffer), offsets);
+	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer, 0, VK_INDEX_TYPE_UINT32);
+
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 }
 
 std::string& Mesh::GetName()

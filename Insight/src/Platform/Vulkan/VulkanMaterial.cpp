@@ -57,11 +57,27 @@ namespace vks
 	void VulkanMaterial::SetupUniformBuffers()
 	{
 		std::vector<VkWriteDescriptorSet> writeDescriptorSets;
+		std::unordered_map<int, VkDescriptorSet> descriptorSets;
+
+
+		int currentSet = -1;
 
 		for (auto& shader : m_shaderData)
 		{
 			for (auto& uniformBlock : shader.UniformBlocks)
 			{
+				if (currentSet == -1)
+				{
+					currentSet = uniformBlock.Set;
+				}
+				else
+				{
+					if (uniformBlock.Set != currentSet)
+					{
+						currentSet = uniformBlock.Set;
+					}
+				}
+
 				std::string key = uniformBlock.Name;
 				if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer)
 				{
@@ -76,23 +92,33 @@ namespace vks
 					m_uniformBuffers[key].Type = uniformBlock.GetVulkanType();
 				}
 
+				if (descriptorSets.find(currentSet) != descriptorSets.end())
+				{
+					m_uniformBuffers[key].Set = descriptorSets[currentSet];
+					continue;
+				}
+
 				// Allocates an empty descriptor set without actual descriptors from the pool using the set layout
 				VkDescriptorSetAllocateInfo allocateInfo{};
 				allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 				allocateInfo.descriptorPool = m_device->GetDescriptorPool();
 				allocateInfo.descriptorSetCount = 1;
 				allocateInfo.pSetLayouts = &m_pipeline.GetDescriptorLayout();
-				ThrowIfFailed(vkAllocateDescriptorSets(*m_device, &allocateInfo, &m_uniformBuffers[key].Set));
-				writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(m_uniformBuffers[key].Set, uniformBlock.GetVulkanType(), uniformBlock.Binding, &m_uniformBuffers[key].Buffer.descriptor, 1));
+				ThrowIfFailed(vkAllocateDescriptorSets(*m_device, &allocateInfo, &descriptorSets[currentSet]));
+				m_uniformBuffers[key].Set = descriptorSets[currentSet];
+				//writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(m_uniformBuffers[key].Set, uniformBlock.GetVulkanType(), uniformBlock.Binding, &m_uniformBuffers[key].Buffer.descriptor, 1));
 			}
 		}
+
+
 
 		/*
 			Execute the writes to update descriptors for this set
 			Note that it's also possible to gather all writes and only run updates once, even for multiple sets
 			This is possible because each VkWriteDescriptorSet also contains the destination set to be updated
 		*/
-		vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+		//vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+		UpdateDescriptorSets();
 	}
 	void VulkanMaterial::CleanUpUniformBuffers()
 	{
@@ -108,7 +134,6 @@ namespace vks
 	void VulkanMaterial::UpdateDescriptorSets()
 	{
 		std::vector<VkWriteDescriptorSet> writesSets;
-
 		for (auto& ubo : m_uniformBuffers)
 		{
 			writesSets.push_back(vks::initializers::writeDescriptorSet(ubo.second.Set, ubo.second.Type, ubo.second.Binding, &ubo.second.Buffer.descriptor));
@@ -122,7 +147,10 @@ namespace vks
 		std::vector<VkDescriptorSet> sets;
 		for (auto& ubo : m_uniformBuffers)
 		{
-			sets.push_back(ubo.second.Set);
+			if (std::find(sets.begin(), sets.end(), ubo.second.Set) == sets.end())
+			{
+				sets.push_back(ubo.second.Set);
+			}
 		}
 		return sets;
 	}

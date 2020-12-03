@@ -10,6 +10,7 @@
 
 #include "ispch.h"
 #include "VulkanBuffer.h"
+#include "VulkanDevice.h"
 
 namespace vks
 {

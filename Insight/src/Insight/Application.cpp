@@ -185,7 +185,7 @@ namespace Insight
 				}
 				ImGui::EndMainMenuBar();
 #endif
-				//m_moduleManager->Update(deltaTime);
+				m_moduleManager->Update(deltaTime);
 
 				//TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 

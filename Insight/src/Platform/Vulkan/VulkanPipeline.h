@@ -31,7 +31,7 @@ namespace vks
 
 		void Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint);
 
-		VkDescriptorSetLayout& GetDescriptorLayout() { return m_descriptorLayout; }
+		VkDescriptorSetLayout& GetDescriptorLayout(int setIndex = 0) { return m_descriptorLayouts[setIndex]; }
 		VkPipelineLayout& GetPipelineLayout() { return m_pipelineLayout; }
 		VkPipeline& GetPipeline() { return m_pipeline; }
 
@@ -45,8 +45,7 @@ namespace vks
 	private:
 		VulkanDevice* m_vulkanDevice;
 
-		VkDescriptorSet m_descriptorSet;
-		VkDescriptorSetLayout m_descriptorLayout;
+		std::unordered_map<int, VkDescriptorSetLayout> m_descriptorLayouts;
 		VkPipelineLayout m_pipelineLayout;
 		VkPipeline m_pipeline;
 

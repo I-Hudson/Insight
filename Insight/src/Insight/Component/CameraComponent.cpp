@@ -38,8 +38,8 @@ void CameraComponent::OnCreate()
 	IS_REGISTER_PROPERTY(float, m_nearPlane, "Near Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
 	IS_REGISTER_PROPERTY(float, m_farPlane, "Far Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
 
-	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 1000.0f);
-	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
+	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	if (!Insight::Module::GraphicsModule::Instance()->HasMainCamera())
 	{
@@ -113,7 +113,8 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 	glm::vec4 vUp = viewMatrix[1];
 	glm::vec4 vTranslation = viewMatrix[3];
 
-	float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * 5 * 2 : a_deltaTime * 5;
+	const float speed = 50;
+	float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * speed * 2 : a_deltaTime * speed;
 
 	// Translate camera
 	if (Input::KeyDown(KEY_W))

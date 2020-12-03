@@ -108,9 +108,11 @@ namespace Insight
 	struct UniformBufferBlock : public UniformBlock
 	{
 		bool IsDynamic;
+		int Set;
 
 		UniformBufferBlock()
 			: IsDynamic(false)
+			, Set(0)
 		{ }
 
 		virtual VkDescriptorType GetVulkanType() override
@@ -233,6 +235,7 @@ namespace Insight
 
 		static void PostProcess(ParsedShadeData& data);
 
+		static int GetIntValue(const std::string& stringKey, const std::string& line);
 		static ShaderType ExtensionToShaderType(const std::string& fileName);
 
 		static std::vector<const char*> m_keywords;

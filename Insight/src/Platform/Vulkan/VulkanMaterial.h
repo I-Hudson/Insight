@@ -49,6 +49,7 @@ namespace vks
 		bool m_init;
 		std::vector<Insight::ParsedShadeData> m_shaderData;
 		
+		U8 m_numberOfDescriptorSets;
 		std::unordered_map<std::string, MaterialUniformBuffer> m_uniformBuffers;
 		VulkanPipeline m_pipeline;
 	};

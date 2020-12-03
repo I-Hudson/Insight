@@ -14,6 +14,8 @@ namespace vks
 	*/
 	VulkanDevice::VulkanDevice(VkPhysicalDevice m_physicalDevice)
 	{
+		SetInstancePtr(this);
+
 		assert(m_physicalDevice);
 		this->m_physicalDevice = m_physicalDevice;
 
@@ -71,6 +73,8 @@ namespace vks
 		{
 			vkDestroyDevice(m_logicalDevice, nullptr);
 		}
+
+		ClearPtr();
 	}
 
 	/**
@@ -439,6 +443,31 @@ namespace vks
 
 		// Attach the memory to the buffer object
 		return buffer->Bind();
+	}
+
+	void VulkanDevice::CreateBufferGPU(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, vks::VulkanBuffer* buffer, void* data)
+	{
+		vks::VulkanBuffer stagingBuffer;
+		CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+					 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+					 size,
+					 &stagingBuffer,
+					 data);
+
+		CreateBuffer(usageFlags,
+					 memoryPropertyFlags,
+					 size,
+					 buffer);
+
+		VkCommandBuffer copyCmd = vks::VulkanDevice::Instance()->CreateSingleUseBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
+		VkBufferCopy copyRegion = {};
+		copyRegion.size = size;
+		vkCmdCopyBuffer(copyCmd, stagingBuffer.buffer, buffer->buffer, 1, &copyRegion);
+
+		FlushCommandBuffer(copyCmd, m_queueFamily.transfer, true);
+		stagingBuffer.Destroy();
+
+
 	}
 
 	/**

@@ -33,8 +33,7 @@ namespace vks
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		bool open = true;
-		ImGui::ShowDemoWindow(&open);
+		//ImGui::DockSpaceOverViewport();
 #endif
 	}
 
@@ -66,7 +65,7 @@ namespace vks
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.

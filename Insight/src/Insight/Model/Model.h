@@ -37,12 +37,6 @@ private:
 
 	unsigned int TextureFromFile(const std::string& path, const std::string& directory, bool gamma = false);
 
-	vks::VulkanBuffer m_vertexBuffer;
-	vks::VulkanBuffer m_indexBuffer;
-	bool m_buffersBound;
-
-	std::vector<Vertex> m_vertices;
-	std::vector<unsigned int> m_indices;
 	std::vector<Texture> m_textures;
 
 	std::vector<Mesh*> m_meshes;

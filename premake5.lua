@@ -125,11 +125,6 @@ project "Insight"
             "GLM_FORCE_SWIZZLE"
         }
 
-        prebuildcommands
-        {
-            ("{COPY} ../PBC/ ../bin/" .. outputdir .. "/Sandbox")
-		}
-
         postbuildcommands 
         { 
             ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox"),

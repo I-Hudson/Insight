@@ -16,14 +16,18 @@ struct Texture
 	std::string Path;
 };
 
+namespace vks
+{
+	class VulkanBuffer;
+}
+
 class Model;
 
 class IS_API Mesh : public Insight::UUID
 {
 public:
 	Mesh();
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures,
-		 U16 firstIndex, U16 indexCount, unsigned int subMeshIndex, Model* modelUUID, const std::string& meshName);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int subMeshIndex, Model* modelUUID, const std::string& meshName);
 	~Mesh();
 
 	void Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
@@ -57,8 +61,8 @@ private:
 	std::vector<unsigned int> m_indices;
 	std::vector<Texture> m_textures;
 
-	U32 m_firstIndex;
-	U32 m_indexCount;
+	vks::VulkanBuffer* m_vertexBuffer;
+	vks::VulkanBuffer* m_indexBuffer;
 
 	Model* m_parentModel;
 	std::string m_meshName;

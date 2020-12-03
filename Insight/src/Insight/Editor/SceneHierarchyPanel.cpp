@@ -25,7 +25,7 @@ namespace Insight
 	void SceneHierarchyPanel::Update(const float& deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
-#ifdef IMGUI_ENABLE
+#ifdef IMGUI_ENABLED
 
 		ImGui::Begin("Scene Hierarchy Panel");
 		bool titleBarHovered = ImGui::IsItemHovered();
@@ -66,7 +66,7 @@ namespace Insight
 
 	void SceneHierarchyPanel::DrawEntityTreeView(Entity* entity, bool& newEntitySelected)
 	{
-#ifdef IMGUI_ENABLE
+#ifdef IMGUI_ENABLED
 		for (unsigned int i = 0; i < entity->GetChildCount(); ++i)
 		{
 			Entity* currentEntity = entity->GetChild(i);
@@ -87,7 +87,7 @@ namespace Insight
 
 	int SceneHierarchyPanel::GetTreeNodeFlags(Entity* entity)
 	{
-#ifdef IMGUI_ENABLE
+#ifdef IMGUI_ENABLED
 		ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed |*/ ImGuiTreeNodeFlags_OpenOnArrow;
 		if (entity->GetChildCount() == 0)
 		{
@@ -109,7 +109,7 @@ namespace Insight
 		//IS_TODO("Remove this and place in it's own class!!!");
 
 		IS_PROFILE_FUNCTION();
-#ifdef IMGUI_ENABLE
+#ifdef IMGUI_ENABLED
 		ImGui::Begin("Components Panel");
 
 		if (entity != nullptr)

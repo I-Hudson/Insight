@@ -156,9 +156,6 @@
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -186,9 +183,6 @@ IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -216,9 +210,6 @@ IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -250,9 +241,6 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -283,9 +271,6 @@ IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I .
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -316,9 +301,6 @@ IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q 
       <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
-    <PreBuildEvent>
-      <Command>IF EXIST ..\PBC\ (xcopy /Q /E /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\PBC ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)</Command>
-    </PreBuildEvent>
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Dist-windows-x86_64\Insight\Insight.lib ..\bin\Dist-windows-x86_64\UnitTests &gt; nul)</Command>
@@ -903,4 +885,4 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-</Project> 
+</Project>

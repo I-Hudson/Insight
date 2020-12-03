@@ -211,10 +211,22 @@ namespace vks
 		struct MVP
 		{
 			glm::mat4 proj;
+			glm::mat4 view;
 			glm::mat4 model;
 			glm::vec4 lightPos;
 		};
 		Model* m_testModel;
+		glm::vec4 m_lightPos;
+		float m_lightPosAngle;
+
+
+		struct DebugOverlay
+		{
+			glm::vec2 debugOptions;
+			int debugOverlay;
+		};
+		bool debugOverlay;
+		DebugOverlay m_debugOverlay;
 	};
 }
 #endif

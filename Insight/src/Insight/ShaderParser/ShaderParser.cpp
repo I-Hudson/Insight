@@ -137,32 +137,12 @@ namespace Insight
 			uniformBlock.Type = ShaderUniformBlockType::Sampler2D;
 		}
 
-		std::string sValue = "binding = ";
-		Size sLoc = line.find(sValue);
-		sLoc += sValue.length();
-
-		std::string returnValue;
-		for (auto it = line.begin() + sLoc; it != line.end(); ++it)
-		{
-			char c = *it;
-			if (c >= '0' && c <= '9')
-			{
-				returnValue += c;
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		if (!returnValue.empty())
-		{
-			uniformBlock.Binding = std::stoi(returnValue);
-		}
+		uniformBlock.Binding = GetIntValue("binding =", line);
+		uniformBlock.Set = GetIntValue("set =", line);
 
 		uniformBlock.Name = GetName(line, false);
 
-		sLoc = line.find("//");
+		int sLoc = line.find("//");
 		sLoc += 2;
 		if (line[sLoc] == '#')
 		{
@@ -342,6 +322,36 @@ namespace Insight
 			(*it).Stride = stride;
 			stride += (*it).Size;
 		}
+	}
+
+	int ShaderParser::GetIntValue(const std::string& stringKey, const std::string& line)
+	{
+		Size sLoc = line.find(stringKey);
+		sLoc += stringKey.length();
+
+		std::string returnValue;
+		for (auto it = line.begin() + sLoc; it != line.end(); ++it)
+		{
+			char c = *it;
+			if (c >= '0' && c <= '9')
+			{
+				returnValue += c;
+			}
+			else if (c == ' ')
+			{
+				continue;
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (!returnValue.empty())
+		{
+			return std::stoi(returnValue);
+		}
+		return -1;
 	}
 
 	ShaderType ShaderParser::ExtensionToShaderType(const std::string& fileName)

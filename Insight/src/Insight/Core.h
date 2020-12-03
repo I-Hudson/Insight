@@ -53,6 +53,10 @@
 #define BIT(x) (1 << x)
 #define ARRAY_SIZEOF(ARR) ((int)(sizeof(ARR) / sizeof(*(ARR))))
 
+#ifndef IS_ASSERT_PATH
+#define IS_ASSERT_PATH "./data"
+#endif
+
 #ifdef IS_BUILD_DLL
 	#define IS_API //__declspec(dllexport)
 

@@ -197,7 +197,10 @@ namespace vks
 
 	void VulkanPipeline::Destroy()
 	{
-		vkDestroyDescriptorSetLayout(*m_vulkanDevice, m_descriptorLayout, nullptr);
+		for (auto& set : m_descriptorLayouts)
+		{
+			vkDestroyDescriptorSetLayout(*m_vulkanDevice, set.second, nullptr);
+		}
 		vkDestroyPipelineLayout(*m_vulkanDevice, m_pipelineLayout, nullptr);
 		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
 	}
@@ -209,25 +212,34 @@ namespace vks
 
 	void VulkanPipeline::CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
 	{
-		std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+		std::set<int> setIndexs;
 
 		for (auto& data : shaderData)
 		{
 			for (auto& buffer : data.UniformBlocks)
 			{
-				VkDescriptorSetLayoutBinding b;
-				b.binding = buffer.Binding;
-				b.descriptorType = buffer.GetVulkanType();
-				b.descriptorCount = 1;
-				b.stageFlags = data.GetVulkanShaderStage();
-				b.pImmutableSamplers = nullptr;
-
-				descriptorSetLayoutBindings.push_back(b);
+				setIndexs.insert(buffer.Set);
 			}
 		}
 
-		auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);
-		ThrowIfFailed(vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &m_descriptorLayout));
+		//TODO Please clean this up it's horriable.
+		for (auto& set : setIndexs)
+		{
+			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+			for (auto& data : shaderData)
+			{
+				for (auto& buffer : data.UniformBlocks)
+				{
+					if (buffer.Set == set)
+					{
+						descriptorSetLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(buffer.GetVulkanType(), data.GetVulkanShaderStage(), buffer.Binding));
+					}
+				}
+			}
+
+			auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);
+			ThrowIfFailed(vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &m_descriptorLayouts[set]));
+		}
 	}
 
 	void VulkanPipeline::CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
@@ -242,7 +254,11 @@ namespace vks
 			}
 		}
 
-		std::vector<VkDescriptorSetLayout> setLayouts = { m_descriptorLayout };
+		std::vector<VkDescriptorSetLayout> setLayouts;
+		for (auto& set : m_descriptorLayouts)
+		{
+			setLayouts.push_back(set.second);
+		}
 		ThrowIfFailed(vkCreatePipelineLayout(*device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_pipelineLayout));
 	}
 
