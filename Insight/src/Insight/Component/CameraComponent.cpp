@@ -34,9 +34,9 @@ void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
-	IS_REGISTER_PROPERTY(float, m_fov, "FOV", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
-	IS_REGISTER_PROPERTY(float, m_nearPlane, "Near Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ClampZero);
-	IS_REGISTER_PROPERTY(float, m_farPlane, "Far Plane", RTTIPropertyEditorFlags_ShowInEditor | RTTIPropertyEditorFlags_ReadOnly);
+	IS_REGISTER_PROPERTY(float, m_fov, "FOV", UIFlags_ShowInEditor | UIFlags_ReadOnly);
+	IS_REGISTER_PROPERTY(float, m_nearPlane, "Near Plane", UIFlags_ShowInEditor | UIFlags_ClampZero);
+	IS_REGISTER_PROPERTY(float, m_farPlane, "Far Plane", UIFlags_ShowInEditor | UIFlags_ReadOnly);
 
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
@@ -87,6 +87,16 @@ void CameraComponent::SetProjMatrix(const float& a_fov, const CameraAspect& a_as
 	m_farPlane = a_far;
 
 	m_projectionMatrix = glm::perspective(glm::radians(m_fov), GetCamerAspect(a_aspect), a_near, a_far);
+	SetProjectionViewMatrix();
+}
+
+void CameraComponent::SetProjMatrix(const float& a_fov, const float& a_near, const float& a_far)
+{
+	m_fov = a_fov;
+	m_nearPlane = a_near;
+	m_farPlane = a_far;
+
+	m_projectionMatrix = glm::perspective(glm::radians(m_fov), GetCamerAspect(m_cameraAspect), a_near, a_far);
 	SetProjectionViewMatrix();
 }
 

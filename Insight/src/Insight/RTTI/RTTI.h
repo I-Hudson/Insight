@@ -2,6 +2,7 @@
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/RTTI/RTTITypes.h"
+#include "Insight/UI/UIFlags.h"
 
 namespace Insight
 {
@@ -15,12 +16,12 @@ namespace Insight
 			RTTI();
 			~RTTI();
 
-			void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags);
+			void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const uint32_t& editorFlags);
 			void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr);
 			void RTTI::UnregisterAllProperty(void* ownerObject);
 
 			RTTIProperty* GetProperty(void* ownerPtr, const std::string& propertyName);
-			std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const RTTIPropertyEditorFlags& editorFlags);
+			std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const uint32_t& editorFlags);
 
 		private:
 			std::unordered_map<void*, std::vector<RTTIProperty*>> m_RTTITypes;

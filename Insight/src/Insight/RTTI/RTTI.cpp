@@ -50,7 +50,7 @@ namespace Insight
 			return nullptr;
 		}
 
-		std::vector<RTTIProperty*> RTTI::GetAllProperties(void* ownerPtr, const RTTIPropertyEditorFlags& editorFlags)
+		std::vector<RTTIProperty*> RTTI::GetAllProperties(void* ownerPtr, const uint32_t& editorFlags)
 		{
 			std::vector<RTTIProperty*> properties;
 			for (auto it = m_RTTITypes[ownerPtr].begin(); it != m_RTTITypes[ownerPtr].end(); ++it)
@@ -63,7 +63,7 @@ namespace Insight
 			return properties;
 		}
 
-		void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const RTTIPropertyEditorFlags& editorFlags)
+		void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const uint32_t& editorFlags)
 		{
 			RTTIProperty* rttiType = NEW_ON_HEAP(RTTIProperty, typeName, propertyName, editorFlags, propertyPtr);
 			if (rttiType == nullptr)

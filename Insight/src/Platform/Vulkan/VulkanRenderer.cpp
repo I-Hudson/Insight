@@ -7,6 +7,9 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanImGUIRenderer.h"
+#if defined(IS_EDITOR)
+#include "Insight/Editor/UIHelper.h"
+#endif
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -16,6 +19,7 @@
 #include "Insight/Component/CameraComponent.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Model/Model.h"
+#include "Insight/Module/EditorModule.h"
 
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -43,10 +47,45 @@ namespace vks
 		return returnStr;
 	}
 
+#if defined(IS_EDITOR)
+	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer)
+		: EditorPanel(editorModule)
+		, m_renderer(*renderer)
+	{
+	}
+
+	VulkanRendererEditorOverlay::~VulkanRendererEditorOverlay()
+	{
+	}
+
+	void VulkanRendererEditorOverlay::Update(const float& deltaTime)
+	{
+		ImGui::Begin("VulkanRendererEditorOverlay");
+
+		ImGui::Checkbox("Debug overlay", &m_renderer.debugOverlay);
+
+		const char* items[] = { "Normal", "Colour" };
+		static int item_current = m_renderer.m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
+		ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
+		m_renderer.m_debugOverlay.debugOptions[0] = 0;
+		m_renderer.m_debugOverlay.debugOptions[1] = 0;
+		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;
+
+		ImGui::Text("EditorCamera");
+		float fov = m_renderer.m_editorCamera->GetFov();
+		float nearPlane = m_renderer.m_editorCamera->GetNearPlane();
+		float farPlane = m_renderer.m_editorCamera->GetFarPlane();
+		if (DrawFloat("FOV", &fov) || DrawFloat("Near Plane", &nearPlane) || DrawFloat("Far Plane", &farPlane))
+		{
+			m_renderer.m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
+		}
+
+		ImGui::End();
+	}
+#endif
+
 	VulkanRenderer::VulkanRenderer()
 	{
-		SetInstancePtr(this);
-
 		REG_EVENT_HANDLE(Insight::EventType::WindowResize, VulkanRenderer::WindowResizeEvent);
 
 		m_numThreads = std::thread::hardware_concurrency();
@@ -60,6 +99,10 @@ namespace vks
 
 		InitVulkan();
 		IS_CORE_INFO("Vulkan Setup Complete.");
+
+#if defined(IS_EDITOR)
+		Insight::Module::EditorModule::Instance()->AddEditorPanel<VulkanRendererEditorOverlay>(this);
+#endif
 	}
 
 	VulkanRenderer::~VulkanRenderer()
@@ -111,23 +154,21 @@ namespace vks
 
 		DELETE_ON_HEAP(m_vulkanDevice);
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			vks::Debug::FreeDebugCallback(m_instance);
 		}
 
 		vkDestroyInstance(m_instance, nullptr);
-
-		ClearPtr();
 	}
 
 	void VulkanRenderer::InitVulkan()
 	{
 		VkResult err;
 
-		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
+		ThrowIfFailed(CreateInstance(true));//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
 			// For validating (debugging) an application the error and warning bits should suffice
@@ -254,20 +295,6 @@ namespace vks
 		IS_PROFILE_FUNCTION();
 
 		Clear();
-
-		ImGui::Begin("Debug");
-		if (ImGui::Checkbox("Debug overlay", &debugOverlay))
-		{
-		}
-
-		const char* items[] = { "Normal", "Colour" };
-		static int item_current = m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
-		ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
-
-		m_debugOverlay.debugOptions[0] = 0;
-		m_debugOverlay.debugOptions[1] = 0;
-		m_debugOverlay.debugOptions[item_current] = 1;
-		ImGui::End();
 
 		float lerpSpeed = 0.5f;
 		if (m_clearColor.float32[0] < 1.0f)
@@ -424,7 +451,7 @@ namespace vks
 	void VulkanRenderer::SetupSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
+		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), false, false);//(bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
 	}
 
 	void VulkanRenderer::CreateCommandBuffers()
@@ -515,7 +542,7 @@ namespace vks
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pNext = NULL;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			uint32_t glfwExtensionCount = 0;
 			const char** glfwExtensions;
@@ -533,7 +560,7 @@ namespace vks
 		instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
 		instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
 			// Note that on Android this layer requires at least NDK r20

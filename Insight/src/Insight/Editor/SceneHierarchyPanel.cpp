@@ -130,7 +130,7 @@ namespace Insight
 			for (auto componentsIT = components->begin(); componentsIT != components->end(); ++componentsIT)
 			{
 				IS_PROFILE_SCOPE("Draw Properties");
-				auto properties = IS_GET_ALL_PROPERTIES(*componentsIT, RTTIPropertyEditorFlags_ShowInEditor);
+				auto properties = IS_GET_ALL_PROPERTIES(*componentsIT,UIFlags_ShowInEditor);
 
 				ImGui::Separator();
 

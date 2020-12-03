@@ -1,8 +1,13 @@
 #pragma once
+
 #ifdef IS_VULKAN
 #include "Insight/Core.h"
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
+
+#if defined(IS_EDITOR)
+#include "Insight/Editor/EditorPanel.h"
+#endif
 
 #include "VulkanDevice.h"
 #include "Swapchain.h"
@@ -26,7 +31,21 @@ const int MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace vks
 {
-	class IS_API VulkanRenderer : public Insight::Renderer, public Insight::TSingleton<VulkanRenderer>
+#if defined(IS_EDITOR)
+	class VulkanRendererEditorOverlay : public Insight::EditorPanel
+	{
+	public:
+		VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer);
+		~VulkanRendererEditorOverlay();
+
+		virtual void Update(const float& deltaTime) override;
+
+	private:
+		VulkanRenderer& m_renderer;
+	};
+#endif
+
+	class IS_API VulkanRenderer : public Insight::Renderer
 	{
 	public:
 		VulkanRenderer();
@@ -227,6 +246,8 @@ namespace vks
 		};
 		bool debugOverlay;
 		DebugOverlay m_debugOverlay;
+
+		friend VulkanRendererEditorOverlay;
 	};
 }
 #endif

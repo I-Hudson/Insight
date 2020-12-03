@@ -10,6 +10,7 @@ namespace Insight
 	{
 		EditorModule::EditorModule()
 		{
+			SetInstancePtr(this);
 			AddEditorPanel<SceneHierarchyPanel>();
 		}
 
@@ -21,6 +22,7 @@ namespace Insight
 			}
 
 			m_editorPanels.clear();
+			ClearPtr();
 		}
 
 		void EditorModule::Update(const float& deltaTime)

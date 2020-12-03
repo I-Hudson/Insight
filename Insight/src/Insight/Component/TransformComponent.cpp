@@ -29,7 +29,7 @@ TransformComponent::~TransformComponent()
 void TransformComponent::OnCreate()
 {
 	__super::OnCreate();
-	IS_REGISTER_PROPERTY(glm::mat4, m_transform, "Transform", RTTIPropertyEditorFlags_ShowInEditor);
+	IS_REGISTER_PROPERTY(glm::mat4, m_transform, "Transform", UIFlags_ShowInEditor);
 }
 
 void TransformComponent::OnDestroy()

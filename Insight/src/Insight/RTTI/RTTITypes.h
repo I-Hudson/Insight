@@ -2,15 +2,7 @@
 #include "Insight/Core.h"
 #include <map>
 
-typedef int RTTIPropertyEditorFlags;
-
-enum RTTIPropertyEditorFlags_
-{
-	RTTIPropertyEditorFlags_None			= 0,
-	RTTIPropertyEditorFlags_ShowInEditor	= 1 << 1,
-	RTTIPropertyEditorFlags_ClampZero		= 1 << 2,
-	RTTIPropertyEditorFlags_ReadOnly		= 1 << 3,
-};
+typedef uint32_t RTTIPropertyEditorFlags;
 
 class RTTIProperty
 {

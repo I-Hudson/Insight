@@ -5,20 +5,8 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NO_VULKAN|x64">
-      <Configuration>Debug_NO_VULKAN</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug_NO_EDITOR|x64">
-      <Configuration>Debug_NO_EDITOR</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release_NO_EDITOR|x64">
-      <Configuration>Release_NO_EDITOR</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Dist|x64">
@@ -40,25 +28,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v142</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
@@ -76,16 +46,7 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -99,30 +60,9 @@
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
-    <OutDir>..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Debug_NO_VULKAN-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <OutDir>..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Debug_NO_EDITOR-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>..\bin\Release-windows-x86_64\Insight\</OutDir>
     <IntDir>..\bin-int\Release-windows-x86_64\Insight\</IntDir>
-    <TargetName>Insight</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
-    <OutDir>..\bin\Release_NO_EDITOR-windows-x86_64\Insight\</OutDir>
-    <IntDir>..\bin-int\Release_NO_EDITOR-windows-x86_64\Insight\</IntDir>
     <TargetName>Insight</TargetName>
     <TargetExt>.lib</TargetExt>
     <IncludePath>$(SolutionDir)Insight\vendor\glm;$(IncludePath)</IncludePath>
@@ -161,60 +101,6 @@
 IF EXIST ..\bin\Debug-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug-windows-x86_64\Insight\Insight.lib ..\bin\Debug-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_VULKAN|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_OPENGL;IS_PROFILE;NOMINMAX;IS_EDITOR;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <Optimization>Disabled</Optimization>
-      <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_VULKAN-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_VULKAN-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_NO_EDITOR|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_DEBUG;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <Optimization>Disabled</Optimization>
-      <MinimalRebuild>false</MinimalRebuild>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mtd.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Debug_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -244,36 +130,6 @@ IF EXIST ..\bin\Debug_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E
     <PostBuildEvent>
       <Command>IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\Sandbox &gt; nul)
 IF EXIST ..\bin\Release-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release-windows-x86_64\Insight\Insight.lib ..\bin\Release-windows-x86_64\UnitTests &gt; nul)</Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_NO_EDITOR|x64'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
-      <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;IS_BUILD_DLL;GLM_FORCE_SWIZZLE;IS_RELEASE;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <Optimization>Full</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <MinimalRebuild>false</MinimalRebuild>
-      <StringPooling>true</StringPooling>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
-      <AdditionalDependencies>OptickCore.lib;ktx.lib;assimp-vc142-mt.lib;shaderc_combined.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.1.130.0\lib;$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);C:\VulkanSDK\1.1.130.0\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-    </Lib>
-    <PostBuildEvent>
-      <Command>IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\Sandbox &gt; nul)
-IF EXIST ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul) ELSE (xcopy /Q /Y /I ..\bin\Release_NO_EDITOR-windows-x86_64\Insight\Insight.lib ..\bin\Release_NO_EDITOR-windows-x86_64\UnitTests &gt; nul)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
@@ -322,6 +178,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Editor\EditorPanel.h" />
     <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h" />
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
+    <ClInclude Include="src\Insight\Editor\UIHelper.h" />
     <ClInclude Include="src\Insight\Entitiy\Entity.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
     <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
@@ -375,6 +232,7 @@ IF EXIST ..\bin\Dist-windows-x86_64\Insight\Insight.lib\ (xcopy /Q /E /Y /I ..\b
     <ClInclude Include="src\Insight\Threading\Threadpool.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
+    <ClInclude Include="src\Insight\UI\UIFlags.h" />
     <ClInclude Include="src\Insight\UUID.h" />
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />

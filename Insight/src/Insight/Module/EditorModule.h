@@ -24,7 +24,7 @@ namespace Insight
 
 	namespace Module
 	{
-		class EditorModule : public Module
+		class EditorModule : public Module, public TSingleton<EditorModule>
 		{
 		public:
 			EditorModule();
@@ -32,8 +32,8 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
-			template<typename T>
-			T* AddEditorPanel();
+			template<typename T, typename... Args>
+			T* AddEditorPanel(Args&&... args);
 
 			template<typename T>
 			void RemoveEditorPanel();
@@ -45,8 +45,8 @@ namespace Insight
 			std::unordered_map<size_t, EditorPanel*> m_editorPanels;
 		};
 
-		template<typename T>
-		inline T* EditorModule::AddEditorPanel()
+		template<typename T, typename... Args>
+		inline T* EditorModule::AddEditorPanel(Args&&... args)
 		{
 			IS_CORE_STATIC_ASSERT(EditorPanel, T, "T is not of type EditorPanel");
 
@@ -55,7 +55,7 @@ namespace Insight
 				return panel;
 			}
 			
-			EditorPanel* newPanel = NEW_ON_HEAP(T, this);
+			EditorPanel* newPanel = NEW_ON_HEAP(T, this, std::forward<Args>(args)...);
 			m_editorPanels[GetEditorPanelID<T>()] = newPanel;
 			
 			return static_cast<T*>(newPanel);

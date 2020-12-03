@@ -70,6 +70,9 @@
     <Filter Include="src\Insight\Time">
       <UniqueIdentifier>{509306AD-3C8C-25FF-65BE-0A845116050B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\UI">
+      <UniqueIdentifier>{5FB5434D-4B83-3753-3417-A879208413B8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -166,6 +169,9 @@
       <Filter>src\Insight\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h">
+      <Filter>src\Insight\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Editor\UIHelper.h">
       <Filter>src\Insight\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Entitiy\Entity.h">
@@ -326,6 +332,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Time.h">
       <Filter>src\Insight\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\UI\UIFlags.h">
+      <Filter>src\Insight\UI</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\UUID.h">
       <Filter>src\Insight</Filter>

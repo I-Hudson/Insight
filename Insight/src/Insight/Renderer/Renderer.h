@@ -35,9 +35,9 @@ namespace Insight
 
 		struct RendererConfig
 		{
-			CVar<int> VSync			{ "vsync", 0 };
-			CVar<int> GSync			{ "gsync", 0 };
-			CVar<int> Validation	{ "validation", 1 };
+			CVar<int> VSync{ "vsync", 0 };
+			CVar<int> GSync{ "gsync", 0 };
+			CVar<int> Validation{ "validation", 1 };
 		};
 
 		static GraphicsAPI s_API;

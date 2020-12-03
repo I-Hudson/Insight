@@ -30,11 +30,14 @@ public:
 	void SetViewMatrix(const glm::mat4& a_value);
 	//Set the projection matrix for the camera
 	void SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far);
+	void SetProjMatrix(const float& a_fov, const float& a_near, const float& a_far);
 
 	//Set the position for the camera
 	void SetPosition(const glm::vec3& a_value);
 	void SetFov(const float& fov);
-	const float GetFov() { return m_fov; }
+	float GetFov() { return m_fov; }
+	float GetNearPlane() { return m_nearPlane; }
+	float GetFarPlane() { return m_farPlane; }
 	virtual void OnUpdate(const float& a_deltaTime) override;
 
 	//Get the projection view matrix

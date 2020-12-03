@@ -52,6 +52,10 @@ namespace Insight
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
 		m_windowModule->SetManuallyUpdate(true);
 
+#ifdef IS_EDITOR
+		m_moduleManager->AddModule<Module::EditorModule>();
+#endif
+
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(m_windowModule);
 		m_graphicsModule->SetManuallyUpdate(true);
 
@@ -61,10 +65,6 @@ namespace Insight
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
 		
 		//m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
-
-#ifdef IS_EDITOR
-		m_moduleManager->AddModule<Module::EditorModule>();
-#endif
 
 		TThreadSafe<int> testInt;
 		testInt = 0;

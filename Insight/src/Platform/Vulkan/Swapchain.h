@@ -4,7 +4,6 @@
 #include "VulkanHeader.h"
 
 #include "Insight/Event/ApplicationEvent.h"
-
 #include "Insight/Renderer/FrameGraph/FrameGraph.h"
 
 namespace Insight
