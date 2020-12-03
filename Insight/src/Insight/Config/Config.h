@@ -18,6 +18,7 @@ namespace Insight
 	{
 	public:
 		void Parse(const std::string& filePath);
+		void ParseInFolder(const std::string& folderPath);
 		void SetVal(const std::string& key, const std::string_view& val);
 
 		static Config& GetInstance()

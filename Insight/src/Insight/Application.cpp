@@ -39,7 +39,7 @@ namespace Insight
 	{
 		IS_PROFILE_FUNCTION();
 
-		Config::GetInstance().Parse("config.txt");
+		Config::GetInstance().ParseInFolder("./data/config");
 		
 		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
 

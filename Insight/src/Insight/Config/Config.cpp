@@ -1,6 +1,8 @@
 #include "ispch.h"
 #include "Config.h"
 
+#include <filesystem>
+
 namespace Insight
 {
 	void Config::Parse(const std::string& filePath)
@@ -23,6 +25,22 @@ namespace Insight
 				SetConfigVal(key, val);
 			}
 			cFile.close();
+		}
+	}
+
+	void Config::ParseInFolder(const std::string& folderPath)
+	{
+		using fs = std::filesystem::recursive_directory_iterator;
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator::recursive_directory_iterator(folderPath))
+		{
+			std::string extension = entry.path().u8string();
+			extension = extension.substr(extension.find_last_of("."));
+
+			if (extension == ".txt")
+			{
+				Parse(entry.path().u8string());
+			}
 		}
 	}
 
