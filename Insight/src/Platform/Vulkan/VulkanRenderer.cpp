@@ -66,7 +66,7 @@ namespace vks
 
 		const char* items[] = { "Normal", "Colour" };
 		static int item_current = m_renderer.m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
-		ImGui::Combo("combo", &item_current, items, IM_ARRAYSIZE(items));
+		ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
 		m_renderer.m_debugOverlay.debugOptions[0] = 0;
 		m_renderer.m_debugOverlay.debugOptions[1] = 0;
 		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;

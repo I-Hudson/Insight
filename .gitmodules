@@ -10,3 +10,7 @@
 [submodule "Insight/vendor/KTX-Software"]
 	path = Insight/vendor/KTX-Software
 	url = https://github.com/KhronosGroup/KTX-Software
+[submodule "Insight/vendor/imgui"]
+	path = Insight/vendor/imgui
+	url = https://github.com/I-Hudson/imgui
+	branch = docking

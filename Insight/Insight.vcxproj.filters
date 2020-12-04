@@ -85,12 +85,6 @@
     <Filter Include="vendor\TinyXML2">
       <UniqueIdentifier>{496EA29A-B5F9-0F5F-BE0A-93532A156C5F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vendor\glad">
-      <UniqueIdentifier>{9A8E79C1-0644-F2B6-8F38-EC8DFBECE8BA}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\glad\src">
-      <UniqueIdentifier>{B1098FEA-1D95-FCAE-26A6-7FA392B058AF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="vendor\glm">
       <UniqueIdentifier>{829FC5A8-6E57-07F6-D75E-E051C335A2E6}</UniqueIdentifier>
     </Filter>
@@ -108,18 +102,6 @@
     </Filter>
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\imgui">
-      <UniqueIdentifier>{5D3BD0F0-499E-5F95-F223-984BDE652B18}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\imgui\examples">
-      <UniqueIdentifier>{ABA16F5A-170E-2B55-E001-C3B24C2D4DBD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\imgui\misc">
-      <UniqueIdentifier>{58F0AC6F-C406-AB05-0D7E-362779D37B8D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="vendor\imgui\misc\cpp">
-      <UniqueIdentifier>{2AD6F862-9642-B45D-5F36-4CBBCB61D6C5}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor\stb_image">
       <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
@@ -1599,36 +1581,6 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="vendor\imgui\examples\imgui_impl_glfw.h">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\examples\imgui_impl_opengl3.h">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\examples\imgui_impl_vulkan.h">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imconfig.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imgui.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imgui_internal.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imstb_rectpack.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imstb_textedit.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\imstb_truetype.h">
-      <Filter>vendor\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\imgui\misc\cpp\imgui_stdlib.h">
-      <Filter>vendor\imgui\misc\cpp</Filter>
-    </ClInclude>
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
@@ -1798,33 +1750,6 @@
     </ClCompile>
     <ClCompile Include="vendor\TinyXML2\tinyxml2.cpp">
       <Filter>vendor\TinyXML2</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\glad\src\glad.cpp">
-      <Filter>vendor\glad\src</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\examples\imgui_impl_glfw.cpp">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\examples\imgui_impl_opengl3.cpp">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\examples\imgui_impl_vulkan.cpp">
-      <Filter>vendor\imgui\examples</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\imgui.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\imgui_demo.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\imgui_draw.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\imgui_widgets.cpp">
-      <Filter>vendor\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\imgui\misc\cpp\imgui_stdlib.cpp">
-      <Filter>vendor\imgui\misc\cpp</Filter>
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>

@@ -19,9 +19,6 @@ project "Insight"
 		"vendor/stb_image/**.cpp",
         "vendor/glm/glm/**.hpp",
 		"vendor/glm/glm/**.inl",
-		"vendor/glad/src/**.cpp",
-		"vendor/imgui/**.h",
-		"vendor/imgui/**.cpp",
         "vendor/TinyXML2/**.h",
 		"vendor/TinyXML2/**.cpp",
 	}
@@ -29,15 +26,16 @@ project "Insight"
     includedirs 
     {
 		"$(ProjectDir)src",
-		"%{IncludeDir.spdlog}",
         "%{IncludeDir.GLFW}",
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.imgui}",
+        
+		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
-        "%{IncludeDir.glad}",
-        "%{IncludeDir.imgui}",
         "%{IncludeDir.TinyXML2}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.tinygltf}",
@@ -59,8 +57,13 @@ project "Insight"
     links 
 	{ 
         "GLFW",
+        "Glad",
+        "ImGui",
+
         "OptickCore",
         "ktx",
+        "shaderc_combined",
+        "vulkan-1",
 	}
 
     filter "system:windows"
@@ -68,27 +71,8 @@ project "Insight"
 
         defines 
         {  
-            "IS_PLATFORM_WINDOWS", 
-            "IS_BUILD_DLL" ,
+            "IS_PLATFORM_WINDOWS",
             "GLM_FORCE_SWIZZLE"
-        }
-
-        postbuildcommands 
-        { 
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox"),
-            ("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/UnitTests")
-        }
-    filter "configurations:Debug_NO_VULKAN"
-        defines { "IS_DEBUG", "IS_OPENGL", "IS_PROFILE", "NOMINMAX", "IS_EDITOR", "IMGUI_ENABLED", }
-        symbols "on"
-        links 
-        {
-            "assimp-vc142-mtd",
-            "opengl32"
-	    }
-        libdirs
-        {
-            "%{LibDirs.assimp}/Debug"
         }
 
     filter "configurations:Debug"
@@ -97,9 +81,8 @@ project "Insight"
         links 
         {
             "assimp-vc142-mtd",
-            "shaderc_combined",
-            "vulkan-1",
-	    }
+        }
+        
         libdirs
         {
             "%{LibDirs.Vulkan}/Debug",
@@ -113,9 +96,9 @@ project "Insight"
         links 
         {
             "assimp-vc142-mt",
-            "shaderc_combined",
-            "vulkan-1",
-	    }
+
+        }
+        
         libdirs
         {
             "%{LibDirs.Vulkan}/Release",
@@ -128,9 +111,8 @@ project "Insight"
         links 
         {
             "assimp-vc142-mt",
-            "shaderc_combined",
-            "vulkan-1",
-	    }
+        }
+        
         libdirs
         {
             "%{LibDirs.Vulkan}/Release",

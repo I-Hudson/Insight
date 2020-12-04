@@ -10,7 +10,7 @@
 
 #include "glm/glm.hpp"
 #include "Insight/Renderer/ImGuiRenderer.h"
-#include "examples/imgui_impl_vulkan.h"
+#include "backends/imgui_impl_vulkan.h"
 #include <GLFW/glfw3.h>
 
 namespace vks
