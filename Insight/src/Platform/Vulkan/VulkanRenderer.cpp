@@ -85,6 +85,8 @@ namespace vks
 			m_renderer.m_editorCamera->SetCameraSpeed(cameraSpeed);
 		}
 
+		DrawMat4("Test Model Matrix", &m_renderer.m_testModelMatrix);
+
 		ImGui::End();
 	}
 #endif
@@ -370,8 +372,7 @@ namespace vks
 		mvp.proj = m_editorCamera->GetProjMatrix();
 		mvp.proj[1][1] *= -1;
 		mvp.view = m_editorCamera->GetViewMatrix();
-		glm::mat4 modelMat(1.0f);
-		mvp.model = modelMat;
+		mvp.model = m_testModelMatrix;
 
 		m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
 		m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
@@ -440,6 +441,7 @@ namespace vks
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
 		m_testModel = NEW_ON_HEAP(Model, "./data/models/sponza/sponza.obj");
+		m_testModelMatrix = glm::mat4(1.0f);
 
 		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);
 		m_lightPosAngle = 0.0f;

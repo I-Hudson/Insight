@@ -10,6 +10,16 @@ namespace Insight
 		void CameraComponentEditorDrawer::OnDraw(Object& obj)
 		{
 			CameraComponent component = static_cast<CameraComponent&>(obj);
+
+			glm::mat4 view = component.GetViewMatrix();
+			float position[4] = { view[3].x, view[3].y, view[3].z, 1.0f };
+			if (DrawVector("Position", 3, position))
+			{
+				view[3].x = position[0];
+				view[3].z = position[1];
+				view[3].z = position[2];
+				component.SetViewMatrix(view);
+			}
 		}
 	}
 }

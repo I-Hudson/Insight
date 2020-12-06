@@ -234,6 +234,7 @@ namespace vks
 			glm::mat4 model;
 			glm::vec4 lightPos;
 		};
+		glm::mat4 m_testModelMatrix;
 		Model* m_testModel;
 		glm::vec4 m_lightPos;
 		float m_lightPosAngle;

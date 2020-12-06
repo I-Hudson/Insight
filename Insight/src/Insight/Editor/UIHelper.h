@@ -15,7 +15,7 @@ namespace Insight
 		{
 			for (auto& func : flagFunctions)
 			{
-				if (func.first & (IS_PropertyFlags)flags)
+				if (func.first == (IS_PropertyFlags)flags)
 				{
 					return func.second();
 				}
