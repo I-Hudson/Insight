@@ -60,6 +60,8 @@ namespace vks
 
 	void VulkanRendererEditorOverlay::Update(const float& deltaTime)
 	{
+		using namespace Insight::Editor;
+
 		ImGui::Begin("VulkanRendererEditorOverlay");
 
 		ImGui::Checkbox("Debug overlay", &m_renderer.debugOverlay);
@@ -71,13 +73,16 @@ namespace vks
 		m_renderer.m_debugOverlay.debugOptions[1] = 0;
 		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;
 
-		ImGui::Text("EditorCamera");
+		DrawString("EditorCamera");
+		DrawString("EditorCamera", TextBold);
 		float fov = m_renderer.m_editorCamera->GetFov();
 		float nearPlane = m_renderer.m_editorCamera->GetNearPlane();
 		float farPlane = m_renderer.m_editorCamera->GetFarPlane();
-		if (DrawFloat("FOV", &fov) || DrawFloat("Near Plane", &nearPlane) || DrawFloat("Far Plane", &farPlane))
+		float cameraSpeed = m_renderer.m_editorCamera->GetCameraSpeed();
+		if (DrawFloat("FOV", &fov) || DrawFloat("Near Plane", &nearPlane) || DrawFloat("Far Plane", &farPlane) || DrawFloat("Camera Speed", &cameraSpeed))
 		{
 			m_renderer.m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
+			m_renderer.m_editorCamera->SetCameraSpeed(cameraSpeed);
 		}
 
 		ImGui::End();

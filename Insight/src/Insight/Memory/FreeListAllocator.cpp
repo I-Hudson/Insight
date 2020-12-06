@@ -57,7 +57,7 @@ namespace Insight
 			m_startAddress = 0;
 		}
 
-		void* FreeListAllocator::Alloc(const Size size, const Byte TypeSize, const std::string& type, const Byte alignment)
+		void* FreeListAllocator::Alloc(const Size size, const Byte TypeSize, const std::string& typeName, const Byte alignment)
 		{
 			const Size allocationHeaderSize = sizeof(FreeListAllocator::AllocHeader);
 			IS_CORE_ASSERT(alignment >= 8, "Alignment must be 8 or greater");
@@ -91,7 +91,8 @@ namespace Insight
 			PtrInt paddingAddress = (PtrInt)&allocHeader->AlignmentPadding;
 			allocHeader->BlockSize = requiredSize;
 			allocHeader->TypeSize = TypeSize;
-			strcpy(&allocHeader->TypeName[0], PrepareTypeName(type).c_str());
+			IS_CORE_ASSERT(typeName.length() <= AllocHeader_TypeNameLength, "[FreeListAllocator::Alloc] 'type' is longer then allowed. Shortten the 'type' name in this function.");
+			strcpy(&allocHeader->TypeName[0], typeName.c_str());
 			allocHeader->AlignmentPadding = alignmentPadding;
 
 			m_sizeUsed += requiredSize;
@@ -229,23 +230,6 @@ namespace Insight
 			}
 			previousNode = itPrev;
 			foundNode = it;
-		}
-
-		std::string FreeListAllocator::PrepareTypeName(const std::string& fullTypeName)
-		{
-			IS_CORE_ASSERT(fullTypeName.length() <= AllocHeader_TypeNameLength, "[FreeListAllocator::Alloc] 'type' is longer then allowed. Shortten the 'type' name in this function.");
-
-			// Remove "Class ", from type name;
-			std::string typeName = fullTypeName;
-			if (typeName.find("class") != std::string::npos)
-			{
-				typeName = fullTypeName.substr(6);
-				if (size_t offset = typeName.find_last_of(':'))
-				{
-					typeName = typeName.substr(offset + 1);
-				}
-			}
-			return typeName;
 		}
 
 		void FreeListAllocator::Reset()

@@ -50,7 +50,7 @@ namespace Insight
 			type = m_freeListAllocator.GetAllocationOfType(ptr);
 			if (type.empty())
 			{
-
+				return "Invalid";
 			}
 
 			return type;

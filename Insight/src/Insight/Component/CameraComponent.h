@@ -35,9 +35,12 @@ public:
 	//Set the position for the camera
 	void SetPosition(const glm::vec3& a_value);
 	void SetFov(const float& fov);
-	float GetFov() { return m_fov; }
-	float GetNearPlane() { return m_nearPlane; }
-	float GetFarPlane() { return m_farPlane; }
+	void SetCameraSpeed(const float& cameraSpeed);
+
+	const float& GetFov() const { return m_fov; }
+	const float& GetNearPlane() const { return m_nearPlane; }
+	const float& GetFarPlane() const { return m_farPlane; }
+	const float& GetCameraSpeed() const { return m_cameraSpeed; }
 	virtual void OnUpdate(const float& a_deltaTime) override;
 
 	//Get the projection view matrix
@@ -51,9 +54,11 @@ private:
 	void SetProjectionViewMatrix();
 
 	CameraAspect m_cameraAspect;
+
 	float m_fov;
 	float m_nearPlane;
 	float m_farPlane;
+	float m_cameraSpeed;
 
 	glm::mat4 m_projectionViewMatrix;
 	glm::mat4 m_projectionMatrix;

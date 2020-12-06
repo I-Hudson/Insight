@@ -1,53 +1,61 @@
 #pragma once
 #include "Insight/Core.h"
+#include "Insight/Enums/PropertyFlags.h"
 #include <map>
 
-typedef uint32_t RTTIPropertyEditorFlags;
-
-class RTTIProperty
+namespace Insight
 {
-public:
-	RTTIProperty(const std::string& typeName, const std::string propertyName, const RTTIPropertyEditorFlags& editorFlags, void* objectPtr)
-		: m_typeName(typeName)
-		, m_propertyName(propertyName)
-		, m_editorFlags(editorFlags)
-		, m_objectPtr(objectPtr)
-	{  }
-
-	~RTTIProperty()
+	class RTTIProperty : public Insight::Object
 	{
-		m_objectPtr = nullptr;
-	}
+	public:
+		RTTIProperty(const std::string& typeName, const std::string propertyName, const PropertyFlags& propertyFlags, void* objectPtr)
+			: m_typeName(typeName)
+			, m_propertyName(propertyName)
+			, m_propertyFlags(propertyFlags)
+			, m_objectPtr(objectPtr)
+		{
+		}
 
-	void* GetObjectPtr()
-	{
-		return m_objectPtr;
-	}
+		~RTTIProperty()
+		{
+			m_objectPtr = nullptr;
+		}
 
-	template<typename T>
-	T& GetPropertyValue()
-	{
-		return *static_cast<T*>(m_objectPtr);
-	}
+		void* GetObjectPtr()
+		{
+			return m_objectPtr;
+		}
 
-	const RTTIPropertyEditorFlags GetPropertyEditorFlags()
-	{
-		return m_editorFlags;
-	}
+		template<typename T>
+		T& GetPropertyValue()
+		{
+			return *static_cast<T*>(m_objectPtr);
+		}
 
-	const std::string GetPropertyName()
-	{
-		return m_propertyName;
-	}
+		const PropertyFlags GetPropertyFlags()
+		{
+			return m_propertyFlags;
+		}
 
-	const std::string GetType()
-	{
-		return m_typeName;
-	}
+		const std::string GetPropertyName()
+		{
+			return m_propertyName;
+		}
 
-protected:
-	std::string m_typeName;
-	std::string m_propertyName;
-	RTTIPropertyEditorFlags m_editorFlags;
-	void* m_objectPtr;
-};
+		const std::string GetType()
+		{
+			return m_typeName;
+		}
+
+		const bool IsValid()
+		{
+			return m_objectPtr != nullptr;
+		}
+
+	protected:
+		std::string m_typeName;
+		std::string m_propertyName;
+		PropertyFlags m_propertyFlags;
+		void* m_objectPtr;
+	};
+}

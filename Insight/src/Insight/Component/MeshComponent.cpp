@@ -33,7 +33,7 @@ void MeshComponent::OnCreate()
 {
 	__super::OnCreate();
 
-	IS_REGISTER_PROPERTY(std::string, m_meshName, "Mesh Name", UIFlags_ShowInEditor | UIFlags_ReadOnly);
+	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
 
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
 	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());

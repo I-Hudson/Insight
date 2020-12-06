@@ -1,6 +1,7 @@
 #include "ispch.h"
 #include "Insight/Config/CVar.h"
 #include "ConfigRegistry.h"
+#include <glm/glm.hpp>
 
 namespace Insight
 {
@@ -8,6 +9,10 @@ namespace Insight
 	template class IS_API CVar<float>;
 	template class IS_API CVar<int>;
 	template class IS_API CVar<unsigned int>;
+	template class IS_API CVar<glm::vec2>;
+	template class IS_API CVar<glm::vec3>;
+	template class IS_API CVar<glm::vec4>;
+
 	std::unordered_map<std::string, ICVar*> ConfigRegistry::m_values;
 
 	template<typename T>

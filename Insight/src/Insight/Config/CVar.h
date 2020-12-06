@@ -2,8 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/Config/ICVar.h"
-#include <string>
-
+#include "Insight/Config/CVarParser.h"
 
 namespace Insight
 {
@@ -16,8 +15,32 @@ namespace Insight
 
 		virtual void SetVal(const std::string_view& value) override
 		{
-			std::istringstream ifs(value.data());
-			ifs >> m_value;
+			/*if (value.find_first_of("array") != std::string::npos)
+			{
+				int valueStringIndex = value.find_first_of("array") + 2;
+				std::string_view valueString = value.substr(valueStringIndex);
+				std::vector<std::string> values;
+				char c = valueString[valueStringIndex];
+
+				while (c != ')')
+				{
+					if (c == ',')
+					{
+						values.push_back(valueString[valueStringIndex - 1]);
+					}
+					++valueStringIndex;
+				}
+
+				for (size_t i = 0; i < values.size(); ++i)
+				{
+					std::istringstream ifs(values[i].data());
+					ifs >> m_value[i];
+				}
+			}
+			else
+			{*/
+			CVarParser<T> parser;
+			m_value = parser.Parse(value);
 		}
 
 		const T& GetVal() const { return m_value; }

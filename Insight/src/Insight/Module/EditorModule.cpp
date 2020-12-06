@@ -4,6 +4,7 @@
 
 #include "Insight/Editor/SceneHierarchyPanel.h"
 
+#if defined(IS_EDITOR)
 namespace Insight
 {
 	namespace Module
@@ -11,7 +12,7 @@ namespace Insight
 		EditorModule::EditorModule()
 		{
 			SetInstancePtr(this);
-			AddEditorPanel<SceneHierarchyPanel>();
+			AddEditorPanel<Editor::SceneHierarchyPanel>();
 		}
 
 		EditorModule::~EditorModule()
@@ -36,3 +37,4 @@ namespace Insight
 		}
 	}
 }
+#endif

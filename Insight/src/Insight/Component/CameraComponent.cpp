@@ -8,6 +8,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
 
+#include "Insight/Editor/Components/CameraComponentEditorDrawer.h"
 #include "Insight/RTTI/RTTI.h"
 
 REGISTER_DEF_TYPE(CameraComponent);
@@ -24,6 +25,8 @@ CameraComponent::CameraComponent(Entity* owner)
 {
 	m_updateEveryFarme = true;
 	m_componentId = GetComponentID<CameraComponent>();
+
+	CUSTOM_EDITOR_DRAWER(Insight::Editor::CameraComponentEditorDrawer, CameraComponent);
 }
 
 CameraComponent::~CameraComponent()
@@ -34,10 +37,11 @@ void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
-	IS_REGISTER_PROPERTY(float, m_fov, "FOV", UIFlags_ShowInEditor | UIFlags_ReadOnly);
-	IS_REGISTER_PROPERTY(float, m_nearPlane, "Near Plane", UIFlags_ShowInEditor | UIFlags_ClampZero);
-	IS_REGISTER_PROPERTY(float, m_farPlane, "Far Plane", UIFlags_ShowInEditor | UIFlags_ReadOnly);
+	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
+	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);
+	IS_PROPERTY(float, m_farPlane, "Far Plane", ShowInEditor | ReadOnly);
 
+	m_cameraSpeed = 50;
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
@@ -111,6 +115,11 @@ void CameraComponent::SetFov(const float& fov)
 	SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
 }
 
+void CameraComponent::SetCameraSpeed(const float& cameraSpeed)
+{
+	m_cameraSpeed = cameraSpeed;
+}
+
 void CameraComponent::OnUpdate(const float& a_deltaTime)
 {
 	SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
@@ -123,8 +132,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 	glm::vec4 vUp = viewMatrix[1];
 	glm::vec4 vTranslation = viewMatrix[3];
 
-	const float speed = 50;
-	float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * speed * 2 : a_deltaTime * speed;
+	float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
 
 	// Translate camera
 	if (Input::KeyDown(KEY_W))

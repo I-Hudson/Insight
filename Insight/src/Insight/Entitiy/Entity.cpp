@@ -35,6 +35,7 @@ Entity::Entity(const std::string& id, bool attachToScene)
 Entity::~Entity()
 {
 	RemoveAllComponenets();
+	//Insight::Scene::s_CurrentScene->m_registry.erase(std::find(Insight::Scene::s_CurrentScene->m_registry.begin(), Insight::Scene::s_CurrentScene->m_registry.end(), this));
 }
 
 Entity* Entity::Create(const std::string& id)

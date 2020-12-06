@@ -158,17 +158,21 @@
     <ClInclude Include="src\Insight\Component\MeshComponent.h" />
     <ClInclude Include="src\Insight\Component\TransformComponent.h" />
     <ClInclude Include="src\Insight\Config\CVar.h" />
+    <ClInclude Include="src\Insight\Config\CVarParser.h" />
     <ClInclude Include="src\Insight\Config\Config.h" />
     <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
     <ClInclude Include="src\Insight\Config\ICVar.h" />
     <ClInclude Include="src\Insight\Core.h" />
+    <ClInclude Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.h" />
     <ClInclude Include="src\Insight\Editor\Diagnostic.h" />
+    <ClInclude Include="src\Insight\Editor\EditorDrawer.h" />
     <ClInclude Include="src\Insight\Editor\EditorPanel.h" />
     <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h" />
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Insight\Editor\UIHelper.h" />
     <ClInclude Include="src\Insight\Entitiy\Entity.h" />
     <ClInclude Include="src\Insight\EntryPoint.h" />
+    <ClInclude Include="src\Insight\Enums\PropertyFlags.h" />
     <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
     <ClInclude Include="src\Insight\Event\Event.h" />
     <ClInclude Include="src\Insight\Event\EventManager.h" />
@@ -220,7 +224,6 @@
     <ClInclude Include="src\Insight\Threading\Threadpool.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
-    <ClInclude Include="src\Insight\UI\UIFlags.h" />
     <ClInclude Include="src\Insight\UUID.h" />
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />
@@ -651,6 +654,7 @@
     <ClCompile Include="src\Insight\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
     <ClCompile Include="src\Insight\Config\Config.cpp" />
+    <ClCompile Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.cpp" />
     <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
     <ClCompile Include="src\Insight\Event\EventManager.cpp" />

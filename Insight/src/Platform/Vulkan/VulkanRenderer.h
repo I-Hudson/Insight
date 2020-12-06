@@ -32,7 +32,7 @@ const int MAX_FRAMES_IN_FLIGHT = 3;
 namespace vks
 {
 #if defined(IS_EDITOR)
-	class VulkanRendererEditorOverlay : public Insight::EditorPanel
+	class VulkanRendererEditorOverlay : public Insight::Editor::EditorPanel
 	{
 	public:
 		VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer);

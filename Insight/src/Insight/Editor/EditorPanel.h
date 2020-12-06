@@ -9,22 +9,25 @@ namespace Insight
 		class EditorModule;
 	}
 
-	class EditorPanel
+	namespace Editor
 	{
-	public:
-		EditorPanel(const Module::EditorModule* editorModule) : m_editorModule(editorModule) { }
-		virtual ~EditorPanel() { }
+		class EditorPanel
+		{
+		public:
+			EditorPanel(const Module::EditorModule* editorModule) : m_editorModule(editorModule) {}
+			virtual ~EditorPanel() {}
 
-		virtual void Update(const float& deltaTime) = 0;
+			virtual void Update(const float& deltaTime) = 0;
 
-		const std::string& GetPanelName() { return m_panelName; }
+			const std::string& GetPanelName() { return m_panelName; }
 
-	protected:
-		const Module::EditorModule* m_editorModule;
-		std::string m_panelName;
+		protected:
+			const Module::EditorModule* m_editorModule;
+			std::string m_panelName;
 
 #define SET_PANEL_NAME(x) m_panelName = typeid(x).name();
-	};
+		};
+	}
 }
 #define ImGui_STORE_TEMP(type, ptr, label, imguiWidget) { type tempV; \
 														  tempV = *ptr; \

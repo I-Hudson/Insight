@@ -49,9 +49,12 @@
 #define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
 
 #define GET_ALLOCATION_OF_TYPE(ptr) Insight::Memory::MemoryManager::Instance()->GetAllocationOfType(ptr);
+#define GET_SHORT_NAME_OF_TYPE(type) Insight::Memory::MemoryManager::Instance()->GetShortNameOfType<type>()
 
 #define BIT(x) (1 << x)
 #define ARRAY_SIZEOF(ARR) ((int)(sizeof(ARR) / sizeof(*(ARR))))
+
+#define ENUM_TO_STRING(r) return #r
 
 #ifndef IS_ASSERT_PATH
 #define IS_ASSERT_PATH "./data"

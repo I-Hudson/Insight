@@ -5,6 +5,7 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Module/GraphicsModule.h"
+#include "Insight/Module/EditorModule.h"
 
 #include <string>
 
@@ -30,6 +31,7 @@ namespace Insight
 		Memory::MemoryManager::MemoryConfig MemoryConfig;
 		Module::WindowModule::WindowConfig WindowConfig;
 		Module::GraphicsModule::GraphicsConfig GraphicsConfig;
+		Module::EditorModule::EditorConfig EditorConfig;
 		Renderer::RendererConfig RendererConfig;
 
 	private:

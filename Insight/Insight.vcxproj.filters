@@ -16,8 +16,14 @@
     <Filter Include="src\Insight\Editor">
       <UniqueIdentifier>{68E89EE5-54CC-5F3B-BD2C-5A8EA92F4ABD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Editor\Components">
+      <UniqueIdentifier>{7DBC8833-E9D4-6F5D-B281-FFF61E5904F7}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Entitiy">
       <UniqueIdentifier>{A7A590B1-1307-6EBF-9C74-B47108D5A47E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Enums">
+      <UniqueIdentifier>{296FCC4C-9585-CAE2-DEFC-55044A529B6A}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Event">
       <UniqueIdentifier>{438ED04C-AFA4-CEE2-F81B-5A0464719F6A}</UniqueIdentifier>
@@ -69,9 +75,6 @@
     </Filter>
     <Filter Include="src\Insight\Time">
       <UniqueIdentifier>{509306AD-3C8C-25FF-65BE-0A845116050B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\UI">
-      <UniqueIdentifier>{5FB5434D-4B83-3753-3417-A879208413B8}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
@@ -129,6 +132,9 @@
     <ClInclude Include="src\Insight\Config\CVar.h">
       <Filter>src\Insight\Config</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Config\CVarParser.h">
+      <Filter>src\Insight\Config</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Config\Config.h">
       <Filter>src\Insight\Config</Filter>
     </ClInclude>
@@ -141,7 +147,13 @@
     <ClInclude Include="src\Insight\Core.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.h">
+      <Filter>src\Insight\Editor\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Editor\Diagnostic.h">
+      <Filter>src\Insight\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Editor\EditorDrawer.h">
       <Filter>src\Insight\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Editor\EditorPanel.h">
@@ -161,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\EntryPoint.h">
       <Filter>src\Insight</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Enums\PropertyFlags.h">
+      <Filter>src\Insight\Enums</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Event\ApplicationEvent.h">
       <Filter>src\Insight\Event</Filter>
@@ -314,9 +329,6 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Time.h">
       <Filter>src\Insight\Time</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\UI\UIFlags.h">
-      <Filter>src\Insight\UI</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\UUID.h">
       <Filter>src\Insight</Filter>
@@ -1603,6 +1615,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Config\Config.cpp">
       <Filter>src\Insight\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.cpp">
+      <Filter>src\Insight\Editor\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp">
       <Filter>src\Insight\Editor</Filter>

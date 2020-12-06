@@ -25,6 +25,7 @@ namespace vks
 	private:
 		virtual void Init(Insight::Renderer* renderer) override;
 		void InitResources();
+		void SetStyle();
 
 		void WindowResize(Insight::Event const& event);
 

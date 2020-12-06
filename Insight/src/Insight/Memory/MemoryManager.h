@@ -40,6 +40,8 @@ namespace Insight
 			static void UnTrackObject(void* ptr);
 
 			std::string GetAllocationOfType(void* ptr);
+			template<typename T>
+			std::string GetShortNameOfType();
 
 			static void PrintStackAllocatorUsed() { Instance()->m_stackAllocator.PrintUsed(); }
 
@@ -107,6 +109,22 @@ namespace Insight
 		inline void MemoryManager::DeleteArrOnFreeList(T* ptrToDelete)
 		{
 			Instance()->m_freeListAllocator.DeleteArr<T>(ptrToDelete);
+		}
+
+		template<typename T>
+		inline std::string MemoryManager::GetShortNameOfType()
+		{
+			// Remove "Class ", from type name;
+			std::string typeName = typeid(T).name();
+			if (typeName.find("class") != std::string::npos)
+			{
+				typeName = typeName.substr(6);
+				if (size_t offset = typeName.find_last_of(':'))
+				{
+					typeName = typeName.substr(offset + 1);
+				}
+			}
+			return typeName;
 		}
 	}
 }

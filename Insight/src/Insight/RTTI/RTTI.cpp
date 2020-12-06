@@ -15,14 +15,6 @@ namespace Insight
 
 		RTTI::~RTTI()
 		{
-			for (auto it = m_RTTITypes.begin(); it != m_RTTITypes.end(); ++it)
-			{
-				for (auto vIT = it->second.begin(); vIT != it->second.end(); ++vIT)
-				{
-					DELETE_ON_HEAP(*vIT);
-				}
-			}
-
 			m_RTTITypes.clear();
 		}
 
@@ -31,15 +23,12 @@ namespace Insight
 			auto properties = m_RTTITypes[ownerPtr];
 			if (!properties.empty())
 			{
-				auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyName](RTTIProperty* rttiType)
+				auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyName](RTTIProperty& rttiType)
 					{
-						if (rttiType->GetPropertyName() == propertyName)
-						{
-							return rttiType;
-						}
+						return rttiType.GetPropertyName() == propertyName;
 					});
 
-				RTTIProperty* type = *typeIT;
+				RTTIProperty* type = &(*typeIT);
 
 				if (type)
 				{
@@ -55,9 +44,9 @@ namespace Insight
 			std::vector<RTTIProperty*> properties;
 			for (auto it = m_RTTITypes[ownerPtr].begin(); it != m_RTTITypes[ownerPtr].end(); ++it)
 			{
-				if (((*it)->GetPropertyEditorFlags() & editorFlags) != 0)
+				if (((*it).GetPropertyFlags() & editorFlags) != 0)
 				{
-					properties.push_back(*it);
+					properties.push_back(&(*it));
 				}
 			}
 			return properties;
@@ -65,8 +54,8 @@ namespace Insight
 
 		void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const uint32_t& editorFlags)
 		{
-			RTTIProperty* rttiType = NEW_ON_HEAP(RTTIProperty, typeName, propertyName, editorFlags, propertyPtr);
-			if (rttiType == nullptr)
+			RTTIProperty rttiType = RTTIProperty(typeName, propertyName, editorFlags, propertyPtr);
+			if (!rttiType.IsValid())
 			{
 				IS_CORE_ERROR("[RTTI::RegisterProperty] Can't not find RTTIType.");
 				return;
@@ -84,18 +73,14 @@ namespace Insight
 
 		void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr)
 		{
-			std::vector<RTTIProperty*>& properties = m_RTTITypes[ownerObject];
-			auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyPtr](RTTIProperty* rttiType)
+			std::vector<RTTIProperty>& properties = m_RTTITypes[ownerObject];
+			auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyPtr](RTTIProperty& rttiType)
 				{
-					if (rttiType->GetObjectPtr() == propertyPtr)
-					{
-						return rttiType;
-					}
+					return rttiType.GetObjectPtr() == propertyPtr;
 				});
 
 			if (typeIT != properties.end())
 			{
-				DELETE_ON_HEAP(*typeIT);
 				properties.erase(typeIT);
 
 				if (properties.size() == 0)
@@ -110,11 +95,7 @@ namespace Insight
 		{
 			if (m_RTTITypes.find(ownerObject) != m_RTTITypes.end())
 			{
-				std::vector<RTTIProperty*>& properties = m_RTTITypes[ownerObject];
-				for (auto it = properties.begin(); it != properties.end(); ++it)
-				{
-					DELETE_ON_HEAP(*it);
-				}
+				std::vector<RTTIProperty>& properties = m_RTTITypes[ownerObject];
 				properties.clear();
 				m_RTTITypes.erase(ownerObject);
 			}

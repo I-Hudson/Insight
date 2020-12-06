@@ -2,7 +2,6 @@
 #include "Insight/Core.h"
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/RTTI/RTTITypes.h"
-#include "Insight/UI/UIFlags.h"
 
 namespace Insight
 {
@@ -10,6 +9,11 @@ namespace Insight
 
 	namespace RTTI
 	{
+		struct RTTIPropertyParser
+		{
+
+		};
+
 		class RTTI : public TSingleton<RTTI>
 		{
 		public:
@@ -24,16 +28,16 @@ namespace Insight
 			std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const uint32_t& editorFlags);
 
 		private:
-			std::unordered_map<void*, std::vector<RTTIProperty*>> m_RTTITypes;
+			std::unordered_map<void*, std::vector<RTTIProperty>> m_RTTITypes;
 		};
 	}
 }
 
-#define IS_REGISTER_PROPERTY(type, ptr, propertyName, editorFlags) \
+#define IS_PROPERTY(type, ptr, propertyName, editorFlags); \
 	Insight::RTTI::RTTI::Instance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name(), editorFlags);
 
-#define IS_UNREGISTER_PROPERTY(ptr) \
-	Insight::RTTI::RTTI::Instance()->UnregisterProperty(this, (void*)(&ptr));
+#define IS_REGISTER_PROPERTY(type, ptr, propertyName, editorFlags); \
+	Insight::RTTI::RTTI::Instance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name(), editorFlags);
 
 #define IS_GET_PROPERTY(propertyName) \
 	Insight::RTTI::RTTI::Instance()->GetProperty(this, propertyName);

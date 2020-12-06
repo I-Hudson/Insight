@@ -23,7 +23,7 @@ namespace Insight
 			FreeListAllocator(const Size size, const PlacementPolicy policy);
 			~FreeListAllocator();
 
-			void* Alloc(const Size size, const Byte TypeSize, const std::string& type, const Byte alignment);
+			void* Alloc(const Size size, const Byte TypeSize, const std::string& typeName, const Byte alignment);
 			void Free(void* ptr);
 
 			template <typename T, typename... Args>
@@ -59,7 +59,6 @@ namespace Insight
 			void Find(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
 			void FindBest(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
 			void FindFirst(const Size size, const Byte alignment, Size& padding, Node*& previousNode, Node*& foundNode);
-			std::string PrepareTypeName(const std::string& fullTypeName);
 
 			void Reset();
 
@@ -80,7 +79,7 @@ namespace Insight
 		template<typename T, typename ...Args>
 		inline T* FreeListAllocator::New(Args... args)
 		{
-			T* ptr = new (Alloc((Size)sizeof(T), (Byte)sizeof(T), typeid(T).name(), MemoryUtlis::Alignment)) T(args...);
+			T* ptr = new (Alloc((Size)sizeof(T), (Byte)sizeof(T), GET_SHORT_NAME_OF_TYPE(T), MemoryUtlis::Alignment)) T(args...);
 #if defined(IS_DEBUG)
 			m_numOfNews++;
 			std::string name = std::string(typeid(T).name());
