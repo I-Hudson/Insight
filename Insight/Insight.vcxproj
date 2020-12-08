@@ -656,6 +656,7 @@
     <ClCompile Include="src\Insight\Config\Config.cpp" />
     <ClCompile Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.cpp" />
     <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp" />
+    <ClCompile Include="src\Insight\Editor\UIHelper.cpp" />
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
     <ClCompile Include="src\Insight\Event\EventManager.cpp" />
     <ClCompile Include="src\Insight\Input\Input.cpp" />

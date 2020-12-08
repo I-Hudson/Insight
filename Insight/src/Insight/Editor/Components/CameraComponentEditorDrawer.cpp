@@ -2,6 +2,8 @@
 #include "CameraComponentEditorDrawer.h"
 #include "Insight/Component/CameraComponent.h"
 
+#include <glm/gtx/euler_angles.hpp>
+
 #if defined(IS_EDITOR)
 namespace Insight
 {
@@ -13,7 +15,7 @@ namespace Insight
 
 			glm::mat4 view = component.GetViewMatrix();
 			float position[4] = { view[3].x, view[3].y, view[3].z, 1.0f };
-			if (DrawVector("Position", 3, position))
+			if (UIHelper::DrawVector("Position", 3, position))
 			{
 				view[3].x = position[0];
 				view[3].z = position[1];

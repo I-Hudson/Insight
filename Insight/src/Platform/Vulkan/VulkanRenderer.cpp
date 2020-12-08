@@ -73,19 +73,42 @@ namespace vks
 		m_renderer.m_debugOverlay.debugOptions[1] = 0;
 		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;
 
-		DrawString("EditorCamera");
-		DrawString("EditorCamera", TextBold);
+		UIHelper::DrawString("EditorCamera");
+		UIHelper::DrawString("EditorCamera", TextBold);
 		float fov = m_renderer.m_editorCamera->GetFov();
 		float nearPlane = m_renderer.m_editorCamera->GetNearPlane();
 		float farPlane = m_renderer.m_editorCamera->GetFarPlane();
 		float cameraSpeed = m_renderer.m_editorCamera->GetCameraSpeed();
-		if (DrawFloat("FOV", &fov) || DrawFloat("Near Plane", &nearPlane) || DrawFloat("Far Plane", &farPlane) || DrawFloat("Camera Speed", &cameraSpeed))
+		if (UIHelper::DrawFloat("FOV", &fov) || UIHelper::DrawFloat("Near Plane", &nearPlane) || UIHelper::DrawFloat("Far Plane", &farPlane) || UIHelper::DrawFloat("Camera Speed", &cameraSpeed))
 		{
 			m_renderer.m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
 			m_renderer.m_editorCamera->SetCameraSpeed(cameraSpeed);
 		}
 
-		DrawMat4("Test Model Matrix", &m_renderer.m_testModelMatrix);
+		// TODO: THIS IS NOT WORKING. WHY!!!!!!!!!!!!!!!
+
+		glm::vec4 rotation = glm::vec4(0, 0, 0, 0);
+		rotation.x = glm::degrees(atan2(m_renderer.m_testModelMatrix[1][2], m_renderer.m_testModelMatrix[2][2]));
+		rotation.y = glm::degrees(atan2(-m_renderer.m_testModelMatrix[0][2], glm::sqrt((m_renderer.m_testModelMatrix[0][0] * m_renderer.m_testModelMatrix[0][0]) + (m_renderer.m_testModelMatrix[0][1] * m_renderer.m_testModelMatrix[0][1]))));
+		rotation.z = glm::degrees(atan2((sin(rotation.x) * m_renderer.m_testModelMatrix[2][0]) - (cos(rotation.x) * m_renderer.m_testModelMatrix[1][0]), 
+										(cos(rotation.x) * m_renderer.m_testModelMatrix[1][1] - (sin(rotation.x) * m_renderer.m_testModelMatrix[2][1]))));
+		if (UIHelper::DrawVector("Rotation", 3, &rotation.x))
+		{
+			glm::mat4 newMatrix(1.0f);
+
+			float radX = glm::radians(rotation.x);
+			float radY = glm::radians(rotation.y);
+			float radZ = glm::radians(rotation.z);
+		
+			newMatrix = glm::rotate(newMatrix, radX, glm::vec3(1, 0, 0));
+			//newMatrix = glm::rotate(newMatrix, radY, glm::vec3(0, 1, 0));
+			newMatrix = glm::rotate(newMatrix, radZ, glm::vec3(0, 0, 1));
+
+			m_renderer.m_testModelMatrix = newMatrix;
+		}
+		IS_CORE_INFO("{0}", rotation.x);
+		
+		UIHelper::DrawMat4("Test Model Matrix", &m_renderer.m_testModelMatrix);
 
 		ImGui::End();
 	}

@@ -1769,5 +1769,8 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Editor\UIHelper.cpp">
+      <Filter>src\Insight\Editor</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

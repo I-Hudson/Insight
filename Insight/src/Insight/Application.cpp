@@ -146,8 +146,8 @@ namespace Insight
 
 				m_windowModule->Update(deltaTime);
 
-				IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
-				IS_CORE_INFO("Frame Time: {0}", deltaTime);
+				//IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
+				//IS_CORE_INFO("Frame Time: {0}", deltaTime);
 
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 				Insight::ImGuiRenderer::Instance()->NewFrame();
