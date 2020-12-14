@@ -16,9 +16,14 @@ layout (set = 0, binding = 0) uniform UBO
 
 layout (set = 1, binding = 0) uniform DEBUGINFO 
 {
-	vec2 debugColorOptions; 
+	vec3 debugColorOptions; 
 	int debugIsOn;
 } debugInfo;
+
+layout (set = 2, binding = 0) uniform DYNAMIC_UBO //#dynamic
+{
+	vec4 Color;
+} dynamicUbo;
 
 layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outColor;
@@ -36,6 +41,10 @@ void main()
 	{
 		outColor = inColor.xyz;
 	}	
+	else if (debugInfo.debugColorOptions.z == 1)
+	{
+		outColor = dynamicUbo.Color.xyz;
+	}
 	else
 	{
 		outColor = vec3(0.85, 0.25, 0.35);//inColor.xyz;

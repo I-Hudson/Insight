@@ -1,9 +1,12 @@
 #pragma once
 
 #pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
+#include <rpc.h>
 #include <windows.h>
 #include <random>
 #include <sstream>
+
+#include "Insight/Core.h"
 
 namespace Insight
 {
@@ -23,8 +26,6 @@ namespace Insight
         UUID() : m_uuid(GenUUID())
         { }
         const std::string& GetUUID() const { return m_uuid; }
-
-    private:
 
         static std::string GenUUID()
         {
@@ -57,6 +58,13 @@ namespace Insight
                 ss << dis(gen);
             };
             return ss.str();
+        }
+
+        static U128 GenUUID_U128()
+        {
+            U128 uuid;
+            UuidCreate(&uuid);
+            return uuid;
         }
 
     protected:

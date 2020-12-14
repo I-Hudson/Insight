@@ -95,7 +95,7 @@ namespace Insight
 			strcpy(&allocHeader->TypeName[0], typeName.c_str());
 			allocHeader->AlignmentPadding = alignmentPadding;
 
-			m_sizeUsed += requiredSize;
+			m_sizeUsed += requiredSize + alignmentPadding;
 
 #if defined(IS_DEBUG)
 			IS_CORE_INFO("\t@H {0} \tD@ {1} \tS {2} \tAP {3} \tP {4}, \tU {5} \tR {6}", (void*)headerAddress, (void*)dataAddress, ((FreeListAllocator::AllocHeader*) headerAddress)->BlockSize,
@@ -135,6 +135,37 @@ namespace Insight
 #if defined(IS_DEBUG)
 			m_numOfFrees++;
 #endif
+		}
+
+		void* FreeListAllocator::NewArr(const U64& size, const Byte& alignment)
+		{
+			void* alloc = Alloc(size, 0, "void", alignment);
+#if defined(IS_DEBUG)
+			m_numOfArrNews++;
+			std::string name = std::string("void");
+			U64 vPointer = *reinterpret_cast<U64*>(alloc);
+			m_vtableToNameMap.insert({ vPointer, name });
+#endif
+			return alloc;
+		}
+
+		void FreeListAllocator::DeleteArr(void* ptrToDelete)
+		{
+#if defined(IS_DEBUG)
+			m_numOfArrDeletes++;
+			std::string name;
+
+			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it)
+			{
+				U64 vPointer = *reinterpret_cast<U64*>(ptrToDelete);
+				if ((*it).first == vPointer)
+				{
+					m_vtableToNameMap.erase(it);
+					break;
+				}
+			}
+#endif
+			Free(static_cast<void*>(ptrToDelete));
 		}
 
 		std::string FreeListAllocator::GetAllocationOfType(void* ptr)

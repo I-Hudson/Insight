@@ -33,7 +33,12 @@ namespace vks
 		VkQueue			GetQueue(VkQueueFlags queue);
 		VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
+		VkPhysicalDeviceProperties GetProperties() { return m_properties; }
 
+		void CheckIdleQueue();
+
+		void QueueIdleCommand(const std::function<void()>& funcPtr);
+		void EnableIdleCommands();
 		VkResult WaitForIdle();
 
 		/** @brief Return the default render pass */
@@ -76,6 +81,9 @@ namespace vks
 		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 
 		VkPipelineCache m_pipelineCache;
+
+		bool m_enableWaitCommands;
+		std::vector<std::function<void()>> m_waitIdleCommands;
 
 		/** @brief Contains queue family indices */
 		struct

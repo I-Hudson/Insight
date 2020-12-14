@@ -14,6 +14,7 @@ using U8 = uint8_t;
 using U16 = uint16_t;
 using U32 = uint32_t;
 using U64 = uint64_t;
+using U128 = _GUID;
 
 constexpr U8 U8_MAX = 0xFF;
 constexpr U16 U16_MAX = 0xFFFF;

@@ -654,6 +654,50 @@ namespace vks
 		return m_queueFamily.graphics;
 	}
 	
+	/*
+	* Check if we have any commands which need the GPU to be idle.
+	* If we do then wait and execute the commands.
+	* TODO: This might be able to change to wait for the command buffer the 
+	*/
+	void VulkanDevice::CheckIdleQueue()
+	{
+		if (m_waitIdleCommands.size() > 0)
+		{
+			WaitForIdle();
+			for (auto& func : m_waitIdleCommands)
+			{
+				func();
+			}
+
+			m_waitIdleCommands.clear();
+		}
+	}
+
+	/*
+	* Queue a new GPU command which needs the device to be idle.
+	* TODO: Look at doing in a more effective way. Try and reduce this as much as possible.
+	*/
+	void VulkanDevice::QueueIdleCommand(const std::function<void()>& funcPtr)
+	{
+		if (m_enableWaitCommands)
+		{
+			IS_PROFILE_CATEGORY("QueueIdleCommand", Insight::Category::Type::GPU_CRITICAL);
+			m_waitIdleCommands.push_back(funcPtr);
+		}
+		else
+		{
+			funcPtr();
+		}
+	}
+
+	void VulkanDevice::EnableIdleCommands()
+	{
+		if (!m_enableWaitCommands)
+		{
+			m_enableWaitCommands = true;
+		}
+	}
+
 	VkResult VulkanDevice::WaitForIdle()
 	{
 		return vkDeviceWaitIdle(m_logicalDevice);
@@ -661,6 +705,7 @@ namespace vks
 
 	void VulkanDevice::CreateRenderpass()
 	{
+
 	}
 
 	void VulkanDevice::CreateDescriptorPool()

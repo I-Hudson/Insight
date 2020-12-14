@@ -66,11 +66,12 @@ namespace vks
 
 		ImGui::Checkbox("Debug overlay", &m_renderer.debugOverlay);
 
-		const char* items[] = { "Normal", "Colour" };
+		const char* items[] = { "Normal", "Colour", "Dynamic Uniform Colour" };
 		static int item_current = m_renderer.m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
 		ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
 		m_renderer.m_debugOverlay.debugOptions[0] = 0;
 		m_renderer.m_debugOverlay.debugOptions[1] = 0;
+		m_renderer.m_debugOverlay.debugOptions[2] = 0;
 		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;
 
 		UIHelper::DrawString("EditorCamera");
@@ -324,6 +325,8 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
+		m_vulkanDevice->EnableIdleCommands();
+
 		Clear();
 
 		float lerpSpeed = 0.5f;
@@ -402,10 +405,17 @@ namespace vks
 		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
 
 		mvp.lightPos = m_lightPos;
-		m_defaultMaterial[m_imageIndex].UploadUniform("UBO", mvp);
+		m_defaultMaterial[m_imageIndex].UploadUniform("UBO", mvp, m_defaultMaterialBlock[m_imageIndex]);
 
 		m_debugOverlay.debugOverlay = (int)debugOverlay;
-		m_defaultMaterial[m_imageIndex].UploadUniform("DEBUGINFO", m_debugOverlay);
+		m_defaultMaterial[m_imageIndex].UploadUniform("DEBUGINFO", m_debugOverlay, m_defaultMaterialBlock[m_imageIndex]);
+
+		glm::vec4 color{ 0.5f, 0.1f, 0.47f, 1.0f};
+		m_defaultMaterial[m_imageIndex].UploadUniform("//#dynamic", color, m_defaultMaterialBlock[m_imageIndex]);
+
+
+		//TODO: Look into this. Maybe change how it works.
+		m_vulkanDevice->CheckIdleQueue();
 	}
 
 	void VulkanRenderer::Present()
@@ -442,7 +452,7 @@ namespace vks
 		{
 			vks::DebugMarker::Setup(m_device);
 		}
-
+		
 		InitSwapchain();
 		SetupSwapchain();
 		CreateCommandPool();
@@ -665,7 +675,7 @@ namespace vks
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
 
-			m_defaultMaterial[i].Bind(m_drawCmdBuffers[i]);
+			m_defaultMaterial[i].Bind(m_drawCmdBuffers[i], &m_defaultMaterialBlock[i]);
 			m_testModel->Draw(m_drawCmdBuffers[i]);
 
 			imgui->Render(m_drawCmdBuffers[i]);
@@ -868,7 +878,7 @@ namespace vks
 
 		m_threadData.resize(m_numThreads);
 
-		float maxX = std::floor(std::sqrt((double)m_numThreads * (double)m_numObjectsPerThread));
+		float maxX = (float)std::floor(std::sqrt((double)m_numThreads * (double)m_numObjectsPerThread));
 		uint32_t posX = 0;
 		uint32_t posZ = 0;
 

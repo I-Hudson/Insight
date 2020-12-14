@@ -74,10 +74,11 @@ namespace vks
 	* @param size Size of the data to copy in machine units
 	*
 	*/
-	void VulkanBuffer::CopyTo(void* data, VkDeviceSize size)
+	void VulkanBuffer::CopyTo(void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
 		assert(mapped);
-		memcpy(mapped, data, size);
+		PtrInt* dstPtr = (PtrInt*)mapped + offset;
+		memcpy((void*)dstPtr, data, size);
 	}
 
 	/**

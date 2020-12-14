@@ -14,6 +14,16 @@ namespace Insight
 			return Instance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
+		void* MemoryManager::NewArrOnFreeListVoid(const U64& size, U8 alignment)
+		{
+			return Instance()->m_freeListAllocator.NewArr(size, alignment);
+		}
+
+		void MemoryManager::DeleteArrOnFreeListVoid(void* ptrToDelete)
+		{
+			return Instance()->m_freeListAllocator.DeleteArr(ptrToDelete);
+		}
+
 		void MemoryManager::TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line)
 		{
 			if (!Instance()->m_trackingObjects.count(ptr))

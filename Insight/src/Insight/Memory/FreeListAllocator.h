@@ -35,6 +35,9 @@ namespace Insight
 			template <typename T>
 			void DeleteArr(T* ptrToDelete);
 
+			void* NewArr(const U64& size, const Byte& alignment);
+			void DeleteArr(void* ptrToDelete);
+
 			std::string GetAllocationOfType(void* ptr);
 
 		private:

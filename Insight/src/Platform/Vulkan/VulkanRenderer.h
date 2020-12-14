@@ -224,6 +224,7 @@ namespace vks
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
 		VulkanMaterial m_defaultMaterial[3];
+		MaterialBlockData m_defaultMaterialBlock[3];
 		Entity* m_editorEntity;
 		CameraComponent* m_editorCamera;
 
@@ -242,7 +243,7 @@ namespace vks
 
 		struct DebugOverlay
 		{
-			glm::vec2 debugOptions;
+			glm::vec3 debugOptions;
 			int debugOverlay;
 		};
 		bool debugOverlay;

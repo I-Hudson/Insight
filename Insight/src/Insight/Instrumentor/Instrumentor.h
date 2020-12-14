@@ -397,7 +397,7 @@ namespace Insight
 			GPU_UI,
 			GPU_VFX,
 			GPU_Water,
-
+			GPU_CRITICAL
 		};
 	};
 
@@ -439,6 +439,7 @@ namespace Insight
 			GPU_UI = INSIGHT_MAKE_CATEGORY(Filter::GPU_UI, Color::PaleTurquoise),
 			GPU_VFX = INSIGHT_MAKE_CATEGORY(Filter::GPU_VFX, Color::SaddleBrown),
 			GPU_Water = INSIGHT_MAKE_CATEGORY(Filter::GPU_Water, Color::SteelBlue),
+			GPU_CRITICAL = INSIGHT_MAKE_CATEGORY(Filter::GPU_CRITICAL, Color::Red),
 		};
 	};
 }
@@ -495,6 +496,7 @@ namespace Insight
 #define IS_PROFILE_SCOPE(name) INSIGHT_PROFILE_CATEGORY_LINE(name, Insight::Category::Type::None)
 #define IS_PROFILE_FUNCTION() OPTICK_EVENT()
 #define IS_PROFILE_CATEGORY(name, category) INSIGHT_PROFILE_CATEGORY_LINE(name, category)
+
 #define IS_PROFILE_THREAD(threadName) OPTICK_THREAD(threadName)
 #define IS_PROFILE_TAG(name, ptr) OPTICK_TAG(name, ptr)
 #define IS_PROFILE_STATE_CHANGED(callbackFunc) OPTICK_SET_STATE_CHANGED_CALLBACK(callbackFunc)

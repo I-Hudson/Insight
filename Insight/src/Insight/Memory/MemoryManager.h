@@ -36,6 +36,9 @@ namespace Insight
 			template<typename T>
 			static void DeleteArrOnFreeList(T* ptrToDelete);
 
+			static void* NewArrOnFreeListVoid(const U64& size, U8 alignment = MemoryUtlis::Alignment);
+			static void DeleteArrOnFreeListVoid(void* ptrToDelete);
+
 			static void TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line);
 			static void UnTrackObject(void* ptr);
 
