@@ -127,7 +127,7 @@ namespace vks
 
 			//TODO copy ram data to gpu and flush gpu buffer
 			mub.Buffer.CopyTo(&data, dataSize, offset);
-			mub.Buffer.Flush(dataSize, offset);
+			mub.Buffer.Flush();
 		}
 		else
 		{
