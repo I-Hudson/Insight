@@ -23,13 +23,14 @@ template<typename T, typename TDeleter = DefaultDelete<T>>
 class TUniquePtr
 {
 public:
-	TUniquePtr() : m_ptr(nullptr) { }
+	TUniquePtr() : m_ptr(Insight::Memory::MemoryManager::Instance()->NewOnFreeList<T>()) { }
 	TUniquePtr(T* ptr) : m_ptr(ptr) { }
+	template<typename... Args>
+	TUniquePtr(Args&&... args) : m_ptr(Insight::Memory::MemoryManager::Instance()->NewOnFreeList<T>(std::forward<Args>(args)...)) { }
 
 	// Copy ptr, delete.
 	TUniquePtr(const TUniquePtr& ptr) = delete;
 	TUniquePtr& operator=(const TUniquePtr& ptr) = delete;
-
 
 	// Move ptr.
 	TUniquePtr(TUniquePtr&& ptr)
@@ -52,26 +53,28 @@ public:
 
 	T& operator*()
 	{
-		return *(m_ptr);
+		return *m_ptr;
 	}
 
 	void Reset()
 	{
-		if (m_ptr)
+		if (m_ptr != nullptr)
 		{
-			TDeleter(m_ptr);
+			m_deletor(m_ptr);
 		}
 	}
+
+	~TUniquePtr() { Reset(); }
 
 	void Release()
 	{
 		// This removes ownership of this pointer.
-		// THIS NEEDS TO BE DELETE BE SOMETHING.
 		m_ptr = nullptr;
 	}
 
 private:
 	T* m_ptr;
+	TDeleter m_deletor;
 };
 
 
