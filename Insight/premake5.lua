@@ -74,6 +74,7 @@ project "Insight"
             "IS_PLATFORM_WINDOWS",
             "GLM_FORCE_SWIZZLE",
             "GLM_FORCE_SILENT_WARNINGS",
+            "IS_STANDARD_POINTER",
         }
 
     filter "configurations:Debug"

@@ -1,5 +1,7 @@
 #pragma once
 
+#if !defined(IS_STANDARD_POINTER)
+
 #include "Insight/Core.h"
 #include <type_traits>
 
@@ -76,7 +78,7 @@ private:
 	T* m_ptr;
 	TDeleter m_deletor;
 };
-
+#endif
 
 //template<typename T>
 //class TSafePtr

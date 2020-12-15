@@ -2,6 +2,7 @@
 
 #include "Insight/Core.h"
 #include "Insight/UUID.h"
+#include "Insight/Templates/TSingleton.h"
 
 namespace Insight
 {

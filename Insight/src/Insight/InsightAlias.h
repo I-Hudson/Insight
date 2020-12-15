@@ -1,8 +1,6 @@
 #pragma once
 
 #include "ispch.h"
-
-// TODO: (ian) move this and TSafePtr into a Util class.
 #include "Insight/Log.h"
 
 #include <memory>
@@ -40,6 +38,8 @@ inline auto operator""_KB(Size const x) { return 1024 * x; }
 inline auto operator""_MB(Size const x) { return 1024 * 1024 * x; }
 inline auto operator""_GB(Size const x) { return 1024 * 1024 * 1024 * x; }
 
+#if defined(IS_STANDARD_POINTER)
+
 template<typename T>
 using UniquePtr = std::unique_ptr<T>;
 template<typename T, typename ... Args>
@@ -55,3 +55,13 @@ constexpr SharedPtr<T> CreateSharedPtr(Args&& ... args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
+
+template<typename T>
+using WeakPtr = std::weak_ptr<T>;
+#else
+//TODO: Finish this
+template<typename T>
+class TUniquePtr<T>;
+using UniquePtr = TUniquePtr<T>;
+
+#endif
