@@ -22,8 +22,8 @@ public:
 	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
-	virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;
-	virtual void Deserialize(tinyxml2::XMLNode* in, bool force = false) override;
+	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
 
 	MaterialRenderData GetMaterialRendererData() { return m_materialRendererData; }
 

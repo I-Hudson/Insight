@@ -177,11 +177,11 @@ namespace Insight
 
 				if (ImGui::MenuItem("Save Model Library"))
 				{
-					tinyxml2::XMLDocument doc;
-					tinyxml2::XMLNode* models = doc.NewElement("Models");
-					Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
-					doc.InsertEndChild(models);
-					doc.SaveFile("ModelLibrary.xml");
+					//tinyxml2::XMLDocument doc;
+					//tinyxml2::XMLNode* models = doc.NewElement("Models");
+					//Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
+					//doc.InsertEndChild(models);
+					//doc.SaveFile("ModelLibrary.xml");
 				}
 				ImGui::EndMainMenuBar();
 #endif

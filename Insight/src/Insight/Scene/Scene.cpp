@@ -9,6 +9,8 @@
 #include "Insight/Event/ApplicationEvent.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
+#include "Insight/Serialization/File/SerializableFile.h"
+
 #if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
 #include "imgui.h"
 #endif
@@ -112,30 +114,21 @@ namespace Insight
 
 	void Scene::Serialize()
 	{
-		{
-			IS_PROFILE_SCOPE("XML Parse");
-			using namespace tinyxml2;
-			tinyxml2::XMLDocument doc;
-			XMLNode* root = doc.NewElement("Scene");
-			doc.InsertFirstChild(root);
+			IS_PROFILE_FUNCTION();
 
+			Insight::Serialization::SerializableFile* serializableFile = Insight::Serialization::SerializableFile::Create();
+			auto root = serializableFile->GetNewElement("Scene");
 			for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
 			{
-				XMLNode* entityNode = doc.NewElement("Entity");
-				(*it)->Serialize(entityNode, &doc);
-				if (!entityNode->NoChildren())
-				{
-					root->InsertEndChild(entityNode);
-				}
+				auto entityNode = root->AddChild("Entity");
+				(*it)->Serialize(entityNode);
 			}
 
-			if (XMLError err = doc.SaveFile((DEFAULT_SAVE_PATH + m_sceneName + ".xml").c_str()))
-			{
-				IS_CORE_ASSERT(false, doc.ErrorIDToName(err));
-			}
+			serializableFile->SaveFile(DEFAULT_SAVE_PATH + m_sceneName);
+
+			DELETE_ON_HEAP(serializableFile);
 
 			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
-		}
 	}
 
 	void Scene::Deserialize(const std::string& file)
@@ -161,7 +154,7 @@ namespace Insight
 					{
 						std::string type = c->FirstChildElement("Type")->ToElement()->GetText();
 						Serialization::Serializable* s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
-						s->Deserialize(c);
+						//s->Deserialize(c);
 						c = c->NextSibling();
 					} while (c != nullptr);
 				}

@@ -59,22 +59,22 @@ void CameraComponent::OnDestroy()
 	}
 }
 
-void CameraComponent::Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force)
+void CameraComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	Type->SetText("CameraComponent");
-	data->InsertEndChild(Type);
-
-	SerializeHelper::SerializeFloat(data, doc, "FOV", m_fov);
-	SerializeHelper::SerializeFloat(data, doc, "NearPlane", m_nearPlane);
-	SerializeHelper::SerializeFloat(data, doc, "FarPlane", m_farPlane);
+	//tinyxml2::XMLElement* Type = doc->NewElement("Type"); // GetNewElement();
+	//Type->SetText("CameraComponent");
+	//data->InsertEndChild(Type);
+	//
+	//SerializeHelper::SerializeFloat(data, doc, "FOV", m_fov);
+	//SerializeHelper::SerializeFloat(data, doc, "NearPlane", m_nearPlane);
+	//SerializeHelper::SerializeFloat(data, doc, "FarPlane", m_farPlane);
 }
 
-void CameraComponent::Deserialize(tinyxml2::XMLNode* data, bool force)
+void CameraComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	m_fov = data->FirstChildElement("FOV")->FloatText();
-	m_nearPlane = data->FirstChildElement("NearPlane")->FloatText();
-	m_farPlane = data->FirstChildElement("FarPlane")->FloatText();
+	//m_fov = data->FirstChildElement("FOV")->FloatText();
+	//m_nearPlane = data->FirstChildElement("NearPlane")->FloatText();
+	//m_farPlane = data->FirstChildElement("FarPlane")->FloatText();
 }
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)

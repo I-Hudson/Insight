@@ -14,11 +14,8 @@ namespace Insight
 			typedef Size Marker;
 
 			StackAllocator() = delete;
-			StackAllocator(void* ptr, Size stackSize);
 			StackAllocator(Size stackSize);
 			~StackAllocator();
-
-			void IsSubAllocatiom(const bool& subAllocation);
 
 			void* Alloc(Size size, Byte alignment = MemoryUtlis::Alignment);
 

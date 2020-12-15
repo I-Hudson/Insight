@@ -59,25 +59,25 @@ namespace Insight
 			}
 		}
 
-		void ModelLibrary::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+		void ModelLibrary::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 		{
-			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
-			{
-				tinyxml2::XMLNode* model = doc->NewElement("Model");
-				
-				tinyxml2::XMLElement* uuid = doc->NewElement("UUID");
-				uuid->SetText(it->second->GetUUID().c_str());
-				model->InsertEndChild(uuid);
-
-				tinyxml2::XMLElement* filePath = doc->NewElement("FilePath");
-				filePath->SetText(it->second->GetFilePath().c_str());
-				model->InsertEndChild(filePath);
-
-				out->InsertEndChild(model);
-			}
+			//for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
+			//{
+			//	tinyxml2::XMLNode* model = doc->NewElement("Model");
+			//	
+			//	tinyxml2::XMLElement* uuid = doc->NewElement("UUID");
+			//	uuid->SetText(it->second->GetUUID().c_str());
+			//	model->InsertEndChild(uuid);
+			//
+			//	tinyxml2::XMLElement* filePath = doc->NewElement("FilePath");
+			//	filePath->SetText(it->second->GetFilePath().c_str());
+			//	model->InsertEndChild(filePath);
+			//
+			//	out->InsertEndChild(model);
+			//}
 		}
 
-		void ModelLibrary::Deserialize(tinyxml2::XMLNode* data, bool force)
+		void ModelLibrary::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -93,7 +93,7 @@ namespace Insight
 			//
 			//std::vector<std::pair<std::string, std::string>> modelsInFile;
 
-			tinyxml2::XMLNode* model = data->FirstChild();
+			tinyxml2::XMLNode* model = nullptr;//data->FirstChild();
 			do
 			{
 				std::string uuid = model->FirstChildElement("UUID")->GetText();

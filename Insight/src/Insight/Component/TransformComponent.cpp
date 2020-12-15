@@ -66,17 +66,17 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_isDirty = true;
 }
 
-void TransformComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+void TransformComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	Type->SetText("TransformComponent");
-	out->InsertEndChild(Type);
+	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	//Type->SetText("TransformComponent");
+	//out->InsertEndChild(Type);
 
-	SerializeHelper::SerializeMat4(out, doc, "ViewMatrix", m_transform);
+	//SerializeHelper::SerializeMat4(out, doc, "ViewMatrix", m_transform);
 }
 
-void TransformComponent::Deserialize(tinyxml2::XMLNode* in, bool force)
+void TransformComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	m_transform = SerializeHelper::DeserializeMat4(in, "ViewMatrix");
+	//m_transform = SerializeHelper::DeserializeMat4(in, "ViewMatrix");
 }
 

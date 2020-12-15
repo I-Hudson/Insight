@@ -115,6 +115,7 @@ namespace vks
 		U64 dataSize = sizeof(T);
 		if (mub.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
 		{
+			return;
 			if (!materialBlockData.InUse)
 			{
 				materialBlockData = FindValidMaterialBlock(mub, key);

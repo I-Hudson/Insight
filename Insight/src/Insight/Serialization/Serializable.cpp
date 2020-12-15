@@ -1,5 +1,4 @@
 #include "ispch.h"
-
 #include "Insight/Serialization/Serializable.h"
 
 namespace Insight

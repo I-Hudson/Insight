@@ -215,6 +215,9 @@
     <ClInclude Include="src\Insight\Renderer\Renderer.h" />
     <ClInclude Include="src\Insight\Renderer\Texture.h" />
     <ClInclude Include="src\Insight\Scene\Scene.h" />
+    <ClInclude Include="src\Insight\Serialization\File\SerializableElementTypes.h" />
+    <ClInclude Include="src\Insight\Serialization\File\SerializableFile.h" />
+    <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_XML.h" />
     <ClInclude Include="src\Insight\Serialization\Serializable.h" />
     <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
@@ -689,6 +692,9 @@
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
     <ClCompile Include="src\Insight\Scene\Scene.cpp" />
+    <ClCompile Include="src\Insight\Serialization\File\SerializableElementTypes.cpp" />
+    <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp" />
+    <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_XML.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
     <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Insight\Threading\TThreadSafe.cpp" />

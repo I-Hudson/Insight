@@ -164,92 +164,72 @@ void Entity::RemoveChild(Entity* child)
 //	}
 //}
 
-void Entity::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+void Entity::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 {
 	if (GetParent() == nullptr || force)
 	{
-		tinyxml2::XMLElement* Uuid = doc->NewElement("UUID");
-		Uuid->SetText(GetUUID().c_str());
-		out->InsertEndChild(Uuid);
+		element->AddString("UUID", GetUUID());
+		element->AddString("Type", "Entity");
+		element->AddString("Name", m_data.Name);
 
-		tinyxml2::XMLElement* Type = doc->NewElement("Type");
-		Type->SetText("Entity");
-		out->InsertEndChild(Type);
-
-		tinyxml2::XMLElement* Name = doc->NewElement("Name");
-		Name->SetText(m_data.Name.c_str());
-		out->InsertEndChild(Name);
-
-		if (m_data.Children.size() > 0)
+		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
 		{
-			tinyxml2::XMLNode* childrenNode = doc->NewElement("Children");
-			for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
-			{
-				tinyxml2::XMLNode* childNode = doc->NewElement("Entity");
-				(*it)->Serialize(childNode, doc, true);
-				childrenNode->InsertEndChild(childNode);
-			}
-			out->InsertEndChild(childrenNode);
+			auto childComponent = element->AddChild("Component");
+			(*it)->Serialize(childComponent, true);
 		}
 
-		if (m_data.Components.size() > 0)
+		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
 		{
-			tinyxml2::XMLNode* componentNodes = doc->NewElement("Components");
-			for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
-			{
-				tinyxml2::XMLNode* componentNode = doc->NewElement("Component");
-				(*it)->Serialize(componentNode, doc);
-				componentNodes->InsertEndChild(componentNode);
-			}
-			out->InsertEndChild(componentNodes);
+			auto childEntity = element->AddChild("Entity");
+			(*it)->Serialize(childEntity, true);
 		}
 	}
 }
 
-void Entity::Deserialize(tinyxml2::XMLNode* in, bool force)
+void Entity::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	if (auto uuid = in->FirstChildElement("UUID"))
-	{
-		SetUUID(uuid->GetText());
-	}
-	if (auto name = in->FirstChildElement("Name"))
-	{
-		m_data.Name = name->GetText() != 0 ? name->GetText() : "Defualt";
-	}
-
-	tinyxml2::XMLNode* children = in->FirstChildElement("Children");
-	if (children != nullptr)
-	{
-		tinyxml2::XMLNode* child = children->FirstChild();
-		do
-		{
-			Serializable* s = CreateInstanceFromType<Serializable>(child->FirstChildElement("Type")->GetText());
-			dynamic_cast<Entity*>(s)->SetParent(this);
-			if (s != nullptr)
-			{
-				s->Deserialize(child);
-				m_data.Children.push_back(dynamic_cast<Entity*>(s));
-			}
-
-			child = child->NextSibling();
-		} while (child != nullptr);
-	}
-
-	tinyxml2::XMLNode* components = in->FirstChildElement("Components");
-	if (components != nullptr)
-	{
-		tinyxml2::XMLNode* c = components->FirstChild();
-		do
-		{
-			Serializable* s = CreateInstanceFromType<Serializable>(c->FirstChildElement("Type")->GetText());
-			if (s != nullptr)
-			{
-				AddComponent(dynamic_cast<Component*>(s));
-				s->Deserialize(c);
-			}
-			c = c->NextSibling();
-		} while (c != nullptr);
-	}
+	//if (auto uuid = in->FirstChildElement("UUID"))
+	//{
+	//	SetUUID(uuid->GetText());
+	//}
+	//if (auto name = in->FirstChildElement("Name"))
+	//{
+	//	m_data.Name = name->GetText() != 0 ? name->GetText() : "Defualt";
+	//}
+	//
+	//tinyxml2::XMLNode* children = in->FirstChildElement("Children");
+	//if (children != nullptr)
+	//{
+	//	tinyxml2::XMLNode* child = children->FirstChild();
+	//	do
+	//	{
+	//		Serializable* s = CreateInstanceFromType<Serializable>(child->FirstChildElement("Type")->GetText());
+	//		dynamic_cast<Entity*>(s)->SetParent(this);
+	//		if (s != nullptr)
+	//		{
+	//			s->Deserialize(child);
+	//			m_data.Children.push_back(dynamic_cast<Entity*>(s));
+	//		}
+	//
+	//		child = child->NextSibling();
+	//	} while (child != nullptr);
+	//}
+	//
+	//tinyxml2::XMLNode* components = in->FirstChildElement("Components");
+	//if (components != nullptr)
+	//{
+	//	tinyxml2::XMLNode* c = components->FirstChild();
+	//	do
+	//	{
+	//		Serializable* s = CreateInstanceFromType<Serializable>(c->FirstChildElement("Type")->GetText());
+	//		if (s != nullptr)
+	//		{
+	//			AddComponent(dynamic_cast<Component*>(s));
+	//			s->Deserialize(c);
+	//		}
+	//		c = c->NextSibling();
+	//	} while (c != nullptr);
+	//}
 }
 
 void Entity::AddComponent(Component* component)

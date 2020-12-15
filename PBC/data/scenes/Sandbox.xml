@@ -1,0 +1,24 @@
+<ROOT>
+    <Scene>
+        <Children>
+            <Entity>
+                <UUID>c7adb7cf-13d4-4f69-a414-40d2f4381499</UUID>
+                <Type>Entity</Type>
+                <Name>MainCamera</Name>
+            </Entity>
+            <Entity>
+                <UUID>b3ea04fb-c97f-4149-b0aa-088a8b9e3bd4</UUID>
+                <Type>Entity</Type>
+                <Name>Root Entity</Name>
+                <Children>
+                    <Entity>
+                        <UUID>be06be3f-f552-4743-8812-c461a6a98610</UUID>
+                        <Type>Entity</Type>
+                        <Name>child_1</Name>
+                    </Entity>
+                </Children>
+            </Entity>
+            <Entity/>
+        </Children>
+    </Scene>
+</ROOT>

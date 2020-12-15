@@ -23,8 +23,8 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	virtual void Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force = false) override;
-	virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) override;
+	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
 
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);

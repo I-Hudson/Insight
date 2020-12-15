@@ -28,12 +28,12 @@ namespace Insight
 
 		void AssetModule::Deserialize()
 		{
-			m_deserlizaed = true;
-			tinyxml2::XMLDocument doc;
-			if (doc.LoadFile("ModelLibrary.xml") == tinyxml2::XML_SUCCESS)
-			{
-				m_modelLibrary->Deserialize(doc.FirstChild());
-			}
+			//m_deserlizaed = true;
+			//tinyxml2::XMLDocument doc;
+			//if (doc.LoadFile("ModelLibrary.xml") == tinyxml2::XML_SUCCESS)
+			//{
+			//	m_modelLibrary->Deserialize(doc.FirstChild());
+			//}
 		}
 	}
 }

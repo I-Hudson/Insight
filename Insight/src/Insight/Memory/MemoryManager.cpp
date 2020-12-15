@@ -108,7 +108,7 @@ namespace Insight
 
 		MemoryManager::MemoryManager()
 #ifndef IS_SMART_POINTERS_IN_USE
-			:m_stackAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.StackAllocAmount), CONFIG_VAL(Config::MemoryConfig.StackAllocType)))
+			: m_stackAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.StackAllocAmount), CONFIG_VAL(Config::MemoryConfig.StackAllocType)))
 			, m_freeListAllocator(GetConfigMemorySize(CONFIG_VAL(Config::MemoryConfig.FreeListAllocAmount), CONFIG_VAL(Config::MemoryConfig.FreeListAllocType))
 				,(Insight::Memory::FreeListAllocator::PlacementPolicy)CONFIG_VAL(Config::MemoryConfig.PlacementPolicy))
 #endif

@@ -100,27 +100,27 @@ void MeshComponent::SetMaterial(Material* material)
 	}
 }
 
-void MeshComponent::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+void MeshComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	Type->SetText("MeshComponent");
-	out->InsertEndChild(Type);
-
-	tinyxml2::XMLElement* MeshName = doc->NewElement("MeshName");
-	MeshName->SetText(m_mesh->GetName().c_str());
-	out->InsertEndChild(MeshName);
-
-	tinyxml2::XMLElement* ModelUUID = doc->NewElement("ModelUUID");
-	ModelUUID->SetText(m_mesh->GetModelUUID().c_str());
-	out->InsertEndChild(ModelUUID);
-
-	tinyxml2::XMLElement* SubMeshIndex = doc->NewElement("SubMeshIndex");
-	SubMeshIndex->SetText(m_mesh->GetSubMeshIndex());
-	out->InsertEndChild(SubMeshIndex);
+	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	//Type->SetText("MeshComponent");
+	//out->InsertEndChild(Type);
+	//
+	//tinyxml2::XMLElement* MeshName = doc->NewElement("MeshName");
+	//MeshName->SetText(m_mesh->GetName().c_str());
+	//out->InsertEndChild(MeshName);
+	//
+	//tinyxml2::XMLElement* ModelUUID = doc->NewElement("ModelUUID");
+	//ModelUUID->SetText(m_mesh->GetModelUUID().c_str());
+	//out->InsertEndChild(ModelUUID);
+	//
+	//tinyxml2::XMLElement* SubMeshIndex = doc->NewElement("SubMeshIndex");
+	//SubMeshIndex->SetText(m_mesh->GetSubMeshIndex());
+	//out->InsertEndChild(SubMeshIndex);
 }
 
-void MeshComponent::Deserialize(tinyxml2::XMLNode* in, bool force)
+void MeshComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	using namespace Insight::Library;
-	SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
+	//using namespace Insight::Library;
+	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

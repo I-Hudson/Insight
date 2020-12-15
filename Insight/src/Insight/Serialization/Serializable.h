@@ -6,11 +6,8 @@
 
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Log.h"
-#include "../vendor/TinyXML2/tinyxml2.h"
+#include "File/SerializableFile.h"
 #include "SerializeHelper.h"
-#include <ostream>
-#include <istream>
 #include <map>
 
 #define REGISTER_DEC_TYPE(NAME) \
@@ -41,8 +38,8 @@ namespace Insight
 			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
 			virtual ~Serializable();
 
-			virtual void Serialize(tinyxml2::XMLNode* data, tinyxml2::XMLDocument* doc, bool force = false) { }
-			virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) { }
+			virtual void Serialize(SerializableElement* element, bool force = false) { }
+			virtual void Deserialize(SerializableElement* element, bool force = false) { }
 
 			template<typename T> 
 			static Serializable* CreateInstance()

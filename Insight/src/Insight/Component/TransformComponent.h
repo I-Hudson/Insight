@@ -21,8 +21,8 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
-	virtual void Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force = false) override;
-	virtual void Deserialize(tinyxml2::XMLNode* in, bool force = false) override;
+	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
 
 private:
 	glm::mat4 m_transform;

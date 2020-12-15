@@ -52,13 +52,13 @@ void PlayerController::OnUpdate(const float& deltaTime)
 }
 
 
-void PlayerController::Serialize(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, bool force)
+void PlayerController::Serialize(Insight::Serialization::SerializableElement* element, bool force)
 {
-	tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	Type->SetText("PlayerController");
-	out->InsertEndChild(Type);
+	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
+	//Type->SetText("PlayerController");
+	//out->InsertEndChild(Type);
 }
 
-void PlayerController::Deserialize(tinyxml2::XMLNode* data, bool force)
+void PlayerController::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
 {
 }

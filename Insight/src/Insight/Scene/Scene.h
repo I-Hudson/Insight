@@ -1,13 +1,12 @@
 #pragma once
 
 #include "Insight/Core.h"
-#include "Insight/Serialization/Serializable.h"
 #include <string>
 
 class Entity;
 class Component;
 
-const std::string DEFAULT_SAVE_PATH = "scenes/";
+const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
 namespace Insight
 {
