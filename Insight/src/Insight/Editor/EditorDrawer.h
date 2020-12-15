@@ -36,7 +36,7 @@ namespace Insight
 			template<typename EditorDrawerClass, typename ObjectClass>
 			void AddEditorDrawer()
 			{
-				IS_CORE_STATIC_ASSERT(EditorDrawer, EditorDrawerClass, "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
+				IS_CORE_STATIC_ASSERT((std::is_base_of<EditorDrawer, EditorDrawerClass>::value), "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
 
 				std::string objectClassName = GET_SHORT_NAME_OF_TYPE(ObjectClass);
 				if (m_editorDrawers.find(objectClassName) == std::end(m_editorDrawers))

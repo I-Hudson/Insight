@@ -72,7 +72,8 @@ project "Insight"
         defines 
         {  
             "IS_PLATFORM_WINDOWS",
-            "GLM_FORCE_SWIZZLE"
+            "GLM_FORCE_SWIZZLE",
+            "GLM_FORCE_SILENT_WARNINGS",
         }
 
     filter "configurations:Debug"

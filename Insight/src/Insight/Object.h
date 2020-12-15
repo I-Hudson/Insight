@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Templates/TSafePtr.h"
+#include "Insight/Templates/TPointers.h"
 #include "UUID.h"
 
 namespace Insight

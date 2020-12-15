@@ -90,7 +90,7 @@ namespace Insight
 		template<typename T, typename... Args>
 		inline T* EditorModule::AddEditorPanel(Args&&... args)
 		{
-			IS_CORE_STATIC_ASSERT(Editor::EditorPanel, T, "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
 
 			if (T* panel = HasEditorPanel<T>())
 			{
@@ -106,7 +106,7 @@ namespace Insight
 		template<typename T>
 		inline void EditorModule::RemoveEditorPanel()
 		{
-			IS_CORE_STATIC_ASSERT(EditorPanel, T, "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<EditorPanel, T>::value), "T is not of type EditorPanel");
 
 			if (Editor::EditorPanel* panel = HasEditorPanel<T>())
 			{
@@ -118,7 +118,7 @@ namespace Insight
 		template<typename T>
 		inline T* EditorModule::HasEditorPanel()
 		{
-			IS_CORE_STATIC_ASSERT(Editor::EditorPanel, T, "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
 			return static_cast<T*>(m_editorPanels[GetEditorPanelID<T>()]);
 		}
 	}

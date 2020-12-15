@@ -37,9 +37,6 @@
     <Filter Include="src\Insight\Library">
       <UniqueIdentifier>{766A7DBF-E2CB-5ACD-6B39-A17FD799918C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Insight\Maths">
-      <UniqueIdentifier>{5E0D564D-CA23-54E3-139B-DF047FF0246B}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Insight\Memory">
       <UniqueIdentifier>{9A625CF8-8646-1D4E-EFA6-17A1DBA907D0}</UniqueIdentifier>
     </Filter>
@@ -213,24 +210,6 @@
     <ClInclude Include="src\Insight\Log.h">
       <Filter>src\Insight</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Maths\InsightMaths.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Maths\Matrix3.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Maths\Matrix4.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Maths\Vector2.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Maths\Vector3.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Maths\Vector4.h">
-      <Filter>src\Insight\Maths</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Memory\FreeListAllocator.h">
       <Filter>src\Insight\Memory</Filter>
     </ClInclude>
@@ -309,6 +288,9 @@
     <ClInclude Include="src\Insight\Serialization\File\SerializableElementTypes.h">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Serialization\File\SerializableFile.h">
+      <Filter>src\Insight\Serialization\File</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_XML.h">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClInclude>
@@ -321,7 +303,7 @@
     <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h">
       <Filter>src\Insight\ShaderParser</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Templates\TSafePtr.h">
+    <ClInclude Include="src\Insight\Templates\TPointers.h">
       <Filter>src\Insight\Templates</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Templates\TSingleton.h">
@@ -1605,9 +1587,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Serialization\File\SerializableFile.h">
-      <Filter>src\Insight\Serialization\File</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Application.cpp">
@@ -1654,21 +1633,6 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Log.cpp">
       <Filter>src\Insight</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Maths\Matrix3.cpp">
-      <Filter>src\Insight\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Maths\Matrix4.cpp">
-      <Filter>src\Insight\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Maths\Vector2.cpp">
-      <Filter>src\Insight\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Maths\Vector3.cpp">
-      <Filter>src\Insight\Maths</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Maths\Vector4.cpp">
-      <Filter>src\Insight\Maths</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp">
       <Filter>src\Insight\Memory</Filter>
@@ -1736,6 +1700,9 @@
     <ClCompile Include="src\Insight\Serialization\File\SerializableElementTypes.cpp">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp">
+      <Filter>src\Insight\Serialization\File</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_XML.cpp">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClCompile>
@@ -1789,9 +1756,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp">
-      <Filter>src\Insight\Serialization\File</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
