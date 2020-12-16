@@ -28,11 +28,12 @@ namespace Insight
 				m_dependentUpon.clear();
 			}
 
+			virtual void OnCreate() { }
 			virtual void Update(const float& deltaTime) = 0;
 
 			const bool ShouldManuallUpate() const { return m_manuallUpdate; }
 
-			Module& AddDependency(Module* module)
+			Module& AddDependency(SharedPtr<Module> module)
 			{
 				if (!DependencyExists(m_dependentUpon, module))
 				{
@@ -42,7 +43,7 @@ namespace Insight
 				return *this;
 			}
 
-			Module& RemoveDependency(Module* module)
+			Module& RemoveDependency(SharedPtr<Module> module)
 			{
 				if (DependencyExists(m_dependentUpon, module))
 				{
@@ -62,14 +63,14 @@ namespace Insight
 		protected:
 			bool m_manuallUpdate = false;
 			ModulePriority m_modulePriority;
-			std::vector<Module*> m_dependentUpon;
+			std::vector<SharedPtr<Module>> m_dependentUpon;
 			int m_dependencies = 0;
 
 			friend Module;
 			friend ModuleManager;
 		
 		private:
-			bool DependencyExists(std::vector<Module*>& vec, Module* module)
+			bool DependencyExists(std::vector< SharedPtr<Module>> vec, SharedPtr<Module> module)
 			{
 				return std::find(vec.begin(), vec.end(), module) != vec.end();
 			}

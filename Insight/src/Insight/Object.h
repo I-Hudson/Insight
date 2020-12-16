@@ -14,6 +14,9 @@ namespace Insight
 		Object();
 		virtual ~Object();
 
+		virtual void OnCreate() { }
+		virtual void OnDestroy() { }
+
 		bool Equals(const Object* pObject) const;
 		virtual bool Equals(const Object& pObject) const;
 
@@ -27,7 +30,7 @@ namespace Insight
 
 		void CreateHash(std::string const& str);
 
-		void operator delete(void* ptr);
+		//void operator delete(void* ptr);
 
 	private:
 		long m_refCount;

@@ -16,7 +16,7 @@ MeshComponent::MeshComponent()
 	m_componentId = GetComponentID<MeshComponent>();
 }
 
-MeshComponent::MeshComponent(Entity* owner)
+MeshComponent::MeshComponent(SharedPtr<Entity> owner)
 	: Component(owner)
 	, m_mesh(nullptr)
 	, m_materal(nullptr)
@@ -56,7 +56,7 @@ float GetMax(float& f1, float& f2)
 	return f1 > f2 ? f1 : f2;
 }
 
-void MeshComponent::SetMesh(Mesh* mesh)
+void MeshComponent::SetMesh(SharedPtr<Mesh> mesh)
 {
 	m_mesh = mesh;
 	m_meshName = m_mesh->GetName();
@@ -100,7 +100,7 @@ void MeshComponent::SetMaterial(Material* material)
 	}
 }
 
-void MeshComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
 	//Type->SetText("MeshComponent");
@@ -119,7 +119,7 @@ void MeshComponent::Serialize(Insight::Serialization::SerializableElement* eleme
 	//out->InsertEndChild(SubMeshIndex);
 }
 
-void MeshComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+void MeshComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//using namespace Insight::Library;
 	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));

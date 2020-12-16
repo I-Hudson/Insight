@@ -14,6 +14,19 @@ namespace Insight
 			return Instance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
+		void* MemoryManager::AlignedAlloc(const U64& size, const U64& alignment)
+		{
+			void* data = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__)
+			data = _aligned_malloc(size, alignment);
+#else
+			int res = posix_memalign(&data, alignment, size);
+			if (res != 0)
+				data = nullptr;
+#endif
+			return data;
+		}
+
 		void* MemoryManager::NewArrOnFreeListVoid(const U64& size, U8 alignment)
 		{
 			return Instance()->m_freeListAllocator.NewArr(size, alignment);

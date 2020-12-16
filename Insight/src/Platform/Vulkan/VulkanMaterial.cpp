@@ -72,7 +72,7 @@ namespace vks
 				}
 			}
 
-			vkCmdBindDescriptorSets(commandBuffer, bindPoint, m_pipeline.GetPipelineLayout(), 0, sets.size(), sets.data(), static_cast<U32>(dynamicOffsets.size()), dynamicOffsets.data());
+			vkCmdBindDescriptorSets(commandBuffer, bindPoint, m_pipeline.GetPipelineLayout(), 0, static_cast<U32>(sets.size()), sets.data(), static_cast<U32>(dynamicOffsets.size()), dynamicOffsets.data());
 		}
 	}
 
@@ -157,7 +157,10 @@ namespace vks
 			ubo.second.Buffer.Unmap();
 			ubo.second.Buffer.Destroy();
 
-			DELETE_ARR_ON_HEAP_VOID(ubo.second.DynamicUniformBlock.DynamicBuffer);
+			if (ubo.second.DynamicUniformBlock.DynamicBuffer)
+			{
+				_aligned_free(ubo.second.DynamicUniformBlock.DynamicBuffer);
+			}
 		}
 		std::vector<VkDescriptorSet> sets = GetDescriptorSets();
 		vkFreeDescriptorSets(*m_device, m_device->GetDescriptorPool(), static_cast<uint32_t>(sets.size()), sets.data());
@@ -194,12 +197,12 @@ namespace vks
 			U64 oldArrSize = materialBlock.DynamicUniformBlock.DynamicBufferSize;
 
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = NEW_ARR_ON_HEAP_VOID(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = Insight::Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 
 			// Copy and delete old data.
-			memcpy(materialBlock.DynamicUniformBlock.DynamicBuffer, oldArrPtr, oldArrSize);
-			DELETE_ARR_ON_HEAP_VOID(oldArrPtr);
+			memcpy_s(materialBlock.DynamicUniformBlock.DynamicBuffer, materialBlock.DynamicUniformBlock.DynamicBufferSize, oldArrPtr, oldArrSize);
+			delete oldArrPtr;
 
 			//VulkanDevice::Instance()->QueueIdleCommand([&]()
 			//	{
@@ -210,7 +213,7 @@ namespace vks
 		else
 		{
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = NEW_ARR_ON_HEAP_VOID(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = Insight::Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 		}
 

@@ -61,8 +61,8 @@ private:
 	std::vector<unsigned int> m_indices;
 	std::vector<Texture> m_textures;
 
-	vks::VulkanBuffer* m_vertexBuffer;
-	vks::VulkanBuffer* m_indexBuffer;
+	SharedPtr<vks::VulkanBuffer> m_vertexBuffer;
+	SharedPtr<vks::VulkanBuffer> m_indexBuffer;
 
 	Model* m_parentModel;
 	std::string m_meshName;

@@ -12,18 +12,22 @@ namespace Insight
 		EditorModule::EditorModule()
 		{
 			SetInstancePtr(this);
-			AddEditorPanel<Editor::SceneHierarchyPanel>();
 		}
 
 		EditorModule::~EditorModule()
 		{
 			for (auto it = m_editorPanels.begin(); it != m_editorPanels.end(); ++it)
 			{
-				DELETE_ON_HEAP(it->second);
+				it->second.reset();
 			}
 
 			m_editorPanels.clear();
 			ClearPtr();
+		}
+
+		void EditorModule::OnCreate()
+		{
+			AddEditorPanel<Editor::SceneHierarchyPanel>();
 		}
 
 		void EditorModule::Update(const float& deltaTime)

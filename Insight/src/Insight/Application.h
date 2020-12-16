@@ -56,9 +56,9 @@ namespace Insight
 		Memory::MemoryManager* m_memoryManager;
 
 		Module::ModuleManager* m_moduleManager;
-		Module::WindowModule* m_windowModule;
-		Module::GraphicsModule* m_graphicsModule;
-		Module::InputModule* m_inputModule;
+		SharedPtr<Module::WindowModule> m_windowModule;
+		SharedPtr<Module::GraphicsModule> m_graphicsModule;
+		SharedPtr<Module::InputModule> m_inputModule;
 	};
 
 	Application* CreateApplication();

@@ -16,16 +16,16 @@ namespace Insight
 		Scene(const std::string& sceneName = "Default");
 		~Scene();
 
-		Entity* CreateEntity(const std::string& name = std::string());
+		SharedPtr<Entity> CreateEntity(const std::string& name = std::string());
 		void DeleteEntiy(const std::string uuid);
-		void DeleteEntiy(Entity* ptr);
+		void DeleteEntiy(SharedPtr<Entity> ptr);
 
 		const std::string& GetSceneName() const;
 		void SetSceneName(const std::string& sceneName);
 
 		void SetActiveScene();
 		static Scene* ActiveScene();
-		const std::vector<Entity*>& GetEntites() { return m_registry; }
+		const std::vector<SharedPtr<Entity>> GetEntites() { return m_registry; }
 
 		void Load(const std::string& file);
 		void Save();
@@ -39,11 +39,11 @@ namespace Insight
 		void Clean();
 
 		template<typename T>
-		T* FindFirstComponent();
+		SharedPtr<T> FindFirstComponent();
 
 	private:
-		std::vector<Entity*> m_registry;
-		std::vector<Component*> m_updateComponents;
+		std::vector<SharedPtr<Entity>> m_registry;
+		std::vector<SharedPtr<Component>> m_updateComponents;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		std::string m_sceneName;
@@ -56,7 +56,7 @@ namespace Insight
 	};
 
 	template<typename T>
-	inline T* Scene::FindFirstComponent()
+	inline SharedPtr<T> Scene::FindFirstComponent()
 	{
 		for (auto it = m_registry.begin(); it != m_registry.end(); ++it) 
 		{

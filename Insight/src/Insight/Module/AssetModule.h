@@ -23,7 +23,7 @@ namespace Insight
 		private:
 			bool m_deserlizaed;
 
-			Insight::Library::ModelLibrary* m_modelLibrary;
+			SharedPtr<Insight::Library::ModelLibrary> m_modelLibrary;
 			//Insight::Library::ShaderLibrary* m_shaderLibrary;
 		};
 	}

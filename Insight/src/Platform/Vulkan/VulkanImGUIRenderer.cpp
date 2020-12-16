@@ -56,10 +56,10 @@ namespace vks
 #endif
 	}
 
-	void VulkanImGUIRenderer::Init(Insight::Renderer* renderer)
+	void VulkanImGUIRenderer::Init(SharedPtr<Insight::Renderer> renderer)
 	{
 #if defined(IMGUI_ENABLED)
-		m_renderer = static_cast<vks::VulkanRenderer*>(renderer);
+		m_renderer = DynamicPointerCast<vks::VulkanRenderer>(renderer);
 		device = m_renderer->GetDevice();
 
 		// Setup Dear ImGui context

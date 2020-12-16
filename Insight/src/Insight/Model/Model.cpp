@@ -26,20 +26,20 @@ Model::Model(const std::string& filePath, const std::string& uuid)
 
 Model::~Model()
 {
-	for (auto it = m_meshes.begin(); it != m_meshes.end(); ++it)
-	{
-		DELETE_ON_HEAP(*it);
-	}
 }
 
-Model* Model::Create(const std::string& filepath)
+void Model::Destroy()
+{
+	m_meshes.clear();
+}
+
+void Model::Create(const std::string& filepath)
 {
 	if (!filepath.empty())
 	{
 		IS_INFO("Loading model");
 		LoadMesh(filepath);
 	}
-	return this;
 }
 
 void Model::Draw(VkCommandBuffer commandBuffer)
@@ -50,7 +50,7 @@ void Model::Draw(VkCommandBuffer commandBuffer)
 	}
 }
 
-Mesh* Model::GetSubMesh(int index)
+SharedPtr<Mesh> Model::GetSubMesh(int index)
 {
 	IS_ASSERT(index >= 0 && index < m_meshes.size(), "Model: GetSubMesh: Out of range.");
 	return m_meshes[index];
@@ -101,7 +101,7 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+SharedPtr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	IS_PROFILE_FUNCTION();
 
@@ -173,7 +173,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		m_textures.insert(m_textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return NEW_ON_HEAP(Mesh, vertices, indices, textures, (unsigned int)m_meshes.size(), this, mesh->mName.C_Str());
+	return CreateSharedPtr<Mesh>(vertices, indices, textures, (unsigned int)m_meshes.size(), this, mesh->mName.C_Str());
 }
 
 std::vector<Texture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

@@ -16,15 +16,16 @@ namespace Insight
 		CameraComponent* GraphicsModule::m_mainCamera;
 		std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
-		GraphicsModule::GraphicsModule(WindowModule* windowModule) 
+		GraphicsModule::GraphicsModule(SharedPtr<WindowModule> windowModule)
 		{
 			SetInstancePtr(this);
 
 			m_windowModule = windowModule;
 
 			m_renderer = Renderer::Create();
+			m_renderer->OnCreate();
 
-			ImGuiRenderer::Create();
+			m_imguiRenderer = ImGuiRenderer::Create();
 			ImGuiRenderer::Instance()->Init(m_renderer);
 		}
 
@@ -33,9 +34,9 @@ namespace Insight
 			m_renderer->WaitForIdle();
 
 			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::Instance();
-			DELETE_ON_HEAP(imguiRenderer);
+			m_imguiRenderer.reset();
 
-			DELETE_ON_HEAP(m_renderer);
+			m_renderer.reset();
 			m_windowModule = nullptr;
 
 			ClearPtr();

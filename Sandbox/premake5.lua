@@ -43,7 +43,8 @@ project "Sandbox"
 
         defines 
         { 
-            "IS_PLATFORM_WINDOWS" 
+            "IS_PLATFORM_WINDOWS",
+            "IS_STANDARD_POINTER",
         }
 
 

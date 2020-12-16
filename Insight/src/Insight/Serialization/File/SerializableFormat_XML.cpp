@@ -32,15 +32,15 @@ namespace Insight
 			}
 		}
 
-		void SerializableFile_XML::SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SerializableElement* element)
+		void SerializableFile_XML::SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element)
 		{
 			tinyxml2::XMLElement* elementRootNode = doc.NewElement(element->GetElementName().c_str());
 			node->InsertEndChild(elementRootNode);
 
 			if (!element->NoDataTypes())
 			{
-				auto& allDataTypes = element->GetAllData();
-				for (auto* data : allDataTypes)
+				auto allDataTypes = element->GetAllData();
+				for (auto data : allDataTypes)
 				{
 					tinyxml2::XMLElement* xmlElement = doc.NewElement(data->GetKey().c_str());
 					xmlElement->SetText(data->GetValue().c_str());
@@ -51,8 +51,8 @@ namespace Insight
 			if (!element->NoChildren())
 			{
 				tinyxml2::XMLElement* childRoot = doc.NewElement("Children");
-				auto& allChildren = element->GetAllChildren();
-				for (auto& child : allChildren)
+				auto allChildren = element->GetAllChildren();
+				for (auto child : allChildren)
 				{
 					SerializeElement(doc, childRoot, child);
 				}

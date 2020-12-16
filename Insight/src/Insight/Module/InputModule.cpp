@@ -13,7 +13,7 @@ namespace Insight
 		double InputModule::m_mouseX;
 		double InputModule::m_mouseY;
 
-		InputModule::InputModule(WindowModule* windowModule)
+		InputModule::InputModule(SharedPtr<WindowModule> windowModule)
 		{
 			m_windowModule = windowModule;
 

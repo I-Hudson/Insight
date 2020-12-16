@@ -16,16 +16,16 @@ namespace Insight
 		public:
 			virtual ~SerializableFile();
 
-			SerializableElement* GetNewElement(const std::string& name);
+			SharedPtr<SerializableElement> GetNewElement(const std::string& name);
 
-			static SerializableFile* Create();
+			static UniquePtr<SerializableFile> Create();
 
 			virtual void SerializeData(const std::string& fileName) = 0;
 			virtual void DeserializeData(const std::string& fileName) = 0;
 			virtual void SaveFile(const std::string& fileName) = 0;
 
 		protected:
-			std::vector<SerializableElement*> m_rootNodes;
+			std::vector<SharedPtr<SerializableElement>> m_rootNodes;
 		};
 
 		class IS_API SerializableElement
@@ -37,32 +37,31 @@ namespace Insight
 
 			const std::string& GetElementName() const { return m_elementName; }
 
-			void AddChild(SerializableElement* child);
-			SerializableElement* AddChild(const std::string& childName);
+			SharedPtr<SerializableElement> AddChild(const std::string& childName);
 
-			SerializableElement* AddString(const std::string& key, const std::string& value);
-			SerializableElement* AddInt(const std::string& key, const U32& value);
-			SerializableElement* AddFloat(const std::string& key, const float& value);
-							   
-			SerializableElement* AddVec2(const std::string& key, const glm::vec2& value);
-			SerializableElement* AddVec3(const std::string& key, const glm::vec3& value);
-			SerializableElement* AddVec4(const std::string& key, const glm::vec4& value);
-							   
-			SerializableElement* AddMat2(const std::string& key, const glm::mat2& value);
-			SerializableElement* AddMat3(const std::string& key, const glm::mat3& value);
-			SerializableElement* AddMat4(const std::string& key, const glm::mat4& value);
+			void AddString(const std::string& key, const std::string& value);
+			void AddInt(const std::string& key, const U32& value);
+			void AddFloat(const std::string& key, const float& value);
+
+			void AddVec2(const std::string& key, const glm::vec2& value);
+			void AddVec3(const std::string& key, const glm::vec3& value);
+			void AddVec4(const std::string& key, const glm::vec4& value);
+
+			void AddMat2(const std::string& key, const glm::mat2& value);
+			void AddMat3(const std::string& key, const glm::mat3& value);
+			void AddMat4(const std::string& key, const glm::mat4& value);
 
 			bool NoChildren() const;
 			bool NoDataTypes() const;
 
-			const std::vector<SerializableElement*>& GetAllChildren() const { return m_children; }
-			const std::vector<SerializableElementType*>& GetAllData() const { return m_dataTypes; }
+			const std::vector<SharedPtr<SerializableElement>> GetAllChildren() const { return m_children; }
+			const std::vector<SharedPtr<SerializableElementType>> GetAllData() const { return m_dataTypes; }
 
 		protected:
 			std::string m_elementName;
-			std::vector<SerializableElement*> m_children;
+			std::vector<SharedPtr<SerializableElement>> m_children;
 
-			std::vector<SerializableElementType*> m_dataTypes;
+			std::vector<SharedPtr<SerializableElementType>> m_dataTypes;
 		};
 	}
 }

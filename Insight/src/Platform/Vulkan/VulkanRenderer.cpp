@@ -48,9 +48,9 @@ namespace vks
 	}
 
 #if defined(IS_EDITOR)
-	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer)
+	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
 		: EditorPanel(editorModule)
-		, m_renderer(*renderer)
+		, m_renderer(renderer)
 	{
 	}
 
@@ -64,53 +64,55 @@ namespace vks
 
 		ImGui::Begin("VulkanRendererEditorOverlay");
 
-		ImGui::Checkbox("Debug overlay", &m_renderer.debugOverlay);
-
-		const char* items[] = { "Normal", "Colour", "Dynamic Uniform Colour" };
-		static int item_current = m_renderer.m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
-		ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
-		m_renderer.m_debugOverlay.debugOptions[0] = 0;
-		m_renderer.m_debugOverlay.debugOptions[1] = 0;
-		m_renderer.m_debugOverlay.debugOptions[2] = 0;
-		m_renderer.m_debugOverlay.debugOptions[item_current] = 1;
-
-		UIHelper::DrawString("EditorCamera");
-		UIHelper::DrawString("EditorCamera", TextBold);
-		float fov = m_renderer.m_editorCamera->GetFov();
-		float nearPlane = m_renderer.m_editorCamera->GetNearPlane();
-		float farPlane = m_renderer.m_editorCamera->GetFarPlane();
-		float cameraSpeed = m_renderer.m_editorCamera->GetCameraSpeed();
-		if (UIHelper::DrawFloat("FOV", &fov) || UIHelper::DrawFloat("Near Plane", &nearPlane) || UIHelper::DrawFloat("Far Plane", &farPlane) || UIHelper::DrawFloat("Camera Speed", &cameraSpeed))
+		if (SharedPtr< VulkanRenderer> renderer = m_renderer.lock())
 		{
-			m_renderer.m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
-			m_renderer.m_editorCamera->SetCameraSpeed(cameraSpeed);
+			ImGui::Checkbox("Debug overlay", &renderer->debugOverlay);
+
+			const char* items[] = { "Normal", "Colour", "Dynamic Uniform Colour" };
+			static int item_current = renderer->m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
+			ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
+			renderer->m_debugOverlay.debugOptions[0] = 0;
+			renderer->m_debugOverlay.debugOptions[1] = 0;
+			renderer->m_debugOverlay.debugOptions[2] = 0;
+			renderer->m_debugOverlay.debugOptions[item_current] = 1;
+
+			UIHelper::DrawString("EditorCamera");
+			UIHelper::DrawString("EditorCamera", TextBold);
+			float fov = renderer->m_editorCamera->GetFov();
+			float nearPlane = renderer->m_editorCamera->GetNearPlane();
+			float farPlane = renderer->m_editorCamera->GetFarPlane();
+			float cameraSpeed = renderer->m_editorCamera->GetCameraSpeed();
+			if (UIHelper::DrawFloat("FOV", &fov) || UIHelper::DrawFloat("Near Plane", &nearPlane) || UIHelper::DrawFloat("Far Plane", &farPlane) || UIHelper::DrawFloat("Camera Speed", &cameraSpeed))
+			{
+				renderer->m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
+				renderer->m_editorCamera->SetCameraSpeed(cameraSpeed);
+			}
+
+			// TODO: THIS IS NOT WORKING. WHY!!!!!!!!!!!!!!!
+
+			glm::vec4 rotation = glm::vec4(0, 0, 0, 0);
+			rotation.x = glm::degrees(atan2(renderer->m_testModelMatrix[1][2], renderer->m_testModelMatrix[2][2]));
+			rotation.y = glm::degrees(atan2(-renderer->m_testModelMatrix[0][2], glm::sqrt((renderer->m_testModelMatrix[0][0] * renderer->m_testModelMatrix[0][0]) + (renderer->m_testModelMatrix[0][1] * renderer->m_testModelMatrix[0][1]))));
+			rotation.z = glm::degrees(atan2((sin(rotation.x) * renderer->m_testModelMatrix[2][0]) - (cos(rotation.x) * renderer->m_testModelMatrix[1][0]),
+				(cos(rotation.x) * renderer->m_testModelMatrix[1][1] - (sin(rotation.x) * renderer->m_testModelMatrix[2][1]))));
+			if (UIHelper::DrawVector("Rotation", 3, &rotation.x))
+			{
+				glm::mat4 newMatrix(1.0f);
+
+				float radX = glm::radians(rotation.x);
+				float radY = glm::radians(rotation.y);
+				float radZ = glm::radians(rotation.z);
+
+				newMatrix = glm::rotate(newMatrix, radX, glm::vec3(1, 0, 0));
+				//newMatrix = glm::rotate(newMatrix, radY, glm::vec3(0, 1, 0));
+				newMatrix = glm::rotate(newMatrix, radZ, glm::vec3(0, 0, 1));
+
+				renderer->m_testModelMatrix = newMatrix;
+			}
+			IS_CORE_INFO("{0}", rotation.x);
+
+			UIHelper::DrawMat4("Test Model Matrix", &renderer->m_testModelMatrix);
 		}
-
-		// TODO: THIS IS NOT WORKING. WHY!!!!!!!!!!!!!!!
-
-		glm::vec4 rotation = glm::vec4(0, 0, 0, 0);
-		rotation.x = glm::degrees(atan2(m_renderer.m_testModelMatrix[1][2], m_renderer.m_testModelMatrix[2][2]));
-		rotation.y = glm::degrees(atan2(-m_renderer.m_testModelMatrix[0][2], glm::sqrt((m_renderer.m_testModelMatrix[0][0] * m_renderer.m_testModelMatrix[0][0]) + (m_renderer.m_testModelMatrix[0][1] * m_renderer.m_testModelMatrix[0][1]))));
-		rotation.z = glm::degrees(atan2((sin(rotation.x) * m_renderer.m_testModelMatrix[2][0]) - (cos(rotation.x) * m_renderer.m_testModelMatrix[1][0]), 
-										(cos(rotation.x) * m_renderer.m_testModelMatrix[1][1] - (sin(rotation.x) * m_renderer.m_testModelMatrix[2][1]))));
-		if (UIHelper::DrawVector("Rotation", 3, &rotation.x))
-		{
-			glm::mat4 newMatrix(1.0f);
-
-			float radX = glm::radians(rotation.x);
-			float radY = glm::radians(rotation.y);
-			float radZ = glm::radians(rotation.z);
-		
-			newMatrix = glm::rotate(newMatrix, radX, glm::vec3(1, 0, 0));
-			//newMatrix = glm::rotate(newMatrix, radY, glm::vec3(0, 1, 0));
-			newMatrix = glm::rotate(newMatrix, radZ, glm::vec3(0, 0, 1));
-
-			m_renderer.m_testModelMatrix = newMatrix;
-		}
-		IS_CORE_INFO("{0}", rotation.x);
-		
-		UIHelper::DrawMat4("Test Model Matrix", &m_renderer.m_testModelMatrix);
-
 		ImGui::End();
 	}
 #endif
@@ -130,18 +132,14 @@ namespace vks
 
 		InitVulkan();
 		IS_CORE_INFO("Vulkan Setup Complete.");
-
-#if defined(IS_EDITOR)
-		Insight::Module::EditorModule::Instance()->AddEditorPanel<VulkanRendererEditorOverlay>(this);
-#endif
 	}
 
 	VulkanRenderer::~VulkanRenderer()
 	{
 		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
 
-		DELETE_ON_HEAP(m_editorEntity);
-		DELETE_ON_HEAP(m_testModel);
+		m_editorEntity.reset();
+		m_testModel.reset();
 
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -183,7 +181,7 @@ namespace vks
 
 		IS_PROFILE_GPUI_SHUTDOWN();
 
-		DELETE_ON_HEAP(m_vulkanDevice);
+		m_vulkanDevice.reset();
 
 		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
@@ -191,6 +189,13 @@ namespace vks
 		}
 
 		vkDestroyInstance(m_instance, nullptr);
+	}
+
+	void VulkanRenderer::OnCreate()
+	{
+#if defined(IS_EDITOR)
+		Insight::Module::EditorModule::Instance()->AddEditorPanel<VulkanRendererEditorOverlay>(this->shared_from_this());
+#endif
 	}
 
 	void VulkanRenderer::InitVulkan()
@@ -260,7 +265,7 @@ namespace vks
 		// Vulkan device creation
 		// This is handled by a separate class that gets a logical device representation
 		// and encapsulates functions related to a device
-		m_vulkanDevice = NEW_ON_HEAP(vks::VulkanDevice, m_physicalDevice);
+		m_vulkanDevice = CreateSharedPtr<vks::VulkanDevice>(m_physicalDevice);
 		VkResult res = m_vulkanDevice->CreateLogicalDevice(m_enabledFeatures, m_enabledDeviceExtensions, m_deviceCreatepNextChain);
 		if (res != VK_SUCCESS)
 		{
@@ -466,14 +471,14 @@ namespace vks
 		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert",  "./data/shaders/vulkan/default.frag" };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			m_defaultMaterial[i].Create(m_vulkanDevice, shaders, m_vulkanDevice->GetRenderPass());
+			m_defaultMaterial[i].Create(m_vulkanDevice.get(), shaders, m_vulkanDevice->GetRenderPass());
 		}
 
-		m_editorEntity = NEW_ON_HEAP(Entity, "Editor entity", false);
+		m_editorEntity = CreateSharedPtr<Entity>("Editor entity", false);
 		m_editorEntity->AddComponent<TransformComponent>();
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
-		m_testModel = NEW_ON_HEAP(Model, "./data/models/sponza/sponza.obj");
+		m_testModel = CreateSharedPtr<Model>("./data/models/sponza/sponza.obj");
 		m_testModelMatrix = glm::mat4(1.0f);
 
 		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);

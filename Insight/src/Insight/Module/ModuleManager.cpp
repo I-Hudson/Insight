@@ -8,7 +8,6 @@ namespace Insight
 	namespace Module
 	{
 		ModuleManager::ModuleManager()
-			: m_moduleAlloc(1024)
 		{
 		}
 
@@ -18,8 +17,9 @@ namespace Insight
 			{
 				if (it->second != nullptr && it->second->GetDependenciesCount() == 0)
 				{
-					Module* m = it->second;
+					SharedPtr<Module> m = it->second;
 					m->~Module();
+					m.reset();
 
 					m_modules.erase(it);
 					it = m_modules.begin();
@@ -33,7 +33,6 @@ namespace Insight
 					IS_CORE_ASSERT(false, "Not all modules have been removed.");
 				}
 			}
-			m_moduleAlloc.FreeAll();
 			m_modules.clear();
 		}
 

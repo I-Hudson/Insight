@@ -122,7 +122,7 @@ namespace vks
 			}
 
 			VkDeviceSize offset = materialBlockData.DynamicBuffers[key].Index * mub.DynamicUniformBlock.DynamicUniformAlign;
-			void* dstPtr = (void*)((U64)mub.DynamicUniformBlock.DynamicBuffer + offset);
+			void* dstPtr = (void*)((U64*)mub.DynamicUniformBlock.DynamicBuffer + offset);
 			void* srcPtr = (void*)(&data);
 			memcpy(dstPtr, srcPtr, dataSize);
 

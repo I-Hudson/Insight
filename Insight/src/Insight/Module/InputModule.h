@@ -18,7 +18,7 @@ namespace Insight
 		class IS_API InputModule : public Module
 		{
 		public:
-			InputModule(WindowModule* windowModule);
+			InputModule(SharedPtr<WindowModule> windowModule);
 			virtual ~InputModule() override;
 
 			virtual void Update(const float& deltaTime) override;
@@ -46,7 +46,7 @@ namespace Insight
 			static double m_mouseX;
 			static double m_mouseY;
 
-			WindowModule* m_windowModule;
+			SharedPtr<WindowModule> m_windowModule;
 
 			friend Input;
 		};

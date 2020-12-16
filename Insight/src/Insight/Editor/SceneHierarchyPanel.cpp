@@ -14,9 +14,8 @@ namespace Insight
 {
 	namespace Editor
 	{
-		SceneHierarchyPanel::SceneHierarchyPanel(const Module::EditorModule* editorModule)
+		SceneHierarchyPanel::SceneHierarchyPanel(SharedPtr<Module::EditorModule> editorModule)
 			: EditorPanel(editorModule)
-			, m_selectedEntity(nullptr)
 		{
 			SET_PANEL_NAME(SceneHierarchyPanel);
 		}
@@ -39,9 +38,9 @@ namespace Insight
 
 			for (auto entitesIT = entites.begin(); entitesIT != entites.end(); ++entitesIT)
 			{
-				if ((*entitesIT)->GetParent() == nullptr)
+				if ((*entitesIT)->GetParent().expired())
 				{
-					if (ImGui::TreeNodeEx((*entitesIT), GetTreeNodeFlags(*entitesIT), (*entitesIT)->GetID().c_str()))
+					if (ImGui::TreeNodeEx((*entitesIT).get(), GetTreeNodeFlags(*entitesIT), (*entitesIT)->GetID().c_str()))
 					{
 						DrawEntityTreeView((*entitesIT), newEntitySelected);
 						ImGui::TreePop();
@@ -67,47 +66,53 @@ namespace Insight
 #endif
 		}
 
-		void SceneHierarchyPanel::DrawEntityTreeView(Entity* entity, bool& newEntitySelected)
+		void SceneHierarchyPanel::DrawEntityTreeView(WeakPtr<Entity> entity, bool& newEntitySelected)
 		{
-#ifdef IMGUI_ENABLED
-			for (unsigned int i = 0; i < entity->GetChildCount(); ++i)
+			if (auto spEntity = entity.lock())
 			{
-				Entity* currentEntity = entity->GetChild(i);
-				if (ImGui::TreeNodeEx(currentEntity, GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
+#ifdef IMGUI_ENABLED
+				for (unsigned int i = 0; i < spEntity->GetChildCount(); ++i)
 				{
-					DrawEntityTreeView(currentEntity, newEntitySelected);
-					ImGui::TreePop();
-				}
+					SharedPtr<Entity> currentEntity = spEntity->GetChild(i);
+					if (ImGui::TreeNodeEx(currentEntity.get(), GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
+					{
+						DrawEntityTreeView(currentEntity, newEntitySelected);
+						ImGui::TreePop();
+					}
 
-				if (ImGui::IsItemClicked() && !newEntitySelected)
-				{
-					m_selectedEntity = currentEntity;
-					newEntitySelected = true;
+					if (ImGui::IsItemClicked() && !newEntitySelected)
+					{
+						m_selectedEntity = currentEntity;
+						newEntitySelected = true;
+					}
 				}
-			}
 #endif
+			}
 		}
 
-		int SceneHierarchyPanel::GetTreeNodeFlags(Entity* entity)
+		int SceneHierarchyPanel::GetTreeNodeFlags(WeakPtr<Entity> entity)
 		{
+			if (auto spEntity = entity.lock())
+			{
 #ifdef IMGUI_ENABLED
-			ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed |*/ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			if (entity->GetChildCount() == 0)
-			{
-				flags |= ImGuiTreeNodeFlags_Leaf;
-			}
+				ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed |*/ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+				if (spEntity->GetChildCount() == 0)
+				{
+					flags |= ImGuiTreeNodeFlags_Leaf;
+				}
 
-			if (m_selectedEntity == entity)
-			{
-				flags |= ImGuiTreeNodeFlags_Selected;
-			}
+				if (m_selectedEntity == spEntity)
+				{
+					flags |= ImGuiTreeNodeFlags_Selected;
+				}
 
-			return flags;
+				return flags;
 #endif
+			}
 			return 0;
 		}
 
-		void SceneHierarchyPanel::DrawCompoentPanel(Entity* entity)
+		void SceneHierarchyPanel::DrawCompoentPanel(WeakPtr<Entity> entity)
 		{
 			//IS_TODO("Remove this and place in it's own class!!!");
 
@@ -115,25 +120,25 @@ namespace Insight
 #ifdef IMGUI_ENABLED
 			ImGui::Begin("Components Panel");
 
-			if (entity != nullptr)
+			if (auto spEntity = entity.lock())
 			{
-				ImGui::InputText(":Name", &entity->GetID());
-				ImGui::Checkbox(":Active", &entity->IsActive());
-				ImGui::Checkbox(":Debug", &entity->ShowDebugInfo());
+				ImGui::InputText(":Name", &spEntity->GetID());
+				ImGui::Checkbox(":Active", &spEntity->IsActive());
+				ImGui::Checkbox(":Debug", &spEntity->ShowDebugInfo());
 
-				if (entity->ShowDebugInfo())
+				if (spEntity->ShowDebugInfo())
 				{
-					ImGui::LabelText(":UUID", entity->GetUUID().c_str());
+					ImGui::LabelText(":UUID", spEntity->GetUUID().c_str());
 				}
 
 				ImGui::NewLine();
 
-				auto components = entity->GetAllComponents();
+				auto components = spEntity->GetAllComponents();
 
-				for (auto componentsIT = components->begin(); componentsIT != components->end(); ++componentsIT)
+				for (auto componentsIT = components.begin(); componentsIT != components.end(); ++componentsIT)
 				{
 					IS_PROFILE_SCOPE("Draw Properties");
-					auto properties = IS_GET_ALL_PROPERTIES(*componentsIT, ShowInEditor);
+					auto properties = IS_GET_ALL_PROPERTIES(&componentsIT, ShowInEditor);
 
 					ImGui::Separator();
 					ImGui::Text((*componentsIT)->GetType().c_str());

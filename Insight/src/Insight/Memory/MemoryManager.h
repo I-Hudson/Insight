@@ -36,6 +36,8 @@ namespace Insight
 			template<typename T>
 			static void DeleteArrOnFreeList(T* ptrToDelete);
 
+			void* AlignedAlloc(const U64& size, const U64& alignment);
+
 			static void* NewArrOnFreeListVoid(const U64& size, U8 alignment = MemoryUtlis::Alignment);
 			static void DeleteArrOnFreeListVoid(void* ptrToDelete);
 

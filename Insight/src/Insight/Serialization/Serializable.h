@@ -38,17 +38,17 @@ namespace Insight
 			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
 			virtual ~Serializable();
 
-			virtual void Serialize(SerializableElement* element, bool force = false) { }
-			virtual void Deserialize(SerializableElement* element, bool force = false) { }
+			virtual void Serialize(SharedPtr<SerializableElement> element, bool force = false) { }
+			virtual void Deserialize(SharedPtr<SerializableElement> element, bool force = false) { }
 
 			template<typename T> 
-			static Serializable* CreateInstance()
+			static SharedPtr<Serializable> CreateInstance()
 			{ 
-				return NEW_ON_HEAP(T); 
+				return CreateSharedPtr<T>(); 
 			}
 
 			template<typename T>
-			static Serializable* CreateInstanceFromType(const std::string& type)
+			static SharedPtr<Serializable> CreateInstanceFromType(const std::string& type)
 			{
 				auto t = SerializableRegistry::GetTypes().find(type);
 				if (t != SerializableRegistry::GetTypes().end())
@@ -70,7 +70,7 @@ namespace Insight
 		struct SerializableRegistry
 		{
 		public:
-			typedef std::map<std::string, Serializable* (*)()> MapTypes;
+			typedef std::map<std::string, SharedPtr<Serializable> (*)()> MapTypes;
 
 			static MapTypes& GetTypes()
 			{

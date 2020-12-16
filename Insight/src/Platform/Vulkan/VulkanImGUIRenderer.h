@@ -23,7 +23,7 @@ namespace vks
 		void Render(VkCommandBuffer commandBuffer);
 
 	private:
-		virtual void Init(Insight::Renderer* renderer) override;
+		virtual void Init(SharedPtr<Insight::Renderer> renderer) override;
 		void InitResources();
 		void SetStyle();
 
@@ -31,7 +31,7 @@ namespace vks
 
 	private:
 		bool m_newFrameInit = false;
-		VulkanRenderer* m_renderer;
+		SharedPtr<VulkanRenderer> m_renderer;
 
 		// Vulkan resources for rendering the UI
 		VkSampler             sampler;
@@ -48,6 +48,6 @@ namespace vks
 		VkDescriptorPool      descriptorPool;
 		VkDescriptorSetLayout descriptorSetLayout;
 		VkDescriptorSet       descriptorSet;
-		vks::VulkanDevice*	  device;
+		SharedPtr<vks::VulkanDevice> device;
 	};
 }

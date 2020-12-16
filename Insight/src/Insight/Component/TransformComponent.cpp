@@ -14,7 +14,7 @@ TransformComponent::TransformComponent()
 	m_componentId = GetComponentID<TransformComponent>();
 }
 
-TransformComponent::TransformComponent(Entity* owner)
+TransformComponent::TransformComponent(SharedPtr<Entity> owner)
 	: Component(owner)
 	, m_transform(glm::mat4(1.0f))
 {
@@ -40,13 +40,15 @@ glm::mat4 TransformComponent::GetTransform() const
 {
 	glm::mat4 m = m_transform;
 
-	const Entity* parent = GetEntity()->GetParent();
-	while (parent != nullptr)
+	if (SharedPtr<Entity> parentPtr = GetEntity().lock()->GetParent().lock())
 	{
-		m = m + parent->GetComponent<TransformComponent>()->GetTransform();
-		parent = parent->GetParent();
+		SharedPtr<Entity> parent = parentPtr;
+		while (parent != nullptr)
+		{
+			m = m + parent->GetComponent<TransformComponent>()->GetTransform();
+			parent = parent->GetParent().lock();
+		}
 	}
-
 	return m;
 }
 
@@ -66,7 +68,7 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_isDirty = true;
 }
 
-void TransformComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+void TransformComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
 	//Type->SetText("TransformComponent");
@@ -75,7 +77,7 @@ void TransformComponent::Serialize(Insight::Serialization::SerializableElement* 
 	//SerializeHelper::SerializeMat4(out, doc, "ViewMatrix", m_transform);
 }
 
-void TransformComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+void TransformComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//m_transform = SerializeHelper::DeserializeMat4(in, "ViewMatrix");
 }

@@ -17,10 +17,10 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		m_sandboxScene = NEW_ON_HEAP(Scene, "Sandbox");
+		m_sandboxScene = new Scene("Sandbox");
 		m_sandboxScene->SetActiveScene();
 
-		Entity* mainCamera = Entity::Create("MainCamera");
+		SharedPtr<Entity> mainCamera = Entity::Create("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 
 		bool test = false;
@@ -30,15 +30,15 @@ public:
 		if (test)
 		{
 			Library::ModelLibrary::Instance()->LoadAssetsFromFolder("./models", true);
-			Model* m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
+			SharedPtr<Model> m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 			for (size_t i = 0; i < 50; ++i)
 			{
 				{
-					Entity* testModel = Entity::CreateFromModel(m);
+					SharedPtr<Entity> testModel = Entity::CreateFromModel(m);
  					testModel->AddComponent<PlayerController>();
 					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
-					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
+					transformComponents.push_back(testModel->GetComponent<TransformComponent>().get());
 				}
 			}
 		}
@@ -75,7 +75,7 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		DELETE_ON_HEAP(m_sandboxScene);
+		delete m_sandboxScene;
 	}
 };
 

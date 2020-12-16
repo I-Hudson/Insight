@@ -33,22 +33,25 @@ namespace Insight
 
 	namespace Module
 	{
-		class EditorModule : public Module, public TSingleton<EditorModule>
+		class EditorModule : public Module
+			, public TSingleton<EditorModule>
+			, public std::enable_shared_from_this<EditorModule>
 		{
 		public:
 			EditorModule();
 			~EditorModule() override;
 
+			virtual void OnCreate() override;
 			virtual void Update(const float& deltaTime) override;
 
 			template<typename T, typename... Args>
-			T* AddEditorPanel(Args&&... args);
+			SharedPtr<T> AddEditorPanel(Args&&... args);
 
 			template<typename T>
 			void RemoveEditorPanel();
 
 			template<typename T>
-			T* HasEditorPanel();
+			bool HasEditorPanel();
 
 			struct EditorConfig
 			{
@@ -84,23 +87,23 @@ namespace Insight
 
 		private:
 			Editor::EditorDrawerRegistry m_editorDrawerRegisty;
-			std::unordered_map<size_t, Editor::EditorPanel*> m_editorPanels;
+			std::unordered_map<size_t, SharedPtr<Editor::EditorPanel>> m_editorPanels;
 		};
 
 		template<typename T, typename... Args>
-		inline T* EditorModule::AddEditorPanel(Args&&... args)
+		inline SharedPtr<T> EditorModule::AddEditorPanel(Args&&... args)
 		{
 			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
 
-			if (T* panel = HasEditorPanel<T>())
+			if (HasEditorPanel<T>())
 			{
-				return panel;
+				return DynamicPointerCast<T>(m_editorPanels[GetEditorPanelID<T>()]);
 			}
 
-			Editor::EditorPanel* newPanel = NEW_ON_HEAP(T, this, std::forward<Args>(args)...);
+			SharedPtr<Editor::EditorPanel> newPanel = CreateSharedPtr<T>(this->shared_from_this(), std::forward<Args>(args)...);
 			m_editorPanels[GetEditorPanelID<T>()] = newPanel;
 
-			return static_cast<T*>(newPanel);
+			return DynamicPointerCast<T>(newPanel);
 		}
 
 		template<typename T>
@@ -111,15 +114,14 @@ namespace Insight
 			if (Editor::EditorPanel* panel = HasEditorPanel<T>())
 			{
 				m_editorPanels.erase(GetEditorPanelID<T>());
-				DELETE_ON_HEAP(panel);
 			}
 		}
 
 		template<typename T>
-		inline T* EditorModule::HasEditorPanel()
+		inline bool EditorModule::HasEditorPanel()
 		{
 			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
-			return static_cast<T*>(m_editorPanels[GetEditorPanelID<T>()]);
+			return m_editorPanels.find(GetEditorPanelID<T>()) != m_editorPanels.end();
 		}
 	}
 }

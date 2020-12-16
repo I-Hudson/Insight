@@ -20,36 +20,35 @@ namespace Insight
 			virtual void Update(const float& deltaTime) override;
 
 			template <typename T, typename... Args>
-			T* AddModule(Args... args);
+			SharedPtr<T> AddModule(Args... args);
 			template <typename T>
 			void RemoveModule();
 
 			template<typename T>
-			T* GetModule();
+			SharedPtr<T> GetModule();
 
-			const std::unordered_map<std::string, Module*>& GetModules() const { return m_modules; }
+			const std::unordered_map<std::string, SharedPtr<Module>> GetModules() const { return m_modules; }
 
 		private:
 			bool Exists(const std::string& moduleName);
 
 		private:
-			std::unordered_map<std::string, Module*> m_modules;
-			Memory::StackAllocator m_moduleAlloc;
+			std::unordered_map<std::string, SharedPtr<Module>> m_modules;
 		};
 
 		template<typename T, typename ...Args>
-		inline T* ModuleManager::AddModule(Args... args)
+		inline SharedPtr<T> ModuleManager::AddModule(Args... args)
 		{
 			std::string typeId = typeid(T).name();
 			if (!Exists(typeId))
 			{
-				T* newModule = m_moduleAlloc.New<T>(std::forward<Args>(args)...);
-
+				SharedPtr<T> newModule = CreateSharedPtr<T>(std::forward<Args>(args)...);
+				StaticPointerCast<Module>(newModule)->OnCreate();
 				m_modules[typeId] = newModule;
 
 				return newModule;
 			}
-			return dynamic_cast<T*>(m_modules[typeId]);
+			return DynamicPointerCast<T>(m_modules[typeId]);
 		}
 
 		template<typename T>
@@ -59,20 +58,20 @@ namespace Insight
 			if (Exists(typeId))
 			{
 				auto it = m_modules[typeId];
-				DELETE_ON_HEAP(*it);
+				*it.reset();
 				m_modules.erase(it);
 			}
 		}
 
 		template<typename T>
-		inline T* ModuleManager::GetModule()
+		inline SharedPtr<T> ModuleManager::GetModule()
 		{
 			std::string typeId = typeid(T).name();
 			if (Exists(typeId))
 			{
-				return dynamic_cast<T*>(m_modules[typeId]);
+				return DynamicPointerCast<T>(m_modules[typeId]);
 			}
-			return nullptr;
+			return {};
 		}
 	}
 }

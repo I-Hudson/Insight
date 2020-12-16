@@ -12,7 +12,7 @@ PlayerController::PlayerController()
 	m_componentId = GetComponentID<PlayerController>();
 }
 
-PlayerController::PlayerController(Entity* owner)
+PlayerController::PlayerController(SharedPtr<Entity> owner)
 	: Component(owner)
 {
 	m_componentId = GetComponentID<PlayerController>();
@@ -52,13 +52,13 @@ void PlayerController::OnUpdate(const float& deltaTime)
 }
 
 
-void PlayerController::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+void PlayerController::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
 	//Type->SetText("PlayerController");
 	//out->InsertEndChild(Type);
 }
 
-void PlayerController::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+void PlayerController::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 }

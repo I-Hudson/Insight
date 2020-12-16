@@ -18,7 +18,7 @@ namespace Insight
 			virtual void SaveFile(const std::string& fileName) override;
 
 		private: 
-			void SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SerializableElement* element);
+			void SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element);
 
 			tinyxml2::XMLDocument m_document;
 		};

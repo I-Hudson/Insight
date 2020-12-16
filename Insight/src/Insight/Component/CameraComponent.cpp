@@ -20,7 +20,7 @@ CameraComponent::CameraComponent()
 	m_componentId = GetComponentID<CameraComponent>();
 }
 
-CameraComponent::CameraComponent(Entity* owner)
+CameraComponent::CameraComponent(SharedPtr<Entity> owner)
 	: Component(owner)
 {
 	m_updateEveryFarme = true;
@@ -53,13 +53,13 @@ void CameraComponent::OnCreate()
 
 void CameraComponent::OnDestroy()
 {
-	if (Insight::Module::GraphicsModule::Instance()->IsThisMainCamera(this))
+	if (Insight::Module::GraphicsModule::IsInitialised() && Insight::Module::GraphicsModule::Instance()->IsThisMainCamera(this))
 	{
 		Insight::Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
 	}
 }
 
-void CameraComponent::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+void CameraComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//tinyxml2::XMLElement* Type = doc->NewElement("Type"); // GetNewElement();
 	//Type->SetText("CameraComponent");
@@ -70,7 +70,7 @@ void CameraComponent::Serialize(Insight::Serialization::SerializableElement* ele
 	//SerializeHelper::SerializeFloat(data, doc, "FarPlane", m_farPlane);
 }
 
-void CameraComponent::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+void CameraComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//m_fov = data->FirstChildElement("FOV")->FloatText();
 	//m_nearPlane = data->FirstChildElement("NearPlane")->FloatText();
@@ -79,8 +79,11 @@ void CameraComponent::Deserialize(Insight::Serialization::SerializableElement* e
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)
 {
-	GetEntity()->GetComponent<TransformComponent>()->SetTransform(a_value);
-	SetProjectionViewMatrix();
+	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	{
+		parentPtr->GetComponent<TransformComponent>()->SetTransform(a_value);
+		SetProjectionViewMatrix();
+	}
 }
 
 void CameraComponent::SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far)
@@ -124,7 +127,12 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 {
 	SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
 
-	glm::mat4 viewMatrix = GetEntity()->GetComponent<TransformComponent>()->GetTransform();
+
+	glm::mat4 viewMatrix = glm::mat4(1.0f);
+	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	{
+		viewMatrix = parentPtr->GetComponent<TransformComponent>()->GetTransform();
+	}
 
 	// Get the camera's forward, right, up, and location vectors
 	glm::vec4 vForward = viewMatrix[2];
@@ -209,7 +217,10 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		viewMatrix[1] = vUp;
 		viewMatrix[2] = vForward;
 
-		GetEntity()->GetComponent<TransformComponent>()->SetTransform(viewMatrix);
+		if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+		{
+			parentPtr->GetComponent<TransformComponent>()->SetTransform(viewMatrix);
+		}
 	}
 	else
 	{
@@ -230,7 +241,11 @@ const glm::mat4& CameraComponent::GetProjMatrix() const
 
 const glm::mat4 CameraComponent::GetViewMatrix() const
 {
-	return GetEntity()->GetComponent<TransformComponent>()->GetTransform();
+	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	{
+		return parentPtr->GetComponent<TransformComponent>()->GetTransform();
+	}
+	return glm::mat4(1.0f);
 }
 
 const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
@@ -248,5 +263,8 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 
 void CameraComponent::SetProjectionViewMatrix()
 {
-	m_projectionViewMatrix = m_projectionMatrix * glm::inverse(GetEntity()->GetComponent<TransformComponent>()->GetTransform());
+	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	{
+		m_projectionViewMatrix = m_projectionMatrix * glm::inverse(parentPtr->GetComponent<TransformComponent>()->GetTransform());
+	}
 }

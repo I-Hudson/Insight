@@ -6,13 +6,13 @@ class PlayerController : public Component
 {
 public:
 	PlayerController();
-	PlayerController(Entity* owner);
+	PlayerController(SharedPtr<Entity> owner);
 
 	virtual void OnCreate() override;
 	virtual void OnUpdate(const float& deltaTime) override;
 
-	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
 private:
 	glm::mat2 mat2;

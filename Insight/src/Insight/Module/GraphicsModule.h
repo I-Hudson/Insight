@@ -6,6 +6,7 @@
 #include "Insight/Config/CVar.h"
 
 #include "Insight/Renderer/Renderer.h"
+#include "Insight/Renderer/ImGuiRenderer.h"
 
 class MeshComponent;
 class CameraComponent;
@@ -21,7 +22,7 @@ namespace Insight
 			, public TSingleton<GraphicsModule>
 		{
 		public:
-			GraphicsModule(WindowModule* windowModule);
+			GraphicsModule(SharedPtr<WindowModule> windowModule);
 			virtual ~GraphicsModule() override;
 
 			virtual void Update(const float& deltaTime) override;
@@ -38,8 +39,9 @@ namespace Insight
 			};
 
 		private:
-			WindowModule* m_windowModule;
-			Renderer* m_renderer;
+			SharedPtr<WindowModule> m_windowModule;
+			SharedPtr<Renderer> m_renderer;
+			SharedPtr<ImGuiRenderer> m_imguiRenderer;
 
 			static CameraComponent* m_mainCamera;
 			static std::vector<MeshComponent*> m_meshs;

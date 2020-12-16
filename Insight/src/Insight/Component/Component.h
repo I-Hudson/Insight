@@ -26,7 +26,7 @@ public:
 		, m_componentId(-1)
 	{ }
 
-	Component(Entity* owner)
+	Component(SharedPtr<Entity> owner)
 		: Insight::Object()
 		, Insight::Serialization::Serializable(this, true)
 		, m_owner(owner)
@@ -36,11 +36,11 @@ public:
 	{ }
 	virtual ~Component() {}
 
-	void SetEntity(Entity* entity) { m_owner = entity; }
-	Entity* GetEntity() const { return m_owner; }
+	void SetEntity(SharedPtr<Entity> entity) { m_owner = entity; }
+	WeakPtr<Entity> GetEntity() const { return m_owner; }
 
 	template<typename T>
-	T* GetComponent();
+	SharedPtr<T> GetComponent();
 
 	const bool& IsDirty() const { return m_isDirty; }
 
@@ -57,7 +57,7 @@ private:
 	void Clean() { m_isDirty = false; }
 
 private:
-	Entity* m_owner;
+	WeakPtr<Entity> m_owner;
 	std::string m_uuid;
 
 	friend Entity;
@@ -65,10 +65,14 @@ private:
 };
 
 template<typename T>
-inline T* Component::GetComponent()
+inline SharedPtr<T> Component::GetComponent()
 {
 	const bool result = std::is_base_of<Component, T>::value;
 	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
 
-	return m_owner->GetComponent<T>();
+	if (SharedPtr<Entity> parnetPtr = m_owner.lock())
+	{
+		return parnetPtr->GetComponent<T>();
+	}
+	return {};
 }

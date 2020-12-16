@@ -11,18 +11,18 @@ namespace Insight
 		{
 			for (auto root : m_rootNodes)
 			{
-				DELETE_ON_HEAP(root);
+				root.reset();
 			}
 		}
 
-		SerializableElement* SerializableFile::GetNewElement(const std::string& name)
+		SharedPtr<SerializableElement> SerializableFile::GetNewElement(const std::string& name)
 		{
-			SerializableElement* elment = NEW_ON_HEAP(SerializableElement, name);
-			m_rootNodes.push_back(elment);
-			return elment;
+			SharedPtr<SerializableElement> element = CreateSharedPtr<SerializableElement>(name);
+			m_rootNodes.push_back(element);
+			return element;
 		}
 
-		SerializableFile* SerializableFile::Create()
+		UniquePtr<SerializableFile> SerializableFile::Create()
 		{
 			/* Read config and choose what to use.
 			if (xml)
@@ -33,7 +33,7 @@ namespace Insight
 			{
 				return NEW_ON_HEAP(SerializableFileJSON);
 			}*/
-			return NEW_ON_HEAP(SerializableFile_XML);
+			return CreateUniquePtr<SerializableFile_XML>();
 		}
 
 		SerializableElement::SerializableElement(const std::string& elementName)
@@ -44,97 +44,83 @@ namespace Insight
 		{
 			for (auto child : m_children)
 			{
-				DELETE_ON_HEAP(child);
+				child.reset();
 			}
 
 			for (auto data : m_dataTypes)
 			{
-				DELETE_ON_HEAP(data);
+				data.reset();
 			}
 		}
 
-		void SerializableElement::AddChild(SerializableElement* child)
+		SharedPtr<SerializableElement> SerializableElement::AddChild(const std::string& childName)
 		{
-			m_children.push_back(child);
-		}
-
-		SerializableElement* SerializableElement::AddChild(const std::string& childName)
-		{
-			SerializableElement* child = NEW_ON_HEAP(SerializableElement, childName);
+			SharedPtr<SerializableElement>child = CreateSharedPtr<SerializableElement>(childName);
 			m_children.push_back(child);
 			return child;
 		}
 
-		SerializableElement* SerializableElement::AddString(const std::string& key, const std::string& value)
+		void SerializableElement::AddString(const std::string& key, const std::string& value)
 		{
-			SerializableElementString* stringType = NEW_ON_HEAP(SerializableElementString);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementString> type = CreateSharedPtr<SerializableElementString>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddInt(const std::string& key, const U32& value)
+		void SerializableElement::AddInt(const std::string& key, const U32& value)
 		{
-			SerializableElementInt* stringType = NEW_ON_HEAP(SerializableElementInt);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementInt> type = CreateSharedPtr<SerializableElementInt>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddFloat(const std::string& key, const float& value)
+		void SerializableElement::AddFloat(const std::string& key, const float& value)
 		{
-			SerializableElementFloat* stringType = NEW_ON_HEAP(SerializableElementFloat);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementFloat> type = CreateSharedPtr<SerializableElementFloat>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddVec2(const std::string& key, const glm::vec2& value)
+		void SerializableElement::AddVec2(const std::string& key, const glm::vec2& value)
 		{
-			SerializableElementVec2* stringType = NEW_ON_HEAP(SerializableElementVec2);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementVec2> type = CreateSharedPtr<SerializableElementVec2>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddVec3(const std::string& key, const glm::vec3& value)
+		void SerializableElement::AddVec3(const std::string& key, const glm::vec3& value)
 		{
-			SerializableElementVec3* stringType = NEW_ON_HEAP(SerializableElementVec3);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementVec3> type = CreateSharedPtr<SerializableElementVec3>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddVec4(const std::string& key, const glm::vec4& value)
+		void SerializableElement::AddVec4(const std::string& key, const glm::vec4& value)
 		{
-			SerializableElementVec4* stringType = NEW_ON_HEAP(SerializableElementVec4);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementVec4> type = CreateSharedPtr<SerializableElementVec4>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddMat2(const std::string& key, const glm::mat2& value)
+		void SerializableElement::AddMat2(const std::string& key, const glm::mat2& value)
 		{
-			SerializableElementMat2* stringType = NEW_ON_HEAP(SerializableElementMat2);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementMat2> type = CreateSharedPtr<SerializableElementMat2>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddMat3(const std::string& key, const glm::mat3& value)
+		void SerializableElement::AddMat3(const std::string& key, const glm::mat3& value)
 		{
-			SerializableElementMat3* stringType = NEW_ON_HEAP(SerializableElementMat3);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementMat3> type = CreateSharedPtr<SerializableElementMat3>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
-		SerializableElement* SerializableElement::AddMat4(const std::string& key, const glm::mat4& value)
+		void SerializableElement::AddMat4(const std::string& key, const glm::mat4& value)
 		{
-			SerializableElementMat4* stringType = NEW_ON_HEAP(SerializableElementMat4);
-			stringType->SetKeyData(key, value);
-			m_dataTypes.push_back(stringType);
-			return this;
+			SharedPtr<SerializableElementMat4> type = CreateSharedPtr<SerializableElementMat4>();
+			type->SetKeyData(key, value);
+			m_dataTypes.push_back(type);
 		}
 
 		bool SerializableElement::NoChildren() const

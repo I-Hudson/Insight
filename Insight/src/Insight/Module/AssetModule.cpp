@@ -12,13 +12,13 @@ namespace Insight
 		AssetModule::AssetModule()
 			: m_deserlizaed(false)
 		{
-			m_modelLibrary = NEW_ON_HEAP(Insight::Library::ModelLibrary);
+			m_modelLibrary = CreateSharedPtr<Insight::Library::ModelLibrary>();
 			//m_shaderLibrary = NEW_ON_HEAP(Insight::Library::ShaderLibrary);
 		}
 
 		AssetModule::~AssetModule()
 		{
-			DELETE_ON_HEAP(m_modelLibrary);
+			m_modelLibrary.reset();
 			//DELETE_ON_HEAP(m_shaderLibrary);
 		}
 

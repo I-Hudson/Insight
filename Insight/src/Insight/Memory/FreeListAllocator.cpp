@@ -92,7 +92,7 @@ namespace Insight
 			allocHeader->BlockSize = requiredSize;
 			allocHeader->TypeSize = TypeSize;
 			IS_CORE_ASSERT(typeName.length() <= AllocHeader_TypeNameLength, "[FreeListAllocator::Alloc] 'type' is longer then allowed. Shortten the 'type' name in this function.");
-			strcpy(&allocHeader->TypeName[0], typeName.c_str());
+			strcpy_s(&allocHeader->TypeName[0], typeName.size() * sizeof(char), typeName.c_str());
 			allocHeader->AlignmentPadding = alignmentPadding;
 
 			m_sizeUsed += requiredSize + alignmentPadding;

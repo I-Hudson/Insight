@@ -35,21 +35,24 @@ namespace vks
 	class VulkanRendererEditorOverlay : public Insight::Editor::EditorPanel
 	{
 	public:
-		VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer);
+		VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);
 		~VulkanRendererEditorOverlay();
 
 		virtual void Update(const float& deltaTime) override;
 
 	private:
-		VulkanRenderer& m_renderer;
+		WeakPtr<VulkanRenderer> m_renderer;
 	};
 #endif
 
 	class IS_API VulkanRenderer : public Insight::Renderer
+		, public std::enable_shared_from_this<VulkanRenderer>
 	{
 	public:
 		VulkanRenderer();
 		virtual ~VulkanRenderer() override;
+
+		virtual void OnCreate() override;
 
 		void InitVulkan();
 
@@ -61,7 +64,7 @@ namespace vks
 		/** @brief Return our instance */
 		VkInstance GetInstance() { return m_instance; }
 		/** @brief Return our device wrapper */
-		vks::VulkanDevice* GetDevice() { return m_vulkanDevice; }
+		SharedPtr<vks::VulkanDevice> GetDevice() { return m_vulkanDevice; }
 		/** @brief Return our physical device */
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 		/** @brief Return the graphics queue */
@@ -189,7 +192,7 @@ namespace vks
 		void* m_deviceCreatepNextChain = nullptr;
 
 		/** @brief Encapsulated physical and logical vulkan device */
-		vks::VulkanDevice* m_vulkanDevice;
+		SharedPtr<vks::VulkanDevice> m_vulkanDevice;
 
 		/** @brief Logical device, application's view of the physical device (GPU) */
 		VkDevice m_device;
@@ -225,8 +228,8 @@ namespace vks
 
 		VulkanMaterial m_defaultMaterial[3];
 		MaterialBlockData m_defaultMaterialBlock[3];
-		Entity* m_editorEntity;
-		CameraComponent* m_editorCamera;
+		SharedPtr<Entity> m_editorEntity;
+		SharedPtr<CameraComponent> m_editorCamera;
 
 		struct MVP
 		{
@@ -236,7 +239,7 @@ namespace vks
 			glm::vec4 lightPos;
 		};
 		glm::mat4 m_testModelMatrix;
-		Model* m_testModel;
+		SharedPtr<Model> m_testModel;
 		glm::vec4 m_lightPos;
 		float m_lightPosAngle;
 

@@ -14,11 +14,11 @@ namespace Insight
 {
 	GraphicsAPI Renderer::s_API = GraphicsAPI::Vulkan;
 
-	Renderer* Renderer::Create()
+	SharedPtr<Renderer> Renderer::Create()
 	{
 		switch (s_API)
 		{
-		case GraphicsAPI::Vulkan: return NEW_ON_HEAP(vks::VulkanRenderer);
+		case GraphicsAPI::Vulkan: return CreateSharedPtr<vks::VulkanRenderer>();
 		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
 		}
 		return nullptr;

@@ -31,7 +31,7 @@ namespace Insight
 
 		virtual Material* GetDefaultMaterial() { return nullptr; }
 
-		static Renderer* Create();
+		static SharedPtr<Renderer> Create();
 
 		struct RendererConfig
 		{

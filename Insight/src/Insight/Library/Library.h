@@ -15,29 +15,25 @@ namespace Insight
 			Library() { }
 			virtual ~Library();
 
-			T* AddAsset(const std::string& uuid, T* asset);
-			T* AddAsset();
-			T* GetAsset(const std::string& uuid);
+			SharedPtr<T> AddAsset(const std::string& uuid, SharedPtr<T> asset);
+			SharedPtr<T> AddAsset();
+			SharedPtr<T> GetAsset(const std::string& uuid);
 			void RemoveAsset(const std::string& uuid);
 
 		protected:
 			bool Exists(const std::string& uuid);
 
-			std::unordered_map<std::string, T*> m_assets;
+			std::unordered_map<std::string, SharedPtr<T>> m_assets;
 		};
 
 		template<typename T>
 		inline Library<T>::~Library()
 		{
-			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
-			{
-				DELETE_ON_HEAP((*it).second);
-			}
 			m_assets.clear();
 		}
 
 		template<typename T>
-		inline T* Library<T>::AddAsset(const std::string& uuid, T* asset)
+		inline SharedPtr<T> Library<T>::AddAsset(const std::string& uuid, SharedPtr<T> asset)
 		{
 			if (Exists(uuid))
 			{
@@ -49,15 +45,15 @@ namespace Insight
 		}
 
 		template<typename T>
-		inline T* Library<T>::AddAsset()
+		inline SharedPtr<T> Library<T>::AddAsset()
 		{
-			T* t = NEW_ON_HEAP(T);
-			Insight::UUID* uuid = static_cast<Insight::UUID*>(t);
+			SharedPtr<T> t = CreateSharedPtr<T>();
+			SharedPtr<T> uuid = StaticPointerCast<Insight::UUID>(t);
 			return AddAsset(uuid->GetUUID(), t);
 		}
 
 		template<typename T>
-		inline T* Library<T>::GetAsset(const std::string& uuid)
+		inline SharedPtr<T> Library<T>::GetAsset(const std::string& uuid)
 		{
 			if (Exists(uuid))
 			{

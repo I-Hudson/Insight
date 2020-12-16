@@ -10,20 +10,20 @@ class IS_API MeshComponent : public Component
 {
 public:
 	MeshComponent();
-	MeshComponent(Entity* owner);
+	MeshComponent(SharedPtr<Entity> owner);
 	virtual ~MeshComponent() override;
 
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	void SetMesh(Mesh* mesh);
-	Mesh* GetMesh() const { return m_mesh; }
+	void SetMesh(SharedPtr<Mesh> mesh);
+	SharedPtr<Mesh> GetMesh() const { return m_mesh; }
 
 	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
-	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
 	MaterialRenderData GetMaterialRendererData() { return m_materialRendererData; }
 
@@ -96,7 +96,7 @@ private:
 	};
 
 	BoundingBox m_boundingBox;
-	Mesh* m_mesh;
+	SharedPtr<Mesh> m_mesh;
 	Material* m_materal;
 	MaterialRenderData m_materialRendererData;
 

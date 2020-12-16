@@ -40,7 +40,7 @@ namespace Insight
         template<typename... Args>
         static T* Create(Args... args)
         {
-            SetInstancePtr(NEW_ON_HEAP(T, std::forward<Args>(args)...));
+            SetInstancePtr(new T(std::forward<Args>(args)...));
 
             return Instance();
         }
@@ -55,7 +55,7 @@ namespace Insight
 
         static void Destroy()
         {
-            DELETE_ON_HEAP(s_instance);
+            delete s_instance;
         }
 
         static void DestroyWithoutMemoryManager()

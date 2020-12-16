@@ -36,8 +36,8 @@ Mesh::~Mesh()
 	m_vertexBuffer->Destroy();
 	m_indexBuffer->Destroy();
 
-	DELETE_ON_HEAP(m_vertexBuffer);
-	DELETE_ON_HEAP(m_indexBuffer);
+	m_vertexBuffer.reset();
+	m_indexBuffer.reset();
 }
 
 void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
@@ -53,11 +53,11 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_textures = textures;
 	}
 
-	m_vertexBuffer = NEW_ON_HEAP(vks::VulkanBuffer);
-	m_indexBuffer = NEW_ON_HEAP(vks::VulkanBuffer);
+	m_vertexBuffer = CreateSharedPtr<vks::VulkanBuffer>();
+	m_indexBuffer = CreateSharedPtr<vks::VulkanBuffer>();
 
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer, m_vertices.data());
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer, m_indices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
 }
 
 void Mesh::Draw(VkCommandBuffer commandBuffer)

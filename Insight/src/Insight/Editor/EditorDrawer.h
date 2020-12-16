@@ -41,7 +41,7 @@ namespace Insight
 				std::string objectClassName = GET_SHORT_NAME_OF_TYPE(ObjectClass);
 				if (m_editorDrawers.find(objectClassName) == std::end(m_editorDrawers))
 				{
-					EditorDrawerClass* tPtr = NEW_ON_HEAP(EditorDrawerClass);
+					SharedPtr<EditorDrawerClass> tPtr = CreateSharedPtr<EditorDrawerClass>();
 					m_editorDrawers[objectClassName] = tPtr;
 				}
 			}
@@ -61,12 +61,12 @@ namespace Insight
 			{
 				for (auto& drawer : m_editorDrawers)
 				{
-					DELETE_ON_HEAP(drawer.second);
+					drawer.second.reset();
 				}
 			}
 
 		private:
-			std::unordered_map<std::string, EditorDrawer*> m_editorDrawers;
+			std::unordered_map<std::string, SharedPtr<EditorDrawer>> m_editorDrawers;
 		};
 	}
 }

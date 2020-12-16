@@ -23,7 +23,7 @@ namespace Insight
 			ClearPtr();
 		}
 
-		Model* ModelLibrary::GetAssetFromPath(const std::string& filePath)
+		SharedPtr<Model> ModelLibrary::GetAssetFromPath(const std::string& filePath)
 		{
 			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			{
@@ -33,7 +33,7 @@ namespace Insight
 				}
 			}
 
-			Model* m = NEW_ON_HEAP(Model, filePath);
+			SharedPtr<Model> m = CreateSharedPtr<Model>(filePath);
 			AddAsset(m->GetUUID(), m);
 
 			return m;
@@ -53,13 +53,13 @@ namespace Insight
 				{
 					std::string formattedFilePath = entry.path().u8string();
 					std::replace(formattedFilePath.begin(), formattedFilePath.end(), '\\', '/');
-					Model* m = NEW_ON_HEAP(Model, formattedFilePath);
+					SharedPtr<Model> m = CreateSharedPtr<Model>(formattedFilePath);
 					AddAsset(m->GetUUID(), m);
 				}
 			}
 		}
 
-		void ModelLibrary::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+		void ModelLibrary::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 		{
 			//for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			//{
@@ -77,7 +77,7 @@ namespace Insight
 			//}
 		}
 
-		void ModelLibrary::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+		void ModelLibrary::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -99,7 +99,7 @@ namespace Insight
 				std::string uuid = model->FirstChildElement("UUID")->GetText();
 				std::string filePath = model->FirstChildElement("FilePath")->GetText();
 				//modelsInFile.push_back(std::pair<std::string, std::string>(filePath, uuid));
-				Model* m = NEW_ON_HEAP(Model, filePath, uuid);
+				SharedPtr<Model> m = CreateSharedPtr<Model>(filePath, uuid);
 				AddAsset(m->GetUUID(), m);
 
 				model = model->NextSibling();

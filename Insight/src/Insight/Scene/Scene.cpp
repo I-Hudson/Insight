@@ -35,11 +35,11 @@ namespace Insight
 		Unload();
 	}
 
-	Entity* Scene::CreateEntity(const std::string& name)
+	SharedPtr<Entity> Scene::CreateEntity(const std::string& name)
 	{
-		Entity* e = NEW_ON_HEAP(Entity, name);
+		SharedPtr<Entity> e = CreateSharedPtr<Entity>(name);
 		e->AddComponent<TransformComponent>();
-
+		m_registry.push_back(e);
 		return e;
 	}
 
@@ -58,17 +58,20 @@ namespace Insight
 
 		if (found)
 		{
-			DELETE_ON_HEAP((*it));
+			(*it).reset();
 			m_registry.erase(it);
 		}
 	}
 
-	void Scene::DeleteEntiy(Entity* ptr)
+	void Scene::DeleteEntiy(SharedPtr<Entity> ptr)
 	{
 		auto it = std::find(m_registry.begin(), m_registry.end(), ptr);
-		DELETE_ON_HEAP((*it));
+		if (it != m_registry.end())
+		{
+			(*it).reset();
 
-		m_registry.erase(it);
+			m_registry.erase(it);
+		}
 	}
 
 	const std::string& Scene::GetSceneName() const
@@ -116,17 +119,18 @@ namespace Insight
 	{
 			IS_PROFILE_FUNCTION();
 
-			Insight::Serialization::SerializableFile* serializableFile = Insight::Serialization::SerializableFile::Create();
+			UniquePtr<Insight::Serialization::SerializableFile> serializableFile = Insight::Serialization::SerializableFile::Create();
 			auto root = serializableFile->GetNewElement("Scene");
 			for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
 			{
-				auto entityNode = root->AddChild("Entity");
+				SharedPtr<Insight::Serialization::SerializableElement>entityNode = root->AddChild("Entity");
 				(*it)->Serialize(entityNode);
 			}
 
 			serializableFile->SaveFile(DEFAULT_SAVE_PATH + m_sceneName);
 
-			DELETE_ON_HEAP(serializableFile);
+			serializableFile.reset();
+			//DELETE_ON_HEAP(serializableFile);
 
 			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
 	}
@@ -153,7 +157,7 @@ namespace Insight
 					do
 					{
 						std::string type = c->FirstChildElement("Type")->ToElement()->GetText();
-						Serialization::Serializable* s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
+						SharedPtr<Serialization::Serializable> s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
 						//s->Deserialize(c);
 						c = c->NextSibling();
 					} while (c != nullptr);
@@ -170,7 +174,7 @@ namespace Insight
 			for (auto itE = m_registry.begin(); itE != m_registry.end(); ++itE)
 			{
 				auto components = (*itE)->GetAllComponents();
-				for (auto itC = components->begin(); itC != components->end(); ++itC)
+				for (auto itC = components.begin(); itC != components.end(); ++itC)
 				{
 					(*itC)->OnCreate();
 				}

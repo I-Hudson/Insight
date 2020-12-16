@@ -14,49 +14,46 @@ REGISTER_DEF_TYPE(Entity);
 Entity::Entity()
 	: Serializable(this, false)
 {
-	m_data.Name = "Default";
-	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
+	m_name = "Default";
 }
 
 Entity::Entity(const std::string& id)
 	: Serializable(this, false)
 {
-	m_data.Name = id;
-	Insight::Scene::s_CurrentScene->m_registry.push_back(this);
+	m_name = id;
 }
 
 Entity::Entity(const std::string& id, bool attachToScene)
 	: Serializable(this, false)
 {
-	m_data.Name = id;
-	m_data.AttachedToScene = false;
+	m_name = id;
+	m_attachedToScene = false;
 }
 
 Entity::~Entity()
 {
 	RemoveAllComponenets();
-	//Insight::Scene::s_CurrentScene->m_registry.erase(std::find(Insight::Scene::s_CurrentScene->m_registry.begin(), Insight::Scene::s_CurrentScene->m_registry.end(), this));
 }
 
-Entity* Entity::Create(const std::string& id)
+SharedPtr<Entity> Entity::Create(const std::string& id)
 {
 	return Insight::Scene::s_CurrentScene->CreateEntity(id);
 }
 
-Entity* Entity::CreateFromModel(Model* model)
+SharedPtr<Entity> Entity::CreateFromModel(SharedPtr<Model> model)
 {
 	IS_PROFILE_FUNCTION();
 
 	std::string modelName = model->GetName();
-	Entity* e = Entity::Create(modelName);
+	SharedPtr<Entity> e = Entity::Create(modelName);
 
 	unsigned int meshCount = model->GetSubMeshCount();
 	if (meshCount > 1)
 	{
 		for (unsigned int i = 0; i < meshCount; ++i)
 		{
-			Mesh* subMesh = model->GetSubMesh(i);
-			Entity* childEntity = Entity::Create(subMesh->GetName());
+			SharedPtr<Mesh> subMesh = model->GetSubMesh(i);
+			SharedPtr<Entity> childEntity = Entity::Create(subMesh->GetName());
 			childEntity->AddComponent<MeshComponent>()->SetMesh(subMesh);
 
 			e->AddChild(childEntity);
@@ -80,11 +77,11 @@ void Entity::Delete()
 
 	if (this != nullptr)
 	{
-		for (int i = 0; i < m_data.Children.size(); ++i)
+		for (int i = 0; i < m_children.size(); ++i)
 		{
-			Insight::Scene::s_CurrentScene->DeleteEntiy(m_data.Children[i]);
+			Insight::Scene::s_CurrentScene->DeleteEntiy(m_children[i]);
 		}
-		Insight::Scene::s_CurrentScene->DeleteEntiy(this);
+		Insight::Scene::s_CurrentScene->DeleteEntiy(this->shared_from_this());
 	}
 }
 
@@ -92,7 +89,7 @@ void Entity::OnUpdate(const float deltaTime)
 {
 	IS_PROFILE_FUNCTION();
 
-	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		(*it)->OnUpdate(deltaTime);
 	}
@@ -100,46 +97,46 @@ void Entity::OnUpdate(const float deltaTime)
 
 void Entity::SetID(const std::string& id)
 {
-	m_data.Name = id;
+	m_name = id;
 }
 
 std::string& Entity::GetID()
 {
-	return m_data.Name;
+	return m_name;
 }
 
-Entity* Entity::AddChild(const std::string& childId)
+SharedPtr<Entity> Entity::AddChild(const std::string& childId)
 {
-	Entity* e = Insight::Scene::s_CurrentScene->CreateEntity(childId);
+	SharedPtr<Entity> e = Insight::Scene::s_CurrentScene->CreateEntity(childId);
 	AddChild(e);
 	return e;
 }
 
-void Entity::AddChild(Entity* child)
+void Entity::AddChild(SharedPtr<Entity> child)
 {
-	if (std::find(m_data.Children.begin(), m_data.Children.end(), child) == m_data.Children.end())
+	if (std::find(m_children.begin(), m_children.end(), child) == m_children.end())
 	{
-		m_data.Children.push_back(child);
+		m_children.push_back(child);
 	}
-	child->SetParent(this);
+	child->SetParent(this->shared_from_this());
 }
 
-Entity* Entity::GetChild(int childIndex)
+SharedPtr<Entity> Entity::GetChild(int childIndex)
 {
-	if (childIndex < 0 || childIndex >= m_data.Children.size())
+	if (childIndex < 0 || childIndex >= m_children.size())
 	{
 		IS_ASSERT(true, "Entity: GetChild: Out of range.");
 		return nullptr;
 	}
-	return m_data.Children[childIndex];
+	return m_children[childIndex];
 }
 
-void Entity::RemoveChild(Entity* child)
+void Entity::RemoveChild(SharedPtr<Entity> child)
 {
-	auto it = std::find(m_data.Children.begin(), m_data.Children.end(), child);
-	if (it != m_data.Children.end())
+	auto it = std::find(m_children.begin(), m_children.end(), child);
+	if (it != m_children.end())
 	{
-		m_data.Children.erase(it);
+		m_children.erase(it);
 		child->SetParent(nullptr);
 	}
 }
@@ -164,21 +161,21 @@ void Entity::RemoveChild(Entity* child)
 //	}
 //}
 
-void Entity::Serialize(Insight::Serialization::SerializableElement* element, bool force)
+void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	if (GetParent() == nullptr || force)
+	if (GetParent().expired() || force)
 	{
 		element->AddString("UUID", GetUUID());
 		element->AddString("Type", "Entity");
-		element->AddString("Name", m_data.Name);
+		element->AddString("Name", m_name);
 
-		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
 			auto childComponent = element->AddChild("Component");
 			(*it)->Serialize(childComponent, true);
 		}
 
-		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
+		for (auto it = m_children.begin(); it != m_children.end(); ++it)
 		{
 			auto childEntity = element->AddChild("Entity");
 			(*it)->Serialize(childEntity, true);
@@ -186,7 +183,7 @@ void Entity::Serialize(Insight::Serialization::SerializableElement* element, boo
 	}
 }
 
-void Entity::Deserialize(Insight::Serialization::SerializableElement* element, bool force)
+void Entity::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	//if (auto uuid = in->FirstChildElement("UUID"))
 	//{
@@ -232,12 +229,12 @@ void Entity::Deserialize(Insight::Serialization::SerializableElement* element, b
 	//}
 }
 
-void Entity::AddComponent(Component* component)
+void Entity::AddComponent(SharedPtr<Component> component)
 {
-	m_data.Components.push_back(component);
+	m_components.push_back(component);
 
-	component->SetEntity(this);
-	m_data.ComponetBitset[component->m_componentId] = true;
+	component->SetEntity(this->shared_from_this());
+	m_componetBitset[component->m_componentId] = true;
 
 	if (component->m_updateEveryFarme)
 	{
@@ -249,16 +246,11 @@ void Entity::RemoveAllComponenets()
 {
 	IS_PROFILE_FUNCTION();
 
-	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
+	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		(*it)->OnDestroy();
 	}
 
-	for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
-	{
-		DELETE_ON_HEAP(*it);
-	}
-
-	m_data.Components.clear();
-	m_data.ComponetBitset.reset();
+	m_components.clear();
+	m_componetBitset.reset();
 }

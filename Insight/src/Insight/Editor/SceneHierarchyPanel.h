@@ -11,18 +11,18 @@ namespace Insight
 		class SceneHierarchyPanel : public EditorPanel
 		{
 		public:
-			SceneHierarchyPanel(const Module::EditorModule* editorModule);
+			SceneHierarchyPanel(const SharedPtr<Module::EditorModule> editorModule);
 			~SceneHierarchyPanel() override;
 
 			virtual void Update(const float& deltaTime) override;
 
 		private:
-			void DrawEntityTreeView(Entity* entity, bool& newEntitySelected);
-			int GetTreeNodeFlags(Entity* entity);
+			void DrawEntityTreeView(WeakPtr<Entity> entity, bool& newEntitySelected);
+			int GetTreeNodeFlags(WeakPtr<Entity> entity);
 
-			void DrawCompoentPanel(Entity* entity);
+			void DrawCompoentPanel(WeakPtr<Entity> entity);
 
-			Entity* m_selectedEntity;
+			SharedPtr<Entity> m_selectedEntity;
 		};
 	}
 }

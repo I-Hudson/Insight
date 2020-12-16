@@ -15,11 +15,11 @@ namespace Insight
 		ClearPtr();
 	}
 
-	ImGuiRenderer* Insight::ImGuiRenderer::Create()
+	SharedPtr<ImGuiRenderer> Insight::ImGuiRenderer::Create()
 	{
 		switch (Renderer::s_API)
 		{
-			case GraphicsAPI::Vulkan: return NEW_ON_HEAP(vks::VulkanImGUIRenderer);
+			case GraphicsAPI::Vulkan: return CreateSharedPtr<vks::VulkanImGUIRenderer>();
 		}
 
 		return nullptr;

@@ -19,11 +19,11 @@ namespace Insight
 			ModelLibrary();
 			virtual ~ModelLibrary() override;
 
-			Model* GetAssetFromPath(const std::string& filePath);
+			SharedPtr<Model> GetAssetFromPath(const std::string& filePath);
 			void LoadAssetsFromFolder(const std::string& folderName, const bool& lookInChildren);
 
-			virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
-			virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+			virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+			virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
 		private:
 			const std::vector<std::string> m_extensions =

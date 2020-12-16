@@ -17,14 +17,14 @@ class IS_API CameraComponent : public Component
 {
 public:
 	CameraComponent();
-	CameraComponent(Entity* owner);
+	CameraComponent(SharedPtr<Entity> owner);
 	virtual ~CameraComponent() override;
 
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	virtual void Serialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Insight::Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);
