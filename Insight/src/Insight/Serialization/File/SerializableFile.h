@@ -9,7 +9,6 @@ namespace Insight
 	namespace Serialization
 	{
 		class SerializableElement;
-		class SerializableElementType;
 
 		class IS_API SerializableFile
 		{
@@ -41,41 +40,28 @@ namespace Insight
 
 			const std::string& GetElementName() const { return m_elementName; }
 
-			void AddDataFromType(const std::string& attriKey, const std::string& attriValue, const std::string& attriType);
-
 			SharedPtr<SerializableElement> GetFirstChild();
 			SharedPtr<SerializableElement> GetLastChild();
 
 			WeakPtr<SerializableElement> PreviousSibling() const { return m_previousSibling; }
 			WeakPtr<SerializableElement> NextSibling() const { return m_nextSibling; }
 
-			SharedPtr<SerializableElementType> GetFirstElement(const std::string& elementKey);
+			SharedPtr<SerializableAttribute> GetFirstAttribute(const std::string& elementKey);
 
 			SharedPtr<SerializableElement> AddChild(const std::string& childName);
 
-			void AddString(const std::string& key, const std::string& value);
-			void AddInt(const std::string& key, const U32& value);
-			void AddFloat(const std::string& key, const float& value);
+			void AddAttribute(const std::string& key, const std::string& value);
 
-			void AddVec2(const std::string& key, const glm::vec2& value);
-			void AddVec3(const std::string& key, const glm::vec3& value);
-			void AddVec4(const std::string& key, const glm::vec4& value);
-
-			void AddMat2(const std::string& key, const glm::mat2& value);
-			void AddMat3(const std::string& key, const glm::mat3& value);
-			void AddMat4(const std::string& key, const glm::mat4& value);
-
-			bool NoChildren() const;
-			bool NoDataTypes() const;
+			bool HasChildren() const;
+			bool HasAttributes() const;
 
 			const std::vector<SharedPtr<SerializableElement>> GetAllChildren() const { return m_children; }
-			const std::vector<SharedPtr<SerializableElementType>> GetAllData() const { return m_dataTypes; }
+			const std::vector<SharedPtr<SerializableAttribute>> GetAllData() const { return m_attributes; }
 
 		private:
 			std::string m_elementName;
 			std::vector<SharedPtr<SerializableElement>> m_children;
-
-			std::vector<SharedPtr<SerializableElementType>> m_dataTypes;
+			std::vector<SharedPtr<SerializableAttribute>> m_attributes;
 
 			WeakPtr<SerializableElement> m_previousSibling;
 			WeakPtr<SerializableElement> m_nextSibling;

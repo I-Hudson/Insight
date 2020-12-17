@@ -165,9 +165,9 @@ void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> el
 {
 	if (GetParent().expired() || force)
 	{
-		element->AddString("UUID", GetUUID());
-		element->AddString("Type", "Entity");
-		element->AddString("Name", m_name);
+		element->AddAttribute("UUID", GetUUID());
+		element->AddAttribute("Type", "Entity");
+		element->AddAttribute("Name", m_name);
 
 		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{

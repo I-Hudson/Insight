@@ -102,21 +102,13 @@ void MeshComponent::SetMaterial(Material* material)
 
 void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	//Type->SetText("MeshComponent");
-	//out->InsertEndChild(Type);
-	//
-	//tinyxml2::XMLElement* MeshName = doc->NewElement("MeshName");
-	//MeshName->SetText(m_mesh->GetName().c_str());
-	//out->InsertEndChild(MeshName);
-	//
-	//tinyxml2::XMLElement* ModelUUID = doc->NewElement("ModelUUID");
-	//ModelUUID->SetText(m_mesh->GetModelUUID().c_str());
-	//out->InsertEndChild(ModelUUID);
-	//
-	//tinyxml2::XMLElement* SubMeshIndex = doc->NewElement("SubMeshIndex");
-	//SubMeshIndex->SetText(m_mesh->GetSubMeshIndex());
-	//out->InsertEndChild(SubMeshIndex);
+	element->AddAttribute("UUID", GetUUID());
+	if (m_mesh)
+	{
+		element->AddAttribute("MeshName", m_mesh->GetName().c_str());
+		element->AddAttribute("ModelUUID", m_mesh->GetUUID());
+		element->AddAttribute("SubMeshIndex", std::to_string(m_mesh->GetSubMeshIndex()));
+	}
 }
 
 void MeshComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)

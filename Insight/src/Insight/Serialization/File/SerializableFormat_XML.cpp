@@ -96,8 +96,8 @@ namespace Insight
 			const tinyxml2::XMLAttribute* attri = xmlElement->FirstAttribute();
 			while (attri != nullptr)
 			{
-				element->AddDataFromType(attri->Name(), attri->Value(), attri->Next()->Value());
-				attri = attri->Next()->Next();
+				element->AddAttribute(attri->Name(), attri->Value());
+				attri = attri->Next();
 			}
 
 			const tinyxml2::XMLElement* childElement = xmlElement->FirstChildElement();

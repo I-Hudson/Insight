@@ -1,39 +1,12 @@
 <Scene>
-    <Entity>
-        <UUID>
-            <Data Data="471daa91-e519-4776-8f86-2b0e4b792982" DataType="1"/>
-        </UUID>
-        <Type>
-            <Data Data="Entity" DataType="1"/>
-        </Type>
-        <Name>
-            <Data Data="MainCamera_In_Scene" DataType="1"/>
-        </Name>
-        <Component/>
-        <Component/>
+    <Entity UUID="547cf47f-724f-4329-9b90-25e1fb6ce48b" Type="Entity" Name="MainCamera">
+        <Component UUID="0a96fd44-49b0-454e-8cfa-523e65e72767" Type="TransformComponent" ViewMatrix="[-1.000000,0.000000,-0.000000,0.000000],[0.000000,1.000000,-0.000000,0.000000],[0.000000,-0.000000,-1.000000,0.000000],[-0.000000,-0.000000,0.000000,1.000000]"/>
+        <Component UUID="20bbce33-921d-4191-962c-1cf5c349d3f7" Type="CameraComponent" FOV="90.000000" NearPlane="0.100000" FarPlane="100000.000000"/>
     </Entity>
-    <Entity>
-        <UUID>
-            <Data Data="db2810e8-f62e-4d25-9d74-65e9c71c49d2" DataType="1"/>
-        </UUID>
-        <Type>
-            <Data Data="Entity" DataType="1"/>
-        </Type>
-        <Name>
-            <Data Data="Model Root" DataType="1"/>
-        </Name>
-        <Component/>
-        <Entity>
-            <UUID>
-                <Data Data="461578e8-f42e-4151-a8ac-3514c35547d3" DataType="1"/>
-            </UUID>
-            <Type>
-                <Data Data="Entity" DataType="1"/>
-            </Type>
-            <Name>
-                <Data Data="child_1" DataType="1"/>
-            </Name>
-            <Component/>
+    <Entity UUID="627cc292-29ad-4463-81d6-2fa46e731513" Type="Entity" Name="Root Entity">
+        <Component UUID="81ab05d8-7d2b-44c8-86f1-502268a28920" Type="TransformComponent" ViewMatrix="[1.000000,0.000000,0.000000,0.000000],[0.000000,1.000000,0.000000,0.000000],[0.000000,0.000000,1.000000,0.000000],[0.000000,0.000000,0.000000,1.000000]"/>
+        <Entity UUID="dc92131c-3248-42ab-8e6f-2d712d0e540e" Type="Entity" Name="child_1">
+            <Component UUID="7e2162e0-e1e7-4a30-abf2-35e58af11f85" Type="TransformComponent" ViewMatrix="[1.000000,0.000000,0.000000,0.000000],[0.000000,1.000000,0.000000,0.000000],[0.000000,0.000000,1.000000,0.000000],[0.000000,0.000000,0.000000,1.000000]"/>
         </Entity>
     </Entity>
     <Entity/>

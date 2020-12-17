@@ -681,7 +681,6 @@
     <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
     <ClCompile Include="src\Insight\Scene\Scene.cpp" />
-    <ClCompile Include="src\Insight\Serialization\File\SerializableElementTypes.cpp" />
     <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp" />
     <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_XML.cpp" />
     <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />

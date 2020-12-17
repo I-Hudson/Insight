@@ -1697,9 +1697,6 @@
     <ClCompile Include="src\Insight\Scene\Scene.cpp">
       <Filter>src\Insight\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Serialization\File\SerializableElementTypes.cpp">
-      <Filter>src\Insight\Serialization\File</Filter>
-    </ClCompile>
     <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClCompile>

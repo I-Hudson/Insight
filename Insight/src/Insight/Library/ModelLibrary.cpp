@@ -93,17 +93,17 @@ namespace Insight
 			//
 			//std::vector<std::pair<std::string, std::string>> modelsInFile;
 
-			tinyxml2::XMLNode* model = nullptr;//data->FirstChild();
-			do
-			{
-				std::string uuid = model->FirstChildElement("UUID")->GetText();
-				std::string filePath = model->FirstChildElement("FilePath")->GetText();
-				//modelsInFile.push_back(std::pair<std::string, std::string>(filePath, uuid));
-				SharedPtr<Model> m = CreateSharedPtr<Model>(filePath, uuid);
-				AddAsset(m->GetUUID(), m);
+			//tinyxml2::XMLNode* model = nullptr;//data->FirstChild();
+			//do
+			//{
+			//	std::string uuid = model->FirstChildElement("UUID")->GetText();
+			//	std::string filePath = model->FirstChildElement("FilePath")->GetText();
+			//	//modelsInFile.push_back(std::pair<std::string, std::string>(filePath, uuid));
+			//	SharedPtr<Model> m = CreateSharedPtr<Model>(filePath, uuid);
+			//	AddAsset(m->GetUUID(), m);
 
-				model = model->NextSibling();
-			} while (model != nullptr);
+			//	model = model->NextSibling();
+			//} while (model != nullptr);
 
 			//concurrency::concurrent_vector<Model*> loadedMeshes;
 			//

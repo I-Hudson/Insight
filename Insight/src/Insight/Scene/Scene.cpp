@@ -143,13 +143,12 @@ namespace Insight
 			if (serializableFile->LoadFile((DEFAULT_SAVE_PATH + file).c_str()))
 			{
 				SharedPtr<Insight::Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
-				SharedPtr<Insight::Serialization::SerializableElement> entities = sceneNode->GetFirstChild();
-				if (entities != nullptr)
+				SharedPtr<Insight::Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
+				if (entity != nullptr)
 				{
-					SharedPtr<Insight::Serialization::SerializableElement> entity = entities->GetFirstChild();
 					do
 					{
-						auto typeElement = entity->GetFirstElement("Type");
+						auto typeElement = entity->GetFirstAttribute("Type");
 						if (typeElement)
 						{
 							std::string type = typeElement->GetValue();
@@ -160,7 +159,6 @@ namespace Insight
 					} while (entity != nullptr);
 				}
 			}
-			serializableFile->SaveFile(DEFAULT_SAVE_PATH + "Scene_Load_Save");
 		}
 
 		{

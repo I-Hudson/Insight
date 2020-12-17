@@ -7,7 +7,6 @@
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "File/SerializableFile.h"
-#include "SerializeHelper.h"
 #include <map>
 
 #define REGISTER_DEC_TYPE(NAME) \

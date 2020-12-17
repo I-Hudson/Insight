@@ -61,13 +61,11 @@ void CameraComponent::OnDestroy()
 
 void CameraComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//tinyxml2::XMLElement* Type = doc->NewElement("Type"); // GetNewElement();
-	//Type->SetText("CameraComponent");
-	//data->InsertEndChild(Type);
-	//
-	//SerializeHelper::SerializeFloat(data, doc, "FOV", m_fov);
-	//SerializeHelper::SerializeFloat(data, doc, "NearPlane", m_nearPlane);
-	//SerializeHelper::SerializeFloat(data, doc, "FarPlane", m_farPlane);
+	element->AddAttribute("UUID", GetUUID());
+	element->AddAttribute("Type", "CameraComponent");
+	element->AddAttribute("FOV", std::to_string(m_fov));
+	element->AddAttribute("NearPlane", std::to_string(m_nearPlane));
+	element->AddAttribute("FarPlane", std::to_string(m_farPlane));
 }
 
 void CameraComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)

@@ -1,6 +1,7 @@
 #include "ispch.h"
 #include "TransformComponent.h"
 #include "Insight/Entitiy/Entity.h"
+#include "Insight/Serialization/SerializeHelper.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -70,9 +71,9 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 
 void TransformComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	element->AddString("UUID", GetUUID());
-	element->AddString("Type", "TransformComponent");
-	element->AddMat4("ViewMatrix", m_transform);
+	element->AddAttribute("UUID", GetUUID());
+	element->AddAttribute("Type", "TransformComponent");
+	element->AddAttribute("ViewMatrix", SerializeHelper::TypeToString(m_transform));
 }
 
 void TransformComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
