@@ -1,0 +1,40 @@
+<Scene>
+    <Entity>
+        <UUID>
+            <Data Data="471daa91-e519-4776-8f86-2b0e4b792982" DataType="1"/>
+        </UUID>
+        <Type>
+            <Data Data="Entity" DataType="1"/>
+        </Type>
+        <Name>
+            <Data Data="MainCamera_In_Scene" DataType="1"/>
+        </Name>
+        <Component/>
+        <Component/>
+    </Entity>
+    <Entity>
+        <UUID>
+            <Data Data="db2810e8-f62e-4d25-9d74-65e9c71c49d2" DataType="1"/>
+        </UUID>
+        <Type>
+            <Data Data="Entity" DataType="1"/>
+        </Type>
+        <Name>
+            <Data Data="Model Root" DataType="1"/>
+        </Name>
+        <Component/>
+        <Entity>
+            <UUID>
+                <Data Data="461578e8-f42e-4151-a8ac-3514c35547d3" DataType="1"/>
+            </UUID>
+            <Type>
+                <Data Data="Entity" DataType="1"/>
+            </Type>
+            <Name>
+                <Data Data="child_1" DataType="1"/>
+            </Name>
+            <Component/>
+        </Entity>
+    </Entity>
+    <Entity/>
+</Scene>

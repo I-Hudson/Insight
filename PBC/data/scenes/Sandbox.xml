@@ -1,24 +1,13 @@
-<ROOT>
-    <Scene>
-        <Children>
-            <Entity>
-                <UUID>c7adb7cf-13d4-4f69-a414-40d2f4381499</UUID>
-                <Type>Entity</Type>
-                <Name>MainCamera</Name>
-            </Entity>
-            <Entity>
-                <UUID>b3ea04fb-c97f-4149-b0aa-088a8b9e3bd4</UUID>
-                <Type>Entity</Type>
-                <Name>Root Entity</Name>
-                <Children>
-                    <Entity>
-                        <UUID>be06be3f-f552-4743-8812-c461a6a98610</UUID>
-                        <Type>Entity</Type>
-                        <Name>child_1</Name>
-                    </Entity>
-                </Children>
-            </Entity>
-            <Entity/>
-        </Children>
-    </Scene>
-</ROOT>
+<Scene>
+    <Entity UUID="4e917297-0b11-4ac4-bfe1-93205b2624b4" Type="Entity" Name="MainCamera" Test_Int="42" Test_Float="84.000000" Test_Vec2="vec2(12.000000, 78.000000)">
+        <Component UUID="72b0a102-e63b-4fc8-9767-567bb8e34a05" Type="TransformComponent" ViewMatrix="mat4x4((-1.000000, 0.000000, -0.000000, 0.000000), (0.000000, 1.000000, -0.000000, 0.000000), (0.000000, -0.000000, -1.000000, 0.000000), (-0.000000, -0.000000, 0.000000, 1.000000))"/>
+        <Component/>
+    </Entity>
+    <Entity UUID="49ab2b92-ee63-483c-93ce-4c2c58fce089" Type="Entity" Name="Root Entity" Test_Int="42" Test_Float="84.000000" Test_Vec2="vec2(12.000000, 78.000000)">
+        <Component UUID="9980bf27-6b37-477f-bcc6-06abde36b33f" Type="TransformComponent" ViewMatrix="mat4x4((1.000000, 0.000000, 0.000000, 0.000000), (0.000000, 1.000000, 0.000000, 0.000000), (0.000000, 0.000000, 1.000000, 0.000000), (0.000000, 0.000000, 0.000000, 1.000000))"/>
+        <Entity UUID="bb0449c6-0a3d-4915-8268-72083993517e" Type="Entity" Name="child_1" Test_Int="42" Test_Float="84.000000" Test_Vec2="vec2(12.000000, 78.000000)">
+            <Component UUID="086809ab-6408-4b71-9921-dfd8bb0061d8" Type="TransformComponent" ViewMatrix="mat4x4((1.000000, 0.000000, 0.000000, 0.000000), (0.000000, 1.000000, 0.000000, 0.000000), (0.000000, 0.000000, 1.000000, 0.000000), (0.000000, 0.000000, 0.000000, 1.000000))"/>
+        </Entity>
+    </Entity>
+    <Entity/>
+</Scene>

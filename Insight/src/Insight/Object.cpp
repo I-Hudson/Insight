@@ -46,14 +46,14 @@ namespace Insight
 		return this == &pObject;
 	}
 
-	std::string Object::GetType()
-	{
-		if (!m_typeName.empty())
-		{
-			return m_typeName;
-		}
-		return std::string("Object");
-	}
+	//std::string Object::GetType()
+	//{
+	//	if (!m_typeName.empty())
+	//	{
+	//		return m_typeName;
+	//	}
+	//	return std::string("Object");
+	//}
 
 	void Object::RegisterOnDestroyCallback(void* callerClass, ObjectCallback callback)
 	{

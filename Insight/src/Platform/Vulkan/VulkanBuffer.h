@@ -43,5 +43,7 @@ namespace vks
 		VkResult Flush(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		VkResult Invalidate(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
 		void Destroy();
+
+		virtual std::string GetTypeName() const { return "VulkanBuffer"; }
 	};
 }

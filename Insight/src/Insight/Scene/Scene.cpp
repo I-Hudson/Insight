@@ -128,9 +128,7 @@ namespace Insight
 			}
 
 			serializableFile->SaveFile(DEFAULT_SAVE_PATH + m_sceneName);
-
 			serializableFile.reset();
-			//DELETE_ON_HEAP(serializableFile);
 
 			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
 	}
@@ -140,33 +138,29 @@ namespace Insight
 		{
 			IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
 
-			std::string filePath = file;
-			if (filePath.find_last_of('.') == SIZE_MAX)
+			UniquePtr<Insight::Serialization::SerializableFile> serializableFile = Insight::Serialization::SerializableFile::Create();
+			
+			if (serializableFile->LoadFile((DEFAULT_SAVE_PATH + file).c_str()))
 			{
-				filePath.append(".xml");
-			}
-
-			tinyxml2::XMLDocument doc;
-			tinyxml2::XMLError eResult = doc.LoadFile((DEFAULT_SAVE_PATH + filePath).c_str());
-			if (eResult == tinyxml2::XML_SUCCESS)
-			{
-				tinyxml2::XMLNode* root = doc.FirstChild();
-				tinyxml2::XMLNode* c = root->FirstChild();
-				if (c != nullptr)
+				SharedPtr<Insight::Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
+				SharedPtr<Insight::Serialization::SerializableElement> entities = sceneNode->GetFirstChild();
+				if (entities != nullptr)
 				{
+					SharedPtr<Insight::Serialization::SerializableElement> entity = entities->GetFirstChild();
 					do
 					{
-						std::string type = c->FirstChildElement("Type")->ToElement()->GetText();
-						SharedPtr<Serialization::Serializable> s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
-						//s->Deserialize(c);
-						c = c->NextSibling();
-					} while (c != nullptr);
+						auto typeElement = entity->GetFirstElement("Type");
+						if (typeElement)
+						{
+							std::string type = typeElement->GetValue();
+							SharedPtr<Serialization::Serializable> s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
+							s->Deserialize(entity);
+						}
+						entity = entity->NextSibling().lock();
+					} while (entity != nullptr);
 				}
 			}
-			else
-			{
-				IS_CORE_INFO("{0}", doc.ErrorIDToName(doc.ErrorID()));
-			}
+			serializableFile->SaveFile(DEFAULT_SAVE_PATH + "Scene_Load_Save");
 		}
 
 		{

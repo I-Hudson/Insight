@@ -77,7 +77,7 @@ namespace vks
 			renderer->m_debugOverlay.debugOptions[item_current] = 1;
 
 			UIHelper::DrawString("EditorCamera");
-			UIHelper::DrawString("EditorCamera", TextBold);
+			UIHelper::DrawString("EditorCamera", ShowInEditor | TextBold);
 			float fov = renderer->m_editorCamera->GetFov();
 			float nearPlane = renderer->m_editorCamera->GetNearPlane();
 			float farPlane = renderer->m_editorCamera->GetFarPlane();

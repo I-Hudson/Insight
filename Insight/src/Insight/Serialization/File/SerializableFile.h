@@ -1,7 +1,7 @@
 #pragma once
 #include "Insight/Core.h"
 #include "Insight/Memory/MemoryManager.h"
-
+#include "SerializableElementTypes.h"
 #include <glm/glm.hpp>
 
 namespace Insight
@@ -22,7 +22,11 @@ namespace Insight
 
 			virtual void SerializeData(const std::string& fileName) = 0;
 			virtual void DeserializeData(const std::string& fileName) = 0;
-			virtual void SaveFile(const std::string& fileName) = 0;
+			virtual bool SaveFile(const std::string& fileName) = 0;
+			virtual bool LoadFile(const std::string& fileName) = 0;
+
+			SharedPtr<SerializableElement> GetFirstChild();
+			SharedPtr<SerializableElement> GetLastChild();
 
 		protected:
 			std::vector<SharedPtr<SerializableElement>> m_rootNodes;
@@ -36,6 +40,16 @@ namespace Insight
 			~SerializableElement();
 
 			const std::string& GetElementName() const { return m_elementName; }
+
+			void AddDataFromType(const std::string& attriKey, const std::string& attriValue, const std::string& attriType);
+
+			SharedPtr<SerializableElement> GetFirstChild();
+			SharedPtr<SerializableElement> GetLastChild();
+
+			WeakPtr<SerializableElement> PreviousSibling() const { return m_previousSibling; }
+			WeakPtr<SerializableElement> NextSibling() const { return m_nextSibling; }
+
+			SharedPtr<SerializableElementType> GetFirstElement(const std::string& elementKey);
 
 			SharedPtr<SerializableElement> AddChild(const std::string& childName);
 
@@ -57,11 +71,16 @@ namespace Insight
 			const std::vector<SharedPtr<SerializableElement>> GetAllChildren() const { return m_children; }
 			const std::vector<SharedPtr<SerializableElementType>> GetAllData() const { return m_dataTypes; }
 
-		protected:
+		private:
 			std::string m_elementName;
 			std::vector<SharedPtr<SerializableElement>> m_children;
 
 			std::vector<SharedPtr<SerializableElementType>> m_dataTypes;
+
+			WeakPtr<SerializableElement> m_previousSibling;
+			WeakPtr<SerializableElement> m_nextSibling;
+
+			friend SerializableFile;
 		};
 	}
 }

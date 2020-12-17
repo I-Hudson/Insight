@@ -70,11 +70,9 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 
 void TransformComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
-	//Type->SetText("TransformComponent");
-	//out->InsertEndChild(Type);
-
-	//SerializeHelper::SerializeMat4(out, doc, "ViewMatrix", m_transform);
+	element->AddString("UUID", GetUUID());
+	element->AddString("Type", "TransformComponent");
+	element->AddMat4("ViewMatrix", m_transform);
 }
 
 void TransformComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)

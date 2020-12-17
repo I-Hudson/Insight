@@ -138,12 +138,12 @@ namespace Insight
 				for (auto componentsIT = components.begin(); componentsIT != components.end(); ++componentsIT)
 				{
 					IS_PROFILE_SCOPE("Draw Properties");
-					auto properties = IS_GET_ALL_PROPERTIES(&componentsIT, ShowInEditor);
+					auto properties = IS_GET_ALL_PROPERTIES((*componentsIT).get(), ShowInEditor);
 
 					ImGui::Separator();
-					ImGui::Text((*componentsIT)->GetType().c_str());
+					ImGui::Text((*componentsIT)->GetTypeName().c_str());
 
-					if (!Editor::EditorDrawerRegistry::Instance()->CallEditorDrawer((*componentsIT)->GetType().c_str(), *(*componentsIT)))
+					if (!Editor::EditorDrawerRegistry::Instance()->CallEditorDrawer((*componentsIT)->GetTypeName().c_str(), *(*componentsIT).get()))
 					{
 						for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
 						{

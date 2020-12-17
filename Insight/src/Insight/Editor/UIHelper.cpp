@@ -25,37 +25,37 @@ namespace Insight
 
 		bool IS_API UIHelper::DrawBool(const std::string& name, bool* v, PropertyFlags flags)
 		{
-			return InternalDrawElement({ {IS_PropertyFlags::None, [&]() { return ImGui::Checkbox(name.c_str(), v); }},
+			return InternalDrawElement({ {IS_PropertyFlags::ShowInEditor, [&]() { return ImGui::Checkbox(name.c_str(), v); }},
 									   }, flags, "bool");
 		}
 
 		bool IS_API UIHelper::DrawInt(const std::string& name, int* v, int clampMax, const std::string& format, PropertyFlags flags)
 		{
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputInt(name.c_str(), v, 0, 0, ImGuiInputTextFlags_ReadOnly); }},
-										 {IS_PropertyFlags::None, [&]() { return ImGui::DragInt(name.c_str(), v, 1.0f, 0, clampMax, format.c_str()); }},
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputInt(name.c_str(), v, 0, 0, ImGuiInputTextFlags_ReadOnly); }},
+										 {IS_PropertyFlags::ShowInEditor, [&]() { return ImGui::DragInt(name.c_str(), v, 1.0f, 0, clampMax, format.c_str()); }},
 									   }, flags, "int");
 		}
 
 		bool IS_API UIHelper::DrawFloat(const std::string& name, float* v, float clampMax, const std::string& format, PropertyFlags flags)
 		{
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat(name.c_str(), v, 0.0f, 0.0f, format.c_str(), ImGuiInputTextFlags_ReadOnly); }},
-										 {IS_PropertyFlags::None, [&]() { return ImGui::DragFloat(name.c_str(), v, 1.0f, 0, clampMax, format.c_str()); }},
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat(name.c_str(), v, 0.0f, 0.0f, format.c_str(), ImGuiInputTextFlags_ReadOnly); }},
+										 {IS_PropertyFlags::ShowInEditor, [&]() { return ImGui::DragFloat(name.c_str(), v, 1.0f, 0, clampMax, format.c_str()); }},
 									   }, flags, "float");
 		}
 
 		bool IS_API UIHelper::DrawString(const std::string& name, std::string* v, PropertyFlags flags)
 		{
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputText(name.c_str(), v, ImGuiInputTextFlags_ReadOnly); }},
-										 {InernalResolveFlags(IS_PropertyFlags::TextBold), [&]() { ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]); bool r = ImGui::InputText(name.c_str(), v); ImGui::PopFont(); return r; }},
-										 {IS_PropertyFlags::None, [&]() { return ImGui::InputText(name.c_str(), v); }},
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputText(name.c_str(), v, ImGuiInputTextFlags_ReadOnly); }},
+										 {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::TextBold), [&]() { ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]); bool r = ImGui::InputText(name.c_str(), v); ImGui::PopFont(); return r; }},
+										 {IS_PropertyFlags::ShowInEditor, [&]() { return ImGui::InputText(name.c_str(), v); }},
 									   }, flags, "string");
 		}
 
 		bool IS_API UIHelper::DrawString(const std::string& name, PropertyFlags flags)
 		{
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { ImGui::Text(name.c_str(), ImGuiInputTextFlags_ReadOnly); return 0; }},
-										 {InernalResolveFlags(IS_PropertyFlags::TextBold), [&]() { ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]); ImGui::Text(name.c_str()); ImGui::PopFont(); return 0; }},
-										 {IS_PropertyFlags::None, [&]() { ImGui::Text(name.c_str()); return 0; }},
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { ImGui::Text(name.c_str(), ImGuiInputTextFlags_ReadOnly); return 0; }},
+										 {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::TextBold), [&]() { ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]); ImGui::Text(name.c_str()); ImGui::PopFont(); return 0; }},
+										 {IS_PropertyFlags::ShowInEditor, [&]() { ImGui::Text(name.c_str()); return 0; }},
 									   }, flags, "string");
 		}
 
@@ -124,8 +124,8 @@ namespace Insight
 		{
 			float row[2] = { (*mat2)[rowIndex].x, (*mat2)[rowIndex].y, };
 			std::string label = propertyName + rowName;
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat2(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
-										  {IS_PropertyFlags::None, [&]()
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat2(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
+										  {IS_PropertyFlags::ShowInEditor, [&]()
 											{
 												bool r = ImGui::DragFloat2(label.c_str(), row, 1.0f, 0.0f, (flags & IS_PropertyFlags::ClampZero) == 1 ? std::numeric_limits<float>::max() : 0.0f);
 												(*mat2)[rowIndex].x = row[0]; (*mat2)[rowIndex].y = row[1];
@@ -138,8 +138,8 @@ namespace Insight
 		{
 			float row[3] = { (*mat3)[rowIndex].x, (*mat3)[rowIndex].y, (*mat3)[rowIndex].z };
 			std::string label = propertyName + rowName;
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat3(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
-										 {IS_PropertyFlags::None, [&]()
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat3(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
+										 {IS_PropertyFlags::ShowInEditor, [&]()
 											{
 												bool r = ImGui::DragFloat3(label.c_str(), row, 1.0f, 0.0f, (flags & IS_PropertyFlags::ClampZero) == 1 ? std::numeric_limits<float>::max() : 0.0f);
 												(*mat3)[rowIndex].x = row[0]; (*mat3)[rowIndex].y = row[1]; (*mat3)[rowIndex].z = row[2];
@@ -152,8 +152,8 @@ namespace Insight
 		{
 			float row[4] = { (*mat4)[rowIndex].x, (*mat4)[rowIndex].y, (*mat4)[rowIndex].z, (*mat4)[rowIndex].w };
 			std::string label = propertyName + rowName;
-			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat4(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
-										 {IS_PropertyFlags::None, [&]()
+			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat4(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
+										 {IS_PropertyFlags::ShowInEditor, [&]()
 											{
 												bool r = ImGui::DragFloat4(label.c_str(), row, 1.0f, 0.0f, (flags & IS_PropertyFlags::ClampZero) == 1 ? std::numeric_limits<float>::max() : 0.0f);
 												(*mat4)[rowIndex].x = row[0]; (*mat4)[rowIndex].y = row[1]; (*mat4)[rowIndex].z = row[2]; (*mat4)[rowIndex].w = row[3];

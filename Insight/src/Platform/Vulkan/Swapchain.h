@@ -38,6 +38,8 @@ namespace vks
 		VkResult QueuePresent(VkQueue queue, uint32_t imageIndex, VkSemaphore waitSemaphore = VK_NULL_HANDLE);
 		void CleanUp();
 
+		virtual std::string GetTypeName() const { return "Swapchain"; }
+
 		uint32_t GetImageCount() { return m_imageCount; }
 		uint32_t GetQueuNodeIndex() { return m_queueNodeIndex; }
 		VkImageView GetImageView(uint32_t index) { return m_buffers[index].view; }

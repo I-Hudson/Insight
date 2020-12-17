@@ -7,11 +7,16 @@
 class SerializeHelper
 {
 public:
-	static void SerializeFloat(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc, const std::string& id, const float& value)
+	template<typename T>
+	constexpr static std::string TypeToString(const T& data)
 	{
-		tinyxml2::XMLElement* floatElement = doc->NewElement(id.c_str());
-		floatElement->SetText(value);
-		out->InsertEndChild(floatElement);
+		IS_CORE_STATIC_ASSERT(false, "[SerializeHelper::TypeToString] no implementation.");
+	}
+
+	template<typename T>
+	constexpr static T StringToType(const std::string& data)
+	{
+		IS_CORE_STATIC_ASSERT(false, "[SerializeHelper::StringToType] no implementation.");
 	}
 
 	static void SerializeMat4(tinyxml2::XMLNode* out, tinyxml2::XMLDocument* doc,

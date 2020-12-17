@@ -36,6 +36,24 @@ namespace Insight
 			return CreateUniquePtr<SerializableFile_XML>();
 		}
 
+		SharedPtr<SerializableElement> SerializableFile::GetFirstChild()
+		{
+			if (m_rootNodes.size() > 0)
+			{
+				return m_rootNodes.at(0);
+			}
+			return {};
+		}
+
+		SharedPtr<SerializableElement> SerializableFile::GetLastChild()
+		{
+			if (m_rootNodes.size() > 0)
+			{
+				return m_rootNodes.at(m_rootNodes.size() - 1);
+			}
+			return {};
+		}
+
 		SerializableElement::SerializableElement(const std::string& elementName)
 			: m_elementName(elementName)
 		{ }
@@ -51,6 +69,57 @@ namespace Insight
 			{
 				data.reset();
 			}
+		}
+
+		void SerializableElement::AddDataFromType(const std::string& attriKey, const std::string& attriValue, const std::string& attriType)
+		{
+			const SerializableElementDataType type = static_cast<const SerializableElementDataType>(std::stoi(attriType));
+			SharedPtr<SerializableElementType> data;
+			switch (type)
+			{
+			case SerializableElementDataType::String:	data = CreateSharedPtr<SerializableElementString>(); break;
+			case SerializableElementDataType::Int:		data = CreateSharedPtr<SerializableElementInt>(); break;
+			case SerializableElementDataType::Float:	data = CreateSharedPtr<SerializableElementFloat>(); break;
+			case SerializableElementDataType::Vec2:		data = CreateSharedPtr<SerializableElementVec2>(); break;
+			case SerializableElementDataType::Vec3:		data = CreateSharedPtr<SerializableElementVec3>(); break;
+			case SerializableElementDataType::Vec4:		data = CreateSharedPtr<SerializableElementVec4>(); break;
+			case SerializableElementDataType::Mat2:		data = CreateSharedPtr<SerializableElementMat2>(); break;
+			case SerializableElementDataType::Mat3:		data = CreateSharedPtr<SerializableElementMat3>(); break;
+			case SerializableElementDataType::Mat4:		data = CreateSharedPtr<SerializableElementMat4>(); break;
+			}
+
+			data->StringToData(attriKey, attriValue);
+			m_dataTypes.push_back(data);
+		}
+
+		SharedPtr<SerializableElement> SerializableElement::GetFirstChild()
+		{
+			if (m_children.size() > 0)
+			{
+				return m_children.at(0);
+			}
+			return {};
+		}
+
+		SharedPtr<SerializableElement> SerializableElement::GetLastChild()
+		{
+			if (m_children.size() > 0)
+			{
+				return m_children.at(m_children.size() - 1);
+			}
+			return {};
+		}
+
+		SharedPtr<SerializableElementType> SerializableElement::GetFirstElement(const std::string& elementKey)
+		{
+			for (auto& ptr : m_dataTypes)
+			{
+				if (ptr->GetKey() == elementKey)
+				{
+					return ptr;
+				}
+			}
+			return {};
 		}
 
 		SharedPtr<SerializableElement> SerializableElement::AddChild(const std::string& childName)

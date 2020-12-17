@@ -61,6 +61,8 @@ namespace vks
 		virtual void Present() override;
 		virtual void WaitForIdle() override;
 
+		virtual std::string GetTypeName() const { return "VulkanRenderer"; }
+
 		/** @brief Return our instance */
 		VkInstance GetInstance() { return m_instance; }
 		/** @brief Return our device wrapper */

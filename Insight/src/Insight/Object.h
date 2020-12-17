@@ -20,7 +20,7 @@ namespace Insight
 		bool Equals(const Object* pObject) const;
 		virtual bool Equals(const Object& pObject) const;
 
-		std::string GetType();
+		virtual std::string GetTypeName() const = 0;
 
 		void RegisterOnDestroyCallback(void* callerClass, ObjectCallback callback);
 		void UnregisterOnDestroyCallback(void* callerClass);

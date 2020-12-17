@@ -26,6 +26,8 @@ public:
 	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
+	virtual std::string GetTypeName() const { return "CameraComponent"; }
+
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);
 	//Set the projection matrix for the camera

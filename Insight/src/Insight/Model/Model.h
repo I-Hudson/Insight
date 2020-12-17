@@ -31,6 +31,8 @@ public:
 	const std::string& GetName() const;
 	const std::string& GetFilePath() const;
 
+	virtual std::string GetTypeName() const { return "Model"; }
+
 private:
 	void LoadMesh(const std::string& filePath);
 	void ProcessNode(aiNode* node, const aiScene* scene);

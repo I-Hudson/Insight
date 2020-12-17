@@ -48,7 +48,7 @@ namespace Insight
 #endif
 
 #define IS_CORE_ASSERT(expr, msg)					__assert(#expr, expr, __FILE__, __LINE__, msg, "Core")
-#define IS_CORE_STATIC_ASSERT(expr, msg)			static_assert(expr, msg)
+#define IS_CORE_STATIC_ASSERT(expr, msg)		static_assert(expr, msg);
 #define IS_ASSERT(expr, msg)						__assert(#expr, expr, __FILE__, __LINE__, msg, "Application")
 
 inline void __assert(const std::string& expr_str, bool expr, const std::string& file, int line, const std::string& msg, const std::string& engineAsset)
@@ -60,4 +60,15 @@ inline void __assert(const std::string& expr_str, bool expr, const std::string& 
 		IS_CORE_ERROR(errorMsg);
 		__debugbreak();
 	}
+}
+
+template<typename... Args>
+std::string StringFormat(const std::string& format, Args... args)
+{
+
+	int size = snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+	if (size <= 0) { throw std::runtime_error("Error during formatting."); }
+	std::unique_ptr<char[]> buf(new char[size]);
+	snprintf(buf.get(), size, format.c_str(), args ...);
+	return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
 }
