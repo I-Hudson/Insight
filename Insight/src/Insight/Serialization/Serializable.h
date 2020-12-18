@@ -47,14 +47,20 @@ namespace Insight
 			}
 
 			template<typename T>
-			static SharedPtr<Serializable> CreateInstanceFromType(const std::string& type)
+			static SharedPtr<T> CreateInstanceFromType(const std::string& type)
 			{
 				auto t = SerializableRegistry::GetTypes().find(type);
 				if (t != SerializableRegistry::GetTypes().end())
 				{
-					return t->second();
+					SharedPtr<T> tValue = DynamicPointerCast<T>(t->second());
+					if (tValue)
+					{
+						return tValue;
+					}
+
+					IS_CORE_ERROR("[Serializable::CreateInstanceFromType] Could not cast to T.");
 				}
-				return nullptr;
+				return {};
 			}
 
 			static std::vector<Serializable*> m_serializableObjects;

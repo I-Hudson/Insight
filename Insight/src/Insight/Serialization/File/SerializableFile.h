@@ -9,6 +9,7 @@ namespace Insight
 	namespace Serialization
 	{
 		class SerializableElement;
+		class SerializableFile_XML;
 
 		class IS_API SerializableFile
 		{
@@ -40,6 +41,7 @@ namespace Insight
 
 			const std::string& GetElementName() const { return m_elementName; }
 
+			SharedPtr<SerializableElement> GetFirstChild(const std::string& childName);
 			SharedPtr<SerializableElement> GetFirstChild();
 			SharedPtr<SerializableElement> GetLastChild();
 
@@ -66,7 +68,7 @@ namespace Insight
 			WeakPtr<SerializableElement> m_previousSibling;
 			WeakPtr<SerializableElement> m_nextSibling;
 
-			friend SerializableFile;
+			friend SerializableFile_XML;
 		};
 	}
 }

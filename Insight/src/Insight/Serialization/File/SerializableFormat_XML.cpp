@@ -103,7 +103,16 @@ namespace Insight
 			const tinyxml2::XMLElement* childElement = xmlElement->FirstChildElement();
 			while (childElement != nullptr)
 			{
+				bool hasChildren = element->HasChildren();
 				auto childPtr = element->AddChild(childElement->Name());
+			
+				if (hasChildren)
+				{
+					auto elementChildren = element->GetAllChildren();
+					childPtr->m_previousSibling = elementChildren[elementChildren.size() - 2];
+					elementChildren[elementChildren.size() - 2]->m_nextSibling = childPtr;
+				}
+				
 				DeserializeElement(doc, childElement, childPtr);
 
 				childElement = childElement->NextSiblingElement();

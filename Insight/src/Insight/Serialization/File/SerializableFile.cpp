@@ -71,6 +71,18 @@ namespace Insight
 			}
 		}
 
+		SharedPtr<SerializableElement> SerializableElement::GetFirstChild(const std::string& childName)
+		{
+			for (auto child : m_children)
+			{
+				if (child->GetElementName() == childName)
+				{
+					return child;
+				}
+			}
+			return {};
+		}
+
 		SharedPtr<SerializableElement> SerializableElement::GetFirstChild()
 		{
 			if (m_children.size() > 0)
@@ -117,12 +129,12 @@ namespace Insight
 
 		bool SerializableElement::HasChildren() const
 		{
-			return m_children.size() == 0;
+			return m_children.size() != 0;
 		}
 
 		bool SerializableElement::HasAttributes() const
 		{
-			return m_attributes.size() == 0;
+			return m_attributes.size() != 0;
 		}
 	}
 }

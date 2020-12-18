@@ -169,15 +169,17 @@ void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> el
 		element->AddAttribute("Type", "Entity");
 		element->AddAttribute("Name", m_name);
 
+		auto componentsRoot = element->AddChild("Components");
 		for (auto it = m_components.begin(); it != m_components.end(); ++it)
 		{
-			auto childComponent = element->AddChild("Component");
+			auto childComponent = componentsRoot->AddChild("Component");
 			(*it)->Serialize(childComponent, true);
 		}
 
+		auto childrenRoot = element->AddChild("Children");
 		for (auto it = m_children.begin(); it != m_children.end(); ++it)
 		{
-			auto childEntity = element->AddChild("Entity");
+			auto childEntity = childrenRoot->AddChild("Entity");
 			(*it)->Serialize(childEntity, true);
 		}
 	}
@@ -185,48 +187,51 @@ void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> el
 
 void Entity::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//if (auto uuid = in->FirstChildElement("UUID"))
-	//{
-	//	SetUUID(uuid->GetText());
-	//}
-	//if (auto name = in->FirstChildElement("Name"))
-	//{
-	//	m_data.Name = name->GetText() != 0 ? name->GetText() : "Defualt";
-	//}
-	//
-	//tinyxml2::XMLNode* children = in->FirstChildElement("Children");
-	//if (children != nullptr)
-	//{
-	//	tinyxml2::XMLNode* child = children->FirstChild();
-	//	do
-	//	{
-	//		Serializable* s = CreateInstanceFromType<Serializable>(child->FirstChildElement("Type")->GetText());
-	//		dynamic_cast<Entity*>(s)->SetParent(this);
-	//		if (s != nullptr)
-	//		{
-	//			s->Deserialize(child);
-	//			m_data.Children.push_back(dynamic_cast<Entity*>(s));
-	//		}
-	//
-	//		child = child->NextSibling();
-	//	} while (child != nullptr);
-	//}
-	//
-	//tinyxml2::XMLNode* components = in->FirstChildElement("Components");
-	//if (components != nullptr)
-	//{
-	//	tinyxml2::XMLNode* c = components->FirstChild();
-	//	do
-	//	{
-	//		Serializable* s = CreateInstanceFromType<Serializable>(c->FirstChildElement("Type")->GetText());
-	//		if (s != nullptr)
-	//		{
-	//			AddComponent(dynamic_cast<Component*>(s));
-	//			s->Deserialize(c);
-	//		}
-	//		c = c->NextSibling();
-	//	} while (c != nullptr);
-	//}
+	if (auto ptr = element->GetFirstAttribute("UUID"))
+	{
+		SetUUID(ptr->GetValue());
+	}
+	else
+	{
+		IS_CORE_ERROR("[Entity::Deserialize] UUID not found.");
+	}
+
+	if (auto ptr = element->GetFirstAttribute("Name"))
+	{
+		m_name = ptr->GetValue();
+	}
+	else
+	{
+		IS_CORE_ERROR("[Entity::Deserialize] Name not found.");
+	}
+
+	auto componentRoot = element->GetFirstChild("Components");
+	for (auto component : componentRoot->GetAllChildren())
+	{
+		if (auto ptr = component->GetFirstAttribute("Type"))
+		{
+			if (SharedPtr<Component> componentObject = CreateInstanceFromType<Component>(ptr->GetValue()))
+			{
+				AddComponent(componentObject);
+				componentObject->Deserialize(component);
+			}
+			IS_CORE_ERROR("[Entity::Deserialize] Child entity is null.");
+		}
+	} 
+
+	auto childrenRoot = element->GetFirstChild("Children");
+	for (auto child : childrenRoot->GetAllChildren())
+	{
+		if (auto ptr = child->GetFirstAttribute("Type"))
+		{
+			if (SharedPtr<Entity> childObject = CreateInstanceFromType<Entity>(ptr->GetValue()))
+			{
+				childObject->Deserialize(child);
+				m_children.push_back(childObject);
+			}
+			IS_CORE_ERROR("[Entity::Deserialize] Child entity is null.");
+		}
+	}
 }
 
 void Entity::AddComponent(SharedPtr<Component> component)

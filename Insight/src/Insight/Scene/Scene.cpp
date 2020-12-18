@@ -152,8 +152,9 @@ namespace Insight
 						if (typeElement)
 						{
 							std::string type = typeElement->GetValue();
-							SharedPtr<Serialization::Serializable> s = Serialization::Serializable::CreateInstanceFromType<Serialization::Serializable>(type);
+							SharedPtr<Entity> s = Serialization::Serializable::CreateInstanceFromType<Entity>(type);
 							s->Deserialize(entity);
+							m_registry.push_back(DynamicPointerCast<Entity>(s));
 						}
 						entity = entity->NextSibling().lock();
 					} while (entity != nullptr);
