@@ -143,7 +143,7 @@ namespace Insight
 					ImGui::Separator();
 					ImGui::Text((*componentsIT)->GetTypeName().c_str());
 
-					if (!Editor::EditorDrawerRegistry::Instance()->CallEditorDrawer((*componentsIT)->GetTypeName().c_str(), *(*componentsIT).get()))
+					if (!Editor::EditorDrawerRegistry::CallEditorDrawer((*componentsIT)->GetTypeName().c_str(), *componentsIT))
 					{
 						for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
 						{
@@ -157,7 +157,6 @@ namespace Insight
 				}
 				ImGui::Separator();
 			}
-
 			ImGui::End();
 #endif
 		}

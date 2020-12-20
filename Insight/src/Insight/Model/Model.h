@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 #include "Insight/Model/Mesh.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Object.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"

@@ -2,7 +2,7 @@
 #include "Model.h"
 
 #include "stb_image.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Library/ModelLibrary.h"
 #include "Insight/Instrumentor/Instrumentor.h"

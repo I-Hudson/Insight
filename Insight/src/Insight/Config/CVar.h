@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Config/ICVar.h"
 #include "Insight/Config/CVarParser.h"
 

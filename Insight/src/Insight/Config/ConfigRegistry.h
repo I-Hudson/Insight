@@ -1,9 +1,9 @@
 #pragma once
 
 #include "ispch.h"
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Config/ICVar.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

@@ -474,11 +474,11 @@ namespace vks
 			m_defaultMaterial[i].Create(m_vulkanDevice.get(), shaders, m_vulkanDevice->GetRenderPass());
 		}
 
-		m_editorEntity = CreateSharedPtr<Entity>("Editor entity", false);
+		m_editorEntity = Object::CreateObject<Entity>("Editor entity", false);
 		m_editorEntity->AddComponent<TransformComponent>();
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
-		m_testModel = CreateSharedPtr<Model>("./data/models/sponza/sponza.obj");
+		m_testModel = Object::CreateObject<Model>("./data/models/sponza/sponza.obj");
 		m_testModelMatrix = glm::mat4(1.0f);
 
 		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);

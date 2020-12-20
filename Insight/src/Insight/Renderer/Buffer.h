@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Insight/Core.h"
-#include "Insight/UUID.h"
+#include "Insight/Core/Core.h"
+#include "Insight/Core/UUID.h"
 
 #include <../vendor/glm/glm/glm.hpp>
 

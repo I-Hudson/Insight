@@ -1,5 +1,5 @@
 #pragma once
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 
 typedef uint32_t PropertyFlags;
 

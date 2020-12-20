@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -103,7 +103,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -130,7 +130,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DIST;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -152,7 +152,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Insight.h" />
-    <ClInclude Include="src\Insight\Application.h" />
     <ClInclude Include="src\Insight\Component\CameraComponent.h" />
     <ClInclude Include="src\Insight\Component\Component.h" />
     <ClInclude Include="src\Insight\Component\MeshComponent.h" />
@@ -162,7 +161,15 @@
     <ClInclude Include="src\Insight\Config\Config.h" />
     <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
     <ClInclude Include="src\Insight\Config\ICVar.h" />
-    <ClInclude Include="src\Insight\Core.h" />
+    <ClInclude Include="src\Insight\Core\Application.h" />
+    <ClInclude Include="src\Insight\Core\Core.h" />
+    <ClInclude Include="src\Insight\Core\EntryPoint.h" />
+    <ClInclude Include="src\Insight\Core\InsightAlias.h" />
+    <ClInclude Include="src\Insight\Core\Log.h" />
+    <ClInclude Include="src\Insight\Core\Object.h" />
+    <ClInclude Include="src\Insight\Core\Type.h" />
+    <ClInclude Include="src\Insight\Core\Utils.h" />
+    <ClInclude Include="src\Insight\Core\UUID.h" />
     <ClInclude Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.h" />
     <ClInclude Include="src\Insight\Editor\Diagnostic.h" />
     <ClInclude Include="src\Insight\Editor\EditorDrawer.h" />
@@ -171,19 +178,16 @@
     <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h" />
     <ClInclude Include="src\Insight\Editor\UIHelper.h" />
     <ClInclude Include="src\Insight\Entitiy\Entity.h" />
-    <ClInclude Include="src\Insight\EntryPoint.h" />
     <ClInclude Include="src\Insight\Enums\PropertyFlags.h" />
     <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
     <ClInclude Include="src\Insight\Event\Event.h" />
     <ClInclude Include="src\Insight\Event\EventManager.h" />
     <ClInclude Include="src\Insight\Input\Input.h" />
     <ClInclude Include="src\Insight\Input\InsightKeyCodes.h" />
-    <ClInclude Include="src\Insight\InsightAlias.h" />
     <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h" />
     <ClInclude Include="src\Insight\Library\Library.h" />
     <ClInclude Include="src\Insight\Library\ModelLibrary.h" />
     <ClInclude Include="src\Insight\Library\ShaderLibrary.h" />
-    <ClInclude Include="src\Insight\Log.h" />
     <ClInclude Include="src\Insight\Memory\FreeListAllocator.h" />
     <ClInclude Include="src\Insight\Memory\MemoryManager.h" />
     <ClInclude Include="src\Insight\Memory\MemoryUtils.h" />
@@ -198,7 +202,6 @@
     <ClInclude Include="src\Insight\Module\Module.h" />
     <ClInclude Include="src\Insight\Module\ModuleManager.h" />
     <ClInclude Include="src\Insight\Module\WindowModule.h" />
-    <ClInclude Include="src\Insight\Object.h" />
     <ClInclude Include="src\Insight\RTTI\RTTI.h" />
     <ClInclude Include="src\Insight\RTTI\RTTITypes.h" />
     <ClInclude Include="src\Insight\Renderer\Buffer.h" />
@@ -221,7 +224,6 @@
     <ClInclude Include="src\Insight\Threading\Threadpool.h" />
     <ClInclude Include="src\Insight\Time\Stopwatch.h" />
     <ClInclude Include="src\Insight\Time\Time.h" />
-    <ClInclude Include="src\Insight\UUID.h" />
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanDebug.h" />
@@ -645,12 +647,14 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Insight\Application.cpp" />
     <ClCompile Include="src\Insight\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Insight\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Insight\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Insight\Config\CVar.cpp" />
     <ClCompile Include="src\Insight\Config\Config.cpp" />
+    <ClCompile Include="src\Insight\Core\Application.cpp" />
+    <ClCompile Include="src\Insight\Core\Log.cpp" />
+    <ClCompile Include="src\Insight\Core\Object.cpp" />
     <ClCompile Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.cpp" />
     <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp" />
     <ClCompile Include="src\Insight\Editor\UIHelper.cpp" />
@@ -659,7 +663,6 @@
     <ClCompile Include="src\Insight\Input\Input.cpp" />
     <ClCompile Include="src\Insight\Library\ModelLibrary.cpp" />
     <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp" />
-    <ClCompile Include="src\Insight\Log.cpp" />
     <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
     <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
@@ -671,7 +674,6 @@
     <ClCompile Include="src\Insight\Module\InputModule.cpp" />
     <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
     <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
-    <ClCompile Include="src\Insight\Object.cpp" />
     <ClCompile Include="src\Insight\RTTI\RTTI.cpp" />
     <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
     <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp" />

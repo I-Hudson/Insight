@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Scene/Scene.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Object.h"
 
 #include <string>
 #include <vector>
@@ -124,7 +124,7 @@ inline SharedPtr<T> Entity::AddComponent()
 
 	if (m_components.size() < MaxComponents && !HasComponent<T>())
 	{
-		SharedPtr<T> c = CreateSharedPtr<T>(this->shared_from_this());
+		SharedPtr<T> c = Object::CreateObject<T>(this->shared_from_this());
 		StaticPointerCast<Component>(c)->OnCreate();
 		
 		m_components.push_back(c);

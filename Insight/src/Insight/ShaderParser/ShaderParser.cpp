@@ -1,7 +1,6 @@
 #include "ispch.h"
 #include "ShaderParser.h"
-#include "Insight/InsightAlias.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "ConfigRegistry.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"

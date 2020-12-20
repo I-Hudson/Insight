@@ -37,7 +37,7 @@ namespace Insight
 
 	SharedPtr<Entity> Scene::CreateEntity(const std::string& name)
 	{
-		SharedPtr<Entity> e = CreateSharedPtr<Entity>(name);
+		SharedPtr<Entity> e = Object::CreateObject<Entity>(name);
 		e->AddComponent<TransformComponent>();
 		m_registry.push_back(e);
 		return e;

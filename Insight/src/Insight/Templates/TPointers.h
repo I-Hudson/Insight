@@ -2,7 +2,6 @@
 
 #if !defined(IS_STANDARD_POINTER)
 
-#include "Insight/Core.h"
 #include <type_traits>
 
 template<class T>

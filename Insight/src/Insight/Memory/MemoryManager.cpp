@@ -2,7 +2,7 @@
 
 #include "MemoryManager.h"
 #include "Insight/Config/Config.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 #include <typeinfo>
 
 namespace Insight

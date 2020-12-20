@@ -2,7 +2,7 @@
 #include "FreeListAllocator.h"
 #include "Insight/Memory/MemoryUtils.h"
 
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 #include <inttypes.h>
 

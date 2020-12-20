@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "VulkanHeader.h"
 #include "VulkanRenderer.h"

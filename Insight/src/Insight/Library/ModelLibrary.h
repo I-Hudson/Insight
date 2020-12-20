@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Library/Library.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Model/Model.h"

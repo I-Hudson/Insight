@@ -3,7 +3,7 @@
 // Include all the headers files for the Vulkan SDK
 
 #ifdef _WIN32
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "VulkanInitializers.h"
 #include <vulkan/vulkan.hpp>

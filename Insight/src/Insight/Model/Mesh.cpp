@@ -53,8 +53,8 @@ void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indice
 		m_textures = textures;
 	}
 
-	m_vertexBuffer = CreateSharedPtr<vks::VulkanBuffer>();
-	m_indexBuffer = CreateSharedPtr<vks::VulkanBuffer>();
+	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
 
 	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
 	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());

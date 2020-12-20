@@ -1,5 +1,5 @@
 #pragma once
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "SerializableElementTypes.h"
 #include <glm/glm.hpp>

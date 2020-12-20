@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "File/SerializableFile.h"
 #include <map>
@@ -43,7 +43,7 @@ namespace Insight
 			template<typename T> 
 			static SharedPtr<Serializable> CreateInstance()
 			{ 
-				return CreateSharedPtr<T>(); 
+				return Object::CreateObject<T>(); 
 			}
 
 			template<typename T>

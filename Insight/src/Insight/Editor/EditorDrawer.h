@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Editor/UIHelper.h"
 
@@ -11,45 +11,59 @@ namespace Insight
 
 	namespace Editor
 	{
-		struct EditorDrawerRegistry;
-
-		class IS_API EditorDrawer
+		class IS_API IEditorDrawer
 		{
 		public:
-			virtual void OnDraw(Object& obj) { }
+			virtual void OnDraw(SharedPtr<Object> obj) = 0;
 		};
 
-		struct EditorDrawerRegistry : TSingleton<EditorDrawerRegistry>
+		template<typename TObjectClass, typename TEditorDrawerClass>
+		struct IS_API EditorDrawerRegister
+		{
+			EditorDrawerRegister()
+			{
+				IS_CORE_STATIC_ASSERT((std::is_base_of<IEditorDrawer, TEditorDrawerClass>::value), "'TEditorDrawerClass' does not inherit from 'IEditorDrawer'.");
+				EditorDrawerRegistry::AddEditorDrawer<TObjectClass, TEditorDrawerClass>();
+			}
+		};
+
+		template<typename TObjectClass, typename TEditorDrawerClass>
+		class IS_API TEditorDrawer : public IEditorDrawer
+		{
+		private:
+			static EditorDrawerRegister<TObjectClass, TEditorDrawerClass> s_editorDrawerRegister;
+		};
+
+
+		class IS_API EditorDrawerRegistry
 		{
 		public:
 			EditorDrawerRegistry()
 			{
-				SetInstancePtr(this);
 			}
 
 			~EditorDrawerRegistry()
 			{
 				Destroy();
-				ClearPtr();
 			}
 
-			template<typename EditorDrawerClass, typename ObjectClass>
-			void AddEditorDrawer()
+			template<typename TObjectClass , typename TEditorDrawerClass>
+			static void AddEditorDrawer()
 			{
-				IS_CORE_STATIC_ASSERT((std::is_base_of<EditorDrawer, EditorDrawerClass>::value), "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
+				IS_CORE_STATIC_ASSERT((std::is_base_of<IEditorDrawer, TEditorDrawerClass>::value), "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
 
-				std::string objectClassName = GET_SHORT_NAME_OF_TYPE(ObjectClass);
-				if (m_editorDrawers.find(objectClassName) == std::end(m_editorDrawers))
+				std::string objectClassName = typeid(ObjectClass).name();
+				if (!m_editorDrawers.at(objectClassName))
 				{
-					SharedPtr<EditorDrawerClass> tPtr = CreateSharedPtr<EditorDrawerClass>();
-					m_editorDrawers[objectClassName] = tPtr;
+					SharedPtr<TEditorDrawerClass> tPtr = CreateSharedPtr<TEditorDrawerClass>();
+					GetTypes().insert(std::pair(objectClassName, tPtr));
 				}
 			}
 
-			bool CallEditorDrawer(const std::string& typeName, Object& obj)
+			static bool CallEditorDrawer(const std::string& typeName, SharedPtr<Object> obj)
 			{
-				auto& it = m_editorDrawers.find(typeName);
-				if (it != std::end(m_editorDrawers))
+				auto& it = GetTypes().find(typeName);
+				if (it != GetTypes().end())
 				{
 					(*it).second->OnDraw(obj);
 					return true;
@@ -57,20 +71,24 @@ namespace Insight
 				return false;
 			}
 
-			void Destroy()
+			static void Destroy()
 			{
-				for (auto& drawer : m_editorDrawers)
+				for (auto& drawer : GetTypes())
 				{
 					drawer.second.reset();
 				}
 			}
 
-		private:
-			std::unordered_map<std::string, SharedPtr<EditorDrawer>> m_editorDrawers;
+			typedef std::unordered_map<std::string, SharedPtr<IEditorDrawer>> CustomEditorDrawerTypes;
+
+			static CustomEditorDrawerTypes& GetTypes()
+			{
+				static CustomEditorDrawerTypes types;
+				return types;
+			}
 		};
 	}
 }
-#define CUSTOM_EDITOR_DRAWER(editorDrawer, objectClass) Insight::Editor::EditorDrawerRegistry::Instance()->AddEditorDrawer<editorDrawer, objectClass>()
 #else
-#define CUSTOM_EDITOR_DRAWER(editorDrawer, objectClass)
+#define REGISTER_EDITOR_DRAWER_TYPE(DataClass, EditorClass)
 #endif

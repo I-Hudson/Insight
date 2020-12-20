@@ -48,7 +48,7 @@ namespace Insight
 #endif
 
 #define IS_CORE_ASSERT(expr, msg)					__assert(#expr, expr, __FILE__, __LINE__, msg, "Core")
-#define IS_CORE_STATIC_ASSERT(expr, msg)		static_assert(expr, msg);
+#define IS_CORE_STATIC_ASSERT(expr, msg)			static_assert(expr, msg);
 #define IS_ASSERT(expr, msg)						__assert(#expr, expr, __FILE__, __LINE__, msg, "Application")
 
 inline void __assert(const std::string& expr_str, bool expr, const std::string& file, int line, const std::string& msg, const std::string& engineAsset)

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Insight/Core.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Core.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

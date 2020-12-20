@@ -5,7 +5,8 @@
 #ifdef  IS_PLATFORM_WINDOWS
 
 #include "InsightAlias.h"
-#include "Insight/Object.h"
+#include "Object.h"
+#include "Utils.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
 #ifdef IS_DEBUG

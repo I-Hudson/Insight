@@ -12,7 +12,7 @@
 
 #include <vector>
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "VulkanHeader.h"
 
 namespace vks

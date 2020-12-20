@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "../vendor/glm/glm/glm.hpp"
 
 namespace Insight

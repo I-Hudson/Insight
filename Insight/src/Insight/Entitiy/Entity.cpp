@@ -7,7 +7,7 @@
 #include "Insight/Model/Model.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 REGISTER_DEF_TYPE(Entity);
 
@@ -140,26 +140,6 @@ void Entity::RemoveChild(SharedPtr<Entity> child)
 		child->SetParent(nullptr);
 	}
 }
-
-//void Entity::Serialize(json& out, bool force)
-//{
-//	if (GetParent() == nullptr || force)
-//	{
-//		out["UUID"] = GetUUID().c_str();
-//		out["Type"] = "Entity";
-//		out["Name"] = m_data.Name;
-//
-//		for (auto it = m_data.Children.begin(); it != m_data.Children.end(); ++it)
-//		{
-//			(*it)->Serialize(out["Children"][(*it)->GetUUID()], true);
-//		}
-//
-//		for (auto it = m_data.Components.begin(); it != m_data.Components.end(); ++it)
-//		{
-//			(*it)->Serialize(out["Components"][(*it)->GetUUID()]);
-//		}
-//	}
-//}
 
 void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {

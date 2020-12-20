@@ -25,7 +25,7 @@ public:
 
 		bool test = false;
 
-		Entity::Create("Root Entity")->AddChild("child_1");
+		//Entity::Create("Root Entity")->AddChild("child_1");
 
 		if (test)
 		{

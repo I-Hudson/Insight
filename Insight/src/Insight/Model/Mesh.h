@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Platform/Vulkan/VulkanHeader.h"
-#include "Insight/UUID.h"
+#include "Insight/Core/UUID.h"
 #include "Insight/Renderer/Buffer.h"
 
 #include <vector>

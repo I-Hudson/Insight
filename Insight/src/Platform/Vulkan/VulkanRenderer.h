@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef IS_VULKAN
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
 

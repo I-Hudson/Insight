@@ -1,7 +1,7 @@
 #include "ispch.h"
 #include "Insight/Memory/StackAllocator.h"
 #include "Insight/Memory/MemoryUtils.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

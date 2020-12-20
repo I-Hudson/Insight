@@ -1,7 +1,7 @@
 #include "ispch.h"
 #include "EventManager.h"
 
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

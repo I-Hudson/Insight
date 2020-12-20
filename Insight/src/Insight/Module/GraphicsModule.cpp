@@ -7,7 +7,7 @@
 #include "Insight/Renderer/ImGuiRenderer.h"
 
 #include "Insight/Time/Stopwatch.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 namespace Insight
 {

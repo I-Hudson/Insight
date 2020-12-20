@@ -2,9 +2,9 @@
 
 // For use by apps only. No core system should directly be here.
 
-#include "Insight/Core.h"
-#include "Insight/Application.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Core.h"
+#include "Insight/Core/Application.h"
+#include "Insight/Core/Log.h"
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Time/Time.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -23,5 +23,5 @@
 #include "Insight/Component/CameraComponent.h"
 
 // --Entry Point--------------------------
-#include "InSight/EntryPoint.h"
+#include "InSight/Core/EntryPoint.h"
 // --Entry Point--------------------------

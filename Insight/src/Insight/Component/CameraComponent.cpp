@@ -25,8 +25,6 @@ CameraComponent::CameraComponent(SharedPtr<Entity> owner)
 {
 	m_updateEveryFarme = true;
 	m_componentId = GetComponentID<CameraComponent>();
-
-	CUSTOM_EDITOR_DRAWER(Insight::Editor::CameraComponentEditorDrawer, CameraComponent);
 }
 
 CameraComponent::~CameraComponent()
@@ -70,9 +68,18 @@ void CameraComponent::Serialize(SharedPtr<Insight::Serialization::SerializableEl
 
 void CameraComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//m_fov = data->FirstChildElement("FOV")->FloatText();
-	//m_nearPlane = data->FirstChildElement("NearPlane")->FloatText();
-	//m_farPlane = data->FirstChildElement("FarPlane")->FloatText();
+	if (auto ptr = element->GetFirstAttribute("FOV"))
+	{
+		m_fov = std::stof(ptr->GetValue());
+	}
+	if (auto ptr = element->GetFirstAttribute("NearPlane"))
+	{
+		m_nearPlane = std::stof(ptr->GetValue());
+	}
+	if (auto ptr = element->GetFirstAttribute("FarPlane"))
+	{
+		m_farPlane = std::stof(ptr->GetValue());
+	}
 }
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)

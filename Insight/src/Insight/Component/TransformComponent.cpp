@@ -78,6 +78,9 @@ void TransformComponent::Serialize(SharedPtr<Insight::Serialization::Serializabl
 
 void TransformComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
-	//m_transform = SerializeHelper::DeserializeMat4(in, "ViewMatrix");
+	if (auto ptr = element->GetFirstAttribute("ViewMatrix"))
+	{
+		m_transform = SerializeHelper::StringToType<glm::mat4>(ptr->GetValue());
+	}
 }
 

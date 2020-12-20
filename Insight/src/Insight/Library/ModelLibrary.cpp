@@ -33,7 +33,7 @@ namespace Insight
 				}
 			}
 
-			SharedPtr<Model> m = CreateSharedPtr<Model>(filePath);
+			SharedPtr<Model> m = Object::CreateObject<Model>(filePath);
 			AddAsset(m->GetUUID(), m);
 
 			return m;
@@ -53,7 +53,7 @@ namespace Insight
 				{
 					std::string formattedFilePath = entry.path().u8string();
 					std::replace(formattedFilePath.begin(), formattedFilePath.end(), '\\', '/');
-					SharedPtr<Model> m = CreateSharedPtr<Model>(formattedFilePath);
+					SharedPtr<Model> m = Object::CreateObject<Model>(formattedFilePath);
 					AddAsset(m->GetUUID(), m);
 				}
 			}

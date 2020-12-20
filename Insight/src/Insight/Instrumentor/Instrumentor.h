@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 
 #if defined(IS_OPTICK_PROFILE)
 #include "optick.h"
@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <thread>
 #include <mutex>
+#include <fstream>
+#include <iosfwd>
 
 #define INSIGHT_MAKE_CATEGORY(filter, color) ((Insight::Category::Type)(((uint64_t)(1ull) << (filter + 32)) | (uint64_t)color))
 

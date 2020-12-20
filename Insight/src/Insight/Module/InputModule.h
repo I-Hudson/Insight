@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Module/Module.h"
 #include "Insight/Input/InsightKeyCodes.h"
 #include <functional>

@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "InputModule.h"
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 #include "WindowModule.h"
 #include "GLFW/glfw3.h"
 #include "backends/imgui_impl_glfw.h"

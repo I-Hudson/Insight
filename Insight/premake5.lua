@@ -26,6 +26,7 @@ project "Insight"
     includedirs 
     {
 		"$(ProjectDir)src",
+		"$(ProjectDir)src/Insight",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",

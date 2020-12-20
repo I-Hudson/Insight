@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Insight/Core.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Core.h"
+#include "Insight/Core/Object.h"
 #include "Insight/Serialization/Serializable.h"
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/RTTI/RTTI.h"

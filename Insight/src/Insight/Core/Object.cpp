@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Object.h"
 
-#include "Insight/Log.h"
+#include "Insight/Core/Log.h"
 #include "Insight/Memory/MemoryManager.h"
 
 namespace Insight
@@ -9,10 +9,8 @@ namespace Insight
 	Object::Object()
 		: Insight::UUID()
 		, m_refCount(0)
-		, m_typeName("")
 	{
 		AddRef();
-		m_typeName = GET_ALLOCATION_OF_TYPE(this);
 	}
 
 	Object::~Object()
@@ -81,11 +79,6 @@ namespace Insight
 	inline void Object::Release()
 	{
 		--m_refCount;
-	}
-
-	void Object::CreateHash(std::string const & str)
-	{
-		m_hash = std::hash<std::string>{}(str);
 	}
 
 	//void Object::operator delete(void* ptr)

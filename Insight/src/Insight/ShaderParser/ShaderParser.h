@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 
 namespace Insight

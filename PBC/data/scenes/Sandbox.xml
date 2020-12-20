@@ -1,23 +1,9 @@
 <Scene>
-    <Entity UUID="0e1b2413-7ee7-4ece-9c54-9b0238d40dc1" Type="Entity" Name="MainCamera">
+    <Entity UUID="29c40995-ab19-4391-8568-ed6eb5d828a7" Type="Entity" Name="MainCamera">
         <Components>
-            <Component UUID="49754856-2136-41e1-8d23-616636fc9513" Type="TransformComponent" ViewMatrix="[105.000000,0.000000,-0.000000,0.000000],[0.000000,1.000000,-0.000000,0.000000],[0.000000,-0.000000,-1.000000,0.000000],[-0.000000,-0.000000,0.000000,1.000000]"/>
-            <Component UUID="f39f1c13-3ea8-4f5a-843c-c53cbbe65d12" Type="CameraComponent" FOV="90.000000" NearPlane="0.100000" FarPlane="100000.000000"/>
+            <Component UUID="ff599564-c012-4ef0-8141-602da3117bf3" Type="TransformComponent" ViewMatrix="-1.000000,0.000000,-0.000000,0.000000,:0.000000,1.000000,-0.000000,0.000000,:0.000000,-0.000000,-1.000000,0.000000,:43.000000,-0.000000,7.000000,1.000000,:"/>
+            <Component UUID="b2beff44-f861-4e4c-a293-01fd125bde98" Type="CameraComponent" FOV="122.000000" NearPlane="0.100000" FarPlane="100000.000000"/>
         </Components>
         <Children/>
     </Entity>
-    <Entity UUID="82c4feea-f642-414a-99f0-6124d277da46" Type="Entity" Name="Root Entity">
-        <Components>
-            <Component UUID="07e3cbcf-f22e-4279-bfba-22ec7106101e" Type="TransformComponent" ViewMatrix="[1.000000,0.000000,0.000000,0.000000],[0.000000,1.000000,0.000000,0.000000],[0.000000,0.000000,1.000000,0.000000],[0.000000,0.000000,0.000000,1.000000]"/>
-        </Components>
-        <Children>
-            <Entity UUID="cabb7a49-046d-4fab-8052-dc1699c948c7" Type="Entity" Name="child_1">
-                <Components>
-                    <Component UUID="19ee0bee-5707-4177-9571-a7a861cd84cb" Type="TransformComponent" ViewMatrix="[1.000000,0.000000,0.000000,0.000000],[0.000000,1.000000,0.000000,0.000000],[0.000000,0.000000,1.000000,0.000000],[0.000000,0.000000,0.000000,1.000000]"/>
-                </Components>
-                <Children/>
-            </Entity>
-        </Children>
-    </Entity>
-    <Entity/>
 </Scene>

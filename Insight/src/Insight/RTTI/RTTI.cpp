@@ -2,8 +2,8 @@
 
 #include "Insight/RTTI/RTTI.h"
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Log.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Log.h"
+#include "Insight/Core/Object.h"
 
 namespace Insight
 {

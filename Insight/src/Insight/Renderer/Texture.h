@@ -1,6 +1,6 @@
 #pragma once
-#include "Insight/Core.h"
-#include "Insight/Object.h"
+#include "Insight/Core/Core.h"
+#include "Insight/Core/Object.h"
 
 namespace Insight
 {

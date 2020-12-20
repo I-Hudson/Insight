@@ -18,7 +18,7 @@ namespace Insight
 	{
 		switch (s_API)
 		{
-		case GraphicsAPI::Vulkan: return CreateSharedPtr<vks::VulkanRenderer>();
+		case GraphicsAPI::Vulkan: return Object::CreateObject<vks::VulkanRenderer>();
 		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
 		}
 		return nullptr;

@@ -1,16 +1,17 @@
 #pragma once
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 #include "Insight/Editor/EditorDrawer.h"
+#include "Insight/Component/CameraComponent.h"
 
 #if defined(IS_EDITOR)
 namespace Insight
 {
 	namespace Editor
 	{
-		class CameraComponentEditorDrawer : public EditorDrawer
+		class CameraComponentEditorDrawer : public TEditorDrawer<CameraComponent, CameraComponentEditorDrawer>
 		{
 		public:
-			virtual void OnDraw(Object& obj) override;
+			virtual void OnDraw(SharedPtr<Object> obj) override;
 		};
 	}
 }

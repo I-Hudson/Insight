@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Insight/Core.h"
+#include "Insight/Core/Core.h"
 
 #include "Insight/Config/CVar.h"
 #include "Insight/Templates/TSingleton.h"
-#include "Insight/InsightAlias.h"
 #include "FreeListAllocator.h"
 #include "StackAllocator.h"
 

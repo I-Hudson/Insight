@@ -9,18 +9,24 @@ namespace Insight
 {
 	namespace Editor
 	{
-		void CameraComponentEditorDrawer::OnDraw(Object& obj)
+		void CameraComponentEditorDrawer::OnDraw(SharedPtr<Object> obj)
 		{
-			CameraComponent component = static_cast<CameraComponent&>(obj);
+			SharedPtr<CameraComponent> component = DynamicPointerCast<CameraComponent>(obj);
 
-			glm::mat4 view = component.GetViewMatrix();
-			float position[4] = { view[3].x, view[3].y, view[3].z, 1.0f };
+			glm::mat4 view = component->GetViewMatrix();
+			float position[3] = { view[3].x, view[3].y, view[3].z };
 			if (UIHelper::DrawVector("Position", 3, position))
 			{
 				view[3].x = position[0];
-				view[3].z = position[1];
+				view[3].y = position[1];
 				view[3].z = position[2];
-				component.SetViewMatrix(view);
+				component->SetViewMatrix(view);
+			}
+
+			float fov = component->GetFov();
+			if (UIHelper::DrawFloat("FOV", &fov))
+			{
+				component->SetFov(fov);
 			}
 		}
 	}
