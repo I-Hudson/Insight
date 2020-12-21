@@ -12,6 +12,7 @@ namespace Insight
 		EditorModule::EditorModule()
 		{
 			SetInstancePtr(this);
+			Editor::EditorDrawerRegistry::GetTypes();
 		}
 
 		EditorModule::~EditorModule()

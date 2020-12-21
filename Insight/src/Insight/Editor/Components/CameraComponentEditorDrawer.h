@@ -8,10 +8,13 @@ namespace Insight
 {
 	namespace Editor
 	{
-		class CameraComponentEditorDrawer : public TEditorDrawer<CameraComponent, CameraComponentEditorDrawer>
+		class CameraComponentEditorDrawer : public IEditorDrawer
 		{
 		public:
-			virtual void OnDraw(SharedPtr<Object> obj) override;
+			virtual void OnDraw(Object& obj) override;
+
+		private:
+			EDITOR_DEC_TYPE(CameraComponent, CameraComponentEditorDrawer);
 		};
 	}
 }

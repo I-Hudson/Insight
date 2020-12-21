@@ -21,8 +21,6 @@ namespace Insight
 			m_objectPtr = nullptr;
 		}
 
-		virtual std::string GetTypeName() const { return "RTTIProperty"; }
-
 		void* GetObjectPtr()
 		{
 			return m_objectPtr;

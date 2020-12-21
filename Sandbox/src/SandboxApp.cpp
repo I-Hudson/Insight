@@ -22,6 +22,7 @@ public:
 
 		SharedPtr<Entity> mainCamera = Entity::Create("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
+		mainCamera->AddComponent<PlayerController>();
 
 		bool test = false;
 

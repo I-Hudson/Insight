@@ -48,8 +48,6 @@ public:
 	virtual void OnUpdate(const float& deltaTime) { }
 	virtual void OnDestroy() { }
 
-	virtual std::string GetTypeName() const { return "Component"; }
-
 protected:
 	bool m_isDirty;
 	bool m_updateEveryFarme;

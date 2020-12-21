@@ -24,8 +24,6 @@ public:
 	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 
-	virtual std::string GetTypeName() const { return "TransformComponent"; }
-
 private:
 	glm::mat4 m_transform;
 

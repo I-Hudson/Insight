@@ -125,9 +125,16 @@ namespace Insight
 			float row[2] = { (*mat2)[rowIndex].x, (*mat2)[rowIndex].y, };
 			std::string label = propertyName + rowName;
 			return InternalDrawElement({ {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ReadOnly), [&]() { return ImGui::InputFloat2(label.c_str(), row, "%.3f", ImGuiInputTextFlags_ReadOnly); }},
+										 {InernalResolveFlags(IS_PropertyFlags::ShowInEditor | IS_PropertyFlags::ClampZero), [&]()
+											{
+												bool r = ImGui::DragFloat2(label.c_str(), row, 1.0f, 0.0f, std::numeric_limits<float>::max());
+												(*mat2)[rowIndex].x = row[0]; (*mat2)[rowIndex].y = row[1];
+												return r;
+											}
+										  },
 										  {IS_PropertyFlags::ShowInEditor, [&]()
 											{
-												bool r = ImGui::DragFloat2(label.c_str(), row, 1.0f, 0.0f, (flags & IS_PropertyFlags::ClampZero) == 1 ? std::numeric_limits<float>::max() : 0.0f);
+												bool r = ImGui::DragFloat2(label.c_str(), row);
 												(*mat2)[rowIndex].x = row[0]; (*mat2)[rowIndex].y = row[1];
 												return r;
 											}
@@ -175,6 +182,7 @@ namespace Insight
 			bool r = false;
 			r |= DrawSingleRowMatrix3(v, 0, name, " X", flags);
 			r |= DrawSingleRowMatrix3(v, 1, name, " Y", flags);
+			r |= DrawSingleRowMatrix3(v, 2, name, " Z", flags);
 			return r;
 		}
 		bool IS_API UIHelper::DrawMat4(const std::string& name, glm::mat4* v, PropertyFlags flags)

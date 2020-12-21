@@ -5,6 +5,12 @@
 #include "Insight/Editor/UIHelper.h"
 
 #if defined(IS_EDITOR)
+
+#define EDITOR_DEC_TYPE(TYPE, EDITOR_TYPE) \
+	static Insight::Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> s_reg;
+#define EDITOR_DEF_TYPE(TYPE, EDITOR_TYPE) \
+	Insight::Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> EDITOR_TYPE::s_reg
+
 namespace Insight
 {
 	class Object;
@@ -14,7 +20,7 @@ namespace Insight
 		class IS_API IEditorDrawer
 		{
 		public:
-			virtual void OnDraw(SharedPtr<Object> obj) = 0;
+			virtual void OnDraw(Object& obj) = 0;
 		};
 
 		template<typename TObjectClass, typename TEditorDrawerClass>
@@ -27,21 +33,9 @@ namespace Insight
 			}
 		};
 
-		template<typename TObjectClass, typename TEditorDrawerClass>
-		class IS_API TEditorDrawer : public IEditorDrawer
-		{
-		private:
-			static EditorDrawerRegister<TObjectClass, TEditorDrawerClass> s_editorDrawerRegister;
-		};
-
-
 		class IS_API EditorDrawerRegistry
 		{
 		public:
-			EditorDrawerRegistry()
-			{
-			}
-
 			~EditorDrawerRegistry()
 			{
 				Destroy();
@@ -52,15 +46,15 @@ namespace Insight
 			{
 				IS_CORE_STATIC_ASSERT((std::is_base_of<IEditorDrawer, TEditorDrawerClass>::value), "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
 
-				std::string objectClassName = typeid(ObjectClass).name();
-				if (!m_editorDrawers.at(objectClassName))
+				std::string objectClassName = typeid(TObjectClass).name();
+				if (!GetTypes().at(objectClassName))
 				{
 					SharedPtr<TEditorDrawerClass> tPtr = CreateSharedPtr<TEditorDrawerClass>();
 					GetTypes().insert(std::pair(objectClassName, tPtr));
 				}
 			}
 
-			static bool CallEditorDrawer(const std::string& typeName, SharedPtr<Object> obj)
+			static bool CallEditorDrawer(const std::string& typeName, Object& obj)
 			{
 				auto& it = GetTypes().find(typeName);
 				if (it != GetTypes().end())
