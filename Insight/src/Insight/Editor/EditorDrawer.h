@@ -17,10 +17,18 @@ namespace Insight
 
 	namespace Editor
 	{
+		class EditorDrawerRegistry;
+
 		class IS_API IEditorDrawer
 		{
 		public:
 			virtual void OnDraw(Object& obj) = 0;
+
+		private:
+
+			Type m_objectType;
+
+			friend EditorDrawerRegistry;
 		};
 
 		template<typename TObjectClass, typename TEditorDrawerClass>
@@ -46,17 +54,24 @@ namespace Insight
 			{
 				IS_CORE_STATIC_ASSERT((std::is_base_of<IEditorDrawer, TEditorDrawerClass>::value), "'EditorDrawerClass' does not inherit 'EditorDrawer'.");
 
-				std::string objectClassName = typeid(TObjectClass).name();
-				if (!GetTypes().at(objectClassName))
+				Type type = Type();
+				type.SetType<TObjectClass>();
+
+				auto it = GetTypes().find(type);
+				if (it == GetTypes().end())
 				{
 					SharedPtr<TEditorDrawerClass> tPtr = CreateSharedPtr<TEditorDrawerClass>();
-					GetTypes().insert(std::pair(objectClassName, tPtr));
+					SharedPtr<IEditorDrawer> iEdtiroDrawerPtr = StaticPointerCast<IEditorDrawer>(tPtr);
+					iEdtiroDrawerPtr->m_objectType = type;
+
+					GetTypes().insert(std::pair(iEdtiroDrawerPtr->m_objectType, tPtr));
 				}
 			}
 
-			static bool CallEditorDrawer(const std::string& typeName, Object& obj)
+			static bool CallEditorDrawer(const Type& typeName, Object& obj)
 			{
-				auto& it = GetTypes().find(typeName);
+				auto it = GetTypes().find(typeName);
+				auto f = GetTypes();
 				if (it != GetTypes().end())
 				{
 					(*it).second->OnDraw(obj);
@@ -73,7 +88,7 @@ namespace Insight
 				}
 			}
 
-			typedef std::unordered_map<std::string, SharedPtr<IEditorDrawer>> CustomEditorDrawerTypes;
+			typedef std::unordered_map<Type, SharedPtr<IEditorDrawer>> CustomEditorDrawerTypes;
 
 			static CustomEditorDrawerTypes& GetTypes()
 			{

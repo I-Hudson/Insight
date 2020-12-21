@@ -16,9 +16,15 @@ namespace Insight
 		const std::string& GetTypeName() const { return m_typeId.Name; }
 		const uint64_t& GetTypeSize() const { return m_size; }
 
-	private:
 		template<typename T>
 		void SetType();
+
+		bool operator==(const Type& rhs) const
+		{
+			return m_typeId.Hash == rhs.m_typeId.Hash &&
+				   m_typeId.Name == rhs.m_typeId.Name &&
+				   m_size == rhs.m_size;
+		}
 
 	private:
 		TypeID m_typeId;
@@ -42,5 +48,18 @@ namespace Insight
 		}
 		m_typeId.Name = typeName;
 		m_typeId.Hash = typeid(T).hash_code();
+		m_size = sizeof(T);
 	}
 }
+
+template<>
+struct std::hash<Insight::Type>
+{
+	size_t operator()(const Insight::Type& type) const
+	{
+		size_t res = 17;
+		res = res * 31 + std::hash<std::string>()(type.GetTypeName());
+		res = res * 31 + std::hash<uint64_t>()(type.GetTypeSize());
+		return res;
+	}
+};

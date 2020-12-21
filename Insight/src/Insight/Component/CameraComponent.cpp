@@ -35,6 +35,8 @@ void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
+	Insight::Editor::CameraComponentEditorDrawer();
+
 	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
 	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);
 	IS_PROPERTY(float, m_farPlane, "Far Plane", ShowInEditor | ReadOnly);
