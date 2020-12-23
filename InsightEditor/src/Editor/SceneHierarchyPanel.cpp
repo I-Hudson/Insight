@@ -1,13 +1,13 @@
 #include "ispch.h"
-#include "Insight/Editor/SceneHierarchyPanel.h"
+#include "Editor/SceneHierarchyPanel.h"
 #include "Insight/Scene/Scene.h"
 #include "Insight/Entitiy/Entity.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Input/Input.h"
 #include "Insight/Event/EventManager.h"
-#include "Insight/Editor/EditorDrawer.h"
+#include "Editor/EditorDrawer.h"
 
-#include "Insight/Editor/RTTIToImGUI.h"
+#include "Editor/RTTIToImGUI.h"
 #include "imgui.h"
 
 namespace Insight

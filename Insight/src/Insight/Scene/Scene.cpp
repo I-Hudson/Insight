@@ -11,10 +11,6 @@
 
 #include "Insight/Serialization/File/SerializableFile.h"
 
-#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-#include "imgui.h"
-#endif
-
 #include <ostream>
 
 namespace Insight
@@ -90,7 +86,8 @@ namespace Insight
 	}
 
 	Scene* Scene::ActiveScene()
-	{
+	{		
+		IS_CORE_ASSERT(s_CurrentScene != nullptr, "[Scene::ActiveScene] 's_CurrentScene' must be a valid pointer.");
 		return s_CurrentScene;
 	}
 
@@ -180,12 +177,6 @@ namespace Insight
 	void Scene::OnUpdate(const float& deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
-
-#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-		ImGui::Begin("Scene");
-		ImGui::Checkbox("Scene playing", &m_isPlaying);
-		ImGui::End();
-#endif
 
 		if (!m_isPlaying)
 		{

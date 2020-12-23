@@ -10,7 +10,6 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
-#include "Module/EditorModule.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Scene/Scene.h"
@@ -52,10 +51,6 @@ namespace Insight
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
 		m_windowModule->SetManuallyUpdate(true);
 
-#ifdef IS_EDITOR
-		m_moduleManager->AddModule<Module::EditorModule>();
-#endif
-
 		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(m_windowModule);
 		m_graphicsModule->SetManuallyUpdate(true);
 
@@ -63,15 +58,6 @@ namespace Insight
 		m_inputModule->SetManuallyUpdate(true);
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
-		
-		//m_moduleManager->GetModule<Module::AssetModule>()->Deserialize();
-
-		TThreadSafe<int> testInt;
-		testInt = 0;
-		++testInt;
-		IS_CORE_INFO("{0}", testInt.GetValue());
-
-		IS_CORE_INFO("ALL TASKS ARE COMPLETED!");
 	}
 
 	Application::~Application()
@@ -90,26 +76,6 @@ namespace Insight
 		}
 	}
 
-	void TestFunc(CameraComponent* cam)
-	{
-		IS_PROFILE_FUNCTION();
-#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-		//ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-		//float cameraFOV = cam != nullptr ? cam->GetFov() : 0;
-		//if (ImGui::SliderFloat("Main Camera FOV: ", &cameraFOV, 0.1f, 120.0f))
-		//{
-		//	if (cam != nullptr)
-		//	{
-		//		cam->SetFov(cameraFOV);
-		//	}
-		//}
-
-		//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		//ImGui::End();
-#endif
-	}
-
 	void Application::Run()
 	{
 		//AllcoBench();
@@ -123,6 +89,9 @@ namespace Insight
 		uint32_t m_loopCount = 0;
 		uint32_t m_frameCount = 0;
 		float deltaTime = 0.0f;
+		Scene untitledScene;
+		untitledScene.SetActiveScene();
+		untitledScene.SetSceneName("Untitled Scene");
 
 		while (m_isRunning)
 		{
@@ -149,47 +118,51 @@ namespace Insight
 				//IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
 				//IS_CORE_INFO("Frame Time: {0}", deltaTime);
 
-#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+#ifdef IMGUI_ENABLED
 				Insight::ImGuiRenderer::Instance()->NewFrame();
-				
-				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
-				ImGui::Begin("Scene");
-				ImGui::InputText("Scene Name", &sceneFileName);
-				ImGui::End();
-
-				Scene::ActiveScene()->SetSceneName(sceneFileName);
-
-				ImGui::BeginMainMenuBar();
-
-				if (ImGui::BeginMenu("Scene"))
-				{
-					if (ImGui::MenuItem("Save Scene"))
-					{
-						Scene::ActiveScene()->Save();
-					}
-
-					if (ImGui::MenuItem("Load Scene"))
-					{
-						Scene::ActiveScene()->Load(sceneFileName);
-					}
-					ImGui::EndMenu();
-				}
-
-				if (ImGui::MenuItem("Save Model Library"))
-				{
-					//tinyxml2::XMLDocument doc;
-					//tinyxml2::XMLNode* models = doc.NewElement("Models");
-					//Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
-					//doc.InsertEndChild(models);
-					//doc.SaveFile("ModelLibrary.xml");
-				}
-				ImGui::EndMainMenuBar();
 #endif
+//#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
+//				
+//				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
+//				ImGui::Begin("Scene");
+//				ImGui::InputText("Scene Name", &sceneFileName);
+//				ImGui::End();
+//
+//				Scene::ActiveScene()->SetSceneName(sceneFileName);
+//
+//				ImGui::BeginMainMenuBar();
+//
+//				if (ImGui::BeginMenu("Scene"))
+//				{
+//					if (ImGui::MenuItem("Save Scene"))
+//					{
+//						Scene::ActiveScene()->Save();
+//					}
+//
+//					if (ImGui::MenuItem("Load Scene"))
+//					{
+//						Scene::ActiveScene()->Load(sceneFileName);
+//					}
+//					ImGui::EndMenu();
+//				}
+//
+//				if (ImGui::MenuItem("Save Model Library"))
+//				{
+//					//tinyxml2::XMLDocument doc;
+//					//tinyxml2::XMLNode* models = doc.NewElement("Models");
+//					//Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
+//					//doc.InsertEndChild(models);
+//					//doc.SaveFile("ModelLibrary.xml");
+//				}
+//				ImGui::EndMainMenuBar();
+//#endif
 				m_moduleManager->Update(deltaTime);
 
 				//TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 
 				Update(deltaTime);
+				Scene::ActiveScene()->OnUpdate(deltaTime);
+
 				Draw();
 #ifndef THREADS
 				m_graphicsModule->Update(deltaTime);

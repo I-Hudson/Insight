@@ -7,9 +7,6 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanImGUIRenderer.h"
-#if defined(IS_EDITOR)
-#include "Insight/Editor/UIHelper.h"
-#endif
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -19,7 +16,6 @@
 #include "Insight/Component/CameraComponent.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Model/Model.h"
-#include "Insight/Module/EditorModule.h"
 
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -47,75 +43,75 @@ namespace vks
 		return returnStr;
 	}
 
-#if defined(IS_EDITOR)
-	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
-		: EditorPanel(editorModule)
-		, m_renderer(renderer)
-	{
-	}
-
-	VulkanRendererEditorOverlay::~VulkanRendererEditorOverlay()
-	{
-	}
-
-	void VulkanRendererEditorOverlay::Update(const float& deltaTime)
-	{
-		using namespace Insight::Editor;
-
-		ImGui::Begin("VulkanRendererEditorOverlay");
-
-		if (SharedPtr< VulkanRenderer> renderer = m_renderer.lock())
-		{
-			ImGui::Checkbox("Debug overlay", &renderer->debugOverlay);
-
-			const char* items[] = { "Normal", "Colour", "Dynamic Uniform Colour" };
-			static int item_current = renderer->m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
-			ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
-			renderer->m_debugOverlay.debugOptions[0] = 0;
-			renderer->m_debugOverlay.debugOptions[1] = 0;
-			renderer->m_debugOverlay.debugOptions[2] = 0;
-			renderer->m_debugOverlay.debugOptions[item_current] = 1;
-
-			UIHelper::DrawString("EditorCamera");
-			UIHelper::DrawString("EditorCamera", ShowInEditor | TextBold);
-			float fov = renderer->m_editorCamera->GetFov();
-			float nearPlane = renderer->m_editorCamera->GetNearPlane();
-			float farPlane = renderer->m_editorCamera->GetFarPlane();
-			float cameraSpeed = renderer->m_editorCamera->GetCameraSpeed();
-			if (UIHelper::DrawFloat("FOV", &fov) || UIHelper::DrawFloat("Near Plane", &nearPlane) || UIHelper::DrawFloat("Far Plane", &farPlane) || UIHelper::DrawFloat("Camera Speed", &cameraSpeed))
-			{
-				renderer->m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
-				renderer->m_editorCamera->SetCameraSpeed(cameraSpeed);
-			}
-
-			// TODO: THIS IS NOT WORKING. WHY!!!!!!!!!!!!!!!
-
-			glm::vec4 rotation = glm::vec4(0, 0, 0, 0);
-			rotation.x = glm::degrees(atan2(renderer->m_testModelMatrix[1][2], renderer->m_testModelMatrix[2][2]));
-			rotation.y = glm::degrees(atan2(-renderer->m_testModelMatrix[0][2], glm::sqrt((renderer->m_testModelMatrix[0][0] * renderer->m_testModelMatrix[0][0]) + (renderer->m_testModelMatrix[0][1] * renderer->m_testModelMatrix[0][1]))));
-			rotation.z = glm::degrees(atan2((sin(rotation.x) * renderer->m_testModelMatrix[2][0]) - (cos(rotation.x) * renderer->m_testModelMatrix[1][0]),
-				(cos(rotation.x) * renderer->m_testModelMatrix[1][1] - (sin(rotation.x) * renderer->m_testModelMatrix[2][1]))));
-			if (UIHelper::DrawVector("Rotation", 3, &rotation.x))
-			{
-				glm::mat4 newMatrix(1.0f);
-
-				float radX = glm::radians(rotation.x);
-				float radY = glm::radians(rotation.y);
-				float radZ = glm::radians(rotation.z);
-
-				newMatrix = glm::rotate(newMatrix, radX, glm::vec3(1, 0, 0));
-				//newMatrix = glm::rotate(newMatrix, radY, glm::vec3(0, 1, 0));
-				newMatrix = glm::rotate(newMatrix, radZ, glm::vec3(0, 0, 1));
-
-				renderer->m_testModelMatrix = newMatrix;
-			}
-			IS_CORE_INFO("{0}", rotation.x);
-
-			UIHelper::DrawMat4("Test Model Matrix", &renderer->m_testModelMatrix);
-		}
-		ImGui::End();
-	}
-#endif
+//#if defined(IS_EDITOR)
+//	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
+//		: EditorPanel(editorModule)
+//		, m_renderer(renderer)
+//	{
+//	}
+//
+//	VulkanRendererEditorOverlay::~VulkanRendererEditorOverlay()
+//	{
+//	}
+//
+//	void VulkanRendererEditorOverlay::Update(const float& deltaTime)
+//	{
+//		using namespace Insight::Editor;
+//
+//		ImGui::Begin("VulkanRendererEditorOverlay");
+//
+//		if (SharedPtr< VulkanRenderer> renderer = m_renderer.lock())
+//		{
+//			ImGui::Checkbox("Debug overlay", &renderer->debugOverlay);
+//
+//			const char* items[] = { "Normal", "Colour", "Dynamic Uniform Colour" };
+//			static int item_current = renderer->m_debugOverlay.debugOptions.x == 1 ? 0 : 1;
+//			ImGui::Combo("combo", &item_current, items, ARRAY_SIZEOF(items));
+//			renderer->m_debugOverlay.debugOptions[0] = 0;
+//			renderer->m_debugOverlay.debugOptions[1] = 0;
+//			renderer->m_debugOverlay.debugOptions[2] = 0;
+//			renderer->m_debugOverlay.debugOptions[item_current] = 1;
+//
+//			UIHelper::DrawString("EditorCamera");
+//			UIHelper::DrawString("EditorCamera", ShowInEditor | TextBold);
+//			float fov = renderer->m_editorCamera->GetFov();
+//			float nearPlane = renderer->m_editorCamera->GetNearPlane();
+//			float farPlane = renderer->m_editorCamera->GetFarPlane();
+//			float cameraSpeed = renderer->m_editorCamera->GetCameraSpeed();
+//			if (UIHelper::DrawFloat("FOV", &fov) || UIHelper::DrawFloat("Near Plane", &nearPlane) || UIHelper::DrawFloat("Far Plane", &farPlane) || UIHelper::DrawFloat("Camera Speed", &cameraSpeed))
+//			{
+//				renderer->m_editorCamera->SetProjMatrix(fov, nearPlane, farPlane);
+//				renderer->m_editorCamera->SetCameraSpeed(cameraSpeed);
+//			}
+//
+//			// TODO: THIS IS NOT WORKING. WHY!!!!!!!!!!!!!!!
+//
+//			glm::vec4 rotation = glm::vec4(0, 0, 0, 0);
+//			rotation.x = glm::degrees(atan2(renderer->m_testModelMatrix[1][2], renderer->m_testModelMatrix[2][2]));
+//			rotation.y = glm::degrees(atan2(-renderer->m_testModelMatrix[0][2], glm::sqrt((renderer->m_testModelMatrix[0][0] * renderer->m_testModelMatrix[0][0]) + (renderer->m_testModelMatrix[0][1] * renderer->m_testModelMatrix[0][1]))));
+//			rotation.z = glm::degrees(atan2((sin(rotation.x) * renderer->m_testModelMatrix[2][0]) - (cos(rotation.x) * renderer->m_testModelMatrix[1][0]),
+//				(cos(rotation.x) * renderer->m_testModelMatrix[1][1] - (sin(rotation.x) * renderer->m_testModelMatrix[2][1]))));
+//			if (UIHelper::DrawVector("Rotation", 3, &rotation.x))
+//			{
+//				glm::mat4 newMatrix(1.0f);
+//
+//				float radX = glm::radians(rotation.x);
+//				float radY = glm::radians(rotation.y);
+//				float radZ = glm::radians(rotation.z);
+//
+//				newMatrix = glm::rotate(newMatrix, radX, glm::vec3(1, 0, 0));
+//				//newMatrix = glm::rotate(newMatrix, radY, glm::vec3(0, 1, 0));
+//				newMatrix = glm::rotate(newMatrix, radZ, glm::vec3(0, 0, 1));
+//
+//				renderer->m_testModelMatrix = newMatrix;
+//			}
+//			IS_CORE_INFO("{0}", rotation.x);
+//
+//			UIHelper::DrawMat4("Test Model Matrix", &renderer->m_testModelMatrix);
+//		}
+//		ImGui::End();
+//	}
+//#endif
 
 	VulkanRenderer::VulkanRenderer()
 	{
@@ -193,9 +189,6 @@ namespace vks
 
 	void VulkanRenderer::OnCreate()
 	{
-#if defined(IS_EDITOR)
-		Insight::Module::EditorModule::Instance()->AddEditorPanel<VulkanRendererEditorOverlay>(this->shared_from_this());
-#endif
 	}
 
 	void VulkanRenderer::InitVulkan()

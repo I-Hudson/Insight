@@ -1,11 +1,11 @@
 #Editor styles
-window_bg=	        0.1, 0.105, 0.11, 1
+window_bg=				0.1, 0.105, 0.11, 1
 
-header=		        0.2, 0.205, 0.21, 1
+header=					0.2, 0.205, 0.21, 1
 header_hovered=	        0.3, 0.305, 0.31, 1
 header_active=	        0.15, 0.1505, 0.151, 1
 
-button=		        0.2, 0.205, 0.21, 1
+button=					0.2, 0.205, 0.21, 1
 button_hovered=	        0.3, 0.305, 0.31, 1
 button_active=          0.15, 0.1505, 0.151, 1
 

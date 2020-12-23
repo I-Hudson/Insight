@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Insight/Editor/UIHelper.h"
+#include "Editor/UIHelper.h"
 
 namespace Insight
 {

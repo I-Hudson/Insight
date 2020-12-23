@@ -1,6 +1,6 @@
 #pragma once
 #include "Insight/Core/Core.h"
-#include "Insight/Editor/EditorPanel.h"
+#include "Editor/EditorPanel.h"
 
 class Entity;
 

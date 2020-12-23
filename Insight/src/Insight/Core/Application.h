@@ -41,7 +41,7 @@ namespace Insight
 		void Run();
 		void RenderLoop();
 
-	private:
+	protected:
 
 		std::mutex m_mutex;
 		std::thread m_updateThread;

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Editor">
+      <UniqueIdentifier>{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Components">
+      <UniqueIdentifier>{21D0DF35-8DE6-DDCB-D65D-69ED42B3AE53}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Module">
+      <UniqueIdentifier>{0BB38DC3-F754-B899-E00F-CCEDCC503FEA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Editor\Components\CameraComponentEditorDrawer.h">
+      <Filter>Editor\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\Diagnostic.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorDrawer.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\EditorPanel.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\RTTIToImGUI.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\SceneHierarchyPanel.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\UIHelper.h">
+      <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Module\EditorModule.h">
+      <Filter>Module</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Editor.cpp" />
+    <ClCompile Include="src\Editor\Components\CameraComponentEditorDrawer.cpp">
+      <Filter>Editor\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\SceneHierarchyPanel.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\UIHelper.cpp">
+      <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Module\EditorModule.cpp">
+      <Filter>Module</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

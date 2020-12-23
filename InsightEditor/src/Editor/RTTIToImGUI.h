@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Insight/Core/Core.h"
-#include "Insight/Editor/UIHelper.h"
+#include "Editor/UIHelper.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include <glm/glm.hpp>

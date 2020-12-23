@@ -11,6 +11,7 @@ if not exist "%cd%\Insight\vendor\assimp\BINARIES" (
 echo "Creating symlinks"
 
 CALL :SymlinkData "%cd%\bin\Debug-windows-x86_64\Sandbox\data", "%cd%\PBC\data"
+CALL :SymlinkData "%cd%\bin\Debug-windows-x86_64\InsightEditor\data", "%cd%\PBC\data"
 CALL :SymlinkData "%cd%\bin\Release-windows-x86_64\Sandbox\data", "%cd%\PBC\data"
 CALL :SymlinkData "%cd%\bin\Dist-windows-x86_64\Sandbox\data", "%cd%\PBC\data"
 

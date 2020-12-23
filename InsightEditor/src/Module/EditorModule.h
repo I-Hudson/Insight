@@ -1,11 +1,11 @@
 #pragma once
 #include "Insight/Core/Core.h"
-#include "Module.h"
+#include "Insight/Module/Module.h"
 #include "Insight/Core/Log.h"
 #include "Insight/Memory/MemoryManager.h"
 #include <bitset>
 
-#include "Insight/Editor/EditorDrawer.h"
+#include "Editor/EditorDrawer.h"
 
 #include <glm/glm.hpp>
 
@@ -84,6 +84,8 @@ namespace Insight
 				CVar<glm::vec4> TitleBgCollapsed{ "title_bg_collapsed", glm::vec4() };
 
 			};
+
+			EditorConfig EditorConfig;
 
 		private:
 			Editor::EditorDrawerRegistry m_editorDrawerRegisty;

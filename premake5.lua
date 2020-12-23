@@ -47,4 +47,5 @@ group "Dependencies"
 group ""
 
 include "Insight"
+include "InsightEditor"
 include "Sandbox"

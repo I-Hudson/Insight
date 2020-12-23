@@ -1,8 +1,8 @@
 #include "ispch.h"
 #include "EditorModule.h"
-#include "Insight/Editor/EditorPanel.h"
+#include "Editor/EditorPanel.h"
 
-#include "Insight/Editor/SceneHierarchyPanel.h"
+#include "Editor/SceneHierarchyPanel.h"
 
 #if defined(IS_EDITOR)
 namespace Insight

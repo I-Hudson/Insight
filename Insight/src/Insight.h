@@ -4,6 +4,7 @@
 
 #include "Insight/Core/Core.h"
 #include "Insight/Core/Application.h"
+#include "Insight/Module/ModuleManager.h"
 #include "Insight/Core/Log.h"
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Time/Time.h"

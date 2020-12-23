@@ -5,10 +5,6 @@
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
 
-#if defined(IS_EDITOR)
-#include "Insight/Editor/EditorPanel.h"
-#endif
-
 #include "VulkanDevice.h"
 #include "Swapchain.h"
 #include "VulkanMaterial.h"
@@ -31,19 +27,19 @@ const int MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace vks
 {
-#if defined(IS_EDITOR)
-	class VulkanRendererEditorOverlay : public Insight::Editor::EditorPanel
-	{
-	public:
-		VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);
-		~VulkanRendererEditorOverlay();
-
-		virtual void Update(const float& deltaTime) override;
-
-	private:
-		WeakPtr<VulkanRenderer> m_renderer;
-	};
-#endif
+//#if defined(IS_EDITOR)
+//	class VulkanRendererEditorOverlay : public Insight::Editor::EditorPanel
+//	{
+//	public:
+//		VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);
+//		~VulkanRendererEditorOverlay();
+//
+//		virtual void Update(const float& deltaTime) override;
+//
+//	private:
+//		WeakPtr<VulkanRenderer> m_renderer;
+//	};
+//#endif
 
 	class IS_API VulkanRenderer : public Insight::Renderer
 		, public std::enable_shared_from_this<VulkanRenderer>
@@ -251,8 +247,6 @@ namespace vks
 		};
 		bool debugOverlay;
 		DebugOverlay m_debugOverlay;
-
-		friend VulkanRendererEditorOverlay;
 	};
 }
 #endif

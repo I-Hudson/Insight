@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImGui", "Insight\vendor\ImG
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Insight", "Insight\Insight.vcxproj", "{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InsightEditor", "InsightEditor\InsightEditor.vcxproj", "{62AD160B-CE6D-9241-97A8-DBBE0328D71D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -50,6 +52,12 @@ Global
 		{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}.Dist|x64.Build.0 = Dist|x64
 		{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}.Release|x64.ActiveCfg = Release|x64
 		{5BBF0E00-C79E-8D9B-D0B6-18723C15F4FC}.Release|x64.Build.0 = Release|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Debug|x64.ActiveCfg = Debug|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Debug|x64.Build.0 = Debug|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Dist|x64.ActiveCfg = Dist|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Dist|x64.Build.0 = Dist|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Release|x64.ActiveCfg = Release|x64
+		{62AD160B-CE6D-9241-97A8-DBBE0328D71D}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

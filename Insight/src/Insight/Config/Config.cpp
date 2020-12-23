@@ -100,7 +100,6 @@ namespace Insight
 	const std::string Config::GetVal(const std::string& line, const int delimiterPos)
 	{
 		return line.substr(delimiterPos + 1);
-
 	}
 	
 	void Config::SetConfigVal(const std::string& key, const std::string_view& val)

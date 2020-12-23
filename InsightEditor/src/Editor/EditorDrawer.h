@@ -2,7 +2,7 @@
 
 #include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryManager.h"
-#include "Insight/Editor/UIHelper.h"
+#include "Editor/UIHelper.h"
 
 #if defined(IS_EDITOR)
 

@@ -16,12 +16,6 @@
     <Filter Include="src\Insight\Core">
       <UniqueIdentifier>{0A5BFDAC-F653-1CFF-1F86-01840BDEFB0A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Insight\Editor">
-      <UniqueIdentifier>{68E89EE5-54CC-5F3B-BD2C-5A8EA92F4ABD}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\Editor\Components">
-      <UniqueIdentifier>{7DBC8833-E9D4-6F5D-B281-FFF61E5904F7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Insight\Entitiy">
       <UniqueIdentifier>{A7A590B1-1307-6EBF-9C74-B47108D5A47E}</UniqueIdentifier>
     </Filter>
@@ -168,26 +162,8 @@
     <ClInclude Include="src\Insight\Core\UUID.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.h">
-      <Filter>src\Insight\Editor\Components</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\Diagnostic.h">
-      <Filter>src\Insight\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\EditorDrawer.h">
-      <Filter>src\Insight\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\EditorPanel.h">
-      <Filter>src\Insight\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\RTTIToImGUI.h">
-      <Filter>src\Insight\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\SceneHierarchyPanel.h">
-      <Filter>src\Insight\Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Editor\UIHelper.h">
-      <Filter>src\Insight\Editor</Filter>
+    <ClInclude Include="src\Insight\Core\Utils.h">
+      <Filter>src\Insight\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Entitiy\Entity.h">
       <Filter>src\Insight\Entitiy</Filter>
@@ -244,9 +220,6 @@
       <Filter>src\Insight\Model</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\AssetModule.h">
-      <Filter>src\Insight\Module</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Module\EditorModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\GraphicsModule.h">
@@ -1593,9 +1566,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Core\Utils.h">
-      <Filter>src\Insight\Core</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Component\CameraComponent.cpp">
@@ -1621,15 +1591,6 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Core\Object.cpp">
       <Filter>src\Insight\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Editor\Components\CameraComponentEditorDrawer.cpp">
-      <Filter>src\Insight\Editor\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Editor\SceneHierarchyPanel.cpp">
-      <Filter>src\Insight\Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Editor\UIHelper.cpp">
-      <Filter>src\Insight\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp">
       <Filter>src\Insight\Entitiy</Filter>
@@ -1662,9 +1623,6 @@
       <Filter>src\Insight\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\AssetModule.cpp">
-      <Filter>src\Insight\Module</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Module\EditorModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\GraphicsModule.cpp">

@@ -8,7 +8,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
 
-#include "Insight/Editor/Components/CameraComponentEditorDrawer.h"
 #include "Insight/RTTI/RTTI.h"
 
 REGISTER_DEF_TYPE(CameraComponent);
@@ -34,8 +33,6 @@ CameraComponent::~CameraComponent()
 void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
-
-	Insight::Editor::CameraComponentEditorDrawer();
 
 	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
 	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);

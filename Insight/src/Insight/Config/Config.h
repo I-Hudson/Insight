@@ -5,16 +5,16 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Module/GraphicsModule.h"
-#include "Insight/Module/EditorModule.h"
 
 #include <string>
 
-namespace Insight
-{
+#define CONFIG_GET_VAL(expr) expr.GetVal()
 #define CONFIG_VAL(expr) Insight::Config::GetInstance().expr.GetVal()
 #define CONFIG_SET(key, val) Insight::Config::GetInstance().SetVal(key, val)
 #define CONFIG_SET_P(expr, val) Insight::Config::GetInstance().expr.SetVal(val)
 
+namespace Insight
+{
 	class IS_API Config
 	{
 	public:
@@ -31,7 +31,6 @@ namespace Insight
 		Memory::MemoryManager::MemoryConfig MemoryConfig;
 		Module::WindowModule::WindowConfig WindowConfig;
 		Module::GraphicsModule::GraphicsConfig GraphicsConfig;
-		Module::EditorModule::EditorConfig EditorConfig;
 		Renderer::RendererConfig RendererConfig;
 
 	private:
