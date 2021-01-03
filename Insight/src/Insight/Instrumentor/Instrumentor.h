@@ -43,6 +43,8 @@ namespace Insight
 
 			void BeginSession(const std::string& name, const std::string& filepath = "results.json")
 			{
+				IS_CORE_INFO("Profile started!");
+
 				std::lock_guard lock(m_Mutex);
 				if (m_CurrentSession)
 				{
@@ -140,6 +142,7 @@ namespace Insight
 					delete m_CurrentSession;
 					m_CurrentSession = nullptr;
 				}
+				IS_INFO("Logging has finished. Session: {0}.", m_CurrentSession != nullptr);
 			}
 		private:
 			std::mutex m_Mutex;
@@ -469,9 +472,11 @@ namespace Insight
 #endif
 
 #define IS_PROFILE_BEGIN_SESSION(name, filepath) ::Insight::Profile::Instrumentor::Get().BeginSession(name, filepath)
-#define IS_PROFILE_END_SESSION() :::Insight::Profile::Instrumentor::Get().EndSession()
+#define IS_PROFILE_END_SESSION() ::Insight::Profile::Instrumentor::Get().EndSession()
 #define IS_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::Insight::Profile::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
 											   ::Insight::Profile::InstrumentationTimer timer##line(fixedName##line.Data)
+
+#define IS_PROFILE_FRAME(name) IS_PROFILE_SCOPE(name)
 #define IS_PROFILE_SCOPE_LINE(name, line) IS_PROFILE_SCOPE_LINE2(name, line)
 #define IS_PROFILE_SCOPE(name) IS_PROFILE_SCOPE_LINE(name, __LINE__)
 #define IS_PROFILE_FUNCTION() IS_PROFILE_SCOPE(IS_FUNC_SIG)
@@ -482,6 +487,7 @@ namespace Insight
 #define IS_PROFILE_SET_MEMORY_ALLOCATOR(allocFunc, deAllocFunc, callbackFunc)
 
 #define IS_PROFILE_GPU_INIT_VULKAN(DEVICES, PHYSICAL_DEVICES, CMD_QUEUES, CMD_QUEUES_FAMILY, NUM_CMD_QUEUS, FUNCTIONS)
+#define IS_PROFILE_GPUI_SHUTDOWN()
 #define IS_PROFILE_GPU_CONTEXT(commandList)
 #define IS_PROFILE_GPU_FUNCTION(name)
 #define IS_PROFILE_GPU_FLIP(swapchain)
@@ -493,6 +499,7 @@ namespace Insight
 #elif defined(IS_OPTICK_PROFILE)
 #define INSIGHT_PROFILE_CATEGORY_LINE(name, cat) Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)cat); OPTICK_CATEGORY(name, optickCat)
 
+#define IS_PROFILE_FRAME(name) OPTICK_FRAME(name)
 #define IS_PROFILE_BEGIN_SESSION(name, filepath)
 #define IS_PROFILE_END_SESSION() OPTICK_SHUTDOWN()
 #define IS_PROFILE_SCOPE(name) INSIGHT_PROFILE_CATEGORY_LINE(name, Insight::Category::Type::None)
@@ -514,6 +521,7 @@ namespace Insight
 #define IS_PROFILE_START_END() OPTICK_STOP_CAPTURE()
 #define IS_PROFILE_START_SAVE() OPTICK_SAVE_CAPTURE()
 #else
+#define IS_PROFILE_FRAME(name)
 #define IS_PROFILE_BEGIN_SESSION(name, filepath)
 #define IS_PROFILE_END_SESSION()
 #define IS_PROFILE_SCOPE(name)

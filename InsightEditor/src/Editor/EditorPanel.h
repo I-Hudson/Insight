@@ -1,6 +1,9 @@
 #pragma once
 #include "Insight/Core/Core.h"
+#include "Insight/Core/Log.h"
+#include "Insight/Input/Input.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 namespace Insight
 {
@@ -18,6 +21,27 @@ namespace Insight
 			virtual ~EditorPanel() {}
 
 			virtual void Update(const float& deltaTime) = 0;
+
+			const bool IsMouseInBounds()
+			{
+				float mousePosX, mousePosY;
+				Input::GetMousePosition(&mousePosX, &mousePosY);
+
+				IS_INFO("Mouse Pos:{0}, {1}", mousePosX, mousePosY);
+
+				auto imguiWindow = ImGui::GetCurrentWindowRead();
+				if (imguiWindow)
+				{
+					auto windowPos = imguiWindow->Pos;
+					auto windowSize = imguiWindow->Size;
+					IS_INFO("Window Pos:{0}, {1}", windowPos.x, windowPos.y);
+
+
+					return (windowPos.x - (windowSize.x * 0.5f)) <= mousePosX && (windowPos.x + (windowSize.x * 0.5f)) >= mousePosX &&
+						(windowPos.y - (windowSize.y * 0.5f)) <= mousePosY && (windowPos.y + (windowSize.y * 0.5f)) >= mousePosY;
+				}
+				return false;
+			}
 
 			const std::string& GetPanelName() { return m_panelName; }
 

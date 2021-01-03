@@ -18,9 +18,9 @@ namespace Insight
 			m_RTTITypes.clear();
 		}
 
-		RTTIProperty* RTTI::GetProperty(void* ownerPtr, const std::string& propertyName)
+		const RTTIProperty& RTTI::GetProperty(void* ownerPtr, const std::string& propertyName)
 		{
-			auto properties = m_RTTITypes[ownerPtr];
+			auto& properties = m_RTTITypes[ownerPtr];
 			if (!properties.empty())
 			{
 				auto typeIT = std::find_if(properties.begin(), properties.end(), [&propertyName](RTTIProperty& rttiType)
@@ -28,18 +28,15 @@ namespace Insight
 						return rttiType.GetPropertyName() == propertyName;
 					});
 
-				RTTIProperty* type = &(*typeIT);
-
-				if (type)
+				if (typeIT != properties.end())
 				{
-					return type;
+					return *typeIT;
 				}
 			}
-
-			return nullptr;
+			return RTTIProperty("Invalid", "Invalid", 0, nullptr);
 		}
 
-		std::vector<RTTIProperty*> RTTI::GetAllProperties(void* ownerPtr, const uint32_t& editorFlags)
+		const std::vector<RTTIProperty*> RTTI::GetAllProperties(void* ownerPtr, const uint32_t& editorFlags)
 		{
 			std::vector<RTTIProperty*> properties;
 			for (auto it = m_RTTITypes[ownerPtr].begin(); it != m_RTTITypes[ownerPtr].end(); ++it)

@@ -16,14 +16,12 @@ CameraComponent::CameraComponent()
 	: Component(nullptr)
 {
 	m_updateEveryFarme = true;
-	m_componentId = GetComponentID<CameraComponent>();
 }
 
 CameraComponent::CameraComponent(SharedPtr<Entity> owner)
 	: Component(owner)
 {
 	m_updateEveryFarme = true;
-	m_componentId = GetComponentID<CameraComponent>();
 }
 
 CameraComponent::~CameraComponent()

@@ -12,7 +12,7 @@ namespace Insight
 	float Stopwatch::End()
 	{
 		m_endTime = std::chrono::high_resolution_clock::now();
-		return Sec();
+		return static_cast<float>(Sec());
 	}
 
 	double Stopwatch::Sec() const

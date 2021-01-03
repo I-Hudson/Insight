@@ -35,7 +35,7 @@ public:
 	void Draw(VkCommandBuffer commandBuffer);
 
 	std::string& GetName();
-	const std::string& GetModelUUID() const;
+	const std::string GetModelUUID() const;
 	const unsigned int GetSubMeshIndex() const { return m_subMeshIndex; }
 
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }

@@ -10,7 +10,7 @@
 #include "VulkanMaterial.h"
 
 #include "Insight/Renderer/ImGuiRenderer.h"
-#include "Insight/Threading/Threadpool.h"
+#include "Insight/Threading/Threadpool.hpp"
 
 #include <glm/glm.hpp>
 
@@ -143,7 +143,7 @@ namespace vks
 		// Multi threaded stuff
 		// Max. number of concurrent threads
 		uint32_t m_numThreads;
-		Insight::ThreadPool m_threadPool;
+		thread_pool m_threadPool;
 		uint32_t m_numObjectsPerThread;
 
 		std::default_random_engine m_rndEngine;

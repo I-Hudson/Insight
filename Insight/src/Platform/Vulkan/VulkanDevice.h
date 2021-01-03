@@ -85,6 +85,8 @@ namespace vks
 		bool m_enableWaitCommands;
 		std::vector<std::function<void()>> m_waitIdleCommands;
 
+		std::mutex m_mutex;
+
 		/** @brief Contains queue family indices */
 		struct
 		{

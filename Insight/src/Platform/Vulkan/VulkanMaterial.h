@@ -12,14 +12,14 @@ namespace vks
 {
 	struct MaterialDynamicUniformInfo
 	{
-		U64 Index;
+		U32 Index;
 		bool InUse;
 
 		MaterialDynamicUniformInfo()
 			: InUse(false)
 		{ }
 
-		MaterialDynamicUniformInfo(U64 const& index, bool const& inUse)
+		MaterialDynamicUniformInfo(U32 const& index, bool const& inUse)
 			: Index(index)
 			, InUse(inUse)
 		{ }

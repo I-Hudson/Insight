@@ -23,6 +23,8 @@ namespace Insight
 			void DrawCompoentPanel(WeakPtr<Entity> entity);
 
 			SharedPtr<Entity> m_selectedEntity;
+			bool m_openContextPopup;
+			bool m_openAddComponentPopup;
 		};
 	}
 }

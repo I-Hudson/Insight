@@ -28,9 +28,9 @@ public:
 
 		//Entity::Create("Root Entity")->AddChild("child_1");
 
+		Library::ModelLibrary::Instance()->LoadAssetsFromFolder("./data/models", true);
 		if (test)
 		{
-			Library::ModelLibrary::Instance()->LoadAssetsFromFolder("./models", true);
 			SharedPtr<Model> m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 			for (size_t i = 0; i < 50; ++i)
 			{

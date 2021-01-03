@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <functional>
+#include <mutex>
 
 using Byte = uint8_t;
 using Size = size_t;
@@ -30,6 +31,10 @@ using Action = std::function<void(T...)>;
 
 template <typename result, typename... T>
 using Func = std::function<result(T...)>;
+
+using MutexUnqiueLock = std::unique_lock<std::mutex>;
+using MutexLockGuard = std::lock_guard<std::mutex>;
+using MutexScopedLock = std::scoped_lock<std::mutex>;
 
 inline auto operator""_B(Size const x) { return x; }
 inline auto operator""_KB(Size const x) { return 1024 * x; }

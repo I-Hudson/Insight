@@ -20,6 +20,8 @@ namespace Insight
 	};
 }
 
+#pragma warning(push)
+#pragma warning(disable : 4005)
 #if defined(IS_DEBUG)
 #define IS_CORE_TRACE(...)							::Insight::Log::GetCoreLogger()->trace(__VA_ARGS__)
 #define IS_CORE_INFO(...)							::Insight::Log::GetCoreLogger()->info(__VA_ARGS__)
@@ -46,6 +48,7 @@ namespace Insight
 #define IS_ERROR(...)
 #define IS_FATEL(...)
 #endif
+#pragma warning(pop)
 
 #define IS_CORE_ASSERT(expr, msg)					__assert(#expr, expr, __FILE__, __LINE__, msg, "Core")
 #define IS_CORE_STATIC_ASSERT(expr, msg)			static_assert(expr, msg);

@@ -13,7 +13,6 @@ MeshComponent::MeshComponent()
 	, m_materal(nullptr)
 {
 	m_updateEveryFarme = false;
-	m_componentId = GetComponentID<MeshComponent>();
 }
 
 MeshComponent::MeshComponent(SharedPtr<Entity> owner)
@@ -22,7 +21,6 @@ MeshComponent::MeshComponent(SharedPtr<Entity> owner)
 	, m_materal(nullptr)
 {
 	m_updateEveryFarme = false;
-	m_componentId = GetComponentID<MeshComponent>();
 }
 
 MeshComponent::~MeshComponent()

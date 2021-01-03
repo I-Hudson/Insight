@@ -9,13 +9,11 @@ REGISTER_DEF_TYPE(PlayerController);
 PlayerController::PlayerController()
 	: Component(nullptr)
 {
-	m_componentId = GetComponentID<PlayerController>();
 }
 
 PlayerController::PlayerController(SharedPtr<Entity> owner)
 	: Component(owner)
 {
-	m_componentId = GetComponentID<PlayerController>();
 }
 
 void PlayerController::OnCreate()

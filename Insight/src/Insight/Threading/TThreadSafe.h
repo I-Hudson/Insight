@@ -42,7 +42,6 @@ namespace Insight
 
 		T& GetValue();
 
-	private:
 		bool Lock();
 		void Unlock();
 

@@ -2,6 +2,9 @@
 
 #include "Insight/Library/ModelLibrary.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Insight/Threading/ThreadPool.hpp"
+#include "Insight/Threading/ThreadCollection.h"
+#include "Insight/Threading/TThreadSafe.h"
 
 #include <ppl.h>
 #include <concurrent_vector.h>
@@ -41,7 +44,11 @@ namespace Insight
 
 		void ModelLibrary::LoadAssetsFromFolder(const std::string& folderName, const bool& lookInChildren)
 		{
+			IS_PROFILE_FUNCTION();
+
 			using fs = std::filesystem::recursive_directory_iterator;
+			std::vector<std::string> filePaths;
+			std::vector<U32> filePathsSize;
 
 			for (const auto& entry : std::filesystem::recursive_directory_iterator::recursive_directory_iterator(folderName))
 			{
@@ -53,7 +60,69 @@ namespace Insight
 				{
 					std::string formattedFilePath = entry.path().u8string();
 					std::replace(formattedFilePath.begin(), formattedFilePath.end(), '\\', '/');
-					SharedPtr<Model> m = Object::CreateObject<Model>(formattedFilePath);
+					filePaths.push_back(formattedFilePath);
+					filePathsSize.push_back(static_cast<U32>(entry.file_size()));
+				}
+			}
+
+			U32 objsPerThread = static_cast<U32>(filePaths.size()) >= 4 ? static_cast<U32>(filePaths.size()) / 4 : 0;
+			if (objsPerThread >= 1)
+			{
+				using VecSharedModels = std::vector<SharedPtr<Model>>;
+
+				auto addMeshToContainer = [](ModelLoadThread threadData)
+				{
+					VecSharedModels loadedModels;
+					for (const auto& file : threadData.FilesToLoad)
+					{
+						SharedPtr<Model> m = Object::CreateObject<Model>(file);
+						loadedModels.push_back(m);
+					}
+					return loadedModels;
+				};
+
+				auto assignDataToThread = [](std::array<ModelLoadThread, 4>& threadsData, std::string fileName, U32 fileSize)
+				{
+					U32 lowsetSize = std::numeric_limits<U32>::max();
+					U32 index = 0;
+					for (U32 i = 0; i < 4; ++i)
+					{
+						if (threadsData[i].FileOverallSize < lowsetSize)
+						{
+							index = i;
+							lowsetSize = threadsData[i].FileOverallSize;
+						}
+					}
+
+					threadsData[index].FilesToLoad.push_back(fileName);
+					threadsData[index].FileOverallSize += fileSize;
+				};
+
+				/// -----------------------------------------------------------
+				// TEST
+				Threading::ThreadCollection<4, VecSharedModels, ModelLoadThread, std::string, U32> threadCollection(addMeshToContainer, assignDataToThread);
+
+				int index = 0;
+				for (auto& file : filePaths)
+				{
+					threadCollection.AddData(file, filePathsSize[index++]);
+				}
+				auto results = threadCollection.Execute();
+				threadCollection.Wait();
+
+				for (auto& vec : results)
+				{
+					for (auto& model : vec.get())
+					{
+						AddAsset(model->GetUUID(), model);
+					}
+				}
+			}
+			else
+			{
+				for (auto& file : filePaths)
+				{
+					SharedPtr<Model> m = Object::CreateObject<Model>(file);
 					AddAsset(m->GetUUID(), m);
 				}
 			}

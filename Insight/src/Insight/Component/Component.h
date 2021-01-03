@@ -18,14 +18,6 @@ class IS_API Component :
 	, public Insight::Serialization::Serializable
 {
 public:
-	Component()
-		: Insight::Object()
-		, Insight::Serialization::Serializable(this, true)
-		, m_isDirty(true)
-		, m_updateEveryFarme(true)
-		, m_componentId(-1)
-	{ }
-
 	Component(SharedPtr<Entity> owner)
 		: Insight::Object()
 		, Insight::Serialization::Serializable(this, true)
@@ -33,7 +25,9 @@ public:
 		, m_isDirty(true)
 		, m_updateEveryFarme(true)
 		, m_componentId(-1)
-	{ }
+	{
+		IS_PROPERTY(bool, m_allowRemovale, "Allow_Removable", 0);
+	}
 	virtual ~Component() {}
 
 	void SetEntity(SharedPtr<Entity> entity) { m_owner = entity; }
@@ -44,7 +38,7 @@ public:
 
 	const bool& IsDirty() const { return m_isDirty; }
 
-	virtual void OnCreate() { IS_CORE_ASSERT(m_componentId != -1, "A component has not been given an id. 'm_componentId' must be set with 'GetComponentID<T>'"); }
+	virtual void OnCreate() { }
 	virtual void OnUpdate(const float& deltaTime) { }
 	virtual void OnDestroy() { }
 
@@ -52,8 +46,10 @@ protected:
 	bool m_isDirty;
 	bool m_updateEveryFarme;
 	size_t m_componentId;
+	bool m_allowRemovale;
 
 private:
+	void Init() {  }
 	void Clean() { m_isDirty = false; }
 
 private:

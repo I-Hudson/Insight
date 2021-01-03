@@ -121,7 +121,7 @@ namespace vks
 		IS_CORE_ASSERT(m_numThreads > 0, "Number of threads has to be greater than 0.");
 		IS_CORE_INFO("numThreads = {0}", m_numThreads);
 #endif
-		m_threadPool.setThreadCount(m_numThreads);
+		m_threadPool.set_thread_count(m_numThreads);
 		m_numObjectsPerThread = 512 / m_numThreads;
 
 		m_rndEngine.seed((unsigned)time(nullptr));
@@ -1003,14 +1003,14 @@ namespace vks
 			{
 				if (m_threadData[t].objectData[i].visible)
 				{
-					m_threadPool.threads[t]->addJob([=] { ThreadRenderCode(t, i, inheritanceInfo); });
+					m_threadPool.push([=] { ThreadRenderCode(t, i, inheritanceInfo); });
 				}
 			}
 		}
 
 		{
 			IS_PROFILE_SCOPE("WAIT FOR ALL THREADS");
-			m_threadPool.wait();
+			m_threadPool.join();
 		}
 
 		// Only submit if object is within the current view frustum

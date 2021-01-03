@@ -34,6 +34,8 @@ namespace Insight
 			//{
 			//	m_modelLibrary->Deserialize(doc.FirstChild());
 			//}
+
+			m_modelLibrary->LoadAssetsFromFolder("./data", true);
 		}
 	}
 }

@@ -12,7 +12,6 @@ TransformComponent::TransformComponent()
 	, m_transform(glm::mat4(1.0f))
 {
 	m_updateEveryFarme = false;
-	m_componentId = GetComponentID<TransformComponent>();
 }
 
 TransformComponent::TransformComponent(SharedPtr<Entity> owner)
@@ -20,7 +19,6 @@ TransformComponent::TransformComponent(SharedPtr<Entity> owner)
 	, m_transform(glm::mat4(1.0f))
 {
 	m_updateEveryFarme = false;
-	m_componentId = GetComponentID<TransformComponent>();
 }
 
 TransformComponent::~TransformComponent()
@@ -31,6 +29,7 @@ void TransformComponent::OnCreate()
 {
 	__super::OnCreate();
 	IS_REGISTER_PROPERTY(glm::mat4, m_transform, "Transform", ShowInEditor);
+	m_allowRemovale = false;
 }
 
 void TransformComponent::OnDestroy()

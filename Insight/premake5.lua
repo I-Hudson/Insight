@@ -14,6 +14,7 @@ project "Insight"
     files
 	{
 		"src/**.h",
+		"src/**.hpp",
         "src/**.cpp",
         "vendor/stb_image/**.h",
 		"vendor/stb_image/**.cpp",

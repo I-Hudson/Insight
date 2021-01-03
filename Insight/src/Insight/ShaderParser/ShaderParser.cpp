@@ -141,7 +141,7 @@ namespace Insight
 
 		uniformBlock.Name = GetName(line, false);
 
-		int sLoc = line.find("//");
+		size_t sLoc = line.find("//");
 		sLoc += 2;
 		if (line[sLoc] == '#')
 		{

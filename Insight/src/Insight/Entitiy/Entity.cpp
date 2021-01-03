@@ -214,6 +214,11 @@ void Entity::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> 
 	}
 }
 
+bool Entity::HasComponent(const Insight::Type& type)
+{
+	return m_componetBitset[GetComponentID(type)];
+}
+
 void Entity::AddComponent(SharedPtr<Component> component)
 {
 	m_components.push_back(component);
@@ -227,6 +232,37 @@ void Entity::AddComponent(SharedPtr<Component> component)
 	}
 }
 
+void Entity::RemoveComponent(const std::string& uuid)
+{
+	auto it = std::find_if(m_components.begin(), m_components.end(), [uuid](SharedPtr<Component> ptr)
+		{
+			return ptr->GetUUID() == uuid;
+		});
+
+	if (it != m_components.end())
+	{
+		(*it)->OnDestroy();
+
+		m_componetBitset[GetComponentID((*it)->GetType())] = false;
+
+		if (m_attachedToScene)
+		{
+			auto sceneUpdateComponent = std::find_if(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
+				Insight::Scene::ActiveScene()->m_updateComponents.end(), [it](SharedPtr<Component> ptr)
+				{
+					return (*it)->GetUUID() == ptr->GetUUID();
+				});
+			if (sceneUpdateComponent != Insight::Scene::ActiveScene()->m_updateComponents.end())
+			{
+				Insight::Scene::ActiveScene()->m_updateComponents.erase(sceneUpdateComponent);
+			}
+		}
+
+		(*it).reset();
+		m_components.erase(it);
+	}
+}
+
 void Entity::RemoveAllComponenets()
 {
 	IS_PROFILE_FUNCTION();
@@ -237,5 +273,5 @@ void Entity::RemoveAllComponenets()
 	}
 
 	m_components.clear();
-	m_componetBitset.reset();
+	m_componetBitset.clear();
 }

@@ -46,7 +46,7 @@ namespace Insight
 		
 		m_moduleManager = Module::ModuleManager::Create();
 		
-		m_moduleManager->AddModule<Module::AssetModule>();
+		auto assertModule = m_moduleManager->AddModule<Module::AssetModule>();
 
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
 		m_windowModule->SetManuallyUpdate(true);
@@ -58,6 +58,8 @@ namespace Insight
 		m_inputModule->SetManuallyUpdate(true);
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
+
+		assertModule->Deserialize();
 	}
 
 	Application::~Application()
@@ -95,7 +97,7 @@ namespace Insight
 
 		while (m_isRunning)
 		{
-			OPTICK_FRAME("MainThread");
+			IS_PROFILE_FRAME("MainThread");
 
 			IS_PROFILE_SCOPE("UPDATE_LOOP");
 			{
@@ -206,7 +208,7 @@ namespace Insight
 		uint32_t m_frameCount = 0;
 
 		IS_PROFILE_THREAD("Render Thread");
-		Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Insight::Category::AI);
+		//Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Insight::Category::AI);
 
 		while (m_isRunning)
 		{

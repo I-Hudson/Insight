@@ -31,6 +31,12 @@ namespace Insight
 				".fbx", ".obj",
 			};
 
+			struct ModelLoadThread
+			{
+				std::vector<std::string> FilesToLoad;
+				U32 FileOverallSize = 0;
+			};
+
 			std::mutex m_lock;
 		};
 	}

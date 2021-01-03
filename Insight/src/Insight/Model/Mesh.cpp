@@ -74,7 +74,7 @@ std::string& Mesh::GetName()
 	return m_meshName;
 }
 
-const std::string& Mesh::GetModelUUID() const
+const std::string Mesh::GetModelUUID() const
 {
 	if (m_parentModel)
 	{

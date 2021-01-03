@@ -51,7 +51,7 @@ namespace vks
 			std::vector<VkDescriptorSet> sets = GetDescriptorSets();
 			m_pipeline.Bind(commandBuffer, bindPoint);
 
-			std::vector<uint32_t> dynamicOffsets;
+			std::vector<U32> dynamicOffsets;
 			if (materialBlockData && materialBlockData->InUse)
 			{
 				dynamicOffsets.resize(materialBlockData->DynamicBuffers.size());
@@ -232,8 +232,8 @@ namespace vks
 	MaterialBlockData VulkanMaterial::FindValidMaterialBlock(MaterialUniformBuffer& materialUniformBuffer, const std::string& uniformKey)
 	{
 		MaterialUniformDynamicBlock& dynamicBlock = materialUniformBuffer.DynamicUniformBlock;
-		U64 blockIndex = -1;
-		for (size_t i = 0; i < dynamicBlock.DynamicBlocks.size(); ++i)
+		U32 blockIndex = -1;
+		for (U32 i = 0; i < dynamicBlock.DynamicBlocks.size(); ++i)
 		{
 			if (!dynamicBlock.DynamicBlocks[i].InUse)
 			{
@@ -244,7 +244,7 @@ namespace vks
 
 		if (blockIndex == -1)
 		{
-			U64 orginalVectorSize = dynamicBlock.DynamicBlocks.size();
+			U32 orginalVectorSize = static_cast<U32>(dynamicBlock.DynamicBlocks.size());
 			if (dynamicBlock.DynamicBlocks.size() == 0)
 			{
 				dynamicBlock.DynamicBlocks.resize(1);

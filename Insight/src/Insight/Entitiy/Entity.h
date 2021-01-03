@@ -15,18 +15,9 @@ class Component;
 class Entity;
 const size_t MaxComponents = 32;
 
-using ComponentID = size_t;
-inline ComponentID GetComponentID()
+inline U64 GetComponentID(const Insight::Type& type) noexcept
 {
-	static ComponentID lastID = 0;
-	return lastID++;
-}
-
-template<typename T>
-inline ComponentID GetComponentID() noexcept
-{
-	static ComponentID typeID = GetComponentID();
-	return typeID;
+	return type.GetTypeHash();
 }
 
 namespace Insight
@@ -46,7 +37,7 @@ public:
 	Entity(const std::string& id, bool attachToScene);
 	virtual ~Entity() override;
 
-	static SharedPtr<Entity> Create(const std::string& id = "");
+	static SharedPtr<Entity> Create(const std::string& id = "Untitled");
 	static SharedPtr<Entity> CreateFromModel(SharedPtr<Model> model);
 	void Delete();
 
@@ -75,7 +66,6 @@ public:
 
 	template <typename T>
 	void RemoveComponent();
-	template <typename T>
 	void RemoveComponent(const std::string& uuid);
 
 	template<typename T>
@@ -88,6 +78,7 @@ public:
 
 private:
 
+	bool HasComponent(const Insight::Type& type);
 	void AddComponent(SharedPtr<Component> component);
 	void RemoveAllComponenets();
 
@@ -95,7 +86,7 @@ private:
 	WeakPtr<Entity> m_parent;
 	std::vector<SharedPtr<Entity>> m_children;
 	std::vector<SharedPtr<Component>> m_components;
-	std::bitset<MaxComponents> m_componetBitset;
+	std::unordered_map<U64, U8> m_componetBitset;
 	bool m_isActive;
 	bool m_showDebugInfo;
 	bool m_attachedToScene = true;
@@ -111,7 +102,9 @@ inline bool Entity::HasComponent()
 	const bool result = std::is_base_of<Component, T>::value;
 	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
 
-	return m_componetBitset[GetComponentID<T>()];
+	Insight::Type type;
+	type.SetType<T>();
+	return HasComponent(type);
 }
 
 template<typename T>
@@ -123,10 +116,11 @@ inline SharedPtr<T> Entity::AddComponent()
 	if (m_components.size() < MaxComponents && !HasComponent<T>())
 	{
 		SharedPtr<T> c = Object::CreateObject<T>(this->shared_from_this());
-		StaticPointerCast<Component>(c)->OnCreate();
+		SharedPtr<Component> base = StaticPointerCast<Component>(c);
+		base->OnCreate();
 		
 		m_components.push_back(c);
-		m_componetBitset[GetComponentID<T>()] = true;
+		m_componetBitset[GetComponentID(base->GetType())] = true;
 
 		if (StaticPointerCast<Component>(c)->m_updateEveryFarme)
 		{
@@ -154,10 +148,12 @@ inline void Entity::RemoveComponent()
 			SharedPtr<T> tempPtr = DynamicPointerCast<T>(*it);
 			if (tempPtr != nullptr)
 			{
+				SharedPtr<Component> base = StaticPointerCast<Component>(c);
+
 				(*it)->OnDestroy();
 				(*it).reset();
 
-				m_componetBitset[GetComponentID<T>()] = false;
+				m_componetBitset[GetComponentID(base->GetType())] = false;
 				m_components.erase(it);
 
 				if (m_attachedToScene)
@@ -166,35 +162,6 @@ inline void Entity::RemoveComponent()
 																					  Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
 				}
 
-				break;
-			}
-		}
-	}
-}
-
-template<typename T>
-inline void Entity::RemoveComponent(const std::string& uuid)
-{
-	const bool result = std::is_base_of<Component, T>::value;
-	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
-
-	if (HasComponent<T>())
-	{
-		for (auto it = m_components.begin(); it != m_components.end(); ++it)
-		{
-			if ((*it)->GetUUID() == uuid)
-			{
-				(*it)->OnDestroy();
-				(*it).reset();
-
-				m_componetBitset[GetComponentID<T>()] = false;
-				m_components.erase(it);
-
-				if (m_attachedToScene)
-				{
-					Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
-																					  Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
-				}
 				break;
 			}
 		}

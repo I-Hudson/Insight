@@ -60,6 +60,28 @@ namespace Insight
 				m_selectedEntity = nullptr;
 			}
 
+			if (IsMouseInBounds() && Input::MouseButtonDown(MOUSE_BUTTON_RIGHT))
+			{
+				if (!m_openContextPopup)
+				{
+					m_openContextPopup = true;
+				}
+			}
+
+			if (m_openContextPopup)
+			{
+				ImGui::OpenPopup("Context Menu");
+				if (ImGui::BeginPopup("Context Menu"))
+				{
+					if (ImGui::Selectable("Create Entity"))
+					{
+						Entity::Create();
+						m_openContextPopup = false;
+					}
+					ImGui::EndPopup();
+				}
+			}
+
 			ImGui::End();
 
 			DrawCompoentPanel(m_selectedEntity);
@@ -139,9 +161,20 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Draw Properties");
 					auto properties = IS_GET_ALL_PROPERTIES((*componentsIT).get(), ShowInEditor);
+					auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT).get(), "Allow_Removable");
 
 					ImGui::Separator();
 					ImGui::Text((*componentsIT)->GetType().GetTypeName().c_str());
+					if (allowRemovableProb.IsValid() && allowRemovableProb.GetPropertyValue<bool>())
+					{
+						ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+						if (ImGui::Button("X"))
+						{
+							// TODO: Remove component
+							spEntity->RemoveComponent((*componentsIT)->GetUUID());
+							continue;
+						}
+					}
 
 					if (!Editor::EditorDrawerRegistry::CallEditorDrawer((*componentsIT)->GetType(), *(*componentsIT)))
 					{
@@ -156,6 +189,14 @@ namespace Insight
 					}
 				}
 				ImGui::Separator();
+
+				const char* addComponentButtonText = "+";
+				//ImGui::SetCursorPos(ImVec2((ImGui::GetWindowWidth() - ImGui::CalcTextSize(addComponentButtonText).x) * 0.5f, ImGui::GetCursorPosY()));
+				if (ImGui::Button(addComponentButtonText, ImVec2(ImGui::GetWindowWidth(), 35.f)))
+				{
+					// TODO: Add component
+					m_openAddComponentPopup = true;
+				}
 			}
 			ImGui::End();
 #endif

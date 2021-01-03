@@ -68,7 +68,7 @@ namespace Insight
 
 #ifdef IMGUI_ENABLED
 			ImGuiIO io = ImGui::GetIO();
-			io.MousePos = ImVec2(m_mouseX, m_mouseY);
+			io.MousePos = ImVec2(static_cast<float>(m_mouseX), static_cast<float>(m_mouseY));
 #endif
 		}
 

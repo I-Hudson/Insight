@@ -13,6 +13,7 @@ namespace Insight
 	class Type
 	{
 	public:
+		const uint64_t& GetTypeHash() const { return m_typeId.Hash; }
 		const std::string& GetTypeName() const { return m_typeId.Name; }
 		const uint64_t& GetTypeSize() const { return m_size; }
 

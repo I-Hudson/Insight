@@ -24,5 +24,8 @@ namespace Insight
 			{
 				throw std::runtime_error(msg);
 			});
+
+		IS_CORE_INFO("CORE LOG INIT!");
+		IS_INFO("APP LOG INIT!");
 	}
 }
