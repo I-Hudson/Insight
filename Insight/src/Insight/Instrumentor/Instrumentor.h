@@ -493,8 +493,8 @@ namespace Insight
 #define IS_PROFILE_GPU_FLIP(swapchain)
 
 #define IS_PROFILE_START_CAPTURE()
-#define IS_PROFILE_START_END()
-#define IS_PROFILE_START_SAVE()
+#define IS_PROFILE_STOP_CAPTURE()
+#define IS_PROFILE_SAVE_CAPTURE()
 
 #elif defined(IS_OPTICK_PROFILE)
 #define INSIGHT_PROFILE_CATEGORY_LINE(name, cat) Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)cat); OPTICK_CATEGORY(name, optickCat)
@@ -518,8 +518,8 @@ namespace Insight
 #define IS_PROFILE_GPU_FLIP(swapchain) OPTICK_GPU_FLIP(swapchain)
 
 #define IS_PROFILE_START_CAPTURE() OPTICK_START_CAPTURE()
-#define IS_PROFILE_START_END() OPTICK_STOP_CAPTURE()
-#define IS_PROFILE_START_SAVE() OPTICK_SAVE_CAPTURE()
+#define IS_PROFILE_STOP_CAPTURE() OPTICK_STOP_CAPTURE()
+#define IS_PROFILE_SAVE_CAPTURE(path) OPTICK_SAVE_CAPTURE(path)
 #else
 #define IS_PROFILE_FRAME(name)
 #define IS_PROFILE_BEGIN_SESSION(name, filepath)
@@ -539,6 +539,6 @@ namespace Insight
 #define IS_PROFILE_GPU_FLIP(swapchain)
 
 #define IS_PROFILE_START_CAPTURE()
-#define IS_PROFILE_START_END()
-#define IS_PROFILE_START_SAVE()
+#define IS_PROFILE_STOP_CAPTURE()
+#define IS_PROFILE_SAVE_CAPTURE()
 #endif

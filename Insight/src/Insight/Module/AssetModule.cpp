@@ -35,7 +35,10 @@ namespace Insight
 			//	m_modelLibrary->Deserialize(doc.FirstChild());
 			//}
 
+			IS_PROFILE_START_CAPTURE();
 			m_modelLibrary->LoadAssetsFromFolder("./data", true);
+			IS_PROFILE_STOP_CAPTURE();
+			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture.opt");
 		}
 	}
 }

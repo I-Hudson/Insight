@@ -340,7 +340,7 @@ namespace vks
 	*/
 	VkResult VulkanDevice::CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, VkBuffer* buffer, VkDeviceMemory* memory, void* data)
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard l(m_mutex);
 
 		// Create the buffer handle
 		VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo(usageFlags, size);
@@ -401,7 +401,7 @@ namespace vks
 	*/
 	VkResult VulkanDevice::CreateBuffer(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, vks::VulkanBuffer* buffer, void* data)
 	{
-		//MutexUnqiueLock l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		buffer->device = m_logicalDevice;
 
@@ -451,8 +451,6 @@ namespace vks
 
 	void VulkanDevice::CreateBufferGPU(VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkDeviceSize size, vks::VulkanBuffer* buffer, void* data)
 	{
-		//MutexLockGuard l(m_mutex);
-
 		vks::VulkanBuffer stagingBuffer;
 		CreateBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 					 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
@@ -465,15 +463,16 @@ namespace vks
 					 size,
 					 buffer);
 
+
 		VkCommandBuffer copyCmd = vks::VulkanDevice::Instance()->CreateSingleUseBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
 		VkBufferCopy copyRegion = {};
 		copyRegion.size = size;
-		vkCmdCopyBuffer(copyCmd, stagingBuffer.buffer, buffer->buffer, 1, &copyRegion);
 
+		MutexUnqiueLock lock(m_mutex);
+		vkCmdCopyBuffer(copyCmd, stagingBuffer.buffer, buffer->buffer, 1, &copyRegion);
+		lock.unlock();
 		FlushCommandBuffer(copyCmd, m_queueFamily.transfer, true);
 		stagingBuffer.Destroy();
-
-
 	}
 
 	/**
@@ -488,7 +487,7 @@ namespace vks
 	*/
 	void VulkanDevice::CopyBuffer(vks::VulkanBuffer* src, vks::VulkanBuffer* dst, VkQueue queue, VkBufferCopy* copyRegion)
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		assert(dst->size <= src->size);
 		assert(src->buffer);
@@ -520,7 +519,7 @@ namespace vks
 	*/
 	VkCommandPool VulkanDevice::CreateCommandPool(uint32_t queueFamilyIndex, VkCommandPoolCreateFlags createFlags)
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		VkCommandPoolCreateInfo cmdPoolInfo = {};
 		cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -542,7 +541,7 @@ namespace vks
 	*/
 	VkCommandBuffer VulkanDevice::CreateCommandBuffer(VkCommandBufferLevel level, VkCommandPool pool, bool begin, VkCommandBufferUsageFlags usage)
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		VkCommandBufferAllocateInfo cmdBufAllocateInfo = vks::initializers::commandBufferAllocateInfo(pool, level, 1);
 		VkCommandBuffer cmdBuffer;
@@ -580,7 +579,7 @@ namespace vks
 	*/
 	void VulkanDevice::FlushCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue, VkCommandPool pool, bool free)
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		if (commandBuffer == VK_NULL_HANDLE)
 		{
@@ -714,7 +713,7 @@ namespace vks
 
 	VkResult VulkanDevice::WaitForIdle()
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		return vkDeviceWaitIdle(m_logicalDevice);
 	}
@@ -726,7 +725,7 @@ namespace vks
 
 	void VulkanDevice::CreateDescriptorPool()
 	{
-		//MutexLockGuard l(m_mutex);
+		MutexLockGuard lock(m_mutex);
 
 		VkDescriptorPoolSize pool_sizes[] =
 		{

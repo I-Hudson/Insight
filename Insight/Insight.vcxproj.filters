@@ -294,6 +294,9 @@
     <ClInclude Include="src\Insight\Threading\TThreadSafe.h">
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Threading\ThreadCollection.h">
+      <Filter>src\Insight\Threading</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Threading\ThreadPool.hpp">
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
@@ -1566,7 +1569,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Threading\ThreadCollection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Component\CameraComponent.cpp">

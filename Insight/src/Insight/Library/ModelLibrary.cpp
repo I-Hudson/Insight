@@ -72,6 +72,8 @@ namespace Insight
 
 				auto addMeshToContainer = [](ModelLoadThread threadData)
 				{
+					IS_PROFILE_THREAD("Worker");
+
 					VecSharedModels loadedModels;
 					for (const auto& file : threadData.FilesToLoad)
 					{
@@ -80,7 +82,6 @@ namespace Insight
 					}
 					return loadedModels;
 				};
-
 				auto assignDataToThread = [](std::array<ModelLoadThread, 4>& threadsData, std::string fileName, U32 fileSize)
 				{
 					U32 lowsetSize = std::numeric_limits<U32>::max();
@@ -98,8 +99,6 @@ namespace Insight
 					threadsData[index].FileOverallSize += fileSize;
 				};
 
-				/// -----------------------------------------------------------
-				// TEST
 				Threading::ThreadCollection<4, VecSharedModels, ModelLoadThread, std::string, U32> threadCollection(addMeshToContainer, assignDataToThread);
 
 				int index = 0;
