@@ -1,6 +1,14 @@
 #pragma once
 
 #include "Insight/Core/Log.h"
+#include "Insight/Core/Utils.h"
+
+#if !defined(IS_PROFILE) && !defined(IS_OPTICK_PROFILE)
+#ifdef _MSC_VER
+#pragma message ("Debug should have profilling. 'IS_PROFILE' has been set as the default.")
+#endif
+#define IS_PROFILE
+#endif
 
 #if defined(IS_OPTICK_PROFILE)
 #include "optick.h"
@@ -38,14 +46,26 @@ namespace Insight
 		class Instrumentor
 		{
 		public:
+			Instrumentor()
+				: m_CurrentSession(nullptr)
+			{ }
+			~Instrumentor()
+			{}
+
 			Instrumentor(const Instrumentor&) = delete;
 			Instrumentor(Instrumentor&&) = delete;
 
-			void BeginSession(const std::string& name, const std::string& filepath = "results.json")
+			void BeginSession()
 			{
-				IS_CORE_INFO("Profile started!");
+				IS_CORE_INFO("Temp profile started!");
 
 				std::lock_guard lock(m_Mutex);
+				
+				if (&Get() != this)
+				{
+					Get().AddProfile(this);
+				}
+
 				if (m_CurrentSession)
 				{
 					// If there is already a current session, then close it before beginning new one.
@@ -54,30 +74,36 @@ namespace Insight
 					// profiling output.
 					if (Insight::Log::GetCoreLogger()) // Edge case: BeginSession() might be before Log::Init()
 					{
-						IS_CORE_ERROR("Instrumentor::BeginSession('{0}') when session '{1}' already open.", name, m_CurrentSession->Name);
+						IS_CORE_ERROR("Instrumentor::BeginSession('{0}') when session '{1}' already open.", "", m_CurrentSession->Name);
 					}
-					InternalEndSession();
+					return;
 				}
-				m_OutputStream.open(filepath);
-
-				if (m_OutputStream.is_open())
-				{
-					m_CurrentSession = new InstrumentationSession({ name });
-					WriteHeader();
-				}
-				else
-				{
-					if (Log::GetCoreLogger()) // Edge case: BeginSession() might be before Log::Init()
-					{
-						IS_CORE_ERROR("Instrumentor could not open results file '{0}'.", filepath);
-					}
-				}
+				m_CurrentSession = new InstrumentationSession({ "" });
+				WriteHeader();
 			}
 
 			void EndSession()
 			{
 				std::lock_guard lock(m_Mutex);
+				if (&Get() != this)
+				{
+					Get().RemoveProfile(this);
+				}
 				InternalEndSession();
+			}
+
+			void SaveSession(const std::string& filePath)
+			{
+				m_OutputStream.open(filePath);
+				if (m_OutputStream.is_open())
+				{
+					m_OutputStream << m_dataString;
+					m_OutputStream.close();
+				}
+				else
+				{
+					IS_CORE_ERROR("Profile could not be saved to file.");
+				}
 			}
 
 			void WriteProfile(const ProfileResult& result)
@@ -98,9 +124,25 @@ namespace Insight
 				std::lock_guard lock(m_Mutex);
 				if (m_CurrentSession)
 				{
-					m_OutputStream << json.str();
-					m_OutputStream.flush();
+					m_dataString += json.str();
 				}
+
+				for (auto& profile : m_profiles)
+				{
+					profile->m_dataString += json.str();
+				}
+			}
+
+			void AddProfile(Instrumentor* ptr)
+			{
+				std::lock_guard lock(m_Mutex);
+				m_profiles.push_back(ptr);
+			}
+
+			void RemoveProfile(Instrumentor* ptr)
+			{
+				std::lock_guard lock(m_Mutex);
+				m_profiles.erase(std::find(m_profiles.begin(), m_profiles.end(), ptr));
 			}
 
 			static Instrumentor& Get()
@@ -109,26 +151,14 @@ namespace Insight
 				return instance;
 			}
 		private:
-			Instrumentor()
-				: m_CurrentSession(nullptr)
-			{
-			}
-
-			~Instrumentor()
-			{
-				EndSession();
-			}
-
 			void WriteHeader()
 			{
-				m_OutputStream << "{\"otherData\": {},\"traceEvents\":[{}";
-				m_OutputStream.flush();
+				m_dataString += "{\"otherData\": {},\"traceEvents\":[{}";
 			}
 
 			void WriteFooter()
 			{
-				m_OutputStream << "]}";
-				m_OutputStream.flush();
+				m_dataString += "]}";
 			}
 
 			// Note: you must already own lock on m_Mutex before
@@ -138,7 +168,7 @@ namespace Insight
 				if (m_CurrentSession)
 				{
 					WriteFooter();
-					m_OutputStream.close();
+					
 					delete m_CurrentSession;
 					m_CurrentSession = nullptr;
 				}
@@ -148,6 +178,9 @@ namespace Insight
 			std::mutex m_Mutex;
 			InstrumentationSession* m_CurrentSession;
 			std::ofstream m_OutputStream;
+			std::string m_dataString;
+
+			std::vector<Instrumentor*> m_profiles;
 		};
 
 		class InstrumentationTimer
@@ -471,8 +504,9 @@ namespace Insight
 #define IS_FUNC_SIG "IS_FUNC_SIG unknown!"
 #endif
 
-#define IS_PROFILE_BEGIN_SESSION(name, filepath) ::Insight::Profile::Instrumentor::Get().BeginSession(name, filepath)
+#define IS_PROFILE_BEGIN_SESSION() ::Insight::Profile::Instrumentor::Get().BeginSession()
 #define IS_PROFILE_END_SESSION() ::Insight::Profile::Instrumentor::Get().EndSession()
+#define IS_PROFILE_SAVE_SESSION(filePath) ::Insight::Profile::Instrumentor::Get().SaveSession(filePath)
 #define IS_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::Insight::Profile::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
 											   ::Insight::Profile::InstrumentationTimer timer##line(fixedName##line.Data)
 
@@ -492,17 +526,19 @@ namespace Insight
 #define IS_PROFILE_GPU_FUNCTION(name)
 #define IS_PROFILE_GPU_FLIP(swapchain)
 
-#define IS_PROFILE_START_CAPTURE()
-#define IS_PROFILE_STOP_CAPTURE()
-#define IS_PROFILE_SAVE_CAPTURE()
+#define IS_PROFILE_START_CAPTURE() ::Insight::Profile::Instrumentor temp; temp.BeginSession()
+#define IS_PROFILE_STOP_CAPTURE() temp.EndSession()
+#define IS_PROFILE_SAVE_CAPTURE(filePath) temp.SaveSession(CheckAndAppend(".json", filePath))
 
 #elif defined(IS_OPTICK_PROFILE)
 #define INSIGHT_PROFILE_CATEGORY_LINE(name, cat) Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)cat); OPTICK_CATEGORY(name, optickCat)
 
 #define IS_PROFILE_FRAME(name) OPTICK_FRAME(name)
-#define IS_PROFILE_BEGIN_SESSION(name, filepath)
+#define IS_PROFILE_BEGIN_SESSION()
 #define IS_PROFILE_END_SESSION() OPTICK_SHUTDOWN()
+#define IS_PROFILE_SAVE_SESSION(filePath)
 #define IS_PROFILE_SCOPE(name) INSIGHT_PROFILE_CATEGORY_LINE(name, Insight::Category::Type::None)
+#define IS_PROFILE_SCOPE_CAT(name, cat) INSIGHT_PROFILE_CATEGORY_LINE(name, cat)
 #define IS_PROFILE_FUNCTION() OPTICK_EVENT()
 #define IS_PROFILE_CATEGORY(name, category) INSIGHT_PROFILE_CATEGORY_LINE(name, category)
 
@@ -519,11 +555,12 @@ namespace Insight
 
 #define IS_PROFILE_START_CAPTURE() OPTICK_START_CAPTURE()
 #define IS_PROFILE_STOP_CAPTURE() OPTICK_STOP_CAPTURE()
-#define IS_PROFILE_SAVE_CAPTURE(path) OPTICK_SAVE_CAPTURE(path)
+#define IS_PROFILE_SAVE_CAPTURE(filePath) OPTICK_SAVE_CAPTURE(CheckAndAppend(".opt", filePath);)
 #else
 #define IS_PROFILE_FRAME(name)
-#define IS_PROFILE_BEGIN_SESSION(name, filepath)
+#define IS_PROFILE_BEGIN_SESSION()
 #define IS_PROFILE_END_SESSION()
+#define IS_PROFILE_SAVE_SESSION(filePath)
 #define IS_PROFILE_SCOPE(name)
 #define IS_PROFILE_FUNCTION()
 #define IS_PROFILE_CATEGORY(name, category)

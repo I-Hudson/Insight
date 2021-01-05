@@ -2,6 +2,7 @@
 #include "SerializableFile.h"
 #include "SerializableElementTypes.h"
 #include "SerializableFormat_XML.h"
+#include "SerializableFormat_JSON.h"
 
 namespace Insight
 {

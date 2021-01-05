@@ -29,20 +29,28 @@ namespace Insight
 		}
 
 		void InputModule::Update(const float& deltaTime)
-		{ }
+		{
+			for (auto& input : m_inputStates)
+			{
+				input.second.KeyPressed = 0;
+				input.second.KeyReleased = 0;
+				input.second.MouseButtonPressed = 0;
+				input.second.MouseButtonReleased = 0;
+			}
+		}
 
 		void InputModule::KeybordCallback(GLFWwindow* window, int key, int scanCode, int action, int mod)
 		{
 			switch (action)
 			{
 			case KEY_PRESS:
-				m_inputStates[key].KeyPressed = !m_inputStates[key].KeyPressed;
-				m_inputStates[key].KeyReleased = !m_inputStates[key].KeyPressed;
+				m_inputStates[key].KeyPressed = 1;
+				m_inputStates[key].KeyReleased = 0;
 				break;
 			case KEY_RELEASE:
-				m_inputStates[key].KeyReleased = !m_inputStates[key].KeyReleased;
-				m_inputStates[key].KeyPressed = !m_inputStates[key].KeyReleased;
-				m_inputStates[key].KeyHeld = !m_inputStates[key].KeyReleased;
+				m_inputStates[key].KeyPressed = 0;
+				m_inputStates[key].KeyReleased = 1;
+				m_inputStates[key].KeyHeld = 0;
 				break;
 			case KEY_REPEAT:
 				m_inputStates[key].KeyHeld = !m_inputStates[key].KeyHeld;
@@ -77,12 +85,12 @@ namespace Insight
 			switch (action)
 			{
 			case KEY_PRESS:
-				m_inputStates[button].MouseButtonPressed = !m_inputStates[button].MouseButtonPressed;
-				m_inputStates[button].MouseButtonReleased = !m_inputStates[button].MouseButtonPressed;
+				m_inputStates[button].MouseButtonPressed = 1;
+				m_inputStates[button].MouseButtonReleased = 0;
 				break;
 			case KEY_RELEASE:
-				m_inputStates[button].MouseButtonReleased = !m_inputStates[button].MouseButtonReleased;
-				m_inputStates[button].MouseButtonPressed = !m_inputStates[button].MouseButtonReleased;
+				m_inputStates[button].MouseButtonPressed = 0;
+				m_inputStates[button].MouseButtonReleased = 1;
 				break;
 			}
 

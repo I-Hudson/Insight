@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Object.h"
-#include "InsightAlias.h"
+#include <string>
 
 #if defined(IS_STANDARD_POINTER)
 
@@ -59,5 +59,13 @@ _NODISCARD SharedPtr<T> DynamicPointerCast(SharedPtr<T2>&& other) noexcept
 template<typename T>
 class TUniquePtr<T>;
 using UniquePtr = TUniquePtr<T>;
-
 #endif
+
+inline std::string CheckAndAppend(const char* extension, const std::string& str)
+{
+	if (str.find(extension) == std::string::npos)
+	{
+		return std::string(str).append(extension);
+	}
+	return str;
+}

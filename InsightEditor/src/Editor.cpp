@@ -63,6 +63,11 @@ public:
 	virtual void Update(const float deltaTime) override
 	{
 		//m_editorModule->Update();
+
+		if (Input::KeyDown(KEY_SPACE))
+		{
+			Insight::Scene::ActiveScene()->Save();
+		}
 	}
 
 	virtual void Draw() override

@@ -14,3 +14,6 @@
 	path = Insight/vendor/imgui
 	url = https://github.com/I-Hudson/imgui
 	branch = docking
+[submodule "Insight/vendor/json"]
+	path = Insight/vendor/json
+	url = https://github.com/nlohmann/json

@@ -115,6 +115,7 @@ namespace Insight
 				Time::UpdateTime();
 				deltaTime = Time::GetDeltaTime();
 
+				m_inputModule->Update(deltaTime);
 				m_windowModule->Update(deltaTime);
 
 				//IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);

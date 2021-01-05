@@ -73,14 +73,23 @@ namespace Insight
 				ImGui::OpenPopup("Context Menu");
 				if (ImGui::BeginPopup("Context Menu"))
 				{
-					if (ImGui::Selectable("Create Entity"))
+					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+
+					if (ImGui::Button("Create Entity"))
 					{
 						Entity::Create();
-						m_openContextPopup = false;
 					}
+
+					ImGui::PopStyleColor();
 					ImGui::EndPopup();
 				}
+
+				if ((!IsMouseInBounds() && (Input::MouseButtonUp(MOUSE_BUTTON_LEFT) || Input::MouseButtonUp(MOUSE_BUTTON_RIGHT))) || Input::MouseButtonUp(MOUSE_BUTTON_LEFT))
+				{
+					m_openContextPopup = false;
+				}
 			}
+			
 
 			ImGui::End();
 

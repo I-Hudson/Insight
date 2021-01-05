@@ -11,4 +11,5 @@
 #### [stb](https://github.com/nothings/stb "stb")
 #### [tinygltf](https://github.com/syoyo/tinygltf)
 #### [TinyXML2](https://github.com/leethomason/tinyxml2)
+#### [json](https://github.com/nlohmann/json)
 #### [Optick Profiler](https://github.com/bombomby/optick) 

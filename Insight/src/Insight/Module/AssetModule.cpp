@@ -28,17 +28,10 @@ namespace Insight
 
 		void AssetModule::Deserialize()
 		{
-			//m_deserlizaed = true;
-			//tinyxml2::XMLDocument doc;
-			//if (doc.LoadFile("ModelLibrary.xml") == tinyxml2::XML_SUCCESS)
-			//{
-			//	m_modelLibrary->Deserialize(doc.FirstChild());
-			//}
-
 			IS_PROFILE_START_CAPTURE();
 			m_modelLibrary->LoadAssetsFromFolder("./data", true);
 			IS_PROFILE_STOP_CAPTURE();
-			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture.opt");
+			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture");
 		}
 	}
 }

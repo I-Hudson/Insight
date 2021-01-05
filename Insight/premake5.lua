@@ -39,6 +39,7 @@ project "Insight"
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.TinyXML2}",
+        "%{IncludeDir.json}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.tinygltf}",
         "%{IncludeDir.ktx}",
@@ -80,7 +81,7 @@ project "Insight"
         }
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN", "IMGUI_ENABLED", "IS_OPTICK_PROFILE" }
+        defines { "IS_DEBUG", "IS_VULKAN", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN", "IMGUI_ENABLED" }
         symbols "on"
         links 
         {

@@ -273,6 +273,9 @@
     <ClInclude Include="src\Insight\Serialization\File\SerializableFile.h">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_JSON.h">
+      <Filter>src\Insight\Serialization\File</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_XML.h">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClInclude>
@@ -1668,6 +1671,9 @@
       <Filter>src\Insight\Scene</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp">
+      <Filter>src\Insight\Serialization\File</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_JSON.cpp">
       <Filter>src\Insight\Serialization\File</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_XML.cpp">

@@ -37,8 +37,9 @@ void Model::Create(const std::string& filepath)
 {
 	if (!filepath.empty())
 	{
-		IS_INFO("Loading model");
+		IS_INFO("Loading model: '{0}'", filepath);
 		LoadMesh(filepath);
+		IS_INFO("Model Loaded: '{0}'", filepath);
 	}
 }
 
