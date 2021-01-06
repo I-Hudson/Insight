@@ -17,3 +17,6 @@
 [submodule "Insight/vendor/json"]
 	path = Insight/vendor/json
 	url = https://github.com/nlohmann/json
+[submodule "InsightEditor/vendor/ImGui-Addons"]
+	path = InsightEditor/vendor/ImGui-Addons
+	url = https://github.com/gallickgunner/ImGui-Addons
