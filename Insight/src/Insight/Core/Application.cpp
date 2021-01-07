@@ -14,6 +14,7 @@
 #include "Insight/Event/EventManager.h"
 #include "Insight/Scene/Scene.h"
 
+#include "Insight/FileSystem/FileSystem.h"
 #include "Insight/RTTI/RTTI.h"
 
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -40,6 +41,7 @@ namespace Insight
 
 		Config::GetInstance().ParseInFolder("./data/config");
 		
+		m_fileSystem = CreateSharedPtr<FileSystem::FileSystem>("F:\\Users\\Documents\\SourceControl\\Github\\C++ Porjects\\Vulkan\\PBC\\data");
 		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
 
 		RTTI::RTTI::Create();
@@ -114,9 +116,10 @@ namespace Insight
 #endif
 				Time::UpdateTime();
 				deltaTime = Time::GetDeltaTime();
-
-				m_inputModule->Update(deltaTime);
-				m_windowModule->Update(deltaTime);
+				
+					m_fileSystem->Update();
+					m_inputModule->Update(deltaTime);
+					m_windowModule->Update(deltaTime);
 
 				//IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
 				//IS_CORE_INFO("Frame Time: {0}", deltaTime);

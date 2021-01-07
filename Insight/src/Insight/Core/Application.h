@@ -15,6 +15,11 @@ namespace Insight
 		class AssetModule;
 	}
 
+	namespace FileSystem
+	{
+		class FileSystem;
+	}
+
 	namespace Memory
 	{
 		class MemoryManager;
@@ -54,6 +59,7 @@ namespace Insight
 		bool m_renderComplete = true;
 
 		Memory::MemoryManager* m_memoryManager;
+		SharedPtr<FileSystem::FileSystem> m_fileSystem;
 
 		Module::ModuleManager* m_moduleManager;
 		SharedPtr<Module::WindowModule> m_windowModule;

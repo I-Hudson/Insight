@@ -25,6 +25,9 @@
     <Filter Include="src\Insight\Event">
       <UniqueIdentifier>{438ED04C-AFA4-CEE2-F81B-5A0464719F6A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\FileSystem">
+      <UniqueIdentifier>{46D6303E-32D0-5990-1B3D-F0A007D6BFFC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Input">
       <UniqueIdentifier>{F1BC144D-5DD3-12E3-A64A-9E0412A0E36A}</UniqueIdentifier>
     </Filter>
@@ -179,6 +182,12 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Event\EventManager.h">
       <Filter>src\Insight\Event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\FileSystem\FileHandle.h">
+      <Filter>src\Insight\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\FileSystem\FileSystem.h">
+      <Filter>src\Insight\FileSystem</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Input\Input.h">
       <Filter>src\Insight\Input</Filter>
@@ -1606,6 +1615,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Event\EventManager.cpp">
       <Filter>src\Insight\Event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\FileSystem\FileSystem.cpp">
+      <Filter>src\Insight\FileSystem</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Input\Input.cpp">
       <Filter>src\Insight\Input</Filter>

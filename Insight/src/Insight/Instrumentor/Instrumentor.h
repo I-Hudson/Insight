@@ -555,7 +555,7 @@ namespace Insight
 
 #define IS_PROFILE_START_CAPTURE() OPTICK_START_CAPTURE()
 #define IS_PROFILE_STOP_CAPTURE() OPTICK_STOP_CAPTURE()
-#define IS_PROFILE_SAVE_CAPTURE(filePath) OPTICK_SAVE_CAPTURE(CheckAndAppend(".opt", filePath);)
+#define IS_PROFILE_SAVE_CAPTURE(filePath) OPTICK_SAVE_CAPTURE(CheckAndAppend(".opt", filePath).c_str())
 #else
 #define IS_PROFILE_FRAME(name)
 #define IS_PROFILE_BEGIN_SESSION()

@@ -27,6 +27,9 @@
     <ClInclude Include="src\Editor\Components\CameraComponentEditorDrawer.h">
       <Filter>src\Editor\Components</Filter>
     </ClInclude>
+    <ClInclude Include="src\Editor\Components\MeshComponentEditorDrawer.h">
+      <Filter>src\Editor\Components</Filter>
+    </ClInclude>
     <ClInclude Include="src\Editor\Diagnostic.h">
       <Filter>src\Editor</Filter>
     </ClInclude>
@@ -54,15 +57,15 @@
     <ClInclude Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.h">
       <Filter>vendor\ImGui-Addons\FileBrowser</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\Components\MeshComponentEditorDrawer.h">
-      <Filter>src\Editor\Components</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Editor.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\Components\CameraComponentEditorDrawer.cpp">
+      <Filter>src\Editor\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Components\MeshComponentEditorDrawer.cpp">
       <Filter>src\Editor\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\SceneHierarchyPanel.cpp">
@@ -79,9 +82,6 @@
     </ClCompile>
     <ClCompile Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.cpp">
       <Filter>vendor\ImGui-Addons\FileBrowser</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor\Components\MeshComponentEditorDrawer.cpp">
-      <Filter>src\Editor\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
