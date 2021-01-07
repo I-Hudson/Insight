@@ -13,6 +13,8 @@ project "InsightEditor"
 	{
 		"src/**.h",
         "src/**.cpp",
+        "vendor/ImGui-Addons/FileBrowser/ImGuiFileBrowser.cpp",
+        "vendor/ImGui-Addons/FileBrowser/ImGuiFileBrowser.h",
 	}
 
     includedirs 
@@ -24,6 +26,8 @@ project "InsightEditor"
         "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.imguiFileDialog}",
+        "%{IncludeDir.dirent}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.Vulkan}",
 	}

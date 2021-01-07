@@ -97,9 +97,9 @@ namespace Insight
 		Deserialize(file);
 	}
 
-	void Scene::Save()
+	void Scene::Save(const std::string& file)
 	{
-		Serialize();
+		Serialize(file);
 	}
 
 	void Scene::Unload()
@@ -112,7 +112,7 @@ namespace Insight
 		m_updateComponents.clear();
 	}
 
-	void Scene::Serialize()
+	void Scene::Serialize(const std::string& file)
 	{
 			IS_PROFILE_FUNCTION();
 
@@ -124,7 +124,7 @@ namespace Insight
 				(*it)->Serialize(entityNode);
 			}
 
-			serializableFile->SaveFile(DEFAULT_SAVE_PATH + m_sceneName);
+			serializableFile->SaveFile(file);
 			serializableFile.reset();
 
 			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
@@ -136,27 +136,30 @@ namespace Insight
 			IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
 
 			UniquePtr<Insight::Serialization::SerializableFile> serializableFile = Insight::Serialization::SerializableFile::Create();
-			
-			if (serializableFile->LoadFile((DEFAULT_SAVE_PATH + file).c_str()))
+
+			if (!serializableFile->LoadFile(file))
 			{
-				SharedPtr<Insight::Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
-				SharedPtr<Insight::Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
-				if (entity != nullptr)
-				{
-					do
-					{
-						auto typeElement = entity->GetFirstAttribute("Type");
-						if (typeElement)
-						{
-							std::string type = typeElement->GetValue();
-							SharedPtr<Entity> s = Serialization::Serializable::CreateInstanceFromType<Entity>(type);
-							s->Deserialize(entity);
-							m_registry.push_back(DynamicPointerCast<Entity>(s));
-						}
-						entity = entity->NextSibling().lock();
-					} while (entity != nullptr);
-				}
+				return;
 			}
+
+			SharedPtr<Insight::Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
+			SharedPtr<Insight::Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
+			if (entity != nullptr)
+			{
+				do
+				{
+					auto typeElement = entity->GetFirstAttribute("Type");
+					if (typeElement)
+					{
+						std::string type = typeElement->GetValue();
+						SharedPtr<Entity> s = Serialization::Serializable::CreateInstanceFromType<Entity>(type);
+						s->Deserialize(entity);
+						m_registry.push_back(DynamicPointerCast<Entity>(s));
+					}
+					entity = entity->NextSibling().lock();
+				} while (entity != nullptr);
+			}
+
 		}
 
 		{

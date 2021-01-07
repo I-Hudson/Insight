@@ -27,11 +27,11 @@ namespace Insight
 		static Scene* ActiveScene();
 		const std::vector<SharedPtr<Entity>> GetEntites() { return m_registry; }
 
+		void Save(const std::string& file);
 		void Load(const std::string& file);
-		void Save();
 		void Unload();
 
-		void Serialize();
+		void Serialize(const std::string& file);
 		void Deserialize(const std::string& file);
 
 		void OnUpdate(const float& deltaTime);

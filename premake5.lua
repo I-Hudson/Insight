@@ -33,6 +33,9 @@ IncludeDir["optick"] = "$(SolutionDir)Insight/vendor/optick/src"
 IncludeDir["tinygltf"] = "$(SolutionDir)Insight/vendor/tinygltf"
 IncludeDir["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/include"
 
+IncludeDir["imguiFileDialog"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/"
+IncludeDir["dirent"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/dirent/"
+
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}
 LibDirs["Vulkan"] = "C:/VulkanSDK/1.1.130.0/lib"

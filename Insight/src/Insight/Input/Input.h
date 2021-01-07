@@ -8,15 +8,18 @@ class IS_API Input
 {
 public:
 
-	static bool KeyDown(int keycode);
-	static bool KeyDown(char keycode);
-	static bool KeyUp(int keycode);
-	static bool KeyUp(char keycode);
-	static bool KeyHeld(int keycode);
-	static bool KeyHeld(char keycode);
+	static bool IsKeyDown(int keycode);
+	static bool IsKeyDown(char keycode);
+	static bool IsKeyUp(int keycode);
+	static bool IsKeyUp(char keycode);
+	static bool IsKeyHeld(int keycode);
+	static bool IsKeyHeld(char keycode);
 
-	static bool MouseButtonDown(int keycode);
-	static bool MouseButtonUp(int keycode);
+	static bool IsMouseButtonDown(int keycode);
+	static bool IsMouseButtonUp(int keycode);
+	static bool IsMouseButtonPressed(int keycode);
+	static bool IsMouseButtonReleased(int keycode);
+
 	static void GetMousePosition(double* mouseX, double* mouseY);
 	static void GetMousePosition(float* mouseX, float* mouseY);
 	static void GetMousePosition(int* mouseX, int* mouseY);

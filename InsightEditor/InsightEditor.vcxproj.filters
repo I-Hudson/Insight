@@ -1,55 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Editor">
-      <UniqueIdentifier>{8C1A20B0-78BC-4A86-6177-5EDA4DB8D1D6}</UniqueIdentifier>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Editor\Components">
-      <UniqueIdentifier>{21D0DF35-8DE6-DDCB-D65D-69ED42B3AE53}</UniqueIdentifier>
+    <Filter Include="src\Editor">
+      <UniqueIdentifier>{C3F37E0D-AFAB-C05A-18B3-99B6048A5B4B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Module">
-      <UniqueIdentifier>{0BB38DC3-F754-B899-E00F-CCEDCC503FEA}</UniqueIdentifier>
+    <Filter Include="src\Editor\Components">
+      <UniqueIdentifier>{F818EE8A-6485-A985-2D79-41E399A4CBED}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Module">
+      <UniqueIdentifier>{428CEC20-2E44-2E6E-974B-07CA8322C95E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\ImGui-Addons">
+      <UniqueIdentifier>{63AEF26D-CF0F-D07B-587D-162EC4DD063B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor\ImGui-Addons\FileBrowser">
+      <UniqueIdentifier>{56D88994-C2BB-98D4-CBBE-C61037215F25}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Editor\Components\CameraComponentEditorDrawer.h">
-      <Filter>Editor\Components</Filter>
+      <Filter>src\Editor\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\Diagnostic.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorDrawer.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\EditorPanel.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\RTTIToImGUI.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\SceneHierarchyPanel.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\TopBarMenu.h">
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\UIHelper.h">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Module\EditorModule.h">
-      <Filter>Module</Filter>
+      <Filter>src\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.h">
+      <Filter>vendor\ImGui-Addons\FileBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\Components\MeshComponentEditorDrawer.h">
+      <Filter>src\Editor\Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Editor.cpp" />
+    <ClCompile Include="src\Editor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor\Components\CameraComponentEditorDrawer.cpp">
-      <Filter>Editor\Components</Filter>
+      <Filter>src\Editor\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\SceneHierarchyPanel.cpp">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\TopBarMenu.cpp">
+      <Filter>src\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\UIHelper.cpp">
-      <Filter>Editor</Filter>
+      <Filter>src\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Module\EditorModule.cpp">
-      <Filter>Module</Filter>
+      <Filter>src\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.cpp">
+      <Filter>vendor\ImGui-Addons\FileBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Components\MeshComponentEditorDrawer.cpp">
+      <Filter>src\Editor\Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

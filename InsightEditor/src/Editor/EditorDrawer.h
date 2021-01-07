@@ -98,6 +98,20 @@ namespace Insight
 		};
 	}
 }
+
+#define EDITOR_DRAWER_CLASS(ClassName, EditorClassName)					\
+namespace Insight														\
+{																		\
+	namespace Editor													\
+	{																	\
+		class EditorClassName : public IEditorDrawer					\
+		{																\
+		public:															\
+			virtual void OnDraw(Object& obj) override;					\
+			EDITOR_DEC_TYPE(ClassName, EditorClassName)					\
+		};																\
+	}																	\
+}																	
 #else
 #define REGISTER_EDITOR_DRAWER_TYPE(DataClass, EditorClass)
 #endif

@@ -8,6 +8,8 @@
 #include "Editor/EditorDrawer.h"
 
 #include "Editor/RTTIToImGUI.h"
+#include "Insight/Component/CameraComponent.h"
+#include "Insight/Component/MeshComponent.h"
 #include "imgui.h"
 
 namespace Insight
@@ -46,7 +48,7 @@ namespace Insight
 						ImGui::TreePop();
 					}
 
-					if (ImGui::IsItemClicked() && !newEntitySelected)
+					if (ImGui::IsItemHovered() && Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !newEntitySelected)
 					{
 						m_selectedEntity = *entitesIT;
 						newEntitySelected = true;
@@ -55,12 +57,12 @@ namespace Insight
 			}
 			ImGui::TreePop();
 
-			if (!titleBarHovered && ImGui::IsWindowHovered() && Input::MouseButtonDown(MOUSE_BUTTON_LEFT) && !newEntitySelected)
+			if (!titleBarHovered && ImGui::IsWindowHovered() && Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !newEntitySelected)
 			{
 				m_selectedEntity = nullptr;
 			}
 
-			if (IsMouseInBounds() && Input::MouseButtonDown(MOUSE_BUTTON_RIGHT))
+			if (IsMouseInBounds() && Input::IsMouseButtonReleased(MOUSE_BUTTON_RIGHT))
 			{
 				if (!m_openContextPopup)
 				{
@@ -84,7 +86,7 @@ namespace Insight
 					ImGui::EndPopup();
 				}
 
-				if ((!IsMouseInBounds() && (Input::MouseButtonUp(MOUSE_BUTTON_LEFT) || Input::MouseButtonUp(MOUSE_BUTTON_RIGHT))) || Input::MouseButtonUp(MOUSE_BUTTON_LEFT))
+				if ((!IsMouseInBounds() && (Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT) || Input::IsMouseButtonReleased(MOUSE_BUTTON_RIGHT))) || Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
 				{
 					m_openContextPopup = false;
 				}
@@ -201,6 +203,23 @@ namespace Insight
 
 				const char* addComponentButtonText = "+";
 				//ImGui::SetCursorPos(ImVec2((ImGui::GetWindowWidth() - ImGui::CalcTextSize(addComponentButtonText).x) * 0.5f, ImGui::GetCursorPosY()));
+
+				if (m_openAddComponentPopup)
+				{
+					ImGui::OpenPopup("Add Component Menu");
+					if (ImGui::BeginPopup("Add Component Menu"))
+					{
+						if (ImGui::Button("Camera Component")) { spEntity->AddComponent<CameraComponent>(); }
+						else if (ImGui::Button("Mesh Component")) { spEntity->AddComponent<MeshComponent>(); }
+						ImGui::EndPopup();
+					}
+
+					if (Input::IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+					{
+						m_openAddComponentPopup = false;
+					}
+				}
+
 				if (ImGui::Button(addComponentButtonText, ImVec2(ImGui::GetWindowWidth(), 35.f)))
 				{
 					// TODO: Add component

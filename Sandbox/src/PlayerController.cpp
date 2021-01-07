@@ -28,22 +28,22 @@ void PlayerController::OnCreate()
 
 void PlayerController::OnUpdate(const float& deltaTime)
 {
-	if (Input::KeyDown(KEY_UP))
+	if (Input::IsKeyDown(KEY_UP))
 	{
 		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(0.0f, 0.0f, 5.0f * Insight::Time::GetDeltaTime()));
 	}
 
-	if (Input::KeyDown(KEY_DOWN))
+	if (Input::IsKeyDown(KEY_DOWN))
 	{
 		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(0.0f, 0.0f, 5.0f * Insight::Time::GetDeltaTime()));
 	}
 
-	if (Input::KeyDown(KEY_LEFT))
+	if (Input::IsKeyDown(KEY_LEFT))
 	{
 		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(5.0f * Insight::Time::GetDeltaTime(), 0.0f, 0.0f));
 	}
 
-	if (Input::KeyDown(KEY_RIGHT))
+	if (Input::IsKeyDown(KEY_RIGHT))
 	{
 		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(5.0f * Insight::Time::GetDeltaTime(), 0.0f, 0.0f));
 	}

@@ -20,6 +20,9 @@ namespace Insight
 		static void SetFullscreen(const bool& fullscreen = true);
 		static bool IsFullscreen();
 
+		static void HideWindow();
+		static void ShowWindow();
+
 		static void WaitForEvents();
 		static bool ShouldClose();
 

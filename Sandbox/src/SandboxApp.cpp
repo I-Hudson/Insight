@@ -49,12 +49,12 @@ public:
 	{
 		IS_PROFILE_FUNCTION();
 
-		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_S))
+		if (Input::IsKeyDown(KEY_LEFT_CONTROL) && Input::IsKeyDown(KEY_S))
 		{
 			Scene::ActiveScene()->Save();
 		}
 
-		if (Input::KeyDown(KEY_LEFT_CONTROL) && Input::KeyDown(KEY_F))
+		if (Input::IsKeyDown(KEY_LEFT_CONTROL) && Input::IsKeyDown(KEY_F))
 		{
 			Scene::ActiveScene()->Load("Sandbox.xml");
 		}

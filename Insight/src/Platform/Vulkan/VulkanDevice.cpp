@@ -472,7 +472,10 @@ namespace vks
 		vkCmdCopyBuffer(copyCmd, stagingBuffer.buffer, buffer->buffer, 1, &copyRegion);
 		lock.unlock();
 		FlushCommandBuffer(copyCmd, m_queueFamily.transfer, true);
+
+		lock.lock();
 		stagingBuffer.Destroy();
+		lock.unlock();
 	}
 
 	/**
@@ -487,8 +490,6 @@ namespace vks
 	*/
 	void VulkanDevice::CopyBuffer(vks::VulkanBuffer* src, vks::VulkanBuffer* dst, VkQueue queue, VkBufferCopy* copyRegion)
 	{
-		MutexLockGuard lock(m_mutex);
-
 		assert(dst->size <= src->size);
 		assert(src->buffer);
 		VkCommandBuffer copyCmd = CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
@@ -502,8 +503,9 @@ namespace vks
 			bufferCopy = *copyRegion;
 		}
 
+		MutexUnqiueLock lock(m_mutex);
 		vkCmdCopyBuffer(copyCmd, src->buffer, dst->buffer, 1, &bufferCopy);
-
+		lock.unlock();
 		FlushCommandBuffer(copyCmd, queue);
 	}
 

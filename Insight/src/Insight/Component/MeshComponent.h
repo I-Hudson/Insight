@@ -22,6 +22,8 @@ public:
 	void SetMaterial(Material* material);
 	Material* GeMaterial() const { return m_materal; }
 
+	std::string& GetMeshName() { return m_meshName; }
+
 	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
 

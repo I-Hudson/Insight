@@ -31,7 +31,6 @@ project "Insight"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",
-        
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",

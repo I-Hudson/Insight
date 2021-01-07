@@ -36,10 +36,18 @@ namespace Insight
 				}
 			}
 
-			SharedPtr<Model> m = Object::CreateObject<Model>(filePath);
-			AddAsset(m->GetUUID(), m);
-
-			return m;
+			std::string filepathLinux = filePath;
+			std::replace(filepathLinux.begin(), filepathLinux.end(), '\\', '/');
+			FILE* f = fopen(filepathLinux.c_str(), "r");
+			if (f)
+			{
+				SharedPtr<Model> m = Object::CreateObject<Model>(filePath);
+				AddAsset(m->GetUUID(), m);
+				return m;
+			}
+			
+			//IS_CORE_ERROR("[ModelLibrary::GetAssetFromPath] Was unable to load '{0}'. Make sure file exists.", filePath);
+			return SharedPtr<Model>();
 		}
 
 		void ModelLibrary::LoadAssetsFromFolder(const std::string& folderName, const bool& lookInChildren)

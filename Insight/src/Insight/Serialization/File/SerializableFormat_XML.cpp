@@ -28,38 +28,31 @@ namespace Insight
 
 		bool SerializableFile_XML::SaveFile(const std::string& fileName)
 		{
+			bool result = true;
 			SerializeData(fileName);
 
-			if (tinyxml2::XMLError err = m_document.SaveFile((fileName + ".xml").c_str()))
+			if (tinyxml2::XMLError err = m_document.SaveFile(CheckAndAppend(".xml", fileName).c_str()))
 			{
 				IS_CORE_ERROR(m_document.ErrorIDToName(err));
-				return false;
+				result = false;
 			}
 			m_document.Clear();
-
-			return true;
+			return result;
 		}
 
 		bool SerializableFile_XML::LoadFile(const std::string& fileName)
 		{
-			std::string filePath = fileName;
-			auto extension = filePath.find(".xml");
-			if (extension == std::string::npos)
-			{
-				filePath.append(".xml");
-			}
-
-			tinyxml2::XMLError err = m_document.LoadFile(filePath.c_str());
+			bool result = true;
+			tinyxml2::XMLError err = m_document.LoadFile(CheckAndAppend(".xml", fileName).c_str());
 			if (err != tinyxml2::XMLError::XML_SUCCESS)
 			{
 				IS_CORE_ERROR(m_document.ErrorIDToName(err));
-				return false;
+				result = false;
 			}
 
-			DeserializeData(filePath);
+			DeserializeData(fileName);
 			m_document.Clear();
-
-			return true;
+			return result;
 		}
 
 		void SerializableFile_XML::SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element)

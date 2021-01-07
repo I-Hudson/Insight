@@ -44,10 +44,14 @@ namespace Insight
 			switch (action)
 			{
 			case KEY_PRESS:
+				m_inputStates[key].KeyDown = 1;
+				m_inputStates[key].KeyUp = 0;
 				m_inputStates[key].KeyPressed = 1;
 				m_inputStates[key].KeyReleased = 0;
 				break;
 			case KEY_RELEASE:
+				m_inputStates[key].KeyDown = 0;
+				m_inputStates[key].KeyUp = 1;
 				m_inputStates[key].KeyPressed = 0;
 				m_inputStates[key].KeyReleased = 1;
 				m_inputStates[key].KeyHeld = 0;
@@ -85,10 +89,14 @@ namespace Insight
 			switch (action)
 			{
 			case KEY_PRESS:
+				m_inputStates[button].MouseButtonDown = 1;
+				m_inputStates[button].MouseButtonUp = 0;
 				m_inputStates[button].MouseButtonPressed = 1;
 				m_inputStates[button].MouseButtonReleased = 0;
 				break;
 			case KEY_RELEASE:
+				m_inputStates[button].MouseButtonDown = 0;
+				m_inputStates[button].MouseButtonUp = 1;
 				m_inputStates[button].MouseButtonPressed = 0;
 				m_inputStates[button].MouseButtonReleased = 1;
 				break;

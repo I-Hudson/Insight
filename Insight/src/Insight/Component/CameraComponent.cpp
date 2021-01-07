@@ -32,6 +32,8 @@ void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
+
+	IS_PROPERTY_GLOBAL(CameraComponent, "Camera Component", ShowInEditor);
 	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
 	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);
 	IS_PROPERTY(float, m_farPlane, "Far Plane", ShowInEditor | ReadOnly);
@@ -142,37 +144,37 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 	glm::vec4 vUp = viewMatrix[1];
 	glm::vec4 vTranslation = viewMatrix[3];
 
-	float frameSpeed = Input::KeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
+	float frameSpeed = Input::IsKeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
 
 	// Translate camera
-	if (Input::KeyDown(KEY_W))
+	if (Input::IsKeyDown(KEY_W))
 	{
 		vTranslation -= vForward * frameSpeed;
 	}
-	if (Input::KeyDown(KEY_S))
+	if (Input::IsKeyDown(KEY_S))
 	{
 		vTranslation += vForward * frameSpeed;
 	}
-	if (Input::KeyDown(KEY_D))
+	if (Input::IsKeyDown(KEY_D))
 	{
 		vTranslation += vRight * frameSpeed;
 	}
-	if (Input::KeyDown(KEY_A))
+	if (Input::IsKeyDown(KEY_A))
 	{
 		vTranslation -= vRight * frameSpeed;
 	}
-	if (Input::KeyDown('Q'))
+	if (Input::IsKeyDown('Q'))
 	{
 		vTranslation += vUp * frameSpeed;
 	}
-	if (Input::KeyDown('E'))
+	if (Input::IsKeyDown('E'))
 	{
 		vTranslation -= vUp * frameSpeed;
 	}
 
 	// check for camera rotation
 	static bool sbMouseButtonDown = false;
-	bool mouseDown = Input::MouseButtonDown(MOUSE_BUTTON_RIGHT);
+	bool mouseDown = Input::IsMouseButtonDown(MOUSE_BUTTON_RIGHT);
 	if (mouseDown)
 	{
 		viewMatrix[3] = vTranslation;

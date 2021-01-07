@@ -29,7 +29,7 @@ namespace Insight
 		void AssetModule::Deserialize()
 		{
 			IS_PROFILE_START_CAPTURE();
-			m_modelLibrary->LoadAssetsFromFolder("./data", true);
+			//m_modelLibrary->LoadAssetsFromFolder("./data", true);
 			IS_PROFILE_STOP_CAPTURE();
 			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture");
 		}

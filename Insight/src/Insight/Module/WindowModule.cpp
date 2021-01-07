@@ -73,6 +73,16 @@ namespace Insight
 		return false;
 	}
 
+	void Window::HideWindow()
+	{
+		glfwHideWindow(m_window);
+	}
+
+	void Window::ShowWindow()
+	{
+		glfwShowWindow(m_window);
+	}
+
 	void Window::WaitForEvents()
 	{
 		glfwWaitEvents();
@@ -89,13 +99,16 @@ namespace Insight
 
 		WindowModule::WindowModule()
 		{
-			glfwInit();
+			IS_CORE_ASSERT(glfwInit() == 1, "GLFW failed to init!");
+			glfwSetErrorCallback([](int errorCode, const char* errorMessage)
+				{
+					IS_CORE_ERROR("GLFW ERROR CODE: {0}, MESSAGE: {1}", errorCode, errorMessage);
+					IS_CORE_ASSERT(false, "GLFW ERROR");
+				});
 
-#ifdef IS_VULKAN
 			if (Renderer::s_API == GraphicsAPI::Vulkan)
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-				//glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 			}
 			else if (Renderer::s_API == GraphicsAPI::OpenGL)
 			{
@@ -103,8 +116,6 @@ namespace Insight
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 			}
-#endif // IS_VULKAN
-
 
 			m_window.m_window = glfwCreateWindow(CONFIG_VAL(Config::WindowConfig.WindowWidth),
 				CONFIG_VAL(Config::WindowConfig.WindowHeight),

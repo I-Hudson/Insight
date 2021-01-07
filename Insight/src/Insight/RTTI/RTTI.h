@@ -33,6 +33,9 @@ namespace Insight
 	}
 }
 
+#define IS_PROPERTY_GLOBAL(type, propertyName, editorFlags); \
+	Insight::RTTI::RTTI::Instance()->RegisterProperty(this, nullptr, propertyName, typeid(type).name(), editorFlags);
+
 #define IS_PROPERTY(type, ptr, propertyName, editorFlags); \
 	Insight::RTTI::RTTI::Instance()->RegisterProperty(this, (void*)(&ptr), propertyName, typeid(type).name(), editorFlags);
 

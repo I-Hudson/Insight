@@ -3,42 +3,52 @@
 
 using namespace Insight::Module;
 
-bool Input::KeyDown(int keycode)
+bool Input::IsKeyDown(int keycode)
 {
-	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyPressed & 1;
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyDown & 1;
 }
 
-bool Input::KeyDown(char keycode)
+bool Input::IsKeyDown(char keycode)
 {
-	return KeyDown(toupper(keycode));
+	return IsKeyDown(toupper(keycode));
 }
 
-bool Input::KeyUp(int keycode)
+bool Input::IsKeyUp(int keycode)
 {
-	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyReleased & 1;
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].KeyUp & 1;
 }
 
-bool Input::KeyUp(char keycode)
+bool Input::IsKeyUp(char keycode)
 {
-	return KeyUp((int)keycode);
+	return IsKeyUp((int)keycode);
 }
 
-bool Input::KeyHeld(int keycode)
+bool Input::IsKeyHeld(int keycode)
 {
-	return KeyCodeExits(keycode) && (InputModule::m_inputStates[keycode].KeyHeld & 1 || KeyDown(keycode));
+	return KeyCodeExits(keycode) && (InputModule::m_inputStates[keycode].KeyHeld & 1 || IsKeyDown(keycode));
 }
 
-bool Input::KeyHeld(char keycode)
+bool Input::IsKeyHeld(char keycode)
 {
-	return KeyHeld((int)keycode);
+	return IsKeyHeld((int)keycode);
 }
 
-bool Input::MouseButtonDown(int keycode)
+bool Input::IsMouseButtonDown(int keycode)
+{
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonDown & 1;
+}
+
+bool Input::IsMouseButtonUp(int keycode)
+{
+	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonUp & 1;
+}
+
+bool Input::IsMouseButtonPressed(int keycode)
 {
 	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonPressed & 1;
 }
 
-bool Input::MouseButtonUp(int keycode)
+bool Input::IsMouseButtonReleased(int keycode)
 {
 	return KeyCodeExits(keycode) && InputModule::m_inputStates[keycode].MouseButtonReleased & 1;
 }

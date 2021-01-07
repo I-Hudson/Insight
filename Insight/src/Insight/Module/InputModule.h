@@ -35,11 +35,16 @@ namespace Insight
 		private:
 			struct KeyStates
 			{
+				unsigned int KeyDown : 1;
+				unsigned int KeyUp : 1;
 				unsigned int KeyPressed : 1;
 				unsigned int KeyReleased : 1;
 				unsigned int KeyHeld : 1;
-				unsigned int MouseButtonPressed : 1;
-				unsigned int MouseButtonReleased : 1;
+
+				unsigned int MouseButtonDown : 1;
+				unsigned int MouseButtonUp : 1;
+				unsigned int MouseButtonPressed: 1;
+				unsigned int MouseButtonReleased: 1;
 			};
 
 			static std::unordered_map<int, KeyStates> m_inputStates;

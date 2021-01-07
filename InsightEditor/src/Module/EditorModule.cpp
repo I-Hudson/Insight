@@ -3,6 +3,7 @@
 #include "Editor/EditorPanel.h"
 
 #include "Editor/SceneHierarchyPanel.h"
+#include "Editor/TopBarMenu.h"
 
 #if defined(IS_EDITOR)
 namespace Insight
@@ -29,6 +30,7 @@ namespace Insight
 		void EditorModule::OnCreate()
 		{
 			AddEditorPanel<Editor::SceneHierarchyPanel>();
+			AddEditorPanel<Editor::TopBarMenu>();
 		}
 
 		void EditorModule::Update(const float& deltaTime)
