@@ -52,7 +52,7 @@
 #define GET_SHORT_NAME_OF_TYPE(type) Insight::Memory::MemoryManager::Instance()->GetShortNameOfType<type>()
 
 #define BIT(x) (1 << x)
-#define ARRAY_SIZEOF(ARR) ((int)(sizeof(ARR) / sizeof(*(ARR))))
+#define ARRAY_SIZEOF(a) (sizeof(a) / (sizeof(a)[0]))
 
 #define ENUM_TO_STRING(r) return #r
 

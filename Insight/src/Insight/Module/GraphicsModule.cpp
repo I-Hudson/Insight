@@ -18,8 +18,6 @@ namespace Insight
 
 		GraphicsModule::GraphicsModule(SharedPtr<WindowModule> windowModule)
 		{
-			SetInstancePtr(this);
-
 			m_windowModule = windowModule;
 
 			m_renderer = Renderer::Create();
@@ -38,8 +36,6 @@ namespace Insight
 
 			m_renderer.reset();
 			m_windowModule = nullptr;
-
-			ClearPtr();
 		}
 
 		void GraphicsModule::Update(const float& deltaTime)

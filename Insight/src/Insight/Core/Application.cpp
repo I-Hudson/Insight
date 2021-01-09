@@ -41,7 +41,7 @@ namespace Insight
 
 		Config::GetInstance().ParseInFolder("./data/config");
 		
-		m_fileSystem = CreateSharedPtr<FileSystem::FileSystem>("F:\\Users\\Documents\\SourceControl\\Github\\C++ Porjects\\Vulkan\\PBC\\data");
+		m_fileSystem = CreateSharedPtr<FileSystem::FileSystem>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
 		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
 
 		RTTI::RTTI::Create();
@@ -117,54 +117,14 @@ namespace Insight
 				Time::UpdateTime();
 				deltaTime = Time::GetDeltaTime();
 				
-					m_fileSystem->Update();
-					m_inputModule->Update(deltaTime);
-					m_windowModule->Update(deltaTime);
-
-				//IS_CORE_INFO("FPS: {0}", 1.0 / deltaTime);
-				//IS_CORE_INFO("Frame Time: {0}", deltaTime);
+				m_fileSystem->Update();
+				m_inputModule->Update(deltaTime);
+				m_windowModule->Update(deltaTime);
 
 #ifdef IMGUI_ENABLED
 				Insight::ImGuiRenderer::Instance()->NewFrame();
 #endif
-//#if defined(IS_EDITOR) && defined(IMGUI_ENABLED)
-//				
-//				std::string sceneFileName = Scene::ActiveScene()->GetSceneName();
-//				ImGui::Begin("Scene");
-//				ImGui::InputText("Scene Name", &sceneFileName);
-//				ImGui::End();
-//
-//				Scene::ActiveScene()->SetSceneName(sceneFileName);
-//
-//				ImGui::BeginMainMenuBar();
-//
-//				if (ImGui::BeginMenu("Scene"))
-//				{
-//					if (ImGui::MenuItem("Save Scene"))
-//					{
-//						Scene::ActiveScene()->Save();
-//					}
-//
-//					if (ImGui::MenuItem("Load Scene"))
-//					{
-//						Scene::ActiveScene()->Load(sceneFileName);
-//					}
-//					ImGui::EndMenu();
-//				}
-//
-//				if (ImGui::MenuItem("Save Model Library"))
-//				{
-//					//tinyxml2::XMLDocument doc;
-//					//tinyxml2::XMLNode* models = doc.NewElement("Models");
-//					//Insight::Library::ModelLibrary::Instance()->Serialize(models, &doc);
-//					//doc.InsertEndChild(models);
-//					//doc.SaveFile("ModelLibrary.xml");
-//				}
-//				ImGui::EndMainMenuBar();
-//#endif
 				m_moduleManager->Update(deltaTime);
-
-				//TestFunc(Scene::ActiveScene()->FindFirstComponent<CameraComponent>());
 
 				Update(deltaTime);
 				Scene::ActiveScene()->OnUpdate(deltaTime);
@@ -178,10 +138,6 @@ namespace Insight
 				m_mutex.lock();
 #endif
 				m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
-				//if (m_windowModule->GetWindow()->ShouldClose())
-				//{
-				//	break;
-				//}
 #ifdef THREADS
 				m_renderComplete = false;
 				m_triggerRender = true;

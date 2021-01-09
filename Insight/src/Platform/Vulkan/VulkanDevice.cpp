@@ -14,7 +14,6 @@ namespace vks
 	*/
 	VulkanDevice::VulkanDevice(VkPhysicalDevice m_physicalDevice)
 	{
-		SetInstancePtr(this);
 
 		assert(m_physicalDevice);
 		this->m_physicalDevice = m_physicalDevice;
@@ -73,8 +72,6 @@ namespace vks
 		{
 			vkDestroyDevice(m_logicalDevice, nullptr);
 		}
-
-		ClearPtr();
 	}
 
 	/**

@@ -12,7 +12,6 @@ namespace Insight
 	{
 		EditorModule::EditorModule()
 		{
-			SetInstancePtr(this);
 			Editor::EditorDrawerRegistry::GetTypes();
 		}
 
@@ -24,7 +23,6 @@ namespace Insight
 			}
 
 			m_editorPanels.clear();
-			ClearPtr();
 		}
 
 		void EditorModule::OnCreate()

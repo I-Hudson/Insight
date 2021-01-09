@@ -78,7 +78,7 @@
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IMGUI_ENABLED;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IMGUI_ENABLED;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IS_PROFILE_OPTICK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(SolutionDir)Insight\src;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)InsightEditor\vendor\ImGui-Addons\FileBrowser;$(SolutionDir)InsightEditor\vendor\ImGui-Addons\FileBrowser\dirent;$(SolutionDir)Insight\vendor\optick\src;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>

@@ -40,6 +40,7 @@ namespace Insight
 		/* @brief Assignment crement operator (Read/Write) */
 		T& operator=(const T& b);
 
+		T& operator()();
 		T& GetValue();
 
 		bool Lock();
@@ -150,6 +151,12 @@ namespace Insight
 		m_var = b;
 		Unlock();
 		return m_var;
+	}
+
+	template<typename T>
+	inline T& TThreadSafe<T>::operator()()
+	{
+		return GetValue();
 	}
 
 	template<typename T>

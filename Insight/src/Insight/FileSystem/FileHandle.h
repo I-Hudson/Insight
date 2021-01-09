@@ -17,9 +17,12 @@ namespace Insight
 		struct DirectoryListenHandle
 		{
 			HANDLE Handle;
-			HANDLE Event;
 			OVERLAPPED Overlapped;
-			DWORD AsyncBuffer[1024];
+
+			DirectoryListenHandle()
+				: Handle(nullptr)
+				, Overlapped({})
+			{ }
 		};
 
 		struct FileHandle

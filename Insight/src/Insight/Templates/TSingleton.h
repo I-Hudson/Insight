@@ -23,14 +23,13 @@ namespace Insight
             return s_instance != nullptr;
         }
 
-    protected:
-        static void SetInstancePtr(T* instance)
+        TSingleton()
         {
             IS_CORE_ASSERT(s_instance == nullptr, "[TSingleton::SetInstancePtr] Instance already created for.");
-            s_instance = instance;
+            s_instance = static_cast<T*>(this);
         }
 
-        static void ClearPtr()
+        ~TSingleton()
         {
             IS_CORE_ASSERT(s_instance != nullptr, "[TSingleton::SetInstancePtr] Instance is already null.");
             s_instance = nullptr;
@@ -40,7 +39,7 @@ namespace Insight
         template<typename... Args>
         static T* Create(Args... args)
         {
-            SetInstancePtr(new T(std::forward<Args>(args)...));
+            new T(std::forward<Args>(args)...);
 
             return Instance();
         }
@@ -48,7 +47,7 @@ namespace Insight
         template<typename... Args>
         static T* CreateWithoutMemoryManager(Args... args)
         {
-            SetInstancePtr(new T(std::forward<Args>(args)...));
+            new T(std::forward<Args>(args)...);
 
             return Instance();
         }

@@ -7,12 +7,10 @@ namespace Insight
 {
 	ImGuiRenderer::ImGuiRenderer()
 	{
-		SetInstancePtr(this);
 	}
 
 	ImGuiRenderer::~ImGuiRenderer()
 	{
-		ClearPtr();
 	}
 
 	SharedPtr<ImGuiRenderer> Insight::ImGuiRenderer::Create()

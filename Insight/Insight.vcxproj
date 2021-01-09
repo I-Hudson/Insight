@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE_OPTICK;IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;C:\VulkanSDK\1.2.154.1\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -177,6 +177,7 @@
     <ClInclude Include="src\Insight\Event\EventManager.h" />
     <ClInclude Include="src\Insight\FileSystem\FileHandle.h" />
     <ClInclude Include="src\Insight\FileSystem\FileSystem.h" />
+    <ClInclude Include="src\Insight\FileSystem\WatchInfo.h" />
     <ClInclude Include="src\Insight\Input\Input.h" />
     <ClInclude Include="src\Insight\Input\InsightKeyCodes.h" />
     <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h" />
@@ -655,6 +656,7 @@
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
     <ClCompile Include="src\Insight\Event\EventManager.cpp" />
     <ClCompile Include="src\Insight\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="src\Insight\FileSystem\WatchInfo.cpp" />
     <ClCompile Include="src\Insight\Input\Input.cpp" />
     <ClCompile Include="src\Insight\Library\ModelLibrary.cpp" />
     <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp" />
@@ -711,6 +713,9 @@
     <ProjectReference Include="vendor\ImGui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

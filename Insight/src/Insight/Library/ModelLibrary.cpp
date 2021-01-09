@@ -18,12 +18,10 @@ namespace Insight
 			: Library()
 			, Serializable(this, false, "ModelLibrary.json")
 		{
-			SetInstancePtr(this);
 		}
 
 		ModelLibrary::~ModelLibrary()
 		{
-			ClearPtr();
 		}
 
 		SharedPtr<Model> ModelLibrary::GetAssetFromPath(const std::string& filePath)
@@ -38,8 +36,10 @@ namespace Insight
 
 			std::string filepathLinux = filePath;
 			std::replace(filepathLinux.begin(), filepathLinux.end(), '\\', '/');
-			FILE* f = fopen(filepathLinux.c_str(), "r");
-			if (f)
+
+			FILE* f;
+			errno_t error = fopen_s(&f, filepathLinux.c_str(), "r");
+			if (error == 0)
 			{
 				SharedPtr<Model> m = Object::CreateObject<Model>(filePath);
 				AddAsset(m->GetUUID(), m);

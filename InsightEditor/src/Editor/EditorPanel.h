@@ -27,16 +27,11 @@ namespace Insight
 				float mousePosX, mousePosY;
 				Input::GetMousePosition(&mousePosX, &mousePosY);
 
-				IS_INFO("Mouse Pos:{0}, {1}", mousePosX, mousePosY);
-
 				auto imguiWindow = ImGui::GetCurrentWindowRead();
 				if (imguiWindow)
 				{
 					auto windowPos = imguiWindow->Pos;
 					auto windowSize = imguiWindow->Size;
-					IS_INFO("Window Pos:{0}, {1}", windowPos.x, windowPos.y);
-
-
 					return (windowPos.x - (windowSize.x * 0.5f)) <= mousePosX && (windowPos.x + (windowSize.x * 0.5f)) >= mousePosX &&
 						(windowPos.y - (windowSize.y * 0.5f)) <= mousePosY && (windowPos.y + (windowSize.y * 0.5f)) >= mousePosY;
 				}

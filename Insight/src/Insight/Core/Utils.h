@@ -69,3 +69,29 @@ inline std::string CheckAndAppend(const char* extension, const std::string& str)
 	}
 	return str;
 }
+
+inline std::wstring StringToWString(const char* str)
+{
+    if (!str)
+    {
+        return std::wstring();
+    }
+
+    int sizeNeeded = MultiByteToWideChar(CP_UTF8, 0, str, -1, nullptr, 0);
+    std::wstring unicodeStr(sizeNeeded, 0);
+    MultiByteToWideChar(CP_UTF8, 0, str, -1, &unicodeStr[0], sizeNeeded);
+    return unicodeStr;
+}
+
+inline std::string WStringToString(const WCHAR* str, int cbStr = -1)
+{
+    if (!str)
+    {
+        return std::string();
+    }
+
+    int sizeNeeded = WideCharToMultiByte(CP_ACP, 0, str, cbStr, nullptr, 0, nullptr, nullptr);
+    std::string ansiStr(sizeNeeded, 0);
+    WideCharToMultiByte(CP_ACP, 0, str, cbStr, &ansiStr[0], sizeNeeded, nullptr, nullptr);
+    return ansiStr;
+}

@@ -3,14 +3,14 @@
 #include "Insight/Core/Log.h"
 #include "Insight/Core/Utils.h"
 
-#if !defined(IS_PROFILE) && !defined(IS_OPTICK_PROFILE)
+#if !defined(IS_PROFILE) && !defined(IS_PROFILE_OPTICK)
 #ifdef _MSC_VER
 #pragma message ("Debug should have profilling. 'IS_PROFILE' has been set as the default.")
 #endif
 #define IS_PROFILE
 #endif
 
-#if defined(IS_OPTICK_PROFILE)
+#if defined(IS_PROFILE_OPTICK)
 #include "optick.h"
 #endif
 
@@ -530,7 +530,7 @@ namespace Insight
 #define IS_PROFILE_STOP_CAPTURE() temp.EndSession()
 #define IS_PROFILE_SAVE_CAPTURE(filePath) temp.SaveSession(CheckAndAppend(".json", filePath))
 
-#elif defined(IS_OPTICK_PROFILE)
+#elif defined(IS_PROFILE_OPTICK)
 #define INSIGHT_PROFILE_CATEGORY_LINE(name, cat) Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)cat); OPTICK_CATEGORY(name, optickCat)
 
 #define IS_PROFILE_FRAME(name) OPTICK_FRAME(name)
