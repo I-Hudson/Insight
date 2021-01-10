@@ -28,7 +28,7 @@ const int MAX_FRAMES_IN_FLIGHT = 3;
 namespace vks
 {
 //#if defined(IS_EDITOR)
-//	class VulkanRendererEditorOverlay : public Insight::Editor::EditorPanel
+//	class VulkanRendererEditorOverlay : public Insight::Editor::EditorWindow
 //	{
 //	public:
 //		VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);

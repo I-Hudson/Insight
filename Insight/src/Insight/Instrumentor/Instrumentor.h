@@ -5,9 +5,13 @@
 
 #if !defined(IS_PROFILE) && !defined(IS_PROFILE_OPTICK)
 #ifdef _MSC_VER
-#pragma message ("Debug should have profilling. 'IS_PROFILE' has been set as the default.")
+#pragma message ("Debug should have profiling. 'IS_PROFILE' has been set as the default.")
 #endif
 #define IS_PROFILE
+#elif defined(IS_PROFILE) && defined(IS_PROFILE_OPTICK)
+#ifdef _MSC_VER
+#error 'IS_PROFILE' and 'IS_PROFILE_OPTICK' are defined. Only one can be defined.
+#endif
 #endif
 
 #if defined(IS_PROFILE_OPTICK)

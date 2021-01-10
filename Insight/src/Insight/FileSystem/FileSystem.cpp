@@ -1,7 +1,5 @@
 #include "ispch.h"
 #include "FileSystem.h"
-#include <filesystem>
-#include <codecvt>
 
 namespace Insight
 {
@@ -83,7 +81,7 @@ namespace Insight
 			}
 		}
 
-		void FileSystemWatcher::RemoveOldDirectory(FileNotifyHandle id)
+		void FileSystemWatcher::RemoveOldDirectory(U64 id)
 		{
 			MutexLockGuard lock(m_watchInfoMutex);
 			auto watchInfoIt = std::find_if(
@@ -118,6 +116,22 @@ namespace Insight
 				// send stop "magic packet"
 				PostQueuedCompletionStatus(m_iocp.get(), 0, reinterpret_cast<ULONG_PTR>(this), nullptr);
 			}
+		}
+
+		FileNotifcationQueue FileSystemWatcher::GetNotifications()
+		{
+			FileNotifcationQueue copy;
+			if (m_notificationsQueue.TryLock())
+			{
+				copy = m_notificationsQueue.GetValue();
+				m_notificationsQueue.GetValue().clear();
+				m_notificationsQueue.Unlock();
+			}
+			else
+			{
+				IS_CORE_WARN("[FileSystemWatcher::GetNotifications] Notifications queue was in use.");
+			}
+			return copy;
 		}
 
 		void FileSystemWatcher::EventLoop()
@@ -211,12 +225,11 @@ namespace Insight
 
 			if (watchInfo.CanRun()) 
 			{
-				auto notificationResult = watchInfo.ProcessNotifications();
+				auto newNotifications = watchInfo.ProcessNotifications();
+				m_notificationsQueue.Lock();
+				m_notificationsQueue.GetValue().insert(m_notificationsQueue.GetValue().end(), newNotifications.begin(), newNotifications.end());
+				m_notificationsQueue.Unlock();
 
-				if (!notificationResult.empty())
-				{
-					ChangeEvent(watchInfo.rId, std::move(notificationResult));
-				}
 				auto res = watchInfo.Listen();
 				if (!res) 
 				{
@@ -230,103 +243,59 @@ namespace Insight
 			}
 		}
 
-		void FileSystemWatcher::ChangeEvent(U64 id, const std::set<std::pair<std::wstring, uint32_t>>& notifcations)
-		{
-			for (auto& change : notifcations)
-			{
-				std::string filePath = WStringToString(change.first.c_str());
-				IS_CORE_INFO("[FileSystemWatcher::ChangeEvent] Action: '{0}', Data: {1}", change.second, filePath);
-			}
-		}
-
 		/*
 		* -------------------------------------------------------------------------------------------------------------------
 		*/
 
-		FileSystem::FileSystem(const std::string& rootDir)
+		FileSystemManager::FileSystemManager(const std::string& rootDir)
 		{
-			auto getFileName = [](const std::string& filePath)
-			{
-				U64 dotPos = filePath.find_last_of('.');
-				U64 lastSlash = filePath.find_last_of('\\');
-				if (dotPos != std::string::npos && lastSlash != std::string::npos)
-				{
-					return filePath.substr(lastSlash + (U64)1, (dotPos - lastSlash) - (U64)1);
-				}
-				return filePath.substr(lastSlash + (U64)1);
-			};
-			auto getExtension = [](const std::string& filePath)
-			{
-				U64 dotPos = filePath.find_last_of('.');
-				if (dotPos != std::string::npos)
-				{
-					return filePath.substr();
-				}
-				return std::string("");
-			};
-
-			for (const auto& entry : std::filesystem::recursive_directory_iterator::recursive_directory_iterator(rootDir))
-			{
-				if (entry.is_regular_file())
-				{
-					const std::string filePath = entry.path().u8string();
-
-					FileHandle handle;
-					handle.Info = FileInfo
-					{
-						filePath,
-						getFileName(filePath),
-						getExtension(filePath),
-						static_cast<U64>(std::filesystem::file_size(entry))
-					};
-
-					FileNotifyHandle hash = std::hash<std::string>{}(handle.Info.Path);
-					m_fileHandles[hash] = handle;
-				}
-			}
-
-			m_fileNotifcationFuncs[FILE_ACTION_ADDED] = std::bind(&FileSystem::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			m_fileNotifcationFuncs[FILE_ACTION_MODIFIED] = std::bind(&FileSystem::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			m_fileNotifcationFuncs[FILE_ACTION_REMOVED] = std::bind(&FileSystem::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			m_fileNotifcationFuncs[FILE_ACTION_RENAMED_OLD_NAME] = std::bind(&FileSystem::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-			m_fileNotifcationFuncs[FILE_ACTION_RENAMED_NEW_NAME] = std::bind(&FileSystem::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+			//m_fileNotifcationFuncs[FILE_ACTION_ADDED] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+			//m_fileNotifcationFuncs[FILE_ACTION_MODIFIED] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+			//m_fileNotifcationFuncs[FILE_ACTION_REMOVED] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+			//m_fileNotifcationFuncs[FILE_ACTION_RENAMED_OLD_NAME] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+			//m_fileNotifcationFuncs[FILE_ACTION_RENAMED_NEW_NAME] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
 			m_fileSystemWatcher.AddNewDirectory(0, rootDir);
 			m_fileSystemWatcher.StartWatching();
 		}
 
-		FileSystem::~FileSystem()
+		FileSystemManager::~FileSystemManager()
 		{
 		}
 
-
-		SharedPtr<Object> FileSystem::LoadObject(const std::string& filePath)
-		{
-			return SharedPtr<Object>();
-		}
-
-		void FileSystem::UnloadObject(const WeakPtr<Object> objectPtr)
+		void FileSystemManager::UnloadObject(const WeakPtr<Object> objectPtr)
 		{
 		}
 
-		void FileSystem::Update()
+		void FileSystemManager::Update()
 		{
-			//IS_CORE_INFO("File Notifcations: '{0}'", m_fileSystemWatcher.GetNotifcations().size());
-		}
-
-		void FileSystem::HandleFileNotifcationRenameOld(const FILE_NOTIFY_INFORMATION* fileInfo, DWORD* asyncBuffer, U64& offset)
-		{
-			offset += fileInfo->NextEntryOffset;
-			const FILE_NOTIFY_INFORMATION* newInfo = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(
-				reinterpret_cast<const uint8_t*>(asyncBuffer) + offset);
-
-			std::string newPathName = WStringToString(fileInfo->FileName);
-			FileNotifyHandle hash = std::hash<std::string>{}(newPathName);
-			if (newInfo->Action == FILE_ACTION_RENAMED_NEW_NAME)
+			auto notifications = m_fileSystemWatcher.GetNotifications();
+			// maybe this should be done on the other thread?
+			//for (auto& n : Notifications)
 			{
-				m_fileHandles[hash].Info.Path = newPathName;
+				IS_CORE_INFO("File Notifications: '{0}'", notifications.size());
 			}
 		}
 
+		std::string FileSystemManager::GetFileName(const std::string& filePath)
+		{
+			U64 dotPos = filePath.find_last_of('.');
+			U64 lastSlash = filePath.find_last_of('\\');
+			if (dotPos != std::string::npos && lastSlash != std::string::npos)
+			{
+				return filePath.substr(lastSlash + (U64)1, (dotPos - lastSlash) - (U64)1);
+			}
+			return filePath.substr(lastSlash + (U64)1);
+		}
+
+		std::string FileSystemManager::GetExtension(const std::string& filePath)
+		{
+			U64 dotPos = filePath.find_last_of('.');
+			if (dotPos != std::string::npos)
+			{
+				return filePath.substr();
+			}
+			return std::string("");
+		}
 	}
 }

@@ -44,6 +44,7 @@ namespace Insight
 		T& GetValue();
 
 		bool Lock();
+		bool TryLock();
 		void Unlock();
 
 	private:
@@ -170,6 +171,12 @@ namespace Insight
 	{
 		m_mutex.lock();
 		return true;
+	}
+
+	template<typename T>
+	inline bool TThreadSafe<T>::TryLock()
+	{
+		return m_mutex.try_lock();
 	}
 
 	template<typename T>

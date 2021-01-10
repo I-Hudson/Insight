@@ -8,8 +8,9 @@ namespace Insight
 	namespace Editor
 	{
 		TopBarMenu::TopBarMenu(const SharedPtr<Module::EditorModule> editorModule)
-			: EditorPanel(editorModule)
+			: EditorWindow(editorModule)
 		{
+			SET_PANEL_NAME(TopBarMenu);
 		}
 
 		TopBarMenu::~TopBarMenu()

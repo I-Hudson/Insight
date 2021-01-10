@@ -45,7 +45,7 @@ namespace vks
 
 //#if defined(IS_EDITOR)
 //	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
-//		: EditorPanel(editorModule)
+//		: EditorWindow(editorModule)
 //		, m_renderer(renderer)
 //	{
 //	}

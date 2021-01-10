@@ -1,5 +1,6 @@
 #pragma once
 #include "Insight/Core/Core.h"
+#include <deque>
 
 namespace Insight
 {
@@ -16,6 +17,7 @@ namespace Insight
 			}
 		};
 		using HandlePtr = std::unique_ptr<std::remove_pointer<HANDLE>::type, HandleDeleter>;
+		using FileNotifcationQueue = std::vector<std::pair<std::wstring, uint32_t>>;
 
 		// Information about a subscription for the changes of a single directory.
 		class WatchInfo
@@ -26,17 +28,13 @@ namespace Insight
 			// Has to be destructed after the directory handle is closed!
 			// RDC() requires a "pointer to the DWORD-aligned formatted buffer."
 			std::aligned_storage_t<64 * 1024, sizeof(DWORD)> notifBuffer;
-			static_assert(
-				sizeof(WatchInfo::notifBuffer) <= 64 * 1024, "Must be smaller than RDC()'s network limit!");
-			static_assert(sizeof(WatchInfo::notifBuffer) >= (sizeof(FILE_NOTIFY_INFORMATION) + (1 << 15)),
-				"Must be able to store a long path.");
+			static_assert(sizeof(WatchInfo::notifBuffer) <= 64 * 1024, "Must be smaller than RDC()'s network limit!");
+			static_assert(sizeof(WatchInfo::notifBuffer) >= (sizeof(FILE_NOTIFY_INFORMATION) + (1 << 15)), "Must be able to store a long path.");
 
 			std::wstring path;
 			HandlePtr directory;
 
-			void ProcessNotification(
-				const FILE_NOTIFY_INFORMATION& notIf,
-				std::set<std::pair<std::wstring, uint32_t>>& notifications) const;
+			void ProcessNotification(const FILE_NOTIFY_INFORMATION& notIf, FileNotifcationQueue& notifications) const;
 			// The FileName might be in the short 8.3 form, so we try to get the long form.
 			// Similar solution to libuv's.
 			std::wstring TryToGetLongName(const std::wstring& pathName) const;
@@ -68,7 +66,7 @@ namespace Insight
 				return this->state != State::PendingClose;
 			}
 
-			std::set<std::pair<std::wstring, uint32_t>> ProcessNotifications() const;
+			FileNotifcationQueue ProcessNotifications() const;
 		};
 	}
 }

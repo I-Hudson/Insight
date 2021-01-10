@@ -28,7 +28,7 @@ namespace Insight
 {
 	namespace Editor
 	{
-		class EditorPanel;
+		class EditorWindow;
 	}
 
 	namespace Module
@@ -89,20 +89,20 @@ namespace Insight
 
 		private:
 			Editor::EditorDrawerRegistry m_editorDrawerRegisty;
-			std::unordered_map<size_t, SharedPtr<Editor::EditorPanel>> m_editorPanels;
+			std::unordered_map<size_t, SharedPtr<Editor::EditorWindow>> m_editorPanels;
 		};
 
 		template<typename T, typename... Args>
 		inline SharedPtr<T> EditorModule::AddEditorPanel(Args&&... args)
 		{
-			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorWindow, T>::value), "T is not of type EditorWindow");
 
 			if (HasEditorPanel<T>())
 			{
 				return DynamicPointerCast<T>(m_editorPanels[GetEditorPanelID<T>()]);
 			}
 
-			SharedPtr<Editor::EditorPanel> newPanel = CreateSharedPtr<T>(this->shared_from_this(), std::forward<Args>(args)...);
+			SharedPtr<Editor::EditorWindow> newPanel = CreateSharedPtr<T>(this->shared_from_this(), std::forward<Args>(args)...);
 			m_editorPanels[GetEditorPanelID<T>()] = newPanel;
 
 			return DynamicPointerCast<T>(newPanel);
@@ -111,9 +111,9 @@ namespace Insight
 		template<typename T>
 		inline void EditorModule::RemoveEditorPanel()
 		{
-			IS_CORE_STATIC_ASSERT((std::is_base_of<EditorPanel, T>::value), "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<EditorWindow, T>::value), "T is not of type EditorWindow");
 
-			if (Editor::EditorPanel* panel = HasEditorPanel<T>())
+			if (Editor::EditorWindow* panel = HasEditorPanel<T>())
 			{
 				m_editorPanels.erase(GetEditorPanelID<T>());
 			}
@@ -122,7 +122,7 @@ namespace Insight
 		template<typename T>
 		inline bool EditorModule::HasEditorPanel()
 		{
-			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorPanel, T>::value), "T is not of type EditorPanel");
+			IS_CORE_STATIC_ASSERT((std::is_base_of<Editor::EditorWindow, T>::value), "T is not of type EditorWindow");
 			return m_editorPanels.find(GetEditorPanelID<T>()) != m_editorPanels.end();
 		}
 	}

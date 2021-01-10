@@ -58,6 +58,9 @@ public:
 		style[ImGuiCol_TitleBgActive] = ImVec4(titleBgActive.x, titleBgActive.y, titleBgActive.z, titleBgActive.w);
 		glm::vec4 titleBgCollapsed = Insight::Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
+
+		Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx", "./data/models/nano/nanosuit.fbx");
+		Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx", "./data/models/nano/nanosuit.fbx");
 	}
 
 	virtual void Update(const float deltaTime) override

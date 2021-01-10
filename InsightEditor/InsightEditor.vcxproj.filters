@@ -10,6 +10,9 @@
     <Filter Include="src\Editor\Components">
       <UniqueIdentifier>{F818EE8A-6485-A985-2D79-41E399A4CBED}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Editor\Windows">
+      <UniqueIdentifier>{FDB0990B-E994-5A61-52F5-54B43EF844E3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Module">
       <UniqueIdentifier>{428CEC20-2E44-2E6E-974B-07CA8322C95E}</UniqueIdentifier>
     </Filter>
@@ -36,7 +39,7 @@
     <ClInclude Include="src\Editor\EditorDrawer.h">
       <Filter>src\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorPanel.h">
+    <ClInclude Include="src\Editor\EditorWindow.h">
       <Filter>src\Editor</Filter>
     </ClInclude>
     <ClInclude Include="src\Editor\RTTIToImGUI.h">
@@ -50,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="src\Editor\UIHelper.h">
       <Filter>src\Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Editor\Windows\AssetWindow.h">
+      <Filter>src\Editor\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Module\EditorModule.h">
       <Filter>src\Module</Filter>
@@ -76,6 +82,9 @@
     </ClCompile>
     <ClCompile Include="src\Editor\UIHelper.cpp">
       <Filter>src\Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Windows\AssetWindow.cpp">
+      <Filter>src\Editor\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Module\EditorModule.cpp">
       <Filter>src\Module</Filter>

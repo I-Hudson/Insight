@@ -17,7 +17,7 @@ namespace Insight
 	namespace Editor
 	{
 		SceneHierarchyPanel::SceneHierarchyPanel(SharedPtr<Module::EditorModule> editorModule)
-			: EditorPanel(editorModule)
+			: EditorWindow(editorModule)
 		{
 			SET_PANEL_NAME(SceneHierarchyPanel);
 		}

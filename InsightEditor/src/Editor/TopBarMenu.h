@@ -1,13 +1,13 @@
 #pragma once
 #include "Insight/Core/Core.h"
-#include "Editor/EditorPanel.h"
+#include "Editor/EditorWindow.h"
 #include "ImGuiFileBrowser.h"
 
 namespace Insight
 {
 	namespace Editor
 	{
-		class TopBarMenu : public EditorPanel
+		class TopBarMenu : public EditorWindow
 		{
 		public:
 			TopBarMenu(const SharedPtr<Module::EditorModule> editorModule);

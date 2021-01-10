@@ -12,7 +12,12 @@ workspace "Insight"
     flags
 	{
 		"MultiProcessorCompile"
-	}
+    }
+    
+    defines
+    {
+        "IS_PROFILE_OPTICK"
+    }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 

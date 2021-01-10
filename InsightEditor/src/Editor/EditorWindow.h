@@ -14,11 +14,12 @@ namespace Insight
 
 	namespace Editor
 	{
-		class EditorPanel
+		class EditorWindow
 		{
 		public:
-			EditorPanel(SharedPtr<Module::EditorModule> editorModule) : m_editorModule(editorModule) {}
-			virtual ~EditorPanel() {}
+			EditorWindow() = delete;
+			EditorWindow(SharedPtr<Module::EditorModule> editorModule) : m_editorModule(editorModule) {}
+			virtual ~EditorWindow() {}
 
 			virtual void Update(const float& deltaTime) = 0;
 
@@ -38,13 +39,13 @@ namespace Insight
 				return false;
 			}
 
-			const std::string& GetPanelName() { return m_panelName; }
+			const std::string& GetWindowName() { return m_windowName; }
 
 		protected:
 			SharedPtr<Module::EditorModule> m_editorModule;
-			std::string m_panelName;
+			std::string m_windowName;
 
-#define SET_PANEL_NAME(x) m_panelName = typeid(x).name();
+#define SET_PANEL_NAME(x) m_windowName = typeid(x).name();
 		};
 	}
 }

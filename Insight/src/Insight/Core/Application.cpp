@@ -41,7 +41,7 @@ namespace Insight
 
 		Config::GetInstance().ParseInFolder("./data/config");
 		
-		m_fileSystem = CreateSharedPtr<FileSystem::FileSystem>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
+		m_fileSystem = CreateSharedPtr<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
 		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
 
 		RTTI::RTTI::Create();
@@ -68,6 +68,7 @@ namespace Insight
 	{
 		IS_PROFILE_FUNCTION();
 
+		m_fileSystem.reset();
 		Module::ModuleManager::Destroy();
 
 		RTTI::RTTI::Destroy();

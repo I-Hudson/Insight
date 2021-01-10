@@ -1,9 +1,10 @@
 #include "ispch.h"
 #include "EditorModule.h"
-#include "Editor/EditorPanel.h"
+#include "Editor/EditorWindow.h"
 
 #include "Editor/SceneHierarchyPanel.h"
 #include "Editor/TopBarMenu.h"
+#include "Editor/Windows/AssetWindow.h"
 
 #if defined(IS_EDITOR)
 namespace Insight
@@ -29,6 +30,7 @@ namespace Insight
 		{
 			AddEditorPanel<Editor::SceneHierarchyPanel>();
 			AddEditorPanel<Editor::TopBarMenu>();
+			AddEditorPanel<Editor::AssetWindow>();
 		}
 
 		void EditorModule::Update(const float& deltaTime)

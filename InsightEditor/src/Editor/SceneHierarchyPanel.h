@@ -1,6 +1,6 @@
 #pragma once
 #include "Insight/Core/Core.h"
-#include "Editor/EditorPanel.h"
+#include "Editor/EditorWindow.h"
 
 class Entity;
 
@@ -8,7 +8,7 @@ namespace Insight
 {
 	namespace Editor
 	{
-		class SceneHierarchyPanel : public EditorPanel
+		class SceneHierarchyPanel : public EditorWindow
 		{
 		public:
 			SceneHierarchyPanel(const SharedPtr<Module::EditorModule> editorModule);

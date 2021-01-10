@@ -5,7 +5,7 @@ namespace Insight
 {
 	namespace FileSystem
 	{
-		void WatchInfo::ProcessNotification(const FILE_NOTIFY_INFORMATION& notIf, std::set<std::pair<std::wstring, uint32_t>>& notifications) const
+		void WatchInfo::ProcessNotification(const FILE_NOTIFY_INFORMATION& notIf, FileNotifcationQueue& notifications) const
 		{
 			std::wstring wPathName(
 				notIf.FileName, notIf.FileName + (notIf.FileNameLength / sizeof(notIf.FileName)));
@@ -15,7 +15,7 @@ namespace Insight
 					wPathName = longName;
 				}
 			}
-			notifications.emplace(wPathName, notIf.Action);
+			notifications.emplace_back(wPathName, notIf.Action);
 		}
 
 		std::wstring WatchInfo::TryToGetLongName(const std::wstring& pathName) const
@@ -93,9 +93,9 @@ namespace Insight
 			directory.reset(INVALID_HANDLE_VALUE);
 		}
 
-		std::set<std::pair<std::wstring, uint32_t>> WatchInfo::ProcessNotifications() const
+		FileNotifcationQueue WatchInfo::ProcessNotifications() const
 		{
-			std::set<std::pair<std::wstring, uint32_t>> notifications;
+			FileNotifcationQueue notifications;
 
 			auto notInf = reinterpret_cast<const FILE_NOTIFY_INFORMATION*>(&notifBuffer);
 			for (bool moreNotif = true; moreNotif; moreNotif = notInf->NextEntryOffset > 0,

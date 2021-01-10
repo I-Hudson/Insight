@@ -17,7 +17,7 @@ namespace Insight
 
 	namespace FileSystem
 	{
-		class FileSystem;
+		class FileSystemManager;
 	}
 
 	namespace Memory
@@ -59,7 +59,7 @@ namespace Insight
 		bool m_renderComplete = true;
 
 		Memory::MemoryManager* m_memoryManager;
-		SharedPtr<FileSystem::FileSystem> m_fileSystem;
+		SharedPtr<FileSystem::FileSystemManager> m_fileSystem;
 
 		Module::ModuleManager* m_moduleManager;
 		SharedPtr<Module::WindowModule> m_windowModule;
