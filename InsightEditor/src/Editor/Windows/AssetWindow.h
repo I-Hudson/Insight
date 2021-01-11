@@ -29,9 +29,14 @@ namespace Insight
                 FilterMode_Dirs = 0x02
             };
 
+            enum ColumnLayout
+            {
+                OneColumn,
+                TwoColumn,
+            };
+
         private:
             void ClearFileList();
-            void FilterFiles(const int& filterMode);
             void ParsePathTabs(const std::string& str);
 
             bool ReadAssetDirectory(const std::string& assetDirectoryPath);
@@ -43,13 +48,6 @@ namespace Insight
             bool RenderButtonsAndCheckboxRegion();
 
             bool OnDirClick(const int& idx);
-
-#ifdef IS_PLATFORM_WINDOWS
-            bool LoadWindowsDrives();
-#endif
-#ifndef IS_PLATFORM_WINDOWS
-            void InitCurrentPath();
-#endif
             
         private:
             std::string m_selectedFn;
@@ -61,17 +59,10 @@ namespace Insight
             std::vector<Info> m_subFiles;
             std::string m_currentPath, m_errorMsg, m_errorTitle, m_invfileModalId, m_repfileModalId, m_inputFn;
 
-
-            std::vector<std::string> m_validExts;
-            ImGuiTextFilter m_filter;
-            std::string m_validTypes;
-            std::vector<const Info*> m_filteredDirs; // Note: We don't need to call delete. It's just for storing filtered items from subdirs and subfiles so we don't use PassFilter every frame.
-            std::vector<const Info*> m_filteredFiles;
-            std::vector<std::reference_wrapper<std::string>> m_inputcbFilterFiles;
-
+            ColumnLayout m_layout;
             int m_filterMode, m_colItemsLimit, m_selectedIdx, m_selectedExtIdx;
             float m_colWidth, m_extBoxWidth;
-            bool m_showHidden, m_showInputbarCombobox, m_isDir, m_isAppearing, m_filterDirty, m_validateFile;
+            bool m_showHidden, m_showInputbarCombobox, m_isDir, m_initRead, m_filterDirty, m_validateFile;
         };
     }
 }

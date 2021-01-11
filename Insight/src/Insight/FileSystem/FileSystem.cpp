@@ -99,7 +99,7 @@ namespace Insight
 
 		void FileSystemWatcher::StartWatching()
 		{
-			m_loop = std::thread([this]() { this->EventLoop(); });
+			m_loop = std::thread([this]() { IS_PROFILE_THREAD("FileSystemWatcher"); this->EventLoop(); });
 		}
 
 		void FileSystemWatcher::StopWatching()
@@ -136,12 +136,16 @@ namespace Insight
 
 		void FileSystemWatcher::EventLoop()
 		{
+
+			IS_PROFILE_FUNCTION();
 			DWORD numOfBytes = 0;
 			OVERLAPPED* ov = nullptr;
 			ULONG_PTR compKey = 0;
 			BOOL res = FALSE;
 			while ((res = GetQueuedCompletionStatus(m_iocp.get(), &numOfBytes, &compKey, &ov, INFINITE)) != FALSE)
 			{
+				IS_PROFILE_SCOPE("[FileSystemWatcher::EventLoop] GetQueuedCompletionStatus");
+
 				if (compKey != 0 && compKey == reinterpret_cast<ULONG_PTR>(this)) {
 					// stop "magic packet" was sent, so we shut down:
 					break;
