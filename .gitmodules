@@ -20,3 +20,9 @@
 [submodule "InsightEditor/vendor/ImGui-Addons"]
 	path = InsightEditor/vendor/ImGui-Addons
 	url = https://github.com/gallickgunner/ImGui-Addons
+[submodule "InsightEditor/vendor/IconFontCppHeaders"]
+	path = InsightEditor/vendor/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders
+[submodule "Insight/vendor/IconFontCppHeaders"]
+	path = Insight/vendor/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders
