@@ -1,6 +1,7 @@
 #pragma once
 #include "Insight/Core/Core.h"
 #include "Editor/EditorWindow.h"
+#include <filesystem>
 
 namespace Insight
 {
@@ -13,13 +14,23 @@ namespace Insight
 
             virtual void Update(const float& deltaTime) override;
 
-            struct Info
+            struct PathInfo
             {
-                Info(const std::string& name, bool isHidden) : Name(name), IsHidden(isHidden)
+                PathInfo(const std::filesystem::path& path, const bool& isHidden, const bool& expanded)
+                    : Path(path)
+                    , IsHidden(isHidden) 
+                    , Expanded(expanded)
+                { }
+
+                void Sort()
                 {
+                    std::sort(SubPaths.begin(), SubPaths.end(), AlphaSortComparator);
                 }
-                std::string Name;
+
+                std::filesystem::path Path;
                 bool IsHidden;
+                bool Expanded;
+                std::vector<std::filesystem::path> SubPaths;
             };
 
             //Enum used as bit flags.
@@ -36,14 +47,12 @@ namespace Insight
             };
 
         private:
-            void ClearFileList();
-            void ParsePathTabs(const std::string& str);
-
             bool ReadAssetDirectory(const std::string& assetDirectoryPath);
-            static bool AlphaSortComparator(const Info& a, const Info& b);
+            static bool AlphaSortComparator(const std::filesystem::path& a, const std::filesystem::path& b);
+            void DrawFolderTree(const std::filesystem::path& path, const U32& flags);
 
             bool RenderNavAndSearchBarRegion();
-            bool RenderFileListRegion();
+            bool RenderFileListRegion(const ColumnLayout& layout);
             bool RenderInputTextAndExtRegion();
             bool RenderButtonsAndCheckboxRegion();
 
@@ -54,10 +63,9 @@ namespace Insight
             std::string m_selectedPath;
             std::string m_ext;    // Store the saved file extension
 
-            std::vector<std::string> m_directoryList;
-            std::vector<Info> m_subDirs;
-            std::vector<Info> m_subFiles;
-            std::string m_currentPath, m_errorMsg, m_errorTitle, m_invfileModalId, m_repfileModalId, m_inputFn;
+            PathInfo m_assetRootPath;
+            std::unordered_map<std::string, bool> m_expandedPaths;
+            std::string m_searchInput;
 
             ColumnLayout m_layout;
             int m_filterMode, m_colItemsLimit, m_selectedIdx, m_selectedExtIdx;

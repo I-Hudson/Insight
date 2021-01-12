@@ -37,9 +37,12 @@ IncludeDir["json"] = "$(SolutionDir)Insight/vendor/json/single_include/nlohmann"
 IncludeDir["optick"] = "$(SolutionDir)Insight/vendor/optick/src"
 IncludeDir["tinygltf"] = "$(SolutionDir)Insight/vendor/tinygltf"
 IncludeDir["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/include"
+IncludeDir["IconsFontAwesome"] = "$(SolutionDir)Insight/vendor/IconFontCppHeaders/"
 
+-- Editor Includes
 IncludeDir["imguiFileDialog"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/"
 IncludeDir["dirent"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/dirent/"
+
 
 -- Lib directories relative to root folder (solution directory)
 LibDirs = {}

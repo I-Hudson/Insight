@@ -85,6 +85,9 @@
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor\IconFontCppHeaders">
+      <UniqueIdentifier>{0128ED43-6DEA-20CE-B69A-AF5A229CF9AB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="vendor\TinyXML2">
       <UniqueIdentifier>{496EA29A-B5F9-0F5F-BE0A-93532A156C5F}</UniqueIdentifier>
     </Filter>
@@ -356,6 +359,33 @@
     </ClInclude>
     <ClInclude Include="src\ispch.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome4.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome5.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome5Brands.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome5Pro.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome5ProBrands.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsFontaudio.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsForkAwesome.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsKenney.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\IconFontCppHeaders\IconsMaterialDesign.h">
+      <Filter>vendor\IconFontCppHeaders</Filter>
     </ClInclude>
     <ClInclude Include="vendor\TinyXML2\tinyxml2.h">
       <Filter>vendor\TinyXML2</Filter>

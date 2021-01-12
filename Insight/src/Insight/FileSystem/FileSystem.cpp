@@ -136,7 +136,6 @@ namespace Insight
 
 		void FileSystemWatcher::EventLoop()
 		{
-
 			IS_PROFILE_FUNCTION();
 			DWORD numOfBytes = 0;
 			OVERLAPPED* ov = nullptr;

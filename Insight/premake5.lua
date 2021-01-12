@@ -22,6 +22,7 @@ project "Insight"
 		"vendor/glm/glm/**.inl",
         "vendor/TinyXML2/**.h",
 		"vendor/TinyXML2/**.cpp",
+		"vendor/IconFontCppHeaders/**.h",
 	}
 
     includedirs 
@@ -42,6 +43,7 @@ project "Insight"
         "%{IncludeDir.optick}",
         "%{IncludeDir.tinygltf}",
         "%{IncludeDir.ktx}",
+        "%{IncludeDir.IconsFontAwesome}",
 	}
 
     sysincludedirs 

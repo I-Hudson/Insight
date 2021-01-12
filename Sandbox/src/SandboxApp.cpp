@@ -51,7 +51,7 @@ public:
 
 		if (Input::IsKeyDown(KEY_LEFT_CONTROL) && Input::IsKeyDown(KEY_S))
 		{
-			Scene::ActiveScene()->Save();
+			Scene::ActiveScene()->Save("");
 		}
 
 		if (Input::IsKeyDown(KEY_LEFT_CONTROL) && Input::IsKeyDown(KEY_F))

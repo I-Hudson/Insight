@@ -26,10 +26,12 @@ project "InsightEditor"
         "%{IncludeDir.assimp_gen}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
-        "%{IncludeDir.imguiFileDialog}",
-        "%{IncludeDir.dirent}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.Vulkan}",
+
+        "%{IncludeDir.imguiFileDialog}",
+        "%{IncludeDir.dirent}",
+        "%{IncludeDir.IconsFontAwesome}",
 	}
 
 
