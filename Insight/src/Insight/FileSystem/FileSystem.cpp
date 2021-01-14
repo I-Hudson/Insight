@@ -16,9 +16,8 @@ namespace Insight
 
 		FileSystemWatcher::~FileSystemWatcher()
 		{
-			StopWatching();
-			m_loop.join();
-
+			//StopWatching();
+			//m_loop.join();
 		}
 
 		void FileSystemWatcher::AddNewDirectory(U64 id, const std::string& directory)
@@ -156,7 +155,8 @@ namespace Insight
 			}
 
 			m_stopped.store(true);
-			if (res != FALSE) {
+			if (res != FALSE) 
+			{
 				// IOCP is intact, so we clean up outstanding calls:
 				MutexLockGuard lock(m_watchInfoMutex);
 				const auto hasPending = [&lock, this]()
@@ -180,7 +180,8 @@ namespace Insight
 					}
 				}
 			}
-			else {
+			else 
+			{
 				const uint32_t errorCode = GetLastError();
 				std::cerr << "There is something wrong with the IOCP: " << errorCode << std::endl;
 				// alert all subscribers that they will not receive events from now on:
@@ -258,12 +259,18 @@ namespace Insight
 			//m_fileNotifcationFuncs[FILE_ACTION_RENAMED_OLD_NAME] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 			//m_fileNotifcationFuncs[FILE_ACTION_RENAMED_NEW_NAME] = std::bind(&FileSystemManager::HandleFileNotifcationRenameOld, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
-			m_fileSystemWatcher.AddNewDirectory(0, rootDir);
-			m_fileSystemWatcher.StartWatching();
+			//m_fileSystemWatcher.AddNewDirectory(0, rootDir);
+			//m_fileSystemWatcher.StartWatching();
 		}
 
 		FileSystemManager::~FileSystemManager()
 		{
+		}
+
+		bool FileSystemManager::FileExists(const std::string& path)
+		{
+			MutexLockGuard lock(m_mutex);
+			return std::filesystem::exists(std::filesystem::path(path));
 		}
 
 		void FileSystemManager::UnloadObject(const WeakPtr<Object> objectPtr)
@@ -272,12 +279,12 @@ namespace Insight
 
 		void FileSystemManager::Update()
 		{
-			auto notifications = m_fileSystemWatcher.GetNotifications();
-			// maybe this should be done on the other thread?
-			//for (auto& n : Notifications)
-			{
-				IS_CORE_INFO("File Notifications: '{0}'", notifications.size());
-			}
+			//auto notifications = m_fileSystemWatcher.GetNotifications();
+			//// maybe this should be done on the other thread?
+			////for (auto& n : Notifications)
+			//{
+			//	IS_CORE_INFO("File Notifications: '{0}'", notifications.size());
+			//}
 		}
 
 		std::string FileSystemManager::GetFileName(const std::string& filePath)

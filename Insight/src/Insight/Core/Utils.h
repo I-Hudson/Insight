@@ -95,3 +95,9 @@ inline std::string WStringToString(const WCHAR* str, int cbStr = -1)
     WideCharToMultiByte(CP_ACP, 0, str, cbStr, &ansiStr[0], sizeNeeded, nullptr, nullptr);
     return ansiStr;
 }
+
+#if defined _CONCAT
+#undef _CONCAT
+#endif
+#define _CONCAT_EXPANDED(A,B) A##B
+#define _CONCAT(A,B) _CONCAT_EXPANDED(A,B)

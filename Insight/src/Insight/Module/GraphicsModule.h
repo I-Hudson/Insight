@@ -27,6 +27,7 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
+			GraphicsAPI GetAPI();
 			void SetMainCamera(CameraComponent* camera);
 			const bool HasMainCamera();
 			const bool IsThisMainCamera(CameraComponent* camera);

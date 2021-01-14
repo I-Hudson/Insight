@@ -27,9 +27,10 @@ layout (set = 2, binding = 0) uniform DYNAMIC_UBO //#dynamic
 
 layout (location = 0) out vec3 outNormal;
 layout (location = 1) out vec3 outColor;
-layout (location = 2) out vec3 outViewVec;
-layout (location = 3) out vec3 outLightVec;
-layout (location = 4) out vec3 outCameraVec;
+layout (location = 2) out vec2 outUV;
+layout (location = 3) out vec3 outViewVec;
+layout (location = 4) out vec3 outLightVec;
+layout (location = 5) out vec3 outCameraVec;
 
 void main() 
 {
@@ -61,5 +62,6 @@ void main()
 	outLightVec = lPos - pos.xyz;
 	outViewVec = -pos.xyz;	
 
+	outUV = inUV;
 	outCameraVec = cameraPos - pos.xyz;
 }

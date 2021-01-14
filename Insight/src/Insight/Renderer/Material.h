@@ -8,42 +8,60 @@ namespace Insight
 	namespace Render
 	{
 		class Shader;
+		class Texture;
 	}
 }
-class MeshComponent;
 
-enum MaterialRenderDataState
+struct MaterialDynamicUniformInfo
 {
-	Invalid,
-	Valid
+	U32 Index;
+	bool InUse;
+
+	MaterialDynamicUniformInfo()
+		: InUse(false)
+	{ }
+
+	MaterialDynamicUniformInfo(U32 const& index, bool const& inUse)
+		: Index(index)
+		, InUse(inUse)
+	{ }
 };
 
-struct MaterialRenderData
+struct MaterialBlockData
 {
-	MaterialRenderDataState State = MaterialRenderDataState::Invalid;
+	std::unordered_map<std::string, MaterialDynamicUniformInfo> DynamicBuffers;
+	U128 UUID;
+	bool InUse;
+
+	MaterialBlockData()
+		: InUse(false)
+	{ }
 };
 
-class IS_API Material
+struct MaterialUniformDynamicBlock
+{
+	void* DynamicBuffer;
+	U64 DynamicBufferSize;
+	U64 DynamicUniformAlign;
+	std::vector<MaterialBlockData> DynamicBlocks;
+
+	MaterialUniformDynamicBlock()
+		: DynamicUniformAlign(0)
+		, DynamicBuffer(nullptr)
+		, DynamicBufferSize(0)
+	{ }
+};
+
+class IS_API Material : public Insight::Object
 {
 public:
 	virtual ~Material() { }
+	static SharedPtr<Material> Create();
 
-	virtual void SetShader(Insight::Render::Shader* shader) = 0;
-	virtual Insight::Render::Shader* GetShader() = 0;
-	virtual void SetUniforms() = 0;
-	virtual void UpdateMVPUniform(const glm::mat4& proj, const glm::mat4& view, const glm::mat4& model = glm::mat4()) = 0;
-	virtual void UpdateUniform(const std::string& key, void* uniformData, size_t size, int binding) = 0;
-	virtual void UpdateSampler2D(const std::string& key, void* imageView, void* sampler, int binding) = 0;
+	virtual void CreateDefault() = 0;
 
-	virtual MaterialRenderData IncrementUsageCount(const MeshComponent* meshComponent) = 0;
-	virtual void DecrementUsageCount(const MeshComponent* meshComponent) = 0;
+	virtual void Update() = 0;
 
-	static Material* Create();
-
-protected:
-	UINT m_usageCount;
-	bool m_isDirty;
-
-	friend MeshComponent;
+	virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) = 0;
+	virtual void UploadTexture(const std::string& key, WeakPtr<Insight::Render::Texture> texture) = 0;
 };
-

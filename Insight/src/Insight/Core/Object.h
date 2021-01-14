@@ -22,6 +22,7 @@ namespace Insight
 
 		virtual void OnCreate() { }
 		virtual void OnDestroy() { }
+		virtual bool IsValid() { return m_refCount > 0; }
 
 		template<typename T, typename... Args>
 		static SharedPtr<T> CreateObject(Args&& ...);
@@ -36,8 +37,6 @@ namespace Insight
 
 		inline void AddRef();
 		inline void Release();
-
-		//void operator delete(void* ptr);
 
 	private:
 		uint64_t m_refCount;

@@ -1,72 +1,47 @@
 #pragma once
-
 #include "Insight/Core/Core.h"
-#include "Platform/Vulkan/VulkanHeader.h"
-#include "Insight/Core/UUID.h"
-#include "Insight/Renderer/Buffer.h"
-
-#include <vector>
-#include <string>
-#include <../vendor/glm/glm/glm.hpp>
-
-struct Texture
-{
-	unsigned int ID;
-	std::string Type;
-	std::string Path;
-};
-
-namespace vks
-{
-	class VulkanBuffer;
-}
+#include "Insight/Core/Object.h"
+#include "SubMesh.h"
+#include "Insight/Renderer/Material.h"
+#include "Insight/Module/GraphicsModule.h"
 
 class Model;
+struct aiNode;
+struct aiMesh;
+struct aiMaterial;
+enum aiTextureType;
+struct aiScene;
 
-class IS_API Mesh : public Insight::UUID
+using LoadedTextures = std::vector<std::pair<std::string, SharedPtr<Insight::Render::Texture>>>;
+namespace Insight::Render
+{
+	class Texture;
+}
+
+class Mesh : public Insight::Object
 {
 public:
-	Mesh();
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int subMeshIndex, Model* modelUUID, const std::string& meshName);
 	~Mesh();
 
-	void Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	// Getters for all the values and setters.
+	const std::string& GetMeshName() const { return m_meshName; }
+	const U32& GetMeshSubCount() { return static_cast<U32>(m_subMeshes.size()); }
 
-	void Draw(VkCommandBuffer commandBuffer);
-
-	std::string& GetName();
-	const std::string GetModelUUID() const;
-	const unsigned int GetSubMeshIndex() const { return m_subMeshIndex; }
-
-	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
-	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
-
-	// Returns a new array of vertices.
-	std::vector<Vertex> GetVertices();
-	// Returns a new array of colours.
-	std::vector<glm::vec3> GetColours();
-	// Returns a new array of normals.
-	std::vector<glm::vec3> GetNormals();
-	// Returns a new array of indcies.
-	std::vector<unsigned int> GetIndices();
-	// Returns a new array of uvs.
-	std::vector<glm::vec2> GetUVs();
-
-	std::vector<Texture> GetTextures();
+	void Draw(VkCommandBuffer cmd);
+	void Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materials, const std::vector<MaterialBlockData>& materialBlockDatas);
 
 private:
+	void LoadSubMeshes(const std::string& filePath, Model& model);
+	void ProcessNode(aiNode* node, const aiScene* scene);
+	SharedPtr<SubMesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+
+	LoadedTextures LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
 private:
-	std::vector<Vertex> m_vertices;
-	std::vector<unsigned int> m_indices;
-	std::vector<Texture> m_textures;
+	std::vector<SharedPtr<SubMesh>> m_subMeshes;
+	Model* m_model;
 
-	SharedPtr<vks::VulkanBuffer> m_vertexBuffer;
-	SharedPtr<vks::VulkanBuffer> m_indexBuffer;
-
-	Model* m_parentModel;
 	std::string m_meshName;
-	unsigned int m_subMeshIndex;
-	bool m_created;
+	std::string m_directory;
+	friend class Model;
 };
-

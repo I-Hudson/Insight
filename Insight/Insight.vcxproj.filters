@@ -147,6 +147,9 @@
     <ClInclude Include="src\Insight\Core\Application.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Core\CRC32.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Core\Core.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
@@ -232,6 +235,9 @@
       <Filter>src\Insight\Model</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Model\Model.h">
+      <Filter>src\Insight\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Model\SubMesh.h">
       <Filter>src\Insight\Model</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Module\AssetModule.h">
@@ -355,6 +361,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanRenderer.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanTexture.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\ispch.h">
@@ -1614,6 +1623,9 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\stb_image\cro_mipmap.h">
+      <Filter>vendor\stb_image</Filter>
+    </ClInclude>
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
@@ -1677,6 +1689,9 @@
       <Filter>src\Insight\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Model\Model.cpp">
+      <Filter>src\Insight\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Model\SubMesh.cpp">
       <Filter>src\Insight\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Module\AssetModule.cpp">
@@ -1773,6 +1788,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanTexture.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\ispch.cpp">

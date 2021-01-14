@@ -92,6 +92,8 @@ namespace Insight
 				};
 				auto assignDataToThread = [](std::array<ModelLoadThread, 4>& threadsData, std::string fileName, U32 fileSize)
 				{
+					IS_PROFILE_FUNCTION();
+
 					U32 lowsetSize = std::numeric_limits<U32>::max();
 					U32 index = 0;
 					for (U32 i = 0; i < 4; ++i)

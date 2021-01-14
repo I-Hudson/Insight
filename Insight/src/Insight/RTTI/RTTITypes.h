@@ -5,7 +5,7 @@
 
 namespace Insight
 {
-	class RTTIProperty : public Insight::Object
+	class RTTIProperty
 	{
 	public:
 		RTTIProperty(const std::string& typeName, const std::string propertyName, const PropertyFlags& propertyFlags, void* objectPtr)

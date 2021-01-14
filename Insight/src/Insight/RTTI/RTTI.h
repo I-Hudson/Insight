@@ -33,6 +33,16 @@ namespace Insight
 	}
 }
 
+//
+// Helper macros for concatenating two names together such that they will defeat the macro parser.
+// Useful for things like:
+// #define LINEBASEDOBJ(NAME) CLineBasedObj _CONCAT(NAME,__LINE__)
+// such that
+//   LINEBASEDOBJ(Foo);
+// gets expanded as
+//   CLineBasedObj Foo28;
+//
+
 #define IS_PROPERTY_GLOBAL(type, propertyName, editorFlags); \
 	Insight::RTTI::RTTI::Instance()->RegisterProperty(this, nullptr, propertyName, typeid(type).name(), editorFlags);
 

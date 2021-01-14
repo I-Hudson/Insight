@@ -66,6 +66,11 @@ namespace Insight
 			}
 		}
 
+		GraphicsAPI GraphicsModule::GetAPI()
+		{
+			return m_renderer->GetAPI();
+		}
+
 		void GraphicsModule::SetMainCamera(CameraComponent* camera)
 		{
 			m_mainCamera = camera;

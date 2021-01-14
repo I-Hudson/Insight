@@ -1,6 +1,7 @@
 #include "ispch.h"
 #include "VulkanMaterial.h"
 #include "VulkanDevice.h"
+#include "VulkanTexture.h"
 
 namespace vks
 {
@@ -10,6 +11,21 @@ namespace vks
 
 	VulkanMaterial::~VulkanMaterial()
 	{
+		CleanUpUniformBuffers();
+	}
+
+	void VulkanMaterial::CreateDefault()
+	{
+		m_init = true;
+		m_device = VulkanDevice::Instance();
+		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert", "./data/shaders/vulkan/default.frag" };
+		for (auto& shader : shaders)
+		{
+			m_shaderData.push_back(Insight::ShaderParser::ParseShader(shader));
+		}
+		m_pipeline.Create(m_device, shaders, m_device->GetRenderPass(), m_shaderData);
+
+		SetupUniformBuffers();
 	}
 
 	void VulkanMaterial::Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass)
@@ -28,7 +44,6 @@ namespace vks
 	void VulkanMaterial::Destroy()
 	{
 		m_init = false;
-		m_pipeline.Destroy();
 		CleanUpUniformBuffers();
 	}
 
@@ -73,6 +88,57 @@ namespace vks
 			}
 
 			vkCmdBindDescriptorSets(commandBuffer, bindPoint, m_pipeline.GetPipelineLayout(), 0, static_cast<U32>(sets.size()), sets.data(), static_cast<U32>(dynamicOffsets.size()), dynamicOffsets.data());
+		}
+	}
+
+	void VulkanMaterial::UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData)
+	{
+		if (m_uniformBuffers.find(key) == m_uniformBuffers.end())
+		{
+			return;
+		}
+
+		MaterialUniformBuffer& mub = m_uniformBuffers[key];
+
+		if (mub.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
+		{
+			return;
+			if (!materialBlockData.InUse)
+			{
+				materialBlockData = FindValidMaterialBlock(mub, key);
+			}
+
+			VkDeviceSize offset = materialBlockData.DynamicBuffers[key].Index * mub.DynamicUniformBlock.DynamicUniformAlign;
+			void* dstPtr = (void*)((U64*)mub.DynamicUniformBlock.DynamicBuffer + offset);
+			void* srcPtr = data;
+			memcpy(dstPtr, srcPtr, dataSize);
+
+			//TODO copy ram data to gpu and flush gpu buffer
+			mub.Buffer.CopyTo(data, dataSize, offset);
+			mub.Buffer.Flush();
+		}
+		else
+		{
+			mub.Buffer.CopyTo(data, dataSize);
+		}
+	}
+
+	void VulkanMaterial::UploadTexture(const std::string& key, WeakPtr<Insight::Render::Texture> texture)
+	{
+		if (m_uniformTextures.find(key) == m_uniformTextures.end())
+		{
+			return;
+		}
+
+		if (auto textureSP = texture.lock())
+		{
+			if (textureSP->IsValid())
+			{
+				SharedPtr<VulkanTextureGPUData> vTex = DynamicPointerCast<VulkanTextureGPUData>(textureSP->GetGPUTextureData());
+				m_uniformTextures[key].ImageInfo.imageView = vTex->GetImageView();
+				m_uniformTextures[key].ImageInfo.sampler = vTex->GetSampler();
+				m_uniformTextures[key].ImageInfo.imageLayout = vTex->GetImageLayout();
+			}
 		}
 	}
 
@@ -123,10 +189,23 @@ namespace vks
 					m_uniformBuffers[key].Binding = uniformBlock.Binding;
 					m_uniformBuffers[key].Type = uniformBlock.GetVulkanType();
 				}
+				else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+				{
+					m_uniformTextures[key].ImageInfo.imageView = VK_NULL_HANDLE;
+					m_uniformTextures[key].Binding = uniformBlock.Binding;
+					m_uniformTextures[key].Type = uniformBlock.GetVulkanType();
+				}
 
 				if (descriptorSets.find(currentSet) != descriptorSets.end())
 				{
-					m_uniformBuffers[key].Set = descriptorSets[currentSet];
+					if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBufferDynamic)
+					{
+						m_uniformBuffers[key].Set = descriptorSets[currentSet];
+					}
+					else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+					{
+						m_uniformTextures[key].Set = descriptorSets[currentSet];
+					}
 					continue;
 				}
 
@@ -137,8 +216,15 @@ namespace vks
 				allocateInfo.descriptorSetCount = 1;
 				allocateInfo.pSetLayouts = &m_pipeline.GetDescriptorLayout(currentSet);
 				ThrowIfFailed(vkAllocateDescriptorSets(*m_device, &allocateInfo, &descriptorSets[currentSet]));
-				m_uniformBuffers[key].Set = descriptorSets[currentSet];
-				//writeDescriptorSets.push_back(vks::initializers::writeDescriptorSet(m_uniformBuffers[key].Set, uniformBlock.GetVulkanType(), uniformBlock.Binding, &m_uniformBuffers[key].Buffer.descriptor, 1));
+
+				if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBufferDynamic)
+				{
+					m_uniformBuffers[key].Set = descriptorSets[currentSet];
+				}
+				else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+				{
+					m_uniformTextures[key].Set = descriptorSets[currentSet];
+				}
 			}
 		}
 
@@ -172,6 +258,13 @@ namespace vks
 		for (auto& ubo : m_uniformBuffers)
 		{
 			writesSets.push_back(vks::initializers::writeDescriptorSet(ubo.second.Set, ubo.second.Type, ubo.second.Binding, &ubo.second.Buffer.descriptor));
+		}
+		for (auto & tex : m_uniformTextures)
+		{
+			if (tex.second.ImageInfo.imageView != VK_NULL_HANDLE)
+			{
+				writesSets.push_back(vks::initializers::writeDescriptorSet(tex.second.Set, tex.second.Type, tex.second.Binding, &tex.second.ImageInfo));
+			}
 		}
 
 		vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(writesSets.size()), writesSets.data(), 0, nullptr);

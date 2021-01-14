@@ -9,16 +9,12 @@ REGISTER_DEF_TYPE(MeshComponent);
 
 MeshComponent::MeshComponent()
 	: Component(nullptr)
-	, m_mesh(nullptr)
-	, m_materal(nullptr)
 {
 	m_updateEveryFarme = false;
 }
 
 MeshComponent::MeshComponent(SharedPtr<Entity> owner)
 	: Component(owner)
-	, m_mesh(nullptr)
-	, m_materal(nullptr)
 {
 	m_updateEveryFarme = false;
 }
@@ -34,78 +30,36 @@ void MeshComponent::OnCreate()
 	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
 
 	Insight::Module::GraphicsModule::m_meshs.push_back(this);
-	SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
+	//SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
 }
 
 void MeshComponent::OnDestroy()
 {
-	SetMaterial(nullptr);
 	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
 }
 
-float GetMin(float& f1, float& f2)
-{
-	return f1 < f2 ? f1 : f2;
-}
-
-float GetMax(float& f1, float& f2)
-{
-	return f1 > f2 ? f1 : f2;
-}
-
-void MeshComponent::SetMesh(SharedPtr<Mesh> mesh)
+void MeshComponent::SetMesh(WeakPtr<Mesh> mesh)
 {
 	m_mesh = mesh;
-	m_meshName = m_mesh->GetName();
-
-	float xMin = 0;
-	float xMax = 0;
-	float yMin = 0;
-	float yMax = 0;
-	float zMin = 0;
-	float zMax = 0;
-
-	auto vertices = mesh->GetVertices();
-	for (auto it = vertices.begin(); it != vertices.end(); ++it)
-	{
-		xMin = GetMin((*it).Position.x, xMin);
-		xMax = GetMax((*it).Position.x, xMax);
-		yMin = GetMin((*it).Position.y, yMin);
-		yMax = GetMax((*it).Position.y, yMax);
-		zMin = GetMin((*it).Position.z, zMin);
-		zMax = GetMax((*it).Position.z, zMax);
-	}
-	m_boundingBox.Half_size.x = static_cast<float>(glm::abs(xMax - xMin) * 0.5);
-	m_boundingBox.Half_size.y = static_cast<float>(glm::abs(yMax - yMin) * 0.5);
-	m_boundingBox.Half_size.z = static_cast<float>(glm::abs(zMax - zMin) * 0.5);
+	m_meshName = mesh.lock()->GetMeshName();
 }
 
-void MeshComponent::SetMaterial(Material* material)
+void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
 {
-	if (m_materal != nullptr && m_materal != material)
-	{
-		m_materal->DecrementUsageCount(this);
-		m_materal->m_isDirty = true;
-	}
 
-	m_materal = material;
+}
 
-	if (m_materal != nullptr)
-	{
-		m_materialRendererData = m_materal->IncrementUsageCount(this);
-		m_materal->m_isDirty = true;
-	}
+void MeshComponent::SetMaterials(std::vector<WeakPtr<Material>> material, int index)
+{
 }
 
 void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
-	if (m_mesh)
+	if (auto meshSP = m_mesh.lock())
 	{
-		element->AddAttribute("MeshName", m_mesh->GetName().c_str());
-		element->AddAttribute("ModelUUID", m_mesh->GetUUID());
-		element->AddAttribute("SubMeshIndex", std::to_string(m_mesh->GetSubMeshIndex()));
+		//element->AddAttribute("MeshName", meshSP->GetName().c_str());
 	}
 }
 

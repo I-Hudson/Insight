@@ -44,29 +44,10 @@ SharedPtr<Entity> Entity::CreateFromModel(SharedPtr<Model> model)
 {
 	IS_PROFILE_FUNCTION();
 
-	std::string modelName = model->GetName();
+	std::string modelName = model->GetModelName();
 	SharedPtr<Entity> e = Entity::Create(modelName);
+	e->AddComponent<MeshComponent>()->SetMesh(model->GetMesh());
 
-	unsigned int meshCount = model->GetSubMeshCount();
-	if (meshCount > 1)
-	{
-		for (unsigned int i = 0; i < meshCount; ++i)
-		{
-			SharedPtr<Mesh> subMesh = model->GetSubMesh(i);
-			SharedPtr<Entity> childEntity = Entity::Create(subMesh->GetName());
-			childEntity->AddComponent<MeshComponent>()->SetMesh(subMesh);
-
-			e->AddChild(childEntity);
-		}
-	}
-	else if (meshCount == 1)
-	{
-		e->AddComponent<MeshComponent>()->SetMesh(model->GetSubMesh(0));
-	}
-	else
-	{
-		IS_CORE_ERROR("");
-	}
 
 	return e;
 }

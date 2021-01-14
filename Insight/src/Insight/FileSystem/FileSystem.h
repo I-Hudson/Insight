@@ -53,8 +53,10 @@ namespace Insight
 			FileSystemManager(const std::string& rootDir);
 			~FileSystemManager();
 
+			bool FileExists(const std::string& path);
+
 			template<typename T, typename... Args>
-			SharedPtr<Object> LoadObject(const std::string& filePath, Args&&... args);
+			SharedPtr<T> LoadObject(const std::string& filePath, Args&&... args);
 
 			void UnloadObject(const WeakPtr<Object> objectPtr);
 
@@ -74,8 +76,10 @@ namespace Insight
 		};
 
 		template<typename T, typename... Args>
-		inline SharedPtr<Object> FileSystemManager::LoadObject(const std::string& filePath, Args&&... args)
+		inline SharedPtr<T> FileSystemManager::LoadObject(const std::string& filePath, Args&&... args)
 		{
+			MutexLockGuard lock(m_mutex);
+
 			IS_CORE_STATIC_ASSERT((std::is_base_of_v<Object, T>), "[FileSystemManager::LoadObject] 'LoadObject' can only be used on Object types.");
 
 			FileHash fileHash = std::hash<std::string>{}(filePath);
@@ -92,9 +96,9 @@ namespace Insight
 				filePath,
 				GetFileName(filePath),
 				GetExtension(filePath),
-				static_cast<U64>(std::filesystem::file_size(path))
+				0//static_cast<U64>(std::filesystem::file_size(path))
 			};
-			handle.Object = Object::CreateObject<T>(std::forward<Args>(args)...);
+			handle.Object = Object::CreateObject<T>(filePath, std::forward<Args>(args)...);
 			m_fileHandles[fileHash] = handle;
 
 			return DynamicPointerCast<T>(handle.Object);

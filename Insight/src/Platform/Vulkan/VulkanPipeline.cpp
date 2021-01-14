@@ -179,6 +179,13 @@ namespace vks
 
 	VulkanPipeline::~VulkanPipeline()
 	{
+		for (auto& set : m_descriptorLayouts)
+		{
+			vkDestroyDescriptorSetLayout(*m_vulkanDevice, set.second, nullptr);
+		}
+		vkDestroyPipelineLayout(*m_vulkanDevice, m_pipelineLayout, nullptr);
+		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
+
 		if (s_glslInit)
 		{
 			glslang::FinalizeProcess();
@@ -193,16 +200,6 @@ namespace vks
 		CreateDescriptorSetLayout(device, shaders, shaderData);
 		CreatePipelineLayout(device, shaders, shaderData);
 		CreatePipeline(device, shaders, renderPass, shaderData);
-	}
-
-	void VulkanPipeline::Destroy()
-	{
-		for (auto& set : m_descriptorLayouts)
-		{
-			vkDestroyDescriptorSetLayout(*m_vulkanDevice, set.second, nullptr);
-		}
-		vkDestroyPipelineLayout(*m_vulkanDevice, m_pipelineLayout, nullptr);
-		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
 	}
 
 	void VulkanPipeline::Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint)

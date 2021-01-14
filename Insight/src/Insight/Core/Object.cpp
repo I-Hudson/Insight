@@ -44,15 +44,6 @@ namespace Insight
 		return this == &pObject;
 	}
 
-	//std::string Object::GetType()
-	//{
-	//	if (!m_typeName.empty())
-	//	{
-	//		return m_typeName;
-	//	}
-	//	return std::string("Object");
-	//}
-
 	void Object::RegisterOnDestroyCallback(void* callerClass, ObjectCallback callback)
 	{
 		if (m_onDestroyCallbacks.find(callerClass) == m_onDestroyCallbacks.end())
@@ -80,9 +71,4 @@ namespace Insight
 	{
 		--m_refCount;
 	}
-
-	//void Object::operator delete(void* ptr)
-	//{
-	//	IS_CORE_ERROR("Object of type '{0}' can not use delete operator.", static_cast<Object*>(ptr)->GetType());
-	//}
 }

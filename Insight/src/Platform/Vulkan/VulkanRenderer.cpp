@@ -16,6 +16,8 @@
 #include "Insight/Component/CameraComponent.h"
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Model/Model.h"
+#include "Insight/Renderer/Texture.h"
+#include "Insight/FileSystem/FileSystem.h"
 
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
@@ -140,7 +142,7 @@ namespace vks
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			m_defaultMaterial[i].Destroy();
+			m_defaultMaterial[i].reset();
 		}
 
 		DestroyCommandBuffers();
@@ -195,9 +197,9 @@ namespace vks
 	{
 		VkResult err;
 
-		ThrowIfFailed(CreateInstance(true));//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
+		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
 
-		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
 			// For validating (debugging) an application the error and warning bits should suffice
@@ -252,7 +254,6 @@ namespace vks
 		vkGetPhysicalDeviceFeatures(m_physicalDevice, &m_deviceFeatures);
 		vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &m_deviceMemoryProperties);
 
-		// Derived examples can override this to set actual features (based on above readings) to enable for logical device creation
 		GetEnabledFeatures();
 
 		// Vulkan device creation
@@ -403,14 +404,16 @@ namespace vks
 		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
 
 		mvp.lightPos = m_lightPos;
-		m_defaultMaterial[m_imageIndex].UploadUniform("UBO", mvp, m_defaultMaterialBlock[m_imageIndex]);
+		m_defaultMaterial[m_imageIndex]->UploadUniform("UBO", &mvp, sizeof(MVP), m_defaultMaterialBlock[m_imageIndex]);
 
 		m_debugOverlay.debugOverlay = (int)debugOverlay;
-		m_defaultMaterial[m_imageIndex].UploadUniform("DEBUGINFO", m_debugOverlay, m_defaultMaterialBlock[m_imageIndex]);
+		m_defaultMaterial[m_imageIndex]->UploadUniform("DEBUGINFO", &m_debugOverlay, sizeof(DebugOverlay), m_defaultMaterialBlock[m_imageIndex]);
 
 		glm::vec4 color{ 0.5f, 0.1f, 0.47f, 1.0f};
-		m_defaultMaterial[m_imageIndex].UploadUniform("//#dynamic", color, m_defaultMaterialBlock[m_imageIndex]);
+		m_defaultMaterial[m_imageIndex]->UploadUniform("//#dynamic", &color, sizeof(glm::vec4), m_defaultMaterialBlock[m_imageIndex]);
 
+		WeakPtr<Insight::Render::Texture> tex = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Render::Texture>("./data/models/Survival_BackPack_2/diffuse.jpg");
+		m_defaultMaterial[m_imageIndex]->UploadTexture("texSampler;", tex);
 
 		//TODO: Look into this. Maybe change how it works.
 		m_vulkanDevice->CheckIdleQueue();
@@ -464,7 +467,8 @@ namespace vks
 		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert",  "./data/shaders/vulkan/default.frag" };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			m_defaultMaterial[i].Create(m_vulkanDevice.get(), shaders, m_vulkanDevice->GetRenderPass());
+			m_defaultMaterial[i] = Material::Create();
+			DynamicPointerCast<vks::VulkanMaterial>(m_defaultMaterial[i])->Create(m_vulkanDevice.get(), shaders, m_vulkanDevice->GetRenderPass());
 		}
 
 		m_editorEntity = Object::CreateObject<Entity>("Editor entity", false);
@@ -656,8 +660,8 @@ namespace vks
 		imgui->EndFrame();
 
 		int i = m_imageIndex;
-		m_defaultMaterial[i].Update();
-		//m_defaultMaterial[i].Update();
+		m_defaultMaterial[i]->Update();
+
 		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
 		{
 			// Set target frame buffer
@@ -673,8 +677,34 @@ namespace vks
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
 
-			m_defaultMaterial[i].Bind(m_drawCmdBuffers[i], &m_defaultMaterialBlock[i]);
-			m_testModel->Draw(m_drawCmdBuffers[i]);
+			// This should be replaced by the mesh components in the scene.
+
+			//DynamicPointerCast<vks::VulkanMaterial>(m_defaultMaterial[i])->Bind(m_drawCmdBuffers[i], &m_defaultMaterialBlock[i]);
+			if (i == 0)
+			{
+				// NEEDS OFFSCREEN RENDERERING
+				MVP mvp;
+				mvp.proj = m_editorCamera->GetProjMatrix();
+				mvp.proj[1][1] *= -1;
+				mvp.view = m_editorCamera->GetViewMatrix();
+				mvp.model = m_testModelMatrix;
+				m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
+				m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
+				m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
+				mvp.lightPos = m_lightPos;
+
+				auto mats = m_testModel->GetMaterals();
+				for (auto& m : mats)
+				{
+					if (auto mSP = m.lock())
+					{
+						MaterialBlockData data;
+						mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
+					}
+				}
+
+				m_testModel->GetMesh().lock()->Draw(m_drawCmdBuffers[i], m_testModel->GetMaterals(), { });
+			}
 
 			imgui->Render(m_drawCmdBuffers[i]);
 		
@@ -829,6 +859,7 @@ namespace vks
 
 	void VulkanRenderer::GetEnabledFeatures()
 	{
+		m_enabledFeatures.samplerAnisotropy = VK_TRUE;
 	}
 
 	VkSubmitInfo VulkanRenderer::GetSubmitInfo()

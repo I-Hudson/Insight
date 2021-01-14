@@ -34,6 +34,7 @@ namespace vks
 		VkPipelineCache GetPipelineCache() { return m_pipelineCache; }
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 		VkPhysicalDeviceProperties GetProperties() { return m_properties; }
+		VkPhysicalDeviceFeatures GetFeatures() { return m_features; }
 
 		void CheckIdleQueue();
 

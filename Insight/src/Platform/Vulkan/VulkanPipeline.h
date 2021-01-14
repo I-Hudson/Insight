@@ -27,7 +27,6 @@ namespace vks
 		~VulkanPipeline();
 
 		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData);
-		void Destroy();
 
 		void Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint);
 

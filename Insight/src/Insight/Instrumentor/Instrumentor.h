@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Insight/Core/Log.h"
 #include "Insight/Core/Utils.h"
 
@@ -93,6 +92,7 @@ namespace Insight
 			void EndSession()
 			{
 				std::lock_guard lock(m_Mutex);
+				auto p = &Get();
 				if (&Get() != this)
 				{
 					Get().RemoveProfile(this);
@@ -112,6 +112,7 @@ namespace Insight
 				{
 					IS_CORE_ERROR("Profile could not be saved to file.");
 				}
+				IS_CORE_INFO("Profile has been saved.");
 			}
 
 			void WriteProfile(const ProfileResult& result)

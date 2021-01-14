@@ -1,129 +1,184 @@
 #include "ispch.h"
 #include "Mesh.h"
-#include "Insight/Memory/MemoryManager.h"
-#include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Renderer/Buffer.h"
 
-#include "Platform/Vulkan/VulkanMaterial.h"
-#include "Platform/Vulkan/VulkanDevice.h"
-#include "Insight/Model/Model.h"
+#include "Model.h"
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "Assimp/mesh.h"
+#include "assimp/postprocess.h"
 
-Mesh::Mesh()
-	: Insight::UUID()
-	, m_created(false)
-{ }
-
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures, unsigned int subMeshIndex, Model* parentModel, const std::string & meshName)
-	: Insight::UUID()
-	, m_created(false)
-	, m_parentModel(parentModel)
-	, m_meshName(meshName)
-	, m_subMeshIndex(subMeshIndex)
-{
-	IS_PROFILE_FUNCTION();
-
-	Create(vertices, indices, textures);
-}
+#include "Insight/FileSystem/FileSystem.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
 
 Mesh::~Mesh()
 {
+	for (auto& subMesh : m_subMeshes)
+	{
+		subMesh.reset();
+	}
+	m_subMeshes.clear();
+}
+
+void Mesh::Draw(VkCommandBuffer cmd)
+{
+	for (auto& mesh : m_subMeshes)
+	{
+		mesh->Draw(cmd);
+	}
+}
+
+void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materials, const std::vector<MaterialBlockData>& materialBlockDatas)
+{
+	for (U64 i = 0; i < m_subMeshes.size(); ++i)
+	{
+		if (i >= materials.size())
+		{
+			return;
+		}
+
+		if (auto materialSP = materials.at(i).lock())
+		{
+			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
+			auto vMaterialSP = DynamicPointerCast<vks::VulkanMaterial>(materialSP);
+			vMaterialSP->Update();
+			vMaterialSP->Bind(cmd, &materialBlockData);
+			m_subMeshes.at(i)->Draw(cmd);
+		}
+	}
+}
+
+void Mesh::LoadSubMeshes(const std::string& filePath, Model& model)
+{
 	IS_PROFILE_FUNCTION();
 
-	m_vertices.clear();
-	m_indices.clear();
-	m_textures.clear();
+	m_model = &model;
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
 
-	m_vertexBuffer->Destroy();
-	m_indexBuffer->Destroy();
-
-	m_vertexBuffer.reset();
-	m_indexBuffer.reset();
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		IS_CORE_ERROR("Assimp model load: {0}", importer.GetErrorString());
+		return;
+	}
+	// retrieve the directory path of the filepath
+	m_directory = filePath.substr(0, filePath.find_last_of('/'));
+	m_meshName = scene->mRootNode->mName.C_Str();
+	ProcessNode(scene->mRootNode, scene);
 }
 
-void Mesh::Create(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+void Mesh::ProcessNode(aiNode* node, const aiScene* scene)
 {
 	IS_PROFILE_FUNCTION();
 
-	if (!m_created)
+	// process all the node's meshes (if any)
+	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
-		m_created = true;
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		m_subMeshes.push_back(ProcessMesh(mesh, scene));
+	}
+	// then do the same for each of its children
+	for (unsigned int i = 0; i < node->mNumChildren; i++)
+	{
+		ProcessNode(node->mChildren[i], scene);
+	}
+}
 
-		m_vertices = vertices;
-		m_indices = indices;
-		m_textures = textures;
+SharedPtr<SubMesh> Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+{
+	IS_PROFILE_FUNCTION();
+
+	std::vector<Vertex> vertices;
+	std::vector<unsigned int> indices;
+	LoadedTextures textures;
+
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+	{
+		Vertex vertex;
+		// process vertex positions, normals and texture coordinates
+		glm::vec3 position;
+		position.x = mesh->mVertices[i].x;
+		position.y = mesh->mVertices[i].y;
+		position.z = mesh->mVertices[i].z;
+		vertex.Position = position;
+
+		glm::vec4 colour = glm::vec4();
+		colour.r = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.g = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.b = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		colour.a = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		vertex.Colour = colour;
+
+		glm::vec3 normal;
+		if (mesh->mNormals != nullptr)
+		{
+			normal.x = mesh->mNormals[i].x;
+			normal.y = mesh->mNormals[i].y;
+			normal.z = mesh->mNormals[i].z;
+		}
+		vertex.Normal = normal;
+
+		glm::vec2 uv;
+		if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+		{
+			uv.x = mesh->mTextureCoords[0][i].x;
+			uv.y = mesh->mTextureCoords[0][i].y;
+		}
+		else
+		{
+			uv.x = 0.0f;
+			uv.y = 0.0f;
+		}
+		vertex.UV1 = uv;
+
+		vertices.push_back(vertex);
 	}
 
-	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
-}
-
-void Mesh::Draw(VkCommandBuffer commandBuffer)
-{
-	VkDeviceSize offsets[] = { 0 };
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, &(m_vertexBuffer->buffer), offsets);
-	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer, 0, VK_INDEX_TYPE_UINT32);
-
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
-}
-
-std::string& Mesh::GetName()
-{
-	return m_meshName;
-}
-
-const std::string Mesh::GetModelUUID() const
-{
-	if (m_parentModel)
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
-		return m_parentModel->GetUUID();
+		aiFace face = mesh->mFaces[i];
+		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		{
+			indices.push_back(face.mIndices[j]);
+		}
 	}
-	return "INVALID";
-}
 
-std::vector<Vertex> Mesh::GetVertices()
-{
-	return m_vertices;
-}
-
-std::vector<glm::vec3> Mesh::GetColours()
-{
-	std::vector<glm::vec3> colours;
-	for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
+	if (mesh->mMaterialIndex >= 0)
 	{
-		colours.push_back((*it).Colour);
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		LoadedTextures diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		LoadedTextures specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
-	return colours;
+
+	m_model->SetMaterials(textures);
+	return CreateSharedPtr<SubMesh>(vertices, indices);
 }
 
-std::vector<glm::vec3> Mesh::GetNormals()
+LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
 {
-	std::vector<glm::vec3> normals;
-	for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
+	IS_PROFILE_FUNCTION();
+
+	LoadedTextures textures;
+	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
-		normals.push_back((*it).Normal);
+		aiString str;
+		mat->GetTexture(type, i, &str);
+		//bool skip = false;
+		//for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
+		//{
+		//	if (std::strcmp(m_loadedTextures[j].GetFilePath().c_str(), str.C_Str()) == 0)
+		//	{
+		//		textures.push_back(m_loadedTextures[j]);
+		//		skip = true;
+		//		break;
+		//	}
+		//}
+		//if (!skip)
+		{   // if texture hasn't been loaded already, load it
+			textures.emplace_back(typeName,  Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Texture>(m_directory + "/" + str.C_Str()));
+			//m_loadedTextures.push_back(texture); // add to loaded textures
+		}
 	}
-	return normals;
-}
-
-std::vector<unsigned int> Mesh::GetIndices()
-{
-	return m_indices;
-}
-
-std::vector<glm::vec2> Mesh::GetUVs()
-{
-	std::vector<glm::vec2> uvs;
-	for (auto it = m_vertices.begin(); it != m_vertices.end(); ++it)
-	{
-		uvs.push_back((*it).UV1);
-	}
-	return uvs;
-}
-
-std::vector<Texture> Mesh::GetTextures()
-{
-	return m_textures;
+	return textures;
 }

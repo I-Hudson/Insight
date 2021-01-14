@@ -247,6 +247,9 @@ namespace Insight
 
 	std::string ShaderParser::GetName(const std::string& line, const bool& removeLastCharacter)
 	{
+		// This goes from right to left. This allows us to avoid having to find 
+		// where the word starts as we know the last character on the line 
+		// must be part of the name.
 		std::string sValue;
 		bool wordStart = false;
 		for (auto it = line.rbegin(); it != line.rend(); ++it)
@@ -269,6 +272,13 @@ namespace Insight
 		if (removeLastCharacter)
 		{
 			sValue.erase(sValue.begin(), sValue.begin() + 1);
+		}
+		else
+		{
+			if (*sValue.begin() == ';')
+			{
+				sValue.erase(sValue.begin(), sValue.begin() + 1);
+			}
 		}
 
 		// Swap character starting from two 

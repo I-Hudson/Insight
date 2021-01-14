@@ -28,6 +28,7 @@ project "InsightEditor"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.Vulkan}",
+        "%{IncludeDir.ktx}",
 
         "%{IncludeDir.imguiFileDialog}",
         "%{IncludeDir.dirent}",

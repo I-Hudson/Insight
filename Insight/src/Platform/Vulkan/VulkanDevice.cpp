@@ -14,7 +14,6 @@ namespace vks
 	*/
 	VulkanDevice::VulkanDevice(VkPhysicalDevice m_physicalDevice)
 	{
-
 		assert(m_physicalDevice);
 		this->m_physicalDevice = m_physicalDevice;
 

@@ -222,7 +222,7 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-		VulkanMaterial m_defaultMaterial[3];
+		SharedPtr<Material> m_defaultMaterial[3];
 		MaterialBlockData m_defaultMaterialBlock[3];
 		SharedPtr<Entity> m_editorEntity;
 		SharedPtr<CameraComponent> m_editorCamera;
@@ -238,7 +238,6 @@ namespace vks
 		SharedPtr<Model> m_testModel;
 		glm::vec4 m_lightPos;
 		float m_lightPosAngle;
-
 
 		struct DebugOverlay
 		{

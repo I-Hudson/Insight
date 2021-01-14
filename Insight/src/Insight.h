@@ -24,6 +24,9 @@
 
 #include "Insight/Model/Model.h"
 #include "Insight/Model/Mesh.h"
+#include "Insight/Renderer/Texture.h"
+#include "Insight/Renderer/Material.h"
+
 #include "Insight/Scene/Scene.h"
 #include "Insight/Entitiy/Entity.h"
 

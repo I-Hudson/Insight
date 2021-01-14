@@ -18,7 +18,7 @@ namespace Insight
 				auto modelPtr = Library::ModelLibrary::Instance()->GetAssetFromPath(component.GetMeshName());
 				if (modelPtr)
 				{
-					component.SetMesh(modelPtr->GetSubMesh(0));
+					component.SetMesh(modelPtr->GetMesh());
 				}
 			}
 		}
