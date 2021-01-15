@@ -228,6 +228,7 @@
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanDebug.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h" />
+    <ClInclude Include="src\Platform\Vulkan\VulkanFrameBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanHeader.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanImGUIRenderer.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanInitializers.h" />
@@ -706,6 +707,7 @@
     <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\VulkanFrameBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanMaterial.cpp" />

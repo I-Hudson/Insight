@@ -61,7 +61,7 @@ namespace Insight
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
 
-		assertModule->Deserialize();
+		//assertModule->Deserialize();
 	}
 
 	Application::~Application()

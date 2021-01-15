@@ -147,6 +147,7 @@ namespace vks
 
 		DestroyCommandBuffers();
 
+		m_frameBuffer.~VulkanFrameBuffer();
 		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
 		{
 			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
@@ -666,14 +667,14 @@ namespace vks
 		{
 			// Set target frame buffer
 			renderPassBeginInfo.framebuffer = m_frameBuffers[i];
-		
+
 			ThrowIfFailed(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
-		
+
 			vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-		
+
 			VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
 			vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
-		
+
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
 
@@ -707,9 +708,8 @@ namespace vks
 			}
 
 			imgui->Render(m_drawCmdBuffers[i]);
-		
+
 			vkCmdEndRenderPass(m_drawCmdBuffers[i]);
-		
 			ThrowIfFailed(vkEndCommandBuffer(m_drawCmdBuffers[i]));
 		}
 	}
@@ -782,6 +782,14 @@ namespace vks
 			attachments[0] = m_swapchain.GetImageView(i);
 			ThrowIfFailed(vkCreateFramebuffer(m_device, &frameBufferCreateInfo, nullptr, &m_frameBuffers[i]));
 		}
+
+		m_frameBuffer.SetRect((uint32_t)Insight::Window::GetWidth(), (uint32_t)Insight::Window::GetHeight());
+		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Colour");
+		VkFormat attDepthFormat;
+		vks::getSupportedDepthFormat(m_physicalDevice, &attDepthFormat);
+		IS_CORE_ASSERT(attDepthFormat, "[VulkanRenderer::SetupFrameBuffer] Must have a valid depth format.");
+		m_frameBuffer.CreateAttachment(attDepthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, "Depth");
+		m_frameBuffer.CreateRenderPass();
 	}
 
 	void VulkanRenderer::SetupRenderPass()

@@ -8,6 +8,7 @@
 #include "VulkanDevice.h"
 #include "Swapchain.h"
 #include "VulkanMaterial.h"
+#include "VulkanFrameBuffer.h"
 
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Threading/Threadpool.hpp"
@@ -138,6 +139,7 @@ namespace vks
 
 	private:
 		bool m_recordCommandBuffers;
+		VulkanFrameBuffer m_frameBuffer;
 
 		std::vector<ThreadData> m_threadData;
 		// Multi threaded stuff
@@ -205,6 +207,7 @@ namespace vks
 		std::vector<VkCommandBuffer> m_drawCmdBuffers;
 		// Pirmary Command buffers used for rendering
 		VkCommandBuffer m_primaryCommandBuffer;
+
 		struct
 		{
 			VkCommandBuffer UI;
