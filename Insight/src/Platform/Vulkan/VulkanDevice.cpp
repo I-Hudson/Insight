@@ -13,6 +13,7 @@ namespace vks
 	* @param m_physicalDevice Physical device that is to be used
 	*/
 	VulkanDevice::VulkanDevice(VkPhysicalDevice m_physicalDevice)
+		: m_renderPass(nullptr)
 	{
 		assert(m_physicalDevice);
 		this->m_physicalDevice = m_physicalDevice;
@@ -66,7 +67,7 @@ namespace vks
 		{
 			vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
 		}
-		vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
+		//vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 		if (m_logicalDevice)
 		{
 			vkDestroyDevice(m_logicalDevice, nullptr);
@@ -716,9 +717,11 @@ namespace vks
 		return vkDeviceWaitIdle(m_logicalDevice);
 	}
 
-	void VulkanDevice::CreateRenderpass()
+	void VulkanDevice::SetRenderPass(VkRenderPass renderPass, const RenderPassInfo& renderPassInfo)
 	{
-
+		IS_CORE_ASSERT(!m_renderPass, "[VulkanDevice::SetRenderPass] RenderPass should only be set once from VulkanRenderer.");
+		m_renderPass = renderPass;
+		m_renderPassInfo = renderPassInfo;
 	}
 
 	void VulkanDevice::CreateDescriptorPool()

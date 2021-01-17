@@ -165,10 +165,10 @@ namespace Insight
 		{
 			switch (ShaderType)
 			{
-				case Insight::ShaderType::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
-				case Insight::ShaderType::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
-				case Insight::ShaderType::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
-				case Insight::ShaderType::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+			case Insight::ShaderType::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
+			case Insight::ShaderType::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
+			case Insight::ShaderType::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
+			case Insight::ShaderType::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
 			return VK_SHADER_STAGE_ALL;
 		}
@@ -177,23 +177,29 @@ namespace Insight
 		{
 			switch (type)
 			{
-				case ShaderAttributeType::Int: return VK_FORMAT_R32_SINT;
-				case ShaderAttributeType::Float: return VK_FORMAT_R32_SFLOAT;
-				case ShaderAttributeType::Double: return VK_FORMAT_R32_SFLOAT;
-				case ShaderAttributeType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
-				case ShaderAttributeType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
-				case ShaderAttributeType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-				case ShaderAttributeType::IVec2: return VK_FORMAT_R32G32_SINT;
-				case ShaderAttributeType::IVec3: return VK_FORMAT_R32G32B32_SINT;
-				case ShaderAttributeType::IVec4: return VK_FORMAT_R32G32B32A32_SINT;
+			case ShaderAttributeType::Int: return VK_FORMAT_R32_SINT;
+			case ShaderAttributeType::Float: return VK_FORMAT_R32_SFLOAT;
+			case ShaderAttributeType::Double: return VK_FORMAT_R32_SFLOAT;
+			case ShaderAttributeType::Vec2: return VK_FORMAT_R32G32_SFLOAT;
+			case ShaderAttributeType::Vec3: return VK_FORMAT_R32G32B32_SFLOAT;
+			case ShaderAttributeType::Vec4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+			case ShaderAttributeType::IVec2: return VK_FORMAT_R32G32_SINT;
+			case ShaderAttributeType::IVec3: return VK_FORMAT_R32G32B32_SINT;
+			case ShaderAttributeType::IVec4: return VK_FORMAT_R32G32B32A32_SINT;
 			}
 			return VK_FORMAT_R32G32B32A32_SFLOAT;
 		}
+
 
 		std::vector<VkVertexInputBindingDescription> VertexInputBinding;
 		std::vector<VkVertexInputAttributeDescription> VertexInputAttribute;
 		VkPipelineVertexInputStateCreateInfo GetVertexInputState()
 		{
+			if (InAttri.Attributes.size() == 0)
+			{
+				return vks::initializers::pipelineVertexInputStateCreateInfo();
+			}
+
 			VkVertexInputBindingDescription inputBinding;
 			inputBinding.binding = 0;
 			inputBinding.stride = InAttri.Size;
@@ -205,7 +211,6 @@ namespace Insight
 			{
 				VertexInputAttribute.push_back(vks::initializers::vertexInputAttributeDescription(0, in.Location, GetVulkanFormatType(in.Type), in.Stride));
 			}
-
 			return vks::initializers::pipelineVertexInputStateCreateInfo(VertexInputBinding, VertexInputAttribute);
 		}
 	};

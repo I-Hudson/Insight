@@ -457,6 +457,23 @@ namespace vks
 			return pipelineColorBlendAttachmentState;
 		}
 
+		inline std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentState(
+			VkColorComponentFlags colorWriteMask,
+			VkBool32 blendEnable, 
+			const U32& size)
+		{
+			std::vector<VkPipelineColorBlendAttachmentState> states;
+			states.reserve(size);
+			for (size_t i = 0; i < size; ++i)
+			{
+				VkPipelineColorBlendAttachmentState state{};
+				state.colorWriteMask = colorWriteMask;
+				state.blendEnable = blendEnable;
+				states.push_back(state);
+			}
+			return states;
+		}
+
 		inline VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
 			uint32_t attachmentCount,
 			const VkPipelineColorBlendAttachmentState* pAttachments)

@@ -11,13 +11,19 @@
 SubMesh::SubMesh()
 	: Insight::UUID()
 	, m_created(false)
-{ }
+{
+	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+}
 
 SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	: Insight::UUID()
 	, m_created(false)
 {
 	IS_PROFILE_FUNCTION();
+
+	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
 
 	Create(vertices, indices);
 }
@@ -48,9 +54,6 @@ void SubMesh::Create(const std::vector<Vertex>& vertices, const std::vector<unsi
 		m_indices = indices;
 	}
 
-	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-
 	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
 	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
 }
@@ -62,6 +65,26 @@ void SubMesh::Draw(VkCommandBuffer commandBuffer)
 	vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer->buffer, 0, VK_INDEX_TYPE_UINT32);
 
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
+}
+
+void SubMesh::SetVertices(const std::vector<Vertex>& vertices)
+{
+	m_vertices = vertices;
+}
+
+void SubMesh::SetIndices(const std::vector<unsigned int>& indices)
+{
+	m_indices = indices;
+}
+
+void SubMesh::Rebuild()
+{
+	m_vertexBuffer->Destroy();
+	m_indexBuffer->Destroy();
+
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
+
 }
 
 std::vector<Vertex> SubMesh::GetVertices()

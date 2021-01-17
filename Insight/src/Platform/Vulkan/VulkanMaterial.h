@@ -41,6 +41,8 @@ struct MaterialTexture
 
 namespace vks
 {
+	struct RenderPassInfo;
+
 	class IS_API VulkanMaterial : public Material
 	{
 	public:
@@ -48,7 +50,7 @@ namespace vks
 		virtual ~VulkanMaterial() override;
 
 		virtual void CreateDefault() override;
-		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass);
+		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, const RenderPassInfo& renderPassInfo);
 		void Destroy();
 
 		virtual void Update() override;
@@ -56,6 +58,7 @@ namespace vks
 
 		virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) override;
 		virtual void UploadTexture(const std::string& key, WeakPtr<Insight::Render::Texture> texture) override;
+		virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format) override;
 
 	private:
 		void SetupUniformBuffers();
@@ -74,6 +77,7 @@ namespace vks
 		std::unordered_map<std::string, MaterialUniformBuffer> m_uniformBuffers;
 		std::unordered_map<std::string, MaterialTexture> m_uniformTextures;
 
+		bool updated = false;
 		bool m_init;
 		std::vector<Insight::ParsedShadeData> m_shaderData;
 		

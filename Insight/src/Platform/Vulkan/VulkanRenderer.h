@@ -9,6 +9,7 @@
 #include "Swapchain.h"
 #include "VulkanMaterial.h"
 #include "VulkanFrameBuffer.h"
+#include "Insight/Model/Mesh.h"
 
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "Insight/Threading/Threadpool.hpp"
@@ -70,6 +71,7 @@ namespace vks
 		VkViewport GetViewPort() { return m_viewPort; }
 		/** @brief Return the default view port */
 		VkRect2D GetScissor() { return m_scissor; }
+		VkRenderPass GetPresentRenderPass() { return m_presentRenderPass; }
 
 	private:
 		void Prepare();
@@ -78,6 +80,8 @@ namespace vks
 		void CreateCommandBuffers();
 		void DestroyCommandBuffers();
 		void CreateCommandPool();
+		void SetupScreenRender();
+		void SetupPresentRenderPass();
 
 		void CreateSynchronizationPrimitives();
 
@@ -85,12 +89,11 @@ namespace vks
 		virtual VkResult CreateInstance(bool enableValidation);
 		/** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
 		virtual void BuildCommandBuffers();
+		virtual void BuildPresentBuffers();
 		/** @brief (Virtual) Setup default depth and stencil views */
 		virtual void SetupDepthStencil();
 		/** @brief (Virtual) Setup default framebuffers for all requested swapchain images */
 		virtual void SetupFrameBuffer();
-		/** @brief (Virtual) Setup a default renderpass */
-		virtual void SetupRenderPass();
 		/** @brief (Virtual) Called after the physical device features have been read, can be used to set features to enable on the device */
 		virtual void GetEnabledFeatures();
 
@@ -204,7 +207,16 @@ namespace vks
 		VkPipelineStageFlags m_submitPipelineStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		// Contains command buffers and semaphores to be presented to the queue
 		VkSubmitInfo m_submitInfo;
-		std::vector<VkCommandBuffer> m_drawCmdBuffers;
+
+		// Present 
+		std::vector<VkCommandBuffer> m_presentCmdBuffers;
+		// List of available frame buffers (same as number of swap chain images)
+		std::vector<VkFramebuffer> m_presentFrameBuffers;
+		SharedPtr<Material> m_presentMaterials[MAX_FRAMES_IN_FLIGHT];
+		SharedPtr<Mesh> m_presentMeshes[MAX_FRAMES_IN_FLIGHT];
+		VkRenderPass m_presentRenderPass;
+
+		VkCommandBuffer m_frameBufferCmdBuffer;
 		// Pirmary Command buffers used for rendering
 		VkCommandBuffer m_primaryCommandBuffer;
 
@@ -212,8 +224,6 @@ namespace vks
 		{
 			VkCommandBuffer UI;
 		} m_secondaryCommandBuffers;
-		// List of available frame buffers (same as number of swap chain images)
-		std::vector<VkFramebuffer> m_frameBuffers;
 		uint32_t m_imageIndex = 0;
 		uint32_t m_currentFrame = 0;
 		// List of shader modules created (stored for cleanup)
@@ -225,8 +235,10 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-		SharedPtr<Material> m_defaultMaterial[3];
-		MaterialBlockData m_defaultMaterialBlock[3];
+
+
+
+
 		SharedPtr<Entity> m_editorEntity;
 		SharedPtr<CameraComponent> m_editorCamera;
 

@@ -23,6 +23,10 @@ class Mesh : public Insight::Object
 public:
 	~Mesh();
 
+	void SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIndex = 0);
+	void SetIndices(const std::vector<U32>& indices, const U32& submeshIndex = 0);
+	void Rebuild();
+
 	// Getters for all the values and setters.
 	const std::string& GetMeshName() const { return m_meshName; }
 	const U32& GetMeshSubCount() { return static_cast<U32>(m_subMeshes.size()); }

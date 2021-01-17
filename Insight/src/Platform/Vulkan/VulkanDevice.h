@@ -3,10 +3,12 @@
 #include "Insight/Core/Core.h"
 #include "VulkanHeader.h"
 #include "VulkanBuffer.h"
+#include "VulkanFrameBuffer.h"
 
 namespace vks
 {
 	class VulkanRenderer;
+	struct RenderPassInfo;
 
 	class IS_API VulkanDevice : public Insight::TSingleton<VulkanDevice>
 	{
@@ -35,6 +37,7 @@ namespace vks
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 		VkPhysicalDeviceProperties GetProperties() { return m_properties; }
 		VkPhysicalDeviceFeatures GetFeatures() { return m_features; }
+		VkFormat GetSwapchainFormat() { return m_swapChainFormat; }
 
 		void CheckIdleQueue();
 
@@ -43,15 +46,16 @@ namespace vks
 		VkResult WaitForIdle();
 
 		/** @brief Return the default render pass */
-		VkRenderPass& GetRenderPass() { return m_renderPass; }
+		VkRenderPass GetRenderPass() { return m_renderPass; }
+		const RenderPassInfo& GetRenderPassInfo() { return m_renderPassInfo; }
 		/** @brief Return the default descriptor pool */
-		VkDescriptorPool& GetDescriptorPool() { return m_descriptorPool; }
+		VkDescriptorPool GetDescriptorPool() { return m_descriptorPool; }
 
 		VkDevice operator* () {return m_logicalDevice; }
 		operator VkDevice() const { return m_logicalDevice; };
 
 	private:
-		void CreateRenderpass();
+		void SetRenderPass(VkRenderPass renderPass, const RenderPassInfo& renderPassInfo);
 		void CreateDescriptorPool();
 
 	private:
@@ -76,8 +80,12 @@ namespace vks
 		/** @brief Set to true when the debug marker extension is detected */
 		bool m_enableDebugMarkers = false;
 
-		// Global render pass for frame buffer writes
+		// Global render pass for frame buffer writes. Theses are populated from VulkanRenderer and are the default 
+		// objects to use when rendering. They are used from VulkanMaterial::CreateDefault.
 		VkRenderPass m_renderPass;
+		RenderPassInfo m_renderPassInfo;
+		VkFormat m_swapChainFormat;
+
 		// Descriptor set pool
 		VkDescriptorPool m_descriptorPool = VK_NULL_HANDLE;
 
@@ -103,7 +111,7 @@ namespace vks
 			VkQueue transfer;
 		}m_queueFamily;
 
-		friend VulkanRenderer;
+		friend class VulkanRenderer;
 	};
 }
 #endif

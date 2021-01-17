@@ -15,14 +15,9 @@ namespace Insight
 
 	Object::~Object()
 	{
-		for (auto it = m_onDestroyCallbacks.begin(); it != m_onDestroyCallbacks.end(); ++it)
+		for (auto& it : m_onDestroyCallbacks)
 		{
-			it->second(this);
-
-			if (m_onDestroyCallbacks.empty())
-			{
-				break;
-			}
+			it.second(this);
 		}
 		m_onDestroyCallbacks.clear();
 

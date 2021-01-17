@@ -35,7 +35,6 @@ project "InsightEditor"
         "%{IncludeDir.IconsFontAwesome}",
 	}
 
-
     links 
 	{ 
         "Insight",

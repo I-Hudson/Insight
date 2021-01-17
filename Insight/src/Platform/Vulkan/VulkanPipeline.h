@@ -18,15 +18,16 @@ enum class PolygonMode
 namespace vks
 {
 	class VulkanDevice;
+	struct RenderPassInfo;
 
 	class VulkanPipeline
 	{
 	public:
 		VulkanPipeline();
-		VulkanPipeline(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass);
+		VulkanPipeline(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, const RenderPassInfo& renderPassInfo);
 		~VulkanPipeline();
 
-		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData);
+		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
 
 		void Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint);
 
@@ -37,7 +38,7 @@ namespace vks
 	private:
 		void CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
 		void CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
-		void CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData);
+		void CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
 
 		std::vector<uint32_t> CompileGLSL(const std::string& fileName);
 

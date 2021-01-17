@@ -25,6 +25,7 @@ namespace vks
 	private:
 		virtual void Init(SharedPtr<Insight::Renderer> renderer) override;
 		void InitResources();
+		void SetupImGuiRenderPass();
 		void SetStyle();
 
 		void WindowResize(Insight::Event const& event);
@@ -49,5 +50,6 @@ namespace vks
 		VkDescriptorSetLayout descriptorSetLayout;
 		VkDescriptorSet       descriptorSet;
 		SharedPtr<vks::VulkanDevice> device;
+		VkRenderPass			renderPass;
 	};
 }

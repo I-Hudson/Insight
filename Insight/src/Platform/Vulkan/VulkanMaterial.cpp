@@ -2,6 +2,7 @@
 #include "VulkanMaterial.h"
 #include "VulkanDevice.h"
 #include "VulkanTexture.h"
+#include "VulkanFrameBuffer.h"
 
 namespace vks
 {
@@ -23,12 +24,12 @@ namespace vks
 		{
 			m_shaderData.push_back(Insight::ShaderParser::ParseShader(shader));
 		}
-		m_pipeline.Create(m_device, shaders, m_device->GetRenderPass(), m_shaderData);
+		m_pipeline.Create(m_device, shaders, m_device->GetRenderPass(), m_shaderData, m_device->GetRenderPassInfo());
 
 		SetupUniformBuffers();
 	}
 
-	void VulkanMaterial::Create(VulkanDevice* device, const std::vector<std::string>& shaders, VkRenderPass& renderPass)
+	void VulkanMaterial::Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, const RenderPassInfo& renderPassInfo)
 	{
 		m_init = true;
 		m_device = device;
@@ -36,7 +37,7 @@ namespace vks
 		{
 			m_shaderData.push_back(Insight::ShaderParser::ParseShader(shader));
 		}
-		m_pipeline.Create(device, shaders, renderPass, m_shaderData);
+		m_pipeline.Create(device, shaders, renderPass, m_shaderData, renderPassInfo);
 
 		SetupUniformBuffers();
 	}
@@ -140,6 +141,18 @@ namespace vks
 				m_uniformTextures[key].ImageInfo.imageLayout = vTex->GetImageLayout();
 			}
 		}
+	}
+
+	void VulkanMaterial::UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format)
+	{
+		if (m_uniformTextures.find(key) == m_uniformTextures.end())
+		{
+			return;
+		}
+
+		m_uniformTextures[key].ImageInfo.imageView = static_cast<VkImageView>(imageView);
+		m_uniformTextures[key].ImageInfo.sampler = static_cast<VkSampler>(sampler);
+		m_uniformTextures[key].ImageInfo.imageLayout = static_cast<VkImageLayout>(format);
 	}
 
 	void VulkanMaterial::SetupUniformBuffers()
@@ -267,6 +280,7 @@ namespace vks
 			}
 		}
 
+		updated = true;
 		vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(writesSets.size()), writesSets.data(), 0, nullptr);
 	}
 
@@ -372,6 +386,13 @@ namespace vks
 			if (std::find(sets.begin(), sets.end(), ubo.second.Set) == sets.end())
 			{
 				sets.push_back(ubo.second.Set);
+			}
+		}
+		for (auto& texSet : m_uniformTextures)
+		{
+			if (std::find(sets.begin(), sets.end(), texSet.second.Set) == sets.end())
+			{
+				sets.push_back(texSet.second.Set);
 			}
 		}
 		return sets;

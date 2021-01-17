@@ -63,7 +63,7 @@ namespace Insight
 			// Register remove from RTTI when object is destroyed.
 			ownerObject->RegisterOnDestroyCallback(this, [&](Object* objectPtr)
 				{
-					objectPtr->UnregisterOnDestroyCallback(this);
+					//objectPtr->UnregisterOnDestroyCallback(this);
 					RTTI::Instance()->UnregisterAllProperty(objectPtr);
 				});
 		}

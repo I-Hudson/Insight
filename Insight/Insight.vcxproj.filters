@@ -34,6 +34,9 @@
     <Filter Include="src\Insight\Instrumentor">
       <UniqueIdentifier>{FB450404-E76A-5384-10B6-3814FC3952A2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Instrumentor\Vulkan">
+      <UniqueIdentifier>{1B6B7F2D-874E-8E6D-9051-BCA9FCB354BE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Library">
       <UniqueIdentifier>{766A7DBF-E2CB-5ACD-6B39-A17FD799918C}</UniqueIdentifier>
     </Filter>
@@ -343,6 +346,9 @@
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VulkanFrameBuffer.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanHeader.h">
@@ -1629,7 +1635,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanFrameBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Insight\Component\CameraComponent.cpp">
@@ -1670,6 +1675,9 @@
     </ClCompile>
     <ClCompile Include="src\Insight\Input\Input.cpp">
       <Filter>src\Insight\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Instrumentor\Vulkan\VulkanRendererEditorOverlay.cpp">
+      <Filter>src\Insight\Instrumentor\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Library\ModelLibrary.cpp">
       <Filter>src\Insight\Library</Filter>
@@ -1776,6 +1784,9 @@
     <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VulkanFrameBuffer.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
@@ -1803,6 +1814,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanFrameBuffer.cpp" />
   </ItemGroup>
 </Project>

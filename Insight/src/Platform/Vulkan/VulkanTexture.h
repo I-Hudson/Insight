@@ -12,10 +12,11 @@ namespace vks
 
 		virtual void Init(void* textureData, const U32& textureDataSize, const U32& width, const U32& height, const U32& channels) override;
 
-		VkImage GetImage() const { return m_image; }
-		VkImageView GetImageView() const { return m_imageView; }
-		VkSampler GetSampler() const { return m_sampler; }
-		VkImageLayout GetImageLayout() const { return m_imageLayout; }
+		VkImage& GetImage() { return m_image; }
+		VkImageView& GetImageView() { return m_imageView; }
+		VkSampler& GetSampler() { return m_sampler; }
+		VkImageLayout& GetImageLayout() { return m_imageLayout; }
+		VkDeviceMemory& GetDeviceMemory() { return m_deviceMemory; }
 
 	private:
 		VkImage m_image;

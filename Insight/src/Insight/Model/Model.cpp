@@ -70,13 +70,25 @@ const std::string& Model::GetModelName() const
 
 void Model::SetMaterials(const std::vector<std::pair<std::string, SharedPtr<Texture>>>& textures)
 {
-	for (auto& tex : textures)
-	{
-		m_textures.push_back(tex.second);
-
 		SharedPtr<Material> material = Material::Create();
 		material->CreateDefault();
-		material->UploadTexture(tex.first, tex.second);
 		m_materials.push_back(material);
-	}
+		int texturesSet = 0;
+
+		for (auto& tex : textures)
+		{
+			m_textures.push_back(tex.second);
+			material->UploadTexture(tex.first, tex.second);
+			if (tex.first == "texture_diffuse")
+			{
+				texturesSet = 1;
+			}
+			else
+			{
+				IS_CORE_INFO("");
+			}
+		}
+		MaterialBlockData mbd;
+		material->UploadUniform("TextureLookup", &texturesSet, sizeof(int), mbd);
+		material->Update();
 }

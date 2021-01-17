@@ -26,6 +26,7 @@
 [submodule "Insight/vendor/IconFontCppHeaders"]
 	path = Insight/vendor/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders
-[submodule "Insight/vendor/shaderc"]
-	path = Insight/vendor/shaderc
-	url = https://github.com/google/shaderc
+[submodule "Insight/vendor/glslang"]
+	path = Insight/vendor/glslang
+	url = https://github.com/KhronosGroup/glslang
+	branch = master

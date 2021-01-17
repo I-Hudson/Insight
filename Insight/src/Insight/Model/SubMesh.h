@@ -30,6 +30,10 @@ public:
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
 	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
 
+	void SetVertices(const std::vector<Vertex>& vertices);
+	void SetIndices(const std::vector<unsigned int>& indices);
+	void Rebuild();
+
 	// Returns a new array of vertices.
 	std::vector<Vertex> GetVertices();
 	// Returns a new array of colours.

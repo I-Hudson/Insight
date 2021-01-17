@@ -19,6 +19,44 @@ Mesh::~Mesh()
 	m_subMeshes.clear();
 }
 
+void Mesh::SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIndex)
+{
+	SharedPtr<SubMesh> subMesh;
+	if (submeshIndex >= m_subMeshes.size())
+	{
+		subMesh = CreateSharedPtr<SubMesh>();
+		m_subMeshes.push_back(subMesh);
+	}
+	else
+	{
+		subMesh = m_subMeshes.at(submeshIndex);
+	}
+	subMesh->SetVertices(vertices);
+}
+
+void Mesh::SetIndices(const std::vector<U32>& indices, const U32& submeshIndex)
+{
+	SharedPtr<SubMesh> subMesh;
+	if (submeshIndex >= m_subMeshes.size())
+	{
+		subMesh = CreateSharedPtr<SubMesh>();
+		m_subMeshes.push_back(subMesh);
+	}
+	else
+	{
+		subMesh = m_subMeshes.at(submeshIndex);
+	}
+	subMesh->SetIndices(indices);
+}
+
+void Mesh::Rebuild()
+{
+	for (auto& subMesh : m_subMeshes)
+	{
+		subMesh->Rebuild();
+	}
+}
+
 void Mesh::Draw(VkCommandBuffer cmd)
 {
 	for (auto& mesh : m_subMeshes)
@@ -40,7 +78,7 @@ void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materi
 		{
 			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
 			auto vMaterialSP = DynamicPointerCast<vks::VulkanMaterial>(materialSP);
-			vMaterialSP->Update();
+			//vMaterialSP->Update();
 			vMaterialSP->Bind(cmd, &materialBlockData);
 			m_subMeshes.at(i)->Draw(cmd);
 		}
@@ -180,5 +218,11 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 			//m_loadedTextures.push_back(texture); // add to loaded textures
 		}
 	}
+
+	if (textures.size() == 0)
+	{
+		textures.emplace_back(typeName, Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Texture>("./data/shaders/undefinedTexture.png"));
+	}
+
 	return textures;
 }

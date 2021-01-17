@@ -72,7 +72,9 @@ namespace Insight
 			, m_texHeight(0)
 			, m_texDepth(0)
 			, m_texChannels(0)
-		{ }
+		{
+			m_gpuData = TextureGPUData::Create();
+		}
 
 		Texture::Texture(std::string const& filePath)
 			: m_textureId(0)

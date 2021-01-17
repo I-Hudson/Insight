@@ -24,7 +24,9 @@ namespace vks
 
 			vkDestroyFramebuffer(*device, m_frameBuffer, nullptr);
 			vkDestroyRenderPass(*device, m_renderPass, nullptr);
-			vkDestroySemaphore(*device, m_semaphore, nullptr);
+			vkDestroySemaphore(*device, m_readySemaphore, nullptr);
+			vkDestroySemaphore(*device, m_finishedSemaphore, nullptr);
+			vkDestroyFence(*device, m_fence, nullptr);
 			m_destroyed = true;
 		}
 	}
@@ -96,41 +98,45 @@ namespace vks
 
 	void VulkanFrameBuffer::CreateRenderPass()
 	{
-		const U32 attachmentsSize = m_attachmnets.size();
+		auto device = VulkanDevice::Instance();
 		// Set up separate renderpass with references to the color and depth attachments
-		std::vector<VkAttachmentDescription> attachmentDescs;
-		std::vector<VkImageView> attachmentsViews;
-		attachmentDescs.resize(attachmentsSize);
-		attachmentsViews.resize(attachmentsSize);
-
-		std::vector<VkAttachmentReference> colorReferences;
-		VkAttachmentReference depthReference = {};
+		std::array<VkAttachmentDescription, 4> attachmentDescs = {};
 
 		// Init attachment properties
-		for (uint32_t i = 0; i < attachmentsSize; ++i)
+		for (uint32_t i = 0; i < 4; ++i)
 		{
 			attachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
 			attachmentDescs[i].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
 			attachmentDescs[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 			attachmentDescs[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 			attachmentDescs[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-			if (m_attachmnets[i].ImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+			if (i == 3)
 			{
 				attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-				depthReference.attachment = i;
-				depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 			}
 			else
 			{
 				attachmentDescs[i].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				attachmentDescs[i].finalLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-				colorReferences.push_back({ i, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 			}
-
-			attachmentDescs[i].format = m_attachmnets[i].Format;
-			attachmentsViews[i] = m_attachmnets[i].ImageView;
 		}
+
+		// Formats
+		attachmentDescs[0].format = m_attachmnets[0].Format;
+		attachmentDescs[1].format = m_attachmnets[1].Format;
+		attachmentDescs[2].format = m_attachmnets[2].Format;
+		attachmentDescs[3].format = m_attachmnets[3].Format;
+
+		std::vector<VkAttachmentReference> colorReferences;
+		colorReferences.push_back({ 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+		colorReferences.push_back({ 1, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+		colorReferences.push_back({ 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
+		m_renderPassInfo.ColorAttachmentCount = 3;
+
+		VkAttachmentReference depthReference = {};
+		depthReference.attachment = 3;
+		depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 		VkSubpassDescription subpass = {};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
@@ -157,8 +163,6 @@ namespace vks
 		dependencies[1].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
 		dependencies[1].dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
 
-		auto device = VulkanDevice::Instance();
-
 		VkRenderPassCreateInfo renderPassInfo = {};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassInfo.pAttachments = attachmentDescs.data();
@@ -169,18 +173,24 @@ namespace vks
 		renderPassInfo.pDependencies = dependencies.data();
 
 		ThrowIfFailed(vkCreateRenderPass(*device, &renderPassInfo, nullptr, &m_renderPass));
-	
+
+		std::array<VkImageView, 4> attachments;
+		attachments[0] = m_attachmnets[0].ImageView;
+		attachments[1] = m_attachmnets[1].ImageView;
+		attachments[2] = m_attachmnets[2].ImageView;
+		attachments[3] = m_attachmnets[3].ImageView;
+
 		VkFramebufferCreateInfo fbufCreateInfo = {};
 		fbufCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		fbufCreateInfo.pNext = NULL;
 		fbufCreateInfo.renderPass = m_renderPass;
-		fbufCreateInfo.pAttachments = attachmentsViews.data();
-		fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachmentsViews.size());
+		fbufCreateInfo.pAttachments = attachments.data();
+		fbufCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		fbufCreateInfo.width = m_width;
 		fbufCreateInfo.height = m_height;
 		fbufCreateInfo.layers = 1;
 		ThrowIfFailed(vkCreateFramebuffer(*device, &fbufCreateInfo, nullptr, &m_frameBuffer));
-	
+
 		// Create sampler to sample from the color attachments
 		VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
 		sampler.magFilter = VK_FILTER_NEAREST;
@@ -198,6 +208,54 @@ namespace vks
 
 		// Create a semaphore used to synchronize offscreen rendering and usage
 		VkSemaphoreCreateInfo semaphoreCreateInfo = vks::initializers::semaphoreCreateInfo();
-		ThrowIfFailed(vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_semaphore));
+		ThrowIfFailed(vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_readySemaphore));
+		ThrowIfFailed(vkCreateSemaphore(*device, &semaphoreCreateInfo, nullptr, &m_finishedSemaphore));
+
+		VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
+		ThrowIfFailed(vkCreateFence(*device, &fenceCreateInfo, nullptr, &m_fence));
+	}
+
+	const FrameBufferAttachment& VulkanFrameBuffer::GetAttachment(const std::string& attachmentName)
+	{
+		for (auto& attachment : m_attachmnets)
+		{
+			if (attachment.Name == attachmentName)
+			{
+				return attachment;
+			}
+		}
+		return FrameBufferAttachment();
+	}
+
+	std::vector<VkClearValue> VulkanFrameBuffer::GetClearAttachments()
+	{
+		std::vector<VkClearValue> clearColors;
+		clearColors.resize(m_attachmnets.size());
+
+		int i = 0;
+		for (auto& cc : clearColors)
+		{
+			if (m_attachmnets[i++].ImageLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+			{
+				cc.depthStencil = { 1.0f, 0 };
+			}
+			else
+			{
+				cc.color = VkClearColorValue{ 0.15f, 0.15f, 1.0f, 1.0f };
+			}
+		}
+		return clearColors;
+	}
+
+	void VulkanFrameBuffer::WaitForFence()
+	{
+		auto device = VulkanDevice::Instance();
+		vkWaitForFences(*device, 1, &m_fence, VK_TRUE, U64_MAX);
+	}
+
+	void VulkanFrameBuffer::ResetFence()
+	{
+		auto device = VulkanDevice::Instance();
+		vkResetFences(*device, 1, &m_fence);
 	}
 }

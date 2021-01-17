@@ -35,7 +35,6 @@ project "Insight"
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",
-        "%{IncludeDir.Vulkan}",
         "%{IncludeDir.glm}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.TinyXML2}",
@@ -44,6 +43,9 @@ project "Insight"
         "%{IncludeDir.tinygltf}",
         "%{IncludeDir.ktx}",
         "%{IncludeDir.IconsFontAwesome}",
+
+        "%{IncludeDir.shaderc}",
+        "%{IncludeDir.Vulkan}",
 	}
 
     sysincludedirs 
@@ -53,9 +55,11 @@ project "Insight"
 
     libdirs
     {
-        "%{LibDirs.Vulkan}",
         "%{LibDirs.optick}",
         "%{LibDirs.ktx}",
+
+        "%{LibDirs.shaderc}",
+        "%{LibDirs.Vulkan}",
 	}
 
     links 
@@ -66,8 +70,8 @@ project "Insight"
 
         "OptickCore",
         "ktx",
-        "shaderc_combined",
         "vulkan-1",
+        "shaderc_combined",
 	}
 
     filter "system:windows"

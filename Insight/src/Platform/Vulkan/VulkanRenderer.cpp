@@ -142,15 +142,16 @@ namespace vks
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			m_defaultMaterial[i].reset();
+			m_presentMaterials[i].reset();
+			m_presentMeshes[i].reset();
 		}
 
 		DestroyCommandBuffers();
 
 		m_frameBuffer.~VulkanFrameBuffer();
-		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		for (uint32_t i = 0; i < m_presentFrameBuffers.size(); i++)
 		{
-			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
+			vkDestroyFramebuffer(m_device, m_presentFrameBuffers[i], nullptr);
 		}
 		
 		for (auto& shaderModule : m_shaderModules)
@@ -177,12 +178,13 @@ namespace vks
 			vkFreeCommandBuffers(m_device, thread.commandPool, static_cast<uint32_t>(thread.commandBuffer.size()), thread.commandBuffer.data());
 			vkDestroyCommandPool(m_device, thread.commandPool, nullptr);
 		}
+		vkDestroyRenderPass(m_device, m_presentRenderPass, nullptr);
 
 		IS_PROFILE_GPUI_SHUTDOWN();
 
 		m_vulkanDevice.reset();
 
-		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			vks::Debug::FreeDebugCallback(m_instance);
 		}
@@ -203,7 +205,7 @@ namespace vks
 		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
-			// For validating (debugging) an application the error and warning bits should suffice
+			// For validating (debugging) an application the error and warning bits should sufficeVK_EXT_debug_report
 			VkDebugReportFlagsEXT debugReportFlags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 			// Additional flags include performance info, loader and layer debug messages, etc.
 			vks::Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
@@ -267,6 +269,7 @@ namespace vks
 			IS_CORE_FATEL("Could not create Vulkan device: {0}", vks::errorString(res), res);
 		}
 		m_device = m_vulkanDevice->m_logicalDevice;
+		m_vulkanDevice->m_swapChainFormat = m_swapchain.GetColorFormat();
 
 		// Get a graphics queue from the device
 		vkGetDeviceQueue(m_device, m_vulkanDevice->m_queueFamilyIndices.graphics, 0, &m_queue);
@@ -298,9 +301,9 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		vkWaitForFences(m_device, 1, &m_waitFences[m_currentFrame], VK_TRUE, UINT64_MAX);
+		//vkWaitForFences(m_device, 1, &m_waitFences[0], VK_TRUE, UINT64_MAX);
 
-		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.ImageAquired[m_currentFrame], &m_imageIndex);
+		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.ImageAquired[0], &m_imageIndex);
 		if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR))
 		{
 			WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
@@ -310,14 +313,14 @@ namespace vks
 			ThrowIfFailed(result);
 		}
 
-		if (m_waitImagesFences[m_imageIndex] != VK_NULL_HANDLE)
+		VkFence f = m_frameBuffer.GetFence();
+		if (f != VK_NULL_HANDLE)
 		{
-			vkWaitForFences(m_device, 1, &m_waitImagesFences[m_imageIndex], VK_TRUE, UINT64_MAX);
+			//vkWaitForFences(m_device, 1, &f, VK_TRUE, UINT64_MAX);
 		}
 
-		m_waitImagesFences[m_imageIndex] = m_waitFences[m_currentFrame];
-
-		vkResetFences(m_device, 1, &m_waitFences[m_currentFrame]);
+		//m_waitImagesFences[m_imageIndex] = m_waitFences[0];
+		//vkResetFences(m_device, 1, &f);
 	}
 
 	// This should be moved to a submodule for every type of rendering we are doing.
@@ -329,92 +332,50 @@ namespace vks
 
 		Clear();
 
-		float lerpSpeed = 0.5f;
-		if (m_clearColor.float32[0] < 1.0f)
 		{
-			m_clearColor.float32[0] += lerpSpeed * Insight::Time::GetDeltaTime();
+			IS_PROFILE_SCOPE("Vulkan wait for fence")
+			m_frameBuffer.WaitForFence();
+			m_frameBuffer.ResetFence();
 		}
-		else if (m_clearColor.float32[1] < 1.0f)
-		{
-			m_clearColor.float32[0] = 1.0f;
-			m_clearColor.float32[1] += lerpSpeed * Insight::Time::GetDeltaTime();
-		}
-		else if (m_clearColor.float32[2] < 1.0f)
-		{
-			m_clearColor.float32[1] = 1.0f;
-			m_clearColor.float32[2] += lerpSpeed * Insight::Time::GetDeltaTime();
-		}
-		else
-		{
-			m_clearColor.float32[0] = 0.0f;
-			m_clearColor.float32[1] = 0.0f;
-			m_clearColor.float32[2] = 0.0f;
-		}
-
 		if (true)
 		{
 			BuildCommandBuffers();
-			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
-
-			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
-
-			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
-			submitInfo.pWaitSemaphores = waitSemahores;
-			submitInfo.waitSemaphoreCount = 1;
-
-			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
-			submitInfo.pSignalSemaphores = signalSemahores;
-			submitInfo.signalSemaphoreCount = 1;
-
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &m_drawCmdBuffers[m_imageIndex];
-
-			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
 		}
 		else
 		{
-			UpdateCommandBuffer(m_frameBuffers[m_imageIndex]);
-			VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+			UpdateCommandBuffer(m_presentFrameBuffers[m_imageIndex]);
+		}	
+		BuildPresentBuffers();
 
-			submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
+		// Offscreen rendering
+		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+		submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
 
-			VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
-			submitInfo.pWaitSemaphores = waitSemahores;
-			submitInfo.waitSemaphoreCount = 1;
+		VkSemaphore offscreenWaitSemahores[] = { m_semaphores.ImageAquired[0] };
+		submitInfo.pWaitSemaphores = offscreenWaitSemahores;
+		submitInfo.waitSemaphoreCount = 1;
+		VkSemaphore signalSemahores[] = { m_frameBuffer.GetFinishedSemaphore() };
+		submitInfo.pSignalSemaphores = signalSemahores;
+		submitInfo.signalSemaphoreCount = 1;
 
-			VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
-			submitInfo.pSignalSemaphores = signalSemahores;
-			submitInfo.signalSemaphoreCount = 1;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_frameBufferCmdBuffer;
+		ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_frameBuffer.GetFence()));
 
-			submitInfo.commandBufferCount = 1;
-			submitInfo.pCommandBuffers = &m_primaryCommandBuffer;
-			ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_waitFences[m_currentFrame]));
-		}
+		// Scene rendering
+		// Wait semaphores
+		VkSemaphore waitSemahores[] = { m_frameBuffer.GetFinishedSemaphore() };
+		submitInfo.pWaitSemaphores = waitSemahores;
+		// Signal ready with render complete semaphore
+		signalSemahores[0] = m_semaphores.RenderComplete[0];
+		submitInfo.pSignalSemaphores = signalSemahores;
+		// Submit work
+		submitInfo.pCommandBuffers = &m_presentCmdBuffers[m_currentFrame];
+		ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE));
+
 		Present();
 
 		m_editorEntity->OnUpdate(Insight::Time::GetDeltaTime());
-
-		MVP mvp;
-		mvp.proj = m_editorCamera->GetProjMatrix();
-		mvp.proj[1][1] *= -1;
-		mvp.view = m_editorCamera->GetViewMatrix();
-		mvp.model = m_testModelMatrix;
-
-		m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
-		m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
-		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
-
-		mvp.lightPos = m_lightPos;
-		m_defaultMaterial[m_imageIndex]->UploadUniform("UBO", &mvp, sizeof(MVP), m_defaultMaterialBlock[m_imageIndex]);
-
-		m_debugOverlay.debugOverlay = (int)debugOverlay;
-		m_defaultMaterial[m_imageIndex]->UploadUniform("DEBUGINFO", &m_debugOverlay, sizeof(DebugOverlay), m_defaultMaterialBlock[m_imageIndex]);
-
-		glm::vec4 color{ 0.5f, 0.1f, 0.47f, 1.0f};
-		m_defaultMaterial[m_imageIndex]->UploadUniform("//#dynamic", &color, sizeof(glm::vec4), m_defaultMaterialBlock[m_imageIndex]);
-
-		WeakPtr<Insight::Render::Texture> tex = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Render::Texture>("./data/models/Survival_BackPack_2/diffuse.jpg");
-		m_defaultMaterial[m_imageIndex]->UploadTexture("texSampler;", tex);
 
 		//TODO: Look into this. Maybe change how it works.
 		m_vulkanDevice->CheckIdleQueue();
@@ -424,7 +385,7 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		VkResult result = m_swapchain.QueuePresent(m_queue, m_imageIndex, m_semaphores.RenderComplete[m_currentFrame]);
+		VkResult result = m_swapchain.QueuePresent(m_queue, m_imageIndex, m_semaphores.RenderComplete[0]);
 		if (!((result == VK_SUCCESS) || (result == VK_SUBOPTIMAL_KHR)))
 		{
 			if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -461,16 +422,19 @@ namespace vks
 		CreateCommandBuffers();
 		CreateSynchronizationPrimitives();
 		SetupDepthStencil();
-		SetupRenderPass();
+		SetupPresentRenderPass();
 		SetupFrameBuffer();
+		m_vulkanDevice->SetRenderPass(m_frameBuffer.GetRenderPass(), m_frameBuffer.GetRenderPassInfo());
 		PrepareMultiThreadedRenderer();
 
-		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert",  "./data/shaders/vulkan/default.frag" };
+		std::vector<std::string> shaders = { "./data/shaders/vulkan/present.vert",  "./data/shaders/vulkan/present.frag" };
+		RenderPassInfo renderPassInfo = { 1 };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			m_defaultMaterial[i] = Material::Create();
-			DynamicPointerCast<vks::VulkanMaterial>(m_defaultMaterial[i])->Create(m_vulkanDevice.get(), shaders, m_vulkanDevice->GetRenderPass());
+			m_presentMaterials[i] = Material::Create();
+			DynamicPointerCast<vks::VulkanMaterial>(m_presentMaterials[i])->Create(m_vulkanDevice.get(), shaders, m_presentRenderPass, renderPassInfo);
 		}
+		SetupScreenRender();
 
 		m_editorEntity = Object::CreateObject<Entity>("Editor entity", false);
 		m_editorEntity->AddComponent<TransformComponent>();
@@ -494,28 +458,37 @@ namespace vks
 	void VulkanRenderer::SetupSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), false, false);//(bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
+		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
 	}
 
 	void VulkanRenderer::CreateCommandBuffers()
 	{
 		IS_PROFILE_FUNCTION();
-		// Create one command buffer for each swap chain image and reuse for rendering
-		m_drawCmdBuffers.resize(m_swapchain.GetImageCount());
+		// Create one command buffer for the offscreen rendering
 
 		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
 			vks::initializers::commandBufferAllocateInfo(
 				m_cmdPool,
 				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-				static_cast<uint32_t>(m_drawCmdBuffers.size()));
+				1);
 		
-		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_drawCmdBuffers.data()));
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_frameBufferCmdBuffer));
+
+		m_presentCmdBuffers.resize(m_swapchain.GetImageCount());
+		cmdBufAllocateInfo =
+			vks::initializers::commandBufferAllocateInfo(
+				m_cmdPool,
+				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+				static_cast<U32>(m_presentCmdBuffers.size()));
+
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_presentCmdBuffers.data()));
 	}
 
 	void VulkanRenderer::DestroyCommandBuffers()
 	{
 		IS_PROFILE_FUNCTION();
-		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<uint32_t>(m_drawCmdBuffers.size()), m_drawCmdBuffers.data());
+		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_frameBufferCmdBuffer);
+		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<U32>(m_presentCmdBuffers.size()), m_presentCmdBuffers.data());
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_primaryCommandBuffer);
 	}
 
@@ -527,6 +500,34 @@ namespace vks
 		cmdPoolInfo.queueFamilyIndex = m_swapchain.GetQueuNodeIndex();
 		cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		ThrowIfFailed(vkCreateCommandPool(m_device, &cmdPoolInfo, nullptr, &m_cmdPool));
+	}
+
+	void VulkanRenderer::SetupScreenRender()
+	{
+		std::vector<Vertex> fullScreenQuadV =
+		{
+			Vertex{ {-1,-1,0}, {0,0,0}, {0,0,0,0}, {0,0}},
+			Vertex{ {-1,1,0}, {0,0,0}, {0,0,0,0}, {0,1}},
+			Vertex{ {1,1,0}, {0,0,0}, {0,0,0,0}, {1,1}},
+			Vertex{ {1,-1,0}, {0,0,0}, {0,0,0,0}, {1,0}},
+		};
+		std::vector<U32> fullScreenQuadI = { 0,2,1, 0,3,2 };
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_presentMeshes[i] = Object::CreateObject<Mesh>();
+			m_presentMeshes[i]->SetVertices(fullScreenQuadV);
+			m_presentMeshes[i]->SetIndices(fullScreenQuadI);
+			m_presentMeshes[i]->Rebuild();
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+		{
+			m_presentMaterials[i]->UploadTexture("fullScreenQuadPositionTex", m_frameBuffer.GetAttachment("Position").ImageView, m_frameBuffer.GetSampler(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_presentMaterials[i]->UploadTexture("fullScreenQuadNormalTex", m_frameBuffer.GetAttachment("Normal").ImageView, m_frameBuffer.GetSampler(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_presentMaterials[i]->UploadTexture("fullScreenQuadColorTex", m_frameBuffer.GetAttachment("Color").ImageView, m_frameBuffer.GetSampler(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			//m_presentMaterials[i]->UploadTexture("fullScreenQuadDepthTex", m_frameBuffer.GetAttachment("Depth").ImageView, m_frameBuffer.GetSampler(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_presentMaterials[i]->Update();
+		}
 	}
 
 	void VulkanRenderer::CreateSynchronizationPrimitives()
@@ -585,7 +586,7 @@ namespace vks
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pNext = NULL;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			uint32_t glfwExtensionCount = 0;
 			const char** glfwExtensions;
@@ -603,7 +604,7 @@ namespace vks
 		instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
 		instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 
-		if (true)//(bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
 		{
 			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
 			// Note that on Android this layer requires at least NDK r20
@@ -639,17 +640,75 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		uint32_t width = (uint32_t)Insight::Window::GetWidth();
-		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+
+		auto clearColors = m_frameBuffer.GetClearAttachments();
+		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+		renderPassBeginInfo.renderPass = m_frameBuffer.GetRenderPass() /*m_vulkanDevice->GetRenderPass()*/;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent.width = m_frameBuffer.GetWidth();
+		renderPassBeginInfo.renderArea.extent.height = m_frameBuffer.GetHeight();
+		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
+		renderPassBeginInfo.pClearValues = clearColors.data();
+
+		{
+			// Set target frame buffer
+			renderPassBeginInfo.framebuffer = m_frameBuffer.GetFrameBuffer();
+
+			ThrowIfFailed(vkBeginCommandBuffer(m_frameBufferCmdBuffer, &cmdBufInfo));
+
+			vkCmdBeginRenderPass(m_frameBufferCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+			VkViewport viewport = vks::initializers::viewport(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0.0f, 1.0f);
+			vkCmdSetViewport(m_frameBufferCmdBuffer, 0, 1, &viewport);
+
+			VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
+			vkCmdSetScissor(m_frameBufferCmdBuffer, 0, 1, &scissor);
+
+			// This should be replaced by the mesh components in the scene.
+			MVP mvp;
+			mvp.proj = m_editorCamera->GetProjMatrix();
+			mvp.proj[1][1] *= -1;
+			mvp.view = m_editorCamera->GetViewMatrix();
+			mvp.model = m_testModelMatrix;
+			m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
+			m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
+			m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
+			mvp.lightPos = m_lightPos;
+
+			auto mats = m_testModel->GetMaterals();
+			for (auto& m : mats)
+			{
+				if (auto mSP = m.lock())
+				{
+					MaterialBlockData data;
+					mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
+				}
+			}
+
+			m_testModel->GetMesh().lock()->Draw(m_frameBufferCmdBuffer, m_testModel->GetMaterals(), { });
+
+			vkCmdEndRenderPass(m_frameBufferCmdBuffer);
+			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBuffer));
+		}
+	}
+
+	void VulkanRenderer::BuildPresentBuffers()
+	{
+		IS_PROFILE_FUNCTION();
+
+		U32 width = Insight::Window::GetWidth();
+		U32 height = Insight::Window::GetHeight();
 
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
 		VkClearValue clearValues[2];
-		clearValues[0].color = VkClearColorValue{ 0.15f, 0.15f, 0.15f, 1.0f };
+		clearValues[0].color = VkClearColorValue{ 1.0f, 0.15f, 0.15f, 1.0f };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
-		renderPassBeginInfo.renderPass = m_vulkanDevice->GetRenderPass();
+		renderPassBeginInfo.renderPass = m_presentRenderPass;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = width;
@@ -660,57 +719,29 @@ namespace vks
 		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::Instance());
 		imgui->EndFrame();
 
-		int i = m_imageIndex;
-		m_defaultMaterial[i]->Update();
-
-		//for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
+		int i = m_currentFrame;
 		{
 			// Set target frame buffer
-			renderPassBeginInfo.framebuffer = m_frameBuffers[i];
+			renderPassBeginInfo.framebuffer = m_presentFrameBuffers[i];
 
-			ThrowIfFailed(vkBeginCommandBuffer(m_drawCmdBuffers[i], &cmdBufInfo));
+			ThrowIfFailed(vkBeginCommandBuffer(m_presentCmdBuffers[i], &cmdBufInfo));
 
-			vkCmdBeginRenderPass(m_drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdBeginRenderPass(m_presentCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-			VkViewport viewport = vks::initializers::viewport((float)width, (float)height, 0.0f, 1.0f);
-			vkCmdSetViewport(m_drawCmdBuffers[i], 0, 1, &viewport);
+			VkViewport viewport = vks::initializers::viewport(width, height, 0.0f, 1.0f);
+			vkCmdSetViewport(m_presentCmdBuffers[i], 0, 1, &viewport);
 
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
-			vkCmdSetScissor(m_drawCmdBuffers[i], 0, 1, &scissor);
+			vkCmdSetScissor(m_presentCmdBuffers[i], 0, 1, &scissor);
 
-			// This should be replaced by the mesh components in the scene.
+			DynamicPointerCast<vks::VulkanMaterial>(m_presentMaterials[i])->Bind(m_presentCmdBuffers[i]);
+			// DRAW
+			vkCmdDraw(m_presentCmdBuffers[i], 3, 1, 0, 0);
 
-			//DynamicPointerCast<vks::VulkanMaterial>(m_defaultMaterial[i])->Bind(m_drawCmdBuffers[i], &m_defaultMaterialBlock[i]);
-			if (i == 0)
-			{
-				// NEEDS OFFSCREEN RENDERERING
-				MVP mvp;
-				mvp.proj = m_editorCamera->GetProjMatrix();
-				mvp.proj[1][1] *= -1;
-				mvp.view = m_editorCamera->GetViewMatrix();
-				mvp.model = m_testModelMatrix;
-				m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
-				m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
-				m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
-				mvp.lightPos = m_lightPos;
+			//imgui->Render(m_presentCmdBuffers[i]);
 
-				auto mats = m_testModel->GetMaterals();
-				for (auto& m : mats)
-				{
-					if (auto mSP = m.lock())
-					{
-						MaterialBlockData data;
-						mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
-					}
-				}
-
-				m_testModel->GetMesh().lock()->Draw(m_drawCmdBuffers[i], m_testModel->GetMaterals(), { });
-			}
-
-			imgui->Render(m_drawCmdBuffers[i]);
-
-			vkCmdEndRenderPass(m_drawCmdBuffers[i]);
-			ThrowIfFailed(vkEndCommandBuffer(m_drawCmdBuffers[i]));
+			vkCmdEndRenderPass(m_presentCmdBuffers[i]);
+			ThrowIfFailed(vkEndCommandBuffer(m_presentCmdBuffers[i]));
 		}
 	}
 
@@ -768,7 +799,7 @@ namespace vks
 		VkFramebufferCreateInfo frameBufferCreateInfo = {};
 		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 		frameBufferCreateInfo.pNext = NULL;
-		frameBufferCreateInfo.renderPass = m_vulkanDevice->GetRenderPass();
+		frameBufferCreateInfo.renderPass = m_presentRenderPass;
 		frameBufferCreateInfo.attachmentCount = 2;
 		frameBufferCreateInfo.pAttachments = attachments;
 		frameBufferCreateInfo.width = (uint32_t)Insight::Window::GetWidth();
@@ -776,15 +807,17 @@ namespace vks
 		frameBufferCreateInfo.layers = 1;
 
 		// Create frame buffers for every swap chain image
-		m_frameBuffers.resize(m_swapchain.GetImageCount());
-		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		m_presentFrameBuffers.resize(m_swapchain.GetImageCount());
+		for (uint32_t i = 0; i < m_presentFrameBuffers.size(); ++i)
 		{
 			attachments[0] = m_swapchain.GetImageView(i);
-			ThrowIfFailed(vkCreateFramebuffer(m_device, &frameBufferCreateInfo, nullptr, &m_frameBuffers[i]));
+			ThrowIfFailed(vkCreateFramebuffer(m_device, &frameBufferCreateInfo, nullptr, &m_presentFrameBuffers[i]));
 		}
 
 		m_frameBuffer.SetRect((uint32_t)Insight::Window::GetWidth(), (uint32_t)Insight::Window::GetHeight());
-		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Colour");
+		m_frameBuffer.CreateAttachment(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Color");
+		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Normal");
+		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Position");
 		VkFormat attDepthFormat;
 		vks::getSupportedDepthFormat(m_physicalDevice, &attDepthFormat);
 		IS_CORE_ASSERT(attDepthFormat, "[VulkanRenderer::SetupFrameBuffer] Must have a valid depth format.");
@@ -792,7 +825,7 @@ namespace vks
 		m_frameBuffer.CreateRenderPass();
 	}
 
-	void VulkanRenderer::SetupRenderPass()
+	void VulkanRenderer::SetupPresentRenderPass()
 	{
 		IS_PROFILE_FUNCTION();
 		std::array<VkAttachmentDescription, 2> attachments = {};
@@ -862,7 +895,7 @@ namespace vks
 		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 		renderPassInfo.pDependencies = dependencies.data();
 
-		ThrowIfFailed(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_vulkanDevice->GetRenderPass()));
+		ThrowIfFailed(vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_presentRenderPass));
 	}
 
 	void VulkanRenderer::GetEnabledFeatures()
@@ -879,11 +912,11 @@ namespace vks
 
 		submitInfo.pWaitDstStageMask = &m_submitPipelineStages;
 
-		VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[m_currentFrame] };
+		VkSemaphore waitSemahores[] = { m_semaphores.ImageAquired[0] };
 		submitInfo.pWaitSemaphores = waitSemahores;
 		submitInfo.waitSemaphoreCount = 1;
 
-		VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[m_currentFrame] };
+		VkSemaphore signalSemahores[] = { m_semaphores.RenderComplete[0] };
 		submitInfo.pSignalSemaphores = signalSemahores;
 		submitInfo.signalSemaphoreCount = 1;
 
@@ -1134,9 +1167,9 @@ namespace vks
 		vkDestroyImage(m_device, m_depthStencil.Image, nullptr);
 		vkFreeMemory(m_device, m_depthStencil.Mem, nullptr);
 		SetupDepthStencil();
-		for (uint32_t i = 0; i < m_frameBuffers.size(); i++)
+		for (uint32_t i = 0; i < m_presentFrameBuffers.size(); i++)
 		{
-			vkDestroyFramebuffer(m_device, m_frameBuffers[i], nullptr);
+			vkDestroyFramebuffer(m_device, m_presentFrameBuffers[i], nullptr);
 		}
 		SetupFrameBuffer();
 
