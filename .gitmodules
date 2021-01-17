@@ -29,3 +29,6 @@
 [submodule "Insight/vendor/shaderc"]
 	path = Insight/vendor/shaderc
 	url = https://github.com/google/shaderc
+[submodule "Insight/vendor/glslang"]
+	path = Insight/vendor/glslang
+	url = https://github.com/KhronosGroup/glslang
