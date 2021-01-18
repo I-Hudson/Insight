@@ -25,7 +25,7 @@ namespace Insight
 		virtual ~Renderer() { }
 
 		virtual void Clear() = 0;
-		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) = 0;
+		virtual void Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes) = 0;
 		virtual void Present() = 0;
 		virtual void WaitForIdle() = 0;
 

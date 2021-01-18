@@ -6,6 +6,7 @@
 
 namespace Insight
 {
+	class Scene;
 	namespace Module
 	{
 		class ModuleManager;
@@ -57,6 +58,7 @@ namespace Insight
 		bool m_isRunning = true;
 		bool m_triggerRender = true;
 		bool m_renderComplete = true;
+		SharedPtr<Scene> m_utitledScene;
 
 		Memory::MemoryManager* m_memoryManager;
 		SharedPtr<FileSystem::FileSystemManager> m_fileSystem;

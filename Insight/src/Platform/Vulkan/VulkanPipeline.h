@@ -48,7 +48,5 @@ namespace vks
 		std::unordered_map<int, VkDescriptorSetLayout> m_descriptorLayouts;
 		VkPipelineLayout m_pipelineLayout;
 		VkPipeline m_pipeline;
-
-		static bool s_glslInit;
 	};
 }

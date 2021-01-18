@@ -12,5 +12,5 @@ layout (set = 0, binding = 2) uniform sampler2D fullScreenQuadPositionTex;
 
 void main() 
 {
-	outFragColor = vec4(0.0, 1.0, 0.0, 1.0);
+	outFragColor = texture(fullScreenQuadColorTex, inUV);
 }

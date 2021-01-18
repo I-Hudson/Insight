@@ -16,7 +16,7 @@ workspace "Insight"
     
     defines
     {
-        "IS_PROFILE_OPTICK"
+        "IS_PROFILE"
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -39,7 +39,7 @@ IncludeDir["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/include"
 IncludeDir["IconsFontAwesome"] = "$(SolutionDir)Insight/vendor/IconFontCppHeaders/"
 
 IncludeDir["Vulkan"] = os.getenv("VK_SDK_PATH") .. "/Include"
-IncludeDir["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/"
+IncludeDir["glslang"] = "$(SolutionDir)Insight/vendor/glslang/"
 
 -- Editor Includes
 IncludeDir["imguiFileDialog"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/"
@@ -52,7 +52,7 @@ LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/BINARIES/x64/lib"
 LibDirs["optick"] = "$(SolutionDir)Insight/vendor/optick/bin/vs2019/x64/Debug"
 LibDirs["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/build/$(Configuration)"
 LibDirs["Vulkan"] = os.getenv("VK_SDK_PATH") .. "/lib/"
-LibDirs["shaderc"] = "$(SolutionDir)Insight/vendor/shaderc/build/libshaderc/$(Configuration)"
+LibDirs["glslang"] = "$(SolutionDir)Insight/vendor/glslang/build/"
 
 
 group "Dependencies"

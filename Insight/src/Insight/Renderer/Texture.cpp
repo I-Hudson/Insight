@@ -86,26 +86,28 @@ namespace Insight
 			, m_texDepth(0)
 			, m_texChannels(0)
 		{
+			std::string path = filePath;
+
 			if (!std::filesystem::exists(std::filesystem::path(filePath)))
 			{
-				IS_CORE_ERROR("[Texture::Texture] File was not found. '{0}'", filePath);
+				IS_CORE_ERROR("[Texture::Texture] File was not found. '{0}'.", filePath);
+				path = "./data/shaders/undefinedTexture.png";
+			}
+
+			int x, y, c;
+			void* data = stbi_load(path.c_str(), &x, &y, &c, STBI_rgb_alpha);
+			if (data)
+			{
+				m_dataSize = x * y * 4;
+				m_gpuData = TextureGPUData::Create();
+				m_gpuData->Init(data, m_dataSize, x, y, 4);
 			}
 			else
 			{
-				int x, y, c;
-				void* data = stbi_load(filePath.c_str(), &x, &y, &c, STBI_rgb_alpha);
-				if (data)
-				{
-					m_dataSize = x * y * 4;
-					m_gpuData = TextureGPUData::Create();
-					m_gpuData->Init(data, m_dataSize, x, y, 4);
-				}
-				else
-				{
-					IS_CORE_ERROR("[Texture::Texture] Texture was unable to load.");
-				}
-				stbi_image_free(data);
+				IS_CORE_ERROR("[Texture::Texture] Texture was unable to load.");
 			}
+			stbi_image_free(data);
+
 		}
 
 		Texture::~Texture()

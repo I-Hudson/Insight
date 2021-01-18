@@ -27,6 +27,7 @@ namespace Insight
 
 			virtual void Update(const float& deltaTime) override;
 
+			void WaitForIdle();
 			GraphicsAPI GetAPI();
 			void SetMainCamera(CameraComponent* camera);
 			const bool HasMainCamera();
@@ -45,7 +46,7 @@ namespace Insight
 			SharedPtr<ImGuiRenderer> m_imguiRenderer;
 
 			static CameraComponent* m_mainCamera;
-			static std::vector<MeshComponent*> m_meshs;
+			static std::vector<WeakPtr<MeshComponent>> m_meshs;
 
 			friend MeshComponent;
 		};

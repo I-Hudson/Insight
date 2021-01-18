@@ -219,10 +219,5 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 		}
 	}
 
-	if (textures.size() == 0)
-	{
-		textures.emplace_back(typeName, Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Texture>("./data/shaders/undefinedTexture.png"));
-	}
-
 	return textures;
 }

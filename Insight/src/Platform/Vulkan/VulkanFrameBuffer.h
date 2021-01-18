@@ -13,11 +13,13 @@ namespace vks
 		VkDeviceMemory DeviceMemory;
 		VkImageLayout ImageLayout;
 		VkFormat Format;
+		U32 ImageUsage;
 	};
 
 	struct RenderPassInfo
 	{
-		U32 ColorAttachmentCount;
+		U32 ColorAttachmentCount = 0;
+		U32 SamplerCount = 1;
 	};
 
 	class VulkanFrameBuffer
@@ -29,6 +31,8 @@ namespace vks
 		void SetRect(const U32& width, const U32& height);
 		void CreateAttachment(const U32& format, const U32& imageUsage, const std::string& attachmentName);
 		void CreateRenderPass();
+
+		void SetSampleCount(const U32& sampleCount, const bool& rebuild = true);
 
 		const FrameBufferAttachment& GetAttachment(const std::string& attachmentName);
 		std::vector<VkClearValue> GetClearAttachments();
@@ -45,6 +49,9 @@ namespace vks
 		VkSemaphore GetReadySemaphore() const { return m_readySemaphore; }
 		VkSemaphore GetFinishedSemaphore() const { return m_finishedSemaphore; }
 		VkFence GetFence() const { return m_fence; }
+
+	private:
+		void CreateAttachment(FrameBufferAttachment& attachment);
 
 	private:
 		U32 m_width;

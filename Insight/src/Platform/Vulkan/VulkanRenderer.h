@@ -55,7 +55,7 @@ namespace vks
 		void InitVulkan();
 
 		virtual void Clear() override;
-		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes) override;
+		virtual void Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes) override;
 		virtual void Present() override;
 		virtual void WaitForIdle() override;
 
@@ -88,7 +88,7 @@ namespace vks
 		/** @brief (Virtual) Creates the application wide Vulkan instance */
 		virtual VkResult CreateInstance(bool enableValidation);
 		/** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
-		virtual void BuildCommandBuffers();
+		virtual void BuildCommandBuffers(std::vector<WeakPtr<MeshComponent>>& meshes);
 		virtual void BuildPresentBuffers();
 		/** @brief (Virtual) Setup default depth and stencil views */
 		virtual void SetupDepthStencil();
@@ -217,6 +217,8 @@ namespace vks
 		VkRenderPass m_presentRenderPass;
 
 		VkCommandBuffer m_frameBufferCmdBuffer;
+		//std::vector<VkCommandBuffer> m_frameBufferCmdBuffer;
+		std::vector<VkFence> m_frameBufferCmdFence;
 		// Pirmary Command buffers used for rendering
 		VkCommandBuffer m_primaryCommandBuffer;
 
@@ -235,10 +237,6 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-
-
-
-
 		SharedPtr<Entity> m_editorEntity;
 		SharedPtr<CameraComponent> m_editorCamera;
 
@@ -249,8 +247,6 @@ namespace vks
 			glm::mat4 model;
 			glm::vec4 lightPos;
 		};
-		glm::mat4 m_testModelMatrix;
-		SharedPtr<Model> m_testModel;
 		glm::vec4 m_lightPos;
 		float m_lightPosAngle;
 

@@ -14,7 +14,7 @@ namespace Insight
 	namespace Module
 	{
 		CameraComponent* GraphicsModule::m_mainCamera;
-		std::vector<MeshComponent*> GraphicsModule::m_meshs;
+		std::vector<WeakPtr<MeshComponent>> GraphicsModule::m_meshs;
 
 		GraphicsModule::GraphicsModule(SharedPtr<WindowModule> windowModule)
 		{
@@ -29,8 +29,6 @@ namespace Insight
 
 		GraphicsModule::~GraphicsModule()
 		{
-			m_renderer->WaitForIdle();
-
 			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::Instance();
 			m_imguiRenderer.reset();
 
@@ -44,26 +42,17 @@ namespace Insight
 
 			if (m_renderer != nullptr)
 			{
-				//m_renderer->Clear();
-
-				Insight::Stopwatch stopwatch;
-
-				stopwatch.Start();
 				m_renderer->Render(m_mainCamera, m_meshs);
-				stopwatch.End();
-
-				std::stringstream ss;
-				double fps = 1.0 / stopwatch.Sec();
-				ss << "FPS: " << fps;
-				//Insight::Window::SetTitle(ss.str());
-
-
-				//m_renderer->Present();
 			}
 			else
 			{
 				IS_CORE_ERROR("[GraphicsModule::Update] No renderer setup.");
 			}
+		}
+
+		void GraphicsModule::WaitForIdle()
+		{
+			m_renderer->WaitForIdle();
 		}
 
 		GraphicsAPI GraphicsModule::GetAPI()

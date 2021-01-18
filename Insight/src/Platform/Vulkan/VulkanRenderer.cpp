@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanImGUIRenderer.h"
+#include "glslang/Public/ShaderLang.h"
 
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -15,6 +16,7 @@
 #include "Insight/Event/EventManager.h"
 #include "Insight/Component/CameraComponent.h"
 #include "Insight/Component/TransformComponent.h"
+#include "Insight/Component/MeshComponent.h"
 #include "Insight/Model/Model.h"
 #include "Insight/Renderer/Texture.h"
 #include "Insight/FileSystem/FileSystem.h"
@@ -128,6 +130,7 @@ namespace vks
 
 		m_rndEngine.seed((unsigned)time(nullptr));
 
+		glslang::InitializeProcess();
 		InitVulkan();
 		IS_CORE_INFO("Vulkan Setup Complete.");
 	}
@@ -136,8 +139,9 @@ namespace vks
 	{
 		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
 
+		glslang::FinalizeProcess();
+
 		m_editorEntity.reset();
-		m_testModel.reset();
 
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -324,7 +328,7 @@ namespace vks
 	}
 
 	// This should be moved to a submodule for every type of rendering we are doing.
-	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*> meshes)
+	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
@@ -333,13 +337,14 @@ namespace vks
 		Clear();
 
 		{
-			IS_PROFILE_SCOPE("Vulkan wait for fence")
+			IS_PROFILE_SCOPE("Vulkan wait for fence");
 			m_frameBuffer.WaitForFence();
 			m_frameBuffer.ResetFence();
 		}
+
 		if (true)
 		{
-			BuildCommandBuffers();
+			BuildCommandBuffers(meshes);
 		}
 		else
 		{
@@ -440,9 +445,6 @@ namespace vks
 		m_editorEntity->AddComponent<TransformComponent>();
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
-		m_testModel = Object::CreateObject<Model>("./data/models/sponza/sponza.obj");
-		m_testModelMatrix = glm::mat4(1.0f);
-
 		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);
 		m_lightPosAngle = 0.0f;
 
@@ -466,12 +468,12 @@ namespace vks
 		IS_PROFILE_FUNCTION();
 		// Create one command buffer for the offscreen rendering
 
+		//m_frameBufferCmdBuffer.resize(m_swapchain.GetImageCount());
 		VkCommandBufferAllocateInfo cmdBufAllocateInfo =
 			vks::initializers::commandBufferAllocateInfo(
 				m_cmdPool,
 				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 				1);
-		
 		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_frameBufferCmdBuffer));
 
 		m_presentCmdBuffers.resize(m_swapchain.GetImageCount());
@@ -480,7 +482,6 @@ namespace vks
 				m_cmdPool,
 				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 				static_cast<U32>(m_presentCmdBuffers.size()));
-
 		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_presentCmdBuffers.data()));
 	}
 
@@ -533,12 +534,16 @@ namespace vks
 	void VulkanRenderer::CreateSynchronizationPrimitives()
 	{
 		IS_PROFILE_FUNCTION();
+
+		m_frameBufferCmdFence.resize(m_swapchain.GetImageCount());
 		// Wait fences to sync command buffer access
 		VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
 		for (int i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
 			ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_waitFences[i]));
 			m_waitImagesFences[i] = VK_NULL_HANDLE;
+
+			ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &m_frameBufferCmdFence[i]));
 		}
 	}
 
@@ -636,11 +641,12 @@ namespace vks
 		return vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance);
 	}
 
-	void VulkanRenderer::BuildCommandBuffers()
+	void VulkanRenderer::BuildCommandBuffers(std::vector<WeakPtr<MeshComponent>>& meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
+		//cmdBufInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 
 		auto clearColors = m_frameBuffer.GetClearAttachments();
 		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
@@ -651,6 +657,16 @@ namespace vks
 		renderPassBeginInfo.renderArea.extent.height = m_frameBuffer.GetHeight();
 		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
 		renderPassBeginInfo.pClearValues = clearColors.data();
+
+		MVP mvp;
+		mvp.proj = m_editorCamera->GetProjMatrix();
+		mvp.proj[1][1] *= -1;
+		mvp.view = m_editorCamera->GetViewMatrix();
+		mvp.model = glm::mat4(1.0f);
+		m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
+		m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
+		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
+		mvp.lightPos = m_lightPos;
 
 		{
 			// Set target frame buffer
@@ -667,27 +683,27 @@ namespace vks
 			vkCmdSetScissor(m_frameBufferCmdBuffer, 0, 1, &scissor);
 
 			// This should be replaced by the mesh components in the scene.
-			MVP mvp;
-			mvp.proj = m_editorCamera->GetProjMatrix();
-			mvp.proj[1][1] *= -1;
-			mvp.view = m_editorCamera->GetViewMatrix();
-			mvp.model = m_testModelMatrix;
-			m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
-			m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
-			m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
-			mvp.lightPos = m_lightPos;
-
-			auto mats = m_testModel->GetMaterals();
-			for (auto& m : mats)
+			for (auto& mesh : meshes)
 			{
-				if (auto mSP = m.lock())
+				if (auto meshSP = mesh.lock())
 				{
-					MaterialBlockData data;
-					mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
+					//TODO REMOVE THIS. Place this somewhere else. no need for a 
+					// double loop here.
+					{
+						IS_PROFILE_SCOPE("Updating materials.");
+						auto mats = meshSP->GetMaterails();
+						for (auto& m : mats)
+						{
+							if (auto mSP = m.lock())
+							{
+								MaterialBlockData data;
+								mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
+							}
+						}
+					}
+					meshSP->Draw(m_frameBufferCmdBuffer);
 				}
 			}
-
-			m_testModel->GetMesh().lock()->Draw(m_frameBufferCmdBuffer, m_testModel->GetMaterals(), { });
 
 			vkCmdEndRenderPass(m_frameBufferCmdBuffer);
 			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBuffer));
@@ -738,7 +754,7 @@ namespace vks
 			// DRAW
 			vkCmdDraw(m_presentCmdBuffers[i], 3, 1, 0, 0);
 
-			//imgui->Render(m_presentCmdBuffers[i]);
+			imgui->Render(m_presentCmdBuffers[i]);
 
 			vkCmdEndRenderPass(m_presentCmdBuffers[i]);
 			ThrowIfFailed(vkEndCommandBuffer(m_presentCmdBuffers[i]));

@@ -5,7 +5,9 @@
 #include "VulkanFrameBuffer.h"
 #include "Insight/ShaderParser/ShaderParser.h"
 
-#include <shaderc/shaderc.hpp>
+#include "glslang/Public/ShaderLang.h"
+#include "SPIRV/GlslangToSpv.h"
+#include "StandAlone/DirStackFileIncluder.h"
 
 namespace vks
 {
@@ -20,38 +22,138 @@ namespace vks
 		return fileName.substr(fileName.find_last_of('/'), fileName.find_last_of('.'));
 	}
 
-	shaderc_shader_kind  GetShaderStage(const std::string& stage)
+	EShLanguage GetShaderStage(const std::string& stage)
 	{
-		if (stage == "vert")
-		{
-			return shaderc_shader_kind::shaderc_vertex_shader;
+		if (stage == "vert") {
+			return EShLangVertex;
 		}
-		else if (stage == "tesc")
-		{
-			return shaderc_shader_kind::shaderc_tess_control_shader;
+		else if (stage == "tesc") {
+			return EShLangTessControl;
 		}
-		else if (stage == "tese")
-		{
-			return shaderc_shader_kind::shaderc_tess_evaluation_shader;
+		else if (stage == "tese") {
+			return EShLangTessEvaluation;
 		}
-		else if (stage == "geom")
-		{
-			return shaderc_shader_kind::shaderc_geometry_shader;
+		else if (stage == "geom") {
+			return EShLangGeometry;
 		}
-		else if (stage == "frag")
-		{
-			return shaderc_shader_kind::shaderc_fragment_shader;
+		else if (stage == "frag") {
+			return EShLangFragment;
 		}
-		else if (stage == "comp")
-		{
-			return shaderc_shader_kind::shaderc_compute_shader;
+		else if (stage == "comp") {
+			return EShLangCompute;
 		}
-		else
-		{
+		else {
 			assert(0 && "Unknown shader stage");
-			return shaderc_shader_kind::shaderc_anyhit_shader;
+			return EShLangCount;
 		}
 	}
+
+	const TBuiltInResource DefaultTBuiltInResource = {
+		/* .MaxLights = */ 32,
+		/* .MaxClipPlanes = */ 6,
+		/* .MaxTextureUnits = */ 32,
+		/* .MaxTextureCoords = */ 32,
+		/* .MaxVertexAttribs = */ 64,
+		/* .MaxVertexUniformComponents = */ 4096,
+		/* .MaxVaryingFloats = */ 64,
+		/* .MaxVertexTextureImageUnits = */ 32,
+		/* .MaxCombinedTextureImageUnits = */ 80,
+		/* .MaxTextureImageUnits = */ 32,
+		/* .MaxFragmentUniformComponents = */ 4096,
+		/* .MaxDrawBuffers = */ 32,
+		/* .MaxVertexUniformVectors = */ 128,
+		/* .MaxVaryingVectors = */ 8,
+		/* .MaxFragmentUniformVectors = */ 16,
+		/* .MaxVertexOutputVectors = */ 16,
+		/* .MaxFragmentInputVectors = */ 15,
+		/* .MinProgramTexelOffset = */ -8,
+		/* .MaxProgramTexelOffset = */ 7,
+		/* .MaxClipDistances = */ 8,
+		/* .MaxComputeWorkGroupCountX = */ 65535,
+		/* .MaxComputeWorkGroupCountY = */ 65535,
+		/* .MaxComputeWorkGroupCountZ = */ 65535,
+		/* .MaxComputeWorkGroupSizeX = */ 1024,
+		/* .MaxComputeWorkGroupSizeY = */ 1024,
+		/* .MaxComputeWorkGroupSizeZ = */ 64,
+		/* .MaxComputeUniformComponents = */ 1024,
+		/* .MaxComputeTextureImageUnits = */ 16,
+		/* .MaxComputeImageUniforms = */ 8,
+		/* .MaxComputeAtomicCounters = */ 8,
+		/* .MaxComputeAtomicCounterBuffers = */ 1,
+		/* .MaxVaryingComponents = */ 60,
+		/* .MaxVertexOutputComponents = */ 64,
+		/* .MaxGeometryInputComponents = */ 64,
+		/* .MaxGeometryOutputComponents = */ 128,
+		/* .MaxFragmentInputComponents = */ 128,
+		/* .MaxImageUnits = */ 8,
+		/* .MaxCombinedImageUnitsAndFragmentOutputs = */ 8,
+		/* .MaxCombinedShaderOutputResources = */ 8,
+		/* .MaxImageSamples = */ 0,
+		/* .MaxVertexImageUniforms = */ 0,
+		/* .MaxTessControlImageUniforms = */ 0,
+		/* .MaxTessEvaluationImageUniforms = */ 0,
+		/* .MaxGeometryImageUniforms = */ 0,
+		/* .MaxFragmentImageUniforms = */ 8,
+		/* .MaxCombinedImageUniforms = */ 8,
+		/* .MaxGeometryTextureImageUnits = */ 16,
+		/* .MaxGeometryOutputVertices = */ 256,
+		/* .MaxGeometryTotalOutputComponents = */ 1024,
+		/* .MaxGeometryUniformComponents = */ 1024,
+		/* .MaxGeometryVaryingComponents = */ 64,
+		/* .MaxTessControlInputComponents = */ 128,
+		/* .MaxTessControlOutputComponents = */ 128,
+		/* .MaxTessControlTextureImageUnits = */ 16,
+		/* .MaxTessControlUniformComponents = */ 1024,
+		/* .MaxTessControlTotalOutputComponents = */ 4096,
+		/* .MaxTessEvaluationInputComponents = */ 128,
+		/* .MaxTessEvaluationOutputComponents = */ 128,
+		/* .MaxTessEvaluationTextureImageUnits = */ 16,
+		/* .MaxTessEvaluationUniformComponents = */ 1024,
+		/* .MaxTessPatchComponents = */ 120,
+		/* .MaxPatchVertices = */ 32,
+		/* .MaxTessGenLevel = */ 64,
+		/* .MaxViewports = */ 16,
+		/* .MaxVertexAtomicCounters = */ 0,
+		/* .MaxTessControlAtomicCounters = */ 0,
+		/* .MaxTessEvaluationAtomicCounters = */ 0,
+		/* .MaxGeometryAtomicCounters = */ 0,
+		/* .MaxFragmentAtomicCounters = */ 8,
+		/* .MaxCombinedAtomicCounters = */ 8,
+		/* .MaxAtomicCounterBindings = */ 1,
+		/* .MaxVertexAtomicCounterBuffers = */ 0,
+		/* .MaxTessControlAtomicCounterBuffers = */ 0,
+		/* .MaxTessEvaluationAtomicCounterBuffers = */ 0,
+		/* .MaxGeometryAtomicCounterBuffers = */ 0,
+		/* .MaxFragmentAtomicCounterBuffers = */ 1,
+		/* .MaxCombinedAtomicCounterBuffers = */ 1,
+		/* .MaxAtomicCounterBufferSize = */ 16384,
+		/* .MaxTransformFeedbackBuffers = */ 4,
+		/* .MaxTransformFeedbackInterleavedComponents = */ 64,
+		/* .MaxCullDistances = */ 8,
+		/* .MaxCombinedClipAndCullDistances = */ 8,
+		/* .MaxSamples = */ 4,
+		/* .maxMeshOutputVerticesNV = */ 0,
+		/* .maxMeshOutputPrimitivesNV = */  0,
+		/* .maxMeshWorkGroupSizeX_NV = */  0,
+		/* .maxMeshWorkGroupSizeY_NV = */ 0,
+		/* .maxMeshWorkGroupSizeZ_NV = */ 0,
+		/* .maxTaskWorkGroupSizeX_NV = */ 0,
+		/* .maxTaskWorkGroupSizeY_NV = */ 0,
+		/* .maxTaskWorkGroupSizeZ_NV = */ 0,
+		/* .maxMeshViewCountNV = */ 0,
+		/* .maxDualSourceDrawBuffersEXT = */ 0,
+		/* .limits = */ {
+			/* .nonInductiveForLoops = */ 1,
+			/* .whileLoops = */ 1,
+			/* .doWhileLoops = */ 1,
+			/* .generalUniformIndexing = */ 1,
+			/* .generalAttributeMatrixVectorIndexing = */ 1,
+			/* .generalVaryingIndexing = */ 1,
+			/* .generalSamplerIndexing = */ 1,
+			/* .generalVariableIndexing = */ 1,
+			/* .generalConstantMatrixVectorIndexing = */ 1,
+		}
+	};
 
 	VulkanPipeline::VulkanPipeline()
 	{
@@ -80,7 +182,6 @@ namespace vks
 		}
 		vkDestroyPipelineLayout(*m_vulkanDevice, m_pipelineLayout, nullptr);
 		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
-
 	}
 
 	void VulkanPipeline::Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
@@ -113,6 +214,7 @@ namespace vks
 		for (auto& set : setIndexs)
 		{
 			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+			std::vector<VkDescriptorBindingFlagsEXT> bindFlag;
 			for (auto& data : shaderData)
 			{
 				for (auto& buffer : data.UniformBlocks)
@@ -120,11 +222,20 @@ namespace vks
 					if (buffer.Set == set)
 					{
 						descriptorSetLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(buffer.GetVulkanType(), data.GetVulkanShaderStage(), buffer.Binding));
+						bindFlag.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 					}
 				}
 			}
 
+			// TODO: Depending on check from Vulkan Device. Do this.
+			VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
+			extendedInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+			extendedInfo.pNext = nullptr;
+			extendedInfo.bindingCount = static_cast<U32>(descriptorSetLayoutBindings.size());
+			extendedInfo.pBindingFlags = bindFlag.data();
+
 			auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);
+			createInfo.pNext = &extendedInfo;
 			ThrowIfFailed(vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &m_descriptorLayouts[set]));
 		}
 	}
@@ -151,6 +262,17 @@ namespace vks
 
 	void VulkanPipeline::CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
 	{
+		VkSpecializationMapEntry specializationEntry{};
+		specializationEntry.constantID = 0;
+		specializationEntry.offset = 0;
+		specializationEntry.size = sizeof(uint32_t);
+
+		VkSpecializationInfo specializationInfo;
+		specializationInfo.mapEntryCount = 1;
+		specializationInfo.pMapEntries = &specializationEntry;
+		specializationInfo.dataSize = sizeof(renderPassInfo.SamplerCount);
+		specializationInfo.pData = &renderPassInfo.SamplerCount;
+
 		Insight::ParsedShadeData vertexShaderData;
 		std::vector<std::vector<uint32_t>> compiledShaders;
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -160,6 +282,7 @@ namespace vks
 			
 			compiledShaders.push_back(CompileGLSL(shaders[i]));
 			shaderStages.push_back(loadShaderFromSPIRV(compiledShaders[i], *device, shaderData[i].GetVulkanShaderStage()));
+			shaderStages[shaderStages.size() - 1].pSpecializationInfo = &specializationInfo;
 
 			if (shaderData[i].GetVulkanShaderStage() == VK_SHADER_STAGE_VERTEX_BIT)
 			{
@@ -174,7 +297,7 @@ namespace vks
 		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(renderPassInfo.ColorAttachmentCount, blendAttachmentStates.data());
 		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
 		VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
-		VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(VK_SAMPLE_COUNT_1_BIT);
+		VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(static_cast<VkSampleCountFlagBits>(renderPassInfo.SamplerCount));
 		std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_LINE_WIDTH, };
 		VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
@@ -205,23 +328,58 @@ namespace vks
 
 	std::vector<uint32_t> VulkanPipeline::CompileGLSL(const std::string& fileName)
 	{
-		shaderc::Compiler compiler;
-		shaderc::CompileOptions options;
+		std::string glslRaw = loadShaderString(fileName);
+		const char* glslRawC = glslRaw.c_str();
 
-		// Like -DMY_DEFINE=1
-		options.AddMacroDefinition("MY_DEFINE", "1");
-		if (false) options.SetOptimizationLevel(shaderc_optimization_level_size);
+		EShLanguage ShaderType = GetShaderStage(GetSuffix(fileName));
+		glslang::TShader Shader(ShaderType);
+		Shader.setStrings(&glslRawC, 1);
 
-		auto source = vks::loadShaderString(fileName);
+		int ClientInputSemanticsVersion = 100; // maps to, say, #define VULKAN 100
+		glslang::EShTargetClientVersion VulkanClientVersion = glslang::EShTargetVulkan_1_0;
+		glslang::EShTargetLanguageVersion TargetVersion = glslang::EShTargetSpv_1_0;
 
-		shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(source, GetShaderStage(GetSuffix(fileName)), GetShaderFileName(fileName).c_str(), options);
+		Shader.setEnvInput(glslang::EShSourceGlsl, ShaderType, glslang::EShClientVulkan, ClientInputSemanticsVersion);
+		Shader.setEnvClient(glslang::EShClientVulkan, VulkanClientVersion);
+		Shader.setEnvTarget(glslang::EShTargetSpv, TargetVersion);
 
-		if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
-			std::cerr << module.GetErrorMessage();
-			return std::vector<uint32_t>();
+		TBuiltInResource Resources;
+		Resources = DefaultTBuiltInResource;
+		EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
+		const int DefaultVersion = 100;
+
+		DirStackFileIncluder Includer;
+		//Get Path of File
+		Includer.pushExternalLocalDirectory(fileName);
+
+		std::string PreprocessedGLSL;
+		if (!Shader.preprocess(&Resources, DefaultVersion, ENoProfile, false, false, messages, &PreprocessedGLSL, Includer))
+		{
+			IS_CORE_ERROR("GLSL preprocess Failed for: {0}.", fileName);
+			IS_CORE_ERROR("{0}", Shader.getInfoLog());
+			IS_CORE_ERROR("{0}", Shader.getInfoDebugLog());
 		}
 
-		return { module.cbegin(), module.cend() };
+		if (!Shader.parse(&Resources, 100, false, messages))
+		{
+			IS_CORE_ERROR("GLSL parse Failed for: {0}.", fileName);
+			IS_CORE_ERROR("{0}", Shader.getInfoLog());
+			IS_CORE_ERROR("{0}", Shader.getInfoDebugLog());
+		}
 
+		glslang::TProgram Program;
+		Program.addShader(&Shader);
+		if (!Program.link(messages))
+		{
+			IS_CORE_ERROR("GLSL Linking Failed for: {0}.", fileName);
+			IS_CORE_ERROR("{0}", Shader.getInfoLog());
+			IS_CORE_ERROR("{0}", Shader.getInfoDebugLog());
+		}
+
+		std::vector<uint32_t> SpirV;
+		spv::SpvBuildLogger logger;
+		glslang::GlslangToSpv(*Program.getIntermediate(ShaderType), SpirV, &logger);
+
+		return SpirV;
 	}
 }

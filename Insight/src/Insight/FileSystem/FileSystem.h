@@ -78,8 +78,6 @@ namespace Insight
 		template<typename T, typename... Args>
 		inline SharedPtr<T> FileSystemManager::LoadObject(const std::string& filePath, Args&&... args)
 		{
-			MutexLockGuard lock(m_mutex);
-
 			IS_CORE_STATIC_ASSERT((std::is_base_of_v<Object, T>), "[FileSystemManager::LoadObject] 'LoadObject' can only be used on Object types.");
 
 			FileHash fileHash = std::hash<std::string>{}(filePath);
@@ -99,7 +97,10 @@ namespace Insight
 				0//static_cast<U64>(std::filesystem::file_size(path))
 			};
 			handle.Object = Object::CreateObject<T>(filePath, std::forward<Args>(args)...);
+
+			MutexUnqiueLock lock(m_mutex);
 			m_fileHandles[fileHash] = handle;
+			lock.unlock();
 
 			return DynamicPointerCast<T>(handle.Object);
 		}

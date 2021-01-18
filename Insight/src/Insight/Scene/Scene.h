@@ -10,7 +10,7 @@ const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
 namespace Insight
 {
-	class Scene
+	class Scene : std::enable_shared_from_this<Scene>
 	{
 	public:
 		Scene(const std::string& sceneName = "Default");

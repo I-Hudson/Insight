@@ -44,7 +44,7 @@ project "Insight"
         "%{IncludeDir.ktx}",
         "%{IncludeDir.IconsFontAwesome}",
 
-        "%{IncludeDir.shaderc}",
+        "%{IncludeDir.glslang}",
         "%{IncludeDir.Vulkan}",
 	}
 
@@ -58,7 +58,12 @@ project "Insight"
         "%{LibDirs.optick}",
         "%{LibDirs.ktx}",
 
-        "%{LibDirs.shaderc}",
+        "%{LibDirs.glslang}/glslang/$(Configuration)",
+        "%{LibDirs.glslang}/glslang/OSDependent/Windows/$(Configuration)",
+        "%{LibDirs.glslang}/OGLCompilersDLL/$(Configuration)",
+        "%{LibDirs.glslang}/SPIRV/$(Configuration)",
+        "%{LibDirs.glslang}/StandAlone/$(Configuration)",
+        "%{LibDirs.glslang}/OGLCompilerd/$(Configuration)",
         "%{LibDirs.Vulkan}",
 	}
 
@@ -71,7 +76,6 @@ project "Insight"
         "OptickCore",
         "ktx",
         "vulkan-1",
-        "shaderc_combined",
 	}
 
     filter "system:windows"
@@ -91,6 +95,13 @@ project "Insight"
         links 
         {
             "assimp-vc142-mtd",
+            "glslangd",
+            "MachineIndependentd",
+            "GenericCodeGend",
+            "OSDependentd",
+            "SPIRVd",
+            "OGLCompilerd",
+            "glslang-default-resource-limitsd",
         }
         
         libdirs
@@ -106,7 +117,13 @@ project "Insight"
         links 
         {
             "assimp-vc142-mt",
-
+            "glslang",
+            "MachineIndependent",
+            "GenericCodeGen",
+            "OSDependent",
+            "SPIRV",
+            "OGLCompiler",
+            "glslang-default-resource-limits",
         }
         
         libdirs

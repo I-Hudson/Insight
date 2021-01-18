@@ -58,6 +58,17 @@ public:
 		style[ImGuiCol_TitleBgActive] = ImVec4(titleBgActive.x, titleBgActive.y, titleBgActive.z, titleBgActive.w);
 		glm::vec4 titleBgCollapsed = Insight::Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
+	
+		const int SKY = ('*' || ' ');
+	
+		auto meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
+		auto model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+		meshComponent->SetModel(model);
+
+		meshComponent = Entity::Create("Building Entity")->AddComponent<MeshComponent>();
+		model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
+		meshComponent->SetModel(model);
+
 	}
 
 	virtual void Update(const float deltaTime) override

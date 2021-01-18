@@ -29,14 +29,30 @@ void MeshComponent::OnCreate()
 
 	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
 
-	Insight::Module::GraphicsModule::m_meshs.push_back(this);
+	Insight::Module::GraphicsModule::m_meshs.push_back(shared_from_this());
 	//SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
 }
 
 void MeshComponent::OnDestroy()
 {
-	Insight::Module::GraphicsModule::m_meshs.erase(std::find(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), this));
+	auto it = std::find_if(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), [&](WeakPtr<MeshComponent> component)
+		{
+			if (auto comSP = component.lock())
+			{
+				return this == comSP.get();
+			}
+			return false;
+		});
+	Insight::Module::GraphicsModule::m_meshs.erase(it);
+}
+
+void MeshComponent::Draw(VkCommandBuffer cmd)
+{
+	if (auto meshSP = m_mesh.lock())
+	{
+		meshSP->Draw(cmd, m_materials, m_materialBlockDatas);
+	}
 }
 
 void MeshComponent::SetMesh(WeakPtr<Mesh> mesh)
@@ -45,13 +61,28 @@ void MeshComponent::SetMesh(WeakPtr<Mesh> mesh)
 	m_meshName = mesh.lock()->GetMeshName();
 }
 
-void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
+void MeshComponent::SetModel(WeakPtr<Model> model)
 {
-
+	if (auto modelSP = model.lock())
+	{
+		SetMesh(modelSP->GetMesh());
+		SetMaterials(modelSP->GetMaterals());
+	}
 }
 
-void MeshComponent::SetMaterials(std::vector<WeakPtr<Material>> material, int index)
+void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
 {
+	if (index < 0 || index > m_materials.size())
+	{
+		IS_CORE_ERROR("[MeshComponent::SetMaterial] Index is not within Materials bounds.");
+		return;
+	}
+	m_materials[index] = material;
+}
+
+void MeshComponent::SetMaterials(std::vector<WeakPtr<Material>> materials)
+{
+	m_materials = materials;
 }
 
 void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)

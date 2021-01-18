@@ -6,6 +6,7 @@ namespace vks
 {
 	VulkanFrameBuffer::VulkanFrameBuffer()
 		: m_destroyed(false)
+		, m_renderPassInfo{ 0, 1 }
 	{ }
 
 	VulkanFrameBuffer::~VulkanFrameBuffer()
@@ -44,6 +45,7 @@ namespace vks
 
 		attachment.Name = attachmentName;
 		attachment.Format = (VkFormat)format;
+		attachment.ImageUsage = imageUsage;
 
 		if (imageUsage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
 		{
@@ -55,8 +57,7 @@ namespace vks
 			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 			attachment.ImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 		}
-
-		IS_CORE_ASSERT((aspectMask > 0), "");
+		IS_CORE_ASSERT((aspectMask > 0), "[VulkanFrameBuffer::CreateAttachment] aspectMask must not be 0.");
 
 		VkImageCreateInfo image = vks::initializers::imageCreateInfo();
 		image.imageType = VK_IMAGE_TYPE_2D;
@@ -94,6 +95,58 @@ namespace vks
 		ThrowIfFailed(vkCreateImageView(*device, &imageView, nullptr, &attachment.ImageView));
 	
 		m_attachmnets.push_back(attachment);
+	}
+
+	void VulkanFrameBuffer::CreateAttachment(FrameBufferAttachment& attachment)
+	{
+		VkImageAspectFlags aspectMask = 0;
+
+		if (attachment.ImageUsage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)
+		{
+			aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			attachment.ImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		}
+		if (attachment.ImageUsage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)
+		{
+			aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+			attachment.ImageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		}
+		IS_CORE_ASSERT((aspectMask > 0), "[VulkanFrameBuffer::CreateAttachment] aspectMask must not be 0.");
+
+		VkImageCreateInfo image = vks::initializers::imageCreateInfo();
+		image.imageType = VK_IMAGE_TYPE_2D;
+		image.format = (VkFormat)attachment.Format;
+		image.extent.width = m_width;
+		image.extent.height = m_height;
+		image.extent.depth = 1;
+		image.mipLevels = 1;
+		image.arrayLayers = 1;
+		image.samples = static_cast<VkSampleCountFlagBits>(m_renderPassInfo.SamplerCount);
+		image.tiling = VK_IMAGE_TILING_OPTIMAL;
+		image.usage = attachment.ImageUsage | VK_IMAGE_USAGE_SAMPLED_BIT;
+
+		VkMemoryAllocateInfo memAlloc = vks::initializers::memoryAllocateInfo();
+		VkMemoryRequirements memReqs;
+
+		auto device = VulkanDevice::Instance();
+		ThrowIfFailed(vkCreateImage(*device, &image, nullptr, &attachment.Image));
+		vkGetImageMemoryRequirements(*device, attachment.Image, &memReqs);
+		memAlloc.allocationSize = memReqs.size;
+		memAlloc.memoryTypeIndex = device->GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		ThrowIfFailed(vkAllocateMemory(*device, &memAlloc, nullptr, &attachment.DeviceMemory));
+		ThrowIfFailed(vkBindImageMemory(*device, attachment.Image, attachment.DeviceMemory, 0));
+
+		VkImageViewCreateInfo imageView = vks::initializers::imageViewCreateInfo();
+		imageView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		imageView.format = (VkFormat)attachment.Format;
+		imageView.subresourceRange = {};
+		imageView.subresourceRange.aspectMask = aspectMask;
+		imageView.subresourceRange.baseMipLevel = 0;
+		imageView.subresourceRange.levelCount = 1;
+		imageView.subresourceRange.baseArrayLayer = 0;
+		imageView.subresourceRange.layerCount = 1;
+		imageView.image = attachment.Image;
+		ThrowIfFailed(vkCreateImageView(*device, &imageView, nullptr, &attachment.ImageView));
 	}
 
 	void VulkanFrameBuffer::CreateRenderPass()
@@ -213,6 +266,24 @@ namespace vks
 
 		VkFenceCreateInfo fenceCreateInfo = vks::initializers::fenceCreateInfo(VK_FENCE_CREATE_SIGNALED_BIT);
 		ThrowIfFailed(vkCreateFence(*device, &fenceCreateInfo, nullptr, &m_fence));
+	}
+
+	void VulkanFrameBuffer::SetSampleCount(const U32& sampleCount, const bool& rebuild)
+	{
+		m_renderPassInfo.SamplerCount = sampleCount;
+
+		auto device = VulkanDevice::Instance();
+		if (rebuild)
+		{
+			for (auto& attachment : m_attachmnets)
+			{
+				vkDestroyImage(*device, attachment.Image, nullptr);
+				vkDestroyImageView(*device, attachment.ImageView, nullptr);
+				vkFreeMemory(*device, attachment.DeviceMemory, nullptr);
+
+				CreateAttachment(attachment);
+			}
+		}
 	}
 
 	const FrameBufferAttachment& VulkanFrameBuffer::GetAttachment(const std::string& attachmentName)

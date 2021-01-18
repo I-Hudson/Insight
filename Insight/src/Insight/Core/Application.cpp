@@ -61,6 +61,10 @@ namespace Insight
 
 		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
 
+		m_utitledScene = CreateSharedPtr<Scene>();
+		m_utitledScene->SetActiveScene();
+		m_utitledScene->SetSceneName("Untitled Scene");
+
 		//assertModule->Deserialize();
 	}
 
@@ -68,6 +72,9 @@ namespace Insight
 	{
 		IS_PROFILE_FUNCTION();
 
+		m_graphicsModule->WaitForIdle();
+
+		m_utitledScene.reset();
 		m_fileSystem.reset();
 		Module::ModuleManager::Destroy();
 
@@ -94,9 +101,6 @@ namespace Insight
 		uint32_t m_loopCount = 0;
 		uint32_t m_frameCount = 0;
 		float deltaTime = 0.0f;
-		Scene untitledScene;
-		untitledScene.SetActiveScene();
-		untitledScene.SetSceneName("Untitled Scene");
 
 		while (m_isRunning)
 		{
