@@ -222,7 +222,7 @@ namespace vks
 					if (buffer.Set == set)
 					{
 						descriptorSetLayoutBindings.push_back(vks::initializers::descriptorSetLayoutBinding(buffer.GetVulkanType(), data.GetVulkanShaderStage(), buffer.Binding));
-						bindFlag.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+						//bindFlag.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 					}
 				}
 			}
@@ -235,7 +235,7 @@ namespace vks
 			extendedInfo.pBindingFlags = bindFlag.data();
 
 			auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);
-			createInfo.pNext = &extendedInfo;
+			//createInfo.pNext = &extendedInfo;
 			ThrowIfFailed(vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &m_descriptorLayouts[set]));
 		}
 	}

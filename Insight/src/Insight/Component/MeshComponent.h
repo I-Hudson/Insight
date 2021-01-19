@@ -17,7 +17,7 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	void Draw(VkCommandBuffer cmd);
+	void Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc);
 
 	void SetMesh(WeakPtr<Mesh> mesh);
 	void SetModel(WeakPtr<Model> model);
@@ -26,7 +26,9 @@ public:
 	void SetMaterial(WeakPtr<Material> material, int index);
 	void SetMaterials(std::vector<WeakPtr<Material>> materials);
 
-	std::vector<WeakPtr<Material>>& GetMaterails() { return m_materials; }
+	std::vector<WeakPtr<Material>>& GetMaterials() { return m_materials; }
+	std::vector<MaterialBlockData>& GetMaterialBlockData() { return m_materialBlockDatas; }
+	void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
 	std::string& GetMeshName() { return m_meshName; }
 
 	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;

@@ -47,11 +47,11 @@ void MeshComponent::OnDestroy()
 	Insight::Module::GraphicsModule::m_meshs.erase(it);
 }
 
-void MeshComponent::Draw(VkCommandBuffer cmd)
+void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
 {
 	if (auto meshSP = m_mesh.lock())
 	{
-		meshSP->Draw(cmd, m_materials, m_materialBlockDatas);
+		meshSP->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
 	}
 }
 
@@ -78,11 +78,19 @@ void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
 		return;
 	}
 	m_materials[index] = material;
+	m_materialBlockDatas[index] = MaterialBlockData();
 }
 
 void MeshComponent::SetMaterials(std::vector<WeakPtr<Material>> materials)
 {
 	m_materials = materials;
+	m_materialBlockDatas.clear();
+	m_materialBlockDatas.resize(m_materials.size());
+}
+
+void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas)
+{
+	m_materialBlockDatas = materialBlockDatas;
 }
 
 void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)

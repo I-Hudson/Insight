@@ -5,7 +5,6 @@
 #include "Insight/Renderer/Renderer.h"
 #include "Insight/Module/WindowModule.h"
 
-#include "VulkanDevice.h"
 #include "Swapchain.h"
 #include "VulkanMaterial.h"
 #include "VulkanFrameBuffer.h"
@@ -42,6 +41,8 @@ namespace vks
 //		WeakPtr<VulkanRenderer> m_renderer;
 //	};
 //#endif
+
+	class VulkanDevice;
 
 	class IS_API VulkanRenderer : public Insight::Renderer
 		, public std::enable_shared_from_this<VulkanRenderer>

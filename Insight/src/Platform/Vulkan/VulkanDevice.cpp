@@ -4,7 +4,6 @@
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Config/Config.h"
 
-
 namespace vks
 {
 	/**
@@ -12,11 +11,14 @@ namespace vks
 	*
 	* @param m_physicalDevice Physical device that is to be used
 	*/
-	VulkanDevice::VulkanDevice(VkPhysicalDevice m_physicalDevice)
+	VulkanDevice::VulkanDevice(VkPhysicalDevice physicalDevice, VkInstance instance)
 		: m_renderPass(nullptr)
 	{
-		assert(m_physicalDevice);
-		this->m_physicalDevice = m_physicalDevice;
+		IS_CORE_ASSERT(instance, "[VulkanDevice::VulkanDevice] Instance can not be null.");
+		IS_CORE_ASSERT(m_physicalDevice, "[VulkanDevice::VulkanDevice] Physical device can not be null.");
+
+		m_instance = instance;
+		m_physicalDevice = physicalDevice;
 
 		// Store Properties m_features, limits and m_properties of the physical device for later use
 		// Device m_properties also contain limits and sparse m_properties
@@ -67,6 +69,9 @@ namespace vks
 		{
 			vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
 		}
+
+		vmaDestroyAllocator(m_vmaAllocator);
+
 		//vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 		if (m_logicalDevice)
 		{
@@ -184,17 +189,15 @@ namespace vks
 	*
 	* @return VkResult of the device creation call
 	*/
-	VkResult VulkanDevice::CreateLogicalDevice(VkPhysicalDeviceFeatures m_enabledFeatures, std::vector<const char*> enabledExtensions, void* pNextChain, bool useSwapChain, VkQueueFlags requestedQueueTypes)
+	VkResult VulkanDevice::CreateLogicalDevice(VkPhysicalDeviceFeatures enabledFeatures, std::vector<const char*> enabledExtensions, void* pNextChain, bool useSwapChain, VkQueueFlags requestedQueueTypes)
 	{
 		// Desired queues need to be requested upon logical device creation
 		// Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
 		// requests different queue types
-
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
 
 		// Get queue family indices for the requested queue family types
 		// Note that the indices may overlap depending on the implementation
-
 		const float defaultQueuePriority(0.0f);
 
 		// Graphics queue
@@ -308,14 +311,20 @@ namespace vks
 			deviceCreateInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 			deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
 		}
-
-		this->m_enabledFeatures = m_enabledFeatures;
+		m_enabledFeatures = enabledFeatures;
 
 		VkResult result = vkCreateDevice(m_physicalDevice, &deviceCreateInfo, nullptr, &m_logicalDevice);
 		if (result != VK_SUCCESS)
 		{
 			return result;
 		}
+
+		VmaAllocatorCreateInfo allocatorInfo = {};
+		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+		allocatorInfo.physicalDevice = m_physicalDevice;
+		allocatorInfo.device = m_logicalDevice;
+		allocatorInfo.instance = m_instance;
+		vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator);
 
 		vkGetDeviceQueue(m_logicalDevice, m_queueFamilyIndices.graphics, 0, &m_queueFamily.graphics);
 		vkGetDeviceQueue(m_logicalDevice, m_queueFamilyIndices.compute, 0, &m_queueFamily.compute);

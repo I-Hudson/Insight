@@ -18,6 +18,9 @@ namespace Insight::Render
 	class Texture;
 }
 
+class MeshComponent;
+using MeshMaterialUpdateFunc = const std::function<void(MeshComponent* meshCom, SharedPtr<Material> materai, MaterialBlockData& materialBlockData)>&;
+
 class Mesh : public Insight::Object
 {
 public:
@@ -32,7 +35,7 @@ public:
 	const U32& GetMeshSubCount() { return static_cast<U32>(m_subMeshes.size()); }
 
 	void Draw(VkCommandBuffer cmd);
-	void Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materials, const std::vector<MaterialBlockData>& materialBlockDatas);
+	void Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt);
 
 private:
 	void LoadSubMeshes(const std::string& filePath, Model& model);

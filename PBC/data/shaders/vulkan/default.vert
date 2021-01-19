@@ -14,6 +14,11 @@ layout (set = 0, binding = 0) uniform UBO
 	vec4 lightPos;
 } ubo;
 
+layout (set = 0, binding = 1) uniform MODELUBO //#dynamic
+{
+	mat4 model;
+} modelUBO;
+
 layout (location = 0) out vec4 outPos;
 layout (location = 1) out vec4 outNormal;
 layout (location = 2) out vec4 outColor;
@@ -21,7 +26,7 @@ layout (location = 3) out vec2 outUV;
 
 void main() 
 {
-	gl_Position = ubo.projection * inverse(ubo.view) * ubo.model * vec4(inPos.xyz, 1.0);
+	gl_Position = ubo.projection * inverse(ubo.view) * modelUBO.model * vec4(inPos.xyz, 1.0);
 	outPos = ubo.projection * inverse(ubo.view) * ubo.model * vec4(inPos.xyz, 1.0);
 	outNormal = vec4(inNormal, 1.0);
 	outColor = inColor;

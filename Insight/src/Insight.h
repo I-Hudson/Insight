@@ -21,7 +21,6 @@
 
 #include "../vendor/imgui/imgui.h"
 
-
 #include "Insight/Model/Model.h"
 #include "Insight/Model/Mesh.h"
 #include "Insight/Renderer/Texture.h"

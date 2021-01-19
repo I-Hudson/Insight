@@ -4,6 +4,7 @@
 #include "VulkanHeader.h"
 #include "VulkanBuffer.h"
 #include "VulkanFrameBuffer.h"
+#include "VmaUsage.h"
 
 namespace vks
 {
@@ -13,7 +14,7 @@ namespace vks
 	class IS_API VulkanDevice : public Insight::TSingleton<VulkanDevice>
 	{
 	public:
-		explicit VulkanDevice(VkPhysicalDevice m_physicalDevice);
+		explicit VulkanDevice(VkPhysicalDevice m_physicalDevice, VkInstance instance);
 		~VulkanDevice();
 		uint32_t        GetMemoryType(uint32_t typeBits, VkMemoryPropertyFlags m_properties, VkBool32* memTypeFound = nullptr) const;
 		uint32_t&		GetQueueFamilyIndex(VkQueueFlagBits queueFlags);
@@ -59,6 +60,7 @@ namespace vks
 		void CreateDescriptorPool();
 
 	private:
+		VkInstance m_instance;
 		/** @brief Physical device representation */
 		VkPhysicalDevice m_physicalDevice;
 		/** @brief Logical device representation (application's view of the device) */
@@ -79,6 +81,8 @@ namespace vks
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 		/** @brief Set to true when the debug marker extension is detected */
 		bool m_enableDebugMarkers = false;
+
+		VmaAllocator m_vmaAllocator;
 
 		// Global render pass for frame buffer writes. Theses are populated from VulkanRenderer and are the default 
 		// objects to use when rendering. They are used from VulkanMaterial::CreateDefault.

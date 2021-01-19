@@ -59,14 +59,22 @@ public:
 		glm::vec4 titleBgCollapsed = Insight::Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 	
-		const int SKY = ('*' || ' ');
-	
-		auto meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
-		auto model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
-		meshComponent->SetModel(model);
+		for (size_t i = 0; i < 4; i++)
+		{
+			auto meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
+			auto model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+			meshComponent->SetModel(model);
+			meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
+		}
 
-		meshComponent = Entity::Create("Building Entity")->AddComponent<MeshComponent>();
-		model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
+
+		//meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
+		//model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+		//meshComponent->SetModel(model);
+		//meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(5,0,0));
+
+		auto meshComponent = Entity::Create("Building Entity")->AddComponent<MeshComponent>();
+		auto model = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
 		meshComponent->SetModel(model);
 
 	}

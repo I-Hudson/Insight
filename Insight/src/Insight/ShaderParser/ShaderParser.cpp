@@ -251,8 +251,16 @@ namespace Insight
 		// where the word starts as we know the last character on the line 
 		// must be part of the name.
 		std::string sValue;
+		U64 startPos = 0;
 		bool wordStart = false;
-		for (auto it = line.rbegin(); it != line.rend(); ++it)
+
+		auto dyanmicPos = line.find("//#dynamic");
+		if (dyanmicPos != std::string::npos)
+		{
+			startPos = line.size() - dyanmicPos;
+		}
+
+		for (auto it = line.rbegin() + startPos; it != line.rend(); ++it)
 		{
 			if (isspace(*it) || *it == '{')
 			{

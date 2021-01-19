@@ -77,8 +77,8 @@ namespace vks
 	void VulkanBuffer::CopyTo(void* data, VkDeviceSize size, VkDeviceSize offset)
 	{
 		assert(mapped);
-		PtrInt* dstPtr = (PtrInt*)mapped + offset;
-		memcpy((void*)dstPtr, data, size);
+		void* dstPtr = static_cast<char*>(mapped) + offset;
+		memcpy(dstPtr, data, size);
 	}
 
 	/**

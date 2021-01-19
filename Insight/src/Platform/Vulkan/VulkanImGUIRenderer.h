@@ -3,12 +3,15 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
 #include "VulkanHeader.h"
-#include "VulkanRenderer.h"
-#include "VulkanDevice.h"
 #include "VulkanBuffer.h"
 #include <imgui.h>
 #include <glm/glm.hpp>
 #include "Insight/Threading/TThreadSafe.h"
+
+namespace Insight
+{
+	class Event;
+}
 
 namespace vks
 {
@@ -32,24 +35,5 @@ namespace vks
 
 	private:
 		bool m_newFrameInit = false;
-		SharedPtr<VulkanRenderer> m_renderer;
-
-		// Vulkan resources for rendering the UI
-		VkSampler             sampler;
-		vks::VulkanBuffer     vertexBuffer;
-		vks::VulkanBuffer     indexBuffer;
-		int32_t               vertexCount = 0;
-		int32_t               indexCount = 0;
-		VkDeviceMemory        fontMemory = VK_NULL_HANDLE;
-		VkImage               fontImage = VK_NULL_HANDLE;
-		VkImageView           fontView = VK_NULL_HANDLE;
-		VkPipelineCache       pipelineCache;
-		VkPipelineLayout      pipelineLayout;
-		VkPipeline            pipeline;
-		VkDescriptorPool      descriptorPool;
-		VkDescriptorSetLayout descriptorSetLayout;
-		VkDescriptorSet       descriptorSet;
-		SharedPtr<vks::VulkanDevice> device;
-		VkRenderPass			renderPass;
 	};
 }

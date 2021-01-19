@@ -3,6 +3,7 @@
 #include "VulkanHeader.h"
 #include "VulkanRenderer.h"
 #include "VulkanDebug.h"
+#include "VulkanDevice.h"
 
 #include <GLFW/glfw3.h>
 
@@ -266,7 +267,7 @@ namespace vks
 		// Vulkan device creation
 		// This is handled by a separate class that gets a logical device representation
 		// and encapsulates functions related to a device
-		m_vulkanDevice = CreateSharedPtr<vks::VulkanDevice>(m_physicalDevice);
+		m_vulkanDevice = CreateSharedPtr<vks::VulkanDevice>(m_physicalDevice, m_instance);
 		VkResult res = m_vulkanDevice->CreateLogicalDevice(m_enabledFeatures, m_enabledDeviceExtensions, m_deviceCreatepNextChain);
 		if (res != VK_SUCCESS)
 		{
@@ -668,6 +669,33 @@ namespace vks
 		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
 		mvp.lightPos = m_lightPos;
 
+		auto updateMaterail = [&](MeshComponent* meshCom, SharedPtr<Material> material, MaterialBlockData& materialBlockData)
+		{
+			IS_PROFILE_SCOPE("Uniform Update");
+			auto vMat = DynamicPointerCast<VulkanMaterial>(material);
+
+			vMat->UploadUniform("UBO", &mvp, sizeof(MVP), materialBlockData);
+			auto tc = meshCom->GetComponent<TransformComponent>();
+			auto transform = tc->GetTransform();
+			vMat->UploadUniform("MODELUBO", &transform, sizeof(glm::mat4), materialBlockData);
+		};
+
+		// TODO rework this. Really there should be a material manager with handles all the material lifetimes.
+		{
+			IS_PROFILE_SCOPE("Material reset");
+			for (auto& mesh : meshes)
+			{
+				if (auto meshSP = mesh.lock())
+				{
+					for (auto& mat : meshSP->GetMaterials())
+					{
+						if (auto& matSP = mat.lock())
+							matSP->ResetUniformInfo();
+					}
+				}
+			}
+		}
+
 		{
 			// Set target frame buffer
 			renderPassBeginInfo.framebuffer = m_frameBuffer.GetFrameBuffer();
@@ -676,32 +704,24 @@ namespace vks
 
 			vkCmdBeginRenderPass(m_frameBufferCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-			VkViewport viewport = vks::initializers::viewport(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0.0f, 1.0f);
+			VkViewport viewport = vks::initializers::viewport(static_cast<float>(m_frameBuffer.GetWidth()), static_cast<float>(m_frameBuffer.GetHeight()), 0.0f, 1.0f);
 			vkCmdSetViewport(m_frameBufferCmdBuffer, 0, 1, &viewport);
 
 			VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
 			vkCmdSetScissor(m_frameBufferCmdBuffer, 0, 1, &scissor);
 
 			// This should be replaced by the mesh components in the scene.
-			for (auto& mesh : meshes)
 			{
-				if (auto meshSP = mesh.lock())
+				IS_PROFILE_SCOPE("All Draws");
+				for (auto& mesh : meshes)
 				{
-					//TODO REMOVE THIS. Place this somewhere else. no need for a 
-					// double loop here.
+					if (auto meshSP = mesh.lock())
 					{
-						IS_PROFILE_SCOPE("Updating materials.");
-						auto mats = meshSP->GetMaterails();
-						for (auto& m : mats)
 						{
-							if (auto mSP = m.lock())
-							{
-								MaterialBlockData data;
-								mSP->UploadUniform("UBO", &mvp, sizeof(MVP), data);
-							}
+							IS_PROFILE_SCOPE("Single Draw");
+							meshSP->Draw(m_frameBufferCmdBuffer, updateMaterail);
 						}
 					}
-					meshSP->Draw(m_frameBufferCmdBuffer);
 				}
 			}
 
@@ -744,7 +764,7 @@ namespace vks
 
 			vkCmdBeginRenderPass(m_presentCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-			VkViewport viewport = vks::initializers::viewport(width, height, 0.0f, 1.0f);
+			VkViewport viewport = vks::initializers::viewport(static_cast<float>(width), static_cast<float>(height), 0.0f, 1.0f);
 			vkCmdSetViewport(m_presentCmdBuffers[i], 0, 1, &viewport);
 
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);

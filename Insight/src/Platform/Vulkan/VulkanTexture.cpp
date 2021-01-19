@@ -1,7 +1,6 @@
 #include "ispch.h"
 #include "VulkanTexture.h"
 #include "VulkanDevice.h"
-#include "cro_mipmap.h"
 
 namespace vks
 {

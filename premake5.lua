@@ -40,6 +40,7 @@ IncludeDir["IconsFontAwesome"] = "$(SolutionDir)Insight/vendor/IconFontCppHeader
 
 IncludeDir["Vulkan"] = os.getenv("VK_SDK_PATH") .. "/Include"
 IncludeDir["glslang"] = "$(SolutionDir)Insight/vendor/glslang/"
+IncludeDir["VulkanMemoryAllocator"] = "$(SolutionDir)Insight/vendor/VulkanMemoryAllocator/src"
 
 -- Editor Includes
 IncludeDir["imguiFileDialog"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrowser/"

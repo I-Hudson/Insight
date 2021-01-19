@@ -9,6 +9,7 @@
 
 #include "Insight/FileSystem/FileSystem.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
+#include "Insight/Component/MeshComponent.h"
 
 Mesh::~Mesh()
 {
@@ -65,7 +66,7 @@ void Mesh::Draw(VkCommandBuffer cmd)
 	}
 }
 
-void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materials, const std::vector<MaterialBlockData>& materialBlockDatas)
+void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
 {
 	for (U64 i = 0; i < m_subMeshes.size(); ++i)
 	{
@@ -78,7 +79,10 @@ void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>> materi
 		{
 			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
 			auto vMaterialSP = DynamicPointerCast<vks::VulkanMaterial>(materialSP);
-			//vMaterialSP->Update();
+			if (materialUpdateFunc)
+			{
+				materialUpdateFunc(meshCompoennt, vMaterialSP, materialBlockData);
+			}
 			vMaterialSP->Bind(cmd, &materialBlockData);
 			m_subMeshes.at(i)->Draw(cmd);
 		}

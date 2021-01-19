@@ -339,6 +339,9 @@
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Platform\Vulkan\VmaUsage.h">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
@@ -1773,6 +1776,9 @@
       <Filter>src\Insight\Time</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
+      <Filter>src\Platform\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\VmaUsage.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp">

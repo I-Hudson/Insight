@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Insight/Renderer/ImGuiRenderer.h"
-
+#include "Module/GraphicsModule.h"
 #include "Platform/Vulkan/VulkanImGUIRenderer.h"
 
 namespace Insight
@@ -15,7 +15,7 @@ namespace Insight
 
 	SharedPtr<ImGuiRenderer> Insight::ImGuiRenderer::Create()
 	{
-		switch (Renderer::s_API)
+		switch (Module::GraphicsModule::Instance()->GetAPI())
 		{
 			case GraphicsAPI::Vulkan: return CreateSharedPtr<vks::VulkanImGUIRenderer>();
 		}

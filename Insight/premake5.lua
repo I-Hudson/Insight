@@ -45,6 +45,7 @@ project "Insight"
         "%{IncludeDir.IconsFontAwesome}",
 
         "%{IncludeDir.glslang}",
+        "%{IncludeDir.VulkanMemoryAllocator}",
         "%{IncludeDir.Vulkan}",
 	}
 

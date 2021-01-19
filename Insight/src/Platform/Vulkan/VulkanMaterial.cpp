@@ -92,6 +92,14 @@ namespace vks
 		}
 	}
 
+	void VulkanMaterial::ResetUniformInfo()
+	{
+		for (auto& uniform : m_uniformBuffers)
+		{
+			uniform.second.DynamicUniformBlock.TopIndex = 0;
+		}
+	}
+
 	void VulkanMaterial::UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData)
 	{
 		if (m_uniformBuffers.find(key) == m_uniformBuffers.end())
@@ -99,18 +107,13 @@ namespace vks
 			return;
 		}
 
-		MaterialUniformBuffer& mub = m_uniformBuffers[key];
+		MaterialUniformBuffer& mub = m_uniformBuffers.at(key);
 
 		if (mub.Type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC)
 		{
-			return;
-			if (!materialBlockData.InUse)
-			{
-				materialBlockData = FindValidMaterialBlock(mub, key);
-			}
-
-			VkDeviceSize offset = materialBlockData.DynamicBuffers[key].Index * mub.DynamicUniformBlock.DynamicUniformAlign;
-			void* dstPtr = (void*)((U64*)mub.DynamicUniformBlock.DynamicBuffer + offset);
+			FindValidMaterialBlock(mub, key, materialBlockData);
+			VkDeviceSize offset = materialBlockData.DynamicBuffers[key].Index;
+			void* dstPtr = (char*)mub.DynamicUniformBlock.DynamicBuffer + offset;
 			void* srcPtr = data;
 			memcpy(dstPtr, srcPtr, dataSize);
 
@@ -197,7 +200,7 @@ namespace vks
 					m_uniformBuffers[key].Buffer = ubo;
 
 					CalcDynamicUniformAlig(m_uniformBuffers[key].DynamicUniformBlock.DynamicUniformAlign, uniformBlock.Size);
-					CreateDynamicUniformBuffer(m_uniformBuffers[key], m_uniformBuffers[key].DynamicUniformBlock.DynamicUniformAlign);
+					CreateDynamicUniformBuffer(m_uniformBuffers[key], m_uniformBuffers[key].DynamicUniformBlock.DynamicUniformAlign * 32);
 
 					m_uniformBuffers[key].Binding = uniformBlock.Binding;
 					m_uniformBuffers[key].Type = uniformBlock.GetVulkanType();
@@ -309,12 +312,12 @@ namespace vks
 
 			// Copy and delete old data.
 			memcpy_s(materialBlock.DynamicUniformBlock.DynamicBuffer, materialBlock.DynamicUniformBlock.DynamicBufferSize, oldArrPtr, oldArrSize);
-			delete oldArrPtr;
+			_aligned_free(oldArrPtr);
 
 			//VulkanDevice::Instance()->QueueIdleCommand([&]()
 			//	{
-					materialBlock.Buffer.Unmap();
-					materialBlock.Buffer.Destroy();
+			materialBlock.Buffer.Unmap();
+			materialBlock.Buffer.Destroy();
 			//	});
 		}
 		else
@@ -326,56 +329,37 @@ namespace vks
 
 		//VulkanDevice::Instance()->QueueIdleCommand([&]()
 		//	{
-				ThrowIfFailed(m_device->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-					newSize, &materialBlock.Buffer));
-				ThrowIfFailed(materialBlock.Buffer.Map());
+		ThrowIfFailed(m_device->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+			newSize, &materialBlock.Buffer));
+		ThrowIfFailed(materialBlock.Buffer.Map());
 
-				materialBlock.Buffer.CopyTo(materialBlock.DynamicUniformBlock.DynamicBuffer, newSize);
-				materialBlock.Buffer.Flush();
+		materialBlock.Buffer.CopyTo(materialBlock.DynamicUniformBlock.DynamicBuffer, newSize);
+		materialBlock.Buffer.Flush();
 		//	});
 	}
 
-	MaterialBlockData VulkanMaterial::FindValidMaterialBlock(MaterialUniformBuffer& materialUniformBuffer, const std::string& uniformKey)
+	void VulkanMaterial::FindValidMaterialBlock(MaterialUniformBuffer& materialUniformBuffer, const std::string& uniformKey, MaterialBlockData& materialBlockData)
 	{
 		MaterialUniformDynamicBlock& dynamicBlock = materialUniformBuffer.DynamicUniformBlock;
 		U32 blockIndex = -1;
-		for (U32 i = 0; i < dynamicBlock.DynamicBlocks.size(); ++i)
+		if (dynamicBlock.TopIndex >= dynamicBlock.DynamicBufferSize)
 		{
-			if (!dynamicBlock.DynamicBlocks[i].InUse)
-			{
-				blockIndex = i;
-				break;
-			}
+			// resize
+			CreateDynamicUniformBuffer(materialUniformBuffer, dynamicBlock.DynamicBufferSize * 2);
+			Update();
 		}
 
-		if (blockIndex == -1)
+		if (!materialBlockData.InUse)
 		{
-			U32 orginalVectorSize = static_cast<U32>(dynamicBlock.DynamicBlocks.size());
-			if (dynamicBlock.DynamicBlocks.size() == 0)
-			{
-				dynamicBlock.DynamicBlocks.resize(1);
-			}
-			else
-			{
-				// Double the MaterialDynamicUniformInfo in the vector.
-				dynamicBlock.DynamicBlocks.resize(orginalVectorSize * (U64)2);
-			}
-			blockIndex = orginalVectorSize;
-
-			//TODO: Rebuild buffer as the size has changed.
-			CreateDynamicUniformBuffer(materialUniformBuffer, dynamicBlock.DynamicUniformAlign * dynamicBlock.DynamicBlocks.size());
+			materialBlockData.UUID = Insight::UUID::GenUUID_U128();
+			materialBlockData.InUse = true;
+			materialBlockData.DynamicBuffers.clear();
 		}
 
-		MaterialBlockData& materialBlockData = dynamicBlock.DynamicBlocks[blockIndex];
-		materialBlockData.UUID = Insight::UUID::GenUUID_U128();
-		materialBlockData.InUse = true;
-		materialBlockData.DynamicBuffers.clear();
-		materialBlockData.DynamicBuffers[uniformKey].InUse = true;
-		materialBlockData.DynamicBuffers[uniformKey].Index = blockIndex;
-
-		// Return a copy of the MaterialBlockData we have just populated.
-		return dynamicBlock.DynamicBlocks[blockIndex];
+		materialBlockData.DynamicBuffers[uniformKey].Index = static_cast<U32>(dynamicBlock.TopIndex);
+		materialBlockData.DynamicBuffers[uniformKey].DynamicOffset = static_cast<U32>(dynamicBlock.DynamicUniformAlign);
+		dynamicBlock.TopIndex += dynamicBlock.DynamicUniformAlign;
 	}
 
 	std::vector<VkDescriptorSet> VulkanMaterial::GetDescriptorSets()
