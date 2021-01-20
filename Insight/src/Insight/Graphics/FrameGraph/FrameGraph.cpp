@@ -1,7 +1,7 @@
 #include "ispch.h"
 
-#include "Insight/Renderer/FrameGraph/FrameGraph.h"
-#include "Insight/Core/Log.h"
+#include "Graphics/FrameGraph/FrameGraph.h"
+#include "Core/Log.h"
 
 namespace Insight
 {

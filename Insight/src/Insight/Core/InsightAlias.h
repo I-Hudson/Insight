@@ -23,6 +23,8 @@ using I16 = int16_t;
 using I32 = int32_t;
 using I64 = int64_t;
 
+using WChar = wchar_t;
+
 using PtrDiff = std::ptrdiff_t;
 using PtrInt = uintptr_t;
 
@@ -58,3 +60,13 @@ template<typename T>
 class TUniquePtr<T>;
 using UniquePtr = TUniquePtr<T>;
 #endif
+
+// Declares full set of operators for the enum type (using binary operation on integer values)
+#define DECLARE_ENUM_OPERATORS(T) \
+    inline T operator~ (T a) { return (T)~(int)a; } \
+    inline T operator| (T a, T b) { return (T)((int)a | (int)b); } \
+    inline int operator& (T a, T b) { return ((int)a & (int)b); } \
+    inline T operator^ (T a, T b) { return (T)((int)a ^ (int)b); } \
+    inline T& operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); } \
+    inline T& operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); } \
+    inline T& operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }

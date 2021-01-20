@@ -85,13 +85,15 @@ project "Insight"
         defines 
         {  
             "IS_PLATFORM_WINDOWS",
+            "IS_PLATFORM_WIN32",
+            "WIN32_LEAN_AND_MEAN",
             "GLM_FORCE_SWIZZLE",
             "GLM_FORCE_SILENT_WARNINGS",
             "IS_STANDARD_POINTER",
         }
 
     filter "configurations:Debug"
-        defines { "IS_DEBUG", "IS_VULKAN", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN", "IMGUI_ENABLED" }
+        defines { "IS_DEBUG", "IS_VULKAN", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN", "IMGUI_ENABLED", "VMA_RECORDING_ENABLED" }
         symbols "on"
         links 
         {

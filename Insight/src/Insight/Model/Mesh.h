@@ -2,7 +2,7 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Core/Object.h"
 #include "SubMesh.h"
-#include "Insight/Renderer/Material.h"
+#include "Graphics/Material.h"
 #include "Insight/Module/GraphicsModule.h"
 
 class Model;

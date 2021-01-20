@@ -4,10 +4,12 @@
 
 #ifdef  IS_PLATFORM_WINDOWS
 
+#include "Compiler.h"
 #include "InsightAlias.h"
 #include "Object.h"
 #include "Utils.h"
 #include "Insight/Instrumentor/Instrumentor.h"
+#include "Enums.h"
 
 #ifdef IS_DEBUG
 
@@ -52,7 +54,7 @@
 #define GET_SHORT_NAME_OF_TYPE(type) Insight::Memory::MemoryManager::Instance()->GetShortNameOfType<type>()
 
 #define BIT(x) (1 << x)
-#define ARRAY_SIZEOF(a) (sizeof(a) / (sizeof(a)[0]))
+#define ARRAY_SIZEOF(array) (sizeof(array) / sizeof(array[0]))
 
 #define ENUM_TO_STRING(r) return #r
 

@@ -19,13 +19,13 @@
 #include "Insight/Component/TransformComponent.h"
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Model/Model.h"
-#include "Insight/Renderer/Texture.h"
+#include "Graphics/Texture.h"
 #include "Insight/FileSystem/FileSystem.h"
 
 #include "Insight/Config/Config.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Time/Time.h"
-#include <Insight\Renderer\ImGuiRenderer.cpp>
+#include "Graphics/ImGuiRenderer.cpp"
 
 namespace vks
 {

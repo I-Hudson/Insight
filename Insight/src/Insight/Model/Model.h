@@ -3,7 +3,7 @@
 #include "Insight/Core/Core.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 #include "Insight/Model/Mesh.h"
-#include "Insight/Renderer/Texture.h"
+#include "Graphics/Texture.h"
 #include "Insight/Core/Object.h"
 
 #include "Platform/Vulkan/VulkanBuffer.h"

@@ -16,6 +16,12 @@
     <Filter Include="src\Insight\Core">
       <UniqueIdentifier>{0A5BFDAC-F653-1CFF-1F86-01840BDEFB0A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Core\Collections">
+      <UniqueIdentifier>{F87A77B5-E435-6761-8DED-DFAB7987B1F1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Core\Types">
+      <UniqueIdentifier>{2EBEF21F-1AB8-1B72-0325-B282EFBD81DE}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\Entitiy">
       <UniqueIdentifier>{A7A590B1-1307-6EBF-9C74-B47108D5A47E}</UniqueIdentifier>
     </Filter>
@@ -27,6 +33,12 @@
     </Filter>
     <Filter Include="src\Insight\FileSystem">
       <UniqueIdentifier>{46D6303E-32D0-5990-1B3D-F0A007D6BFFC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Graphics">
+      <UniqueIdentifier>{F20738C4-DE96-C18D-87B5-D5887323D233}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Graphics\FrameGraph">
+      <UniqueIdentifier>{7EBE8251-EAA1-9191-F3A4-BFCD5F0758E2}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Input">
       <UniqueIdentifier>{F1BC144D-5DD3-12E3-A64A-9E0412A0E36A}</UniqueIdentifier>
@@ -49,14 +61,20 @@
     <Filter Include="src\Insight\Module">
       <UniqueIdentifier>{E7800CF9-D364-CD4E-3CC5-C7A128C8B7D0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Insight\Platform">
+      <UniqueIdentifier>{067CF244-F20A-7C0E-9B29-900987978CB4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Platform\Base">
+      <UniqueIdentifier>{504C577D-BC0E-8B07-05BF-199471C063E5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Platform\Win32">
+      <UniqueIdentifier>{6820C129-5430-6DFA-BDE9-D118A9185C93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Insight\Platform\Windows">
+      <UniqueIdentifier>{40CCA69E-2C87-964A-D53E-0F95C1D8E0DA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Insight\RTTI">
       <UniqueIdentifier>{E41D05AD-D016-24FF-F948-0984E5A0030B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\Renderer">
-      <UniqueIdentifier>{5883CF1F-4412-59E9-ED30-6DE4D99E698F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\Renderer\FrameGraph">
-      <UniqueIdentifier>{248E8E4F-9071-9D8F-9974-CBCB05D763E0}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Insight\Scene">
       <UniqueIdentifier>{0F7AC34D-7B90-C1E3-C407-4D05305D926B}</UniqueIdentifier>
@@ -150,13 +168,28 @@
     <ClInclude Include="src\Insight\Core\Application.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Core\CRC32.h">
+    <ClInclude Include="src\Insight\Core\Collections\span.h">
+      <Filter>src\Insight\Core\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Compiler.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core\Core.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Core\Delegate.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Encoding.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Core\EntryPoint.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Enums.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\HashFunctions.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core\InsightAlias.h">
@@ -165,11 +198,26 @@
     <ClInclude Include="src\Insight\Core\Log.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Core\NonCopyable.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\Core\Object.h">
+      <Filter>src\Insight\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Templates.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core\Type.h">
       <Filter>src\Insight\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Types\DateTime.h">
+      <Filter>src\Insight\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Types\Guid.h">
+      <Filter>src\Insight\Core\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Core\Types\TimeSpan.h">
+      <Filter>src\Insight\Core\Types</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core\UUID.h">
       <Filter>src\Insight\Core</Filter>
@@ -179,6 +227,9 @@
     </ClInclude>
     <ClInclude Include="src\Insight\Entitiy\Entity.h">
       <Filter>src\Insight\Entitiy</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Enums\GPUResourceUsage.h">
+      <Filter>src\Insight\Enums</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Enums\PropertyFlags.h">
       <Filter>src\Insight\Enums</Filter>
@@ -200,6 +251,42 @@
     </ClInclude>
     <ClInclude Include="src\Insight\FileSystem\WatchInfo.h">
       <Filter>src\Insight\FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\FrameGraph\FrameGraph.h">
+      <Filter>src\Insight\Graphics\FrameGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\Framebuffer.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\GPUBuffer.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\GPUBufferDescription.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\GPUResource.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\ImGuiRenderer.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\Material.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\PixelFormat.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\PixelFormatExtensions.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\Renderer.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\SplashScreen.h">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Graphics\Texture.h">
+      <Filter>src\Insight\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Input\Input.h">
       <Filter>src\Insight\Input</Filter>
@@ -261,35 +348,110 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\ClipboardBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\FileBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\FileSystemBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\FileSystemWatcherBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\PlatformBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\ThreadBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Base\WindowBase.h">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\CPUInfo.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\CriticalSection.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Defines.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\File.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\MemoryStats.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Platform.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Thread.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Types.h">
+      <Filter>src\Insight\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\IncludeWindowsHeaders.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32ConditionVariable.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32CriticalSection.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32Defines.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32File.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32FileSystem.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32Platform.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\Win32Thread.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Win32\WindowsMinimal.h">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\ComPtr.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsClipboard.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsDefines.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsFileSystem.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsFileSystemWatcher.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsInput.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsPlatform.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsPlatformSettings.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Platform\Windows\WindowsWindow.h">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight\RTTI\RTTI.h">
       <Filter>src\Insight\RTTI</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\RTTI\RTTITypes.h">
       <Filter>src\Insight\RTTI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Buffer.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h">
-      <Filter>src\Insight\Renderer\FrameGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Framebuffer.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\ImGuiRenderer.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Material.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Renderer.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\SplashScreen.h">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Renderer\Texture.h">
-      <Filter>src\Insight\Renderer</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Scene\Scene.h">
       <Filter>src\Insight\Scene</Filter>
@@ -328,6 +490,9 @@
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Threading\ThreadPool.hpp">
+      <Filter>src\Insight\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Insight\Threading\ThreadSpawner.h">
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Stopwatch.h">
@@ -1664,6 +1829,15 @@
     <ClCompile Include="src\Insight\Core\Object.cpp">
       <Filter>src\Insight\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Core\Types\DateTime.cpp">
+      <Filter>src\Insight\Core\Types</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Core\Types\Guid.cpp">
+      <Filter>src\Insight\Core\Types</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Core\Types\TimeSpan.cpp">
+      <Filter>src\Insight\Core\Types</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\Entitiy\Entity.cpp">
       <Filter>src\Insight\Entitiy</Filter>
     </ClCompile>
@@ -1675,6 +1849,36 @@
     </ClCompile>
     <ClCompile Include="src\Insight\FileSystem\WatchInfo.cpp">
       <Filter>src\Insight\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\FrameGraph\FrameGraph.cpp">
+      <Filter>src\Insight\Graphics\FrameGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\Framebuffer.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\GPUBuffer.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\GPUBufferDescription.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\ImGuiRenderer.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\Material.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\PixelFormatExtensions.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\Renderer.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\SplashScreen.cpp">
+      <Filter>src\Insight\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Graphics\Texture.cpp">
+      <Filter>src\Insight\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Input\Input.cpp">
       <Filter>src\Insight\Input</Filter>
@@ -1721,32 +1925,65 @@
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\FileBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\FileSystemBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\PlatformBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\StringUtilsBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\ThreadBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\WindowBase.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Base\WindowsManager.cpp">
+      <Filter>src\Insight\Platform\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Win32\Win32File.cpp">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Win32\Win32FileSystem.cpp">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Win32\Win32Platform.cpp">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Win32\Win32StringUtils.cpp">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Win32\Win32Thread.cpp">
+      <Filter>src\Insight\Platform\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsClipboard.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsFileSystem.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsFileSystemWatcher.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsInput.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsPlatform.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsWindow.DragDrop.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Insight\Platform\Windows\WindowsWindow.cpp">
+      <Filter>src\Insight\Platform\Windows</Filter>
+    </ClCompile>
     <ClCompile Include="src\Insight\RTTI\RTTI.cpp">
       <Filter>src\Insight\RTTI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Buffer.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp">
-      <Filter>src\Insight\Renderer\FrameGraph</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Framebuffer.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\ImGuiRenderer.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Material.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Renderer.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\SplashScreen.cpp">
-      <Filter>src\Insight\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Renderer\Texture.cpp">
-      <Filter>src\Insight\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\Scene\Scene.cpp">
       <Filter>src\Insight\Scene</Filter>

@@ -2,7 +2,7 @@
 
 #ifdef IS_VULKAN
 #include "Insight/Core/Core.h"
-#include "Insight/Renderer/Renderer.h"
+#include "Graphics/Renderer.h"
 #include "Insight/Module/WindowModule.h"
 
 #include "Swapchain.h"
@@ -10,7 +10,7 @@
 #include "VulkanFrameBuffer.h"
 #include "Insight/Model/Mesh.h"
 
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 #include "Insight/Threading/Threadpool.hpp"
 
 #include <glm/glm.hpp>

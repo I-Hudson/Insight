@@ -10,7 +10,7 @@
 #include "Module/WindowModule.h"
 #include "Module/GraphicsModule.h"
 #include "Module/InputModule.h"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 #include "Insight/Event/EventManager.h"
 #include "Insight/Scene/Scene.h"
 

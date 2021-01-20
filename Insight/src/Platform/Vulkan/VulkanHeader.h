@@ -8,7 +8,7 @@
 #include "VulkanInitializers.h"
 #include <vulkan/vulkan.hpp>
 #else
-#define VK_USE_PLATFORM_XCB_KHR
+#define VK_USE_IS_PLATFORM_XCB_KHR
 #include <vulkan/vk_sdk_platform.h>
 #endif
 

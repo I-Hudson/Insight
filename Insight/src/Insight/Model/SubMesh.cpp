@@ -2,7 +2,7 @@
 #include "SubMesh.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Renderer/Buffer.h"
+#include "Graphics/Buffer.h"
 
 #include "Platform/Vulkan/VulkanMaterial.h"
 #include "Platform/Vulkan/VulkanDevice.h"

@@ -6,7 +6,7 @@
 
 #endif
 
-#include "Insight/Renderer/Renderer.h"
+#include "Graphics/Renderer.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Config/Config.h"
 

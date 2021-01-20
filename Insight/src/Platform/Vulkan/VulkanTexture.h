@@ -1,6 +1,6 @@
 #pragma once
 #include "Insight/Core/Core.h"
-#include "Renderer/Texture.h"
+#include "Graphics/Texture.h"
 #include "VulkanHeader.h"
 
 namespace vks

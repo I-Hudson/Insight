@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Insight/Core/Core.h"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 #include "VulkanHeader.h"
 #include "VulkanBuffer.h"
 #include <imgui.h>

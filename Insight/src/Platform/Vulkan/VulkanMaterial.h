@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Insight/Core/Core.h"
-#include "Insight/Renderer/Material.h"
+#include "Graphics/Material.h"
 #include "VulkanHeader.h"
 #include "VulkanPipeline.h"
 #include "VulkanBuffer.h"

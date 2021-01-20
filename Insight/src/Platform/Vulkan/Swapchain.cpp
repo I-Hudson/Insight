@@ -9,7 +9,7 @@
 #include "Insight/Config/Config.h"
 
 #include "glm/glm.hpp"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 #include "backends/imgui_impl_vulkan.h"
 #include <GLFW/glfw3.h>
 

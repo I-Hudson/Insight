@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Insight/Renderer/Framebuffer.h"
+#include "Graphics/Framebuffer.h"
 
 namespace Insight
 {

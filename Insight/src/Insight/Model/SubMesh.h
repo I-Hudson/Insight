@@ -2,7 +2,7 @@
 
 #include "Insight/Core/Core.h"
 #include "Insight/Core/UUID.h"
-#include "Insight/Renderer/Buffer.h"
+#include "Graphics/GPUBuffer.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 
 #include <vector>

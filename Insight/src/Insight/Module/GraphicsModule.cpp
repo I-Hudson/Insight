@@ -4,7 +4,7 @@
 #include "Insight/Module/WindowModule.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 #include "Insight/Component/MeshComponent.h"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Core/Log.h"

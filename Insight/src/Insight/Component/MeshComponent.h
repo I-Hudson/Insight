@@ -2,7 +2,7 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Component/Component.h"
 #include "Insight/Model/Mesh.h"
-#include "Insight/Renderer/Material.h"
+#include "Graphics/Material.h"
 
 #include <../vendor/glm/glm/glm.hpp>
 

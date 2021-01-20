@@ -5,8 +5,8 @@
 #include "Insight/Templates/TSingleton.h"
 #include "Insight/Config/CVar.h"
 
-#include "Insight/Renderer/Renderer.h"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/Renderer.h"
+#include "Graphics/ImGuiRenderer.h"
 
 class MeshComponent;
 class CameraComponent;

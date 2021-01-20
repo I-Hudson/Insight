@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Graphics/ImGuiRenderer.h"
 #include "Module/GraphicsModule.h"
-#include "Platform/Vulkan/VulkanImGUIRenderer.h"
+#include "Vulkan/VulkanImGUIRenderer.h"
 
 namespace Insight
 {
