@@ -84,6 +84,8 @@ project "Insight"
 
         defines 
         {  
+            "INSIGHT_NAMESPACE=",
+
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "WIN32_LEAN_AND_MEAN",

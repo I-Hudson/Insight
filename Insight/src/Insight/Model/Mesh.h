@@ -12,16 +12,15 @@ struct aiMaterial;
 enum aiTextureType;
 struct aiScene;
 
-using LoadedTextures = std::vector<std::pair<std::string, SharedPtr<Insight::Render::Texture>>>;
-namespace Insight::Render
-{
-	class Texture;
-}
-
+using LoadedTextures = std::vector<std::pair<std::string, SharedPtr<Render::Texture>>>;
+	namespace Render
+	{
+		class Texture;
+	}
 class MeshComponent;
 using MeshMaterialUpdateFunc = const std::function<void(MeshComponent* meshCom, SharedPtr<Material> materai, MaterialBlockData& materialBlockData)>&;
 
-class Mesh : public Insight::Object
+class Mesh : public Object
 {
 public:
 	~Mesh();

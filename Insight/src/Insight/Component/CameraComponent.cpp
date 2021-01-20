@@ -42,21 +42,21 @@ void CameraComponent::OnCreate()
 	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
 	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 
-	if (!Insight::Module::GraphicsModule::Instance()->HasMainCamera())
+	if (!Module::GraphicsModule::Instance()->HasMainCamera())
 	{
-		Insight::Module::GraphicsModule::Instance()->SetMainCamera(this);
+		Module::GraphicsModule::Instance()->SetMainCamera(this);
 	}
 }
 
 void CameraComponent::OnDestroy()
 {
-	if (Insight::Module::GraphicsModule::IsInitialised() && Insight::Module::GraphicsModule::Instance()->IsThisMainCamera(this))
+	if (Module::GraphicsModule::IsInitialised() && Module::GraphicsModule::Instance()->IsThisMainCamera(this))
 	{
-		Insight::Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
+		Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
 	}
 }
 
-void CameraComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void CameraComponent::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
 	element->AddAttribute("Type", "CameraComponent");
@@ -65,7 +65,7 @@ void CameraComponent::Serialize(SharedPtr<Insight::Serialization::SerializableEl
 	element->AddAttribute("FarPlane", std::to_string(m_farPlane));
 }
 
-void CameraComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void CameraComponent::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	if (auto ptr = element->GetFirstAttribute("FOV"))
 	{
@@ -258,8 +258,8 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 	{
 	case CameraAspect::A_4x3: return 4.0f / 3.0f;
 	case CameraAspect::A_16x9: return 16.0f / 9.0f;
-	case CameraAspect::CurrentWindowSize: return (float)Insight::Module::WindowModule::GetWindow()->GetWidth() /
-		(float)Insight::Module::WindowModule::GetWindow()->GetHeight();
+	case CameraAspect::CurrentWindowSize: return (float)Module::WindowModule::GetWindow()->GetWidth() /
+		(float)Module::WindowModule::GetWindow()->GetHeight();
 
 	default: return 1.0f;
 	}

@@ -6,10 +6,8 @@
 
 #if defined(IS_EDITOR)
 
-EDITOR_DEF_TYPE(CameraComponent, Insight::Editor::CameraComponentEditorDrawer);
+EDITOR_DEF_TYPE(CameraComponent, Editor::CameraComponentEditorDrawer);
 
-namespace Insight
-{
 	namespace Editor
 	{
 		void CameraComponentEditorDrawer::OnDraw(Object& obj)
@@ -33,5 +31,4 @@ namespace Insight
 			}
 		}
 	}
-}
 #endif

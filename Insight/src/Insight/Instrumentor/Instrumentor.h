@@ -28,10 +28,8 @@
 #include <fstream>
 #include <iosfwd>
 
-#define INSIGHT_MAKE_CATEGORY(filter, color) ((Insight::Category::Type)(((uint64_t)(1ull) << (filter + 32)) | (uint64_t)color))
+#define INSIGHT_MAKE_CATEGORY(filter, color) ((Category::Type)(((uint64_t)(1ull) << (filter + 32)) | (uint64_t)color))
 
-namespace Insight
-{
 	namespace Profile
 	{
 		using FloatingPointMicroseconds = std::chrono::duration<double, std::micro>;
@@ -79,7 +77,7 @@ namespace Insight
 					// Subsequent profiling output meant for the original session will end up in the
 					// newly opened session instead.  That's better than having badly formatted
 					// profiling output.
-					if (Insight::Log::GetCoreLogger()) // Edge case: BeginSession() might be before Log::Init()
+					if (Log::GetCoreLogger()) // Edge case: BeginSession() might be before Log::Init()
 					{
 						IS_CORE_ERROR("Instrumentor::BeginSession('{0}') when session '{1}' already open.", "", m_CurrentSession->Name);
 					}
@@ -489,7 +487,6 @@ namespace Insight
 			GPU_CRITICAL = INSIGHT_MAKE_CATEGORY(Filter::GPU_CRITICAL, Color::Red),
 		};
 	};
-}
 
 #ifdef IS_PROFILE
 // Resolve which function signature macro will be used. Note that this only
@@ -513,11 +510,11 @@ namespace Insight
 #define IS_FUNC_SIG "IS_FUNC_SIG unknown!"
 #endif
 
-#define IS_PROFILE_BEGIN_SESSION() ::Insight::Profile::Instrumentor::Get().BeginSession()
-#define IS_PROFILE_END_SESSION() ::Insight::Profile::Instrumentor::Get().EndSession()
-#define IS_PROFILE_SAVE_SESSION(filePath) ::Insight::Profile::Instrumentor::Get().SaveSession(filePath)
-#define IS_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = ::Insight::Profile::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
-											   ::Insight::Profile::InstrumentationTimer timer##line(fixedName##line.Data)
+#define IS_PROFILE_BEGIN_SESSION() Profile::Instrumentor::Get().BeginSession()
+#define IS_PROFILE_END_SESSION() Profile::Instrumentor::Get().EndSession()
+#define IS_PROFILE_SAVE_SESSION(filePath) Profile::Instrumentor::Get().SaveSession(filePath)
+#define IS_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = Profile::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
+											   Profile::InstrumentationTimer timer##line(fixedName##line.Data)
 
 #define IS_PROFILE_FRAME(name) IS_PROFILE_SCOPE(name)
 #define IS_PROFILE_SCOPE_LINE(name, line) IS_PROFILE_SCOPE_LINE2(name, line)
@@ -535,7 +532,7 @@ namespace Insight
 #define IS_PROFILE_GPU_FUNCTION(name)
 #define IS_PROFILE_GPU_FLIP(swapchain)
 
-#define IS_PROFILE_START_CAPTURE() ::Insight::Profile::Instrumentor temp; temp.BeginSession()
+#define IS_PROFILE_START_CAPTURE() ::Profile::Instrumentor temp; temp.BeginSession()
 #define IS_PROFILE_STOP_CAPTURE() temp.EndSession()
 #define IS_PROFILE_SAVE_CAPTURE(filePath) temp.SaveSession(CheckAndAppend(".json", filePath))
 
@@ -546,7 +543,7 @@ namespace Insight
 #define IS_PROFILE_BEGIN_SESSION()
 #define IS_PROFILE_END_SESSION() OPTICK_SHUTDOWN()
 #define IS_PROFILE_SAVE_SESSION(filePath)
-#define IS_PROFILE_SCOPE(name) INSIGHT_PROFILE_CATEGORY_LINE(name, Insight::Category::Type::None)
+#define IS_PROFILE_SCOPE(name) INSIGHT_PROFILE_CATEGORY_LINE(name, Category::Type::None)
 #define IS_PROFILE_SCOPE_CAT(name, cat) INSIGHT_PROFILE_CATEGORY_LINE(name, cat)
 #define IS_PROFILE_FUNCTION() OPTICK_EVENT()
 #define IS_PROFILE_CATEGORY(name, category) INSIGHT_PROFILE_CATEGORY_LINE(name, category)

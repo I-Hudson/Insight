@@ -5,8 +5,6 @@
 #include "Insight/Config/ICVar.h"
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
 	class IS_API ConfigRegistry
 	{
 	public:
@@ -46,4 +44,3 @@ namespace Insight
 	private:
 		static std::unordered_map<std::string, ICVar*> m_values;
 	};
-}

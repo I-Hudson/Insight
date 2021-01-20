@@ -3,8 +3,6 @@
 #include "Insight/Scene/Scene.h"
 #include "Insight/Entitiy/Entity.h"
 
-namespace Insight
-{
 	namespace Editor
 	{
 		TopBarMenu::TopBarMenu(const SharedPtr<Module::EditorModule> editorModule)
@@ -62,4 +60,3 @@ namespace Insight
 			}
 		}
 	}
-}

@@ -9,12 +9,10 @@
 #include <string>
 
 #define CONFIG_GET_VAL(expr) expr.GetVal()
-#define CONFIG_VAL(expr) Insight::Config::GetInstance().expr.GetVal()
-#define CONFIG_SET(key, val) Insight::Config::GetInstance().SetVal(key, val)
-#define CONFIG_SET_P(expr, val) Insight::Config::GetInstance().expr.SetVal(val)
+#define CONFIG_VAL(expr) Config::GetInstance().expr.GetVal()
+#define CONFIG_SET(key, val) Config::GetInstance().SetVal(key, val)
+#define CONFIG_SET_P(expr, val) Config::GetInstance().expr.SetVal(val)
 
-namespace Insight
-{
 	class IS_API Config
 	{
 	public:
@@ -41,4 +39,3 @@ namespace Insight
 		ConfigRegistry m_cvarsRegistry;
 		std::string m_configFile;
 	};
-}

@@ -5,16 +5,13 @@
 #endif
 #include "InsightAlias.h"
 #include "Log.h"
-#include "UUID.h"
 #include "Type.h"
 
-namespace Insight
-{
 	class Object;
 
 	typedef std::function<void(Object*)> ObjectCallback;
 
-	class Object : public Insight::UUID
+	class Object
 	{
 	public:
 		Object();
@@ -23,6 +20,9 @@ namespace Insight
 		virtual void OnCreate() { }
 		virtual void OnDestroy() { }
 		virtual bool IsValid() { return m_refCount > 0; }
+
+		void SetUUID(const std::string& uuid);
+		const std::string& GetUUID() const { return m_uuid; }
 
 		template<typename T, typename... Args>
 		static SharedPtr<T> CreateObject(Args&& ...);
@@ -41,6 +41,7 @@ namespace Insight
 	private:
 		uint64_t m_refCount;
 		Type m_type;
+		std::string m_uuid;
 		std::unordered_map<void*, ObjectCallback> m_onDestroyCallbacks;
 	};
 
@@ -56,6 +57,5 @@ namespace Insight
 
 		return ptr;
 	}
-}
 #define REG_ON_DESTROY(objectPtr, callerClass, func) Object::RegisterOnDestroyCallback(std::bind(&func, objectPtr, std::placeholders::_1), callerClass)
 #define UNREG_ON_DESTROY() Object::UnregisterOnDestroyCallback(this)

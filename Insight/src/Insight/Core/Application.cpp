@@ -33,8 +33,6 @@
 
 //#define THREADS
 
-namespace Insight
-{
 	Application::Application()
 	{
 		IS_PROFILE_FUNCTION();
@@ -127,7 +125,7 @@ namespace Insight
 				m_windowModule->Update(deltaTime);
 
 #ifdef IMGUI_ENABLED
-				Insight::ImGuiRenderer::Instance()->NewFrame();
+				ImGuiRenderer::Instance()->NewFrame();
 #endif
 				m_moduleManager->Update(deltaTime);
 
@@ -173,7 +171,7 @@ namespace Insight
 		uint32_t m_frameCount = 0;
 
 		IS_PROFILE_THREAD("Render Thread");
-		//Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Insight::Category::AI);
+		//Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Category::AI);
 
 		while (m_isRunning)
 		{
@@ -194,4 +192,3 @@ namespace Insight
 		IS_CORE_INFO("RENDER LOOP COUNT: {0}", m_loopCount);
 		IS_CORE_INFO("RENDER FRAME COUNT: {0}", m_frameCount);
 	}
-}

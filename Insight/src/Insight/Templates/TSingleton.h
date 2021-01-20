@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
     class Application;
 
     template<class T>
@@ -66,7 +64,6 @@ namespace Insight
 
         friend Application;
     };
-}
 
 template<class T>
-T* Insight::TSingleton<T>::s_instance;
+T* TSingleton<T>::s_instance;

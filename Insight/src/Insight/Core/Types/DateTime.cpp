@@ -3,7 +3,6 @@
 #include "ispch.h"
 #include "DateTime.h"
 #include "TimeSpan.h"
-#include "std::string.h"
 #include "Platform/Platform.h"
 
 const I32 DateTime::CachedDaysPerMonth[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -11,7 +10,7 @@ const I32 DateTime::CachedDaysToMonth[] = { 0, 31, 59, 90, 120, 151, 181, 212, 2
 
 DateTime::DateTime(I32 year, I32 month, I32 day, I32 hour, I32 minute, I32 second, I32 millisecond)
 {
-    ASSERT_LOW_LAYER(Validate(year, month, day, hour, minute, second, millisecond));
+    //ASSERT_LOW_LAYER(Validate(year, month, day, hour, minute, second, millisecond));
     I32 totalDays = 0;
     if (month > 2 && IsLeapYear(year))
         totalDays++;
@@ -94,7 +93,7 @@ I32 DateTime::GetYear() const
 
 I32 DateTime::DaysInMonth(I32 year, I32 month)
 {
-    ASSERT_LOW_LAYER((month >= 1) && (month <= 12));
+    //ASSERT_LOW_LAYER((month >= 1) && (month <= 12));
     if (month == 2 && IsLeapYear(year))
         return 29;
     return CachedDaysPerMonth[month];

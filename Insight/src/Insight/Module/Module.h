@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include <vector>
 
-namespace Insight
-{
 	namespace Module
 	{
 		class ModuleManager;
@@ -76,4 +74,3 @@ namespace Insight
 			}
 		};
 	}
-}

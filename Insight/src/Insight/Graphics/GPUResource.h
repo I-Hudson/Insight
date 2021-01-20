@@ -2,8 +2,6 @@
 #include "Core/Core.h"
 #include "Core/NonCopyable.h"
 
-namespace Insight
-{
 	class IS_API GPUResource : public Object, public NonCopyable
 	{
 	public:
@@ -61,4 +59,3 @@ namespace Insight
 		/// <returns>The pointer.</returns>
 		virtual void* GetNativePtr() const = 0;
 	};
-}

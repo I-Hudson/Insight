@@ -4,8 +4,6 @@
 
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace Insight
-{
 	std::shared_ptr<spdlog::logger> Log::s_CoreLogger;
 	std::shared_ptr<spdlog::logger> Log::s_ClientLogger;
 
@@ -28,4 +26,3 @@ namespace Insight
 		IS_CORE_INFO("CORE LOG INIT!");
 		IS_INFO("APP LOG INIT!");
 	}
-}

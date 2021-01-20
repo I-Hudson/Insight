@@ -2,7 +2,7 @@
 
 #ifdef IS_PLATFORM_WINDOWS
 
-extern Insight::Application* Insight::CreateApplication();
+extern Application* CreateApplication();
 #if defined(IS_DEBUG)
 int main(int argc, char** argv)
 #else
@@ -10,10 +10,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 #endif
 {
 	{
-		Insight::Log::Init();
+		Log::Init();
 		IS_PROFILE_BEGIN_SESSION();
-		//::Insight::Profile::Instrumentor::Get().BeginSession("App Begin", "profileResults.json");
-		auto app = Insight::CreateApplication();
+		//::Profile::Instrumentor::Get().BeginSession("App Begin", "profileResults.json");
+		auto app = CreateApplication();
 		app->Run();
 		delete app;
 		IS_PROFILE_END_SESSION();

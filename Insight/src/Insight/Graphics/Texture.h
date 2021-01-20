@@ -2,8 +2,6 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Core/Object.h"
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		class FileSystemManager;
@@ -57,4 +55,3 @@ namespace Insight
 			SharedPtr<TextureGPUData> m_gpuData;
 		};
 	}
-}

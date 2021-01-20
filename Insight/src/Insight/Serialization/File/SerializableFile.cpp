@@ -4,8 +4,6 @@
 #include "SerializableFormat_XML.h"
 #include "SerializableFormat_JSON.h"
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		SerializableFile::~SerializableFile()
@@ -138,4 +136,3 @@ namespace Insight
 			return m_attributes.size() != 0;
 		}
 	}
-}

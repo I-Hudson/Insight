@@ -68,14 +68,14 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	m_isDirty = true;
 }
 
-void TransformComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void TransformComponent::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
 	element->AddAttribute("Type", "TransformComponent");
 	element->AddAttribute("ViewMatrix", SerializeHelper::TypeToString(m_transform));
 }
 
-void TransformComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void TransformComponent::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	if (auto ptr = element->GetFirstAttribute("ViewMatrix"))
 	{

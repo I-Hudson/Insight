@@ -6,8 +6,6 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include <glm/glm.hpp>
 
-namespace Insight
-{
 	namespace Editor
 	{
 		inline bool RTTIToImGUI_Input(void* objectPtr, const std::string& typeName, const std::string& propertyName, const PropertyFlags& proertyFlags)
@@ -58,4 +56,3 @@ namespace Insight
 			return false;
 		}
 	}
-}

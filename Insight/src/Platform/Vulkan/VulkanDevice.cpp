@@ -717,7 +717,7 @@ namespace vks
 	{
 		if (m_enableWaitCommands)
 		{
-			IS_PROFILE_CATEGORY("QueueIdleCommand", Insight::Category::Type::GPU_CRITICAL);
+			IS_PROFILE_CATEGORY("QueueIdleCommand", Category::Type::GPU_CRITICAL);
 			m_waitIdleCommands.push_back(funcPtr);
 		}
 		else

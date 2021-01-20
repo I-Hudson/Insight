@@ -7,20 +7,17 @@
 #include "Insight/RTTI/RTTI.h"
 
 class Entity;
+class Scene;
 
-namespace Insight
-{
-	class Scene;
-}
 
 class IS_API Component : 
-	public Insight::Object
-	, public Insight::Serialization::Serializable
+	public Object
+	, public Serialization::Serializable
 {
 public:
 	Component(SharedPtr<Entity> owner)
-		: Insight::Object()
-		, Insight::Serialization::Serializable(this, true)
+		: Object()
+		, Serialization::Serializable(this, true)
 		, m_owner(owner)
 		, m_isDirty(true)
 		, m_updateEveryFarme(true)
@@ -57,7 +54,7 @@ private:
 	std::string m_uuid;
 
 	friend Entity;
-	friend Insight::Scene;
+	friend Scene;
 };
 
 template<typename T>

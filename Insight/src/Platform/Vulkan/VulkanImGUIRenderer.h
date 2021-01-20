@@ -8,14 +8,11 @@
 #include <glm/glm.hpp>
 #include "Insight/Threading/TThreadSafe.h"
 
-namespace Insight
-{
 	class Event;
-}
 
 namespace vks
 {
-	class VulkanImGUIRenderer : public Insight::ImGuiRenderer
+	class VulkanImGUIRenderer : public ImGuiRenderer
 	{
 	public:
 		VulkanImGUIRenderer();
@@ -26,12 +23,12 @@ namespace vks
 		void Render(VkCommandBuffer commandBuffer);
 
 	private:
-		virtual void Init(SharedPtr<Insight::Renderer> renderer) override;
+		virtual void Init(SharedPtr<Renderer> renderer) override;
 		void InitResources();
 		void SetupImGuiRenderPass();
 		void SetStyle();
 
-		void WindowResize(Insight::Event const& event);
+		void WindowResize(Event const& event);
 
 	private:
 		bool m_newFrameInit = false;

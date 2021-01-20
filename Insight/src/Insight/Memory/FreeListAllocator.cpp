@@ -6,8 +6,6 @@
 
 #include <inttypes.h>
 
-namespace Insight
-{
 	namespace Memory
 	{
 		FreeListAllocator::FreeListAllocator(const Size size, const PlacementPolicy policy)
@@ -272,4 +270,3 @@ namespace Insight
 			m_freeList.Insert(nullptr, firstNode);
 		}
 	}
-}

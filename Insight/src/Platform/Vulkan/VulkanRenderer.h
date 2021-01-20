@@ -19,20 +19,17 @@ class Model;
 class CameraComponent;
 class Entity;
 
-namespace Insight
-{
 	class Event;
-}
 
 const int MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace vks
 {
 //#if defined(IS_EDITOR)
-//	class VulkanRendererEditorOverlay : public Insight::Editor::EditorWindow
+//	class VulkanRendererEditorOverlay : public Editor::EditorWindow
 //	{
 //	public:
-//		VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);
+//		VulkanRendererEditorOverlay(SharedPtr<Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer);
 //		~VulkanRendererEditorOverlay();
 //
 //		virtual void Update(const float& deltaTime) override;
@@ -44,7 +41,7 @@ namespace vks
 
 	class VulkanDevice;
 
-	class IS_API VulkanRenderer : public Insight::Renderer
+	class IS_API VulkanRenderer : public Renderer
 		, public std::enable_shared_from_this<VulkanRenderer>
 	{
 	public:
@@ -107,7 +104,7 @@ namespace vks
 
 		void ThreadRenderCode(int32_t threadIndex, uint32_t cmdBufferIndex, VkCommandBufferInheritanceInfo inheritanceInfo);
 
-		void WindowResizeEvent(const Insight::Event& event);
+		void OnWindowResizeEvent(const Event& event);
 
 		// Use push constants to update shader
 		// parameters on a per-thread base
@@ -152,7 +149,7 @@ namespace vks
 		thread_pool m_threadPool;
 		uint32_t m_numObjectsPerThread;
 
-		std::default_random_engine m_rndEngine;
+		//std::default_random_engine m_rndEngine;
 
 		// Vulkan objects
 		Swapchain m_swapchain;

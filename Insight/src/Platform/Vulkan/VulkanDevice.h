@@ -11,7 +11,7 @@ namespace vks
 	class VulkanRenderer;
 	struct RenderPassInfo;
 
-	class IS_API VulkanDevice : public Insight::TSingleton<VulkanDevice>
+	class IS_API VulkanDevice : public TSingleton<VulkanDevice>
 	{
 	public:
 		explicit VulkanDevice(VkPhysicalDevice m_physicalDevice, VkInstance instance);

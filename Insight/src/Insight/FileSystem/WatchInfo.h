@@ -2,8 +2,6 @@
 #include "Insight/Core/Core.h"
 #include <deque>
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		struct HandleDeleter
@@ -69,4 +67,3 @@ namespace Insight
 			FileNotifcationQueue ProcessNotifications() const;
 		};
 	}
-}

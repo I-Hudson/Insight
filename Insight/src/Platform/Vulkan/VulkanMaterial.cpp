@@ -22,7 +22,7 @@ namespace vks
 		std::vector<std::string> shaders = { "./data/shaders/vulkan/default.vert", "./data/shaders/vulkan/default.frag" };
 		for (auto& shader : shaders)
 		{
-			m_shaderData.push_back(Insight::ShaderParser::ParseShader(shader));
+			m_shaderData.push_back(ShaderParser::ParseShader(shader));
 		}
 		m_pipeline.Create(m_device, shaders, m_device->GetRenderPass(), m_shaderData, m_device->GetRenderPassInfo());
 
@@ -35,7 +35,7 @@ namespace vks
 		m_device = device;
 		for (auto& shader : shaders)
 		{
-			m_shaderData.push_back(Insight::ShaderParser::ParseShader(shader));
+			m_shaderData.push_back(ShaderParser::ParseShader(shader));
 		}
 		m_pipeline.Create(device, shaders, renderPass, m_shaderData, renderPassInfo);
 
@@ -127,7 +127,7 @@ namespace vks
 		}
 	}
 
-	void VulkanMaterial::UploadTexture(const std::string& key, WeakPtr<Insight::Render::Texture> texture)
+	void VulkanMaterial::UploadTexture(const std::string& key, WeakPtr<Render::Texture> texture)
 	{
 		if (m_uniformTextures.find(key) == m_uniformTextures.end())
 		{
@@ -182,7 +182,7 @@ namespace vks
 				}
 
 				std::string key = uniformBlock.Name;
-				if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer)
+				if (uniformBlock.Type == ShaderUniformBlockType::UniformBuffer)
 				{
 					VulkanBuffer ubo;
 					ThrowIfFailed(m_device->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
@@ -194,7 +194,7 @@ namespace vks
 					m_uniformBuffers[key].Binding = uniformBlock.Binding;
 					m_uniformBuffers[key].Type = uniformBlock.GetVulkanType();
 				}
-				else if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBufferDynamic)
+				else if (uniformBlock.Type == ShaderUniformBlockType::UniformBufferDynamic)
 				{
 					VulkanBuffer ubo;
 					m_uniformBuffers[key].Buffer = ubo;
@@ -205,7 +205,7 @@ namespace vks
 					m_uniformBuffers[key].Binding = uniformBlock.Binding;
 					m_uniformBuffers[key].Type = uniformBlock.GetVulkanType();
 				}
-				else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+				else if (uniformBlock.Type == ShaderUniformBlockType::Sampler2D)
 				{
 					m_uniformTextures[key].ImageInfo.imageView = VK_NULL_HANDLE;
 					m_uniformTextures[key].Binding = uniformBlock.Binding;
@@ -214,11 +214,11 @@ namespace vks
 
 				if (descriptorSets.find(currentSet) != descriptorSets.end())
 				{
-					if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBufferDynamic)
+					if (uniformBlock.Type == ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == ShaderUniformBlockType::UniformBufferDynamic)
 					{
 						m_uniformBuffers[key].Set = descriptorSets[currentSet];
 					}
-					else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+					else if (uniformBlock.Type == ShaderUniformBlockType::Sampler2D)
 					{
 						m_uniformTextures[key].Set = descriptorSets[currentSet];
 					}
@@ -233,11 +233,11 @@ namespace vks
 				allocateInfo.pSetLayouts = &m_pipeline.GetDescriptorLayout(currentSet);
 				ThrowIfFailed(vkAllocateDescriptorSets(*m_device, &allocateInfo, &descriptorSets[currentSet]));
 
-				if (uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == Insight::ShaderUniformBlockType::UniformBufferDynamic)
+				if (uniformBlock.Type == ShaderUniformBlockType::UniformBuffer || uniformBlock.Type == ShaderUniformBlockType::UniformBufferDynamic)
 				{
 					m_uniformBuffers[key].Set = descriptorSets[currentSet];
 				}
-				else if (uniformBlock.Type == Insight::ShaderUniformBlockType::Sampler2D)
+				else if (uniformBlock.Type == ShaderUniformBlockType::Sampler2D)
 				{
 					m_uniformTextures[key].Set = descriptorSets[currentSet];
 				}
@@ -307,7 +307,7 @@ namespace vks
 			U64 oldArrSize = materialBlock.DynamicUniformBlock.DynamicBufferSize;
 
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = Insight::Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 
 			// Copy and delete old data.
@@ -323,7 +323,7 @@ namespace vks
 		else
 		{
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = Insight::Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 		}
 
@@ -352,7 +352,6 @@ namespace vks
 
 		if (!materialBlockData.InUse)
 		{
-			materialBlockData.UUID = Insight::UUID::GenUUID_U128();
 			materialBlockData.InUse = true;
 			materialBlockData.DynamicBuffers.clear();
 		}

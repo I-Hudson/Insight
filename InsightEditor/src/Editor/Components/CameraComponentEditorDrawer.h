@@ -4,8 +4,6 @@
 #include "Insight/Component/CameraComponent.h"
 
 #if defined(IS_EDITOR)
-namespace Insight
-{
 	namespace Editor
 	{
 		class CameraComponentEditorDrawer : public IEditorDrawer
@@ -17,5 +15,4 @@ namespace Insight
 			EDITOR_DEC_TYPE(CameraComponent, CameraComponentEditorDrawer);
 		};
 	}
-}
 #endif

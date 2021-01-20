@@ -3,8 +3,6 @@
 
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
 	void EventManager::Bind(const EventType type, const std::string& className, EventFunc listener)
 	{
 		if (HasBoundFunction(type, className))
@@ -42,4 +40,3 @@ namespace Insight
 		}
 		return false;
 	}
-}

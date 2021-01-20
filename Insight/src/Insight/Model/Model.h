@@ -9,9 +9,9 @@
 #include "Platform/Vulkan/VulkanBuffer.h"
 #include "Platform/Vulkan/VulkanMaterial.h"
 
-using Texture = Insight::Render::Texture;
+using Texture = Render::Texture;
 
-class IS_API Model : public Insight::Object
+class IS_API Model : public Object
 {
 public:
 	Model();

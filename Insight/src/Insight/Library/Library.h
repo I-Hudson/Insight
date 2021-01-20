@@ -1,11 +1,8 @@
 #pragma once
 
 #include "Insight/Core/Core.h"
-#include "Insight/Core/UUID.h"
 #include "Insight/Templates/TSingleton.h"
 
-namespace Insight
-{
 	namespace Library
 	{
 		template<typename T>
@@ -48,7 +45,7 @@ namespace Insight
 		inline SharedPtr<T> Library<T>::AddAsset()
 		{
 			SharedPtr<T> t = CreateSharedPtr<T>();
-			SharedPtr<T> uuid = StaticPointerCast<Insight::UUID>(t);
+			SharedPtr<T> uuid = StaticPointerCast<UUID>(t);
 			return AddAsset(uuid->GetUUID(), t);
 		}
 
@@ -68,4 +65,3 @@ namespace Insight
 			return m_assets.find(uuid) != m_assets.end();
 		}
 	}
-}

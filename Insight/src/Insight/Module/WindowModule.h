@@ -7,8 +7,6 @@
 
 struct GLFWwindow;
 
-namespace Insight
-{
 	class IS_API Window
 	{
 	public:
@@ -53,5 +51,3 @@ namespace Insight
 			static Window m_window;
 		};
 	}
-}
-

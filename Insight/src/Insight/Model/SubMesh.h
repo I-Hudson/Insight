@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Insight/Core/Core.h"
-#include "Insight/Core/UUID.h"
 #include "Graphics/GPUBuffer.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 
@@ -16,7 +15,7 @@ namespace vks
 
 class Model;
 
-class IS_API SubMesh : public Insight::UUID
+class IS_API SubMesh
 {
 public:
 

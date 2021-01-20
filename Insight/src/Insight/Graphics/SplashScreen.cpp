@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "SplashScreen.h"
 
-namespace Insight
-{
 	SplashScreen::SplashScreen(const int& width, const int& height, const std::string& imagePath)
 		: m_window(nullptr)
 	{
@@ -20,4 +18,3 @@ namespace Insight
 	SplashScreen::~SplashScreen()
 	{
 	}
-}

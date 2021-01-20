@@ -4,8 +4,6 @@
 #include "Insight/Memory/MemoryUtils.h"
 #include "Insight/Memory/SinglyLinkedList.h"
 
-namespace Insight
-{
 	namespace Memory
 	{
 		class IS_API FreeListAllocator
@@ -159,4 +157,3 @@ namespace Insight
 			Free(static_cast<void*>(ptrToDelete));
 		}
 	}
-}

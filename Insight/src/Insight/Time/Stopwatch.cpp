@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "Insight/Time/Stopwatch.h"
 
-namespace Insight
-{
 	void Stopwatch::Start()
 	{
 		m_startTime = std::chrono::high_resolution_clock::now();
@@ -28,6 +26,4 @@ namespace Insight
 	U64 Stopwatch::Nano() const
 	{
 		return static_cast<U64>(std::chrono::duration<double, std::nano>(m_endTime - m_startTime).count());
-
 	}
-}

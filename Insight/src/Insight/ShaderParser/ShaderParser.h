@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include "Platform/Vulkan/VulkanHeader.h"
 
-namespace Insight
-{
 	struct KeywordFind
 	{
 		int Loc;
@@ -125,11 +123,11 @@ namespace Insight
 			{
 				switch (Type)
 				{
-					case Insight::ShaderUniformBlockType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-					case Insight::ShaderUniformBlockType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					case Insight::ShaderUniformBlockType::UniformBufferDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-					case Insight::ShaderUniformBlockType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-					case Insight::ShaderUniformBlockType::StorageBufferDynamic: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+					case ShaderUniformBlockType::Sampler2D: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+					case ShaderUniformBlockType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+					case ShaderUniformBlockType::UniformBufferDynamic: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+					case ShaderUniformBlockType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+					case ShaderUniformBlockType::StorageBufferDynamic: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
 				}
 			}
 			return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -165,10 +163,10 @@ namespace Insight
 		{
 			switch (ShaderType)
 			{
-			case Insight::ShaderType::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
-			case Insight::ShaderType::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
-			case Insight::ShaderType::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
-			case Insight::ShaderType::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
+			case ShaderType::VertexShader: return VK_SHADER_STAGE_VERTEX_BIT;
+			case ShaderType::GeometryShader: return VK_SHADER_STAGE_GEOMETRY_BIT;
+			case ShaderType::FragmentShader: return VK_SHADER_STAGE_FRAGMENT_BIT;
+			case ShaderType::ComputeShader: return VK_SHADER_STAGE_COMPUTE_BIT;
 			}
 			return VK_SHADER_STAGE_ALL;
 		}
@@ -248,4 +246,3 @@ namespace Insight
 		static bool m_recordUniform;
 		static UniformBlock* m_recordUniformBlock;
 	};
-}

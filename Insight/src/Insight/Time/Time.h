@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include <chrono>
 
-namespace Insight
-{
 	enum RecordTimeType
 	{
 		Micro,
@@ -51,4 +49,3 @@ namespace Insight
 		static double s_previousFrameTimeSum;
 		static double s_previousFrameTimes[s_PreviousFrameTimeCount];
 	};
-}

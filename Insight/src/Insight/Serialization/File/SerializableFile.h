@@ -4,8 +4,6 @@
 #include "SerializableElementTypes.h"
 #include <glm/glm.hpp>
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		class SerializableElement;
@@ -71,4 +69,3 @@ namespace Insight
 			friend SerializableFile_XML;
 		};
 	}
-}

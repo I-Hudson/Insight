@@ -3,12 +3,11 @@
 
 #include "Insight/Core/Log.h"
 #include "Insight/Memory/MemoryManager.h"
+#include "Platform/Platform.h"
 
-namespace Insight
-{
 	Object::Object()
-		: Insight::UUID()
-		, m_refCount(0)
+		: m_refCount(0)
+		, m_uuid(Platform::UUIDToString(Platform::GenerateUUID()))
 	{
 		AddRef();
 	}
@@ -23,6 +22,11 @@ namespace Insight
 
 		Release();
 		IS_CORE_ASSERT(m_refCount == 0, "Object's reference count is not 0. Something has not released this.");
+	}
+
+	void Object::SetUUID(const std::string& uuid)
+	{
+		m_uuid = uuid;
 	}
 
 	bool Object::Equals(const Object* pObject) const
@@ -66,4 +70,3 @@ namespace Insight
 	{
 		--m_refCount;
 	}
-}

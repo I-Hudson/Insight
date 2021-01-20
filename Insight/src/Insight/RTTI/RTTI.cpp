@@ -5,8 +5,6 @@
 #include "Insight/Core/Log.h"
 #include "Insight/Core/Object.h"
 
-namespace Insight
-{
 	namespace RTTI
 	{
 		RTTI::RTTI()
@@ -98,4 +96,3 @@ namespace Insight
 			}
 		}
 	}
-}

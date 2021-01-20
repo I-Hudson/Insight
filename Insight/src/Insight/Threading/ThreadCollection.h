@@ -3,8 +3,6 @@
 #include "Core/Core.h"
 #include "Insight/Threading/ThreadPool.hpp"
 
-namespace Insight
-{
 	namespace Threading
 	{
 		template<U32 ThreadCount, typename TThreadFuncReturnValue, typename TThreadData, typename... TThreadInputData>
@@ -51,8 +49,4 @@ namespace Insight
 			DefaultAssignThreadFunc  m_assignFunc;
 			bool m_waitHasBeenCalled;
 		};
-
-
-
 	}
-}

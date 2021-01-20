@@ -7,8 +7,6 @@
 #include "FreeListAllocator.h"
 #include "StackAllocator.h"
 
-namespace Insight
-{
 	namespace Memory
 	{
 		class IS_API MemoryManager : public TSingleton<MemoryManager>
@@ -131,5 +129,3 @@ namespace Insight
 			return typeName;
 		}
 	}
-}
-

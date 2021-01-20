@@ -2,8 +2,6 @@
 #include "SerializableFormat_JSON.h"
 #include "SerializableElementTypes.h"
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		void SerializableFile_JSON::SerializeData(const std::string& fileName)
@@ -107,4 +105,3 @@ namespace Insight
 
 		}
 	}
-}

@@ -2,8 +2,6 @@
 
 #include "Insight/Core/Core.h"
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		struct FileInfo
@@ -31,4 +29,3 @@ namespace Insight
 			FileInfo Info;
 		};
 	}
-}

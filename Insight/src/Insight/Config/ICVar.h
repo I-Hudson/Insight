@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include <string>
 
-namespace Insight
-{
 	class IS_API ICVar
 	{
 	public:
@@ -21,4 +19,3 @@ namespace Insight
 	private:
 		std::string m_key;
 	};
-}

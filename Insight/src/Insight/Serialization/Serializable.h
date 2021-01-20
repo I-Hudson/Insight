@@ -10,13 +10,11 @@
 #include <map>
 
 #define REGISTER_DEC_TYPE(NAME) \
-	static Insight::Serialization::TypeRegister<NAME> reg
+	static Serialization::TypeRegister<NAME> reg
 
 #define REGISTER_DEF_TYPE(NAME) \
-    Insight::Serialization::TypeRegister<NAME> NAME::reg(#NAME)
+    Serialization::TypeRegister<NAME> NAME::reg(#NAME)
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		template<typename T>
@@ -87,4 +85,3 @@ namespace Insight
 			static bool m_inUse;
 		};
 	}
-}

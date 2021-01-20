@@ -6,10 +6,10 @@
 
 SharedPtr<Material> Material::Create()
 {
-	switch (Insight::Module::GraphicsModule::Instance()->GetAPI())
+	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-	case Insight::GraphicsAPI::Vulkan: return Object::CreateObject<vks::VulkanMaterial>();
-		//case Insight::GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
+	case GraphicsAPI::Vulkan: return Object::CreateObject<vks::VulkanMaterial>();
+		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
 	}
 	return SharedPtr<Material>();
 }

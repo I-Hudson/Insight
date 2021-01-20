@@ -4,8 +4,6 @@
 #include "Insight/Library/Library.h"
 #include "Insight/Serialization/Serializable.h"
 
-namespace Insight
-{
 	namespace Library
 	{
 		//class ShaderLibrary : public Library<Render::>
@@ -20,4 +18,3 @@ namespace Insight
 		//	virtual void Deserialize(tinyxml2::XMLNode* data, bool force = false) override;
 		//};
 	}
-}

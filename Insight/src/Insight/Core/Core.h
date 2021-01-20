@@ -33,25 +33,25 @@
 #define IS_IMPLERMENT_CORE(...)
 
 #endif // IS_DEBUG 
-//#define NEW_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
-//#define NEW_ARR_ON_HEAP(type, ...) Insight::Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
-//#define NEW_ARR_ON_HEAP_VOID(size, align) Insight::Memory::MemoryManager::NewArrOnFreeListVoid(size, align)
+//#define NEW_ON_HEAP(type, ...) Memory::MemoryManager::NewOnFreeList<type>(__VA_ARGS__)
+//#define NEW_ARR_ON_HEAP(type, ...) Memory::MemoryManager::NewArrOnFreeList<type>(__VA_ARGS__)
+//#define NEW_ARR_ON_HEAP_VOID(size, align) Memory::MemoryManager::NewArrOnFreeListVoid(size, align)
 //
-//#define DELETE_ON_HEAP(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
-//#define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
-//#define DELETE_ARR_ON_HEAP_VOID(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteArrOnFreeListVoid(ptr); ptr = nullptr; }
+//#define DELETE_ON_HEAP(ptr)  if(ptr) { Memory::MemoryManager::DeleteOnFreeList(ptr); ptr = nullptr; }
+//#define DELETE_ARR_ON_HEAP(ptr) if(ptr) { Memory::MemoryManager::DeleteArrOnFreeList(ptr); ptr = nullptr; }
+//#define DELETE_ARR_ON_HEAP_VOID(ptr)  if(ptr) { Memory::MemoryManager::DeleteArrOnFreeListVoid(ptr); ptr = nullptr; }
 //
-//#define NEW_ON_STACK(type, ...) Insight::Memory::MemoryManager::NewOnStack<type>(__VA_ARGS__)
-//#define DELETE_ON_STACK(ptr)  if(ptr) { Insight::Memory::MemoryManager::DeleteOnStack((uint64_t)ptr); ptr = nullptr; }
+//#define NEW_ON_STACK(type, ...) Memory::MemoryManager::NewOnStack<type>(__VA_ARGS__)
+//#define DELETE_ON_STACK(ptr)  if(ptr) { Memory::MemoryManager::DeleteOnStack((uint64_t)ptr); ptr = nullptr; }
 
-#define TRACK_CLASS() Insight::Memory::MemoryManager::TrackObject(this, "Class", __FILE__, __LINE__);
-#define UNTRACK_CLASS() Insight::Memory::MemoryManager::UnTrackObject(this);
+#define TRACK_CLASS() Memory::MemoryManager::TrackObject(this, "Class", __FILE__, __LINE__);
+#define UNTRACK_CLASS() Memory::MemoryManager::UnTrackObject(this);
 
-#define TRACK_OBJECT(x) Insight::Memory::MemoryManager::TrackObject(x, "Object (Ptr/Ref)", __FILE__, __LINE__);
-#define UNTRACK_OBJECT(x) Insight::Memory::MemoryManager::UnTrackObject(x);
+#define TRACK_OBJECT(x) Memory::MemoryManager::TrackObject(x, "Object (Ptr/Ref)", __FILE__, __LINE__);
+#define UNTRACK_OBJECT(x) Memory::MemoryManager::UnTrackObject(x);
 
-#define GET_ALLOCATION_OF_TYPE(ptr) Insight::Memory::MemoryManager::Instance()->GetAllocationOfType(ptr);
-#define GET_SHORT_NAME_OF_TYPE(type) Insight::Memory::MemoryManager::Instance()->GetShortNameOfType<type>()
+#define GET_ALLOCATION_OF_TYPE(ptr) Memory::MemoryManager::Instance()->GetAllocationOfType(ptr);
+#define GET_SHORT_NAME_OF_TYPE(type) Memory::MemoryManager::Instance()->GetShortNameOfType<type>()
 
 #define BIT(x) (1 << x)
 #define ARRAY_SIZEOF(array) (sizeof(array) / sizeof(array[0]))

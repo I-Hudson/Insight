@@ -7,8 +7,6 @@
 #include <glm/glm.hpp>
 #include <imgui_internal.h>
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class UIHelper
@@ -44,4 +42,3 @@ namespace Insight
 			static bool IS_API DrawMat4(const std::string& name, glm::mat4* v, PropertyFlags flags = IS_PropertyFlags::ShowInEditor);
 		};
 	}
-}

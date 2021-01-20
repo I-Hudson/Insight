@@ -3,14 +3,11 @@
 #include "Insight/Core/Core.h"
 #include "../vendor/glm/glm/glm.hpp"
 
-namespace Insight
-{
 	namespace Render
 	{
 		class Shader;
 		class Texture;
 	}
-}
 
 // Single struct defining a dynamic uniform offset and index.
 struct MaterialDynamicUniformInfo
@@ -52,7 +49,7 @@ struct MaterialUniformDynamicBlock
 	{ }
 };
 
-class IS_API Material : public Insight::Object
+class IS_API Material : public Object
 {
 public:
 	virtual ~Material() { }
@@ -64,6 +61,6 @@ public:
 	virtual void ResetUniformInfo() = 0;
 
 	virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) = 0;
-	virtual void UploadTexture(const std::string& key, WeakPtr<Insight::Render::Texture> texture) = 0;
+	virtual void UploadTexture(const std::string& key, WeakPtr<Render::Texture> texture) = 0;
 	virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format) = 0;
 };

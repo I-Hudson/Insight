@@ -10,8 +10,6 @@
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
 
-namespace Insight
-{
 	GLFWwindow* Window::m_window;
 
 	const int Window::GetWidth()
@@ -158,4 +156,3 @@ namespace Insight
 			m_window.SetTitle(ss.str());
 		}
 	}
-}

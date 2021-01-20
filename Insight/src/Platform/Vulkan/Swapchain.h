@@ -6,11 +6,8 @@
 #include "Insight/Event/ApplicationEvent.h"
 #include "Graphics/FrameGraph/FrameGraph.h"
 
-namespace Insight
-{
 	class Event;
 	class ImGuiRenderer;
-}
 
 namespace vks
 {
@@ -27,7 +24,7 @@ namespace vks
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
-	class IS_API Swapchain : public Insight::Object
+	class IS_API Swapchain : public Object
 	{
 	public:
 

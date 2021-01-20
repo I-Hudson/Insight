@@ -21,7 +21,7 @@ namespace vks
 	* @brief Encapsulates access to a Vulkan buffer backed up by device memory
 	* @note To be filled by an external source like the VulkanDevice
 	*/
-	class VulkanBuffer : public Insight::Object
+	class VulkanBuffer : public Object
 	{
 	public:
 		VkDevice device;

@@ -2,8 +2,6 @@
 #include "SerializableFormat_XML.h"
 #include "SerializableElementTypes.h"
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		void SerializableFile_XML::SerializeData(const std::string& fileName)
@@ -112,4 +110,3 @@ namespace Insight
 			}
 		}
 	}
-}

@@ -3,8 +3,6 @@
 #include "Insight/Enums/PropertyFlags.h"
 #include <map>
 
-namespace Insight
-{
 	class RTTIProperty
 	{
 	public:
@@ -58,4 +56,3 @@ namespace Insight
 		PropertyFlags m_propertyFlags;
 		void* m_objectPtr;
 	};
-}

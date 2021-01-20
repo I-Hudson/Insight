@@ -3,10 +3,7 @@
 #include "Insight/Core/Core.h"
 #include "VulkanHeader.h"
 
-namespace Insight
-{
 	struct ParsedShadeData;
-}
 
 enum class PolygonMode
 {
@@ -27,7 +24,7 @@ namespace vks
 		VulkanPipeline(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, const RenderPassInfo& renderPassInfo);
 		~VulkanPipeline();
 
-		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
+		void Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
 
 		void Bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint);
 
@@ -36,9 +33,9 @@ namespace vks
 		VkPipeline& GetPipeline() { return m_pipeline; }
 
 	private:
-		void CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
-		void CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData);
-		void CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
+		void CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<ParsedShadeData>& shaderData);
+		void CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<ParsedShadeData>& shaderData);
+		void CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo);
 
 		std::vector<uint32_t> CompileGLSL(const std::string& fileName);
 

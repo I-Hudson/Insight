@@ -4,8 +4,6 @@
 #include <string>
 #include <glm/glm.hpp>
 
-namespace Insight
-{
 	template<typename T>
 	class CVarParser
 	{
@@ -67,4 +65,3 @@ namespace Insight
 	{
 		return CVarParseVec<glm::vec4>(str);
 	}
-}

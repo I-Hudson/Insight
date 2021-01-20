@@ -3,8 +3,6 @@
 #include "Insight/Memory/MemoryUtils.h"
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
 	namespace Memory
 	{
 		StackAllocator::StackAllocator(Size stackSize)
@@ -68,5 +66,3 @@ namespace Insight
 #endif
 		}
 	}
-}
-

@@ -1,8 +1,6 @@
 #include "AssetWindow.h"
 #include "Insight/FileSystem/FileSystem.h"
 
-namespace Insight
-{
     namespace Editor
     {
         AssetWindow::AssetWindow(SharedPtr<Module::EditorModule> editorModule)
@@ -263,4 +261,3 @@ namespace Insight
             return false;
         }
     }
-}

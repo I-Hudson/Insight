@@ -1,7 +1,5 @@
 #pragma once
 
-namespace Insight
-{
 	class Object;
 
 	struct TypeID
@@ -51,12 +49,11 @@ namespace Insight
 		m_typeId.Hash = typeid(T).hash_code();
 		m_size = sizeof(T);
 	}
-}
 
 template<>
-struct std::hash<Insight::Type>
+struct std::hash<Type>
 {
-	size_t operator()(const Insight::Type& type) const
+	size_t operator()(const Type& type) const
 	{
 		size_t res = 17;
 		res = res * 31 + std::hash<std::string>()(type.GetTypeName());

@@ -2,8 +2,6 @@
 #include "Graphics/GPUBuffer.h"
 
 
-namespace Insight
-{
 	namespace Render
 	{
 //		VertexBuffer* VertexBuffer::Create(const std::vector<Vertex>& vertices)
@@ -24,4 +22,3 @@ namespace Insight
 //			return nullptr;
 //		}
 	}
-}

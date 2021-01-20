@@ -4,8 +4,6 @@
 #include "Insight/Config/ICVar.h"
 #include "Insight/Config/CVarParser.h"
 
-namespace Insight
-{
 	template<typename T>
 	class IS_API CVar : public ICVar
 	{
@@ -66,4 +64,3 @@ namespace Insight
 	private:
 		std::string m_value;
 	};
-}

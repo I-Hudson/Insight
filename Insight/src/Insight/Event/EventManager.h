@@ -5,8 +5,6 @@
 #include <typeinfo>
 #include <functional>
 
-namespace Insight
-{
 	class IS_API EventManager
 	{
 	public:
@@ -44,11 +42,10 @@ namespace Insight
 			(*it).Func(event);
 		}
 	}
-}
 
 #define BIND_FUNC(func, classIns) (std::bind(&func, classIns, std::placeholders::_1))
 
-#define REG_EVENT_HANDLE(type, func) Insight::EventManager::Bind(type, typeid(this).name(), BIND_FUNC(func, this))
-#define UNREG_EVENT_HANDLE(type) Insight::EventManager::Unbind(type, typeid(this).name())
+#define REG_EVENT_HANDLE(type, func) EventManager::Bind(type, typeid(this).name(), BIND_FUNC(func, this))
+#define UNREG_EVENT_HANDLE(type) EventManager::Unbind(type, typeid(this).name())
 
-#define EVENT_DISPATCH(type, e) Insight::EventManager::Dispatch(type, e)
+#define EVENT_DISPATCH(type, e) EventManager::Dispatch(type, e)

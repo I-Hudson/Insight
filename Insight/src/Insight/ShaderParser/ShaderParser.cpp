@@ -2,8 +2,6 @@
 #include "ShaderParser.h"
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
 	std::vector<const char*> ShaderParser::m_keywords
 	{
 		"in", "uniform", "out"
@@ -397,4 +395,3 @@ namespace Insight
 		}
 		return ShaderType::None;
 	}
-}

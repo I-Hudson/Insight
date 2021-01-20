@@ -6,8 +6,6 @@
 #include "imgui_internal.h"
 #include "IconsFontAwesome5.h"
 
-namespace Insight
-{
 	namespace Module
 	{
 		class EditorModule;
@@ -49,7 +47,6 @@ namespace Insight
 #define SET_PANEL_NAME(x) m_windowName = typeid(x).name();
 		};
 	}
-}
 #define ImGui_STORE_TEMP(type, ptr, label, imguiWidget) { type tempV; \
 														  tempV = *ptr; \
 														  if(imguiWidget(label, &tempV)) \

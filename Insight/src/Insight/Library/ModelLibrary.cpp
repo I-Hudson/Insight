@@ -10,8 +10,6 @@
 #include <concurrent_vector.h>
 #include <filesystem>
 
-namespace Insight
-{
 	namespace Library
 	{
 		ModelLibrary::ModelLibrary()
@@ -137,7 +135,7 @@ namespace Insight
 			}
 		}
 
-		void ModelLibrary::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+		void ModelLibrary::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 		{
 			//for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			//{
@@ -155,7 +153,7 @@ namespace Insight
 			//}
 		}
 
-		void ModelLibrary::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+		void ModelLibrary::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -198,4 +196,3 @@ namespace Insight
 			//}
 		}
 	}
-}

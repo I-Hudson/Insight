@@ -2,8 +2,6 @@
 
 #include "Insight/Core/Core.h"
 
-namespace Insight
-{
 	namespace FrameGraph
 	{
 		class FrameGraph;
@@ -48,4 +46,3 @@ namespace Insight
 			std::vector<FGNode> m_allNodes;
 		};
 	}
-}

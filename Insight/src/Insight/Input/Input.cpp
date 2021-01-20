@@ -1,7 +1,7 @@
 #include "ispch.h"
 #include "Input.h"
 
-using namespace Insight::Module;
+using namespace Module;
 
 bool Input::IsKeyDown(int keycode)
 {

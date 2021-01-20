@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include <chrono>
 
-namespace Insight
-{
 	class IS_API Stopwatch
 	{
 	public:
@@ -21,4 +19,3 @@ namespace Insight
 		std::chrono::steady_clock::time_point m_startTime;
 		std::chrono::steady_clock::time_point m_endTime;
 	};
-}

@@ -8,7 +8,7 @@
 //
 //namespace vks
 //{
-//	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(const Insight::Module::EditorModule* editorModule, VulkanRenderer* renderer)
+//	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(const Module::EditorModule* editorModule, VulkanRenderer* renderer)
 //		: EditorPanel(editorModule)
 //		, m_renderer(*renderer)
 //	{

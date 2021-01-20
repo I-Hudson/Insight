@@ -10,8 +10,6 @@
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Config/Config.h"
 
-namespace Insight
-{
 	GraphicsAPI Renderer::s_API = GraphicsAPI::Vulkan;
 
 	SharedPtr<Renderer> Renderer::Create()
@@ -23,4 +21,3 @@ namespace Insight
 		}
 		return nullptr;
 	}
-}

@@ -7,8 +7,6 @@
 
 #include <type_traits>
 
-namespace Insight
-{
 	namespace Module
 	{
 		class IS_API ModuleManager : public TSingleton<ModuleManager>, public Module
@@ -74,5 +72,3 @@ namespace Insight
 			return {};
 		}
 	}
-}
-

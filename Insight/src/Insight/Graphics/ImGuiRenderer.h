@@ -3,11 +3,9 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Templates/TSingleton.h"
 
-namespace Insight
-{
 	class Renderer;
 
-	class ImGuiRenderer : public Insight::TSingleton<ImGuiRenderer>
+	class ImGuiRenderer : public TSingleton<ImGuiRenderer>
 	{
 	public:
 		ImGuiRenderer();
@@ -19,4 +17,3 @@ namespace Insight
 
 		static SharedPtr<ImGuiRenderer> Create();
 	};
-}

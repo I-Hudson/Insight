@@ -7,8 +7,6 @@
 	Due to this being GLFW this must be created on the same thread as glfw.
 */
 
-namespace Insight
-{
 	class SplashScreen
 	{
 		SplashScreen() = delete;
@@ -18,4 +16,3 @@ namespace Insight
 	private:
 		GLFWwindow* m_window;
 	};
-}

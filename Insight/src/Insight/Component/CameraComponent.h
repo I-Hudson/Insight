@@ -23,8 +23,8 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
 
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);

@@ -4,8 +4,6 @@
 #include "SerializableFile.h"
 #include "json.hpp"
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		class IS_API SerializableFile_JSON : public SerializableFile
@@ -25,4 +23,3 @@ namespace Insight
 			nlohmann::json m_document;
 		};
 	}
-}

@@ -21,8 +21,8 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
-	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
 
 private:
 	glm::mat4 m_transform;

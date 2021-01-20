@@ -6,8 +6,6 @@
 #include "Platform/Vulkan/VulkanTexture.h"
 #include "stb_image.h"
 
-namespace Insight
-{
 	namespace Render
 	{
 		U32 TextureGPUData::GetMipMapCount(const U32& width, const U32& height, const U32& channels)
@@ -115,4 +113,3 @@ namespace Insight
 
 		}
 	}
-}

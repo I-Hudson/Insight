@@ -24,8 +24,6 @@ inline size_t GetEditorPanelID() noexcept
 	return typeID;
 }
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class EditorWindow;
@@ -126,5 +124,4 @@ namespace Insight
 			return m_editorPanels.find(GetEditorPanelID<T>()) != m_editorPanels.end();
 		}
 	}
-}
 #endif

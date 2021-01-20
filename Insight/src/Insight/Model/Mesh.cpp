@@ -218,7 +218,7 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 		//}
 		//if (!skip)
 		{   // if texture hasn't been loaded already, load it
-			textures.emplace_back(typeName,  Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Texture>(m_directory + "/" + str.C_Str()));
+			textures.emplace_back(typeName,  FileSystem::FileSystemManager::Instance()->LoadObject<Texture>(m_directory + "/" + str.C_Str()));
 			//m_loadedTextures.push_back(texture); // add to loaded textures
 		}
 	}

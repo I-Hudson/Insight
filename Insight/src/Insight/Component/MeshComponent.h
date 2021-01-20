@@ -31,8 +31,8 @@ public:
 	void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
 	std::string& GetMeshName() { return m_meshName; }
 
-	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
 
 private:
 	WeakPtr<Mesh> m_mesh;

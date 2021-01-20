@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "WatchInfo.h"
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		void WatchInfo::ProcessNotification(const FILE_NOTIFY_INFORMATION& notIf, FileNotifcationQueue& notifications) const
@@ -108,4 +106,3 @@ namespace Insight
 			return std::move(notifications);
 		}
 	}
-}

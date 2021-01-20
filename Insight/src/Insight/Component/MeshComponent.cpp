@@ -29,14 +29,14 @@ void MeshComponent::OnCreate()
 
 	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
 
-	Insight::Module::GraphicsModule::m_meshs.push_back(shared_from_this());
-	//SetMaterial(Insight::Module::GraphicsModule::GetDefaultMaterial());
+	Module::GraphicsModule::m_meshs.push_back(shared_from_this());
+	//SetMaterial(Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
 }
 
 void MeshComponent::OnDestroy()
 {
-	auto it = std::find_if(Insight::Module::GraphicsModule::m_meshs.begin(), Insight::Module::GraphicsModule::m_meshs.end(), [&](WeakPtr<MeshComponent> component)
+	auto it = std::find_if(Module::GraphicsModule::m_meshs.begin(), Module::GraphicsModule::m_meshs.end(), [&](WeakPtr<MeshComponent> component)
 		{
 			if (auto comSP = component.lock())
 			{
@@ -44,7 +44,7 @@ void MeshComponent::OnDestroy()
 			}
 			return false;
 		});
-	Insight::Module::GraphicsModule::m_meshs.erase(it);
+	Module::GraphicsModule::m_meshs.erase(it);
 }
 
 void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
@@ -93,7 +93,7 @@ void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& m
 	m_materialBlockDatas = materialBlockDatas;
 }
 
-void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void MeshComponent::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
 	if (auto meshSP = m_mesh.lock())
@@ -102,8 +102,7 @@ void MeshComponent::Serialize(SharedPtr<Insight::Serialization::SerializableElem
 	}
 }
 
-void MeshComponent::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void MeshComponent::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
-	//using namespace Insight::Library;
 	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

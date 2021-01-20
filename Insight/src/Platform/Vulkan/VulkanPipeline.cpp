@@ -163,10 +163,10 @@ namespace vks
 		: m_vulkanDevice(device)
 	{
 
-		std::vector<Insight::ParsedShadeData> shaderData;
+		std::vector<ParsedShadeData> shaderData;
 		for (size_t i = 0; i < shaders.size(); ++i)
 		{
-			shaderData.push_back(Insight::ShaderParser::ParseShader(shaders[i]));
+			shaderData.push_back(ShaderParser::ParseShader(shaders[i]));
 		}
 
 		CreateDescriptorSetLayout(device, shaders, shaderData);
@@ -184,7 +184,7 @@ namespace vks
 		vkDestroyPipeline(*m_vulkanDevice, m_pipeline, nullptr);
 	}
 
-	void VulkanPipeline::Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
+	void VulkanPipeline::Create(VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
 	{
 		m_vulkanDevice = device;
 
@@ -198,7 +198,7 @@ namespace vks
 		vkCmdBindPipeline(commandBuffer, bindPoint, m_pipeline);
 	}
 
-	void VulkanPipeline::CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
+	void VulkanPipeline::CreateDescriptorSetLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<ParsedShadeData>& shaderData)
 	{
 		std::set<int> setIndexs;
 
@@ -240,7 +240,7 @@ namespace vks
 		}
 	}
 
-	void VulkanPipeline::CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<Insight::ParsedShadeData>& shaderData)
+	void VulkanPipeline::CreatePipelineLayout(vks::VulkanDevice* device, const std::vector<std::string>& shaders, std::vector<ParsedShadeData>& shaderData)
 	{
 		std::vector<VkPushConstantRange> pushConstants;
 
@@ -260,7 +260,7 @@ namespace vks
 		ThrowIfFailed(vkCreatePipelineLayout(*device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_pipelineLayout));
 	}
 
-	void VulkanPipeline::CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<Insight::ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
+	void VulkanPipeline::CreatePipeline(vks::VulkanDevice* device, const std::vector<std::string>& shaders, const VkRenderPass& renderPass, std::vector<ParsedShadeData>& shaderData, const RenderPassInfo& renderPassInfo)
 	{
 		VkSpecializationMapEntry specializationEntry{};
 		specializationEntry.constantID = 0;
@@ -273,7 +273,7 @@ namespace vks
 		specializationInfo.dataSize = sizeof(renderPassInfo.SamplerCount);
 		specializationInfo.pData = &renderPassInfo.SamplerCount;
 
-		Insight::ParsedShadeData vertexShaderData;
+		ParsedShadeData vertexShaderData;
 		std::vector<std::vector<uint32_t>> compiledShaders;
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 		for (size_t i = 0; i < shaders.size(); ++i)

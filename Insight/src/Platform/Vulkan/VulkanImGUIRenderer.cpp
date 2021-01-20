@@ -17,7 +17,7 @@ namespace vks
 {
 	VulkanImGUIRenderer::VulkanImGUIRenderer()
 	{
-		REG_EVENT_HANDLE(Insight::EventType::VulkanWindowResize, VulkanImGUIRenderer::WindowResize);
+		REG_EVENT_HANDLE(EventType::VulkanWindowResize, VulkanImGUIRenderer::WindowResize);
 	}
 
 	VulkanImGUIRenderer::~VulkanImGUIRenderer()
@@ -59,7 +59,7 @@ namespace vks
 #endif
 	}
 
-	void VulkanImGUIRenderer::Init(SharedPtr<Insight::Renderer> renderer)
+	void VulkanImGUIRenderer::Init(SharedPtr<Renderer> renderer)
 	{
 #if defined(IMGUI_ENABLED)
 		auto device = VulkanDevice::Instance();
@@ -82,7 +82,7 @@ namespace vks
 
 		SetupImGuiRenderPass();
 
-		ImGui_ImplGlfw_InitForVulkan(Insight::Window::m_window, false);
+		ImGui_ImplGlfw_InitForVulkan(Window::m_window, false);
 		ImGui_ImplVulkan_InitInfo init_info = {};
 		init_info.Instance = vRenderer->GetInstance();
 		init_info.PhysicalDevice = vRenderer->GetPhysicalDevice();
@@ -197,10 +197,10 @@ namespace vks
 		//ThrowIfFailed(vkCreateRenderPass(*device, &renderPassInfo, nullptr, &renderPass));
 	}
 
-	void VulkanImGUIRenderer::WindowResize(Insight::Event const& event)
+	void VulkanImGUIRenderer::WindowResize(Event const& event)
 	{
 #if defined(IMGUI_ENABLED)
-		Insight::VulkanResizeEvent resizeEvent = static_cast<const Insight::VulkanResizeEvent&>(event);
+		VulkanResizeEvent resizeEvent = static_cast<const VulkanResizeEvent&>(event);
 
 		ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2((float)resizeEvent.m_width, (float)resizeEvent.m_height);

@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include <glm/glm.hpp>
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		class IS_API SerializableAttribute
@@ -20,4 +18,3 @@ namespace Insight
 			std::string m_value;
 		};
 	}
-}

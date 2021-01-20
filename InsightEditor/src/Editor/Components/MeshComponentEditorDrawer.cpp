@@ -3,10 +3,8 @@
 #include "Insight/Component/MeshComponent.h"
 #include "Insight/Library/ModelLibrary.h"
 
-EDITOR_DEF_TYPE(MeshComponent, Insight::Editor::MeshComponentEditorDrawer);
+EDITOR_DEF_TYPE(MeshComponent, Editor::MeshComponentEditorDrawer);
 
-namespace Insight
-{
 	namespace Editor
 	{
 		void MeshComponentEditorDrawer::OnDraw(Object& obj)
@@ -23,4 +21,3 @@ namespace Insight
 			}
 		}
 	}
-}

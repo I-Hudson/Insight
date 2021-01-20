@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "Editor/UIHelper.h"
 
-namespace Insight
-{
 	namespace Editor
 	{
 		bool IS_API UIHelper::InternalDrawElement(const std::unordered_map<IS_PropertyFlags, std::function<bool()>>& flagFunctions, const PropertyFlags& flags, const std::string& typeName)
@@ -195,4 +193,3 @@ namespace Insight
 			return r;
 		}
 	}
-}

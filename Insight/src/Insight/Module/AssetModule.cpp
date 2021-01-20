@@ -5,15 +5,13 @@
 
 #include "Insight/Model/Model.h"
 
-namespace Insight
-{
 	namespace Module
 	{
 		AssetModule::AssetModule()
 			: m_deserlizaed(false)
 		{
-			m_modelLibrary = CreateSharedPtr<Insight::Library::ModelLibrary>();
-			//m_shaderLibrary = NEW_ON_HEAP(Insight::Library::ShaderLibrary);
+			m_modelLibrary = CreateSharedPtr<Library::ModelLibrary>();
+			//m_shaderLibrary = NEW_ON_HEAP(Library::ShaderLibrary);
 		}
 
 		AssetModule::~AssetModule()
@@ -34,4 +32,3 @@ namespace Insight
 			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture");
 		}
 	}
-}

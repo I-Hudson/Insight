@@ -7,8 +7,6 @@
 #include <map>
 #include <filesystem>
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		using DirectoryHash = U64;
@@ -105,4 +103,3 @@ namespace Insight
 			return DynamicPointerCast<T>(handle.Object);
 		}
 	}
-}

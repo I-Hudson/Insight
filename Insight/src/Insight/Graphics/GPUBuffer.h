@@ -11,7 +11,7 @@ struct Vertex
 	glm::vec2 UV1;
 };
 
-class IS_API GPUBuffer : public Insight::GPUResource
+class IS_API GPUBuffer : public GPUResource
 {
 public:
 	static SharedPtr<GPUBuffer> Create();

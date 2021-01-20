@@ -3,8 +3,6 @@
 #include "ModuleManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
 
-namespace Insight
-{
 	namespace Module
 	{
 		ModuleManager::ModuleManager()
@@ -54,4 +52,3 @@ namespace Insight
 			return m_modules.find(moduleName) != m_modules.end();
 		}
 	}
-}

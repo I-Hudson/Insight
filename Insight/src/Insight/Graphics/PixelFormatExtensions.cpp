@@ -1,7 +1,6 @@
 // Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
 
 #include "ispch.h"
-#include "Platform/Platform.h"
 #include "PixelFormatExtensions.h"
 
 #define MAX_PIXEL_FORMATS 256
@@ -21,7 +20,7 @@ namespace
 void PixelFormatExtensions::Init()
 {
     // Clear lookup table
-    Platform::MemoryClear(sizeOfInBits, sizeof sizeOfInBits);
+    memset(sizeOfInBits, 0, sizeof(sizeOfInBits));
 
     PixelFormat formats1[] = {
         PixelFormat::R1_UNorm

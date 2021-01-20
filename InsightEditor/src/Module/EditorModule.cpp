@@ -7,8 +7,6 @@
 #include "Editor/Windows/AssetWindow.h"
 
 #if defined(IS_EDITOR)
-namespace Insight
-{
 	namespace Module
 	{
 		EditorModule::EditorModule()
@@ -43,5 +41,4 @@ namespace Insight
 			}
 		}
 	}
-}
 #endif

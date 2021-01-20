@@ -4,8 +4,6 @@
 
 class Entity;
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class SceneHierarchyPanel : public EditorWindow
@@ -27,4 +25,3 @@ namespace Insight
 			bool m_openAddComponentPopup;
 		};
 	}
-}

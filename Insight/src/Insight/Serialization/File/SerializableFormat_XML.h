@@ -4,8 +4,6 @@
 #include "SerializableFile.h"
 #include "tinyxml2.h"
 
-namespace Insight
-{
 	namespace Serialization
 	{
 		class IS_API SerializableFile_XML : public SerializableFile
@@ -25,4 +23,3 @@ namespace Insight
 			tinyxml2::XMLDocument m_document;
 		};
 	}
-}

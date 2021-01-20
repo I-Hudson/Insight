@@ -4,8 +4,6 @@
 #include <memory>
 #include <thread>
 
-namespace Insight
-{
 	class Scene;
 	namespace Module
 	{
@@ -70,4 +68,3 @@ namespace Insight
 	};
 
 	Application* CreateApplication();
-}

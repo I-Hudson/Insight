@@ -2,28 +2,26 @@
 #include "SubMesh.h"
 #include "Insight/Memory/MemoryManager.h"
 #include "Insight/Instrumentor/Instrumentor.h"
-#include "Graphics/Buffer.h"
+#include "Graphics/GPUBuffer.h"
 
 #include "Platform/Vulkan/VulkanMaterial.h"
 #include "Platform/Vulkan/VulkanDevice.h"
 #include "Insight/Model/Model.h"
 
 SubMesh::SubMesh()
-	: Insight::UUID()
-	, m_created(false)
+	: m_created(false)
 {
-	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+	m_vertexBuffer = Object::CreateObject<vks::VulkanBuffer>();
+	m_indexBuffer = Object::CreateObject<vks::VulkanBuffer>();
 }
 
 SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
-	: Insight::UUID()
-	, m_created(false)
+	: m_created(false)
 {
 	IS_PROFILE_FUNCTION();
 
-	m_vertexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Insight::Object::CreateObject<vks::VulkanBuffer>();
+	m_vertexBuffer = Object::CreateObject<vks::VulkanBuffer>();
+	m_indexBuffer = Object::CreateObject<vks::VulkanBuffer>();
 
 	Create(vertices, indices);
 }

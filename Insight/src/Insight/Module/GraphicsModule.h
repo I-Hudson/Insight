@@ -12,8 +12,6 @@ class MeshComponent;
 class CameraComponent;
 class Material;
 
-namespace Insight
-{
 	namespace Module
 	{
 		class WindowModule;
@@ -51,5 +49,3 @@ namespace Insight
 			friend MeshComponent;
 		};
 	}
-}
-

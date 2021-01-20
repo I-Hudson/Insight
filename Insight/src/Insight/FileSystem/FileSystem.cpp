@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "FileSystem.h"
 
-namespace Insight
-{
 	namespace FileSystem
 	{
 		FileSystemWatcher::FileSystemWatcher()
@@ -308,4 +306,3 @@ namespace Insight
 			return std::string("");
 		}
 	}
-}

@@ -15,20 +15,16 @@ class Component;
 class Entity;
 const size_t MaxComponents = 32;
 
-inline U64 GetComponentID(const Insight::Type& type) noexcept
+inline U64 GetComponentID(const Type& type) noexcept
 {
 	return type.GetTypeHash();
 }
 
-namespace Insight
-{
 	class Scene;
-}
-
 class Model;
 
-class IS_API Entity : public Insight::Object
-					, public Insight::Serialization::Serializable
+class IS_API Entity : public Object
+					, public Serialization::Serializable
 					, public std::enable_shared_from_this<Entity>
 {
 public:
@@ -73,12 +69,12 @@ public:
 	template<typename T>
 	SharedPtr<T> GetComponent(const std::string& uuid) const;
 
-	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
 
 private:
 
-	bool HasComponent(const Insight::Type& type);
+	bool HasComponent(const Type& type);
 	void AddComponent(SharedPtr<Component> component);
 	void RemoveAllComponenets();
 
@@ -91,7 +87,7 @@ private:
 	bool m_showDebugInfo;
 	bool m_attachedToScene = true;
 
-	friend Insight::Scene;
+	friend Scene;
 
 	REGISTER_DEC_TYPE(Entity);
 };
@@ -102,7 +98,7 @@ inline bool Entity::HasComponent()
 	const bool result = std::is_base_of<Component, T>::value;
 	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
 
-	Insight::Type type;
+	Type type;
 	type.SetType<T>();
 	return HasComponent(type);
 }
@@ -126,7 +122,7 @@ inline SharedPtr<T> Entity::AddComponent()
 		{
 			if (m_attachedToScene)
 			{
-				Insight::Scene::ActiveScene()->m_updateComponents.push_back(c);
+				Scene::ActiveScene()->m_updateComponents.push_back(c);
 			}
 		}
 
@@ -158,8 +154,8 @@ inline void Entity::RemoveComponent()
 
 				if (m_attachedToScene)
 				{
-					Insight::Scene::ActiveScene()->m_updateComponents.erase(std::find(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
-																					  Insight::Scene::ActiveScene()->m_updateComponents.end(), it));
+					Scene::ActiveScene()->m_updateComponents.erase(std::find(Scene::ActiveScene()->m_updateComponents.begin(),
+																					  Scene::ActiveScene()->m_updateComponents.end(), it));
 				}
 
 				break;

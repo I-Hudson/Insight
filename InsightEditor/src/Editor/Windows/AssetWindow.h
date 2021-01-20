@@ -3,8 +3,6 @@
 #include "Editor/EditorWindow.h"
 #include <filesystem>
 
-namespace Insight
-{
     namespace Editor
     {
         class AssetWindow : public EditorWindow
@@ -73,5 +71,3 @@ namespace Insight
             bool m_showHidden, m_showInputbarCombobox, m_isDir, m_initRead, m_filterDirty, m_validateFile;
         };
     }
-}
-

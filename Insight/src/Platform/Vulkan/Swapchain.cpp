@@ -198,7 +198,7 @@ namespace vks
 	void Swapchain::InitSurface(void* platformWindow)
 	{
 		IS_PROFILE_FUNCTION();
-		IS_CORE_ASSERT(glfwCreateWindowSurface(m_instance, Insight::Window::m_window, nullptr, &m_surface) == VK_SUCCESS, "Window Surface failed to be created.");
+		IS_CORE_ASSERT(glfwCreateWindowSurface(m_instance, Window::m_window, nullptr, &m_surface) == VK_SUCCESS, "Window Surface failed to be created.");
 
 		// Get available queue family properties
 		uint32_t queueCount;

@@ -3,8 +3,6 @@
 #include "Insight/Core/Core.h"
 #include "Insight/Memory/MemoryUtils.h"
 
-namespace Insight
-{
 	namespace Memory
 	{
 		class IS_API StackAllocator
@@ -61,4 +59,3 @@ namespace Insight
 		}
 
 	}
-}

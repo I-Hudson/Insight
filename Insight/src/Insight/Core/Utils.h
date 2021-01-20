@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Object.h"
+#include "Compiler.h"
 #include <string>
 
 #if defined(IS_STANDARD_POINTER)
@@ -8,7 +9,7 @@
 template<typename T, typename ... Args>
 constexpr UniquePtr<T> CreateUniquePtr(Args&& ... args)
 {
-	static_assert(!std::is_base_of_v<Insight::Object, T>, "'Object::CreateObjbect<T>' must be used.");
+	static_assert(!std::is_base_of_v<Object, T>, "'Object::CreateObjbect<T>' must be used.");
 	return std::make_unique<T>(std::forward<Args>(args)...);
 }
 template<typename T, typename ... Args>
@@ -20,7 +21,7 @@ constexpr UniquePtr<T> CreateUniquePtrNoExpect(Args&& ... args)
 template<typename T, typename ... Args>
 constexpr SharedPtr<T> CreateSharedPtr(Args&& ... args)
 {
-	static_assert(!std::is_base_of_v<Insight::Object, T>, "'Object::CreateObjbect<T>' must be used.");
+	static_assert(!std::is_base_of_v<Object, T>, "'Object::CreateObjbect<T>' must be used.");
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
 template<typename T, typename ... Args>

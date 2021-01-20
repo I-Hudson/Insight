@@ -4,8 +4,6 @@
 #include "Insight/Event/Event.h"
 #include <string>
 
-namespace Insight
-{
 	class WindowCloseEvent : public Event
 	{
 	public:
@@ -100,4 +98,3 @@ namespace Insight
 		//private:
 		unsigned int m_width, m_height;
 	};
-}

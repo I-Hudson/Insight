@@ -5,7 +5,7 @@
 
 namespace vks
 {
-	class IS_API VulkanTextureGPUData : public Insight::Render::TextureGPUData
+	class IS_API VulkanTextureGPUData : public Render::TextureGPUData
 	{
 	public:
 		virtual ~VulkanTextureGPUData() override;

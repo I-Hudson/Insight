@@ -8,8 +8,6 @@ class Component;
 
 const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
-namespace Insight
-{
 	class Scene : std::enable_shared_from_this<Scene>
 	{
 	public:
@@ -68,4 +66,3 @@ namespace Insight
 
 		return nullptr;
 	}
-}

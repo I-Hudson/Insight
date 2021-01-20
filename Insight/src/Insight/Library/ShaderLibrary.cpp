@@ -2,8 +2,6 @@
 
 #include "Insight/Library/ShaderLibrary.h"
 
-namespace Insight
-{
 	namespace Library
 	{
 		//ShaderLibrary::ShaderLibrary()
@@ -25,4 +23,3 @@ namespace Insight
 		//{
 		//}
 	}
-}

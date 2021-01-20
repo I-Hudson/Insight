@@ -3,8 +3,6 @@
 #include "Graphics/FrameGraph/FrameGraph.h"
 #include "Core/Log.h"
 
-namespace Insight
-{
 	namespace FrameGraph
 	{
 		FrameGraph::FrameGraph()
@@ -138,4 +136,3 @@ namespace Insight
 		}
 
 	}
-}

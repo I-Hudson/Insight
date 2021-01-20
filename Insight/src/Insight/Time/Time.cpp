@@ -1,8 +1,6 @@
 #include "ispch.h"
 #include "Time.h"
 
-namespace Insight
-{
 	std::chrono::high_resolution_clock Time::s_clock;
 	std::chrono::steady_clock::time_point Time::s_startTimePoint;
 
@@ -84,4 +82,3 @@ namespace Insight
 	{
 		return d / 1000.0;
 	}
-}

@@ -2,8 +2,6 @@
 
 #include "Insight/Core/Core.h"
 
-namespace Insight
-{
 	namespace Memory
 	{
 		class IS_API MemoryUtlis
@@ -42,4 +40,3 @@ namespace Insight
 			}
 		};
 	}
-}

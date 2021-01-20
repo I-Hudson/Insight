@@ -7,8 +7,6 @@ class CameraComponent;
 class Material;
 struct RendererData;
 
-namespace Insight
-{
 	namespace Module
 	{ class WindowModule; }
 
@@ -43,6 +41,3 @@ namespace Insight
 
 		static GraphicsAPI s_API;
 	};
-}
-
-

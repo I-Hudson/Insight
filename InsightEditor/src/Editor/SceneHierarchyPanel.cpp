@@ -12,8 +12,7 @@
 #include "Insight/Component/MeshComponent.h"
 #include "imgui.h"
 
-namespace Insight
-{
+
 	namespace Editor
 	{
 		SceneHierarchyPanel::SceneHierarchyPanel(SharedPtr<Module::EditorModule> editorModule)
@@ -230,4 +229,3 @@ namespace Insight
 #endif
 		}
 	}
-}

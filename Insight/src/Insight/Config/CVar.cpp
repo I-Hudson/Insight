@@ -3,8 +3,6 @@
 #include "ConfigRegistry.h"
 #include <glm/glm.hpp>
 
-namespace Insight
-{
 	// Declare template classes for CVar.
 	template class IS_API CVar<float>;
 	template class IS_API CVar<int>;
@@ -36,4 +34,3 @@ namespace Insight
 	{
 		ConfigRegistry::Register(this);
 	}
-}

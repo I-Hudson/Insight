@@ -64,12 +64,6 @@
     <Filter Include="src\Insight\Platform">
       <UniqueIdentifier>{067CF244-F20A-7C0E-9B29-900987978CB4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Insight\Platform\Base">
-      <UniqueIdentifier>{504C577D-BC0E-8B07-05BF-199471C063E5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Insight\Platform\Win32">
-      <UniqueIdentifier>{6820C129-5430-6DFA-BDE9-D118A9185C93}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Insight\Platform\Windows">
       <UniqueIdentifier>{40CCA69E-2C87-964A-D53E-0F95C1D8E0DA}</UniqueIdentifier>
     </Filter>
@@ -177,12 +171,6 @@
     <ClInclude Include="src\Insight\Core\Core.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Core\Delegate.h">
-      <Filter>src\Insight\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Core\Encoding.h">
-      <Filter>src\Insight\Core</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Core\EntryPoint.h">
       <Filter>src\Insight\Core</Filter>
     </ClInclude>
@@ -213,14 +201,8 @@
     <ClInclude Include="src\Insight\Core\Types\DateTime.h">
       <Filter>src\Insight\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Core\Types\Guid.h">
-      <Filter>src\Insight\Core\Types</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Core\Types\TimeSpan.h">
       <Filter>src\Insight\Core\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Core\UUID.h">
-      <Filter>src\Insight\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Core\Utils.h">
       <Filter>src\Insight\Core</Filter>
@@ -348,103 +330,10 @@
     <ClInclude Include="src\Insight\Module\WindowModule.h">
       <Filter>src\Insight\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\ClipboardBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\FileBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\FileSystemBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\FileSystemWatcherBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\PlatformBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\ThreadBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Base\WindowBase.h">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\CPUInfo.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\CriticalSection.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Defines.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\File.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\MemoryStats.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
     <ClInclude Include="src\Insight\Platform\Platform.h">
       <Filter>src\Insight\Platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Thread.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Types.h">
-      <Filter>src\Insight\Platform</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\IncludeWindowsHeaders.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32ConditionVariable.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32CriticalSection.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32Defines.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32File.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32FileSystem.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32Platform.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\Win32Thread.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Win32\WindowsMinimal.h">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\ComPtr.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsClipboard.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsDefines.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsFileSystem.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsFileSystemWatcher.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsInput.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsPlatform.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsPlatformSettings.h">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Platform\Windows\WindowsWindow.h">
+    <ClInclude Include="src\Insight\Platform\Windows\PlatformWindows.h">
       <Filter>src\Insight\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\RTTI\RTTI.h">
@@ -490,9 +379,6 @@
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Threading\ThreadPool.hpp">
-      <Filter>src\Insight\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Insight\Threading\ThreadSpawner.h">
       <Filter>src\Insight\Threading</Filter>
     </ClInclude>
     <ClInclude Include="src\Insight\Time\Stopwatch.h">
@@ -1832,9 +1718,6 @@
     <ClCompile Include="src\Insight\Core\Types\DateTime.cpp">
       <Filter>src\Insight\Core\Types</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Core\Types\Guid.cpp">
-      <Filter>src\Insight\Core\Types</Filter>
-    </ClCompile>
     <ClCompile Include="src\Insight\Core\Types\TimeSpan.cpp">
       <Filter>src\Insight\Core\Types</Filter>
     </ClCompile>
@@ -1925,61 +1808,7 @@
     <ClCompile Include="src\Insight\Module\WindowModule.cpp">
       <Filter>src\Insight\Module</Filter>
     </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\FileBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\FileSystemBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\PlatformBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\StringUtilsBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\ThreadBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\WindowBase.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Base\WindowsManager.cpp">
-      <Filter>src\Insight\Platform\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Win32\Win32File.cpp">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Win32\Win32FileSystem.cpp">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Win32\Win32Platform.cpp">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Win32\Win32StringUtils.cpp">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Win32\Win32Thread.cpp">
-      <Filter>src\Insight\Platform\Win32</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsClipboard.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsFileSystem.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsFileSystemWatcher.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsInput.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsPlatform.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsWindow.DragDrop.cpp">
-      <Filter>src\Insight\Platform\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Insight\Platform\Windows\WindowsWindow.cpp">
+    <ClCompile Include="src\Insight\Platform\Windows\PlatformWindows.cpp">
       <Filter>src\Insight\Platform\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Insight\RTTI\RTTI.cpp">

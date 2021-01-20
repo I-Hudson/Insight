@@ -37,7 +37,7 @@ Entity::~Entity()
 
 SharedPtr<Entity> Entity::Create(const std::string& id)
 {
-	return Insight::Scene::s_CurrentScene->CreateEntity(id);
+	return Scene::s_CurrentScene->CreateEntity(id);
 }
 
 SharedPtr<Entity> Entity::CreateFromModel(SharedPtr<Model> model)
@@ -60,9 +60,9 @@ void Entity::Delete()
 	{
 		for (int i = 0; i < m_children.size(); ++i)
 		{
-			Insight::Scene::s_CurrentScene->DeleteEntiy(m_children[i]);
+			Scene::s_CurrentScene->DeleteEntiy(m_children[i]);
 		}
-		Insight::Scene::s_CurrentScene->DeleteEntiy(this->shared_from_this());
+		Scene::s_CurrentScene->DeleteEntiy(this->shared_from_this());
 	}
 }
 
@@ -88,7 +88,7 @@ std::string& Entity::GetID()
 
 SharedPtr<Entity> Entity::AddChild(const std::string& childId)
 {
-	SharedPtr<Entity> e = Insight::Scene::s_CurrentScene->CreateEntity(childId);
+	SharedPtr<Entity> e = Scene::s_CurrentScene->CreateEntity(childId);
 	AddChild(e);
 	return e;
 }
@@ -122,7 +122,7 @@ void Entity::RemoveChild(SharedPtr<Entity> child)
 	}
 }
 
-void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void Entity::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	if (GetParent().expired() || force)
 	{
@@ -146,7 +146,7 @@ void Entity::Serialize(SharedPtr<Insight::Serialization::SerializableElement> el
 	}
 }
 
-void Entity::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void Entity::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	if (auto ptr = element->GetFirstAttribute("UUID"))
 	{
@@ -195,7 +195,7 @@ void Entity::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> 
 	}
 }
 
-bool Entity::HasComponent(const Insight::Type& type)
+bool Entity::HasComponent(const Type& type)
 {
 	return m_componetBitset[GetComponentID(type)];
 }
@@ -209,7 +209,7 @@ void Entity::AddComponent(SharedPtr<Component> component)
 
 	if (component->m_updateEveryFarme)
 	{
-		Insight::Scene::ActiveScene()->m_updateComponents.push_back(component);
+		Scene::ActiveScene()->m_updateComponents.push_back(component);
 	}
 }
 
@@ -228,14 +228,14 @@ void Entity::RemoveComponent(const std::string& uuid)
 
 		if (m_attachedToScene)
 		{
-			auto sceneUpdateComponent = std::find_if(Insight::Scene::ActiveScene()->m_updateComponents.begin(),
-				Insight::Scene::ActiveScene()->m_updateComponents.end(), [it](SharedPtr<Component> ptr)
+			auto sceneUpdateComponent = std::find_if(Scene::ActiveScene()->m_updateComponents.begin(),
+				Scene::ActiveScene()->m_updateComponents.end(), [it](SharedPtr<Component> ptr)
 				{
 					return (*it)->GetUUID() == ptr->GetUUID();
 				});
-			if (sceneUpdateComponent != Insight::Scene::ActiveScene()->m_updateComponents.end())
+			if (sceneUpdateComponent != Scene::ActiveScene()->m_updateComponents.end())
 			{
-				Insight::Scene::ActiveScene()->m_updateComponents.erase(sceneUpdateComponent);
+				Scene::ActiveScene()->m_updateComponents.erase(sceneUpdateComponent);
 			}
 		}
 

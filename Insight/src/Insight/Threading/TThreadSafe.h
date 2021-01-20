@@ -2,8 +2,6 @@
 #include "Insight/Core/Core.h"
 #include <mutex>
 
-namespace Insight
-{
 	template<typename T>
 	class TThreadSafe
 	{
@@ -184,4 +182,3 @@ namespace Insight
 	{
 		m_mutex.unlock();
 	}
-}

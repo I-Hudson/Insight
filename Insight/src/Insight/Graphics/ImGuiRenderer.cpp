@@ -1,10 +1,8 @@
 #include "ispch.h"
 #include "Graphics/ImGuiRenderer.h"
 #include "Module/GraphicsModule.h"
-#include "Vulkan/VulkanImGUIRenderer.h"
+#include "Platform/Vulkan/VulkanImGUIRenderer.h"
 
-namespace Insight
-{
 	ImGuiRenderer::ImGuiRenderer()
 	{
 	}
@@ -13,7 +11,7 @@ namespace Insight
 	{
 	}
 
-	SharedPtr<ImGuiRenderer> Insight::ImGuiRenderer::Create()
+	SharedPtr<ImGuiRenderer> ImGuiRenderer::Create()
 	{
 		switch (Module::GraphicsModule::Instance()->GetAPI())
 		{
@@ -22,4 +20,3 @@ namespace Insight
 
 		return nullptr;
 	}
-}

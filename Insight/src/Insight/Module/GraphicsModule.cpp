@@ -9,8 +9,6 @@
 #include "Insight/Time/Stopwatch.h"
 #include "Insight/Core/Log.h"
 
-namespace Insight
-{
 	namespace Module
 	{
 		CameraComponent* GraphicsModule::m_mainCamera;
@@ -29,7 +27,7 @@ namespace Insight
 
 		GraphicsModule::~GraphicsModule()
 		{
-			Insight::ImGuiRenderer* imguiRenderer = Insight::ImGuiRenderer::Instance();
+			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
 			m_imguiRenderer.reset();
 
 			m_renderer.reset();
@@ -80,4 +78,3 @@ namespace Insight
 			return GraphicsModule::Instance()->m_renderer->GetDefaultMaterial();
 		}
 	}
-}

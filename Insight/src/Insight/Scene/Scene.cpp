@@ -13,8 +13,6 @@
 
 #include <ostream>
 
-namespace Insight
-{
 	Scene* Scene::s_CurrentScene;
 
 	Scene::Scene(const std::string& sceneName)
@@ -116,18 +114,18 @@ namespace Insight
 	{
 			IS_PROFILE_FUNCTION();
 
-			UniquePtr<Insight::Serialization::SerializableFile> serializableFile = Insight::Serialization::SerializableFile::Create();
+			UniquePtr<Serialization::SerializableFile> serializableFile = Serialization::SerializableFile::Create();
 			auto root = serializableFile->GetNewElement("Scene");
 			for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
 			{
-				SharedPtr<Insight::Serialization::SerializableElement>entityNode = root->AddChild("Entity");
+				SharedPtr<Serialization::SerializableElement>entityNode = root->AddChild("Entity");
 				(*it)->Serialize(entityNode);
 			}
 
 			serializableFile->SaveFile(file);
 			serializableFile.reset();
 
-			Insight::EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
+			EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
 	}
 
 	void Scene::Deserialize(const std::string& file)
@@ -135,15 +133,15 @@ namespace Insight
 		{
 			IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
 
-			UniquePtr<Insight::Serialization::SerializableFile> serializableFile = Insight::Serialization::SerializableFile::Create();
+			UniquePtr<Serialization::SerializableFile> serializableFile = Serialization::SerializableFile::Create();
 
 			if (!serializableFile->LoadFile(file))
 			{
 				return;
 			}
 
-			SharedPtr<Insight::Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
-			SharedPtr<Insight::Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
+			SharedPtr<Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
+			SharedPtr<Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
 			if (entity != nullptr)
 			{
 				do
@@ -174,7 +172,7 @@ namespace Insight
 			}
 		}
 
-		Insight::EventManager::Dispatch<DeserializeEvent>(EventType::Deserialize, DeserializeEvent());
+		EventManager::Dispatch<DeserializeEvent>(EventType::Deserialize, DeserializeEvent());
 	}
 
 	void Scene::OnUpdate(const float& deltaTime)
@@ -211,4 +209,3 @@ namespace Insight
 			(*it)->Clean();
 		}
 	}
-}

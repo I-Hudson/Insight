@@ -3,7 +3,6 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "Platform/Platform.h"
 #include "Core/Templates.h"
 
 namespace Constants

@@ -16,7 +16,7 @@ struct DefaultDelete
 	void operator()(T* ptr) const noexcept
 	{
 		IS_CORE_STATIC_ASSERT(0 < sizeof(T), "Can't delete imcomplete type.");
-		Insight::Memory::MemoryManager::Instance()->DeleteOnFreeList(ptr);
+		Memory::MemoryManager::Instance()->DeleteOnFreeList(ptr);
 	}
 };
 
@@ -24,10 +24,10 @@ template<typename T, typename TDeleter = DefaultDelete<T>>
 class TUniquePtr
 {
 public:
-	TUniquePtr() : m_ptr(Insight::Memory::MemoryManager::Instance()->NewOnFreeList<T>()) { }
+	TUniquePtr() : m_ptr(Memory::MemoryManager::Instance()->NewOnFreeList<T>()) { }
 	TUniquePtr(T* ptr) : m_ptr(ptr) { }
 	template<typename... Args>
-	TUniquePtr(Args&&... args) : m_ptr(Insight::Memory::MemoryManager::Instance()->NewOnFreeList<T>(std::forward<Args>(args)...)) { }
+	TUniquePtr(Args&&... args) : m_ptr(Memory::MemoryManager::Instance()->NewOnFreeList<T>(std::forward<Args>(args)...)) { }
 
 	// Copy ptr, delete.
 	TUniquePtr(const TUniquePtr& ptr) = delete;
@@ -86,19 +86,19 @@ private:
 //	TSafePtr()
 //		: m_ptr(NEW_ON_HEAP(T))
 //	{
-//		IS_CORE_STATIC_ASSERT(std::is_base_of_v<Insight::Object, T>::value, "'T' is not derived from 'Insight::Object'.");
+//		IS_CORE_STATIC_ASSERT(std::is_base_of_v<Object, T>::value, "'T' is not derived from 'Object'.");
 //	}
 //
 //	TSafePtr(T* ptr)
 //		: m_ptr(ptr)
 //	{
-//		IS_CORE_STATIC_ASSERT(Insight::Object, T, "'T' is not derived from 'Insight::Object'.");
+//		IS_CORE_STATIC_ASSERT(Object, T, "'T' is not derived from 'Object'.");
 //	}
 //
 //	TSafePtr(T& ptr)
 //		: m_ptr(&ptr)
 //	{
-//		IS_CORE_STATIC_ASSERT(Insight::Object, T, "'T' is not derived from 'Insight::Object'.");
+//		IS_CORE_STATIC_ASSERT(Object, T, "'T' is not derived from 'Object'.");
 //	}
 //
 //	~TSafePtr()
