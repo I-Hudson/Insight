@@ -1,16 +1,13 @@
 #pragma once
 #ifdef IS_VULKAN
-#include "Insight/Core/Core.h"
+#include "Engine/Core/Core.h"
 #include "VulkanHeader.h"
 
-#include "Insight/Event/ApplicationEvent.h"
-#include "Insight/Renderer/FrameGraph/FrameGraph.h"
+#include "Engine/Event/ApplicationEvent.h"
+#include "Engine/Graphics/FrameGraph/FrameGraph.h"
 
-namespace Insight
-{
 	class Event;
 	class ImGuiRenderer;
-}
 
 namespace vks
 {
@@ -27,7 +24,7 @@ namespace vks
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
-	class IS_API Swapchain : public Insight::Object
+	class IS_API Swapchain : public Object
 	{
 	public:
 

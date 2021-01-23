@@ -1,15 +1,15 @@
 #include "ispch.h"
 #include "Swapchain.h"
 
-#include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Library/ShaderLibrary.h"
-#include "Insight/Module/WindowModule.h"
-#include "Insight/Event/EventManager.h"
+#include "Engine/Instrumentor/Instrumentor.h"
+#include "Engine/Library/ShaderLibrary.h"
+#include "Engine/Module/WindowModule.h"
+#include "Engine/Event/EventManager.h"
 
-#include "Insight/Config/Config.h"
+#include "Engine/Config/Config.h"
 
 #include "glm/glm.hpp"
-#include "Insight/Renderer/ImGuiRenderer.h"
+#include "Engine/Graphics/ImGuiRenderer.h"
 #include "backends/imgui_impl_vulkan.h"
 #include <GLFW/glfw3.h>
 
@@ -198,7 +198,7 @@ namespace vks
 	void Swapchain::InitSurface(void* platformWindow)
 	{
 		IS_PROFILE_FUNCTION();
-		IS_CORE_ASSERT(glfwCreateWindowSurface(m_instance, Insight::Window::m_window, nullptr, &m_surface) == VK_SUCCESS, "Window Surface failed to be created.");
+		IS_CORE_ASSERT(glfwCreateWindowSurface(m_instance, Window::m_window, nullptr, &m_surface) == VK_SUCCESS, "Window Surface failed to be created.");
 
 		// Get available queue family properties
 		uint32_t queueCount;

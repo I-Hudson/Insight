@@ -1,19 +1,18 @@
 #include "ispch.h"
 #include "Editor/SceneHierarchyPanel.h"
-#include "Insight/Scene/Scene.h"
-#include "Insight/Entitiy/Entity.h"
-#include "Insight/Component/Component.h"
-#include "Insight/Input/Input.h"
-#include "Insight/Event/EventManager.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Entitiy/Entity.h"
+#include "Engine/Component/Component.h"
+#include "Engine/Input/Input.h"
+#include "Engine/Event/EventManager.h"
 #include "Editor/EditorDrawer.h"
 
 #include "Editor/RTTIToImGUI.h"
-#include "Insight/Component/CameraComponent.h"
-#include "Insight/Component/MeshComponent.h"
+#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/MeshComponent.h"
 #include "imgui.h"
 
-namespace Insight
-{
+
 	namespace Editor
 	{
 		SceneHierarchyPanel::SceneHierarchyPanel(SharedPtr<Module::EditorModule> editorModule)
@@ -230,4 +229,3 @@ namespace Insight
 #endif
 		}
 	}
-}

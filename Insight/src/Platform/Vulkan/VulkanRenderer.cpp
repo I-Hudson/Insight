@@ -13,19 +13,19 @@
 #include <glm/gtc/constants.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Insight/Config/Config.h"
-#include "Insight/Event/EventManager.h"
-#include "Insight/Component/CameraComponent.h"
-#include "Insight/Component/TransformComponent.h"
-#include "Insight/Component/MeshComponent.h"
-#include "Insight/Model/Model.h"
-#include "Insight/Renderer/Texture.h"
-#include "Insight/FileSystem/FileSystem.h"
+#include "Engine/Config/Config.h"
+#include "Engine/Event/EventManager.h"
+#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/MeshComponent.h"
+#include "Engine/Model/Model.h"
+#include "Engine/Graphics/Texture.h"
+#include "Engine/FileSystem/FileSystem.h"
 
-#include "Insight/Config/Config.h"
-#include "Insight/Instrumentor/Instrumentor.h"
-#include "Insight/Time/Time.h"
-#include <Insight\Renderer\ImGuiRenderer.cpp>
+#include "Engine/Config/Config.h"
+#include "Engine/Instrumentor/Instrumentor.h"
+#include "Engine/Time/Time.h"
+#include "Engine/Graphics/ImGuiRenderer.cpp"
 
 namespace vks
 {
@@ -49,7 +49,7 @@ namespace vks
 	}
 
 //#if defined(IS_EDITOR)
-//	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Insight::Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
+//	VulkanRendererEditorOverlay::VulkanRendererEditorOverlay(SharedPtr<Module::EditorModule> editorModule, SharedPtr<VulkanRenderer> renderer)
 //		: EditorWindow(editorModule)
 //		, m_renderer(renderer)
 //	{
@@ -61,7 +61,6 @@ namespace vks
 //
 //	void VulkanRendererEditorOverlay::Update(const float& deltaTime)
 //	{
-//		using namespace Insight::Editor;
 //
 //		ImGui::Begin("VulkanRendererEditorOverlay");
 //
@@ -120,7 +119,7 @@ namespace vks
 
 	VulkanRenderer::VulkanRenderer()
 	{
-		REG_EVENT_HANDLE(Insight::EventType::WindowResize, VulkanRenderer::WindowResizeEvent);
+		REG_EVENT_HANDLE(EventType::WindowResize, VulkanRenderer::OnWindowResizeEvent);
 
 		m_numThreads = std::thread::hardware_concurrency();
 		IS_CORE_ASSERT(m_numThreads > 0, "Number of threads has to be greater than 0.");
@@ -129,7 +128,7 @@ namespace vks
 		m_threadPool.set_thread_count(m_numThreads);
 		m_numObjectsPerThread = 512 / m_numThreads;
 
-		m_rndEngine.seed((unsigned)time(nullptr));
+		//m_rndEngine.seed((unsigned)time(nullptr));
 
 		glslang::InitializeProcess();
 		InitVulkan();
@@ -138,7 +137,7 @@ namespace vks
 
 	VulkanRenderer::~VulkanRenderer()
 	{
-		UNREG_EVENT_HANDLE(Insight::EventType::WindowResize);
+		UNREG_EVENT_HANDLE(EventType::WindowResize);
 
 		glslang::FinalizeProcess();
 
@@ -189,7 +188,7 @@ namespace vks
 
 		m_vulkanDevice.reset();
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
 		{
 			vks::Debug::FreeDebugCallback(m_instance);
 		}
@@ -205,9 +204,9 @@ namespace vks
 	{
 		VkResult err;
 
-		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation)));
+		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Config::RendererConfig.Validation)));
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
 			// For validating (debugging) an application the error and warning bits should sufficeVK_EXT_debug_report
@@ -311,7 +310,7 @@ namespace vks
 		VkResult result = m_swapchain.AcquireNextImage(m_semaphores.ImageAquired[0], &m_imageIndex);
 		if ((result == VK_ERROR_OUT_OF_DATE_KHR) || (result == VK_SUBOPTIMAL_KHR))
 		{
-			WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
+			OnWindowResizeEvent(WindowResizeEvent(Window::GetWidth(), Window::GetHeight()));
 		}
 		else
 		{
@@ -381,7 +380,7 @@ namespace vks
 
 		Present();
 
-		m_editorEntity->OnUpdate(Insight::Time::GetDeltaTime());
+		m_editorEntity->OnUpdate(Time::GetDeltaTime());
 
 		//TODO: Look into this. Maybe change how it works.
 		m_vulkanDevice->CheckIdleQueue();
@@ -397,7 +396,7 @@ namespace vks
 			if (result == VK_ERROR_OUT_OF_DATE_KHR)
 			{
 				// Swap chain is no longer compatible with the surface and needs to be recreated
-				WindowResizeEvent(Insight::WindowResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
+				WindowResizeEvent(WindowResizeEvent(Window::GetWidth(), Window::GetHeight()));
 				return;
 			}
 			else
@@ -455,13 +454,13 @@ namespace vks
 	void VulkanRenderer::InitSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.InitSurface(Insight::Window::m_window);
+		m_swapchain.InitSurface(Window::m_window);
 	}
 
 	void VulkanRenderer::SetupSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.Create(Insight::Window::GetWidth(), Insight::Window::GetHeight(), (bool)CONFIG_VAL(Insight::Config::RendererConfig.VSync), (bool)CONFIG_VAL(Insight::Config::RendererConfig.GSync));
+		m_swapchain.Create(Window::GetWidth(), Window::GetHeight(), (bool)CONFIG_VAL(Config::RendererConfig.VSync), (bool)CONFIG_VAL(Config::RendererConfig.GSync));
 	}
 
 	void VulkanRenderer::CreateCommandBuffers()
@@ -592,7 +591,7 @@ namespace vks
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pNext = NULL;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
 		{
 			uint32_t glfwExtensionCount = 0;
 			const char** glfwExtensions;
@@ -610,7 +609,7 @@ namespace vks
 		instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
 		instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 
-		if ((bool)CONFIG_VAL(Insight::Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
 		{
 			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
 			// Note that on Android this layer requires at least NDK r20
@@ -666,7 +665,7 @@ namespace vks
 		mvp.model = glm::mat4(1.0f);
 		m_lightPos.x = 20 * glm::cos(m_lightPosAngle);
 		m_lightPos.z = 20 * glm::sin(m_lightPosAngle);
-		m_lightPosAngle += Insight::Time::GetDeltaTime() * 1.0f;
+		m_lightPosAngle += Time::GetDeltaTime() * 1.0f;
 		mvp.lightPos = m_lightPos;
 
 		auto updateMaterail = [&](MeshComponent* meshCom, SharedPtr<Material> material, MaterialBlockData& materialBlockData)
@@ -734,8 +733,8 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		U32 width = Insight::Window::GetWidth();
-		U32 height = Insight::Window::GetHeight();
+		U32 width = Window::GetWidth();
+		U32 height = Window::GetHeight();
 
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -752,7 +751,7 @@ namespace vks
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::Instance());
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
 		imgui->EndFrame();
 
 		int i = m_currentFrame;
@@ -788,7 +787,7 @@ namespace vks
 		imageCI.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCI.imageType = VK_IMAGE_TYPE_2D;
 		imageCI.format = m_depthFormat;
-		imageCI.extent = { (uint32_t)Insight::Window::GetWidth(), (uint32_t)Insight::Window::GetHeight(), 1 };
+		imageCI.extent = { (uint32_t)Window::GetWidth(), (uint32_t)Window::GetHeight(), 1 };
 		imageCI.mipLevels = 1;
 		imageCI.arrayLayers = 1;
 		imageCI.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -838,8 +837,8 @@ namespace vks
 		frameBufferCreateInfo.renderPass = m_presentRenderPass;
 		frameBufferCreateInfo.attachmentCount = 2;
 		frameBufferCreateInfo.pAttachments = attachments;
-		frameBufferCreateInfo.width = (uint32_t)Insight::Window::GetWidth();
-		frameBufferCreateInfo.height = (uint32_t)Insight::Window::GetHeight();
+		frameBufferCreateInfo.width = (uint32_t)Window::GetWidth();
+		frameBufferCreateInfo.height = (uint32_t)Window::GetHeight();
 		frameBufferCreateInfo.layers = 1;
 
 		// Create frame buffers for every swap chain image
@@ -850,7 +849,7 @@ namespace vks
 			ThrowIfFailed(vkCreateFramebuffer(m_device, &frameBufferCreateInfo, nullptr, &m_presentFrameBuffers[i]));
 		}
 
-		m_frameBuffer.SetRect((uint32_t)Insight::Window::GetWidth(), (uint32_t)Insight::Window::GetHeight());
+		m_frameBuffer.SetRect((uint32_t)Window::GetWidth(), (uint32_t)Window::GetHeight());
 		m_frameBuffer.CreateAttachment(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Color");
 		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Normal");
 		m_frameBuffer.CreateAttachment(VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, "Position");
@@ -961,8 +960,9 @@ namespace vks
 
 	float VulkanRenderer::rnd(float range)
 	{
-		std::uniform_real_distribution<float> rndDist(0.0f, range);
-		return rndDist(m_rndEngine);
+		//std::uniform_real_distribution<float> rndDist(0.0f, range);
+		//return rndDist(m_rndEngine);
+		return 0.f;
 	}
 
 	void VulkanRenderer::PrepareMultiThreadedRenderer()
@@ -1042,8 +1042,8 @@ namespace vks
 			by secondary command buffers, which also applies to the UI overlay command buffer
 		*/
 
-		uint32_t width = (uint32_t)Insight::Window::GetWidth();
-		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+		uint32_t width = (uint32_t)Window::GetWidth();
+		uint32_t height = (uint32_t)Window::GetHeight();
 
 		ThrowIfFailed(vkBeginCommandBuffer(m_secondaryCommandBuffers.UI, &commandBufferBeginInfo));
 
@@ -1055,7 +1055,7 @@ namespace vks
 
 		//vkCmdBindPipeline(m_secondaryCommandBuffers.UI, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(Insight::ImGuiRenderer::Instance());
+		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
 		imgui->EndFrame();
 		imgui->Render(m_secondaryCommandBuffers.UI);
 
@@ -1068,8 +1068,8 @@ namespace vks
 		// Contains the list of secondary command buffers to be submitted
 		std::vector<VkCommandBuffer> commandBuffers;
 
-		uint32_t width = (uint32_t)Insight::Window::GetWidth();
-		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+		uint32_t width = (uint32_t)Window::GetWidth();
+		uint32_t height = (uint32_t)Window::GetHeight();
 
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 
@@ -1157,8 +1157,8 @@ namespace vks
 			return;
 		}
 
-		uint32_t width = (uint32_t)Insight::Window::GetWidth();
-		uint32_t height = (uint32_t)Insight::Window::GetHeight();
+		uint32_t width = (uint32_t)Window::GetWidth();
+		uint32_t height = (uint32_t)Window::GetHeight();
 
 		VkCommandBufferBeginInfo commandBufferBeginInfo = vks::initializers::commandBufferBeginInfo();
 		commandBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
@@ -1180,19 +1180,19 @@ namespace vks
 		ThrowIfFailed(vkEndCommandBuffer(cmdBuffer));
 	}
 
-	void VulkanRenderer::WindowResizeEvent(const Insight::Event& event)
+	void VulkanRenderer::OnWindowResizeEvent(const Event& event)
 	{
 		IS_PROFILE_FUNCTION();
-		Insight::WindowResizeEvent resizeEvent = static_cast<const Insight::WindowResizeEvent&>(event);
+		WindowResizeEvent resizeEvent = static_cast<const WindowResizeEvent&>(event);
 		IS_CORE_INFO("{0}", resizeEvent.ToString());
 
 		m_vulkanDevice->WaitForIdle();
 
 		int width = 0, height = 0;
-		glfwGetFramebufferSize(Insight::Window::m_window, &width, &height);
+		glfwGetFramebufferSize(Window::m_window, &width, &height);
 		while (width == 0 && height == 0)
 		{
-			glfwGetFramebufferSize(Insight::Window::m_window, &width, &height);
+			glfwGetFramebufferSize(Window::m_window, &width, &height);
 			glfwWaitEvents();
 		}
 
@@ -1214,6 +1214,6 @@ namespace vks
 		DestroyCommandBuffers();
 		CreateCommandBuffers();
 
-		EVENT_DISPATCH(Insight::EventType::VulkanWindowResize, Insight::VulkanResizeEvent(Insight::Window::GetWidth(), Insight::Window::GetHeight()));
+		EVENT_DISPATCH(EventType::VulkanWindowResize, VulkanResizeEvent(Window::GetWidth(), Window::GetHeight()));
 	}
 }

@@ -1,16 +1,14 @@
 #include <Insight.h>
 #include "PlayerController.h"
 
-using namespace Insight;
-
-class Sandbox : public Insight::Application
+class Sandbox : public Application
 {
 public:
 	std::vector<TransformComponent*> transformComponents;
-	Insight::Scene* m_sandboxScene;
+	Scene* m_sandboxScene;
 
 
-	Sandbox() : Insight::Application()
+	Sandbox() : Application()
 	{ }
 
 	virtual void Create() override
@@ -80,7 +78,7 @@ public:
 	}
 };
 
-Insight::Application* Insight::CreateApplication()
+Application* CreateApplication()
 {
 	return new Sandbox();
 }

@@ -11,7 +11,7 @@
 
 const std::string getAssetPath()
 {
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#if defined(VK_USE_IS_PLATFORM_ANDROID_KHR)
 	return "";
 #elif defined(VK_EXAMPLE_DATA_DIR)
 	return VK_EXAMPLE_DATA_DIR;
@@ -388,7 +388,7 @@ namespace vks
 		VkPipelineShaderStageCreateInfo shaderStage = {};
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.stage = stage;
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#if defined(VK_USE_IS_PLATFORM_ANDROID_KHR)
 		shaderStage.module = vks::loadShader(androidApp->activity->assetManager, fileName.c_str(), device);
 #else
 		VkShaderModuleCreateInfo moduleCreateInfo{};
@@ -408,7 +408,7 @@ namespace vks
 		VkPipelineShaderStageCreateInfo shaderStage = {};
 		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		shaderStage.stage = stage;
-#if defined(VK_USE_PLATFORM_ANDROID_KHR)
+#if defined(VK_USE_IS_PLATFORM_ANDROID_KHR)
 		shaderStage.module = vks::loadShader(androidApp->activity->assetManager, fileName.c_str(), device);
 #else
 		shaderStage.module = vks::loadShader(fileName.c_str(), device);

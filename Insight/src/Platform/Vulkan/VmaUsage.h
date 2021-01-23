@@ -28,7 +28,7 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_IS_PLATFORM_WIN32_KHR
 
 #else  // #ifdef _WIN32
 

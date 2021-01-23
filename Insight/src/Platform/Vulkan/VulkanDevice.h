@@ -1,6 +1,7 @@
 #pragma once
 #ifdef IS_VULKAN
-#include "Insight/Core/Core.h"
+#include "Engine/Core/Core.h"
+#include "Engine/Templates/TSingleton.h"
 #include "VulkanHeader.h"
 #include "VulkanBuffer.h"
 #include "VulkanFrameBuffer.h"
@@ -11,7 +12,7 @@ namespace vks
 	class VulkanRenderer;
 	struct RenderPassInfo;
 
-	class IS_API VulkanDevice : public Insight::TSingleton<VulkanDevice>
+	class IS_API VulkanDevice : public TSingleton<VulkanDevice>
 	{
 	public:
 		explicit VulkanDevice(VkPhysicalDevice m_physicalDevice, VkInstance instance);

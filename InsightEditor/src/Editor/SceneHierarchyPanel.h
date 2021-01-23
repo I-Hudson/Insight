@@ -1,11 +1,9 @@
 #pragma once
-#include "Insight/Core/Core.h"
+#include "Engine/Core/Core.h"
 #include "Editor/EditorWindow.h"
 
 class Entity;
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class SceneHierarchyPanel : public EditorWindow
@@ -27,4 +25,3 @@ namespace Insight
 			bool m_openAddComponentPopup;
 		};
 	}
-}

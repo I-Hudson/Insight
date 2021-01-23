@@ -1,15 +1,13 @@
 #include "ispch.h"
 #include "CameraComponentEditorDrawer.h"
-#include "Insight/Component/CameraComponent.h"
+#include "Engine/Component/CameraComponent.h"
 
 #include <glm/gtx/euler_angles.hpp>
 
 #if defined(IS_EDITOR)
 
-EDITOR_DEF_TYPE(CameraComponent, Insight::Editor::CameraComponentEditorDrawer);
+EDITOR_DEF_TYPE(CameraComponent, Editor::CameraComponentEditorDrawer);
 
-namespace Insight
-{
 	namespace Editor
 	{
 		void CameraComponentEditorDrawer::OnDraw(Object& obj)
@@ -33,5 +31,4 @@ namespace Insight
 			}
 		}
 	}
-}
 #endif

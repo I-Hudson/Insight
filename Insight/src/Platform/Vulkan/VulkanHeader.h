@@ -3,12 +3,12 @@
 // Include all the headers files for the Vulkan SDK
 
 #ifdef _WIN32
-#include "Insight/Core/Log.h"
-#include "Insight/Memory/MemoryManager.h"
+#include "Engine/Core/Log.h"
+#include "Engine/Memory/MemoryManager.h"
 #include "VulkanInitializers.h"
 #include <vulkan/vulkan.hpp>
 #else
-#define VK_USE_PLATFORM_XCB_KHR
+#define VK_USE_IS_PLATFORM_XCB_KHR
 #include <vulkan/vk_sdk_platform.h>
 #endif
 

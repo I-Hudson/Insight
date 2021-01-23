@@ -1,8 +1,8 @@
 #pragma once
-#include "Insight/Core/Core.h"
-#include "Insight/Module/Module.h"
-#include "Insight/Core/Log.h"
-#include "Insight/Memory/MemoryManager.h"
+#include "Engine/Core/Core.h"
+#include "Engine/Module/Module.h"
+#include "Engine/Core/Log.h"
+#include "Engine/Memory/MemoryManager.h"
 #include <bitset>
 
 #include "Editor/EditorDrawer.h"
@@ -24,8 +24,6 @@ inline size_t GetEditorPanelID() noexcept
 	return typeID;
 }
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class EditorWindow;
@@ -126,5 +124,4 @@ namespace Insight
 			return m_editorPanels.find(GetEditorPanelID<T>()) != m_editorPanels.end();
 		}
 	}
-}
 #endif

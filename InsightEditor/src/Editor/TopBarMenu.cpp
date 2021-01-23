@@ -1,10 +1,8 @@
 #include "TopBarMenu.h"
 #include "ImGuiFileBrowser.h"
-#include "Insight/Scene/Scene.h"
-#include "Insight/Entitiy/Entity.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Entitiy/Entity.h"
 
-namespace Insight
-{
 	namespace Editor
 	{
 		TopBarMenu::TopBarMenu(const SharedPtr<Module::EditorModule> editorModule)
@@ -62,4 +60,3 @@ namespace Insight
 			}
 		}
 	}
-}

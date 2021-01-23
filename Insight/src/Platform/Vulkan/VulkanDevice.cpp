@@ -1,8 +1,8 @@
 #include "ispch.h"
 #include "VulkanDevice.h"
 
-#include "Insight/Module/WindowModule.h"
-#include "Insight/Config/Config.h"
+#include "Engine/Module/WindowModule.h"
+#include "Engine/Config/Config.h"
 
 namespace vks
 {
@@ -15,7 +15,7 @@ namespace vks
 		: m_renderPass(nullptr)
 	{
 		IS_CORE_ASSERT(instance, "[VulkanDevice::VulkanDevice] Instance can not be null.");
-		IS_CORE_ASSERT(m_physicalDevice, "[VulkanDevice::VulkanDevice] Physical device can not be null.");
+		IS_CORE_ASSERT(physicalDevice, "[VulkanDevice::VulkanDevice] Physical device can not be null.");
 
 		m_instance = instance;
 		m_physicalDevice = physicalDevice;
@@ -324,6 +324,13 @@ namespace vks
 		allocatorInfo.physicalDevice = m_physicalDevice;
 		allocatorInfo.device = m_logicalDevice;
 		allocatorInfo.instance = m_instance;
+
+#ifdef IS_DEBUG
+		VmaRecordSettings recordingSettings = {};
+		recordingSettings.pFilePath = "VMA.csv";
+		allocatorInfo.pRecordSettings = &recordingSettings;
+#endif
+
 		vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator);
 
 		vkGetDeviceQueue(m_logicalDevice, m_queueFamilyIndices.graphics, 0, &m_queueFamily.graphics);
@@ -710,7 +717,7 @@ namespace vks
 	{
 		if (m_enableWaitCommands)
 		{
-			IS_PROFILE_CATEGORY("QueueIdleCommand", Insight::Category::Type::GPU_CRITICAL);
+			IS_PROFILE_CATEGORY("QueueIdleCommand", Category::Type::GPU_CRITICAL);
 			m_waitIdleCommands.push_back(funcPtr);
 		}
 		else

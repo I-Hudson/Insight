@@ -1,0 +1,43 @@
+#pragma once
+
+#include "Engine/Core/Core.h"
+
+class MeshComponent;
+class CameraComponent;
+class Material;
+struct RendererData;
+
+	namespace Module
+	{ class WindowModule; }
+
+	enum class GraphicsAPI
+	{
+		None = 0,
+		Vulkan = 1,
+		OpenGL = 2
+	};
+
+	class IS_API Renderer : public Object
+	{
+	public:
+		virtual ~Renderer() { }
+
+		virtual void Clear() = 0;
+		virtual void Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes) = 0;
+		virtual void Present() = 0;
+		virtual void WaitForIdle() = 0;
+
+		virtual Material* GetDefaultMaterial() { return nullptr; }
+
+		GraphicsAPI GetAPI() { return s_API; }
+		static SharedPtr<Renderer> Create();
+
+		struct RendererConfig
+		{
+			CVar<int> VSync{ "vsync", 0 };
+			CVar<int> GSync{ "gsync", 0 };
+			CVar<int> Validation{ "validation", 1 };
+		};
+
+		static GraphicsAPI s_API;
+	};

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Insight/Component/Component.h"
+#include "Engine/Component/Component.h"
 
 class PlayerController : public Component
 {
@@ -11,8 +11,8 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnUpdate(const float& deltaTime) override;
 
-	virtual void Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
 
 private:
 	glm::mat2 mat2;

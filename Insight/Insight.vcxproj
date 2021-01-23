@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -102,7 +102,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -129,7 +129,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;IS_PLATFORM_WINDOWS;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DIST;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DIST;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)src;$(ProjectDir)src\Insight;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -151,79 +151,100 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Engine\Component\CameraComponent.h" />
+    <ClInclude Include="src\Engine\Component\Component.h" />
+    <ClInclude Include="src\Engine\Component\MeshComponent.h" />
+    <ClInclude Include="src\Engine\Component\TransformComponent.h" />
+    <ClInclude Include="src\Engine\Config\CVar.h" />
+    <ClInclude Include="src\Engine\Config\CVarParser.h" />
+    <ClInclude Include="src\Engine\Config\Config.h" />
+    <ClInclude Include="src\Engine\Config\ConfigRegistry.h" />
+    <ClInclude Include="src\Engine\Config\ICVar.h" />
+    <ClInclude Include="src\Engine\Core\Application.h" />
+    <ClInclude Include="src\Engine\Core\Collections\span.h" />
+    <ClInclude Include="src\Engine\Core\Compiler.h" />
+    <ClInclude Include="src\Engine\Core\Core.h" />
+    <ClInclude Include="src\Engine\Core\EntryPoint.h" />
+    <ClInclude Include="src\Engine\Core\Enums.h" />
+    <ClInclude Include="src\Engine\Core\HashFunctions.h" />
+    <ClInclude Include="src\Engine\Core\InsightAlias.h" />
+    <ClInclude Include="src\Engine\Core\Log.h" />
+    <ClInclude Include="src\Engine\Core\NonCopyable.h" />
+    <ClInclude Include="src\Engine\Core\Object.h" />
+    <ClInclude Include="src\Engine\Core\Templates.h" />
+    <ClInclude Include="src\Engine\Core\Type.h" />
+    <ClInclude Include="src\Engine\Core\Types\DateTime.h" />
+    <ClInclude Include="src\Engine\Core\Types\TimeSpan.h" />
+    <ClInclude Include="src\Engine\Core\Utils.h" />
+    <ClInclude Include="src\Engine\Entitiy\Entity.h" />
+    <ClInclude Include="src\Engine\Enums\GPUResourceUsage.h" />
+    <ClInclude Include="src\Engine\Enums\PropertyFlags.h" />
+    <ClInclude Include="src\Engine\Event\ApplicationEvent.h" />
+    <ClInclude Include="src\Engine\Event\Event.h" />
+    <ClInclude Include="src\Engine\Event\EventManager.h" />
+    <ClInclude Include="src\Engine\FileSystem\FileHandle.h" />
+    <ClInclude Include="src\Engine\FileSystem\FileSystem.h" />
+    <ClInclude Include="src\Engine\FileSystem\WatchInfo.h" />
+    <ClInclude Include="src\Engine\Graphics\Enums.h" />
+    <ClInclude Include="src\Engine\Graphics\FrameGraph\FrameGraph.h" />
+    <ClInclude Include="src\Engine\Graphics\Framebuffer.h" />
+    <ClInclude Include="src\Engine\Graphics\GPUBuffer.h" />
+    <ClInclude Include="src\Engine\Graphics\GPUBufferDescription.h" />
+    <ClInclude Include="src\Engine\Graphics\GPUResource.h" />
+    <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h" />
+    <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h" />
+    <ClInclude Include="src\Engine\Graphics\Material.h" />
+    <ClInclude Include="src\Engine\Graphics\PixelFormat.h" />
+    <ClInclude Include="src\Engine\Graphics\PixelFormatExtensions.h" />
+    <ClInclude Include="src\Engine\Graphics\Renderer.h" />
+    <ClInclude Include="src\Engine\Graphics\SplashScreen.h" />
+    <ClInclude Include="src\Engine\Graphics\Texture.h" />
+    <ClInclude Include="src\Engine\Input\Input.h" />
+    <ClInclude Include="src\Engine\Input\InsightKeyCodes.h" />
+    <ClInclude Include="src\Engine\Instrumentor\Instrumentor.h" />
+    <ClInclude Include="src\Engine\Library\Library.h" />
+    <ClInclude Include="src\Engine\Library\ModelLibrary.h" />
+    <ClInclude Include="src\Engine\Library\ShaderLibrary.h" />
+    <ClInclude Include="src\Engine\Memory\FreeListAllocator.h" />
+    <ClInclude Include="src\Engine\Memory\MemoryManager.h" />
+    <ClInclude Include="src\Engine\Memory\MemoryUtils.h" />
+    <ClInclude Include="src\Engine\Memory\SinglyLinkedList.h" />
+    <ClInclude Include="src\Engine\Memory\StackAllocator.h" />
+    <ClInclude Include="src\Engine\Model\Mesh.h" />
+    <ClInclude Include="src\Engine\Model\Model.h" />
+    <ClInclude Include="src\Engine\Model\SubMesh.h" />
+    <ClInclude Include="src\Engine\Module\AssetModule.h" />
+    <ClInclude Include="src\Engine\Module\GraphicsModule.h" />
+    <ClInclude Include="src\Engine\Module\InputModule.h" />
+    <ClInclude Include="src\Engine\Module\Module.h" />
+    <ClInclude Include="src\Engine\Module\ModuleManager.h" />
+    <ClInclude Include="src\Engine\Module\WindowModule.h" />
+    <ClInclude Include="src\Engine\Platform\CriticalSection.h" />
+    <ClInclude Include="src\Engine\Platform\Platform.h" />
+    <ClInclude Include="src\Engine\Platform\Win32\Win32CriticalSection.h" />
+    <ClInclude Include="src\Engine\Platform\Win32\Win32Defines.h" />
+    <ClInclude Include="src\Engine\Platform\Win32\Win32Platform.h" />
+    <ClInclude Include="src\Engine\Platform\Win32\WindowsMinimal.h" />
+    <ClInclude Include="src\Engine\Platform\Windows\PlatformWindows.h" />
+    <ClInclude Include="src\Engine\Platform\Windows\WindowsDefines.h" />
+    <ClInclude Include="src\Engine\RTTI\RTTI.h" />
+    <ClInclude Include="src\Engine\RTTI\RTTITypes.h" />
+    <ClInclude Include="src\Engine\Scene\Scene.h" />
+    <ClInclude Include="src\Engine\Serialization\File\SerializableElementTypes.h" />
+    <ClInclude Include="src\Engine\Serialization\File\SerializableFile.h" />
+    <ClInclude Include="src\Engine\Serialization\File\SerializableFormat_JSON.h" />
+    <ClInclude Include="src\Engine\Serialization\File\SerializableFormat_XML.h" />
+    <ClInclude Include="src\Engine\Serialization\Serializable.h" />
+    <ClInclude Include="src\Engine\Serialization\SerializeHelper.h" />
+    <ClInclude Include="src\Engine\ShaderParser\ShaderParser.h" />
+    <ClInclude Include="src\Engine\Templates\TPointers.h" />
+    <ClInclude Include="src\Engine\Templates\TSingleton.h" />
+    <ClInclude Include="src\Engine\Threading\TThreadSafe.h" />
+    <ClInclude Include="src\Engine\Threading\ThreadCollection.h" />
+    <ClInclude Include="src\Engine\Threading\ThreadPool.hpp" />
+    <ClInclude Include="src\Engine\Time\Stopwatch.h" />
+    <ClInclude Include="src\Engine\Time\Time.h" />
     <ClInclude Include="src\Insight.h" />
-    <ClInclude Include="src\Insight\Component\CameraComponent.h" />
-    <ClInclude Include="src\Insight\Component\Component.h" />
-    <ClInclude Include="src\Insight\Component\MeshComponent.h" />
-    <ClInclude Include="src\Insight\Component\TransformComponent.h" />
-    <ClInclude Include="src\Insight\Config\CVar.h" />
-    <ClInclude Include="src\Insight\Config\CVarParser.h" />
-    <ClInclude Include="src\Insight\Config\Config.h" />
-    <ClInclude Include="src\Insight\Config\ConfigRegistry.h" />
-    <ClInclude Include="src\Insight\Config\ICVar.h" />
-    <ClInclude Include="src\Insight\Core\Application.h" />
-    <ClInclude Include="src\Insight\Core\CRC32.h" />
-    <ClInclude Include="src\Insight\Core\Core.h" />
-    <ClInclude Include="src\Insight\Core\EntryPoint.h" />
-    <ClInclude Include="src\Insight\Core\InsightAlias.h" />
-    <ClInclude Include="src\Insight\Core\Log.h" />
-    <ClInclude Include="src\Insight\Core\Object.h" />
-    <ClInclude Include="src\Insight\Core\Type.h" />
-    <ClInclude Include="src\Insight\Core\UUID.h" />
-    <ClInclude Include="src\Insight\Core\Utils.h" />
-    <ClInclude Include="src\Insight\Entitiy\Entity.h" />
-    <ClInclude Include="src\Insight\Enums\PropertyFlags.h" />
-    <ClInclude Include="src\Insight\Event\ApplicationEvent.h" />
-    <ClInclude Include="src\Insight\Event\Event.h" />
-    <ClInclude Include="src\Insight\Event\EventManager.h" />
-    <ClInclude Include="src\Insight\FileSystem\FileHandle.h" />
-    <ClInclude Include="src\Insight\FileSystem\FileSystem.h" />
-    <ClInclude Include="src\Insight\FileSystem\WatchInfo.h" />
-    <ClInclude Include="src\Insight\Input\Input.h" />
-    <ClInclude Include="src\Insight\Input\InsightKeyCodes.h" />
-    <ClInclude Include="src\Insight\Instrumentor\Instrumentor.h" />
-    <ClInclude Include="src\Insight\Library\Library.h" />
-    <ClInclude Include="src\Insight\Library\ModelLibrary.h" />
-    <ClInclude Include="src\Insight\Library\ShaderLibrary.h" />
-    <ClInclude Include="src\Insight\Memory\FreeListAllocator.h" />
-    <ClInclude Include="src\Insight\Memory\MemoryManager.h" />
-    <ClInclude Include="src\Insight\Memory\MemoryUtils.h" />
-    <ClInclude Include="src\Insight\Memory\SinglyLinkedList.h" />
-    <ClInclude Include="src\Insight\Memory\StackAllocator.h" />
-    <ClInclude Include="src\Insight\Model\Mesh.h" />
-    <ClInclude Include="src\Insight\Model\Model.h" />
-    <ClInclude Include="src\Insight\Model\SubMesh.h" />
-    <ClInclude Include="src\Insight\Module\AssetModule.h" />
-    <ClInclude Include="src\Insight\Module\GraphicsModule.h" />
-    <ClInclude Include="src\Insight\Module\InputModule.h" />
-    <ClInclude Include="src\Insight\Module\Module.h" />
-    <ClInclude Include="src\Insight\Module\ModuleManager.h" />
-    <ClInclude Include="src\Insight\Module\WindowModule.h" />
-    <ClInclude Include="src\Insight\RTTI\RTTI.h" />
-    <ClInclude Include="src\Insight\RTTI\RTTITypes.h" />
-    <ClInclude Include="src\Insight\Renderer\Buffer.h" />
-    <ClInclude Include="src\Insight\Renderer\FrameGraph\FrameGraph.h" />
-    <ClInclude Include="src\Insight\Renderer\Framebuffer.h" />
-    <ClInclude Include="src\Insight\Renderer\ImGuiRenderer.h" />
-    <ClInclude Include="src\Insight\Renderer\Material.h" />
-    <ClInclude Include="src\Insight\Renderer\Renderer.h" />
-    <ClInclude Include="src\Insight\Renderer\SplashScreen.h" />
-    <ClInclude Include="src\Insight\Renderer\Texture.h" />
-    <ClInclude Include="src\Insight\Scene\Scene.h" />
-    <ClInclude Include="src\Insight\Serialization\File\SerializableElementTypes.h" />
-    <ClInclude Include="src\Insight\Serialization\File\SerializableFile.h" />
-    <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_JSON.h" />
-    <ClInclude Include="src\Insight\Serialization\File\SerializableFormat_XML.h" />
-    <ClInclude Include="src\Insight\Serialization\Serializable.h" />
-    <ClInclude Include="src\Insight\Serialization\SerializeHelper.h" />
-    <ClInclude Include="src\Insight\ShaderParser\ShaderParser.h" />
-    <ClInclude Include="src\Insight\Templates\TPointers.h" />
-    <ClInclude Include="src\Insight\Templates\TSingleton.h" />
-    <ClInclude Include="src\Insight\Threading\TThreadSafe.h" />
-    <ClInclude Include="src\Insight\Threading\ThreadCollection.h" />
-    <ClInclude Include="src\Insight\Threading\ThreadPool.hpp" />
-    <ClInclude Include="src\Insight\Time\Stopwatch.h" />
-    <ClInclude Include="src\Insight\Time\Time.h" />
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h" />
     <ClInclude Include="src\Platform\Vulkan\VmaUsage.h" />
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h" />
@@ -660,51 +681,58 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Insight\Component\CameraComponent.cpp" />
-    <ClCompile Include="src\Insight\Component\MeshComponent.cpp" />
-    <ClCompile Include="src\Insight\Component\TransformComponent.cpp" />
-    <ClCompile Include="src\Insight\Config\CVar.cpp" />
-    <ClCompile Include="src\Insight\Config\Config.cpp" />
-    <ClCompile Include="src\Insight\Core\Application.cpp" />
-    <ClCompile Include="src\Insight\Core\Log.cpp" />
-    <ClCompile Include="src\Insight\Core\Object.cpp" />
-    <ClCompile Include="src\Insight\Entitiy\Entity.cpp" />
-    <ClCompile Include="src\Insight\Event\EventManager.cpp" />
-    <ClCompile Include="src\Insight\FileSystem\FileSystem.cpp" />
-    <ClCompile Include="src\Insight\FileSystem\WatchInfo.cpp" />
-    <ClCompile Include="src\Insight\Input\Input.cpp" />
-    <ClCompile Include="src\Insight\Instrumentor\Vulkan\VulkanRendererEditorOverlay.cpp" />
-    <ClCompile Include="src\Insight\Library\ModelLibrary.cpp" />
-    <ClCompile Include="src\Insight\Library\ShaderLibrary.cpp" />
-    <ClCompile Include="src\Insight\Memory\FreeListAllocator.cpp" />
-    <ClCompile Include="src\Insight\Memory\MemoryManager.cpp" />
-    <ClCompile Include="src\Insight\Memory\StackAllocator.cpp" />
-    <ClCompile Include="src\Insight\Model\Mesh.cpp" />
-    <ClCompile Include="src\Insight\Model\Model.cpp" />
-    <ClCompile Include="src\Insight\Model\SubMesh.cpp" />
-    <ClCompile Include="src\Insight\Module\AssetModule.cpp" />
-    <ClCompile Include="src\Insight\Module\GraphicsModule.cpp" />
-    <ClCompile Include="src\Insight\Module\InputModule.cpp" />
-    <ClCompile Include="src\Insight\Module\ModuleManager.cpp" />
-    <ClCompile Include="src\Insight\Module\WindowModule.cpp" />
-    <ClCompile Include="src\Insight\RTTI\RTTI.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Buffer.cpp" />
-    <ClCompile Include="src\Insight\Renderer\FrameGraph\FrameGraph.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Framebuffer.cpp" />
-    <ClCompile Include="src\Insight\Renderer\ImGuiRenderer.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Material.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Renderer.cpp" />
-    <ClCompile Include="src\Insight\Renderer\SplashScreen.cpp" />
-    <ClCompile Include="src\Insight\Renderer\Texture.cpp" />
-    <ClCompile Include="src\Insight\Scene\Scene.cpp" />
-    <ClCompile Include="src\Insight\Serialization\File\SerializableFile.cpp" />
-    <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_JSON.cpp" />
-    <ClCompile Include="src\Insight\Serialization\File\SerializableFormat_XML.cpp" />
-    <ClCompile Include="src\Insight\Serialization\Serializable.cpp" />
-    <ClCompile Include="src\Insight\ShaderParser\ShaderParser.cpp" />
-    <ClCompile Include="src\Insight\Threading\TThreadSafe.cpp" />
-    <ClCompile Include="src\Insight\Time\Stopwatch.cpp" />
-    <ClCompile Include="src\Insight\Time\Time.cpp" />
+    <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
+    <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
+    <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
+    <ClCompile Include="src\Engine\Config\CVar.cpp" />
+    <ClCompile Include="src\Engine\Config\Config.cpp" />
+    <ClCompile Include="src\Engine\Core\Application.cpp" />
+    <ClCompile Include="src\Engine\Core\Log.cpp" />
+    <ClCompile Include="src\Engine\Core\Object.cpp" />
+    <ClCompile Include="src\Engine\Core\Types\DateTime.cpp" />
+    <ClCompile Include="src\Engine\Core\Types\TimeSpan.cpp" />
+    <ClCompile Include="src\Engine\Entitiy\Entity.cpp" />
+    <ClCompile Include="src\Engine\Event\EventManager.cpp" />
+    <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
+    <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />
+    <ClCompile Include="src\Engine\Graphics\FrameGraph\FrameGraph.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp" />
+    <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp" />
+    <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Material.cpp" />
+    <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Texture.cpp" />
+    <ClCompile Include="src\Engine\Input\Input.cpp" />
+    <ClCompile Include="src\Engine\Instrumentor\Vulkan\VulkanRendererEditorOverlay.cpp" />
+    <ClCompile Include="src\Engine\Library\ModelLibrary.cpp" />
+    <ClCompile Include="src\Engine\Library\ShaderLibrary.cpp" />
+    <ClCompile Include="src\Engine\Memory\FreeListAllocator.cpp" />
+    <ClCompile Include="src\Engine\Memory\MemoryManager.cpp" />
+    <ClCompile Include="src\Engine\Memory\StackAllocator.cpp" />
+    <ClCompile Include="src\Engine\Model\Mesh.cpp" />
+    <ClCompile Include="src\Engine\Model\Model.cpp" />
+    <ClCompile Include="src\Engine\Model\SubMesh.cpp" />
+    <ClCompile Include="src\Engine\Module\AssetModule.cpp" />
+    <ClCompile Include="src\Engine\Module\GraphicsModule.cpp" />
+    <ClCompile Include="src\Engine\Module\InputModule.cpp" />
+    <ClCompile Include="src\Engine\Module\ModuleManager.cpp" />
+    <ClCompile Include="src\Engine\Module\WindowModule.cpp" />
+    <ClCompile Include="src\Engine\Platform\Win32\Win32Platform.cpp" />
+    <ClCompile Include="src\Engine\Platform\Windows\PlatformWindows.cpp" />
+    <ClCompile Include="src\Engine\RTTI\RTTI.cpp" />
+    <ClCompile Include="src\Engine\Scene\Scene.cpp" />
+    <ClCompile Include="src\Engine\Serialization\File\SerializableFile.cpp" />
+    <ClCompile Include="src\Engine\Serialization\File\SerializableFormat_JSON.cpp" />
+    <ClCompile Include="src\Engine\Serialization\File\SerializableFormat_XML.cpp" />
+    <ClCompile Include="src\Engine\Serialization\Serializable.cpp" />
+    <ClCompile Include="src\Engine\ShaderParser\ShaderParser.cpp" />
+    <ClCompile Include="src\Engine\Threading\TThreadSafe.cpp" />
+    <ClCompile Include="src\Engine\Time\Stopwatch.cpp" />
+    <ClCompile Include="src\Engine\Time\Time.cpp" />
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VmaUsage.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp" />

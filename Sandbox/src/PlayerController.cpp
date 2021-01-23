@@ -1,8 +1,8 @@
 #include "PlayerController.h"
 
-#include "Insight/Component/TransformComponent.h"
-#include "Insight/Time/Time.h"
-#include "Insight/Input/Input.h"
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Time/Time.h"
+#include "Engine/Input/Input.h"
 
 REGISTER_DEF_TYPE(PlayerController);
 
@@ -30,33 +30,33 @@ void PlayerController::OnUpdate(const float& deltaTime)
 {
 	if (Input::IsKeyDown(KEY_UP))
 	{
-		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(0.0f, 0.0f, 5.0f * Insight::Time::GetDeltaTime()));
+		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(0.0f, 0.0f, 5.0f * Time::GetDeltaTime()));
 	}
 
 	if (Input::IsKeyDown(KEY_DOWN))
 	{
-		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(0.0f, 0.0f, 5.0f * Insight::Time::GetDeltaTime()));
+		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(0.0f, 0.0f, 5.0f * Time::GetDeltaTime()));
 	}
 
 	if (Input::IsKeyDown(KEY_LEFT))
 	{
-		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(5.0f * Insight::Time::GetDeltaTime(), 0.0f, 0.0f));
+		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() + glm::vec3(5.0f * Time::GetDeltaTime(), 0.0f, 0.0f));
 	}
 
 	if (Input::IsKeyDown(KEY_RIGHT))
 	{
-		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(5.0f * Insight::Time::GetDeltaTime(), 0.0f, 0.0f));
+		GetComponent<TransformComponent>()->SetPosition(GetComponent<TransformComponent>()->GetPostion() - glm::vec3(5.0f * Time::GetDeltaTime(), 0.0f, 0.0f));
 	}
 }
 
 
-void PlayerController::Serialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void PlayerController::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 	//tinyxml2::XMLElement* Type = doc->NewElement("Type");
 	//Type->SetText("PlayerController");
 	//out->InsertEndChild(Type);
 }
 
-void PlayerController::Deserialize(SharedPtr<Insight::Serialization::SerializableElement> element, bool force)
+void PlayerController::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
 {
 }

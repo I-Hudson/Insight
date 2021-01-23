@@ -16,7 +16,7 @@ workspace "Insight"
     
     defines
     {
-        "IS_PROFILE"
+        "IS_PROFILE",
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"

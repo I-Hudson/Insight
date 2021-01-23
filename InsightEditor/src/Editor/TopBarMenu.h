@@ -1,10 +1,8 @@
 #pragma once
-#include "Insight/Core/Core.h"
+#include "Engine/Core/Core.h"
 #include "Editor/EditorWindow.h"
 #include "ImGuiFileBrowser.h"
 
-namespace Insight
-{
 	namespace Editor
 	{
 		class TopBarMenu : public EditorWindow
@@ -19,4 +17,3 @@ namespace Insight
 			imgui_addons::ImGuiFileBrowser m_fileDialog;
 		};
 	}
-}

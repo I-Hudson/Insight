@@ -1,11 +1,11 @@
 #pragma once
-#include "Insight/Core/Core.h"
-#include "Renderer/Texture.h"
+#include "Engine/Core/Core.h"
+#include "Engine/Graphics/Texture.h"
 #include "VulkanHeader.h"
 
 namespace vks
 {
-	class IS_API VulkanTextureGPUData : public Insight::Render::TextureGPUData
+	class IS_API VulkanTextureGPUData : public Render::TextureGPUData
 	{
 	public:
 		virtual ~VulkanTextureGPUData() override;

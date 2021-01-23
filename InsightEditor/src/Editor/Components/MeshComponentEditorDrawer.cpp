@@ -1,12 +1,10 @@
 #include "ispch.h"
 #include "MeshComponentEditorDrawer.h"
-#include "Insight/Component/MeshComponent.h"
-#include "Insight/Library/ModelLibrary.h"
+#include "Engine/Component/MeshComponent.h"
+#include "Engine/Library/ModelLibrary.h"
 
-EDITOR_DEF_TYPE(MeshComponent, Insight::Editor::MeshComponentEditorDrawer);
+EDITOR_DEF_TYPE(MeshComponent, Editor::MeshComponentEditorDrawer);
 
-namespace Insight
-{
 	namespace Editor
 	{
 		void MeshComponentEditorDrawer::OnDraw(Object& obj)
@@ -23,4 +21,3 @@ namespace Insight
 			}
 		}
 	}
-}

@@ -2,37 +2,37 @@
 
 // For use by apps only. No core system should directly be here.
 
-#include "Insight/Core/Core.h"
-#include "Insight/Core/Application.h"
-#include "Insight/Core/Log.h"
-#include "Insight/Module/ModuleManager.h"
+#include "Engine/Core/Core.h"
+#include "Engine/Core/Application.h"
+#include "Engine/Core/Log.h"
+#include "Engine/Module/ModuleManager.h"
 
-#include "Insight/FileSystem/FileSystem.h"
+#include "Engine/FileSystem/FileSystem.h"
 
-#include "Insight/Input/Input.h"
+#include "Engine/Input/Input.h"
 
-#include "Insight/Library/Library.h"
-#include "Insight/Library/ModelLibrary.h"
+#include "Engine/Library/Library.h"
+#include "Engine/Library/ModelLibrary.h"
 
-#include "Insight/Time/Stopwatch.h"
-#include "Insight/Time/Time.h"
+#include "Engine/Time/Stopwatch.h"
+#include "Engine/Time/Time.h"
 
-#include "Insight/Instrumentor/Instrumentor.h"
+#include "Engine/Instrumentor/Instrumentor.h"
 
 #include "../vendor/imgui/imgui.h"
 
-#include "Insight/Model/Model.h"
-#include "Insight/Model/Mesh.h"
-#include "Insight/Renderer/Texture.h"
-#include "Insight/Renderer/Material.h"
+#include "Engine/Model/Model.h"
+#include "Engine/Model/Mesh.h"
+#include "Engine/Graphics/Texture.h"
+#include "Engine/Graphics/Material.h"
 
-#include "Insight/Scene/Scene.h"
-#include "Insight/Entitiy/Entity.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Entitiy/Entity.h"
 
-#include "Insight/Component/TransformComponent.h"
-#include "Insight/Component/MeshComponent.h"
-#include "Insight/Component/CameraComponent.h"
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/MeshComponent.h"
+#include "Engine/Component/CameraComponent.h"
 
 // --Entry Point--------------------------
-#include "InSight/Core/EntryPoint.h"
+#include "Engine/Core/EntryPoint.h"
 // --Entry Point--------------------------
