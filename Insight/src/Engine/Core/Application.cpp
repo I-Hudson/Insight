@@ -4,7 +4,9 @@
 #include "Log.h"
 #include "Engine/Config/Config.h"
 
-#include "Engine/Memory/MemoryManager.h"
+#include "Engine/Memory/ProfilerMemory.h"
+#include "Engine/Memory/Memory.h"
+
 #include "Engine/Module/ModuleManager.h"
 #include "Engine/Module/AssetModule.h"
 #include "Engine/Module/WindowModule.h"
@@ -33,162 +35,165 @@
 
 //#define THREADS
 
-	Application::Application()
+Application::Application()
+{
+	IS_PROFILE_FUNCTION();
+
+	new ProfilerMemory();
+
+	Config::GetInstance().ParseInFolder("./data/config");
+
+	m_fileSystem = ::New<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
+
+	::New<RTTI::RTTI>();
+
+	m_moduleManager = ::New<Module::ModuleManager>();
+
+	auto assertModule = m_moduleManager->AddModule<Module::AssetModule>();
+
+	m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
+	m_windowModule->SetManuallyUpdate(true);
+
+	m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>();
+	m_graphicsModule->SetManuallyUpdate(true);
+	m_graphicsModule->SetDestroyManually(true);
+
+	m_inputModule = m_moduleManager->AddModule<Module::InputModule>();
+	m_inputModule->SetManuallyUpdate(true);
+
+	m_utitledScene = ::New<Scene>();
+	m_utitledScene->SetActiveScene();
+	m_utitledScene->SetSceneName("Untitled Scene");
+
+	//assertModule->Deserialize();
+}
+
+Application::~Application()
+{
+	IS_PROFILE_FUNCTION();
+
+	m_graphicsModule->WaitForIdle();
+
+	Scene::ActiveScene()->Unload();
+	::Delete(m_utitledScene);
+	::Delete(m_fileSystem);
+
+	::Delete(m_graphicsModule);
+	::Delete(Module::ModuleManager::Instance());
+
+	::Delete(RTTI::RTTI::Instance());
+
+	while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
 	{
-		IS_PROFILE_FUNCTION();
-
-		Config::GetInstance().ParseInFolder("./data/config");
-		
-		m_fileSystem = CreateSharedPtr<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
-		m_memoryManager = Memory::MemoryManager::CreateWithoutMemoryManager();
-
-		RTTI::RTTI::Create();
-		
-		m_moduleManager = Module::ModuleManager::Create();
-		
-		auto assertModule = m_moduleManager->AddModule<Module::AssetModule>();
-
-		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
-		m_windowModule->SetManuallyUpdate(true);
-
-		m_graphicsModule = m_moduleManager->AddModule<Module::GraphicsModule>(m_windowModule);
-		m_graphicsModule->SetManuallyUpdate(true);
-
-		m_inputModule = m_moduleManager->AddModule<Module::InputModule>(m_windowModule);
-		m_inputModule->SetManuallyUpdate(true);
-
-		m_moduleManager->GetModule<Module::AssetModule>()->AddDependency(m_graphicsModule);
-
-		m_utitledScene = CreateSharedPtr<Scene>();
-		m_utitledScene->SetActiveScene();
-		m_utitledScene->SetSceneName("Untitled Scene");
-
-		//assertModule->Deserialize();
+		free(entry);
 	}
 
-	Application::~Application()
+	delete ProfilerMemory::Instance();
+}
+
+void Application::Run()
+{
+	//AllcoBench();
+	Create();
+
+#ifdef THREADS
+	m_updateThreadState = UpdateThreadState::SAME_FRMAE;
+	m_renderThread = std::thread(&Application::RenderLoop, this);
+#endif
+
+	uint32_t m_loopCount = 0;
+	uint32_t m_frameCount = 0;
+	float deltaTime = 0.0f;
+
+	while (m_isRunning)
 	{
-		IS_PROFILE_FUNCTION();
+		IS_PROFILE_FRAME("MainThread");
 
-		m_graphicsModule->WaitForIdle();
-
-		m_utitledScene.reset();
-		m_fileSystem.reset();
-		Module::ModuleManager::Destroy();
-
-		RTTI::RTTI::Destroy();
-
-		Memory::MemoryManager::DestroyWithoutMemoryManager();
-
-		while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
+		IS_PROFILE_SCOPE("UPDATE_LOOP");
 		{
-			free(entry);
+			IS_PROFILE_SCOPE("UPDATE_LOOP_START");
 		}
-	}
-
-	void Application::Run()
-	{
-		//AllcoBench();
-		Create();
-
 #ifdef THREADS
-			m_updateThreadState = UpdateThreadState::SAME_FRMAE;
-			m_renderThread = std::thread(&Application::RenderLoop, this);
+		if (m_updateThreadState == UpdateThreadState::SAME_FRMAE || m_updateThreadState == UpdateThreadState::ONE_FRAME_AHEAD)
 #endif
-
-		uint32_t m_loopCount = 0;
-		uint32_t m_frameCount = 0;
-		float deltaTime = 0.0f;
-
-		while (m_isRunning)
 		{
-			IS_PROFILE_FRAME("MainThread");
+#ifdef THREADS
+			m_mutex.lock();
+			m_triggerRender = false;
+			m_mutex.unlock();
+#endif
+			Time::UpdateTime();
+			deltaTime = Time::GetDeltaTime();
 
-			IS_PROFILE_SCOPE("UPDATE_LOOP");
-			{
-				IS_PROFILE_SCOPE("UPDATE_LOOP_START");
-			}
-#ifdef THREADS
-			if (m_updateThreadState == UpdateThreadState::SAME_FRMAE || m_updateThreadState == UpdateThreadState::ONE_FRAME_AHEAD)
-#endif
-			{
-#ifdef THREADS
-				m_mutex.lock();
-				m_triggerRender = false;
-				m_mutex.unlock();
-#endif
-				Time::UpdateTime();
-				deltaTime = Time::GetDeltaTime();
-				
-				m_fileSystem->Update();
-				m_inputModule->Update(deltaTime);
-				m_windowModule->Update(deltaTime);
+			m_fileSystem->Update();
+			m_inputModule->Update(deltaTime);
+			m_windowModule->Update(deltaTime);
 
 #ifdef IMGUI_ENABLED
-				ImGuiRenderer::Instance()->NewFrame();
+			ImGuiRenderer::Instance()->NewFrame();
 #endif
-				m_moduleManager->Update(deltaTime);
+			m_moduleManager->Update(deltaTime);
 
-				Update(deltaTime);
-				Scene::ActiveScene()->OnUpdate(deltaTime);
+			Update(deltaTime);
+			Scene::ActiveScene()->OnUpdate(deltaTime);
 
-				Draw();
+			Draw();
 #ifndef THREADS
-				m_graphicsModule->Update(deltaTime);
+			m_graphicsModule->Update(deltaTime);
 #endif
 
 #ifdef THREADS
-				m_mutex.lock();
+			m_mutex.lock();
 #endif
-				m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
+			m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
 #ifdef THREADS
-				m_renderComplete = false;
-				m_triggerRender = true;
-				m_updateThreadState = (UpdateThreadState)((int)m_updateThreadState + 1);
-				// Transfer all data to render thread.
-				m_mutex.unlock();
+			m_renderComplete = false;
+			m_triggerRender = true;
+			m_updateThreadState = (UpdateThreadState)((int)m_updateThreadState + 1);
+			// Transfer all data to render thread.
+			m_mutex.unlock();
 #endif	
-				OnFrameEnd();
-				++m_frameCount;
-			}
-			++m_loopCount;
-			{
-				IS_PROFILE_SCOPE("UPDATE_LOOP_END");
-			}
-		};
+			OnFrameEnd();
+			++m_frameCount;
+		}
+		++m_loopCount;
+		{
+			IS_PROFILE_SCOPE("UPDATE_LOOP_END");
+		}
+	};
 
 #ifdef THREADS
-		m_renderThread.join();
+	m_renderThread.join();
 #endif
 
-		IS_CORE_INFO("UPDATE LOOP COUNT: {0}", m_loopCount);
-		IS_CORE_INFO("UPDATE FRAME COUNT: {0}", m_frameCount);
-	}
+	IS_CORE_INFO("UPDATE LOOP COUNT: {0}", m_loopCount);
+	IS_CORE_INFO("UPDATE FRAME COUNT: {0}", m_frameCount);
+}
 
-	void Application::RenderLoop()
+void Application::RenderLoop()
+{
+	uint32_t m_loopCount = 0;
+	uint32_t m_frameCount = 0;
+
+	IS_PROFILE_THREAD("Render Thread");
+	//Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Category::AI);
+
+	while (m_isRunning)
 	{
-		uint32_t m_loopCount = 0;
-		uint32_t m_frameCount = 0;
-
-		IS_PROFILE_THREAD("Render Thread");
-		//Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)Category::AI);
-
-		while (m_isRunning)
+		IS_PROFILE_FUNCTION();
+		if (m_triggerRender)
 		{
-			IS_PROFILE_FUNCTION();
-			if (m_triggerRender)
-			{
-				m_graphicsModule->Update(Time::GetDeltaTime());
-				m_mutex.lock();
-				m_renderComplete = true;
-				m_triggerRender = false;
-				m_updateThreadState = UpdateThreadState::SAME_FRMAE;
-				m_mutex.unlock();
-				++m_frameCount;
-			}
-			++m_loopCount;
+			m_graphicsModule->Update(Time::GetDeltaTime());
+			m_mutex.lock();
+			m_renderComplete = true;
+			m_triggerRender = false;
+			m_updateThreadState = UpdateThreadState::SAME_FRMAE;
+			m_mutex.unlock();
+			++m_frameCount;
 		}
-
-		IS_CORE_INFO("RENDER LOOP COUNT: {0}", m_loopCount);
-		IS_CORE_INFO("RENDER FRAME COUNT: {0}", m_frameCount);
+		++m_loopCount;
 	}
+
+	IS_CORE_INFO("RENDER LOOP COUNT: {0}", m_loopCount);
+	IS_CORE_INFO("RENDER FRAME COUNT: {0}", m_frameCount);
+}

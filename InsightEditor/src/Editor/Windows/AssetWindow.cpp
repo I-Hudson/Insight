@@ -3,7 +3,7 @@
 
     namespace Editor
     {
-        AssetWindow::AssetWindow(SharedPtr<Module::EditorModule> editorModule)
+        AssetWindow::AssetWindow(const Module::EditorModule* editorModule)
             : EditorWindow(editorModule)
             , m_assetRootPath("./", false, false)
         { 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Templates.h"
+#include "Engine/Core/Common.h"
+#include "Engine/Core/Templates.h"
 
 namespace Constants
 {

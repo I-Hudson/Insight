@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
+#include "Engine/Core/InsightAlias.h"
 
 /// <summary>
 /// Graphics rendering backend system types.

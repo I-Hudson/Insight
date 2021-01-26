@@ -8,22 +8,22 @@ class Component;
 
 const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
-	class Scene : std::enable_shared_from_this<Scene>
+	class IS_API Scene : std::enable_shared_from_this<Scene>
 	{
 	public:
 		Scene(const std::string& sceneName = "Default");
 		~Scene();
 
-		SharedPtr<Entity> CreateEntity(const std::string& name = std::string());
+		Entity* CreateEntity(const std::string& name = std::string());
 		void DeleteEntiy(const std::string uuid);
-		void DeleteEntiy(SharedPtr<Entity> ptr);
+		void DeleteEntiy(Entity* ptr);
 
 		const std::string& GetSceneName() const;
 		void SetSceneName(const std::string& sceneName);
 
 		void SetActiveScene();
 		static Scene* ActiveScene();
-		const std::vector<SharedPtr<Entity>> GetEntites() { return m_registry; }
+		const std::vector<Entity*> GetEntites() { return m_registry; }
 
 		void Save(const std::string& file);
 		void Load(const std::string& file);
@@ -37,11 +37,11 @@ const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 		void Clean();
 
 		template<typename T>
-		SharedPtr<T> FindFirstComponent();
+		T* FindFirstComponent();
 
 	private:
-		std::vector<SharedPtr<Entity>> m_registry;
-		std::vector<SharedPtr<Component>> m_updateComponents;
+		std::vector<Entity*> m_registry;
+		std::vector<Component*> m_updateComponents;
 
 		uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 		std::string m_sceneName;
@@ -54,7 +54,7 @@ const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 	};
 
 	template<typename T>
-	inline SharedPtr<T> Scene::FindFirstComponent()
+	inline T* Scene::FindFirstComponent()
 	{
 		for (auto it = m_registry.begin(); it != m_registry.end(); ++it) 
 		{

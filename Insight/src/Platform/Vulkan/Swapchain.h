@@ -24,7 +24,7 @@ namespace vks
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
-	class IS_API Swapchain : public Object
+	class Swapchain
 	{
 	public:
 

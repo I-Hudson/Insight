@@ -23,7 +23,7 @@ namespace vks
 		void Render(VkCommandBuffer commandBuffer);
 
 	private:
-		virtual void Init(SharedPtr<Renderer> renderer) override;
+		virtual void Init(Renderer* renderer) override;
 		void InitResources();
 		void SetupImGuiRenderPass();
 		void SetStyle();

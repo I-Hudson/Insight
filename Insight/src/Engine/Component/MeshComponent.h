@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Core/Core.h"
+
 #include "Engine/Component/Component.h"
 #include "Engine/Model/Mesh.h"
 #include "Engine/Graphics/Material.h"
@@ -7,11 +7,10 @@
 #include <../vendor/glm/glm/glm.hpp>
 
 class IS_API MeshComponent : public Component
-	, public std::enable_shared_from_this<MeshComponent>
 {
 public:
 	MeshComponent();
-	MeshComponent(SharedPtr<Entity> owner);
+	MeshComponent(Entity* owner);
 	virtual ~MeshComponent() override;
 
 	virtual void OnCreate() override;
@@ -19,24 +18,24 @@ public:
 
 	void Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc);
 
-	void SetMesh(WeakPtr<Mesh> mesh);
-	void SetModel(WeakPtr<Model> model);
-	WeakPtr<Mesh> GetMesh() const { return m_mesh; }
+	void SetMesh(Mesh* mesh);
+	void SetModel(Model* model);
+	Mesh* GetMesh() const { return m_mesh; }
 
-	void SetMaterial(WeakPtr<Material> material, int index);
-	void SetMaterials(std::vector<WeakPtr<Material>> materials);
+	void SetMaterial(Material* material, int index);
+	void SetMaterials(std::vector<Material*> materials);
 
-	std::vector<WeakPtr<Material>>& GetMaterials() { return m_materials; }
+	std::vector<Material*>& GetMaterials() { return m_materials; }
 	std::vector<MaterialBlockData>& GetMaterialBlockData() { return m_materialBlockDatas; }
 	void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
 	std::string& GetMeshName() { return m_meshName; }
 
-	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
-	WeakPtr<Mesh> m_mesh;
-	std::vector<WeakPtr<Material>> m_materials;
+	Mesh* m_mesh;
+	std::vector<Material*> m_materials;
 	std::vector<MaterialBlockData> m_materialBlockDatas;
 
 	std::string m_meshName;

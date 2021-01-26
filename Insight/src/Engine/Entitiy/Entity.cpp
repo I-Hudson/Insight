@@ -13,18 +13,21 @@ REGISTER_DEF_TYPE(Entity);
 
 Entity::Entity()
 	: Serializable(this, false)
+	, m_parent(nullptr)
 {
 	m_name = "Default";
 }
 
 Entity::Entity(const std::string& id)
 	: Serializable(this, false)
+	, m_parent(nullptr)
 {
 	m_name = id;
 }
 
 Entity::Entity(const std::string& id, bool attachToScene)
 	: Serializable(this, false)
+	, m_parent(nullptr)
 {
 	m_name = id;
 	m_attachedToScene = false;
@@ -35,17 +38,17 @@ Entity::~Entity()
 	RemoveAllComponenets();
 }
 
-SharedPtr<Entity> Entity::Create(const std::string& id)
+Entity* Entity::New(const std::string& id)
 {
 	return Scene::s_CurrentScene->CreateEntity(id);
 }
 
-SharedPtr<Entity> Entity::CreateFromModel(SharedPtr<Model> model)
+Entity* Entity::CreateFromModel(Model* model)
 {
 	IS_PROFILE_FUNCTION();
 
 	std::string modelName = model->GetModelName();
-	SharedPtr<Entity> e = Entity::Create(modelName);
+	Entity* e = Entity::New(modelName);
 	e->AddComponent<MeshComponent>()->SetMesh(model->GetMesh());
 
 
@@ -62,7 +65,7 @@ void Entity::Delete()
 		{
 			Scene::s_CurrentScene->DeleteEntiy(m_children[i]);
 		}
-		Scene::s_CurrentScene->DeleteEntiy(this->shared_from_this());
+		Scene::s_CurrentScene->DeleteEntiy(this);
 	}
 }
 
@@ -86,23 +89,23 @@ std::string& Entity::GetID()
 	return m_name;
 }
 
-SharedPtr<Entity> Entity::AddChild(const std::string& childId)
+Entity* Entity::AddChild(const std::string& childId)
 {
-	SharedPtr<Entity> e = Scene::s_CurrentScene->CreateEntity(childId);
+	Entity* e = Scene::s_CurrentScene->CreateEntity(childId);
 	AddChild(e);
 	return e;
 }
 
-void Entity::AddChild(SharedPtr<Entity> child)
+void Entity::AddChild(Entity* child)
 {
 	if (std::find(m_children.begin(), m_children.end(), child) == m_children.end())
 	{
 		m_children.push_back(child);
 	}
-	child->SetParent(this->shared_from_this());
+	child->SetParent(this);
 }
 
-SharedPtr<Entity> Entity::GetChild(int childIndex)
+Entity* Entity::GetChild(int childIndex)
 {
 	if (childIndex < 0 || childIndex >= m_children.size())
 	{
@@ -112,7 +115,7 @@ SharedPtr<Entity> Entity::GetChild(int childIndex)
 	return m_children[childIndex];
 }
 
-void Entity::RemoveChild(SharedPtr<Entity> child)
+void Entity::RemoveChild(Entity* child)
 {
 	auto it = std::find(m_children.begin(), m_children.end(), child);
 	if (it != m_children.end())
@@ -122,9 +125,9 @@ void Entity::RemoveChild(SharedPtr<Entity> child)
 	}
 }
 
-void Entity::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void Entity::Serialize(Serialization::SerializableElement* element, bool force)
 {
-	if (GetParent().expired() || force)
+	if (GetParent() || force)
 	{
 		element->AddAttribute("UUID", GetUUID());
 		element->AddAttribute("Type", "Entity");
@@ -146,7 +149,7 @@ void Entity::Serialize(SharedPtr<Serialization::SerializableElement> element, bo
 	}
 }
 
-void Entity::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void Entity::Deserialize(Serialization::SerializableElement* element, bool force)
 {
 	if (auto ptr = element->GetFirstAttribute("UUID"))
 	{
@@ -171,7 +174,7 @@ void Entity::Deserialize(SharedPtr<Serialization::SerializableElement> element, 
 	{
 		if (auto ptr = component->GetFirstAttribute("Type"))
 		{
-			if (SharedPtr<Component> componentObject = CreateInstanceFromType<Component>(ptr->GetValue()))
+			if (Component* componentObject = Serialization::Serializable::NewInstanceFromType<Component>(ptr->GetValue()))
 			{
 				AddComponent(componentObject);
 				componentObject->Deserialize(component);
@@ -185,7 +188,7 @@ void Entity::Deserialize(SharedPtr<Serialization::SerializableElement> element, 
 	{
 		if (auto ptr = child->GetFirstAttribute("Type"))
 		{
-			if (SharedPtr<Entity> childObject = CreateInstanceFromType<Entity>(ptr->GetValue()))
+			if (Entity* childObject = NewInstanceFromType<Entity>(ptr->GetValue()))
 			{
 				childObject->Deserialize(child);
 				m_children.push_back(childObject);
@@ -200,11 +203,11 @@ bool Entity::HasComponent(const Type& type)
 	return m_componetBitset[GetComponentID(type)];
 }
 
-void Entity::AddComponent(SharedPtr<Component> component)
+void Entity::AddComponent(Component* component)
 {
 	m_components.push_back(component);
 
-	component->SetEntity(this->shared_from_this());
+	component->SetEntity(this);
 	m_componetBitset[component->m_componentId] = true;
 
 	if (component->m_updateEveryFarme)
@@ -215,7 +218,7 @@ void Entity::AddComponent(SharedPtr<Component> component)
 
 void Entity::RemoveComponent(const std::string& uuid)
 {
-	auto it = std::find_if(m_components.begin(), m_components.end(), [uuid](SharedPtr<Component> ptr)
+	auto it = std::find_if(m_components.begin(), m_components.end(), [uuid](Component* ptr)
 		{
 			return ptr->GetUUID() == uuid;
 		});
@@ -229,7 +232,7 @@ void Entity::RemoveComponent(const std::string& uuid)
 		if (m_attachedToScene)
 		{
 			auto sceneUpdateComponent = std::find_if(Scene::ActiveScene()->m_updateComponents.begin(),
-				Scene::ActiveScene()->m_updateComponents.end(), [it](SharedPtr<Component> ptr)
+				Scene::ActiveScene()->m_updateComponents.end(), [it](Component* ptr)
 				{
 					return (*it)->GetUUID() == ptr->GetUUID();
 				});
@@ -239,7 +242,7 @@ void Entity::RemoveComponent(const std::string& uuid)
 			}
 		}
 
-		(*it).reset();
+		::Delete(*it);
 		m_components.erase(it);
 	}
 }
@@ -251,6 +254,7 @@ void Entity::RemoveAllComponenets()
 	for (auto it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		(*it)->OnDestroy();
+		::Delete(*it);
 	}
 
 	m_components.clear();

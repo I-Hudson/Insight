@@ -21,7 +21,7 @@
 		private:
 			bool m_deserlizaed;
 
-			SharedPtr<Library::ModelLibrary> m_modelLibrary;
+			Library::ModelLibrary* m_modelLibrary;
 			//Library::ShaderLibrary* m_shaderLibrary;
 		};
 	}

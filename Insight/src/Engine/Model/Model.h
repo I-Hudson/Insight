@@ -21,18 +21,18 @@ public:
 	void Create(const std::string& filepath);
 	//void Draw(VkCommandBuffer commandBuffer);
 
-	WeakPtr<Mesh> GetMesh();
-	const std::vector<WeakPtr<Material>> GetMaterals();
+	Mesh* GetMesh();
+	const std::vector<Material*>& GetMaterals();
 
 	const std::string& GetFilePath() const;
 	const std::string& GetModelName() const;
 
-	void SetMaterials(const std::vector<std::pair<std::string, SharedPtr<Texture>>>& textures);
+	void SetMaterials(const std::vector<std::pair<std::string, Texture*>>& textures);
 private:
 
-	SharedPtr<Mesh> m_mesh;
-	std::vector<SharedPtr<Material>> m_materials;
-	std::vector<SharedPtr<Texture>> m_textures;
+	Mesh* m_mesh;
+	std::vector<Material*> m_materials;
+	std::vector<Texture*> m_textures;
 	std::string m_directory;
 	std::string m_modelName;
 	std::string m_path;

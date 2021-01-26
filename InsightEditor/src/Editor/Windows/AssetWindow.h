@@ -8,7 +8,7 @@
         class AssetWindow : public EditorWindow
         {
         public:
-            AssetWindow(SharedPtr<Module::EditorModule> editorModule);
+            AssetWindow(const Module::EditorModule* editorModule);
 
             virtual void Update(const float& deltaTime) override;
 

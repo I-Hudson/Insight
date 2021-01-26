@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
-#include "Engine/Memory/MemoryManager.h"
+#include "Engine/Core/Common.h"
 #include "Editor/UIHelper.h"
 
 #if defined(IS_EDITOR)
@@ -58,8 +57,8 @@ namespace Editor
 			auto it = GetTypes().find(type);
 			if (it == GetTypes().end())
 			{
-				SharedPtr<TEditorDrawerClass> tPtr = CreateSharedPtr<TEditorDrawerClass>();
-				SharedPtr<IEditorDrawer> iEdtiroDrawerPtr = StaticPointerCast<IEditorDrawer>(tPtr);
+				TEditorDrawerClass* tPtr = new TEditorDrawerClass();
+				IEditorDrawer* iEdtiroDrawerPtr = static_cast<IEditorDrawer*>(tPtr);
 				iEdtiroDrawerPtr->m_objectType = type;
 
 				GetTypes().insert(std::pair(iEdtiroDrawerPtr->m_objectType, tPtr));
@@ -82,11 +81,11 @@ namespace Editor
 		{
 			for (auto& drawer : GetTypes())
 			{
-				drawer.second.reset();
+				delete drawer.second;
 			}
 		}
 
-		typedef std::unordered_map<Type, SharedPtr<IEditorDrawer>> CustomEditorDrawerTypes;
+		using CustomEditorDrawerTypes = std::unordered_map<Type, IEditorDrawer*>;
 
 		static CustomEditorDrawerTypes& GetTypes()
 		{

@@ -13,22 +13,9 @@
 		{
 			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
 			{
-				if (it->second != nullptr && it->second->GetDependenciesCount() == 0)
+				if (it->second != nullptr && !it->second->ShouldDestroyManually())
 				{
-					SharedPtr<Module> m = it->second;
-					m->~Module();
-					m.reset();
-
-					m_modules.erase(it);
-					--it;
-				}
-				else if (it != m_modules.end())
-				{
-					++it;
-				}
-				else
-				{
-					IS_CORE_ASSERT(false, "Not all modules have been removed.");
+					::Delete(it->second);
 				}
 			}
 			m_modules.clear();
@@ -38,7 +25,7 @@
 		{
 			IS_PROFILE_FUNCTION();
 
-			for (auto mod : m_modules)
+			for (auto& mod : m_modules)
 			{
 				if (!mod.second->ShouldManuallUpate())
 				{
@@ -47,8 +34,8 @@
 			}
 		}
 
-		bool ModuleManager::Exists(const std::string& moduleName)
+		bool ModuleManager::Exists(const Type& type)
 		{
-			return m_modules.find(moduleName) != m_modules.end();
+			return m_modules.find(type) != m_modules.end();
 		}
 	}

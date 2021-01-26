@@ -1,6 +1,5 @@
 #pragma once
-
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include "Enums.h"
 #include "PixelFormat.h"
 

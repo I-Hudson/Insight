@@ -3,7 +3,6 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Entitiy/Entity.h"
 #include "Engine/Component/Component.h"
-#include "Engine/Memory/MemoryManager.h"
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
@@ -29,9 +28,9 @@
 		Unload();
 	}
 
-	SharedPtr<Entity> Scene::CreateEntity(const std::string& name)
+	Entity* Scene::CreateEntity(const std::string& name)
 	{
-		SharedPtr<Entity> e = Object::CreateObject<Entity>(name);
+		Entity* e = ::New<Entity>(name);
 		e->AddComponent<TransformComponent>();
 		m_registry.push_back(e);
 		return e;
@@ -52,17 +51,17 @@
 
 		if (found)
 		{
-			(*it).reset();
+			::Delete(*it);
 			m_registry.erase(it);
 		}
 	}
 
-	void Scene::DeleteEntiy(SharedPtr<Entity> ptr)
+	void Scene::DeleteEntiy(Entity* ptr)
 	{
 		auto it = std::find(m_registry.begin(), m_registry.end(), ptr);
 		if (it != m_registry.end())
 		{
-			(*it).reset();
+			::Delete(*it);
 
 			m_registry.erase(it);
 		}
@@ -114,16 +113,16 @@
 	{
 			IS_PROFILE_FUNCTION();
 
-			UniquePtr<Serialization::SerializableFile> serializableFile = Serialization::SerializableFile::Create();
+			Serialization::SerializableFile* serializableFile = Serialization::SerializableFile::New();
 			auto root = serializableFile->GetNewElement("Scene");
 			for (auto it = m_registry.begin(); it != m_registry.end(); ++it)
 			{
-				SharedPtr<Serialization::SerializableElement>entityNode = root->AddChild("Entity");
+				Serialization::SerializableElement* entityNode = root->AddChild("Entity");
 				(*it)->Serialize(entityNode);
 			}
 
 			serializableFile->SaveFile(file);
-			serializableFile.reset();
+			::Delete(serializableFile);
 
 			EventManager::Dispatch<SerializeEvent>(EventType::Serialize, SerializeEvent());
 	}
@@ -133,15 +132,15 @@
 		{
 			IS_PROFILE_SCOPE("[Scene::Deserialize] 'Deserialize' all scene objects");
 
-			UniquePtr<Serialization::SerializableFile> serializableFile = Serialization::SerializableFile::Create();
+			Serialization::SerializableFile* serializableFile = Serialization::SerializableFile::New();
 
 			if (!serializableFile->LoadFile(file))
 			{
 				return;
 			}
 
-			SharedPtr<Serialization::SerializableElement> sceneNode = serializableFile->GetFirstChild();
-			SharedPtr<Serialization::SerializableElement> entity = sceneNode->GetFirstChild();
+			Serialization::SerializableElement* sceneNode = serializableFile->GetFirstChild();
+			Serialization::SerializableElement* entity = sceneNode->GetFirstChild();
 			if (entity != nullptr)
 			{
 				do
@@ -150,14 +149,14 @@
 					if (typeElement)
 					{
 						std::string type = typeElement->GetValue();
-						SharedPtr<Entity> s = Serialization::Serializable::CreateInstanceFromType<Entity>(type);
+						Entity* s = Serialization::Serializable::NewInstanceFromType<Entity>(type);
 						s->Deserialize(entity);
-						m_registry.push_back(DynamicPointerCast<Entity>(s));
+						m_registry.push_back(dynamic_cast<Entity*>(s));
 					}
-					entity = entity->NextSibling().lock();
+					entity = entity->NextSibling();
 				} while (entity != nullptr);
 			}
-
+			::Delete(serializableFile);
 		}
 
 		{

@@ -71,7 +71,7 @@ void GPUResourceCollection::DumpToLog() const
     m_lock.Unlock();
 }
 
-void GPUResourceCollection::Add(SharedPtr<GPUResource> resource)
+void GPUResourceCollection::Add(GPUResource* resource)
 {
     m_lock.Lock();
 
@@ -86,9 +86,9 @@ void GPUResourceCollection::Remove(GPUResource* resource)
 {
     m_lock.Lock();
 
-    auto it = std::find_if(m_collection.begin(), m_collection.end(), [resource](SharedPtr<GPUResource>& gpuResource)
+    auto it = std::find_if(m_collection.begin(), m_collection.end(), [resource](GPUResource* gpuResource)
         {
-            return resource == gpuResource.get();
+            return resource == gpuResource;
         });
     ASSERT(resource && it != m_collection.end());
     m_collection.erase(it);

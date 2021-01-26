@@ -6,56 +6,74 @@
 #include "InsightAlias.h"
 #include "Log.h"
 #include "Type.h"
+#include "Engine/Memory/Memory.h"
 
-	class Object;
+class Object;
 
-	typedef std::function<void(Object*)> ObjectCallback;
+typedef std::function<void(Object*)> ObjectCallback;
 
-	class Object
-	{
-	public:
-		Object();
-		virtual ~Object();
+class Object
+{
+public:
+	Object();
+	virtual ~Object();
 
-		virtual void OnCreate() { }
-		virtual void OnDestroy() { }
-		virtual bool IsValid() { return m_refCount > 0; }
+	virtual void OnCreate() { }
+	virtual void OnDestroy() { }
+	virtual bool IsValid() { return m_refCount > 0; }
 
-		void SetUUID(const std::string& uuid);
-		const std::string& GetUUID() const { return m_uuid; }
+	void SetUUID(const std::string& uuid);
+	const std::string& GetUUID() const { return m_uuid; }
 
-		template<typename T, typename... Args>
-		static SharedPtr<T> CreateObject(Args&& ...);
+	bool Equals(const Object* pObject) const;
+	virtual bool Equals(const Object& pObject) const;
 
-		bool Equals(const Object* pObject) const;
-		virtual bool Equals(const Object& pObject) const;
+	const Type& GetType() const { ASSERT(!m_type.GetTypeName().empty()); return m_type; }
 
-		const Type& GetType() const { return m_type; }
+	void RegisterOnDestroyCallback(void* callerClass, ObjectCallback callback);
+	void UnregisterOnDestroyCallback(void* callerClass);
 
-		void RegisterOnDestroyCallback(void* callerClass, ObjectCallback callback);
-		void UnregisterOnDestroyCallback(void* callerClass);
+	inline void AddRef();
+	inline void Release();
 
-		inline void AddRef();
-		inline void Release();
+	//template<typename T>
+	//INLINE T* New()
+	//{
+	//	IS_CORE_STATIC_ASSERT((std::is_base_of<Object, T>::value), "'T' does not inherit from 'Object'.");
+	//	T* ptr = ::New<T>();
+	//	Object* objPtr = static_cast<Object*>(ptr);
+	//	objPtr->m_type.SetType<T>();
+	//	objPtr->OnCreate();
+	//	return ptr;
+	//}
 
-	private:
-		uint64_t m_refCount;
-		Type m_type;
-		std::string m_uuid;
-		std::unordered_map<void*, ObjectCallback> m_onDestroyCallbacks;
-	};
+	//template<typename T, typename... Args>
+	//INLINE T* New(Args&&... args)
+	//{
+	//	IS_CORE_STATIC_ASSERT((std::is_base_of<Object, T>::value), "'T' does not inherit from 'Object'.");
+	//	T* ptr = ::New<T>(std::forward<Args>(args)...);
+	//	Object* objPtr = static_cast<Object*>(ptr);
+	//	objPtr->m_type.SetType<T>();
+	//	objPtr->OnCreate();
+	//	return ptr;
+	//}
 
-	template<typename T, typename ...Args>
-	inline SharedPtr<T> Object::CreateObject(Args&&... args)
-	{
-		IS_CORE_STATIC_ASSERT((std::is_base_of<Object, T>::value), "'T' does not inherit from 'Object'.");
+protected:
+	template<typename T>
+	void SetType();
 
-		SharedPtr<T> ptr = CreateSharedPtrNoExpect<T>(std::forward<Args>(args)...);
+private:
+	uint64_t m_refCount;
+	Type m_type;
+	std::string m_uuid;
+	std::unordered_map<void*, ObjectCallback> m_onDestroyCallbacks;
+};
 
-		Object* objPtr = static_cast<Object*>(ptr.get());
-		objPtr->m_type.SetType<T>();
-
-		return ptr;
-	}
 #define REG_ON_DESTROY(objectPtr, callerClass, func) Object::RegisterOnDestroyCallback(std::bind(&func, objectPtr, std::placeholders::_1), callerClass)
 #define UNREG_ON_DESTROY() Object::UnregisterOnDestroyCallback(this)
+
+template<typename T>
+inline void Object::SetType()
+{
+	m_type.SetType<T>();
+}

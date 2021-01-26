@@ -2,8 +2,21 @@
 
 #pragma once
 #include "InsightAlias.h"
+#include "Engine/Platform/Platform.h"
 
-// @formatter:off
+template<typename T>
+class TRefCountedObject : public T
+{
+public:
+    void IncCount() { ++m_refCount; }
+    void DecCount() { --m_refCount; }
+
+    ~TRefCountedObject() { ASSERT(m_refCount == 0); }
+
+private:
+    U32 m_refCount;
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -432,5 +445,3 @@ template<> struct TIsBitwiseConstructible<U32, I32> { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<I32, U32> { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<U64, I64> { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<I64, U64> { enum { Value = true }; };
-
-// @formatter:on

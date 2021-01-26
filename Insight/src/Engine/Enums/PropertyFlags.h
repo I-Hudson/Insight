@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Core/Core.h"
+#include "Engine/Core/InsightAlias.h"
 
 typedef uint32_t PropertyFlags;
 

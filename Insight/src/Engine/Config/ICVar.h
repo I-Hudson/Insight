@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include <string>
 
 	class IS_API ICVar

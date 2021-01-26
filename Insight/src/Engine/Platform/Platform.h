@@ -1,3 +1,4 @@
+#pragma once
 
 // Link types and defines
 #include "Types.h"

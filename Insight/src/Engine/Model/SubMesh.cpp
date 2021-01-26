@@ -11,8 +11,8 @@
 SubMesh::SubMesh()
 	: m_created(false)
 {
-	m_vertexBuffer = Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Object::CreateObject<vks::VulkanBuffer>();
+	m_vertexBuffer = ::New<vks::VulkanBuffer>();
+	m_indexBuffer = ::New<vks::VulkanBuffer>();
 }
 
 SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
@@ -20,8 +20,8 @@ SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned
 {
 	IS_PROFILE_FUNCTION();
 
-	m_vertexBuffer = Object::CreateObject<vks::VulkanBuffer>();
-	m_indexBuffer = Object::CreateObject<vks::VulkanBuffer>();
+	m_vertexBuffer = ::New<vks::VulkanBuffer>();
+	m_indexBuffer = ::New<vks::VulkanBuffer>();
 
 	Create(vertices, indices);
 }
@@ -36,8 +36,8 @@ SubMesh::~SubMesh()
 	m_vertexBuffer->Destroy();
 	m_indexBuffer->Destroy();
 
-	m_vertexBuffer.reset();
-	m_indexBuffer.reset();
+	::Delete(m_vertexBuffer);
+	::Delete(m_indexBuffer);
 }
 
 void SubMesh::Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
@@ -52,8 +52,8 @@ void SubMesh::Create(const std::vector<Vertex>& vertices, const std::vector<unsi
 		m_indices = indices;
 	}
 
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer, m_vertices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer, m_indices.data());
 }
 
 void SubMesh::Draw(VkCommandBuffer commandBuffer)
@@ -80,8 +80,8 @@ void SubMesh::Rebuild()
 	m_vertexBuffer->Destroy();
 	m_indexBuffer->Destroy();
 
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer.get(), m_vertices.data());
-	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer.get(), m_indices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_vertices.size() * sizeof(Vertex), m_vertexBuffer, m_vertices.data());
+	vks::VulkanDevice::Instance()->CreateBufferGPU(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indices.size() * sizeof(unsigned int), m_indexBuffer, m_indices.data());
 
 }
 

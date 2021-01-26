@@ -6,7 +6,6 @@
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
-#include "Engine/Module/WindowModule.h"
 #include "IconsFontAwesome5.h"
 
 #include "Engine/Input/Input.h"
@@ -59,11 +58,11 @@ namespace vks
 #endif
 	}
 
-	void VulkanImGUIRenderer::Init(SharedPtr<Renderer> renderer)
+	void VulkanImGUIRenderer::Init(Renderer* renderer)
 	{
 #if defined(IMGUI_ENABLED)
 		auto device = VulkanDevice::Instance();
-		SharedPtr<vks::VulkanRenderer> vRenderer = DynamicPointerCast<vks::VulkanRenderer>(renderer);
+		vks::VulkanRenderer* vRenderer = dynamic_cast<vks::VulkanRenderer*>(renderer);
 
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
@@ -85,10 +84,10 @@ namespace vks
 		ImGui_ImplGlfw_InitForVulkan(Window::m_window, false);
 		ImGui_ImplVulkan_InitInfo init_info = {};
 		init_info.Instance = vRenderer->GetInstance();
-		init_info.PhysicalDevice = vRenderer->GetPhysicalDevice();
+		init_info.PhysicalDevice = device->Instance()->GetPhysicalDevice();
 		init_info.Device = *device;
 		init_info.QueueFamily = device->GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
-		init_info.Queue = vRenderer->GetQueue();
+		init_info.Queue = device->Instance()->GetQueue(VK_QUEUE_GRAPHICS_BIT);
 		init_info.PipelineCache = nullptr;
 		init_info.DescriptorPool = device->GetDescriptorPool();
 		init_info.Allocator = nullptr;

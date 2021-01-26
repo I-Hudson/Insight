@@ -5,14 +5,10 @@
 #include "VulkanHeader.h"
 #include "VulkanPipeline.h"
 #include "VulkanBuffer.h"
+#include "VulkanTexture.h"
 #include "Engine/ShaderParser/ShaderParser.h"
 
 #include <bitset>
-
-	namespace Render
-	{
-		class Texture;
-	}
 
 struct MaterialUniformBuffer
 {
@@ -55,7 +51,7 @@ namespace vks
 		virtual void ResetUniformInfo() override;
 
 		virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) override;
-		virtual void UploadTexture(const std::string& key, WeakPtr<Render::Texture> texture) override;
+		virtual void UploadTexture(const std::string& key, Render::Texture* texture) override;
 		virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format) override;
 
 	private:
@@ -78,7 +74,7 @@ namespace vks
 		bool updated = false;
 		bool m_init;
 		std::vector<ParsedShadeData> m_shaderData;
-		
+
 		U8 m_numberOfDescriptorSets;
 
 		VulkanPipeline m_pipeline;

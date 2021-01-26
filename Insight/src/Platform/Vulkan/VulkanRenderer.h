@@ -42,25 +42,24 @@ namespace vks
 	class VulkanDevice;
 
 	class IS_API VulkanRenderer : public Renderer
-		, public std::enable_shared_from_this<VulkanRenderer>
 	{
 	public:
 		VulkanRenderer();
 		virtual ~VulkanRenderer() override;
 
-		virtual void OnCreate() override;
+		virtual void Init() override;
 
 		void InitVulkan();
 
 		virtual void Clear() override;
-		virtual void Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes) override;
+		virtual void Render(CameraComponent* mainCamera, std::vector<MeshComponent*>& meshes) override;
 		virtual void Present() override;
 		virtual void WaitForIdle() override;
 
 		/** @brief Return our instance */
 		VkInstance GetInstance() { return m_instance; }
 		/** @brief Return our device wrapper */
-		SharedPtr<vks::VulkanDevice> GetDevice() { return m_vulkanDevice; }
+		vks::VulkanDevice* GetDevice() { return m_vulkanDevice; }
 		/** @brief Return our physical device */
 		VkPhysicalDevice GetPhysicalDevice() { return m_physicalDevice; }
 		/** @brief Return the graphics queue */
@@ -86,7 +85,7 @@ namespace vks
 		/** @brief (Virtual) Creates the application wide Vulkan instance */
 		virtual VkResult CreateInstance(bool enableValidation);
 		/** @brief (Virtual) Called when resources have been recreated that require a rebuild of the command buffers (e.g. frame buffer), to be implemented by the sample application */
-		virtual void BuildCommandBuffers(std::vector<WeakPtr<MeshComponent>>& meshes);
+		virtual void BuildCommandBuffers(std::vector<MeshComponent*>& meshes);
 		virtual void BuildPresentBuffers();
 		/** @brief (Virtual) Setup default depth and stencil views */
 		virtual void SetupDepthStencil();
@@ -191,7 +190,7 @@ namespace vks
 		void* m_deviceCreatepNextChain = nullptr;
 
 		/** @brief Encapsulated physical and logical vulkan device */
-		SharedPtr<vks::VulkanDevice> m_vulkanDevice;
+		vks::VulkanDevice* m_vulkanDevice;
 
 		/** @brief Logical device, application's view of the physical device (GPU) */
 		VkDevice m_device;
@@ -210,8 +209,8 @@ namespace vks
 		std::vector<VkCommandBuffer> m_presentCmdBuffers;
 		// List of available frame buffers (same as number of swap chain images)
 		std::vector<VkFramebuffer> m_presentFrameBuffers;
-		SharedPtr<Material> m_presentMaterials[MAX_FRAMES_IN_FLIGHT];
-		SharedPtr<Mesh> m_presentMeshes[MAX_FRAMES_IN_FLIGHT];
+		Material* m_presentMaterials[MAX_FRAMES_IN_FLIGHT];
+		Mesh* m_presentMeshes[MAX_FRAMES_IN_FLIGHT];
 		VkRenderPass m_presentRenderPass;
 
 		VkCommandBuffer m_frameBufferCmdBuffer;
@@ -235,8 +234,8 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-		SharedPtr<Entity> m_editorEntity;
-		SharedPtr<CameraComponent> m_editorCamera;
+		Entity* m_editorEntity;
+		CameraComponent* m_editorCamera;
 
 		struct MVP
 		{

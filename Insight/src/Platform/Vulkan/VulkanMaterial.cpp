@@ -8,6 +8,7 @@ namespace vks
 {
 	VulkanMaterial::VulkanMaterial()
 	{
+		SetType<VulkanMaterial>();
 	}
 
 	VulkanMaterial::~VulkanMaterial()
@@ -127,18 +128,18 @@ namespace vks
 		}
 	}
 
-	void VulkanMaterial::UploadTexture(const std::string& key, WeakPtr<Render::Texture> texture)
+	void VulkanMaterial::UploadTexture(const std::string& key, Render::Texture* texture)
 	{
 		if (m_uniformTextures.find(key) == m_uniformTextures.end())
 		{
 			return;
 		}
 
-		if (auto textureSP = texture.lock())
+		if (texture)
 		{
-			if (textureSP->IsValid())
+			if (texture->IsValid())
 			{
-				SharedPtr<VulkanTextureGPUData> vTex = DynamicPointerCast<VulkanTextureGPUData>(textureSP->GetGPUTextureData());
+				VulkanTexture* vTex = dynamic_cast<VulkanTexture*>(texture);
 				m_uniformTextures[key].ImageInfo.imageView = vTex->GetImageView();
 				m_uniformTextures[key].ImageInfo.sampler = vTex->GetSampler();
 				m_uniformTextures[key].ImageInfo.imageLayout = vTex->GetImageLayout();
@@ -185,9 +186,9 @@ namespace vks
 				if (uniformBlock.Type == ShaderUniformBlockType::UniformBuffer)
 				{
 					VulkanBuffer ubo;
-					ThrowIfFailed(m_device->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-														 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-														 uniformBlock.Size, &ubo));
+					ThrowIfFailed(m_device->CreateBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+						VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+						uniformBlock.Size, &ubo));
 					ThrowIfFailed(ubo.Map());
 
 					m_uniformBuffers[key].Buffer = ubo;
@@ -261,7 +262,7 @@ namespace vks
 
 			if (ubo.second.DynamicUniformBlock.DynamicBuffer)
 			{
-				_aligned_free(ubo.second.DynamicUniformBlock.DynamicBuffer);
+				::DeleteArrayBytes(ubo.second.DynamicUniformBlock.DynamicBuffer);
 			}
 		}
 		std::vector<VkDescriptorSet> sets = GetDescriptorSets();
@@ -275,7 +276,7 @@ namespace vks
 		{
 			writesSets.push_back(vks::initializers::writeDescriptorSet(ubo.second.Set, ubo.second.Type, ubo.second.Binding, &ubo.second.Buffer.descriptor));
 		}
-		for (auto & tex : m_uniformTextures)
+		for (auto& tex : m_uniformTextures)
 		{
 			if (tex.second.ImageInfo.imageView != VK_NULL_HANDLE)
 			{
@@ -307,12 +308,12 @@ namespace vks
 			U64 oldArrSize = materialBlock.DynamicUniformBlock.DynamicBufferSize;
 
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = ::NewArrayBytes(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 
 			// Copy and delete old data.
 			memcpy_s(materialBlock.DynamicUniformBlock.DynamicBuffer, materialBlock.DynamicUniformBlock.DynamicBufferSize, oldArrPtr, oldArrSize);
-			_aligned_free(oldArrPtr);
+			::DeleteArrayBytes(oldArrPtr);
 
 			//VulkanDevice::Instance()->QueueIdleCommand([&]()
 			//	{
@@ -323,7 +324,7 @@ namespace vks
 		else
 		{
 			// New arr for data.
-			materialBlock.DynamicUniformBlock.DynamicBuffer = Memory::MemoryManager::Instance()->AlignedAlloc(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
+			materialBlock.DynamicUniformBlock.DynamicBuffer = ::NewArrayBytes(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
 			materialBlock.DynamicUniformBlock.DynamicBufferSize = newSize;
 		}
 

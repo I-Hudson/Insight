@@ -3,6 +3,8 @@
 #include "Engine/Core/Core.h"
 #include "Engine/Module/Module.h"
 #include "Engine/Templates/TSingleton.h"
+#include "Engine/Module/WindowModule.h"
+
 #include "Engine/Config/CVar.h"
 
 #include "Engine/Graphics/Renderer.h"
@@ -14,13 +16,11 @@ class Material;
 
 namespace Module
 {
-	class WindowModule;
-
 	class IS_API GraphicsModule : public Module
-		, public TSingleton<GraphicsModule>
+								, public TSingleton<GraphicsModule>
 	{
 	public:
-		GraphicsModule(SharedPtr<WindowModule> windowModule);
+		GraphicsModule();
 		virtual ~GraphicsModule() override;
 
 		virtual void Update(const float& deltaTime) override;
@@ -35,16 +35,18 @@ namespace Module
 
 		struct GraphicsConfig
 		{
+			CVar<int> Validation{ "validation", 1 };
+			CVar<int> VSync{ "vsync", 1 };
+			CVar<int> GSync{ "gsync", 1 };
 			CVar<int> GraphicsAPI{ "graphics_api", 1 };
 		};
 
 	private:
-		SharedPtr<WindowModule> m_windowModule;
-		SharedPtr<Renderer> m_renderer;
-		SharedPtr<ImGuiRenderer> m_imguiRenderer;
+		Renderer* m_renderer;
+		ImGuiRenderer* m_imguiRenderer;
 
 		static CameraComponent* m_mainCamera;
-		static std::vector<WeakPtr<MeshComponent>> m_meshs;
+		static std::vector<MeshComponent*> m_meshs;
 
 		friend MeshComponent;
 	};

@@ -76,10 +76,16 @@
 #error "Required Visual Studio 2015 or newer."
 #endif
 
+#ifndef COMPILER_DEFINES
+#define COMPILER_DEFINES
+#endif
+
+#ifdef COMPILER_DEFINES
 #define DLLEXPORT __declspec(dllexport)
 #define DLLIMPORT __declspec(dllimport)
 #define THREADLOCAL __declspec(thread)
 #define STDCALL __stdcall
+#undef CDECL
 #define CDECL __cdecl
 #define RESTRICT __restrict
 #define INLINE __inline
@@ -94,6 +100,7 @@
 #define DEPRECATED __declspec(deprecated)
 #undef __PRETTY_FUNCTION__
 #define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 
 #pragma warning(disable: 4251)
 

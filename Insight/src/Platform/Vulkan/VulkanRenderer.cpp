@@ -1,5 +1,4 @@
 #include "ispch.h"
-#ifdef IS_VULKAN
 #include "VulkanHeader.h"
 #include "VulkanRenderer.h"
 #include "VulkanDebug.h"
@@ -118,22 +117,7 @@ namespace vks
 //#endif
 
 	VulkanRenderer::VulkanRenderer()
-	{
-		REG_EVENT_HANDLE(EventType::WindowResize, VulkanRenderer::OnWindowResizeEvent);
-
-		m_numThreads = std::thread::hardware_concurrency();
-		IS_CORE_ASSERT(m_numThreads > 0, "Number of threads has to be greater than 0.");
-		IS_CORE_INFO("numThreads = {0}", m_numThreads);
-#endif
-		m_threadPool.set_thread_count(m_numThreads);
-		m_numObjectsPerThread = 512 / m_numThreads;
-
-		//m_rndEngine.seed((unsigned)time(nullptr));
-
-		glslang::InitializeProcess();
-		InitVulkan();
-		IS_CORE_INFO("Vulkan Setup Complete.");
-	}
+	{ }
 
 	VulkanRenderer::~VulkanRenderer()
 	{
@@ -141,13 +125,13 @@ namespace vks
 
 		glslang::FinalizeProcess();
 
-		m_editorEntity.reset();
+		::Delete(m_editorEntity);
 
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			m_presentMaterials[i].reset();
-			m_presentMeshes[i].reset();
+			::Delete(m_presentMaterials[i]);
+			::Delete(m_presentMeshes[i]);
 		}
 
 		DestroyCommandBuffers();
@@ -186,9 +170,9 @@ namespace vks
 
 		IS_PROFILE_GPUI_SHUTDOWN();
 
-		m_vulkanDevice.reset();
+		::Delete(m_vulkanDevice);
 
-		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			vks::Debug::FreeDebugCallback(m_instance);
 		}
@@ -196,17 +180,31 @@ namespace vks
 		vkDestroyInstance(m_instance, nullptr);
 	}
 
-	void VulkanRenderer::OnCreate()
+	void VulkanRenderer::Init()
 	{
+		REG_EVENT_HANDLE(EventType::WindowResize, VulkanRenderer::OnWindowResizeEvent);
+
+		m_numThreads = std::thread::hardware_concurrency();
+		IS_CORE_ASSERT(m_numThreads > 0, "Number of threads has to be greater than 0.");
+		IS_CORE_INFO("numThreads = {0}", m_numThreads);
+
+		m_threadPool.set_thread_count(m_numThreads);
+		m_numObjectsPerThread = 512 / m_numThreads;
+
+		//m_rndEngine.seed((unsigned)time(nullptr));
+
+		glslang::InitializeProcess();
+		InitVulkan();
+		IS_CORE_INFO("Vulkan Setup Complete.");
 	}
 
 	void VulkanRenderer::InitVulkan()
 	{
 		VkResult err;
 
-		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Config::RendererConfig.Validation)));
+		ThrowIfFailed(CreateInstance((bool)CONFIG_VAL(Config::GraphicsConfig.Validation)));
 
-		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
 			// For validating (debugging) an application the error and warning bits should sufficeVK_EXT_debug_report
@@ -266,7 +264,7 @@ namespace vks
 		// Vulkan device creation
 		// This is handled by a separate class that gets a logical device representation
 		// and encapsulates functions related to a device
-		m_vulkanDevice = CreateSharedPtr<vks::VulkanDevice>(m_physicalDevice, m_instance);
+		m_vulkanDevice = ::New<vks::VulkanDevice>(m_physicalDevice, m_instance);
 		VkResult res = m_vulkanDevice->CreateLogicalDevice(m_enabledFeatures, m_enabledDeviceExtensions, m_deviceCreatepNextChain);
 		if (res != VK_SUCCESS)
 		{
@@ -328,7 +326,7 @@ namespace vks
 	}
 
 	// This should be moved to a submodule for every type of rendering we are doing.
-	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<WeakPtr<MeshComponent>>& meshes)
+	void VulkanRenderer::Render(CameraComponent* mainCamera, std::vector<MeshComponent*>& meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
@@ -436,12 +434,12 @@ namespace vks
 		RenderPassInfo renderPassInfo = { 1 };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			m_presentMaterials[i] = Material::Create();
-			DynamicPointerCast<vks::VulkanMaterial>(m_presentMaterials[i])->Create(m_vulkanDevice.get(), shaders, m_presentRenderPass, renderPassInfo);
+			m_presentMaterials[i] = Material::New();
+			dynamic_cast<vks::VulkanMaterial*>(m_presentMaterials[i])->Create(m_vulkanDevice, shaders, m_presentRenderPass, renderPassInfo);
 		}
 		SetupScreenRender();
 
-		m_editorEntity = Object::CreateObject<Entity>("Editor entity", false);
+		m_editorEntity = ::New<Entity>("Editor entity", false);
 		m_editorEntity->AddComponent<TransformComponent>();
 		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
@@ -460,7 +458,7 @@ namespace vks
 	void VulkanRenderer::SetupSwapchain()
 	{
 		IS_PROFILE_FUNCTION();
-		m_swapchain.Create(Window::GetWidth(), Window::GetHeight(), (bool)CONFIG_VAL(Config::RendererConfig.VSync), (bool)CONFIG_VAL(Config::RendererConfig.GSync));
+		m_swapchain.Create(Window::GetWidth(), Window::GetHeight(), (bool)CONFIG_VAL(Config::GraphicsConfig.VSync), (bool)CONFIG_VAL(Config::GraphicsConfig.GSync));
 	}
 
 	void VulkanRenderer::CreateCommandBuffers()
@@ -515,7 +513,7 @@ namespace vks
 		std::vector<U32> fullScreenQuadI = { 0,2,1, 0,3,2 };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
-			m_presentMeshes[i] = Object::CreateObject<Mesh>();
+			m_presentMeshes[i] = ::New<Mesh>();
 			m_presentMeshes[i]->SetVertices(fullScreenQuadV);
 			m_presentMeshes[i]->SetIndices(fullScreenQuadI);
 			m_presentMeshes[i]->Rebuild();
@@ -591,7 +589,7 @@ namespace vks
 		instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		instanceCreateInfo.pNext = NULL;
 		instanceCreateInfo.pApplicationInfo = &appInfo;
-		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			uint32_t glfwExtensionCount = 0;
 			const char** glfwExtensions;
@@ -609,7 +607,7 @@ namespace vks
 		instanceCreateInfo.enabledExtensionCount = (uint32_t)instanceExtensions.size();
 		instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
 
-		if ((bool)CONFIG_VAL(Config::RendererConfig.Validation))
+		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			// The VK_LAYER_KHRONOS_validation contains all current validation functionality.
 			// Note that on Android this layer requires at least NDK r20
@@ -641,7 +639,7 @@ namespace vks
 		return vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance);
 	}
 
-	void VulkanRenderer::BuildCommandBuffers(std::vector<WeakPtr<MeshComponent>>& meshes)
+	void VulkanRenderer::BuildCommandBuffers(std::vector<MeshComponent*>& meshes)
 	{
 		IS_PROFILE_FUNCTION();
 
@@ -668,10 +666,10 @@ namespace vks
 		m_lightPosAngle += Time::GetDeltaTime() * 1.0f;
 		mvp.lightPos = m_lightPos;
 
-		auto updateMaterail = [&](MeshComponent* meshCom, SharedPtr<Material> material, MaterialBlockData& materialBlockData)
+		auto updateMaterail = [&](MeshComponent* meshCom, Material* material, MaterialBlockData& materialBlockData)
 		{
 			IS_PROFILE_SCOPE("Uniform Update");
-			auto vMat = DynamicPointerCast<VulkanMaterial>(material);
+			auto vMat = dynamic_cast<VulkanMaterial*>(material);
 
 			vMat->UploadUniform("UBO", &mvp, sizeof(MVP), materialBlockData);
 			auto tc = meshCom->GetComponent<TransformComponent>();
@@ -684,12 +682,14 @@ namespace vks
 			IS_PROFILE_SCOPE("Material reset");
 			for (auto& mesh : meshes)
 			{
-				if (auto meshSP = mesh.lock())
+				if (mesh)
 				{
-					for (auto& mat : meshSP->GetMaterials())
+					for (auto& mat : mesh->GetMaterials())
 					{
-						if (auto& matSP = mat.lock())
-							matSP->ResetUniformInfo();
+						if (mat)
+						{
+							mat->ResetUniformInfo();
+						}
 					}
 				}
 			}
@@ -714,11 +714,11 @@ namespace vks
 				IS_PROFILE_SCOPE("All Draws");
 				for (auto& mesh : meshes)
 				{
-					if (auto meshSP = mesh.lock())
+					if (mesh)
 					{
 						{
 							IS_PROFILE_SCOPE("Single Draw");
-							meshSP->Draw(m_frameBufferCmdBuffer, updateMaterail);
+							mesh->Draw(m_frameBufferCmdBuffer, updateMaterail);
 						}
 					}
 				}
@@ -769,7 +769,7 @@ namespace vks
 			VkRect2D scissor = vks::initializers::rect2D(width, height, 0, 0);
 			vkCmdSetScissor(m_presentCmdBuffers[i], 0, 1, &scissor);
 
-			DynamicPointerCast<vks::VulkanMaterial>(m_presentMaterials[i])->Bind(m_presentCmdBuffers[i]);
+			dynamic_cast<vks::VulkanMaterial*>(m_presentMaterials[i])->Bind(m_presentCmdBuffers[i]);
 			// DRAW
 			vkCmdDraw(m_presentCmdBuffers[i], 3, 1, 0, 0);
 

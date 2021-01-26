@@ -13,6 +13,9 @@
     <Filter Include="src\Engine\Config">
       <UniqueIdentifier>{D7F3C5AB-430A-C441-8C81-4F63F8D694C9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\Content">
+      <UniqueIdentifier>{5C0C8C24-48F0-4C7A-B150-47CD9D5337FC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\Core">
       <UniqueIdentifier>{AA407579-16CC-E23D-1FDD-65328BE73E3E}</UniqueIdentifier>
     </Filter>
@@ -39,6 +42,15 @@
     </Filter>
     <Filter Include="src\Engine\Graphics\FrameGraph">
       <UniqueIdentifier>{1EB03365-0AD6-FDCB-F31B-8397DFE02298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\GraphicsAPI">
+      <UniqueIdentifier>{6CCBBDCA-58C5-E61C-4132-7D2D2DCB4C89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\GraphicsAPI\Vulkan">
+      <UniqueIdentifier>{6C47C086-D85F-A7B0-A10C-374A0DE43B4A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\GraphicsAPI\Vulkan\Win32">
+      <UniqueIdentifier>{4E602FEB-BA19-9A95-4379-B46FAF315005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Input">
       <UniqueIdentifier>{915689A8-7D4F-A8FA-A681-8D7F92D98706}</UniqueIdentifier>
@@ -159,16 +171,28 @@
     <ClInclude Include="src\Engine\Config\ICVar.h">
       <Filter>src\Engine\Config</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Content\Assert.h">
+      <Filter>src\Engine\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Content\Asset.h">
+      <Filter>src\Engine\Content</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Core\Application.h">
       <Filter>src\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\Collections\span.h">
       <Filter>src\Engine\Core\Collections</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Core\Common.h">
+      <Filter>src\Engine\Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Core\Compiler.h">
       <Filter>src\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\Core.h">
+      <Filter>src\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\DerivedFrom.h">
       <Filter>src\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\EntryPoint.h">
@@ -234,10 +258,16 @@
     <ClInclude Include="src\Engine\FileSystem\WatchInfo.h">
       <Filter>src\Engine\FileSystem</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Enums.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\FrameGraph\FrameGraph.h">
       <Filter>src\Engine\Graphics\FrameGraph</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Framebuffer.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUAdapter.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\GPUBuffer.h">
@@ -246,7 +276,16 @@
     <ClInclude Include="src\Engine\Graphics\GPUBufferDescription.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUDevice.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPULimits.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\GPUResource.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h">
@@ -270,6 +309,21 @@
     <ClInclude Include="src\Engine\Graphics\Texture.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Input\Input.h">
       <Filter>src\Engine\Input</Filter>
     </ClInclude>
@@ -288,13 +342,22 @@
     <ClInclude Include="src\Engine\Library\ShaderLibrary.h">
       <Filter>src\Engine\Library</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Memory\CrtAllocator.h">
+      <Filter>src\Engine\Memory</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Memory\FreeListAllocator.h">
+      <Filter>src\Engine\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Memory\Memory.h">
       <Filter>src\Engine\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Memory\MemoryManager.h">
       <Filter>src\Engine\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Memory\MemoryUtils.h">
+      <Filter>src\Engine\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Memory\ProfilerMemory.h">
       <Filter>src\Engine\Memory</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Memory\SinglyLinkedList.h">
@@ -330,7 +393,16 @@
     <ClInclude Include="src\Engine\Module\WindowModule.h">
       <Filter>src\Engine\Module</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Platform\CriticalSection.h">
+      <Filter>src\Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Platform\Defines.h">
+      <Filter>src\Engine\Platform</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Platform\Platform.h">
+      <Filter>src\Engine\Platform</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Platform\Types.h">
       <Filter>src\Engine\Platform</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Platform\Win32\Win32CriticalSection.h">
@@ -346,6 +418,9 @@
       <Filter>src\Engine\Platform\Win32</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Platform\Windows\PlatformWindows.h">
+      <Filter>src\Engine\Platform\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Platform\Windows\WindowsDefines.h">
       <Filter>src\Engine\Platform\Windows</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\RTTI\RTTI.h">
@@ -1704,15 +1779,14 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Enums.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Windows\WindowsDefines.h">
-      <Filter>src\Engine\Platform\Windows</Filter>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h" />
-    <ClInclude Include="src\Engine\Platform\CriticalSection.h">
-      <Filter>src\Engine\Platform</Filter>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1770,6 +1844,12 @@
     <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1788,6 +1868,18 @@
     <ClCompile Include="src\Engine\Graphics\Texture.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Input\Input.cpp">
       <Filter>src\Engine\Input</Filter>
     </ClCompile>
@@ -1804,6 +1896,9 @@
       <Filter>src\Engine\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Memory\MemoryManager.cpp">
+      <Filter>src\Engine\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Memory\ProfilerMemory.cpp">
       <Filter>src\Engine\Memory</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Memory\StackAllocator.cpp">
@@ -1914,6 +2009,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include "Engine/Core/NonCopyable.h"
 
 	class IS_API GPUResource : public Object, public NonCopyable

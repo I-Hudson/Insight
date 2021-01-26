@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include "Core/Core.h"
 #include "TimeSpan.h"
-#include "Core/Enums.h"
 
 /// <summary>
 /// The days of the week.

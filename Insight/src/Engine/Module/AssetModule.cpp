@@ -10,13 +10,13 @@
 		AssetModule::AssetModule()
 			: m_deserlizaed(false)
 		{
-			m_modelLibrary = CreateSharedPtr<Library::ModelLibrary>();
+			m_modelLibrary = ::New<Library::ModelLibrary>();
 			//m_shaderLibrary = NEW_ON_HEAP(Library::ShaderLibrary);
 		}
 
 		AssetModule::~AssetModule()
 		{
-			m_modelLibrary.reset();
+			::Delete(m_modelLibrary);
 			//DELETE_ON_HEAP(m_shaderLibrary);
 		}
 

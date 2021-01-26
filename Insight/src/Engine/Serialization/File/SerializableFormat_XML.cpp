@@ -17,7 +17,7 @@
 			tinyxml2::XMLNode* root = m_document.FirstChild();
 			while (root != nullptr)
 			{
-				SharedPtr<SerializableElement> rootElement = CreateSharedPtr<SerializableElement>(root->Value());
+				SerializableElement* rootElement = ::New<SerializableElement>(root->Value());
 				m_rootNodes.push_back(rootElement);
 				DeserializeElement(m_document, root, rootElement);
 				root = root->NextSibling();
@@ -53,7 +53,7 @@
 			return result;
 		}
 
-		void SerializableFile_XML::SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element)
+		void SerializableFile_XML::SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SerializableElement* element)
 		{
 			tinyxml2::XMLElement* elementRootNode = doc.NewElement(element->GetElementName().c_str());
 			if (node)
@@ -80,7 +80,7 @@
 
 		}
 
-		void SerializableFile_XML::DeserializeElement(tinyxml2::XMLDocument& doc, const tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element)
+		void SerializableFile_XML::DeserializeElement(tinyxml2::XMLDocument& doc, const tinyxml2::XMLNode* node, SerializableElement* element)
 		{
 			// Get all the children.
 			const tinyxml2::XMLElement* xmlElement = (tinyxml2::XMLElement*)node;//node->FirstChildElement();

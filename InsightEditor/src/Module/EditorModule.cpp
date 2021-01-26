@@ -18,7 +18,7 @@
 		{
 			for (auto it = m_editorPanels.begin(); it != m_editorPanels.end(); ++it)
 			{
-				it->second.reset();
+				::Delete(it->second);
 			}
 
 			m_editorPanels.clear();

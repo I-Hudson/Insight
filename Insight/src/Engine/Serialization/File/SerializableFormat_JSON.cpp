@@ -17,7 +17,7 @@
 			auto root = m_document.begin();
 			while (root != m_document.end())
 			{
-				SharedPtr<SerializableElement> rootElement = CreateSharedPtr<SerializableElement>(root.key());
+				SerializableElement* rootElement = ::New<SerializableElement>(root.key());
 				m_rootNodes.push_back(rootElement);
 				DeserializeElement(m_document, &(*root), rootElement);
 				++root;
@@ -72,7 +72,7 @@
 			return true;
 		}
 
-		void SerializableFile_JSON::SerializeElement(nlohmann::json& doc, nlohmann::json* node, SharedPtr<SerializableElement> element)
+		void SerializableFile_JSON::SerializeElement(nlohmann::json& doc, nlohmann::json* node, SerializableElement* element)
 		{
 			nlohmann::json elementNode;
 
@@ -100,7 +100,7 @@
 			}
 		}
 
-		void SerializableFile_JSON::DeserializeElement(nlohmann::json& doc, const nlohmann::json* node, SharedPtr<SerializableElement> element)
+		void SerializableFile_JSON::DeserializeElement(nlohmann::json& doc, const nlohmann::json* node, SerializableElement* element)
 		{
 
 		}

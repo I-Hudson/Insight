@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
 #include "SerializableFile.h"
 #include "tinyxml2.h"
 
@@ -17,8 +16,8 @@
 			virtual bool LoadFile(const std::string& fileName) override;
 
 		private: 
-			void SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element);
-			void DeserializeElement(tinyxml2::XMLDocument& doc, const tinyxml2::XMLNode* node, SharedPtr<SerializableElement> element);
+			void SerializeElement(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* node, SerializableElement* element);
+			void DeserializeElement(tinyxml2::XMLDocument& doc, const tinyxml2::XMLNode* node, SerializableElement* element);
 
 			tinyxml2::XMLDocument m_document;
 		};

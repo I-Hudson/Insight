@@ -10,12 +10,14 @@ REGISTER_DEF_TYPE(MeshComponent);
 MeshComponent::MeshComponent()
 	: Component(nullptr)
 {
+	SetType<MeshComponent>();
 	m_updateEveryFarme = false;
 }
 
-MeshComponent::MeshComponent(SharedPtr<Entity> owner)
+MeshComponent::MeshComponent(Entity* owner)
 	: Component(owner)
 {
+	SetType<MeshComponent>();
 	m_updateEveryFarme = false;
 }
 
@@ -29,18 +31,18 @@ void MeshComponent::OnCreate()
 
 	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
 
-	Module::GraphicsModule::m_meshs.push_back(shared_from_this());
+	Module::GraphicsModule::m_meshs.push_back(this);
 	//SetMaterial(Module::GraphicsModule::GetDefaultMaterial());
 	m_updateEveryFarme = false;
 }
 
 void MeshComponent::OnDestroy()
 {
-	auto it = std::find_if(Module::GraphicsModule::m_meshs.begin(), Module::GraphicsModule::m_meshs.end(), [&](WeakPtr<MeshComponent> component)
+	auto it = std::find_if(Module::GraphicsModule::m_meshs.begin(), Module::GraphicsModule::m_meshs.end(), [&](MeshComponent* component)
 		{
-			if (auto comSP = component.lock())
+			if (component)
 			{
-				return this == comSP.get();
+				return this == component;
 			}
 			return false;
 		});
@@ -49,28 +51,28 @@ void MeshComponent::OnDestroy()
 
 void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
 {
-	if (auto meshSP = m_mesh.lock())
+	if (m_mesh)
 	{
-		meshSP->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
+		m_mesh->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
 	}
 }
 
-void MeshComponent::SetMesh(WeakPtr<Mesh> mesh)
+void MeshComponent::SetMesh(Mesh* mesh)
 {
 	m_mesh = mesh;
-	m_meshName = mesh.lock()->GetMeshName();
+	m_meshName = mesh->GetMeshName();
 }
 
-void MeshComponent::SetModel(WeakPtr<Model> model)
+void MeshComponent::SetModel(Model* model)
 {
-	if (auto modelSP = model.lock())
+	if (model)
 	{
-		SetMesh(modelSP->GetMesh());
-		SetMaterials(modelSP->GetMaterals());
+		SetMesh(model->GetMesh());
+		SetMaterials(model->GetMaterals());
 	}
 }
 
-void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
+void MeshComponent::SetMaterial(Material* material, int index)
 {
 	if (index < 0 || index > m_materials.size())
 	{
@@ -81,7 +83,7 @@ void MeshComponent::SetMaterial(WeakPtr<Material> material, int index)
 	m_materialBlockDatas[index] = MaterialBlockData();
 }
 
-void MeshComponent::SetMaterials(std::vector<WeakPtr<Material>> materials)
+void MeshComponent::SetMaterials(std::vector<Material*> materials)
 {
 	m_materials = materials;
 	m_materialBlockDatas.clear();
@@ -93,16 +95,16 @@ void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& m
 	m_materialBlockDatas = materialBlockDatas;
 }
 
-void MeshComponent::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void MeshComponent::Serialize(Serialization::SerializableElement* element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
-	if (auto meshSP = m_mesh.lock())
+	if (m_mesh)
 	{
 		//element->AddAttribute("MeshName", meshSP->GetName().c_str());
 	}
 }
 
-void MeshComponent::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void MeshComponent::Deserialize(Serialization::SerializableElement* element, bool force)
 {
 	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

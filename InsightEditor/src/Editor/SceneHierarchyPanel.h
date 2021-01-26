@@ -9,18 +9,18 @@ class Entity;
 		class SceneHierarchyPanel : public EditorWindow
 		{
 		public:
-			SceneHierarchyPanel(const SharedPtr<Module::EditorModule> editorModule);
+			SceneHierarchyPanel(const Module::EditorModule* editorModule);
 			~SceneHierarchyPanel() override;
 
 			virtual void Update(const float& deltaTime) override;
 
 		private:
-			void DrawEntityTreeView(WeakPtr<Entity> entity, bool& newEntitySelected);
-			int GetTreeNodeFlags(WeakPtr<Entity> entity);
+			void DrawEntityTreeView(Entity* entity, bool& newEntitySelected);
+			int GetTreeNodeFlags(Entity* entity);
 
-			void DrawCompoentPanel(WeakPtr<Entity> entity);
+			void DrawCompoentPanel(Entity* entity);
 
-			SharedPtr<Entity> m_selectedEntity;
+			Entity* m_selectedEntity;
 			bool m_openContextPopup;
 			bool m_openAddComponentPopup;
 		};

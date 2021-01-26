@@ -17,7 +17,7 @@ struct Vertex
 class IS_API GPUBuffer : public GPUResource
 {
 public:
-	SharedPtr<GPUBuffer> Create();
+	GPUBuffer* New();
 
 	GPUBuffer();
 	virtual ~GPUBuffer() override;
@@ -46,18 +46,17 @@ public:
 	bool Resize(U32 newSize);
 
 protected:
-
-	virtual void* Map(GPUResourceMapMode mapMode) = 0;
-	virtual void UnMap() = 0;
+	virtual void* Map(GPUResourceMapMode mapMode) { return nullptr; }
+	virtual void UnMap() {}
 
 	/// <summary>
 	/// Upload the bufffer data to the GPU.
 	/// </summary>
-	virtual void Upload() = 0;
+	virtual void Upload() {}
 	/// <summary>
 	/// Get the buffer data from the GPU. This is slow and should not really but used.
 	/// </summary>
-	virtual void Download() = 0;
+	virtual void Download() {}
 
 protected:
 	GPUBufferDescription m_desc;

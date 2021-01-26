@@ -1,7 +1,7 @@
 #include "ispch.h"
 
-#include "Graphics/FrameGraph/FrameGraph.h"
-#include "Core/Log.h"
+#include "Engine/Graphics/FrameGraph/FrameGraph.h"
+#include "Engine/Core/Log.h"
 
 	namespace FrameGraph
 	{

@@ -12,15 +12,14 @@
 			Library() { }
 			virtual ~Library();
 
-			SharedPtr<T> AddAsset(const std::string& uuid, SharedPtr<T> asset);
-			SharedPtr<T> AddAsset();
-			SharedPtr<T> GetAsset(const std::string& uuid);
+			T* AddAsset(const std::string& uuid, T* asset);
+			T* GetAsset(const std::string& uuid);
 			void RemoveAsset(const std::string& uuid);
 
 		protected:
 			bool Exists(const std::string& uuid);
 
-			std::unordered_map<std::string, SharedPtr<T>> m_assets;
+			std::unordered_map<std::string, T*> m_assets;
 		};
 
 		template<typename T>
@@ -30,7 +29,7 @@
 		}
 
 		template<typename T>
-		inline SharedPtr<T> Library<T>::AddAsset(const std::string& uuid, SharedPtr<T> asset)
+		inline T* Library<T>::AddAsset(const std::string& uuid, T* asset)
 		{
 			if (Exists(uuid))
 			{
@@ -42,15 +41,7 @@
 		}
 
 		template<typename T>
-		inline SharedPtr<T> Library<T>::AddAsset()
-		{
-			SharedPtr<T> t = CreateSharedPtr<T>();
-			SharedPtr<T> uuid = StaticPointerCast<UUID>(t);
-			return AddAsset(uuid->GetUUID(), t);
-		}
-
-		template<typename T>
-		inline SharedPtr<T> Library<T>::GetAsset(const std::string& uuid)
+		inline T* Library<T>::GetAsset(const std::string& uuid)
 		{
 			if (Exists(uuid))
 			{

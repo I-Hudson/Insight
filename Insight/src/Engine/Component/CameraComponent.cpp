@@ -15,12 +15,14 @@ REGISTER_DEF_TYPE(CameraComponent);
 CameraComponent::CameraComponent()
 	: Component(nullptr)
 {
+	SetType<CameraComponent>();
 	m_updateEveryFarme = true;
 }
 
-CameraComponent::CameraComponent(SharedPtr<Entity> owner)
+CameraComponent::CameraComponent(Entity* owner)
 	: Component(owner)
 {
+	SetType<CameraComponent>();
 	m_updateEveryFarme = true;
 }
 
@@ -56,7 +58,7 @@ void CameraComponent::OnDestroy()
 	}
 }
 
-void CameraComponent::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void CameraComponent::Serialize(Serialization::SerializableElement* element, bool force)
 {
 	element->AddAttribute("UUID", GetUUID());
 	element->AddAttribute("Type", "CameraComponent");
@@ -65,7 +67,7 @@ void CameraComponent::Serialize(SharedPtr<Serialization::SerializableElement> el
 	element->AddAttribute("FarPlane", std::to_string(m_farPlane));
 }
 
-void CameraComponent::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+void CameraComponent::Deserialize(Serialization::SerializableElement* element, bool force)
 {
 	if (auto ptr = element->GetFirstAttribute("FOV"))
 	{
@@ -83,7 +85,7 @@ void CameraComponent::Deserialize(SharedPtr<Serialization::SerializableElement> 
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)
 {
-	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	if (Entity* parentPtr = GetEntity())
 	{
 		parentPtr->GetComponent<TransformComponent>()->SetTransform(a_value);
 		SetProjectionViewMatrix();
@@ -133,7 +135,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 
 
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	if (Entity* parentPtr = GetEntity())
 	{
 		viewMatrix = parentPtr->GetComponent<TransformComponent>()->GetTransform();
 	}
@@ -221,7 +223,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		viewMatrix[1] = vUp;
 		viewMatrix[2] = vForward;
 
-		if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+		if (Entity* parentPtr = GetEntity())
 		{
 			parentPtr->GetComponent<TransformComponent>()->SetTransform(viewMatrix);
 		}
@@ -245,7 +247,7 @@ const glm::mat4& CameraComponent::GetProjMatrix() const
 
 const glm::mat4 CameraComponent::GetViewMatrix() const
 {
-	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	if (Entity* parentPtr = GetEntity())
 	{
 		return parentPtr->GetComponent<TransformComponent>()->GetTransform();
 	}
@@ -267,7 +269,7 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 
 void CameraComponent::SetProjectionViewMatrix()
 {
-	if (SharedPtr<Entity> parentPtr = GetEntity().lock())
+	if (Entity* parentPtr = GetEntity())
 	{
 		m_projectionViewMatrix = m_projectionMatrix * glm::inverse(parentPtr->GetComponent<TransformComponent>()->GetTransform());
 	}

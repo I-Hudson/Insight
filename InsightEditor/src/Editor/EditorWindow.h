@@ -17,7 +17,7 @@
 		{
 		public:
 			EditorWindow() = delete;
-			EditorWindow(SharedPtr<Module::EditorModule> editorModule) : m_editorModule(editorModule) {}
+			EditorWindow(const Module::EditorModule* editorModule) : m_editorModule(editorModule) {}
 			virtual ~EditorWindow() {}
 
 			virtual void Update(const float& deltaTime) = 0;
@@ -41,7 +41,7 @@
 			const std::string& GetWindowName() { return m_windowName; }
 
 		protected:
-			SharedPtr<Module::EditorModule> m_editorModule;
+			const Module::EditorModule* m_editorModule;
 			std::string m_windowName;
 
 #define SET_PANEL_NAME(x) m_windowName = typeid(x).name();

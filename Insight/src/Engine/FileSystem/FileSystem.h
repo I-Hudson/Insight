@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Core/Core.h"
+
 #include "FileHandle.h"
 #include "WatchInfo.h"
 #include "Engine/Templates/TSingleton.h"
@@ -54,11 +54,14 @@
 			bool FileExists(const std::string& path);
 
 			template<typename T, typename... Args>
-			SharedPtr<T> LoadObject(const std::string& filePath, Args&&... args);
-
-			void UnloadObject(const WeakPtr<Object> objectPtr);
+			T* LoadObject(const std::string& filePath, Args&&... args);
+			template<typename T, typename... Args>
+			T* LoadObject(const std::string& filePath, const std::function<SharedPtr<T>(const std::string&)>& createFunction);
+			void UnloadObject(const Object* objectPtr);
 
 			void Update();
+
+			std::string FormatFilePathStringToUNIX(const std::string& filePath);
 
 		private:
 			//void HandleFileNotifcationRenameOld(const FILE_NOTIFY_INFORMATION* fileInfo, DWORD* asyncBuffer, U64& offset);
@@ -74,7 +77,7 @@
 		};
 
 		template<typename T, typename... Args>
-		inline SharedPtr<T> FileSystemManager::LoadObject(const std::string& filePath, Args&&... args)
+		inline T* FileSystemManager::LoadObject(const std::string& filePath, Args&&... args)
 		{
 			IS_CORE_STATIC_ASSERT((std::is_base_of_v<Object, T>), "[FileSystemManager::LoadObject] 'LoadObject' can only be used on Object types.");
 
@@ -82,7 +85,7 @@
 			auto it = m_fileHandles.find(fileHash);
 			if (it != m_fileHandles.end())
 			{
-				return DynamicPointerCast<T>((*it).second.Object);
+				return dynamic_cast<T*>((*it).second.Object);
 			}
 
 			std::filesystem::path path = filePath;
@@ -94,12 +97,42 @@
 				GetExtension(filePath),
 				0//static_cast<U64>(std::filesystem::file_size(path))
 			};
-			handle.Object = Object::CreateObject<T>(filePath, std::forward<Args>(args)...);
+			handle.Object = ::New<T>(filePath, std::forward<Args>(args)...);
 
 			MutexUnqiueLock lock(m_mutex);
 			m_fileHandles[fileHash] = handle;
 			lock.unlock();
 
-			return DynamicPointerCast<T>(handle.Object);
+			return dynamic_cast<T*>(handle.Object);
+		}
+
+		template<typename T, typename ...Args>
+		inline T* FileSystemManager::LoadObject(const std::string& filePath, const std::function<SharedPtr<T>(const std::string&)>& createFunction)
+		{
+			IS_CORE_STATIC_ASSERT((std::is_base_of_v<Object, T>), "[FileSystemManager::LoadObject] 'LoadObject' can only be used on Object types.");
+
+			FileHash fileHash = std::hash<std::string>{}(filePath);
+			auto it = m_fileHandles.find(fileHash);
+			if (it != m_fileHandles.end())
+			{
+				return dynamic_cast<T*>((*it).second.Object);
+			}
+
+			std::filesystem::path path = filePath;
+			FileHandle handle;
+			handle.Info = FileInfo
+			{
+				filePath,
+				GetFileName(filePath),
+				GetExtension(filePath),
+				0//static_cast<U64>(std::filesystem::file_size(path))
+			};
+			handle.Object = createFunction(filePath);
+
+			MutexUnqiueLock lock(m_mutex);
+			m_fileHandles[fileHash] = handle;
+			lock.unlock();
+
+			return dynamic_cast<T*>(handle.Object);
 		}
 	}

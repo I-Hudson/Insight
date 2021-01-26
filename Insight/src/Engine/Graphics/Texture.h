@@ -1,57 +1,76 @@
 #pragma once
 #include "Engine/Core/Core.h"
-#include "Engine/Core/Object.h"
+#include "Engine/Core/DerivedFrom.h"
+#include "GPUResource.h"
+#include "PixelFormat.h"
 
-	namespace FileSystem
+namespace FileSystem
+{
+	class FileSystemManager;
+}
+
+namespace Render
+{
+	struct IS_API TextureDescription
 	{
-		class FileSystemManager;
-	}
+		U32 TextureId;
+		std::string FileName;
+		std::string FilePath;
+		std::string Extension;
 
-	namespace Render
+		void* Data;
+		U32 TexWidth;
+		U32 TexHeight;
+		U32 TexDepth;
+
+		U32 TexChannels;
+		U32 MipLevels;
+		U32 SizeBytes;
+
+		PixelFormat Format;
+		bool HasBeenDestroyed;
+
+		TextureDescription()
+			: TextureId(-1), FileName(""), FilePath("")
+			, Data(nullptr), TexWidth(0), TexHeight(0), TexDepth(0)
+			, TexChannels(0), SizeBytes(0), MipLevels(0)
+			, Format(PixelFormat::Unknown), HasBeenDestroyed(false)
+		{ }
+	};
+
+	class IS_API Texture : public GPUResource
 	{
-		class IS_API TextureGPUData
-		{
-		public:
-			virtual ~TextureGPUData() { };
-			virtual void Init(void* textureData, const U32& textureDataSize, const U32& width, const U32& height, const U32& channels) = 0;
+	public:
+		Texture();
+		virtual ~Texture() override;
 
-			U32 GetMipMapCount(const U32& width, const U32& height, const U32& channels);
-			U64 GetMipMapOffset(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
-			U64 GetImageBufferSize(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
+		void Init(const std::string& filePath);
+		void Init(const TextureDescription& desc);
+		virtual bool IsValid() = 0;
 
-			static SharedPtr<TextureGPUData> Create();
-		};
+		U32 const& GetId() { return m_desc.TextureId; }
+		std::string const& GetFileName() const { return m_desc.FileName; }
+		std::string const& GetFilePath() const { return m_desc.FilePath; }
 
-		class IS_API Texture : public Object
-		{
-		public:
-			Texture();
-			Texture(std::string const& filePath);
-			virtual ~Texture() override;
-			virtual bool IsValid() { return m_gpuData.get() != nullptr; }
+		int const& GetWidth() const { return m_desc.TexWidth; }
+		int const& GetHeight() const { return m_desc.TexHeight; }
+		int const& GetDepth() const { return m_desc.TexDepth; }
+		int const& GetChannels() const { return m_desc.TexChannels; }
+		U32 const& GetSizeBytes() const { return m_desc.SizeBytes; }
+		PixelFormat const& GetFormat() const { return m_desc.Format; }
 
-			U32 const& GetId() { return m_textureId; }
-			U32 const& GetDataSize() const { return m_dataSize; }
-			int const& GetWidth() const { return m_texWidth; }
-			int const& GetHeight() const { return m_texHeight; }
-			int const& GetDepth() const { return m_texDepth; }
-			int const& GetChannels() const { return m_texChannels; }
-			std::string const& GetFileName() const { return m_fileName; }
-			std::string const& GetFilePath() const { return m_filePath; }
+		TextureDescription const& GetDescription() const { return m_desc; }
 
-			const SharedPtr<TextureGPUData> GetGPUTextureData() { return m_gpuData; }
+		virtual ResourceType GetResourceType() const { return ResourceType::Texture; }
 
-		protected:
-			U32 m_textureId;
+		static Texture* New();
 
-			U32 m_dataSize;
-			std::string m_fileName;
-			std::string m_filePath;
+	protected:
+		U32 GetMipMapCount(const U32& width, const U32& height, const U32& channels);
+		U64 GetMipMapOffset(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
+		U64 GetImageBufferSize(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
 
-			int m_texWidth;
-			int m_texHeight;
-			int m_texDepth;
-			int m_texChannels;
-			SharedPtr<TextureGPUData> m_gpuData;
-		};
-	}
+	protected:
+		TextureDescription m_desc;
+	};
+}

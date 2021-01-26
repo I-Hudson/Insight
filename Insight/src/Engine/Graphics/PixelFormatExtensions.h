@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include "PixelFormat.h"
 
 /// <summary>

@@ -49,8 +49,8 @@ private:
 	std::vector<unsigned int> m_indices;
 
 	// TOOD: Maybe move this into Mesh to have one buffer for all sub meshes.
-	SharedPtr<vks::VulkanBuffer> m_vertexBuffer;
-	SharedPtr<vks::VulkanBuffer> m_indexBuffer;
+	vks::VulkanBuffer* m_vertexBuffer;
+	vks::VulkanBuffer* m_indexBuffer;
 	bool m_created;
 };
 

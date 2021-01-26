@@ -1,10 +1,11 @@
 #include "ispch.h"
 #include "GraphicsModule.h"
-#include "Engine/Memory/MemoryManager.h"
 #include "Engine/Module/WindowModule.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
+
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
@@ -12,26 +13,27 @@
 	namespace Module
 	{
 		CameraComponent* GraphicsModule::m_mainCamera;
-		std::vector<WeakPtr<MeshComponent>> GraphicsModule::m_meshs;
+		std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
-		GraphicsModule::GraphicsModule(SharedPtr<WindowModule> windowModule)
+		GraphicsModule::GraphicsModule()
 		{
-			m_windowModule = windowModule;
+			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+			gpuDevice->Dispose();
+			::Delete(gpuDevice);
 
-			m_renderer = Renderer::Create();
-			m_renderer->OnCreate();
+			m_renderer = Renderer::New();
+			m_renderer->Init();
 
-			m_imguiRenderer = ImGuiRenderer::Create();
+			m_imguiRenderer = ImGuiRenderer::New();
 			ImGuiRenderer::Instance()->Init(m_renderer);
 		}
 
 		GraphicsModule::~GraphicsModule()
 		{
 			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
-			m_imguiRenderer.reset();
+			::Delete(m_imguiRenderer);
 
-			m_renderer.reset();
-			m_windowModule = nullptr;
+			::Delete(m_renderer);
 		}
 
 		void GraphicsModule::Update(const float& deltaTime)

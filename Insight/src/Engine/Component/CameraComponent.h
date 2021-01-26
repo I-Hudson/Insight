@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Core/Core.h"
+
 #include "Component.h"
 #include <glm/glm.hpp>
 
@@ -17,14 +17,14 @@ class IS_API CameraComponent : public Component
 {
 public:
 	CameraComponent();
-	CameraComponent(SharedPtr<Entity> owner);
+	CameraComponent(Entity* owner);
 	virtual ~CameraComponent() override;
 
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	virtual void Serialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
-	virtual void Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force = false) override;
+	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
+	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);

@@ -15,8 +15,9 @@
 
 	namespace Editor
 	{
-		SceneHierarchyPanel::SceneHierarchyPanel(SharedPtr<Module::EditorModule> editorModule)
+		SceneHierarchyPanel::SceneHierarchyPanel(const Module::EditorModule* editorModule)
 			: EditorWindow(editorModule)
+			, m_selectedEntity(nullptr)
 		{
 			SET_PANEL_NAME(SceneHierarchyPanel);
 		}
@@ -39,9 +40,9 @@
 
 			for (auto entitesIT = entites.begin(); entitesIT != entites.end(); ++entitesIT)
 			{
-				if ((*entitesIT)->GetParent().expired())
+				if ((*entitesIT)->GetParent())
 				{
-					if (ImGui::TreeNodeEx((*entitesIT).get(), GetTreeNodeFlags(*entitesIT), (*entitesIT)->GetID().c_str()))
+					if (ImGui::TreeNodeEx((*entitesIT), GetTreeNodeFlags(*entitesIT), (*entitesIT)->GetID().c_str()))
 					{
 						DrawEntityTreeView((*entitesIT), newEntitySelected);
 						ImGui::TreePop();
@@ -78,7 +79,7 @@
 
 					if (ImGui::Button("Create Entity"))
 					{
-						Entity::Create();
+						Entity::New();
 					}
 
 					ImGui::PopStyleColor();
@@ -98,15 +99,15 @@
 #endif
 		}
 
-		void SceneHierarchyPanel::DrawEntityTreeView(WeakPtr<Entity> entity, bool& newEntitySelected)
+		void SceneHierarchyPanel::DrawEntityTreeView(Entity* entity, bool& newEntitySelected)
 		{
-			if (auto spEntity = entity.lock())
+			if (entity)
 			{
 #ifdef IMGUI_ENABLED
-				for (unsigned int i = 0; i < spEntity->GetChildCount(); ++i)
+				for (unsigned int i = 0; i < entity->GetChildCount(); ++i)
 				{
-					SharedPtr<Entity> currentEntity = spEntity->GetChild(i);
-					if (ImGui::TreeNodeEx(currentEntity.get(), GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
+					Entity* currentEntity = entity->GetChild(i);
+					if (ImGui::TreeNodeEx(currentEntity, GetTreeNodeFlags(currentEntity), currentEntity->GetID().c_str()))
 					{
 						DrawEntityTreeView(currentEntity, newEntitySelected);
 						ImGui::TreePop();
@@ -122,18 +123,18 @@
 			}
 		}
 
-		int SceneHierarchyPanel::GetTreeNodeFlags(WeakPtr<Entity> entity)
+		int SceneHierarchyPanel::GetTreeNodeFlags(Entity* entity)
 		{
-			if (auto spEntity = entity.lock())
+			if (entity)
 			{
 #ifdef IMGUI_ENABLED
 				ImGuiTreeNodeFlags flags = /*ImGuiTreeNodeFlags_Framed |*/ ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-				if (spEntity->GetChildCount() == 0)
+				if (entity->GetChildCount() == 0)
 				{
 					flags |= ImGuiTreeNodeFlags_Leaf;
 				}
 
-				if (m_selectedEntity == spEntity)
+				if (m_selectedEntity == entity)
 				{
 					flags |= ImGuiTreeNodeFlags_Selected;
 				}
@@ -144,7 +145,7 @@
 			return 0;
 		}
 
-		void SceneHierarchyPanel::DrawCompoentPanel(WeakPtr<Entity> entity)
+		void SceneHierarchyPanel::DrawCompoentPanel(Entity* entity)
 		{
 			//IS_TODO("Remove this and place in it's own class!!!");
 
@@ -152,26 +153,26 @@
 #ifdef IMGUI_ENABLED
 			ImGui::Begin("Components Panel");
 
-			if (auto spEntity = entity.lock())
+			if (entity)
 			{
-				ImGui::InputText(":Name", &spEntity->GetID());
-				ImGui::Checkbox(":Active", &spEntity->IsActive());
-				ImGui::Checkbox(":Debug", &spEntity->ShowDebugInfo());
+				ImGui::InputText(":Name", &entity->GetID());
+				ImGui::Checkbox(":Active", &entity->IsActive());
+				ImGui::Checkbox(":Debug", &entity->ShowDebugInfo());
 
-				if (spEntity->ShowDebugInfo())
+				if (entity->ShowDebugInfo())
 				{
-					ImGui::LabelText(":UUID", spEntity->GetUUID().c_str());
+					ImGui::LabelText(":UUID", entity->GetUUID().c_str());
 				}
 
 				ImGui::NewLine();
 
-				auto components = spEntity->GetAllComponents();
+				auto components = entity->GetAllComponents();
 
 				for (auto componentsIT = components.begin(); componentsIT != components.end(); ++componentsIT)
 				{
 					IS_PROFILE_SCOPE("Draw Properties");
-					auto properties = IS_GET_ALL_PROPERTIES((*componentsIT).get(), ShowInEditor);
-					auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT).get(), "Allow_Removable");
+					auto properties = IS_GET_ALL_PROPERTIES((*componentsIT), ShowInEditor);
+					auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT), "Allow_Removable");
 
 					ImGui::Separator();
 					ImGui::Text((*componentsIT)->GetType().GetTypeName().c_str());
@@ -181,7 +182,7 @@
 						if (ImGui::Button("X"))
 						{
 							// TODO: Remove component
-							spEntity->RemoveComponent((*componentsIT)->GetUUID());
+							entity->RemoveComponent((*componentsIT)->GetUUID());
 							continue;
 						}
 					}
@@ -208,8 +209,8 @@
 					ImGui::OpenPopup("Add Component Menu");
 					if (ImGui::BeginPopup("Add Component Menu"))
 					{
-						if (ImGui::Button("Camera Component")) { spEntity->AddComponent<CameraComponent>(); }
-						else if (ImGui::Button("Mesh Component")) { spEntity->AddComponent<MeshComponent>(); }
+						if (ImGui::Button("Camera Component")) { entity->AddComponent<CameraComponent>(); }
+						else if (ImGui::Button("Mesh Component")) { entity->AddComponent<MeshComponent>(); }
 						ImGui::EndPopup();
 					}
 

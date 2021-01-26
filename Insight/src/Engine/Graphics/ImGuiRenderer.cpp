@@ -3,20 +3,20 @@
 #include "Engine/Module/GraphicsModule.h"
 #include "Platform/Vulkan/VulkanImGUIRenderer.h"
 
-	ImGuiRenderer::ImGuiRenderer()
+ImGuiRenderer::ImGuiRenderer()
+{
+}
+
+ImGuiRenderer::~ImGuiRenderer()
+{
+}
+
+ImGuiRenderer* ImGuiRenderer::New()
+{
+	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
+	case GraphicsAPI::Vulkan: return ::New<vks::VulkanImGUIRenderer>();
 	}
 
-	ImGuiRenderer::~ImGuiRenderer()
-	{
-	}
-
-	SharedPtr<ImGuiRenderer> ImGuiRenderer::Create()
-	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
-		{
-			case GraphicsAPI::Vulkan: return CreateSharedPtr<vks::VulkanImGUIRenderer>();
-		}
-
-		return nullptr;
-	}
+	return nullptr;
+}

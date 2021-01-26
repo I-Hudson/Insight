@@ -1,6 +1,7 @@
 #include "ispch.h"
 #include "InputModule.h"
 #include "Engine/Core/Log.h"
+#include "ModuleManager.h"
 #include "WindowModule.h"
 #include "GLFW/glfw3.h"
 #include "backends/imgui_impl_glfw.h"
@@ -11,14 +12,13 @@ namespace Module
 	double InputModule::m_mouseX;
 	double InputModule::m_mouseY;
 
-	InputModule::InputModule(SharedPtr<WindowModule> windowModule)
+	InputModule::InputModule()
 	{
-		m_windowModule = windowModule;
-
-		glfwSetKeyCallback(m_windowModule->GetWindow()->m_window, KeybordCallback);
-		glfwSetCharCallback(m_windowModule->GetWindow()->m_window, CharCallback);
-		glfwSetMouseButtonCallback(m_windowModule->GetWindow()->m_window, MouseButtonCallback);
-		glfwSetCursorPosCallback(m_windowModule->GetWindow()->m_window, MousePositionCallback);
+		auto windowModule = ModuleManager::Instance()->GetModule<WindowModule>();
+		glfwSetKeyCallback(windowModule->GetWindow()->m_window, KeybordCallback);
+		glfwSetCharCallback(windowModule->GetWindow()->m_window, CharCallback);
+		glfwSetMouseButtonCallback(windowModule->GetWindow()->m_window, MouseButtonCallback);
+		glfwSetCursorPosCallback(windowModule->GetWindow()->m_window, MousePositionCallback);
 	}
 
 	InputModule::~InputModule()

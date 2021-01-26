@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "Engine/Core/Core.h"
-#include "Engine/Memory/MemoryManager.h"
 #include "File/SerializableFile.h"
 #include <map>
 
@@ -35,22 +33,22 @@
 			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
 			virtual ~Serializable();
 
-			virtual void Serialize(SharedPtr<SerializableElement> element, bool force = false) { }
-			virtual void Deserialize(SharedPtr<SerializableElement> element, bool force = false) { }
+			virtual void Serialize(SerializableElement* element, bool force = false) { }
+			virtual void Deserialize(SerializableElement* element, bool force = false) { }
 
 			template<typename T> 
-			static SharedPtr<Serializable> CreateInstance()
+			static Serializable* CreateInstance()
 			{ 
-				return Object::CreateObject<T>(); 
+				return ::New<T>(); 
 			}
 
 			template<typename T>
-			static SharedPtr<T> CreateInstanceFromType(const std::string& type)
+			static T* NewInstanceFromType(const std::string& type)
 			{
 				auto t = SerializableRegistry::GetTypes().find(type);
 				if (t != SerializableRegistry::GetTypes().end())
 				{
-					SharedPtr<T> tValue = DynamicPointerCast<T>(t->second());
+					T* tValue = dynamic_cast<T*>(t->second());
 					if (tValue)
 					{
 						return tValue;
@@ -73,7 +71,7 @@
 		struct SerializableRegistry
 		{
 		public:
-			typedef std::map<std::string, SharedPtr<Serializable> (*)()> MapTypes;
+			typedef std::map<std::string, Serializable* (*)()> MapTypes;
 
 			static MapTypes& GetTypes()
 			{

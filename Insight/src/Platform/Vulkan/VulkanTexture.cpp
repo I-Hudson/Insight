@@ -4,22 +4,35 @@
 
 namespace vks
 {
-	VulkanTextureGPUData::~VulkanTextureGPUData()
+	VulkanTexture::VulkanTexture()
+		: Texture()
+	{
+	}
+
+	VulkanTexture::~VulkanTexture()
 	{
 		auto device = VulkanDevice::Instance();
 		vkDestroyImage(*device, m_image, nullptr);
 		vkDestroyImageView(*device, m_imageView, nullptr);
 		vkDestroySampler(*device, m_sampler, nullptr);
 		vkFreeMemory(*device, m_deviceMemory, nullptr);
+		m_desc.HasBeenDestroyed = true;
 	}
 
-	void VulkanTextureGPUData::Init(void* textureData, const U32& textureDataSize, const U32& width, const U32& height, const U32& channels)
+	bool VulkanTexture::IsValid()
+	{
+		return m_image != VK_NULL_HANDLE &&
+			m_imageView != VK_NULL_HANDLE &&
+			m_deviceMemory != VK_NULL_HANDLE;
+	}
+
+	void VulkanTexture::ReleaseGPUResource()
+	{
+	}
+
+	bool VulkanTexture::CreateGPUResource()
 	{
 		auto device = VulkanDevice::Instance();
-		m_width = width;
-		m_height = height;
-		m_mipLevels = 1;//GetMipMapCount(width, height, channels);
-		//U64 gpuTextureDatasize = GetImageBufferSize(width, height, channels, m_mipLevels);
 
 		// Texture data contains 4 channels (RGBA) with unnormalized 8-bit values, this is the most commonly supported format
 		VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
@@ -51,7 +64,7 @@ namespace vks
 			VkDeviceMemory stagingMemory;
 
 			VkBufferCreateInfo bufferCreateInfo = vks::initializers::bufferCreateInfo();
-			bufferCreateInfo.size = textureDataSize;
+			bufferCreateInfo.size = m_desc.SizeBytes;
 			// This buffer is used as a transfer source for the buffer copy
 			bufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 			bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -68,14 +81,14 @@ namespace vks
 			// Copy texture data into host local staging buffer
 			uint8_t* data;
 			ThrowIfFailed(vkMapMemory(*device, stagingMemory, 0, memReqs.size, 0, (void**)&data));
-			memcpy(data, textureData, textureDataSize);
+			memcpy(data, m_desc.Data, m_desc.SizeBytes);
 			vkUnmapMemory(*device, stagingMemory);
 
 			// Setup buffer copy regions for each mip level
 			std::vector<VkBufferImageCopy> bufferCopyRegions;
 			uint32_t offset = 0;
 
-			for (uint32_t i = 0; i < m_mipLevels; ++i)
+			for (uint32_t i = 0; i < m_desc.MipLevels; ++i)
 			{
 				// Setup a buffer image copy structure for the current mip level
 				VkBufferImageCopy bufferCopyRegion = {};
@@ -83,10 +96,10 @@ namespace vks
 				bufferCopyRegion.imageSubresource.mipLevel = i;
 				bufferCopyRegion.imageSubresource.baseArrayLayer = 0;
 				bufferCopyRegion.imageSubresource.layerCount = 1;
-				bufferCopyRegion.imageExtent.width = width >> i;
-				bufferCopyRegion.imageExtent.height = height >> i;
+				bufferCopyRegion.imageExtent.width = m_desc.TexWidth >> i;
+				bufferCopyRegion.imageExtent.height = m_desc.TexHeight >> i;
 				bufferCopyRegion.imageExtent.depth = 1;
-				bufferCopyRegion.bufferOffset = GetMipMapOffset(width, height, channels, i);
+				bufferCopyRegion.bufferOffset = GetMipMapOffset(m_desc.TexWidth, m_desc.TexHeight, m_desc.TexChannels, i);
 				bufferCopyRegions.push_back(bufferCopyRegion);
 			}
 
@@ -94,26 +107,26 @@ namespace vks
 			VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
 			imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
 			imageCreateInfo.format = format;
-			imageCreateInfo.mipLevels = m_mipLevels;
+			imageCreateInfo.mipLevels = m_desc.MipLevels;
 			imageCreateInfo.arrayLayers = 1;
 			imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 			imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			// Set initial layout of the image to undefined
 			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-			imageCreateInfo.extent = { width, height, 1 };
+			imageCreateInfo.extent = { m_desc.TexWidth, m_desc.TexHeight, 1 };
 			imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			ThrowIfFailed(vkCreateImage(*device, &imageCreateInfo, nullptr, &m_image));
-		
+
 			vkGetImageMemoryRequirements(*device, m_image, &memReqs);
 			memAllocInfo.allocationSize = memReqs.size;
 			memAllocInfo.memoryTypeIndex = device->GetMemoryType(memReqs.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			ThrowIfFailed(vkAllocateMemory(*device, &memAllocInfo, nullptr, &m_deviceMemory));
 			ThrowIfFailed(vkBindImageMemory(*device, m_image, m_deviceMemory, 0));
-		
-			
+
+
 			VkCommandBuffer copyCmd = device->CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-		
+
 			// Image memory barriers for the texture image
 
 			// The sub resource range describes the regions of the image that will be transitioned using the memory barriers below
@@ -123,7 +136,7 @@ namespace vks
 			// Start at first mip level
 			subresourceRange.baseMipLevel = 0;
 			// We will transition on all mip levels
-			subresourceRange.levelCount = m_mipLevels;
+			subresourceRange.levelCount = m_desc.MipLevels;
 			// The 2D texture only has one layer
 			subresourceRange.layerCount = 1;
 
@@ -202,7 +215,7 @@ namespace vks
 			imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
 			imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_PREINITIALIZED;
-			imageCreateInfo.extent = { width, height, 1 };
+			imageCreateInfo.extent = { m_desc.TexWidth, m_desc.TexHeight, 1 };
 			ThrowIfFailed(vkCreateImage(*device, &imageCreateInfo, nullptr, &mappableImage));
 
 			// Get memory requirements for this image like size and alignment
@@ -218,7 +231,7 @@ namespace vks
 			void* data;
 			ThrowIfFailed(vkMapMemory(*device, mappableMemory, 0, memReqs.size, 0, &data));
 			// Copy image data of the first mip level into memory
-			memcpy(data, textureData, memReqs.size);
+			memcpy(data, m_desc.Data, memReqs.size);
 			vkUnmapMemory(*device, mappableMemory);
 
 			// Linear tiled images don't need to be staged and can be directly used as textures
@@ -275,16 +288,16 @@ namespace vks
 		sampler.compareOp = VK_COMPARE_OP_NEVER;
 		sampler.minLod = 0.0f;
 		// Set max level-of-detail to mip level count of the texture
-		sampler.maxLod = (useStaging) ? (float)m_mipLevels : 0.0f;
+		sampler.maxLod = (useStaging) ? (float)m_desc.MipLevels : 0.0f;
 		// Enable anisotropic filtering
 		// This feature is optional, so we must check if it's supported on the device
-		if (device->GetFeatures().samplerAnisotropy) 
+		if (device->GetFeatures().samplerAnisotropy)
 		{
 			// Use max. level of anisotropy for this example
 			sampler.maxAnisotropy = device->GetProperties().limits.maxSamplerAnisotropy;
 			sampler.anisotropyEnable = VK_TRUE;
 		}
-		else 
+		else
 		{
 			// The device does not support anisotropic filtering
 			sampler.maxAnisotropy = 1.0;
@@ -309,9 +322,12 @@ namespace vks
 		view.subresourceRange.layerCount = 1;
 		// Linear tiling usually won't support mip maps
 		// Only set mip map count if optimal tiling is used
-		view.subresourceRange.levelCount = (useStaging) ? m_mipLevels : 1;
+		view.subresourceRange.levelCount = (useStaging) ? m_desc.MipLevels : 1;
 		// The view will be based on the texture's image
 		view.image = m_image;
 		ThrowIfFailed(vkCreateImageView(*device, &view, nullptr, &m_imageView));
+
+		return true;
 	}
+
 }

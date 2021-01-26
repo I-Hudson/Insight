@@ -5,12 +5,13 @@
 
 namespace vks
 {
-	class IS_API VulkanTextureGPUData : public Render::TextureGPUData
+	class IS_API VulkanTexture : public Render::Texture
 	{
 	public:
-		virtual ~VulkanTextureGPUData() override;
+		VulkanTexture(); 
+		virtual ~VulkanTexture() override;
 
-		virtual void Init(void* textureData, const U32& textureDataSize, const U32& width, const U32& height, const U32& channels) override;
+		virtual bool IsValid() override;
 
 		VkImage& GetImage() { return m_image; }
 		VkImageView& GetImageView() { return m_imageView; }
@@ -18,14 +19,15 @@ namespace vks
 		VkImageLayout& GetImageLayout() { return m_imageLayout; }
 		VkDeviceMemory& GetDeviceMemory() { return m_deviceMemory; }
 
+	protected:
+		virtual void ReleaseGPUResource() override;
+		virtual bool CreateGPUResource() override;
+
 	private:
 		VkImage m_image;
 		VkImageView m_imageView;
 		VkSampler m_sampler;
 		VkDeviceMemory m_deviceMemory;
-
 		VkImageLayout m_imageLayout;
-		U32 m_width, m_height;
-		U32 m_mipLevels;
 	};
 }

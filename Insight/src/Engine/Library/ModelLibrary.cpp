@@ -22,7 +22,7 @@
 		{
 		}
 
-		SharedPtr<Model> ModelLibrary::GetAssetFromPath(const std::string& filePath)
+		Model* ModelLibrary::GetAssetFromPath(const std::string& filePath)
 		{
 			for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			{
@@ -39,13 +39,13 @@
 			errno_t error = fopen_s(&f, filepathLinux.c_str(), "r");
 			if (error == 0)
 			{
-				SharedPtr<Model> m = Object::CreateObject<Model>(filePath);
+				Model* m = ::New<Model>(filePath);
 				AddAsset(m->GetUUID(), m);
 				return m;
 			}
 			
 			//IS_CORE_ERROR("[ModelLibrary::GetAssetFromPath] Was unable to load '{0}'. Make sure file exists.", filePath);
-			return SharedPtr<Model>();
+			return nullptr;
 		}
 
 		void ModelLibrary::LoadAssetsFromFolder(const std::string& folderName, const bool& lookInChildren)
@@ -74,7 +74,7 @@
 			U32 objsPerThread = static_cast<U32>(filePaths.size()) >= 4 ? static_cast<U32>(filePaths.size()) / 4 : 0;
 			if (objsPerThread >= 1)
 			{
-				using VecSharedModels = std::vector<SharedPtr<Model>>;
+				using VecSharedModels = std::vector<Model*>;
 
 				auto addMeshToContainer = [](ModelLoadThread threadData)
 				{
@@ -83,7 +83,7 @@
 					VecSharedModels loadedModels;
 					for (const auto& file : threadData.FilesToLoad)
 					{
-						SharedPtr<Model> m = Object::CreateObject<Model>(file);
+						Model* m = ::New<Model>(file);
 						loadedModels.push_back(m);
 					}
 					return loadedModels;
@@ -129,13 +129,13 @@
 			{
 				for (auto& file : filePaths)
 				{
-					SharedPtr<Model> m = Object::CreateObject<Model>(file);
+					Model* m = ::New<Model>(file);
 					AddAsset(m->GetUUID(), m);
 				}
 			}
 		}
 
-		void ModelLibrary::Serialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+		void ModelLibrary::Serialize(Serialization::SerializableElement* element, bool force)
 		{
 			//for (auto it = m_assets.begin(); it != m_assets.end(); ++it)
 			//{
@@ -153,7 +153,7 @@
 			//}
 		}
 
-		void ModelLibrary::Deserialize(SharedPtr<Serialization::SerializableElement> element, bool force)
+		void ModelLibrary::Deserialize(Serialization::SerializableElement* element, bool force)
 		{
 			IS_PROFILE_FUNCTION();
 

@@ -1,9 +1,10 @@
 #include "ispch.h"
 #include "GPUBuffer.h"
+#include "GPUDevice.h"
 
-SharedPtr<GPUBuffer> GPUBuffer::Create()
+GPUBuffer* GPUBuffer::New()
 {
-	return SharedPtr<GPUBuffer>();
+	return GPUDevice::Instance()->NewBuffer();
 }
 
 GPUBuffer::GPUBuffer()

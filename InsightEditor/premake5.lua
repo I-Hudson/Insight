@@ -27,9 +27,8 @@ project "InsightEditor"
         "%{IncludeDir.glm}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.optick}",
-        "%{IncludeDir.ktx}",
+
         "%{IncludeDir.Vulkan}",
-        "%{IncludeDir.VulkanMemoryAllocator}",
 
         "%{IncludeDir.imguiFileDialog}",
         "%{IncludeDir.dirent}",

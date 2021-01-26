@@ -11,21 +11,26 @@
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Engine/Component/MeshComponent.h"
 
+Mesh::Mesh()
+{
+	SetType<Mesh>();
+}
+
 Mesh::~Mesh()
 {
 	for (auto& subMesh : m_subMeshes)
 	{
-		subMesh.reset();
+		::Delete(subMesh);
 	}
 	m_subMeshes.clear();
 }
 
 void Mesh::SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIndex)
 {
-	SharedPtr<SubMesh> subMesh;
+	SubMesh* subMesh;
 	if (submeshIndex >= m_subMeshes.size())
 	{
-		subMesh = CreateSharedPtr<SubMesh>();
+		subMesh = ::New<SubMesh>();
 		m_subMeshes.push_back(subMesh);
 	}
 	else
@@ -37,10 +42,10 @@ void Mesh::SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIn
 
 void Mesh::SetIndices(const std::vector<U32>& indices, const U32& submeshIndex)
 {
-	SharedPtr<SubMesh> subMesh;
+	SubMesh* subMesh;
 	if (submeshIndex >= m_subMeshes.size())
 	{
-		subMesh = CreateSharedPtr<SubMesh>();
+		subMesh = ::New<SubMesh>();
 		m_subMeshes.push_back(subMesh);
 	}
 	else
@@ -66,7 +71,7 @@ void Mesh::Draw(VkCommandBuffer cmd)
 	}
 }
 
-void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
+void Mesh::Draw(VkCommandBuffer cmd, const std::vector<Material*>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
 {
 	for (U64 i = 0; i < m_subMeshes.size(); ++i)
 	{
@@ -75,10 +80,10 @@ void Mesh::Draw(VkCommandBuffer cmd, const std::vector<WeakPtr<Material>>& mater
 			return;
 		}
 
-		if (auto materialSP = materials.at(i).lock())
+		if (materials[i])
 		{
 			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
-			auto vMaterialSP = DynamicPointerCast<vks::VulkanMaterial>(materialSP);
+			auto vMaterialSP = dynamic_cast<vks::VulkanMaterial*>(materials[i]);
 			if (materialUpdateFunc)
 			{
 				materialUpdateFunc(meshCompoennt, vMaterialSP, materialBlockData);
@@ -125,7 +130,7 @@ void Mesh::ProcessNode(aiNode* node, const aiScene* scene)
 	}
 }
 
-SharedPtr<SubMesh> Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
+SubMesh* Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	IS_PROFILE_FUNCTION();
 
@@ -194,7 +199,7 @@ SharedPtr<SubMesh> Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	}
 
 	m_model->SetMaterials(textures);
-	return CreateSharedPtr<SubMesh>(vertices, indices);
+	return ::New<SubMesh>(vertices, indices);
 }
 
 LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
@@ -218,7 +223,9 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 		//}
 		//if (!skip)
 		{   // if texture hasn't been loaded already, load it
-			textures.emplace_back(typeName,  FileSystem::FileSystemManager::Instance()->LoadObject<Texture>(m_directory + "/" + str.C_Str()));
+			Texture* texture = Texture::New();
+			texture->Init(m_directory + "/" + str.C_Str());
+			textures.emplace_back(typeName, texture);
 			//m_loadedTextures.push_back(texture); // add to loaded textures
 		}
 	}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include "Engine/Enums/PropertyFlags.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"

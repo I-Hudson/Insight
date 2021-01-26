@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Core.h"
 #include "Engine/Module/Module.h"
+#include "Engine/Module/WindowModule.h"
 #include "Engine/Input/InsightKeyCodes.h"
 #include <functional>
 
@@ -15,7 +16,7 @@ namespace Module
 	class IS_API InputModule : public Module
 	{
 	public:
-		InputModule(SharedPtr<WindowModule> windowModule);
+		InputModule();
 		virtual ~InputModule() override;
 
 		virtual void Update(const float& deltaTime) override;
@@ -47,8 +48,6 @@ namespace Module
 		static std::unordered_map<int, KeyStates> m_inputStates;
 		static double m_mouseX;
 		static double m_mouseY;
-
-		SharedPtr<WindowModule> m_windowModule;
 
 		friend Input;
 	};

@@ -5,7 +5,7 @@
 
 	namespace Editor
 	{
-		TopBarMenu::TopBarMenu(const SharedPtr<Module::EditorModule> editorModule)
+		TopBarMenu::TopBarMenu(const Module::EditorModule* editorModule)
 			: EditorWindow(editorModule)
 		{
 			SET_PANEL_NAME(TopBarMenu);
@@ -31,7 +31,7 @@
 						int r = rand() % 100 + 50;
 						for (size_t i = 0; i < r; ++i)
 						{
-							Entity::Create(std::to_string(i));
+							Entity::New(std::to_string(i));
 						}
 					}
 #endif

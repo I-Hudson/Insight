@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
 #include "Engine/Config/ICVar.h"
 #include "Engine/Config/CVarParser.h"
 

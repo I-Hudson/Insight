@@ -5,7 +5,7 @@
 class EditorApp : public Application
 {
 public:
-	SharedPtr<Module::EditorModule> m_editorModule;
+	Module::EditorModule* m_editorModule;
 
 	EditorApp() : Application()
 	{ }
@@ -61,10 +61,10 @@ public:
 	
 		for (size_t i = 0; i < 4; i++)
 		{
-			auto meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
+			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
 			auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
 			meshComponent->SetModel(model);
-			meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
+			meshComponent->GetEntity()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
 		}
 
 
@@ -73,7 +73,7 @@ public:
 		//meshComponent->SetModel(model);
 		//meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(5,0,0));
 
-		auto meshComponent = Entity::Create("Building Entity")->AddComponent<MeshComponent>();
+		auto meshComponent = Entity::New("Building Entity")->AddComponent<MeshComponent>();
 		auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
 		meshComponent->SetModel(model);
 

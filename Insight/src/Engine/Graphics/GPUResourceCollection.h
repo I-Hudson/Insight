@@ -21,13 +21,13 @@ public:
 
 	void DumpToLog() const;
 
-	void Add(SharedPtr<GPUResource> resource);
+	void Add(GPUResource* resource);
 
 	void Remove(GPUResource* resource);
 
 private:
 
 	CriticalSection m_lock;
-	std::vector<SharedPtr<GPUResource>> m_collection;
+	std::vector<GPUResource*> m_collection;
 };
 

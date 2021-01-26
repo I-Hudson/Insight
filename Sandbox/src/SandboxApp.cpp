@@ -18,7 +18,7 @@ public:
 		m_sandboxScene = new Scene("Sandbox");
 		m_sandboxScene->SetActiveScene();
 
-		SharedPtr<Entity> mainCamera = Entity::Create("MainCamera");
+		Entity* mainCamera = Entity::New("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 		mainCamera->AddComponent<PlayerController>();
 
@@ -29,15 +29,15 @@ public:
 		Library::ModelLibrary::Instance()->LoadAssetsFromFolder("./data/models", true);
 		if (test)
 		{
-			SharedPtr<Model> m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
+			Model* m = Library::ModelLibrary::Instance()->GetAssetFromPath("./models/Test/testCube.fbx"); //". / models / Survival_BackPack_2 / backpack.obj");
 			for (size_t i = 0; i < 50; ++i)
 			{
 				{
-					SharedPtr<Entity> testModel = Entity::CreateFromModel(m);
+					Entity* testModel = Entity::CreateFromModel(m);
  					testModel->AddComponent<PlayerController>();
 					glm::vec3 pos = glm::vec3(rand() % 50, 0, rand() % 50);
 					testModel->GetComponent<TransformComponent>()->SetPosition(pos);
-					transformComponents.push_back(testModel->GetComponent<TransformComponent>().get());
+					transformComponents.push_back(testModel->GetComponent<TransformComponent>());
 				}
 			}
 		}

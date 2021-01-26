@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 
 	namespace FileSystem
 	{
@@ -25,7 +25,7 @@
 
 		struct FileHandle
 		{
-			SharedPtr<Object> Object;
+			Object* Object;
 			FileInfo Info;
 		};
 	}

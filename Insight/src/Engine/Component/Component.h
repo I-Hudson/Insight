@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Engine/Core/Core.h"
-#include "Engine/Core/Object.h"
+#include "Engine/Core/Common.h"
 #include "Engine/Serialization/Serializable.h"
 #include "Engine/Entitiy/Entity.h"
 #include "Engine/RTTI/RTTI.h"
@@ -15,7 +14,7 @@ class IS_API Component :
 	, public Serialization::Serializable
 {
 public:
-	Component(SharedPtr<Entity> owner)
+	Component(Entity* owner)
 		: Object()
 		, Serialization::Serializable(this, true)
 		, m_owner(owner)
@@ -27,11 +26,11 @@ public:
 	}
 	virtual ~Component() {}
 
-	void SetEntity(SharedPtr<Entity> entity) { m_owner = entity; }
-	WeakPtr<Entity> GetEntity() const { return m_owner; }
+	void SetEntity(Entity* entity) { m_owner = entity; }
+	Entity* GetEntity() const { return m_owner; }
 
 	template<typename T>
-	SharedPtr<T> GetComponent();
+	T* GetComponent();
 
 	const bool& IsDirty() const { return m_isDirty; }
 
@@ -50,7 +49,7 @@ private:
 	void Clean() { m_isDirty = false; }
 
 private:
-	WeakPtr<Entity> m_owner;
+	Entity* m_owner;
 	std::string m_uuid;
 
 	friend Entity;
@@ -58,14 +57,14 @@ private:
 };
 
 template<typename T>
-inline SharedPtr<T> Component::GetComponent()
+inline T* Component::GetComponent()
 {
 	const bool result = std::is_base_of<Component, T>::value;
 	IS_CORE_ASSERT(result, "'T' is not drevided from 'Component'");
 
-	if (SharedPtr<Entity> parnetPtr = m_owner.lock())
+	if (m_owner)
 	{
-		return parnetPtr->GetComponent<T>();
+		return m_owner->GetComponent<T>();
 	}
 	return {};
 }

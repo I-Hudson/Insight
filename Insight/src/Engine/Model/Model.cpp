@@ -9,11 +9,14 @@
 
 Model::Model()
 {
+	SetType<Model>();
 }
 
 Model::Model(const std::string& filePath, const std::string& uuid)
 	: m_path(filePath)
 {
+	SetType<Model>();
+
 	if (!uuid.empty())
 	{
 		SetUUID(uuid);
@@ -24,12 +27,18 @@ Model::Model(const std::string& filePath, const std::string& uuid)
 
 Model::~Model()
 {
-	m_mesh.reset();
+	::Delete(m_mesh);
 	for (auto& mat : m_materials)
 	{
-		mat.reset();
+		::Delete(mat);
 	}
+	for (auto& texture : m_textures)
+	{
+		::Delete(texture);
+	}
+
 	m_materials.clear();
+	m_textures.clear();
 }
 
 void Model::Create(const std::string& filepath)
@@ -37,25 +46,20 @@ void Model::Create(const std::string& filepath)
 	if (!filepath.empty())
 	{
 		IS_INFO("Loading model: '{0}'", filepath);
-		m_mesh = Object::CreateObject<Mesh>();
+		m_mesh = ::New<Mesh>();
 		m_mesh->LoadSubMeshes(filepath, *this);
 		IS_INFO("Model Loaded: '{0}'", filepath);
 	}
 }
 
-WeakPtr<Mesh> Model::GetMesh()
+Mesh* Model::GetMesh()
 {
 	return m_mesh;
 }
 
-const std::vector<WeakPtr<Material>> Model::GetMaterals()
+const std::vector<Material*>& Model::GetMaterals()
 {
-	std::vector<WeakPtr<Material>> wpMaterials;
-	for (auto& sp : m_materials)
-	{
-		wpMaterials.push_back(sp);
-	}
-	return wpMaterials;
+	return m_materials;
 }
 
 const std::string& Model::GetFilePath() const
@@ -68,9 +72,9 @@ const std::string& Model::GetModelName() const
 	return m_modelName;
 }
 
-void Model::SetMaterials(const std::vector<std::pair<std::string, SharedPtr<Texture>>>& textures)
+void Model::SetMaterials(const std::vector<std::pair<std::string, Texture*>>& textures)
 {
-		SharedPtr<Material> material = Material::Create();
+		Material* material = Material::New();
 		material->CreateDefault();
 		m_materials.push_back(material);
 		int texturesSet = 0;

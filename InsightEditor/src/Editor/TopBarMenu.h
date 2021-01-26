@@ -8,7 +8,7 @@
 		class TopBarMenu : public EditorWindow
 		{
 		public:
-			TopBarMenu(const SharedPtr<Module::EditorModule> editorModule);
+			TopBarMenu(const Module::EditorModule* editorModule);
 			~TopBarMenu() override;
 
 			virtual void Update(const float& deltaTime) override;

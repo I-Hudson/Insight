@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ispch.h"
-#include "Engine/Core/Core.h"
+#include "Engine/Core/Common.h"
 #include "Engine/Config/ICVar.h"
 #include "Engine/Core/Log.h"
 

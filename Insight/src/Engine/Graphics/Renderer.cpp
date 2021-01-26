@@ -1,5 +1,4 @@
 #include "ispch.h"
-#include "Engine/Memory/MemoryManager.h"
 
 #ifdef IS_VULKAN
 #include "Platform/Vulkan/VulkanRenderer.h"
@@ -10,14 +9,14 @@
 #include "Engine/Memory/MemoryManager.h"
 #include "Engine/Config/Config.h"
 
-	GraphicsAPI Renderer::s_API = GraphicsAPI::Vulkan;
+GraphicsAPI Renderer::s_API = GraphicsAPI::Vulkan;
 
-	SharedPtr<Renderer> Renderer::Create()
+Renderer* Renderer::New()
+{
+	switch (s_API)
 	{
-		switch (s_API)
-		{
-		case GraphicsAPI::Vulkan: return Object::CreateObject<vks::VulkanRenderer>();
+		case GraphicsAPI::Vulkan: return ::New<vks::VulkanRenderer>();
 		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
-		}
-		return nullptr;
 	}
+	return nullptr;
+}
