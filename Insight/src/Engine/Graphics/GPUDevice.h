@@ -6,6 +6,7 @@
 #include "GPULimits.h"
 #include "GPUAdapter.h"
 #include "Enums.h"
+#include "Config.h"
 
 class GPUContext;
 class GPUTexture;
@@ -54,7 +55,7 @@ public:
     FormatFeatures GetFormatFeatures(const PixelFormat& format) const { return m_featuresPerFormat[(I32)format]; }
     const 
 
-    FORCE_INLINE U64 GetMemoryusage() const { return m_collection.GetMemoryUsage(); }
+    FORCE_INLINE U64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
     
     virtual GPUContext* GetMainContext() = 0;
     virtual GPUAdapter* GetAdapter() = 0;
@@ -64,12 +65,14 @@ public:
     virtual void Dispose();
     virtual void WaitForGPU() = 0;
 
-    virtual GPUBuffer* NewBuffer() = 0;
-    virtual GPUTexture* NewTexture() = 0;
+    virtual GPUBuffer* NewBuffer(const std::string& name = "") = 0;
+    virtual GPUTexture* NewTexture(const std::string& name = "") = 0;
+
+public:
+    GPUResourceCollection Resources;
 
 protected:
     CriticalSection m_locker;
-    GPUResourceCollection m_collection;
 
     U64 m_totalGraphicsMemory;
     GPULimits m_gpuLimits;

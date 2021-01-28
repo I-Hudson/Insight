@@ -2,6 +2,8 @@
 
 #pragma warning (disable : 4005)
 
+#define SAFE_DELETE(x) { if(x) { ::Delete(x); (x)=nullptr; } }
+
 #ifdef  IS_PLATFORM_WINDOWS
 
 #ifdef IS_DEBUG

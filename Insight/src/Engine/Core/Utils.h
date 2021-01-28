@@ -145,6 +145,62 @@ std::string BytesToText(T bytes)
     return StringFormat("{0} {1}", RoundTo2DecimalPlaces(dblSByte), sizes[i]);
 }
 
+/// <summary>
+/// Aligns value up to match desire alignment.
+/// </summary>
+/// <param name="value">The value.</param>
+/// <param name="alignment">The alignment.</param>
+/// <returns>Aligned value (multiple of alignment).</returns>
+template<typename T>
+FORCE_INLINE T AlignUp(T value, T alignment)
+{
+    T mask = alignment - 1;
+    return (T)(value + mask & ~mask);
+}
+
+template<typename T>
+FORCE_INLINE bool VectorContains(const std::vector<T>& vector, const T& item)
+{
+    return std::find(vector.begin(), vector.end(), item) != vector.end();
+}
+
+template<typename T>
+FORCE_INLINE U32 VectorFindIndex(const std::vector<T>& vector, const T& item)
+{
+    for (size_t i = 0; i < vector.size(); ++i)
+    {
+        if (vector[i] == item)
+        {
+            return (U32)i;
+        }
+    }
+    ASSERT(false && "VectorFindIndex. Out of range.");
+}
+
+INLINE I32 HexDigit(char c)
+{
+    I32 result = 0;
+
+    if (c >= '0' && c <= '9')
+    {
+        result = c - '0';
+    }
+    else if (c >= 'a' && c <= 'f')
+    {
+        result = c + 10 - 'a';
+    }
+    else if (c >= 'A' && c <= 'F')
+    {
+        result = c + 10 - 'A';
+    }
+    else
+    {
+        result = 0;
+    }
+
+    return result;
+}
+
 #if defined _CONCAT
 #undef _CONCAT
 #endif

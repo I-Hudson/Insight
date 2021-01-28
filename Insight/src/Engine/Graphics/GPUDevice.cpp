@@ -18,7 +18,7 @@ GPUDevice::GPUDevice(RendererType rendererType, ShaderProfile shaderProfile)
 	, m_defaultData(::New<DefaultData>())
 	, m_rendererType(rendererType)
 	, m_shaderProfile(shaderProfile)
-	, m_collection(1024)
+	, Resources(1024)
 	, m_totalGraphicsMemory(0)
 {
 }
@@ -45,6 +45,7 @@ bool GPUDevice::LoadContent()
 
 void GPUDevice::Dispose()
 {
+	m_videoOutputModes.resize(0);
 }
 
 void GPUDevice::WaitForGPU()

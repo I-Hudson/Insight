@@ -70,8 +70,6 @@ namespace vks
 			vkDestroyDescriptorPool(m_logicalDevice, m_descriptorPool, nullptr);
 		}
 
-		vmaDestroyAllocator(m_vmaAllocator);
-
 		//vkDestroyRenderPass(m_logicalDevice, m_renderPass, nullptr);
 		if (m_logicalDevice)
 		{
@@ -318,20 +316,6 @@ namespace vks
 		{
 			return result;
 		}
-
-		VmaAllocatorCreateInfo allocatorInfo = {};
-		allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
-		allocatorInfo.physicalDevice = m_physicalDevice;
-		allocatorInfo.device = m_logicalDevice;
-		allocatorInfo.instance = m_instance;
-
-#ifdef IS_DEBUG
-		VmaRecordSettings recordingSettings = {};
-		recordingSettings.pFilePath = "VMA.csv";
-		allocatorInfo.pRecordSettings = &recordingSettings;
-#endif
-
-		vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator);
 
 		vkGetDeviceQueue(m_logicalDevice, m_queueFamilyIndices.graphics, 0, &m_queueFamily.graphics);
 		vkGetDeviceQueue(m_logicalDevice, m_queueFamilyIndices.compute, 0, &m_queueFamily.compute);
