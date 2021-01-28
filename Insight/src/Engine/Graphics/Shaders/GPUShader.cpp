@@ -2,7 +2,7 @@
 #include "GPUShader.h"
 #include "Engine/Platform/Platform.h"
 #include "Engine/FileSystem/FileSystem.h"
-#include "ShaderCompliation.h"
+#include "Engine/Graphics/ShaderCompliation.h"
 #include "spirv_cross/spirv_glsl.hpp"
 
 GPUShaderStage::GPUShaderStage(const ShaderStages& stage, const std::string& str, const ShaderStageInput& input)

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "GPUResource.h"
-#include "Enums.h"
+#include "Engine/Graphics/GPUResource.h"
+#include "Engine/Graphics/Enums.h"
 
 enum ShaderStageInput
 {

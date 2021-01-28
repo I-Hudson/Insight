@@ -11,7 +11,7 @@
 #include "Engine/Core/Log.h"
 
 // TESTING
-#include "Engine/Graphics/GPUShader.h"
+#include "Engine/Graphics/Shaders/GPUShader.h"
 // TESTING
 
 	namespace Module

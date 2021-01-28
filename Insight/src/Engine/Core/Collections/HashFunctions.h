@@ -49,7 +49,7 @@ inline U32 GetHash(const char key)
     return key;
 }
 
-inline U32 GetHash(const char key)
+inline U32 GetHash(const WCHAR key)
 {
     return key;
 }

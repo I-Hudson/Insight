@@ -2,12 +2,6 @@
 #include "Engine/Core/Common.h"
 #include "Engine/Core/NonCopyable.h"
 
-<<<<<<< HEAD
-	class IS_API GPUResource : public Object, public NonCopyable
-	{
-	public:
-		DECLARE_ENUM_3(ResourceType, Texture, Buffer, Shader);
-=======
 class IS_API GPUResource : public Object, public NonCopyable
 {
 public:
@@ -15,7 +9,6 @@ public:
 	/// GPU Resources types.
 	/// </summary>
 	DECLARE_ENUM_9(ResourceType, RenderTarget, Texture, CubeTexture, VolumeTexture, Buffer, Shader, PipelineState, Descriptor, Query);
->>>>>>> a0b153bceb7b6e0fd3cc1420dc8cc281c18d0bf6
 
 	/// <summary>
 	/// GPU Resources object types. Used to detect Texture objects from subset of Types:  RenderTarget, Texture, CubeTexture, VolumeTexture which use the same API object.
@@ -49,80 +42,10 @@ public:
 			OnReleaseGPU();
 			m_memoryUsage = 0;
 		}
-<<<<<<< HEAD
-
-	protected:
-		virtual void ReleaseGPUResource() = 0;
-		virtual bool CreateGPUResource() = 0;
-		U64 m_memoryUsage = 0;
 	};
-=======
-	}
 
 protected:
 	virtual void OnReleaseGPU() = 0;
 	virtual bool CreateGPUResource() { return false; }
 	U64 m_memoryUsage = 0;
 };
-
-/// <summary>
-/// Describes base implementation of Graphics Device resource for rendering back-ends.
-/// </summary>
-/// <remarks>
-/// DeviceType is GPU device typename, BaseType must be GPUResource type to inherit from).
-/// </remarks>
-template<class DeviceType, class BaseType>
-class GPUResourceBase : public BaseType
-{
-public:
-
-	/// <summary>
-	/// Initializes a new instance of the <see cref="GPUResourceBase"/> class.
-	/// </summary>
-	/// <param name="device">The graphics device.</param>
-	/// <param name="name">The resource name.</param>
-	GPUResourceBase(DeviceType* device, const std::string& name) noexcept
-		: m_device(device)
-		, m_name(name)
-	{
-		ASSERT(device);
-
-		// Register
-		device->Resources.Add(this);
-	}
-
-	/// <summary>
-	/// Finalizes an instance of the <see cref="GPUResourceBase"/> class.
-	/// </summary>
-	virtual ~GPUResourceBase()
-	{
-		// Unregister
-		if (m_device)
-			m_device->Resources.Remove(this);
-	}
-
-	/// <summary>
-	/// Gets the graphics device.
-	/// </summary>
-	/// <returns>The device.</returns>
-	FORCE_INLINE DeviceType* GetDevice() const
-	{
-		return m_device;
-	}
-
-	virtual void OnDeviceDispose() override
-	{
-		// Base
-		GPUResource::OnDeviceDispose();
-
-		// Unlink device handle
-		m_device = nullptr;
-	}
-
-	const std::string& GetName() const { return m_name; }
-
-protected:
-	DeviceType* m_device;
-	std::string m_name;
-};
->>>>>>> a0b153bceb7b6e0fd3cc1420dc8cc281c18d0bf6
