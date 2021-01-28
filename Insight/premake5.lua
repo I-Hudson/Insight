@@ -32,6 +32,7 @@ project "Insight"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.SPIRV_Cross}",
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",
@@ -73,6 +74,7 @@ project "Insight"
         "GLFW",
         "Glad",
         "ImGui",
+        "SPIRV_Cross",
 
         "OptickCore",
         "ktx",

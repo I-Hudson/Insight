@@ -10,6 +10,10 @@
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
 
+// TESTING
+#include "Engine/Graphics/GPUShader.h"
+// TESTING
+
 	namespace Module
 	{
 		CameraComponent* GraphicsModule::m_mainCamera;
@@ -20,6 +24,9 @@
 			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
 			gpuDevice->Dispose();
 			::Delete(gpuDevice);
+
+			GPUShaderStage stage(ShaderStages::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
+			stage.Parse();
 
 			m_renderer = Renderer::New();
 			m_renderer->Init();

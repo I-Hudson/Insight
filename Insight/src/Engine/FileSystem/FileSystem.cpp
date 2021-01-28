@@ -303,6 +303,21 @@ namespace FileSystem
 		//}
 	}
 
+	std::vector<Byte> FileSystemManager::ReadFileToVector(const std::string& filePath)
+	{
+		std::ifstream file(filePath);
+		if (file.is_open())
+		{
+			std::vector<Byte> vec;
+			std::copy(
+				std::istreambuf_iterator<char>(file),
+				std::istreambuf_iterator<char>(),
+				std::back_inserter(vec));
+			return vec;
+		}
+		return std::vector<Byte>();
+	}
+
 	std::string FileSystemManager::FormatFilePathStringToUNIX(const std::string& filePath)
 	{
 		std::string temp = filePath;

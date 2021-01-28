@@ -943,7 +943,6 @@ enum class ViewFlags : I64
     /// </summary>
     DefaultAssetPreview = Reflections | Decals | GI | DirectionalLights | PointLights | SpotLights | SkyLights | SpecularLight | AntiAliasing | Bloom | ToneMapping | EyeAdaptation | CameraArtifacts | LensFlares | ContactShadows,
 };
-
 DECLARE_ENUM_OPERATORS(ViewFlags);
 
 /// <summary>
@@ -997,5 +996,19 @@ enum class ShaderFlags : U32
     /// </summary>
     VertexToGeometryShader = 4,
 };
-
 DECLARE_ENUM_OPERATORS(ShaderFlags);
+
+/// <summary>
+/// Define the different stages a shader can have.
+/// </summary>
+enum class ShaderStages : U32
+{
+    Vertex,
+    TessControl,
+    TessEvaluation,
+    Geometry,
+    Fragment,
+    Compute,
+
+    Count
+};

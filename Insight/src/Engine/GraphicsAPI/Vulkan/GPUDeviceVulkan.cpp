@@ -62,7 +62,7 @@ bool GPUDeviceVulkan::Init()
 	instanceCreateInfo.enabledLayerCount = 1;
 	ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance));
 
-//#ifdef IS_DEBUG
+#ifdef IS_DEBUG
 	// Setup debugging reports. 
 	if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 	{
@@ -72,7 +72,7 @@ bool GPUDeviceVulkan::Init()
 		// Additional flags include performance info, loader and layer debug messages, etc.
 		Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
 	}
-//#endif
+#endif
 
 	// Get physical device
 	U32 gpuCount = 0;
@@ -254,6 +254,7 @@ void GPUDeviceVulkan::Dispose()
 
 void GPUDeviceVulkan::WaitForGPU()
 {
+	vkDeviceWaitIdle(m_device);
 }
 
 GPUBuffer* GPUDeviceVulkan::NewBuffer()

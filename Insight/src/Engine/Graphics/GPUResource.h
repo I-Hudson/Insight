@@ -5,12 +5,7 @@
 	class IS_API GPUResource : public Object, public NonCopyable
 	{
 	public:
-		DECLARE_ENUM_2(ResourceType, Texture, Buffer);
-
-	protected:
-		virtual void ReleaseGPUResource() = 0;
-		virtual bool CreateGPUResource() = 0;
-		U64 m_memoryUsage = 0;
+		DECLARE_ENUM_3(ResourceType, Texture, Buffer, Shader);
 
 	public:
 
@@ -36,4 +31,9 @@
 				m_memoryUsage = 0;
 			}
 		}
+
+	protected:
+		virtual void ReleaseGPUResource() = 0;
+		virtual bool CreateGPUResource() = 0;
+		U64 m_memoryUsage = 0;
 	};

@@ -61,6 +61,7 @@
 
 			void Update();
 
+			std::vector<Byte> ReadFileToVector(const std::string& filePath);
 			std::string FormatFilePathStringToUNIX(const std::string& filePath);
 
 		private:

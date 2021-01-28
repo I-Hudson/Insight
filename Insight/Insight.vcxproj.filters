@@ -288,6 +288,9 @@
     <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUShader.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -303,6 +306,9 @@
     <ClInclude Include="src\Engine\Graphics\Renderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\ShaderCompliation.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\SplashScreen.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -315,14 +321,26 @@
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Input\Input.h">
       <Filter>src\Engine\Input</Filter>
@@ -1779,15 +1797,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
@@ -1850,6 +1859,9 @@
     <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUShader.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1860,6 +1872,9 @@
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Renderer.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\ShaderCompliation.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp">
@@ -1877,8 +1892,17 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Input\Input.cpp">
       <Filter>src\Engine\Input</Filter>
@@ -2009,6 +2033,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp" />
   </ItemGroup>
 </Project>
