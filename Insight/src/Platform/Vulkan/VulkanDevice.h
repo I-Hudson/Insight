@@ -5,7 +5,6 @@
 #include "VulkanHeader.h"
 #include "VulkanBuffer.h"
 #include "VulkanFrameBuffer.h"
-#include "VmaUsage.h"
 
 namespace vks
 {
@@ -82,8 +81,6 @@ namespace vks
 		VkCommandPool m_commandPool = VK_NULL_HANDLE;
 		/** @brief Set to true when the debug marker extension is detected */
 		bool m_enableDebugMarkers = false;
-
-		VmaAllocator m_vmaAllocator;
 
 		// Global render pass for frame buffer writes. Theses are populated from VulkanRenderer and are the default 
 		// objects to use when rendering. They are used from VulkanMaterial::CreateDefault.

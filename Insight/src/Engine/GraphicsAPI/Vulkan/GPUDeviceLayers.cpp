@@ -89,7 +89,7 @@ static void EnumerateDeviceExtensionProperties(VkPhysicalDevice device, const ch
 
 static void TrimDuplicates(std::vector<const char*>& array)
 {
-    for (I32 i = array.size() - 1; i >= 0; i--)
+    for (I32 i = (I32)array.size() - 1; i >= 0; i--)
     {
         bool found = false;
         for (I32 j = i - 1; j >= 0; j--)

@@ -35,6 +35,8 @@
 
 //#define THREADS
 
+U64 Application::FrameCount = 0;
+
 Application::Application()
 {
 	IS_PROFILE_FUNCTION();
@@ -137,6 +139,7 @@ void Application::Run()
 			Update(deltaTime);
 			Scene::ActiveScene()->OnUpdate(deltaTime);
 
+			++FrameCount;
 			Draw();
 #ifndef THREADS
 			m_graphicsModule->Update(deltaTime);

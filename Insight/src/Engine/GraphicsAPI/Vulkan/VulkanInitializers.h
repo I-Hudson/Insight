@@ -233,6 +233,7 @@ namespace vks
 			descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 			descriptorPoolInfo.pPoolSizes = poolSizes.data();
 			descriptorPoolInfo.maxSets = maxSets;
+			descriptorPoolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 			return descriptorPoolInfo;
 		}
 
@@ -312,6 +313,13 @@ namespace vks
 			pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
 			return pipelineLayoutCreateInfo;
+		}
+
+		inline VkDescriptorSetAllocateInfo descriptorSetAllocateInfo()
+		{
+			VkDescriptorSetAllocateInfo descriptorSetAllocateInfo{};
+			descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			return descriptorSetAllocateInfo;
 		}
 
 		inline VkDescriptorSetAllocateInfo descriptorSetAllocateInfo(

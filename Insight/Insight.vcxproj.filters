@@ -22,6 +22,9 @@
     <Filter Include="src\Engine\Core\Collections">
       <UniqueIdentifier>{98D0548B-04DE-8271-8DC4-7E5CF9D04E28}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\Core\Maths">
+      <UniqueIdentifier>{9698DC1D-0205-9818-CBF8-2F763724BA80}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\Core\Types">
       <UniqueIdentifier>{CE5B681E-3AC8-2319-03BC-BB766FE74581}</UniqueIdentifier>
     </Filter>
@@ -42,6 +45,12 @@
     </Filter>
     <Filter Include="src\Engine\Graphics\FrameGraph">
       <UniqueIdentifier>{1EB03365-0AD6-FDCB-F31B-8397DFE02298}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Graphics\Shaders">
+      <UniqueIdentifier>{6B54B325-D761-E10B-6048-DDF6CC54ADC2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Graphics\Textures">
+      <UniqueIdentifier>{A5F34118-91AE-31C4-3A66-AA0E26007C54}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\GraphicsAPI">
       <UniqueIdentifier>{6CCBBDCA-58C5-E61C-4132-7D2D2DCB4C89}</UniqueIdentifier>
@@ -105,6 +114,9 @@
     </Filter>
     <Filter Include="src\Engine\Time">
       <UniqueIdentifier>{F0787E79-5C04-EC3D-6515-6F32D11F483E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Engine\Utils">
+      <UniqueIdentifier>{F2A765A9-DEA0-84FB-07D3-6980F32A6407}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
@@ -180,6 +192,9 @@
     <ClInclude Include="src\Engine\Core\Application.h">
       <Filter>src\Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Core\Collections\HashFunctions.h">
+      <Filter>src\Engine\Core\Collections</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Core\Collections\span.h">
       <Filter>src\Engine\Core\Collections</Filter>
     </ClInclude>
@@ -209,6 +224,15 @@
     </ClInclude>
     <ClInclude Include="src\Engine\Core\Log.h">
       <Filter>src\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\Maths\Color.h">
+      <Filter>src\Engine\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\Maths\Color32.h">
+      <Filter>src\Engine\Core\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Core\Maths\Maths.h">
+      <Filter>src\Engine\Core\Maths</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Core\NonCopyable.h">
       <Filter>src\Engine\Core</Filter>
@@ -258,6 +282,9 @@
     <ClInclude Include="src\Engine\FileSystem\WatchInfo.h">
       <Filter>src\Engine\FileSystem</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Config.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Enums.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -288,6 +315,15 @@
     <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUResourceState.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUSamplerDescription.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUTimerQuery.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -303,11 +339,26 @@
     <ClInclude Include="src\Engine\Graphics\Renderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Shaders\Config.h">
+      <Filter>src\Engine\Graphics\Shaders</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\SplashScreen.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Texture.h">
       <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Textures\GPUTextureDescription.h">
+      <Filter>src\Engine\Graphics\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\CmdBufferVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Config.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\DescriptorSetVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
@@ -315,14 +366,44 @@
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUTimerQueryVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\QueueVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\ResourceOwnerVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Types.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\UniformBufferUploaderVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanHeaders.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Input\Input.h">
       <Filter>src\Engine\Input</Filter>
@@ -468,19 +549,22 @@
     <ClInclude Include="src\Engine\Threading\ThreadPool.hpp">
       <Filter>src\Engine\Threading</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Threading\Threading.h">
+      <Filter>src\Engine\Threading</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Time\Stopwatch.h">
       <Filter>src\Engine\Time</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Time\Time.h">
       <Filter>src\Engine\Time</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Utils\Crc.h">
+      <Filter>src\Engine\Utils</Filter>
+    </ClInclude>
     <ClInclude Include="src\Insight.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\Swapchain.h">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VmaUsage.h">
       <Filter>src\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h">
@@ -1779,14 +1863,9 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
+    <ClInclude Include="src\Engine\Graphics\Textures\GPUTexture.h" />
+    <ClInclude Include="src\Engine\Graphics\Textures\Types.h">
+      <Filter>src\Engine\Graphics\Textures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1810,6 +1889,15 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Log.cpp">
       <Filter>src\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Maths\Color.cpp">
+      <Filter>src\Engine\Core\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Maths\Color32.cpp">
+      <Filter>src\Engine\Core\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Maths\Maths.cpp">
+      <Filter>src\Engine\Core\Maths</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Object.cpp">
       <Filter>src\Engine\Core</Filter>
@@ -1868,6 +1956,15 @@
     <ClCompile Include="src\Engine\Graphics\Texture.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Textures\GPUTextureDescription.cpp">
+      <Filter>src\Engine\Graphics\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\CmdBufferVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\DescriptorSetVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
@@ -1877,8 +1974,29 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUTimerQueryVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\QueueVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\UniformBufferUploaderVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Input\Input.cpp">
       <Filter>src\Engine\Input</Filter>
@@ -1964,10 +2082,10 @@
     <ClCompile Include="src\Engine\Time\Time.cpp">
       <Filter>src\Engine\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClCompile Include="src\Engine\Utils\Crc.cpp">
+      <Filter>src\Engine\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VmaUsage.cpp">
+    <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp">
@@ -2009,6 +2127,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Textures\GPUTexture.cpp" />
   </ItemGroup>
 </Project>

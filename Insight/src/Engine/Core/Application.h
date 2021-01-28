@@ -41,8 +41,9 @@ public:
 	void Run();
 	void RenderLoop();
 
-protected:
+	static uint64_t FrameCount;
 
+protected:
 	std::mutex m_mutex;
 	std::thread m_updateThread;
 	std::thread m_renderThread;

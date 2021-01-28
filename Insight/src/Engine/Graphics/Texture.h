@@ -38,11 +38,11 @@ namespace Render
 		{ }
 	};
 
-	class IS_API Texture : public GPUResource
+	class IS_API Texture : public Object
 	{
 	public:
 		Texture();
-		virtual ~Texture() override;
+		virtual ~Texture();
 
 		void Init(const std::string& filePath);
 		void Init(const TextureDescription& desc);
@@ -61,14 +61,14 @@ namespace Render
 
 		TextureDescription const& GetDescription() const { return m_desc; }
 
-		virtual ResourceType GetResourceType() const { return ResourceType::Texture; }
-
 		static Texture* New();
 
 	protected:
 		U32 GetMipMapCount(const U32& width, const U32& height, const U32& channels);
 		U64 GetMipMapOffset(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
 		U64 GetImageBufferSize(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
+
+		virtual void CreateGPUResource() = 0;
 
 	protected:
 		TextureDescription m_desc;

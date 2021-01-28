@@ -102,35 +102,24 @@ INLINE void* NewArrayBytes(U32 sizeInBytes, U8 alignemnt = 16)
 template<typename T, class MemoryAllocator = Allocator>
 INLINE void Delete(T* ptr)
 {
-	if (ptr)
-	{
-		ptr->~T();
-		Platform::Free(ptr);
-		ptr = nullptr;
-	}
+	ptr->~T();
+	Platform::Free(ptr);
 }
 
 template<typename T, class MemoryAllocator = Allocator>
 INLINE void DeleteArray(T* ptr, U32 count)
 {
-	if (ptr)
+	T* dst = ptr;
+	while (--count)
 	{
-		T* dst = ptr;
-		while (--count)
-		{
-			dst->~T();
-			++dst;
-		}
-		Platform::Free(ptr);
-		ptr = nullptr;
+		dst->~T();
+		++dst;
 	}
+	Platform::Free(ptr);
+	ptr = nullptr;
 }
 
 INLINE void DeleteArrayBytes(void* ptr)
 {
-	if (ptr)
-	{
-		Platform::Free(ptr);
-		ptr = nullptr;
-	}
+	Platform::Free(ptr);
 }

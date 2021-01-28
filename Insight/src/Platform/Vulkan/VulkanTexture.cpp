@@ -26,11 +26,7 @@ namespace vks
 			m_deviceMemory != VK_NULL_HANDLE;
 	}
 
-	void VulkanTexture::ReleaseGPUResource()
-	{
-	}
-
-	bool VulkanTexture::CreateGPUResource()
+	void VulkanTexture::CreateGPUResource()
 	{
 		auto device = VulkanDevice::Instance();
 
@@ -326,8 +322,6 @@ namespace vks
 		// The view will be based on the texture's image
 		view.image = m_image;
 		ThrowIfFailed(vkCreateImageView(*device, &view, nullptr, &m_imageView));
-
-		return true;
 	}
 
 }

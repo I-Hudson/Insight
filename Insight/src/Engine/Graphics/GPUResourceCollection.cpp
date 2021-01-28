@@ -18,11 +18,13 @@ void GPUResourceCollection::OnDeviceDestroy()
 {
     m_lock.Lock();
 
-    for (I32 i = m_collection.size() - 1; i >= 0 && i < m_collection.size(); i--)
+    for (I32 i = (I32)m_collection.size() - 1; i >= 0 && i < (I32)m_collection.size(); i--)
     {
-        m_collection[i]->ReleaseGPU();
+        if (m_collection[i])
+        {
+            m_collection[i]->ReleaseGPU();
+        }
     }
-    m_collection.clear();
 
     m_lock.Unlock();
 }
@@ -77,7 +79,20 @@ void GPUResourceCollection::Add(GPUResource* resource)
 
     auto it = std::find(m_collection.begin(), m_collection.end(), resource);
     ASSERT(resource && it == m_collection.end());
-    m_collection.push_back(resource);
+    bool foundEmptyPlace = false;
+    for (auto& ptr : m_collection)
+    {
+        if (ptr == nullptr)
+        {
+            ptr = resource;
+            foundEmptyPlace = true;
+            break;
+        }
+    }
+    if (!foundEmptyPlace)
+    {
+        m_collection.push_back(resource);
+    }
 
     m_lock.Unlock();
 }

@@ -20,8 +20,7 @@ namespace vks
 		VkDeviceMemory& GetDeviceMemory() { return m_deviceMemory; }
 
 	protected:
-		virtual void ReleaseGPUResource() override;
-		virtual bool CreateGPUResource() override;
+		virtual void CreateGPUResource() override;
 
 	private:
 		VkImage m_image;
