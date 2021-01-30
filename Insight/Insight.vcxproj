@@ -193,7 +193,6 @@
     <ClInclude Include="src\Engine\FileSystem\WatchInfo.h" />
     <ClInclude Include="src\Engine\Graphics\Config.h" />
     <ClInclude Include="src\Engine\Graphics\Enums.h" />
-    <ClInclude Include="src\Engine\Graphics\FrameGraph\FrameGraph.h" />
     <ClInclude Include="src\Engine\Graphics\Framebuffer.h" />
     <ClInclude Include="src\Engine\Graphics\GPUAdapter.h" />
     <ClInclude Include="src\Engine\Graphics\GPUBuffer.h" />
@@ -209,6 +208,8 @@
     <ClInclude Include="src\Engine\Graphics\Material.h" />
     <ClInclude Include="src\Engine\Graphics\PixelFormat.h" />
     <ClInclude Include="src\Engine\Graphics\PixelFormatExtensions.h" />
+    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderGraph.h" />
+    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderPass.h" />
     <ClInclude Include="src\Engine\Graphics\Renderer.h" />
     <ClInclude Include="src\Engine\Graphics\ShaderCompliation.h" />
     <ClInclude Include="src\Engine\Graphics\Shaders\GPUShader.h" />
@@ -217,6 +218,7 @@
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Config.h" />
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h" />
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h" />
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Types.h" />
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.h" />
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.h" />
@@ -729,7 +731,6 @@
     <ClCompile Include="src\Engine\Event\EventManager.cpp" />
     <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />
-    <ClCompile Include="src\Engine\Graphics\FrameGraph\FrameGraph.cpp" />
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp" />
@@ -738,6 +739,8 @@
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp" />
     <ClCompile Include="src\Engine\Graphics\Material.cpp" />
     <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp" />
+    <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderGraph.cpp" />
+    <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderPass.cpp" />
     <ClCompile Include="src\Engine\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Engine\Graphics\ShaderCompliation.cpp" />
     <ClCompile Include="src\Engine\Graphics\Shaders\GPUShader.cpp" />
@@ -746,6 +749,7 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.cpp" />

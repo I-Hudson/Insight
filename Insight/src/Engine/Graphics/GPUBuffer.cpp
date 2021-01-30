@@ -22,7 +22,7 @@ bool GPUBuffer::Init(const GPUBufferDescription& desc)
 	ReleaseGPU();
 
 	m_desc = desc;
-	if (CreateGPUResource())
+	if (OnInit())
 	{
 		IS_WARN("[GPUBuffer::Init] Can not create GPU resources.");
 		return false;

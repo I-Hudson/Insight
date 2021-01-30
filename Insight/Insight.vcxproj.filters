@@ -43,8 +43,8 @@
     <Filter Include="src\Engine\Graphics">
       <UniqueIdentifier>{92BD692F-FE1E-473D-878C-8DEFF3EC7DFC}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\Graphics\FrameGraph">
-      <UniqueIdentifier>{1EB03365-0AD6-FDCB-F31B-8397DFE02298}</UniqueIdentifier>
+    <Filter Include="src\Engine\Graphics\RenderGraph">
+      <UniqueIdentifier>{D3DEC614-3FC2-D554-48C5-0391B4279CA5}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Graphics\Shaders">
       <UniqueIdentifier>{6B54B325-D761-E10B-6048-DDF6CC54ADC2}</UniqueIdentifier>
@@ -279,9 +279,6 @@
     <ClInclude Include="src\Engine\Graphics\Enums.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\FrameGraph\FrameGraph.h">
-      <Filter>src\Engine\Graphics\FrameGraph</Filter>
-    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Framebuffer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -327,6 +324,12 @@
     <ClInclude Include="src\Engine\Graphics\PixelFormatExtensions.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderGraph.h">
+      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderPass.h">
+      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Renderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -349,6 +352,9 @@
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Types.h">
@@ -1883,9 +1889,6 @@
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp">
       <Filter>src\Engine\FileSystem</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\FrameGraph\FrameGraph.cpp">
-      <Filter>src\Engine\Graphics\FrameGraph</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1910,6 +1913,12 @@
     <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderGraph.cpp">
+      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderPass.cpp">
+      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Renderer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1932,6 +1941,9 @@
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.cpp">

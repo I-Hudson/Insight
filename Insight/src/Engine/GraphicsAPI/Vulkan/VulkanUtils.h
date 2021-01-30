@@ -6,6 +6,8 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/GPUSamplerDescription.h"
+#include "spirv_cross.hpp"
+#include "Engine/Graphics/Shaders/GPUShader.h"
 
 extern VkFormat PixelFormatToVkFormat[static_cast<I32>(PixelFormat::MAX)];
 extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
@@ -217,4 +219,44 @@ namespace
         return result;
     }
 
+    VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const U32& vecSize)
+    {
+        switch (type.basetype)
+        {
+        case spirv_cross::SPIRType::Int:
+            switch (vecSize)
+            {
+            case 1: return VK_FORMAT_R32_SINT;
+            case 2: return VK_FORMAT_R32G32_SINT;
+            case 3: return VK_FORMAT_R32G32B32_SINT;
+            case 4: return VK_FORMAT_R32G32B32A32_SINT;
+            }
+            break;
+        case spirv_cross::SPIRType::Float:
+            switch (vecSize)
+            {
+            case 1: return VK_FORMAT_R32_SFLOAT;
+            case 2: return VK_FORMAT_R32G32_SFLOAT;
+            case 3: return VK_FORMAT_R32G32B32_SFLOAT;
+            case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+            }
+            break;
+
+        }
+        return VK_FORMAT_R32G32B32A32_SFLOAT;
+    }
+
+    VkShaderStageFlagBits ToVulkanShaderStageFlags(const ShaderStage& shaderStage)
+    {
+        switch (shaderStage)
+        {
+        case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderStage::TessControl: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        case ShaderStage::TessEvaluation: return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+        case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+        }
+        return VK_SHADER_STAGE_ALL;
+    }
 }

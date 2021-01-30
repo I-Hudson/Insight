@@ -49,6 +49,8 @@ protected:
 	virtual void* Map(GPUResourceMapMode mapMode) { return nullptr; }
 	virtual void UnMap() {}
 
+	virtual bool OnInit() = 0;
+
 	/// <summary>
 	/// Upload the bufffer data to the GPU.
 	/// </summary>

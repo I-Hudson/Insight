@@ -219,3 +219,9 @@ private:
     friend GPUContextVulkan;
     friend FenceManagerVulkan;
 };
+
+template<typename Resource>
+class GPUResouceVulkan : public GPUResouceBase<GPUDeviceVulkan, Resource>
+{
+public:
+};

@@ -5,29 +5,29 @@
 #include "SPIRV/GlslangToSpv.h"
 #include "StandAlone/DirStackFileIncluder.h"
 
-EShLanguage GetShaderStage(const ShaderStages& stage)
+EShLanguage GetShaderStage(const ShaderStage& stage)
 {
-	if (stage == ShaderStages::Vertex)
+	if (stage == ShaderStage::Vertex)
 	{
 		return EShLangVertex;
 	}
-	else if (stage == ShaderStages::TessControl)
+	else if (stage == ShaderStage::TessControl)
 	{
 		return EShLangTessControl;
 	}
-	else if (stage == ShaderStages::TessEvaluation)
+	else if (stage == ShaderStage::TessEvaluation)
 	{
 		return EShLangTessEvaluation;
 	}
-	else if (stage == ShaderStages::Geometry)
+	else if (stage == ShaderStage::Geometry)
 	{
 		return EShLangGeometry;
 	}
-	else if (stage == ShaderStages::Fragment)
+	else if (stage == ShaderStage::Fragment)
 	{
 		return EShLangFragment;
 	}
-	else if (stage == ShaderStages::Compute) 
+	else if (stage == ShaderStage::Compute) 
 	{
 		return EShLangCompute;
 	}
@@ -147,7 +147,7 @@ const TBuiltInResource DefaultTBuiltInResource = {
 
 bool glslangInit = false;
 
-std::vector<U32> ShaderCompliation::CompileGLSLToSpirV(const ShaderStages& stage, const std::string& shaderData)
+std::vector<U32> ShaderCompliation::CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData)
 {
 	if (!glslangInit)
 	{

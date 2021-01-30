@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Engine/Core/Common.h"
-#include "GPUShader.h"
+#include "Enums.h"
 
 namespace ShaderCompliation
 {
-	std::vector<U32> CompileGLSLToSpirV(const ShaderStages& stage, const std::string& shaderData);
+	std::vector<U32> CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData);
 }

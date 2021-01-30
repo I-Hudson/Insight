@@ -214,6 +214,7 @@ namespace vks
 		VkRenderPass m_presentRenderPass;
 
 		VkCommandBuffer m_frameBufferCmdBuffer;
+		VkCommandBuffer m_frameBufferCmdBufferTest;
 		//std::vector<VkCommandBuffer> m_frameBufferCmdBuffer;
 		std::vector<VkFence> m_frameBufferCmdFence;
 		// Pirmary Command buffers used for rendering

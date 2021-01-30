@@ -46,6 +46,32 @@ public:
 
 protected:
 	virtual void OnReleaseGPU() = 0;
-	virtual bool CreateGPUResource() { return false; }
 	U64 m_memoryUsage = 0;
+};
+
+template<typename Device, typename Resouce>
+class GPUResouceBase : public Resouce
+{
+public:
+	GPUResouceBase()
+	{
+		m_device = dynamic_cast<Device*>(GPUDevice::Instance());
+		m_type.SetType<Resouce>();
+
+		// Register
+		m_device->Resources.Add(this);
+	}
+
+	virtual ~GPUResouceBase()
+	{
+		// Unregister
+		if (m_device)
+		{
+			m_device->Resources.Remove(this);
+		}
+	}
+
+protected:
+	Type m_type;
+	Device* m_device;
 };

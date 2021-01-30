@@ -12,6 +12,7 @@
 
 // TESTING
 #include "Engine/Graphics/Shaders/GPUShader.h"
+#include "Engine/Graphics/RenderGraph/RenderGraph.h"
 // TESTING
 
 	namespace Module
@@ -21,12 +22,35 @@
 
 		GraphicsModule::GraphicsModule()
 		{
+			// TESTING
 			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+
+			GPUShader* shader = GPUShader::New();
+			shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
+			shader->Compile();
+			::Delete(shader);
+
 			gpuDevice->Dispose();
 			::Delete(gpuDevice);
 
-			GPUShaderStage stage(ShaderStages::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
-			stage.Parse();
+			ImageAttachmentInfo swapchain;
+			swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
+			swapchain.Height = 1080;
+			swapchain.Width = 1920;
+			swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
+			swapchain.Samples = 4;
+			swapchain.Levels = 1;
+			swapchain.Layers = 1;
+
+			RenderGraph graph;
+			auto pass = graph.AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			ImageAttachmentInfo color;
+			color.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
+			pass.AddColorOutput("color", color);
+
+			graph.Build();
+
+			// TESTING
 
 			m_renderer = Renderer::New();
 			m_renderer->Init();

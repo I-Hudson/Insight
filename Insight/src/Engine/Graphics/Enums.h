@@ -1001,7 +1001,7 @@ DECLARE_ENUM_OPERATORS(ShaderFlags);
 /// <summary>
 /// Define the different stages a shader can have.
 /// </summary>
-enum class ShaderStages : U32
+enum class ShaderStage : U32
 {
     Vertex,
     TessControl,
@@ -1012,3 +1012,42 @@ enum class ShaderStages : U32
 
     Count
 };
+
+/// <summary>
+/// Define the pipeline stages.
+/// </summary>
+enum class PipelineStage : U32
+{
+    Top_Of_Pipe             = 1 << 0,
+    Vertex_Input            = 1 << 1,
+    Vertex_Shader           = 1 << 2,
+    Tess_Control_Shader     = 1 << 3,
+    Tess_Evaluation_Shader  = 1 << 4,
+    Geometry_Shader         = 1 << 5,
+    Early_Fragmnet_Shader   = 1 << 6,
+    Late_Fragmnet_Shader    = 1 << 7,
+    Color_Attachment_Output = 1 << 8,
+    Compute_Shader          = 1 << 9,
+    Transfer                = 1 << 10,
+    Bottom_Of_Pipe          = 1 << 11,
+    Host                    = 1 << 12,
+    All_Graphics            = 1 << 13,
+    All_Commands            = 1 << 14,
+};
+
+/// <summary>
+/// Define the image usage flags which a input within the 
+/// rendering pipeline can be.
+/// </summary>
+enum class ImageUsageFlagsBits : U32
+{
+    Transfer_Src                = 1 << 0,
+    Transfer_Dst                = 1 << 1,
+    Sampled                     = 1 << 2,
+    Storage                     = 1 << 3,
+    Color_Attachment            = 1 << 4,
+    Depth_Stencil_Attachment    = 1 << 5,
+    Transient_Attachment        = 1 << 6,
+    Input_Attachment            = 1 << 7,
+};
+using ImageUsageFlags = U32;

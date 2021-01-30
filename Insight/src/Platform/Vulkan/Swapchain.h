@@ -4,7 +4,6 @@
 #include "VulkanHeader.h"
 
 #include "Engine/Event/ApplicationEvent.h"
-#include "Engine/Graphics/FrameGraph/FrameGraph.h"
 
 	class Event;
 	class ImGuiRenderer;

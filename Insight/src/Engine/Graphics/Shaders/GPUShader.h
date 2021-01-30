@@ -2,6 +2,7 @@
 
 #include "Engine/Graphics/GPUResource.h"
 #include "Engine/Graphics/Enums.h"
+#include "spirv_cross/spirv_glsl.hpp"
 
 enum ShaderStageInput
 {
@@ -17,7 +18,10 @@ struct ShaderStageBindings
 {
 	std::string Name;
 	U32 Binding;
-	U32 Size;
+	spirv_cross::SPIRType Type;
+	U32 VecSize;
+	U32 ByteSize;
+	U32 Stride;
 };
 
 /// <summary>
@@ -36,11 +40,11 @@ struct ShaderStageUniform
 /// <summary>
 /// Define a single stage within a shader. This should define a stage not store any resources.
 /// </summary>
-class GPUShaderStage
+class IS_API GPUShaderStage
 {
 public:
 	GPUShaderStage() = delete;
-	GPUShaderStage(const ShaderStages& stage, const std::string& str, const ShaderStageInput& input);
+	GPUShaderStage(const ShaderStage& stage, const std::string& str, const ShaderStageInput& input);
 
 	bool IsValid() const { return m_parsed; }
 
@@ -49,7 +53,12 @@ public:
 	/// </summary>
 	void Parse();
 
-	const ShaderStages& GetStage() const { return m_stage; }
+	const ShaderStage& GetStage() const { return m_stage; }
+	const std::vector<ShaderStageBindings>& GetInputs() const { return m_inputs; }
+	const std::vector<ShaderStageUniform>& GetUniforms() const { return m_uniforms; }
+
+	const U32 GetInputsSize() const;
+	const std::vector<U32>& GetRawData() const { return m_rawData; }
 
 	// Compile this shader stage for the graphic's API format.
 	// [ReturnValue] Compile();
@@ -57,7 +66,7 @@ public:
 	// [ReturnValue] GetBindings();
 
 protected:
-	ShaderStages m_stage;
+	ShaderStage m_stage;
 
 	bool m_parsed;
 
@@ -80,12 +89,15 @@ protected:
 	/// Shader stage uniforms.
 	/// </summary>
 	std::vector<ShaderStageUniform> m_uniforms;
+
+private:
+	U32 GetStride();
 };
 
 /// <summary>
 /// Define a single shader. This includes all the stage needed for a complete pipeline.
 /// </summary>
-class GPUShader : public GPUResource
+class IS_API GPUShader : public GPUResource
 {
 public:
 	static GPUShader* New();
@@ -107,19 +119,25 @@ public:
 	/// Set a shader stage.
 	/// </summary>
 	/// <param name="shaderStage"></param>
-	void SetStage(const ShaderStages& stage, const std::string& str, const ShaderStageInput& input);
+	void SetStage(const ShaderStage& stage, const std::string& str, const ShaderStageInput& input);
 
 	/// <summary>
 	/// Get a single stage from this shader.
 	/// </summary>
 	/// <param name="stage"></param>
 	/// <returns></returns>
-	const GPUShaderStage& GetStage(const ShaderStages& stage) { return m_stages.at((U32)stage); }
+	GPUShaderStage& GetStage(const ShaderStage& stage) { return m_stages.at((U32)stage); }
 	
+	/// <summary>
+	/// Release all the gpu resources before the program quits.
+	/// </summary>
+	virtual void ReleaseGPUResoucesEarly() = 0;
+
 	// [GPUResource]
 	virtual ResourceType GetResourceType() const override { return ResourceType::Shader; }
+	virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
 
 protected:
-	std::array<GPUShaderStage, (size_t)ShaderStages::Count> m_stages;
+	std::array<GPUShaderStage, (size_t)ShaderStage::Count> m_stages;
 };
 

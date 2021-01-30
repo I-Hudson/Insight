@@ -361,8 +361,9 @@ namespace vks
 		submitInfo.pSignalSemaphores = signalSemahores;
 		submitInfo.signalSemaphoreCount = 1;
 
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_frameBufferCmdBuffer;
+		submitInfo.commandBufferCount = 2;
+		VkCommandBuffer commandBuffers[] = { m_frameBufferCmdBuffer, m_frameBufferCmdBufferTest };
+		submitInfo.pCommandBuffers = commandBuffers;
 		ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, m_frameBuffer.GetFence()));
 
 		// Scene rendering
@@ -372,6 +373,7 @@ namespace vks
 		// Signal ready with render complete semaphore
 		signalSemahores[0] = m_semaphores.RenderComplete[0];
 		submitInfo.pSignalSemaphores = signalSemahores;
+		submitInfo.commandBufferCount = 1;
 		// Submit work
 		submitInfo.pCommandBuffers = &m_presentCmdBuffers[m_currentFrame];
 		ThrowIfFailed(vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE));
@@ -473,6 +475,7 @@ namespace vks
 				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
 				1);
 		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_frameBufferCmdBuffer));
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, &m_frameBufferCmdBufferTest));
 
 		m_presentCmdBuffers.resize(m_swapchain.GetImageCount());
 		cmdBufAllocateInfo =
@@ -487,6 +490,7 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_frameBufferCmdBuffer);
+		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_frameBufferCmdBufferTest);
 		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<U32>(m_presentCmdBuffers.size()), m_presentCmdBuffers.data());
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_primaryCommandBuffer);
 	}
@@ -726,6 +730,37 @@ namespace vks
 
 			vkCmdEndRenderPass(m_frameBufferCmdBuffer);
 			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBuffer));
+		}
+
+		vkResetCommandBuffer(m_frameBufferCmdBufferTest, 0);
+		{
+			ThrowIfFailed(vkBeginCommandBuffer(m_frameBufferCmdBufferTest, &cmdBufInfo));
+
+			vkCmdBeginRenderPass(m_frameBufferCmdBufferTest, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+			VkViewport viewport = vks::initializers::viewport(static_cast<float>(m_frameBuffer.GetWidth()), static_cast<float>(m_frameBuffer.GetHeight()), 0.0f, 1.0f);
+			vkCmdSetViewport(m_frameBufferCmdBufferTest, 0, 1, &viewport);
+
+			VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
+			vkCmdSetScissor(m_frameBufferCmdBufferTest, 0, 1, &scissor);
+
+			// This should be replaced by the mesh components in the scene.
+			{
+				IS_PROFILE_SCOPE("All Draws");
+				for (auto& mesh : meshes)
+				{
+					if (mesh)
+					{
+						{
+							IS_PROFILE_SCOPE("Single Draw");
+							mesh->Draw(m_frameBufferCmdBufferTest, updateMaterail);
+						}
+					}
+				}
+			}
+
+			vkCmdEndRenderPass(m_frameBufferCmdBufferTest);
+			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBufferTest));
 		}
 	}
 
