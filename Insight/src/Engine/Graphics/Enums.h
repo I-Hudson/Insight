@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Core/InsightAlias.h"
+#include "Engine/Platform/Platform.h"
 
 /// <summary>
 /// Graphics rendering backend system types.
@@ -1024,16 +1025,19 @@ enum class PipelineStage : U32
     Tess_Control_Shader     = 1 << 3,
     Tess_Evaluation_Shader  = 1 << 4,
     Geometry_Shader         = 1 << 5,
-    Early_Fragmnet_Shader   = 1 << 6,
-    Late_Fragmnet_Shader    = 1 << 7,
-    Color_Attachment_Output = 1 << 8,
-    Compute_Shader          = 1 << 9,
-    Transfer                = 1 << 10,
-    Bottom_Of_Pipe          = 1 << 11,
-    Host                    = 1 << 12,
-    All_Graphics            = 1 << 13,
-    All_Commands            = 1 << 14,
+    Fragment_Shader         = 1 << 6,
+    Early_Fragment_Test     = 1 << 7,
+    Late_Fragment_Test      = 1 << 8,
+    Color_Attachment_Output = 1 << 9,
+    Compute_Shader          = 1 << 10,
+    Transfer                = 1 << 11,
+    Bottom_Of_Pipe          = 1 << 12,
+    Host                    = 1 << 13,
+    All_Graphics            = 1 << 14,
+    All_Commands            = 1 << 15,
 };
+using PipelineStageFlags = U32;
+std::string PipelineStageFlagsToString(const PipelineStageFlags& flags);
 
 /// <summary>
 /// Define the image usage flags which a input within the 
@@ -1048,6 +1052,99 @@ enum class ImageUsageFlagsBits : U32
     Color_Attachment            = 1 << 4,
     Depth_Stencil_Attachment    = 1 << 5,
     Transient_Attachment        = 1 << 6,
-    Input_Attachment            = 1 << 7,
+    Input_Attachment            = 1 << 7
 };
 using ImageUsageFlags = U32;
+
+enum class ImageMisc
+{
+    Generate_Mips                                   = 1 << 0,
+    Force_Array                                     = 1 << 1,
+    Mutable_SRGB                                    = 1 << 2,
+    Concurrent_Queue_Graphics                       = 1 << 3,
+    Concurrent_Queue_Async_Compute                  = 1 << 4,
+    Concurrent_Queue_Async_Graphics                 = 1 << 5,
+    Concurrent_Queue_Async_Transfer                 = 1 << 6,
+    Verify_Format_Feature_Sampled_Linear_Filter     = 1 << 7,
+    Linear_Image_Ignore_Device_Local                = 1 << 8,
+    Force_No_Dedicated                              = 1 << 9,
+};
+using ImageMiscFlags = U32;
+
+enum class ImageCreate
+{
+    Sparse_Binding = 1 << 0,
+    Sparse_Residency = 1 << 1,
+    Sparse_Aliased = 1 << 2,
+    Mutable_Format = 1 << 3,
+    Cube_Compatible = 1 << 4,
+};
+using ImageCreateFlags = U32;
+
+enum class ImageLayout : U32
+{
+    Undefined                   = 1 << 0,
+    General                     = 1 << 1,
+    Color_Attachment            = 1 << 2,
+    Depth_Stencil_Attachment    = 1 << 3,
+    Depth_Stencil_Read_Only     = 1 << 4,
+    Shader_Read_Only            = 1 << 5,
+    Transfer_Src                = 1 << 6,
+    Transfer_Dst                = 1 << 7,
+    Preinitialized              = 1 << 8
+};
+using ImageLayoutFlags = U32;
+const char* ImageLayoutToString(const ImageLayout& layout);
+
+enum class ImageType
+{
+    Image_1D,
+    Image_2D,
+    Image_3D,
+
+    Count
+};
+
+enum class ImageDomain
+{
+    Physical,
+    Transient, 
+    LinearHostCached,
+    LinearHost,
+
+    Count
+};
+
+enum class Access : U32
+{
+    Indirect_Command_Read           = 1 << 0,
+    Index_Read                      = 1 << 1,
+    Vertex_Attribute_Read           = 1 << 2,
+    Uniform_Read                    = 1 << 3,
+    Input_Attachmnet_Read           = 1 << 4,
+    Shader_Read                     = 1 << 5,
+    Shader_Write                    = 1 << 6,
+    Color_Attachment_Read           = 1 << 7,
+    Color_Attachment_Write          = 1 << 8,
+    Depth_Stencil_Attachment_Read   = 1 << 9,
+    Depth_Stencil_Attachment_Write  = 1 << 10,
+    Transfer_Read                   = 1 << 11,
+    Transfer_Write                  = 1 << 12,
+    Host_Read                       = 1 << 13,
+    Host_Write                      = 1 << 14,
+    Memory_Read                     = 1 << 15,
+    Memory_Write                    = 1 << 16
+};
+using AccessFlags = U32;
+std::string AccessFlagsToString(const AccessFlags& flags);
+
+enum class RenderPassOp
+{
+    Clear_Depth_Stencil         = 1 << 0,
+    Load_Depth_Stencil          = 1 << 1,
+    Store_Depth_Stencil         = 1 << 2,
+    Depth_Stencil_Read_Only     = 1 << 3,
+    Enable_Transient_Store      = 1 << 4,
+    Enable_Transient_Load       = 1 << 5,
+};
+using RenderPassOpFlags = U32;

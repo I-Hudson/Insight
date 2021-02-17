@@ -175,6 +175,7 @@ FORCE_INLINE U32 VectorFindIndex(const std::vector<T>& vector, const T& item)
         }
     }
     ASSERT(false && "VectorFindIndex. Out of range.");
+    return ~0u;
 }
 
 INLINE I32 HexDigit(char c)

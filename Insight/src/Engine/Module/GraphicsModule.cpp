@@ -13,6 +13,7 @@
 // TESTING
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
+#include "Engine/Graphics/Image/GPUImage.h"
 // TESTING
 
 	namespace Module
@@ -30,25 +31,47 @@
 			shader->Compile();
 			::Delete(shader);
 
-			gpuDevice->Dispose();
-			::Delete(gpuDevice);
+			GPUImage* image = GPUImage::New();
+			image->Init(GPUImageDescription::RenderTarget(1920, 1080, PixelFormat::R8G8B8A8_SNorm));
+			GPUImageView* view = GPUImageView::New();
+			view->Init(image);
 
-			ImageAttachmentInfo swapchain;
+			::Delete(image);
+			::Delete(view);
+
+			ResourceDimensions swapchain;
 			swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			swapchain.Height = 1080;
 			swapchain.Width = 1920;
-			swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
+			swapchain.Height = 1080;
 			swapchain.Samples = 4;
 			swapchain.Levels = 1;
 			swapchain.Layers = 1;
+			swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
 
-			RenderGraph graph;
-			auto pass = graph.AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			ImageAttachmentInfo color;
+			ImageAttachmentInfo color, hdrLighting;
 			color.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			pass.AddColorOutput("color", color);
+			hdrLighting.Format = PixelFormat::R32G32B32A32_SInt;
 
-			graph.Build();
+			RenderGraph* graph = RenderGraph::New();
+			graph->SetSwapchainDimensions(swapchain);
+
+			auto& lPass = graph->AddPass("Lightting", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			lPass.AddColorOutput("HDR-Lightting-Image", hdrLighting);
+			lPass.AddAttachmentInput("color");
+
+			auto& gPass = graph->AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			gPass.AddColorOutput("color", color);
+
+			graph->SetbackBufferSource("HDR-Lightting-Image");
+			graph->Build();
+			graph->SetupAttachments();
+			graph->EnqueueRenderPass();
+
+			graph->LogToConsole();
+			graph->Reset();
+
+			GPUDevice::Instance()->Dispose();
+			::Delete(GPUDevice::Instance());
 
 			// TESTING
 

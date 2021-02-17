@@ -93,3 +93,77 @@ inline void CombineHash(U32& hash, const T* value)
 {
     CombineHash(hash, GetHash(value));
 }
+
+class Hasher
+{
+public:
+    Hasher(U64 hash)
+        : m_hash(hash)
+    { }
+
+    Hasher() {}
+
+    template<typename T>
+    INLINE void Data(const T* data, U64 size)
+    {
+        size /= sizeof(*data);
+        for (U64 i = 0; i < size; ++i)
+            m_hash = (m_hash * 0x100000001b3ull) ^ data[i];
+    }
+
+	INLINE void U32(uint32_t value)
+	{
+		m_hash = (m_hash * 0x100000001b3ull) ^ value;
+	}
+
+	INLINE void S32(int32_t value)
+	{
+		U32(uint32_t(value));
+	}
+
+	INLINE void F32(float value)
+	{
+		union
+		{
+			float f32;
+			uint32_t u32;
+		} u;
+		u.f32 = value;
+		U32(u.u32);
+	}
+
+	INLINE void U64(uint64_t value)
+	{
+		U32(value & 0xffffffffu);
+		U32(value >> 32);
+	}
+
+	template <typename T>
+	INLINE void Pointer(T* ptr)
+	{
+		U64(reinterpret_cast<uintptr_t>(ptr));
+	}
+
+	INLINE void String(const char* str)
+	{
+		char c;
+		U32(0xff);
+		while ((c = *str++) != '\0')
+			U32(uint8_t(c));
+	}
+
+	INLINE void String(const std::string& str)
+	{
+		U32(0xff);
+		for (auto& c : str)
+			U32(uint8_t(c));
+	}
+
+	INLINE uint64_t Get() const
+	{
+		return m_hash;
+	}
+
+private:
+	uint64_t m_hash = 0xcbf29ce484222325ull;
+};

@@ -39,6 +39,11 @@ namespace Module
 			CVar<int> VSync{ "vsync", 1 };
 			CVar<int> GSync{ "gsync", 1 };
 			CVar<int> GraphicsAPI{ "graphics_api", 1 };
+
+			CVar<int> MergeSubpasses{ "merge_subpasses", 1 };
+			CVar<int> UseTransientDepthStencil{ "use_transient_depth_stencil", 1 };
+			CVar<int> UseTransientColor{ "use_transient_color", 1 };
+
 		};
 
 	private:

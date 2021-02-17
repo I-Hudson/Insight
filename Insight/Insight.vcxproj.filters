@@ -43,6 +43,9 @@
     <Filter Include="src\Engine\Graphics">
       <UniqueIdentifier>{92BD692F-FE1E-473D-878C-8DEFF3EC7DFC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\Graphics\Image">
+      <UniqueIdentifier>{0405C372-70C7-F6FC-B977-85892579CFDA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\Graphics\RenderGraph">
       <UniqueIdentifier>{D3DEC614-3FC2-D554-48C5-0391B4279CA5}</UniqueIdentifier>
     </Filter>
@@ -294,6 +297,9 @@
     <ClInclude Include="src\Engine\Graphics\GPUDevice.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\GPUImage.h">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\GPULimits.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -315,6 +321,12 @@
     <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Image\GPUImage.h">
+      <Filter>src\Engine\Graphics\Image</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\Image\GPUImageDescription.h">
+      <Filter>src\Engine\Graphics\Image</Filter>
+    </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Material.h">
       <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
@@ -329,6 +341,9 @@
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderPass.h">
       <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine\Graphics\RenderPassInfo.h">
+      <Filter>src\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Engine\Graphics\Renderer.h">
       <Filter>src\Engine\Graphics</Filter>
@@ -1842,6 +1857,8 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h" />
+    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
@@ -1889,6 +1906,9 @@
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp">
       <Filter>src\Engine\FileSystem</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Enums.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1906,6 +1926,9 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp">
       <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Image\GPUImage.cpp">
+      <Filter>src\Engine\Graphics\Image</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Material.cpp">
       <Filter>src\Engine\Graphics</Filter>
@@ -2090,5 +2113,8 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDescription.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.cpp" />
   </ItemGroup>
 </Project>

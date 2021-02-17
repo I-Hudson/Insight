@@ -18,7 +18,7 @@ void ProfilerMemory::TrackAllocation(void* ptr, U64 size)
 {
 	m_locker.Lock();
 
-	ASSERT(!ContainsAllocation(ptr, m_currentAllocations) && !ContainsAllocation(ptr, m_allAllocations));
+	//ASSERT(!ContainsAllocation(ptr, m_currentAllocations) && !ContainsAllocation(ptr, m_allAllocations));
 
 	m_currentAllocations[ptr] = ProfilerMemoryAdditionalInfo { "", size };
 	m_allAllocations[ptr] = ProfilerMemoryAdditionalInfo { "", size };
@@ -30,9 +30,10 @@ void ProfilerMemory::UnTrackAllocation(void* ptr)
 {
 	m_locker.Lock();
 
-	ASSERT(ContainsAllocation(ptr, m_currentAllocations));
+	//ASSERT(ContainsAllocation(ptr, m_currentAllocations));
 	auto currentIt = GetIterator(ptr, m_currentAllocations);
-	m_currentAllocations.erase(currentIt);
+	if (currentIt != m_currentAllocations.end())
+		m_currentAllocations.erase(currentIt);
 
 	m_locker.Unlock();
 }
@@ -73,8 +74,8 @@ bool ProfilerMemory::ContainsAllocation(void* ptr, ProProfilerMemoryCollection& 
 {
 	for (auto& alloc : collection)
 	{
-		char* c1 = (char*)ptr;
-		char* c2 = (char*)alloc.first;
+		U64* c1 = (U64*)ptr;
+		U64* c2 = (U64*)alloc.first;
 
 		if (c1 == c2)
 		{

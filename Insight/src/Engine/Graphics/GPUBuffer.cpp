@@ -4,7 +4,7 @@
 
 GPUBuffer* GPUBuffer::New()
 {
-	return GPUDevice::Instance()->NewBuffer();
+	return nullptr;
 }
 
 GPUBuffer::GPUBuffer()

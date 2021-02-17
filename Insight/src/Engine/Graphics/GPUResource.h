@@ -8,7 +8,7 @@ public:
 	/// <summary>
 	/// GPU Resources types.
 	/// </summary>
-	DECLARE_ENUM_9(ResourceType, RenderTarget, Texture, CubeTexture, VolumeTexture, Buffer, Shader, PipelineState, Descriptor, Query);
+	DECLARE_ENUM_11(ResourceType, RenderTarget, Image, ImageView, Texture, CubeTexture, VolumeTexture, Buffer, Shader, PipelineState, Descriptor, Query);
 
 	/// <summary>
 	/// GPU Resources object types. Used to detect Texture objects from subset of Types:  RenderTarget, Texture, CubeTexture, VolumeTexture which use the same API object.
@@ -44,9 +44,14 @@ public:
 		}
 	};
 
+	void SetName(const std::string& name) { m_name = name; }
+	const std::string& GetName() const { return m_name; }
+
 protected:
 	virtual void OnReleaseGPU() = 0;
 	U64 m_memoryUsage = 0;
+
+	std::string m_name;
 };
 
 template<typename Device, typename Resouce>

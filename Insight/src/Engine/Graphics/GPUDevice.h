@@ -13,6 +13,8 @@ class GPUTexture;
 class GPUBuffer;
 class GPUSwapChain;
 class GPUShader;
+class GPUImageView;
+class GPUImage;
 
 class GPUDevice : public TSingleton<GPUDevice>
 {
@@ -45,6 +47,9 @@ public:
     void Lock() { m_locker.Lock(); }
     void Unlock() { m_locker.Unlock(); }
 
+    virtual void BeginFrame() { }
+    virtual void EndFrame() { }
+
     const DeviceState& GetState() const { return m_state; }
     const bool& IsRendering() const { return m_isRendering; }
     const RendererType& GetRendererType() const { return m_rendererType; }
@@ -65,8 +70,7 @@ public:
     virtual void Dispose();
     virtual void WaitForGPU() = 0;
 
-    virtual GPUBuffer* NewBuffer(const std::string& name = "") = 0;
-    virtual GPUTexture* NewTexture(const std::string& name = "") = 0;
+    virtual GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) = 0;
 
 public:
     GPUResourceCollection Resources;

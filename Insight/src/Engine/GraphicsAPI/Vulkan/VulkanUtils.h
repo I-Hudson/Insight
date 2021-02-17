@@ -70,193 +70,287 @@ namespace
 	}
 
 
-    /// <summary>
-    /// Converts Flax Pixel Format to the Vulkan Format.
-    /// </summary>
-    /// <param name="value">The Flax Pixel Format.</param>
-    /// <returns>The Vulkan Format.</returns>
-    FORCE_INLINE VkFormat ToVulkanFormat(const PixelFormat value)
-    {
-        return PixelFormatToVkFormat[(I32)value];
-    }
+	/// <summary>
+	/// Converts Flax Pixel Format to the Vulkan Format.
+	/// </summary>
+	/// <param name="value">The Flax Pixel Format.</param>
+	/// <returns>The Vulkan Format.</returns>
+	FORCE_INLINE VkFormat ToVulkanFormat(const PixelFormat value)
+	{
+		return PixelFormatToVkFormat[(I32)value];
+	}
 
-    /// <summary>
-    /// Converts Flax blend mode to the Vulkan blend factor.
-    /// </summary>
-    /// <param name="value">The Flax blend mode.</param>
-    /// <returns>The Vulkan blend factor.</returns>
-    FORCE_INLINE VkBlendFactor ToVulkanBlendFactor(const BlendingMode::Blend value)
-    {
-        return BlendToVkBlendFactor[(I32)value];
-    }
+	/// <summary>
+	/// Converts Flax blend mode to the Vulkan blend factor.
+	/// </summary>
+	/// <param name="value">The Flax blend mode.</param>
+	/// <returns>The Vulkan blend factor.</returns>
+	FORCE_INLINE VkBlendFactor ToVulkanBlendFactor(const BlendingMode::Blend value)
+	{
+		return BlendToVkBlendFactor[(I32)value];
+	}
 
-    /// <summary>
-    /// Converts Flax blend operation to the Vulkan blend operation.
-    /// </summary>
-    /// <param name="value">The Flax blend operation.</param>
-    /// <returns>The Vulkan blend operation.</returns>
-    FORCE_INLINE VkBlendOp ToVulkanBlendOp(const BlendingMode::Operation value)
-    {
-        return OperationToVkBlendOp[(I32)value];
-    }
+	/// <summary>
+	/// Converts Flax blend operation to the Vulkan blend operation.
+	/// </summary>
+	/// <param name="value">The Flax blend operation.</param>
+	/// <returns>The Vulkan blend operation.</returns>
+	FORCE_INLINE VkBlendOp ToVulkanBlendOp(const BlendingMode::Operation value)
+	{
+		return OperationToVkBlendOp[(I32)value];
+	}
 
-    /// <summary>
-    /// Converts Flax comparison function to the Vulkan comparison operation.
-    /// </summary>
-    /// <param name="value">The Flax comparison function.</param>
-    /// <returns>The Vulkan comparison operation.</returns>
-    FORCE_INLINE VkCompareOp ToVulkanCompareOp(const ComparisonFunc value)
-    {
-        return ComparisonFuncToVkCompareOp[(I32)value];
-    }
+	/// <summary>
+	/// Converts Flax comparison function to the Vulkan comparison operation.
+	/// </summary>
+	/// <param name="value">The Flax comparison function.</param>
+	/// <returns>The Vulkan comparison operation.</returns>
+	FORCE_INLINE VkCompareOp ToVulkanCompareOp(const ComparisonFunc value)
+	{
+		return ComparisonFuncToVkCompareOp[(I32)value];
+	}
 
-    VkSamplerMipmapMode ToVulkanMipFilterMode(GPUSamplerFilter filter)
-    {
-        VkSamplerMipmapMode result;
-        switch (filter)
-        {
-        case GPUSamplerFilter::Point:
-            result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-            break;
-        case GPUSamplerFilter::Bilinear:
-            result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-            break;
-        case GPUSamplerFilter::Trilinear:
-            result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-            break;
-        case GPUSamplerFilter::Anisotropic:
-            result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
+	VkSamplerMipmapMode ToVulkanMipFilterMode(GPUSamplerFilter filter)
+	{
+		VkSamplerMipmapMode result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
 
-    VkFilter ToVulkanMagFilterMode(GPUSamplerFilter filter)
-    {
-        VkFilter result;
-        switch (filter)
-        {
-        case GPUSamplerFilter::Point:
-            result = VK_FILTER_NEAREST;
-            break;
-        case GPUSamplerFilter::Bilinear:
-            result = VK_FILTER_LINEAR;
-            break;
-        case GPUSamplerFilter::Trilinear:
-            result = VK_FILTER_LINEAR;
-            break;
-        case GPUSamplerFilter::Anisotropic:
-            result = VK_FILTER_LINEAR;
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
+	VkFilter ToVulkanMagFilterMode(GPUSamplerFilter filter)
+	{
+		VkFilter result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_FILTER_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_FILTER_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
 
-    VkFilter ToVulkanMinFilterMode(GPUSamplerFilter filter)
-    {
-        VkFilter result;
-        switch (filter)
-        {
-        case GPUSamplerFilter::Point:
-            result = VK_FILTER_NEAREST;
-            break;
-        case GPUSamplerFilter::Bilinear:
-            result = VK_FILTER_LINEAR;
-            break;
-        case GPUSamplerFilter::Trilinear:
-            result = VK_FILTER_LINEAR;
-            break;
-        case GPUSamplerFilter::Anisotropic:
-            result = VK_FILTER_LINEAR;
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
+	VkFilter ToVulkanMinFilterMode(GPUSamplerFilter filter)
+	{
+		VkFilter result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_FILTER_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_FILTER_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
 
-    VkSamplerAddressMode ToVulkanWrapMode(GPUSamplerAddressMode addressMode, const bool supportsMirrorClampToEdge)
-    {
-        VkSamplerAddressMode result;
-        switch (addressMode)
-        {
-        case GPUSamplerAddressMode::Wrap:
-            result = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            break;
-        case GPUSamplerAddressMode::Clamp:
-            result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-            break;
-        case GPUSamplerAddressMode::Mirror:
-            result = supportsMirrorClampToEdge ? VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-            break;
-        case GPUSamplerAddressMode::Border:
-            result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
+	VkSamplerAddressMode ToVulkanWrapMode(GPUSamplerAddressMode addressMode, const bool supportsMirrorClampToEdge)
+	{
+		VkSamplerAddressMode result;
+		switch (addressMode)
+		{
+		case GPUSamplerAddressMode::Wrap:
+			result = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			break;
+		case GPUSamplerAddressMode::Clamp:
+			result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			break;
+		case GPUSamplerAddressMode::Mirror:
+			result = supportsMirrorClampToEdge ? VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			break;
+		case GPUSamplerAddressMode::Border:
+			result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
 
-    VkCompareOp ToVulkanSamplerCompareFunction(GPUSamplerCompareFunction samplerComparisonFunction)
-    {
-        VkCompareOp result;
-        switch (samplerComparisonFunction)
-        {
-        case GPUSamplerCompareFunction::Less:
-            result = VK_COMPARE_OP_LESS;
-            break;
-        case GPUSamplerCompareFunction::Never:
-            result = VK_COMPARE_OP_NEVER;
-            break;
-        default:
-            break;
-        }
-        return result;
-    }
+	VkCompareOp ToVulkanSamplerCompareFunction(GPUSamplerCompareFunction samplerComparisonFunction)
+	{
+		VkCompareOp result;
+		switch (samplerComparisonFunction)
+		{
+		case GPUSamplerCompareFunction::Less:
+			result = VK_COMPARE_OP_LESS;
+			break;
+		case GPUSamplerCompareFunction::Never:
+			result = VK_COMPARE_OP_NEVER;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
 
-    VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const U32& vecSize)
-    {
-        switch (type.basetype)
-        {
-        case spirv_cross::SPIRType::Int:
-            switch (vecSize)
-            {
-            case 1: return VK_FORMAT_R32_SINT;
-            case 2: return VK_FORMAT_R32G32_SINT;
-            case 3: return VK_FORMAT_R32G32B32_SINT;
-            case 4: return VK_FORMAT_R32G32B32A32_SINT;
-            }
-            break;
-        case spirv_cross::SPIRType::Float:
-            switch (vecSize)
-            {
-            case 1: return VK_FORMAT_R32_SFLOAT;
-            case 2: return VK_FORMAT_R32G32_SFLOAT;
-            case 3: return VK_FORMAT_R32G32B32_SFLOAT;
-            case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
-            }
-            break;
+	VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const U32& vecSize)
+	{
+		switch (type.basetype)
+		{
+		case spirv_cross::SPIRType::Int:
+			switch (vecSize)
+			{
+			case 1: return VK_FORMAT_R32_SINT;
+			case 2: return VK_FORMAT_R32G32_SINT;
+			case 3: return VK_FORMAT_R32G32B32_SINT;
+			case 4: return VK_FORMAT_R32G32B32A32_SINT;
+			}
+			break;
+		case spirv_cross::SPIRType::Float:
+			switch (vecSize)
+			{
+			case 1: return VK_FORMAT_R32_SFLOAT;
+			case 2: return VK_FORMAT_R32G32_SFLOAT;
+			case 3: return VK_FORMAT_R32G32B32_SFLOAT;
+			case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+			}
+			break;
 
-        }
-        return VK_FORMAT_R32G32B32A32_SFLOAT;
-    }
+		}
+		return VK_FORMAT_R32G32B32A32_SFLOAT;
+	}
 
-    VkShaderStageFlagBits ToVulkanShaderStageFlags(const ShaderStage& shaderStage)
-    {
-        switch (shaderStage)
-        {
-        case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-        case ShaderStage::TessControl: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-        case ShaderStage::TessEvaluation: return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
-        case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case ShaderStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
-        }
-        return VK_SHADER_STAGE_ALL;
-    }
+	VkShaderStageFlagBits ToVulkanShaderStageFlags(const ShaderStage& shaderStage)
+	{
+		switch (shaderStage)
+		{
+		case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+		case ShaderStage::TessControl: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+		case ShaderStage::TessEvaluation: return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+		case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+		case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+		case ShaderStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+		}
+		return VK_SHADER_STAGE_ALL;
+	}
+
+	VkImageType ToVulkanImageType(const ImageType& imageType)
+	{
+		switch (imageType)
+		{
+		case ImageType::Image_1D: return VK_IMAGE_TYPE_1D;
+		case ImageType::Image_2D: return VK_IMAGE_TYPE_2D;
+		case ImageType::Image_3D: return VK_IMAGE_TYPE_3D;
+		}
+		return VK_IMAGE_TYPE_2D;
+	}
+
+	VkImageViewType ToVulkanImageViewType(const ImageType& imageType)
+	{
+		switch (imageType)
+		{
+		case ImageType::Image_1D: return VK_IMAGE_VIEW_TYPE_1D;
+		case ImageType::Image_2D: return VK_IMAGE_VIEW_TYPE_2D;
+		case ImageType::Image_3D: return VK_IMAGE_VIEW_TYPE_3D;
+		}
+		return VK_IMAGE_VIEW_TYPE_2D;
+	}
+
+	VkSampleCountFlagBits ToVulkanSampleCountBits(const U32 sample)
+	{
+		if (sample & VK_SAMPLE_COUNT_64_BIT)
+		{
+			return VK_SAMPLE_COUNT_64_BIT;
+		}
+		if (sample & VK_SAMPLE_COUNT_32_BIT)
+		{
+			return VK_SAMPLE_COUNT_32_BIT;
+		}
+		if (sample & VK_SAMPLE_COUNT_16_BIT)
+		{
+			return VK_SAMPLE_COUNT_16_BIT;
+		}
+		if (sample & VK_SAMPLE_COUNT_8_BIT)
+		{
+			return VK_SAMPLE_COUNT_8_BIT;
+		}
+		if (sample & VK_SAMPLE_COUNT_4_BIT)
+		{
+			return VK_SAMPLE_COUNT_4_BIT;
+		}
+		if (sample & VK_SAMPLE_COUNT_2_BIT)
+		{
+			return VK_SAMPLE_COUNT_2_BIT;
+		}
+		return VK_SAMPLE_COUNT_1_BIT;
+	}
+
+	VkImageUsageFlags ToVulkanImageUsage(const ImageUsageFlags imageUsageFlags)
+	{
+		VkImageUsageFlags flags = 0;
+		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)				{ flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)				{ flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT)					{ flags |= VK_IMAGE_USAGE_SAMPLED_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT)					{ flags |= VK_IMAGE_USAGE_STORAGE_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)			{ flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)	{ flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT)		{ flags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT; }
+		if (imageUsageFlags & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT)			{ flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT; }
+	
+		return flags;
+	}
+
+	VkImageLayout ToVulkanImageLayout(const ImageLayout& imageLayout)
+	{
+		switch (imageLayout)
+		{
+		case ImageLayout::Undefined: return VK_IMAGE_LAYOUT_UNDEFINED;
+		case ImageLayout::General: return VK_IMAGE_LAYOUT_GENERAL;
+		case ImageLayout::Color_Attachment: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		case ImageLayout::Depth_Stencil_Attachment: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		case ImageLayout::Depth_Stencil_Read_Only: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		case ImageLayout::Shader_Read_Only: return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		case ImageLayout::Transfer_Src: return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		case ImageLayout::Transfer_Dst: return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		case ImageLayout::Preinitialized: return VK_IMAGE_LAYOUT_PREINITIALIZED;
+		}
+		return VK_IMAGE_LAYOUT_UNDEFINED;
+	}
+
+	VkImageCreateFlags ToVulkanImageCreateFlags(const ImageCreateFlags& createFlags)
+	{
+		VkImageCreateFlags flags = 0;
+		if (createFlags & VK_IMAGE_CREATE_SPARSE_BINDING_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_BINDING_BIT; }
+		if (createFlags & VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT; }
+		if (createFlags & VK_IMAGE_CREATE_SPARSE_ALIASED_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_ALIASED_BIT; }
+		if (createFlags & VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT)		{ flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT; }
+		if (createFlags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT)		{ flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT; }
+		return flags;
+	}
 }

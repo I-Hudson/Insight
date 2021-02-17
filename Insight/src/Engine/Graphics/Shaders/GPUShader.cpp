@@ -53,7 +53,7 @@ void GPUShaderStage::Parse()
 			resource.name,
 			glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
 			glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding),
-			glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
+			(U32)glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
 		};
 		m_uniforms.push_back(binding);
 	}

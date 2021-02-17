@@ -88,7 +88,7 @@ INLINE T* NewArray(U32 count)
 /// <param name="sizeInBytes"></param>
 /// <returns></returns>
 template<class MemoryAllocator = Allocator>
-INLINE void* NewArrayBytes(U32 sizeInBytes, U8 alignemnt = 16)
+INLINE void* NewArrayBytes(U32 sizeInBytes, U64 alignemnt = 16)
 {
 	void* ptr = MemoryAllocator::Allocate(sizeInBytes, alignemnt);
 

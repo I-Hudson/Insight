@@ -10,6 +10,7 @@
 
 #include "GPUAdapterVulkan.h"
 #include "Engine/Graphics/GPUBufferDescription.h"
+#include "Engine/Graphics/Image/GPUImage.h"
 
 #include "Engine/Core/Application.h"
 #include "Engine/Core/Collections/HashFunctions.h"
@@ -416,6 +417,7 @@ bool GPUDeviceVulkan::Init()
 
 	//Prepare other things for the engine to use in relation to vulkan.
 	FenceManager.Init(this);
+	PipelineEventManger.Init(this);
 
 	return true;
 }
@@ -439,11 +441,13 @@ void GPUDeviceVulkan::Dispose()
 	WaitForGPU();
 
 	Resources.OnDeviceDestroy();
+	m_trasientImages.clear();
 
 	//SAFE_DELETE(GraphicsQueue);
 	//SAFE_DELETE(ComputeQueue);
 	//SAFE_DELETE(TransferQueue);
 	FenceManager.Dispose();
+	PipelineEventManger.Dispose();
 
 	vmaDestroyAllocator(VmaAllocator);
 	VmaAllocator = VK_NULL_HANDLE;
@@ -469,15 +473,154 @@ void GPUDeviceVulkan::WaitForGPU()
 	vkDeviceWaitIdle(Device);
 }
 
-GPUBuffer* GPUDeviceVulkan::NewBuffer(const std::string& name)
+void GPUDeviceVulkan::BeginFrame()
 {
-	return nullptr;
+	for (auto& kvp : m_trasientImages)
+	{
+		kvp.second.first = false;
+	}
 }
 
-GPUTexture* GPUDeviceVulkan::NewTexture(const std::string& name)
+void GPUDeviceVulkan::EndFrame()
 {
-	return nullptr;
 }
+
+GPUImageView* GPUDeviceVulkan::GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers)
+{
+	Hasher h;
+	h.U32(width);
+	h.U32(height);
+	h.U32((U32)format);
+	h.U32(index);
+	h.U32(samples);
+	h.U32(layers);
+	U64 hash = h.Get();
+
+	// Check if we have trasient images ready to be used. This is reset every frame
+	// but the images are not destroyed. Pooled.
+	GPUDeviceLock lock(this);
+	auto& node = m_trasientImages[hash];
+	if (!node.first && node.second != nullptr)
+	{
+		node.first = true;
+		return node.second->GetView();
+	}
+
+	auto desc = GPUImageDescription::TransientRenderTarget(width, height, format);
+	desc.Samples = samples;
+	desc.Layers = layers;
+	auto* image = GPUImage::New();
+	image->Init(desc);
+	auto* imageView = GPUImageView::New();
+	imageView->Init(image);
+
+	m_trasientImages[hash] = { true, image };
+
+	return image->GetView();
+}
+
+PipelineEventVulkan::PipelineEventVulkan(GPUDeviceVulkan* device, PipelineEventManagerVulkan* owner)
+	: m_owner(owner)
+{
+	auto createInfo = vks::initializers::eventCreateInfo();
+	ThrowIfFailed(vkCreateEvent(device->Device, &createInfo, nullptr, &m_event));
+}
+
+bool PipelineEventVulkan::IsSignaled() const
+{
+	return false;
+}
+
+PipelineEventManagerVulkan::PipelineEventManagerVulkan()
+{
+}
+
+PipelineEventManagerVulkan::~PipelineEventManagerVulkan()
+{
+}
+
+void PipelineEventManagerVulkan::Dispose()
+{
+	ScopeLock lock(m_device->m_pipelineEventLock);
+
+	ASSERT(m_usedEvents.empty());
+	for (PipelineEventVulkan* event : m_freeEvents)
+	{
+		DestroyEvent(event);
+	}
+	m_freeEvents.clear();
+}
+
+PipelineEventVulkan* PipelineEventManagerVulkan::AllocateEvent(bool createSignaled)
+{
+	ScopeLock lock(m_device->m_pipelineEventLock);
+
+	PipelineEventVulkan* event;
+	if (!m_freeEvents.empty())
+	{
+		event = m_freeEvents.back();
+		m_freeEvents.pop_back();
+		m_usedEvents.push_back(event);
+
+		if (createSignaled)
+		{
+			event->m_signaled = true;
+		}
+
+		return event;
+	}
+
+	event = ::New<PipelineEventVulkan>(m_device, this);
+	m_usedEvents.push_back(event);
+	return event;
+}
+
+bool PipelineEventManagerVulkan::IsEventSignaled(PipelineEventVulkan* event)
+{
+	if (event->m_signaled)
+	{
+		return true;
+	}
+	return CheckForEventStatus(event);
+};
+
+void PipelineEventManagerVulkan::ResetEvent(PipelineEventVulkan*& event)
+{
+	ThrowIfFailed(vkResetEvent(m_device->Device, event->GetHandle()));
+}
+
+void PipelineEventManagerVulkan::ReleaseEvent(PipelineEventVulkan*& event)
+{
+	ScopeLock lock(m_device->m_pipelineEventLock);
+
+	ResetEvent(event);
+	m_usedEvents.erase(m_usedEvents.begin() + VectorFindIndex(m_usedEvents, event));
+	m_freeEvents.push_back(event);
+	event = nullptr;
+}
+
+
+bool PipelineEventManagerVulkan::CheckForEventStatus(PipelineEventVulkan* event)
+{
+	ASSERT(VectorContains(m_usedEvents, event));
+	ASSERT(!event->m_signaled);
+
+	const VkResult res = vkGetEventStatus(m_device->Device, event->GetHandle());
+	if (res == VK_SUCCESS)
+	{
+		event->m_signaled = true;
+		return true;
+	}
+	return false;
+}
+
+void PipelineEventManagerVulkan::DestroyEvent(PipelineEventVulkan* event)
+{
+	vkDestroyEvent(m_device->Device, event->GetHandle(), nullptr);
+	event->m_event = VK_NULL_HANDLE;
+	::Delete(event);
+}
+
 
 SemaphoreVulkan::SemaphoreVulkan(GPUDeviceVulkan* device)
 	: _device(device)
@@ -545,7 +688,7 @@ FenceVulkan* FenceManagerVulkan::AllocateFence(bool createSignaled)
 		return fence;
 	}
 
-	fence = New<FenceVulkan>(m_device, this, createSignaled);
+	fence = ::New<FenceVulkan>(m_device, this, createSignaled);
 	m_usedFences.push_back(fence);
 	return fence;
 }
