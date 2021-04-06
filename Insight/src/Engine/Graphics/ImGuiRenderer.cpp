@@ -15,7 +15,7 @@ ImGuiRenderer* ImGuiRenderer::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-	case GraphicsAPI::Vulkan: return ::New<vks::VulkanImGUIRenderer>();
+	case GraphicsRendererAPI::Vulkan: return ::New<vks::VulkanImGUIRenderer>();
 	}
 
 	return nullptr;

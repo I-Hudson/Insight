@@ -66,7 +66,7 @@ namespace Render
 	{
 		switch (Module::GraphicsModule::Instance()->GetAPI())
 		{
-			case GraphicsAPI::Vulkan: return ::New<vks::VulkanTexture>();
+			case GraphicsRendererAPI::Vulkan: return ::New<vks::VulkanTexture>();
 		}
 		ASSERT(false);
 	}

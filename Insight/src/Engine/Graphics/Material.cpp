@@ -11,7 +11,7 @@ Material* Material::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-	case GraphicsAPI::Vulkan: return ::New<vks::VulkanMaterial>();
+	case GraphicsRendererAPI::Vulkan: return ::New<vks::VulkanMaterial>();
 		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLMaterial);
 	}
 	return nullptr;

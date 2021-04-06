@@ -12,7 +12,7 @@ namespace Module
 	class WindowModule;
 }
 
-enum class GraphicsAPI
+enum class GraphicsRendererAPI
 {
 	None = 0,
 	Vulkan = 1,
@@ -32,9 +32,9 @@ public:
 
 	virtual Material* GetDefaultMaterial() { return nullptr; }
 
-	GraphicsAPI GetAPI() { return s_API; }
+	GraphicsRendererAPI GetAPI() { return s_API; }
 
 	static Renderer* New();
 
-	static GraphicsAPI s_API;
+	static GraphicsRendererAPI s_API;
 };

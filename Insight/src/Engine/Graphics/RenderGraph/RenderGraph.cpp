@@ -10,7 +10,7 @@ RenderGraph* RenderGraph::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-		case GraphicsAPI::Vulkan: return ::New<RenderGraphVulkan>();
+		case GraphicsRendererAPI::Vulkan: return ::New<RenderGraphVulkan>();
 	}
 	ASSERT(false && "[RenderGraph::New] API implementation is missing.")
 	return nullptr;

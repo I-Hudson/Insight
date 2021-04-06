@@ -2,12 +2,16 @@
 
 #include "Engine/Core/Compiler.h"
 #include "Engine/Core/Log.h"
+
+#include "Engine/Core/Maths/Rect.h"
+
 #include <vulkan/vulkan.hpp>
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/GPUSamplerDescription.h"
 #include "spirv_cross.hpp"
 #include "Engine/Graphics/Shaders/GPUShader.h"
+#include "Engine/Graphics/GPUCommandBuffer.h"
 
 extern VkFormat PixelFormatToVkFormat[static_cast<I32>(PixelFormat::MAX)];
 extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
@@ -314,14 +318,14 @@ namespace
 	VkImageUsageFlags ToVulkanImageUsage(const ImageUsageFlags imageUsageFlags)
 	{
 		VkImageUsageFlags flags = 0;
-		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_SRC_BIT)				{ flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT)				{ flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_SAMPLED_BIT)					{ flags |= VK_IMAGE_USAGE_SAMPLED_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_STORAGE_BIT)					{ flags |= VK_IMAGE_USAGE_STORAGE_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT)			{ flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)	{ flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT)		{ flags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT; }
-		if (imageUsageFlags & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT)			{ flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transfer_Src)				{ flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transfer_Dst)				{ flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Sampled)					{ flags |= VK_IMAGE_USAGE_SAMPLED_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Storage)					{ flags |= VK_IMAGE_USAGE_STORAGE_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Color_Attachment)			{ flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Depth_Stencil_Attachment)	{ flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transient_Attachment)		{ flags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Input_Attachment)			{ flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT; }
 	
 		return flags;
 	}
@@ -346,11 +350,30 @@ namespace
 	VkImageCreateFlags ToVulkanImageCreateFlags(const ImageCreateFlags& createFlags)
 	{
 		VkImageCreateFlags flags = 0;
-		if (createFlags & VK_IMAGE_CREATE_SPARSE_BINDING_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_BINDING_BIT; }
-		if (createFlags & VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT; }
-		if (createFlags & VK_IMAGE_CREATE_SPARSE_ALIASED_BIT)		{ flags |= VK_IMAGE_CREATE_SPARSE_ALIASED_BIT; }
-		if (createFlags & VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT)		{ flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT; }
-		if (createFlags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT)		{ flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT; }
+		if (createFlags & (u32)ImageCreate::Sparse_Binding)		{ flags |= VK_IMAGE_CREATE_SPARSE_BINDING_BIT; }
+		if (createFlags & (u32)ImageCreate::Sparse_Residency)	{ flags |= VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT; }
+		if (createFlags & (u32)ImageCreate::Sparse_Aliased)		{ flags |= VK_IMAGE_CREATE_SPARSE_ALIASED_BIT; }
+		if (createFlags & (u32)ImageCreate::Mutable_Format)		{ flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT; }
+		if (createFlags & (u32)ImageCreate::Cube_Compatible)	{ flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT; }
 		return flags;
+	}
+	
+	VkCommandBufferResetFlags ToVulkanCommandBufferUsageFlags(Insight::Graphics::GPUCommandBufferUsageFlags const& flags)
+	{
+		VkCommandBufferResetFlags vFlags = 0;
+		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT) { vFlags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; }
+		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE) { vFlags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT; }
+		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE) { vFlags |= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; }
+		return vFlags;
+	}
+
+	VkViewport ToVulkanViewPort(Insight::Maths::Rect const& rect)
+	{
+		VkViewport viewport;
+		viewport.width = rect.GetX();
+		viewport.height = rect.GetY();
+		viewport.minDepth = rect.GetWidth();
+		viewport.maxDepth = rect.GetHeight();
+		return viewport;
 	}
 }

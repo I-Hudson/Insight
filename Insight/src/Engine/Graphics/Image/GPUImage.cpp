@@ -7,7 +7,7 @@ GPUImageView* GPUImageView::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-		case GraphicsAPI::Vulkan: return ::New<GPUImageViewVulkan>();
+		case GraphicsRendererAPI::Vulkan: return ::New<GPUImageViewVulkan>();
 	}
 
 	ASSERT(false && "[GPUImageView::New] API missing.");
@@ -40,7 +40,7 @@ GPUImage* GPUImage::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-		case GraphicsAPI::Vulkan: return ::New<GPUImageVulkan>();
+		case GraphicsRendererAPI::Vulkan: return ::New<GPUImageVulkan>();
 	}
 
 	ASSERT(false && "[GPUImage::New] API missing.");

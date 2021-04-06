@@ -112,7 +112,7 @@
 			m_renderer->WaitForIdle();
 		}
 
-		GraphicsAPI GraphicsModule::GetAPI()
+		GraphicsRendererAPI GraphicsModule::GetAPI()
 		{
 			return m_renderer->GetAPI();
 		}

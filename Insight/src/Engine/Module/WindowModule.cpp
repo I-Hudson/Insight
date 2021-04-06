@@ -104,11 +104,11 @@
 					IS_CORE_ASSERT(false, "GLFW ERROR");
 				});
 
-			if (Renderer::s_API == GraphicsAPI::Vulkan)
+			if (Renderer::s_API == GraphicsRendererAPI::Vulkan)
 			{
 				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			}
-			else if (Renderer::s_API == GraphicsAPI::OpenGL)
+			else if (Renderer::s_API == GraphicsRendererAPI::OpenGL)
 			{
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -126,7 +126,7 @@
 					EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));
 				});
 
-			if (Renderer::s_API == GraphicsAPI::OpenGL)
+			if (Renderer::s_API == GraphicsRendererAPI::OpenGL)
 			{
 				glfwMakeContextCurrent(m_window.m_window);
 

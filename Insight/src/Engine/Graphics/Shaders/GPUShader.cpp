@@ -85,7 +85,7 @@ GPUShader* GPUShader::New()
 {
 	switch (Module::GraphicsModule::Instance()->GetAPI())
 	{
-		case GraphicsAPI::Vulkan: return ::New<GPUShaderVulkan>();
+		case GraphicsRendererAPI::Vulkan: return ::New<GPUShaderVulkan>();
 	}
 	ASSERT(false && "No GPUShader for graphics API exists.");
 }

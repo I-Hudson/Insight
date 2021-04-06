@@ -25,6 +25,7 @@
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Time/Time.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
+#include <Engine/GraphicsAPI/Vulkan/VulkanUtils.h>
 
 namespace vks
 {

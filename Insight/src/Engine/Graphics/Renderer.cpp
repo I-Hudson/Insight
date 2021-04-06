@@ -9,13 +9,13 @@
 #include "Engine/Memory/MemoryManager.h"
 #include "Engine/Config/Config.h"
 
-GraphicsAPI Renderer::s_API = GraphicsAPI::Vulkan;
+GraphicsRendererAPI Renderer::s_API = GraphicsRendererAPI::Vulkan;
 
 Renderer* Renderer::New()
 {
 	switch (s_API)
 	{
-		case GraphicsAPI::Vulkan: return ::New<vks::VulkanRenderer>();
+		case GraphicsRendererAPI::Vulkan: return ::New<vks::VulkanRenderer>();
 		//case GraphicsAPI::OpenGL: return NEW_ON_HEAP(Platform::OpenGLRenderer);
 	}
 	return nullptr;

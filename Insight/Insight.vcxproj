@@ -223,6 +223,7 @@
     <ClInclude Include="inc\Engine\Graphics\Texture.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h" />
@@ -760,6 +761,7 @@
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />
     <ClCompile Include="src\Engine\Graphics\Texture.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp" />

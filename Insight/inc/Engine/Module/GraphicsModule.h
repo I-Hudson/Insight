@@ -26,7 +26,7 @@ namespace Module
 		virtual void Update(const float& deltaTime) override;
 
 		void WaitForIdle();
-		GraphicsAPI GetAPI();
+		GraphicsRendererAPI GetAPI();
 		void SetMainCamera(CameraComponent* camera);
 		const bool HasMainCamera();
 		const bool IsThisMainCamera(CameraComponent* camera);
