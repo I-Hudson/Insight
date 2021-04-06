@@ -7,6 +7,15 @@
 
 namespace Insight::Graphics
 {
+	GPUCommandBuffer::GPUCommandBuffer()
+		: m_recordCommandCount(0)
+		, m_state(GPUCommandBufferState::IDLE)
+		, m_desc(GPUCommandBufferDesc(GPUCommandBufferUsageFlags::INVALID))
+	{ }
+
+	GPUCommandBuffer::~GPUCommandBuffer()
+	{ }
+
 	GPUCommandBuffer* GPUCommandBuffer::New()
 	{
 		switch (Module::GraphicsModule::Instance()->GetAPI())
@@ -15,5 +24,6 @@ namespace Insight::Graphics
 		}
 
 		ASSERT(false && "[GPUCommandBuffer::New] API not supported.");
+		return nullptr;
 	}
 }

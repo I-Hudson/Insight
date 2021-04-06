@@ -1980,6 +1980,9 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Core\Maths\Rect.h">
+      <Filter>inc\Engine\Core\Maths</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
@@ -2248,6 +2251,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Maths\Rect.cpp">
+      <Filter>src\Engine\Core\Maths</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

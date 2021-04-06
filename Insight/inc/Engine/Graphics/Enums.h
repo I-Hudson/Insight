@@ -301,7 +301,7 @@ enum class GPUResourceMapMode
 /// <summary>
 /// Primitives types.
 /// </summary>
-enum class PrimitiveTopologyType
+enum class PipelineBindPoint
 {
     /// <summary>
     /// Unknown topology.

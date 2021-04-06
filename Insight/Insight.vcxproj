@@ -177,6 +177,7 @@
     <ClInclude Include="inc\Engine\Core\InsightAlias.h" />
     <ClInclude Include="inc\Engine\Core\Log.h" />
     <ClInclude Include="inc\Engine\Core\Maths\Maths.h" />
+    <ClInclude Include="inc\Engine\Core\Maths\Rect.h" />
     <ClInclude Include="inc\Engine\Core\NonCopyable.h" />
     <ClInclude Include="inc\Engine\Core\Object.h" />
     <ClInclude Include="inc\Engine\Core\Templates.h" />
@@ -734,6 +735,7 @@
     <ClCompile Include="src\Engine\Core\InsightAlias.cpp" />
     <ClCompile Include="src\Engine\Core\Log.cpp" />
     <ClCompile Include="src\Engine\Core\Maths\Maths.cpp" />
+    <ClCompile Include="src\Engine\Core\Maths\Rect.cpp" />
     <ClCompile Include="src\Engine\Core\Object.cpp" />
     <ClCompile Include="src\Engine\Core\Types\DateTime.cpp" />
     <ClCompile Include="src\Engine\Core\Types\TimeSpan.cpp" />

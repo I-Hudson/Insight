@@ -1,10 +1,14 @@
 #pragma once
 #include "Engine/Graphics/GPUResource.h"
+#include "Engine/Graphics/Enums.h"
 #include "Engine/Core/Maths/Rect.h"
 
 namespace Insight::Graphics
 {
+	class GPUBuffer;
 	class GPURenderPass;
+	class GPUPipelineLayout;
+	class GPUDescriptorSet;
 
 	enum class GPUCommandBufferState : u8
 	{
@@ -22,6 +26,12 @@ namespace Insight::Graphics
 		ONE_TIME_SUBMIT, 
 		RENDER_PASS_CONTINUE,
 		SIMULATANEOUS_USE
+	};
+
+	enum class GPUCommandBufferIndexType
+	{
+		UINT16,
+		UINT32
 	};
 
 	struct GPUCommandBufferDesc
@@ -51,14 +61,16 @@ namespace Insight::Graphics
 	class GPUCommandBuffer : public GPUResource
 	{
 	public:
-		GPUCommandBuffer()
-		: m_isUsed(false)
-		, m_recordCommandCount(0)
-		, m_state(GPUCommandBufferState::IDLE)
-		{ }
-		~GPUCommandBuffer() { }
+		GPUCommandBuffer();
+		GPUCommandBuffer(GPUCommandBuffer const& other) = delete;
+		~GPUCommandBuffer();
 
 		static GPUCommandBuffer* New();
+		
+		GPUCommandBufferDesc const& GetDesc() const { return m_desc; }
+		bool const& IsSubmitted() const { return m_state == GPUCommandBufferState::SUBMITTED; }
+		u32 const& GetRecordCommandsCount() const { return m_recordCommandCount; }
+		GPUCommandBufferState const& GetState() const { return m_state; }
 
 		virtual void Init(GPUCommandBufferDesc const& desc) = 0;
 		virtual void BeginRecord() = 0;
@@ -66,27 +78,22 @@ namespace Insight::Graphics
 		virtual void Submit() = 0;
 		virtual void Clear() = 0;
 
-		virtual ResourceType GetResourceType() const override { return ResourceType::CommandBuffer; }
-		virtual ObjectType GetObjectType() const override { return ObjectType::Buffer; }
-
-		bool const& IsUsed() const { return m_isUsed; }
-		u32 const& GetRecordCommandsCount() const { return m_recordCommandCount; }
-		GPUCommandBufferState const& GetState() const { return m_state; }
-
 		virtual void BeginRenderpass(GPURenderPass* renderpass) = 0;
 		virtual void EndRenderpass(GPURenderPass* renderpass) = 0;
 		virtual void SetViewPort(Maths::Rect rect) = 0;
 		virtual void SetScissor(Maths::Rect rect) = 0;
 
-		virtual void BindDescriptorSets(bindPoint, pipelineLayout, u32 firstSet, u32 descriptorSetCount, descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
-		virtual void BindVertexBuffer() = 0;
-		virtual void BindVertexBuffers() = 0;
-		virtual void BindIndexBuffer() = 0;
-		virtual void BindIndexBuffers() = 0;
-		virtual void DrawIndex(u32 indicesCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
+		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
+		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer* buffers, u32* offsets) = 0;
+		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, GPUCommandBufferIndexType indexType) = 0;
+		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
+
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const override { return ResourceType::CommandBuffer; }
+		virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
 
 	protected:
-		bool m_isUsed;
+		GPUCommandBufferDesc m_desc;
 		u32 m_recordCommandCount;
 		GPUCommandBufferState m_state;
 	};
