@@ -11,7 +11,8 @@ project "InsightEditor"
 
     files
 	{
-		"src/**.h",
+		"inc/**.h",
+		"inc/**.hpp",
         "src/**.cpp",
         "vendor/ImGui-Addons/FileBrowser/ImGuiFileBrowser.cpp",
         "vendor/ImGui-Addons/FileBrowser/ImGuiFileBrowser.h",
@@ -19,8 +20,8 @@ project "InsightEditor"
 
     includedirs 
     {
-		"$(ProjectDir)src",
-        "$(SolutionDir)Insight/src",
+		"$(ProjectDir)inc",
+        "$(SolutionDir)Insight/inc",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",

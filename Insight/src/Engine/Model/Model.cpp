@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Model.h"
+#include "Engine/Model/Model.h"
 
 #include "stb_image.h"
 #include "Engine/Core/Log.h"

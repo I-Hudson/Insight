@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "ShaderParser.h"
+#include "Engine/ShaderParser/ShaderParser.h"
 #include "Engine/Core/Log.h"
 
 	std::vector<const char*> ShaderParser::m_keywords

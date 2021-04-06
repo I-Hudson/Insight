@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "CameraComponent.h"
+#include "Engine/Component/CameraComponent.h"
 
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Input/Input.h"

@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "SerializableFormat_JSON.h"
-#include "SerializableElementTypes.h"
+#include "Engine/Serialization/File/SerializableFormat_JSON.h"
+#include "Engine/Serialization/File/SerializableElementTypes.h"
 
 	namespace Serialization
 	{

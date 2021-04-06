@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "GPUDevice.h"
-#include "GPUBuffer.h"
-#include "Material.h"
+#include "Engine/Graphics/GPUDevice.h"
+#include "Engine/Graphics/GPUBuffer.h"
+#include "Engine/Graphics/Material.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 #include "Engine/Module/GraphicsModule.h"
 

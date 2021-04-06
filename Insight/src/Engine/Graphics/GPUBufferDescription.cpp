@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "GPUBufferDescription.h"
+#include "Engine/Graphics/GPUBufferDescription.h"
 #include "Engine/Platform/Platform.h"
-#include "PixelFormatExtensions.h"
+#include "Engine/Graphics/PixelFormatExtensions.h"
 
 void GPUBufferDescription::Clear()
 {

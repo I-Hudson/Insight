@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="inc">
+      <UniqueIdentifier>{1F80880B-8B89-887C-1405-9F7C800D947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Editor">
+      <UniqueIdentifier>{75842313-613C-6560-CA43-3EBCB61A0051}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Editor\Components">
+      <UniqueIdentifier>{6A96CF2F-D602-8B2A-9FF6-22880B22AD92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Editor\Windows">
+      <UniqueIdentifier>{AFD35473-9BB7-15C9-0418-101CF01A004B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Module">
+      <UniqueIdentifier>{F41C9126-E0D4-D273-49DC-ABCF35B36D64}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -27,38 +42,38 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Editor\Components\CameraComponentEditorDrawer.h">
-      <Filter>src\Editor\Components</Filter>
+    <ClInclude Include="inc\Editor\Components\CameraComponentEditorDrawer.h">
+      <Filter>inc\Editor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\Components\MeshComponentEditorDrawer.h">
-      <Filter>src\Editor\Components</Filter>
+    <ClInclude Include="inc\Editor\Components\MeshComponentEditorDrawer.h">
+      <Filter>inc\Editor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\Diagnostic.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\Diagnostic.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorDrawer.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\EditorDrawer.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\EditorWindow.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\EditorWindow.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\RTTIToImGUI.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\RTTIToImGUI.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\SceneHierarchyPanel.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\SceneHierarchyPanel.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\TopBarMenu.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\TopBarMenu.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\UIHelper.h">
-      <Filter>src\Editor</Filter>
+    <ClInclude Include="inc\Editor\UIHelper.h">
+      <Filter>inc\Editor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Editor\Windows\AssetWindow.h">
-      <Filter>src\Editor\Windows</Filter>
+    <ClInclude Include="inc\Editor\Windows\AssetWindow.h">
+      <Filter>inc\Editor\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Module\EditorModule.h">
-      <Filter>src\Module</Filter>
+    <ClInclude Include="inc\Module\EditorModule.h">
+      <Filter>inc\Module</Filter>
     </ClInclude>
     <ClInclude Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.h">
       <Filter>vendor\ImGui-Addons\FileBrowser</Filter>

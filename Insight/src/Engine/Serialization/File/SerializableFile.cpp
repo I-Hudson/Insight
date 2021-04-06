@@ -1,8 +1,8 @@
 #include "ispch.h"
-#include "SerializableFile.h"
-#include "SerializableElementTypes.h"
-#include "SerializableFormat_XML.h"
-#include "SerializableFormat_JSON.h"
+#include "Engine/Serialization/File/SerializableFile.h"
+#include "Engine/Serialization/File/SerializableElementTypes.h"
+#include "Engine/Serialization/File/SerializableFormat_XML.h"
+#include "Engine/Serialization/File/SerializableFormat_JSON.h"
 
 namespace Serialization
 {

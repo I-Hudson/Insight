@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "RenderPass.h"
-#include "RenderGraph.h"
+#include "Engine/Graphics/RenderGraph/RenderPass.h"
+#include "Engine/Graphics/RenderGraph/RenderGraph.h"
 
 RenderPass::RenderPass(RenderGraph* graph, const U32& index, const std::string name,
 	RenderGraphQueueFlags queue)

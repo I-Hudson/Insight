@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Material.h"
+#include "Engine/Graphics/Material.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Platform/Vulkan/VulkanMaterial.h"
 

@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "GPUImage.h"
+#include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 

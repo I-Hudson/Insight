@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Config.h"
+#include "Engine/Config/Config.h"
 
 #include <filesystem>
 

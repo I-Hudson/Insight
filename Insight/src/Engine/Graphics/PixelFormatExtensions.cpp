@@ -1,7 +1,7 @@
 // Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
 
 #include "ispch.h"
-#include "PixelFormatExtensions.h"
+#include "Engine/Graphics/PixelFormatExtensions.h"
 
 #define MAX_PIXEL_FORMATS 256
 

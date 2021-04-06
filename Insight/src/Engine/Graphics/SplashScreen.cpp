@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "SplashScreen.h"
+#include "Engine/Graphics/SplashScreen.h"
 
 	SplashScreen::SplashScreen(const int& width, const int& height, const std::string& imagePath)
 		: m_window(nullptr)

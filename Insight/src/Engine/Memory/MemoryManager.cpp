@@ -1,6 +1,6 @@
 #include "ispch.h"
 
-#include "MemoryManager.h"
+#include "Engine/Memory/MemoryManager.h"
 #include "Engine/Config/Config.h"
 #include "Engine/Core/Log.h"
 #include <typeinfo>

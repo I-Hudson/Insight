@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "GPUResourceCollection.h"
-#include "GPUResource.h"
+#include "Engine/Graphics/GPUResourceCollection.h"
+#include "Engine/Graphics/GPUResource.h"
 
 U64 GPUResourceCollection::GetMemoryUsage() const
 {

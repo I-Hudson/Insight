@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "VulkanHeader.h"
+#include	"VulkanHeader.h"
 #include "VulkanRenderer.h"
 #include "VulkanDebug.h"
 #include "VulkanDevice.h"
@@ -24,7 +24,7 @@
 #include "Engine/Config/Config.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Time/Time.h"
-#include "Engine/Graphics/ImGuiRenderer.cpp"
+#include "Engine/Graphics/ImGuiRenderer.h"
 
 namespace vks
 {
@@ -699,49 +699,23 @@ namespace vks
 			}
 		}
 
+		vkResetCommandBuffer(m_frameBufferCmdBufferTest, 0);
 		{
 			// Set target frame buffer
 			renderPassBeginInfo.framebuffer = m_frameBuffer.GetFrameBuffer();
 
 			ThrowIfFailed(vkBeginCommandBuffer(m_frameBufferCmdBuffer, &cmdBufInfo));
-
-			vkCmdBeginRenderPass(m_frameBufferCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-			VkViewport viewport = vks::initializers::viewport(static_cast<float>(m_frameBuffer.GetWidth()), static_cast<float>(m_frameBuffer.GetHeight()), 0.0f, 1.0f);
-			vkCmdSetViewport(m_frameBufferCmdBuffer, 0, 1, &viewport);
-
-			VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
-			vkCmdSetScissor(m_frameBufferCmdBuffer, 0, 1, &scissor);
-
-			// This should be replaced by the mesh components in the scene.
-			{
-				IS_PROFILE_SCOPE("All Draws");
-				for (auto& mesh : meshes)
-				{
-					if (mesh)
-					{
-						{
-							IS_PROFILE_SCOPE("Single Draw");
-							mesh->Draw(m_frameBufferCmdBuffer, updateMaterail);
-						}
-					}
-				}
-			}
-
-			vkCmdEndRenderPass(m_frameBufferCmdBuffer);
-			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBuffer));
-		}
-
-		vkResetCommandBuffer(m_frameBufferCmdBufferTest, 0);
-		{
 			ThrowIfFailed(vkBeginCommandBuffer(m_frameBufferCmdBufferTest, &cmdBufInfo));
 
+			vkCmdBeginRenderPass(m_frameBufferCmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 			vkCmdBeginRenderPass(m_frameBufferCmdBufferTest, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 			VkViewport viewport = vks::initializers::viewport(static_cast<float>(m_frameBuffer.GetWidth()), static_cast<float>(m_frameBuffer.GetHeight()), 0.0f, 1.0f);
+			vkCmdSetViewport(m_frameBufferCmdBuffer, 0, 1, &viewport);
 			vkCmdSetViewport(m_frameBufferCmdBufferTest, 0, 1, &viewport);
 
 			VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
+			vkCmdSetScissor(m_frameBufferCmdBuffer, 0, 1, &scissor);
 			vkCmdSetScissor(m_frameBufferCmdBufferTest, 0, 1, &scissor);
 
 			// This should be replaced by the mesh components in the scene.
@@ -753,15 +727,49 @@ namespace vks
 					{
 						{
 							IS_PROFILE_SCOPE("Single Draw");
+							mesh->Draw(m_frameBufferCmdBuffer, updateMaterail);
 							mesh->Draw(m_frameBufferCmdBufferTest, updateMaterail);
 						}
 					}
 				}
 			}
 
+			vkCmdEndRenderPass(m_frameBufferCmdBuffer);
 			vkCmdEndRenderPass(m_frameBufferCmdBufferTest);
+			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBuffer));
 			ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBufferTest));
 		}
+
+		//vkResetCommandBuffer(m_frameBufferCmdBufferTest, 0);
+		//{
+		//	ThrowIfFailed(vkBeginCommandBuffer(m_frameBufferCmdBufferTest, &cmdBufInfo));
+
+		//	vkCmdBeginRenderPass(m_frameBufferCmdBufferTest, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		//	VkViewport viewport = vks::initializers::viewport(static_cast<float>(m_frameBuffer.GetWidth()), static_cast<float>(m_frameBuffer.GetHeight()), 0.0f, 1.0f);
+		//	vkCmdSetViewport(m_frameBufferCmdBufferTest, 0, 1, &viewport);
+
+		//	VkRect2D scissor = vks::initializers::rect2D(m_frameBuffer.GetWidth(), m_frameBuffer.GetHeight(), 0, 0);
+		//	vkCmdSetScissor(m_frameBufferCmdBufferTest, 0, 1, &scissor);
+
+		//	// This should be replaced by the mesh components in the scene.
+		//	{
+		//		IS_PROFILE_SCOPE("All Draws");
+		//		for (auto& mesh : meshes)
+		//		{
+		//			if (mesh)
+		//			{
+		//				{
+		//					IS_PROFILE_SCOPE("Single Draw");
+		//					mesh->Draw(m_frameBufferCmdBufferTest, updateMaterail);
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	vkCmdEndRenderPass(m_frameBufferCmdBufferTest);
+		//	ThrowIfFailed(vkEndCommandBuffer(m_frameBufferCmdBufferTest));
+		//}
 	}
 
 	void VulkanRenderer::BuildPresentBuffers()

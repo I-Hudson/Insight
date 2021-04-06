@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "GPUImageDescription.h"
+#include "Engine/Graphics/Image/GPUImageDescription.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 
 GPUImageDescription GPUImageDescription::Image2D(U32 width, U32 height, U32 depth, U32 levels, U32 samples, U32 layers, ImageLayout initLayout, ImageUsageFlags usage, PixelFormat format)

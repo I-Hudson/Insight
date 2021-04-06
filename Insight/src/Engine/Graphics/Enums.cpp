@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Enums.h"
+#include "Engine/Graphics/Enums.h"
 
 std::string PipelineStageFlagsToString(const PipelineStageFlags& flags)
 {

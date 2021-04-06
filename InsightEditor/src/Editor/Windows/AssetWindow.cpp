@@ -1,4 +1,4 @@
-#include "AssetWindow.h"
+#include "Editor/Windows/AssetWindow.h"
 #include "Engine/FileSystem/FileSystem.h"
 
     namespace Editor

@@ -1,6 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="inc">
+      <UniqueIdentifier>{1F80880B-8B89-887C-1405-9F7C800D947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine">
+      <UniqueIdentifier>{C431D713-B0E9-1861-19F1-F1BC05C8B351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Component">
+      <UniqueIdentifier>{260F3565-129E-BE2E-BBBC-D229A72ACFD4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Config">
+      <UniqueIdentifier>{49886EBE-B59E-6C54-FE15-F8756A6B3DDC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Content">
+      <UniqueIdentifier>{0E2F478C-FA12-08E2-6373-02354F76F263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Core">
+      <UniqueIdentifier>{9C10AA2B-089C-17F0-11AD-9AE47DB773F0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Core\Collections">
+      <UniqueIdentifier>{8A1B0F0C-F628-3DF2-7F0F-39DDEB1B09A9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Core\Maths">
+      <UniqueIdentifier>{0816BEC2-7482-79BD-3D76-111BA9A19B25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Core\Types">
+      <UniqueIdentifier>{40D949C3-AC45-05BE-7539-9D1BE1642726}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Entitiy">
+      <UniqueIdentifier>{F9494D24-E52D-0E7A-4E8E-08CD3A91F8FB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Enums">
+      <UniqueIdentifier>{FBD60FA1-E7CF-2EF3-1002-1478FC590EFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Event">
+      <UniqueIdentifier>{15F613A1-01EF-32F3-2A21-1878167912FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\FileSystem">
+      <UniqueIdentifier>{58F187E1-C45D-43DC-8D51-DB39F97C6544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Graphics">
+      <UniqueIdentifier>{8436898E-F097-669C-7905-AD4EE5659D5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Graphics\Image">
+      <UniqueIdentifier>{76EB297E-E2AD-5D08-2B5E-EC94975F36E6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Graphics\RenderGraph">
+      <UniqueIdentifier>{C552B1AE-3136-C0EE-3A39-EE2AA69B863F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Graphics\Shaders">
+      <UniqueIdentifier>{5D9F6DA6-C9AC-9B8C-5293-9777BE9F6743}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\GraphicsAPI">
+      <UniqueIdentifier>{1EF7CE0B-0AF1-F75D-F35D-8E6EDFF65DCA}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\GraphicsAPI\Vulkan">
+      <UniqueIdentifier>{DE16391F-4A2F-2049-13DC-AFE27FB3B4E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\GraphicsAPI\Vulkan\RenderGraph">
+      <UniqueIdentifier>{1F8A9ACD-8BA4-FD6E-D4C6-0D0340202576}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\GraphicsAPI\Vulkan\Win32">
+      <UniqueIdentifier>{407D369C-AC36-A146-3596-BB20A14E57B6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Input">
+      <UniqueIdentifier>{C32458A1-AF1D-77F3-D84F-5C78C4A756FF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Instrumentor">
+      <UniqueIdentifier>{8D6D8ED9-F9A4-D670-02AF-3A946E65FD69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Library">
+      <UniqueIdentifier>{C80E3A32-B4F2-FA87-1D53-F5DA0956E509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Memory">
+      <UniqueIdentifier>{ACC40CD5-18DB-0A6B-6152-968CCDA7DBF2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Model">
+      <UniqueIdentifier>{04DEA0A1-F0D6-BFF3-1909-A57805619FFF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Module">
+      <UniqueIdentifier>{F9E2BCD5-65F9-BA6B-AE70-468D1AC68BF3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Platform">
+      <UniqueIdentifier>{98AA430F-040C-211D-8D79-67CFF9D957DC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Platform\Win32">
+      <UniqueIdentifier>{7A74738A-E636-A714-2FE7-35A19BE87FF2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Platform\Windows">
+      <UniqueIdentifier>{D26C3EF5-3E7A-6CDB-C760-68C6336D3892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\RTTI">
+      <UniqueIdentifier>{76D3B12B-E25E-1FF0-EB6F-A2E4577A7BF0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Scene">
+      <UniqueIdentifier>{E1E106A2-CDDA-25F4-F60C-0B79E2640500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Serialization">
+      <UniqueIdentifier>{515147AC-3D76-962C-66C1-7BBC5245954A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Serialization\File">
+      <UniqueIdentifier>{207BEE22-8C93-D54C-5540-65E6C1176AE6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\ShaderParser">
+      <UniqueIdentifier>{77392CE8-E370-747F-EC7A-D8A258319B78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Templates">
+      <UniqueIdentifier>{A213A9E6-8EA2-32B0-37C1-46AB232F4356}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Threading">
+      <UniqueIdentifier>{096DE311-F5FB-6CDB-9E1A-81D68A887D81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Time">
+      <UniqueIdentifier>{E248B32B-4ED4-20F0-57E5-A3E4C3EF7CF0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\Utils">
+      <UniqueIdentifier>{247634A2-106F-53F4-39A1-387925F93200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Platform">
+      <UniqueIdentifier>{534F0EE6-3FB2-9D8A-E837-D640D479690D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Platform\Vulkan">
+      <UniqueIdentifier>{738166A7-DFE2-43B5-6850-8A67D4B07A74}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
     </Filter>
@@ -13,14 +136,8 @@
     <Filter Include="src\Engine\Config">
       <UniqueIdentifier>{D7F3C5AB-430A-C441-8C81-4F63F8D694C9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\Content">
-      <UniqueIdentifier>{5C0C8C24-48F0-4C7A-B150-47CD9D5337FC}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Engine\Core">
       <UniqueIdentifier>{AA407579-16CC-E23D-1FDD-65328BE73E3E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Engine\Core\Collections">
-      <UniqueIdentifier>{98D0548B-04DE-8271-8DC4-7E5CF9D04E28}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Core\Maths">
       <UniqueIdentifier>{9698DC1D-0205-9818-CBF8-2F763724BA80}</UniqueIdentifier>
@@ -30,9 +147,6 @@
     </Filter>
     <Filter Include="src\Engine\Entitiy">
       <UniqueIdentifier>{472792BC-330B-5312-9C6B-4D65886E3D94}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Engine\Enums">
-      <UniqueIdentifier>{C90841A8-B501-60FA-DE33-457FCA8B3F06}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Event">
       <UniqueIdentifier>{E32745A8-CF20-64FA-F852-497FE4AA4306}</UniqueIdentifier>
@@ -58,17 +172,14 @@
     <Filter Include="src\Engine\GraphicsAPI\Vulkan">
       <UniqueIdentifier>{6C47C086-D85F-A7B0-A10C-374A0DE43B4A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph">
+      <UniqueIdentifier>{ADFF2090-191A-8431-623C-94C5CE95AB38}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\GraphicsAPI\Vulkan\Win32">
       <UniqueIdentifier>{4E602FEB-BA19-9A95-4379-B46FAF315005}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Input">
       <UniqueIdentifier>{915689A8-7D4F-A8FA-A681-8D7F92D98706}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Engine\Instrumentor">
-      <UniqueIdentifier>{9BCB5776-0703-A00D-100D-04317CC3C606}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Engine\Instrumentor\Vulkan">
-      <UniqueIdentifier>{BB5C3041-A782-FAA7-90C8-7F737C8D1F74}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Library">
       <UniqueIdentifier>{16EC7ECA-02D0-3F20-6B30-3A7357332AA2}</UniqueIdentifier>
@@ -105,9 +216,6 @@
     </Filter>
     <Filter Include="src\Engine\ShaderParser">
       <UniqueIdentifier>{8597F584-F1CE-3D1C-FAD8-A13F668F6415}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Engine\Templates">
-      <UniqueIdentifier>{707C9AA3-5C0B-246D-052A-3868F1973413}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Threading">
       <UniqueIdentifier>{D7D5D4CE-C364-5E98-6C83-729358F16E3E}</UniqueIdentifier>
@@ -156,446 +264,458 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Engine\Component\CameraComponent.h">
-      <Filter>src\Engine\Component</Filter>
+    <ClInclude Include="inc\Engine\Component\CameraComponent.h">
+      <Filter>inc\Engine\Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Component\Component.h">
-      <Filter>src\Engine\Component</Filter>
+    <ClInclude Include="inc\Engine\Component\Component.h">
+      <Filter>inc\Engine\Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Component\MeshComponent.h">
-      <Filter>src\Engine\Component</Filter>
+    <ClInclude Include="inc\Engine\Component\MeshComponent.h">
+      <Filter>inc\Engine\Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Component\TransformComponent.h">
-      <Filter>src\Engine\Component</Filter>
+    <ClInclude Include="inc\Engine\Component\TransformComponent.h">
+      <Filter>inc\Engine\Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Config\CVar.h">
-      <Filter>src\Engine\Config</Filter>
+    <ClInclude Include="inc\Engine\Config\CVar.h">
+      <Filter>inc\Engine\Config</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Config\CVarParser.h">
-      <Filter>src\Engine\Config</Filter>
+    <ClInclude Include="inc\Engine\Config\CVarParser.h">
+      <Filter>inc\Engine\Config</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Config\Config.h">
-      <Filter>src\Engine\Config</Filter>
+    <ClInclude Include="inc\Engine\Config\Config.h">
+      <Filter>inc\Engine\Config</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Config\ConfigRegistry.h">
-      <Filter>src\Engine\Config</Filter>
+    <ClInclude Include="inc\Engine\Config\ConfigRegistry.h">
+      <Filter>inc\Engine\Config</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Config\ICVar.h">
-      <Filter>src\Engine\Config</Filter>
+    <ClInclude Include="inc\Engine\Config\ICVar.h">
+      <Filter>inc\Engine\Config</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Content\Assert.h">
-      <Filter>src\Engine\Content</Filter>
+    <ClInclude Include="inc\Engine\Content\Assert.h">
+      <Filter>inc\Engine\Content</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Content\Asset.h">
-      <Filter>src\Engine\Content</Filter>
+    <ClInclude Include="inc\Engine\Content\Asset.h">
+      <Filter>inc\Engine\Content</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Application.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Application.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Collections\HashFunctions.h">
-      <Filter>src\Engine\Core\Collections</Filter>
+    <ClInclude Include="inc\Engine\Core\Collections\Buffer.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Collections\span.h">
-      <Filter>src\Engine\Core\Collections</Filter>
+    <ClInclude Include="inc\Engine\Core\Collections\DynamicBuffer.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Common.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Collections\HashFunctions.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Compiler.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Collections\span.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Core.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Common.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\DerivedFrom.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Compiler.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\EntryPoint.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Core.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Enums.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\DerivedFrom.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\HashFunctions.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\EntryPoint.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\InsightAlias.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Enums.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Log.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\HashFunctions.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Maths\Maths.h">
-      <Filter>src\Engine\Core\Maths</Filter>
+    <ClInclude Include="inc\Engine\Core\InsightAlias.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\NonCopyable.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Log.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Object.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Maths\Maths.h">
+      <Filter>inc\Engine\Core\Maths</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Templates.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\NonCopyable.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Type.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Object.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Types\DateTime.h">
-      <Filter>src\Engine\Core\Types</Filter>
+    <ClInclude Include="inc\Engine\Core\Templates.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Types\TimeSpan.h">
-      <Filter>src\Engine\Core\Types</Filter>
+    <ClInclude Include="inc\Engine\Core\Type.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Core\Utils.h">
-      <Filter>src\Engine\Core</Filter>
+    <ClInclude Include="inc\Engine\Core\Types\DateTime.h">
+      <Filter>inc\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Entitiy\Entity.h">
-      <Filter>src\Engine\Entitiy</Filter>
+    <ClInclude Include="inc\Engine\Core\Types\TimeSpan.h">
+      <Filter>inc\Engine\Core\Types</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Enums\GPUResourceUsage.h">
-      <Filter>src\Engine\Enums</Filter>
+    <ClInclude Include="inc\Engine\Core\Utils.h">
+      <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Enums\PropertyFlags.h">
-      <Filter>src\Engine\Enums</Filter>
+    <ClInclude Include="inc\Engine\Entitiy\Entity.h">
+      <Filter>inc\Engine\Entitiy</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Event\ApplicationEvent.h">
-      <Filter>src\Engine\Event</Filter>
+    <ClInclude Include="inc\Engine\Enums\GPUResourceUsage.h">
+      <Filter>inc\Engine\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Event\Event.h">
-      <Filter>src\Engine\Event</Filter>
+    <ClInclude Include="inc\Engine\Enums\PropertyFlags.h">
+      <Filter>inc\Engine\Enums</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Event\EventManager.h">
-      <Filter>src\Engine\Event</Filter>
+    <ClInclude Include="inc\Engine\Event\ApplicationEvent.h">
+      <Filter>inc\Engine\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\FileSystem\FileHandle.h">
-      <Filter>src\Engine\FileSystem</Filter>
+    <ClInclude Include="inc\Engine\Event\Event.h">
+      <Filter>inc\Engine\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\FileSystem\FileSystem.h">
-      <Filter>src\Engine\FileSystem</Filter>
+    <ClInclude Include="inc\Engine\Event\EventManager.h">
+      <Filter>inc\Engine\Event</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\FileSystem\WatchInfo.h">
-      <Filter>src\Engine\FileSystem</Filter>
+    <ClInclude Include="inc\Engine\FileSystem\FileHandle.h">
+      <Filter>inc\Engine\FileSystem</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Config.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\FileSystem\FileSystem.h">
+      <Filter>inc\Engine\FileSystem</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Enums.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h">
+      <Filter>inc\Engine\FileSystem</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Framebuffer.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Config.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUAdapter.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Enums.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUBuffer.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Framebuffer.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUBufferDescription.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUAdapter.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUDevice.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUBuffer.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUImage.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUBufferDescription.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPULimits.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUCommandBuffer.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUResource.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUDevice.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUResourceCollection.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPULimits.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUResourceState.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUResource.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUSamplerDescription.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUResourceCollection.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\GPUTimerQuery.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUResourceState.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\ImGuiRenderer.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUSamplerDescription.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Image\GPUImage.h">
-      <Filter>src\Engine\Graphics\Image</Filter>
+    <ClInclude Include="inc\Engine\Graphics\GPUTimerQuery.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Image\GPUImageDescription.h">
-      <Filter>src\Engine\Graphics\Image</Filter>
+    <ClInclude Include="inc\Engine\Graphics\ImGuiRenderer.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Material.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Image\GPUImage.h">
+      <Filter>inc\Engine\Graphics\Image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\PixelFormat.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDescription.h">
+      <Filter>inc\Engine\Graphics\Image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\PixelFormatExtensions.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Material.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderGraph.h">
-      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    <ClInclude Include="inc\Engine\Graphics\PixelFormat.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\RenderGraph\RenderPass.h">
-      <Filter>src\Engine\Graphics\RenderGraph</Filter>
+    <ClInclude Include="inc\Engine\Graphics\PixelFormatExtensions.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\RenderPassInfo.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderGraph.h">
+      <Filter>inc\Engine\Graphics\RenderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Renderer.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderPass.h">
+      <Filter>inc\Engine\Graphics\RenderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\ShaderCompliation.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\RenderPassInfo.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Shaders\GPUShader.h">
-      <Filter>src\Engine\Graphics\Shaders</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Renderer.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\SplashScreen.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\ShaderCompliation.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Graphics\Texture.h">
-      <Filter>src\Engine\Graphics</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Shaders\GPUShader.h">
+      <Filter>inc\Engine\Graphics\Shaders</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Config.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\Graphics\SplashScreen.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\Graphics\Texture.h">
+      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Types.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanHeaders.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan\RenderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Types.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VmaUsage.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanDebug.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanHeaders.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
-      <Filter>src\Engine\GraphicsAPI\Vulkan\Win32</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Input\Input.h">
-      <Filter>src\Engine\Input</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Input\InsightKeyCodes.h">
-      <Filter>src\Engine\Input</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Instrumentor\Instrumentor.h">
-      <Filter>src\Engine\Instrumentor</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanUtils.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Library\Library.h">
-      <Filter>src\Engine\Library</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Library\ModelLibrary.h">
-      <Filter>src\Engine\Library</Filter>
+    <ClInclude Include="inc\Engine\Input\Input.h">
+      <Filter>inc\Engine\Input</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Library\ShaderLibrary.h">
-      <Filter>src\Engine\Library</Filter>
+    <ClInclude Include="inc\Engine\Input\InsightKeyCodes.h">
+      <Filter>inc\Engine\Input</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\CrtAllocator.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Instrumentor\Instrumentor.h">
+      <Filter>inc\Engine\Instrumentor</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\FreeListAllocator.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Library\Library.h">
+      <Filter>inc\Engine\Library</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\Memory.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Library\ModelLibrary.h">
+      <Filter>inc\Engine\Library</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\MemoryManager.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Library\ShaderLibrary.h">
+      <Filter>inc\Engine\Library</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\MemoryUtils.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Memory\CrtAllocator.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\ProfilerMemory.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Memory\FreeListAllocator.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\SinglyLinkedList.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Memory\Memory.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Memory\StackAllocator.h">
-      <Filter>src\Engine\Memory</Filter>
+    <ClInclude Include="inc\Engine\Memory\MemoryManager.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Model\Mesh.h">
-      <Filter>src\Engine\Model</Filter>
+    <ClInclude Include="inc\Engine\Memory\MemoryUtils.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Model\Model.h">
-      <Filter>src\Engine\Model</Filter>
+    <ClInclude Include="inc\Engine\Memory\ProfilerMemory.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Model\SubMesh.h">
-      <Filter>src\Engine\Model</Filter>
+    <ClInclude Include="inc\Engine\Memory\SinglyLinkedList.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\AssetModule.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Memory\StackAllocator.h">
+      <Filter>inc\Engine\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\GraphicsModule.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Model\Mesh.h">
+      <Filter>inc\Engine\Model</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\InputModule.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Model\Model.h">
+      <Filter>inc\Engine\Model</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\Module.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Model\SubMesh.h">
+      <Filter>inc\Engine\Model</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\ModuleManager.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Module\AssetModule.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Module\WindowModule.h">
-      <Filter>src\Engine\Module</Filter>
+    <ClInclude Include="inc\Engine\Module\GraphicsModule.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\CriticalSection.h">
-      <Filter>src\Engine\Platform</Filter>
+    <ClInclude Include="inc\Engine\Module\InputModule.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Defines.h">
-      <Filter>src\Engine\Platform</Filter>
+    <ClInclude Include="inc\Engine\Module\Module.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Platform.h">
-      <Filter>src\Engine\Platform</Filter>
+    <ClInclude Include="inc\Engine\Module\ModuleManager.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Types.h">
-      <Filter>src\Engine\Platform</Filter>
+    <ClInclude Include="inc\Engine\Module\WindowModule.h">
+      <Filter>inc\Engine\Module</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Win32\Win32CriticalSection.h">
-      <Filter>src\Engine\Platform\Win32</Filter>
+    <ClInclude Include="inc\Engine\Platform\CriticalSection.h">
+      <Filter>inc\Engine\Platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Win32\Win32Defines.h">
-      <Filter>src\Engine\Platform\Win32</Filter>
+    <ClInclude Include="inc\Engine\Platform\Defines.h">
+      <Filter>inc\Engine\Platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Win32\Win32Platform.h">
-      <Filter>src\Engine\Platform\Win32</Filter>
+    <ClInclude Include="inc\Engine\Platform\Platform.h">
+      <Filter>inc\Engine\Platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Win32\WindowsMinimal.h">
-      <Filter>src\Engine\Platform\Win32</Filter>
+    <ClInclude Include="inc\Engine\Platform\Types.h">
+      <Filter>inc\Engine\Platform</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Windows\PlatformWindows.h">
-      <Filter>src\Engine\Platform\Windows</Filter>
+    <ClInclude Include="inc\Engine\Platform\Win32\Win32CriticalSection.h">
+      <Filter>inc\Engine\Platform\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Platform\Windows\WindowsDefines.h">
-      <Filter>src\Engine\Platform\Windows</Filter>
+    <ClInclude Include="inc\Engine\Platform\Win32\Win32Defines.h">
+      <Filter>inc\Engine\Platform\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\RTTI\RTTI.h">
-      <Filter>src\Engine\RTTI</Filter>
+    <ClInclude Include="inc\Engine\Platform\Win32\Win32Platform.h">
+      <Filter>inc\Engine\Platform\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\RTTI\RTTITypes.h">
-      <Filter>src\Engine\RTTI</Filter>
+    <ClInclude Include="inc\Engine\Platform\Win32\WindowsMinimal.h">
+      <Filter>inc\Engine\Platform\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Scene\Scene.h">
-      <Filter>src\Engine\Scene</Filter>
+    <ClInclude Include="inc\Engine\Platform\Windows\PlatformWindows.h">
+      <Filter>inc\Engine\Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\File\SerializableElementTypes.h">
-      <Filter>src\Engine\Serialization\File</Filter>
+    <ClInclude Include="inc\Engine\Platform\Windows\WindowsDefines.h">
+      <Filter>inc\Engine\Platform\Windows</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\File\SerializableFile.h">
-      <Filter>src\Engine\Serialization\File</Filter>
+    <ClInclude Include="inc\Engine\RTTI\RTTI.h">
+      <Filter>inc\Engine\RTTI</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\File\SerializableFormat_JSON.h">
-      <Filter>src\Engine\Serialization\File</Filter>
+    <ClInclude Include="inc\Engine\RTTI\RTTITypes.h">
+      <Filter>inc\Engine\RTTI</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\File\SerializableFormat_XML.h">
-      <Filter>src\Engine\Serialization\File</Filter>
+    <ClInclude Include="inc\Engine\Scene\Scene.h">
+      <Filter>inc\Engine\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\Serializable.h">
-      <Filter>src\Engine\Serialization</Filter>
+    <ClInclude Include="inc\Engine\Serialization\File\SerializableElementTypes.h">
+      <Filter>inc\Engine\Serialization\File</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Serialization\SerializeHelper.h">
-      <Filter>src\Engine\Serialization</Filter>
+    <ClInclude Include="inc\Engine\Serialization\File\SerializableFile.h">
+      <Filter>inc\Engine\Serialization\File</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\ShaderParser\ShaderParser.h">
-      <Filter>src\Engine\ShaderParser</Filter>
+    <ClInclude Include="inc\Engine\Serialization\File\SerializableFormat_JSON.h">
+      <Filter>inc\Engine\Serialization\File</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Templates\TPointers.h">
-      <Filter>src\Engine\Templates</Filter>
+    <ClInclude Include="inc\Engine\Serialization\File\SerializableFormat_XML.h">
+      <Filter>inc\Engine\Serialization\File</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Templates\TSingleton.h">
-      <Filter>src\Engine\Templates</Filter>
+    <ClInclude Include="inc\Engine\Serialization\Serializable.h">
+      <Filter>inc\Engine\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Threading\TThreadSafe.h">
-      <Filter>src\Engine\Threading</Filter>
+    <ClInclude Include="inc\Engine\Serialization\SerializeHelper.h">
+      <Filter>inc\Engine\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Threading\ThreadCollection.h">
-      <Filter>src\Engine\Threading</Filter>
+    <ClInclude Include="inc\Engine\ShaderParser\ShaderParser.h">
+      <Filter>inc\Engine\ShaderParser</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Threading\ThreadPool.hpp">
-      <Filter>src\Engine\Threading</Filter>
+    <ClInclude Include="inc\Engine\Templates\TPointers.h">
+      <Filter>inc\Engine\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Threading\Threading.h">
-      <Filter>src\Engine\Threading</Filter>
+    <ClInclude Include="inc\Engine\Templates\TSingleton.h">
+      <Filter>inc\Engine\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Time\Stopwatch.h">
-      <Filter>src\Engine\Time</Filter>
+    <ClInclude Include="inc\Engine\Threading\TThreadSafe.h">
+      <Filter>inc\Engine\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Time\Time.h">
-      <Filter>src\Engine\Time</Filter>
+    <ClInclude Include="inc\Engine\Threading\ThreadCollection.h">
+      <Filter>inc\Engine\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\Utils\Crc.h">
-      <Filter>src\Engine\Utils</Filter>
+    <ClInclude Include="inc\Engine\Threading\ThreadPool.hpp">
+      <Filter>inc\Engine\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Insight.h">
-      <Filter>src</Filter>
+    <ClInclude Include="inc\Engine\Threading\Threading.h">
+      <Filter>inc\Engine\Threading</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\Swapchain.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\Time\Stopwatch.h">
+      <Filter>inc\Engine\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanBuffer.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\Time\Time.h">
+      <Filter>inc\Engine\Time</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanDebug.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Engine\Utils\Crc.h">
+      <Filter>inc\Engine\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanDevice.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Insight.h">
+      <Filter>inc</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanFrameBuffer.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\Swapchain.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanHeader.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanBuffer.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanImGUIRenderer.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanDebug.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanInitializers.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanDevice.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanMaterial.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanFrameBuffer.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanPipeline.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanHeader.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanRenderer.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanImGUIRenderer.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\Platform\Vulkan\VulkanTexture.h">
-      <Filter>src\Platform\Vulkan</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanInitializers.h">
+      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="src\ispch.h">
-      <Filter>src</Filter>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanMaterial.h">
+      <Filter>inc\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanPipeline.h">
+      <Filter>inc\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanRenderer.h">
+      <Filter>inc\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Platform\Vulkan\VulkanTexture.h">
+      <Filter>inc\Platform\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\ispch.h">
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome4.h">
       <Filter>vendor\IconFontCppHeaders</Filter>
@@ -1857,8 +1977,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h" />
-    <ClInclude Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
@@ -1918,6 +2036,9 @@
     <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUCommandBuffer.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -1928,6 +2049,9 @@
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Image\GPUImage.cpp">
+      <Filter>src\Engine\Graphics\Image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDescription.cpp">
       <Filter>src\Engine\Graphics\Image</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Material.cpp">
@@ -1966,8 +2090,14 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\RenderGraph</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
@@ -1986,9 +2116,6 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Input\Input.cpp">
       <Filter>src\Engine\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Instrumentor\Vulkan\VulkanRendererEditorOverlay.cpp">
-      <Filter>src\Engine\Instrumentor\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Library\ModelLibrary.cpp">
       <Filter>src\Engine\Library</Filter>
@@ -2113,8 +2240,8 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDescription.cpp" />
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp" />
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.cpp" />
+    <ClCompile Include="src\Engine\Core\InsightAlias.cpp">
+      <Filter>src\Engine\Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -13,8 +13,8 @@ project "Insight"
 
     files
 	{
-		"src/**.h",
-		"src/**.hpp",
+		"inc/**.h",
+		"inc/**.hpp",
         "src/**.cpp",
         "vendor/stb_image/**.h",
 		"vendor/stb_image/**.cpp",
@@ -27,8 +27,10 @@ project "Insight"
 
     includedirs 
     {
-		"$(ProjectDir)src",
-		"$(ProjectDir)src/Insight",
+		"$(ProjectDir)inc",
+		"$(ProjectDir)inc/Insight",
+		"$(ProjectDir)inc/Platform",
+		"$(ProjectDir)inc/Platform/Vulkan",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",

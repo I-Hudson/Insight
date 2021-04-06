@@ -1,7 +1,7 @@
 #include "ispch.h"
 
-#include "Application.h"
-#include "Log.h"
+#include "Engine/Core/Application.h"
+#include "Engine/Core/Log.h"
 #include "Engine/Config/Config.h"
 
 #include "Engine/Memory/ProfilerMemory.h"
@@ -41,7 +41,10 @@ Application::Application()
 {
 	IS_PROFILE_FUNCTION();
 
+#ifdef IS_DEBUG
 	new ProfilerMemory();
+#endif
+
 
 	Config::GetInstance().ParseInFolder("./data/config");
 
@@ -90,12 +93,13 @@ Application::~Application()
 		free(entry);
 	}
 
+#ifdef IS_DEBUG
 	delete ProfilerMemory::Instance();
+#endif
 }
 
 void Application::Run()
 {
-	//AllcoBench();
 	Create();
 
 #ifdef THREADS

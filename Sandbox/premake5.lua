@@ -9,13 +9,15 @@ project "Sandbox"
 
     files
 	{
-		"src/**.h",
+		"inc/**.h",
+		"inc/**.hpp",
 		"src/**.cpp"
 	}
 
     includedirs
     {
-        "$(SolutionDir)Insight/src",
+        "$(ProjectDir)/inc",
+        "$(SolutionDir)Insight/inc",
         "%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",

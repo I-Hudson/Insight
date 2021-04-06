@@ -1,14 +1,14 @@
 #include "ispch.h"
-#include "GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 #include "VulkanInitializers.h"
 #include "VulkanDebug.h"
-#include "VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/Config/Config.h"
 #include "GLFW/glfw3.h"
-#include "VulkanPlatform.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanPlatform.h"
 #include "Engine/Threading/Threading.h"
 
-#include "GPUAdapterVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
 #include "Engine/Graphics/GPUBufferDescription.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 

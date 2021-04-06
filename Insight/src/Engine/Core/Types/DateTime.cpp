@@ -1,8 +1,8 @@
 // Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
 
 #include "ispch.h"
-#include "DateTime.h"
-#include "TimeSpan.h"
+#include "Engine/Core/Types/DateTime.h"
+#include "Engine/Core/Types/TimeSpan.h"
 #include "Engine/Platform/Platform.h"
 
 const I32 DateTime::CachedDaysPerMonth[] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };

@@ -1,6 +1,6 @@
 #include "ispch.h"
 
-#include "ModuleManager.h"
+#include "Engine/Module/ModuleManager.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 
 	namespace Module

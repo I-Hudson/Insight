@@ -1,9 +1,9 @@
 #include "ispch.h"
 #include "vulkan/vulkan.h"
 #include "Engine/Platform/Platform.h"
-#include "GPUDeviceVulkan.h"
-#include "VulkanUtils.h"
-#include "VulkanPlatform.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanPlatform.h"
 #include "Engine/Config/Config.h"
 #include "GLFW/glfw3.h"
 

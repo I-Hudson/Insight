@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "GPUImageVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 #include "VulkanInitializers.h"
-#include "VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 
 GPUImageViewVulkan::GPUImageViewVulkan()

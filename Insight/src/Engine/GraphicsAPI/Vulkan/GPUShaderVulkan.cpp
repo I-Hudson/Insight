@@ -1,8 +1,8 @@
 #include "ispch.h"
-#include "GPUShaderVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
 #include "VulkanInitializers.h"
-#include "VulkanUtils.h"
-#include "GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 
 GPUShaderVulkan::GPUShaderVulkan()
 	: m_pipelineShaderStages(

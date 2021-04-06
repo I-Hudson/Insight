@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "RenderGraph.h"
+#include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
 #include "Engine/Config/Config.h"
 #include "Engine/Module/GraphicsModule.h"
@@ -25,6 +25,15 @@ RenderGraph::RenderGraph()
 
 RenderGraph::~RenderGraph()
 {
+	for (auto* pass : m_passes)
+	{
+		::Delete(pass);
+	}
+
+	for (auto* resource : m_resources)
+	{
+		::Delete(resource);
+	}
 }
 
 RenderPass& RenderGraph::AddPass(const std::string& name, RenderGraphQueueFlags queue)
@@ -37,7 +46,7 @@ RenderPass& RenderGraph::AddPass(const std::string& name, RenderGraphQueueFlags 
 	else
 	{
 		U32 newIndex = (U32)m_passes.size();
-		m_passes.emplace_back(new RenderPass(this, newIndex, name, queue));
+		m_passes.emplace_back(::New<RenderPass>(this, newIndex, name, queue));
 		m_passToIndex[name] = newIndex;
 		return *m_passes.back();
 	}
@@ -54,7 +63,7 @@ RenderTextureResouce& RenderGraph::GetTextureResouce(const std::string& name)
 	else
 	{
 		U32 newIndex = (U32)m_resources.size();
-		m_resources.emplace_back(new RenderTextureResouce(name, newIndex));
+		m_resources.emplace_back(::New<RenderTextureResouce>(name, newIndex));
 		m_resourceToIndex[name] = newIndex;
 		return static_cast<RenderTextureResouce&>(*m_resources.back());
 	}

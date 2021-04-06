@@ -1,7 +1,7 @@
 #include "ispch.h"
-#include "Mesh.h"
+#include "Engine/Model/Mesh.h"
 
-#include "Model.h"
+#include "Engine/Model/Model.h"
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "Assimp/mesh.h"

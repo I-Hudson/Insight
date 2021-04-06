@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Entity.h"
+#include "Engine/Entitiy/Entity.h"
 
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Component.h"

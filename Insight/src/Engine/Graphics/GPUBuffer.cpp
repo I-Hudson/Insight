@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "GPUBuffer.h"
-#include "GPUDevice.h"
+#include "Engine/Graphics/GPUBuffer.h"
+#include "Engine/Graphics/GPUDevice.h"
 
 GPUBuffer* GPUBuffer::New()
 {

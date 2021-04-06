@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "GraphicsModule.h"
+#include "Engine/Module/GraphicsModule.h"
 #include "Engine/Module/WindowModule.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Component/MeshComponent.h"
@@ -23,57 +23,60 @@
 
 		GraphicsModule::GraphicsModule()
 		{
-			// TESTING
-			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+#ifdef RENDER_GRAPH_TESTING
+			{
+				// TESTING
+				GPUDevice* gpuDevice = GPUDeviceVulkan::New();
 
-			GPUShader* shader = GPUShader::New();
-			shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
-			shader->Compile();
-			::Delete(shader);
+				GPUShader* shader = GPUShader::New();
+				shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
+				shader->Compile();
+				::Delete(shader);
 
-			GPUImage* image = GPUImage::New();
-			image->Init(GPUImageDescription::RenderTarget(1920, 1080, PixelFormat::R8G8B8A8_SNorm));
-			GPUImageView* view = GPUImageView::New();
-			view->Init(image);
+				GPUImage* image = GPUImage::New();
+				image->Init(GPUImageDescription::RenderTarget(1920, 1080, PixelFormat::R8G8B8A8_SNorm));
+				GPUImageView* view = GPUImageView::New();
+				view->Init(image);
 
-			::Delete(image);
-			::Delete(view);
+				::Delete(image);
+				::Delete(view);
 
-			ResourceDimensions swapchain;
-			swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			swapchain.Width = 1920;
-			swapchain.Height = 1080;
-			swapchain.Samples = 4;
-			swapchain.Levels = 1;
-			swapchain.Layers = 1;
-			swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
+				ResourceDimensions swapchain;
+				swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
+				swapchain.Width = 1920;
+				swapchain.Height = 1080;
+				swapchain.Samples = 4;
+				swapchain.Levels = 1;
+				swapchain.Layers = 1;
+				swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
 
-			ImageAttachmentInfo color, hdrLighting;
-			color.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			hdrLighting.Format = PixelFormat::R32G32B32A32_SInt;
+				ImageAttachmentInfo color, hdrLighting;
+				color.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
+				hdrLighting.Format = PixelFormat::R32G32B32A32_SInt;
 
-			RenderGraph* graph = RenderGraph::New();
-			graph->SetSwapchainDimensions(swapchain);
+				RenderGraph* graph = RenderGraph::New();
+				graph->SetSwapchainDimensions(swapchain);
 
-			auto& lPass = graph->AddPass("Lightting", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			lPass.AddColorOutput("HDR-Lightting-Image", hdrLighting);
-			lPass.AddAttachmentInput("color");
+				auto& lPass = graph->AddPass("Lightting", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+				lPass.AddColorOutput("HDR-Lightting-Image", hdrLighting);
+				lPass.AddAttachmentInput("color");
 
-			auto& gPass = graph->AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			gPass.AddColorOutput("color", color);
+				auto& gPass = graph->AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+				gPass.AddColorOutput("color", color);
 
-			graph->SetbackBufferSource("HDR-Lightting-Image");
-			graph->Build();
-			graph->SetupAttachments();
-			graph->EnqueueRenderPass();
+				graph->SetbackBufferSource("HDR-Lightting-Image");
+				graph->Build();
+				graph->SetupAttachments();
+				graph->EnqueueRenderPass();
 
-			graph->LogToConsole();
-			graph->Reset();
+				graph->LogToConsole();
+				::Delete(graph);
 
-			GPUDevice::Instance()->Dispose();
-			::Delete(GPUDevice::Instance());
-
-			// TESTING
+				GPUDevice::Instance()->Dispose();
+				::Delete(GPUDevice::Instance());
+				// TESTING
+			}
+#endif
 
 			m_renderer = Renderer::New();
 			m_renderer->Init();

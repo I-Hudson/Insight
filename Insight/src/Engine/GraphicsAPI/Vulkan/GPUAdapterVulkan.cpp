@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "GPUAdapterVulkan.h"
-#include "VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 
 GPUAdapterVulkan::GPUAdapterVulkan(const VkPhysicalDevice device)
 	: Gpu(device)

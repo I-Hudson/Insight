@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "Texture.h"
+#include "Engine/Graphics/Texture.h"
 
 #include "Engine/Platform/Platform.h"
 #include "Engine/Module/GraphicsModule.h"

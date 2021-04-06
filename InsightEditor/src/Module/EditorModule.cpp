@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "EditorModule.h"
+#include "Module/EditorModule.h"
 #include "Editor/EditorWindow.h"
 
 #include "Editor/SceneHierarchyPanel.h"

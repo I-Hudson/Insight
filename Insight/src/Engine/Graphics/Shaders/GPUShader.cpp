@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "GPUShader.h"
+#include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Platform/Platform.h"
 #include "Engine/FileSystem/FileSystem.h"
 #include "Engine/Graphics/ShaderCompliation.h"

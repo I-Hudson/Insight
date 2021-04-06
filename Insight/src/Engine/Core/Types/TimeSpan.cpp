@@ -2,7 +2,7 @@
 
 #include "ispch.h"
 #include "Engine/Core/Utils.h"
-#include "TimeSpan.h"
+#include "Engine/Core/Types/TimeSpan.h"
 
 TimeSpan TimeSpan::FromDays(double days)
 {

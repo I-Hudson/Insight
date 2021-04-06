@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Engine/Config/CVar.h"
-#include "ConfigRegistry.h"
+#include "Engine/Config/ConfigRegistry.h"
 #include <glm/glm.hpp>
 
 	// Declare template classes for CVar.

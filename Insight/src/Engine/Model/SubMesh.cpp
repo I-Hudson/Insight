@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "SubMesh.h"
+#include "Engine/Model/SubMesh.h"
 #include "Engine/Memory/MemoryManager.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Graphics/GPUBuffer.h"

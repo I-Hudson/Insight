@@ -1,5 +1,5 @@
 #include "ispch.h"
-#include "MeshComponent.h"
+#include "Engine/Component/MeshComponent.h"
 
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Library/ModelLibrary.h"
