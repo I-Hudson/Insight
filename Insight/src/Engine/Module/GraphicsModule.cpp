@@ -14,6 +14,8 @@
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/Graphics/Image/GPUImage.h"
+#include "Engine/Graphics/GPUCommandBuffer.h"
+#define RENDER_GRAPH_TESTING 1
 // TESTING
 
 	namespace Module
@@ -23,7 +25,7 @@
 
 		GraphicsModule::GraphicsModule()
 		{
-#ifdef RENDER_GRAPH_TESTING
+#if RENDER_GRAPH_TESTING
 			{
 				// TESTING
 				GPUDevice* gpuDevice = GPUDeviceVulkan::New();
@@ -40,6 +42,18 @@
 
 				::Delete(image);
 				::Delete(view);
+
+				{
+					using namespace Insight::Graphics;
+					GPUCommandPool* cmdPool = GPUCommandPool::New();
+					cmdPool->Init(GPUCommandPoolDesc(GPUCommandPoolFlags::TRANSIENT, 0));
+					auto* buffer = cmdPool->AllocateCommandBuffer(GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+
+					buffer->ReleaseGPU();
+					::Delete(buffer);
+					cmdPool->ReleaseGPU();
+					::Delete(cmdPool);
+				}
 
 				ResourceDimensions swapchain;
 				swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;

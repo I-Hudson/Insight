@@ -5,17 +5,19 @@
 
 namespace Insight::GraphicsAPI::Vulkan
 {
+	class GPUCommandPoolVulkan;
+
 	class GPUCommandBufferVulkan : public GPUResouceVulkan<Graphics::GPUCommandBuffer>
 	{
 	public:
 		GPUCommandBufferVulkan();
-		~GPUCommandBufferVulkan();
+		virtual ~GPUCommandBufferVulkan() override;
 
 		virtual void Init(Graphics::GPUCommandBufferDesc const& desc) override;
 		virtual void BeginRecord() override;
 		virtual void EndRecord() override;
+		virtual void Reset() override;
 		virtual void Submit() override;
-		virtual void Clear() override;
 
 		virtual void BeginRenderpass(Graphics::GPURenderPass* renderpass) override;
 		virtual void EndRenderpass(Graphics::GPURenderPass* renderpass) override;
@@ -24,7 +26,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) override;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer* buffers, u32* offsets) override;
-		virtual void BindIndexBuffers(GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType) override;
+		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType) override;
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) override;
 
 		// [GPUResouce]
@@ -32,5 +34,31 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	private:
 		VkCommandBuffer m_cmdBuffer;
+
+		friend class GPUCommandPoolVulkan;
+	};
+
+	class GPUCommandPoolVulkan : public GPUResouceVulkan<Graphics::GPUCommandPool>
+	{
+	public:
+		GPUCommandPoolVulkan();
+		virtual ~GPUCommandPoolVulkan() override;
+
+		virtual void Init(Graphics::GPUCommandPoolDesc const& desc) override;
+		virtual Graphics::GPUCommandBuffer* AllocateCommandBuffer(Graphics::GPUCommandBufferDesc& desc) override;
+		virtual std::vector<Graphics::GPUCommandBuffer*> AllocateCommandBuffers(Graphics::GPUCommandBufferDesc& desc, u32 count) override;
+		virtual void FreeCommandBuffer(std::vector<Graphics::GPUCommandBuffer*> buffers) override;
+
+		// [GPUResource]
+		virtual void OnReleaseGPU() override;
+
+	private:
+		void AllocateCommandBuffer(GPUCommandBufferVulkan* buffer);
+		void FreeCommandBuffer(GPUCommandBufferVulkan* buffer);
+
+	private:
+		VkCommandPool m_cmdPool;
+
+		friend class GPUCommandBufferVulkan;
 	};
 }

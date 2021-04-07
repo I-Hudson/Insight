@@ -10,19 +10,31 @@ namespace Insight::GraphicsAPI::Vulkan
 {
 	GPUCommandBufferVulkan::GPUCommandBufferVulkan()
 		: m_cmdBuffer(nullptr)
-	{
-	}
+	{ }
 
 	GPUCommandBufferVulkan::~GPUCommandBufferVulkan()
-	{
-	}
+	{ }
 
 	void GPUCommandBufferVulkan::Init(Graphics::GPUCommandBufferDesc const& desc)
 	{
+		ReleaseGPU();
+
+		m_desc = desc;
+		GPUCommandPoolVulkan* cmdPool = m_desc.CommandPool != nullptr ? static_cast<GPUCommandPoolVulkan*>(m_desc.CommandPool) : nullptr;// m_device->GetDefaultCommandPool();
+		cmdPool->AllocateCommandBuffer(this);
+		m_memoryUsage = 1;
 	}
 
 	void GPUCommandBufferVulkan::BeginRecord()
 	{
+		ASSERT(	GetDesc().Usage == Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE ? 
+				m_state == Graphics::GPUCommandBufferState::IDLE || m_state == Graphics::GPUCommandBufferState::SUBMITTED :
+				m_state == Graphics::GPUCommandBufferState::IDLE && 
+				GetDesc().Usage == Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE ? 
+				"[GPUCommandBufferVulkan::BeginRecord] CommandBuffer 'SIMULATANEOUS_USE' is set. Command Buffer must be in the 'IDLE' or 'SUBMITTED' state." : 
+				"[GPUCommandBufferVulkan::BeginRecord] CommandBuffer must be in the 'IDLE' state before recording again.");
+		
+		m_state = Graphics::GPUCommandBufferState::RECORDING;
 		VkCommandBufferBeginInfo info = vks::initializers::commandBufferBeginInfo();
 		info.flags = ToVulkanCommandBufferUsageFlags(m_desc.Usage);
 		ThrowIfFailed(vkBeginCommandBuffer(m_cmdBuffer, &info));
@@ -30,19 +42,32 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::EndRecord()
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::EndRecord] 'EndRecord' can only be called on a command buffer which is in the recording state.");
 		vkEndCommandBuffer(m_cmdBuffer);
+		m_state = Graphics::GPUCommandBufferState::IDLE;
+	}
+
+	void GPUCommandBufferVulkan::Reset()
+	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Reset] Command buffer must be in 'IDLE' state before being reset.");
+		vkResetCommandBuffer(m_cmdBuffer, GetDesc().ReleaseResources == false ? 0 : VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 	}
 
 	void GPUCommandBufferVulkan::Submit()
 	{
-	}
-
-	void GPUCommandBufferVulkan::Clear()
-	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Submit] Command buffer must be in the 'IDLE' state to be submitted.");
+		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
 	}
 
 	void GPUCommandBufferVulkan::OnReleaseGPU()
 	{
+		if (m_cmdBuffer)
+		{
+			/*ASSERT(m_cmdBuffer && "[GPUCommandBufferVulkan::OnReleaseGPU] Command buffer must be freed. This is done through the command pool it was allocated \
+														or calling '::Delete' on the command buffer pointer.");*/
+			m_desc.CommandPool->FreeCommandBuffer({ this });
+			m_memoryUsage = 0;
+		}
 	}
 
 	void GPUCommandBufferVulkan::BeginRenderpass(Graphics::GPURenderPass* renderpass)
@@ -86,7 +111,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		for (u32 i = 0; i < bindingCount; ++i)
 		{
 			//TODO: Finish this.
-			// Make the assumption that buffers and offsets is a pointer to the first element in an array/vector.
+			// Make the assumption that 'buffers' and 'offsets' is a pointer to the first element in an array/vector.
 			ASSERT((buffers + (sizeof(GPUBuffer) * i))->GetDescription().Flags == GPUBufferFlags::VertexBuffer && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type vertex.");
 			//GPUBufferVulkan* gpuVkBuffer = static_cast<GPUBufferVulkan*>(buffers[i]->GetBuffer());
 			//vkBuffers.push_back()
@@ -95,17 +120,84 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkCmdBindVertexBuffers(m_cmdBuffer, firstBinding, bindingCount, vkBuffers.data(), vkDeviceSizes.data());
 	}
 
-	void GPUCommandBufferVulkan::BindIndexBuffers(GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType)
+	void GPUCommandBufferVulkan::BindIndexBuffer(GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType)
 	{
 		++m_recordCommandCount;
 		ASSERT(buffer->GetDescription().Flags == GPUBufferFlags::IndexBuffer && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type index.");
 		VkBuffer vkBuffer = nullptr; //static_cast<GPUBufferVulkan*>(buffer->GetBuffer());
 		vkCmdBindIndexBuffer(m_cmdBuffer, vkBuffer, offset, (VkIndexType)indexType);
 	}
-
+	
 	void GPUCommandBufferVulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 	{
 		++m_recordCommandCount;
 		vkCmdDrawIndexed(m_cmdBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+	}
+
+	/// 
+	// GPUCommandPoolVulkan
+	/// 
+	GPUCommandPoolVulkan::GPUCommandPoolVulkan()
+		: m_cmdPool(nullptr)
+	{ }
+
+	GPUCommandPoolVulkan::~GPUCommandPoolVulkan()
+	{ }
+
+	void GPUCommandPoolVulkan::Init(Graphics::GPUCommandPoolDesc const& desc)
+	{
+		ReleaseGPU();
+
+		m_desc = desc;
+		VkCommandPoolCreateInfo info = vks::initializers::commandPoolCreateInfo();
+		info.flags = ToVulkanCommandPoolUsageFlgas(m_desc.Flags);
+		info.queueFamilyIndex = m_desc.QueueIndex;
+		vkCreateCommandPool(m_device->Device, &info, nullptr, &m_cmdPool);
+		m_memoryUsage = 1;
+	}
+
+	Graphics::GPUCommandBuffer* GPUCommandPoolVulkan::AllocateCommandBuffer(Graphics::GPUCommandBufferDesc& desc)
+	{
+		Graphics::GPUCommandBuffer* buffer = Graphics::GPUCommandBuffer::New();
+		desc.CommandPool = this;
+		buffer->Init(desc);
+		return buffer;
+	}
+
+	std::vector<Graphics::GPUCommandBuffer*> GPUCommandPoolVulkan::AllocateCommandBuffers(Graphics::GPUCommandBufferDesc& desc, u32 count)
+	{
+		return std::vector<Graphics::GPUCommandBuffer*>();
+	}
+
+	void GPUCommandPoolVulkan::FreeCommandBuffer(std::vector<Graphics::GPUCommandBuffer*> buffers)
+	{
+		std::vector<VkCommandBuffer> vkCmdBuffers;
+		vkCmdBuffers.reserve(buffers.size());
+		for (auto const& cmdBuffer : buffers)
+		{
+			ASSERT((cmdBuffer && cmdBuffer->GetState() == Graphics::GPUCommandBufferState::IDLE) && "[GPUCommandPoolVulkan::FreeCommandBuffer] Command buffer must be valid and in the 'IDLE' state.");
+			vkCmdBuffers.push_back(static_cast<GPUCommandBufferVulkan*>(cmdBuffer)->m_cmdBuffer);
+		}
+		vkFreeCommandBuffers(m_device->Device, m_cmdPool, static_cast<u32>(vkCmdBuffers.size()), vkCmdBuffers.data());
+	}
+
+	void Insight::GraphicsAPI::Vulkan::GPUCommandPoolVulkan::OnReleaseGPU()
+	{
+		m_memoryUsage = 0;
+		vkDestroyCommandPool(m_device->Device, m_cmdPool, nullptr);
+		m_cmdPool = nullptr;
+	}
+
+	void GPUCommandPoolVulkan::AllocateCommandBuffer(GPUCommandBufferVulkan* buffer)
+	{
+		ASSERT(!buffer->m_cmdBuffer && "[GPUCommandPoolVulkan::AllocateCommandBuffer] Command buffer handle must be null before being allocated.");
+		VkCommandBufferAllocateInfo info = vks::initializers::commandBufferAllocateInfo(m_cmdPool, (VkCommandBufferLevel)buffer->GetDesc().Level, 1);
+		ThrowIfFailed(vkAllocateCommandBuffers(m_device->Device, &info, &buffer->m_cmdBuffer));
+	}
+
+	void GPUCommandPoolVulkan::FreeCommandBuffer(GPUCommandBufferVulkan* buffer)
+	{
+		ASSERT(buffer->m_cmdBuffer && "[GPUCommandPoolVulkan::AllocateCommandBuffer] Command buffer handle must be valid before being freed.");
+		vkFreeCommandBuffers(m_device->Device, m_cmdPool, 1, &buffer->m_cmdBuffer);	
 	}
 }

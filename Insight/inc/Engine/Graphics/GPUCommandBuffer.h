@@ -3,10 +3,12 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Core/Maths/Rect.h"
 
+class GPUBuffer;
+
 namespace Insight::Graphics
 {
-	class GPUBuffer;
 	class GPURenderPass;
+	class GPUCommandPool;
 	class GPUPipelineLayout;
 	class GPUDescriptorSet;
 
@@ -19,13 +21,18 @@ namespace Insight::Graphics
 		COUNT
 	};
 
-	enum GPUCommandBufferUsageFlags
+	enum class GPUCommandBufferUsageFlags
 	{
 		INVALID,
-
 		ONE_TIME_SUBMIT, 
 		RENDER_PASS_CONTINUE,
 		SIMULATANEOUS_USE
+	};
+
+	enum class GPUCommandBufferLevel
+	{
+		PRIMARY,
+		SECONDARY
 	};
 
 	enum class GPUCommandBufferIndexType
@@ -36,23 +43,48 @@ namespace Insight::Graphics
 
 	struct GPUCommandBufferDesc
 	{
-		GPUCommandBufferDesc(GPUCommandBufferUsageFlags const& flags)
+		GPUCommandBufferDesc(GPUCommandBufferUsageFlags const& flags, GPUCommandPool* commandPool = nullptr, 
+							 GPUCommandBufferLevel const& level = GPUCommandBufferLevel::PRIMARY, bool const& releaseResources = false)
 			: Usage(flags)
+			, CommandPool(commandPool)
+			, Level(level)
+			, ReleaseResources(releaseResources)
 		{ }
+
 		GPUCommandBufferUsageFlags Usage = GPUCommandBufferUsageFlags::INVALID;
+		GPUCommandBufferLevel Level = GPUCommandBufferLevel::PRIMARY;
+		GPUCommandPool* CommandPool = nullptr;
+		bool ReleaseResources = false;
 
 		static GPUCommandBufferDesc CreateOneTimeCmdBuffer()
 		{
-			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT);
+			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT, nullptr, GPUCommandBufferLevel::PRIMARY, false);
 		}
 		static GPUCommandBufferDesc CreateRenderPassContinueCmdBuffer()
 		{
-			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE);
+			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE, nullptr, GPUCommandBufferLevel::PRIMARY, false);
 		}
 		static GPUCommandBufferDesc CreateSimulataneousUseCmdBuffer()
 		{
-			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::SIMULATANEOUS_USE);
+			return GPUCommandBufferDesc(GPUCommandBufferUsageFlags::SIMULATANEOUS_USE, nullptr, GPUCommandBufferLevel::PRIMARY, false);
 		}
+	};
+
+	enum class GPUCommandPoolFlags
+	{
+		INVALID, 
+		TRANSIENT,
+		RESET_COMMAND_BUFFER,
+		PROTECTED
+	};
+
+	struct GPUCommandPoolDesc
+	{
+		GPUCommandPoolDesc(GPUCommandPoolFlags const& flags, u32 queueIndex)
+			: Flags(flags), QueueIndex(queueIndex)
+		{ }
+		GPUCommandPoolFlags Flags;
+		u32 QueueIndex;
 	};
 
 	/// <summary>
@@ -63,7 +95,7 @@ namespace Insight::Graphics
 	public:
 		GPUCommandBuffer();
 		GPUCommandBuffer(GPUCommandBuffer const& other) = delete;
-		~GPUCommandBuffer();
+		virtual ~GPUCommandBuffer();
 
 		static GPUCommandBuffer* New();
 		
@@ -71,12 +103,13 @@ namespace Insight::Graphics
 		bool const& IsSubmitted() const { return m_state == GPUCommandBufferState::SUBMITTED; }
 		u32 const& GetRecordCommandsCount() const { return m_recordCommandCount; }
 		GPUCommandBufferState const& GetState() const { return m_state; }
+		bool const IsEmpty() const { return m_recordCommandCount == 0; }
 
 		virtual void Init(GPUCommandBufferDesc const& desc) = 0;
 		virtual void BeginRecord() = 0;
 		virtual void EndRecord() = 0;
+		virtual void Reset() = 0;
 		virtual void Submit() = 0;
-		virtual void Clear() = 0;
 
 		virtual void BeginRenderpass(GPURenderPass* renderpass) = 0;
 		virtual void EndRenderpass(GPURenderPass* renderpass) = 0;
@@ -98,4 +131,25 @@ namespace Insight::Graphics
 		GPUCommandBufferState m_state;
 	};
 
+	class GPUCommandPool : public GPUResource
+	{
+	public:
+		GPUCommandPool();
+		virtual ~GPUCommandPool();
+
+		static GPUCommandPool* New();
+
+		virtual void Init(GPUCommandPoolDesc const& desc) = 0;
+		virtual GPUCommandBuffer* AllocateCommandBuffer(GPUCommandBufferDesc& desc) = 0;
+		virtual std::vector<GPUCommandBuffer*> AllocateCommandBuffers(GPUCommandBufferDesc& desc, u32 count) = 0;
+		virtual void FreeCommandBuffer(std::vector<GPUCommandBuffer*> buffers) = 0;
+
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const override { return ResourceType::CommandPool; }
+		virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
+
+	protected:
+		GPUCommandPoolDesc m_desc;
+		std::vector<GPUCommandBuffer*> m_buffers;
+	};
 }

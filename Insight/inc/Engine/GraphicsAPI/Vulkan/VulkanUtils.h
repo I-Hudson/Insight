@@ -361,9 +361,18 @@ namespace
 	VkCommandBufferResetFlags ToVulkanCommandBufferUsageFlags(Insight::Graphics::GPUCommandBufferUsageFlags const& flags)
 	{
 		VkCommandBufferResetFlags vFlags = 0;
-		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT) { vFlags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; }
-		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE) { vFlags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT; }
-		if (flags & Insight::Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE) { vFlags |= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; }
+		if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT) { vFlags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE) { vFlags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE) { vFlags |= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; }
+		return vFlags;
+	}
+
+	VkCommandPoolCreateFlags ToVulkanCommandPoolUsageFlgas(Insight::Graphics::GPUCommandPoolFlags const& flags)
+	{
+		VkCommandPoolCreateFlags vFlags = 0;
+		if (flags == Insight::Graphics::GPUCommandPoolFlags::TRANSIENT) { vFlags |= VK_COMMAND_POOL_CREATE_TRANSIENT_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandPoolFlags::RESET_COMMAND_BUFFER) { vFlags |= VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandPoolFlags::PROTECTED) { vFlags |= VK_COMMAND_POOL_CREATE_PROTECTED_BIT; }
 		return vFlags;
 	}
 
