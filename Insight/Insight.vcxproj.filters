@@ -342,6 +342,9 @@
     <ClInclude Include="inc\Engine\Core\Maths\Maths.h">
       <Filter>inc\Engine\Core\Maths</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Core\Maths\Rect.h">
+      <Filter>inc\Engine\Core\Maths</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Core\NonCopyable.h">
       <Filter>inc\Engine\Core</Filter>
     </ClInclude>
@@ -405,7 +408,7 @@
     <ClInclude Include="inc\Engine\Graphics\GPUBuffer.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\GPUBufferDescription.h">
+    <ClInclude Include="inc\Engine\Graphics\GPUBufferDesc.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\GPUCommandBuffer.h">
@@ -1980,8 +1983,8 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Core\Maths\Rect.h">
-      <Filter>inc\Engine\Core\Maths</Filter>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2010,6 +2013,9 @@
       <Filter>src\Engine\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Maths\Maths.cpp">
+      <Filter>src\Engine\Core\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Core\Maths\Rect.cpp">
       <Filter>src\Engine\Core\Maths</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Object.cpp">
@@ -2042,7 +2048,7 @@
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp">
+    <ClCompile Include="src\Engine\Graphics\GPUBufferDesc.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\GPUCommandBuffer.cpp">
@@ -2252,8 +2258,6 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Core\Maths\Rect.cpp">
-      <Filter>src\Engine\Core\Maths</Filter>
-    </ClCompile>
+    <ClCompile Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
   </ItemGroup>
 </Project>

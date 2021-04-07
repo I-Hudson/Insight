@@ -1,66 +1,63 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUBuffer.h"
 #include "Engine/Graphics/GPUDevice.h"
+#include "Engine/Module/GraphicsModule.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 
-GPUBuffer* GPUBuffer::New()
+namespace Insight::Graphics
 {
-	return nullptr;
-}
-
-GPUBuffer::GPUBuffer()
-{
-}
-
-GPUBuffer::~GPUBuffer()
-{
-}
-
-bool GPUBuffer::Init(const GPUBufferDescription& desc)
-{
-	ASSERT(desc.Size > 0 && desc.Stride > 0);
-
-	ReleaseGPU();
-
-	m_desc = desc;
-	if (OnInit())
+	GPUBuffer* GPUBuffer::New()
 	{
-		IS_WARN("[GPUBuffer::Init] Can not create GPU resources.");
-		return false;
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUBufferVulkan>();
+		}
+
+		ASSERT(false && "[GPUCommandBuffer::New] API not supported.");
+		return nullptr;
 	}
-	return true;
-}
 
-void GPUBuffer::SetData(void* data, const U64& size)
-{
-	ASSERT(data != nullptr && size > 0 && size <= GetSize());
-
-	void* mapped = Map(GPUResourceMapMode::Write);
-	if (!mapped)
+	GPUBuffer::GPUBuffer()
 	{
-		return;
 	}
-	Platform::MemCopy(mapped, data, size);
-	UnMap();
-}
 
-void GPUBuffer::GetData(std::vector<Byte>& data)
-{
-	void* mapped = Map(GPUResourceMapMode::Read);
-	if (!mapped)
+	GPUBuffer::~GPUBuffer()
 	{
-		return;
 	}
-	Platform::MemCopy(data.data(), mapped, GetSize());
-	UnMap();
-}
 
-bool GPUBuffer::Resize(U32 newSize)
-{
-	ASSERT(IsAllocated());
+	void GPUBuffer::SetData(void const* data, const U64& size)
+	{
+		ASSERT(data != nullptr && size > 0 && size <= GetSize());
 
-	auto desc = m_desc;
-	desc.Size = newSize;
-	desc.InitData = nullptr;
+		void* mapped = Map(GPUResourceMapMode::Write);
+		if (!IsMapped())
+		{
+			return;
+		}
+		Platform::MemCopy(mapped, data, size);
+		UnMap();
+	}
 
-	return Init(desc);
+	void GPUBuffer::GetData(std::vector<Byte>& data)
+	{
+		void* mapped = Map(GPUResourceMapMode::Read);
+		if (!mapped)
+		{
+			return;
+		}
+		data.resize(GetSize());
+		Platform::MemCopy(data.data(), mapped, GetSize());
+		UnMap();
+	}
+
+	void GPUBuffer::Resize(U32 newSize)
+	{
+		ASSERT(IsAllocated());
+
+		auto desc = m_desc;
+		desc.Size = newSize;
+		desc.InitData = nullptr;
+
+		Init(desc);
+	}
 }

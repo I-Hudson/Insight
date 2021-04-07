@@ -13,7 +13,7 @@
 #define ASSERT(expression) \
     if (!(expression)) \
     { \
-        if (Platform::IsDebuggerPresent()) \
+        if (!Platform::IsDebuggerPresent()) \
         { \
             PLATFORM_DEBUG_BREAK; \
         } \

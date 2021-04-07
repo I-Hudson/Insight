@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/Platform/Platform.h"
-#include "GPUBufferDescription.h"
+#include "GPUBufferDesc.h"
 #include "GPUResource.h"
 #include "glm/glm.hpp"
 
@@ -13,53 +13,53 @@ struct Vertex
 	glm::vec2 UV1;
 };
 
-
-class IS_API GPUBuffer : public GPUResource
+namespace Insight::Graphics
 {
-public:
-	GPUBuffer* New();
+	class GPUBuffer : public GPUResource
+	{
+	public:
 
-	GPUBuffer();
-	virtual ~GPUBuffer() override;
+		GPUBuffer();
+		virtual ~GPUBuffer() override;
 
-	virtual ResourceType GetResourceType() const { return ResourceType::Buffer; }
+		static GPUBuffer* New();
+		virtual void Init(const GPUBufferDesc& desc) = 0;
 
-	bool Init(const GPUBufferDescription& desc);
+		void SetData(void const* data, const U64& size);
+		void GetData(std::vector<Byte>& data);
 
-	void SetData(void* data, const U64& size);
-	void GetData(std::vector<Byte>& data);
+		FORCE_INLINE bool IsAllocated() const { return m_desc.Size > 0; }
+		FORCE_INLINE U32 GetSize() const { return m_desc.Size; }
+		FORCE_INLINE U32 GetStride() const { return m_desc.Stride; }
+		FORCE_INLINE GPUBufferFlags GetFlags() const { return m_desc.Flags; }
+		FORCE_INLINE U32 GetElementsCount() const { ASSERT(GetStride() > 0); return m_desc.Size / m_desc.Stride; }
+		FORCE_INLINE PixelFormat GetFromat() const { return m_desc.Format; }
 
-	FORCE_INLINE bool IsAllocated() const { return m_desc.Size > 0; }
-	FORCEINLINE U32 GetSize() const { return m_desc.Size; }
-	FORCEINLINE U32 GetStride() const { return m_desc.Stride; }
-	FORCEINLINE GPUBufferFlags GetFlags() const { return m_desc.Flags; }
-	FORCEINLINE U32 GetElementsCount() const { ASSERT(GetStride() > 0); return m_desc.Size / m_desc.Stride; }
-	FORCEINLINE PixelFormat GetFromat() const { return m_desc.Format; }
-	FORCEINLINE GPUResourceUsage GetUsage() const { return m_desc.Usage; }
+		FORCE_INLINE bool IsStaging() const { return m_desc.Flags == GPUBufferFlags::TRANSFER_SRC || m_desc.Flags == GPUBufferFlags::TRANSFER_DST; }
+		FORCE_INLINE const GPUBufferDesc& GetDesc() const { return m_desc; }
 
-	FORCE_INLINE bool IsStaging() const { return m_desc.Usage == GPUResourceUsage::StagingUpload || m_desc.Usage == GPUResourceUsage::StagingReadback; }
-	FORCE_INLINE bool IsDynamic() const { return m_desc.Usage == GPUResourceUsage::Dynamic; }
-	FORCE_INLINE bool IsShaderResource() const { return m_desc.IsShaderResource(); }
-	FORCE_INLINE bool IsUnorderedAccess() const { return m_desc.IsUnorderedAccess(); }
-	FORCE_INLINE const GPUBufferDescription& GetDescription() const { return m_desc; }
+		void Resize(U32 newSize);
+		bool IsMapped() const { return m_mappedData != nullptr; }
 
-	bool Resize(U32 newSize);
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const { return ResourceType::Buffer; }
+		virtual ObjectType GetObjectType() const { return ObjectType::Buffer; }
 
-protected:
-	virtual void* Map(GPUResourceMapMode mapMode) { return nullptr; }
-	virtual void UnMap() {}
+	protected:
+		virtual void* Map(GPUResourceMapMode mapMode) = 0;
+		virtual void UnMap() = 0;
 
-	virtual bool OnInit() = 0;
+		/// <summary>
+		/// Upload the bufffer data to the GPU.
+		/// </summary>
+		virtual void Upload() = 0;
+		/// <summary>
+		/// Get the buffer data from the GPU. This is slow and should not really but used.
+		/// </summary>
+		virtual void Download() = 0;
 
-	/// <summary>
-	/// Upload the bufffer data to the GPU.
-	/// </summary>
-	virtual void Upload() {}
-	/// <summary>
-	/// Get the buffer data from the GPU. This is slow and should not really but used.
-	/// </summary>
-	virtual void Download() {}
-
-protected:
-	GPUBufferDescription m_desc;
-};
+	protected:
+		GPUBufferDesc m_desc;
+		void* m_mappedData;
+	};
+}

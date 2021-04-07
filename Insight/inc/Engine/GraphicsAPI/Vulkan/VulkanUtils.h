@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/GPUSamplerDescription.h"
+#include "Engine/Graphics/GPUBufferDesc.h"
 #include "spirv_cross.hpp"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
@@ -384,5 +385,21 @@ namespace
 		viewport.minDepth = rect.GetWidth();
 		viewport.maxDepth = rect.GetHeight();
 		return viewport;
+	}
+
+	VkBufferUsageFlags ToVulkanBufferUsageFlags(Insight::Graphics::GPUBufferFlags const& flags)
+	{
+		VkBufferUsageFlags vFlags = 0;
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { vFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { vFlags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM_TEXEL) { vFlags |= VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE_TEXEL) { vFlags |= VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM) { vFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE) { vFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX) { vFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { vFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDIRECT) { vFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::SHADER_DEVICE_ADDRESS) { vFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT; }
+		return vFlags;
 	}
 }

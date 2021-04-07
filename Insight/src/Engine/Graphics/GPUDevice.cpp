@@ -8,7 +8,7 @@
 struct GPUDevice::DefaultData
 {
 	Material* FullScreenMaterial;
-	GPUBuffer* FullscreenTriangle;
+	Insight::Graphics::GPUBuffer* FullscreenTriangle;
 };
 
 GPUDevice::GPUDevice(RendererType rendererType, ShaderProfile shaderProfile)

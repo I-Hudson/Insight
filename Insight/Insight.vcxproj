@@ -194,12 +194,13 @@
     <ClInclude Include="inc\Engine\FileSystem\FileHandle.h" />
     <ClInclude Include="inc\Engine\FileSystem\FileSystem.h" />
     <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h" />
     <ClInclude Include="inc\Engine\Graphics\Config.h" />
     <ClInclude Include="inc\Engine\Graphics\Enums.h" />
     <ClInclude Include="inc\Engine\Graphics\Framebuffer.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUAdapter.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUBuffer.h" />
-    <ClInclude Include="inc\Engine\Graphics\GPUBufferDescription.h" />
+    <ClInclude Include="inc\Engine\Graphics\GPUBufferDesc.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUCommandBuffer.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUDevice.h" />
     <ClInclude Include="inc\Engine\Graphics\GPULimits.h" />
@@ -726,6 +727,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
@@ -746,7 +748,7 @@
     <ClCompile Include="src\Engine\Graphics\Enums.cpp" />
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />
-    <ClCompile Include="src\Engine\Graphics\GPUBufferDescription.cpp" />
+    <ClCompile Include="src\Engine\Graphics\GPUBufferDesc.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUCommandBuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp" />

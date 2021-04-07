@@ -8,9 +8,13 @@
 #include "Enums.h"
 #include "Config.h"
 
+namespace Insight::Graphics
+{
+    class GPUBuffer;
+}
+
 class GPUContext;
 class GPUTexture;
-class GPUBuffer;
 class GPUSwapChain;
 class GPUShader;
 class GPUImageView;

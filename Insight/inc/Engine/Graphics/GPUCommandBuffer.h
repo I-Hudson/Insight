@@ -3,10 +3,10 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Core/Maths/Rect.h"
 
-class GPUBuffer;
 
 namespace Insight::Graphics
 {
+	class GPUBuffer;
 	class GPURenderPass;
 	class GPUCommandPool;
 	class GPUPipelineLayout;

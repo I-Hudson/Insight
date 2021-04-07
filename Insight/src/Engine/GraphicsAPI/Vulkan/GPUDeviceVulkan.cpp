@@ -9,7 +9,7 @@
 #include "Engine/Threading/Threading.h"
 
 #include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
-#include "Engine/Graphics/GPUBufferDescription.h"
+#include "Engine/Graphics/GPUBufferDesc.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 
 #include "Engine/Core/Application.h"
