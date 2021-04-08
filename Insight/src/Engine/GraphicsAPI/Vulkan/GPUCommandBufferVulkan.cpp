@@ -1,10 +1,10 @@
 #include "ispch.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
-
-#include "Engine/Graphics/GPUBuffer.h"
 
 namespace Insight::GraphicsAPI::Vulkan
 {
@@ -22,7 +22,11 @@ namespace Insight::GraphicsAPI::Vulkan
 		ReleaseGPU();
 
 		m_desc = desc;
-		GPUCommandPoolVulkan* cmdPool = m_desc.CommandPool != nullptr ? static_cast<GPUCommandPoolVulkan*>(m_desc.CommandPool) : nullptr;// m_device->GetDefaultCommandPool();
+		if (m_desc.CommandPool == nullptr)
+		{
+			m_desc.CommandPool = m_device->GetDefaultCommandPool();
+		}
+		GPUCommandPoolVulkan* cmdPool = static_cast<GPUCommandPoolVulkan*>(m_desc.CommandPool);
 		cmdPool->AllocateCommandBuffer(this);
 		m_memoryUsage = 1;
 	}
@@ -56,10 +60,32 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkResetCommandBuffer(m_cmdBuffer, GetDesc().ReleaseResources == false ? 0 : VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 	}
 
-	void GPUCommandBufferVulkan::Submit()
+	void GPUCommandBufferVulkan::Submit(GPUQueue queue)
 	{
 		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Submit] Command buffer must be in the 'IDLE' state to be submitted.");
+
+		//TODO. Think about matching this with some form of queue system.
+		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_cmdBuffer;
+		vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, VK_NULL_HANDLE);
 		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
+	}
+
+	void GPUCommandBufferVulkan::SubmitAndWait(GPUQueue queue)
+	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Submit] Command buffer must be in the 'IDLE' state to be submitted.");
+		
+		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_cmdBuffer;
+
+		auto fence = m_device->FenceManager.AllocateFence();
+		ThrowIfFailed(vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, fence->GetHandle()));
+		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
+		m_device->FenceManager.WaitAndReleaseFence(fence, U64_MAX);
+
+		m_state = Graphics::GPUCommandBufferState::IDLE;
 	}
 
 	void GPUCommandBufferVulkan::OnReleaseGPU()
@@ -96,13 +122,25 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	}
 
+	void Insight::GraphicsAPI::Vulkan::GPUCommandBufferVulkan::CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
+	{
+		++m_recordCommandCount;
+		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
+		GPUBufferVulkan* destinationBuffer = static_cast<GPUBufferVulkan*>(dstBuffer);
+		VkBufferCopy copy = { };
+		copy.srcOffset = srcOffset;
+		copy.dstOffset = dstOffset;
+		copy.size = size;
+		vkCmdCopyBuffer(m_cmdBuffer, sourceBuffer->m_buffer, destinationBuffer->m_buffer, regionCount, &copy);
+	}
+
 	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
 	{
 		++m_recordCommandCount;
 
 	}
 
-	void GPUCommandBufferVulkan::BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer* buffers, u32* offsets)
+	void GPUCommandBufferVulkan::BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets)
 	{
 		++m_recordCommandCount;
 
@@ -111,15 +149,17 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkBuffers.reserve(bindingCount);
 		vkDeviceSizes.reserve(bindingCount);
 
+		const u32 sizeOf = sizeof(GPUBufferVulkan);
 		for (u32 i = 0; i < bindingCount; ++i)
 		{
+			GPUBufferVulkan* gpuBufferVulkan = static_cast<GPUBufferVulkan*>(buffers[i]);
+			ASSERT((gpuBufferVulkan && gpuBufferVulkan->GetDesc().Flags & Graphics::GPUBufferFlags::VERTEX) && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be valid and of type vertex.");
+			vkBuffers.push_back(gpuBufferVulkan->m_buffer);
 
-			//TODO: Finish this.
-			// Make the assumption that 'buffers' and 'offsets' is a pointer to the first element in an array/vector.
-			ASSERT((buffers + (sizeof(Graphics::GPUBuffer) * i))->GetDesc().Flags == Graphics::GPUBufferFlags::VERTEX && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type vertex.");
-			//GPUBufferVulkan* gpuVkBuffer = static_cast<GPUBufferVulkan*>(buffers[i]->GetBuffer());
-			//vkBuffers.push_back()
-			vkDeviceSizes.push_back(*(offsets + (sizeof(u32) * i)));
+			ASSERT(offsets && "[GPUCommandBufferVulkan::BindVertexBuffers] Offsets must be valid.");
+
+			VkDeviceSize offset = static_cast<VkDeviceSize>(offsets[i]);
+			vkDeviceSizes.push_back(offset);
 		}
 		vkCmdBindVertexBuffers(m_cmdBuffer, firstBinding, bindingCount, vkBuffers.data(), vkDeviceSizes.data());
 	}
@@ -127,8 +167,8 @@ namespace Insight::GraphicsAPI::Vulkan
 	void GPUCommandBufferVulkan::BindIndexBuffer(Graphics::GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType)
 	{
 		++m_recordCommandCount;
-		ASSERT(buffer->GetDesc().Flags == Graphics::GPUBufferFlags::INDEX && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type index.");
-		VkBuffer vkBuffer = nullptr; //static_cast<GPUBufferVulkan*>(buffer->GetBuffer());
+		ASSERT(buffer->GetDesc().Flags & Graphics::GPUBufferFlags::INDEX && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type index.");
+		VkBuffer vkBuffer = static_cast<GPUBufferVulkan*>(buffer)->m_buffer;
 		vkCmdBindIndexBuffer(m_cmdBuffer, vkBuffer, offset, (VkIndexType)indexType);
 	}
 	
@@ -157,7 +197,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		m_desc = desc;
 		VkCommandPoolCreateInfo info = vks::initializers::commandPoolCreateInfo();
 		info.flags = ToVulkanCommandPoolUsageFlgas(m_desc.Flags);
-		info.queueFamilyIndex = m_desc.QueueIndex;
+		info.queueFamilyIndex = m_device->GetQueueFamilyIndex(m_desc.Queue);
 		vkCreateCommandPool(m_device->Device, &info, nullptr, &m_cmdPool);
 		m_memoryUsage = 1;
 	}

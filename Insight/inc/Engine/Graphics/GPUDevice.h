@@ -11,6 +11,8 @@
 namespace Insight::Graphics
 {
     class GPUBuffer;
+    class GPUCommandBuffer;
+    class GPUCommandPool;
 }
 
 class GPUContext;
@@ -62,7 +64,8 @@ public:
 
     const GPULimits& GetLimits() const { return m_gpuLimits; }
     FormatFeatures GetFormatFeatures(const PixelFormat& format) const { return m_featuresPerFormat[(I32)format]; }
-    const 
+    
+    Insight::Graphics::GPUCommandPool* GetDefaultCommandPool() const { return m_defaultCommandPool; }
 
     FORCE_INLINE U64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
     
@@ -73,6 +76,7 @@ public:
     virtual bool CanDraw() { return true; }
     virtual void Dispose();
     virtual void WaitForGPU() = 0;
+    virtual u32 GetQueueIndex(GPUQueue queue) = 0;
 
     virtual GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) = 0;
 
@@ -93,6 +97,8 @@ protected:
     RendererType m_rendererType;
     ShaderProfile m_shaderProfile;
     FeatureLevel m_featureLevel;
+
+    Insight::Graphics::GPUCommandPool* m_defaultCommandPool;
 
     struct DefaultData;
     DefaultData* m_defaultData;

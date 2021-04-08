@@ -80,11 +80,11 @@ namespace Insight::Graphics
 
 	struct GPUCommandPoolDesc
 	{
-		GPUCommandPoolDesc(GPUCommandPoolFlags const& flags, u32 queueIndex)
-			: Flags(flags), QueueIndex(queueIndex)
+		GPUCommandPoolDesc(GPUCommandPoolFlags const& flags, GPUQueue queue)
+			: Flags(flags), Queue(queue)
 		{ }
 		GPUCommandPoolFlags Flags;
-		u32 QueueIndex;
+		GPUQueue Queue;
 	};
 
 	/// <summary>
@@ -109,15 +109,18 @@ namespace Insight::Graphics
 		virtual void BeginRecord() = 0;
 		virtual void EndRecord() = 0;
 		virtual void Reset() = 0;
-		virtual void Submit() = 0;
+		virtual void Submit(GPUQueue queue) = 0;
+		virtual void SubmitAndWait(GPUQueue queue) = 0;
 
 		virtual void BeginRenderpass(GPURenderPass* renderpass) = 0;
 		virtual void EndRenderpass(GPURenderPass* renderpass) = 0;
 		virtual void SetViewPort(Maths::Rect rect) = 0;
 		virtual void SetScissor(Maths::Rect rect) = 0;
 
+		virtual void CopyBuffer(GPUBuffer* srcBuffer, GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;
+
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
-		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer* buffers, u32* offsets) = 0;
+		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;
 		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, GPUCommandBufferIndexType indexType) = 0;
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
 

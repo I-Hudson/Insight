@@ -34,7 +34,6 @@ void CameraComponent::OnCreate()
 {
 	__super::OnCreate();
 
-
 	IS_PROPERTY_GLOBAL(CameraComponent, "Camera Component", ShowInEditor);
 	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
 	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);

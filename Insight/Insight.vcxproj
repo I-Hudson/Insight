@@ -194,7 +194,6 @@
     <ClInclude Include="inc\Engine\FileSystem\FileHandle.h" />
     <ClInclude Include="inc\Engine\FileSystem\FileSystem.h" />
     <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h" />
-    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h" />
     <ClInclude Include="inc\Engine\Graphics\Config.h" />
     <ClInclude Include="inc\Engine\Graphics\Enums.h" />
     <ClInclude Include="inc\Engine\Graphics\Framebuffer.h" />
@@ -225,6 +224,7 @@
     <ClInclude Include="inc\Engine\Graphics\Texture.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h" />
@@ -727,7 +727,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
@@ -765,6 +764,7 @@
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />
     <ClCompile Include="src\Engine\Graphics\Texture.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp" />

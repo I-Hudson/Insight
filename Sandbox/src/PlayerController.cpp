@@ -9,11 +9,13 @@ REGISTER_DEF_TYPE(PlayerController);
 PlayerController::PlayerController()
 	: Component(nullptr)
 {
+	SetType<PlayerController>();
 }
 
 PlayerController::PlayerController(Entity* owner)
 	: Component(owner)
 {
+	SetType<PlayerController>();
 }
 
 void PlayerController::OnCreate()

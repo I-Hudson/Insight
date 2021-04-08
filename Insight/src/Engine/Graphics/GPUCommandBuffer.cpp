@@ -28,7 +28,7 @@ namespace Insight::Graphics
 	}
 
 	GPUCommandPool::GPUCommandPool()
-		: m_desc(GPUCommandPoolDesc(GPUCommandPoolFlags::INVALID, -1))
+		: m_desc(GPUCommandPoolDesc(GPUCommandPoolFlags::INVALID, GPUQueue::GRAPHICS))
 	{ }
 
 	GPUCommandPool::~GPUCommandPool()

@@ -5,6 +5,8 @@
 
 namespace Insight::GraphicsAPI::Vulkan
 {
+	class GPUCommandBufferVulkan;
+
 	class GPUBufferVulkan : public GPUResouceVulkan<Graphics::GPUBuffer>
 	{
 	public:
@@ -17,8 +19,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void* Map(GPUResourceMapMode mapMode) override;
 		virtual void UnMap() override;
 
-		virtual void Upload() override;
-		virtual void Download() override;
+		virtual void Upload(void* mapped, void const* data, u32 const& size) override;
+		virtual void Download(std::vector<u8>& data, void const* mapped) override;
 
 		// [GPUResource]
 		virtual void OnReleaseGPU() override;
@@ -26,6 +28,9 @@ namespace Insight::GraphicsAPI::Vulkan
 	private:
 		VkBuffer m_buffer;
 		VmaAllocation m_vmaAllocation;
+		VmaMemoryUsage m_vmaMemoryUsage;
 		VmaAllocationInfo m_vmaAllocationInfo;
+
+		friend GPUCommandBufferVulkan;
 	};
 }

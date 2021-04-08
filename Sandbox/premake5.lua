@@ -46,6 +46,9 @@ project "Sandbox"
         defines 
         { 
             "IS_PLATFORM_WINDOWS",
+            "IS_PLATFORM_WIN32",
+            "GLM_FORCE_SWIZZLE",
+            "GLM_FORCE_SILENT_WARNINGS",
             "IS_STANDARD_POINTER",
         }
 

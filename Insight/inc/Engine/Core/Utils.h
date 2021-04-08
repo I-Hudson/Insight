@@ -3,6 +3,8 @@
 #include "Object.h"
 #include "Compiler.h"
 #include <string>
+#include <vector>
+#include <tuple>
 
 #if defined(IS_STANDARD_POINTER)
 
@@ -200,6 +202,22 @@ INLINE I32 HexDigit(char c)
     }
 
     return result;
+}
+
+template<typename Key, typename Value>
+INLINE std::vector<Value> UnorderedMapValuesToVector(std::unordered_map<Key, Value> const& map)
+{
+    std::vector<Key> keys;
+    keys.reserve(map.size());
+    std::vector<Value> values;
+    values.reserve(map.size());
+
+    for (auto const& kv : map) 
+    {
+        keys.push_back(kv.first);
+        values.push_back(kv.second);
+    }
+    return values;
 }
 
 #if defined _CONCAT

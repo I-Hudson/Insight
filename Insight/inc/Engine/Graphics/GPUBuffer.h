@@ -39,7 +39,6 @@ namespace Insight::Graphics
 		FORCE_INLINE const GPUBufferDesc& GetDesc() const { return m_desc; }
 
 		void Resize(U32 newSize);
-		bool IsMapped() const { return m_mappedData != nullptr; }
 
 		// [GPUResource]
 		virtual ResourceType GetResourceType() const { return ResourceType::Buffer; }
@@ -49,17 +48,20 @@ namespace Insight::Graphics
 		virtual void* Map(GPUResourceMapMode mapMode) = 0;
 		virtual void UnMap() = 0;
 
+		bool IsMapped() const { return m_mappedData != nullptr; }
+
 		/// <summary>
 		/// Upload the bufffer data to the GPU.
 		/// </summary>
-		virtual void Upload() = 0;
+		virtual void Upload(void* mapped, void const* data, u32 const& size) = 0;
 		/// <summary>
 		/// Get the buffer data from the GPU. This is slow and should not really but used.
 		/// </summary>
-		virtual void Download() = 0;
+		virtual void Download(std::vector<u8>& data, void const* mapped) = 0;
 
 	protected:
 		GPUBufferDesc m_desc;
 		void* m_mappedData;
+		bool m_mustBeMapped;
 	};
 }

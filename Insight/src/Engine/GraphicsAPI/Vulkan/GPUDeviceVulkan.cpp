@@ -9,6 +9,8 @@
 #include "Engine/Threading/Threading.h"
 
 #include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
+
 #include "Engine/Graphics/GPUBufferDesc.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 
@@ -36,6 +38,28 @@ GPUDeviceVulkan::GPUDeviceVulkan()
 
 GPUDeviceVulkan::~GPUDeviceVulkan()
 {
+}
+
+VkQueue GPUDeviceVulkan::GetQueue(GPUQueue queue)
+{
+	switch (queue)
+	{
+		case GPUQueue::GRAPHICS: return m_graphicsQueue;
+		case GPUQueue::COMPUTE: return m_computeQueue;
+		case GPUQueue::TRANSFER: return m_transferQueue;
+		default: return m_graphicsQueue;
+	}
+}
+
+u32 GPUDeviceVulkan::GetQueueFamilyIndex(GPUQueue queue)
+{
+	switch (queue)
+	{
+		case GPUQueue::GRAPHICS: return m_graphicsQueueFamilyIndex;
+		case GPUQueue::COMPUTE: return m_computeQueueFamilyIndex;
+		case GPUQueue::TRANSFER: return m_transferQueueFamilyIndex;
+		default: return m_graphicsQueueFamilyIndex;
+	}
 }
 
 GPUContext* GPUDeviceVulkan::GetMainContext()
@@ -177,10 +201,11 @@ bool GPUDeviceVulkan::Init()
 	deviceInfo.ppEnabledLayerNames = deviceInfo.enabledLayerCount > 0 ? validationLayers.data() : nullptr;
 
 	// Setup queues info
-	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos{};
-	I32 graphicsQueueIndex = -1;
-	I32 computeQueueIndex = -1;
-	I32 transferQueueIndex = -1;
+	std::unordered_map<GPUQueue, VkDeviceQueueCreateInfo> queueCreateInfos{};
+	VkDeviceQueueCreateInfo* queueInfo = nullptr;
+	i32 graphicsQueueIndex = -1;
+	i32 computeQueueIndex = -1;
+	i32 transferQueueIndex = -1;
 	IS_INFO("Found {0} queue families:", m_queueFamilyProps.size());
 	U32 numPriorities = 0;
 	for (I32 i = 0; i < m_queueFamilyProps.size(); ++i)
@@ -194,6 +219,7 @@ bool GPUDeviceVulkan::Init()
 			{
 				graphicsQueueIndex = i;
 				isValidQueue = true;
+				queueInfo = &queueCreateInfos[GPUQueue::GRAPHICS];
 			}
 			else
 			{
@@ -207,6 +233,7 @@ bool GPUDeviceVulkan::Init()
 			{
 				computeQueueIndex = i;
 				isValidQueue = true;
+				queueInfo = &queueCreateInfos[GPUQueue::COMPUTE];
 			}
 		}
 
@@ -217,6 +244,7 @@ bool GPUDeviceVulkan::Init()
 			{
 				transferQueueIndex = i;
 				isValidQueue = true;
+				queueInfo = &queueCreateInfos[GPUQueue::TRANSFER];
 			}
 		}
 
@@ -237,29 +265,41 @@ bool GPUDeviceVulkan::Init()
 		}
 
 		const I32 queueIndex = (I32)queueCreateInfos.size();
-		queueCreateInfos.push_back(VkDeviceQueueCreateInfo{});
-		VkDeviceQueueCreateInfo& curQueue = queueCreateInfos[queueIndex];
+		//queueCreateInfos.push_back(VkDeviceQueueCreateInfo{});
+		VkDeviceQueueCreateInfo& curQueue = *queueInfo;
 		curQueue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 		curQueue.queueFamilyIndex = i;
 		curQueue.queueCount = curProps.queueCount;
 		numPriorities += curProps.queueCount;
 		IS_INFO("- queue family {0}: {1} queues{2}", i, curProps.queueCount, queueTypeInfo);
 	}
+
+	//TODO: Remove this when QueueVulkan class is made.
+	m_graphicsQueueIndex = graphicsQueueIndex;
+	m_computeQueueIndex = computeQueueIndex;
+	m_transferQueueIndex = transferQueueIndex;
+	m_graphicsQueueFamilyIndex = queueCreateInfos[GPUQueue::GRAPHICS].queueFamilyIndex;
+	m_computeQueueFamilyIndex = queueCreateInfos[GPUQueue::COMPUTE].queueFamilyIndex;
+	m_transferQueueFamilyIndex = queueCreateInfos[GPUQueue::TRANSFER].queueFamilyIndex;
+
 	std::vector<float> queuePriorities;
 	queuePriorities.resize(numPriorities);
 	float* currentPriority = queuePriorities.data();
-	for (I32 index = 0; index < queueCreateInfos.size(); ++index)
+	u32 index = 0;
+	for (auto& item : queueCreateInfos)
 	{
-		VkDeviceQueueCreateInfo& queue = queueCreateInfos[index];
+		VkDeviceQueueCreateInfo& queue = item.second;
 		queue.pQueuePriorities = currentPriority;
 		const VkQueueFamilyProperties& properties = m_queueFamilyProps[queue.queueFamilyIndex];
 		for (I32 queueIndex = 0; queueIndex < (I32)properties.queueCount; queueIndex++)
 		{
 			*currentPriority++ = 1.0f;
 		}
+		++index;
 	}
 	deviceInfo.queueCreateInfoCount = static_cast<U32>(queueCreateInfos.size());
-	deviceInfo.pQueueCreateInfos = queueCreateInfos.data();
+	auto values = UnorderedMapValuesToVector(queueCreateInfos);
+	deviceInfo.pQueueCreateInfos = values.data();
 
 	VkPhysicalDeviceFeatures enabledFeatures;
 	VulkanPlatform::EnabledPhysicalDeviceFeatures(m_physicalDeviceFeatures, enabledFeatures);
@@ -276,6 +316,9 @@ bool GPUDeviceVulkan::Init()
 	//GraphicsQueue = ::New<QueueVulkan>(this, graphicsQueueIndex);
 	//ComputeQueue = computeQueueIndex != -1 ? ::New<QueueVulkan>(this, computeQueueIndex) : GraphicsQueue;
 	//TransferQueue = transferQueueIndex != -1 ? ::New<QueueVulkan>(this, transferQueueIndex) : GraphicsQueue;
+	vkGetDeviceQueue(Device, queueCreateInfos[GPUQueue::GRAPHICS].queueFamilyIndex, m_graphicsQueueIndex, &m_graphicsQueue);
+	vkGetDeviceQueue(Device, queueCreateInfos[GPUQueue::COMPUTE].queueFamilyIndex, m_computeQueueFamilyIndex, &m_computeQueue);
+	vkGetDeviceQueue(Device, queueCreateInfos[GPUQueue::TRANSFER].queueFamilyIndex, m_transferQueueFamilyIndex, &m_transferQueue);
 
 	// Init device limits 
 	PhysicalDeviceLimits = m_adapter->GpuProps.limits;
@@ -413,6 +456,9 @@ bool GPUDeviceVulkan::Init()
 	allocatorInfo.pRecordSettings = &vmaRecordSettings;
 #endif
 
+	m_defaultCommandPool = Insight::GraphicsAPI::Vulkan::GPUCommandPoolVulkan::New();
+	m_defaultCommandPool->Init(Insight::Graphics::GPUCommandPoolDesc(Insight::Graphics::GPUCommandPoolFlags::RESET_COMMAND_BUFFER, GPUQueue::GRAPHICS));
+
 	ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &VmaAllocator));
 
 	//Prepare other things for the engine to use in relation to vulkan.
@@ -442,6 +488,8 @@ void GPUDeviceVulkan::Dispose()
 
 	Resources.OnDeviceDestroy();
 	m_trasientImages.clear();
+	m_defaultCommandPool->ReleaseGPU();
+	::Delete(m_defaultCommandPool);
 
 	//SAFE_DELETE(GraphicsQueue);
 	//SAFE_DELETE(ComputeQueue);
@@ -471,6 +519,17 @@ void GPUDeviceVulkan::Dispose()
 void GPUDeviceVulkan::WaitForGPU()
 {
 	vkDeviceWaitIdle(Device);
+}
+
+u32 GPUDeviceVulkan::GetQueueIndex(GPUQueue queue)
+{
+	switch (queue)
+	{
+		case GPUQueue::GRAPHICS: return m_graphicsQueueIndex;
+		case GPUQueue::COMPUTE: return m_computeQueueIndex;
+		case GPUQueue::TRANSFER: return m_transferQueueIndex;
+	}
+	return m_graphicsQueueIndex;
 }
 
 void GPUDeviceVulkan::BeginFrame()

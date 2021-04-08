@@ -199,6 +199,9 @@ public:
 	GPUDeviceVulkan();
 	virtual ~GPUDeviceVulkan() override;
 
+	VkQueue GetQueue(GPUQueue queue);
+	u32 GetQueueFamilyIndex(GPUQueue queue);
+
 	virtual GPUContext* GetMainContext() override;
 	virtual GPUAdapter* GetAdapter() override;
 	virtual bool Init();
@@ -206,6 +209,7 @@ public:
 	virtual bool CanDraw() { return true; }
 	virtual void Dispose();
 	virtual void WaitForGPU() override;
+	virtual u32 GetQueueIndex(GPUQueue queue) override;
 
 	virtual void BeginFrame() override;
 	virtual void EndFrame() override;
@@ -277,6 +281,17 @@ private:
 
 	CriticalSection m_fenceLock;
 	CriticalSection m_pipelineEventLock;
+
+	//TODO: Remove this when QueueVulkan is made.
+	u32 m_graphicsQueueIndex;
+	u32 m_computeQueueIndex;
+	u32 m_transferQueueIndex;
+	u32 m_graphicsQueueFamilyIndex;
+	u32 m_computeQueueFamilyIndex;
+	u32 m_transferQueueFamilyIndex;
+	VkQueue m_graphicsQueue;
+	VkQueue m_computeQueue;
+	VkQueue m_transferQueue;
 
 	friend GPUContextVulkan;
 	friend FenceManagerVulkan;

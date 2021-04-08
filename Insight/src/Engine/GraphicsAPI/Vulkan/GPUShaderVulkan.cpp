@@ -19,6 +19,7 @@ GPUShaderVulkan::GPUShaderVulkan()
 
 GPUShaderVulkan::~GPUShaderVulkan()
 {
+	ReleaseGPU();
 }
 
 void GPUShaderVulkan::Compile()
@@ -69,7 +70,7 @@ void GPUShaderVulkan::OnReleaseGPU()
 		if (stage.module != VK_NULL_HANDLE)
 		{
 			vkDestroyShaderModule(m_device->Device, stage.module, nullptr);
-			stage.module = VK_NULL_HANDLE;
+			stage.module = nullptr;
 		}
 	}
 }
@@ -93,7 +94,8 @@ void GPUShaderVulkan::CompileModules()
 		moduleCreateInfo.codeSize = stage.GetRawData().size() * sizeof(uint32_t);
 		moduleCreateInfo.pCode = stage.GetRawData().data();
 		ThrowIfFailed(vkCreateShaderModule(m_device->Device, &moduleCreateInfo, NULL, &shaderStage.module));
-	
+		m_memoryUsage = 1;
+
 		shaderStage.pName = "main";
 		ASSERT(shaderStage.module != VK_NULL_HANDLE);
 

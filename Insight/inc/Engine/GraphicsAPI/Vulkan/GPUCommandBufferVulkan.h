@@ -17,15 +17,18 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void BeginRecord() override;
 		virtual void EndRecord() override;
 		virtual void Reset() override;
-		virtual void Submit() override;
+		virtual void Submit(GPUQueue queue) override;
+		virtual void SubmitAndWait(GPUQueue queue) override;
 
 		virtual void BeginRenderpass(Graphics::GPURenderPass* renderpass) override;
 		virtual void EndRenderpass(Graphics::GPURenderPass* renderpass) override;
 		virtual void SetViewPort(Maths::Rect rect) override;
 		virtual void SetScissor(Maths::Rect rect) override;
 
+		virtual void CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;
+
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) override;
-		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer* buffers, u32* offsets) override;
+		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets) override;
 		virtual void BindIndexBuffer(Graphics::GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType) override;
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) override;
 

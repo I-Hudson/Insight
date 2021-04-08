@@ -168,6 +168,20 @@ enum class FeatureLevel
 
 const char* ToString(FeatureLevel value);
 
+namespace Insight::Graphics
+{
+    /// <summary>
+    /// Define how a resource will be interacted with. Should the resource be allowed access from the CPU/GPU or both.
+    /// </summary>
+    enum class GPUResourceUsage
+    {
+        GPU,
+        GPU_AND_CPU,
+        UPLOAD,
+        READ_BACK
+    };
+}
+
 /// <summary>
 /// Multisample count level.
 /// </summary>
@@ -1096,3 +1110,13 @@ enum class RenderPassOp
     Enable_Transient_Load       = 1 << 5,
 };
 using RenderPassOpFlags = U32;
+
+/// <summary>
+/// Define the three queues which can be used on the GPU.
+/// </summary>
+enum class GPUQueue
+{
+    GRAPHICS,
+    COMPUTE,
+    TRANSFER
+};

@@ -28,7 +28,7 @@ namespace Insight::Graphics
     struct IS_API GPUBufferDesc
     {
         /// <summary>
-        /// The buffer total size.
+        /// The buffer total size in bytes.
         /// </summary>
         U32 Size;
 
@@ -69,33 +69,33 @@ namespace Insight::Graphics
 
         static GPUBufferDesc Buffer(U32 size, GPUBufferFlags flags, PixelFormat format = PixelFormat::Unknown, const void* initData = nullptr, U32 stride = 0);
 
-        static GPUBufferDesc Uniform(I32 elementStride, I32 elementsCount, void* data)
+        static GPUBufferDesc Uniform(u32 elementStride, u32 elementsCount, void* data)
         {
             return Buffer(elementsCount * elementStride, GPUBufferFlags::UNIFORM, PixelFormat::Unknown, data, elementStride);
         }
 
-        static GPUBufferDesc Uniform(I32 elementStride, I32 elementsCount)
+        static GPUBufferDesc Uniform(u32 elementStride, u32 elementsCount)
         {
             return Buffer(elementsCount * elementStride, GPUBufferFlags::UNIFORM, PixelFormat::Unknown, nullptr, elementStride);
         }
 
-        static GPUBufferDesc Vertex(I32 elementStride, I32 elementsCount, void* data)
+        static GPUBufferDesc Vertex(u32 elementStride, u32 elementsCount, void* data)
         {
             return Buffer(elementsCount * elementStride, GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_DST, PixelFormat::Unknown, data, elementStride);
         }
 
-        static GPUBufferDesc Vertex(I32 elementStride, I32 elementsCount)
+        static GPUBufferDesc Vertex(u32 elementStride, u32 elementsCount)
         {
             return Buffer(elementsCount * elementStride, GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_DST, PixelFormat::Unknown, nullptr, elementStride);
         }
 
-        static GPUBufferDesc Index(I32 elementStride, I32 elementsCount, void* data)
+        static GPUBufferDesc Index(u32 elementStride, u32 elementsCount, void* data)
         {
             const auto format = elementStride == 4 ? PixelFormat::R32_UInt : PixelFormat::R16_UInt;
             return Buffer(elementsCount * elementStride, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_DST, format, data, elementStride);
         }
 
-        static GPUBufferDesc Index(I32 elementStride, I32 elementsCount)
+        static GPUBufferDesc Index(u32 elementStride, u32 elementsCount)
         {
             const auto format = elementStride == 4 ? PixelFormat::R32_UInt : PixelFormat::R16_UInt;
             return Buffer(elementsCount * elementStride, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_DST, format, nullptr, elementStride);

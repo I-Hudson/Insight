@@ -4,6 +4,7 @@
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
+#include "Engine/Config/Config.h"
 
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 
@@ -46,27 +47,56 @@ namespace Module
 			{
 				using namespace Insight::Graphics;
 				GPUCommandPool* cmdPool = GPUCommandPool::New();
-				cmdPool->Init(GPUCommandPoolDesc(GPUCommandPoolFlags::TRANSIENT, 0));
-				auto* buffer = cmdPool->AllocateCommandBuffer(GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
-				auto* newBuffer = GPUCommandBuffer::New();
-				newBuffer->Init(GPUCommandBufferDesc(GPUCommandBufferUsageFlags::SIMULATANEOUS_USE, cmdPool));
-
-
-				::Delete(buffer);
-				::Delete(newBuffer);
-				::Delete(cmdPool);
+				cmdPool->Init(GPUCommandPoolDesc(GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
+				auto* cmdBuffer = cmdPool->AllocateCommandBuffer(GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
 
 				GPUBuffer* gpuBuffer = GPUBuffer::New();
+				GPUBuffer* gpuBuffer1 = GPUBuffer::New();
 				glm::vec4 vec4 = glm::vec4(1.0f, 2.0f, 3.0f, 4.0f);
 				GPUBufferDesc desc = GPUBufferDesc::Vertex(16, 1, &vec4);
-				desc.Flags = GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_SRC;
 				gpuBuffer->Init(desc);
-				::Delete(gpuBuffer);
+				desc.Flags = GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_SRC;
+				gpuBuffer1->Init(desc);
 
-				GPUBuffer* uniformBuffer = GPUBuffer::New();
-				uniformBuffer->Init(GPUBufferDesc::Uniform(16, 1));
-				uniformBuffer->SetData(&vec4, sizeof(glm::vec4));
-				::Delete(uniformBuffer);
+				///
+				// Get data from a GPU buffer
+				///
+				std::vector<Byte> gpuBufferData;
+				gpuBuffer->GetData(gpuBufferData);
+				void* dataPtr = gpuBufferData.data();
+				glm::vec4 returnedValue = *static_cast<glm::vec4*>(dataPtr);
+
+				///
+				// Set data to a GPU buffer
+				///
+				vec4 = glm::vec4(10, 20,30,40);
+				gpuBuffer->SetData(&vec4, sizeof(glm::vec4));
+
+				///
+				// Get data from a GPU buffer
+				///
+				gpuBuffer->GetData(gpuBufferData);
+				dataPtr = gpuBufferData.data();
+				returnedValue = *static_cast<glm::vec4*>(dataPtr);
+
+				cmdBuffer->BeginRecord();
+				cmdBuffer->SetViewPort(Insight::Maths::Rect(1920, 1080, 0, 1));
+				std::vector<GPUBuffer*> vBuffers = { gpuBuffer};
+				std::vector<u32> vOffsets = { 0 };
+				cmdBuffer->BindVertexBuffers(0, 1, vBuffers.data(), vOffsets.data());
+
+				vBuffers = { gpuBuffer, gpuBuffer1 };
+				vOffsets = { 0, 0 };
+				cmdBuffer->BindVertexBuffers(0, 2, vBuffers.data() , vOffsets.data());
+
+				cmdBuffer->EndRecord();
+
+				::Delete(gpuBuffer);
+				::Delete(gpuBuffer1);
+				::Delete(cmdBuffer);
+				::Delete(cmdPool);
+
+
 			}
 
 			//ResourceDimensions swapchain;
@@ -99,26 +129,27 @@ namespace Module
 
 			//graph->LogToConsole();
 			//::Delete(graph);
-
-			GPUDevice::Instance()->Dispose();
-			::Delete(GPUDevice::Instance());
-			// TESTING
 		}
-#endif
-
+#else
 		m_renderer = Renderer::New();
 		m_renderer->Init();
 
 		m_imguiRenderer = ImGuiRenderer::New();
 		ImGuiRenderer::Instance()->Init(m_renderer);
+#endif
 	}
 
 	GraphicsModule::~GraphicsModule()
 	{
+#if RENDER_GRAPH_TESTING
+		GPUDevice::Instance()->Dispose();
+		::Delete(GPUDevice::Instance());
+		// TESTING
+#else
 		ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
 		::Delete(m_imguiRenderer);
-
 		::Delete(m_renderer);
+#endif
 	}
 
 	void GraphicsModule::Update(const float& deltaTime)
@@ -137,12 +168,15 @@ namespace Module
 
 	void GraphicsModule::WaitForIdle()
 	{
-		m_renderer->WaitForIdle();
+		if (m_renderer)
+		{
+			m_renderer->WaitForIdle();
+		}
 	}
 
 	GraphicsRendererAPI GraphicsModule::GetAPI()
 	{
-		return m_renderer->GetAPI();
+		return (GraphicsRendererAPI)CONFIG_VAL(GraphicsConfig.GraphicsAPI);
 	}
 
 	void GraphicsModule::SetMainCamera(CameraComponent* camera)

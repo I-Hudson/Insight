@@ -483,6 +483,9 @@
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
@@ -1983,9 +1986,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h">
-      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
@@ -2097,6 +2097,9 @@
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp">
@@ -2258,6 +2261,5 @@
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
-    <ClCompile Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
   </ItemGroup>
 </Project>

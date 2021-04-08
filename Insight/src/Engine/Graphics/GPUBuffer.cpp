@@ -18,36 +18,51 @@ namespace Insight::Graphics
 	}
 
 	GPUBuffer::GPUBuffer()
-	{
-	}
+		: m_mappedData(nullptr)
+		, m_mustBeMapped(false)
+	{ }
 
 	GPUBuffer::~GPUBuffer()
-	{
-	}
+	{ }
 
 	void GPUBuffer::SetData(void const* data, const U64& size)
 	{
 		ASSERT(data != nullptr && size > 0 && size <= GetSize());
 
-		void* mapped = Map(GPUResourceMapMode::Write);
-		if (!IsMapped())
+		void* mapped = nullptr;
+		if (m_mustBeMapped)
 		{
-			return;
+			mapped = Map(GPUResourceMapMode::Write);
+			if (!IsMapped())
+			{
+				return;
+			}
 		}
-		Platform::MemCopy(mapped, data, size);
-		UnMap();
+		Upload(mapped, data, size);
+		//Platform::MemCopy(mapped, data, size);
+		if (m_mustBeMapped)
+		{
+			UnMap();
+		}
 	}
 
 	void GPUBuffer::GetData(std::vector<Byte>& data)
 	{
-		void* mapped = Map(GPUResourceMapMode::Read);
-		if (!mapped)
+		void* mapped = nullptr;
+		if (m_mustBeMapped)
 		{
-			return;
+			mapped = Map(GPUResourceMapMode::Read);
+			if (!mapped)
+			{
+				return;
+			}
 		}
 		data.resize(GetSize());
-		Platform::MemCopy(data.data(), mapped, GetSize());
-		UnMap();
+		Download(data, mapped);
+		if (m_mustBeMapped)
+		{
+			UnMap();
+		}
 	}
 
 	void GPUBuffer::Resize(U32 newSize)
