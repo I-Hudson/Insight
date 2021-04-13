@@ -2,138 +2,159 @@
 #include "Engine/Graphics/RenderGraph/RenderPass.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 
-RenderPass::RenderPass(RenderGraph* graph, const U32& index, const std::string name,
-	RenderGraphQueueFlags queue)
-	: m_graph(graph)
-	, m_index(index)
-	, m_name(name)
-	, m_queue(queue)
+namespace Insight::Graphics
 {
-}
-
-RenderPass::~RenderPass()
-{
-}
-
-RenderTextureResouce& RenderPass::AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment, const std::string& input)
-{
-	auto& res = m_graph->GetTextureResouce(name);
-	res.AddQueue(m_queue);
-	res.AddWrittenInPass(m_index);
-	res.SetAttachmentInfo(attachment);
-	res.AddImageUsage((U32)ImageUsageFlagsBits::Color_Attachment);
-	m_colorOutputs.push_back(&res);
-
-	if (attachment.Levels != 1)
+	RenderPass::RenderPass(RenderGraph* graph, const u32& index, const std::string name,
+						   RenderGraphQueueFlags queue)
+		: m_graph(graph)
+		, m_passIndex(index)
+		, m_name(name)
+		, m_queue(queue)
 	{
-		res.AddImageUsage((U32)ImageUsageFlagsBits::Transfer_Src | (U32)ImageUsageFlagsBits::Transfer_Dst);
 	}
 
-	if (!input.empty())
+	RenderPass::~RenderPass()
+	{
+	}
+
+	RenderGraphResource& RenderPass::AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment)
 	{
 		auto& res = m_graph->GetTextureResouce(name);
-		res.AddReadInPass(m_index);
-		res.AddImageUsage((U32)ImageUsageFlagsBits::Color_Attachment);
-		m_colorInputs.push_back(&res);
-	}
-	else
-	{
-		m_colorInputs.push_back(nullptr);
-	}
+		res.SetPassName(m_name);
+		res.AddQueue(m_queue);
+		res.AddWrittenInPass(m_passIndex);
+		res.TextureInfo.SetAttachmentInfo(attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
+		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
+		m_colorOutputs.push_back(res.GetIndex());
 
-	return res;
-}
-
-RenderTextureResouce& RenderPass::SetDepthStencilOutput(const std::string& name, ImageAttachmentInfo& attachment)
-{
-	auto& res = m_graph->GetTextureResouce(name);
-	res.AddQueue(m_queue);
-	res.AddWrittenInPass(m_index);
-	res.SetAttachmentInfo(attachment);
-	res.AddImageUsage((U32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
-	m_depthStencilOutput = &res;
-	return res;
-}
-
-RenderTextureResouce& RenderPass::AddAttachmentInput(const std::string& name)
-{
-	auto& res = m_graph->GetTextureResouce(name);
-	res.AddQueue(m_queue);
-	res.AddReadInPass(m_index);
-	res.AddImageUsage((U32)ImageUsageFlagsBits::Input_Attachment);
-	m_attachmentsInputs.push_back(&res);
-	return res;
-}
-
-RenderTextureResouce& RenderPass::AddTextureInput(const std::string& name, PipelineStageFlags stages)
-{
-	auto& res = m_graph->GetTextureResouce(name);
-	res.AddQueue(m_queue);
-	res.AddReadInPass(m_index);
-	res.AddImageUsage((U32)ImageUsageFlagsBits::Sampled);
-
-	auto itr = std::find_if(m_genericTextures.begin(), m_genericTextures.end(), [&](const AccessedTextureResource& acc)
+		if (attachment.Levels != 1)
 		{
-			return acc.Texture == &res;
+			res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src | (u32)ImageUsageFlagsBits::Transfer_Dst);
+		}
+
+		return res;
+	}
+
+	RenderGraphResource& RenderPass::AddColorInput(const std::string& name)
+	{
+		auto& res = m_graph->GetTextureResouce(name);
+		res.AddQueue(m_queue);
+		res.AddReadInPass(m_passIndex);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Sampled);
+		m_colorInputs.push_back(res.GetIndex());
+		return res;
+	}
+
+	RenderGraphResource& RenderPass::SetDepthStencilOutput(const std::string& name, ImageAttachmentInfo& attachment)
+	{
+		auto& res = m_graph->GetTextureResouce(name);
+		res.SetPassName(m_name);
+		res.AddQueue(m_queue);
+		res.AddWrittenInPass(m_passIndex);
+		res.TextureInfo.SetAttachmentInfo(attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
+		res.TextureInfo.ImageLayout = ImageLayout::Depth_Stencil_Attachment;
+		m_depthStencilOutput = res.GetIndex();
+		return res;
+	}
+
+	RenderGraphResource& RenderPass::AddAttachmentInput(const std::string& name)
+	{
+		ASSERT(false && "[RenderPass::AddAttachmentInput] Not supported.");
+		auto& res = m_graph->GetTextureResouce(name);
+		res.AddQueue(m_queue);
+		res.AddReadInPass(m_passIndex);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Input_Attachment);
+		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
+		m_attachmentsInputs.push_back(res.GetIndex());
+		return res;
+	}
+
+	/*RenderGraphResource& RenderPass::AddTextureInput(const std::string& name, PipelineStageFlags stages)
+	{
+		auto& res = m_graph->GetTextureResouce(name);
+		res.AddQueue(m_queue);
+		res.AddReadInPass(m_passIndex);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Sampled);
+
+		auto itr = std::find_if(m_genericTextures.begin(), m_genericTextures.end(), [&](const RenderGraphResource& resource)
+		{
+			return resource.GetIndex() == res.GetIndex();
 		});
 
-	if (itr != m_genericTextures.end())
+		if (itr != m_genericTextures.end())
+		{
+			return *itr;
+		}
+
+		AccessedResouce acc;
+		acc.Layout = (u32)ImageLayout::Shader_Read_Only;
+		acc.Access = (u32)Access::Shader_Read;
+
+		if (stages != 0)
+		{
+			acc.Stages = stages;
+		}
+		else if ((m_queue & ComputeQueues) != 0)
+		{
+			acc.Stages = (u32)PipelineStage::Compute_Shader;
+		}
+		else
+		{
+			acc.Stages = (u32)PipelineStage::Fragment_Shader;
+		}
+		res.AccessedResource = acc;
+
+		m_genericTextures.push_back(res);
+		return res;
+	}*/
+
+	RenderGraphResource& RenderPass::SetDepthStencilInput(const std::string& name)
 	{
-		return *itr->Texture;
+		auto& res = m_graph->GetTextureResouce(name);
+		res.AddQueue(m_queue);
+		res.AddReadInPass(m_passIndex);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
+		m_depthStencilInput = res.GetIndex();
+		return res;
 	}
 
-	AccessedTextureResource acc;
-	acc.Texture = &res;
-	acc.Layout = (U32)ImageLayout::Shader_Read_Only;
-	acc.Access = (U32)Access::Shader_Read;
+	//void RenderPass::AddStorageInput(const std::string& name, BufferAttachmentInfo& attachment)
+	//{
+	//}
 
-	if (stages != 0)
+	//RenderGraphResource& RenderPass::AddUniformInput(const std::string& name, BufferAttachmentInfo& attachment)
+	//{
+	//	auto& res = m_graph->GetBufferResource(name);
+	//	res.AddQueue(m_queue);
+	//	res.AddReadInPass(m_passIndex);
+	//	res.BufferInfo.Size = attachment.Size;
+	//	res.BufferInfo.Usage = GPUBufferFlags::TRANSFER_SRC | GPUBufferFlags::UNIFORM;
+
+	//	auto itr = std::find_if(m_uniformBuffer.begin(), m_uniformBuffer.end(), [res](const RenderGraphResource& resource)
+	//	{
+	//		return resource.GetIndex() == res.GetIndex();
+	//	});
+
+	//	AccessedResouce acc;
+	//	acc.Layout = (u32)ImageLayout::General;
+	//	acc.Access = (u32)Access::Uniform_Read;
+	//	if (attachment.ShaderStages != 0)
+	//	{
+	//		acc.Stages = attachment.ShaderStages;
+	//	}
+	//	m_uniformBuffer.push_back(res);
+	//	return m_uniformBuffer.back();
+	//}
+
+	RenderGraphResource& RenderPass::GetDepthStencilInput() const
 	{
-		acc.Stages = stages;
+		return m_graph->GetTextureResouce(m_depthStencilInput);
 	}
-	else if ((m_queue & ComputeQueues) != 0)
+
+	RenderGraphResource& RenderPass::GetDepthStencilOutput() const
 	{
-		acc.Stages = (U32)PipelineStage::Compute_Shader;
+		return m_graph->GetTextureResouce(m_depthStencilOutput);
 	}
-	else
-	{
-		acc.Stages = (U32)PipelineStage::Fragment_Shader;
-	}
-
-	m_genericTextures.push_back(acc);
-	return res;
-}
-
-RenderTextureResouce& RenderPass::SetDepthStencilInput(const std::string& name)
-{
-	auto& res = m_graph->GetTextureResouce(name);
-	res.AddQueue(m_queue);
-	res.AddReadInPass(m_index);
-	res.AddImageUsage((U32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
-	m_depthStencilInput = &res;
-	return res;
-}
-
-void RenderPass::AddStorageInput(const std::string& name, BufferAttachmentInfo& attachment)
-{
-}
-
-void RenderPass::AddUniformInput(const std::string& name, BufferAttachmentInfo& attachment)
-{
-}
-
-bool RenderPass::GetClearColor(U32 index, glm::vec4* value)
-{
-	if (m_clearColorFunc)
-		return m_clearColorFunc(index, value);
-	else
-		return false;
-}
-
-bool RenderPass::GetClearDepthStencil(glm::vec2* value)
-{
-	if (m_clearDepthStencilFunc)
-		return m_clearDepthStencilFunc(value);
-	else
-		return false;
 }

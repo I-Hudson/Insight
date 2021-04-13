@@ -34,6 +34,7 @@ project "InsightEditor"
         "%{IncludeDir.imguiFileDialog}",
         "%{IncludeDir.dirent}",
         "%{IncludeDir.IconsFontAwesome}",
+        "%{IncludeDir.Reflect}",
 	}
 
     links 

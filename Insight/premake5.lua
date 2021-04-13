@@ -14,6 +14,7 @@ project "Insight"
     files
 	{
 		"inc/**.h",
+		"inc/**.cpp",
 		"inc/**.hpp",
         "src/**.cpp",
         "vendor/stb_image/**.h",
@@ -46,6 +47,7 @@ project "Insight"
         "%{IncludeDir.tinygltf}",
         "%{IncludeDir.ktx}",
         "%{IncludeDir.IconsFontAwesome}",
+        "%{IncludeDir.Reflect}",
 
         "%{IncludeDir.glslang}",
         "%{IncludeDir.VulkanMemoryAllocator}",
@@ -82,6 +84,11 @@ project "Insight"
         "ktx",
         "vulkan-1",
 	}
+
+    prebuildcommands
+    {
+        "\"$(ProjectDir)vendor/Reflect/bin/" .. outputdir .. "/ReflectEXE/ReflectEXE.exe\" \"$(ProjectDir)inc\" pchInclude=ispch.h",
+    }
 
     filter "system:windows"
         systemversion "latest"

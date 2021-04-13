@@ -13,14 +13,14 @@ namespace Insight::Graphics
     class GPUBuffer;
     class GPUCommandBuffer;
     class GPUCommandPool;
+    class GPUImageView;
+    class GPUImage;
 }
 
 class GPUContext;
 class GPUTexture;
 class GPUSwapChain;
 class GPUShader;
-class GPUImageView;
-class GPUImage;
 
 class GPUDevice : public TSingleton<GPUDevice>
 {
@@ -78,7 +78,7 @@ public:
     virtual void WaitForGPU() = 0;
     virtual u32 GetQueueIndex(GPUQueue queue) = 0;
 
-    virtual GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) = 0;
+    virtual Insight::Graphics::GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) = 0;
 
 public:
     GPUResourceCollection Resources;

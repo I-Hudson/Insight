@@ -477,7 +477,7 @@ public:
     static BlendingMode Multiply;
 };
 
-U32 GetHash(const BlendingMode& key);
+u32 GetHash(const BlendingMode& key);
 
 /// <summary>
 /// Comparison function modes
@@ -937,7 +937,7 @@ enum class TessellationMethod
 /// <summary>
 /// Describes the shader function flags used for shader compilation.
 /// </summary>
-enum class ShaderFlags : U32
+enum class ShaderFlags : u32
 {
     /// <summary>
     /// The default set for flags.
@@ -964,7 +964,7 @@ DECLARE_ENUM_OPERATORS(ShaderFlags);
 /// <summary>
 /// Define the different stages a shader can have.
 /// </summary>
-enum class ShaderStage : U32
+enum class ShaderStage : u32
 {
     Vertex,
     TessControl,
@@ -979,7 +979,7 @@ enum class ShaderStage : U32
 /// <summary>
 /// Define the pipeline stages.
 /// </summary>
-enum class PipelineStage : U32
+enum class PipelineStage : u32
 {
     Top_Of_Pipe             = 1 << 0,
     Vertex_Input            = 1 << 1,
@@ -998,14 +998,14 @@ enum class PipelineStage : U32
     All_Graphics            = 1 << 14,
     All_Commands            = 1 << 15,
 };
-using PipelineStageFlags = U32;
+using PipelineStageFlags = u32;
 std::string PipelineStageFlagsToString(const PipelineStageFlags& flags);
 
 /// <summary>
 /// Define the image usage flags which a input within the 
 /// rendering pipeline can be.
 /// </summary>
-enum class ImageUsageFlagsBits : U32
+enum ImageUsageFlagsBits
 {
     Transfer_Src                = 1 << 0,
     Transfer_Dst                = 1 << 1,
@@ -1016,7 +1016,7 @@ enum class ImageUsageFlagsBits : U32
     Transient_Attachment        = 1 << 6,
     Input_Attachment            = 1 << 7
 };
-using ImageUsageFlags = U32;
+using ImageUsageFlags = u32;
 
 enum class ImageMisc
 {
@@ -1031,7 +1031,7 @@ enum class ImageMisc
     Linear_Image_Ignore_Device_Local                = 1 << 8,
     Force_No_Dedicated                              = 1 << 9,
 };
-using ImageMiscFlags = U32;
+using ImageMiscFlags = u32;
 
 enum class ImageCreate
 {
@@ -1041,9 +1041,9 @@ enum class ImageCreate
     Mutable_Format = 1 << 3,
     Cube_Compatible = 1 << 4,
 };
-using ImageCreateFlags = U32;
+using ImageCreateFlags = u32;
 
-enum class ImageLayout : U32
+enum class ImageLayout : u32
 {
     Undefined                   = 1 << 0,
     General                     = 1 << 1,
@@ -1055,7 +1055,7 @@ enum class ImageLayout : U32
     Transfer_Dst                = 1 << 7,
     Preinitialized              = 1 << 8
 };
-using ImageLayoutFlags = U32;
+using ImageLayoutFlags = u32;
 const char* ImageLayoutToString(const ImageLayout& layout);
 
 enum class ImageType
@@ -1063,8 +1063,13 @@ enum class ImageType
     Image_1D,
     Image_2D,
     Image_3D,
+};
 
-    Count
+enum class ImageUsageType
+{
+    Texture,
+    Render_Target,
+    Transient_Render_Target
 };
 
 enum class ImageDomain
@@ -1077,7 +1082,7 @@ enum class ImageDomain
     Count
 };
 
-enum class Access : U32
+enum class Access : u32
 {
     Indirect_Command_Read           = 1 << 0,
     Index_Read                      = 1 << 1,
@@ -1097,7 +1102,7 @@ enum class Access : U32
     Memory_Read                     = 1 << 15,
     Memory_Write                    = 1 << 16
 };
-using AccessFlags = U32;
+using AccessFlags = u32;
 std::string AccessFlagsToString(const AccessFlags& flags);
 
 enum class RenderPassOp
@@ -1109,7 +1114,7 @@ enum class RenderPassOp
     Enable_Transient_Store      = 1 << 4,
     Enable_Transient_Load       = 1 << 5,
 };
-using RenderPassOpFlags = U32;
+using RenderPassOpFlags = u32;
 
 /// <summary>
 /// Define the three queues which can be used on the GPU.

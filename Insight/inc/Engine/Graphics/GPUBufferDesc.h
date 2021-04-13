@@ -101,6 +101,11 @@ namespace Insight::Graphics
             return Buffer(elementsCount * elementStride, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_DST, format, nullptr, elementStride);
         }
 
+        static GPUBufferDesc RawUpload(u32 size, void* data)
+        {
+            return Buffer(size, GPUBufferFlags::TRANSFER_SRC, PixelFormat::Unknown, data, size);
+        }
+
         /// <summary>
        /// Gets the staging upload description for this instance.
        /// </summary>

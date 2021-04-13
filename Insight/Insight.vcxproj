@@ -80,7 +80,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -96,6 +96,9 @@
       <AdditionalDependencies>OptickCore.lib;ktx.lib;vulkan-1.lib;assimp-vc142-mtd.lib;glslangd.lib;MachineIndependentd.lib;GenericCodeGend.lib;OSDependentd.lib;SPIRVd.lib;OGLCompilerd.lib;glslang-default-resource-limitsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\OSDependent\Windows\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilersDLL\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\SPIRV\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\StandAlone\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilerd\$(Configuration);C:\VulkanSDK\1.2.162.1\lib;C:\VulkanSDK\1.2.162.1\lib\Debug;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)vendor/Reflect/bin/Debug-windows-x86_64/ReflectEXE/ReflectEXE.exe" "$(ProjectDir)inc" pchInclude=ispch.h</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -103,7 +106,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -123,6 +126,9 @@
       <AdditionalDependencies>OptickCore.lib;ktx.lib;vulkan-1.lib;assimp-vc142-mt.lib;glslang.lib;MachineIndependent.lib;GenericCodeGen.lib;OSDependent.lib;SPIRV.lib;OGLCompiler.lib;glslang-default-resource-limits.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\OSDependent\Windows\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilersDLL\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\SPIRV\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\StandAlone\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilerd\$(Configuration);C:\VulkanSDK\1.2.162.1\lib;C:\VulkanSDK\1.2.162.1\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)vendor/Reflect/bin/Release-windows-x86_64/ReflectEXE/ReflectEXE.exe" "$(ProjectDir)inc" pchInclude=ispch.h</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
     <ClCompile>
@@ -130,7 +136,7 @@
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;IS_STANDARD_POINTER;IS_DIST;IS_VULKAN;NOMINMAX;GLFW_INCLUDE_VULKAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb_image;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -149,10 +155,14 @@
       <AdditionalDependencies>OptickCore.lib;ktx.lib;vulkan-1.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)Insight\vendor\optick\bin\vs2019\x64\Debug;$(SolutionDir)Insight\vendor\KTX-Software\build\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\glslang\OSDependent\Windows\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilersDLL\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\SPIRV\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\StandAlone\$(Configuration);$(SolutionDir)Insight\vendor\glslang\build\OGLCompilerd\$(Configuration);C:\VulkanSDK\1.2.162.1\lib;C:\VulkanSDK\1.2.162.1\lib\Release;$(ProjectDir)vendor\assimp\BINARIES\x64\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PreBuildEvent>
+      <Command>"$(ProjectDir)vendor/Reflect/bin/Dist-windows-x86_64/ReflectEXE/ReflectEXE.exe" "$(ProjectDir)inc" pchInclude=ispch.h</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="inc\Engine\Component\CameraComponent.h" />
     <ClInclude Include="inc\Engine\Component\Component.h" />
+    <ClInclude Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.h" />
     <ClInclude Include="inc\Engine\Component\MeshComponent.h" />
     <ClInclude Include="inc\Engine\Component\TransformComponent.h" />
     <ClInclude Include="inc\Engine\Config\CVar.h" />
@@ -166,6 +176,8 @@
     <ClInclude Include="inc\Engine\Core\Collections\Buffer.h" />
     <ClInclude Include="inc\Engine\Core\Collections\DynamicBuffer.h" />
     <ClInclude Include="inc\Engine\Core\Collections\HashFunctions.h" />
+    <ClInclude Include="inc\Engine\Core\Collections\SparseSet.h" />
+    <ClInclude Include="inc\Engine\Core\Collections\TSystemCollection.h" />
     <ClInclude Include="inc\Engine\Core\Collections\span.h" />
     <ClInclude Include="inc\Engine\Core\Common.h" />
     <ClInclude Include="inc\Engine\Core\Compiler.h" />
@@ -173,10 +185,8 @@
     <ClInclude Include="inc\Engine\Core\DerivedFrom.h" />
     <ClInclude Include="inc\Engine\Core\EntryPoint.h" />
     <ClInclude Include="inc\Engine\Core\Enums.h" />
-    <ClInclude Include="inc\Engine\Core\HashFunctions.h" />
     <ClInclude Include="inc\Engine\Core\InsightAlias.h" />
     <ClInclude Include="inc\Engine\Core\Log.h" />
-    <ClInclude Include="inc\Engine\Core\Maths\Maths.h" />
     <ClInclude Include="inc\Engine\Core\Maths\Rect.h" />
     <ClInclude Include="inc\Engine\Core\NonCopyable.h" />
     <ClInclude Include="inc\Engine\Core\Object.h" />
@@ -194,13 +204,16 @@
     <ClInclude Include="inc\Engine\FileSystem\FileHandle.h" />
     <ClInclude Include="inc\Engine\FileSystem\FileSystem.h" />
     <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h" />
     <ClInclude Include="inc\Engine\Graphics\Config.h" />
+    <ClInclude Include="inc\Engine\Graphics\Debug\GPUDebug.h" />
     <ClInclude Include="inc\Engine\Graphics\Enums.h" />
     <ClInclude Include="inc\Engine\Graphics\Framebuffer.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUAdapter.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUBuffer.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUBufferDesc.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUCommandBuffer.h" />
+    <ClInclude Include="inc\Engine\Graphics\GPUDescriptorSet.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUDevice.h" />
     <ClInclude Include="inc\Engine\Graphics\GPULimits.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUResource.h" />
@@ -210,7 +223,7 @@
     <ClInclude Include="inc\Engine\Graphics\GPUTimerQuery.h" />
     <ClInclude Include="inc\Engine\Graphics\ImGuiRenderer.h" />
     <ClInclude Include="inc\Engine\Graphics\Image\GPUImage.h" />
-    <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDescription.h" />
+    <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDesc.h" />
     <ClInclude Include="inc\Engine\Graphics\Material.h" />
     <ClInclude Include="inc\Engine\Graphics\PixelFormat.h" />
     <ClInclude Include="inc\Engine\Graphics\PixelFormatExtensions.h" />
@@ -223,6 +236,7 @@
     <ClInclude Include="inc\Engine\Graphics\SplashScreen.h" />
     <ClInclude Include="inc\Engine\Graphics\Texture.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h" />
@@ -290,7 +304,7 @@
     <ClInclude Include="inc\Engine\Threading\Threading.h" />
     <ClInclude Include="inc\Engine\Time\Stopwatch.h" />
     <ClInclude Include="inc\Engine\Time\Time.h" />
-    <ClInclude Include="inc\Engine\Utils\Crc.h" />
+    <ClInclude Include="inc\Engine\Utils\Hasher.h" />
     <ClInclude Include="inc\Insight.h" />
     <ClInclude Include="inc\Platform\Vulkan\Swapchain.h" />
     <ClInclude Include="inc\Platform\Vulkan\VulkanBuffer.h" />
@@ -727,6 +741,7 @@
     <ClInclude Include="vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
@@ -735,7 +750,6 @@
     <ClCompile Include="src\Engine\Core\Application.cpp" />
     <ClCompile Include="src\Engine\Core\InsightAlias.cpp" />
     <ClCompile Include="src\Engine\Core\Log.cpp" />
-    <ClCompile Include="src\Engine\Core\Maths\Maths.cpp" />
     <ClCompile Include="src\Engine\Core\Maths\Rect.cpp" />
     <ClCompile Include="src\Engine\Core\Object.cpp" />
     <ClCompile Include="src\Engine\Core\Types\DateTime.cpp" />
@@ -744,16 +758,18 @@
     <ClCompile Include="src\Engine\Event\EventManager.cpp" />
     <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp" />
     <ClCompile Include="src\Engine\Graphics\Enums.cpp" />
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBufferDesc.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUCommandBuffer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\GPUDescriptorSet.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp" />
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp" />
     <ClCompile Include="src\Engine\Graphics\Image\GPUImage.cpp" />
-    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDescription.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDesc.cpp" />
     <ClCompile Include="src\Engine\Graphics\Material.cpp" />
     <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp" />
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderGraph.cpp" />
@@ -763,6 +779,7 @@
     <ClCompile Include="src\Engine\Graphics\Shaders\GPUShader.cpp" />
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />
     <ClCompile Include="src\Engine\Graphics\Texture.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp" />
@@ -803,7 +820,6 @@
     <ClCompile Include="src\Engine\Threading\TThreadSafe.cpp" />
     <ClCompile Include="src\Engine\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Engine\Time\Time.cpp" />
-    <ClCompile Include="src\Engine\Utils\Crc.cpp" />
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp">

@@ -24,6 +24,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		// [GPUResource]
 		virtual void OnReleaseGPU() override;
+		virtual void SetName(const std::string& name) override;
 
 	private:
 		VkBuffer m_buffer;

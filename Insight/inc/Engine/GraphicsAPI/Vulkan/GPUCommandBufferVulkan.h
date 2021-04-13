@@ -13,6 +13,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUCommandBufferVulkan();
 		virtual ~GPUCommandBufferVulkan() override;
 
+		VkCommandBuffer GetCmdBuffer() { return m_cmdBuffer; }
+
 		virtual void Init(Graphics::GPUCommandBufferDesc const& desc) override;
 		virtual void BeginRecord() override;
 		virtual void EndRecord() override;
@@ -26,6 +28,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void SetScissor(Maths::Rect rect) override;
 
 		virtual void CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;
+		virtual void CopyBufferToImage(Graphics::GPUBuffer* srcBuffer, Graphics::GPUImage* dstImage, Graphics::GPUImageDesc const* imageDesc) override;
 
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) override;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets) override;
@@ -34,6 +37,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		// [GPUResouce]
 		virtual void OnReleaseGPU() override;
+		virtual void SetName(const std::string& name) override;
 
 	private:
 		VkCommandBuffer m_cmdBuffer;
@@ -54,6 +58,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		// [GPUResource]
 		virtual void OnReleaseGPU() override;
+		virtual void SetName(const std::string& name) override;
 
 	private:
 		void AllocateCommandBuffer(GPUCommandBufferVulkan* buffer);

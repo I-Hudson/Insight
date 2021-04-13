@@ -116,7 +116,16 @@ public:
 		m_hash = (m_hash * 0x100000001b3ull) ^ value;
 	}
 
+	INLINE void u32(uint32_t value)
+	{
+		m_hash = (m_hash * 0x100000001b3ull) ^ value;
+	}
+
 	INLINE void S32(int32_t value)
+	{
+		U32(uint32_t(value));
+	}
+	INLINE void s32(int32_t value)
 	{
 		U32(uint32_t(value));
 	}
@@ -131,8 +140,23 @@ public:
 		u.f32 = value;
 		U32(u.u32);
 	}
+	INLINE void f32(float value)
+	{
+		union
+		{
+			float f32;
+			uint32_t u32;
+		} u;
+		u.f32 = value;
+		U32(u.u32);
+	}
 
 	INLINE void U64(uint64_t value)
+	{
+		U32(value & 0xffffffffu);
+		U32(value >> 32);
+	}
+	INLINE void u64(uint64_t value)
 	{
 		U32(value & 0xffffffffu);
 		U32(value >> 32);

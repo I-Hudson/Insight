@@ -18,9 +18,6 @@ public:
 		m_sandboxScene = new Scene("Sandbox");
 		m_sandboxScene->SetActiveScene();
 
-		Mat4 m4;
-
-
 		Entity* mainCamera = Entity::New("MainCamera");
 		mainCamera->AddComponent<CameraComponent>();
 		mainCamera->AddComponent<PlayerController>();

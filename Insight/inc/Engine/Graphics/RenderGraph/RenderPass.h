@@ -3,177 +3,226 @@
 #include "Engine/Core/Common.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/Enums.h"
+
+#include "Engine/Graphics/GPUBufferDesc.h"
+
 #include <functional>
 #include "glm/glm.hpp"
 
-class Texture;
-class RenderGraph;
 
-enum RenderGraphQueueFlagsBits
+namespace Insight::Graphics
 {
-	RENDER_GRAPH_QUEUE_GRAPHICS_BIT			= 1 << 0,
-	RENDER_GRAPH_QUEUE_COMPUTE_BIT			= 1 << 1,
-	RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT	= 1 << 2,
-	RENDER_GRAPH_QUEUE_ASYNC_GRAPHICS_BIT	= 1 << 3,
-};
-using RenderGraphQueueFlags = U32;
+	using RenderPassRenderFunc = std::function<void()>;
+	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
+	using RenderPassClearDepthStencilFunc = std::function<void(glm::vec2&)>;
 
-static const RenderGraphQueueFlags ComputeQueues = RENDER_GRAPH_QUEUE_COMPUTE_BIT |
-RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT;
 
-/// <summary>
-/// Define an image attachment
-/// </summary>
-struct ImageAttachmentInfo
-{
-	PixelFormat Format = PixelFormat::Unknown;
-	std::string Name = "";
-	ImageUsageFlags ImageUsage = 0;
-	U32 Width = 0;
-	U32 Height = 0;
-	U32 Depth = 1;
-	U32 Samples = 1;
-	U32 Levels = 1;
-	U32 Layers = 1;
-	bool Persistent = true;
-	bool UnormSRGBAlias = false;
-	bool SupportsPrerotate = false;
-};
+	class Texture;
+	class RenderGraph;
 
-struct BufferAttachmentInfo
-{
-	U64 Size;
-	ShaderStage ShaderStages;
-};
-
-class RenderGraphResource
-{
-public:
-	enum class Type
+	enum RenderGraphQueueFlagsBits
 	{
-		Buffer,
-		Texture
+		RENDER_GRAPH_QUEUE_GRAPHICS_BIT = 1 << 0,
+		RENDER_GRAPH_QUEUE_COMPUTE_BIT = 1 << 1,
+		RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT = 1 << 2,
+		RENDER_GRAPH_QUEUE_ASYNC_GRAPHICS_BIT = 1 << 3,
+	};
+	using RenderGraphQueueFlags = u32;
+
+	static const RenderGraphQueueFlags ComputeQueues = RENDER_GRAPH_QUEUE_COMPUTE_BIT |
+		RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT;
+
+	/// <summary>
+	/// Define an image attachment
+	/// </summary>
+	struct ImageAttachmentInfo
+	{
+		PixelFormat Format = PixelFormat::Unknown;
+		std::string Name = "";
+		u32 Width = 0;
+		u32 Height = 0;
+		u32 Depth = 1;
+		u32 Samples = 1;
+		u32 Levels = 1;
+		u32 Layers = 1;
+		bool Persistent = true;
+		bool UnormSRGBAlias = false;
+		bool SupportsPrerotate = false;
 	};
 
-	enum {Unused = -1};
+	struct BufferAttachmentInfo
+	{
+		u64 Size;
+		ShaderStage ShaderStages;
+	};
 
-	RenderGraphResource(const Type& type, U32 index, const std::string& name)
-		: m_type(type)
-		, m_index(index)
-		, m_name(name)
-		, m_physicalIndex(Unused)
-	{ }
+	struct TextureGraphResourceInfo
+	{
+		const ImageAttachmentInfo& GetAttachmentInfo() const { return m_info; }
+		void SetAttachmentInfo(const ImageAttachmentInfo& info) { m_info = info; }
+		void AddImageUsage(const ImageUsageFlags& imageUsage) { m_usageFlags |= imageUsage; }
+		const ImageUsageFlags& GetImageUsage() const { return m_usageFlags; }
 
-	const Type& GetType() const { return m_type; }
-	const U32& GetIndex() const { return m_index; }
-	const U32& GetPhysicalIndex() const { return m_physicalIndex; }
-	void SetPhysicalIndex(const U32& physicalIndex) { m_physicalIndex = physicalIndex; }
+		void SetTransientState(bool enable) { m_transient = enable; }
+		const bool& GetTransientState() const { return m_transient; }
 
-	void AddQueue(const RenderGraphQueueFlags& flags) { m_usedQueues |= flags; }
-	void AddWrittenInPass(const U32& pass) { m_writtemInPasses.insert(pass); }
-	void AddReadInPass(const U32& pass) { m_readInPasses.insert(pass); }
+		ImageAttachmentInfo m_info = {};
+		ImageUsageFlags m_usageFlags = 0;
+		ImageLayout ImageLayout;
+		bool m_transient = false;
+	};
 
-	const std::unordered_set<U32>& GetWritePasses() const { return m_writtemInPasses; }
-	const std::unordered_set<U32>& GetReadPasses() const { return m_readInPasses; }
+	struct BufferGraphResourceInfo
+	{
+		u64 Size;
+		GPUBufferFlags Usage;
+	};
 
-	const std::string& GetName() const { return m_name; }
-	const RenderGraphQueueFlags& GetUsedQueues() const { return m_usedQueues; }
+	struct AccessedResouce
+	{
+		PipelineStageFlags Stages = 0;
+		AccessFlags Access = 0;
+		ImageLayoutFlags Layout = 0;
+	};
 
-private:
-	Type m_type;
-	U32 m_index;
-	U32 m_physicalIndex;
-	std::unordered_set<U32> m_writtemInPasses;
-	std::unordered_set<U32> m_readInPasses;
-	std::string m_name;
-	RenderGraphQueueFlags m_usedQueues = 0;
-};
+	class RenderGraphResource
+	{
+	public:
+		enum class Type
+		{
+			Buffer,
+			Texture
+		};
 
-class RenderTextureResouce : public RenderGraphResource
-{
-public:
-	RenderTextureResouce(const std::string& name, U32 index)
-		: RenderGraphResource(Type::Texture, index, name)
-	{ }
+		enum { Unused = -1 };
 
-	const ImageAttachmentInfo& GetAttachmentInfo() const { return m_info; }
-	void SetAttachmentInfo(const ImageAttachmentInfo& info) { m_info = info; }
-	void AddImageUsage(const ImageUsageFlags& imageUsage) { m_usageFlags |= imageUsage; }
-	const ImageUsageFlags& GetImageUsage() const { return m_usageFlags; }
+		RenderGraphResource(const Type& type, u32 index, const std::string& name)
+			: m_type(type)
+			, m_index(index)
+			, m_name(name)
+			, m_physicalIndex(Unused)
+		{ }
 
-	void SetTransientState(bool enable) { m_transient = enable; }
-	const bool& GetTransientState() const { return m_transient; }
+		const Type& GetType() const { return m_type; }
+		const u32& GetIndex() const { return m_index; }
+		const u32& GetPhysicalIndex() const { return m_physicalIndex; }
+		void SetPhysicalIndex(const u32& physicalIndex) { m_physicalIndex = physicalIndex; }
+		void SetPassName(const std::string& passName) { m_passName = passName; }
 
-private:
-	ImageAttachmentInfo m_info = {};
-	ImageUsageFlags m_usageFlags = 0;
-	bool m_transient = false;
-};
+		void AddQueue(const RenderGraphQueueFlags& flags) { m_usedQueues |= flags; }
+		void AddWrittenInPass(const u32& pass) { m_writtemInPasses.insert(pass); }
+		void AddReadInPass(const u32& pass) { m_readInPasses.insert(pass); }
 
-struct AccessedResouce
-{
-	PipelineStageFlags Stages = 0;
-	AccessFlags Access = 0;
-	ImageLayoutFlags Layout = 0;
-};
+		const std::unordered_set<u32>& GetWritePasses() const { return m_writtemInPasses; }
+		const std::unordered_set<u32>& GetReadPasses() const { return m_readInPasses; }
 
-struct AccessedTextureResource : AccessedResouce
-{
-	RenderTextureResouce* Texture = nullptr;
-};
+		const std::string& GetName() const { return m_name; }
+		const std::string& GetPassName() const { return m_passName; }
+		std::string GetFullName() const { return m_passName + ": " + m_name; }
+		const RenderGraphQueueFlags& GetUsedQueues() const { return m_usedQueues; }
 
-class IS_API RenderPass
-{
-public:
-	explicit RenderPass(RenderGraph* graph, const U32& index, const std::string name,
-		RenderGraphQueueFlags queue);
-	~RenderPass();
+	private:
+		Type m_type;
+		u32 m_index;
+		u32 m_physicalIndex;
+		std::unordered_set<u32> m_writtemInPasses;
+		std::unordered_set<u32> m_readInPasses;
+		std::string m_name;
+		std::string m_passName;
+		RenderGraphQueueFlags m_usedQueues = 0;
 
-	RenderGraph* GetGraph() const { return m_graph; }
-	const U32& GetIndex() const { return m_index; }
-	const U32& GetPhysicalPassIndex() const { return m_pyshicalIndex; }
-	void SetPhysicalPassIndex(const U32& index) { m_pyshicalIndex = index; }
+	public:
+		AccessedResouce AccessedResource;
+		BufferGraphResourceInfo BufferInfo;
+		TextureGraphResourceInfo TextureInfo;
+	};
 
-	const RenderGraphQueueFlags& GetQueue()const { return m_queue; }
-	const std::string& GetPassName() const { return m_name; }
+	class RenderPass
+	{
+	public:
+		explicit RenderPass(RenderGraph* graph, const u32& index, const std::string name,
+							RenderGraphQueueFlags queue);
+		~RenderPass();
 
-	RenderTextureResouce& AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment, const std::string& input = "");
-	RenderTextureResouce& SetDepthStencilOutput(const std::string& name, ImageAttachmentInfo& attachment);
-	RenderTextureResouce& AddAttachmentInput(const std::string& name);
+		RenderGraph* GetGraph() const { return m_graph; }
+		const u32& GetPassIndex() const { return m_passIndex; }
+		const u32& GetOrderedPassIndex() const { return m_orderedPassIndex; }
+		void SetPhysicalPassIndex(const u32& index) { m_orderedPassIndex = index; }
 
-	RenderTextureResouce& SetDepthStencilInput(const std::string& name);
-	RenderTextureResouce& AddTextureInput(const std::string& name, PipelineStageFlags stages);
+		const RenderGraphQueueFlags& GetQueue()const { return m_queue; }
+		const std::string& GetPassName() const { return m_name; }
 
-	void AddStorageInput(const std::string& name, BufferAttachmentInfo& attachment);
-	void AddUniformInput(const std::string& name, BufferAttachmentInfo& attachment);
+		RenderGraphResource& AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment);
+		RenderGraphResource& AddColorInput(const std::string& name);
+		RenderGraphResource& SetDepthStencilOutput(const std::string& name, ImageAttachmentInfo& attachment);
 
-	const std::vector<RenderTextureResouce*>& GetColorInputs() const { return m_colorInputs; }
-	const std::vector<RenderTextureResouce*>& GetColorOutputs() const { return m_colorOutputs; }
-	const std::vector<RenderTextureResouce*>& GetAttachmentInputs() const { return m_attachmentsInputs; }
-	const std::vector<RenderTextureResouce*>& GetHistoryInputs() const { return m_historyInputs; }
-	const std::vector<AccessedTextureResource>& GetGenericTextureInputs() const { return m_genericTextures; }
+		//TODO: Used for tile rendering. Currently not supported.
+		RenderGraphResource& AddAttachmentInput(const std::string& name);
 
-	RenderTextureResouce* GetDepthStencilInput() const { return m_depthStencilInput; }
-	RenderTextureResouce* GetDepthStencilOutput() const { return m_depthStencilOutput; }
+		RenderGraphResource& SetDepthStencilInput(const std::string& name);
 
-	bool GetClearColor(U32 index, glm::vec4* value = nullptr);
-	bool GetClearDepthStencil(glm::vec2* value = nullptr);
+		void SetRenderFunc(RenderPassRenderFunc func) { m_renderFunc = func; }
+		void SetClearColour(const glm::vec4& clearColour) { m_clearColour = clearColour; }
+		void SetClearDepthStencil(const glm::vec2& clearDepthStencil) { m_clearDepthStencil = clearDepthStencil; }
 
-private:
-	RenderGraph* m_graph;
-	U32 m_index;
-	U32 m_pyshicalIndex;
-	RenderGraphQueueFlags m_queue;
-	std::string m_name;
-	std::vector<RenderTextureResouce*> m_colorInputs;
-	std::vector<RenderTextureResouce*> m_colorOutputs;
-	std::vector<RenderTextureResouce*> m_attachmentsInputs;
-	std::vector<RenderTextureResouce*> m_historyInputs;
-	std::vector<AccessedTextureResource> m_genericTextures;
+		const glm::vec4& GetClearColour() const { return m_clearColour; }
+		const glm::vec2& GetClearDepthStencil() const { return m_clearDepthStencil; }
 
-	std::function<bool(U32, glm::vec4*)> m_clearColorFunc;
-	std::function<bool(glm::vec2*)> m_clearDepthStencilFunc;
+		//RenderGraphResource& AddTextureInput(const std::string& name, PipelineStageFlags stages);
+		//void AddStorageInput(const std::string& name, BufferAttachmentInfo& attachment);
+		//RenderGraphResource& AddUniformInput(const std::string& name, BufferAttachmentInfo& attachment);
 
-	RenderTextureResouce* m_depthStencilInput = nullptr;
-	RenderTextureResouce* m_depthStencilOutput = nullptr;
-};
+		const std::vector<u32>& GetColorInputs() const { return m_colorInputs; }
+		const std::vector<u32>& GetColorOutputs() const { return m_colorOutputs; }
+		const std::vector<u32>& GetAttachmentInputs() const { return m_attachmentsInputs; }
+		const std::vector<RenderGraphResource>& GetGenericTextureInputs() const { return m_genericTextures; }
+
+		RenderGraphResource& GetDepthStencilInput() const;
+		RenderGraphResource& GetDepthStencilOutput() const;
+
+		bool IsDepthSencilInputValid() const { return m_depthStencilInput != -1; }
+		bool IsDepthSencilOuputValid() const { return m_depthStencilOutput != -1; }
+
+		void AddDependentPass(u32 passIndex) { m_dependentPasses.insert(passIndex); }
+		const std::unordered_set<u32> GetDependentPasses() { return m_dependentPasses; }
+
+		bool GetClearColor(u32 index, glm::vec4* value = nullptr);
+		bool GetClearDepthStencil(glm::vec2* value = nullptr);
+
+	private:
+		/// <summary>
+		/// Owner graph for this render pass.
+		/// </summary>
+		RenderGraph* m_graph;
+		/// <summary>
+		/// Render pass index in the unordered passes vector.
+		/// </summary>
+		u32 m_passIndex;
+		/// <summary>
+		/// Pass index which has been ordered by the render graph. TODO: Do this.
+		/// </summary>
+		u32 m_orderedPassIndex;
+		/// <summary>
+		/// Queue for this pass.
+		/// </summary>
+		RenderGraphQueueFlags m_queue;
+		/// <summary>
+		/// Render pass name. Used for debug.
+		/// </summary>
+		std::string m_name;
+
+		std::unordered_set<u32> m_dependentPasses;
+
+		std::vector<u32> m_colorInputs;
+		std::vector<u32> m_colorOutputs;
+		std::vector<u32> m_attachmentsInputs;
+		std::vector<RenderGraphResource> m_genericTextures;
+
+		RenderPassRenderFunc m_renderFunc;
+		glm::vec4 m_clearColour;
+		glm::vec2 m_clearDepthStencil;
+
+		u32 m_depthStencilInput = -1;
+		u32 m_depthStencilOutput = -1;
+	};
+}

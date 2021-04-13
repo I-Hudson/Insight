@@ -2,6 +2,7 @@
 #include "vulkan/vulkan.h"
 #include "Engine/Platform/Platform.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanPlatform.h"
 #include "Engine/Config/Config.h"
@@ -54,7 +55,7 @@ static void EnumerateInstanceExtensionProperties(const char* layerName, LayerExt
     VkResult result;
     do
     {
-        U32 count = 0;
+        u32 count = 0;
         result = vkEnumerateInstanceExtensionProperties(layerName, &count, nullptr);
         ASSERT(result >= VK_SUCCESS);
 
@@ -73,7 +74,7 @@ static void EnumerateDeviceExtensionProperties(VkPhysicalDevice device, const ch
     VkResult result;
     do
     {
-        U32 count = 0;
+        u32 count = 0;
         result = vkEnumerateDeviceExtensionProperties(device, layerName, &count, nullptr);
         ASSERT(result >= VK_SUCCESS);
 
@@ -89,10 +90,10 @@ static void EnumerateDeviceExtensionProperties(VkPhysicalDevice device, const ch
 
 static void TrimDuplicates(std::vector<const char*>& array)
 {
-    for (I32 i = (I32)array.size() - 1; i >= 0; i--)
+    for (i32 i = (i32)array.size() - 1; i >= 0; i--)
     {
         bool found = false;
-        for (I32 j = i - 1; j >= 0; j--)
+        for (i32 j = i - 1; j >= 0; j--)
         {
             if (array[i] != array[j])
             {
@@ -109,7 +110,7 @@ static void TrimDuplicates(std::vector<const char*>& array)
 
 static int FindLayerIndex(const std::vector<LayerExtension>& list, const char* layerName)
 {
-    for (I32 i = 1; i < list.size(); i++)
+    for (i32 i = 1; i < list.size(); i++)
     {
         if (list[i].Layer.layerName != layerName)
         {
@@ -126,9 +127,9 @@ static bool ContainsLayer(const std::vector<LayerExtension>& list, const char* l
 
 static bool FindLayerExtension(const std::vector<LayerExtension>& list, const char* extensionName, const char*& foundLayer)
 {
-    for (I32 extIndex = 0; extIndex < list.size(); extIndex++)
+    for (i32 extIndex = 0; extIndex < list.size(); extIndex++)
     {
-        for (I32 i = 0; i < list[extIndex].Extensions.size(); i++)
+        for (i32 i = 0; i < list[extIndex].Extensions.size(); i++)
         {
             if (list[extIndex].Extensions[i].extensionName != extensionName)
             {
@@ -146,7 +147,7 @@ static bool FindLayerExtension(const std::vector<LayerExtension>& list, const ch
     return FindLayerExtension(list, extensionName, dummy);
 }
 
-void GPUDeviceVulkan::GetInstanceExtensions(std::vector<const char*>& instanceExtensions, std::vector<const char*>& layerExtensions)
+void GPUDeviceVulkan::GetInstanceExtensions(std::vector<std::string>& instanceExtensions, std::vector<std::string>& layerExtensions)
 {
     // Get extensions supported by the instance and store for later use
     std::vector<std::string> supportedExtensions;
@@ -180,7 +181,7 @@ void GPUDeviceVulkan::GetInstanceExtensions(std::vector<const char*>& instanceEx
         }
     }
 
-    U32 glfwExtentionsCount = 0;
+    u32 glfwExtentionsCount = 0;
     const char** exts = glfwGetRequiredInstanceExtensions(&glfwExtentionsCount);
     for (size_t i = 0; i < glfwExtentionsCount; ++i)
     {
@@ -197,7 +198,7 @@ void GPUDeviceVulkan::GetInstanceExtensions(std::vector<const char*>& instanceEx
     const char* validationLayerName = "VK_LAYER_KHRONOS_validation";
 
     // Check if this layer is available at instance level
-    U32 instanceLayerCount;
+    u32 instanceLayerCount;
     vkEnumerateInstanceLayerProperties(&instanceLayerCount, nullptr);
     std::vector<VkLayerProperties> instanceLayerProperties(instanceLayerCount);
     vkEnumerateInstanceLayerProperties(&instanceLayerCount, instanceLayerProperties.data());
@@ -220,12 +221,12 @@ void GPUDeviceVulkan::GetInstanceExtensions(std::vector<const char*>& instanceEx
     }
 }
 
-void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::vector<const char*>& deviceExtensions, std::vector<const char*>& layerExtensions)
+void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::vector<std::string>& deviceExtensions, std::vector<std::string>& layerExtensions)
 {
     std::vector<LayerExtension> deviceLayerExtensions;
     deviceLayerExtensions.resize(1);
     {
-        U32 count = 0;
+        u32 count = 0;
         std::vector<VkLayerProperties> properties;
         ThrowIfFailed(vkEnumerateDeviceLayerProperties(gpu, &count, nullptr));
         properties.resize(count);
@@ -242,7 +243,7 @@ void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::ve
     std::vector<std::string> foundUniqueLayers;
     std::vector<std::string> foundUniqueExtensions;
 
-    for (I32 i = 0; i < deviceLayerExtensions.size(); i++)
+    for (i32 i = 0; i < deviceLayerExtensions.size(); i++)
     {
         if (i == 0)
         {
@@ -286,14 +287,14 @@ void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::ve
 
     std::vector<const char*> availableExtensions;
     {
-        for (I32 i = 0; i < deviceLayerExtensions[0].Extensions.size(); i++)
+        for (i32 i = 0; i < deviceLayerExtensions[0].Extensions.size(); i++)
         {
             availableExtensions.push_back(deviceLayerExtensions[0].Extensions[i].extensionName);
         }
 
-        for (I32 layerIndex = 0; layerIndex < layerExtensions.size(); layerIndex++)
+        for (i32 layerIndex = 0; layerIndex < layerExtensions.size(); layerIndex++)
         {
-            I32 findLayerIndex;
+            i32 findLayerIndex;
             for (findLayerIndex = 1; findLayerIndex < deviceLayerExtensions.size(); findLayerIndex++)
             {
                 if (deviceLayerExtensions[findLayerIndex].Layer.layerName != layerExtensions[layerIndex])
@@ -333,7 +334,7 @@ void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::ve
         }
     }
 
-    for (U32 i = 0; i < ARRAY_COUNT(GDeviceExtensions) && GDeviceExtensions[i] != nullptr; i++)
+    for (u32 i = 0; i < ARRAY_COUNT(GDeviceExtensions) && GDeviceExtensions[i] != nullptr; i++)
     {
         if (ListContains(availableExtensions, GDeviceExtensions[i]))
         {
@@ -344,7 +345,7 @@ void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::ve
     if (!deviceExtensions.empty())
     {
         IS_INFO("Using device extensions:");
-        for (const char* extension : deviceExtensions)
+        for (auto& extension : deviceExtensions)
         {
             IS_INFO("- {0}", extension);
         }
@@ -353,9 +354,60 @@ void GPUDeviceVulkan::GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::ve
     if (!deviceExtensions.empty())
     {
         IS_INFO("Using device layers:");
-        for (const char* layer : layerExtensions)
+        for (auto& layer : layerExtensions)
         {
             IS_INFO("- {0}", layer);
         }
     }
+}
+
+bool GPUDeviceVulkan::CheckForDeviceExtension(const std::string& ext, bool add, std::vector<std::string>& deviceExtensions)
+{
+    std::vector<LayerExtension> deviceLayerExtensions;
+    deviceLayerExtensions.resize(1);
+    {
+        u32 count = 0;
+        std::vector<VkLayerProperties> properties;
+        ThrowIfFailed(vkEnumerateDeviceLayerProperties(m_adapter->Gpu, &count, nullptr));
+        properties.resize(count);
+        ThrowIfFailed(vkEnumerateDeviceLayerProperties(m_adapter->Gpu, &count, properties.data()));
+        ASSERT(count == properties.size());
+        for (const VkLayerProperties& property : properties)
+        {
+            LayerExtension layerExtension{};
+            layerExtension.Layer = property;
+            deviceLayerExtensions.push_back(layerExtension);
+        }
+    }
+
+    std::vector<std::string> foundUniqueLayers;
+    std::vector<std::string> foundUniqueExtensions;
+
+    for (i32 i = 0; i < deviceLayerExtensions.size(); i++)
+    {
+        if (i == 0)
+        {
+            EnumerateDeviceExtensionProperties(m_adapter->Gpu, nullptr, deviceLayerExtensions[i]);
+        }
+        else
+        {
+            foundUniqueLayers.push_back(deviceLayerExtensions[i].Layer.layerName);
+            EnumerateDeviceExtensionProperties(m_adapter->Gpu, deviceLayerExtensions[i].Layer.layerName, deviceLayerExtensions[i]);
+        }
+
+        deviceLayerExtensions[i].GetExtensions(foundUniqueExtensions);
+    }
+
+    for (auto& extention : foundUniqueExtensions)
+    {
+        if (extention == ext)
+        {
+            if (add)
+            {
+                deviceExtensions.push_back(extention);
+            }
+            return true;
+        }
+    }
+    return false;
 }

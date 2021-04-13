@@ -3,10 +3,11 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Core/Maths/Rect.h"
 
-
 namespace Insight::Graphics
 {
 	class GPUBuffer;
+	class GPUImage;
+	struct GPUImageDesc;
 	class GPURenderPass;
 	class GPUCommandPool;
 	class GPUPipelineLayout;
@@ -118,6 +119,14 @@ namespace Insight::Graphics
 		virtual void SetScissor(Maths::Rect rect) = 0;
 
 		virtual void CopyBuffer(GPUBuffer* srcBuffer, GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;
+		/// <summary>
+		/// This will copy the whole buffer to the image. No sub-copies should be done from this. Use 'CopyBufferToImageSub'
+		/// </summary>
+		/// <param name="buffer"></param>
+		/// <param name="offset"></param>
+		/// <param name="indexType"></param>
+		virtual void CopyBufferToImage(GPUBuffer* srcBuffer, GPUImage* dstImage, GPUImageDesc const* imageDesc) = 0;
+		//virtual void CopyBufferToImageSub(GPUBuffer* srcBuffer, GPUImage* dstImage) = 0;
 
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;

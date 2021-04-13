@@ -13,6 +13,7 @@
 #include "spirv_cross.hpp"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
+#include "Engine/Graphics/GPUDescriptorSet.h"
 
 extern VkFormat PixelFormatToVkFormat[static_cast<I32>(PixelFormat::MAX)];
 extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
@@ -400,6 +401,15 @@ namespace
 		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { vFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; }
 		if (flags & Insight::Graphics::GPUBufferFlags::INDIRECT) { vFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT; }
 		if (flags & Insight::Graphics::GPUBufferFlags::SHADER_DEVICE_ADDRESS) { vFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT; }
+		return vFlags;
+	}
+
+	VkDescriptorPoolResetFlags ToVulkanDescriptorResetFlags(Insight::Graphics::GPUDescriptorPoolResetFlag flags)
+	{
+		VkDescriptorPoolResetFlags vFlags = 0;
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Free_Descriptor_Set) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; }
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT; }
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind_EXT) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT; }
 		return vFlags;
 	}
 }

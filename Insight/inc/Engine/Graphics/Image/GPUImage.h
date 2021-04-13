@@ -2,68 +2,71 @@
 
 #include "Engine/Graphics/GPUResource.h"
 #include "Engine/Graphics/Enums.h"
-#include "GPUImageDescription.h"
+#include "GPUImageDesc.h"
 
-class GPUImage;
-
-/// <summary>
-/// Define a single GPUImageView. Use this to "look at" a GPUImage.
-/// </summary>
-class IS_API GPUImageView : public GPUResource
+namespace Insight::Graphics
 {
-public:
-	static GPUImageView* New();
+	class GPUImage;
 
-	GPUImageView();
-	virtual ~GPUImageView();
+	/// <summary>
+	/// Define a single GPUImageView. Use this to "look at" a GPUImage.
+	/// </summary>
+	class IS_API GPUImageView : public GPUResource
+	{
+	public:
+		static GPUImageView* New();
 
-	void Init(GPUImage* image);
+		GPUImageView();
+		virtual ~GPUImageView();
 
-	GPUImage* GetImage() const { return m_image; }
+		void Init(GPUImage* image);
 
-	// [GPUResource]
-	virtual ResourceType GetResourceType() const override { return ResourceType::ImageView; }
-	virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
+		GPUImage* GetImage() const { return m_image; }
 
-protected:
-	virtual bool OnInit() = 0;
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const override { return ResourceType::ImageView; }
+		virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
 
-protected:
-	GPUImage* m_image;
-};
+	protected:
+		virtual bool OnInit() = 0;
 
-/// <summary>
-/// Define a single GPUImage. This image stores the data when rendering to it.
-/// </summary>
-class IS_API GPUImage : public GPUResource
-{
-public:
-	static GPUImage* New();
+	protected:
+		GPUImage* m_image;
+	};
 
-	GPUImage();
-	virtual ~GPUImage();
+	/// <summary>
+	/// Define a single GPUImage. This image can store the data when rendering to it or as a texture.
+	/// </summary>
+	class IS_API GPUImage : public GPUResource
+	{
+	public:
+		GPUImage();
+		virtual ~GPUImage();
 
-	void Init(GPUImageDescription desc);
+		static GPUImage* New();
 
-	const GPUImageDescription& GetDesc() const { return m_desc; }
-	GPUImageView* GetView() const { return m_view; }
+		void Init(GPUImageDesc desc);
 
-	void SetLayout(const ImageLayout& newLayout);
-	const bool IsTransient() const { return m_desc.IsTransient(); }
+		const GPUImageDesc& GetDesc() const { return m_desc; }
+		GPUImageView* GetView() const { return m_view; }
 
-	// [GPUResource]
-	virtual ResourceType GetResourceType() const override { return ResourceType::Image; }
-	virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
+		void SetLayout(const ImageLayout& newLayout);
+		const bool IsTransient() const { return m_desc.IsTransient(); }
 
-protected:
-	virtual bool OnInit() = 0;
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const override { return ResourceType::Image; }
+		virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
 
-protected:
-	GPUImageView* m_view;
-	GPUImageDescription m_desc;
-	ImageLayout m_imageLayout;
+	protected:
+		virtual bool OnInit() = 0;
 
-private:
-	friend GPUImageView;
-};
+	protected:
+		GPUImageView* m_view;
+		GPUImageDesc m_desc;
+		ImageLayout m_imageLayout;
 
+	private:
+		friend GPUImageView;
+	};
+
+}

@@ -1,4 +1,5 @@
 // Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
+// Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
 
 #pragma once
 
@@ -13,6 +14,7 @@
 #define INLINE inline
 #define FORCE_INLINE inline
 #define FORCE_NOINLINE __attribute__((noinline))
+#define NO_EXPECT noexpect
 #define NO_RETURN __attribute__((noreturn))
 #define PACK_BEGIN()
 #define PACK_END() __attribute__((__packed__))
@@ -38,6 +40,7 @@
 #define INLINE inline
 #define FORCE_INLINE inline
 #define FORCE_NOINLINE __attribute__((noinline))
+#define NO_EXPECT noexpect
 #define NO_RETURN __attribute__((noreturn))
 #define PACK_BEGIN()
 #define PACK_END() __attribute__((__packed__))
@@ -61,6 +64,7 @@
 #define INLINE inline
 #define FORCE_INLINE inline
 #define FORCE_NOINLINE
+#define NO_EXPECT
 #define NO_RETURN ??
 #define PACK_BEGIN() ??
 #define PACK_END() ??
@@ -91,6 +95,7 @@
 #define INLINE __inline
 #define FORCE_INLINE __forceinline
 #define FORCE_NOINLINE __declspec(noinline)
+#define NO_EXPECT noexpect
 #define NO_RETURN __declspec(noreturn)
 #define PACK_BEGIN() __pragma(pack(push, 1))
 #define PACK_END() ; __pragma(pack(pop))
@@ -99,6 +104,7 @@
 #define OFFSET_OF(X, Y) offsetof(X, Y)
 #define DEPRECATED __declspec(deprecated)
 #define DEPRECATED_MSG(msg) [[deprecated(msg)]]
+#define NO_DISCARD [[nodiscard]]
 #undef __PRETTY_FUNCTION__
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif

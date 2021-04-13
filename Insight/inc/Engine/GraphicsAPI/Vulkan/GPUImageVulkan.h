@@ -3,42 +3,51 @@
 #include "GPUDeviceVulkan.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 
-class GPUImageViewVulkan : public GPUResouceVulkan<GPUImageView>
+namespace Insight::GraphicsAPI::Vulkan
 {
-public:
-	GPUImageViewVulkan();
-	virtual ~GPUImageViewVulkan();
+	class GPUCommandBufferVulkan;
 
-protected:
-	//[GPUImageView]
-	virtual bool OnInit() override;
+	class GPUImageViewVulkan : public GPUResouceVulkan<Graphics::GPUImageView>
+	{
+	public:
+		GPUImageViewVulkan();
+		virtual ~GPUImageViewVulkan();
 
-protected:
-	//[GPUResouce]
-	virtual void OnReleaseGPU() override;
+	protected:
+		//[GPUImageView]
+		virtual bool OnInit() override;
 
-private:
-	VkImageView m_vView;
-};
+	protected:
+		//[GPUResouce]
+		virtual void OnReleaseGPU() override;
+		virtual void SetName(const std::string& name) override;
 
-class GPUImageVulkan : public GPUResouceVulkan<GPUImage>
-{
-public:
-	GPUImageVulkan();
-	virtual ~GPUImageVulkan();
+	private:
+		VkImageView m_vView;
+	};
 
-	VkImage GetVulkanImage() const { return m_vImage; }
+	class GPUImageVulkan : public GPUResouceVulkan<Graphics::GPUImage>
+	{
+	public:
+		GPUImageVulkan();
+		virtual ~GPUImageVulkan();
 
-protected:
-	//[GPUImage]
-	virtual bool OnInit() override;
+		VkImage GetVulkanImage() const { return m_vImage; }
 
-protected:
-	//[GPUResouce]
-	virtual void OnReleaseGPU() override;
+	protected:
+		//[GPUImage]
+		virtual bool OnInit() override;
 
-private:
-	VkImage m_vImage;
-	VmaAllocation m_vImageAlloc;
-};
+	protected:
+		//[GPUResouce]
+		virtual void OnReleaseGPU() override;
+		virtual void SetName(const std::string& name) override;
 
+	private:
+		VkImage m_vImage;
+		VmaAllocation m_vmaImageAlloc;
+		VmaAllocationInfo m_vmaImageAllocInfo;
+
+		friend GPUCommandBufferVulkan;
+	};
+}

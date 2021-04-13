@@ -138,5 +138,14 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		vmaDestroyBuffer(m_device->VmaAllocator, m_buffer, m_vmaAllocation);
 	}
+
+	void GPUBufferVulkan::SetName(const std::string& name)
+	{
+		m_name = name;
+		if (GPUDebugMarkerVulkan::IsInitialised())
+		{
+			GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Graphics::Debug::DebugObject::Buffer, (u64)m_buffer);
+		}
+	}
 }
 

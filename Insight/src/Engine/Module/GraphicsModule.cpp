@@ -17,6 +17,7 @@
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
 #include "Engine/Graphics/GPUBuffer.h"
+#include "stb_image.h"
 #define RENDER_GRAPH_TESTING 1
 // TESTING
 
@@ -29,6 +30,8 @@ namespace Module
 	{
 #if RENDER_GRAPH_TESTING
 		{
+			PixelFormatExtensions::Init();
+
 			// TESTING
 			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
 
@@ -37,25 +40,25 @@ namespace Module
 			shader->Compile();
 			::Delete(shader);
 
-			GPUImage* image = GPUImage::New();
-			image->Init(GPUImageDescription::RenderTarget(1920, 1080, PixelFormat::R8G8B8A8_SNorm));
-			GPUImageView* view = GPUImageView::New();
+			Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
+			image->Init(Insight::Graphics::GPUImageDesc::Texture(1, 0, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
+			Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
 			view->Init(image);
 			::Delete(image);
 			::Delete(view);
 
 			{
-				using namespace Insight::Graphics;
-				GPUCommandPool* cmdPool = GPUCommandPool::New();
-				cmdPool->Init(GPUCommandPoolDesc(GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
-				auto* cmdBuffer = cmdPool->AllocateCommandBuffer(GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+				using namespace Insight;
+				Graphics::GPUCommandPool* cmdPool = Graphics::GPUCommandPool::New();
+				cmdPool->Init(Graphics::GPUCommandPoolDesc(Graphics::GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
+				auto* cmdBuffer = cmdPool->AllocateCommandBuffer(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
 
-				GPUBuffer* gpuBuffer = GPUBuffer::New();
-				GPUBuffer* gpuBuffer1 = GPUBuffer::New();
+				Graphics::GPUBuffer* gpuBuffer = Graphics::GPUBuffer::New();
+				Graphics::GPUBuffer* gpuBuffer1 = Graphics::GPUBuffer::New();
 				glm::vec4 vec4 = glm::vec4(1.0f, 2.0f, 3.0f, 4.0f);
-				GPUBufferDesc desc = GPUBufferDesc::Vertex(16, 1, &vec4);
+				Graphics::GPUBufferDesc desc = Graphics::GPUBufferDesc::Vertex(16, 1, &vec4);
 				gpuBuffer->Init(desc);
-				desc.Flags = GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_SRC;
+				desc.Flags = Graphics::GPUBufferFlags::VERTEX | Graphics::GPUBufferFlags::TRANSFER_SRC;
 				gpuBuffer1->Init(desc);
 
 				///
@@ -80,8 +83,8 @@ namespace Module
 				returnedValue = *static_cast<glm::vec4*>(dataPtr);
 
 				cmdBuffer->BeginRecord();
-				cmdBuffer->SetViewPort(Insight::Maths::Rect(1920, 1080, 0, 1));
-				std::vector<GPUBuffer*> vBuffers = { gpuBuffer};
+				cmdBuffer->SetViewPort(Maths::Rect(1920, 1080, 0, 1));
+				std::vector<Graphics::GPUBuffer*> vBuffers = { gpuBuffer};
 				std::vector<u32> vOffsets = { 0 };
 				cmdBuffer->BindVertexBuffers(0, 1, vBuffers.data(), vOffsets.data());
 
@@ -98,6 +101,66 @@ namespace Module
 
 
 			}
+
+			{
+				using namespace Insight::Graphics;
+				RenderGraph* graph = RenderGraph::New();
+				
+				//while (appRunning)
+				//{
+					graph->Reset();
+
+					ImageAttachmentInfo mainPassOutput = { };
+					mainPassOutput.Width = 2560;
+					mainPassOutput.Height = 1440;
+					mainPassOutput.Name = "mainPass-Color";
+					mainPassOutput.Format = PixelFormat::R8G8B8A8_UNorm;
+
+					ImageAttachmentInfo depthOutput = {};
+					depthOutput.Width = 1920;
+					depthOutput.Height = 1080;
+					depthOutput.Name = "depth";
+					depthOutput.Format = PixelFormat::D24_UNorm_S8_UInt;
+
+					auto& lightingPass = graph->AddPass("LightingPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+					lightingPass.AddColorInput("colour");
+					lightingPass.AddColorInput("normal");
+					lightingPass.AddColorInput("position");
+					lightingPass.AddColorInput("pointLights");
+					lightingPass.SetDepthStencilInput("shaderDepthStencil");
+					lightingPass.AddColorOutput("lightingOutput", mainPassOutput);
+
+					auto& shadowPass = graph->AddPass("ShaderPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+					shadowPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
+
+					// Add all my passes at runtime.
+					auto& mainPass = graph->AddPass("MainPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+					mainPass.AddColorOutput("colour", mainPassOutput);
+					mainPass.AddColorOutput("normal", mainPassOutput);
+					mainPass.AddColorOutput("position", mainPassOutput);
+					mainPass.SetDepthStencilInput("shaderDepthStencil");
+
+					mainPass.SetClearColour(glm::vec4());
+					mainPass.SetRenderFunc([&]()
+					{
+						// bind material
+						// bind buffers
+						// Draw mesn, 
+					});
+
+					auto& pointLights = graph->AddPass("pointLights", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+					pointLights.SetDepthStencilInput("shaderDepthStencil");
+					pointLights.AddColorOutput("pointLights", mainPassOutput);
+
+					graph->SetbackBufferSource("lightingOutput");
+					graph->Build();
+					graph->Execute();
+
+					::Delete(graph);
+
+				//}
+			}
+
 
 			//ResourceDimensions swapchain;
 			//swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
@@ -130,26 +193,25 @@ namespace Module
 			//graph->LogToConsole();
 			//::Delete(graph);
 		}
-#else
+#endif
 		m_renderer = Renderer::New();
 		m_renderer->Init();
 
 		m_imguiRenderer = ImGuiRenderer::New();
 		ImGuiRenderer::Instance()->Init(m_renderer);
-#endif
+
 	}
 
 	GraphicsModule::~GraphicsModule()
 	{
 #if RENDER_GRAPH_TESTING
+		// TESTING
 		GPUDevice::Instance()->Dispose();
 		::Delete(GPUDevice::Instance());
-		// TESTING
-#else
+#endif
 		ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
 		::Delete(m_imguiRenderer);
 		::Delete(m_renderer);
-#endif
 	}
 
 	void GraphicsModule::Update(const float& deltaTime)

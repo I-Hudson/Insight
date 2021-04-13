@@ -10,6 +10,9 @@
     <Filter Include="inc\Engine\Component">
       <UniqueIdentifier>{260F3565-129E-BE2E-BBBC-D229A72ACFD4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inc\Engine\Component\Generated">
+      <UniqueIdentifier>{44E7A8AF-300D-7316-1953-F8E1051898E2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="inc\Engine\Config">
       <UniqueIdentifier>{49886EBE-B59E-6C54-FE15-F8756A6B3DDC}</UniqueIdentifier>
     </Filter>
@@ -43,6 +46,9 @@
     <Filter Include="inc\Engine\Graphics">
       <UniqueIdentifier>{8436898E-F097-669C-7905-AD4EE5659D5B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inc\Engine\Graphics\Debug">
+      <UniqueIdentifier>{FA13CB7D-66D6-FE07-AF86-8D941B88D7E5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="inc\Engine\Graphics\Image">
       <UniqueIdentifier>{76EB297E-E2AD-5D08-2B5E-EC94975F36E6}</UniqueIdentifier>
     </Filter>
@@ -57,6 +63,9 @@
     </Filter>
     <Filter Include="inc\Engine\GraphicsAPI\Vulkan">
       <UniqueIdentifier>{DE16391F-4A2F-2049-13DC-AFE27FB3B4E2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc\Engine\GraphicsAPI\Vulkan\Debug">
+      <UniqueIdentifier>{D44FDC9A-4009-4745-C968-611F3521FDB4}</UniqueIdentifier>
     </Filter>
     <Filter Include="inc\Engine\GraphicsAPI\Vulkan\RenderGraph">
       <UniqueIdentifier>{1F8A9ACD-8BA4-FD6E-D4C6-0D0340202576}</UniqueIdentifier>
@@ -172,6 +181,9 @@
     <Filter Include="src\Engine\GraphicsAPI\Vulkan">
       <UniqueIdentifier>{6C47C086-D85F-A7B0-A10C-374A0DE43B4A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\GraphicsAPI\Vulkan\Debug">
+      <UniqueIdentifier>{E232D5E9-4EEC-3F94-D74B-5A6E4304F603}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph">
       <UniqueIdentifier>{ADFF2090-191A-8431-623C-94C5CE95AB38}</UniqueIdentifier>
     </Filter>
@@ -223,9 +235,6 @@
     <Filter Include="src\Engine\Time">
       <UniqueIdentifier>{F0787E79-5C04-EC3D-6515-6F32D11F483E}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\Utils">
-      <UniqueIdentifier>{F2A765A9-DEA0-84FB-07D3-6980F32A6407}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Platform">
       <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
     </Filter>
@@ -270,6 +279,9 @@
     <ClInclude Include="inc\Engine\Component\Component.h">
       <Filter>inc\Engine\Component</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.h">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Component\MeshComponent.h">
       <Filter>inc\Engine\Component</Filter>
     </ClInclude>
@@ -309,6 +321,12 @@
     <ClInclude Include="inc\Engine\Core\Collections\HashFunctions.h">
       <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Core\Collections\SparseSet.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Core\Collections\TSystemCollection.h">
+      <Filter>inc\Engine\Core\Collections</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Core\Collections\span.h">
       <Filter>inc\Engine\Core\Collections</Filter>
     </ClInclude>
@@ -330,17 +348,11 @@
     <ClInclude Include="inc\Engine\Core\Enums.h">
       <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Core\HashFunctions.h">
-      <Filter>inc\Engine\Core</Filter>
-    </ClInclude>
     <ClInclude Include="inc\Engine\Core\InsightAlias.h">
       <Filter>inc\Engine\Core</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Core\Log.h">
       <Filter>inc\Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Core\Maths\Maths.h">
-      <Filter>inc\Engine\Core\Maths</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Core\Maths\Rect.h">
       <Filter>inc\Engine\Core\Maths</Filter>
@@ -396,6 +408,9 @@
     <ClInclude Include="inc\Engine\Graphics\Config.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\Debug\GPUDebug.h">
+      <Filter>inc\Engine\Graphics\Debug</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Enums.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
@@ -412,6 +427,9 @@
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\GPUCommandBuffer.h">
+      <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\GPUDescriptorSet.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\GPUDevice.h">
@@ -441,7 +459,7 @@
     <ClInclude Include="inc\Engine\Graphics\Image\GPUImage.h">
       <Filter>inc\Engine\Graphics\Image</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDescription.h">
+    <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDesc.h">
       <Filter>inc\Engine\Graphics\Image</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Material.h">
@@ -479,6 +497,9 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan\Debug</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
@@ -681,7 +702,7 @@
     <ClInclude Include="inc\Engine\Time\Time.h">
       <Filter>inc\Engine\Time</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Utils\Crc.h">
+    <ClInclude Include="inc\Engine\Utils\Hasher.h">
       <Filter>inc\Engine\Utils</Filter>
     </ClInclude>
     <ClInclude Include="inc\Insight.h">
@@ -1986,8 +2007,14 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
       <Filter>src\Engine\Component</Filter>
     </ClCompile>
@@ -2011,9 +2038,6 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Log.cpp">
       <Filter>src\Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Core\Maths\Maths.cpp">
-      <Filter>src\Engine\Core\Maths</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Core\Maths\Rect.cpp">
       <Filter>src\Engine\Core\Maths</Filter>
@@ -2054,6 +2078,9 @@
     <ClCompile Include="src\Engine\Graphics\GPUCommandBuffer.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUDescriptorSet.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -2066,7 +2093,7 @@
     <ClCompile Include="src\Engine\Graphics\Image\GPUImage.cpp">
       <Filter>src\Engine\Graphics\Image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDescription.cpp">
+    <ClCompile Include="src\Engine\Graphics\Image\GPUImageDesc.cpp">
       <Filter>src\Engine\Graphics\Image</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Material.cpp">
@@ -2095,6 +2122,9 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Texture.cpp">
       <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan\Debug</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
@@ -2216,9 +2246,6 @@
     <ClCompile Include="src\Engine\Time\Time.cpp">
       <Filter>src\Engine\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Utils\Crc.cpp">
-      <Filter>src\Engine\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
       <Filter>src\Platform\Vulkan</Filter>
     </ClCompile>
@@ -2260,6 +2287,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

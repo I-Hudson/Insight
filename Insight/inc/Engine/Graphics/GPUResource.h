@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Core/Common.h"
 #include "Engine/Core/NonCopyable.h"
+#include "Engine/Graphics/Debug/GPUDebug.h"
 
 class IS_API GPUResource : public Object, public NonCopyable
 {
@@ -44,7 +45,7 @@ public:
 		}
 	};
 
-	void SetName(const std::string& name) { m_name = name; }
+	virtual void SetName(const std::string& name) = 0;
 	const std::string& GetName() const { return m_name; }
 
 protected:

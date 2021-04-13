@@ -101,10 +101,20 @@ static I32 GetMaxSampleCount(VkSampleCountFlags counts)
 	return VK_SAMPLE_COUNT_1_BIT;
 }
 
+std::vector<const char*> StringVectorToConstChar(const std::vector<std::string>& vec)
+{
+	std::vector<const char*> v;
+	for (auto& value : vec)
+	{
+		v.push_back(value.c_str());
+	}
+	return v;
+}
+
 bool GPUDeviceVulkan::Init()
 {
 	// Get all the extensions we need/want for vulkan.
-	std::vector<const char*> instanceExtensions, layerExtentions;
+	std::vector<std::string> instanceExtensions, layerExtentions;
 	GetInstanceExtensions(instanceExtensions, layerExtentions);
 
 	// Create a vulkan instance.
@@ -114,14 +124,16 @@ bool GPUDeviceVulkan::Init()
 	appInfo.pEngineName = "Insight";
 	appInfo.apiVersion = VK_MAKE_VERSION(INSIGHT_MAJOR, INSIGHT_MINOR, INSIGHT_PATCH);
 
+	std::vector<const char*> instanceExtensionsCC = StringVectorToConstChar(instanceExtensions);
+	std::vector<const char*> layerExtentionsCC = StringVectorToConstChar(layerExtentions);
 	VkInstanceCreateInfo instanceCreateInfo{};
 	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instanceCreateInfo.pNext = NULL;
 	instanceCreateInfo.pApplicationInfo = &appInfo;
-	instanceCreateInfo.enabledExtensionCount = static_cast<U32>(instanceExtensions.size());
-	instanceCreateInfo.ppEnabledExtensionNames = instanceExtensions.data();
-	instanceCreateInfo.ppEnabledLayerNames = layerExtentions.data();
-	instanceCreateInfo.enabledLayerCount = 1;
+	instanceCreateInfo.enabledExtensionCount = static_cast<u32>(instanceExtensionsCC.size());
+	instanceCreateInfo.ppEnabledExtensionNames = instanceExtensionsCC.data();
+	instanceCreateInfo.ppEnabledLayerNames = layerExtentionsCC.data();
+	instanceCreateInfo.enabledLayerCount = static_cast<u32>(layerExtentionsCC.size());
 	ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance));
 
 #ifdef IS_DEBUG
@@ -131,18 +143,18 @@ bool GPUDeviceVulkan::Init()
 		// For validating (debugging) an application the error and warning bits should sufficeVK_EXT_debug_report
 		VkDebugReportFlagsEXT debugReportFlags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_INFORMATION_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
 		// Additional flags include performance info, loader and layer debug messages, etc.
-		Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
+		Insight::GraphicsAPI::Vulkan::Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
 	}
 #endif
 
-		// Get physical device
-	U32 gpuCount = 0;
+	// Get physical device
+	u32 gpuCount = 0;
 	ThrowIfFailed(vkEnumeratePhysicalDevices(m_instance, &gpuCount, nullptr));
 	ASSERT(gpuCount > 0);
 	std::vector<VkPhysicalDevice> physicalDevices(gpuCount);
 	ThrowIfFailed(vkEnumeratePhysicalDevices(m_instance, &gpuCount, physicalDevices.data()));
 	std::vector<GPUAdapterVulkan> adapters;
-	U32 gpuIndex = 0;
+	u32 gpuIndex = 0;
 	for (auto& gpu : physicalDevices)
 	{
 		GPUAdapterVulkan adapter(gpu);
@@ -158,7 +170,7 @@ bool GPUDeviceVulkan::Init()
 	}
 
 	// New adapter.
-	U32 selectedGpu = 0;
+	u32 selectedGpu = 0;
 	for (auto& gpu : adapters)
 	{
 		if (gpu.IsNVIDIA() || gpu.IsAMD())
@@ -179,7 +191,7 @@ bool GPUDeviceVulkan::Init()
 	// Get queue family indices for the requested queue family types
 	// Note that the indices may overlap depending on the implementation
 	const float defaultQueuePriority(0.0f);
-	U32 queueCount = 0;
+	u32 queueCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(gpu, &queueCount, nullptr);
 	ASSERT(queueCount >= 1);
 	m_queueFamilyProps.resize(queueCount);
@@ -189,16 +201,18 @@ bool GPUDeviceVulkan::Init()
 	vkGetPhysicalDeviceFeatures(gpu, &m_physicalDeviceFeatures);
 
 	// Setup device extensions and layers.
-	std::vector<const char*> deviceExtensions;
-	std::vector<const char*> validationLayers;
+	std::vector<std::string> deviceExtensions;
+	std::vector<std::string> validationLayers;
 	GetDeviceExtensionsAndLayers(gpu, deviceExtensions, validationLayers);
 
+	std::vector<const char*> deviceExtensionsCC = StringVectorToConstChar(deviceExtensions);
+	std::vector<const char*> validationLayersCC = StringVectorToConstChar(validationLayers);
 	VkDeviceCreateInfo deviceInfo{};
 	deviceInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceInfo.enabledExtensionCount = static_cast<U32>(deviceExtensions.size());
-	deviceInfo.ppEnabledExtensionNames = deviceExtensions.data();
-	deviceInfo.enabledLayerCount = static_cast<U32>(validationLayers.size());
-	deviceInfo.ppEnabledLayerNames = deviceInfo.enabledLayerCount > 0 ? validationLayers.data() : nullptr;
+	deviceInfo.enabledExtensionCount = static_cast<u32>(deviceExtensionsCC.size());
+	deviceInfo.ppEnabledExtensionNames = deviceExtensionsCC.data();
+	deviceInfo.enabledLayerCount = static_cast<u32>(validationLayers.size());
+	deviceInfo.ppEnabledLayerNames = deviceInfo.enabledLayerCount > 0 ? validationLayersCC.data() : nullptr;
 
 	// Setup queues info
 	std::unordered_map<GPUQueue, VkDeviceQueueCreateInfo> queueCreateInfos{};
@@ -207,7 +221,7 @@ bool GPUDeviceVulkan::Init()
 	i32 computeQueueIndex = -1;
 	i32 transferQueueIndex = -1;
 	IS_INFO("Found {0} queue families:", m_queueFamilyProps.size());
-	U32 numPriorities = 0;
+	u32 numPriorities = 0;
 	for (I32 i = 0; i < m_queueFamilyProps.size(); ++i)
 	{
 		const VkQueueFamilyProperties& curProps = m_queueFamilyProps[i];
@@ -297,7 +311,7 @@ bool GPUDeviceVulkan::Init()
 		}
 		++index;
 	}
-	deviceInfo.queueCreateInfoCount = static_cast<U32>(queueCreateInfos.size());
+	deviceInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
 	auto values = UnorderedMapValuesToVector(queueCreateInfos);
 	deviceInfo.pQueueCreateInfos = values.data();
 
@@ -306,6 +320,14 @@ bool GPUDeviceVulkan::Init()
 	deviceInfo.pEnabledFeatures = &enabledFeatures;
 	ThrowIfFailed(vkCreateDevice(gpu, &deviceInfo, nullptr, &Device));
 	ASSERT(Device != VK_NULL_HANDLE);
+
+#ifdef IS_DEBUG
+	if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
+	{
+		::New<Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan>();
+		Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance()->Init();
+	}
+#endif
 
 	// Create queues
 	if (graphicsQueueIndex == -1)
@@ -416,16 +438,16 @@ bool GPUDeviceVulkan::Init()
 	vkGetPhysicalDeviceMemoryProperties(gpu, &memoryProperties);
 	IS_INFO("Max memory allocations: {0}", m_adapter->GpuProps.limits.maxMemoryAllocationCount);
 	IS_INFO("Found {0} device memory heaps:", memoryProperties.memoryHeapCount);
-	for (U32 i = 0; i < memoryProperties.memoryHeapCount; ++i)
+	for (u32 i = 0; i < memoryProperties.memoryHeapCount; ++i)
 	{
 		const VkMemoryHeap& heap = memoryProperties.memoryHeaps[i];
 		bool isGPUHeap = (heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) == VK_MEMORY_HEAP_DEVICE_LOCAL_BIT;
-		IS_INFO("-  memory heap {0}: flags 0x{1:x}, size {2} MB (GPU: {3})", i, heap.flags, (U32)(heap.size / 1024 / 1024), isGPUHeap);
+		IS_INFO("-  memory heap {0}: flags 0x{1:x}, size {2} MB (GPU: {3})", i, heap.flags, (u32)(heap.size / 1024 / 1024), isGPUHeap);
 		if (isGPUHeap)
 			m_totalGraphicsMemory += heap.size;
 	}
 	IS_INFO("Found {0} device memory types:", memoryProperties.memoryTypeCount);
-	for (U32 i = 0; i < memoryProperties.memoryTypeCount; ++i)
+	for (u32 i = 0; i < memoryProperties.memoryTypeCount; ++i)
 	{
 		const VkMemoryType& type = memoryProperties.memoryTypes[i];
 		std::string flagsInfo;
@@ -505,7 +527,9 @@ void GPUDeviceVulkan::Dispose()
 #ifdef IS_DEBUG
 	if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 	{
-		Debug::FreeDebugCallback(m_instance);
+		Insight::GraphicsAPI::Vulkan::Debug::FreeDebugCallback(m_instance);
+		::Delete(Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance());
+
 	}
 #endif
 
@@ -544,15 +568,15 @@ void GPUDeviceVulkan::EndFrame()
 {
 }
 
-GPUImageView* GPUDeviceVulkan::GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers)
+Insight::Graphics::GPUImageView* GPUDeviceVulkan::GetTransientAttachment(u32 width, u32 height, PixelFormat format, u32 index, u32 samples, u32 layers)
 {
 	Hasher h;
-	h.U32(width);
-	h.U32(height);
-	h.U32((U32)format);
-	h.U32(index);
-	h.U32(samples);
-	h.U32(layers);
+	h.u32(width);
+	h.u32(height);
+	h.u32((u32)format);
+	h.u32(index);
+	h.u32(samples);
+	h.u32(layers);
 	U64 hash = h.Get();
 
 	// Check if we have trasient images ready to be used. This is reset every frame
@@ -565,12 +589,12 @@ GPUImageView* GPUDeviceVulkan::GetTransientAttachment(U32 width, U32 height, Pix
 		return node.second->GetView();
 	}
 
-	auto desc = GPUImageDescription::TransientRenderTarget(width, height, format);
+	auto desc = Insight::Graphics::GPUImageDesc::TransientRenderTarget(width, height, format);
 	desc.Samples = samples;
 	desc.Layers = layers;
-	auto* image = GPUImage::New();
+	auto* image = Insight::Graphics::GPUImage::New();
 	image->Init(desc);
-	auto* imageView = GPUImageView::New();
+	auto* imageView = Insight::Graphics::GPUImageView::New();
 	imageView->Init(image);
 
 	m_trasientImages[hash] = { true, image };

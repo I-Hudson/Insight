@@ -75,6 +75,15 @@ void GPUShaderVulkan::OnReleaseGPU()
 	}
 }
 
+void GPUShaderVulkan::SetName(const std::string& name)
+{
+	m_name = name;
+	if (Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::IsInitialised())
+	{
+		//Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Insight::Graphics::Debug::DebugObject::Image, (u64)m_);
+	}
+}
+
 void GPUShaderVulkan::CompileModules()
 {
 	for (auto& stage : m_stages)

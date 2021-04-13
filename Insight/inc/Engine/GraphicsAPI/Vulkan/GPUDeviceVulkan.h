@@ -4,6 +4,7 @@
 #include "Engine/Graphics/GPUDevice.h"
 #include "Engine/Graphics/GPUResource.h"
 #include "VulkanDebug.h"
+#include "Engine/GraphicsAPI/Vulkan/Debug/GPUDebugVulkan.h"
 #include "Config.h"
 #include "Types.h"
 
@@ -214,22 +215,25 @@ public:
 	virtual void BeginFrame() override;
 	virtual void EndFrame() override;
 
-	virtual GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) override;
+	virtual Insight::Graphics::GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) override;
 
 	struct OptionalVulkanDeviceExtensions
 	{
-		U32 HasKHRMaintenance1 : 1;
-		U32 HasKHRMaintenance2 : 1;
-		U32 HasMirrorClampToEdge : 1;
-		U32 HasKHRExternalMemoryCapabilities : 1;
-		U32 HasKHRGetPhysicalDeviceProperties2 : 1;
-		U32 HasEXTValidationCache : 1;
+		u32 HasKHRMaintenance1 : 1;
+		u32 HasKHRMaintenance2 : 1;
+		u32 HasMirrorClampToEdge : 1;
+		u32 HasKHRExternalMemoryCapabilities : 1;
+		u32 HasKHRGetPhysicalDeviceProperties2 : 1;
+		u32 HasEXTValidationCache : 1;
+		u32 HasDebugMakerEXT : 1;
 	};
 	static OptionalVulkanDeviceExtensions OptionalDeviceExtensions;
 
 private:
-	static void GetInstanceExtensions(std::vector<const char*>& instanceExtensions, std::vector<const char*>& layerExtensions);
-	void GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::vector<const char*>& deviceExtensions, std::vector<const char*>& layerExtensions);
+	static void GetInstanceExtensions(std::vector<std::string>& instanceExtensions, std::vector<std::string>& layerExtensions);
+	void GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::vector<std::string>& deviceExtensions, std::vector<std::string>& layerExtensions);
+
+	bool CheckForDeviceExtension(const std::string& ext, bool add, std::vector<std::string>& deviceExtensions);
 
 public:
 	VkDevice Device;
@@ -277,7 +281,7 @@ private:
 
 	GPUAdapterVulkan* m_adapter = nullptr;
 
-	std::unordered_map<U32, std::pair<bool, GPUImage*>> m_trasientImages;
+	std::unordered_map<U32, std::pair<bool, Insight::Graphics::GPUImage*>> m_trasientImages;
 
 	CriticalSection m_fenceLock;
 	CriticalSection m_pipelineEventLock;

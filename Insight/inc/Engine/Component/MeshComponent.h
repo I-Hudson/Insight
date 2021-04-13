@@ -4,10 +4,15 @@
 #include "Engine/Model/Mesh.h"
 #include "Engine/Graphics/Material.h"
 
+#include "Reflect.h"
+#include "Generated/MeshComponent_reflect_generated.h"
+
 #include <../vendor/glm/glm/glm.hpp>
 
-class IS_API MeshComponent : public Component
+IS_API REFLECT_CLASS(MeshComponent), public Component
 {
+	REFLECT_GENERATED_BODY()
+
 public:
 	MeshComponent();
 	MeshComponent(Entity* owner);
@@ -38,6 +43,7 @@ private:
 	std::vector<Material*> m_materials;
 	std::vector<MaterialBlockData> m_materialBlockDatas;
 
+	REFLECT_PROPERTY()
 	std::string m_meshName;
 
 	REGISTER_DEC_TYPE(MeshComponent);

@@ -62,7 +62,7 @@ public:
 		for (size_t i = 0; i < 4; i++)
 		{
 			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
-			auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
 			meshComponent->SetModel(model);
 			meshComponent->GetEntity()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
 		}

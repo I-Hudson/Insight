@@ -3,70 +3,75 @@
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 
-GPUImageView* GPUImageView::New()
+namespace Insight::Graphics
 {
-	switch (Module::GraphicsModule::Instance()->GetAPI())
+
+	GPUImageView* GPUImageView::New()
 	{
-		case GraphicsRendererAPI::Vulkan: return ::New<GPUImageViewVulkan>();
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUImageViewVulkan>();
+		}
+
+		ASSERT(false && "[GPUImageView::New] API missing.");
+		return nullptr;
 	}
 
-	ASSERT(false && "[GPUImageView::New] API missing.");
-	return nullptr;
-}
-
-GPUImageView::GPUImageView()
-{
-}
-
-GPUImageView::~GPUImageView()
-{
-}
-
-void GPUImageView::Init(GPUImage* image)
-{
-	ASSERT(image != nullptr && "[GPUImageView::Init] 'image' must be valid.");
-	ReleaseGPU();
-
-	m_image = image;
-	m_image->m_view = this;
-	if (!OnInit())
+	GPUImageView::GPUImageView()
 	{
-		IS_WARN("GPUImage::Init] Can not create gpu resource.");
-	}
-}
-
-
-GPUImage* GPUImage::New()
-{
-	switch (Module::GraphicsModule::Instance()->GetAPI())
-	{
-		case GraphicsRendererAPI::Vulkan: return ::New<GPUImageVulkan>();
 	}
 
-	ASSERT(false && "[GPUImage::New] API missing.");
-	return nullptr;
-}
-
-GPUImage::GPUImage()
-{
-}
-
-GPUImage::~GPUImage()
-{
-}
-
-void GPUImage::Init(GPUImageDescription desc)
-{
-	ReleaseGPU();
-
-	m_desc = desc;
-	if (!OnInit())
+	GPUImageView::~GPUImageView()
 	{
-		IS_WARN("GPUImage::Init] Can not create gpu resource.");
 	}
-}
 
-void GPUImage::SetLayout(const ImageLayout& newLayout)
-{
-	m_imageLayout = newLayout;
+	void GPUImageView::Init(GPUImage* image)
+	{
+		ASSERT(image != nullptr && "[GPUImageView::Init] 'image' must be valid.");
+		ReleaseGPU();
+
+		m_image = image;
+		m_image->m_view = this;
+		if (!OnInit())
+		{
+			IS_WARN("GPUImage::Init] Can not create gpu resource.");
+		}
+	}
+
+
+	GPUImage* GPUImage::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUImageVulkan>();
+		}
+
+		ASSERT(false && "[GPUImage::New] API missing.");
+		return nullptr;
+	}
+
+	GPUImage::GPUImage()
+		: m_desc(GPUImageDesc(0, 0, 0, 0,0, 0,ImageDomain::Physical, ImageLayout::Undefined, 0,0,0,PixelFormat::Unknown, ImageType::Image_2D, ImageUsageType::Texture, nullptr))
+	{
+	}
+
+	GPUImage::~GPUImage()
+	{
+	}
+
+	void GPUImage::Init(GPUImageDesc desc)
+	{
+		ReleaseGPU();
+
+		m_desc = desc;
+		if (!OnInit())
+		{
+			IS_WARN("GPUImage::Init] Can not create gpu resource.");
+		}
+	}
+
+	void GPUImage::SetLayout(const ImageLayout& newLayout)
+	{
+		m_imageLayout = newLayout;
+	}
 }
