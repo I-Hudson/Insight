@@ -266,6 +266,18 @@ namespace
 		return VK_SHADER_STAGE_ALL;
 	}
 
+	VkShaderStageFlags ToVulkanShaderStageFlagsMuti(const ShaderStage& shaderStage)
+	{
+		VkShaderStageFlags vFlags = 0;
+		if ((u32)shaderStage & (u32)ShaderStage::Vertex) { vFlags |= VK_SHADER_STAGE_VERTEX_BIT; }
+		if ((u32)shaderStage & (u32)ShaderStage::TessControl) { vFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT; }
+		if ((u32)shaderStage & (u32)ShaderStage::TessEvaluation) { vFlags |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; }
+		if ((u32)shaderStage & (u32)ShaderStage::Geometry) { vFlags |= VK_SHADER_STAGE_GEOMETRY_BIT; }
+		if ((u32)shaderStage & (u32)ShaderStage::Fragment) { vFlags |= VK_SHADER_STAGE_FRAGMENT_BIT; }
+		if ((u32)shaderStage & (u32)ShaderStage::Compute) { vFlags |= VK_SHADER_STAGE_COMPUTE_BIT; }
+		return vFlags;
+	}
+
 	VkImageType ToVulkanImageType(const ImageType& imageType)
 	{
 		switch (imageType)
@@ -411,5 +423,10 @@ namespace
 		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT; }
 		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind_EXT) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT; }
 		return vFlags;
+	}
+
+	VkDescriptorType ToVulkanDescriptorType(DescriptorType type)
+	{
+		return (VkDescriptorType)type;
 	}
 }

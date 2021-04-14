@@ -204,7 +204,6 @@
     <ClInclude Include="inc\Engine\FileSystem\FileHandle.h" />
     <ClInclude Include="inc\Engine\FileSystem\FileSystem.h" />
     <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h" />
-    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h" />
     <ClInclude Include="inc\Engine\Graphics\Config.h" />
     <ClInclude Include="inc\Engine\Graphics\Debug\GPUDebug.h" />
     <ClInclude Include="inc\Engine\Graphics\Enums.h" />
@@ -240,6 +239,8 @@
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorAllocatorVulkan.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h" />
@@ -758,7 +759,6 @@
     <ClCompile Include="src\Engine\Event\EventManager.cpp" />
     <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp" />
     <ClCompile Include="src\Engine\Graphics\Enums.cpp" />
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />
@@ -783,6 +783,8 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorAllocatorVulkan.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp" />

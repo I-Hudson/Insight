@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Engine/Graphics/GPUResource.h"
+#include "Engine/Graphics/Enums.h"
 
 namespace Insight::Graphics
 {
@@ -16,6 +17,7 @@ namespace Insight::Graphics
 
 	enum GPUDescriptorPoolResetFlag
 	{
+		None = 0,
 		Free_Descriptor_Set = 1 << 0,
 		Update_After_Bind = 1 << 1,
 		Update_After_Bind_EXT = Update_After_Bind,
@@ -23,11 +25,11 @@ namespace Insight::Graphics
 
 	struct GPUDescriptorSetDesc
 	{
-		GPUDescriptorSetDesc(GPUDescriptorPool* pool, GPUPipeline* pipeline)
-			: Pool(pool), m_pipeline(pipeline)
+		GPUDescriptorSetDesc(GPUDescriptorPool* pool, void* layout)
+			: Pool(pool), Layout(layout)
 		{ }
 		GPUDescriptorPool* Pool;
-		GPUPipeline* m_pipeline;
+		void* Layout;
 	};
 
 	class GPUDescriptorSet : public GPUResource
@@ -39,7 +41,7 @@ namespace Insight::Graphics
 		static GPUDescriptorSet* New();
 
 		const GPUDescriptorSetDesc& GetDesc() const { return m_desc; }
-		virtual void Init(GPUDescriptorSetDesc& desc) = 0;
+		virtual GPUResults Init(GPUDescriptorSetDesc& desc) = 0;
 
 		virtual void BindTexture(GPUImage* image, u32 slot) = 0;
 		virtual void BindUniformBuffer(GPUBuffer* buffer, u32 slot) = 0;
@@ -63,7 +65,7 @@ namespace Insight::Graphics
 
 		static GPUDescriptorPool* New();
 
-		virtual void Init() = 0;
+		virtual GPUResults Init() = 0;
 
 		virtual GPUDescriptorSet* AllocaSet(GPUDescriptorSetDesc& desc) = 0;
 		virtual void ResetPool(GPUDescriptorPoolResetFlag resetFlags) = 0;
@@ -75,5 +77,21 @@ namespace Insight::Graphics
 		
 	protected:
 		std::vector<GPUDescriptorSet*> m_sets;
+	};
+
+	class GPUDescriptorAllocator {};
+	class GPUDescriptorLayoutCache {};
+
+	class GPUDescriptorBuilder
+	{
+	public:
+		static GPUDescriptorBuilder* New();
+
+		virtual GPUDescriptorBuilder* Begin(GPUDescriptorLayoutCache* layoutCache, GPUDescriptorAllocator* allocator) = 0;
+	
+		virtual GPUDescriptorBuilder* BindBuffer(u32 binding, GPUBuffer* buffer, DescriptorType type, ShaderStage stage) = 0;
+		virtual GPUDescriptorBuilder* BindImage(u32 binding, GPUImage* image, DescriptorType type, ShaderStage stage) = 0;
+	
+		virtual bool Build(GPUDescriptorSet* set) = 0;
 	};
 }

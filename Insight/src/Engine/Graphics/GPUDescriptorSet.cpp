@@ -2,6 +2,7 @@
 #include "Engine/Graphics/GPUDescriptorSet.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorSetVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDescriptorAllocatorVulkan.h"
 
 namespace Insight::Graphics
 {
@@ -41,6 +42,16 @@ namespace Insight::Graphics
 		switch (Module::GraphicsModule::Instance()->GetAPI())
 		{
 			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorPoolVulkan>();
+		}
+		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
+		return nullptr;
+	}
+
+	GPUDescriptorBuilder* GPUDescriptorBuilder::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorBuilderVulkan>();
 		}
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;

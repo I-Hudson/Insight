@@ -510,6 +510,12 @@
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorAllocatorVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
@@ -2007,9 +2013,6 @@
     <ClInclude Include="vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.h">
-      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp">
@@ -2133,6 +2136,12 @@
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUCommandBufferVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorAllocatorVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceLayers.cpp">
@@ -2287,9 +2296,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDescriptorSetVulkan.cpp">
-      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

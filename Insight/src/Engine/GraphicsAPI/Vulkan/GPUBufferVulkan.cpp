@@ -50,6 +50,10 @@ namespace Insight::GraphicsAPI::Vulkan
 		ThrowIfFailed(vmaCreateBuffer(m_device->VmaAllocator, &info, &vmaInfo, &m_buffer, &m_vmaAllocation, &m_vmaAllocationInfo));
 		m_memoryUsage = m_desc.Size;
 
+		m_bufferInfo.buffer = m_buffer;
+		m_bufferInfo.range = m_desc.Size;
+		m_bufferInfo.offset = 0;
+
 		if (m_desc.InitData != nullptr)
 		{
 			SetData(m_desc.InitData, m_desc.Size);

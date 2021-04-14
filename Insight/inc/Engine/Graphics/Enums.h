@@ -1125,3 +1125,43 @@ enum class GPUQueue
     COMPUTE,
     TRANSFER
 };
+
+enum class DescriptorType
+{
+    Sampler,
+    Combined_Image_Sampler,
+    Sampled_Image,
+    Storage_Image,
+    Uniform_Texel_Buffer,
+    Storage_Texel_Buffer,
+    Unifom_Buffer,
+    Storage_Buffer,
+    Uniform_Buffer_Dynamic,
+    Storage_Buffer_Dyanmic,
+    Input_Attachment,
+};
+
+enum class GPUResults
+{
+    Success = 0,
+    Not_Ready = 1,
+    Timeout = 2,
+    Event_Set = 3,
+    Event_Reset = 4,
+    Incomplete = 5,
+    Error_Out_Of_Host_Memory = -1,
+    Error_Out_Of_Device_Memory = -2,
+    Error_Initialization_Failed = -3,
+    Error_Device_Lost = -4,
+    Error_Memory_Map_Failed = -5,
+    Error_Layer_Not_Present = -6,
+    Error_Extension_Not_Present = -7,
+    Error_Feature_Not_Present = -8,
+    Error_Incompatiable_Driver = -9,
+    Error_Too_Many_Objects = -10,
+    Error_Format_Not_Supported = -11,
+    Error_Fragmented_Pool = -12,
+    Error_Unkown = -13,
+    Error_Out_Of_Pool_Memory = 1000069000,
+
+};

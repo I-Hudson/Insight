@@ -6,6 +6,9 @@
 namespace Insight::GraphicsAPI::Vulkan
 {
 	class GPUDescriptorPoolVulkan;
+	class GPUDescriptorAllocatorVulkan;
+	class GPUDescriptorLayoutCacheVulkan;
+	class GPUDescriptorBuilderVulkan;
 
 	class GPUDescriptorSetVulkan : public GPUResouceVulkan<Graphics::GPUDescriptorSet>
 	{
@@ -13,7 +16,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUDescriptorSetVulkan();
 		virtual ~GPUDescriptorSetVulkan() override;
 
-		virtual void Init(Graphics::GPUDescriptorSetDesc& desc) override;
+		virtual GPUResults Init(Graphics::GPUDescriptorSetDesc& desc) override;
 
 		virtual void BindTexture(Graphics::GPUImage* image, u32 slot) override;
 		virtual void BindUniformBuffer(Graphics::GPUBuffer* buffer, u32 slot) override;
@@ -27,6 +30,9 @@ namespace Insight::GraphicsAPI::Vulkan
 	private:
 		VkDescriptorSet m_set;
 		friend class GPUDescriptorPoolVulkan;
+		friend class GPUDescriptorBuilderVulkan;
+		friend class GPUDescriptorLayoutCacheVulkan;
+		friend class GPUDescriptorAllocatorVulkan;
 	};
 
 	class GPUDescriptorPoolVulkan : public GPUResouceVulkan<Graphics::GPUDescriptorPool>
@@ -35,7 +41,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUDescriptorPoolVulkan();
 		virtual ~GPUDescriptorPoolVulkan() override;
 
-		virtual void Init() override;
+		virtual GPUResults Init() override;
 
 		virtual Graphics::GPUDescriptorSet* AllocaSet(Graphics::GPUDescriptorSetDesc& desc) override;
 		virtual void ResetPool(Graphics::GPUDescriptorPoolResetFlag resetFlags) override;

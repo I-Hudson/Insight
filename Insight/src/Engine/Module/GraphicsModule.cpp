@@ -16,6 +16,7 @@
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
+#include "Engine/Graphics/GPUDescriptorSet.h"
 #include "Engine/Graphics/GPUBuffer.h"
 #include "stb_image.h"
 #define RENDER_GRAPH_TESTING 1

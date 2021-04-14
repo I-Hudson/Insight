@@ -7,6 +7,11 @@ namespace Insight::GraphicsAPI::Vulkan
 {
 	class GPUCommandBufferVulkan;
 
+	struct GPUBufferVulkanInfo
+	{
+
+	};
+
 	class GPUBufferVulkan : public GPUResouceVulkan<Graphics::GPUBuffer>
 	{
 	public:
@@ -14,6 +19,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		~GPUBufferVulkan();
 
 		virtual void Init(Graphics::GPUBufferDesc const& desc) override;
+
+		VkDescriptorBufferInfo* GetBufferInfo() { return &m_bufferInfo; }
 
 	protected:
 		virtual void* Map(GPUResourceMapMode mapMode) override;
@@ -31,6 +38,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		VmaAllocation m_vmaAllocation;
 		VmaMemoryUsage m_vmaMemoryUsage;
 		VmaAllocationInfo m_vmaAllocationInfo;
+
+		VkDescriptorBufferInfo m_bufferInfo;
 
 		friend GPUCommandBufferVulkan;
 	};
