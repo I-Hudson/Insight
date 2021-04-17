@@ -20,7 +20,7 @@
         Platform::Assert(#expression, __FILE__, __LINE__); \
     }
 #else
-#define ASSERT(expression) ((void)0);
+#define ASSERT(expression) (expression);
 #endif
 #if ENABLE_ASSERTION_LOW_LAYERS
 #define ASSERT_LOW_LAYER(x) ASSERT(x)

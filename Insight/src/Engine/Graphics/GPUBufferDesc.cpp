@@ -21,6 +21,16 @@ namespace Insight::Graphics
         return desc;
     }
 
+    GPUBufferDesc GPUBufferDesc::SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size)
+    {
+        GPUBufferDesc desc = {};
+        desc.SubAlloc.Size = size;
+        desc.SubAlloc.Begin = begin;
+        desc.SubAlloc.ParentBuffer = parentBuffer;
+        desc.SubAlloc.State = GPUBufferSubAllocDesc::Used;
+        return desc;
+    }
+
 
     bool GPUBufferDesc::Equals(const GPUBufferDesc& other) const
     {

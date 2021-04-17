@@ -18,6 +18,8 @@
 #include "Engine/Graphics/GPUCommandBuffer.h"
 #include "Engine/Graphics/GPUDescriptorSet.h"
 #include "Engine/Graphics/GPUBuffer.h"
+#include "Engine/Graphics/GPUDynamicBuffer.h"
+#include "Engine/Graphics/GPUSync.h"
 #include "stb_image.h"
 #define RENDER_GRAPH_TESTING 1
 // TESTING
@@ -28,6 +30,7 @@ namespace Module
 	std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
 	GraphicsModule::GraphicsModule()
+		: m_renderer(nullptr)
 	{
 #if RENDER_GRAPH_TESTING
 		{
@@ -42,7 +45,7 @@ namespace Module
 			::Delete(shader);
 
 			Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
-			image->Init(Insight::Graphics::GPUImageDesc::Texture(1, 0, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
+			image->Init(Insight::Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
 			Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
 			view->Init(image);
 			::Delete(image);
@@ -73,7 +76,7 @@ namespace Module
 				///
 				// Set data to a GPU buffer
 				///
-				vec4 = glm::vec4(10, 20,30,40);
+				vec4 = glm::vec4(10, 20, 30, 40);
 				gpuBuffer->SetData(&vec4, sizeof(glm::vec4));
 
 				///
@@ -84,17 +87,26 @@ namespace Module
 				returnedValue = *static_cast<glm::vec4*>(dataPtr);
 
 				cmdBuffer->BeginRecord();
-				cmdBuffer->SetViewPort(Maths::Rect(1920, 1080, 0, 1));
-				std::vector<Graphics::GPUBuffer*> vBuffers = { gpuBuffer};
+				std::vector<Graphics::GPUBuffer*> vBuffers = { gpuBuffer };
 				std::vector<u32> vOffsets = { 0 };
 				cmdBuffer->BindVertexBuffers(0, 1, vBuffers.data(), vOffsets.data());
 
 				vBuffers = { gpuBuffer, gpuBuffer1 };
 				vOffsets = { 0, 0 };
-				cmdBuffer->BindVertexBuffers(0, 2, vBuffers.data() , vOffsets.data());
+				cmdBuffer->BindVertexBuffers(0, 2, vBuffers.data(), vOffsets.data());
 
 				cmdBuffer->EndRecord();
 
+				Graphics::GPUDynamicBuffer* dyanmicBuffer = Graphics::GPUDynamicBuffer::New();
+				dyanmicBuffer->Init(Graphics::GPUDynamicBufferDesc::Uniform(64, 256, 1000));
+				dyanmicBuffer->SetName("Dynamic Uniform Buffer");
+
+				Graphics::GPUBuffer* sub1 = dyanmicBuffer->Upload(&vec4, 16);
+				std::vector<u8> vector; vector.resize(128);
+				Graphics::GPUBuffer* sub2 = dyanmicBuffer->Upload(vector.data(), sizeof(u8) * vector.size());
+				dyanmicBuffer->Reset();
+
+				::Delete(dyanmicBuffer);
 				::Delete(gpuBuffer);
 				::Delete(gpuBuffer1);
 				::Delete(cmdBuffer);
@@ -102,104 +114,14 @@ namespace Module
 
 
 			}
-
-			{
-				using namespace Insight::Graphics;
-				RenderGraph* graph = RenderGraph::New();
-				
-				//while (appRunning)
-				//{
-					graph->Reset();
-
-					ImageAttachmentInfo mainPassOutput = { };
-					mainPassOutput.Width = 2560;
-					mainPassOutput.Height = 1440;
-					mainPassOutput.Name = "mainPass-Color";
-					mainPassOutput.Format = PixelFormat::R8G8B8A8_UNorm;
-
-					ImageAttachmentInfo depthOutput = {};
-					depthOutput.Width = 1920;
-					depthOutput.Height = 1080;
-					depthOutput.Name = "depth";
-					depthOutput.Format = PixelFormat::D24_UNorm_S8_UInt;
-
-					auto& lightingPass = graph->AddPass("LightingPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-					lightingPass.AddColorInput("colour");
-					lightingPass.AddColorInput("normal");
-					lightingPass.AddColorInput("position");
-					lightingPass.AddColorInput("pointLights");
-					lightingPass.SetDepthStencilInput("shaderDepthStencil");
-					lightingPass.AddColorOutput("lightingOutput", mainPassOutput);
-
-					auto& shadowPass = graph->AddPass("ShaderPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-					shadowPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
-
-					// Add all my passes at runtime.
-					auto& mainPass = graph->AddPass("MainPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-					mainPass.AddColorOutput("colour", mainPassOutput);
-					mainPass.AddColorOutput("normal", mainPassOutput);
-					mainPass.AddColorOutput("position", mainPassOutput);
-					mainPass.SetDepthStencilInput("shaderDepthStencil");
-
-					mainPass.SetClearColour(glm::vec4());
-					mainPass.SetRenderFunc([&]()
-					{
-						// bind material
-						// bind buffers
-						// Draw mesn, 
-					});
-
-					auto& pointLights = graph->AddPass("pointLights", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-					pointLights.SetDepthStencilInput("shaderDepthStencil");
-					pointLights.AddColorOutput("pointLights", mainPassOutput);
-
-					graph->SetbackBufferSource("lightingOutput");
-					graph->Build();
-					graph->Execute();
-
-					::Delete(graph);
-
-				//}
-			}
-
-
-			//ResourceDimensions swapchain;
-			//swapchain.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			//swapchain.Width = 1920;
-			//swapchain.Height = 1080;
-			//swapchain.Samples = 4;
-			//swapchain.Levels = 1;
-			//swapchain.Layers = 1;
-			//swapchain.ImageUsage = (U32)ImageUsageFlagsBits::Color_Attachment;
-
-			//ImageAttachmentInfo color, hdrLighting;
-			//color.Format = PixelFormat::R8G8B8A8_UNorm_sRGB;
-			//hdrLighting.Format = PixelFormat::R32G32B32A32_SInt;
-
-			//RenderGraph* graph = RenderGraph::New();
-			//graph->SetSwapchainDimensions(swapchain);
-
-			//auto& lPass = graph->AddPass("Lightting", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			//lPass.AddColorOutput("HDR-Lightting-Image", hdrLighting);
-			//lPass.AddAttachmentInput("color");
-
-			//auto& gPass = graph->AddPass("g-buffer", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			//gPass.AddColorOutput("color", color);
-
-			//graph->SetbackBufferSource("HDR-Lightting-Image");
-			//graph->Build();
-			//graph->SetupAttachments();
-			//graph->EnqueueRenderPass();
-
-			//graph->LogToConsole();
-			//::Delete(graph);
+			Insight::Graphics::RenderGraph* graph = Insight::Graphics::RenderGraph::New();
 		}
 #endif
-		m_renderer = Renderer::New();
-		m_renderer->Init();
+		//m_renderer = Renderer::New();
+		//m_renderer->Init();
 
-		m_imguiRenderer = ImGuiRenderer::New();
-		ImGuiRenderer::Instance()->Init(m_renderer);
+		//m_imguiRenderer = ImGuiRenderer::New();
+		//ImGuiRenderer::Instance()->Init(m_renderer);
 
 	}
 
@@ -207,18 +129,26 @@ namespace Module
 	{
 #if RENDER_GRAPH_TESTING
 		// TESTING
+		::Delete(Insight::Graphics::RenderGraph::Instance());
 		GPUDevice::Instance()->Dispose();
 		::Delete(GPUDevice::Instance());
 #endif
-		ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
-		::Delete(m_imguiRenderer);
-		::Delete(m_renderer);
+		if (ImGuiRenderer::IsInitialised())
+		{
+			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
+			::Delete(m_imguiRenderer);
+		}
+
+		if (m_renderer)
+		{
+			::Delete(m_renderer);
+		}
 	}
 
+	u32 imageIndex = 0;
 	void GraphicsModule::Update(const float& deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
-
 		if (m_renderer != nullptr)
 		{
 			m_renderer->Render(m_mainCamera, m_meshs);
@@ -227,6 +157,86 @@ namespace Module
 		{
 			IS_CORE_ERROR("[GraphicsModule::Update] No renderer setup.");
 		}
+
+		{
+			IS_PROFILE_SCOPE("RenderGraph: Create");
+
+			using namespace Insight;
+			Graphics::RenderGraph::Instance()->Reset();
+
+			Graphics::ImageAttachmentInfo mainPassOutput = { };
+			mainPassOutput.Width = Window::GetWidth();
+			mainPassOutput.Height = Window::GetHeight();
+			mainPassOutput.Name = "mainPass-Color";
+			mainPassOutput.Format = PixelFormat::R8G8B8A8_UNorm;
+
+			Graphics::ImageAttachmentInfo depthOutput = {};
+			depthOutput.Width = Window::GetWidth();
+			depthOutput.Height = Window::GetHeight();
+			depthOutput.Name = "depth";
+			depthOutput.Format = PixelFormat::D24_UNorm_S8_UInt;
+
+			auto& lightingPass = Graphics::RenderGraph::Instance()->AddPass("LightingPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			lightingPass.AddColorInput("colour");
+			lightingPass.AddColorInput("normal");
+			lightingPass.AddColorInput("position");
+			lightingPass.AddColorInput("pointLights");
+			lightingPass.SetDepthStencilInput("shaderDepthStencil");
+			lightingPass.AddColorOutput("lightingOutput", mainPassOutput);
+			lightingPass.SetClearColour(glm::vec4(0, 1, 1, 1));
+
+			auto& shadowPass = Graphics::RenderGraph::Instance()->AddPass("shadowPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			shadowPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
+			shadowPass.SetClearDepthStencil(glm::vec2(1, 0));
+
+			// Add all my passes at runtime.
+			auto& mainPass = Graphics::RenderGraph::Instance()->AddPass("MainPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			mainPass.AddColorOutput("colour", mainPassOutput);
+			mainPass.AddColorOutput("normal", mainPassOutput);
+			mainPass.AddColorOutput("position", mainPassOutput);
+			mainPass.SetDepthStencilInput("shaderDepthStencil");
+
+			mainPass.SetClearColour(glm::vec4(0, 1, 0, 1));
+			mainPass.SetRenderFunc([&](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::GPUDynamicBuffer* dynamicBuffer, Graphics::GPUDescriptorBuilder* builder)
+			{
+				glm::vec4 screenColour;
+				Graphics::GPUBuffer* colourBuffer = dynamicBuffer->Upload(&screenColour, sizeof(glm::vec4));
+
+				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
+				builder->BindBuffer(0, colourBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
+				::Delete(testSet);
+
+				//Graphics::GPUDescriptorBuilder* build = Graphics::GPUDescriptorBuilder::New();
+				//build->Begin(layoutCache, descriptorAlloc);
+				//build->BindBuffer(0, colourBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment);
+
+				// bind material
+				// bind buffers
+				// Draw mesh, 
+			});
+
+			auto& pointLights = Graphics::RenderGraph::Instance()->AddPass("pointLights", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+			pointLights.SetDepthStencilInput("shaderDepthStencil");
+			pointLights.AddColorOutput("pointLights", mainPassOutput);
+			pointLights.SetClearColour({ 1, 0, 1, 1 });
+		}
+
+		if (imageIndex % 3 == 0)
+		{
+		Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
+		}
+		else if (imageIndex % 3 == 1)
+		{
+			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("pointLights");
+		}
+		else if (imageIndex % 3 == 2)
+		{
+			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
+		}
+		++imageIndex;
+		Insight::Graphics::RenderGraph::Instance()->Build();
+		Insight::Graphics::RenderGraph::Instance()->LogToConsole();
+		Insight::Graphics::RenderGraph::Instance()->Execute();
 	}
 
 	void GraphicsModule::WaitForIdle()

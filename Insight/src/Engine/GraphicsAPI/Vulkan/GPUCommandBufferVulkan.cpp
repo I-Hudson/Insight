@@ -1,11 +1,14 @@
 #include "ispch.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUSyncVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
 
 namespace Insight::GraphicsAPI::Vulkan
 {
@@ -61,15 +64,21 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkResetCommandBuffer(m_cmdBuffer, GetDesc().ReleaseResources == false ? 0 : VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 	}
 
-	void GPUCommandBufferVulkan::Submit(GPUQueue queue)
+	void GPUCommandBufferVulkan::Submit(GPUQueue queue, Graphics::GPUFence* fence)
 	{
 		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Submit] Command buffer must be in the 'IDLE' state to be submitted.");
+
+		GPUFenceVulkan* fenceVulkan = nullptr;
+		if (fence != nullptr)
+		{
+			fenceVulkan = static_cast<GPUFenceVulkan*>(fence);
+		}
 
 		//TODO. Think about matching this with some form of queue system.
 		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_cmdBuffer;
-		vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, fenceVulkan ? *fenceVulkan->GetHandleVulkan() : nullptr);
 		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
 	}
 
@@ -81,10 +90,12 @@ namespace Insight::GraphicsAPI::Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_cmdBuffer;
 
-		auto fence = m_device->FenceManager.AllocateFence();
-		ThrowIfFailed(vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, fence->GetHandle()));
+		GPUFenceVulkan* fence = static_cast<GPUFenceVulkan*>(Graphics::GPUFence::New());
+		fence->Init(Graphics::GPUFenceDesc());
+		ThrowIfFailed(vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, *fence->GetHandleVulkan()));
 		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
-		m_device->FenceManager.WaitAndReleaseFence(fence, U64_MAX);
+		fence->Wait();
+		::Delete(fence);
 
 		m_state = Graphics::GPUCommandBufferState::IDLE;
 	}
@@ -109,27 +120,58 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 	}
 
-	void GPUCommandBufferVulkan::BeginRenderpass(Graphics::GPURenderPass* renderpass)
+	void GPUCommandBufferVulkan::BeginRenderpass(Graphics::GPURenderGraphPass* renderpass)
 	{
 		++m_recordCommandCount;
+		GPURenderGraphPassVulkan* renderPass = static_cast<GPURenderGraphPassVulkan*>(renderpass);
+
+		std::vector<VkClearValue> clearColors;
+		for (size_t i = 0; i < renderPass->m_colorAttachmentsCount; ++i)
+		{
+			VkClearValue v;
+			v.color.float32[0] = renderPass->GetRenderPass().GetClearColor().x;
+			v.color.float32[1] = renderPass->GetRenderPass().GetClearColor().y;
+			v.color.float32[2] = renderPass->GetRenderPass().GetClearColor().z;
+			v.color.float32[3] = renderPass->GetRenderPass().GetClearColor().w;
+			clearColors.push_back(v);
+		}
+		if (renderPass->GetRenderPass().IsDepthSencilOuputValid())
+		{
+			VkClearValue v;
+			v.depthStencil.depth = (u32)renderPass->GetRenderPass().GetClearDepthStencil().x;
+			v.depthStencil.stencil = (u32)renderPass->GetRenderPass().GetClearDepthStencil().y;
+			clearColors.push_back(v);
+		}
+
+		VkRenderPassBeginInfo renderPassBeginInfo = vks::initializers::renderPassBeginInfo();
+		renderPassBeginInfo.renderPass = renderPass->m_renderPass;
+		renderPassBeginInfo.framebuffer = renderPass->m_frameBuffer;
+		renderPassBeginInfo.renderArea.offset.x = 0;
+		renderPassBeginInfo.renderArea.offset.y = 0;
+		renderPassBeginInfo.renderArea.extent.width = renderPass->GetRenderPass().GetWindowRect().GetWidth();
+		renderPassBeginInfo.renderArea.extent.height = renderPass->GetRenderPass().GetWindowRect().GetHeight();
+		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
+		renderPassBeginInfo.pClearValues = clearColors.data();
+		vkCmdBeginRenderPass(m_cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
-	void GPUCommandBufferVulkan::EndRenderpass(Graphics::GPURenderPass* renderpass)
+	void GPUCommandBufferVulkan::EndRenderpass(Graphics::GPURenderGraphPass* renderpass)
 	{
 		++m_recordCommandCount;
-
+		vkCmdEndRenderPass(m_cmdBuffer);
 	}
 
 	void GPUCommandBufferVulkan::SetViewPort(Maths::Rect rect)
 	{
 		++m_recordCommandCount;
-
+		VkViewport viewPorts[] = { ToVulkanViewPort(rect) };
+		vkCmdSetViewport(m_cmdBuffer, 0, 1, &viewPorts[0]);
 	}
 
 	void GPUCommandBufferVulkan::SetScissor(Maths::Rect rect)
 	{
 		++m_recordCommandCount;
-
+		vkCmdSetScissor(m_cmdBuffer, 0, 1, nullptr);
 	}
 
 	void Insight::GraphicsAPI::Vulkan::GPUCommandBufferVulkan::CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
@@ -224,6 +266,149 @@ namespace Insight::GraphicsAPI::Vulkan
 			0, nullptr,
 			0, nullptr,
 			1, &imageMemoryBarrier);
+	}
+
+	void GPUCommandBufferVulkan::BlipImageToSwapchain(Graphics::GPUImage* srcImage, Graphics::GPUImage* dstImage)
+	{
+		++m_recordCommandCount;
+
+		GPUImageVulkan* sourceImage = static_cast<GPUImageVulkan*>(srcImage);
+		GPUImageVulkan* destinationImage = static_cast<GPUImageVulkan*>(dstImage);
+
+		VkImageSubresourceRange srcSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		// Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
+		VkImageMemoryBarrier srcImageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+		srcImageMemoryBarrier.image = sourceImage->m_vImage;
+		srcImageMemoryBarrier.subresourceRange = srcSubresourceRange;
+		srcImageMemoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		srcImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		srcImageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		srcImageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+
+		vkCmdPipelineBarrier(
+			m_cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &srcImageMemoryBarrier);
+
+		VkImageSubresourceRange dstSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		// Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
+		VkImageMemoryBarrier dstImageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+		dstImageMemoryBarrier.image = destinationImage->m_vImage;
+		dstImageMemoryBarrier.subresourceRange = dstSubresourceRange;
+		dstImageMemoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT;
+		dstImageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		dstImageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		dstImageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+		vkCmdPipelineBarrier(
+			m_cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &dstImageMemoryBarrier);
+
+		// Check blit support for source and destination
+		VkFormatProperties formatProps;
+		GPUAdapterVulkan* adapter = static_cast<GPUAdapterVulkan*>(m_device->GetAdapter());
+		bool supportsBlit = true;
+
+		// Check if the device supports blitting from optimal images (the swapchain images are in optimal format)
+		vkGetPhysicalDeviceFormatProperties(adapter->Gpu, ToVulkanFormat(dstImage->GetDesc().Format), &formatProps);
+		if (!(formatProps.optimalTilingFeatures & VK_FORMAT_FEATURE_BLIT_SRC_BIT))
+		{
+			supportsBlit = false;
+		}
+
+		if (supportsBlit)
+		{
+			// Define the region to blit (we will blit the whole swapchain image)
+			VkOffset3D blitSize;
+			blitSize.x = dstImage->GetDesc().Width;
+			blitSize.y = dstImage->GetDesc().Height;
+			blitSize.z = 1;
+			VkImageBlit imageBlitRegion{};
+			imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageBlitRegion.srcSubresource.layerCount = 1;
+			imageBlitRegion.srcOffsets[1] = blitSize;
+			imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageBlitRegion.dstSubresource.layerCount = 1;
+			imageBlitRegion.dstOffsets[1] = blitSize;
+
+			// Issue the blit command
+			vkCmdBlitImage(
+				m_cmdBuffer,
+				sourceImage->m_vImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				destinationImage->m_vImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				1,
+				&imageBlitRegion,
+				VK_FILTER_NEAREST);
+		}
+		else
+		{
+			// Otherwise use image copy (requires us to manually flip components)
+			VkImageCopy imageCopyRegion{};
+			imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageCopyRegion.srcSubresource.layerCount = 1;
+			imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			imageCopyRegion.dstSubresource.layerCount = 1;
+			imageCopyRegion.extent.width = dstImage->GetDesc().Width;
+			imageCopyRegion.extent.height = dstImage->GetDesc().Height;
+			imageCopyRegion.extent.depth = 1;
+
+			// Issue the copy command
+			vkCmdCopyImage(
+				m_cmdBuffer,
+				sourceImage->m_vImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				destinationImage->m_vImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				1,
+				&imageCopyRegion);
+		}
+
+		srcSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		// Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
+		srcImageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+		srcImageMemoryBarrier.image = sourceImage->m_vImage;
+		srcImageMemoryBarrier.subresourceRange = srcSubresourceRange;
+		srcImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		srcImageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		srcImageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		srcImageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+		vkCmdPipelineBarrier(
+			m_cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &srcImageMemoryBarrier);
+
+		dstSubresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+		// Transition the texture image layout to transfer target, so we can safely copy our buffer data to it.
+		dstImageMemoryBarrier = vks::initializers::imageMemoryBarrier();
+		dstImageMemoryBarrier.image = destinationImage->m_vImage;
+		dstImageMemoryBarrier.subresourceRange = dstSubresourceRange;
+		dstImageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+		dstImageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+		dstImageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		dstImageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+		vkCmdPipelineBarrier(
+			m_cmdBuffer,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			VK_PIPELINE_STAGE_TRANSFER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &dstImageMemoryBarrier);
+
+
 	}
 
 	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
@@ -354,5 +539,14 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkFreeCommandBuffers(m_device->Device, m_cmdPool, 1, &buffer->m_cmdBuffer);	
 		buffer->m_cmdBuffer = nullptr;
 		m_buffers.erase(std::find(m_buffers.begin(), m_buffers.end(), buffer));
+	}
+
+	void GPUCommandPoolVulkan::Reset()
+	{
+		ThrowIfFailed(vkResetCommandPool(m_device->Device, m_cmdPool, 0));
+		for (auto* cmdBuffer : m_buffers)
+		{
+			static_cast<GPUCommandBufferVulkan*>(cmdBuffer)->m_state = Graphics::GPUCommandBufferState::IDLE;
+		}
 	}
 }

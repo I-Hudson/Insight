@@ -1,6 +1,8 @@
 #include "ispch.h"
 #include "Engine/Graphics/RenderGraph/RenderPass.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
+#include "Engine/Graphics/Image/GPUImage.h"
+#include "Engine/Module/WindowModule.h"
 
 namespace Insight::Graphics
 {
@@ -10,6 +12,7 @@ namespace Insight::Graphics
 		, m_passIndex(index)
 		, m_name(name)
 		, m_queue(queue)
+		, m_windowRect(Maths::Rect(0,0, (float)Module::WindowModule::GetWindow()->GetWidth(), (float)Module::WindowModule::GetWindow()->GetHeight()))
 	{
 	}
 
@@ -25,6 +28,7 @@ namespace Insight::Graphics
 		res.AddWrittenInPass(m_passIndex);
 		res.TextureInfo.SetAttachmentInfo(attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
 		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
 		m_colorOutputs.push_back(res.GetIndex());
 
@@ -54,6 +58,7 @@ namespace Insight::Graphics
 		res.AddWrittenInPass(m_passIndex);
 		res.TextureInfo.SetAttachmentInfo(attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
 		res.TextureInfo.ImageLayout = ImageLayout::Depth_Stencil_Attachment;
 		m_depthStencilOutput = res.GetIndex();
 		return res;
@@ -116,6 +121,7 @@ namespace Insight::Graphics
 		res.AddQueue(m_queue);
 		res.AddReadInPass(m_passIndex);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
 		m_depthStencilInput = res.GetIndex();
 		return res;
 	}
@@ -156,5 +162,20 @@ namespace Insight::Graphics
 	RenderGraphResource& RenderPass::GetDepthStencilOutput() const
 	{
 		return m_graph->GetTextureResouce(m_depthStencilOutput);
+	}
+
+	RenderGraphResource& RenderPass::GetTextureResource(u32 index) const
+	{
+		return m_graph->GetTextureResouce(index);
+	}
+
+	const GPUImage* RenderPass::GetPhysicalImage(u32 index) const
+	{
+		return m_graph->m_physicalImages.at(index);
+	}
+
+	const GPUImageView* RenderPass::GetPhysicalImageView(u32 index) const
+	{
+		return m_graph->m_physicalImageViews.at(index);
 	}
 }

@@ -56,4 +56,24 @@ namespace Insight::Graphics
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;
 	}
+
+	GPUDescriptorAllocator* GPUDescriptorAllocator::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorAllocatorVulkan>();
+		}
+		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
+		return nullptr;
+	}
+
+	GPUDescriptorLayoutCache* GPUDescriptorLayoutCache::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorLayoutCacheVulkan>();
+		}
+		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
+		return nullptr;
+	}
 }

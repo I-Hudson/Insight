@@ -13,7 +13,7 @@ namespace Insight::Graphics
 			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUBufferVulkan>();
 		}
 
-		ASSERT(false && "[GPUCommandBuffer::New] API not supported.");
+		ASSERT(false && "[GPUBuffer::New] API not supported.");
 		return nullptr;
 	}
 
@@ -32,7 +32,7 @@ namespace Insight::Graphics
 		void* mapped = nullptr;
 		if (m_mustBeMapped)
 		{
-			mapped = Map(GPUResourceMapMode::Write);
+			mapped = Map();
 			if (!IsMapped())
 			{
 				return;
@@ -51,7 +51,7 @@ namespace Insight::Graphics
 		void* mapped = nullptr;
 		if (m_mustBeMapped)
 		{
-			mapped = Map(GPUResourceMapMode::Read);
+			mapped = Map();
 			if (!mapped)
 			{
 				return;

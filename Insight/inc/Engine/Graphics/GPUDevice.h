@@ -15,6 +15,8 @@ namespace Insight::Graphics
     class GPUCommandPool;
     class GPUImageView;
     class GPUImage;
+    class GPUFenceManager;
+    class GPUSemaphoreManager;
 }
 
 class GPUContext;
@@ -66,6 +68,8 @@ public:
     FormatFeatures GetFormatFeatures(const PixelFormat& format) const { return m_featuresPerFormat[(I32)format]; }
     
     Insight::Graphics::GPUCommandPool* GetDefaultCommandPool() const { return m_defaultCommandPool; }
+    virtual Insight::Graphics::GPUFenceManager* GetDefaultFenceManager() = 0;
+    virtual Insight::Graphics::GPUSemaphoreManager* GetDefaultSignalManager() = 0;
 
     FORCE_INLINE U64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
     
@@ -77,8 +81,6 @@ public:
     virtual void Dispose();
     virtual void WaitForGPU() = 0;
     virtual u32 GetQueueIndex(GPUQueue queue) = 0;
-
-    virtual Insight::Graphics::GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) = 0;
 
 public:
     GPUResourceCollection Resources;

@@ -36,6 +36,7 @@ namespace Insight::Graphics
 		FORCE_INLINE PixelFormat GetFromat() const { return m_desc.Format; }
 
 		FORCE_INLINE bool IsStaging() const { return m_desc.Flags == GPUBufferFlags::TRANSFER_SRC || m_desc.Flags == GPUBufferFlags::TRANSFER_DST; }
+		FORCE_INLINE bool IsSubAllocation() const { return m_desc.SubAlloc.State != GPUBufferSubAllocDesc::Unsed; }
 		FORCE_INLINE const GPUBufferDesc& GetDesc() const { return m_desc; }
 
 		void Resize(U32 newSize);
@@ -45,7 +46,7 @@ namespace Insight::Graphics
 		virtual ObjectType GetObjectType() const { return ObjectType::Buffer; }
 
 	protected:
-		virtual void* Map(GPUResourceMapMode mapMode) = 0;
+		virtual void* Map() = 0;
 		virtual void UnMap() = 0;
 
 		bool IsMapped() const { return m_mappedData != nullptr; }

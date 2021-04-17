@@ -1,5 +1,7 @@
 #include "ispch.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
+#include "Engine/Graphics/GPUCommandBuffer.h"
+#include "Engine/Graphics/GPUDynamicBuffer.h"
 #include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
 #include "Engine/Config/Config.h"
 #include "Engine/Module/GraphicsModule.h"
@@ -12,9 +14,8 @@ namespace Insight::Graphics
 	{
 		switch (Module::GraphicsModule::Instance()->GetAPI())
 		{
-			//case GraphicsRendererAPI::Vulkan: return ::New<RenderGraphVulkan>();
-		}
-		return ::New<RenderGraph>();
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::RenderGraphVulkan>();
+		}	
 		ASSERT(false && "[RenderGraph::New] API implementation is missing.")
 			return nullptr;
 	}
@@ -23,11 +24,17 @@ namespace Insight::Graphics
 		: m_built(false)
 		, m_changed(false)
 	{
-
+		m_swapchain = GPUSwapchain::New();
+		m_swapchain->Init();
+		m_swapchain->Build(Graphics::GPUSwapchainDesc());
 	}
 
 	RenderGraph::~RenderGraph()
 	{
+		m_singleFrame.ReleaseGPU();
+		m_swapchain->ReleaseGPU();
+		::Delete(m_swapchain);
+
 		for (auto* image : m_physicalImages)
 		{
 			::Delete(image);
@@ -61,6 +68,8 @@ namespace Insight::Graphics
 
 	void RenderGraph::Build()
 	{
+		IS_PROFILE_FUNCTION();
+
 		auto backbufferItr = m_resourceToIndex.find(m_backBufferSource);
 		if (backbufferItr == m_resourceToIndex.end())
 		{
@@ -78,21 +87,109 @@ namespace Insight::Graphics
 		ReorderRenderPasses(m_passStack);
 
 		BuildPhysical();
+
+		m_singleFrame.Init();
 	}
 
 	void RenderGraph::Execute()
 	{
+		IS_PROFILE_FUNCTION();
+
+		u32 imageIndex;
+		{
+			IS_PROFILE_SCOPE("Get next swapchain image.");
+			GPUResults res = m_swapchain->GetNextImage(m_singleFrame.SwapchainImageAquired, &imageIndex);
+			if (res == GPUResults::Error_Out_Of_Data)
+			{
+				SwapchainRebuild();
+				return;
+			}
+		}
+
+		auto* cmdBuffer = m_singleFrame.CommandBuffers;
+		cmdBuffer->BeginRecord();
+		for (size_t i = 0; i < m_singleFrame.RenderPasses.size(); ++i)
+		{
+			cmdBuffer->BeginRenderpass(m_singleFrame.RenderPasses[i]);
+			cmdBuffer->SetViewPort(m_singleFrame.RenderPasses[i]->GetRenderPass().GetWindowRect());
+			m_singleFrame.RenderPasses[i]->GetRenderPass().CallRenderFunc(cmdBuffer, m_singleFrame.DynamicBuffer, m_singleFrame.DescriptorBuilder);
+			cmdBuffer->EndRenderpass(m_singleFrame.RenderPasses[i]);
+		}
+
+		{
+			IS_PROFILE_SCOPE("Blip to swapchain.");
+			Graphics::GPUImage* swapchainImage = m_swapchain->GetImage(imageIndex);
+			GPUImage* backbufferImage = m_physicalImages.at(m_resourceToIndex.at(m_backBufferSource));
+			cmdBuffer->BlipImageToSwapchain(backbufferImage, swapchainImage);
+		}
+
+		{
+			IS_PROFILE_SCOPE("End record and submit go gpu.");
+			cmdBuffer->EndRecord();
+			cmdBuffer->Submit(GPUQueue::GRAPHICS, m_singleFrame.Fence);
+		}
+
+		{
+			IS_PROFILE_SCOPE("Present to swapchain.");
+			std::vector<GPUSemaphore*> waitSemaphores = { m_singleFrame.SwapchainImageAquired };
+			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, imageIndex, waitSemaphores);
+			if (res == GPUResults::Error_Out_Of_Data)
+			{
+				SwapchainRebuild();
+				return;
+			}
+		}
 	}
 
 	void RenderGraph::Reset()
 	{
+		IS_PROFILE_FUNCTION();
+		
 		m_passes.clear();
 		m_passToIndex.clear();
 		m_passStack.clear();
+		if (m_singleFrame.Initialised)
+		{
+			{
+				IS_PROFILE_SCOPE("[RenderGraph::Reset] single frame wait/reset");
+				m_singleFrame.Fence->Wait();
+				m_singleFrame.Fence->Reset();
+			}
+			m_singleFrame.Reset();
+		}
 	}
 
 	void RenderGraph::LogToConsole()
 	{
+		for (auto& renderPassIndex : m_passStack)
+		{
+			auto& renderPass = m_passes[renderPassIndex];
+			IS_CORE_INFO("RenderPass: {0}", renderPass.GetPassName());
+			IS_CORE_INFO("	Colour Inputs:");
+			for (auto& inputIndex : renderPass.GetColorInputs() )
+			{
+				auto& input = m_resources[inputIndex];
+				IS_CORE_INFO("		Name: {0}", input.GetName());
+			}
+			if (renderPass.IsDepthSencilInputValid())
+			{
+				IS_CORE_INFO("	DepthStencil Input: Enabled");
+			}
+			IS_CORE_INFO("	DepthStencil Input: Disabled");
+
+
+			IS_CORE_INFO("	Colour Output:");
+			for (auto& outputIndex : renderPass.GetColorOutputs())
+			{
+				auto& output = m_resources[outputIndex];
+				IS_CORE_INFO("		Name: {0}", output.GetName());
+			}
+			if (renderPass.IsDepthSencilOuputValid())
+			{
+				IS_CORE_INFO("	DepthStencil Output: Enabled");
+			}
+			IS_CORE_INFO("	DepthStencil Output: Disabled");
+		}
 	}
 
 	RenderGraphResource& RenderGraph::GetTextureResouce(const std::string& name)
@@ -141,6 +238,8 @@ namespace Insight::Graphics
 
 	void RenderGraph::GetPassDependencies()
 	{
+		IS_PROFILE_FUNCTION();
+
 		u32 backbufferResourceIndex = m_resourceToIndex[m_backBufferSource];
 		auto& backbufferResource = m_resources[backbufferResourceIndex];
 		ASSERT(!backbufferResource.GetWritePasses().empty() && "[RenderGraph::ReorderRenderPasses] Back buffer resource is not written to.");
@@ -164,6 +263,8 @@ namespace Insight::Graphics
 
 	void RenderGraph::ReorderRenderPasses(std::vector<u32>& flattenedPasses)
 	{
+		IS_PROFILE_FUNCTION();
+
 		// We now have all the passes and which other dependent passes.
 		std::vector<u32> unorderedPasses;
 		unorderedPasses.reserve(flattenedPasses.size());
@@ -184,7 +285,7 @@ namespace Insight::Graphics
 			u32 bestOverlap = 0;
 			u32 bestCandidate = 0;
 
-			for (size_t i = 0; i < unorderedPasses.size(); ++i)
+			for (u32 i = 0; i < unorderedPasses.size(); ++i)
 			{
 				u32 overlapFactor = 0;
 				for (auto itr = flattenedPasses.rbegin(); itr != flattenedPasses.rend(); ++itr)
@@ -331,6 +432,8 @@ namespace Insight::Graphics
 
 	void RenderGraph::BuildPhysical()
 	{
+		IS_PROFILE_FUNCTION();
+
 		for (auto& resource : m_resources)
 		{
 			if (resource.GetPhysicalIndex() == RenderGraphResource::Unused)
@@ -352,5 +455,129 @@ namespace Insight::Graphics
 				resource.SetPhysicalIndex(physicalIndex);
 			}
 		}
+
+		for (auto& passIndex : m_passStack)
+		{
+			auto& pass = m_passes[passIndex];
+			auto* frameBuffer = GPURenderGraphPass::New();
+			frameBuffer->Init(pass);
+			m_singleFrame.RenderPasses.push_back(frameBuffer);
+		}
+	}
+
+	void RenderGraph::SwapchainRebuild()
+	{
+		while (Window::GetWidth() == 0 || Window::GetHeight() == 0)
+		{
+			Window::WaitForEvents();
+		}
+
+		GPUDevice::Instance()->WaitForGPU();
+
+		m_singleFrame.Reset();
+
+		for (auto& res : m_resources)
+		{
+			if (res.GetType() == RenderGraphResource::Type::Texture && !res.TextureInfo.m_info.AutoSizeToWindow)
+			{
+				continue;
+			}
+
+			if (res.GetType() == RenderGraphResource::Type::Texture)
+			{
+				// Texture should be recreated with the new window size.
+				auto* physicalImage = m_physicalImages[res.GetPhysicalIndex()];
+				Graphics::GPUImageDesc desc = physicalImage->GetDesc();
+				desc.Width = Window::GetWidth();
+				desc.Height = Window::GetHeight();
+				physicalImage->Init(desc);
+
+				auto* physicalImageView = m_physicalImageViews[res.GetPhysicalIndex()];
+				physicalImageView->Init(physicalImage);
+			}
+		}
+
+		for (auto& pass : m_passes)
+		{
+			pass.m_windowRect = Maths::Rect(0, 0, Window::GetWidth(), Window::GetHeight());
+		}
+
+		m_swapchain->Build(Graphics::GPUSwapchainDesc());
+	}
+
+	GPURenderGraphPass* GPURenderGraphPass::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPURenderGraphPassVulkan>();
+		}
+		ASSERT(false && "[RenderGraph::New] API implementation is missing.")
+			return nullptr;
+	}
+
+	RenderPass& GPURenderGraphPass::GetRenderPass() const
+	{
+		return m_graph->m_passes.at(m_renderPassIndex);
+	}
+
+	void RenderGraph::FrameSubmision::Init()
+	{
+		if (Initialised)
+		{
+			return;
+		}
+		Initialised = true;
+
+		CommandPools = GPUCommandPool::New();
+		CommandPools->Init(GPUCommandPoolDesc::GPUCommandPoolDesc(GPUCommandPoolFlags::INVALID, GPUQueue::GRAPHICS));
+		CommandBuffers = CommandPools->AllocateCommandBuffer(GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+
+		Fence = GPUFence::New();
+		Fence->Init(GPUFenceDesc());
+
+		SwapchainImageAquired = GPUSemaphore::New();
+		SwapchainImageAquired->Init(Graphics::GPUSemaphoreDesc());
+
+		DescriptorAllocator = GPUDescriptorAllocator::New();
+		DescriptorAllocator->Init();
+		DescriptorLayoutCache = GPUDescriptorLayoutCache::New();
+
+		DescriptorBuilder = GPUDescriptorBuilder::New();
+		DescriptorBuilder->Begin(DescriptorLayoutCache, DescriptorAllocator);
+
+		DynamicBuffer = GPUDynamicBuffer::New();
+		DynamicBuffer->Init(GPUDynamicBufferDesc::Uniform(64, 256, 1 * 1024 * 1024));
+	}
+
+	void RenderGraph::FrameSubmision::Reset()
+	{
+		IS_PROFILE_FUNCTION();
+
+		for (auto* frameBuffer : RenderPasses)
+		{
+			::Delete(frameBuffer);
+		}
+		RenderPasses.clear();
+		
+		CommandPools->Reset();
+		DynamicBuffer->Reset();
+		DescriptorAllocator->ResetPools();
+	}
+
+	void RenderGraph::FrameSubmision::ReleaseGPU()
+	{
+		GPUDevice::Instance()->WaitForGPU();
+		Reset();
+		CommandBuffers->ReleaseGPU();
+		::Delete(CommandBuffers);
+		CommandPools->ReleaseGPU();
+		::Delete(CommandPools);
+		::Delete(Fence);
+		::Delete(SwapchainImageAquired);
+		::Delete(DescriptorBuilder);
+		::Delete(DescriptorAllocator);
+		::Delete(DescriptorLayoutCache);
+		DynamicBuffer->ReleaseGPU();
+		::Delete(DynamicBuffer);
 	}
 }

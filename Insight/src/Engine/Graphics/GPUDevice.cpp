@@ -47,7 +47,3 @@ void GPUDevice::Dispose()
 {
 	m_videoOutputModes.resize(0);
 }
-
-void GPUDevice::WaitForGPU()
-{
-}

@@ -1,5 +1,6 @@
 #include "ispch.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUSyncVulkan.h"
 #include "VulkanInitializers.h"
 #include "VulkanDebug.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
@@ -60,6 +61,16 @@ u32 GPUDeviceVulkan::GetQueueFamilyIndex(GPUQueue queue)
 		case GPUQueue::TRANSFER: return m_transferQueueFamilyIndex;
 		default: return m_graphicsQueueFamilyIndex;
 	}
+}
+
+Insight::Graphics::GPUFenceManager* GPUDeviceVulkan::GetDefaultFenceManager()
+{
+	return GPUFenceManager;
+}
+
+Insight::Graphics::GPUSemaphoreManager* GPUDeviceVulkan::GetDefaultSignalManager()
+{
+	return GPUSignalManager;
 }
 
 GPUContext* GPUDeviceVulkan::GetMainContext()
@@ -344,12 +355,12 @@ bool GPUDeviceVulkan::Init()
 
 	// Init device limits 
 	PhysicalDeviceLimits = m_adapter->GpuProps.limits;
-	MSAALevel maxMssa = MSAALevel::None;
+	SampleLevel maxSampleLevel = SampleLevel::None;
 	if (m_physicalDeviceFeatures.sampleRateShading)
 	{
 		const I32 framebufferColorSampleCount = GetMaxSampleCount(PhysicalDeviceLimits.framebufferColorSampleCounts);
 		const I32 framebufferDepthSampleCount = GetMaxSampleCount(PhysicalDeviceLimits.framebufferDepthSampleCounts);
-		maxMssa = (MSAALevel)std::clamp(std::min<I32>(framebufferColorSampleCount, framebufferDepthSampleCount), 1, 8);
+		maxSampleLevel = (SampleLevel)std::clamp(std::min<I32>(framebufferColorSampleCount, framebufferDepthSampleCount), 1, 8);
 	}
 
 	auto& limits = m_gpuLimits;
@@ -377,7 +388,7 @@ bool GPUDeviceVulkan::Init()
 		const auto format = static_cast<PixelFormat>(i);
 		const auto vkFormat = ToVulkanFormat(format);
 
-		MSAALevel msaa = MSAALevel::None;
+		SampleLevel msaa = SampleLevel::None;
 		FormatSupport support = FormatSupport::None;
 
 		if (vkFormat != VK_FORMAT_UNDEFINED)
@@ -426,7 +437,7 @@ bool GPUDeviceVulkan::Init()
 
 			// Multi-sampling support
 			if (support & FormatSupport::Texture2D)
-				msaa = maxMssa;
+				msaa = maxSampleLevel;
 		}
 
 		m_featuresPerFormat[i] = FormatFeatures(format, msaa, support);
@@ -487,6 +498,9 @@ bool GPUDeviceVulkan::Init()
 	FenceManager.Init(this);
 	PipelineEventManger.Init(this);
 
+	GPUFenceManager = ::New<Insight::GraphicsAPI::Vulkan::GPUFenceManagerVulkan>();
+	GPUSignalManager = ::New<Insight::GraphicsAPI::Vulkan::GPUSemaphoreManagerVulkan>();
+
 	return true;
 }
 
@@ -509,15 +523,17 @@ void GPUDeviceVulkan::Dispose()
 	WaitForGPU();
 
 	Resources.OnDeviceDestroy();
-	m_trasientImages.clear();
 	m_defaultCommandPool->ReleaseGPU();
-	::Delete(m_defaultCommandPool);
+	SAFE_DELETE(m_defaultCommandPool);
 
 	//SAFE_DELETE(GraphicsQueue);
 	//SAFE_DELETE(ComputeQueue);
 	//SAFE_DELETE(TransferQueue);
 	FenceManager.Dispose();
 	PipelineEventManger.Dispose();
+	GPUFenceManager->Release();
+	SAFE_DELETE(GPUFenceManager);
+	SAFE_DELETE(GPUSignalManager);
 
 	vmaDestroyAllocator(VmaAllocator);
 	VmaAllocator = VK_NULL_HANDLE;
@@ -558,48 +574,10 @@ u32 GPUDeviceVulkan::GetQueueIndex(GPUQueue queue)
 
 void GPUDeviceVulkan::BeginFrame()
 {
-	for (auto& kvp : m_trasientImages)
-	{
-		kvp.second.first = false;
-	}
 }
 
 void GPUDeviceVulkan::EndFrame()
 {
-}
-
-Insight::Graphics::GPUImageView* GPUDeviceVulkan::GetTransientAttachment(u32 width, u32 height, PixelFormat format, u32 index, u32 samples, u32 layers)
-{
-	Hasher h;
-	h.u32(width);
-	h.u32(height);
-	h.u32((u32)format);
-	h.u32(index);
-	h.u32(samples);
-	h.u32(layers);
-	U64 hash = h.Get();
-
-	// Check if we have trasient images ready to be used. This is reset every frame
-	// but the images are not destroyed. Pooled.
-	GPUDeviceLock lock(this);
-	auto& node = m_trasientImages[hash];
-	if (!node.first && node.second != nullptr)
-	{
-		node.first = true;
-		return node.second->GetView();
-	}
-
-	auto desc = Insight::Graphics::GPUImageDesc::TransientRenderTarget(width, height, format);
-	desc.Samples = samples;
-	desc.Layers = layers;
-	auto* image = Insight::Graphics::GPUImage::New();
-	image->Init(desc);
-	auto* imageView = Insight::Graphics::GPUImageView::New();
-	imageView->Init(image);
-
-	m_trasientImages[hash] = { true, image };
-
-	return image->GetView();
 }
 
 PipelineEventVulkan::PipelineEventVulkan(GPUDeviceVulkan* device, PipelineEventManagerVulkan* owner)

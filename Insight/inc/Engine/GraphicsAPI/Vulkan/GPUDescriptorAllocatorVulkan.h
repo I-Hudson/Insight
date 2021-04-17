@@ -7,11 +7,11 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 	public:
 		GPUDescriptorAllocatorVulkan();
-		~GPUDescriptorAllocatorVulkan();
+		virtual ~GPUDescriptorAllocatorVulkan() override;
 
-		void Init();
+		virtual void Init() override;
 		bool Allocate(Graphics::GPUDescriptorSet* set, VkDescriptorSetLayout layout);
-		void ResetPools();
+		virtual void ResetPools() override;
 
 	private:
 		Graphics::GPUDescriptorPool* GrabPool();
@@ -21,11 +21,14 @@ namespace Insight::GraphicsAPI::Vulkan
 		Graphics::GPUDescriptorPool* m_currentPool;
 		std::vector<Graphics::GPUDescriptorPool*> m_usedPools;
 		std::vector<Graphics::GPUDescriptorPool*> m_freePools;
+		std::vector<Graphics::GPUDescriptorSet*> m_allocatedSets;
 	};
 
 	class GPUDescriptorLayoutCacheVulkan : public Graphics::GPUDescriptorLayoutCache
 	{
 	public:
+		virtual ~GPUDescriptorLayoutCacheVulkan() override;
+
 		void Init();
 		void Cleanup();
 

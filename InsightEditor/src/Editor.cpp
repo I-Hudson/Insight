@@ -12,6 +12,7 @@ public:
 
 	virtual void Create() override
 	{
+#ifdef IMGUI_ENABLED
 		m_editorModule = m_moduleManager->AddModule<Module::EditorModule>();
 		Config::GetInstance().Parse("./data/config/editorConfig.txt");
 
@@ -58,8 +59,8 @@ public:
 		style[ImGuiCol_TitleBgActive] = ImVec4(titleBgActive.x, titleBgActive.y, titleBgActive.z, titleBgActive.w);
 		glm::vec4 titleBgCollapsed = Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
-	
-		for (size_t i = 0; i < 4; i++)
+#endif
+		for (size_t i = 0; i < 0; i++)
 		{
 			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
 			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
@@ -73,10 +74,9 @@ public:
 		//meshComponent->SetModel(model);
 		//meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(5,0,0));
 
-		auto meshComponent = Entity::New("Building Entity")->AddComponent<MeshComponent>();
-		auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
-		meshComponent->SetModel(model);
-
+		//auto meshComponent = Entity::New("Building Entity")->AddComponent<MeshComponent>();
+		//auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
+		//meshComponent->SetModel(model);
 	}
 
 	virtual void Update(const float deltaTime) override

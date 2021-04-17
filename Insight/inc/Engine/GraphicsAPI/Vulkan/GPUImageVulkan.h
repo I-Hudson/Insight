@@ -13,6 +13,11 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUImageViewVulkan();
 		virtual ~GPUImageViewVulkan();
 
+		VkImageView GetImageView() const { return m_vView; }
+
+		//[GPUResouce]
+		virtual void SetName(const std::string& name) override;
+
 	protected:
 		//[GPUImageView]
 		virtual bool OnInit() override;
@@ -20,7 +25,6 @@ namespace Insight::GraphicsAPI::Vulkan
 	protected:
 		//[GPUResouce]
 		virtual void OnReleaseGPU() override;
-		virtual void SetName(const std::string& name) override;
 
 	private:
 		VkImageView m_vView;
@@ -34,6 +38,9 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		VkImage GetVulkanImage() const { return m_vImage; }
 
+		//[GPUResouce]
+		virtual void SetName(const std::string& name) override;
+
 	protected:
 		//[GPUImage]
 		virtual bool OnInit() override;
@@ -41,7 +48,6 @@ namespace Insight::GraphicsAPI::Vulkan
 	protected:
 		//[GPUResouce]
 		virtual void OnReleaseGPU() override;
-		virtual void SetName(const std::string& name) override;
 
 	private:
 		VkImage m_vImage;

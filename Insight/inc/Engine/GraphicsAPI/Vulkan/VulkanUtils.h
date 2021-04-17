@@ -15,10 +15,11 @@
 #include "Engine/Graphics/GPUCommandBuffer.h"
 #include "Engine/Graphics/GPUDescriptorSet.h"
 
-extern VkFormat PixelFormatToVkFormat[static_cast<I32>(PixelFormat::MAX)];
-extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
-extern VkBlendOp OperationToVkBlendOp[static_cast<I32>(BlendingMode::Operation::MAX)];
-extern VkCompareOp ComparisonFuncToVkCompareOp[static_cast<I32>(ComparisonFunc::MAX)];
+extern VkFormat PixelFormatToVkFormat[static_cast<i32>(PixelFormat::MAX)];
+extern PixelFormat VkFormatToPixelFormat[static_cast<i32>(PixelFormat::MAX)];
+//extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
+//extern VkBlendOp OperationToVkBlendOp[static_cast<I32>(BlendingMode::Operation::MAX)];
+//extern VkCompareOp ComparisonFuncToVkCompareOp[static_cast<I32>(ComparisonFunc::MAX)];
 
 namespace
 {
@@ -83,7 +84,12 @@ namespace
 	/// <returns>The Vulkan Format.</returns>
 	FORCE_INLINE VkFormat ToVulkanFormat(const PixelFormat value)
 	{
-		return PixelFormatToVkFormat[(I32)value];
+		return PixelFormatToVkFormat[(i32)value];
+	}
+
+	FORCE_INLINE PixelFormat FromVulkanFormat(const VkFormat value)
+	{
+		return VkFormatToPixelFormat[(i32)value];
 	}
 
 	/// <summary>
@@ -91,30 +97,30 @@ namespace
 	/// </summary>
 	/// <param name="value">The Flax blend mode.</param>
 	/// <returns>The Vulkan blend factor.</returns>
-	FORCE_INLINE VkBlendFactor ToVulkanBlendFactor(const BlendingMode::Blend value)
-	{
-		return BlendToVkBlendFactor[(I32)value];
-	}
+	//FORCE_INLINE VkBlendFactor ToVulkanBlendFactor(const BlendingMode::Blend value)
+	//{
+	//	return BlendToVkBlendFactor[(I32)value];
+	//}
 
 	/// <summary>
 	/// Converts Flax blend operation to the Vulkan blend operation.
 	/// </summary>
 	/// <param name="value">The Flax blend operation.</param>
 	/// <returns>The Vulkan blend operation.</returns>
-	FORCE_INLINE VkBlendOp ToVulkanBlendOp(const BlendingMode::Operation value)
-	{
-		return OperationToVkBlendOp[(I32)value];
-	}
+	//FORCE_INLINE VkBlendOp ToVulkanBlendOp(const BlendingMode::Operation value)
+	//{
+	//	return OperationToVkBlendOp[(I32)value];
+	//}
 
 	/// <summary>
 	/// Converts Flax comparison function to the Vulkan comparison operation.
 	/// </summary>
 	/// <param name="value">The Flax comparison function.</param>
 	/// <returns>The Vulkan comparison operation.</returns>
-	FORCE_INLINE VkCompareOp ToVulkanCompareOp(const ComparisonFunc value)
-	{
-		return ComparisonFuncToVkCompareOp[(I32)value];
-	}
+	//FORCE_INLINE VkCompareOp ToVulkanCompareOp(const ComparisonFunc value)
+	//{
+	//	return ComparisonFuncToVkCompareOp[(I32)value];
+	//}
 
 	VkSamplerMipmapMode ToVulkanMipFilterMode(GPUSamplerFilter filter)
 	{
@@ -300,32 +306,15 @@ namespace
 		return VK_IMAGE_VIEW_TYPE_2D;
 	}
 
-	VkSampleCountFlagBits ToVulkanSampleCountBits(const U32 sample)
+	VkSampleCountFlagBits ToVulkanSampleCount(SampleLevel& sampleLevel)
 	{
-		if (sample & VK_SAMPLE_COUNT_64_BIT)
-		{
-			return VK_SAMPLE_COUNT_64_BIT;
-		}
-		if (sample & VK_SAMPLE_COUNT_32_BIT)
-		{
-			return VK_SAMPLE_COUNT_32_BIT;
-		}
-		if (sample & VK_SAMPLE_COUNT_16_BIT)
-		{
-			return VK_SAMPLE_COUNT_16_BIT;
-		}
-		if (sample & VK_SAMPLE_COUNT_8_BIT)
-		{
-			return VK_SAMPLE_COUNT_8_BIT;
-		}
-		if (sample & VK_SAMPLE_COUNT_4_BIT)
-		{
-			return VK_SAMPLE_COUNT_4_BIT;
-		}
-		if (sample & VK_SAMPLE_COUNT_2_BIT)
-		{
-			return VK_SAMPLE_COUNT_2_BIT;
-		}
+		if (sampleLevel == SampleLevel::None) { return  VK_SAMPLE_COUNT_1_BIT; }
+		else if (sampleLevel == SampleLevel::X2) { return  VK_SAMPLE_COUNT_2_BIT; }
+		else if (sampleLevel == SampleLevel::X4) { return  VK_SAMPLE_COUNT_4_BIT; }
+		else if (sampleLevel == SampleLevel::X8) { return  VK_SAMPLE_COUNT_8_BIT; }
+		else if (sampleLevel == SampleLevel::X16) { return  VK_SAMPLE_COUNT_16_BIT; }
+		else if (sampleLevel == SampleLevel::X32) { return  VK_SAMPLE_COUNT_32_BIT; }
+		else if (sampleLevel == SampleLevel::X64) { return  VK_SAMPLE_COUNT_64_BIT; }
 		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
@@ -392,11 +381,11 @@ namespace
 
 	VkViewport ToVulkanViewPort(Insight::Maths::Rect const& rect)
 	{
-		VkViewport viewport;
-		viewport.width = rect.GetX();
-		viewport.height = rect.GetY();
-		viewport.minDepth = rect.GetWidth();
-		viewport.maxDepth = rect.GetHeight();
+		VkViewport viewport = { };
+		viewport.width = rect.GetWidth();
+		viewport.height = rect.GetHeight();
+		viewport.minDepth = 0;
+		viewport.maxDepth = 1;
 		return viewport;
 	}
 

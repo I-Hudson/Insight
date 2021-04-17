@@ -51,7 +51,7 @@ namespace Insight::Graphics
 	}
 
 	GPUImage::GPUImage()
-		: m_desc(GPUImageDesc(0, 0, 0, 0,0, 0,ImageDomain::Physical, ImageLayout::Undefined, 0,0,0,PixelFormat::Unknown, ImageType::Image_2D, ImageUsageType::Texture, nullptr))
+		: m_desc(GPUImageDesc())
 	{
 	}
 

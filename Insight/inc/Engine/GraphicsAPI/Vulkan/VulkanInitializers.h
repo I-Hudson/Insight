@@ -143,6 +143,20 @@ namespace vks
 			return semaphoreCreateInfo;
 		}
 
+		inline VkSemaphoreWaitInfo semaphoreWaitInfo()
+		{
+			VkSemaphoreWaitInfo semaphoreWaitInfo{};
+			semaphoreWaitInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+			return semaphoreWaitInfo;
+		}
+
+		inline VkSemaphoreSignalInfo semaphoreSignalInfo()
+		{
+			VkSemaphoreSignalInfo semaphoreSignalnfo{};
+			semaphoreSignalnfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SIGNAL_INFO;
+			return semaphoreSignalnfo;
+		}
+
 		inline VkFenceCreateInfo fenceCreateInfo(VkFenceCreateFlags flags = 0)
 		{
 			VkFenceCreateInfo fenceCreateInfo{};

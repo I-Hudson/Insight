@@ -5,6 +5,8 @@
 
 namespace Insight::Graphics
 {
+    class GPUDynamicBuffer;
+
     /// <summary>
     /// The GPU buffer usage flags.
     /// </summary>
@@ -24,6 +26,20 @@ namespace Insight::Graphics
     };
 
     DECLARE_ENUM_OPERATORS(GPUBufferFlags);
+
+    struct GPUBufferSubAllocDesc
+    {
+        enum
+        {
+            Unsed = 1,
+            Used = 0
+        };
+
+        u64 Size;
+        u64 Begin;
+        u32 State = Unsed;
+        GPUDynamicBuffer* ParentBuffer;
+    };
 
     struct IS_API GPUBufferDesc
     {
@@ -52,6 +68,11 @@ namespace Insight::Graphics
         /// </summary>
         const void* InitData;
 
+        /// <summary>
+        /// Is this buffer a sub allocation of a bigger buffer. Mainly used in rendering.
+        /// </summary>
+        GPUBufferSubAllocDesc SubAlloc;
+
     public:
 
         /// <summary>
@@ -68,6 +89,7 @@ namespace Insight::Graphics
         void Clear();
 
         static GPUBufferDesc Buffer(U32 size, GPUBufferFlags flags, PixelFormat format = PixelFormat::Unknown, const void* initData = nullptr, U32 stride = 0);
+        static GPUBufferDesc SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size);
 
         static GPUBufferDesc Uniform(u32 elementStride, u32 elementsCount, void* data)
         {
@@ -104,6 +126,11 @@ namespace Insight::Graphics
         static GPUBufferDesc RawUpload(u32 size, void* data)
         {
             return Buffer(size, GPUBufferFlags::TRANSFER_SRC, PixelFormat::Unknown, data, size);
+        }
+
+        static GPUBufferDesc SubAllocation(GPUDynamicBuffer* buffer, u64 begin, u64 size)
+        {
+            return SubBuffer(buffer, begin, size);
         }
 
         /// <summary>

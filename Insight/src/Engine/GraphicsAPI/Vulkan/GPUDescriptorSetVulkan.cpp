@@ -19,8 +19,10 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		m_desc = desc;
 		GPUDescriptorPoolVulkan* pool = static_cast<GPUDescriptorPoolVulkan*>(m_desc.Pool);
-		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(pool->m_pool, nullptr, 1);
-		return (GPUResults)vkAllocateDescriptorSets(m_device->Device, &allocInfo, &m_set);
+		VkDescriptorSetLayout layout = static_cast<VkDescriptorSetLayout>(desc.Layout);
+		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(pool->m_pool, &layout, 1);
+		VkResult res = vkAllocateDescriptorSets(m_device->Device, &allocInfo, &m_set);
+		return static_cast<GPUResults>(res);
 	}
 
 	void GPUDescriptorSetVulkan::BindTexture(Graphics::GPUImage* image, u32 slot)
@@ -57,7 +59,9 @@ namespace Insight::GraphicsAPI::Vulkan
 	{ }
 
 	GPUDescriptorPoolVulkan::~GPUDescriptorPoolVulkan()
-	{ }
+	{
+		ReleaseGPU();
+	}
 
 	GPUResults GPUDescriptorPoolVulkan::Init()
 	{

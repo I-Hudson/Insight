@@ -7,11 +7,6 @@ namespace Insight::GraphicsAPI::Vulkan
 {
 	class GPUCommandBufferVulkan;
 
-	struct GPUBufferVulkanInfo
-	{
-
-	};
-
 	class GPUBufferVulkan : public GPUResouceVulkan<Graphics::GPUBuffer>
 	{
 	public:
@@ -23,7 +18,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		VkDescriptorBufferInfo* GetBufferInfo() { return &m_bufferInfo; }
 
 	protected:
-		virtual void* Map(GPUResourceMapMode mapMode) override;
+		virtual void* Map() override;
 		virtual void UnMap() override;
 
 		virtual void Upload(void* mapped, void const* data, u32 const& size) override;

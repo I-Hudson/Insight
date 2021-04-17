@@ -2,6 +2,9 @@
 #include "RenderPass.h"
 #include "glm/glm.hpp"
 #include "Engine/Graphics/GPUDevice.h"
+#include "Engine/Graphics/GPUDescriptorSet.h"
+#include "Engine/Graphics/GPUSync.h"
+#include "Engine/Graphics/GPUSwapchain.h"
 
 #define RENDER_PASS_ATTACHMENT_COUNT 6
 
@@ -114,6 +117,29 @@ namespace Insight::Graphics
 		U32 NumSubpasses = 0;
 	};
 
+	class GPURenderGraphPass
+	{
+	public:
+		GPURenderGraphPass() { }
+		virtual ~GPURenderGraphPass() { }
+
+		static GPURenderGraphPass* New();
+
+		virtual void Init(RenderPass& renderPass) = 0;
+
+		RenderPass& GetRenderPass() const;
+
+	protected:
+		std::vector<const GPUImage*> m_colourAttachments;
+		u32 m_colorAttachmentsCount;
+		const GPUImageView* m_depthStenci = nullptr;
+
+		// Wait Fence and Semaphore.
+
+		u32 m_renderPassIndex = -1;
+		RenderGraph* m_graph;
+	};
+
 	/// <summary>
 	/// Create a render graph to be used when rendering. This graph should describe 
 	/// all passes needed inputs/output to each pass and the dependencies between 
@@ -121,7 +147,7 @@ namespace Insight::Graphics
 	/// Currently the graph does not share resources between each pass. This needs to be 
 	/// looked into to share resources instead of having unique resources per a pass.
 	/// </summary>
-	class IS_API RenderGraph
+	class IS_API RenderGraph : public TSingleton<RenderGraph>
 	{
 	public:
 		static RenderGraph* New();
@@ -184,7 +210,15 @@ namespace Insight::Graphics
 
 		void ResourceDependPass(RenderPass& pass, const std::unordered_set<u32>& writtenPasses, u32 stackCount, bool noCheck, bool ignoreSelf);
 
+		/// <summary>
+		/// Create all the physical/device resources we need. Example: images and image views.
+		/// </summary>
 		void BuildPhysical();
+
+		/// <summary>
+		/// Rebuild the swapchain as it is not longer optimal.
+		/// </summary>
+		void SwapchainRebuild();
 
 	protected:
 		bool m_built;
@@ -236,27 +270,42 @@ namespace Insight::Graphics
 
 		struct FrameSubmision
 		{
-			// Framebuffer
-			// Renderpass
-			// Fence
-			std::array<GPUCommandPool*, 32> CommandPools;
-			std::array<GPUCommandBuffer*, 32> CommandBuffers;
+			GPUCommandPool* CommandPools;
+			GPUCommandBuffer* CommandBuffers;
+
+			GPUFence* Fence;
+			GPUSemaphore* SwapchainImageAquired;
+			GPUSemaphore* Present;
+
+			GPUDescriptorAllocator* DescriptorAllocator;
+			GPUDescriptorLayoutCache* DescriptorLayoutCache;
+			/// <summary>
+			/// Handle all the descriptors within this frame.
+			/// </summary>
+			GPUDescriptorBuilder* DescriptorBuilder;
+
+			/// <summary>
+			/// Store the render passes as FrameBuffer* pointers. 
+			/// </summary>
+			std::vector<GPURenderGraphPass*> RenderPasses;
+
+			GPUDynamicBuffer* DynamicBuffer;
 
 			//Seampahores SwapchainAcquire;
 			//Seampahores SwapchainRelease;
 
-			struct DescriptorBinder
-			{
-				GPUDevice* Device;
-				//GPUDescriptorPool DescriptorPool;
-				u32 PoolSize = 256;
+			bool Initialised = false;
 
-				//std::vector<DescriptorSet*> DescriptorWrites;
-				//std::vector<DescriptorBufferInfo> BufferInfos;
-				//std::vector<DescriptorImageInfo> ImageInfos;
-			};
+			void Init();
+			void Reset();
+			void ReleaseGPU();
 		};
 
+		FrameSubmision m_singleFrame;
+
+		GPUSwapchain* m_swapchain;
+
+		friend GPURenderGraphPass;
 		friend RenderPass;
 	};
 }

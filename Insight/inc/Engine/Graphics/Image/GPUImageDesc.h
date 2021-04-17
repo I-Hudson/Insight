@@ -13,7 +13,7 @@ namespace Insight::Graphics
 			: Width(0), Height(0)
 		{ }
 
-		GPUImageDesc(u32 width, u32 height, u32 depth, u32 levels, u32 samples, u32 layers,
+		GPUImageDesc(u32 width, u32 height, u32 depth, u32 levels, SampleLevel samples, u32 layers,
 					 ImageDomain domain, ImageLayout initLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
 					 ImageCreateFlags createFlags, PixelFormat format, ImageType type, ImageUsageType imageUsageType,
 					 void* data)
@@ -30,7 +30,7 @@ namespace Insight::Graphics
 		u32 Height;
 		u32 Depth;
 		u32 Levels; // mipmaps
-		u32 Samples;
+		SampleLevel Samples;
 		u32 Layers;
 
 		ImageDomain Domain;
@@ -45,18 +45,18 @@ namespace Insight::Graphics
 		void* Data;
 		u32 Size;
 
-		static GPUImageDesc Image2D(u32 width, u32 height, u32 depth, u32 levels, u32 samples, u32 layers,
+		static GPUImageDesc Image2D(u32 width, u32 height, u32 depth, u32 levels, SampleLevel samples, u32 layers,
 									ImageDomain domain, ImageLayout initLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
 									ImageCreateFlags createFlags, PixelFormat format, ImageType type, ImageUsageType imageUsageType,
 									void* data);
 
-		static GPUImageDesc Texture(u32 width, u32 height, u32 levels, u32 samples, PixelFormat format, void* data)
+		static GPUImageDesc Texture(u32 width, u32 height, u32 levels, SampleLevel samples, PixelFormat format, void* data)
 		{
 			return Image2D(width, height, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0, 
 						   0, format, ImageType::Image_2D, ImageUsageType::Texture, data);
 		}
 
-		static GPUImageDesc Texture(u32 levels, u32 samples, PixelFormat format, std::string const& dataPath)
+		static GPUImageDesc Texture(u32 levels, SampleLevel samples, PixelFormat format, std::string const& dataPath)
 		{
 			int x, y, c;
 			void* data = stbi_load(dataPath.c_str(), &x, &y, &c, STBI_rgb_alpha);
@@ -66,7 +66,7 @@ namespace Insight::Graphics
 
 		static GPUImageDesc RenderTarget(u32 width, u32 height, PixelFormat format)
 		{
-			return Image2D(width, height, 1, 1, 1, 1, ImageDomain::Physical,
+			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Physical,
 						   PixelFormatExtensions::IsDepthStencil(format) ?
 						   ImageLayout::Depth_Stencil_Attachment :
 						   ImageLayout::Undefined,
@@ -79,12 +79,19 @@ namespace Insight::Graphics
 
 		static GPUImageDesc TransientRenderTarget(u32 width, u32 height, PixelFormat format)
 		{
-			return Image2D(width, height, 1, 1, 1, 1, ImageDomain::Transient, ImageLayout::Undefined,
+			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Transient, ImageLayout::Undefined,
 						   (PixelFormatExtensions::IsDepthStencil(format) ? ImageUsageFlagsBits::Depth_Stencil_Attachment :
 							ImageUsageFlagsBits::Color_Attachment) |
 						   ImageUsageFlagsBits::Input_Attachment,
 						   0,
 						   0, format, ImageType::Image_2D, ImageUsageType::Transient_Render_Target, nullptr);
+		}
+
+		static GPUImageDesc SwapchainImage(u32 width, u32 height, PixelFormat format, void* image)
+		{
+			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Physical, 
+						ImageLayout::Color_Attachment, ImageUsageFlagsBits::Color_Attachment, 0, 0, 
+						format, ImageType::Image_2D, ImageUsageType::Swapchain_Image, image) ;
 		}
 
 		bool IsTransient() const { return Domain == ImageDomain::Transient; }

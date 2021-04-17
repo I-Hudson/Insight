@@ -8,10 +8,11 @@ namespace Insight::Graphics
 	class GPUBuffer;
 	class GPUImage;
 	struct GPUImageDesc;
-	class GPURenderPass;
 	class GPUCommandPool;
 	class GPUPipelineLayout;
 	class GPUDescriptorSet;
+	class GPURenderGraphPass;
+	class GPUFence;
 
 	enum class GPUCommandBufferState : u8
 	{
@@ -110,11 +111,11 @@ namespace Insight::Graphics
 		virtual void BeginRecord() = 0;
 		virtual void EndRecord() = 0;
 		virtual void Reset() = 0;
-		virtual void Submit(GPUQueue queue) = 0;
+		virtual void Submit(GPUQueue queue, GPUFence* fence = nullptr) = 0;
 		virtual void SubmitAndWait(GPUQueue queue) = 0;
 
-		virtual void BeginRenderpass(GPURenderPass* renderpass) = 0;
-		virtual void EndRenderpass(GPURenderPass* renderpass) = 0;
+		virtual void BeginRenderpass(GPURenderGraphPass* renderpass) = 0;
+		virtual void EndRenderpass(GPURenderGraphPass* renderpass) = 0;
 		virtual void SetViewPort(Maths::Rect rect) = 0;
 		virtual void SetScissor(Maths::Rect rect) = 0;
 
@@ -127,6 +128,7 @@ namespace Insight::Graphics
 		/// <param name="indexType"></param>
 		virtual void CopyBufferToImage(GPUBuffer* srcBuffer, GPUImage* dstImage, GPUImageDesc const* imageDesc) = 0;
 		//virtual void CopyBufferToImageSub(GPUBuffer* srcBuffer, GPUImage* dstImage) = 0;
+		virtual void BlipImageToSwapchain(GPUImage* srcImage, GPUImage* dstImage) = 0;
 
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;
@@ -141,6 +143,8 @@ namespace Insight::Graphics
 		GPUCommandBufferDesc m_desc;
 		u32 m_recordCommandCount;
 		GPUCommandBufferState m_state;
+
+		friend GPUCommandPool;
 	};
 
 	class GPUCommandPool : public GPUResource
@@ -155,6 +159,7 @@ namespace Insight::Graphics
 		virtual GPUCommandBuffer* AllocateCommandBuffer(GPUCommandBufferDesc& desc) = 0;
 		virtual std::vector<GPUCommandBuffer*> AllocateCommandBuffers(GPUCommandBufferDesc& desc, u32 count) = 0;
 		virtual void FreeCommandBuffer(std::vector<GPUCommandBuffer*> buffers) = 0;
+		virtual void Reset() = 0;
 
 		// [GPUResource]
 		virtual ResourceType GetResourceType() const override { return ResourceType::CommandPool; }

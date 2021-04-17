@@ -218,7 +218,7 @@ namespace vks
 		}
 
 		// Search for a graphics and a present queue in the array of queue
-	// families, try to find one that supports both
+		// families, try to find one that supports both
 		uint32_t graphicsQueueNodeIndex = UINT32_MAX;
 		uint32_t presentQueueNodeIndex = UINT32_MAX;
 		for (uint32_t i = 0; i < queueCount; i++)

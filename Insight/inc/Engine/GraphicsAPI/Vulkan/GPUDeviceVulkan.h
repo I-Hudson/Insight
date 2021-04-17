@@ -8,6 +8,13 @@
 #include "Config.h"
 #include "Types.h"
 
+namespace Insight::GraphicsAPI::Vulkan
+{
+	class GPUFenceManagerVulkan;
+	class GPUSemaphoreManagerVulkan;
+	class GPUSwapchainVulkan;
+}
+
 class GPUContextVulkan;
 class GPUDeviceVulkan;
 class GPUAdapterVulkan;
@@ -203,6 +210,9 @@ public:
 	VkQueue GetQueue(GPUQueue queue);
 	u32 GetQueueFamilyIndex(GPUQueue queue);
 
+	virtual Insight::Graphics::GPUFenceManager* GetDefaultFenceManager() override;
+	virtual Insight::Graphics::GPUSemaphoreManager* GetDefaultSignalManager() override;
+
 	virtual GPUContext* GetMainContext() override;
 	virtual GPUAdapter* GetAdapter() override;
 	virtual bool Init();
@@ -214,8 +224,6 @@ public:
 
 	virtual void BeginFrame() override;
 	virtual void EndFrame() override;
-
-	virtual Insight::Graphics::GPUImageView* GetTransientAttachment(U32 width, U32 height, PixelFormat format, U32 index, U32 samples, U32 layers) override;
 
 	struct OptionalVulkanDeviceExtensions
 	{
@@ -244,6 +252,9 @@ public:
 	/// The Vulkan fence manager.
 	/// </summary>
 	FenceManagerVulkan FenceManager;
+
+	Insight::GraphicsAPI::Vulkan::GPUFenceManagerVulkan* GPUFenceManager;
+	Insight::GraphicsAPI::Vulkan::GPUSemaphoreManagerVulkan* GPUSignalManager;
 
 	PipelineEventManagerVulkan PipelineEventManger;
 
@@ -281,8 +292,6 @@ private:
 
 	GPUAdapterVulkan* m_adapter = nullptr;
 
-	std::unordered_map<U32, std::pair<bool, Insight::Graphics::GPUImage*>> m_trasientImages;
-
 	CriticalSection m_fenceLock;
 	CriticalSection m_pipelineEventLock;
 
@@ -300,6 +309,7 @@ private:
 	friend GPUContextVulkan;
 	friend FenceManagerVulkan;
 	friend PipelineEventManagerVulkan;
+	friend Insight::GraphicsAPI::Vulkan::GPUSwapchainVulkan;
 };
 
 template<typename Resource>

@@ -28,7 +28,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void OnReleaseGPU() override;
 
 	private:
-		VkDescriptorSet m_set;
+		VkDescriptorSet m_set = VK_NULL_HANDLE;
 		friend class GPUDescriptorPoolVulkan;
 		friend class GPUDescriptorBuilderVulkan;
 		friend class GPUDescriptorLayoutCacheVulkan;
@@ -52,7 +52,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void OnReleaseGPU() override;
 
 	private:
-		VkDescriptorPool m_pool;
+		VkDescriptorPool m_pool = VK_NULL_HANDLE;
 
 		friend class GPUDescriptorSetVulkan;
 	};

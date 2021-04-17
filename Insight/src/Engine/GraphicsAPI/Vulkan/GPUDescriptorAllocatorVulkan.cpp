@@ -36,9 +36,13 @@ namespace Insight::GraphicsAPI::Vulkan
 			m_currentPool = GrabPool();
 			m_usedPools.push_back(m_currentPool);
 		}
-		Graphics::GPUDescriptorSetDesc setDesc(m_currentPool, layout);
-		set = Graphics::GPUDescriptorSet::New();
 
+		Graphics::GPUDescriptorSetDesc setDesc(m_currentPool, layout);
+		if (!set)
+		{
+			set = Graphics::GPUDescriptorSet::New();
+			m_allocatedSets.push_back(set);
+		}
 		bool reallocate = false;
 		switch (set->Init(setDesc))
 		{
@@ -67,6 +71,12 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 		m_usedPools.clear();
 		m_currentPool = nullptr;
+
+		for (auto* set : m_allocatedSets)
+		{
+			::Delete(set);
+		}
+		m_allocatedSets.clear();
 	}
 
 	Graphics::GPUDescriptorPool* GPUDescriptorAllocatorVulkan::GrabPool()
@@ -88,6 +98,11 @@ namespace Insight::GraphicsAPI::Vulkan
 		auto* pool = Graphics::GPUDescriptorPool::New();
 		pool->Init();
 		return pool;
+	}
+
+	GPUDescriptorLayoutCacheVulkan::~GPUDescriptorLayoutCacheVulkan()
+	{
+		Cleanup();
 	}
 
 	/// <summary>
@@ -114,12 +129,12 @@ namespace Insight::GraphicsAPI::Vulkan
 		int lastBinding = -1;
 
 		//copy from the direct info struct into our own one
-		for (size_t i = 0; i < info->bindingCount; ++i)
+		for (u32 i = 0; i < info->bindingCount; ++i)
 		{
 			layoutInfo.Bindings.push_back(info->pBindings[i]);
 
 			//check that the bindings are in strict increasing order
-			if (info->pBindings[i].binding > lastBinding)
+			if ((i32)info->pBindings[i].binding > lastBinding)
 			{
 				lastBinding = info->pBindings[i].binding;
 			}
@@ -245,7 +260,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		newWrite.pNext = nullptr;
 
 		newWrite.descriptorCount = 1;
-		newWrite.descriptorType = ToVulkanDescriptorType(type);;
+		newWrite.descriptorType = ToVulkanDescriptorType(type);
 		newWrite.pBufferInfo = static_cast<GPUBufferVulkan*>(buffer)->GetBufferInfo();
 		newWrite.dstBinding = binding;
 
@@ -281,7 +296,9 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 
 		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
-		vkUpdateDescriptorSets(device, m_writes.size(), m_writes.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device, static_cast<u32>(m_writes.size()), m_writes.data(), 0, nullptr);
+		m_writes.clear();
+		m_bindings.clear();
 
 		return true;
 	}

@@ -185,7 +185,7 @@ struct FormatFeatures
     /// <summary>
     /// Gets the maximum MSAA sample count for a particular <see cref="PixelFormat"/>.
     /// </summary>
-    MSAALevel MSAALevelMax;
+    SampleLevel MaxSampleLevel;
 
     /// <summary>
     /// Support of a given format on the installed video device.
@@ -202,8 +202,8 @@ struct FormatFeatures
     /// <param name="format">The format.</param>
     /// <param name="msaaLevelMax">The MSAA level maximum.</param>
     /// <param name="formatSupport">The format support.</param>
-    FormatFeatures(const PixelFormat format, MSAALevel msaaLevelMax, FormatSupport formatSupport)
-        : MSAALevelMax(msaaLevelMax)
+    FormatFeatures(const PixelFormat format, SampleLevel msaaLevelMax, FormatSupport formatSupport)
+        : MaxSampleLevel(msaaLevelMax)
         , Support(formatSupport)
     {
     }

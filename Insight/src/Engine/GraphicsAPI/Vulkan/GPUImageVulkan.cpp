@@ -16,7 +16,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	GPUImageViewVulkan::~GPUImageViewVulkan()
 	{
-		OnReleaseGPU();
+		ReleaseGPU();
 	}
 
 	bool GPUImageViewVulkan::OnInit()
@@ -71,7 +71,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	GPUImageVulkan::~GPUImageVulkan()
 	{
-		OnReleaseGPU();
+		ReleaseGPU();
 	}
 
 	bool GPUImageVulkan::OnInit()
@@ -81,6 +81,12 @@ namespace Insight::GraphicsAPI::Vulkan
 			return false;
 		}
 
+		if (m_desc.UsageType == ImageUsageType::Swapchain_Image)
+		{
+			m_vImage = static_cast<VkImage>(m_desc.Data);
+			return true;
+		}
+
 		VkImageCreateInfo imageCreateInfo = vks::initializers::imageCreateInfo();
 		imageCreateInfo.flags = ToVulkanImageCreateFlags(m_desc.CreateFlags);
 		imageCreateInfo.imageType = ToVulkanImageType(m_desc.Type);
@@ -88,7 +94,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		imageCreateInfo.extent = { m_desc.Width, m_desc.Height, m_desc.Depth };
 		imageCreateInfo.mipLevels = m_desc.Levels;
 		imageCreateInfo.arrayLayers = m_desc.Layers;
-		imageCreateInfo.samples = ToVulkanSampleCountBits(m_desc.Samples);
+		imageCreateInfo.samples = ToVulkanSampleCount(m_desc.Samples);
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = ToVulkanImageUsage(m_desc.Usage);
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -127,10 +133,9 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUImageVulkan::OnReleaseGPU()
 	{
-		if (m_vImage != VK_NULL_HANDLE)
+		if (m_vImage != VK_NULL_HANDLE && m_desc.UsageType != ImageUsageType::Swapchain_Image)
 		{
 			vmaDestroyImage(m_device->VmaAllocator, m_vImage, m_vmaImageAlloc);
-			m_memoryUsage = 0;
 		}
 	}
 

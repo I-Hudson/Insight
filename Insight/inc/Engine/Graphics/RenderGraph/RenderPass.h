@@ -3,6 +3,7 @@
 #include "Engine/Core/Common.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/Enums.h"
+#include "Engine/Core/Maths/Rect.h"
 
 #include "Engine/Graphics/GPUBufferDesc.h"
 
@@ -12,7 +13,14 @@
 
 namespace Insight::Graphics
 {
-	using RenderPassRenderFunc = std::function<void()>;
+	class GPUDynamicBuffer;
+	class GPUDescriptorBuilder;
+	class GPUDescriptorAllocator;
+	class GPUImage;
+	class GPUImageView;
+	class GPUCommandBuffer;
+
+	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)>;
 	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
 	using RenderPassClearDepthStencilFunc = std::function<void(glm::vec2&)>;
 
@@ -42,9 +50,10 @@ namespace Insight::Graphics
 		u32 Width = 0;
 		u32 Height = 0;
 		u32 Depth = 1;
-		u32 Samples = 1;
+		SampleLevel Samples = SampleLevel::None;
 		u32 Levels = 1;
 		u32 Layers = 1;
+		bool AutoSizeToWindow = true;
 		bool Persistent = true;
 		bool UnormSRGBAlias = false;
 		bool SupportsPrerotate = false;
@@ -186,8 +195,23 @@ namespace Insight::Graphics
 		void AddDependentPass(u32 passIndex) { m_dependentPasses.insert(passIndex); }
 		const std::unordered_set<u32> GetDependentPasses() { return m_dependentPasses; }
 
-		bool GetClearColor(u32 index, glm::vec4* value = nullptr);
-		bool GetClearDepthStencil(glm::vec2* value = nullptr);
+		RenderGraphResource& GetTextureResource(u32 index) const;
+		const GPUImage* GetPhysicalImage(u32 index) const;
+		const GPUImageView* GetPhysicalImageView(u32 index) const;
+
+		const Maths::Rect& GetWindowRect() const { return m_windowRect; }
+
+		const glm::vec4& GetClearColor() { return m_clearColour; }
+		const glm::vec2& GetClearDepthStencil() { return m_clearDepthStencil; }
+
+	private:
+		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)
+		{
+			if (m_renderFunc)
+			{
+				m_renderFunc(cmdBuffer, dynamicBuffer, builder);
+			}
+		}
 
 	private:
 		/// <summary>
@@ -211,6 +235,8 @@ namespace Insight::Graphics
 		/// </summary>
 		std::string m_name;
 
+		Maths::Rect m_windowRect;
+
 		std::unordered_set<u32> m_dependentPasses;
 
 		std::vector<u32> m_colorInputs;
@@ -224,5 +250,7 @@ namespace Insight::Graphics
 
 		u32 m_depthStencilInput = -1;
 		u32 m_depthStencilOutput = -1;
+
+		friend RenderGraph;
 	};
 }

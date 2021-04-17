@@ -435,6 +435,9 @@
     <ClInclude Include="inc\Engine\Graphics\GPUDevice.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\GPUDynamicBuffer.h">
+      <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\GPULimits.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
@@ -444,10 +447,13 @@
     <ClInclude Include="inc\Engine\Graphics\GPUResourceCollection.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\GPUResourceState.h">
+    <ClInclude Include="inc\Engine\Graphics\GPUSamplerDescription.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\GPUSamplerDescription.h">
+    <ClInclude Include="inc\Engine\Graphics\GPUSwapchain.h">
+      <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\GPUSync.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\GPUTimerQuery.h">
@@ -476,9 +482,6 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderPass.h">
       <Filter>inc\Engine\Graphics\RenderGraph</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\RenderPassInfo.h">
-      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Renderer.h">
       <Filter>inc\Engine\Graphics</Filter>
@@ -519,10 +522,19 @@
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUDynamicBufferVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUSwapchainVulkan.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUSyncVulkan.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.h">
@@ -2087,7 +2099,13 @@
     <ClCompile Include="src\Engine\Graphics\GPUDevice.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUDynamicBuffer.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUSync.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp">
@@ -2150,10 +2168,19 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDeviceVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUDynamicBufferVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUImageVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUShaderVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUSwapchainVulkan.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUSyncVulkan.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.cpp">
@@ -2296,6 +2323,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUSwapchain.cpp">
+      <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

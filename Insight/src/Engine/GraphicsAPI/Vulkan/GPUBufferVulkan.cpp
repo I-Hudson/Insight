@@ -1,5 +1,6 @@
 #include "ispch.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
@@ -36,31 +37,41 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUBufferVulkan::Init(Graphics::GPUBufferDesc const& desc)
 	{
-		ASSERT(desc.Size > 0 && desc.Stride > 0);
-
-		ReleaseGPU();
-		m_desc = desc;
-
-		VkBufferCreateInfo info = vks::initializers::bufferCreateInfo(ToVulkanBufferUsageFlags(m_desc.Flags), m_desc.Size);
-
-		VmaAllocationCreateInfo vmaInfo = { };
-		m_vmaMemoryUsage = ToVMAMemoryUsage(m_desc.Flags, m_mustBeMapped);
-		vmaInfo.usage = m_vmaMemoryUsage;
-
-		ThrowIfFailed(vmaCreateBuffer(m_device->VmaAllocator, &info, &vmaInfo, &m_buffer, &m_vmaAllocation, &m_vmaAllocationInfo));
-		m_memoryUsage = m_desc.Size;
-
-		m_bufferInfo.buffer = m_buffer;
-		m_bufferInfo.range = m_desc.Size;
-		m_bufferInfo.offset = 0;
-
-		if (m_desc.InitData != nullptr)
+		if (desc.SubAlloc.State == Graphics::GPUBufferSubAllocDesc::Unsed)
 		{
-			SetData(m_desc.InitData, m_desc.Size);
+			ASSERT(desc.Size > 0 && desc.Stride > 0);
+
+			ReleaseGPU();
+			m_desc = desc;
+
+			VkBufferCreateInfo info = vks::initializers::bufferCreateInfo(ToVulkanBufferUsageFlags(m_desc.Flags), m_desc.Size);
+
+			VmaAllocationCreateInfo vmaInfo = { };
+			m_vmaMemoryUsage = ToVMAMemoryUsage(m_desc.Flags, m_mustBeMapped);
+			vmaInfo.usage = m_vmaMemoryUsage;
+
+			ThrowIfFailed(vmaCreateBuffer(m_device->VmaAllocator, &info, &vmaInfo, &m_buffer, &m_vmaAllocation, &m_vmaAllocationInfo));
+			m_memoryUsage = m_desc.Size;
+
+			m_bufferInfo.buffer = m_buffer;
+			m_bufferInfo.range = m_desc.Size;
+			m_bufferInfo.offset = 0;
+
+			if (m_desc.InitData != nullptr)
+			{
+				SetData(m_desc.InitData, m_desc.Size);
+			}
+		}
+		else
+		{
+			m_desc = desc;
+			m_bufferInfo.buffer = static_cast<GPUDynamicBufferVulkan*>(m_desc.SubAlloc.ParentBuffer)->m_buffer;
+			m_bufferInfo.range = m_desc.SubAlloc.Size;
+			m_bufferInfo.offset = m_desc.SubAlloc.Begin;
 		}
 	}
 
-	void* GPUBufferVulkan::Map(GPUResourceMapMode mapMode)
+	void* GPUBufferVulkan::Map()
 	{
 		ThrowIfFailed(vmaMapMemory(m_device->VmaAllocator, m_vmaAllocation, &m_mappedData));
 		return m_mappedData;
