@@ -111,7 +111,7 @@ namespace Insight::Graphics
 
 			auto* cmdBuffer = m_singleFrame.CommandBuffers;
 		{
-				IS_PROFILE_SCOPE("Record render passes.");
+			IS_PROFILE_SCOPE("Record render passes.");
 			cmdBuffer->BeginRecord();
 			for (auto& passIndex : m_singleFrame.PassStack)
 			{

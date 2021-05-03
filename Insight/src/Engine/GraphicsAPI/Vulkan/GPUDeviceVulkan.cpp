@@ -501,6 +501,10 @@ bool GPUDeviceVulkan::Init()
 	GPUFenceManager = ::New<Insight::GraphicsAPI::Vulkan::GPUFenceManagerVulkan>();
 	GPUSignalManager = ::New<Insight::GraphicsAPI::Vulkan::GPUSemaphoreManagerVulkan>();
 
+	VkQueue vkQueues[] = { m_graphicsQueue };
+	U32 vkQueuesIndex[] = { m_graphicsQueueFamilyIndex };
+	IS_PROFILE_GPU_INIT_VULKAN(&Device, &m_adapter->Gpu, vkQueues, vkQueuesIndex, 1, nullptr);
+
 	return true;
 }
 
@@ -534,6 +538,7 @@ void GPUDeviceVulkan::Dispose()
 	GPUFenceManager->Release();
 	SAFE_DELETE(GPUFenceManager);
 	SAFE_DELETE(GPUSignalManager);
+	IS_PROFILE_GPUI_SHUTDOWN();
 
 	vmaDestroyAllocator(VmaAllocator);
 	VmaAllocator = VK_NULL_HANDLE;

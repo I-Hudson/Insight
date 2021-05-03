@@ -336,6 +336,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		// Check if a wait semaphore has been specified to wait for before presenting the image
 		presentInfo.pWaitSemaphores = waitSemaphoresVulkan.data();
 		presentInfo.waitSemaphoreCount = static_cast<u32>(waitSemaphoresVulkan.size());
+		IS_PROFILE_GPU_FLIP(&m_swapchain);
 		return static_cast<GPUResults>(vkQueuePresentKHR(m_device->GetQueue(queue), &presentInfo));
 	}
 
