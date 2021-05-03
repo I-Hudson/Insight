@@ -6,6 +6,7 @@ namespace Insight::Utils
 {
 	class Hasher
 	{
+	public:
 		Hasher()
 			: m_hash(0)
 		{ }
@@ -13,11 +14,14 @@ namespace Insight::Utils
 		{ }
 
 		template<typename T>
-		INLINE u64 Hash(T& v)
+		INLINE u64 Hash(T v)
 		{
 			std::hash<T> hasher;
 			m_hash ^= hasher(v) + 0x9e3779b9 + (m_hash << 6) + (m_hash >> 2);
+			return m_hash;
 		}
+
+		const u64& GetHash() const { return m_hash; }
 
 	private:
 		u64 m_hash;

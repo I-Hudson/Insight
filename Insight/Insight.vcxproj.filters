@@ -2105,6 +2105,9 @@
     <ClCompile Include="src\Engine\Graphics\GPUResourceCollection.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\GPUSwapchain.cpp">
+      <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\GPUSync.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
@@ -2323,9 +2326,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\GPUSwapchain.cpp">
-      <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

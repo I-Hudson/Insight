@@ -30,7 +30,6 @@
 		{
 			IS_PROFILE_FUNCTION();
 #ifdef IMGUI_ENABLED
-
 			ImGui::Begin("Scene Hierarchy Panel");
 			bool titleBarHovered = ImGui::IsItemHovered();
 

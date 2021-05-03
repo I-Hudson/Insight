@@ -159,6 +159,7 @@ namespace Insight::Graphics
 
 		void SetSwapchainDimensions(const ResourceDimensions& dimensions) { m_swapchainDimensions = dimensions; }
 		void SetbackBufferSource(const std::string& name);
+		const std::string& GetBackbufferSourceName() const { return m_backBufferSource; }
 
 		/// <summary>
 		/// Build the graph and create any resources which are needed. This should 
@@ -287,7 +288,9 @@ namespace Insight::Graphics
 			/// <summary>
 			/// Store the render passes as FrameBuffer* pointers. 
 			/// </summary>
-			std::vector<GPURenderGraphPass*> RenderPasses;
+			std::unordered_map<u64, GPURenderGraphPass*> RenderPasses;
+			std::vector<RenderPass> Passes;
+			std::vector<u32> PassStack;
 
 			GPUDynamicBuffer* DynamicBuffer;
 

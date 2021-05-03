@@ -1,8 +1,11 @@
 #include "ispch.h"
 #include "VulkanImGUIRenderer.h"
 #include "Engine/Config/Config.h"
-#include "VulkanRenderer.h"
-#include "VulkanDevice.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -12,58 +15,12 @@
 #include "Engine/Time/Time.h"
 #include "Engine/Event/EventManager.h"
 
-namespace vks
+namespace Insight::GraphicsAPI::Vulkan
 {
 	VulkanImGUIRenderer::VulkanImGUIRenderer()
 	{
 		REG_EVENT_HANDLE(EventType::VulkanWindowResize, VulkanImGUIRenderer::WindowResize);
-	}
-
-	VulkanImGUIRenderer::~VulkanImGUIRenderer()
-	{
-#if defined(IMGUI_ENABLED)
-		ImGui_ImplVulkan_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-#endif
-	}
-
-	void VulkanImGUIRenderer::NewFrame()
-	{
-		IS_PROFILE_FUNCTION();
-#if defined(IMGUI_ENABLED)
-		ImGui_ImplVulkan_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		//ImGui::DockSpaceOverViewport();
-#endif
-	}
-
-	void VulkanImGUIRenderer::EndFrame()
-	{
-		IS_PROFILE_FUNCTION();
-#if defined(IMGUI_ENABLED)
-		ImGui::Render();
-		ImGui::UpdatePlatformWindows();
-#endif
-	}
-
-	void VulkanImGUIRenderer::Render(VkCommandBuffer commandBuffer)
-	{
-		IS_PROFILE_FUNCTION();
-#if defined(IMGUI_ENABLED)
-		//OPTICK_GPU_EVENT("ImGui Draw");
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
-#endif
-	}
-
-	void VulkanImGUIRenderer::Init(Renderer* renderer)
-	{
-#if defined(IMGUI_ENABLED)
-		auto device = VulkanDevice::Instance();
-		vks::VulkanRenderer* vRenderer = dynamic_cast<vks::VulkanRenderer*>(renderer);
-
+	
 		// Setup Dear ImGui context
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -78,22 +35,105 @@ namespace vks
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
+	}
+
+	VulkanImGUIRenderer::~VulkanImGUIRenderer()
+	{
+#if defined(IMGUI_ENABLED)
+		GPUDeviceVulkan& device = static_cast<GPUDeviceVulkan&>(*GPUDevice::Instance());
+		if (m_descriptorPool)
+		{
+			vkDestroyDescriptorPool(device.Device, m_descriptorPool, nullptr);
+		}
+
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+#endif
+	}
+
+	void VulkanImGUIRenderer::NewFrame()
+	{
+		IS_PROFILE_FUNCTION();
+#if defined(IMGUI_ENABLED)
+		if (m_init)
+		{
+			ImGui_ImplVulkan_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
+		//ImGui::DockSpaceOverViewport();
+#endif
+	}
+
+	void VulkanImGUIRenderer::EndFrame()
+	{
+		IS_PROFILE_FUNCTION();
+#if defined(IMGUI_ENABLED)
+		if (m_init)
+		{
+			ImGui::Render();
+			ImGui::UpdatePlatformWindows();
+		}
+#endif
+	}
+
+	void VulkanImGUIRenderer::Render()
+	{
+		IS_PROFILE_FUNCTION();
+#if defined(IMGUI_ENABLED)
+		Graphics::RenderGraph& graph = *Graphics::RenderGraph::Instance();
+		auto& imguiPass = graph.AddPass("ImGui", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		imguiPass.AddColorOutput(graph.GetBackbufferSourceName());
+		imguiPass.SetPassQueue(Graphics::RenderPassQueue::UI);
+
+		imguiPass.OnBeginRender([this](Graphics::RenderPass* pass, Graphics::GPURenderGraphPass* graphPass)
+		{
+			if (!m_init)
+			{
+				m_renderpass = static_cast<GPURenderGraphPassVulkan*>(graphPass)->GetRenderPassVulkan();
+				Init();
+			}
+		});
+
+		//OPTICK_GPU_EVENT("ImGui Draw");
+		imguiPass.SetRenderFunc([this](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::GPUDynamicBuffer* dynamicBuffer, Graphics::GPUDescriptorBuilder* builder)
+		{
+			if (m_init)
+			{
+				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), static_cast<GPUCommandBufferVulkan*>(cmdBuffer)->GetCmdBuffer());
+			}
+		});
+
+		imguiPass.OnEndRender([this](Graphics::RenderPass* renderPass)
+		{
+			m_init = true;
+		});
+#endif
+	}
+
+	void VulkanImGUIRenderer::Init()
+	{
+#if defined(IMGUI_ENABLED)
+		GPUDeviceVulkan& device = static_cast<GPUDeviceVulkan&>(*GPUDevice::Instance());
+		GPUAdapterVulkan& adapter = static_cast<GPUAdapterVulkan&>(*device.GetAdapter());
 
 		SetupImGuiRenderPass();
+		SetupImGuiDescriptorPool();
 
 		ImGui_ImplGlfw_InitForVulkan(Window::m_window, false);
 		ImGui_ImplVulkan_InitInfo init_info = {};
-		init_info.Instance = vRenderer->GetInstance();
-		init_info.PhysicalDevice = device->Instance()->GetPhysicalDevice();
-		init_info.Device = *device;
-		init_info.QueueFamily = device->GetQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
-		init_info.Queue = device->Instance()->GetQueue(VK_QUEUE_GRAPHICS_BIT);
+		init_info.Instance = device.m_instance;
+		init_info.PhysicalDevice = adapter.Gpu;
+		init_info.Device = device.Device;
+		init_info.QueueFamily = device.GetQueueFamilyIndex(GPUQueue::GRAPHICS);
+		init_info.Queue = device.GetQueue(GPUQueue::GRAPHICS);
 		init_info.PipelineCache = nullptr;
-		init_info.DescriptorPool = device->GetDescriptorPool();
+		init_info.DescriptorPool = m_descriptorPool;
 		init_info.Allocator = nullptr;
 		init_info.MinImageCount = 2;
 		init_info.ImageCount = 3;
-		ImGui_ImplVulkan_Init(&init_info, vRenderer->GetPresentRenderPass());
+		ImGui_ImplVulkan_Init(&init_info, m_renderpass);
 
 		InitResources();
 #endif
@@ -102,8 +142,6 @@ namespace vks
 	void VulkanImGUIRenderer::InitResources()
 	{
 #if defined(IMGUI_ENABLED)
-		auto device = VulkanDevice::Instance();
-
 		ImGuiIO& io = ImGui::GetIO();
 		io.Fonts->AddFontFromFileTTF("./data/fonts/montserrat/Montserrat-Bold.ttf", 18.0f);
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("./data/fonts/montserrat/Montserrat-Regular.ttf", 18.0f);
@@ -114,15 +152,19 @@ namespace vks
 		io.Fonts->AddFontFromFileTTF("./data/fonts/" FONT_ICON_FILE_NAME_FAS, 16.0f, &icons_config, icons_ranges);
 		// use FONT_ICON_FILE_NAME_FAR if you want regular instead of solid
 
-		VkCommandBuffer command_buffer = device->CreateSingleUseBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY, true);
-		ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
-		device->FlushCommandBuffer(command_buffer, device->GetQueue(VK_QUEUE_GRAPHICS_BIT));
+		GPUCommandBufferVulkan* command_buffer = static_cast<GPUCommandBufferVulkan*>(GPUCommandBufferVulkan::New());
+		command_buffer->Init(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+		command_buffer->BeginRecord();
+		ImGui_ImplVulkan_CreateFontsTexture(command_buffer->GetCmdBuffer());
+		command_buffer->EndRecord();
+		command_buffer->SubmitAndWait(GPUQueue::GRAPHICS);
+		::Delete(command_buffer);
 #endif
 	}
 
 	void VulkanImGUIRenderer::SetupImGuiRenderPass()
 	{
-		auto device = VulkanDevice::Instance();
+		//auto device = VulkanDevice::Instance();
 
 		//std::array<VkAttachmentDescription, 2> attachments = {};
 		//// Color attachment
@@ -196,14 +238,44 @@ namespace vks
 		//ThrowIfFailed(vkCreateRenderPass(*device, &renderPassInfo, nullptr, &renderPass));
 	}
 
+	void VulkanImGUIRenderer::SetupImGuiDescriptorPool()
+	{
+		//1: create descriptor pool for IMGUI
+	// the size of the pool is very oversize, but it's copied from imgui demo itself.
+		VkDescriptorPoolSize pool_sizes[] =
+		{
+			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+			{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+		};
+
+		VkDescriptorPoolCreateInfo pool_info = {};
+		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		pool_info.maxSets = 1000;
+		pool_info.poolSizeCount = std::size(pool_sizes);
+		pool_info.pPoolSizes = pool_sizes;
+
+		GPUDeviceVulkan& device = static_cast<GPUDeviceVulkan&>(*GPUDevice::Instance());
+		ThrowIfFailed(vkCreateDescriptorPool(device.Device, &pool_info, nullptr, &m_descriptorPool));
+	}
+
 	void VulkanImGUIRenderer::WindowResize(Event const& event)
 	{
 #if defined(IMGUI_ENABLED)
-		VulkanResizeEvent resizeEvent = static_cast<const VulkanResizeEvent&>(event);
+		//VulkanResizeEvent resizeEvent = static_cast<const VulkanResizeEvent&>(event);
 
-		ImGuiIO& io = ImGui::GetIO();
-		io.DisplaySize = ImVec2((float)resizeEvent.m_width, (float)resizeEvent.m_height);
-		ImGui_ImplVulkan_SetMinImageCount(2);
+		//ImGuiIO& io = ImGui::GetIO();
+		//io.DisplaySize = ImVec2((float)resizeEvent.m_width, (float)resizeEvent.m_height);
+		//ImGui_ImplVulkan_SetMinImageCount(2);
 #endif
 	}
 }

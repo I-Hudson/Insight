@@ -69,6 +69,7 @@ namespace Render
 			case GraphicsRendererAPI::Vulkan: return ::New<vks::VulkanTexture>();
 		}
 		ASSERT(false);
+		return nullptr;
 	}
 
 	U32 Texture::GetMipMapCount(const U32& width, const U32& height, const U32& channels)

@@ -4,6 +4,7 @@
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Core/Maths/Rect.h"
+#include "Engine/Utils/Hasher.h"
 
 #include "Engine/Graphics/GPUBufferDesc.h"
 
@@ -20,13 +21,17 @@ namespace Insight::Graphics
 	class GPUImageView;
 	class GPUCommandBuffer;
 
-	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)>;
-	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
-	using RenderPassClearDepthStencilFunc = std::function<void(glm::vec2&)>;
-
-
+	class GPURenderGraphPass;
+	class RenderPass;
 	class Texture;
 	class RenderGraph;
+
+	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)>;
+	using RenderPassBeginRenderFunc = std::function<void(RenderPass*, GPURenderGraphPass*)>;
+	using RenderPassEndRenderFunc = std::function<void(RenderPass* renderPass)>;
+
+	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
+	using RenderPassClearDepthStencilFunc = std::function<void(glm::vec2&)>;
 
 	enum RenderGraphQueueFlagsBits
 	{
@@ -39,6 +44,16 @@ namespace Insight::Graphics
 
 	static const RenderGraphQueueFlags ComputeQueues = RENDER_GRAPH_QUEUE_COMPUTE_BIT |
 		RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT;
+
+	enum RenderPassQueue
+	{
+		Invalid = 0,
+		Default = 1,
+		UI = 2,
+		Overlay = 3,
+
+		Count
+	};
 
 	/// <summary>
 	/// Define an image attachment
@@ -162,6 +177,7 @@ namespace Insight::Graphics
 		const std::string& GetPassName() const { return m_name; }
 
 		RenderGraphResource& AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment);
+		RenderGraphResource& AddColorOutput(const std::string& name);
 		RenderGraphResource& AddColorInput(const std::string& name);
 		RenderGraphResource& SetDepthStencilOutput(const std::string& name, ImageAttachmentInfo& attachment);
 
@@ -170,7 +186,11 @@ namespace Insight::Graphics
 
 		RenderGraphResource& SetDepthStencilInput(const std::string& name);
 
+		void SetPassQueue(RenderPassQueue passQueue) { m_passQueue = passQueue; }
 		void SetRenderFunc(RenderPassRenderFunc func) { m_renderFunc = func; }
+		void OnBeginRender(RenderPassBeginRenderFunc func) { m_beginRenderFunc = func; }
+		void OnEndRender(RenderPassEndRenderFunc func) { m_endRenderFunc = func; }
+
 		void SetClearColour(const glm::vec4& clearColour) { m_clearColour = clearColour; }
 		void SetClearDepthStencil(const glm::vec2& clearDepthStencil) { m_clearDepthStencil = clearDepthStencil; }
 
@@ -199,17 +219,33 @@ namespace Insight::Graphics
 		const GPUImage* GetPhysicalImage(u32 index) const;
 		const GPUImageView* GetPhysicalImageView(u32 index) const;
 
+		u64 GetColorOutputHash() { return m_colorOutputHasher.GetHash(); }
 		const Maths::Rect& GetWindowRect() const { return m_windowRect; }
-
 		const glm::vec4& GetClearColor() { return m_clearColour; }
 		const glm::vec2& GetClearDepthStencil() { return m_clearDepthStencil; }
 
 	private:
+		void CallBeginRenderFunc(GPURenderGraphPass* pass)
+		{
+			if (m_beginRenderFunc)
+			{
+				m_beginRenderFunc(this, pass);
+			}
+		}
+
 		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)
 		{
 			if (m_renderFunc)
 			{
 				m_renderFunc(cmdBuffer, dynamicBuffer, builder);
+			}
+		}
+
+		void CallEndRenderFunc()
+		{
+			if (m_endRenderFunc)
+			{
+				m_endRenderFunc(this);
 			}
 		}
 
@@ -235,6 +271,7 @@ namespace Insight::Graphics
 		/// </summary>
 		std::string m_name;
 
+		RenderPassQueue m_passQueue;
 		Maths::Rect m_windowRect;
 
 		std::unordered_set<u32> m_dependentPasses;
@@ -245,9 +282,12 @@ namespace Insight::Graphics
 		std::vector<RenderGraphResource> m_genericTextures;
 
 		RenderPassRenderFunc m_renderFunc;
+		RenderPassBeginRenderFunc m_beginRenderFunc;
+		RenderPassEndRenderFunc m_endRenderFunc;
 		glm::vec4 m_clearColour;
 		glm::vec2 m_clearDepthStencil;
 
+		Utils::Hasher m_colorOutputHasher;
 		u32 m_depthStencilInput = -1;
 		u32 m_depthStencilOutput = -1;
 

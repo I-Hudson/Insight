@@ -88,6 +88,7 @@ GPUShader* GPUShader::New()
 		case GraphicsRendererAPI::Vulkan: return ::New<GPUShaderVulkan>();
 	}
 	ASSERT(false && "No GPUShader for graphics API exists.");
+	return nullptr;
 }
 
 GPUShader::GPUShader()

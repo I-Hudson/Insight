@@ -795,7 +795,7 @@ namespace vks
 		renderPassBeginInfo.clearValueCount = 2;
 		renderPassBeginInfo.pClearValues = clearValues;
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
+		Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer* imgui = static_cast<Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
 		imgui->EndFrame();
 
 		int i = m_currentFrame;
@@ -817,7 +817,7 @@ namespace vks
 			// DRAW
 			vkCmdDraw(m_presentCmdBuffers[i], 3, 1, 0, 0);
 
-			imgui->Render(m_presentCmdBuffers[i]);
+			//imgui->Render(m_presentCmdBuffers[i]);
 
 			vkCmdEndRenderPass(m_presentCmdBuffers[i]);
 			ThrowIfFailed(vkEndCommandBuffer(m_presentCmdBuffers[i]));
@@ -1099,9 +1099,9 @@ namespace vks
 
 		//vkCmdBindPipeline(m_secondaryCommandBuffers.UI, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.starsphere);
 
-		VulkanImGUIRenderer* imgui = static_cast<VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
+		Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer* imgui = static_cast<Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer*>(ImGuiRenderer::Instance());
 		imgui->EndFrame();
-		imgui->Render(m_secondaryCommandBuffers.UI);
+		//imgui->Render(m_secondaryCommandBuffers.UI);
 
 		ThrowIfFailed(vkEndCommandBuffer(m_secondaryCommandBuffers.UI));
 	}

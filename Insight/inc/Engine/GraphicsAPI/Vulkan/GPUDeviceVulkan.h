@@ -245,6 +245,7 @@ private:
 
 public:
 	VkDevice Device;
+	VkInstance m_instance;
 
 	GPUContextVulkan* MainContext = nullptr;
 
@@ -284,7 +285,6 @@ public:
 	VmaAllocator VmaAllocator = VK_NULL_HANDLE;
 
 private:
-	VkInstance m_instance;
 
 	std::vector<VkQueueFamilyProperties> m_queueFamilyProps;
 

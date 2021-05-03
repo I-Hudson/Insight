@@ -12,6 +12,7 @@ namespace Insight::Graphics
 		, m_passIndex(index)
 		, m_name(name)
 		, m_queue(queue)
+		, m_passQueue(RenderPassQueue::Default)
 		, m_windowRect(Maths::Rect(0,0, (float)Module::WindowModule::GetWindow()->GetWidth(), (float)Module::WindowModule::GetWindow()->GetHeight()))
 	{
 	}
@@ -31,11 +32,28 @@ namespace Insight::Graphics
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
 		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
 		m_colorOutputs.push_back(res.GetIndex());
+		m_colorOutputHasher.Hash(name);
 
 		if (attachment.Levels != 1)
 		{
 			res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src | (u32)ImageUsageFlagsBits::Transfer_Dst);
 		}
+
+		return res;
+	}
+
+	RenderGraphResource& RenderPass::AddColorOutput(const std::string& name)
+	{
+		auto& res = m_graph->GetTextureResouce(name);
+		ASSERT(res.TextureInfo.m_info.Width != 0 || res.TextureInfo.m_info.Height != 0 && "[RenderPass::AddColorOutput] Output color texture is not valid. Texture must have already been rendered to.");
+		res.SetPassName(m_name);
+		res.AddQueue(m_queue);
+		res.AddWrittenInPass(m_passIndex);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
+		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
+		m_colorOutputs.push_back(res.GetIndex());
+		m_colorOutputHasher.Hash(name);
 
 		return res;
 	}

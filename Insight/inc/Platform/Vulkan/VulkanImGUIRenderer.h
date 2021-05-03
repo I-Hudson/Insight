@@ -2,15 +2,13 @@
 
 #include "Engine/Core/Core.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
-#include "VulkanHeader.h"
-#include "VulkanBuffer.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include <imgui.h>
 #include <glm/glm.hpp>
-#include "Engine/Threading/TThreadSafe.h"
 
-	class Event;
+class Event;
 
-namespace vks
+namespace Insight::GraphicsAPI::Vulkan
 {
 	class VulkanImGUIRenderer : public ImGuiRenderer
 	{
@@ -20,17 +18,21 @@ namespace vks
 
 		virtual void NewFrame() override;
 		virtual void EndFrame() override;
-		void Render(VkCommandBuffer commandBuffer);
+		virtual void Render() override;
 
 	private:
-		virtual void Init(Renderer* renderer) override;
+		virtual void Init() override;
 		void InitResources();
 		void SetupImGuiRenderPass();
+		void SetupImGuiDescriptorPool();
 		void SetStyle();
 
 		void WindowResize(Event const& event);
 
 	private:
 		bool m_newFrameInit = false;
+
+		VkDescriptorPool m_descriptorPool;
+		VkRenderPass m_renderpass;
 	};
 }

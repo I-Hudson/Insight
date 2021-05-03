@@ -6,6 +6,8 @@
 #include "Editor/TopBarMenu.h"
 #include "Editor/Windows/AssetWindow.h"
 
+#include "Engine/Graphics/ImGuiRenderer.h"
+
 #if defined(IS_EDITOR)
 	namespace Module
 	{
@@ -35,9 +37,12 @@
 		{
 			IS_PROFILE_FUNCTION();
 
-			for (auto it = m_editorPanels.begin(); it != m_editorPanels.end(); ++it)
+			if (ImGuiRenderer::Instance()->IsInit())
 			{
-				it->second->Update(deltaTime);
+				for (auto it = m_editorPanels.begin(); it != m_editorPanels.end(); ++it)
+				{
+					it->second->Update(deltaTime);
+				}
 			}
 		}
 	}

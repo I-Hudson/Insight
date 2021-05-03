@@ -7,6 +7,7 @@
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "Engine/Graphics/Image/GPUImage.h"
+#include <map>
 
 namespace Insight::Graphics
 {
@@ -89,6 +90,8 @@ namespace Insight::Graphics
 		BuildPhysical();
 
 		m_singleFrame.Init();
+		m_singleFrame.Passes = m_passes;
+		m_singleFrame.PassStack = m_passStack;
 	}
 
 	void RenderGraph::Execute()
@@ -106,14 +109,21 @@ namespace Insight::Graphics
 			}
 		}
 
-		auto* cmdBuffer = m_singleFrame.CommandBuffers;
-		cmdBuffer->BeginRecord();
-		for (size_t i = 0; i < m_singleFrame.RenderPasses.size(); ++i)
+			auto* cmdBuffer = m_singleFrame.CommandBuffers;
 		{
-			cmdBuffer->BeginRenderpass(m_singleFrame.RenderPasses[i]);
-			cmdBuffer->SetViewPort(m_singleFrame.RenderPasses[i]->GetRenderPass().GetWindowRect());
-			m_singleFrame.RenderPasses[i]->GetRenderPass().CallRenderFunc(cmdBuffer, m_singleFrame.DynamicBuffer, m_singleFrame.DescriptorBuilder);
-			cmdBuffer->EndRenderpass(m_singleFrame.RenderPasses[i]);
+				IS_PROFILE_SCOPE("Record render passes.");
+			cmdBuffer->BeginRecord();
+			for (auto& passIndex : m_singleFrame.PassStack)
+			{
+				auto& pass = m_singleFrame.Passes.at(passIndex);
+				auto* renderPass = m_singleFrame.RenderPasses.at(pass.GetColorOutputHash());
+				pass.CallBeginRenderFunc(renderPass);
+				cmdBuffer->BeginRenderpass(renderPass);
+				cmdBuffer->SetViewPort(pass.GetWindowRect());
+				pass.CallRenderFunc(cmdBuffer, m_singleFrame.DynamicBuffer, m_singleFrame.DescriptorBuilder);
+				cmdBuffer->EndRenderpass(renderPass);
+				pass.CallEndRenderFunc();
+			}
 		}
 
 		{
@@ -264,65 +274,77 @@ namespace Insight::Graphics
 	void RenderGraph::ReorderRenderPasses(std::vector<u32>& flattenedPasses)
 	{
 		IS_PROFILE_FUNCTION();
-
-		// We now have all the passes and which other dependent passes.
-		std::vector<u32> unorderedPasses;
-		unorderedPasses.reserve(flattenedPasses.size());
-		std::swap(flattenedPasses, unorderedPasses);
-
-		const auto schedule = [&](unsigned index) {
-			// Need to preserve the order of remaining elements.
-			flattenedPasses.push_back(unorderedPasses[index]);
-			std::move(unorderedPasses.begin() + index + 1,
-				 unorderedPasses.end(),
-				 unorderedPasses.begin() + index);
-			unorderedPasses.pop_back();
-		};
-
-		schedule(0);
-		while (!unorderedPasses.empty())
+		std::map<RenderPassQueue, std::vector<u32>> passesByQueue;
+		for (auto& passIndex : flattenedPasses)
 		{
-			u32 bestOverlap = 0;
-			u32 bestCandidate = 0;
+			auto& pass = m_passes.at(passIndex);
+			passesByQueue[pass.m_passQueue].push_back(pass.GetPassIndex());
+		}
+		flattenedPasses.clear();
 
-			for (u32 i = 0; i < unorderedPasses.size(); ++i)
+		for (auto& queue : passesByQueue)
+		{
+			// We now have all the passes and which other dependent passes.
+			std::vector<u32> unorderedPasses;
+			std::vector<u32> localFlattedPasses = queue.second;
+			unorderedPasses.reserve(localFlattedPasses.size());
+			std::swap(localFlattedPasses, unorderedPasses);
+
+			const auto schedule = [&](unsigned index) {
+				// Need to preserve the order of remaining elements.
+				localFlattedPasses.push_back(unorderedPasses[index]);
+				std::move(unorderedPasses.begin() + index + 1,
+						  unorderedPasses.end(),
+						  unorderedPasses.begin() + index);
+				unorderedPasses.pop_back();
+			};
+
+			schedule(0);
+			while (!unorderedPasses.empty())
 			{
-				u32 overlapFactor = 0;
-				for (auto itr = flattenedPasses.rbegin(); itr != flattenedPasses.rend(); ++itr)
+				u32 bestOverlap = 0;
+				u32 bestCandidate = 0;
+
+				for (u32 i = 0; i < unorderedPasses.size(); ++i)
 				{
-					if (DependsOnPass(unorderedPasses[i], *itr))
+					u32 overlapFactor = 0;
+					for (auto itr = localFlattedPasses.rbegin(); itr != localFlattedPasses.rend(); ++itr)
 					{
-						break;
+						if (DependsOnPass(unorderedPasses[i], *itr))
+						{
+							break;
+						}
+						++overlapFactor;
 					}
-					++overlapFactor;
-				}
 
-				if (overlapFactor >= bestOverlap)
-				{
-					continue;
-				}
-
-				bool possibleCandidate = true;
-				for (u32 j = 0; j < i; ++j)
-				{
-					auto& pass = m_passes.at(unorderedPasses.at(i));
-					auto& pass2 = m_passes.at(unorderedPasses.at(j));
-					if (pass.GetDependentPasses().find(pass2.GetPassIndex()) != pass.GetDependentPasses().end())
+					if (overlapFactor >= bestOverlap)
 					{
-						possibleCandidate = false;
-						break;
+						continue;
 					}
-				}
 
-				if (!possibleCandidate)
-				{
-					continue;
-				}
+					bool possibleCandidate = true;
+					for (u32 j = 0; j < i; ++j)
+					{
+						auto& pass = m_passes.at(queue.second.at(unorderedPasses.at(i)));
+						auto& pass2 = m_passes.at(queue.second.at(unorderedPasses.at(j)));
+						if (pass.GetDependentPasses().find(pass2.GetPassIndex()) != pass.GetDependentPasses().end())
+						{
+							possibleCandidate = false;
+							break;
+						}
+					}
 
-				bestCandidate = i;
-				bestOverlap = overlapFactor;
+					if (!possibleCandidate)
+					{
+						continue;
+					}
+
+					bestCandidate = i;
+					bestOverlap = overlapFactor;
+				}
+				schedule(bestCandidate);
 			}
-			schedule(bestCandidate);
+			flattenedPasses.insert(flattenedPasses.end(), localFlattedPasses.begin(), localFlattedPasses.end());
 		}
 	}
 
@@ -438,7 +460,7 @@ namespace Insight::Graphics
 		{
 			if (resource.GetPhysicalIndex() == RenderGraphResource::Unused)
 			{
-				u32 physicalIndex = m_physicalImages.size();
+				u32 physicalIndex = (u32)m_physicalImages.size();
 
 				GPUImage* image = GPUImage::New();
 				GPUImageDesc desc = GPUImageDesc::Image2D(resource.TextureInfo.m_info.Width, resource.TextureInfo.m_info.Height, resource.TextureInfo.m_info.Depth, resource.TextureInfo.m_info.Levels,
@@ -459,9 +481,12 @@ namespace Insight::Graphics
 		for (auto& passIndex : m_passStack)
 		{
 			auto& pass = m_passes[passIndex];
-			auto* frameBuffer = GPURenderGraphPass::New();
-			frameBuffer->Init(pass);
-			m_singleFrame.RenderPasses.push_back(frameBuffer);
+			if (m_singleFrame.RenderPasses.find(pass.GetColorOutputHash()) == m_singleFrame.RenderPasses.end())
+			{
+				auto* frameBuffer = GPURenderGraphPass::New();
+				frameBuffer->Init(pass);
+				m_singleFrame.RenderPasses.emplace(pass.GetColorOutputHash(), frameBuffer);
+			}
 		}
 	}
 
@@ -499,7 +524,7 @@ namespace Insight::Graphics
 
 		for (auto& pass : m_passes)
 		{
-			pass.m_windowRect = Maths::Rect(0, 0, Window::GetWidth(), Window::GetHeight());
+			pass.m_windowRect = Maths::Rect(0, 0, (float)Window::GetWidth(), (float)Window::GetHeight());
 		}
 
 		m_swapchain->Build(Graphics::GPUSwapchainDesc());
@@ -553,9 +578,9 @@ namespace Insight::Graphics
 	{
 		IS_PROFILE_FUNCTION();
 
-		for (auto* frameBuffer : RenderPasses)
+		for (std::pair<u64, GPURenderGraphPass*> frameBuffer : RenderPasses)
 		{
-			::Delete(frameBuffer);
+			::Delete(frameBuffer.second);
 		}
 		RenderPasses.clear();
 		

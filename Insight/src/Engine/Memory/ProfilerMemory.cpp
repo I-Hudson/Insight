@@ -118,6 +118,7 @@ ProProfilerMemoryCollection::iterator ProfilerMemory::GetIterator(void* ptr, Pro
 			return it;
 		}
 	}
+	return collection.end();
 }
 
 std::vector<std::string> ProfilerMemory::GetCallStack()

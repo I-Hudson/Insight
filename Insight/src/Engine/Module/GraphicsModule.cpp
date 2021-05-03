@@ -120,24 +120,27 @@ namespace Module
 		//m_renderer = Renderer::New();
 		//m_renderer->Init();
 
-		//m_imguiRenderer = ImGuiRenderer::New();
+		m_imguiRenderer = ImGuiRenderer::New();
 		//ImGuiRenderer::Instance()->Init(m_renderer);
 
 	}
 
 	GraphicsModule::~GraphicsModule()
 	{
+		GPUDevice::Instance()->WaitForGPU();
+
+		if (ImGuiRenderer::IsInitialised())
+		{
+			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
+			::Delete(m_imguiRenderer);
+		}
+
 #if RENDER_GRAPH_TESTING
 		// TESTING
 		::Delete(Insight::Graphics::RenderGraph::Instance());
 		GPUDevice::Instance()->Dispose();
 		::Delete(GPUDevice::Instance());
 #endif
-		if (ImGuiRenderer::IsInitialised())
-		{
-			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
-			::Delete(m_imguiRenderer);
-		}
 
 		if (m_renderer)
 		{
@@ -223,17 +226,21 @@ namespace Module
 
 		if (imageIndex % 3 == 0)
 		{
-		Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
+			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
 		}
 		else if (imageIndex % 3 == 1)
 		{
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("pointLights");
+			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("pointLights");
 		}
 		else if (imageIndex % 3 == 2)
 		{
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
+			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
 		}
 		++imageIndex;
+
+		m_imguiRenderer->EndFrame();
+		m_imguiRenderer->Render();
+
 		Insight::Graphics::RenderGraph::Instance()->Build();
 		Insight::Graphics::RenderGraph::Instance()->LogToConsole();
 		Insight::Graphics::RenderGraph::Instance()->Execute();

@@ -13,6 +13,9 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual ~GPURenderGraphPassVulkan();
 		virtual void Init(Graphics::RenderPass& renderPass) override;
 
+		VkRenderPass GetRenderPassVulkan() { return m_renderPass; }
+		VkFramebuffer GetFramebufferVulkan() { return m_frameBuffer; }
+
 	private:
 		VkRenderPass m_renderPass;
 		VkFramebuffer m_frameBuffer;
