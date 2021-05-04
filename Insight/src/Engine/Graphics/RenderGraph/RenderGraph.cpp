@@ -24,15 +24,23 @@ namespace Insight::Graphics
 	RenderGraph::RenderGraph()
 		: m_built(false)
 		, m_changed(false)
+		, m_frameIndex(0)
 	{
 		m_swapchain = GPUSwapchain::New();
 		m_swapchain->Init();
 		m_swapchain->Build(Graphics::GPUSwapchainDesc());
+
+		m_frames.resize(c_MaxFrameCount);
 	}
 
 	RenderGraph::~RenderGraph()
 	{
-		m_singleFrame.ReleaseGPU();
+		//m_singleFrame.ReleaseGPU();
+		for (auto& frame : m_frames)
+		{
+			frame.ReleaseGPU();
+		}
+
 		m_swapchain->ReleaseGPU();
 		::Delete(m_swapchain);
 
@@ -88,20 +96,21 @@ namespace Insight::Graphics
 		ReorderRenderPasses(m_passStack);
 
 		BuildPhysical();
-
-		m_singleFrame.Init();
-		m_singleFrame.Passes = m_passes;
-		m_singleFrame.PassStack = m_passStack;
 	}
 
 	void RenderGraph::Execute()
 	{
 		IS_PROFILE_FUNCTION();
 
+		auto& frame = m_frames.at(m_frameIndex);
+		frame.Init();
+		frame.Passes = m_passes;
+		frame.PassStack = m_passStack;
+
 		u32 imageIndex;
 		{
 			IS_PROFILE_SCOPE("Get next swapchain image.");
-			GPUResults res = m_swapchain->GetNextImage(m_singleFrame.SwapchainImageAquired, &imageIndex);
+			GPUResults res = m_swapchain->GetNextImage(frame.SwapchainImageAquired, &imageIndex);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
 				SwapchainRebuild();
@@ -109,18 +118,18 @@ namespace Insight::Graphics
 			}
 		}
 
-			auto* cmdBuffer = m_singleFrame.CommandBuffers;
+		auto* cmdBuffer = frame.CommandBuffers;
 		{
 			IS_PROFILE_SCOPE("Record render passes.");
 			cmdBuffer->BeginRecord();
-			for (auto& passIndex : m_singleFrame.PassStack)
+			for (auto& passIndex : frame.PassStack)
 			{
-				auto& pass = m_singleFrame.Passes.at(passIndex);
-				auto* renderPass = m_singleFrame.RenderPasses.at(pass.GetColorOutputHash());
+				auto& pass = frame.Passes.at(passIndex);
+				auto* renderPass = frame.RenderPasses.at(pass.GetColorOutputHash());
 				pass.CallBeginRenderFunc(renderPass);
 				cmdBuffer->BeginRenderpass(renderPass);
 				cmdBuffer->SetViewPort(pass.GetWindowRect());
-				pass.CallRenderFunc(cmdBuffer, m_singleFrame.DynamicBuffer, m_singleFrame.DescriptorBuilder);
+				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
 				cmdBuffer->EndRenderpass(renderPass);
 				pass.CallEndRenderFunc();
 			}
@@ -136,12 +145,12 @@ namespace Insight::Graphics
 		{
 			IS_PROFILE_SCOPE("End record and submit go gpu.");
 			cmdBuffer->EndRecord();
-			cmdBuffer->Submit(GPUQueue::GRAPHICS, m_singleFrame.Fence);
+			cmdBuffer->Submit(GPUQueue::GRAPHICS, frame.Fence);
 		}
 
 		{
 			IS_PROFILE_SCOPE("Present to swapchain.");
-			std::vector<GPUSemaphore*> waitSemaphores = { m_singleFrame.SwapchainImageAquired };
+			std::vector<GPUSemaphore*> waitSemaphores = { frame.SwapchainImageAquired };
 			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, imageIndex, waitSemaphores);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
@@ -149,23 +158,26 @@ namespace Insight::Graphics
 				return;
 			}
 		}
+		m_frameIndex = (m_frameIndex + 1) % c_MaxFrameCount;
 	}
 
 	void RenderGraph::Reset()
 	{
 		IS_PROFILE_FUNCTION();
 		
+		auto& frame = m_frames.at(m_frameIndex);
+
 		m_passes.clear();
 		m_passToIndex.clear();
 		m_passStack.clear();
-		if (m_singleFrame.Initialised)
+		if (frame.Initialised)
 		{
 			{
 				IS_PROFILE_SCOPE("[RenderGraph::Reset] single frame wait/reset");
-				m_singleFrame.Fence->Wait();
-				m_singleFrame.Fence->Reset();
+				frame.Fence->Wait();
+				frame.Fence->Reset();
 			}
-			m_singleFrame.Reset();
+			frame.Reset();
 		}
 	}
 
@@ -478,14 +490,15 @@ namespace Insight::Graphics
 			}
 		}
 
+		auto& frame = m_frames.at(m_frameIndex);
 		for (auto& passIndex : m_passStack)
 		{
 			auto& pass = m_passes[passIndex];
-			if (m_singleFrame.RenderPasses.find(pass.GetColorOutputHash()) == m_singleFrame.RenderPasses.end())
+			if (frame.RenderPasses.find(pass.GetColorOutputHash()) == frame.RenderPasses.end())
 			{
 				auto* frameBuffer = GPURenderGraphPass::New();
 				frameBuffer->Init(pass);
-				m_singleFrame.RenderPasses.emplace(pass.GetColorOutputHash(), frameBuffer);
+				frame.RenderPasses.emplace(pass.GetColorOutputHash(), frameBuffer);
 			}
 		}
 	}
@@ -499,7 +512,8 @@ namespace Insight::Graphics
 
 		GPUDevice::Instance()->WaitForGPU();
 
-		m_singleFrame.Reset();
+		auto& frame = m_frames.at(m_frameIndex);
+		frame.Reset();
 
 		for (auto& res : m_resources)
 		{
@@ -570,8 +584,17 @@ namespace Insight::Graphics
 		DescriptorBuilder = GPUDescriptorBuilder::New();
 		DescriptorBuilder->Begin(DescriptorLayoutCache, DescriptorAllocator);
 
-		DynamicBuffer = GPUDynamicBuffer::New();
-		DynamicBuffer->Init(GPUDynamicBufferDesc::Uniform(64, 256, 1 * 1024 * 1024));
+		Buffers[GPUBufferFlags::VERTEX] = GPUDynamicBuffer::New();
+		Buffers.at(GPUBufferFlags::VERTEX)->Init(GPUDynamicBufferDesc::Vertex(1 * 1024 * 1024));
+		Buffers.at(GPUBufferFlags::VERTEX)->SetName("FrameDynamicBuffer " + std::to_string(RenderGraph::Instance()->GetFrameIndex()) + " Vertex");
+
+		Buffers[GPUBufferFlags::INDEX] = GPUDynamicBuffer::New();
+		Buffers.at(GPUBufferFlags::INDEX)->Init(GPUDynamicBufferDesc::Index(1 * 1024 * 1024));
+		Buffers.at(GPUBufferFlags::INDEX)->SetName("FrameDynamicBuffer " + std::to_string(RenderGraph::Instance()->GetFrameIndex()) + " Index");
+
+		Buffers[GPUBufferFlags::UNIFORM] = GPUDynamicBuffer::New();
+		Buffers.at(GPUBufferFlags::UNIFORM)->Init(GPUDynamicBufferDesc::Uniform(64, 256, 1 * 1024 * 1024));
+		Buffers.at(GPUBufferFlags::UNIFORM)->SetName("FrameDynamicBuffer " + std::to_string(RenderGraph::Instance()->GetFrameIndex()) + " Uniform");
 	}
 
 	void RenderGraph::FrameSubmision::Reset()
@@ -582,10 +605,15 @@ namespace Insight::Graphics
 		{
 			::Delete(frameBuffer.second);
 		}
+
+		for (auto& buffer : Buffers)
+		{
+			buffer.second->Reset();
+		}
+
 		RenderPasses.clear();
 		
 		CommandPools->Reset();
-		DynamicBuffer->Reset();
 		DescriptorAllocator->ResetPools();
 	}
 
@@ -602,7 +630,11 @@ namespace Insight::Graphics
 		::Delete(DescriptorBuilder);
 		::Delete(DescriptorAllocator);
 		::Delete(DescriptorLayoutCache);
-		DynamicBuffer->ReleaseGPU();
-		::Delete(DynamicBuffer);
+
+		for (auto& buffer : Buffers)
+		{
+			buffer.second->ReleaseGPU();
+			::Delete(buffer.second);
+		}
 	}
 }

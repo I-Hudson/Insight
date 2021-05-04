@@ -1,12 +1,16 @@
 #include "ispch.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 
 namespace Insight::GraphicsAPI::Vulkan
 {
 	GPUDynamicBufferVulkan::GPUDynamicBufferVulkan()
-	{ }
+	{
+		m_mapped = nullptr;
+	}
 
 	GPUDynamicBufferVulkan::~GPUDynamicBufferVulkan()
 	{
@@ -25,12 +29,16 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		VkBufferCreateInfo info = vks::initializers::bufferCreateInfo(ToVulkanBufferUsageFlags(m_desc.Flags), m_desc.Size);
 		
+		bool mustBeMapped = false;
 		VmaAllocationCreateInfo vmaInfo = { };
-		vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+		vmaInfo.usage = ToVMAMemoryUsage(desc.Flags, mustBeMapped);
 
 		ThrowIfFailed(vmaCreateBuffer(m_device->VmaAllocator, &info, &vmaInfo, &m_buffer, &m_vmaAllocation, &m_vmaAllocationInfo));
 		m_memoryUsage = m_desc.Size;
-		vmaMapMemory(m_device->VmaAllocator, m_vmaAllocation, &m_mapped);
+		if (mustBeMapped)
+		{
+			ThrowIfFailed(vmaMapMemory(m_device->VmaAllocator, m_vmaAllocation, &m_mapped));
+		}
 	}
 
 	Graphics::GPUBuffer* GPUDynamicBufferVulkan::Upload(void* data, u64 size)
@@ -38,9 +46,36 @@ namespace Insight::GraphicsAPI::Vulkan
 		ASSERT(m_currentOffset + size <= m_desc.Size && "[GPUDynamicBufferVulkan::Upload] Dynamic buffer is too small.");
 
 		u64 offset = m_currentOffset;
-		char* target = (char*)m_mapped;
-		target += m_currentOffset;
-		Platform::MemCopy(target, data, size);
+		if (m_mapped)
+		{
+			char* target = (char*)m_mapped;
+			target += m_currentOffset;
+			Platform::MemCopy(target, data, size);
+		}
+		else
+		{
+			// Create staging buffer. 
+			GPUBufferVulkan stagingBuffer;
+			Graphics::GPUBufferDesc stagingBuffDesc = Graphics::GPUBufferDesc();
+			stagingBuffDesc.Flags = m_desc.Flags | Graphics::GPUBufferFlags::TRANSFER_SRC;
+			stagingBuffDesc.Size = size;
+			stagingBuffDesc.Stride = 1;
+			stagingBuffDesc.InitData = data;
+			stagingBuffer.Init(stagingBuffDesc);
+
+			//Create command buffer
+			GPUCommandBufferVulkan cmdBuffer;
+			cmdBuffer.Init(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+			cmdBuffer.BeginRecord();
+
+			// Copy command
+			cmdBuffer.CopyBufferToDynamic(&stagingBuffer, this, 1, 0, m_currentOffset, size);
+
+			// submit buffer 
+			cmdBuffer.EndRecord();
+			cmdBuffer.SubmitAndWait(GPUQueue::GRAPHICS);
+			cmdBuffer.ReleaseGPU();
+		}
 		m_currentOffset += size;
 		m_currentOffset = PadData(m_currentOffset);
 
@@ -61,7 +96,10 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUDynamicBufferVulkan::OnReleaseGPU()
 	{
-		vmaUnmapMemory(m_device->VmaAllocator, m_vmaAllocation);
+		if (m_mapped)
+		{
+			vmaUnmapMemory(m_device->VmaAllocator, m_vmaAllocation);
+		}
 		vmaDestroyBuffer(m_device->VmaAllocator, m_buffer, m_vmaAllocation);
 	}
 

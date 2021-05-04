@@ -26,9 +26,11 @@ namespace Insight::Graphics
 	class Texture;
 	class RenderGraph;
 
-	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)>;
+	using FrameBufferResources = std::unordered_map<GPUBufferFlags, GPUDynamicBuffer*>;
+
 	using RenderPassBeginRenderFunc = std::function<void(RenderPass*, GPURenderGraphPass*)>;
-	using RenderPassEndRenderFunc = std::function<void(RenderPass* renderPass)>;
+	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer*, FrameBufferResources&, GPUDescriptorBuilder*)>;
+	using RenderPassEndRenderFunc = std::function<void(RenderPass*)>;
 
 	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
 	using RenderPassClearDepthStencilFunc = std::function<void(glm::vec2&)>;
@@ -233,11 +235,11 @@ namespace Insight::Graphics
 			}
 		}
 
-		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, GPUDynamicBuffer* dynamicBuffer, GPUDescriptorBuilder* builder)
+		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, FrameBufferResources& frameBuffers, GPUDescriptorBuilder* builder)
 		{
 			if (m_renderFunc)
 			{
-				m_renderFunc(cmdBuffer, dynamicBuffer, builder);
+				m_renderFunc(cmdBuffer, frameBuffers, builder);
 			}
 		}
 

@@ -3,6 +3,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
@@ -138,7 +139,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		if (renderPass->GetRenderPass().IsDepthSencilOuputValid())
 		{
 			VkClearValue v;
-			v.depthStencil.depth = (u32)renderPass->GetRenderPass().GetClearDepthStencil().x;
+			v.depthStencil.depth = (float)renderPass->GetRenderPass().GetClearDepthStencil().x;
 			v.depthStencil.stencil = (u32)renderPass->GetRenderPass().GetClearDepthStencil().y;
 			clearColors.push_back(v);
 		}
@@ -148,8 +149,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		renderPassBeginInfo.framebuffer = renderPass->m_frameBuffer;
 		renderPassBeginInfo.renderArea.offset.x = 0;
 		renderPassBeginInfo.renderArea.offset.y = 0;
-		renderPassBeginInfo.renderArea.extent.width = renderPass->GetRenderPass().GetWindowRect().GetWidth();
-		renderPassBeginInfo.renderArea.extent.height = renderPass->GetRenderPass().GetWindowRect().GetHeight();
+		renderPassBeginInfo.renderArea.extent.width = (u32)renderPass->GetRenderPass().GetWindowRect().GetWidth();
+		renderPassBeginInfo.renderArea.extent.height = (u32)renderPass->GetRenderPass().GetWindowRect().GetHeight();
 		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
 		renderPassBeginInfo.pClearValues = clearColors.data();
 		vkCmdBeginRenderPass(m_cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -179,6 +180,18 @@ namespace Insight::GraphicsAPI::Vulkan
 		++m_recordCommandCount;
 		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
 		GPUBufferVulkan* destinationBuffer = static_cast<GPUBufferVulkan*>(dstBuffer);
+		VkBufferCopy copy = { };
+		copy.srcOffset = srcOffset;
+		copy.dstOffset = dstOffset;
+		copy.size = size;
+		vkCmdCopyBuffer(m_cmdBuffer, sourceBuffer->m_buffer, destinationBuffer->m_buffer, regionCount, &copy);
+	}
+
+	void GPUCommandBufferVulkan::CopyBufferToDynamic(Graphics::GPUBuffer* srcBuffer, Graphics::GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
+	{
+		++m_recordCommandCount;
+		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
+		GPUDynamicBufferVulkan* destinationBuffer = static_cast<GPUDynamicBufferVulkan*>(dstBuffer);
 		VkBufferCopy copy = { };
 		copy.srcOffset = srcOffset;
 		copy.dstOffset = dstOffset;

@@ -6,6 +6,7 @@
 namespace Insight::Graphics
 {
 	class GPUBuffer;
+	class GPUDynamicBuffer;
 	class GPUImage;
 	struct GPUImageDesc;
 	class GPUCommandPool;
@@ -120,6 +121,7 @@ namespace Insight::Graphics
 		virtual void SetScissor(Maths::Rect rect) = 0;
 
 		virtual void CopyBuffer(GPUBuffer* srcBuffer, GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;
+		virtual void CopyBufferToDynamic(GPUBuffer* srcBuffer, GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;
 		/// <summary>
 		/// This will copy the whole buffer to the image. No sub-copies should be done from this. Use 'CopyBufferToImageSub'
 		/// </summary>

@@ -160,6 +160,7 @@ namespace Insight::Graphics
 		void SetSwapchainDimensions(const ResourceDimensions& dimensions) { m_swapchainDimensions = dimensions; }
 		void SetbackBufferSource(const std::string& name);
 		const std::string& GetBackbufferSourceName() const { return m_backBufferSource; }
+		const u32& GetFrameIndex() const { return m_frameIndex; }
 
 		/// <summary>
 		/// Build the graph and create any resources which are needed. This should 
@@ -292,10 +293,7 @@ namespace Insight::Graphics
 			std::vector<RenderPass> Passes;
 			std::vector<u32> PassStack;
 
-			GPUDynamicBuffer* DynamicBuffer;
-
-			//Seampahores SwapchainAcquire;
-			//Seampahores SwapchainRelease;
+			FrameBufferResources Buffers;
 
 			bool Initialised = false;
 
@@ -304,7 +302,10 @@ namespace Insight::Graphics
 			void ReleaseGPU();
 		};
 
-		FrameSubmision m_singleFrame;
+		std::vector<FrameSubmision> m_frames;
+		u32 m_frameIndex;
+		const u32 c_MaxFrameCount = 2;
+		//FrameSubmision m_singleFrame;
 
 		GPUSwapchain* m_swapchain;
 

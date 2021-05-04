@@ -28,12 +28,12 @@ namespace Insight::Graphics
 
 		static GPUDynamicBufferDesc Vertex(u64 size)
 		{
-			return GPUDynamicBufferDesc(0, 0, size, GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_SRC);
+			return GPUDynamicBufferDesc(0, 0, size, GPUBufferFlags::VERTEX | GPUBufferFlags::TRANSFER_DST);
 		}
 
 		static GPUDynamicBufferDesc Index(u64 size)
 		{
-			return GPUDynamicBufferDesc(0, 0, size, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_SRC);
+			return GPUDynamicBufferDesc(0, 0, size, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_DST);
 		}
 	};
 

@@ -28,6 +28,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void SetScissor(Maths::Rect rect) override;
 
 		virtual void CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;
+		virtual void CopyBufferToDynamic(Graphics::GPUBuffer* srcBuffer, Graphics::GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;
 		virtual void CopyBufferToImage(Graphics::GPUBuffer* srcBuffer, Graphics::GPUImage* dstImage, Graphics::GPUImageDesc const* imageDesc) override;
 		virtual void BlipImageToSwapchain(Graphics::GPUImage* srcImage, Graphics::GPUImage* dstImage) override;
 

@@ -97,7 +97,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		});
 
 		//OPTICK_GPU_EVENT("ImGui Draw");
-		imguiPass.SetRenderFunc([this](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::GPUDynamicBuffer* dynamicBuffer, Graphics::GPUDescriptorBuilder* builder)
+		imguiPass.SetRenderFunc([this](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder)
 		{
 			if (m_init)
 			{
@@ -261,7 +261,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		pool_info.maxSets = 1000;
-		pool_info.poolSizeCount = std::size(pool_sizes);
+		pool_info.poolSizeCount = (u32)std::size(pool_sizes);
 		pool_info.pPoolSizes = pool_sizes;
 
 		GPUDeviceVulkan& device = static_cast<GPUDeviceVulkan&>(*GPUDevice::Instance());

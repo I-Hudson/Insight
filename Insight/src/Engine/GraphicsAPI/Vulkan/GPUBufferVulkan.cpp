@@ -8,24 +8,6 @@
 
 namespace Insight::GraphicsAPI::Vulkan
 {
-	VmaMemoryUsage ToVMAMemoryUsage(Graphics::GPUBufferFlags const& flags, bool& mustBeMapped)
-	{
-		VmaMemoryUsage usage = VMA_MEMORY_USAGE_UNKNOWN;
-		if (flags & Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY; mustBeMapped = true; }
-		if (flags & Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true; }
-
-		if (flags & Graphics::GPUBufferFlags::UNIFORM) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
-
-		if (flags & Graphics::GPUBufferFlags::VERTEX && flags & Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
-		if (flags & Graphics::GPUBufferFlags::INDEX && flags & Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
-		if (flags & Graphics::GPUBufferFlags::VERTEX && flags & Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true;}
-		if (flags & Graphics::GPUBufferFlags::INDEX && flags & Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true;}
-
-		ASSERT(usage != VMA_MEMORY_USAGE_UNKNOWN && "[ToVMAMemoryUsage] GPUBufferFlag not setup.");
-
-		return usage;
-	}
-
 	GPUBufferVulkan::GPUBufferVulkan()
 		: m_buffer(nullptr)
 	{ }
@@ -122,14 +104,14 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 		else
 		{
-			ASSERT(m_desc.Flags & Graphics::GPUBufferFlags::TRANSFER_SRC && "[GPUBufferVulkan::Download] GPUBuffer must have 'GPUBufferFlags::TRANSFER_SRC' set or use a different VMA memory usage.");
+			//ASSERT(m_desc.Flags & Graphics::GPUBufferFlags::TRANSFER_SRC && "[GPUBufferVulkan::Download] GPUBuffer must have 'GPUBufferFlags::TRANSFER_SRC' set or use a different VMA memory usage.");
+			//TODO: This buffer needs to transitioned to be a source buffer.
 
 			// Create staging buffer. 
 			GPUBufferVulkan stagingBuffer;
-			Graphics::GPUBufferDesc stagingBuffDesc = { };
+			Graphics::GPUBufferDesc stagingBuffDesc = m_desc;
 			stagingBuffDesc.Flags = Graphics::GPUBufferFlags::TRANSFER_DST;
-			stagingBuffDesc.Size = m_desc.Size;
-			stagingBuffDesc.Stride = m_desc.Size;
+			stagingBuffDesc.InitData = nullptr;
 			stagingBuffer.Init(stagingBuffDesc);
 
 			//Create command buffer

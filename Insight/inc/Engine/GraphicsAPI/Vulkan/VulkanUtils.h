@@ -5,7 +5,7 @@
 
 #include "Engine/Core/Maths/Rect.h"
 
-#include <vulkan/vulkan.hpp>
+#include "Engine/GraphicsAPI/Vulkan/VmaUsage.h"
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/GPUSamplerDescription.h"
@@ -417,5 +417,25 @@ namespace
 	VkDescriptorType ToVulkanDescriptorType(DescriptorType type)
 	{
 		return (VkDescriptorType)type;
+	}
+
+	VmaMemoryUsage ToVMAMemoryUsage(Insight::Graphics::GPUBufferFlags const& flags, bool& mustBeMapped)
+	{
+		VmaMemoryUsage usage = VMA_MEMORY_USAGE_UNKNOWN;
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true; }
+
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+
+		ASSERT(usage != VMA_MEMORY_USAGE_UNKNOWN && "[ToVMAMemoryUsage] GPUBufferFlag not setup.");
+
+		return usage;
 	}
 }

@@ -6,6 +6,8 @@
 namespace Insight::GraphicsAPI::Vulkan
 {
 	class GPUBufferVulkan;
+	class GPUCommandBufferVulkan;
+
 	class GPUDynamicBufferVulkan : public GPUResouceVulkan<Graphics::GPUDynamicBuffer>
 	{
 	public:
@@ -30,5 +32,6 @@ namespace Insight::GraphicsAPI::Vulkan
 		VmaAllocationInfo m_vmaAllocationInfo;
 
 		friend GPUBufferVulkan;
+		friend GPUCommandBufferVulkan;
 	};
 }

@@ -200,10 +200,20 @@ namespace Module
 			mainPass.SetDepthStencilInput("shaderDepthStencil");
 
 			mainPass.SetClearColour(glm::vec4(0, 1, 0, 1));
-			mainPass.SetRenderFunc([&](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::GPUDynamicBuffer* dynamicBuffer, Graphics::GPUDescriptorBuilder* builder)
+			mainPass.SetRenderFunc([&](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder)
 			{
+				IS_PROFILE_SCOPE("MainPassRenderFunc");
 				glm::vec4 screenColour;
-				Graphics::GPUBuffer* colourBuffer = dynamicBuffer->Upload(&screenColour, sizeof(glm::vec4));
+				Graphics::GPUBuffer* colourBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&screenColour, sizeof(glm::vec4));
+
+				{
+					IS_PROFILE_SCOPE("Upload mesh vertices");
+					glm::vec2 vertices[] =
+					{
+						glm::vec2(-1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec2(1.0f, 0.0f)
+					};
+					Graphics::GPUBuffer* meshBuffer = buffers.at(Graphics::GPUBufferFlags::VERTEX)->Upload(vertices, sizeof(glm::vec2) * 3);
+				}
 
 				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
 				builder->BindBuffer(0, colourBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
