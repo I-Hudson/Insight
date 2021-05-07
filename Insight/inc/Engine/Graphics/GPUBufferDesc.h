@@ -89,7 +89,7 @@ namespace Insight::Graphics
         void Clear();
 
         static GPUBufferDesc Buffer(U32 size, GPUBufferFlags flags, PixelFormat format = PixelFormat::Unknown, const void* initData = nullptr, U32 stride = 0);
-        static GPUBufferDesc SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size);
+        static GPUBufferDesc SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size, GPUBufferFlags additionalFlags);
 
         static GPUBufferDesc Uniform(u32 elementStride, u32 elementsCount, void* data)
         {
@@ -128,9 +128,9 @@ namespace Insight::Graphics
             return Buffer(size, GPUBufferFlags::TRANSFER_SRC, PixelFormat::Unknown, data, size);
         }
 
-        static GPUBufferDesc SubAllocation(GPUDynamicBuffer* buffer, u64 begin, u64 size)
+        static GPUBufferDesc SubAllocation(GPUDynamicBuffer* buffer, u64 begin, u64 size, GPUBufferFlags additionalFlags)
         {
-            return SubBuffer(buffer, begin, size);
+            return SubBuffer(buffer, begin, size, additionalFlags);
         }
 
         /// <summary>

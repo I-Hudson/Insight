@@ -22,16 +22,14 @@ public:
 	Mesh();
 	~Mesh();
 
-	void SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIndex = 0);
-	void SetIndices(const std::vector<U32>& indices, const U32& submeshIndex = 0);
+	void SetVertices(const std::vector<Vertex>& vertices, const u32& submeshIndex = 0);
+	void SetIndices(const std::vector<u32>& indices, const u32& submeshIndex = 0);
 	void Rebuild();
+	SubMesh& GetSubMesh(u32 index) { return *m_subMeshes.at(index); }
 
 	// Getters for all the values and setters.
 	const std::string& GetMeshName() const { return m_meshName; }
-	const U32& GetMeshSubCount() { return static_cast<U32>(m_subMeshes.size()); }
-
-	void Draw(VkCommandBuffer cmd);
-	void Draw(VkCommandBuffer cmd, const std::vector<Material*>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt);
+	const u32 GetMeshSubCount() { return static_cast<u32>(m_subMeshes.size()); }
 
 private:
 	void LoadSubMeshes(const std::string& filePath, Model& model);

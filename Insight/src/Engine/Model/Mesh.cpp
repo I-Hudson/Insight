@@ -25,7 +25,7 @@ Mesh::~Mesh()
 	m_subMeshes.clear();
 }
 
-void Mesh::SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIndex)
+void Mesh::SetVertices(const std::vector<Vertex>& vertices, const u32& submeshIndex)
 {
 	SubMesh* subMesh;
 	if (submeshIndex >= m_subMeshes.size())
@@ -40,7 +40,7 @@ void Mesh::SetVertices(const std::vector<Vertex>& vertices, const U32& submeshIn
 	subMesh->SetVertices(vertices);
 }
 
-void Mesh::SetIndices(const std::vector<U32>& indices, const U32& submeshIndex)
+void Mesh::SetIndices(const std::vector<u32>& indices, const u32& submeshIndex)
 {
 	SubMesh* subMesh;
 	if (submeshIndex >= m_subMeshes.size())
@@ -63,36 +63,36 @@ void Mesh::Rebuild()
 	}
 }
 
-void Mesh::Draw(VkCommandBuffer cmd)
-{
-	for (auto& mesh : m_subMeshes)
-	{
-		mesh->Draw(cmd);
-	}
-}
-
-void Mesh::Draw(VkCommandBuffer cmd, const std::vector<Material*>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
-{
-	for (U64 i = 0; i < m_subMeshes.size(); ++i)
-	{
-		if (i >= materials.size())
-		{
-			return;
-		}
-
-		if (materials[i])
-		{
-			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
-			auto vMaterialSP = dynamic_cast<vks::VulkanMaterial*>(materials[i]);
-			if (materialUpdateFunc)
-			{
-				materialUpdateFunc(meshCompoennt, vMaterialSP, materialBlockData);
-			}
-			vMaterialSP->Bind(cmd, &materialBlockData);
-			m_subMeshes.at(i)->Draw(cmd);
-		}
-	}
-}
+//void Mesh::Draw(VkCommandBuffer cmd)
+//{
+//	for (auto& mesh : m_subMeshes)
+//	{
+//		mesh->Draw(cmd);
+//	}
+//}
+//
+//void Mesh::Draw(VkCommandBuffer cmd, const std::vector<Material*>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
+//{
+//	for (U64 i = 0; i < m_subMeshes.size(); ++i)
+//	{
+//		if (i >= materials.size())
+//		{
+//			return;
+//		}
+//
+//		if (materials[i])
+//		{
+//			MaterialBlockData& materialBlockData = i < materialBlockDatas.size() ? const_cast<MaterialBlockData&>(materialBlockDatas.at(i)) : MaterialBlockData();
+//			auto vMaterialSP = dynamic_cast<vks::VulkanMaterial*>(materials[i]);
+//			if (materialUpdateFunc)
+//			{
+//				materialUpdateFunc(meshCompoennt, vMaterialSP, materialBlockData);
+//			}
+//			vMaterialSP->Bind(cmd, &materialBlockData);
+//			m_subMeshes.at(i)->Draw(cmd);
+//		}
+//	}
+//}
 
 void Mesh::LoadSubMeshes(const std::string& filePath, Model& model)
 {
@@ -198,7 +198,7 @@ SubMesh* Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	m_model->SetMaterials(textures);
+	//m_model->SetMaterials(textures);
 	return ::New<SubMesh>(vertices, indices);
 }
 
@@ -223,9 +223,9 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 		//}
 		//if (!skip)
 		{   // if texture hasn't been loaded already, load it
-			Texture* texture = Texture::New();
-			texture->Init(m_directory + "/" + str.C_Str());
-			textures.emplace_back(typeName, texture);
+			//Texture* texture = Texture::New();
+			//texture->Init(m_directory + "/" + str.C_Str());
+			//textures.emplace_back(typeName, texture);
 			//m_loadedTextures.push_back(texture); // add to loaded textures
 		}
 	}

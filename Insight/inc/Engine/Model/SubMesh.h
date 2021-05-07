@@ -24,7 +24,6 @@ public:
 	~SubMesh();
 
 	void Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
-	void Draw(VkCommandBuffer commandBuffer);
 
 	unsigned int GetVertexCount() { return static_cast<unsigned int>(m_vertices.size()); }
 	unsigned int GetIndicesCount() { return static_cast<unsigned int>(m_indices.size()); }
@@ -44,13 +43,15 @@ public:
 	// Returns a new array of uvs.
 	std::vector<glm::vec2> GetUVs();
 
+	Insight::Graphics::GPUBuffer* GetGPUVerticesBuffer() { return m_vertexBuffer; }
+	Insight::Graphics::GPUBuffer* GetGPUIndexBuffer() { return m_indexBuffer; }
+
 private:
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
 
-	// TOOD: Maybe move this into Mesh to have one buffer for all sub meshes.
-	vks::VulkanBuffer* m_vertexBuffer;
-	vks::VulkanBuffer* m_indexBuffer;
+	Insight::Graphics::GPUBuffer* m_vertexBuffer;
+	Insight::Graphics::GPUBuffer* m_indexBuffer;
 	bool m_created;
 };
 

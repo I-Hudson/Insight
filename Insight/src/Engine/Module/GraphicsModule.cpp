@@ -208,11 +208,28 @@ namespace Module
 
 				{
 					IS_PROFILE_SCOPE("Upload mesh vertices");
-					glm::vec2 vertices[] =
+					for (auto* mesh : m_meshs)
 					{
-						glm::vec2(-1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec2(1.0f, 0.0f)
-					};
-					Graphics::GPUBuffer* meshBuffer = buffers.at(Graphics::GPUBufferFlags::VERTEX)->Upload(vertices, sizeof(glm::vec2) * 3);
+						for (u32 subMeshIndex = 0; subMeshIndex < mesh->GetMesh()->GetMeshSubCount(); ++subMeshIndex)
+						{
+							SubMesh& subMesh = mesh->GetMesh()->GetSubMesh(subMeshIndex);
+
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVerticesBuffer() };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
+							//cmdBuffer->DrawIndexed(subMesh.GetIndicesCount(), 1, 0, 0, 0);
+				//			auto* subMesh = mesh->GetMesh()->GetSubMesh(subMeshIndex);
+				//			auto vertices = subMesh->GetVertices();
+				//			Graphics::GPUBuffer* meshBuffer[] = { buffers.at(Graphics::GPUBufferFlags::VERTEX)->Upload(vertices.data(), sizeof(Vertex) * vertices.size()) };
+				//			auto indices = subMesh->GetIndices();
+				//			Graphics::GPUBuffer* indexBuffer = buffers.at(Graphics::GPUBufferFlags::INDEX)->Upload(indices.data(), sizeof(u32) * indices.size());
+
+				//			u32 offsets[] = { 0 };
+				//			cmdBuffer->BindVertexBuffers(0, 1, meshBuffer, offsets);
+				//			cmdBuffer->BindIndexBuffer(indexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+						}
+					}
 				}
 
 				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();

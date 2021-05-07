@@ -21,13 +21,14 @@ namespace Insight::Graphics
         return desc;
     }
 
-    GPUBufferDesc GPUBufferDesc::SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size)
+    GPUBufferDesc GPUBufferDesc::SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size, GPUBufferFlags additionalFlags)
     {
         GPUBufferDesc desc = {};
         desc.SubAlloc.Size = size;
         desc.SubAlloc.Begin = begin;
         desc.SubAlloc.ParentBuffer = parentBuffer;
         desc.SubAlloc.State = GPUBufferSubAllocDesc::Used;
+        desc.Flags = additionalFlags;
         return desc;
     }
 

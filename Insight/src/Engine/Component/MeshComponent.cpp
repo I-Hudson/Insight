@@ -49,13 +49,13 @@ void MeshComponent::OnDestroy()
 	Module::GraphicsModule::m_meshs.erase(it);
 }
 
-void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
-{
-	if (m_mesh)
-	{
-		m_mesh->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
-	}
-}
+//void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
+//{
+//	if (m_mesh)
+//	{
+//		m_mesh->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
+//	}
+//}
 
 void MeshComponent::SetMesh(Mesh* mesh)
 {

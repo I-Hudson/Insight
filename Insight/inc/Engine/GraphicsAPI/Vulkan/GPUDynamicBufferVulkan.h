@@ -25,6 +25,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	private:
 		u64 PadData(u64 orginalSize);
+		void Resize();
 
 	private:
 		VkBuffer m_buffer;

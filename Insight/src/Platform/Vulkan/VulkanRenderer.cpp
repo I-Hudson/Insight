@@ -728,8 +728,8 @@ namespace vks
 					{
 						{
 							IS_PROFILE_SCOPE("Single Draw");
-							mesh->Draw(m_frameBufferCmdBuffer, updateMaterail);
-							mesh->Draw(m_frameBufferCmdBufferTest, updateMaterail);
+							//mesh->Draw(m_frameBufferCmdBuffer, updateMaterail);
+							//mesh->Draw(m_frameBufferCmdBufferTest, updateMaterail);
 						}
 					}
 				}

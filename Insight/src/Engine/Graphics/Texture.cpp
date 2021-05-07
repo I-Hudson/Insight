@@ -12,6 +12,8 @@ namespace Render
 	Texture::Texture()
 		: m_desc(TextureDescription())
 	{
+		ASSERT(false && "This has been deprecated. This must be removed.");
+
 		SetType<Texture>();
 	}
 

@@ -50,6 +50,8 @@ namespace Insight::GraphicsAPI::Vulkan
 			m_bufferInfo.buffer = static_cast<GPUDynamicBufferVulkan*>(m_desc.SubAlloc.ParentBuffer)->m_buffer;
 			m_bufferInfo.range = m_desc.SubAlloc.Size;
 			m_bufferInfo.offset = m_desc.SubAlloc.Begin;
+
+			m_buffer = m_bufferInfo.buffer;
 		}
 	}
 

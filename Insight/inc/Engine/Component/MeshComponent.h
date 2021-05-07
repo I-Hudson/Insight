@@ -21,8 +21,6 @@ public:
 	virtual void OnCreate() override;
 	virtual void OnDestroy() override;
 
-	void Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc);
-
 	void SetMesh(Mesh* mesh);
 	void SetModel(Model* model);
 	Mesh* GetMesh() const { return m_mesh; }
