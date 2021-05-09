@@ -2,112 +2,268 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
 #include "VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
+#include <spirv_reflect.hpp>
 
-GPUShaderVulkan::GPUShaderVulkan()
-	: m_pipelineShaderStages(
-		std::array<VkPipelineShaderStageCreateInfo, (size_t)ShaderStage::Count>{
-		VkPipelineShaderStageCreateInfo{},
-		VkPipelineShaderStageCreateInfo{},
-		VkPipelineShaderStageCreateInfo{},
-		VkPipelineShaderStageCreateInfo{},
-		VkPipelineShaderStageCreateInfo{},
-		VkPipelineShaderStageCreateInfo{}})
-	, m_pipelineVertexInputState(VkPipelineVertexInputStateCreateInfo{})
+namespace Insight::GraphicsAPI::Vulkan
 {
-}
+	/// <summary>
+	/// GPUShaderVulkan
+	/// </summary>
 
-GPUShaderVulkan::~GPUShaderVulkan()
-{
-	ReleaseGPU();
-}
-
-void GPUShaderVulkan::Compile()
-{
-	GPUShaderStage& stage = GetStage(ShaderStage::Vertex);
-	if (!stage.IsValid())
+	GPUShaderVulkan::GPUShaderVulkan()
+		: m_pipelineShaderStages(
+			std::array<VkPipelineShaderStageCreateInfo, (size_t)ShaderStage::Count>{
+		VkPipelineShaderStageCreateInfo{},
+			VkPipelineShaderStageCreateInfo{},
+			VkPipelineShaderStageCreateInfo{},
+			VkPipelineShaderStageCreateInfo{},
+			VkPipelineShaderStageCreateInfo{},
+			VkPipelineShaderStageCreateInfo{}})
+		, m_pipelineVertexInputState(PipelineVertexInputState{})
 	{
-		stage.Parse();
 	}
-	auto inputs = stage.GetInputs();
-	if (inputs.size() == 0)
+
+	GPUShaderVulkan::~GPUShaderVulkan()
 	{
-		m_pipelineVertexInputState = vks::initializers::pipelineVertexInputStateCreateInfo();
+		ReleaseGPU();
 	}
-	else
+
+	std::vector<VkPipelineShaderStageCreateInfo> GPUShaderVulkan::GetPipelineShaderStages()
 	{
-		std::vector<VkVertexInputBindingDescription> VertexInputBinding;
-		std::vector<VkVertexInputAttributeDescription> VertexInputAttribute;
-
-		VkVertexInputBindingDescription inputBinding;
-		inputBinding.binding = 0;
-		inputBinding.stride = stage.GetInputsSize();
-		inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		VertexInputBinding.push_back(inputBinding);
-
-		for (size_t i = 0; i < inputs.size(); ++i)
+		std::vector<VkPipelineShaderStageCreateInfo> stages;
+		for (auto& stage : m_pipelineShaderStages)
 		{
-			VertexInputAttribute.push_back(vks::initializers::vertexInputAttributeDescription(
-				0,
-				inputs[i].Binding,
-				ToVulkanFormatFromSPRIV(inputs[i].Type, inputs[i].VecSize), inputs[i].Stride));
+			if (stage.module != VK_NULL_HANDLE)
+			{
+				stages.push_back(stage);
+			}
 		}
-		m_pipelineVertexInputState = vks::initializers::pipelineVertexInputStateCreateInfo(VertexInputBinding, VertexInputAttribute);
+		return stages;
 	}
-
-	CompileModules();
-}
-
-void GPUShaderVulkan::ReleaseGPUResoucesEarly()
-{
-	OnReleaseGPU();
-}
-
-void GPUShaderVulkan::OnReleaseGPU()
-{
-	for (auto& stage : m_pipelineShaderStages)
+	
+	void GPUShaderVulkan::Compile()
 	{
-		if (stage.module != VK_NULL_HANDLE)
-		{
-			vkDestroyShaderModule(m_device->Device, stage.module, nullptr);
-			stage.module = nullptr;
-		}
-	}
-}
-
-void GPUShaderVulkan::SetName(const std::string& name)
-{
-	m_name = name;
-	if (Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::IsInitialised())
-	{
-		//Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Insight::Graphics::Debug::DebugObject::Image, (u64)m_);
-	}
-}
-
-void GPUShaderVulkan::CompileModules()
-{
-	for (auto& stage : m_stages)
-	{
+		Graphics::GPUShaderStage& stage = GetStage(ShaderStage::Vertex);
 		if (!stage.IsValid())
 		{
-			continue;
+			stage.Parse();
+		}
+		auto inputs = stage.GetInputs();
+		if (inputs.size() == 0)
+		{
+			m_pipelineVertexInputState.CreateInfo = vks::initializers::pipelineVertexInputStateCreateInfo();
+		}
+		else
+		{
+			VkVertexInputBindingDescription inputBinding;
+			inputBinding.binding = 0;
+			inputBinding.stride = stage.GetInputsSize();
+			inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			m_pipelineVertexInputState.VertexInputBinding.push_back(inputBinding);
+	
+			for (size_t i = 0; i < inputs.size(); ++i)
+			{
+				m_pipelineVertexInputState.VertexInputAttribute.push_back(vks::initializers::vertexInputAttributeDescription(
+					0,
+					inputs[i].Binding,
+					ToVulkanFormatFromSPRIV(inputs[i].Type, inputs[i].VecSize), inputs[i].Stride));
+			}
+			m_pipelineVertexInputState.CreateInfo = vks::initializers::pipelineVertexInputStateCreateInfo(m_pipelineVertexInputState.VertexInputBinding, m_pipelineVertexInputState.VertexInputAttribute);
+		}
+	
+		CompileModules();
+		ParseDescriptorSetLayouts();
+	}
+	
+	void GPUShaderVulkan::ReleaseGPUResoucesEarly()
+	{
+		OnReleaseGPU();
+	}
+	
+	void GPUShaderVulkan::OnReleaseGPU()
+	{
+		for (auto& stage : m_pipelineShaderStages)
+		{
+			if (stage.module != VK_NULL_HANDLE)
+			{
+				vkDestroyShaderModule(m_device->Device, stage.module, nullptr);
+				stage.module = nullptr;
+			}
 		}
 
-		// Create a shader stage with the required information.
-		VkPipelineShaderStageCreateInfo shaderStage{};
-		shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStage.stage = ToVulkanShaderStageFlags(stage.GetStage());
+		for (auto& kvp : m_setLayouts)
+		{
+			for (auto& set : kvp.second)
+			{
+				vkDestroyDescriptorSetLayout(m_device->Device, set.second.Layout, nullptr);
+			}
+		}
+	}
+	
+	void GPUShaderVulkan::SetName(const std::string& name)
+	{
+		m_name = name;
+		if (Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::IsInitialised())
+		{
+			//Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Insight::Graphics::Debug::DebugObject::Pipeline_Layout, (u64)m_pipelineLayout);
+		}
+	}
+	
+	void GPUShaderVulkan::CompileModules()
+	{
+		for (auto& stage : m_stages)
+		{
+			if (!stage.IsValid())
+			{
+				m_pipelineShaderStages[(size_t)stage.GetStage()] = { };
+				continue;
+			}
+	
+			// Create a shader stage with the required information.
+			VkPipelineShaderStageCreateInfo shaderStage = { };
+			shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStage.stage = ToVulkanShaderStageFlags(stage.GetStage());
+	
+			VkShaderModuleCreateInfo moduleCreateInfo{};
+			moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+			moduleCreateInfo.codeSize = stage.GetRawData().size() * sizeof(uint32_t);
+			moduleCreateInfo.pCode = stage.GetRawData().data();
+			ThrowIfFailed(vkCreateShaderModule(m_device->Device, &moduleCreateInfo, NULL, &shaderStage.module));
+			m_memoryUsage = 1;
+	
+			shaderStage.pName = "main";
+			ASSERT(shaderStage.module != VK_NULL_HANDLE);
+	
+			m_pipelineShaderStages[(size_t)stage.GetStage()] = shaderStage;
+		}
+	}
 
-		VkShaderModuleCreateInfo moduleCreateInfo{};
-		moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		moduleCreateInfo.codeSize = stage.GetRawData().size() * sizeof(uint32_t);
-		moduleCreateInfo.pCode = stage.GetRawData().data();
-		ThrowIfFailed(vkCreateShaderModule(m_device->Device, &moduleCreateInfo, NULL, &shaderStage.module));
-		m_memoryUsage = 1;
+	void GPUShaderVulkan::ParseDescriptorSetLayouts()
+	{
+		for (auto& stage : m_stages)
+		{
+			if (!stage.IsValid())
+			{
+				continue;
+			}
 
-		shaderStage.pName = "main";
-		ASSERT(shaderStage.module != VK_NULL_HANDLE);
+			std::unordered_map<u32, DescriptorSetLayoutData>& setLayouts = m_setLayouts[stage.GetStage()];
+			spirv_cross::CompilerGLSL glsl(stage.GetRawData());
+			spirv_cross::ShaderResources resources = glsl.get_shader_resources();
 
-		m_pipelineShaderStages[(size_t)stage.GetStage()] = shaderStage;
+			for (auto& uniformBuffer : resources.uniform_buffers)
+			{
+
+				u32 bindingNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationBinding);
+				u32 setNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationDescriptorSet);
+				spirv_cross::SPIRType type = glsl.get_type(uniformBuffer.base_type_id);
+				
+				DescriptorSetLayoutData& set = setLayouts[setNumber];
+				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
+				set.SetNumber = setNumber;
+			}
+
+			for (auto& kvp : setLayouts)
+			{
+				VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = vks::initializers::descriptorSetLayoutCreateInfo(kvp.second.Bindings);
+				ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->Device, &setLayoutCreateInfo, nullptr, &kvp.second.Layout));
+			}
+		}
+	}
+
+	/// <summary>
+	/// GPUShaderVulkan
+	/// </summary>
+	/// 
+	GPUPipelineVulkan::~GPUPipelineVulkan()
+	{
+		ReleaseGPU();
+	}
+
+	void GPUPipelineVulkan::SetShader(Graphics::GPUShader* shader)
+	{
+		m_shader = shader;
+	}
+
+	void GPUPipelineVulkan::BuildPipeline(Graphics::GPURenderGraphPass* graphPass)
+	{
+		ReleaseGPU();
+
+		ASSERT(m_shader && "[GPUPipelineVulkan::BuildPipeline] Shader must be valid to build a pipeline.");
+
+		GPUShaderVulkan* shaderVulkan = static_cast<GPUShaderVulkan*>(m_shader);
+		GPURenderGraphPassVulkan* graphPassVulkan = static_cast<GPURenderGraphPassVulkan*>(graphPass);
+
+		std::vector<VkPushConstantRange> pushConstants;
+		/*for (auto& data : )
+		{
+			for (auto& buffer : data.PushConstants)
+			{
+				pushConstants.push_back(vks::initializers::pushConstantRange(data.GetVulkanShaderStage(), buffer.Size, buffer.Offset));
+			}
+		}*/
+
+		std::vector<VkDescriptorSetLayout> setLayouts;
+		for (auto& stage : shaderVulkan->GetDescriptorSetlayouts())
+		{
+			for (auto& set : stage.second)
+			{
+				setLayouts.push_back(set.second.Layout);
+			}
+		}
+		ThrowIfFailed(vkCreatePipelineLayout(m_device->Device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_layout));
+
+		auto vertexInputInfo = shaderVulkan->GetPipelineVertexInputState();
+		auto shaderStages = shaderVulkan->GetPipelineShaderStages();
+
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
+		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);;
+		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, graphPassVulkan->GetRenderPass().GetColorOutputs().size());
+		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(graphPassVulkan->GetRenderPass().GetColorOutputs().size(), blendAttachmentStates.data());
+		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+		VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
+		VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(static_cast<VkSampleCountFlagBits>(1));
+		std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_LINE_WIDTH, };
+		VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
+
+		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(m_layout, graphPassVulkan->GetRenderPassVulkan());
+		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;
+		pipelineCreateInfo.pRasterizationState = &rasterizationState;
+		pipelineCreateInfo.pColorBlendState = &colorBlendState;
+		pipelineCreateInfo.pMultisampleState = &multisampleState;
+		pipelineCreateInfo.pViewportState = &viewportState;
+		pipelineCreateInfo.pDepthStencilState = &depthStencilState;
+		pipelineCreateInfo.pDynamicState = &dynamicState;
+		pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+		pipelineCreateInfo.pStages = shaderStages.data();
+		pipelineCreateInfo.pVertexInputState = &vertexInputInfo;
+
+		ThrowIfFailed(vkCreateGraphicsPipelines(m_device->Device, nullptr, 1, &pipelineCreateInfo, nullptr, &m_pipeline));
+		m_memoryUsage = 8;
+	}
+
+	void GPUPipelineVulkan::SetName(const std::string& name)
+	{
+		m_name = name;
+		if (GPUDebugMarkerVulkan::Instance()->IsInitialised())
+		{
+			GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Graphics::Debug::DebugObject::Pipeline, (u64)m_pipeline);
+			GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Graphics::Debug::DebugObject::Pipeline_Layout, (u64)m_layout);
+		}
+	}
+
+	void GPUPipelineVulkan::OnReleaseGPU()
+	{
+		if (m_pipeline)
+		{
+			vkDestroyPipeline(m_device->Device, m_pipeline, nullptr);
+		}
+		if (m_layout)
+		{
+			vkDestroyPipelineLayout(m_device->Device, m_layout, nullptr);
+		}
 	}
 }

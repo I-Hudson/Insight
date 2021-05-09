@@ -10,7 +10,7 @@ namespace Insight::Graphics
 	class GPUImage;
 	struct GPUImageDesc;
 	class GPUCommandPool;
-	class GPUPipelineLayout;
+	class GPUPipeline;
 	class GPUDescriptorSet;
 	class GPURenderGraphPass;
 	class GPUFence;
@@ -132,7 +132,8 @@ namespace Insight::Graphics
 		//virtual void CopyBufferToImageSub(GPUBuffer* srcBuffer, GPUImage* dstImage) = 0;
 		virtual void BlipImageToSwapchain(GPUImage* srcImage, GPUImage* dstImage) = 0;
 
-		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
+		virtual void BindPipeline(PipelineBindPoint bindPoint, GPUPipeline* pipeline) = 0;
+		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;
 		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, GPUCommandBufferIndexType indexType) = 0;
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;

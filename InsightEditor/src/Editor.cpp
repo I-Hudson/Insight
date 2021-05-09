@@ -60,7 +60,7 @@ public:
 		glm::vec4 titleBgCollapsed = Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
-		for (size_t i = 0; i < 1; i++)
+		for (size_t i = 0; i < 0; i++)
 		{
 			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
 			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");

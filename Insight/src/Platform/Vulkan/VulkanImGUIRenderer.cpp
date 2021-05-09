@@ -97,7 +97,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		});
 
 		//OPTICK_GPU_EVENT("ImGui Draw");
-		imguiPass.SetRenderFunc([this](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder)
+		imguiPass.SetRenderFunc([this](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 		{
 			if (m_init)
 			{

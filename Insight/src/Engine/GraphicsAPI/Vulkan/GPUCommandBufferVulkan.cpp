@@ -5,6 +5,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
@@ -424,7 +425,13 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	}
 
-	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipelineLayout* pipelineLayout, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
+	void GPUCommandBufferVulkan::BindPipeline(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline)
+	{
+		++m_recordCommandCount;
+		vkCmdBindPipeline(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipeline());
+	}
+
+	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
 	{
 		++m_recordCommandCount;
 

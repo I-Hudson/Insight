@@ -29,7 +29,7 @@ namespace Insight::Graphics
 	using FrameBufferResources = std::unordered_map<GPUBufferFlags, GPUDynamicBuffer*>;
 
 	using RenderPassBeginRenderFunc = std::function<void(RenderPass*, GPURenderGraphPass*)>;
-	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer*, FrameBufferResources&, GPUDescriptorBuilder*)>;
+	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer*, FrameBufferResources&, GPUDescriptorBuilder*, RenderPass&)>;
 	using RenderPassEndRenderFunc = std::function<void(RenderPass*)>;
 
 	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
@@ -174,6 +174,9 @@ namespace Insight::Graphics
 		const u32& GetPassIndex() const { return m_passIndex; }
 		const u32& GetOrderedPassIndex() const { return m_orderedPassIndex; }
 		void SetPhysicalPassIndex(const u32& index) { m_orderedPassIndex = index; }
+		
+		void SetGPUGraphPass(GPURenderGraphPass* pass) { m_graphPass = pass; }
+		GPURenderGraphPass* GetGraphPass() const { return m_graphPass; }
 
 		const RenderGraphQueueFlags& GetQueue()const { return m_queue; }
 		const std::string& GetPassName() const { return m_name; }
@@ -239,7 +242,7 @@ namespace Insight::Graphics
 		{
 			if (m_renderFunc)
 			{
-				m_renderFunc(cmdBuffer, frameBuffers, builder);
+				m_renderFunc(cmdBuffer, frameBuffers, builder, *this);
 			}
 		}
 
@@ -272,6 +275,8 @@ namespace Insight::Graphics
 		/// Render pass name. Used for debug.
 		/// </summary>
 		std::string m_name;
+
+		GPURenderGraphPass* m_graphPass;
 
 		RenderPassQueue m_passQueue;
 		Maths::Rect m_windowRect;

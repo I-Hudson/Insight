@@ -177,15 +177,11 @@ enum class SampleLevel : i32
     X64 = 64,
 };
 
-/// <summary>
-/// Primitives types.
-/// </summary>
 enum class PipelineBindPoint
 {
-    Undefined = 0,
-    Point = 1,
-    Line = 2,
-    Triangle = 3,
+    Graphics = 0,
+    Compute = 1,
+    Ray_Tracing = 2,
 };
 
 /// <summary>

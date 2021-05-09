@@ -18,6 +18,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
 
+		renderPass.SetGPUGraphPass(this);
 		m_renderPassIndex = renderPass.GetPassIndex();
 		m_graph = renderPass.GetGraph();
 		// Setup all our attachments for the render pass.

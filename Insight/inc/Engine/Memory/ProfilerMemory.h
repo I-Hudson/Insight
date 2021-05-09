@@ -28,7 +28,6 @@ public:
 	void AddName(void* ptr, const std::string& name);
 
 private:
-	bool ContainsAllocation(void* ptr, std::unordered_map<void*, ProfilerMemoryAdditionalInfo>& collection);
 	ProProfilerMemoryCollection::iterator GetIterator(void* ptr, ProProfilerMemoryCollection& collection);
 
 	std::vector<std::string> GetCallStack();

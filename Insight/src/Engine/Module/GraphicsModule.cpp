@@ -39,20 +39,21 @@ namespace Module
 			// TESTING
 			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
 
-			GPUShader* shader = GPUShader::New();
-			shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", ShaderStageInput::FilePath);
-			shader->Compile();
-			::Delete(shader);
-
-			Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
-			image->Init(Insight::Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
-			Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
-			view->Init(image);
-			::Delete(image);
-			::Delete(view);
-
 			{
 				using namespace Insight;
+
+				Graphics::GPUShader* shader = Graphics::GPUShader::New();
+				shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
+				shader->Compile();
+				::Delete(shader);
+
+				Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
+				image->Init(Insight::Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
+				Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
+				view->Init(image);
+				::Delete(image);
+				::Delete(view);
+
 				Graphics::GPUCommandPool* cmdPool = Graphics::GPUCommandPool::New();
 				cmdPool->Init(Graphics::GPUCommandPoolDesc(Graphics::GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
 				auto* cmdBuffer = cmdPool->AllocateCommandBuffer(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
@@ -200,11 +201,28 @@ namespace Module
 			mainPass.SetDepthStencilInput("shaderDepthStencil");
 
 			mainPass.SetClearColour(glm::vec4(0, 1, 0, 1));
-			mainPass.SetRenderFunc([&](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder)
+			mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 			{
 				IS_PROFILE_SCOPE("MainPassRenderFunc");
-				glm::vec4 screenColour;
-				Graphics::GPUBuffer* colourBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&screenColour, sizeof(glm::vec4));
+				struct UBO
+				{
+					glm::mat4 Proj;
+					glm::mat4 View;
+					glm::mat4 Model;
+					glm::vec4 LightPos;
+				};
+
+				UBO ubo = {};
+				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
+
+				Graphics::GPUShader* defaultShader = Graphics::GPUShader::New();
+				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
+				defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
+				defaultShader->Compile();
+				Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
+				defaultPipeline->SetShader(defaultShader);
+				defaultPipeline->BuildPipeline(pass.GetGraphPass());
+				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 
 				{
 					IS_PROFILE_SCOPE("Upload mesh vertices");
@@ -233,8 +251,10 @@ namespace Module
 				}
 
 				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
-				builder->BindBuffer(0, colourBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
-				::Delete(testSet);
+				builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
+
+				Graphics::GPUDescriptorSet* sets[] = { testSet };
+				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, 1, sets[0], 0, nullptr);
 
 				//Graphics::GPUDescriptorBuilder* build = Graphics::GPUDescriptorBuilder::New();
 				//build->Begin(layoutCache, descriptorAlloc);
@@ -243,6 +263,10 @@ namespace Module
 				// bind material
 				// bind buffers
 				// Draw mesh, 
+
+				::Delete(testSet);
+				::Delete(defaultShader);
+				//::Delete(defaultPipeline);
 			});
 
 			auto& pointLights = Graphics::RenderGraph::Instance()->AddPass("pointLights", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);

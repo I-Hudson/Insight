@@ -15,6 +15,7 @@ namespace Insight::Graphics
     class GPUCommandPool;
     class GPUImageView;
     class GPUImage;
+    class GPUShader;
     class GPUFenceManager;
     class GPUSemaphoreManager;
 }
@@ -22,7 +23,6 @@ namespace Insight::Graphics
 class GPUContext;
 class GPUTexture;
 class GPUSwapChain;
-class GPUShader;
 
 class GPUDevice : public TSingleton<GPUDevice>
 {

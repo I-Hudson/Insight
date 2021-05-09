@@ -24,11 +24,12 @@ ProfilerMemory::~ProfilerMemory()
 	m_locker.Unlock();
 }
 
-void ProfilerMemory::TrackAllocation(void* ptr, U64 size)
+void ProfilerMemory::TrackAllocation(void* ptr, u64 size)
 {
 	m_locker.Lock();
 
-	//ASSERT(!ContainsAllocation(ptr, m_currentAllocations) && !ContainsAllocation(ptr, m_allAllocations));
+	ASSERT(GetIterator(ptr, m_currentAllocations) == m_currentAllocations.end()&&
+	"[ProfilerMemory::TrackAllocation] Pointer is already being tracked. Make sure pointer was created with ::New.");
 
 	ProfilerMemoryAdditionalInfo info =
 	{
@@ -47,7 +48,7 @@ void ProfilerMemory::UnTrackAllocation(void* ptr)
 {
 	m_locker.Lock();
 
-	//ASSERT(ContainsAllocation(ptr, m_currentAllocations));
+	ASSERT(GetIterator(ptr, m_currentAllocations) != m_currentAllocations.end() && "[ProfilerMemory::UnTrackAllocation] Pointer is not being tracked. Make sure pointer was created with ::New.");
 	auto currentIt = GetIterator(ptr, m_currentAllocations);
 	if (currentIt != m_currentAllocations.end())
 		m_currentAllocations.erase(currentIt);
@@ -55,10 +56,10 @@ void ProfilerMemory::UnTrackAllocation(void* ptr)
 	m_locker.Unlock();
 }
 
-U64 ProfilerMemory::GetCurrentAllocatedSize()
+u64 ProfilerMemory::GetCurrentAllocatedSize()
 {
 	m_locker.Lock();
-	U64 currentAllocationSize = 0;
+	u64 currentAllocationSize = 0;
 	for (auto&  alloc : m_currentAllocations)
 	{
 		currentAllocationSize += alloc.second.Size;
@@ -92,21 +93,6 @@ void ProfilerMemory::AddName(void* ptr, const std::string& name)
 	{
 		(*it).second.Name = name;
 	}
-}
-
-bool ProfilerMemory::ContainsAllocation(void* ptr, ProProfilerMemoryCollection& collection)
-{
-	for (auto& alloc : collection)
-	{
-		U64* c1 = (U64*)ptr;
-		U64* c2 = (U64*)alloc.first;
-
-		if (c1 == c2)
-		{
-			return true;
-		}
-	}
-	return false;
 }
 
 ProProfilerMemoryCollection::iterator ProfilerMemory::GetIterator(void* ptr, ProProfilerMemoryCollection& collection)

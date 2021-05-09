@@ -438,4 +438,15 @@ namespace
 
 		return usage;
 	}
+
+	VkPipelineBindPoint ToVulkanPipelineBindPoint(PipelineBindPoint bindPoint)
+	{
+		switch (bindPoint)
+		{
+			case PipelineBindPoint::Graphics: return VK_PIPELINE_BIND_POINT_GRAPHICS;
+			case PipelineBindPoint::Compute: return VK_PIPELINE_BIND_POINT_COMPUTE;
+			case PipelineBindPoint::Ray_Tracing: return VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
+		}
+		return VK_PIPELINE_BIND_POINT_GRAPHICS;
+	}
 }
