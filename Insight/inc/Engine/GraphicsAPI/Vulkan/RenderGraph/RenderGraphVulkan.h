@@ -3,6 +3,12 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 
+namespace Insight::Graphics
+{
+	class RenderGraph;
+	class GPUImage;
+}
+
 namespace Insight::GraphicsAPI::Vulkan
 {
 	class GPUCommandBufferVulkan;
@@ -17,6 +23,9 @@ namespace Insight::GraphicsAPI::Vulkan
 		VkFramebuffer GetFramebufferVulkan() { return m_frameBuffer; }
 
 	private:
+		virtual void InitForSwapchain(Insight::Graphics::GPUSwapchain* swapchain, Insight::Graphics::GPUImage* image) override;
+
+	private:
 		VkRenderPass m_renderPass;
 		VkFramebuffer m_frameBuffer;
 
@@ -26,10 +35,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	class RenderGraphVulkan : public Graphics::RenderGraph
 	{
 	public:
-
-
 	protected:
-
 	};
 }
 

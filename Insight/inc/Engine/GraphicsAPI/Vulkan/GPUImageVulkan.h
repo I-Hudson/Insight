@@ -37,6 +37,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual ~GPUImageVulkan();
 
 		VkImage GetVulkanImage() const { return m_vImage; }
+		VkDescriptorImageInfo* GetDescriptorImageInfo() { return &m_descriptorImageInfo; }
 
 		//[GPUResouce]
 		virtual void SetName(const std::string& name) override;
@@ -53,7 +54,27 @@ namespace Insight::GraphicsAPI::Vulkan
 		VkImage m_vImage;
 		VmaAllocation m_vmaImageAlloc;
 		VmaAllocationInfo m_vmaImageAllocInfo;
+		VkDescriptorImageInfo m_descriptorImageInfo;
 
 		friend GPUCommandBufferVulkan;
+	};
+
+	class GPUSamplerVulkan : public GPUResouceVulkan<Graphics::GPUSampler>
+	{
+	public:
+		GPUSamplerVulkan();
+		virtual ~GPUSamplerVulkan() override;
+
+		virtual void Init(Graphics::GPUSamplerDesc& desc) override;
+
+		VkSampler GetSampler() const { return m_sampler; }
+
+		//[GPUResouce]
+		virtual void SetName(const std::string& name) override;
+	protected:
+		virtual void OnReleaseGPU() override;
+
+	private:
+		VkSampler m_sampler;
 	};
 }

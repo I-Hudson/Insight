@@ -46,11 +46,12 @@ namespace Insight::GraphicsAPI::Vulkan
 	
 	void GPUShaderVulkan::Compile()
 	{
-		Graphics::GPUShaderStage& stage = GetStage(ShaderStage::Vertex);
-		if (!stage.IsValid())
+		for (auto& stage : m_stages)
 		{
 			stage.Parse();
 		}
+
+		Graphics::GPUShaderStage& stage = GetStage(ShaderStage::Vertex);
 		auto inputs = stage.GetInputs();
 		if (inputs.size() == 0)
 		{
@@ -145,7 +146,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		for (auto& stage : m_stages)
 		{
-			if (!stage.IsValid())
+			if (stage.GetRawData().empty())
 			{
 				continue;
 			}
@@ -163,6 +164,18 @@ namespace Insight::GraphicsAPI::Vulkan
 				
 				DescriptorSetLayoutData& set = setLayouts[setNumber];
 				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
+				set.SetNumber = setNumber;
+			}
+
+			for (auto& sampler2D : resources.sampled_images)
+			{
+
+				u32 bindingNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationBinding);
+				u32 setNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationDescriptorSet);
+				spirv_cross::SPIRType type = glsl.get_type(sampler2D.base_type_id);
+
+				DescriptorSetLayoutData& set = setLayouts[setNumber];
+				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
 				set.SetNumber = setNumber;
 			}
 
@@ -219,15 +232,27 @@ namespace Insight::GraphicsAPI::Vulkan
 		auto vertexInputInfo = shaderVulkan->GetPipelineVertexInputState();
 		auto shaderStages = shaderVulkan->GetPipelineShaderStages();
 
+		u32 outColorAttachments = 1;
+		if (!graphPass->IsSwapchainPass())
+		{
+			outColorAttachments = graphPassVulkan->GetRenderPass().GetColorOutputs().size();
+		}
+
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
 		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);;
-		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, graphPassVulkan->GetRenderPass().GetColorOutputs().size());
-		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(graphPassVulkan->GetRenderPass().GetColorOutputs().size(), blendAttachmentStates.data());
+		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, outColorAttachments);
+		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(outColorAttachments, blendAttachmentStates.data());
 		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
 		VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
 		VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(static_cast<VkSampleCountFlagBits>(1));
 		std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_LINE_WIDTH, };
 		VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
+
+		// TODO: remove this and place into a Desc struct.
+		if (vertexInputInfo.vertexBindingDescriptionCount == 0)
+		{
+			rasterizationState.cullMode = VK_CULL_MODE_FRONT_BIT;
+		}
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(m_layout, graphPassVulkan->GetRenderPassVulkan());
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;

@@ -492,6 +492,15 @@ bool GPUDeviceVulkan::Init()
 	m_defaultCommandPool = Insight::GraphicsAPI::Vulkan::GPUCommandPoolVulkan::New();
 	m_defaultCommandPool->Init(Insight::Graphics::GPUCommandPoolDesc(Insight::Graphics::GPUCommandPoolFlags::RESET_COMMAND_BUFFER, GPUQueue::GRAPHICS));
 
+	m_samplerCache.SetCreateFunc([]()
+	{
+		return Insight::Graphics::GPUSampler::New();
+	});
+	m_shaderCache.SetCreateFunc([]()
+	{
+		return Insight::Graphics::GPUShader::New();
+	});
+
 	ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &VmaAllocator));
 
 	//Prepare other things for the engine to use in relation to vulkan.
@@ -529,6 +538,9 @@ void GPUDeviceVulkan::Dispose()
 	Resources.OnDeviceDestroy();
 	m_defaultCommandPool->ReleaseGPU();
 	SAFE_DELETE(m_defaultCommandPool);
+
+	m_samplerCache.ReleaseGPUAll();
+	m_shaderCache.ReleaseGPUAll();
 
 	//SAFE_DELETE(GraphicsQueue);
 	//SAFE_DELETE(ComputeQueue);

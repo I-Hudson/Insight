@@ -32,7 +32,7 @@
 	{
 		Entity* e = ::New<Entity>(name);
 		e->AddComponent<TransformComponent>();
-		m_registry.push_back(e);
+		//m_registry.push_back(e);
 		return e;
 	}
 

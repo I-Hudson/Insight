@@ -177,6 +177,51 @@ enum class SampleLevel : i32
     X64 = 64,
 };
 
+enum class SamplerFilter
+{
+    Nearest = 0,
+    Linear = 1,
+    Cubic_Img = 2
+};
+
+enum class SamplerMipmapMode
+{
+    Nearest = 0,
+    Linear = 1
+};
+
+enum class SamplerAddressMode
+{
+    Repeat = 0,
+    Mirrored_Repeat = 1,
+    Clamp_To_Edge = 2,
+    Clamp_To_Border = 3,
+    Mirror_Clamp_To_Edge = 4,
+};
+
+enum class CompareOp
+{
+    Never = 0,
+    Less = 1,
+    Equal = 2,
+    Less_Or_Equal = 3,
+    Greater = 4,
+    Not_Equal = 5,
+    Greater_Or_Equal = 6,
+    Always = 7
+};
+
+enum class BorderColor
+{
+    Float_Transparent_Black = 0,
+    Int_Transparent_Black = 1,
+    Float_Opaque_Black = 2,
+    Int_Opaque_Black = 3,
+    Float_Opaque_White = 4,
+    Int_Opaque_White = 5,
+
+};
+
 enum class PipelineBindPoint
 {
     Graphics = 0,

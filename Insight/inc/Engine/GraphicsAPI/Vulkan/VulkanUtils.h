@@ -275,12 +275,12 @@ namespace
 	VkShaderStageFlags ToVulkanShaderStageFlagsMuti(const ShaderStage& shaderStage)
 	{
 		VkShaderStageFlags vFlags = 0;
-		if ((u32)shaderStage & (u32)ShaderStage::Vertex) { vFlags |= VK_SHADER_STAGE_VERTEX_BIT; }
-		if ((u32)shaderStage & (u32)ShaderStage::TessControl) { vFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT; }
-		if ((u32)shaderStage & (u32)ShaderStage::TessEvaluation) { vFlags |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; }
-		if ((u32)shaderStage & (u32)ShaderStage::Geometry) { vFlags |= VK_SHADER_STAGE_GEOMETRY_BIT; }
-		if ((u32)shaderStage & (u32)ShaderStage::Fragment) { vFlags |= VK_SHADER_STAGE_FRAGMENT_BIT; }
-		if ((u32)shaderStage & (u32)ShaderStage::Compute) { vFlags |= VK_SHADER_STAGE_COMPUTE_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Vertex) { vFlags |= VK_SHADER_STAGE_VERTEX_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::TessControl) { vFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::TessEvaluation) { vFlags |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Geometry) { vFlags |= VK_SHADER_STAGE_GEOMETRY_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Fragment) { vFlags |= VK_SHADER_STAGE_FRAGMENT_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Compute) { vFlags |= VK_SHADER_STAGE_COMPUTE_BIT; }
 		return vFlags;
 	}
 
@@ -387,6 +387,16 @@ namespace
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
 		return viewport;
+	}
+
+	VkRect2D ToVulkanScissor(Insight::Maths::Rect const& rect)
+	{
+		VkRect2D rect2D = { };
+		rect2D.offset.x = 0;
+		rect2D.offset.x = 0;
+		rect2D.extent.width = (u32)rect.GetWidth();
+		rect2D.extent.height = (u32)rect.GetHeight();
+		return rect2D;
 	}
 
 	VkBufferUsageFlags ToVulkanBufferUsageFlags(Insight::Graphics::GPUBufferFlags const& flags)

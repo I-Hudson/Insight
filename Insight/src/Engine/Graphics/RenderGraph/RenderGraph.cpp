@@ -7,6 +7,7 @@
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "Engine/Graphics/Image/GPUImage.h"
+#include "Engine/Graphics/Shaders/GPUShader.h"
 #include <map>
 
 namespace Insight::Graphics
@@ -25,10 +26,52 @@ namespace Insight::Graphics
 		: m_built(false)
 		, m_changed(false)
 		, m_frameIndex(0)
+		, m_swapchainPresentPass(RenderPass(this, -1, "SwapchainPresentPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT))
 	{
 		m_swapchain = GPUSwapchain::New();
 		m_swapchain->Init();
 		m_swapchain->Build(Graphics::GPUSwapchainDesc());
+
+		for (u32 i = 0; i < m_swapchain->GetImageCount(); ++i)
+		{
+			m_swapchainSubmision.push_back(SwapchainSubmision());
+			SwapchainSubmision& sub = m_swapchainSubmision.back();
+
+			sub.Image = m_swapchain->GetImage(i);
+			sub.GraphPass = GPURenderGraphPass::New();
+			sub.GraphPass->InitForSwapchain(m_swapchain, sub.Image);
+			sub.GraphPass->m_graph = this;
+
+			// Swapchain resources needed for submission.
+			sub.Shader = GPUShader::New();
+			sub.Shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/present.vert", ShaderStageInput::FilePath);
+			sub.Shader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/present.frag", ShaderStageInput::FilePath);
+			sub.Shader->Compile();
+
+			sub.Pipeline = GPUPipeline::New();
+			sub.Pipeline->SetShader(sub.Shader);
+			sub.Pipeline->BuildPipeline(sub.GraphPass);
+		}
+
+		m_swapchainPresentPass.SetClearColour(glm::vec4(0.9f, 0.2f, 0.7f, 1.0f));
+		m_swapchainPresentPass.SetRenderFunc([this](GPUCommandBuffer* cmdBuffer, FrameBufferResources& buffers, GPUDescriptorBuilder* builder, RenderPass& pass)
+		{
+			IS_PROFILE_SCOPE("Swapchain present pass.");
+			const SwapchainSubmision& swapchain = RenderGraph::Instance()->GetCurrentSwapchainSubmision();
+
+			cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, swapchain.Pipeline);
+
+			GPUImage* sampleImage = m_physicalImages.at(m_resources.at(m_resourceToIndex.at(m_backBufferSource)).GetPhysicalIndex());
+			Graphics::GPUDescriptorSet* samplerSet = Graphics::GPUDescriptorSet::New();
+			builder->BindImage(0, sampleImage, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(samplerSet);
+
+			Graphics::GPUDescriptorSet* sets[] = { samplerSet };
+			cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, swapchain.Pipeline, 0, 1, sets[0], 0, nullptr);
+
+			cmdBuffer->Draw(3, 1, 0, 0);
+
+			::Delete(samplerSet);
+		});
 
 		m_frames.resize(c_MaxFrameCount);
 	}
@@ -39,6 +82,15 @@ namespace Insight::Graphics
 		for (auto& frame : m_frames)
 		{
 			frame.ReleaseGPU();
+		}
+
+		for (auto& swapchainImage : m_swapchainSubmision)
+		{
+			::Delete(swapchainImage.GraphPass);
+			swapchainImage.Shader->ReleaseGPU();
+			::Delete(swapchainImage.Shader);
+			swapchainImage.Pipeline->ReleaseGPU();
+			::Delete(swapchainImage.Pipeline);
 		}
 
 		m_swapchain->ReleaseGPU();
@@ -107,10 +159,9 @@ namespace Insight::Graphics
 		frame.Passes = m_passes;
 		frame.PassStack = m_passStack;
 
-		u32 imageIndex;
 		{
 			IS_PROFILE_SCOPE("Get next swapchain image.");
-			GPUResults res = m_swapchain->GetNextImage(frame.SwapchainImageAquired, &imageIndex);
+			GPUResults res = m_swapchain->GetNextImage(frame.SwapchainImageAquired, &m_swapchainImageIndex);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
 				SwapchainRebuild();
@@ -129,6 +180,7 @@ namespace Insight::Graphics
 				pass.CallBeginRenderFunc(renderPass);
 				cmdBuffer->BeginRenderpass(renderPass);
 				cmdBuffer->SetViewPort(pass.GetWindowRect());
+				cmdBuffer->SetScissor(pass.GetWindowRect());
 				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
 				cmdBuffer->EndRenderpass(renderPass);
 				pass.CallEndRenderFunc();
@@ -136,10 +188,15 @@ namespace Insight::Graphics
 		}
 
 		{
-			IS_PROFILE_SCOPE("Blip to swapchain.");
-			Graphics::GPUImage* swapchainImage = m_swapchain->GetImage(imageIndex);
-			GPUImage* backbufferImage = m_physicalImages.at(m_resourceToIndex.at(m_backBufferSource));
-			cmdBuffer->BlipImageToSwapchain(backbufferImage, swapchainImage);
+			IS_PROFILE_SCOPE("Render to swapchain image.");
+			auto& swapchainSubmision = m_swapchainSubmision.at(m_swapchainImageIndex);
+			m_swapchainPresentPass.CallBeginRenderFunc(swapchainSubmision.GraphPass);
+			cmdBuffer->BeginRenderpass(swapchainSubmision.GraphPass);
+			cmdBuffer->SetViewPort(m_swapchainPresentPass.GetWindowRect());
+			cmdBuffer->SetScissor(m_swapchainPresentPass.GetWindowRect());
+			m_swapchainPresentPass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
+			cmdBuffer->EndRenderpass(swapchainSubmision.GraphPass);
+			m_swapchainPresentPass.CallEndRenderFunc();
 		}
 
 		{
@@ -151,7 +208,7 @@ namespace Insight::Graphics
 		{
 			IS_PROFILE_SCOPE("Present to swapchain.");
 			std::vector<GPUSemaphore*> waitSemaphores = { frame.SwapchainImageAquired };
-			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, imageIndex, waitSemaphores);
+			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, m_swapchainImageIndex, waitSemaphores);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
 				SwapchainRebuild();
@@ -556,7 +613,14 @@ namespace Insight::Graphics
 
 	RenderPass& GPURenderGraphPass::GetRenderPass() const
 	{
-		return m_graph->m_passes.at(m_renderPassIndex);
+		if (m_swapchainPass)
+		{
+			return m_graph->m_swapchainPresentPass;
+		}
+		else
+		{
+			return m_graph->m_passes.at(m_renderPassIndex);
+		}
 	}
 
 	void RenderGraph::FrameSubmision::Init()
@@ -611,6 +675,10 @@ namespace Insight::Graphics
 			buffer.second->Reset();
 		}
 
+		for (auto& pass : Passes)
+		{
+			pass.m_lifeTimeObjects.clear();
+		}
 		RenderPasses.clear();
 		
 		CommandPools->Reset();
@@ -625,7 +693,9 @@ namespace Insight::Graphics
 		::Delete(CommandBuffers);
 		CommandPools->ReleaseGPU();
 		::Delete(CommandPools);
+		Fence->ReleaseGPU();
 		::Delete(Fence);
+		SwapchainImageAquired->ReleaseGPU();
 		::Delete(SwapchainImageAquired);
 		::Delete(DescriptorBuilder);
 		::Delete(DescriptorAllocator);

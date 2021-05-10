@@ -22,6 +22,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void BindUniformBuffer(Graphics::GPUBuffer* buffer, u32 slot) override;
 		virtual void BindDynamicUniformBuffer(Graphics::GPUBuffer* buffer, u32 slot) override;
 
+		VkDescriptorSet GetSetVulkan() const { return m_set; }
+
 	protected:
 		// [GPUResource]
 		virtual void SetName(const std::string& name) override;

@@ -6,11 +6,9 @@ layout (location = 0) in vec2 inUV;
 
 layout (location = 0) out vec4 outFragColor;
 
-layout (set = 0, binding = 0) uniform sampler2D fullScreenQuadColorTex;
-layout (set = 0, binding = 1) uniform sampler2D fullScreenQuadNormalTex;
-layout (set = 0, binding = 2) uniform sampler2D fullScreenQuadPositionTex;
+layout (set = 0, binding = 0) uniform sampler2D offscreenTexture;
 
 void main() 
 {
-	outFragColor = texture(fullScreenQuadColorTex, inUV);
+	outFragColor = texture(offscreenTexture, inUV);
 }

@@ -25,6 +25,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		{
 			return false;
 		}
+
 		VkImageViewCreateInfo info = vks::initializers::imageViewCreateInfo();
 		info.image = static_cast<GPUImageVulkan*>(m_image)->GetVulkanImage();
 		info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -43,6 +44,9 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		ThrowIfFailed(vkCreateImageView(m_device->Device, &info, nullptr, &m_vView));
 		m_memoryUsage = 8;
+		
+		static_cast<GPUImageVulkan*>(m_image)->GetDescriptorImageInfo()->imageView = m_vView;
+		
 		return true;
 	}
 
@@ -109,6 +113,16 @@ namespace Insight::GraphicsAPI::Vulkan
 		ThrowIfFailed(vmaCreateImage(m_device->VmaAllocator, &imageCreateInfo, &vmaAllocCreateInfo, &m_vImage, &m_vmaImageAlloc, &allocInfo));
 		m_memoryUsage = allocInfo.size;
 
+		m_descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+		Graphics::GPUSamplerDesc samplerDesc = Graphics::GPUSamplerDesc();
+		Graphics::GPUSampler* sampler = nullptr;
+		if (Graphics::GPUSamplerCache::Instance()->GetItem(samplerDesc.Hash(), sampler))
+		{
+			sampler->Init(samplerDesc);
+		}
+		m_descriptorImageInfo.sampler = static_cast<GPUSamplerVulkan*>(sampler)->GetSampler();
+
 		if (m_desc.Data != nullptr)
 		{
 			GPUBufferVulkan stagingBuffer;
@@ -146,5 +160,55 @@ namespace Insight::GraphicsAPI::Vulkan
 		{
 			GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Graphics::Debug::DebugObject::Image, (u64)m_vImage);
 		}
+	}
+
+
+	/// <summary>
+	/// GPUSamplerVulkan
+	/// </summary>
+	GPUSamplerVulkan::GPUSamplerVulkan()
+	{ }
+
+	GPUSamplerVulkan::~GPUSamplerVulkan()
+	{
+		ReleaseGPU();
+	}
+
+	void GPUSamplerVulkan::Init(Graphics::GPUSamplerDesc& desc)
+	{
+		ReleaseGPU();
+
+		m_desc = desc;
+
+		VkSamplerCreateInfo sampler = vks::initializers::samplerCreateInfo();
+		sampler.magFilter = (VkFilter)m_desc.MagFilter;
+		sampler.minFilter = (VkFilter)m_desc.MinFilter;
+		sampler.mipmapMode = (VkSamplerMipmapMode)m_desc.MipmapMode;
+		sampler.addressModeU = (VkSamplerAddressMode)m_desc.AddressModeU;
+		sampler.addressModeV = (VkSamplerAddressMode)m_desc.AddressModeV;
+		sampler.addressModeW = (VkSamplerAddressMode)m_desc.AddressModeW;
+		sampler.mipLodBias = m_desc.MipLodBias;
+		sampler.compareOp = (VkCompareOp)m_desc.CompareOP;
+		sampler.minLod = m_desc.MinLod;
+		sampler.maxLod = m_desc.MaxLoad;
+		sampler.maxAnisotropy = m_desc.MaxAnisotropy;
+		sampler.anisotropyEnable = m_desc.AnisortopyEnable;
+		sampler.borderColor = (VkBorderColor)m_desc.BorderColor;
+		ThrowIfFailed(vkCreateSampler(m_device->Device, &sampler, nullptr, &m_sampler));
+		m_memoryUsage = 8;
+	}
+
+	void GPUSamplerVulkan::SetName(const std::string& name)
+	{
+		m_name = name;
+		if (GPUDebugMarkerVulkan::Instance()->IsInitialised())
+		{
+			GPUDebugMarkerVulkan::Instance()->SetObjectName(m_name, Graphics::Debug::DebugObject::Sampler, (u64)m_sampler);
+		}
+	}
+
+	void GPUSamplerVulkan::OnReleaseGPU()
+	{
+		vkDestroySampler(m_device->Device, m_sampler, nullptr);
 	}
 }

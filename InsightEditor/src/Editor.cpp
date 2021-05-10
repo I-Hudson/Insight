@@ -6,6 +6,7 @@ class EditorApp : public Application
 {
 public:
 	Module::EditorModule* m_editorModule;
+	Entity* m_editorCamera = nullptr;
 
 	EditorApp() : Application()
 	{ }
@@ -60,6 +61,12 @@ public:
 		glm::vec4 titleBgCollapsed = Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
+		m_editorCamera = Entity::New("EditorCamera");
+		auto* cameraComponent = m_editorCamera->AddComponent<CameraComponent>();
+		cameraComponent->SetProjMatrix(60, 0.1f, 1000.0f);
+		cameraComponent->SetCameraSpeed(50.0f);
+		Module::GraphicsModule::Instance()->SetMainCamera(cameraComponent);
+
 		for (size_t i = 0; i < 0; i++)
 		{
 			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
@@ -81,6 +88,10 @@ public:
 
 	virtual void Update(const float deltaTime) override
 	{
+		if (m_editorCamera)
+		{
+			m_editorCamera->OnUpdate(deltaTime);
+		}
 	}
 
 	virtual void Draw() override
@@ -94,6 +105,7 @@ public:
 
 	~EditorApp()
 	{
+		::Delete(m_editorCamera);
 	}
 };
 

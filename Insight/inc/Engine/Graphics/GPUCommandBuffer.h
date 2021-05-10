@@ -136,6 +136,8 @@ namespace Insight::Graphics
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;
 		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, GPUCommandBufferIndexType indexType) = 0;
+		
+		virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
 		virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
 
 		// [GPUResource]

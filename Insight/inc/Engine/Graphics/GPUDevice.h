@@ -15,9 +15,14 @@ namespace Insight::Graphics
     class GPUCommandPool;
     class GPUImageView;
     class GPUImage;
+    class GPUSampler;
     class GPUShader;
     class GPUFenceManager;
     class GPUSemaphoreManager;
+
+
+    using GPUSamplerCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUSampler*>;
+    using GPUShaderCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUShader*>;
 }
 
 class GPUContext;
@@ -83,7 +88,7 @@ public:
     virtual u32 GetQueueIndex(GPUQueue queue) = 0;
 
 public:
-    GPUResourceCollection Resources;
+    Insight::Graphics::GPUResourceCollection Resources;
 
 protected:
     CriticalSection m_locker;
@@ -101,6 +106,8 @@ protected:
     FeatureLevel m_featureLevel;
 
     Insight::Graphics::GPUCommandPool* m_defaultCommandPool;
+    Insight::Graphics::GPUSamplerCache m_samplerCache;
+    Insight::Graphics::GPUShaderCache m_shaderCache;
 
     struct DefaultData;
     DefaultData* m_defaultData;

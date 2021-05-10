@@ -19,6 +19,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void ReleaseGPU() override;
 		virtual u32 GetImageCount() override;
 
+		VkFormat GetColorFormat() const { return m_colorFormat; }
+
 	private:
 		GPUDeviceVulkan* m_device;
 		VkFormat m_colorFormat;

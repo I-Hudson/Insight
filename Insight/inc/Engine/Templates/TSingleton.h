@@ -34,7 +34,7 @@ public:
 		s_instance = nullptr;
 	}
 
-private:
+protected:
 	template<typename... Args>
 	static T* Create(Args... args)
 	{
@@ -59,6 +59,11 @@ private:
 	static void DestroyWithoutMemoryManager()
 	{
 		delete s_instance;
+	}
+
+	static void ReleaseInstance()
+	{
+		s_instance = nullptr;
 	}
 
 	static T* s_instance;

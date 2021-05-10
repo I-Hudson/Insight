@@ -10,6 +10,11 @@
 
 namespace Insight::Graphics
 {
+	class GPUCmdBuffer;
+	class PipelineEvent;
+	class GPUImage;
+	class GPUSwapchain;
+
 	struct ResourceDimensions
 	{
 		PixelFormat Format = PixelFormat::Unknown;
@@ -75,8 +80,6 @@ namespace Insight::Graphics
 		class GPUImageView;
 		class GPUImage;
 	}
-	class GPUCmdBuffer;
-	class PipelineEvent;
 
 	struct RenderPassInfo
 	{
@@ -128,16 +131,23 @@ namespace Insight::Graphics
 		virtual void Init(RenderPass& renderPass) = 0;
 
 		RenderPass& GetRenderPass() const;
+		bool IsSwapchainPass() const { return m_swapchainPass; }
+
+	private:
+		virtual void InitForSwapchain(GPUSwapchain* swapchain, GPUImage* image) = 0;
+
 
 	protected:
 		std::vector<const GPUImage*> m_colourAttachments;
 		u32 m_colorAttachmentsCount;
 		const GPUImageView* m_depthStenci = nullptr;
+		bool m_swapchainPass = false;
 
 		// Wait Fence and Semaphore.
-
 		u32 m_renderPassIndex = -1;
 		RenderGraph* m_graph;
+
+		friend RenderGraph;
 	};
 
 	/// <summary>
@@ -229,6 +239,7 @@ namespace Insight::Graphics
 		std::vector<RenderPass> m_passes;
 		std::vector<RenderPass> m_passesCached;
 		std::vector<RenderGraphResource> m_resources;
+		RenderPass m_swapchainPresentPass;
 
 		std::vector<GPUImage*> m_physicalImages;
 		std::vector<GPUImageView*> m_physicalImageViews;
@@ -302,10 +313,25 @@ namespace Insight::Graphics
 			void ReleaseGPU();
 		};
 
+		struct SwapchainSubmision
+		{
+			GPUShader* Shader;
+			GPUPipeline* Pipeline;
+			GPUImage* Image;
+			GPURenderGraphPass* GraphPass;
+		};
+		std::vector<SwapchainSubmision> m_swapchainSubmision;
+
+		public:
+			const FrameSubmision& GetFrame(u32 index) const { return m_frames.at(index); }
+			const FrameSubmision& GetCurrentFrame() const { return m_frames.at(m_frameIndex); }
+			const SwapchainSubmision& GetCurrentSwapchainSubmision() const { return m_swapchainSubmision.at(m_swapchainImageIndex); }
+		private:
+
 		std::vector<FrameSubmision> m_frames;
 		u32 m_frameIndex;
+		u32 m_swapchainImageIndex = 0;
 		const u32 c_MaxFrameCount = 2;
-		//FrameSubmision m_singleFrame;
 
 		GPUSwapchain* m_swapchain;
 

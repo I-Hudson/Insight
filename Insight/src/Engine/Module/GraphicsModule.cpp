@@ -3,6 +3,7 @@
 #include "Engine/Module/WindowModule.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Component/MeshComponent.h"
+#include "Engine/Component/CameraComponent.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
 #include "Engine/Config/Config.h"
 
@@ -212,17 +213,48 @@ namespace Module
 					glm::vec4 LightPos;
 				};
 
-				UBO ubo = {};
+				// bind material
+				// bind buffers
+				// Draw mesh, 
+				
+				UBO ubo = {
+					m_mainCamera->GetProjMatrix(), 
+					m_mainCamera->GetViewMatrix(), 
+					glm::mat4(1.0f), 
+					glm::vec4(5.0f, 5.0f, 5.0f, 1.0f)
+				};
 				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
-				Graphics::GPUShader* defaultShader = Graphics::GPUShader::New();
-				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
-				defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
-				defaultShader->Compile();
+				glm::mat4 modelMatrix(1.0f);
+				Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
+				Graphics::GPUShader* defaultShader = nullptr;
+				if (Graphics::GPUShaderCache::Instance()->GetItem(0, defaultShader))
+				{
+					IS_PROFILE_SCOPE("Default shader create");
+					defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
+					defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
+					defaultShader->Compile();
+				}
+
 				Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
-				defaultPipeline->SetShader(defaultShader);
-				defaultPipeline->BuildPipeline(pass.GetGraphPass());
-				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
+				{
+					IS_PROFILE_SCOPE("Default pipeline create and bind");
+					pass.AddLifeTimeObject(defaultPipeline);
+					defaultPipeline->SetShader(defaultShader);
+					defaultPipeline->BuildPipeline(pass.GetGraphPass());
+					cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
+				}
+
+				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
+				{
+					IS_PROFILE_SCOPE("Build descriptor set");
+
+					builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+						->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
+				}
+				Graphics::GPUDescriptorSet* sets[] = { testSet };
+				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, 1, sets[0], 0, nullptr);
 
 				{
 					IS_PROFILE_SCOPE("Upload mesh vertices");
@@ -236,37 +268,21 @@ namespace Module
 							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVerticesBuffer() };
 							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
 							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-							//cmdBuffer->DrawIndexed(subMesh.GetIndicesCount(), 1, 0, 0, 0);
-				//			auto* subMesh = mesh->GetMesh()->GetSubMesh(subMeshIndex);
-				//			auto vertices = subMesh->GetVertices();
-				//			Graphics::GPUBuffer* meshBuffer[] = { buffers.at(Graphics::GPUBufferFlags::VERTEX)->Upload(vertices.data(), sizeof(Vertex) * vertices.size()) };
-				//			auto indices = subMesh->GetIndices();
-				//			Graphics::GPUBuffer* indexBuffer = buffers.at(Graphics::GPUBufferFlags::INDEX)->Upload(indices.data(), sizeof(u32) * indices.size());
+							cmdBuffer->DrawIndexed(subMesh.GetIndicesCount(), 1, 0, 0, 0);
+							//			auto* subMesh = mesh->GetMesh()->GetSubMesh(subMeshIndex);
+							//			auto vertices = subMesh->GetVertices();
+							//			Graphics::GPUBuffer* meshBuffer[] = { buffers.at(Graphics::GPUBufferFlags::VERTEX)->Upload(vertices.data(), sizeof(Vertex) * vertices.size()) };
+							//			auto indices = subMesh->GetIndices();
+							//			Graphics::GPUBuffer* indexBuffer = buffers.at(Graphics::GPUBufferFlags::INDEX)->Upload(indices.data(), sizeof(u32) * indices.size());
 
-				//			u32 offsets[] = { 0 };
-				//			cmdBuffer->BindVertexBuffers(0, 1, meshBuffer, offsets);
-				//			cmdBuffer->BindIndexBuffer(indexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+							//			u32 offsets[] = { 0 };
+							//			cmdBuffer->BindVertexBuffers(0, 1, meshBuffer, offsets);
+							//			cmdBuffer->BindIndexBuffer(indexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
 						}
 					}
 				}
 
-				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
-				builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
-
-				Graphics::GPUDescriptorSet* sets[] = { testSet };
-				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, 1, sets[0], 0, nullptr);
-
-				//Graphics::GPUDescriptorBuilder* build = Graphics::GPUDescriptorBuilder::New();
-				//build->Begin(layoutCache, descriptorAlloc);
-				//build->BindBuffer(0, colourBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment);
-
-				// bind material
-				// bind buffers
-				// Draw mesh, 
-
 				::Delete(testSet);
-				::Delete(defaultShader);
-				//::Delete(defaultPipeline);
 			});
 
 			auto& pointLights = Graphics::RenderGraph::Instance()->AddPass("pointLights", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
@@ -277,7 +293,7 @@ namespace Module
 
 		if (imageIndex % 3 == 0)
 		{
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
+			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
 		}
 		else if (imageIndex % 3 == 1)
 		{
@@ -285,8 +301,8 @@ namespace Module
 		}
 		else if (imageIndex % 3 == 2)
 		{
-			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
 		}
+			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
 		++imageIndex;
 
 		m_imguiRenderer->EndFrame();

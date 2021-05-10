@@ -41,6 +41,13 @@ namespace Insight::Graphics
 		std::vector<ShaderStageBindings> Bindings;
 	};
 
+	struct ShaderStageSampler2D
+	{
+		std::string Name;
+		U32 Set;
+		U32 Binding;
+	};
+
 	/// <summary>
 	/// Define a single stage within a shader. This should define a stage not store any resources.
 	/// </summary>
@@ -94,6 +101,11 @@ namespace Insight::Graphics
 		/// </summary>
 		std::vector<ShaderStageUniform> m_uniforms;
 
+		/// <summary>
+		/// Shader stage uniforms.
+		/// </summary>
+		std::vector<ShaderStageSampler2D> m_samplers;
+
 	private:
 		U32 GetStride();
 	};
@@ -104,10 +116,11 @@ namespace Insight::Graphics
 	class IS_API GPUShader : public GPUResource
 	{
 	public:
-		static GPUShader* New();
 
 		GPUShader();
 		virtual ~GPUShader();
+
+		static GPUShader* New();
 
 		/// <summary>
 		/// Compile this shader into the format needed for the graphic's API being used.

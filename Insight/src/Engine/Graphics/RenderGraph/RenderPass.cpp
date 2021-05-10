@@ -30,7 +30,7 @@ namespace Insight::Graphics
 		res.TextureInfo.SetAttachmentInfo(attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
-		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
+		res.TextureInfo.ImageLayout = ImageLayout::Shader_Read_Only;
 		m_colorOutputs.push_back(res.GetIndex());
 		m_colorOutputHasher.Hash(name);
 
@@ -51,7 +51,7 @@ namespace Insight::Graphics
 		res.AddWrittenInPass(m_passIndex);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
-		res.TextureInfo.ImageLayout = ImageLayout::Color_Attachment;
+		res.TextureInfo.ImageLayout = ImageLayout::Shader_Read_Only;
 		m_colorOutputs.push_back(res.GetIndex());
 		m_colorOutputHasher.Hash(name);
 
@@ -195,5 +195,73 @@ namespace Insight::Graphics
 	const GPUImageView* RenderPass::GetPhysicalImageView(u32 index) const
 	{
 		return m_graph->m_physicalImageViews.at(index);
+	}
+
+	/// <summary>
+	/// RenderPassLifeTimeObject
+	/// </summary>
+	/// <param name="objectPtr"></param>
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(void* objectPtr)
+		: m_objectPtr(objectPtr),
+		m_refCount(::New<u32>())
+	{
+		*m_refCount = 1;
+	}
+
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(const RenderPassLifeTimeObject& other)
+	{
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		*m_refCount = *m_refCount + 1;
+	}
+
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(RenderPassLifeTimeObject&& other)
+	{
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+
+		other.m_objectPtr = nullptr;
+		other.m_refCount = nullptr;
+	}
+
+	RenderPassLifeTimeObject::~RenderPassLifeTimeObject()
+	{
+		if (m_refCount)
+		{
+			*m_refCount = *m_refCount - 1;
+			if (*m_refCount == 0)
+			{
+				::Delete(static_cast<GPUResource*>(m_objectPtr));
+				::Delete(m_refCount);
+			}
+		}
+	}
+
+	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(const RenderPassLifeTimeObject& other)
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		*m_refCount = *m_refCount + 1;
+		return *this;
+	}
+
+	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(RenderPassLifeTimeObject&& other)
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		other.m_objectPtr = nullptr;
+		other.m_refCount = nullptr;
+
+		return *this;
 	}
 }

@@ -2,6 +2,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorAllocatorVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 
 namespace Insight::GraphicsAPI::Vulkan
 {
@@ -249,7 +250,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		newBinding.descriptorCount = 1;
 		newBinding.descriptorType = ToVulkanDescriptorType(type);
 		newBinding.pImmutableSamplers = nullptr;
-		newBinding.stageFlags = ToVulkanShaderStageFlagsMuti(stage);
+		newBinding.stageFlags = ToVulkanShaderStageFlags(stage);
 		newBinding.binding = binding;
 
 		m_bindings.push_back(newBinding);
@@ -270,7 +271,29 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage)
 	{
-		return nullptr;
+		//create the descriptor binding for the layout
+		VkDescriptorSetLayoutBinding newBinding{};
+
+		newBinding.descriptorCount = 1;
+		newBinding.descriptorType = ToVulkanDescriptorType(type);
+		newBinding.pImmutableSamplers = nullptr;
+		newBinding.stageFlags = ToVulkanShaderStageFlags(stage);
+		newBinding.binding = binding;
+
+		m_bindings.push_back(newBinding);
+
+		//create the descriptor write
+		VkWriteDescriptorSet newWrite{};
+		newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		newWrite.pNext = nullptr;
+
+		newWrite.descriptorCount = 1;
+		newWrite.descriptorType = ToVulkanDescriptorType(type);
+		newWrite.pImageInfo = static_cast<GPUImageVulkan*>(image)->GetDescriptorImageInfo();
+		newWrite.dstBinding = binding;
+
+		m_writes.push_back(newWrite);
+		return this;
 	}
 
 	bool GPUDescriptorBuilderVulkan::Build(Graphics::GPUDescriptorSet* set)

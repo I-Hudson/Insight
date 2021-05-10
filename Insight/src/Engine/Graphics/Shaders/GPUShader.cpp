@@ -28,6 +28,11 @@ namespace Insight::Graphics
 
 	void GPUShaderStage::Parse()
 	{
+		if (m_loadedShaderString.empty())
+		{
+			return;
+		}
+
 		// Parse the shader stage raw data and get all the info we need.
 		m_rawData = ShaderCompliation::CompileGLSLToSpirV(m_stage, m_loadedShaderString);
 
@@ -50,14 +55,25 @@ namespace Insight::Graphics
 
 		for (auto& resource : resources.uniform_buffers)
 		{
-			ShaderStageUniform binding
+			ShaderStageUniform uniform
 			{
 				resource.name,
 				glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
 				glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding),
 				(U32)glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
 			};
-			m_uniforms.push_back(binding);
+			m_uniforms.push_back(uniform);
+		}
+
+		for (auto& resource : resources.sampled_images)
+		{
+			ShaderStageSampler2D sampler2D
+			{
+				resource.name,
+				glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
+				glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding)
+			};
+			m_samplers.push_back(sampler2D);
 		}
 
 		m_parsed = true;
@@ -95,7 +111,7 @@ namespace Insight::Graphics
 
 	GPUShader::GPUShader()
 		: m_stages(
-			std::array<GPUShaderStage, (size_t)ShaderStage::Count>{
+			std::array<GPUShaderStage, (u64)ShaderStage::Count>{
 			GPUShaderStage(ShaderStage::Vertex, "", ShaderStageInput::RawData),
 			GPUShaderStage(ShaderStage::TessControl, "", ShaderStageInput::RawData),
 			GPUShaderStage(ShaderStage::TessEvaluation, "", ShaderStageInput::RawData),
@@ -110,7 +126,8 @@ namespace Insight::Graphics
 	}
 	void GPUShader::SetStage(const GPUShaderStage& shaderStage)
 	{
-		m_stages[(size_t)shaderStage.GetStage()] = shaderStage;
+		GPUShaderStage& stage = m_stages.at((u32)shaderStage.GetStage());
+		stage = shaderStage;
 	}
 
 	void GPUShader::SetStage(const ShaderStage& stage, const std::string& str, const ShaderStageInput& input)

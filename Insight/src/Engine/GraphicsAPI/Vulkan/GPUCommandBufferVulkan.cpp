@@ -6,6 +6,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUDescriptorSetVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
@@ -124,6 +125,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::BeginRenderpass(Graphics::GPURenderGraphPass* renderpass)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BeginRenderpass] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		GPURenderGraphPassVulkan* renderPass = static_cast<GPURenderGraphPassVulkan*>(renderpass);
 
@@ -159,12 +161,14 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::EndRenderpass(Graphics::GPURenderGraphPass* renderpass)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::EndRenderpass] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		vkCmdEndRenderPass(m_cmdBuffer);
 	}
 
 	void GPUCommandBufferVulkan::SetViewPort(Maths::Rect rect)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::SetViewPort] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		VkViewport viewPorts[] = { ToVulkanViewPort(rect) };
 		vkCmdSetViewport(m_cmdBuffer, 0, 1, &viewPorts[0]);
@@ -172,12 +176,15 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::SetScissor(Maths::Rect rect)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::SetScissor] Command Buffer must be recording.");
 		++m_recordCommandCount;
-		vkCmdSetScissor(m_cmdBuffer, 0, 1, nullptr);
+		VkRect2D scissor = ToVulkanScissor(rect);
+		vkCmdSetScissor(m_cmdBuffer, 0, 1, &scissor);
 	}
 
 	void Insight::GraphicsAPI::Vulkan::GPUCommandBufferVulkan::CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::CopyBuffer] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
 		GPUBufferVulkan* destinationBuffer = static_cast<GPUBufferVulkan*>(dstBuffer);
@@ -190,6 +197,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::CopyBufferToDynamic(Graphics::GPUBuffer* srcBuffer, Graphics::GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::CopyBufferToDynamic] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
 		GPUDynamicBufferVulkan* destinationBuffer = static_cast<GPUDynamicBufferVulkan*>(dstBuffer);
@@ -202,6 +210,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::CopyBufferToImage(Graphics::GPUBuffer* srcBuffer, Graphics::GPUImage* dstImage, Graphics::GPUImageDesc const* imageDesc)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::CopyBufferToImage] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		GPUBufferVulkan* sourceBuffer = static_cast<GPUBufferVulkan*>(srcBuffer);
 		GPUImageVulkan* destinationImage = static_cast<GPUImageVulkan*>(dstImage);
@@ -284,6 +293,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::BlipImageToSwapchain(Graphics::GPUImage* srcImage, Graphics::GPUImage* dstImage)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BlipImageToSwapchain] Command Buffer must be recording.");
 		++m_recordCommandCount;
 
 		GPUImageVulkan* sourceImage = static_cast<GPUImageVulkan*>(srcImage);
@@ -427,18 +437,28 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::BindPipeline(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindPipeline] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		vkCmdBindPipeline(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipeline());
 	}
 
 	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
 	{
+		IS_PROFILE_FUNCTION();
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindDescriptorSets] Command Buffer must be recording.");
 		++m_recordCommandCount;
-
+		std::vector<VkDescriptorSet> sets;
+		for (u32 i = 0; i < descriptorSetCount; ++i)
+		{
+			GPUDescriptorSetVulkan* ptr = static_cast<GPUDescriptorSetVulkan*>(descriptorSets + (i * sizeof(Graphics::GPUDescriptorSet*)));
+			sets.push_back(ptr->GetSetVulkan());
+		}
+		vkCmdBindDescriptorSets(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipelineLayout(), firstSet, descriptorSetCount, sets.data(), dynamicOffsetCount, dynamicOffsets);
 	}
 
 	void GPUCommandBufferVulkan::BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindVertexBuffers] Command Buffer must be recording.");
 		++m_recordCommandCount;
 
 		std::vector<VkBuffer> vkBuffers = std::vector<VkBuffer>();
@@ -463,14 +483,23 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUCommandBufferVulkan::BindIndexBuffer(Graphics::GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindIndexBuffer] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		ASSERT(buffer->GetDesc().Flags & Graphics::GPUBufferFlags::INDEX && "[GPUCommandBufferVulkan::BindVertexBuffers] Buffer must be of type index.");
 		VkBuffer vkBuffer = static_cast<GPUBufferVulkan*>(buffer)->m_buffer;
 		vkCmdBindIndexBuffer(m_cmdBuffer, vkBuffer, offset, (VkIndexType)indexType);
 	}
 	
+	void GPUCommandBufferVulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
+	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::Draw] Command Buffer must be recording.");
+		++m_recordCommandCount;
+		vkCmdDraw(m_cmdBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+	}
+
 	void GPUCommandBufferVulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::DrawIndexed] Command Buffer must be recording.");
 		++m_recordCommandCount;
 		vkCmdDrawIndexed(m_cmdBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 	}

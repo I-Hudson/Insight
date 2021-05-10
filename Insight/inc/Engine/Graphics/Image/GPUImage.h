@@ -3,6 +3,7 @@
 #include "Engine/Graphics/GPUResource.h"
 #include "Engine/Graphics/Enums.h"
 #include "GPUImageDesc.h"
+#include "Engine/Utils/Hasher.h"
 
 namespace Insight::Graphics
 {
@@ -69,4 +70,62 @@ namespace Insight::Graphics
 		friend GPUImageView;
 	};
 
+	struct GPUSamplerDesc
+	{
+		SamplerFilter MagFilter = SamplerFilter::Linear;
+		SamplerFilter MinFilter = SamplerFilter::Linear;
+		SamplerMipmapMode MipmapMode = SamplerMipmapMode::Linear;
+		SamplerAddressMode AddressModeU = SamplerAddressMode::Mirrored_Repeat;
+		SamplerAddressMode AddressModeV = SamplerAddressMode::Mirrored_Repeat;
+		SamplerAddressMode AddressModeW = SamplerAddressMode::Mirrored_Repeat;
+		float MipLodBias = 0.0f;
+		CompareOp CompareOP = CompareOp::Never;
+		float MinLod = 0.0f;
+		float MaxLoad = 0.0f;
+		float MaxAnisotropy = 1.0f;
+		bool AnisortopyEnable = false;
+		BorderColor BorderColor = BorderColor::Float_Opaque_White;
+
+		u64 Hash()
+		{
+			Utils::Hasher hasher;
+			hasher.Hash(MagFilter);
+			hasher.Hash(MinFilter);
+			hasher.Hash(MipmapMode);
+			hasher.Hash(AddressModeU);
+			hasher.Hash(AddressModeV);
+			hasher.Hash(AddressModeW);
+			hasher.Hash(MipLodBias);
+			hasher.Hash(CompareOP);
+			hasher.Hash(MinLod);
+			hasher.Hash(MaxLoad);
+			hasher.Hash(MaxAnisotropy);
+			hasher.Hash(AnisortopyEnable);
+			hasher.Hash(BorderColor);
+			return hasher.GetHash();
+		}
+	};
+
+	/// <summary>
+	/// GPU SAMPLER
+	/// </summary>
+	class GPUSampler : public GPUResource
+	{
+	public:
+		GPUSampler();
+		virtual ~GPUSampler();
+
+		static GPUSampler* New();
+		static GPUSampler* TryFromCache(GPUSamplerDesc& desc);
+
+		virtual void Init(GPUSamplerDesc& desc) = 0;
+		const GPUSamplerDesc& GetDesc() const { return m_desc; }
+
+		// [GPUResource]
+		virtual ResourceType GetResourceType() const override { return ResourceType::Sampler; }
+		virtual ObjectType GetObjectType() const override { return ObjectType::Other; }
+
+	protected:
+		GPUSamplerDesc m_desc;
+	};
 }

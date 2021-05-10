@@ -52,12 +52,10 @@ namespace Insight::Graphics
 
 	GPUImage::GPUImage()
 		: m_desc(GPUImageDesc())
-	{
-	}
+	{ }
 
 	GPUImage::~GPUImage()
-	{
-	}
+	{ }
 
 	void GPUImage::Init(GPUImageDesc desc)
 	{
@@ -73,5 +71,33 @@ namespace Insight::Graphics
 	void GPUImage::SetLayout(const ImageLayout& newLayout)
 	{
 		m_imageLayout = newLayout;
+	}
+
+	/// <summary>
+	/// GPUSAMPLER
+	/// </summary>
+	GPUSampler::GPUSampler()
+		: m_desc(GPUSamplerDesc())
+	{ }
+
+	GPUSampler::~GPUSampler()
+	{ }
+
+	GPUSampler* GPUSampler::New()
+	{
+		switch (Module::GraphicsModule::Instance()->GetAPI())
+		{
+			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUSamplerVulkan>();
+		}
+
+		ASSERT(false && "[GPUImage::New] API missing.");
+		return nullptr;
+	}
+
+	GPUSampler* GPUSampler::TryFromCache(GPUSamplerDesc& desc)
+	{
+		GPUSampler* samplerPtr = nullptr;
+		GPUSamplerCache::Instance()->GetItem(desc.Hash(), samplerPtr);
+		return samplerPtr;
 	}
 }
