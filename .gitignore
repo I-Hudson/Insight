@@ -1042,3 +1042,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+/Insight/ReflectEXE_Profile.json
