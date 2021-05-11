@@ -14,12 +14,13 @@ IS_API REFLECT_CLASS(MeshComponent), public Component
 	REFLECT_GENERATED_BODY()
 
 public:
-	MeshComponent();
-	MeshComponent(Entity* owner);
+	MeshComponent() { }
+	MeshComponent(const EntityID& entity);
 	virtual ~MeshComponent() override;
 
-	virtual void OnCreate() override;
-	virtual void OnDestroy() override;
+	virtual void OnUpdate(const float& a_deltaTime) override;
+	//virtual void OnCreate() override;
+	//virtual void OnDestroy() override;
 
 	void SetMesh(Mesh* mesh);
 	void SetModel(Model* model);
@@ -33,8 +34,8 @@ public:
 	void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
 	std::string& GetMeshName() { return m_meshName; }
 
-	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
 	Mesh* m_mesh;

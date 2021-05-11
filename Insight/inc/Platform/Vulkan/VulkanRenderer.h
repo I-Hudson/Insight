@@ -235,7 +235,6 @@ namespace vks
 		VkFence m_waitFences[MAX_FRAMES_IN_FLIGHT];
 		VkFence m_waitImagesFences[MAX_FRAMES_IN_FLIGHT];
 
-		Entity* m_editorEntity;
 		CameraComponent* m_editorCamera;
 
 		struct MVP

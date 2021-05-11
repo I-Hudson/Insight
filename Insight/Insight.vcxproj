@@ -195,7 +195,9 @@
     <ClInclude Include="inc\Engine\Core\Types\DateTime.h" />
     <ClInclude Include="inc\Engine\Core\Types\TimeSpan.h" />
     <ClInclude Include="inc\Engine\Core\Utils.h" />
-    <ClInclude Include="inc\Engine\Entitiy\Entity.h" />
+    <ClInclude Include="inc\Engine\Entity\ComponentManager.h" />
+    <ClInclude Include="inc\Engine\Entity\Entity.h" />
+    <ClInclude Include="inc\Engine\Entity\EntityManager.h" />
     <ClInclude Include="inc\Engine\Enums\GPUResourceUsage.h" />
     <ClInclude Include="inc\Engine\Enums\PropertyFlags.h" />
     <ClInclude Include="inc\Engine\Event\ApplicationEvent.h" />
@@ -748,6 +750,7 @@
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
+    <ClCompile Include="src\Engine\Component\Component.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Engine\Config\CVar.cpp" />
@@ -759,7 +762,9 @@
     <ClCompile Include="src\Engine\Core\Object.cpp" />
     <ClCompile Include="src\Engine\Core\Types\DateTime.cpp" />
     <ClCompile Include="src\Engine\Core\Types\TimeSpan.cpp" />
-    <ClCompile Include="src\Engine\Entitiy\Entity.cpp" />
+    <ClCompile Include="src\Engine\Entity\ComponentManager.cpp" />
+    <ClCompile Include="src\Engine\Entity\Entity.cpp" />
+    <ClCompile Include="src\Engine\Entity\EntityManager.cpp" />
     <ClCompile Include="src\Engine\Event\EventManager.cpp" />
     <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />

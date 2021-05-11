@@ -2,6 +2,7 @@
 #include "Engine/Component/CameraComponent.h"
 
 #include "Engine/Component/TransformComponent.h"
+#include "Engine/Entity/Entity.h"
 #include "Engine/Input/Input.h"
 #include "Engine/Module/WindowModule.h"
 #include "Engine/Module/GraphicsModule.h"
@@ -12,83 +13,75 @@
 
 REGISTER_DEF_TYPE(CameraComponent);
 
-CameraComponent::CameraComponent()
-	: Component(nullptr)
-{
-	SetType<CameraComponent>();
-	m_updateEveryFarme = true;
-}
 
-CameraComponent::CameraComponent(Entity* owner)
-	: Component(owner)
+CameraComponent::CameraComponent(const EntityID& entity)
+	: Component(entity)
 {
-	SetType<CameraComponent>();
-	m_updateEveryFarme = true;
+	//SetType<CameraComponent>();
+	//m_updateEveryFarme = true;
 }
 
 CameraComponent::~CameraComponent()
 {
 }
 
-void CameraComponent::OnCreate()
-{
-	__super::OnCreate();
+//void CameraComponent::OnCreate()
+//{
+//	__super::OnCreate();
+//
+//	IS_PROPERTY_GLOBAL(CameraComponent, "Camera Component", ShowInEditor);
+//	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
+//	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);
+//	IS_PROPERTY(float, m_farPlane, "Far Plane", ShowInEditor | ReadOnly);
+//
+//	m_cameraSpeed = 50;
+//	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
+//	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+//
+//	if (!Module::GraphicsModule::Instance()->HasMainCamera())
+//	{
+//		Module::GraphicsModule::Instance()->SetMainCamera(this);
+//	}
+//}
 
-	IS_PROPERTY_GLOBAL(CameraComponent, "Camera Component", ShowInEditor);
-	IS_PROPERTY(float, m_fov, "FOV", ShowInEditor | ReadOnly);
-	IS_PROPERTY(float, m_nearPlane, "Near Plane", ShowInEditor | ClampZero);
-	IS_PROPERTY(float, m_farPlane, "Far Plane", ShowInEditor | ReadOnly);
+//void CameraComponent::OnDestroy()
+//{
+//	if (Module::GraphicsModule::IsInitialised() && Module::GraphicsModule::Instance()->IsThisMainCamera(this))
+//	{
+//		Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
+//	}
+//}
 
-	m_cameraSpeed = 50;
-	SetProjMatrix(90, CameraAspect::CurrentWindowSize, 0.1f, 100000.0f);
-	SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+//void CameraComponent::Serialize(Serialization::SerializableElement* element, bool force)
+//{
+//	element->AddAttribute("UUID", GetUUID());
+//	element->AddAttribute("Type", "CameraComponent");
+//	element->AddAttribute("FOV", std::to_string(m_fov));
+//	element->AddAttribute("NearPlane", std::to_string(m_nearPlane));
+//	element->AddAttribute("FarPlane", std::to_string(m_farPlane));
+//}
 
-	if (!Module::GraphicsModule::Instance()->HasMainCamera())
-	{
-		Module::GraphicsModule::Instance()->SetMainCamera(this);
-	}
-}
-
-void CameraComponent::OnDestroy()
-{
-	if (Module::GraphicsModule::IsInitialised() && Module::GraphicsModule::Instance()->IsThisMainCamera(this))
-	{
-		Module::GraphicsModule::Instance()->SetMainCamera(nullptr);
-	}
-}
-
-void CameraComponent::Serialize(Serialization::SerializableElement* element, bool force)
-{
-	element->AddAttribute("UUID", GetUUID());
-	element->AddAttribute("Type", "CameraComponent");
-	element->AddAttribute("FOV", std::to_string(m_fov));
-	element->AddAttribute("NearPlane", std::to_string(m_nearPlane));
-	element->AddAttribute("FarPlane", std::to_string(m_farPlane));
-}
-
-void CameraComponent::Deserialize(Serialization::SerializableElement* element, bool force)
-{
-	if (auto ptr = element->GetFirstAttribute("FOV"))
-	{
-		m_fov = std::stof(ptr->GetValue());
-	}
-	if (auto ptr = element->GetFirstAttribute("NearPlane"))
-	{
-		m_nearPlane = std::stof(ptr->GetValue());
-	}
-	if (auto ptr = element->GetFirstAttribute("FarPlane"))
-	{
-		m_farPlane = std::stof(ptr->GetValue());
-	}
-}
+//void CameraComponent::Deserialize(Serialization::SerializableElement* element, bool force)
+//{
+//	if (auto ptr = element->GetFirstAttribute("FOV"))
+//	{
+//		m_fov = std::stof(ptr->GetValue());
+//	}
+//	if (auto ptr = element->GetFirstAttribute("NearPlane"))
+//	{
+//		m_nearPlane = std::stof(ptr->GetValue());
+//	}
+//	if (auto ptr = element->GetFirstAttribute("FarPlane"))
+//	{
+//		m_farPlane = std::stof(ptr->GetValue());
+//	}
+//}
 
 void CameraComponent::SetViewMatrix(const glm::mat4& a_value)
 {
-	if (Entity* parentPtr = GetEntity())
-	{
-		parentPtr->GetComponent<TransformComponent>()->SetTransform(a_value);
-		SetProjectionViewMatrix();
-	}
+	GetEntity().GetComponent<TransformComponent>().SetTransform(a_value);
+	SetProjectionViewMatrix();
+
 }
 
 void CameraComponent::SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far)
@@ -133,11 +126,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 	SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
 
 
-	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	if (Entity* parentPtr = GetEntity())
-	{
-		viewMatrix = parentPtr->GetComponent<TransformComponent>()->GetTransform();
-	}
+	glm::mat4 viewMatrix = GetEntity().GetComponent<TransformComponent>().GetTransform();
 
 	// Get the camera's forward, right, up, and location vectors
 	glm::vec4 vForward = viewMatrix[2];
@@ -222,10 +211,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		viewMatrix[1] = vUp;
 		viewMatrix[2] = vForward;
 
-		if (Entity* parentPtr = GetEntity())
-		{
-			parentPtr->GetComponent<TransformComponent>()->SetTransform(viewMatrix);
-		}
+		GetEntity().GetComponent<TransformComponent>().SetTransform(viewMatrix);
 	}
 	else
 	{
@@ -244,13 +230,9 @@ const glm::mat4& CameraComponent::GetProjMatrix() const
 	return m_projectionMatrix;
 }
 
-const glm::mat4 CameraComponent::GetViewMatrix() const
+const glm::mat4 CameraComponent::GetViewMatrix()
 {
-	if (Entity* parentPtr = GetEntity())
-	{
-		return parentPtr->GetComponent<TransformComponent>()->GetTransform();
-	}
-	return glm::mat4(1.0f);
+	return GetEntity().GetComponent<TransformComponent>().GetTransform();
 }
 
 const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
@@ -268,8 +250,5 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 
 void CameraComponent::SetProjectionViewMatrix()
 {
-	if (Entity* parentPtr = GetEntity())
-	{
-		m_projectionViewMatrix = m_projectionMatrix * glm::inverse(parentPtr->GetComponent<TransformComponent>()->GetTransform());
-	}
+	m_projectionViewMatrix = m_projectionMatrix * glm::inverse(GetEntity().GetComponent<TransformComponent>().GetTransform());
 }

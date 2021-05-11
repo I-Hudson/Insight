@@ -27,7 +27,7 @@
 #include "Engine/Graphics/Material.h"
 
 #include "Engine/Scene/Scene.h"
-#include "Engine/Entitiy/Entity.h"
+#include "Engine/Entity/Entity.h"
 
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"

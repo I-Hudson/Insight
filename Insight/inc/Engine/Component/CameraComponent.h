@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Component.h"
+#include "Engine/Component/Component.h"
 #include <glm/glm.hpp>
-
-class Entity;
 
 enum CameraAspect
 {
@@ -16,15 +14,17 @@ enum CameraAspect
 class IS_API CameraComponent : public Component
 {
 public:
-	CameraComponent();
-	CameraComponent(Entity* owner);
+	CameraComponent() { }
+	CameraComponent(const EntityID& entity);
 	virtual ~CameraComponent() override;
 
-	virtual void OnCreate() override;
-	virtual void OnDestroy() override;
+	virtual void OnUpdate(const float& a_deltaTime) override;
 
-	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void OnCreate() override;
+	//virtual void OnDestroy() override;
+
+	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 	//Set the view matrix for the camera
 	void SetViewMatrix(const glm::mat4& a_value);
@@ -41,12 +41,11 @@ public:
 	const float& GetNearPlane() const { return m_nearPlane; }
 	const float& GetFarPlane() const { return m_farPlane; }
 	const float& GetCameraSpeed() const { return m_cameraSpeed; }
-	virtual void OnUpdate(const float& a_deltaTime) override;
 
 	//Get the projection view matrix
 	const glm::mat4& GetProjViewMatrix() const;
 	const glm::mat4& GetProjMatrix() const;
-	const glm::mat4 GetViewMatrix() const;
+	const glm::mat4 GetViewMatrix();
 
 	const float GetCamerAspect(const CameraAspect& cameraAspect);
 

@@ -39,7 +39,8 @@
 			template<typename T> 
 			static Serializable* CreateInstance()
 			{ 
-				return ::New<T>(); 
+				//return ::New<T>(); 
+				return nullptr;
 			}
 
 			template<typename T>

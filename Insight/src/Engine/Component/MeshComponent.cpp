@@ -7,47 +7,40 @@
 
 REGISTER_DEF_TYPE(MeshComponent);
 
-MeshComponent::MeshComponent()
-	: Component(nullptr)
+MeshComponent::MeshComponent(const EntityID& entity)
+	: Component(entity)
 {
-	SetType<MeshComponent>();
-	m_updateEveryFarme = false;
-}
-
-MeshComponent::MeshComponent(Entity* owner)
-	: Component(owner)
-{
-	SetType<MeshComponent>();
-	m_updateEveryFarme = false;
+	//SetType<MeshComponent>();
+	//m_updateEveryFarme = false;
 }
 
 MeshComponent::~MeshComponent()
 {
 }
 
-void MeshComponent::OnCreate()
-{
-	__super::OnCreate();
+//void MeshComponent::OnCreate()
+//{
+//	__super::OnCreate();
+//
+//	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
+//
+//	Module::GraphicsModule::m_meshs.push_back(this);
+//	//SetMaterial(Module::GraphicsModule::GetDefaultMaterial());
+//	m_updateEveryFarme = false;
+//}
 
-	IS_PROPERTY(std::string, m_meshName, "Mesh Name", ShowInEditor | ReadOnly);
-
-	Module::GraphicsModule::m_meshs.push_back(this);
-	//SetMaterial(Module::GraphicsModule::GetDefaultMaterial());
-	m_updateEveryFarme = false;
-}
-
-void MeshComponent::OnDestroy()
-{
-	auto it = std::find_if(Module::GraphicsModule::m_meshs.begin(), Module::GraphicsModule::m_meshs.end(), [&](MeshComponent* component)
-		{
-			if (component)
-			{
-				return this == component;
-			}
-			return false;
-		});
-	Module::GraphicsModule::m_meshs.erase(it);
-}
+//void MeshComponent::OnDestroy()
+//{
+//	auto it = std::find_if(Module::GraphicsModule::m_meshs.begin(), Module::GraphicsModule::m_meshs.end(), [&](MeshComponent* component)
+//		{
+//			if (component)
+//			{
+//				return this == component;
+//			}
+//			return false;
+//		});
+//	Module::GraphicsModule::m_meshs.erase(it);
+//}
 
 //void MeshComponent::Draw(VkCommandBuffer cmd, MeshMaterialUpdateFunc materialUpdateFunc)
 //{
@@ -95,16 +88,20 @@ void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& m
 	m_materialBlockDatas = materialBlockDatas;
 }
 
-void MeshComponent::Serialize(Serialization::SerializableElement* element, bool force)
-{
-	element->AddAttribute("UUID", GetUUID());
-	if (m_mesh)
-	{
-		//element->AddAttribute("MeshName", meshSP->GetName().c_str());
-	}
-}
+//void MeshComponent::Serialize(Serialization::SerializableElement* element, bool force)
+//{
+//	element->AddAttribute("UUID", GetUUID());
+//	if (m_mesh)
+//	{
+//		//element->AddAttribute("MeshName", meshSP->GetName().c_str());
+//	}
+//}
+//
+//void MeshComponent::Deserialize(Serialization::SerializableElement* element, bool force)
+//{
+//	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
+//}
 
-void MeshComponent::Deserialize(Serialization::SerializableElement* element, bool force)
+void OnUpdate(const float& a_deltaTime)
 {
-	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 }

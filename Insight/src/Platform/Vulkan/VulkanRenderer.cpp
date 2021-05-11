@@ -126,8 +126,6 @@ namespace vks
 
 		glslang::FinalizeProcess();
 
-		::Delete(m_editorEntity);
-
 		m_swapchain.CleanUp();
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
@@ -381,8 +379,6 @@ namespace vks
 
 		Present();
 
-		m_editorEntity->OnUpdate(Time::GetDeltaTime());
-
 		//TODO: Look into this. Maybe change how it works.
 		m_vulkanDevice->CheckIdleQueue();
 	}
@@ -441,10 +437,6 @@ namespace vks
 			dynamic_cast<vks::VulkanMaterial*>(m_presentMaterials[i])->Create(m_vulkanDevice, shaders, m_presentRenderPass, renderPassInfo);
 		}
 		SetupScreenRender();
-
-		m_editorEntity = ::New<Entity>("Editor entity", false);
-		m_editorEntity->AddComponent<TransformComponent>();
-		m_editorCamera = m_editorEntity->AddComponent<CameraComponent>();
 
 		m_lightPos = glm::vec4(0.0f, 1.0f, 3.0f, 1.0f);
 		m_lightPosAngle = 0.0f;
@@ -677,9 +669,9 @@ namespace vks
 			auto vMat = dynamic_cast<VulkanMaterial*>(material);
 
 			vMat->UploadUniform("UBO", &mvp, sizeof(MVP), materialBlockData);
-			auto tc = meshCom->GetComponent<TransformComponent>();
-			auto transform = tc->GetTransform();
-			vMat->UploadUniform("MODELUBO", &transform, sizeof(glm::mat4), materialBlockData);
+			//auto tc = meshCom->GetComponent<TransformComponent>();
+			//auto transform = tc->GetTransform();
+			//vMat->UploadUniform("MODELUBO", &transform, sizeof(glm::mat4), materialBlockData);
 		};
 
 		// TODO rework this. Really there should be a material manager with handles all the material lifetimes.

@@ -61,20 +61,23 @@ public:
 		glm::vec4 titleBgCollapsed = Module::EditorModule::Instance()->EditorConfig.TitleBgCollapsed.GetVal();
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
-		m_editorCamera = Entity::New("EditorCamera");
-		auto* cameraComponent = m_editorCamera->AddComponent<CameraComponent>();
-		cameraComponent->SetProjMatrix(60, 0.1f, 1000.0f);
-		cameraComponent->SetCameraSpeed(50.0f);
-		Module::GraphicsModule::Instance()->SetMainCamera(cameraComponent);
-		m_editorCamera->GetComponent<TransformComponent>()->SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
 
-		for (size_t i = 0; i < 1; i++)
-		{
-			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
-			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
-			meshComponent->SetModel(model);
-			meshComponent->GetEntity()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
-		}
+		Entity& e = Scene::ActiveScene()->CreateEntity("New Entity");
+		e.SetName("New Test Entity");
+		e.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+
+		CameraComponent& camera = e.AddComponent<CameraComponent>();
+		camera.SetProjMatrix(60, 0.1f, 1000.0f);
+		camera.SetCameraSpeed(50.0f);
+		Module::GraphicsModule::Instance()->SetMainCamera(&camera);
+
+		//for (size_t i = 0; i < 1; i++)
+		//{
+		//	auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
+		//	Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+		//	meshComponent->SetModel(model);
+		//	meshComponent->GetEntity()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
+		//}
 
 
 		//meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
@@ -91,7 +94,7 @@ public:
 	{
 		if (m_editorCamera)
 		{
-			m_editorCamera->OnUpdate(deltaTime);
+			//m_editorCamera->OnUpdate(deltaTime);
 		}
 	}
 

@@ -5,14 +5,13 @@
 class PlayerController : public Component
 {
 public:
-	PlayerController();
-	PlayerController(Entity* owner);
+	explicit PlayerController(const EntityID& entity);
 
-	virtual void OnCreate() override;
+	//virtual void OnCreate() override;
 	virtual void OnUpdate(const float& deltaTime) override;
 
-	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
-	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
+	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
 	glm::mat2 mat2;

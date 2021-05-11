@@ -3,6 +3,7 @@
 #include <memory>
 #include <functional>
 #include <mutex>
+#include <bitset>
 
 using Byte = uint8_t;
 using Size = size_t;
@@ -48,6 +49,11 @@ using Func = std::function<result(T...)>;
 using MutexUnqiueLock = std::unique_lock<std::mutex>;
 using MutexLockGuard = std::lock_guard<std::mutex>;
 using MutexScopedLock = std::scoped_lock<std::mutex>;
+
+using EntityID = u32;
+const u32 MAX_COMPONENTS_COUNT = 32;
+const u32 MAX_ENTITIES_COUNT = 5000;
+using EntityComponentSignature = std::bitset<MAX_COMPONENTS_COUNT>;
 
 inline auto operator""_B(Size const x) { return x; }
 inline auto operator""_KB(Size const x) { return 1024 * x; }

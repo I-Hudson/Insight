@@ -1,7 +1,7 @@
 #include "Editor/TopBarMenu.h"
 #include "ImGuiFileBrowser.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Entitiy/Entity.h"
+#include "Engine/Entity/Entity.h"
 
 	namespace Editor
 	{
@@ -31,7 +31,7 @@
 						int r = rand() % 100 + 50;
 						for (size_t i = 0; i < r; ++i)
 						{
-							Entity::New(std::to_string(i));
+							Scene::ActiveScene()->CreateEntity(std::to_string(i));
 						}
 					}
 #endif

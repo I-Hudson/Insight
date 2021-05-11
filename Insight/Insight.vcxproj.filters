@@ -31,8 +31,8 @@
     <Filter Include="inc\Engine\Core\Types">
       <UniqueIdentifier>{40D949C3-AC45-05BE-7539-9D1BE1642726}</UniqueIdentifier>
     </Filter>
-    <Filter Include="inc\Engine\Entitiy">
-      <UniqueIdentifier>{F9494D24-E52D-0E7A-4E8E-08CD3A91F8FB}</UniqueIdentifier>
+    <Filter Include="inc\Engine\Entity">
+      <UniqueIdentifier>{90190AC3-FC2F-0859-45A7-937AB1FCD8E0}</UniqueIdentifier>
     </Filter>
     <Filter Include="inc\Engine\Enums">
       <UniqueIdentifier>{FBD60FA1-E7CF-2EF3-1002-1478FC590EFF}</UniqueIdentifier>
@@ -154,8 +154,8 @@
     <Filter Include="src\Engine\Core\Types">
       <UniqueIdentifier>{CE5B681E-3AC8-2319-03BC-BB766FE74581}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\Entitiy">
-      <UniqueIdentifier>{472792BC-330B-5312-9C6B-4D65886E3D94}</UniqueIdentifier>
+    <Filter Include="src\Engine\Entity">
+      <UniqueIdentifier>{1E8561B0-8A9B-5F46-D312-EB673F6830CE}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Event">
       <UniqueIdentifier>{E32745A8-CF20-64FA-F852-497FE4AA4306}</UniqueIdentifier>
@@ -378,8 +378,14 @@
     <ClInclude Include="inc\Engine\Core\Utils.h">
       <Filter>inc\Engine\Core</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Entitiy\Entity.h">
-      <Filter>inc\Engine\Entitiy</Filter>
+    <ClInclude Include="inc\Engine\Entity\ComponentManager.h">
+      <Filter>inc\Engine\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Entity\Entity.h">
+      <Filter>inc\Engine\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Entity\EntityManager.h">
+      <Filter>inc\Engine\Entity</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Enums\GPUResourceUsage.h">
       <Filter>inc\Engine\Enums</Filter>
@@ -2066,8 +2072,14 @@
     <ClCompile Include="src\Engine\Core\Types\TimeSpan.cpp">
       <Filter>src\Engine\Core\Types</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Entitiy\Entity.cpp">
-      <Filter>src\Engine\Entitiy</Filter>
+    <ClCompile Include="src\Engine\Entity\ComponentManager.cpp">
+      <Filter>src\Engine\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Entity\Entity.cpp">
+      <Filter>src\Engine\Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Entity\EntityManager.cpp">
+      <Filter>src\Engine\Entity</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Event\EventManager.cpp">
       <Filter>src\Engine\Event</Filter>
@@ -2326,6 +2338,9 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Component\Component.cpp">
+      <Filter>src\Engine\Component</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
