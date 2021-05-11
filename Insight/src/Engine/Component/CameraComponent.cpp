@@ -14,8 +14,8 @@
 REGISTER_DEF_TYPE(CameraComponent);
 
 
-CameraComponent::CameraComponent(const EntityID& entity)
-	: Component(entity)
+CameraComponent::CameraComponent(EntityManager* entityManager, const EntityID& entity)
+	: Component(entityManager, entity), m_cameraAspect(CameraAspect::CurrentWindowSize)
 {
 	//SetType<CameraComponent>();
 	//m_updateEveryFarme = true;

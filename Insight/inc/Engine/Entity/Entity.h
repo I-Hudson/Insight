@@ -16,7 +16,9 @@ class IS_API Entity : public Object
 					, public Serialization::Serializable
 {
 public:
+	Entity();
 	explicit Entity(EntityManager* entityManager, EntityID id);
+	~Entity();
 
 	void SetName(const std::string& name);
 
@@ -50,7 +52,7 @@ private:
 #include "Engine/Entity/EntityManager.h"
 
 template<typename T, typename ...Args>
-T& Entity::AddComponent(Args && ...args)
+T& Entity::AddComponent(Args&&... args)
 {
 	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.");
 	return m_entityManager->AddComponent<T>(m_entityID, std::forward<Args...>(args)...);

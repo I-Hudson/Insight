@@ -4,16 +4,22 @@
 #include "Engine/Serialization/Serializable.h"
 
 class Entity;
+class EntityManager;
+class ComponentManager;
 
 class IS_API Component
 {
 public:
 	Component();
-	Component(EntityID entity);
+	Component(EntityManager* entityManager, EntityID entity);
 	virtual ~Component();
 	virtual void OnUpdate(const float& a_deltaTime) = 0;
+	bool IsValid() { return m_entityID != -1; }
 	Entity GetEntity();
 
 protected:
 	EntityID m_entityID;
+	EntityManager* m_entityManager;
+
+	friend ComponentManager;
 };

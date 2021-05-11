@@ -7,8 +7,8 @@
 
 REGISTER_DEF_TYPE(TransformComponent);
 
-TransformComponent::TransformComponent(const EntityID& entity)
-	: Component(entity)
+TransformComponent::TransformComponent(EntityManager* entityManager, const EntityID& entity)
+	: Component(entityManager, entity)
 	, m_transform(glm::mat4(1.0f))
 {
 	//SetType<TransformComponent>();

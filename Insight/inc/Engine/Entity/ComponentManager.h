@@ -1,14 +1,15 @@
 #pragma once
 
-#include "Engine/Entity/Entity.h"
+#include "Engine/Core/Common.h"
 #include <array>
 
-using ComponentType = u32;
+class ComponentManager;
 
 class IComponentArray
 {
 public:
 	virtual ~IComponentArray() = default;
+	virtual void Update(const float& deltaTime) = 0;
 	virtual void EntityDestroyed(EntityID entity) = 0;
 };
 
@@ -59,6 +60,18 @@ public:
 		return m_componentArray[m_entityToIndexMap[entity]];
 	}
 
+	virtual void Update(const float& deltaTime) override
+	{
+		IS_PROFILE_FUNCTION();
+		for (auto& component : m_componentArray)
+		{
+			if (component.IsValid())
+			{
+				component.OnUpdate(deltaTime);
+			}
+		}
+	}
+
 	virtual void EntityDestroyed(EntityID entity) override
 	{
 		if (m_entityToIndexMap.find(entity) != m_entityToIndexMap.end())
@@ -83,6 +96,8 @@ private:
 
 	// Total size of valid entries in the array.
 	u32 m_size;
+
+	friend ComponentManager;
 };
 
 class ComponentManager
@@ -90,6 +105,8 @@ class ComponentManager
 public:
 	ComponentManager();
 	~ComponentManager();
+
+	void Update(const float& deltaTime);
 
 	template<typename T>
 	void RegisterComponent()
@@ -137,6 +154,12 @@ public:
 	{
 		// Get a reference to a component from the array for an entity
 		return GetComponentArray<T>()->GetComponent(entity);
+	}
+
+	template<typename T>
+	std::array<T, MAX_ENTITIES_COUNT>& GetAllComponents()
+	{
+		return GetComponentArray<T>()->m_componentArray;
 	}
 
 	void EntityDestroyed(const EntityID& entity)

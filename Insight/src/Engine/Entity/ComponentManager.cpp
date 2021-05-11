@@ -7,11 +7,20 @@
 
 ComponentManager::ComponentManager()
 {
-	//RegisterComponent<CameraComponent>();
-	//RegisterComponent<TransformComponent>();
-	//RegisterComponent<MeshComponent>();
+	RegisterComponent<CameraComponent>();
+	RegisterComponent<TransformComponent>();
+	RegisterComponent<MeshComponent>();
 }
 
 ComponentManager::~ComponentManager()
 {
+}
+
+void ComponentManager::Update(const float& deltaTime)
+{
+	IS_PROFILE_FUNCTION();
+	for (auto& componentArray : m_componentArrays)
+	{
+		componentArray.second->Update(deltaTime);
+	}
 }

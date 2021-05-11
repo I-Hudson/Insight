@@ -5,7 +5,8 @@
 class PlayerController : public Component
 {
 public:
-	explicit PlayerController(const EntityID& entity);
+	PlayerController();
+	explicit PlayerController(EntityManager* entityManager, const EntityID& entity);
 
 	//virtual void OnCreate() override;
 	virtual void OnUpdate(const float& deltaTime) override;

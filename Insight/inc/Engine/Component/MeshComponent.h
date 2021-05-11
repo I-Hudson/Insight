@@ -15,7 +15,7 @@ IS_API REFLECT_CLASS(MeshComponent), public Component
 
 public:
 	MeshComponent() { }
-	MeshComponent(const EntityID& entity);
+	MeshComponent(EntityManager* entityManager,const EntityID& entity);
 	virtual ~MeshComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;

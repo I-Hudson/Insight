@@ -4,11 +4,16 @@
 
 REGISTER_DEF_TYPE(Entity);
 
-Entity::Entity(EntityManager* entityManager, EntityID id)
-	: Serializable(this, false), m_entityManager(entityManager), m_entityID(id)
-{
+Entity::Entity()
+	: Serializable(this, false), m_entityManager(nullptr), m_entityID(-1), m_parentEntityID(-1)
+{ }
 
-}
+Entity::Entity(EntityManager* entityManager, EntityID id)
+	: Serializable(this, false), m_entityManager(entityManager), m_entityID(id), m_parentEntityID(-1)
+{ }
+
+Entity::~Entity()
+{ }
 
 void Entity::SetName(const std::string& name)
 {
@@ -21,12 +26,10 @@ void Entity::SetName(const std::string& name)
 }
 
 void Entity::Serialize(Serialization::SerializableElement* element, bool force)
-{
-}
+{ }
 
 void Entity::Deserialize(Serialization::SerializableElement* element, bool force)
-{
-}
+{ }
 
 void Entity::SetParent(const EntityID& entity)
 {

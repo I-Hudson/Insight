@@ -7,8 +7,12 @@
 
 REGISTER_DEF_TYPE(PlayerController);
 
-PlayerController::PlayerController(const EntityID& entity)
-	: Component(entity)
+PlayerController::PlayerController()
+	: Component(nullptr, -1)
+{ }
+
+PlayerController::PlayerController(EntityManager* entityManager, const EntityID& entity)
+	: Component(entityManager, entity)
 {
 	//SetType<PlayerController>();
 }

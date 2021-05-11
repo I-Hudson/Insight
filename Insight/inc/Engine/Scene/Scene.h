@@ -35,6 +35,11 @@ public:
 	void Clean();
 
 	Entity GetEntity(const EntityID& entity) { return m_entityManager.GetEntity(entity); }
+	template<typename T>
+	std::array<T, MAX_ENTITIES_COUNT>& GetAllComponents()
+	{
+		return m_componentManager.GetAllComponents<T>();
+	}
 
 private:
 	EntityManager& GetEntityManager() { return m_entityManager; }

@@ -7,8 +7,8 @@
 
 REGISTER_DEF_TYPE(MeshComponent);
 
-MeshComponent::MeshComponent(const EntityID& entity)
-	: Component(entity)
+MeshComponent::MeshComponent(EntityManager* entityManager, const EntityID& entity)
+	: Component(entityManager, entity)
 {
 	//SetType<MeshComponent>();
 	//m_updateEveryFarme = false;
@@ -102,6 +102,6 @@ void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& m
 //	//SetMesh(ModelLibrary::Instance()->GetAsset(in->FirstChildElement("ModelUUID")->GetText())->GetSubMesh(in->FirstChildElement("SubMeshIndex")->IntText()));
 //}
 
-void OnUpdate(const float& a_deltaTime)
+void MeshComponent::OnUpdate(const float& a_deltaTime)
 {
 }

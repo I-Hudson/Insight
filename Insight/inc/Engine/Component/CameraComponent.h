@@ -15,7 +15,7 @@ class IS_API CameraComponent : public Component
 {
 public:
 	CameraComponent() { }
-	CameraComponent(const EntityID& entity);
+	CameraComponent(EntityManager* entityManager, const EntityID& entity);
 	virtual ~CameraComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;

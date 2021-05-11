@@ -7,7 +7,7 @@ class IS_API TransformComponent : public Component
 {
 public:
 	TransformComponent() { }
-	TransformComponent(const EntityID& entity);
+	TransformComponent(EntityManager* entityManager, const EntityID& entity);
 	virtual ~TransformComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;

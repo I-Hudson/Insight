@@ -16,7 +16,7 @@ Scene* Scene::s_CurrentScene;
 
 Scene::Scene(const std::string& sceneName)
 	: m_sceneName(sceneName)
-	, m_entityManager(EntityManager(this))
+	, m_entityManager(EntityManager(this, m_componentManager))
 #ifdef IS_EDITOR
 	, m_isPlaying(false)
 #else 
@@ -156,10 +156,7 @@ void Scene::OnUpdate(const float& deltaTime)
 		return;
 	}
 
-	/*for (auto it = m_updateComponents.begin(); it != m_updateComponents.end(); ++it)
-	{
-		(*it)->OnUpdate(deltaTime);
-	}*/
+	m_componentManager.Update(deltaTime);
 }
 
 void Scene::OnViewportResize(uint32_t width, uint32_t height)

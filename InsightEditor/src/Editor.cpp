@@ -6,9 +6,13 @@ class EditorApp : public Application
 {
 public:
 	Module::EditorModule* m_editorModule;
-	Entity* m_editorCamera = nullptr;
+
+	EntityManager m_entityManager;
+	ComponentManager m_componentManager;
+	Entity m_editorCamera;
 
 	EditorApp() : Application()
+		, m_entityManager(EntityManager(nullptr, m_componentManager))
 	{ }
 
 	virtual void Create() override
@@ -62,40 +66,29 @@ public:
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
 
-		Entity& e = Scene::ActiveScene()->CreateEntity("New Entity");
-		e.SetName("New Test Entity");
-		e.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+		m_editorCamera = m_entityManager.CreateEntity();
+		m_editorCamera.AddComponent<TransformComponent>();
+		m_editorCamera.SetName("New Test Entity");
+		m_editorCamera.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
 
-		CameraComponent& camera = e.AddComponent<CameraComponent>();
-		camera.SetProjMatrix(60, 0.1f, 1000.0f);
+		CameraComponent& camera = m_editorCamera.AddComponent<CameraComponent>();
+		camera.SetProjMatrix(90.0f, 0.1f, 1000.0f);
 		camera.SetCameraSpeed(50.0f);
 		Module::GraphicsModule::Instance()->SetMainCamera(&camera);
 
-		//for (size_t i = 0; i < 1; i++)
-		//{
-		//	auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
-		//	Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
-		//	meshComponent->SetModel(model);
-		//	meshComponent->GetEntity()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(rand() + 50, 0, 0));
-		//}
-
-
-		//meshComponent = Entity::Create("Nano suit Entity")->AddComponent<MeshComponent>();
-		//model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
-		//meshComponent->SetModel(model);
-		//meshComponent->GetEntity().lock()->GetComponent<TransformComponent>()->SetPosition(glm::vec3(5,0,0));
-
-		//auto meshComponent = Entity::New("Building Entity")->AddComponent<MeshComponent>();
-		//auto model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
-		//meshComponent->SetModel(model);
+		for (size_t i = 0; i < 1; i++)
+		{
+			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
+			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
+			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+			meshComponent.SetModel(model);
+			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition(glm::vec3(rand() + 50, 0, 0));
+		}
 	}
 
 	virtual void Update(const float deltaTime) override
 	{
-		if (m_editorCamera)
-		{
-			//m_editorCamera->OnUpdate(deltaTime);
-		}
+		m_componentManager.Update(deltaTime);
 	}
 
 	virtual void Draw() override
@@ -109,7 +102,7 @@ public:
 
 	~EditorApp()
 	{
-		::Delete(m_editorCamera);
+		m_entityManager.DestroyEntity(m_editorCamera.GetEntityID());
 	}
 };
 
