@@ -208,6 +208,8 @@ namespace Insight::Graphics
 		RenderGraphResource& SetDepthStencilInput(const std::string& name);
 
 		void SetPassQueue(RenderPassQueue passQueue) { m_passQueue = passQueue; }
+		const RenderPassQueue& GetPassQueue() const { return m_passQueue; }
+
 		void SetRenderFunc(RenderPassRenderFunc func) { m_renderFunc = func; }
 		void OnBeginRender(RenderPassBeginRenderFunc func) { m_beginRenderFunc = func; }
 		void OnEndRender(RenderPassEndRenderFunc func) { m_endRenderFunc = func; }

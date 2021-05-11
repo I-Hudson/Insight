@@ -133,7 +133,7 @@ namespace Insight::Graphics
 		virtual void BlipImageToSwapchain(GPUImage* srcImage, GPUImage* dstImage) = 0;
 
 		virtual void BindPipeline(PipelineBindPoint bindPoint, GPUPipeline* pipeline) = 0;
-		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
+		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, GPUDescriptorSet** descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) = 0;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, GPUBuffer** buffers, u32* offsets) = 0;
 		virtual void BindIndexBuffer(GPUBuffer* buffer, u32 offset, GPUCommandBufferIndexType indexType) = 0;
 		

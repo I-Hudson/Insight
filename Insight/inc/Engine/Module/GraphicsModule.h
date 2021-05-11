@@ -31,8 +31,6 @@ namespace Module
 		const bool HasMainCamera();
 		const bool IsThisMainCamera(CameraComponent* camera);
 
-		static Material* GetDefaultMaterial();
-
 		struct GraphicsConfig
 		{
 			CVar<int> Validation{ "validation", 1 };
@@ -47,7 +45,6 @@ namespace Module
 		};
 
 	private:
-		Renderer* m_renderer;
 		ImGuiRenderer* m_imguiRenderer;
 
 		static CameraComponent* m_mainCamera;

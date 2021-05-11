@@ -23,6 +23,7 @@ namespace Insight::Graphics
 
     using GPUSamplerCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUSampler*>;
     using GPUShaderCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUShader*>;
+    using GPUImageCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUImage*>;
 }
 
 class GPUContext;
@@ -106,8 +107,10 @@ protected:
     FeatureLevel m_featureLevel;
 
     Insight::Graphics::GPUCommandPool* m_defaultCommandPool;
+
     Insight::Graphics::GPUSamplerCache m_samplerCache;
     Insight::Graphics::GPUShaderCache m_shaderCache;
+    Insight::Graphics::GPUImageCache m_imageCache;
 
     struct DefaultData;
     DefaultData* m_defaultData;

@@ -12,7 +12,6 @@
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
 
-// TESTING
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/Graphics/Image/GPUImage.h"
@@ -22,8 +21,6 @@
 #include "Engine/Graphics/GPUDynamicBuffer.h"
 #include "Engine/Graphics/GPUSync.h"
 #include "stb_image.h"
-#define RENDER_GRAPH_TESTING 1
-// TESTING
 
 namespace Module
 {
@@ -31,100 +28,90 @@ namespace Module
 	std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
 	GraphicsModule::GraphicsModule()
-		: m_renderer(nullptr)
 	{
-#if RENDER_GRAPH_TESTING
+		PixelFormatExtensions::Init();
+		GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+
 		{
-			PixelFormatExtensions::Init();
+			using namespace Insight;
 
-			// TESTING
-			GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+			Graphics::GPUShader* shader = Graphics::GPUShader::New();
+			shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
+			shader->Compile();
+			::Delete(shader);
 
-			{
-				using namespace Insight;
+			Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
+			image->Init(Insight::Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
+			Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
+			view->Init(image);
+			::Delete(image);
+			::Delete(view);
 
-				Graphics::GPUShader* shader = Graphics::GPUShader::New();
-				shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
-				shader->Compile();
-				::Delete(shader);
+			Graphics::GPUCommandPool* cmdPool = Graphics::GPUCommandPool::New();
+			cmdPool->Init(Graphics::GPUCommandPoolDesc(Graphics::GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
+			auto* cmdBuffer = cmdPool->AllocateCommandBuffer(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
 
-				Insight::Graphics::GPUImage* image = Insight::Graphics::GPUImage::New();
-				image->Init(Insight::Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/embed2.jpg"));
-				Insight::Graphics::GPUImageView* view = Insight::Graphics::GPUImageView::New();
-				view->Init(image);
-				::Delete(image);
-				::Delete(view);
+			Graphics::GPUBuffer* gpuBuffer = Graphics::GPUBuffer::New();
+			Graphics::GPUBuffer* gpuBuffer1 = Graphics::GPUBuffer::New();
+			glm::vec4 vec4 = glm::vec4(1.0f, 2.0f, 3.0f, 4.0f);
+			Graphics::GPUBufferDesc desc = Graphics::GPUBufferDesc::Vertex(16, 1, &vec4);
+			gpuBuffer->Init(desc);
+			desc.Flags = Graphics::GPUBufferFlags::VERTEX | Graphics::GPUBufferFlags::TRANSFER_SRC;
+			gpuBuffer1->Init(desc);
 
-				Graphics::GPUCommandPool* cmdPool = Graphics::GPUCommandPool::New();
-				cmdPool->Init(Graphics::GPUCommandPoolDesc(Graphics::GPUCommandPoolFlags::TRANSIENT, GPUQueue::GRAPHICS));
-				auto* cmdBuffer = cmdPool->AllocateCommandBuffer(Graphics::GPUCommandBufferDesc::CreateOneTimeCmdBuffer());
+			///
+			// Get data from a GPU buffer
+			///
+			std::vector<Byte> gpuBufferData;
+			gpuBuffer->GetData(gpuBufferData);
+			void* dataPtr = gpuBufferData.data();
+			glm::vec4 returnedValue = *static_cast<glm::vec4*>(dataPtr);
 
-				Graphics::GPUBuffer* gpuBuffer = Graphics::GPUBuffer::New();
-				Graphics::GPUBuffer* gpuBuffer1 = Graphics::GPUBuffer::New();
-				glm::vec4 vec4 = glm::vec4(1.0f, 2.0f, 3.0f, 4.0f);
-				Graphics::GPUBufferDesc desc = Graphics::GPUBufferDesc::Vertex(16, 1, &vec4);
-				gpuBuffer->Init(desc);
-				desc.Flags = Graphics::GPUBufferFlags::VERTEX | Graphics::GPUBufferFlags::TRANSFER_SRC;
-				gpuBuffer1->Init(desc);
+			///
+			// Set data to a GPU buffer
+			///
+			vec4 = glm::vec4(10, 20, 30, 40);
+			gpuBuffer->SetData(&vec4, sizeof(glm::vec4));
 
-				///
-				// Get data from a GPU buffer
-				///
-				std::vector<Byte> gpuBufferData;
-				gpuBuffer->GetData(gpuBufferData);
-				void* dataPtr = gpuBufferData.data();
-				glm::vec4 returnedValue = *static_cast<glm::vec4*>(dataPtr);
+			///
+			// Get data from a GPU buffer
+			///
+			gpuBuffer->GetData(gpuBufferData);
+			dataPtr = gpuBufferData.data();
+			returnedValue = *static_cast<glm::vec4*>(dataPtr);
 
-				///
-				// Set data to a GPU buffer
-				///
-				vec4 = glm::vec4(10, 20, 30, 40);
-				gpuBuffer->SetData(&vec4, sizeof(glm::vec4));
+			cmdBuffer->BeginRecord();
+			std::vector<Graphics::GPUBuffer*> vBuffers = { gpuBuffer };
+			std::vector<u32> vOffsets = { 0 };
+			cmdBuffer->BindVertexBuffers(0, 1, vBuffers.data(), vOffsets.data());
 
-				///
-				// Get data from a GPU buffer
-				///
-				gpuBuffer->GetData(gpuBufferData);
-				dataPtr = gpuBufferData.data();
-				returnedValue = *static_cast<glm::vec4*>(dataPtr);
+			vBuffers = { gpuBuffer, gpuBuffer1 };
+			vOffsets = { 0, 0 };
+			cmdBuffer->BindVertexBuffers(0, 2, vBuffers.data(), vOffsets.data());
 
-				cmdBuffer->BeginRecord();
-				std::vector<Graphics::GPUBuffer*> vBuffers = { gpuBuffer };
-				std::vector<u32> vOffsets = { 0 };
-				cmdBuffer->BindVertexBuffers(0, 1, vBuffers.data(), vOffsets.data());
+			cmdBuffer->EndRecord();
 
-				vBuffers = { gpuBuffer, gpuBuffer1 };
-				vOffsets = { 0, 0 };
-				cmdBuffer->BindVertexBuffers(0, 2, vBuffers.data(), vOffsets.data());
+			Graphics::GPUDynamicBuffer* dyanmicBuffer = Graphics::GPUDynamicBuffer::New();
+			dyanmicBuffer->Init(Graphics::GPUDynamicBufferDesc::Uniform(64, 256, 1000));
+			dyanmicBuffer->SetName("Dynamic Uniform Buffer");
 
-				cmdBuffer->EndRecord();
+			Graphics::GPUBuffer* sub1 = dyanmicBuffer->Upload(&vec4, 16);
+			std::vector<u8> vector; vector.resize(128);
+			Graphics::GPUBuffer* sub2 = dyanmicBuffer->Upload(vector.data(), sizeof(u8) * vector.size());
+			dyanmicBuffer->Reset();
 
-				Graphics::GPUDynamicBuffer* dyanmicBuffer = Graphics::GPUDynamicBuffer::New();
-				dyanmicBuffer->Init(Graphics::GPUDynamicBufferDesc::Uniform(64, 256, 1000));
-				dyanmicBuffer->SetName("Dynamic Uniform Buffer");
-
-				Graphics::GPUBuffer* sub1 = dyanmicBuffer->Upload(&vec4, 16);
-				std::vector<u8> vector; vector.resize(128);
-				Graphics::GPUBuffer* sub2 = dyanmicBuffer->Upload(vector.data(), sizeof(u8) * vector.size());
-				dyanmicBuffer->Reset();
-
-				::Delete(dyanmicBuffer);
-				::Delete(gpuBuffer);
-				::Delete(gpuBuffer1);
-				::Delete(cmdBuffer);
-				::Delete(cmdPool);
+			::Delete(dyanmicBuffer);
+			::Delete(gpuBuffer);
+			::Delete(gpuBuffer1);
+			::Delete(cmdBuffer);
+			::Delete(cmdPool);
 
 
-			}
-			Insight::Graphics::RenderGraph* graph = Insight::Graphics::RenderGraph::New();
 		}
-#endif
-		//m_renderer = Renderer::New();
-		//m_renderer->Init();
+		Insight::Graphics::RenderGraph* graph = Insight::Graphics::RenderGraph::New();
+
 
 		m_imguiRenderer = ImGuiRenderer::New();
-		//ImGuiRenderer::Instance()->Init(m_renderer);
-
 	}
 
 	GraphicsModule::~GraphicsModule()
@@ -137,32 +124,15 @@ namespace Module
 			::Delete(m_imguiRenderer);
 		}
 
-#if RENDER_GRAPH_TESTING
-		// TESTING
 		::Delete(Insight::Graphics::RenderGraph::Instance());
 		GPUDevice::Instance()->Dispose();
 		::Delete(GPUDevice::Instance());
-#endif
-
-		if (m_renderer)
-		{
-			::Delete(m_renderer);
-		}
 	}
 
 	u32 imageIndex = 0;
 	void GraphicsModule::Update(const float& deltaTime)
 	{
 		IS_PROFILE_FUNCTION();
-		if (m_renderer != nullptr)
-		{
-			m_renderer->Render(m_mainCamera, m_meshs);
-		}
-		else
-		{
-			IS_CORE_ERROR("[GraphicsModule::Update] No renderer setup.");
-		}
-
 		{
 			IS_PROFILE_SCOPE("RenderGraph: Create");
 
@@ -181,15 +151,6 @@ namespace Module
 			depthOutput.Name = "depth";
 			depthOutput.Format = PixelFormat::D24_UNorm_S8_UInt;
 
-			auto& lightingPass = Graphics::RenderGraph::Instance()->AddPass("LightingPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			lightingPass.AddColorInput("colour");
-			lightingPass.AddColorInput("normal");
-			lightingPass.AddColorInput("position");
-			lightingPass.AddColorInput("pointLights");
-			lightingPass.SetDepthStencilInput("shaderDepthStencil");
-			lightingPass.AddColorOutput("lightingOutput", mainPassOutput);
-			lightingPass.SetClearColour(glm::vec4(0, 1, 1, 1));
-
 			auto& shadowPass = Graphics::RenderGraph::Instance()->AddPass("shadowPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
 			shadowPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
 			shadowPass.SetClearDepthStencil(glm::vec2(1, 0));
@@ -199,8 +160,9 @@ namespace Module
 			mainPass.AddColorOutput("colour", mainPassOutput);
 			mainPass.AddColorOutput("normal", mainPassOutput);
 			mainPass.AddColorOutput("position", mainPassOutput);
-			mainPass.SetDepthStencilInput("shaderDepthStencil");
+			mainPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
 
+			mainPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
 			mainPass.SetClearColour(glm::vec4(0, 1, 0, 1));
 			mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 			{
@@ -216,17 +178,33 @@ namespace Module
 				// bind material
 				// bind buffers
 				// Draw mesh, 
-				
+
 				UBO ubo = {
-					m_mainCamera->GetProjMatrix(), 
-					m_mainCamera->GetViewMatrix(), 
-					glm::mat4(1.0f), 
+					m_mainCamera->GetProjMatrix(),
+					m_mainCamera->GetViewMatrix(),
+					glm::mat4(1.0f),
 					glm::vec4(5.0f, 5.0f, 5.0f, 1.0f)
 				};
+				ubo.Proj[1][1] *= -1;
 				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 				glm::mat4 modelMatrix(1.0f);
 				Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
+				int textureDiffuse = 1;
+				Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
+
+				Graphics::GPUImage* diffuseTexture = nullptr;
+				Utils::Hasher diffuseTextureHasher;
+				diffuseTextureHasher.Hash("./data/models/nano/body_dif.png");
+				if (Graphics::GPUImageCache::Instance()->GetItem(diffuseTextureHasher.GetHash(), diffuseTexture))
+				{
+					diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, "./data/models/nano/body_dif.png"));
+				}
+
+				Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
+				pass.AddLifeTimeObject(diffuseTextureView);
+				diffuseTextureView->Init(diffuseTexture);
 
 				Graphics::GPUShader* defaultShader = nullptr;
 				if (Graphics::GPUShaderCache::Instance()->GetItem(0, defaultShader))
@@ -242,19 +220,22 @@ namespace Module
 					IS_PROFILE_SCOPE("Default pipeline create and bind");
 					pass.AddLifeTimeObject(defaultPipeline);
 					defaultPipeline->SetShader(defaultShader);
-					defaultPipeline->BuildPipeline(pass.GetGraphPass());
+					defaultPipeline->Init(pass.GetGraphPass(), Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
 					cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 				}
 
-				Graphics::GPUDescriptorSet* testSet = Graphics::GPUDescriptorSet::New();
+				Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
+				Graphics::GPUDescriptorSet* fragSet = Graphics::GPUDescriptorSet::New();
 				{
 					IS_PROFILE_SCOPE("Build descriptor set");
-
 					builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-						->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(testSet);
+						->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
+
+					builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
+						->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
 				}
-				Graphics::GPUDescriptorSet* sets[] = { testSet };
-				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, 1, sets[0], 0, nullptr);
+				Graphics::GPUDescriptorSet* sets[] = { vertexSet, fragSet };
+				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
 				{
 					IS_PROFILE_SCOPE("Upload mesh vertices");
@@ -282,27 +263,12 @@ namespace Module
 					}
 				}
 
-				::Delete(testSet);
+				::Delete(vertexSet);
+				::Delete(fragSet);
 			});
-
-			auto& pointLights = Graphics::RenderGraph::Instance()->AddPass("pointLights", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			pointLights.SetDepthStencilInput("shaderDepthStencil");
-			pointLights.AddColorOutput("pointLights", mainPassOutput);
-			pointLights.SetClearColour({ 1, 0, 1, 1 });
 		}
 
-		if (imageIndex % 3 == 0)
-		{
-			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("lightingOutput");
-		}
-		else if (imageIndex % 3 == 1)
-		{
-			//Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("pointLights");
-		}
-		else if (imageIndex % 3 == 2)
-		{
-		}
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
+		Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("colour");
 		++imageIndex;
 
 		m_imguiRenderer->EndFrame();
@@ -315,10 +281,7 @@ namespace Module
 
 	void GraphicsModule::WaitForIdle()
 	{
-		if (m_renderer)
-		{
-			m_renderer->WaitForIdle();
-		}
+		GPUDevice::Instance()->WaitForGPU();
 	}
 
 	GraphicsRendererAPI GraphicsModule::GetAPI()
@@ -339,10 +302,5 @@ namespace Module
 	const bool GraphicsModule::IsThisMainCamera(CameraComponent* camera)
 	{
 		return camera == m_mainCamera;
-	}
-
-	Material* GraphicsModule::GetDefaultMaterial()
-	{
-		return GraphicsModule::Instance()->m_renderer->GetDefaultMaterial();
 	}
 }

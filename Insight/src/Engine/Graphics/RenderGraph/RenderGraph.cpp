@@ -50,7 +50,7 @@ namespace Insight::Graphics
 
 			sub.Pipeline = GPUPipeline::New();
 			sub.Pipeline->SetShader(sub.Shader);
-			sub.Pipeline->BuildPipeline(sub.GraphPass);
+			sub.Pipeline->Init(sub.GraphPass, Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
 		}
 
 		m_swapchainPresentPass.SetClearColour(glm::vec4(0.9f, 0.2f, 0.7f, 1.0f));
@@ -66,7 +66,7 @@ namespace Insight::Graphics
 			builder->BindImage(0, sampleImage, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(samplerSet);
 
 			Graphics::GPUDescriptorSet* sets[] = { samplerSet };
-			cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, swapchain.Pipeline, 0, 1, sets[0], 0, nullptr);
+			cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, swapchain.Pipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
 			cmdBuffer->Draw(3, 1, 0, 0);
 

@@ -229,6 +229,42 @@ enum class PipelineBindPoint
     Ray_Tracing = 2,
 };
 
+enum class PrimitiveTopologyType
+{
+    Point_List = 0,
+    Line_List = 1,
+    Line_Strip = 2,
+    Triangle_List = 3,
+    Triangle_Strip = 4,
+    Triangle_Fan = 5,
+    Line_List_With_Adjacency = 6,
+    Line_Strip_With_Adjacency = 7,
+    Triangle_List_With_Adjacency = 8,
+    Triangle_Strip_With_Adjacency = 9,
+    Patch_List = 10,
+};
+
+enum class PolygonMode
+{
+    Fill = 0,
+    Line = 1,
+    Point = 2,
+};
+
+enum class CullMode
+{
+    None = 0,
+    Front = 1,
+    Back = 2,
+    Front_And_Back = 3,
+};
+
+enum class FrontFace
+{
+    Counter_Clockwise = 0,
+    Clockwise = 1,
+};
+
 /// <summary>
 /// Define the different stages a shader can have.
 /// </summary>

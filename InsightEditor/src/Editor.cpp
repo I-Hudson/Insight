@@ -66,8 +66,9 @@ public:
 		cameraComponent->SetProjMatrix(60, 0.1f, 1000.0f);
 		cameraComponent->SetCameraSpeed(50.0f);
 		Module::GraphicsModule::Instance()->SetMainCamera(cameraComponent);
+		m_editorCamera->GetComponent<TransformComponent>()->SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
 
-		for (size_t i = 0; i < 0; i++)
+		for (size_t i = 0; i < 1; i++)
 		{
 			auto meshComponent = Entity::New("Nano suit Entity")->AddComponent<MeshComponent>();
 			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");

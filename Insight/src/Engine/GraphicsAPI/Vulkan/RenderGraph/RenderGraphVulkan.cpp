@@ -39,20 +39,32 @@ namespace Insight::GraphicsAPI::Vulkan
 				auto& res = renderPass.GetTextureResource(attIndex);
 				VkAttachmentDescription attach = {};
 				attach.samples = ToVulkanSampleCount(res.TextureInfo.m_info.Samples);
-				attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+
+				if (renderPass.GetPassQueue() == Graphics::RenderPassQueue::Default)
+				{
+					attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					attach.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				}
+				else
+				{
+					attach.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+					attach.initialLayout = ToVulkanImageLayout(res.TextureInfo.ImageLayout);
+				}
+
 				attach.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 				attach.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				attach.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
 				attach.format = ToVulkanFormat(res.TextureInfo.m_info.Format);
-				attach.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				attach.finalLayout = ToVulkanImageLayout(res.TextureInfo.ImageLayout);
 				attachmentDesc.push_back(attach);
+
 
 				if (res.TextureInfo.ImageLayout == ImageLayout::Color_Attachment || res.TextureInfo.ImageLayout == ImageLayout::Shader_Read_Only)
 				{
 					colourAttachRefs.push_back({ index, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 				}
+
 				const GPUImageViewVulkan* imageView = static_cast<const GPUImageViewVulkan*>(renderPass.GetPhysicalImageView(res.GetPhysicalIndex()));
 				fbAttachments.push_back(imageView->GetImageView());
 				++index;
@@ -67,13 +79,22 @@ namespace Insight::GraphicsAPI::Vulkan
 				auto& res = renderPass.GetTextureResource(renderPass.GetDepthStencilOutput().GetIndex());
 				VkAttachmentDescription attach = {};
 				attach.samples = ToVulkanSampleCount(res.TextureInfo.m_info.Samples);
-				attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				if (renderPass.GetPassQueue() == Graphics::RenderPassQueue::Default)
+				{
+					attach.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+					attach.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				}
+				else
+				{
+					attach.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+					attach.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				}
+
 				attach.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 				attach.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				attach.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
 				attach.format = ToVulkanFormat(res.TextureInfo.m_info.Format);
-				attach.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				attach.finalLayout = ToVulkanImageLayout(res.TextureInfo.ImageLayout);
 				attachmentDesc.push_back(attach);
 
@@ -113,7 +134,7 @@ namespace Insight::GraphicsAPI::Vulkan
 			renderPassInfo.attachmentCount = static_cast<uint32_t>(attachmentDesc.size());
 			renderPassInfo.subpassCount = 1;
 			renderPassInfo.pSubpasses = &subpass;
-			renderPassInfo.dependencyCount = 2;
+			renderPassInfo.dependencyCount = (u32)dependencies.size();
 			renderPassInfo.pDependencies = dependencies.data();
 
 			ThrowIfFailed(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass));

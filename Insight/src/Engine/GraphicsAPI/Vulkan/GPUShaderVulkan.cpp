@@ -201,9 +201,10 @@ namespace Insight::GraphicsAPI::Vulkan
 		m_shader = shader;
 	}
 
-	void GPUPipelineVulkan::BuildPipeline(Graphics::GPURenderGraphPass* graphPass)
+	void GPUPipelineVulkan::Init(Graphics::GPURenderGraphPass* graphPass, Graphics::GPUPipelineDesc& desc)
 	{
 		ReleaseGPU();
+		m_desc = desc;
 
 		ASSERT(m_shader && "[GPUPipelineVulkan::BuildPipeline] Shader must be valid to build a pipeline.");
 
@@ -238,8 +239,8 @@ namespace Insight::GraphicsAPI::Vulkan
 			outColorAttachments = graphPassVulkan->GetRenderPass().GetColorOutputs().size();
 		}
 
-		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, 0, VK_FALSE);
-		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE, 0);;
+		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo((VkPrimitiveTopology)m_desc.PrimitiveTopologyType, 0, VK_FALSE);
+		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo((VkPolygonMode)m_desc.PolygonMode, (VkCullModeFlags)m_desc.CullMode, (VkFrontFace)m_desc.FrontFace, 0);
 		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, outColorAttachments);
 		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(outColorAttachments, blendAttachmentStates.data());
 		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);

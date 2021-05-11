@@ -500,6 +500,10 @@ bool GPUDeviceVulkan::Init()
 	{
 		return Insight::Graphics::GPUShader::New();
 	});
+	m_imageCache.SetCreateFunc([]()
+	{
+		return Insight::Graphics::GPUImage::New();
+	});
 
 	ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &VmaAllocator));
 
@@ -541,6 +545,7 @@ void GPUDeviceVulkan::Dispose()
 
 	m_samplerCache.ReleaseGPUAll();
 	m_shaderCache.ReleaseGPUAll();
+	m_imageCache.ReleaseGPUAll();
 
 	//SAFE_DELETE(GraphicsQueue);
 	//SAFE_DELETE(ComputeQueue);

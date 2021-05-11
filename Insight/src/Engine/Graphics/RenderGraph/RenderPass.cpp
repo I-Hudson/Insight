@@ -29,6 +29,7 @@ namespace Insight::Graphics
 		res.AddWrittenInPass(m_passIndex);
 		res.TextureInfo.SetAttachmentInfo(attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Color_Attachment);
+		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Sampled);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
 		res.TextureInfo.ImageLayout = ImageLayout::Shader_Read_Only;
 		m_colorOutputs.push_back(res.GetIndex());

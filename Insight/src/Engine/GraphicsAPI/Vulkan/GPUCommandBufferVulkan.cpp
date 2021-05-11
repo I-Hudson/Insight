@@ -132,18 +132,20 @@ namespace Insight::GraphicsAPI::Vulkan
 		std::vector<VkClearValue> clearColors;
 		for (size_t i = 0; i < renderPass->m_colorAttachmentsCount; ++i)
 		{
+			glm::vec4 clearColor = renderPass->GetRenderPass().GetClearColor();
 			VkClearValue v;
-			v.color.float32[0] = renderPass->GetRenderPass().GetClearColor().x;
-			v.color.float32[1] = renderPass->GetRenderPass().GetClearColor().y;
-			v.color.float32[2] = renderPass->GetRenderPass().GetClearColor().z;
-			v.color.float32[3] = renderPass->GetRenderPass().GetClearColor().w;
+			v.color.float32[0] = clearColor.x;
+			v.color.float32[1] = clearColor.y;
+			v.color.float32[2] = clearColor.z;
+			v.color.float32[3] = clearColor.w;
 			clearColors.push_back(v);
 		}
 		if (renderPass->GetRenderPass().IsDepthSencilOuputValid())
 		{
+			glm::vec2 clearColor = renderPass->GetRenderPass().GetClearDepthStencil();
 			VkClearValue v;
-			v.depthStencil.depth = (float)renderPass->GetRenderPass().GetClearDepthStencil().x;
-			v.depthStencil.stencil = (u32)renderPass->GetRenderPass().GetClearDepthStencil().y;
+			v.depthStencil.depth = (float)clearColor.x;
+			v.depthStencil.stencil = (u32)clearColor.y;
 			clearColors.push_back(v);
 		}
 
@@ -442,7 +444,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkCmdBindPipeline(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipeline());
 	}
 
-	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet* descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
+	void GPUCommandBufferVulkan::BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet** descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets)
 	{
 		IS_PROFILE_FUNCTION();
 		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindDescriptorSets] Command Buffer must be recording.");
@@ -450,7 +452,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		std::vector<VkDescriptorSet> sets;
 		for (u32 i = 0; i < descriptorSetCount; ++i)
 		{
-			GPUDescriptorSetVulkan* ptr = static_cast<GPUDescriptorSetVulkan*>(descriptorSets + (i * sizeof(Graphics::GPUDescriptorSet*)));
+			GPUDescriptorSetVulkan* ptr = static_cast<GPUDescriptorSetVulkan*>(descriptorSets[i]);
 			sets.push_back(ptr->GetSetVulkan());
 		}
 		vkCmdBindDescriptorSets(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipelineLayout(), firstSet, descriptorSetCount, sets.data(), dynamicOffsetCount, dynamicOffsets);

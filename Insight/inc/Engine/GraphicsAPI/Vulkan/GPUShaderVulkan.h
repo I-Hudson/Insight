@@ -58,7 +58,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual ~GPUPipelineVulkan() override;
 
 		virtual void SetShader(Graphics::GPUShader* shader) override;
-		virtual void BuildPipeline(Graphics::GPURenderGraphPass* graphPass) override;
+		virtual void Init(Graphics::GPURenderGraphPass* graphPass, Graphics::GPUPipelineDesc& desc) override;
 
 		VkPipeline GetPipeline() const { return m_pipeline; }
 		VkPipelineLayout GetPipelineLayout() const { return m_layout; }

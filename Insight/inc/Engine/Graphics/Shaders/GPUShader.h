@@ -158,16 +158,42 @@ namespace Insight::Graphics
 		std::array<GPUShaderStage, (size_t)ShaderStage::Count> m_stages;
 	};
 
+
+	/// <summary>
+	/// GPUPipeline
+	/// </summary>
+
+	struct GPUPipelineDesc
+	{
+		GPUPipelineDesc()
+			: PrimitiveTopologyType(PrimitiveTopologyType::Triangle_List), PolygonMode(PolygonMode::Fill)
+			, CullMode(CullMode::Back), FrontFace(FrontFace::Counter_Clockwise)
+		{ }
+		GPUPipelineDesc(PrimitiveTopologyType topologyType, PolygonMode polygonMode, CullMode cullMode, FrontFace frontFace)
+			: PrimitiveTopologyType(topologyType), PolygonMode(polygonMode)
+			, CullMode(cullMode), FrontFace(frontFace)
+		{ }
+
+		PrimitiveTopologyType PrimitiveTopologyType;
+		PolygonMode PolygonMode;
+		CullMode CullMode;
+		FrontFace FrontFace;
+	};
+
 	class GPUPipeline : public GPUResource
 	{
 	public:
 		static GPUPipeline* New();
 
-		GPUPipeline() { }
+		GPUPipeline()
+			: m_desc(GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise))
+		{ }
 		virtual ~GPUPipeline() { }
 
 		virtual void SetShader(Graphics::GPUShader* shader) = 0;
-		virtual void BuildPipeline(GPURenderGraphPass* graphPass) = 0;
+		virtual void Init(GPURenderGraphPass* graphPass, GPUPipelineDesc& desc) = 0;
+
+		const GPUPipelineDesc& GetDesc() const { return m_desc; }
 
 		// [GPUResource]
 		virtual ResourceType GetResourceType() const override { return ResourceType::PipelineState; }
@@ -175,5 +201,6 @@ namespace Insight::Graphics
 
 	protected:
 		GPUShader* m_shader;
+		GPUPipelineDesc m_desc;
 	};
 }
