@@ -64,7 +64,7 @@ INLINE T* New(Args&&... args)
 /// <param name="count"></param>
 /// <returns></returns>
 template<typename T, class MemoryAllocator = Allocator>
-INLINE T* NewArray(U32 count)
+INLINE T* NewArray(u32 count)
 {
 	T* ptr = (T*)MemoryAllocator::Allocate(sizeof(T) * count);
 	T* dst = ptr;
@@ -88,7 +88,7 @@ INLINE T* NewArray(U32 count)
 /// <param name="sizeInBytes"></param>
 /// <returns></returns>
 template<class MemoryAllocator = Allocator>
-INLINE void* NewArrayBytes(U32 sizeInBytes, U64 alignemnt = 16)
+INLINE void* NewArrayBytes(u32 sizeInBytes, u64 alignemnt = 16)
 {
 	void* ptr = MemoryAllocator::Allocate(sizeInBytes, alignemnt);
 
@@ -107,7 +107,7 @@ INLINE void Delete(T* ptr)
 }
 
 template<typename T, class MemoryAllocator = Allocator>
-INLINE void DeleteArray(T* ptr, U32 count)
+INLINE void DeleteArray(T* ptr, u32 count)
 {
 	T* dst = ptr;
 	while (--count)

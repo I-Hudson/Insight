@@ -10,8 +10,6 @@ using Size = size_t;
 
 using U8 = uint8_t; // TODO: Make deprecated 
 using U16 = uint16_t; // TODO: Make deprecated 
-using U32 = uint32_t; // TODO: Make deprecated
-using U64 = uint64_t; // TODO: Make deprecated 
 using U128 = _GUID; // TODO: Make deprecated 
 
 using u8 = uint8_t;

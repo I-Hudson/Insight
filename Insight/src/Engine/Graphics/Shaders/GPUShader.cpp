@@ -60,7 +60,7 @@ namespace Insight::Graphics
 				resource.name,
 				glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
 				glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding),
-				(U32)glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
+				(u32)glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
 			};
 			m_uniforms.push_back(uniform);
 		}
@@ -79,9 +79,9 @@ namespace Insight::Graphics
 		m_parsed = true;
 	}
 
-	const U32 GPUShaderStage::GetInputsSize() const
+	const u32 GPUShaderStage::GetInputsSize() const
 	{
-		U32 size = 0;
+		u32 size = 0;
 		for (auto& input : m_inputs)
 		{
 			size += input.ByteSize;
@@ -89,9 +89,9 @@ namespace Insight::Graphics
 		return size;
 	}
 
-	U32 GPUShaderStage::GetStride()
+	u32 GPUShaderStage::GetStride()
 	{
-		U32 stride = 0;
+		u32 stride = 0;
 		for (auto& input : m_inputs)
 		{
 			stride += input.ByteSize;

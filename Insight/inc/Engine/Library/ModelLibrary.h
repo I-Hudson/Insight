@@ -32,7 +32,7 @@ class Model;
 			struct ModelLoadThread
 			{
 				std::vector<std::string> FilesToLoad;
-				U32 FileOverallSize = 0;
+				u32 FileOverallSize = 0;
 			};
 
 			std::mutex m_lock;

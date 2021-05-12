@@ -13,7 +13,7 @@
 
 		double Sec() const;
 		double Mill() const;
-		U64 Nano() const;
+		u64 Nano() const;
 
 	private:
 		std::chrono::steady_clock::time_point m_startTime;

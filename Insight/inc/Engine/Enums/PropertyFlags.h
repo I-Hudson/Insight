@@ -8,7 +8,7 @@ typedef uint32_t PropertyFlags;
 
 namespace
 {
-	enum IS_PropertyFlags : U32
+	enum IS_PropertyFlags : u32
 	{
 		None = 1 << 0,
 

@@ -46,12 +46,12 @@ namespace Insight::Graphics
         /// <summary>
         /// The buffer total size in bytes.
         /// </summary>
-        U32 Size;
+        u32 Size;
 
         /// <summary>
         /// The buffer structure stride (size in bytes per element).
         /// </summary>
-        U32 Stride;
+        u32 Stride;
 
         /// <summary>
         /// The buffer flags.
@@ -78,7 +78,7 @@ namespace Insight::Graphics
         /// <summary>
         /// Gets the number elements in the buffer.
         /// </summary>
-        FORCE_INLINE U32 GetElementsCount() const
+        FORCE_INLINE u32 GetElementsCount() const
         {
             return Stride > 0 ? Size / Stride : 0;
         }
@@ -88,7 +88,7 @@ namespace Insight::Graphics
         /// </summary>
         void Clear();
 
-        static GPUBufferDesc Buffer(U32 size, GPUBufferFlags flags, PixelFormat format = PixelFormat::Unknown, const void* initData = nullptr, U32 stride = 0);
+        static GPUBufferDesc Buffer(u32 size, GPUBufferFlags flags, PixelFormat format = PixelFormat::Unknown, const void* initData = nullptr, u32 stride = 0);
         static GPUBufferDesc SubBuffer(GPUDynamicBuffer* parentBuffer, u64 begin, u64 size, GPUBufferFlags additionalFlags);
 
         static GPUBufferDesc Uniform(u32 elementStride, u32 elementsCount, void* data)
@@ -187,5 +187,5 @@ namespace Insight::Graphics
         std::string ToString() const;
     };
 
-    U32 GetHash(const GPUBufferDesc& key);
+    u32 GetHash(const GPUBufferDesc& key);
 }

@@ -33,9 +33,9 @@
 			template<typename T>
 			static void DeleteArrOnFreeList(T* ptrToDelete);
 
-			void* AlignedAlloc(const U64& size, const U64& alignment);
+			void* AlignedAlloc(const u64& size, const u64& alignment);
 
-			static void* NewArrOnFreeListVoid(const U64& size, U8 alignment = MemoryUtlis::Alignment);
+			static void* NewArrOnFreeListVoid(const u64& size, U8 alignment = MemoryUtlis::Alignment);
 			static void DeleteArrOnFreeListVoid(void* ptrToDelete);
 
 			static void TrackObject(void* ptr, const std::string& str, const std::string& file, const unsigned int& line);

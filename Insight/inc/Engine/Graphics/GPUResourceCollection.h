@@ -9,14 +9,14 @@ namespace Insight::Graphics
 	class GPUResourceCollection
 	{
 	public:
-		GPUResourceCollection(const U32& size)
+		GPUResourceCollection(const u32& size)
 			: m_collection(size)
 		{ }
 
 		~GPUResourceCollection()
 		{ }
 
-		U64 GetMemoryUsage() const;
+		u64 GetMemoryUsage() const;
 
 		void OnDeviceDestroy();
 

@@ -460,7 +460,7 @@ namespace vks
 		inline std::vector<VkPipelineColorBlendAttachmentState> pipelineColorBlendAttachmentState(
 			VkColorComponentFlags colorWriteMask,
 			VkBool32 blendEnable, 
-			const U32& size)
+			const u32& size)
 		{
 			std::vector<VkPipelineColorBlendAttachmentState> states;
 			states.reserve(size);

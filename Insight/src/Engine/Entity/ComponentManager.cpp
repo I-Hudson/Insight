@@ -14,6 +14,10 @@ ComponentManager::ComponentManager()
 
 ComponentManager::~ComponentManager()
 {
+	for (auto& kvp : m_componentArrays)
+	{
+		::Delete(kvp.second);
+	}
 }
 
 void ComponentManager::Update(const float& deltaTime)

@@ -67,7 +67,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		m_mappedData = nullptr;
 	}
 
-	void GPUBufferVulkan::Upload(void* mapped, void const* data, u32 const& size)
+	void GPUBufferVulkan::Upload(void* mapped, void const* data, u64 const& size)
 	{
 		if (mapped != nullptr)
 		{

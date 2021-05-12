@@ -50,17 +50,17 @@ namespace vks
 
 		virtual void ResetUniformInfo() override;
 
-		virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) override;
+		virtual void UploadUniform(const std::string& key, void* data, const u32& dataSize, MaterialBlockData& materialBlockData) override;
 		virtual void UploadTexture(const std::string& key, Render::Texture* texture) override;
-		virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format) override;
+		virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const u32& format) override;
 
 	private:
 		void SetupUniformBuffers();
 		void CleanUpUniformBuffers();
 		void UpdateDescriptorSets();
 
-		void CalcDynamicUniformAlig(U64& v, const U64& uniformSize);
-		void CreateDynamicUniformBuffer(MaterialUniformBuffer& materialBlock, const U64& newSize);
+		void CalcDynamicUniformAlig(u64& v, const u64& uniformSize);
+		void CreateDynamicUniformBuffer(MaterialUniformBuffer& materialBlock, const u64& newSize);
 
 		void FindValidMaterialBlock(MaterialUniformBuffer& materialUniformBuffer, const std::string& uniformKey, MaterialBlockData& materialBlockData);
 

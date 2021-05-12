@@ -6,7 +6,7 @@ class CrtAllocator
 {
 public:
 
-	FORCE_INLINE static void* Allocate(U64 size, U64 alignment = 16)
+	FORCE_INLINE static void* Allocate(u64 size, u64 alignment = 16)
 	{
 		return Platform::Allocate(size, alignment);
 	}

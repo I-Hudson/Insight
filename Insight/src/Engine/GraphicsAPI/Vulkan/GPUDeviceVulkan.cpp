@@ -515,7 +515,7 @@ bool GPUDeviceVulkan::Init()
 	GPUSignalManager = ::New<Insight::GraphicsAPI::Vulkan::GPUSemaphoreManagerVulkan>();
 
 	VkQueue vkQueues[] = { m_graphicsQueue };
-	U32 vkQueuesIndex[] = { m_graphicsQueueFamilyIndex };
+	u32 vkQueuesIndex[] = { m_graphicsQueueFamilyIndex };
 	IS_PROFILE_GPU_INIT_VULKAN(&Device, &m_adapter->Gpu, vkQueues, vkQueuesIndex, 1, nullptr);
 
 	return true;
@@ -776,7 +776,7 @@ FenceVulkan* FenceManagerVulkan::AllocateFence(bool createSignaled)
 	return fence;
 }
 
-bool FenceManagerVulkan::WaitForFence(FenceVulkan* fence, U64 timeInNanoseconds)
+bool FenceManagerVulkan::WaitForFence(FenceVulkan* fence, u64 timeInNanoseconds)
 {
 	//ASSERT(VectorContains(m_usedFences, fence));
 	ASSERT(!fence->m_signaled);
@@ -811,7 +811,7 @@ void FenceManagerVulkan::ReleaseFence(FenceVulkan*& fence)
 	fence = nullptr;
 }
 
-void FenceManagerVulkan::WaitAndReleaseFence(FenceVulkan*& fence, U64 timeInNanoseconds)
+void FenceManagerVulkan::WaitAndReleaseFence(FenceVulkan*& fence, u64 timeInNanoseconds)
 {
 	ScopeLock lock(m_device->m_fenceLock);
 

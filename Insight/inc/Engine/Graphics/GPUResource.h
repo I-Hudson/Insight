@@ -34,7 +34,7 @@ public:
 		ReleaseGPU();
 	}
 
-	FORCE_INLINE U64 GetMemoryUsage() const { return m_memoryUsage; }
+	FORCE_INLINE u64 GetMemoryUsage() const { return m_memoryUsage; }
 
 	void ReleaseGPU()
 	{
@@ -50,7 +50,7 @@ public:
 
 protected:
 	virtual void OnReleaseGPU() = 0;
-	U64 m_memoryUsage = 0;
+	u64 m_memoryUsage = 0;
 
 	std::string m_name;
 };

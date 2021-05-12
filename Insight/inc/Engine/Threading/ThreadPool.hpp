@@ -34,7 +34,7 @@ public:
 		}
 	}
 
-	void set_thread_count(const U32& count) {
+	void set_thread_count(const u32& count) {
 		for (std::size_t i{ 0 }; i < count; ++i) {
 			m_workers.emplace_back(std::bind(&thread_pool::thread_loop, this));
 		}

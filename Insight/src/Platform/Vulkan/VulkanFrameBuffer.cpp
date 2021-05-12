@@ -32,13 +32,13 @@ namespace vks
 		}
 	}
 
-	void VulkanFrameBuffer::SetRect(const U32& width, const U32& height)
+	void VulkanFrameBuffer::SetRect(const u32& width, const u32& height)
 	{
 		m_width = width;
 		m_height = height;
 	}
 
-	void VulkanFrameBuffer::CreateAttachment(const U32& format, const U32& imageUsage, const std::string& attachmentName)
+	void VulkanFrameBuffer::CreateAttachment(const u32& format, const u32& imageUsage, const std::string& attachmentName)
 	{
 		VkImageAspectFlags aspectMask = 0;
 		FrameBufferAttachment attachment;
@@ -268,7 +268,7 @@ namespace vks
 		ThrowIfFailed(vkCreateFence(*device, &fenceCreateInfo, nullptr, &m_fence));
 	}
 
-	void VulkanFrameBuffer::SetSampleCount(const U32& sampleCount, const bool& rebuild)
+	void VulkanFrameBuffer::SetSampleCount(const u32& sampleCount, const bool& rebuild)
 	{
 		m_renderPassInfo.SamplerCount = sampleCount;
 

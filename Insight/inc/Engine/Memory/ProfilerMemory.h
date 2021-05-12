@@ -8,7 +8,7 @@
 struct ProfilerMemoryAdditionalInfo
 {
 	std::string Name;
-	U64 Size;
+	u64 Size;
 	std::vector<std::string> CallStack;
 };
 
@@ -19,10 +19,10 @@ class ProfilerMemory : public TSingleton<ProfilerMemory>
 public:
 	~ProfilerMemory();
 
-	void TrackAllocation(void* ptr, U64 size);
+	void TrackAllocation(void* ptr, u64 size);
 	void UnTrackAllocation(void* ptr);
 
-	U64 GetCurrentAllocatedSize();
+	u64 GetCurrentAllocatedSize();
 	void DumpAllocations();
 
 	void AddName(void* ptr, const std::string& name);

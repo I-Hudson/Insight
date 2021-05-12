@@ -9,8 +9,8 @@
 
 	namespace FileSystem
 	{
-		using DirectoryHash = U64;
-		using FileHash = U64;
+		using DirectoryHash = u64;
+		using FileHash = u64;
 
 		class FileSystemWatcher
 		{
@@ -18,8 +18,8 @@
 			FileSystemWatcher();
 			~FileSystemWatcher();
 
-			void AddNewDirectory(U64 id, const std::string& directory);
-			void RemoveOldDirectory(U64 id);
+			void AddNewDirectory(u64 id, const std::string& directory);
+			void RemoveOldDirectory(u64 id);
 
 			void StartWatching();
 			void StopWatching();
@@ -65,7 +65,7 @@
 			std::string FormatFilePathStringToUNIX(const std::string& filePath);
 
 		private:
-			//void HandleFileNotifcationRenameOld(const FILE_NOTIFY_INFORMATION* fileInfo, DWORD* asyncBuffer, U64& offset);
+			//void HandleFileNotifcationRenameOld(const FILE_NOTIFY_INFORMATION* fileInfo, DWORD* asyncBuffer, u64& offset);
 			std::string GetFileName(const std::string& filePath);
 			std::string GetExtension(const std::string& filePath);
 
@@ -74,7 +74,7 @@
 			std::unordered_map<FileHash, FileHandle> m_fileHandles;
 			FileSystemWatcher m_fileSystemWatcher;
 			
-			//std::unordered_map<DWORD, std::function<void(const FILE_NOTIFY_INFORMATION*, DWORD*, U64&)>> m_fileNotifcationFuncs;
+			//std::unordered_map<DWORD, std::function<void(const FILE_NOTIFY_INFORMATION*, DWORD*, u64&)>> m_fileNotifcationFuncs;
 		};
 
 		template<typename T, typename... Args>
@@ -96,7 +96,7 @@
 				filePath,
 				GetFileName(filePath),
 				GetExtension(filePath),
-				0//static_cast<U64>(std::filesystem::file_size(path))
+				0//static_cast<u64>(std::filesystem::file_size(path))
 			};
 			handle.Object = ::New<T>(filePath, std::forward<Args>(args)...);
 
@@ -126,7 +126,7 @@
 				filePath,
 				GetFileName(filePath),
 				GetExtension(filePath),
-				0//static_cast<U64>(std::filesystem::file_size(path))
+				0//static_cast<u64>(std::filesystem::file_size(path))
 			};
 			handle.Object = createFunction(filePath);
 

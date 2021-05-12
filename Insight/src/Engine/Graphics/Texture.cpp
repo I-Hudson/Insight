@@ -74,14 +74,14 @@ namespace Render
 		return nullptr;
 	}
 
-	U32 Texture::GetMipMapCount(const U32& width, const U32& height, const U32& channels)
+	u32 Texture::GetMipMapCount(const u32& width, const u32& height, const u32& channels)
 	{
-		const U32 smallestMipMapSize = 32;
-		U32 i = 0;
+		const u32 smallestMipMapSize = 32;
+		u32 i = 0;
 		for (;;)
 		{
-			U32 w = width >> i;
-			U32 h = height >> i;
+			u32 w = width >> i;
+			u32 h = height >> i;
 
 			if (w < smallestMipMapSize || h < smallestMipMapSize)
 			{
@@ -92,28 +92,28 @@ namespace Render
 		return i;
 	}
 
-	U64 Texture::GetMipMapOffset(const U32& width, const U32& height, const U32& channels, const U16& mipMaps)
+	u64 Texture::GetMipMapOffset(const u32& width, const u32& height, const u32& channels, const U16& mipMaps)
 	{
-		U64 dataSize = 0;
+		u64 dataSize = 0;
 		//width* height* channels;
 		for (size_t i = 0; i < mipMaps; ++i)
 		{
-			U32 w = width >> i;
-			U32 h = height >> i;
+			u32 w = width >> i;
+			u32 h = height >> i;
 
 			dataSize += w * h * channels;
 		}
 		return dataSize;
 	}
 
-	U64 Texture::GetImageBufferSize(const U32& width, const U32& height, const U32& channels, const U16& mipMaps)
+	u64 Texture::GetImageBufferSize(const u32& width, const u32& height, const u32& channels, const U16& mipMaps)
 	{
-		U64 dataSize = 0;
+		u64 dataSize = 0;
 		//width* height* channels;
 		for (size_t i = 0; i <= mipMaps; ++i)
 		{
-			U32 w = width >> i;
-			U32 h = height >> i;
+			u32 w = width >> i;
+			u32 h = height >> i;
 			dataSize += w * h * channels;
 		}
 		return dataSize;

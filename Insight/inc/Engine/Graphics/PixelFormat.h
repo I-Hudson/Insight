@@ -8,7 +8,7 @@
 /// <remarks>
 /// Reference: https://msdn.microsoft.com/en-us/library/windows/desktop/bb173059(v=vs.85).aspx
 /// </remarks>
-enum class PixelFormat : U32
+enum class PixelFormat : u32
 {
     /// <summary>
     /// The format is not known.

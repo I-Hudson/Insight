@@ -38,7 +38,7 @@
 			std::wstring TryToGetLongName(const std::wstring& pathName) const;
 
 		public:
-			const U64 rId;
+			const u64 rId;
 			enum class State : uint8_t
 			{
 				Initialized, // No outstanding RDC() call.
@@ -51,7 +51,7 @@
 			};
 			std::atomic<State> state;
 
-			WatchInfo(const U64& rId, std::unique_ptr<OVERLAPPED>&& overlapped,
+			WatchInfo(const u64& rId, std::unique_ptr<OVERLAPPED>&& overlapped,
 				const std::wstring& path, HandlePtr&& dirHandle);
 			WatchInfo(const WatchInfo&) = delete;
 			WatchInfo& operator=(const WatchInfo&) = delete;

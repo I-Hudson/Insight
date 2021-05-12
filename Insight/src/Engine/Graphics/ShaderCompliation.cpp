@@ -147,7 +147,7 @@ const TBuiltInResource DefaultTBuiltInResource = {
 
 bool glslangInit = false;
 
-std::vector<U32> ShaderCompliation::CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData)
+std::vector<u32> ShaderCompliation::CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData)
 {
 	if (!glslangInit)
 	{

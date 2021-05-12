@@ -23,7 +23,7 @@
 		return std::chrono::duration<double, std::milli>(m_endTime - m_startTime).count();
 	}
 
-	U64 Stopwatch::Nano() const
+	u64 Stopwatch::Nano() const
 	{
-		return static_cast<U64>(std::chrono::duration<double, std::nano>(m_endTime - m_startTime).count());
+		return static_cast<u64>(std::chrono::duration<double, std::nano>(m_endTime - m_startTime).count());
 	}

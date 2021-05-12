@@ -9,6 +9,8 @@ REGISTER_DEF_TYPE(MeshComponent);
 
 MeshComponent::MeshComponent(EntityManager* entityManager, const EntityID& entity)
 	: Component(entityManager, entity)
+	, m_mesh(nullptr)
+	, m_meshName("")
 {
 	//SetType<MeshComponent>();
 	//m_updateEveryFarme = false;

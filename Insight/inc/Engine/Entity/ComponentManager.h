@@ -69,6 +69,7 @@ public:
 			{
 				component.OnUpdate(deltaTime);
 			}
+			return;
 		}
 	}
 
@@ -118,7 +119,7 @@ public:
 		m_componentTypes.insert({ typeName, m_nextComponentType });
 
 		// Create a ComponentArray pointer and add it to the component arrays map
-		m_componentArrays.insert({ typeName, std::make_shared<ComponentArray<T>>() });
+		m_componentArrays.insert({ typeName, ::New<ComponentArray<T>>() });
 
 		// Increment the value so that the next component registered will be different
 		++m_nextComponentType;
@@ -179,20 +180,20 @@ private:
 	std::unordered_map<const char*, ComponentType> m_componentTypes{};
 
 	// Map from type string pointer to a component array
-	std::unordered_map<const char*, std::shared_ptr<IComponentArray>> m_componentArrays{};
+	std::unordered_map<const char*, IComponentArray*> m_componentArrays{};
 
 	// The component type to be assigned to the next registered component - starting at 0
 	ComponentType m_nextComponentType{};
 
 	// Convenience function to get the statically casted pointer to the ComponentArray of type T.
 	template<typename T>
-	std::shared_ptr<ComponentArray<T>> GetComponentArray()
+	ComponentArray<T>* GetComponentArray()
 	{
 		const char* typeName = typeid(T).name();
 
 		assert(m_componentTypes.find(typeName) != m_componentTypes.end() && 
 			   "[ComponentManager::GetComponentArray] Component not registered before use.");
 
-		return std::static_pointer_cast<ComponentArray<T>>(m_componentArrays.at(typeName));
+		return static_cast<ComponentArray<T>*>(m_componentArrays.at(typeName));
 	}
 };

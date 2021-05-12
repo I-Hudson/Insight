@@ -26,9 +26,12 @@ public:
 
 	template<typename T, typename... Args>
 	T& AddComponent(Args&&... args);
-
 	template<typename T>
 	T& GetComponent();
+	template<typename T>
+	void RemoveComponent();
+	template<typename T>
+	bool HasComponent();
 
 	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
@@ -52,15 +55,33 @@ private:
 #include "Engine/Entity/EntityManager.h"
 
 template<typename T, typename ...Args>
-T& Entity::AddComponent(Args&&... args)
+INLINE T& Entity::AddComponent(Args&&... args)
 {
-	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.");
+	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::AddComponent] template 'T' does not inherit from 'Component'");
+	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.")
 	return m_entityManager->AddComponent<T>(m_entityID, std::forward<Args...>(args)...);
 }
 
 template<typename T>
-	inline T& Entity::GetComponent()
+INLINE T& Entity::GetComponent()
 {
-	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.");
+	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::GetComponent] template 'T' does not inherit from 'Component'");
+	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.")
 	return m_entityManager->GetComponent<T>(m_entityID);
+}
+
+template<typename T>
+INLINE void Entity::RemoveComponent()
+{
+	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::RemoveComponent] template 'T' does not inherit from 'Component'");
+	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.");
+	return m_entityManager->RemoveComponent<T>(m_entityID);
+}
+
+template<typename T>
+INLINE bool Entity::HasComponent()
+{
+	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::RemoveComponent] template 'T' does not inherit from 'Component'");
+	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.");
+	return m_entityManager->HasComponent<T>(m_entityID);
 }

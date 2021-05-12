@@ -9,7 +9,7 @@
 			std::string Path;
 			std::string Name;
 			std::string Extension;
-			U64 Size;
+			u64 Size;
 		};
 
 		struct DirectoryListenHandle

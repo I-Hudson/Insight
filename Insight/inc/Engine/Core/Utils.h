@@ -138,9 +138,9 @@ template<typename T>
 std::string BytesToText(T bytes)
 {
     static const char* sizes[] = { "B", "KB", "MB", "GB", "TB" };
-    U64 i = 0;
+    u64 i = 0;
     double dblSByte = static_cast<double>(bytes);
-    for (; static_cast<U64>(bytes / 1024.0) > 0; i++, bytes /= 1024)
+    for (; static_cast<u64>(bytes / 1024.0) > 0; i++, bytes /= 1024)
         dblSByte = bytes / 1024.0;
     if (i >= ARRAY_COUNT(sizes))
         return "";
@@ -167,13 +167,13 @@ FORCE_INLINE bool VectorContains(const std::vector<T>& vector, const T& item)
 }
 
 template<typename T>
-FORCE_INLINE U32 VectorFindIndex(const std::vector<T>& vector, const T& item)
+FORCE_INLINE u32 VectorFindIndex(const std::vector<T>& vector, const T& item)
 {
     for (size_t i = 0; i < vector.size(); ++i)
     {
         if (vector[i] == item)
         {
-            return (U32)i;
+            return (u32)i;
         }
     }
     ASSERT(false && "VectorFindIndex. Out of range.");

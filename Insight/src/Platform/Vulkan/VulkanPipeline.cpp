@@ -231,7 +231,7 @@ namespace vks
 			VkDescriptorSetLayoutBindingFlagsCreateInfoEXT extendedInfo{};
 			extendedInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
 			extendedInfo.pNext = nullptr;
-			extendedInfo.bindingCount = static_cast<U32>(descriptorSetLayoutBindings.size());
+			extendedInfo.bindingCount = static_cast<u32>(descriptorSetLayoutBindings.size());
 			extendedInfo.pBindingFlags = bindFlag.data();
 
 			auto createInfo = vks::initializers::descriptorSetLayoutCreateInfo(descriptorSetLayoutBindings);

@@ -64,7 +64,7 @@ namespace Insight::Graphics
 
 		bool IsStorageImage() const
 		{
-			return (ImageUsage & (U32)ImageUsageFlagsBits::Storage) != 0;
+			return (ImageUsage & (u32)ImageUsageFlagsBits::Storage) != 0;
 		}
 
 		bool IsBufferLike() const
@@ -85,13 +85,13 @@ namespace Insight::Graphics
 	{
 		const Insight::Graphics::GPUImageView* ColorAttachments[RENDER_PASS_ATTACHMENT_COUNT];
 		const Insight::Graphics::GPUImageView* DepthStenci = nullptr;
-		U32 NumColorAttachments = 0;
+		u32 NumColorAttachments = 0;
 		RenderPassOpFlags OpFlags = 0;
-		U32 ClearAttachments = 0;
-		U32 LoadAttachments = 0;
-		U32 StoreAttachments = 0;
-		U32 BaseLayer = 0;
-		U32 NumLayers = 0;
+		u32 ClearAttachments = 0;
+		u32 LoadAttachments = 0;
+		u32 StoreAttachments = 0;
+		u32 BaseLayer = 0;
+		u32 NumLayers = 0;
 
 		glm::vec4 ClearColor[RENDER_PASS_ATTACHMENT_COUNT];
 		glm::vec2 ClearDepthStencil = { 1.0f, 0.0f };
@@ -105,19 +105,19 @@ namespace Insight::Graphics
 
 		struct Subpass
 		{
-			U32 ColorAttachments[RENDER_PASS_ATTACHMENT_COUNT];
-			U32 InputAttachments[RENDER_PASS_ATTACHMENT_COUNT];
-			U32 ResolveAttachments[RENDER_PASS_ATTACHMENT_COUNT];
-			U32 NumColorAttachments = 0;
-			U32 NumInputAttachments = 0;
-			U32 NumResolveAttachments = 0;
+			u32 ColorAttachments[RENDER_PASS_ATTACHMENT_COUNT];
+			u32 InputAttachments[RENDER_PASS_ATTACHMENT_COUNT];
+			u32 ResolveAttachments[RENDER_PASS_ATTACHMENT_COUNT];
+			u32 NumColorAttachments = 0;
+			u32 NumInputAttachments = 0;
+			u32 NumResolveAttachments = 0;
 
 			DepthStencil DepthStencilMode = DepthStencil::Read_Only;
 		};
 
 		// If 0/nullptr, assume a default subpass.
 		const Subpass* subpass = nullptr;
-		U32 NumSubpasses = 0;
+		u32 NumSubpasses = 0;
 	};
 
 	class GPURenderGraphPass
@@ -258,7 +258,7 @@ namespace Insight::Graphics
 		{
 			RenderPass* Pass;
 			glm::vec4* Target;
-			U32 Index;
+			u32 Index;
 		};
 
 		struct DepthClearRequest

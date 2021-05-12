@@ -135,13 +135,13 @@
 #endif
 		}
 
-		void* FreeListAllocator::NewArr(const U64& size, const Byte& alignment)
+		void* FreeListAllocator::NewArr(const u64& size, const Byte& alignment)
 		{
 			void* alloc = Alloc(size, 0, "void", alignment);
 #if defined(IS_DEBUG)
 			m_numOfArrNews++;
 			std::string name = std::string("void");
-			U64 vPointer = *reinterpret_cast<U64*>(alloc);
+			u64 vPointer = *reinterpret_cast<u64*>(alloc);
 			m_vtableToNameMap.insert({ vPointer, name });
 #endif
 			return alloc;
@@ -155,7 +155,7 @@
 
 			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it)
 			{
-				U64 vPointer = *reinterpret_cast<U64*>(ptrToDelete);
+				u64 vPointer = *reinterpret_cast<u64*>(ptrToDelete);
 				if ((*it).first == vPointer)
 				{
 					m_vtableToNameMap.erase(it);

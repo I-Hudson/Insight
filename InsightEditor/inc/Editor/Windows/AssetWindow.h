@@ -47,7 +47,7 @@
         private:
             bool ReadAssetDirectory(const std::string& assetDirectoryPath);
             static bool AlphaSortComparator(const std::filesystem::path& a, const std::filesystem::path& b);
-            void DrawFolderTree(const std::filesystem::path& path, const U32& flags);
+            void DrawFolderTree(const std::filesystem::path& path, const u32& flags);
 
             bool RenderNavAndSearchBarRegion();
             bool RenderFileListRegion(const ColumnLayout& layout);

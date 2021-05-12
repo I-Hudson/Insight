@@ -13,19 +13,19 @@ namespace Render
 {
 	struct IS_API TextureDescription
 	{
-		U32 TextureId;
+		u32 TextureId;
 		std::string FileName;
 		std::string FilePath;
 		std::string Extension;
 
 		void* Data;
-		U32 TexWidth;
-		U32 TexHeight;
-		U32 TexDepth;
+		u32 TexWidth;
+		u32 TexHeight;
+		u32 TexDepth;
 
-		U32 TexChannels;
-		U32 MipLevels;
-		U32 SizeBytes;
+		u32 TexChannels;
+		u32 MipLevels;
+		u32 SizeBytes;
 
 		PixelFormat Format;
 		bool HasBeenDestroyed;
@@ -48,7 +48,7 @@ namespace Render
 		void Init(const TextureDescription& desc);
 		virtual bool IsValid() = 0;
 
-		U32 const& GetId() { return m_desc.TextureId; }
+		u32 const& GetId() { return m_desc.TextureId; }
 		std::string const& GetFileName() const { return m_desc.FileName; }
 		std::string const& GetFilePath() const { return m_desc.FilePath; }
 
@@ -56,7 +56,7 @@ namespace Render
 		int const& GetHeight() const { return m_desc.TexHeight; }
 		int const& GetDepth() const { return m_desc.TexDepth; }
 		int const& GetChannels() const { return m_desc.TexChannels; }
-		U32 const& GetSizeBytes() const { return m_desc.SizeBytes; }
+		u32 const& GetSizeBytes() const { return m_desc.SizeBytes; }
 		PixelFormat const& GetFormat() const { return m_desc.Format; }
 
 		TextureDescription const& GetDescription() const { return m_desc; }
@@ -64,9 +64,9 @@ namespace Render
 		static Texture* New();
 
 	protected:
-		U32 GetMipMapCount(const U32& width, const U32& height, const U32& channels);
-		U64 GetMipMapOffset(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
-		U64 GetImageBufferSize(const U32& width, const U32& height, const U32& channels, const U16& mipMaps);
+		u32 GetMipMapCount(const u32& width, const u32& height, const u32& channels);
+		u64 GetMipMapOffset(const u32& width, const u32& height, const u32& channels, const U16& mipMaps);
+		u64 GetImageBufferSize(const u32& width, const u32& height, const u32& channels, const U16& mipMaps);
 
 		virtual void CreateGPUResource() = 0;
 

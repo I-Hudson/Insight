@@ -101,7 +101,7 @@
             }
         }
 
-        void AssetWindow::DrawFolderTree(const std::filesystem::path& path, const U32& flags)
+        void AssetWindow::DrawFolderTree(const std::filesystem::path& path, const u32& flags)
         {
             for (auto& f : std::filesystem::directory_iterator(path))
             {
@@ -117,7 +117,7 @@
                 }
 
                 treeTitle += "  " + strPath;
-                U32 newFlags = flags | (f.is_regular_file() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
+                u32 newFlags = flags | (f.is_regular_file() ? ImGuiTreeNodeFlags_Leaf : ImGuiTreeNodeFlags_None);
                 if (ImGui::TreeNodeEx(strPath.c_str(), newFlags,
                     treeTitle.c_str()))
                 {

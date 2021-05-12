@@ -14,7 +14,7 @@ public:
     ~TRefCountedObject() { ASSERT(m_refCount == 0); }
 
 private:
-    U32 m_refCount;
+    u32 m_refCount;
 };
 
 
@@ -161,8 +161,8 @@ template<> struct TIsArithmetic<double>      { enum { Value = true }; };
 template<> struct TIsArithmetic<long double> { enum { Value = true }; };
 template<> struct TIsArithmetic<U8>       { enum { Value = true }; };
 template<> struct TIsArithmetic<U16>      { enum { Value = true }; };
-template<> struct TIsArithmetic<U32>      { enum { Value = true }; };
-template<> struct TIsArithmetic<U64>      { enum { Value = true }; };
+template<> struct TIsArithmetic<u32>      { enum { Value = true }; };
+template<> struct TIsArithmetic<u64>      { enum { Value = true }; };
 template<> struct TIsArithmetic<I8>        { enum { Value = true }; };
 template<> struct TIsArithmetic<I16>       { enum { Value = true }; };
 template<> struct TIsArithmetic<I32>       { enum { Value = true }; };
@@ -441,7 +441,7 @@ template<> struct TIsBitwiseConstructible<U8, I8>   { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<I8, U8>   { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<U16, I16> { enum { Value = true }; };
 template<> struct TIsBitwiseConstructible<I16, U16> { enum { Value = true }; };
-template<> struct TIsBitwiseConstructible<U32, I32> { enum { Value = true }; };
-template<> struct TIsBitwiseConstructible<I32, U32> { enum { Value = true }; };
-template<> struct TIsBitwiseConstructible<U64, I64> { enum { Value = true }; };
-template<> struct TIsBitwiseConstructible<I64, U64> { enum { Value = true }; };
+template<> struct TIsBitwiseConstructible<u32, I32> { enum { Value = true }; };
+template<> struct TIsBitwiseConstructible<I32, u32> { enum { Value = true }; };
+template<> struct TIsBitwiseConstructible<u64, I64> { enum { Value = true }; };
+template<> struct TIsBitwiseConstructible<I64, u64> { enum { Value = true }; };

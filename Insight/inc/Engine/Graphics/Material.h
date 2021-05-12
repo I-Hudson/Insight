@@ -8,12 +8,12 @@
 // Single struct defining a dynamic uniform offset and index.
 struct MaterialDynamicUniformInfo
 {
-	U32 Index;
-	U32 DynamicOffset;
+	u32 Index;
+	u32 DynamicOffset;
 	MaterialDynamicUniformInfo()
 	{ }
 
-	MaterialDynamicUniformInfo(U32 const& index)
+	MaterialDynamicUniformInfo(u32 const& index)
 		: Index(index)
 	{ }
 };
@@ -33,9 +33,9 @@ struct MaterialBlockData
 struct MaterialUniformDynamicBlock
 {
 	void* DynamicBuffer;
-	U64 DynamicBufferSize;
-	U64 DynamicUniformAlign;
-	U64 TopIndex;
+	u64 DynamicBufferSize;
+	u64 DynamicUniformAlign;
+	u64 TopIndex;
 
 	MaterialUniformDynamicBlock()
 		: DynamicUniformAlign(0)
@@ -57,7 +57,7 @@ public:
 	virtual void Update() = 0;
 	virtual void ResetUniformInfo() = 0;
 
-	virtual void UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData) = 0;
+	virtual void UploadUniform(const std::string& key, void* data, const u32& dataSize, MaterialBlockData& materialBlockData) = 0;
 	virtual void UploadTexture(const std::string& key, Render::Texture* texture) = 0;
-	virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format) = 0;
+	virtual void UploadTexture(const std::string& key, void* imageView, void* sampler, const u32& format) = 0;
 };

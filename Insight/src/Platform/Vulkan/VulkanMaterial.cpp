@@ -68,7 +68,7 @@ namespace vks
 			std::vector<VkDescriptorSet> sets = GetDescriptorSets();
 			m_pipeline.Bind(commandBuffer, bindPoint);
 
-			std::vector<U32> dynamicOffsets;
+			std::vector<u32> dynamicOffsets;
 			if (materialBlockData && materialBlockData->InUse)
 			{
 				dynamicOffsets.resize(materialBlockData->DynamicBuffers.size());
@@ -89,7 +89,7 @@ namespace vks
 				}
 			}
 
-			vkCmdBindDescriptorSets(commandBuffer, bindPoint, m_pipeline.GetPipelineLayout(), 0, static_cast<U32>(sets.size()), sets.data(), static_cast<U32>(dynamicOffsets.size()), dynamicOffsets.data());
+			vkCmdBindDescriptorSets(commandBuffer, bindPoint, m_pipeline.GetPipelineLayout(), 0, static_cast<u32>(sets.size()), sets.data(), static_cast<u32>(dynamicOffsets.size()), dynamicOffsets.data());
 		}
 	}
 
@@ -101,7 +101,7 @@ namespace vks
 		}
 	}
 
-	void VulkanMaterial::UploadUniform(const std::string& key, void* data, const U32& dataSize, MaterialBlockData& materialBlockData)
+	void VulkanMaterial::UploadUniform(const std::string& key, void* data, const u32& dataSize, MaterialBlockData& materialBlockData)
 	{
 		if (m_uniformBuffers.find(key) == m_uniformBuffers.end())
 		{
@@ -147,7 +147,7 @@ namespace vks
 		}
 	}
 
-	void VulkanMaterial::UploadTexture(const std::string& key, void* imageView, void* sampler, const U32& format)
+	void VulkanMaterial::UploadTexture(const std::string& key, void* imageView, void* sampler, const u32& format)
 	{
 		if (m_uniformTextures.find(key) == m_uniformTextures.end())
 		{
@@ -288,7 +288,7 @@ namespace vks
 		vkUpdateDescriptorSets(*m_device, static_cast<uint32_t>(writesSets.size()), writesSets.data(), 0, nullptr);
 	}
 
-	void VulkanMaterial::CalcDynamicUniformAlig(U64& v, const U64& uniformSize)
+	void VulkanMaterial::CalcDynamicUniformAlig(u64& v, const u64& uniformSize)
 	{
 		// Calculate required alignment based on minimum device offset alignment
 		size_t minUboAlignment = VulkanDevice::Instance()->GetProperties().limits.minUniformBufferOffsetAlignment;
@@ -299,13 +299,13 @@ namespace vks
 		}
 	}
 
-	void VulkanMaterial::CreateDynamicUniformBuffer(MaterialUniformBuffer& materialBlock, const U64& newSize)
+	void VulkanMaterial::CreateDynamicUniformBuffer(MaterialUniformBuffer& materialBlock, const u64& newSize)
 	{
 		if (materialBlock.DynamicUniformBlock.DynamicBuffer != nullptr)
 		{
 			// Old data.
 			void* oldArrPtr = materialBlock.DynamicUniformBlock.DynamicBuffer;
-			U64 oldArrSize = materialBlock.DynamicUniformBlock.DynamicBufferSize;
+			u64 oldArrSize = materialBlock.DynamicUniformBlock.DynamicBufferSize;
 
 			// New arr for data.
 			materialBlock.DynamicUniformBlock.DynamicBuffer = ::NewArrayBytes(newSize, materialBlock.DynamicUniformBlock.DynamicUniformAlign);
@@ -343,7 +343,7 @@ namespace vks
 	void VulkanMaterial::FindValidMaterialBlock(MaterialUniformBuffer& materialUniformBuffer, const std::string& uniformKey, MaterialBlockData& materialBlockData)
 	{
 		MaterialUniformDynamicBlock& dynamicBlock = materialUniformBuffer.DynamicUniformBlock;
-		U32 blockIndex = -1;
+		u32 blockIndex = -1;
 		if (dynamicBlock.TopIndex >= dynamicBlock.DynamicBufferSize)
 		{
 			// resize
@@ -357,8 +357,8 @@ namespace vks
 			materialBlockData.DynamicBuffers.clear();
 		}
 
-		materialBlockData.DynamicBuffers[uniformKey].Index = static_cast<U32>(dynamicBlock.TopIndex);
-		materialBlockData.DynamicBuffers[uniformKey].DynamicOffset = static_cast<U32>(dynamicBlock.DynamicUniformAlign);
+		materialBlockData.DynamicBuffers[uniformKey].Index = static_cast<u32>(dynamicBlock.TopIndex);
+		materialBlockData.DynamicBuffers[uniformKey].DynamicOffset = static_cast<u32>(dynamicBlock.DynamicUniformAlign);
 		dynamicBlock.TopIndex += dynamicBlock.DynamicUniformAlign;
 	}
 

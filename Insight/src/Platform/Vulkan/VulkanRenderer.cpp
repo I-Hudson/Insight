@@ -475,7 +475,7 @@ namespace vks
 			vks::initializers::commandBufferAllocateInfo(
 				m_cmdPool,
 				VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-				static_cast<U32>(m_presentCmdBuffers.size()));
+				static_cast<u32>(m_presentCmdBuffers.size()));
 		ThrowIfFailed(vkAllocateCommandBuffers(m_device, &cmdBufAllocateInfo, m_presentCmdBuffers.data()));
 	}
 
@@ -484,7 +484,7 @@ namespace vks
 		IS_PROFILE_FUNCTION();
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_frameBufferCmdBuffer);
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_frameBufferCmdBufferTest);
-		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<U32>(m_presentCmdBuffers.size()), m_presentCmdBuffers.data());
+		vkFreeCommandBuffers(m_device, m_cmdPool, static_cast<u32>(m_presentCmdBuffers.size()), m_presentCmdBuffers.data());
 		vkFreeCommandBuffers(m_device, m_cmdPool, 1, &m_primaryCommandBuffer);
 	}
 
@@ -507,7 +507,7 @@ namespace vks
 			Vertex{ {1,1,0}, {0,0,0}, {0,0,0,0}, {1,1}},
 			Vertex{ {1,-1,0}, {0,0,0}, {0,0,0,0}, {1,0}},
 		};
-		std::vector<U32> fullScreenQuadI = { 0,2,1, 0,3,2 };
+		std::vector<u32> fullScreenQuadI = { 0,2,1, 0,3,2 };
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
 		{
 			m_presentMeshes[i] = ::New<Mesh>();
@@ -650,7 +650,7 @@ namespace vks
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = m_frameBuffer.GetWidth();
 		renderPassBeginInfo.renderArea.extent.height = m_frameBuffer.GetHeight();
-		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
+		renderPassBeginInfo.clearValueCount = static_cast<u32>(clearColors.size());
 		renderPassBeginInfo.pClearValues = clearColors.data();
 
 		MVP mvp;
@@ -769,8 +769,8 @@ namespace vks
 	{
 		IS_PROFILE_FUNCTION();
 
-		U32 width = Window::GetWidth();
-		U32 height = Window::GetHeight();
+		u32 width = Window::GetWidth();
+		u32 height = Window::GetHeight();
 
 		VkCommandBufferBeginInfo cmdBufInfo = vks::initializers::commandBufferBeginInfo();
 

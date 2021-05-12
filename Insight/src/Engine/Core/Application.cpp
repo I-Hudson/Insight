@@ -35,7 +35,7 @@
 
 //#define THREADS
 
-U64 Application::FrameCount = 0;
+u64 Application::FrameCount = 0;
 
 Application::Application()
 {

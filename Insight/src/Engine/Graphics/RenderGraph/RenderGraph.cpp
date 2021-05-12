@@ -115,7 +115,7 @@ namespace Insight::Graphics
 		}
 		else
 		{
-			U32 newIndex = (U32)m_passes.size();
+			u32 newIndex = (u32)m_passes.size();
 			m_passes.push_back(RenderPass(this, newIndex, name, queue));
 			m_passToIndex[name] = newIndex;
 			return m_passes.back();
@@ -280,7 +280,7 @@ namespace Insight::Graphics
 		}
 		else
 		{
-			U32 newIndex = (U32)m_resources.size();
+			u32 newIndex = (u32)m_resources.size();
 			m_resources.push_back(RenderGraphResource(RenderGraphResource::Type::Texture, newIndex, name));
 			m_resourceToIndex[name] = newIndex;
 			return m_resources.back();
@@ -303,7 +303,7 @@ namespace Insight::Graphics
 	//	}
 	//	else
 	//	{
-	//		U32 newIndex = (U32)m_resources.size();
+	//		u32 newIndex = (u32)m_resources.size();
 	//		m_resources.push_back(RenderGraphResource(RenderGraphResource::Type::Buffer, newIndex, name));
 	//		m_resourceToIndex[name] = newIndex;
 	//		return m_resources.back();

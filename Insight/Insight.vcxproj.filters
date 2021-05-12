@@ -2039,6 +2039,9 @@
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
       <Filter>src\Engine\Component</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\Component\Component.cpp">
+      <Filter>src\Engine\Component</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp">
       <Filter>src\Engine\Component</Filter>
     </ClCompile>
@@ -2338,9 +2341,6 @@
     </ClCompile>
     <ClCompile Include="vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Component\Component.cpp">
-      <Filter>src\Engine\Component</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

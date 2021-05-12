@@ -5,7 +5,7 @@
 
 	namespace Threading
 	{
-		template<U32 ThreadCount, typename TThreadFuncReturnValue, typename TThreadData, typename... TThreadInputData>
+		template<u32 ThreadCount, typename TThreadFuncReturnValue, typename TThreadData, typename... TThreadInputData>
 		class ThreadCollection
 		{
 			using ThreadFunc = std::function< TThreadFuncReturnValue(TThreadData&)>;

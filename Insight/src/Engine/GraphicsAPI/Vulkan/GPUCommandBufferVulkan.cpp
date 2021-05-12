@@ -156,7 +156,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		renderPassBeginInfo.renderArea.offset.y = 0;
 		renderPassBeginInfo.renderArea.extent.width = (u32)renderPass->GetRenderPass().GetWindowRect().GetWidth();
 		renderPassBeginInfo.renderArea.extent.height = (u32)renderPass->GetRenderPass().GetWindowRect().GetHeight();
-		renderPassBeginInfo.clearValueCount = static_cast<U32>(clearColors.size());
+		renderPassBeginInfo.clearValueCount = static_cast<u32>(clearColors.size());
 		renderPassBeginInfo.pClearValues = clearColors.data();
 		vkCmdBeginRenderPass(m_cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}

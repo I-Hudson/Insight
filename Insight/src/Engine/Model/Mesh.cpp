@@ -73,7 +73,7 @@ void Mesh::Rebuild()
 //
 //void Mesh::Draw(VkCommandBuffer cmd, const std::vector<Material*>& materials, const std::vector<MaterialBlockData>& materialBlockDatas, MeshMaterialUpdateFunc materialUpdateFunc, MeshComponent* meshCompoennt)
 //{
-//	for (U64 i = 0; i < m_subMeshes.size(); ++i)
+//	for (u64 i = 0; i < m_subMeshes.size(); ++i)
 //	{
 //		if (i >= materials.size())
 //		{

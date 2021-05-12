@@ -12,7 +12,7 @@
 			return Instance()->m_stackAllocator.FreeToMarker(marker);
 		}
 
-		void* MemoryManager::AlignedAlloc(const U64& size, const U64& alignment)
+		void* MemoryManager::AlignedAlloc(const u64& size, const u64& alignment)
 		{
 			void* data = nullptr;
 #if defined(_MSC_VER) || defined(__MINGW32__)
@@ -25,7 +25,7 @@
 			return data;
 		}
 
-		void* MemoryManager::NewArrOnFreeListVoid(const U64& size, U8 alignment)
+		void* MemoryManager::NewArrOnFreeListVoid(const u64& size, U8 alignment)
 		{
 			return Instance()->m_freeListAllocator.NewArr(size, alignment);
 		}

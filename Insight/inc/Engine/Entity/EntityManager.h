@@ -24,6 +24,8 @@ private:
 	T& AddComponent(const EntityID& entity);
 	template<typename T>
 	T& GetComponent(const EntityID& entity);
+	template<typename T>
+	void RemoveComponent(const EntityID& entity);
 
 	template<typename T>
 	bool HasComponent(const EntityID& entity);
@@ -41,20 +43,27 @@ private:
 };
 
 template<typename T>
-inline T& EntityManager::AddComponent(const EntityID& entity)
+INLINE T& EntityManager::AddComponent(const EntityID& entity)
 {
 	m_entityData.at(entity).Signature.set(m_componentManager.GetComponentType<T>());
 	return m_componentManager.AddComponent(entity, T(this, entity));
 }
 
 template<typename T>
-inline T& EntityManager::GetComponent(const EntityID& entity)
+INLINE T& EntityManager::GetComponent(const EntityID& entity)
 {
 	return m_componentManager.GetComponent<T>(entity);
 }
 
 template<typename T>
-bool EntityManager::HasComponent(const EntityID& entity)
+INLINE void EntityManager::RemoveComponent(const EntityID& entity)
+{
+	m_entityData.at(entity).Signature.reset(m_componentManager.GetComponentType<T>());
+	m_componentManager.RemoveComponent<T>(entity);
+}
+
+template<typename T>
+INLINE bool EntityManager::HasComponent(const EntityID& entity)
 {
 	return m_entityData.at(entity).Signature.test(m_componentManager.GetComponentType<T>());
 }

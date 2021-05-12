@@ -18,7 +18,7 @@
 			RTTI();
 			~RTTI();
 
-			void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const U32& editorFlags = IS_PropertyFlags::None);
+			void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const u32& editorFlags = IS_PropertyFlags::None);
 			void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr);
 			void RTTI::UnregisterAllProperty(void* ownerObject);
 

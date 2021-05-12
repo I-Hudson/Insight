@@ -54,7 +54,7 @@
 
 			using fs = std::filesystem::recursive_directory_iterator;
 			std::vector<std::string> filePaths;
-			std::vector<U32> filePathsSize;
+			std::vector<u32> filePathsSize;
 
 			for (const auto& entry : std::filesystem::recursive_directory_iterator::recursive_directory_iterator(folderName))
 			{
@@ -67,11 +67,11 @@
 					std::string formattedFilePath = entry.path().u8string();
 					std::replace(formattedFilePath.begin(), formattedFilePath.end(), '\\', '/');
 					filePaths.push_back(formattedFilePath);
-					filePathsSize.push_back(static_cast<U32>(entry.file_size()));
+					filePathsSize.push_back(static_cast<u32>(entry.file_size()));
 				}
 			}
 
-			U32 objsPerThread = static_cast<U32>(filePaths.size()) >= 4 ? static_cast<U32>(filePaths.size()) / 4 : 0;
+			u32 objsPerThread = static_cast<u32>(filePaths.size()) >= 4 ? static_cast<u32>(filePaths.size()) / 4 : 0;
 			if (objsPerThread >= 1)
 			{
 				using VecSharedModels = std::vector<Model*>;
@@ -88,13 +88,13 @@
 					}
 					return loadedModels;
 				};
-				auto assignDataToThread = [](std::array<ModelLoadThread, 4>& threadsData, std::string fileName, U32 fileSize)
+				auto assignDataToThread = [](std::array<ModelLoadThread, 4>& threadsData, std::string fileName, u32 fileSize)
 				{
 					IS_PROFILE_FUNCTION();
 
-					U32 lowsetSize = std::numeric_limits<U32>::max();
-					U32 index = 0;
-					for (U32 i = 0; i < 4; ++i)
+					u32 lowsetSize = std::numeric_limits<u32>::max();
+					u32 index = 0;
+					for (u32 i = 0; i < 4; ++i)
 					{
 						if (threadsData[i].FileOverallSize < lowsetSize)
 						{
@@ -107,7 +107,7 @@
 					threadsData[index].FileOverallSize += fileSize;
 				};
 
-				Threading::ThreadCollection<4, VecSharedModels, ModelLoadThread, std::string, U32> threadCollection(addMeshToContainer, assignDataToThread);
+				Threading::ThreadCollection<4, VecSharedModels, ModelLoadThread, std::string, u32> threadCollection(addMeshToContainer, assignDataToThread);
 
 				int index = 0;
 				for (auto& file : filePaths)

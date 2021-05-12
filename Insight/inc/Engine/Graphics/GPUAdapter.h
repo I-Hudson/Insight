@@ -41,7 +41,7 @@ public:
     /// <summary>
     /// Gets the GPU vendor identifier.
     /// </summary>
-    virtual U32 GetVendorId() const = 0;
+    virtual u32 GetVendorId() const = 0;
 
     /// <summary>
     /// Gets a string that contains the adapter description. Used for presentation to the user.

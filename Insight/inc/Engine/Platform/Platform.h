@@ -19,8 +19,11 @@
         } \
         Platform::Assert(#expression, __FILE__, __LINE__); \
     }
+#define STATIC_ASSERT(expression, message) \
+        PLATFORM_STATIC_ASSERT_BREAK(expression, message)
 #else
 #define ASSERT(expression) (expression);
+#define STATIC_ASSERT(expression) (expression);
 #endif
 #if ENABLE_ASSERTION_LOW_LAYERS
 #define ASSERT_LOW_LAYER(x) ASSERT(x)

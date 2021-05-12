@@ -231,7 +231,7 @@ namespace
 		return result;
 	}
 
-	VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const U32& vecSize)
+	VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const u32& vecSize)
 	{
 		switch (type.basetype)
 		{

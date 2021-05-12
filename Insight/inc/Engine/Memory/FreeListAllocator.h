@@ -32,7 +32,7 @@
 			template <typename T>
 			void DeleteArr(T* ptrToDelete);
 
-			void* NewArr(const U64& size, const Byte& alignment);
+			void* NewArr(const u64& size, const Byte& alignment);
 			void DeleteArr(void* ptrToDelete);
 
 			std::string GetAllocationOfType(void* ptr);
@@ -71,7 +71,7 @@
 			Size m_numOfArrDeletes{ 0 };
 			Size m_numOfAllocs{ 0 };
 			Size m_numOfFrees{ 0 };
-			std::unordered_map<U64, std::string> m_vtableToNameMap;
+			std::unordered_map<u64, std::string> m_vtableToNameMap;
 #endif	
 			friend class MemoryManager;
 		};
@@ -83,7 +83,7 @@
 #if defined(IS_DEBUG)
 			m_numOfNews++;
 			std::string name = std::string(typeid(T).name());
-			U64 vPointer = *reinterpret_cast<U64*>(ptr);
+			u64 vPointer = *reinterpret_cast<u64*>(ptr);
 			m_vtableToNameMap.insert({ vPointer, name });
 #endif
 			return ptr;
@@ -97,7 +97,7 @@
 
 			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it) 
 			{
-				U64 vPointer = *reinterpret_cast<U64*>(ptr);
+				u64 vPointer = *reinterpret_cast<u64*>(ptr);
 				if ((*it).first == vPointer)
 				{
 					m_vtableToNameMap.erase(it);
@@ -118,7 +118,7 @@
 			std::string name = std::string(typeid(T).name());
 			if (std::is_base_of<class Component, T>::value) 
 			{
-				U64 vPointer = *reinterpret_cast<U64*>(alloc);
+				u64 vPointer = *reinterpret_cast<u64*>(alloc);
 				m_vtableToNameMap.insert({ vPointer, name });
 			}
 #endif
@@ -136,7 +136,7 @@
 
 			for (auto it = m_vtableToNameMap.begin(); it != m_vtableToNameMap.end(); ++it)
 			{
-				U64 vPointer = *reinterpret_cast<U64*>(ptrToDelete);
+				u64 vPointer = *reinterpret_cast<u64*>(ptrToDelete);
 				if ((*it).first == vPointer)
 				{
 					m_vtableToNameMap.erase(it);

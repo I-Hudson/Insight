@@ -25,7 +25,7 @@ namespace Insight::Graphics
 	GPUBuffer::~GPUBuffer()
 	{ }
 
-	void GPUBuffer::SetData(void const* data, const U64& size)
+	void GPUBuffer::SetData(void const* data, const u64& size)
 	{
 		ASSERT(data != nullptr && size > 0 && size <= GetSize());
 
@@ -65,7 +65,7 @@ namespace Insight::Graphics
 		}
 	}
 
-	void GPUBuffer::Resize(U32 newSize)
+	void GPUBuffer::Resize(u32 newSize)
 	{
 		ASSERT(IsAllocated());
 

@@ -44,7 +44,7 @@
 			}
 		}
 
-		WatchInfo::WatchInfo(const U64& rId, std::unique_ptr<OVERLAPPED>&& overlapped,
+		WatchInfo::WatchInfo(const u64& rId, std::unique_ptr<OVERLAPPED>&& overlapped,
 			const std::wstring& path, HandlePtr&& dirHandle)
 			: overlapped(std::move(overlapped))
 			, notifBuffer()

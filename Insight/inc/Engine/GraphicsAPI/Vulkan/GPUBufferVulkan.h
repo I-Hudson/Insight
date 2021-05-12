@@ -21,7 +21,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void* Map() override;
 		virtual void UnMap() override;
 
-		virtual void Upload(void* mapped, void const* data, u32 const& size) override;
+		virtual void Upload(void* mapped, void const* data, u64 const& size) override;
 		virtual void Download(std::vector<u8>& data, void const* mapped) override;
 
 		// [GPUResource]

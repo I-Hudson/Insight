@@ -249,7 +249,7 @@
 		// where the word starts as we know the last character on the line 
 		// must be part of the name.
 		std::string sValue;
-		U64 startPos = 0;
+		u64 startPos = 0;
 		bool wordStart = false;
 
 		auto dyanmicPos = line.find("//#dynamic");

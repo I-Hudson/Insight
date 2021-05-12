@@ -70,9 +70,9 @@ struct SpirvShaderDescriptorInfo
         SpirvShaderResourceType ResourceType;
     };
 
-    U64 ImageInfosCount;
-    U64 BufferInfosCount;
-    U32 DescriptorTypesCount;
+    u64 ImageInfosCount;
+    u64 BufferInfosCount;
+    u32 DescriptorTypesCount;
     Descriptor DescriptorTypes[MaxDescriptors];
 };
 

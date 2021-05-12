@@ -29,7 +29,7 @@ public:
 
 	// [GPUAdapter]
 	virtual bool IsValid() const override { return Gpu != VK_NULL_HANDLE; }
-	virtual U32 GetVendorId() const { return GpuProps.vendorID; }
+	virtual u32 GetVendorId() const { return GpuProps.vendorID; }
 	virtual std::string GetDescription() const { return Description; }
 
 	/// <summary>

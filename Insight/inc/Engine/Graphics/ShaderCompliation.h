@@ -5,5 +5,5 @@
 
 namespace ShaderCompliation
 {
-	std::vector<U32> CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData);
+	std::vector<u32> CompileGLSLToSpirV(const ShaderStage& stage, const std::string& shaderData);
 }

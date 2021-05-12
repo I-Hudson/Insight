@@ -10,7 +10,7 @@ namespace Insight::Graphics
         Platform::MemClear(this, sizeof(GPUBufferDesc));
     }
 
-    GPUBufferDesc GPUBufferDesc::Buffer(U32 size, GPUBufferFlags flags, PixelFormat format, const void* initData, U32 stride)
+    GPUBufferDesc GPUBufferDesc::Buffer(u32 size, GPUBufferFlags flags, PixelFormat format, const void* initData, u32 stride)
     {
         GPUBufferDesc desc;
         desc.Size = size;
@@ -76,12 +76,12 @@ namespace Insight::Graphics
                             (I32)Format);
     }
 
-    U32 GetHash(const GPUBufferDesc& key)
+    u32 GetHash(const GPUBufferDesc& key)
     {
-        U32 hashCode = key.Size;
+        u32 hashCode = key.Size;
         hashCode = (hashCode * 397) ^ key.Stride;
-        hashCode = (hashCode * 397) ^ (U32)key.Flags;
-        hashCode = (hashCode * 397) ^ (U32)key.Format;
+        hashCode = (hashCode * 397) ^ (u32)key.Flags;
+        hashCode = (hashCode * 397) ^ (u32)key.Format;
         return hashCode;
     }
 }

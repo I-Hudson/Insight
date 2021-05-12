@@ -4,9 +4,9 @@
 
 namespace Insight::Graphics
 {
-	U64 GPUResourceCollection::GetMemoryUsage() const
+	u64 GPUResourceCollection::GetMemoryUsage() const
 	{
-		U64 result = 0;
+		u64 result = 0;
 		m_lock.Lock();
 
 		for (I32 i = 0; i < m_collection.size(); ++i)
@@ -49,7 +49,7 @@ namespace Insight::Graphics
 			output.append("\n");
 
 			I32 count = 0;
-			U64 memUsage = 0;
+			u64 memUsage = 0;
 			for (I32 i = 0; i < m_collection.size(); ++i)
 			{
 				const auto resource = m_collection[i];

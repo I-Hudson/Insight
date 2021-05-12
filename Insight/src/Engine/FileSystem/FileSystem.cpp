@@ -18,7 +18,7 @@ namespace FileSystem
 		//m_loop.join();
 	}
 
-	void FileSystemWatcher::AddNewDirectory(U64 id, const std::string& directory)
+	void FileSystemWatcher::AddNewDirectory(u64 id, const std::string& directory)
 	{
 		HandlePtr dirHandle(CreateFileA(directory.c_str(),
 			FILE_LIST_DIRECTORY,
@@ -78,7 +78,7 @@ namespace FileSystem
 		}
 	}
 
-	void FileSystemWatcher::RemoveOldDirectory(U64 id)
+	void FileSystemWatcher::RemoveOldDirectory(u64 id)
 	{
 		MutexLockGuard lock(m_watchInfoMutex);
 		auto watchInfoIt = std::find_if(
@@ -327,18 +327,18 @@ namespace FileSystem
 
 	std::string FileSystemManager::GetFileName(const std::string& filePath)
 	{
-		U64 dotPos = filePath.find_last_of('.');
-		U64 lastSlash = filePath.find_last_of('\\');
+		u64 dotPos = filePath.find_last_of('.');
+		u64 lastSlash = filePath.find_last_of('\\');
 		if (dotPos != std::string::npos && lastSlash != std::string::npos)
 		{
-			return filePath.substr(lastSlash + (U64)1, (dotPos - lastSlash) - (U64)1);
+			return filePath.substr(lastSlash + (u64)1, (dotPos - lastSlash) - (u64)1);
 		}
-		return filePath.substr(lastSlash + (U64)1);
+		return filePath.substr(lastSlash + (u64)1);
 	}
 
 	std::string FileSystemManager::GetExtension(const std::string& filePath)
 	{
-		U64 dotPos = filePath.find_last_of('.');
+		u64 dotPos = filePath.find_last_of('.');
 		if (dotPos != std::string::npos)
 		{
 			return filePath.substr();

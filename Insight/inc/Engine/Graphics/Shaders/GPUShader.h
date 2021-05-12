@@ -21,11 +21,11 @@ namespace Insight::Graphics
 	struct ShaderStageBindings
 	{
 		std::string Name;
-		U32 Binding;
+		u32 Binding;
 		spirv_cross::SPIRType Type;
-		U32 VecSize;
-		U32 ByteSize;
-		U32 Stride;
+		u32 VecSize;
+		u32 ByteSize;
+		u32 Stride;
 	};
 
 	/// <summary>
@@ -35,17 +35,17 @@ namespace Insight::Graphics
 	struct ShaderStageUniform
 	{
 		std::string Name;
-		U32 Set;
-		U32 Binding;
-		U32 Size;
+		u32 Set;
+		u32 Binding;
+		u32 Size;
 		std::vector<ShaderStageBindings> Bindings;
 	};
 
 	struct ShaderStageSampler2D
 	{
 		std::string Name;
-		U32 Set;
-		U32 Binding;
+		u32 Set;
+		u32 Binding;
 	};
 
 	/// <summary>
@@ -68,8 +68,8 @@ namespace Insight::Graphics
 		const std::vector<ShaderStageBindings>& GetInputs() const { return m_inputs; }
 		const std::vector<ShaderStageUniform>& GetUniforms() const { return m_uniforms; }
 
-		const U32 GetInputsSize() const;
-		const std::vector<U32>& GetRawData() const { return m_rawData; }
+		const u32 GetInputsSize() const;
+		const std::vector<u32>& GetRawData() const { return m_rawData; }
 
 		// Compile this shader stage for the graphic's API format.
 		// [ReturnValue] Compile();
@@ -89,7 +89,7 @@ namespace Insight::Graphics
 		/// <summary>
 		/// Store the raw shader data. This is used for runtime compilation.
 		/// </summary>
-		std::vector<U32> m_rawData;
+		std::vector<u32> m_rawData;
 
 		/// <summary>
 		/// Shader stage bindings.
@@ -107,7 +107,7 @@ namespace Insight::Graphics
 		std::vector<ShaderStageSampler2D> m_samplers;
 
 	private:
-		U32 GetStride();
+		u32 GetStride();
 	};
 
 	/// <summary>
@@ -143,7 +143,7 @@ namespace Insight::Graphics
 		/// </summary>
 		/// <param name="stage"></param>
 		/// <returns></returns>
-		GPUShaderStage& GetStage(const ShaderStage& stage) { return m_stages.at((U32)stage); }
+		GPUShaderStage& GetStage(const ShaderStage& stage) { return m_stages.at((u32)stage); }
 
 		/// <summary>
 		/// Release all the gpu resources before the program quits.

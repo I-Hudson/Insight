@@ -42,17 +42,17 @@ public:
         /// <summary>
         /// The resolution width (in pixel).
         /// </summary>
-        U32 Width;
+        u32 Width;
 
         /// <summary>
         /// The resolution height (in pixel).
         /// </summary>
-        U32 Height;
+        u32 Height;
 
         /// <summary>
         /// The screen refresh rate (in hertz).
         /// </summary>
-        U32 RefreshRate;
+        u32 RefreshRate;
     };
 
     GPUDevice(RendererType rendererType, ShaderProfile shaderProfile);
@@ -77,7 +77,7 @@ public:
     virtual Insight::Graphics::GPUFenceManager* GetDefaultFenceManager() = 0;
     virtual Insight::Graphics::GPUSemaphoreManager* GetDefaultSignalManager() = 0;
 
-    FORCE_INLINE U64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
+    FORCE_INLINE u64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
     
     virtual GPUContext* GetMainContext() = 0;
     virtual GPUAdapter* GetAdapter() = 0;
@@ -94,7 +94,7 @@ public:
 protected:
     CriticalSection m_locker;
 
-    U64 m_totalGraphicsMemory;
+    u64 m_totalGraphicsMemory;
     GPULimits m_gpuLimits;
     std::vector<VideoOutputMode> m_videoOutputModes;
 
