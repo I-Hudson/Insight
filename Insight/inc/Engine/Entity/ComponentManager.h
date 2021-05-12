@@ -12,6 +12,8 @@ class IComponentArray
 public:
 	virtual ~IComponentArray() = default;
 	virtual void Update(const float& deltaTime) = 0;
+	virtual bool HasComponent(const EntityID& entity) = 0;
+	virtual Component& GetComponentBaseRef(const EntityID& entity) = 0;
 	virtual void EntityDestroyed(EntityID entity) = 0;
 };
 
@@ -53,7 +55,7 @@ public:
 		--m_size;
 	}
 
-	T& GetComponent(EntityID entity)
+	T& GetComponent(const EntityID& entity)
 	{
 		ASSERT(m_entityToIndexMap.find(entity) != m_entityToIndexMap.end() &&
 			   "[ComponentArray::GetComponent] Retrieving non-existent component.");
@@ -73,6 +75,16 @@ public:
 			}
 			return;
 		}
+	}
+
+	virtual bool HasComponent(const EntityID& entity) override
+	{
+		return m_entityToIndexMap.find(entity) != m_entityToIndexMap.end();
+	}
+
+	virtual Component& GetComponentBaseRef(const EntityID& entity) override
+	{
+		return GetComponent(entity);
 	}
 
 	virtual void EntityDestroyed(EntityID entity) override
@@ -229,6 +241,11 @@ public:
 	{
 		// Get a reference to a component from the array for an entity
 		return GetComponentArray<T>()->GetComponent(entity);
+	}
+
+	Component& GetComponent(const EntityID& entity, const ComponentType& componentType)
+	{
+		return m_componentArrays.at(componentType)->GetComponentBaseRef(entity);
 	}
 
 	template<typename T>

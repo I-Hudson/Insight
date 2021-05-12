@@ -49,13 +49,23 @@ Entity Entity::GetChild(const EntityID& entity)
 	return m_entityManager->GetEntity(GetEntiyData().EntityChildrenIDs.at(entity));
 }
 
-std::vector<Component> Entity::GetAllComponents()
+//std::vector<Component> Entity::GetAllComponents()
+//{
+//	if (!IsValid())
+//	{
+//		return {};
+//	}
+//	return m_entityManager->GetAllComponent(m_entityID);
+//}
+
+u32 Entity::GetComponentCount()
 {
-	if (IsValid())
-	{
-		return {};
-	}
-	return m_entityManager->GetAllComponent(m_entityID);
+	return static_cast<u32>(GetEntiyData().Signature.count());
+}
+
+Component& Entity::GetComponent(const u32& index)
+{
+	return m_entityManager->GetComponent(m_entityID, index);
 }
 
 void Entity::Serialize(Serialization::SerializableElement* element, bool force)

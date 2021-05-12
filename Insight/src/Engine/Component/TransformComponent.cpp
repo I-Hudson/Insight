@@ -14,7 +14,7 @@ TransformComponentData::TransformComponentData()
 TransformComponent::TransformComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity)
 	: Component(componentManager, componentID, componentType, entityManager, entity)
 {
-	//SetType<TransformComponent>();
+	SetType<TransformComponent>();
 	//m_updateEveryFarme = false;
 }
 

@@ -3,6 +3,8 @@
 #include "Engine/Core/Common.h"
 #include "Engine/Serialization/Serializable.h"
 
+#include "Reflect.h"
+
 class Entity;
 class EntityManager;
 class ComponentManager;
@@ -10,14 +12,14 @@ class ComponentManager;
 struct IS_API ComponentData
 { };
 
-class IS_API Component
+class Component : REFLECT_BASE(), public Object
 {
 public:
 	Component();
 	Component(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity);
 	virtual ~Component();
 
-	virtual void OnUpdate(const float& a_deltaTime) = 0;
+	virtual void OnUpdate(const float& a_deltaTime) { }
 	bool IsValid() { return m_entityID != -1; }
 	Entity GetEntity();
 

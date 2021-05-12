@@ -2,7 +2,7 @@
 #include "../MeshComponent.h"
 
 Reflect::ReflectMemberProp MeshComponent::__REFLECT_MEMBER_PROPS__[1] = {
-	Reflect::ReflectMemberProp("m_meshName", Reflect::Util::GetTypeName<std::string>(), __REFLECT__m_meshName(), { }),
+	Reflect::ReflectMemberProp("m_meshName", Reflect::Util::GetTypeName<std::string>(), __REFLECT__m_meshName(), {"ShowInEditor"}),
 };
 
 Reflect::ReflectFunction MeshComponent::GetFunction(const char* functionName)

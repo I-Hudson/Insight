@@ -7,37 +7,37 @@
 #endif Entity_reflect_generated_h
 #define Entity_reflect_generated_h
 
-#define Entity_Source_h_13_PROPERTIES \
+#define Entity_Source_h_14_PROPERTIES \
 private:\
 	static Reflect::ReflectMemberProp __REFLECT_MEMBER_PROPS__[1];\
 
 
-#define Entity_Source_h_13_FUNCTION_DECLARE \
+#define Entity_Source_h_14_FUNCTION_DECLARE \
 private:\
 
 
-#define Entity_Source_h_13_FUNCTION_GET \
+#define Entity_Source_h_14_FUNCTION_GET \
 public:\
 	virtual Reflect::ReflectFunction GetFunction(const char* functionName) override;\
 
 
-#define Entity_Source_h_13_PROPERTIES_OFFSET \
+#define Entity_Source_h_14_PROPERTIES_OFFSET \
 private:\
 	static int __REFLECT__ShowDebug() { return offsetof(EntityData, ShowDebug); }; \
 
 
-#define Entity_Source_h_13_PROPERTIES_GET \
+#define Entity_Source_h_14_PROPERTIES_GET \
 public:\
 virtual Reflect::ReflectMember GetMember(const char* memberName) override;\
 virtual std::vector<Reflect::ReflectMember> GetMembers(std::vector<std::string> const& flags) override;\
 
 
-#define Entity_Source_h_13_GENERATED_BODY \
-Entity_Source_h_13_PROPERTIES \
-Entity_Source_h_13_FUNCTION_DECLARE \
-Entity_Source_h_13_FUNCTION_GET \
-Entity_Source_h_13_PROPERTIES_OFFSET \
-Entity_Source_h_13_PROPERTIES_GET \
+#define Entity_Source_h_14_GENERATED_BODY \
+Entity_Source_h_14_PROPERTIES \
+Entity_Source_h_14_FUNCTION_DECLARE \
+Entity_Source_h_14_FUNCTION_GET \
+Entity_Source_h_14_PROPERTIES_OFFSET \
+Entity_Source_h_14_PROPERTIES_GET \
 
 
 #undef CURRENT_FILE_ID

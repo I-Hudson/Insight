@@ -10,6 +10,7 @@
 #include "Editor/RTTIToImGUI.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/MeshComponent.h"
+#include "ReflectStructs.h"
 #include "imgui.h"
 
 
@@ -170,38 +171,38 @@
 				}
 				ImGui::NewLine();
 
-				//auto components = entity->GetAllComponents();
-				//for (auto componentsIT = components.begin(); componentsIT != components.end(); ++componentsIT)
-				//{
-				//	IS_PROFILE_SCOPE("Draw Properties");
-				//	auto properties = IS_GET_ALL_PROPERTIES((*componentsIT), ShowInEditor);
-				//	auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT), "Allow_Removable");
+				for (u32 i = 0; i < entity.GetComponentCount(); ++i)
+				{
+					auto& component = entity.GetComponent(i);
+					IS_PROFILE_SCOPE("Draw Properties");
+					auto properties = component.GetMembers({ "ShowInEditor" });
+					//auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT), "Allow_Removable");
 
-				//	ImGui::Separator();
-				//	ImGui::Text((*componentsIT)->GetType().GetTypeName().c_str());
-				//	if (allowRemovableProb.IsValid() && allowRemovableProb.GetPropertyValue<bool>())
-				//	{
-				//		ImGui::SameLine(ImGui::GetWindowWidth() - 30);
-				//		if (ImGui::Button("X"))
-				//		{
-				//			// TODO: Remove component
-				//			entity->RemoveComponent((*componentsIT)->GetUUID());
-				//			continue;
-				//		}
-				//	}
+					ImGui::Separator();
+					ImGui::Text(component.GetType().GetTypeName().c_str());
+					//if (allowRemovableProb.IsValid() && allowRemovableProb.GetPropertyValue<bool>())
+					//{
+					//	ImGui::SameLine(ImGui::GetWindowWidth() - 30);
+					//	if (ImGui::Button("X"))
+					//	{
+					//		// TODO: Remove component
+					//		entity->RemoveComponent((*componentsIT)->GetUUID());
+					//		continue;
+					//	}
+					//}
 
-				//	if (!Editor::EditorDrawerRegistry::CallEditorDrawer((*componentsIT)->GetType(), *(*componentsIT)))
-				//	{
-				//		for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
-				//		{
-				//			if ((*propertyIT)->IsValid())
-				//			{
-				//				RTTIToImGUI_Input((*propertyIT)->GetObjectPtr(), (*propertyIT)->GetType(), (*propertyIT)->GetPropertyName(), (*propertyIT)->GetPropertyFlags());
-				//				ImGui::Spacing();
-				//			}
-				//		}
-				//	}
-				//}
+					if (!Editor::EditorDrawerRegistry::CallEditorDrawer(component.GetType(), component))
+					{
+						for (auto propertyIT = properties.begin(); propertyIT != properties.end(); ++propertyIT)
+						{
+							if ((*propertyIT).IsValid())
+							{
+								RTTIToImGUI_Input((*propertyIT).GetRawPointer(), (*propertyIT).GetTypeName(), (*propertyIT).GetName(), ShowInEditor);
+								ImGui::Spacing();
+							}
+						}
+					}
+				}
 				ImGui::Separator();
 
 				const char* addComponentButtonText = "+";

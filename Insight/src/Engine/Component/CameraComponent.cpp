@@ -24,7 +24,7 @@ CameraComponent::CameraComponent(ComponentManager* componentManager, ComponentID
 	, m_projectionViewMatrix(glm::mat4(1.0f))
 	, m_projectionMatrix(glm::mat4(1.0f))
 {
-	//SetType<CameraComponent>();
+	SetType<CameraComponent>();
 	//m_updateEveryFarme = true;
 }
 

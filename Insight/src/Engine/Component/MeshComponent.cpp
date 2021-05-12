@@ -12,7 +12,7 @@ MeshComponent::MeshComponent(ComponentManager* componentManager, ComponentID com
 	, m_mesh(nullptr)
 	, m_meshName("")
 {
-	//SetType<MeshComponent>();
+	SetType<MeshComponent>();
 	//m_updateEveryFarme = false;
 }
 

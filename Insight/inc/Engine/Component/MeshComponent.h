@@ -9,7 +9,8 @@
 
 #include <../vendor/glm/glm/glm.hpp>
 
-IS_API REFLECT_CLASS(MeshComponent), public Component
+REFLECT_CLASS()
+class MeshComponent : public Component
 {
 	REFLECT_GENERATED_BODY()
 
@@ -42,7 +43,7 @@ private:
 	std::vector<Material*> m_materials;
 	std::vector<MaterialBlockData> m_materialBlockDatas;
 
-	REFLECT_PROPERTY()
+	REFLECT_PROPERTY(ShowInEditor)
 	std::string m_meshName;
 
 	REGISTER_DEC_TYPE(MeshComponent);

@@ -36,5 +36,13 @@ void ComponentManager::Update(const float& deltaTime)
 
 std::vector<Component> ComponentManager::GetAllComponents(const EntityID& entity)
 {
-	return std::vector<Component>();
+	std::vector<Component> components;
+	for (auto& componentArray : m_componentArrays)
+	{
+		if (componentArray.second->HasComponent(entity))
+		{
+			components.push_back(componentArray.second->GetComponentBaseRef(entity));
+		}
+	}
+	return components;
 }

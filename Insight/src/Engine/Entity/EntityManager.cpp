@@ -56,6 +56,11 @@ std::vector<Entity> EntityManager::GetAliveEntities()
 	return aliveEntities;
 }
 
+Component& EntityManager::GetComponent(const EntityID& entity, const u32& componentIndex)
+{
+	return m_componentManager.GetComponent(entity, GetEntityData(entity).ComponentIDs.at(componentIndex).first);
+}
+
 std::vector<Component> EntityManager::GetAllComponent(const EntityID& entity)
 {
 	return m_componentManager.GetAllComponents(entity);

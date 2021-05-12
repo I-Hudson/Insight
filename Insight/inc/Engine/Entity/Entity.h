@@ -8,11 +8,13 @@
 
 class EntityManager;
 
-REFLECT_STRUCT(EntityData)
+REFLECT_STRUCT()
+struct EntityData : REFLECT_BASE()
 {
 	REFLECT_GENERATED_BODY()
 	std::string	Name;
 	EntityComponentSignature Signature;
+	std::vector<std::pair<ComponentType, ComponentID>> ComponentIDs;
 
 	EntityID ParentEntityID = -1;
 	std::vector<EntityID> EntityChildrenIDs;
@@ -46,7 +48,9 @@ public:
 	template<typename T>
 	bool HasComponent();
 
-	std::vector<Component> GetAllComponents();
+	u32 GetComponentCount();
+	Component& GetComponent(const u32& index);
+	//std::vector<Component> GetAllComponents();
 
 	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
@@ -73,7 +77,7 @@ template<typename T>
 INLINE T& Entity::AddComponent()
 {
 	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::AddComponent] template 'T' does not inherit from 'Component'");
-	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.")
+	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.");
 	return m_entityManager->AddComponent<T>(m_entityID);
 }
 
@@ -81,7 +85,7 @@ template<typename T>
 INLINE T& Entity::GetComponent()
 {
 	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::GetComponent] template 'T' does not inherit from 'Component'");
-	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.")
+	ASSERT(IsValid() && "[Entity::GetComponent] Entity is not valid. Check 'IsValid' before this call.");
 	return m_entityManager->GetComponent<T>(m_entityID);
 }
 

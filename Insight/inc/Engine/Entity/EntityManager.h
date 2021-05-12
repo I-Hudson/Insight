@@ -28,9 +28,10 @@ private:
 	T& GetComponent(const EntityID& entity);
 	template<typename T>
 	void RemoveComponent(const EntityID& entity);
-
 	template<typename T>
 	bool HasComponent(const EntityID& entity);
+
+	Component& GetComponent(const EntityID& entity, const u32& componentIndex);
 
 	std::vector<Component> GetAllComponent(const EntityID& entity);
 
@@ -50,7 +51,9 @@ template<typename T>
 INLINE T& EntityManager::AddComponent(const EntityID& entity)
 {
 	m_entityData.at(entity).Signature.set(m_componentManager.GetComponentType<T>());
-	return m_componentManager.AddComponent<T>(entity, this);
+	T& component = m_componentManager.AddComponent<T>(entity, this);
+	m_entityData.at(entity).ComponentIDs.push_back({ m_componentManager.GetComponentType<T>(), component.GetComponentID() });
+	return component;
 }
 
 template<typename T>
@@ -63,6 +66,12 @@ template<typename T>
 INLINE void EntityManager::RemoveComponent(const EntityID& entity)
 {
 	m_entityData.at(entity).Signature.reset(m_componentManager.GetComponentType<T>());
+	auto itr = std::find_if(m_entityData.at(entity).ComponentIDs.begin(), m_entityData.at(entity).ComponentIDs.end(), [this, &entity](const std::pair<ComponentType, ComponentID>& pair)
+	{
+		return m_componentManager.GetComponentType<T>() == pair.first && m_componentManager.GetComponent<T>(entity).GetComponentID() == pair.second;
+	});
+	//ASSERT(itr != m_entityData.at(entity).ComponentIDs.end() && "[EntityManager::RemoveComponent] Component not listed on Entity.");
+	m_entityData.at(entity).ComponentIDs.erase(itr);
 	m_componentManager.RemoveComponent<T>(entity);
 }
 
