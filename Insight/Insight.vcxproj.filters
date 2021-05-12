@@ -34,6 +34,9 @@
     <Filter Include="inc\Engine\Entity">
       <UniqueIdentifier>{90190AC3-FC2F-0859-45A7-937AB1FCD8E0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inc\Engine\Entity\Generated">
+      <UniqueIdentifier>{2E7E35F3-9A8B-63D9-2372-5FC48F7E2F90}</UniqueIdentifier>
+    </Filter>
     <Filter Include="inc\Engine\Enums">
       <UniqueIdentifier>{FBD60FA1-E7CF-2EF3-1002-1478FC590EFF}</UniqueIdentifier>
     </Filter>
@@ -386,6 +389,9 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\Entity\EntityManager.h">
       <Filter>inc\Engine\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Entity\Generated\Entity_reflect_generated.h">
+      <Filter>inc\Engine\Entity\Generated</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Enums\GPUResourceUsage.h">
       <Filter>inc\Engine\Enums</Filter>
@@ -2035,6 +2041,9 @@
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp">
       <Filter>inc\Engine\Component\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\Engine\Entity\Generated\Entity_reflect_generated.cpp">
+      <Filter>inc\Engine\Entity\Generated</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp">
       <Filter>src\Engine\Component</Filter>

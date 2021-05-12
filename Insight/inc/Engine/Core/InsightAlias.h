@@ -48,9 +48,11 @@ using MutexUnqiueLock = std::unique_lock<std::mutex>;
 using MutexLockGuard = std::lock_guard<std::mutex>;
 using MutexScopedLock = std::scoped_lock<std::mutex>;
 
-using EntityID = u32;
 const u32 MAX_COMPONENTS_COUNT = 32;
 const u32 MAX_ENTITIES_COUNT = 5000;
+
+using EntityID = u32;
+using ComponentID = u32;
 using EntityComponentSignature = std::bitset<MAX_COMPONENTS_COUNT>;
 using ComponentType = u32;
 

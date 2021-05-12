@@ -90,6 +90,9 @@ public:
 			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
 			meshComponent.SetModel(model);
 			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition(glm::vec3(rand() + 50, 0, 0));
+
+			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
+			meshChild.SetParent(mesh.GetEntityID());
 		}
 	}
 

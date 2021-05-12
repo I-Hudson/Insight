@@ -198,6 +198,7 @@
     <ClInclude Include="inc\Engine\Entity\ComponentManager.h" />
     <ClInclude Include="inc\Engine\Entity\Entity.h" />
     <ClInclude Include="inc\Engine\Entity\EntityManager.h" />
+    <ClInclude Include="inc\Engine\Entity\Generated\Entity_reflect_generated.h" />
     <ClInclude Include="inc\Engine\Enums\GPUResourceUsage.h" />
     <ClInclude Include="inc\Engine\Enums\PropertyFlags.h" />
     <ClInclude Include="inc\Engine\Event\ApplicationEvent.h" />
@@ -749,6 +750,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp" />
+    <ClCompile Include="inc\Engine\Entity\Generated\Entity_reflect_generated.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Engine\Component\Component.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />

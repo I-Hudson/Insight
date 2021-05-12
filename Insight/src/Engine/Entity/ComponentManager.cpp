@@ -8,13 +8,18 @@
 ComponentManager::ComponentManager()
 {
 	RegisterComponent<CameraComponent>();
-	RegisterComponent<TransformComponent>();
+	RegisterComponent<TransformComponent, TransformComponentData>();
 	RegisterComponent<MeshComponent>();
 }
 
 ComponentManager::~ComponentManager()
 {
 	for (auto& kvp : m_componentArrays)
+	{
+		::Delete(kvp.second);
+	}
+
+	for (auto& kvp : m_componentDataArrays)
 	{
 		::Delete(kvp.second);
 	}
@@ -27,4 +32,9 @@ void ComponentManager::Update(const float& deltaTime)
 	{
 		componentArray.second->Update(deltaTime);
 	}
+}
+
+std::vector<Component> ComponentManager::GetAllComponents(const EntityID& entity)
+{
+	return std::vector<Component>();
 }

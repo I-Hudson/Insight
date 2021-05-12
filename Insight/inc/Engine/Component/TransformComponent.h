@@ -3,11 +3,18 @@
 #include "Engine/Component/Component.h"
 #include "glm/glm.hpp"
 
+struct TransformComponentData
+{
+	TransformComponentData();
+
+	glm::mat4 Transform;
+};
+
 class IS_API TransformComponent : public Component
 {
 public:
 	TransformComponent() { }
-	TransformComponent(EntityManager* entityManager, const EntityID& entity);
+	TransformComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity);
 	virtual ~TransformComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;
@@ -24,7 +31,6 @@ public:
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
-	glm::mat4 m_transform;
 
 	REGISTER_DEC_TYPE(TransformComponent);
 };

@@ -7,8 +7,8 @@
 
 REGISTER_DEF_TYPE(MeshComponent);
 
-MeshComponent::MeshComponent(EntityManager* entityManager, const EntityID& entity)
-	: Component(entityManager, entity)
+MeshComponent::MeshComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity)
+	: Component(componentManager, componentID, componentType, entityManager, entity)
 	, m_mesh(nullptr)
 	, m_meshName("")
 {

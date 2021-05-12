@@ -45,3 +45,18 @@ EntityData& EntityManager::GetEntityData(const EntityID& entity)
 {
 	return m_entityData.at(entity);
 }
+
+std::vector<Entity> EntityManager::GetAliveEntities()
+{
+	std::vector<Entity> aliveEntities;
+	for (auto& e : m_aliveEntitiesIDs)
+	{
+		aliveEntities.push_back(Entity(this, e));
+	}
+	return aliveEntities;
+}
+
+std::vector<Component> EntityManager::GetAllComponent(const EntityID& entity)
+{
+	return m_componentManager.GetAllComponents(entity);
+}

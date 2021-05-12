@@ -7,9 +7,12 @@
 
 REGISTER_DEF_TYPE(TransformComponent);
 
-TransformComponent::TransformComponent(EntityManager* entityManager, const EntityID& entity)
-	: Component(entityManager, entity)
-	, m_transform(glm::mat4(1.0f))
+TransformComponentData::TransformComponentData()
+	: Transform(glm::mat4(1.0f))
+{ }
+
+TransformComponent::TransformComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity)
+	: Component(componentManager, componentID, componentType, entityManager, entity)
 {
 	//SetType<TransformComponent>();
 	//m_updateEveryFarme = false;
@@ -36,7 +39,8 @@ void TransformComponent::OnUpdate(const float& a_deltaTime)
 
 glm::mat4 TransformComponent::GetTransform()
 {
-	glm::mat4 m = m_transform;
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	glm::mat4 m = data.Transform;
 
 	Entity parentEntity = GetEntity().GetParent();
 	if (parentEntity.IsValid())
@@ -52,17 +56,20 @@ glm::mat4 TransformComponent::GetTransform()
 
 void TransformComponent::SetTransform(const glm::mat4& mat4)
 {
-	m_transform = mat4;
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	data.Transform = mat4;
 }
 
 const glm::vec3 TransformComponent::GetPostion()
 {
-	return m_transform[3].xyz();
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	return data.Transform[3].xyz();
 }
 
 void TransformComponent::SetPosition(const glm::vec3& position)
 {
-	m_transform[3] = glm::vec4(position, 1.0f);
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	data.Transform[3] = glm::vec4(position, 1.0f);
 	//m_isDirty = true;
 }
 
@@ -80,4 +87,3 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 //		//m_transform = SerializeHelper::StringToType<glm::mat4>(ptr->GetValue());
 //	}
 //}
-

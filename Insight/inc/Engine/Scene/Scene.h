@@ -21,7 +21,8 @@ public:
 
 	void SetActiveScene();
 	static Scene* ActiveScene();
-	//const std::vector<Entity*> GetEntites() { return m_registry; }
+
+	std::vector<Entity> GetEntites();
 
 	void Save(const std::string& file);
 	void Load(const std::string& file);

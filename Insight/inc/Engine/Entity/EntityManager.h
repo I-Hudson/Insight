@@ -19,6 +19,8 @@ public:
 	Entity GetEntity(const EntityID entity);
 	EntityData& GetEntityData(const EntityID& entity);
 
+	std::vector<Entity> GetAliveEntities();
+
 private:
 	template<typename T>
 	T& AddComponent(const EntityID& entity);
@@ -29,6 +31,8 @@ private:
 
 	template<typename T>
 	bool HasComponent(const EntityID& entity);
+
+	std::vector<Component> GetAllComponent(const EntityID& entity);
 
 private:
 	std::queue<EntityID> m_entities;
@@ -46,7 +50,7 @@ template<typename T>
 INLINE T& EntityManager::AddComponent(const EntityID& entity)
 {
 	m_entityData.at(entity).Signature.set(m_componentManager.GetComponentType<T>());
-	return m_componentManager.AddComponent(entity, T(this, entity));
+	return m_componentManager.AddComponent<T>(entity, this);
 }
 
 template<typename T>

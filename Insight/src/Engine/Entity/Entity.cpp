@@ -5,11 +5,11 @@
 REGISTER_DEF_TYPE(Entity);
 
 Entity::Entity()
-	: Serializable(this, false), m_entityManager(nullptr), m_entityID(-1), m_parentEntityID(-1)
+	: Serializable(this, false), m_entityManager(nullptr), m_entityID(-1)
 { }
 
 Entity::Entity(EntityManager* entityManager, EntityID id)
-	: Serializable(this, false), m_entityManager(entityManager), m_entityID(id), m_parentEntityID(-1)
+	: Serializable(this, false), m_entityManager(entityManager), m_entityID(id)
 { }
 
 Entity::~Entity()
@@ -25,6 +25,39 @@ void Entity::SetName(const std::string& name)
 	data.Name = name;
 }
 
+std::string Entity::GetName()
+{
+	if (!IsValid())
+	{
+		return "";
+	}
+	return m_entityManager->GetEntityData(m_entityID).Name;
+}
+
+u32 Entity::GetChildCount()
+{
+	return static_cast<u32>(GetEntiyData().EntityChildrenIDs.size());
+}
+
+Entity Entity::GetChild(const EntityID& entity)
+{
+	ASSERT(entity < static_cast<u32>(GetEntiyData().EntityChildrenIDs.size())  && "[Entity::GetChild] Entity is not a child.");
+	if (!IsValid())
+	{
+		return Entity(nullptr, -1);
+	}
+	return m_entityManager->GetEntity(GetEntiyData().EntityChildrenIDs.at(entity));
+}
+
+std::vector<Component> Entity::GetAllComponents()
+{
+	if (IsValid())
+	{
+		return {};
+	}
+	return m_entityManager->GetAllComponent(m_entityID);
+}
+
 void Entity::Serialize(Serialization::SerializableElement* element, bool force)
 { }
 
@@ -37,7 +70,25 @@ void Entity::SetParent(const EntityID& entity)
 	{
 		return;
 	}
-	m_parentEntityID = entity;
+	if (entity == -1)
+	{
+		Entity parent = GetParent();
+		if (parent.IsValid())
+		{
+			auto itr = std::find(GetEntiyData().EntityChildrenIDs.begin(), GetEntiyData().EntityChildrenIDs.end(), entity);
+			GetParent().GetEntiyData().EntityChildrenIDs.erase(itr);
+		}
+	}
+	else
+	{
+		GetEntiyData().ParentEntityID = entity;
+		Entity parent = GetParent();
+		if (parent.IsValid())
+		{
+			GetParent().GetEntiyData().EntityChildrenIDs.push_back(m_entityID);
+		}
+	}
+
 }
 
 Entity Entity::GetParent()
@@ -46,5 +97,10 @@ Entity Entity::GetParent()
 	{
 		return Entity(nullptr, -1);
 	}
-	return m_entityManager->GetEntity(m_parentEntityID); 
+	return m_entityManager->GetEntity(GetEntiyData().ParentEntityID);
+}
+
+EntityData& Entity::GetEntiyData()
+{
+	return m_entityManager->GetEntityData(m_entityID);
 }

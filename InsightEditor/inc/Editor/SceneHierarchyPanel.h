@@ -1,27 +1,26 @@
 #pragma once
 #include "Engine/Core/Core.h"
 #include "Editor/EditorWindow.h"
+#include "Engine/Entity/Entity.h"
 
-class Entity;
-
-	namespace Editor
+namespace Editor
+{
+	class SceneHierarchyPanel : public EditorWindow
 	{
-		class SceneHierarchyPanel : public EditorWindow
-		{
-		public:
-			SceneHierarchyPanel(const Module::EditorModule* editorModule);
-			~SceneHierarchyPanel() override;
+	public:
+		SceneHierarchyPanel(const Module::EditorModule* editorModule);
+		~SceneHierarchyPanel() override;
 
-			virtual void Update(const float& deltaTime) override;
+		virtual void Update(const float& deltaTime) override;
 
-		private:
-			void DrawEntityTreeView(Entity* entity, bool& newEntitySelected);
-			int GetTreeNodeFlags(Entity* entity);
+	private:
+		void DrawEntityTreeView(Entity& entity, bool& newEntitySelected);
+		int GetTreeNodeFlags(Entity& entity);
 
-			void DrawCompoentPanel(Entity* entity);
+		void DrawCompoentPanel(Entity& entity);
 
-			Entity* m_selectedEntity;
-			bool m_openContextPopup;
-			bool m_openAddComponentPopup;
-		};
-	}
+		Entity m_selectedEntity;
+		bool m_openContextPopup;
+		bool m_openAddComponentPopup;
+	};
+}

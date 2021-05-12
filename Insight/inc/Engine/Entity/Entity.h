@@ -3,17 +3,27 @@
 #include "Engine/Core/Common.h"
 #include "Engine/Serialization/Serializable.h"
 #include "Engine/Component/Component.h"
+#include "Reflect.h"
+#include "Generated/Entity_reflect_generated.h"
 
 class EntityManager;
 
-struct EntityData
+REFLECT_STRUCT(EntityData)
 {
+	REFLECT_GENERATED_BODY()
 	std::string	Name;
 	EntityComponentSignature Signature;
+
+	EntityID ParentEntityID = -1;
+	std::vector<EntityID> EntityChildrenIDs;
+	bool IsActive = false;
+
+private:
+	REFLECT_PROPERTY(EditorOnly)
+	bool ShowDebug;
 };
 
-class IS_API Entity : public Object
-					, public Serialization::Serializable
+IS_API class Entity : public Object, public Serialization::Serializable
 {
 public:
 	Entity();
@@ -21,17 +31,22 @@ public:
 	~Entity();
 
 	void SetName(const std::string& name);
+	std::string GetName();
 
 	bool IsValid() { return m_entityID != -1; }
+	u32 GetChildCount();
+	Entity GetChild(const EntityID& entity);
 
-	template<typename T, typename... Args>
-	T& AddComponent(Args&&... args);
+	template<typename T>
+	T& AddComponent();
 	template<typename T>
 	T& GetComponent();
 	template<typename T>
 	void RemoveComponent();
 	template<typename T>
 	bool HasComponent();
+
+	std::vector<Component> GetAllComponents();
 
 	virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
@@ -40,13 +55,13 @@ public:
 	Entity GetParent();
 
 	const EntityID& GetEntityID() const { return m_entityID; }
-	const EntityID& GetParentEntityID() const { return m_parentEntityID; }
+	const EntityID& GetParentEntityID() { return GetEntiyData().ParentEntityID; }
+
+	EntityData& GetEntiyData();
 
 private:
 	EntityID m_entityID;
-	EntityID m_parentEntityID;
 	EntityManager* m_entityManager;
-	bool m_isValid;
 
 	REGISTER_DEC_TYPE(Entity);
 	friend EntityManager;
@@ -54,12 +69,12 @@ private:
 
 #include "Engine/Entity/EntityManager.h"
 
-template<typename T, typename ...Args>
-INLINE T& Entity::AddComponent(Args&&... args)
+template<typename T>
+INLINE T& Entity::AddComponent()
 {
 	STATIC_ASSERT((std::is_base_of_v<Component, T>), "[Entity::AddComponent] template 'T' does not inherit from 'Component'");
 	ASSERT(IsValid() && "[Entity::AddComponent] Entity is not valid. Check 'IsValid' before this call.")
-	return m_entityManager->AddComponent<T>(m_entityID, std::forward<Args...>(args)...);
+	return m_entityManager->AddComponent<T>(m_entityID);
 }
 
 template<typename T>

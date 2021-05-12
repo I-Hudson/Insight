@@ -5,11 +5,19 @@
 #include "Engine/Scene/Scene.h"
 
 Component::Component()
-	: m_entityManager(nullptr), m_entityID(-1)
+	: m_componentManager(nullptr)
+	, m_componentID(-1)
+	, m_componentType(-1)
+	, m_entityManager(nullptr)
+	, m_entityID(-1)
 { }
 
-Component::Component(EntityManager* entityManager, EntityID entity)
-	: m_entityManager(entityManager), m_entityID(entity)
+Component::Component(ComponentManager* componentManger, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity)
+	: m_componentManager(componentManger)
+	, m_componentID(componentID)
+	, m_componentType(componentType)
+	, m_entityManager(entityManager)
+	, m_entityID(entity)
 { }
 
 Component::~Component()

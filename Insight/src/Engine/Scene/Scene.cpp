@@ -65,6 +65,11 @@ Scene* Scene::ActiveScene()
 	return s_CurrentScene;
 }
 
+std::vector<Entity> Scene::GetEntites()
+{
+	return m_entityManager.GetAliveEntities();
+}
+
 void Scene::Load(const std::string& file)
 {
 	Unload();
