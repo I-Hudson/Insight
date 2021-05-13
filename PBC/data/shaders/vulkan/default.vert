@@ -26,8 +26,8 @@ layout (location = 3) out vec2 outUV;
 
 void main() 
 {
-	gl_Position = ubo.projection * inverse(ubo.view) * vec4(inPos.xyz, 1.0);
-	outPos = ubo.projection * inverse(ubo.view) * ubo.model * vec4(inPos.xyz, 1.0);
+	gl_Position = ubo.projection * inverse(ubo.view) * modelUBO.model * vec4(inPos.xyz, 1.0);
+	outPos = ubo.projection * inverse(ubo.view) *  modelUBO.model * vec4(inPos.xyz, 1.0);
 	outNormal = vec4(inNormal, 1.0);
 	outColor = inColor;
 	outUV = inUV;

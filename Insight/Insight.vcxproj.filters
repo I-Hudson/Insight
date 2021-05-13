@@ -282,6 +282,9 @@
     <ClInclude Include="inc\Engine\Component\Component.h">
       <Filter>inc\Engine\Component</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Component\Generated\Component_reflect_generated.h">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.h">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClInclude>
@@ -2039,6 +2042,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClCompile>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClCompile>

@@ -15,12 +15,15 @@ namespace vks
 
 class Model;
 
+using LoadedTextureStrings = std::vector<std::pair<std::string, std::string>>;
+
 class IS_API SubMesh
 {
 public:
 
 	SubMesh();
 	SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+	SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const LoadedTextureStrings& loadedTextureStrings);
 	~SubMesh();
 
 	void Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
@@ -46,9 +49,12 @@ public:
 	Insight::Graphics::GPUBuffer* GetGPUVerticesBuffer() { return m_vertexBuffer; }
 	Insight::Graphics::GPUBuffer* GetGPUIndexBuffer() { return m_indexBuffer; }
 
+	std::string GetDiffuseTextureString() { return m_loadedTexturesStrings[0].second; }
+
 private:
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
+	LoadedTextureStrings m_loadedTexturesStrings;
 
 	Insight::Graphics::GPUBuffer* m_vertexBuffer;
 	Insight::Graphics::GPUBuffer* m_indexBuffer;

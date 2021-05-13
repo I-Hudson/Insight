@@ -69,7 +69,7 @@ project "InsightEditor"
         kind "WindowedApp"
 
     filter "configurations:Dist"
-        defines { "IS_DIST", "IS_VULKAN", "NOMINMAX", "GLFW_INCLUDE_VULKAN" }
+        defines { "IS_DIST", "IS_VULKAN", "NOMINMAX", "IS_EDITOR", "GLFW_INCLUDE_VULKAN" }
         optimize "full"
         kind "WindowedApp"
 

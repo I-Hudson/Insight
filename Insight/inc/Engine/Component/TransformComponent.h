@@ -3,10 +3,9 @@
 #include "Engine/Component/Component.h"
 #include "glm/glm.hpp"
 
-struct TransformComponentData
+struct TransformComponentData : public ComponentData
 {
 	TransformComponentData();
-
 	glm::mat4 Transform;
 };
 

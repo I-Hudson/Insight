@@ -49,6 +49,11 @@ Entity Entity::GetChild(const EntityID& entity)
 	return m_entityManager->GetEntity(GetEntiyData().EntityChildrenIDs.at(entity));
 }
 
+void Entity::RemoveComponent(const Component& component)
+{
+	m_entityManager->RemoveComponent(m_entityID, component);
+}
+
 //std::vector<Component> Entity::GetAllComponents()
 //{
 //	if (!IsValid())

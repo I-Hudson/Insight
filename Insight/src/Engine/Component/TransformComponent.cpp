@@ -9,7 +9,9 @@ REGISTER_DEF_TYPE(TransformComponent);
 
 TransformComponentData::TransformComponentData()
 	: Transform(glm::mat4(1.0f))
-{ }
+{
+	AllowRemovable = false;
+}
 
 TransformComponent::TransformComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity)
 	: Component(componentManager, componentID, componentType, entityManager, entity)

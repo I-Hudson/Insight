@@ -171,25 +171,26 @@
 				}
 				ImGui::NewLine();
 
+				std::vector<Component> removedComponents;
 				for (u32 i = 0; i < entity.GetComponentCount(); ++i)
 				{
 					auto& component = entity.GetComponent(i);
 					IS_PROFILE_SCOPE("Draw Properties");
 					auto properties = component.GetMembers({ "ShowInEditor" });
-					//auto allowRemovableProb = IS_GET_PROPERTY((*componentsIT), "Allow_Removable");
+					auto& componentData = component.GetComponentData();
+					auto dataProperties = componentData.GetMember("AllowRemovable");
 
 					ImGui::Separator();
 					ImGui::Text(component.GetType().GetTypeName().c_str());
-					//if (allowRemovableProb.IsValid() && allowRemovableProb.GetPropertyValue<bool>())
-					//{
-					//	ImGui::SameLine(ImGui::GetWindowWidth() - 30);
-					//	if (ImGui::Button("X"))
-					//	{
-					//		// TODO: Remove component
-					//		entity->RemoveComponent((*componentsIT)->GetUUID());
-					//		continue;
-					//	}
-					//}
+					if (dataProperties.IsValid() && *dataProperties.ConvertToType<bool>())
+					{
+						ImGui::SameLine(ImGui::GetWindowWidth() - 150);
+						if (ImGui::Button("X"))
+						{
+							removedComponents.push_back(component);
+							continue;
+						}
+					}
 
 					if (!Editor::EditorDrawerRegistry::CallEditorDrawer(component.GetType(), component))
 					{
@@ -203,6 +204,11 @@
 						}
 					}
 				}
+				for (auto& component : removedComponents)
+				{
+					entity.RemoveComponent(component);
+				}
+
 				ImGui::Separator();
 
 				const char* addComponentButtonText = "+";

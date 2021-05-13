@@ -1,16 +1,16 @@
 #include "ispch.h"
-#include "../MeshComponent.h"
+#include "../Component.h"
 
-Reflect::ReflectMemberProp MeshComponent::__REFLECT_MEMBER_PROPS__[1] = {
-	Reflect::ReflectMemberProp("m_meshName", Reflect::Util::GetTypeName<std::string>(), __REFLECT__m_meshName(), {"ShowInEditor"}),
+Reflect::ReflectMemberProp ComponentData::__REFLECT_MEMBER_PROPS__[1] = {
+	Reflect::ReflectMemberProp("AllowRemovable", Reflect::Util::GetTypeName<bool>(), __REFLECT__AllowRemovable(), {"Editor"}),
 };
 
-Reflect::ReflectFunction MeshComponent::GetFunction(const char* functionName)
+Reflect::ReflectFunction ComponentData::GetFunction(const char* functionName)
 {
 	return __super::GetFunction(functionName);
 }
 
-Reflect::ReflectMember MeshComponent::GetMember(const char* memberName)
+Reflect::ReflectMember ComponentData::GetMember(const char* memberName)
 {
 	for(const auto& member : __REFLECT_MEMBER_PROPS__)
 	{
@@ -23,7 +23,7 @@ Reflect::ReflectMember MeshComponent::GetMember(const char* memberName)
 	return __super::GetMember(memberName);
 }
 
-std::vector<Reflect::ReflectMember> MeshComponent::GetMembers(std::vector<std::string> const& flags)
+std::vector<Reflect::ReflectMember> ComponentData::GetMembers(std::vector<std::string> const& flags)
 {
 	std::vector<Reflect::ReflectMember> members = __super::GetMembers(flags);
 	for(auto& member : __REFLECT_MEMBER_PROPS__)

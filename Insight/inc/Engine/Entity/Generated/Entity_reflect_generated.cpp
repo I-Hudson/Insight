@@ -7,7 +7,7 @@ Reflect::ReflectMemberProp EntityData::__REFLECT_MEMBER_PROPS__[1] = {
 
 Reflect::ReflectFunction EntityData::GetFunction(const char* functionName)
 {
-	return Reflect::ReflectFunction(nullptr, nullptr);
+	return __super::GetFunction(functionName);
 }
 
 Reflect::ReflectMember EntityData::GetMember(const char* memberName)
@@ -20,12 +20,12 @@ Reflect::ReflectMember EntityData::GetMember(const char* memberName)
 			return Reflect::ReflectMember(member.Name, member.Type, ((char*)this) + member.Offset);
 		}
 	}
-	return Reflect::ReflectMember("null", Reflect::Util::GetTypeName<void>(), nullptr);
+	return __super::GetMember(memberName);
 }
 
 std::vector<Reflect::ReflectMember> EntityData::GetMembers(std::vector<std::string> const& flags)
 {
-	std::vector<Reflect::ReflectMember> members;
+	std::vector<Reflect::ReflectMember> members = __super::GetMembers(flags);
 	for(auto& member : __REFLECT_MEMBER_PROPS__)
 	{
 		if(member.ContainsProperty(flags))

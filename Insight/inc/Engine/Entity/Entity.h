@@ -41,10 +41,14 @@ public:
 
 	template<typename T>
 	T& AddComponent();
+
 	template<typename T>
 	T& GetComponent();
+	
 	template<typename T>
 	void RemoveComponent();
+	void RemoveComponent(const Component& component);
+
 	template<typename T>
 	bool HasComponent();
 

@@ -137,6 +137,7 @@ SubMesh* Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	LoadedTextures textures;
+	LoadedTextureStrings textureStrings;
 
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -192,26 +193,30 @@ SubMesh* Mesh::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 	if (mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-		LoadedTextures diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		auto [diffuseMaps, diffuseMapStrings]  = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		LoadedTextures specularMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		textureStrings = diffuseMapStrings;
+		auto [specularMaps, specularMapStrings] = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	//m_model->SetMaterials(textures);
-	return ::New<SubMesh>(vertices, indices);
+	return ::New<SubMesh>(vertices, indices, textureStrings);
 }
 
-LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
+std::tuple<LoadedTextures, LoadedTextureStrings> Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName)
 {
 	IS_PROFILE_FUNCTION();
 
 	LoadedTextures textures;
+	LoadedTextureStrings textureStrings;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
 	{
 		aiString str;
 		mat->GetTexture(type, i, &str);
-		//bool skip = false;
+		bool skip = false;
+		std::string formatedString = str.C_Str();
+		formatedString = formatedString.substr(formatedString.find_last_of('\\') + 1);
 		//for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
 		//{
 		//	if (std::strcmp(m_loadedTextures[j].GetFilePath().c_str(), str.C_Str()) == 0)
@@ -221,14 +226,16 @@ LoadedTextures Mesh::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, c
 		//		break;
 		//	}
 		//}
-		//if (!skip)
-		{   // if texture hasn't been loaded already, load it
+		if (!skip)
+		{   
+			//if texture hasn't been loaded already, load it
 			//Texture* texture = Texture::New();
 			//texture->Init(m_directory + "/" + str.C_Str());
 			//textures.emplace_back(typeName, texture);
 			//m_loadedTextures.push_back(texture); // add to loaded textures
+			textureStrings.push_back({ typeName, m_directory + "/" + formatedString });
 		}
 	}
 
-	return textures;
+	return { textures, textureStrings };
 }

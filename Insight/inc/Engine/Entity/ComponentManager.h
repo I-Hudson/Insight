@@ -12,7 +12,10 @@ class IComponentArray
 public:
 	virtual ~IComponentArray() = default;
 	virtual void Update(const float& deltaTime) = 0;
+
+	virtual void RemoveComponent(const EntityID& entity) = 0;
 	virtual bool HasComponent(const EntityID& entity) = 0;
+
 	virtual Component& GetComponentBaseRef(const EntityID& entity) = 0;
 	virtual void EntityDestroyed(EntityID entity) = 0;
 };
@@ -34,7 +37,7 @@ public:
 		return m_componentArray.at(newIndex);
 	}
 
-	void RemoveComponent(EntityID entity)
+	virtual void RemoveComponent(const EntityID& entity) override
 	{
 		ASSERT(m_entityToIndexMap.find(entity) != m_entityToIndexMap.end() && 
 			   "[ComponentArray::RemoveComponent] Removing non-existent component.");
@@ -121,6 +124,7 @@ public:
 	virtual ~IComponentDataArray() = default;
 	virtual void AddComponentData(ComponentID component) = 0;
 	virtual void RemoveComponentData(ComponentID component) = 0;
+	virtual ComponentData& GetComponentDataBaseRef(const ComponentID& component) = 0;
 };
 
 template<typename T>
@@ -169,6 +173,11 @@ public:
 		--m_size;
 	}
 
+	virtual ComponentData& GetComponentDataBaseRef(const ComponentID& component) override
+	{
+		return GetComponentData(component);
+	}
+
 private:
 	std::array<T, MAX_ENTITIES_COUNT> m_componentDataArray;
 	// Track the component data via each component not entity. Thie will allow for more than on component on an entity.
@@ -190,6 +199,8 @@ public:
 	template<typename T, typename TData = ComponentData>
 	void RegisterComponent()
 	{
+		STATIC_ASSERT((std::is_base_of_v<ComponentData, TData>), "[ComponentManager::RegisterComponent] 'TData' needs to inherit from 'ComponentData'.");
+
 		const char* typeName = typeid(T).name();
 		ASSERT(m_componentTypes.find(typeName) == m_componentTypes.end() &&
 			   "[ComponentManager::RegisterComponent] Registering component type more than once.");
@@ -235,6 +246,11 @@ public:
 		m_componentDataArrays.at(GetComponentType<T>())->RemoveComponentData(component.GetComponentID());
 		GetComponentArray<T>()->RemoveComponent(entity);
 	}
+	void RemoveComponent(const EntityID& entity, const ComponentType& componentType, const ComponentID& componentID)
+	{
+		m_componentDataArrays.at(componentType)->RemoveComponentData(componentID);
+		m_componentArrays.at(componentType)->RemoveComponent(entity);
+	}
 
 	template<typename T>
 	T& GetComponent(const EntityID& entity)
@@ -243,7 +259,7 @@ public:
 		return GetComponentArray<T>()->GetComponent(entity);
 	}
 
-	Component& GetComponent(const EntityID& entity, const ComponentType& componentType)
+	Component& GetComponentBaseRef(const EntityID& entity, const ComponentType& componentType)
 	{
 		return m_componentArrays.at(componentType)->GetComponentBaseRef(entity);
 	}
@@ -260,6 +276,11 @@ public:
 	T& GetComponentData(ComponentType componentType, ComponentID componentID)
 	{
 		return GetComponentDataArray<T>(componentType)->GetComponentData(componentID);
+	}
+
+	ComponentData& GetComponentDataBaseRef(ComponentType componentType, ComponentID componentID)
+	{
+		return m_componentDataArrays.at(componentType)->GetComponentDataBaseRef(componentID);;
 	}
 
 	void EntityDestroyed(const EntityID& entity)
@@ -302,8 +323,8 @@ private:
 	template<typename T>
 	ComponentDataArray<T>* GetComponentDataArray(ComponentType componentType)
 	{
-		//ASSERT(m_componentTypes.find(typeName) != m_componentTypes.end() &&
-		//	   "[ComponentManager::GetComponentDataArray] Component data not registered before use.");
+		ASSERT(m_componentDataArrays.find(componentType) != m_componentDataArrays.end() &&
+			   "[ComponentManager::GetComponentDataArray] Component data not registered before use.");
 
 		return static_cast<ComponentDataArray<T>*>(m_componentDataArrays.at(componentType));
 	}

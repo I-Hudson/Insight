@@ -74,22 +74,15 @@ public:
 		CameraComponent& camera = m_editorCamera.AddComponent<CameraComponent>();
 		camera.SetProjMatrix(90.0f, 0.1f, 1000.0f);
 		camera.SetCameraSpeed(50.0f);
-		bool hasComponent = m_editorCamera.HasComponent<CameraComponent>();
-		m_editorCamera.RemoveComponent<CameraComponent>();
-		hasComponent = m_editorCamera.HasComponent<CameraComponent>();
-
-		camera = m_editorCamera.AddComponent<CameraComponent>();
-		camera.SetProjMatrix(90.0f, 0.1f, 1000.0f);
-		camera.SetCameraSpeed(50.0f);
 		Module::GraphicsModule::Instance()->SetMainCamera(&camera);
 
-		for (size_t i = 0; i < 1; i++)
+		for (size_t i = 0; i < 2; i++)
 		{
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
 			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
 			meshComponent.SetModel(model);
-			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition(glm::vec3(rand() + 50, 0, 0));
+			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 15.0f, 0, 0 });
 
 			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
 			meshChild.SetParent(mesh.GetEntityID());

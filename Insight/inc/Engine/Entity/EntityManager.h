@@ -24,10 +24,14 @@ public:
 private:
 	template<typename T>
 	T& AddComponent(const EntityID& entity);
+
 	template<typename T>
 	T& GetComponent(const EntityID& entity);
+
 	template<typename T>
 	void RemoveComponent(const EntityID& entity);
+	void RemoveComponent(const EntityID& entity, const Component& component);
+
 	template<typename T>
 	bool HasComponent(const EntityID& entity);
 

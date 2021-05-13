@@ -56,9 +56,21 @@ std::vector<Entity> EntityManager::GetAliveEntities()
 	return aliveEntities;
 }
 
+void EntityManager::RemoveComponent(const EntityID& entity, const Component& component)
+{
+	m_entityData.at(entity).Signature.reset(component.GetComponentType());
+	auto itr = std::find_if(m_entityData.at(entity).ComponentIDs.begin(), m_entityData.at(entity).ComponentIDs.end(), [this, &entity, &component](const std::pair<ComponentType, ComponentID>& pair)
+	{
+		return component.GetComponentType() == pair.first && component.GetComponentID() == pair.second;
+	});
+	ASSERT(itr != m_entityData.at(entity).ComponentIDs.end() && "[EntityManager::RemoveComponent] Component not listed on Entity.");
+	m_entityData.at(entity).ComponentIDs.erase(itr);
+	m_componentManager.RemoveComponent(entity, component.GetComponentType(), component.GetComponentID());
+}
+
 Component& EntityManager::GetComponent(const EntityID& entity, const u32& componentIndex)
 {
-	return m_componentManager.GetComponent(entity, GetEntityData(entity).ComponentIDs.at(componentIndex).first);
+	return m_componentManager.GetComponentBaseRef(entity, GetEntityData(entity).ComponentIDs.at(componentIndex).first);
 }
 
 std::vector<Component> EntityManager::GetAllComponent(const EntityID& entity)

@@ -26,6 +26,18 @@ SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned
 	Create(vertices, indices);
 }
 
+SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const LoadedTextureStrings& loadedTextureStrings)
+	: m_created(false)
+{
+	IS_PROFILE_FUNCTION();
+
+	m_vertexBuffer = Insight::Graphics::GPUBuffer::New();
+	m_indexBuffer = Insight::Graphics::GPUBuffer::New();
+	m_loadedTexturesStrings = loadedTextureStrings;
+
+	Create(vertices, indices);
+}
+
 SubMesh::~SubMesh()
 {
 	IS_PROFILE_FUNCTION();

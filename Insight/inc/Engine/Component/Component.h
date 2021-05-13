@@ -4,13 +4,21 @@
 #include "Engine/Serialization/Serializable.h"
 
 #include "Reflect.h"
+#include "Generated/Component_reflect_generated.h"
 
 class Entity;
 class EntityManager;
 class ComponentManager;
 
-struct IS_API ComponentData
-{ };
+REFLECT_STRUCT()
+struct ComponentData : REFLECT_BASE()
+{
+	REFLECT_GENERATED_BODY()
+
+protected:
+	REFLECT_PROPERTY(Editor)
+	bool AllowRemovable = true;
+};
 
 class Component : REFLECT_BASE(), public Object
 {
@@ -24,12 +32,15 @@ public:
 	Entity GetEntity();
 
 	ComponentID GetComponentID() const { return m_componentID; }
+	ComponentType GetComponentType() const { return m_componentType; }
 
 	template<typename T>
 	T& GetComponentData()
 	{
 		return m_componentManager->GetComponentData<T>(m_componentType, m_componentID);
 	}
+
+	ComponentData& GetComponentData();
 
 protected:
 	ComponentID m_componentID;

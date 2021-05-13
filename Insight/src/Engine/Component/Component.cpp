@@ -31,3 +31,8 @@ Entity Component::GetEntity()
 	}
 	return Entity(nullptr, -1);
 }
+
+ComponentData& Component::GetComponentData()
+{
+	return m_componentManager->GetComponentDataBaseRef(m_componentType, m_componentID);
+}

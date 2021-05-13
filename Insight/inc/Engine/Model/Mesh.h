@@ -36,7 +36,7 @@ private:
 	void ProcessNode(aiNode* node, const aiScene* scene);
 	SubMesh* ProcessMesh(aiMesh* mesh, const aiScene* scene);
 
-	LoadedTextures LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+	std::tuple<LoadedTextures, LoadedTextureStrings> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
 private:
 	std::vector<SubMesh*> m_subMeshes;
