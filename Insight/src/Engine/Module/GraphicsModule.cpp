@@ -14,6 +14,7 @@
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
 
+#include "Engine/Graphics/Model/Model.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/Graphics/Image/GPUImage.h"
@@ -215,7 +216,6 @@ namespace Module
 					IS_PROFILE_SCOPE("Upload mesh vertices");
 					for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
 					{
-
 						if (mesh.GetMesh() != nullptr)
 						{
 							glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
@@ -229,18 +229,28 @@ namespace Module
 							Graphics::GPUDescriptorSet* sets[] = { vertexSet };
 							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
-							for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetMeshSubCount(); ++subMeshIndex)
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { mesh.GetMesh()->GetGPUVertexBuffer() };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+							cmdBuffer->BindIndexBuffer(mesh.GetMesh()->GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
+
+							for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
 							{
 								int textureDiffuse = 1;
 								Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
-
-								SubMesh& subMesh = mesh.GetMesh()->GetSubMesh(subMeshIndex);
+								
+								const Graphics::SubMesh& subMesh = mesh.GetMesh()->GetSubMesh(subMeshIndex);
 								Graphics::GPUImage* diffuseTexture = nullptr;
+								std::string diffuseTextureString = "";//subMesh.GetDiffuseTextureString();
+								if (diffuseTextureString.empty())
+								{
+									diffuseTextureString = "./data/embed2.jpg";
+								}
 								Utils::Hasher diffuseTextureHasher;
-								diffuseTextureHasher.Hash(subMesh.GetDiffuseTextureString());
+								diffuseTextureHasher.Hash(diffuseTextureString);
 								if (Graphics::GPUImageCache::Instance()->GetItem(diffuseTextureHasher.GetHash(), diffuseTexture))
 								{
-									diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, subMesh.GetDiffuseTextureString()));
+									diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
 								}
 
 								Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
@@ -255,11 +265,7 @@ namespace Module
 								Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
 								cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
-								u32 offsets[] = { 0 };
-								Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVerticesBuffer() };
-								cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-								cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-								cmdBuffer->DrawIndexed(subMesh.GetIndicesCount(), 1, 0, 0, 0);
+								cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, subMesh.GetFirstIndex(), 0, 0);
 							}
 						}
 					}

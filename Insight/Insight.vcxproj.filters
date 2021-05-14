@@ -55,6 +55,9 @@
     <Filter Include="inc\Engine\Graphics\Image">
       <UniqueIdentifier>{76EB297E-E2AD-5D08-2B5E-EC94975F36E6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inc\Engine\Graphics\Model">
+      <UniqueIdentifier>{C472737E-3035-A708-79E5-3595E5E67FE6}</UniqueIdentifier>
+    </Filter>
     <Filter Include="inc\Engine\Graphics\RenderGraph">
       <UniqueIdentifier>{C552B1AE-3136-C0EE-3A39-EE2AA69B863F}</UniqueIdentifier>
     </Filter>
@@ -172,6 +175,9 @@
     <Filter Include="src\Engine\Graphics\Image">
       <UniqueIdentifier>{0405C372-70C7-F6FC-B977-85892579CFDA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\Graphics\Model">
+      <UniqueIdentifier>{528C0C73-BE4E-40FD-07FF-CE89730019DB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\Graphics\RenderGraph">
       <UniqueIdentifier>{D3DEC614-3FC2-D554-48C5-0391B4279CA5}</UniqueIdentifier>
     </Filter>
@@ -271,8 +277,8 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vendor\stb_image">
-      <UniqueIdentifier>{0DA0BA59-F998-D9AB-22CB-BE300E23B9B7}</UniqueIdentifier>
+    <Filter Include="vendor\tinygltf">
+      <UniqueIdentifier>{53CDE522-BF58-53E7-C869-D6DB3474AFE7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -485,6 +491,12 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Material.h">
       <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\Model\Model.h">
+      <Filter>inc\Engine\Graphics\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\Model\ModelLoading.h">
+      <Filter>inc\Engine\Graphics\Model</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\PixelFormat.h">
       <Filter>inc\Engine\Graphics</Filter>
@@ -2034,11 +2046,17 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="vendor\stb_image\cro_mipmap.h">
-      <Filter>vendor\stb_image</Filter>
+    <ClInclude Include="vendor\tinygltf\json.hpp">
+      <Filter>vendor\tinygltf</Filter>
     </ClInclude>
-    <ClInclude Include="vendor\stb_image\stb_image.h">
-      <Filter>vendor\stb_image</Filter>
+    <ClInclude Include="vendor\tinygltf\stb_image.h">
+      <Filter>vendor\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinygltf\stb_image_write.h">
+      <Filter>vendor\tinygltf</Filter>
+    </ClInclude>
+    <ClInclude Include="vendor\tinygltf\tiny_gltf.h">
+      <Filter>vendor\tinygltf</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2152,6 +2170,12 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Material.cpp">
       <Filter>src\Engine\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Model\Model.cpp">
+      <Filter>src\Engine\Graphics\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Model\ModelLoading.cpp">
+      <Filter>src\Engine\Graphics\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp">
       <Filter>src\Engine\Graphics</Filter>
@@ -2353,9 +2377,6 @@
     </ClCompile>
     <ClCompile Include="vendor\TinyXML2\tinyxml2.cpp">
       <Filter>vendor\TinyXML2</Filter>
-    </ClCompile>
-    <ClCompile Include="vendor\stb_image\stb_image.cpp">
-      <Filter>vendor\stb_image</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

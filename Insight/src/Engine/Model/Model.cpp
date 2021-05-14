@@ -6,6 +6,7 @@
 #include "Engine/Memory/MemoryManager.h"
 #include "Engine/Library/ModelLibrary.h"
 #include "Engine/Instrumentor/Instrumentor.h"
+#include "..\..\..\inc\Engine\Graphics\Model\Model.h"
 
 Model::Model()
 {

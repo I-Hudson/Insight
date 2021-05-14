@@ -216,7 +216,10 @@ std::tuple<LoadedTextures, LoadedTextureStrings> Mesh::LoadMaterialTextures(aiMa
 		mat->GetTexture(type, i, &str);
 		bool skip = false;
 		std::string formatedString = str.C_Str();
-		formatedString = formatedString.substr(formatedString.find_last_of('\\') + 1);
+		if (formatedString.find(":") != std::string::npos)
+		{
+			formatedString = formatedString.substr(formatedString.find_last_of('\\') + 1);
+		}
 		//for (unsigned int j = 0; j < m_loadedTextures.size(); j++)
 		//{
 		//	if (std::strcmp(m_loadedTextures[j].GetFilePath().c_str(), str.C_Str()) == 0)
@@ -227,7 +230,7 @@ std::tuple<LoadedTextures, LoadedTextureStrings> Mesh::LoadMaterialTextures(aiMa
 		//	}
 		//}
 		if (!skip)
-		{   
+		{
 			//if texture hasn't been loaded already, load it
 			//Texture* texture = Texture::New();
 			//texture->Init(m_directory + "/" + str.C_Str());

@@ -4,6 +4,7 @@
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Library/ModelLibrary.h"
 #include "Engine/Model/Model.h"
+#include "Engine/Graphics/Model/Model.h"
 
 REGISTER_DEF_TYPE(MeshComponent);
 
@@ -51,6 +52,21 @@ MeshComponent::~MeshComponent()
 //		m_mesh->Draw(cmd, m_materials, m_materialBlockDatas, materialUpdateFunc, this);
 //	}
 //}
+
+void MeshComponent::SetModel(Insight::Graphics::Model* model)
+{
+	if (model)
+	{
+		Insight::Graphics::Mesh* mesh = &const_cast<Insight::Graphics::Mesh&>(model->GetMesh(0));
+		SetMesh(mesh);
+		//SetMaterials(model->GetMaterals());
+	}
+}
+
+void MeshComponent::SetMesh(Insight::Graphics::Mesh* mesh)
+{
+	m_insightMesh = mesh;
+}
 
 void MeshComponent::SetMesh(Mesh* mesh)
 {

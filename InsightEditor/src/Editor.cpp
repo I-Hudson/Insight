@@ -78,9 +78,13 @@ public:
 
 		for (size_t i = 0; i < 2; i++)
 		{
+			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/gltf/Sponza/glTF/Sponza.gltf");
+			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
+
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
-			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/nano/nanosuit.fbx");
+			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("");
+			//meshComponent.SetModel(graphicsModel);
 			meshComponent.SetModel(model);
 			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 15.0f, 0, 0 });
 

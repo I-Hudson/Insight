@@ -9,6 +9,12 @@
 
 #include <../vendor/glm/glm/glm.hpp>
 
+namespace Insight::Graphics
+{
+	class Model;
+	class Mesh;
+}
+
 REFLECT_CLASS()
 class MeshComponent : public Component
 {
@@ -23,9 +29,13 @@ public:
 	//virtual void OnCreate() override;
 	//virtual void OnDestroy() override;
 
+	void SetModel(Insight::Graphics::Model* model);
+	void SetMesh(Insight::Graphics::Mesh* mesh);
+	Insight::Graphics::Mesh* GetMesh() const { return m_insightMesh; }
+
 	void SetMesh(Mesh* mesh);
 	void SetModel(Model* model);
-	Mesh* GetMesh() const { return m_mesh; }
+	//Mesh* GetMesh() const { return m_mesh; }
 
 	void SetMaterial(Material* material, int index);
 	void SetMaterials(std::vector<Material*> materials);
@@ -42,6 +52,8 @@ private:
 	Mesh* m_mesh;
 	std::vector<Material*> m_materials;
 	std::vector<MaterialBlockData> m_materialBlockDatas;
+
+	Insight::Graphics::Mesh* m_insightMesh;
 
 	REFLECT_PROPERTY(ShowInEditor)
 	std::string m_meshName;

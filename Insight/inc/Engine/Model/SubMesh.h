@@ -49,7 +49,14 @@ public:
 	Insight::Graphics::GPUBuffer* GetGPUVerticesBuffer() { return m_vertexBuffer; }
 	Insight::Graphics::GPUBuffer* GetGPUIndexBuffer() { return m_indexBuffer; }
 
-	std::string GetDiffuseTextureString() { return m_loadedTexturesStrings[0].second; }
+	std::string GetDiffuseTextureString()
+	{
+		if (m_loadedTexturesStrings.size() == 0)
+		{
+			return "";
+		}
+		return m_loadedTexturesStrings[0].second;
+	}
 
 private:
 	std::vector<Vertex> m_vertices;

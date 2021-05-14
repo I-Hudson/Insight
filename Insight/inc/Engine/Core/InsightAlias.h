@@ -23,6 +23,10 @@ extern u16 U16_MAX;
 extern u32 U32_MAX;
 extern u64 U64_MAX;
 
+extern float FLOAT_MIN;
+extern float FLOAT_MAX;
+extern float FLOAT_EPSILON;
+
 using I8 = int8_t; // TODO: Make deprecated 
 using I16 = int16_t; // TODO: Make deprecated 
 using I32 = int32_t; // TODO: Make deprecated 
