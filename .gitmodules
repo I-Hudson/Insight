@@ -4,9 +4,6 @@
 [submodule "Insight/vendor/optick"]
 	path = Insight/vendor/optick
 	url = https://github.com/bombomby/optick.git
-[submodule "Insight/vendor/tinygltf"]
-	path = Insight/vendor/tinygltf
-	url = https://github.com/syoyo/tinygltf
 [submodule "Insight/vendor/KTX-Software"]
 	path = Insight/vendor/KTX-Software
 	url = https://github.com/KhronosGroup/KTX-Software
