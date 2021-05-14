@@ -6,11 +6,11 @@
 
 namespace Insight::Graphics
 {
+	using MeshTextures = std::unordered_map<std::string, std::string>;
+
 	namespace ModelLoading
 	{
-		struct GLTFModelLoader;
-		struct FBXModelLoader;
-		struct OBJModelLoader;
+		struct AssimpLoader;
 	}
 
 	class Model;
@@ -31,6 +31,7 @@ namespace Insight::Graphics
 	{
 	public:
 		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount);
+		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 		~SubMesh();
 
 		const MeshDimensions& GetDimensions() const { return m_dimensions; }
@@ -39,6 +40,13 @@ namespace Insight::Graphics
 		const u32& GetVertexCount() const { return m_vertexCount; }
 		const u32& GetFirstIndex() const { return m_firstIndex; }
 		const u32& GetIndexCount() const { return m_indexCount; }
+
+		std::string GetTexture(const std::string& textureId);
+
+		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
+		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
+
+		void Release();
 
 	private:
 		void SetDimensions(glm::vec3 min, glm::vec3 max);
@@ -51,9 +59,11 @@ namespace Insight::Graphics
 		u32 m_indexCount;
 		MeshDimensions m_dimensions;
 
-		friend Insight::Graphics::ModelLoading::GLTFModelLoader;
-		friend Insight::Graphics::ModelLoading::FBXModelLoader;
-		friend Insight::Graphics::ModelLoading::OBJModelLoader;
+		MeshTextures m_textures;
+		GPUBuffer* m_vertexBuffer;
+		GPUBuffer* m_indexBuffer;
+
+		friend Insight::Graphics::ModelLoading::AssimpLoader;
 	};
 
 	/// <summary>
@@ -70,13 +80,20 @@ namespace Insight::Graphics
 		u32 GetSubMeshCount() const { return static_cast<u32>(m_subMeshes.size()); }
 		const SubMesh& GetSubMesh(const u32& index) const { return m_subMeshes.at(index); }
 
+		const u32& GetVertexCount() const { return m_vertexCount; }
+		const u32& GetIndexCount() const { return m_indexCount; }
+
 		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
+
+		void Release();
 
 	private:
 		void SetupGPUBuffers();
 
 	private:
+		std::string	m_meshName;
+
 		std::vector<SubMesh> m_subMeshes;
 		MeshDimensions m_dimensions;
 
@@ -89,9 +106,7 @@ namespace Insight::Graphics
 		GPUBuffer* m_indexBuffer;
 
 		friend Model;
-		friend Insight::Graphics::ModelLoading::GLTFModelLoader;
-		friend Insight::Graphics::ModelLoading::FBXModelLoader;
-		friend Insight::Graphics::ModelLoading::OBJModelLoader;
+		friend Insight::Graphics::ModelLoading::AssimpLoader;
 	};
 
 
@@ -108,15 +123,14 @@ namespace Insight::Graphics
 
 		void LoadFromFile(const std::string& filePath);
 
-		u32 GetMeshCount() { return static_cast<u32>(m_meshes.size()); }
-		const Mesh& GetMesh(const u32& index) const { return m_meshes.at(index); }
+		const Mesh& GetMesh() const { return m_mesh; }
 
 	private:
-		std::vector<Mesh> m_meshes;
-		std::string m_path;
+		Mesh m_mesh;
+		
+		std::string m_fileName;
+		std::string m_fileDirectory;
 
-		friend Insight::Graphics::ModelLoading::GLTFModelLoader;
-		friend Insight::Graphics::ModelLoading::FBXModelLoader;
-		friend Insight::Graphics::ModelLoading::OBJModelLoader;
+		friend Insight::Graphics::ModelLoading::AssimpLoader;
 	};
 }

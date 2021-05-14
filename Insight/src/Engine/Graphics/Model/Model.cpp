@@ -13,10 +13,43 @@ namespace Insight::Graphics
 		, m_vertexCount(vertexCount)
 		, m_firstIndex(firstIndex)
 		, m_indexCount(indexCount)
+		, m_vertexBuffer(nullptr)
+		, m_indexBuffer(nullptr)
 	{ }
+
+	SubMesh::SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices , std::vector<u32>& indices)
+		: m_firstVertex(firstVertex)
+		, m_vertexCount(vertexCount)
+		, m_firstIndex(firstIndex)
+		, m_indexCount(indexCount)
+	{
+		m_vertexBuffer = GPUBuffer::New();
+		m_indexBuffer = GPUBuffer::New();
+
+		m_vertexBuffer->Init(GPUBufferDesc::Vertex(sizeof(Vertex), vertexCount, vertices.data()));
+		m_indexBuffer->Init(GPUBufferDesc::Index(sizeof(u32), m_indexCount, indices.data()));
+	}
 
 	SubMesh::~SubMesh()
 	{ }
+
+	void SubMesh::Release()
+	{
+		m_vertexBuffer->ReleaseGPU();
+		::Delete(m_vertexBuffer);
+		m_indexBuffer->ReleaseGPU();
+		::Delete(m_indexBuffer);
+	}
+
+	std::string SubMesh::GetTexture(const std::string& textureId)
+	{
+		auto itr = m_textures.find(textureId);
+		if (itr == m_textures.end())
+		{
+			return "";
+		}
+		return itr->second;
+	}
 
 	void SubMesh::SetDimensions(glm::vec3 min, glm::vec3 max)
 	{
@@ -31,15 +64,25 @@ namespace Insight::Graphics
 		: m_vertexBuffer(nullptr)
 		, m_indexBuffer(nullptr)
 	{
-		m_vertexBuffer = GPUBuffer::New();
-		m_indexBuffer = GPUBuffer::New();
+		//m_vertexBuffer = GPUBuffer::New();
+		//m_indexBuffer = GPUBuffer::New();
 	}
 
 	Mesh::~Mesh()
 	{ }
 
+	void Mesh::Release()
+	{
+		for (auto& subMesh : m_subMeshes)
+		{
+			subMesh.Release();
+		}
+	}
+
 	void Mesh::SetupGPUBuffers()
 	{
+		m_vertexCount = m_vertices.size();
+		m_indexCount = m_indices.size();
 		m_vertexBuffer->Init(GPUBufferDesc::Vertex(sizeof(Vertex), m_vertices.size(), m_vertices.data()));
 		m_indexBuffer->Init(GPUBufferDesc::Index(sizeof(u32), m_indices.size(), m_indices.data()));
 	}
@@ -60,27 +103,13 @@ namespace Insight::Graphics
 	}
 
 	Model::~Model()
-	{ }
+	{
+		m_mesh.Release();
+	}
 
 	void Model::LoadFromFile(const std::string& filePath)
 	{
-		std::string fileExtension = std::filesystem::path(filePath).extension().u8string();
-		if (fileExtension == ".gltf")
-		{
-			ModelLoading::GLTFModelLoader::LoadFromFile(*this, filePath);
-		}
-		else if (fileExtension == ".fbx")
-		{
-			ModelLoading::FBXModelLoader::LoadFromFile(*this, filePath);
-		}
-		else if (fileExtension == ".obj")
-		{
-			ModelLoading::OBJModelLoader::LoadFromFile(*this, filePath);
-		}
-
-		for (u64 i = 0; i < m_meshes.size(); ++i)
-		{
-			m_meshes.at(i).SetupGPUBuffers();
-		}
+		ModelLoading::AssimpLoader::LoadFromFile(*this, filePath);
+		//m_mesh.SetupGPUBuffers();
 	}
 }

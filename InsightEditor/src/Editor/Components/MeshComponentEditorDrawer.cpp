@@ -16,7 +16,7 @@ namespace Editor
 			auto modelPtr = Library::ModelLibrary::Instance()->GetAssetFromPath(component.GetMeshName());
 			if (modelPtr)
 			{
-				component.SetMesh(modelPtr->GetMesh());
+				//component.SetMesh(modelPtr->GetMesh());
 			}
 		}
 	}

@@ -31,11 +31,7 @@ public:
 
 	void SetModel(Insight::Graphics::Model* model);
 	void SetMesh(Insight::Graphics::Mesh* mesh);
-	Insight::Graphics::Mesh* GetMesh() const { return m_insightMesh; }
-
-	void SetMesh(Mesh* mesh);
-	void SetModel(Model* model);
-	//Mesh* GetMesh() const { return m_mesh; }
+	Insight::Graphics::Mesh* GetMesh() const { return m_mesh; }
 
 	void SetMaterial(Material* material, int index);
 	void SetMaterials(std::vector<Material*> materials);
@@ -49,11 +45,11 @@ public:
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
-	Mesh* m_mesh;
+	Insight::Graphics::Mesh* m_mesh;
+
 	std::vector<Material*> m_materials;
 	std::vector<MaterialBlockData> m_materialBlockDatas;
 
-	Insight::Graphics::Mesh* m_insightMesh;
 
 	REFLECT_PROPERTY(ShowInEditor)
 	std::string m_meshName;

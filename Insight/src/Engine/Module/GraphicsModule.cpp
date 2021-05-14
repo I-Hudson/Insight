@@ -229,19 +229,14 @@ namespace Module
 							Graphics::GPUDescriptorSet* sets[] = { vertexSet };
 							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
-							u32 offsets[] = { 0 };
-							Graphics::GPUBuffer* verticesBuffer[] = { mesh.GetMesh()->GetGPUVertexBuffer() };
-							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-							cmdBuffer->BindIndexBuffer(mesh.GetMesh()->GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-
 							for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
 							{
 								int textureDiffuse = 1;
 								Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
 								
-								const Graphics::SubMesh& subMesh = mesh.GetMesh()->GetSubMesh(subMeshIndex);
+								Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
 								Graphics::GPUImage* diffuseTexture = nullptr;
-								std::string diffuseTextureString = "";//subMesh.GetDiffuseTextureString();
+								std::string diffuseTextureString = subMesh.GetTexture("texture_diffuse");
 								if (diffuseTextureString.empty())
 								{
 									diffuseTextureString = "./data/embed2.jpg";
@@ -265,7 +260,12 @@ namespace Module
 								Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
 								cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
-								cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, subMesh.GetFirstIndex(), 0, 0);
+								u32 offsets[] = { 0 };
+								Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
+								cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+								cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
+
+								cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
 							}
 						}
 					}

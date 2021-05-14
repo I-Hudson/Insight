@@ -76,16 +76,15 @@ public:
 		camera.SetCameraSpeed(50.0f);
 		Module::GraphicsModule::Instance()->SetMainCamera(&camera);
 
-		for (size_t i = 0; i < 2; i++)
+		for (size_t i = 0; i < 2; ++i)
 		{
-			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/gltf/Sponza/glTF/Sponza.gltf");
+			Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/gltf/Sponza/glTF/Sponza.gltf");
 			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
 
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
-			Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("");
-			//meshComponent.SetModel(graphicsModel);
-			meshComponent.SetModel(model);
+			//Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
+			meshComponent.SetModel(graphicsModel);
 			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 15.0f, 0, 0 });
 
 			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");

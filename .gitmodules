@@ -36,3 +36,6 @@
 	path = Insight/vendor/Reflect
 	url = https://github.com/I-Hudson/Reflect.git
 	branch = master
+[submodule "Insight/vendor/stb"]
+	path = Insight/vendor/stb
+	url = https://github.com/nothings/stb

@@ -57,7 +57,7 @@ void MeshComponent::SetModel(Insight::Graphics::Model* model)
 {
 	if (model)
 	{
-		Insight::Graphics::Mesh* mesh = &const_cast<Insight::Graphics::Mesh&>(model->GetMesh(0));
+		Insight::Graphics::Mesh* mesh = &const_cast<Insight::Graphics::Mesh&>(model->GetMesh());
 		SetMesh(mesh);
 		//SetMaterials(model->GetMaterals());
 	}
@@ -65,22 +65,7 @@ void MeshComponent::SetModel(Insight::Graphics::Model* model)
 
 void MeshComponent::SetMesh(Insight::Graphics::Mesh* mesh)
 {
-	m_insightMesh = mesh;
-}
-
-void MeshComponent::SetMesh(Mesh* mesh)
-{
 	m_mesh = mesh;
-	m_meshName = mesh->GetMeshName();
-}
-
-void MeshComponent::SetModel(Model* model)
-{
-	if (model)
-	{
-		SetMesh(model->GetMesh());
-		SetMaterials(model->GetMaterals());
-	}
 }
 
 void MeshComponent::SetMaterial(Material* material, int index)

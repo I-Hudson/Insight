@@ -277,8 +277,8 @@
     <Filter Include="vendor\glm\glm\gtx">
       <UniqueIdentifier>{B3A6A76B-9F8A-68C1-08EB-6214F4ED5243}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vendor\tinygltf">
-      <UniqueIdentifier>{53CDE522-BF58-53E7-C869-D6DB3474AFE7}</UniqueIdentifier>
+    <Filter Include="vendor\stb">
+      <UniqueIdentifier>{8BD3C5A8-778B-07F6-E092-E051CC69A2E6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -2046,17 +2046,11 @@
     <ClInclude Include="vendor\glm\glm\vector_relational.hpp">
       <Filter>vendor\glm\glm</Filter>
     </ClInclude>
-    <ClInclude Include="vendor\tinygltf\json.hpp">
-      <Filter>vendor\tinygltf</Filter>
+    <ClInclude Include="vendor\stb\stb_image.h">
+      <Filter>vendor\stb</Filter>
     </ClInclude>
-    <ClInclude Include="vendor\tinygltf\stb_image.h">
-      <Filter>vendor\tinygltf</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\tinygltf\stb_image_write.h">
-      <Filter>vendor\tinygltf</Filter>
-    </ClInclude>
-    <ClInclude Include="vendor\tinygltf\tiny_gltf.h">
-      <Filter>vendor\tinygltf</Filter>
+    <ClInclude Include="vendor\stb\stb_image_write.h">
+      <Filter>vendor\stb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

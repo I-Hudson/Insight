@@ -21,10 +21,8 @@ project "Insight"
 		"vendor/glm/glm/**.inl",
         "vendor/TinyXML2/**.h",
 		"vendor/TinyXML2/**.cpp",
-        "vendor/tinygltf/stb_image.h",
-        "vendor/tinygltf/stb_image_write.h",
-        "vendor/tinygltf/json.hpp",
-        "vendor/tinygltf/tiny_gltf.h",
+        "vendor/stb/stb_image.h",
+        "vendor/stb/stb_image_write.h",
 		"vendor/IconFontCppHeaders/**.h",
 	}
 
