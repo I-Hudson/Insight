@@ -21,31 +21,38 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	bool GPUImageViewVulkan::OnInit()
 	{
-		if (m_image == nullptr)
+		if (m_desc.Image == nullptr)
 		{
 			return false;
 		}
 
 		VkImageViewCreateInfo info = vks::initializers::imageViewCreateInfo();
-		info.image = static_cast<GPUImageVulkan*>(m_image)->GetVulkanImage();
+		info.image = static_cast<GPUImageVulkan*>(m_desc.Image)->GetVulkanImage();
 		info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
 		info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		info.subresourceRange.aspectMask = PixelFormatExtensions::IsDepthStencil(m_image->GetDesc().Format) ?
-			VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT :
-			VK_IMAGE_ASPECT_COLOR_BIT;
+		info.subresourceRange.aspectMask = PixelFormatExtensions::IsDepth(m_desc.Image->GetDesc().Format) ?
+			VK_IMAGE_ASPECT_DEPTH_BIT : PixelFormatExtensions::IsDepthStencil(m_desc.Image->GetDesc().Format) ?
+			VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
 		info.subresourceRange.baseMipLevel = 0;
-		info.subresourceRange.levelCount = m_image->GetDesc().Levels;
+		info.subresourceRange.levelCount = m_desc.Image->GetDesc().Levels;
 		info.subresourceRange.baseArrayLayer = 0;
-		info.subresourceRange.layerCount = m_image->GetDesc().Layers;
-		info.viewType = ToVulkanImageViewType(m_image->GetDesc().Type);
-		info.format = ToVulkanFormat(m_image->GetDesc().Format);
+		info.subresourceRange.layerCount = m_desc.Image->GetDesc().Layers;
+		if (m_desc.ViewType == Graphics::GPUImageViewType::Default)
+		{
+			info.viewType = ToVulkanImageViewType(m_desc.Image->GetDesc().Type);
+		}
+		else
+		{
+			info.viewType = ToVulkanImageViewType(m_desc.ViewType);
+		}
+		info.format = ToVulkanFormat(m_desc.Image->GetDesc().Format);
 
 		ThrowIfFailed(vkCreateImageView(m_device->Device, &info, nullptr, &m_vView));
 		m_memoryUsage = 8;
 		
-		static_cast<GPUImageVulkan*>(m_image)->GetDescriptorImageInfo()->imageView = m_vView;
+		static_cast<GPUImageVulkan*>(m_desc.Image)->GetDescriptorImageInfo()->imageView = m_vView;
 		
 		return true;
 	}
@@ -115,7 +122,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		m_descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-		Graphics::GPUSamplerDesc samplerDesc = Graphics::GPUSamplerDesc();
+		Graphics::GPUSamplerDesc samplerDesc = m_desc.Sampler;
 		Graphics::GPUSampler* sampler = nullptr;
 		if (Graphics::GPUSamplerCache::Instance()->GetItem(samplerDesc.Hash(), sampler))
 		{

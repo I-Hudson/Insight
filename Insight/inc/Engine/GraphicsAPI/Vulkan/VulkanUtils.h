@@ -10,6 +10,7 @@
 #include "Engine/Graphics/PixelFormat.h"
 #include "Engine/Graphics/GPUSamplerDescription.h"
 #include "Engine/Graphics/GPUBufferDesc.h"
+#include "Engine/Graphics/Image/GPUImageDesc.h"
 #include "spirv_cross.hpp"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
@@ -306,6 +307,11 @@ namespace
 		return VK_IMAGE_VIEW_TYPE_2D;
 	}
 
+	VkImageViewType ToVulkanImageViewType(const Insight:: Graphics::GPUImageViewType& imageViewType)
+	{
+		return static_cast<VkImageViewType>(imageViewType);
+	}
+
 	VkSampleCountFlagBits ToVulkanSampleCount(SampleLevel& sampleLevel)
 	{
 		if (sampleLevel == SampleLevel::None) { return  VK_SAMPLE_COUNT_1_BIT; }
@@ -382,6 +388,8 @@ namespace
 	VkViewport ToVulkanViewPort(Insight::Maths::Rect const& rect)
 	{
 		VkViewport viewport = { };
+		viewport.x = rect.GetX();
+		viewport.y = rect.GetY();
 		viewport.width = rect.GetWidth();
 		viewport.height = rect.GetHeight();
 		viewport.minDepth = 0;
@@ -458,5 +466,51 @@ namespace
 			case PipelineBindPoint::Ray_Tracing: return VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
 		}
 		return VK_PIPELINE_BIND_POINT_GRAPHICS;
+	}
+
+	VkPipelineStageFlags ToVulkanPipelineStageFlags(const PipelineStageFlags& flags)
+	{
+		VkPipelineStageFlags vFlags = 0;
+		if (flags & (u32)PipelineStage::Top_Of_Pipe)				{ vFlags |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; }
+		if (flags & (u32)PipelineStage::Draw_Indirect)				{ vFlags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; }
+		if (flags & (u32)PipelineStage::Vertex_Input)				{ vFlags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; }
+		if (flags & (u32)PipelineStage::Vertex_Shader)				{ vFlags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Tess_Control_Shader)		{ vFlags |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Tess_Evaluation_Shader)		{ vFlags |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Geometry_Shader)			{ vFlags |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Fragment_Shader)			{ vFlags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Early_Fragment_Test)		{ vFlags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; }
+		if (flags & (u32)PipelineStage::Late_Fragment_Test)			{ vFlags |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT; }
+		if (flags & (u32)PipelineStage::Color_Attachment_Output)	{ vFlags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; }
+		if (flags & (u32)PipelineStage::Compute_Shader)				{ vFlags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Transfer)					{ vFlags |= VK_PIPELINE_STAGE_TRANSFER_BIT; }
+		if (flags & (u32)PipelineStage::Bottom_Of_Pipe)				{ vFlags |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT; }
+		if (flags & (u32)PipelineStage::Host)						{ vFlags |= VK_PIPELINE_STAGE_HOST_BIT; }
+		if (flags & (u32)PipelineStage::All_Graphics)				{ vFlags |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT; }
+		if (flags & (u32)PipelineStage::All_Commands)				{ vFlags |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT; }
+		return vFlags;
+	}
+
+	VkAccessFlags ToVulkanAccessFlags(const AccessFlags& flags)
+	{
+		VkAccessFlags vFlags = 0;
+		if (flags & (u32)Access::Indirect_Command_Read)				{ vFlags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT; }
+		if (flags & (u32)Access::Index_Read)						{ vFlags |= VK_ACCESS_INDEX_READ_BIT; }
+		if (flags & (u32)Access::Vertex_Attribute_Read)				{ vFlags |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT; }
+		if (flags & (u32)Access::Uniform_Read)						{ vFlags |= VK_ACCESS_UNIFORM_READ_BIT; }
+		if (flags & (u32)Access::Input_Attachmnet_Read)				{ vFlags |= VK_ACCESS_INPUT_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Shader_Read)						{ vFlags |= VK_ACCESS_SHADER_READ_BIT; }
+		if (flags & (u32)Access::Shader_Write)						{ vFlags |= VK_ACCESS_SHADER_WRITE_BIT; }
+		if (flags & (u32)Access::Color_Attachment_Read)				{ vFlags |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Color_Attachment_Write)			{ vFlags |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT; }
+		if (flags & (u32)Access::Depth_Stencil_Attachment_Read)		{ vFlags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Depth_Stencil_Attachment_Write)	{ vFlags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT; }
+		if (flags & (u32)Access::Transfer_Read)						{ vFlags |= VK_ACCESS_TRANSFER_READ_BIT; }
+		if (flags & (u32)Access::Transfer_Write)					{ vFlags |= VK_ACCESS_TRANSFER_WRITE_BIT; }
+		if (flags & (u32)Access::Host_Read)							{ vFlags |= VK_ACCESS_HOST_READ_BIT; }
+		if (flags & (u32)Access::Host_Write)						{ vFlags |= VK_ACCESS_HOST_WRITE_BIT; }
+		if (flags & (u32)Access::Memory_Read)						{ vFlags |= VK_ACCESS_MEMORY_READ_BIT; }
+		if (flags & (u32)Access::Memory_Write)						{ vFlags |= VK_ACCESS_MEMORY_WRITE_BIT; }
+		return vFlags;
 	}
 }

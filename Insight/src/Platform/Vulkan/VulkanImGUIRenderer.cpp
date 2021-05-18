@@ -6,6 +6,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
+#include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"

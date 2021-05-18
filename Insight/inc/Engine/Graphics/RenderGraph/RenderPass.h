@@ -7,6 +7,7 @@
 #include "Engine/Utils/Hasher.h"
 
 #include "Engine/Graphics/GPUBufferDesc.h"
+#include "Engine/Graphics/Image/GPUImageDesc.h"
 
 #include <functional>
 #include "glm/glm.hpp"
@@ -72,6 +73,49 @@ namespace Insight::Graphics
 		Count
 	};
 
+	enum class SubpassDependencySource : u32
+	{
+		None = 0,
+		External = U32_MAX,
+	};
+
+	struct SubpassDependency
+	{
+		SubpassDependency(PipelineStageFlags sourceStageMask, PipelineStageFlags destinationStageMask, const AccessFlags& sourceAccessMask, const AccessFlags& destintionAccessMask)
+			: SourceStageMask(sourceStageMask)
+			, DestinationStageMask(destinationStageMask)
+			, SourceAccessMask(sourceAccessMask)
+			, DestinationAccessMask(destintionAccessMask)
+		{ }
+
+		SubpassDependencySource SourceSubpass = SubpassDependencySource::External;
+		SubpassDependencySource DestinationSubpass = SubpassDependencySource::None;
+		PipelineStageFlags SourceStageMask;
+		PipelineStageFlags DestinationStageMask;
+		AccessFlags SourceAccessMask;
+		AccessFlags DestinationAccessMask;
+
+		static std::vector<SubpassDependency> MainDeferedPass()
+		{
+			return { SubpassDependency((u32)PipelineStage::Bottom_Of_Pipe, (u32)PipelineStage::Color_Attachment_Output, (u32)Access::Memory_Read, (u32)Access::Color_Attachment_Read | (u32)Access::Color_Attachment_Write),
+					SubpassDependency((u32)PipelineStage::Color_Attachment_Output, (u32)PipelineStage::Bottom_Of_Pipe, (u32)Access::Color_Attachment_Read | (u32)Access::Color_Attachment_Write, (u32)Access::Memory_Read) };
+		}
+
+		static std::vector<SubpassDependency> ShadowPass()
+		{
+			return { SubpassDependency((u32)PipelineStage::Fragment_Shader, (u32)PipelineStage::Early_Fragment_Test, (u32)Access::Shader_Read, (u32)Access::Depth_Stencil_Attachment_Write),
+					 SubpassDependency((u32)PipelineStage::Late_Fragment_Test, (u32)PipelineStage::Fragment_Shader, (u32)Access::Depth_Stencil_Attachment_Write, (u32)Access::Shader_Read) };
+		}
+	};
+
+	/// <summary>
+	/// Define properties about an image attachment.
+	/// </summary>
+	struct ImageAttachmentViewInfo
+	{
+		GPUImageViewType ImageViewTytpe = GPUImageViewType::Default;
+	};
+
 	/// <summary>
 	/// Define an image attachment
 	/// </summary>
@@ -85,6 +129,8 @@ namespace Insight::Graphics
 		SampleLevel Samples = SampleLevel::None;
 		u32 Levels = 1;
 		u32 Layers = 1;
+		GPUSamplerDesc SamplerDesc = GPUSamplerDesc();
+		ImageAttachmentViewInfo ViewInfo;
 		bool AutoSizeToWindow = true;
 		bool Persistent = true;
 		bool UnormSRGBAlias = false;
@@ -197,6 +243,9 @@ namespace Insight::Graphics
 		const RenderGraphQueueFlags& GetQueue()const { return m_queue; }
 		const std::string& GetPassName() const { return m_name; }
 
+		RenderGraphResource& AddOutput(const std::string& name, ImageAttachmentInfo& attachment, const ImageUsageFlags& usageFlags);
+		RenderGraphResource& AddInput(const std::string& name, const ImageUsageFlags& usageFlags);
+
 		RenderGraphResource& AddColorOutput(const std::string& name, ImageAttachmentInfo& attachment);
 		RenderGraphResource& AddColorOutput(const std::string& name);
 		RenderGraphResource& AddColorInput(const std::string& name);
@@ -239,11 +288,17 @@ namespace Insight::Graphics
 		const std::unordered_set<u32> GetDependentPasses() { return m_dependentPasses; }
 
 		RenderGraphResource& GetTextureResource(u32 index) const;
-		const GPUImage* GetPhysicalImage(u32 index) const;
-		const GPUImageView* GetPhysicalImageView(u32 index) const;
+		GPUImage* GetPhysicalImage(u32 index) const;
+		GPUImageView* GetPhysicalImageView(u32 index) const;
+
+		void AddSubpassDependency(const SubpassDependency& dependency) { m_subpassDependencies.push_back(dependency); }
+		void AddSubpassDependencies(const std::vector<SubpassDependency>& dependencies) { m_subpassDependencies.insert(m_subpassDependencies.end(), dependencies.begin(), dependencies.end()); }
+		std::vector<SubpassDependency> GetSubpassDependencies() const { return m_subpassDependencies; }
+
+		void SetWindowRect(const Maths::Rect& rect) { m_windowRect = rect; }
+		const Maths::Rect& GetWindowRect() const { return m_windowRect; }
 
 		u64 GetColorOutputHash() { return m_colorOutputHasher.GetHash(); }
-		const Maths::Rect& GetWindowRect() const { return m_windowRect; }
 		const glm::vec4& GetClearColor() { return m_clearColour; }
 		const glm::vec2& GetClearDepthStencil() { return m_clearDepthStencil; }
 
@@ -299,6 +354,7 @@ namespace Insight::Graphics
 
 		GPURenderGraphPass* m_graphPass;
 		std::vector<RenderPassLifeTimeObject> m_lifeTimeObjects;
+		std::vector<SubpassDependency> m_subpassDependencies;
 
 		RenderPassQueue m_passQueue;
 		Maths::Rect m_windowRect;

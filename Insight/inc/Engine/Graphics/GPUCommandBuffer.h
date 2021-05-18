@@ -117,8 +117,10 @@ namespace Insight::Graphics
 
 		virtual void BeginRenderpass(GPURenderGraphPass* renderpass) = 0;
 		virtual void EndRenderpass(GPURenderGraphPass* renderpass) = 0;
+
 		virtual void SetViewPort(Maths::Rect rect) = 0;
 		virtual void SetScissor(Maths::Rect rect) = 0;
+		virtual void SetDepthBias(float constantFactor, float slope, float slopeFactor) = 0;
 
 		virtual void CopyBuffer(GPUBuffer* srcBuffer, GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;
 		virtual void CopyBufferToDynamic(GPUBuffer* srcBuffer, GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) = 0;

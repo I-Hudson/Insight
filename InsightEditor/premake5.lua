@@ -51,8 +51,11 @@ project "InsightEditor"
         {  
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
+
             "GLM_FORCE_SWIZZLE",
             "GLM_FORCE_SILENT_WARNINGS",
+            "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+
             "IS_STANDARD_POINTER",
             "IMGUI_ENABLED",
         }

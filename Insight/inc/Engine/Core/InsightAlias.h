@@ -18,14 +18,14 @@ using u32 = uint32_t;
 using u64 = uint64_t;
 using u128 = _GUID;
 
-extern u8 U8_MAX;
-extern u16 U16_MAX;
-extern u32 U32_MAX;
-extern u64 U64_MAX;
+inline constexpr u8 U8_MAX = 0xFF;
+inline constexpr u16 U16_MAX = 0xFFFF;
+inline constexpr u32 U32_MAX = 0xFFFFFFFF;
+inline constexpr u64 U64_MAX = 0xFFFFFFFFFFFFFFFF;
 
-extern float FLOAT_MIN;
-extern float FLOAT_MAX;
-extern float FLOAT_EPSILON;
+inline constexpr float FLOAT_MIN = 1.175494e-38f;
+inline constexpr float FLOAT_MAX = 3.402823e+38f;
+inline constexpr float FLOAT_EPSILON = 1.192093e-07f;
 
 using I8 = int8_t; // TODO: Make deprecated 
 using I16 = int16_t; // TODO: Make deprecated 

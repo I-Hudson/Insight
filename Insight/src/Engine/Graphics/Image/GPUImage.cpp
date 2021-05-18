@@ -18,6 +18,7 @@ namespace Insight::Graphics
 	}
 
 	GPUImageView::GPUImageView()
+		: m_desc(GPUImageViewDesc(nullptr))
 	{
 	}
 
@@ -25,13 +26,13 @@ namespace Insight::Graphics
 	{
 	}
 
-	void GPUImageView::Init(GPUImage* image)
+	void GPUImageView::Init(const GPUImageViewDesc& desc)
 	{
-		ASSERT(image != nullptr && "[GPUImageView::Init] 'image' must be valid.");
+		ASSERT(desc.Image != nullptr && "[GPUImageView::Init] 'image' must be valid.");
 		ReleaseGPU();
 
-		m_image = image;
-		m_image->m_view = this;
+		m_desc = desc;
+		m_desc.Image->m_view = this;
 		if (!OnInit())
 		{
 			IS_WARN("GPUImage::Init] Can not create gpu resource.");

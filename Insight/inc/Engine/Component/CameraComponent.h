@@ -5,6 +5,7 @@
 
 enum CameraAspect
 {
+	A_1,
 	A_4x3,
 	A_16x9,
 
@@ -31,6 +32,7 @@ public:
 	//Set the projection matrix for the camera
 	void SetProjMatrix(const float& a_fov, const CameraAspect& a_aspect, const float& a_near, const float& a_far);
 	void SetProjMatrix(const float& a_fov, const float& a_near, const float& a_far);
+	void SetOthroMatrix(const float& left, const float& right, const float& bottom, const float& top, const float& a_near, const float& a_far);
 
 	//Set the position for the camera
 	void SetPosition(const glm::vec3& a_value);

@@ -112,6 +112,16 @@ void CameraComponent::SetProjMatrix(const float& a_fov, const float& a_near, con
 	SetProjectionViewMatrix();
 }
 
+void CameraComponent::SetOthroMatrix(const float& left, const float& right, const float& bottom, const float& top, const float& a_near, const float& a_far)
+{
+	m_fov = 0;
+	m_nearPlane = a_near;
+	m_farPlane = a_far;
+
+	m_projectionMatrix = glm::ortho<float>(left, right, bottom, top, a_near, a_far);
+	SetProjectionViewMatrix();
+}
+
 void CameraComponent::SetPosition(const glm::vec3& a_value)
 {
 	SetProjectionViewMatrix();
@@ -130,8 +140,7 @@ void CameraComponent::SetCameraSpeed(const float& cameraSpeed)
 
 void CameraComponent::OnUpdate(const float& a_deltaTime)
 {
-	SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
-
+	//SetProjMatrix(m_fov, m_cameraAspect, m_nearPlane, m_farPlane);
 
 	glm::mat4 viewMatrix = GetEntity().GetComponent<TransformComponent>().GetTransform();
 
@@ -246,6 +255,7 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 {
 	switch (cameraAspect)
 	{
+	case CameraAspect::A_1: return 1.0f;
 	case CameraAspect::A_4x3: return 4.0f / 3.0f;
 	case CameraAspect::A_16x9: return 16.0f / 9.0f;
 	case CameraAspect::CurrentWindowSize: return (float)Module::WindowModule::GetWindow()->GetWidth() /
@@ -257,5 +267,5 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 
 void CameraComponent::SetProjectionViewMatrix()
 {
-	m_projectionViewMatrix = m_projectionMatrix * glm::inverse(GetEntity().GetComponent<TransformComponent>().GetTransform());
+	m_projectionViewMatrix = m_projectionMatrix * GetEntity().GetComponent<TransformComponent>().GetTransform();
 }

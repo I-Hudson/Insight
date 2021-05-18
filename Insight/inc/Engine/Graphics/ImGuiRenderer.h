@@ -3,6 +3,11 @@
 #include "Engine/Core/Core.h"
 #include "Engine/Templates/TSingleton.h"
 
+namespace Insight::Graphics
+{
+	class GPUImage;
+}
+
 class ImGuiRenderer : public TSingleton<ImGuiRenderer>
 {
 public:

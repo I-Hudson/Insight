@@ -286,6 +286,7 @@ enum class ShaderStage : u32
 enum class PipelineStage : u32
 {
     Top_Of_Pipe             = 1 << 0,
+    Draw_Indirect           = 1 << 0,
     Vertex_Input            = 1 << 1,
     Vertex_Shader           = 1 << 2,
     Tess_Control_Shader     = 1 << 3,

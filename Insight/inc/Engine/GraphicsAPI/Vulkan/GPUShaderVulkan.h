@@ -34,7 +34,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void Compile() override;
 		virtual void ReleaseGPUResoucesEarly() override;
 
-		const std::unordered_map<ShaderStage, std::unordered_map<u32, DescriptorSetLayoutData>>& GetDescriptorSetlayouts() const { return m_setLayouts; }
+		const std::unordered_map<u32, DescriptorSetLayoutData>& GetDescriptorSetlayouts() const { return m_setLayouts; }
 
 	protected:
 		// [GPUResouce]
@@ -48,7 +48,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	private:
 		std::array<VkPipelineShaderStageCreateInfo, (size_t)ShaderStage::Count> m_pipelineShaderStages;
 		PipelineVertexInputState m_pipelineVertexInputState;
-		std::unordered_map<ShaderStage, std::unordered_map<u32, DescriptorSetLayoutData>> m_setLayouts;
+		std::unordered_map<u32, DescriptorSetLayoutData> m_setLayouts;
 	};
 
 	class GPUPipelineVulkan : public GPUResouceVulkan<Graphics::GPUPipeline>

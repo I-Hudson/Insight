@@ -35,6 +35,7 @@ project "Insight"
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.imgui}",
         "%{IncludeDir.SPIRV_Cross}",
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
@@ -100,8 +101,11 @@ project "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "WIN32_LEAN_AND_MEAN",
+            
             "GLM_FORCE_SWIZZLE",
             "GLM_FORCE_SILENT_WARNINGS",
+            "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+
             "IS_STANDARD_POINTER",
         }
 

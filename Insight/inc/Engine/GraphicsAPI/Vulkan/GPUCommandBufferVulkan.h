@@ -24,8 +24,10 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		virtual void BeginRenderpass(Graphics::GPURenderGraphPass* renderpass) override;
 		virtual void EndRenderpass(Graphics::GPURenderGraphPass* renderpass) override;
+
 		virtual void SetViewPort(Maths::Rect rect) override;
 		virtual void SetScissor(Maths::Rect rect) override;
+		virtual void SetDepthBias(float constantFactor, float slope, float slopeFactor) override;
 
 		virtual void CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;
 		virtual void CopyBufferToDynamic(Graphics::GPUBuffer* srcBuffer, Graphics::GPUDynamicBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size) override;

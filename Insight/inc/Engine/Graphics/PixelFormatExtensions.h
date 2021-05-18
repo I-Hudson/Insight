@@ -61,6 +61,13 @@ public:
     static bool IsDepthStencil(PixelFormat format);
 
     /// <summary>
+    /// Determines whether the specified <see cref="PixelFormat"/> is depth.
+    /// </summary>
+    /// <param name="format"></param>
+    /// <returns></returns>
+    static bool IsDepth(PixelFormat format);
+
+    /// <summary>
     /// Determines whether the specified <see cref="PixelFormat"/> has stencil bits.
     /// </summary>
     /// <param name="format">The Pixel Format.</param>

@@ -97,10 +97,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		for (auto& kvp : m_setLayouts)
 		{
-			for (auto& set : kvp.second)
-			{
-				vkDestroyDescriptorSetLayout(m_device->Device, set.second.Layout, nullptr);
-			}
+			vkDestroyDescriptorSetLayout(m_device->Device, kvp.second.Layout, nullptr);
 		}
 	}
 	
@@ -151,7 +148,6 @@ namespace Insight::GraphicsAPI::Vulkan
 				continue;
 			}
 
-			std::unordered_map<u32, DescriptorSetLayoutData>& setLayouts = m_setLayouts[stage.GetStage()];
 			spirv_cross::CompilerGLSL glsl(stage.GetRawData());
 			spirv_cross::ShaderResources resources = glsl.get_shader_resources();
 
@@ -162,7 +158,7 @@ namespace Insight::GraphicsAPI::Vulkan
 				u32 setNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationDescriptorSet);
 				spirv_cross::SPIRType type = glsl.get_type(uniformBuffer.base_type_id);
 				
-				DescriptorSetLayoutData& set = setLayouts[setNumber];
+				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
 				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
 				set.SetNumber = setNumber;
 			}
@@ -174,16 +170,16 @@ namespace Insight::GraphicsAPI::Vulkan
 				u32 setNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationDescriptorSet);
 				spirv_cross::SPIRType type = glsl.get_type(sampler2D.base_type_id);
 
-				DescriptorSetLayoutData& set = setLayouts[setNumber];
+				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
 				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
 				set.SetNumber = setNumber;
 			}
+		}
 
-			for (auto& kvp : setLayouts)
-			{
-				VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = vks::initializers::descriptorSetLayoutCreateInfo(kvp.second.Bindings);
-				ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->Device, &setLayoutCreateInfo, nullptr, &kvp.second.Layout));
-			}
+		for (auto& kvp : m_setLayouts)
+		{
+			VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = vks::initializers::descriptorSetLayoutCreateInfo(kvp.second.Bindings);
+			ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->Device, &setLayoutCreateInfo, nullptr, &kvp.second.Layout));
 		}
 	}
 
@@ -221,12 +217,9 @@ namespace Insight::GraphicsAPI::Vulkan
 		}*/
 
 		std::vector<VkDescriptorSetLayout> setLayouts;
-		for (auto& stage : shaderVulkan->GetDescriptorSetlayouts())
+		for (auto& set : shaderVulkan->GetDescriptorSetlayouts())
 		{
-			for (auto& set : stage.second)
-			{
-				setLayouts.push_back(set.second.Layout);
-			}
+			setLayouts.push_back(set.second.Layout);
 		}
 		ThrowIfFailed(vkCreatePipelineLayout(m_device->Device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_layout));
 
@@ -240,13 +233,13 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo((VkPrimitiveTopology)m_desc.PrimitiveTopologyType, 0, VK_FALSE);
-		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo((VkPolygonMode)m_desc.PolygonMode, (VkCullModeFlags)m_desc.CullMode, (VkFrontFace)m_desc.FrontFace, 0);
+		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo((VkPolygonMode)m_desc.PolygonMode, (VkCullModeFlags)m_desc.CullMode, (VkFrontFace)m_desc.FrontFace, m_desc.DepthBaisEnabled, 0);
 		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, outColorAttachments);
 		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(outColorAttachments, blendAttachmentStates.data());
-		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
+		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(m_desc.DepthTest, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);
 		VkPipelineViewportStateCreateInfo viewportState = vks::initializers::pipelineViewportStateCreateInfo(1, 1, 0);
 		VkPipelineMultisampleStateCreateInfo multisampleState = vks::initializers::pipelineMultisampleStateCreateInfo(static_cast<VkSampleCountFlagBits>(1));
-		std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_LINE_WIDTH, };
+		std::vector<VkDynamicState> dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_LINE_WIDTH, VK_DYNAMIC_STATE_DEPTH_BIAS };
 		VkPipelineDynamicStateCreateInfo dynamicState = vks::initializers::pipelineDynamicStateCreateInfo(dynamicStateEnables);
 
 		// TODO: remove this and place into a Desc struct.

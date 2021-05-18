@@ -331,7 +331,7 @@ namespace Insight::Graphics
 		std::vector<FrameSubmision> m_frames;
 		u32 m_frameIndex;
 		u32 m_swapchainImageIndex = 0;
-		const u32 c_MaxFrameCount = 2;
+		const u32 c_MaxFrameCount = 1;
 
 		GPUSwapchain* m_swapchain;
 

@@ -10,5 +10,9 @@ layout (set = 0, binding = 0) uniform sampler2D offscreenTexture;
 
 void main() 
 {
-	outFragColor = texture(offscreenTexture, inUV);
+	float r = texture(offscreenTexture, inUV).x;
+	float g = texture(offscreenTexture, inUV).y;
+	float b = texture(offscreenTexture, inUV).z;
+	outFragColor = vec4(r, g, b, 1);
+	//outFragColor = texture(offscreenTexture, inUV);
 }

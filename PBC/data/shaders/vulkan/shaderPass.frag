@@ -6,12 +6,10 @@ layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec3 inColor;
 layout (location = 3) in vec2 inUV;
-layout (location = 4) in vec4 inShadowCoord;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outNormal;
 layout (location = 2) out vec4 outPos;
-
 
 layout (set = 1, binding = 0) uniform sampler2D texture_diffuse;
 layout (set = 1, binding = 1) uniform TextureLookup
@@ -19,27 +17,8 @@ layout (set = 1, binding = 1) uniform TextureLookup
 	int diffuse;
 }textureLookup;
 
-layout (set = 0, binding = 2) uniform sampler2D texture_shadowpass;
-
-#define ambient 0.1
-float textureProj(vec4 shadowCoord, vec2 off)
-{
-	float shadow = 1.0;
-	if ( shadowCoord.z > -1.0 && shadowCoord.z < 1.0 ) 
-	{
-		float dist = texture(texture_shadowpass, shadowCoord.xy + off ).x;
-		if (dist < shadowCoord.z - 0.005) 
-		{
-			shadow = ambient;
-		}
-	}
-	return shadow;
-}
-
 void main() 
 {
-	float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
-	
 	if(textureLookup.diffuse == 1)
 	{
 		outColor = vec4(texture(texture_diffuse, inUV).xyz, 1.0);
@@ -48,7 +27,6 @@ void main()
 	{
 		outColor = vec4(inColor, 1.0);
 	}
-	//outColor.xyz *= shadow;
 	outNormal = vec4(1.0, 0.0, 0.0, 1.0);
 	outPos = vec4(0.0, 1.0, 0.0, 1.0);
 }

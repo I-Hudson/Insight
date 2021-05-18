@@ -1,6 +1,8 @@
 #include <Insight.h>
 #include "Engine/Config/Config.h"
 #include "Module/EditorModule.h"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 class EditorApp : public Application
 {
@@ -69,14 +71,24 @@ public:
 		m_editorCamera = m_entityManager.CreateEntity();
 		m_editorCamera.AddComponent<TransformComponent>();
 		m_editorCamera.SetName("New Test Entity");
-		m_editorCamera.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+		m_editorCamera.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 150.0f, -10.0f));
 
 		CameraComponent& camera = m_editorCamera.AddComponent<CameraComponent>();
-		camera.SetProjMatrix(90.0f, 0.1f, 1000.0f);
-		camera.SetCameraSpeed(50.0f);
+		camera.SetProjMatrix(90.0f, 0.1f, 10000.0f);
+		camera.SetCameraSpeed(200.0f);
+		/*camera.SetViewMatrix(glm::lookAt(glm::vec3(0.0f, 0.0f, -1.0f),
+										 glm::vec3(0.0f, 0.0f, 0.0f),
+										 glm::vec3(0.0f, 1.0f, 0.0f)));*/
+		//camera.SetProjMatrix(45.f, CameraAspect::A_1, 0.1f, 10000.0f);
+		//camera.SetViewMatrix(glm::mat4(0.435682f, 0.000000f, -0.900100f, 0.000000f,
+		//							   -0.645693f, 0.696706f, -0.312539f, 0.000000f,
+		//							   0.627106f, 0.717356f, 0.303543f, 0.000000f,
+		//							   843.348572f, 1750.858398f, 150.264442f, 1.000000f));
+
+
 		Module::GraphicsModule::Instance()->SetMainCamera(&camera);
 
-		for (size_t i = 0; i < 2; ++i)
+		for (size_t i = 0; i < 1; ++i)
 		{
 			Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/gltf/Sponza/glTF/Sponza.gltf");
 			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
@@ -95,6 +107,7 @@ public:
 	virtual void Update(const float deltaTime) override
 	{
 		m_componentManager.Update(deltaTime);
+		IS_INFO("Main camera Transform: {0}", glm::to_string(m_editorCamera.GetComponent<TransformComponent>().GetTransform()));
 	}
 
 	virtual void Draw() override

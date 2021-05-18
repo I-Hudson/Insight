@@ -4,9 +4,74 @@
 #include "Engine/Graphics/Enums.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "stb_image.h"
+#include "Engine/Utils/Hasher.h"
 
 namespace Insight::Graphics
 {
+	class GPUImage;
+
+	struct GPUSamplerDesc
+	{
+		SamplerFilter MagFilter = SamplerFilter::Linear;
+		SamplerFilter MinFilter = SamplerFilter::Linear;
+		SamplerMipmapMode MipmapMode = SamplerMipmapMode::Linear;
+		SamplerAddressMode AddressModeU = SamplerAddressMode::Mirrored_Repeat;
+		SamplerAddressMode AddressModeV = SamplerAddressMode::Mirrored_Repeat;
+		SamplerAddressMode AddressModeW = SamplerAddressMode::Mirrored_Repeat;
+		float MipLodBias = 0.0f;
+		CompareOp CompareOP = CompareOp::Never;
+		float MinLod = 0.0f;
+		float MaxLoad = 0.0f;
+		float MaxAnisotropy = 1.0f;
+		bool AnisortopyEnable = false;
+		BorderColor BorderColor = BorderColor::Float_Opaque_White;
+
+		u64 Hash()
+		{
+			Utils::Hasher hasher;
+			hasher.Hash(MagFilter);
+			hasher.Hash(MinFilter);
+			hasher.Hash(MipmapMode);
+			hasher.Hash(AddressModeU);
+			hasher.Hash(AddressModeV);
+			hasher.Hash(AddressModeW);
+			hasher.Hash(MipLodBias);
+			hasher.Hash(CompareOP);
+			hasher.Hash(MinLod);
+			hasher.Hash(MaxLoad);
+			hasher.Hash(MaxAnisotropy);
+			hasher.Hash(AnisortopyEnable);
+			hasher.Hash(BorderColor);
+			return hasher.GetHash();
+		}
+	};
+
+	enum class GPUImageViewType
+	{
+		Type_1D = 0,
+		Type_2D = 1,
+		Type_3D = 2,
+		Type_Cube = 3,
+		Type_1D_Array = 4,
+		Type_2D_Array = 5,
+		Type_Cube_Array = 6,
+
+		Default,
+	};
+
+	struct GPUImageViewDesc
+	{
+		GPUImageViewDesc(GPUImage* image)
+			: Image(image), ViewType(GPUImageViewType::Default)
+		{ }
+		GPUImageViewDesc(GPUImage* image, GPUImageViewType viewType)
+			: Image(image), ViewType(viewType)
+		{ }
+
+		GPUImage* Image;
+		GPUImageViewType ViewType;
+	};
+
 	struct IS_API GPUImageDesc
 	{
 		GPUImageDesc()
@@ -44,6 +109,7 @@ namespace Insight::Graphics
 		ImageUsageType UsageType;
 		void* Data;
 		u32 Size;
+		GPUSamplerDesc Sampler;
 
 		static GPUImageDesc Image2D(u32 width, u32 height, u32 depth, u32 levels, SampleLevel samples, u32 layers,
 									ImageDomain domain, ImageLayout initLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,

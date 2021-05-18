@@ -239,6 +239,18 @@ bool PixelFormatExtensions::IsDepthStencil(const PixelFormat format)
     }
 }
 
+bool PixelFormatExtensions::IsDepth(PixelFormat format)
+{
+    switch (format)
+    {
+        case PixelFormat::D32_Float:
+        case PixelFormat::D16_UNorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool PixelFormatExtensions::HasStencil(const PixelFormat format)
 {
     switch (format)

@@ -3,7 +3,7 @@
 #include "Engine/Graphics/GPUResource.h"
 #include "Engine/Graphics/Enums.h"
 #include "GPUImageDesc.h"
-#include "Engine/Utils/Hasher.h"
+#include "Engine/Graphics/Image/GPUImageDesc.h"
 
 namespace Insight::Graphics
 {
@@ -20,9 +20,10 @@ namespace Insight::Graphics
 		GPUImageView();
 		virtual ~GPUImageView();
 
-		void Init(GPUImage* image);
+		void Init(const GPUImageViewDesc& desc);
 
-		GPUImage* GetImage() const { return m_image; }
+		const GPUImageViewDesc& GetDesc() const { return m_desc; }
+		GPUImage* GetImage() const { return m_desc.Image; }
 
 		// [GPUResource]
 		virtual ResourceType GetResourceType() const override { return ResourceType::ImageView; }
@@ -32,7 +33,7 @@ namespace Insight::Graphics
 		virtual bool OnInit() = 0;
 
 	protected:
-		GPUImage* m_image;
+		GPUImageViewDesc m_desc;
 	};
 
 	/// <summary>
@@ -68,42 +69,6 @@ namespace Insight::Graphics
 
 	private:
 		friend GPUImageView;
-	};
-
-	struct GPUSamplerDesc
-	{
-		SamplerFilter MagFilter = SamplerFilter::Linear;
-		SamplerFilter MinFilter = SamplerFilter::Linear;
-		SamplerMipmapMode MipmapMode = SamplerMipmapMode::Linear;
-		SamplerAddressMode AddressModeU = SamplerAddressMode::Mirrored_Repeat;
-		SamplerAddressMode AddressModeV = SamplerAddressMode::Mirrored_Repeat;
-		SamplerAddressMode AddressModeW = SamplerAddressMode::Mirrored_Repeat;
-		float MipLodBias = 0.0f;
-		CompareOp CompareOP = CompareOp::Never;
-		float MinLod = 0.0f;
-		float MaxLoad = 0.0f;
-		float MaxAnisotropy = 1.0f;
-		bool AnisortopyEnable = false;
-		BorderColor BorderColor = BorderColor::Float_Opaque_White;
-
-		u64 Hash()
-		{
-			Utils::Hasher hasher;
-			hasher.Hash(MagFilter);
-			hasher.Hash(MinFilter);
-			hasher.Hash(MipmapMode);
-			hasher.Hash(AddressModeU);
-			hasher.Hash(AddressModeV);
-			hasher.Hash(AddressModeW);
-			hasher.Hash(MipLodBias);
-			hasher.Hash(CompareOP);
-			hasher.Hash(MinLod);
-			hasher.Hash(MaxLoad);
-			hasher.Hash(MaxAnisotropy);
-			hasher.Hash(AnisortopyEnable);
-			hasher.Hash(BorderColor);
-			return hasher.GetHash();
-		}
 	};
 
 	/// <summary>

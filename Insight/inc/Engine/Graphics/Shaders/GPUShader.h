@@ -162,7 +162,6 @@ namespace Insight::Graphics
 	/// <summary>
 	/// GPUPipeline
 	/// </summary>
-
 	struct GPUPipelineDesc
 	{
 		GPUPipelineDesc()
@@ -178,6 +177,8 @@ namespace Insight::Graphics
 		PolygonMode PolygonMode;
 		CullMode CullMode;
 		FrontFace FrontFace;
+		bool DepthTest = true;
+		bool DepthBaisEnabled = false;
 	};
 
 	class GPUPipeline : public GPUResource

@@ -1043,3 +1043,5 @@ Module.symvers
 Mkfile.old
 dkms.conf
 /Insight/ReflectEXE_Profile.json
+/NsightProfiles/InsightEngine - Debug/InsightEngine - Debug.ngfx-proj
+/NsightProfiles/InsightEditor - Release/InsightEditor - Release.ngfx-proj
