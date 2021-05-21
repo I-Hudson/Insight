@@ -151,10 +151,11 @@ namespace Module
 			Graphics::RenderGraph::Instance()->Reset();
 
 			timer += deltaTime * 0.05f;
-			projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
+			//projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
+			projDepthMatrix = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 96.0f);
 			lightPos.x = cos(glm::radians(timer * 360.0f)) * 25.0f;
 			lightPos.y = -50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
-			lightPos.z = -12.0f + sin(glm::radians(timer * 360.0f)) * 5.0f;
+			lightPos.z = 25.0f + sin(glm::radians(timer * 360.0f)) * 5.0f;
 			viewDepthMatrix = glm::lookAt(lightPos, glm::vec3(0), glm::vec3(0, 1, 0));
 
 			Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };

@@ -71,7 +71,9 @@ public:
 		m_editorCamera = m_entityManager.CreateEntity();
 		m_editorCamera.AddComponent<TransformComponent>();
 		m_editorCamera.SetName("New Test Entity");
-		m_editorCamera.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, 0.0f, -10.0f));
+		m_editorCamera.GetComponent<TransformComponent>().SetPosition(glm::vec3(0.0f, -0.0f, 10.0f));
+		//m_editorCamera.GetComponent<TransformComponent>().SetRotation(glm::vec3(-15.0f, -390.0f, 0.0f));
+		glm::vec3 rot = m_editorCamera.GetComponent<TransformComponent>().GetRotation();
 
 		CameraComponent& camera = m_editorCamera.AddComponent<CameraComponent>();
 		camera.SetProjMatrix(90.0f, 0.1f, 256.0f);
@@ -88,7 +90,7 @@ public:
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
 			//Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
 			meshComponent.SetModel(graphicsModel);
-			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 15.0f, 0, 0 });
+			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 0, 0, 0 });
 
 			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
 			meshChild.SetParent(mesh.GetEntityID());

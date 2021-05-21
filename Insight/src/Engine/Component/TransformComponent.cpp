@@ -75,6 +75,31 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 	//m_isDirty = true;
 }
 
+glm::vec3 TransformComponent::GetRotation()
+{
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	glm::vec3 rot;
+	rot.x = atan2(-data.Transform[1][2], data.Transform[2][2]);
+	float c2 = sqrt(pow(data.Transform[0][0], 2) + pow(data.Transform[0][1], 2));
+	rot.y = atan2(-data.Transform[0][2], c2);
+	float s1 = sin(rot.x);
+	float c1 = cos(rot.x);
+	rot.z = atan2(s1 * data.Transform[2][0] - c1 * data.Transform[1][0], c1 * data.Transform[1][1] * s1 * -data.Transform[2][1]);
+	return rot;
+}
+
+void TransformComponent::SetRotation(glm::vec3 rotation)
+{
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	glm::mat4 rotM(1.0f);
+	rotM = glm::rotate(rotM, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+	rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	glm::mat4 translateM = glm::translate(glm::mat4(1.0f), GetPostion());
+	data.Transform = translateM * rotM;
+}									
+									
 //void TransformComponent::Serialize(Serialization::SerializableElement* element, bool force)
 //{
 //	//element->AddAttribute("UUID", GetUUID());

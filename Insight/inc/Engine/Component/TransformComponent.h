@@ -26,6 +26,9 @@ public:
 	const glm::vec3 GetPostion();
 	void SetPosition(const glm::vec3& position);
 
+	glm::vec3 GetRotation();
+	void SetRotation(glm::vec3 rotation);
+
 	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
