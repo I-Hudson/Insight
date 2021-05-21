@@ -136,6 +136,8 @@ namespace Insight::Graphics
 		bool UnormSRGBAlias = false;
 		bool SupportsPrerotate = false;
 		bool SwapchainImage = false;
+
+		static ImageAttachmentInfo DepthAttachment();
 	};
 
 	struct BufferAttachmentInfo
@@ -156,7 +158,7 @@ namespace Insight::Graphics
 
 		ImageAttachmentInfo m_info = {};
 		ImageUsageFlags m_usageFlags = 0;
-		ImageLayout ImageLayout;
+		ImageLayout ImageLayout = ImageLayout::Undefined;
 		bool m_transient = false;
 	};
 

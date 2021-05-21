@@ -6,6 +6,97 @@
 
 namespace Insight::Graphics
 {
+	/// <summary>
+	/// RenderPassLifeTimeObject
+	/// </summary>
+	/// <param name="objectPtr"></param>
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(void* objectPtr)
+		: m_objectPtr(objectPtr),
+		m_refCount(::New<u32>())
+	{
+		*m_refCount = 1;
+	}
+
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(const RenderPassLifeTimeObject& other)
+	{
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		*m_refCount = *m_refCount + 1;
+	}
+
+	RenderPassLifeTimeObject::RenderPassLifeTimeObject(RenderPassLifeTimeObject&& other)
+	{
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+
+		other.m_objectPtr = nullptr;
+		other.m_refCount = nullptr;
+	}
+
+	RenderPassLifeTimeObject::~RenderPassLifeTimeObject()
+	{
+		if (m_refCount)
+		{
+			*m_refCount = *m_refCount - 1;
+			if (*m_refCount == 0)
+			{
+				::Delete(static_cast<GPUResource*>(m_objectPtr));
+				::Delete(m_refCount);
+			}
+		}
+	}
+
+	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(const RenderPassLifeTimeObject& other)
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		*m_refCount = *m_refCount + 1;
+		return *this;
+	}
+
+	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(RenderPassLifeTimeObject&& other)
+	{
+		if (this == &other)
+		{
+			return *this;
+		}
+
+		m_objectPtr = other.m_objectPtr;
+		m_refCount = other.m_refCount;
+		other.m_objectPtr = nullptr;
+		other.m_refCount = nullptr;
+
+		return *this;
+	}
+
+
+	/// <summary>
+	/// ImageAttachmentInfo::DepthAttachment
+	/// </summary>
+	/// <returns></returns>
+	ImageAttachmentInfo ImageAttachmentInfo::DepthAttachment()
+	{
+		ImageAttachmentInfo info = { };
+		info.Format = PixelFormat::D16_UNorm;
+		info.Name = "DepthAttachment";
+		info.Width = Window::GetWidth();
+		info.Height = Window::GetHeight();
+		return info;
+	}
+
+
+	/// <summary>
+	/// RenderPass
+	/// </summary>
+	/// <param name="graph"></param>
+	/// <param name="index"></param>
+	/// <param name="name"></param>
+	/// <param name="queue"></param>
 	RenderPass::RenderPass(RenderGraph* graph, const u32& index, const std::string name,
 						   RenderGraphQueueFlags queue)
 		: m_graph(graph)
@@ -108,8 +199,8 @@ namespace Insight::Graphics
 		res.TextureInfo.SetAttachmentInfo(attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Depth_Stencil_Attachment);
 		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Sampled);
-		res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
-		res.TextureInfo.ImageLayout = ImageLayout::Shader_Read_Only;
+		//res.TextureInfo.AddImageUsage((u32)ImageUsageFlagsBits::Transfer_Src);
+		res.TextureInfo.ImageLayout = ImageLayout::Depth_Stencil_Read_Only;
 		m_depthStencilOutput = res.GetIndex();
 		return res;
 	}
@@ -227,73 +318,5 @@ namespace Insight::Graphics
 	GPUImageView* RenderPass::GetPhysicalImageView(u32 index) const
 	{
 		return m_graph->m_physicalImageViews.at(index);
-	}
-
-	/// <summary>
-	/// RenderPassLifeTimeObject
-	/// </summary>
-	/// <param name="objectPtr"></param>
-	RenderPassLifeTimeObject::RenderPassLifeTimeObject(void* objectPtr)
-		: m_objectPtr(objectPtr),
-		m_refCount(::New<u32>())
-	{
-		*m_refCount = 1;
-	}
-
-	RenderPassLifeTimeObject::RenderPassLifeTimeObject(const RenderPassLifeTimeObject& other)
-	{
-		m_objectPtr = other.m_objectPtr;
-		m_refCount = other.m_refCount;
-		*m_refCount = *m_refCount + 1;
-	}
-
-	RenderPassLifeTimeObject::RenderPassLifeTimeObject(RenderPassLifeTimeObject&& other)
-	{
-		m_objectPtr = other.m_objectPtr;
-		m_refCount = other.m_refCount;
-
-		other.m_objectPtr = nullptr;
-		other.m_refCount = nullptr;
-	}
-
-	RenderPassLifeTimeObject::~RenderPassLifeTimeObject()
-	{
-		if (m_refCount)
-		{
-			*m_refCount = *m_refCount - 1;
-			if (*m_refCount == 0)
-			{
-				::Delete(static_cast<GPUResource*>(m_objectPtr));
-				::Delete(m_refCount);
-			}
-		}
-	}
-
-	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(const RenderPassLifeTimeObject& other)
-	{
-		if (this == &other)
-		{
-			return *this;
-		}
-
-		m_objectPtr = other.m_objectPtr;
-		m_refCount = other.m_refCount;
-		*m_refCount = *m_refCount + 1;
-		return *this;
-	}
-
-	RenderPassLifeTimeObject& RenderPassLifeTimeObject::operator=(RenderPassLifeTimeObject&& other)
-	{
-		if (this == &other)
-		{
-			return *this;
-		}
-
-		m_objectPtr = other.m_objectPtr;
-		m_refCount = other.m_refCount;
-		other.m_objectPtr = nullptr;
-		other.m_refCount = nullptr;
-
-		return *this;
 	}
 }

@@ -179,6 +179,7 @@ namespace Insight::Graphics
 		FrontFace FrontFace;
 		bool DepthTest = true;
 		bool DepthBaisEnabled = false;
+		bool DepthClampEnabled = false;
 	};
 
 	class GPUPipeline : public GPUResource

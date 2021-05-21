@@ -10,7 +10,7 @@ layout (set = 0, binding = 0) uniform UBO
 {
 	mat4 PVMatrix;
 	mat4 lightSpace;
-	vec4 lightPos;
+	vec3 lightPos;
 } ubo;
 
 layout (set = 0, binding = 1) uniform MODELUBO //#dynamic
@@ -24,18 +24,23 @@ const mat4 biasMat = mat4(
 	0.0, 0.0, 1.0, 0.0,
 	0.5, 0.5, 0.0, 1.0 );
 
-layout (location = 0) out vec4 outPos;
-layout (location = 1) out vec4 outNormal;
-layout (location = 2) out vec4 outColor;
+layout (location = 0) out vec3 outPos;
+layout (location = 1) out vec3 outNormal;
+layout (location = 2) out vec3 outColor;
 layout (location = 3) out vec2 outUV;
-layout (location = 4) out vec4 outShadowCoord;
+layout (location = 4) out vec3 outViewVec;
+layout (location = 5) out vec3 outLightVec;
+layout (location = 6) out vec4 outShadowCoord;
 
 void main() 
 {
 	gl_Position = ubo.PVMatrix * modelUBO.model * vec4(inPos.xyz, 1.0);
-	outPos = ubo.PVMatrix * modelUBO.model * vec4(inPos.xyz, 1.0);
-	outNormal = vec4(inNormal, 1.0);
-	outColor = inColor;
+	outPos = mat3(modelUBO.model) * inPos.xyz;
+	outNormal = mat3(modelUBO.model) * inNormal;
+	outColor = inColor.xyz;
 	outUV = inUV;
-	outShadowCoord = biasMat * ubo.lightSpace * modelUBO.model * vec4(inPos.xyz, 1.0);
+
+	outLightVec = normalize(ubo.lightPos.xyz - inPos);
+    outViewVec = -outPos.xyz;	
+	outShadowCoord = (biasMat * ubo.lightSpace * modelUBO.model) * vec4(inPos.xyz, 1);
 }

@@ -79,11 +79,11 @@ namespace Insight::Graphics
 		{ }
 
 		GPUImageDesc(u32 width, u32 height, u32 depth, u32 levels, SampleLevel samples, u32 layers,
-					 ImageDomain domain, ImageLayout initLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
+					 ImageDomain domain, ImageLayout initLayout, ImageLayout finalLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
 					 ImageCreateFlags createFlags, PixelFormat format, ImageType type, ImageUsageType imageUsageType,
 					 void* data)
 			: Width(width), Height(height), Depth(depth), Levels(levels), Samples(samples), Layers(layers)
-			, Domain(domain), InitLayout(initLayout), Usage(usageFlags), MiscFlags(miscFlags)
+			, Domain(domain), InitLayout(initLayout), FinalLayout(finalLayout), Usage(usageFlags), MiscFlags(miscFlags)
 			, CreateFlags(createFlags), Format(format), Type(type), UsageType(imageUsageType)
 			, Data(data)
 		{
@@ -100,7 +100,7 @@ namespace Insight::Graphics
 
 		ImageDomain Domain;
 		ImageLayout InitLayout;
-		ImageLayout Layout;
+		ImageLayout FinalLayout;
 		ImageUsageFlags Usage;
 		ImageMiscFlags MiscFlags;
 		ImageCreateFlags CreateFlags;
@@ -112,13 +112,13 @@ namespace Insight::Graphics
 		GPUSamplerDesc Sampler;
 
 		static GPUImageDesc Image2D(u32 width, u32 height, u32 depth, u32 levels, SampleLevel samples, u32 layers,
-									ImageDomain domain, ImageLayout initLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
+									ImageDomain domain, ImageLayout initLayout, ImageLayout finalLayout, ImageUsageFlags usageFlags, ImageMiscFlags miscFlags,
 									ImageCreateFlags createFlags, PixelFormat format, ImageType type, ImageUsageType imageUsageType,
 									void* data);
 
 		static GPUImageDesc Texture(u32 width, u32 height, u32 levels, SampleLevel samples, PixelFormat format, void* data)
 		{
-			return Image2D(width, height, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0, 
+			return Image2D(width, height, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageLayout::Shader_Read_Only, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0,
 						   0, format, ImageType::Image_2D, ImageUsageType::Texture, data);
 		}
 
@@ -126,13 +126,14 @@ namespace Insight::Graphics
 		{
 			int x, y, c;
 			void* data = stbi_load(dataPath.c_str(), &x, &y, &c, STBI_rgb_alpha);
-			return Image2D(x, y, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0,
+			return Image2D(x, y, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageLayout::Shader_Read_Only, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0,
 						   0, format, ImageType::Image_2D, ImageUsageType::Texture, data);
 		}
 
 		static GPUImageDesc RenderTarget(u32 width, u32 height, PixelFormat format)
 		{
 			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Physical,
+						   ImageLayout::Undefined,
 						   PixelFormatExtensions::IsDepthStencil(format) ?
 						   ImageLayout::Depth_Stencil_Attachment :
 						   ImageLayout::Undefined,
@@ -145,7 +146,7 @@ namespace Insight::Graphics
 
 		static GPUImageDesc TransientRenderTarget(u32 width, u32 height, PixelFormat format)
 		{
-			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Transient, ImageLayout::Undefined,
+			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Transient, ImageLayout::Undefined, ImageLayout::Undefined,
 						   (PixelFormatExtensions::IsDepthStencil(format) ? ImageUsageFlagsBits::Depth_Stencil_Attachment :
 							ImageUsageFlagsBits::Color_Attachment) |
 						   ImageUsageFlagsBits::Input_Attachment,
@@ -156,7 +157,7 @@ namespace Insight::Graphics
 		static GPUImageDesc SwapchainImage(u32 width, u32 height, PixelFormat format, void* image)
 		{
 			return Image2D(width, height, 1, 1, SampleLevel::None, 1, ImageDomain::Physical, 
-						ImageLayout::Color_Attachment, ImageUsageFlagsBits::Color_Attachment, 0, 0, 
+						   ImageLayout::Color_Attachment, ImageLayout::Undefined, ImageUsageFlagsBits::Color_Attachment, 0, 0,
 						format, ImageType::Image_2D, ImageUsageType::Swapchain_Image, image) ;
 		}
 

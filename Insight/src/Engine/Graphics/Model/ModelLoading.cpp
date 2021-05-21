@@ -20,7 +20,7 @@ namespace Insight::Graphics::ModelLoading
 	{
 		IS_PROFILE_FUNCTION();
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
+		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate |aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
@@ -68,7 +68,7 @@ namespace Insight::Graphics::ModelLoading
 			// process vertex positions, normals and texture coordinates
 			glm::vec3 position;
 			position.x = aiMesh->mVertices[i].x;
-			position.y = aiMesh->mVertices[i].y;
+			position.y = aiMesh->mVertices[i].y *= -1;
 			position.z = aiMesh->mVertices[i].z;
 			vertex.Position = position;
 
@@ -83,7 +83,7 @@ namespace Insight::Graphics::ModelLoading
 			if (aiMesh->mNormals != nullptr)
 			{
 				normal.x = aiMesh->mNormals[i].x;
-				normal.y = aiMesh->mNormals[i].y;
+				normal.y = aiMesh->mNormals[i].y *= -1;
 				normal.z = aiMesh->mNormals[i].z;
 			}
 			vertex.Normal = normal;

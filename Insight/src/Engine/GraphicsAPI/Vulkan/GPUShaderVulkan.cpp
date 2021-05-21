@@ -233,7 +233,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo((VkPrimitiveTopology)m_desc.PrimitiveTopologyType, 0, VK_FALSE);
-		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo((VkPolygonMode)m_desc.PolygonMode, (VkCullModeFlags)m_desc.CullMode, (VkFrontFace)m_desc.FrontFace, m_desc.DepthBaisEnabled, 0);
+		VkPipelineRasterizationStateCreateInfo rasterizationState = vks::initializers::pipelineRasterizationStateCreateInfo(
+			(VkPolygonMode)m_desc.PolygonMode, (VkCullModeFlags)m_desc.CullMode, (VkFrontFace)m_desc.FrontFace, m_desc.DepthBaisEnabled, m_desc.DepthClampEnabled, 0);
 		std::vector<VkPipelineColorBlendAttachmentState> blendAttachmentStates = vks::initializers::pipelineColorBlendAttachmentState(0xf, VK_FALSE, outColorAttachments);
 		VkPipelineColorBlendStateCreateInfo colorBlendState = vks::initializers::pipelineColorBlendStateCreateInfo(outColorAttachments, blendAttachmentStates.data());
 		VkPipelineDepthStencilStateCreateInfo depthStencilState = vks::initializers::pipelineDepthStencilStateCreateInfo(m_desc.DepthTest, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL);

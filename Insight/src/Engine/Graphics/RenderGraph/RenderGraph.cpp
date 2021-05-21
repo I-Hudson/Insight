@@ -179,8 +179,8 @@ namespace Insight::Graphics
 				auto* renderPass = frame.RenderPasses.at(pass.GetColorOutputHash());
 				pass.CallBeginRenderFunc(renderPass);
 				cmdBuffer->BeginRenderpass(renderPass);
-				Maths::Rect viewPortRect = Maths::Rect(0, pass.GetWindowRect().GetHeight(), pass.GetWindowRect().GetWidth(), -pass.GetWindowRect().GetHeight());
-				cmdBuffer->SetViewPort(viewPortRect);
+				//Maths::Rect viewPortRect = Maths::Rect(0, pass.GetWindowRect().GetHeight(), pass.GetWindowRect().GetWidth(), -pass.GetWindowRect().GetHeight());
+				cmdBuffer->SetViewPort(pass.GetWindowRect());
 				cmdBuffer->SetScissor(pass.GetWindowRect());
 				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
 				cmdBuffer->EndRenderpass(renderPass);
@@ -534,7 +534,7 @@ namespace Insight::Graphics
 
 				GPUImage* image = GPUImage::New();
 				GPUImageDesc desc = GPUImageDesc::Image2D(resource.TextureInfo.m_info.Width, resource.TextureInfo.m_info.Height, resource.TextureInfo.m_info.Depth, resource.TextureInfo.m_info.Levels,
-														  resource.TextureInfo.m_info.Samples, resource.TextureInfo.m_info.Layers, ImageDomain::Physical, ImageLayout::Undefined, 
+														  resource.TextureInfo.m_info.Samples, resource.TextureInfo.m_info.Layers, ImageDomain::Physical, ImageLayout::Undefined, resource.TextureInfo.ImageLayout, 
 														  resource.TextureInfo.m_usageFlags, 0, 0, resource.TextureInfo.m_info.Format, ImageType::Image_2D, ImageUsageType::Render_Target, nullptr);
 				desc.Sampler = resource.TextureInfo.m_info.SamplerDesc;
 

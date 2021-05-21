@@ -120,7 +120,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		ThrowIfFailed(vmaCreateImage(m_device->VmaAllocator, &imageCreateInfo, &vmaAllocCreateInfo, &m_vImage, &m_vmaImageAlloc, &allocInfo));
 		m_memoryUsage = allocInfo.size;
 
-		m_descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		m_descriptorImageInfo.imageLayout = ToVulkanImageLayout(m_desc.FinalLayout);
 
 		Graphics::GPUSamplerDesc samplerDesc = m_desc.Sampler;
 		Graphics::GPUSampler* sampler = nullptr;
@@ -146,7 +146,6 @@ namespace Insight::GraphicsAPI::Vulkan
 			cmdBuffer.ReleaseGPU();
 
 			stbi_image_free(m_desc.Data);
-			m_desc.Layout = ImageLayout::Shader_Read_Only;
 		}
 
 		return true;

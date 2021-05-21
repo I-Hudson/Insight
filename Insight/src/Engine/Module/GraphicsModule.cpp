@@ -137,6 +137,8 @@ namespace Module
 
 	glm::mat4 projDepthMatrix;
 	glm::mat4 viewDepthMatrix;
+	glm::vec3 lightPos = glm::vec3();
+	float timer = 0.0f;
 	u32 imageIndex = 0;
 
 	void GraphicsModule::Update(const float& deltaTime)
@@ -148,34 +150,29 @@ namespace Module
 			using namespace Insight;
 			Graphics::RenderGraph::Instance()->Reset();
 
-			projDepthMatrix = glm::perspective(45.f, 1.f, 0.1f, 10000.f);
-			viewDepthMatrix = glm::lookAt(glm::vec3(1000.0f, 2500.0f, 350.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)); 
-										/*glm::mat4(0.435682f, 0.000000f, -0.900100f, 0.000000f,
-										-0.645693f, 0.696706f, -0.312539f, 0.000000f,
-										0.627106f, 0.717356f, 0.303543f, 0.000000f,
-										843.348572f, 1750.858398f, 150.264442f, 1.000000f);*/
+			timer += deltaTime * 0.05f;
+			projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
+			lightPos.x = cos(glm::radians(timer * 360.0f)) * 25.0f;
+			lightPos.y = -50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
+			lightPos.z = -12.0f + sin(glm::radians(timer * 360.0f)) * 5.0f;
+			viewDepthMatrix = glm::lookAt(lightPos, glm::vec3(0), glm::vec3(0, 1, 0));
 
 			Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
-			shadowPassCascadeMap.Width = 4096;
-			shadowPassCascadeMap.Height = 4096;
+			shadowPassCascadeMap.Width = 2048;
+			shadowPassCascadeMap.Height = 2048;
 			shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
-			shadowPassCascadeMap.Format = PixelFormat::D32_Float;
+			shadowPassCascadeMap.Format = PixelFormat::D16_UNorm;
 			//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
 			shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
 			shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
 			shadowPassCascadeMap.SamplerDesc.AddressModeW = SamplerAddressMode::Clamp_To_Edge;
 			shadowPassCascadeMap.SamplerDesc.MaxLoad = 1.0f;
-			Graphics::ImageAttachmentInfo depthOutput = {};
-			depthOutput.Width = Window::GetWidth();
-			depthOutput.Height = Window::GetHeight();
-			depthOutput.Name = "depth";
-			depthOutput.Format = PixelFormat::D24_UNorm_S8_UInt;
 
 			auto& shadowPass = Graphics::RenderGraph::Instance()->AddPass("shadowPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
 			shadowPass.SetDepthStencilOutput("shaderPass_cacadeMap", shadowPassCascadeMap);
-			shadowPass.SetClearDepthStencil(glm::vec2(1, 0));
-			shadowPass.SetClearColour(glm::vec4(1, 1, 1, 1));
-			shadowPass.SetWindowRect(Maths::Rect(0, 0, 4096, 4096));
+			shadowPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
+			shadowPass.SetClearColour(glm::vec4(0, 0, 0, 0));
+			shadowPass.SetWindowRect(Maths::Rect(0, 0, shadowPassCascadeMap.Width, shadowPassCascadeMap.Height));
 			shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
 			shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 			{
@@ -186,7 +183,7 @@ namespace Module
 					glm::mat4 DepthMVP;
 				};
 				UBO depthMVP;
-				depthMVP.DepthMVP = projDepthMatrix * glm::inverse(viewDepthMatrix);
+				depthMVP.DepthMVP = projDepthMatrix * viewDepthMatrix;
 				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
 
 				Graphics::GPUShader* defaultShader = nullptr;
@@ -258,7 +255,7 @@ namespace Module
 			mainPass.AddColorOutput("normal", mainPassOutput);
 			mainPass.AddColorOutput("position", mainPassOutput);
 			mainPass.SetDepthStencilInput("shaderPass_cacadeMap");
-			mainPass.SetDepthStencilOutput("shaderDepthStencil", depthOutput);
+			mainPass.SetDepthStencilOutput("mainPassDepthAttachment", Graphics::ImageAttachmentInfo::DepthAttachment());
 			mainPass.AddSubpassDependencies(Graphics::SubpassDependency::MainDeferedPass());
 			mainPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
 			mainPass.SetClearColour(glm::vec4(0, 0, 0, 1));
@@ -269,7 +266,7 @@ namespace Module
 				{
 					glm::mat4 PVMatrix;
 					glm::mat4 LightSpace;
-					glm::vec4 LightPos;
+					glm::vec3 LightPos;
 				};
 
 				// bind material
@@ -280,10 +277,11 @@ namespace Module
 				{
 					glm::mat4(1.0f),
 					glm::mat4(1.0f),
-					glm::vec4(5.0f, 5.0f, 5.0f, 1.0f)
+					glm::vec3(5.0f, 5.0f, 5.0f)
 				};
-				ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
-				ubo.LightSpace = projDepthMatrix * glm::inverse(viewDepthMatrix);
+				ubo.LightSpace = projDepthMatrix * viewDepthMatrix;
+				ubo.LightPos = lightPos;
+				ubo.PVMatrix = m_mainCamera->GetProjMatrix()* glm::inverse(m_mainCamera->GetViewMatrix());
 				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 				Graphics::GPUShader* defaultShader = nullptr;

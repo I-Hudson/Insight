@@ -435,6 +435,7 @@ namespace vks
 			VkCullModeFlags cullMode,
 			VkFrontFace frontFace,
 			u32 depthBaisEnabled,
+			bool depthClampEnabnled,
 			VkPipelineRasterizationStateCreateFlags flags = 0)
 		{
 			VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo{};
@@ -443,7 +444,8 @@ namespace vks
 			pipelineRasterizationStateCreateInfo.cullMode = cullMode;
 			pipelineRasterizationStateCreateInfo.frontFace = frontFace;
 			pipelineRasterizationStateCreateInfo.flags = flags;
-			pipelineRasterizationStateCreateInfo.depthClampEnable = depthBaisEnabled;
+			pipelineRasterizationStateCreateInfo.depthBiasEnable = depthBaisEnabled;
+			pipelineRasterizationStateCreateInfo.depthClampEnable = depthClampEnabnled;
 			pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 			return pipelineRasterizationStateCreateInfo;
 		}
