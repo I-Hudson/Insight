@@ -8,6 +8,7 @@
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
+#include "Engine/Event/EventManager.h"
 #include <map>
 
 namespace Insight::Graphics
@@ -74,10 +75,20 @@ namespace Insight::Graphics
 		});
 
 		m_frames.resize(c_MaxFrameCount);
+
+		EventManager::Bind(EventType::WindowResize, "RenderGraph", [this](const Event& e)
+		{
+			m_queuedFuncs.emplace("RebuildSwapchain", [this]()
+			{
+				SwapchainRebuild();
+			});
+		});
 	}
 
 	RenderGraph::~RenderGraph()
 	{
+		EventManager::Unbind(EventType::WindowResize, "RenderGraph");
+
 		//m_singleFrame.ReleaseGPU();
 		for (auto& frame : m_frames)
 		{
@@ -164,7 +175,10 @@ namespace Insight::Graphics
 			GPUResults res = m_swapchain->GetNextImage(frame.SwapchainImageAquired, &m_swapchainImageIndex);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
-				SwapchainRebuild();
+				m_queuedFuncs.emplace("RebuildSwapchain", [this]()
+				{
+					SwapchainRebuild();
+				});
 				return;
 			}
 		}
@@ -179,7 +193,6 @@ namespace Insight::Graphics
 				auto* renderPass = frame.RenderPasses.at(pass.GetColorOutputHash());
 				pass.CallBeginRenderFunc(renderPass);
 				cmdBuffer->BeginRenderpass(renderPass);
-				//Maths::Rect viewPortRect = Maths::Rect(0, pass.GetWindowRect().GetHeight(), pass.GetWindowRect().GetWidth(), -pass.GetWindowRect().GetHeight());
 				cmdBuffer->SetViewPort(pass.GetWindowRect());
 				cmdBuffer->SetScissor(pass.GetWindowRect());
 				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
@@ -212,8 +225,10 @@ namespace Insight::Graphics
 			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, m_swapchainImageIndex, waitSemaphores);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
-				SwapchainRebuild();
-				return;
+				m_queuedFuncs.emplace("RebuildSwapchain", [this]()
+				{
+					SwapchainRebuild();
+				});
 			}
 		}
 		m_frameIndex = (m_frameIndex + 1) % c_MaxFrameCount;
@@ -237,6 +252,12 @@ namespace Insight::Graphics
 			}
 			frame.Reset();
 		}
+
+		for (auto& func : m_queuedFuncs)
+		{
+			func.second();
+		}
+		m_queuedFuncs.clear();
 	}
 
 	void RenderGraph::LogToConsole()
@@ -560,6 +581,10 @@ namespace Insight::Graphics
 				frameBuffer->Init(pass);
 				frame.RenderPasses.emplace(pass.GetColorOutputHash(), frameBuffer);
 			}
+			else
+			{
+				pass.SetGPUGraphPass(frame.RenderPasses.at(pass.GetColorOutputHash()));
+			}
 		}
 	}
 
@@ -586,22 +611,57 @@ namespace Insight::Graphics
 			{
 				// Texture should be recreated with the new window size.
 				auto* physicalImage = m_physicalImages[res.GetPhysicalIndex()];
-				Graphics::GPUImageDesc desc = physicalImage->GetDesc();
-				desc.Width = Window::GetWidth();
-				desc.Height = Window::GetHeight();
-				physicalImage->Init(desc);
+				physicalImage->ReleaseGPU();
+				::Delete(physicalImage);
 
 				auto* physicalImageView = m_physicalImageViews[res.GetPhysicalIndex()];
-				physicalImageView->Init(physicalImage);
+				physicalImageView->ReleaseGPU();
+				::Delete(physicalImageView);
+			
+				res.SetPhysicalIndex(RenderGraphResource::Unused);
 			}
 		}
+		m_physicalImages.clear();
+		m_physicalImageViews.clear();
 
-		for (auto& pass : m_passes)
-		{
-			pass.m_windowRect = Maths::Rect(0, 0, (float)Window::GetWidth(), (float)Window::GetHeight());
-		}
+		//for (auto& pass : m_passes)
+		//{
+		//	pass.m_windowRect = Maths::Rect(0, 0, (float)Window::GetWidth(), (float)Window::GetHeight());
+		//}
 
+		m_swapchainPresentPass.SetWindowRect(Maths::Rect(0, 0, Window::GetWidth(), Window::GetHeight()));
 		m_swapchain->Build(Graphics::GPUSwapchainDesc());
+
+		for (auto& swapchainImage : m_swapchainSubmision)
+		{
+			::Delete(swapchainImage.GraphPass);
+			swapchainImage.Shader->ReleaseGPU();
+			::Delete(swapchainImage.Shader);
+			swapchainImage.Pipeline->ReleaseGPU();
+			::Delete(swapchainImage.Pipeline);
+		}
+		m_swapchainSubmision.clear();
+
+		for (u32 i = 0; i < m_swapchain->GetImageCount(); ++i)
+		{
+			m_swapchainSubmision.push_back(SwapchainSubmision());
+			SwapchainSubmision& sub = m_swapchainSubmision.back();
+
+			sub.Image = m_swapchain->GetImage(i);
+			sub.GraphPass = GPURenderGraphPass::New();
+			sub.GraphPass->InitForSwapchain(m_swapchain, sub.Image);
+			sub.GraphPass->m_graph = this;
+
+			// Swapchain resources needed for submission.
+			sub.Shader = GPUShader::New();
+			sub.Shader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/present.vert", ShaderStageInput::FilePath);
+			sub.Shader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/present.frag", ShaderStageInput::FilePath);
+			sub.Shader->Compile();
+
+			sub.Pipeline = GPUPipeline::New();
+			sub.Pipeline->SetShader(sub.Shader);
+			sub.Pipeline->Init(sub.GraphPass, Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
+		}
 	}
 
 	GPURenderGraphPass* GPURenderGraphPass::New()

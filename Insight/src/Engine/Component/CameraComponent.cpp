@@ -208,7 +208,14 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		// pitch
 		if (iDeltaY != 0)
 		{
-			mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
+			if (Module::GraphicsModule::Instance()->IsVulkan())
+			{
+				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
+			}
+			else
+			{
+				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)-iDeltaY / 150.0f);
+			}
 			vRight = mMat * vRight;
 			vUp = mMat * vUp;
 			vForward = mMat * vForward;

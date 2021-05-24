@@ -107,6 +107,7 @@ project "Insight"
             "GLM_FORCE_DEPTH_ZERO_TO_ONE",
 
             "IS_STANDARD_POINTER",
+            "IS_Y_IS_DOWN",
         }
 
     filter "configurations:Debug"

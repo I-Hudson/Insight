@@ -31,6 +31,8 @@ namespace Module
 		const bool HasMainCamera();
 		const bool IsThisMainCamera(CameraComponent* camera);
 
+		bool IsVulkan();
+
 		struct GraphicsConfig
 		{
 			CVar<int> Validation{ "validation", 1 };

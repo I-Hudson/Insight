@@ -3,6 +3,7 @@
 #include "Module/EditorModule.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include "Engine/Graphics/Debug/Gizmos.h"
 
 class EditorApp : public Application
 {
@@ -90,11 +91,13 @@ public:
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
 			//Model* model = FileSystem::FileSystemManager::Instance()->LoadObject<Model>("./data/models/sponza/sponza.obj");
 			meshComponent.SetModel(graphicsModel);
-			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 0, 0, 0 });
+			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 0, i * 20, 0 });
 
 			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
 			meshChild.SetParent(mesh.GetEntityID());
 		}
+
+		::New<Insight::Graphics::Debug::Gizmos>();
 	}
 
 	virtual void Update(const float deltaTime) override
@@ -105,7 +108,6 @@ public:
 
 	virtual void Draw() override
 	{
-
 	}
 
 	virtual void OnFrameEnd() override
@@ -115,6 +117,7 @@ public:
 	~EditorApp()
 	{
 		m_entityManager.DestroyEntity(m_editorCamera.GetEntityID());
+		::Delete(Insight::Graphics::Debug::Gizmos::Instance());
 	}
 };
 

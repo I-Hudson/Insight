@@ -167,7 +167,7 @@ namespace Insight::Graphics
 	RenderGraphResource& RenderPass::AddColorOutput(const std::string& name)
 	{
 		auto& res = m_graph->GetTextureResouce(name);
-		ASSERT(res.TextureInfo.m_info.Width != 0 || res.TextureInfo.m_info.Height != 0 && "[RenderPass::AddColorOutput] Output color texture is not valid. Texture must have already been rendered to.");
+		//ASSERT(res.TextureInfo.m_info.Width != 0 || res.TextureInfo.m_info.Height != 0 && "[RenderPass::AddColorOutput] Output color texture is not valid. Texture must have already been rendered to.");
 		res.SetPassName(m_name);
 		res.AddQueue(m_queue);
 		res.AddWrittenInPass(m_passIndex);

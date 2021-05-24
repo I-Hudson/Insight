@@ -191,6 +191,13 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkCmdSetDepthBias(m_cmdBuffer, constantFactor, slope, slopeFactor);
 	}
 
+	void GPUCommandBufferVulkan::SetLineWidth(float lineWidth)
+	{
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::SetScissor] Command Buffer must be recording.");
+		++m_recordCommandCount;
+		vkCmdSetLineWidth(m_cmdBuffer, lineWidth);
+	}
+
 	void Insight::GraphicsAPI::Vulkan::GPUCommandBufferVulkan::CopyBuffer(Graphics::GPUBuffer* srcBuffer, Graphics::GPUBuffer* dstBuffer, u32 regionCount, u64 srcOffset, u64 dstOffset, u64 size)
 	{
 		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::CopyBuffer] Command Buffer must be recording.");

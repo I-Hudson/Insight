@@ -333,6 +333,7 @@ namespace Insight::Graphics
 		u32 m_swapchainImageIndex = 0;
 		const u32 c_MaxFrameCount = 1;
 
+		std::unordered_map<std::string, std::function<void()>> m_queuedFuncs;
 		GPUSwapchain* m_swapchain;
 
 		friend GPURenderGraphPass;

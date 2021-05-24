@@ -210,6 +210,7 @@
     <ClInclude Include="inc\Engine\FileSystem\WatchInfo.h" />
     <ClInclude Include="inc\Engine\Graphics\Config.h" />
     <ClInclude Include="inc\Engine\Graphics\Debug\GPUDebug.h" />
+    <ClInclude Include="inc\Engine\Graphics\Debug\Gizmos.h" />
     <ClInclude Include="inc\Engine\Graphics\Enums.h" />
     <ClInclude Include="inc\Engine\Graphics\Framebuffer.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUAdapter.h" />
@@ -774,6 +775,7 @@
     <ClCompile Include="src\Engine\Event\EventManager.cpp" />
     <ClCompile Include="src\Engine\FileSystem\FileSystem.cpp" />
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp" />
+    <ClCompile Include="src\Engine\Graphics\Debug\Gizmos.cpp" />
     <ClCompile Include="src\Engine\Graphics\Enums.cpp" />
     <ClCompile Include="src\Engine\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Engine\Graphics\GPUBuffer.cpp" />

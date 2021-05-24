@@ -14,6 +14,8 @@
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
 
+#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Debug/Gizmos.h"
 #include "Engine/Graphics/Model/Model.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
@@ -140,6 +142,7 @@ namespace Module
 	glm::vec3 lightPos = glm::vec3();
 	float timer = 0.0f;
 	u32 imageIndex = 0;
+	bool shadowMapFilter = false;
 
 	void GraphicsModule::Update(const float& deltaTime)
 	{
@@ -151,10 +154,17 @@ namespace Module
 			Graphics::RenderGraph::Instance()->Reset();
 
 			timer += deltaTime * 0.05f;
-			//projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
-			projDepthMatrix = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 96.0f);
+			projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
+			//projDepthMatrix = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 96.0f);
 			lightPos.x = cos(glm::radians(timer * 360.0f)) * 25.0f;
-			lightPos.y = -50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
+			if (IsVulkan())
+			{
+				lightPos.y = -50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
+			}
+			else
+			{
+				lightPos.y = 50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
+			}
 			lightPos.z = 25.0f + sin(glm::radians(timer * 360.0f)) * 5.0f;
 			viewDepthMatrix = glm::lookAt(lightPos, glm::vec3(0), glm::vec3(0, 1, 0));
 
@@ -162,7 +172,7 @@ namespace Module
 			shadowPassCascadeMap.Width = 2048;
 			shadowPassCascadeMap.Height = 2048;
 			shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
-			shadowPassCascadeMap.Format = PixelFormat::D16_UNorm;
+			shadowPassCascadeMap.Format = PixelFormat::D32_Float;
 			//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
 			shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
 			shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
@@ -274,7 +284,7 @@ namespace Module
 				// bind buffers
 				// Draw mesh, 
 
-				UBO ubo = 
+				UBO ubo =
 				{
 					glm::mat4(1.0f),
 					glm::mat4(1.0f),
@@ -282,7 +292,7 @@ namespace Module
 				};
 				ubo.LightSpace = projDepthMatrix * viewDepthMatrix;
 				ubo.LightPos = lightPos;
-				ubo.PVMatrix = m_mainCamera->GetProjMatrix()* glm::inverse(m_mainCamera->GetViewMatrix());
+				ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
 				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 				Graphics::GPUShader* defaultShader = nullptr;
@@ -331,7 +341,7 @@ namespace Module
 							{
 								int textureDiffuse = 1;
 								Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
-								
+
 								Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
 								Graphics::GPUImage* diffuseTexture = nullptr;
 								std::string diffuseTextureString = subMesh.GetTexture("texture_diffuse");
@@ -376,6 +386,10 @@ namespace Module
 			++imageIndex;
 		}
 
+#ifdef IS_EDITOR
+		Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
+#endif
+
 		m_imguiRenderer->EndFrame();
 		m_imguiRenderer->Render();
 
@@ -407,5 +421,10 @@ namespace Module
 	const bool GraphicsModule::IsThisMainCamera(CameraComponent* camera)
 	{
 		return camera == m_mainCamera;
+	}
+
+	bool GraphicsModule::IsVulkan()
+	{
+		return GetAPI() == GraphicsRendererAPI::Vulkan;
 	}
 }

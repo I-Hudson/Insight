@@ -2,6 +2,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Serialization/SerializeHelper.h"
+#include "Engine/Module/GraphicsModule.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -71,7 +72,12 @@ const glm::vec3 TransformComponent::GetPostion()
 void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
-	data.Transform[3] = glm::vec4(position, 1.0f);
+	glm::vec3 pos = position;
+	if (Module::GraphicsModule::Instance()->IsVulkan())
+	{
+		pos.y *= -1;
+	}
+	data.Transform[3] = glm::vec4(pos, 1.0f);
 	//m_isDirty = true;
 }
 

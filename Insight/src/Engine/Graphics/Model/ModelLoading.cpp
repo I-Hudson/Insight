@@ -2,6 +2,7 @@
 #include "Engine/Graphics/Model/ModelLoading.h"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "Engine/Module/GraphicsModule.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -68,7 +69,14 @@ namespace Insight::Graphics::ModelLoading
 			// process vertex positions, normals and texture coordinates
 			glm::vec3 position;
 			position.x = aiMesh->mVertices[i].x;
-			position.y = aiMesh->mVertices[i].y *= -1;
+			if (Module::GraphicsModule::Instance()->IsVulkan())
+			{
+				position.y = aiMesh->mVertices[i].y *= -1;
+			}
+			else
+			{
+				position.y = aiMesh->mVertices[i].y;
+			}
 			position.z = aiMesh->mVertices[i].z;
 			vertex.Position = position;
 
@@ -83,7 +91,14 @@ namespace Insight::Graphics::ModelLoading
 			if (aiMesh->mNormals != nullptr)
 			{
 				normal.x = aiMesh->mNormals[i].x;
-				normal.y = aiMesh->mNormals[i].y *= -1;
+				if (Module::GraphicsModule::Instance()->IsVulkan())
+				{
+					normal.y = aiMesh->mNormals[i].y *= -1;
+				}
+				else
+				{
+					normal.y = aiMesh->mNormals[i].y;
+				}
 				normal.z = aiMesh->mNormals[i].z;
 			}
 			vertex.Normal = normal;

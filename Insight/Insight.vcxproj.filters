@@ -172,6 +172,9 @@
     <Filter Include="src\Engine\Graphics">
       <UniqueIdentifier>{92BD692F-FE1E-473D-878C-8DEFF3EC7DFC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\Engine\Graphics\Debug">
+      <UniqueIdentifier>{882D6472-F4EF-97FC-3DA0-2689A9A170DA}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\Engine\Graphics\Image">
       <UniqueIdentifier>{0405C372-70C7-F6FC-B977-85892579CFDA}</UniqueIdentifier>
     </Filter>
@@ -430,6 +433,9 @@
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Debug\GPUDebug.h">
+      <Filter>inc\Engine\Graphics\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\Debug\Gizmos.h">
       <Filter>inc\Engine\Graphics\Debug</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Enums.h">
@@ -2119,6 +2125,9 @@
     </ClCompile>
     <ClCompile Include="src\Engine\FileSystem\WatchInfo.cpp">
       <Filter>src\Engine\FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\Debug\Gizmos.cpp">
+      <Filter>src\Engine\Graphics\Debug</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Enums.cpp">
       <Filter>src\Engine\Graphics</Filter>

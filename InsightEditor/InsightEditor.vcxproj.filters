@@ -80,6 +80,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Editor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Editor\Components\CameraComponentEditorDrawer.cpp">
       <Filter>src\Editor\Components</Filter>
     </ClCompile>
@@ -103,9 +106,6 @@
     </ClCompile>
     <ClCompile Include="vendor\ImGui-Addons\FileBrowser\ImGuiFileBrowser.cpp">
       <Filter>vendor\ImGui-Addons\FileBrowser</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Editor.cpp">
-      <Filter>vendor</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

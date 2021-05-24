@@ -55,7 +55,7 @@ float filterPCF(vec4 sc)
 
 	float shadowFactor = 0.0;
 	int count = 0;
-	int range = 1;
+	int range = 2;
 	
 	for (int x = -range; x <= range; x++)
 	{
@@ -71,8 +71,8 @@ float filterPCF(vec4 sc)
 
 void main() 
 {
-	//float shadow = filterPCF(inShadowCoord / inShadowCoord.w);
-	float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
+	float shadow = filterPCF(inShadowCoord / inShadowCoord.w);
+	//float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
 
 	if(textureLookup.diffuse == 1)
 	{
