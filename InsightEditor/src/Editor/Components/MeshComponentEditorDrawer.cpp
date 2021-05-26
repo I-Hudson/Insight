@@ -3,9 +3,9 @@
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Library/ModelLibrary.h"
 
-EDITOR_DEF_TYPE(MeshComponent, Editor::MeshComponentEditorDrawer);
+EDITOR_DEF_TYPE(MeshComponent, Insight::Editor::MeshComponentEditorDrawer);
 
-namespace Editor
+namespace Insight::Editor
 {
 	void MeshComponentEditorDrawer::OnDraw(Object& obj)
 	{

@@ -28,6 +28,9 @@ namespace Module
 		void WaitForIdle();
 		GraphicsRendererAPI GetAPI();
 		void SetMainCamera(CameraComponent* camera);
+#ifdef IS_EDITOR
+		void SetEditorCamera(CameraComponent* camera);
+#endif
 		const bool HasMainCamera();
 		const bool IsThisMainCamera(CameraComponent* camera);
 
@@ -47,9 +50,17 @@ namespace Module
 		};
 
 	private:
+		void ShadowMap();
+		void Deffered();
+		void Editor();
+
+	private:
 		ImGuiRenderer* m_imguiRenderer;
 
 		static CameraComponent* m_mainCamera;
+#ifdef IS_EDITOR
+		static CameraComponent* m_editorCamera;
+#endif
 		static std::vector<MeshComponent*> m_meshs;
 
 		friend MeshComponent;

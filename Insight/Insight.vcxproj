@@ -79,8 +79,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <MinimalRebuild>false</MinimalRebuild>
@@ -105,8 +105,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -135,8 +135,8 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_DIST;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DIST;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -162,8 +162,11 @@
   <ItemGroup>
     <ClInclude Include="inc\Engine\Component\CameraComponent.h" />
     <ClInclude Include="inc\Engine\Component\Component.h" />
+    <ClInclude Include="inc\Engine\Component\DirectionalLightComponent.h" />
     <ClInclude Include="inc\Engine\Component\Generated\Component_reflect_generated.h" />
+    <ClInclude Include="inc\Engine\Component\Generated\DirectionalLightComponent_reflect_generated.h" />
     <ClInclude Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.h" />
+    <ClInclude Include="inc\Engine\Component\Generated\TransformComponent_reflect_generated.h" />
     <ClInclude Include="inc\Engine\Component\MeshComponent.h" />
     <ClInclude Include="inc\Engine\Component\TransformComponent.h" />
     <ClInclude Include="inc\Engine\Config\CVar.h" />
@@ -754,10 +757,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp" />
+    <ClCompile Include="inc\Engine\Component\Generated\DirectionalLightComponent_reflect_generated.cpp" />
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp" />
+    <ClCompile Include="inc\Engine\Component\Generated\TransformComponent_reflect_generated.cpp" />
     <ClCompile Include="inc\Engine\Entity\Generated\Entity_reflect_generated.cpp" />
     <ClCompile Include="src\Engine\Component\CameraComponent.cpp" />
     <ClCompile Include="src\Engine\Component\Component.cpp" />
+    <ClCompile Include="src\Engine\Component\DirectionalLightComponent.cpp" />
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Engine\Component\TransformComponent.cpp" />
     <ClCompile Include="src\Engine\Config\CVar.cpp" />
@@ -876,6 +882,9 @@
     </ProjectReference>
     <ProjectReference Include="vendor\ImGui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\ImGuizmo\ImGuizmo.vcxproj">
+      <Project>{36FD234F-22CA-7E5A-4BE3-6C02370FB4E8}</Project>
     </ProjectReference>
     <ProjectReference Include="vendor\SPIRV-Cross\SPIRV_Cross.vcxproj">
       <Project>{A2A0FF0E-0E56-7804-974A-72DB03FF6E08}</Project>

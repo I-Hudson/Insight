@@ -6,9 +6,9 @@
 
 #if defined(IS_EDITOR)
 
-EDITOR_DEF_TYPE(CameraComponent, Editor::CameraComponentEditorDrawer);
+EDITOR_DEF_TYPE(CameraComponent, Insight::Editor::CameraComponentEditorDrawer);
 
-namespace Editor
+namespace Insight::Editor
 {
 	void CameraComponentEditorDrawer::OnDraw(Object& obj)
 	{

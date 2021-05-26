@@ -10,6 +10,7 @@
 #include "Engine/Graphics/Image/GPUImageDesc.h"
 
 #include <functional>
+#include <unordered_set>
 #include "glm/glm.hpp"
 
 
@@ -137,6 +138,7 @@ namespace Insight::Graphics
 		bool SupportsPrerotate = false;
 		bool SwapchainImage = false;
 
+		ImageAttachmentInfo();
 		static ImageAttachmentInfo DepthAttachment();
 	};
 
@@ -290,6 +292,7 @@ namespace Insight::Graphics
 		const std::unordered_set<u32> GetDependentPasses() { return m_dependentPasses; }
 
 		RenderGraphResource& GetTextureResource(u32 index) const;
+		RenderGraphResource& GetTextureResource(const std::string& name) const;
 		GPUImage* GetPhysicalImage(u32 index) const;
 		GPUImageView* GetPhysicalImageView(u32 index) const;
 

@@ -3,17 +3,17 @@
 #include "Editor/EditorWindow.h"
 #include "ImGuiFileBrowser.h"
 
-	namespace Editor
+namespace Insight::Editor
+{
+	class TopBarMenu : public EditorWindow
 	{
-		class TopBarMenu : public EditorWindow
-		{
-		public:
-			TopBarMenu(const Module::EditorModule* editorModule);
-			~TopBarMenu() override;
+	public:
+		TopBarMenu(const Module::EditorModule* editorModule);
+		~TopBarMenu() override;
 
-			virtual void Update(const float& deltaTime) override;
+		virtual void Update(const float& deltaTime) override;
 
-		private:
-			imgui_addons::ImGuiFileBrowser m_fileDialog;
-		};
-	}
+	private:
+		imgui_addons::ImGuiFileBrowser m_fileDialog;
+	};
+}

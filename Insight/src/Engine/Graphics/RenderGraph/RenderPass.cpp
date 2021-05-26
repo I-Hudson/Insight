@@ -74,6 +74,10 @@ namespace Insight::Graphics
 		return *this;
 	}
 
+	ImageAttachmentInfo::ImageAttachmentInfo()
+	{
+
+	}
 
 	/// <summary>
 	/// ImageAttachmentInfo::DepthAttachment
@@ -84,8 +88,6 @@ namespace Insight::Graphics
 		ImageAttachmentInfo info = { };
 		info.Format = PixelFormat::D16_UNorm;
 		info.Name = "DepthAttachment";
-		info.Width = Window::GetWidth();
-		info.Height = Window::GetHeight();
 		return info;
 	}
 
@@ -308,6 +310,11 @@ namespace Insight::Graphics
 	RenderGraphResource& RenderPass::GetTextureResource(u32 index) const
 	{
 		return m_graph->GetTextureResouce(index);
+	}
+
+	RenderGraphResource& RenderPass::GetTextureResource(const std::string& name) const
+	{
+		return m_graph->GetTextureResouce(name);
 	}
 
 	GPUImage* RenderPass::GetPhysicalImage(u32 index) const

@@ -16,6 +16,10 @@ namespace Insight::Graphics
 			: Width(Window::GetWidth()), Height(Window::GetHeight())
 			, VSync(false), GSync(true)
 		{ }
+		GPUSwapchainDesc(u32 width, u32 height)
+			: Width(width), Height(height)
+			, VSync(false), GSync(true)
+		{ }
 		GPUSwapchainDesc(u32 width, u32 height, bool vsync, bool gsync)
 			: Width(width), Height(height)
 			, VSync(vsync), GSync(gsync)

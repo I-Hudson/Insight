@@ -6,53 +6,53 @@
 #include "misc/cpp/imgui_stdlib.h"
 #include <glm/glm.hpp>
 
-	namespace Editor
+namespace Insight::Editor
+{
+	inline bool RTTIToImGUI_Input(void* objectPtr, const std::string& typeName, const std::string& propertyName, const PropertyFlags& proertyFlags)
 	{
-		inline bool RTTIToImGUI_Input(void* objectPtr, const std::string& typeName, const std::string& propertyName, const PropertyFlags& proertyFlags)
-		{
 #define TYPE_NAME(x) typeid(x).name()
 
-			if (typeName == TYPE_NAME(bool))
-			{
-				return UIHelper::DrawBool(propertyName, static_cast<bool*>(objectPtr));
-			}
-
-			else if (typeName == TYPE_NAME(int))
-			{
-				return UIHelper::DrawInt(propertyName, static_cast<int*>(objectPtr), (proertyFlags & ClampZero) != 0 ? std::numeric_limits<int>::max() : 0);
-			}
-
-			else if (typeName == TYPE_NAME(float))
-			{
-				return UIHelper::DrawFloat(propertyName, static_cast<float*>(objectPtr), (proertyFlags & ClampZero) != 0 ? std::numeric_limits<float>::max() : 0.0f);
-			}
-
-			else if (typeName == TYPE_NAME(std::string))
-			{
-				return UIHelper::DrawString(propertyName.c_str(), static_cast<std::string*>(objectPtr), proertyFlags);
-			}
-
-			else if (typeName == TYPE_NAME(glm::mat2))
-			{
-				glm::mat2* data = static_cast<glm::mat2*>(objectPtr);
-				return UIHelper::DrawMat2(propertyName, data, proertyFlags);
-			}
-
-			else if (typeName == TYPE_NAME(glm::mat3))
-			{
-				glm::mat3* data = static_cast<glm::mat3*>(objectPtr);
-				return UIHelper::DrawMat3(propertyName, data, proertyFlags);
-
-			}
-
-			else if (typeName == TYPE_NAME(glm::mat4))
-			{
-				glm::mat4* data = static_cast<glm::mat4*>(objectPtr);
-				return UIHelper::DrawMat4(propertyName, data, proertyFlags);
-			}
-
-			else { IS_CORE_ERROR("Type '{0}' does not have a converstion to ImGUI.", typeName); }
-
-			return false;
+		if (typeName == TYPE_NAME(bool))
+		{
+			return UIHelper::DrawBool(propertyName, static_cast<bool*>(objectPtr));
 		}
+
+		else if (typeName == TYPE_NAME(int))
+		{
+			return UIHelper::DrawInt(propertyName, static_cast<int*>(objectPtr), (proertyFlags & ClampZero) != 0 ? std::numeric_limits<int>::max() : 0);
+		}
+
+		else if (typeName == TYPE_NAME(float))
+		{
+			return UIHelper::DrawFloat(propertyName, static_cast<float*>(objectPtr), (proertyFlags & ClampZero) != 0 ? std::numeric_limits<float>::max() : 0.0f);
+		}
+
+		else if (typeName == TYPE_NAME(std::string))
+		{
+			return UIHelper::DrawString(propertyName.c_str(), static_cast<std::string*>(objectPtr), proertyFlags);
+		}
+
+		else if (typeName == TYPE_NAME(glm::mat2))
+		{
+			glm::mat2* data = static_cast<glm::mat2*>(objectPtr);
+			return UIHelper::DrawMat2(propertyName, data, proertyFlags);
+		}
+
+		else if (typeName == TYPE_NAME(glm::mat3))
+		{
+			glm::mat3* data = static_cast<glm::mat3*>(objectPtr);
+			return UIHelper::DrawMat3(propertyName, data, proertyFlags);
+
+		}
+
+		else if (typeName == TYPE_NAME(glm::mat4))
+		{
+			glm::mat4* data = static_cast<glm::mat4*>(objectPtr);
+			return UIHelper::DrawMat4(propertyName, data, proertyFlags);
+		}
+
+		else { IS_CORE_ERROR("Type '{0}' does not have a converstion to ImGUI.", typeName); }
+
+		return false;
 	}
+}

@@ -166,6 +166,7 @@ namespace Insight::Graphics
 		virtual ~RenderGraph();
 
 		RenderPass& AddPass(const std::string& name, RenderGraphQueueFlags queue);
+		RenderPass& GetPass(const std::string& name);
 
 		void SetSwapchainDimensions(const ResourceDimensions& dimensions) { m_swapchainDimensions = dimensions; }
 		void SetbackBufferSource(const std::string& name);
@@ -332,6 +333,7 @@ namespace Insight::Graphics
 		u32 m_frameIndex;
 		u32 m_swapchainImageIndex = 0;
 		const u32 c_MaxFrameCount = 1;
+		glm::ivec2 m_renderGraphRenderSize;
 
 		std::unordered_map<std::string, std::function<void()>> m_queuedFuncs;
 		GPUSwapchain* m_swapchain;

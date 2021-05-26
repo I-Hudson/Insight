@@ -39,3 +39,6 @@
 [submodule "Insight/vendor/stb"]
 	path = Insight/vendor/stb
 	url = https://github.com/nothings/stb
+[submodule "Insight/vendor/ImGuizmo"]
+	path = Insight/vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo

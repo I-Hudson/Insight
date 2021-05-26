@@ -27,14 +27,19 @@ inline size_t GetEditorPanelID() noexcept
 	return typeID;
 }
 
-namespace Editor
+namespace Insight::Editor
 {
 	class EditorWindow;
 }
 
 namespace Module
 {
-	class EditorModule : public Module, public TSingleton<EditorModule>
+	class Module;
+}
+
+namespace Insight::Module
+{
+	class EditorModule : public ::Module::Module, public TSingleton<EditorModule>
 	{
 	public:
 		EditorModule();
@@ -45,6 +50,9 @@ namespace Module
 
 		template<typename T, typename... Args>
 		T* AddEditorPanel(Args&&... args);
+
+		template<typename T>
+		T GetEditorPanel(const std::string& panelName);
 
 		template<typename T>
 		void RemoveEditorPanel();
@@ -105,6 +113,19 @@ namespace Module
 		m_editorPanels[GetEditorPanelID<T>()] = newPanel;
 
 		return dynamic_cast<T*>(newPanel);
+	}
+
+	template<typename T>
+	inline T EditorModule::GetEditorPanel(const std::string& panelName)
+	{
+		for (auto& kvp : m_editorPanels)
+		{
+			if (kvp.second->GetWindowName() == panelName)
+			{
+				return static_cast<T>(kvp.second);
+			}
+		}
+		return nullptr;
 	}
 
 	template<typename T>

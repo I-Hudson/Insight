@@ -7,7 +7,7 @@
 
 const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
-class IS_API Scene : std::enable_shared_from_this<Scene>
+class IS_API Scene
 {
 public:
 	Scene(const std::string& sceneName = "Default");
@@ -31,9 +31,13 @@ public:
 	void Serialize(const std::string& file);
 	void Deserialize(const std::string& file);
 
+	void OnBeginPlay();
+	void OnEndPlay();
+
 	void OnUpdate(const float& deltaTime);
-	void OnViewportResize(uint32_t width, uint32_t height);
 	void Clean();
+
+	bool IsPlaying() const { return m_isPlaying; }
 
 	Entity GetEntity(const EntityID& entity) { return m_entityManager.GetEntity(entity); }
 	template<typename T>

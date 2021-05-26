@@ -4,15 +4,15 @@
 #include "Engine/Component/CameraComponent.h"
 
 #if defined(IS_EDITOR)
-	namespace Editor
+namespace Insight::Editor
+{
+	class CameraComponentEditorDrawer : public IEditorDrawer
 	{
-		class CameraComponentEditorDrawer : public IEditorDrawer
-		{
-		public:
-			virtual void OnDraw(Object& obj) override;
+	public:
+		virtual void OnDraw(Object& obj) override;
 
-		private:
-			EDITOR_DEC_TYPE(CameraComponent, CameraComponentEditorDrawer);
-		};
-	}
+	private:
+		EDITOR_DEC_TYPE(CameraComponent, CameraComponentEditorDrawer);
+	};
+}
 #endif

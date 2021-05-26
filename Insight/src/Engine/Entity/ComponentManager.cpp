@@ -4,12 +4,14 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"
+#include "Engine/Component/DirectionalLightComponent.h"
 
 ComponentManager::ComponentManager()
 {
 	RegisterComponent<CameraComponent>();
 	RegisterComponent<TransformComponent, TransformComponentData>();
 	RegisterComponent<MeshComponent>();
+	RegisterComponent<DirectionalLightComponent, DirectionalLightComponentData>();
 }
 
 ComponentManager::~ComponentManager()

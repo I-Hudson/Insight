@@ -3,7 +3,7 @@
 #include "Editor/EditorWindow.h"
 #include "Engine/Entity/Entity.h"
 
-namespace Editor
+namespace Insight::Editor
 {
 	class SceneHierarchyPanel : public EditorWindow
 	{

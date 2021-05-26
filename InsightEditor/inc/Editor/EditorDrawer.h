@@ -6,13 +6,13 @@
 #if defined(IS_EDITOR)
 
 #define EDITOR_DEC_TYPE(TYPE, EDITOR_TYPE) \
-	static Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> s_reg;
+	static Insight::Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> s_reg;
 #define EDITOR_DEF_TYPE(TYPE, EDITOR_TYPE) \
-	Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> EDITOR_TYPE::s_reg
+	Insight::Editor::EditorDrawerRegister<TYPE, EDITOR_TYPE> EDITOR_TYPE::s_reg
 
 class Object;
 
-namespace Editor
+namespace Insight::Editor
 {
 	class EditorDrawerRegistry;
 
@@ -96,7 +96,7 @@ namespace Editor
 }
 
 #define EDITOR_DRAWER_CLASS(ClassName, EditorClassName)				\
-namespace Editor													\
+namespace Insight::Editor											\
 {																	\
 	class EditorClassName : public IEditorDrawer					\
 	{																\

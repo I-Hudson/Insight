@@ -9,6 +9,7 @@
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Event/EventManager.h"
+#include "Engine/Event/ApplicationEvent.h"
 #include <map>
 
 namespace Insight::Graphics
@@ -28,6 +29,7 @@ namespace Insight::Graphics
 		, m_changed(false)
 		, m_frameIndex(0)
 		, m_swapchainPresentPass(RenderPass(this, -1, "SwapchainPresentPass", RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT))
+		, m_renderGraphRenderSize(1280, 720)
 	{
 		m_swapchain = GPUSwapchain::New();
 		m_swapchain->Init();
@@ -78,7 +80,9 @@ namespace Insight::Graphics
 
 		EventManager::Bind(EventType::WindowResize, "RenderGraph", [this](const Event& e)
 		{
-			m_queuedFuncs.emplace("RebuildSwapchain", [this]()
+			const WindowResizeEvent& event = static_cast<const WindowResizeEvent&>(e);
+			m_renderGraphRenderSize = glm::ivec2(event.m_width, event.m_height);
+			m_queuedFuncs.emplace("RebuildSwapchain", [this, event]()
 			{
 				SwapchainRebuild();
 			});
@@ -133,6 +137,12 @@ namespace Insight::Graphics
 		}
 	}
 
+	RenderPass& RenderGraph::GetPass(const std::string& name)
+	{
+		auto it = m_passToIndex.find(name);
+		return m_passes.at(it->second);
+	}
+
 	void RenderGraph::SetbackBufferSource(const std::string& name)
 	{
 		m_backBufferSource = name;
@@ -175,6 +185,7 @@ namespace Insight::Graphics
 			GPUResults res = m_swapchain->GetNextImage(frame.SwapchainImageAquired, &m_swapchainImageIndex);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
+				m_renderGraphRenderSize = glm::ivec2(Window::GetWidth(), Window::GetHeight());
 				m_queuedFuncs.emplace("RebuildSwapchain", [this]()
 				{
 					SwapchainRebuild();
@@ -225,6 +236,7 @@ namespace Insight::Graphics
 			GPUResults res = m_swapchain->Present(GPUQueue::GRAPHICS, m_swapchainImageIndex, waitSemaphores);
 			if (res == GPUResults::Error_Out_Of_Data)
 			{
+				m_renderGraphRenderSize = glm::ivec2(Window::GetWidth(), Window::GetHeight());
 				m_queuedFuncs.emplace("RebuildSwapchain", [this]()
 				{
 					SwapchainRebuild();
@@ -553,6 +565,12 @@ namespace Insight::Graphics
 			{
 				u32 physicalIndex = (u32)m_physicalImages.size();
 
+				if (resource.TextureInfo.m_info.AutoSizeToWindow)
+				{
+					resource.TextureInfo.m_info.Width = Window::GetWidth();//m_renderGraphRenderSize.x;
+					resource.TextureInfo.m_info.Height = Window::GetHeight();// m_renderGraphRenderSize.y;
+				}
+
 				GPUImage* image = GPUImage::New();
 				GPUImageDesc desc = GPUImageDesc::Image2D(resource.TextureInfo.m_info.Width, resource.TextureInfo.m_info.Height, resource.TextureInfo.m_info.Depth, resource.TextureInfo.m_info.Levels,
 														  resource.TextureInfo.m_info.Samples, resource.TextureInfo.m_info.Layers, ImageDomain::Physical, ImageLayout::Undefined, resource.TextureInfo.ImageLayout, 
@@ -590,7 +608,7 @@ namespace Insight::Graphics
 
 	void RenderGraph::SwapchainRebuild()
 	{
-		while (Window::GetWidth() == 0 || Window::GetHeight() == 0)
+		while (m_renderGraphRenderSize.x == 0 || m_renderGraphRenderSize.y == 0)
 		{
 			Window::WaitForEvents();
 		}
@@ -602,11 +620,6 @@ namespace Insight::Graphics
 
 		for (auto& res : m_resources)
 		{
-			if (res.GetType() == RenderGraphResource::Type::Texture && !res.TextureInfo.m_info.AutoSizeToWindow)
-			{
-				continue;
-			}
-
 			if (res.GetType() == RenderGraphResource::Type::Texture)
 			{
 				// Texture should be recreated with the new window size.

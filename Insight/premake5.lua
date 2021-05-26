@@ -29,12 +29,14 @@ project "Insight"
     includedirs 
     {
 		"$(ProjectDir)inc",
+        "$(SolutionDir)InsightEditor/inc",
 		"$(ProjectDir)inc/Insight",
 		"$(ProjectDir)inc/Platform",
 		"$(ProjectDir)inc/Platform/Vulkan",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
         "%{IncludeDir.imgui}",
+        "%{IncludeDir.imguizmo}",
         "%{IncludeDir.imgui}",
         "%{IncludeDir.SPIRV_Cross}",
 		"%{IncludeDir.spdlog}",
@@ -79,6 +81,7 @@ project "Insight"
         "GLFW",
         "Glad",
         "ImGui",
+        "ImGuizmo",
         "SPIRV_Cross",
 
         "OptickCore",

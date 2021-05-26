@@ -1,11 +1,16 @@
 #pragma once
 
 #include "Engine/Component/Component.h"
+#include "Engine/Component/Generated/TransformComponent_reflect_generated.h"
 #include "glm/glm.hpp"
 
+REFLECT_STRUCT()
 struct TransformComponentData : public ComponentData
 {
+	REFLECT_GENERATED_BODY()
+
 	TransformComponentData();
+	REFLECT_PROPERTY(ShowInEditor)
 	glm::mat4 Transform;
 };
 

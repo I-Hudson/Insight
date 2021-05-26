@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include "glm/glm.hpp"
 
 #if defined(IS_STANDARD_POINTER)
 

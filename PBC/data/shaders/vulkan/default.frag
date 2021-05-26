@@ -69,10 +69,33 @@ float filterPCF(vec4 sc)
 	return shadowFactor / count;
 }
 
+float ShadowCalc(vec4 shadowCoord)
+{
+	vec3 projCoords = shadowCoord.xyz / shadowCoord.w;
+	//projCoords = projCoords * 0.5 + 0.5; 
+	float closestDepth = texture(texture_shadowpass, projCoords.xy).r;   
+	float currentDepth = projCoords.z;  
+
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(texture_shadowpass, 0);
+	for(int x = -1; x <= 1; ++x)
+	{
+	    for(int y = -1; y <= 1; ++y)
+	    {
+	        float pcfDepth = texture(texture_shadowpass, projCoords.xy + vec2(x, y) * texelSize).r; 
+	        shadow += currentDepth < pcfDepth ? 1.0 : 0.0;        
+	    }    
+	}
+	shadow /= 9.0;
+
+	return shadow;
+}
+
 void main() 
 {
 	float shadow = filterPCF(inShadowCoord / inShadowCoord.w);
 	//float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
+	//float shadow = ShadowCalc(inShadowCoord);
 
 	if(textureLookup.diffuse == 1)
 	{

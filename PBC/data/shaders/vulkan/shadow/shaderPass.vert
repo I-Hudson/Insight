@@ -20,5 +20,5 @@ layout (location = 0) out vec4 outPos;
 
 void main() 
 {
-	gl_Position = ubo.depthMVP * modelUBO.model * vec4(inPos.xyz, 1.0);
+	gl_Position = ubo.depthMVP * vec4(inPos.xyz, 1.0);
 }

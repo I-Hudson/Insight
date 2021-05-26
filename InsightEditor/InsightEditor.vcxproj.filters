@@ -72,6 +72,9 @@
     <ClInclude Include="inc\Editor\Windows\AssetWindow.h">
       <Filter>inc\Editor\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Editor\Windows\SceneWindow.h">
+      <Filter>inc\Editor\Windows</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Module\EditorModule.h">
       <Filter>inc\Module</Filter>
     </ClInclude>
@@ -99,6 +102,9 @@
       <Filter>src\Editor</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\Windows\AssetWindow.cpp">
+      <Filter>src\Editor\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Windows\SceneWindow.cpp">
       <Filter>src\Editor\Windows</Filter>
     </ClCompile>
     <ClCompile Include="src\Module\EditorModule.cpp">

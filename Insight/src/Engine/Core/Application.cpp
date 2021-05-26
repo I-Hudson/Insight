@@ -45,7 +45,6 @@ Application::Application()
 	new ProfilerMemory();
 #endif
 
-
 	Config::GetInstance().ParseInFolder("./data/config");
 
 	m_fileSystem = ::New<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");

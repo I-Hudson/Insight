@@ -10,6 +10,7 @@
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
+#include "ImGuizmo.h"
 #include "IconsFontAwesome5.h"
 
 #include "Engine/Input/Input.h"
@@ -63,6 +64,7 @@ namespace Insight::GraphicsAPI::Vulkan
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+			ImGuizmo::BeginFrame();
 		}
 #endif
 	}

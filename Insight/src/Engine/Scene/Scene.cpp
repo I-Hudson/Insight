@@ -152,6 +152,14 @@ void Scene::Deserialize(const std::string& file)
 	*/
 }
 
+void Scene::OnBeginPlay()
+{
+}
+
+void Scene::OnEndPlay()
+{
+}
+
 void Scene::OnUpdate(const float& deltaTime)
 {
 	IS_PROFILE_FUNCTION();
@@ -162,11 +170,6 @@ void Scene::OnUpdate(const float& deltaTime)
 	}
 
 	m_componentManager.Update(deltaTime);
-}
-
-void Scene::OnViewportResize(uint32_t width, uint32_t height)
-{
-
 }
 
 void Scene::Clean()

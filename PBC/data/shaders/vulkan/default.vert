@@ -10,7 +10,7 @@ layout (set = 0, binding = 0) uniform UBO
 {
 	mat4 PVMatrix;
 	mat4 lightSpace;
-	vec3 lightPos;
+	vec3 lightDir;
 } ubo;
 
 layout (set = 0, binding = 1) uniform MODELUBO //#dynamic
@@ -40,7 +40,7 @@ void main()
 	outColor = inColor.xyz;
 	outUV = inUV;
 
-	outLightVec = normalize(ubo.lightPos.xyz - inPos);
+	outLightVec = ubo.lightDir;
     outViewVec = -outPos.xyz;	
 	outShadowCoord = (biasMat * ubo.lightSpace * modelUBO.model) * vec4(inPos.xyz, 1);
 }

@@ -19,8 +19,6 @@
 
 #include "Engine/Instrumentor/Instrumentor.h"
 
-#include "../vendor/imgui/imgui.h"
-
 #include "Engine/Graphics/Model/Model.h"
 #include "Engine/Model/Model.h"
 #include "Engine/Model/Mesh.h"
@@ -33,6 +31,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/DirectionalLightComponent.h"
 
 // --Entry Point--------------------------
 #include "Engine/Core/EntryPoint.h"

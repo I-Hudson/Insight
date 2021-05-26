@@ -5,6 +5,7 @@
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/DirectionalLightComponent.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
 #include "Engine/Config/Config.h"
 #include "Engine/Scene/Scene.h"
@@ -28,11 +29,39 @@
 #include "stb_image.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "imgui.h"
-#include "backends/imgui_impl_vulkan.h"
+
+// TODO: Remove this.
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+//
 
 namespace Module
 {
+	glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
+	{
+		glm::vec3 const f(vec);
+		glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
+		glm::vec3 const u(cross(f, s));
+
+		glm::mat4 Result(1);
+		Result[0][0] = s.x;
+		Result[1][0] = s.y;
+		Result[2][0] = s.z;
+		Result[0][1] = u.x;
+		Result[1][1] = u.y;
+		Result[2][1] = u.z;
+		Result[0][2] = -f.x;
+		Result[1][2] = -f.y;
+		Result[2][2] = -f.z;
+		Result[3][0] = -glm::dot(s, position);
+		Result[3][1] = -glm::dot(u, position);
+		Result[3][2] = glm::dot(f, position);
+		return Result;
+	}
+
 	CameraComponent* GraphicsModule::m_mainCamera;
+#ifdef IS_EDITOR
+	CameraComponent* GraphicsModule::m_editorCamera;
+#endif
 	std::vector<MeshComponent*> GraphicsModule::m_meshs;
 
 	GraphicsModule::GraphicsModule()
@@ -137,10 +166,6 @@ namespace Module
 		::Delete(GPUDevice::Instance());
 	}
 
-	glm::mat4 projDepthMatrix;
-	glm::mat4 viewDepthMatrix;
-	glm::vec3 lightPos = glm::vec3();
-	float timer = 0.0f;
 	u32 imageIndex = 0;
 	bool shadowMapFilter = false;
 
@@ -150,239 +175,27 @@ namespace Module
 		{
 			IS_PROFILE_SCOPE("RenderGraph: Create");
 
+			if (!Scene::ActiveScene()->IsPlaying())
+			{
+#ifdef IS_EDITOR
+				m_mainCamera = m_editorCamera;
+#endif
+			}
+
 			using namespace Insight;
 			Graphics::RenderGraph::Instance()->Reset();
 
-			timer += deltaTime * 0.05f;
-			projDepthMatrix = glm::perspective(45.f, 1.0f, 1.0f, 96.0f);
-			//projDepthMatrix = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 1.0f, 96.0f);
-			lightPos.x = cos(glm::radians(timer * 360.0f)) * 25.0f;
-			if (IsVulkan())
-			{
-				lightPos.y = -50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
-			}
-			else
-			{
-				lightPos.y = 50.0f + sin(glm::radians(timer * 360.0f)) * 20.0f;
-			}
-			lightPos.z = 25.0f + sin(glm::radians(timer * 360.0f)) * 5.0f;
-			viewDepthMatrix = glm::lookAt(lightPos, glm::vec3(0), glm::vec3(0, 1, 0));
+			ShadowMap();
+			Deffered();
 
-			Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
-			shadowPassCascadeMap.Width = 2048;
-			shadowPassCascadeMap.Height = 2048;
-			shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
-			shadowPassCascadeMap.Format = PixelFormat::D32_Float;
-			//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
-			shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
-			shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
-			shadowPassCascadeMap.SamplerDesc.AddressModeW = SamplerAddressMode::Clamp_To_Edge;
-			shadowPassCascadeMap.SamplerDesc.MaxLoad = 1.0f;
-
-			auto& shadowPass = Graphics::RenderGraph::Instance()->AddPass("shadowPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			shadowPass.SetDepthStencilOutput("shaderPass_cacadeMap", shadowPassCascadeMap);
-			shadowPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
-			shadowPass.SetClearColour(glm::vec4(0, 0, 0, 0));
-			shadowPass.SetWindowRect(Maths::Rect(0, 0, shadowPassCascadeMap.Width, shadowPassCascadeMap.Height));
-			shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
-			shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
-			{
-				cmdBuffer->SetDepthBias(1.25f, 0.0f, 1.75f);
-
-				struct UBO
-				{
-					glm::mat4 DepthMVP;
-				};
-				UBO depthMVP;
-				depthMVP.DepthMVP = projDepthMatrix * viewDepthMatrix;
-				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
-
-				Graphics::GPUShader* defaultShader = nullptr;
-				Utils::Hasher hasher;
-				hasher.Hash("./data/shaders/vulkan/shaderPass.vert");
-				if (Graphics::GPUShaderCache::Instance()->GetItem(hasher.GetHash(), defaultShader))
-				{
-					IS_PROFILE_SCOPE("Default shader create");
-					defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/shaderPass.vert", Graphics::ShaderStageInput::FilePath);
-					//defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
-					defaultShader->Compile();
-				}
-
-				Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
-				{
-					IS_PROFILE_SCOPE("Default pipeline create and bind");
-					pass.AddLifeTimeObject(defaultPipeline);
-					defaultPipeline->SetShader(defaultShader);
-					Graphics::GPUPipelineDesc pipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise);
-					pipelineDesc.DepthBaisEnabled = true;
-					defaultPipeline->Init(pass.GetGraphPass(), pipelineDesc);
-					cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
-				}
-
-				Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
-				{
-					IS_PROFILE_SCOPE("Draw mesh vertices");
-					for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
-					{
-						if (mesh.GetMesh() != nullptr)
-						{
-							glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
-							Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
-							{
-								IS_PROFILE_SCOPE("Build per mesh descriptor set");
-								builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-									->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
-							}
-							Graphics::GPUDescriptorSet* sets[] = { vertexSet };
-							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
-
-							for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
-							{
-								Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
-
-								u32 offsets[] = { 0 };
-								Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
-								cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-								cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-								cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
-							}
-						}
-					}
-				}
-				::Delete(vertexSet);
-			});
-
-
-			Graphics::ImageAttachmentInfo mainPassOutput = { };
-			mainPassOutput.Width = Window::GetWidth();
-			mainPassOutput.Height = Window::GetHeight();
-			mainPassOutput.Name = "mainPass-Color";
-			mainPassOutput.Format = PixelFormat::R8G8B8A8_UNorm;
-
-			// Add all my passes at runtime.
-			auto& mainPass = Graphics::RenderGraph::Instance()->AddPass("MainPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
-			mainPass.AddColorOutput("color", mainPassOutput);
-			mainPass.AddColorOutput("normal", mainPassOutput);
-			mainPass.AddColorOutput("position", mainPassOutput);
-			mainPass.SetDepthStencilInput("shaderPass_cacadeMap");
-			mainPass.SetDepthStencilOutput("mainPassDepthAttachment", Graphics::ImageAttachmentInfo::DepthAttachment());
-			mainPass.AddSubpassDependencies(Graphics::SubpassDependency::MainDeferedPass());
-			mainPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
-			mainPass.SetClearColour(glm::vec4(0, 0, 0, 1));
-			mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
-			{
-				IS_PROFILE_SCOPE("MainPassRenderFunc");
-				struct UBO
-				{
-					glm::mat4 PVMatrix;
-					glm::mat4 LightSpace;
-					glm::vec3 LightPos;
-				};
-
-				// bind material
-				// bind buffers
-				// Draw mesh, 
-
-				UBO ubo =
-				{
-					glm::mat4(1.0f),
-					glm::mat4(1.0f),
-					glm::vec3(5.0f, 5.0f, 5.0f)
-				};
-				ubo.LightSpace = projDepthMatrix * viewDepthMatrix;
-				ubo.LightPos = lightPos;
-				ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
-				Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
-
-				Graphics::GPUShader* defaultShader = nullptr;
-				if (Graphics::GPUShaderCache::Instance()->GetItem(0, defaultShader))
-				{
-					IS_PROFILE_SCOPE("Default shader create");
-					defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
-					defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
-					defaultShader->Compile();
-				}
-
-				Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
-				{
-					IS_PROFILE_SCOPE("Default pipeline create and bind");
-					pass.AddLifeTimeObject(defaultPipeline);
-					defaultPipeline->SetShader(defaultShader);
-					defaultPipeline->Init(pass.GetGraphPass(), Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
-					cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
-				}
-
-				Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
-				Graphics::GPUDescriptorSet* fragSet = Graphics::GPUDescriptorSet::New();
-
-				{
-					IS_PROFILE_SCOPE("Upload mesh vertices");
-					for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
-					{
-						if (mesh.GetMesh() != nullptr)
-						{
-							glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
-							Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
-							Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
-							const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
-
-							{
-								IS_PROFILE_SCOPE("Build per mesh descriptor set");
-								builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-									->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-									->BindImage(2, shadowPassTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(vertexSet);
-							}
-							Graphics::GPUDescriptorSet* sets[] = { vertexSet };
-							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
-
-							for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
-							{
-								int textureDiffuse = 1;
-								Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
-
-								Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
-								Graphics::GPUImage* diffuseTexture = nullptr;
-								std::string diffuseTextureString = subMesh.GetTexture("texture_diffuse");
-								if (diffuseTextureString.empty())
-								{
-									diffuseTextureString = "./data/embed2.jpg";
-								}
-								Utils::Hasher diffuseTextureHasher;
-								diffuseTextureHasher.Hash(diffuseTextureString);
-								if (Graphics::GPUImageCache::Instance()->GetItem(diffuseTextureHasher.GetHash(), diffuseTexture))
-								{
-									diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
-								}
-
-								Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
-								pass.AddLifeTimeObject(diffuseTextureView);
-								diffuseTextureView->Init(diffuseTexture);
-
-								{
-									IS_PROFILE_SCOPE("Build per submesh descriptor set");
-									builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-										->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
-								}
-								Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
-								cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
-
-								u32 offsets[] = { 0 };
-								Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
-								cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-								cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-
-								cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
-							}
-						}
-					}
-				}
-				::Delete(vertexSet);
-				::Delete(fragSet);
-			});
-
+			// If we are in editor then set a blank image as the output.
+#ifdef IS_EDITOR
+			Editor();
+			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("editorPass_Output");			
+#else
+			// We are in a game build .exe. the backbuffer source should a an image which has had processing on it.
 			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("color");
+#endif
 			++imageIndex;
 		}
 
@@ -413,6 +226,13 @@ namespace Module
 		m_mainCamera = camera;
 	}
 
+#ifdef IS_EDITOR
+	void GraphicsModule::SetEditorCamera(CameraComponent* camera)
+	{
+		m_editorCamera = camera;
+	}
+#endif
+
 	const bool GraphicsModule::HasMainCamera()
 	{
 		return m_mainCamera != nullptr;
@@ -426,5 +246,247 @@ namespace Module
 	bool GraphicsModule::IsVulkan()
 	{
 		return GetAPI() == GraphicsRendererAPI::Vulkan;
+	}
+
+	void GraphicsModule::ShadowMap()
+	{
+		using namespace Insight;
+
+		Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
+		shadowPassCascadeMap.Width = 2048;
+		shadowPassCascadeMap.Height = 2048;
+		shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
+		shadowPassCascadeMap.Format = PixelFormat::D16_UNorm;
+		//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
+		shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
+		shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
+		shadowPassCascadeMap.SamplerDesc.AddressModeW = SamplerAddressMode::Clamp_To_Edge;
+		shadowPassCascadeMap.SamplerDesc.MaxLoad = 1.0f;
+		shadowPassCascadeMap.AutoSizeToWindow = false;
+
+		auto& shadowPass = Graphics::RenderGraph::Instance()->AddPass("shadowPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		shadowPass.SetDepthStencilOutput("shaderPass_cacadeMap", shadowPassCascadeMap);
+		shadowPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
+		shadowPass.SetClearColour(glm::vec4(0, 0, 0, 0));
+		shadowPass.SetWindowRect(Maths::Rect(0, 0, shadowPassCascadeMap.Width, shadowPassCascadeMap.Height));
+		shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
+		shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
+		{
+			cmdBuffer->SetDepthBias(1.25f, 0.0f, 1.75f);
+
+			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
+			DirectionalLightComponentData& data = lightCom.GetComponentData<DirectionalLightComponentData>();
+			struct UBO
+			{
+				glm::mat4 DepthMVP;
+			};
+			UBO depthMVP;
+			depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
+
+			Graphics::GPUShader* defaultShader = nullptr;
+			Utils::Hasher hasher;
+			hasher.Hash("./data/shaders/vulkan/shadow/shaderPass.vert");
+			if (Graphics::GPUShaderCache::Instance()->GetItem(hasher.GetHash(), defaultShader))
+			{
+				IS_PROFILE_SCOPE("Default shader create");
+				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/shadow/shaderPass.vert", Graphics::ShaderStageInput::FilePath);
+				defaultShader->Compile();
+			}
+
+			Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
+			{
+				IS_PROFILE_SCOPE("Default pipeline create and bind");
+				pass.AddLifeTimeObject(defaultPipeline);
+				defaultPipeline->SetShader(defaultShader);
+				Graphics::GPUPipelineDesc pipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Front, FrontFace::Counter_Clockwise);
+				pipelineDesc.DepthBaisEnabled = true;
+				defaultPipeline->Init(pass.GetGraphPass(), pipelineDesc);
+				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
+			}
+
+			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
+			{
+				IS_PROFILE_SCOPE("Draw mesh vertices");
+				for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
+				{
+					if (mesh.GetMesh() != nullptr)
+					{
+						glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
+						Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
+						{
+							IS_PROFILE_SCOPE("Build per mesh descriptor set");
+							builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+								->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
+						}
+						Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+
+						for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
+						{
+							Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
+
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
+							cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
+						}
+					}
+				}
+			}
+			::Delete(vertexSet);
+		});
+	}
+	
+	void GraphicsModule::Deffered()
+	{
+		using namespace Insight;
+
+		Graphics::ImageAttachmentInfo mainPassOutput = { };
+		mainPassOutput.Name = "mainPass-Color";
+		mainPassOutput.Format = PixelFormat::R8G8B8A8_UNorm;
+
+		// Add all my passes at runtime.
+		auto& mainPass = Graphics::RenderGraph::Instance()->AddPass("MainPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		mainPass.AddColorOutput("color", mainPassOutput);
+		mainPass.AddColorOutput("normal", mainPassOutput);
+		mainPass.AddColorOutput("position", mainPassOutput);
+		mainPass.SetDepthStencilInput("shaderPass_cacadeMap");
+		mainPass.SetDepthStencilOutput("mainPassDepthAttachment", Graphics::ImageAttachmentInfo::DepthAttachment());
+		mainPass.AddSubpassDependencies(Graphics::SubpassDependency::MainDeferedPass());
+		mainPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
+		mainPass.SetClearColour(glm::vec4(0, 0, 0, 1));
+		mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
+		{
+			IS_PROFILE_SCOPE("MainPassRenderFunc");
+			struct UBO
+			{
+				glm::mat4 PVMatrix;
+				glm::mat4 LightSpace;
+				glm::vec3 LightDir;
+			};
+
+			// bind material
+			// bind buffers
+			// Draw mesh, 
+
+			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
+			DirectionalLightComponentData& data = lightCom.GetComponentData<DirectionalLightComponentData>();
+
+			UBO ubo =
+			{
+				glm::mat4(1.0f),
+				glm::mat4(1.0f),
+				glm::vec3(5.0f, 5.0f, 5.0f)
+			};
+			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			ubo.LightDir = -data.Direction;
+			ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
+			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
+
+			Graphics::GPUShader* defaultShader = nullptr;
+			if (Graphics::GPUShaderCache::Instance()->GetItem(0, defaultShader))
+			{
+				IS_PROFILE_SCOPE("Default shader create");
+				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
+				defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
+				defaultShader->Compile();
+			}
+
+			Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
+			{
+				IS_PROFILE_SCOPE("Default pipeline create and bind");
+				pass.AddLifeTimeObject(defaultPipeline);
+				defaultPipeline->SetShader(defaultShader);
+				defaultPipeline->Init(pass.GetGraphPass(), Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
+				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
+			}
+
+			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
+			Graphics::GPUDescriptorSet* fragSet = Graphics::GPUDescriptorSet::New();
+
+			{
+				IS_PROFILE_SCOPE("Upload mesh vertices");
+				for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
+				{
+					if (mesh.GetMesh() != nullptr)
+					{
+						glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
+						Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
+						Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
+						const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
+
+						{
+							IS_PROFILE_SCOPE("Build per mesh descriptor set");
+							builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+								->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+								->BindImage(2, shadowPassTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(vertexSet);
+						}
+						Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+
+						for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
+						{
+							int textureDiffuse = 1;
+							Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
+
+							Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
+							Graphics::GPUImage* diffuseTexture = nullptr;
+							std::string diffuseTextureString = subMesh.GetTexture("texture_diffuse");
+							if (diffuseTextureString.empty())
+							{
+								diffuseTextureString = "./data/embed2.jpg";
+							}
+							Utils::Hasher diffuseTextureHasher;
+							diffuseTextureHasher.Hash(diffuseTextureString);
+							if (Graphics::GPUImageCache::Instance()->GetItem(diffuseTextureHasher.GetHash(), diffuseTexture))
+							{
+								diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
+							}
+
+							Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
+							pass.AddLifeTimeObject(diffuseTextureView);
+							diffuseTextureView->Init(diffuseTexture);
+
+							{
+								IS_PROFILE_SCOPE("Build per submesh descriptor set");
+								builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
+									->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
+							}
+							Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
+							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
+
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
+
+							cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
+						}
+					}
+				}
+			}
+			::Delete(vertexSet);
+			::Delete(fragSet);
+		});
+	}
+
+	void GraphicsModule::Editor()
+	{
+		using namespace Insight;
+
+		Graphics::ImageAttachmentInfo passOutput = { };
+		passOutput.Width = Window::GetWidth();
+		passOutput.Height = Window::GetHeight();
+		passOutput.Name = "editorPass_Output-Color";
+		passOutput.Format = PixelFormat::R8G8B8A8_UNorm;
+
+		// Add all my passes at runtime.
+		auto& pass = Graphics::RenderGraph::Instance()->AddPass("MainPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		pass.AddColorOutput("editorPass_Output", passOutput);
+		pass.SetClearColour(glm::vec4(0.15f, 0.15f, 0.15f, 1));
 	}
 }

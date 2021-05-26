@@ -16,6 +16,9 @@
 #include "Engine/Graphics/GPUCommandBuffer.h"
 #include "Engine/Graphics/GPUDescriptorSet.h"
 
+#include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
+#include "backends/imgui_impl_vulkan.h"
+
 extern VkFormat PixelFormatToVkFormat[static_cast<i32>(PixelFormat::MAX)];
 extern PixelFormat VkFormatToPixelFormat[static_cast<i32>(PixelFormat::MAX)];
 //extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
@@ -512,5 +515,23 @@ namespace
 		if (flags & (u32)Access::Memory_Read)						{ vFlags |= VK_ACCESS_MEMORY_READ_BIT; }
 		if (flags & (u32)Access::Memory_Write)						{ vFlags |= VK_ACCESS_MEMORY_WRITE_BIT; }
 		return vFlags;
+	}
+
+	std::unordered_map<u64, void*> imguiVulkanImages;
+	void* AddImageVulkan(Insight::Graphics::GPUImage* image, Insight::Graphics::GPUImageView* imageView)
+	{
+		if (imguiVulkanImages.find((u64)image) != imguiVulkanImages.end())
+		{
+			return imguiVulkanImages.at((u64)image);
+		}
+
+		Insight::GraphicsAPI::Vulkan::GPUImageVulkan* imageV = static_cast<Insight::GraphicsAPI::Vulkan::GPUImageVulkan*>(image);
+		Insight::GraphicsAPI::Vulkan::GPUImageViewVulkan* imageViewV = static_cast<Insight::GraphicsAPI::Vulkan::GPUImageViewVulkan*>(imageView);
+		Insight::Graphics::GPUSampler* sampler = nullptr;
+		Insight::Graphics::GPUSamplerDesc samplerDesc = imageV->GetDesc().Sampler;
+		ASSERT(!Insight::Graphics::GPUSamplerCache::Instance()->GetItem(samplerDesc.Hash(), sampler));
+		Insight::GraphicsAPI::Vulkan::GPUSamplerVulkan* samplerV = static_cast<Insight::GraphicsAPI::Vulkan::GPUSamplerVulkan*>(sampler);
+		imguiVulkanImages.emplace((u64)image, ImGui_ImplVulkan_AddTexture(samplerV->GetSampler(), imageViewV->GetImageView(), ToVulkanImageLayout(imageV->GetDesc().FinalLayout)));
+		return imguiVulkanImages.at((u64)image);
 	}
 }

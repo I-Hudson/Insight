@@ -6,47 +6,47 @@
 #include "imgui_internal.h"
 #include "IconsFontAwesome5.h"
 
-	namespace Module
-	{
-		class EditorModule;
-	}
+namespace Insight::Module
+{
+	class EditorModule;
+}
 
-	namespace Editor
+namespace Insight::Editor
+{
+	class EditorWindow
 	{
-		class EditorWindow
+	public:
+		EditorWindow() = delete;
+		EditorWindow(const Module::EditorModule* editorModule) : m_editorModule(editorModule) {}
+		virtual ~EditorWindow() {}
+
+		virtual void Update(const float& deltaTime) = 0;
+
+		const bool IsMouseInBounds()
 		{
-		public:
-			EditorWindow() = delete;
-			EditorWindow(const Module::EditorModule* editorModule) : m_editorModule(editorModule) {}
-			virtual ~EditorWindow() {}
+			float mousePosX, mousePosY;
+			Input::GetMousePosition(&mousePosX, &mousePosY);
 
-			virtual void Update(const float& deltaTime) = 0;
-
-			const bool IsMouseInBounds()
+			auto imguiWindow = ImGui::GetCurrentWindowRead();
+			if (imguiWindow)
 			{
-				float mousePosX, mousePosY;
-				Input::GetMousePosition(&mousePosX, &mousePosY);
-
-				auto imguiWindow = ImGui::GetCurrentWindowRead();
-				if (imguiWindow)
-				{
-					auto windowPos = imguiWindow->Pos;
-					auto windowSize = imguiWindow->Size;
-					return (windowPos.x - (windowSize.x * 0.5f)) <= mousePosX && (windowPos.x + (windowSize.x * 0.5f)) >= mousePosX &&
-						(windowPos.y - (windowSize.y * 0.5f)) <= mousePosY && (windowPos.y + (windowSize.y * 0.5f)) >= mousePosY;
-				}
-				return false;
+				auto windowPos = imguiWindow->Pos;
+				auto windowSize = imguiWindow->Size;
+				return (windowPos.x - (windowSize.x * 0.5f)) <= mousePosX && (windowPos.x + (windowSize.x * 0.5f)) >= mousePosX &&
+					(windowPos.y - (windowSize.y * 0.5f)) <= mousePosY && (windowPos.y + (windowSize.y * 0.5f)) >= mousePosY;
 			}
+			return false;
+		}
 
-			const std::string& GetWindowName() { return m_windowName; }
+		const std::string& GetWindowName() { return m_windowName; }
 
-		protected:
-			const Module::EditorModule* m_editorModule;
-			std::string m_windowName;
+	protected:
+		const Module::EditorModule* m_editorModule;
+		std::string m_windowName;
 
 #define SET_PANEL_NAME(x) m_windowName = typeid(x).name();
-		};
-	}
+	};
+}
 #define ImGui_STORE_TEMP(type, ptr, label, imguiWidget) { type tempV; \
 														  tempV = *ptr; \
 														  if(imguiWidget(label, &tempV)) \

@@ -291,10 +291,19 @@
     <ClInclude Include="inc\Engine\Component\Component.h">
       <Filter>inc\Engine\Component</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Component\DirectionalLightComponent.h">
+      <Filter>inc\Engine\Component</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Component\Generated\Component_reflect_generated.h">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Component\Generated\DirectionalLightComponent_reflect_generated.h">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.h">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\Component\Generated\TransformComponent_reflect_generated.h">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Component\MeshComponent.h">
@@ -2063,7 +2072,13 @@
     <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClCompile>
+    <ClCompile Include="inc\Engine\Component\Generated\DirectionalLightComponent_reflect_generated.cpp">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClCompile>
     <ClCompile Include="inc\Engine\Component\Generated\MeshComponent_reflect_generated.cpp">
+      <Filter>inc\Engine\Component\Generated</Filter>
+    </ClCompile>
+    <ClCompile Include="inc\Engine\Component\Generated\TransformComponent_reflect_generated.cpp">
       <Filter>inc\Engine\Component\Generated</Filter>
     </ClCompile>
     <ClCompile Include="inc\Engine\Entity\Generated\Entity_reflect_generated.cpp">
@@ -2073,6 +2088,9 @@
       <Filter>src\Engine\Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Component\Component.cpp">
+      <Filter>src\Engine\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Component\DirectionalLightComponent.cpp">
       <Filter>src\Engine\Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Component\MeshComponent.cpp">
