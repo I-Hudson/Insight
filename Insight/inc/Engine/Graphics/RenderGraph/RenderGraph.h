@@ -15,6 +15,8 @@ namespace Insight::Graphics
 	class GPUImage;
 	class GPUSwapchain;
 
+	using RGOnGraphBuiltFunc = std::function<void()>;
+
 	struct ResourceDimensions
 	{
 		PixelFormat Format = PixelFormat::Unknown;
@@ -167,11 +169,17 @@ namespace Insight::Graphics
 
 		RenderPass& AddPass(const std::string& name, RenderGraphQueueFlags queue);
 		RenderPass& GetPass(const std::string& name);
+		bool HasResource(const std::string& name);
+
+		void SetbackBufferSource(const std::string& name);
 
 		void SetSwapchainDimensions(const ResourceDimensions& dimensions) { m_swapchainDimensions = dimensions; }
-		void SetbackBufferSource(const std::string& name);
 		const std::string& GetBackbufferSourceName() const { return m_backBufferSource; }
+		RenderGraphResource& GetBackbufferSource() { return m_resources.at(m_resourceToIndex.at(m_backBufferSource)); }
 		const u32& GetFrameIndex() const { return m_frameIndex; }
+
+		GPUImage* GetPhysicalImage(u32 index) { return m_physicalImages.at(index); }
+		GPUImageView* GetPhysicalImageView(u32 index) { return m_physicalImageViews.at(index); }
 
 		/// <summary>
 		/// Build the graph and create any resources which are needed. This should 
@@ -194,6 +202,9 @@ namespace Insight::Graphics
 		/// Log the render graph to the console. For Debugging.
 		/// </summary>
 		void LogToConsole();
+
+		void RegisterOnGraphBuiltFunc(std::string name, RGOnGraphBuiltFunc func);
+		void UnregisterOnGraphBuiltFunc(std::string name);
 
 	protected:
 		ResourceDimensions GetResourceDimensions(const RenderGraphResource& resource) const;
@@ -326,15 +337,18 @@ namespace Insight::Graphics
 		public:
 			const FrameSubmision& GetFrame(u32 index) const { return m_frames.at(index); }
 			const FrameSubmision& GetCurrentFrame() const { return m_frames.at(m_frameIndex); }
+			const u32& GetCurrentFrameIndex() const { return m_frameIndex; }
 			const SwapchainSubmision& GetCurrentSwapchainSubmision() const { return m_swapchainSubmision.at(m_swapchainImageIndex); }
+			const u32& GetFrameCount() const { return c_MaxFrameCount; }
 		private:
 
 		std::vector<FrameSubmision> m_frames;
 		u32 m_frameIndex;
 		u32 m_swapchainImageIndex = 0;
-		const u32 c_MaxFrameCount = 1;
+		const u32 c_MaxFrameCount = 3;
 		glm::ivec2 m_renderGraphRenderSize;
 
+		std::unordered_map<std::string, RGOnGraphBuiltFunc> m_onGraphBuiltFuncs;
 		std::unordered_map<std::string, std::function<void()>> m_queuedFuncs;
 		GPUSwapchain* m_swapchain;
 

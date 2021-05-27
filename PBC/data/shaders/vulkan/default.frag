@@ -106,9 +106,6 @@ void main()
 		outColor = vec4(1, 1, 1, 1);
 	}
 
-	outNormal = vec4(inNormal, 1);
-	outPos = vec4(inColor, 1);
-
 	vec3 N = normalize(inNormal);
 	vec3 L = normalize(inLightVec);
 	vec3 V = normalize(inViewVec);
@@ -116,4 +113,6 @@ void main()
 	vec3 diffuse = max(dot(N, L), ambient) * inColor;
 
 	outColor = vec4(diffuse * shadow, 1.0);
+	outNormal = vec4(inNormal, 1);
+	outPos = vec4(inPos, 1);
 }

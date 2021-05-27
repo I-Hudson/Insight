@@ -335,6 +335,15 @@ namespace Insight::Graphics
 			}
 		}
 
+		bool HasRenderFunc()
+		{
+			if (m_renderFunc) 
+			{
+				return true;
+			}
+			return false;
+		}
+
 	private:
 		/// <summary>
 		/// Owner graph for this render pass.

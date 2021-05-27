@@ -22,6 +22,8 @@ namespace Insight::Utils
 		}
 
 		const u64& GetHash() const { return m_hash; }
+		
+		void Clear() { m_hash = 0; }
 
 	private:
 		u64 m_hash;

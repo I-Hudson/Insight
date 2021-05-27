@@ -185,8 +185,13 @@ namespace Module
 			using namespace Insight;
 			Graphics::RenderGraph::Instance()->Reset();
 
+			GPUDevice::Instance()->BeginFrame();
+
 			ShadowMap();
 			Deffered();
+#ifdef IS_EDITOR
+			Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
+#endif
 
 			// If we are in editor then set a blank image as the output.
 #ifdef IS_EDITOR
@@ -199,16 +204,14 @@ namespace Module
 			++imageIndex;
 		}
 
-#ifdef IS_EDITOR
-		Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
-#endif
-
 		m_imguiRenderer->EndFrame();
 		m_imguiRenderer->Render();
 
 		Insight::Graphics::RenderGraph::Instance()->Build();
 		//Insight::Graphics::RenderGraph::Instance()->LogToConsole();
 		Insight::Graphics::RenderGraph::Instance()->Execute();
+
+		GPUDevice::Instance()->EndFrame();
 	}
 
 	void GraphicsModule::WaitForIdle()
@@ -253,10 +256,10 @@ namespace Module
 		using namespace Insight;
 
 		Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
-		shadowPassCascadeMap.Width = 2048;
-		shadowPassCascadeMap.Height = 2048;
+		shadowPassCascadeMap.Width = 2048 * 2;
+		shadowPassCascadeMap.Height = 2048 * 2;
 		shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
-		shadowPassCascadeMap.Format = PixelFormat::D16_UNorm;
+		shadowPassCascadeMap.Format = PixelFormat::D32_Float;
 		//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
 		shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
 		shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
@@ -272,6 +275,7 @@ namespace Module
 		shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
 		shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 		{
+			IS_PROFILE_SCOPE("Shadow Map");
 			cmdBuffer->SetDepthBias(1.25f, 0.0f, 1.75f);
 
 			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
@@ -294,14 +298,19 @@ namespace Module
 				defaultShader->Compile();
 			}
 
-			Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
+			Graphics::GPUPipeline* defaultPipeline = nullptr;
 			{
 				IS_PROFILE_SCOPE("Default pipeline create and bind");
-				pass.AddLifeTimeObject(defaultPipeline);
-				defaultPipeline->SetShader(defaultShader);
+				hasher.Clear();
+				hasher.Hash(defaultShader);
 				Graphics::GPUPipelineDesc pipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Front, FrontFace::Counter_Clockwise);
-				pipelineDesc.DepthBaisEnabled = true;
-				defaultPipeline->Init(pass.GetGraphPass(), pipelineDesc);
+				hasher.Hash(pipelineDesc.Hash());
+				if (Graphics::GPUPipelineCache::Instance()->GetItem(hasher.GetHash(), defaultPipeline))
+				{
+					defaultPipeline->SetShader(defaultShader);
+					pipelineDesc.DepthBaisEnabled = true;
+					defaultPipeline->Init(pass.GetGraphPass(), pipelineDesc);
+				}
 				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 			}
 
@@ -360,7 +369,7 @@ namespace Module
 		mainPass.SetClearColour(glm::vec4(0, 0, 0, 1));
 		mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
 		{
-			IS_PROFILE_SCOPE("MainPassRenderFunc");
+			IS_PROFILE_SCOPE("Main Pass");
 			struct UBO
 			{
 				glm::mat4 PVMatrix;
@@ -387,7 +396,10 @@ namespace Module
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;
-			if (Graphics::GPUShaderCache::Instance()->GetItem(0, defaultShader))
+			Utils::Hasher hasher;
+			hasher.Hash("./data/shaders/vulkan/default.vert");
+			hasher.Hash("./data/shaders/vulkan/default.frag");
+			if (Graphics::GPUShaderCache::Instance()->GetItem(hasher.GetHash(), defaultShader))
 			{
 				IS_PROFILE_SCOPE("Default shader create");
 				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
@@ -395,12 +407,18 @@ namespace Module
 				defaultShader->Compile();
 			}
 
-			Graphics::GPUPipeline* defaultPipeline = Graphics::GPUPipeline::New();
+			hasher.Clear();
+			hasher.Hash(defaultShader);
+			Graphics::GPUPipelineDesc defualtPipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise);
+			hasher.Hash(defualtPipelineDesc.Hash());
+			Graphics::GPUPipeline* defaultPipeline = nullptr;
 			{
 				IS_PROFILE_SCOPE("Default pipeline create and bind");
-				pass.AddLifeTimeObject(defaultPipeline);
-				defaultPipeline->SetShader(defaultShader);
-				defaultPipeline->Init(pass.GetGraphPass(), Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise));
+				if (Graphics::GPUPipelineCache::Instance()->GetItem(hasher.GetHash(), defaultPipeline))
+				{
+					defaultPipeline->SetShader(defaultShader);
+					defaultPipeline->Init(pass.GetGraphPass(), defualtPipelineDesc);
+				}
 				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 			}
 
@@ -474,6 +492,7 @@ namespace Module
 		});
 	}
 
+#ifdef IS_EDITOR
 	void GraphicsModule::Editor()
 	{
 		using namespace Insight;
@@ -485,8 +504,12 @@ namespace Module
 		passOutput.Format = PixelFormat::R8G8B8A8_UNorm;
 
 		// Add all my passes at runtime.
-		auto& pass = Graphics::RenderGraph::Instance()->AddPass("MainPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		auto& pass = Graphics::RenderGraph::Instance()->AddPass("EditorPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
 		pass.AddColorOutput("editorPass_Output", passOutput);
+		pass.AddColorInput("color");
+		pass.AddColorInput("normal");
+		pass.AddColorInput("position");
 		pass.SetClearColour(glm::vec4(0.15f, 0.15f, 0.15f, 1));
 	}
+#endif
 }

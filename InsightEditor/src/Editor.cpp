@@ -67,23 +67,23 @@ public:
 #endif
 
 		Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
-		dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 25, 25 });
+		dirLight.GetComponent<TransformComponent>().SetPosition({ 1000, 2000, 150 });
 		DirectionalLightComponent& lightCom = dirLight.AddComponent<DirectionalLightComponent>();
 		DirectionalLightComponentData& lightData = lightCom.GetComponentData<DirectionalLightComponentData>();
-		lightData.FOV = 15.0f;
+		lightData.FOV = 45.0f;
 		lightData.Direction = glm::normalize(glm::vec3(0,0,0) - dirLight.GetComponent<TransformComponent>().GetPostion());
 		lightData.NearPlane = 1.0f;
-		lightData.FarPlane = 96.f;
+		lightData.FarPlane = 4000.f;
 
-		for (size_t i = 0; i < 1; ++i)
+		for (size_t i = 0; i < 2; ++i)
 		{
-			Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/vulkanscene_shadow.gltf");
-			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
+			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/vulkanscene_shadow.gltf");
+			Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
 
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
 			meshComponent.SetModel(graphicsModel);
-			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 0, 0, 0 });
+			meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 10, 0, 0 });
 
 			Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
 			meshChild.SetParent(mesh.GetEntityID());

@@ -17,13 +17,15 @@ namespace Insight::Graphics
     class GPUImage;
     class GPUSampler;
     class GPUShader;
+    class GPUPipeline;
     class GPUFenceManager;
     class GPUSemaphoreManager;
 
-
+    using GPUDeviceSyncFuncs = std::queue<std::function<void()>>;
     using GPUSamplerCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUSampler*>;
     using GPUShaderCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUShader*>;
     using GPUImageCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUImage*>;
+    using GPUPipelineCache = Insight::Graphics::GPUItemCache<Insight::Graphics::GPUPipeline*>;
 }
 
 class GPUContext;
@@ -111,6 +113,7 @@ protected:
     Insight::Graphics::GPUSamplerCache m_samplerCache;
     Insight::Graphics::GPUShaderCache m_shaderCache;
     Insight::Graphics::GPUImageCache m_imageCache;
+    Insight::Graphics::GPUPipelineCache m_pipelineCache;
 
     struct DefaultData;
     DefaultData* m_defaultData;

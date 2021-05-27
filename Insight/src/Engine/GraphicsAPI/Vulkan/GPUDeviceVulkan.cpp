@@ -504,6 +504,10 @@ bool GPUDeviceVulkan::Init()
 	{
 		return Insight::Graphics::GPUImage::New();
 	});
+	m_pipelineCache.SetCreateFunc([]()
+	{
+		return Insight::Graphics::GPUPipeline::New();
+	});
 
 	ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &VmaAllocator));
 

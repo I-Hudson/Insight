@@ -56,6 +56,7 @@ namespace Module
 
 	private:
 		ImGuiRenderer* m_imguiRenderer;
+		void* m_shadowMap = nullptr;
 
 		static CameraComponent* m_mainCamera;
 #ifdef IS_EDITOR

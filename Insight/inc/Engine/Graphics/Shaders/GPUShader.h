@@ -3,6 +3,7 @@
 #include "Engine/Graphics/GPUResource.h"
 #include "Engine/Graphics/Enums.h"
 #include "spirv_cross/spirv_glsl.hpp"
+#include "Engine/Utils/Hasher.h"
 
 namespace Insight::Graphics
 {
@@ -180,6 +181,19 @@ namespace Insight::Graphics
 		bool DepthTest = true;
 		bool DepthBaisEnabled = false;
 		bool DepthClampEnabled = false;
+
+		u64 Hash()
+		{
+			Utils::Hasher hasher;
+			hasher.Hash(PrimitiveTopologyType);
+			hasher.Hash(PolygonMode);
+			hasher.Hash(CullMode);
+			hasher.Hash(FrontFace);
+			hasher.Hash(DepthTest);
+			hasher.Hash(DepthBaisEnabled);
+			hasher.Hash(DepthClampEnabled);
+			return hasher.GetHash();
+		}
 	};
 
 	class GPUPipeline : public GPUResource

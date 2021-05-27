@@ -81,8 +81,7 @@ namespace Insight::Graphics
 		EventManager::Bind(EventType::WindowResize, "RenderGraph", [this](const Event& e)
 		{
 			const WindowResizeEvent& event = static_cast<const WindowResizeEvent&>(e);
-			m_renderGraphRenderSize = glm::ivec2(event.m_width, event.m_height);
-			m_queuedFuncs.emplace("RebuildSwapchain", [this, event]()
+			m_queuedFuncs.emplace("RebuildSwapchain", [this]()
 			{
 				SwapchainRebuild();
 			});
@@ -143,6 +142,11 @@ namespace Insight::Graphics
 		return m_passes.at(it->second);
 	}
 
+	bool RenderGraph::HasResource(const std::string& name)
+	{
+		return m_resourceToIndex.find(name) != m_resourceToIndex.end();
+	}
+
 	void RenderGraph::SetbackBufferSource(const std::string& name)
 	{
 		m_backBufferSource = name;
@@ -169,6 +173,11 @@ namespace Insight::Graphics
 		ReorderRenderPasses(m_passStack);
 
 		BuildPhysical();
+
+		for (auto& func :  m_onGraphBuiltFuncs)
+		{
+			func.second();
+		}
 	}
 
 	void RenderGraph::Execute()
@@ -200,6 +209,7 @@ namespace Insight::Graphics
 			cmdBuffer->BeginRecord();
 			for (auto& passIndex : frame.PassStack)
 			{
+				IS_PROFILE_SCOPE("RenderGraph-PassRecord");
 				auto& pass = frame.Passes.at(passIndex);
 				auto* renderPass = frame.RenderPasses.at(pass.GetColorOutputHash());
 				pass.CallBeginRenderFunc(renderPass);
@@ -303,6 +313,16 @@ namespace Insight::Graphics
 			}
 			IS_CORE_INFO("	DepthStencil Output: Disabled");
 		}
+	}
+
+	void RenderGraph::RegisterOnGraphBuiltFunc(std::string name, RGOnGraphBuiltFunc func)
+	{
+		m_onGraphBuiltFuncs[std::move(name)] = func;
+	}
+
+	void RenderGraph::UnregisterOnGraphBuiltFunc(std::string name)
+	{
+		m_onGraphBuiltFuncs.erase(name);
 	}
 
 	RenderGraphResource& RenderGraph::GetTextureResouce(const std::string& name)
@@ -608,7 +628,7 @@ namespace Insight::Graphics
 
 	void RenderGraph::SwapchainRebuild()
 	{
-		while (m_renderGraphRenderSize.x == 0 || m_renderGraphRenderSize.y == 0)
+		while (Window::GetWidth == 0 || Window::GetHeight() == 0)
 		{
 			Window::WaitForEvents();
 		}
@@ -616,7 +636,10 @@ namespace Insight::Graphics
 		GPUDevice::Instance()->WaitForGPU();
 
 		auto& frame = m_frames.at(m_frameIndex);
-		frame.Reset();
+		if (frame.Initialised)
+		{
+			frame.Reset();
+		}
 
 		for (auto& res : m_resources)
 		{

@@ -31,7 +31,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		
 		bool mustBeMapped = false;
 		VmaAllocationCreateInfo vmaInfo = { };
-		vmaInfo.usage = ToVMAMemoryUsage(desc.Flags, mustBeMapped);
+		vmaInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;// ToVMAMemoryUsage(desc.Flags, mustBeMapped);
+		mustBeMapped = true;
 
 		ThrowIfFailed(vmaCreateBuffer(m_device->VmaAllocator, &info, &vmaInfo, &m_buffer, &m_vmaAllocation, &m_vmaAllocationInfo));
 		m_memoryUsage = m_desc.Size;
