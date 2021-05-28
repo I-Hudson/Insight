@@ -10,6 +10,11 @@ class Entity;
 class EntityManager;
 class ComponentManager;
 
+namespace Insight::Graphics
+{
+	struct RenderList;
+}
+
 REFLECT_STRUCT()
 struct ComponentData : REFLECT_BASE()
 {
@@ -28,6 +33,7 @@ public:
 	virtual ~Component();
 
 	virtual void OnUpdate(const float& a_deltaTime) { }
+	virtual void OnDraw(Insight::Graphics::RenderList* renderList) { }
 	bool IsValid() { return m_entityID != -1; }
 	Entity GetEntity();
 

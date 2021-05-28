@@ -5,6 +5,7 @@
 #include "Engine/Library/ModelLibrary.h"
 #include "Engine/Model/Model.h"
 #include "Engine/Graphics/Model/Model.h"
+#include "Engine/Graphics/RenderList.h"
 
 REGISTER_DEF_TYPE(MeshComponent);
 
@@ -107,4 +108,10 @@ void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& m
 
 void MeshComponent::OnUpdate(const float& a_deltaTime)
 {
+}
+
+void MeshComponent::OnDraw(Insight::Graphics::RenderList* renderList)
+{
+	using namespace Insight::Graphics;
+	m_mesh->Draw(renderList);
 }

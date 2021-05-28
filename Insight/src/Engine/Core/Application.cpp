@@ -112,12 +112,12 @@ void Application::Run()
 
 	while (m_isRunning)
 	{
+		++FrameCount;
+		++m_loopCount;
+
 		IS_PROFILE_FRAME("MainThread");
 
 		IS_PROFILE_SCOPE("UPDATE_LOOP");
-		{
-			IS_PROFILE_SCOPE("UPDATE_LOOP_START");
-		}
 #ifdef THREADS
 		if (m_updateThreadState == UpdateThreadState::SAME_FRMAE || m_updateThreadState == UpdateThreadState::ONE_FRAME_AHEAD)
 #endif
@@ -138,11 +138,9 @@ void Application::Run()
 			ImGuiRenderer::Instance()->NewFrame();
 #endif
 			m_moduleManager->Update(deltaTime);
-
 			Update(deltaTime);
 			Scene::ActiveScene()->OnUpdate(deltaTime);
 
-			++FrameCount;
 			Draw();
 #ifndef THREADS
 			m_graphicsModule->Update(deltaTime);
@@ -161,10 +159,6 @@ void Application::Run()
 #endif	
 			OnFrameEnd();
 			++m_frameCount;
-		}
-		++m_loopCount;
-		{
-			IS_PROFILE_SCOPE("UPDATE_LOOP_END");
 		}
 	};
 

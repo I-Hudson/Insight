@@ -26,6 +26,7 @@ public:
 	virtual ~MeshComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;
+	virtual void OnDraw(Insight::Graphics::RenderList* renderList) override;
 	//virtual void OnCreate() override;
 	//virtual void OnDestroy() override;
 

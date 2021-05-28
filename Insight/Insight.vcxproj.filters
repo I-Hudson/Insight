@@ -2067,6 +2067,9 @@
     <ClInclude Include="vendor\stb\stb_image_write.h">
       <Filter>vendor\stb</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\RenderList.h">
+      <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp">
@@ -2398,6 +2401,9 @@
     </ClCompile>
     <ClCompile Include="vendor\TinyXML2\tinyxml2.cpp">
       <Filter>vendor\TinyXML2</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine\Graphics\RenderList.cpp">
+      <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

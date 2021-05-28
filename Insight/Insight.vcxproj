@@ -241,6 +241,7 @@
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderGraph.h" />
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderPass.h" />
     <ClInclude Include="inc\Engine\Graphics\Renderer.h" />
+    <ClInclude Include="inc\Engine\Graphics\RenderList.h" />
     <ClInclude Include="inc\Engine\Graphics\ShaderCompliation.h" />
     <ClInclude Include="inc\Engine\Graphics\Shaders\GPUShader.h" />
     <ClInclude Include="inc\Engine\Graphics\SplashScreen.h" />
@@ -803,6 +804,7 @@
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderGraph.cpp" />
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderPass.cpp" />
     <ClCompile Include="src\Engine\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\Engine\Graphics\RenderList.cpp" />
     <ClCompile Include="src\Engine\Graphics\ShaderCompliation.cpp" />
     <ClCompile Include="src\Engine\Graphics\Shaders\GPUShader.cpp" />
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />

@@ -7,6 +7,11 @@
 
 const std::string DEFAULT_SAVE_PATH = "data/scenes/";
 
+namespace Insight::Graphics
+{
+	struct RenderList;
+}
+
 class IS_API Scene
 {
 public:
@@ -35,6 +40,7 @@ public:
 	void OnEndPlay();
 
 	void OnUpdate(const float& deltaTime);
+	void OnDraw(Insight::Graphics::RenderList* renderList);
 	void Clean();
 
 	bool IsPlaying() const { return m_isPlaying; }

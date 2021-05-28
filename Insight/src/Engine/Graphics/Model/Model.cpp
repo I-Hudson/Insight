@@ -1,6 +1,7 @@
 #include "ispch.h"
 #include "Engine/Graphics/Model/Model.h"
 #include "Engine/Graphics/Model/ModelLoading.h"
+#include "Engine/Graphics/RenderList.h"
 #include <filesystem>
 
 namespace Insight::Graphics
@@ -51,6 +52,17 @@ namespace Insight::Graphics
 		return itr->second;
 	}
 
+	void SubMesh::Draw(RenderList* drawList)
+	{
+		DrawCall drawCall;
+		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
+		drawCall.Geometry.IndexBuffer = m_indexBuffer;
+		drawCall.Draw.IndciesStart = 0;
+		drawCall.Draw.IndicesCount = GetVertexCount();
+		drawCall.Draw.IndciesStart = 0;
+		drawCall.Draw.IndicesCount = GetIndexCount();
+	}
+
 	void SubMesh::SetDimensions(glm::vec3 min, glm::vec3 max)
 	{
 
@@ -70,6 +82,14 @@ namespace Insight::Graphics
 
 	Mesh::~Mesh()
 	{ }
+
+	void Mesh::Draw(RenderList* drawList)
+	{
+		for (auto& mesh : m_subMeshes)
+		{
+			mesh.Draw(drawList);
+		}
+	}
 
 	void Mesh::Release()
 	{

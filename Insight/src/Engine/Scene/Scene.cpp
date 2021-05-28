@@ -4,9 +4,11 @@
 #include "Engine/Entity/Entity.h"
 #include "Engine/Component/Component.h"
 #include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/MeshComponent.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 #include "Engine/Instrumentor/Instrumentor.h"
+#include "Engine/Graphics/RenderList.h"
 
 #include "Engine/Serialization/File/SerializableFile.h"
 
@@ -170,6 +172,20 @@ void Scene::OnUpdate(const float& deltaTime)
 	}
 
 	m_componentManager.Update(deltaTime);
+}
+
+void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
+{
+	auto& meshComponents = m_componentManager.GetAllComponents<MeshComponent>();
+	for (auto& com : meshComponents)
+	{
+		if (!com.IsValid())
+		{
+			return;
+		}
+
+		com.OnDraw(renderList);
+	}
 }
 
 void Scene::Clean()

@@ -7,6 +7,7 @@
 namespace Insight::Graphics
 {
 	using MeshTextures = std::unordered_map<std::string, std::string>;
+	class RenderList;
 
 	namespace ModelLoading
 	{
@@ -43,6 +44,7 @@ namespace Insight::Graphics
 
 		std::string GetTexture(const std::string& textureId);
 
+		void Draw(RenderList* drawList);
 		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
@@ -83,6 +85,7 @@ namespace Insight::Graphics
 		const u32& GetVertexCount() const { return m_vertexCount; }
 		const u32& GetIndexCount() const { return m_indexCount; }
 
+		void Draw(RenderList* drawList);
 		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
