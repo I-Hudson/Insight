@@ -3,7 +3,6 @@
 
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Library/ModelLibrary.h"
-#include "Engine/Model/Model.h"
 #include "Engine/Graphics/Model/Model.h"
 #include "Engine/Graphics/RenderList.h"
 
@@ -69,28 +68,28 @@ void MeshComponent::SetMesh(Insight::Graphics::Mesh* mesh)
 	m_mesh = mesh;
 }
 
-void MeshComponent::SetMaterial(Material* material, int index)
-{
-	if (index < 0 || index > m_materials.size())
-	{
-		IS_CORE_ERROR("[MeshComponent::SetMaterial] Index is not within Materials bounds.");
-		return;
-	}
-	m_materials[index] = material;
-	m_materialBlockDatas[index] = MaterialBlockData();
-}
+//void MeshComponent::SetMaterial(Material* material, int index)
+//{
+//	if (index < 0 || index > m_materials.size())
+//	{
+//		IS_CORE_ERROR("[MeshComponent::SetMaterial] Index is not within Materials bounds.");
+//		return;
+//	}
+//	m_materials[index] = material;
+//	m_materialBlockDatas[index] = MaterialBlockData();
+//}
 
-void MeshComponent::SetMaterials(std::vector<Material*> materials)
-{
-	m_materials = materials;
-	m_materialBlockDatas.clear();
-	m_materialBlockDatas.resize(m_materials.size());
-}
+//void MeshComponent::SetMaterials(std::vector<Material*> materials)
+//{
+//	m_materials = materials;
+//	m_materialBlockDatas.clear();
+//	m_materialBlockDatas.resize(m_materials.size());
+//}
 
-void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas)
-{
-	m_materialBlockDatas = materialBlockDatas;
-}
+//void MeshComponent::SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas)
+//{
+//	m_materialBlockDatas = materialBlockDatas;
+//}
 
 //void MeshComponent::Serialize(Serialization::SerializableElement* element, bool force)
 //{

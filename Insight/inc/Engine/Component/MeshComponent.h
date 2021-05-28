@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Engine/Component/Component.h"
-#include "Engine/Model/Mesh.h"
-#include "Engine/Graphics/Material.h"
 
 #include "Reflect.h"
 #include "Generated/MeshComponent_reflect_generated.h"
@@ -34,12 +32,12 @@ public:
 	void SetMesh(Insight::Graphics::Mesh* mesh);
 	Insight::Graphics::Mesh* GetMesh() const { return m_mesh; }
 
-	void SetMaterial(Material* material, int index);
-	void SetMaterials(std::vector<Material*> materials);
+	//void SetMaterial(Material* material, int index);
+	//void SetMaterials(std::vector<Material*> materials);
 
-	std::vector<Material*>& GetMaterials() { return m_materials; }
-	std::vector<MaterialBlockData>& GetMaterialBlockData() { return m_materialBlockDatas; }
-	void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
+	//std::vector<Material*>& GetMaterials() { return m_materials; }
+	//std::vector<MaterialBlockData>& GetMaterialBlockData() { return m_materialBlockDatas; }
+	//void SetMaterialBlockData(const std::vector<MaterialBlockData>& materialBlockDatas);
 	std::string& GetMeshName() { return m_meshName; }
 
 	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
@@ -48,8 +46,8 @@ public:
 private:
 	Insight::Graphics::Mesh* m_mesh;
 
-	std::vector<Material*> m_materials;
-	std::vector<MaterialBlockData> m_materialBlockDatas;
+	//std::vector<Material*> m_materials;
+	//std::vector<MaterialBlockData> m_materialBlockDatas;
 
 
 	REFLECT_PROPERTY(ShowInEditor)

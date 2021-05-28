@@ -9,7 +9,7 @@ namespace Insight::GraphicsAPI::Vulkan
 {
 	GPURenderGraphPassVulkan::~GPURenderGraphPassVulkan()
 	{
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 
 		vkDestroyFramebuffer(device, m_frameBuffer, nullptr);
 		vkDestroyRenderPass(device, m_renderPass, nullptr);
@@ -17,7 +17,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPURenderGraphPassVulkan::Init(Graphics::RenderPass& renderPass)
 	{
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 
 		renderPass.SetGPUGraphPass(this);
 		m_renderPassIndex = renderPass.GetPassIndex();
@@ -210,7 +210,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 		renderPassInfo.pDependencies = dependencies.data();
 
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 		ThrowIfFailed(vkCreateRenderPass(device, &renderPassInfo, nullptr, &m_renderPass));
 
 		VkImageView views[] = { static_cast<GPUImageViewVulkan*>(image->GetView())->GetImageView() };

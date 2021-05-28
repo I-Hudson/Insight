@@ -1,7 +1,7 @@
 #include "ispch.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
-#include "Engine/Module/GraphicsModule.h"
-#include "Platform/Vulkan/VulkanImGUIRenderer.h"
+#include "Engine/Graphics/Graphics.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanImGUIRenderer.h"
 
 ImGuiRenderer::ImGuiRenderer()
 {
@@ -13,9 +13,9 @@ ImGuiRenderer::~ImGuiRenderer()
 
 ImGuiRenderer* ImGuiRenderer::New()
 {
-	switch (Module::GraphicsModule::Instance()->GetAPI())
+	if (::Graphics::IsVulkan())
 	{
-		case GraphicsRendererAPI::Vulkan: return ::New<Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer>();
+		return ::New<Insight::GraphicsAPI::Vulkan::VulkanImGUIRenderer>();
 	}
 
 	return nullptr;

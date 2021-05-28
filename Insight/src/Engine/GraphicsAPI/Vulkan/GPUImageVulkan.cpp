@@ -3,7 +3,7 @@
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/Debug/GPUDebugVulkan.h"
-#include "VulkanInitializers.h"
+#include "Engine/GraphicsAPI/Vulkan/VulkanInitializers.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 

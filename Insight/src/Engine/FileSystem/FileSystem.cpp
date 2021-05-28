@@ -1,7 +1,7 @@
 #include "ispch.h"
 #include "Engine/FileSystem/FileSystem.h"
 
-namespace FileSystem
+namespace Insight::FileSystem
 {
 	FileSystemWatcher::FileSystemWatcher()
 	{

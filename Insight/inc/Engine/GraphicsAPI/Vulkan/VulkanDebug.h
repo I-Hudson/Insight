@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Engine/Core/Core.h"
-#include "vulkan/vulkan.h"
-
-#include <glm/glm.hpp>
+#include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 
 namespace Insight::GraphicsAPI::Vulkan
 {

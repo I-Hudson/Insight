@@ -17,7 +17,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	void GPUFenceVulkan::Init(const Graphics::GPUFenceDesc& desc)
 	{
 		m_desc = desc;
-		m_desc.FenceManager = GPUDevice::Instance()->GetDefaultFenceManager();
+		m_desc.FenceManager = Graphics::GPUDevice::Instance()->GetDefaultFenceManager();
 		ASSERT(m_desc.FenceManager != nullptr && "[GPUFenceVulkan::Init] 'FenceManager' must be a valid pointer.");
 
 		VkFenceCreateInfo info = vks::initializers::fenceCreateInfo(m_desc.IsSignaled);
@@ -122,7 +122,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	void GPUSemaphoreVulkan::Init(const Graphics::GPUSemaphoreDesc& desc)
 	{
 		m_desc = desc;
-		m_desc.SemaphoreManager = GPUDevice::Instance()->GetDefaultSignalManager();
+		m_desc.SemaphoreManager = Graphics::GPUDevice::Instance()->GetDefaultSignalManager();
 		ASSERT(m_desc.SemaphoreManager != nullptr && "[GPUSemaphoreVulkan::Init] 'SemaphoreManager' must be a valid pointer.");
 
 		VkSemaphoreCreateInfo info = vks::initializers::semaphoreCreateInfo();

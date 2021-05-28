@@ -6,35 +6,36 @@
 #include "Engine/Module/WindowModule.h"
 
 #include "Engine/Config/CVar.h"
-
-#include "Engine/Graphics/Renderer.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
 
-class MeshComponent;
-class CameraComponent;
-class Material;
-
-namespace Module
+namespace Insight::Module
 {
-	class IS_API GraphicsModule : public Module
-								, public TSingleton<GraphicsModule>
+	enum class GraphicsRendererAPI
+	{
+		None = 0,
+		D311 = 1,
+		D312 = 2,
+		Vulkan = 3,
+		OpenGL = 4
+	};
+
+	class GraphicsModule : public Module
+								, public Core::TSingleton<GraphicsModule>
 	{
 	public:
 		GraphicsModule();
 		virtual ~GraphicsModule() override;
 
+		virtual void OnCreate() override;
 		virtual void Update(const float& deltaTime) override;
 
 		void WaitForIdle();
 		GraphicsRendererAPI GetAPI();
-		void SetMainCamera(CameraComponent* camera);
-#ifdef IS_EDITOR
-		void SetEditorCamera(CameraComponent* camera);
-#endif
-		const bool HasMainCamera();
-		const bool IsThisMainCamera(CameraComponent* camera);
 
+		bool IsD311();
+		bool IsD312();
 		bool IsVulkan();
+		bool IsOpenGL();
 
 		struct GraphicsConfig
 		{
@@ -50,6 +51,8 @@ namespace Module
 		};
 
 	private:
+		void InitLoading();
+
 		void ShadowMap();
 		void Deffered();
 		void Editor();
@@ -57,13 +60,5 @@ namespace Module
 	private:
 		ImGuiRenderer* m_imguiRenderer;
 		void* m_shadowMap = nullptr;
-
-		static CameraComponent* m_mainCamera;
-#ifdef IS_EDITOR
-		static CameraComponent* m_editorCamera;
-#endif
-		static std::vector<MeshComponent*> m_meshs;
-
-		friend MeshComponent;
 	};
 }

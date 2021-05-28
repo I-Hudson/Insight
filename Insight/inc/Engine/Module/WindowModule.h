@@ -7,47 +7,49 @@
 
 struct GLFWwindow;
 
-	class IS_API Window
+class Window
+{
+public:
+	static const int GetWidth();
+	static const int GetHeight();
+
+	static void SetTitle(const std::string_view& title);
+	static void SetIcon(const std::vector<std::string>& iconPaths);
+	static void SetFullscreen(const bool& fullscreen = true);
+	static bool IsFullscreen();
+
+	static void HideWindow();
+	static void ShowWindow();
+
+	static void WaitForEvents();
+	static bool ShouldClose();
+
+	static GLFWwindow* m_window;
+};
+
+
+namespace Insight::Module
+{
+	class IS_API WindowModule : public Module
 	{
 	public:
-		static const int GetWidth();
-		static const int GetHeight();
+		WindowModule();
+		virtual ~WindowModule() override;
 
-		static void SetTitle(const std::string_view& title);
-		static void SetIcon(const std::vector<std::string>& iconPaths);
-		static void SetFullscreen(const bool& fullscreen = true);
-		static bool IsFullscreen();
+		virtual void OnCreate() override;
+		virtual void Update(const float& deltaTime) override;
 
-		static void HideWindow();
-		static void ShowWindow();
+		static const Window* GetWindow() { return &m_window; }
 
-		static void WaitForEvents();
-		static bool ShouldClose();
-
-		static GLFWwindow* m_window;
-	};
-
-	namespace Module
-	{
-		class IS_API WindowModule : public Module
+		struct WindowConfig
 		{
-		public:
-			WindowModule();
-			virtual ~WindowModule() override;
-
-			virtual void Update(const float& deltaTime) override;
-
-			static const Window* GetWindow() { return &m_window; }
-
-			struct WindowConfig
-			{
-				CVar<int> WindowWidth{ "window_width", 1024 };
-				CVar<int> WindowHeight{ "window_height", 720 };
-				CVarString WindowIcon{ "window_icon", "testIcon.png" };
-				CVarString WindowTitle{ "window_title", "Test Window" };
-			};
-
-		private:
-			static Window m_window;
+			CVar<int> WindowWidth{ "window_width", 1024 };
+			CVar<int> WindowHeight{ "window_height", 720 };
+			CVarString WindowIcon{ "window_icon", "testIcon.png" };
+			CVarString WindowTitle{ "window_title", "Test Window" };
 		};
-	}
+
+	private:
+		static Window m_window;
+	};
+}

@@ -4,7 +4,7 @@
 #include "Engine/FileSystem/FileSystem.h"
 #include "Engine/Graphics/ShaderCompliation.h"
 
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
 
 namespace Insight::Graphics
@@ -101,9 +101,9 @@ namespace Insight::Graphics
 
 	GPUShader* GPUShader::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<Insight::GraphicsAPI::Vulkan::GPUShaderVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUShaderVulkan>();
 		}
 		ASSERT(false && "No GPUShader for graphics API exists.");
 		return nullptr;
@@ -141,9 +141,9 @@ namespace Insight::Graphics
 	///
 	GPUPipeline* GPUPipeline::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<Insight::GraphicsAPI::Vulkan::GPUPipelineVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUPipelineVulkan>();
 		}
 		ASSERT(false && "No GPUPipeline for graphics API exists.");
 		return nullptr;

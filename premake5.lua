@@ -1,6 +1,6 @@
 workspace "Insight"
     architecture "x64"
-    startproject "Sandbox"
+    startproject "InsightEditor"
 
     configurations
     {
@@ -18,6 +18,7 @@ workspace "Insight"
     {
         "IS_PROFILE",
         --"IS_PROFILE_OPTICK",
+        "_CRT_SECURE_NO_WARNINGS",
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -71,4 +72,4 @@ group ""
 
 include "Insight"
 include "InsightEditor"
-include "Sandbox"
+--include "Sandbox"

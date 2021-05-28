@@ -5,37 +5,39 @@
 
 #ifdef IS_DEBUG
 
-struct ProfilerMemoryAdditionalInfo
+namespace Insight::Core
 {
-	std::string Name;
-	u64 Size;
-	std::vector<std::string> CallStack;
-};
+	struct ProfilerMemoryAdditionalInfo
+	{
+		std::string Name;
+		u64 Size;
+		std::vector<std::string> CallStack;
+	};
 
-using ProProfilerMemoryCollection = std::unordered_map<void*, ProfilerMemoryAdditionalInfo>;
+	using ProProfilerMemoryCollection = std::unordered_map<void*, ProfilerMemoryAdditionalInfo>;
 
-class ProfilerMemory : public TSingleton<ProfilerMemory>
-{
-public:
-	~ProfilerMemory();
+	class ProfilerMemory : public Core::TSingleton<ProfilerMemory>
+	{
+	public:
+		~ProfilerMemory();
 
-	void TrackAllocation(void* ptr, u64 size);
-	void UnTrackAllocation(void* ptr);
+		void TrackAllocation(void* ptr, u64 size);
+		void UnTrackAllocation(void* ptr);
 
-	u64 GetCurrentAllocatedSize();
-	void DumpAllocations();
+		u64 GetCurrentAllocatedSize();
+		void DumpAllocations();
 
-	void AddName(void* ptr, const std::string& name);
+		void AddName(void* ptr, const std::string& name);
 
-private:
-	ProProfilerMemoryCollection::iterator GetIterator(void* ptr, ProProfilerMemoryCollection& collection);
+	private:
+		ProProfilerMemoryCollection::iterator GetIterator(void* ptr, ProProfilerMemoryCollection& collection);
 
-	std::vector<std::string> GetCallStack();
+		std::vector<std::string> GetCallStack();
 
-private:
-	CriticalSection m_locker;
-	ProProfilerMemoryCollection m_currentAllocations;
-	ProProfilerMemoryCollection m_allAllocations;
-};
-
+	private:
+		CriticalSection m_locker;
+		ProProfilerMemoryCollection m_currentAllocations;
+		ProProfilerMemoryCollection m_allAllocations;
+	};
+}
 #endif

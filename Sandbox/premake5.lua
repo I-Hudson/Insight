@@ -25,6 +25,7 @@ project "Sandbox"
         "%{IncludeDir.imgui}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.Vulkan}",
+        "%{IncludeDir.Reflect}",
 
 	}
 

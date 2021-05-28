@@ -12,7 +12,7 @@ using Allocator = CrtAllocator;
 template<typename T>
 INLINE void AddAdditionInformation(T* ptr)
 {
-	ProfilerMemory::Instance()->AddName(ptr, typeid(T).name());
+	Insight::Core::ProfilerMemory::Instance()->AddName(ptr, typeid(T).name());
 }
 
 

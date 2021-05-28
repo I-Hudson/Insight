@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUDescriptorSet.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorSetVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorAllocatorVulkan.h"
 
@@ -19,9 +19,9 @@ namespace Insight::Graphics
 
 	GPUDescriptorSet* GPUDescriptorSet::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorSetVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDescriptorSetVulkan>();
 		}
 		ASSERT(false && "[DescriptorSet::New] Unsupported API.");
 		return nullptr;
@@ -39,9 +39,9 @@ namespace Insight::Graphics
 
 	GPUDescriptorPool* GPUDescriptorPool::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorPoolVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDescriptorPoolVulkan>();
 		}
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;
@@ -49,9 +49,9 @@ namespace Insight::Graphics
 
 	GPUDescriptorBuilder* GPUDescriptorBuilder::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorBuilderVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDescriptorBuilderVulkan>();
 		}
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;
@@ -59,9 +59,9 @@ namespace Insight::Graphics
 
 	GPUDescriptorAllocator* GPUDescriptorAllocator::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorAllocatorVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDescriptorAllocatorVulkan>();
 		}
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;
@@ -69,9 +69,9 @@ namespace Insight::Graphics
 
 	GPUDescriptorLayoutCache* GPUDescriptorLayoutCache::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDescriptorLayoutCacheVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDescriptorLayoutCacheVulkan>();
 		}
 		ASSERT(false && "[DescriptorPool::New] Unsupported API.");
 		return nullptr;

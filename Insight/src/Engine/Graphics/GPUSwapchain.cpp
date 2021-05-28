@@ -1,15 +1,15 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUSwapchain.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUSwapchainVulkan.h"
 
 namespace Insight::Graphics
 {
 	GPUSwapchain* GPUSwapchain::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUSwapchainVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUSwapchainVulkan>();
 		}
 		ASSERT(false && "[GPUSwapchain::New] API not supported.");
 		return nullptr;

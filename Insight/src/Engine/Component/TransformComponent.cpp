@@ -2,7 +2,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Serialization/SerializeHelper.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -73,7 +73,7 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
 	glm::vec3 pos = position;
-	if (Module::GraphicsModule::Instance()->IsVulkan())
+	if (::Graphics::IsOpenGL())
 	{
 		pos.y *= -1;
 	}
@@ -86,7 +86,7 @@ glm::vec3 TransformComponent::GetRotation()
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
 	glm::vec3 rot;
 	rot.x = atan2(-data.Transform[1][2], data.Transform[2][2]);
-	float c2 = sqrt(pow(data.Transform[0][0], 2) + pow(data.Transform[0][1], 2));
+	float c2 = (float)sqrt(pow(data.Transform[0][0], 2) + pow(data.Transform[0][1], 2));
 	rot.y = atan2(-data.Transform[0][2], c2);
 	float s1 = sin(rot.x);
 	float c1 = cos(rot.x);

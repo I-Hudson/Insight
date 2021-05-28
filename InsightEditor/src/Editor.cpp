@@ -7,7 +7,7 @@
 #include "Engine/Graphics/Debug/Gizmos.h"
 #include "ImGuizmo.h"
 
-class EditorApp : public Application
+class EditorApp : public Insight::Application
 {
 public:
 	Insight::Module::EditorModule* m_editorModule;
@@ -19,7 +19,7 @@ public:
 	{
 #ifdef IMGUI_ENABLED
 		m_editorModule = m_moduleManager->AddModule<Insight::Module::EditorModule>();
-		Config::GetInstance().Parse("./data/config/editorConfig.txt");
+		Insight::Config::GetInstance().Parse("./data/config/editorConfig.txt");
 
 		auto& style = ImGui::GetStyle().Colors;
 
@@ -78,7 +78,7 @@ public:
 		for (size_t i = 0; i < 2; ++i)
 		{
 			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/vulkanscene_shadow.gltf");
-			Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
+			Insight::Graphics::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
 
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
@@ -103,11 +103,14 @@ public:
 
 	~EditorApp()
 	{
-		::Delete(Insight::Graphics::Debug::Gizmos::Instance());
+		if (Insight::Graphics::Debug::Gizmos::IsInitialised())
+		{
+			::Delete(Insight::Graphics::Debug::Gizmos::Instance());
+		}
 	}
 };
 
-Application* CreateApplication()
+Insight::Application* CreateApplication()
 {
 	return new EditorApp();
 }

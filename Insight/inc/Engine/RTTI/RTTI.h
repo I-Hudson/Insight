@@ -3,32 +3,32 @@
 #include "Engine/Templates/TSingleton.h"
 #include "Engine/RTTI/RTTITypes.h"
 
-	class Object;
+class Object;
 
-	namespace RTTI
+namespace RTTI
+{
+	struct RTTIPropertyParser
 	{
-		struct RTTIPropertyParser
-		{
 
-		};
+	};
 
-		class RTTI : public TSingleton<RTTI>
-		{
-		public:
-			RTTI();
-			~RTTI();
+	class RTTI : public Insight::Core::TSingleton<RTTI>
+	{
+	public:
+		RTTI();
+		~RTTI();
 
-			void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const u32& editorFlags = IS_PropertyFlags::None);
-			void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr);
-			void RTTI::UnregisterAllProperty(void* ownerObject);
+		void RTTI::RegisterProperty(Object* ownerObject, void* propertyPtr, const std::string& propertyName, const std::string& typeName, const u32& editorFlags = IS_PropertyFlags::None);
+		void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr);
+		void RTTI::UnregisterAllProperty(void* ownerObject);
 
-			const RTTIProperty& GetProperty(void* ownerPtr, const std::string& propertyName);
-			const std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const uint32_t& editorFlags);
+		const RTTIProperty& GetProperty(void* ownerPtr, const std::string& propertyName);
+		const std::vector<RTTIProperty*> GetAllProperties(void* ownerPtr, const uint32_t& editorFlags);
 
-		private:
-			std::unordered_map<void*, std::vector<RTTIProperty>> m_RTTITypes;
-		};
-	}
+	private:
+		std::unordered_map<void*, std::vector<RTTIProperty>> m_RTTITypes;
+	};
+}
 //
 // Helper macros for concatenating two names together such that they will defeat the macro parser.
 // Useful for things like:

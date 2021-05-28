@@ -5,9 +5,9 @@
 #include "Engine/Module/Module.h"
 #include "Engine/Core/Templates.h"
 
-namespace Module
+namespace Insight::Module
 {
-	class IS_API ModuleManager : public TSingleton<ModuleManager>, public Module
+	class ModuleManager : public Core::TSingleton<ModuleManager>, public Module
 	{
 	public:
 		ModuleManager();
@@ -23,11 +23,14 @@ namespace Module
 		template<typename T>
 		T* GetModule();
 
+		const std::vector<Module*>& GetAllModules() const { return m_modules; }
+
 	private:
 		bool Exists(const Type& type);
 
 	private:
-		std::unordered_map<Type, Module*> m_modules;
+		std::vector<Module*> m_modules;
+		std::unordered_map<Type, u32> m_typeToModule;
 	};
 
 	template<typename T, typename ...Args>
@@ -38,22 +41,24 @@ namespace Module
 		if (!Exists(type))
 		{
 			T* modulePtr = ::New<T>(std::forward<Args>(args)...);
-			static_cast<Module*>(modulePtr)->OnCreate();
-			m_modules[type] = modulePtr;
+			u32 index = (u32)m_modules.size();
+			m_typeToModule[type] = index;
+			m_modules.push_back(modulePtr);
 			return modulePtr;
 		}
-		return dynamic_cast<T*>(m_modules.at(type));
+		return dynamic_cast<T*>(m_modules.at(m_typeToModule.at(type)));
 	}
 
 	template<typename T>
 	inline void ModuleManager::RemoveModule()
 	{
-		std::string typeId = typeid(T).name();
-		if (Exists(typeId))
+		Type type;
+		type.SetType<T>();
+		if (Exists(type))
 		{
-			auto it = m_modules[typeId];
-			*it.reset();
-			m_modules.erase(it);
+			auto& it = m_modules.at(m_typeToModule.at(type));
+			::Delete(it);
+			m_modules.erase(m_modules.begin() + m_typeToModule.at(type));
 		}
 	}
 
@@ -64,7 +69,7 @@ namespace Module
 		type.SetType<T>();
 		if (Exists(type))
 		{
-			return dynamic_cast<T*>(m_modules.at(type));
+			return dynamic_cast<T*>(m_modules.at(m_typeToModule.at(type)));
 		}
 		return {};
 	}

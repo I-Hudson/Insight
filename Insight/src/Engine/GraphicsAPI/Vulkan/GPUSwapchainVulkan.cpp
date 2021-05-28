@@ -21,7 +21,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUSwapchainVulkan::Init()
 	{
-		m_device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance());
+		m_device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance());
 
 		ASSERT(glfwCreateWindowSurface(m_device->m_instance, Window::m_window, nullptr, &m_surface) == VK_SUCCESS &&
 			   "[GPUSwapchainVulkan::Init] Could not create window surface.");

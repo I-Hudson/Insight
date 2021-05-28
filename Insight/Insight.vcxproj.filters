@@ -91,9 +91,6 @@
     <Filter Include="inc\Engine\Memory">
       <UniqueIdentifier>{ACC40CD5-18DB-0A6B-6152-968CCDA7DBF2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="inc\Engine\Model">
-      <UniqueIdentifier>{04DEA0A1-F0D6-BFF3-1909-A57805619FFF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="inc\Engine\Module">
       <UniqueIdentifier>{F9E2BCD5-65F9-BA6B-AE70-468D1AC68BF3}</UniqueIdentifier>
     </Filter>
@@ -118,9 +115,6 @@
     <Filter Include="inc\Engine\Serialization\File">
       <UniqueIdentifier>{207BEE22-8C93-D54C-5540-65E6C1176AE6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="inc\Engine\ShaderParser">
-      <UniqueIdentifier>{77392CE8-E370-747F-EC7A-D8A258319B78}</UniqueIdentifier>
-    </Filter>
     <Filter Include="inc\Engine\Templates">
       <UniqueIdentifier>{A213A9E6-8EA2-32B0-37C1-46AB232F4356}</UniqueIdentifier>
     </Filter>
@@ -132,12 +126,6 @@
     </Filter>
     <Filter Include="inc\Engine\Utils">
       <UniqueIdentifier>{247634A2-106F-53F4-39A1-387925F93200}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="inc\Platform">
-      <UniqueIdentifier>{534F0EE6-3FB2-9D8A-E837-D640D479690D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="inc\Platform\Vulkan">
-      <UniqueIdentifier>{738166A7-DFE2-43B5-6850-8A67D4B07A74}</UniqueIdentifier>
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
@@ -211,9 +199,6 @@
     <Filter Include="src\Engine\Memory">
       <UniqueIdentifier>{3A3064C2-A646-6258-EFBD-ED795B1333E0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\Model">
-      <UniqueIdentifier>{D20FD2A8-BE08-F1FA-E73A-D67FD392D006}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Engine\Module">
       <UniqueIdentifier>{874E14C3-F364-1259-3CDC-9D7AA831E3E0}</UniqueIdentifier>
     </Filter>
@@ -238,20 +223,11 @@
     <Filter Include="src\Engine\Serialization\File">
       <UniqueIdentifier>{AEAB758A-1AC4-5CB4-E370-EC4D4F48F14D}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Engine\ShaderParser">
-      <UniqueIdentifier>{8597F584-F1CE-3D1C-FAD8-A13F668F6415}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Engine\Threading">
       <UniqueIdentifier>{D7D5D4CE-C364-5E98-6C83-729358F16E3E}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\Engine\Time">
       <UniqueIdentifier>{F0787E79-5C04-EC3D-6515-6F32D11F483E}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Platform">
-      <UniqueIdentifier>{21CA02E5-0D2D-9289-B6B2-CA3FA2F45D0C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\Platform\Vulkan">
-      <UniqueIdentifier>{81084748-ED69-2456-76D7-6A08E2375B15}</UniqueIdentifier>
     </Filter>
     <Filter Include="vendor">
       <UniqueIdentifier>{B3738122-9F15-ACF8-88D0-BF4C74113349}</UniqueIdentifier>
@@ -495,6 +471,9 @@
     <ClInclude Include="inc\Engine\Graphics\GPUTimerQuery.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Graphics\Graphics.h">
+      <Filter>inc\Engine\Graphics</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\ImGuiRenderer.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
@@ -503,9 +482,6 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDesc.h">
       <Filter>inc\Engine\Graphics\Image</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\Material.h">
-      <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\Model\Model.h">
       <Filter>inc\Engine\Graphics\Model</Filter>
@@ -525,7 +501,7 @@
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderPass.h">
       <Filter>inc\Engine\Graphics\RenderGraph</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\Renderer.h">
+    <ClInclude Include="inc\Engine\Graphics\RenderList.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\ShaderCompliation.h">
@@ -535,9 +511,6 @@
       <Filter>inc\Engine\Graphics\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Graphics\SplashScreen.h">
-      <Filter>inc\Engine\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\Texture.h">
       <Filter>inc\Engine\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h">
@@ -592,6 +565,9 @@
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanHeaders.h">
+      <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanImGUIRenderer.h">
       <Filter>inc\Engine\GraphicsAPI\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h">
@@ -650,15 +626,6 @@
     </ClInclude>
     <ClInclude Include="inc\Engine\Memory\StackAllocator.h">
       <Filter>inc\Engine\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Model\Mesh.h">
-      <Filter>inc\Engine\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Model\Model.h">
-      <Filter>inc\Engine\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Engine\Model\SubMesh.h">
-      <Filter>inc\Engine\Model</Filter>
     </ClInclude>
     <ClInclude Include="inc\Engine\Module\AssetModule.h">
       <Filter>inc\Engine\Module</Filter>
@@ -735,9 +702,6 @@
     <ClInclude Include="inc\Engine\Serialization\SerializeHelper.h">
       <Filter>inc\Engine\Serialization</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\ShaderParser\ShaderParser.h">
-      <Filter>inc\Engine\ShaderParser</Filter>
-    </ClInclude>
     <ClInclude Include="inc\Engine\Templates\TPointers.h">
       <Filter>inc\Engine\Templates</Filter>
     </ClInclude>
@@ -767,42 +731,6 @@
     </ClInclude>
     <ClInclude Include="inc\Insight.h">
       <Filter>inc</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\Swapchain.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanBuffer.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanDebug.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanDevice.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanFrameBuffer.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanHeader.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanImGUIRenderer.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanInitializers.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanMaterial.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanPipeline.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanRenderer.h">
-      <Filter>inc\Platform\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="inc\Platform\Vulkan\VulkanTexture.h">
-      <Filter>inc\Platform\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="inc\ispch.h">
       <Filter>inc</Filter>
@@ -2067,9 +1995,6 @@
     <ClInclude Include="vendor\stb\stb_image_write.h">
       <Filter>vendor\stb</Filter>
     </ClInclude>
-    <ClInclude Include="inc\Engine\Graphics\RenderList.h">
-      <Filter>inc\Engine\Graphics</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp">
@@ -2192,9 +2117,6 @@
     <ClCompile Include="src\Engine\Graphics\Image\GPUImageDesc.cpp">
       <Filter>src\Engine\Graphics\Image</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\Material.cpp">
-      <Filter>src\Engine\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine\Graphics\Model\Model.cpp">
       <Filter>src\Engine\Graphics\Model</Filter>
     </ClCompile>
@@ -2210,7 +2132,7 @@
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderPass.cpp">
       <Filter>src\Engine\Graphics\RenderGraph</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\Renderer.cpp">
+    <ClCompile Include="src\Engine\Graphics\RenderList.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\ShaderCompliation.cpp">
@@ -2220,9 +2142,6 @@
       <Filter>src\Engine\Graphics\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp">
-      <Filter>src\Engine\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\Texture.cpp">
       <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.cpp">
@@ -2273,6 +2192,9 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanImGUIRenderer.cpp">
+      <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
+    </ClCompile>
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.cpp">
       <Filter>src\Engine\GraphicsAPI\Vulkan</Filter>
     </ClCompile>
@@ -2302,15 +2224,6 @@
     </ClCompile>
     <ClCompile Include="src\Engine\Memory\StackAllocator.cpp">
       <Filter>src\Engine\Memory</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Model\Mesh.cpp">
-      <Filter>src\Engine\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Model\Model.cpp">
-      <Filter>src\Engine\Model</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Model\SubMesh.cpp">
-      <Filter>src\Engine\Model</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine\Module\AssetModule.cpp">
       <Filter>src\Engine\Module</Filter>
@@ -2351,9 +2264,6 @@
     <ClCompile Include="src\Engine\Serialization\Serializable.cpp">
       <Filter>src\Engine\Serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine\ShaderParser\ShaderParser.cpp">
-      <Filter>src\Engine\ShaderParser</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine\Threading\TThreadSafe.cpp">
       <Filter>src\Engine\Threading</Filter>
     </ClCompile>
@@ -2363,47 +2273,11 @@
     <ClCompile Include="src\Engine\Time\Time.cpp">
       <Filter>src\Engine\Time</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanFrameBuffer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanMaterial.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanPipeline.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanTexture.cpp">
-      <Filter>src\Platform\Vulkan</Filter>
-    </ClCompile>
     <ClCompile Include="src\ispch.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="vendor\TinyXML2\tinyxml2.cpp">
       <Filter>vendor\TinyXML2</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Graphics\RenderList.cpp">
-      <Filter>src\Engine\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -34,7 +34,7 @@ namespace Insight::Graphics
 
 	template<typename T, 
 		typename std::enable_if_t<std::is_base_of<GPUResource*, T>::value>* = nullptr>
-		class GPUItemCache : public TSingleton<GPUItemCache<T>>
+		class GPUItemCache : public Core::TSingleton<GPUItemCache<T>>
 	{
 	public:
 		GPUItemCache()

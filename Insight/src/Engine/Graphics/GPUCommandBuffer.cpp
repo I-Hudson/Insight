@@ -1,8 +1,7 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
 
-#include "Engine/Module/GraphicsModule.h"
-#include "Engine/Graphics/Renderer.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUCommandBufferVulkan.h"
 
 namespace Insight::Graphics
@@ -18,11 +17,10 @@ namespace Insight::Graphics
 
 	GPUCommandBuffer* GPUCommandBuffer::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUCommandBufferVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUCommandBufferVulkan>();
 		}
-
 		ASSERT(false && "[GPUCommandBuffer::New] API not supported.");
 		return nullptr;
 	}
@@ -38,9 +36,9 @@ namespace Insight::Graphics
 
 	GPUCommandPool* GPUCommandPool::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUCommandPoolVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUCommandPoolVulkan>();
 		}
 
 		ASSERT(false && "[GPUCommandPool::New] API not supported.");

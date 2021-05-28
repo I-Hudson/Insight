@@ -4,7 +4,7 @@
 #include "Engine/Graphics/GPUDynamicBuffer.h"
 #include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
 #include "Engine/Config/Config.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
@@ -16,10 +16,10 @@ namespace Insight::Graphics
 {
 	RenderGraph* RenderGraph::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::RenderGraphVulkan>();
-		}	
+			return ::New<GraphicsAPI::Vulkan::RenderGraphVulkan>();
+		}
 		ASSERT(false && "[RenderGraph::New] API implementation is missing.")
 			return nullptr;
 	}
@@ -702,9 +702,9 @@ namespace Insight::Graphics
 
 	GPURenderGraphPass* GPURenderGraphPass::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPURenderGraphPassVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPURenderGraphPassVulkan>();
 		}
 		ASSERT(false && "[RenderGraph::New] API implementation is missing.")
 			return nullptr;

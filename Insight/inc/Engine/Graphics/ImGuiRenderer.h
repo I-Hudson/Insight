@@ -8,7 +8,7 @@ namespace Insight::Graphics
 	class GPUImage;
 }
 
-class ImGuiRenderer : public TSingleton<ImGuiRenderer>
+class ImGuiRenderer : public Insight::Core::TSingleton<ImGuiRenderer>
 {
 public:
 	ImGuiRenderer();

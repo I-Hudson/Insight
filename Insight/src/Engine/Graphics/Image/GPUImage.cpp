@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Engine/Graphics/Image/GPUImage.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
 
 namespace Insight::Graphics
@@ -8,9 +8,9 @@ namespace Insight::Graphics
 
 	GPUImageView* GPUImageView::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUImageViewVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUImageViewVulkan>();
 		}
 
 		ASSERT(false && "[GPUImageView::New] API missing.");
@@ -42,9 +42,9 @@ namespace Insight::Graphics
 
 	GPUImage* GPUImage::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUImageVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUImageVulkan>();
 		}
 
 		ASSERT(false && "[GPUImage::New] API missing.");
@@ -86,9 +86,9 @@ namespace Insight::Graphics
 
 	GPUSampler* GPUSampler::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUSamplerVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUSamplerVulkan>();
 		}
 
 		ASSERT(false && "[GPUImage::New] API missing.");

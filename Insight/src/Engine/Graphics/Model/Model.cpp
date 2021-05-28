@@ -101,8 +101,8 @@ namespace Insight::Graphics
 
 	void Mesh::SetupGPUBuffers()
 	{
-		m_vertexCount = m_vertices.size();
-		m_indexCount = m_indices.size();
+		m_vertexCount = (u32)m_vertices.size();
+		m_indexCount = (u32)m_indices.size();
 		m_vertexBuffer->Init(GPUBufferDesc::Vertex(sizeof(Vertex), m_vertices.size(), m_vertices.data()));
 		m_indexBuffer->Init(GPUBufferDesc::Index(sizeof(u32), m_indices.size(), m_indices.data()));
 	}

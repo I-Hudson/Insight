@@ -4,70 +4,71 @@
 #include "Engine/Core/Core.h"
 #include "Engine/Core/Log.h"
 
-class Application;
-
-template<class T>
-class IS_API TSingleton
+namespace Insight::Core
 {
-public:
-
-	static T* Instance()
+	template<class T>
+	class TSingleton
 	{
-		ASSERT(s_instance != nullptr && "[TSingleton::GetInstance] Usage of before SetInstancePtr is called!");
-		return s_instance;
-	}
+	public:
 
-	static bool IsInitialised()
-	{
-		return s_instance != nullptr;
-	}
+		static T* Instance()
+		{
+			ASSERT(s_instance != nullptr && "[TSingleton::GetInstance] Usage of before SetInstancePtr is called!");
+			return s_instance;
+		}
 
-	TSingleton()
-	{
-		ASSERT(s_instance == nullptr && "[TSingleton::SetInstancePtr] Instance already created for.");
-		s_instance = static_cast<T*>(this);
-	}
+		static bool IsInitialised()
+		{
+			return s_instance != nullptr;
+		}
 
-	~TSingleton()
-	{
-		ASSERT(s_instance != nullptr && "[TSingleton::SetInstancePtr] Instance is already null.");
-		s_instance = nullptr;
-	}
+		TSingleton()
+		{
+			ASSERT(s_instance == nullptr && "[TSingleton::SetInstancePtr] Instance already created for.");
+			s_instance = static_cast<T*>(this);
+		}
 
-protected:
-	template<typename... Args>
-	static T* Create(Args... args)
-	{
-		new T(std::forward<Args>(args)...);
+		~TSingleton()
+		{
+			ASSERT(s_instance != nullptr && "[TSingleton::SetInstancePtr] Instance is already null.");
+			s_instance = nullptr;
+		}
 
-		return Instance();
-	}
+	protected:
+		template<typename... Args>
+		static T* Create(Args... args)
+		{
+			new T(std::forward<Args>(args)...);
 
-	template<typename... Args>
-	static T* CreateWithoutMemoryManager(Args... args)
-	{
-		new T(std::forward<Args>(args)...);
+			return Instance();
+		}
 
-		return Instance();
-	}
+		template<typename... Args>
+		static T* CreateWithoutMemoryManager(Args... args)
+		{
+			new T(std::forward<Args>(args)...);
 
-	static void Destroy()
-	{
-		delete s_instance;
-	}
+			return Instance();
+		}
 
-	static void DestroyWithoutMemoryManager()
-	{
-		delete s_instance;
-	}
+		static void Destroy()
+		{
+			delete s_instance;
+		}
 
-	static void ReleaseInstance()
-	{
-		s_instance = nullptr;
-	}
+		static void DestroyWithoutMemoryManager()
+		{
+			delete s_instance;
+		}
 
-	static T* s_instance;
-};
+		static void ReleaseInstance()
+		{
+			s_instance = nullptr;
+		}
 
-template<class T>
-T* TSingleton<T>::s_instance;
+		static T* s_instance;
+	};
+
+	template<class T>
+	T* TSingleton<T>::s_instance;
+}

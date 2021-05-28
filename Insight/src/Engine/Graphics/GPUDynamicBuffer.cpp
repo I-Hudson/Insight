@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUDynamicBuffer.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDynamicBufferVulkan.h"
 
 namespace Insight::Graphics
@@ -16,9 +16,9 @@ namespace Insight::Graphics
 
 	GPUDynamicBuffer* GPUDynamicBuffer::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUDynamicBufferVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUDynamicBufferVulkan>();
 		}
 
 		ASSERT(false && "[GPUDynamicBuffer::New] API not supported.");

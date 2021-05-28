@@ -79,7 +79,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;_CRT_SECURE_NO_WARNINGS;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DEBUG;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;VMA_RECORDING_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
@@ -105,7 +105,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;_CRT_SECURE_NO_WARNINGS;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_RELEASE;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;IS_OPTICK_PROFILE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -135,7 +135,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>ispch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>IS_PROFILE;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DIST;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IS_PROFILE;_CRT_SECURE_NO_WARNINGS;INSIGHT_NAMESPACE=;IS_PLATFORM_WINDOWS;IS_PLATFORM_WIN32;WIN32_LEAN_AND_MEAN;GLM_FORCE_SWIZZLE;GLM_FORCE_SILENT_WARNINGS;GLM_FORCE_DEPTH_ZERO_TO_ONE;IS_STANDARD_POINTER;IS_Y_IS_DOWN;IS_DIST;IS_VULKAN;NOMINMAX;IS_EDITOR;GLFW_INCLUDE_VULKAN;IMGUI_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)inc;$(SolutionDir)InsightEditor\inc;$(ProjectDir)inc\Insight;$(ProjectDir)inc\Platform;$(ProjectDir)inc\Platform\Vulkan;$(SolutionDir)Insight\vendor\GLFW\include;$(SolutionDir)Insight\vendor\glad\include;$(SolutionDir)Insight\vendor\ImGuizmo;$(SolutionDir)Insight\vendor\imgui;$(SolutionDir)Insight\vendor\SPIRV-Cross;$(SolutionDir)Insight\vendor\spdlog\include;$(SolutionDir)Insight\vendor\assimp\include;$(SolutionDir)Insight\vendor\assimp\BINARIES\x64\Include;$(SolutionDir)Insight\vendor\glm;$(SolutionDir)Insight\vendor\stb;$(SolutionDir)Insight\vendor\TinyXML2;$(SolutionDir)Insight\vendor\json\single_include\nlohmann;$(SolutionDir)Insight\vendor\optick\src;$(SolutionDir)Insight\vendor\tinygltf;$(SolutionDir)Insight\vendor\KTX-Software\include;$(SolutionDir)Insight\vendor\IconFontCppHeaders;$(SolutionDir)Insight\vendor\Reflect\Reflect\inc;$(SolutionDir)Insight\vendor\glslang;$(SolutionDir)Insight\vendor\VulkanMemoryAllocator\src;C:\VulkanSDK\1.2.162.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -230,22 +230,20 @@
     <ClInclude Include="inc\Engine\Graphics\GPUSwapchain.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUSync.h" />
     <ClInclude Include="inc\Engine\Graphics\GPUTimerQuery.h" />
+    <ClInclude Include="inc\Engine\Graphics\Graphics.h" />
     <ClInclude Include="inc\Engine\Graphics\ImGuiRenderer.h" />
     <ClInclude Include="inc\Engine\Graphics\Image\GPUImage.h" />
     <ClInclude Include="inc\Engine\Graphics\Image\GPUImageDesc.h" />
-    <ClInclude Include="inc\Engine\Graphics\Material.h" />
     <ClInclude Include="inc\Engine\Graphics\Model\Model.h" />
     <ClInclude Include="inc\Engine\Graphics\Model\ModelLoading.h" />
     <ClInclude Include="inc\Engine\Graphics\PixelFormat.h" />
     <ClInclude Include="inc\Engine\Graphics\PixelFormatExtensions.h" />
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderGraph.h" />
     <ClInclude Include="inc\Engine\Graphics\RenderGraph\RenderPass.h" />
-    <ClInclude Include="inc\Engine\Graphics\Renderer.h" />
     <ClInclude Include="inc\Engine\Graphics\RenderList.h" />
     <ClInclude Include="inc\Engine\Graphics\ShaderCompliation.h" />
     <ClInclude Include="inc\Engine\Graphics\Shaders\GPUShader.h" />
     <ClInclude Include="inc\Engine\Graphics\SplashScreen.h" />
-    <ClInclude Include="inc\Engine\Graphics\Texture.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Config.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.h" />
@@ -264,6 +262,7 @@
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VmaUsage.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanDebug.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanHeaders.h" />
+    <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanImGUIRenderer.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanInitializers.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanPlatform.h" />
     <ClInclude Include="inc\Engine\GraphicsAPI\Vulkan\VulkanPlatformBase.h" />
@@ -283,9 +282,6 @@
     <ClInclude Include="inc\Engine\Memory\ProfilerMemory.h" />
     <ClInclude Include="inc\Engine\Memory\SinglyLinkedList.h" />
     <ClInclude Include="inc\Engine\Memory\StackAllocator.h" />
-    <ClInclude Include="inc\Engine\Model\Mesh.h" />
-    <ClInclude Include="inc\Engine\Model\Model.h" />
-    <ClInclude Include="inc\Engine\Model\SubMesh.h" />
     <ClInclude Include="inc\Engine\Module\AssetModule.h" />
     <ClInclude Include="inc\Engine\Module\GraphicsModule.h" />
     <ClInclude Include="inc\Engine\Module\InputModule.h" />
@@ -311,7 +307,6 @@
     <ClInclude Include="inc\Engine\Serialization\File\SerializableFormat_XML.h" />
     <ClInclude Include="inc\Engine\Serialization\Serializable.h" />
     <ClInclude Include="inc\Engine\Serialization\SerializeHelper.h" />
-    <ClInclude Include="inc\Engine\ShaderParser\ShaderParser.h" />
     <ClInclude Include="inc\Engine\Templates\TPointers.h" />
     <ClInclude Include="inc\Engine\Templates\TSingleton.h" />
     <ClInclude Include="inc\Engine\Threading\TThreadSafe.h" />
@@ -322,18 +317,6 @@
     <ClInclude Include="inc\Engine\Time\Time.h" />
     <ClInclude Include="inc\Engine\Utils\Hasher.h" />
     <ClInclude Include="inc\Insight.h" />
-    <ClInclude Include="inc\Platform\Vulkan\Swapchain.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanBuffer.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanDebug.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanDevice.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanFrameBuffer.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanHeader.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanImGUIRenderer.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanInitializers.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanMaterial.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanPipeline.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanRenderer.h" />
-    <ClInclude Include="inc\Platform\Vulkan\VulkanTexture.h" />
     <ClInclude Include="inc\ispch.h" />
     <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome4.h" />
     <ClInclude Include="vendor\IconFontCppHeaders\IconsFontAwesome5.h" />
@@ -797,18 +780,15 @@
     <ClCompile Include="src\Engine\Graphics\ImGuiRenderer.cpp" />
     <ClCompile Include="src\Engine\Graphics\Image\GPUImage.cpp" />
     <ClCompile Include="src\Engine\Graphics\Image\GPUImageDesc.cpp" />
-    <ClCompile Include="src\Engine\Graphics\Material.cpp" />
     <ClCompile Include="src\Engine\Graphics\Model\Model.cpp" />
     <ClCompile Include="src\Engine\Graphics\Model\ModelLoading.cpp" />
     <ClCompile Include="src\Engine\Graphics\PixelFormatExtensions.cpp" />
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderGraph.cpp" />
     <ClCompile Include="src\Engine\Graphics\RenderGraph\RenderPass.cpp" />
-    <ClCompile Include="src\Engine\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Engine\Graphics\RenderList.cpp" />
     <ClCompile Include="src\Engine\Graphics\ShaderCompliation.cpp" />
     <ClCompile Include="src\Engine\Graphics\Shaders\GPUShader.cpp" />
     <ClCompile Include="src\Engine\Graphics\SplashScreen.cpp" />
-    <ClCompile Include="src\Engine\Graphics\Texture.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Debug\GPUDebugVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUAdapterVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\GPUBufferVulkan.cpp" />
@@ -825,6 +805,7 @@
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\RenderGraph\RenderGraphVulkan.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VmaUsage.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanDebug.cpp" />
+    <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanImGUIRenderer.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\VulkanUtils.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatform.cpp" />
     <ClCompile Include="src\Engine\GraphicsAPI\Vulkan\Win32\Win32VulkanPlatformBase.cpp" />
@@ -835,11 +816,6 @@
     <ClCompile Include="src\Engine\Memory\MemoryManager.cpp" />
     <ClCompile Include="src\Engine\Memory\ProfilerMemory.cpp" />
     <ClCompile Include="src\Engine\Memory\StackAllocator.cpp" />
-    <ClCompile Include="src\Engine\Model\Mesh.cpp" />
-    <ClCompile Include="src\Engine\Model\Model.cpp">
-      <ObjectFileName>$(IntDir)\Model1.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="src\Engine\Model\SubMesh.cpp" />
     <ClCompile Include="src\Engine\Module\AssetModule.cpp" />
     <ClCompile Include="src\Engine\Module\GraphicsModule.cpp" />
     <ClCompile Include="src\Engine\Module\InputModule.cpp" />
@@ -853,23 +829,9 @@
     <ClCompile Include="src\Engine\Serialization\File\SerializableFormat_JSON.cpp" />
     <ClCompile Include="src\Engine\Serialization\File\SerializableFormat_XML.cpp" />
     <ClCompile Include="src\Engine\Serialization\Serializable.cpp" />
-    <ClCompile Include="src\Engine\ShaderParser\ShaderParser.cpp" />
     <ClCompile Include="src\Engine\Threading\TThreadSafe.cpp" />
     <ClCompile Include="src\Engine\Time\Stopwatch.cpp" />
     <ClCompile Include="src\Engine\Time\Time.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\Swapchain.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanBuffer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanDebug.cpp">
-      <ObjectFileName>$(IntDir)\VulkanDebug1.obj</ObjectFileName>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Vulkan\VulkanDevice.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanFrameBuffer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanHeader.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanImGUIRenderer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanMaterial.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanPipeline.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanRenderer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\VulkanTexture.cpp" />
     <ClCompile Include="src\ispch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>

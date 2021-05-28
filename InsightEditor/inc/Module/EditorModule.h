@@ -32,14 +32,9 @@ namespace Insight::Editor
 	class EditorWindow;
 }
 
-namespace Module
-{
-	class Module;
-}
-
 namespace Insight::Module
 {
-	class EditorModule : public ::Module::Module, public TSingleton<EditorModule>
+	class EditorModule : public Module, public Core::TSingleton<EditorModule>
 	{
 	public:
 		EditorModule();

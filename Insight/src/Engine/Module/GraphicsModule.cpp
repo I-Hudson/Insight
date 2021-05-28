@@ -1,5 +1,6 @@
 #include "ispch.h"
 #include "Engine/Module/GraphicsModule.h"
+#include "Engine/Core/Application.h"
 #include "Engine/Module/WindowModule.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Component/MeshComponent.h"
@@ -15,6 +16,7 @@
 #include "Engine/Time/Stopwatch.h"
 #include "Engine/Core/Log.h"
 
+#include "Engine/Graphics/RenderList.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Graphics/Debug/Gizmos.h"
 #include "Engine/Graphics/Model/Model.h"
@@ -26,6 +28,8 @@
 #include "Engine/Graphics/GPUBuffer.h"
 #include "Engine/Graphics/GPUDynamicBuffer.h"
 #include "Engine/Graphics/GPUSync.h"
+
+
 #include "stb_image.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "imgui.h"
@@ -34,40 +38,53 @@
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 //
 
-namespace Module
+namespace Insight::Module
 {
-	glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
-	{
-		glm::vec3 const f(vec);
-		glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
-		glm::vec3 const u(cross(f, s));
+	//glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
+	//{
+	//	glm::vec3 const f(vec);
+	//	glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
+	//	glm::vec3 const u(cross(f, s));
 
-		glm::mat4 Result(1);
-		Result[0][0] = s.x;
-		Result[1][0] = s.y;
-		Result[2][0] = s.z;
-		Result[0][1] = u.x;
-		Result[1][1] = u.y;
-		Result[2][1] = u.z;
-		Result[0][2] = -f.x;
-		Result[1][2] = -f.y;
-		Result[2][2] = -f.z;
-		Result[3][0] = -glm::dot(s, position);
-		Result[3][1] = -glm::dot(u, position);
-		Result[3][2] = glm::dot(f, position);
-		return Result;
-	}
-
-	CameraComponent* GraphicsModule::m_mainCamera;
-#ifdef IS_EDITOR
-	CameraComponent* GraphicsModule::m_editorCamera;
-#endif
-	std::vector<MeshComponent*> GraphicsModule::m_meshs;
+	//	glm::mat4 Result(1);
+	//	Result[0][0] = s.x;
+	//	Result[1][0] = s.y;
+	//	Result[2][0] = s.z;
+	//	Result[0][1] = u.x;
+	//	Result[1][1] = u.y;
+	//	Result[2][1] = u.z;
+	//	Result[0][2] = -f.x;
+	//	Result[1][2] = -f.y;
+	//	Result[2][2] = -f.z;
+	//	Result[3][0] = -glm::dot(s, position);
+	//	Result[3][1] = -glm::dot(u, position);
+	//	Result[3][2] = glm::dot(f, position);
+	//	return Result;
+	//}
 
 	GraphicsModule::GraphicsModule()
+	{ }
+
+	GraphicsModule::~GraphicsModule()
+	{
+		Graphics::GPUDevice::Instance()->WaitForGPU();
+
+		if (ImGuiRenderer::IsInitialised())
+		{
+			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
+			::Delete(m_imguiRenderer);
+		}
+
+		::Delete(Insight::Graphics::RenderGraph::Instance());
+		Graphics::GPUDevice::Instance()->Dispose();
+		::Delete(Graphics::GPUDevice::Instance());
+	}
+
+	void GraphicsModule::OnCreate()
 	{
 		PixelFormatExtensions::Init();
-		GPUDevice* gpuDevice = GPUDeviceVulkan::New();
+		Graphics::GPUDevice* gpuDevice = Graphics::GPUDevice::New();
+		gpuDevice->Init();
 
 		{
 			using namespace Insight;
@@ -146,24 +163,9 @@ namespace Module
 
 		}
 		Insight::Graphics::RenderGraph* graph = Insight::Graphics::RenderGraph::New();
-
-
 		m_imguiRenderer = ImGuiRenderer::New();
-	}
 
-	GraphicsModule::~GraphicsModule()
-	{
-		GPUDevice::Instance()->WaitForGPU();
-
-		if (ImGuiRenderer::IsInitialised())
-		{
-			ImGuiRenderer* imguiRenderer = ImGuiRenderer::Instance();
-			::Delete(m_imguiRenderer);
-		}
-
-		::Delete(Insight::Graphics::RenderGraph::Instance());
-		GPUDevice::Instance()->Dispose();
-		::Delete(GPUDevice::Instance());
+		m_state = ModuleState::Running;
 	}
 
 	u32 imageIndex = 0;
@@ -171,26 +173,44 @@ namespace Module
 
 	void GraphicsModule::Update(const float& deltaTime)
 	{
+		if (Application::GetState() == ApplicationState::Init)
+		{
+			if (ImGuiRenderer::Instance()->IsInit())
+			{
+				ImGui::Begin("Graphics Module-Loading");
+				ImGui::Text("Application is loading.");
+				ImGui::End();
+			}
+
+			// The engine is still loading. We don't want to do any heavy rendering.
+			Graphics::RenderGraph::Instance()->Reset();
+			Graphics::GPUDevice::Instance()->BeginFrame();
+			InitLoading();
+			m_imguiRenderer->EndFrame();
+			m_imguiRenderer->Render();
+			Insight::Graphics::RenderGraph::Instance()->Build();
+			//Insight::Graphics::RenderGraph::Instance()->LogToConsole();
+			Insight::Graphics::RenderGraph::Instance()->Execute();
+			Graphics::GPUDevice::Instance()->EndFrame();
+
+			return;
+		}
+
 		IS_PROFILE_FUNCTION();
 		{
 			IS_PROFILE_SCOPE("RenderGraph: Create");
 
-			if (!Scene::ActiveScene()->IsPlaying())
-			{
-#ifdef IS_EDITOR
-				m_mainCamera = m_editorCamera;
-#endif
-			}
+			Graphics::RenderList* renderList = Graphics::RenderList::GetFromPool();
+			Scene::ActiveScene()->OnDraw(renderList);
 
 			using namespace Insight;
 			Graphics::RenderGraph::Instance()->Reset();
-
-			GPUDevice::Instance()->BeginFrame();
+			Graphics::GPUDevice::Instance()->BeginFrame();
 
 			ShadowMap();
 			Deffered();
 #ifdef IS_EDITOR
-			Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
+			//Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
 #endif
 
 			// If we are in editor then set a blank image as the output.
@@ -211,12 +231,12 @@ namespace Module
 		//Insight::Graphics::RenderGraph::Instance()->LogToConsole();
 		Insight::Graphics::RenderGraph::Instance()->Execute();
 
-		GPUDevice::Instance()->EndFrame();
+		Graphics::GPUDevice::Instance()->EndFrame();
 	}
 
 	void GraphicsModule::WaitForIdle()
 	{
-		GPUDevice::Instance()->WaitForGPU();
+		Graphics::GPUDevice::Instance()->WaitForGPU();
 	}
 
 	GraphicsRendererAPI GraphicsModule::GetAPI()
@@ -224,31 +244,40 @@ namespace Module
 		return (GraphicsRendererAPI)CONFIG_VAL(GraphicsConfig.GraphicsAPI);
 	}
 
-	void GraphicsModule::SetMainCamera(CameraComponent* camera)
+	bool GraphicsModule::IsD311()
 	{
-		m_mainCamera = camera;
+		return false;
 	}
 
-#ifdef IS_EDITOR
-	void GraphicsModule::SetEditorCamera(CameraComponent* camera)
+	bool GraphicsModule::IsD312()
 	{
-		m_editorCamera = camera;
-	}
-#endif
-
-	const bool GraphicsModule::HasMainCamera()
-	{
-		return m_mainCamera != nullptr;
-	}
-
-	const bool GraphicsModule::IsThisMainCamera(CameraComponent* camera)
-	{
-		return camera == m_mainCamera;
+		return false;
 	}
 
 	bool GraphicsModule::IsVulkan()
 	{
 		return GetAPI() == GraphicsRendererAPI::Vulkan;
+	}
+
+	bool GraphicsModule::IsOpenGL()
+	{
+		return false;
+	}
+
+	void GraphicsModule::InitLoading()
+	{
+		Graphics::ImageAttachmentInfo passOutput = { };
+		passOutput.Width = Window::GetWidth();
+		passOutput.Height = Window::GetHeight();
+		passOutput.Name = "module-init-loading";
+		passOutput.Format = PixelFormat::R8G8B8A8_UNorm;
+
+		// Add all my passes at runtime.
+		auto& pass = Graphics::RenderGraph::Instance()->AddPass("GModuleLoadingPass", Graphics::RenderGraphQueueFlagsBits::RENDER_GRAPH_QUEUE_GRAPHICS_BIT);
+		pass.AddColorOutput("GModule_output", passOutput);
+		pass.SetClearColour(glm::vec4(0, 0, 0.75f, 1));
+
+		Graphics::RenderGraph::Instance()->SetbackBufferSource("GModule_output");
 	}
 
 	void GraphicsModule::ShadowMap()
@@ -285,7 +314,7 @@ namespace Module
 				glm::mat4 DepthMVP;
 			};
 			UBO depthMVP;
-			depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			//depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -390,9 +419,9 @@ namespace Module
 				glm::mat4(1.0f),
 				glm::vec3(5.0f, 5.0f, 5.0f)
 			};
-			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			//ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			ubo.LightDir = -data.Direction;
-			ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
+			//ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;

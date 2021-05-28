@@ -159,7 +159,7 @@ namespace Insight::Graphics
 	/// Currently the graph does not share resources between each pass. This needs to be 
 	/// looked into to share resources instead of having unique resources per a pass.
 	/// </summary>
-	class IS_API RenderGraph : public TSingleton<RenderGraph>
+	class IS_API RenderGraph : public Core::TSingleton<RenderGraph>
 	{
 	public:
 		static RenderGraph* New();

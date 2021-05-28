@@ -1,16 +1,16 @@
 #include "ispch.h"
 #include "Engine/Graphics/GPUBuffer.h"
 #include "Engine/Graphics/GPUDevice.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUBufferVulkan.h"
 
 namespace Insight::Graphics
 {
 	GPUBuffer* GPUBuffer::New()
 	{
-		switch (Module::GraphicsModule::Instance()->GetAPI())
+		if (::Graphics::IsVulkan())
 		{
-			case GraphicsRendererAPI::Vulkan: return ::New<GraphicsAPI::Vulkan::GPUBufferVulkan>();
+			return ::New<GraphicsAPI::Vulkan::GPUBufferVulkan>();
 		}
 
 		ASSERT(false && "[GPUBuffer::New] API not supported.");

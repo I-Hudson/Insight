@@ -13,8 +13,8 @@ namespace Insight::Editor
 
 		if (UIHelper::DrawString("Mesh path", &component.GetMeshName()))
 		{
-			auto modelPtr = Library::ModelLibrary::Instance()->GetAssetFromPath(component.GetMeshName());
-			if (modelPtr)
+			//auto modelPtr = Library::ModelLibrary::Instance()->GetAssetFromPath(component.GetMeshName());
+			//if (modelPtr)
 			{
 				//component.SetMesh(modelPtr->GetMesh());
 			}

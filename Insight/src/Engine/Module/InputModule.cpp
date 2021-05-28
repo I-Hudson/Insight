@@ -6,24 +6,27 @@
 #include "GLFW/glfw3.h"
 #include "backends/imgui_impl_glfw.h"
 
-namespace Module
+namespace Insight::Module
 {
 	std::unordered_map<int, InputModule::KeyStates> InputModule::m_inputStates;
 	double InputModule::m_mouseX;
 	double InputModule::m_mouseY;
 
 	InputModule::InputModule()
+	{ }
+
+	InputModule::~InputModule()
+	{
+
+	}
+
+	void InputModule::OnCreate()
 	{
 		auto windowModule = ModuleManager::Instance()->GetModule<WindowModule>();
 		glfwSetKeyCallback(windowModule->GetWindow()->m_window, KeybordCallback);
 		glfwSetCharCallback(windowModule->GetWindow()->m_window, CharCallback);
 		glfwSetMouseButtonCallback(windowModule->GetWindow()->m_window, MouseButtonCallback);
 		glfwSetCursorPosCallback(windowModule->GetWindow()->m_window, MousePositionCallback);
-	}
-
-	InputModule::~InputModule()
-	{
-
 	}
 
 	void InputModule::Update(const float& deltaTime)

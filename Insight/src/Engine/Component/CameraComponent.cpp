@@ -5,7 +5,7 @@
 #include "Engine/Entity/Entity.h"
 #include "Engine/Input/Input.h"
 #include "Engine/Module/WindowModule.h"
-#include "Engine/Module/GraphicsModule.h"
+#include "Engine/Graphics/Graphics.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
 
@@ -208,7 +208,7 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		// pitch
 		if (iDeltaY != 0)
 		{
-			if (Module::GraphicsModule::Instance()->IsVulkan())
+			if (Graphics::IsVulkan())
 			{
 				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
 			}
@@ -265,8 +265,8 @@ const float CameraComponent::GetCamerAspect(const CameraAspect& cameraAspect)
 	case CameraAspect::A_1: return 1.0f;
 	case CameraAspect::A_4x3: return 4.0f / 3.0f;
 	case CameraAspect::A_16x9: return 16.0f / 9.0f;
-	case CameraAspect::CurrentWindowSize: return (float)Module::WindowModule::GetWindow()->GetWidth() /
-		(float)Module::WindowModule::GetWindow()->GetHeight();
+	case CameraAspect::CurrentWindowSize: return (float)Window::GetWidth() /
+		(float)Window::GetHeight();
 
 	default: return 1.0f;
 	}

@@ -2,7 +2,7 @@
 
 #ifdef IS_PLATFORM_WINDOWS
 
-extern Application* CreateApplication();
+extern Insight::Application* CreateApplication();
 #if defined(IS_DEBUG)
 int main(int argc, char** argv)
 #else

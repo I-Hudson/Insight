@@ -46,6 +46,7 @@ namespace Insight::Graphics
 
 	struct RenderList
 	{
+		std::vector<std::string> Passes;
 		std::vector<DrawCall> DrawCalls;
 		std::unordered_map<std::string, DrawCallList> DrawCallList;
 

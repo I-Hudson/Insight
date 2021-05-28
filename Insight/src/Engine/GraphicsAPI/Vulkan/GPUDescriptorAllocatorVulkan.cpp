@@ -115,7 +115,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	void GPUDescriptorLayoutCacheVulkan::Cleanup()
 	{
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 		for (auto& pair : m_layoutCache)
 		{
 			vkDestroyDescriptorSetLayout(device, pair.second, nullptr);
@@ -154,7 +154,7 @@ namespace Insight::GraphicsAPI::Vulkan
 			});
 		}
 
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 		//try to grab from cache
 		auto it = m_layoutCache.find(layoutInfo);
 		if (it != m_layoutCache.end())
@@ -318,7 +318,7 @@ namespace Insight::GraphicsAPI::Vulkan
 			w.dstSet = static_cast<GPUDescriptorSetVulkan*>(set)->m_set;
 		}
 
-		VkDevice device = static_cast<GPUDeviceVulkan*>(GPUDevice::Instance())->Device;
+		VkDevice device = static_cast<GPUDeviceVulkan*>(Graphics::GPUDevice::Instance())->Device;
 		vkUpdateDescriptorSets(device, static_cast<u32>(m_writes.size()), m_writes.data(), 0, nullptr);
 		m_writes.clear();
 		m_bindings.clear();

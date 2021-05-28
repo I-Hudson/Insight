@@ -9,16 +9,17 @@
 struct GLFWwindow;
 class Input;
 
-namespace Module
+namespace Insight::Module
 {
 	class WindowModule;
 
-	class IS_API InputModule : public Module
+	class InputModule : public Module
 	{
 	public:
 		InputModule();
 		virtual ~InputModule() override;
 
+		virtual void OnCreate() override;
 		virtual void Update(const float& deltaTime) override;
 
 	private:

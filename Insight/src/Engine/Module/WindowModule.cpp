@@ -5,17 +5,16 @@
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 #include "Engine/Instrumentor/Instrumentor.h"
+#include "Engine/Graphics/Graphics.h"
 
-#ifdef IS_EDITOR
-#include "Module/EditorModule.h"
-#include "Editor/Windows/SceneWindow.h"
-#endif
 
 #include "stb_image.h"
 #include <glad/glad.h>
 #include "GLFW/glfw3.h"
 
+
 GLFWwindow* Window::m_window;
+
 
 const int Window::GetWidth()
 {
@@ -64,6 +63,7 @@ void Window::SetIcon(const std::vector<std::string>& iconPaths)
 	}
 }
 
+
 void Window::SetFullscreen(const bool& fullscreen)
 {
 	int xPos, yPos;
@@ -96,11 +96,20 @@ bool Window::ShouldClose()
 	return glfwWindowShouldClose(m_window);
 }
 
-namespace Module
+namespace Insight::Module
 {
 	Window WindowModule::m_window;
 
 	WindowModule::WindowModule()
+	{ }
+
+	WindowModule::~WindowModule()
+	{
+		glfwDestroyWindow(m_window.m_window);
+		glfwTerminate();
+	}
+
+	void WindowModule::OnCreate()
 	{
 		IS_CORE_ASSERT(glfwInit() == 1, "GLFW failed to init!");
 		glfwSetErrorCallback([](int errorCode, const char* errorMessage)
@@ -109,11 +118,11 @@ namespace Module
 			IS_CORE_ASSERT(false, "GLFW ERROR");
 		});
 
-		if (Renderer::s_API == GraphicsRendererAPI::Vulkan)
+		if (::Graphics::IsVulkan())
 		{
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		}
-		else if (Renderer::s_API == GraphicsRendererAPI::OpenGL)
+		else if (::Graphics::IsOpenGL())
 		{
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -131,7 +140,7 @@ namespace Module
 			EventManager::Dispatch(EventType::WindowResize, WindowResizeEvent(width, height));
 		});
 
-		if (Renderer::s_API == GraphicsRendererAPI::OpenGL)
+		if (::Graphics::IsOpenGL())
 		{
 			glfwMakeContextCurrent(m_window.m_window);
 
@@ -142,12 +151,8 @@ namespace Module
 				glViewport(0, 0, CONFIG_VAL(Config::WindowConfig.WindowWidth), CONFIG_VAL(Config::WindowConfig.WindowHeight));
 			}
 		}
-	}
 
-	WindowModule::~WindowModule()
-	{
-		glfwDestroyWindow(m_window.m_window);
-		glfwTerminate();
+		m_state = ModuleState::Running;
 	}
 
 	void WindowModule::Update(const float& deltaTime)

@@ -20,10 +20,6 @@
 #include "Engine/Instrumentor/Instrumentor.h"
 
 #include "Engine/Graphics/Model/Model.h"
-#include "Engine/Model/Model.h"
-#include "Engine/Model/Mesh.h"
-#include "Engine/Graphics/Texture.h"
-#include "Engine/Graphics/Material.h"
 
 #include "Engine/Scene/Scene.h"
 #include "Engine/Entity/Entity.h"

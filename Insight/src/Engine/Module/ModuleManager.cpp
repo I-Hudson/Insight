@@ -3,39 +3,39 @@
 #include "Engine/Module/ModuleManager.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 
-	namespace Module
+namespace Insight::Module
+{
+	ModuleManager::ModuleManager()
 	{
-		ModuleManager::ModuleManager()
-		{
-		}
+	}
 
-		ModuleManager::~ModuleManager()
+	ModuleManager::~ModuleManager()
+	{
+		for (auto& mod : m_modules)
 		{
-			for (auto it = m_modules.begin(); it != m_modules.end(); ++it)
+			if (mod != nullptr && !mod->ShouldDestroyManually())
 			{
-				if (it->second != nullptr && !it->second->ShouldDestroyManually())
-				{
-					::Delete(it->second);
-				}
-			}
-			m_modules.clear();
-		}
-
-		void ModuleManager::Update(const float& deltaTime)
-		{
-			IS_PROFILE_FUNCTION();
-
-			for (auto& mod : m_modules)
-			{
-				if (!mod.second->ShouldManuallUpate())
-				{
-					mod.second->Update(deltaTime);
-				}
+				::Delete(mod);
 			}
 		}
+		m_modules.clear();
+	}
 
-		bool ModuleManager::Exists(const Type& type)
+	void ModuleManager::Update(const float& deltaTime)
+	{
+		IS_PROFILE_FUNCTION();
+
+		for (auto& mod : m_modules)
 		{
-			return m_modules.find(type) != m_modules.end();
+			if (!mod->ShouldManuallUpate())
+			{
+				mod->Update(deltaTime);
+			}
 		}
 	}
+
+	bool ModuleManager::Exists(const Type& type)
+	{
+		return m_typeToModule.find(type) != m_typeToModule.end();
+	}
+}

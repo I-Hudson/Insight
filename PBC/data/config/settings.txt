@@ -13,6 +13,7 @@ placement_policy=0
 smart_pointers=true
 
 Renderer
+validation=1
 vsync=0
 gsync=1
-validation=1
+graphics_api=3

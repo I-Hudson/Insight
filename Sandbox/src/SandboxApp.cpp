@@ -1,7 +1,7 @@
 #include <Insight.h>
 #include "PlayerController.h"
 
-class Sandbox : public Application
+class Sandbox : public Insight::Application
 {
 public:
 	std::vector<TransformComponent*> transformComponents;
@@ -78,7 +78,7 @@ public:
 	}
 };
 
-Application* CreateApplication()
+Insight::Application* CreateApplication()
 {
 	return new Sandbox();
 }

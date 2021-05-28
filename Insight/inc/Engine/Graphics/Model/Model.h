@@ -7,7 +7,7 @@
 namespace Insight::Graphics
 {
 	using MeshTextures = std::unordered_map<std::string, std::string>;
-	class RenderList;
+	struct RenderList;
 
 	namespace ModelLoading
 	{

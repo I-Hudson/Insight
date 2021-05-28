@@ -31,7 +31,7 @@ namespace Insight::Editor
 		camera.SetProjMatrix(90.0f, 0.1f, 10000.0f);
 		camera.SetCameraSpeed(25.0f);
 	
-		::Module::GraphicsModule::Instance()->SetEditorCamera(&camera);
+//		Module::GraphicsModule::Instance()->SetEditorCamera(&camera);
 		m_sceneImages.resize(Graphics::RenderGraph::Instance()->GetFrameCount());
 		for (auto& image : m_sceneImages)
 		{
@@ -73,7 +73,7 @@ namespace Insight::Editor
 				// should be fine.
 
 				glm::ivec2 windowsSize = glm::ivec2((int)ImGui::GetWindowSize().x, (int)ImGui::GetWindowSize().y);
-				windowsSize.y -= ImGui::GetFrameHeight() * 1.5f;
+				windowsSize.y -= (int)(ImGui::GetFrameHeight() * 1.5f);
 				if (windowsSize != m_windowSize)
 				{
 					m_windowSize = windowsSize;
