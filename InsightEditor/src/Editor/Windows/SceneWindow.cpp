@@ -31,7 +31,7 @@ namespace Insight::Editor
 		camera.SetProjMatrix(90.0f, 0.1f, 10000.0f);
 		camera.SetCameraSpeed(25.0f);
 	
-//		Module::GraphicsModule::Instance()->SetEditorCamera(&camera);
+		Module::GraphicsModule::Instance()->SetEditorCamera(&camera);
 		m_sceneImages.resize(Graphics::RenderGraph::Instance()->GetFrameCount());
 		for (auto& image : m_sceneImages)
 		{

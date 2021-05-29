@@ -4,14 +4,19 @@
 #include "Engine/Entity/Entity.h"
 #include "Engine/Component/Component.h"
 #include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Graphics/RenderList.h"
+#include "Engine/Core/Maths/Frustum.h"
+
+#include "Engine/Module/WindowModule.h"
 
 #include "Engine/Serialization/File/SerializableFile.h"
 
+#include "glm/gtc/matrix_transform.hpp"
 #include <ostream>
 
 Scene* Scene::s_CurrentScene;
@@ -176,6 +181,21 @@ void Scene::OnUpdate(const float& deltaTime)
 
 void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 {
+	// Get the first camera only if the scene is playing.
+	if (IsPlaying())
+	{
+		auto& cameraComponents = m_componentManager.GetAllComponents<CameraComponent>();
+		CameraComponent& camera = cameraComponents.at(0);
+		if (camera.IsValid())
+		{
+			renderList->CameraTransform = camera.GetViewMatrix();
+			renderList->CameraProjection = glm::perspective(glm::radians(45.0f), (float)Window::GetWidth() / (float)Window::GetHeight(), 0.1f, 1000.0f);//camera.GetProjMatrix();
+		}
+	}
+
+	Insight::Maths::Frustum cameraFrustum;
+	cameraFrustum.Update(renderList->CameraProjection, renderList->CameraTransform);
+
 	auto& meshComponents = m_componentManager.GetAllComponents<MeshComponent>();
 	for (auto& com : meshComponents)
 	{
@@ -184,7 +204,11 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			return;
 		}
 
-		com.OnDraw(renderList);
+		TransformComponent& transformComponent = com.GetEntity().GetComponent<TransformComponent>();
+		if (cameraFrustum.CheckSphere(transformComponent.GetPostion(), 50.0f))
+		{
+			com.OnDraw(renderList, transformComponent.GetTransform(), cameraFrustum);
+		}
 	}
 }
 

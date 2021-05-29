@@ -478,3 +478,13 @@ enum class GPUResults
     Error_Out_Of_Pool_Memory = 1000069000,
 
 };
+
+namespace Insight::Graphics
+{
+    enum class MaterialDrawMode
+    {
+        Transparent,
+        Opaque
+    };
+    const MaterialDrawMode AllNaterialDrawModes[] = { MaterialDrawMode::Transparent, MaterialDrawMode::Opaque };
+}

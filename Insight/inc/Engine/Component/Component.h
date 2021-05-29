@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Common.h"
 #include "Engine/Serialization/Serializable.h"
+#include "Engine/Core/Maths/Frustum.h"
 
 #include "Reflect.h"
 #include "Generated/Component_reflect_generated.h"
@@ -33,7 +34,7 @@ public:
 	virtual ~Component();
 
 	virtual void OnUpdate(const float& a_deltaTime) { }
-	virtual void OnDraw(Insight::Graphics::RenderList* renderList) { }
+	virtual void OnDraw(Insight::Graphics::RenderList* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) { }
 	bool IsValid() { return m_entityID != -1; }
 	Entity GetEntity();
 

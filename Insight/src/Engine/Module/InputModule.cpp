@@ -27,6 +27,7 @@ namespace Insight::Module
 		glfwSetCharCallback(windowModule->GetWindow()->m_window, CharCallback);
 		glfwSetMouseButtonCallback(windowModule->GetWindow()->m_window, MouseButtonCallback);
 		glfwSetCursorPosCallback(windowModule->GetWindow()->m_window, MousePositionCallback);
+		m_state = ModuleState::Running;
 	}
 
 	void InputModule::Update(const float& deltaTime)

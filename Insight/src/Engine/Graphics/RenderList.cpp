@@ -36,4 +36,11 @@ namespace Insight::Graphics
 		}
 		FreeRenderList.clear();
 	}
+
+	void RenderList::AddDrawCall(MaterialDrawMode drawNode, DrawCall drawCall)
+	{
+		u32 drawCallIndex = DrawCalls.size();
+		DrawCalls.push_back(drawCall);
+		DrawCallList[drawNode].DrawCalls.push_back(drawCallIndex);
+	}
 }

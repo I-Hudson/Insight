@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Common.h"
 #include "Engine/Graphics/GPUBuffer.h"
+#include "Engine/Core/Maths/Frustum.h"
 #include <glm/glm.hpp>
 
 namespace Insight::Graphics
@@ -44,7 +45,7 @@ namespace Insight::Graphics
 
 		std::string GetTexture(const std::string& textureId);
 
-		void Draw(RenderList* drawList);
+		void Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
 		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
@@ -85,7 +86,7 @@ namespace Insight::Graphics
 		const u32& GetVertexCount() const { return m_vertexCount; }
 		const u32& GetIndexCount() const { return m_indexCount; }
 
-		void Draw(RenderList* drawList);
+		void Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
 		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 

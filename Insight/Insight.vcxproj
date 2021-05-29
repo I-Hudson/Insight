@@ -191,6 +191,7 @@
     <ClInclude Include="inc\Engine\Core\Enums.h" />
     <ClInclude Include="inc\Engine\Core\InsightAlias.h" />
     <ClInclude Include="inc\Engine\Core\Log.h" />
+    <ClInclude Include="inc\Engine\Core\Maths\Frustum.h" />
     <ClInclude Include="inc\Engine\Core\Maths\Rect.h" />
     <ClInclude Include="inc\Engine\Core\NonCopyable.h" />
     <ClInclude Include="inc\Engine\Core\Object.h" />

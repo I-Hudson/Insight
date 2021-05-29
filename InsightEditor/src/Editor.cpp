@@ -19,6 +19,7 @@ public:
 	{
 #ifdef IMGUI_ENABLED
 		m_editorModule = m_moduleManager->AddModule<Insight::Module::EditorModule>();
+		m_editorModule->OnCreate();
 		Insight::Config::GetInstance().Parse("./data/config/editorConfig.txt");
 
 		auto& style = ImGui::GetStyle().Colors;
@@ -66,6 +67,10 @@ public:
 		style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
 
+		Entity& mainCamera = Scene::ActiveScene()->CreateEntity("MainCamera");
+		CameraComponent& cameraCom = mainCamera.AddComponent<CameraComponent>();
+		cameraCom.SetProjMatrix(90.0f, 0.1f, 1000.0f);
+
 		Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
 		dirLight.GetComponent<TransformComponent>().SetPosition({ 1000, 2000, 150 });
 		DirectionalLightComponent& lightCom = dirLight.AddComponent<DirectionalLightComponent>();
@@ -90,6 +95,8 @@ public:
 		}
 
 		::New<Insight::Graphics::Debug::Gizmos>();
+
+		m_state = Insight::ApplicationState::Running;
 	}
 
 	virtual void Update(const float deltaTime) override

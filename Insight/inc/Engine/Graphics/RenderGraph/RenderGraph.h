@@ -191,7 +191,7 @@ namespace Insight::Graphics
 		/// Execute the render graph. This should run through all the render passes and call
 		/// their render function call backs. 
 		/// </summary>
-		void Execute();
+		void Execute(RenderList* renderList);
 
 		/// <summary>
 		/// Reset the graph. This should just clear the RenderPasses.
@@ -315,6 +315,7 @@ namespace Insight::Graphics
 			std::unordered_map<u64, GPURenderGraphPass*> RenderPasses;
 			std::vector<RenderPass> Passes;
 			std::vector<u32> PassStack;
+			RenderList* RenderList;
 
 			FrameBufferResources Buffers;
 

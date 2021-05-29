@@ -8,6 +8,7 @@
 
 #include "Engine/Graphics/GPUBufferDesc.h"
 #include "Engine/Graphics/Image/GPUImageDesc.h"
+#include "Engine/Graphics/RenderList.h"
 
 #include <functional>
 #include <unordered_set>
@@ -31,7 +32,7 @@ namespace Insight::Graphics
 	using FrameBufferResources = std::unordered_map<GPUBufferFlags, GPUDynamicBuffer*>;
 
 	using RenderPassBeginRenderFunc = std::function<void(RenderPass*, GPURenderGraphPass*)>;
-	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer*, FrameBufferResources&, GPUDescriptorBuilder*, RenderPass&)>;
+	using RenderPassRenderFunc = std::function<void(GPUCommandBuffer*, FrameBufferResources&, GPUDescriptorBuilder*, RenderPass&, RenderList*)>;
 	using RenderPassEndRenderFunc = std::function<void(RenderPass*)>;
 
 	using RenderPassClearColourFunc = std::function<void(u32, glm::vec4&)>;
@@ -319,11 +320,11 @@ namespace Insight::Graphics
 			}
 		}
 
-		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, FrameBufferResources& frameBuffers, GPUDescriptorBuilder* builder)
+		void CallRenderFunc(GPUCommandBuffer* cmdBuffer, FrameBufferResources& frameBuffers, GPUDescriptorBuilder* builder, RenderList* renderList)
 		{
 			if (m_renderFunc)
 			{
-				m_renderFunc(cmdBuffer, frameBuffers, builder, *this);
+				m_renderFunc(cmdBuffer, frameBuffers, builder, *this, renderList);
 			}
 		}
 
@@ -365,6 +366,7 @@ namespace Insight::Graphics
 		/// Render pass name. Used for debug.
 		/// </summary>
 		std::string m_name;
+		u32 m_passType;
 
 		GPURenderGraphPass* m_graphPass;
 		std::vector<RenderPassLifeTimeObject> m_lifeTimeObjects;

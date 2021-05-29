@@ -33,7 +33,9 @@ namespace Insight
 	enum ApplicationState
 	{
 		Init,
+		Loading,
 		Running,
+		Unloading,
 		Deinit
 	};
 

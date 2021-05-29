@@ -57,7 +57,7 @@ namespace Insight::Graphics
 		}
 
 		m_swapchainPresentPass.SetClearColour(glm::vec4(0.9f, 0.2f, 0.7f, 1.0f));
-		m_swapchainPresentPass.SetRenderFunc([this](GPUCommandBuffer* cmdBuffer, FrameBufferResources& buffers, GPUDescriptorBuilder* builder, RenderPass& pass)
+		m_swapchainPresentPass.SetRenderFunc([this](GPUCommandBuffer* cmdBuffer, FrameBufferResources& buffers, GPUDescriptorBuilder* builder, RenderPass& pass, RenderList* renderList)
 		{
 			IS_PROFILE_SCOPE("Swapchain present pass.");
 			const SwapchainSubmision& swapchain = RenderGraph::Instance()->GetCurrentSwapchainSubmision();
@@ -180,7 +180,7 @@ namespace Insight::Graphics
 		}
 	}
 
-	void RenderGraph::Execute()
+	void RenderGraph::Execute(RenderList* renderList)
 	{
 		IS_PROFILE_FUNCTION();
 
@@ -188,6 +188,7 @@ namespace Insight::Graphics
 		frame.Init();
 		frame.Passes = m_passes;
 		frame.PassStack = m_passStack;
+		frame.RenderList = renderList;
 
 		{
 			IS_PROFILE_SCOPE("Get next swapchain image.");
@@ -216,7 +217,7 @@ namespace Insight::Graphics
 				cmdBuffer->BeginRenderpass(renderPass);
 				cmdBuffer->SetViewPort(pass.GetWindowRect());
 				cmdBuffer->SetScissor(pass.GetWindowRect());
-				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
+				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder, renderList);
 				cmdBuffer->EndRenderpass(renderPass);
 				pass.CallEndRenderFunc();
 			}
@@ -229,7 +230,7 @@ namespace Insight::Graphics
 			cmdBuffer->BeginRenderpass(swapchainSubmision.GraphPass);
 			cmdBuffer->SetViewPort(m_swapchainPresentPass.GetWindowRect());
 			cmdBuffer->SetScissor(m_swapchainPresentPass.GetWindowRect());
-			m_swapchainPresentPass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder);
+			m_swapchainPresentPass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder, nullptr);
 			cmdBuffer->EndRenderpass(swapchainSubmision.GraphPass);
 			m_swapchainPresentPass.CallEndRenderFunc();
 		}
@@ -779,7 +780,8 @@ namespace Insight::Graphics
 			pass.m_lifeTimeObjects.clear();
 		}
 		RenderPasses.clear();
-		
+		RenderList::ReturnToPool(RenderList);
+
 		CommandPools->Reset();
 		DescriptorAllocator->ResetPools();
 	}

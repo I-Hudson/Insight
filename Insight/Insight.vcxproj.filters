@@ -1995,6 +1995,9 @@
     <ClInclude Include="vendor\stb\stb_image_write.h">
       <Filter>vendor\stb</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Engine\Core\Maths\Frustum.h">
+      <Filter>inc\Engine\Core\Maths</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="inc\Engine\Component\Generated\Component_reflect_generated.cpp">

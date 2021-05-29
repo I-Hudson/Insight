@@ -8,6 +8,7 @@
 #include "Engine/Config/CVar.h"
 #include "Engine/Graphics/ImGuiRenderer.h"
 
+class CameraComponent;
 namespace Insight::Module
 {
 	enum class GraphicsRendererAPI
@@ -37,6 +38,10 @@ namespace Insight::Module
 		bool IsVulkan();
 		bool IsOpenGL();
 
+#ifdef IS_EDITOR
+		void SetEditorCamera(CameraComponent* camera) { m_editorCamera = camera; }
+#endif
+
 		struct GraphicsConfig
 		{
 			CVar<int> Validation{ "validation", 1 };
@@ -58,6 +63,9 @@ namespace Insight::Module
 		void Editor();
 
 	private:
+#ifdef IS_EDITOR
+		CameraComponent* m_editorCamera;
+#endif
 		ImGuiRenderer* m_imguiRenderer;
 		void* m_shadowMap = nullptr;
 	};

@@ -52,8 +52,10 @@ namespace Insight::Graphics
 		return itr->second;
 	}
 
-	void SubMesh::Draw(RenderList* drawList)
+	void SubMesh::Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
+		//TODO: look into per submesh culling.
+
 		DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
@@ -61,6 +63,9 @@ namespace Insight::Graphics
 		drawCall.Draw.IndicesCount = GetVertexCount();
 		drawCall.Draw.IndciesStart = 0;
 		drawCall.Draw.IndicesCount = GetIndexCount();
+		drawCall.WorldTransform = worldTransform;
+		drawCall.TempTextureString = GetTexture("texture_diffuse");
+		drawList->AddDrawCall(MaterialDrawMode::Opaque, drawCall);
 	}
 
 	void SubMesh::SetDimensions(glm::vec3 min, glm::vec3 max)
@@ -83,11 +88,11 @@ namespace Insight::Graphics
 	Mesh::~Mesh()
 	{ }
 
-	void Mesh::Draw(RenderList* drawList)
+	void Mesh::Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		for (auto& mesh : m_subMeshes)
 		{
-			mesh.Draw(drawList);
+			mesh.Draw(drawList, worldTransform, cameraFrustum);
 		}
 	}
 

@@ -103,7 +103,8 @@ namespace Insight
 	void Application::Run()
 	{
 		bool modulesLoading = true;
-		while (modulesLoading && m_isRunning)
+		m_state = ApplicationState::Loading;
+		while (m_state == ApplicationState::Loading && m_isRunning)
 		{
 			modulesLoading = false;
 #ifdef IMGUI_ENABLED
@@ -117,16 +118,22 @@ namespace Insight
 				if (mod->GetState() == Module::ModuleState::Init)
 				{
 					mod->OnCreate();
+				}
+				if (mod->GetState() == Module::ModuleState::Loading)
+				{
 					modulesLoading = true;
 				}
 				mod->Update(0.0f);
 			}
-			m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
-		}
 
-		if (m_isRunning)
-		{
-			Create();
+			if (!modulesLoading)
+			{
+				if (m_isRunning)
+				{
+					Create();
+				}
+			}
+			m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
 		}
 
 #ifdef THREADS

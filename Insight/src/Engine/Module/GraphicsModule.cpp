@@ -11,6 +11,7 @@
 #include "Engine/Config/Config.h"
 #include "Engine/Scene/Scene.h"
 
+#include "Engine/Graphics/RenderList.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 
 #include "Engine/Time/Stopwatch.h"
@@ -63,6 +64,10 @@ namespace Insight::Module
 	//}
 
 	GraphicsModule::GraphicsModule()
+		: 
+#ifdef IS_EDITOR
+		m_editorCamera(nullptr)
+#endif
 	{ }
 
 	GraphicsModule::~GraphicsModule()
@@ -76,6 +81,7 @@ namespace Insight::Module
 		}
 
 		::Delete(Insight::Graphics::RenderGraph::Instance());
+		Graphics::RenderList::ClearCache();
 		Graphics::GPUDevice::Instance()->Dispose();
 		::Delete(Graphics::GPUDevice::Instance());
 	}
@@ -164,7 +170,6 @@ namespace Insight::Module
 		}
 		Insight::Graphics::RenderGraph* graph = Insight::Graphics::RenderGraph::New();
 		m_imguiRenderer = ImGuiRenderer::New();
-
 		m_state = ModuleState::Running;
 	}
 
@@ -173,7 +178,7 @@ namespace Insight::Module
 
 	void GraphicsModule::Update(const float& deltaTime)
 	{
-		if (Application::GetState() == ApplicationState::Init)
+		if (Application::GetState() == ApplicationState::Loading)
 		{
 			if (ImGuiRenderer::Instance()->IsInit())
 			{
@@ -190,46 +195,56 @@ namespace Insight::Module
 			m_imguiRenderer->Render();
 			Insight::Graphics::RenderGraph::Instance()->Build();
 			//Insight::Graphics::RenderGraph::Instance()->LogToConsole();
-			Insight::Graphics::RenderGraph::Instance()->Execute();
+			Insight::Graphics::RenderGraph::Instance()->Execute(nullptr);
 			Graphics::GPUDevice::Instance()->EndFrame();
 
 			return;
 		}
 
 		IS_PROFILE_FUNCTION();
+		Graphics::RenderList* renderList = Graphics::RenderList::GetFromPool();
 		{
-			IS_PROFILE_SCOPE("RenderGraph: Create");
-
-			Graphics::RenderList* renderList = Graphics::RenderList::GetFromPool();
-			Scene::ActiveScene()->OnDraw(renderList);
-
-			using namespace Insight;
-			Graphics::RenderGraph::Instance()->Reset();
-			Graphics::GPUDevice::Instance()->BeginFrame();
-
-			ShadowMap();
-			Deffered();
+			IS_PROFILE_SCOPE("Populate render list");
 #ifdef IS_EDITOR
-			//Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
+			if (!Scene::ActiveScene()->IsPlaying())
+			{
+				if (m_editorCamera)
+				{
+					renderList->CameraProjection = m_editorCamera->GetProjMatrix();
+					renderList->CameraTransform = m_editorCamera->GetViewMatrix();
+				}
+			}
+#endif
+			Scene::ActiveScene()->OnDraw(renderList);
+		}
+
+		IS_PROFILE_SCOPE("RenderGraph: Create");
+		using namespace Insight;
+		Graphics::RenderGraph::Instance()->Reset();
+		Graphics::GPUDevice::Instance()->BeginFrame();
+
+		ShadowMap();
+		Deffered();
+#ifdef IS_EDITOR
+		//Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
 #endif
 
 			// If we are in editor then set a blank image as the output.
 #ifdef IS_EDITOR
-			Editor();
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("editorPass_Output");			
+		Editor();
+		Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("editorPass_Output");
 #else
 			// We are in a game build .exe. the backbuffer source should a an image which has had processing on it.
-			Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("color");
+		Insight::Graphics::RenderGraph::Instance()->SetbackBufferSource("color");
 #endif
-			++imageIndex;
-		}
+		++imageIndex;
 
 		m_imguiRenderer->EndFrame();
 		m_imguiRenderer->Render();
 
 		Insight::Graphics::RenderGraph::Instance()->Build();
 		//Insight::Graphics::RenderGraph::Instance()->LogToConsole();
-		Insight::Graphics::RenderGraph::Instance()->Execute();
+		Insight::Graphics::RenderGraph::Instance()->Execute(renderList);
 
 		Graphics::GPUDevice::Instance()->EndFrame();
 	}
@@ -302,7 +317,7 @@ namespace Insight::Module
 		shadowPass.SetClearColour(glm::vec4(0, 0, 0, 0));
 		shadowPass.SetWindowRect(Maths::Rect(0, 0, shadowPassCascadeMap.Width, shadowPassCascadeMap.Height));
 		shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
-		shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
+		shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass, Graphics::RenderList* renderList)
 		{
 			IS_PROFILE_SCOPE("Shadow Map");
 			cmdBuffer->SetDepthBias(1.25f, 0.0f, 1.75f);
@@ -396,7 +411,7 @@ namespace Insight::Module
 		mainPass.AddSubpassDependencies(Graphics::SubpassDependency::MainDeferedPass());
 		mainPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
 		mainPass.SetClearColour(glm::vec4(0, 0, 0, 1));
-		mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass)
+		mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass, Graphics::RenderList* renderList)
 		{
 			IS_PROFILE_SCOPE("Main Pass");
 			struct UBO
@@ -405,10 +420,6 @@ namespace Insight::Module
 				glm::mat4 LightSpace;
 				glm::vec3 LightDir;
 			};
-
-			// bind material
-			// bind buffers
-			// Draw mesh, 
 
 			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
 			DirectionalLightComponentData& data = lightCom.GetComponentData<DirectionalLightComponentData>();
@@ -421,7 +432,7 @@ namespace Insight::Module
 			};
 			//ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			ubo.LightDir = -data.Direction;
-			//ubo.PVMatrix = m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
+			ubo.PVMatrix = renderList->CameraProjection * glm::inverse(renderList->CameraTransform);// m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -454,66 +465,61 @@ namespace Insight::Module
 			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
 			Graphics::GPUDescriptorSet* fragSet = Graphics::GPUDescriptorSet::New();
 
+			Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
+			const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
+
 			{
-				IS_PROFILE_SCOPE("Upload mesh vertices");
-				for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
+				IS_PROFILE_SCOPE("Send draw commands to GPU");
+				auto& DrawCallList = renderList->DrawCallList[Graphics::MaterialDrawMode::Opaque];
+				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
-					if (mesh.GetMesh() != nullptr)
+					Graphics::DrawCall& drawCall = renderList->DrawCalls.at(drawCallIndex);
+					glm::mat4 modelMatrix = drawCall.WorldTransform; //mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
+					Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
 					{
-						glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
-						Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
-						Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
-						const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
-
-						{
-							IS_PROFILE_SCOPE("Build per mesh descriptor set");
-							builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-								->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-								->BindImage(2, shadowPassTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(vertexSet);
-						}
-						Graphics::GPUDescriptorSet* sets[] = { vertexSet };
-						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
-
-						for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
-						{
-							int textureDiffuse = 1;
-							Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
-
-							Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
-							Graphics::GPUImage* diffuseTexture = nullptr;
-							std::string diffuseTextureString = subMesh.GetTexture("texture_diffuse");
-							if (diffuseTextureString.empty())
-							{
-								diffuseTextureString = "./data/embed2.jpg";
-							}
-							Utils::Hasher diffuseTextureHasher;
-							diffuseTextureHasher.Hash(diffuseTextureString);
-							if (Graphics::GPUImageCache::Instance()->GetItem(diffuseTextureHasher.GetHash(), diffuseTexture))
-							{
-								diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
-							}
-
-							Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
-							pass.AddLifeTimeObject(diffuseTextureView);
-							diffuseTextureView->Init(diffuseTexture);
-
-							{
-								IS_PROFILE_SCOPE("Build per submesh descriptor set");
-								builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-									->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
-							}
-							Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
-							cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
-
-							u32 offsets[] = { 0 };
-							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
-							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-
-							cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
-						}
+						IS_PROFILE_SCOPE("Build per mesh descriptor set");
+						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+							->BindImage(2, shadowPassTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(vertexSet);
 					}
+					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+
+					int textureDiffuse = 1;
+					Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
+
+					Graphics::GPUImage* diffuseTexture = nullptr;
+					std::string diffuseTextureString = drawCall.TempTextureString;
+					if (diffuseTextureString.empty())
+					{
+						diffuseTextureString = "./data/embed2.jpg";
+					}
+					hasher.Clear();
+					hasher.Hash(diffuseTextureString);
+					if (Graphics::GPUImageCache::Instance()->GetItem(hasher.GetHash(), diffuseTexture))
+					{
+						diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
+					}
+					Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
+					pass.AddLifeTimeObject(diffuseTextureView);
+					diffuseTextureView->Init(diffuseTexture);
+
+					{
+						IS_PROFILE_SCOPE("Build per draw call descriptor set");
+						builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
+							->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
+					}
+					Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
+					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
+
+					u32 offsets[] = { 0 };
+					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
+					cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+					cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+
+					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
+
 				}
 			}
 			::Delete(vertexSet);
