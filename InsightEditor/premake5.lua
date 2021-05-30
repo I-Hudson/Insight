@@ -39,6 +39,7 @@ project "InsightEditor"
         "%{IncludeDir.dirent}",
         "%{IncludeDir.IconsFontAwesome}",
         "%{IncludeDir.Reflect}",
+        "%{IncludeDir.JobSystem}",
 	}
 
     links 

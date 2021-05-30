@@ -42,3 +42,6 @@
 [submodule "Insight/vendor/ImGuizmo"]
 	path = Insight/vendor/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "Insight/vendor/JobSystem"]
+	path = Insight/vendor/JobSystem
+	url = https://github.com/I-Hudson/JobSystem.git

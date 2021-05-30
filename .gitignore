@@ -1,6 +1,9 @@
 ##### Windows
 
 PBC/data/models
+*.vcxproj
+*.vcxproj.filters
+*.sln
 
 # Windows thumbnail cache files
 Thumbs.db

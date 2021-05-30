@@ -51,6 +51,7 @@ project "Insight"
         "%{IncludeDir.ktx}",
         "%{IncludeDir.IconsFontAwesome}",
         "%{IncludeDir.Reflect}",
+        "%{IncludeDir.JobSystem}",
 
         "%{IncludeDir.glslang}",
         "%{IncludeDir.VulkanMemoryAllocator}",
@@ -83,6 +84,7 @@ project "Insight"
         "ImGui",
         "ImGuizmo",
         "SPIRV_Cross",
+        "JobSystem",
 
         "OptickCore",
         "ktx",

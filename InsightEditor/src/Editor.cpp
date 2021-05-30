@@ -117,6 +117,52 @@ public:
 	}
 };
 
+//std::vector<std::string> modelPaths =
+//{
+//	"./data/models/sponza/sponza.obj",
+//	"./data/models/sponza/sponza.obj",
+//	"./data/models/sponza/sponza.obj"
+//};
+//std::vector<Insight::Graphics::Model*> loadedModels;
+//loadedModels.resize(modelPaths.size());
+//
+//{
+//	IS_PROFILE_START_CAPTURE();
+//	u32 vecIndex = 0;
+//	for (auto& path : modelPaths)
+//	{
+//		loadedModels[vecIndex] = new Insight::Graphics::Model(path);
+//		++vecIndex;
+//	}
+//	IS_PROFILE_STOP_CAPTURE();
+//	IS_PROFILE_SAVE_CAPTURE("ModelLoading - SingleThread");
+//}
+//
+//js::JobSystemManager jsManager;
+//js::JobSystemManager::ReturnCode code = jsManager.Init();
+//
+//loadedModels.clear();
+//{
+//	IS_PROFILE_START_CAPTURE();
+//	std::vector<std::shared_ptr<js::JobWithResult<Insight::Graphics::Model*>>> jsLoadedModels;
+//	js::JobWaitList jsWaitList;
+//	for (size_t i = 0; i < 3; ++i)
+//	{
+//		std::string modelPath = modelPaths[i];
+//		auto job = jsManager.CreateJob(js::JobPriority::Normal, [modelPath]() -> Insight::Graphics::Model*
+//		{
+//			return new Insight::Graphics::Model(modelPath);
+//		});
+//		jsLoadedModels.push_back(job);
+//		jsManager.ScheduleJob(job);
+//		jsWaitList.AddJobToWaitOn(job);
+//	}
+//	jsWaitList.Wait();
+//	IS_PROFILE_STOP_CAPTURE();
+//	IS_PROFILE_SAVE_CAPTURE("ModelLoading - MultiThread");
+//}
+//jsManager.Shutdown(true);
+
 Insight::Application* CreateApplication()
 {
 	return new EditorApp();
