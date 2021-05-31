@@ -56,7 +56,7 @@ namespace Insight
 
 		m_moduleManager = ::New<Module::ModuleManager>();
 
-		//auto assertModule = m_moduleManager->AddModule<Module::AssetModule>();
+		m_moduleManager->AddModule<Module::AssetModule>();
 
 		m_windowModule = m_moduleManager->AddModule<Module::WindowModule>();
 		m_windowModule->SetManuallyUpdate(true);
@@ -85,6 +85,7 @@ namespace Insight
 		::Delete(m_utitledScene);
 		::Delete(m_fileSystem);
 
+		Module::ModuleManager::Instance()->RemoveModule<Module::AssetModule>();
 		Module::ModuleManager::Instance()->RemoveModule<Module::GraphicsModule>();
 		::Delete(Module::ModuleManager::Instance());
 
@@ -136,6 +137,11 @@ namespace Insight
 			m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
 		}
 
+		Assets::AssetPtr<Assets::FileAsset> assetPtr = Module::AssetModule::Instance()->Load<Assets::FileAsset>("./data/File.txt");
+		{
+			auto assetPtr1 = assetPtr;
+		}
+		assetPtr.Clear();
 #ifdef THREADS
 		m_updateThreadState = UpdateThreadState::SAME_FRMAE;
 		m_renderThread = std::thread(&Application::RenderLoop, this);

@@ -1,34 +1,25 @@
 #include "ispch.h"
-//
-//#include "Engine/Module/AssetModule.h"
-//#include "Engine/Memory/MemoryManager.h"
-//
-//#include "Engine/Model/Model.h"
-//
-//	namespace InsiModule
-//	{
-//		AssetModule::AssetModule()
-//			: m_deserlizaed(false)
-//		{
-//			m_modelLibrary = ::New<Library::ModelLibrary>();
-//			//m_shaderLibrary = NEW_ON_HEAP(Library::ShaderLibrary);
-//		}
-//
-//		AssetModule::~AssetModule()
-//		{
-//			::Delete(m_modelLibrary);
-//			//DELETE_ON_HEAP(m_shaderLibrary);
-//		}
-//
-//		void AssetModule::Update(const float& deltaTime)
-//		{
-//		}
-//
-//		void AssetModule::Deserialize()
-//		{
-//			IS_PROFILE_START_CAPTURE();
-//			m_modelLibrary->LoadAssetsFromFolder("./data", true);
-//			IS_PROFILE_STOP_CAPTURE();
-//			IS_PROFILE_SAVE_CAPTURE("ModelLoadCapture");
-//		}
-//	}
+
+#include "Engine/Module/AssetModule.h"
+#include <filesystem>
+
+namespace Insight::Module
+{
+	AssetModule::AssetModule()
+	{ }
+
+	AssetModule::~AssetModule()
+	{
+		for (auto& asset : m_assets)
+		{
+			::Delete(asset.second);
+		}
+
+		for (auto& controlBlock : m_controlBlocks)
+		{
+			ASSERT(controlBlock.second->RefCount.load(std::memory_order::memory_order_acquire) == 0 &&
+				   "[AssetModule::~AssetModule] Asset has a reference somewhere.");
+			::Delete(controlBlock.second);
+		}
+	}
+}

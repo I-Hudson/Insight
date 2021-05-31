@@ -82,8 +82,8 @@ public:
 
 		for (size_t i = 0; i < 2; ++i)
 		{
-			//Insight::Graphics::Model* graphicsModel = FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/vulkanscene_shadow.gltf");
-			Insight::Graphics::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
+			Insight::Graphics::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/vulkanscene_shadow.gltf");
+			//Insight::Graphics::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Graphics::Model>("./data/models/sponza/sponza.obj");
 
 			Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 			MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();

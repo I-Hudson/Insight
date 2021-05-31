@@ -58,7 +58,14 @@ namespace Insight::Module
 		{
 			auto& it = m_modules.at(m_typeToModule.at(type));
 			::Delete(it);
-			m_modules.erase(m_modules.begin() + m_typeToModule.at(type));
+			u32 moduleIndex = m_typeToModule.at(type);
+			m_modules.erase(m_modules.begin() + moduleIndex);
+			for (auto& kvp : m_typeToModule)
+			{
+				if (kvp.second > moduleIndex)
+					--kvp.second;
+			}
+			m_typeToModule.erase(type);
 		}
 	}
 
