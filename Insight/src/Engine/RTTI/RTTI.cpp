@@ -57,13 +57,6 @@ namespace RTTI
 		}
 
 		m_RTTITypes[ownerObject].push_back(rttiType);
-
-		// Register remove from RTTI when object is destroyed.
-		ownerObject->RegisterOnDestroyCallback(this, [&](Object* objectPtr)
-		{
-			//objectPtr->UnregisterOnDestroyCallback(this);
-			RTTI::Instance()->UnregisterAllProperty(objectPtr);
-		});
 	}
 
 	void RTTI::UnregisterProperty(void* ownerObject, void* propertyPtr)

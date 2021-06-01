@@ -54,6 +54,8 @@ namespace Insight
 
 		::New<RTTI::RTTI>();
 
+		ASSERT(JS::JobSystemManager::Instance().Init() == JS::JobSystemManager::ReturnCode::Succes);
+
 		m_moduleManager = ::New<Module::ModuleManager>();
 
 		m_moduleManager->AddModule<Module::AssetModule>();
@@ -84,6 +86,8 @@ namespace Insight
 		Scene::ActiveScene()->Unload();
 		::Delete(m_utitledScene);
 		::Delete(m_fileSystem);
+
+		JS::JobSystemManager::Instance().Shutdown(true);
 
 		Module::ModuleManager::Instance()->RemoveModule<Module::AssetModule>();
 		Module::ModuleManager::Instance()->RemoveModule<Module::GraphicsModule>();
@@ -137,11 +141,6 @@ namespace Insight
 			m_isRunning = !m_windowModule->GetWindow()->ShouldClose();
 		}
 
-		Assets::AssetPtr<Assets::FileAsset> assetPtr = Module::AssetModule::Instance()->Load<Assets::FileAsset>("./data/File.txt");
-		{
-			auto assetPtr1 = assetPtr;
-		}
-		assetPtr.Clear();
 #ifdef THREADS
 		m_updateThreadState = UpdateThreadState::SAME_FRMAE;
 		m_renderThread = std::thread(&Application::RenderLoop, this);
@@ -170,6 +169,7 @@ namespace Insight
 #endif
 				Time::UpdateTime();
 				deltaTime = Time::GetDeltaTime();
+				JS::JobSystemManager::Instance().Update(64);
 
 				m_fileSystem->Update();
 				m_inputModule->Update(deltaTime);

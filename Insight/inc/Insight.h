@@ -7,6 +7,7 @@
 #include "Engine/Core/Application.h"
 #include "Engine/Core/Log.h"
 #include "Engine/Module/ModuleManager.h"
+#include "Engine/Module/AssetModule.h"
 
 #include "Engine/FileSystem/FileSystem.h"
 

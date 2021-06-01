@@ -13,74 +13,74 @@
 #define REGISTER_DEF_TYPE(NAME) \
     Serialization::TypeRegister<NAME> NAME::reg(#NAME)
 
-	namespace Serialization
+namespace Serialization
+{
+	template<typename T>
+	struct TypeRegister
 	{
+		TypeRegister(const std::string& s)
+		{
+			SerializableRegistry::GetTypes().insert(std::pair(s, &Serializable::CreateInstance<T>));;
+		}
+	};
+
+	struct SerializableRegistry;
+
+	class Serializable
+	{
+	public:
+
+		Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
+		virtual ~Serializable();
+
+		virtual void Serialize(SerializableElement* element, bool force = false) { }
+		virtual void Deserialize(SerializableElement* element, bool force = false) { }
+
 		template<typename T>
-		struct TypeRegister
+		static Serializable* CreateInstance()
 		{
-			TypeRegister(const std::string& s)
-			{
-				SerializableRegistry::GetTypes().insert(std::pair(s, &Serializable::CreateInstance<T>));;
-			}
-		};
+			//return ::New<T>(); 
+			return nullptr;
+		}
 
-		struct SerializableRegistry;
-
-		class Serializable
+		template<typename T>
+		static T* NewInstanceFromType(const std::string& type)
 		{
-		public:
-
-			Serializable(Serializable* obj, bool isSubObject, const std::string& filePath = "");
-			virtual ~Serializable();
-
-			virtual void Serialize(SerializableElement* element, bool force = false) { }
-			virtual void Deserialize(SerializableElement* element, bool force = false) { }
-
-			template<typename T> 
-			static Serializable* CreateInstance()
-			{ 
-				//return ::New<T>(); 
-				return nullptr;
-			}
-
-			template<typename T>
-			static T* NewInstanceFromType(const std::string& type)
+			auto t = SerializableRegistry::GetTypes().find(type);
+			if (t != SerializableRegistry::GetTypes().end())
 			{
-				auto t = SerializableRegistry::GetTypes().find(type);
-				if (t != SerializableRegistry::GetTypes().end())
+				T* tValue = dynamic_cast<T*>(t->second());
+				if (tValue)
 				{
-					T* tValue = dynamic_cast<T*>(t->second());
-					if (tValue)
-					{
-						return tValue;
-					}
-
-					IS_CORE_ERROR("[Serializable::CreateInstanceFromType] Could not cast to T.");
+					return tValue;
 				}
-				return {};
+
+				IS_CORE_ERROR("[Serializable::CreateInstanceFromType] Could not cast to T.");
 			}
+			return {};
+		}
 
-			static std::vector<Serializable*> m_serializableObjects;
+		static std::vector<Serializable*> m_serializableObjects;
 
-		protected:
-			std::string m_fileName;
+	protected:
+		std::string m_fileName;
 
-		private:
-			friend SerializableRegistry;
-		};
+	private:
+		friend SerializableRegistry;
+	};
 
-		struct SerializableRegistry
+	struct SerializableRegistry
+	{
+	public:
+		typedef std::map<std::string, Serializable* (*)()> MapTypes;
+
+		static MapTypes& GetTypes()
 		{
-		public:
-			typedef std::map<std::string, Serializable* (*)()> MapTypes;
+			static MapTypes types;
+			return types;
+		}
 
-			static MapTypes& GetTypes()
-			{
-				static MapTypes types;
-				return types;
-			}
-
-		private:
-			static bool m_inUse;
-		};
-	}
+	private:
+		static bool m_inUse;
+	};
+}

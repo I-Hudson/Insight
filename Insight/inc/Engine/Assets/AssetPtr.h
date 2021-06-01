@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Engine/Core/Common.h"
-#include "Engine/Assets/Asset.h"
 
 namespace Insight::Module
 {
@@ -10,23 +9,38 @@ namespace Insight::Module
 
 namespace Insight::Assets
 {
+	class Asset;
+
 	DECLARE_ENUM_7(AssetState, Loaded, Loading, Unloaded, Unloading, Missing, Croupt, NonLoaded)
 	struct AssetPtrControlBlock
 	{
 		AssetPtrControlBlock()
 		{ RefCount.store(0, std::memory_order::memory_order_release); }
 		std::atomic<u32> RefCount;
+
+		void Incerment() { RefCount.fetch_add(1, std::memory_order::memory_order_release); }
+		void Decerment() { RefCount.fetch_sub(1, std::memory_order::memory_order_release); }
 	};
 
 	template<typename T>
 	class AssetPtr
 	{
 	public:
+		AssetPtr()
+			: m_asset(nullptr), m_controlBlock(nullptr)
+		{ }
+		AssetPtr(T* asset, AssetPtrControlBlock* controlBlock)
+			: m_asset(asset), m_controlBlock(controlBlock)
+		{
+			STATIC_ASSERT((std::is_base_of_v<Asset, T>), "[AssetPtr::AssetPtr] 'T' must be derived from 'Asset'.");
+			ASSERT((m_asset && m_controlBlock) && "[AssetPtr::AssetPtr] 'asset' and 'controlBlock' must be valid pointers.");
+			m_controlBlock->Incerment();
+		}
 		AssetPtr(const AssetPtr& other)
 		{
 			m_asset = other.m_asset;
 			m_controlBlock = other.m_controlBlock;
-			m_controlBlock->RefCount.fetch_add(1, std::memory_order::memory_order_release);
+			m_controlBlock->Incerment();
 		}
 		AssetPtr(AssetPtr&& other)
 		{
@@ -35,20 +49,17 @@ namespace Insight::Assets
 			other.m_asset = nullptr;
 			other.m_controlBlock = nullptr;
 		}
-
 		~AssetPtr()
 		{
-			if (m_controlBlock)
-			{
-				m_controlBlock->RefCount.fetch_sub(1, std::memory_order::memory_order_release);
-			}
+			Clear();
 		}
 
 		AssetPtr operator=(const AssetPtr& other)
 		{
 			m_asset = other.m_asset;
 			m_controlBlock = other.m_controlBlock;
-			m_controlBlock->RefCount.fetch_add(1, std::memory_order::memory_order_release);
+			m_controlBlock->Incerment();
+			return *this;
 		}
 		AssetPtr operator=(AssetPtr&& other)
 		{
@@ -56,32 +67,51 @@ namespace Insight::Assets
 			m_controlBlock = other.m_controlBlock;
 			other.m_asset = nullptr;
 			other.m_controlBlock = nullptr;
+			return *this;
 		}
 
-		T* operator*() { return m_asset; }
-		bool IsValid() const { return m_asset && m_controlBlock; }
+		T& operator*() const noexcept { return *m_asset; }
+		T* operator->() const noexcept { return m_asset; }
+
+		template<typename T>
+		AssetPtr<T> StaticCast()
+		{
+			T* ptr = static_cast<T*>(m_asset);
+			return AssetPtr<T>(ptr, m_controlBlock);
+		}
+		template<typename T>
+		AssetPtr<T> DynamicCastTo()
+		{
+			T* ptr = dynamic_cast<T*>(m_asset);
+			if (ptr)
+			{
+				return AssetPtr<T>(ptr, m_controlBlock);
+			}
+			return AssetPtr<T>(nullptr, nullptr);
+		}
+
+		bool IsValid() const
+		{
+			if (m_controlBlock)
+			{
+				return m_controlBlock->RefCount.load(std::memory_order::memory_order_acquire) > 1;
+			}
+			return false;
+		}
 		AssetState GetState() const { return static_cast<Asset*>(m_asset)->GetState(); }
 		void Clear() 
 		{
+			if (m_controlBlock)
+			{
+				m_controlBlock->Decerment();
+			}
 			m_asset = nullptr; 
-			m_controlBlock->RefCount.fetch_sub(1, std::memory_order::memory_order_release);
 			m_controlBlock = nullptr;
-		}
-
-	private:
-		AssetPtr() = delete;
-		AssetPtr(T* asset, AssetPtrControlBlock* controlBlock)
-			:m_asset(asset), m_controlBlock(controlBlock)
-		{ 
-			STATIC_ASSERT((std::is_base_of_v<Asset, T>), "[AssetPtr::AssetPtr] 'T' must be derived from 'Asset'.");
-			ASSERT((m_asset && m_controlBlock) && "[AssetPtr::AssetPtr] 'asset' and 'controlBlock' must be valid pointers.");
-			m_controlBlock->RefCount.fetch_add(1, std::memory_order::memory_order_release);
 		}
 
 	private:
 		T* m_asset;
 		AssetPtrControlBlock* m_controlBlock;
-
 		friend Module::AssetModule;
 	};
 }

@@ -11,6 +11,7 @@ class EditorApp : public Insight::Application
 {
 public:
 	Insight::Module::EditorModule* m_editorModule;
+	Insight::JS::JobWithResultSharedPtr<Insight::Assets::AssetPtr<Insight::Assets::ModelAsset>> modelAsset;
 
 	EditorApp() : Application()
 	{ }
@@ -100,7 +101,17 @@ public:
 	}
 
 	virtual void Update(const float deltaTime) override
-	{ }
+	{
+		if (!modelAsset)
+		{
+			modelAsset = Insight::Module::AssetModule::Instance()->LoadAsync<Insight::Assets::ModelAsset>("./data/models/sponza/sponza.obj");
+		}
+
+		if (modelAsset->IsValid() && modelAsset->IsReady())
+		{
+			auto modelPtr = modelAsset->GetResult().GetResult();
+		}
+	}
 
 	virtual void Draw() override
 	{ }
