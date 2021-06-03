@@ -494,6 +494,10 @@ namespace Insight::GraphicsAPI::Vulkan
 		{
 			return Insight::Graphics::GPUImage::New();
 		});
+		m_imageViewCache.SetCreateFunc([]()
+		{
+			return Insight::Graphics::GPUImageView::New();
+		});
 		m_pipelineCache.SetCreateFunc([]()
 		{
 			return Insight::Graphics::GPUPipeline::New();

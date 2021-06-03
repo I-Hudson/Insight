@@ -59,14 +59,21 @@ namespace Insight::GraphicsAPI::Vulkan
 	public:
 		virtual GPUDescriptorBuilder* Begin(Graphics::GPUDescriptorLayoutCache* layoutCache, Graphics::GPUDescriptorAllocator* allocator) override;
 
-		GPUDescriptorBuilder* BindBuffer(u32 binding, Graphics::GPUBuffer* buffer, DescriptorType type, ShaderStage stage) override;
-		GPUDescriptorBuilder* BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage) override;
+		virtual GPUDescriptorBuilder* BindBuffer(u32 binding, Graphics::GPUBuffer* buffer, DescriptorType type, ShaderStage stage) override;
+		virtual GPUDescriptorBuilder* BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage) override;
+		virtual GPUDescriptorBuilder* BindImageArray(u32 binding, std::vector<Graphics::GPUImage*>& images, DescriptorType type, ShaderStage stage) override;
 
 		virtual bool Build(Graphics::GPUDescriptorSet*& set) override;
 
 	private:
 		std::vector<VkWriteDescriptorSet> m_writes;
 		std::vector<VkDescriptorSetLayoutBinding> m_bindings;
+
+		struct DiscriptorTextureArray
+		{
+			std::vector<VkDescriptorImageInfo> ImageInfos;
+		};
+		std::vector<DiscriptorTextureArray> m_tempTextureArrays;
 
 		GPUDescriptorLayoutCacheVulkan* m_layoutCache;
 		GPUDescriptorAllocatorVulkan* m_allocator;

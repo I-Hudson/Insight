@@ -432,26 +432,39 @@ namespace Insight::Module
 			};
 			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			ubo.LightDir = -data.Direction;
-			ubo.PVMatrix = renderList->CameraProjection * glm::inverse(renderList->CameraTransform);// m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
+			ubo.PVMatrix = renderList->CameraProjection * glm::inverse(renderList->CameraTransform);
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;
+			Graphics::GPUPipeline* defaultPipeline = nullptr;
+			Graphics::GPUPipelineDesc defualtPipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise);
 			Utils::Hasher hasher;
-			hasher.Hash("./data/shaders/vulkan/default.vert");
-			hasher.Hash("./data/shaders/vulkan/default.frag");
+
+			std::string vertexShader;
+			std::string fragmentShader;
+			if (::Graphics::MeshBatchingExt())
+			{
+				vertexShader = "./data/shaders/vulkan/mesh_batch_ext/default.vert";
+				fragmentShader = "./data/shaders/vulkan/mesh_batch_ext/default.frag";
+			}
+			else
+			{
+				vertexShader = "./data/shaders/vulkan/default.vert";
+				fragmentShader = "./data/shaders/vulkan/default.frag";
+			}
+
+			hasher.Hash(vertexShader);
+			hasher.Hash(fragmentShader);
 			if (Graphics::GPUShaderCache::Instance()->GetItem(hasher.GetHash(), defaultShader))
 			{
 				IS_PROFILE_SCOPE("Default shader create");
-				defaultShader->SetStage(ShaderStage::Vertex, "./data/shaders/vulkan/default.vert", Graphics::ShaderStageInput::FilePath);
-				defaultShader->SetStage(ShaderStage::Fragment, "./data/shaders/vulkan/default.frag", Graphics::ShaderStageInput::FilePath);
+				defaultShader->SetStage(ShaderStage::Vertex, vertexShader, Graphics::ShaderStageInput::FilePath);
+				defaultShader->SetStage(ShaderStage::Fragment, fragmentShader, Graphics::ShaderStageInput::FilePath);
 				defaultShader->Compile();
 			}
-
 			hasher.Clear();
 			hasher.Hash(defaultShader);
-			Graphics::GPUPipelineDesc defualtPipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise);
 			hasher.Hash(defualtPipelineDesc.Hash());
-			Graphics::GPUPipeline* defaultPipeline = nullptr;
 			{
 				IS_PROFILE_SCOPE("Default pipeline create and bind");
 				if (Graphics::GPUPipelineCache::Instance()->GetItem(hasher.GetHash(), defaultPipeline))
@@ -459,10 +472,10 @@ namespace Insight::Module
 					defaultPipeline->SetShader(defaultShader);
 					defaultPipeline->Init(pass.GetGraphPass(), defualtPipelineDesc);
 				}
-				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 			}
+			cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 
-			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
+			Graphics::GPUDescriptorSet* vertexSet = nullptr;
 			Graphics::GPUDescriptorSet* fragSet = nullptr;
 
 			Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
@@ -485,9 +498,34 @@ namespace Insight::Module
 					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
+					Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
+
 					if (::Graphics::MeshBatchingExt())
 					{
-
+						std::vector<Graphics::GPUImage*> diffuseTextures;
+						for (auto& textureString : drawCall.DiffuseTextureMeshBatch)
+						{
+							hasher.Clear();
+							hasher.Hash(textureString);
+							Graphics::GPUImage* image;
+							if (Graphics::GPUImageCache::Instance()->GetItem(hasher.GetHash(), image))
+							{
+								image->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, textureString));
+							}
+							Graphics::GPUImageView* diffuseTextureView = nullptr;
+							hasher.Clear();
+							hasher.Hash(textureString);
+							if (Graphics::GPUImageViewCache::Instance()->GetItem(hasher.GetHash(), diffuseTextureView))
+							{
+								diffuseTextureView->Init(image);
+							}
+							diffuseTextures.push_back(image);
+						}
+						{
+							IS_PROFILE_SCOPE("Build per draw call descriptor set - texture array");
+							builder->BindImageArray(0, diffuseTextures, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
+								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(fragSet);
+						}
 					}
 					else
 					{
@@ -503,20 +541,22 @@ namespace Insight::Module
 						{
 							diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
 						}
-						Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
-						pass.AddLifeTimeObject(diffuseTextureView);
-						diffuseTextureView->Init(diffuseTexture);
-
-						Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
-
+						Graphics::GPUImageView* diffuseTextureView = nullptr;
+						hasher.Clear();
+						hasher.Hash(diffuseTextureString);
+						if (Graphics::GPUImageViewCache::Instance()->GetItem(hasher.GetHash(), diffuseTextureView))
+						{
+							diffuseTextureView->Init(diffuseTexture);
+						}
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
 							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
 								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(fragSet);
 						}
-						Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
-						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 					}
+
+					Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
+					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
 					u32 offsets[] = { 0 };
 					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
@@ -527,7 +567,6 @@ namespace Insight::Module
 
 				}
 			}
-			::Delete(vertexSet);
 		});
 	}
 

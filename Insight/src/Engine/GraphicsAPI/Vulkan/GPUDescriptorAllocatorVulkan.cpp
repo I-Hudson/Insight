@@ -297,6 +297,39 @@ namespace Insight::GraphicsAPI::Vulkan
 		return this;
 	}
 
+	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImageArray(u32 binding, std::vector<Graphics::GPUImage*>& images, DescriptorType type, ShaderStage stage)
+	{
+		//create the descriptor binding for the layout
+		VkDescriptorSetLayoutBinding newBinding{};
+
+		newBinding.descriptorCount = (u32)images.size();
+		newBinding.descriptorType = ToVulkanDescriptorType(type);
+		newBinding.pImmutableSamplers = nullptr;
+		newBinding.stageFlags = ToVulkanShaderStageFlags(stage);
+		newBinding.binding = binding;
+		m_bindings.push_back(newBinding);
+
+		m_tempTextureArrays.push_back(DiscriptorTextureArray());
+		DiscriptorTextureArray& array = m_tempTextureArrays.back();
+		for (auto& image : images)
+		{
+			array.ImageInfos.push_back(*static_cast<GPUImageVulkan*>(image)->GetDescriptorImageInfo());
+		}
+
+		//create the descriptor write
+		VkWriteDescriptorSet newWrite{};
+		newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		newWrite.pNext = nullptr;
+		newWrite.descriptorCount = (u32)m_tempTextureArrays.back().ImageInfos.size();
+		newWrite.descriptorType = ToVulkanDescriptorType(type);
+		newWrite.pImageInfo = m_tempTextureArrays.back().ImageInfos.data();
+		newWrite.dstBinding = binding;
+
+		m_writes.push_back(newWrite);
+
+		return this;
+	}
+
 	bool GPUDescriptorBuilderVulkan::Build(Graphics::GPUDescriptorSet*& set)
 	{
 		IS_PROFILE_FUNCTION();
@@ -330,6 +363,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		vkUpdateDescriptorSets(device, static_cast<u32>(m_writes.size()), m_writes.data(), 0, nullptr);
 		m_writes.clear();
 		m_bindings.clear();
+		m_tempTextureArrays.clear();
 
 		return true;
 	}

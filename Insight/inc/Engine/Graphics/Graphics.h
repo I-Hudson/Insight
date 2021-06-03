@@ -19,5 +19,5 @@ public:
 	/// arrays for textures. Reduce draw calls, increase complexly, 
 	/// </summary>
 	/// <returns></returns>
-	static bool MeshBatchingExt() { return false; }
+	static bool MeshBatchingExt() { return false/*true*/; }
 };

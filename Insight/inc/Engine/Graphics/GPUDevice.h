@@ -25,8 +25,8 @@ namespace Insight::Graphics
     using GPUSamplerCache = GPUItemCache<GPUSampler*>;
     using GPUShaderCache = GPUItemCache<GPUShader*>;
     using GPUImageCache = GPUItemCache<GPUImage*>;
+    using GPUImageViewCache = GPUItemCache<GPUImageView*>;
     using GPUPipelineCache = GPUItemCache<GPUPipeline*>;
-
 
     class GPUContext;
     class GPUTexture;
@@ -60,9 +60,9 @@ namespace Insight::Graphics
         const GPULimits& GetLimits() const { return m_gpuLimits; }
         FormatFeatures GetFormatFeatures(const PixelFormat& format) const { return m_featuresPerFormat[(I32)format]; }
 
-        Insight::Graphics::GPUCommandPool* GetDefaultCommandPool() const { return m_defaultCommandPool; }
-        virtual Insight::Graphics::GPUFenceManager* GetDefaultFenceManager() = 0;
-        virtual Insight::Graphics::GPUSemaphoreManager* GetDefaultSignalManager() = 0;
+        GPUCommandPool* GetDefaultCommandPool() const { return m_defaultCommandPool; }
+        virtual GPUFenceManager* GetDefaultFenceManager() = 0;
+        virtual GPUSemaphoreManager* GetDefaultSignalManager() = 0;
 
         FORCE_INLINE u64 GetMemoryusage() const { return Resources.GetMemoryUsage(); }
 
@@ -76,7 +76,7 @@ namespace Insight::Graphics
         virtual u32 GetQueueIndex(GPUQueue queue) = 0;
 
     public:
-        Insight::Graphics::GPUResourceCollection Resources;
+        GPUResourceCollection Resources;
 
     protected:
         CriticalSection m_locker;
@@ -92,12 +92,13 @@ namespace Insight::Graphics
         ShaderProfile m_shaderProfile;
         FeatureLevel m_featureLevel;
 
-        Insight::Graphics::GPUCommandPool* m_defaultCommandPool;
+        GPUCommandPool* m_defaultCommandPool;
 
-        Insight::Graphics::GPUSamplerCache m_samplerCache;
-        Insight::Graphics::GPUShaderCache m_shaderCache;
-        Insight::Graphics::GPUImageCache m_imageCache;
-        Insight::Graphics::GPUPipelineCache m_pipelineCache;
+        GPUSamplerCache m_samplerCache;
+        GPUShaderCache m_shaderCache;
+        GPUImageCache m_imageCache;
+        GPUImageViewCache m_imageViewCache;
+        GPUPipelineCache m_pipelineCache;
     };
 
     /// <summary>
