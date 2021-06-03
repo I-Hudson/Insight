@@ -475,7 +475,7 @@ enum class GPUResults
     Error_Incompatible_Display = -1000003001,
     Error_Native_Window_In_Use = -1000000001,
     Error_Validation_Failed = -1000011001,
-    Error_Out_Of_Pool_Memory = 1000069000,
+    Error_Out_Of_Pool_Memory = -1000069000,
 
 };
 

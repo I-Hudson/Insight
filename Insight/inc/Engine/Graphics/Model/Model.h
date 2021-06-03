@@ -1,20 +1,23 @@
 #pragma once
 
 #include "Engine/Core/Common.h"
+#include "Engine/Assets/Asset.h"
 #include "Engine/Graphics/GPUBuffer.h"
 #include "Engine/Core/Maths/Frustum.h"
 #include <glm/glm.hpp>
 
-namespace Insight::Graphics
+namespace Insight
 {
-	using MeshTextures = std::unordered_map<std::string, std::string>;
-	struct RenderList;
-
+	namespace Graphics
+	{
+		struct RenderList;
+	}
 	namespace ModelLoading
 	{
 		struct AssimpLoader;
 	}
 
+	using MeshTextures = std::unordered_map<std::string, std::string>;
 	class Model;
 
 	struct MeshDimensions
@@ -26,8 +29,15 @@ namespace Insight::Graphics
 		float Radius = 0;
 	};
 
+	enum class MaterialTextureType
+	{
+		Diffuse,
+		Normal,
+	};
+
 	/// <summary>
-	/// 
+	/// Single sub mesh. Stores all data in relation to this sub mesh. Currently this holds it's
+	/// own vertex and index buffer but this should be move to it's parent Mesh class.
 	/// </summary>
 	class SubMesh
 	{
@@ -44,10 +54,11 @@ namespace Insight::Graphics
 		const u32& GetIndexCount() const { return m_indexCount; }
 
 		std::string GetTexture(const std::string& textureId);
+		std::string GetTexture(MaterialTextureType type);
 
-		void Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
-		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
-		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
+		void Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
+		Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
+		Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
 		void Release();
 
@@ -55,18 +66,18 @@ namespace Insight::Graphics
 		void SetDimensions(glm::vec3 min, glm::vec3 max);
 
 	private:
-
 		u32 m_firstVertex;
 		u32 m_vertexCount;
 		u32 m_firstIndex;
 		u32 m_indexCount;
 		MeshDimensions m_dimensions;
+		std::unordered_map<MaterialTextureType, std::string> m_textureStrings;
 
 		MeshTextures m_textures;
-		GPUBuffer* m_vertexBuffer;
-		GPUBuffer* m_indexBuffer;
+		Graphics::GPUBuffer* m_vertexBuffer;
+		Graphics::GPUBuffer* m_indexBuffer;
 
-		friend Insight::Graphics::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::AssimpLoader;
 	};
 
 	/// <summary>
@@ -86,9 +97,11 @@ namespace Insight::Graphics
 		const u32& GetVertexCount() const { return m_vertexCount; }
 		const u32& GetIndexCount() const { return m_indexCount; }
 
-		void Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
-		GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
-		GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
+		std::vector<std::string> GetAllSubMeshTextures(MaterialTextureType type);
+
+		void Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
+		//Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
+		//Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
 		void Release();
 
@@ -99,18 +112,18 @@ namespace Insight::Graphics
 		std::string	m_meshName;
 
 		std::vector<SubMesh> m_subMeshes;
-		MeshDimensions m_dimensions;
+		Mesh::MeshDimensions m_dimensions;
 
 		std::vector<Vertex> m_vertices;
 		std::vector<u32> m_indices;
 
 		u32 m_vertexCount;
-		GPUBuffer* m_vertexBuffer;
+		Graphics::GPUBuffer* m_vertexBuffer;
 		u32 m_indexCount;
-		GPUBuffer* m_indexBuffer;
+		Graphics::GPUBuffer* m_indexBuffer;
 
 		friend Model;
-		friend Insight::Graphics::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::AssimpLoader;
 	};
 
 
@@ -118,23 +131,20 @@ namespace Insight::Graphics
 	/// <summary>
 	/// Store all the data needed for a complete model. This should include all the textures and meshes
 	/// </summary>
-	class Model : public Object
+	class Model : public Assets::Asset
 	{
 	public:
 		Model();
-		Model(const std::string& filePath);
 		~Model();
-
-		void LoadFromFile(const std::string& filePath);
 
 		const Mesh& GetMesh() const { return m_mesh; }
 
+	protected:
+		virtual void LoadAsset(std::string path) override;
+		virtual void UnloadAsset() override;
+
 	private:
 		Mesh m_mesh;
-		
-		std::string m_fileName;
-		std::string m_fileDirectory;
-
-		friend Insight::Graphics::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::AssimpLoader;
 	};
 }

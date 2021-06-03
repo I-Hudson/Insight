@@ -15,36 +15,50 @@ namespace Insight::Module
 
 	AssetModule::~AssetModule()
 	{
+		IS_PROFILE_FUNCTION();
+		JS::JobWaitList waitList;
 		for (auto& asset : m_assets)
 		{
-			::Delete(asset.second);
+			auto job = JS::JobSystemManager::Instance().CreateJob(JS::JobPriority::High, [asset]()
+			{
+				::Delete(asset.second);
+			});
+			JS::JobSystemManager::Instance().ScheduleJob(job);
+			waitList.AddJobToWaitOn(job);
 		}
 
 		for (auto& controlBlock : m_controlBlocks)
 		{
-			ASSERT(controlBlock.second->RefCount.load(std::memory_order::memory_order_acquire) == 0 &&
-				   "[AssetModule::~AssetModule] Asset has a reference somewhere.");
-			::Delete(controlBlock.second);
+			auto job = JS::JobSystemManager::Instance().CreateJob(JS::JobPriority::High, [controlBlock]()
+			{
+				ASSERT(controlBlock.second->RefCount.load(std::memory_order::memory_order_acquire) == 0 &&
+					   "[AssetModule::~AssetModule] Asset has a reference somewhere.");
+				::Delete(controlBlock.second);
+			});
+			JS::JobSystemManager::Instance().ScheduleJob(job);
+			waitList.AddJobToWaitOn(job);
 		}
+		waitList.Wait();
+		waitList = { };
 	}
 
-	Assets::AssetPtr<Assets::Asset> AssetModule::Load(const std::string& path)
+	AssetPtr<Assets::Asset> AssetModule::Load(const std::string& path)
 	{
 		auto [asset, controlBlock, absolutePath] = CheckForAsset(path);
 		if (asset && controlBlock)
 		{
-			return Assets::AssetPtr<Assets::Asset>(asset, controlBlock);
+			return AssetPtr<Assets::Asset>(asset, controlBlock);
 		}
 
 		std::string extension = std::move(std::filesystem::path(path).extension().u8string());
 		Assets::Asset* newAsset = GetAssetFromExtension(extension);
 		if (!newAsset)
 		{
-			return Assets::AssetPtr<Assets::Asset>(nullptr, nullptr);
+			return AssetPtr<Assets::Asset>(nullptr, nullptr);
 		}
 
 		Assets::AssetPtrControlBlock* newControlBlock = ::New<Assets::AssetPtrControlBlock>();
-		static_cast<Assets::Asset*>(newAsset)->Load(absolutePath);
+		static_cast<Assets::Asset*>(newAsset)->LoadAsset(absolutePath);
 
 		{
 			std::lock_guard<std::mutex> lock(m_lock);
@@ -52,10 +66,10 @@ namespace Insight::Module
 			m_controlBlocks.emplace(absolutePath, newControlBlock);
 		}
 
-		return Assets::AssetPtr<Assets::Asset>(newAsset, newControlBlock);
+		return AssetPtr<Assets::Asset>(newAsset, newControlBlock);
 	}
 
-	JS::JobWithResultSharedPtr<Assets::AssetPtr<Assets::Asset>> AssetModule::LoadAsync(const std::string& path)
+	JS::JobWithResultSharedPtr<AssetPtr<Assets::Asset>> AssetModule::LoadAsync(const std::string& path)
 	{
 		return JS::JobSystemManager::Instance().CreateJob(JS::JobPriority::Normal, [this, &path]()
 		{
@@ -85,6 +99,7 @@ namespace Insight::Module
 			m_controlBlocks.erase(absolutePath);
 		}
 
+		static_cast<Assets::Asset*>(asset)->UnloadAsset();
 		u32 assetSize = sizeof(*asset);
 		::Delete(asset);
 		::Delete(controlBlock);

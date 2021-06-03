@@ -61,6 +61,8 @@ namespace Insight::FileSystem
 
 		void Update();
 
+		static std::string WindowsToUinxFilePath(std::string path);
+
 		std::vector<Byte> ReadFileToVector(const std::string& filePath);
 		std::string FormatFilePathStringToUNIX(const std::string& filePath);
 

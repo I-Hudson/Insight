@@ -30,7 +30,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 	}
 
-	bool GPUDescriptorAllocatorVulkan::Allocate(Graphics::GPUDescriptorSet* set, VkDescriptorSetLayout layout)
+	bool GPUDescriptorAllocatorVulkan::Allocate(Graphics::GPUDescriptorSet*& set, VkDescriptorSetLayout layout)
 	{
 		if (m_currentPool == nullptr)
 		{
@@ -58,7 +58,8 @@ namespace Insight::GraphicsAPI::Vulkan
 			m_currentPool = GrabPool();
 			m_usedPools.push_back(m_currentPool);
 
-			ASSERT(set->Init(setDesc) == GPUResults::Success && "[]");
+			setDesc.Pool = m_currentPool;
+			ASSERT(set->Init(setDesc) == GPUResults::Success && "[GPUDescriptorAllocatorVulkan::Allocate] Set was not created.");
 		}
 		return true;
 	}
@@ -96,7 +97,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 	Graphics::GPUDescriptorPool* GPUDescriptorAllocatorVulkan::CreatePool()
 	{
-		auto* pool = Graphics::GPUDescriptorPool::New();
+		Graphics::GPUDescriptorPool* pool = Graphics::GPUDescriptorPool::New();
 		pool->Init();
 		return pool;
 	}
@@ -296,8 +297,9 @@ namespace Insight::GraphicsAPI::Vulkan
 		return this;
 	}
 
-	bool GPUDescriptorBuilderVulkan::Build(Graphics::GPUDescriptorSet* set)
+	bool GPUDescriptorBuilderVulkan::Build(Graphics::GPUDescriptorSet*& set)
 	{
+		IS_PROFILE_FUNCTION();
 		//build layout first
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -306,11 +308,17 @@ namespace Insight::GraphicsAPI::Vulkan
 		layoutInfo.pBindings = m_bindings.data();
 		layoutInfo.bindingCount = static_cast<u32>(m_bindings.size());
 
-		auto layout = m_layoutCache->CreateDescriptorLayout(&layoutInfo);
-
+		VkDescriptorSetLayout layout = nullptr;
+		{
+			IS_PROFILE_SCOPE("CreateDescriptorLayout");
+			layout = m_layoutCache->CreateDescriptorLayout(&layoutInfo);
+		}
 		//allocate descriptor
-		bool success = m_allocator->Allocate(set, layout);
-		if (!success) { return false; };
+		{
+			IS_PROFILE_SCOPE("Allocate");
+			bool success = m_allocator->Allocate(set, layout);
+			if (!success) { return false; };
+		}
 
 		//write descriptor
 		for (VkWriteDescriptorSet& w : m_writes) 

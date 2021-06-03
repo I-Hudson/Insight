@@ -65,15 +65,13 @@ namespace Insight::Graphics
 			cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, swapchain.Pipeline);
 
 			GPUImage* sampleImage = m_physicalImages.at(m_resources.at(m_resourceToIndex.at(m_backBufferSource)).GetPhysicalIndex());
-			Graphics::GPUDescriptorSet* samplerSet = Graphics::GPUDescriptorSet::New();
-			builder->BindImage(0, sampleImage, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(samplerSet);
 
+			Graphics::GPUDescriptorSet* samplerSet = nullptr;
+			builder->BindImage(0, sampleImage, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(samplerSet);
 			Graphics::GPUDescriptorSet* sets[] = { samplerSet };
 			cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, swapchain.Pipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
 			cmdBuffer->Draw(3, 1, 0, 0);
-
-			::Delete(samplerSet);
 		});
 
 		m_frames.resize(c_MaxFrameCount);
@@ -150,6 +148,11 @@ namespace Insight::Graphics
 	void RenderGraph::SetbackBufferSource(const std::string& name)
 	{
 		m_backBufferSource = name;
+	}
+
+	GPUImage* RenderGraph::GetPhysicalImage(std::string name)
+	{
+		return m_physicalImages.at(m_resources.at(m_resourceToIndex.at(name)).GetPhysicalIndex());
 	}
 
 	void RenderGraph::Build()
@@ -666,7 +669,7 @@ namespace Insight::Graphics
 		//	pass.m_windowRect = Maths::Rect(0, 0, (float)Window::GetWidth(), (float)Window::GetHeight());
 		//}
 
-		m_swapchainPresentPass.SetWindowRect(Maths::Rect(0, 0, Window::GetWidth(), Window::GetHeight()));
+		m_swapchainPresentPass.SetWindowRect(Maths::Rect(0, 0, (float)Window::GetWidth(), (float)Window::GetHeight()));
 		m_swapchain->Build(Graphics::GPUSwapchainDesc());
 
 		for (auto& swapchainImage : m_swapchainSubmision)

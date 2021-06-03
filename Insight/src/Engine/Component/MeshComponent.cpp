@@ -53,17 +53,17 @@ MeshComponent::~MeshComponent()
 //	}
 //}
 
-void MeshComponent::SetModel(Insight::Graphics::Model* model)
+void MeshComponent::SetModel(Insight::Model* model)
 {
 	if (model)
 	{
-		Insight::Graphics::Mesh* mesh = &const_cast<Insight::Graphics::Mesh&>(model->GetMesh());
+		Insight::Mesh* mesh = &const_cast<Insight::Mesh&>(model->GetMesh());
 		SetMesh(mesh);
 		//SetMaterials(model->GetMaterals());
 	}
 }
 
-void MeshComponent::SetMesh(Insight::Graphics::Mesh* mesh)
+void MeshComponent::SetMesh(Insight::Mesh* mesh)
 {
 	m_mesh = mesh;
 }

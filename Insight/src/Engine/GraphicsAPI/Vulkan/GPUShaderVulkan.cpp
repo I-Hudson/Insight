@@ -229,7 +229,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		u32 outColorAttachments = 1;
 		if (!graphPass->IsSwapchainPass())
 		{
-			outColorAttachments = graphPassVulkan->GetRenderPass().GetColorOutputs().size();
+			outColorAttachments = (u32)graphPassVulkan->GetRenderPass().GetColorOutputs().size();
 		}
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyState = vks::initializers::pipelineInputAssemblyStateCreateInfo((VkPrimitiveTopology)m_desc.PrimitiveTopologyType, 0, VK_FALSE);

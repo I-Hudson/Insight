@@ -9,6 +9,8 @@ namespace Insight::Graphics
 
 	struct DrawCall
 	{
+		DrawCall() = default;
+
 		struct
 		{
 			GPUBuffer* VertexBuffer;
@@ -26,8 +28,10 @@ namespace Insight::Graphics
 
 		glm::mat4 WorldTransform;
 		glm::mat4 LocalTransform;
+
 		//TODO: Remove this for a material has or pointer.
-		std::string TempTextureString;
+		std::string DiffuseTexture;
+		std::vector<std::string> DiffuseTextureMeshBatch;
 	};
 
 	struct DrawCallList

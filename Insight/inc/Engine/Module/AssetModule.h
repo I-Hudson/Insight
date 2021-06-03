@@ -17,19 +17,19 @@ namespace Insight::Module
 
 		virtual void Update(const float& deltaTime) { }
 
-		Assets::AssetPtr<Assets::Asset> Load(const std::string& path);
+		AssetPtr<Assets::Asset> Load(const std::string& path);
 		template<typename T>
-		Assets::AssetPtr<T> Load(const std::string& path)
+		AssetPtr<T> Load(const std::string& path)
 		{
 			auto [asset, controlBlock, absolutePath] = CheckForAsset(path);
 			if (asset && controlBlock)
 			{
-				return Assets::AssetPtr<T>(static_cast<T*>(asset), controlBlock);
+				return AssetPtr<T>(static_cast<T*>(asset), controlBlock);
 			}
 
 			T* newAsset = ::New<T>();
 			Assets::AssetPtrControlBlock* newControlBlock = ::New<Assets::AssetPtrControlBlock>();
-			static_cast<Assets::Asset*>(newAsset)->Load(absolutePath);
+			static_cast<Assets::Asset*>(newAsset)->LoadAsset(absolutePath);
 
 			{
 				std::lock_guard<std::mutex> lock(m_lock);
@@ -37,12 +37,12 @@ namespace Insight::Module
 				m_controlBlocks.emplace(absolutePath, newControlBlock);
 			}
 
-			return Assets::AssetPtr<T>(newAsset, newControlBlock);
+			return AssetPtr<T>(newAsset, newControlBlock);
 		}
 
-		JS::JobWithResultSharedPtr<Assets::AssetPtr<Assets::Asset>> LoadAsync(const std::string& path);
+		JS::JobWithResultSharedPtr<AssetPtr<Assets::Asset>> LoadAsync(const std::string& path);
 		template<typename T>
-		JS::JobWithResultSharedPtr<Assets::AssetPtr<T>> LoadAsync(const std::string& path)
+		JS::JobWithResultSharedPtr<AssetPtr<T>> LoadAsync(const std::string& path)
 		{
 			auto job = JS::JobSystemManager::Instance().CreateJob(JS::JobPriority::Normal, [this, path]()
 			{
@@ -54,10 +54,10 @@ namespace Insight::Module
 
 		bool Unload(std::string path);
 		template<typename T>
-		bool Unload(Assets::AssetPtr<T>& assetPtr)
+		bool Unload(AssetPtr<T>& assetPtr)
 		{
 			STATIC_ASSERT((std::is_base_of_v<Assets::Asset, T>), "[AssetModule::Unload] 'T' must be derived from 'Insight::Assets::Asset'.");
-			std::string absolutePath = std::move(assetPtr->m_absolutePath);
+			std::string absolutePath = assetPtr->m_absolutePath;
 			assetPtr.Clear();
 			bool result = Unload(absolutePath);
 			return result;

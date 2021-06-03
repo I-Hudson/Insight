@@ -1,13 +1,11 @@
 #pragma once
 
 #include "Engine/Component/Component.h"
-
 #include "Reflect.h"
 #include "Generated/MeshComponent_reflect_generated.h"
-
 #include <../vendor/glm/glm/glm.hpp>
 
-namespace Insight::Graphics
+namespace Insight
 {
 	class Model;
 	class Mesh;
@@ -28,9 +26,9 @@ public:
 	//virtual void OnCreate() override;
 	//virtual void OnDestroy() override;
 
-	void SetModel(Insight::Graphics::Model* model);
-	void SetMesh(Insight::Graphics::Mesh* mesh);
-	Insight::Graphics::Mesh* GetMesh() const { return m_mesh; }
+	void SetModel(Insight::Model* model);
+	void SetMesh(Insight::Mesh* mesh);
+	Insight::Mesh* GetMesh() const { return m_mesh; }
 
 	//void SetMaterial(Material* material, int index);
 	//void SetMaterials(std::vector<Material*> materials);
@@ -44,11 +42,10 @@ public:
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
 private:
-	Insight::Graphics::Mesh* m_mesh;
+	Insight::Mesh* m_mesh;
 
 	//std::vector<Material*> m_materials;
 	//std::vector<MaterialBlockData> m_materialBlockDatas;
-
 
 	REFLECT_PROPERTY(ShowInEditor)
 	std::string m_meshName;

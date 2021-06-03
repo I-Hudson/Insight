@@ -7,7 +7,7 @@ struct aiMaterial;
 enum aiTextureType;
 struct aiScene;
 
-namespace Insight::Graphics::ModelLoading
+namespace Insight::ModelLoading
 {
 	struct AssimpLoader
 	{

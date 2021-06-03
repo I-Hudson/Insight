@@ -5,6 +5,7 @@
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "stb_image.h"
 #include "Engine/Utils/Hasher.h"
+#include "Engine/FileSystem/FileSystem.h"
 
 namespace Insight::Graphics
 {
@@ -125,7 +126,13 @@ namespace Insight::Graphics
 		static GPUImageDesc Texture(u32 levels, SampleLevel samples, PixelFormat format, std::string const& dataPath)
 		{
 			int x, y, c;
-			void* data = stbi_load(dataPath.c_str(), &x, &y, &c, STBI_rgb_alpha);
+			void* data = stbi_load(FileSystem::FileSystemManager::WindowsToUinxFilePath(dataPath).c_str(), &x, &y, &c, STBI_rgb_alpha);
+			if (!data)
+			{
+				IS_CORE_ERROR("[GPUImageDesc::Texture] stbi couldn't load. '{0}'", stbi_failure_reason());
+				Image2D(1, 1, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageLayout::Shader_Read_Only, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0,
+						0, format, ImageType::Image_2D, ImageUsageType::Texture, nullptr);
+			}
 			return Image2D(x, y, 1, levels, samples, 1, ImageDomain::Physical, ImageLayout::Undefined, ImageLayout::Shader_Read_Only, ImageUsageFlagsBits::Transfer_Dst | ImageUsageFlagsBits::Sampled, 0,
 						   0, format, ImageType::Image_2D, ImageUsageType::Texture, data);
 		}

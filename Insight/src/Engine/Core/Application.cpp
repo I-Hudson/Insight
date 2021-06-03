@@ -52,8 +52,6 @@ namespace Insight
 
 		m_fileSystem = ::New<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
 
-		::New<RTTI::RTTI>();
-
 		ASSERT(JS::JobSystemManager::Instance().Init() == JS::JobSystemManager::ReturnCode::Succes);
 
 		m_moduleManager = ::New<Module::ModuleManager>();
@@ -87,13 +85,12 @@ namespace Insight
 		::Delete(m_utitledScene);
 		::Delete(m_fileSystem);
 
-		JS::JobSystemManager::Instance().Shutdown(true);
 
 		Module::ModuleManager::Instance()->RemoveModule<Module::AssetModule>();
+		JS::JobSystemManager::Instance().Shutdown(true);
+
 		Module::ModuleManager::Instance()->RemoveModule<Module::GraphicsModule>();
 		::Delete(Module::ModuleManager::Instance());
-
-		::Delete(RTTI::RTTI::Instance());
 
 		while (auto entry = InterlockedPopEntrySList(reinterpret_cast<PSLIST_HEADER>(&__type_info_root_node)))
 		{

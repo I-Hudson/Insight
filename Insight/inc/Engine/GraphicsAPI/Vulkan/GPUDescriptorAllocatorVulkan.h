@@ -10,7 +10,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual ~GPUDescriptorAllocatorVulkan() override;
 
 		virtual void Init() override;
-		bool Allocate(Graphics::GPUDescriptorSet* set, VkDescriptorSetLayout layout);
+		bool Allocate(Graphics::GPUDescriptorSet*& set, VkDescriptorSetLayout layout);
 		virtual void ResetPools() override;
 
 	private:
@@ -62,7 +62,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUDescriptorBuilder* BindBuffer(u32 binding, Graphics::GPUBuffer* buffer, DescriptorType type, ShaderStage stage) override;
 		GPUDescriptorBuilder* BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage) override;
 
-		virtual bool Build(Graphics::GPUDescriptorSet* set) override;
+		virtual bool Build(Graphics::GPUDescriptorSet*& set) override;
 
 	private:
 		std::vector<VkWriteDescriptorSet> m_writes;

@@ -10,6 +10,7 @@
 #include "Engine/Graphics/ImGuiRenderer.h"
 #include "Engine/Config/Config.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Graphics/Graphics.h"
 
 #include "Engine/Graphics/RenderList.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
@@ -41,27 +42,27 @@
 
 namespace Insight::Module
 {
-	//glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
-	//{
-	//	glm::vec3 const f(vec);
-	//	glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
-	//	glm::vec3 const u(cross(f, s));
+	glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
+	{
+		glm::vec3 const f(vec);
+		glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
+		glm::vec3 const u(cross(f, s));
 
-	//	glm::mat4 Result(1);
-	//	Result[0][0] = s.x;
-	//	Result[1][0] = s.y;
-	//	Result[2][0] = s.z;
-	//	Result[0][1] = u.x;
-	//	Result[1][1] = u.y;
-	//	Result[2][1] = u.z;
-	//	Result[0][2] = -f.x;
-	//	Result[1][2] = -f.y;
-	//	Result[2][2] = -f.z;
-	//	Result[3][0] = -glm::dot(s, position);
-	//	Result[3][1] = -glm::dot(u, position);
-	//	Result[3][2] = glm::dot(f, position);
-	//	return Result;
-	//}
+		glm::mat4 Result(1);
+		Result[0][0] = s.x;
+		Result[1][0] = s.y;
+		Result[2][0] = s.z;
+		Result[0][1] = u.x;
+		Result[1][1] = u.y;
+		Result[2][1] = u.z;
+		Result[0][2] = -f.x;
+		Result[1][2] = -f.y;
+		Result[2][2] = -f.z;
+		Result[3][0] = -glm::dot(s, position);
+		Result[3][1] = -glm::dot(u, position);
+		Result[3][2] = glm::dot(f, position);
+		return Result;
+	}
 
 	GraphicsModule::GraphicsModule()
 		: 
@@ -226,7 +227,7 @@ namespace Insight::Module
 		ShadowMap();
 		Deffered();
 #ifdef IS_EDITOR
-		//Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_mainCamera);
+		Insight::Graphics::Debug::Gizmos::Instance()->DrawGizmos(*m_editorCamera);
 #endif
 
 			// If we are in editor then set a blank image as the output.
@@ -315,7 +316,7 @@ namespace Insight::Module
 		shadowPass.SetDepthStencilOutput("shaderPass_cacadeMap", shadowPassCascadeMap);
 		shadowPass.SetClearDepthStencil(glm::vec2(1.0f, 0.0f));
 		shadowPass.SetClearColour(glm::vec4(0, 0, 0, 0));
-		shadowPass.SetWindowRect(Maths::Rect(0, 0, shadowPassCascadeMap.Width, shadowPassCascadeMap.Height));
+		shadowPass.SetWindowRect(Maths::Rect(0, 0, (float)shadowPassCascadeMap.Width, (float)shadowPassCascadeMap.Height));
 		shadowPass.AddSubpassDependencies(Graphics::SubpassDependency::ShadowPass());
 		shadowPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass, Graphics::RenderList* renderList)
 		{
@@ -329,7 +330,7 @@ namespace Insight::Module
 				glm::mat4 DepthMVP;
 			};
 			UBO depthMVP;
-			//depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -358,7 +359,7 @@ namespace Insight::Module
 				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 			}
 
-			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
+			Graphics::GPUDescriptorSet* vertexSet = nullptr;
 			{
 				IS_PROFILE_SCOPE("Draw mesh vertices");
 				for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
@@ -378,7 +379,7 @@ namespace Insight::Module
 
 						for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
 						{
-							Graphics::SubMesh& subMesh = const_cast<Graphics::SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
+							SubMesh& subMesh = const_cast<SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
 
 							u32 offsets[] = { 0 };
 							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
@@ -389,7 +390,6 @@ namespace Insight::Module
 					}
 				}
 			}
-			::Delete(vertexSet);
 		});
 	}
 	
@@ -430,7 +430,7 @@ namespace Insight::Module
 				glm::mat4(1.0f),
 				glm::vec3(5.0f, 5.0f, 5.0f)
 			};
-			//ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			ubo.LightDir = -data.Direction;
 			ubo.PVMatrix = renderList->CameraProjection * glm::inverse(renderList->CameraTransform);// m_mainCamera->GetProjMatrix() * glm::inverse(m_mainCamera->GetViewMatrix());
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
@@ -463,7 +463,7 @@ namespace Insight::Module
 			}
 
 			Graphics::GPUDescriptorSet* vertexSet = Graphics::GPUDescriptorSet::New();
-			Graphics::GPUDescriptorSet* fragSet = Graphics::GPUDescriptorSet::New();
+			Graphics::GPUDescriptorSet* fragSet = nullptr;
 
 			Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
 			const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
@@ -480,38 +480,43 @@ namespace Insight::Module
 					{
 						IS_PROFILE_SCOPE("Build per mesh descriptor set");
 						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-							->BindImage(2, shadowPassTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(vertexSet);
+							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
 					}
 					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
-					int textureDiffuse = 1;
-					Graphics::GPUBuffer* textureDiffuseBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&textureDiffuse, sizeof(int));
+					if (::Graphics::MeshBatchingExt())
+					{
 
-					Graphics::GPUImage* diffuseTexture = nullptr;
-					std::string diffuseTextureString = drawCall.TempTextureString;
-					if (diffuseTextureString.empty())
-					{
-						diffuseTextureString = "./data/embed2.jpg";
 					}
-					hasher.Clear();
-					hasher.Hash(diffuseTextureString);
-					if (Graphics::GPUImageCache::Instance()->GetItem(hasher.GetHash(), diffuseTexture))
+					else
 					{
-						diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
-					}
-					Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
-					pass.AddLifeTimeObject(diffuseTextureView);
-					diffuseTextureView->Init(diffuseTexture);
+						Graphics::GPUImage* diffuseTexture = nullptr;
+						std::string diffuseTextureString = drawCall.DiffuseTexture;
+						if (diffuseTextureString.empty())
+						{
+							diffuseTextureString = "./data/embed2.jpg";
+						}
+						hasher.Clear();
+						hasher.Hash(diffuseTextureString);
+						if (Graphics::GPUImageCache::Instance()->GetItem(hasher.GetHash(), diffuseTexture))
+						{
+							diffuseTexture->Init(Graphics::GPUImageDesc::Texture(1, SampleLevel::None, PixelFormat::R8G8B8A8_UNorm, diffuseTextureString));
+						}
+						Graphics::GPUImageView* diffuseTextureView = Graphics::GPUImageView::New();
+						pass.AddLifeTimeObject(diffuseTextureView);
+						diffuseTextureView->Init(diffuseTexture);
 
-					{
-						IS_PROFILE_SCOPE("Build per draw call descriptor set");
-						builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-							->BindBuffer(1, textureDiffuseBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Fragment)->Build(fragSet);
+						Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
+
+						{
+							IS_PROFILE_SCOPE("Build per draw call descriptor set");
+							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
+								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(fragSet);
+						}
+						Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
+						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 					}
-					Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
-					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
 					u32 offsets[] = { 0 };
 					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
@@ -523,7 +528,6 @@ namespace Insight::Module
 				}
 			}
 			::Delete(vertexSet);
-			::Delete(fragSet);
 		});
 	}
 

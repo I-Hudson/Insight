@@ -1,6 +1,8 @@
 #include "ispch.h"
 #include "Engine/Graphics/Model/ModelLoading.h"
 #include "glm/gtc/type_ptr.hpp"
+#include <filesystem>
+#include "Engine/FileSystem/FileSystem.h"
 
 #include "Engine/Module/GraphicsModule.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -10,7 +12,7 @@
 #include "assimp/postprocess.h"
 #include "stb_image.h"
 
-namespace Insight::Graphics::ModelLoading
+namespace Insight::ModelLoading
 {
 	/// <summary>
 	/// AssimpLoader
@@ -29,9 +31,10 @@ namespace Insight::Graphics::ModelLoading
 			return;
 		}
 		// retrieve the directory path of the filepath
-		model.m_fileDirectory = filePath.substr(0, filePath.find_last_of('/'));
+		std::string fileDirectory = std::move(FileSystem::FileSystemManager::WindowsToUinxFilePath(filePath));
+		fileDirectory = std::move(fileDirectory.substr(0, fileDirectory.find_last_of('/')));
 		model.m_mesh.m_meshName = scene->mRootNode->mName.C_Str();
-		ProcessNode(model.m_mesh, scene->mRootNode, scene, model.m_fileDirectory);
+		ProcessNode(model.m_mesh, scene->mRootNode, scene, fileDirectory);
 	}
 
 	void AssimpLoader::ProcessNode(Mesh& mesh, aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
@@ -116,6 +119,10 @@ namespace Insight::Graphics::ModelLoading
 			}
 			vertex.UV1 = uv;
 
+//#ifdef IS_MESH_BATCHING_EXT
+			vertex.VIndex = (u32)mesh.m_subMeshes.size();
+//#endif
+
 			mesh.m_vertices.push_back(vertex);
 			vertices.push_back(vertex);
 			++vertexCount;
@@ -136,7 +143,9 @@ namespace Insight::Graphics::ModelLoading
 		if (aiMesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* aiMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
-			mesh.m_subMeshes.back().m_textures = LoadMateials(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+			auto materials = LoadMateials(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+			mesh.m_subMeshes.back().m_textures = materials;
+			mesh.m_subMeshes.back().m_textureStrings[MaterialTextureType::Diffuse] = materials["texture_diffuse"];
 		}
 	}
 
@@ -172,7 +181,7 @@ namespace Insight::Graphics::ModelLoading
 				//texture->Init(m_directory + "/" + str.C_Str());
 				//textures.emplace_back(typeName, texture);
 				//m_loadedTextures.push_back(texture); // add to loaded textures
-				textures.insert({ typeName, directory + "/" + formatedString });
+				textures.insert({ typeName, directory + '/' + formatedString });
 			}
 		}
 		return textures;

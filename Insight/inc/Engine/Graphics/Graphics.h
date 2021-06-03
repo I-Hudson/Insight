@@ -13,4 +13,11 @@ public:
 	static bool IsD312() { return Insight::Module::GraphicsModule::Instance()->IsD312(); }
 	static bool IsVulkan() { return Insight::Module::GraphicsModule::Instance()->IsVulkan(); }
 	static bool IsOpenGL() { return Insight::Module::GraphicsModule::Instance()->IsOpenGL(); }
+
+	/// <summary>
+	/// Extension for if sub meshes should be batched into a single mesh with 
+	/// arrays for textures. Reduce draw calls, increase complexly, 
+	/// </summary>
+	/// <returns></returns>
+	static bool MeshBatchingExt() { return false; }
 };

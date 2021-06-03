@@ -6,17 +6,21 @@ layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inNormal;
 layout (location = 2) in vec3 inColor;
 layout (location = 3) in vec2 inUV;
-layout (location = 4) in vec3 inViewVec;
-layout (location = 5) in vec3 inLightVec;
-layout (location = 6) in vec4 inShadowCoord;
+layout (location = 4) in int  inSubMeshIndex;
+layout (location = 5) in vec3 inViewVec;
+layout (location = 6) in vec3 inLightVec;
+layout (location = 7) in vec4 inShadowCoord;
 
 layout (location = 0) out vec4 outColor;
 layout (location = 1) out vec4 outNormal;
 layout (location = 2) out vec4 outPos;
 
 
-layout (set = 1, binding = 0) uniform sampler2D texture_diffuse;
-layout (set = 1, binding = 1) uniform sampler2D texture_shadowpass;
+layout (set = 1, binding = 0) uniform PER_OBJECT_TEXTURES
+{
+	sampler2D Diffuse[];
+}pc_texture;
+layout (set = 1, binding = 2) uniform sampler2D texture_shadowpass;
 
 float LinearizeDepth(float depth)
 {
@@ -92,7 +96,7 @@ void main()
 	//float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
 	//float shadow = ShadowCalc(inShadowCoord);
 
-	outColor = vec4(texture(texture_diffuse, inUV).xyz, 1.0);
+	outColor = vec4(texture(pc_texture.Diffuse[inSubMeshIndex], inUV).xyz, 1.0);
 
 	vec3 N = normalize(inNormal);
 	vec3 L = normalize(inLightVec);

@@ -39,7 +39,7 @@ namespace Insight::Graphics
 
 	void RenderList::AddDrawCall(MaterialDrawMode drawNode, DrawCall drawCall)
 	{
-		u32 drawCallIndex = DrawCalls.size();
+		u32 drawCallIndex = (u32)DrawCalls.size();
 		DrawCalls.push_back(drawCall);
 		DrawCallList[drawNode].DrawCalls.push_back(drawCallIndex);
 	}

@@ -22,6 +22,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		VkDescriptorSetLayout layout = static_cast<VkDescriptorSetLayout>(desc.Layout);
 		VkDescriptorSetAllocateInfo allocInfo = vks::initializers::descriptorSetAllocateInfo(pool->m_pool, &layout, 1);
 		VkResult res = vkAllocateDescriptorSets(m_device->Device, &allocInfo, &m_set);
+		//pool->m_sets.push_back(this);
 		return static_cast<GPUResults>(res);
 	}
 

@@ -178,6 +178,7 @@ namespace Insight::Graphics
 		RenderGraphResource& GetBackbufferSource() { return m_resources.at(m_resourceToIndex.at(m_backBufferSource)); }
 		const u32& GetFrameIndex() const { return m_frameIndex; }
 
+		GPUImage* GetPhysicalImage(std::string name);
 		GPUImage* GetPhysicalImage(u32 index) { return m_physicalImages.at(index); }
 		GPUImageView* GetPhysicalImageView(u32 index) { return m_physicalImageViews.at(index); }
 

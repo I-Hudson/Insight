@@ -2,9 +2,10 @@
 #include "Engine/Graphics/Model/Model.h"
 #include "Engine/Graphics/Model/ModelLoading.h"
 #include "Engine/Graphics/RenderList.h"
+#include "Engine/Graphics/Graphics.h"
 #include <filesystem>
 
-namespace Insight::Graphics
+namespace Insight
 {
 	/// <summary>
 	/// SubMesh
@@ -24,11 +25,11 @@ namespace Insight::Graphics
 		, m_firstIndex(firstIndex)
 		, m_indexCount(indexCount)
 	{
-		m_vertexBuffer = GPUBuffer::New();
-		m_indexBuffer = GPUBuffer::New();
+		m_vertexBuffer = Graphics::GPUBuffer::New();
+		m_indexBuffer = Graphics::GPUBuffer::New();
 
-		m_vertexBuffer->Init(GPUBufferDesc::Vertex(sizeof(Vertex), vertexCount, vertices.data()));
-		m_indexBuffer->Init(GPUBufferDesc::Index(sizeof(u32), m_indexCount, indices.data()));
+		m_vertexBuffer->Init(Graphics::GPUBufferDesc::Vertex(sizeof(Vertex), vertexCount, vertices.data()));
+		m_indexBuffer->Init(Graphics::GPUBufferDesc::Index(sizeof(u32), m_indexCount, indices.data()));
 	}
 
 	SubMesh::~SubMesh()
@@ -38,8 +39,10 @@ namespace Insight::Graphics
 	{
 		m_vertexBuffer->ReleaseGPU();
 		::Delete(m_vertexBuffer);
+		m_vertexBuffer = nullptr;
 		m_indexBuffer->ReleaseGPU();
 		::Delete(m_indexBuffer);
+		m_indexBuffer = nullptr;
 	}
 
 	std::string SubMesh::GetTexture(const std::string& textureId)
@@ -52,11 +55,21 @@ namespace Insight::Graphics
 		return itr->second;
 	}
 
-	void SubMesh::Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
+	std::string SubMesh::GetTexture(MaterialTextureType type)
+	{
+		auto itr = m_textureStrings.find(type);
+		if (itr != m_textureStrings.end())
+		{
+			return itr->second;
+		}
+		return "";
+	}
+
+	void SubMesh::Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		//TODO: look into per submesh culling.
 
-		DrawCall drawCall;
+		Graphics::DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
 		drawCall.Draw.IndciesStart = 0;
@@ -64,8 +77,8 @@ namespace Insight::Graphics
 		drawCall.Draw.IndciesStart = 0;
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
-		drawCall.TempTextureString = GetTexture("texture_diffuse");
-		drawList->AddDrawCall(MaterialDrawMode::Opaque, drawCall);
+		drawCall.DiffuseTexture = GetTexture("texture_diffuse");
+		drawList->AddDrawCall(Graphics::MaterialDrawMode::Opaque, drawCall);
 	}
 
 	void SubMesh::SetDimensions(glm::vec3 min, glm::vec3 max)
@@ -81,18 +94,52 @@ namespace Insight::Graphics
 		: m_vertexBuffer(nullptr)
 		, m_indexBuffer(nullptr)
 	{
-		//m_vertexBuffer = GPUBuffer::New();
-		//m_indexBuffer = GPUBuffer::New();
+		m_vertexBuffer = Graphics::GPUBuffer::New();
+		m_indexBuffer = Graphics::GPUBuffer::New();
 	}
 
 	Mesh::~Mesh()
-	{ }
+	{ 
+		Release();
+		::Delete(m_vertexBuffer);
+		::Delete(m_indexBuffer);
+	}
 
-	void Mesh::Draw(RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
+	std::vector<std::string> Mesh::GetAllSubMeshTextures(MaterialTextureType type)
 	{
-		for (auto& mesh : m_subMeshes)
+		std::vector<std::string> vec(m_subMeshes.size());
+		for (auto& sm : m_subMeshes)
 		{
-			mesh.Draw(drawList, worldTransform, cameraFrustum);
+			vec.push_back(std::move(sm.GetTexture(MaterialTextureType::Diffuse)));
+			if (vec.back() == "")
+			{
+				vec.back() = ". / data / embed2.jpg";
+			}
+		}
+		return vec;
+	}
+
+	void Mesh::Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
+	{
+		if (::Graphics::MeshBatchingExt())
+		{
+			Graphics::DrawCall drawCall;
+			drawCall.Geometry.VertexBuffer = m_vertexBuffer;
+			drawCall.Geometry.IndexBuffer = m_indexBuffer;
+			drawCall.Draw.IndciesStart = 0;
+			drawCall.Draw.IndicesCount = GetVertexCount();
+			drawCall.Draw.IndciesStart = 0;
+			drawCall.Draw.IndicesCount = GetIndexCount();
+			drawCall.WorldTransform = worldTransform;
+			drawCall.DiffuseTextureMeshBatch = GetAllSubMeshTextures(MaterialTextureType::Diffuse);
+			drawList->AddDrawCall(Graphics::MaterialDrawMode::Opaque, drawCall);
+		}
+		else
+		{
+			for (auto& mesh : m_subMeshes)
+			{
+				mesh.Draw(drawList, worldTransform, cameraFrustum);
+			}
 		}
 	}
 
@@ -102,14 +149,18 @@ namespace Insight::Graphics
 		{
 			subMesh.Release();
 		}
+		m_subMeshes.clear();
+
+		m_vertexBuffer->ReleaseGPU();
+		m_indexBuffer->ReleaseGPU();
 	}
 
 	void Mesh::SetupGPUBuffers()
 	{
 		m_vertexCount = (u32)m_vertices.size();
 		m_indexCount = (u32)m_indices.size();
-		m_vertexBuffer->Init(GPUBufferDesc::Vertex(sizeof(Vertex), m_vertices.size(), m_vertices.data()));
-		m_indexBuffer->Init(GPUBufferDesc::Index(sizeof(u32), m_indices.size(), m_indices.data()));
+		m_vertexBuffer->Init(Graphics::GPUBufferDesc::Vertex(sizeof(Vertex), (u32)m_vertices.size(), m_vertices.data()));
+		m_indexBuffer->Init(Graphics::GPUBufferDesc::Index(sizeof(u32), (u32)m_indices.size(), m_indices.data()));
 	}
 
 
@@ -121,20 +172,22 @@ namespace Insight::Graphics
 		SetType<Model>();
 	}
 
-	Model::Model(const std::string& filePath)
-	{
-		SetType<Model>();
-		LoadFromFile(filePath);
-	}
-
 	Model::~Model()
 	{
 		m_mesh.Release();
 	}
 
-	void Model::LoadFromFile(const std::string& filePath)
+	void Model::LoadAsset(std::string path)
 	{
-		ModelLoading::AssimpLoader::LoadFromFile(*this, filePath);
-		//m_mesh.SetupGPUBuffers();
+		m_absolutePath = std::move(path);
+		IS_CORE_INFO("[Model::LoadAsset] Asset loading: '{0}'.", m_absolutePath);
+		ModelLoading::AssimpLoader::LoadFromFile(*this, m_absolutePath);
+		m_mesh.SetupGPUBuffers();
+		IS_CORE_INFO("[Model::LoadAsset] Asset loaded: '{0}'.", m_absolutePath);
+	}
+
+	void Model::UnloadAsset()
+	{
+		m_mesh.Release();
 	}
 }

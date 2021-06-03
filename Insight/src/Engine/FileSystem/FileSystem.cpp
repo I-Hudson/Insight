@@ -303,6 +303,12 @@ namespace Insight::FileSystem
 		//}
 	}
 
+	std::string FileSystemManager::WindowsToUinxFilePath(std::string path)
+	{
+		std::replace(path.begin(), path.end(), '\\', '/');
+		return path;
+	}
+
 	std::vector<Byte> FileSystemManager::ReadFileToVector(const std::string& filePath)
 	{
 		std::ifstream file(filePath);

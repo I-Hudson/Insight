@@ -19,8 +19,8 @@ namespace Insight::Assets
 		AssetSate GetState() const { return m_state; }
 
 	protected:
-		virtual void Load(std::string path) = 0;
-		virtual void Unload() = 0;
+		virtual void LoadAsset(std::string path) = 0;
+		virtual void UnloadAsset() = 0;
 
 	protected:
 		std::string m_absolutePath;
@@ -81,7 +81,7 @@ namespace Insight::Assets
 		~FileAsset() { }
 
 	protected:
-		virtual void Load(std::string absolutePath) override 
+		virtual void LoadAsset(std::string absolutePath) override
 		{
 			m_absolutePath = std::move(absolutePath); 
 			std::ifstream file(m_absolutePath);
@@ -96,27 +96,27 @@ namespace Insight::Assets
 				file.close();
 			}
 		}
-		virtual void Unload() override { }
+		virtual void UnloadAsset() override { }
 
 	private:
 		std::vector<char> m_fileData;
 	};
 
-	class ModelAsset : public Asset
-	{
-	public:
-		ModelAsset();
-		ModelAsset(const ModelAsset& other) { }
-		ModelAsset(ModelAsset&& other) { }
-		~ModelAsset();
+	//class ModelAsset : public Asset
+	//{
+	//public:
+	//	ModelAsset();
+	//	ModelAsset(const ModelAsset& other) { }
+	//	ModelAsset(ModelAsset&& other) { }
+	//	~ModelAsset();
 
-		ModelAsset& operator=(const ModelAsset& other) { return *this; }
-		ModelAsset& operator=(ModelAsset&& other) { return *this; }
+	//	ModelAsset& operator=(const ModelAsset& other) { return *this; }
+	//	ModelAsset& operator=(ModelAsset&& other) { return *this; }
 
-	protected:
-		virtual void Load(std::string absolutePath) override;
-		virtual void Unload() override { }
-	private:
-		bool b = false;
-	};
+	//protected:
+	//	virtual void Load(std::string absolutePath) override;
+	//	virtual void Unload() override { }
+	//private:
+	//	bool b = false;
+	//};
 }

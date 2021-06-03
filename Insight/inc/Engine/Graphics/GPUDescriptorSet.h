@@ -108,6 +108,6 @@ namespace Insight::Graphics
 		virtual GPUDescriptorBuilder* BindBuffer(u32 binding, GPUBuffer* buffer, DescriptorType type, ShaderStage stage) = 0;
 		virtual GPUDescriptorBuilder* BindImage(u32 binding, GPUImage* image, DescriptorType type, ShaderStage stage) = 0;
 	
-		virtual bool Build(GPUDescriptorSet* set) = 0;
+		virtual bool Build(GPUDescriptorSet*& set) = 0;
 	};
 }
