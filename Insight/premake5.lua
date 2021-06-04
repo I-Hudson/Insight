@@ -48,7 +48,6 @@ project "Insight"
         "%{IncludeDir.json}",
         "%{IncludeDir.optick}",
         "%{IncludeDir.tinygltf}",
-        "%{IncludeDir.ktx}",
         "%{IncludeDir.IconsFontAwesome}",
         "%{IncludeDir.Reflect}",
         "%{IncludeDir.JobSystem}",
@@ -66,7 +65,6 @@ project "Insight"
     libdirs
     {
         "%{LibDirs.optick}",
-        "%{LibDirs.ktx}",
 
         "%{LibDirs.glslang}/glslang/$(Configuration)",
         "%{LibDirs.glslang}/glslang/OSDependent/Windows/$(Configuration)",

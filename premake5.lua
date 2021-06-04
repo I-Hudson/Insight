@@ -41,7 +41,6 @@ IncludeDir["TinyXML2"] = "$(SolutionDir)Insight/vendor/TinyXML2"
 IncludeDir["json"] = "$(SolutionDir)Insight/vendor/json/single_include/nlohmann"
 IncludeDir["optick"] = "$(SolutionDir)Insight/vendor/optick/src"
 IncludeDir["tinygltf"] = "$(SolutionDir)Insight/vendor/tinygltf"
-IncludeDir["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/include"
 IncludeDir["IconsFontAwesome"] = "$(SolutionDir)Insight/vendor/IconFontCppHeaders/"
 IncludeDir["Reflect"] = "$(SolutionDir)Insight/vendor/Reflect/Reflect/inc"
 IncludeDir["JobSystem"] = "$(SolutionDir)Insight/vendor/JobSystem/JobSystem/inc"
@@ -59,7 +58,6 @@ IncludeDir["dirent"] = "$(SolutionDir)InsightEditor/vendor/ImGui-Addons/FileBrow
 LibDirs = {}
 LibDirs["assimp"] = "$(ProjectDir)vendor/assimp/BINARIES/x64/lib"
 LibDirs["optick"] = "$(SolutionDir)Insight/vendor/optick/bin/vs2019/x64/Debug"
-LibDirs["ktx"] = "$(SolutionDir)Insight/vendor/KTX-Software/build/$(Configuration)"
 LibDirs["Vulkan"] = os.getenv("VK_SDK_PATH") .. "/lib/"
 LibDirs["glslang"] = "$(SolutionDir)Insight/vendor/glslang/build/"
 
