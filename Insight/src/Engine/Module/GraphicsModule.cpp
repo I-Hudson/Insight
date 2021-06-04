@@ -475,8 +475,8 @@ namespace Insight::Module
 			}
 			cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 
-			Graphics::GPUDescriptorSet* vertexSet = nullptr;
-			Graphics::GPUDescriptorSet* fragSet = nullptr;
+			Graphics::GPUDescriptorSet* set0 = nullptr;
+			Graphics::GPUDescriptorSet* set1 = nullptr;
 
 			Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
 			const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
@@ -493,9 +493,9 @@ namespace Insight::Module
 					{
 						IS_PROFILE_SCOPE("Build per mesh descriptor set");
 						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
+							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(set0);
 					}
-					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+					Graphics::GPUDescriptorSet* sets[] = { set0 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
 					Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
@@ -524,7 +524,7 @@ namespace Insight::Module
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set - texture array");
 							builder->BindImageArray(0, diffuseTextures, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(fragSet);
+								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
 					else
@@ -551,11 +551,11 @@ namespace Insight::Module
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
 							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(fragSet);
+								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
 
-					Graphics::GPUDescriptorSet* fragSets[] = { fragSet };
+					Graphics::GPUDescriptorSet* fragSets[] = { set1 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
 					u32 offsets[] = { 0 };

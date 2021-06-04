@@ -158,8 +158,10 @@ namespace Insight::GraphicsAPI::Vulkan
 				u32 setNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationDescriptorSet);
 				spirv_cross::SPIRType type = glsl.get_type(uniformBuffer.base_type_id);
 				
+				VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1);
+
 				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
-				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
+				set.Bindings.push_back(setLayoutBinding);
 				set.SetNumber = setNumber;
 			}
 
@@ -168,10 +170,17 @@ namespace Insight::GraphicsAPI::Vulkan
 
 				u32 bindingNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationBinding);
 				u32 setNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationDescriptorSet);
-				spirv_cross::SPIRType type = glsl.get_type(sampler2D.base_type_id);
+				spirv_cross::SPIRType type = glsl.get_type(sampler2D.type_id);
+
+
+				VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1);
+				//if (type.array.size() == 1)
+				//{
+				//	setLayoutBinding.descriptorCount = (u32)type.array[0];
+				//}
 
 				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
-				set.Bindings.push_back(vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1));
+				set.Bindings.push_back(setLayoutBinding);
 				set.SetNumber = setNumber;
 			}
 		}
@@ -248,6 +257,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		{
 			rasterizationState.cullMode = VK_CULL_MODE_FRONT_BIT;
 		}
+
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo = vks::initializers::pipelineCreateInfo(m_layout, graphPassVulkan->GetRenderPassVulkan());
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyState;

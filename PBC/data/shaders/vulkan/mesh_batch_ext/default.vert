@@ -36,7 +36,7 @@ layout (location = 7) out vec4 outShadowCoord;
 
 void main() 
 {
-	gl_Position = ubo.PVMatrix * pc.transforms[inSubMeshIndex] * vec4(inPos.xyz, 1.0);
+	gl_Position = ubo.PVMatrix * pc.transforms * vec4(inPos.xyz, 1.0);
 	outPos = mat3(pc.transforms) * inPos.xyz;
 	outNormal = mat3(pc.transforms) * inNormal;
 	outColor = inColor.xyz;
@@ -44,6 +44,6 @@ void main()
 
 	outLightVec = ubo.lightDir;
     outViewVec = -outPos.xyz;	
-	outShadowCoord = (biasMat * ubo.lightSpace * pc.transforms[inSubMeshIndex]) * vec4(inPos.xyz, 1);
+	outShadowCoord = (biasMat * ubo.lightSpace * pc.transforms) * vec4(inPos.xyz, 1);
 	outSubMeshIndex = inSubMeshIndex; 
 }

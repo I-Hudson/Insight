@@ -107,13 +107,14 @@ namespace Insight
 
 	std::vector<std::string> Mesh::GetAllSubMeshTextures(MaterialTextureType type)
 	{
-		std::vector<std::string> vec(m_subMeshes.size());
+		std::vector<std::string> vec;
+		vec.reserve(m_subMeshes.size());
 		for (auto& sm : m_subMeshes)
 		{
 			vec.push_back(std::move(sm.GetTexture(MaterialTextureType::Diffuse)));
 			if (vec.back() == "")
 			{
-				vec.back() = ". / data / embed2.jpg";
+				vec.back() = "./data/embed2.jpg";
 			}
 		}
 		return vec;

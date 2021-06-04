@@ -98,7 +98,7 @@ void main()
 	vec3 L = normalize(inLightVec);
 	vec3 V = normalize(inViewVec);
 	vec3 R = normalize(-reflect(L, N));
-	vec3 diffuse = max(dot(N, L), ambient) * inColor;
+	vec3 diffuse = max(dot(N, L), ambient) * outColor.xyz;
 
 	outColor = vec4(diffuse * shadow, 1.0);
 	outNormal = vec4(inNormal, 1);
