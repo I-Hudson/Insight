@@ -1048,3 +1048,9 @@ dkms.conf
 /Insight/ReflectEXE_Profile.json
 /NsightProfiles/InsightEngine - Debug/InsightEngine - Debug.ngfx-proj
 /NsightProfiles/InsightEditor - Release/InsightEditor - Release.ngfx-proj
+/Insight/InsightApplication/ReflectEXE_Profile.json
+/Insight/InsightCore/ReflectEXE_Profile.json
+/Insight/InsightECS/ReflectEXE_Profile.json
+/Insight/InsightGraphics/ReflectEXE_Profile.json
+/Insight/InsightInput/ReflectEXE_Profile.json
+/Insight/InsightTools/ReflectEXE_Profile.json
