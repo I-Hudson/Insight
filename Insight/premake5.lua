@@ -85,7 +85,6 @@ project "Insight"
         "JobSystem",
 
         "OptickCore",
-        "ktx",
         "vulkan-1",
 	}
 
