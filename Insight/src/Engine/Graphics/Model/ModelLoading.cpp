@@ -35,6 +35,14 @@ namespace Insight::ModelLoading
 		fileDirectory = std::move(fileDirectory.substr(0, fileDirectory.find_last_of('/')));
 		model.m_mesh.m_meshName = scene->mRootNode->mName.C_Str();
 		ProcessNode(model.m_mesh, scene->mRootNode, scene, fileDirectory);
+
+		// Work out the mesh's centre, size and radius. This needs to be done last 
+		// as we need all the sub meshes information for this.
+		glm::vec3& meshCenter = model.m_mesh.m_dimensions.Center;
+		u32 numOfSubMeshes = (u32)model.m_mesh.m_subMeshes.size();
+		meshCenter = glm::vec3(meshCenter.x / numOfSubMeshes, meshCenter.y / numOfSubMeshes, meshCenter.z / numOfSubMeshes);
+		model.m_mesh.m_dimensions.Size = model.m_mesh.m_dimensions.Max - model.m_mesh.m_dimensions.Min;
+		model.m_mesh.m_dimensions.Radius = glm::distance(meshCenter, model.m_mesh.m_dimensions.Max);
 	}
 
 	void AssimpLoader::ProcessNode(Mesh& mesh, aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
@@ -62,9 +70,14 @@ namespace Insight::ModelLoading
 		std::vector<u32> indices;
 
 		u32 vertexStart = static_cast<u32>(mesh.m_vertices.size());
+		vertexStart = vertexStart == 0 ? vertexStart : vertexStart + 1;
 		u32 indexStart = static_cast<u32>(mesh.m_indices.size());
+		indexStart = indexStart == 0 ? indexStart : indexStart + 1;
 		u32 vertexCount = 0;
 		u32 indexCount = 0;
+
+		MeshDimensions dimensions;
+		glm::vec3 centre = glm::vec3(0);
 
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
 		{
@@ -82,6 +95,14 @@ namespace Insight::ModelLoading
 			}
 			position.z = aiMesh->mVertices[i].z;
 			vertex.Position = position;
+
+			dimensions.Min.x = glm::min(position.x, dimensions.Min.x);
+			dimensions.Min.y = glm::min(position.y, dimensions.Min.y);
+			dimensions.Min.z = glm::min(position.z, dimensions.Min.z);
+			dimensions.Max.x = glm::max(position.x, dimensions.Max.x);
+			dimensions.Max.y = glm::max(position.y, dimensions.Max.y);
+			dimensions.Max.z = glm::max(position.z, dimensions.Max.z);
+			centre += position;
 
 			glm::vec4 colour = glm::vec4();
 			colour.r = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -128,6 +149,25 @@ namespace Insight::ModelLoading
 			++vertexCount;
 		}
 
+		dimensions.Center = glm::vec3(centre.x / aiMesh->mNumVertices, centre.y / aiMesh->mNumVertices,centre.z / aiMesh->mNumVertices);
+		dimensions.Size = dimensions.Max - dimensions.Min;
+
+		for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
+		{
+			glm::vec3 position;
+			position.x = aiMesh->mVertices[i].x;
+			if (Module::GraphicsModule::Instance()->IsVulkan())
+			{
+				position.y = aiMesh->mVertices[i].y *= -1;
+			}
+			else
+			{
+				position.y = aiMesh->mVertices[i].y;
+			}
+			position.z = aiMesh->mVertices[i].z;
+			dimensions.Radius = glm::max(glm::distance(dimensions.Center, position), dimensions.Radius);
+		}
+
 		for (unsigned int i = 0; i < aiMesh->mNumFaces; ++i)
 		{
 			aiFace face = aiMesh->mFaces[i];
@@ -139,6 +179,16 @@ namespace Insight::ModelLoading
 			}
 		}
 		mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, vertices, indices));
+		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, mesh.m_vertexBuffer, mesh.m_indexBuffer));
+
+		MeshDimensions& meshDimensions = mesh.m_dimensions;
+		meshDimensions.Min.x = glm::min(dimensions.Min.x, meshDimensions.Min.x);
+		meshDimensions.Min.y = glm::min(dimensions.Min.y, meshDimensions.Min.y);
+		meshDimensions.Min.z = glm::min(dimensions.Min.z, meshDimensions.Min.z);
+		meshDimensions.Max.x = glm::max(dimensions.Max.x, meshDimensions.Max.x);
+		meshDimensions.Max.y = glm::max(dimensions.Max.y, meshDimensions.Max.y);
+		meshDimensions.Max.z = glm::max(dimensions.Max.z, meshDimensions.Max.z);
+		meshDimensions.Center += dimensions.Center;
 
 		if (aiMesh->mMaterialIndex >= 0)
 		{

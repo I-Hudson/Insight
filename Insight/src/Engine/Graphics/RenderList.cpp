@@ -37,7 +37,7 @@ namespace Insight::Graphics
 		FreeRenderList.clear();
 	}
 
-	void RenderList::AddDrawCall(MaterialDrawMode drawNode, DrawCall drawCall)
+	void RenderListView::AddDrawCall(MaterialDrawMode drawNode, DrawCall drawCall)
 	{
 		u32 drawCallIndex = (u32)DrawCalls.size();
 		DrawCalls.push_back(drawCall);

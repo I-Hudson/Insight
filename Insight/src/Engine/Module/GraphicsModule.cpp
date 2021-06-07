@@ -211,11 +211,13 @@ namespace Insight::Module
 			{
 				if (m_editorCamera)
 				{
-					renderList->CameraProjection = m_editorCamera->GetProjMatrix();
-					renderList->CameraTransform = m_editorCamera->GetViewMatrix();
+					renderList->MainCamera.Projection = m_editorCamera->GetProjMatrix();
+					renderList->MainCamera.Transform = m_editorCamera->GetViewMatrix();
 				}
 			}
 #endif
+			float dis = glm::distance(renderList->MainCamera.Transform[3], glm::vec4(0));
+			IS_CORE_INFO("Distance to center: {0}", dis);
 			Scene::ActiveScene()->OnDraw(renderList);
 		}
 
@@ -432,7 +434,7 @@ namespace Insight::Module
 			};
 			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
 			ubo.LightDir = -data.Direction;
-			ubo.PVMatrix = renderList->CameraProjection * glm::inverse(renderList->CameraTransform);
+			ubo.PVMatrix = renderList->MainCamera.Projection * glm::inverse(renderList->MainCamera.Transform);
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -483,11 +485,12 @@ namespace Insight::Module
 
 			{
 				IS_PROFILE_SCOPE("Send draw commands to GPU");
-				auto& DrawCallList = renderList->DrawCallList[Graphics::MaterialDrawMode::Opaque];
+				auto& DrawCallList = renderList->MainCamera.DrawCallList[Graphics::MaterialDrawMode::Opaque];
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
-					Graphics::DrawCall& drawCall = renderList->DrawCalls.at(drawCallIndex);
-					glm::mat4 modelMatrix = drawCall.WorldTransform; //mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
+					IS_PROFILE_SCOPE("Single Draw command");
+					Graphics::DrawCall& drawCall = renderList->MainCamera.DrawCalls.at(drawCallIndex);
+					glm::mat4 modelMatrix = drawCall.WorldTransform;
 					Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
 
 					{
@@ -558,13 +561,19 @@ namespace Insight::Module
 					Graphics::GPUDescriptorSet* fragSets[] = { set1 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
-					u32 offsets[] = { 0 };
-					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
-					cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-					cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
 
-					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
+					{
+						IS_PROFILE_SCOPE("Bind vertex/index");
+						u32 offsets[] = { 0 };
+						Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
+						cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+						cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+					}
 
+					{
+						IS_PROFILE_SCOPE("DrawIndexed");
+						cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
+					}
 				}
 			}
 		});

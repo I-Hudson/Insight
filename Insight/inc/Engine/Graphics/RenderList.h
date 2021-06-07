@@ -23,6 +23,8 @@ namespace Insight::Graphics
 			{
 				u32 IndciesStart;
 				u32 IndicesCount;
+				u32 VertexStart;
+				u32 VertexCount;
 			};
 		}Draw;
 
@@ -51,23 +53,40 @@ namespace Insight::Graphics
 		}
 	};
 
-	struct RenderList
+	struct RenderListView
 	{
+		bool IsUsed;
 		std::vector<DrawCall> DrawCalls;
 		std::unordered_map<MaterialDrawMode, DrawCallList> DrawCallList;
-		glm::mat4 CameraTransform;
-		glm::mat4 CameraProjection;
+		glm::mat4 Projection;
+		glm::mat4 Transform;
 
 		void Clear()
 		{
+			IsUsed = false;
 			DrawCalls.clear();
 			DrawCallList.clear();
+		}
+
+		void AddDrawCall(MaterialDrawMode drawMode, DrawCall drawCall);
+	};
+
+	struct RenderList
+	{
+		RenderListView MainCamera;
+		std::vector<RenderListView> ExtraCameras;
+
+		RenderListView DirectionalLight;
+
+		void Clear()
+		{
+			MainCamera.Clear();
+			ExtraCameras.clear();
+			DirectionalLight.Clear();
 		}
 
 		static RenderList* GetFromPool();
 		static void ReturnToPool(RenderList* renderList);
 		static void ClearCache();
-
-		void AddDrawCall(MaterialDrawMode drawMode, DrawCall drawCall);
 	};
 }

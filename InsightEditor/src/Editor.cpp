@@ -69,9 +69,9 @@ namespace Insight::Editor
 			style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
 
-			Entity& mainCamera = Scene::ActiveScene()->CreateEntity("MainCamera");
-			CameraComponent& cameraCom = mainCamera.AddComponent<CameraComponent>();
-			cameraCom.SetProjMatrix(90.0f, 0.1f, 1000.0f);
+			//Entity& mainCamera = Scene::ActiveScene()->CreateEntity("MainCamera");
+			//CameraComponent& cameraCom = mainCamera.AddComponent<CameraComponent>();
+			//cameraCom.SetProjMatrix(90.0f, 0.1f, 1000.0f);
 
 			Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
 			dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 50, 25 });

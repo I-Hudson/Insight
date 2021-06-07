@@ -13,7 +13,7 @@ class ComponentManager;
 
 namespace Insight::Graphics
 {
-	struct RenderList;
+	struct RenderListView;
 }
 
 REFLECT_STRUCT()
@@ -34,7 +34,7 @@ public:
 	virtual ~Component();
 
 	virtual void OnUpdate(const float& a_deltaTime) { }
-	virtual void OnDraw(Insight::Graphics::RenderList* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) { }
+	virtual void OnDraw(Insight::Graphics::RenderListView* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) { }
 	bool IsValid() { return m_entityID != -1; }
 	Entity GetEntity();
 

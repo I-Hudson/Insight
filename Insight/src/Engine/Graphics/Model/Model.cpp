@@ -10,13 +10,14 @@ namespace Insight
 	/// <summary>
 	/// SubMesh
 	/// </summary>
-	SubMesh::SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount)
+	SubMesh::SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, Graphics::GPUBuffer* vertexBuffer, Graphics::GPUBuffer* indexBuffer)
 		: m_firstVertex(firstVertex)
 		, m_vertexCount(vertexCount)
 		, m_firstIndex(firstIndex)
 		, m_indexCount(indexCount)
-		, m_vertexBuffer(nullptr)
-		, m_indexBuffer(nullptr)
+		, m_releaseGPUBuffers(false)
+		, m_vertexBuffer(vertexBuffer)
+		, m_indexBuffer(indexBuffer)
 	{ }
 
 	SubMesh::SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices , std::vector<u32>& indices)
@@ -24,10 +25,10 @@ namespace Insight
 		, m_vertexCount(vertexCount)
 		, m_firstIndex(firstIndex)
 		, m_indexCount(indexCount)
+		, m_releaseGPUBuffers(true)
 	{
 		m_vertexBuffer = Graphics::GPUBuffer::New();
 		m_indexBuffer = Graphics::GPUBuffer::New();
-
 		m_vertexBuffer->Init(Graphics::GPUBufferDesc::Vertex(sizeof(Vertex), vertexCount, vertices.data()));
 		m_indexBuffer->Init(Graphics::GPUBufferDesc::Index(sizeof(u32), m_indexCount, indices.data()));
 	}
@@ -37,11 +38,14 @@ namespace Insight
 
 	void SubMesh::Release()
 	{
-		m_vertexBuffer->ReleaseGPU();
-		::Delete(m_vertexBuffer);
+		if (m_releaseGPUBuffers)
+		{
+			m_vertexBuffer->ReleaseGPU();
+			::Delete(m_vertexBuffer);
+			m_indexBuffer->ReleaseGPU();
+			::Delete(m_indexBuffer);
+		}
 		m_vertexBuffer = nullptr;
-		m_indexBuffer->ReleaseGPU();
-		::Delete(m_indexBuffer);
 		m_indexBuffer = nullptr;
 	}
 
@@ -65,16 +69,16 @@ namespace Insight
 		return "";
 	}
 
-	void SubMesh::Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
+	void SubMesh::Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		//TODO: look into per submesh culling.
 
 		Graphics::DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
-		drawCall.Draw.IndciesStart = 0;
-		drawCall.Draw.IndicesCount = GetVertexCount();
-		drawCall.Draw.IndciesStart = 0;
+		drawCall.Draw.VertexStart = m_firstIndex;
+		drawCall.Draw.VertexCount = GetVertexCount();
+		drawCall.Draw.IndciesStart = m_firstIndex;
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
 		drawCall.DiffuseTexture = GetTexture("texture_diffuse");
@@ -91,8 +95,6 @@ namespace Insight
 	/// </summary>
 	/// <param name="subMeshCount"></param>
 	Mesh::Mesh()
-		: m_vertexBuffer(nullptr)
-		, m_indexBuffer(nullptr)
 	{
 		m_vertexBuffer = Graphics::GPUBuffer::New();
 		m_indexBuffer = Graphics::GPUBuffer::New();
@@ -120,7 +122,7 @@ namespace Insight
 		return vec;
 	}
 
-	void Mesh::Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
+	void Mesh::Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		if (::Graphics::MeshBatchingExt())
 		{

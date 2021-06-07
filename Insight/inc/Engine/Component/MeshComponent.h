@@ -22,7 +22,7 @@ public:
 	virtual ~MeshComponent() override;
 
 	virtual void OnUpdate(const float& a_deltaTime) override;
-	virtual void OnDraw(Insight::Graphics::RenderList* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) override;
+	virtual void OnDraw(Insight::Graphics::RenderListView* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) override;
 	//virtual void OnCreate() override;
 	//virtual void OnDestroy() override;
 

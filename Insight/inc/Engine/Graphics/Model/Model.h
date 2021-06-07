@@ -10,7 +10,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		struct RenderList;
+		struct RenderListView;
 	}
 	namespace ModelLoading
 	{
@@ -22,8 +22,8 @@ namespace Insight
 
 	struct MeshDimensions
 	{
-		glm::vec3 Min = glm::vec3(FLOAT_MIN);
-		glm::vec3 Max = glm::vec3(FLOAT_MAX);
+		glm::vec3 Min = glm::vec3(FLOAT_MAX);
+		glm::vec3 Max = glm::vec3(FLOAT_MIN);
 		glm::vec3 Size = glm::vec3(0);
 		glm::vec3 Center = glm::vec3(0);
 		float Radius = 0;
@@ -42,7 +42,7 @@ namespace Insight
 	class SubMesh
 	{
 	public:
-		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount);
+		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, Graphics::GPUBuffer* vertexBuffer, Graphics::GPUBuffer* indexBuffer);
 		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 		~SubMesh();
 
@@ -56,7 +56,7 @@ namespace Insight
 		std::string GetTexture(const std::string& textureId);
 		std::string GetTexture(MaterialTextureType type);
 
-		void Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
+		void Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
 		Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
@@ -74,6 +74,7 @@ namespace Insight
 		std::unordered_map<MaterialTextureType, std::string> m_textureStrings;
 
 		MeshTextures m_textures;
+		bool m_releaseGPUBuffers;
 		Graphics::GPUBuffer* m_vertexBuffer;
 		Graphics::GPUBuffer* m_indexBuffer;
 
@@ -99,7 +100,7 @@ namespace Insight
 
 		std::vector<std::string> GetAllSubMeshTextures(MaterialTextureType type);
 
-		void Draw(Graphics::RenderList* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
+		void Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
 		//Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		//Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 

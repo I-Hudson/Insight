@@ -2,15 +2,19 @@
 
 #include "Engine/Scene/Scene.h"
 #include "Engine/Entity/Entity.h"
-#include "Engine/Component/Component.h"
-#include "Engine/Component/TransformComponent.h"
-#include "Engine/Component/CameraComponent.h"
-#include "Engine/Component/MeshComponent.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Graphics/RenderList.h"
 #include "Engine/Core/Maths/Frustum.h"
+
+#include "Engine/Component/Component.h"
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/MeshComponent.h"
+#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/DirectionalLightComponent.h"
+
+#include "Engine/Graphics/Model/Model.h"
 
 #include "Engine/Module/WindowModule.h"
 
@@ -188,14 +192,21 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 		CameraComponent& camera = cameraComponents.at(0);
 		if (camera.IsValid())
 		{
-			renderList->CameraTransform = camera.GetViewMatrix();
-			renderList->CameraProjection = glm::perspective(glm::radians(45.0f), (float)Window::GetWidth() / (float)Window::GetHeight(), 0.1f, 1000.0f);//camera.GetProjMatrix();
+			renderList->MainCamera.Transform = camera.GetViewMatrix();
+			renderList->MainCamera.Projection = camera.GetProjMatrix();
 		}
 	}
 
-	Insight::Maths::Frustum cameraFrustum;
-	cameraFrustum.Update(renderList->CameraProjection, renderList->CameraTransform);
+	DirectionalLightComponent& dirLight = m_componentManager.GetAllComponents<DirectionalLightComponent>().at(0);
+	if (dirLight.IsValid())
+	{
+		renderList->DirectionalLight.Transform = dirLight.GetEntity().GetComponent<TransformComponent>().GetTransform();
+		DirectionalLightComponentData& lightData = dirLight.GetComponentData<DirectionalLightComponentData>();
+		renderList->DirectionalLight.Projection = glm::perspective(glm::radians(lightData.FOV), 1.0f, lightData.NearPlane, lightData.FarPlane);
 
+	}
+
+	Insight::Maths::Frustum cameraFrustum;
 	auto& meshComponents = m_componentManager.GetAllComponents<MeshComponent>();
 	for (auto& com : meshComponents)
 	{
@@ -204,10 +215,22 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			return;
 		}
 
+		cameraFrustum.Update(renderList->MainCamera.Projection, renderList->MainCamera.Transform);
 		TransformComponent& transformComponent = com.GetEntity().GetComponent<TransformComponent>();
-		if (cameraFrustum.CheckSphere(transformComponent.GetPostion(), 50.0f))
+		float meshRadius = com.GetMesh()->GetDimensions().Radius;
+		glm::vec3 meshCenter = com.GetMesh()->GetDimensions().Center * transformComponent.GetPostion();
+		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
 		{
-			com.OnDraw(renderList, transformComponent.GetTransform(), cameraFrustum);
+			com.OnDraw(&renderList->MainCamera, transformComponent.GetTransform(), cameraFrustum);
+		}
+
+		for (auto& eCamera : renderList->ExtraCameras)
+		{
+			cameraFrustum.Update(eCamera.Projection, eCamera.Transform);
+			if (cameraFrustum.CheckSphere(transformComponent.GetPostion(), meshRadius))
+			{
+				com.OnDraw(&eCamera, transformComponent.GetTransform(), cameraFrustum);
+			}
 		}
 	}
 }
