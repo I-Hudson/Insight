@@ -86,14 +86,16 @@ namespace Insight::Editor
 				IS_PROFILE_SCOPE("Loading models - Single Thread");
 				for (size_t i = 0; i < 1; ++i)
 				{
-					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vulkanscene_shadow.gltf");
-					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/sponza/sponza.obj");
+					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vulkanscene_shadow.gltf");
+					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/Test/testCube.fbx");
+					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/Survival_BackPack_2/backpack.obj");
+					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/sponza/sponza.obj");
 					//Insight::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Model>("./data/models/sponza/sponza.obj");
 
 					Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
 					MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
 					meshComponent.SetModel(&*graphicsModel);
-					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 10, 0, 0 });
+					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 5, 0, 0 });
 
 					Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
 					meshChild.SetParent(mesh.GetEntityID());

@@ -81,6 +81,7 @@ namespace Insight
 		drawCall.Draw.IndciesStart = m_firstIndex;
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
+		drawCall.Dimensions = m_dimensions;
 		drawCall.DiffuseTexture = GetTexture("texture_diffuse");
 		drawList->AddDrawCall(Graphics::MaterialDrawMode::Opaque, drawCall);
 	}

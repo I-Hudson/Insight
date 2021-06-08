@@ -416,6 +416,11 @@ namespace Insight::Module
 		mainPass.SetRenderFunc([](Graphics::GPUCommandBuffer* cmdBuffer, Graphics::FrameBufferResources& buffers, Graphics::GPUDescriptorBuilder* builder, Graphics::RenderPass& pass, Graphics::RenderList* renderList)
 		{
 			IS_PROFILE_SCOPE("Main Pass");
+			if (renderList->MainCamera.DrawCalls.size() == 0)
+			{
+				return;
+			}
+
 			struct UBO
 			{
 				glm::mat4 PVMatrix;
@@ -484,6 +489,15 @@ namespace Insight::Module
 			const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
 
 			{
+				IS_PROFILE_SCOPE("Build set 0");
+				Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
+				builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+					->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set0);
+				Graphics::GPUDescriptorSet* sets[] = { set0 };
+				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+			}
+
+			{
 				IS_PROFILE_SCOPE("Send draw commands to GPU");
 				auto& DrawCallList = renderList->MainCamera.DrawCallList[Graphics::MaterialDrawMode::Opaque];
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
@@ -491,17 +505,10 @@ namespace Insight::Module
 					IS_PROFILE_SCOPE("Single Draw command");
 					Graphics::DrawCall& drawCall = renderList->MainCamera.DrawCalls.at(drawCallIndex);
 					glm::mat4 modelMatrix = drawCall.WorldTransform;
-					Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
 					{
-						IS_PROFILE_SCOPE("Build per mesh descriptor set");
-						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(set0);
+						IS_PROFILE_SCOPE("PushConstant");
+						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(glm::mat4), &modelMatrix);
 					}
-					Graphics::GPUDescriptorSet* sets[] = { set0 };
-					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
-
-					Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
 
 					if (::Graphics::MeshBatchingExt())
 					{
@@ -526,8 +533,7 @@ namespace Insight::Module
 						}
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set - texture array");
-							builder->BindImageArray(0, diffuseTextures, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+							builder->BindImageArray(0, diffuseTextures, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
 					else
@@ -553,8 +559,7 @@ namespace Insight::Module
 						}
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
-							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)
-								->BindImage(1, shadowMap, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
 

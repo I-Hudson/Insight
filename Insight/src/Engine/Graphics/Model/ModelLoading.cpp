@@ -3,6 +3,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include <filesystem>
 #include "Engine/FileSystem/FileSystem.h"
+#include "Engine/Graphics/Graphics.h"
 
 #include "Engine/Module/GraphicsModule.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -42,6 +43,10 @@ namespace Insight::ModelLoading
 		u32 numOfSubMeshes = (u32)model.m_mesh.m_subMeshes.size();
 		meshCenter = glm::vec3(meshCenter.x / numOfSubMeshes, meshCenter.y / numOfSubMeshes, meshCenter.z / numOfSubMeshes);
 		model.m_mesh.m_dimensions.Size = model.m_mesh.m_dimensions.Max - model.m_mesh.m_dimensions.Min;
+		if (::Graphics::IsVulkan())
+		{
+			model.m_mesh.m_dimensions.Size.y *= -1;
+		}
 		model.m_mesh.m_dimensions.Radius = glm::distance(meshCenter, model.m_mesh.m_dimensions.Max);
 	}
 
@@ -149,6 +154,13 @@ namespace Insight::ModelLoading
 			++vertexCount;
 		}
 
+		if (::Graphics::IsVulkan())
+		{
+			std::swap(dimensions.Min.y, dimensions.Max.y);
+			dimensions.Min.y *= -1;
+			dimensions.Max.y *= -1;
+		}
+
 		dimensions.Center = glm::vec3(centre.x / aiMesh->mNumVertices, centre.y / aiMesh->mNumVertices,centre.z / aiMesh->mNumVertices);
 		dimensions.Size = dimensions.Max - dimensions.Min;
 
@@ -180,6 +192,7 @@ namespace Insight::ModelLoading
 		}
 		mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, vertices, indices));
 		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, mesh.m_vertexBuffer, mesh.m_indexBuffer));
+		mesh.m_subMeshes.back().m_dimensions = dimensions;
 
 		MeshDimensions& meshDimensions = mesh.m_dimensions;
 		meshDimensions.Min.x = glm::min(dimensions.Min.x, meshDimensions.Min.x);

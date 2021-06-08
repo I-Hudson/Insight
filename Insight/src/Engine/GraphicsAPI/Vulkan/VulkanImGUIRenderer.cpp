@@ -63,8 +63,8 @@ namespace Insight::GraphicsAPI::Vulkan
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 			ImGuizmo::BeginFrame();
+			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 		}
 #endif
 	}

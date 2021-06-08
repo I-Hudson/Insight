@@ -21,6 +21,13 @@ namespace Insight::GraphicsAPI::Vulkan
 		VkPipelineVertexInputStateCreateInfo CreateInfo;
 	};
 
+	struct PushConstant
+	{
+		ShaderStage Stage;
+		u32 Offset = 0;
+		u32 Size = 0;
+	};
+
 	class GPUShaderVulkan : public GPUResouceVulkan<Insight::Graphics::GPUShader>
 	{
 	public:
@@ -35,6 +42,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		virtual void ReleaseGPUResoucesEarly() override;
 
 		const std::unordered_map<u32, DescriptorSetLayoutData>& GetDescriptorSetlayouts() const { return m_setLayouts; }
+		const PushConstant& GetPushConstant() const { return m_pushConstant; }
 
 	protected:
 		// [GPUResouce]
@@ -49,6 +57,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		std::array<VkPipelineShaderStageCreateInfo, (size_t)ShaderStage::Count> m_pipelineShaderStages;
 		PipelineVertexInputState m_pipelineVertexInputState;
 		std::unordered_map<u32, DescriptorSetLayoutData> m_setLayouts;
+		PushConstant m_pushConstant;
 	};
 
 	class GPUPipelineVulkan : public GPUResouceVulkan<Graphics::GPUPipeline>

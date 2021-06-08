@@ -137,7 +137,6 @@ namespace Insight::GraphicsAPI::Vulkan
 		instanceCreateInfo.enabledLayerCount = static_cast<u32>(layerExtentionsCC.size());
 		ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance));
 
-#ifdef IS_DEBUG
 		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			// The report flags determine what type of messages for the layers will be displayed
@@ -146,7 +145,6 @@ namespace Insight::GraphicsAPI::Vulkan
 			// Additional flags include performance info, loader and layer debug messages, etc.
 			Insight::GraphicsAPI::Vulkan::Debug::SetupDebugging(m_instance, debugReportFlags, VK_NULL_HANDLE);
 		}
-#endif
 
 		// Get physical device
 		u32 gpuCount = 0;
@@ -322,13 +320,11 @@ namespace Insight::GraphicsAPI::Vulkan
 		ThrowIfFailed(vkCreateDevice(gpu, &deviceInfo, nullptr, &Device));
 		ASSERT(Device != VK_NULL_HANDLE);
 
-#ifdef IS_DEBUG
 		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			::New<Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan>();
 			Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance()->Init();
 		}
-#endif
 
 		// Create queues
 		if (graphicsQueueIndex == -1)
@@ -555,14 +551,12 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		SAFE_DELETE(m_adapter);
 
-#ifdef IS_DEBUG
 		if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
 		{
 			Insight::GraphicsAPI::Vulkan::Debug::FreeDebugCallback(m_instance);
 			::Delete(Insight::GraphicsAPI::Vulkan::GPUDebugMarkerVulkan::Instance());
 
 		}
-#endif
 
 		vkDestroyDevice(Device, nullptr);
 		vkDestroyInstance(m_instance, nullptr);

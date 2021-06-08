@@ -50,27 +50,12 @@ namespace Insight::Graphics
 	static const RenderGraphQueueFlags ComputeQueues = RENDER_GRAPH_QUEUE_COMPUTE_BIT |
 		RENDER_GRAPH_QUEUE_ASYNC_COMPUTE_BIT;
 
-	class RenderPassLifeTimeObject
-	{
-	public:
-		RenderPassLifeTimeObject(void* objectPtr);
-		RenderPassLifeTimeObject(const RenderPassLifeTimeObject& other);
-		RenderPassLifeTimeObject(RenderPassLifeTimeObject&& other);
-		~RenderPassLifeTimeObject();
-
-		RenderPassLifeTimeObject& operator= (const RenderPassLifeTimeObject& other);
-		RenderPassLifeTimeObject& operator= (RenderPassLifeTimeObject&& other);
-	private:
-		void* m_objectPtr;
-		u32* m_refCount;
-	};
-
 	enum RenderPassQueue
 	{
 		Invalid = 0,
 		Default = 1,
-		UI = 2,
-		Overlay = 3,
+		Overlay = 2,
+		UI = 3,
 
 		Count
 	};
@@ -308,9 +293,6 @@ namespace Insight::Graphics
 		const glm::vec4& GetClearColor() { return m_clearColour; }
 		const glm::vec2& GetClearDepthStencil() { return m_clearDepthStencil; }
 
-		template<typename T>
-		void AddLifeTimeObject(T* lifeTimeObejct);
-
 	private:
 		void CallBeginRenderFunc(GPURenderGraphPass* pass)
 		{
@@ -369,7 +351,6 @@ namespace Insight::Graphics
 		u32 m_passType;
 
 		GPURenderGraphPass* m_graphPass;
-		std::vector<RenderPassLifeTimeObject> m_lifeTimeObjects;
 		std::vector<SubpassDependency> m_subpassDependencies;
 
 		RenderPassQueue m_passQueue;
@@ -394,10 +375,4 @@ namespace Insight::Graphics
 
 		friend RenderGraph;
 	};
-
-	template<typename T>
-	inline void RenderPass::AddLifeTimeObject(T* lifeTimeObejct)
-	{
-		m_lifeTimeObjects.push_back(RenderPassLifeTimeObject(lifeTimeObejct));
-	}
 }

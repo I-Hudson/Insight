@@ -14,10 +14,10 @@ layout (set = 0, binding = 0) uniform UBO
 	vec3 lightDir;
 } ubo;
 
-layout (set = 0, binding = 1) uniform MODELUBO //#dynamic
+layout(push_constant) uniform PER_OBJECT
 {
-	mat4 model;
-} modelUBO;
+	mat4 modelMatrix;
+}perObject;
 
 const mat4 biasMat = mat4( 
 	0.5, 0.0, 0.0, 0.0,
@@ -35,13 +35,13 @@ layout (location = 6) out vec4 outShadowCoord;
 
 void main() 
 {
-	gl_Position = ubo.PVMatrix * modelUBO.model * vec4(inPos.xyz, 1.0);
-	outPos = mat3(modelUBO.model) * inPos.xyz;
-	outNormal = mat3(modelUBO.model) * inNormal;
+	gl_Position = ubo.PVMatrix * perObject.modelMatrix * vec4(inPos.xyz, 1.0);
+	outPos = mat3(perObject.modelMatrix) * inPos.xyz;
+	outNormal = mat3(perObject.modelMatrix) * inNormal;
 	outColor = inColor.xyz;
 	outUV = inUV;
 
 	outLightVec = ubo.lightDir;
     outViewVec = -outPos.xyz;	
-	outShadowCoord = (biasMat * ubo.lightSpace * modelUBO.model) * vec4(inPos.xyz, 1);
+	outShadowCoord = (biasMat * ubo.lightSpace * perObject.modelMatrix) * vec4(inPos.xyz, 1);
 }

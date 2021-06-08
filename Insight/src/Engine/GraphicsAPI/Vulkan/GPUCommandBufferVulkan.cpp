@@ -72,16 +72,18 @@ namespace Insight::GraphicsAPI::Vulkan
 		ASSERT(m_state == Graphics::GPUCommandBufferState::IDLE && "[GPUCommandBufferVulkan::Submit] Command buffer must be in the 'IDLE' state to be submitted.");
 
 		GPUFenceVulkan* fenceVulkan = nullptr;
+		VkFence vkFence = VK_NULL_HANDLE;
 		if (fence != nullptr)
 		{
 			fenceVulkan = static_cast<GPUFenceVulkan*>(fence);
+			vkFence = *fenceVulkan->GetHandleVulkan();
 		}
 
 		//TODO. Think about matching this with some form of queue system.
 		VkSubmitInfo submitInfo = vks::initializers::submitInfo();
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &m_cmdBuffer;
-		vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, fenceVulkan ? *fenceVulkan->GetHandleVulkan() : nullptr);
+		vkQueueSubmit(m_device->GetQueue(queue), 1, &submitInfo, vkFence != VK_NULL_HANDLE ? vkFence : nullptr);
 		m_state = Graphics::GPUCommandBufferState::SUBMITTED;
 	}
 
@@ -470,6 +472,14 @@ namespace Insight::GraphicsAPI::Vulkan
 			sets.push_back(ptr->GetSetVulkan());
 		}
 		vkCmdBindDescriptorSets(m_cmdBuffer, ToVulkanPipelineBindPoint(bindPoint), static_cast<GPUPipelineVulkan*>(pipeline)->GetPipelineLayout(), firstSet, descriptorSetCount, sets.data(), dynamicOffsetCount, dynamicOffsets);
+	}
+
+	void GPUCommandBufferVulkan::BindPushConstants(Graphics::GPUPipeline* pipeline, ShaderStage shaderStage, u32 offset, u32 size, const void* values)
+	{
+		IS_PROFILE_FUNCTION();
+		ASSERT(m_state == Graphics::GPUCommandBufferState::RECORDING && "[GPUCommandBufferVulkan::BindPushConstants] Command Buffer must be recording.");
+		++m_recordCommandCount;
+		vkCmdPushConstants(m_cmdBuffer, static_cast<GPUPipelineVulkan*>(pipeline)->GetPipelineLayout(), ToVulkanShaderStageFlags(shaderStage), offset, size, values);
 	}
 
 	void GPUCommandBufferVulkan::BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets)

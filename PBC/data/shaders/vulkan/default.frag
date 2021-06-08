@@ -15,8 +15,8 @@ layout (location = 1) out vec4 outNormal;
 layout (location = 2) out vec4 outPos;
 
 
+layout (set = 0, binding = 1) uniform sampler2D texture_shadowpass;
 layout (set = 1, binding = 0) uniform sampler2D texture_diffuse;
-layout (set = 1, binding = 1) uniform sampler2D texture_shadowpass;
 
 float LinearizeDepth(float depth)
 {

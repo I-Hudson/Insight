@@ -37,6 +37,7 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		virtual void BindPipeline(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline) override;
 		virtual void BindDescriptorSets(PipelineBindPoint bindPoint, Graphics::GPUPipeline* pipeline, u32 firstSet, u32 descriptorSetCount, Graphics::GPUDescriptorSet** descriptorSets, u32 dynamicOffsetCount, u32 const* dynamicOffsets) override;
+		virtual void BindPushConstants(Graphics::GPUPipeline* pipeline, ShaderStage shaderStage, u32 offset, u32 size, const void* values) override;
 		virtual void BindVertexBuffers(u32 firstBinding, u32 bindingCount, Graphics::GPUBuffer** buffers, u32* offsets) override;
 		virtual void BindIndexBuffer(Graphics::GPUBuffer* buffer, u32 offset, Graphics::GPUCommandBufferIndexType indexType) override;
 		

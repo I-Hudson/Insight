@@ -2,6 +2,7 @@
 
 #include "Engine/Core/Common.h"
 #include "Engine/Graphics/Enums.h"
+#include "Engine/Graphics/Model/Model.h"
 
 namespace Insight::Graphics
 {
@@ -30,6 +31,7 @@ namespace Insight::Graphics
 
 		glm::mat4 WorldTransform;
 		glm::mat4 LocalTransform;
+		MeshDimensions Dimensions;
 
 		//TODO: Remove this for a material has or pointer.
 		std::string DiffuseTexture;

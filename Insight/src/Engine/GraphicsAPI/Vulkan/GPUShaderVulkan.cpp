@@ -153,7 +153,6 @@ namespace Insight::GraphicsAPI::Vulkan
 
 			for (auto& uniformBuffer : resources.uniform_buffers)
 			{
-
 				u32 bindingNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationBinding);
 				u32 setNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationDescriptorSet);
 				spirv_cross::SPIRType type = glsl.get_type(uniformBuffer.base_type_id);
@@ -163,6 +162,18 @@ namespace Insight::GraphicsAPI::Vulkan
 				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
 				set.Bindings.push_back(setLayoutBinding);
 				set.SetNumber = setNumber;
+			}
+
+			for (auto& pushConstant : resources.push_constant_buffers)
+			{
+				ASSERT(m_pushConstant.Size == 0 && "[ParseDescriptorSetLayouts] There can only be on push constant.");
+				
+				m_pushConstant.Stage = stage.GetStage();
+				spirv_cross::SmallVector<spirv_cross::BufferRange> ranges = glsl.get_active_buffer_ranges(pushConstant.id);
+				for (auto& r :ranges)
+				{
+					m_pushConstant.Size += r.range;
+				}
 			}
 
 			for (auto& sampler2D : resources.sampled_images)
@@ -216,21 +227,19 @@ namespace Insight::GraphicsAPI::Vulkan
 		GPUShaderVulkan* shaderVulkan = static_cast<GPUShaderVulkan*>(m_shader);
 		GPURenderGraphPassVulkan* graphPassVulkan = static_cast<GPURenderGraphPassVulkan*>(graphPass);
 
-		std::vector<VkPushConstantRange> pushConstants;
-		/*for (auto& data : )
+		std::vector<VkPushConstantRange> pushConstantRanges = {};
+		const PushConstant& pushConstant = static_cast<GPUShaderVulkan*>(m_shader)->GetPushConstant();
+		if (pushConstant.Size > 0)
 		{
-			for (auto& buffer : data.PushConstants)
-			{
-				pushConstants.push_back(vks::initializers::pushConstantRange(data.GetVulkanShaderStage(), buffer.Size, buffer.Offset));
-			}
-		}*/
+			pushConstantRanges.push_back(vks::initializers::pushConstantRange(ToVulkanShaderStageFlags(pushConstant.Stage), pushConstant.Size, pushConstant.Offset));
+		}
 
 		std::vector<VkDescriptorSetLayout> setLayouts;
 		for (auto& set : shaderVulkan->GetDescriptorSetlayouts())
 		{
 			setLayouts.push_back(set.second.Layout);
 		}
-		ThrowIfFailed(vkCreatePipelineLayout(m_device->Device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstants), nullptr, &m_layout));
+		ThrowIfFailed(vkCreatePipelineLayout(m_device->Device, &vks::initializers::pipelineLayoutCreateInfo(setLayouts, pushConstantRanges), nullptr, &m_layout));
 
 		auto vertexInputInfo = shaderVulkan->GetPipelineVertexInputState();
 		auto shaderStages = shaderVulkan->GetPipelineShaderStages();

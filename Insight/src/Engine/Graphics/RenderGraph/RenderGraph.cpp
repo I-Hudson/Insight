@@ -273,8 +273,14 @@ namespace Insight::Graphics
 		{
 			{
 				IS_PROFILE_SCOPE("[RenderGraph::Reset] single frame wait/reset");
-				frame.Fence->Wait();
-				frame.Fence->Reset();
+				{
+					IS_PROFILE_SCOPE("Fence wait");
+					frame.Fence->Wait();
+				}
+				{
+					IS_PROFILE_SCOPE("Fence reset");
+					frame.Fence->Reset();
+				}
 			}
 			frame.Reset();
 		}
@@ -768,25 +774,37 @@ namespace Insight::Graphics
 	{
 		IS_PROFILE_FUNCTION();
 
-		for (std::pair<u64, GPURenderGraphPass*> frameBuffer : RenderPasses)
 		{
-			::Delete(frameBuffer.second);
+			IS_PROFILE_SCOPE("Delete temp frame buffers.");
+			for (std::pair<u64, GPURenderGraphPass*> frameBuffer : RenderPasses)
+			{
+				::Delete(frameBuffer.second);
+			}
 		}
 
-		for (auto& buffer : Buffers)
 		{
-			buffer.second->Reset();
+			IS_PROFILE_SCOPE("Rest dynamic buffers");
+			for (auto& buffer : Buffers)
+			{
+				buffer.second->Reset();
+			}
 		}
 
-		for (auto& pass : Passes)
-		{
-			pass.m_lifeTimeObjects.clear();
-		}
 		RenderPasses.clear();
-		RenderList::ReturnToPool(RenderList);
 
-		CommandPools->Reset();
-		DescriptorAllocator->ResetPools();
+		{
+			IS_PROFILE_SCOPE("Rest dynamic buffers");
+			RenderList::ReturnToPool(RenderList);
+		}
+
+		{
+			IS_PROFILE_SCOPE("Command pools reset");
+			CommandPools->Reset();
+		}
+		{
+			IS_PROFILE_SCOPE("Descriptor Allocator reset");
+			DescriptorAllocator->ResetPools();
+		}
 	}
 
 	void RenderGraph::FrameSubmision::ReleaseGPU()
