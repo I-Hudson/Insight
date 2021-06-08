@@ -140,9 +140,25 @@ namespace Insight
 		}
 		else
 		{
-			for (auto& mesh : m_subMeshes)
+			if (drawList->Type == Graphics::RenderListViewType::Camera)
 			{
-				mesh.Draw(drawList, worldTransform, cameraFrustum);
+				for (auto& mesh : m_subMeshes)
+				{
+					mesh.Draw(drawList, worldTransform, cameraFrustum);
+				}
+			}
+			else if (drawList->Type == Graphics::RenderListViewType::Light)
+			{
+				Graphics::DrawCall drawCall;
+				drawCall.Geometry.VertexBuffer = m_vertexBuffer;
+				drawCall.Geometry.IndexBuffer = m_indexBuffer;
+				drawCall.Draw.VertexStart = 0;
+				drawCall.Draw.VertexCount = GetVertexCount();
+				drawCall.Draw.IndciesStart = 0;
+				drawCall.Draw.IndicesCount = GetIndexCount();
+				drawCall.WorldTransform = worldTransform;
+				drawCall.Dimensions = m_dimensions;
+				drawList->AddDrawCall(Graphics::MaterialDrawMode::Opaque, drawCall);
 			}
 		}
 	}

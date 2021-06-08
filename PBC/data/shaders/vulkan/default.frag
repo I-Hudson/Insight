@@ -92,13 +92,13 @@ void main()
 	//float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
 	//float shadow = ShadowCalc(inShadowCoord);
 
-	//outColor = vec4(texture(texture_diffuse, inUV).xyz, 1.0);
+	outColor = vec4(texture(texture_diffuse, inUV).xyz, 1.0);
 
 	vec3 N = normalize(inNormal);
 	vec3 L = normalize(inLightVec);
 	vec3 V = normalize(inViewVec);
 	vec3 R = normalize(-reflect(L, N));
-	vec3 diffuse = max(dot(N, L), ambient) * vec3(1,1,1);// * outColor.xyz;
+	vec3 diffuse = max(dot(N, L), ambient) * outColor.xyz;
 
 	outColor = vec4(diffuse/* * shadow*/, 1.0);
 	outNormal = vec4(inNormal, 1);

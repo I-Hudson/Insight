@@ -55,6 +55,13 @@ namespace Insight::Graphics
 		}
 	};
 
+	enum class RenderListViewType
+	{
+		None,
+		Camera,
+		Light
+	};
+
 	struct RenderListView
 	{
 		bool IsUsed;
@@ -62,6 +69,7 @@ namespace Insight::Graphics
 		std::unordered_map<MaterialDrawMode, DrawCallList> DrawCallList;
 		glm::mat4 Projection;
 		glm::mat4 Transform;
+		RenderListViewType Type = RenderListViewType::None;
 
 		void Clear()
 		{
@@ -73,12 +81,31 @@ namespace Insight::Graphics
 		void AddDrawCall(MaterialDrawMode drawMode, DrawCall drawCall);
 	};
 
+	struct RenderListViewCamera : public RenderListView
+	{
+		RenderListViewCamera()
+		{
+			Type = RenderListViewType::Camera;
+		}
+	};
+
+	struct RenderListViewLight : public RenderListView
+	{
+		glm::vec3 LightDirection;
+
+		RenderListViewLight()
+		{
+			Type = RenderListViewType::Light;
+		}
+	};
+
+
 	struct RenderList
 	{
-		RenderListView MainCamera;
-		std::vector<RenderListView> ExtraCameras;
+		RenderListViewCamera MainCamera;
+		std::vector<RenderListViewCamera> ExtraCameras;
 
-		RenderListView DirectionalLight;
+		RenderListViewLight DirectionalLight;
 
 		void Clear()
 		{

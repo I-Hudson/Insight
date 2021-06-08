@@ -36,34 +36,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "imgui.h"
 
-// TODO: Remove this.
-#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
-//
-
 namespace Insight::Module
 {
-	glm::mat4 DirectionToViewMatrix(const glm::vec3& vec, const glm::vec3& position = glm::vec3(0))
-	{
-		glm::vec3 const f(vec);
-		glm::vec3 const s(glm::normalize(glm::cross(glm::vec3(0, 1, 0), f)));
-		glm::vec3 const u(cross(f, s));
-
-		glm::mat4 Result(1);
-		Result[0][0] = s.x;
-		Result[1][0] = s.y;
-		Result[2][0] = s.z;
-		Result[0][1] = u.x;
-		Result[1][1] = u.y;
-		Result[2][1] = u.z;
-		Result[0][2] = -f.x;
-		Result[1][2] = -f.y;
-		Result[2][2] = -f.z;
-		Result[3][0] = -glm::dot(s, position);
-		Result[3][1] = -glm::dot(u, position);
-		Result[3][2] = glm::dot(f, position);
-		return Result;
-	}
-
 	GraphicsModule::GraphicsModule()
 		: 
 #ifdef IS_EDITOR
@@ -303,8 +277,8 @@ namespace Insight::Module
 		using namespace Insight;
 
 		Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
-		shadowPassCascadeMap.Width = 2048 * 2;
-		shadowPassCascadeMap.Height = 2048 * 2;
+		shadowPassCascadeMap.Width = 2048 * 4;
+		shadowPassCascadeMap.Height = 2048 * 4;
 		shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
 		shadowPassCascadeMap.Format = PixelFormat::D32_Float;
 		//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
@@ -325,14 +299,12 @@ namespace Insight::Module
 			IS_PROFILE_SCOPE("Shadow Map");
 			cmdBuffer->SetDepthBias(1.25f, 0.0f, 1.75f);
 
-			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
-			DirectionalLightComponentData& data = lightCom.GetComponentData<DirectionalLightComponentData>();
 			struct UBO
 			{
 				glm::mat4 DepthMVP;
 			};
 			UBO depthMVP;
-			depthMVP.DepthMVP = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
+			depthMVP.DepthMVP = renderList->DirectionalLight.Projection * renderList->DirectionalLight.Transform;
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&depthMVP, sizeof(UBO));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -363,33 +335,26 @@ namespace Insight::Module
 
 			Graphics::GPUDescriptorSet* vertexSet = nullptr;
 			{
-				IS_PROFILE_SCOPE("Draw mesh vertices");
-				for (auto& mesh : Scene::ActiveScene()->GetAllComponents<MeshComponent>())
+				auto& DrawCallList = renderList->DirectionalLight.DrawCallList[Graphics::MaterialDrawMode::Opaque];
+				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
-					if (mesh.GetMesh() != nullptr)
+					Graphics::DrawCall drawCall = renderList->DirectionalLight.DrawCalls.at(drawCallIndex);
+					glm::mat4 modelMatrix = drawCall.WorldTransform;
+					Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
+
 					{
-						glm::mat4 modelMatrix = mesh.GetEntity().GetComponent<TransformComponent>().GetTransform();
-						Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
-						{
-							IS_PROFILE_SCOPE("Build per mesh descriptor set");
-							builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-								->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
-						}
-						Graphics::GPUDescriptorSet* sets[] = { vertexSet };
-						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
-
-						for (u32 subMeshIndex = 0; subMeshIndex < mesh.GetMesh()->GetSubMeshCount(); ++subMeshIndex)
-						{
-							SubMesh& subMesh = const_cast<SubMesh&>(mesh.GetMesh()->GetSubMesh(subMeshIndex));
-
-							u32 offsets[] = { 0 };
-							Graphics::GPUBuffer* verticesBuffer[] = { subMesh.GetGPUVertexBuffer() };
-							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-							cmdBuffer->BindIndexBuffer(subMesh.GetGPUIndexBuffer(), 0, Graphics::GPUCommandBufferIndexType::UINT32);
-							cmdBuffer->DrawIndexed(subMesh.GetIndexCount(), 1, 0, 0, 0);
-						}
+						IS_PROFILE_SCOPE("Build per mesh descriptor set");
+						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
+							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
 					}
+					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+
+					u32 offsets[] = { 0 };
+					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
+					cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+					cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, 0, 0);
 				}
 			}
 		});
@@ -428,17 +393,14 @@ namespace Insight::Module
 				glm::vec3 LightDir;
 			};
 
-			DirectionalLightComponent& lightCom = Scene::ActiveScene()->GetAllComponents<DirectionalLightComponent>().at(0);
-			DirectionalLightComponentData& data = lightCom.GetComponentData<DirectionalLightComponentData>();
-
 			UBO ubo =
 			{
 				glm::mat4(1.0f),
 				glm::mat4(1.0f),
 				glm::vec3(5.0f, 5.0f, 5.0f)
 			};
-			ubo.LightSpace = glm::perspective(glm::radians(data.FOV), 1.0f, data.NearPlane, data.FarPlane) * DirectionToViewMatrix(data.Direction, lightCom.GetEntity().GetComponent<TransformComponent>().GetPostion());
-			ubo.LightDir = -data.Direction;
+			ubo.LightSpace = renderList->DirectionalLight.Projection * renderList->DirectionalLight.Transform;
+			ubo.LightDir = -renderList->DirectionalLight.LightDirection;
 			ubo.PVMatrix = renderList->MainCamera.Projection * glm::inverse(renderList->MainCamera.Transform);
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 

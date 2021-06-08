@@ -203,7 +203,7 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 		renderList->DirectionalLight.Transform = dirLight.GetEntity().GetComponent<TransformComponent>().GetTransform();
 		DirectionalLightComponentData& lightData = dirLight.GetComponentData<DirectionalLightComponentData>();
 		renderList->DirectionalLight.Projection = glm::perspective(glm::radians(lightData.FOV), 1.0f, lightData.NearPlane, lightData.FarPlane);
-
+		renderList->DirectionalLight.Type = Insight::Graphics::RenderListViewType::Light;
 	}
 
 	Insight::Maths::Frustum cameraFrustum;
@@ -231,6 +231,12 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			{
 				com.OnDraw(&eCamera, transformComponent.GetTransform(), cameraFrustum);
 			}
+		}
+
+		cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
+		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
+		{
+			com.OnDraw(&renderList->DirectionalLight, transformComponent.GetTransform(), cameraFrustum);
 		}
 	}
 }

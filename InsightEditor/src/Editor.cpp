@@ -74,13 +74,13 @@ namespace Insight::Editor
 			//cameraCom.SetProjMatrix(90.0f, 0.1f, 1000.0f);
 
 			Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
-			dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 50, 25 });
+			dirLight.GetComponent<TransformComponent>().SetPosition({ 1000, 2000, 1000 });
 			DirectionalLightComponent& lightCom = dirLight.AddComponent<DirectionalLightComponent>();
 			DirectionalLightComponentData& lightData = lightCom.GetComponentData<DirectionalLightComponentData>();
 			lightData.FOV = 45.0f;
 			lightData.Direction = glm::normalize(glm::vec3(0, 0, 0) - dirLight.GetComponent<TransformComponent>().GetPostion());
 			lightData.NearPlane = 1.0f;
-			lightData.FarPlane = 256.0f;
+			lightData.FarPlane = 4000.0f;
 
 			{
 				IS_PROFILE_SCOPE("Loading models - Single Thread");
