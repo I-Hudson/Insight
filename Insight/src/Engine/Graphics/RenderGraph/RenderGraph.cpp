@@ -794,7 +794,11 @@ namespace Insight::Graphics
 
 		{
 			IS_PROFILE_SCOPE("Rest dynamic buffers");
-			RenderList::ReturnToPool(RenderList);
+			if (RenderList)
+			{
+				RenderList::ReturnToPool(RenderList);
+				RenderList = nullptr;
+			}
 		}
 
 		{
