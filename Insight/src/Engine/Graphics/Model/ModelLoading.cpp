@@ -144,10 +144,9 @@ namespace Insight::ModelLoading
 				uv.y = 0.0f;
 			}
 			vertex.UV1 = uv;
-
-//#ifdef IS_MESH_BATCHING_EXT
+#ifdef IS_MESH_BATCHING_EXT
 			vertex.VIndex = (u32)mesh.m_subMeshes.size();
-//#endif
+#endif
 
 			mesh.m_vertices.push_back(vertex);
 			vertices.push_back(vertex);
@@ -190,6 +189,7 @@ namespace Insight::ModelLoading
 				++indexCount;
 			}
 		}
+
 		mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, vertices, indices));
 		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, mesh.m_vertexBuffer, mesh.m_indexBuffer));
 		mesh.m_subMeshes.back().m_dimensions = dimensions;

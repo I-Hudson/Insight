@@ -7,6 +7,7 @@
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Graphics/RenderList.h"
 #include "Engine/Core/Maths/Frustum.h"
+#include "Engine/Graphics/Graphics.h"
 
 #include "Engine/Component/Component.h"
 #include "Engine/Component/TransformComponent.h"
@@ -200,10 +201,10 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 	DirectionalLightComponent& dirLight = m_componentManager.GetAllComponents<DirectionalLightComponent>().at(0);
 	if (dirLight.IsValid())
 	{
-		renderList->DirectionalLight.Transform = dirLight.GetEntity().GetComponent<TransformComponent>().GetTransform();
+		glm::vec3 pos = dirLight.GetEntity().GetComponent<TransformComponent>().GetPostion();
+		renderList->DirectionalLight.Transform = glm::lookAt(pos, glm::vec3(0), glm::vec3(0, 1, 0));
 		DirectionalLightComponentData& lightData = dirLight.GetComponentData<DirectionalLightComponentData>();
 		renderList->DirectionalLight.Projection = glm::perspective(glm::radians(lightData.FOV), 1.0f, lightData.NearPlane, lightData.FarPlane);
-		renderList->DirectionalLight.Type = Insight::Graphics::RenderListViewType::Light;
 	}
 
 	Insight::Maths::Frustum cameraFrustum;
@@ -233,8 +234,8 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			}
 		}
 
-		cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
-		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
+		//cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
+		//if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
 		{
 			com.OnDraw(&renderList->DirectionalLight, transformComponent.GetTransform(), cameraFrustum);
 		}

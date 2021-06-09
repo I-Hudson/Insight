@@ -88,7 +88,7 @@ float ShadowCalc(vec4 shadowCoord)
 
 void main() 
 {
-	//float shadow = filterPCF(inShadowCoord / inShadowCoord.w);
+	float shadow = filterPCF(inShadowCoord / inShadowCoord.w);
 	//float shadow = textureProj(inShadowCoord / inShadowCoord.w, vec2(0.0));
 	//float shadow = ShadowCalc(inShadowCoord);
 
@@ -100,7 +100,8 @@ void main()
 	vec3 R = normalize(-reflect(L, N));
 	vec3 diffuse = max(dot(N, L), ambient) * outColor.xyz;
 
-	outColor = vec4(diffuse/* * shadow*/, 1.0);
+	outColor = vec4(diffuse * shadow, 1.0);
+	outColor = vec4(texture(texture_diffuse, inUV).xyz, 1.0);
 	outNormal = vec4(inNormal, 1);
 	outPos = vec4(inPos, 1);
 }

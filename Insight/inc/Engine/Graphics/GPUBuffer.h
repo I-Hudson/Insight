@@ -11,7 +11,9 @@ struct Vertex
 	glm::vec3 Normal;
 	glm::vec4 Colour;
 	glm::vec2 UV1;
+#ifdef IS_MESH_BATCHING_EXT
 	u32 VIndex;
+#endif
 };
 
 namespace Insight::Graphics

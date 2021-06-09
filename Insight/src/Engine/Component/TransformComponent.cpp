@@ -73,7 +73,7 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
 	glm::vec3 pos = position;
-	if (::Graphics::IsOpenGL())
+	if (::Graphics::IsVulkan())
 	{
 		pos.y *= -1;
 	}

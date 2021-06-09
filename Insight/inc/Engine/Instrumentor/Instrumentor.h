@@ -187,7 +187,6 @@
 			InstrumentationSession* m_CurrentSession;
 			std::ofstream m_OutputStream;
 			std::string m_dataString;
-
 			std::vector<Instrumentor*> m_profiles;
 		};
 

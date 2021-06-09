@@ -72,13 +72,12 @@ namespace Insight
 	void SubMesh::Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		//TODO: look into per submesh culling.
-
 		Graphics::DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
-		drawCall.Draw.VertexStart = m_firstIndex;
+		drawCall.Draw.VertexStart = 0;// m_firstIndex;
 		drawCall.Draw.VertexCount = GetVertexCount();
-		drawCall.Draw.IndciesStart = m_firstIndex;
+		drawCall.Draw.IndciesStart = 0;// m_firstIndex;
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
 		drawCall.Dimensions = m_dimensions;
@@ -140,7 +139,7 @@ namespace Insight
 		}
 		else
 		{
-			if (drawList->Type == Graphics::RenderListViewType::Camera)
+			if (drawList->Type == Graphics::RenderListViewType::Camera || drawList->Type == Graphics::RenderListViewType::Light)
 			{
 				for (auto& mesh : m_subMeshes)
 				{

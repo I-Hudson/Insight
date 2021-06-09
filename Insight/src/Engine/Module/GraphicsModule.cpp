@@ -34,6 +34,7 @@
 
 #include "stb_image.h"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "imgui.h"
 
 namespace Insight::Module
@@ -277,10 +278,10 @@ namespace Insight::Module
 		using namespace Insight;
 
 		Graphics::ImageAttachmentInfo shadowPassCascadeMap = { };
-		shadowPassCascadeMap.Width = 2048 * 4;
-		shadowPassCascadeMap.Height = 2048 * 4;
+		shadowPassCascadeMap.Width = 2048 * 1;
+		shadowPassCascadeMap.Height = 2048 * 1;
 		shadowPassCascadeMap.Name = "shadowPass-CascadeMap";
-		shadowPassCascadeMap.Format = PixelFormat::D32_Float;
+		shadowPassCascadeMap.Format = PixelFormat::D16_UNorm;
 		//shadowPassCascadeMap.ViewInfo.ImageViewTytpe = Graphics::GPUImageViewType::Type_2D_Array;
 		shadowPassCascadeMap.SamplerDesc.AddressModeU = SamplerAddressMode::Clamp_To_Edge;
 		shadowPassCascadeMap.SamplerDesc.AddressModeV = SamplerAddressMode::Clamp_To_Edge;
@@ -354,7 +355,7 @@ namespace Insight::Module
 					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
 					cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
 					cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
-					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, 0, 0);
+					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
 				}
 			}
 		});

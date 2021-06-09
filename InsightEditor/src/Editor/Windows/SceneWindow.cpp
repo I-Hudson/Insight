@@ -9,6 +9,8 @@
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 
+#include "glm/gtx/string_cast.hpp"
+
 #ifdef IS_EDITOR
 namespace Insight::Editor
 {
@@ -28,7 +30,7 @@ namespace Insight::Editor
 		//glm::vec3 rot = m_editorCamera.GetComponent<TransformComponent>().GetRotation();
 
 		CameraComponent& camera = m_editorCamera.AddComponent<CameraComponent>();
-		camera.SetProjMatrix(90.0f, 0.1f, 10000.0f);
+		camera.SetProjMatrix(90.0f, 0.1f, 5000.0f);
 		camera.SetCameraSpeed(25.0f);
 	
 		Module::GraphicsModule::Instance()->SetEditorCamera(&camera);

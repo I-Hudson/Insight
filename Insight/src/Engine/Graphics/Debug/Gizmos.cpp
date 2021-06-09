@@ -17,8 +17,7 @@
 namespace Insight::Graphics::Debug
 {
 	Gizmos::Gizmos()
-	{
-	}
+	{ }
 
 	Gizmos::~Gizmos()
 	{ }

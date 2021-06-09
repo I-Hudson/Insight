@@ -20,7 +20,7 @@ workspace "Insight"
         --"IS_PROFILE_OPTICK",
         "_CRT_SECURE_NO_WARNINGS",
 
-        "IS_MESH_BATCHING_EXT",
+        --"IS_MESH_BATCHING_EXT",
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
