@@ -69,23 +69,23 @@ namespace Insight::Editor
 			style[ImGuiCol_TitleBgCollapsed] = ImVec4(titleBgCollapsed.x, titleBgCollapsed.y, titleBgCollapsed.z, titleBgCollapsed.w);
 #endif
 
-			//Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
-			//dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 25, 25 });
-			//DirectionalLightComponent& lightCom = dirLight.AddComponent<DirectionalLightComponent>();
-			//DirectionalLightComponentData& lightData = lightCom.GetComponentData<DirectionalLightComponentData>();
-			//lightData.FOV = 15.0f;
-			//lightData.Direction = glm::normalize(glm::vec3(0, 0, 0) - dirLight.GetComponent<TransformComponent>().GetPostion());
-			//lightData.NearPlane = 1.0f;
-			//lightData.FarPlane = 128.0f;
+			Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
+			dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 25, 25 });
+			DirectionalLightComponent& lightCom = dirLight.AddComponent<DirectionalLightComponent>();
+			DirectionalLightComponentData& lightData = lightCom.GetComponentData<DirectionalLightComponentData>();
+			lightData.FOV = 15.0f;
+			lightData.Direction = glm::normalize(glm::vec3(0, 0, 0) - dirLight.GetComponent<TransformComponent>().GetPostion());
+			lightData.NearPlane = 1.0f;
+			lightData.FarPlane = 128.0f;
 
 			{
 				IS_PROFILE_SCOPE("Loading models - Single Thread");
 				for (size_t i = 0; i < 1; ++i)
 				{
-					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vulkanscene_shadow.gltf");
+					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vulkanscene_shadow.gltf");
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/Test/testCube.fbx");
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/Survival_BackPack_2/backpack.obj");
-					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/sponza/sponza.obj");
+					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/sponza/sponza.obj");
 					//Insight::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Model>("./data/models/sponza/sponza.obj");
 
 					Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");

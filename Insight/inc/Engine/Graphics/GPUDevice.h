@@ -59,6 +59,7 @@ namespace Insight::Graphics
 
         const GPULimits& GetLimits() const { return m_gpuLimits; }
         FormatFeatures GetFormatFeatures(const PixelFormat& format) const { return m_featuresPerFormat[(I32)format]; }
+        virtual bool HasExtension(GPUDeviceExtension ext) = 0;
 
         GPUCommandPool* GetDefaultCommandPool() const { return m_defaultCommandPool; }
         virtual GPUFenceManager* GetDefaultFenceManager() = 0;

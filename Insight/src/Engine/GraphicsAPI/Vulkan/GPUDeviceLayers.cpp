@@ -149,6 +149,21 @@ namespace Insight::GraphicsAPI::Vulkan
         return FindLayerExtension(list, extensionName, dummy);
     }
 
+    bool GPUDeviceVulkan::HasExtension(Graphics::GPUDeviceExtension ext)
+    {
+        std::string extString;
+        switch (ext)
+        {
+            case Insight::Graphics::GPUDeviceExtension::Bindless_Descriptor:
+                extString = "VK_EXT_descriptor_indexing";
+                break;
+            default:
+                break;
+        }
+        std::vector<std::string> extensions;
+        return CheckForDeviceExtension(extString, false, extensions);
+    }
+
     void GPUDeviceVulkan::GetInstanceExtensions(std::vector<std::string>& instanceExtensions, std::vector<std::string>& layerExtensions)
     {
         // Get extensions supported by the instance and store for later use

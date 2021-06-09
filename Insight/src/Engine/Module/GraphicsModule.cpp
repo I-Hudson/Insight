@@ -448,9 +448,6 @@ namespace Insight::Module
 			Graphics::GPUDescriptorSet* set0 = nullptr;
 			Graphics::GPUDescriptorSet* set1 = nullptr;
 
-			Graphics::GPUImage* shadowPassTexture = (Graphics::GPUImage*)pass.GetPhysicalImage(pass.GetDepthStencilInput().GetPhysicalIndex());
-			const Graphics::GPUImageView* shadowPassTextureView = pass.GetPhysicalImageView(pass.GetDepthStencilInput().GetPhysicalIndex());
-
 			{
 				IS_PROFILE_SCOPE("Build set 0");
 				Graphics::GPUImage* shadowMap = Graphics::RenderGraph::Instance()->GetPhysicalImage("shaderPass_cacadeMap");
@@ -461,6 +458,9 @@ namespace Insight::Module
 			}
 
 			{
+				Graphics::GPUBuffer* boundVBuffer = nullptr;
+				Graphics::GPUBuffer* boundIBuffer = nullptr;
+
 				IS_PROFILE_SCOPE("Send draw commands to GPU");
 				auto& DrawCallList = renderList->MainCamera.DrawCallList[Graphics::MaterialDrawMode::Opaque];
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
@@ -525,22 +525,29 @@ namespace Insight::Module
 							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
-
 					Graphics::GPUDescriptorSet* fragSets[] = { set1 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
 
 					{
 						IS_PROFILE_SCOPE("Bind vertex/index");
-						u32 offsets[] = { 0 };
-						Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
-						cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-						cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+						if (boundVBuffer != drawCall.Geometry.VertexBuffer)
+						{
+							boundVBuffer = drawCall.Geometry.VertexBuffer;
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { boundVBuffer };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+						}
+						if (boundIBuffer != drawCall.Geometry.IndexBuffer)
+						{
+							boundIBuffer = drawCall.Geometry.IndexBuffer;
+							cmdBuffer->BindIndexBuffer(boundIBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+						}
 					}
 
 					{
 						IS_PROFILE_SCOPE("DrawIndexed");
-						cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
+						cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, 0, 0);
 					}
 				}
 			}

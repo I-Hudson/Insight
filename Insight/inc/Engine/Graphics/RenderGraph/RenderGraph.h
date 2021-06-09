@@ -347,7 +347,7 @@ namespace Insight::Graphics
 		std::vector<FrameSubmision> m_frames;
 		u32 m_frameIndex;
 		u32 m_swapchainImageIndex = 0;
-		const u32 c_MaxFrameCount = 3;
+		const u32 c_MaxFrameCount = 2;
 		glm::ivec2 m_renderGraphRenderSize;
 
 		std::unordered_map<std::string, RGOnGraphBuiltFunc> m_onGraphBuiltFuncs;

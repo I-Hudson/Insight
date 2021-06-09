@@ -16,7 +16,7 @@ namespace Insight::Graphics
 	ImageAttachmentInfo ImageAttachmentInfo::DepthAttachment()
 	{
 		ImageAttachmentInfo info = { };
-		info.Format = PixelFormat::D16_UNorm;
+		info.Format = PixelFormat::D32_Float;
 		info.Name = "DepthAttachment";
 		return info;
 	}

@@ -63,6 +63,8 @@ namespace Insight::GraphicsAPI::Vulkan
 		};
 		static OptionalVulkanDeviceExtensions OptionalDeviceExtensions;
 
+		virtual bool HasExtension(Graphics::GPUDeviceExtension ext) override;
+
 	private:
 		static void GetInstanceExtensions(std::vector<std::string>& instanceExtensions, std::vector<std::string>& layerExtensions);
 		void GetDeviceExtensionsAndLayers(VkPhysicalDevice gpu, std::vector<std::string>& deviceExtensions, std::vector<std::string>& layerExtensions);

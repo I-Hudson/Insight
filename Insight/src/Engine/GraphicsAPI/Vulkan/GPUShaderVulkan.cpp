@@ -199,6 +199,20 @@ namespace Insight::GraphicsAPI::Vulkan
 		for (auto& kvp : m_setLayouts)
 		{
 			VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = vks::initializers::descriptorSetLayoutCreateInfo(kvp.second.Bindings);
+			VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
+			VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetAlloc = {};
+
+			if (m_device->HasExtension(Graphics::GPUDeviceExtension::Bindless_Descriptor))
+			{
+				setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+				setLayoutBindingFlags.bindingCount = kvp.second.Bindings.size();
+				std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
+					0,
+					VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT
+				};
+				setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
+				//setLayoutCreateInfo.pNext = &setLayoutBindingFlags;
+			}
 			ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->Device, &setLayoutCreateInfo, nullptr, &kvp.second.Layout));
 		}
 	}

@@ -213,6 +213,18 @@ namespace Insight::GraphicsAPI::Vulkan
 		deviceInfo.enabledLayerCount = static_cast<u32>(validationLayers.size());
 		deviceInfo.ppEnabledLayerNames = deviceInfo.enabledLayerCount > 0 ? validationLayersCC.data() : nullptr;
 
+		VkPhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures{};
+		physicalDeviceDescriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+		if (HasExtension(Graphics::GPUDeviceExtension::Bindless_Descriptor))
+		{
+			// Enable non-uniform indexing
+			physicalDeviceDescriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing = VK_TRUE;
+			physicalDeviceDescriptorIndexingFeatures.runtimeDescriptorArray = VK_TRUE;
+			physicalDeviceDescriptorIndexingFeatures.descriptorBindingVariableDescriptorCount = VK_TRUE;
+			physicalDeviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+			deviceInfo.pNext = &physicalDeviceDescriptorIndexingFeatures;
+		}
+
 		// Setup queues info
 		std::unordered_map<GPUQueue, VkDeviceQueueCreateInfo> queueCreateInfos{};
 		VkDeviceQueueCreateInfo* queueInfo = nullptr;

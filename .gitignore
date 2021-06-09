@@ -1054,3 +1054,6 @@ dkms.conf
 /Insight/InsightGraphics/ReflectEXE_Profile.json
 /Insight/InsightInput/ReflectEXE_Profile.json
 /Insight/InsightTools/ReflectEXE_Profile.json
+/Insight/vendor/glad/Glad.vcxproj
+/Insight/vendor/GLFW/GLFW.vcxproj
+/Insight/vendor/glad/Glad.vcxproj

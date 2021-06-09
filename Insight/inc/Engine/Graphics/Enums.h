@@ -481,6 +481,12 @@ enum class GPUResults
 
 namespace Insight::Graphics
 {
+    enum class GPUDeviceExtension
+    {
+        Bindless_Descriptor,
+
+    };
+
     enum class MaterialDrawMode
     {
         Transparent,
