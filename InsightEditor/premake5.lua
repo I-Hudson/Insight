@@ -81,5 +81,5 @@ project "InsightEditor"
         optimize "full"
         kind "WindowedApp"
 
-        filter { "system:windows", "configurations:Release" }
-            buildoptions "/MT"
+    filter { "system:windows", "configurations:Release" }
+        buildoptions "/MT"

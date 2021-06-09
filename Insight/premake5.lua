@@ -126,7 +126,6 @@ project "Insight"
             "OGLCompilerd",
             "glslang-default-resource-limitsd",
         }
-        
         libdirs
         {
             "%{LibDirs.Vulkan}/Debug",

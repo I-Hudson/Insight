@@ -323,7 +323,7 @@ namespace Insight::Module
 				IS_PROFILE_SCOPE("Default pipeline create and bind");
 				hasher.Clear();
 				hasher.Hash(defaultShader);
-				Graphics::GPUPipelineDesc pipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Front, FrontFace::Counter_Clockwise);
+				Graphics::GPUPipelineDesc pipelineDesc = Graphics::GPUPipelineDesc(PrimitiveTopologyType::Triangle_List, PolygonMode::Fill, CullMode::Back, FrontFace::Counter_Clockwise);
 				hasher.Hash(pipelineDesc.Hash());
 				if (Graphics::GPUPipelineCache::Instance()->GetItem(hasher.GetHash(), defaultPipeline))
 				{

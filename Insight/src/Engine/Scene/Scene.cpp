@@ -235,8 +235,8 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			}
 		}
 
-		//cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
-		//if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
+		cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
+		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
 		{
 			com.OnDraw(&renderList->DirectionalLight, transformComponent.GetTransform(), cameraFrustum);
 		}
