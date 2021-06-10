@@ -39,3 +39,6 @@
 [submodule "Insight/vendor/JobSystem"]
 	path = Insight/vendor/JobSystem
 	url = https://github.com/I-Hudson/JobSystem.git
+[submodule "Insight/vendor/SPIRV-Reflect"]
+	path = Insight/vendor/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect

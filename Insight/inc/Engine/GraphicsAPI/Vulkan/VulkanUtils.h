@@ -11,7 +11,6 @@
 #include "Engine/Graphics/GPUSamplerDescription.h"
 #include "Engine/Graphics/GPUBufferDesc.h"
 #include "Engine/Graphics/Image/GPUImageDesc.h"
-#include "spirv_cross.hpp"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/GPUCommandBuffer.h"
 #include "Engine/Graphics/GPUDescriptorSet.h"

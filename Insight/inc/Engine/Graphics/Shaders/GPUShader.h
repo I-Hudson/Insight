@@ -5,6 +5,8 @@
 #include "spirv_cross/spirv_glsl.hpp"
 #include "Engine/Utils/Hasher.h"
 
+enum SpvReflectFormat;
+
 namespace Insight::Graphics
 {
 	class GPURenderGraphPass;
@@ -23,9 +25,9 @@ namespace Insight::Graphics
 	{
 		std::string Name;
 		u32 Binding;
-		spirv_cross::SPIRType Type;
-		u32 VecSize;
+		std::string Type;
 		u32 ByteSize;
+		SpvReflectFormat Format;
 		u32 Stride;
 	};
 
@@ -40,6 +42,12 @@ namespace Insight::Graphics
 		u32 Binding;
 		u32 Size;
 		std::vector<ShaderStageBindings> Bindings;
+	};
+
+	struct ShaderStagePushConstant
+	{
+		u32 Size;
+		u32 Offset;
 	};
 
 	struct ShaderStageSampler2D
@@ -68,6 +76,8 @@ namespace Insight::Graphics
 		const ShaderStage& GetStage() const { return m_stage; }
 		const std::vector<ShaderStageBindings>& GetInputs() const { return m_inputs; }
 		const std::vector<ShaderStageUniform>& GetUniforms() const { return m_uniforms; }
+		const std::vector<ShaderStagePushConstant>& GetPushConstants() const { return m_pushConstants; }
+		const std::vector<ShaderStageSampler2D>& GetSamplers() const { return m_samplers; }
 
 		const u32 GetInputsSize() const;
 		const std::vector<u32>& GetRawData() const { return m_rawData; }
@@ -103,7 +113,12 @@ namespace Insight::Graphics
 		std::vector<ShaderStageUniform> m_uniforms;
 
 		/// <summary>
-		/// Shader stage uniforms.
+		/// Shader stage push constatnts.
+		/// </summary>
+		std::vector<ShaderStagePushConstant> m_pushConstants;
+
+		/// <summary>
+		/// Shader stage samplers.
 		/// </summary>
 		std::vector<ShaderStageSampler2D> m_samplers;
 

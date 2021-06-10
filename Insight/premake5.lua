@@ -24,6 +24,8 @@ project "Insight"
         "vendor/stb/stb_image.h",
         "vendor/stb/stb_image_write.h",
 		"vendor/IconFontCppHeaders/**.h",
+		"vendor/SPIRV-Reflect/spirv_reflect.h",
+		"vendor/SPIRV-Reflect/spirv_reflect.c",
 	}
 
     includedirs 
@@ -35,10 +37,8 @@ project "Insight"
 		"$(ProjectDir)inc/Platform/Vulkan",
         "%{IncludeDir.GLFW}",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.imgui}",
         "%{IncludeDir.imguizmo}",
         "%{IncludeDir.imgui}",
-        "%{IncludeDir.SPIRV_Cross}",
 		"%{IncludeDir.spdlog}",
         "%{IncludeDir.assimp}",
         "%{IncludeDir.assimp_gen}",
@@ -53,13 +53,9 @@ project "Insight"
         "%{IncludeDir.JobSystem}",
 
         "%{IncludeDir.glslang}",
+        "%{IncludeDir.SPIRV_Reflect}",
         "%{IncludeDir.VulkanMemoryAllocator}",
         "%{IncludeDir.Vulkan}",
-	}
-
-    sysincludedirs 
-    {
-        "%{IncludeDir.glm}",
 	}
 
     libdirs
@@ -81,7 +77,6 @@ project "Insight"
         "Glad",
         "ImGui",
         "ImGuizmo",
-        "SPIRV_Cross",
         "JobSystem",
 
         "OptickCore",

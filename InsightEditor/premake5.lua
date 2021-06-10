@@ -30,11 +30,11 @@ project "InsightEditor"
         "%{IncludeDir.imguizmo}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.optick}",
-
+        
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.VulkanMemoryAllocator}",
         "%{IncludeDir.SPIRV_Cross}",
-
+        
         "%{IncludeDir.imguiFileDialog}",
         "%{IncludeDir.dirent}",
         "%{IncludeDir.IconsFontAwesome}",

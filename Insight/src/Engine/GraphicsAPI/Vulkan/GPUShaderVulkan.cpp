@@ -5,7 +5,6 @@
 #include "Engine/GraphicsAPI/Vulkan/VulkanHeaders.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDeviceVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/RenderGraph/RenderGraphVulkan.h"
-#include <spirv_reflect.hpp>
 
 namespace Insight::GraphicsAPI::Vulkan
 {
@@ -67,10 +66,11 @@ namespace Insight::GraphicsAPI::Vulkan
 	
 			for (size_t i = 0; i < inputs.size(); ++i)
 			{
+				spirv_cross::SPIRType type = spirv_cross::SPIRType();
 				m_pipelineVertexInputState.VertexInputAttribute.push_back(vks::initializers::vertexInputAttributeDescription(
 					0,
 					inputs[i].Binding,
-					ToVulkanFormatFromSPRIV(inputs[i].Type, inputs[i].VecSize), inputs[i].Stride));
+					(VkFormat)inputs[i].Format, inputs[i].Stride));
 			}
 			m_pipelineVertexInputState.CreateInfo = vks::initializers::pipelineVertexInputStateCreateInfo(m_pipelineVertexInputState.VertexInputBinding, m_pipelineVertexInputState.VertexInputAttribute);
 		}
@@ -148,14 +148,10 @@ namespace Insight::GraphicsAPI::Vulkan
 				continue;
 			}
 
-			spirv_cross::CompilerGLSL glsl(stage.GetRawData());
-			spirv_cross::ShaderResources resources = glsl.get_shader_resources();
-
-			for (auto& uniformBuffer : resources.uniform_buffers)
+			for (auto& uniformBuffer : stage.GetUniforms())
 			{
-				u32 bindingNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationBinding);
-				u32 setNumber = glsl.get_decoration(uniformBuffer.id, spv::Decoration::DecorationDescriptorSet);
-				spirv_cross::SPIRType type = glsl.get_type(uniformBuffer.base_type_id);
+				u32 bindingNumber = uniformBuffer.Binding;
+				u32 setNumber = uniformBuffer.Set;
 				
 				VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1);
 
@@ -164,25 +160,20 @@ namespace Insight::GraphicsAPI::Vulkan
 				set.SetNumber = setNumber;
 			}
 
-			for (auto& pushConstant : resources.push_constant_buffers)
+			for (auto& pushConstant : stage.GetPushConstants())
 			{
 				ASSERT(m_pushConstant.Size == 0 && "[ParseDescriptorSetLayouts] There can only be on push constant.");
 				
 				m_pushConstant.Stage = stage.GetStage();
-				spirv_cross::SmallVector<spirv_cross::BufferRange> ranges = glsl.get_active_buffer_ranges(pushConstant.id);
-				for (auto& r :ranges)
-				{
-					m_pushConstant.Size += r.range;
-				}
+				m_pushConstant.Offset = pushConstant.Offset;
+				m_pushConstant.Size += pushConstant.Size;
 			}
 
-			for (auto& sampler2D : resources.sampled_images)
+			for (auto& sampler2D : stage.GetSamplers())
 			{
 
-				u32 bindingNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationBinding);
-				u32 setNumber = glsl.get_decoration(sampler2D.id, spv::Decoration::DecorationDescriptorSet);
-				spirv_cross::SPIRType type = glsl.get_type(sampler2D.type_id);
-
+				u32 bindingNumber = sampler2D.Binding;
+				u32 setNumber = sampler2D.Set;
 
 				VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1);
 				//if (type.array.size() == 1)

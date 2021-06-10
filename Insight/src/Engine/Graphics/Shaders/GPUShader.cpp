@@ -6,9 +6,43 @@
 
 #include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
+#include "spirv_reflect.h"
 
 namespace Insight::Graphics
 {
+	u32 SpvFormatToByteSize(SpvReflectFormat format)
+	{
+		switch (format)
+		{
+			case SPV_REFLECT_FORMAT_UNDEFINED: ASSERT(false);
+			case SPV_REFLECT_FORMAT_R32_UINT: return 4;
+			case SPV_REFLECT_FORMAT_R32_SINT: return 4;
+			case SPV_REFLECT_FORMAT_R32_SFLOAT: return 4;
+			case SPV_REFLECT_FORMAT_R32G32_UINT: return 8;
+			case SPV_REFLECT_FORMAT_R32G32_SINT: return 8;
+			case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return 8;
+			case SPV_REFLECT_FORMAT_R32G32B32_UINT: return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32_SINT: return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_UINT: return 16;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SINT: return 16;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return 16;
+			case SPV_REFLECT_FORMAT_R64_UINT: return 8;
+			case SPV_REFLECT_FORMAT_R64_SINT: return 8;
+			case SPV_REFLECT_FORMAT_R64_SFLOAT: return 8;
+			case SPV_REFLECT_FORMAT_R64G64_UINT: return 16;
+			case SPV_REFLECT_FORMAT_R64G64_SINT: return 16;
+			case SPV_REFLECT_FORMAT_R64G64_SFLOAT: return 16;
+			case SPV_REFLECT_FORMAT_R64G64B64_UINT: return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64_SINT: return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64_SFLOAT: return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_UINT: return 32;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SINT: return 32;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SFLOAT: return 32;
+			default:  ASSERT(false);
+		}
+	}
+
 	GPUShaderStage::GPUShaderStage(const ShaderStage& stage, const std::string& str, const ShaderStageInput& input)
 		: m_stage(stage)
 		, m_parsed(false)
@@ -36,46 +70,92 @@ namespace Insight::Graphics
 		// Parse the shader stage raw data and get all the info we need.
 		m_rawData = ShaderCompliation::CompileGLSLToSpirV(m_stage, m_loadedShaderString);
 
-		spirv_cross::CompilerGLSL glsl(m_rawData);
-		spirv_cross::ShaderResources resources = glsl.get_shader_resources();
+		SpvReflectShaderModule module;
+		SpvReflectResult result = spvReflectCreateShaderModule(sizeof(u32) * m_rawData.size(), m_rawData.data(), &module);
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
 
-		for (auto& resource : resources.stage_inputs)
+		// Enumerate and extract shader's input variables
+		uint32_t var_count = 0;
+		result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+
+
+		std::vector<SpvReflectInterfaceVariable*> input_vars;
+		input_vars.resize(var_count);
+		result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars.data());
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+		for (auto& resource : input_vars)
 		{
+			if (resource->built_in != -1)
+			{
+				continue;
+			}
+
 			ShaderStageBindings binding
 			{
-				resource.name,
-				glsl.get_decoration(resource.id, spv::Decoration::DecorationLocation),
-				glsl.get_type(resource.base_type_id),
-				glsl.get_type(resource.base_type_id).vecsize,
-				4 * glsl.get_type(resource.base_type_id).vecsize,
+				resource->name,
+				resource->location,
+				"",
+				SpvFormatToByteSize(resource->format),
+				resource->format,
 				GetStride()
 			};
 			m_inputs.push_back(binding);
 		}
 
-		for (auto& resource : resources.uniform_buffers)
+		result = spvReflectEnumerateDescriptorSets(&module, &var_count, nullptr);
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+
+		std::vector<SpvReflectDescriptorSet*> descriptors;
+		descriptors.resize(var_count);
+		result = spvReflectEnumerateDescriptorSets(&module, &var_count, descriptors.data());
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+		for (auto& resource : descriptors)
 		{
-			ShaderStageUniform uniform
+			for (u32 i = 0; i < resource->binding_count; ++i)
 			{
-				resource.name,
-				glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
-				glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding),
-				(u32)glsl.get_declared_struct_size(glsl.get_type(resource.base_type_id))
-			};
-			m_uniforms.push_back(uniform);
+				auto& binding = resource->bindings[i];
+				if (binding->descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+				{
+					ShaderStageUniform uniform
+					{
+						binding->name,
+						binding->set,
+						binding->binding,
+						binding->block.size
+					};
+					m_uniforms.push_back(uniform);
+				}
+				else if (binding->descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
+				{
+					ShaderStageSampler2D sampler2D
+					{
+						binding->name,
+						binding->set,
+						binding->binding,
+					};
+					m_samplers.push_back(sampler2D);
+				}
+			}
 		}
 
-		for (auto& resource : resources.sampled_images)
+		result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, nullptr);
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+		std::vector<SpvReflectBlockVariable*> pushConstants;
+		pushConstants.resize(var_count);
+		result = spvReflectEnumeratePushConstantBlocks(&module, &var_count, pushConstants.data());
+		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+		for (auto& pushConstant :  pushConstants)
 		{
-			ShaderStageSampler2D sampler2D
-			{
-				resource.name,
-				glsl.get_decoration(resource.id, spv::Decoration::DecorationDescriptorSet),
-				glsl.get_decoration(resource.id, spv::Decoration::DecorationBinding)
-			};
-			m_samplers.push_back(sampler2D);
+			m_pushConstants.push_back(ShaderStagePushConstant
+									  {
+										  pushConstant->size,
+										  pushConstant->offset
+									  });
 		}
 
+		// Destroy the reflection data when no longer required.
+		spvReflectDestroyShaderModule(&module);
 		m_parsed = true;
 	}
 
