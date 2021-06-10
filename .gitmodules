@@ -26,9 +26,6 @@
 [submodule "Insight/vendor/VulkanMemoryAllocator"]
 	path = Insight/vendor/VulkanMemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator
-[submodule "Insight/vendor/SPIRV-Cross"]
-	path = Insight/vendor/SPIRV-Cross
-	url = https://github.com/KhronosGroup/SPIRV-Cross
 [submodule "Insight/vendor/Reflect"]
 	path = Insight/vendor/Reflect
 	url = https://github.com/I-Hudson/Reflect.git
