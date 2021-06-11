@@ -3,7 +3,7 @@
 
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Library/ModelLibrary.h"
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 #include "Engine/Graphics/RenderList.h"
 
 REGISTER_DEF_TYPE(MeshComponent);

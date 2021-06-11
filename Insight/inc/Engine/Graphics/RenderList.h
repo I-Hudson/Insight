@@ -2,7 +2,7 @@
 
 #include "Engine/Core/Common.h"
 #include "Engine/Graphics/Enums.h"
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 
 namespace Insight::Graphics
 {

@@ -1,5 +1,6 @@
 #include "ispch.h"
-#include "Engine/Graphics/Model/ModelLoading.h"
+#include "Engine/Model/ModelLoading.h"
+#include "Engine/Model/Bone.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <filesystem>
 #include "Engine/FileSystem/FileSystem.h"
@@ -37,11 +38,24 @@ namespace Insight::ModelLoading
 		model.m_mesh.m_meshName = scene->mRootNode->mName.C_Str();
 		ProcessNode(model.m_mesh, scene->mRootNode, scene, fileDirectory);
 
+
+		for (auto& subMesh : model.m_mesh.m_subMeshes)
+		{
+			model.m_mesh.m_dimensions.Min.x = glm::min(subMesh.m_dimensions.Min.x, model.m_mesh.m_dimensions.Min.x);
+			model.m_mesh.m_dimensions.Min.y = glm::min(subMesh.m_dimensions.Min.y, model.m_mesh.m_dimensions.Min.y);
+			model.m_mesh.m_dimensions.Min.z = glm::min(subMesh.m_dimensions.Min.z, model.m_mesh.m_dimensions.Min.z);
+			model.m_mesh.m_dimensions.Max.x = glm::max(subMesh.m_dimensions.Max.x, model.m_mesh.m_dimensions.Max.x);
+			model.m_mesh.m_dimensions.Max.y = glm::max(subMesh.m_dimensions.Max.y, model.m_mesh.m_dimensions.Max.y);
+			model.m_mesh.m_dimensions.Max.z = glm::max(subMesh.m_dimensions.Max.z, model.m_mesh.m_dimensions.Max.z);
+			model.m_mesh.m_dimensions.Center += subMesh.m_dimensions.Center;
+		}
+
 		// Work out the mesh's centre, size and radius. This needs to be done last 
 		// as we need all the sub meshes information for this.
 		glm::vec3& meshCenter = model.m_mesh.m_dimensions.Center;
 		u32 numOfSubMeshes = (u32)model.m_mesh.m_subMeshes.size();
 		meshCenter = glm::vec3(meshCenter.x / numOfSubMeshes, meshCenter.y / numOfSubMeshes, meshCenter.z / numOfSubMeshes);
+
 		model.m_mesh.m_dimensions.Size = model.m_mesh.m_dimensions.Max - model.m_mesh.m_dimensions.Min;
 		if (::Graphics::IsVulkan())
 		{
@@ -55,27 +69,28 @@ namespace Insight::ModelLoading
 		IS_PROFILE_FUNCTION();
 
 		// process all the node's meshes (if any)
-		for (unsigned int i = 0; i < aiNode->mNumMeshes; i++)
+		for (u32 i = 0; i < aiNode->mNumMeshes; i++)
 		{
 			aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
-			ProcessMesh(mesh, aiMesh, aiScene, directory);
+			mesh.m_subMeshes.push_back(ProcessMesh(mesh, aiMesh, aiScene, directory));
+			ExtractBoneInfo(mesh, aiMesh, aiScene);
 		}
 		// then do the same for each of its children
-		for (unsigned int i = 0; i < aiNode->mNumChildren; i++)
+		for (u32 i = 0; i < aiNode->mNumChildren; i++)
 		{
 			ProcessNode(mesh, aiNode->mChildren[i], aiScene, directory);
 		}
 	}
 
-	void AssimpLoader::ProcessMesh(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene, const std::string& directory)
+	SubMesh AssimpLoader::ProcessMesh(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene, const std::string& directory)
 	{
 		IS_PROFILE_FUNCTION();
 
 		std::vector<Vertex> vertices;
 		std::vector<u32> indices;
 
-		u32 vertexStart = static_cast<u32>(mesh.m_vertices.size());
-		u32 indexStart = static_cast<u32>(mesh.m_indices.size());
+		u32 vertexStart = mesh.m_vertices.size();
+		u32 indicesStart = mesh.m_indices.size();
 
 		MeshDimensions dimensions;
 		glm::vec3 centre = glm::vec3(0);
@@ -143,8 +158,6 @@ namespace Insight::ModelLoading
 #ifdef IS_MESH_BATCHING_EXT
 			vertex.VIndex = (u32)mesh.m_subMeshes.size();
 #endif
-
-			mesh.m_vertices.push_back(vertex);
 			vertices.push_back(vertex);
 		}
 
@@ -179,31 +192,27 @@ namespace Insight::ModelLoading
 			aiFace face = aiMesh->mFaces[i];
 			for (unsigned int j = 0; j < face.mNumIndices; ++j)
 			{
-				mesh.m_indices.push_back(face.mIndices[j]);
+				//mesh.m_indices.push_back(face.mIndices[j]);
 				indices.push_back(face.mIndices[j]);
 			}
 		}
 
-		mesh.m_subMeshes.push_back(SubMesh(0, vertices.size(), 0, indices.size(), vertices, indices));
-		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, mesh.m_vertices.size() - vertexStart, indexStart, mesh.m_indices.size() - indexStart, mesh.m_vertexBuffer, mesh.m_indexBuffer));
-		mesh.m_subMeshes.back().m_dimensions = dimensions;
-
-		MeshDimensions& meshDimensions = mesh.m_dimensions;
-		meshDimensions.Min.x = glm::min(dimensions.Min.x, meshDimensions.Min.x);
-		meshDimensions.Min.y = glm::min(dimensions.Min.y, meshDimensions.Min.y);
-		meshDimensions.Min.z = glm::min(dimensions.Min.z, meshDimensions.Min.z);
-		meshDimensions.Max.x = glm::max(dimensions.Max.x, meshDimensions.Max.x);
-		meshDimensions.Max.y = glm::max(dimensions.Max.y, meshDimensions.Max.y);
-		meshDimensions.Max.z = glm::max(dimensions.Max.z, meshDimensions.Max.z);
-		meshDimensions.Center += dimensions.Center;
+		//SubMesh subMesh = SubMesh(0, vertices.size(), 0, indices.size(), vertices, indices);
+		SubMesh subMesh = SubMesh(vertexStart, (u32)vertices.size(), indicesStart, (u32)indices.size(), mesh.m_vertexBuffer, mesh.m_indexBuffer);
+		subMesh.m_dimensions = dimensions;
 
 		if (aiMesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* aiMaterial = aiScene->mMaterials[aiMesh->mMaterialIndex];
 			auto materials = LoadMateials(aiMaterial, aiTextureType_DIFFUSE, "texture_diffuse", directory);
-			mesh.m_subMeshes.back().m_textures = materials;
-			mesh.m_subMeshes.back().m_textureStrings[MaterialTextureType::Diffuse] = materials["texture_diffuse"];
+			subMesh.m_textures = materials;
+			subMesh.m_textureStrings[MaterialTextureType::Diffuse] = materials["texture_diffuse"];
 		}
+
+		mesh.m_vertices.insert(mesh.m_vertices.end(), vertices.begin(), vertices.end());
+		mesh.m_indices.insert(mesh.m_indices.end(), indices.begin(), indices.end());
+
+		return subMesh;
 	}
 
 	MeshTextures AssimpLoader::LoadMateials(aiMaterial* aiMaterial, aiTextureType aiType, const std::string& typeName, const std::string& directory)
@@ -242,5 +251,73 @@ namespace Insight::ModelLoading
 			}
 		}
 		return textures;
+	}
+
+	void AssimpLoader::ExtractBoneInfo(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene)
+	{
+		for (u32 boneIndex = 0; boneIndex < aiMesh->mNumBones; ++boneIndex)
+		{
+			int boneID = -1;
+			std::string boneName = aiMesh->mBones[boneIndex]->mName.C_Str();
+			if (mesh.m_boneInfoMap.find(boneName) == mesh.m_boneInfoMap.end())
+			{
+				Animation::BoneInfo newBoneInfo;
+				newBoneInfo.Id = mesh.m_boneCounter;
+				newBoneInfo.Offset = AssimpToGLM(aiMesh->mBones[boneIndex]->mOffsetMatrix);
+				mesh.m_boneInfoMap[boneName] = newBoneInfo;
+				boneID = mesh.m_boneCounter;
+				++mesh.m_boneCounter;
+			}
+			else
+			{
+				boneID = mesh.m_boneInfoMap[boneName].Id;
+			}
+
+			ASSERT(boneID != -1);
+			auto weights = aiMesh->mBones[boneIndex]->mWeights;
+			int numWeights = aiMesh->mBones[boneIndex]->mNumWeights;
+
+			for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+			{
+				int vertexId = weights[weightIndex].mVertexId;
+				float weight = weights[weightIndex].mWeight;
+				ASSERT(vertexId <= mesh.m_vertices.size());
+				SetVertexBoneData(mesh.m_vertices[vertexId], boneID, weight);
+			}
+		}
+	}
+
+	glm::mat4 AssimpLoader::AssimpToGLM(const aiMatrix4x4& from)
+	{
+		return glm::mat4(
+			(double)from.a1, (double)from.b1, (double)from.c1, (double)from.d1,
+			(double)from.a2, (double)from.b2, (double)from.c2, (double)from.d2,
+			(double)from.a3, (double)from.b3, (double)from.c3, (double)from.d3,
+			(double)from.a4, (double)from.b4, (double)from.c4, (double)from.d4);
+	}
+
+	aiMatrix4x4 AssimpLoader::GLMToAssimp(const glm::mat4& from)
+	{
+		return aiMatrix4x4(from[0][0], from[1][0], from[2][0], from[3][0],
+						   from[0][1], from[1][1], from[2][1], from[3][1],
+						   from[0][2], from[1][2], from[2][2], from[3][2],
+						   from[0][3], from[1][3], from[2][3], from[3][3]
+		);
+	}
+
+	glm::vec3 AssimpLoader::GetGLMVec(const aiVector3D& vec)
+	{
+		return glm::vec3(vec.x, vec.y, vec.z); 
+	}
+
+	glm::quat AssimpLoader::GetGLMQuat(const aiQuaternion& pOrientation)
+	{
+		return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+	}
+
+	void AssimpLoader::SetVertexBoneData(Vertex& vertex, int boneID, float weight)
+	{
+		vertex.JointIndices = glm::vec4(weight, weight, weight, weight);
+		vertex.JointWeight = glm::vec4(boneID, boneID, boneID, boneID);
 	}
 }

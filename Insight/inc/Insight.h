@@ -21,7 +21,7 @@
 
 #include "Engine/Instrumentor/Instrumentor.h"
 
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 
 #include "Engine/Scene/Scene.h"
 #include "Engine/Entity/Entity.h"

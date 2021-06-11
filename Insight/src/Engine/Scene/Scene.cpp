@@ -15,7 +15,7 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
 
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 
 #include "Engine/Module/WindowModule.h"
 

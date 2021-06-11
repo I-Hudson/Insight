@@ -1,6 +1,6 @@
 #include "ispch.h"
 #include "Engine/Assets/Asset.h"
-#include "Engine/Graphics/Model/ModelLoading.h"
+#include "Engine/Model/ModelLoading.h"
 
 namespace Insight::Assets
 {

@@ -4,6 +4,8 @@
 #include "Engine/Assets/Asset.h"
 #include "Engine/Graphics/GPUBuffer.h"
 #include "Engine/Core/Maths/Frustum.h"
+#include "Engine/Model/Bone.h"
+#include "Engine/Model/Animation.h"
 #include <glm/glm.hpp>
 
 namespace Insight
@@ -75,6 +77,9 @@ namespace Insight
 
 		MeshTextures m_textures;
 		bool m_releaseGPUBuffers;
+
+		std::vector<Vertex> m_vertices;
+		std::vector<u32> m_indices;
 		Graphics::GPUBuffer* m_vertexBuffer;
 		Graphics::GPUBuffer* m_indexBuffer;
 
@@ -88,7 +93,10 @@ namespace Insight
 	{
 	public:
 		Mesh();
-		~Mesh();
+		~Mesh(); 
+
+		//Model& operator== (const Model& other) = default;
+		//Model& operator== (Model&& other) = default;
 
 		const MeshDimensions& GetDimensions() const { return m_dimensions; }
 
@@ -104,6 +112,9 @@ namespace Insight
 		//Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		//Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
+		std::unordered_map<std::string, Animation::BoneInfo>& GetBoneInfoMap() { return m_boneInfoMap; }
+		u32& GetBoneCount() { return m_boneCounter; }
+
 		void Release();
 
 	private:
@@ -115,13 +126,17 @@ namespace Insight
 		std::vector<SubMesh> m_subMeshes;
 		Mesh::MeshDimensions m_dimensions;
 
+		u32 m_boneCounter;
+		std::unordered_map<std::string, Animation::BoneInfo> m_boneInfoMap;
+		std::unordered_map<std::string, Animation::Animation> m_animations;
+
 		std::vector<Vertex> m_vertices;
 		std::vector<u32> m_indices;
 
-		u32 m_vertexCount;
-		Graphics::GPUBuffer* m_vertexBuffer;
-		u32 m_indexCount;
-		Graphics::GPUBuffer* m_indexBuffer;
+		u32 m_vertexCount = 0;
+		Graphics::GPUBuffer* m_vertexBuffer = nullptr;
+		u32 m_indexCount = 0;
+		Graphics::GPUBuffer* m_indexBuffer = nullptr;
 
 		friend Model;
 		friend Insight::ModelLoading::AssimpLoader;
@@ -138,7 +153,7 @@ namespace Insight
 		Model();
 		~Model();
 
-		const Mesh& GetMesh() const { return m_mesh; }
+		Mesh& GetMesh() { return m_mesh; }
 
 	protected:
 		virtual void LoadAsset(std::string path) override;

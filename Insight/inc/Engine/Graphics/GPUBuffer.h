@@ -11,6 +11,8 @@ struct Vertex
 	glm::vec3 Normal;
 	glm::vec4 Colour;
 	glm::vec2 UV1;
+	glm::vec4 JointIndices;
+	glm::vec4 JointWeight;
 #ifdef IS_MESH_BATCHING_EXT
 	u32 VIndex;
 #endif

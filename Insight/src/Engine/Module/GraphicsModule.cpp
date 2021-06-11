@@ -21,7 +21,7 @@
 #include "Engine/Graphics/RenderList.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Graphics/Debug/Gizmos.h"
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/Graphics/Image/GPUImage.h"
@@ -343,16 +343,29 @@ namespace Insight::Module
 			}
 
 			{
+				Graphics::GPUBuffer* boundVBuffer = nullptr;
+				Graphics::GPUBuffer* boundIBuffer = nullptr;
 				auto& DrawCallList = renderList->DirectionalLight.DrawCallList[Graphics::MaterialDrawMode::Opaque];
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
 					Graphics::DrawCall drawCall = renderList->DirectionalLight.DrawCalls.at(drawCallIndex);
 
-					u32 offsets[] = { 0 };
-					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
-					cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
-					cmdBuffer->BindIndexBuffer(drawCall.Geometry.IndexBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
-					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, 0, 0, 0);
+					{
+						IS_PROFILE_SCOPE("Bind vertex/index");
+						if (boundVBuffer != drawCall.Geometry.VertexBuffer)
+						{
+							boundVBuffer = drawCall.Geometry.VertexBuffer;
+							u32 offsets[] = { 0 };
+							Graphics::GPUBuffer* verticesBuffer[] = { boundVBuffer };
+							cmdBuffer->BindVertexBuffers(0, 1, verticesBuffer, offsets);
+						}
+						if (boundIBuffer != drawCall.Geometry.IndexBuffer)
+						{
+							boundIBuffer = drawCall.Geometry.IndexBuffer;
+							cmdBuffer->BindIndexBuffer(boundIBuffer, 0, Graphics::GPUCommandBufferIndexType::UINT32);
+						}
+					}
+					cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, drawCall.Draw.VertexStart, 0);
 				}
 			}
 		});
@@ -545,7 +558,7 @@ namespace Insight::Module
 
 					{
 						IS_PROFILE_SCOPE("DrawIndexed");
-						cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, 0, 0);
+						cmdBuffer->DrawIndexed(drawCall.Draw.IndicesCount, 1, drawCall.Draw.IndciesStart, drawCall.Draw.VertexStart, 0);
 					}
 				}
 			}

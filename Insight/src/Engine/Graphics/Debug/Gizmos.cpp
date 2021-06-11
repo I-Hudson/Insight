@@ -9,7 +9,7 @@
 
 #include "imgui.h"
 #include "Engine/Graphics/Graphics.h"
-#include "Engine/Graphics/Model/Model.h"
+#include "Engine/Model/Model.h"
 
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"

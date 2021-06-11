@@ -1,6 +1,6 @@
 #include "ispch.h"
-#include "Engine/Graphics/Model/Model.h"
-#include "Engine/Graphics/Model/ModelLoading.h"
+#include "Engine/Model/Model.h"
+#include "Engine/Model/ModelLoading.h"
 #include "Engine/Graphics/RenderList.h"
 #include "Engine/Graphics/Graphics.h"
 #include <filesystem>
@@ -26,6 +26,8 @@ namespace Insight
 		, m_firstIndex(firstIndex)
 		, m_indexCount(indexCount)
 		, m_releaseGPUBuffers(true)
+		, m_vertices(vertices)
+		, m_indices(indices)
 	{
 		m_vertexBuffer = Graphics::GPUBuffer::New();
 		m_indexBuffer = Graphics::GPUBuffer::New();
@@ -75,7 +77,7 @@ namespace Insight
 		Graphics::DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
-		drawCall.Draw.VertexStart = m_firstIndex;
+		drawCall.Draw.VertexStart = m_firstVertex;
 		drawCall.Draw.VertexCount = GetVertexCount();
 		drawCall.Draw.IndciesStart = m_firstIndex;
 		drawCall.Draw.IndicesCount = GetIndexCount();
@@ -201,7 +203,7 @@ namespace Insight
 		m_absolutePath = std::move(path);
 		IS_CORE_INFO("[Model::LoadAsset] Asset loading: '{0}'.", m_absolutePath);
 		ModelLoading::AssimpLoader::LoadFromFile(*this, m_absolutePath);
-		//m_mesh.SetupGPUBuffers();
+		m_mesh.SetupGPUBuffers();
 		IS_CORE_INFO("[Model::LoadAsset] Asset loaded: '{0}'.", m_absolutePath);
 	}
 
