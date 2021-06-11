@@ -12,11 +12,6 @@ layout (set = 0, binding = 0) uniform UBO
 	mat4 depthMVP;
 } ubo;
 
-layout (set = 0, binding = 1) uniform MODELUBO 
-{
-	mat4 model;
-} modelUBO;
-
 layout (location = 0) out vec4 outPos;
 
 void main() 

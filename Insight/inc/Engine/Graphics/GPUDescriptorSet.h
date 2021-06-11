@@ -25,15 +25,11 @@ namespace Insight::Graphics
 
 	struct GPUDescriptorSetDesc
 	{
-		GPUDescriptorSetDesc(u32 set)
-			: Set(set)
-		{ }
 		GPUDescriptorSetDesc(GPUDescriptorPool* pool, void* layout)
 			: Pool(pool), Layout(layout)
 		{ }
 		GPUDescriptorPool* Pool;
 		void* Layout;
-		u32 Set;
 	};
 
 	class GPUDescriptorSet : public GPUResource

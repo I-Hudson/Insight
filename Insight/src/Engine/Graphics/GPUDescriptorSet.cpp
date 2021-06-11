@@ -3,6 +3,7 @@
 #include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorSetVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUDescriptorAllocatorVulkan.h"
+#include "Engine/Utils/Hasher.h"
 
 namespace Insight::Graphics
 {

@@ -334,22 +334,19 @@ namespace Insight::Module
 				cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 			}
 
-			Graphics::GPUDescriptorSet* vertexSet = nullptr;
+			{
+				Graphics::GPUDescriptorSet* vertexSet = nullptr;
+				IS_PROFILE_SCOPE("Build per mesh descriptor set");
+				builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
+				Graphics::GPUDescriptorSet* sets[] = { vertexSet };
+				cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
+			}
+
 			{
 				auto& DrawCallList = renderList->DirectionalLight.DrawCallList[Graphics::MaterialDrawMode::Opaque];
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
 					Graphics::DrawCall drawCall = renderList->DirectionalLight.DrawCalls.at(drawCallIndex);
-					glm::mat4 modelMatrix = drawCall.WorldTransform;
-					Graphics::GPUBuffer* modelBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&modelMatrix, sizeof(glm::mat4));
-
-					{
-						IS_PROFILE_SCOPE("Build per mesh descriptor set");
-						builder->BindBuffer(0, uboBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)
-							->BindBuffer(1, modelBuffer, DescriptorType::Unifom_Buffer, ShaderStage::Vertex)->Build(vertexSet);
-					}
-					Graphics::GPUDescriptorSet* sets[] = { vertexSet };
-					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 0, ARRAY_COUNT(sets), sets, 0, nullptr);
 
 					u32 offsets[] = { 0 };
 					Graphics::GPUBuffer* verticesBuffer[] = { drawCall.Geometry.VertexBuffer };
@@ -446,7 +443,6 @@ namespace Insight::Module
 			cmdBuffer->BindPipeline(PipelineBindPoint::Graphics, defaultPipeline);
 
 			Graphics::GPUDescriptorSet* set0 = nullptr;
-			Graphics::GPUDescriptorSet* set1 = nullptr;
 
 			{
 				IS_PROFILE_SCOPE("Build set 0");
@@ -467,11 +463,8 @@ namespace Insight::Module
 				{
 					IS_PROFILE_SCOPE("Single Draw command");
 					Graphics::DrawCall& drawCall = renderList->MainCamera.DrawCalls.at(drawCallIndex);
-					glm::mat4 modelMatrix = drawCall.WorldTransform;
-					{
-						IS_PROFILE_SCOPE("PushConstant");
-						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(glm::mat4), &modelMatrix);
-					}
+
+					Graphics::GPUDescriptorSet* set1 = nullptr;
 
 					if (::Graphics::MeshBatchingExt())
 					{
@@ -528,6 +521,11 @@ namespace Insight::Module
 					Graphics::GPUDescriptorSet* fragSets[] = { set1 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
+					glm::mat4 modelMatrix = drawCall.WorldTransform;
+					{
+						IS_PROFILE_SCOPE("PushConstant");
+						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(glm::mat4), &modelMatrix);
+					}
 
 					{
 						IS_PROFILE_SCOPE("Bind vertex/index");

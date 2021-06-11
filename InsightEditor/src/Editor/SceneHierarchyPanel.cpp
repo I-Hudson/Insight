@@ -180,7 +180,6 @@ namespace Insight::Editor
 				auto& componentData = component.GetComponentData();
 				auto dataProperties = componentData.GetMembers({ "ShowInEditor" });
 				auto allowRemovable = componentData.GetMember("AllowRemovable");
-
 				properties.insert(properties.end(), dataProperties.begin(), dataProperties.end());
 
 				ImGui::Separator();

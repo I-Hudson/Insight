@@ -61,7 +61,7 @@
 			Instrumentor(const Instrumentor&) = delete;
 			Instrumentor(Instrumentor&&) = delete;
 
-			void BeginSession()
+			void BeginSession(std::string filePath)
 			{
 				IS_CORE_INFO("Temp profile started!");
 
@@ -85,6 +85,13 @@
 					return;
 				}
 				m_CurrentSession = new InstrumentationSession({ "" });
+
+				m_OutputStream.open(filePath);
+				if (!m_OutputStream.is_open())
+				{
+					IS_CORE_ERROR("Profile could not be opened.");
+					return;
+				}
 				WriteHeader();
 			}
 
@@ -99,17 +106,15 @@
 				InternalEndSession();
 			}
 
-			void SaveSession(const std::string& filePath)
+			void SaveSession()
 			{
-				m_OutputStream.open(filePath);
 				if (m_OutputStream.is_open())
 				{
-					m_OutputStream << m_dataString;
 					m_OutputStream.close();
 				}
 				else
 				{
-					IS_CORE_ERROR("Profile could not be saved to file.");
+					IS_CORE_ERROR("Profile could not be closed.");
 				}
 				IS_CORE_INFO("Profile has been saved.");
 			}
@@ -118,27 +123,16 @@
 			{
 				std::stringstream json;
 
-				json << std::setprecision(3) << std::fixed;
-				json << ",{";
-				json << "\"cat\":\"function\",";
-				json << "\"dur\":" << (result.ElapsedTime.count()) << ',';
-				json << "\"name\":\"" << result.Name << "\",";
-				json << "\"ph\":\"X\",";
-				json << "\"pid\":0,";
-				json << "\"tid\":" << result.ThreadID << ",";
-				json << "\"ts\":" << result.Start.count();
-				json << "}";
-
-				std::lock_guard lock(m_Mutex);
-				if (m_CurrentSession)
-				{
-					m_dataString += json.str();
-				}
-
-				for (auto& profile : m_profiles)
-				{
-					profile->m_dataString += json.str();
-				}
+				m_OutputStream << std::setprecision(3) << std::fixed;
+				m_OutputStream << ",{";
+				m_OutputStream << "\"cat\":\"function\",";
+				m_OutputStream << "\"dur\":" << (result.ElapsedTime.count()) << ',';
+				m_OutputStream << "\"name\":\"" << result.Name << "\",";
+				m_OutputStream << "\"ph\":\"X\",";
+				m_OutputStream << "\"pid\":0,";
+				m_OutputStream << "\"tid\":" << result.ThreadID << ",";
+				m_OutputStream << "\"ts\":" << result.Start.count();
+				m_OutputStream << "}";
 			}
 
 			void AddProfile(Instrumentor* ptr)
@@ -161,12 +155,12 @@
 		private:
 			void WriteHeader()
 			{
-				m_dataString += "{\"otherData\": {},\"traceEvents\":[{}";
+				m_OutputStream << "{\"otherData\": {},\"traceEvents\":[{}";
 			}
 
 			void WriteFooter()
 			{
-				m_dataString += "]}";
+				m_OutputStream << "]}";
 			}
 
 			// Note: you must already own lock on m_Mutex before
@@ -186,7 +180,6 @@
 			std::mutex m_Mutex;
 			InstrumentationSession* m_CurrentSession;
 			std::ofstream m_OutputStream;
-			std::string m_dataString;
 			std::vector<Instrumentor*> m_profiles;
 		};
 
@@ -510,9 +503,9 @@
 #define IS_FUNC_SIG "IS_FUNC_SIG unknown!"
 #endif
 
-#define IS_PROFILE_BEGIN_SESSION() Profile::Instrumentor::Get().BeginSession()
+#define IS_PROFILE_BEGIN_SESSION(filePath) Profile::Instrumentor::Get().BeginSession(filePath)
 #define IS_PROFILE_END_SESSION() Profile::Instrumentor::Get().EndSession()
-#define IS_PROFILE_SAVE_SESSION(filePath) Profile::Instrumentor::Get().SaveSession(filePath)
+#define IS_PROFILE_SAVE_SESSION() Profile::Instrumentor::Get().SaveSession()
 #define IS_PROFILE_SCOPE_LINE2(name, line) constexpr auto fixedName##line = Profile::InstrumentorUtils::CleanupOutputString(name, "__cdecl ");\
 											   Profile::InstrumentationTimer timer##line(fixedName##line.Data)
 
@@ -532,9 +525,9 @@
 #define IS_PROFILE_GPU_FUNCTION(name)
 #define IS_PROFILE_GPU_FLIP(swapchain)
 
-#define IS_PROFILE_START_CAPTURE() ::Profile::Instrumentor temp; temp.BeginSession()
+#define IS_PROFILE_START_CAPTURE(filePath) ::Profile::Instrumentor temp; temp.BeginSession(CheckAndAppend(".json", filePath))
 #define IS_PROFILE_STOP_CAPTURE() temp.EndSession()
-#define IS_PROFILE_SAVE_CAPTURE(filePath) temp.SaveSession(CheckAndAppend(".json", filePath))
+#define IS_PROFILE_SAVE_CAPTURE() temp.SaveSession()
 
 #elif defined(IS_PROFILE_OPTICK)
 #define INSIGHT_PROFILE_CATEGORY_LINE(name, cat) Optick::Category::Type optickCat = (Optick::Category::Type)((uint32_t)cat); OPTICK_CATEGORY(name, optickCat)

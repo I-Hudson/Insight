@@ -11,13 +11,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 {
 	{
 		Log::Init();
-		IS_PROFILE_BEGIN_SESSION();
+		IS_PROFILE_BEGIN_SESSION("AppProfile.json");
 		//::Profile::Instrumentor::Get().BeginSession("App Begin", "profileResults.json");
 		auto app = CreateApplication();
 		app->Run();
 		delete app;
 		IS_PROFILE_END_SESSION();
-		IS_PROFILE_SAVE_SESSION("AppProfile.json");
+		IS_PROFILE_SAVE_SESSION();
 	}
 
 	return 0;

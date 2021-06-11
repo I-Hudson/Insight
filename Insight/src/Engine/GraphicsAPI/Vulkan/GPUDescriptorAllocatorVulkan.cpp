@@ -6,6 +6,7 @@
 
 namespace Insight::GraphicsAPI::Vulkan
 {
+#define CacheDescriptors 1
 	/// <summary>
 	/// GPUDescriptorAllocator
 	/// </summary>
@@ -18,17 +19,29 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		for (auto* pool : m_freePools)
 		{
+			pool->ResetPool(Graphics::GPUDescriptorPoolResetFlag::None);
 			::Delete(pool);
 		}
 		for (auto* pool : m_usedPools)
 		{
+			pool->ResetPool(Graphics::GPUDescriptorPoolResetFlag::None);
 			::Delete(pool);
+		}
+		for (auto* set : m_allocatedSets)
+		{
+			::Delete(set);
+		}
+		for (auto& kvp : m_freeSets)
+		{
+			for (auto* set : kvp.second)
+			{
+				::Delete(set);
+			}
 		}
 	}
 
 	void GPUDescriptorAllocatorVulkan::Init()
-	{
-	}
+	{ }
 
 	bool GPUDescriptorAllocatorVulkan::Allocate(Graphics::GPUDescriptorSet*& set, VkDescriptorSetLayout layout)
 	{
@@ -39,27 +52,49 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 
 		Graphics::GPUDescriptorSetDesc setDesc(m_currentPool, layout);
+
+#if CacheDescriptors
+		// Check if set has already been allocated
+		Utils::Hasher hash;
+		hash.Hash(layout);
+		auto itr = m_freeSets.find(hash.GetHash());
+		if (itr != m_freeSets.end())
+		{
+			if (itr->second.size() > 0)
+			{
+				set = itr->second.at(0);
+				itr->second.erase(itr->second.begin());
+
+				m_allocatedSets.push_back(set);
+				return true;
+			}
+		}
+#endif
 		if (!set)
 		{
 			set = Graphics::GPUDescriptorSet::New();
 			m_allocatedSets.push_back(set);
 		}
+
 		bool reallocate = false;
-		switch (set->Init(setDesc))
 		{
-			case GPUResults::Error_Fragmented_Pool:
-			case GPUResults::Error_Out_Of_Pool_Memory:
-				reallocate = true;
-				break;
-		}
+			IS_PROFILE_SCOPE("Descriptor set init");
+			switch (set->Init(setDesc))
+			{
+				case GPUResults::Error_Fragmented_Pool:
+				case GPUResults::Error_Out_Of_Pool_Memory:
+					reallocate = true;
+					break;
+			}
 
-		if (reallocate)
-		{
-			m_currentPool = GrabPool();
-			m_usedPools.push_back(m_currentPool);
+			if (reallocate)
+			{
+				m_currentPool = GrabPool();
+				m_usedPools.push_back(m_currentPool);
 
-			setDesc.Pool = m_currentPool;
-			ASSERT(set->Init(setDesc) == GPUResults::Success && "[GPUDescriptorAllocatorVulkan::Allocate] Set was not created.");
+				setDesc.Pool = m_currentPool;
+				ASSERT(set->Init(setDesc) == GPUResults::Success && "[GPUDescriptorAllocatorVulkan::Allocate] Set was not created.");
+			}
 		}
 		return true;
 	}
@@ -68,7 +103,9 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		for (auto* pool : m_usedPools)
 		{
+#if !CacheDescriptors
 			pool->ResetPool(Graphics::GPUDescriptorPoolResetFlag::None);
+#endif
 			m_freePools.push_back(pool);
 		}
 		m_usedPools.clear();
@@ -76,7 +113,13 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		for (auto* set : m_allocatedSets)
 		{
+#if CacheDescriptors
+			Utils::Hasher hash;
+			hash.Hash(set->GetDesc().Layout);
+			m_freeSets[hash.GetHash()].push_back(set);
+#else
 			::Delete(set);
+#endif
 		}
 		m_allocatedSets.clear();
 	}

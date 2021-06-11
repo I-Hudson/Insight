@@ -25,7 +25,7 @@ project "Insight"
         "vendor/stb/stb_image_write.h",
 		"vendor/IconFontCppHeaders/**.h",
 		"vendor/SPIRV-Reflect/spirv_reflect.h",
-		"vendor/SPIRV-Reflect/spirv_reflect.c",
+		"vendor/SPIRV-Reflect/spirv_reflect.cpp",
 	}
 
     includedirs 

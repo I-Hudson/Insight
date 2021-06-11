@@ -21,6 +21,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		Graphics::GPUDescriptorPool* m_currentPool;
 		std::vector<Graphics::GPUDescriptorPool*> m_usedPools;
 		std::vector<Graphics::GPUDescriptorPool*> m_freePools;
+		std::unordered_map<u64, std::vector<Graphics::GPUDescriptorSet*>> m_freeSets;
 		std::vector<Graphics::GPUDescriptorSet*> m_allocatedSets;
 	};
 

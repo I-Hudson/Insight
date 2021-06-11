@@ -75,9 +75,9 @@ namespace Insight
 		Graphics::DrawCall drawCall;
 		drawCall.Geometry.VertexBuffer = m_vertexBuffer;
 		drawCall.Geometry.IndexBuffer = m_indexBuffer;
-		drawCall.Draw.VertexStart = 0;// m_firstIndex;
+		drawCall.Draw.VertexStart = m_firstIndex;
 		drawCall.Draw.VertexCount = GetVertexCount();
-		drawCall.Draw.IndciesStart = 0;// m_firstIndex;
+		drawCall.Draw.IndciesStart = m_firstIndex;
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
 		drawCall.Dimensions = m_dimensions;
@@ -201,7 +201,7 @@ namespace Insight
 		m_absolutePath = std::move(path);
 		IS_CORE_INFO("[Model::LoadAsset] Asset loading: '{0}'.", m_absolutePath);
 		ModelLoading::AssimpLoader::LoadFromFile(*this, m_absolutePath);
-		m_mesh.SetupGPUBuffers();
+		//m_mesh.SetupGPUBuffers();
 		IS_CORE_INFO("[Model::LoadAsset] Asset loaded: '{0}'.", m_absolutePath);
 	}
 

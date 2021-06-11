@@ -35,7 +35,7 @@ layout (location = 6) out vec4 outShadowCoord;
 
 void main() 
 {
-	gl_Position = ubo.PVMatrix /** perObject.modelMatrix*/ * vec4(inPos.xyz, 1.0);
+	gl_Position = ubo.PVMatrix * perObject.modelMatrix * vec4(inPos.xyz, 1.0);
 	outPos = mat3(perObject.modelMatrix) * inPos.xyz;
 	outNormal = mat3(perObject.modelMatrix) * inNormal;
 	outColor = inColor.xyz;

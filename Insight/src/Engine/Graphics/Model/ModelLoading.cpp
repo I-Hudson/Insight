@@ -75,11 +75,7 @@ namespace Insight::ModelLoading
 		std::vector<u32> indices;
 
 		u32 vertexStart = static_cast<u32>(mesh.m_vertices.size());
-		vertexStart = vertexStart == 0 ? vertexStart : vertexStart + 1;
 		u32 indexStart = static_cast<u32>(mesh.m_indices.size());
-		indexStart = indexStart == 0 ? indexStart : indexStart + 1;
-		u32 vertexCount = 0;
-		u32 indexCount = 0;
 
 		MeshDimensions dimensions;
 		glm::vec3 centre = glm::vec3(0);
@@ -150,7 +146,6 @@ namespace Insight::ModelLoading
 
 			mesh.m_vertices.push_back(vertex);
 			vertices.push_back(vertex);
-			++vertexCount;
 		}
 
 		if (::Graphics::IsVulkan())
@@ -186,12 +181,11 @@ namespace Insight::ModelLoading
 			{
 				mesh.m_indices.push_back(face.mIndices[j]);
 				indices.push_back(face.mIndices[j]);
-				++indexCount;
 			}
 		}
 
-		mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, vertices, indices));
-		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, vertexCount, indexStart, indexCount, mesh.m_vertexBuffer, mesh.m_indexBuffer));
+		mesh.m_subMeshes.push_back(SubMesh(0, vertices.size(), 0, indices.size(), vertices, indices));
+		//mesh.m_subMeshes.push_back(SubMesh(vertexStart, mesh.m_vertices.size() - vertexStart, indexStart, mesh.m_indices.size() - indexStart, mesh.m_vertexBuffer, mesh.m_indexBuffer));
 		mesh.m_subMeshes.back().m_dimensions = dimensions;
 
 		MeshDimensions& meshDimensions = mesh.m_dimensions;
