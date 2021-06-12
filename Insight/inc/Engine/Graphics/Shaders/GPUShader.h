@@ -35,7 +35,7 @@ namespace Insight::Graphics
 	/// Define a single uniform within a shader stage. This includes the name, set, binding, overall size 
 	/// and all the bindings for the uniform. The bindings are optional.
 	/// </summary>
-	struct ShaderStageUniform
+	struct ShaderStageBuffer
 	{
 		std::string Name;
 		u32 Set;
@@ -75,7 +75,8 @@ namespace Insight::Graphics
 
 		const ShaderStage& GetStage() const { return m_stage; }
 		const std::vector<ShaderStageBindings>& GetInputs() const { return m_inputs; }
-		const std::vector<ShaderStageUniform>& GetUniforms() const { return m_uniforms; }
+		const std::vector<ShaderStageBuffer>& GetUniforms() const { return m_uniforms; }
+		const std::vector<ShaderStageBuffer>& GetStorages() const { return m_storages; }
 		const std::vector<ShaderStagePushConstant>& GetPushConstants() const { return m_pushConstants; }
 		const std::vector<ShaderStageSampler2D>& GetSamplers() const { return m_samplers; }
 
@@ -110,7 +111,12 @@ namespace Insight::Graphics
 		/// <summary>
 		/// Shader stage uniforms.
 		/// </summary>
-		std::vector<ShaderStageUniform> m_uniforms;
+		std::vector<ShaderStageBuffer> m_uniforms;
+
+		/// <summary>
+		/// Shader stage storage buffers.
+		/// </summary>
+		std::vector<ShaderStageBuffer> m_storages;
 
 		/// <summary>
 		/// Shader stage push constatnts.

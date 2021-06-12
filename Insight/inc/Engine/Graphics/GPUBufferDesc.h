@@ -46,27 +46,27 @@ namespace Insight::Graphics
         /// <summary>
         /// The buffer total size in bytes.
         /// </summary>
-        u32 Size;
+        u32 Size = 0;
 
         /// <summary>
         /// The buffer structure stride (size in bytes per element).
         /// </summary>
-        u32 Stride;
+        u32 Stride = 0;
 
         /// <summary>
         /// The buffer flags.
         /// </summary>
-        GPUBufferFlags Flags;
+        GPUBufferFlags Flags = GPUBufferFlags::NONE;
 
         /// <summary>
         /// The format of the data in a buffer.
         /// </summary>
-        PixelFormat Format;
+        PixelFormat Format = PixelFormat::Unknown;
 
         /// <summary>
         /// The pointer to location of initial resource data. Null if not used.
         /// </summary>
-        const void* InitData;
+        const void* InitData = nullptr;
 
         /// <summary>
         /// Is this buffer a sub allocation of a bigger buffer. Mainly used in rendering.
@@ -121,6 +121,16 @@ namespace Insight::Graphics
         {
             const auto format = elementStride == 4 ? PixelFormat::R32_UInt : PixelFormat::R16_UInt;
             return Buffer(elementsCount * elementStride, GPUBufferFlags::INDEX | GPUBufferFlags::TRANSFER_DST, format, nullptr, elementStride);
+        }
+
+        static GPUBufferDesc StorageBuffer(u32 elementStride, u32 elementsCount)
+        {
+            return Buffer(elementsCount * elementStride, GPUBufferFlags::STORAGE, PixelFormat::Unknown, nullptr, elementStride);
+        }
+
+        static GPUBufferDesc StorageBuffer(u32 elementStride, u32 elementsCount, void* data)
+        {
+            return Buffer(elementsCount * elementStride, GPUBufferFlags::STORAGE, PixelFormat::Unknown, data, elementStride);
         }
 
         static GPUBufferDesc RawUpload(u32 size, void* data)

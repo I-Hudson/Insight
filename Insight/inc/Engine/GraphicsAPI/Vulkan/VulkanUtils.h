@@ -446,6 +446,7 @@ namespace
 		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true; }
 
 		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
 		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
 		if (flags & Insight::Graphics::GPUBufferFlags::INDEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
 

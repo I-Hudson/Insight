@@ -528,7 +528,15 @@ namespace Insight::Module
 						}
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
-							builder->BindImage(0, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+							if (false /*IsSkinnedMesh: Then bind the bones matrix*/)
+							{
+								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex)
+									->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+							}
+							else
+							{
+								builder->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+							}
 						}
 					}
 					Graphics::GPUDescriptorSet* fragSets[] = { set1 };

@@ -10,6 +10,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		u32 SetNumber;
 		VkDescriptorSetLayoutCreateInfo CreateInfo;
+		std::vector<VkDescriptorBindingFlags> BindingFlags;
 		std::vector<VkDescriptorSetLayoutBinding> Bindings;
 		VkDescriptorSetLayout Layout;
 	};

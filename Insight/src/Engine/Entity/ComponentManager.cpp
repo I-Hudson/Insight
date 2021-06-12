@@ -6,20 +6,24 @@
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
 #include "Engine/Component/AnimatorComponent.h"
+#include "Engine/Component/SkinnedMeshComponent.h"
 
 ComponentManager::ComponentManager()
 {
+	RegisterComponent<AnimatorComponent>();
 	RegisterComponent<CameraComponent>();
 	RegisterComponent<TransformComponent, TransformComponentData>();
-	RegisterComponent<MeshComponent>();
 	RegisterComponent<DirectionalLightComponent, DirectionalLightComponentData>();
-	RegisterComponent<AnimatorComponent>();
+
+	RegisterComponent<MeshComponent>();
+	RegisterComponent<SkinnedMeshComponent, SkinnedMeshComponentData>();
 }
 
 ComponentManager::~ComponentManager()
 {
 	for (auto& kvp : m_componentArrays)
 	{
+		kvp.second->OnDestroy();
 		::Delete(kvp.second);
 	}
 

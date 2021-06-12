@@ -21,6 +21,11 @@ layout(push_constant) uniform PER_OBJECT
 	mat4 modelMatrix;
 }perObject;
 
+layout(set = 1, binding = 0) readonly buffer JointMatrices 
+{
+	mat4 jointMatrices[];
+};
+
 const mat4 biasMat = mat4( 
 	0.5, 0.0, 0.0, 0.0,
 	0.0, 0.5, 0.0, 0.0,

@@ -20,7 +20,6 @@ private:
 	void Reset(Insight::Animation::Animation* animation);
 	void CalculateBoneTransform(const Insight::Animation::NodeData& node, glm::mat4 parentTransform);
 
-
 private:
 	std::vector<glm::mat4> m_finalBoneMatrices;
 	Insight::Animation::Animation* m_currentAnimation;

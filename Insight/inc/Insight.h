@@ -31,6 +31,7 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
 #include "Engine/Component/AnimatorComponent.h"
+#include "Engine/Component/SkinnedMeshComponent.h"
 // --Engine--------------------------
 
 // --Entry Point--------------------------

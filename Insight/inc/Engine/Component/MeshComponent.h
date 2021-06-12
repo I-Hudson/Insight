@@ -41,7 +41,7 @@ public:
 	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 
-private:
+protected:
 	Insight::Mesh* m_mesh;
 
 	//std::vector<Material*> m_materials;

@@ -158,6 +158,20 @@ namespace Insight::GraphicsAPI::Vulkan
 				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
 				set.Bindings.push_back(setLayoutBinding);
 				set.SetNumber = setNumber;
+				set.BindingFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+			}
+
+			for (auto& storageBuffer : stage.GetStorages())
+			{
+				u32 bindingNumber = storageBuffer.Binding;
+				u32 setNumber = storageBuffer.Set;
+
+				VkDescriptorSetLayoutBinding setLayoutBinding = vks::initializers::descriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, ToVulkanShaderStageFlags(stage.GetStage()), bindingNumber, 1);
+
+				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
+				set.Bindings.push_back(setLayoutBinding);
+				set.SetNumber = setNumber;
+				set.BindingFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 			}
 
 			for (auto& pushConstant : stage.GetPushConstants())
@@ -184,25 +198,29 @@ namespace Insight::GraphicsAPI::Vulkan
 				DescriptorSetLayoutData& set = m_setLayouts[setNumber];
 				set.Bindings.push_back(setLayoutBinding);
 				set.SetNumber = setNumber;
+				set.BindingFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 			}
 		}
 
 		for (auto& kvp : m_setLayouts)
 		{
 			VkDescriptorSetLayoutCreateInfo setLayoutCreateInfo = vks::initializers::descriptorSetLayoutCreateInfo(kvp.second.Bindings);
-			VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setLayoutBindingFlags{};
-			VkDescriptorSetVariableDescriptorCountAllocateInfoEXT descriptorSetAlloc = {};
+			VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags = { };
 
 			if (m_device->HasExtension(Graphics::GPUDeviceExtension::Bindless_Descriptor))
 			{
-				setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
-				setLayoutBindingFlags.bindingCount = kvp.second.Bindings.size();
-				std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
-					0,
-					VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT
-				};
-				setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
-				//setLayoutCreateInfo.pNext = &setLayoutBindingFlags;
+				//setLayoutBindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO_EXT;
+				//setLayoutBindingFlags.bindingCount = kvp.second.Bindings.size();
+				//std::vector<VkDescriptorBindingFlagsEXT> descriptorBindingFlags = {
+				//	0,
+				//	VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT_EXT
+				//};
+				//setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
+
+				bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+				bindingFlags.bindingCount = static_cast<u32>(kvp.second.BindingFlags.size());
+				bindingFlags.pBindingFlags = kvp.second.BindingFlags.data();
+				setLayoutCreateInfo.pNext = &bindingFlags;
 			}
 			ThrowIfFailed(vkCreateDescriptorSetLayout(m_device->Device, &setLayoutCreateInfo, nullptr, &kvp.second.Layout));
 		}

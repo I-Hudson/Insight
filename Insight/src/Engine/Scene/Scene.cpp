@@ -12,6 +12,7 @@
 #include "Engine/Component/Component.h"
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"
+#include "Engine/Component/SkinnedMeshComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
 
@@ -214,7 +215,40 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 	{
 		if (!com.IsValid())
 		{
-			return;
+			break;
+		}
+
+		cameraFrustum.Update(renderList->MainCamera.Projection, renderList->MainCamera.Transform);
+		TransformComponent& transformComponent = com.GetEntity().GetComponent<TransformComponent>();
+		float meshRadius = com.GetMesh()->GetDimensions().Radius;
+		glm::vec3 meshCenter = com.GetMesh()->GetDimensions().Center * transformComponent.GetPostion();
+		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
+		{
+			com.OnDraw(&renderList->MainCamera, transformComponent.GetTransform(), cameraFrustum);
+		}
+
+		for (auto& eCamera : renderList->ExtraCameras)
+		{
+			cameraFrustum.Update(eCamera.Projection, eCamera.Transform);
+			if (cameraFrustum.CheckSphere(transformComponent.GetPostion(), meshRadius))
+			{
+				com.OnDraw(&eCamera, transformComponent.GetTransform(), cameraFrustum);
+			}
+		}
+
+		cameraFrustum.Update(renderList->DirectionalLight.Projection, renderList->DirectionalLight.Transform);
+		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
+		{
+			com.OnDraw(&renderList->DirectionalLight, transformComponent.GetTransform(), cameraFrustum);
+		}
+	}
+
+	auto& skinnedMeshComponents = m_componentManager.GetAllComponents<SkinnedMeshComponent>();
+	for (auto& com : skinnedMeshComponents)
+	{
+		if (!com.IsValid())
+		{
+			break;
 		}
 
 		cameraFrustum.Update(renderList->MainCamera.Projection, renderList->MainCamera.Transform);

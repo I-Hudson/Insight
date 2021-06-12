@@ -38,6 +38,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		struct DescriptorLayoutInfo
 		{
 			std::vector<VkDescriptorSetLayoutBinding> Bindings;
+			std::vector<VkDescriptorBindingFlags> BindingsFlags;
 
 			bool operator==(const DescriptorLayoutInfo& other) const;
 

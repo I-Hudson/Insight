@@ -117,7 +117,7 @@ namespace Insight::Graphics
 				auto& binding = resource->bindings[i];
 				if (binding->descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 				{
-					ShaderStageUniform uniform
+					ShaderStageBuffer uniform
 					{
 						binding->name,
 						binding->set,
@@ -125,6 +125,17 @@ namespace Insight::Graphics
 						binding->block.size
 					};
 					m_uniforms.push_back(uniform);
+				}
+				else if (binding->descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+				{
+					ShaderStageBuffer storage
+					{
+						binding->name,
+						binding->set,
+						binding->binding,
+						binding->block.size
+					};
+					m_storages.push_back(storage);
 				}
 				else if (binding->descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER)
 				{

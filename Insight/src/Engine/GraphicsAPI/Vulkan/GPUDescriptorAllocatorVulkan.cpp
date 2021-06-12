@@ -170,6 +170,7 @@ namespace Insight::GraphicsAPI::Vulkan
 	{
 		DescriptorLayoutInfo layoutInfo;
 		layoutInfo.Bindings.reserve(info->bindingCount);
+		layoutInfo.BindingsFlags.reserve(info->bindingCount);
 		bool isSorted = true;
 		int lastBinding = -1;
 
@@ -177,6 +178,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		for (u32 i = 0; i < info->bindingCount; ++i)
 		{
 			layoutInfo.Bindings.push_back(info->pBindings[i]);
+			layoutInfo.BindingsFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 
 			//check that the bindings are in strict increasing order
 			if ((i32)info->pBindings[i].binding > lastBinding)
@@ -207,6 +209,16 @@ namespace Insight::GraphicsAPI::Vulkan
 		}
 		else 
 		{
+
+			if (GPUDeviceVulkan::Instance()->HasExtension(Graphics::GPUDeviceExtension::Bindless_Descriptor))
+			{
+				VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlags = { };
+				bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+				bindingFlags.bindingCount = static_cast<u32>(layoutInfo.BindingsFlags.size());
+				bindingFlags.pBindingFlags = layoutInfo.BindingsFlags.data();
+				info->pNext = &bindingFlags;
+			}
+
 			//create a new one (not found)
 			VkDescriptorSetLayout layout;
 			vkCreateDescriptorSetLayout(device, info, nullptr, &layout);
@@ -306,9 +318,11 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		newWrite.descriptorCount = 1;
 		newWrite.descriptorType = ToVulkanDescriptorType(type);
-		newWrite.pBufferInfo = static_cast<GPUBufferVulkan*>(buffer)->GetBufferInfo();
+		if (buffer)
+		{ 
+			newWrite.pBufferInfo = static_cast<GPUBufferVulkan*>(buffer)->GetBufferInfo();
+		}
 		newWrite.dstBinding = binding;
-
 		m_writes.push_back(newWrite);
 		return this;
 	}

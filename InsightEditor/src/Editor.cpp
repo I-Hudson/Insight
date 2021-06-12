@@ -97,9 +97,11 @@ namespace Insight::Editor
 
 
 					Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
-					MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
-					meshComponent.SetModel(&*graphicsModel);
-					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 5, 0, 0 });
+					//MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
+					//meshComponent.SetModel(&*graphicsModel);
+					//meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 5, 0, 0 });
+					SkinnedMeshComponent& skinnedMesh = mesh.AddComponent<SkinnedMeshComponent>();
+					skinnedMesh.SetModel(&*graphicsModel);
 					AnimatorComponent& animCom = mesh.AddComponent<AnimatorComponent>();
 					animCom.PlayAnimation(graphicsModel->GetMesh().GetAnimation(0));
 

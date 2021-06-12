@@ -11,6 +11,7 @@ class IComponentArray
 {
 public:
 	virtual ~IComponentArray() = default;
+	virtual void OnDestroy() = 0;
 	virtual void Update(const float& deltaTime) = 0;
 
 	virtual void RemoveComponent(const EntityID& entity) = 0;
@@ -66,6 +67,19 @@ public:
 		// Return a reference to the entity's component
 		return m_componentArray.at(m_entityToIndexMap.at(entity));
 	}
+
+	virtual void OnDestroy() override
+	{
+		IS_PROFILE_FUNCTION();
+		for (auto& component : m_componentArray)
+		{
+			if (component.IsValid())
+			{
+				component.OnDestroy();
+			}
+		}
+	}
+
 
 	virtual void Update(const float& deltaTime) override
 	{
