@@ -4,6 +4,8 @@
 #include "Engine/Platform/Platform.h"
 #include "Engine/Memory/ProfilerMemory.h"
 
+#include <chrono>
+#include <thread>
 #include <Rpc.h>
 #pragma comment(lib, "Rpcrt4.lib")
 
@@ -159,9 +161,9 @@ void Win32Platform::CheckFailed(const char* message, const char* file, int line)
     IS_FATEL("Check failed!\nFile: {0}\nLine: {1}\n\nExpression: {2}", file, line, message);
 }
 
-void Win32Platform::Sleep(i32 milliseconds)
+void Win32Platform::Sleep(float milliseconds)
 {
-    ::Sleep(static_cast<DWORD>(milliseconds));
+    std::this_thread::sleep_for(std::chrono::duration<float, std::milli>(milliseconds));
 }
 
 double Win32Platform::GetTimeSeconds()

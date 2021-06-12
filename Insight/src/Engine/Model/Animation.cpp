@@ -12,9 +12,13 @@ namespace Insight::Animation
 	/// </summary>
 	/// <param name="aiScene"></param>
 	/// <param name="model"></param>
-	Animation::Animation(const aiScene* aiScene, Model* model)
+	Animation::Animation(const aiScene* aiScene, u32 animationIndex, Model* model)
 	{
-
+		const aiAnimation* aiAnimation = aiScene->mAnimations[animationIndex];
+		m_duration = (float)aiAnimation->mDuration;
+		m_ticksPerSecond = (float)aiAnimation->mTicksPerSecond;
+		ReadHeirarchyData(m_rootNode, aiScene->mRootNode);
+		ReadMissingBones(aiAnimation, model);
 	}
 
 	Bone* Animation::FindBone(const std::string & name)
@@ -41,7 +45,7 @@ namespace Insight::Animation
 		u32& boneCount = model->GetMesh().GetBoneCount(); //getting the m_BoneCounter from Model class
 
 											   //reading channels(bones engaged in an animation and their keyframes)
-		for (u32 i = 0; i < size; i++)
+		for (u32 i = 0; i < size; ++i)
 		{
 			auto channel = animation->mChannels[i];
 			std::string boneName = channel->mNodeName.data;
@@ -65,7 +69,7 @@ namespace Insight::Animation
 		dest.Transform = ModelLoading::AssimpLoader::AssimpToGLM(src->mTransformation);
 		dest.ChildrenCount = src->mNumChildren;
 
-		for (u32 i = 0; i < src->mNumChildren; i++)
+		for (u32 i = 0; i < src->mNumChildren; ++i)
 		{
 			NodeData newData;
 			ReadHeirarchyData(newData, src->mChildren[i]);

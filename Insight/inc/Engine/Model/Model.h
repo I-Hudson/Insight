@@ -114,6 +114,7 @@ namespace Insight
 
 		std::unordered_map<std::string, Animation::BoneInfo>& GetBoneInfoMap() { return m_boneInfoMap; }
 		u32& GetBoneCount() { return m_boneCounter; }
+		Animation::Animation* GetAnimation(u32 index) { return &m_animations.at(index); }
 
 		void Release();
 
@@ -126,9 +127,9 @@ namespace Insight
 		std::vector<SubMesh> m_subMeshes;
 		Mesh::MeshDimensions m_dimensions;
 
-		u32 m_boneCounter;
+		u32 m_boneCounter = 0;
 		std::unordered_map<std::string, Animation::BoneInfo> m_boneInfoMap;
-		std::unordered_map<std::string, Animation::Animation> m_animations;
+		std::vector<Animation::Animation> m_animations;
 
 		std::vector<Vertex> m_vertices;
 		std::vector<u32> m_indices;

@@ -33,6 +33,9 @@ public:
 	void Load(const std::string& file);
 	void Unload();
 
+	void Play() { OnBeginPlay(); m_isPlaying = true; }
+	void End() { OnEndPlay(); m_isPlaying = false; }
+
 	void Serialize(const std::string& file);
 	void Deserialize(const std::string& file);
 

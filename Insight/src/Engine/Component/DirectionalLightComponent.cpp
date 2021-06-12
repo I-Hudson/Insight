@@ -14,6 +14,6 @@ DirectionalLightComponent::~DirectionalLightComponent()
 
 void DirectionalLightComponent::OnUpdate(const float& a_deltaTime)
 {
-	DirectionalLightComponentData& data = GetComponentData<DirectionalLightComponentData>();
-	data.Direction = glm::normalize(glm::vec3(0, 0, 0) - GetEntity().GetComponent<TransformComponent>().GetPostion());
+	//DirectionalLightComponentData& data = GetComponentData<DirectionalLightComponentData>();
+	//data.Direction = glm::normalize(glm::vec3(0, 0, 0) - GetEntity().GetComponent<TransformComponent>().GetPostion());
 }

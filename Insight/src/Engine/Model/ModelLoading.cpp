@@ -62,6 +62,8 @@ namespace Insight::ModelLoading
 			model.m_mesh.m_dimensions.Size.y *= -1;
 		}
 		model.m_mesh.m_dimensions.Radius = glm::distance(meshCenter, model.m_mesh.m_dimensions.Max);
+
+		LoadAnimations(model, scene);
 	}
 
 	void AssimpLoader::ProcessNode(Mesh& mesh, aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
@@ -285,6 +287,16 @@ namespace Insight::ModelLoading
 				SetVertexBoneData(mesh.m_vertices[vertexId], boneID, weight);
 			}
 		}
+	}
+
+	void AssimpLoader::LoadAnimations(Model& model, const aiScene* aiScene)
+	{
+		std::vector<Animation::Animation> animations;
+		for (u32 i= 0; i <  aiScene->mNumAnimations; ++i)
+		{
+			animations.push_back(Animation::Animation(aiScene, i, &model));
+		}
+		model.m_mesh.m_animations = animations;
 	}
 
 	glm::mat4 AssimpLoader::AssimpToGLM(const aiMatrix4x4& from)

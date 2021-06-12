@@ -62,7 +62,7 @@ namespace Insight::Animation
 			if (animationTime < m_positions[index + 1].TimeStamp)
 				return index;
 		}
-		ASSERT(false && "[]");
+		ASSERT(false && "[Bone::GetPositionIndex] Unable to get position index.");
 		return -1;
 	}
 	/* Gets the current index on mKeyRotations to interpolate to based on the current 
@@ -74,7 +74,7 @@ namespace Insight::Animation
 			if (animationTime < m_rotations[index + 1].TimeStamp)
 				return index;
 		}
-		ASSERT(false && "[]");
+		ASSERT(false && "[Bone::GetRotationIndex] Unable to get rotation index.");
 		return -1;
 	}
 	/* Gets the current index on mKeyScalings to interpolate to based on the current 

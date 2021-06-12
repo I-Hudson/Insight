@@ -37,6 +37,13 @@ namespace Insight::Editor
 #endif
 				ImGui::EndMenu();
 			}
+			if (ImGui::BeginMenu("Scene"))
+			{
+				if (ImGui::Button("Start Scene")) { Scene::ActiveScene()->Play(); }
+				if (ImGui::Button("Stop Scene")) { Scene::ActiveScene()->End(); }
+
+				ImGui::EndMenu();
+			}
 			ImGui::EndMainMenuBar();
 		}
 

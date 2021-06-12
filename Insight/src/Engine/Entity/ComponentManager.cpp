@@ -5,6 +5,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
+#include "Engine/Component/AnimatorComponent.h"
 
 ComponentManager::ComponentManager()
 {
@@ -12,6 +13,7 @@ ComponentManager::ComponentManager()
 	RegisterComponent<TransformComponent, TransformComponentData>();
 	RegisterComponent<MeshComponent>();
 	RegisterComponent<DirectionalLightComponent, DirectionalLightComponentData>();
+	RegisterComponent<AnimatorComponent>();
 }
 
 ComponentManager::~ComponentManager()

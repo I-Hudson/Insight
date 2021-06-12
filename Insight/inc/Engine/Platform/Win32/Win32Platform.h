@@ -83,7 +83,7 @@ public:
     static void Assert(const char* message, const char* file, int line);
     static void CheckFailed(const char* message, const char* file, int line);
 
-    static void Sleep(i32 milliseconds);
+    static void Sleep(float milliseconds);
     static double GetTimeSeconds();
 
 	static U128 GenerateUUID();

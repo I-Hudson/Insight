@@ -30,6 +30,7 @@
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/DirectionalLightComponent.h"
+#include "Engine/Component/AnimatorComponent.h"
 // --Engine--------------------------
 
 // --Entry Point--------------------------

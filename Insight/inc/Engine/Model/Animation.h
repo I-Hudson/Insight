@@ -27,7 +27,7 @@ namespace Insight::Animation
 	{
 	public:
 		Animation() = default;
-		Animation(const aiScene* aiScene, Model* model);
+		Animation(const aiScene* aiScene, u32 animationIndex, Model* model);
 
 		Bone* FindBone(const std::string& name);
 
@@ -35,6 +35,7 @@ namespace Insight::Animation
 		INLINE float GetDuration() const { return m_duration; }
 		INLINE NodeData& GetRootNode() { return m_rootNode; }
 		INLINE const std::unordered_map<std::string, BoneInfo>& GetBoneInfoMap() { return m_boneInfoMap; }
+		INLINE u32 GetBoneCount() const { return (u32)m_bones.size(); }
 
 	private:
 		void ReadMissingBones(const aiAnimation* animation, Model* model);
