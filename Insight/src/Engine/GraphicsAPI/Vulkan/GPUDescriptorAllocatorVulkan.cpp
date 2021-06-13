@@ -298,7 +298,7 @@ namespace Insight::GraphicsAPI::Vulkan
 		return this;
 	}
 
-	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindBuffer(u32 binding, Graphics::GPUBuffer* buffer, DescriptorType type, ShaderStage stage)
+	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindBuffer(u32 binding, Graphics::GPUBuffer* buffer, DescriptorType type, ShaderStage stage, bool write)
 	{
 		//create the descriptor binding for the layout
 		VkDescriptorSetLayoutBinding newBinding{};
@@ -311,23 +311,26 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		m_bindings.push_back(newBinding);
 
-		//create the descriptor write
-		VkWriteDescriptorSet newWrite{};
-		newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		newWrite.pNext = nullptr;
+		if (write)
+		{
+			//create the descriptor write
+			VkWriteDescriptorSet newWrite{};
+			newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			newWrite.pNext = nullptr;
 
-		newWrite.descriptorCount = 1;
-		newWrite.descriptorType = ToVulkanDescriptorType(type);
-		if (buffer)
-		{ 
-			newWrite.pBufferInfo = static_cast<GPUBufferVulkan*>(buffer)->GetBufferInfo();
+			newWrite.descriptorCount = 1;
+			newWrite.descriptorType = ToVulkanDescriptorType(type);
+			if (buffer)
+			{
+				newWrite.pBufferInfo = static_cast<GPUBufferVulkan*>(buffer)->GetBufferInfo();
+			}
+			newWrite.dstBinding = binding;
+			m_writes.push_back(newWrite);
 		}
-		newWrite.dstBinding = binding;
-		m_writes.push_back(newWrite);
 		return this;
 	}
 
-	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage)
+	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImage(u32 binding, Graphics::GPUImage* image, DescriptorType type, ShaderStage stage, bool write)
 	{
 		//create the descriptor binding for the layout
 		VkDescriptorSetLayoutBinding newBinding{};
@@ -340,21 +343,23 @@ namespace Insight::GraphicsAPI::Vulkan
 
 		m_bindings.push_back(newBinding);
 
-		//create the descriptor write
-		VkWriteDescriptorSet newWrite{};
-		newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		newWrite.pNext = nullptr;
+		if (write)
+		{
+			//create the descriptor write
+			VkWriteDescriptorSet newWrite{};
+			newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			newWrite.pNext = nullptr;
 
-		newWrite.descriptorCount = 1;
-		newWrite.descriptorType = ToVulkanDescriptorType(type);
-		newWrite.pImageInfo = static_cast<GPUImageVulkan*>(image)->GetDescriptorImageInfo();
-		newWrite.dstBinding = binding;
-
-		m_writes.push_back(newWrite);
+			newWrite.descriptorCount = 1;
+			newWrite.descriptorType = ToVulkanDescriptorType(type);
+			newWrite.pImageInfo = static_cast<GPUImageVulkan*>(image)->GetDescriptorImageInfo();
+			newWrite.dstBinding = binding;
+			m_writes.push_back(newWrite);
+		}
 		return this;
 	}
 
-	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImageArray(u32 binding, std::vector<Graphics::GPUImage*>& images, DescriptorType type, ShaderStage stage)
+	Graphics::GPUDescriptorBuilder* GPUDescriptorBuilderVulkan::BindImageArray(u32 binding, std::vector<Graphics::GPUImage*>& images, DescriptorType type, ShaderStage stage, bool write)
 	{
 		//create the descriptor binding for the layout
 		VkDescriptorSetLayoutBinding newBinding{};
@@ -373,17 +378,18 @@ namespace Insight::GraphicsAPI::Vulkan
 			array.ImageInfos.push_back(*static_cast<GPUImageVulkan*>(image)->GetDescriptorImageInfo());
 		}
 
-		//create the descriptor write
-		VkWriteDescriptorSet newWrite{};
-		newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-		newWrite.pNext = nullptr;
-		newWrite.descriptorCount = (u32)m_tempTextureArrays.back().ImageInfos.size();
-		newWrite.descriptorType = ToVulkanDescriptorType(type);
-		newWrite.pImageInfo = m_tempTextureArrays.back().ImageInfos.data();
-		newWrite.dstBinding = binding;
-
-		m_writes.push_back(newWrite);
-
+		if (write)
+		{
+			//create the descriptor write
+			VkWriteDescriptorSet newWrite{};
+			newWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			newWrite.pNext = nullptr;
+			newWrite.descriptorCount = (u32)m_tempTextureArrays.back().ImageInfos.size();
+			newWrite.descriptorType = ToVulkanDescriptorType(type);
+			newWrite.pImageInfo = m_tempTextureArrays.back().ImageInfos.data();
+			newWrite.dstBinding = binding;
+			m_writes.push_back(newWrite);
+		}
 		return this;
 	}
 

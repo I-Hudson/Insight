@@ -218,7 +218,7 @@ namespace Insight::GraphicsAPI::Vulkan
 				//setLayoutBindingFlags.pBindingFlags = descriptorBindingFlags.data();
 
 				bindingFlags.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
-				bindingFlags.bindingCount = static_cast<u32>(kvp.second.BindingFlags.size());
+				bindingFlags.bindingCount = static_cast<u32>(kvp.second.Bindings.size());
 				bindingFlags.pBindingFlags = kvp.second.BindingFlags.data();
 				setLayoutCreateInfo.pNext = &bindingFlags;
 			}

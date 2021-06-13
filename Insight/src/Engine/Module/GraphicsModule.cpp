@@ -530,12 +530,13 @@ namespace Insight::Module
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
 							if (false /*IsSkinnedMesh: Then bind the bones matrix*/)
 							{
-								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex)
+								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex, true)
 									->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 							}
 							else
 							{
-								builder->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
+								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex, false)
+									->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 							}
 						}
 					}

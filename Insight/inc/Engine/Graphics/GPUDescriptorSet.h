@@ -101,9 +101,9 @@ namespace Insight::Graphics
 
 		virtual GPUDescriptorBuilder* Begin(GPUDescriptorLayoutCache* layoutCache, GPUDescriptorAllocator* allocator) = 0;
 
-		virtual GPUDescriptorBuilder* BindBuffer(u32 binding, GPUBuffer* buffer, DescriptorType type, ShaderStage stage) = 0;
-		virtual GPUDescriptorBuilder* BindImage(u32 binding, GPUImage* image, DescriptorType type, ShaderStage stage) = 0;
-		virtual GPUDescriptorBuilder* BindImageArray(u32 binding, std::vector<GPUImage*>& images, DescriptorType type, ShaderStage stage) = 0;
+		virtual GPUDescriptorBuilder* BindBuffer(u32 binding, GPUBuffer* buffer, DescriptorType type, ShaderStage stage, bool write = true) = 0;
+		virtual GPUDescriptorBuilder* BindImage(u32 binding, GPUImage* image, DescriptorType type, ShaderStage stage, bool write = true) = 0;
+		virtual GPUDescriptorBuilder* BindImageArray(u32 binding, std::vector<GPUImage*>& images, DescriptorType type, ShaderStage stage, bool write = true) = 0;
 	
 		virtual bool Build(GPUDescriptorSet*& set) = 0;
 	};
