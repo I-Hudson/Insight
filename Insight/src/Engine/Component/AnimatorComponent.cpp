@@ -28,7 +28,7 @@ void AnimatorComponent::OnUpdate(const float& a_deltaTime)
     m_deltaTime = a_deltaTime;
     if (m_currentAnimation && m_currentSkeleton)
     {
-        m_currentTime += m_currentAnimation->GetTicksPerSecond() * m_deltaTime;
+        m_currentTime += m_currentAnimation->GetPlayBackSpeed() * m_currentAnimation->GetTicksPerSecond() * m_deltaTime;
         m_currentTime = fmod(m_currentTime, m_currentAnimation->GetDuration());
         CalculateBoneTransform();
         ApplyBoneToModelSpace(m_currentSkeleton->GetRootBone(), glm::mat4(1));

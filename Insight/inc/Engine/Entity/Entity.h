@@ -18,7 +18,7 @@ struct EntityData : REFLECT_BASE()
 
 	EntityID ParentEntityID = -1;
 	std::vector<EntityID> EntityChildrenIDs;
-	bool IsActive = false;
+	bool IsActive = true;
 
 private:
 	REFLECT_PROPERTY(EditorOnly)

@@ -94,19 +94,19 @@ namespace Insight::Editor
 					//Insight::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Model>("./data/models/sponza/sponza.obj");
 					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/dancing_stormtrooper_gltf/scene.gltf");
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vampire/dancing_vampire.dae");
-					
-					Entity& mesh = Scene::ActiveScene()->CreateEntity("StaticMesh");
-					MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
-					meshComponent.SetModel(&*graphicsModel);
-					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 5, 0, 0 });
 
-
-					mesh = Scene::ActiveScene()->CreateEntity("AnimatedMesh");
-					SkinnedMeshComponent& skinnedMesh = mesh.AddComponent<SkinnedMeshComponent>();
+					Entity& animatedMesh = Scene::ActiveScene()->CreateEntity("AnimatedMesh");
+					SkinnedMeshComponent& skinnedMesh = animatedMesh.AddComponent<SkinnedMeshComponent>();
 					skinnedMesh.SetModel(&*graphicsModel);
-					AnimatorComponent& animCom = mesh.AddComponent<AnimatorComponent>();
+					AnimatorComponent& animCom = animatedMesh.AddComponent<AnimatorComponent>();
 					animCom.SetSkelton(&graphicsModel->GetMesh().GetSkeleton());
 					animCom.PlayAnimation(graphicsModel->GetMesh().GetAnimation(0));
+					//graphicsModel->GetMesh().GetAnimation(0)->SetPlayBackSpeed(500);
+
+					Entity& staticMesh = Scene::ActiveScene()->CreateEntity("StaticMesh");
+					MeshComponent& meshComponent = staticMesh.AddComponent<MeshComponent>();
+					meshComponent.SetModel(&*graphicsModel);
+					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 15, 0, 0 });
 				}
 			}
 

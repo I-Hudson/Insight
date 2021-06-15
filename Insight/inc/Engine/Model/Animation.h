@@ -39,8 +39,11 @@ namespace Insight::Animation
 		Animation() = default;
 		Animation(const aiScene* aiScene , u32 animationIndex, Model* model);
 
-		INLINE float GetTicksPerSecond() const { return m_ticksPerSecond; }
-		INLINE float GetDuration() const { return m_duration; }
+		INLINE const float& GetTicksPerSecond() const { return m_ticksPerSecond; }
+		INLINE const float& GetDuration() const { return m_duration; }
+		INLINE const float& GetPlayBackSpeed() const { return m_playBackSpeed; }
+
+		void SetPlayBackSpeed(float speedInSeconds);
 
 		KeyPosition GetPreviousPositionKey(const std::string& boneName, const float& animationTime);
 		KeyPosition GetNextPositionKey(const std::string& boneName, const float& animationTime);
@@ -56,6 +59,7 @@ namespace Insight::Animation
 	private:
 		float m_ticksPerSecond;
 		float m_duration;
+		float m_playBackSpeed = 1;
 		std::unordered_map<std::string, std::vector<KeyPosition>> m_keyPositions;
 		std::unordered_map<std::string, std::vector<KeyRotation>> m_keyRotations;
 		std::unordered_map<std::string, std::vector<KeyScale>> m_keyScale;

@@ -43,7 +43,7 @@ void SkinnedMeshComponent::OnDraw(Insight::Graphics::RenderListView* renderList,
 	MeshComponent::OnDraw(renderList, worldTransform, cameraFrustum);
 
 	SkinnedMeshComponentData& data = GetComponentData<SkinnedMeshComponentData>();
-	for (u32 i = 0; i < renderList->DrawCalls.size() - meshCount; ++i)
+	for (u32 i = meshCount; i < renderList->DrawCalls.size(); ++i)
 	{
 		renderList->DrawCalls.at(i).Skinned.BoneMatrices = data.MatrixStorageBuffer;
 	}

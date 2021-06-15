@@ -223,6 +223,11 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 			break;
 		}
 
+		if (!com.GetEntity().GetEntiyData().IsActive)
+		{
+			continue;
+		}
+
 		cameraFrustum.Update(renderList->MainCamera.Projection, renderList->MainCamera.Transform);
 		TransformComponent& transformComponent = com.GetEntity().GetComponent<TransformComponent>();
 		float meshRadius = com.GetMesh()->GetDimensions().Radius;
@@ -258,11 +263,12 @@ void Scene::OnDraw(Insight::Graphics::RenderList* renderList)
 
 		cameraFrustum.Update(renderList->MainCamera.Projection, renderList->MainCamera.Transform);
 		TransformComponent& transformComponent = com.GetEntity().GetComponent<TransformComponent>();
+		glm::mat4 transformTransform = transformComponent.GetTransform();
 		float meshRadius = com.GetMesh()->GetDimensions().Radius;
-		glm::vec3 meshCenter = com.GetMesh()->GetDimensions().Center * transformComponent.GetPostion();
+		glm::vec3 meshCenter = com.GetMesh()->GetDimensions().Center * transformTransform[0][3];
 		if (cameraFrustum.CheckSphere(meshCenter, meshRadius))
 		{
-			com.OnDraw(&renderList->MainCamera, transformComponent.GetTransform(), cameraFrustum);
+			com.OnDraw(&renderList->MainCamera, transformTransform, cameraFrustum);
 		}
 
 		for (auto& eCamera : renderList->ExtraCameras)

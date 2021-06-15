@@ -210,11 +210,11 @@ void CameraComponent::OnUpdate(const float& a_deltaTime)
 		{
 			if (Graphics::IsVulkan())
 			{
-				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
+				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)-iDeltaY / 150.0f);
 			}
 			else
 			{
-				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)-iDeltaY / 150.0f);
+				mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
 			}
 			vRight = mMat * vRight;
 			vUp = mMat * vUp;

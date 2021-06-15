@@ -53,6 +53,12 @@ namespace Insight::Animation
 
 		}
 	}
+
+	void Animation::SetPlayBackSpeed(float speedInSeconds)
+	{
+		m_playBackSpeed = speedInSeconds;
+	}
+
 	KeyPosition Animation::GetPreviousPositionKey(const std::string& boneName, const float& animationTime)
 	{
 		const std::vector<KeyPosition>& positions = m_keyPositions.at(boneName);
