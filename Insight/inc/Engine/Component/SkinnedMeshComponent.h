@@ -15,6 +15,11 @@ public:
 	SkinnedMeshComponent(ComponentManager* componentManager, ComponentID componentID, ComponentType componentType, EntityManager* entityManager, EntityID entity);
 	virtual ~SkinnedMeshComponent() override;
 
-	virtual void OnUpdate(const float& a_deltaTime);
+	virtual void OnUpdate(const float& a_deltaTime) override;
+	virtual void OnDraw(Insight::Graphics::RenderListView* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum) override;
+
+	virtual void OnBeginPlay() override;
+	virtual void OnEndPlay() override;
+
 	virtual void OnDestroy() override;
 };

@@ -110,6 +110,5 @@ void MeshComponent::OnUpdate(const float& a_deltaTime)
 
 void MeshComponent::OnDraw(Insight::Graphics::RenderListView* renderList, const glm::mat4& worldTransform, const Insight::Maths::Frustum& cameraFrustum)
 {
-	using namespace Insight::Graphics;
 	m_mesh->Draw(renderList, worldTransform, cameraFrustum);
 }

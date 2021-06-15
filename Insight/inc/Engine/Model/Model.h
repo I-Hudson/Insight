@@ -45,7 +45,6 @@ namespace Insight
 	{
 	public:
 		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, Graphics::GPUBuffer* vertexBuffer, Graphics::GPUBuffer* indexBuffer);
-		SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 		~SubMesh();
 
 		const MeshDimensions& GetDimensions() const { return m_dimensions; }
@@ -59,9 +58,6 @@ namespace Insight
 		std::string GetTexture(MaterialTextureType type);
 
 		void Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
-		Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
-		Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
-
 		void Release();
 
 	private:
@@ -77,9 +73,8 @@ namespace Insight
 
 		MeshTextures m_textures;
 		bool m_releaseGPUBuffers;
+		bool m_isSkinnedMesh;
 
-		std::vector<Vertex> m_vertices;
-		std::vector<u32> m_indices;
 		Graphics::GPUBuffer* m_vertexBuffer;
 		Graphics::GPUBuffer* m_indexBuffer;
 
@@ -112,8 +107,7 @@ namespace Insight
 		//Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
 		//Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
 
-		std::unordered_map<std::string, Animation::BoneInfo>& GetBoneInfoMap() { return m_boneInfoMap; }
-		u32& GetBoneCount() { return m_boneCounter; }
+		Animation::Skeleton& GetSkeleton() { return m_skeleton; }
 		Animation::Animation* GetAnimation(u32 index) { return &m_animations.at(index); }
 
 		void Release();
@@ -127,9 +121,9 @@ namespace Insight
 		std::vector<SubMesh> m_subMeshes;
 		Mesh::MeshDimensions m_dimensions;
 
-		u32 m_boneCounter = 0;
-		std::unordered_map<std::string, Animation::BoneInfo> m_boneInfoMap;
+		Animation::Skeleton m_skeleton;
 		std::vector<Animation::Animation> m_animations;
+		bool m_isSkinnedMesh;
 
 		std::vector<Vertex> m_vertices;
 		std::vector<u32> m_indices;

@@ -75,7 +75,6 @@ namespace Insight::ModelLoading
 		{
 			aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 			mesh.m_subMeshes.push_back(ProcessMesh(mesh, aiMesh, aiScene, directory));
-			ExtractBoneInfo(mesh, aiMesh, aiScene);
 		}
 		// then do the same for each of its children
 		for (u32 i = 0; i < aiNode->mNumChildren; i++)
@@ -100,14 +99,17 @@ namespace Insight::ModelLoading
 		for (unsigned int i = 0; i < aiMesh->mNumVertices; ++i)
 		{
 			Vertex vertex;
+		
+			SetVertexBoneDataToDefault(vertex);
+			
 			// process vertex positions, normals and texture coordinates
 			glm::vec3 position;
 			position.x = aiMesh->mVertices[i].x;
-			if (Module::GraphicsModule::Instance()->IsVulkan())
-			{
-				position.y = aiMesh->mVertices[i].y *= -1;
-			}
-			else
+			//if (Module::GraphicsModule::Instance()->IsVulkan())
+			//{
+			//	position.y = aiMesh->mVertices[i].y *= -1;
+			//}
+			//else
 			{
 				position.y = aiMesh->mVertices[i].y;
 			}
@@ -211,8 +213,10 @@ namespace Insight::ModelLoading
 			subMesh.m_textureStrings[MaterialTextureType::Diffuse] = materials["texture_diffuse"];
 		}
 
+		ExtractBoneWeightFromVertices(vertices, mesh, aiMesh, aiScene);
 		mesh.m_vertices.insert(mesh.m_vertices.end(), vertices.begin(), vertices.end());
 		mesh.m_indices.insert(mesh.m_indices.end(), indices.begin(), indices.end());
+		subMesh.m_isSkinnedMesh = mesh.m_isSkinnedMesh;
 
 		return subMesh;
 	}
@@ -255,42 +259,55 @@ namespace Insight::ModelLoading
 		return textures;
 	}
 
-	void AssimpLoader::ExtractBoneInfo(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene)
+	void AssimpLoader::SetVertexBoneDataToDefault(Vertex& vertex)
 	{
+		vertex.JointIndices = glm::ivec4(-1, -1, -1, -1);
+		vertex.JointWeight = glm::vec4(0, 0, 0, 0);
+	}
+
+	void AssimpLoader::ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene)
+	{
+		if (mesh.GetSkeleton().GetBoneCount() == 0)
+		{
+			mesh.m_skeleton = Animation::Skeleton(aiMesh->mNumBones, glm::inverse(AssimpToGLM(aiScene->mRootNode->mTransformation)));
+		}
+
 		for (u32 boneIndex = 0; boneIndex < aiMesh->mNumBones; ++boneIndex)
 		{
+			mesh.m_isSkinnedMesh = true;
 			int boneID = -1;
 			std::string boneName = aiMesh->mBones[boneIndex]->mName.C_Str();
-			if (mesh.m_boneInfoMap.find(boneName) == mesh.m_boneInfoMap.end())
+			if (!mesh.m_skeleton.HasBone(boneName))
 			{
-				Animation::BoneInfo newBoneInfo;
-				newBoneInfo.Id = mesh.m_boneCounter;
-				newBoneInfo.Offset = AssimpToGLM(aiMesh->mBones[boneIndex]->mOffsetMatrix);
-				mesh.m_boneInfoMap[boneName] = newBoneInfo;
-				boneID = mesh.m_boneCounter;
-				++mesh.m_boneCounter;
+				mesh.m_skeleton.AddBone(boneName, AssimpToGLM(aiMesh->mBones[boneIndex]->mOffsetMatrix));
+				boneID = mesh.m_skeleton.GetBone(boneName).GetBoneId();
 			}
 			else
 			{
-				boneID = mesh.m_boneInfoMap[boneName].Id;
+				boneID = mesh.m_skeleton.GetBone(boneName).GetBoneId();
 			}
 
 			ASSERT(boneID != -1);
 			auto weights = aiMesh->mBones[boneIndex]->mWeights;
 			int numWeights = aiMesh->mBones[boneIndex]->mNumWeights;
-
-			for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex)
+			for (u32 weightIndex = 0; weightIndex < numWeights; ++weightIndex)
 			{
-				int vertexId = weights[weightIndex].mVertexId;
+				u32 vertexId = weights[weightIndex].mVertexId;
 				float weight = weights[weightIndex].mWeight;
-				ASSERT(vertexId <= mesh.m_vertices.size());
-				SetVertexBoneData(mesh.m_vertices[vertexId], boneID, weight);
+				ASSERT(vertexId <= vertices.size());
+				SetVertexBoneData(vertices.at(vertexId), boneID, weight);
 			}
 		}
 	}
 
 	void AssimpLoader::LoadAnimations(Model& model, const aiScene* aiScene)
 	{
+		if (model.GetMesh().m_skeleton.GetBoneCount() > 0)
+		{
+			model.GetMesh().m_skeleton.PopulateBoneData(aiScene);
+			model.GetMesh().m_skeleton.GetRootBone().CalcInverseBindTransform(glm::mat4(1));
+		}
+
 		std::vector<Animation::Animation> animations;
 		for (u32 i= 0; i <  aiScene->mNumAnimations; ++i)
 		{
@@ -329,7 +346,14 @@ namespace Insight::ModelLoading
 
 	void AssimpLoader::SetVertexBoneData(Vertex& vertex, int boneID, float weight)
 	{
-		vertex.JointIndices = glm::vec4(weight, weight, weight, weight);
-		vertex.JointWeight = glm::vec4(boneID, boneID, boneID, boneID);
+		for (u32 i = 0; i < 4; ++i)
+		{
+			if (vertex.JointIndices[i] < 0)
+			{
+				vertex.JointIndices[i] = boneID;
+				vertex.JointWeight[i] = weight;
+				break;
+			}
+		}
 	}
 }

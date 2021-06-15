@@ -3,6 +3,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Module/GraphicsModule.h"
+#include "Engine/Scene/Scene.h"
 
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
@@ -104,7 +105,7 @@ namespace Insight::Editor
 			ImGui::End();
 		}
 
-		if (m_windowedHovered)
+		if (m_windowedHovered && !Scene::ActiveScene()->IsPlaying())
 		{
 			m_componentManager.Update(deltaTime);
 		}

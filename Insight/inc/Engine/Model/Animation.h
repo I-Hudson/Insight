@@ -15,37 +15,53 @@ namespace Insight
 
 namespace Insight::Animation
 {
-	struct NodeData
+	struct KeyPosition
 	{
-		glm::mat4 Transform;
-		std::string Name;
-		u32 ChildrenCount;
-		std::vector<NodeData> Children;
+		glm::vec3 Position;
+		float TimeStamp;
+	};
+
+	struct KeyRotation
+	{
+		glm::quat Orientation;
+		float TimeStamp;
+	};
+
+	struct KeyScale
+	{
+		glm::vec3 Scale;
+		float TimeStamp;
 	};
 
 	class Animation
 	{
 	public:
 		Animation() = default;
-		Animation(const aiScene* aiScene, u32 animationIndex, Model* model);
+		Animation(const aiScene* aiScene , u32 animationIndex, Model* model);
 
-		Bone* FindBone(const std::string& name);
+		INLINE const float& GetTicksPerSecond() const { return m_ticksPerSecond; }
+		INLINE const float& GetDuration() const { return m_duration; }
+		INLINE const float& GetPlayBackSpeed() const { return m_playBackSpeed; }
 
-		INLINE float GetTicksPerSecond() const { return m_ticksPerSecond; }
-		INLINE float GetDuration() const { return m_duration; }
-		INLINE NodeData& GetRootNode() { return m_rootNode; }
-		INLINE const std::unordered_map<std::string, BoneInfo>& GetBoneInfoMap() { return m_boneInfoMap; }
-		INLINE u32 GetBoneCount() const { return (u32)m_bones.size(); }
+		void SetPlayBackSpeed(float speedInSeconds);
 
-	private:
-		void ReadMissingBones(const aiAnimation* animation, Model* model);
-		void ReadHeirarchyData(NodeData& dest, const aiNode* src);
+		KeyPosition GetPreviousPositionKey(const std::string& boneName, const float& animationTime);
+		KeyPosition GetNextPositionKey(const std::string& boneName, const float& animationTime);
+
+		KeyRotation GetPreviousRotationKey(const std::string& boneName, const float& animationTime);
+		KeyRotation GetNextRotationKey(const std::string& boneName, const float& animationTime);
+
+		KeyScale GetPreviousScaleKey(const std::string& boneName, const float& animationTime);
+		KeyScale GetNextScaleKey(const std::string& boneName, const float& animationTime);
+
+		float CalculateProgressionThroughFrame(const float& animationTime, const float& previousFrame, const float& nextFrame);
 
 	private:
 		float m_ticksPerSecond;
 		float m_duration;
-		NodeData m_rootNode;
-		std::vector<Bone> m_bones;
-		std::unordered_map<std::string, BoneInfo> m_boneInfoMap;
+		float m_playBackSpeed = 1;
+		std::unordered_map<std::string, std::vector<KeyPosition>> m_keyPositions;
+		std::unordered_map<std::string, std::vector<KeyRotation>> m_keyRotations;
+		std::unordered_map<std::string, std::vector<KeyScale>> m_keyScale;
 	};
 }
