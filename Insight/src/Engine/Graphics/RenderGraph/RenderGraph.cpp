@@ -218,7 +218,12 @@ namespace Insight::Graphics
 				auto* renderPass = frame.RenderPasses.at(pass.GetColorOutputHash());
 				pass.CallBeginRenderFunc(renderPass);
 				cmdBuffer->BeginRenderpass(renderPass);
-				cmdBuffer->SetViewPort(pass.GetWindowRect());
+				Maths::Rect windowPort = pass.GetWindowRect();
+				if (::Graphics::IsVulkan())
+				{
+					windowPort = Maths::Rect(windowPort.GetX(), windowPort.GetHeight(), windowPort.GetWidth(), -windowPort.GetHeight());
+				}
+				cmdBuffer->SetViewPort(windowPort);
 				cmdBuffer->SetScissor(pass.GetWindowRect());
 				pass.CallRenderFunc(cmdBuffer, frame.Buffers, frame.DescriptorBuilder, renderList);
 				cmdBuffer->EndRenderpass(renderPass);

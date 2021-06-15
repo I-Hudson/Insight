@@ -84,6 +84,10 @@ namespace Insight::Graphics
 		input_vars.resize(var_count);
 		result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars.data());
 		ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+		std::sort(input_vars.begin(), input_vars.end(), [](const SpvReflectInterfaceVariable* o, const SpvReflectInterfaceVariable* o1)			  
+				  {
+					  return o->location < o1->location;
+				  });
 		for (auto& resource : input_vars)
 		{
 			if (resource->built_in != -1)

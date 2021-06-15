@@ -71,7 +71,8 @@ namespace Insight::Editor
 
 			Entity& mainCamera = Scene::ActiveScene()->CreateEntity("Main Camera");
 			CameraComponent& camCom = mainCamera.AddComponent<CameraComponent>();
-			camCom.SetProjMatrix(90.0f, CameraAspect::CurrentWindowSize, 0.1f, 4000.0f);
+			camCom.SetProjMatrix(60.0f, CameraAspect::CurrentWindowSize, 0.1f, 4000.0f);
+			camCom.SetCameraSpeed(25);
 
 			Entity& dirLight = Scene::ActiveScene()->CreateEntity("DirectionalLight");
 			dirLight.GetComponent<TransformComponent>().SetPosition({ 25, 25, 25 });
@@ -91,22 +92,21 @@ namespace Insight::Editor
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/Survival_BackPack_2/backpack.obj");
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/sponza/sponza.obj");
 					//Insight::Model* graphicsModel = Insight::FileSystem::FileSystemManager::Instance()->LoadObject<Insight::Model>("./data/models/sponza/sponza.obj");
-					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/gltf/CesiumMan/glTF/CesiumMan.gltf");
+					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/dancing_stormtrooper_gltf/scene.gltf");
+					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vampire/dancing_vampire.dae");
 					
-					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vampire/dancing_vampire.dae");
+					Entity& mesh = Scene::ActiveScene()->CreateEntity("StaticMesh");
+					MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
+					meshComponent.SetModel(&*graphicsModel);
+					meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ 5, 0, 0 });
 
 
-					Entity& mesh = Scene::ActiveScene()->CreateEntity("Mesh");
-					//MeshComponent& meshComponent = mesh.AddComponent<MeshComponent>();
-					//meshComponent.SetModel(&*graphicsModel);
-					//meshComponent.GetEntity().GetComponent<TransformComponent>().SetPosition({ i * 5, 0, 0 });
+					mesh = Scene::ActiveScene()->CreateEntity("AnimatedMesh");
 					SkinnedMeshComponent& skinnedMesh = mesh.AddComponent<SkinnedMeshComponent>();
 					skinnedMesh.SetModel(&*graphicsModel);
 					AnimatorComponent& animCom = mesh.AddComponent<AnimatorComponent>();
+					animCom.SetSkelton(&graphicsModel->GetMesh().GetSkeleton());
 					animCom.PlayAnimation(graphicsModel->GetMesh().GetAnimation(0));
-
-					Entity meshChild = Scene::ActiveScene()->CreateEntity("Mesh Entity Child");
-					meshChild.SetParent(mesh.GetEntityID());
 				}
 			}
 

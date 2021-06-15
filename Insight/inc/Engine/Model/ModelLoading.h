@@ -20,7 +20,8 @@ namespace Insight::ModelLoading
 		static SubMesh ProcessMesh(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene, const std::string& directory);
 		static MeshTextures LoadMateials(aiMaterial* aiMaterial, aiTextureType aiType, const std::string& typeName, const std::string& directory);
 		
-		static void ExtractBoneInfo(Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene);
+		static void SetVertexBoneDataToDefault(Vertex& vertex);
+		static void ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, aiMesh* aiMesh, const aiScene* aiScene);
 		static void LoadAnimations(Model& model, const aiScene* aiScene);
 
 		static glm::mat4 AssimpToGLM(const aiMatrix4x4& from);

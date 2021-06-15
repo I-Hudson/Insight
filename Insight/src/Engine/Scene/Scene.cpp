@@ -96,7 +96,10 @@ void Scene::Save(const std::string& file)
 
 void Scene::Unload()
 {
-
+	if (m_isPlaying)
+	{
+		End();
+	}
 }
 
 void Scene::Serialize(const std::string& file)
@@ -167,10 +170,12 @@ void Scene::Deserialize(const std::string& file)
 
 void Scene::OnBeginPlay()
 {
+	m_componentManager.OnBeginPlay();
 }
 
 void Scene::OnEndPlay()
 {
+	m_componentManager.OnEndPlay();
 }
 
 void Scene::OnUpdate(const float& deltaTime)

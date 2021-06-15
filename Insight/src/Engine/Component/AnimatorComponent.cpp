@@ -1,5 +1,6 @@
 #include "ispch.h"
 #include "Engine/Component/AnimatorComponent.h"
+#include "glm/gtx/quaternion.hpp"
 
 AnimatorComponent::AnimatorComponent()
     : m_currentAnimation(nullptr)
@@ -25,12 +26,19 @@ void AnimatorComponent::OnUpdate(const float& a_deltaTime)
 {
     IS_PROFILE_FUNCTION();
     m_deltaTime = a_deltaTime;
-    if (m_currentAnimation)
+    if (m_currentAnimation && m_currentSkeleton)
     {
         m_currentTime += m_currentAnimation->GetTicksPerSecond() * m_deltaTime;
         m_currentTime = fmod(m_currentTime, m_currentAnimation->GetDuration());
-        CalculateBoneTransform(m_currentAnimation->GetRootNode(), glm::mat4(1.0f));
+        CalculateBoneTransform();
+        ApplyBoneToModelSpace(m_currentSkeleton->GetRootBone(), glm::mat4(1));
     }
+}
+
+void AnimatorComponent::SetSkelton(Insight::Animation::Skeleton* skeleton)
+{
+    m_currentSkeleton = skeleton;
+    // Validate that the new skeleton is compatible with the animations.
 }
 
 void AnimatorComponent::PlayAnimation(Insight::Animation::Animation* animation)
@@ -42,44 +50,59 @@ void AnimatorComponent::PlayAnimation(Insight::Animation::Animation* animation)
 
 void AnimatorComponent::Reset(Insight::Animation::Animation* animation)
 {
-    if (animation == m_currentAnimation)
+    if (!animation || animation == m_currentAnimation)
     {
         return;
     }
 
     m_finalBoneMatrices.clear();
-    m_finalBoneMatrices.resize(animation->GetBoneCount());
-    for (u32 i = 0; i < animation->GetBoneCount(); ++i)
+    m_finalBoneMatrices.resize(m_currentSkeleton->GetBoneCount());
+    for (u32 i = 0; i < m_currentSkeleton->GetBoneCount(); ++i)
     {
         m_finalBoneMatrices.at(i) = glm::mat4(1.0f);
     }
 }
 
-void AnimatorComponent::CalculateBoneTransform(const Insight::Animation::NodeData& node, glm::mat4 parentTransform)
+void AnimatorComponent::CalculateBoneTransform()
 {
-    std::string nodeName = node.Name;
-    glm::mat4 nodeTransform = node.Transform;
-
-    Insight::Animation::Bone* Bone = m_currentAnimation->FindBone(nodeName);
-
-    if (Bone)
+    const std::vector<Insight::Animation::Bone>& skeltonBones = m_currentSkeleton->GetAllBones();
+    for (auto& b : skeltonBones)
     {
-        Bone->Update(m_currentTime);
-        nodeTransform = Bone->GetLocalTransform();
+        Insight::Animation::KeyPosition pPosition = m_currentAnimation->GetPreviousPositionKey(b.GetBoneName(), m_currentTime);
+        Insight::Animation::KeyPosition nPosition = m_currentAnimation->GetNextPositionKey(b.GetBoneName(), m_currentTime);
+
+        Insight::Animation::KeyRotation pRotation = m_currentAnimation->GetPreviousRotationKey(b.GetBoneName(), m_currentTime);
+        Insight::Animation::KeyRotation nRotation = m_currentAnimation->GetNextRotationKey(b.GetBoneName(), m_currentTime);
+
+        Insight::Animation::KeyScale pScale = m_currentAnimation->GetPreviousScaleKey(b.GetBoneName(), m_currentTime);
+        Insight::Animation::KeyScale nScale = m_currentAnimation->GetNextScaleKey(b.GetBoneName(), m_currentTime);
+
+        float animationProgess = m_currentAnimation->CalculateProgressionThroughFrame(m_currentTime, pPosition.TimeStamp, nPosition.TimeStamp);
+        glm::mat4 boneTransform = InterpolateTransform(pPosition, nPosition, pRotation, nRotation, pScale, nScale, animationProgess);
+        m_finalBoneMatrices[b.GetBoneId()] = boneTransform;
     }
+}
 
-    glm::mat4 globalTransformation = parentTransform * nodeTransform;
-
-    auto boneInfoMap = m_currentAnimation->GetBoneInfoMap();
-    if (boneInfoMap.find(nodeName) != boneInfoMap.end())
+void AnimatorComponent::ApplyBoneToModelSpace(Insight::Animation::Bone& bone, glm::mat4 parentTransform)
+{
+    glm::mat4 currentLocalTransform = m_finalBoneMatrices.at(bone.GetBoneId());
+    glm::mat4 currentTransform = parentTransform * currentLocalTransform;
+    for (u32 i = 0; i < bone.GetChildrenCount(); ++i)
     {
-        int index = boneInfoMap[nodeName].Id;
-        glm::mat4 offset = boneInfoMap[nodeName].Offset;
-        m_finalBoneMatrices[index] = globalTransformation * offset;
+        Insight::Animation::Bone& cBone = m_currentSkeleton->GetBone(bone.GetChildren()[i]);
+        ApplyBoneToModelSpace(cBone, currentTransform);
     }
+    currentTransform = currentTransform * bone.GetLocalBindTransform();
+    m_finalBoneMatrices.at(bone.GetBoneId()) = currentTransform;
+}
 
-    for (u32 i = 0; i < node.ChildrenCount; ++i)
-    {
-        CalculateBoneTransform(node.Children[i], globalTransformation);
-    }
+glm::mat4 AnimatorComponent::InterpolateTransform(const Insight::Animation::KeyPosition& pPosition, const Insight::Animation::KeyPosition& nPosition, 
+                                                  const Insight::Animation::KeyRotation& pRotation, const Insight::Animation::KeyRotation& nRotation, 
+                                                  const Insight::Animation::KeyScale& pScale, const Insight::Animation::KeyScale& nScale, const float& progress)
+{
+    glm::mat4 position = glm::translate(glm::mat4(1), glm::mix(pPosition.Position, nPosition.Position, progress));
+    glm::mat4 rotation = glm::toMat4(glm::slerp(pRotation.Orientation, nRotation.Orientation, progress));
+    glm::mat4 scale = glm::scale(glm::mat4(1), glm::mix(pScale.Scale, nScale.Scale, progress));
+
+    return position * rotation * scale;
 }

@@ -14,6 +14,9 @@ public:
 	virtual void OnDestroy() = 0;
 	virtual void Update(const float& deltaTime) = 0;
 
+	virtual void OnBeginPlay() = 0;
+	virtual void OnEndPlay() = 0;
+
 	virtual void RemoveComponent(const EntityID& entity) = 0;
 	virtual bool HasComponent(const EntityID& entity) = 0;
 
@@ -68,6 +71,30 @@ public:
 		return m_componentArray.at(m_entityToIndexMap.at(entity));
 	}
 
+	virtual void OnBeginPlay() override
+	{
+		IS_PROFILE_FUNCTION();
+		for (auto& component : m_componentArray)
+		{
+			if (component.IsValid())
+			{
+				component.OnBeginPlay();
+			}
+		}
+	}
+
+	virtual void OnEndPlay() override
+	{
+		IS_PROFILE_FUNCTION();
+		for (auto& component : m_componentArray)
+		{
+			if (component.IsValid())
+			{
+				component.OnEndPlay();
+			}
+		}
+	}
+
 	virtual void OnDestroy() override
 	{
 		IS_PROFILE_FUNCTION();
@@ -79,7 +106,6 @@ public:
 			}
 		}
 	}
-
 
 	virtual void Update(const float& deltaTime) override
 	{
@@ -209,6 +235,9 @@ public:
 	~ComponentManager();
 
 	void Update(const float& deltaTime);
+
+	void OnBeginPlay();
+	void OnEndPlay();
 
 	template<typename T, typename TData = ComponentData>
 	void RegisterComponent()

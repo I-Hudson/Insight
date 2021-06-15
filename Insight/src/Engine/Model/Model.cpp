@@ -20,36 +20,11 @@ namespace Insight
 		, m_indexBuffer(indexBuffer)
 	{ }
 
-	SubMesh::SubMesh(u32 firstVertex, u32 vertexCount, u32 firstIndex, u32 indexCount, std::vector<Vertex>& vertices , std::vector<u32>& indices)
-		: m_firstVertex(firstVertex)
-		, m_vertexCount(vertexCount)
-		, m_firstIndex(firstIndex)
-		, m_indexCount(indexCount)
-		, m_releaseGPUBuffers(true)
-		, m_vertices(vertices)
-		, m_indices(indices)
-	{
-		m_vertexBuffer = Graphics::GPUBuffer::New();
-		m_indexBuffer = Graphics::GPUBuffer::New();
-		m_vertexBuffer->Init(Graphics::GPUBufferDesc::Vertex(sizeof(Vertex), vertexCount, vertices.data()));
-		m_indexBuffer->Init(Graphics::GPUBufferDesc::Index(sizeof(u32), m_indexCount, indices.data()));
-	}
-
 	SubMesh::~SubMesh()
 	{ }
 
 	void SubMesh::Release()
-	{
-		if (m_releaseGPUBuffers)
-		{
-			m_vertexBuffer->ReleaseGPU();
-			::Delete(m_vertexBuffer);
-			m_indexBuffer->ReleaseGPU();
-			::Delete(m_indexBuffer);
-		}
-		m_vertexBuffer = nullptr;
-		m_indexBuffer = nullptr;
-	}
+	{ }
 
 	std::string SubMesh::GetTexture(const std::string& textureId)
 	{
@@ -83,6 +58,7 @@ namespace Insight
 		drawCall.Draw.IndicesCount = GetIndexCount();
 		drawCall.WorldTransform = worldTransform;
 		drawCall.Dimensions = m_dimensions;
+		drawCall.IsSkinnedMesh = m_isSkinnedMesh;
 		drawCall.DiffuseTexture = GetTexture("texture_diffuse");
 		drawList->AddDrawCall(Graphics::MaterialDrawMode::Opaque, drawCall);
 	}

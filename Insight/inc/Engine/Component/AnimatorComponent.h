@@ -12,16 +12,22 @@ public:
 
 	virtual void OnUpdate(const float& a_deltaTime);
 
+	void SetSkelton(Insight::Animation::Skeleton* skeleton);
 	void PlayAnimation(Insight::Animation::Animation* animation);
 
 	std::vector<glm::mat4> GetFinalBoneMatrices() const { return m_finalBoneMatrices; }
 
 private:
 	void Reset(Insight::Animation::Animation* animation);
-	void CalculateBoneTransform(const Insight::Animation::NodeData& node, glm::mat4 parentTransform);
+	void CalculateBoneTransform();
+	void ApplyBoneToModelSpace(Insight::Animation::Bone& bone, glm::mat4 parentTransform);
+	glm::mat4 InterpolateTransform(const Insight::Animation::KeyPosition& pPosition, const Insight::Animation::KeyPosition& nPosition,
+								   const Insight::Animation::KeyRotation& pRotation, const Insight::Animation::KeyRotation& nRotation,
+								   const Insight::Animation::KeyScale& pScale, const Insight::Animation::KeyScale& nScale, const float& progress);
 
 private:
 	std::vector<glm::mat4> m_finalBoneMatrices;
+	Insight::Animation::Skeleton* m_currentSkeleton;
 	Insight::Animation::Animation* m_currentAnimation;
 	float m_currentTime;
 	float m_deltaTime;	

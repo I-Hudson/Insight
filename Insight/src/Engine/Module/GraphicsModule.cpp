@@ -413,6 +413,7 @@ namespace Insight::Module
 			ubo.LightSpace = renderList->DirectionalLight.Projection * renderList->DirectionalLight.Transform;
 			ubo.LightDir = -renderList->DirectionalLight.LightDirection;
 			ubo.PVMatrix = renderList->MainCamera.Projection * glm::inverse(renderList->MainCamera.Transform);
+			//ubo.PVMatrix[1][1] *= -1;
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;
@@ -528,25 +529,27 @@ namespace Insight::Module
 						}
 						{
 							IS_PROFILE_SCOPE("Build per draw call descriptor set");
-							if (false /*IsSkinnedMesh: Then bind the bones matrix*/)
-							{
-								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex, true)
-									->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
-							}
-							else
-							{
-								builder->BindBuffer(0, nullptr, DescriptorType::Storage_Buffer, ShaderStage::Vertex, false)
-									->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
-							}
+							builder->BindBuffer(0, drawCall.Skinned.BoneMatrices, DescriptorType::Storage_Buffer, ShaderStage::Vertex, drawCall.Skinned.BoneMatrices != nullptr)
+								->BindImage(1, diffuseTexture, DescriptorType::Combined_Image_Sampler, ShaderStage::Fragment)->Build(set1);
 						}
 					}
 					Graphics::GPUDescriptorSet* fragSets[] = { set1 };
 					cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
 
-					glm::mat4 modelMatrix = drawCall.WorldTransform;
+					struct PushConstant
+					{
+						glm::mat4 ModelMatrix;
+						int IsSkinnedMesh;
+					};
+
+					PushConstant pc
+					{
+						drawCall.WorldTransform,
+						drawCall.IsSkinnedMesh && drawCall.Skinned.BoneMatrices != nullptr
+					};
 					{
 						IS_PROFILE_SCOPE("PushConstant");
-						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(glm::mat4), &modelMatrix);
+						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(PushConstant), &pc);
 					}
 
 					{

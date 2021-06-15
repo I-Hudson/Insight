@@ -42,6 +42,22 @@ void ComponentManager::Update(const float& deltaTime)
 	}
 }
 
+void ComponentManager::OnBeginPlay()
+{
+	for (auto& componentArray : m_componentArrays)
+	{
+		componentArray.second->OnBeginPlay();
+	}
+}
+
+void ComponentManager::OnEndPlay()
+{
+	for (auto& componentArray : m_componentArrays)
+	{
+		componentArray.second->OnEndPlay();
+	}
+}
+
 std::vector<Component> ComponentManager::GetAllComponents(const EntityID& entity)
 {
 	std::vector<Component> components;

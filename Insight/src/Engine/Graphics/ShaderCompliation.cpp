@@ -160,9 +160,9 @@ std::vector<u32> ShaderCompliation::CompileGLSLToSpirV(const ShaderStage& stage,
 	glslang::TShader Shader(ShaderType);
 	Shader.setStrings(&glslRaw, 1);
 
-	int ClientInputSemanticsVersion = 100; // maps to, say, #define VULKAN 100
-	glslang::EShTargetClientVersion VulkanClientVersion = glslang::EShTargetVulkan_1_0;
-	glslang::EShTargetLanguageVersion TargetVersion = glslang::EShTargetSpv_1_0;
+	int ClientInputSemanticsVersion = 450; // maps to, say, #define VULKAN 100
+	glslang::EShTargetClientVersion VulkanClientVersion = glslang::EShTargetVulkan_1_1;
+	glslang::EShTargetLanguageVersion TargetVersion = glslang::EShTargetSpv_1_3;
 
 	Shader.setEnvInput(glslang::EShSourceGlsl, ShaderType, glslang::EShClientVulkan, ClientInputSemanticsVersion);
 	Shader.setEnvClient(glslang::EShClientVulkan, VulkanClientVersion);

@@ -14,24 +14,27 @@ namespace Insight::Graphics
 
 		struct
 		{
-			GPUBuffer* VertexBuffer;
-			GPUBuffer* IndexBuffer;
+			GPUBuffer* VertexBuffer = nullptr;
+			GPUBuffer* IndexBuffer = nullptr;
 		} Geometry;
 
-		union
+		struct
 		{
-			struct
-			{
-				u32 IndciesStart;
-				u32 IndicesCount;
-				u32 VertexStart;
-				u32 VertexCount;
-			};
+			u32 IndciesStart = 0;
+			u32 IndicesCount = 0;
+			u32 VertexStart = 0;
+			u32 VertexCount = 0;
 		}Draw;
+
+		struct
+		{
+			GPUBuffer* BoneMatrices = nullptr;
+		}Skinned;
 
 		glm::mat4 WorldTransform;
 		glm::mat4 LocalTransform;
 		MeshDimensions Dimensions;
+		bool IsSkinnedMesh;
 
 		//TODO: Remove this for a material has or pointer.
 		std::string DiffuseTexture;

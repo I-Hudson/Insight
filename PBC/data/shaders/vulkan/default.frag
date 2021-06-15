@@ -26,6 +26,8 @@ float LinearizeDepth(float depth)
   return (2.0 * n) / (f + n - z * (f - n));	
 }
 
+#define ambientLight 0.2
+
 #define ambient 0.1
 float textureProj(vec4 shadowCoord, vec2 off)
 {
@@ -73,9 +75,10 @@ void main()
 	vec3 L = normalize(inLightVec);
 	vec3 V = normalize(inViewVec);
 	vec3 R = normalize(-reflect(L, N));
-	vec3 diffuse = max(dot(N, L), ambient) * inColor.xyz;
+	vec3 diffuse = max(dot(N, L), ambient) * outColor.xyz;
 
 	outColor = vec4(diffuse * shadow, 1.0);
+	outColor += vec4(ambientLight, ambientLight, ambientLight, 1);
 	outNormal = vec4(inNormal, 1);
 	outPos = vec4(inPos, 1);
 }
