@@ -42,3 +42,6 @@
 [submodule "Insight/vendor/SPIRV-Reflect"]
 	path = Insight/vendor/SPIRV-Reflect
 	url = https://github.com/KhronosGroup/SPIRV-Reflect
+[submodule "Insight/vendor/OpenFBX"]
+	path = Insight/vendor/OpenFBX
+	url = https://github.com/nem0/OpenFBX

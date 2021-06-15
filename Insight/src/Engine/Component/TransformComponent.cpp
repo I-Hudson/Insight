@@ -73,10 +73,10 @@ void TransformComponent::SetPosition(const glm::vec3& position)
 {
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
 	glm::vec3 pos = position;
-	if (::Graphics::IsVulkan())
-	{
-		pos.y *= -1;
-	}
+	//if (::Graphics::IsVulkan())
+	//{
+	//	pos.y *= -1;
+	//}
 	data.Transform[3] = glm::vec4(pos, 1.0f);
 	//m_isDirty = true;
 }

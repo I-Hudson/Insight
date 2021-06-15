@@ -41,6 +41,7 @@ namespace Insight::Graphics
 			case SPV_REFLECT_FORMAT_R64G64B64A64_SFLOAT: return 32;
 			default:  ASSERT(false);
 		}
+		return 0;
 	}
 
 	GPUShaderStage::GPUShaderStage(const ShaderStage& stage, const std::string& str, const ShaderStageInput& input)
