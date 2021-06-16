@@ -15,10 +15,13 @@ public:
 	void SetSkelton(Insight::Animation::Skeleton* skeleton);
 	void PlayAnimation(Insight::Animation::Animation* animation);
 
+	Insight::Animation::Skeleton* GetSkelton() const { return m_currentSkeleton; }
+	Insight::Animation::Animation* GetCurrentAnimation() const { return m_currentAnimation; }
+
 	std::vector<glm::mat4> GetFinalBoneMatrices() const { return m_finalBoneMatrices; }
 
 private:
-	void Reset(Insight::Animation::Animation* animation);
+	void Reset();
 	void CalculateBoneTransform();
 	void ApplyBoneToModelSpace(Insight::Animation::Bone& bone, glm::mat4 parentTransform);
 	glm::mat4 InterpolateTransform(const Insight::Animation::KeyPosition& pPosition, const Insight::Animation::KeyPosition& nPosition,
@@ -27,8 +30,8 @@ private:
 
 private:
 	std::vector<glm::mat4> m_finalBoneMatrices;
-	Insight::Animation::Skeleton* m_currentSkeleton;
-	Insight::Animation::Animation* m_currentAnimation;
+	Insight::Animation::Skeleton* m_currentSkeleton = nullptr;
+	Insight::Animation::Animation* m_currentAnimation = nullptr;
 	float m_currentTime;
 	float m_deltaTime;	
 };

@@ -30,6 +30,7 @@ project "InsightEditor"
         "%{IncludeDir.imguizmo}",
         "%{IncludeDir.stb_image}",
         "%{IncludeDir.optick}",
+        "%{IncludeDir.tinygltf}",
         
         "%{IncludeDir.Vulkan}",
         "%{IncludeDir.VulkanMemoryAllocator}",

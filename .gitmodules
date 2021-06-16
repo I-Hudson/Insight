@@ -45,3 +45,6 @@
 [submodule "Insight/vendor/OpenFBX"]
 	path = Insight/vendor/OpenFBX
 	url = https://github.com/nem0/OpenFBX
+[submodule "Insight/vendor/tinygltf"]
+	path = Insight/vendor/tinygltf
+	url = https://github.com/syoyo/tinygltf

@@ -178,7 +178,7 @@ namespace Insight
 	{
 		m_absolutePath = std::move(path);
 		IS_CORE_INFO("[Model::LoadAsset] Asset loading: '{0}'.", m_absolutePath);
-		ModelLoading::AssimpLoader::LoadFromFile(*this, m_absolutePath);
+		ModelLoading::ModelLoader::LoadFromFile(*this, m_absolutePath);
 		m_mesh.SetupGPUBuffers();
 		IS_CORE_INFO("[Model::LoadAsset] Asset loaded: '{0}'.", m_absolutePath);
 	}

@@ -45,6 +45,8 @@ IncludeDir["IconsFontAwesome"] = "$(SolutionDir)Insight/vendor/IconFontCppHeader
 IncludeDir["Reflect"] = "$(SolutionDir)Insight/vendor/Reflect/Reflect/inc"
 IncludeDir["JobSystem"] = "$(SolutionDir)Insight/vendor/JobSystem/JobSystem/inc"
 IncludeDir["imgui_filebrowser"] = "$(SolutionDir)Insight/vendor/ImGui-Addons/FileBrowser"
+IncludeDir["ofbx"] = "$(SolutionDir)Insight/vendor/OpenFBX/src"
+
 
 IncludeDir["SPIRV_Reflect"] = "$(SolutionDir)Insight/vendor/SPIRV-Reflect/"
 IncludeDir["Vulkan"] = os.getenv("VK_SDK_PATH") .. "/Include"

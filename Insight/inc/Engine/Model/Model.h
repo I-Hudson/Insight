@@ -17,6 +17,7 @@ namespace Insight
 	namespace ModelLoading
 	{
 		struct AssimpLoader;
+		struct GltfLoader;
 	}
 
 	using MeshTextures = std::unordered_map<std::string, std::string>;
@@ -79,6 +80,7 @@ namespace Insight
 		Graphics::GPUBuffer* m_indexBuffer;
 
 		friend Insight::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::GltfLoader;
 	};
 
 	/// <summary>
@@ -135,6 +137,7 @@ namespace Insight
 
 		friend Model;
 		friend Insight::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::GltfLoader;
 	};
 
 
@@ -157,5 +160,6 @@ namespace Insight
 	private:
 		Mesh m_mesh;
 		friend Insight::ModelLoading::AssimpLoader;
+		friend Insight::ModelLoading::GltfLoader;
 	};
 }

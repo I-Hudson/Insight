@@ -38,23 +38,18 @@ void AnimatorComponent::OnUpdate(const float& a_deltaTime)
 void AnimatorComponent::SetSkelton(Insight::Animation::Skeleton* skeleton)
 {
     m_currentSkeleton = skeleton;
+    Reset();
     // Validate that the new skeleton is compatible with the animations.
 }
 
 void AnimatorComponent::PlayAnimation(Insight::Animation::Animation* animation)
 {
-    Reset(animation);
 	m_currentAnimation = animation;
 	m_currentTime = 0.0f;
 }
 
-void AnimatorComponent::Reset(Insight::Animation::Animation* animation)
+void AnimatorComponent::Reset()
 {
-    if (!animation || animation == m_currentAnimation)
-    {
-        return;
-    }
-
     m_finalBoneMatrices.clear();
     m_finalBoneMatrices.resize(m_currentSkeleton->GetBoneCount());
     for (u32 i = 0; i < m_currentSkeleton->GetBoneCount(); ++i)

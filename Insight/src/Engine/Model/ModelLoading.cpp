@@ -8,14 +8,31 @@
 
 #include "Engine/Module/GraphicsModule.h"
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "Assimp/mesh.h"
 #include "assimp/postprocess.h"
-#include "stb_image.h"
+
+#define TINYGLTF_IMPLEMENTATION
+#include "tiny_gltf.h"
 
 namespace Insight::ModelLoading
 {
+	void ModelLoader::LoadFromFile(Model& model, const std::string& filePath)
+	{
+		std::filesystem::path path(filePath);
+		if (path.extension() == ".gltf")
+		{
+			GltfLoader::LoadFromFile(model, filePath);
+		}
+		else
+		{
+			AssimpLoader::LoadFromFile(model, filePath);
+		}
+	}
+
+
 	/// <summary>
 	/// AssimpLoader
 	/// </summary>
@@ -24,6 +41,7 @@ namespace Insight::ModelLoading
 	void AssimpLoader::LoadFromFile(Model& model, const std::string& filePath)
 	{
 		IS_PROFILE_FUNCTION();
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filePath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes);
 
@@ -131,7 +149,7 @@ namespace Insight::ModelLoading
 			colour.a = 1.0f; // static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 			vertex.Colour = colour;
 
-			glm::vec3 normal;
+			glm::vec3 normal = glm::vec3(0);
 			if (aiMesh->mNormals != nullptr)
 			{
 				normal.x = aiMesh->mNormals[i].x;
@@ -196,7 +214,6 @@ namespace Insight::ModelLoading
 			aiFace face = aiMesh->mFaces[i];
 			for (unsigned int j = 0; j < face.mNumIndices; ++j)
 			{
-				//mesh.m_indices.push_back(face.mIndices[j]);
 				indices.push_back(face.mIndices[j]);
 			}
 		}
@@ -356,4 +373,184 @@ namespace Insight::ModelLoading
 			}
 		}
 	}
+
+
+	void GltfLoader::LoadFromFile(Model& model, const std::string& filePath)
+	{
+		tinygltf::Model glTFInput;
+		tinygltf::TinyGLTF gltfContext;
+		std::string error, warning;
+
+		bool fileLoaded = gltfContext.LoadASCIIFromFile(&glTFInput, &error, &warning, filePath);
+		if (!fileLoaded)
+		{
+			IS_CORE_ERROR("Could not open the glTF file: '{0}'.", filePath);
+			return;
+		}
+
+		const tinygltf::Scene& rootScene = glTFInput.scenes[0];
+		for (u32 i = 0; i < rootScene.nodes.size(); ++i)
+		{
+			tinygltf::Node& node = glTFInput.nodes.at(rootScene.nodes.at(i));
+			ProcessNode(model.m_mesh, node, glTFInput, "");
+		}
+	}
+
+	void GltfLoader::ProcessNode(Mesh& mesh, const tinygltf::Node& gltfNode, const tinygltf::Model& gltfModel, const std::string & directory)
+	{
+		IS_PROFILE_FUNCTION();
+
+		glm::mat4 matrix = glm::mat4(1.0f);
+
+		// Get the local node matrix
+		// It's either made up from translation, rotation, scale or a 4x4 matrix
+		if (gltfNode.translation.size() == 3) 
+		{
+			matrix = glm::translate(matrix, glm::vec3(glm::make_vec3(gltfNode.translation.data())));
+		}
+		if (gltfNode.rotation.size() == 4) 
+		{
+			glm::quat q = glm::make_quat(gltfNode.rotation.data());
+			matrix *= glm::mat4(q);
+		}
+		if (gltfNode.scale.size() == 3) 
+		{
+			matrix = glm::scale(matrix, glm::vec3(glm::make_vec3(gltfNode.scale.data())));
+		}
+		if (gltfNode.matrix.size() == 16)
+		{
+			matrix = glm::make_mat4x4(gltfNode.matrix.data());
+		};
+
+		if (gltfNode.mesh > -1)
+		{
+			ProcessMesh(mesh, gltfModel.meshes.at(gltfNode.mesh), gltfModel, directory);
+		}
+
+		for (u32 i = 0; i < gltfNode.children.size(); ++i)
+		{
+			ProcessNode(mesh, gltfModel.nodes.at(gltfNode.children.at(i)), gltfModel, directory);
+		}
+	}
+
+	void GltfLoader::ProcessMesh(Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltdModel, const std::string& directory)
+	{
+		// Iterate through all primitives of this node's mesh
+		for (size_t i = 0; i < gltfMesh.primitives.size(); i++)
+		{
+			const tinygltf::Primitive& glTFPrimitive = gltfMesh.primitives[i];
+			u32 firstIndex = static_cast<uint32_t>(mesh.m_indices.size());
+			u32 vertexStart = static_cast<uint32_t>(mesh.m_vertices.size());
+			u32 indexCount = 0;
+			std::vector<Vertex> vertices;
+			std::vector<u32> indices;
+
+			// Vertices
+			{
+				const float* positionBuffer = nullptr;
+				const float* normalsBuffer = nullptr;
+				const float* texCoordsBuffer = nullptr;
+				size_t vertexCount = 0;
+
+				// Get buffer data for vertex normals
+				if (glTFPrimitive.attributes.find("POSITION") != glTFPrimitive.attributes.end()) 
+				{
+					const tinygltf::Accessor& accessor = gltdModel.accessors[glTFPrimitive.attributes.find("POSITION")->second];
+					const tinygltf::BufferView& view = gltdModel.bufferViews[accessor.bufferView];
+					positionBuffer = reinterpret_cast<const float*>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+					vertexCount = accessor.count;
+				}
+				// Get buffer data for vertex normals
+				if (glTFPrimitive.attributes.find("NORMAL") != glTFPrimitive.attributes.end()) 
+				{
+					const tinygltf::Accessor& accessor = gltdModel.accessors[glTFPrimitive.attributes.find("NORMAL")->second];
+					const tinygltf::BufferView& view = gltdModel.bufferViews[accessor.bufferView];
+					normalsBuffer = reinterpret_cast<const float*>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+				}
+				// Get buffer data for vertex texture coordinates
+				// glTF supports multiple sets, we only load the first one
+				if (glTFPrimitive.attributes.find("TEXCOORD_0") != glTFPrimitive.attributes.end()) 
+				{
+					const tinygltf::Accessor& accessor = gltdModel.accessors[glTFPrimitive.attributes.find("TEXCOORD_0")->second];
+					const tinygltf::BufferView& view = gltdModel.bufferViews[accessor.bufferView];
+					texCoordsBuffer = reinterpret_cast<const float*>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+				}
+
+				// Append data to model's vertex buffer
+				for (size_t v = 0; v < vertexCount; v++) 
+				{
+					Vertex vert = {};
+					vert.Position = glm::vec4(glm::make_vec3(&positionBuffer[v * 3]), 1.0f);
+					vert.Normal = glm::normalize(glm::vec3(normalsBuffer ? glm::make_vec3(&normalsBuffer[v * 3]) : glm::vec3(0.0f)));
+					vert.Colour = glm::vec4(1.0f);
+					vert.UV1 = texCoordsBuffer ? glm::make_vec2(&texCoordsBuffer[v * 2]) : glm::vec3(0.0f);
+					vertices.push_back(vert);
+				}
+				ExtractBoneWeightFromVertices(vertices, mesh, gltfMesh, gltdModel);
+				mesh.m_vertices.insert(mesh.m_vertices.end(), vertices.begin(), vertices.end());
+			
+				// Indices
+				{
+					const tinygltf::Accessor& accessor = gltdModel.accessors[glTFPrimitive.indices];
+					const tinygltf::BufferView& bufferView = gltdModel.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = gltdModel.buffers[bufferView.buffer];
+
+					indexCount += static_cast<uint32_t>(accessor.count);
+
+					// glTF supports different component types of indices
+					switch (accessor.componentType) {
+						case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT:
+						{
+							u32* buf = new u32[accessor.count];
+							memcpy(buf, &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(u32));
+							for (u64 index = 0; index < accessor.count; index++) 
+							{
+								indices.push_back(buf[index] + vertexStart);
+							}
+							break;
+						}
+						case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+							u16* buf = new u16[accessor.count];
+							memcpy(buf, &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(u16));
+							for (u64 index = 0; index < accessor.count; index++) 
+							{
+								indices.push_back(buf[index] + vertexStart);
+							}
+							break;
+						}
+						case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+							u8* buf = new u8[accessor.count];
+							memcpy(buf, &buffer.data[accessor.byteOffset + bufferView.byteOffset], accessor.count * sizeof(u8));
+							for (u64 index = 0; index < accessor.count; index++) 
+							{
+								indices.push_back(buf[index] + vertexStart);
+							}
+							break;
+						}
+						default:
+							IS_CORE_ERROR("[GltfLoader::ProcessMesh] Index component type '{0}' not supported!", accessor.componentType);
+							return;
+					}
+
+					mesh.m_indices.insert(mesh.m_indices.end(), indices.begin(), indices.end());
+				}
+				SubMesh subMesh = SubMesh(vertexStart, vertices.size(), firstIndex, indices.size(), mesh.m_vertexBuffer, mesh.m_indexBuffer);
+				mesh.m_subMeshes.push_back(subMesh);
+			}
+		}
+	}
+
+	MeshTextures GltfLoader::LoadMateials(tinygltf::Material& gltfMaterial, const std::string& typeName, const std::string& directory)
+	{
+		return MeshTextures();
+	}
+
+	void GltfLoader::SetVertexBoneDataToDefault(Vertex& vertex)
+	{}
+
+	void GltfLoader::ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel)
+	{}
+
+	void GltfLoader::LoadAnimations(Model& model, const tinygltf::Scene& gltfScene)
+	{}
 }

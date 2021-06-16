@@ -26,6 +26,10 @@ project "Insight"
 		"vendor/IconFontCppHeaders/**.h",
 		"vendor/SPIRV-Reflect/spirv_reflect.h",
 		"vendor/SPIRV-Reflect/spirv_reflect.cpp",
+		"vendor/tinygltf/tiny_gltf.h",
+		"vendor/tinygltf/json.hpp",
+		"vendor/tinygltf/stb_image.h",
+		"vendor/tinygltf/stb_image_write.h",
 	}
 
     includedirs 
@@ -78,6 +82,7 @@ project "Insight"
         "ImGui",
         "ImGuizmo",
         "JobSystem",
+        "ReflectEXE",
 
         "OptickCore",
         "vulkan-1",

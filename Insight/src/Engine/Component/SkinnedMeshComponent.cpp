@@ -16,7 +16,13 @@ SkinnedMeshComponent::~SkinnedMeshComponent()
 
 void SkinnedMeshComponent::OnUpdate(const float& a_deltaTime)
 {
-	if (!GetEntity().HasComponent<AnimatorComponent>())
+	bool hasAnimator = GetEntity().HasComponent<AnimatorComponent>();
+	if (!hasAnimator)
+	{
+		return;
+	}
+	AnimatorComponent& animator = GetEntity().GetComponent<AnimatorComponent>();
+	if (!animator.GetSkelton() || !animator.GetCurrentAnimation())
 	{
 		return;
 	}
@@ -45,7 +51,16 @@ void SkinnedMeshComponent::OnDraw(Insight::Graphics::RenderListView* renderList,
 	SkinnedMeshComponentData& data = GetComponentData<SkinnedMeshComponentData>();
 	for (u32 i = meshCount; i < renderList->DrawCalls.size(); ++i)
 	{
-		renderList->DrawCalls.at(i).Skinned.BoneMatrices = data.MatrixStorageBuffer;
+		if (!data.MatrixStorageBuffer)
+		{
+			renderList->DrawCalls.at(i).Skinned.BoneMatrices = nullptr;
+		}
+		else
+		{
+			renderList->DrawCalls.at(i).Skinned.BoneMatrices = 
+				data.MatrixStorageBuffer->GetDesc().Flags != Insight::Graphics::GPUBufferFlags::NONE ?
+				data.MatrixStorageBuffer : nullptr;
+		}
 	}
 }
 

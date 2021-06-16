@@ -11,8 +11,22 @@ struct aiMaterial;
 enum aiTextureType;
 struct aiScene;
 
+namespace tinygltf
+{
+	class Node;
+	class Mesh;
+	class Model;
+	struct Material;
+	class Scene;
+}
+
 namespace Insight::ModelLoading
 {
+	struct ModelLoader
+	{
+		static void LoadFromFile(Model& model, const std::string& filePath);
+	};
+
 	struct AssimpLoader
 	{
 		static void LoadFromFile(Model& model, const std::string& filePath);
@@ -31,5 +45,17 @@ namespace Insight::ModelLoading
 
 	private:
 		static void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+	};
+
+	struct GltfLoader
+	{
+		static void LoadFromFile(Model& model, const std::string& filePath);
+		static void ProcessNode(Mesh& mesh, const tinygltf::Node& gltfNode, const tinygltf::Model& gltdModel, const std::string& directory);
+		static void ProcessMesh(Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel, const std::string& directory);
+		static MeshTextures LoadMateials(tinygltf::Material& gltfMaterial, const std::string& typeName, const std::string& directory);
+
+		static void SetVertexBoneDataToDefault(Vertex& vertex);
+		static void ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel);
+		static void LoadAnimations(Model& model, const tinygltf::Scene& gltfScene);
 	};
 }
