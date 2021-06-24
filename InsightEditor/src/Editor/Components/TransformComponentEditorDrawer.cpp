@@ -19,14 +19,14 @@ namespace Insight::Editor
 		glm::vec3 rotation = component.GetRotation();
 		if (UIHelper::DrawVector("Rotation", 3, &rotation[0]))
 		{
-			//component.SetRotation(rotation);
+			component.SetRotation(rotation);
 		}
 		UIHelper::Space();
 
 		glm::vec3 scale = component.GetScale();
 		if (UIHelper::DrawVector("Scale", 3, &scale[0]))
 		{
-			//component.SetScale(scale);
+			component.SetScale(scale);
 		}
 		UIHelper::Space();
 	}

@@ -8,8 +8,8 @@ project "Insight"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
-    pchheader "ispch.h"
-    pchsource "src/ispch.cpp"
+    --pchheader "ispch.h"
+    --pchsource "src/ispch.cpp"
 
     files
 	{
@@ -102,7 +102,6 @@ project "Insight"
 
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
-            "WIN32_LEAN_AND_MEAN",
             
             "GLM_FORCE_SWIZZLE",
             "GLM_FORCE_SILENT_WARNINGS",
