@@ -13,6 +13,8 @@ namespace Insight::Editor
 
 		virtual void Update(const float& deltaTime) override;
 
+		Entity GetSelectedEntity() const { return m_selectedEntity; }
+
 	private:
 		void DrawEntityTreeView(Entity& entity, bool& newEntitySelected);
 		int GetTreeNodeFlags(Entity& entity);

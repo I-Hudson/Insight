@@ -34,6 +34,9 @@ public:
 	glm::vec3 GetRotation();
 	void SetRotation(glm::vec3 rotation);
 
+	glm::vec3 GetScale();
+	void SetScale(glm::vec3 scale);
+
 	//virtual void Serialize(Serialization::SerializableElement* element, bool force = false) override;
 	//virtual void Deserialize(Serialization::SerializableElement* element, bool force = false) override;
 

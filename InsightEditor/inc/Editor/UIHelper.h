@@ -40,5 +40,7 @@ namespace Insight::Editor
 		static bool IS_API DrawMat2(const std::string& name, glm::mat2* v, PropertyFlags flags = IS_PropertyFlags::ShowInEditor);
 		static bool IS_API DrawMat3(const std::string& name, glm::mat3* v, PropertyFlags flags = IS_PropertyFlags::ShowInEditor);
 		static bool IS_API DrawMat4(const std::string& name, glm::mat4* v, PropertyFlags flags = IS_PropertyFlags::ShowInEditor);
+	
+		static void Space() { ImGui::Spacing(); }
 	};
 }

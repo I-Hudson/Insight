@@ -3,6 +3,7 @@
 #include "Engine/Entity/Entity.h"
 #include "Engine/Serialization/SerializeHelper.h"
 #include "Engine/Graphics/Graphics.h"
+#include "Engine/Core/Maths/Math.h"
 
 #include <glm/gtx/string_cast.hpp>
 
@@ -97,14 +98,27 @@ glm::vec3 TransformComponent::GetRotation()
 void TransformComponent::SetRotation(glm::vec3 rotation)
 {
 	TransformComponentData& data = GetComponentData<TransformComponentData>();
-	glm::mat4 rotM(1.0f);
-	rotM = glm::rotate(rotM, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	rotM = glm::rotate(rotM, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	rotM = glm::rotate(rotM, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
+	glm::mat4 rotM = Insight::Maths::RotationVectorRadToMatrix(rotation);
 	glm::mat4 translateM = glm::translate(glm::mat4(1.0f), GetPostion());
-	data.Transform = translateM * rotM;
-}									
+	glm::mat4 scaleM = glm::scale(glm::mat4(1.0f), GetScale());
+	data.Transform = translateM * rotM * scaleM;
+}
+
+glm::vec3 TransformComponent::GetScale()
+{
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	return glm::vec3(data.Transform[0][0], data.Transform[1][1], data.Transform[2][2]);
+}
+
+void TransformComponent::SetScale(glm::vec3 scale)
+{
+	TransformComponentData& data = GetComponentData<TransformComponentData>();
+	glm::mat4 scaleM(1.0f);
+	scaleM = glm::scale(scaleM, scale);
+	glm::mat4 translateM = glm::translate(glm::mat4(1.0f), GetPostion());
+	glm::mat4 rotM = Insight::Maths::RotationVectorRadToMatrix(GetRotation());
+	data.Transform = translateM * rotM * scaleM;
+}
 									
 //void TransformComponent::Serialize(Serialization::SerializableElement* element, bool force)
 //{

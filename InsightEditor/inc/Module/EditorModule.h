@@ -47,7 +47,7 @@ namespace Insight::Module
 		T* AddEditorPanel(Args&&... args);
 
 		template<typename T>
-		T GetEditorPanel(const std::string& panelName);
+		T* GetEditorPanel();
 
 		template<typename T>
 		void RemoveEditorPanel();
@@ -111,15 +111,13 @@ namespace Insight::Module
 	}
 
 	template<typename T>
-	inline T EditorModule::GetEditorPanel(const std::string& panelName)
+	inline T* EditorModule::GetEditorPanel()
 	{
-		for (auto& kvp : m_editorPanels)
+		if (HasEditorPanel<T>())
 		{
-			if (kvp.second->GetWindowName() == panelName)
-			{
-				return static_cast<T>(kvp.second);
-			}
+			return dynamic_cast<T*>(m_editorPanels[GetEditorPanelID<T>()]);
 		}
+
 		return nullptr;
 	}
 

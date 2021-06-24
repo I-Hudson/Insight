@@ -4,13 +4,18 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Core/Maths/Math.h"
 
 #include "Engine/Graphics/RenderGraph/RenderGraph.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Event/ApplicationEvent.h"
 
+#include "Module/EditorModule.h"
+#include "Editor/SceneHierarchyPanel.h"
+#include "ImGuizmo.h"
 #include "glm/gtx/string_cast.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 #ifdef IS_EDITOR
 namespace Insight::Editor
@@ -86,7 +91,7 @@ namespace Insight::Editor
 					cleanImages.Descriptors = m_sceneImages;
 					cleanImages.FrameTriggered = Application::FrameCount;
 					m_imagesToClean.push(cleanImages);
-					for (auto& image : m_sceneImages )
+					for (auto& image : m_sceneImages)
 					{
 						image = nullptr;
 					}
@@ -102,9 +107,31 @@ namespace Insight::Editor
 					}
 				}
 			}
+
+			Entity selectedEntity = Module::EditorModule::Instance()->GetEditorPanel<SceneHierarchyPanel>()->GetSelectedEntity();
+			if (selectedEntity.IsValid())
+			{
+				ImGuizmo::SetOrthographic(false);
+				ImGuizmo::SetDrawlist();
+				ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+
+				CameraComponent& camCom = m_editorCamera.GetComponent<CameraComponent>();
+				glm::mat4 cameraView = glm::inverse(camCom.GetViewMatrix());
+				glm::mat4 const& cameraProjection = camCom.GetProjMatrix();
+				TransformComponent& tc = selectedEntity.GetComponent<TransformComponent>();
+
+				glm::mat4 transform = tc.GetTransform();;
+				glm::vec3 originalRotation = tc.GetRotation();
+
+				if (ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION::ROTATE,
+					ImGuizmo::MODE::LOCAL, glm::value_ptr(transform)))
+				{
+					tc.SetTransform(transform);
+				}
+			}
+
 			ImGui::End();
 		}
-
 		if (m_windowedHovered && !Scene::ActiveScene()->IsPlaying())
 		{
 			m_componentManager.Update(deltaTime);

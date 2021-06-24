@@ -48,6 +48,9 @@
     <ClInclude Include="inc\Editor\Components\MeshComponentEditorDrawer.h">
       <Filter>inc\Editor\Components</Filter>
     </ClInclude>
+    <ClInclude Include="inc\Editor\Components\TransformComponentEditorDrawer.h">
+      <Filter>inc\Editor\Components</Filter>
+    </ClInclude>
     <ClInclude Include="inc\Editor\Diagnostic.h">
       <Filter>inc\Editor</Filter>
     </ClInclude>
@@ -90,6 +93,9 @@
       <Filter>src\Editor\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\Components\MeshComponentEditorDrawer.cpp">
+      <Filter>src\Editor\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Components\TransformComponentEditorDrawer.cpp">
       <Filter>src\Editor\Components</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\SceneHierarchyPanel.cpp">
