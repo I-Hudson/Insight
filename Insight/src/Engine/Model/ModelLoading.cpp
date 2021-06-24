@@ -112,8 +112,8 @@ namespace Insight::ModelLoading
 		std::vector<Vertex> vertices;
 		std::vector<u32> indices;
 
-		u32 vertexStart = mesh.m_vertices.size();
-		u32 indicesStart = mesh.m_indices.size();
+		u64 vertexStart = mesh.m_vertices.size();
+		u64 indicesStart = mesh.m_indices.size();
 
 		MeshDimensions dimensions;
 		glm::vec3 centre = glm::vec3(0);

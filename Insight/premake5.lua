@@ -25,7 +25,7 @@ project "Insight"
         "vendor/stb/stb_image_write.h",
 		"vendor/IconFontCppHeaders/**.h",
 		"vendor/SPIRV-Reflect/spirv_reflect.h",
-		"vendor/SPIRV-Reflect/spirv_reflect.cpp",
+		"vendor/SPIRV-Reflect/spirv_reflect.c",
 		"vendor/tinygltf/tiny_gltf.h",
 		"vendor/tinygltf/json.hpp",
 		"vendor/tinygltf/stb_image.h",
