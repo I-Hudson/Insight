@@ -5,7 +5,7 @@
 #include "assimp/anim.h"
 #include "assimp/scene.h"
 #include "glm/gtx/quaternion.hpp"
-
+#include "tiny_gltf.h"
 
 namespace Insight::Animation
 {
@@ -193,6 +193,11 @@ namespace Insight::Animation
 		m_globalTransform = globalTransform;
 	}
 
+	void Skeleton::PopulateBoneData(const tinygltf::Model& gltfModel)
+	{
+		ReadHierarchyData(gltfModel.nodes.at(0), gltfModel);
+	}
+
 	void Skeleton::PopulateBoneData(const aiScene* aiScene)
 	{
 		ReadHierarchyData(aiScene->mRootNode);
@@ -215,6 +220,53 @@ namespace Insight::Animation
 		m_boneNameToIndex[name] = m_boneCount;
 		m_bones.push_back(newBone);
 		++m_boneCount;
+	}
+
+	void Skeleton::ReadHierarchyData(const tinygltf::Node& node, const tinygltf::Model& gltfModel)
+	{
+		std::string nodeName = node.name;
+		Bone* bone = nullptr;
+		if (HasBone(nodeName))
+		{
+			bone = &GetBone(nodeName);
+			if (m_rootBoneId == -1)
+			{
+				m_rootBoneId = bone->GetBoneId();
+			}
+		}
+
+		if (bone && bone->GetBoneId() == m_rootBoneId && bone->GetChildrenCount() > 0)
+		{
+			auto itr = std::find_if(bone->GetChildren().begin(), bone->GetChildren().end(), [this](const u32& index) 
+						 {
+							 return m_rootBoneId == index;
+						 });
+			if (itr != bone->GetChildren().end())
+			{
+				bone->GetChildren().erase(itr);
+			}
+			// Found the root.
+			return;
+		}
+
+		for (u32 i = 0; i < node.children.size(); ++i)
+		{
+			if (bone)
+			{
+				std::string childreName(gltfModel.nodes.at(node.children.at(i)).name);
+				if (HasBone(childreName))
+				{
+					bone->AddChildBone(GetBone(childreName).GetBoneId());
+					bone->SetNodeTransform(ModelLoading::GltfLoader::GetNodeMatrix(gltfModel.nodes.at(node.children.at(i))));
+				}
+			}
+			bool isRootNode = false;
+			if(bone && bone->GetBoneId() == m_rootBoneId)
+			{
+				isRootNode = true;
+			}
+			ReadHierarchyData(gltfModel.nodes.at(node.children.at(i)), gltfModel);
+		}
 	}
 
 	void Skeleton::ReadHierarchyData(const aiNode* node)

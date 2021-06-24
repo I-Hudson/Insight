@@ -13,6 +13,7 @@ namespace Insight::Editor
 	{
 	public:
 		Module::EditorModule* m_editorModule;
+		Mesh* planeMesh;
 
 		EditorApp() : Application()
 		{ }
@@ -83,6 +84,23 @@ namespace Insight::Editor
 			lightData.NearPlane = 1.0f;
 			lightData.FarPlane = 128.0f;
 
+			const float planeSize = 2.5f;
+			std::vector<Vertex> vertices = 
+			{
+				Vertex(glm::vec3(-planeSize, 0, -planeSize), glm::vec3(0), glm::vec4(1)),
+				Vertex(glm::vec3(-planeSize, 0, planeSize), glm::vec3(0), glm::vec4(1)),
+				Vertex(glm::vec3(planeSize, 0, planeSize), glm::vec3(0), glm::vec4(1)),
+				Vertex(glm::vec3(planeSize, 0, -planeSize), glm::vec3(0), glm::vec4(1)),
+			};
+			std::vector<u32> indices = 
+			{
+				0,1,2, 0,2,3
+			};
+			planeMesh = ::New<Mesh>();
+			planeMesh->SetVerticesAndIndcies(vertices, indices);
+			Entity& planeEntity = Scene::ActiveScene()->CreateEntity("planeMesh");
+			planeEntity.AddComponent<MeshComponent>().SetMesh(planeMesh);
+
 			{
 				IS_PROFILE_SCOPE("Loading models - Single Thread");
 				for (size_t i = 0; i < 1; ++i)
@@ -95,7 +113,6 @@ namespace Insight::Editor
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/vampire/dancing_vampire.dae");
 					//AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/adamHead/adamHead.gltf");
 					AssetPtr<Model> graphicsModel = Module::AssetModule::Instance()->Load<Model>("./data/models/dancing_stormtrooper_gltf/scene.gltf");
-
 
 					Entity& animatedMesh = Scene::ActiveScene()->CreateEntity("AnimatedMesh");
 					SkinnedMeshComponent& skinnedMesh = animatedMesh.AddComponent<SkinnedMeshComponent>();
@@ -138,6 +155,7 @@ namespace Insight::Editor
 
 		~EditorApp()
 		{
+			::Delete(planeMesh);
 			if (Insight::Graphics::Debug::Gizmos::IsInitialised())
 			{
 				::Delete(Insight::Graphics::Debug::Gizmos::Instance());

@@ -410,10 +410,10 @@ namespace Insight::Module
 				glm::mat4(1.0f),
 				glm::vec3(5.0f, 5.0f, 5.0f)
 			};
+			renderList->DirectionalLight.Projection[1][1] *= -1;
 			ubo.LightSpace = renderList->DirectionalLight.Projection * renderList->DirectionalLight.Transform;
-			ubo.LightDir = -renderList->DirectionalLight.LightDirection;
+			ubo.LightDir = renderList->DirectionalLight.LightDirection;
 			ubo.PVMatrix = renderList->MainCamera.Projection * glm::inverse(renderList->MainCamera.Transform);
-			//ubo.PVMatrix[1][1] *= -1;
 			Graphics::GPUBuffer* uboBuffer = buffers.at(Graphics::GPUBufferFlags::UNIFORM)->Upload(&ubo, sizeof(ubo));
 
 			Graphics::GPUShader* defaultShader = nullptr;

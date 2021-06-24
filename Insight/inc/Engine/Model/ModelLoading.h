@@ -14,10 +14,11 @@ struct aiScene;
 namespace tinygltf
 {
 	class Node;
-	class Mesh;
+	struct Mesh;
 	class Model;
 	struct Material;
-	class Scene;
+	struct Scene;
+	struct Skin;
 }
 
 namespace Insight::ModelLoading
@@ -52,10 +53,14 @@ namespace Insight::ModelLoading
 		static void LoadFromFile(Model& model, const std::string& filePath);
 		static void ProcessNode(Mesh& mesh, const tinygltf::Node& gltfNode, const tinygltf::Model& gltdModel, const std::string& directory);
 		static void ProcessMesh(Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel, const std::string& directory);
+		static void LoadSkeleton(Mesh& mesh, const tinygltf::Skin& gltfSkin, const tinygltf::Model& gltfModel);
 		static MeshTextures LoadMateials(tinygltf::Material& gltfMaterial, const std::string& typeName, const std::string& directory);
 
+		static glm::mat4 GetNodeMatrix(const tinygltf::Node& gltfNode);
 		static void SetVertexBoneDataToDefault(Vertex& vertex);
 		static void ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel);
-		static void LoadAnimations(Model& model, const tinygltf::Scene& gltfScene);
+		static void LoadAnimations(Model& model, const tinygltf::Model& gltfModel);
+
+		static glm::quat GetGlmQuat(glm::vec4 vec);
 	};
 }

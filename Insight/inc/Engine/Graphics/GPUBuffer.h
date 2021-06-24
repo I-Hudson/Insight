@@ -7,12 +7,27 @@
 
 struct Vertex
 {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec4 Colour;
-	glm::vec2 UV1;
-	glm::ivec4 JointIndices;
-	glm::vec4 JointWeight;
+	Vertex()
+	{ }
+
+	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec4 colour, glm::vec2 uv1, glm::ivec4 jointIndices, glm::vec4 jointWeight)
+		: Position(position), Normal(normal), Colour(colour), UV1(uv1), JointIndices(jointIndices), JointWeight(jointWeight)
+	{ }
+
+	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec4 colour, glm::vec2 uv1)
+		: Position(position), Normal(normal), Colour(colour), UV1(uv1)
+	{ }
+
+	Vertex(glm::vec3 position, glm::vec3 normal, glm::vec4 colour)
+		: Position(position), Normal(normal), Colour(colour)
+	{ }
+
+	glm::vec3 Position = glm::vec3(0);
+	glm::vec3 Normal = glm::vec3(0);
+	glm::vec4 Colour = glm::vec4(0);
+	glm::vec2 UV1 = glm::vec2(0);
+	glm::ivec4 JointIndices = glm::ivec4(0);
+	glm::vec4 JointWeight = glm::vec4(0);
 #ifdef IS_MESH_BATCHING_EXT
 	u32 VIndex;
 #endif

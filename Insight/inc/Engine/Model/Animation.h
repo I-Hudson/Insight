@@ -8,6 +8,11 @@ struct aiAnimation;
 struct aiNode;
 struct aiScene;
 
+namespace tinygltf
+{
+	class Model;
+}
+
 namespace Insight
 {
 	class Model;
@@ -38,6 +43,7 @@ namespace Insight::Animation
 	public:
 		Animation() = default;
 		Animation(const aiScene* aiScene , u32 animationIndex, Model* model);
+		Animation(const tinygltf::Model& gltfModel , u32 animationIndex, Model* model);
 
 		INLINE const float& GetTicksPerSecond() const { return m_ticksPerSecond; }
 		INLINE const float& GetDuration() const { return m_duration; }

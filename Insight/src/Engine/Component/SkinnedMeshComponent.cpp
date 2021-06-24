@@ -22,7 +22,7 @@ void SkinnedMeshComponent::OnUpdate(const float& a_deltaTime)
 		return;
 	}
 	AnimatorComponent& animator = GetEntity().GetComponent<AnimatorComponent>();
-	if (!animator.GetSkelton() || !animator.GetCurrentAnimation())
+	if (!animator.GetSkelton())
 	{
 		return;
 	}

@@ -8,6 +8,8 @@
 #include "Engine/Model/Animation.h"
 #include <glm/glm.hpp>
 
+class MeshComponent;
+
 namespace Insight
 {
 	namespace Graphics
@@ -99,15 +101,12 @@ namespace Insight
 
 		u32 GetSubMeshCount() const { return static_cast<u32>(m_subMeshes.size()); }
 		const SubMesh& GetSubMesh(const u32& index) const { return m_subMeshes.at(index); }
+		std::vector<std::string> GetAllSubMeshTextures(MaterialTextureType type);
 
 		const u32& GetVertexCount() const { return m_vertexCount; }
 		const u32& GetIndexCount() const { return m_indexCount; }
 
-		std::vector<std::string> GetAllSubMeshTextures(MaterialTextureType type);
-
-		void Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
-		//Graphics::GPUBuffer* GetGPUVertexBuffer() const { return m_vertexBuffer; }
-		//Graphics::GPUBuffer* GetGPUIndexBuffer() const { return m_indexBuffer; }
+		void SetVerticesAndIndcies(const std::vector<Vertex>& vertices, const std::vector<u32>& indcies);
 
 		Animation::Skeleton& GetSkeleton() { return m_skeleton; }
 		Animation::Animation* GetAnimation(u32 index) { return &m_animations.at(index); }
@@ -115,6 +114,7 @@ namespace Insight
 		void Release();
 
 	private:
+		void Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum);
 		void SetupGPUBuffers();
 
 	private:
@@ -136,6 +136,7 @@ namespace Insight
 		Graphics::GPUBuffer* m_indexBuffer = nullptr;
 
 		friend Model;
+		friend MeshComponent;
 		friend Insight::ModelLoading::AssimpLoader;
 		friend Insight::ModelLoading::GltfLoader;
 	};
