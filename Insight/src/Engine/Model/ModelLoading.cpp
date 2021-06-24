@@ -17,16 +17,20 @@
 #define TINYGLTF_IMPLEMENTATION
 #include "tiny_gltf.h"
 
+#define IS_ENABLE_GLTF_MODEL_LOADING_EXT 0
+
 namespace Insight::ModelLoading
 {
 	void ModelLoader::LoadFromFile(Model& model, const std::string& filePath)
 	{
 		std::filesystem::path path(filePath);
+#if IS_ENABLE_GLTF_MODEL_LOADING_EXT
 		if (path.extension() == ".gltf")
 		{
 			GltfLoader::LoadFromFile(model, filePath);
 		}
 		else
+#endif
 		{
 			AssimpLoader::LoadFromFile(model, filePath);
 		}
@@ -388,43 +392,31 @@ namespace Insight::ModelLoading
 			return;
 		}
 
+		std::string fileDirectory = std::move(FileSystem::FileSystemManager::WindowsToUinxFilePath(filePath));
+		fileDirectory = std::move(fileDirectory.substr(0, fileDirectory.find_last_of('/')));
+
 		const tinygltf::Scene& rootScene = glTFInput.scenes[0];
 		for (u32 i = 0; i < rootScene.nodes.size(); ++i)
 		{
 			tinygltf::Node& node = glTFInput.nodes.at(rootScene.nodes.at(i));
-			ProcessNode(model.m_mesh, node, glTFInput, "");
+			ProcessNode(model.m_mesh, node, glTFInput, fileDirectory);
 		}
+
+		LoadAnimations(model, glTFInput);
 	}
 
-	void GltfLoader::ProcessNode(Mesh& mesh, const tinygltf::Node& gltfNode, const tinygltf::Model& gltfModel, const std::string & directory)
+	void GltfLoader::ProcessNode(Mesh& mesh, const tinygltf::Node& gltfNode, const tinygltf::Model& gltfModel, const std::string& directory)
 	{
 		IS_PROFILE_FUNCTION();
-
-		glm::mat4 matrix = glm::mat4(1.0f);
-
-		// Get the local node matrix
-		// It's either made up from translation, rotation, scale or a 4x4 matrix
-		if (gltfNode.translation.size() == 3) 
-		{
-			matrix = glm::translate(matrix, glm::vec3(glm::make_vec3(gltfNode.translation.data())));
-		}
-		if (gltfNode.rotation.size() == 4) 
-		{
-			glm::quat q = glm::make_quat(gltfNode.rotation.data());
-			matrix *= glm::mat4(q);
-		}
-		if (gltfNode.scale.size() == 3) 
-		{
-			matrix = glm::scale(matrix, glm::vec3(glm::make_vec3(gltfNode.scale.data())));
-		}
-		if (gltfNode.matrix.size() == 16)
-		{
-			matrix = glm::make_mat4x4(gltfNode.matrix.data());
-		};
 
 		if (gltfNode.mesh > -1)
 		{
 			ProcessMesh(mesh, gltfModel.meshes.at(gltfNode.mesh), gltfModel, directory);
+		}
+
+		if (gltfNode.skin >= 0)
+		{
+			LoadSkeleton(mesh, gltfModel.skins.at(gltfNode.skin), gltfModel);
 		}
 
 		for (u32 i = 0; i < gltfNode.children.size(); ++i)
@@ -450,6 +442,8 @@ namespace Insight::ModelLoading
 				const float* positionBuffer = nullptr;
 				const float* normalsBuffer = nullptr;
 				const float* texCoordsBuffer = nullptr;
+				const u16* jointIndicesBuffer = nullptr;
+				const float* jointWeightsBuffer = nullptr;
 				size_t vertexCount = 0;
 
 				// Get buffer data for vertex normals
@@ -475,6 +469,22 @@ namespace Insight::ModelLoading
 					const tinygltf::BufferView& view = gltdModel.bufferViews[accessor.bufferView];
 					texCoordsBuffer = reinterpret_cast<const float*>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
 				}
+				// Get vertex joint indices
+				if (glTFPrimitive.attributes.find("JOINTS_0") != glTFPrimitive.attributes.end())
+				{
+					const tinygltf::Accessor &  accessor = gltdModel.accessors[glTFPrimitive.attributes.find("JOINTS_0")->second];
+					const tinygltf::BufferView &view     = gltdModel.bufferViews[accessor.bufferView];
+					jointIndicesBuffer                   = reinterpret_cast<const u16 *>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+				}
+				// Get vertex joint weights
+				if (glTFPrimitive.attributes.find("WEIGHTS_0") != glTFPrimitive.attributes.end())
+				{
+					const tinygltf::Accessor &  accessor = gltdModel.accessors[glTFPrimitive.attributes.find("WEIGHTS_0")->second];
+					const tinygltf::BufferView &view     = gltdModel.bufferViews[accessor.bufferView];
+					jointWeightsBuffer                   = reinterpret_cast<const float *>(&(gltdModel.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
+				}
+
+				bool hasSkin = jointIndicesBuffer && jointWeightsBuffer;
 
 				// Append data to model's vertex buffer
 				for (size_t v = 0; v < vertexCount; v++) 
@@ -484,6 +494,8 @@ namespace Insight::ModelLoading
 					vert.Normal = glm::normalize(glm::vec3(normalsBuffer ? glm::make_vec3(&normalsBuffer[v * 3]) : glm::vec3(0.0f)));
 					vert.Colour = glm::vec4(1.0f);
 					vert.UV1 = texCoordsBuffer ? glm::make_vec2(&texCoordsBuffer[v * 2]) : glm::vec3(0.0f);
+					vert.JointIndices = hasSkin ? glm::make_vec4(&jointIndicesBuffer[v * 4]) : glm::vec4(-1);
+					vert.JointWeight = hasSkin ? glm::make_vec4(&jointWeightsBuffer[v * 4]) : glm::vec4(-1);
 					vertices.push_back(vert);
 				}
 				ExtractBoneWeightFromVertices(vertices, mesh, gltfMesh, gltdModel);
@@ -540,9 +552,74 @@ namespace Insight::ModelLoading
 		}
 	}
 
+	void GltfLoader::LoadSkeleton(Mesh& mesh, const tinygltf::Skin& gltfSkin, const tinygltf::Model& gltfModel)
+	{
+		const tinygltf::Accessor* accessor = nullptr;
+		const tinygltf::BufferView* bufferView = nullptr;
+		const tinygltf::Buffer* buffer = nullptr;
+		// Get the inverse bind matrices from the buffer associated to this skin
+		if (gltfSkin.inverseBindMatrices > -1)
+		{
+			accessor = &gltfModel.accessors[gltfSkin.inverseBindMatrices];
+			bufferView = &gltfModel.bufferViews[accessor->bufferView];
+			buffer = &gltfModel.buffers[bufferView->buffer];
+		}
+
+		std::string name = gltfSkin.name;
+		Animation::Skeleton& meshSkeleton = mesh.GetSkeleton();
+		glm::mat4 localBindMatrix = glm::mat4(1);
+
+		if (accessor && bufferView && buffer)
+		{
+			memcpy(&localBindMatrix, &buffer->data[accessor->byteOffset + bufferView->byteOffset], sizeof(glm::mat4));
+		}
+		meshSkeleton.AddBone(name, localBindMatrix);// gltfModel.nodes.at(gltfSkin.skeleton));
+
+		u32 boneCount = 1;
+		for (u32 index : gltfSkin.joints)
+		{
+			tinygltf::Node node = gltfModel.nodes.at(index);
+
+			localBindMatrix = glm::mat4(1);
+			if (accessor && bufferView && buffer)
+			{
+				memcpy(&localBindMatrix, &buffer->data[accessor->byteOffset + bufferView->byteOffset] + (boneCount * sizeof(glm::mat4)), sizeof(glm::mat4));
+				++boneCount;
+			}
+
+			meshSkeleton.AddBone(node.name, localBindMatrix);
+		}
+
+	}
+
 	MeshTextures GltfLoader::LoadMateials(tinygltf::Material& gltfMaterial, const std::string& typeName, const std::string& directory)
 	{
 		return MeshTextures();
+	}
+
+	glm::mat4 GltfLoader::GetNodeMatrix(const tinygltf::Node& gltfNode)
+	{
+		glm::mat4 matrix = glm::mat4(1.0f);
+		// Get the local node matrix
+		// It's either made up from translation, rotation, scale or a 4x4 matrix
+		if (gltfNode.translation.size() == 3) 
+		{
+			matrix = glm::translate(matrix, glm::vec3(glm::make_vec3(gltfNode.translation.data())));
+		}
+		if (gltfNode.rotation.size() == 4) 
+		{
+			glm::quat q = glm::make_quat(gltfNode.rotation.data());
+			matrix *= glm::mat4(q);
+		}
+		if (gltfNode.scale.size() == 3) 
+		{
+			matrix = glm::scale(matrix, glm::vec3(glm::make_vec3(gltfNode.scale.data())));
+		}
+		if (gltfNode.matrix.size() == 16)
+		{
+			matrix = glm::make_mat4x4(gltfNode.matrix.data());
+		};
+		return matrix;
 	}
 
 	void GltfLoader::SetVertexBoneDataToDefault(Vertex& vertex)
@@ -551,6 +628,24 @@ namespace Insight::ModelLoading
 	void GltfLoader::ExtractBoneWeightFromVertices(std::vector<Vertex>& vertices, Mesh& mesh, const tinygltf::Mesh& gltfMesh, const tinygltf::Model& gltfModel)
 	{}
 
-	void GltfLoader::LoadAnimations(Model& model, const tinygltf::Scene& gltfScene)
-	{}
+	void GltfLoader::LoadAnimations(Model& model, const tinygltf::Model& gltfModel)
+	{
+		if (model.GetMesh().m_skeleton.GetBoneCount() > 0)
+		{
+			model.GetMesh().m_skeleton.PopulateBoneData(gltfModel);
+			model.GetMesh().m_skeleton.GetRootBone().CalcInverseBindTransform(glm::mat4(1));
+		}
+
+		std::vector<Animation::Animation> animations;
+		for (u32 i= 0; i <  gltfModel.animations.size(); ++i)
+		{
+			animations.push_back(Animation::Animation(gltfModel, i, &model));
+		}
+		model.m_mesh.m_animations = animations;
+	}
+
+	glm::quat GltfLoader::GetGlmQuat(glm::vec4 vec)
+	{
+		return glm::quat(vec.x, vec.y, vec.z, vec.w);
+	}
 }

@@ -1,0 +1,300 @@
+
+#include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
+
+VkFormat PixelFormatToVkFormat[static_cast<I32>(PixelFormat::MAX)] = 
+{
+
+    VK_FORMAT_UNDEFINED,
+    VK_FORMAT_R32G32B32A32_SFLOAT,
+    VK_FORMAT_R32G32B32A32_SFLOAT,
+    VK_FORMAT_R32G32B32A32_UINT,
+    VK_FORMAT_R32G32B32A32_SINT,
+    VK_FORMAT_R32G32B32_SFLOAT,
+    VK_FORMAT_R32G32B32_SFLOAT,
+    VK_FORMAT_R32G32B32_UINT,
+    VK_FORMAT_R32G32B32_SINT,
+    VK_FORMAT_R16G16B16A16_SFLOAT,
+    VK_FORMAT_R16G16B16A16_SFLOAT,
+    VK_FORMAT_R16G16B16A16_UNORM,
+    VK_FORMAT_R16G16B16A16_UINT,
+    VK_FORMAT_R16G16B16A16_SNORM,
+    VK_FORMAT_R16G16B16A16_SINT,
+    VK_FORMAT_R32G32_SFLOAT,
+    VK_FORMAT_R32G32_SFLOAT,
+    VK_FORMAT_R32G32_UINT,
+    VK_FORMAT_R32G32_SINT,
+    VK_FORMAT_UNDEFINED,
+    // TODO: R32G8X24_Typeless
+    VK_FORMAT_D32_SFLOAT_S8_UINT,
+    VK_FORMAT_UNDEFINED,
+    // TODO: R32_Float_X8X24_Typeless
+    VK_FORMAT_UNDEFINED,
+    // TODO: X32_Typeless_G8X24_UInt
+    VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+    VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+    VK_FORMAT_A2B10G10R10_UINT_PACK32,
+    VK_FORMAT_B10G11R11_UFLOAT_PACK32,
+    VK_FORMAT_R8G8B8A8_UNORM,
+    VK_FORMAT_R8G8B8A8_UNORM,
+    VK_FORMAT_R8G8B8A8_SRGB,
+    VK_FORMAT_R8G8B8A8_UINT,
+    VK_FORMAT_R8G8B8A8_SNORM,
+    VK_FORMAT_R8G8B8A8_SINT,
+    VK_FORMAT_R16G16_SFLOAT,
+    VK_FORMAT_R16G16_SFLOAT,
+    VK_FORMAT_R16G16_UNORM,
+    VK_FORMAT_R16G16_UINT,
+    VK_FORMAT_R16G16_SNORM,
+    VK_FORMAT_R16G16_SINT,
+    VK_FORMAT_R32_SFLOAT,
+    VK_FORMAT_D32_SFLOAT,
+    VK_FORMAT_R32_SFLOAT,
+    VK_FORMAT_R32_UINT,
+    VK_FORMAT_R32_SINT,
+    VK_FORMAT_D24_UNORM_S8_UINT,
+    VK_FORMAT_D24_UNORM_S8_UINT,
+    VK_FORMAT_X8_D24_UNORM_PACK32,
+    VK_FORMAT_D24_UNORM_S8_UINT,
+    VK_FORMAT_R8G8_UNORM,
+    VK_FORMAT_R8G8_UNORM,
+    VK_FORMAT_R8G8_UINT,
+    VK_FORMAT_R8G8_SNORM,
+    VK_FORMAT_R8G8_SINT,
+    VK_FORMAT_R16_SFLOAT,
+    VK_FORMAT_R16_SFLOAT,
+    VK_FORMAT_D16_UNORM,
+    VK_FORMAT_R16_UNORM,
+    VK_FORMAT_R16_UINT,
+    VK_FORMAT_R16_SNORM,
+    VK_FORMAT_R16_SINT,
+    VK_FORMAT_R8_UNORM,
+    VK_FORMAT_R8_UNORM,
+    VK_FORMAT_R8_UINT,
+    VK_FORMAT_R8_SNORM,
+    VK_FORMAT_R8_SINT,
+    VK_FORMAT_UNDEFINED,
+    // TODO: A8_UNorm
+    VK_FORMAT_UNDEFINED,
+    // TODO: R1_UNorm
+    VK_FORMAT_E5B9G9R9_UFLOAT_PACK32,
+    VK_FORMAT_UNDEFINED,
+    // TODO: R8G8_B8G8_UNorm
+    VK_FORMAT_UNDEFINED,
+    // TODO: G8R8_G8B8_UNorm
+    VK_FORMAT_BC1_RGBA_UNORM_BLOCK,
+    VK_FORMAT_BC1_RGBA_UNORM_BLOCK,
+    VK_FORMAT_BC1_RGBA_SRGB_BLOCK,
+    VK_FORMAT_BC2_UNORM_BLOCK,
+    VK_FORMAT_BC2_UNORM_BLOCK,
+    VK_FORMAT_BC2_SRGB_BLOCK,
+    VK_FORMAT_BC3_UNORM_BLOCK,
+    VK_FORMAT_BC3_UNORM_BLOCK,
+    VK_FORMAT_BC3_SRGB_BLOCK,
+    VK_FORMAT_BC4_UNORM_BLOCK,
+    VK_FORMAT_BC4_UNORM_BLOCK,
+    VK_FORMAT_BC4_SNORM_BLOCK,
+    VK_FORMAT_BC5_UNORM_BLOCK,
+    VK_FORMAT_BC5_UNORM_BLOCK,
+    VK_FORMAT_BC5_SNORM_BLOCK,
+    VK_FORMAT_B5G6R5_UNORM_PACK16,
+    VK_FORMAT_B5G5R5A1_UNORM_PACK16,
+    VK_FORMAT_B8G8R8A8_UNORM,
+    VK_FORMAT_B8G8R8A8_UNORM,
+    VK_FORMAT_UNDEFINED,
+    // TODO: R10G10B10_Xr_Bias_A2_UNorm
+    VK_FORMAT_B8G8R8A8_UNORM,
+    VK_FORMAT_B8G8R8A8_SRGB,
+    VK_FORMAT_B8G8R8A8_UNORM,
+    VK_FORMAT_B8G8R8A8_SRGB,
+    VK_FORMAT_BC6H_UFLOAT_BLOCK,
+    VK_FORMAT_BC6H_UFLOAT_BLOCK,
+    VK_FORMAT_BC6H_SFLOAT_BLOCK,
+    VK_FORMAT_BC7_UNORM_BLOCK,
+    VK_FORMAT_BC7_UNORM_BLOCK,
+    VK_FORMAT_BC7_SRGB_BLOCK,
+};
+
+PixelFormat VkFormatToPixelFormat[static_cast<I32>(PixelFormat::MAX)] =
+{
+
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R8_UNorm,
+    // 10
+    PixelFormat::R8_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R8_UInt,
+    PixelFormat::R8_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R8G8_UNorm,
+    PixelFormat::R8G8_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    // 20
+    PixelFormat::R8G8_UInt,
+    PixelFormat::R8G8_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    // 30
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R8G8B8A8_UNorm,
+    PixelFormat::R8G8B8A8_SNorm,
+    PixelFormat::Unknown,
+    // 40
+    PixelFormat::Unknown,
+    PixelFormat::R8G8B8A8_UInt,
+    PixelFormat::R8G8B8A8_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::B8G8R8A8_UNorm,
+    PixelFormat::R8G8B8A8_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::B8G8R8A8_UNorm_sRGB,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R16_UNorm,
+    PixelFormat::R16_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R16_UInt,
+    PixelFormat::R16_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R16G16_UNorm,
+    PixelFormat::R16G16_UNorm,
+    PixelFormat::R16G16_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R16G16_UInt,
+    PixelFormat::R16G16_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R16G16B16A16_UNorm,
+    PixelFormat::R16G16B16A16_SNorm,
+    PixelFormat::Unknown,
+    PixelFormat::Unknown,
+    PixelFormat::R16G16B16A16_UInt,
+    PixelFormat::R16G16B16A16_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R32_UInt,
+    PixelFormat::R32_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R32G32_UInt,
+    PixelFormat::R32G32_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R32G32B32_UInt,
+    PixelFormat::R32G32B32_SInt,
+    PixelFormat::Unknown,
+    PixelFormat::R32G32B32A32_UInt,
+    PixelFormat::R32G32B32A32_SInt,
+    PixelFormat::Unknown,
+};
+
+
+//VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)] =
+//{
+//    VK_BLEND_FACTOR_MAX_ENUM,
+//    VK_BLEND_FACTOR_ZERO,
+//    // Zero
+//    VK_BLEND_FACTOR_ONE,
+//    // One
+//    VK_BLEND_FACTOR_SRC_COLOR,
+//    // SrcColor
+//    VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+//    // InvSrcColor
+//    VK_BLEND_FACTOR_SRC_ALPHA,
+//    // SrcAlpha
+//    VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+//    // InvSrcAlpha
+//    VK_BLEND_FACTOR_DST_ALPHA,
+//    // DestAlpha
+//    VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+//    // InvDestAlpha
+//    VK_BLEND_FACTOR_DST_COLOR,
+//    // DestColor,
+//    VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR,
+//    // InvDestColor
+//    VK_BLEND_FACTOR_SRC_ALPHA_SATURATE,
+//    // SrcAlphaSat
+//    VK_BLEND_FACTOR_CONSTANT_ALPHA,
+//    // BlendFactor
+//    VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA,
+//    // BlendInvFactor
+//    VK_BLEND_FACTOR_SRC1_COLOR,
+//    // Src1Color
+//    VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR,
+//    // InvSrc1Color
+//    VK_BLEND_FACTOR_SRC1_ALPHA,
+//    // Src1Alpha
+//    VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA,
+//    // InvSrc1Alpha
+//};
+//
+//VkBlendOp OperationToVkBlendOp[static_cast<I32>(BlendingMode::Operation::MAX)] =
+//{
+//    VK_BLEND_OP_MAX_ENUM,
+//    VK_BLEND_OP_ADD,
+//    // Add
+//    VK_BLEND_OP_SUBTRACT,
+//    // Subtract
+//    VK_BLEND_OP_REVERSE_SUBTRACT,
+//    // RevSubtract
+//    VK_BLEND_OP_MIN,
+//    // Min
+//    VK_BLEND_OP_MAX,
+//    // Max
+//};
+//
+//VkCompareOp ComparisonFuncToVkCompareOp[static_cast<I32>(ComparisonFunc::MAX)] =
+//{
+//    VK_COMPARE_OP_MAX_ENUM,
+//    VK_COMPARE_OP_NEVER,
+//    // Never
+//    VK_COMPARE_OP_LESS,
+//    // Less
+//    VK_COMPARE_OP_EQUAL,
+//    // Equal
+//    VK_COMPARE_OP_LESS_OR_EQUAL,
+//    // LessEqual
+//    VK_COMPARE_OP_GREATER,
+//    // Grather
+//    VK_COMPARE_OP_NOT_EQUAL,
+//    // NotEqual
+//    VK_COMPARE_OP_GREATER_OR_EQUAL,
+//    // GratherEqual
+//    VK_COMPARE_OP_ALWAYS,
+//    // Always
+//};

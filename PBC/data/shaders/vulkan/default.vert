@@ -67,5 +67,5 @@ void main()
 
 	outLightVec = ubo.lightDir;
     outViewVec = -outPos.xyz;	
-	outShadowCoord = (biasMat * ubo.lightSpace * perObject.modelMatrix) * vec4(inPos.xyz, 1);
+	outShadowCoord = biasMat * ubo.lightSpace * perObject.modelMatrix * skinMat * vec4(inPos.xyz, 1);
 }

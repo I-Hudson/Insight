@@ -5,6 +5,7 @@
 
 #include "assimp/scene.h"
 #include "assimp/anim.h"
+#include "tiny_gltf.h"
 
 namespace Insight::Animation
 {
@@ -51,6 +52,53 @@ namespace Insight::Animation
 				m_keyScale[boneName].push_back(key);
 			}
 
+		}
+	}
+
+	Animation::Animation(const tinygltf::Model& gltfModel, u32 animationIndex, Model* model)
+	{
+		const tinygltf::Animation& gltfAnimation = gltfModel.animations.at(animationIndex);
+		for (u32 i = 0; i < gltfAnimation.channels.size(); ++i)
+		{
+			const tinygltf::AnimationChannel& channel = gltfAnimation.channels.at(i);
+			std::string name = gltfModel.nodes.at(channel.target_node).name;
+			const tinygltf::AnimationSampler& glTFSampler = gltfAnimation.samplers.at(channel.sampler);
+
+			const tinygltf::Accessor &  keyFrameAccessor   = gltfModel.accessors[glTFSampler.input];
+			const tinygltf::BufferView& keyFrameBufferView = gltfModel.bufferViews[keyFrameAccessor.bufferView];
+			const tinygltf::Buffer&     keyFrameBuffer     = gltfModel.buffers[keyFrameBufferView.buffer];
+			const void*					keyFrameDataPtr    = &keyFrameBuffer.data[keyFrameAccessor.byteOffset + keyFrameBufferView.byteOffset];
+			const float*				keyFrameBufferPtr  = static_cast<const float*>(keyFrameDataPtr);
+
+			const tinygltf::Accessor&	accessor   = gltfModel.accessors[glTFSampler.output];
+			const tinygltf::BufferView& bufferView = gltfModel.bufferViews[accessor.bufferView];
+			const tinygltf::Buffer&		buffer     = gltfModel.buffers[bufferView.buffer];
+			const void*					dataPtr    = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
+
+			for (u32 index = 0; index < keyFrameAccessor.count; ++index)
+			{
+				if (channel.target_path == "translation")
+				{
+					KeyPosition position;
+					position.Position = accessor.type == TINYGLTF_TYPE_VEC3 ? glm::vec4(glm::vec4(static_cast<const glm::vec3*>(dataPtr)[index], 1.0f)) : static_cast<const glm::vec4*>(dataPtr)[index];
+					position.TimeStamp = keyFrameBufferPtr[index];
+					m_keyPositions[name].push_back(position);
+				}
+				else if (channel.target_path == "rotation")
+				{
+					KeyRotation rotation;
+					rotation.Orientation = ModelLoading::GltfLoader::GetGlmQuat(static_cast<const glm::vec4*>(dataPtr)[index]);
+					rotation.TimeStamp = keyFrameBufferPtr[index];
+					m_keyRotations[name].push_back(rotation);
+				}
+				else if (channel.target_path == "scale")
+				{
+					KeyScale scale;
+					scale.Scale = accessor.type == TINYGLTF_TYPE_VEC3 ? glm::vec4(glm::vec4(static_cast<const glm::vec3*>(dataPtr)[index], 1.0f)) : static_cast<const glm::vec4*>(dataPtr)[index];
+					scale.TimeStamp = keyFrameBufferPtr[index];
+					m_keyScale[name].push_back(scale);
+				}
+			}
 		}
 	}
 

@@ -8,6 +8,12 @@ struct aiNodeAnim;
 struct aiNode;
 struct aiScene;
 
+namespace tinygltf
+{
+	class Model;
+	class Node;
+}
+
 namespace Insight::Animation
 {
 	class Skeleton;
@@ -63,8 +69,10 @@ namespace Insight::Animation
 		Skeleton();
 		Skeleton(u32 boneCount, glm::mat4 globalTransform);
 
+		void PopulateBoneData(const tinygltf::Model& gltfModel);
 		void PopulateBoneData(const aiScene* aiScene);
 
+		void SetRootBoneId(u32 id) { m_rootBoneId = id; }
 		Bone& GetRootBone() { return m_bones.at(m_rootBoneId); }
 		Bone& GetBone(u32 index);
 		Bone& GetBone(std::string name);
@@ -74,6 +82,7 @@ namespace Insight::Animation
 		void AddBone(const std::string& name, glm::mat4 localBindTransform);
 		bool HasBone(const std::string& name) { return m_boneNameToIndex.find(name) != m_boneNameToIndex.end(); }
 
+		void ReadHierarchyData(const tinygltf::Node& node, const tinygltf::Model& gltfModel);
 		void ReadHierarchyData(const aiNode* node);
 
 	private:

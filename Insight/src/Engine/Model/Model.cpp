@@ -100,6 +100,17 @@ namespace Insight
 		return vec;
 	}
 
+	void Mesh::SetVerticesAndIndcies(const std::vector<Vertex>& vertices, const std::vector<u32>& indcies)
+	{
+		Release();
+		m_vertices = vertices;
+		m_indices = indcies;
+		SetupGPUBuffers();
+		SubMesh subMesh = SubMesh(0, m_vertexCount, 0, m_indexCount, m_vertexBuffer, m_indexBuffer);
+		m_subMeshes.push_back(subMesh);
+		m_dimensions.Radius = 1000.0f;
+	}
+
 	void Mesh::Draw(Graphics::RenderListView* drawList, const glm::mat4& worldTransform, const Maths::Frustum& cameraFrustum)
 	{
 		if (::Graphics::MeshBatchingExt())

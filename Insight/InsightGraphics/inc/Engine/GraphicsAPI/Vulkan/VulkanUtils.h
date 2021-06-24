@@ -1,0 +1,542 @@
+#pragma once
+
+#include "Engine/Core/Compiler.h"
+#include "Engine/Core/Log.h"
+
+#include "Engine/Core/Maths/Rect.h"
+
+#include "Engine/GraphicsAPI/Vulkan/VmaUsage.h"
+#include "Engine/Graphics/Enums.h"
+#include "Engine/Graphics/PixelFormat.h"
+#include "Engine/Graphics/GPUSamplerDescription.h"
+#include "Engine/Graphics/GPUBufferDesc.h"
+#include "Engine/Graphics/Image/GPUImageDesc.h"
+#include "Engine/Graphics/Shaders/GPUShader.h"
+#include "Engine/Graphics/GPUCommandBuffer.h"
+#include "Engine/Graphics/GPUDescriptorSet.h"
+
+#include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"
+
+extern VkFormat PixelFormatToVkFormat[static_cast<i32>(PixelFormat::MAX)];
+extern PixelFormat VkFormatToPixelFormat[static_cast<i32>(PixelFormat::MAX)];
+//extern VkBlendFactor BlendToVkBlendFactor[static_cast<I32>(BlendingMode::Blend::MAX)];
+//extern VkBlendOp OperationToVkBlendOp[static_cast<I32>(BlendingMode::Operation::MAX)];
+//extern VkCompareOp ComparisonFuncToVkCompareOp[static_cast<I32>(ComparisonFunc::MAX)];
+
+namespace
+{
+	std::string VkErrorToString(VkResult errorCode)
+	{
+		switch (errorCode)
+		{
+#define STR(r) case VK_ ##r: return #r
+			STR(NOT_READY);
+			STR(TIMEOUT);
+			STR(EVENT_SET);
+			STR(EVENT_RESET);
+			STR(INCOMPLETE);
+			STR(ERROR_OUT_OF_HOST_MEMORY);
+			STR(ERROR_OUT_OF_DEVICE_MEMORY);
+			STR(ERROR_INITIALIZATION_FAILED);
+			STR(ERROR_DEVICE_LOST);
+			STR(ERROR_MEMORY_MAP_FAILED);
+			STR(ERROR_LAYER_NOT_PRESENT);
+			STR(ERROR_EXTENSION_NOT_PRESENT);
+			STR(ERROR_FEATURE_NOT_PRESENT);
+			STR(ERROR_INCOMPATIBLE_DRIVER);
+			STR(ERROR_TOO_MANY_OBJECTS);
+			STR(ERROR_FORMAT_NOT_SUPPORTED);
+			STR(ERROR_SURFACE_LOST_KHR);
+			STR(ERROR_NATIVE_WINDOW_IN_USE_KHR);
+			STR(SUBOPTIMAL_KHR);
+			STR(ERROR_OUT_OF_DATE_KHR);
+			STR(ERROR_INCOMPATIBLE_DISPLAY_KHR);
+			STR(ERROR_VALIDATION_FAILED_EXT);
+			STR(ERROR_INVALID_SHADER_NV);
+#undef STR
+		default:
+			return "UNKNOWN_ERROR";
+		}
+	}
+
+	std::string PhysicalDeviceTypeString(VkPhysicalDeviceType type)
+	{
+		switch (type)
+		{
+#define STR(r) case VK_PHYSICAL_DEVICE_TYPE_ ##r: return #r
+			STR(OTHER);
+			STR(INTEGRATED_GPU);
+			STR(DISCRETE_GPU);
+			STR(VIRTUAL_GPU);
+#undef STR
+		default: return "UNKNOWN_DEVICE_TYPE";
+		}
+	}
+
+	INLINE void ThrowIfFailed(VkResult errorCode)
+	{
+		IS_CORE_ASSERT(errorCode == VK_SUCCESS, VkErrorToString(errorCode).c_str());
+	}
+
+
+	/// <summary>
+	/// Converts Flax Pixel Format to the Vulkan Format.
+	/// </summary>
+	/// <param name="value">The Flax Pixel Format.</param>
+	/// <returns>The Vulkan Format.</returns>
+	FORCE_INLINE VkFormat ToVulkanFormat(const PixelFormat value)
+	{
+		return PixelFormatToVkFormat[(i32)value];
+	}
+
+	FORCE_INLINE PixelFormat FromVulkanFormat(const VkFormat value)
+	{
+		return VkFormatToPixelFormat[(i32)value];
+	}
+
+	/// <summary>
+	/// Converts Flax blend mode to the Vulkan blend factor.
+	/// </summary>
+	/// <param name="value">The Flax blend mode.</param>
+	/// <returns>The Vulkan blend factor.</returns>
+	//FORCE_INLINE VkBlendFactor ToVulkanBlendFactor(const BlendingMode::Blend value)
+	//{
+	//	return BlendToVkBlendFactor[(I32)value];
+	//}
+
+	/// <summary>
+	/// Converts Flax blend operation to the Vulkan blend operation.
+	/// </summary>
+	/// <param name="value">The Flax blend operation.</param>
+	/// <returns>The Vulkan blend operation.</returns>
+	//FORCE_INLINE VkBlendOp ToVulkanBlendOp(const BlendingMode::Operation value)
+	//{
+	//	return OperationToVkBlendOp[(I32)value];
+	//}
+
+	/// <summary>
+	/// Converts Flax comparison function to the Vulkan comparison operation.
+	/// </summary>
+	/// <param name="value">The Flax comparison function.</param>
+	/// <returns>The Vulkan comparison operation.</returns>
+	//FORCE_INLINE VkCompareOp ToVulkanCompareOp(const ComparisonFunc value)
+	//{
+	//	return ComparisonFuncToVkCompareOp[(I32)value];
+	//}
+
+	VkSamplerMipmapMode ToVulkanMipFilterMode(GPUSamplerFilter filter)
+	{
+		VkSamplerMipmapMode result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	VkFilter ToVulkanMagFilterMode(GPUSamplerFilter filter)
+	{
+		VkFilter result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_FILTER_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_FILTER_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	VkFilter ToVulkanMinFilterMode(GPUSamplerFilter filter)
+	{
+		VkFilter result;
+		switch (filter)
+		{
+		case GPUSamplerFilter::Point:
+			result = VK_FILTER_NEAREST;
+			break;
+		case GPUSamplerFilter::Bilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Trilinear:
+			result = VK_FILTER_LINEAR;
+			break;
+		case GPUSamplerFilter::Anisotropic:
+			result = VK_FILTER_LINEAR;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	VkSamplerAddressMode ToVulkanWrapMode(GPUSamplerAddressMode addressMode, const bool supportsMirrorClampToEdge)
+	{
+		VkSamplerAddressMode result;
+		switch (addressMode)
+		{
+		case GPUSamplerAddressMode::Wrap:
+			result = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+			break;
+		case GPUSamplerAddressMode::Clamp:
+			result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			break;
+		case GPUSamplerAddressMode::Mirror:
+			result = supportsMirrorClampToEdge ? VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+			break;
+		case GPUSamplerAddressMode::Border:
+			result = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	VkCompareOp ToVulkanSamplerCompareFunction(GPUSamplerCompareFunction samplerComparisonFunction)
+	{
+		VkCompareOp result;
+		switch (samplerComparisonFunction)
+		{
+		case GPUSamplerCompareFunction::Less:
+			result = VK_COMPARE_OP_LESS;
+			break;
+		case GPUSamplerCompareFunction::Never:
+			result = VK_COMPARE_OP_NEVER;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	VkFormat ToVulkanFormatFromSPRIV(const spirv_cross::SPIRType& type, const u32& vecSize)
+	{
+		switch (type.basetype)
+		{
+		case spirv_cross::SPIRType::Int:
+			switch (vecSize)
+			{
+			case 1: return VK_FORMAT_R32_SINT;
+			case 2: return VK_FORMAT_R32G32_SINT;
+			case 3: return VK_FORMAT_R32G32B32_SINT;
+			case 4: return VK_FORMAT_R32G32B32A32_SINT;
+			}
+			break;
+		case spirv_cross::SPIRType::Float:
+			switch (vecSize)
+			{
+			case 1: return VK_FORMAT_R32_SFLOAT;
+			case 2: return VK_FORMAT_R32G32_SFLOAT;
+			case 3: return VK_FORMAT_R32G32B32_SFLOAT;
+			case 4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+			}
+			break;
+
+		}
+		return VK_FORMAT_R32G32B32A32_SFLOAT;
+	}
+
+	VkShaderStageFlagBits ToVulkanShaderStageFlags(const ShaderStage& shaderStage)
+	{
+		switch (shaderStage)
+		{
+		case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+		case ShaderStage::TessControl: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+		case ShaderStage::TessEvaluation: return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+		case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+		case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+		case ShaderStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+		}
+		return VK_SHADER_STAGE_ALL;
+	}
+
+	VkShaderStageFlags ToVulkanShaderStageFlagsMuti(const ShaderStage& shaderStage)
+	{
+		VkShaderStageFlags vFlags = 0;
+		if ((u32)shaderStage == (u32)ShaderStage::Vertex) { vFlags |= VK_SHADER_STAGE_VERTEX_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::TessControl) { vFlags |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::TessEvaluation) { vFlags |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Geometry) { vFlags |= VK_SHADER_STAGE_GEOMETRY_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Fragment) { vFlags |= VK_SHADER_STAGE_FRAGMENT_BIT; }
+		if ((u32)shaderStage == (u32)ShaderStage::Compute) { vFlags |= VK_SHADER_STAGE_COMPUTE_BIT; }
+		return vFlags;
+	}
+
+	VkImageType ToVulkanImageType(const ImageType& imageType)
+	{
+		switch (imageType)
+		{
+		case ImageType::Image_1D: return VK_IMAGE_TYPE_1D;
+		case ImageType::Image_2D: return VK_IMAGE_TYPE_2D;
+		case ImageType::Image_3D: return VK_IMAGE_TYPE_3D;
+		}
+		return VK_IMAGE_TYPE_2D;
+	}
+
+	VkImageViewType ToVulkanImageViewType(const ImageType& imageType)
+	{
+		switch (imageType)
+		{
+		case ImageType::Image_1D: return VK_IMAGE_VIEW_TYPE_1D;
+		case ImageType::Image_2D: return VK_IMAGE_VIEW_TYPE_2D;
+		case ImageType::Image_3D: return VK_IMAGE_VIEW_TYPE_3D;
+		}
+		return VK_IMAGE_VIEW_TYPE_2D;
+	}
+
+	VkImageViewType ToVulkanImageViewType(const Insight:: Graphics::GPUImageViewType& imageViewType)
+	{
+		return static_cast<VkImageViewType>(imageViewType);
+	}
+
+	VkSampleCountFlagBits ToVulkanSampleCount(SampleLevel& sampleLevel)
+	{
+		if (sampleLevel == SampleLevel::None) { return  VK_SAMPLE_COUNT_1_BIT; }
+		else if (sampleLevel == SampleLevel::X2) { return  VK_SAMPLE_COUNT_2_BIT; }
+		else if (sampleLevel == SampleLevel::X4) { return  VK_SAMPLE_COUNT_4_BIT; }
+		else if (sampleLevel == SampleLevel::X8) { return  VK_SAMPLE_COUNT_8_BIT; }
+		else if (sampleLevel == SampleLevel::X16) { return  VK_SAMPLE_COUNT_16_BIT; }
+		else if (sampleLevel == SampleLevel::X32) { return  VK_SAMPLE_COUNT_32_BIT; }
+		else if (sampleLevel == SampleLevel::X64) { return  VK_SAMPLE_COUNT_64_BIT; }
+		return VK_SAMPLE_COUNT_1_BIT;
+	}
+
+	VkImageUsageFlags ToVulkanImageUsage(const ImageUsageFlags imageUsageFlags)
+	{
+		VkImageUsageFlags flags = 0;
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transfer_Src)				{ flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transfer_Dst)				{ flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Sampled)					{ flags |= VK_IMAGE_USAGE_SAMPLED_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Storage)					{ flags |= VK_IMAGE_USAGE_STORAGE_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Color_Attachment)			{ flags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Depth_Stencil_Attachment)	{ flags |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Transient_Attachment)		{ flags |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT; }
+		if (imageUsageFlags & (u32)ImageUsageFlagsBits::Input_Attachment)			{ flags |= VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT; }
+	
+		return flags;
+	}
+
+	VkImageLayout ToVulkanImageLayout(const ImageLayout& imageLayout)
+	{
+		switch (imageLayout)
+		{
+		case ImageLayout::Undefined: return VK_IMAGE_LAYOUT_UNDEFINED;
+		case ImageLayout::General: return VK_IMAGE_LAYOUT_GENERAL;
+		case ImageLayout::Color_Attachment: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		case ImageLayout::Depth_Stencil_Attachment: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		case ImageLayout::Depth_Stencil_Read_Only: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+		case ImageLayout::Shader_Read_Only: return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		case ImageLayout::Transfer_Src: return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		case ImageLayout::Transfer_Dst: return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+		case ImageLayout::Preinitialized: return VK_IMAGE_LAYOUT_PREINITIALIZED;
+		}
+		return VK_IMAGE_LAYOUT_UNDEFINED;
+	}
+
+	VkImageCreateFlags ToVulkanImageCreateFlags(const ImageCreateFlags& createFlags)
+	{
+		VkImageCreateFlags flags = 0;
+		if (createFlags & (u32)ImageCreate::Sparse_Binding)		{ flags |= VK_IMAGE_CREATE_SPARSE_BINDING_BIT; }
+		if (createFlags & (u32)ImageCreate::Sparse_Residency)	{ flags |= VK_IMAGE_CREATE_SPARSE_RESIDENCY_BIT; }
+		if (createFlags & (u32)ImageCreate::Sparse_Aliased)		{ flags |= VK_IMAGE_CREATE_SPARSE_ALIASED_BIT; }
+		if (createFlags & (u32)ImageCreate::Mutable_Format)		{ flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT; }
+		if (createFlags & (u32)ImageCreate::Cube_Compatible)	{ flags |= VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT; }
+		return flags;
+	}
+	
+	VkCommandBufferResetFlags ToVulkanCommandBufferUsageFlags(Insight::Graphics::GPUCommandBufferUsageFlags const& flags)
+	{
+		VkCommandBufferResetFlags vFlags = 0;
+		if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::ONE_TIME_SUBMIT) { vFlags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::RENDER_PASS_CONTINUE) { vFlags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandBufferUsageFlags::SIMULATANEOUS_USE) { vFlags |= VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT; }
+		return vFlags;
+	}
+
+	VkCommandPoolCreateFlags ToVulkanCommandPoolUsageFlgas(Insight::Graphics::GPUCommandPoolFlags const& flags)
+	{
+		VkCommandPoolCreateFlags vFlags = 0;
+		if (flags == Insight::Graphics::GPUCommandPoolFlags::TRANSIENT) { vFlags |= VK_COMMAND_POOL_CREATE_TRANSIENT_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandPoolFlags::RESET_COMMAND_BUFFER) { vFlags |= VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT; }
+		else if (flags == Insight::Graphics::GPUCommandPoolFlags::PROTECTED) { vFlags |= VK_COMMAND_POOL_CREATE_PROTECTED_BIT; }
+		return vFlags;
+	}
+
+	VkViewport ToVulkanViewPort(Insight::Maths::Rect const& rect)
+	{
+		VkViewport viewport = { };
+		viewport.x = rect.GetX();
+		viewport.y = rect.GetY();
+		viewport.width = rect.GetWidth();
+		viewport.height = rect.GetHeight();
+		viewport.minDepth = 0;
+		viewport.maxDepth = 1;
+		return viewport;
+	}
+
+	VkRect2D ToVulkanScissor(Insight::Maths::Rect const& rect)
+	{
+		VkRect2D rect2D = { };
+		rect2D.offset.x = 0;
+		rect2D.offset.x = 0;
+		rect2D.extent.width = (u32)rect.GetWidth();
+		rect2D.extent.height = (u32)rect.GetHeight();
+		return rect2D;
+	}
+
+	VkBufferUsageFlags ToVulkanBufferUsageFlags(Insight::Graphics::GPUBufferFlags const& flags)
+	{
+		VkBufferUsageFlags vFlags = 0;
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { vFlags |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { vFlags |= VK_BUFFER_USAGE_TRANSFER_DST_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM_TEXEL) { vFlags |= VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE_TEXEL) { vFlags |= VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM) { vFlags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE) { vFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX) { vFlags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { vFlags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDIRECT) { vFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT; }
+		if (flags & Insight::Graphics::GPUBufferFlags::SHADER_DEVICE_ADDRESS) { vFlags |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT; }
+		return vFlags;
+	}
+
+	VkDescriptorPoolResetFlags ToVulkanDescriptorResetFlags(Insight::Graphics::GPUDescriptorPoolResetFlag flags)
+	{
+		VkDescriptorPoolResetFlags vFlags = 0;
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Free_Descriptor_Set) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT; }
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT; }
+		if (flags & Insight::Graphics::GPUDescriptorPoolResetFlag::Update_After_Bind_EXT) { vFlags |= VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT; }
+		return vFlags;
+	}
+
+	VkDescriptorType ToVulkanDescriptorType(DescriptorType type)
+	{
+		return (VkDescriptorType)type;
+	}
+
+	VmaMemoryUsage ToVMAMemoryUsage(Insight::Graphics::GPUBufferFlags const& flags, bool& mustBeMapped)
+	{
+		VmaMemoryUsage usage = VMA_MEMORY_USAGE_UNKNOWN;
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_TO_CPU; mustBeMapped = true; }
+
+		if (flags & Insight::Graphics::GPUBufferFlags::UNIFORM) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::STORAGE) { usage = VMA_MEMORY_USAGE_CPU_TO_GPU; mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_SRC) { usage = VMA_MEMORY_USAGE_CPU_ONLY;  mustBeMapped = true; }
+		if (flags & Insight::Graphics::GPUBufferFlags::VERTEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+		if (flags & Insight::Graphics::GPUBufferFlags::INDEX && flags & Insight::Graphics::GPUBufferFlags::TRANSFER_DST) { usage = VMA_MEMORY_USAGE_GPU_ONLY; mustBeMapped = false; }
+
+		ASSERT(usage != VMA_MEMORY_USAGE_UNKNOWN && "[ToVMAMemoryUsage] GPUBufferFlag not setup.");
+
+		return usage;
+	}
+
+	VkPipelineBindPoint ToVulkanPipelineBindPoint(PipelineBindPoint bindPoint)
+	{
+		switch (bindPoint)
+		{
+			case PipelineBindPoint::Graphics: return VK_PIPELINE_BIND_POINT_GRAPHICS;
+			case PipelineBindPoint::Compute: return VK_PIPELINE_BIND_POINT_COMPUTE;
+			case PipelineBindPoint::Ray_Tracing: return VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR;
+		}
+		return VK_PIPELINE_BIND_POINT_GRAPHICS;
+	}
+
+	VkPipelineStageFlags ToVulkanPipelineStageFlags(const PipelineStageFlags& flags)
+	{
+		VkPipelineStageFlags vFlags = 0;
+		if (flags & (u32)PipelineStage::Top_Of_Pipe)				{ vFlags |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; }
+		if (flags & (u32)PipelineStage::Draw_Indirect)				{ vFlags |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; }
+		if (flags & (u32)PipelineStage::Vertex_Input)				{ vFlags |= VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; }
+		if (flags & (u32)PipelineStage::Vertex_Shader)				{ vFlags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Tess_Control_Shader)		{ vFlags |= VK_PIPELINE_STAGE_TESSELLATION_CONTROL_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Tess_Evaluation_Shader)		{ vFlags |= VK_PIPELINE_STAGE_TESSELLATION_EVALUATION_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Geometry_Shader)			{ vFlags |= VK_PIPELINE_STAGE_GEOMETRY_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Fragment_Shader)			{ vFlags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Early_Fragment_Test)		{ vFlags |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; }
+		if (flags & (u32)PipelineStage::Late_Fragment_Test)			{ vFlags |= VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT; }
+		if (flags & (u32)PipelineStage::Color_Attachment_Output)	{ vFlags |= VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT; }
+		if (flags & (u32)PipelineStage::Compute_Shader)				{ vFlags |= VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT; }
+		if (flags & (u32)PipelineStage::Transfer)					{ vFlags |= VK_PIPELINE_STAGE_TRANSFER_BIT; }
+		if (flags & (u32)PipelineStage::Bottom_Of_Pipe)				{ vFlags |= VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT; }
+		if (flags & (u32)PipelineStage::Host)						{ vFlags |= VK_PIPELINE_STAGE_HOST_BIT; }
+		if (flags & (u32)PipelineStage::All_Graphics)				{ vFlags |= VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT; }
+		if (flags & (u32)PipelineStage::All_Commands)				{ vFlags |= VK_PIPELINE_STAGE_ALL_COMMANDS_BIT; }
+		return vFlags;
+	}
+
+	VkAccessFlags ToVulkanAccessFlags(const AccessFlags& flags)
+	{
+		VkAccessFlags vFlags = 0;
+		if (flags & (u32)Access::Indirect_Command_Read)				{ vFlags |= VK_ACCESS_INDIRECT_COMMAND_READ_BIT; }
+		if (flags & (u32)Access::Index_Read)						{ vFlags |= VK_ACCESS_INDEX_READ_BIT; }
+		if (flags & (u32)Access::Vertex_Attribute_Read)				{ vFlags |= VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT; }
+		if (flags & (u32)Access::Uniform_Read)						{ vFlags |= VK_ACCESS_UNIFORM_READ_BIT; }
+		if (flags & (u32)Access::Input_Attachmnet_Read)				{ vFlags |= VK_ACCESS_INPUT_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Shader_Read)						{ vFlags |= VK_ACCESS_SHADER_READ_BIT; }
+		if (flags & (u32)Access::Shader_Write)						{ vFlags |= VK_ACCESS_SHADER_WRITE_BIT; }
+		if (flags & (u32)Access::Color_Attachment_Read)				{ vFlags |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Color_Attachment_Write)			{ vFlags |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT; }
+		if (flags & (u32)Access::Depth_Stencil_Attachment_Read)		{ vFlags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT; }
+		if (flags & (u32)Access::Depth_Stencil_Attachment_Write)	{ vFlags |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT; }
+		if (flags & (u32)Access::Transfer_Read)						{ vFlags |= VK_ACCESS_TRANSFER_READ_BIT; }
+		if (flags & (u32)Access::Transfer_Write)					{ vFlags |= VK_ACCESS_TRANSFER_WRITE_BIT; }
+		if (flags & (u32)Access::Host_Read)							{ vFlags |= VK_ACCESS_HOST_READ_BIT; }
+		if (flags & (u32)Access::Host_Write)						{ vFlags |= VK_ACCESS_HOST_WRITE_BIT; }
+		if (flags & (u32)Access::Memory_Read)						{ vFlags |= VK_ACCESS_MEMORY_READ_BIT; }
+		if (flags & (u32)Access::Memory_Write)						{ vFlags |= VK_ACCESS_MEMORY_WRITE_BIT; }
+		return vFlags;
+	}
+
+	//void* AddImageVulkan(Insight::Graphics::GPUImage* image, Insight::Graphics::GPUImageView* imageView)
+	//{
+	//	//if (imguiVulkanImages.find((u64)image) != imguiVulkanImages.end())
+	//	//{
+	//	//	return imguiVulkanImages.at((u64)image);
+	//	//}
+
+	//	Insight::GraphicsAPI::Vulkan::GPUImageVulkan* imageV = static_cast<Insight::GraphicsAPI::Vulkan::GPUImageVulkan*>(image);
+	//	Insight::GraphicsAPI::Vulkan::GPUImageViewVulkan* imageViewV = static_cast<Insight::GraphicsAPI::Vulkan::GPUImageViewVulkan*>(imageView);
+	//	Insight::Graphics::GPUSampler* sampler = nullptr;
+	//	Insight::Graphics::GPUSamplerDesc samplerDesc = imageV->GetDesc().Sampler;
+	//	ASSERT(!Insight::Graphics::GPUSamplerCache::Instance()->GetItem(samplerDesc.Hash(), sampler));
+	//	Insight::GraphicsAPI::Vulkan::GPUSamplerVulkan* samplerV = static_cast<Insight::GraphicsAPI::Vulkan::GPUSamplerVulkan*>(sampler);
+
+	//	return ImGui_ImplVulkan_AddTexture(samplerV->GetSampler(), imageViewV->GetImageView(), ToVulkanImageLayout(imageV->GetDesc().FinalLayout));
+	//	//imguiVulkanImages.emplace((u64)image,ImGui_ImplVulkan_AddTexture(samplerV->GetSampler(), imageViewV->GetImageView(), ToVulkanImageLayout(imageV->GetDesc().FinalLayout)));
+	//	//return imguiVulkanImages.at((u64)image);
+	//}
+
+	//void FreeImageVulkan(void* image)
+	//{
+	//	ImGui_ImplVulkan_FreeTexture(image);
+	//}
+}

@@ -206,6 +206,7 @@ namespace Insight
 
 		IS_CORE_INFO("UPDATE LOOP COUNT: {0}", m_loopCount);
 		IS_CORE_INFO("UPDATE FRAME COUNT: {0}", m_frameCount);
+		m_graphicsModule->WaitForIdle();
 	}
 
 	void Application::RenderLoop()
