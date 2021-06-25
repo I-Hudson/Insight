@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/GraphicsAPI/Vulkan/GPUAdapterVulkan.h"
 #include "Engine/GraphicsAPI/Vulkan/VulkanUtils.h"
 

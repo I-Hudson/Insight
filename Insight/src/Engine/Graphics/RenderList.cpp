@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/RenderList.h"
 
 namespace Insight::Graphics

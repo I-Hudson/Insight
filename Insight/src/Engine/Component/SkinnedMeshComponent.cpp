@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Component/SkinnedMeshComponent.h"
 #include "Engine/Component/AnimatorComponent.h"
 #include "Engine/Entity/Entity.h"

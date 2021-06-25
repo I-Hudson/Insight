@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Component/AnimatorComponent.h"
 #include "glm/gtx/quaternion.hpp"
 

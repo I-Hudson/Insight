@@ -109,7 +109,7 @@ namespace Insight::Editor
 			}
 
 			Entity selectedEntity = Module::EditorModule::Instance()->GetEditorPanel<SceneHierarchyPanel>()->GetSelectedEntity();
-			if (selectedEntity.IsValid())
+			if (!Scene::ActiveScene()->IsPlaying() && selectedEntity.IsValid())
 			{
 				ImGuizmo::SetOrthographic(false);
 				ImGuizmo::SetDrawlist();
@@ -123,7 +123,7 @@ namespace Insight::Editor
 				glm::mat4 transform = tc.GetTransform();;
 				glm::vec3 originalRotation = tc.GetRotation();
 
-				if (ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION::ROTATE,
+				if (ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), ImGuizmo::OPERATION::TRANSLATE,
 					ImGuizmo::MODE::LOCAL, glm::value_ptr(transform)))
 				{
 					tc.SetTransform(transform);

@@ -1,9 +1,9 @@
-#include "ispch.h"
+
 #include "Engine/Model/ModelLoading.h"
 #include "Engine/Model/Bone.h"
 #include "glm/gtc/type_ptr.hpp"
 #include <filesystem>
-#include "Engine/FileSystem/FileSystem.h"
+#include "Engine/FileSystem/File.h"
 #include "Engine/Graphics/Graphics.h"
 
 #include "Engine/Module/GraphicsModule.h"
@@ -55,7 +55,7 @@ namespace Insight::ModelLoading
 			return;
 		}
 		// retrieve the directory path of the filepath
-		std::string fileDirectory = std::move(FileSystem::FileSystemManager::WindowsToUinxFilePath(filePath));
+		std::string fileDirectory = std::move(File::WindowsToUinxFilePath(filePath));
 		fileDirectory = std::move(fileDirectory.substr(0, fileDirectory.find_last_of('/')));
 		model.m_mesh.m_meshName = scene->mRootNode->mName.C_Str();
 		ProcessNode(model.m_mesh, scene->mRootNode, scene, fileDirectory);
@@ -392,7 +392,7 @@ namespace Insight::ModelLoading
 			return;
 		}
 
-		std::string fileDirectory = std::move(FileSystem::FileSystemManager::WindowsToUinxFilePath(filePath));
+		std::string fileDirectory = std::move(File::WindowsToUinxFilePath(filePath));
 		fileDirectory = std::move(fileDirectory.substr(0, fileDirectory.find_last_of('/')));
 
 		const tinygltf::Scene& rootScene = glTFInput.scenes[0];

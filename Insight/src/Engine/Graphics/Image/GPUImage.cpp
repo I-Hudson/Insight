@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/Image/GPUImage.h"
 #include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUImageVulkan.h"

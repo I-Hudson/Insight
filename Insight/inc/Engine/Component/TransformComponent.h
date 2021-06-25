@@ -3,6 +3,7 @@
 #include "Engine/Component/Component.h"
 #include "Engine/Component/Generated/TransformComponent_reflect_generated.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 REFLECT_STRUCT()
 struct TransformComponentData : public ComponentData
@@ -11,7 +12,11 @@ struct TransformComponentData : public ComponentData
 
 	TransformComponentData();
 	REFLECT_PROPERTY(ShowInEditor)
-	glm::mat4 Transform;
+	glm::vec3 Position;
+	REFLECT_PROPERTY(ShowInEditor)
+	glm::quat Rotation;
+	REFLECT_PROPERTY(ShowInEditor)
+	glm::vec3 Scale;
 };
 
 class IS_API TransformComponent : public Component

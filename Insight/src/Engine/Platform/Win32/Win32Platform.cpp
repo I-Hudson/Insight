@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Platform/Win32/Win32Platform.h"
 #include "Engine/Core/Utils.h"
 #include "Engine/Platform/Platform.h"

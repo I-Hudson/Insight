@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Entity/EntityManager.h"
 
 EntityManager::EntityManager(Scene* scene, ComponentManager& componentManager)

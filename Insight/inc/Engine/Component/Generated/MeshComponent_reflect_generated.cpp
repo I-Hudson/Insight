@@ -1,4 +1,3 @@
-#include "ispch.h"
 #include "../MeshComponent.h"
 
 Reflect::ReflectMemberProp MeshComponent::__REFLECT_MEMBER_PROPS__[1] = {

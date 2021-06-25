@@ -5,7 +5,7 @@
 #include "Engine/Graphics/PixelFormatExtensions.h"
 #include "stb_image.h"
 #include "Engine/Utils/Hasher.h"
-#include "Engine/FileSystem/FileSystem.h"
+#include "Engine/FileSystem/File.h"
 
 namespace Insight::Graphics
 {
@@ -126,7 +126,7 @@ namespace Insight::Graphics
 		static GPUImageDesc Texture(u32 levels, SampleLevel samples, PixelFormat format, std::string const& dataPath)
 		{
 			int x, y, c;
-			void* data = stbi_load(FileSystem::FileSystemManager::WindowsToUinxFilePath(dataPath).c_str(), &x, &y, &c, STBI_rgb_alpha);
+			void* data = stbi_load(File::WindowsToUinxFilePath(dataPath).c_str(), &x, &y, &c, STBI_rgb_alpha);
 			if (!data)
 			{
 				IS_CORE_ERROR("[GPUImageDesc::Texture] stbi couldn't load. '{0}'", stbi_failure_reason());

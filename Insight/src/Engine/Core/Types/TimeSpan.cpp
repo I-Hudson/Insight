@@ -1,6 +1,6 @@
 // Copyright (c) 2012-2021 Wojciech Figat. All rights reserved.
 
-#include "ispch.h"
+
 #include "Engine/Core/Utils.h"
 #include "Engine/Core/Types/TimeSpan.h"
 

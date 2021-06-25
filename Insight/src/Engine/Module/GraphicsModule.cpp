@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Module/GraphicsModule.h"
 #include "Engine/Core/Application.h"
 #include "Engine/Module/WindowModule.h"
@@ -349,6 +349,30 @@ namespace Insight::Module
 				for (auto& drawCallIndex : DrawCallList.DrawCalls)
 				{
 					Graphics::DrawCall drawCall = renderList->DirectionalLight.DrawCalls.at(drawCallIndex);
+
+					struct PushConstant
+					{
+						glm::mat4 ModelMatrix;
+						int IsSkinnedMesh;
+					};
+
+					PushConstant pc
+					{
+						drawCall.WorldTransform,
+						drawCall.IsSkinnedMesh && drawCall.Skinned.BoneMatrices != nullptr
+					};
+					{
+						IS_PROFILE_SCOPE("PushConstant");
+						cmdBuffer->BindPushConstants(defaultPipeline, ShaderStage::Vertex, 0, sizeof(PushConstant), &pc);
+					}
+
+					{
+						Graphics::GPUDescriptorSet* set1 = nullptr;
+						IS_PROFILE_SCOPE("Build per draw call descriptor set");
+						builder->BindBuffer(0, drawCall.Skinned.BoneMatrices, DescriptorType::Storage_Buffer, ShaderStage::Vertex, drawCall.Skinned.BoneMatrices != nullptr)->Build(set1);
+						Graphics::GPUDescriptorSet* fragSets[] = { set1 };
+						cmdBuffer->BindDescriptorSets(PipelineBindPoint::Graphics, defaultPipeline, 1, ARRAY_COUNT(fragSets), fragSets, 0, nullptr);
+					}
 
 					{
 						IS_PROFILE_SCOPE("Bind vertex/index");

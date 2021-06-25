@@ -90,7 +90,7 @@ project "Insight"
 
     prebuildcommands
     {
-        "\"$(ProjectDir)vendor/Reflect/bin/" .. outputdir .. "/ReflectEXE/ReflectEXE.exe\" \"$(ProjectDir)inc\" pchInclude=ispch.h",
+        "\"$(ProjectDir)vendor/Reflect/bin/" .. outputdir .. "/ReflectEXE/ReflectEXE.exe\" \"$(ProjectDir)inc\"",
     }
 
     filter "system:windows"

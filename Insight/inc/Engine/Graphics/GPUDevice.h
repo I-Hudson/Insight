@@ -7,6 +7,7 @@
 #include "GPUAdapter.h"
 #include "Enums.h"
 #include "Config.h"
+#include <queue>
 
 namespace Insight::Graphics
 {

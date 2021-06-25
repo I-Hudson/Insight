@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Time/Time.h"
 
 std::chrono::high_resolution_clock Time::s_clock;

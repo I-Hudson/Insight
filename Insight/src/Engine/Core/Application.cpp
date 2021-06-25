@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 
 #include "Engine/Core/Application.h"
 #include "Engine/Core/Log.h"
@@ -15,9 +15,6 @@
 #include "Engine/Graphics/ImGuiRenderer.h"
 #include "Engine/Event/EventManager.h"
 #include "Engine/Scene/Scene.h"
-
-#include "Engine/FileSystem/FileSystem.h"
-#include "Engine/RTTI/RTTI.h"
 
 #include "Engine/Instrumentor/Instrumentor.h"
 #include "Engine/Serialization/Serializable.h"
@@ -50,8 +47,6 @@ namespace Insight
 
 		Config::GetInstance().ParseInFolder("./data/config");
 
-		m_fileSystem = ::New<FileSystem::FileSystemManager>("F:/Users/Documents/SourceControl/Github/C++ Porjects/Vulkan/PBC/data");
-
 		ASSERT(JS::JobSystemManager::Instance().Init() == JS::JobSystemManager::ReturnCode::Succes);
 
 		m_moduleManager = ::New<Module::ModuleManager>();
@@ -83,7 +78,6 @@ namespace Insight
 
 		Scene::ActiveScene()->Unload();
 		::Delete(m_utitledScene);
-		::Delete(m_fileSystem);
 
 
 		Module::ModuleManager::Instance()->RemoveModule<Module::AssetModule>();
@@ -168,7 +162,6 @@ namespace Insight
 				deltaTime = Time::GetDeltaTime();
 				JS::JobSystemManager::Instance().Update(64);
 
-				m_fileSystem->Update();
 				m_inputModule->Update(deltaTime);
 				m_windowModule->Update(deltaTime);
 

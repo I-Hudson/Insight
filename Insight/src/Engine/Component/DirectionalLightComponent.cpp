@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Component/DirectionalLightComponent.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Component/TransformComponent.h"

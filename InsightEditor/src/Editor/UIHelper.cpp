@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Editor/UIHelper.h"
 
 namespace Insight::Editor
@@ -77,7 +77,7 @@ namespace Insight::Editor
 			floatArray[0] = 0.0f;
 		}
 		ImGui::SameLine();
-		r |= ImGui::DragFloat("##X", floatArray, dragSpeed, 0.0f, floatMax);
+		r |= ImGui::DragFloat(("##X" + name).c_str(), floatArray, dragSpeed, 0.0f, floatMax);
 		ImGui::PopItemWidth();
 		ImGui::SameLine();
 
@@ -86,7 +86,7 @@ namespace Insight::Editor
 			floatArray[1] = 0.0f;
 		}
 		ImGui::SameLine();
-		r |= ImGui::DragFloat("##Y", &floatArray[1], dragSpeed, 0.0f, floatMax);
+		r |= ImGui::DragFloat(("##Y" + name).c_str(), &floatArray[1], dragSpeed, 0.0f, floatMax);
 		ImGui::PopItemWidth();
 
 		if (vecSize > 2)
@@ -97,7 +97,7 @@ namespace Insight::Editor
 				floatArray[2] = 0.0f;
 			}
 			ImGui::SameLine();
-			r |= ImGui::DragFloat("##Z", &floatArray[2], dragSpeed, 0.0f, floatMax);
+			r |= ImGui::DragFloat(("##Z" + name).c_str(), &floatArray[2], dragSpeed, 0.0f, floatMax);
 			ImGui::PopItemWidth();
 		}
 
@@ -109,7 +109,7 @@ namespace Insight::Editor
 				floatArray[3] = 0.0f;
 			}
 			ImGui::SameLine();
-			r |= ImGui::DragFloat("##W", &floatArray[3], dragSpeed, 0.0f, floatMax);
+			r |= ImGui::DragFloat(("##W" + name).c_str(), &floatArray[3], dragSpeed, 0.0f, floatMax);
 			ImGui::PopItemWidth();
 		}
 

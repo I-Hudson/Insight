@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Core/Maths/Math.h"
 
 #include "glm/gtx/matrix_decompose.hpp"
@@ -82,9 +82,14 @@ namespace Insight::Maths
 		return true;
 	}
 
-	glm::vec3 RadiansToDegressVector(glm::vec3 const& vec)
+	glm::vec3 RadiansToDegreesVector(glm::vec3 const& vec)
 	{
 		return glm::vec3(glm::degrees(vec.x), glm::degrees(vec.y), glm::degrees(vec.z));
+	}
+
+	glm::vec3 DegreesToRadiansVector(glm::vec3 const& vec)
+	{
+		return glm::vec3(glm::radians(vec.x), glm::radians(vec.y), glm::radians(vec.z));
 	}
 
 	glm::mat4 RotationVectorRadToMatrix(glm::vec3 const& rotation)

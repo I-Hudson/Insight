@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Assets/Asset.h"
 #include "Engine/Model/ModelLoading.h"
 

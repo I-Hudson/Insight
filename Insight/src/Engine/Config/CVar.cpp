@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Config/CVar.h"
 #include "Engine/Config/ConfigRegistry.h"
 #include <glm/glm.hpp>

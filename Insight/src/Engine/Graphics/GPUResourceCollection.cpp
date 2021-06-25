@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/GPUResourceCollection.h"
 #include "Engine/Graphics/GPUResource.h"
 

@@ -1,4 +1,3 @@
-#include "ispch.h"
 #include "../Entity.h"
 
 Reflect::ReflectMemberProp EntityData::__REFLECT_MEMBER_PROPS__[1] = {

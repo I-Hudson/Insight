@@ -1,8 +1,9 @@
-#include "ispch.h"
 #include "../TransformComponent.h"
 
-Reflect::ReflectMemberProp TransformComponentData::__REFLECT_MEMBER_PROPS__[1] = {
-	Reflect::ReflectMemberProp("Transform", Reflect::Util::GetTypeName<glm::mat4>(), __REFLECT__Transform(), {"ShowInEditor"}),
+Reflect::ReflectMemberProp TransformComponentData::__REFLECT_MEMBER_PROPS__[3] = {
+	Reflect::ReflectMemberProp("Position", Reflect::Util::GetTypeName<glm::vec3>(), __REFLECT__Position(), {"ShowInEditor"}),
+	Reflect::ReflectMemberProp("Rotation", Reflect::Util::GetTypeName<glm::quat>(), __REFLECT__Rotation(), {"ShowInEditor"}),
+	Reflect::ReflectMemberProp("Scale", Reflect::Util::GetTypeName<glm::vec3>(), __REFLECT__Scale(), {"ShowInEditor"}),
 };
 
 Reflect::ReflectFunction TransformComponentData::GetFunction(const char* functionName)

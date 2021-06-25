@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/ShaderCompliation.h"
 
 #include "glslang/Public/ShaderLang.h"

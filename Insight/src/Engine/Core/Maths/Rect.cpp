@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Core/Maths/Rect.h"
 
 namespace Insight::Maths

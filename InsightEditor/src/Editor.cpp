@@ -119,8 +119,8 @@ namespace Insight::Editor
 					skinnedMesh.SetModel(&*graphicsModel);
 					AnimatorComponent& animCom = animatedMesh.AddComponent<AnimatorComponent>();
 					animCom.SetSkelton(&graphicsModel->GetMesh().GetSkeleton());
-					//animCom.PlayAnimation(graphicsModel->GetMesh().GetAnimation(0));
-					//graphicsModel->GetMesh().GetAnimation(0)->SetPlayBackSpeed(500);
+					animCom.PlayAnimation(graphicsModel->GetMesh().GetAnimation(0));
+					graphicsModel->GetMesh().GetAnimation(0)->SetPlayBackSpeed(1);
 
 					Entity& staticMesh = Scene::ActiveScene()->CreateEntity("StaticMesh");
 					MeshComponent& meshComponent = staticMesh.AddComponent<MeshComponent>();

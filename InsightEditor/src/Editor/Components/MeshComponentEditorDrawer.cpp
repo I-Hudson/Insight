@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Editor/Components/MeshComponentEditorDrawer.h"
 #include "Engine/Component/MeshComponent.h"
 #include "Engine/Library/ModelLibrary.h"

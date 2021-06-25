@@ -9,7 +9,7 @@
 #include "Engine/Module/ModuleManager.h"
 #include "Engine/Module/AssetModule.h"
 
-#include "Engine/FileSystem/FileSystem.h"
+#include "Engine/FileSystem/File.h"
 
 #include "Engine/Input/Input.h"
 

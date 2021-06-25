@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Config/Config.h"
 
 #include <filesystem>

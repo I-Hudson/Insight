@@ -1,8 +1,8 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/Shaders/GPUShader.h"
 #include "Engine/Platform/Platform.h"
-#include "Engine/FileSystem/FileSystem.h"
 #include "Engine/Graphics/ShaderCompliation.h"
+#include "Engine/FileSystem/File.h"
 
 #include "Engine/Graphics/Graphics.h"
 #include "Engine/GraphicsAPI/Vulkan/GPUShaderVulkan.h"
@@ -56,7 +56,7 @@ namespace Insight::Graphics
 		}
 		else if (input == ShaderStageInput::FilePath)
 		{
-			auto data = FileSystem::FileSystemManager::Instance()->ReadFileToVector(str);
+			auto data = File::ReadFileToVector(str);
 			m_loadedShaderString = std::string(data.begin(), data.end());
 		}
 	}

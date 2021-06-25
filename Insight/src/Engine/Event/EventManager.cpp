@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Event/EventManager.h"
 
 #include "Engine/Core/Log.h"

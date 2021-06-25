@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Time/Stopwatch.h"
 
 	void Stopwatch::Start()

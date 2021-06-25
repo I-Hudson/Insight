@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Core/Log.h"
 #include <vulkan/vulkan_core.h>
 

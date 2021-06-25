@@ -18,11 +18,6 @@ namespace Insight
 		class AssetModule;
 	}
 
-	namespace FileSystem
-	{
-		class FileSystemManager;
-	}
-
 	enum UpdateThreadState
 	{
 		SAME_FRMAE = 0,
@@ -71,8 +66,6 @@ namespace Insight
 		bool m_triggerRender = true;
 		bool m_renderComplete = true;
 		Scene* m_utitledScene;
-
-		FileSystem::FileSystemManager* m_fileSystem;
 
 		Module::ModuleManager* m_moduleManager;
 		Module::WindowModule* m_windowModule;

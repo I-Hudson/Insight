@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/Image/GPUImageDesc.h"
 
 

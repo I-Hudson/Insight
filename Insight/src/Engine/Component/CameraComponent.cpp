@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Component/CameraComponent.h"
 
 #include "Engine/Component/TransformComponent.h"

@@ -1,4 +1,3 @@
-#include "ispch.h"
 #include "../Component.h"
 
 Reflect::ReflectMemberProp ComponentData::__REFLECT_MEMBER_PROPS__[1] = {

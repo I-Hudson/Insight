@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Editor/Components/CameraComponentEditorDrawer.h"
 #include "Engine/Component/CameraComponent.h"
 

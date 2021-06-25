@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/GraphicsAPI/Vulkan/Win32/Win32VulkanPlatform.h"
 #include "vulkan/vulkan_win32.h"
 

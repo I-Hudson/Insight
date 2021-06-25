@@ -1,4 +1,3 @@
-#include "ispch.h"
 #include "../DirectionalLightComponent.h"
 
 Reflect::ReflectMemberProp DirectionalLightComponentData::__REFLECT_MEMBER_PROPS__[4] = {

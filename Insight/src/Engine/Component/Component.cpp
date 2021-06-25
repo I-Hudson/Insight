@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Component/Component.h"
 #include "Engine/Entity/Entity.h"
 #include "Engine/Entity/EntityManager.h"

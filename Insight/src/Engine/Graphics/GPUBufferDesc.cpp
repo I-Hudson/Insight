@@ -1,4 +1,4 @@
-#include "ispch.h"
+
 #include "Engine/Graphics/GPUBufferDesc.h"
 #include "Engine/Platform/Platform.h"
 #include "Engine/Graphics/PixelFormatExtensions.h"

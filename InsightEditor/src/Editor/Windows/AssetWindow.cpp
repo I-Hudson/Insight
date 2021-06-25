@@ -1,5 +1,5 @@
 #include "Editor/Windows/AssetWindow.h"
-#include "Engine/FileSystem/FileSystem.h"
+#include "Engine/FileSystem/File.h"
 
 namespace Insight::Editor
 {
