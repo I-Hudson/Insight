@@ -230,7 +230,10 @@ namespace Insight::GraphicsAPI::Vulkan
         }
         if (validationLayerPresent)
         {
-            layerExtensions.push_back(validationLayerName);
+            if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
+            {
+                layerExtensions.push_back(validationLayerName);
+            }
         }
         else
         {
@@ -299,7 +302,10 @@ namespace Insight::GraphicsAPI::Vulkan
         bool hasKhronosStandardValidationLayer = ContainsLayer(deviceLayerExtensions, vkLayerKhronosValidation);
         if (hasKhronosStandardValidationLayer)
         {
-            layerExtensions.push_back(vkLayerKhronosValidation);
+            if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
+            {
+                layerExtensions.push_back(vkLayerKhronosValidation);
+            }
         }
 
         std::vector<const char*> availableExtensions;
@@ -355,7 +361,17 @@ namespace Insight::GraphicsAPI::Vulkan
         {
             if (ListContains(availableExtensions, GDeviceExtensions[i]))
             {
-                deviceExtensions.push_back(GDeviceExtensions[i]);
+                if (strcmp(GDeviceExtensions[i], VK_EXT_VALIDATION_CACHE_EXTENSION_NAME) == 0)
+                {
+                    if ((bool)CONFIG_VAL(Config::GraphicsConfig.Validation))
+                    {
+                        deviceExtensions.push_back(GDeviceExtensions[i]);
+                    }
+                }
+                else
+                {
+                    deviceExtensions.push_back(GDeviceExtensions[i]);
+                }
             }
         }
 
