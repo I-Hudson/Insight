@@ -403,6 +403,7 @@ FodyWeavers.xsd
 # Build folders
 bin/
 bin-int/
+vendor/
 
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
