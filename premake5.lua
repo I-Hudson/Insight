@@ -54,13 +54,26 @@ workspace "Insight"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+
 IncludeDirs = {}
 IncludeDirs["InsightCore"] = "%{wks.location}/InsightCore/inc"
 IncludeDirs["InsightGraphics"] = "%{wks.location}/InsightGraphics/inc"
+IncludeDirs["InsightApp"] = "%{wks.location}/InsightApp/inc"
 IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 
+IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
+IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
+IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
+
+LibDirs = {}
+LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
+
+group "Dependices"
+        include "vendor/glm/glm.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"
+        include "InsightApp/InsightApp.lua"
 group "Editor"
     include "InsightEditor/InsightEditor.lua"

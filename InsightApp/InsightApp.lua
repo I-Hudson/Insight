@@ -1,4 +1,4 @@
-project "InsightCore"  
+project "InsightApp"  
     kind "SharedLib"   
     language "C++"
     cppdialect "C++17"
@@ -10,12 +10,17 @@ project "InsightCore"
 
     defines
     {
-        "IS_EXPORT_CORE_DLL"
+        "IS_EXPORT_APP_DLL"
     }
     
     includedirs
     {
         "inc",
+        "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightGraphics}",
+
+        "%{IncludeDirs.glfw}",
+        "%{IncludeDirs.glm}",
     }
 
     files 
@@ -27,10 +32,16 @@ project "InsightCore"
 
     links
     {
+        "InsightCore",
+        "InsightGraphics",
+
+        "glfw3.lib",
+        "glm",
     }
 
     libdirs
     {
+        "%{wks.location}/vendor/glfw/lib",
     }
 
     filter "configurations:Debug"

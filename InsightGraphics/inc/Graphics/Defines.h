@@ -6,3 +6,5 @@
 #else
 #define IS_GRAPHICS __declspec(dllimport)
 #endif
+
+#pragma warning( disable : 4251 )

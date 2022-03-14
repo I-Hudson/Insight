@@ -1,5 +1,5 @@
 #include "Editor.h"
-#include "Core/EntryPoint.h"
+#include "App/EntryPoint.h"
 
 namespace Insight
 {
@@ -17,7 +17,7 @@ namespace Insight
 	}
 }
 
-Insight::Core::Engine* CreateApplication()
+Insight::App::Engine* CreateApplication()
 {
 	return new Insight::Editor::Editor();
 }

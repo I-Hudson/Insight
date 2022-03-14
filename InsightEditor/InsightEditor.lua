@@ -18,24 +18,42 @@ project "InsightEditor"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.InsightApp}",
+    
+        "%{IncludeDirs.glfw}",
+        "%{IncludeDirs.glm}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
     }
 
     links
     {
-        "InsightCore"
+        "InsightCore",
+        "InsightGraphics",
+        "InsightApp",
+
+        "glfw3.lib",
+        "glm",
+    }
+
+    libdirs
+    {
+        "%{wks.location}/vendor/glfw/lib",
     }
 
     postbuildcommands
     {
         "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightCore/InsightCore.dll\" \"%{cfg.targetdir}\"",
         "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightGraphics/InsightGraphics.dll\" \"%{cfg.targetdir}\"",
+        "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightApp/InsightApp.dll\" \"%{cfg.targetdir}\"",
+
+        "{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
+
     }
 
     filter "configurations:Debug"

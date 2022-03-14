@@ -17,6 +17,10 @@ project "InsightGraphics"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+
+        "%{IncludeDirs.glfw}",
+        "%{IncludeDirs.glm}",
+        "%{IncludeDirs.vulkan}",
     }
 
     files 
@@ -28,6 +32,16 @@ project "InsightGraphics"
 
     links
     {
+        "InsightCore",
+        "glfw3.lib",
+        "glm",
+        "vulkan-1.lib",
+    }
+
+    libdirs
+    {
+        "%{wks.location}/vendor/glfw/lib",
+        "%{LibDirs.vulkan}",
     }
 
     filter "configurations:Debug"

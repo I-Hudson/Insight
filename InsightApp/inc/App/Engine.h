@@ -1,22 +1,24 @@
 #pragma once
 
-#include "Core/Defines.h"
+#include "Defines.h"
 
 // -- Managers --
 #include "Graphics/GraphicsManager.h"
 
+#include "Graphics/Window.h"
+
 namespace Insight
 {
-	namespace Core
+	namespace App
 	{
 		/*
 			Main engine class.
 		*/
-		class IS_CORE Engine
+		class IS_APP Engine
 		{
 		public:
 
-			void Init();
+			bool Init();
 			void Update();
 			void Destroy();
 
@@ -24,9 +26,7 @@ namespace Insight
 			virtual void OnDestroy() { }
 
 		private:
-
 			Graphics::GraphicsManager m_graphicsManager;
-
 		};
 	}
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Core/Engine.h"
+#include "App/Engine.h"
 
 namespace Insight
 {
 	namespace Editor
 	{
-		class Editor : public Insight::Core::Engine
+		class Editor : public Insight::App::Engine
 		{
 		public:
 
