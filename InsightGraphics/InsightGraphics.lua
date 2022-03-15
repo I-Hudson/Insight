@@ -20,6 +20,8 @@ project "InsightGraphics"
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.stb}",
+        "%{IncludeDirs.vma}",
         "%{IncludeDirs.vulkan}",
     }
 

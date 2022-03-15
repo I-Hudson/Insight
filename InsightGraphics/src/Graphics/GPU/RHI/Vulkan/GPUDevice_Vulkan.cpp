@@ -8,6 +8,9 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#define VMA_IMPLEMENTATION
+#include "VmaUsage.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -213,11 +216,22 @@ namespace Insight
 					m_queues[info.Queue] = m_device.getQueue(info.FamilyQueueIndex, info.FamilyQueueIndex);
 				}
 
+				// Initialise vulkan memory allocator
+				VmaAllocatorCreateInfo vmaAllocatorInfo{};
+				vmaAllocatorInfo.instance = m_instnace;
+				vmaAllocatorInfo.physicalDevice = m_adapter.GetPhysicalDevice();
+				vmaAllocatorInfo.device = m_device;
+				vmaCreateAllocator(&vmaAllocatorInfo, &m_vmaAllocator);
+
 				return true;
 			}
 
 			void GPUDevice_Vulkan::Destroy()
 			{
+				m_semaphoreManager.Destroy();
+
+				vmaDestroyAllocator(m_vmaAllocator);
+
 				m_device.destroy();
 				m_device = nullptr;
 

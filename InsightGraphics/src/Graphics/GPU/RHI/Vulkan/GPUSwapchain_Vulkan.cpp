@@ -1,4 +1,5 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUSwapchain_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/Window.h"
 
@@ -236,6 +237,7 @@ namespace Insight
 				{
 					GetDevice()->GetDevice().destroySwapchainKHR(oldSwapchain);
 				}
+				m_swapchainImages = GetDevice()->GetDevice().getSwapchainImagesKHR(m_swapchain);
 			}
 
 			void GPUSwapchain_Vulkan::Destroy()
@@ -255,7 +257,9 @@ namespace Insight
 
 			void GPUSwapchain_Vulkan::AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence)
 			{
-				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, {}, {});
+				vk::Semaphore* semaphoreVulkan = static_cast<vk::Semaphore*>(semaphore->GetRawResource());
+
+				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, *semaphoreVulkan, {});
 				m_nextImgeIndex = result.value;
 			}
 
@@ -265,7 +269,8 @@ namespace Insight
 				std::vector<vk::Semaphore> semaphoresVk(semaphoreCount);
 				for (size_t i = 0; i < semaphoreCount; ++i)
 				{
-					semaphoresVk[i] = vk::Semaphore(nullptr);
+					vk::Semaphore* s = static_cast<vk::Semaphore*>(semaphores[i]->GetRawResource());
+					semaphoresVk[i] = *s;
 				}
 
 				vk::Result result = {};

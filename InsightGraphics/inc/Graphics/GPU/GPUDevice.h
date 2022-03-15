@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/GraphicsManager.h"
+#include "Graphics/GPU/GPUSemaphore.h"
 
 namespace Insight
 {
@@ -31,6 +32,11 @@ namespace Insight
 			virtual GPUAdapter* GetAdapter() = 0;
 
 			static GPUDevice* Create();
+
+			GPUSemaphoreManager& GetSemaphoreManager() { return m_semaphoreManager; }
+
+		protected:
+			GPUSemaphoreManager m_semaphoreManager;
 		};
 
 		class GPUDeviceResource

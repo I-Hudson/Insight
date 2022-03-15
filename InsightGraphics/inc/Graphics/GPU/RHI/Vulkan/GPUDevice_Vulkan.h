@@ -3,6 +3,8 @@
 #include "Graphics/GPU/GPUDevice.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUAdapter_Vulkan.h"
 
+struct VmaAllocator_T;
+
 namespace Insight
 {
 	namespace Graphics
@@ -28,6 +30,7 @@ namespace Insight
 				vk::Instance& GetInstance() { return m_instnace; }
 				vk::Device& GetDevice() { return m_device; }
 				vk::Queue& GetQueue(GPUQueue queue);
+				VmaAllocator_T* GetVMAAllocator() const { return m_vmaAllocator; }
 
 			private:
 				GPUAdapter_Vulkan FindAdapter();
@@ -39,6 +42,7 @@ namespace Insight
 				GPUAdapter_Vulkan m_adapter;
 				vk::Instance m_instnace{ nullptr };
 				vk::Device m_device{ nullptr };
+				VmaAllocator_T* m_vmaAllocator{ nullptr };
 
 				std::unordered_map<GPUQueue, vk::Queue> m_queues;
 			};

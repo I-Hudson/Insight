@@ -6,6 +6,7 @@ namespace Insight
 	{
 		class GPUDevice;
 		class GPUSwapchain;
+		class GPUSemaphore;
 
 		class Renderer
 		{
@@ -22,8 +23,9 @@ namespace Insight
 			void Submit();
 
 		private:
-			GPUDevice* m_gpuDevice;
-			GPUSwapchain* m_swapchain;
+			GPUDevice* m_gpuDevice{ nullptr };
+			GPUSwapchain* m_swapchain{ nullptr };
+			GPUSemaphore* m_presentCompleteSemaphore{ nullptr };
 		};
 	}
 }

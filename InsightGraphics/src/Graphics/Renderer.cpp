@@ -17,10 +17,17 @@ namespace Insight
 				m_swapchain->Build(GPUSwapchainDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 				m_swapchain->Build(GPUSwapchainDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 			}
+
+			m_presentCompleteSemaphore = m_gpuDevice->GetSemaphoreManager().GetOrCreateSemaphore();
 		}
 
 		void Renderer::Destroy()
 		{
+			if (m_presentCompleteSemaphore)
+			{
+				m_gpuDevice->GetSemaphoreManager().ReturnSemaphore(m_presentCompleteSemaphore);
+			}
+
 			if (m_swapchain)
 			{
 				m_swapchain->Destroy();
@@ -36,12 +43,12 @@ namespace Insight
 
 		void Renderer::Prepare()
 		{
-			m_swapchain->AcquireNextImage(nullptr);
+			m_swapchain->AcquireNextImage(m_presentCompleteSemaphore);
 		}
 
 		void Renderer::Submit()
 		{
-			m_swapchain->Present(GPUQueue::GPUQueue_Graphics, { });
+			m_swapchain->Present(GPUQueue::GPUQueue_Graphics, { m_presentCompleteSemaphore });
 		}
 	}
 }

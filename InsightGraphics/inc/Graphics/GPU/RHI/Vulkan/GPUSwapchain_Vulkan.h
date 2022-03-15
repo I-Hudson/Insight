@@ -26,6 +26,7 @@ namespace Insight
 				vk::SwapchainKHR m_swapchain;
 				vk::SurfaceKHR m_surfaceKHR;
 				vk::ColorSpaceKHR m_colourSpace;
+				std::vector<vk::Image> m_swapchainImages;
 			};
 		}
 	}
