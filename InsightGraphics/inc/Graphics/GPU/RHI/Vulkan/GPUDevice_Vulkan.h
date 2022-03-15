@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Core/TypeAlias.h"
 #include "Graphics/GPU/GPUDevice.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUAdapter_Vulkan.h"
+#include "Graphics/GraphicsManager.h"
+
+#include <map>
 
 struct VmaAllocator_T;
 
@@ -30,6 +34,7 @@ namespace Insight
 				vk::Instance& GetInstance() { return m_instnace; }
 				vk::Device& GetDevice() { return m_device; }
 				vk::Queue& GetQueue(GPUQueue queue);
+				u32 GetQueueFamilyIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }
 				VmaAllocator_T* GetVMAAllocator() const { return m_vmaAllocator; }
 
 			private:
@@ -44,7 +49,8 @@ namespace Insight
 				vk::Device m_device{ nullptr };
 				VmaAllocator_T* m_vmaAllocator{ nullptr };
 
-				std::unordered_map<GPUQueue, vk::Queue> m_queues;
+				std::map<GPUQueue, vk::Queue> m_queues;
+				std::map<GPUQueue, u32> m_queueFamilyLookup;
 			};
 
 			class GPUResource_Vulkan : public GPUDeviceResource

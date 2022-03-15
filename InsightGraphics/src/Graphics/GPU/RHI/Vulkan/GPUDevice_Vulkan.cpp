@@ -1,7 +1,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
-#include <iostream>
 #include "Core/Defines.h"
-#include "Core/TypeAlias.h"
+
+#include <iostream>
 
 #ifdef IS_PLATFORM_WIN32
 #include <Windows.h>
@@ -214,6 +214,7 @@ namespace Insight
 				{
 					const QueueInfo& info = queueInfo[i];
 					m_queues[info.Queue] = m_device.getQueue(info.FamilyQueueIndex, info.FamilyQueueIndex);
+					m_queueFamilyLookup[info.Queue] = info.FamilyQueueIndex;
 				}
 
 				// Initialise vulkan memory allocator

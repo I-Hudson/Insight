@@ -38,27 +38,18 @@ namespace Insight
 			Destroy();
 		}
 
-		GPUImage* GPUImageManager::CreateImage(std::string key)
-		{
-			GPUImage* newImage = new RHI::Vulkan::GPUImage_Vulkan();
-			m_images.push_back(newImage);
-
-			if (!key.empty())
-			{
-				m_keyToImageLookup[key] = newImage;
-			}
-			return newImage;
-		}
-
-		GPUImage* GPUImageManager::GetImage(std::string key)
+		GPUImage* GPUImageManager::CreateOrGetImage(std::string key)
 		{
 			std::map<const std::string, GPUImage*>::iterator itr = m_keyToImageLookup.find(key);
-			if (itr == m_keyToImageLookup.end())
+			if (itr != m_keyToImageLookup.end())
 			{
-				// ERROR
-				return nullptr;
+				return itr->second;
 			}
-			return itr->second;
+
+			GPUImage* newImage = new RHI::Vulkan::GPUImage_Vulkan();
+			m_images.push_back(newImage);
+			m_keyToImageLookup[key] = newImage;
+			return newImage;
 		}
 
 		void GPUImageManager::DestroyImage(std::string key)

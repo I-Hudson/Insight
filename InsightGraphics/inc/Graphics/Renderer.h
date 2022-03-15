@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Graphics/GPU/GPUCommandList.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -19,10 +21,12 @@ namespace Insight
 
 		private:
 			// List all passes.
-			void Prepare();
-			void Submit();
+			void Prepare(GPUCommandList* cmdList);
+			void Submit(GPUCommandList* cmdList);
 
 		private:
+			GPUCommandListManager m_commandListManager;
+
 			GPUDevice* m_gpuDevice{ nullptr };
 			GPUSwapchain* m_swapchain{ nullptr };
 			GPUSemaphore* m_presentCompleteSemaphore{ nullptr };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Graphics/GraphicsManager.h"
 #include "Graphics/GPU/GPUSemaphore.h"
 
 namespace Insight

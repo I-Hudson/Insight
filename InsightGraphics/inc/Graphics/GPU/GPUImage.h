@@ -51,8 +51,7 @@ namespace Insight
 			GPUImageManager();
 			~GPUImageManager();
 
-			GPUImage* CreateImage(std::string key = "");
-			GPUImage* GetImage(std::string key);
+			GPUImage* CreateOrGetImage(std::string key);
 
 			void DestroyImage(std::string key);
 			void DestroyImage(GPUImage* image);
