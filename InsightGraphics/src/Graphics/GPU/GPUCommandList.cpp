@@ -17,6 +17,71 @@ namespace Insight
 			SubmitAndWait(queue, {}, {}, nullptr);
 		}
 
+		void GPUCommandList::SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
+		{
+			Submit(queue, waitSemaphores, signalSemaphores, fence);
+			// Get fence,
+			// Wait on fence,
+			// Return fence to manager.
+		}
+
+		void GPUCommandList::SetShader(GPUShader* shader)
+		{
+			m_pso.Shader = shader;
+		}
+
+		void GPUCommandList::AddRenderTarget(RenderTarget* renderTarget)
+		{
+			m_pso.RenderTargets.push_back(renderTarget);
+		}
+
+		void GPUCommandList::ClearRenderTargets()
+		{
+			m_pso.RenderTargets.clear();
+		}
+
+		void GPUCommandList::SetPrimitiveTopologyType(PrimitiveTopologyType primitiveTopologyType)
+		{
+			m_pso.PrimitiveTopologyType = primitiveTopologyType;
+		}
+
+		void GPUCommandList::SetPolygonMode(PolygonMode polygonMode)
+		{
+			m_pso.PolygonMode = polygonMode;
+		}
+
+		void GPUCommandList::SetCullMode(CullMode cullMode)
+		{
+			m_pso.CullMode = cullMode;
+		}
+
+		void GPUCommandList::SetSwapchainSubmit(bool swapchainSubmit)
+		{
+			m_pso.Swapchain = swapchainSubmit;
+		}
+
+		bool GPUCommandList::CanDraw()
+		{
+			GPUPipelineStateObject* pipelineStateObject = GPUPipelineStateObjectManager::Instance().GetOrCreatePSO(m_pso);
+			if(!pipelineStateObject || pipelineStateObject->Bind())
+			{
+				return;
+			}
+
+			// Do we have an active pipeline?
+				// Do we have an active renderpass? This should be all contained within GPUPipeline.
+				// we shouldn't need to have a separate GPURenderpass for this as renderpass
+				// should be cached within GPUPipeline.
+			// Bind all our descriptor.
+
+			return true;
+		}
+
+		void GPUCommandList::Reset()
+		{
+			m_pso = {};
+		}
+
 
 		GPUCommandListManager::GPUCommandListManager()
 		{

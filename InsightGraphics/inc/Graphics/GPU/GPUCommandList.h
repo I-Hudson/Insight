@@ -2,6 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Graphics/GPU/GPUDevice.h"
+#include "Graphics/GPU/GPUPipelineStateObject.h"
 #include <vector>
 #include <list>
 
@@ -11,6 +12,8 @@ namespace Insight
 	{
 		class GPUSemaphore;
 		class GPUFence;
+		class GPUShader;
+
 		class GPUCommandListManager;
 
 		enum class GPUCommandListType
@@ -43,14 +46,26 @@ namespace Insight
 
 			void Submit(GPUQueue queue);
 			void SubmitAndWait(GPUQueue queue);
+			void SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence);
 			virtual void Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence) = 0;
-			virtual void SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence) = 0;
+
+			void SetShader(GPUShader* shader);
+			void AddRenderTarget(RenderTarget* renderTarget);
+			void ClearRenderTargets();
+			void SetPrimitiveTopologyType(PrimitiveTopologyType primitiveTopologyType);
+			void SetPolygonMode(PolygonMode polygonMode);
+			void SetCullMode(CullMode cullMode);
+			void SetSwapchainSubmit(bool swapchainSubmit);
+
+			bool CanDraw();
+			void Reset();
 
 		protected:
 			GPUCommandListState m_state;
 			u32 m_recordCommandCount = 0;
 			GPUQueue m_queue;
 			GPUCommandListType m_type;
+			PipelineStateObject m_pso;
 
 			friend class GPUCommandListManager;
 		};

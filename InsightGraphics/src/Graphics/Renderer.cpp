@@ -48,7 +48,25 @@ namespace Insight
 		void Renderer::Prepare(GPUCommandList* cmdList)
 		{
 			m_swapchain->AcquireNextImage(m_presentCompleteSemaphore);
-			cmdList->Submit(GPUQueue_Graphics);
+
+			cmdList->SetPrimitiveTopologyType(PrimitiveTopologyType::TriangleList);
+			cmdList->SetPolygonMode(PolygonMode::Fill);
+			cmdList->SetCullMode(CullMode::Back);
+
+			// Render to a GBuffer.
+			//cmdList->SetShader(nullptr);
+			//cmdList->AddRenderTarget(nullptr /*Colour*/);
+			//cmdList->AddRenderTarget(nullptr /*Normal*/);
+			//cmdList->AddRenderTarget(nullptr /*Depth*/);
+			//cmdList->Draw(3, 1, 0, 0);
+
+			// Render straight to swapchain.
+			cmdList->SetShader(nullptr);
+			cmdList->ClearRenderTargets();
+			cmdList->SetSwapchainSubmit(true);
+			cmdList->Draw(3, 1, 0, 0);
+
+			cmdList->SubmitAndWait(GPUQueue_Graphics);
 		}
 
 		void Renderer::Submit(GPUCommandList* cmdList)

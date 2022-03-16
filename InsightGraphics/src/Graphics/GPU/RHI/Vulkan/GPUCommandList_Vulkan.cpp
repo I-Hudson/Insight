@@ -16,18 +16,23 @@ namespace Insight
 			void GPUCommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::Draw] CommandList is null.\n"; return; }
+				if (!CanDraw()) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] Unable to draw.\n"; return; }
 				m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+				++m_recordCommandCount;
 			}
 
 			void GPUCommandList_Vulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] CommandList is null.\n"; return; }
+				if (!CanDraw()) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] Unable to draw.\n"; return; }
 				m_commandList.drawIndexed(indexCount, instanceCount, firstIndex,vertexOffset, firstInstance);
+				++m_recordCommandCount;
 			}
 
 			void GPUCommandList_Vulkan::Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
 			{
 				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::Submit] CommandList is null.\n"; return; }
+				if (m_recordCommandCount == 0) { std::cout << "[GPUCommandList_Vulkan::Submit] Record command count is 0. Nothing is sunmited.\n"; return; }
 
 				std::vector<vk::Semaphore> waitSemaphoresVulkan;
 				std::vector<vk::Semaphore> signalSemaphoresVulkan;
@@ -36,15 +41,6 @@ namespace Insight
 
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(waitSemaphoresVulkan, { }, commandListVulkan, signalSemaphoresVulkan);
 				GetDevice()->GetQueue(queue).submit(submitInfo, fenceVulkan);
-			}
-
-			void GPUCommandList_Vulkan::SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
-			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SubmitAndWait] CommandList is null.\n"; return; }
-				// Get fence,
-				// Wait on fence,
-				Submit(queue, waitSemaphores, signalSemaphores, fence);
-				// Return fence to manager.
 			}
 
 

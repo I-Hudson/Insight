@@ -229,6 +229,7 @@ namespace Insight
 
 			void GPUDevice_Vulkan::Destroy()
 			{
+				GPUPipelineStateObjectManager::Instance().Destroy();
 				m_semaphoreManager.Destroy();
 
 				vmaDestroyAllocator(m_vmaAllocator);
