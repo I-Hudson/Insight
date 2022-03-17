@@ -22,6 +22,7 @@ project "InsightGraphics"
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.stb}",
         "%{IncludeDirs.vma}",
+        "%{IncludeDirs.glslang}win_debug/inc",
         "%{IncludeDirs.vulkan}",
     }
 
@@ -47,8 +48,43 @@ project "InsightGraphics"
     }
 
     filter "configurations:Debug"
-        defines { "DEBUG" }  
+        defines { "DEBUG" }
         symbols "On" 
+
+        links
+        {
+            "GenericCodeGend.lib",
+            "glslangd.lib",
+            "glslang-default-resource-limitsd.lib",
+            "HLSLd.lib",
+            "MachineIndependentd.lib",
+            "OGLCompilerd.lib",
+            "OSDependentd.lib",
+            "SPIRVd.lib",
+            "SPIRV-Toolsd.lib",
+            "SPIRV-Tools-optd.lib",
+            "SPVRemapperd.lib",
+        }
+
+        libdirs
+        {
+            "%{LibDirs.glslang_win_d}",
+        }
+
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On" 
+        
+        links
+        {
+            "glslang.lib",
+            "MachineIndependent.lib",
+            "GenericCodeGen.lib",
+            "OGLCompiler.lib",
+            "OSDependent.lib",
+        }
+
+        libdirs
+        {
+            "%{LibDirs.glslang_win}",
+        }

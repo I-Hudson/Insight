@@ -1,4 +1,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUPipelineStateObject_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUSwapchain_Vulkan.h"
+#include "Graphics/Window.h"
 #include "Core/Defines.h"
 
 #include <iostream>
@@ -224,13 +227,28 @@ namespace Insight
 				vmaAllocatorInfo.device = m_device;
 				vmaCreateAllocator(&vmaAllocatorInfo, &m_vmaAllocator);
 
+				m_swapchain = new GPUSwapchain_Vulkan();
+				m_swapchain->Prepare();
+				m_swapchain->Build(GPUSwapchainDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
+
 				return true;
 			}
 
 			void GPUDevice_Vulkan::Destroy()
 			{
+				WaitForGPU();
+
+				GPURenderpassManager_Vulkan::Instance().Destroy();
 				GPUPipelineStateObjectManager::Instance().Destroy();
 				m_semaphoreManager.Destroy();
+				m_shaderManager.Destroy();
+
+				if (m_swapchain)
+				{
+					m_swapchain->Destroy();
+					delete m_swapchain;
+					m_swapchain = nullptr;
+				}
 
 				vmaDestroyAllocator(m_vmaAllocator);
 

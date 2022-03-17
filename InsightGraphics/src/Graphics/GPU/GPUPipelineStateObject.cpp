@@ -1,4 +1,5 @@
 #include "Graphics/GPU/GPUPipelineStateObject.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUPipelineStateObject_Vulkan.h"
 
 #include <iostream>
 
@@ -31,10 +32,10 @@ namespace Insight
 				return itr->second;
 			}
 
-			GPUPipelineStateObject* psoPtr = nullptr;// new RHI::Vulkan::GPUPipelineStateObject_Vulkan();
-			itr->second->Create(pso);
+			GPUPipelineStateObject* psoPtr = new RHI::Vulkan::GPUPipelineStateObject_Vulkan();
+			psoPtr->Create(pso);
 			m_pipelineStateObjects[psoHash] = psoPtr;
-			return itr->second;
+			return psoPtr;
 		}
 
 		// This should get called in GPUDevice_API

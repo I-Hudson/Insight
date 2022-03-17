@@ -1,11 +1,33 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include <string>
 
 namespace Insight
 {
 	namespace Graphics
 	{
+		enum GPUQueue
+		{
+			GPUQueue_Graphics,
+			GPUQueue_Compute,
+			GPUQueue_Transfer,
+		};
+
+		enum ShaderStageFlagBits
+		{
+			ShaderStage_Vertex,
+			ShaderStage_TessControl,
+			ShaderStage_TessEval,
+			ShaderStage_Geometry,
+			ShaderStage_Pixel,
+
+			ShaderStage_Count
+		};
+		using ShaderStageFlags = u32;
+		std::string ShaderStageFlagsToString(ShaderStageFlags flags);
+
+
 		enum class PrimitiveTopologyType
 		{
 			PointList = 0,
@@ -20,6 +42,7 @@ namespace Insight
 			TriangleStripWithAdjacency = 9,
 			PatchList = 10,
 		};
+		std::string PrimitiveTopologyTypeToString(PrimitiveTopologyType type);
 
 		enum class PolygonMode
 		{
@@ -27,6 +50,7 @@ namespace Insight
 			Line = 1,
 			Point = 2,
 		};
+		std::string PolygonModeToString(PolygonMode mode);
 
 		enum class CullMode
 		{
@@ -35,12 +59,14 @@ namespace Insight
 			Back = 2,
 			FrontAndBack = 3,
 		};
+		std::string CullModeToString(CullMode mode);
 
 		enum class FrontFace
 		{
 			CounterClockwise = 0,
 			Clockwise = 1,
 		};
+		std::string FrontFaceToString(FrontFace face);
 
 		enum ColourComponentFlagBits
 		{
@@ -50,6 +76,7 @@ namespace Insight
 			ColourComponentA = 1 << 3,
 		};
 		using ColourComponentFlags = u32;
+		std::string ColourComponentFlagsToString(ColourComponentFlags flags);
 
 		enum class BlendFactor
 		{
@@ -73,6 +100,7 @@ namespace Insight
 			Src1Alpha = 17,
 			OneMinusSrc1Alpha = 18,
 		};
+		std::string BlendFactorToString(BlendFactor factor);
 
 		enum class BlendOp
 		{
@@ -82,5 +110,24 @@ namespace Insight
 			Min = 3,
 			Max = 4,
 		};
+		std::string BlendOpToString(BlendOp op);
+
+        /// <summary>
+        /// Define the image usage flags which a input within the 
+        /// rendering pipeline can be.
+        /// </summary>
+        enum ImageUsageFlagsBits
+        {
+            TransferSrc = 1 << 0,
+            TransferDst = 1 << 1,
+            Sampled = 1 << 2,
+            Storage = 1 << 3,
+            ColourAttachment = 1 << 4,
+            DepthStencilAttachment = 1 << 5,
+            TransientAttachment = 1 << 6,
+            InputAttachment = 1 << 7
+        };
+        using ImageUsageFlags = u32;
+        std::string ImageUsageFlagsToString(ImageUsageFlags flags);
 	}
 }

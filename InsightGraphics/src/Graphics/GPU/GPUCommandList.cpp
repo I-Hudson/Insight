@@ -62,10 +62,23 @@ namespace Insight
 
 		bool GPUCommandList::CanDraw()
 		{
-			GPUPipelineStateObject* pipelineStateObject = GPUPipelineStateObjectManager::Instance().GetOrCreatePSO(m_pso);
-			if(!pipelineStateObject || pipelineStateObject->Bind())
+			if (!m_activeItems.Renderpass)
 			{
-				return;
+				BeginRenderpass();
+			}
+
+			if (m_activeItems.ActivePso.GetHash() != m_pso.GetHash())
+			{
+				// PSO is different, find out new PSO and bid it.
+				GPUPipelineStateObject* pipelineStateObject = GPUPipelineStateObjectManager::Instance().GetOrCreatePSO(m_pso);
+				if (!pipelineStateObject)
+				{
+					//std::cout << "[GPUCommandList::CanDraw] PipelineStateObejct is not valid. Missing some required data.\n";
+					return false;
+				}
+
+				BindPipeline(pipelineStateObject);
+				m_activeItems.ActivePso = m_pso;
 			}
 
 			// Do we have an active pipeline?
@@ -80,6 +93,7 @@ namespace Insight
 		void GPUCommandList::Reset()
 		{
 			m_pso = {};
+			m_activeItems = {};
 		}
 
 
@@ -118,6 +132,16 @@ namespace Insight
 		void GPUCommandListManager::ResetCommandPool(GPUCommandListType type)
 		{
 			m_commandListAllocator->ResetCommandPool(type);
+			for (auto& k : m_typeToListLookup[type])
+			{
+				auto itr = std::find(m_inUseCommandLists.begin(), m_inUseCommandLists.end(), k);
+				if (itr != m_inUseCommandLists.end())
+				{
+					//GPUCommandList* cmdList = *itr;
+					m_freeCommandLists.push_back(*itr);
+					m_inUseCommandLists.erase(itr);
+				}
+			}
 		}
 
 		GPUCommandList* GPUCommandListManager::GetOrCreateCommandList(GPUCommandListType type)
@@ -132,6 +156,7 @@ namespace Insight
 
 			GPUCommandList* cmdList = m_commandListAllocator->AllocateCommandList(type);
 			m_inUseCommandLists.push_back(cmdList);
+			m_typeToListLookup[type].push_back(cmdList);
 			return cmdList;
 		}
 
@@ -158,6 +183,11 @@ namespace Insight
 
 		void GPUCommandListManager::Destroy()
 		{
+			if (!m_commandListAllocator)
+			{
+				return;
+			}
+
 			if (m_inUseCommandLists.size() > 0)
 			{
 				// ERROR: Command lists are in use.
@@ -166,6 +196,11 @@ namespace Insight
 			m_commandListAllocator->FreeCommandLists(m_freeCommandLists);
 			m_inUseCommandLists.resize(0);
 			m_freeCommandLists.resize(0);
+			m_typeToListLookup.clear();
+
+			m_commandListAllocator->Destroy();
+			delete m_commandListAllocator;
+			m_commandListAllocator = nullptr;
 		}
 	}
 }

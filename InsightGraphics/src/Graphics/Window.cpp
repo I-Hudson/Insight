@@ -35,6 +35,8 @@ namespace Insight
 
 		void Window::Destroy()
 		{
+			m_title.resize(0);
+
 			if (m_glfwWindow)
 			{
 				glfwDestroyWindow(m_glfwWindow);

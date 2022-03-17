@@ -235,15 +235,36 @@ namespace Insight
 
 				if (oldSwapchain)
 				{
+					for (vk::ImageView& view : m_swapchainImageViews)
+					{
+						GetDevice()->GetDevice().destroyImageView(view);
+					}
+					m_swapchainImageViews.clear();
 					GetDevice()->GetDevice().destroySwapchainKHR(oldSwapchain);
 				}
 				m_swapchainImages = GetDevice()->GetDevice().getSwapchainImagesKHR(m_swapchain);
+
+				for (vk::Image& image : m_swapchainImages)
+				{
+					vk::ImageViewCreateInfo info = vk::ImageViewCreateInfo(
+						{},
+						image,
+						vk::ImageViewType::e2D,
+						PixelFormatToVulkan(m_surfaceFormat));
+					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					m_swapchainImageViews.push_back(GetDevice()->GetDevice().createImageView(info));
+				}
 			}
 
 			void GPUSwapchain_Vulkan::Destroy()
 			{
 				if (m_swapchain)
 				{
+					for (vk::ImageView& view : m_swapchainImageViews)
+					{
+						GetDevice()->GetDevice().destroyImageView(view);
+					}
+					m_swapchainImageViews.clear();
 					GetDevice()->GetDevice().destroySwapchainKHR(m_swapchain);
 					m_swapchain = vk::SwapchainKHR(nullptr);
 				}

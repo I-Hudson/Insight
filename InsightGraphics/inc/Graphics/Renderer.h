@@ -28,7 +28,6 @@ namespace Insight
 			GPUCommandListManager m_commandListManager;
 
 			GPUDevice* m_gpuDevice{ nullptr };
-			GPUSwapchain* m_swapchain{ nullptr };
 			GPUSemaphore* m_presentCompleteSemaphore{ nullptr };
 		};
 	}

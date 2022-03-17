@@ -30,6 +30,12 @@ namespace Insight
 			Submitted
 		};
 
+		struct GPUCommandListActive
+		{
+			bool Renderpass = false;
+			PipelineStateObject ActivePso;
+		};
+
 		class GPUCommandList
 		{
 		public:
@@ -40,6 +46,9 @@ namespace Insight
 			u32 GetRecordCommandCount() const { return m_recordCommandCount; }
 			GPUQueue GetQueue() const { return m_queue; }
 			GPUCommandListType GetType() const { return m_type; }
+
+			virtual void SetViewport(int width, int height) = 0;
+			virtual void SetScissor(int width, int height) = 0;
 
 			virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
 			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
@@ -57,15 +66,24 @@ namespace Insight
 			void SetCullMode(CullMode cullMode);
 			void SetSwapchainSubmit(bool swapchainSubmit);
 
+			virtual void BeginRecord() = 0;
+			virtual void EndRecord() = 0;
+
+			virtual void BeginRenderpass() = 0;
+			virtual void EndRenderpass() = 0;
+
+			virtual void BindPipeline(GPUPipelineStateObject* pipeline) = 0;
+
 			bool CanDraw();
 			void Reset();
 
 		protected:
-			GPUCommandListState m_state;
+			GPUCommandListState m_state = GPUCommandListState::Idle;
 			u32 m_recordCommandCount = 0;
 			GPUQueue m_queue;
 			GPUCommandListType m_type;
 			PipelineStateObject m_pso;
+			GPUCommandListActive m_activeItems;
 
 			friend class GPUCommandListManager;
 		};
@@ -85,6 +103,8 @@ namespace Insight
 			virtual void FreeCommandList(GPUCommandList* cmdList) = 0;
 			virtual void FreeCommandLists(const std::list<GPUCommandList*>& cmdLists) = 0;
 			virtual void FreeAllCommandLists() = 0;
+
+			virtual void Destroy() = 0;
 
 		protected:
 			GPUQueue m_queue = GPUQueue::GPUQueue_Graphics;
@@ -113,6 +133,7 @@ namespace Insight
 		private:
 			std::list<GPUCommandList*> m_inUseCommandLists;
 			std::list<GPUCommandList*> m_freeCommandLists;
+			std::map<GPUCommandListType, std::vector<GPUCommandList*>> m_typeToListLookup;
 			GPUComamndListAllocator* m_commandListAllocator{ nullptr };
 		};
 	}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GPUPipelineStateObjectEnums.h"
+#include "Enums.h"
 #include "Graphics/GPU/GPUDevice.h"
 #include <glm/glm.hpp>
 #include <vector>
@@ -12,6 +12,7 @@ namespace Insight
 	{
 		class GPUShader;
 		class RenderTarget;
+		class GPUPipelineStateObjectManager;
 
 		// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
@@ -84,14 +85,11 @@ namespace Insight
 			}
 		};
 
-		class GPUPipelineStateObjectManager;
 
 		class GPUPipelineStateObject
 		{
 		public:
 			virtual ~GPUPipelineStateObject() { };
-
-			virtual bool Bind() = 0;
 
 		protected:
 			virtual void Create(PipelineStateObject pso) = 0;

@@ -2,6 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Graphics/PixelFormat.h"
+#include "Graphics/GPU/Enums.h"
 #include <string>
 #include <vector>
 #include <list>
@@ -17,6 +18,7 @@ namespace Insight
 		{
 			std::vector<Byte> Data;
 			PixelFormat Format;
+			ImageUsageFlags Usage;
 		};
 
 		class GPUImage
@@ -24,7 +26,6 @@ namespace Insight
 		public:
 			virtual ~GPUImage() { }
 
-			void LoadFromFile(std::string filename, PixelFormat format = PixelFormat::R8G8B8A8_UNorm);
 			virtual void LoadFromData(GPUImageCreateInfo info) = 0;
 
 			int GetWidth() const { return m_width; }
@@ -50,6 +51,12 @@ namespace Insight
 		public:
 			GPUImageManager();
 			~GPUImageManager();
+
+			static GPUImageManager& Instance()
+			{
+				static GPUImageManager ins;
+				return ins;
+			}
 
 			GPUImage* CreateOrGetImage(std::string key);
 

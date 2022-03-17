@@ -26,7 +26,7 @@ namespace Insight
 					1,
 					vk::SampleCountFlagBits::e1,
 					vk::ImageTiling::eOptimal,
-					vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
+					ImageUsageFlagsToVulkan(info.Usage),
 					vk::SharingMode::eExclusive,
 					{ },
 					vk::ImageLayout::eUndefined
@@ -52,6 +52,16 @@ namespace Insight
 					1
 					));
 				m_view = GetDevice()->GetDevice().createImageView(viewCreateInfo);
+
+
+				if (!info.Data.empty())
+				{
+					// Get buffer, make is a staging buffer
+					// upload data
+					// CopyBufferToImage
+					// SubmitAnd Wait
+					// Release everything
+				}
 			}
 
 			void GPUImage_Vulkan::Destroy()

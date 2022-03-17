@@ -8,25 +8,25 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		void GPUImage::LoadFromFile(std::string filename, PixelFormat format)
-		{
-			stbi_uc* stbiData = stbi_load(filename.c_str(), &m_width, &m_height, &m_channels, STBI_rgb);
-			if (!stbiData)
-			{
-				return;
-			}
-			m_loadedFromFile = true;
-			const u64 dataSize = m_width * m_height * m_channels;
-			std::vector<Byte> data;
-			data.resize(dataSize);
-			memcpy_s(data.data(), dataSize, stbiData, dataSize);
-			stbi_image_free(stbiData);
+		//void GPUImage::LoadFromFile(std::string filename, PixelFormat format)
+		//{
+		//	stbi_uc* stbiData = stbi_load(filename.c_str(), &m_width, &m_height, &m_channels, STBI_rgb);
+		//	if (!stbiData)
+		//	{
+		//		return;
+		//	}
+		//	m_loadedFromFile = true;
+		//	const u64 dataSize = m_width * m_height * m_channels;
+		//	std::vector<Byte> data;
+		//	data.resize(dataSize);
+		//	memcpy_s(data.data(), dataSize, stbiData, dataSize);
+		//	stbi_image_free(stbiData);
 
-			GPUImageCreateInfo info{};
-			info.Data = data;
-			info.Format = format;
-			LoadFromData(info);
-		}
+		//	GPUImageCreateInfo info{};
+		//	info.Data = data;
+		//	info.Format = format;
+		//	LoadFromData(info);
+		//}
 
 
 		GPUImageManager::GPUImageManager()

@@ -6,6 +6,7 @@ extern Insight::App::Engine* CreateApplication();
 
 int main(int argc, char** argv)
 {
+	Insight::Core::MemoryTracker::Instance();
 	Insight::App::Engine* app = CreateApplication();
 	if (app->Init())
 	{
@@ -14,7 +15,7 @@ int main(int argc, char** argv)
 	app->Destroy();
 	delete app;
 
-	Insight::Core::MemoryTracker::Instance().Destroy();
+	//Insight::Core::MemoryTracker::Instance().Destroy();
 
 	return 0;
 }

@@ -483,3 +483,130 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
 //    PixelFormat::R32G32B32A32_SInt,
 //    PixelFormat::Unknown,
 //};
+
+namespace Insight
+{
+    namespace Graphics
+    {
+        vk::ImageUsageFlags ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags)
+        {
+            vk::ImageUsageFlags flags;
+            if (imageUsageFlags & ImageUsageFlagsBits::TransferSrc) { flags |= vk::ImageUsageFlagBits::eTransferSrc; }
+            if (imageUsageFlags & ImageUsageFlagsBits::TransferDst) { flags |= vk::ImageUsageFlagBits::eTransferDst; }
+            if (imageUsageFlags & ImageUsageFlagsBits::Sampled) { flags |= vk::ImageUsageFlagBits::eSampled; }
+            if (imageUsageFlags & ImageUsageFlagsBits::Storage) { flags |= vk::ImageUsageFlagBits::eStorage; }
+            if (imageUsageFlags & ImageUsageFlagsBits::ColourAttachment) { flags |= vk::ImageUsageFlagBits::eColorAttachment; }
+            if (imageUsageFlags & ImageUsageFlagsBits::DepthStencilAttachment) { flags |= vk::ImageUsageFlagBits::eDepthStencilAttachment; }
+            if (imageUsageFlags & ImageUsageFlagsBits::TransientAttachment) { flags |= vk::ImageUsageFlagBits::eTransientAttachment; }
+            if (imageUsageFlags & ImageUsageFlagsBits::InputAttachment) { flags |= vk::ImageUsageFlagBits::eInputAttachment; }
+            return flags;
+        }
+
+        vk::Format PixelFormatToVulkan(PixelFormat format)
+        {
+            return PixelFormatToVkFormat[(int)format];
+        }
+
+        vk::PipelineBindPoint GPUQueueToVulkanBindPoint(GPUQueue queue)
+        {
+            switch (queue)
+            {
+            case GPUQueue_Graphics: return vk::PipelineBindPoint::eGraphics;
+            case GPUQueue_Compute: return vk::PipelineBindPoint::eCompute;
+            default:
+                break;
+            }
+            return vk::PipelineBindPoint::eGraphics;
+        }
+
+        vk::ShaderStageFlagBits ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage)
+        {
+            switch (stage)
+            {
+            case ShaderStage_Vertex: return vk::ShaderStageFlagBits::eVertex;
+            case ShaderStage_TessControl: return vk::ShaderStageFlagBits::eTessellationControl;
+            case ShaderStage_TessEval: return vk::ShaderStageFlagBits::eTessellationEvaluation;
+            case ShaderStage_Geometry: return vk::ShaderStageFlagBits::eGeometry;
+            case ShaderStage_Pixel: return vk::ShaderStageFlagBits::eFragment;
+            default:
+                break;
+            }
+            return vk::ShaderStageFlagBits::eVertex;
+        }
+
+        vk::PrimitiveTopology PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type)
+        {
+            switch (type)
+            {
+            case PrimitiveTopologyType::PointList: return vk::PrimitiveTopology::ePointList;
+            case PrimitiveTopologyType::LineList: return vk::PrimitiveTopology::eLineList;
+            case PrimitiveTopologyType::LineStrip: return vk::PrimitiveTopology::eLineStrip;
+            case PrimitiveTopologyType::TriangleList: return vk::PrimitiveTopology::eTriangleList;
+            case PrimitiveTopologyType::TriangleStrip: return vk::PrimitiveTopology::eTriangleStrip;
+            case PrimitiveTopologyType::TriangleFan: return vk::PrimitiveTopology::eTriangleFan;
+            case PrimitiveTopologyType::LineListWithAdjacency: return vk::PrimitiveTopology::eLineListWithAdjacency;
+            case PrimitiveTopologyType::LineStripWithAdjacency: return vk::PrimitiveTopology::eLineStripWithAdjacency;
+            case PrimitiveTopologyType::TriangleListWithAdjacency: return vk::PrimitiveTopology::eTriangleListWithAdjacency;
+            case PrimitiveTopologyType::TriangleStripWithAdjacency: return vk::PrimitiveTopology::eTriangleStripWithAdjacency;
+            case PrimitiveTopologyType::PatchList: return vk::PrimitiveTopology::ePatchList;
+            default:
+                break;
+            }
+            return vk::PrimitiveTopology::eTriangleList;
+        }
+
+        vk::ColorComponentFlags ColourComponentFlagsToVulkan(ColourComponentFlags flags)
+        {
+            vk::ColorComponentFlags flag(0);
+            if (flags & ColourComponentR) { flag |= vk::ColorComponentFlagBits::eR; }
+            if (flags & ColourComponentG) { flag |= vk::ColorComponentFlagBits::eG; }
+            if (flags & ColourComponentB) { flag |= vk::ColorComponentFlagBits::eB; }
+            if (flags & ColourComponentA) { flag |= vk::ColorComponentFlagBits::eA; }
+            return flag;
+        }
+
+        vk::BlendFactor BlendFactorToVulkan(BlendFactor factor)
+        {
+            switch (factor)
+            {
+            case Insight::Graphics::BlendFactor::Zero: return vk::BlendFactor::eZero;
+            case Insight::Graphics::BlendFactor::One: return vk::BlendFactor::eOne;
+            case Insight::Graphics::BlendFactor::SrcColour: return vk::BlendFactor::eSrcColor;
+            case Insight::Graphics::BlendFactor::OneMinusSrcColour: return vk::BlendFactor::eOneMinusSrcColor;
+            case Insight::Graphics::BlendFactor::DstColour: return vk::BlendFactor::eDstColor;
+            case Insight::Graphics::BlendFactor::OneMinusDstColour: return vk::BlendFactor::eOneMinusDstColor;
+            case Insight::Graphics::BlendFactor::SrcAlpha: return vk::BlendFactor::eSrcAlpha;
+            case Insight::Graphics::BlendFactor::OneMinusSrcAlpha: return vk::BlendFactor::eOneMinusSrcAlpha;
+            case Insight::Graphics::BlendFactor::DstAlpha: return vk::BlendFactor::eDstAlpha;
+            case Insight::Graphics::BlendFactor::OneMinusDstAlpha: return vk::BlendFactor::eOneMinusDstAlpha;
+            case Insight::Graphics::BlendFactor::ConstantColour: return vk::BlendFactor::eConstantColor;
+            case Insight::Graphics::BlendFactor::OneMinusConstantColour: return vk::BlendFactor::eOneMinusConstantColor;
+            case Insight::Graphics::BlendFactor::ConstantAlpha: return vk::BlendFactor::eConstantAlpha;
+            case Insight::Graphics::BlendFactor::OneMinusConstantAlpha: return vk::BlendFactor::eOneMinusConstantAlpha;
+            case Insight::Graphics::BlendFactor::SrcAplhaSaturate: return vk::BlendFactor::eSrcAlphaSaturate;
+            case Insight::Graphics::BlendFactor::Src1Colour: return vk::BlendFactor::eSrc1Color;
+            case Insight::Graphics::BlendFactor::OneMinusSrc1Colour: return vk::BlendFactor::eOneMinusSrc1Color;
+            case Insight::Graphics::BlendFactor::Src1Alpha: return vk::BlendFactor::eSrc1Alpha;
+            case Insight::Graphics::BlendFactor::OneMinusSrc1Alpha: return vk::BlendFactor::eOneMinusSrc1Alpha;
+            default:
+                break;
+            }
+            return vk::BlendFactor::eZero;
+        }
+
+        vk::BlendOp BlendOpToVulkan(BlendOp op)
+        {
+            switch (op)
+            {
+            case Insight::Graphics::BlendOp::Add: return vk::BlendOp::eAdd;
+            case Insight::Graphics::BlendOp::Subtract: return vk::BlendOp::eSubtract;
+            case Insight::Graphics::BlendOp::ReverseSubtract: return vk::BlendOp::eReverseSubtract;
+            case Insight::Graphics::BlendOp::Min: return vk::BlendOp::eMin;
+            case Insight::Graphics::BlendOp::Max: return vk::BlendOp::eMax;
+            default:
+                break;
+            }
+            return vk::BlendOp::eAdd;
+        }
+    }
+}

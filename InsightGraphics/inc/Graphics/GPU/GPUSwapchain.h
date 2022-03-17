@@ -42,14 +42,14 @@ namespace Insight
 		public:
 			virtual ~GPUSwapchain() { }
 
-			static GPUSwapchain* Create();
-
 			GPUSwapchainDesc GetDesc() const { return m_desc; }
 
 			virtual void Prepare() = 0;
 			virtual void Build(GPUSwapchainDesc desc) = 0;
 			virtual void Destroy() = 0;
 			
+			PixelFormat GetColourFormat() const { return m_surfaceFormat; }
+
 			void AcquireNextImage(GPUSemaphore* semaphore);
 			virtual void AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence) = 0;
 

@@ -1,19 +1,15 @@
 #pragma once
 
 #include "Graphics/GPU/GPUSemaphore.h"
+#include "Graphics/GPU/GPUShader.h"
+#include "Graphics/GPU/Enums.h"
 
 namespace Insight
 {
 	namespace Graphics
 	{
 		class GPUAdapter;
-
-		enum GPUQueue
-		{
-			GPUQueue_Graphics,
-			GPUQueue_Compute,
-			GPUQueue_Transfer,
-		};
+		class GPUSwapchain;
 
 		/*
 			GPUDevice: This contains the logical and physical device for any gpu use.
@@ -33,9 +29,14 @@ namespace Insight
 			static GPUDevice* Create();
 
 			GPUSemaphoreManager& GetSemaphoreManager() { return m_semaphoreManager; }
+			GPUShaderManager& GetShaderManager() { return m_shaderManager; }
+			GPUSwapchain* GetSwapchain() { return m_swapchain; }
 
 		protected:
 			GPUSemaphoreManager m_semaphoreManager;
+			GPUShaderManager m_shaderManager;
+
+			GPUSwapchain* m_swapchain{ nullptr };
 		};
 
 		class GPUDeviceResource

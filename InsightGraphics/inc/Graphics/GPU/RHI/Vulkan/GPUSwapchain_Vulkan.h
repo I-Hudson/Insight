@@ -22,11 +22,14 @@ namespace Insight
 				virtual void AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence) override;
 				virtual void Present(GPUQueue queue, u32 imageIndex, const std::vector<GPUSemaphore*>& semaphores) override;
 
+				vk::ImageView GetImageView() const { return m_swapchainImageViews[m_nextImgeIndex]; }
+
 			private:
 				vk::SwapchainKHR m_swapchain;
 				vk::SurfaceKHR m_surfaceKHR;
 				vk::ColorSpaceKHR m_colourSpace;
 				std::vector<vk::Image> m_swapchainImages;
+				std::vector<vk::ImageView> m_swapchainImageViews;
 			};
 		}
 	}
