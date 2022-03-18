@@ -15,6 +15,12 @@ namespace Insight
 
 		struct ShaderInputLayout
 		{
+			ShaderInputLayout()
+			{ }
+			ShaderInputLayout(int binding, PixelFormat format, int stride, std::string name = "")
+				: Binding(binding), Format(format), Stride(stride), Name(std::move(name))
+			{ }
+
 			int Binding;
 			PixelFormat Format;
 			int Stride;
@@ -94,6 +100,13 @@ namespace Insight
 		class GPUShaderManager
 		{
 		public:
+			~GPUShaderManager();
+
+			static GPUShaderManager& Instance()
+			{
+				static GPUShaderManager ins;
+				return ins;
+			}
 
 			GPUShader* CreateShader(std::string key, ShaderDesc desc);
 			GPUShader* GetShader(std::string key);

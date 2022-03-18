@@ -7,6 +7,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUShaderManager::~GPUShaderManager()
+		{
+			if (m_shaders.size() > 0)
+			{
+				std::cout << "[GPUShaderManager::~GPUShaderManager] Not all shader have been desttroyed.\n";
+			}
+		}
+
 		GPUShader* GPUShaderManager::CreateShader(std::string key, ShaderDesc desc)
 		{
 			const auto& itr = m_shaders.find(key);

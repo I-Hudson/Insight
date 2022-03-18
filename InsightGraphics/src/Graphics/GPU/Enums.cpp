@@ -15,6 +15,7 @@ namespace Insight
             if (!str.empty())
             {
                 str.pop_back();
+                str.pop_back();
             }
             return str;
         }
@@ -89,6 +90,7 @@ namespace Insight
             if (!str.empty())
             {
                 str.pop_back();
+                str.pop_back();
             }
             return str;
         }
@@ -151,8 +153,48 @@ namespace Insight
             if (!str.empty())
             {
                 str.pop_back();
+                str.pop_back();
             }
             return str;
         }
+
+        std::string GPUBufferTypeToString(GPUBufferType type)
+        {
+            switch (type)
+            {
+            case GPUBufferType::Vertex: return "Vertex";
+            case GPUBufferType::Index: return "Index";
+            case GPUBufferType::Uniform: return "Uniform";
+            case GPUBufferType::Constant: return "Constant";
+            case GPUBufferType::Staging: return "Staging";
+            case GPUBufferType::Readback: return "Readback";
+                break;
+            default:
+                break;
+            }
+            return "Unknown";
+        }
+
+        //std::string GUPBufferFlagsToString(GUPBufferFlags flags)
+        //{
+        //    std::string str;
+        //    if (flags & GUPBufferFlagBits::None) { str += "None |"; }
+        //    if (flags & GUPBufferFlagBits::TransferSrc) { str += "TransferSrc |"; }
+        //    if (flags & GUPBufferFlagBits::TransferDst) { str += "TransferDst |"; }
+        //    if (flags & GUPBufferFlagBits::UniformTexel) { str += "UniformTexel |"; }
+        //    if (flags & GUPBufferFlagBits::StorageTexel) { str += "StorageTexel |"; }
+        //    if (flags & GUPBufferFlagBits::Uniform) { str += "Uniform |"; }
+        //    if (flags & GUPBufferFlagBits::Storage) { str += "Storage |"; }
+        //    if (flags & GUPBufferFlagBits::Index) { str += "Index |"; }
+        //    if (flags & GUPBufferFlagBits::Vertex) { str += "Vertex |"; }
+        //    if (flags & GUPBufferFlagBits::Indirect) { str += "Indirect |"; }
+        //    if (flags & GUPBufferFlagBits::ShaderDeviceAddress) { str += "ShaderDeviceAddress |"; }
+        //    if (!str.empty())
+        //    {
+        //        str.pop_back();
+        //        str.pop_back();
+        //    }
+        //    return str;
+        //}
     }
 }

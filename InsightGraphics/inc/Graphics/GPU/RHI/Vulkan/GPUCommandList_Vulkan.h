@@ -19,8 +19,13 @@ namespace Insight
 				GPUCommandList_Vulkan();
 				virtual ~GPUCommandList_Vulkan() override;
 
+				virtual void CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst, u64 srcOffset, u64 dstOffset, u64 size) override;
+
 				virtual void SetViewport(int width, int height) override;
 				virtual void SetScissor(int width, int height) override;
+
+				virtual void SetVertexBuffer(GPUBuffer* buffer) override;
+				virtual void SetIndexBuffer(GPUBuffer* buffer) override;
 
 				virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) override;
 				virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) override;

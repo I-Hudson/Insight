@@ -12,11 +12,6 @@ namespace Insight
 				GetDevice()->GetDevice().signalSemaphore(info);
 			}
 
-			void* GPUSemaphore_Vulkan::GetRawResource()
-			{
-				return &m_semaphore;
-			}
-
 			void GPUSemaphore_Vulkan::Create(bool signaled)
 			{
 				if (!m_semaphore)

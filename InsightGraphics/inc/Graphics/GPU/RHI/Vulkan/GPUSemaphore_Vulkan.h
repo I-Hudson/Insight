@@ -15,7 +15,7 @@ namespace Insight
 				virtual ~GPUSemaphore_Vulkan() override { }
 
 				virtual void Signal() override;
-				virtual void* GetRawResource() override;
+				vk::Semaphore GetSemaphore() const { return m_semaphore; }
 
 			protected:
 				virtual void Create(bool signaled) override;

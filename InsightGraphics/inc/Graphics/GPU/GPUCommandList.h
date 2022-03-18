@@ -13,6 +13,7 @@ namespace Insight
 		class GPUSemaphore;
 		class GPUFence;
 		class GPUShader;
+		class GPUBuffer;
 
 		class GPUCommandListManager;
 
@@ -34,6 +35,8 @@ namespace Insight
 		{
 			bool Renderpass = false;
 			PipelineStateObject ActivePso;
+			GPUBuffer* VertexBuffer = nullptr;
+			GPUBuffer* IndexBuffer = nullptr;
 		};
 
 		class GPUCommandList
@@ -47,8 +50,14 @@ namespace Insight
 			GPUQueue GetQueue() const { return m_queue; }
 			GPUCommandListType GetType() const { return m_type; }
 
+			void CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst);
+			virtual void CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst, u64 srcOffset, u64 dstOffset, u64 size) = 0;
+
 			virtual void SetViewport(int width, int height) = 0;
 			virtual void SetScissor(int width, int height) = 0;
+
+			virtual void SetVertexBuffer(GPUBuffer* buffer) = 0;
+			virtual void SetIndexBuffer(GPUBuffer* buffer) = 0;
 
 			virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
 			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
@@ -64,6 +73,7 @@ namespace Insight
 			void SetPrimitiveTopologyType(PrimitiveTopologyType primitiveTopologyType);
 			void SetPolygonMode(PolygonMode polygonMode);
 			void SetCullMode(CullMode cullMode);
+			void SetFrontFace(FrontFace frontFace);
 			void SetSwapchainSubmit(bool swapchainSubmit);
 
 			virtual void BeginRecord() = 0;
@@ -117,6 +127,12 @@ namespace Insight
 		public:
 			GPUCommandListManager();
 			~GPUCommandListManager();
+
+			static GPUCommandListManager& Instance()
+			{
+				static GPUCommandListManager ins;
+				return ins;
+			}
 
 			void Create();
 			void SetQueue(GPUQueue queue);

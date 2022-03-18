@@ -1,6 +1,8 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUPipelineStateObject_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUSwapchain_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUBuffer_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
 #include "Graphics/Window.h"
 #include "Core/Defines.h"
 
@@ -231,6 +233,8 @@ namespace Insight
 				m_swapchain->Prepare();
 				m_swapchain->Build(GPUSwapchainDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight()));
 
+				GPUCommandListManager::Instance().Create();
+
 				return true;
 			}
 
@@ -238,10 +242,13 @@ namespace Insight
 			{
 				WaitForGPU();
 
+				GPUBufferManager::Instance().Destroy();
 				GPURenderpassManager_Vulkan::Instance().Destroy();
 				GPUPipelineStateObjectManager::Instance().Destroy();
-				m_semaphoreManager.Destroy();
-				m_shaderManager.Destroy();
+				GPUSemaphoreManager::Instance().Destroy();
+				GPUFenceManager::Instance().Destroy();
+				GPUShaderManager::Instance().Destroy();
+				GPUCommandListManager::Instance().Destroy();
 
 				if (m_swapchain)
 				{

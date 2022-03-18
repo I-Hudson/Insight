@@ -250,8 +250,8 @@ namespace Insight
 				for (const auto& input : desc.VertexLayout)
 				{
 					vk::VertexInputAttributeDescription attri = {};
-					attri.location = 0;
-					attri.binding = input.Binding;
+					attri.location = input.Binding;
+					attri.binding = 0;
 					attri.format = PixelFormatToVulkan(input.Format);
 					attri.offset = stride;
 					stride += PixelFormatExtensions::SizeInBytes(input.Format);

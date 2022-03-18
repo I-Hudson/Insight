@@ -33,6 +33,11 @@ project "InsightCore"
     {
     }
 
+    postbuildcommands
+    {
+       "{COPY} \"%{cfg.targetdir}/InsightCore.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On" 

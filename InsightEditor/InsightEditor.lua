@@ -48,12 +48,7 @@ project "InsightEditor"
 
     postbuildcommands
     {
-        "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightCore/InsightCore.dll\" \"%{cfg.targetdir}\"",
-        "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightGraphics/InsightGraphics.dll\" \"%{cfg.targetdir}\"",
-        "{COPY} \"%{wks.location}/bin/".. outputdir..  "/InsightApp/InsightApp.dll\" \"%{cfg.targetdir}\"",
-
         "{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
-
     }
 
     filter "configurations:Debug"

@@ -77,7 +77,7 @@ namespace Insight
 		{
 			std::array<std::string, c_CallStackCount> callStack;
 
-#ifdef IS_PLATFORM_WINDOWS
+#if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)
 			const ULONG framesToSkip = 0;
 			const ULONG framesToCapture = c_CallStackCount;
 			void* backTrace[framesToCapture]{};

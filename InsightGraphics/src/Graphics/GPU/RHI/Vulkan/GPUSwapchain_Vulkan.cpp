@@ -278,9 +278,8 @@ namespace Insight
 
 			void GPUSwapchain_Vulkan::AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence)
 			{
-				vk::Semaphore* semaphoreVulkan = static_cast<vk::Semaphore*>(semaphore->GetRawResource());
-
-				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, *semaphoreVulkan, {});
+				const GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(semaphore);
+				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, semaphoreVulkan->GetSemaphore(), {});
 				m_nextImgeIndex = result.value;
 			}
 
@@ -290,8 +289,8 @@ namespace Insight
 				std::vector<vk::Semaphore> semaphoresVk(semaphoreCount);
 				for (size_t i = 0; i < semaphoreCount; ++i)
 				{
-					vk::Semaphore* s = static_cast<vk::Semaphore*>(semaphores[i]->GetRawResource());
-					semaphoresVk[i] = *s;
+					const GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(semaphores[i]);
+					semaphoresVk[i] = semaphoreVulkan->GetSemaphore();
 				}
 
 				vk::Result result = {};

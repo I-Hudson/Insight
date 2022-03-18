@@ -1,5 +1,7 @@
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 
+#include "VmaUsage.h"
+
 vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
 {
     vk::Format::eUndefined,
@@ -607,6 +609,40 @@ namespace Insight
                 break;
             }
             return vk::BlendOp::eAdd;
+        }
+
+        vk::BufferUsageFlags GPUBufferTypeToVulkanBufferUsageFlags(GPUBufferType type)
+        {
+            switch (type)
+            {
+            case GPUBufferType::Invalid:    break;
+            case GPUBufferType::Vertex:     return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case GPUBufferType::Index:      return vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case GPUBufferType::Uniform:    return vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case GPUBufferType::Constant:   return vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case GPUBufferType::Staging:    return vk::BufferUsageFlagBits::eTransferSrc;
+            case GPUBufferType::Readback:   return vk::BufferUsageFlagBits::eTransferDst;
+            default:
+                break;
+            }
+            return vk::BufferUsageFlags();
+        }
+
+        VmaMemoryUsage GPUBufferTypeToVMAUsage(GPUBufferType type)
+        {
+            switch (type)
+            {
+            case GPUBufferType::Invalid:    break;
+            case GPUBufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case GPUBufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case GPUBufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case GPUBufferType::Constant:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case GPUBufferType::Staging:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+            case GPUBufferType::Readback:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+            default:
+                break;
+            }
+            return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
         }
     }
 }

@@ -129,5 +129,34 @@ namespace Insight
         };
         using ImageUsageFlags = u32;
         std::string ImageUsageFlagsToString(ImageUsageFlags flags);
+
+		enum class GPUBufferType
+		{
+			Invalid,
+			Vertex,
+			Index,
+			Uniform,
+			Constant,
+			Staging,
+			Readback,
+		};
+		std::string GPUBufferTypeToString(GPUBufferType type);
+
+		//enum GUPBufferFlagBits
+		//{
+		//	None = 1 << 0,
+		//	TransferSrc = 1 << 1,
+		//	TransferDst = 1 << 2,
+		//	UniformTexel = 1 << 3,
+		//	StorageTexel = 1 << 4,
+		//	Uniform = 1 << 5,
+		//	Storage = 1 << 6,
+		//	Index = 1 << 7,
+		//	Vertex = 1 << 8,
+		//	Indirect = 1 << 9,
+		//	ShaderDeviceAddress = 1 << 10,
+		//};
+		//using GUPBufferFlags = u32;
+		//std::string GUPBufferFlagsToString(GUPBufferFlags flags);
 	}
 }

@@ -1,4 +1,7 @@
 #include "Graphics/GPU/GPUCommandList.h"
+#include "Graphics/GPU/GPUBuffer.h"
+#include "Graphics/GPU/GPUFence.h"
+
 #include "Graphics/GPU/RHI/Vulkan/GPUCommandList_Vulkan.h"
 
 #include <iostream>
@@ -7,6 +10,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		void GPUCommandList::CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst)
+		{
+			const u64 srcSize = src->GetSize();
+			const u64 dstSize = dst->GetSize();
+			assert(srcSize == dstSize);
+			CopyBufferToBuffer(src, dst, 0, 0, srcSize);
+		}
+
 		void GPUCommandList::Submit(GPUQueue queue)
 		{
 			Submit(queue, {}, {}, nullptr);
@@ -19,10 +30,13 @@ namespace Insight
 
 		void GPUCommandList::SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
 		{
-			Submit(queue, waitSemaphores, signalSemaphores, fence);
-			// Get fence,
-			// Wait on fence,
-			// Return fence to manager.
+			GPUFence* waitFence = fence != nullptr ? fence : GPUFenceManager::Instance().GetFence();
+			Submit(queue, waitSemaphores, signalSemaphores, waitFence);
+			waitFence->Wait();
+			if (fence == nullptr)
+			{
+				GPUFenceManager::Instance().ReturnFence(waitFence);
+			}
 		}
 
 		void GPUCommandList::SetShader(GPUShader* shader)
@@ -53,6 +67,11 @@ namespace Insight
 		void GPUCommandList::SetCullMode(CullMode cullMode)
 		{
 			m_pso.CullMode = cullMode;
+		}
+
+		void GPUCommandList::SetFrontFace(FrontFace frontFace)
+		{
+			m_pso.FrontFace = frontFace;
 		}
 
 		void GPUCommandList::SetSwapchainSubmit(bool swapchainSubmit)

@@ -24,8 +24,6 @@ namespace Insight
 			{
 				m_pso = pso;
 
-				// Create Render pass
-
 				// Create descriptor set layout
 			
 				m_pipelineLayout = GetDevice()->GetDevice().createPipelineLayout(vk::PipelineLayoutCreateInfo({}, {}, {}));

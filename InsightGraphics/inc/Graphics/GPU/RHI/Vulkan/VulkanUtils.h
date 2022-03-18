@@ -6,6 +6,7 @@
 
 extern vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)];
 extern PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)];
+enum VmaMemoryUsage;
 
 namespace Insight
 {
@@ -19,5 +20,7 @@ namespace Insight
 		vk::ColorComponentFlags ColourComponentFlagsToVulkan(ColourComponentFlags flags);
 		vk::BlendFactor BlendFactorToVulkan(BlendFactor factor);
 		vk::BlendOp BlendOpToVulkan(BlendOp op);
+		vk::BufferUsageFlags GPUBufferTypeToVulkanBufferUsageFlags(GPUBufferType type);
+		VmaMemoryUsage GPUBufferTypeToVMAUsage(GPUBufferType type);
 	}
 }

@@ -1,18 +1,18 @@
 #include "Graphics/GPU/GPUSemaphore.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
+
 #include <iostream>
 
 namespace Insight
 {
 	namespace Graphics
 	{
-		GPUSemaphoreManager::GPUSemaphoreManager()
-		{
-		}
-
 		GPUSemaphoreManager::~GPUSemaphoreManager()
 		{
-			Destroy();
+			if (m_inUseSemaphroes.size() > 0)
+			{
+				std::cout << "[GPUSemaphoreManager::~GPUSemaphoreManager] Not all semaphores have been returned.\n";
+			}
 		}
 
 		GPUSemaphore* GPUSemaphoreManager::GetOrCreateSemaphore(bool signaled)

@@ -44,6 +44,11 @@ project "InsightApp"
         "%{wks.location}/vendor/glfw/lib",
     }
 
+    postbuildcommands
+    {
+       "{COPY} \"%{cfg.targetdir}/InsightApp.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On" 

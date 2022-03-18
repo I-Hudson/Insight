@@ -47,6 +47,11 @@ project "InsightGraphics"
         "%{LibDirs.vulkan}",
     }
 
+    postbuildcommands
+    {
+       "{COPY} \"%{cfg.targetdir}/InsightGraphics.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On" 

@@ -33,7 +33,7 @@ namespace Insight
 					);
 
 				VmaAllocationCreateInfo vmaAllocCreateInfo = {};
-				vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+				vmaAllocCreateInfo.usage = VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 				VmaAllocationInfo allocInfo;
 				vmaCreateImage(GetDevice()->GetVMAAllocator(), reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo), &vmaAllocCreateInfo, reinterpret_cast<VkImage*>(&m_image), &m_vmaAllocation, &allocInfo);
 

@@ -1,6 +1,9 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUCommandList_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUPipelineStateObject_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUSwapchain_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUBuffer_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/Window.h"
@@ -26,6 +29,19 @@ namespace Insight
 				}
 			}
 
+			void GPUCommandList_Vulkan::CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst, u64 srcOffset, u64 dstOffset, u64 size)
+			{
+				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is null.\n"; return; }
+				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is not recording.\n"; return; }
+
+				GPUBuffer_Vulkan* srcBufferVulkan = dynamic_cast<GPUBuffer_Vulkan*>(src);
+				GPUBuffer_Vulkan* dstBufferVulkan = dynamic_cast<GPUBuffer_Vulkan*>(dst);
+				std::array<vk::BufferCopy, 1> regions =
+				{ vk::BufferCopy(srcOffset, dstOffset, size) };
+				m_commandList.copyBuffer(srcBufferVulkan->GetBuffer(), dstBufferVulkan->GetBuffer(), regions);
+				++m_recordCommandCount;
+			}
+
 			void GPUCommandList_Vulkan::SetViewport(int width, int height)
 			{
 				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetViewport] CommandList is null.\n"; return; }
@@ -34,7 +50,7 @@ namespace Insight
 				vk::Viewport viewports[1] = { vk::Viewport(0, 0, static_cast<float>(width),  static_cast<float>(-height), 0, 1) }; // Inverse height as vulkan is from top left, not bottom left.
 				if (m_pso.Swapchain)
 				{
-					viewports[0].height = height;
+					viewports[0].height = static_cast<float>(height);
 				}
 				m_commandList.setViewport(0, 1, viewports);
 				++m_recordCommandCount;
@@ -48,6 +64,38 @@ namespace Insight
 				vk::Rect2D scissors[1] = { vk::Rect2D({0, 0}, {static_cast<u32>(width), static_cast<u32>(height)}) };
 				m_commandList.setScissor(0, 1, scissors);
 				++m_recordCommandCount;
+			}
+
+			void GPUCommandList_Vulkan::SetVertexBuffer(GPUBuffer* buffer)
+			{
+				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is null.\n"; return; }
+				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is not recording.\n"; return; }
+
+				if (!buffer || m_activeItems.VertexBuffer == buffer)
+				{
+					return;
+				}
+				const GPUBuffer_Vulkan* bufferVulkan = dynamic_cast<const GPUBuffer_Vulkan*>(buffer);
+				std::array<vk::Buffer, 1> buffersVulkan = { bufferVulkan->GetBuffer()};
+				std::array<vk::DeviceSize, 1> offsets = { 0 };
+				m_commandList.bindVertexBuffers(0, buffersVulkan, offsets);
+				++m_recordCommandCount;
+				m_activeItems.VertexBuffer = buffer;
+			}
+
+			void GPUCommandList_Vulkan::SetIndexBuffer(GPUBuffer* buffer)
+			{
+				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is null.\n"; return; }
+				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is not recording.\n"; return; }
+
+				if (!buffer || m_activeItems.IndexBuffer == buffer)
+				{
+					return;
+				}
+				const GPUBuffer_Vulkan* bufferVulkan = dynamic_cast<const GPUBuffer_Vulkan*>(buffer);
+				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
+				++m_recordCommandCount;
+				m_activeItems.IndexBuffer = buffer;
 			}
 
 			void GPUCommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
@@ -77,12 +125,22 @@ namespace Insight
 				}
 
 				std::vector<vk::Semaphore> waitSemaphoresVulkan;
+				for (const GPUSemaphore* smeaphore : waitSemaphores)
+				{
+					const GPUSemaphore_Vulkan* semaphroeVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(smeaphore);
+					waitSemaphoresVulkan.push_back(semaphroeVulkan->GetSemaphore());
+				}
 				std::vector<vk::Semaphore> signalSemaphoresVulkan;
+				for (const GPUSemaphore* smeaphore : signalSemaphores)
+				{
+					const GPUSemaphore_Vulkan* semaphroeVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(smeaphore);
+					waitSemaphoresVulkan.push_back(semaphroeVulkan->GetSemaphore());
+				}
 				std::vector<vk::CommandBuffer> commandListVulkan = { m_commandList };
-				vk::Fence fenceVulkan;
+				const GPUFence_Vulkan* fenceVulkan = dynamic_cast<const GPUFence_Vulkan*>(fence);
 
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(waitSemaphoresVulkan, { }, commandListVulkan, signalSemaphoresVulkan);
-				GetDevice()->GetQueue(queue).submit(submitInfo, fenceVulkan);
+				GetDevice()->GetQueue(queue).submit(submitInfo, fenceVulkan->GetFence());
 			}
 
 			void GPUCommandList_Vulkan::BeginRecord()
@@ -213,7 +271,12 @@ namespace Insight
 				vk::CommandPool& commandPool = m_commandPools[type];
 				if (!commandPool)
 				{
-					vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo({}, GetDevice()->GetQueueFamilyIndex(m_queue));
+					vk::CommandPoolCreateFlags flags;
+					if (type == GPUCommandListType::Transient)
+					{
+						flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+					}
+					vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo( flags, GetDevice()->GetQueueFamilyIndex(m_queue));
 					commandPool = GetDevice()->GetDevice().createCommandPool(poolCreateInfo);
 				}
 

@@ -14,7 +14,6 @@ namespace Insight
 			virtual ~GPUSemaphore() { }
 
 			virtual void Signal() = 0;
-			virtual void* GetRawResource() = 0;
 
 		protected:
 			virtual void Create(bool signaled) = 0;
@@ -26,8 +25,13 @@ namespace Insight
 		class GPUSemaphoreManager
 		{
 		public:
-			GPUSemaphoreManager();
 			~GPUSemaphoreManager();
+
+			static GPUSemaphoreManager& Instance()
+			{
+				static GPUSemaphoreManager ins;
+				return ins;
+			}
 
 			GPUSemaphore* GetOrCreateSemaphore(bool signaled = false);
 			void ReturnSemaphore(GPUSemaphore*& semaphore);

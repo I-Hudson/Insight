@@ -28,14 +28,9 @@ namespace Insight
 
 			static GPUDevice* Create();
 
-			GPUSemaphoreManager& GetSemaphoreManager() { return m_semaphoreManager; }
-			GPUShaderManager& GetShaderManager() { return m_shaderManager; }
 			GPUSwapchain* GetSwapchain() { return m_swapchain; }
 
 		protected:
-			GPUSemaphoreManager m_semaphoreManager;
-			GPUShaderManager m_shaderManager;
-
 			GPUSwapchain* m_swapchain{ nullptr };
 		};
 
