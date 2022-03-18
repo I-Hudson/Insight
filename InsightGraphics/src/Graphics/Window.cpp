@@ -1,4 +1,6 @@
 #include "Graphics/Window.h"
+#include "Core/Logger.h"
+
 #include <iostream>
 
 namespace Insight
@@ -9,7 +11,7 @@ namespace Insight
 		{
 			if (m_glfwInit)
 			{
-				std::cout << "[Window::Init] Init already called." << '\n';
+				IS_CORE_INFO("[Window::Init] Init already called.");
 				return true;
 			}
 
@@ -24,7 +26,7 @@ namespace Insight
 
 			glfwSetErrorCallback([](int error_code, const char* description)
 				{
-					std::cout << "ErrorCode: " << error_code << ", Description: " << description << '\n';
+					IS_CORE_ERROR("ErrorCode: {}\n Description: {}", error_code, description);
 				});
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

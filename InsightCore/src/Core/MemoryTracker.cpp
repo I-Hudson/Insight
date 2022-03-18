@@ -1,4 +1,6 @@
 #include "Core/MemoryTracker.h"
+#include "Core/Logger.h"
+
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -28,10 +30,10 @@ namespace Insight
 				for (const auto& pair :m_allocations)
 				{
 					const MemoryTrackedAlloc& alloc = pair.second;
-					std::cout << "Allocation leak: \n";
-					std::cout << "\tPtr: " << alloc.Ptr << "\n";
-					std::cout << "\tType: " << (int)alloc.Type << "\n";
-					std::cout << "\tCallstack: \n";
+					IS_CORE_ERROR("Allocation leak:");
+					IS_CORE_ERROR("\tPtr: {}", alloc.Ptr);
+					IS_CORE_ERROR("\tType: {}", (int)alloc.Type);
+					IS_CORE_ERROR("\tCallstack: ");
 					for (int i = c_CallStackCount - 1; i >= 0; --i)
 					{
 						const std::string& str = alloc.CallStack[i];
@@ -40,7 +42,7 @@ namespace Insight
 							continue;
 						}
 
-						std::cout << "\t\t" << str << "\n";
+						IS_CORE_ERROR("\t\t{}", str);
 					}
 				}
 			}

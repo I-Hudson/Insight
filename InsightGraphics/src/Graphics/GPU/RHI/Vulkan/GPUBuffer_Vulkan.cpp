@@ -1,6 +1,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUBuffer_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/GPU/GPUCommandList.h"
+#include "Core/Logger.h"
 
 #include "VmaUsage.h"
 
@@ -26,7 +27,7 @@ namespace Insight
 				m_info = desc;
 				if (m_info.Type == GPUBufferType::Invalid)
 				{
-					std::cout << "[GPUBuffer_Vulkan::Create] Buffer type is invalid.\n";
+					IS_CORE_ERROR("[GPUBuffer_Vulkan::Create] Buffer type is invalid.");
 					exit(24);
 				}
 

@@ -65,6 +65,7 @@ IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
 IncludeDirs["stb"] = "%{wks.location}/Vendor/stb"
+IncludeDirs["spdlog"] = "%{wks.location}/Vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 

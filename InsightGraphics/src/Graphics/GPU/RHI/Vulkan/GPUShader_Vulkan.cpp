@@ -1,13 +1,14 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUShader_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/PixelFormatExtensions.h"
+#include "Core/Defines.h"
+#include "Core/Logger.h"
 
 #include "glslang/SPIRV/GlslangToSpv.h"
 
 #include <iostream>
 #include <fstream>
 
-#include "Core/Defines.h"
 #pragma warning( disable : 4099 )
 
 namespace Insight
@@ -193,7 +194,7 @@ namespace Insight
 				inFile.open(path.data());
 				if (!inFile.is_open())
 				{
-					std::cout << "[GPUShader_Vulkan::CompileStage] Unable to open file: " << path << "\n";
+					IS_CORE_WARN("[GPUShader_Vulkan::CompileStage] Unable to open file: {}.", path);
 					return;
 				}
 
@@ -219,8 +220,8 @@ namespace Insight
 
 				if (!shader.parse(&Resources, 100, false, messages)) 
 				{
-					std::cout << "[GPUShader_Vulkan::CompileStage] Info log: " << shader.getInfoLog() << "\n";
-					std::cout << "[GPUShader_Vulkan::CompileStage] Info debug log: " << shader.getInfoDebugLog() << "\n";
+					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info log: {}.", shader.getInfoLog());
+					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info debug log: {}.", shader.getInfoDebugLog());
 					return;  // something didn't work
 				}
 
@@ -232,8 +233,9 @@ namespace Insight
 
 				if (!program.link(messages)) 
 				{
-					std::cout << "[GPUShader_Vulkan::CompileStage] Info log: " << shader.getInfoLog() << "\n";
-					std::cout << "[GPUShader_Vulkan::CompileStage] Info debug log: " << shader.getInfoDebugLog() << "\n";
+					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info log: {}.", shader.getInfoLog());
+					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info debug log: {}.", shader.getInfoDebugLog());
+					return;
 				}
 				
 				std::vector<u32> spirv;

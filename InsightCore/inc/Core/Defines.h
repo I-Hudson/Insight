@@ -6,6 +6,8 @@
 #define IS_CORE __declspec(dllimport)
 #endif
 
+#define IS_UNUSED(x) (void)x
+
 // Static array size
 #define ARRAY_COUNT(array) (sizeof(array) / sizeof(array[0]))
 

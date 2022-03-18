@@ -5,6 +5,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
 #include "Graphics/Window.h"
 #include "Core/Defines.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -104,7 +105,7 @@ namespace Insight
 					messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT ||
 					messageSeverity & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT)
 				{
-					std::cout << "Id: " << pCallbackData->messageIdNumber <<  ", Name: " << pCallbackData->pMessageIdName << " , Msg: " << pCallbackData->pMessage << "\n";
+					IS_CORE_ERROR("Id: {}\n Name: {}\n Msg: {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
 				}
 
 				// The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
@@ -362,15 +363,15 @@ namespace Insight
                     }
                 }
 
-				std::cout << "Device layers:\n";
+				IS_CORE_INFO("Device layers:");
 				for (size_t i = 0; i < layerProperties.size(); ++i)
 				{
-					std::cout << layerProperties[i].layerName <<'\n';
+					IS_CORE_INFO("{}", layerProperties[i].layerName);
 				}
 				std::cout << "Device extensions:\n";
 				for (size_t i = 0; i < extensionProperties.size(); ++i)
 				{
-					std::cout << extensionProperties[i].extensionName << '\n';
+					IS_CORE_INFO("{}", extensionProperties[i].extensionName);
 				}
 
 				for (size_t i = 0; i < ARRAY_COUNT(g_DeviceExtensions); i++)

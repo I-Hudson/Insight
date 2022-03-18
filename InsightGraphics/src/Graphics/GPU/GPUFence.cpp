@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUFence.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -13,9 +14,9 @@ namespace Insight
 
 		GPUFenceManager::~GPUFenceManager()
 		{
-			if (m_inUseFences.size() > 0 || m_freeFences.size() > 0)
+			if (m_inUseFences.size() > 0)
 			{
-				std::cout << "[GPUFenceManager::~GPUFenceManager] Destroy must be called.\n";
+				IS_CORE_ERROR("[GPUFenceManager::~GPUFenceManager] Fences still in use.");
 			}
 		}
 
@@ -44,13 +45,13 @@ namespace Insight
 			}
 			else
 			{
-				std::cout << "[GPUFenceManager::ReturnFence] Fence is not being tracked. Fences must be create through GPUFenceManager.\n";
+				IS_CORE_ERROR("[GPUFenceManager::ReturnFence] Fence is not being tracked. Fences must be create through GPUFenceManager.");
 			}
 
 			itr = std::find(m_freeFences.begin(), m_freeFences.end(), fence);
 			if (itr != m_freeFences.end())
 			{
-				std::cout << "[GPUFenceManager::ReturnFence] Fence is already in the free list.\n";
+				IS_CORE_ERROR("[GPUFenceManager::ReturnFence] Fence is already in the free list.");
 				return;
 			}
 			m_freeFences.push_back(fence);

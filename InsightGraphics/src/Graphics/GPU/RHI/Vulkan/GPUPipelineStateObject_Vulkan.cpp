@@ -2,6 +2,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUShader_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/GPU/GPUSwapchain.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -143,7 +144,7 @@ namespace Insight
 			{
 				if (m_renderpasses.size() > 0)
 				{
-					std::cout << "[GPURenderpassManager_Vulkan::~GPURenderpassManager_Vulkan] Destroy must be called.\n";
+					IS_CORE_ERROR("[GPURenderpassManager_Vulkan::~GPURenderpassManager_Vulkan] Not all renderpass have not been destroyed.");
 				}
 			}
 

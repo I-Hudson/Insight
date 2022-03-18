@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUSemaphore.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -11,7 +12,7 @@ namespace Insight
 		{
 			if (m_inUseSemaphroes.size() > 0)
 			{
-				std::cout << "[GPUSemaphoreManager::~GPUSemaphoreManager] Not all semaphores have been returned.\n";
+				IS_CORE_ERROR("[GPUSemaphoreManager::~GPUSemaphoreManager] Not all semaphores have been returned.");
 			}
 		}
 
@@ -40,13 +41,13 @@ namespace Insight
 			}
 			else
 			{
-				std::cout << "[GPUSemaphoreManager::ReturnSemaphore] Semaphore: " << semaphore << " is not tracked. All semaphores should be created using GetDevice()->GetSemaphoreManager().GetOrCreateSemaphore().\n";
+				IS_CORE_ERROR("[GPUSemaphoreManager::ReturnSemaphore] Semaphore is not tracked.All semaphores should be created using GetDevice()->GetSemaphoreManager().GetOrCreateSemaphore().");
 			}
 
 			itr = std::find(m_freeSemaphroes.begin(), m_freeSemaphroes.end(), semaphore);
 			if (itr != m_freeSemaphroes.end())
 			{
-				std::cout << "[GPUSemaphoreManager::ReturnSemaphore] Semaphore: "<< semaphore << " already in free list.\n";
+				IS_CORE_ERROR("[GPUSemaphoreManager::ReturnSemaphore] Semaphore already in free list.");
 				return;
 			}
 			m_freeSemaphroes.push_back(semaphore);
@@ -57,7 +58,7 @@ namespace Insight
 		{
 			if (m_inUseSemaphroes.size() > 0)
 			{
-				std::cout << "[GPUSemaphoreManager::Destroy] Semaphores in use. Not all semaphores have been returned.\n";
+				IS_CORE_ERROR("[GPUSemaphoreManager::Destroy] Semaphores in use. Not all semaphores have been returned.");
 			}
 
 			for (std::list<GPUSemaphore*>::iterator::value_type& ptr : m_inUseSemaphroes)

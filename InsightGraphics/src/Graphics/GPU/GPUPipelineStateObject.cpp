@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUPipelineStateObject.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUPipelineStateObject_Vulkan.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -20,7 +21,7 @@ namespace Insight
 		{
 			if (!pso.IsValid())
 			{
-				std::cout << "[GPUPipelineStateObjectManager::GetOrCreatePSO] PipelineStateObject is not valid.\n";
+				IS_CORE_ERROR("[GPUPipelineStateObjectManager::GetOrCreatePSO] PipelineStateObject is not valid.");
 				return nullptr;
 			}
 

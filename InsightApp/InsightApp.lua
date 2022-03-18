@@ -21,6 +21,7 @@ project "InsightApp"
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.spdlog}",
     }
 
     files 

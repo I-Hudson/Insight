@@ -8,6 +8,7 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/Window.h"
 #include "Graphics/RenderTarget.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -31,8 +32,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst, u64 srcOffset, u64 dstOffset, u64 size)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::CopyBufferToBuffer] CommandList is not recording."); return; }
 
 				GPUBuffer_Vulkan* srcBufferVulkan = dynamic_cast<GPUBuffer_Vulkan*>(src);
 				GPUBuffer_Vulkan* dstBufferVulkan = dynamic_cast<GPUBuffer_Vulkan*>(dst);
@@ -44,8 +45,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::SetViewport(int width, int height)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetViewport] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetViewport] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetViewport] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetViewport] CommandList is not recording."); return; }
 
 				vk::Viewport viewports[1] = { vk::Viewport(0, 0, static_cast<float>(width),  static_cast<float>(-height), 0, 1) }; // Inverse height as vulkan is from top left, not bottom left.
 				if (m_pso.Swapchain)
@@ -58,8 +59,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::SetScissor(int width, int height)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetScissor] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetScissor] CommandList is not recording."); return; }
 
 				vk::Rect2D scissors[1] = { vk::Rect2D({0, 0}, {static_cast<u32>(width), static_cast<u32>(height)}) };
 				m_commandList.setScissor(0, 1, scissors);
@@ -68,8 +69,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::SetVertexBuffer(GPUBuffer* buffer)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetVertexBuffer] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetVertexBuffer] CommandList is not recording."); return; }
 
 				if (!buffer || m_activeItems.VertexBuffer == buffer)
 				{
@@ -85,8 +86,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::SetIndexBuffer(GPUBuffer* buffer)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::SetScissor] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetIndexBuffer] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::SetIndexBuffer] CommandList is not recording."); return; }
 
 				if (!buffer || m_activeItems.IndexBuffer == buffer)
 				{
@@ -100,24 +101,24 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::Draw] CommandList is null.\n"; return; }
-				if (!CanDraw()) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] Unable to draw.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::Draw] CommandList is null."); return; }
+				if (!CanDraw()) { IS_CORE_ERROR("[GPUCommandList_Vulkan::DrawIndexed] Unable to draw."); return; }
 				m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
 				++m_recordCommandCount;
 			}
 
 			void GPUCommandList_Vulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] CommandList is null.\n"; return; }
-				if (!CanDraw()) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] Unable to draw.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::DrawIndexed] CommandList is null."); return; }
+				if (!CanDraw()) { IS_CORE_ERROR("[GPUCommandList_Vulkan::DrawIndexed] Unable to draw."); return; }
 				m_commandList.drawIndexed(indexCount, instanceCount, firstIndex,vertexOffset, firstInstance);
 				++m_recordCommandCount;
 			}
 
 			void GPUCommandList_Vulkan::Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::Submit] CommandList is null.\n"; return; }
-				if (m_recordCommandCount == 0) { std::cout << "[GPUCommandList_Vulkan::Submit] Record command count is 0. Nothing is sunmited.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::Submit] CommandList is null."); return; }
+				if (m_recordCommandCount == 0) { IS_CORE_ERROR("[GPUCommandList_Vulkan::Submit] Record command count is 0. Nothing is submitted."); return; }
 
 				if (m_activeItems.Renderpass)
 				{
@@ -146,8 +147,8 @@ namespace Insight
 			void GPUCommandList_Vulkan::BeginRecord()
 			{
 				Reset();
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::BeginRecord] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Idle) { std::cout << "[GPUCommandList_Vulkan::BeginRecord] CommandList is already recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRecord] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Idle) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRecord] CommandList is already recording."); return; }
 				m_state = GPUCommandListState::Recording;
 
 				vk::CommandBufferBeginInfo info = vk::CommandBufferBeginInfo();
@@ -157,8 +158,8 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::EndRecord()
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::EndRecord] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::EndRecord] CommandList is not recording.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::EndRecord] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::EndRecord] CommandList is not recording."); return; }
 				
 				if (m_activeItems.Renderpass)
 				{
@@ -172,9 +173,9 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::BeginRenderpass()
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::BeginRenderpass] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::BeginRenderpass] CommandList is not recording.\n"; return; }
-				if (m_activeItems.Renderpass) { std::cout << "[GPUCommandList_Vulkan::BeginRenderpass] Renderpass must call End before Begin can be called.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRenderpass] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRenderpass] CommandList is not recording."); return; }
+				if (m_activeItems.Renderpass) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRenderpass] Renderpass must call End before Begin can be called."); return; }
 
 				vk::RenderPass renderpass = GPURenderpassManager_Vulkan::Instance().GetOrCreateRenderpass({ m_pso.RenderTargets });
 				vk::Rect2D rect = vk::Rect2D({}, { static_cast<u32>(Window::Instance().GetWidth()), static_cast<u32>(Window::Instance().GetHeight()) });
@@ -236,9 +237,9 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::EndRenderpass()
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::EndRenderpass] CommandList is null.\n"; return; }
-				if (m_state != GPUCommandListState::Recording) { std::cout << "[GPUCommandList_Vulkan::EndRenderpass] CommandList is not recording.\n"; return; }
-				if (!m_activeItems.Renderpass) { std::cout << "[GPUCommandList_Vulkan::BeginRenderpass] Renderpass must call Begin before End can be called.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::EndRenderpass] CommandList is null."); return; }
+				if (m_state != GPUCommandListState::Recording) { IS_CORE_ERROR("[GPUCommandList_Vulkan::EndRenderpass] CommandList is not recording."); return; }
+				if (!m_activeItems.Renderpass) { IS_CORE_ERROR("[GPUCommandList_Vulkan::BeginRenderpass] Renderpass must call Begin before End can be called."); return; }
 
 				m_commandList.endRenderPass();
 				++m_recordCommandCount;
@@ -247,7 +248,7 @@ namespace Insight
 
 			void GPUCommandList_Vulkan::BindPipeline(GPUPipelineStateObject* pipeline)
 			{
-				if (!m_commandList) { std::cout << "[GPUCommandList_Vulkan::DrawIndexed] CommandList is null.\n"; return; }
+				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::DrawIndexed] CommandList is null."); return; }
 				const GPUPipelineStateObject_Vulkan* pipelineVulkan = dynamic_cast<GPUPipelineStateObject_Vulkan*>(pipeline);
 
 				// Check if we need to also begin a render pass?
@@ -338,7 +339,7 @@ namespace Insight
 					vk::CommandPool& cmdPool = m_commandPools[kvp.first];
 					if (!cmdPool)
 					{
-						std::cout << "[GPUComamndListAllocator_Vulkan::FreeCommandLists] CommandPool is null.\n";
+						IS_CORE_ERROR("[GPUComamndListAllocator_Vulkan::FreeCommandLists] CommandPool is null.");
 						continue;
 					}
 					GetDevice()->GetDevice().freeCommandBuffers(cmdPool, kvp.second);

@@ -22,6 +22,7 @@ project "InsightEditor"
     
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.spdlog}",
     }
 
     files 

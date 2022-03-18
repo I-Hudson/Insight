@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUShader.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUShader_Vulkan.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -11,7 +12,7 @@ namespace Insight
 		{
 			if (m_shaders.size() > 0)
 			{
-				std::cout << "[GPUShaderManager::~GPUShaderManager] Not all shader have been desttroyed.\n";
+				IS_CORE_ERROR("[GPUShaderManager::~GPUShaderManager] Not all shader have been destroyed.");
 			}
 		}
 
@@ -20,7 +21,7 @@ namespace Insight
 			const auto& itr = m_shaders.find(key);
 			if (itr != m_shaders.end())
 			{
-				std::cout << "[GPUShaderManager::CreateShader] Found already created shader with key: " << key << "\n";
+				IS_CORE_ERROR("[GPUShaderManager::CreateShader] Found already created shader with key: {}.", key);
 				return itr->second;
 			}
 
@@ -35,7 +36,7 @@ namespace Insight
 			const auto& itr = m_shaders.find(key);
 			if (itr == m_shaders.end())
 			{
-				std::cout << "[GPUShaderManager::GetShader] No shader with key: " << key << "\n";
+				IS_CORE_ERROR("[GPUShaderManager::GetShader] No shader with key: {}.",key);
 				return nullptr;
 			}
 			return itr->second;
@@ -46,7 +47,7 @@ namespace Insight
 			const auto& itr = m_shaders.find(key);
 			if (itr == m_shaders.end())
 			{
-				std::cout << "[GPUShaderManager::DestroyShader] No shader with key: " << key<< " found.\n";
+				IS_CORE_ERROR("[GPUShaderManager::DestroyShader] No shader with key: {} found.", key);
 				return;
 			}
 			itr->second->Destroy();

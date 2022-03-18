@@ -21,6 +21,7 @@ project "InsightGraphics"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.stb}",
+        "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.vma}",
         "%{IncludeDirs.glslang}win_debug/inc",
         "%{IncludeDirs.vulkan}",

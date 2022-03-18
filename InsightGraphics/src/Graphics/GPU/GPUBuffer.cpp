@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUBuffer.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUBuffer_Vulkan.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 
@@ -15,7 +16,7 @@ namespace Insight
 		{
 			if (m_buffers.size() > 0)
 			{
-				std::cout << "[GPUBufferManager::~GPUBufferManager] Destroy must be called.\n";
+				IS_CORE_ERROR("[GPUBufferManager::~GPUBufferManager] Buffers have not been destroyed.");
 			}
 		}
 
@@ -24,7 +25,7 @@ namespace Insight
 			GPUBuffer* buffer = GetBuffer(key);
 			if (buffer != nullptr)
 			{
-				std::cout << "[GPUBufferManager::CreateBuffer] Buffer exists with key: " << key << "\n";
+				IS_CORE_ERROR("[GPUBufferManager::CreateBuffer] Buffer exists with key: {}.", key);
 				return buffer;
 			}
 
@@ -66,7 +67,7 @@ namespace Insight
 					return;
 				}
 			}
-			std::cout << "[GPUBufferManager::DestroyBuffer] Buffer not being tracked. Buffer must be created through GPUBufferManager.\n";
+			IS_CORE_ERROR("[GPUBufferManager::DestroyBuffer] Buffer not being tracked. Buffer must be created through GPUBufferManager.");
 		}
 
 		void GPUBufferManager::Destroy()

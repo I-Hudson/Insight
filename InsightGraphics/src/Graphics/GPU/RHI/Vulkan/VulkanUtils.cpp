@@ -628,6 +628,23 @@ namespace Insight
             return vk::BufferUsageFlags();
         }
 
+        VmaAllocationCreateFlags GPUBufferTypeToVMAAllocCreateFlags(GPUBufferType type)
+        {
+            switch (type)
+            {
+            case GPUBufferType::Invalid:    break;
+            case GPUBufferType::Vertex:     return 0;
+            case GPUBufferType::Index:      return 0;
+            case GPUBufferType::Uniform:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case GPUBufferType::Constant:   return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case GPUBufferType::Staging:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case GPUBufferType::Readback:   return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+            default:
+                break;
+            }
+            return 0;
+        }
+
         VmaMemoryUsage GPUBufferTypeToVMAUsage(GPUBufferType type)
         {
             switch (type)
@@ -635,8 +652,8 @@ namespace Insight
             case GPUBufferType::Invalid:    break;
             case GPUBufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
             case GPUBufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
-            case GPUBufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
-            case GPUBufferType::Constant:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case GPUBufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+            case GPUBufferType::Constant:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
             case GPUBufferType::Staging:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
             case GPUBufferType::Readback:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
             default:

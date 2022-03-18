@@ -1,5 +1,6 @@
 #include "Graphics/GPU/GPUImage.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUImage_Vulkan.h"
+#include "Core/Logger.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -57,7 +58,7 @@ namespace Insight
 			std::map<const std::string, GPUImage*>::iterator itr = m_keyToImageLookup.find(key);
 			if (itr == m_keyToImageLookup.end())
 			{
-				// ERROR
+				IS_CORE_WARN("[GPUImageManager::DestroyImage] Image with key {} does not exists.");
 				return;
 			}
 			DestroyImage(itr->second);
@@ -69,7 +70,7 @@ namespace Insight
 			std::list<GPUImage*>::iterator itr = std::find(m_images.begin(), m_images.end(), image);
 			if (itr == m_images.end())
 			{
-				// ERROR
+				IS_CORE_WARN("[GPUImageManager::DestroyImage] Image does not exists.");
 				return;
 			}
 
@@ -83,7 +84,7 @@ namespace Insight
 		{
 			if (m_images.size() > 0)
 			{
-				// ERROR
+				IS_CORE_WARN("[GPUImageManager::Destroy] Outstanding images have not been destroy explicitly.");
 			}
 
 			for (std::list<GPUImage*>::iterator::value_type& ptr : m_images)

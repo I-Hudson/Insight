@@ -2,6 +2,7 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/Window.h"
+#include "Core/Logger.h"
 
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -75,13 +76,13 @@ namespace Insight
 				// Exit if either a graphics or a presenting queue hasn't been found
 				if (graphicsQueueNodeIndex == UINT32_MAX || presentQueueNodeIndex == UINT32_MAX)
 				{
-					std::cout << "[GPUSwapchainVulkan::Init] Could not find a graphics and/or presenting queue!\n";
+					IS_CORE_WARN("[GPUSwapchainVulkan::Init] Could not find a graphics and/or presenting queue!");
 				}
 
 				// todo : Add support for separate graphics and presenting queue
 				if (graphicsQueueNodeIndex != presentQueueNodeIndex)
 				{
-					std::cout << "[GPUSwapchainVulkan::Init] Separate graphics and presenting queues are not supported yet!\n";
+					IS_CORE_INFO("[GPUSwapchainVulkan::Init] Separate graphics and presenting queues are not supported yet!");
 				}
 
 				vk::Format surfaceFormat;

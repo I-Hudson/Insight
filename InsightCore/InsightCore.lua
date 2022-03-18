@@ -16,6 +16,7 @@ project "InsightCore"
     includedirs
     {
         "inc",
+        "%{IncludeDirs.spdlog}",
     }
 
     files 

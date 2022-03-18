@@ -92,7 +92,7 @@ namespace Insight
 				GPUPipelineStateObject* pipelineStateObject = GPUPipelineStateObjectManager::Instance().GetOrCreatePSO(m_pso);
 				if (!pipelineStateObject)
 				{
-					//std::cout << "[GPUCommandList::CanDraw] PipelineStateObejct is not valid. Missing some required data.\n";
+					//IS_CORE_ERROR("[GPUCommandList::CanDraw] PipelineStateObejct is not valid. Missing some required data.");
 					return false;
 				}
 
