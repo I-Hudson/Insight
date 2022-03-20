@@ -14,6 +14,14 @@ namespace Insight
 			GPUQueue_Transfer,
 		};
 
+		enum class GPUCommandListType
+		{
+			Default,
+			Transient,
+			Compute,
+			Reset
+		};
+
 		enum ShaderStageFlagBits
 		{
 			ShaderStage_Vertex,

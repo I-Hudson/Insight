@@ -1,6 +1,8 @@
 #include "Graphics/GPU/GPUSemaphore.h"
-#include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
 #include "Core/Logger.h"
+
+#include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
+#include "Graphics/GPU/RHI/DX12/GPUSemaphore_DX12.h"
 
 #include <iostream>
 
@@ -8,6 +10,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUSemaphore* GPUSemaphore::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUSemaphore_Vulkan(); }
+			else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUSemaphore_DX12(); }
+			return nullptr;
+		}
+
+
 		GPUSemaphoreManager::~GPUSemaphoreManager()
 		{
 			if (m_inUseSemaphroes.size() > 0)
@@ -26,7 +36,7 @@ namespace Insight
 				return semaphore;
 			}
 
-			GPUSemaphore* semaphore = new RHI::Vulkan::GPUSemaphore_Vulkan();
+			GPUSemaphore* semaphore = GPUSemaphore::New();
 			semaphore->Create(signaled);
 			m_inUseSemaphroes.push_back(semaphore);
 			return semaphore;

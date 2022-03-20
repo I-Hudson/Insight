@@ -15,6 +15,9 @@ namespace Insight
 
 			virtual void Signal() = 0;
 
+		private:
+			static GPUSemaphore* New();
+
 		protected:
 			virtual void Create(bool signaled) = 0;
 			virtual void Destroy() = 0;

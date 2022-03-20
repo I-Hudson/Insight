@@ -1,6 +1,9 @@
 #include "Graphics/GPU/RHI/Vulkan/GPUSwapchain_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUSemaphore_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUCommandList_Vulkan.h"
 #include "Graphics/GPU/RHI/Vulkan/VulkanUtils.h"
+#include "Graphics/Renderer.h"
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
 
@@ -122,6 +125,15 @@ namespace Insight
 				}
 				m_surfaceFormat = VkFormatToPixelFormat[(int)surfaceFormat];
 				m_colourSpace = surfaceColourSpace;
+
+				for (auto* semaphore : m_nextImageAvailable)
+				{
+					semaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+				}
+				for (auto* semaphore : m_completedImageAvailable)
+				{
+					semaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+				}
 			}
 
 			void GPUSwapchain_Vulkan::Build(GPUSwapchainDesc desc)
@@ -255,6 +267,30 @@ namespace Insight
 					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 					m_swapchainImageViews.push_back(GetDevice()->GetDevice().createImageView(info));
 				}
+
+				for (GPUSemaphore* semaphore : m_nextImageAvailable)
+				{
+					GPUSemaphoreManager::Instance().ReturnSemaphore(semaphore);
+				}
+				for (GPUSemaphore* semaphore : m_completedImageAvailable)
+				{
+					GPUSemaphoreManager::Instance().ReturnSemaphore(semaphore);
+				}
+
+				m_nextImageAvailable.resize(m_desc.ImageCount);
+				m_completedImageAvailable.resize(m_desc.ImageCount);
+				for (GPUSemaphore*& semaphore : m_nextImageAvailable)
+				{
+					semaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+				}
+				for (GPUSemaphore*& semaphore : m_completedImageAvailable)
+				{
+					semaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+				}
+
+				AcquireNextImage(nullptr, nullptr);
+				//m_fence->Wait();
+				//m_fence->Reset();
 			}
 
 			void GPUSwapchain_Vulkan::Destroy()
@@ -275,35 +311,83 @@ namespace Insight
 					GetDevice()->GetInstance().destroySurfaceKHR(m_surfaceKHR);
 					m_surfaceKHR = vk::SurfaceKHR(nullptr);
 				}
-			}
 
-			void GPUSwapchain_Vulkan::AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence)
-			{
-				const GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(semaphore);
-				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, semaphoreVulkan->GetSemaphore(), {});
-				m_nextImgeIndex = result.value;
+				for (GPUSemaphore* semaphore : m_nextImageAvailable)
+				{
+					GPUSemaphoreManager::Instance().ReturnSemaphore(semaphore);
+				}
+				m_nextImageAvailable.clear();
+				for (GPUSemaphore* semaphore : m_completedImageAvailable)
+				{
+					GPUSemaphoreManager::Instance().ReturnSemaphore(semaphore);
+				}
+				m_completedImageAvailable.clear();
 			}
 
 			void GPUSwapchain_Vulkan::Present(GPUQueue queue, u32 imageIndex, const std::vector<GPUSemaphore*>& semaphores)
 			{
 				const u32 semaphoreCount = static_cast<u32>(semaphores.size());
-				std::vector<vk::Semaphore> semaphoresVk(semaphoreCount);
+				std::vector<vk::Semaphore> semaphoresVk;
 				for (size_t i = 0; i < semaphoreCount; ++i)
 				{
 					const GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(semaphores[i]);
-					semaphoresVk[i] = semaphoreVulkan->GetSemaphore();
+					semaphoresVk.push_back(semaphoreVulkan->GetSemaphore());
 				}
+
+				// Wait for all command buffer executions to complete.
+				const std::list<GPUCommandList*>&  activeCmdLists = GPUCommandListManager::Instance().GetAllInUseCommandLists(CMD_RENDERER + std::to_string(m_currentFrame));
+				for (const auto& cmdList : activeCmdLists)
+				{
+					const GPUSemaphore_Vulkan* cmdListSemaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(cmdList->GetSignalSemaphore());
+					semaphoresVk.push_back(cmdListSemaphoreVulkan->GetSemaphore());
+				}
+
+				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
+				std::array<u32, 1> imageIndexs = { imageIndex };
+				std::array<vk::Result, 1> results;
 
 				vk::Result result = {};
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(
-					semaphoreCount,
-					semaphoresVk.data(),
-					1,
-					&m_swapchain,
-					&imageIndex,
-					&result
+					semaphoresVk,
+					swapchains,
+					imageIndexs,
+					results
 				);
 				vk::Result presentResult = GetDevice()->GetQueue(queue).presentKHR(presentInfo);
+
+				m_cmdListsFromFrame[m_currentFrame] = activeCmdLists;
+
+				m_currentFrame = (m_currentFrame + 1) % m_desc.ImageCount;
+
+				// Wait on all the executing command lists from m_currentFrame (The previous time we submit cmd to this frame).
+				for (const auto& cmdList : m_cmdListsFromFrame[m_currentFrame])
+				{
+					const GPUCommandList_Vulkan* cmdListVulkan = dynamic_cast<const GPUCommandList_Vulkan*>(cmdList);
+					GPUFence* fence = cmdListVulkan->GetFence();
+					fence->Wait();
+					fence->Reset();
+				}
+
+				AcquireNextImage(nullptr, nullptr);
+			}
+
+			void GPUSwapchain_Vulkan::AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence)
+			{
+				const GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(m_nextImageAvailable[m_currentFrame]);
+				vk::Fence waitFence = nullptr;
+				if (fence)
+				{
+					const GPUFence_Vulkan* fenceVulkan = dynamic_cast<const GPUFence_Vulkan*>(fence);
+					waitFence = fenceVulkan->GetFence();
+				}
+				vk::ResultValue result = GetDevice()->GetDevice().acquireNextImageKHR(m_swapchain, UINT64_MAX, semaphoreVulkan->GetSemaphore(), waitFence);
+				m_nextImgeIndex = result.value;
+			}
+
+			GPUSemaphore_Vulkan* GPUSwapchain_Vulkan::GetImageAcquiredSemaphore()
+			{
+				GPUSemaphore_Vulkan* semaphoreVulkan = dynamic_cast<GPUSemaphore_Vulkan*>(m_nextImageAvailable[m_currentFrame]);
+				return semaphoreVulkan;
 			}
 		}
 	}

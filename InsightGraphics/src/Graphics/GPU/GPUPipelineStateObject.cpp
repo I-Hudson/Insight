@@ -8,6 +8,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUPipelineStateObject* GPUPipelineStateObject::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUPipelineStateObject_Vulkan(); }
+			//else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUPipelineStateObject_DX12(); }
+			return nullptr;
+		}
+
+
 		GPUPipelineStateObjectManager::GPUPipelineStateObjectManager()
 		{
 		}
@@ -33,7 +41,7 @@ namespace Insight
 				return itr->second;
 			}
 
-			GPUPipelineStateObject* psoPtr = new RHI::Vulkan::GPUPipelineStateObject_Vulkan();
+			GPUPipelineStateObject* psoPtr = GPUPipelineStateObject::New();
 			psoPtr->Create(pso);
 			m_pipelineStateObjects[psoHash] = psoPtr;
 			return psoPtr;

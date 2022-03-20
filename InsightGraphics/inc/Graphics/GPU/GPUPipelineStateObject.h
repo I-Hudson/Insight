@@ -95,6 +95,9 @@ namespace Insight
 			virtual void Create(PipelineStateObject pso) = 0;
 			virtual void Destroy() = 0;
 
+		private:
+			static GPUPipelineStateObject* New();
+
 		protected:
 			PipelineStateObject m_pso;
 

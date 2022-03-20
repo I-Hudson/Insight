@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Graphics/GPU/Enums.h"
 #include "Graphics/GPU/GPUDevice.h"
 #include "Graphics/GPU/GPUPipelineStateObject.h"
 #include <vector>
@@ -10,19 +11,17 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		namespace RHI::Vulkan
+		{
+			class GPUSwapchain_Vulkan;
+		}
+
 		class GPUSemaphore;
 		class GPUFence;
 		class GPUShader;
 		class GPUBuffer;
 
 		class GPUCommandListManager;
-
-		enum class GPUCommandListType
-		{
-			Default,
-			Transient,
-			Reset
-		};
 
 		enum class GPUCommandListState
 		{
@@ -64,8 +63,8 @@ namespace Insight
 
 			void Submit(GPUQueue queue);
 			void SubmitAndWait(GPUQueue queue);
-			void SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence);
-			virtual void Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence) = 0;
+			void SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores);
+			virtual void Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores) = 0;
 
 			void SetShader(GPUShader* shader);
 			void AddRenderTarget(RenderTarget* renderTarget);
@@ -87,6 +86,9 @@ namespace Insight
 			bool CanDraw();
 			void Reset();
 
+			GPUSemaphore* GetSignalSemaphore() const { return m_signalSemaphore; }
+			GPUFence* GetFence() const { return m_fence; }
+
 		protected:
 			GPUCommandListState m_state = GPUCommandListState::Idle;
 			u32 m_recordCommandCount = 0;
@@ -94,6 +96,8 @@ namespace Insight
 			GPUCommandListType m_type;
 			PipelineStateObject m_pso;
 			GPUCommandListActive m_activeItems;
+			GPUSemaphore* m_signalSemaphore{ nullptr };
+			GPUFence* m_fence{ nullptr };
 
 			friend class GPUCommandListManager;
 		};
@@ -114,13 +118,26 @@ namespace Insight
 			virtual void FreeCommandLists(const std::list<GPUCommandList*>& cmdLists) = 0;
 			virtual void FreeAllCommandLists() = 0;
 
+		private:
+			static GPUComamndListAllocator* New();
+
+		protected:
 			virtual void Destroy() = 0;
 
 		protected:
 			GPUQueue m_queue = GPUQueue::GPUQueue_Graphics;
 			std::list<GPUCommandList*> m_allocatedCommandLists;
+
+			friend class GPUCommandListManager;
 		};
 
+		struct GPUCommandListGroup
+		{
+			std::list<GPUCommandList*> m_inUseCommandLists;
+			std::list<GPUCommandList*> m_freeCommandLists;
+			std::map<GPUCommandListType, std::vector<GPUCommandList*>> m_typeToListLookup;
+			GPUComamndListAllocator* m_commandListAllocator{ nullptr };
+		};
 
 		class GPUCommandListManager
 		{
@@ -135,22 +152,22 @@ namespace Insight
 			}
 
 			void Create();
-			void SetQueue(GPUQueue queue);
 
-			void ResetCommandList(GPUCommandList* cmdList);
-			void ResetCommandLists(std::list<GPUCommandList*> cmdLists);
+			void ResetCommandLists(std::string key, std::list<GPUCommandList*> cmdLists);
 
-			void ResetCommandPool(GPUCommandListType type = GPUCommandListType::Default);
+			void ResetCommandPool(std::string key, GPUCommandListType type = GPUCommandListType::Default);
 
-			GPUCommandList* GetOrCreateCommandList(GPUCommandListType type = GPUCommandListType::Default);
-			void ReturnCommandList(GPUCommandList* cmdList);
+			GPUCommandList* GetOrCreateCommandList(std::string key, GPUCommandListType type = GPUCommandListType::Default);
+			void ReturnCommandList(std::string key, GPUCommandList* cmdList);
 			void Destroy();
 
 		private:
-			std::list<GPUCommandList*> m_inUseCommandLists;
-			std::list<GPUCommandList*> m_freeCommandLists;
-			std::map<GPUCommandListType, std::vector<GPUCommandList*>> m_typeToListLookup;
-			GPUComamndListAllocator* m_commandListAllocator{ nullptr };
+			const std::list<GPUCommandList*>& GetAllInUseCommandLists(std::string key) const;
+
+		private:
+			std::map<std::string, GPUCommandListGroup> m_commandListGroup;
+
+			friend class RHI::Vulkan::GPUSwapchain_Vulkan;
 		};
 	}
 }

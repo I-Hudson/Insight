@@ -24,6 +24,8 @@ namespace Insight
 			class GPUDevice_Vulkan : public GPUDevice
 			{
 			public:
+				virtual ~GPUDevice_Vulkan() override;
+
 				virtual bool Init() override;
 				virtual void Destroy() override;
 

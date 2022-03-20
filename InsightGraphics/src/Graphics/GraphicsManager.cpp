@@ -2,6 +2,9 @@
 #include "Graphics/GPU/GPUDevice.h"
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
+#include "Graphics/GPU/RHI/DX12/GPUDevice_DX12.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -12,7 +15,8 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GPUDevice = GPUDevice::Create();
+			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			m_sharedData.GPUDevice = GPUDevice::New();
 			if (!m_sharedData.GPUDevice->Init())
 			{
 				// Error message.

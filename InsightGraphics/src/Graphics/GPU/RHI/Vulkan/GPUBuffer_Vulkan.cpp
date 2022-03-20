@@ -70,7 +70,8 @@ namespace Insight
 				}
 				else
 				{
-					GPUCommandList* cmdList = GPUCommandListManager::Instance().GetOrCreateCommandList(GPUCommandListType::Transient);
+					constexpr const char* CMD_GPU_BUFFER_VULKAN = "CMD_GPU_BUFFER_VULKAN";
+					GPUCommandList* cmdList = GPUCommandListManager::Instance().GetOrCreateCommandList(CMD_GPU_BUFFER_VULKAN, GPUCommandListType::Transient);
 					GPUBuffer* stagingBuffer = GPUBufferManager::Instance().CreateBuffer("StagingBuffer", GPUBufferCreateInfo(m_info.Size, GPUBufferType::Staging));
 					stagingBuffer->SetData(data, size, offset);
 
@@ -80,7 +81,7 @@ namespace Insight
 					cmdList->SubmitAndWait(GPUQueue_Graphics);
 
 					GPUBufferManager::Instance().DestroyBuffer(stagingBuffer);
-					GPUCommandListManager::Instance().ReturnCommandList(cmdList);
+					GPUCommandListManager::Instance().ReturnCommandList(CMD_GPU_BUFFER_VULKAN, cmdList);
 				}
 
 				return true;

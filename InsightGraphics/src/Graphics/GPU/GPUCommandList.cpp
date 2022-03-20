@@ -1,8 +1,10 @@
 #include "Graphics/GPU/GPUCommandList.h"
 #include "Graphics/GPU/GPUBuffer.h"
 #include "Graphics/GPU/GPUFence.h"
+#include "Core/Logger.h"
 
 #include "Graphics/GPU/RHI/Vulkan/GPUCommandList_Vulkan.h"
+#include "Graphics/GPU/RHI/DX12/GPUCommandList_DX12.h"
 
 #include <iostream>
 
@@ -20,23 +22,18 @@ namespace Insight
 
 		void GPUCommandList::Submit(GPUQueue queue)
 		{
-			Submit(queue, {}, {}, nullptr);
+			Submit(queue, {}, {});
 		}
 
 		void GPUCommandList::SubmitAndWait(GPUQueue queue)
 		{
-			SubmitAndWait(queue, {}, {}, nullptr);
+			SubmitAndWait(queue, {}, {});
 		}
 
-		void GPUCommandList::SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
+		void GPUCommandList::SubmitAndWait(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores)
 		{
-			GPUFence* waitFence = fence != nullptr ? fence : GPUFenceManager::Instance().GetFence();
-			Submit(queue, waitSemaphores, signalSemaphores, waitFence);
-			waitFence->Wait();
-			if (fence == nullptr)
-			{
-				GPUFenceManager::Instance().ReturnFence(waitFence);
-			}
+			Submit(queue, waitSemaphores, signalSemaphores);
+			m_fence->Wait();
 		}
 
 		void GPUCommandList::SetShader(GPUShader* shader)
@@ -113,7 +110,19 @@ namespace Insight
 		{
 			m_pso = {};
 			m_activeItems = {};
+			m_recordCommandCount = 0;
+			m_fence->Reset();
 		}
+
+
+
+		GPUComamndListAllocator* GPUComamndListAllocator::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUComamndListAllocator_Vulkan(); }
+			else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUComamndListAllocator_DX12(); }
+			return nullptr;
+		}
+
 
 
 		GPUCommandListManager::GPUCommandListManager()
@@ -127,99 +136,108 @@ namespace Insight
 
 		void GPUCommandListManager::Create()
 		{
-			if (!m_commandListAllocator)
+		}
+
+		void GPUCommandListManager::ResetCommandLists(std::string key, std::list<GPUCommandList*> cmdLists)
+		{
+			if (!m_commandListGroup[key].m_commandListAllocator)
 			{
-				m_commandListAllocator = new RHI::Vulkan::GPUComamndListAllocator_Vulkan();
+				return;
 			}
+			m_commandListGroup[key].m_commandListAllocator->ResetCommandLists(cmdLists);
 		}
 
-		void GPUCommandListManager::SetQueue(GPUQueue queue)
+		void GPUCommandListManager::ResetCommandPool(std::string key, GPUCommandListType type)
 		{
-			m_commandListAllocator->SetQueue(queue);
-		}
-
-		void GPUCommandListManager::ResetCommandList(GPUCommandList* cmdList)
-		{
-			ResetCommandLists({cmdList});
-		}
-
-		void GPUCommandListManager::ResetCommandLists(std::list<GPUCommandList*> cmdLists)
-		{
-			m_commandListAllocator->ResetCommandLists(cmdLists);
-		}
-
-		void GPUCommandListManager::ResetCommandPool(GPUCommandListType type)
-		{
-			m_commandListAllocator->ResetCommandPool(type);
-			for (auto& k : m_typeToListLookup[type])
+			if (!m_commandListGroup[key].m_commandListAllocator)
 			{
-				auto itr = std::find(m_inUseCommandLists.begin(), m_inUseCommandLists.end(), k);
-				if (itr != m_inUseCommandLists.end())
+				return;
+			}
+
+			m_commandListGroup[key].m_commandListAllocator->ResetCommandPool(type);
+			for (auto& k : m_commandListGroup[key].m_typeToListLookup[type])
+			{
+				auto itr = std::find(m_commandListGroup[key].m_inUseCommandLists.begin(), m_commandListGroup[key].m_inUseCommandLists.end(), k);
+				if (itr != m_commandListGroup[key].m_inUseCommandLists.end())
 				{
 					//GPUCommandList* cmdList = *itr;
-					m_freeCommandLists.push_back(*itr);
-					m_inUseCommandLists.erase(itr);
+					m_commandListGroup[key].m_freeCommandLists.push_back(*itr);
+					m_commandListGroup[key].m_inUseCommandLists.erase(itr);
 				}
 			}
 		}
 
-		GPUCommandList* GPUCommandListManager::GetOrCreateCommandList(GPUCommandListType type)
+		GPUCommandList* GPUCommandListManager::GetOrCreateCommandList(std::string key, GPUCommandListType type)
 		{
-			if (m_freeCommandLists.size() > 0)
+			GPUCommandListGroup& group = m_commandListGroup[key];
+
+			if (!group.m_commandListAllocator)
 			{
-				GPUCommandList* cmdList = m_freeCommandLists.back();
-				m_freeCommandLists.pop_back();
-				m_inUseCommandLists.push_back(cmdList);
+				group.m_commandListAllocator = GPUComamndListAllocator::New();
+			}
+
+			if (group.m_freeCommandLists.size() > 0)
+			{
+				GPUCommandList* cmdList = group.m_freeCommandLists.back();
+				group.m_freeCommandLists.pop_back();
+				group.m_inUseCommandLists.push_back(cmdList);
 				return cmdList;
 			}
 
-			GPUCommandList* cmdList = m_commandListAllocator->AllocateCommandList(type);
-			m_inUseCommandLists.push_back(cmdList);
-			m_typeToListLookup[type].push_back(cmdList);
+			GPUCommandList* cmdList = group.m_commandListAllocator->AllocateCommandList(type);
+			group.m_inUseCommandLists.push_back(cmdList);
+			group.m_typeToListLookup[type].push_back(cmdList);
 			return cmdList;
 		}
 
-		void GPUCommandListManager::ReturnCommandList(GPUCommandList* cmdList)
+		void GPUCommandListManager::ReturnCommandList(std::string key, GPUCommandList* cmdList)
 		{
-			std::list<GPUCommandList*>::iterator itr = std::find(m_inUseCommandLists.begin(), m_inUseCommandLists.end(), cmdList);
-			if (itr != m_inUseCommandLists.end())
+			std::list<GPUCommandList*>::iterator itr = std::find(m_commandListGroup[key].m_inUseCommandLists.begin(), m_commandListGroup[key].m_inUseCommandLists.end(), cmdList);
+			if (itr != m_commandListGroup[key].m_inUseCommandLists.end())
 			{
-				m_inUseCommandLists.erase(itr);
+				m_commandListGroup[key].m_inUseCommandLists.erase(itr);
 			}
 			else
 			{
 				// ERROR: Command list not being tracked.
 			}
 
-			itr = std::find(m_freeCommandLists.begin(), m_freeCommandLists.end(), cmdList);
-			if (itr != m_freeCommandLists.end())
+			itr = std::find(m_commandListGroup[key].m_freeCommandLists.begin(), m_commandListGroup[key].m_freeCommandLists.end(), cmdList);
+			if (itr != m_commandListGroup[key].m_freeCommandLists.end())
 			{
 				// ERROR: Command list already in free list.
 				return;
 			}
-			m_freeCommandLists.push_back(cmdList);
+			m_commandListGroup[key].m_freeCommandLists.push_back(cmdList);
 		}
 
 		void GPUCommandListManager::Destroy()
 		{
-			if (!m_commandListAllocator)
+			for (auto& pair : m_commandListGroup)
 			{
-				return;
-			}
+				if (pair.second.m_inUseCommandLists.size() > 0)
+				{
+					// ERROR: Command lists are in use.
+					IS_CORE_WARN("[GPUCommandListManager::Destroy] Command list are still in use.");
+				}
 
-			if (m_inUseCommandLists.size() > 0)
-			{
-				// ERROR: Command lists are in use.
-			}
-			m_commandListAllocator->FreeCommandLists(m_inUseCommandLists);
-			m_commandListAllocator->FreeCommandLists(m_freeCommandLists);
-			m_inUseCommandLists.resize(0);
-			m_freeCommandLists.resize(0);
-			m_typeToListLookup.clear();
+				pair.second.m_commandListAllocator->FreeCommandLists(pair.second.m_inUseCommandLists);
+				pair.second.m_commandListAllocator->FreeCommandLists(pair.second.m_freeCommandLists);
+				pair.second.m_inUseCommandLists.resize(0);
+				pair.second.m_freeCommandLists.resize(0);
+				pair.second.m_typeToListLookup.clear();
 
-			m_commandListAllocator->Destroy();
-			delete m_commandListAllocator;
-			m_commandListAllocator = nullptr;
+
+				pair.second.m_commandListAllocator->Destroy();
+				delete pair.second.m_commandListAllocator;
+				pair.second.m_commandListAllocator = nullptr;
+			}
+			m_commandListGroup.clear();
+		}
+
+		const std::list<GPUCommandList*>& GPUCommandListManager::GetAllInUseCommandLists(std::string key) const
+		{
+			return m_commandListGroup.at(key).m_inUseCommandLists;
 		}
 	}
 }

@@ -40,6 +40,9 @@ project "InsightGraphics"
         "glfw3.lib",
         "glm",
         "vulkan-1.lib",
+        "D3d12.lib",
+        "DXGI.lib",
+        "dxguid.lib",
     }
 
     libdirs

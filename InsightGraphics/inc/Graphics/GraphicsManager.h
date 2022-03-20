@@ -14,7 +14,7 @@ namespace Insight
 			{
 				class GPUResource_Vulkan;
 			}
-			namespace DX
+			namespace DX12
 			{
 				class GPUResource_DX12;
 			}
@@ -22,9 +22,16 @@ namespace Insight
 
 		class GPUDevice;
 
+		enum class GraphicsAPI
+		{
+			Vulkan,
+			DX12
+		};
+
 		struct GraphicsManagerData
 		{
 			GPUDevice* GPUDevice;
+			GraphicsAPI GraphicsAPI;
 		};
 
 		class IS_GRAPHICS GraphicsManager : public Insight::Core::ManagerInterface
@@ -36,6 +43,8 @@ namespace Insight
 				static GraphicsManager instance;
 				return instance;
 			}
+			static bool IsVulkan() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::Vulkan; }
+			static bool IsDX12() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::DX12; }
 
 			virtual bool Init() override;
 			virtual void Update(const float deltaTime) override;
@@ -47,7 +56,7 @@ namespace Insight
 			Renderer m_renderer;
 
 			friend class RHI::Vulkan::GPUResource_Vulkan;
-			friend class RHI::DX::GPUResource_DX12;
+			friend class RHI::DX12::GPUResource_DX12;
 		};
 	}
 }

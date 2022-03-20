@@ -114,6 +114,10 @@ namespace Insight
 				return VK_FALSE;
 			}
 
+			GPUDevice_Vulkan::~GPUDevice_Vulkan()
+			{
+			}
+
 			bool GPUDevice_Vulkan::Init()
 			{
 				if (m_instnace && m_device)
@@ -243,20 +247,20 @@ namespace Insight
 			{
 				WaitForGPU();
 
-				GPUBufferManager::Instance().Destroy();
-				GPURenderpassManager_Vulkan::Instance().Destroy();
-				GPUPipelineStateObjectManager::Instance().Destroy();
-				GPUSemaphoreManager::Instance().Destroy();
-				GPUFenceManager::Instance().Destroy();
-				GPUShaderManager::Instance().Destroy();
-				GPUCommandListManager::Instance().Destroy();
-
 				if (m_swapchain)
 				{
 					m_swapchain->Destroy();
 					delete m_swapchain;
 					m_swapchain = nullptr;
 				}
+
+				GPUBufferManager::Instance().Destroy();
+				GPURenderpassManager_Vulkan::Instance().Destroy();
+				GPUPipelineStateObjectManager::Instance().Destroy();
+				GPUShaderManager::Instance().Destroy();
+				GPUCommandListManager::Instance().Destroy();
+				GPUSemaphoreManager::Instance().Destroy();
+				GPUFenceManager::Instance().Destroy();
 
 				vmaDestroyAllocator(m_vmaAllocator);
 

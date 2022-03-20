@@ -50,18 +50,20 @@ namespace Insight
 			
 			PixelFormat GetColourFormat() const { return m_surfaceFormat; }
 
-			void AcquireNextImage(GPUSemaphore* semaphore);
-			virtual void AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence) = 0;
-
+			u32 GetCurrentImageIndex() const { return m_imageIndex; }
+			u32 GetCurrentFrameIndex() const { return m_currentFrame; }
 			void Present(GPUQueue queue, const std::vector<GPUSemaphore*>& semaphores);
 			virtual void Present(GPUQueue queue, u32 imageIndex, const std::vector<GPUSemaphore*>& semaphores) = 0;
 
-			u32 GetNextImageIndex() const { return m_nextImgeIndex; }
+		protected:
+			void AcquireNextImage(GPUSemaphore* semaphore);
+			virtual void AcquireNextImage(GPUSemaphore* semaphore, GPUFence* fence) = 0;
 
 		protected:
 			GPUSwapchainDesc m_desc;
 			u32 m_nextImgeIndex;
-			int m_imageCount;
+			int m_imageIndex;
+			int m_currentFrame;
 
 			PixelFormat m_surfaceFormat;
 		};

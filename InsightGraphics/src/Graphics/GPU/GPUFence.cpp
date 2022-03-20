@@ -1,6 +1,8 @@
 #include "Graphics/GPU/GPUFence.h"
-#include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
 #include "Core/Logger.h"
+
+#include "Graphics/GPU/RHI/DX12/GPUFence_DX12.h"
+#include "Graphics/GPU/RHI/Vulkan/GPUFence_Vulkan.h"
 
 #include <iostream>
 
@@ -8,6 +10,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUFence* GPUFence::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUFence_Vulkan(); }
+			else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUFence_DX12(); }
+			return nullptr;
+		}
+
+
 		GPUFenceManager::GPUFenceManager()
 		{
 		}
@@ -30,7 +40,7 @@ namespace Insight
 				return fence;
 			}
 
-			GPUFence* fence = new RHI::Vulkan::GPUFence_Vulkan();
+			GPUFence* fence = GPUFence::New();
 			fence->Create();
 			m_inUseFences.push_back(fence);
 			return fence;

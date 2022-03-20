@@ -19,7 +19,10 @@ namespace Insight
 		namespace RHI::Vulkan
 		{
 			GPUCommandList_Vulkan::GPUCommandList_Vulkan()
-			{ }
+			{
+				m_signalSemaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+				m_fence = GPUFenceManager::Instance().GetFence();
+			}
 
 			GPUCommandList_Vulkan::~GPUCommandList_Vulkan()
 			{
@@ -27,6 +30,16 @@ namespace Insight
 				{
 					GetDevice()->GetDevice().destroyFramebuffer(m_framebuffer);
 					m_framebuffer = nullptr;
+				}
+
+				if (m_signalSemaphore)
+				{
+					GPUSemaphoreManager::Instance().ReturnSemaphore(m_signalSemaphore);
+				}
+
+				if (m_fence)
+				{
+					GPUFenceManager::Instance().ReturnFence(m_fence);
 				}
 			}
 
@@ -115,7 +128,7 @@ namespace Insight
 				++m_recordCommandCount;
 			}
 
-			void GPUCommandList_Vulkan::Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores, GPUFence* fence)
+			void GPUCommandList_Vulkan::Submit(GPUQueue queue, std::vector<GPUSemaphore*> waitSemaphores, std::vector<GPUSemaphore*> signalSemaphores)
 			{
 				if (!m_commandList) { IS_CORE_ERROR("[GPUCommandList_Vulkan::Submit] CommandList is null."); return; }
 				if (m_recordCommandCount == 0) { IS_CORE_ERROR("[GPUCommandList_Vulkan::Submit] Record command count is 0. Nothing is submitted."); return; }
@@ -125,23 +138,38 @@ namespace Insight
 					EndRenderpass();
 				}
 
+				std::vector<vk::PipelineStageFlags> pipelineStageFlags;
 				std::vector<vk::Semaphore> waitSemaphoresVulkan;
 				for (const GPUSemaphore* smeaphore : waitSemaphores)
 				{
 					const GPUSemaphore_Vulkan* semaphroeVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(smeaphore);
 					waitSemaphoresVulkan.push_back(semaphroeVulkan->GetSemaphore());
+					pipelineStageFlags.push_back(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 				}
+				// Get the swapchain image acquired semaphore for this frame.
+				GPUSwapchain_Vulkan* swapchainVulkan = dynamic_cast<GPUSwapchain_Vulkan*>(GetDevice()->GetSwapchain());
+				GPUSemaphore_Vulkan* swaphcainImage = swapchainVulkan->GetImageAcquiredSemaphore();
+				waitSemaphoresVulkan.push_back(swaphcainImage->GetSemaphore());
+				pipelineStageFlags.push_back(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+
 				std::vector<vk::Semaphore> signalSemaphoresVulkan;
 				for (const GPUSemaphore* smeaphore : signalSemaphores)
 				{
 					const GPUSemaphore_Vulkan* semaphroeVulkan = dynamic_cast<const GPUSemaphore_Vulkan*>(smeaphore);
-					waitSemaphoresVulkan.push_back(semaphroeVulkan->GetSemaphore());
+					signalSemaphoresVulkan.push_back(semaphroeVulkan->GetSemaphore());
 				}
-				std::vector<vk::CommandBuffer> commandListVulkan = { m_commandList };
-				const GPUFence_Vulkan* fenceVulkan = dynamic_cast<const GPUFence_Vulkan*>(fence);
 
-				vk::SubmitInfo submitInfo = vk::SubmitInfo(waitSemaphoresVulkan, { }, commandListVulkan, signalSemaphoresVulkan);
-				GetDevice()->GetQueue(queue).submit(submitInfo, fenceVulkan->GetFence());
+				// Signal our command list semaphore so other GPU work know this command lists has completed.
+				const GPUSemaphore_Vulkan* signalSemaphore = dynamic_cast<const GPUSemaphore_Vulkan*>(m_signalSemaphore);
+				signalSemaphoresVulkan.push_back(signalSemaphore->GetSemaphore());
+
+				// Signal our command lists fence so the CPU can wait if needed.
+				const GPUFence_Vulkan* fenceVulkan = dynamic_cast<const GPUFence_Vulkan*>(m_fence);
+				vk::Fence waitFence = fenceVulkan->GetFence();
+
+				std::vector<vk::CommandBuffer> commandListVulkan = { m_commandList };	
+				vk::SubmitInfo submitInfo = vk::SubmitInfo(waitSemaphoresVulkan, pipelineStageFlags, commandListVulkan, signalSemaphoresVulkan);
+				GetDevice()->GetQueue(queue).submit(submitInfo, waitFence);
 			}
 
 			void GPUCommandList_Vulkan::BeginRecord()
@@ -296,6 +324,7 @@ namespace Insight
 			void GPUComamndListAllocator_Vulkan::ResetCommandLists(std::list<GPUCommandList*> cmdLists)
 			{
 				// TOOD:
+				IS_CORE_ERROR("[GPUComamndListAllocator_Vulkan::ResetCommandPool] Vulkan does not support this.");
 			}
 
 			void GPUComamndListAllocator_Vulkan::ResetCommandPool(GPUCommandListType type)

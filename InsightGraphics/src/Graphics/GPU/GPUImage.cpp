@@ -28,6 +28,12 @@ namespace Insight
 		//	info.Format = format;
 		//	LoadFromData(info);
 		//}
+		GPUImage* GPUImage::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUImage_Vulkan(); }
+			//else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUImage_DX12(); }
+			return nullptr;
+		}
 
 
 		GPUImageManager::GPUImageManager()
@@ -47,7 +53,7 @@ namespace Insight
 				return itr->second;
 			}
 
-			GPUImage* newImage = new RHI::Vulkan::GPUImage_Vulkan();
+			GPUImage* newImage = GPUImage::New();
 			m_images.push_back(newImage);
 			m_keyToImageLookup[key] = newImage;
 			return newImage;

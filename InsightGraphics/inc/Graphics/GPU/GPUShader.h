@@ -91,6 +91,7 @@ namespace Insight
 			virtual ~GPUShader() { }
 
 		private:
+			static GPUShader* New();
 			virtual void Create(ShaderDesc desc) = 0;
 			virtual void Destroy() = 0;
 

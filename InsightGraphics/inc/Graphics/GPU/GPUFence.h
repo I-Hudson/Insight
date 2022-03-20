@@ -6,6 +6,11 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		namespace RHI::DX12
+		{
+			class GPUDevice_DX12;
+		}
+
 		class GPUFenceManager;
 
 		class GPUFence
@@ -16,6 +21,9 @@ namespace Insight
 			virtual void Wait() = 0;
 			virtual void Reset() = 0;
 			virtual bool IsSignaled() = 0;
+
+		private:
+			static GPUFence* New();
 
 		protected:
 			virtual void Create() = 0;
@@ -44,6 +52,8 @@ namespace Insight
 		private:
 			std::list<GPUFence*> m_inUseFences;
 			std::list<GPUFence*> m_freeFences;
+
+			friend class RHI::DX12::GPUDevice_DX12;
 		};
 	}
 }

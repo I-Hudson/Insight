@@ -33,6 +33,9 @@ namespace Insight
 			bool SetData(const void* data, u64 size) { return Upload(data, size, 0); }
 			bool SetData(const void* data, u64 size, u64 offset) { return Upload(data, size, offset); };
 
+		private:
+			static GPUBuffer* New();
+
 		protected:
 			virtual void Create(GPUBufferCreateInfo desc) = 0;
 			virtual void Destroy() = 0;

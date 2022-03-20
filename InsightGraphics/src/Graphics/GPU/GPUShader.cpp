@@ -8,6 +8,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUShader* GPUShader::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUShader_Vulkan(); }
+			//else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUShader_DX12(); }
+			return nullptr;
+		}
+
+
 		GPUShaderManager::~GPUShaderManager()
 		{
 			if (m_shaders.size() > 0)
@@ -25,7 +33,7 @@ namespace Insight
 				return itr->second;
 			}
 
-			GPUShader* shader = new RHI::Vulkan::GPUShader_Vulkan();
+			GPUShader* shader = GPUShader::New();
 			shader->Create(desc);
 			m_shaders[key] = shader;
 			return shader;

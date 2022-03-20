@@ -10,6 +10,7 @@ namespace Insight
 	{
 		class GPUAdapter;
 		class GPUSwapchain;
+		class GraphicsManager;
 
 		/*
 			GPUDevice: This contains the logical and physical device for any gpu use.
@@ -26,12 +27,15 @@ namespace Insight
 
 			virtual GPUAdapter* GetAdapter() = 0;
 
-			static GPUDevice* Create();
-
 			GPUSwapchain* GetSwapchain() { return m_swapchain; }
+
+		private:
+			static GPUDevice* New();
 
 		protected:
 			GPUSwapchain* m_swapchain{ nullptr };
+
+			friend class GraphicsManager;
 		};
 
 		class GPUDeviceResource

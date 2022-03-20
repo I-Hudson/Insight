@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Graphics/GPU/GPUCommandList.h"
-#include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
+#include "Graphics/GPU/RHI/DX12/GPUDevice_DX12.h"
 
 #include <map>
 
@@ -9,15 +9,15 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		namespace RHI::Vulkan
+		namespace RHI::DX12
 		{
-			class GPUComamndListAllocator_Vulkan;
+			class GPUComamndListAllocator_DX12;
 
-			class GPUCommandList_Vulkan : public GPUCommandList, public GPUResource_Vulkan
+			class GPUCommandList_DX12 : public GPUCommandList, public GPUResource_DX12
 			{
 			public:
-				GPUCommandList_Vulkan();
-				virtual ~GPUCommandList_Vulkan() override;
+				GPUCommandList_DX12();
+				virtual ~GPUCommandList_DX12() override;
 
 				virtual void CopyBufferToBuffer(GPUBuffer* src, GPUBuffer* dst, u64 srcOffset, u64 dstOffset, u64 size) override;
 
@@ -40,20 +40,20 @@ namespace Insight
 
 				virtual void BindPipeline(GPUPipelineStateObject* pipeline) override;
 
-				vk::CommandBuffer GetCommandBufferVulkan() { return m_commandList; }
+				ID3D12GraphicsCommandList* GetCommandListDX12() { return m_commandList.Get(); }
 
 			private:
-				vk::CommandBuffer m_commandList{ nullptr };
-				vk::Framebuffer m_framebuffer;
+				ComPtr<ID3D12GraphicsCommandList> m_commandList{ nullptr };
+				GPUComamndListAllocator_DX12* m_allocator{ nullptr };
 
-				friend class GPUComamndListAllocator_Vulkan;
+				friend class GPUComamndListAllocator_DX12;
 			};
 
-			class GPUComamndListAllocator_Vulkan : public GPUComamndListAllocator, public GPUResource_Vulkan
+			class GPUComamndListAllocator_DX12 : public GPUComamndListAllocator, public GPUResource_DX12
 			{
 			public:
-				GPUComamndListAllocator_Vulkan();
-				virtual ~GPUComamndListAllocator_Vulkan() override;
+				GPUComamndListAllocator_DX12();
+				virtual ~GPUComamndListAllocator_DX12() override;
 
 				virtual GPUCommandList* AllocateCommandList(GPUCommandListType type) override;
 
@@ -64,11 +64,13 @@ namespace Insight
 				virtual void FreeCommandLists(const std::list<GPUCommandList*>& cmdLists) override;
 				virtual void FreeAllCommandLists() override;
 
+				ID3D12CommandAllocator* GetCommandPool(GPUCommandListType type) const;
+
 			protected:
 				virtual void Destroy() override;
 
 			private:
-				std::map<GPUCommandListType, vk::CommandPool> m_commandPools;
+				std::map<GPUCommandListType, ComPtr<ID3D12CommandAllocator>> m_commandPools;
 			};
 		}
 	}

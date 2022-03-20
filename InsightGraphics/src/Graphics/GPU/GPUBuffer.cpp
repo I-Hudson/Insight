@@ -1,4 +1,5 @@
 #include "Graphics/GPU/GPUBuffer.h"
+#include "Graphics/GraphicsManager.h"
 #include "Graphics/GPU/RHI/Vulkan/GPUBuffer_Vulkan.h"
 #include "Core/Logger.h"
 
@@ -8,6 +9,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		GPUBuffer* GPUBuffer::New()
+		{
+			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::GPUBuffer_Vulkan(); }
+			else if (GraphicsManager::IsDX12()) { return nullptr; }// new RHI::DX12::GPUDevice_Buffer(); }
+			return nullptr;
+		}
+
+
 		GPUBufferManager::GPUBufferManager()
 		{
 		}
@@ -29,7 +38,8 @@ namespace Insight
 				return buffer;
 			}
 
-			buffer = new RHI::Vulkan::GPUBuffer_Vulkan();
+
+			buffer = GPUBuffer::New();
 			buffer->Create(createInfo);
 			m_buffers[key] = buffer;
 			return buffer;

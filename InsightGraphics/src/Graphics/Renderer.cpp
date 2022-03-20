@@ -4,6 +4,7 @@
 #include "Graphics/GPU/GPUSwapchain.h"
 #include "Graphics/GPU/GPUImage.h"
 #include "Graphics/GPU/GPUBuffer.h"
+#include "Graphics/GPU/GPUFence.h"
 
 #include <iostream>
 
@@ -11,12 +12,15 @@ namespace Insight
 {
 	namespace Graphics
 	{
-#define TRI_TEST
+		//#define TRI_TEST
 		void Renderer::Init(GPUDevice* gpuDevice)
 		{
 			m_gpuDevice = gpuDevice;
-			m_presentCompleteSemaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
-			m_commandListManager.Create();
+			m_frames.resize(gpuDevice->GetSwapchain()->GetDesc().ImageCount);
+			for (Frame& frame : m_frames)
+			{
+				frame.Init();
+			}
 			GPUShaderManager::Instance().CreateShader("Swapchain", ShaderDesc("Resources/Shaders/Swapchain.vert", "Resources/Shaders/Swapchain.frag"));
 
 #ifdef TRI_TEST
@@ -35,7 +39,7 @@ namespace Insight
 				glm::vec4 Colour;
 			};
 			const int vertexCount = 3;
-			GPUBuffer* vBuffer = GPUBufferManager::Instance().CreateBuffer("TRI_TEST_V", GPUBufferCreateInfo(sizeof(Vertex)* vertexCount, GPUBufferType::Vertex));
+			GPUBuffer* vBuffer = GPUBufferManager::Instance().CreateBuffer("TRI_TEST_V", GPUBufferCreateInfo(sizeof(Vertex) * vertexCount, GPUBufferType::Vertex));
 			Vertex vertices[vertexCount] =
 			{
 				{glm::vec4(-1, 1, 0, 1), glm::vec4(1, 0, 0, 1)},
@@ -53,27 +57,28 @@ namespace Insight
 
 		void Renderer::Destroy()
 		{
-			if (m_presentCompleteSemaphore)
+			m_gpuDevice->WaitForGPU();
+			for (Frame& frame : m_frames)
 			{
-				GPUSemaphoreManager::Instance().ReturnSemaphore(m_presentCompleteSemaphore);
+				frame.Destroy();
 			}
-
-			m_commandListManager.Destroy();
 			GPUImageManager::Instance().Destroy();
 		}
 
 		void Renderer::Render()
 		{
-			m_commandListManager.ResetCommandPool();
-			GPUCommandList* cmdList = m_commandListManager.GetOrCreateCommandList();
+			m_imageIndex = m_gpuDevice->GetSwapchain()->GetCurrentImageIndex();
+			Frame& frame = m_frames[m_imageIndex];
+
+			int swapchainFrame = m_gpuDevice->GetSwapchain()->GetCurrentFrameIndex();
+			GPUCommandListManager::Instance().ResetCommandPool(CMD_RENDERER + std::to_string(swapchainFrame));
+			GPUCommandList* cmdList = GPUCommandListManager::Instance().GetOrCreateCommandList(CMD_RENDERER + std::to_string(swapchainFrame));
 			Prepare(cmdList);
 			Submit(cmdList);
 		}
 
 		void Renderer::Prepare(GPUCommandList* cmdList)
 		{
-			m_gpuDevice->GetSwapchain()->AcquireNextImage(m_presentCompleteSemaphore);
-
 			cmdList->BeginRecord();
 
 			cmdList->SetPrimitiveTopologyType(PrimitiveTopologyType::TriangleList);
@@ -106,13 +111,32 @@ namespace Insight
 
 			cmdList->EndRecord();
 
-			cmdList->SubmitAndWait(GPUQueue_Graphics);
-			m_gpuDevice->WaitForGPU();
+			cmdList->Submit(GPUQueue_Graphics);
 		}
 
 		void Renderer::Submit(GPUCommandList* cmdList)
 		{
-			m_gpuDevice->GetSwapchain()->Present(GPUQueue::GPUQueue_Graphics, { m_presentCompleteSemaphore });
+			Frame& frame = m_frames[m_imageIndex];
+			m_gpuDevice->GetSwapchain()->Present(GPUQueue::GPUQueue_Graphics, { });
+		}
+
+		void Renderer::Frame::Init()
+		{
+			PresentCompleteSemaphore = GPUSemaphoreManager::Instance().GetOrCreateSemaphore();
+			Fence = GPUFenceManager::Instance().GetFence();
+		}
+
+		void Renderer::Frame::Destroy()
+		{
+			if (PresentCompleteSemaphore)
+			{
+				GPUSemaphoreManager::Instance().ReturnSemaphore(PresentCompleteSemaphore);
+			}
+
+			if (Fence)
+			{
+				GPUFenceManager::Instance().ReturnFence(Fence);
+			}
 		}
 	}
 }

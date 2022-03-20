@@ -9,6 +9,9 @@ namespace Insight
 		class GPUDevice;
 		class GPUSwapchain;
 		class GPUSemaphore;
+		class GPUFence;
+
+		constexpr const char* CMD_RENDERER = "CMD_RENDERER";
 
 		class Renderer
 		{
@@ -25,10 +28,18 @@ namespace Insight
 			void Submit(GPUCommandList* cmdList);
 
 		private:
-			GPUCommandListManager m_commandListManager;
-
 			GPUDevice* m_gpuDevice{ nullptr };
-			GPUSemaphore* m_presentCompleteSemaphore{ nullptr };
+
+			struct Frame
+			{
+				GPUSemaphore* PresentCompleteSemaphore{ nullptr };
+				GPUFence* Fence{ nullptr };
+
+				void Init();
+				void Destroy();
+			};
+			std::vector<Frame> m_frames;
+			int m_imageIndex;
 		};
 	}
 }

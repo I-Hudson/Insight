@@ -34,6 +34,7 @@ namespace Insight
 			bool LoadedFromFile() const { return m_loadedFromFile; }
 
 		private:
+			static GPUImage* New();
 			virtual void Destroy() = 0;
 
 		protected:
