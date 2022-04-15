@@ -1,5 +1,5 @@
 #include "Graphics/RenderTarget.h"
-#include "Graphics/GPU/GPUImage.h"
+//#include "Graphics/GPU/GPUImage.h"
 
 namespace Insight
 {
@@ -16,7 +16,7 @@ namespace Insight
 
 		void RenderTarget::Create(std::string key, RenderTargetDesc desc)
 		{
-			m_image	= GPUImageManager::Instance().CreateOrGetImage(key);
+			//m_image	= GPUImageManager::Instance().CreateOrGetImage(key);
 			//m_image->
 		}
 

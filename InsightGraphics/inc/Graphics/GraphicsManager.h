@@ -2,7 +2,6 @@
 
 #include "Defines.h"
 #include "Core/ManagerInterface.h"
-#include "Renderer.h"
 
 namespace Insight
 {
@@ -21,6 +20,7 @@ namespace Insight
 		}
 
 		class GPUDevice;
+		class RenderContext;
 
 		enum class GraphicsAPI
 		{
@@ -53,7 +53,7 @@ namespace Insight
 		private:
 			static GraphicsManagerData m_sharedData;
 
-			Renderer m_renderer;
+			RenderContext* m_renderContext{ nullptr };
 
 			friend class RHI::Vulkan::GPUResource_Vulkan;
 			friend class RHI::DX12::GPUResource_DX12;
