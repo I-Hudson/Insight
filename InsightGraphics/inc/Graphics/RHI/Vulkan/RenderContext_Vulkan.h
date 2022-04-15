@@ -71,7 +71,9 @@ namespace Insight
 
 				vk::Device GetDevice() const { return m_device; }
 
+				vk::ImageView GetSwapchainImageView() const { return m_swapchainImageViews[m_availableSwapchainImage]; }
 				vk::Format GetSwapchainColourFormat() const { return m_swapchainFormat; }
+				vk::SwapchainKHR GetSwapchain() const { return m_swapchain; }
 
 				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
 				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
@@ -100,6 +102,7 @@ namespace Insight
 				vk::SwapchainKHR m_swapchain{ nullptr };
 				vk::Format m_swapchainFormat;
 				std::vector<vk::Image> m_swapchainImages;
+				std::vector<vk::ImageView> m_swapchainImageViews;
 
 				std::unordered_map<GPUQueue, vk::Queue> m_commandQueues;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;
@@ -113,6 +116,7 @@ namespace Insight
 
 				const static int c_FrameCount = 2;
 				int m_currentFrame = 0;
+				int m_availableSwapchainImage = 0;
 
 				struct FrameResource
 				{

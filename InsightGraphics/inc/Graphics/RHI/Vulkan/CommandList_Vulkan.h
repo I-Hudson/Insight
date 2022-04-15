@@ -17,6 +17,7 @@ namespace Insight
 				CommandList_Vulkan(RenderContext_Vulkan* context, vk::CommandBuffer cmdBuffer);
 
 				void Record(CommandList& cmdList);
+				void Reset();
 				vk::CommandBuffer GetCommandBuffer() const { return m_commandBuffer; }
 
 				bool operator==(const CommandList_Vulkan& other) const { return m_commandBuffer == other.m_commandBuffer; }
@@ -28,8 +29,10 @@ namespace Insight
 				vk::CommandBuffer m_commandBuffer;
 				RenderContext_Vulkan* m_context;
 
+				bool m_activeRenderpass = false;
 				PipelineStateObject m_pso;
 				PipelineStateObject m_activePSO;
+				vk::Framebuffer m_framebuffer;
 			};
 
 			class CommandPool_Vulkan

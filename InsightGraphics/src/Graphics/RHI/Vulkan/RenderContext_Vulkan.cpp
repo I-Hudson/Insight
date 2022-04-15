@@ -197,12 +197,18 @@ namespace Insight
 				m_vertexBuffers.Destroy();
 				m_indexBuffers.Destroy();
 
+				m_shaderManager.Destroy();
 				m_pipelineStateObjectManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
 				m_renderpassManager.Destroy();
 
 				if (m_swapchain)
 				{
+					for (vk::ImageView& view : m_swapchainImageViews)
+					{
+						m_device.destroyImageView(view);
+					}
+					m_swapchainImageViews.clear();
 					m_device.destroySwapchainKHR(m_swapchain);
 					m_swapchainImages.resize(0);
 				}
@@ -230,6 +236,7 @@ namespace Insight
 
 				m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
 				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, frame.SwapchainAcquire);
+				m_availableSwapchainImage = nextImage.value;
 				m_device.resetFences({ frame.SubmitFence });
 
 				frame.CommandPool.Update();
@@ -248,7 +255,11 @@ namespace Insight
 					signalSemaphore);
 				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, frame.SubmitFence);
 
-				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(frame.SignalSemaphore, m_swapchain, nextImage.value);
+				std::array<vk::Semaphore, 1> signalSemaphores = { frame.SignalSemaphore };
+				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
+				std::array<u32, 1> swapchainImageIndex = { m_availableSwapchainImage };
+
+				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 				m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
 			}
 
@@ -520,12 +531,28 @@ namespace Insight
 				createInfo.setOldSwapchain(m_swapchain);
 
 				vk::SwapchainKHR swapchain =  m_device.createSwapchainKHR(createInfo);
-				m_swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
 
 				if (m_swapchain)
 				{
+					for (vk::ImageView& view : m_swapchainImageViews)
+					{
+						m_device.destroyImageView(view);
+					}
+					m_swapchainImageViews.clear();
 					m_device.destroySwapchainKHR(m_swapchain);
 					m_swapchain = nullptr;
+				}
+
+				m_swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
+				for (vk::Image& image : m_swapchainImages)
+				{
+					vk::ImageViewCreateInfo info = vk::ImageViewCreateInfo(
+						{},
+						image,
+						vk::ImageViewType::e2D,
+						m_swapchainFormat);
+					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					m_swapchainImageViews.push_back(m_device.createImageView(info));
 				}
 
 				return swapchain;

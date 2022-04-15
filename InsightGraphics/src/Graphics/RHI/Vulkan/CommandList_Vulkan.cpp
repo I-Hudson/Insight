@@ -1,5 +1,6 @@
 #include "Graphics/RHI/Vulkan/CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#include "Graphics/Window.h"
 #include "Core/Logger.h"
 
 namespace Insight
@@ -86,11 +87,59 @@ namespace Insight
 					cmdList.NextCommand();
 				}
 
+				if (m_activeRenderpass)
+				{
+					m_commandBuffer.endRenderPass();
+					m_activeRenderpass = false;
+				}
+
 				m_commandBuffer.end();
+			}
+
+			void CommandList_Vulkan::Reset()
+			{
+				m_pso = {};
+				m_activePSO = {};
+				if (m_framebuffer)
+				{
+					m_context->GetDevice().destroyFramebuffer(m_framebuffer);
+					m_framebuffer = nullptr;
+				}
 			}
 
 			bool CommandList_Vulkan::CanDraw()
 			{
+				if (!m_activeRenderpass)
+				{
+					vk::Rect2D rect = vk::Rect2D({ }, { (u32)Window::Instance().GetWidth(), (u32)Window::Instance().GetHeight() });
+					vk::RenderPass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{ m_pso.RenderTargets });
+					std::vector<vk::ImageView> imageViews;
+					std::vector<vk::ClearValue> clearColours;
+					if (m_pso.Swapchain)
+					{
+						vk::SwapchainKHR swapchainVulkan = m_context->GetSwapchain();
+						imageViews.push_back(m_context->GetSwapchainImageView());
+
+						vk::ClearValue clearValue;
+						clearValue.color.float32[0] = 0;
+						clearValue.color.float32[1] = 0;
+						clearValue.color.float32[2] = 0;
+						clearValue.color.float32[3] = 1;
+						clearColours.push_back(clearValue);
+					}
+					else
+					{
+						IS_CORE_ERROR("[CommandList_Vulkan::CanDraw] TODO");
+					}
+
+					vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);
+					m_framebuffer = m_context->GetDevice().createFramebuffer(frameBufferInfo);
+
+					vk::RenderPassBeginInfo info = vk::RenderPassBeginInfo(renderpass, m_framebuffer, rect, clearColours);
+					m_commandBuffer.beginRenderPass(info, vk::SubpassContents::eInline);
+					m_activeRenderpass = true;
+				}
+
 				vk::Pipeline pipeline = m_context->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				if (m_pso.GetHash() != m_activePSO.GetHash())
 				{
@@ -118,6 +167,7 @@ namespace Insight
 			{
 				for (size_t i = 0; i < m_allocLists.size(); ++i)
 				{
+					m_allocLists[i].Reset();
 					m_freeLists.push_back(m_allocLists[i]);
 				}
 				m_allocLists.clear();
@@ -126,6 +176,15 @@ namespace Insight
 
 			void CommandPool_Vulkan::Destroy()
 			{
+				for (CommandList_Vulkan& cmdList : m_allocLists)
+				{
+					cmdList.Reset();
+				}
+				for (CommandList_Vulkan& cmdList : m_freeLists)
+				{
+					cmdList.Reset();
+				}
+
 				m_context->GetDevice().resetCommandPool(m_pool);
 				m_context->GetDevice().destroyCommandPool(m_pool);
 			}
