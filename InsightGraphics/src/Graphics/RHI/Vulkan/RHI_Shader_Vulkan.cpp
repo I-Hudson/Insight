@@ -16,132 +16,9 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
-			int RHI_Shader_Vulkan::s_gslangInit = 0;
-
-			void InitResources(TBuiltInResource& Resources) 
-			 {
-				Resources.maxLights = 32;
-				Resources.maxClipPlanes = 6;
-				Resources.maxTextureUnits = 32;
-				Resources.maxTextureCoords = 32;
-				Resources.maxVertexAttribs = 64;
-				Resources.maxVertexUniformComponents = 4096;
-				Resources.maxVaryingFloats = 64;
-				Resources.maxVertexTextureImageUnits = 32;
-				Resources.maxCombinedTextureImageUnits = 80;
-				Resources.maxTextureImageUnits = 32;
-				Resources.maxFragmentUniformComponents = 4096;
-				Resources.maxDrawBuffers = 32;
-				Resources.maxVertexUniformVectors = 128;
-				Resources.maxVaryingVectors = 8;
-				Resources.maxFragmentUniformVectors = 16;
-				Resources.maxVertexOutputVectors = 16;
-				Resources.maxFragmentInputVectors = 15;
-				Resources.minProgramTexelOffset = -8;
-				Resources.maxProgramTexelOffset = 7;
-				Resources.maxClipDistances = 8;
-				Resources.maxComputeWorkGroupCountX = 65535;
-				Resources.maxComputeWorkGroupCountY = 65535;
-				Resources.maxComputeWorkGroupCountZ = 65535;
-				Resources.maxComputeWorkGroupSizeX = 1024;
-				Resources.maxComputeWorkGroupSizeY = 1024;
-				Resources.maxComputeWorkGroupSizeZ = 64;
-				Resources.maxComputeUniformComponents = 1024;
-				Resources.maxComputeTextureImageUnits = 16;
-				Resources.maxComputeImageUniforms = 8;
-				Resources.maxComputeAtomicCounters = 8;
-				Resources.maxComputeAtomicCounterBuffers = 1;
-				Resources.maxVaryingComponents = 60;
-				Resources.maxVertexOutputComponents = 64;
-				Resources.maxGeometryInputComponents = 64;
-				Resources.maxGeometryOutputComponents = 128;
-				Resources.maxFragmentInputComponents = 128;
-				Resources.maxImageUnits = 8;
-				Resources.maxCombinedImageUnitsAndFragmentOutputs = 8;
-				Resources.maxCombinedShaderOutputResources = 8;
-				Resources.maxImageSamples = 0;
-				Resources.maxVertexImageUniforms = 0;
-				Resources.maxTessControlImageUniforms = 0;
-				Resources.maxTessEvaluationImageUniforms = 0;
-				Resources.maxGeometryImageUniforms = 0;
-				Resources.maxFragmentImageUniforms = 8;
-				Resources.maxCombinedImageUniforms = 8;
-				Resources.maxGeometryTextureImageUnits = 16;
-				Resources.maxGeometryOutputVertices = 256;
-				Resources.maxGeometryTotalOutputComponents = 1024;
-				Resources.maxGeometryUniformComponents = 1024;
-				Resources.maxGeometryVaryingComponents = 64;
-				Resources.maxTessControlInputComponents = 128;
-				Resources.maxTessControlOutputComponents = 128;
-				Resources.maxTessControlTextureImageUnits = 16;
-				Resources.maxTessControlUniformComponents = 1024;
-				Resources.maxTessControlTotalOutputComponents = 4096;
-				Resources.maxTessEvaluationInputComponents = 128;
-				Resources.maxTessEvaluationOutputComponents = 128;
-				Resources.maxTessEvaluationTextureImageUnits = 16;
-				Resources.maxTessEvaluationUniformComponents = 1024;
-				Resources.maxTessPatchComponents = 120;
-				Resources.maxPatchVertices = 32;
-				Resources.maxTessGenLevel = 64;
-				Resources.maxViewports = 16;
-				Resources.maxVertexAtomicCounters = 0;
-				Resources.maxTessControlAtomicCounters = 0;
-				Resources.maxTessEvaluationAtomicCounters = 0;
-				Resources.maxGeometryAtomicCounters = 0;
-				Resources.maxFragmentAtomicCounters = 8;
-				Resources.maxCombinedAtomicCounters = 8;
-				Resources.maxAtomicCounterBindings = 1;
-				Resources.maxVertexAtomicCounterBuffers = 0;
-				Resources.maxTessControlAtomicCounterBuffers = 0;
-				Resources.maxTessEvaluationAtomicCounterBuffers = 0;
-				Resources.maxGeometryAtomicCounterBuffers = 0;
-				Resources.maxFragmentAtomicCounterBuffers = 1;
-				Resources.maxCombinedAtomicCounterBuffers = 1;
-				Resources.maxAtomicCounterBufferSize = 16384;
-				Resources.maxTransformFeedbackBuffers = 4;
-				Resources.maxTransformFeedbackInterleavedComponents = 64;
-				Resources.maxCullDistances = 8;
-				Resources.maxCombinedClipAndCullDistances = 8;
-				Resources.maxSamples = 4;
-				Resources.maxMeshOutputVerticesNV = 256;
-				Resources.maxMeshOutputPrimitivesNV = 512;
-				Resources.maxMeshWorkGroupSizeX_NV = 32;
-				Resources.maxMeshWorkGroupSizeY_NV = 1;
-				Resources.maxMeshWorkGroupSizeZ_NV = 1;
-				Resources.maxTaskWorkGroupSizeX_NV = 32;
-				Resources.maxTaskWorkGroupSizeY_NV = 1;
-				Resources.maxTaskWorkGroupSizeZ_NV = 1;
-				Resources.maxMeshViewCountNV = 4;
-				Resources.limits.nonInductiveForLoops = 1;
-				Resources.limits.whileLoops = 1;
-				Resources.limits.doWhileLoops = 1;
-				Resources.limits.generalUniformIndexing = 1;
-				Resources.limits.generalAttributeMatrixVectorIndexing = 1;
-				Resources.limits.generalVaryingIndexing = 1;
-				Resources.limits.generalSamplerIndexing = 1;
-				Resources.limits.generalVariableIndexing = 1;
-				Resources.limits.generalConstantMatrixVectorIndexing = 1;
-			}
-
-			EShLanguage FindLanguage(const vk::ShaderStageFlagBits shader_type) 
-			 {
-				switch (shader_type) {
-				case vk::ShaderStageFlagBits::eVertex:
-					return EShLangVertex;
-				case vk::ShaderStageFlagBits::eTessellationControl:
-					return EShLangTessControl;
-				case vk::ShaderStageFlagBits::eTessellationEvaluation:
-					return EShLangTessEvaluation;
-				case vk::ShaderStageFlagBits::eGeometry:
-					return EShLangGeometry;
-				case vk::ShaderStageFlagBits::eFragment:
-					return EShLangFragment;
-				case vk::ShaderStageFlagBits::eCompute:
-					return EShLangCompute;
-				default:
-					return EShLangVertex;
-				}
-			}
+			DX12::ComPtr<IDxcUtils> RHI_Shader_Vulkan::s_dxUtils;
+			DX12::ComPtr<IDxcCompiler3> RHI_Shader_Vulkan::s_dxCompiler;
+			int RHI_Shader_Vulkan::s_dxInUse;
 
 			void RHI_Shader_Vulkan::Create(RenderContext* context, ShaderDesc desc)
 			{
@@ -167,76 +44,133 @@ namespace Insight
 					}
 				}
 
-				--s_gslangInit;
-				if (s_gslangInit == 0)
+				--s_dxInUse;
+				if (s_dxInUse == 0)
 				{
-					glslang::FinalizeProcess();
+					s_dxCompiler.Reset();
+					s_dxUtils.Reset();
 				}
 			}
 
-			void RHI_Shader_Vulkan::CompileStage(vk::ShaderStageFlagBits stageType, std::string_view path, int moduleIndex)
+			void RHI_Shader_Vulkan::CompileStage(vk::ShaderStageFlagBits stageType, std::wstring_view path, int moduleIndex)
 			{
-				// Compile glsl to spirv.
-				if (s_gslangInit == 0)
+				HRESULT hres;
+				if (!s_dxUtils)
 				{
-					glslang::InitializeProcess();
+					// Initialize DXC library
+					hres = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&s_dxUtils));
+					if (FAILED(hres)) {
+						throw std::runtime_error("Could not init DXC Library");
+					}
+
+					// Initialize the DXC compiler
+					hres = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&s_dxCompiler));
+					if (FAILED(hres)) {
+						throw std::runtime_error("Could not init DXC Compiler");
+					}
 				}
-				++s_gslangInit;
+				++s_dxInUse;
 
-				std::ifstream inFile;
-				inFile.open(path.data());
-				if (!inFile.is_open())
+				// Create default include handler. (You can create your own...)
+				DX12::ComPtr<IDxcIncludeHandler> pIncludeHandler;
+				s_dxUtils->CreateDefaultIncludeHandler(&pIncludeHandler);
+
+				// Load the HLSL text shader from disk
+				uint32_t codePage = CP_UTF8;
+				DX12::ComPtr<IDxcBlobEncoding> sourceBlob;
+				hres = s_dxUtils->LoadFile(path.data(), nullptr, &sourceBlob);
+				if (FAILED(hres))
 				{
-					IS_CORE_WARN("[GPUShader_Vulkan::CompileStage] Unable to open file: {}.", path);
-					return;
-				}
-
-				std::string	pShader;
-				std::string line;
-				while (std::getline(inFile, line))
-				{
-					pShader += line + '\n';
-				}
-
-				EShLanguage stage = FindLanguage(stageType);
-				glslang::TShader shader(stage);
-				glslang::TProgram program;
-				const char* shaderStrings[1];
-				TBuiltInResource Resources = {};
-				InitResources(Resources);
-
-				// Enable SPIR-V and Vulkan rules when parsing GLSL
-				EShMessages messages = (EShMessages)(EShMsgSpvRules | EShMsgVulkanRules);
-
-				shaderStrings[0] = pShader.data();
-				shader.setStrings(shaderStrings, 1);
-
-				if (!shader.parse(&Resources, 100, false, messages))
-				{
-					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info log: {}.", shader.getInfoLog());
-					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info debug log: {}.", shader.getInfoDebugLog());
-					return;  // something didn't work
+					throw std::runtime_error("Could not load shader file");
 				}
 
-				program.addShader(&shader);
+				DxcBuffer Source;
+				Source.Ptr = sourceBlob->GetBufferPointer();
+				Source.Size = sourceBlob->GetBufferSize();
+				Source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
-				if (!program.link(messages))
+
+				// Set up arguments to be passed to the shader compiler
+
+				// Tell the compiler to output SPIR-V
+				std::vector<LPCWSTR> arguments;
+				arguments.push_back(L"-spirv");
+
+				std::wstring mainFunc;
+				std::wstring targetProfile;
+				switch (stageType)
 				{
-					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info log: {}.", shader.getInfoLog());
-					IS_CORE_INFO("[GPUShader_Vulkan::CompileStage] Info debug log: {}.", shader.getInfoDebugLog());
-					return;
+				case vk::ShaderStageFlagBits::eVertex:
+					mainFunc = L"VSMain";
+					targetProfile = L"vs_6_1";
+					break;
+				case vk::ShaderStageFlagBits::eTessellationControl:
+					mainFunc = L"TSMain";
+					targetProfile = L"vs_6_1";
+					break;
+				case vk::ShaderStageFlagBits::eTessellationEvaluation:
+					mainFunc = L"TEMain";
+					targetProfile = L"vs_6_1";
+					break;
+				case vk::ShaderStageFlagBits::eGeometry:
+					mainFunc = L"GSMain";
+					targetProfile = L"vs_6_1";
+					break;
+				case vk::ShaderStageFlagBits::eFragment:
+					mainFunc = L"PSMain";
+					targetProfile = L"ps_6_1";
+					break;
+				case vk::ShaderStageFlagBits::eCompute:
+					mainFunc = L"CSMain";
+					targetProfile = L"vs_6_1";
+					break;
+				}
+				// Entry point
+				arguments.push_back(L"-E");
+				arguments.push_back(mainFunc.c_str());
+
+				// Select target profile based on shader file extension
+				arguments.push_back(L"-T");
+				arguments.push_back(targetProfile.c_str());
+
+				// Compile shader
+				DX12::ComPtr<IDxcResult> pResults;
+				hres = s_dxCompiler->Compile(
+					&Source,                // Source buffer.
+					arguments.data(),       // Array of pointers to arguments.
+					arguments.size(),		// Number of arguments.
+					pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
+					IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
+				);
+				// Print errors if present.
+				//
+				DX12::ComPtr<IDxcBlobUtf8> pErrors = nullptr;
+				pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
+				// Note that d3dcompiler would return null if no errors or warnings are present.  
+				// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
+				if (pErrors != nullptr && pErrors->GetStringLength() != 0)
+				{
+					IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
 				}
 
-				std::vector<u32> spirv;
-				glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
+				// Get compilation result
+				DX12::ComPtr<IDxcBlob> code;
+				pResults->GetResult(&code);
 
-				vk::ShaderModuleCreateInfo createInfo = vk::ShaderModuleCreateInfo({}, spirv);
+				vk::ShaderModuleCreateInfo createInfo = vk::ShaderModuleCreateInfo({}, {});
+				createInfo.setCodeSize(code->GetBufferSize());
+				createInfo.setPCode((u32*)code->GetBufferPointer());
 
 				if (m_modules[moduleIndex])
 				{
 					m_context->GetDevice().destroyShaderModule(m_modules[moduleIndex]);
 				}
 				m_modules[moduleIndex] = m_context->GetDevice().createShaderModule(createInfo);
+				m_mainFuncNames[moduleIndex] = mainFunc;
+				if (!m_modules[moduleIndex])
+				{
+					IS_CORE_ERROR("Shader compilation failed.");
+				}
 			}
 
 			void RHI_Shader_Vulkan::CreateVertexInputLayout(const ShaderDesc& desc)

@@ -70,6 +70,7 @@ namespace Insight
 
 				RHI_Shader_Vulkan* shaderVulkan = dynamic_cast<RHI_Shader_Vulkan*>(pso.Shader);
 				std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
+				std::array<std::string, ShaderStage_Count> shaderFuncNames;
 				for (int i = 0; i < ShaderStage_Count; ++i)
 				{
 					vk::ShaderModule shaderModule = shaderVulkan->GetStage((ShaderStageFlagBits)i);
@@ -78,7 +79,12 @@ namespace Insight
 						continue;
 					}
 			
-					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan((ShaderStageFlagBits)i), shaderModule, "main");
+					shaderFuncNames[i] = std::string(shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i).begin(),
+						shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i).end());
+
+					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan((ShaderStageFlagBits)i), 
+						shaderModule, 
+						shaderFuncNames[i].c_str());
 					pipelineShaderStageCreateInfos.push_back(info);
 				}
 				const VertexInputLayout_Vulkan& pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();

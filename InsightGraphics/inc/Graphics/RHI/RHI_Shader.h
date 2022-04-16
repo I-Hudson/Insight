@@ -42,19 +42,19 @@ namespace Insight
 			ShaderDesc()
 			{ }
 
-			ShaderDesc(std::string vertex, std::string pixel)
+			ShaderDesc(std::wstring vertex, std::wstring pixel)
 				: VertexFilePath(vertex), PixelFilePath(pixel)
 			{ }
-			ShaderDesc(std::string vertex, std::string pixel, std::vector<ShaderInputLayout> vertexLayout)
+			ShaderDesc(std::wstring vertex, std::wstring pixel, std::vector<ShaderInputLayout> vertexLayout)
 				: VertexFilePath(vertex), PixelFilePath(pixel), VertexLayout(vertexLayout)
 			{ }
 
-			std::string VertexFilePath = "";
-			std::string TesselationControlFilePath = "";
-			std::string TesselationEvaluationVertexFilePath = "";
-			std::string GeoemtyFilePath = "";
-			std::string PixelFilePath = "";
-			std::string MainFunc = "main";
+			std::wstring VertexFilePath = L"";
+			std::wstring TesselationControlFilePath = L"";
+			std::wstring TesselationEvaluationVertexFilePath = L"";
+			std::wstring GeoemtyFilePath = L"";
+			std::wstring PixelFilePath = L"";
+			std::string MainFunc = "Main";
 
 			std::vector<ShaderInputLayout> VertexLayout;
 

@@ -17,7 +17,7 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
+			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
 			m_renderContext = RenderContext::New();
 			if (!m_renderContext)
 			{
@@ -43,8 +43,8 @@ namespace Insight
 				return;
 			}
 			ShaderDesc shaderDesc;
-			shaderDesc.VertexFilePath = "Resources/Shaders/Swapchain.vert";
-			shaderDesc.PixelFilePath = "Resources/Shaders/Swapchain.frag";
+			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+			shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 			RHI_Shader* shader = Renderer::GetShader(shaderDesc);
 
 			PipelineStateObject pso{};

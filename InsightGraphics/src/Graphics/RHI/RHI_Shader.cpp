@@ -2,6 +2,7 @@
 #include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
+#include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 
 namespace Insight
 {
@@ -10,7 +11,7 @@ namespace Insight
 		RHI_Shader* RHI_Shader::New()
 		{
 			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::RHI_Shader_Vulkan(); }
-			//else if (GraphicsManager::IsDX12()) { return new RHI::DX12::GPUShader_DX12(); }
+			else if (GraphicsManager::IsDX12()) { return new RHI::DX12::RHI_Shader_DX12(); }
 			return nullptr;
 		}
 
