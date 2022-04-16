@@ -32,6 +32,7 @@ namespace Insight
 
 		protected:
 			RHI_ShaderManager m_shaderManager;
+			const static int c_FrameCount = 2;
 
 			friend class Renderer;
 		};

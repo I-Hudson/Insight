@@ -2,6 +2,7 @@
 #include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
 namespace Insight
 {
@@ -14,8 +15,14 @@ namespace Insight
 		{
 			RenderContext* context = nullptr;
 			if (GraphicsManager::IsVulkan()) { context = new RHI::Vulkan::RenderContext_Vulkan(); }
-			else if (GraphicsManager::IsDX12()) { context = nullptr; }
+			else if (GraphicsManager::IsDX12()) { context = new RHI::DX12::RenderContext_DX12(); }
 			
+			if (!context)
+			{
+				IS_CORE_ERROR("[RenderContext* RenderContext::New] Unable to create a RenderContext.");
+				return context;
+			}
+
 			::Insight::Renderer::s_context = context;
 			context->m_shaderManager.SetRenderContext(context);
 

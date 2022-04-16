@@ -17,17 +17,31 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
+			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
 			m_renderContext = RenderContext::New();
-			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
-			m_renderContext->Init();
+			if (!m_renderContext)
+			{
+				return false;
+			}
+
+			if (!m_renderContext->Init())
+			{
+				return false;
+			}
 
 			return true;
 		}
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
-			GPUBuffer* vBuffer = Renderer::CreateVertexBuffer(128);
+			//GPUBuffer* vBuffer = Renderer::CreateVertexBuffer(128);
 
+			if (IsDX12())
+			{
+				m_renderContext->Render(Renderer::s_FrameCommandList);
+				Renderer::s_FrameCommandList.Reset();
+				return;
+			}
 			ShaderDesc shaderDesc;
 			shaderDesc.VertexFilePath = "Resources/Shaders/Swapchain.vert";
 			shaderDesc.PixelFilePath = "Resources/Shaders/Swapchain.frag";
@@ -48,7 +62,7 @@ namespace Insight
 			m_renderContext->Render(Renderer::s_FrameCommandList);
 			Renderer::s_FrameCommandList.Reset();
 
-			Renderer::FreeVertexBuffer(vBuffer);
+			//Renderer::FreeVertexBuffer(vBuffer);
 		}
 
 		void GraphicsManager::Destroy()

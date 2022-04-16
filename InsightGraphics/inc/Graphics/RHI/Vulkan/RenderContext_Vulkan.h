@@ -114,7 +114,6 @@ namespace Insight
 				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;
 				RenderpassManager_Vulkan m_renderpassManager;
 
-				const static int c_FrameCount = 2;
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
 

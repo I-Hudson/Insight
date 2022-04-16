@@ -5,6 +5,7 @@
 #ifdef IS_PLATFORM_WIN32
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
+#include "..\..\..\..\inc\Graphics\RHI\DX12\RenderContext_DX12.h"
 #endif
 
 namespace Insight

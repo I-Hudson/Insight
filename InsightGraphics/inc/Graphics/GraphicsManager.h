@@ -24,6 +24,7 @@ namespace Insight
 
 		enum class GraphicsAPI
 		{
+			None,
 			Vulkan,
 			DX12
 		};
