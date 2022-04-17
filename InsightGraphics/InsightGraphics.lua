@@ -43,6 +43,7 @@ project "InsightGraphics"
         "D3d12.lib",
         "DXGI.lib",
         "dxguid.lib",
+        "dxcompiler.lib",
     }
 
     libdirs
