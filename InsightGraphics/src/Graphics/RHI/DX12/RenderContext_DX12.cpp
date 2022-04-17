@@ -236,21 +236,22 @@ namespace Insight
 				ImGuiBeginFrame();
 			}
 
-			GPUBuffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)
+			RHI_Buffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)
+			{
+				return m_vertexBuffer.GetObject(0);
+
+			}
+
+			RHI_Buffer* RenderContext_DX12::CreateIndexBuffer(u64 sizeBytes)
 			{
 				return nullptr;
 			}
 
-			GPUBuffer* RenderContext_DX12::CreateIndexBuffer(u64 sizeBytes)
-			{
-				return nullptr;
-			}
-
-			void RenderContext_DX12::FreeVertexBuffer(GPUBuffer* buffer)
+			void RenderContext_DX12::FreeVertexBuffer(RHI_Buffer* buffer)
 			{
 			}
 
-			void RenderContext_DX12::FreeIndexBuffer(GPUBuffer* buffer)
+			void RenderContext_DX12::FreeIndexBuffer(RHI_Buffer* buffer)
 			{
 			}
 

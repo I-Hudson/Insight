@@ -42,10 +42,9 @@ namespace Insight
 				return;
 			}
 
-			//GPUBuffer* vBuffer = Renderer::CreateVertexBuffer(128);
+			RHI_Buffer* vBuffer = Renderer::CreateVertexBuffer(128);
 
 			bool show = true;
-			//ImGui::ShowDemoWindow(&show);
 			std::string currentAPI = "Graphics API: " + std::to_string(currentGraphicsAPI);
 			ImGui::Begin(currentAPI.c_str());
 			const char* graphicsAPIs[] = { "Vulkan", "DX12" };

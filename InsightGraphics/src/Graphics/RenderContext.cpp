@@ -74,32 +74,32 @@ namespace Insight
 	}
 
 	// Renderer
-	Graphics::GPUBuffer* Renderer::CreateVertexBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes)
 	{
 		return s_context->CreateVertexBuffer(sizeBytes);
 	}
 
-	Graphics::GPUBuffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
 	{
 		return s_context->CreateIndexBuffer(sizeBytes);
 	}
 
-	void Renderer::FreeVertexBuffer(Graphics::GPUBuffer* buffer)
+	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
 		s_context->FreeVertexBuffer(buffer);
 	}
 
-	void Renderer::FreeIndexBuffer(Graphics::GPUBuffer* buffer)
+	void Renderer::FreeIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
 		s_context->FreeIndexBuffer(buffer);
 	}
 
-	void Renderer::BindVertexBuffer(Graphics::GPUBuffer* buffer)
+	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
 		s_FrameCommandList.SetVertexBuffer(buffer);
 	}
 
-	void Renderer::BindIndexBuffer(Graphics::GPUBuffer* buffer)
+	void Renderer::BindIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
 		s_FrameCommandList.SetIndexBuffer(buffer);
 	}

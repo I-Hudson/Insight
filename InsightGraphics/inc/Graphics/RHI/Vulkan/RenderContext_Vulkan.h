@@ -3,7 +3,7 @@
 #include "Graphics/RenderContext.h"
 #include "Core/Logger.h"
 #include "Graphics/RHI/Vulkan/CommandList_Vulkan.h"
-#include "Graphics/RHI/GPUBuffer.h"
+#include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 
 #include <glm/glm.hpp>
@@ -23,7 +23,7 @@ namespace Insight
 				GPUQueue Queue;
 			};
 
-			class GPUBuffer_Vulkan : public GPUBuffer
+			class GPUBuffer_Vulkan : public RHI_Buffer
 			{ };
 
 			template<typename T>
@@ -87,10 +87,10 @@ namespace Insight
 				virtual void WaitForGpu() override;
 
 			private:
-				virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) override;
-				virtual GPUBuffer* CreateIndexBuffer(u64 sizeBytes) override;
-				virtual void FreeVertexBuffer(GPUBuffer* buffer) override;
-				virtual void FreeIndexBuffer(GPUBuffer* buffer) override;
+				virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) override;
+				virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) override;
+				virtual void FreeVertexBuffer(RHI_Buffer* buffer) override;
+				virtual void FreeIndexBuffer(RHI_Buffer* buffer) override;
 
 			private:
 				vk::Instance CreateInstance();

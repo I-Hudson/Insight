@@ -152,12 +152,12 @@ namespace Insight
 			AddCommand(CMD_SetScissor(width, height));
 		}
 
-		void CommandList::SetVertexBuffer(GPUBuffer* buffer)
+		void CommandList::SetVertexBuffer(RHI_Buffer* buffer)
 		{
 			AddCommand(CMD_SetVertexBuffer(buffer));
 		}
 
-		void CommandList::SetIndexBuffer(GPUBuffer* buffer)
+		void CommandList::SetIndexBuffer(RHI_Buffer* buffer)
 		{
 			AddCommand(CMD_SetIndexBuffer(buffer));
 		}

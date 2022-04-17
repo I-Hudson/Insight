@@ -2,9 +2,13 @@
 
 #include "Graphics/Defines.h"
 #include "Graphics/CommandList.h"
-#include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/Enums.h"
 #include "imgui.h"
+
+#include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/RHI_Shader.h"
+
+#include "Core/Collections/FactoryMap.h"
 
 namespace Insight
 {
@@ -12,8 +16,6 @@ namespace Insight
 	
 	namespace Graphics
 	{
-		class GPUBuffer;
-
 		class RenderContext
 		{
 		public:
@@ -35,14 +37,16 @@ namespace Insight
 			virtual void WaitForGpu() = 0;
 
 		private:
-			virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) = 0;
-			virtual GPUBuffer* CreateIndexBuffer(u64 sizeBytes) = 0;
-			virtual void FreeVertexBuffer(GPUBuffer* buffer) = 0;
-			virtual void FreeIndexBuffer(GPUBuffer* buffer) = 0;
+			virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) = 0;
+			virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) = 0;
+			virtual void FreeVertexBuffer(RHI_Buffer* buffer) = 0;
+			virtual void FreeIndexBuffer(RHI_Buffer* buffer) = 0;
 
 		protected:
-			RHI_ShaderManager m_shaderManager;
 			const static int c_FrameCount = 2;
+
+			::Core::FactoryMap<RHI_Buffer*> m_vertexBuffer;
+			RHI_ShaderManager m_shaderManager;
 
 			friend class Renderer;
 		};
@@ -54,14 +58,14 @@ namespace Insight
 	public:
 		static void SetImGUIContext(ImGuiContext*& context);
 
-		static Graphics::GPUBuffer* CreateVertexBuffer(u64 sizeBytes);
-		static Graphics::GPUBuffer* CreateIndexBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes);
 
-		static void FreeVertexBuffer(Graphics::GPUBuffer* buffer);
-		static void FreeIndexBuffer(Graphics::GPUBuffer* buffer);
+		static void FreeVertexBuffer(Graphics::RHI_Buffer* buffer);
+		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);
 
-		static void BindVertexBuffer(Graphics::GPUBuffer* buffer);
-		static void BindIndexBuffer(Graphics::GPUBuffer* buffer);
+		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
+		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);
 
 		static Graphics::RHI_Shader* GetShader(Graphics::ShaderDesc desc);
 

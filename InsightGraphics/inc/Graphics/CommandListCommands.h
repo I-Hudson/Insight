@@ -7,7 +7,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		class GPUBuffer;
+		class RHI_Buffer;
 		struct ResourceBarrier
 		{
 			ResourceType Type;
@@ -78,23 +78,23 @@ namespace Insight
 		struct CMD_SetVertexBuffer : public ICommand
 		{
 			virtual u64 GetSize() override { return sizeof(CMD_SetVertexBuffer); }
-			CMD_SetVertexBuffer(GPUBuffer* buffer)
+			CMD_SetVertexBuffer(RHI_Buffer* buffer)
 			{ 
 				CommandType = CommandType::SetVertexBuffer;
 				Buffer = buffer;
 			}
-			GPUBuffer* Buffer;
+			RHI_Buffer* Buffer;
 		};
 
 		struct CMD_SetIndexBuffer : public ICommand
 		{
 			virtual u64 GetSize() override { return sizeof(CMD_SetIndexBuffer); }
-			CMD_SetIndexBuffer(GPUBuffer* buffer)
+			CMD_SetIndexBuffer(RHI_Buffer* buffer)
 			{
 				CommandType = CommandType::SetIndexBuffer;
 				Buffer = buffer;
 			}
-			GPUBuffer* Buffer;
+			RHI_Buffer* Buffer;
 		};
 
 		struct CMD_Draw : public ICommand

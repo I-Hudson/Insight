@@ -10,7 +10,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		class GPUBuffer;
+		class RHI_Buffer;
 		class RHI_Shader;
 
 		class CommandList
@@ -42,8 +42,8 @@ namespace Insight
 			void SetViewport(int width, int height);
 			void SetScissor(int width, int height);
 
-			void SetVertexBuffer(GPUBuffer* buffer);
-			void SetIndexBuffer(GPUBuffer* buffer);
+			void SetVertexBuffer(RHI_Buffer* buffer);
+			void SetIndexBuffer(RHI_Buffer* buffer);
 
 			void AddResourceBarrier(ResourceBarrier barrier);
 

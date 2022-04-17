@@ -393,7 +393,6 @@ namespace Insight
 
 
 				// Render imgui.
-
 				if (m_imguiFramebuffers[m_currentFrame])
 				{
 					m_device.destroyFramebuffer(m_imguiFramebuffers[m_currentFrame]);
@@ -455,24 +454,24 @@ namespace Insight
 				m_device.waitIdle();
 			}
 
-			GPUBuffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)
+			RHI_Buffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)
 			{
 				GPUBuffer_Vulkan* buffer = m_vertexBuffers.CreateResource();
 				return buffer;
 			}
 
-			GPUBuffer* RenderContext_Vulkan::CreateIndexBuffer(u64 sizeBytes)
+			RHI_Buffer* RenderContext_Vulkan::CreateIndexBuffer(u64 sizeBytes)
 			{
 				GPUBuffer_Vulkan* buffer = m_indexBuffers.CreateResource();
 				return buffer;
 			}
 
-			void RenderContext_Vulkan::FreeVertexBuffer(GPUBuffer* buffer)
+			void RenderContext_Vulkan::FreeVertexBuffer(RHI_Buffer* buffer)
 			{
 				m_vertexBuffers.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
 			}
 
-			void RenderContext_Vulkan::FreeIndexBuffer(GPUBuffer* buffer)
+			void RenderContext_Vulkan::FreeIndexBuffer(RHI_Buffer* buffer)
 			{
 				m_indexBuffers.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
 			}
