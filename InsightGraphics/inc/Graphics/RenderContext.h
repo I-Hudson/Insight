@@ -16,10 +16,11 @@ namespace Insight
 	
 	namespace Graphics
 	{
+		class RenderContext;
+
 		class RenderContext
 		{
 		public:
-
 			static RenderContext* New();
 
 			virtual bool Init() = 0;
@@ -36,6 +37,8 @@ namespace Insight
 
 			virtual void WaitForGpu() = 0;
 
+			void BaseDestroy();
+
 		private:
 			virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) = 0;
 			virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) = 0;
@@ -45,7 +48,7 @@ namespace Insight
 		protected:
 			const static int c_FrameCount = 2;
 
-			::Core::FactoryMap<RHI_Buffer*> m_vertexBuffer;
+			RHI_ResourceManager<RHI_Buffer> m_vertexBuffer;
 			RHI_ShaderManager m_shaderManager;
 
 			friend class Renderer;

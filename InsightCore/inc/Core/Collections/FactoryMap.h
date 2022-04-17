@@ -16,35 +16,18 @@ namespace Core
 		}
 	};
 
-	template<typename, typename T>
+	template <typename T>
 	struct FactoryMapHasFactoryFunc
 	{
-		using Type = std::remove_pointer_t<T>;
-		static_assert(
-			std::integral_constant<Type, false>::value,
-			"T must have a 'static T* New()' function used as a factory function."
-			);
-	};
-
-	// Specialization that does the checking
-	template<typename C, typename Ret, typename... Args>
-	struct FactoryMapHasFactoryFunc<C, Ret(Args...)>
-	{
-		using Type = std::remove_reference_t<std::remove_pointer_t<C>>;
 	private:
-		template<typename T>
-		static constexpr auto check(T*) -> typename
-			std::is_same< decltype(std::declval<T>().New(std::declval<Args>()...)),
-			Ret    // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			>::type;  // attempt to call it and see if the return type is correct
+		typedef std::true_type yes;
+		typedef std::false_type no;
 
-		template<typename>
-		static constexpr std::false_type check(...);
-
-		typedef decltype(check<Type>(0)) type;
+		template<typename U> static auto test(int) -> decltype(std::declval<U>().New() == 1, yes());
+		template<typename> static no test(...);
 
 	public:
-		static constexpr bool value = type::value;
+		static constexpr bool value = std::is_same<decltype(test<T>(0)), yes>::value;
 	};
 
 	/// <summary>
@@ -55,21 +38,20 @@ namespace Core
 	struct FactoryMapFuncType
 	{
 		using Type = std::remove_pointer_t<T>;
-		static decltype(&Type::New) get() { return &Type::New; }
+
+		static decltype(&Type::New) get() { return &Type::New; } // Class is missing a 'static T* New()' function.
 	};
 
 	/// <summary>
 	/// Manage objects via hash with a custom facroy funciton.
 	/// </summary>
-	template<typename T, typename FactoryFunc = FactoryMapFuncType<T>,
-		typename TReturn = T, typename TDestrcutorStruct = DefaultFactoryMapObjectDestructor>
+	template<typename THash, typename T, typename TDestrcutorStruct = DefaultFactoryMapObjectDestructor>
 	class FactoryMap
 	{
 		using Type = std::remove_reference_t<std::remove_pointer_t<T>>;
 	public:
 		FactoryMap()
 		{
-			static_assert(FactoryMapHasFactoryFunc<Type, T()>::value == 1);
 		}
 
 		FactoryMap(const FactoryMap& other)
@@ -101,7 +83,7 @@ namespace Core
 			m_destrcutorStruct = other.m_destrcutorStruct;
 		}
 
-		TReturn GetObject(u64 hash)
+		T GetObject(THash hash = { })
 		{
 			auto itr = m_objects.find(hash);
 			if (itr != m_objects.end())
@@ -110,10 +92,10 @@ namespace Core
 			}
 
 			// Get our static New function.
-			auto factoryFunc = FactoryMapFuncType<T>::get();
+			auto factoryFunc = FactoryMapFuncType<Type>::get();
 			T newObject = factoryFunc();
 			m_objects[hash] = newObject;
-			return newObject;
+			return m_objects[hash];
 		}
 
 		void Clear()
@@ -122,7 +104,7 @@ namespace Core
 		}
 
 	private:
-		std::map<u64, T> m_objects;
+		std::map<THash, T> m_objects;
 		//FactoryFunc m_factoryFunc;
 		TDestrcutorStruct m_destrcutorStruct;
 	};

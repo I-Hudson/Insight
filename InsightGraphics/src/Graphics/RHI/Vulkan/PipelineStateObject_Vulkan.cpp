@@ -79,8 +79,10 @@ namespace Insight
 						continue;
 					}
 			
-					shaderFuncNames[i] = std::string(shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i).begin(),
-						shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i).end());
+					for (const wchar_t wChar : shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i))
+					{
+						shaderFuncNames[i].push_back((char)wChar);
+					}
 
 					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan((ShaderStageFlagBits)i), 
 						shaderModule, 

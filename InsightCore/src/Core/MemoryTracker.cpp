@@ -75,6 +75,7 @@ namespace Insight
 			}
 		}
 
+#define MEMORY_TRACK_CALLSTACK
 		std::array<std::string, c_CallStackCount> MemoryTracker::GetCallStack()
 		{
 			std::array<std::string, c_CallStackCount> callStack;

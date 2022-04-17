@@ -1,4 +1,5 @@
 #include "Core/Logger.h"
+#include "Core/Memory.h"
 
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/sinks/base_sink.h"
@@ -6,6 +7,19 @@
 
 namespace Insight
 {
+	struct TestStruct
+	{
+		TestStruct()
+		{
+			IS_CORE_INFO("TestStruct_C");
+		}
+
+		~TestStruct()
+		{
+			IS_CORE_INFO("TestStruct_D");
+		}
+	};
+
 	namespace Core
 	{
 		std::shared_ptr<spdlog::logger> Logger::s_CoreLogger;

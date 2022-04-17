@@ -5,6 +5,7 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
 #include "backends/imgui_impl_glfw.h"
+#include "Core/Memory.h"
 
 namespace Insight
 {
@@ -16,8 +17,8 @@ namespace Insight
 		RenderContext* RenderContext::New()
 		{
 			RenderContext* context = nullptr;
-			if (GraphicsManager::IsVulkan()) { context = new RHI::Vulkan::RenderContext_Vulkan(); }
-			else if (GraphicsManager::IsDX12()) { context = new RHI::DX12::RenderContext_DX12(); }
+			if (GraphicsManager::IsVulkan()) { context = NewTracked(RHI::Vulkan::RenderContext_Vulkan); }
+			else if (GraphicsManager::IsDX12()) { context = NewTracked(RHI::DX12::RenderContext_DX12); }
 			
 			if (!context)
 			{
@@ -64,6 +65,12 @@ namespace Insight
 		{
 			ImGui::Render();
 			ImGui::UpdatePlatformWindows();
+		}
+
+		void RenderContext::BaseDestroy()
+		{
+			m_vertexBuffer.ReleaseAll();
+			m_shaderManager.Destroy();
 		}
 	}
 

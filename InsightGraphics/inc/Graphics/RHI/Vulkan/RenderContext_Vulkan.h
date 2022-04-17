@@ -23,8 +23,11 @@ namespace Insight
 				GPUQueue Queue;
 			};
 
-			class GPUBuffer_Vulkan : public RHI_Buffer
-			{ };
+			class RHI_Buffer_Vulkan : public RHI_Buffer
+			{
+			public:
+				virtual void Release() override { }
+			};
 
 			template<typename T>
 			class RenderContextResources
@@ -113,9 +116,6 @@ namespace Insight
 
 				std::unordered_map<GPUQueue, vk::Queue> m_commandQueues;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;
-
-				RenderContextResources<GPUBuffer_Vulkan> m_vertexBuffers;
-				RenderContextResources<GPUBuffer_Vulkan> m_indexBuffers;
 
 				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
 				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;

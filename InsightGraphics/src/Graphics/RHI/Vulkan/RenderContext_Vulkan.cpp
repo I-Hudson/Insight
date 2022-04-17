@@ -201,10 +201,8 @@ namespace Insight
 					frame.Destroy();
 				}
 
-				m_vertexBuffers.Destroy();
-				m_indexBuffers.Destroy();
+				BaseDestroy();
 
-				m_shaderManager.Destroy();
 				m_pipelineStateObjectManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
 				m_renderpassManager.Destroy();
@@ -456,24 +454,25 @@ namespace Insight
 
 			RHI_Buffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)
 			{
-				GPUBuffer_Vulkan* buffer = m_vertexBuffers.CreateResource();
+				RHI_Buffer_Vulkan* buffer = dynamic_cast<RHI_Buffer_Vulkan*>(m_vertexBuffer.CreateResource());
 				return buffer;
 			}
 
 			RHI_Buffer* RenderContext_Vulkan::CreateIndexBuffer(u64 sizeBytes)
 			{
-				GPUBuffer_Vulkan* buffer = m_indexBuffers.CreateResource();
-				return buffer;
+				//RHI_Buffer_Vulkan* buffer = m_indexBuffers.CreateResource();
+				//return buffer;
+				return nullptr;
 			}
 
 			void RenderContext_Vulkan::FreeVertexBuffer(RHI_Buffer* buffer)
 			{
-				m_vertexBuffers.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
+				m_vertexBuffer.FreeResource(buffer);
 			}
 
 			void RenderContext_Vulkan::FreeIndexBuffer(RHI_Buffer* buffer)
 			{
-				m_indexBuffers.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
+				//m_indexBuffer.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
 			}
 
 			vk::Instance RenderContext_Vulkan::CreateInstance()

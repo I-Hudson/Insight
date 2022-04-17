@@ -2,10 +2,8 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
-//#include "Graphics/GPU/GPUDevice.h"
 
-//#include "Graphics/GPU/RHI/Vulkan/GPUDevice_Vulkan.h"
-//#include "Graphics/GPU/RHI/DX12/GPUDevice_DX12.h"
+#include "Core/Memory.h"
 
 namespace Insight
 {
@@ -52,7 +50,7 @@ namespace Insight
 			{
 				// New API
 				m_renderContext->Destroy();
-				delete m_renderContext;
+				DeleteTracked(m_renderContext);
 				m_renderContext = nullptr;
 
 				Window::Instance().Rebuild();
@@ -87,7 +85,7 @@ namespace Insight
 			m_renderContext->Render(Renderer::s_FrameCommandList);
 			Renderer::s_FrameCommandList.Reset();
 
-			//Renderer::FreeVertexBuffer(vBuffer);
+			Renderer::FreeVertexBuffer(vBuffer);
 		}
 
 		void GraphicsManager::Destroy()
@@ -95,7 +93,7 @@ namespace Insight
 			if (m_renderContext)
 			{
 				m_renderContext->Destroy();
-				delete m_renderContext;
+				DeleteTracked(m_renderContext);
 				m_renderContext = nullptr;
 			}
 		}

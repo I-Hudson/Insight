@@ -117,6 +117,8 @@ namespace Insight
 					frame.Destroy();
 				}
 
+				BaseDestroy();
+
 				m_queues.clear();
 
 				CloseHandle(m_fenceEvent);
@@ -238,8 +240,8 @@ namespace Insight
 
 			RHI_Buffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)
 			{
-				return m_vertexBuffer.GetObject(0);
-
+				RHI_Buffer* buffer = m_vertexBuffer.CreateResource();
+				return buffer;
 			}
 
 			RHI_Buffer* RenderContext_DX12::CreateIndexBuffer(u64 sizeBytes)
@@ -249,6 +251,7 @@ namespace Insight
 
 			void RenderContext_DX12::FreeVertexBuffer(RHI_Buffer* buffer)
 			{
+				m_vertexBuffer.FreeResource(buffer);
 			}
 
 			void RenderContext_DX12::FreeIndexBuffer(RHI_Buffer* buffer)

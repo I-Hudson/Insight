@@ -1,4 +1,5 @@
 #include "Graphics/RHI/RHI_Shader.h"
+#include "Core/Memory.h"
 #include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
@@ -10,8 +11,8 @@ namespace Insight
 	{
 		RHI_Shader* RHI_Shader::New()
 		{
-			if (GraphicsManager::IsVulkan()) { return new RHI::Vulkan::RHI_Shader_Vulkan(); }
-			else if (GraphicsManager::IsDX12()) { return new RHI::DX12::RHI_Shader_DX12(); }
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Shader_Vulkan); }
+			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Shader_DX12); }
 			return nullptr;
 		}
 
@@ -49,7 +50,7 @@ namespace Insight
 			for (const auto& pair : m_shaders)
 			{
 				pair.second->Destroy();
-				delete pair.second;
+				DeleteTracked(pair.second);
 			}
 			m_shaders.clear();
 		}
@@ -125,7 +126,7 @@ namespace Insight
 			hres = s_dxCompiler->Compile(
 				&Source,                // Source buffer.
 				arguments.data(),       // Array of pointers to arguments.
-				arguments.size(),		// Number of arguments.
+				(UINT)arguments.size(),		// Number of arguments.
 				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
 				IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
 			);

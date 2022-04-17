@@ -53,6 +53,10 @@ namespace Insight
 				: VertexFilePath(vertex), PixelFilePath(pixel), VertexLayout(vertexLayout)
 			{ }
 
+			~ShaderDesc()
+			{
+			}
+
 			std::wstring VertexFilePath = L"";
 			std::wstring TesselationControlFilePath = L"";
 			std::wstring TesselationEvaluationVertexFilePath = L"";

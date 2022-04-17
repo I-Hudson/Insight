@@ -17,6 +17,7 @@ namespace Insight
 			public:
 				CommandList_DX12() { }
 				CommandList_DX12(RenderContext_DX12* context, ComPtr<ID3D12GraphicsCommandList> cmdList);
+				~CommandList_DX12() { }
 
 				void Record(CommandList& cmdList);
 				void Reset();
@@ -43,6 +44,8 @@ namespace Insight
 			class CommandAllocator_DX12
 			{
 			public:
+				CommandAllocator_DX12() { }
+				~CommandAllocator_DX12() { }
 
 				void Init(RenderContext_DX12* context);
 				void Update();

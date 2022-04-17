@@ -3,7 +3,7 @@
 #include <new>
 #include "MemoryTracker.h"
 
-#define IS_MEMORY_OVERRIDES
+//#define IS_MEMORY_OVERRIDES
 #ifdef IS_MEMORY_OVERRIDES
 void* operator new(size_t size)
 {
@@ -46,5 +46,16 @@ void operator delete[](void* ptr)
 	Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
 	std::free(ptr);
 }
-
 #endif
+
+namespace Insight::Core
+{
+	class IS_CORE MemoryNewObject
+	{
+	public:
+		MemoryNewObject(void* ptr);
+		void* Ptr;
+	};
+}
+#define NewTracked(Type) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
+#define DeleteTracked(ptr) Insight::Core::MemoryTracker::Instance().UnTrack(ptr); delete ptr;
