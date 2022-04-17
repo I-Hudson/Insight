@@ -7,6 +7,19 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		enum class ResourceType
+		{
+			Buffer,
+			Texture,
+
+		};
+
+		enum ResourceState
+		{
+			ResourceState_Present,
+			ResourceState_Render_Target
+		};
+
 		enum GPUQueue
 		{
 			GPUQueue_Graphics,

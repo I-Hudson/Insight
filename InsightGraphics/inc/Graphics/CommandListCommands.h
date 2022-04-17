@@ -8,6 +8,13 @@ namespace Insight
 	namespace Graphics
 	{
 		class GPUBuffer;
+		struct ResourceBarrier
+		{
+			ResourceType Type;
+			void* Resource;
+			ResourceState InialState;
+			ResourceState FinalState;
+		};
 
 		enum class CommandType
 		{
@@ -17,6 +24,7 @@ namespace Insight
 			SetScissor,
 			SetVertexBuffer,
 			SetIndexBuffer,
+			AddResourceBarrier,
 			Draw, 
 			DrawIndexed,
 		};
@@ -123,6 +131,17 @@ namespace Insight
 			u32 FirstIndex;
 			u32 VertexOffset;
 			u32 FirstInstance;
+		};
+
+		struct CMD_AddResourceBarrier : public ICommand
+		{
+			virtual u64 GetSize() override { return sizeof(CMD_AddResourceBarrier); }
+			CMD_AddResourceBarrier(ResourceBarrier barrier)
+			{
+				CommandType = CommandType::AddResourceBarrier;
+				Barrier = barrier;
+			}
+			ResourceBarrier Barrier;
 		};
 	}
 }

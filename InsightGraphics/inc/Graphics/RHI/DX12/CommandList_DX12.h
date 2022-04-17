@@ -20,6 +20,7 @@ namespace Insight
 
 				void Record(CommandList& cmdList);
 				void Reset();
+				void Close();
 				ID3D12GraphicsCommandList* GetCommandBuffer() const { return m_commandList.Get(); }
 
 				bool operator==(const CommandList_DX12& other) const { return m_commandList == other.m_commandList; }
@@ -36,6 +37,7 @@ namespace Insight
 				PipelineStateObject m_activePSO;
 
 				friend class CommandAllocator_DX12;
+				friend class RenderContext_DX12;
 			};
 
 			class CommandAllocator_DX12

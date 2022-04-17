@@ -92,6 +92,8 @@ namespace Insight
 					frame.Init(this);
 				}
 
+				m_pipelineStateObjectManager.SetRenderContext(this);
+
 				WaitForGPU();
 
 				return true;
@@ -100,6 +102,8 @@ namespace Insight
 			void RenderContext_DX12::Destroy()
 			{
 				WaitForGPU();
+
+				m_pipelineStateObjectManager.Destroy();
 
 				for (FrameResourceDX12& frame : m_frames)
 				{
@@ -150,7 +154,15 @@ namespace Insight
 				// Record cmd buffers and execute
 				frame.CommandAllocator.Update();
 				CommandList_DX12& cmdListDX12 = frame.CommandAllocator.GetCommandList();
+
+				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+				CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+				cmdListDX12.m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+
 				cmdListDX12.Record(cmdList);
+				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+				cmdListDX12.Close();
 
 				ID3D12CommandList* ppCommandLists[] = { cmdListDX12.GetCommandBuffer() };
 				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);

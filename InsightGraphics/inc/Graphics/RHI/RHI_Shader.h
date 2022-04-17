@@ -1,9 +1,13 @@
 #pragma once
 
 #include "Graphics/PixelFormat.h"
+#include "Graphics/Enums.h"
 #include <string>
 #include <vector>
 #include <map>
+
+#include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
+#include "dxc/dxcapi.h"
 
 namespace Insight
 {
@@ -89,10 +93,15 @@ namespace Insight
 		public:
 			virtual ~RHI_Shader() { }
 
+			bool IsCompiled() const { return m_compiled; }
+
 		private:
 			static RHI_Shader* New();
 			virtual void Create(RenderContext* context, ShaderDesc desc) = 0;
 			virtual void Destroy() = 0;
+
+		protected:
+			bool m_compiled = false;;
 
 			friend RHI_ShaderManager;
 		};
@@ -110,6 +119,21 @@ namespace Insight
 		private:
 			std::map<u64, RHI_Shader*> m_shaders;
 			RenderContext* m_context{ nullptr };
+		};
+
+		struct ShaderCompiler
+		{
+			ShaderCompiler();
+			ShaderCompiler(const ShaderCompiler& other) = delete;
+			ShaderCompiler(ShaderCompiler&& other) = delete;
+			~ShaderCompiler();
+
+			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, std::vector<std::wstring> additionalArgs = {});
+			std::wstring StageToFuncName(ShaderStageFlagBits stage);
+			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
+
+			RHI::DX12::ComPtr<IDxcUtils> s_dxUtils;
+			RHI::DX12::ComPtr<IDxcCompiler3> s_dxCompiler;
 		};
 	}
 }

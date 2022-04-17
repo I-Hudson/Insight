@@ -5,8 +5,7 @@
 #include <map>
 #include <array>
 
-#include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
-#include "dxc/dxcapi.h"
+
 
 namespace Insight
 {
@@ -34,7 +33,7 @@ namespace Insight
 				virtual void Create(RenderContext* context, ShaderDesc desc) override;
 				virtual void Destroy() override;
 
-				void CompileStage(vk::ShaderStageFlagBits stageType, std::wstring_view path, int moduleIndex);
+				void CompileStage(ShaderStageFlagBits stage, std::wstring_view path, int moduleIndex);
 				void CreateVertexInputLayout(const ShaderDesc& desc);
 
 			private:
@@ -42,11 +41,6 @@ namespace Insight
 				std::array<vk::ShaderModule, 5> m_modules;
 				std::array<std::wstring, 5> m_mainFuncNames;
 				RenderContext_Vulkan* m_context{ nullptr };
-
-				//static int s_gslangInit;
-				static DX12::ComPtr<IDxcUtils> s_dxUtils;
-				static DX12::ComPtr<IDxcCompiler3> s_dxCompiler;
-				static int s_dxInUse;
 			};
 		}
 	}

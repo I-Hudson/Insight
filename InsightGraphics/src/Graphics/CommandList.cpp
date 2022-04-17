@@ -162,6 +162,11 @@ namespace Insight
 			AddCommand(CMD_SetIndexBuffer(buffer));
 		}
 
+		void CommandList::AddResourceBarrier(ResourceBarrier barrier)
+		{
+			AddCommand(CMD_AddResourceBarrier(barrier));
+		}
+
 		void CommandList::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 		{
 			AddCommand(CMD_SetPipelineStateObject(m_pso));

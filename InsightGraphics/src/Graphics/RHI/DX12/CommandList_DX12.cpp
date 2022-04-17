@@ -34,17 +34,16 @@ namespace Insight
 					case CommandType::SetViewport:
 					{
 						const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
-						//std::array<vk::Viewport, 1> viewports = { vk::Viewport(0, 0, cmd->Width, cmd->Height) };
-						//m_commandBuffer.setViewport(0, viewports);
+						std::array<D3D12_VIEWPORT, 1> viewports = { D3D12_VIEWPORT{ 0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f } };
+						m_commandList->RSSetViewports(1, viewports.data());
 						break;
 					}
 
 					case CommandType::SetScissor:
 					{
 						const CMD_SetScissor* cmd = dynamic_cast<const CMD_SetScissor*>(command);
-						//std::array<vk::Rect2D, 1> scissors = { vk::Rect2D(vk::Offset2D(0, 0),
-						//	vk::Extent2D(static_cast<uint32_t>(cmd->Width), static_cast<uint32_t>(cmd->Height))) };
-						//m_commandBuffer.setScissor(0, scissors);
+						std::array<D3D12_RECT, 1> scissors = { D3D12_RECT{ 0, 0, cmd->Width, cmd->Height } };
+						m_commandList->RSSetScissorRects(1, scissors.data());
 						break;
 					}
 
@@ -63,7 +62,7 @@ namespace Insight
 							break;
 						}
 						const CMD_Draw* cmd = dynamic_cast<const CMD_Draw*>(command);
-						//m_commandBuffer.draw(cmd->VertexCount, cmd->InstanceCount, cmd->FirstVertex, cmd->FirstInstance);
+						m_commandList->DrawInstanced(cmd->VertexCount, cmd->InstanceCount, cmd->FirstVertex, cmd->FirstInstance);
 						break;
 					}
 
@@ -91,7 +90,6 @@ namespace Insight
 				{
 					m_activeRenderpass = false;
 				}
-				ThrowIfFailed(m_commandList->Close());
 			}
 
 			void CommandList_DX12::Reset()
@@ -100,8 +98,21 @@ namespace Insight
 				m_activePSO = {};
 			}
 
+			void CommandList_DX12::Close()
+			{
+				ThrowIfFailed(m_commandList->Close());
+			}
+
 			bool CommandList_DX12::CanDraw()
 			{
+				ID3D12PipelineState* pipeline = m_context->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
+				if (m_pso.GetHash() != m_activePSO.GetHash())
+				{
+					m_activePSO = m_pso;
+					m_commandList->SetPipelineState(pipeline);
+					m_commandList->SetGraphicsRootSignature(m_context->GetPipelineStateObjectManager().GetRootSignature(m_activePSO));
+					m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
+				}
 				return true;
 			}
 

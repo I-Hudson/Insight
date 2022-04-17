@@ -4,9 +4,9 @@ project "InsightEditor"
     cppdialect "C++17"
     configurations { "Debug", "Release" } 
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir ("%{wks.location}" .. outputdir_target .. "/%{prj.name}")
+    objdir ("%{wks.location}" .. outputdir_obj .. "/%{prj.name}")
+    debugdir ("%{wks.location}" .. outputdir_debug .. "/%{prj.name}")
 
     defines
     {

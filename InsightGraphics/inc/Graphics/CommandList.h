@@ -45,6 +45,8 @@ namespace Insight
 			void SetVertexBuffer(GPUBuffer* buffer);
 			void SetIndexBuffer(GPUBuffer* buffer);
 
+			void AddResourceBarrier(ResourceBarrier barrier);
+
 			void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance);
 			void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance);
 

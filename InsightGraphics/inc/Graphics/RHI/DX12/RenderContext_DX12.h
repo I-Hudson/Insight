@@ -3,6 +3,7 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/CommandList_DX12.h"
+#include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
 #include "Core/Logger.h"
 
 namespace Insight
@@ -21,6 +22,7 @@ namespace Insight
 				virtual void Render(CommandList cmdList) override;
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
+				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 
 			private:
 				virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) override;
@@ -45,6 +47,8 @@ namespace Insight
 				ComPtr<ID3D12DescriptorHeap> m_rtvHeap{ nullptr };
 				u32 m_rtvDescriptorSize;
 				std::vector<ComPtr<ID3D12Resource>> m_swapchainImages;
+
+				PipelineStateObjectManager_DX12 m_pipelineStateObjectManager;
 
 				HANDLE m_fenceEvent;
 				ComPtr<ID3D12Fence> m_swapchainFence{ nullptr };

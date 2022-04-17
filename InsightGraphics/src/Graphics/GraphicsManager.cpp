@@ -17,7 +17,7 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
 			m_renderContext = RenderContext::New();
 			if (!m_renderContext)
 			{
@@ -36,12 +36,6 @@ namespace Insight
 		{
 			//GPUBuffer* vBuffer = Renderer::CreateVertexBuffer(128);
 
-			if (IsDX12())
-			{
-				m_renderContext->Render(Renderer::s_FrameCommandList);
-				Renderer::s_FrameCommandList.Reset();
-				return;
-			}
 			ShaderDesc shaderDesc;
 			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 			shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
