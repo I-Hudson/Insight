@@ -20,6 +20,7 @@ project "InsightGraphics"
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.imgui}",
         "%{IncludeDirs.stb}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.vma}",
@@ -39,6 +40,7 @@ project "InsightGraphics"
         "InsightCore",
         "glfw3.lib",
         "glm",
+        "imgui",
         "vulkan-1.lib",
         "D3d12.lib",
         "DXGI.lib",

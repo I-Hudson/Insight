@@ -2,10 +2,12 @@
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
 
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_vulkan.h"
+
 #ifdef IS_PLATFORM_WIN32
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
-#include "..\..\..\..\inc\Graphics\RHI\DX12\RenderContext_DX12.h"
 #endif
 
 namespace Insight
@@ -183,12 +185,16 @@ namespace Insight
 					frame.Init(this);
 				}
 
+				InitImGui();
+
 				return true;
 			}
 
 			void RenderContext_Vulkan::Destroy()
 			{
 				m_device.waitIdle();
+
+				DestroyImGui();
 
 				for (FrameResource& frame : m_frames)
 				{
@@ -231,8 +237,144 @@ namespace Insight
 				m_instnace = nullptr;
 			}
 
+			void RenderContext_Vulkan::InitImGui()
+			{
+				//1: create descriptor pool for IMGUI
+				// the size of the pool is very oversize, but it's copied from imgui demo itself.
+				VkDescriptorPoolSize pool_sizes[] =
+				{
+					{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+					{ VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+					{ VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+					{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+					{ VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+					{ VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+				};
+
+				VkDescriptorPoolCreateInfo pool_info = {};
+				pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+				pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+				pool_info.maxSets = 1000;
+				pool_info.poolSizeCount = (u32)std::size(pool_sizes);
+				pool_info.pPoolSizes = pool_sizes;
+				m_imguiDescriptorPool = m_device.createDescriptorPool(pool_info);
+
+				// Create the Render Pass
+				{
+					VkAttachmentDescription attachment = {};
+					attachment.format = (VkFormat)m_swapchainFormat;
+					attachment.samples = VK_SAMPLE_COUNT_1_BIT;
+					attachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+					attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+					attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+					attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+					attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+					attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+					VkAttachmentReference color_attachment = {};
+					color_attachment.attachment = 0;
+					color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+					VkSubpassDescription subpass = {};
+					subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+					subpass.colorAttachmentCount = 1;
+					subpass.pColorAttachments = &color_attachment;
+					VkSubpassDependency dependency = {};
+					dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+					dependency.dstSubpass = 0;
+					dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+					dependency.srcAccessMask = 0;
+					dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+					VkRenderPassCreateInfo info = {};
+					info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+					info.attachmentCount = 1;
+					info.pAttachments = &attachment;
+					info.subpassCount = 1;
+					info.pSubpasses = &subpass;
+					info.dependencyCount = 1;
+					info.pDependencies = &dependency;
+					m_imguiRenderpass = m_device.createRenderPass(info);
+
+					// Render imgui straight on top of what ever is on the swap chain image.
+				}
+
+				// Setup Platform/Renderer backends
+				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), true);
+				ImGui_ImplVulkan_InitInfo init_info = {};
+				init_info.Instance = m_instnace;
+				init_info.PhysicalDevice = m_adapter;
+				init_info.Device = m_device;
+				init_info.QueueFamily = m_queueFamilyLookup[GPUQueue_Graphics];
+				init_info.Queue = m_commandQueues[GPUQueue_Graphics];
+				init_info.PipelineCache = nullptr;
+				init_info.DescriptorPool = m_imguiDescriptorPool;
+				init_info.Subpass = 0;
+				init_info.MinImageCount = c_FrameCount;
+				init_info.ImageCount = c_FrameCount;
+				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+				init_info.Allocator = nullptr;
+				init_info.CheckVkResultFn = [](VkResult error)
+				{
+					if (error != 0)
+					{
+						IS_CORE_ERROR("[IMGUI] Error: {}", error);
+					}
+					};
+				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
+
+				FrameResource& frame = m_frames[m_currentFrame];
+				frame.CommandPool.Update();
+				CommandList_Vulkan& cmdListVulkan = frame.CommandPool.GetCommandList();
+
+				vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
+				cmdListVulkan.m_commandBuffer.begin(beginInfo);
+
+				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan.m_commandBuffer);
+
+				cmdListVulkan.m_commandBuffer.end();
+
+				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan .m_commandBuffer };
+				vk::SubmitInfo submitInfo = vk::SubmitInfo();
+				submitInfo.setCommandBuffers(commandBuffers);
+				m_commandQueues[GPUQueue_Graphics].submit(submitInfo);
+
+				m_device.waitIdle();
+
+				ImGui_ImplVulkan_DestroyFontUploadObjects();
+				frame.CommandPool.Update();
+
+				ImGui_ImplVulkan_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
+			}
+
+			void RenderContext_Vulkan::DestroyImGui()
+			{
+				ImGui_ImplVulkan_Shutdown();
+				ImGui_ImplGlfw_Shutdown();
+				ImGui::DestroyContext();
+
+				for (vk::Framebuffer& frameBuffer : m_imguiFramebuffers)
+				{
+					m_device.destroyFramebuffer(frameBuffer);
+					frameBuffer = nullptr;
+				}
+
+				m_device.destroyDescriptorPool(m_imguiDescriptorPool);
+				m_imguiDescriptorPool = nullptr;
+				m_device.destroyRenderPass(m_imguiRenderpass);
+				m_imguiRenderpass = nullptr;
+			}
+
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
+				ImGui::Render();
+				ImGui::UpdatePlatformWindows();
+
 				FrameResource& frame = m_frames[m_currentFrame];
 
 				m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
@@ -243,6 +385,42 @@ namespace Insight
 				frame.CommandPool.Update();
 				CommandList_Vulkan& cmdListVulkan = frame.CommandPool.GetCommandList();
 				cmdListVulkan.Record(cmdList);
+
+
+				// Render imgui.
+
+				if (m_imguiFramebuffers[m_currentFrame])
+				{
+					m_device.destroyFramebuffer(m_imguiFramebuffers[m_currentFrame]);
+				}
+
+				std::array<vk::ImageView, 1> imguiFramebufferViews = { GetSwapchainImageView() };
+				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, 
+					m_imguiRenderpass,
+					imguiFramebufferViews,
+					Window::Instance().GetWidth(), 
+					Window::Instance().GetHeight(), 1);
+				m_imguiFramebuffers[m_currentFrame] = m_device.createFramebuffer(frameBufferInfo);
+
+				VkClearValue clearValue;
+				clearValue.color.float32[0] = 0;
+				clearValue.color.float32[1] = 0;
+				clearValue.color.float32[2] = 0;
+				clearValue.color.float32[3] = 1;
+
+				VkRenderPassBeginInfo info = {};
+				info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+				info.renderPass = m_imguiRenderpass;
+				info.framebuffer = m_imguiFramebuffers[m_currentFrame];
+				info.renderArea.extent.width = Window::Instance().GetWidth();
+				info.renderArea.extent.height = Window::Instance().GetHeight();
+				info.clearValueCount = 1;
+				info.pClearValues = &clearValue;
+				cmdListVulkan.m_commandBuffer.beginRenderPass(info, vk::SubpassContents::eInline);
+				// Record dear imgui primitives into command buffer
+				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan.m_commandBuffer);
+				cmdListVulkan.m_commandBuffer.endRenderPass();
+				cmdListVulkan.m_commandBuffer.end();
 
 				std::array<vk::Semaphore, 1> waitSemaphores = { frame.SwapchainAcquire };
 				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
@@ -262,6 +440,10 @@ namespace Insight
 
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 				m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+
+				ImGui_ImplVulkan_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
 			}
 
 			GPUBuffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)

@@ -2,7 +2,10 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
+#include "backends/imgui_impl_glfw.h"
+
 #ifdef IS_PLATFORM_WINDOWS
+#include "backends/imgui_impl_dx12.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
 #endif
@@ -94,6 +97,8 @@ namespace Insight
 
 				m_pipelineStateObjectManager.SetRenderContext(this);
 
+				InitImGui();
+
 				WaitForGPU();
 
 				return true;
@@ -102,6 +107,8 @@ namespace Insight
 			void RenderContext_DX12::Destroy()
 			{
 				WaitForGPU();
+
+				DestroyImGui();
 
 				m_pipelineStateObjectManager.Destroy();
 
@@ -147,20 +154,64 @@ namespace Insight
 				}
 			}
 
+			void RenderContext_DX12::InitImGui()
+			{
+				ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), true);
+
+				D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+				desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+				desc.NumDescriptors = 1;
+				desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+				ThrowIfFailed(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srcImGuiHeap)));
+
+				ImGui_ImplDX12_Init(m_device.Get(), 
+					c_FrameCount,
+					DXGI_FORMAT_R8G8B8A8_UNORM, 
+					m_srcImGuiHeap.Get(), 
+					m_srcImGuiHeap->GetCPUDescriptorHandleForHeapStart(),
+					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart());
+
+				ImGui_ImplDX12_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
+			}
+
+			void RenderContext_DX12::DestroyImGui()
+			{
+				ImGui_ImplDX12_Shutdown();
+				ImGui_ImplGlfw_Shutdown();
+				ImGui::DestroyContext();
+				m_srcImGuiHeap.Reset();
+				m_srcImGuiHeap = nullptr;
+			}
+
 			void RenderContext_DX12::Render(CommandList cmdList)
 			{
+				ImGui::Render();
+				ImGui::UpdatePlatformWindows();
+
 				FrameResourceDX12& frame = m_frames[m_frameIndex];
 
 				// Record cmd buffers and execute
 				frame.CommandAllocator.Update();
 				CommandList_DX12& cmdListDX12 = frame.CommandAllocator.GetCommandList();
 
+				// Set back buffer texture/image to render target so we can render to it.
 				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 				CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+				ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+				const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+				cmdListDX12.m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
 				cmdListDX12.m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 				cmdListDX12.Record(cmdList);
+
+				std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
+				cmdListDX12.m_commandList->SetDescriptorHeaps(1, imguiHeap.data());
+				ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12.m_commandList.Get());
+
+				// Set back buffer texture/image back to present so we can use it within the swapchain.
 				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 				cmdListDX12.Close();
 
@@ -186,6 +237,13 @@ namespace Insight
 
 				// Set the fence value for the next frame.
 				m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
+
+				//ImGui::EndFrame();
+				//ImGui::UpdatePlatformWindows();
+
+				ImGui_ImplDX12_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
 			}
 
 			GPUBuffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)

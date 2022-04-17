@@ -4,6 +4,7 @@
 #include "Graphics/CommandList.h"
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/Enums.h"
+#include "imgui.h"
 
 namespace Insight
 {
@@ -21,6 +22,9 @@ namespace Insight
 
 			virtual bool Init() = 0;
 			virtual void Destroy() = 0;
+
+			virtual void InitImGui() = 0;
+			virtual void DestroyImGui() = 0;
 
 			virtual void Render(CommandList cmdList) = 0;
 
@@ -42,6 +46,8 @@ namespace Insight
 	class IS_GRAPHICS Renderer
 	{
 	public:
+		static void SetImGUIContext(ImGuiContext*& context);
+
 		static Graphics::GPUBuffer* CreateVertexBuffer(u64 sizeBytes);
 		static Graphics::GPUBuffer* CreateIndexBuffer(u64 sizeBytes);
 

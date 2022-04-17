@@ -33,6 +33,8 @@ namespace Insight
 				PipelineStateObject m_pso;
 				PipelineStateObject m_activePSO;
 				vk::Framebuffer m_framebuffer;
+
+				friend class RenderContext_Vulkan;
 			};
 
 			class CommandPool_Vulkan

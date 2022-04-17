@@ -92,8 +92,6 @@ namespace Insight
 					m_commandBuffer.endRenderPass();
 					m_activeRenderpass = false;
 				}
-
-				m_commandBuffer.end();
 			}
 
 			void CommandList_Vulkan::Reset()

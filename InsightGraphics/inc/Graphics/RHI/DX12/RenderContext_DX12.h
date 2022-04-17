@@ -19,6 +19,9 @@ namespace Insight
 				virtual bool Init() override;
 				virtual void Destroy() override;
 
+				virtual void InitImGui() override;
+				virtual void DestroyImGui() override;
+
 				virtual void Render(CommandList cmdList) override;
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
@@ -53,6 +56,9 @@ namespace Insight
 				HANDLE m_fenceEvent;
 				ComPtr<ID3D12Fence> m_swapchainFence{ nullptr };
 				u64 m_swapchainFenceValues[c_FrameCount];
+
+				ComPtr<ID3D12DescriptorHeap> m_srcImGuiHeap{ nullptr };
+
 
 				int m_currentFrame = 0;
 				int m_frameIndex = 0;

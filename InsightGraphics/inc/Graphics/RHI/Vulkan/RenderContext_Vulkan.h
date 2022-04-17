@@ -67,6 +67,9 @@ namespace Insight
 				virtual bool Init() override;
 				virtual void Destroy() override;
 
+				virtual void InitImGui() override;
+				virtual void DestroyImGui() override;
+
 				virtual void Render(CommandList cmdList) override;
 
 				vk::Device GetDevice() const { return m_device; }
@@ -113,6 +116,10 @@ namespace Insight
 				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
 				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;
 				RenderpassManager_Vulkan m_renderpassManager;
+
+				vk::DescriptorPool m_imguiDescriptorPool;
+				vk::RenderPass m_imguiRenderpass;
+				std::array<vk::Framebuffer, c_FrameCount> m_imguiFramebuffers;
 
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
