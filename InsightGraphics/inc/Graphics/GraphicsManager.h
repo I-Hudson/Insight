@@ -24,15 +24,16 @@ namespace Insight
 
 		enum class GraphicsAPI
 		{
-			None,
 			Vulkan,
-			DX12
+			DX12,
+
+			None,
 		};
 
 		struct GraphicsManagerData
 		{
 			GPUDevice* GPUDevice;
-			GraphicsAPI GraphicsAPI;
+			GraphicsAPI GraphicsAPI = GraphicsAPI::None;
 		};
 
 		class IS_GRAPHICS GraphicsManager : public Insight::Core::ManagerInterface

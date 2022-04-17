@@ -6,6 +6,7 @@
 #include "Graphics/RHI/GPUBuffer.h"
 #include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 
+#include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 #include <unordered_map>
 #include <string>
@@ -82,6 +83,9 @@ namespace Insight
 				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 				RenderpassManager_Vulkan& GetRenderpassManager() { return m_renderpassManager; }
 
+			protected:
+				virtual void WaitForGpu() override;
+
 			private:
 				virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) override;
 				virtual GPUBuffer* CreateIndexBuffer(u64 sizeBytes) override;
@@ -93,8 +97,7 @@ namespace Insight
 				vk::PhysicalDevice FindAdapter();
 				std::vector<vk::DeviceQueueCreateInfo> GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo);
 				void GetDeviceExtensionAndLayers(std::vector<std::string>& extensions, std::vector<std::string>& layers);
-
-				vk::SwapchainKHR CreateSwapchain();
+				void CreateSwapchain();
 
 			private:
 				vk::Instance m_instnace{ nullptr };
@@ -106,6 +109,7 @@ namespace Insight
 				vk::Format m_swapchainFormat;
 				std::vector<vk::Image> m_swapchainImages;
 				std::vector<vk::ImageView> m_swapchainImageViews;
+				glm::ivec2 m_swapchainBufferSize;
 
 				std::unordered_map<GPUQueue, vk::Queue> m_commandQueues;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;

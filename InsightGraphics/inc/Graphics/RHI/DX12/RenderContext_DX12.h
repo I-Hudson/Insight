@@ -5,6 +5,7 @@
 #include "Graphics/RHI/DX12/CommandList_DX12.h"
 #include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
 #include "Core/Logger.h"
+#include <glm/glm.hpp>
 
 namespace Insight
 {
@@ -27,6 +28,9 @@ namespace Insight
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 
+			protected:
+				virtual void WaitForGpu() override;
+
 			private:
 				virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) override;
 				virtual GPUBuffer* CreateIndexBuffer(u64 sizeBytes) override;
@@ -36,7 +40,9 @@ namespace Insight
 			private:
 				void FindPhysicalDevice(IDXGIAdapter1** ppAdapter);
 				void CreateSwapchain();
-				void WaitForGPU();
+				void ResizeSwapchainBuffers();
+
+				void WaitForNextFrame();
 
 			private:
 				RHI_PhysicalDevice_DX12 m_physicalDevice;
@@ -50,6 +56,7 @@ namespace Insight
 				ComPtr<ID3D12DescriptorHeap> m_rtvHeap{ nullptr };
 				u32 m_rtvDescriptorSize;
 				std::vector<ComPtr<ID3D12Resource>> m_swapchainImages;
+				glm::ivec2 m_swapchainSize;
 
 				PipelineStateObjectManager_DX12 m_pipelineStateObjectManager;
 

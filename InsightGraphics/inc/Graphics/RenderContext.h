@@ -28,6 +28,12 @@ namespace Insight
 
 			virtual void Render(CommandList cmdList) = 0;
 
+		protected:
+			void ImGuiBeginFrame();
+			void ImGuiRender();
+
+			virtual void WaitForGpu() = 0;
+
 		private:
 			virtual GPUBuffer* CreateVertexBuffer(u64 sizeBytes) = 0;
 			virtual GPUBuffer* CreateIndexBuffer(u64 sizeBytes) = 0;

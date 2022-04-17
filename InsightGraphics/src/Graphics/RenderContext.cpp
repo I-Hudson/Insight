@@ -4,6 +4,8 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
+#include "backends/imgui_impl_glfw.h"
+
 namespace Insight
 {
 	Graphics::CommandList Renderer::s_FrameCommandList;
@@ -31,7 +33,7 @@ namespace Insight
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-			//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 			//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
 			//io.ConfigViewportsNoAutoMerge = true;
 			//io.ConfigViewportsNoTaskBarIcon = true;
@@ -49,6 +51,19 @@ namespace Insight
 			}
 
 			return context;
+		}
+
+		void RenderContext::ImGuiBeginFrame()
+		{
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+		}
+
+		void RenderContext::ImGuiRender()
+		{
+			ImGui::Render();
+			ImGui::UpdatePlatformWindows();
 		}
 	}
 

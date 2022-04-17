@@ -99,14 +99,14 @@ namespace Insight
 
 				InitImGui();
 
-				WaitForGPU();
+				WaitForGpu();
 
 				return true;
 			}
 
 			void RenderContext_DX12::Destroy()
 			{
-				WaitForGPU();
+				WaitForGpu();
 
 				DestroyImGui();
 
@@ -172,8 +172,7 @@ namespace Insight
 					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart());
 
 				ImGui_ImplDX12_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				ImGuiBeginFrame();
 			}
 
 			void RenderContext_DX12::DestroyImGui()
@@ -181,14 +180,14 @@ namespace Insight
 				ImGui_ImplDX12_Shutdown();
 				ImGui_ImplGlfw_Shutdown();
 				ImGui::DestroyContext();
+
 				m_srcImGuiHeap.Reset();
 				m_srcImGuiHeap = nullptr;
 			}
 
 			void RenderContext_DX12::Render(CommandList cmdList)
 			{
-				ImGui::Render();
-				ImGui::UpdatePlatformWindows();
+				ImGuiRender();
 
 				FrameResourceDX12& frame = m_frames[m_frameIndex];
 
@@ -221,29 +220,20 @@ namespace Insight
 				// Present the frame.
 				ThrowIfFailed(m_swapchain->Present(1, 0));
 
-				// Schedule a Signal command in the queue.
-				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
-				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));
+				WaitForNextFrame();
 
-				// Update the frame index.
-				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
-
-				// If the next frame is not ready to be rendered yet, wait until it is ready.
-				if (m_swapchainFence->GetCompletedValue() < currentFenceValue)
+				if (Window::Instance().GetSize() != m_swapchainSize)
 				{
-					ThrowIfFailed(m_swapchainFence->SetEventOnCompletion(currentFenceValue, m_fenceEvent));
-					WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+					WaitForGpu();
+					m_swapchainSize = Window::Instance().GetSize();
+					ResizeSwapchainBuffers();
 				}
-
-				// Set the fence value for the next frame.
-				m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
 
 				//ImGui::EndFrame();
 				//ImGui::UpdatePlatformWindows();
 
 				ImGui_ImplDX12_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				ImGuiBeginFrame();
 			}
 
 			GPUBuffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)
@@ -347,10 +337,12 @@ namespace Insight
 				ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 				m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 				
+				m_swapchainSize = { Window::Instance().GetWidth(), Window::Instance().GetHeight() };
+
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 				swapChainDesc.BufferCount = c_FrameCount;
-				swapChainDesc.Width = Window::Instance().GetWidth();
-				swapChainDesc.Height = Window::Instance().GetHeight();
+				swapChainDesc.Width = m_swapchainSize.x;
+				swapChainDesc.Height = m_swapchainSize.y;
 				swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -380,7 +372,49 @@ namespace Insight
 				}
 			}
 
-			void RenderContext_DX12::WaitForGPU()
+			void RenderContext_DX12::ResizeSwapchainBuffers()
+			{
+				// Release all our previous render targets from the swapchain.
+				for (size_t i = 0; i < m_swapchainImages.size(); ++i)
+				{
+					m_swapchainImages[i].Reset();
+				}
+
+				// Resize our swap chain buffers.
+				m_swapchain->ResizeBuffers(c_FrameCount, m_swapchainSize.x, m_swapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
+				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
+
+				// Create new render targets for teh swapchain.
+				D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+				for (u32 i = 0; i < c_FrameCount; ++i)
+				{
+					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&m_swapchainImages[i])));
+					m_device->CreateRenderTargetView(m_swapchainImages[i].Get(), nullptr, rtvHandle);
+					rtvHandle.ptr += m_rtvDescriptorSize;
+				}
+			}
+
+			void RenderContext_DX12::WaitForNextFrame()
+			{
+				// Schedule a Signal command in the queue.
+				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
+				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));
+
+				// Update the frame index.
+				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
+
+				// If the next frame is not ready to be rendered yet, wait until it is ready.
+				if (m_swapchainFence->GetCompletedValue() < currentFenceValue)
+				{
+					ThrowIfFailed(m_swapchainFence->SetEventOnCompletion(currentFenceValue, m_fenceEvent));
+					WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+				}
+
+				// Set the fence value for the next frame.
+				m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
+			}
+
+			void RenderContext_DX12::WaitForGpu()
 			{
 				// Schedule a Signal command in the queue.
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), m_swapchainFenceValues[m_frameIndex]));

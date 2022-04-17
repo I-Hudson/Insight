@@ -23,6 +23,8 @@ namespace Insight
 			void Destroy();
 			void Update();
 
+			void Rebuild();
+
 			std::string_view GetTitle() const { return m_title; }
 			void SetTite(std::string title);
 

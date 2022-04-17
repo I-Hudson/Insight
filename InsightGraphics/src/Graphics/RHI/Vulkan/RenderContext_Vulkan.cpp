@@ -174,7 +174,7 @@ namespace Insight
 				VkSurfaceKHR surfaceKHR;
 				VkResult res = glfwCreateWindowSurface(m_instnace, Window::Instance().GetRawWindow(), nullptr, &surfaceKHR);
 				m_surface = vk::SurfaceKHR(surfaceKHR);
-				m_swapchain = CreateSwapchain();
+				CreateSwapchain();
 
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineStateObjectManager.SetRenderContext(this);
@@ -348,8 +348,7 @@ namespace Insight
 				frame.CommandPool.Update();
 
 				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				ImGuiBeginFrame();
 			}
 
 			void RenderContext_Vulkan::DestroyImGui()
@@ -372,14 +371,20 @@ namespace Insight
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
-				ImGui::Render();
-				ImGui::UpdatePlatformWindows();
+				ImGuiRender();
 
 				FrameResource& frame = m_frames[m_currentFrame];
 
 				m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
+
+				if (Window::Instance().GetSize() != m_swapchainBufferSize)
+				{
+					WaitForGpu();
+					CreateSwapchain();
+				}
+
 				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, frame.SwapchainAcquire);
-				m_availableSwapchainImage = nextImage.value;
+				m_availableSwapchainImage = nextImage.value;		
 				m_device.resetFences({ frame.SubmitFence });
 
 				frame.CommandPool.Update();
@@ -398,8 +403,8 @@ namespace Insight
 				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, 
 					m_imguiRenderpass,
 					imguiFramebufferViews,
-					Window::Instance().GetWidth(), 
-					Window::Instance().GetHeight(), 1);
+					m_swapchainBufferSize.x,
+					m_swapchainBufferSize.y, 1);
 				m_imguiFramebuffers[m_currentFrame] = m_device.createFramebuffer(frameBufferInfo);
 
 				VkClearValue clearValue;
@@ -412,8 +417,8 @@ namespace Insight
 				info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 				info.renderPass = m_imguiRenderpass;
 				info.framebuffer = m_imguiFramebuffers[m_currentFrame];
-				info.renderArea.extent.width = Window::Instance().GetWidth();
-				info.renderArea.extent.height = Window::Instance().GetHeight();
+				info.renderArea.extent.width = m_swapchainBufferSize.x;
+				info.renderArea.extent.height = m_swapchainBufferSize.y;
 				info.clearValueCount = 1;
 				info.pClearValues = &clearValue;
 				cmdListVulkan.m_commandBuffer.beginRenderPass(info, vk::SubpassContents::eInline);
@@ -436,14 +441,18 @@ namespace Insight
 
 				std::array<vk::Semaphore, 1> signalSemaphores = { frame.SignalSemaphore };
 				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
-				std::array<u32, 1> swapchainImageIndex = { m_availableSwapchainImage };
+				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
 
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
-				m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+				vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
 
 				ImGui_ImplVulkan_NewFrame();
-				ImGui_ImplGlfw_NewFrame();
-				ImGui::NewFrame();
+				ImGuiBeginFrame();
+			}
+
+			void RenderContext_Vulkan::WaitForGpu()
+			{
+				m_device.waitIdle();
 			}
 
 			GPUBuffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)
@@ -609,7 +618,7 @@ namespace Insight
 					}
 			}
 			
-			vk::SwapchainKHR RenderContext_Vulkan::CreateSwapchain()
+			void RenderContext_Vulkan::CreateSwapchain()
 			{
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
 				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
@@ -628,6 +637,7 @@ namespace Insight
 					// If the surface size is defined, the swap chain size must match
 					swapchainExtent = surfaceCapabilites.currentExtent;
 				}
+				m_swapchainBufferSize = { swapchainExtent.width, swapchainExtent.height };
 
 				// Select a present mode for the swapchain
 
@@ -712,7 +722,6 @@ namespace Insight
 				createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
 				createInfo.setPresentMode(presentMode);
 				createInfo.setOldSwapchain(m_swapchain);
-
 				vk::SwapchainKHR swapchain =  m_device.createSwapchainKHR(createInfo);
 
 				if (m_swapchain)
@@ -737,8 +746,7 @@ namespace Insight
 					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 					m_swapchainImageViews.push_back(m_device.createImageView(info));
 				}
-
-				return swapchain;
+				m_swapchain = swapchain;
 			}
 
 			void RenderContext_Vulkan::FrameResource::Init(RenderContext_Vulkan* context)

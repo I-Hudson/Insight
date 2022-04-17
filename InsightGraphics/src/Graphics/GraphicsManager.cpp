@@ -13,11 +13,14 @@ namespace Insight
 	{
 		GraphicsManagerData GraphicsManager::m_sharedData;
 
+		int currentGraphicsAPI;
 		bool GraphicsManager::Init()
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
+			currentGraphicsAPI = (int)m_sharedData.GraphicsAPI;
+
 			m_renderContext = RenderContext::New();
 			if (!m_renderContext)
 			{
@@ -34,13 +37,36 @@ namespace Insight
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
+			if (!m_renderContext)
+			{
+				return;
+			}
+
 			//GPUBuffer* vBuffer = Renderer::CreateVertexBuffer(128);
 
 			bool show = true;
 			//ImGui::ShowDemoWindow(&show);
-			ImGui::Begin("Test window");
-			ImGui::Text("TEXT");
-			ImGui::End();
+			std::string currentAPI = "Graphics API: " + std::to_string(currentGraphicsAPI);
+			ImGui::Begin(currentAPI.c_str());
+			const char* graphicsAPIs[] = { "Vulkan", "DX12" };
+			if (ImGui::ListBox("Graphcis API", &currentGraphicsAPI, graphicsAPIs, _countof(graphicsAPIs)))
+			{
+				// New API
+				m_renderContext->Destroy();
+				delete m_renderContext;
+				m_renderContext = nullptr;
+
+				Window::Instance().Rebuild();
+
+				m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
+				m_renderContext = RenderContext::New();
+				m_renderContext->Init();
+				return;
+			}
+			else
+			{
+				ImGui::End();
+			}
 
 			ShaderDesc shaderDesc;
 			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
