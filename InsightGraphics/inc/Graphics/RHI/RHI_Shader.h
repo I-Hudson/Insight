@@ -1,10 +1,12 @@
 #pragma once
 
 #include "Graphics/PixelFormat.h"
+#include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/Enums.h"
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "dxc/dxcapi.h"
@@ -105,7 +107,8 @@ namespace Insight
 			virtual void Destroy() = 0;
 
 		protected:
-			bool m_compiled = false;;
+			bool m_compiled = false;
+			std::unordered_map<int, std::vector<Descriptor>> m_descriptors;
 
 			friend RHI_ShaderManager;
 		};
@@ -132,12 +135,15 @@ namespace Insight
 			ShaderCompiler(ShaderCompiler&& other) = delete;
 			~ShaderCompiler();
 
-			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, std::vector<std::wstring> additionalArgs = {});
 			std::wstring StageToFuncName(ShaderStageFlagBits stage);
 			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
 
+			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, std::vector<std::wstring> additionalArgs = {});
+			std::unordered_map<int, std::vector<Descriptor>> GetDescriptors();
+
 			RHI::DX12::ComPtr<IDxcUtils> s_dxUtils;
 			RHI::DX12::ComPtr<IDxcCompiler3> s_dxCompiler;
+			RHI::DX12::ComPtr<IDxcResult> m_results;
 		};
 	}
 }

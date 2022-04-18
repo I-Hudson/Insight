@@ -4,6 +4,7 @@
 
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
+#include "Graphics/RHI/DX12/DX12Utils.h"
 
 namespace Insight
 {
@@ -122,18 +123,17 @@ namespace Insight
 			arguments.push_back(targetProfile.c_str());
 
 			// Compile shader
-			RHI::DX12::ComPtr<IDxcResult> pResults;
 			hres = s_dxCompiler->Compile(
 				&Source,                // Source buffer.
 				arguments.data(),       // Array of pointers to arguments.
 				(UINT)arguments.size(),		// Number of arguments.
 				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&pResults) // Compiler output status, buffer, and errors.
+				IID_PPV_ARGS(&m_results) // Compiler output status, buffer, and errors.
 			);
 
 			// Print errors if present.
 			RHI::DX12::ComPtr<IDxcBlobUtf8> pErrors = nullptr;
-			pResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
+			m_results->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr);
 			// Note that d3dcompiler would return null if no errors or warnings are present.  
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
@@ -143,25 +143,42 @@ namespace Insight
 
 			// Get compilation result
 			RHI::DX12::ComPtr<IDxcBlob> code;
-			pResults->GetResult(&code);
-
-			//std::vector<uint8_t> dxil_data;
-			//for (size_t i = 0; i < code->GetBufferSize(); ++i)
-			//{
-			//	dxil_data.push_back(*((uint8_t*)code->GetBufferPointer() + i));
-			//}
-
-			//RHI::DX12::ComPtr<IDxcBlobEncoding> container_blob;
-
-			//s_dxUtils->CreateBlobFromPinned(
-			//	(BYTE*)dxil_data.data(),
-			//	(UINT32)dxil_data.size(),
-			//	0 /* binary, no code page */,
-			//	container_blob.GetAddressOf());
-
+			m_results->GetResult(&code);
 
 			return code;
 		}
+
+		std::unordered_map<int, std::vector<Descriptor>> ShaderCompiler::GetDescriptors()
+		{
+			RHI::DX12::ComPtr<IDxcBlob> pReflectionData;
+			m_results->GetOutput(DXC_OUT_REFLECTION, IID_PPV_ARGS(pReflectionData.GetAddressOf()), nullptr);
+			DxcBuffer reflectionBuffer;
+			reflectionBuffer.Ptr = pReflectionData->GetBufferPointer();
+			reflectionBuffer.Size = pReflectionData->GetBufferSize();
+			reflectionBuffer.Encoding = 0;
+			RHI::DX12::ComPtr<ID3D12ShaderReflection> pShaderReflection;
+			s_dxUtils->CreateReflection(&reflectionBuffer, IID_PPV_ARGS(pShaderReflection.GetAddressOf()));
+
+			D3D12_SHADER_DESC shaderDesc = {};
+			ThrowIfFailed(pShaderReflection->GetDesc(&shaderDesc));
+
+			std::unordered_map<int, std::vector<Descriptor>> descriptors;
+			for (UINT i = 0; i < shaderDesc.ConstantBuffers; ++i)
+			{
+				ID3D12ShaderReflectionConstantBuffer* buffer = pShaderReflection->GetConstantBufferByIndex(i);
+				D3D12_SHADER_BUFFER_DESC bufferDesc = {};
+				ThrowIfFailed(buffer->GetDesc(&bufferDesc));
+
+				descriptors[0].push_back(Descriptor(
+					0, 
+					i, 
+					ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel, 
+					bufferDesc.Size, 
+					DescriptorType::Unifom_Buffer));
+			}
+			return descriptors;
+		}
+
 
 		std::wstring ShaderCompiler::StageToFuncName(ShaderStageFlagBits stage)
 		{

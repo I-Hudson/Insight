@@ -28,6 +28,8 @@ namespace Insight
 
 			::Insight::Renderer::s_context = context;
 			context->m_shaderManager.SetRenderContext(context);
+			context->m_descriptorLayoutManager.SetRenderContext(context);
+			context->m_descriptorManager.SetRenderContext(context);
 
 			IMGUI_CHECKVERSION();
 			ImGui::CreateContext();
@@ -70,6 +72,8 @@ namespace Insight
 		void RenderContext::BaseDestroy()
 		{
 			m_vertexBuffer.ReleaseAll();
+			m_descriptorLayoutManager.ReleaseAll();
+			m_descriptorManager.ReleaseAll();
 			m_shaderManager.Destroy();
 		}
 	}
@@ -129,6 +133,15 @@ namespace Insight
 	void Renderer::SetScissor(int width, int height)
 	{
 		s_FrameCommandList.SetScissor(width, height);
+	}
+
+	void Renderer::SetUniform(int set, int binding, void* data, int sizeInBytes)
+	{
+		s_FrameCommandList.SetUniform(set, binding, data, sizeInBytes);
+	}
+
+	void Renderer::SetTexture(int set, int binding, Graphics::RHI_Texture* texture)
+	{
 	}
 
 	void Renderer::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)

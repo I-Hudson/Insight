@@ -163,6 +163,23 @@ namespace Insight
 		};
 		std::string GPUBufferTypeToString(GPUBufferType type);
 
+		enum class DescriptorType
+		{
+			Sampler,
+			Combined_Image_Sampler,
+			Sampled_Image,
+			Storage_Image,
+			Uniform_Texel_Buffer,
+			Storage_Texel_Buffer,
+			Unifom_Buffer,
+			Storage_Buffer,
+			Uniform_Buffer_Dynamic,
+			Storage_Buffer_Dyanmic,
+			Input_Attachment,
+
+			Unknown
+		};
+
 		//enum GUPBufferFlagBits
 		//{
 		//	None = 1 << 0,

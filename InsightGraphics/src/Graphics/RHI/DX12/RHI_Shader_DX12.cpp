@@ -40,6 +40,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				ComPtr<IDxcBlob> code = compiler.Compile(stage, path);
+				m_descriptors = compiler.GetDescriptors();
 				m_modules[moduleIndex] = code;
 			}
 

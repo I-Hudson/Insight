@@ -1,5 +1,6 @@
 #include "Graphics/CommandList.h"
 #include "Core/MemoryTracker.h"
+#include "Core/Memory.h"
 
 namespace Insight
 {
@@ -21,6 +22,8 @@ namespace Insight
 			memcpy_s(m_commands, m_commandMaxByteSize, other.m_commands, other.m_commandMaxByteSize);
 			m_pos = (Byte*)m_commands + other.GetByteSizeFromStart();
 			m_readHead = (Byte*)m_commands + other.GetBytesSizeReadHeadFromStart();
+
+			m_uniformBuffer = other.m_uniformBuffer;
 		}
 
 		CommandList::CommandList(CommandList&& other)
@@ -31,6 +34,8 @@ namespace Insight
 			m_pos = other.m_pos;
 			m_commandMaxByteSize = other.m_commandMaxByteSize;
 			m_commands = other.m_commands;
+			m_uniformBuffer = std::move(other.m_uniformBuffer);
+
 
 			other.Reset();
 			other.m_commandMaxByteSize = 0;
@@ -96,6 +101,7 @@ namespace Insight
 			m_commandCount = 0;
 			m_readHead = (Byte*)m_commands;
 			m_pso = {};
+			m_uniformBuffer.Reset();
 		}
 
 		void CommandList::ResetReadHead()
@@ -150,6 +156,11 @@ namespace Insight
 		void CommandList::SetScissor(int width, int height)
 		{
 			AddCommand(CMD_SetScissor(width, height));
+		}
+
+		void CommandList::SetUniform(int set, int binding, void* data, int sizeInBytes)
+		{
+			m_uniformBuffer.SetUniform(set, binding, data, sizeInBytes);
 		}
 
 		void CommandList::SetVertexBuffer(RHI_Buffer* buffer)

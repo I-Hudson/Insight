@@ -2,6 +2,7 @@
 
 #include "Graphics/CommandListCommands.h"
 #include "Graphics/PipelineStateObject.h"
+#include "Graphics/UniformBuffer.h"
 #include <type_traits>
 #include <string>
 #include <assert.h>
@@ -42,6 +43,8 @@ namespace Insight
 			void SetViewport(int width, int height);
 			void SetScissor(int width, int height);
 
+			void SetUniform(int set, int binding, void* data, int sizeInBytes);
+
 			void SetVertexBuffer(RHI_Buffer* buffer);
 			void SetIndexBuffer(RHI_Buffer* buffer);
 
@@ -79,6 +82,8 @@ namespace Insight
 			unsigned char* m_pos = 0;
 			ICommand* m_commands = nullptr;
 			u64 m_commandMaxByteSize = 0;
+
+			UniformBuffer m_uniformBuffer;
 
 			PipelineStateObject m_pso;
 		};

@@ -45,25 +45,26 @@ namespace Insight
 			bool show = true;
 			std::string currentAPI = "Graphics API: " + std::to_string(currentGraphicsAPI);
 			ImGui::Begin(currentAPI.c_str());
+			const int previousGrapicsAPI = currentGraphicsAPI;
 			const char* graphicsAPIs[] = { "Vulkan", "DX12" };
 			if (ImGui::ListBox("Graphcis API", &currentGraphicsAPI, graphicsAPIs, _countof(graphicsAPIs)))
 			{
-				// New API
-				m_renderContext->Destroy();
-				DeleteTracked(m_renderContext);
-				m_renderContext = nullptr;
+				if (currentGraphicsAPI != previousGrapicsAPI)
+				{
+					// New API
+					m_renderContext->Destroy();
+					DeleteTracked(m_renderContext);
+					m_renderContext = nullptr;
 
-				Window::Instance().Rebuild();
+					Window::Instance().Rebuild();
 
-				m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
-				m_renderContext = RenderContext::New();
-				m_renderContext->Init();
-				return;
+					m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
+					m_renderContext = RenderContext::New();
+					m_renderContext->Init();
+					return;
+				}
 			}
-			else
-			{
-				ImGui::End();
-			}
+			ImGui::End();
 
 			ShaderDesc shaderDesc;
 			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
@@ -79,6 +80,9 @@ namespace Insight
 
 			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 			Renderer::SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+
+			glm::vec4 swapchainColour = { 0,0,1,1 };
+			Renderer::SetUniform(0,0, &swapchainColour, sizeof(swapchainColour));
 
 			Renderer::Draw(3, 1, 0, 0);
 

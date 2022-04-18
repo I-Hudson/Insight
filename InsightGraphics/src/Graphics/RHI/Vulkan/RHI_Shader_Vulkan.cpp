@@ -43,6 +43,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, { L"-spirv" });
+				m_descriptors = compiler.GetDescriptors();
 				if (!code)
 				{
 					return;
