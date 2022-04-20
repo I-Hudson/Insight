@@ -23,7 +23,7 @@ namespace Insight
 			m_pos = (Byte*)m_commands + other.GetByteSizeFromStart();
 			m_readHead = (Byte*)m_commands + other.GetBytesSizeReadHeadFromStart();
 
-			m_uniformBuffer = other.m_uniformBuffer;
+			m_descriptorBuffer = other.m_descriptorBuffer;
 		}
 
 		CommandList::CommandList(CommandList&& other)
@@ -34,7 +34,7 @@ namespace Insight
 			m_pos = other.m_pos;
 			m_commandMaxByteSize = other.m_commandMaxByteSize;
 			m_commands = other.m_commands;
-			m_uniformBuffer = std::move(other.m_uniformBuffer);
+			m_descriptorBuffer = std::move(other.m_descriptorBuffer);
 
 
 			other.Reset();
@@ -101,7 +101,7 @@ namespace Insight
 			m_commandCount = 0;
 			m_readHead = (Byte*)m_commands;
 			m_pso = {};
-			m_uniformBuffer.Reset();
+			m_descriptorBuffer.Reset();
 		}
 
 		void CommandList::ResetReadHead()
@@ -160,7 +160,8 @@ namespace Insight
 
 		void CommandList::SetUniform(int set, int binding, void* data, int sizeInBytes)
 		{
-			m_uniformBuffer.SetUniform(set, binding, data, sizeInBytes);
+			m_descriptorBuffer.SetUniform(set, binding, data, sizeInBytes);
+			AddCommand(CMD_SetDescriptorBuffer(m_descriptorBuffer));
 		}
 
 		void CommandList::SetVertexBuffer(RHI_Buffer* buffer)

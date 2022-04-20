@@ -238,26 +238,6 @@ namespace Insight
 				ImGuiBeginFrame();
 			}
 
-			RHI_Buffer* RenderContext_DX12::CreateVertexBuffer(u64 sizeBytes)
-			{
-				RHI_Buffer* buffer = m_vertexBuffer.CreateResource();
-				return buffer;
-			}
-
-			RHI_Buffer* RenderContext_DX12::CreateIndexBuffer(u64 sizeBytes)
-			{
-				return nullptr;
-			}
-
-			void RenderContext_DX12::FreeVertexBuffer(RHI_Buffer* buffer)
-			{
-				m_vertexBuffer.FreeResource(buffer);
-			}
-
-			void RenderContext_DX12::FreeIndexBuffer(RHI_Buffer* buffer)
-			{
-			}
-
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
 			{
 				*ppAdapter = nullptr;

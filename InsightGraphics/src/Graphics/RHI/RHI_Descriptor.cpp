@@ -84,14 +84,27 @@ namespace Insight
 			ReleaseAll();
 		}
 
-		RHI_Descriptor* RHI_DescriptorManager::GetDescriptor(u64 hash)
+		RHI_Descriptor* RHI_DescriptorManager::GetDescriptor(const DescriptorBuffer& buffer)
 		{
-			auto itr = m_descriptors.find(hash);
-			if (itr != m_descriptors.end())
+			std::vector<Descriptor> descriptors;
+			for (const auto& sets : buffer.GetUniforms())
 			{
-
+				const int setIndex = sets.first;
+				for (const auto& binding : sets.second )
+				{
+					const int bindingIndex = binding.first;
+					const int bindingSize = binding.second.Size;
+					const void* resource = binding.second.Ptr;
+					descriptors.push_back(Descriptor(setIndex, 
+						bindingIndex, 
+						0, 
+						bindingSize, 
+						DescriptorType::Unifom_Buffer, 
+						DescriptorResourceType::CBV, 
+						nullptr));
+				}
 			}
-			return nullptr;
+			return GetDescriptor(descriptors);
 		}
 
 		void RHI_DescriptorManager::ReleaseAll()
@@ -102,6 +115,22 @@ namespace Insight
 				DeleteTracked(pair.second);
 			}
 			m_descriptors.clear();
+		}
+
+		RHI_Descriptor* RHI_DescriptorManager::GetDescriptor(std::vector<Descriptor> descriptors)
+		{
+			u64 hash = 0;
+			for (const Descriptor& descriptor : descriptors)
+			{
+				HashCombine(hash, descriptor.GetHash(true));
+			}
+
+			auto itr = m_descriptors.find(hash);
+			if (itr != m_descriptors.end())
+			{
+
+			}
+			return nullptr;
 		}
 	}
 }

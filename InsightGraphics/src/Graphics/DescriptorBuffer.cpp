@@ -1,4 +1,4 @@
-#include "Graphics/UniformBuffer.h"
+#include "Graphics/DescriptorBuffer.h"
 #include "Core/Memory.h"
 #include <assert.h>
 
@@ -6,22 +6,22 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		UniformBuffer::UniformBuffer()
+		DescriptorBuffer::DescriptorBuffer()
 		{
 			Resize(12);
 		}
 
-		UniformBuffer::UniformBuffer(const UniformBuffer& other)
+		DescriptorBuffer::DescriptorBuffer(const DescriptorBuffer& other)
 		{
 			*this = other;
 		}
 
-		UniformBuffer::UniformBuffer(UniformBuffer&& other)
+		DescriptorBuffer::DescriptorBuffer(DescriptorBuffer&& other)
 		{
 			*this = std::move(other);
 		}
 
-		UniformBuffer& UniformBuffer::operator=(const UniformBuffer& other)
+		DescriptorBuffer& DescriptorBuffer::operator=(const DescriptorBuffer& other)
 		{
 			Resize(0); // Reset our current buffer to 0;
 			Resize(other.m_capacity); // Resize our buffer to the same size as other;s.
@@ -49,7 +49,7 @@ namespace Insight
 			return *this;
 		}
 
-		UniformBuffer& UniformBuffer::operator=(UniformBuffer&& other)
+		DescriptorBuffer& DescriptorBuffer::operator=(DescriptorBuffer&& other)
 		{
 			m_capacity = other.m_capacity;
 			m_size = other.m_size;
@@ -66,12 +66,12 @@ namespace Insight
 			return *this;
 		}
 
-		UniformBuffer::~UniformBuffer()
+		DescriptorBuffer::~DescriptorBuffer()
 		{
 			Release();
 		}
 
-		void UniformBuffer::SetUniform(int set, int binding, void* data, int sizeInBytes)
+		void DescriptorBuffer::SetUniform(int set, int binding, void* data, int sizeInBytes)
 		{
 			if (m_size + sizeInBytes > m_capacity)
 			{
@@ -84,7 +84,7 @@ namespace Insight
 			m_uniforms[set][binding] = Uniform(startPtr, sizeInBytes, set, binding);
 		}
 
-		void UniformBuffer::Resize(int newCapacity)
+		void DescriptorBuffer::Resize(int newCapacity)
 		{
 			// Clamp newCapacity to 0 and above.
 			newCapacity = std::max(0, newCapacity);
@@ -110,7 +110,7 @@ namespace Insight
 			{
 				// We need to reallocte.
 				void* newBlock = realloc(m_buffer, newCapacity);
-				assert(newBlock != nullptr && "[UniformBuffer::Resize] Unable to realloc buffer.");
+				assert(newBlock != nullptr && "[DescriptorBuffer::Resize] Unable to realloc buffer.");
 
 				UntrackPtr(m_buffer);
 				m_buffer = (Byte*)newBlock;
@@ -122,13 +122,13 @@ namespace Insight
 			TrackPtr(m_buffer);
 		}
 
-		void UniformBuffer::Reset()
+		void DescriptorBuffer::Reset()
 		{
 			m_size = 0;
 			m_uniforms.clear();
 		}
 
-		void UniformBuffer::Release()
+		void DescriptorBuffer::Release()
 		{
 			if (m_buffer)
 			{

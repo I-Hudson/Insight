@@ -452,29 +452,6 @@ namespace Insight
 				m_device.waitIdle();
 			}
 
-			RHI_Buffer* RenderContext_Vulkan::CreateVertexBuffer(u64 sizeBytes)
-			{
-				RHI_Buffer_Vulkan* buffer = dynamic_cast<RHI_Buffer_Vulkan*>(m_vertexBuffer.CreateResource());
-				return buffer;
-			}
-
-			RHI_Buffer* RenderContext_Vulkan::CreateIndexBuffer(u64 sizeBytes)
-			{
-				//RHI_Buffer_Vulkan* buffer = m_indexBuffers.CreateResource();
-				//return buffer;
-				return nullptr;
-			}
-
-			void RenderContext_Vulkan::FreeVertexBuffer(RHI_Buffer* buffer)
-			{
-				m_vertexBuffer.FreeResource(buffer);
-			}
-
-			void RenderContext_Vulkan::FreeIndexBuffer(RHI_Buffer* buffer)
-			{
-				//m_indexBuffer.FreeResource(static_cast<GPUBuffer_Vulkan*>(buffer));
-			}
-
 			vk::Instance RenderContext_Vulkan::CreateInstance()
 			{
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(

@@ -23,19 +23,21 @@ namespace Insight
 		/// <summary>
 		/// Handle CPU side uniform buffer to prepare for upload to GPU if required.
 		/// </summary>
-		class UniformBuffer
+		class DescriptorBuffer
 		{
 		public:
-			UniformBuffer();
-			UniformBuffer(const UniformBuffer& other);
-			UniformBuffer(UniformBuffer&& other);
-			~UniformBuffer();
+			DescriptorBuffer();
+			DescriptorBuffer(const DescriptorBuffer& other);
+			DescriptorBuffer(DescriptorBuffer&& other);
+			~DescriptorBuffer();
 
-			UniformBuffer& operator=(const UniformBuffer& other);
-			UniformBuffer& operator=(UniformBuffer&& other);
+			DescriptorBuffer& operator=(const DescriptorBuffer& other);
+			DescriptorBuffer& operator=(DescriptorBuffer&& other);
 
 			void SetUniform(int set, int binding, void* data, int sizeInBytes);
 			void Resize(int newCapacity);
+
+			const std::unordered_map<int, std::unordered_map<int, Uniform>>& GetUniforms() const { return m_uniforms; }
 
 			void Reset();
 			void Release();

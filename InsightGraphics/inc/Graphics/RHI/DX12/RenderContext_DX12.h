@@ -32,12 +32,6 @@ namespace Insight
 				virtual void WaitForGpu() override;
 
 			private:
-				virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) override;
-				virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) override;
-				virtual void FreeVertexBuffer(RHI_Buffer* buffer) override;
-				virtual void FreeIndexBuffer(RHI_Buffer* buffer) override;
-
-			private:
 				void FindPhysicalDevice(IDXGIAdapter1** ppAdapter);
 				void CreateSwapchain();
 				void ResizeSwapchainBuffers();

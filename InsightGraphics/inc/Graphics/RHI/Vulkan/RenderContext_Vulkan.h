@@ -90,12 +90,6 @@ namespace Insight
 				virtual void WaitForGpu() override;
 
 			private:
-				virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) override;
-				virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) override;
-				virtual void FreeVertexBuffer(RHI_Buffer* buffer) override;
-				virtual void FreeIndexBuffer(RHI_Buffer* buffer) override;
-
-			private:
 				vk::Instance CreateInstance();
 				vk::PhysicalDevice FindAdapter();
 				std::vector<vk::DeviceQueueCreateInfo> GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo);

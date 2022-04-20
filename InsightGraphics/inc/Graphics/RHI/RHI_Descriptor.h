@@ -2,7 +2,9 @@
 
 #include "Core/TypeAlias.h"
 #include "Graphics/RHI/RHI_Resource.h"
+#include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/Enums.h"
+#include "Graphics/DescriptorBuffer.h"
 #include <unordered_map>
 
 namespace Insight
@@ -17,6 +19,9 @@ namespace Insight
 			Descriptor() { }
 			Descriptor(int set, int binding, int stage, int size, DescriptorType type, DescriptorResourceType resourceType)
 				: Set(set), Binding(binding), Stage(stage), Size(size), Type(type), ResourceType(resourceType)
+			{ }
+			Descriptor(int set, int binding, int stage, int size, DescriptorType type, DescriptorResourceType resourceType, void* resource)
+				: Set(set), Binding(binding), Stage(stage), Size(size), Type(type), ResourceType(resourceType), Resource(resource)
 			{ }
 
 			int Set = 0;
@@ -76,6 +81,8 @@ namespace Insight
 		{
 		public:
 			static RHI_Descriptor* New();
+
+			virtual void Update(std::vector<Descriptor> descriptors) = 0;
 		};
 
 		class RHI_DescriptorManager
@@ -86,13 +93,18 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 			
-			RHI_Descriptor* GetDescriptor(u64 hash);
+			RHI_Descriptor* GetDescriptor(const DescriptorBuffer& buffer);
 
 			void ReleaseAll();
+
+		private:
+			RHI_Descriptor* GetDescriptor(std::vector<Descriptor> descriptors);
 
 		private:
 			std::unordered_map<u64, RHI_Descriptor*> m_descriptors;
 			RenderContext* m_context{ nullptr };
 		};
+
+
 	}
 }

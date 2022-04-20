@@ -45,15 +45,14 @@ namespace Insight
 			void BaseDestroy();
 
 		private:
-			virtual RHI_Buffer* CreateVertexBuffer(u64 sizeBytes) = 0;
-			virtual RHI_Buffer* CreateIndexBuffer(u64 sizeBytes) = 0;
-			virtual void FreeVertexBuffer(RHI_Buffer* buffer) = 0;
-			virtual void FreeIndexBuffer(RHI_Buffer* buffer) = 0;
+			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes);
+			void FreeBuffer(RHI_Buffer* buffer);
 
 		protected:
 			const static int c_FrameCount = 2;
 
 			RHI_ResourceManager<RHI_Buffer> m_vertexBuffer;
+			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ShaderManager m_shaderManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
@@ -71,9 +70,13 @@ namespace Insight
 
 		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes);
 		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes);
 
 		static void FreeVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);
+		static void FreeUniformBuffer(Graphics::RHI_Buffer* buffer);
+		static void FreeRawBuffer(Graphics::RHI_Buffer* buffer);
 
 		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);

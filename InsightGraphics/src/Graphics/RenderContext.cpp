@@ -76,37 +76,74 @@ namespace Insight
 			m_descriptorManager.ReleaseAll();
 			m_shaderManager.Destroy();
 		}
+
+		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes)
+		{
+			RHI_Buffer* buffer = m_buffers[bufferType].CreateResource();
+			buffer->Create(this, bufferType, sizeBytes);
+			return buffer;
+		}
+
+		void RenderContext::FreeBuffer(RHI_Buffer* buffer)
+		{
+			BufferType bufferType = buffer->GetType();
+			m_buffers[bufferType].FreeResource(buffer);
+		}
 	}
 
 	
+	// Renderer
 	void Renderer::SetImGUIContext(ImGuiContext*& context)
 	{
 		context = ImGui::GetCurrentContext();
 	}
 
-	// Renderer
 	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes)
 	{
-		return s_context->CreateVertexBuffer(sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::BufferType_Vertex, sizeBytes);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
 	{
-		return s_context->CreateIndexBuffer(sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::BufferType_Index, sizeBytes);
+	}
+
+	Graphics::RHI_Buffer* Renderer::CreateUniformBuffer(u64 sizeBytes)
+	{
+		return s_context->CreateBuffer(Graphics::BufferType::BufferType_Uniform, sizeBytes);
+	}
+
+	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes)
+	{
+		return s_context->CreateBuffer(Graphics::BufferType::BufferType_Raw, sizeBytes);
 	}
 
 	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		s_context->FreeVertexBuffer(buffer);
+		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::FreeIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		s_context->FreeIndexBuffer(buffer);
+		assert(buffer->GetType() == Graphics::BufferType::BufferType_Vertex);
+		s_context->FreeBuffer(buffer);
+	}
+
+	void Renderer::FreeUniformBuffer(Graphics::RHI_Buffer* buffer)
+	{
+		assert(buffer->GetType() == Graphics::BufferType::BufferType_Uniform);
+		s_context->FreeBuffer(buffer);
+	}
+
+	void Renderer::FreeRawBuffer(Graphics::RHI_Buffer* buffer)
+	{
+		assert(buffer->GetType() == Graphics::BufferType::BufferType_Index);
+		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		assert(buffer->GetType() == Graphics::BufferType::BufferType_Raw);
 		s_FrameCommandList.SetVertexBuffer(buffer);
 	}
 

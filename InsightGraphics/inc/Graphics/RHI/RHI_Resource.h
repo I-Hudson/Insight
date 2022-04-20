@@ -2,6 +2,8 @@
 
 #include "Core/Logger.h"
 #include "Core/Memory.h"
+#include "Core/TypeAlias.h"
+#include "Graphics/Enums.h"
 #include <type_traits>
 #include <map>
 

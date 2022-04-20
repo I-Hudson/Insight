@@ -2,7 +2,7 @@
 
 #include "Graphics/CommandListCommands.h"
 #include "Graphics/PipelineStateObject.h"
-#include "Graphics/UniformBuffer.h"
+#include "Graphics/DescriptorBuffer.h"
 #include <type_traits>
 #include <string>
 #include <assert.h>
@@ -83,7 +83,7 @@ namespace Insight
 			ICommand* m_commands = nullptr;
 			u64 m_commandMaxByteSize = 0;
 
-			UniformBuffer m_uniformBuffer;
+			DescriptorBuffer m_descriptorBuffer;
 
 			PipelineStateObject m_pso;
 		};

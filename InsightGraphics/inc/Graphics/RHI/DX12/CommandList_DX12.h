@@ -36,6 +36,7 @@ namespace Insight
 				bool m_activeRenderpass = false;
 				PipelineStateObject m_pso;
 				PipelineStateObject m_activePSO;
+				DescriptorBuffer m_activeDescriptorBuffer;
 
 				friend class CommandAllocator_DX12;
 				friend class RenderContext_DX12;

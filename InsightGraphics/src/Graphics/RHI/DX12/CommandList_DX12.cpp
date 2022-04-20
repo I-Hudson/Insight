@@ -27,7 +27,14 @@ namespace Insight
 					case CommandType::SetPipelineStateObject:
 					{
 						const CMD_SetPipelineStateObject* cmd = dynamic_cast<const CMD_SetPipelineStateObject*>(command);
-						m_pso = cmd->Pso;;
+						m_pso = cmd->Pso;
+						break;
+					}
+
+					case CommandType::SetUniformBuffer:
+					{
+						const CMD_SetDescriptorBuffer* cmd = dynamic_cast<const CMD_SetDescriptorBuffer*>(command);
+						m_activeDescriptorBuffer = cmd->Buffer;
 						break;
 					}
 
@@ -113,6 +120,8 @@ namespace Insight
 					m_commandList->SetGraphicsRootSignature(m_context->GetPipelineStateObjectManager().GetRootSignature(m_activePSO));
 					m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
 				}
+
+				m_context->GetDescriptorManager().GetDescriptor(m_activeDescriptorBuffer);
 				return true;
 			}
 

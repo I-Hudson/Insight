@@ -189,6 +189,15 @@ namespace Insight
 			Unknown
 		};
 
+		enum BufferType
+		{
+			BufferType_Vertex,
+			BufferType_Index,
+			BufferType_Uniform,
+			BufferType_Constant,
+			BufferType_Raw
+		};
+
 		//enum GUPBufferFlagBits
 		//{
 		//	None = 1 << 0,

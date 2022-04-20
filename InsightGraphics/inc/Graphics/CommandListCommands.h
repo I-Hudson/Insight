@@ -2,6 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Graphics/PipelineStateObject.h"
+#include "Graphics/RHI/RHI_Descriptor.h"
 
 namespace Insight
 {
@@ -20,6 +21,7 @@ namespace Insight
 		{
 			None,
 			SetPipelineStateObject,
+			SetUniformBuffer,
 			SetViewport,
 			SetScissor,
 			SetVertexBuffer,
@@ -44,6 +46,17 @@ namespace Insight
 				Pso = pso;
 			}
 			PipelineStateObject Pso;
+		};
+
+		struct CMD_SetDescriptorBuffer : public ICommand
+		{
+			virtual u64 GetSize() override { return sizeof(CMD_SetDescriptorBuffer); }
+			CMD_SetDescriptorBuffer(DescriptorBuffer buffer)
+			{
+				CommandType = CommandType::SetUniformBuffer;
+				Buffer = std::move(buffer);
+			}
+			DescriptorBuffer Buffer;
 		};
 
 		struct CMD_SetViewport : public ICommand
