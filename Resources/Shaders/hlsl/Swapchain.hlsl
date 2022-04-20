@@ -5,7 +5,12 @@ float4 VSMain(uint id : SV_VertexID) : SV_POSITION
 	return float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
 }
 
+cbuffer ubo : register(b0)
+{
+	float4 SwapchainColour = float4(1, 0, 0, 1);
+}
+
 float4 PSMain() : SV_TARGET
 {
-	return float4(1, 1, 0, 1);
+	return float4(1, 0, 0, 1);
 }

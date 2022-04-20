@@ -10,6 +10,7 @@
 
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "dxc/dxcapi.h"
+#include "spirv_reflect.h"
 
 namespace Insight
 {
@@ -100,6 +101,7 @@ namespace Insight
 			virtual ~RHI_Shader() { }
 
 			bool IsCompiled() const { return m_compiled; }
+			std::vector<Descriptor> GetDescriptors() const { return m_descriptors; }
 
 		private:
 			static RHI_Shader* New();
@@ -108,7 +110,7 @@ namespace Insight
 
 		protected:
 			bool m_compiled = false;
-			std::unordered_map<int, std::vector<Descriptor>> m_descriptors;
+			std::vector<Descriptor> m_descriptors;
 
 			friend RHI_ShaderManager;
 		};
@@ -128,6 +130,12 @@ namespace Insight
 			RenderContext* m_context{ nullptr };
 		};
 
+		enum class ShaderCompilerLanguage
+		{
+			Spirv,
+			Hlsl
+		};
+
 		struct ShaderCompiler
 		{
 			ShaderCompiler();
@@ -138,12 +146,19 @@ namespace Insight
 			std::wstring StageToFuncName(ShaderStageFlagBits stage);
 			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
 
-			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, std::vector<std::wstring> additionalArgs = {});
-			std::unordered_map<int, std::vector<Descriptor>> GetDescriptors();
+			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
+			std::vector<Descriptor> GetDescriptors();
 
-			RHI::DX12::ComPtr<IDxcUtils> s_dxUtils;
-			RHI::DX12::ComPtr<IDxcCompiler3> s_dxCompiler;
-			RHI::DX12::ComPtr<IDxcResult> m_results;
+			DescriptorType SpvReflectDescriptorTypeToDescriptorType(SpvReflectDescriptorType type);
+			DescriptorResourceType SpvReflectDescriptorResourceTypeToDescriptorResourceType(SpvReflectResourceType type);
+
+			ShaderCompilerLanguage m_languageToCompileTo;
+
+			RHI::DX12::ComPtr<IDxcUtils> DXUtils;
+			RHI::DX12::ComPtr<IDxcCompiler3> DXCompiler;
+
+			RHI::DX12::ComPtr<IDxcResult> ShaderCompileResults;
+			RHI::DX12::ComPtr<IDxcResult> ShaderReflectionResults;
 		};
 	}
 }

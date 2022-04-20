@@ -26,13 +26,18 @@ project "InsightGraphics"
         "%{IncludeDirs.vma}",
         "%{IncludeDirs.glslang}win_debug/inc",
         "%{IncludeDirs.vulkan}",
+        "%{IncludeDirs.spirv_reflect}",
+        "%{IncludeDirs.dxcompiler}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
+
+        "../vendor/SPIRV-Reflect/spirv_reflect.h",
+        "../vendor/SPIRV-Reflect/spirv_reflect.cpp",
     }
 
     links
@@ -81,6 +86,13 @@ project "InsightGraphics"
         libdirs
         {
             "%{LibDirs.glslang_win_d}",
+            "%{LibDirs.dxcompiler_win_d}",
+        }
+
+        postbuildcommands
+        {
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
 
     filter "configurations:Release"  
@@ -99,4 +111,11 @@ project "InsightGraphics"
         libdirs
         {
             "%{LibDirs.glslang_win}",
+            "%{LibDirs.dxcompiler_win}",
+        }
+
+        postbuildcommands
+        {
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }

@@ -1,5 +1,8 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 
+#include "Graphics/GraphicsManager.h"
+#include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -10,6 +13,8 @@ namespace Insight
 		/// <returns></returns>
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
+			if (GraphicsManager::IsVulkan()) { return nullptr; }
+			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
 			return nullptr;
 		}
 
@@ -40,6 +45,7 @@ namespace Insight
 			}
 
 			RHI_DescriptorLayout* newLayout = RHI_DescriptorLayout::New();
+			assert(newLayout);
 			m_layouts[hash] = newLayout;
 			newLayout->Create(m_context, set, descriptors);
 			return newLayout;
@@ -47,6 +53,12 @@ namespace Insight
 
 		void RHI_DescriptorLayoutManager::ReleaseAll()
 		{
+			for (auto& pair : m_layouts)
+			{
+				pair.second->Release();
+				DeleteTracked(pair.second);
+			}
+			m_layouts.clear();
 		}
 
 
@@ -84,6 +96,12 @@ namespace Insight
 
 		void RHI_DescriptorManager::ReleaseAll()
 		{
+			for (auto& pair : m_descriptors)
+			{
+				pair.second->Release();
+				DeleteTracked(pair.second);
+			}
+			m_descriptors.clear();
 		}
 	}
 }

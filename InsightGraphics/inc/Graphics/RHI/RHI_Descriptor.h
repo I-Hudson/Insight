@@ -15,8 +15,8 @@ namespace Insight
 		struct Descriptor
 		{
 			Descriptor() { }
-			Descriptor(int set, int binding, int stage, int size, DescriptorType type)
-				: Set(set), Binding(binding), Stage(stage), Type(type)
+			Descriptor(int set, int binding, int stage, int size, DescriptorType type, DescriptorResourceType resourceType)
+				: Set(set), Binding(binding), Stage(stage), Size(size), Type(type), ResourceType(resourceType)
 			{ }
 
 			int Set = 0;
@@ -24,6 +24,7 @@ namespace Insight
 			int Stage = 0;
 			int Size = 0;
 			DescriptorType Type = DescriptorType::Unknown;
+			DescriptorResourceType ResourceType = DescriptorResourceType::Unknown;
 			void* Resource = nullptr;
 
 			u64 GetHash(bool includeResource) const

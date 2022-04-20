@@ -72,11 +72,15 @@ IncludeDirs["stb"] = "%{wks.location}/Vendor/imgui"
 IncludeDirs["spdlog"] = "%{wks.location}/Vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
+IncludeDirs["spirv_reflect"] = "%{wks.location}/vendor/SPIRV-Reflect"
+IncludeDirs["dxcompiler"] = "%{wks.location}/vendor/dxcompiler/win_debug/inc"
 
 LibDirs = {}
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"
 LibDirs["glslang_win"] = "%{wks.location}/vendor/glslang/win_release/lib"
 LibDirs["imgui"] = "%{wks.location}/vendor/imgui/" .. outputdir .. "ImGui/"
+LibDirs["dxcompiler_win_d"] = "%{wks.location}/vendor/dxcompiler/win_debug/lib/x64"
+LibDirs["dxcompiler_win"] = "%{wks.location}/vendor/dxcompiler/win_release/lib/x64"
 LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 
 group "Dependices"

@@ -180,6 +180,15 @@ namespace Insight
 			Unknown
 		};
 
+		enum class DescriptorResourceType
+		{
+			Sampler,
+			CBV,
+			SRV,
+			UAV,
+			Unknown
+		};
+
 		//enum GUPBufferFlagBits
 		//{
 		//	None = 1 << 0,

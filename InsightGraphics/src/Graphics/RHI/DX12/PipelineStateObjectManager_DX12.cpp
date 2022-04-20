@@ -38,51 +38,6 @@ namespace Insight
 				}
 			};
 
-			struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC
-			{
-				explicit CD3DX12_ROOT_SIGNATURE_DESC(const D3D12_ROOT_SIGNATURE_DESC& o) noexcept :
-					D3D12_ROOT_SIGNATURE_DESC(o)
-				{}
-				CD3DX12_ROOT_SIGNATURE_DESC(
-					UINT numParameters,
-					_In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
-					UINT numStaticSamplers = 0,
-					_In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
-					D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE) noexcept
-				{
-					Init(numParameters, _pParameters, numStaticSamplers, _pStaticSamplers, flags);
-				}
-				CD3DX12_ROOT_SIGNATURE_DESC() noexcept
-				{
-					Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_NONE);
-				}
-
-				inline void Init(
-					UINT numParameters,
-					_In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
-					UINT numStaticSamplers = 0,
-					_In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
-					D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE) noexcept
-				{
-					Init(*this, numParameters, _pParameters, numStaticSamplers, _pStaticSamplers, flags);
-				}
-
-				static inline void Init(
-					_Out_ D3D12_ROOT_SIGNATURE_DESC& desc,
-					UINT numParameters,
-					_In_reads_opt_(numParameters) const D3D12_ROOT_PARAMETER* _pParameters,
-					UINT numStaticSamplers = 0,
-					_In_reads_opt_(numStaticSamplers) const D3D12_STATIC_SAMPLER_DESC* _pStaticSamplers = nullptr,
-					D3D12_ROOT_SIGNATURE_FLAGS flags = D3D12_ROOT_SIGNATURE_FLAG_NONE) noexcept
-				{
-					desc.NumParameters = numParameters;
-					desc.pParameters = _pParameters;
-					desc.NumStaticSamplers = numStaticSamplers;
-					desc.pStaticSamplers = _pStaticSamplers;
-					desc.Flags = flags;
-				}
-			};
-
 			PipelineStateObjectManager_DX12::PipelineStateObjectManager_DX12()
 			{
 			}
@@ -102,24 +57,9 @@ namespace Insight
 					return itr->second.Get();
 				}
 
-
-				//if (m_rootSigs.find(psoHash) == m_rootSigs.end())
-				//{
-				//	ComPtr<ID3D12RootSignature> rootSignature;
-				//	CD3DX12_ROOT_SIGNATURE_DESC rootSignatureDesc;
-				//	rootSignatureDesc.Init(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-				//	ComPtr<ID3DBlob> signature;
-				//	ComPtr<ID3DBlob> error;
-				//	ThrowIfFailed(D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
-				//	ThrowIfFailed(m_context->GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature)));
-				//	m_rootSigs[psoHash] = rootSignature;
-				//}
-
 				RHI_Shader_DX12* shader = dynamic_cast<RHI_Shader_DX12*>(pso.Shader);
 
-
-				m_context->GetDescriptorLayoutManager().GetLayout(0, {});
+				RHI_DescriptorLayout_DX12* layout = dynamic_cast<RHI_DescriptorLayout_DX12*>(m_context->GetDescriptorLayoutManager().GetLayout(0, shader->GetDescriptors()));
 
 				D3D12_RASTERIZER_DESC rasterizerState;
 				rasterizerState.FillMode = PolygonModeToDX12(pso.PolygonMode);
@@ -153,7 +93,7 @@ namespace Insight
 				// Describe and create the graphics pipeline state object (PSO).
 				D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 				psoDesc.InputLayout = shader->GetInputLayout();
-				psoDesc.pRootSignature = m_rootSigs[psoHash].Get();
+				psoDesc.pRootSignature = layout->GetRootSignature();
 				psoDesc.VS = CD3DX12_SHADER_BYTECODE(shader->GetStage(ShaderStageFlagBits::ShaderStage_Vertex));
 				psoDesc.HS = CD3DX12_SHADER_BYTECODE(shader->GetStage(ShaderStageFlagBits::ShaderStage_TessControl));
 				psoDesc.DS = CD3DX12_SHADER_BYTECODE(shader->GetStage(ShaderStageFlagBits::ShaderStage_TessEval));

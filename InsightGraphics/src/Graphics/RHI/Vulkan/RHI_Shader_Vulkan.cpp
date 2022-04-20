@@ -42,7 +42,7 @@ namespace Insight
 			void RHI_Shader_Vulkan::CompileStage(ShaderStageFlagBits stage, std::wstring_view path, int moduleIndex)
 			{
 				ShaderCompiler compiler;
-				DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, { L"-spirv" });
+				DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Spirv);
 				m_descriptors = compiler.GetDescriptors();
 				if (!code)
 				{

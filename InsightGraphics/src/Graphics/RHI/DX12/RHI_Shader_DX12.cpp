@@ -39,7 +39,7 @@ namespace Insight
 			void RHI_Shader_DX12::CompileStage(ShaderStageFlagBits stage, std::wstring_view path, int moduleIndex)
 			{
 				ShaderCompiler compiler;
-				ComPtr<IDxcBlob> code = compiler.Compile(stage, path);
+				ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Hlsl);
 				m_descriptors = compiler.GetDescriptors();
 				m_modules[moduleIndex] = code;
 			}

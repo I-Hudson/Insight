@@ -55,7 +55,7 @@ namespace Insight
 
 			void ReleaseAll()
 			{
-				for (const auto& pair : m_objects)
+				for (auto& pair : m_objects)
 				{
 					if (pair.second)
 					{

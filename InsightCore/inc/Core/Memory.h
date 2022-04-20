@@ -60,5 +60,11 @@ namespace Insight::Core
 #define NewTracked(Type) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
 #define TrackPtr(Ptr) Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
-#define DeleteTracked(Ptr) Insight::Core::MemoryTracker::Instance().UnTrack(Ptr); delete Ptr;
+#define DeleteTracked(Ptr)								\
+Insight::Core::MemoryTracker::Instance().UnTrack(Ptr);	\
+if (Ptr)												\
+{														\
+	delete Ptr;											\
+	Ptr = nullptr;										\
+};
 #define UntrackPtr(Ptr) Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
