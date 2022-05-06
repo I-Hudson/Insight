@@ -17,6 +17,8 @@ project "InsightCore"
     {
         "inc",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.tracy}",
+
     }
 
     files 
@@ -28,6 +30,7 @@ project "InsightCore"
 
     links
     {
+        "tracy",
     }
 
     libdirs

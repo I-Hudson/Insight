@@ -16,14 +16,19 @@ namespace Insight
 
 				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes) override;
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;
+				virtual std::vector<Byte> Download() override;
 
 				virtual void Release() override;
+				virtual void SetName(std::wstring name) override;
+
+				ID3D12Resource* GetResouce() const { return m_resource.Get(); }
 
 			protected:
 				virtual void Resize(int newSizeInBytes) override;
 
 			private:
 				RenderContext_DX12* m_context = nullptr;
+				Byte* m_mappedData = nullptr;
 				ComPtr<ID3D12Resource> m_resource;
 			};
 		}

@@ -49,6 +49,7 @@ namespace Insight
 				Core::MemoryTracker::Instance().UnTrack(m_commands);
 				free(m_commands);
 			}
+			m_descriptorBuffer.Release();
 		}
 
 		CommandList& CommandList::operator=(const CommandList& other)
@@ -121,31 +122,37 @@ namespace Insight
 		void CommandList::SetPipelineStateObject(PipelineStateObject pso)
 		{
 			m_pso = pso;
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::SetPrimitiveTopologyType(PrimitiveTopologyType type)
 		{
 			m_pso.PrimitiveTopologyType = type;
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::SetPolygonMode(PolygonMode mode)
 		{
 			m_pso.PolygonMode = mode;
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::SetCullMode(CullMode mode)
 		{
-			m_pso.CullMode = mode;
+			m_pso.CullMode = mode;			
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::SetShader(RHI_Shader* shader)
 		{
-			m_pso.Shader = shader;
+			m_pso.Shader = shader;			
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::ClearRenderTargets()
 		{
 			m_pso.RenderTargets.clear();
+			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
 		void CommandList::SetViewport(int width, int height)
@@ -160,8 +167,8 @@ namespace Insight
 
 		void CommandList::SetUniform(int set, int binding, void* data, int sizeInBytes)
 		{
-			m_descriptorBuffer.SetUniform(set, binding, data, sizeInBytes);
-			AddCommand(CMD_SetDescriptorBuffer(m_descriptorBuffer));
+			DescriptorBufferView view = m_descriptorBuffer.SetUniform(set, binding, data, sizeInBytes);
+			AddCommand(CMD_SetUniform(set, binding, view));
 		}
 
 		void CommandList::SetVertexBuffer(RHI_Buffer* buffer)
@@ -181,13 +188,11 @@ namespace Insight
 
 		void CommandList::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 		{
-			AddCommand(CMD_SetPipelineStateObject(m_pso));
 			AddCommand(CMD_Draw(vertexCount, instanceCount, firstVertex, firstInstance));
 		}
 
 		void CommandList::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 		{
-			AddCommand(CMD_SetPipelineStateObject(m_pso));
 			AddCommand(CMD_DrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance));
 		}
 

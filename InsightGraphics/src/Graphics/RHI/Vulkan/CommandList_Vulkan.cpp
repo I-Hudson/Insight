@@ -37,7 +37,7 @@ namespace Insight
 					case CommandType::SetViewport:
 					{
 						const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
-						std::array<vk::Viewport, 1> viewports = { vk::Viewport(0, 0, cmd->Width, cmd->Height) };
+						std::array<vk::Viewport, 1> viewports = { vk::Viewport(0, 0, (float)cmd->Width, (float)cmd->Height) };
 						m_commandBuffer.setViewport(0, viewports);
 						break;
 					}

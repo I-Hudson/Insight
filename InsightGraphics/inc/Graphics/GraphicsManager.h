@@ -2,6 +2,7 @@
 
 #include "Defines.h"
 #include "Core/ManagerInterface.h"
+#include "Graphics/Renderpass.h"
 
 namespace Insight
 {
@@ -56,6 +57,7 @@ namespace Insight
 			static GraphicsManagerData m_sharedData;
 
 			RenderContext* m_renderContext{ nullptr };
+			Renderpass m_renderpass;
 
 			friend class RHI::Vulkan::GPUResource_Vulkan;
 			friend class RHI::DX12::GPUResource_DX12;

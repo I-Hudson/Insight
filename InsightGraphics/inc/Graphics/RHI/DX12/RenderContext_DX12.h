@@ -4,6 +4,7 @@
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/CommandList_DX12.h"
 #include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Core/Logger.h"
 #include <glm/glm.hpp>
 
@@ -13,6 +14,17 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			struct FrameResourceDX12
+			{
+				CommandAllocator_DX12 CommandAllocator;
+				RenderContext_DX12* Context;
+				RHI_DynamicBuffer UniformBuffer;
+				DescriptorAllocator_DX12 DescriptorAllocator;
+
+				void Init(RenderContext_DX12* context);
+				void Destroy();
+			};
+
 			class RenderContext_DX12 : public RenderContext
 			{
 			public:
@@ -64,14 +76,6 @@ namespace Insight
 				int m_currentFrame = 0;
 				int m_frameIndex = 0;
 
-				struct FrameResourceDX12
-				{
-					CommandAllocator_DX12 CommandAllocator;
-					RenderContext_DX12* Context;
-
-					void Init(RenderContext_DX12* context);
-					void Destroy();
-				};
 				FrameResourceDX12 m_frames[c_FrameCount];
 			};
 		}

@@ -112,6 +112,7 @@ namespace Insight
 
 				m_pipelineStateObjectManager.Destroy();
 
+
 				for (FrameResourceDX12& frame : m_frames)
 				{
 					frame.Destroy();
@@ -158,30 +159,30 @@ namespace Insight
 
 			void RenderContext_DX12::InitImGui()
 			{
-				ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), true);
+				IMGUI_VALID(ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), true));
 
 				D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 				desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 				desc.NumDescriptors = 1;
 				desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				ThrowIfFailed(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srcImGuiHeap)));
+				IMGUI_VALID(ThrowIfFailed(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srcImGuiHeap))));
 
-				ImGui_ImplDX12_Init(m_device.Get(), 
+				IMGUI_VALID(ImGui_ImplDX12_Init(m_device.Get(),
 					c_FrameCount,
 					DXGI_FORMAT_R8G8B8A8_UNORM, 
 					m_srcImGuiHeap.Get(), 
 					m_srcImGuiHeap->GetCPUDescriptorHandleForHeapStart(),
-					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart());
+					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart()));
 
-				ImGui_ImplDX12_NewFrame();
-				ImGuiBeginFrame();
+				IMGUI_VALID(ImGui_ImplDX12_NewFrame());
+				IMGUI_VALID(ImGuiBeginFrame());
 			}
 
 			void RenderContext_DX12::DestroyImGui()
 			{
-				ImGui_ImplDX12_Shutdown();
-				ImGui_ImplGlfw_Shutdown();
-				ImGui::DestroyContext();
+				IMGUI_VALID(ImGui_ImplDX12_Shutdown());
+				IMGUI_VALID(ImGui_ImplGlfw_Shutdown());
+				IMGUI_VALID(ImGui::DestroyContext());
 
 				m_srcImGuiHeap.Reset();
 				m_srcImGuiHeap = nullptr;
@@ -195,28 +196,30 @@ namespace Insight
 
 				// Record cmd buffers and execute
 				frame.CommandAllocator.Update();
-				CommandList_DX12& cmdListDX12 = frame.CommandAllocator.GetCommandList();
+				CommandList_DX12* cmdListDX12 = frame.CommandAllocator.GetCommandList();
+
+				frame.DescriptorAllocator.Reset();
 
 				// Set back buffer texture/image to render target so we can render to it.
-				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+				cmdListDX12->m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 				CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
 				ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 				const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-				cmdListDX12.m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
-				cmdListDX12.m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+				cmdListDX12->m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
+				cmdListDX12->m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-				cmdListDX12.Record(cmdList);
+				cmdListDX12->Record(cmdList, frame);
 
 				std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-				cmdListDX12.m_commandList->SetDescriptorHeaps(1, imguiHeap.data());
-				ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12.m_commandList.Get());
+				IMGUI_VALID(cmdListDX12->m_commandList->SetDescriptorHeaps(1, imguiHeap.data()));
+				IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->m_commandList.Get()));
 
 				// Set back buffer texture/image back to present so we can use it within the swapchain.
-				cmdListDX12.m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-				cmdListDX12.Close();
+				cmdListDX12->m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+				cmdListDX12->Close();
 
-				ID3D12CommandList* ppCommandLists[] = { cmdListDX12.GetCommandBuffer() };
+				ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandBuffer() };
 				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 				// Present the frame.
@@ -231,11 +234,11 @@ namespace Insight
 					ResizeSwapchainBuffers();
 				}
 
-				//ImGui::EndFrame();
-				//ImGui::UpdatePlatformWindows();
+				IMGUI_VALID(ImGui::EndFrame());
+				//IMGUI_VALID(ImGui::UpdatePlatformWindows());
 
-				ImGui_ImplDX12_NewFrame();
-				ImGuiBeginFrame();
+				IMGUI_VALID(ImGui_ImplDX12_NewFrame());
+				IMGUI_VALID(ImGuiBeginFrame());
 			}
 
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
@@ -412,15 +415,19 @@ namespace Insight
 			}
 
 
-			void RenderContext_DX12::FrameResourceDX12::Init(RenderContext_DX12* context)
+			void FrameResourceDX12::Init(RenderContext_DX12* context)
 			{
 				Context = context;
 				CommandAllocator.Init(Context);
+				UniformBuffer.Create(Context);
+				DescriptorAllocator.SetRenderContext(Context);
 			}
 
-			void RenderContext_DX12::FrameResourceDX12::Destroy()
+			void FrameResourceDX12::Destroy()
 			{
 				CommandAllocator.Destroy();
+				UniformBuffer.Release();
+				DescriptorAllocator.Destroy();
 			}
 }
 	}

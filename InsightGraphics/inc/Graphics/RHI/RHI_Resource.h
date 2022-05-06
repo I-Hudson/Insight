@@ -6,6 +6,7 @@
 #include "Graphics/Enums.h"
 #include <type_traits>
 #include <map>
+#include <string>
 
 namespace Insight
 {
@@ -15,6 +16,7 @@ namespace Insight
 		{
 		public:
 			virtual void Release() = 0;
+			virtual void SetName(std::wstring name) = 0;
 		};
 
 		template<typename T>

@@ -8,8 +8,6 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-
-
 			void RHI_Shader_DX12::Create(RenderContext* context, ShaderDesc desc)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);

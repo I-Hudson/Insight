@@ -111,25 +111,17 @@ namespace Insight
 
 				ComPtr<ID3D12PipelineState> pipeline;
 				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipeline)));
+				if (!pso.Name.empty())
+				{
+					pipeline->SetName(pso.Name.c_str());
+				}
 				m_pipelines[psoHash] = pipeline;
 				return pipeline.Get();
-			}
-
-			ID3D12RootSignature* PipelineStateObjectManager_DX12::GetRootSignature(PipelineStateObject pso)
-			{
-				const u64 psoHash = pso.GetHash();
-				auto itr = m_rootSigs.find(psoHash);
-				if (itr != m_rootSigs.end())
-				{
-					return itr->second.Get();
-				}
-				return nullptr;
 			}
 
 			void PipelineStateObjectManager_DX12::Destroy()
 			{
 				m_pipelines.clear();
-				m_rootSigs.clear();
 			}
 		}
 	}

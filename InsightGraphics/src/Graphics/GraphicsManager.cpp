@@ -5,6 +5,8 @@
 
 #include "Core/Memory.h"
 
+#include "Tracy.hpp"
+
 namespace Insight
 {
 	namespace Graphics
@@ -35,19 +37,19 @@ namespace Insight
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
+			ZoneScoped;
+
 			if (!m_renderContext)
 			{
 				return;
 			}
 
-			RHI_Buffer* vBuffer = Renderer::CreateVertexBuffer(128);
-
 			bool show = true;
 			std::string currentAPI = "Graphics API: " + std::to_string(currentGraphicsAPI);
-			ImGui::Begin(currentAPI.c_str());
 			const int previousGrapicsAPI = currentGraphicsAPI;
 			const char* graphicsAPIs[] = { "Vulkan", "DX12" };
-			if (ImGui::ListBox("Graphcis API", &currentGraphicsAPI, graphicsAPIs, _countof(graphicsAPIs)))
+			IMGUI_VALID(ImGui::Begin(currentAPI.c_str()));
+			IMGUI_VALID(if (ImGui::ListBox("Graphcis API", &currentGraphicsAPI, graphicsAPIs, _countof(graphicsAPIs)))
 			{
 				if (currentGraphicsAPI != previousGrapicsAPI)
 				{
@@ -55,41 +57,20 @@ namespace Insight
 					m_renderContext->Destroy();
 					DeleteTracked(m_renderContext);
 					m_renderContext = nullptr;
-
+			
 					Window::Instance().Rebuild();
-
+			
 					m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
 					m_renderContext = RenderContext::New();
 					m_renderContext->Init();
 					return;
 				}
-			}
-			ImGui::End();
+			})
+			IMGUI_VALID(ImGui::End());
 
-			ShaderDesc shaderDesc;
-			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-			shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-			RHI_Shader* shader = Renderer::GetShader(shaderDesc);
-
-			PipelineStateObject pso{};
-			pso.Shader = shader;
-			pso.CullMode = CullMode::None;
-			pso.RenderTargets.clear();
-			pso.Swapchain = true;
-			Renderer::SetPipelineStateObject(pso);
-
-			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			Renderer::SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-
-			glm::vec4 swapchainColour = { 0,0,1,1 };
-			Renderer::SetUniform(0,0, &swapchainColour, sizeof(swapchainColour));
-
-			Renderer::Draw(3, 1, 0, 0);
-
+			m_renderpass.Render();
 			m_renderContext->Render(Renderer::s_FrameCommandList);
 			Renderer::s_FrameCommandList.Reset();
-
-			Renderer::FreeVertexBuffer(vBuffer);
 		}
 
 		void GraphicsManager::Destroy()

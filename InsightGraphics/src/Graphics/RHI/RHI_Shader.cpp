@@ -6,6 +6,8 @@
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include <fstream>
+
 namespace Insight
 {
 	namespace Graphics
@@ -154,6 +156,22 @@ namespace Insight
 			// Get compilation result
 			RHI::DX12::ComPtr<IDxcBlob> code;
 			ShaderCompileResults->GetResult(&code);
+
+			// Write shader to disk.
+			std::ofstream shaderDisk;
+
+			int startShaderFile = (int)filePath.find_last_of('/') + 1;
+			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
+
+			std::wstring_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
+			std::wstring shaderToDisk = std::wstring(shaderToDiskView) + L".cso";
+
+			shaderDisk.open(shaderToDisk.c_str());
+			if (shaderDisk.is_open())
+			{
+				shaderDisk.write((const char*)code->GetBufferPointer(), code->GetBufferSize());
+				shaderDisk.close();
+			}
 
 			return code;
 		}

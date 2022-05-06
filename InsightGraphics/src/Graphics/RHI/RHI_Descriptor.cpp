@@ -84,27 +84,27 @@ namespace Insight
 			ReleaseAll();
 		}
 
-		RHI_Descriptor* RHI_DescriptorManager::GetDescriptor(const DescriptorBuffer& buffer)
+		std::unordered_map<int, RHI_Descriptor*> RHI_DescriptorManager::GetDescriptors(const DescriptorBuffer& buffer)
 		{
-			std::vector<Descriptor> descriptors;
+			std::unordered_map<int, std::vector<Descriptor>> descriptors;
 			for (const auto& sets : buffer.GetUniforms())
 			{
 				const int setIndex = sets.first;
 				for (const auto& binding : sets.second )
 				{
 					const int bindingIndex = binding.first;
-					const int bindingSize = binding.second.Size;
-					const void* resource = binding.second.Ptr;
-					descriptors.push_back(Descriptor(setIndex, 
-						bindingIndex, 
-						0, 
-						bindingSize, 
-						DescriptorType::Unifom_Buffer, 
-						DescriptorResourceType::CBV, 
-						nullptr));
+				//	const int bindingSize = binding.second.Size;
+				//	const void* resource = binding.second.Ptr;
+				//	descriptors[setIndex].push_back(Descriptor(setIndex,
+				//		bindingIndex, 
+				//		0, 
+				//		bindingSize, 
+				//		DescriptorType::Unifom_Buffer, 
+				//		DescriptorResourceType::CBV, 
+				//		nullptr));
 				}
 			}
-			return GetDescriptor(descriptors);
+			return GetDescriptors(descriptors);
 		}
 
 		void RHI_DescriptorManager::ReleaseAll()
@@ -117,20 +117,30 @@ namespace Insight
 			m_descriptors.clear();
 		}
 
-		RHI_Descriptor* RHI_DescriptorManager::GetDescriptor(std::vector<Descriptor> descriptors)
+		std::unordered_map<int, RHI_Descriptor*> RHI_DescriptorManager::GetDescriptors(std::unordered_map<int, std::vector<Descriptor>> descriptors)
 		{
-			u64 hash = 0;
-			for (const Descriptor& descriptor : descriptors)
+			std::unordered_map<int, RHI_Descriptor*> rhi_Descriptors;
+			for (const auto sets : descriptors)
 			{
-				HashCombine(hash, descriptor.GetHash(true));
-			}
+				u64 hash = 0;
+				for (const Descriptor& descriptor : sets.second)
+				{
+					HashCombine(hash, descriptor.GetHash(true));
+				}
 
-			auto itr = m_descriptors.find(hash);
-			if (itr != m_descriptors.end())
-			{
-
+				auto itr = m_descriptors.find(hash);
+				if (itr != m_descriptors.end())
+				{
+					rhi_Descriptors[sets.first] = itr->second;
+					itr->second->Update(sets.second);
+				}
+				else
+				{
+					RHI_Descriptor* newDescriptor = RHI_Descriptor::New();
+					//newDescriptor->
+				}
 			}
-			return nullptr;
+			return rhi_Descriptors;
 		}
 	}
 }

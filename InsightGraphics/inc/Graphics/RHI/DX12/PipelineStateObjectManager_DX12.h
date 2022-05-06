@@ -21,12 +21,10 @@ namespace Insight
 
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
 				ID3D12PipelineState* GetOrCreatePSO(PipelineStateObject pso);
-				ID3D12RootSignature* GetRootSignature(PipelineStateObject pso);
 				void Destroy();
 
 			private:
 				std::map<u64, ComPtr<ID3D12PipelineState>> m_pipelines;
-				std::map<u64, ComPtr<ID3D12RootSignature>> m_rootSigs;
 				RenderContext_DX12* m_context{ nullptr };
 			};
 		}

@@ -23,6 +23,7 @@ project "InsightEditor"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.tracy}",
     }
 
     files 
@@ -40,6 +41,7 @@ project "InsightEditor"
 
         "glfw3.lib",
         "glm",
+        "tracy",
     }
 
     libdirs

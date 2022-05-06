@@ -9,6 +9,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RHI_Buffer;
+		//struct DescriptorBufferView;
 		struct ResourceBarrier
 		{
 			ResourceType Type;
@@ -22,6 +23,7 @@ namespace Insight
 			None,
 			SetPipelineStateObject,
 			SetUniformBuffer,
+			SetUniform,
 			SetViewport,
 			SetScissor,
 			SetVertexBuffer,
@@ -40,7 +42,7 @@ namespace Insight
 		struct CMD_SetPipelineStateObject : public ICommand
 		{
 			virtual u64 GetSize() override { return sizeof(CMD_SetPipelineStateObject); }
-			CMD_SetPipelineStateObject(PipelineStateObject pso) 
+			CMD_SetPipelineStateObject(PipelineStateObject pso)
 			{
 				CommandType = CommandType::SetPipelineStateObject;
 				Pso = pso;
@@ -58,6 +60,22 @@ namespace Insight
 			}
 			DescriptorBuffer Buffer;
 		};
+
+		struct CMD_SetUniform : public ICommand
+		{
+			virtual u64 GetSize() override { return sizeof(CMD_SetUniform); }
+			CMD_SetUniform(int set, int binding, DescriptorBufferView view)
+			{
+				CommandType = CommandType::SetUniform;
+				Set = set;
+				Binding = binding;
+				View = view;
+			}
+			int Set;
+			int Binding;
+			DescriptorBufferView View;
+		};
+
 
 		struct CMD_SetViewport : public ICommand
 		{

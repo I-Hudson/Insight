@@ -12,6 +12,8 @@ namespace Insight
 	Graphics::CommandList Renderer::s_FrameCommandList;
 	Graphics::RenderContext* Renderer::s_context;
 	
+#define ENABLE_IMGUI 1
+
 	namespace Graphics
 	{
 		RenderContext* RenderContext::New()
@@ -31,26 +33,29 @@ namespace Insight
 			context->m_descriptorLayoutManager.SetRenderContext(context);
 			context->m_descriptorManager.SetRenderContext(context);
 
-			IMGUI_CHECKVERSION();
-			ImGui::CreateContext();
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-			//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
-			//io.ConfigViewportsNoAutoMerge = true;
-			//io.ConfigViewportsNoTaskBarIcon = true;
-
-			// Setup Dear ImGui style
-			ImGui::StyleColorsDark();
-			//ImGui::StyleColorsClassic();
-
-			// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-			ImGuiStyle& style = ImGui::GetStyle();
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			if (ENABLE_IMGUI)
 			{
-				style.WindowRounding = 0.0f;
-				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+				IMGUI_CHECKVERSION();
+				ImGui::CreateContext();
+				ImGuiIO& io = ImGui::GetIO(); (void)io;
+				io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+				//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+				io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+				//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+				//io.ConfigViewportsNoAutoMerge = true;
+				//io.ConfigViewportsNoTaskBarIcon = true;
+
+				// Setup Dear ImGui style
+				ImGui::StyleColorsDark();
+				//ImGui::StyleColorsClassic();
+
+				// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+				ImGuiStyle& style = ImGui::GetStyle();
+				if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+				{
+					style.WindowRounding = 0.0f;
+					style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+				}
 			}
 
 			return context;
@@ -58,15 +63,15 @@ namespace Insight
 
 		void RenderContext::ImGuiBeginFrame()
 		{
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+			IMGUI_VALID(ImGui_ImplGlfw_NewFrame());
+			IMGUI_VALID(ImGui::NewFrame());
+			IMGUI_VALID(ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode));
 		}
 
 		void RenderContext::ImGuiRender()
 		{
-			ImGui::Render();
-			ImGui::UpdatePlatformWindows();
+			IMGUI_VALID(ImGui::Render());
+			IMGUI_VALID(ImGui::UpdatePlatformWindows());
 		}
 
 		void RenderContext::BaseDestroy()

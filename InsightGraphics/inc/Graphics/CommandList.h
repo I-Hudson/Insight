@@ -28,7 +28,8 @@ namespace Insight
 			ICommand* GetCurrentCommand();
 			void NextCommand();
 			u64 GetCommandCount() const { return m_commandCount; }
-			
+			const DescriptorBuffer& GetDescriptorBuffer() const { return m_descriptorBuffer; }
+
 			void Reset();
 			void ResetReadHead();
 			void SetReadHeadToCommandIndex(int index);

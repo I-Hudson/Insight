@@ -13,6 +13,7 @@ namespace Insight
 		// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
 		{
+			std::wstring Name;
 			RHI_Shader* Shader = nullptr;
 			GPUQueue Queue = GPUQueue_Graphics;
 

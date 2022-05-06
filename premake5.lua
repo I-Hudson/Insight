@@ -19,7 +19,11 @@ workspace "Insight"
         "IS_PROFILE_OPTICK",
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
+        "TRACY_IMPORTS",
+        "TRACY_ENABLE",
     }
+
+    editandcontinue "Off"
 
     filter "configurations:Debug"
         defines
@@ -67,8 +71,8 @@ IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 
 IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
-IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
-IncludeDirs["stb"] = "%{wks.location}/Vendor/imgui"
+IncludeDirs["imgui"] = "%{wks.location}/Vendor/imgui"
+IncludeDirs["tracy"] = "%{wks.location}/Vendor/tracy"
 IncludeDirs["spdlog"] = "%{wks.location}/Vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
@@ -86,6 +90,7 @@ LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 group "Dependices"
         include "vendor/glm/glm.lua"
         include "vendor/imgui/imgui.lua"
+        include "vendor/tracy/tracy.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"

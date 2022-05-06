@@ -58,6 +58,7 @@ namespace Insight::Core
 	};
 }
 #define NewTracked(Type) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
+#define NewArgsTracked(Type, ...) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
 #define TrackPtr(Ptr) Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
 #define DeleteTracked(Ptr)								\

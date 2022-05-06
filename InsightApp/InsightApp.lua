@@ -22,6 +22,7 @@ project "InsightApp"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.tracy}",
     }
 
     files 
@@ -38,6 +39,7 @@ project "InsightApp"
 
         "glfw3.lib",
         "glm",
+        "tracy",
     }
 
     libdirs

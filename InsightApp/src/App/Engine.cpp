@@ -1,4 +1,5 @@
 #include "App/Engine.h"
+#include "Tracy.hpp"
 
 namespace Insight
 {
@@ -22,6 +23,8 @@ namespace Insight
 			{
 				m_graphicsManager.Update(0.0f);
 				Graphics::Window::Instance().Update();
+				
+				FrameMark;
 			}
 		}
 

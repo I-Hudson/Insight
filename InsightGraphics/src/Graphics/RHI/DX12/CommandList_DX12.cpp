@@ -1,6 +1,7 @@
 ﻿#include "Graphics/RHI/DX12/CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
+#include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 
 namespace Insight
 {
@@ -8,15 +9,27 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-
-			CommandList_DX12::CommandList_DX12(RenderContext_DX12* context, ComPtr<ID3D12GraphicsCommandList> cmdList)
+			CommandList_DX12::CommandList_DX12()
 			{
-				m_commandList = cmdList;
+			}
+
+			CommandList_DX12::CommandList_DX12(RenderContext_DX12* context)
+			{
 				m_context = context;
 			}
 
-			void CommandList_DX12::Record(CommandList& cmdList)
+			CommandList_DX12::~CommandList_DX12()
 			{
+			}
+
+			void CommandList_DX12::Record(CommandList& cmdList, FrameResourceDX12& frameResouces)
+			{
+				m_frameResouces = &frameResouces;
+				m_frameResouces->UniformBuffer.Reset();
+				m_frameResouces->UniformBuffer.Resize(cmdList.GetDescriptorBuffer().GetCapacity());
+
+				m_frameResouces->UniformBuffer.Upload(cmdList.GetDescriptorBuffer().GetData(), cmdList.GetDescriptorBuffer().GetSize());
+
 				for (int i = 0; i < cmdList.GetCommandCount(); ++i)
 				{
 					ICommand* command = cmdList.GetCurrentCommand();
@@ -28,13 +41,14 @@ namespace Insight
 					{
 						const CMD_SetPipelineStateObject* cmd = dynamic_cast<const CMD_SetPipelineStateObject*>(command);
 						m_pso = cmd->Pso;
+						m_frameResouces->DescriptorAllocator.SetPipeline(m_pso);
 						break;
 					}
 
-					case CommandType::SetUniformBuffer:
+					case CommandType::SetUniform:
 					{
-						const CMD_SetDescriptorBuffer* cmd = dynamic_cast<const CMD_SetDescriptorBuffer*>(command);
-						m_activeDescriptorBuffer = cmd->Buffer;
+						const CMD_SetUniform* cmd = dynamic_cast<const CMD_SetUniform*>(command);
+						m_frameResouces->DescriptorAllocator.SetUniform(cmd->Set, cmd->Binding, m_frameResouces->UniformBuffer.GetView(cmd->View.Offset, cmd->View.SizeInBytes));
 						break;
 					}
 
@@ -64,7 +78,7 @@ namespace Insight
 
 					case CommandType::Draw:
 					{
-						if (!CanDraw())
+						if (!CanDraw(cmdList))
 						{
 							break;
 						}
@@ -75,7 +89,7 @@ namespace Insight
 
 					case CommandType::DrawIndexed:
 					{
-						if (!CanDraw())
+						if (!CanDraw(cmdList))
 						{
 							break;
 						}
@@ -97,6 +111,7 @@ namespace Insight
 				{
 					m_activeRenderpass = false;
 				}
+				m_frameResouces = nullptr;
 			}
 
 			void CommandList_DX12::Reset()
@@ -110,22 +125,54 @@ namespace Insight
 				ThrowIfFailed(m_commandList->Close());
 			}
 
-			bool CommandList_DX12::CanDraw()
+			void CommandList_DX12::Release()
+			{
+				if (m_commandList)
+				{
+					m_commandList.Reset();
+				}
+			}
+
+			bool CommandList_DX12::CanDraw(CommandList& cmdList)
 			{
 				ID3D12PipelineState* pipeline = m_context->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				if (m_pso.GetHash() != m_activePSO.GetHash())
 				{
 					m_activePSO = m_pso;
 					m_commandList->SetPipelineState(pipeline);
-					m_commandList->SetGraphicsRootSignature(m_context->GetPipelineStateObjectManager().GetRootSignature(m_activePSO));
+
+					RHI_DescriptorLayout_DX12* layout = dynamic_cast<RHI_DescriptorLayout_DX12*>(m_context->GetDescriptorLayoutManager().GetLayout(0, cmdList.GetDescriptorBuffer().GetDescriptors()));
+					m_commandList->SetGraphicsRootSignature(layout->GetRootSignature());
 					m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
 				}
 
-				m_context->GetDescriptorManager().GetDescriptor(m_activeDescriptorBuffer);
+				return BindDescriptorSets();
+			}
+
+			bool CommandList_DX12::BindDescriptorSets()
+			{
+				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
+				m_frameResouces->DescriptorAllocator.BindTempConstentBuffer(this, m_frameResouces->DescriptorAllocator.GetDescriptor(0,0).BufferView, 0);
+				std::vector<ID3D12DescriptorHeap*> descriptors = m_frameResouces->DescriptorAllocator.GetHeaps();
+				if (result && descriptors.size() > 0)
+				{
+					// Set our descriptor heaps.
+					m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
+
+					// Set all our descriptors tables.
+					//m_frameResouces->DescriptorAllocator.SetDescriptors(this);
+
+				}
 				return true;
 			}
 
 
+
+			CommandAllocator_DX12::CommandAllocator_DX12()
+			{
+				m_allocLists = {};
+				m_freeLists = {};
+			}
 
 			void CommandAllocator_DX12::Init(RenderContext_DX12* context)
 			{
@@ -143,8 +190,8 @@ namespace Insight
 
 				for (size_t i = 0; i < m_allocLists.size(); ++i)
 				{
-					m_allocLists[i].Reset();
-					m_allocLists[i].m_commandList->Reset(m_allocator.Get(), nullptr);
+					m_allocLists[i]->Reset();
+					m_allocLists[i]->m_commandList->Reset(m_allocator.Get(), nullptr);
 					m_freeLists.push_back(m_allocLists[i]);
 				}
 				m_allocLists.clear();
@@ -152,25 +199,35 @@ namespace Insight
 
 			void CommandAllocator_DX12::Destroy()
 			{
+				for (auto& list : m_allocLists)
+				{
+					list->Release();
+					DeleteTracked(list);
+				}
+				for (auto& list : m_freeLists)
+				{
+					list->Release();
+					DeleteTracked(list);
+				}
+
 				m_allocLists.resize(0);
 				m_freeLists.resize(0);
 				m_allocator.Reset();
 			}
 
-			CommandList_DX12& CommandAllocator_DX12::GetCommandList()
+			CommandList_DX12* CommandAllocator_DX12::GetCommandList()
 			{
 				if (m_freeLists.size() > 0)
 				{
-					CommandList_DX12 list = m_freeLists.back();
+					CommandList_DX12* list = m_freeLists.back();
 					m_freeLists.pop_back();
 					m_allocLists.push_back(list);
 					return m_allocLists.back();
 				}
 
-				ComPtr<ID3D12GraphicsCommandList> commandList;
-				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
+				CommandList_DX12* list = NewArgsTracked(CommandList_DX12, m_context);
+				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator.Get(), nullptr, IID_PPV_ARGS(& list->GetCommandBufferInteral())));
 
-				CommandList_DX12 list = CommandList_DX12(m_context, commandList);
 				m_allocLists.push_back(list);
 				return m_allocLists.back();
 			}

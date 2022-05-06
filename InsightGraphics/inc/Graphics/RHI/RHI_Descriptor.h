@@ -14,40 +14,6 @@ namespace Insight
 		class RenderContext;
 		class RHI_DescriptorLayoutManager;
 
-		struct Descriptor
-		{
-			Descriptor() { }
-			Descriptor(int set, int binding, int stage, int size, DescriptorType type, DescriptorResourceType resourceType)
-				: Set(set), Binding(binding), Stage(stage), Size(size), Type(type), ResourceType(resourceType)
-			{ }
-			Descriptor(int set, int binding, int stage, int size, DescriptorType type, DescriptorResourceType resourceType, void* resource)
-				: Set(set), Binding(binding), Stage(stage), Size(size), Type(type), ResourceType(resourceType), Resource(resource)
-			{ }
-
-			int Set = 0;
-			int Binding = 0;
-			int Stage = 0;
-			int Size = 0;
-			DescriptorType Type = DescriptorType::Unknown;
-			DescriptorResourceType ResourceType = DescriptorResourceType::Unknown;
-			void* Resource = nullptr;
-
-			u64 GetHash(bool includeResource) const
-			{
-				u64 hash = 0;
-
-				HashCombine(hash, Set);
-				HashCombine(hash, Binding);
-				HashCombine(hash, Stage);
-				HashCombine(hash, static_cast<u64>(Type));
-				if (includeResource)
-				{
-					HashCombine(hash, Resource);
-				}
-				return hash;
-			}
-		};
-
 		class RHI_DescriptorLayout : public RHI_Resource
 		{
 		public:
@@ -93,12 +59,12 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 			
-			RHI_Descriptor* GetDescriptor(const DescriptorBuffer& buffer);
+			std::unordered_map<int, RHI_Descriptor*> GetDescriptors(const DescriptorBuffer& buffer);
 
 			void ReleaseAll();
 
 		private:
-			RHI_Descriptor* GetDescriptor(std::vector<Descriptor> descriptors);
+			std::unordered_map<int, RHI_Descriptor*> GetDescriptors(std::unordered_map<int, std::vector<Descriptor>> descriptors);
 
 		private:
 			std::unordered_map<u64, RHI_Descriptor*> m_descriptors;

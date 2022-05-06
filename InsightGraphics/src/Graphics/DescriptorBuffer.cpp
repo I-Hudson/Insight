@@ -8,7 +8,7 @@ namespace Insight
 	{
 		DescriptorBuffer::DescriptorBuffer()
 		{
-			Resize(12);
+			Resize(256);
 		}
 
 		DescriptorBuffer::DescriptorBuffer(const DescriptorBuffer& other)
@@ -23,8 +23,8 @@ namespace Insight
 
 		DescriptorBuffer& DescriptorBuffer::operator=(const DescriptorBuffer& other)
 		{
-			Resize(0); // Reset our current buffer to 0;
-			Resize(other.m_capacity); // Resize our buffer to the same size as other;s.
+			//Resize(0); // Reset our current buffer to 0;
+			//Resize(other.m_capacity); // Resize our buffer to the same size as other's.
 			m_size = other.m_size;
 
 			memcpy_s(m_buffer, m_capacity, other.m_buffer, other.m_capacity); // Call all contents from other into this buffer.
@@ -40,10 +40,12 @@ namespace Insight
 				for (const auto& binding : set.second)
 				{
 					const int bindingIndex = binding.first;
-					const Uniform otherUniform = binding.second;
-					const int bufferOffset = otherUniform.Ptr - otherStartPtr;
 
-					m_uniforms[setIndex][bindingIndex] = Uniform(m_buffer + bufferOffset, otherUniform.Size, setIndex, bindingIndex);
+					for (const auto& uniform : binding.second)
+					{
+						const int bufferOffset = (int)(uniform.Ptr - otherStartPtr);
+						m_uniforms[setIndex][bindingIndex].push_back(Uniform(m_buffer + bufferOffset, uniform.Size, setIndex, bindingIndex));
+					}
 				}
 			}
 			return *this;
@@ -54,7 +56,7 @@ namespace Insight
 			m_capacity = other.m_capacity;
 			m_size = other.m_size;
 			m_buffer = other.m_buffer;
-			m_uniforms = other.m_uniforms;
+			m_uniforms = std::move(other.m_uniforms);
 
 			// Invalidate other data as we take control over it.
 			// Not need but nice for explaining.
@@ -71,7 +73,7 @@ namespace Insight
 			Release();
 		}
 
-		void DescriptorBuffer::SetUniform(int set, int binding, void* data, int sizeInBytes)
+		DescriptorBufferView DescriptorBuffer::SetUniform(int set, int binding, void* data, int sizeInBytes)
 		{
 			if (m_size + sizeInBytes > m_capacity)
 			{
@@ -80,8 +82,10 @@ namespace Insight
 
 			Byte* startPtr = m_buffer + m_size; // Get our start point in the buffer block of memory.
 			memcpy_s(startPtr, sizeInBytes, data, sizeInBytes); // Copy data info the block of memory.
-			m_size += sizeInBytes; // Increase size member.
-			m_uniforms[set][binding] = Uniform(startPtr, sizeInBytes, set, binding);
+
+			m_size += AlignUp(sizeInBytes, 256); // Increase size member. Align with 256.
+			m_uniforms[set][binding].push_back(Uniform(startPtr, sizeInBytes, set, binding));
+			return DescriptorBufferView(this, (int)(startPtr - m_buffer), AlignUp(sizeInBytes, 256));
 		}
 
 		void DescriptorBuffer::Resize(int newCapacity)
@@ -122,10 +126,36 @@ namespace Insight
 			TrackPtr(m_buffer);
 		}
 
+		std::vector<Descriptor> DescriptorBuffer::GetDescriptors() const
+		{
+			std::vector<Descriptor> descriptors;
+			for (const auto& sets : m_uniforms)
+			{
+				const int setIndex = sets.first;
+				for (const auto& bindings : sets.second)
+				{
+					const int bindingIndex = bindings.first;
+					const int descriptorStartIndex = (int)descriptors.size();
+
+					for (const auto& desc : bindings.second)
+					{
+						descriptors.push_back(Descriptor(setIndex, bindingIndex, 0, desc.Size, DescriptorType::Unifom_Buffer, DescriptorResourceType::CBV));
+					}
+
+					std::sort(descriptors.begin() + descriptorStartIndex, descriptors.end(), [](const Descriptor& d1, const Descriptor& d2)
+						{
+							return d1.Binding < d2.Binding;
+						});
+				}
+			}
+			return descriptors;
+		}
+
 		void DescriptorBuffer::Reset()
 		{
 			m_size = 0;
 			m_uniforms.clear();
+			memset(m_buffer, 0, m_capacity);
 		}
 
 		void DescriptorBuffer::Release()
