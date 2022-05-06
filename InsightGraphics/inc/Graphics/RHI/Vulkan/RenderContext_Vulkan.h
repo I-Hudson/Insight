@@ -23,46 +23,15 @@ namespace Insight
 				GPUQueue Queue;
 			};
 
-			class RHI_Buffer_Vulkan : public RHI_Buffer
+			struct FrameResource_Vulkan : public FrameResouce
 			{
-			public:
-				virtual void Release() override { }
-			};
+				RenderContext_Vulkan* Context;
+				vk::Semaphore SwapchainAcquire;
+				vk::Semaphore SignalSemaphore;
+				vk::Fence SubmitFence;
 
-			template<typename T>
-			class RenderContextResources
-			{
-			public:
-
-				T* CreateResource()
-				{
-					std::unique_ptr<T> resource = std::make_unique<T>();
-					m_resources.push_back(std::move(resource));
-					return m_resources.back().get();
-				}
-
-				void FreeResource(T* resource)
-				{
-					auto itr = std::find_if(m_resources.begin(), m_resources.end(), [resource](const std::unique_ptr<T>& ptr)
-						{
-							return resource == ptr.get();
-						});
-
-					if (itr == m_resources.end())
-					{
-						IS_CORE_ERROR("[RenderContextResources::FreeResource] Unable to find resource to free.");
-						return;
-					}
-					m_resources.erase(itr);
-				}
-
-				void Destroy()
-				{
-					m_resources.resize(0);
-				}
-
-			private:
-				std::vector<std::unique_ptr<T>> m_resources;
+				void Init(RenderContext_Vulkan* context);
+				void Destroy();
 			};
 
 			class RenderContext_Vulkan : public RenderContext
@@ -122,19 +91,7 @@ namespace Insight
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
 
-				struct FrameResource
-				{
-					CommandPool_Vulkan CommandPool;
-					vk::Semaphore SwapchainAcquire;
-					vk::Semaphore SignalSemaphore;
-					vk::Fence SubmitFence;
-
-					RenderContext_Vulkan* Context;
-
-					void Init(RenderContext_Vulkan* context);
-					void Destroy();
-				};
-				FrameResource m_frames[c_FrameCount];
+				FrameResource_Vulkan m_frames[c_FrameCount];
 			};
 		}
 	}

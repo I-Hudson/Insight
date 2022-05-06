@@ -80,7 +80,6 @@ namespace Insight
 					m_commandList.Reset();
 					m_commandList = nullptr;
 				}
-				m_allocator = nullptr;
 			}
 
 			void RHI_CommandList_DX12::SetName(std::wstring name)

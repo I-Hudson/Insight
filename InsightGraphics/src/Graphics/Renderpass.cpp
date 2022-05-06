@@ -11,6 +11,8 @@ namespace Insight
 	{
 		void VulkanTest()
 		{
+			ZoneScoped;
+
 			ShaderDesc shaderDesc;
 			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 			shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";

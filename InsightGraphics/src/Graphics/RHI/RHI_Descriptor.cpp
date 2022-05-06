@@ -45,9 +45,12 @@ namespace Insight
 			}
 
 			RHI_DescriptorLayout* newLayout = RHI_DescriptorLayout::New();
-			assert(newLayout);
+			//assert(newLayout);
 			m_layouts[hash] = newLayout;
-			newLayout->Create(m_context, set, descriptors);
+			if (newLayout)
+			{
+				newLayout->Create(m_context, set, descriptors);
+			}
 			return newLayout;
 		}
 
@@ -55,8 +58,11 @@ namespace Insight
 		{
 			for (auto& pair : m_layouts)
 			{
-				pair.second->Release();
-				DeleteTracked(pair.second);
+				if (pair.second)
+				{
+					pair.second->Release();
+					DeleteTracked(pair.second);
+				}
 			}
 			m_layouts.clear();
 		}

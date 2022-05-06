@@ -12,5 +12,6 @@ cbuffer ubo : register(b0)
 
 float4 PSMain() : SV_TARGET
 {
-	return SwapchainColour;
+	//return SwapchainColour;
+	return float4(1, 0, 0, 1);
 }

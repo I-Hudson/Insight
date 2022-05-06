@@ -1,6 +1,9 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
+
+#include "Tracy.hpp"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -109,6 +112,8 @@ namespace Insight
 
 			bool RenderContext_Vulkan::Init()
 			{
+				ZoneScoped;
+
 				if (m_instnace && m_device)
 				{
 					IS_CORE_ERROR("[RenderContext_Vulkan::Init] Context already inited.");
@@ -180,7 +185,7 @@ namespace Insight
 				m_pipelineStateObjectManager.SetRenderContext(this);
 				m_renderpassManager.SetRenderContext(this);
 
-				for (FrameResource& frame : m_frames)
+				for (FrameResource_Vulkan& frame : m_frames)
 				{
 					frame.Init(this);
 				}
@@ -192,11 +197,13 @@ namespace Insight
 
 			void RenderContext_Vulkan::Destroy()
 			{
+				ZoneScoped;
+
 				m_device.waitIdle();
 
 				DestroyImGui();
 
-				for (FrameResource& frame : m_frames)
+				for (FrameResource_Vulkan& frame : m_frames)
 				{
 					frame.Destroy();
 				}
@@ -324,18 +331,18 @@ namespace Insight
 					};
 				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
 
-				FrameResource& frame = m_frames[m_currentFrame];
-				frame.CommandPool.Update();
-				CommandList_Vulkan& cmdListVulkan = frame.CommandPool.GetCommandList();
+				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
+				frame.CommandListManager.Update();
+				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 
 				vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
-				cmdListVulkan.m_commandBuffer.begin(beginInfo);
+				cmdListVulkan->GetCommandList().begin(beginInfo);
 
-				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan.m_commandBuffer);
+				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
 
-				cmdListVulkan.m_commandBuffer.end();
+				cmdListVulkan->GetCommandList().end();
 
-				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan .m_commandBuffer };
+				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 				vk::SubmitInfo submitInfo = vk::SubmitInfo();
 				submitInfo.setCommandBuffers(commandBuffers);
 				m_commandQueues[GPUQueue_Graphics].submit(submitInfo);
@@ -343,7 +350,7 @@ namespace Insight
 				m_device.waitIdle();
 
 				ImGui_ImplVulkan_DestroyFontUploadObjects();
-				frame.CommandPool.Update();
+				frame.CommandListManager.Update();
 
 				ImGui_ImplVulkan_NewFrame();
 				ImGuiBeginFrame();
@@ -351,6 +358,8 @@ namespace Insight
 
 			void RenderContext_Vulkan::DestroyImGui()
 			{
+				ZoneScoped;
+
 				ImGui_ImplVulkan_Shutdown();
 				ImGui_ImplGlfw_Shutdown();
 				ImGui::DestroyContext();
@@ -369,9 +378,11 @@ namespace Insight
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
+				ZoneScoped;
+
 				ImGuiRender();
 
-				FrameResource& frame = m_frames[m_currentFrame];
+				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
 
 				m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
 
@@ -385,10 +396,10 @@ namespace Insight
 				m_availableSwapchainImage = nextImage.value;		
 				m_device.resetFences({ frame.SubmitFence });
 
-				frame.CommandPool.Update();
-				CommandList_Vulkan& cmdListVulkan = frame.CommandPool.GetCommandList();
-				cmdListVulkan.Record(cmdList);
-
+				frame.CommandListManager.Update();
+				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
+				cmdListVulkan->Record(cmdList, &frame);
+				cmdListVulkan->GetCommandList().endRenderPass();
 
 				// Render imgui.
 				if (m_imguiFramebuffers[m_currentFrame])
@@ -418,15 +429,15 @@ namespace Insight
 				info.renderArea.extent.height = m_swapchainBufferSize.y;
 				info.clearValueCount = 1;
 				info.pClearValues = &clearValue;
-				cmdListVulkan.m_commandBuffer.beginRenderPass(info, vk::SubpassContents::eInline);
+				cmdListVulkan->GetCommandList().beginRenderPass(info, vk::SubpassContents::eInline);
 				// Record dear imgui primitives into command buffer
-				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan.m_commandBuffer);
-				cmdListVulkan.m_commandBuffer.endRenderPass();
-				cmdListVulkan.m_commandBuffer.end();
+				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan->GetCommandList());
+				cmdListVulkan->GetCommandList().endRenderPass();
+				cmdListVulkan->GetCommandList().end();
 
 				std::array<vk::Semaphore, 1> waitSemaphores = { frame.SwapchainAcquire };
 				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-				std::array<vk::CommandBuffer , 1> commandBuffers = { cmdListVulkan.GetCommandBuffer() };
+				std::array<vk::CommandBuffer , 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 				std::array<vk::Semaphore, 1> signalSemaphore = { frame.SignalSemaphore };
 
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(
@@ -449,6 +460,8 @@ namespace Insight
 
 			void RenderContext_Vulkan::WaitForGpu()
 			{
+				ZoneScoped;
+
 				m_device.waitIdle();
 			}
 
@@ -724,11 +737,12 @@ namespace Insight
 				m_swapchain = swapchain;
 			}
 
-			void RenderContext_Vulkan::FrameResource::Init(RenderContext_Vulkan* context)
+			void FrameResource_Vulkan::Init(RenderContext_Vulkan* context)
 			{
 				Context = context;
 
-				CommandPool.Init(context);
+				CommandListManager.Create(context);
+				//UniformBuffer.Create(Context);
 
 				vk::SemaphoreCreateInfo semaphoreInfo = vk::SemaphoreCreateInfo();
 				SwapchainAcquire = Context->GetDevice().createSemaphore(semaphoreInfo);
@@ -738,9 +752,10 @@ namespace Insight
 				SubmitFence = context->GetDevice().createFence(fenceCreateInfo);
 			}
 
-			void RenderContext_Vulkan::FrameResource::Destroy()
+			void FrameResource_Vulkan::Destroy()
 			{
-				CommandPool.Destroy();
+				CommandListManager.Destroy();
+				UniformBuffer.Release();
 
 				Context->GetDevice().destroySemaphore(SwapchainAcquire);
 				Context->GetDevice().destroySemaphore(SignalSemaphore);

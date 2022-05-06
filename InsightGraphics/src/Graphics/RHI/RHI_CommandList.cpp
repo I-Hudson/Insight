@@ -4,6 +4,7 @@
 #include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
+#include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 
 #include "Tracy.hpp"
 
@@ -17,7 +18,7 @@ namespace Insight
 		/// <returns></returns>
 		RHI_CommandList* RHI_CommandList::New()
 		{
-			if (GraphicsManager::IsVulkan()) { return nullptr; }
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_CommandList_Vulkan); }
 			if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_CommandList_DX12); }
 			return nullptr;
 		}
@@ -145,7 +146,7 @@ namespace Insight
 		/// <returns></returns>
 		RHI_CommandListAllocator* RHI_CommandListAllocator::New()
 		{
-			if (GraphicsManager::IsVulkan()) { return nullptr; }
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_CommandListAllocator_Vulkan); }
 			if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_CommandListAllocator_DX12); }
 			return nullptr;
 		}
