@@ -118,6 +118,6 @@ project "InsightGraphics"
 
         postbuildcommands
         {
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }

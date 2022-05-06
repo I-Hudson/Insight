@@ -3,6 +3,8 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 
+#include "Tracy.hpp"
+
 namespace Insight
 {
 	namespace Graphics
@@ -24,6 +26,7 @@ namespace Insight
 
 			void CommandList_DX12::Record(CommandList& cmdList, FrameResourceDX12& frameResouces)
 			{
+				ZoneScoped;
 				m_frameResouces = &frameResouces;
 				m_frameResouces->UniformBuffer.Reset();
 				m_frameResouces->UniformBuffer.Resize(cmdList.GetDescriptorBuffer().GetCapacity());
@@ -32,6 +35,7 @@ namespace Insight
 
 				for (int i = 0; i < cmdList.GetCommandCount(); ++i)
 				{
+					ZoneScopedN("Single Command");
 					ICommand* command = cmdList.GetCurrentCommand();
 					switch (command->CommandType)
 					{
@@ -39,6 +43,7 @@ namespace Insight
 
 					case CommandType::SetPipelineStateObject:
 					{
+						ZoneScopedN("SetPipelineStateObject");
 						const CMD_SetPipelineStateObject* cmd = dynamic_cast<const CMD_SetPipelineStateObject*>(command);
 						m_pso = cmd->Pso;
 						m_frameResouces->DescriptorAllocator.SetPipeline(m_pso);
@@ -47,6 +52,7 @@ namespace Insight
 
 					case CommandType::SetUniform:
 					{
+						ZoneScopedN("SetUniform");
 						const CMD_SetUniform* cmd = dynamic_cast<const CMD_SetUniform*>(command);
 						m_frameResouces->DescriptorAllocator.SetUniform(cmd->Set, cmd->Binding, m_frameResouces->UniformBuffer.GetView(cmd->View.Offset, cmd->View.SizeInBytes));
 						break;
@@ -54,6 +60,7 @@ namespace Insight
 
 					case CommandType::SetViewport:
 					{
+						ZoneScopedN("SetViewport");
 						const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
 						std::array<D3D12_VIEWPORT, 1> viewports = { D3D12_VIEWPORT{ 0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f } };
 						m_commandList->RSSetViewports(1, viewports.data());
@@ -62,6 +69,7 @@ namespace Insight
 
 					case CommandType::SetScissor:
 					{
+						ZoneScopedN("SetScissor");
 						const CMD_SetScissor* cmd = dynamic_cast<const CMD_SetScissor*>(command);
 						std::array<D3D12_RECT, 1> scissors = { D3D12_RECT{ 0, 0, cmd->Width, cmd->Height } };
 						m_commandList->RSSetScissorRects(1, scissors.data());
@@ -78,6 +86,7 @@ namespace Insight
 
 					case CommandType::Draw:
 					{
+						ZoneScopedN("Draw");
 						if (!CanDraw(cmdList))
 						{
 							break;
@@ -135,6 +144,7 @@ namespace Insight
 
 			bool CommandList_DX12::CanDraw(CommandList& cmdList)
 			{
+				ZoneScoped;
 				ID3D12PipelineState* pipeline = m_context->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				if (m_pso.GetHash() != m_activePSO.GetHash())
 				{
@@ -151,6 +161,7 @@ namespace Insight
 
 			bool CommandList_DX12::BindDescriptorSets()
 			{
+				ZoneScoped;
 				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
 				m_frameResouces->DescriptorAllocator.BindTempConstentBuffer(this, m_frameResouces->DescriptorAllocator.GetDescriptor(0,0).BufferView, 0);
 				std::vector<ID3D12DescriptorHeap*> descriptors = m_frameResouces->DescriptorAllocator.GetHeaps();

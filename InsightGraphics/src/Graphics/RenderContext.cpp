@@ -91,8 +91,11 @@ namespace Insight
 
 		void RenderContext::FreeBuffer(RHI_Buffer* buffer)
 		{
-			BufferType bufferType = buffer->GetType();
-			m_buffers[bufferType].FreeResource(buffer);
+			if (buffer)
+			{
+				BufferType bufferType = buffer->GetType();
+				m_buffers[bufferType].FreeResource(buffer);
+			}
 		}
 	}
 
