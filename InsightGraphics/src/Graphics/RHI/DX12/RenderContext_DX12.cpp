@@ -92,7 +92,7 @@ namespace Insight
 					ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 				}
 
-				for (FrameResourceDX12& frame : m_frames)
+				for (FrameResource_DX12& frame : m_frames)
 				{
 					frame.Init(this);
 				}
@@ -115,7 +115,7 @@ namespace Insight
 				m_pipelineStateObjectManager.Destroy();
 
 
-				for (FrameResourceDX12& frame : m_frames)
+				for (FrameResource_DX12& frame : m_frames)
 				{
 					frame.Destroy();
 				}
@@ -195,42 +195,47 @@ namespace Insight
 				ZoneScoped;
 				ImGuiRender();
 
-				FrameResourceDX12& frame = m_frames[m_frameIndex];
+				FrameResource_DX12& frame = m_frames[m_frameIndex];
 
 				// Record cmd buffers and execute
-				frame.CommandAllocator.Update();
-				CommandList_DX12* cmdListDX12 = frame.CommandAllocator.GetCommandList();
+				frame.CommandListManager.Update();
+				RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
 				frame.DescriptorAllocator.Reset();
+				frame.UniformBuffer.Reset();
 
 				// Set back buffer texture/image to render target so we can render to it.
-				cmdListDX12->m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+				//cmdListDX12->GetCommandList()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+				cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 				CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
 				ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 				const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-				cmdListDX12->m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
-				cmdListDX12->m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+				//cmdListDX12->m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
+				cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
+				//cmdListDX12->m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+				cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
-				cmdListDX12->Record(cmdList, frame);
+				cmdListDX12->Record(cmdList, &frame);
 
 				{
 					ZoneScopedN("ImGui_DescriptorHeap");
 					std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-					IMGUI_VALID(cmdListDX12->m_commandList->SetDescriptorHeaps(1, imguiHeap.data()));
-					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->m_commandList.Get()));
+					//IMGUI_VALID(cmdListDX12->m_commandList->SetDescriptorHeaps(1, imguiHeap.data()));
+					IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
+					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
 				}
 				
 				{
 					ZoneScopedN("ResourceBarrier_swapchain_present");
 					// Set back buffer texture/image back to present so we can use it within the swapchain.
-					cmdListDX12->m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+					cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 				}
 				cmdListDX12->Close();
 
 				{
 					ZoneScopedN("ExecuteCommandLists");
-					ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandBuffer() };
+					ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 					m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				}
 
@@ -431,17 +436,17 @@ namespace Insight
 			}
 
 
-			void FrameResourceDX12::Init(RenderContext_DX12* context)
+			void FrameResource_DX12::Init(RenderContext_DX12* context)
 			{
 				Context = context;
-				CommandAllocator.Init(Context);
+				CommandListManager.Create(Context);
 				UniformBuffer.Create(Context);
 				DescriptorAllocator.SetRenderContext(Context);
 			}
 
-			void FrameResourceDX12::Destroy()
+			void FrameResource_DX12::Destroy()
 			{
-				CommandAllocator.Destroy();
+				CommandListManager.Destroy();
 				UniformBuffer.Release();
 				DescriptorAllocator.Destroy();
 			}

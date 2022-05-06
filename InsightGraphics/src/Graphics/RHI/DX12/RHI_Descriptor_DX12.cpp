@@ -1,7 +1,6 @@
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
-#include "Graphics/RHI/DX12/CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 
 namespace Insight
@@ -314,7 +313,7 @@ namespace Insight
 				}
 			}
 
-			void DescriptorAllocator_DX12::BindTempConstentBuffer(CommandList_DX12* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex)
+			void DescriptorAllocator_DX12::BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex)
 			{
 				if (m_heaps.find(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) == m_heaps.end())
 				{
@@ -332,7 +331,7 @@ namespace Insight
 				cbvDesc.SizeInBytes = AlignUp(bufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 				m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
 
-				cmdList->GetCommandBuffer()->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
+				cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
 			}
 
 			Descriptor DescriptorAllocator_DX12::GetDescriptor(int set, int binding)

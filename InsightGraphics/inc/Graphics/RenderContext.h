@@ -6,6 +6,7 @@
 #include "imgui.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 
@@ -59,6 +60,12 @@ namespace Insight
 			RHI_DescriptorManager m_descriptorManager;
 
 			friend class Renderer;
+		};
+
+		struct FrameResouce
+		{
+			RHI_DynamicBuffer UniformBuffer;
+			CommandListManager CommandListManager;
 		};
 	}
 

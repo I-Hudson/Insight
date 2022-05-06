@@ -132,7 +132,7 @@ namespace Insight
 				std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
 				void SetDescriptors(CommandList_DX12* cmdList);
 
-				void BindTempConstentBuffer(CommandList_DX12* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
+				void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
 
 				Descriptor GetDescriptor(int set, int binding);
 
