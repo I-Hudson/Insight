@@ -34,6 +34,8 @@ namespace Insight
 
 			virtual void Render(CommandList cmdList) = 0;
 
+			bool HasExtension(DeviceExtension extension);
+
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_DescriptorManager& GetDescriptorManager() { return m_descriptorManager; }
 
@@ -51,6 +53,8 @@ namespace Insight
 
 		protected:
 			const static int c_FrameCount = 2;
+
+			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 
 			RHI_ResourceManager<RHI_Buffer> m_vertexBuffer;
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;

@@ -61,6 +61,11 @@ namespace Insight
 			return context;
 		}
 
+		bool RenderContext::HasExtension(DeviceExtension extension)
+		{
+			return m_deviceExtensions[(u32)extension] == 1;
+		}
+
 		void RenderContext::ImGuiBeginFrame()
 		{
 			IMGUI_VALID(ImGui_ImplGlfw_NewFrame());

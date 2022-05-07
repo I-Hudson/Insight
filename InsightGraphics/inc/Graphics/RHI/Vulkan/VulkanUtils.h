@@ -13,6 +13,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		std::string DeviceExtensionToVulkan(DeviceExtension extension);
 		vk::ImageUsageFlags ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
 		vk::Format PixelFormatToVulkan(PixelFormat format);
 		vk::PipelineBindPoint GPUQueueToVulkanBindPoint(GPUQueue queue);

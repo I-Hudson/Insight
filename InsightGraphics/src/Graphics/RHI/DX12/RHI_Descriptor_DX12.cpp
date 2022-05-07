@@ -17,6 +17,11 @@ namespace Insight
 				}
 			}
 
+			bool RHI_DescriptorLayout_DX12::ValidResouce()
+			{
+				return m_layout;
+			}
+
 			void RHI_DescriptorLayout_DX12::SetName(std::wstring name)
 			{
 				if (m_layout)

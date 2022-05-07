@@ -214,5 +214,13 @@ namespace Insight
 		//};
 		//using GUPBufferFlags = u32;
 		//std::string GUPBufferFlagsToString(GUPBufferFlags flags);
+	
+		enum class DeviceExtension : u32
+		{
+			BindlessDescriptors,
+			ExclusiveFullScreen,
+
+			DeviceExtensionCount
+		};
 	}
 }

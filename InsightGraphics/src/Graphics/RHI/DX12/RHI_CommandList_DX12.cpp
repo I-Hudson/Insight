@@ -82,6 +82,11 @@ namespace Insight
 				}
 			}
 
+			bool RHI_CommandList_DX12::ValidResouce()
+			{
+				return m_commandList;
+			}
+
 			void RHI_CommandList_DX12::SetName(std::wstring name)
 			{
 				if (m_commandList)
@@ -253,6 +258,11 @@ namespace Insight
 					m_allocator.Reset();
 					m_allocator = nullptr;
 				}
+			}
+
+			bool RHI_CommandListAllocator_DX12::ValidResouce()
+			{
+				return m_allocator;
 			}
 
 			void RHI_CommandListAllocator_DX12::SetName(std::wstring name)

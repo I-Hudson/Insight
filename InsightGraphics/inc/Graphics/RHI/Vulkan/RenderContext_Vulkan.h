@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
 #include <unordered_map>
+#include <set>
 #include <string>
 
 namespace Insight
@@ -44,6 +45,7 @@ namespace Insight
 
 				virtual void Render(CommandList cmdList) override;
 
+				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
 				vk::Device GetDevice() const { return m_device; }
 
 				vk::ImageView GetSwapchainImageView() const { return m_swapchainImageViews[m_availableSwapchainImage]; }
@@ -61,8 +63,10 @@ namespace Insight
 				vk::Instance CreateInstance();
 				vk::PhysicalDevice FindAdapter();
 				std::vector<vk::DeviceQueueCreateInfo> GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo);
-				void GetDeviceExtensionAndLayers(std::vector<std::string>& extensions, std::vector<std::string>& layers);
+				void GetDeviceExtensionAndLayers(std::set<std::string>& extensions, std::set<std::string>& layers, bool includeAll = false);
 				void CreateSwapchain();
+
+				void SetDeviceExtensions();
 
 			private:
 				vk::Instance m_instnace{ nullptr };

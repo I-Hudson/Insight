@@ -66,6 +66,11 @@ namespace Insight
 				}
 			}
 
+			bool RHI_Buffer_DX12::ValidResouce()
+			{
+				return m_resource;
+			}
+
 			void RHI_Buffer_DX12::SetName(std::wstring name)
 			{
 				if (m_resource)

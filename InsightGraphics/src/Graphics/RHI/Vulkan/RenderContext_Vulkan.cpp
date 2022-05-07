@@ -9,6 +9,7 @@
 #include "backends/imgui_impl_vulkan.h"
 
 #ifdef IS_PLATFORM_WIN32
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
 #endif
@@ -89,6 +90,8 @@ namespace Insight
 			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
 			PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 			VkDebugUtilsMessengerEXT debugUtilsMessenger;
+			vk::DispatchLoaderDynamic debugDispatcher;
+
 			VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
 				VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 				VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -157,9 +160,19 @@ namespace Insight
 					}
 				}
 
-				std::vector<std::string> deviceLayers;
-				std::vector<std::string> deviceExtensions;
-				GetDeviceExtensionAndLayers(deviceExtensions, deviceLayers);
+				std::set<std::string> deviceLayersSets;
+				std::set<std::string> deviceExtensionsSets;
+				GetDeviceExtensionAndLayers(deviceExtensionsSets, deviceLayersSets);
+
+				SetDeviceExtensions();
+
+				std::vector<std::string> deviceLayers = std::vector<std::string>(deviceLayersSets.begin(), deviceLayersSets.end());
+				std::vector<std::string> deviceExtensions = std::vector<std::string>(deviceExtensionsSets.begin(), deviceExtensionsSets.end());
+
+				if (HasExtension(DeviceExtension::ExclusiveFullScreen))
+				{
+					deviceExtensions.push_back(DeviceExtensionToVulkan(DeviceExtension::ExclusiveFullScreen));
+				}
 
 				std::vector<const char*> deviceLayersCC = StringVectorToConstChar(deviceLayers);
 				std::vector<const char*> deviceExtensionsCC = StringVectorToConstChar(deviceExtensions);
@@ -168,6 +181,10 @@ namespace Insight
 
 				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, &deviceFeatures);
 				m_device = m_adapter.createDevice(deviceCreateInfo);
+
+				vk::DynamicLoader dl;
+				PFN_vkGetInstanceProcAddr getInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+				debugDispatcher = vk::DispatchLoaderDynamic(m_instnace, getInstanceProcAddr, m_device);
 
 				for (size_t i = 0; i < queueInfo.size(); ++i)
 				{
@@ -384,7 +401,8 @@ namespace Insight
 
 				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
 
-				m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
+				vk::Result waitResult = m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
+				assert(waitResult == vk::Result::eSuccess);
 
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
@@ -458,6 +476,17 @@ namespace Insight
 				ImGuiBeginFrame();
 			}
 
+			void RenderContext_Vulkan::SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType)
+			{
+				std::string str;
+				std::transform(name.begin(), name.end(), std::back_inserter(str), [](wchar_t c) {
+					return (char)c;
+					});
+
+				vk::DebugUtilsObjectNameInfoEXT info = vk::DebugUtilsObjectNameInfoEXT(objectType, handle, str.c_str());
+				m_device.setDebugUtilsObjectNameEXT(info, debugDispatcher);
+			}
+
 			void RenderContext_Vulkan::WaitForGpu()
 			{
 				ZoneScoped;
@@ -499,7 +528,11 @@ namespace Insight
 #endif        
 
 #if VK_EXT_debug_utils
-					VK_EXT_DEBUG_UTILS_EXTENSION_NAME
+					VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+#endif
+
+#if VK_KHR_get_surface_capabilities2
+					VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME,
 #endif
 
 #if VK_KHR_get_physical_device_properties2 && !VK_VERSION_1_1
@@ -564,7 +597,7 @@ namespace Insight
 				return queueCreateInfos;
 			}
 
-			void RenderContext_Vulkan::GetDeviceExtensionAndLayers(std::vector<std::string>& extensions, std::vector<std::string>& layers)
+			void RenderContext_Vulkan::GetDeviceExtensionAndLayers(std::set<std::string>& extensions, std::set<std::string>& layers, bool includeAll)
 			{
 				std::vector<vk::LayerProperties> layerProperties = m_adapter.enumerateDeviceLayerProperties();
 				std::vector<vk::ExtensionProperties> extensionProperties = m_adapter.enumerateDeviceExtensionProperties();
@@ -574,25 +607,35 @@ namespace Insight
 					{
 						return strcmp(layer.layerName, vkLayerKhronosValidation);
 					}) != layerProperties.end();
-					if (hasKhronosStandardValidationLayer)
-					{
-						if (true/*(bool)CONFIG_VAL(Config::GraphicsConfig.Validation)*/)
-						{
-							layers.push_back(vkLayerKhronosValidation);
-						}
-					}
 
-					IS_CORE_INFO("Device layers:");
-					for (size_t i = 0; i < layerProperties.size(); ++i)
+				if (hasKhronosStandardValidationLayer)
+				{
+					if (true/*(bool)CONFIG_VAL(Config::GraphicsConfig.Validation)*/)
 					{
-						IS_CORE_INFO("{}", layerProperties[i].layerName);
+						layers.insert(vkLayerKhronosValidation);
 					}
-					IS_CORE_INFO("Device extensions:");
+				}
+
+				IS_CORE_INFO("Device layers:");
+				for (size_t i = 0; i < layerProperties.size(); ++i)
+				{
+					IS_CORE_INFO("{}", layerProperties[i].layerName);
+				}
+				IS_CORE_INFO("Device extensions:");
+				for (size_t i = 0; i < extensionProperties.size(); ++i)
+				{
+					IS_CORE_INFO("{}", extensionProperties[i].extensionName);
+				}
+
+				if (includeAll)
+				{
 					for (size_t i = 0; i < extensionProperties.size(); ++i)
 					{
-						IS_CORE_INFO("{}", extensionProperties[i].extensionName);
+						extensions.insert(extensionProperties[i].extensionName);
 					}
-
+				}
+				else
+				{
 					for (size_t i = 0; i < ARRAY_COUNT(g_DeviceExtensions); i++)
 					{
 						const char* ext = g_DeviceExtensions[i];
@@ -601,9 +644,10 @@ namespace Insight
 								return strcmp(extnesion.extensionName, ext);
 							}) != extensionProperties.end())
 						{
-							extensions.push_back(ext);
+							extensions.insert(ext);
 						}
 					}
+				}
 			}
 			
 			void RenderContext_Vulkan::CreateSwapchain()
@@ -735,6 +779,16 @@ namespace Insight
 					m_swapchainImageViews.push_back(m_device.createImageView(info));
 				}
 				m_swapchain = swapchain;
+			}
+
+			void RenderContext_Vulkan::SetDeviceExtensions()
+			{
+				std::set<std::string> deviceExts;
+				std::set<std::string> layerExts;
+				GetDeviceExtensionAndLayers(deviceExts, layerExts, true);
+
+				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = deviceExts.find(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != deviceExts.end();
+				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = deviceExts.find(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) != deviceExts.end();
 			}
 
 			void FrameResource_Vulkan::Init(RenderContext_Vulkan* context)

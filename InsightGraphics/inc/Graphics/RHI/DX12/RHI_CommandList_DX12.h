@@ -35,6 +35,7 @@ namespace Insight
 
 				// RHI_Resouce
 				virtual void Release() override;
+				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
 			protected:
@@ -79,6 +80,7 @@ namespace Insight
 
 				// RHI_Resouce
 				virtual void Release() override;
+				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
 			private:

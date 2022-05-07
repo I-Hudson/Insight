@@ -19,6 +19,7 @@ namespace Insight
 				virtual std::vector<Byte> Download() override;
 
 				virtual void Release() override;
+				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
 				ID3D12Resource* GetResouce() const { return m_resource.Get(); }

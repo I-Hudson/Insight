@@ -46,6 +46,7 @@ workspace "Insight"
         {
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
+            "VK_USE_PLATFORM_WIN32_KHR",
         }
     	
     filter "system:Unix"

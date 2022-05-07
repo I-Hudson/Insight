@@ -16,6 +16,7 @@ namespace Insight
 		{
 		public:
 			virtual void Release() = 0;
+			virtual bool ValidResouce() = 0;
 			virtual void SetName(std::wstring name) = 0;
 		};
 

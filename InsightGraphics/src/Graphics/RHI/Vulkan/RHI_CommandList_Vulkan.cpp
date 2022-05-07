@@ -35,13 +35,25 @@ namespace Insight
 			{
 				if (m_commandList)
 				{
+					if (m_framebuffer)
+					{
+						RenderContextVulkan()->GetDevice().destroyFramebuffer(m_framebuffer);
+						m_framebuffer = nullptr;
+					}
+
 					RenderContextVulkan()->GetDevice().freeCommandBuffers(m_allocator->GetAllocator(), { m_commandList });
 					m_commandList = nullptr;
 				}
+
+			}
+			bool RHI_CommandList_Vulkan::ValidResouce()
+			{
+				return m_commandList;
 			}
 
 			void RHI_CommandList_Vulkan::SetName(std::wstring name)
 			{
+				RenderContextVulkan()->SetObejctName(name, (u64)m_commandList.operator VkCommandBuffer(), m_commandList.objectType);
 			}
 
 			void RHI_CommandList_Vulkan::SetPipeline(PipelineStateObject pso)
@@ -186,6 +198,7 @@ namespace Insight
 				
 				list->GetCommandList().begin(vk::CommandBufferBeginInfo());
 				m_allocLists.insert(list);
+				list->SetName(L"CommandList");
 				return list;
 			}
 
@@ -224,9 +237,14 @@ namespace Insight
 				}
 			}
 
+			bool RHI::Vulkan::RHI_CommandListAllocator_Vulkan::ValidResouce()
+			{
+				return m_allocator;
+			}
+
 			void RHI_CommandListAllocator_Vulkan::SetName(std::wstring name)
 			{
-
+				m_context->SetObejctName(name, (u64)m_allocator.operator VkCommandPool(), m_allocator.objectType);
 			}
 		}
 	}
