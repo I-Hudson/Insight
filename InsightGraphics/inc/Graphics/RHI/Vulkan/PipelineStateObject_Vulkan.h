@@ -19,7 +19,7 @@ namespace Insight
 				~PipelineLayoutManager_Vulkan();
 
 				void SetRenderContext(RenderContext_Vulkan* context) { m_context = context; }
-				vk::PipelineLayout GetOrCreateLayout();
+				vk::PipelineLayout GetOrCreateLayout(PipelineStateObject pso);
 				void Destroy();
 
 			private:

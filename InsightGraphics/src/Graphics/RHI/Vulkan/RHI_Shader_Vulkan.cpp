@@ -14,6 +14,18 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
+			vk::ShaderModule RHI_Shader_Vulkan::GetStage(ShaderStageFlagBits stage) const
+			{
+				int index = BitFlagsToIndex(stage);
+				return m_modules.at(index);
+			}
+
+			std::wstring_view RHI_Shader_Vulkan::GetMainFuncName(ShaderStageFlagBits stage) const
+			{
+				int index = BitFlagsToIndex(stage);
+				return m_mainFuncNames.at(index);
+			}
+
 			void RHI_Shader_Vulkan::Create(RenderContext* context, ShaderDesc desc)
 			{
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
@@ -43,7 +55,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Spirv);
-				m_descriptors = compiler.GetDescriptors();
+				compiler.GetDescriptors(stage, m_descriptors);
 				if (!code)
 				{
 					return;

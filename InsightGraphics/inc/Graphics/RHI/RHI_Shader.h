@@ -147,7 +147,7 @@ namespace Insight
 			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
 
 			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
-			std::vector<Descriptor> GetDescriptors();
+			void GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors);
 
 			DescriptorType SpvReflectDescriptorTypeToDescriptorType(SpvReflectDescriptorType type);
 			DescriptorResourceType SpvReflectDescriptorResourceTypeToDescriptorResourceType(SpvReflectResourceType type);

@@ -45,7 +45,7 @@ namespace Insight
 			CMD_SetPipelineStateObject(PipelineStateObject pso)
 			{
 				CommandType = CommandType::SetPipelineStateObject;
-				Pso = pso;
+				Pso = std::move(pso);
 			}
 			PipelineStateObject Pso;
 		};

@@ -2,8 +2,10 @@
 
 #include "Graphics/RenderContext.h"
 #include "Core/Logger.h"
-#include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
+#include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
+#include "VmaUsage.h"
 
 #include <glm/glm.hpp>
 #include <vulkan/vulkan.hpp>
@@ -26,6 +28,8 @@ namespace Insight
 			struct FrameResource_Vulkan : public FrameResouce
 			{
 				RenderContext_Vulkan* Context;
+				DescriptorAllocator_Vulkan DescriptorAllocator;
+
 				vk::Semaphore SwapchainAcquire;
 				vk::Semaphore SignalSemaphore;
 				vk::Fence SubmitFence;
@@ -47,6 +51,7 @@ namespace Insight
 
 				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
 				vk::Device GetDevice() const { return m_device; }
+				VmaAllocator GetVMA() const { return m_vmaAllocator; }
 
 				vk::ImageView GetSwapchainImageView() const { return m_swapchainImageViews[m_availableSwapchainImage]; }
 				vk::Format GetSwapchainColourFormat() const { return m_swapchainFormat; }
@@ -72,6 +77,8 @@ namespace Insight
 				vk::Instance m_instnace{ nullptr };
 				vk::Device m_device{ nullptr };
 				vk::PhysicalDevice m_adapter{ nullptr };
+
+				VmaAllocator m_vmaAllocator{ nullptr };
 
 				vk::SurfaceKHR m_surface{ nullptr };
 				vk::SwapchainKHR m_swapchain{ nullptr };

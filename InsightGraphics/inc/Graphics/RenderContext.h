@@ -37,7 +37,6 @@ namespace Insight
 			bool HasExtension(DeviceExtension extension);
 
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
-			RHI_DescriptorManager& GetDescriptorManager() { return m_descriptorManager; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -61,7 +60,6 @@ namespace Insight
 			RHI_ShaderManager m_shaderManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
-			RHI_DescriptorManager m_descriptorManager;
 
 			friend class Renderer;
 		};

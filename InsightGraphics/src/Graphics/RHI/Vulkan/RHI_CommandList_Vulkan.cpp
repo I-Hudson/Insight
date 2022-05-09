@@ -60,13 +60,13 @@ namespace Insight
 			{
 				ZoneScoped;
 				m_pso = pso;
-				//FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
+				FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_Vulkan::SetUniform(int set, int binding, DescriptorBufferView view)
 			{
 				ZoneScoped;
-
+				FrameResourceVulkan()->DescriptorAllocator.SetUniform(set, binding, FrameResourceVulkan()->UniformBuffer.GetView(view.Offset, view.SizeInBytes));
 			}
 
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
@@ -147,7 +147,27 @@ namespace Insight
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()
 			{
 				ZoneScoped;
-				return true;
+
+				std::vector<RHI_Descriptor*> descriptors;
+				bool result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
+				const int descriptorCount = static_cast<int>(descriptors.size());
+
+				if (result && descriptorCount > 0)
+				{
+					vk::PipelineLayout layout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+
+					std::vector<vk::DescriptorSet> sets;
+					sets.resize(descriptorCount);
+					for (size_t i = 0; i < descriptorCount; ++i)
+					{
+						RHI_Descriptor_Vulkan* descriptorVulkan = dynamic_cast<RHI_Descriptor_Vulkan*>(descriptors.at(i));
+						sets[i] = descriptorVulkan->GetSet();
+					}
+
+					std::vector<u32> dynamicOffsets = {};
+					m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets, dynamicOffsets);
+				}
+				return result && descriptorCount > 0;
 			}
 
 			RenderContext_Vulkan* RHI_CommandList_Vulkan::RenderContextVulkan()
@@ -160,8 +180,8 @@ namespace Insight
 			FrameResource_Vulkan* RHI_CommandList_Vulkan::FrameResourceVulkan()
 			{
 				ZoneScoped;
-				assert(m_context);
-				return dynamic_cast<FrameResource_Vulkan*>(m_context);
+				assert(m_frameResouces);
+				return static_cast<FrameResource_Vulkan*>(m_frameResouces);
 			}
 
 

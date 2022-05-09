@@ -37,14 +37,13 @@ namespace Insight
 
 		enum ShaderStageFlagBits
 		{
-			ShaderStage_Vertex,
-			ShaderStage_TessControl,
-			ShaderStage_TessEval,
-			ShaderStage_Geometry,
-			ShaderStage_Pixel,
-
-			ShaderStage_Count
+			ShaderStage_Vertex			= 1 << 0,
+			ShaderStage_TessControl		= 1 << 1,
+			ShaderStage_TessEval		= 1 << 2,
+			ShaderStage_Geometry		= 1 << 3,
+			ShaderStage_Pixel			= 1 << 4,
 		};
+		const u32 ShaderStageCount = 5;
 		using ShaderStageFlags = u32;
 		std::string ShaderStageFlagsToString(ShaderStageFlags flags);
 
@@ -139,29 +138,17 @@ namespace Insight
         /// </summary>
         enum ImageUsageFlagsBits
         {
-            TransferSrc = 1 << 0,
-            TransferDst = 1 << 1,
-            Sampled = 1 << 2,
-            Storage = 1 << 3,
-            ColourAttachment = 1 << 4,
-            DepthStencilAttachment = 1 << 5,
-            TransientAttachment = 1 << 6,
-            InputAttachment = 1 << 7
+            TransferSrc					= 1 << 0,
+            TransferDst					= 1 << 1,
+            Sampled						= 1 << 2,
+            Storage						= 1 << 3,
+            ColourAttachment			= 1 << 4,
+            DepthStencilAttachment		= 1 << 5,
+            TransientAttachment			= 1 << 6,
+            InputAttachment				= 1 << 7
         };
         using ImageUsageFlags = u32;
         std::string ImageUsageFlagsToString(ImageUsageFlags flags);
-
-		enum class GPUBufferType
-		{
-			Invalid,
-			Vertex,
-			Index,
-			Uniform,
-			Constant,
-			Staging,
-			Readback,
-		};
-		std::string GPUBufferTypeToString(GPUBufferType type);
 
 		enum class DescriptorType
 		{
@@ -189,13 +176,15 @@ namespace Insight
 			Unknown
 		};
 
-		enum BufferType
+		enum class BufferType
 		{
-			BufferType_Vertex,
-			BufferType_Index,
-			BufferType_Uniform,
-			BufferType_Constant,
-			BufferType_Raw
+			Vertex,
+			Index,
+			Uniform,
+			Storage,
+			Raw,
+			Staging,
+			Readback
 		};
 
 		//enum GUPBufferFlagBits

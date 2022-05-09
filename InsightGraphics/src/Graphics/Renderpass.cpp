@@ -9,40 +9,10 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		void VulkanTest()
-		{
-			ZoneScoped;
-
-			ShaderDesc shaderDesc;
-			shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-			shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-			RHI_Shader* shader = Renderer::GetShader(shaderDesc);
-
-			PipelineStateObject pso{};
-			pso.Name = L"Swapchain_PSO";
-			pso.Shader = shader;
-			pso.CullMode = CullMode::None;
-			pso.RenderTargets.clear();
-			pso.Swapchain = true;
-			Renderer::SetPipelineStateObject(pso);
-
-			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			Renderer::SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-
-			Renderer::Draw(3, 1, 0, 0);
-		}
-
 		void Renderpass::Render()
 		{
 			ZoneScoped;
-			if (GraphicsManager::IsVulkan())
-			{
-				VulkanTest();
-			}
-			else
-			{
-				Sample();
-			}
+			Sample();
 		}
 
 		glm::vec4 swapchainColour = { 0,0,1,1 };

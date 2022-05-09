@@ -5,6 +5,7 @@
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
+#include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 
 namespace Insight
 {
@@ -12,7 +13,7 @@ namespace Insight
 	{
 		RHI_Buffer* RHI_Buffer::New()
 		{
-			if (GraphicsManager::IsVulkan()) { return nullptr; }
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Buffer_Vulkan); }
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Buffer_DX12); }
 			return nullptr;
 		}

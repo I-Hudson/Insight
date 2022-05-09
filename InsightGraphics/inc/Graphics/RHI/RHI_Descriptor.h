@@ -5,6 +5,7 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/Enums.h"
 #include "Graphics/DescriptorBuffer.h"
+#include "Graphics/PipelineStateObject.h"
 #include <unordered_map>
 
 namespace Insight
@@ -48,29 +49,30 @@ namespace Insight
 		public:
 			static RHI_Descriptor* New();
 
-			virtual void Update(std::vector<Descriptor> descriptors) = 0;
+			virtual void Update(const std::vector<Descriptor>& descriptors) = 0;
 		};
 
-		class RHI_DescriptorManager
+		class DescriptorAllocator
 		{
 		public:
-			RHI_DescriptorManager();
-			~RHI_DescriptorManager();
 
-			void SetRenderContext(RenderContext* context) { m_context = context; }
-			
-			std::unordered_map<int, RHI_Descriptor*> GetDescriptors(const DescriptorBuffer& buffer);
+			void SetPipeline(PipelineStateObject pso);
 
-			void ReleaseAll();
+			void SetUniform(int set, int binding, RHI_BufferView view);
 
+			Descriptor GetDescriptor(int set, int binding);
+
+			virtual void SetRenderContext(RenderContext* context) = 0;
+			virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) = 0;
+
+			virtual void Reset() = 0;
+			virtual void Destroy() = 0;
+
+		protected:
+			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; // Current descriptors information. 
+		
 		private:
-			std::unordered_map<int, RHI_Descriptor*> GetDescriptors(std::unordered_map<int, std::vector<Descriptor>> descriptors);
-
-		private:
-			std::unordered_map<u64, RHI_Descriptor*> m_descriptors;
-			RenderContext* m_context{ nullptr };
+			RenderContext* m_context = nullptr;
 		};
-
-
 	}
 }

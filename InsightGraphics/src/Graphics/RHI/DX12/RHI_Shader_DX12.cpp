@@ -2,12 +2,20 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include <bit>
+
 namespace Insight
 {
 	namespace Graphics
 	{
 		namespace RHI::DX12
 		{
+			IDxcBlob* RHI_Shader_DX12::GetStage(ShaderStageFlagBits stage)
+			{
+				int index = BitFlagsToIndex(stage);
+				return m_modules.at(index).Get();
+			}
+
 			void RHI_Shader_DX12::Create(RenderContext* context, ShaderDesc desc)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
@@ -38,7 +46,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Hlsl);
-				m_descriptors = compiler.GetDescriptors();
+				compiler.GetDescriptors(stage, m_descriptors);
 				m_modules[moduleIndex] = code;
 			}
 

@@ -7,11 +7,11 @@ float4 VSMain(uint id : SV_VertexID) : SV_POSITION
 
 cbuffer ubo : register(b0)
 {
-	float4 SwapchainColour = float4(1, 0, 0, 1);
+	float4 SwapchainColour;
 }
 
 float4 PSMain() : SV_TARGET
-{
-	//return SwapchainColour;
-	return float4(1, 0, 0, 1);
+{	
+	return SwapchainColour;
+	//return float4(1, 0, 0, 1);
 }

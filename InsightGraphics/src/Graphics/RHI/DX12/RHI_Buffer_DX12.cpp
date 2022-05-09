@@ -11,17 +11,17 @@ namespace Insight
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
 				m_bufferType = bufferType;
-				m_size = sizeBytes ;
+				m_size = sizeBytes;
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = {};
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
-				if (bufferType == BufferType::BufferType_Vertex || bufferType == BufferType_Index)
+				if (bufferType == BufferType::Vertex || bufferType == BufferType::Index)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
 				}
-				else if (bufferType == BufferType::BufferType_Uniform)
+				else if (bufferType == BufferType::Uniform)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); // must be a multiple 256 bytes

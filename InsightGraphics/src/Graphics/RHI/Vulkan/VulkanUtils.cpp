@@ -557,6 +557,20 @@ namespace Insight
             return vk::ShaderStageFlagBits::eVertex;
         }
 
+        vk::ShaderStageFlags ShaderStageFlagsToVulkan(ShaderStageFlags flags)
+        {
+            vk::ShaderStageFlags result = {};
+            for (size_t i = 0; i < ShaderStageCount; ++i)
+            {
+                ShaderStageFlagBits stageBit = static_cast<ShaderStageFlagBits>(1 << i);
+                if (flags & stageBit)
+                {
+                    result |= ShaderStageFlagBitsToVulkan(stageBit);
+                }
+            }
+            return result;
+        }
+
         vk::PrimitiveTopology PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type)
         {
             switch (type)
@@ -632,17 +646,17 @@ namespace Insight
             return vk::BlendOp::eAdd;
         }
 
-        vk::BufferUsageFlags GPUBufferTypeToVulkanBufferUsageFlags(GPUBufferType type)
+        vk::BufferUsageFlags BufferTypeToVulkanBufferUsageFlags(BufferType type)
         {
             switch (type)
             {
-            case GPUBufferType::Invalid:    break;
-            case GPUBufferType::Vertex:     return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case GPUBufferType::Index:      return vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case GPUBufferType::Uniform:    return vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case GPUBufferType::Constant:   return vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case GPUBufferType::Staging:    return vk::BufferUsageFlagBits::eTransferSrc;
-            case GPUBufferType::Readback:   return vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Vertex:     return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Index:      return vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Uniform:    return vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Storage:    return vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Raw:        return vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Staging:    return vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::Readback:   return vk::BufferUsageFlagBits::eTransferDst;
             default:
                 break;
             }
@@ -663,34 +677,56 @@ namespace Insight
             return vk::CullModeFlagBits::eNone;
         }
 
-        VmaAllocationCreateFlags GPUBufferTypeToVMAAllocCreateFlags(GPUBufferType type)
+        vk::DescriptorType DescriptorTypeToVulkan(DescriptorType type)
         {
             switch (type)
             {
-            case GPUBufferType::Invalid:    break;
-            case GPUBufferType::Vertex:     return 0;
-            case GPUBufferType::Index:      return 0;
-            case GPUBufferType::Uniform:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-            case GPUBufferType::Constant:   return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-            case GPUBufferType::Staging:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-            case GPUBufferType::Readback:   return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+            case Insight::Graphics::DescriptorType::Sampler:                    return vk::DescriptorType::eSampler;
+            case Insight::Graphics::DescriptorType::Combined_Image_Sampler:     return vk::DescriptorType::eCombinedImageSampler;
+            case Insight::Graphics::DescriptorType::Sampled_Image:              return vk::DescriptorType::eSampledImage;
+            case Insight::Graphics::DescriptorType::Storage_Image:              return vk::DescriptorType::eStorageImage;
+            case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:       return vk::DescriptorType::eUniformTexelBuffer;
+            case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:       return vk::DescriptorType::eStorageTexelBuffer;
+            case Insight::Graphics::DescriptorType::Unifom_Buffer:              return vk::DescriptorType::eUniformBuffer;
+            case Insight::Graphics::DescriptorType::Storage_Buffer:             return vk::DescriptorType::eStorageBuffer;
+            case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic:     return vk::DescriptorType::eUniformBufferDynamic;
+            case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic:     return vk::DescriptorType::eStorageBufferDynamic;
+            case Insight::Graphics::DescriptorType::Input_Attachment:           return vk::DescriptorType::eInputAttachment;
+            case Insight::Graphics::DescriptorType::Unknown:                    return vk::DescriptorType::eCombinedImageSampler;
+            default:
+                break;
+            }
+            return vk::DescriptorType::eCombinedImageSampler;
+        }
+
+        VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)
+        {
+            switch (type)
+            {
+            case BufferType::Vertex:     return 0;
+            case BufferType::Index:      return 0;
+            case BufferType::Uniform:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case BufferType::Storage:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case BufferType::Raw:        return 0;
+            case BufferType::Staging:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+            case BufferType::Readback:   return VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
             default:
                 break;
             }
             return 0;
         }
 
-        VmaMemoryUsage GPUBufferTypeToVMAUsage(GPUBufferType type)
+        VmaMemoryUsage BufferTypeToVMAUsage(BufferType type)
         {
             switch (type)
             {
-            case GPUBufferType::Invalid:    break;
-            case GPUBufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
-            case GPUBufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
-            case GPUBufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-            case GPUBufferType::Constant:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-            case GPUBufferType::Staging:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-            case GPUBufferType::Readback:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+            case BufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case BufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case BufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+            case BufferType::Storage:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+            case BufferType::Raw:        return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case BufferType::Staging:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+            case BufferType::Readback:   return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
             default:
                 break;
             }

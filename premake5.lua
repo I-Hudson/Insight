@@ -21,6 +21,7 @@ workspace "Insight"
         "GLM_FORCE_SWIZZLE",
         "TRACY_IMPORTS",
         "TRACY_ENABLE",
+        "PLATFORM_X64",
     }
 
     editandcontinue "Off"

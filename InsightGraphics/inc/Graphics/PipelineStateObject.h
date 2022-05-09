@@ -2,6 +2,7 @@
 
 #include "Graphics/Enums.h"
 #include <vector>
+#include <memory>
 
 namespace Insight
 {

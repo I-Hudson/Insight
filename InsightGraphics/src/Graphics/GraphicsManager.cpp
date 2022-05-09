@@ -63,6 +63,7 @@ namespace Insight
 					m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
 					m_renderContext = RenderContext::New();
 					m_renderContext->Init();
+					Renderer::s_FrameCommandList.Reset();
 					return;
 				}
 			})

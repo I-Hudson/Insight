@@ -102,7 +102,9 @@ namespace Insight
 			m_commandCount = 0;
 			m_readHead = (Byte*)m_commands;
 			m_pso = {};
+
 			m_descriptorBuffer.Reset();
+			memset(m_commands, 0, m_commandMaxByteSize);
 		}
 
 		void CommandList::ResetReadHead()

@@ -4,6 +4,8 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Core/Logger.h"
 
+#include "Graphics/RHI/Vulkan/VulkanUtils.h"
+
 #include <iostream>
 
 namespace Insight
@@ -18,23 +20,51 @@ namespace Insight
 			PipelineLayoutManager_Vulkan::~PipelineLayoutManager_Vulkan()
 			{ }
 
-			vk::PipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout()
+			vk::PipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout(PipelineStateObject pso)
 			{
 				assert(m_context != nullptr);
 
-				const u64 hash = 0;
+				const std::vector<Descriptor> descriptors = pso.Shader->GetDescriptors();
+				u64 hash = 0;
+				for (const Descriptor& descriptor : descriptors)
+				{
+					HashCombine(hash, descriptor.GetHash(false));
+				}
+
 				auto itr = m_layouts.find(hash);
 				if (itr != m_layouts.end())
 				{
 					return itr->second;
 				}
 
+				std::vector<vk::DescriptorSetLayout> setLayouts = {};
+
+				int currentSet = 0;
+				std::vector<Descriptor> currentDescriptors;
+
+				for (const Descriptor& descriptor : descriptors)
+				{
+					if (currentSet != descriptor.Set)
+					{
+						RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentSet, currentDescriptors));
+						currentDescriptors.clear();
+						currentSet = descriptor.Set;
+
+						setLayouts.push_back(layoutVulkan->GetLayout());
+					}
+					currentDescriptors.push_back(descriptor);
+				}
+				RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentSet, currentDescriptors));
+				setLayouts.push_back(layoutVulkan->GetLayout());
+
+
 				vk::PipelineLayoutCreateInfo createInfo = vk::PipelineLayoutCreateInfo(
 					{},
-					{},
+					setLayouts,
 					{});
 				vk::PipelineLayout layout = m_context->GetDevice().createPipelineLayout(createInfo);
 				m_layouts[hash] = layout;
+
 				return layout;
 			}
 
@@ -66,25 +96,26 @@ namespace Insight
 
 				// Create pipeline layout.
 				// Create descriptor set layout
-				vk::PipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout();
+				vk::PipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 
 				RHI_Shader_Vulkan* shaderVulkan = dynamic_cast<RHI_Shader_Vulkan*>(pso.Shader);
 				std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
-				std::array<std::string, ShaderStage_Count> shaderFuncNames;
-				for (int i = 0; i < ShaderStage_Count; ++i)
+				std::array<std::string, ShaderStageCount> shaderFuncNames;
+				for (int i = 0; i < ShaderStageCount; ++i)
 				{
-					vk::ShaderModule shaderModule = shaderVulkan->GetStage((ShaderStageFlagBits)i);
+					ShaderStageFlagBits shaderStage =static_cast<ShaderStageFlagBits>(1 << i);
+					vk::ShaderModule shaderModule = shaderVulkan->GetStage(shaderStage);
 					if (!shaderModule)
 					{
 						continue;
 					}
 			
-					for (const wchar_t wChar : shaderVulkan->GetMainFuncName((ShaderStageFlagBits)i))
+					for (const wchar_t wChar : shaderVulkan->GetMainFuncName(shaderStage))
 					{
 						shaderFuncNames[i].push_back((char)wChar);
 					}
 
-					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan((ShaderStageFlagBits)i), 
+					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan(shaderStage),
 						shaderModule, 
 						shaderFuncNames[i].c_str());
 					pipelineShaderStageCreateInfos.push_back(info);

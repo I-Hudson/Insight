@@ -9,6 +9,9 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			/// <summary>
+			/// RHI_DescriptorLayout_DX12
+			/// </summary>
 			void RHI_DescriptorLayout_DX12::Release()
 			{
 				if (m_layout)
@@ -29,6 +32,16 @@ namespace Insight
 					m_layout->SetName(name.c_str());
 				}
 			}
+
+
+			/// <summary>
+			/// RHI_Descriptor_DX12
+			/// </summary>
+			/// <param name="descriptors"></param>
+			void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
+			{
+			}
+
 
 			/// <summary>
 			/// RHI_DescriptorLayout_DX12
@@ -227,44 +240,13 @@ namespace Insight
 			{
 			}
 
+			bool RHI_Descriptor_DX12::ValidResouce()
+			{
+				return false;
+			}
+
 			void RHI_Descriptor_DX12::SetName(std::wstring name)
 			{
-			}
-
-			void DescriptorAllocator_DX12::SetPipeline(PipelineStateObject pso)
-			{
-				RHI_Shader* shader = pso.Shader;
-				if (!shader)
-				{
-					return;
-				}
-
-				m_pso = pso;
-				m_descriptors.clear();
-
-				std::vector<Descriptor> descriptors = shader->GetDescriptors();
-				for (const Descriptor& desc : descriptors)
-				{
-					m_descriptors[desc.Set].push_back(desc);
-				}
-				for (auto& descs : m_descriptors)
-				{
-					std::sort(descs.second.begin(), descs.second.end(), [](const Descriptor& d1, const Descriptor& d2)
-						{
-							return d1.Binding < d2.Binding;
-						});
-				}
-			}
-
-			void DescriptorAllocator_DX12::SetUniform(int set, int binding, RHI_BufferView view)
-			{
-				std::vector<Descriptor>& descriptors = m_descriptors[set];
-				if (binding >= (int)descriptors.size())
-				{
-					IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
-					return;
-				}
-				descriptors[binding].BufferView = view;
 			}
 
 			bool DescriptorAllocator_DX12::SetupDescriptors()
@@ -339,9 +321,14 @@ namespace Insight
 				cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
 			}
 
-			Descriptor DescriptorAllocator_DX12::GetDescriptor(int set, int binding)
+			void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
 			{
-				return m_descriptors[set][binding];
+				m_context = dynamic_cast<RenderContext_DX12*>(context);
+			}
+
+			bool DescriptorAllocator_DX12::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
+			{
+				return false;
 			}
 
 			void DescriptorAllocator_DX12::Reset()

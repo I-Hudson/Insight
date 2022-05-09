@@ -180,6 +180,14 @@ namespace Insight
 				const vk::PhysicalDeviceFeatures deviceFeatures = m_adapter.getFeatures();
 
 				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, &deviceFeatures);
+
+				vk::PhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures = {};
+				if (HasExtension(DeviceExtension::BindlessDescriptors))
+				{
+					physicalDeviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
+					deviceCreateInfo.setPNext(&physicalDeviceDescriptorIndexingFeatures);
+				}
+
 				m_device = m_adapter.createDevice(deviceCreateInfo);
 
 				vk::DynamicLoader dl;
@@ -201,6 +209,13 @@ namespace Insight
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineStateObjectManager.SetRenderContext(this);
 				m_renderpassManager.SetRenderContext(this);
+
+				// Initialise vulkan memory allocator
+				VmaAllocatorCreateInfo allocatorInfo{};
+				allocatorInfo.instance = m_instnace;
+				allocatorInfo.physicalDevice = m_adapter;
+				allocatorInfo.device = m_device;
+				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
 				for (FrameResource_Vulkan& frame : m_frames)
 				{
@@ -246,6 +261,9 @@ namespace Insight
 				{
 					m_instnace.destroySurfaceKHR(m_surface);
 				}
+
+				vmaDestroyAllocator(m_vmaAllocator);
+				m_vmaAllocator = VK_NULL_HANDLE;
 
 				m_device.destroy();
 				m_device = nullptr;
@@ -352,9 +370,6 @@ namespace Insight
 				frame.CommandListManager.Update();
 				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 
-				vk::CommandBufferBeginInfo beginInfo = vk::CommandBufferBeginInfo({ vk::CommandBufferUsageFlagBits::eOneTimeSubmit });
-				cmdListVulkan->GetCommandList().begin(beginInfo);
-
 				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
 
 				cmdListVulkan->GetCommandList().end();
@@ -411,10 +426,12 @@ namespace Insight
 				}
 
 				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, frame.SwapchainAcquire);
-				m_availableSwapchainImage = nextImage.value;		
+				m_availableSwapchainImage = nextImage.value;
 				m_device.resetFences({ frame.SubmitFence });
 
+				frame.DescriptorAllocator.Reset();
 				frame.CommandListManager.Update();
+				
 				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 				cmdListVulkan->Record(cmdList, &frame);
 				cmdListVulkan->GetCommandList().endRenderPass();
@@ -471,6 +488,8 @@ namespace Insight
 
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 				vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+
+				m_currentFrame = (m_currentFrame + 1) % c_FrameCount;
 
 				ImGui_ImplVulkan_NewFrame();
 				ImGuiBeginFrame();
@@ -796,7 +815,8 @@ namespace Insight
 				Context = context;
 
 				CommandListManager.Create(context);
-				//UniformBuffer.Create(Context);
+				DescriptorAllocator.SetRenderContext(Context);
+				UniformBuffer.Create(Context);
 
 				vk::SemaphoreCreateInfo semaphoreInfo = vk::SemaphoreCreateInfo();
 				SwapchainAcquire = Context->GetDevice().createSemaphore(semaphoreInfo);
@@ -809,6 +829,7 @@ namespace Insight
 			void FrameResource_Vulkan::Destroy()
 			{
 				CommandListManager.Destroy();
+				DescriptorAllocator.Destroy();
 				UniformBuffer.Release();
 
 				Context->GetDevice().destroySemaphore(SwapchainAcquire);

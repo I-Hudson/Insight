@@ -3,6 +3,7 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 #include <vulkan/vulkan.hpp>
+#include "VmaUsage.h"
 
 extern vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)];
 extern PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)];
@@ -18,14 +19,57 @@ namespace Insight
 		vk::Format PixelFormatToVulkan(PixelFormat format);
 		vk::PipelineBindPoint GPUQueueToVulkanBindPoint(GPUQueue queue);
 		vk::ShaderStageFlagBits ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
+		vk::ShaderStageFlags ShaderStageFlagsToVulkan(ShaderStageFlags flags);
 		vk::PrimitiveTopology PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);
 		vk::ColorComponentFlags ColourComponentFlagsToVulkan(ColourComponentFlags flags);
 		vk::BlendFactor BlendFactorToVulkan(BlendFactor factor);
 		vk::BlendOp BlendOpToVulkan(BlendOp op);
-		vk::BufferUsageFlags GPUBufferTypeToVulkanBufferUsageFlags(GPUBufferType type);
+		vk::BufferUsageFlags BufferTypeToVulkanBufferUsageFlags(BufferType type);
 		vk::CullModeFlags CullModeToVulkan(CullMode cullMode);
+		vk::DescriptorType DescriptorTypeToVulkan(DescriptorType type);
 
-		VmaAllocationCreateFlags GPUBufferTypeToVMAAllocCreateFlags(GPUBufferType type);
-		VmaMemoryUsage GPUBufferTypeToVMAUsage(GPUBufferType type);
+		VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type);
+		VmaMemoryUsage BufferTypeToVMAUsage(BufferType type);
+
+		/*
+		std::string VkErrorToString(VkResult errorCode)
+		{
+			switch (errorCode)
+			{
+#define STR(r) case VK_ ##r: return #r
+				STR(NOT_READY);
+				STR(TIMEOUT);
+				STR(EVENT_SET);
+				STR(EVENT_RESET);
+				STR(INCOMPLETE);
+				STR(ERROR_OUT_OF_HOST_MEMORY);
+				STR(ERROR_OUT_OF_DEVICE_MEMORY);
+				STR(ERROR_INITIALIZATION_FAILED);
+				STR(ERROR_DEVICE_LOST);
+				STR(ERROR_MEMORY_MAP_FAILED);
+				STR(ERROR_LAYER_NOT_PRESENT);
+				STR(ERROR_EXTENSION_NOT_PRESENT);
+				STR(ERROR_FEATURE_NOT_PRESENT);
+				STR(ERROR_INCOMPATIBLE_DRIVER);
+				STR(ERROR_TOO_MANY_OBJECTS);
+				STR(ERROR_FORMAT_NOT_SUPPORTED);
+				STR(ERROR_SURFACE_LOST_KHR);
+				STR(ERROR_NATIVE_WINDOW_IN_USE_KHR);
+				STR(SUBOPTIMAL_KHR);
+				STR(ERROR_OUT_OF_DATE_KHR);
+				STR(ERROR_INCOMPATIBLE_DISPLAY_KHR);
+				STR(ERROR_VALIDATION_FAILED_EXT);
+				STR(ERROR_INVALID_SHADER_NV);
+#undef STR
+			default:
+				return "UNKNOWN_ERROR";
+			}
+		}
+		*/
+
+		inline void ThrowIfFailed(VkResult errorCode)
+		{
+			assert(errorCode == VK_SUCCESS);//&& VkErrorToString(errorCode).c_str());
+		}
 	}
 }

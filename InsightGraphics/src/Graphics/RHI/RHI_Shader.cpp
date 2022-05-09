@@ -109,6 +109,13 @@ namespace Insight
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
 			{
 				arguments.push_back(L"-spirv");
+				arguments.push_back(L"-D");
+				arguments.push_back(L"VULKAN");
+			}
+			else
+			{
+				arguments.push_back(L"-D");
+				arguments.push_back(L"DX12");
 			}
 
 			std::wstring mainFunc = StageToFuncName(stage);
@@ -176,10 +183,8 @@ namespace Insight
 			return code;
 		}
 
-		std::vector<Descriptor> ShaderCompiler::GetDescriptors()
+		void ShaderCompiler::GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors)
 		{
-			std::vector<Descriptor> descriptors;
-
 			RHI::DX12::ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
@@ -209,6 +214,23 @@ namespace Insight
 			result = spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data());
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 
+			auto findPreviousDescriptor = [](const Descriptor& descriptoToFind, const std::vector<Descriptor>& descriptorsToFindIn) 
+				-> std::pair<bool, Descriptor*>
+			{
+				for (auto& desc : descriptorsToFindIn)
+				{
+					if (descriptoToFind.Set == desc.Set
+						&& descriptoToFind.Binding == desc.Binding
+						&& descriptoToFind.Size == desc.Size
+						&& descriptoToFind.Type == desc.Type
+						&& descriptoToFind.ResourceType == desc.ResourceType)
+					{
+						return std::make_pair(true, &const_cast<Descriptor&>(desc));
+					}
+				}
+				return std::make_pair(false, nullptr);
+			};
+
 			for (size_t i = 0; i < descriptorSets.size(); ++i)
 			{
 				const SpvReflectDescriptorSet& descriptorSet = *descriptorSets[i];
@@ -216,22 +238,37 @@ namespace Insight
 				{
 					const SpvReflectDescriptorBinding& binding = *descriptorSet.bindings[j];
 					const SpvReflectBlockVariable& block = descriptorSet.bindings[j]->block;
-				
-					descriptors.push_back(Descriptor(
+
+					Descriptor descriptor(
 						binding.set,
 						binding.binding,
-						0,
+						stage,
 						block.size,
 						SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type),
 						SpvReflectDescriptorResourceTypeToDescriptorResourceType(binding.resource_type)
-					));
+					);
+
+					auto [foundDescriptor, descriptorFound] = findPreviousDescriptor(descriptor, descriptors);
+					if (foundDescriptor)
+					{
+						descriptorFound->Stage |= stage;
+					}
+					else
+					{
+						descriptors.push_back(descriptor);
+					}
 				}
 			}
 
 			// Destroy the reflection data when no longer required.
 			spvReflectDestroyShaderModule(&module);
 
-			return descriptors;
+			// Sort all descriptors from 0 to n, by Set then Binding.
+			std::sort(descriptors.begin(), descriptors.end(), [](const Descriptor& d1, const Descriptor& d2)
+				{
+					return d1.Set != d2.Set ? d1.Set < d2.Set
+						: d1.Binding < d2.Binding;
+				});
 		}
 
 

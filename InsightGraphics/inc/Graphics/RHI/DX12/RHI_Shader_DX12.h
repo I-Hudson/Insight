@@ -18,7 +18,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Shader_DX12() override { Destroy(); }
 
-				IDxcBlob* GetStage(ShaderStageFlagBits stage) { return m_modules.at(stage).Get(); }
+				IDxcBlob* GetStage(ShaderStageFlagBits stage);
 				D3D12_INPUT_LAYOUT_DESC GetInputLayout() const { return m_inputLayout; }
 
 			private:

@@ -1,7 +1,9 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
+#include "Graphics/RHI/RHI_Shader.h"
 
 #include "Graphics/GraphicsManager.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
+#include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 
 namespace Insight
 {
@@ -13,7 +15,7 @@ namespace Insight
 		/// <returns></returns>
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
-			if (GraphicsManager::IsVulkan()) { return nullptr; }
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
 			return nullptr;
 		}
@@ -74,79 +76,62 @@ namespace Insight
 		/// <returns></returns>
 		RHI_Descriptor* RHI_Descriptor::New()
 		{
+			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Descriptor_Vulkan); }
+			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Descriptor_DX12); }
 			return nullptr;
 		}
 
 
+
 		/// <summary>
-		/// RHI_DescriptorManager
+		/// DescriptorAllocator
 		/// </summary>
-		RHI_DescriptorManager::RHI_DescriptorManager()
+		/// <param name="pso"></param>
+		void DescriptorAllocator::SetPipeline(PipelineStateObject pso)
 		{
-		}
-
-		RHI_DescriptorManager::~RHI_DescriptorManager()
-		{
-			ReleaseAll();
-		}
-
-		std::unordered_map<int, RHI_Descriptor*> RHI_DescriptorManager::GetDescriptors(const DescriptorBuffer& buffer)
-		{
-			std::unordered_map<int, std::vector<Descriptor>> descriptors;
-			for (const auto& sets : buffer.GetUniforms())
+			RHI_Shader* shader = pso.Shader;
+			if (!shader)
 			{
-				const int setIndex = sets.first;
-				for (const auto& binding : sets.second )
-				{
-					const int bindingIndex = binding.first;
-				//	const int bindingSize = binding.second.Size;
-				//	const void* resource = binding.second.Ptr;
-				//	descriptors[setIndex].push_back(Descriptor(setIndex,
-				//		bindingIndex, 
-				//		0, 
-				//		bindingSize, 
-				//		DescriptorType::Unifom_Buffer, 
-				//		DescriptorResourceType::CBV, 
-				//		nullptr));
-				}
+				return;
 			}
-			return GetDescriptors(descriptors);
-		}
 
-		void RHI_DescriptorManager::ReleaseAll()
-		{
-			for (auto& pair : m_descriptors)
-			{
-				pair.second->Release();
-				DeleteTracked(pair.second);
-			}
 			m_descriptors.clear();
+
+			std::vector<Descriptor> descriptors = shader->GetDescriptors();
+			for (const Descriptor& desc : descriptors)
+			{
+				m_descriptors[desc.Set].push_back(desc);
+			}
+			for (auto& descs : m_descriptors)
+			{
+				std::sort(descs.second.begin(), descs.second.end(), [](const Descriptor& d1, const Descriptor& d2)
+					{
+						return d1.Binding < d2.Binding;
+					});
+			}
 		}
 
-		std::unordered_map<int, RHI_Descriptor*> RHI_DescriptorManager::GetDescriptors(std::unordered_map<int, std::vector<Descriptor>> descriptors)
+		void DescriptorAllocator::SetUniform(int set, int binding, RHI_BufferView view)
 		{
-			std::unordered_map<int, RHI_Descriptor*> rhi_Descriptors;
-			for (const auto sets : descriptors)
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (binding >= (int)descriptors.size())
 			{
-				u64 hash = 0;
-				for (const Descriptor& descriptor : sets.second)
-				{
-					HashCombine(hash, descriptor.GetHash(true));
-				}
-
-				auto itr = m_descriptors.find(hash);
-				if (itr != m_descriptors.end())
-				{
-					rhi_Descriptors[sets.first] = itr->second;
-					itr->second->Update(sets.second);
-				}
-				else
-				{
-					RHI_Descriptor* newDescriptor = RHI_Descriptor::New();
-					//newDescriptor->
-				}
+				IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
+				return;
 			}
-			return rhi_Descriptors;
+			descriptors[binding].BufferView = view;
+		}
+
+
+		Descriptor DescriptorAllocator::GetDescriptor(int set, int binding)
+		{
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (binding >= (int)descriptors.size())
+			{
+				IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
+				return { };
+			}
+			return descriptors[binding];
 		}
 	}
 }

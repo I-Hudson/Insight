@@ -2,7 +2,6 @@
 
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
-#include "Graphics/PipelineStateObject.h"
 #include <unordered_set>
 
 namespace Insight
@@ -37,8 +36,11 @@ namespace Insight
 			{
 			public:
 
-				// RHI_DescriptorLayout
+				virtual void Update(const std::vector<Descriptor>& descriptors) override;
+
+				// RHI_Resouce
 				virtual void Release() override;
+				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
 			private:
@@ -119,26 +121,21 @@ namespace Insight
 				std::unordered_map<u64, int> m_descriptorHashToHandleIndex; // Keep track of all the slots for the descriptors.
 			};
 
-			class DescriptorAllocator_DX12
+			class DescriptorAllocator_DX12 : public DescriptorAllocator
 			{
 			public:
-
-				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
-
-				void SetPipeline(PipelineStateObject pso);
-
-				void SetUniform(int set, int binding, RHI_BufferView view);
 
 				bool SetupDescriptors();
 				std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
 				void SetDescriptors(CommandList_DX12* cmdList);
 
 				void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
-
-				Descriptor GetDescriptor(int set, int binding);
-
-				void Reset();
-				void Destroy();
+				
+				// DescriptorAllocator
+				virtual void SetRenderContext(RenderContext* context) override;
+				virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
+				virtual void Reset() override;
+				virtual void Destroy() override;
 
 			private:
 				RenderContext_DX12* m_context = nullptr;
