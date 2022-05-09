@@ -197,12 +197,10 @@ namespace Insight
 
 				FrameResource_DX12& frame = m_frames[m_frameIndex];
 
-				// Record cmd buffers and execute
-				frame.CommandListManager.Update();
-				RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
+				frame.Reset();
 
-				frame.DescriptorAllocator.Reset();
-				frame.UniformBuffer.Reset();
+				// Record cmd buffers and execute
+				RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
 				// Set back buffer texture/image to render target so we can render to it.
 				//cmdListDX12->GetCommandList()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -449,6 +447,12 @@ namespace Insight
 				CommandListManager.Destroy();
 				UniformBuffer.Release();
 				DescriptorAllocator.Destroy();
+			}
+
+			void FrameResource_DX12::Reset()
+			{
+				FrameResouce::Reset();
+				DescriptorAllocator.Reset();
 			}
 }
 	}

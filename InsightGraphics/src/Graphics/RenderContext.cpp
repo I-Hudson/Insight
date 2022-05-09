@@ -100,6 +100,12 @@ namespace Insight
 				m_buffers[bufferType].FreeResource(buffer);
 			}
 		}
+		
+		void FrameResouce::Reset()
+		{
+			CommandListManager.Update();
+			UniformBuffer.Reset();
+		}
 	}
 
 	

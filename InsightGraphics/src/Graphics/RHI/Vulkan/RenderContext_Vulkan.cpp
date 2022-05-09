@@ -429,8 +429,7 @@ namespace Insight
 				m_availableSwapchainImage = nextImage.value;
 				m_device.resetFences({ frame.SubmitFence });
 
-				frame.DescriptorAllocator.Reset();
-				frame.CommandListManager.Update();
+				frame.Reset();
 				
 				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 				cmdListVulkan->Record(cmdList, &frame);
@@ -515,6 +514,8 @@ namespace Insight
 
 			vk::Instance RenderContext_Vulkan::CreateInstance()
 			{
+				ZoneScoped;
+
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
 					"ApplciationName",
 					0,
@@ -569,6 +570,8 @@ namespace Insight
 
 			vk::PhysicalDevice RenderContext_Vulkan::FindAdapter()
 			{
+				ZoneScoped;
+
 				std::vector<vk::PhysicalDevice> physicalDevices = m_instnace.enumeratePhysicalDevices();
 				vk::PhysicalDevice adapter(nullptr);
 				for (auto& gpu : physicalDevices)
@@ -671,6 +674,8 @@ namespace Insight
 			
 			void RenderContext_Vulkan::CreateSwapchain()
 			{
+				ZoneScoped;
+
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
 				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
 
@@ -828,6 +833,7 @@ namespace Insight
 
 			void FrameResource_Vulkan::Destroy()
 			{
+				ZoneScoped;
 				CommandListManager.Destroy();
 				DescriptorAllocator.Destroy();
 				UniformBuffer.Release();
@@ -835,6 +841,13 @@ namespace Insight
 				Context->GetDevice().destroySemaphore(SwapchainAcquire);
 				Context->GetDevice().destroySemaphore(SignalSemaphore);
 				Context->GetDevice().destroyFence(SubmitFence);
+			}
+			
+			void FrameResource_Vulkan::Reset()
+			{
+				ZoneScoped;
+				FrameResouce::Reset();
+				DescriptorAllocator.Reset();
 			}
 }
 	}

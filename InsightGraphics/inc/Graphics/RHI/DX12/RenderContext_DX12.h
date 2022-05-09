@@ -21,6 +21,7 @@ namespace Insight
 
 				void Init(RenderContext_DX12* context);
 				void Destroy();
+				virtual void Reset() override;
 			};
 
 			class RenderContext_DX12 : public RenderContext

@@ -36,6 +36,7 @@ namespace Insight
 
 				void Init(RenderContext_Vulkan* context);
 				void Destroy();
+				void Reset();
 			};
 
 			class RenderContext_Vulkan : public RenderContext

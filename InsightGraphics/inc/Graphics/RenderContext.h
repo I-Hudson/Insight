@@ -68,6 +68,8 @@ namespace Insight
 		{
 			RHI_DynamicBuffer UniformBuffer;
 			CommandListManager CommandListManager;
+
+			virtual void Reset();
 		};
 	}
 
