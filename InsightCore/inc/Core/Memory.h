@@ -50,16 +50,15 @@ void operator delete[](void* ptr)
 
 namespace Insight::Core
 {
-	class IS_CORE MemoryNewObject
+	struct IS_CORE MemoryNewObject
 	{
-	public:
 		MemoryNewObject(void* ptr);
 		void* Ptr;
 	};
 }
-#define NewTracked(Type) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
-#define NewArgsTracked(Type, ...) static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
-#define TrackPtr(Ptr) Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
+#define NewTracked(Type)			static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
+#define NewArgsTracked(Type, ...)	static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
+#define TrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
 #define DeleteTracked(Ptr)								\
 Insight::Core::MemoryTracker::Instance().UnTrack(Ptr);	\
@@ -68,4 +67,4 @@ if (Ptr)												\
 	delete Ptr;											\
 	Ptr = nullptr;										\
 };
-#define UntrackPtr(Ptr) Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
+#define UntrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)

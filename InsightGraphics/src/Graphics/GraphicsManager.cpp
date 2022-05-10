@@ -80,7 +80,6 @@ namespace Insight
 			{
 				m_renderContext->Destroy();
 				DeleteTracked(m_renderContext);
-				m_renderContext = nullptr;
 			}
 		}
 	}

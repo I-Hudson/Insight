@@ -22,10 +22,17 @@ namespace Insight
 		{
 			ZoneScoped;
 
-			RHI_Buffer* vBuffer = nullptr;
+			static RHI_Buffer* vBuffer = nullptr;
+			if (!vBuffer)
 			{
 				ZoneScopedN("CreateVertexBuffer");
-				//vBuffer = Renderer::CreateVertexBuffer(128);
+
+				struct Vertex
+				{
+					glm::vec3 Pos;
+					glm::vec3 Colour;
+				};
+				vBuffer = Renderer::CreateVertexBuffer(sizeof(Vertex) * 3);
 			}
 
 			RHI_Shader* shader = nullptr;
@@ -62,7 +69,7 @@ namespace Insight
 
 			{
 				ZoneScopedN("FreeVertexBuffer");
-				Renderer::FreeVertexBuffer(vBuffer);
+				//Renderer::FreeVertexBuffer(vBuffer);
 			}
 		}
 	}

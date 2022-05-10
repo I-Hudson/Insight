@@ -8,7 +8,7 @@ namespace Insight
 	{
 		DescriptorBuffer::DescriptorBuffer()
 		{
-			Resize(256);
+			Resize(2048);
 		}
 
 		DescriptorBuffer::DescriptorBuffer(const DescriptorBuffer& other)
@@ -125,8 +125,8 @@ namespace Insight
 				return;
 			}
 
-			m_buffer = (Byte*)malloc(m_capacity);
 			m_capacity = newCapacity;
+			m_buffer = (Byte*)malloc(m_capacity);
 			TrackPtr(m_buffer);
 		}
 

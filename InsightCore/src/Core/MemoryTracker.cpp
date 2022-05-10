@@ -1,5 +1,6 @@
 #include "Core/MemoryTracker.h"
 #include "Core/Logger.h"
+#include "Platform/Platform.h"
 
 #include <iostream>
 #include <sstream>
@@ -78,18 +79,32 @@ namespace Insight
 #define MEMORY_TRACK_CALLSTACK
 		std::array<std::string, c_CallStackCount> MemoryTracker::GetCallStack()
 		{
+			std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
 
+			for (size_t i = 0; i < c_CallStackCount; ++i)
+			{
+				if (i < callStackVector.size())
+				{
+					callStack[i] = std::move(callStackVector[i]);
+				}
+			}
+
+			return callStack;
 #if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)
+			/*
 			const ULONG framesToSkip = 0;
 			const ULONG framesToCapture = c_CallStackCount;
 			void* backTrace[framesToCapture]{};
 			ULONG backTraceHash = 0;
 
-			SYMBOL_INFO* symbol;
-			HANDLE process;
+			SYMBOL_INFO* symbol = nullptr;
+			static HANDLE process = nullptr;
+			if (!process)
+			{
+				process = GetCurrentProcess();
+			}
 
-			process = GetCurrentProcess();
 			if (!m_symInitialize)
 			{
 				m_symInitialize = SymInitialize(process, NULL, TRUE);
@@ -129,6 +144,7 @@ namespace Insight
 				}
 				free(symbol);
 			}
+			*/
 #endif
 
 			return callStack;
