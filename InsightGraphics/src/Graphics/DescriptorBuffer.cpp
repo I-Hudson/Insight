@@ -24,7 +24,7 @@ namespace Insight
 		DescriptorBuffer& DescriptorBuffer::operator=(const DescriptorBuffer& other)
 		{
 			//Resize(0); // Reset our current buffer to 0;
-			//Resize(other.m_capacity); // Resize our buffer to the same size as other's.
+			Resize(other.m_capacity); // Resize our buffer to the same size as other's.
 			m_size = other.m_size;
 
 			memcpy_s(m_buffer, m_capacity, other.m_buffer, other.m_capacity); // Call all contents from other into this buffer.
@@ -43,8 +43,7 @@ namespace Insight
 
 					for (const auto& uniform : binding.second)
 					{
-						const int bufferOffset = (int)(uniform.Ptr - otherStartPtr);
-						m_uniforms[setIndex][bindingIndex].push_back(Uniform(m_buffer + bufferOffset, uniform.Size, setIndex, bindingIndex));
+						m_uniforms[setIndex][bindingIndex].push_back(Uniform(uniform.Offset, uniform.Size, setIndex, bindingIndex));
 					}
 				}
 			}
@@ -83,9 +82,11 @@ namespace Insight
 			Byte* startPtr = m_buffer + m_size; // Get our start point in the buffer block of memory.
 			memcpy_s(startPtr, sizeInBytes, data, sizeInBytes); // Copy data info the block of memory.
 
+			const int offset = m_size;
+			m_uniforms[set][binding].push_back(Uniform(offset, sizeInBytes, set, binding));
+
 			m_size += AlignUp(sizeInBytes, 256); // Increase size member. Align with 256.
-			m_uniforms[set][binding].push_back(Uniform(startPtr, sizeInBytes, set, binding));
-			return DescriptorBufferView(this, (int)(startPtr - m_buffer), AlignUp(sizeInBytes, 256));
+			return DescriptorBufferView(this, offset, AlignUp(sizeInBytes, 256));
 		}
 
 		void DescriptorBuffer::Resize(int newCapacity)
@@ -108,13 +109,15 @@ namespace Insight
 			{
 				return;
 			}
-			m_capacity = newCapacity;
 
 			if (m_buffer)
 			{
 				// We need to reallocte.
 				void* newBlock = realloc(m_buffer, newCapacity);
 				assert(newBlock != nullptr && "[DescriptorBuffer::Resize] Unable to realloc buffer.");
+
+				memcpy_s(newBlock, newCapacity, m_buffer, m_capacity);
+				m_capacity = newCapacity;
 
 				UntrackPtr(m_buffer);
 				m_buffer = (Byte*)newBlock;
@@ -123,6 +126,7 @@ namespace Insight
 			}
 
 			m_buffer = (Byte*)malloc(m_capacity);
+			m_capacity = newCapacity;
 			TrackPtr(m_buffer);
 		}
 

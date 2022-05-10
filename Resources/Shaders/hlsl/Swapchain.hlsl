@@ -7,11 +7,17 @@ float4 VSMain(uint id : SV_VertexID) : SV_POSITION
 
 cbuffer ubo : register(b0)
 {
-	float4 SwapchainColour;
+	float2 SwapchainColour;
+}
+cbuffer ubo2 : register(b1)
+{
+	float2 SwapchainColour2;
 }
 
 float4 PSMain() : SV_TARGET
 {	
-	return SwapchainColour;
+	float4 result = float4(SwapchainColour.x, SwapchainColour.y, SwapchainColour2.x, SwapchainColour2.y);
+	//result += textureColor.Sample(samplerColor, float2(0, 0));
+	return result;
 	//return float4(1, 0, 0, 1);
 }

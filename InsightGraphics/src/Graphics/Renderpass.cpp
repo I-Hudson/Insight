@@ -15,7 +15,8 @@ namespace Insight
 			Sample();
 		}
 
-		glm::vec4 swapchainColour = { 0,0,1,1 };
+		glm::vec2 swapchainColour = { 0,0 };
+		glm::vec2 swapchainColour2 = { 0,0 };
 
 		void Renderpass::Sample()
 		{
@@ -50,10 +51,12 @@ namespace Insight
 			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 			Renderer::SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
-			IMGUI_VALID(ImGui::DragFloat4("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
+			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
+			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
 				ZoneScopedN("SetUniform");
 				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
+				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 			}
 			Renderer::Draw(3, 1, 0, 0);
 

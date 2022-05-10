@@ -166,7 +166,10 @@ namespace Insight
 			{
 				ZoneScoped;
 				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
-				FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
+				//FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
+				
+				FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables();
+
 				std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
 				if (result && descriptors.size() > 0)
 				{
@@ -174,7 +177,7 @@ namespace Insight
 					m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
 
 					// Set all our descriptors tables.
-					//m_frameResouces->DescriptorAllocator.SetDescriptors(this);
+					FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
 
 				}
 				return true;

@@ -85,11 +85,11 @@ namespace Insight
 		struct Uniform
 		{
 			Uniform() { }
-			Uniform(Byte* ptr, int size, int set, int binding)
-				: Ptr(ptr), Size(size), Set(set), Binding(binding)
+			Uniform(int offset, int size, int set, int binding)
+				: Offset(offset), Size(size), Set(set), Binding(binding)
 			{ }
 
-			Byte* Ptr = nullptr;
+			int Offset = 0;
 			int Size = 0;
 			int Set = -1;
 			int Binding = -1;

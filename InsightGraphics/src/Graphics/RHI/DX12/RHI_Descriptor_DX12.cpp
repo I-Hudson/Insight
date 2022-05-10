@@ -55,17 +55,11 @@ namespace Insight
 
 				// Reference: https://github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
 
-				std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
-				ranges.resize(descriptors.size());
-				//CD3DX12_DESCRIPTOR_RANGE1 range = {};
-				ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-				//ranges.push_back(range);
-
-				std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
-				rootParameters.resize(descriptors.size());
+				//std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
+				//rootParameters.resize(descriptors.size());
 				//CD3DX12_ROOT_PARAMETER1 rootParameter = {};
 				//rootParameters[0].InitAsDescriptorTable(1, &ranges[0]);
-				rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+				//rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
 				//rootParameters.push_back(rootParameter);
 
 				//int baseRegister = 0;
@@ -80,8 +74,24 @@ namespace Insight
 				//	rootParameters.push_back(rootParameter);
 				//}
 
+				std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
+				for (const Descriptor& desc : descriptors)
+				{
+					CD3DX12_DESCRIPTOR_RANGE1 range = {};
+					range.Init(DescriptorRangeTypeToDX12(desc.Type), 1, desc.Binding);
+					ranges.push_back(range);
+				}
+
+				int rangeIndex = 0;
+				std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
+				rootParameters.resize(ranges.size());
+				for (CD3DX12_ROOT_PARAMETER1& root : rootParameters)
+				{
+					root.InitAsDescriptorTable(1, &ranges[rangeIndex++]);
+				}
+
 				CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-				rootSignatureDesc.Init_1_1((UINT)rootParameters.size(), rootParameters.data(), 0, nullptr);
+				rootSignatureDesc.Init_1_1((UINT)rootParameters.size(), rootParameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 				
 				// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
 				D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
@@ -137,6 +147,11 @@ namespace Insight
 					handleIndex = m_freeSlots.back();
 					m_freeSlots.pop_back();
 				}
+				else if (!m_allocateIndexs.empty())
+				{
+					handleIndex = m_allocateIndexs.back() + 1;
+				}
+
 
 				D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_descriptorHeapCPUStart;
 				cpuHandle.ptr += handleIndex * m_descriptorSize;
@@ -146,6 +161,8 @@ namespace Insight
 				handle.SetCPUHandle(cpuHandle);
 				handle.SetGPUHandle(gpuHandle);
 				handle.SetHeapIndex(handleIndex);
+
+				m_allocateIndexs.push_back(handleIndex);
 
 				++m_size;
 
@@ -166,6 +183,7 @@ namespace Insight
 			void DescriptorHeapPage_DX12::Reset()
 			{
 				m_freeSlots.clear();
+				m_allocateIndexs.clear();
 				m_size = 0;
 			}
 
@@ -191,6 +209,7 @@ namespace Insight
 			{
 				if (m_heaps.size() == 0 || m_heaps.back().IsFull())
 				{
+					assert(false);
 					AddNewHeap();
 				}
 
@@ -321,9 +340,65 @@ namespace Insight
 				cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
 			}
 
+			void DescriptorAllocator_DX12::SetDescriptorTables()
+			{
+				for (const auto& sets : m_descriptors)
+				{
+					int rootParaemterIndex = 0;
+					for (const Descriptor& descriptor : sets.second)
+					{
+						D3D12_DESCRIPTOR_HEAP_TYPE heapType = DescriptorTypeToDX12(descriptor.Type);
+						if (m_heaps.find(heapType) == m_heaps.end())
+						{
+							// Create intital heap if needed.
+							m_heaps[heapType].SetRenderContext(m_context);
+							m_heaps[heapType].Create(heapType);
+						}
+
+						DescriptorHeapHandle_DX12 handle = m_heaps[heapType].GetNewHandle();
+
+						if (descriptor.BufferView.IsValid())
+						{
+							RHI_Buffer_DX12* buffer_dx12 = dynamic_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
+
+							D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
+							cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
+							cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+							m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
+						}
+						m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
+						++rootParaemterIndex;
+					}
+				}
+			}
+
+			void DescriptorAllocator_DX12::BindDescriptorTables(ID3D12GraphicsCommandList* cmdList)
+			{
+				for (const auto& pair : m_descrptorTables)
+				{
+					cmdList->SetGraphicsRootDescriptorTable(pair.first, pair.second.GetGPUHandle());
+				}
+			}
+
 			void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
+
+				//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+				//m_heaps[heapType].SetRenderContext(m_context);
+				//m_heaps[heapType].Create(heapType);
+				//
+				//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+				//m_heaps[heapType].SetRenderContext(m_context);
+				//m_heaps[heapType].Create(heapType);
+				//
+				//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+				//m_heaps[heapType].SetRenderContext(m_context);
+				//m_heaps[heapType].Create(heapType);
+				//
+				//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+				//m_heaps[heapType].SetRenderContext(m_context);
+				//m_heaps[heapType].Create(heapType);
 			}
 
 			bool DescriptorAllocator_DX12::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
@@ -338,6 +413,7 @@ namespace Insight
 				{
 					heap.second.Reset();
 				}
+				m_descrptorTables.clear();
 			}
 
 			void DescriptorAllocator_DX12::Destroy()

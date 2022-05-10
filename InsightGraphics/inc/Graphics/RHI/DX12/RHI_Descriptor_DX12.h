@@ -53,16 +53,16 @@ namespace Insight
 				D3D12_GPU_DESCRIPTOR_HANDLE GPUPtr{ 0 };
 				int HandleIndex = -1;
 
-				D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() { return CPUPtr; }
-				D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() { return GPUPtr; }
+				D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() const { return CPUPtr; }
+				D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const { return GPUPtr; }
 				u32 GetHeapIndex() { return HandleIndex; }
 
 				void SetCPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) { CPUPtr = cpuHandle; }
 				void SetGPUHandle(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle) { GPUPtr = gpuHandle; }
 				void SetHeapIndex(u32 heapIndex) { HandleIndex = heapIndex; }
 
-				bool IsValid() { return CPUPtr.ptr != NULL; }
-				bool IsReferencedByShader() { return GPUPtr.ptr != NULL; }
+				bool IsValid() const { return CPUPtr.ptr != NULL; }
+				bool IsReferencedByShader() const { return GPUPtr.ptr != NULL; }
 			};
 
 			class DescriptorHeapPage_DX12
@@ -89,6 +89,7 @@ namespace Insight
 				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
 
 				std::vector<int> m_freeSlots;
+				std::vector<int> m_allocateIndexs;
 				D3D12_CPU_DESCRIPTOR_HANDLE m_descriptorHeapCPUStart;
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart;
 
@@ -129,8 +130,10 @@ namespace Insight
 				std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
 				void SetDescriptors(CommandList_DX12* cmdList);
 
+				void SetDescriptorTables();
+				void BindDescriptorTables(ID3D12GraphicsCommandList* cmdList);
 				void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
-				
+
 				// DescriptorAllocator
 				virtual void SetRenderContext(RenderContext* context) override;
 				virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
@@ -140,8 +143,9 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_context = nullptr;
 				std::unordered_map<D3D12_DESCRIPTOR_HEAP_TYPE, DescriptorHeap_DX12> m_heaps;
-				std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; // Current descriptors information. 
 				PipelineStateObject m_pso;
+
+				std::vector<std::pair<int, DescriptorHeapHandle_DX12>> m_descrptorTables;
 			};
 		}
 	}

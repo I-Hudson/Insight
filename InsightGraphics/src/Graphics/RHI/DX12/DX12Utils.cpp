@@ -231,5 +231,27 @@ namespace Insight
             }
             return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         }
+
+        D3D12_DESCRIPTOR_RANGE_TYPE DescriptorRangeTypeToDX12(DescriptorType type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case Insight::Graphics::DescriptorType::Unifom_Buffer:          return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case Insight::Graphics::DescriptorType::Storage_Buffer:         return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic: return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic: return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case Insight::Graphics::DescriptorType::Input_Attachment:       return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case Insight::Graphics::DescriptorType::Unknown: break;
+            default:
+                break;
+            }
+            return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+        }
 	}
 }
