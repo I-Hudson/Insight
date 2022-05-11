@@ -45,8 +45,8 @@ namespace Insight
 				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;
 
-				virtual void SetVertexBuffer() override;
-				virtual void SetIndexBuffer() override;
+				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
+				virtual void SetIndexBuffer(RHI_Buffer* buffer) override;
 
 				virtual void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) override;
 				virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) override;

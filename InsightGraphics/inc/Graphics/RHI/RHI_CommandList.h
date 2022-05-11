@@ -31,8 +31,8 @@ namespace Insight
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;
 
-			virtual void SetVertexBuffer() = 0;
-			virtual void SetIndexBuffer() = 0;
+			virtual void SetVertexBuffer(RHI_Buffer* buffer) = 0;
+			virtual void SetIndexBuffer(RHI_Buffer* buffer) = 0;
 
 			virtual void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) = 0;
 			virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) = 0;

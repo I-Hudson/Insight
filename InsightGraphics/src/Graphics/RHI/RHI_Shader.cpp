@@ -271,6 +271,119 @@ namespace Insight
 				});
 		}
 
+		u32 SpvFormatToByteSize(SpvReflectFormat format)
+		{
+			switch (format)
+			{
+			case SPV_REFLECT_FORMAT_UNDEFINED: assert(false);
+			case SPV_REFLECT_FORMAT_R32_UINT:				return 4;
+			case SPV_REFLECT_FORMAT_R32_SINT:				return 4;
+			case SPV_REFLECT_FORMAT_R32_SFLOAT:				return 4;
+			case SPV_REFLECT_FORMAT_R32G32_UINT:			return 8;
+			case SPV_REFLECT_FORMAT_R32G32_SINT:			return 8;
+			case SPV_REFLECT_FORMAT_R32G32_SFLOAT:			return 8;
+			case SPV_REFLECT_FORMAT_R32G32B32_UINT:			return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32_SINT:			return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:		return 12;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_UINT:		return 16;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SINT:		return 16;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:	return 16;
+			case SPV_REFLECT_FORMAT_R64_UINT:				return 8;
+			case SPV_REFLECT_FORMAT_R64_SINT:				return 8;
+			case SPV_REFLECT_FORMAT_R64_SFLOAT:				return 8;
+			case SPV_REFLECT_FORMAT_R64G64_UINT:			return 16;
+			case SPV_REFLECT_FORMAT_R64G64_SINT:			return 16;
+			case SPV_REFLECT_FORMAT_R64G64_SFLOAT:			return 16;
+			case SPV_REFLECT_FORMAT_R64G64B64_UINT:			return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64_SINT:			return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64_SFLOAT:		return 24;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_UINT:		return 32;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SINT:		return 32;
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SFLOAT:	return 32;
+			default:  assert(false);
+			}
+			return 0;
+		}
+
+		PixelFormat SpvFormatToPixelFormat(SpvReflectFormat frt)
+		{
+			switch (frt)
+			{
+			case SPV_REFLECT_FORMAT_UNDEFINED:				return PixelFormat::Unknown;
+			case SPV_REFLECT_FORMAT_R32_UINT:				return PixelFormat::R32_UInt;
+			case SPV_REFLECT_FORMAT_R32_SINT:				return PixelFormat::R32_SInt;
+			case SPV_REFLECT_FORMAT_R32_SFLOAT:				return PixelFormat::R32_Float;
+			case SPV_REFLECT_FORMAT_R32G32_UINT:			return PixelFormat::R32G32_UInt;
+			case SPV_REFLECT_FORMAT_R32G32_SINT:			return PixelFormat::R32G32_SInt;
+			case SPV_REFLECT_FORMAT_R32G32_SFLOAT:			return PixelFormat::R32G32_Float;
+			case SPV_REFLECT_FORMAT_R32G32B32_UINT:			return PixelFormat::R32G32B32_UInt;
+			case SPV_REFLECT_FORMAT_R32G32B32_SINT:			return PixelFormat::R32G32B32_SInt;
+			case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:		return PixelFormat::R32G32B32_Float;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_UINT:		return PixelFormat::R32G32B32A32_UInt;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SINT:		return PixelFormat::R32G32B32A32_SInt;
+			case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:	return PixelFormat::R32G32B32A32_Float;
+			case SPV_REFLECT_FORMAT_R64_UINT:				assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64_SINT:				assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64_SFLOAT:				assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64_UINT:			assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64_SINT:			assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64_SFLOAT:			assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64_UINT:			assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64_SINT:			assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64_SFLOAT:		assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64A64_UINT:		assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SINT:		assert(false && "Format not supported.");
+			case SPV_REFLECT_FORMAT_R64G64B64A64_SFLOAT:	assert(false && "Format not supported.");
+			}
+			return PixelFormat::Unknown;
+		}
+
+		std::vector<ShaderInputLayout> ShaderCompiler::GetInputLayout()
+		{
+			RHI::DX12::ComPtr<IDxcBlob> code;
+			ShaderReflectionResults->GetResult(&code);
+
+			// Generate reflection data for a shader
+			SpvReflectShaderModule module;
+			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			// Enumerate and extract shader's input variables
+			uint32_t inputCount = 0;
+			result = spvReflectEnumerateInputVariables(&module, &inputCount, NULL);
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			std::vector<SpvReflectInterfaceVariable*> inputVars;
+			inputVars.resize(inputCount);
+
+			//SpvReflectInterfaceVariable** input_vars =inputVars (SpvReflectInterfaceVariable**)malloc(inputCount * sizeof(SpvReflectInterfaceVariable*));
+			result = spvReflectEnumerateInputVariables(&module, &inputCount, inputVars.data());
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			std::vector<ShaderInputLayout> inputLayout;
+			int stride = 0;
+
+			for (size_t i = 0; i < inputCount; i++)
+			{
+				SpvReflectInterfaceVariable* interfaceVariable = inputVars.at(i);
+				std::string name = interfaceVariable->name;
+				name = name.substr(name.find_last_of('.') + 1);
+
+				ShaderInputLayout layout(
+					interfaceVariable->location,
+					SpvFormatToPixelFormat(interfaceVariable->format),
+					stride,
+					std::move(name));
+				inputLayout.push_back(layout);
+
+				stride += SpvFormatToByteSize(interfaceVariable->format);
+			}
+
+			// Destroy the reflection data when no longer required.
+			spvReflectDestroyShaderModule(&module);
+
+			return inputLayout;
+		}
+
 
 		std::wstring ShaderCompiler::StageToFuncName(ShaderStageFlagBits stage)
 		{

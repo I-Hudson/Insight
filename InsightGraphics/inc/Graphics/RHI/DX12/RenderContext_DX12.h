@@ -36,6 +36,8 @@ namespace Insight
 
 				virtual void Render(CommandList cmdList) override;
 
+				virtual void GpuWaitForIdle() override;
+
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 

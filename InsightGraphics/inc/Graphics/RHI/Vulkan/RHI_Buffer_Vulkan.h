@@ -30,7 +30,7 @@ namespace Insight
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
-				Byte* m_mappedData = nullptr;
+				void* m_mappedData = nullptr;
 				vk::Buffer m_buffer;
 				VmaAllocation m_vmaAllocation;
 			};

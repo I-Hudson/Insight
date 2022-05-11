@@ -1,5 +1,6 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 
 #include "Tracy.hpp"
 
@@ -125,16 +126,24 @@ namespace Insight
 				m_commandList->RSSetScissorRects(1, rects);
 			}
 
-			void RHI_CommandList_DX12::SetVertexBuffer()
+			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				ZoneScoped;
-				assert(false);
+				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
+				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
+					(UINT)bufferDX12->GetSize(),
+					24}};
+				m_commandList->IASetVertexBuffers(0, 1, views);
 			}
 
-			void RHI_CommandList_DX12::SetIndexBuffer()
+			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer)
 			{
 				ZoneScoped;
-				assert(false);
+				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
+				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
+					(UINT)bufferDX12->GetSize(),  
+					DXGI_FORMAT_R32_UINT };
+				m_commandList->IASetIndexBuffer(&view);
 			}
 
 			void RHI_CommandList_DX12::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)

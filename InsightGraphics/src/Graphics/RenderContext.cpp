@@ -142,7 +142,7 @@ namespace Insight
 
 	void Renderer::FreeIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		assert(buffer->GetType() == Graphics::BufferType::Vertex);
+		assert(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);
 	}
 
@@ -160,12 +160,13 @@ namespace Insight
 
 	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		assert(buffer->GetType() == Graphics::BufferType::Raw);
+		assert(buffer->GetType() == Graphics::BufferType::Vertex);
 		s_FrameCommandList.SetVertexBuffer(buffer);
 	}
 
 	void Renderer::BindIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		assert(buffer->GetType() == Graphics::BufferType::Index);
 		s_FrameCommandList.SetIndexBuffer(buffer);
 	}
 
@@ -203,8 +204,8 @@ namespace Insight
 		s_FrameCommandList.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
 	}
 
-	void Renderer::DrawIndexed()
+	void Renderer::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 	{
-		s_FrameCommandList.DrawIndexed(0, 0, 0, 0, 0);
+		s_FrameCommandList.DrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 	}
 }

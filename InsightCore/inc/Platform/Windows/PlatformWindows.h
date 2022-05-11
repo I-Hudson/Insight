@@ -3,6 +3,7 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 #include "Core/TypeAlias.h"
+#include "Core/Defines.h"
 #include <string>
 #include <vector>
 
@@ -10,7 +11,7 @@ namespace Insight
 {
 	namespace Windows
 	{
-		class PlatformWindows
+		class IS_CORE PlatformWindows
 		{
 		public:
 

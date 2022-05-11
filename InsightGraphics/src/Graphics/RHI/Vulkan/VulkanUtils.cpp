@@ -703,8 +703,8 @@ namespace Insight
         {
             switch (type)
             {
-            case BufferType::Vertex:     return 0;
-            case BufferType::Index:      return 0;
+            case BufferType::Vertex:     return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;//return 0;
+            case BufferType::Index:      return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT; //return 0;
             case BufferType::Uniform:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
             case BufferType::Storage:    return VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
             case BufferType::Raw:        return 0;
@@ -720,8 +720,8 @@ namespace Insight
         {
             switch (type)
             {
-            case BufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
-            case BufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case BufferType::Vertex:     return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;//return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+            case BufferType::Index:      return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;//return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
             case BufferType::Uniform:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
             case BufferType::Storage:    return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
             case BufferType::Raw:        return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;

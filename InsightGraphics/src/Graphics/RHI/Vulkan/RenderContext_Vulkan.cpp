@@ -494,6 +494,11 @@ namespace Insight
 				ImGuiBeginFrame();
 			}
 
+			void RenderContext_Vulkan::GpuWaitForIdle()
+			{
+				m_device.waitIdle();
+			}
+
 			void RenderContext_Vulkan::SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType)
 			{
 				std::string str;

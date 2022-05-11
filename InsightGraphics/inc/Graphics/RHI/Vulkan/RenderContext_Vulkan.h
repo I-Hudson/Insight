@@ -50,6 +50,8 @@ namespace Insight
 
 				virtual void Render(CommandList cmdList) override;
 
+				virtual void GpuWaitForIdle() override;
+
 				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
 				vk::Device GetDevice() const { return m_device; }
 				VmaAllocator GetVMA() const { return m_vmaAllocator; }

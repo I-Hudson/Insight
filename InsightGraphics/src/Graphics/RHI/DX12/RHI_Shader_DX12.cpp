@@ -2,8 +2,6 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
-#include <bit>
-
 namespace Insight
 {
 	namespace Graphics
@@ -52,11 +50,15 @@ namespace Insight
 
 			void RHI_Shader_DX12::CreateVertexInputLayout(const ShaderDesc& desc)
 			{
+				ShaderCompiler compiler;
+				compiler.Compile(ShaderStage_Vertex, desc.VertexFilePath, ShaderCompilerLanguage::Hlsl);
+				m_shaderInputLayout = compiler.GetInputLayout();
+
 				m_inputElements = {};
 				int stride = 0;
-				for (size_t i = 0; i < desc.VertexLayout.size(); ++i)
+				for (size_t i = 0; i < m_shaderInputLayout.size(); ++i)
 				{
-					const ShaderInputLayout& inputLayout = desc.VertexLayout.at(i);
+					const ShaderInputLayout& inputLayout = m_shaderInputLayout.at(i);
 					D3D12_INPUT_ELEMENT_DESC input;
 					input.SemanticName = inputLayout.Name.c_str();
 					input.SemanticIndex = 0;

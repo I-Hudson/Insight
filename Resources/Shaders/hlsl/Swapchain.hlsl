@@ -1,8 +1,17 @@
 
-float4 VSMain(uint id : SV_VertexID) : SV_POSITION
+struct VertexInput
 {
-	float2 uv = float2((id << 1) & 2, id & 2);
-	return float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
+	float3 Pos : POSITION;
+	float3 Colour : COLOR;
+};
+
+//float4 VSMain(uint id : SV_VertexID) : SV_POSITION
+float4 VSMain(const VertexInput input) : SV_POSITION
+{
+	//float2 uv = float2((id << 1) & 2, id & 2);
+	//return float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
+
+	return float4(input.Pos, 1);
 }
 
 cbuffer ubo : register(b0)

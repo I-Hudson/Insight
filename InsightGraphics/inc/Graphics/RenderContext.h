@@ -34,6 +34,8 @@ namespace Insight
 
 			virtual void Render(CommandList cmdList) = 0;
 
+			virtual void GpuWaitForIdle() = 0;
+
 			bool HasExtension(DeviceExtension extension);
 
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
@@ -103,7 +105,7 @@ namespace Insight
 		static void SetTexture(int set, int binding, Graphics::RHI_Texture* texture);
 
 		static void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance);
-		static void DrawIndexed();
+		static void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance);
 
 		static Graphics::CommandList s_FrameCommandList;
 

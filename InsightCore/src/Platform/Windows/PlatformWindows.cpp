@@ -13,7 +13,6 @@ namespace Insight
 {
 	namespace Windows
 	{
-
 		void PlatformWindows::MemCopy(void* dst, void const* src, u64 size)
 		{
 			memcpy(dst, src, size);
@@ -34,8 +33,7 @@ namespace Insight
 			return memcmp(buf1, buf2, size);
 		}
 
-		// https://gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4
-		
+		// https://gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
 		inline std::string basename(const std::string& file)
 		{
 			unsigned int i = file.find_last_of("\\/");

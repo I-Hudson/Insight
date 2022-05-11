@@ -259,6 +259,11 @@ namespace Insight
 				IMGUI_VALID(ImGuiBeginFrame());
 			}
 
+			void RenderContext_DX12::GpuWaitForIdle()
+			{
+				WaitForGpu();
+			}
+
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
 			{
 				*ppAdapter = nullptr;

@@ -1,5 +1,6 @@
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/Window.h"
 
 #include "Tracy.hpp"
@@ -72,7 +73,7 @@ namespace Insight
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
 				ZoneScoped;
-				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, y, width, height, minDepth, maxDepth) };
+				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
 				m_commandList.setViewport(0, viewports);
 			}
 
@@ -84,14 +85,20 @@ namespace Insight
 				m_commandList.setScissor(0, scissors);
 			}
 
-			void RHI_CommandList_Vulkan::SetVertexBuffer()
+			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				ZoneScoped;
+				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+				std::array<vk::Buffer, 1> buffers = { bufferVulkan->GetBuffer() };
+				std::array<vk::DeviceSize, 1> offsets = { 0 };
+				m_commandList.bindVertexBuffers(0, buffers, offsets);
 			}
 
-			void RHI_CommandList_Vulkan::SetIndexBuffer()
+			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)
 			{
 				ZoneScoped;
+				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
 			}
 
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)

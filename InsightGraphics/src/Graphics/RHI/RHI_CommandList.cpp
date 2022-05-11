@@ -74,8 +74,14 @@ namespace Insight
 				case CommandType::SetVertexBuffer:
 				{
 					const CMD_SetVertexBuffer* cmd = dynamic_cast<const CMD_SetVertexBuffer*>(command);
-					//std::array<vk::Buffer, 1> buffers = { cmd-> };
-					//m_commandBuffer.bindVertexBuffers(0, buffers, offset);
+					SetVertexBuffer(cmd->Buffer);
+					break;
+				}
+
+				case CommandType::SetIndexBuffer:
+				{
+					const CMD_SetIndexBuffer* cmd = dynamic_cast<const CMD_SetIndexBuffer*>(command);
+					SetIndexBuffer(cmd->Buffer);
 					break;
 				}
 

@@ -3,6 +3,8 @@
 #include "Graphics/CommandListCommands.h"
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/DescriptorBuffer.h"
+#include "Platform/Platform.h"
+
 #include <type_traits>
 #include <string>
 #include <assert.h>
@@ -67,7 +69,7 @@ namespace Insight
 				{
 					Resize(m_commandMaxByteSize * 2);
 				}
-				memcpy((void*)m_pos, (const void*)&command, commandSize);
+				Platform::MemCopy((void*)m_pos, (const void*)&command, commandSize);
 				m_pos += baseCommand.GetSize();
 				++m_commandCount;
 			}

@@ -1,5 +1,6 @@
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
+#include "Platform/Platform.h"
 
 #include "VmaUsage.h"
 
@@ -32,15 +33,17 @@ namespace Insight
 				if (m_bufferType == BufferType::Uniform
 					|| m_bufferType == BufferType::Storage
 					|| m_bufferType == BufferType::Raw
-					|| m_bufferType == BufferType::Staging)
+					|| m_bufferType == BufferType::Staging
+					|| m_bufferType == BufferType::Vertex
+					|| m_bufferType == BufferType::Index)
 				{
-					vmaMapMemory(m_context->GetVMA(), m_vmaAllocation, reinterpret_cast<void**>(&m_mappedData));
+					vmaMapMemory(m_context->GetVMA(), m_vmaAllocation, &m_mappedData);
 				}
 			}
 
 			RHI_BufferView RHI_Buffer_Vulkan::Upload(void* data, int sizeInBytes, int offset)
 			{
-				memcpy(m_mappedData + offset, data, sizeInBytes);
+				Platform::MemCopy((Byte*)m_mappedData + offset, data, sizeInBytes);
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 

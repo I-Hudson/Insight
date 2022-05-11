@@ -32,6 +32,8 @@ namespace Insight
 				return false;
 			}
 
+			m_renderpass.Create();
+
 			return true;
 		}
 
@@ -54,6 +56,9 @@ namespace Insight
 				if (currentGraphicsAPI != previousGrapicsAPI)
 				{
 					// New API
+					m_renderContext->GpuWaitForIdle();
+					m_renderpass.Destroy();
+
 					m_renderContext->Destroy();
 					DeleteTracked(m_renderContext);
 					m_renderContext = nullptr;
@@ -63,6 +68,7 @@ namespace Insight
 					m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
 					m_renderContext = RenderContext::New();
 					m_renderContext->Init();
+					m_renderpass.Create();
 					Renderer::s_FrameCommandList.Reset();
 					return;
 				}
@@ -78,6 +84,9 @@ namespace Insight
 		{
 			if (m_renderContext)
 			{
+				m_renderContext->GpuWaitForIdle();
+
+				m_renderpass.Destroy();
 				m_renderContext->Destroy();
 				DeleteTracked(m_renderContext);
 			}
