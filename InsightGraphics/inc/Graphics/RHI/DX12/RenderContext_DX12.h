@@ -37,9 +37,12 @@ namespace Insight
 				virtual void Render(CommandList cmdList) override;
 
 				virtual void GpuWaitForIdle() override;
+				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
+
+				FrameResource_DX12& GetFrameResouce() { return m_frames[m_frameIndex]; }
 
 			protected:
 				virtual void WaitForGpu() override;

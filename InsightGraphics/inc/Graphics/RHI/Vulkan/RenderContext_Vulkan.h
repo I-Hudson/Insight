@@ -51,6 +51,7 @@ namespace Insight
 				virtual void Render(CommandList cmdList) override;
 
 				virtual void GpuWaitForIdle() override;
+				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
 				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
 				vk::Device GetDevice() const { return m_device; }
@@ -63,6 +64,8 @@ namespace Insight
 				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
 				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 				RenderpassManager_Vulkan& GetRenderpassManager() { return m_renderpassManager; }
+
+				FrameResource_Vulkan& GetFrameResouce() { return m_frames[m_currentFrame]; }
 
 			protected:
 				virtual void WaitForGpu() override;

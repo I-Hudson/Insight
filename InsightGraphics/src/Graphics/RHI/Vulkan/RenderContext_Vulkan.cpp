@@ -64,7 +64,7 @@ namespace Insight
 
 				LayerExtension()
 				{
-					//Platform::MemClear(&Layer, sizeof(Layer));
+					Platform::MemClear(&Layer, sizeof(Layer));
 				}
 
 				void GetExtensions(std::vector<std::string>& result)
@@ -497,6 +497,22 @@ namespace Insight
 			void RenderContext_Vulkan::GpuWaitForIdle()
 			{
 				m_device.waitIdle();
+			}
+
+			void RenderContext_Vulkan::SubmitCommandListAndWait(RHI_CommandList* cmdList)
+			{
+				const RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(cmdList);
+
+				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+				vk::SubmitInfo submitInfo = vk::SubmitInfo(
+					{ },
+					{ },
+					commandBuffers,
+					{ });
+				vk::Fence waitFence = m_device.createFence(vk::FenceCreateInfo());
+				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, waitFence);
+				m_device.waitForFences({ waitFence }, 1, INFINITE);
+				m_device.destroyFence(waitFence);
 			}
 
 			void RenderContext_Vulkan::SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType)

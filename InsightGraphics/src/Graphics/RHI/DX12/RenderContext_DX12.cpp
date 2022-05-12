@@ -264,6 +264,14 @@ namespace Insight
 				WaitForGpu();
 			}
 
+			void RenderContext_DX12::SubmitCommandListAndWait(RHI_CommandList* cmdList)
+			{
+				const RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(cmdList);
+				ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
+				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+				GpuWaitForIdle();
+			}
+
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
 			{
 				*ppAdapter = nullptr;

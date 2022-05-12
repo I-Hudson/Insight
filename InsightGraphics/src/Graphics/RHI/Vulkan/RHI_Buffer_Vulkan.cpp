@@ -34,8 +34,7 @@ namespace Insight
 					|| m_bufferType == BufferType::Storage
 					|| m_bufferType == BufferType::Raw
 					|| m_bufferType == BufferType::Staging
-					|| m_bufferType == BufferType::Vertex
-					|| m_bufferType == BufferType::Index)
+					|| m_bufferType == BufferType::Readback)
 				{
 					vmaMapMemory(m_context->GetVMA(), m_vmaAllocation, &m_mappedData);
 				}
@@ -43,7 +42,26 @@ namespace Insight
 
 			RHI_BufferView RHI_Buffer_Vulkan::Upload(void* data, int sizeInBytes, int offset)
 			{
-				Platform::MemCopy((Byte*)m_mappedData + offset, data, sizeInBytes);
+				if (m_mappedData)
+				{
+					Platform::MemCopy((Byte*)m_mappedData + offset, data, sizeInBytes);
+				}
+				else
+				{
+					// We need a staging buffer to upload data from CPU to GPU.
+					RHI_Buffer_Vulkan stagingBuffer;
+					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes);
+					stagingBuffer.Upload(data, sizeInBytes, offset);
+
+					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetCommandList();
+					cmdList->CopyBufferToBuffer(this, &stagingBuffer);
+					cmdList->Close();
+
+					m_context->SubmitCommandListAndWait(cmdList);
+					m_context->GetFrameResouce().CommandListManager.ReturnCommandList(cmdList);
+
+					stagingBuffer.Release();
+				}
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 

@@ -159,6 +159,7 @@ namespace Insight
 
 		void RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)
 		{
+			/*
 			if (m_allocLists.find(cmdList) == m_allocLists.end())
 			{
 				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
@@ -171,6 +172,7 @@ namespace Insight
 				return;
 			}
 			m_freeLists.insert(cmdList);
+			*/
 		}
 
 		/// <summary>

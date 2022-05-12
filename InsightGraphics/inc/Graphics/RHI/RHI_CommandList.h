@@ -22,6 +22,8 @@ namespace Insight
 
 			virtual void Close() = 0;
 
+			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) = 0;
+
 		protected:
 			bool CanDraw(CommandList& cmdList);
 			virtual bool BindDescriptorSets();

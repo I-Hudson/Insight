@@ -35,6 +35,7 @@ namespace Insight
 			virtual void Render(CommandList cmdList) = 0;
 
 			virtual void GpuWaitForIdle() = 0;
+			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 
 			bool HasExtension(DeviceExtension extension);
 

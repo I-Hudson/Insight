@@ -16,10 +16,13 @@ namespace Insight
 				CD3DX12_HEAP_PROPERTIES heapProperties = {};
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
-				if (bufferType == BufferType::Vertex || bufferType == BufferType::Index)
+				D3D12_RESOURCE_STATES resouceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+				if (bufferType == BufferType::Vertex 
+					|| bufferType == BufferType::Index)
 				{
-					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
+					resouceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 				}
 				else if (bufferType == BufferType::Uniform)
 				{
@@ -27,24 +30,55 @@ namespace Insight
 					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); // must be a multiple 256 bytes
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
 				}
+				else if (bufferType == BufferType::Staging)
+				{
+					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
+					resouceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+				}
 
 				// Create the constant buffer.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
 					&heapProperties,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
-					D3D12_RESOURCE_STATE_GENERIC_READ,
+					resouceStates,
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
+
+				if (m_bufferType == BufferType::Uniform
+					|| m_bufferType == BufferType::Storage
+					|| m_bufferType == BufferType::Raw
+					|| m_bufferType == BufferType::Staging
+					|| m_bufferType == BufferType::Readback)
+				{
+					CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+					ThrowIfFailed(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedData)));
+				}
 			}
 
 			RHI_BufferView RHI_Buffer_DX12::Upload(void* data, int sizeInBytes, int offset)
 			{
-				// Map and initialize the constant buffer. We don't unmap this until the
-				// app closes. Keeping things mapped for the lifetime of the resource is okay.
-				CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
-				ThrowIfFailed(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedData)));
-				memcpy_s(m_mappedData + offset, sizeInBytes, data, sizeInBytes);
+				if (m_mappedData)
+				{
+					Platform::MemCopy(m_mappedData + offset, data, sizeInBytes);
+				}
+				else
+				{
+					// We need a staging buffer to upload data from CPU to GPU.
+					RHI_Buffer_DX12 stagingBuffer;
+					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes);
+					stagingBuffer.Upload(data, sizeInBytes, offset);
+
+					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetCommandList();
+					cmdList->CopyBufferToBuffer(this, &stagingBuffer);
+					cmdList->Close();
+
+					m_context->SubmitCommandListAndWait(cmdList);
+					m_context->GetFrameResouce().CommandListManager.ReturnCommandList(cmdList);
+
+					stagingBuffer.Release();
+				}
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 
