@@ -55,11 +55,14 @@ namespace Insight
 			static RHI_CommandListAllocator* New();
 
 			virtual void Create(RenderContext* context) = 0;
-
-			virtual RHI_CommandList* GetCommandList() = 0;
+			
 			virtual void Reset() = 0;
 
+			virtual RHI_CommandList* GetCommandList() = 0;
+			virtual RHI_CommandList* GetSingleSubmitCommandList() = 0;
+
 			void ReturnCommandList(RHI_CommandList* cmdList);
+			virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) = 0;
 
 		protected:
 			std::unordered_set<RHI_CommandList*> m_allocLists;
@@ -77,7 +80,9 @@ namespace Insight
 			void Destroy();
 
 			RHI_CommandList* GetCommandList();
+			RHI_CommandList* GetSingleUseCommandList();
 			void ReturnCommandList(RHI_CommandList* cmdList);
+			void ReturnSingleUseCommandList(RHI_CommandList* cmdList);
 
 		private:
 			RenderContext* m_context{ nullptr };

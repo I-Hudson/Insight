@@ -62,7 +62,7 @@ namespace Insight
 					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_DIRECT, HrToString(createCommandQueueResult));
 				}
-				
+
 				queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
 				createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Compute]));
 				if (createCommandQueueResult != S_OK)
@@ -70,7 +70,7 @@ namespace Insight
 					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_COMPUTE, HrToString(createCommandQueueResult));
 				}
-				
+
 				queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
 				createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Transfer]));
 				if (createCommandQueueResult != S_OK)
@@ -171,8 +171,8 @@ namespace Insight
 
 				IMGUI_VALID(ImGui_ImplDX12_Init(m_device.Get(),
 					c_FrameCount,
-					DXGI_FORMAT_R8G8B8A8_UNORM, 
-					m_srcImGuiHeap.Get(), 
+					DXGI_FORMAT_R8G8B8A8_UNORM,
+					m_srcImGuiHeap.Get(),
 					m_srcImGuiHeap->GetCPUDescriptorHandleForHeapStart(),
 					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart()));
 
@@ -203,15 +203,12 @@ namespace Insight
 				RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
 				// Set back buffer texture/image to render target so we can render to it.
-				//cmdListDX12->GetCommandList()->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 				cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
 				CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
 				ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 				const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-				//cmdListDX12->m_commandList->ClearRenderTargetView(rtvHandle, clear_color_with_alpha, 0, NULL);
 				cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
-				//cmdListDX12->m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 				cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
 
 				cmdListDX12->Record(cmdList, &frame);
@@ -219,11 +216,10 @@ namespace Insight
 				{
 					ZoneScopedN("ImGui_DescriptorHeap");
 					std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-					//IMGUI_VALID(cmdListDX12->m_commandList->SetDescriptorHeaps(1, imguiHeap.data()));
 					IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
 					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
 				}
-				
+
 				{
 					ZoneScopedN("ResourceBarrier_swapchain_present");
 					// Set back buffer texture/image back to present so we can use it within the swapchain.
@@ -253,7 +249,6 @@ namespace Insight
 				}
 
 				IMGUI_VALID(ImGui::EndFrame());
-				//IMGUI_VALID(ImGui::UpdatePlatformWindows());
 
 				IMGUI_VALID(ImGui_ImplDX12_NewFrame());
 				IMGUI_VALID(ImGuiBeginFrame());
@@ -354,7 +349,7 @@ namespace Insight
 				rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 				ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 				m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-				
+
 				m_swapchainSize = { Window::Instance().GetWidth(), Window::Instance().GetHeight() };
 
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -467,6 +462,6 @@ namespace Insight
 				FrameResouce::Reset();
 				DescriptorAllocator.Reset();
 			}
-}
+		}
 	}
 }

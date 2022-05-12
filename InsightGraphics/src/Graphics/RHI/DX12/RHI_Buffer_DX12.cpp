@@ -70,12 +70,12 @@ namespace Insight
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes);
 					stagingBuffer.Upload(data, sizeInBytes, offset);
 
-					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetCommandList();
+					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetSingleUseCommandList();
 					cmdList->CopyBufferToBuffer(this, &stagingBuffer);
 					cmdList->Close();
 
 					m_context->SubmitCommandListAndWait(cmdList);
-					m_context->GetFrameResouce().CommandListManager.ReturnCommandList(cmdList);
+					m_context->GetFrameResouce().CommandListManager.ReturnSingleUseCommandList(cmdList);
 
 					stagingBuffer.Release();
 				}

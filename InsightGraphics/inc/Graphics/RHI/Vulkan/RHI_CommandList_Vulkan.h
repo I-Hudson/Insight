@@ -66,9 +66,13 @@ namespace Insight
 
 				// RHI_CommandListAllocator
 				virtual void Create(RenderContext* context) override;
+				
+				virtual void Reset() override;
 
 				virtual RHI_CommandList* GetCommandList() override;
-				virtual void Reset() override;
+				virtual RHI_CommandList* GetSingleSubmitCommandList() override;
+
+				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
 				// RHI_Resouce
 				virtual void Release() override;

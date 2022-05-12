@@ -75,9 +75,13 @@ namespace Insight
 
 				// RHI_CommandListAllocator
 				virtual void Create(RenderContext* context) override;
+				
+				virtual void Reset() override;
 
 				virtual RHI_CommandList* GetCommandList() override;
-				virtual void Reset() override;
+				virtual RHI_CommandList* GetSingleSubmitCommandList() override;
+
+				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
 				// RHI_Resouce
 				virtual void Release() override;
@@ -87,6 +91,8 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_context{ nullptr };
 				ComPtr<ID3D12CommandAllocator> m_allocator{ nullptr };
+
+				std::unordered_map<RHI_CommandList*, std::pair<RHI_CommandList*, ComPtr<ID3D12CommandAllocator>>> m_singleUseCommandLists;
 			};
 		}
 	}

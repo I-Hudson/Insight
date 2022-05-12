@@ -51,7 +51,7 @@ namespace Insight
 				{
 					ZoneScopedN("SetUniform");
 					const CMD_SetUniform* cmd = dynamic_cast<const CMD_SetUniform*>(command);
-					SetUniform(cmd->Set, cmd->Binding,cmd->View);
+					SetUniform(cmd->Set, cmd->Binding, cmd->View);
 					break;
 				}
 
@@ -59,7 +59,7 @@ namespace Insight
 				{
 					ZoneScopedN("SetViewport");
 					const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
-					SetViewport(0.0f,0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f);
+					SetViewport(0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f);
 					break;
 				}
 
@@ -159,20 +159,18 @@ namespace Insight
 
 		void RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)
 		{
-			/*
-			if (m_allocLists.find(cmdList) == m_allocLists.end())
-			{
-				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
-			}
-			m_allocLists.erase(cmdList);
-
-			if (m_freeLists.find(cmdList) != m_freeLists.end())
-			{
-				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
-				return;
-			}
-			m_freeLists.insert(cmdList);
-			*/
+			//if (m_allocLists.find(cmdList) == m_allocLists.end())
+			//{
+			//	IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
+			//}
+			//m_allocLists.erase(cmdList);
+			//
+			//if (m_freeLists.find(cmdList) != m_freeLists.end())
+			//{
+			//	IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
+			//	return;
+			//}
+			//m_freeLists.insert(cmdList);
 		}
 
 		/// <summary>
@@ -220,10 +218,22 @@ namespace Insight
 			return m_allocator->GetCommandList();
 		}
 
+		RHI_CommandList* CommandListManager::GetSingleUseCommandList()
+		{
+			assert(m_allocator);
+			return m_allocator->GetSingleSubmitCommandList();
+		}
+
 		void CommandListManager::ReturnCommandList(RHI_CommandList* cmdList)
 		{
 			assert(m_allocator);
 			m_allocator->ReturnCommandList(cmdList);
 		}
-}
+
+		void CommandListManager::ReturnSingleUseCommandList(RHI_CommandList* cmdList)
+		{
+			assert(m_allocator);
+			m_allocator->ReturnSingleSubmitCommandList(cmdList);
+		}
+	}
 }

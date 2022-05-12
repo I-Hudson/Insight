@@ -244,6 +244,33 @@ namespace Insight
 				return list;
 			}
 
+			RHI_CommandList* RHI_CommandListAllocator_DX12::GetSingleSubmitCommandList()
+			{
+				ComPtr<ID3D12CommandAllocator> allocator;
+				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)));
+				
+				RHI_CommandList_DX12* list = dynamic_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
+				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
+				
+				m_singleUseCommandLists[list] = std::make_pair(list, allocator);
+
+				return list;
+			}
+
+			void RHI_CommandListAllocator_DX12::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
+			{
+				auto itr = m_singleUseCommandLists.find(cmdList);
+				if (itr == m_singleUseCommandLists.end())
+				{
+					IS_CORE_ERROR("[RHI_CommandListAllocator_DX12::ReturnSingleSubmitCommandList]");
+					return;
+				}
+
+				cmdList->Release();
+				DeleteTracked(cmdList);
+				m_singleUseCommandLists.erase(itr);
+			}
+
 			void RHI_CommandListAllocator_DX12::Reset()
 			{
 				m_allocator->Reset();

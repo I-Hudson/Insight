@@ -40,7 +40,7 @@ namespace Insight
 				{
 					vk::BufferCopy(0,0, src->GetSize())
 				};
-				m_commandList.copyBuffer(dstVulkan->GetBuffer(), srcVulkan->GetBuffer(), copyRegion);
+				m_commandList.copyBuffer(srcVulkan->GetBuffer(), dstVulkan->GetBuffer(), copyRegion);
 			}
 
 			void RHI_CommandList_Vulkan::Release()
@@ -212,7 +212,7 @@ namespace Insight
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
 
 				vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo();
-				m_allocator =  m_context->GetDevice().createCommandPool(poolCreateInfo);
+				m_allocator = m_context->GetDevice().createCommandPool(poolCreateInfo);
 			}
 
 			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetCommandList()
@@ -238,6 +238,16 @@ namespace Insight
 				m_allocLists.insert(list);
 				list->SetName(L"CommandList");
 				return list;
+			}
+
+			RHI_CommandList* RHI::Vulkan::RHI_CommandListAllocator_Vulkan::GetSingleSubmitCommandList()
+			{
+				return GetCommandList();
+			}
+
+			void RHI::Vulkan::RHI_CommandListAllocator_Vulkan::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
+			{
+				return ReturnCommandList(cmdList);
 			}
 
 			void RHI_CommandListAllocator_Vulkan::Reset()
