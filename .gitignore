@@ -2,10 +2,11 @@
 /bin
 /bin-int
 /vendor
+*.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
-
+Tracy.exe - Shortcut
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio
