@@ -6,7 +6,7 @@
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
-Tracy.exe - Shortcut
+*.lnk
 
 # Created by https://www.toptal.com/developers/gitignore/api/visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=visualstudio
