@@ -2,7 +2,9 @@
 struct VertexInput
 {
 	float3 Pos : POSITION;
+	float3 Normal : NORMAL;
 	float3 Colour : COLOR;
+	float2 UV : TEXCOORD;
 };
 
 //float4 VSMain(uint id : SV_VertexID) : SV_POSITION

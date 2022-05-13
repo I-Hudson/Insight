@@ -32,13 +32,13 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_Vulkan::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src)
+			void RHI_CommandList_Vulkan::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset)
 			{
 				RHI_Buffer_Vulkan* dstVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(dst);
 				RHI_Buffer_Vulkan* srcVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(src);
 				std::array<vk::BufferCopy, 1> copyRegion =
 				{
-					vk::BufferCopy(0,0, src->GetSize())
+					vk::BufferCopy(0, offset, src->GetSize())
 				};
 				m_commandList.copyBuffer(srcVulkan->GetBuffer(), dstVulkan->GetBuffer(), copyRegion);
 			}

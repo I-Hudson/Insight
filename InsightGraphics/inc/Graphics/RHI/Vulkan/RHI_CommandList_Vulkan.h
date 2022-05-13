@@ -22,7 +22,7 @@ namespace Insight
 				// RHI_CommandList
 				virtual void Reset() override;
 				virtual void Close() override;
-				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) override;
+				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
 
 				// RHI_Resouce
 				virtual void Release() override;

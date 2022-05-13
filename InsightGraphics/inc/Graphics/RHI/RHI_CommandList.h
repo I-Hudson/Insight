@@ -22,7 +22,8 @@ namespace Insight
 
 			virtual void Close() = 0;
 
-			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) = 0;
+			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;
+			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) { CopyBufferToBuffer(dst, src, 0); }
 
 		protected:
 			bool CanDraw(CommandList& cmdList);

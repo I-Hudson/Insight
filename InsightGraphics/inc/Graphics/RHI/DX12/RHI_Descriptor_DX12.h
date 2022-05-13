@@ -146,6 +146,7 @@ namespace Insight
 				PipelineStateObject m_pso;
 
 				std::vector<std::pair<int, DescriptorHeapHandle_DX12>> m_descrptorTables;
+				std::unordered_map<int, std::unordered_map<int, u64>> m_boundDescriptors;
 			};
 		}
 	}

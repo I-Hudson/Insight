@@ -3,8 +3,6 @@
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsManager.h"
 
-#include "Graphics/Mesh.h"
-
 #include "Tracy.hpp"
 
 namespace Insight
@@ -13,28 +11,20 @@ namespace Insight
 	{
 		void Renderpass::Create()
 		{
-			Mesh mesh;
-			mesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 
 			if (!m_vertexBuffer)
 			{
 				ZoneScopedN("CreateVertexBuffer");
 
-				struct Vertex
-				{
-					glm::vec3 Pos;
-					glm::vec3 Colour;
-				};
-
 				Vertex vertices[3] =
 				{
-					Vertex{ glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f) },
-					Vertex{ glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f) },
-					Vertex{ glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f) }
+					Vertex{ glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) },
+					Vertex{ glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) },
+					Vertex{ glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) },
 				};
 				m_vertexBuffer = Renderer::CreateVertexBuffer(sizeof(Vertex) * ARRAYSIZE(vertices));
 				m_vertexBuffer->Upload(vertices, sizeof(vertices));
-
 			}
 
 			if (!m_indexBuffer)
@@ -106,6 +96,9 @@ namespace Insight
 				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
 				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 			}
+
+			//m_testMesh.Draw();
+
 			//Renderer::Draw(3, 1, 0, 0);
 			Renderer::DrawIndexed(3, 1, 0, 0, 0);
 		}

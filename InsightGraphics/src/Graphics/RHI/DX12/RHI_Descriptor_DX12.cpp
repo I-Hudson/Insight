@@ -355,18 +355,21 @@ namespace Insight
 							m_heaps[heapType].Create(heapType);
 						}
 
-						DescriptorHeapHandle_DX12 handle = m_heaps[heapType].GetNewHandle();
+						u64 hash = descriptor.GetHash(true);
 
-						if (descriptor.BufferView.IsValid())
+						if (descriptor.BufferView.IsValid() && m_boundDescriptors[sets.first][descriptor.Binding] != hash)
 						{
+							DescriptorHeapHandle_DX12 handle = m_heaps[heapType].GetNewHandle();
 							RHI_Buffer_DX12* buffer_dx12 = dynamic_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
 							D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
 							cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
 							cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 							m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
+
+							m_boundDescriptors[sets.first][descriptor.Binding] = hash;
+							m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
 						}
-						m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
 						++rootParaemterIndex;
 					}
 				}
@@ -414,6 +417,7 @@ namespace Insight
 					heap.second.Reset();
 				}
 				m_descrptorTables.clear();
+				m_boundDescriptors.clear();
 			}
 
 			void DescriptorAllocator_DX12::Destroy()

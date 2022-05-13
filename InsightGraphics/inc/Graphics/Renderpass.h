@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Graphics/Mesh.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -15,6 +17,8 @@ namespace Insight
 
 		private:
 			void Sample();
+
+			Mesh m_testMesh;
 
 			RHI_Buffer* m_vertexBuffer = nullptr;
 			RHI_Buffer* m_indexBuffer = nullptr;

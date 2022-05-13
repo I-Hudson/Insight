@@ -111,9 +111,9 @@ namespace Insight
 
 				ComPtr<ID3D12PipelineState> pipeline;
 				ThrowIfFailed(m_context->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipeline)));
-				if (!pso.Name.empty())
+				if (lstrcmpW(pso.Name, L""))
 				{
-					pipeline->SetName(pso.Name.c_str());
+					pipeline->SetName(pso.Name);
 				}
 				m_pipelines[psoHash] = pipeline;
 				return pipeline.Get();

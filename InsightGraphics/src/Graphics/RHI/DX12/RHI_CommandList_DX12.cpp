@@ -74,11 +74,11 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src)
+			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset)
 			{
 				RHI_Buffer_DX12* dstDX12 = dynamic_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = dynamic_cast<RHI_Buffer_DX12*>(src);
-				m_commandList->CopyBufferRegion(dstDX12->GetResouce(), 0, srcDX12->GetResouce(), 0, src->GetSize());
+				m_commandList->CopyBufferRegion(dstDX12->GetResouce(), offset, srcDX12->GetResouce(), 0, src->GetSize());
 			}
 
 			void RHI_CommandList_DX12::Release()

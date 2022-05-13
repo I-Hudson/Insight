@@ -206,6 +206,7 @@ namespace Insight
 			}
 
 			u64 byteSizeFromStart = GetByteSizeFromStart();
+			u64 readHeadbyteSizeFromStart = GetBytesSizeReadHeadFromStart();
 
 			if (m_commands != nullptr)
 			{
@@ -227,6 +228,8 @@ namespace Insight
 					m_commands = (ICommand*)newBlock;
 					m_pos = (Byte*)m_commands;
 					m_pos += byteSizeFromStart;
+					m_readHead = (Byte*)m_commands;
+					m_readHead += readHeadbyteSizeFromStart;
 					m_commandMaxByteSize = newSize;
 					// Realloc passed 
 					return;
