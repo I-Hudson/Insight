@@ -10,6 +10,11 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
+			RHI_Buffer_Vulkan::~RHI_Buffer_Vulkan()
+			{
+				Release();
+			}
+
 			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes)
 			{
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);

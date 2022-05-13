@@ -3,6 +3,8 @@
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsManager.h"
 
+#include "Graphics/Mesh.h"
+
 #include "Tracy.hpp"
 
 namespace Insight
@@ -11,6 +13,9 @@ namespace Insight
 	{
 		void Renderpass::Create()
 		{
+			Mesh mesh;
+			mesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+
 			if (!m_vertexBuffer)
 			{
 				ZoneScopedN("CreateVertexBuffer");

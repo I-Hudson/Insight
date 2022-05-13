@@ -39,6 +39,8 @@ namespace Insight
 		public:
 			static RHI_Buffer* New();
 
+			virtual ~RHI_Buffer() { }
+
 			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes) = 0;
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) = 0;
 

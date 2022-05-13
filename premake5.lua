@@ -42,7 +42,7 @@ workspace "Insight"
 
         filter "system:Windows"
     	system "windows"
-    	toolset("msc")
+    	toolset("msc-v143")
         defines
         {
             "IS_PLATFORM_WINDOWS",
@@ -80,6 +80,7 @@ IncludeDirs["vma"] = "%{wks.location}/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 IncludeDirs["spirv_reflect"] = "%{wks.location}/vendor/SPIRV-Reflect"
 IncludeDirs["dxcompiler"] = "%{wks.location}/vendor/dxcompiler/win_debug/inc"
+IncludeDirs["assimp"] = "%{wks.location}/vendor/assimp/include"
 
 LibDirs = {}
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"

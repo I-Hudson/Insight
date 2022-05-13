@@ -15,6 +15,8 @@ namespace Insight
 		class RHI_Resource
 		{
 		public:
+			virtual ~RHI_Resource() { }
+
 			virtual void Release() = 0;
 			virtual bool ValidResouce() = 0;
 			virtual void SetName(std::wstring name) = 0;

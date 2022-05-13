@@ -29,6 +29,8 @@ project "InsightGraphics"
         "%{IncludeDirs.vulkan}",
         "%{IncludeDirs.spirv_reflect}",
         "%{IncludeDirs.dxcompiler}",
+        "%{IncludeDirs.assimp}",
+        "%{IncludeDirs.assimp}/../build/include",
     }
 
     files 
@@ -59,6 +61,7 @@ project "InsightGraphics"
     {
         "%{wks.location}/vendor/glfw/lib",
         "%{LibDirs.vulkan}",
+        "%{wks.location}/deps/lib",
     }
 
     postbuildcommands
@@ -83,6 +86,7 @@ project "InsightGraphics"
             "SPIRV-Toolsd.lib",
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
+            "assimp-vc143-mtd.lib",
         }
 
         libdirs
@@ -95,6 +99,7 @@ project "InsightGraphics"
         {
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/deps/dll/assimp-vc143-mtd.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
 
     filter "configurations:Release"  
@@ -108,6 +113,7 @@ project "InsightGraphics"
             "GenericCodeGen.lib",
             "OGLCompiler.lib",
             "OSDependent.lib",
+            "assimp-vc143-mt.lib",
         }
 
         libdirs
@@ -120,4 +126,5 @@ project "InsightGraphics"
         {
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            "{COPY} \"%{wks.location}/deps/dll/assimp-vc143-mt.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }

@@ -13,6 +13,7 @@ namespace Insight
 			class RHI_Buffer_DX12 : public RHI_Buffer
 			{
 			public:
+				virtual ~RHI_Buffer_DX12() override;
 
 				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes) override;
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;

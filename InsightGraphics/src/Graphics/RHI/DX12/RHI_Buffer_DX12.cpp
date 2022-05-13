@@ -7,6 +7,11 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			RHI_Buffer_DX12::~RHI_Buffer_DX12()
+			{
+				Release();
+			}
+			
 			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
