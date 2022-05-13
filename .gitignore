@@ -3,6 +3,7 @@
 /bin-int
 /vendor
 /deps
+/models
 *.sln
 *.vcxproj
 *.vcxproj.filters
