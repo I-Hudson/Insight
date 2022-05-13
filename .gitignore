@@ -2,6 +2,7 @@
 /bin
 /bin-int
 /vendor
+/deps
 *.sln
 *.vcxproj
 *.vcxproj.filters
