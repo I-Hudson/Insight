@@ -1,10 +1,9 @@
 #pragma once
 
-#include "Core/TypeAlias.h"
 #include "Graphics/Defines.h"
-#include "Core/Memory.h"
-
 #include "Graphics/RHI/RHI_Buffer.h"
+#include <memory>
+
 
 #include "glm/glm.hpp"
 #include <vector>
@@ -21,10 +20,16 @@ namespace Insight
 
 		struct Vertex
 		{
-			glm::vec3 Position;
-			glm::vec3 Normal;
-			glm::vec3 Colour;
-			glm::vec2 UV;
+			Vertex() 
+			{ }
+			Vertex(glm::vec4 pos, glm::vec4 nor, glm::vec4 col, glm::vec2 uv)
+				: Position(pos)//, Normal(nor), Colour(col), UV(uv)
+			{ }
+
+			glm::vec4 Position;
+			//glm::vec4 Normal;
+			//glm::vec4 Colour;
+			//glm::vec2 UV;
 
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
@@ -37,21 +42,21 @@ namespace Insight
 		public:
 			Submesh() = delete;
 			Submesh(Mesh* mesh) { m_mesh = mesh; }
+			~Submesh();
 
 			void Draw() const;
 
-			void SetVertexView(RHI_BufferView view) { m_indexView = view; }
-			void SetIndexView(RHI_BufferView view) { m_indexView = view; }
+			void SetVertexBuffer(RHI_Buffer* buffer);
+			void SetIndexBuffer(RHI_Buffer* buffer);
 
-			RHI_BufferView GetVertexView() const { return m_vertexView; }
-			RHI_BufferView GetIndexView() const { return m_indexView; }
+			int GetVertexCount() const { return (int)(m_vertexBuffer->GetSize() / sizeof(Vertex)); }
+			int GetIndexCount() const { return (int)(m_indexBuffer->GetSize() / sizeof(int)); }
 
-			int GetVertexCount() const { return m_vertexView.GetSize() / sizeof(Vertex); }
-			int GetIndexCount() const { return m_indexView.GetSize() / sizeof(int); }
+			void Destroy();
 
 		private:
-			RHI_BufferView m_vertexView;
-			RHI_BufferView m_indexView;
+			UPtr<RHI_Buffer> m_vertexBuffer;
+			UPtr<RHI_Buffer> m_indexBuffer;
 			Mesh* m_mesh = nullptr;
 		};
 
@@ -64,19 +69,17 @@ namespace Insight
 			Mesh();
 
 			bool LoadFromFile(std::string filePath);
-
+			void Destroy();
+		
 			void Draw() const;
-
+		
 		private:
 			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath);
 			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory);
 			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices);
-
+		
 		private:
-			std::vector<Submesh> m_submeshes;
-
-			UPtr<RHI_Buffer> m_vertexBuffer;
-			UPtr<RHI_Buffer> m_indexBuffer;
+			std::vector<Submesh*> m_submeshes;
 		};
 	}
 }

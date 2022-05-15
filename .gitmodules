@@ -16,10 +16,9 @@
 [submodule "vendor/SPIRV-Reflect"]
 	path = vendor/SPIRV-Reflect
 	url = https://github.com/KhronosGroup/SPIRV-Reflect
-[submodule "vendor/tracy"]
-	path = vendor/tracy
-	url = https://github.com/wolfpld/tracy.git
-	branch = master
 [submodule "vendor/assimp"]
 	path = vendor/assimp
 	url = https://github.com/assimp/assimp
+[submodule "vendor/optick"]
+	path = vendor/optick
+	url = https://github.com/bombomby/optick

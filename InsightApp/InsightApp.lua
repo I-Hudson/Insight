@@ -22,7 +22,6 @@ project "InsightApp"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.tracy}",
     }
 
     files 
@@ -39,7 +38,6 @@ project "InsightApp"
 
         "glfw3.lib",
         "glm",
-        "tracy",
     }
 
     libdirs
@@ -55,6 +53,23 @@ project "InsightApp"
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
+        }
+
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/release",
+        }

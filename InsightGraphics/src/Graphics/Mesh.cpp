@@ -1,7 +1,7 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -12,10 +12,43 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		Submesh::~Submesh()
+		{
+			Destroy();
+		}
+
 		void Submesh::Draw() const
 		{
-			const int indexCount = m_indexView.GetSize() / sizeof(int);
+			Renderer::BindVertexBuffer(*m_vertexBuffer);
+			Renderer::BindIndexBuffer(*m_indexBuffer);
+
+			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
 			Renderer::DrawIndexed(indexCount, 1, 0, 0, 0);
+		}
+
+		void Submesh::SetVertexBuffer(RHI_Buffer* buffer)
+		{
+			m_vertexBuffer = UPtr<RHI_Buffer>(buffer);
+		}
+
+		void Submesh::SetIndexBuffer(RHI_Buffer* buffer)
+		{
+			m_indexBuffer = UPtr<RHI_Buffer>(buffer);
+		}
+
+		void Submesh::Destroy()
+		{
+			if (m_vertexBuffer)
+			{
+				m_vertexBuffer->Release();
+				m_vertexBuffer.Reset();
+			}
+			
+			if (m_indexBuffer)
+			{
+				m_indexBuffer->Release();
+				m_indexBuffer.Reset();
+			}
 		}
 
 		int vertexOffset = 0;
@@ -28,7 +61,7 @@ namespace Insight
 
 		bool Mesh::LoadFromFile(std::string filePath)
 		{
-			ZoneScoped;
+			OPTICK_EVENT();
 
 			vertexOffset = 0;
 			indexOffset = 0;
@@ -54,18 +87,31 @@ namespace Insight
 			return true;
 		}
 
+		void Mesh::Destroy()
+		{
+			for (Submesh* submesh : m_submeshes)
+			{
+				submesh->Destroy();
+				DeleteTracked(submesh);
+			}
+			m_submeshes.clear();
+		}
+
 		void Mesh::Draw() const
 		{
-			Renderer::BindVertexBuffer(*m_vertexBuffer);
-			Renderer::BindIndexBuffer(*m_indexBuffer);
-			for (const Submesh& submesh : m_submeshes)
+			OPTICK_EVENT();
+
+			int indexOffset = 0;
+			for (Submesh* submesh : m_submeshes)
 			{
-				submesh.Draw();
+				submesh->Draw();
 			}
 		}
 
 		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath)
 		{
+			OPTICK_EVENT();
+
 			int vertexCount = 0;
 			int indexCount = 0;
 			std::function<void(aiNode* node, const aiScene* scene)> getVertexAndIndexCount;
@@ -96,16 +142,11 @@ namespace Insight
 				{
 					return (wchar_t)c;
 				});
-
-			m_vertexBuffer = UPtr(Renderer::CreateVertexBuffer(vertexCount * sizeof(Vertex)));
-			m_vertexBuffer->SetName(wShortFileName + L"_Mesh_Vertex_Buffer");
-			m_indexBuffer = UPtr(Renderer::CreateIndexBuffer(indexCount * sizeof(int)));
-			m_indexBuffer->SetName(wShortFileName + L"_Mesh_Index_Buffer");
 		}
 
 		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
 		{
-			ZoneScoped;
+			OPTICK_EVENT();
 
 			if (aiNode->mNumMeshes > 0)
 			{
@@ -121,20 +162,21 @@ namespace Insight
 					const int vertexSizeBytes = (int)vertices.size() * (int)sizeof(Vertex);
 					const int indexSizeBytes = (int)indices.size() * (int)sizeof(int);
 
-					const int vertexOffsetSizeBytes = vertexOffset * (int)sizeof(Vertex);
-					const int indexOffsetSizeBytes = indexOffset * (int)sizeof(int);
+					RHI_Buffer* vBuffer = Renderer::CreateVertexBuffer(vertexSizeBytes, sizeof(Vertex));
+					{
+						//ZoneScopedN("Vertex_Upload");
+						vBuffer->Upload(vertices.data(), vertexSizeBytes, 0);
+					}
+					RHI_Buffer* iBuffer = Renderer::CreateIndexBuffer(indexSizeBytes);
+					{
+						//ZoneScopedN("Index_Upload");
+						iBuffer->Upload(indices.data(), indexSizeBytes, 0);
+					}
 
-					Submesh subMesh(this);
-					subMesh.SetVertexView(RHI_BufferView(*m_vertexBuffer, vertexOffsetSizeBytes, vertexSizeBytes));
-					subMesh.SetIndexView(RHI_BufferView(*m_indexBuffer, indexOffsetSizeBytes, indexSizeBytes));
-					m_submeshes.push_back(subMesh);
-
-					// Upload data
-					m_vertexBuffer->Upload(vertices.data(), vertexSizeBytes, vertexOffsetSizeBytes);
-					m_indexBuffer->Upload(indices.data(), indexSizeBytes, indexOffsetSizeBytes);
-
-					vertexOffset += (int)vertices.size();
-					indexOffset += (int)indices.size();
+					Submesh* subMesh = NewArgsTracked(Submesh, this);
+					subMesh->SetVertexBuffer(vBuffer);
+					subMesh->SetIndexBuffer(iBuffer);
+					m_submeshes.push_back(std::move(subMesh));
 				}
 
 				//Mesh* mesh = ::New<Mesh, MemoryCategory::Core>(&model, static_cast<u32>(model.m_meshes.size()));
@@ -166,11 +208,13 @@ namespace Insight
 
 		void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices)
 		{
+			OPTICK_EVENT();
+
 			// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
 				Vertex vertex;
-				glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				glm::vec4 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 				// positions
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;
@@ -182,7 +226,7 @@ namespace Insight
 					vector.x = mesh->mNormals[i].x;
 					vector.y = mesh->mNormals[i].y;
 					vector.z = mesh->mNormals[i].z;
-					vertex.Normal = vector;
+					//vertex.Normal = vector;
 				}
 				// texture coordinates
 				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
@@ -192,7 +236,7 @@ namespace Insight
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
-					vertex.UV = vec;
+					//vertex.UV = vec;
 					// tangent
 					if (mesh->mTangents)
 					{
@@ -212,7 +256,7 @@ namespace Insight
 				}
 				else
 				{
-					vertex.UV = glm::vec2(0.0f, 0.0f);
+					//vertex.UV = glm::vec2(0.0f, 0.0f);
 				}
 
 				vertices.push_back(vertex);

@@ -166,7 +166,7 @@ namespace Insight
 				else
 				{
 					DWORD error = GetLastError();
-					IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address 0x%X: %u\n", frame.AddrPC.Offset, error);
+					//IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address {}: {}\n", frame.AddrPC.Offset, error);
 					f.name = "Unknown Function";
 				}
 

@@ -22,7 +22,6 @@ project "InsightGraphics"
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.imgui}",
-        "%{IncludeDirs.tracy}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.vma}",
         "%{IncludeDirs.glslang}win_debug/inc",
@@ -31,6 +30,7 @@ project "InsightGraphics"
         "%{IncludeDirs.dxcompiler}",
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
+        "%{IncludeDirs.optick}",
     }
 
     files 
@@ -49,7 +49,6 @@ project "InsightGraphics"
         "glfw3.lib",
         "glm",
         "imgui",
-        "tracy",
         "vulkan-1.lib",
         "D3d12.lib",
         "DXGI.lib",
@@ -61,7 +60,6 @@ project "InsightGraphics"
     {
         "%{wks.location}/vendor/glfw/lib",
         "%{LibDirs.vulkan}",
-        "%{wks.location}/deps/lib",
     }
 
     postbuildcommands
@@ -72,7 +70,6 @@ project "InsightGraphics"
     filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On" 
-
         links
         {
             "GenericCodeGend.lib",
@@ -87,25 +84,25 @@ project "InsightGraphics"
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
             "assimp-vc143-mtd.lib",
+            "Optickcore.lib",
         }
 
         libdirs
         {
             "%{LibDirs.glslang_win_d}",
             "%{LibDirs.dxcompiler_win_d}",
+            "%{wks.location}/deps/lib/debug",
         }
 
         postbuildcommands
         {
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            "{COPY} \"%{wks.location}/deps/dll/assimp-vc143-mtd.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
-        optimize "On" 
-        
+        optimize "On"   
         links
         {
             "glslang.lib",
@@ -114,17 +111,18 @@ project "InsightGraphics"
             "OGLCompiler.lib",
             "OSDependent.lib",
             "assimp-vc143-mt.lib",
+            "Optickcore.lib",
         }
 
         libdirs
         {
             "%{LibDirs.glslang_win}",
             "%{LibDirs.dxcompiler_win}",
+            "%{wks.location}/deps/lib/release",
         }
 
         postbuildcommands
         {
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
             "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            "{COPY} \"%{wks.location}/deps/dll/assimp-vc143-mt.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }

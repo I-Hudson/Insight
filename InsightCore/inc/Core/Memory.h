@@ -81,7 +81,7 @@ namespace Insight
 }
 
 template<typename T>
-struct IS_CORE UPtr
+struct UPtr
 {
 	UPtr() 
 	{ }
@@ -91,6 +91,7 @@ struct IS_CORE UPtr
 	}
 	UPtr(UPtr&& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		other.Release();
 	}
@@ -101,6 +102,7 @@ struct IS_CORE UPtr
 
 	UPtr& operator=(UPtr&& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		other.Release();
 		return *this;
@@ -138,7 +140,7 @@ private:
 };
 
 template<typename T>
-struct IS_CORE RPtr : RefCount
+struct RPtr : RefCount
 {
 	RPtr() { }
 	RPtr(T* ptr) { }

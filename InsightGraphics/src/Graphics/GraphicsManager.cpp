@@ -5,7 +5,7 @@
 
 #include "Core/Memory.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 namespace Insight
 {
@@ -39,7 +39,7 @@ namespace Insight
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
-			//ZoneScoped;
+			OPTICK_EVENT();
 
 			if (!m_renderContext)
 			{

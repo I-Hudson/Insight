@@ -1,11 +1,12 @@
 #include "App/Engine.h"
-#include "Tracy.hpp"
+
+#include "optick.h"
 
 namespace Insight
 {
 	namespace App
 	{
-//#define TRACY_WAIT_FOR_CONNECTION
+//#define WAIT_FOR_PROFILE_CONNECTION
 
 		bool Engine::Init()
 		{
@@ -21,15 +22,14 @@ namespace Insight
 
 		void Engine::Update()
 		{
-#ifdef TRACY_WAIT_FOR_CONNECTION
-			while (!tracy::GetProfiler().IsConnected()) { }
+#ifdef WAIT_FOR_PROFILE_CONNECTION
+			while (!Optick::IsActive()) { }
 #endif
 			while (!Graphics::Window::Instance().ShouldClose())
 			{
+				OPTICK_FRAME("MainThread");
 				m_graphicsManager.Update(0.0f);
 				Graphics::Window::Instance().Update();
-				
-				FrameMark;
 			}
 		}
 

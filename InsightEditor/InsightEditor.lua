@@ -23,7 +23,6 @@ project "InsightEditor"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.tracy}",
     }
 
     files 
@@ -41,7 +40,6 @@ project "InsightEditor"
 
         "glfw3.lib",
         "glm",
-        "tracy",
     }
 
     libdirs
@@ -56,7 +54,32 @@ project "InsightEditor"
 
     filter "configurations:Debug"
         defines { "DEBUG" }  
-        symbols "On" 
+        symbols "On"
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
+        }
+        postbuildcommands
+        {
+            "{COPYDIR} \"%{wks.location}/deps/dll/debug/\" \"%{cfg.targetdir}\"",
+        }
+
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/release",
+        }
+        postbuildcommands
+        {
+            "{COPYDIR} \"%{wks.location}/deps/dll/release/\" \"%{cfg.targetdir}\"",
+        }

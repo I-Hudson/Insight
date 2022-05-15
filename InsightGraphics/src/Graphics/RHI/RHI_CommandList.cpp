@@ -6,7 +6,7 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 
-#include "Tracy.hpp"
+
 
 namespace Insight
 {

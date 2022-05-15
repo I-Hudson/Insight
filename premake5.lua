@@ -19,9 +19,12 @@ workspace "Insight"
         "IS_PROFILE_OPTICK",
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
-        "TRACY_IMPORTS",
-        "TRACY_ENABLE",
         "PLATFORM_X64",
+    }
+
+    includedirs
+    {
+        "%{IncludeDirs.optick}",
     }
 
     editandcontinue "Off"
@@ -74,13 +77,13 @@ IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
 IncludeDirs["imgui"] = "%{wks.location}/Vendor/imgui"
-IncludeDirs["tracy"] = "%{wks.location}/Vendor/tracy"
 IncludeDirs["spdlog"] = "%{wks.location}/Vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 IncludeDirs["spirv_reflect"] = "%{wks.location}/vendor/SPIRV-Reflect"
 IncludeDirs["dxcompiler"] = "%{wks.location}/vendor/dxcompiler/win_debug/inc"
 IncludeDirs["assimp"] = "%{wks.location}/vendor/assimp/include"
+IncludeDirs["optick"] = "%{wks.location}/vendor/optick/src"
 
 LibDirs = {}
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"
@@ -93,7 +96,6 @@ LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 group "Dependices"
         include "vendor/glm/glm.lua"
         include "vendor/imgui/imgui.lua"
-        include "vendor/tracy/tracy.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"

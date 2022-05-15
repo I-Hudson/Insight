@@ -3,7 +3,7 @@
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/Window.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 namespace Insight
 {
@@ -70,27 +70,27 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetPipeline(PipelineStateObject pso)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				m_pso = pso;
 				FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_Vulkan::SetUniform(int set, int binding, DescriptorBufferView view)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				FrameResourceVulkan()->DescriptorAllocator.SetUniform(set, binding, FrameResourceVulkan()->UniformBuffer.GetView(view.Offset, view.SizeInBytes));
 			}
 
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
 				m_commandList.setViewport(0, viewports);
 			}
 
 			void RHI_CommandList_Vulkan::SetScissor(int x, int y, int width, int height)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				std::array<vk::Rect2D, 1> scissors = { vk::Rect2D(vk::Offset2D(x, y),
 					vk::Extent2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height))) };
 				m_commandList.setScissor(0, scissors);
@@ -98,7 +98,7 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
 				std::array<vk::Buffer, 1> buffers = { bufferVulkan->GetBuffer() };
 				std::array<vk::DeviceSize, 1> offsets = { 0 };
@@ -107,26 +107,26 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
 				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
 			}
 
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
 			}
 
 			void RHI_CommandList_Vulkan::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 			}
 
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				if (!m_activeRenderpass)
 				{
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)Window::Instance().GetWidth(), (u32)Window::Instance().GetHeight() });
@@ -164,7 +164,7 @@ namespace Insight
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				std::vector<RHI_Descriptor*> descriptors;
 				bool result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
@@ -190,14 +190,14 @@ namespace Insight
 
 			RenderContext_Vulkan* RHI_CommandList_Vulkan::RenderContextVulkan()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_context);
 				return dynamic_cast<RenderContext_Vulkan*>(m_context);
 			}
 
 			FrameResource_Vulkan* RHI_CommandList_Vulkan::FrameResourceVulkan()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_frameResouces);
 				return static_cast<FrameResource_Vulkan*>(m_frameResouces);
 			}

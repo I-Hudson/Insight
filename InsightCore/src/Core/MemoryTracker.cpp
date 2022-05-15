@@ -79,20 +79,20 @@ namespace Insight
 #define MEMORY_TRACK_CALLSTACK
 		std::array<std::string, c_CallStackCount> MemoryTracker::GetCallStack()
 		{
-			std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
+			//std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
 
-			for (size_t i = 0; i < c_CallStackCount; ++i)
-			{
-				if (i < callStackVector.size())
-				{
-					callStack[i] = std::move(callStackVector[i]);
-				}
-			}
+			//for (size_t i = 0; i < c_CallStackCount; ++i)
+			//{
+			//	if (i < callStackVector.size())
+			//	{
+			//		callStack[i] = std::move(callStackVector[i]);
+			//	}
+			//}
 
-			return callStack;
+			//return callStack;
 #if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)
-			/*
+			
 			const ULONG framesToSkip = 0;
 			const ULONG framesToCapture = c_CallStackCount;
 			void* backTrace[framesToCapture]{};
@@ -144,7 +144,6 @@ namespace Insight
 				}
 				free(symbol);
 			}
-			*/
 #endif
 
 			return callStack;

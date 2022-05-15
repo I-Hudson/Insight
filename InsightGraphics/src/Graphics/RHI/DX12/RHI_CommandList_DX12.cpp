@@ -2,7 +2,7 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 namespace Insight
 {
@@ -105,21 +105,21 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetPipeline(PipelineStateObject pso)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				m_pso = pso;
 				FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_DX12::SetUniform(int set, int binding, DescriptorBufferView view)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				RHI_BufferView bufferView = FrameResourceDX12()->UniformBuffer.GetView(view.Offset, view.SizeInBytes);
 				FrameResourceDX12()->DescriptorAllocator.SetUniform(set, binding, bufferView);
 			}
 
 			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_commandList);
 				D3D12_VIEWPORT viewports[1] = { D3D12_VIEWPORT{ x, y, width, height, minDepth, maxDepth } };
 				m_commandList->RSSetViewports(1, viewports);
@@ -127,7 +127,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetScissor(int x, int y, int width, int height)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_commandList);
 				D3D12_RECT rects[1] = { D3D12_RECT{ x, y, width, height } };
 				m_commandList->RSSetScissorRects(1, rects);
@@ -135,7 +135,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),
@@ -145,7 +145,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),  
@@ -155,21 +155,21 @@ namespace Insight
 
 			void RHI_CommandList_DX12::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_commandList);
 				m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
 			}
 
 			void RHI_CommandList_DX12::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_commandList);
 				m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 			}
 
 			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				ID3D12PipelineState* pipeline = RenderContextDX12()->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
 				m_commandList->SetPipelineState(pipeline);
 
@@ -180,7 +180,7 @@ namespace Insight
 
 			bool RHI_CommandList_DX12::BindDescriptorSets()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
 				//FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
 				
@@ -200,14 +200,14 @@ namespace Insight
 
 			RenderContext_DX12* RHI_CommandList_DX12::RenderContextDX12()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_context);
 				return dynamic_cast<RenderContext_DX12*>(m_context);
 			}
 
 			FrameResource_DX12* RHI_CommandList_DX12::FrameResourceDX12()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				assert(m_frameResouces);
 				return static_cast<FrameResource_DX12*>(m_frameResouces);
 			}

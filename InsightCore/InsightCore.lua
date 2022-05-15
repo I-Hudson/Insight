@@ -17,8 +17,7 @@ project "InsightCore"
     {
         "inc",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.tracy}",
-
+        "%{IncludeDirs.optick}",
     }
 
     files 
@@ -30,11 +29,11 @@ project "InsightCore"
 
     links
     {
-        "tracy",
     }
 
     libdirs
     {
+        "%{wks.location}/deps/lib",
     }
 
     postbuildcommands
@@ -45,6 +44,23 @@ project "InsightCore"
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
+        }
+
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/release",
+        }

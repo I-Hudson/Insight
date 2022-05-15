@@ -3,7 +3,7 @@
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -115,7 +115,7 @@ namespace Insight
 
 			bool RenderContext_Vulkan::Init()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				if (m_instnace && m_device)
 				{
@@ -229,7 +229,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::Destroy()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				m_device.waitIdle();
 
@@ -390,7 +390,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::DestroyImGui()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				ImGui_ImplVulkan_Shutdown();
 				ImGui_ImplGlfw_Shutdown();
@@ -410,7 +410,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				ImGuiRender();
 
@@ -528,14 +528,14 @@ namespace Insight
 
 			void RenderContext_Vulkan::WaitForGpu()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				m_device.waitIdle();
 			}
 
 			vk::Instance RenderContext_Vulkan::CreateInstance()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
 					"ApplciationName",
@@ -591,7 +591,7 @@ namespace Insight
 
 			vk::PhysicalDevice RenderContext_Vulkan::FindAdapter()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				std::vector<vk::PhysicalDevice> physicalDevices = m_instnace.enumeratePhysicalDevices();
 				vk::PhysicalDevice adapter(nullptr);
@@ -695,7 +695,7 @@ namespace Insight
 			
 			void RenderContext_Vulkan::CreateSwapchain()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
 				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
@@ -854,7 +854,7 @@ namespace Insight
 
 			void FrameResource_Vulkan::Destroy()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				CommandListManager.Destroy();
 				DescriptorAllocator.Destroy();
 				UniformBuffer.Release();
@@ -866,7 +866,7 @@ namespace Insight
 			
 			void FrameResource_Vulkan::Reset()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				FrameResouce::Reset();
 				DescriptorAllocator.Reset();
 			}

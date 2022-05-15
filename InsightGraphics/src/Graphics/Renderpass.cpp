@@ -3,7 +3,7 @@
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsManager.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 namespace Insight
 {
@@ -11,11 +11,7 @@ namespace Insight
 	{
 		void Renderpass::Create()
 		{
-			//if (!m_testMesh)
-			{
-				//m_testMesh = Core::MakeUPtr<Mesh>();
-			}
-			//m_testMesh->LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 
 			if (!m_vertexBuffer)
 			{
@@ -43,7 +39,7 @@ namespace Insight
 
 		void Renderpass::Render()
 		{
-			//ZoneScoped;
+			OPTICK_EVENT();
 			Sample();
 		}
 
@@ -61,7 +57,7 @@ namespace Insight
 				m_indexBuffer = nullptr;
 			}
 
-		//	m_testMesh->Destroy();
+			m_testMesh.Destroy();
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -69,7 +65,7 @@ namespace Insight
 
 		void Renderpass::Sample()
 		{
-			//ZoneScoped;
+			OPTICK_EVENT();
 
 			RHI_Shader* shader = nullptr;
 			{
@@ -105,7 +101,7 @@ namespace Insight
 				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 			}
 
-		//	m_testMesh->Draw();
+			m_testMesh.Draw();
 
 			//Renderer::Draw(3, 1, 0, 0);
 			//Renderer::DrawIndexed(3, 1, 0, 0, 0);

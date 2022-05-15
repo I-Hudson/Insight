@@ -2,7 +2,7 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
-#include "Tracy.hpp"
+#include "optick.h"
 
 #include "backends/imgui_impl_glfw.h"
 
@@ -192,7 +192,7 @@ namespace Insight
 
 			void RenderContext_DX12::Render(CommandList cmdList)
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				ImGuiRender();
 
 				FrameResource_DX12& frame = m_frames[m_frameIndex];
@@ -409,7 +409,7 @@ namespace Insight
 
 			void RenderContext_DX12::WaitForNextFrame()
 			{
-				//ZoneScoped;
+				OPTICK_EVENT();
 				// Schedule a Signal command in the queue.
 				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));
