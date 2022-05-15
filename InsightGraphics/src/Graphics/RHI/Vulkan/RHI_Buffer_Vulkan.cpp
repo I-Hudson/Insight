@@ -15,11 +15,12 @@ namespace Insight
 				Release();
 			}
 
-			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes)
+			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride)
 			{
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
+				m_stride = stride;
 
 				vk::BufferCreateInfo createInfo = {};
 				createInfo.setSize(m_size);
@@ -55,7 +56,7 @@ namespace Insight
 				{
 					// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_Vulkan stagingBuffer;
-					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes);
+					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0);
 					stagingBuffer.Upload(data, sizeInBytes, 0);
 
 					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetCommandList();
@@ -105,7 +106,7 @@ namespace Insight
 				{
 					std::vector<Byte> data = Download();
 					Release();
-					Create(m_context, m_bufferType, newSizeInBytes);
+					Create(m_context, m_bufferType, newSizeInBytes, m_stride);
 					Upload(data.data(), (int)data.size(), 0);
 				}
 			}

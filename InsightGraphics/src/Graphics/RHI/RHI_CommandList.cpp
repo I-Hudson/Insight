@@ -32,7 +32,7 @@ namespace Insight
 
 			for (int i = 0; i < cmdList.GetCommandCount(); ++i)
 			{
-				ZoneScopedN("Single Command");
+				//ZoneScopedN("Single Command");
 				ICommand* command = cmdList.GetCurrentCommand();
 				switch (command->CommandType)
 				{
@@ -40,7 +40,7 @@ namespace Insight
 
 				case CommandType::SetPipelineStateObject:
 				{
-					ZoneScopedN("SetPipelineStateObject");
+					//ZoneScopedN("SetPipelineStateObject");
 					const CMD_SetPipelineStateObject* cmd = dynamic_cast<const CMD_SetPipelineStateObject*>(command);
 					m_pso = cmd->Pso;
 					SetPipeline(m_pso);
@@ -49,7 +49,7 @@ namespace Insight
 
 				case CommandType::SetUniform:
 				{
-					ZoneScopedN("SetUniform");
+					//ZoneScopedN("SetUniform");
 					const CMD_SetUniform* cmd = dynamic_cast<const CMD_SetUniform*>(command);
 					SetUniform(cmd->Set, cmd->Binding, cmd->View);
 					break;
@@ -57,7 +57,7 @@ namespace Insight
 
 				case CommandType::SetViewport:
 				{
-					ZoneScopedN("SetViewport");
+					//ZoneScopedN("SetViewport");
 					const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
 					SetViewport(0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f);
 					break;
@@ -65,7 +65,7 @@ namespace Insight
 
 				case CommandType::SetScissor:
 				{
-					ZoneScopedN("SetScissor");
+					//ZoneScopedN("SetScissor");
 					const CMD_SetScissor* cmd = dynamic_cast<const CMD_SetScissor*>(command);
 					SetScissor(0, 0, cmd->Width, cmd->Height);
 					break;
@@ -87,7 +87,7 @@ namespace Insight
 
 				case CommandType::Draw:
 				{
-					ZoneScopedN("Draw");
+					//ZoneScopedN("Draw");
 					if (!CanDraw(cmdList))
 					{
 						break;

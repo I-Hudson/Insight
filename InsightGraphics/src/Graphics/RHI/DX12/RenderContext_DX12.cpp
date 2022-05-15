@@ -192,7 +192,7 @@ namespace Insight
 
 			void RenderContext_DX12::Render(CommandList cmdList)
 			{
-				ZoneScoped;
+				//ZoneScoped;
 				ImGuiRender();
 
 				FrameResource_DX12& frame = m_frames[m_frameIndex];
@@ -214,27 +214,27 @@ namespace Insight
 				cmdListDX12->Record(cmdList, &frame);
 
 				{
-					ZoneScopedN("ImGui_DescriptorHeap");
+					//ZoneScopedN("ImGui_DescriptorHeap");
 					std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
 					IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
 					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
 				}
 
 				{
-					ZoneScopedN("ResourceBarrier_swapchain_present");
+					//ZoneScopedN("ResourceBarrier_swapchain_present");
 					// Set back buffer texture/image back to present so we can use it within the swapchain.
 					cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 				}
 				cmdListDX12->Close();
 
 				{
-					ZoneScopedN("ExecuteCommandLists");
+					//ZoneScopedN("ExecuteCommandLists");
 					ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 					m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				}
 
 				{
-					ZoneScopedN("Present");
+					//ZoneScopedN("Present");
 					// Present the frame.
 					ThrowIfFailed(m_swapchain->Present(0, 0));
 				}
@@ -409,7 +409,7 @@ namespace Insight
 
 			void RenderContext_DX12::WaitForNextFrame()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 				// Schedule a Signal command in the queue.
 				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));

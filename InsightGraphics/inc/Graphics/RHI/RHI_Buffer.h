@@ -41,7 +41,7 @@ namespace Insight
 
 			virtual ~RHI_Buffer() { }
 
-			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes) = 0;
+			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride) = 0;
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) = 0;
 
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes) { return Upload(data, sizeInBytes, 0); }
@@ -49,6 +49,7 @@ namespace Insight
 			
 			RHI_BufferView GetView(int offset, int size);
 			u64 GetSize() const { return m_size; }
+			u64 GetStride() const { return m_stride; }
 			BufferType GetType() const { return m_bufferType; }
 
 		protected:
@@ -57,6 +58,7 @@ namespace Insight
 		protected:
 			BufferType m_bufferType;
 			u64 m_size = 0;
+			u64 m_stride = 0;
 
 			friend class RenderContext;
 			friend class RHI_DynamicBuffer;

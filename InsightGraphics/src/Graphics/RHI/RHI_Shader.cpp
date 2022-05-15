@@ -355,7 +355,7 @@ namespace Insight
 			std::vector<SpvReflectInterfaceVariable*> inputVars;
 			inputVars.resize(inputCount);
 
-			//SpvReflectInterfaceVariable** input_vars =inputVars (SpvReflectInterfaceVariable**)malloc(inputCount * sizeof(SpvReflectInterfaceVariable*));
+			//SpvReflectInterfaceVariable** input_vars = inputVars (SpvReflectInterfaceVariable**)malloc(inputCount * sizeof(SpvReflectInterfaceVariable*));
 			result = spvReflectEnumerateInputVariables(&module, &inputCount, inputVars.data());
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 

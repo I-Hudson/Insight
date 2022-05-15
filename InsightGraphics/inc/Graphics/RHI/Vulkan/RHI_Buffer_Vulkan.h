@@ -16,7 +16,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Buffer_Vulkan() override;
 
-				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes) override;
+				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride) override;
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;
 				virtual std::vector<Byte> Download() override;
 

@@ -39,7 +39,7 @@ namespace Insight
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
-			ZoneScoped;
+			//ZoneScoped;
 
 			if (!m_renderContext)
 			{

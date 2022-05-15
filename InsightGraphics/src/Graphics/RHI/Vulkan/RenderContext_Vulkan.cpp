@@ -115,7 +115,7 @@ namespace Insight
 
 			bool RenderContext_Vulkan::Init()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				if (m_instnace && m_device)
 				{
@@ -229,7 +229,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::Destroy()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				m_device.waitIdle();
 
@@ -390,7 +390,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::DestroyImGui()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				ImGui_ImplVulkan_Shutdown();
 				ImGui_ImplGlfw_Shutdown();
@@ -410,7 +410,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				ImGuiRender();
 
@@ -528,14 +528,14 @@ namespace Insight
 
 			void RenderContext_Vulkan::WaitForGpu()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				m_device.waitIdle();
 			}
 
 			vk::Instance RenderContext_Vulkan::CreateInstance()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
 					"ApplciationName",
@@ -591,7 +591,7 @@ namespace Insight
 
 			vk::PhysicalDevice RenderContext_Vulkan::FindAdapter()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				std::vector<vk::PhysicalDevice> physicalDevices = m_instnace.enumeratePhysicalDevices();
 				vk::PhysicalDevice adapter(nullptr);
@@ -695,7 +695,7 @@ namespace Insight
 			
 			void RenderContext_Vulkan::CreateSwapchain()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
 				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
@@ -854,7 +854,7 @@ namespace Insight
 
 			void FrameResource_Vulkan::Destroy()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 				CommandListManager.Destroy();
 				DescriptorAllocator.Destroy();
 				UniformBuffer.Release();
@@ -866,7 +866,7 @@ namespace Insight
 			
 			void FrameResource_Vulkan::Reset()
 			{
-				ZoneScoped;
+				//ZoneScoped;
 				FrameResouce::Reset();
 				DescriptorAllocator.Reset();
 			}

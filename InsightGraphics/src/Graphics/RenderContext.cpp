@@ -85,10 +85,10 @@ namespace Insight
 			m_shaderManager.Destroy();
 		}
 
-		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes)
+		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride)
 		{
 			RHI_Buffer* buffer = m_buffers[bufferType].CreateResource();
-			buffer->Create(this, bufferType, sizeBytes);
+			buffer->Create(this, bufferType, sizeBytes, stride);
 			return buffer;
 		}
 
@@ -115,24 +115,24 @@ namespace Insight
 		context = ImGui::GetCurrentContext();
 	}
 
-	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes, int stride)
 	{
-		return s_context->CreateBuffer(Graphics::BufferType::Vertex, sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::Vertex, sizeBytes, stride);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
 	{
-		return s_context->CreateBuffer(Graphics::BufferType::Index, sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::Index, sizeBytes, 0);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateUniformBuffer(u64 sizeBytes)
 	{
-		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes, 0);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes)
 	{
-		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes);
+		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes, 0);
 	}
 
 	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)

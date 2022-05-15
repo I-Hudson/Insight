@@ -33,6 +33,16 @@ namespace Insight
 			return memcmp(buf1, buf2, size);
 		}
 
+		bool PlatformWindows::StrCompare(const char* str1, const char* str2)
+		{
+			return strcmp(str1, str2);
+		}
+
+		bool PlatformWindows::WStrCompare(const wchar_t* wstr1, const wchar_t* wstr2)
+		{
+			return wcscmp(wstr1, wstr1);
+		}
+
 		// https://gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
 		inline std::string basename(const std::string& file)
 		{

@@ -11,20 +11,25 @@ namespace Insight
 	{
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//if (!m_testMesh)
+			{
+				//m_testMesh = Core::MakeUPtr<Mesh>();
+			}
+			//m_testMesh->LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 
 			if (!m_vertexBuffer)
 			{
-				ZoneScopedN("CreateVertexBuffer");
+				//ZoneScopedN("CreateVertexBuffer");
 
 				Vertex vertices[3] =
 				{
-					Vertex{ glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) },
-					Vertex{ glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) },
-					Vertex{ glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f) },
+					Vertex( glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
+					Vertex( glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
+					Vertex( glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
 				};
-				m_vertexBuffer = Renderer::CreateVertexBuffer(sizeof(Vertex) * ARRAYSIZE(vertices));
+				m_vertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
 				m_vertexBuffer->Upload(vertices, sizeof(vertices));
+				m_vertexBuffer->SetName(L"TriangleMesh_Vertex_Buffer");
 			}
 
 			if (!m_indexBuffer)
@@ -32,12 +37,13 @@ namespace Insight
 				int indices[3] = { 0, 1, 2, };
 				m_indexBuffer = Renderer::CreateIndexBuffer(sizeof(int) * ARRAYSIZE(indices));
 				m_indexBuffer->Upload(indices, sizeof(indices));
+				m_indexBuffer->SetName(L"TriangleMesh_Index_Buffer");
 			}
 		}
 
 		void Renderpass::Render()
 		{
-			ZoneScoped;
+			//ZoneScoped;
 			Sample();
 		}
 
@@ -54,6 +60,8 @@ namespace Insight
 				Renderer::FreeIndexBuffer(m_indexBuffer);
 				m_indexBuffer = nullptr;
 			}
+
+		//	m_testMesh->Destroy();
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -61,11 +69,11 @@ namespace Insight
 
 		void Renderpass::Sample()
 		{
-			ZoneScoped;
+			//ZoneScoped;
 
 			RHI_Shader* shader = nullptr;
 			{
-				ZoneScopedN("GetShader");
+				//ZoneScopedN("GetShader");
 				ShaderDesc shaderDesc;
 				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
@@ -74,7 +82,7 @@ namespace Insight
 
 			PipelineStateObject pso{};
 			{
-				ZoneScopedN("SetPipelineStateObject");
+				//ZoneScopedN("SetPipelineStateObject");
 				pso.Name = L"Swapchain_PSO";
 				pso.Shader = shader;
 				pso.CullMode = CullMode::None;
@@ -92,15 +100,15 @@ namespace Insight
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
-				ZoneScopedN("SetUniform");
+				//ZoneScopedN("SetUniform");
 				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
 				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 			}
 
-			//m_testMesh.Draw();
+		//	m_testMesh->Draw();
 
 			//Renderer::Draw(3, 1, 0, 0);
-			Renderer::DrawIndexed(3, 1, 0, 0, 0);
+			//Renderer::DrawIndexed(3, 1, 0, 0, 0);
 		}
 	}
 }

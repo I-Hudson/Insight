@@ -91,6 +91,7 @@ namespace Insight
 
 			bool IsCompiled() const { return m_compiled; }
 			std::vector<Descriptor> GetDescriptors() const { return m_descriptors; }
+			int GetShaderInputLayoutStride() const { return m_shaderInputLayputStride; }
 
 		private:
 			static RHI_Shader* New();
@@ -101,6 +102,7 @@ namespace Insight
 			bool m_compiled = false;
 			std::vector<Descriptor> m_descriptors;
 			std::vector<ShaderInputLayout> m_shaderInputLayout;
+			int m_shaderInputLayputStride = 0;
 
 			friend RHI_ShaderManager;
 		};

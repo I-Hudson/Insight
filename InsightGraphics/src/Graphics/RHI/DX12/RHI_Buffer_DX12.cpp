@@ -12,11 +12,12 @@ namespace Insight
 				Release();
 			}
 			
-			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes)
+			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
+				m_stride = stride;
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = {};
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
@@ -72,7 +73,7 @@ namespace Insight
 				{
 					// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_DX12 stagingBuffer;
-					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes);
+					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0);
 					stagingBuffer.Upload(data, sizeInBytes, 0);
 
 					RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetSingleUseCommandList();
@@ -124,7 +125,7 @@ namespace Insight
 				{
 					std::vector<Byte> data = Download();
 					Release();
-					Create(m_context, m_bufferType, newSizeInBytes);
+					Create(m_context, m_bufferType, newSizeInBytes, m_stride);
 					Upload(data.data(), (int)data.size(), 0);
 				}
 			}

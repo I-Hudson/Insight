@@ -3,6 +3,7 @@
 #include <new>
 #include "MemoryTracker.h"
 #include <atomic>
+#include <type_traits>
 
 #define NewTracked(Type)			static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
 #define NewArgsTracked(Type, ...)	static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
@@ -80,7 +81,7 @@ namespace Insight
 }
 
 template<typename T>
-struct UPtr
+struct IS_CORE UPtr
 {
 	UPtr() 
 	{ }
@@ -109,6 +110,12 @@ struct UPtr
 	UPtr(const UPtr& other) = delete;
 	UPtr& operator=(const UPtr& other) = delete;
 
+	UPtr& operator=(std::nullptr_t) noexcept
+	{
+		Reset();
+		return *this;
+	}
+
 	void Reset() 
 	{
 		if (m_ptr)
@@ -121,6 +128,7 @@ struct UPtr
 
 	bool operator==(const UPtr& other) const { return m_ptr == other.m_ptr; }
 	bool operator==(const UPtr* other) const { return m_ptr == other; }
+	operator bool() const { return m_ptr; }
 
 	T* operator->() const { return m_ptr; }
 	T* operator*() const { return m_ptr; }
@@ -130,7 +138,7 @@ private:
 };
 
 template<typename T>
-struct RPtr : RefCount
+struct IS_CORE RPtr : RefCount
 {
 	RPtr() { }
 	RPtr(T* ptr) { }
@@ -193,4 +201,17 @@ namespace Insight::Core
 		MemoryNewObject(void* ptr);
 		void* Ptr;
 	};
+
+	template<typename T, typename... Args>
+	UPtr<T> MakeUPtr(Args&&... args)
+	{
+		if constexpr (sizeof...(Args) > 0)
+		{
+			return UPtr(NewArgsTracked(T, std::forward<Args...>(args)...));
+		}
+		else
+		{
+			return UPtr(NewTracked(T));
+		}
+	}
 }

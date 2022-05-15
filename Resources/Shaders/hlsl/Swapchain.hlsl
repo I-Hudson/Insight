@@ -1,10 +1,10 @@
 
 struct VertexInput
 {
-	float3 Pos : POSITION;
-	float3 Normal : NORMAL;
-	float3 Colour : COLOR;
-	float2 UV : TEXCOORD;
+	float4 Pos : POSITION;
+	//float4 Normal : NORMAL;
+	//float4 Colour : COLOR;
+	//float2 UV : TEXCOORD;
 };
 
 //float4 VSMain(uint id : SV_VertexID) : SV_POSITION
@@ -13,7 +13,7 @@ float4 VSMain(const VertexInput input) : SV_POSITION
 	//float2 uv = float2((id << 1) & 2, id & 2);
 	//return float4(uv * float2(2, -2) + float2(-1, 1), 0, 1);
 
-	return float4(input.Pos, 1);
+	return float4(input.Pos.xyz, 1);
 }
 
 cbuffer ubo : register(b0)

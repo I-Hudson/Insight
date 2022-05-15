@@ -50,7 +50,7 @@ namespace Insight
 			void BaseDestroy();
 
 		private:
-			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes);
+			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride);
 			void FreeBuffer(RHI_Buffer* buffer);
 
 		protected:
@@ -82,7 +82,7 @@ namespace Insight
 	public:
 		static void SetImGUIContext(ImGuiContext*& context);
 
-		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes, int stride);
 		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes);
 		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes);
 		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes);
