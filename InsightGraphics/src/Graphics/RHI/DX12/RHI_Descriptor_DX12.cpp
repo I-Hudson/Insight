@@ -42,6 +42,11 @@ namespace Insight
 			{
 			}
 
+			u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
+			{
+				return 0;
+			}
+
 
 			/// <summary>
 			/// RHI_DescriptorLayout_DX12

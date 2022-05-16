@@ -122,6 +122,11 @@ namespace Insight
 				}
 			}
 
+			u64 RHI_Descriptor_Vulkan::GetHash(bool includeResouce)
+			{
+				return includeResouce ? m_hashWithResouce : m_hash;
+			}
+
 			void RHI_Descriptor_Vulkan::Release()
 			{
 				if (m_set)
@@ -181,23 +186,34 @@ namespace Insight
 
 			RHI_Descriptor* DescriptorPoolPage_Vulkan::GetDescriptorSet(const std::vector<Descriptor>& descriptors)
 			{
-				u64 hash = 0;
+				u64 hashWith = 0;
+				u64 hashWithResouce = 0;
 				for (const Descriptor& desc : descriptors)
 				{
-					HashCombine(hash, desc.GetHash(false));
+					HashCombine(hashWith, desc.GetHash(false));
+					HashCombine(hashWithResouce, desc.GetHash(true));
 				}
 
-				++m_size;
-				if (auto itr = m_freeDescriptors.find(hash); itr != m_freeDescriptors.end())
+
+				// If descriptor with the same resouce is already in use, reuse it.
+				if (auto itr = m_usedDescriptors.find(hashWithResouce); itr != m_usedDescriptors.end())
 				{
-					RHI_Descriptor* returnDescriptor = itr->second;
+					return itr->second;
+				}
+
+				// Do we have a free descriptor which we can use?
+				if (m_freeDescriptors.size() > 0)
+				{
+					const u64 hash = m_freeDescriptors.begin()->first;
+					RHI_Descriptor* returnDescriptor = m_freeDescriptors.begin()->second;
 					m_freeDescriptors.erase(hash);
 					m_usedDescriptors[hash] = returnDescriptor;
 
 					return returnDescriptor;
 				}
 
-				// Create a new descriptor.
+				++m_size;
+				// No in use decriptor found and no free one to resue so make a new descriptor.
 				RHI_Descriptor_Vulkan* newDescriptor = dynamic_cast<RHI_Descriptor_Vulkan*>(RHI_Descriptor::New());
 				newDescriptor->m_context = m_context;
 				newDescriptor->m_pool = this;
@@ -211,10 +227,20 @@ namespace Insight
 				createInfo.setPSetLayouts(layouts.data());
 				newDescriptor->m_set = m_context->GetDevice().allocateDescriptorSets(createInfo)[0];
 
-				m_usedDescriptors[hash] = newDescriptor;
-				m_descriptorToHash[newDescriptor] = hash;
+				m_usedDescriptors[hashWithResouce] = newDescriptor;
+				m_descriptorToHash[newDescriptor] = hashWithResouce;
 
 				return newDescriptor;
+			}
+
+			bool DescriptorPoolPage_Vulkan::HasAllocatedDescriptor(const std::vector<Descriptor>& descriptors)
+			{
+				u64 hash = 0;
+				for (const Descriptor& desc : descriptors)
+				{
+					HashCombine(hash, desc.GetHash(true));
+				}
+				return m_usedDescriptors.find(hash) != m_usedDescriptors.end();
 			}
 
 			bool DescriptorPoolPage_Vulkan::HasFreeDescriptor(const std::vector<Descriptor>& descriptors)
@@ -276,74 +302,54 @@ namespace Insight
 				}
 
 				m_context = context;
-				DescriptorPoolPage_Vulkan pool(m_context, 256);
-				m_pools.push_back(pool);
 			}
 
 			RHI_Descriptor* DescriptorPool_Vulkan::GetDescriptor(const std::vector<Descriptor>& descriptors)
 			{
-				DescriptorPoolPage_Vulkan* firstAvailablePool = nullptr;
-				RHI_Descriptor* reuseDescriptor = nullptr;
-
-				for (DescriptorPoolPage_Vulkan& p : m_pools)
+				u64 descriptorHash = 0;
+				for (const Descriptor& desc : descriptors)
 				{
-					if (firstAvailablePool == nullptr && !p.IsFull())
-					{
-						firstAvailablePool = &p;
-					}
-					
-					if (p.HasFreeDescriptor(descriptors))
-					{
-						reuseDescriptor = p.GetDescriptorSet(descriptors);
-						break;
-					}
+					HashCombine(descriptorHash, desc.GetHash(false));
 				}
 
-				// Try and reuse a descriptor which has already been allocated,
-				// if no free descriptor found, allocate a new descriptor from the first available pool,
-				// if no available pool, allocate a new pool and allocate a descriptor.
-				if (reuseDescriptor)
+				auto itr = m_pools.find(descriptorHash);
+				if (itr != m_pools.end())
 				{
-					return reuseDescriptor;
-				}
-				else if (firstAvailablePool)
-				{
-					return firstAvailablePool->GetDescriptorSet(descriptors);
+					return itr->second.GetDescriptorSet(descriptors);
 				}
 
-				AddNewPool();
-				return m_pools.back().GetDescriptorSet(descriptors);
+				AddNewPool(descriptorHash);
+				return m_pools.find(descriptorHash)->second.GetDescriptorSet(descriptors);
 			}
 
 			void DescriptorPool_Vulkan::FreeDescriptor(RHI_Descriptor* descriptor)
 			{
-				for (DescriptorPoolPage_Vulkan& pool : m_pools)
-				{
-					FreeDescriptor(descriptor);
-				}
+				auto itr = m_pools.find(descriptor->GetHash(false));
+				assert(itr != m_pools.end());
+				itr->second.FreeDescriptor(descriptor);
 			}
 
 			void DescriptorPool_Vulkan::Reset()
 			{
-				for (DescriptorPoolPage_Vulkan& pool : m_pools)
+				for (auto& pair : m_pools)
 				{
-					pool.Reset();
+					pair.second.Reset();
 				}
 			}
 
 			void DescriptorPool_Vulkan::Destroy()
 			{
-				for (DescriptorPoolPage_Vulkan& pool : m_pools)
+				for (auto& pair : m_pools)
 				{
-					pool.Release();
+					pair.second.Release();
 				}
-				m_pools.resize(0);
+				m_pools.clear();
 			}
 
-			void DescriptorPool_Vulkan::AddNewPool()
+			void DescriptorPool_Vulkan::AddNewPool(u64 hash)
 			{
 				DescriptorPoolPage_Vulkan pool(m_context, 256);
-				m_pools.push_back(pool);
+				m_pools[hash] = pool;
 			}
 
 			/// <summary>

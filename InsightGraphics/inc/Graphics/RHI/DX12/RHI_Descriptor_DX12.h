@@ -37,6 +37,7 @@ namespace Insight
 			public:
 
 				virtual void Update(const std::vector<Descriptor>& descriptors) override;
+				virtual u64 GetHash(bool includeResouce = false) override;
 
 				// RHI_Resouce
 				virtual void Release() override;

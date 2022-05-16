@@ -645,6 +645,7 @@ namespace Insight
 				std::vector<vk::LayerProperties> layerProperties = m_adapter.enumerateDeviceLayerProperties();
 				std::vector<vk::ExtensionProperties> extensionProperties = m_adapter.enumerateDeviceExtensionProperties();
 
+#if defined(_DEBUG)
 				const char* vkLayerKhronosValidation = "VK_LAYER_KHRONOS_validation";
 				bool hasKhronosStandardValidationLayer = std::find_if(layerProperties.begin(), layerProperties.end(), [vkLayerKhronosValidation](const vk::LayerProperties& layer)
 					{
@@ -658,7 +659,7 @@ namespace Insight
 						layers.insert(vkLayerKhronosValidation);
 					}
 				}
-
+#endif
 				IS_CORE_INFO("Device layers:");
 				for (size_t i = 0; i < layerProperties.size(); ++i)
 				{

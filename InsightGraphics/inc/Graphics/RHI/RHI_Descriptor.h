@@ -50,6 +50,7 @@ namespace Insight
 			static RHI_Descriptor* New();
 
 			virtual void Update(const std::vector<Descriptor>& descriptors) = 0;
+			virtual u64 GetHash(bool includeResouce = false) = 0;
 		};
 
 		class DescriptorAllocator

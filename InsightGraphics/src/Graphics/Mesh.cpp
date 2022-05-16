@@ -210,24 +210,49 @@ namespace Insight
 		{
 			OPTICK_EVENT();
 
+			glm::vec4 vertexColour;
+			vertexColour.x = (rand() % 100 + 1) * 0.01f;
+			vertexColour.y = (rand() % 100 + 1) * 0.01f;
+			vertexColour.z = (rand() % 100 + 1) * 0.01f;
+			vertexColour.w = 1.0f;
+ 
 			// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
-				Vertex vertex;
-				glm::vec4 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				Vertex vertex = { };
+				glm::vec4 vector = { }; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 				// positions
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;
 				vector.z = mesh->mVertices[i].z;
 				vertex.Position = vector;
+
 				// normals
 				if (mesh->HasNormals())
 				{
 					vector.x = mesh->mNormals[i].x;
 					vector.y = mesh->mNormals[i].y;
 					vector.z = mesh->mNormals[i].z;
-					//vertex.Normal = vector;
+					vertex.Normal = vector;
 				}
+				vector = { };
+				if (mesh->mColors[0])
+				{
+					vector.x = mesh->mColors[0]->r;
+					vector.y = mesh->mColors[0]->g;
+					vector.z = mesh->mColors[0]->b;
+					vector.w = mesh->mColors[0]->a;
+					vertex.Normal = vector;
+				}
+				else
+				{
+					vector.x = (rand() % 100 + 1) * 0.01f;
+					vector.y = (rand() % 100 + 1) * 0.01f;
+					vector.z = (rand() % 100 + 1) * 0.01f;
+					vector.w = 1.0f;
+					vertex.Colour = vertexColour;
+				}
+				vector = { };
 				// texture coordinates
 				if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
 				{

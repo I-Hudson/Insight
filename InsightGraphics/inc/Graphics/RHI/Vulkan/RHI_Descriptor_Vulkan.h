@@ -39,6 +39,8 @@ namespace Insight
 			public:
 
 				virtual void Update(const std::vector<Descriptor>& descriptors) override;
+				virtual u64 GetHash(bool includeResouce = false) override;
+
 				vk::DescriptorSet GetSet() const { return m_set; }
 
 				// RHI_Resouce
@@ -52,6 +54,7 @@ namespace Insight
 				DescriptorPoolPage_Vulkan* m_pool{ nullptr };
 
 				u64 m_hash = 0;
+				u64 m_hashWithResouce = 0;
 
 				friend class DescriptorPoolPage_Vulkan;
 			};
@@ -64,6 +67,7 @@ namespace Insight
 
 				RHI_Descriptor* GetDescriptorSet(const std::vector<Descriptor>& descriptors);
 
+				bool HasAllocatedDescriptor(const std::vector<Descriptor>& descriptors);
 				bool HasFreeDescriptor(const std::vector<Descriptor>& descriptors);
 				void FreeDescriptor(RHI_Descriptor* descriptor);
 
@@ -100,11 +104,11 @@ namespace Insight
 				void Destroy();
 
 			private:
-				void AddNewPool();
+				void AddNewPool(u64 hash);
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
-				std::vector<DescriptorPoolPage_Vulkan> m_pools;
+				std::unordered_map<u64, DescriptorPoolPage_Vulkan> m_pools;
 			};
 
 			class DescriptorAllocator_Vulkan : public DescriptorAllocator
