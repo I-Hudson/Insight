@@ -20,9 +20,10 @@ namespace Insight
 
 				void ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers);
 
-				void ClearRenderTargetView(CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects);
+				void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects);
+				void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, int Stencil, int NumRects, D3D12_RECT* rects);
 
-				void OMSetRenderTargets(int count, CD3DX12_CPU_DESCRIPTOR_HANDLE* rtvHandles, bool RTsSingleHandleToDescriptorRange, CD3DX12_CPU_DESCRIPTOR_HANDLE* depthStencilDescriptor);
+				void OMSetRenderTargets(int count, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, bool RTsSingleHandleToDescriptorRange, D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilDescriptor);
 
 				void SetDescriptorHeaps(int count, ID3D12DescriptorHeap** heaps);
 				void SetDescriptorHeaps(std::vector<ID3D12DescriptorHeap*> heaps);

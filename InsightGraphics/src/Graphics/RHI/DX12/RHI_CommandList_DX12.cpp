@@ -23,7 +23,7 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::ClearRenderTargetView(CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects)
+			void RHI_CommandList_DX12::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects)
 			{
 				if (m_commandList)
 				{
@@ -31,7 +31,15 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::OMSetRenderTargets(int count, CD3DX12_CPU_DESCRIPTOR_HANDLE* rtvHandles, bool RTsSingleHandleToDescriptorRange, CD3DX12_CPU_DESCRIPTOR_HANDLE* depthStencilDescriptor)
+			void RHI_CommandList_DX12::ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, int Stencil, int NumRects, D3D12_RECT* rects)
+			{
+				if (m_commandList)
+				{
+					m_commandList->ClearDepthStencilView(DepthStencilView, ClearFlags, Depth, Stencil, NumRects, rects);
+				}
+			}
+
+			void RHI_CommandList_DX12::OMSetRenderTargets(int count, D3D12_CPU_DESCRIPTOR_HANDLE* rtvHandles, bool RTsSingleHandleToDescriptorRange, D3D12_CPU_DESCRIPTOR_HANDLE* depthStencilDescriptor)
 			{
 				if (m_commandList)
 				{

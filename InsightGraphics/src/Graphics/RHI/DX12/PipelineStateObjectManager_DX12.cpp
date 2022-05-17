@@ -101,12 +101,19 @@ namespace Insight
 				psoDesc.PS = CD3DX12_SHADER_BYTECODE(shader->GetStage(ShaderStageFlagBits::ShaderStage_Pixel));
 				psoDesc.RasterizerState = rasterizerState;
 				psoDesc.BlendState = blendState;
-				psoDesc.DepthStencilState.DepthEnable = FALSE;
+				psoDesc.DepthStencilState.DepthEnable = pso.DepthTest;
+				psoDesc.DepthStencilState.DepthWriteMask = pso.DepthTest ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
+				psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+				const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = // a stencil operation structure, again does not really matter since stencil testing is turned off
+				{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
+				psoDesc.DepthStencilState.FrontFace = defaultStencilOp;
+				psoDesc.DepthStencilState.BackFace = defaultStencilOp;
 				psoDesc.DepthStencilState.StencilEnable = FALSE;
 				psoDesc.SampleMask = UINT_MAX;
 				psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 				psoDesc.NumRenderTargets = 1;
 				psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+				psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 				psoDesc.SampleDesc.Count = 1;
 
 				ComPtr<ID3D12PipelineState> pipeline;

@@ -6,7 +6,7 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 
-
+#include "optick.h"
 
 namespace Insight
 {
@@ -25,8 +25,9 @@ namespace Insight
 
 		void RHI_CommandList::Record(CommandList& cmdList, FrameResouce* frameResouces)
 		{
-			m_frameResouces = frameResouces;
+			OPTICK_EVENT();
 
+			m_frameResouces = frameResouces;
 			m_frameResouces->UniformBuffer.Resize(cmdList.GetDescriptorBuffer().GetCapacity());
 			m_frameResouces->UniformBuffer.Upload(cmdList.GetDescriptorBuffer().GetData(), cmdList.GetDescriptorBuffer().GetSize());
 

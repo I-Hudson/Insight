@@ -11,13 +11,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
 			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
-				float aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 				m_camera.View = glm::mat4(1.0f);
 			}
@@ -224,6 +225,9 @@ namespace Insight
 			{
 				sbMouseButtonDown = false;
 			}
+
+			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+			m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 			m_camera.ProjView = m_camera.Projection * glm::inverse(m_camera.View);
 		}
 	}

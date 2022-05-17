@@ -54,7 +54,7 @@ namespace Insight
 			void FreeBuffer(RHI_Buffer* buffer);
 
 		protected:
-			const static int c_FrameCount = 2;
+			const static int c_FrameCount = 3;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 

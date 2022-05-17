@@ -24,6 +24,14 @@ namespace Insight
 				virtual void Reset() override;
 			};
 
+			struct SwapchainImage
+			{
+				ComPtr<ID3D12Resource> Colour;
+				DescriptorHeapHandle_DX12 ColourHandle;
+				ComPtr<ID3D12Resource> DepthStencil;
+				DescriptorHeapHandle_DX12 DepthStencilHandle;
+			};
+
 			class RenderContext_DX12 : public RenderContext
 			{
 			public:
@@ -63,9 +71,9 @@ namespace Insight
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			
 				ComPtr<IDXGISwapChain3> m_swapchain{ nullptr };
-				ComPtr<ID3D12DescriptorHeap> m_rtvHeap{ nullptr };
 				u32 m_rtvDescriptorSize;
-				std::vector<ComPtr<ID3D12Resource>> m_swapchainImages;
+
+				std::vector<SwapchainImage> m_swapchainImages;
 				glm::ivec2 m_swapchainSize;
 
 				PipelineStateObjectManager_DX12 m_pipelineStateObjectManager;
@@ -74,8 +82,9 @@ namespace Insight
 				ComPtr<ID3D12Fence> m_swapchainFence{ nullptr };
 				u64 m_swapchainFenceValues[c_FrameCount];
 
+				DescriptorHeap_DX12 m_rtvHeap;
+				DescriptorHeap_DX12 m_dsvHeap;
 				ComPtr<ID3D12DescriptorHeap> m_srcImGuiHeap{ nullptr };
-
 
 				int m_currentFrame = 0;
 				int m_frameIndex = 0;
