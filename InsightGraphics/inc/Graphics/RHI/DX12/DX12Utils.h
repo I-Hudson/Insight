@@ -84,6 +84,24 @@ namespace Insight
 		}
 
 		//------------------------------------------------------------------------------------------------
+		// Returns required size of a buffer to be used for data upload
+		inline UINT64 GetRequiredIntermediateSize(
+			_In_ ID3D12Resource* pDestinationResource,
+			_In_range_(0, D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
+			_In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource) UINT NumSubresources) noexcept
+		{
+			auto Desc = pDestinationResource->GetDesc();
+			UINT64 RequiredSize = 0;
+
+			ID3D12Device* pDevice = nullptr;
+			pDestinationResource->GetDevice(IID_ID3D12Device, reinterpret_cast<void**>(&pDevice));
+			pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, 0, nullptr, nullptr, nullptr, &RequiredSize);
+			pDevice->Release();
+
+			return RequiredSize;
+		}
+
+		//------------------------------------------------------------------------------------------------
 		struct CD3DX12_RANGE : public D3D12_RANGE
 		{
 			CD3DX12_RANGE() = default;

@@ -8,18 +8,6 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		namespace RHI
-		{
-			namespace Vulkan
-			{
-				class GPUResource_Vulkan;
-			}
-			namespace DX12
-			{
-				class GPUResource_DX12;
-			}
-		}
-
 		class GPUDevice;
 		class RenderContext;
 
@@ -49,6 +37,8 @@ namespace Insight
 			static bool IsVulkan() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::Vulkan; }
 			static bool IsDX12() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::DX12; }
 
+			RenderContext* GetRenderContext() const { return m_renderContext; }
+
 			virtual bool Init() override;
 			virtual void Update(const float deltaTime) override;
 			virtual void Destroy() override;
@@ -58,9 +48,6 @@ namespace Insight
 
 			RenderContext* m_renderContext{ nullptr };
 			Renderpass m_renderpass;
-
-			friend class RHI::Vulkan::GPUResource_Vulkan;
-			friend class RHI::DX12::GPUResource_DX12;
 		};
 	}
 }

@@ -22,26 +22,44 @@ workspace "Insight"
         "PLATFORM_X64",
     }
 
+    files 
+    { 
+        "../vendor/doctest/doctest.h",
+    }
+
     includedirs
     {
         "%{IncludeDirs.optick}",
+        "%{IncludeDirs.doctest}",
     }
 
-    editandcontinue "Off"
+    libdirs
+    {
+        "%{LibDirs.deps_lib_debug}",
+        "%{LibDirs.deps_lib_release}",
+    }
 
     filter "configurations:Debug"
+        buildoptions "/MDd"
         defines
         {
             "_DEBUG"
         }
-        buildoptions "/MDd"
+        libdirs
+        {
+            "%{LibDirs.deps_lib_debug}",
+        }
 
     filter "configurations:Release"
+        buildoptions "/MD"
         defines
         {
             "NDEBUG"
         }
-        buildoptions "/MD"
+        libdirs
+        {
+            "%{LibDirs.deps_lib_release}",
+        }
 
         filter "system:Windows"
     	system "windows"
@@ -74,6 +92,7 @@ IncludeDirs["InsightGraphics"] = "%{wks.location}/InsightGraphics/inc"
 IncludeDirs["InsightApp"] = "%{wks.location}/InsightApp/inc"
 IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 
+IncludeDirs["doctest"] = "%{wks.location}/vendor/doctest/"
 IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
 IncludeDirs["imgui"] = "%{wks.location}/Vendor/imgui"
@@ -84,8 +103,13 @@ IncludeDirs["spirv_reflect"] = "%{wks.location}/vendor/SPIRV-Reflect"
 IncludeDirs["dxcompiler"] = "%{wks.location}/vendor/dxcompiler/win_debug/inc"
 IncludeDirs["assimp"] = "%{wks.location}/vendor/assimp/include"
 IncludeDirs["optick"] = "%{wks.location}/vendor/optick/src"
+IncludeDirs["stb_image"] = "%{wks.location}/vendor/stb"
 
 LibDirs = {}
+
+LibDirs["deps_lib_debug"] = "%{wks.location}/deps/lib/debug/"
+LibDirs["deps_lib_release"] = "%{wks.location}/deps/lib/debug/"
+
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"
 LibDirs["glslang_win"] = "%{wks.location}/vendor/glslang/win_release/lib"
 LibDirs["imgui"] = "%{wks.location}/vendor/imgui/" .. outputdir .. "ImGui/"

@@ -31,6 +31,7 @@ project "InsightGraphics"
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
         "%{IncludeDirs.optick}",
+        "%{IncludeDirs.stb_image}",
     }
 
     files 
@@ -41,6 +42,8 @@ project "InsightGraphics"
 
         "../vendor/SPIRV-Reflect/spirv_reflect.h",
         "../vendor/SPIRV-Reflect/spirv_reflect.cpp",
+        "../vendor/stb/stb_image.h",
+        "../vendor/stb/stb_image_write.h",
     }
 
     links

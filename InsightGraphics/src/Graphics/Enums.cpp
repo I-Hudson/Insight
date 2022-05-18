@@ -7,6 +7,49 @@ namespace Insight
 #define IF_FLAG_BITS_STR(flags, flagBit) if (flags & flagBit) { str += #flagBit; str += " |"; }
 #define IF_FLAG_STR(flag, flagBit) if (flag == flagBit) { str += #flagBit; str += " |"; }
 
+		std::string EnumToString(ResourceType type)
+		{
+			std::string str;
+
+			IF_FLAG_STR(type, ResourceType::Buffer);
+			IF_FLAG_STR(type, ResourceType::Texture);
+
+			return str;
+		}
+
+		std::string ResourceStateToString(ResourceState state)
+		{
+			std::string str;
+
+			IF_FLAG_BITS_STR(state, ResourceState::ResourceState_Present);
+			IF_FLAG_BITS_STR(state, ResourceState::ResourceState_Render_Target);
+
+			return str;
+		}
+
+		std::string GPUQueueToString(GPUQueue queue)
+		{
+			std::string str;
+
+			IF_FLAG_BITS_STR(queue, GPUQueue::GPUQueue_Graphics);
+			IF_FLAG_BITS_STR(queue, GPUQueue::GPUQueue_Compute);
+			IF_FLAG_BITS_STR(queue, GPUQueue::GPUQueue_Transfer);
+
+			return str;
+		}
+
+		std::string GPUCommandListTypeToString(GPUCommandListType type)
+		{
+			std::string str;
+
+			IF_FLAG_STR(type, GPUCommandListType::Default);
+			IF_FLAG_STR(type, GPUCommandListType::Transient);
+			IF_FLAG_STR(type, GPUCommandListType::Compute);
+			IF_FLAG_STR(type, GPUCommandListType::Reset);
+
+			return str;
+		}
+
 		std::string ShaderStageFlagsToString(ShaderStageFlags flags)
 		{
 			std::string str;

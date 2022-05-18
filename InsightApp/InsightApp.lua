@@ -28,7 +28,7 @@ project "InsightApp"
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
     }
 
     links

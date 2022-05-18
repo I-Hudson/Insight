@@ -1,24 +1,84 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Core/Defines.h"
 #include <string>
 
 namespace Insight
 {
 	namespace Graphics
 	{
+		template<typename E, E V> 
+		constexpr bool IsValid() 
+		{
+			// When compiled with clang, `name` will contain a prettified function name,
+			// including the enum value name for `V` if valid. For example:
+			// "bool IsValid() [E = Fruit, V = Fruit::BANANA]" for valid enum values, or:
+			// "bool IsValid() [E = Fruit, V = 10]" for invalid enum values.
+			constexpr const char* name = FUNCTION;
+			int i = strlen(name);
+			// Find the final space character in the pretty name.
+			for (; i >= 0; --i)
+			{
+				if (name[i] == ' ') 
+				{
+					break;
+				}
+			}
+			// The character after the final space will indicate if
+			// it's a valid value or not.
+			char c = name[i + 1];
+			if (c >= '0' && c <= '9') 
+			{
+				return false;
+			}
+			return true;
+		}
+
+		template<typename E> 
+		constexpr int CountValid() 
+		{
+			return 0;
+		}
+
+		template<typename E, E A, E... B> 
+		constexpr int CountValid()
+		{
+			bool is_valid = IsValid<E, A>();
+			return CountValid<E, B...>() + (int)is_valid;
+		}
+
+		template<typename E, int... I> 
+		constexpr int InternalElementCount(std::integer_sequence<int, I...> unused)
+		{
+			return CountValid<E, (E)I...>();
+		}
+
+		template<typename E> 
+		struct ElementCount
+		{
+			static const int value = InternalElementCount<E>(std::make_integer_sequence<int, 100>());
+		};
+
+		template<int Size, typename... Args>
+		struct EnumToStringObject
+		{ };
+
 		enum class ResourceType
 		{
 			Buffer,
 			Texture,
 
+			Count
 		};
+		std::string ResourceTypeToString(ResourceType type);
 
 		enum ResourceState
 		{
 			ResourceState_Present,
 			ResourceState_Render_Target
 		};
+		std::string ResourceStateToString(ResourceState state);
 
 		enum GPUQueue
 		{
@@ -26,6 +86,7 @@ namespace Insight
 			GPUQueue_Compute,
 			GPUQueue_Transfer,
 		};
+		std::string GPUQueueToString(GPUQueue queue);
 
 		enum class GPUCommandListType
 		{
@@ -34,6 +95,7 @@ namespace Insight
 			Compute,
 			Reset
 		};
+		std::string GPUCommandListTypeToString(GPUCommandListType type);
 
 		enum ShaderStageFlagBits
 		{
@@ -187,6 +249,19 @@ namespace Insight
 			Readback
 		};
 
+		enum class TextureType
+		{
+			Unknown,
+
+			Tex1D,
+			Tex2D,
+			Tex3D,
+			TexCube,
+
+			Tex2DArray,
+			Tex3DArray,
+		};
+
 		//enum GUPBufferFlagBits
 		//{
 		//	None = 1 << 0,
@@ -211,5 +286,6 @@ namespace Insight
 
 			DeviceExtensionCount
 		};
+
 	}
 }
