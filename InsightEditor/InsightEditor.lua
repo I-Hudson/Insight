@@ -47,12 +47,12 @@ project "InsightEditor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
-    postbuildcommands
+    prebuildcommands
     {
         "{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
     }
 
-    filter "configurations:Debug"
+    filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
         symbols "On"
         links

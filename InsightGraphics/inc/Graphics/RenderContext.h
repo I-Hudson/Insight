@@ -52,6 +52,7 @@ namespace Insight
 		private:
 			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride);
 			void FreeBuffer(RHI_Buffer* buffer);
+			int GetBufferCount(BufferType bufferType) const;
 
 		protected:
 			const static int c_FrameCount = 3;
@@ -91,6 +92,11 @@ namespace Insight
 		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeUniformBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeRawBuffer(Graphics::RHI_Buffer* buffer);
+
+		static int GetVertexBufferCount();
+		static int GetIndexBufferCount();
+		static int GetUniformBufferCount();
+		static int GetBufferCount(Graphics::BufferType bufferType);
 
 		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);

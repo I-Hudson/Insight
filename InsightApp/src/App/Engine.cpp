@@ -2,7 +2,6 @@
 
 #include "optick.h"
 
-#define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"
 
 namespace Insight
@@ -13,12 +12,6 @@ namespace Insight
 
 		bool Engine::Init()
 		{
-#ifdef TESTING
-			doctest::Context().run();
-			return false;
-#endif
-
-
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			
 			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
@@ -51,22 +44,22 @@ namespace Insight
 		}
 
 #ifdef TESTING
-		TEST_CASE("lots of nested subcases")
+		TEST_SUITE("App Run")
 		{
 			Graphics::GraphicsManager graphicsManager;
-			SUBCASE("Init")
+			TEST_CASE("Init")
 			{
 				CHECK(Graphics::Window::Instance().Init() == true);
 				CHECK(graphicsManager.Init());
 			}
 
-			SUBCASE("Update")
+			TEST_CASE("Update")
 			{
 				graphicsManager.Update(0.0f);
 				Graphics::Window::Instance().Update();
 			}
 
-			SUBCASE("Destroy")
+			TEST_CASE("Destroy")
 			{
 				graphicsManager.Destroy();
 				Graphics::Window::Instance().Destroy();

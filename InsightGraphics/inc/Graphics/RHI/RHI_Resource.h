@@ -36,7 +36,6 @@ namespace Insight
 
 			~RHI_ResourceManager()
 			{
-				IS_CORE_INFO("Allocs: {}", m_objects.size());
 			}
 
 			TypePtr CreateResource()
@@ -72,6 +71,8 @@ namespace Insight
 				}
 				m_objects.clear();
 			}
+
+			int GetSize() const { return m_objects.size(); }
 
 		private:
 			std::map<TypePtr, TypePtr> m_objects;

@@ -8,6 +8,7 @@ echo Project sucessfully generated
 
 set output_debug=%cd%\bin\Debug-windows-x86_64\InsightEditor
 set output_release=%cd%\bin\Release-windows-x86_64\InsightEditor
+set output_testing=%cd%\bin\Testing-windows-x86_64\InsightEditor
 
 if exist "%output_debug%" (
     echo "Creating symlinks debug"
@@ -21,6 +22,13 @@ echo "Creating symlinks release"
 CALL :SymlinkData "%output_release%\Resources", "%cd%\Resources"
 ) else (
     echo "Dir %output_release% has not been created."
+)
+
+if exist "%output_testing%" (
+echo "Creating symlinks release"
+CALL :SymlinkData "%output_testing%\Resources", "%cd%\Resources"
+) else (
+    echo "Dir %output_testing% has not been created."
 )
 
 pause

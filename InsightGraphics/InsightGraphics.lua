@@ -70,7 +70,7 @@ project "InsightGraphics"
        "{COPY} \"%{cfg.targetdir}/InsightGraphics.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
     }
 
-    filter "configurations:Debug"
+    filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }
         symbols "On" 
         links

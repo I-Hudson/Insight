@@ -5,6 +5,9 @@
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.h"
+
 namespace Insight
 {
 	struct TestStruct

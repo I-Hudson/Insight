@@ -7,6 +7,7 @@ workspace "Insight"
     {
         "Debug",
         "Release",
+        "Testing",
     }
 
     flags
@@ -24,7 +25,7 @@ workspace "Insight"
 
     files 
     { 
-        "../vendor/doctest/doctest.h",
+        "../vendor/doctest/doctest/doctest.h",
     }
 
     includedirs
@@ -40,6 +41,12 @@ workspace "Insight"
     }
 
     filter "configurations:Debug"
+        defines
+        {
+            "DOCTEST_CONFIG_DISABLE",
+        }
+
+    filter { "configurations:Debug", "configurations:Testing" }
         buildoptions "/MDd"
         defines
         {
@@ -54,7 +61,8 @@ workspace "Insight"
         buildoptions "/MD"
         defines
         {
-            "NDEBUG"
+            "NDEBUG",
+            "DOCTEST_CONFIG_DISABLE",
         }
         libdirs
         {
@@ -69,6 +77,13 @@ workspace "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "VK_USE_PLATFORM_WIN32_KHR",
+        }
+
+    filter "configurations:Testing"
+        defines
+        {
+            "TESTING",
+            "DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
         }
     	
     filter "system:Unix"
@@ -92,7 +107,7 @@ IncludeDirs["InsightGraphics"] = "%{wks.location}/InsightGraphics/inc"
 IncludeDirs["InsightApp"] = "%{wks.location}/InsightApp/inc"
 IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 
-IncludeDirs["doctest"] = "%{wks.location}/vendor/doctest/"
+IncludeDirs["doctest"] = "%{wks.location}/vendor/doctest/doctest"
 IncludeDirs["glfw"] = "%{wks.location}/Vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}/Vendor/glm"
 IncludeDirs["imgui"] = "%{wks.location}/Vendor/imgui"

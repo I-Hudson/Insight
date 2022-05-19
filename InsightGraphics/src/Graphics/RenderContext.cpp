@@ -100,6 +100,16 @@ namespace Insight
 				m_buffers[bufferType].FreeResource(buffer);
 			}
 		}
+
+		int RenderContext::GetBufferCount(BufferType bufferType) const
+		{
+			const auto itr = m_buffers.find(bufferType);
+			if (itr != m_buffers.end())
+			{
+				return itr->second.GetSize();
+			}
+			return 0;
+		}
 		
 		void FrameResouce::Reset()
 		{
@@ -156,6 +166,26 @@ namespace Insight
 	{
 		assert(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);
+	}
+
+	int Renderer::GetVertexBufferCount()
+	{
+		return s_context->GetBufferCount(Graphics::BufferType::Vertex);
+	}
+
+	int Renderer::GetIndexBufferCount()
+	{
+		return s_context->GetBufferCount(Graphics::BufferType::Index);
+	}
+
+	int Renderer::GetUniformBufferCount()
+	{
+		return s_context->GetBufferCount(Graphics::BufferType::Uniform);
+	}
+
+	int Renderer::GetBufferCount(Graphics::BufferType bufferType)
+	{
+		return s_context->GetBufferCount(bufferType);
 	}
 
 	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)

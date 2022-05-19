@@ -49,8 +49,8 @@ project "InsightApp"
     {
        "{COPY} \"%{cfg.targetdir}/InsightApp.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
     }
-
-    filter "configurations:Debug"
+    
+    filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
         symbols "On" 
         links
