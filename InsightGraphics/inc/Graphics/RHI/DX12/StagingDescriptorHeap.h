@@ -1,6 +1,6 @@
 #pragma once
 
-
+#if defined(IS_DX12_ENABLED)
 
 #include "Core/TypeAlias.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"

@@ -77,6 +77,8 @@ workspace "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "VK_USE_PLATFORM_WIN32_KHR",
+            "IS_DX12_ENABLED",
+            "IS_VULKAN_ENABLED",
         }
 
     filter "configurations:Testing"
@@ -92,6 +94,7 @@ workspace "Insight"
         defines
         {
             "IS_PLATFORM_LINUX",
+            "IS_VULKAN_ENABLED",
         }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
