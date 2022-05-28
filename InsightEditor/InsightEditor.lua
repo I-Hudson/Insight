@@ -37,8 +37,6 @@ project "InsightEditor"
         "InsightCore",
         "InsightGraphics",
         "InsightApp",
-
-        "glfw3.lib",
         "glm",
     }
 
@@ -49,7 +47,8 @@ project "InsightEditor"
 
     prebuildcommands
     {
-        "{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
+        --"{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
+        "{COPYDIR} \"%{wks.location}/deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"",
     }
 
     filter "configurations:Debug or configurations:Testing"

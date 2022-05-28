@@ -25,7 +25,7 @@ workspace "Insight"
 
     files 
     { 
-        "../vendor/doctest/doctest/doctest.h",
+        "vendor/doctest/doctest/doctest.h",
     }
 
     includedirs
@@ -133,8 +133,10 @@ LibDirs["dxcompiler_win"] = "%{wks.location}/vendor/dxcompiler/win_release/lib/x
 LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 
 group "Dependices"
+        include "vendor/glfw/glfw.lua"
         include "vendor/glm/glm.lua"
         include "vendor/imgui/imgui.lua"
+        include "vendor/optick/optick.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"

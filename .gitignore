@@ -425,3 +425,6 @@ vendor/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudio
 /Optick.exe
+/compileData.scor
+/compileData.scor.incl
+/compileData.scor.t0000

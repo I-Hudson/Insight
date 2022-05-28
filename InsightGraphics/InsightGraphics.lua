@@ -49,7 +49,7 @@ project "InsightGraphics"
     links
     {
         "InsightCore",
-        "glfw3.lib",
+        "GLFW",
         "glm",
         "imgui",
         "vulkan-1.lib",
@@ -61,7 +61,6 @@ project "InsightGraphics"
 
     libdirs
     {
-        "%{wks.location}/vendor/glfw/lib",
         "%{LibDirs.vulkan}",
     }
 
@@ -99,8 +98,8 @@ project "InsightGraphics"
 
         postbuildcommands
         {
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
 
     filter "configurations:Release"  

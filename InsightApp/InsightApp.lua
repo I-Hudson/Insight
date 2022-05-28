@@ -36,7 +36,6 @@ project "InsightApp"
         "InsightCore",
         "InsightGraphics",
 
-        "glfw3.lib",
         "glm",
     }
 
