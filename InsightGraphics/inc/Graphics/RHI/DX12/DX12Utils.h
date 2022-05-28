@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 #include <d3d12.h>
@@ -1065,3 +1067,5 @@ namespace Insight
         }
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

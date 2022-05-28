@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #include "Core/TypeAlias.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include <vector>
@@ -111,3 +113,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

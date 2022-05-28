@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
@@ -30,3 +32,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

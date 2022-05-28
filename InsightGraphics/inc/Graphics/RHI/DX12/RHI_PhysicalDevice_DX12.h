@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/RHI/RHI_PhysicalDevice.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -54,3 +56,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

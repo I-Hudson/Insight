@@ -15,8 +15,11 @@ namespace Insight
 		/// <returns></returns>
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
+#if defined(TRUE)
 			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
+#elif defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
+#endif	
 			return nullptr;
 		}
 

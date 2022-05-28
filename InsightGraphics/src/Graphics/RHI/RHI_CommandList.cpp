@@ -18,8 +18,11 @@ namespace Insight
 		/// <returns></returns>
 		RHI_CommandList* RHI_CommandList::New()
 		{
+#if defined(TRUE)
 			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_CommandList_Vulkan); }
+#elif defined(IS_DX12_ENABLED)
 			if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_CommandList_DX12); }
+#endif
 			return nullptr;
 		}
 

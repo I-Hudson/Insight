@@ -1,3 +1,5 @@
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 
 namespace Insight
@@ -53,3 +55,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

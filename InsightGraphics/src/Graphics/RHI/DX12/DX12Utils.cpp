@@ -1,3 +1,5 @@
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
 DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
@@ -255,3 +257,5 @@ namespace Insight
         }
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

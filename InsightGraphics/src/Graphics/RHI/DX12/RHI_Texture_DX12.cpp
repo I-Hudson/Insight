@@ -1,3 +1,5 @@
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
@@ -71,3 +73,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)

@@ -14,8 +14,11 @@ namespace Insight
 	{
 		RHI_Shader* RHI_Shader::New()
 		{
+#if defined(TRUE)
 			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Shader_Vulkan); }
+#elif defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Shader_DX12); }
+#endif
 			return nullptr;
 		}
 

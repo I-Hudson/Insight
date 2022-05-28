@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_DX12_ENABLED)
+
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
@@ -94,3 +96,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif // if defined(IS_DX12_ENABLED)
