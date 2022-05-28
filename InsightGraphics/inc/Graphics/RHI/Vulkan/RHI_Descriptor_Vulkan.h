@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/PipelineStateObject.h"
 
@@ -127,3 +129,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
@@ -297,3 +299,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
 #include "Core/Logger.h"
 #include "Graphics/PixelFormat.h"
@@ -114,3 +116,5 @@ namespace Insight
 }
 
 #pragma warning( default : 4099 )
+
+#endif //#if defined(IS_VULKAN_ENABLED)

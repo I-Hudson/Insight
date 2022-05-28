@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 #include <vulkan/vulkan.hpp>
@@ -73,3 +75,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

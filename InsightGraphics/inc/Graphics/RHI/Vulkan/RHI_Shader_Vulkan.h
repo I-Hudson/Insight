@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include <map>
@@ -45,3 +47,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

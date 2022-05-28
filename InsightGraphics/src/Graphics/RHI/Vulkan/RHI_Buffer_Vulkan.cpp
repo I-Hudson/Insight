@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Platform/Platform.h"
@@ -113,3 +115,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

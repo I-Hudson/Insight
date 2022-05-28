@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 //
 // Copyright (c) 2017-2020 Advanced Micro Devices, Inc. All rights reserved.
 //
@@ -28,3 +30,5 @@ vk_mem_alloc.h to include definitions of its internal implementation
 
 #define VMA_IMPLEMENTATION
 #include "VmaUsage.h"
+
+#endif //#if defined(IS_VULKAN_ENABLED)

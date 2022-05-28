@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
@@ -86,3 +88,5 @@ namespace Insight
 		}
 	}
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)

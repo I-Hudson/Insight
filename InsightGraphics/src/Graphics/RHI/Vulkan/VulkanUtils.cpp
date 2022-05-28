@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
 #ifdef IS_PLATFORM_WINDOWS
@@ -734,3 +736,5 @@ namespace Insight
         }
     }
 }
+
+#endif //#if defined(IS_VULKAN_ENABLED)
