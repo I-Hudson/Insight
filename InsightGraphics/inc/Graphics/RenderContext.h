@@ -6,6 +6,7 @@
 #include "imgui.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
@@ -54,6 +55,9 @@ namespace Insight
 			void FreeBuffer(RHI_Buffer* buffer);
 			int GetBufferCount(BufferType bufferType) const;
 
+			RHI_Texture* CreateTextre();
+			void FreeTexture(RHI_Texture* texture);
+
 		protected:
 			const static int c_FrameCount = 3;
 
@@ -61,6 +65,7 @@ namespace Insight
 
 			RHI_ResourceManager<RHI_Buffer> m_vertexBuffer;
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
+			RHI_ResourceManager<RHI_Texture> m_textures;
 			RHI_ShaderManager m_shaderManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
@@ -97,6 +102,9 @@ namespace Insight
 		static int GetIndexBufferCount();
 		static int GetUniformBufferCount();
 		static int GetBufferCount(Graphics::BufferType bufferType);
+
+		static Graphics::RHI_Texture* CreateTexture();
+		static void FreeTexture(Graphics::RHI_Texture* texture);
 
 		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);

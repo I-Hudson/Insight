@@ -59,6 +59,8 @@ namespace Insight
 				vk::Device GetDevice() const { return m_device; }
 				VmaAllocator GetVMA() const { return m_vmaAllocator; }
 
+				u32 GetFamilyQueueIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }
+
 				vk::ImageView GetSwapchainImageView() const { return m_swapchainImageViews[m_availableSwapchainImage]; }
 				vk::Format GetSwapchainColourFormat() const { return m_swapchainFormat; }
 				vk::SwapchainKHR GetSwapchain() const { return m_swapchain; }

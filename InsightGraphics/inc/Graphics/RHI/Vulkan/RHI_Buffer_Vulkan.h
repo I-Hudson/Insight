@@ -22,6 +22,7 @@ namespace Insight
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;
 				virtual std::vector<Byte> Download() override;
 
+				// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;

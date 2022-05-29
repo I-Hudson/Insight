@@ -45,6 +45,13 @@ namespace Insight
 				m_indexBuffer->Upload(indices, sizeof(indices));
 				m_indexBuffer->SetName(L"TriangleMesh_Index_Buffer");
 			}
+
+			if (!m_testTexture)
+			{
+				m_testTexture = Renderer::CreateTexture();
+				m_testTexture->LoadFromFile("./Resources/testTexture.png");
+				m_testTexture->SetName(L"TestTexture");
+			}
 		}
 
 		void Renderpass::Render()
@@ -66,6 +73,12 @@ namespace Insight
 			{
 				Renderer::FreeIndexBuffer(m_indexBuffer);
 				m_indexBuffer = nullptr;
+			}
+
+			if (m_testTexture)
+			{
+				Renderer::FreeTexture(m_testTexture);
+				m_testTexture = nullptr;
 			}
 
 			m_testMesh.Destroy();
@@ -123,8 +136,8 @@ namespace Insight
 
 		void Renderpass::UpdateCamera()
 		{
-			float deltaTime = glfwGetTime() - previousTime;
-			previousTime = glfwGetTime();
+			float deltaTime = (float)glfwGetTime() - previousTime;
+			previousTime = (float)glfwGetTime();
 
 			glm::mat4 viewMatrix = m_camera.View;
 

@@ -125,7 +125,8 @@
 #define INLINE __inline
 #define FORCE_INLINE __forceinline
 #define FORCE_NOINLINE __declspec(noinline)
-#define NO_EXPECT noexpect
+#define NO_EXPECT noexcept
+#define CONSTEXPR constexpr
 #define NO_RETURN __declspec(noreturn)
 #define PACK_BEGIN() __pragma(pack(push, 1))
 #define PACK_END() ; __pragma(pack(pop))

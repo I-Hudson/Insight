@@ -72,7 +72,7 @@ namespace Insight
 				m_objects.clear();
 			}
 
-			int GetSize() const { return m_objects.size(); }
+			int GetSize() const { return static_cast<int>(m_objects.size()); }
 
 		private:
 			std::map<TypePtr, TypePtr> m_objects;

@@ -13,8 +13,22 @@ namespace Insight
 	namespace Graphics
 	{
 		GraphicsManagerData GraphicsManager::m_sharedData;
+		GraphicsManager* GraphicsManager::s_instance = nullptr;
 
 		int currentGraphicsAPI;
+
+		GraphicsManager::GraphicsManager()
+		{
+			assert(s_instance == nullptr);
+			s_instance = this;
+		}
+
+		GraphicsManager::~GraphicsManager()
+		{
+			assert(s_instance != nullptr);
+			s_instance = nullptr;
+		}
+
 		bool GraphicsManager::Init()
 		{
 			PixelFormatExtensions::Init();

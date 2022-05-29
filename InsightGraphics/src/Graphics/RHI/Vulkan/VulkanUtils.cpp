@@ -544,6 +544,31 @@ namespace Insight
             return vk::PipelineBindPoint::eGraphics;
         }
 
+        vk::PipelineStageFlags PipelineStageFlagsToVulkan(PipelineStageFlags flags)
+        {
+            vk::PipelineStageFlags result;
+
+            if (flags & PipelineStageFlagBits::TopOfPipe)                       { result |= vk::PipelineStageFlagBits::eTopOfPipe; }
+            if (flags & PipelineStageFlagBits::DrawIndirect)                    { result |= vk::PipelineStageFlagBits::eDrawIndirect; }
+            if (flags & PipelineStageFlagBits::VertexInput)                     { result |= vk::PipelineStageFlagBits::eVertexInput; }
+            if (flags & PipelineStageFlagBits::VertexShader)                    { result |= vk::PipelineStageFlagBits::eVertexShader; }
+            if (flags & PipelineStageFlagBits::TessesllationControlShader)      { result |= vk::PipelineStageFlagBits::eTessellationControlShader; }
+            if (flags & PipelineStageFlagBits::TessesllationEvaluationShader)   { result |= vk::PipelineStageFlagBits::eTessellationEvaluationShader; }
+            if (flags & PipelineStageFlagBits::GeometryShader)                  { result |= vk::PipelineStageFlagBits::eGeometryShader; }
+            if (flags & PipelineStageFlagBits::FragmentShader)                  { result |= vk::PipelineStageFlagBits::eFragmentShader; }
+            if (flags & PipelineStageFlagBits::EarlyFramgmentShader)            { result |= vk::PipelineStageFlagBits::eEarlyFragmentTests; }
+            if (flags & PipelineStageFlagBits::LateFramgmentShader)             { result |= vk::PipelineStageFlagBits::eLateFragmentTests; }
+            if (flags & PipelineStageFlagBits::ColourAttachmentOutput)          { result |= vk::PipelineStageFlagBits::eColorAttachmentOutput; }
+            if (flags & PipelineStageFlagBits::ComputeShader)                   { result |= vk::PipelineStageFlagBits::eComputeShader; }
+            if (flags & PipelineStageFlagBits::Transfer)                        { result |= vk::PipelineStageFlagBits::eTransfer; }
+            if (flags & PipelineStageFlagBits::BottomOfPipe)                    { result |= vk::PipelineStageFlagBits::eBottomOfPipe; }
+            if (flags & PipelineStageFlagBits::Host)                            { result |= vk::PipelineStageFlagBits::eHost; }
+            if (flags & PipelineStageFlagBits::AllGraphics)                     { result |= vk::PipelineStageFlagBits::eAllGraphics; }
+            if (flags & PipelineStageFlagBits::AllCommands)                     { result |= vk::PipelineStageFlagBits::eAllCommands; }
+
+            return result;
+        }
+
         vk::ShaderStageFlagBits ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage)
         {
             switch (stage)

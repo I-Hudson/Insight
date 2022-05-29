@@ -11,6 +11,16 @@ namespace Insight
 	{
 		class RenderContext;
 
+		struct RHI_TextureCreateInfo
+		{
+			TextureType TextureType = TextureType::Unknown;
+			int Width = -1;
+			int Height = -1;
+			int Depth = -1;
+			PixelFormat Format = PixelFormat::Unknown;
+			ImageUsageFlags ImageUsage = 0;
+		};
+
 		class RHI_Texture : public RHI_Resource
 		{
 		public:
@@ -18,23 +28,19 @@ namespace Insight
 
 			void LoadFromFile(std::string filePath);
 
-			int GetWidth() const			{ return m_width; }
-			int GetHeight() const			{ return m_height; }
-			int GetChannels() const			{ return m_channels; }
-			TextureType GetType() const		{ return m_type; }
-			PixelFormat GetFormat() const	{ return m_format; }
+			int GetWidth() const			{ return m_info.Width; }
+			int GetHeight() const			{ return m_info.Height; }
+			int GetChannels() const			{ return 4; }
+			TextureType GetType() const		{ return m_info.TextureType; }
+			PixelFormat GetFormat() const	{ return m_info.Format; }
 
-			virtual void Create(RenderContext* context, TextureType textureType, int width, int height, int channels) = 0;
+			virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) = 0;
 
 			virtual void Upload(void* data, int sizeInBytes) = 0;
 			virtual std::vector<Byte> Download(void* data, int sizeInBytes) = 0;
 
 		protected:
-			int m_width = 0;
-			int m_height = 0;
-			int m_channels = 0;
-			TextureType m_type = TextureType::Unknown;
-			PixelFormat m_format = PixelFormat::Unknown;
+			RHI_TextureCreateInfo m_info = { };
 		};
 	}
 }

@@ -4,6 +4,7 @@
 
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
+#include "Core/Slice.h"
 
 namespace Insight
 {
@@ -21,10 +22,15 @@ namespace Insight
 
 				vk::CommandBuffer GetCommandList() const { return m_commandList; };
 
+				void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier);
+				void PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier);
+				void PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier);
+
 				// RHI_CommandList
 				virtual void Reset() override;
 				virtual void Close() override;
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
+				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) override;
 
 				// RHI_Resouce
 				virtual void Release() override;

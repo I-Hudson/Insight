@@ -11,6 +11,8 @@ namespace Insight
 		class RenderContext;
 		struct FrameResouce;
 
+		class RHI_Texture;
+
 		class RHI_CommandList : public RHI_Resource
 		{
 		public:
@@ -24,6 +26,8 @@ namespace Insight
 
 			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;
 			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) { CopyBufferToBuffer(dst, src, 0); }
+
+			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
 
 		protected:
 			bool CanDraw(CommandList& cmdList);

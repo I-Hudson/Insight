@@ -9,18 +9,15 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			void RHI_Texture_DX12::Create(RenderContext* context, TextureType textureType, int width, int height, int channels)
+			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
 			{
 				m_context = dynamic_cast<RenderContext_DX12*>(context);
-				m_width = width;
-				m_height = height;
-				m_channels = channels;
-				m_type = textureType;
+				m_info = createInfo;
 
 				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-					PixelFormatToDX12(m_format),
-					m_width,
-					m_height,
+					PixelFormatToDX12(m_info.Format),
+					m_info.Width,
+					m_info.Height,
 					1,
 					0,
 					1,

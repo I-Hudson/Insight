@@ -28,11 +28,12 @@ namespace Insight
 		class IS_GRAPHICS GraphicsManager : public Insight::Core::ManagerInterface
 		{
 		public:
+			GraphicsManager();
+			~GraphicsManager();
 
 			static GraphicsManager& Instance()
 			{
-				static GraphicsManager instance;
-				return instance;
+				return *s_instance;
 			}
 			static bool IsVulkan() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::Vulkan; }
 			static bool IsDX12() { return Instance().m_sharedData.GraphicsAPI == GraphicsAPI::DX12; }
@@ -45,6 +46,7 @@ namespace Insight
 
 		private:
 			static GraphicsManagerData m_sharedData;
+			static GraphicsManager* s_instance;
 
 			RenderContext* m_renderContext{ nullptr };
 			Renderpass m_renderpass;

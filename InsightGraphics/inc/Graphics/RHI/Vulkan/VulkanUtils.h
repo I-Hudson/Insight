@@ -20,6 +20,7 @@ namespace Insight
 		vk::ImageUsageFlags ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
 		vk::Format PixelFormatToVulkan(PixelFormat format);
 		vk::PipelineBindPoint GPUQueueToVulkanBindPoint(GPUQueue queue);
+		vk::PipelineStageFlags PipelineStageFlagsToVulkan(PipelineStageFlags flags);
 		vk::ShaderStageFlagBits ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
 		vk::ShaderStageFlags ShaderStageFlagsToVulkan(ShaderStageFlags flags);
 		vk::PrimitiveTopology PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);

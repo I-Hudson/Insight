@@ -91,6 +91,10 @@ namespace Insight
 				m_commandList->CopyBufferRegion(dstDX12->GetResouce(), offset, srcDX12->GetResouce(), 0, src->GetSize());
 			}
 
+			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
+			{
+			}
+
 			void RHI_CommandList_DX12::Release()
 			{
 				if (m_commandList)

@@ -7,6 +7,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RHI_Buffer;
+		class RHI_Texture;
 
 		struct UBO_Camera
 		{
@@ -29,6 +30,7 @@ namespace Insight
 			void UpdateCamera();
 
 			Mesh m_testMesh;
+			RHI_Texture* m_testTexture = nullptr;
 
 			RHI_Buffer* m_vertexBuffer = nullptr;
 			RHI_Buffer* m_indexBuffer = nullptr;

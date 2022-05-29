@@ -64,6 +64,49 @@ namespace Insight
 		struct EnumToStringObject
 		{ };
 
+		template<typename FlagBits>
+		struct Flags
+		{
+			using MaskType = std::underlying_type_t<FlagBits>;
+			using LocalFlag = Flags<FlagBits>;
+			static_assert(std::is_same_v<MaskType, int> && "[struct Flags] 'FlagBits' type must be of type 'int'.");
+		public:
+			CONSTEXPR Flags() NO_EXPECT : m_mask(0) { }
+			CONSTEXPR Flags(FlagBits bit) NO_EXPECT : m_mask(static_cast<MaskType>(bit)) { }
+			CONSTEXPR Flags(LocalFlag const& rhs) NO_EXPECT : m_mask(rhs.m_mask) { }
+			CONSTEXPR Flags(LocalFlag&& rhs) NO_EXPECT : m_mask(rhs.m_mask) { }
+			CONSTEXPR explicit Flags(MaskType flags) NO_EXPECT : m_mask(flags) {}
+
+			// Comparison
+			CONSTEXPR bool operator < (LocalFlag const& rhs) const { return m_mask < rhs.m_mask; }
+			CONSTEXPR bool operator <=(LocalFlag const& rhs) const { return m_mask <= rhs.m_mask; }
+			CONSTEXPR bool operator > (LocalFlag const& rhs) const { return m_mask >= rhs.m_mask; }
+			CONSTEXPR bool operator >=(LocalFlag const& rhs) const { return m_mask >= rhs.m_mask; }
+			CONSTEXPR bool operator ==(LocalFlag const& rhs) const { return m_mask == rhs.m_mask; }
+			CONSTEXPR bool operator !=(LocalFlag const& rhs) const { return m_mask != rhs.m_mask; }
+
+			CONSTEXPR bool operator!() const { return !m_mask; }
+
+			// Bitwise
+			CONSTEXPR LocalFlag operator&(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask & rhs.m_mask); }
+			CONSTEXPR LocalFlag operator|(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask | rhs.m_mask); }
+			CONSTEXPR LocalFlag operator^(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ^ rhs.m_mask); }
+			//constexpr LocalFlag operator~(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ~ rhs.m_mask); }
+
+			// Assigment 
+			CONSTEXPR LocalFlag& operator=(LocalFlag const& rhs) NO_EXPECT { m_mask = rhs.m_mask; return *this; }
+			CONSTEXPR LocalFlag& operator|=(LocalFlag const& rhs) NO_EXPECT { m_mask |= rhs.m_mask; return *this; }
+			CONSTEXPR LocalFlag& operator^=(LocalFlag const& rhs) NO_EXPECT { m_mask ^= rhs.m_mask; return *this; }
+			CONSTEXPR LocalFlag& operator&=(LocalFlag const& rhs) NO_EXPECT { m_mask &= rhs.m_mask; return *this; }
+
+			explicit CONSTEXPR operator bool() const NO_EXPECT { return !!m_mask; }
+			explicit CONSTEXPR operator MaskType() const NO_EXPECT { return m_mask; }
+
+		private:
+			MaskType m_mask  = 0;
+		};
+
+
 		enum class ResourceType
 		{
 			Buffer,
@@ -211,6 +254,29 @@ namespace Insight
         };
         using ImageUsageFlags = u32;
         std::string ImageUsageFlagsToString(ImageUsageFlags flags);
+
+		enum class PipelineStageFlagBits
+		{
+			TopOfPipe						= 1 << 0,
+			DrawIndirect					= 1 << 1,
+			VertexInput						= 1 << 2,
+			VertexShader					= 1 << 3,
+			TessesllationControlShader		= 1 << 4,
+			TessesllationEvaluationShader	= 1 << 5,
+			GeometryShader					= 1 << 6,
+			FragmentShader					= 1 << 7,
+			EarlyFramgmentShader			= 1 << 8,
+			LateFramgmentShader				= 1 << 9,
+			ColourAttachmentOutput			= 1 << 10,
+			ComputeShader					= 1 << 11,
+			Transfer						= 1 << 12,
+			BottomOfPipe					= 1 << 13,
+			Host							= 1 << 14,
+			AllGraphics						= 1 << 15,
+			AllCommands						= 1 << 16,
+		};
+		using PipelineStageFlags = Flags<PipelineStageFlagBits>;
+		std::string PipelineStageFlagsToString(PipelineStageFlags flags);
 
 		enum class DescriptorType
 		{

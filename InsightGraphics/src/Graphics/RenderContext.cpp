@@ -82,6 +82,7 @@ namespace Insight
 		{
 			m_vertexBuffer.ReleaseAll();
 			m_descriptorLayoutManager.ReleaseAll();
+			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
 		}
 
@@ -109,6 +110,16 @@ namespace Insight
 				return itr->second.GetSize();
 			}
 			return 0;
+		}
+
+		RHI_Texture* RenderContext::CreateTextre()
+		{
+			return m_textures.CreateResource();
+		}
+
+		void RenderContext::FreeTexture(RHI_Texture* texture)
+		{
+			m_textures.FreeResource(texture);
 		}
 		
 		void FrameResouce::Reset()
@@ -186,6 +197,16 @@ namespace Insight
 	int Renderer::GetBufferCount(Graphics::BufferType bufferType)
 	{
 		return s_context->GetBufferCount(bufferType);
+	}
+
+	Graphics::RHI_Texture* Renderer::CreateTexture()
+	{
+		return s_context->CreateTextre();
+	}
+
+	void Renderer::FreeTexture(Graphics::RHI_Texture* texture)
+	{
+		s_context->FreeTexture(texture);
 	}
 
 	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)

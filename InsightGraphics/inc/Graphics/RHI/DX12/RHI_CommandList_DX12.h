@@ -36,6 +36,7 @@ namespace Insight
 				virtual void Reset() override;
 				virtual void Close() override;
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
+				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) override;
 
 				// RHI_Resouce
 				virtual void Release() override;

@@ -3,6 +3,7 @@
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/Window.h"
 
 #include "optick.h"
@@ -13,6 +14,29 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
+			void RHI_CommandList_Vulkan::PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier)
+			{
+				vk::ArrayProxy<const vk::BufferMemoryBarrier> bufferMemory(bufferMemoryBarrier.GetSize(), bufferMemoryBarrier.GetBegin());
+				vk::ArrayProxy<const vk::ImageMemoryBarrier>imageMemory(imageMemoryBarrier.GetSize(), imageMemoryBarrier.GetBegin());
+				m_commandList.pipelineBarrier(
+					PipelineStageFlagsToVulkan(srcStage), 
+					PipelineStageFlagsToVulkan(dstStage), 
+					vk::DependencyFlagBits::eByRegion, 
+					{ },
+					bufferMemory,
+					imageMemory);
+			}
+
+			void RHI_CommandList_Vulkan::PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier)
+			{
+				PipelineBarrier(srcStage, dstStage, bufferMemoryBarrier, { });
+			}
+
+			void RHI_CommandList_Vulkan::PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier)
+			{
+				PipelineBarrier(srcStage, dstStage, { }, imageMemoryBarrier);
+			}
+
 			/// <summary>
 			/// RHI_CommandList_Vulkan
 			/// </summary>
@@ -43,6 +67,40 @@ namespace Insight
 					vk::BufferCopy(0, offset, src->GetSize())
 				};
 				m_commandList.copyBuffer(srcVulkan->GetBuffer(), dstVulkan->GetBuffer(), copyRegion);
+			}
+
+			void RHI_CommandList_Vulkan::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
+			{
+				RHI_Texture_Vulkan* dstVulkan = dynamic_cast<RHI_Texture_Vulkan*>(dst);
+				RHI_Buffer_Vulkan* srcVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(src);
+				std::array<vk::BufferImageCopy, 1> copyRegion =
+				{
+					vk::BufferImageCopy(
+						0,
+						0,
+						0,
+						vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
+						vk::Offset3D(0, 0, 0),
+						vk::Extent3D(dst->GetWidth(), dst->GetHeight(), 1))
+				};
+				vk::ImageMemoryBarrier memoryBarriers = vk::ImageMemoryBarrier(
+					vk::AccessFlagBits::eNoneKHR,
+					vk::AccessFlagBits::eTransferWrite,
+					vk::ImageLayout::eUndefined,
+					vk::ImageLayout::eTransferDstOptimal,
+					RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					dstVulkan->GetImage(),
+					vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+
+				PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::Transfer, { memoryBarriers });
+				m_commandList.copyBufferToImage(srcVulkan->GetBuffer(), dstVulkan->GetImage(), vk::ImageLayout::eTransferDstOptimal, copyRegion);
+
+				memoryBarriers.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+				memoryBarriers.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+				memoryBarriers.oldLayout = vk::ImageLayout::eTransferDstOptimal;
+				memoryBarriers.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+				PipelineBarrierImage(PipelineStageFlagBits::Transfer, PipelineStageFlagBits::FragmentShader, { memoryBarriers });
 			}
 
 			void RHI_CommandList_Vulkan::Release()

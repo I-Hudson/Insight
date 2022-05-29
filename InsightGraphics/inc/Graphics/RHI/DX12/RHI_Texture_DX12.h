@@ -19,7 +19,7 @@ namespace Insight
 				ID3D12Resource* GetResouce() const { return m_resource.Get(); }
 
 				// RHI_Texture
-				virtual void Create(RenderContext* context, TextureType textureType, int width, int height, int channels) override;
+				virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) override;
 				virtual void Upload(void* data, int sizeInBytes) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 
