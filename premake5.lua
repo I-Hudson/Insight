@@ -69,7 +69,8 @@ workspace "Insight"
             "%{LibDirs.deps_lib_release}",
         }
 
-        filter "system:Windows"
+
+    filter "system:Windows"
     	system "windows"
     	toolset("msc-v143")
         defines
@@ -81,6 +82,7 @@ workspace "Insight"
             "IS_VULKAN_ENABLED",
         }
 
+
     filter "configurations:Testing"
         defines
         {
@@ -88,6 +90,7 @@ workspace "Insight"
             "DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
         }
     	
+    
     filter "system:Unix"
     	system "linux"
     	toolset("clang")

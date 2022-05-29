@@ -15,9 +15,10 @@ namespace Insight
 		/// <returns></returns>
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
-#if defined(TRUE)
+#if defined(IS_VULKAN_ENABLED)
 			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
-#elif defined(IS_DX12_ENABLED)
+#endif
+#if defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
 #endif	
 			return nullptr;
@@ -79,8 +80,12 @@ namespace Insight
 		/// <returns></returns>
 		RHI_Descriptor* RHI_Descriptor::New()
 		{
+#if defined(IS_VULKAN_ENABLED)
 			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Descriptor_Vulkan); }
+#endif
+#if defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Descriptor_DX12); }
+#endif
 			return nullptr;
 		}
 
