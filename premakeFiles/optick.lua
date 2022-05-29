@@ -9,18 +9,18 @@ project "OptickCore"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
-	folderDir = "../vendor/optick/"
-	location "%{folderDir}"
+	folderDirOptick = "../vendor/optick/"
+	location "%{folderDirOptick}"
 
 	files 
 	{
-		"%{folderDir}" .. "src/**.cpp",
-        "%{folderDir}" .. "src/**.h", 
+		folderDirOptick.. "src/**.cpp",
+        folderDirOptick.. "src/**.h", 
 	}
 
 	includedirs
 	{
-		"%{folderDir}" .. "src"
+		folderDirOptick .. "src"
 	}
 
 	defines 

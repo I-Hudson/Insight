@@ -7,33 +7,33 @@ project "ImGui"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
-	folderDir = "../vendor/imgui/"
-	location "%{folderDir}"
+	folderDirImGui = "../vendor/imgui/"
+	location "%{folderDirImGui}"
 
 	files
 	{
-        "%{folderDir}" .. "imgui.h",
-        "%{folderDir}" .. "imconfig.h",
-        "%{folderDir}" .. "imgui_internal.h",
-        "%{folderDir}" .. "imstb_rectpack.h",
-        "%{folderDir}" .. "imstb_textedit.h",
-        "%{folderDir}" .. "imstb_truetype.h",
-		"%{folderDir}" .. "misc/cpp/imgui_stdlib.h",
-		"%{folderDir}" .. "backends/imgui_impl_glfw.h",
-		"%{folderDir}" .. "backends/imgui_impl_win32.h",
-		"%{folderDir}" .. "backends/imgui_impl_vulkan.h",
-		"%{folderDir}" .. "backends/imgui_impl_dx12.h",
+        folderDirImGui .. "imgui.h",
+        folderDirImGui .. "imconfig.h",
+        folderDirImGui .. "imgui_internal.h",
+        folderDirImGui .. "imstb_rectpack.h",
+        folderDirImGui .. "imstb_textedit.h",
+        folderDirImGui .. "imstb_truetype.h",
+		folderDirImGui .. "misc/cpp/imgui_stdlib.h",
+		folderDirImGui .. "backends/imgui_impl_glfw.h",
+		folderDirImGui .. "backends/imgui_impl_win32.h",
+		folderDirImGui .. "backends/imgui_impl_vulkan.h",
+		folderDirImGui .. "backends/imgui_impl_dx12.h",
 
-		"%{folderDir}" .. "imgui.cpp",
-		"%{folderDir}" .. "imgui_demo.cpp",
-		"%{folderDir}" .. "imgui_draw.cpp",
-		"%{folderDir}" .. "imgui_tables.cpp",
-		"%{folderDir}" .. "imgui_widgets.cpp",
-		"%{folderDir}" .. "misc/cpp/imgui_stdlib.cpp",
-		"%{folderDir}" .. "backends/imgui_impl_glfw.cpp",
-		"%{folderDir}" .. "backends/imgui_impl_win32.cpp",
-		"%{folderDir}" .. "backends/imgui_impl_vulkan.cpp",
-		"%{folderDir}" .. "backends/imgui_impl_dx12.cpp",
+		folderDirImGui .. "imgui.cpp",
+		folderDirImGui .. "imgui_demo.cpp",
+		folderDirImGui .. "imgui_draw.cpp",
+		folderDirImGui .. "imgui_tables.cpp",
+		folderDirImGui .. "imgui_widgets.cpp",
+		folderDirImGui .. "misc/cpp/imgui_stdlib.cpp",
+		folderDirImGui .. "backends/imgui_impl_glfw.cpp",
+		folderDirImGui .. "backends/imgui_impl_win32.cpp",
+		folderDirImGui .. "backends/imgui_impl_vulkan.cpp",
+		folderDirImGui .. "backends/imgui_impl_dx12.cpp",
 	}
 
 	defines
@@ -42,9 +42,9 @@ project "ImGui"
 
 	includedirs
 	{
-		"%{folderDir}" .. "./",
-		"%{folderDir}" .. "%{IncludeDirs.glfw}",
-		"%{folderDir}" .. "%{IncludeDirs.vulkan}",
+		folderDirImGui .. "./",
+		folderDirImGui .. "%{IncludeDirs.glfw}",
+		folderDirImGui .. "%{IncludeDirs.vulkan}",
 	}
 
     libdirs

@@ -6,26 +6,26 @@ project "GLFW"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	
-	folderDir = "../vendor/glfw/"
-	location "%{folderDir}"
+	folderDirGLFW = "../vendor/glfw/"
+	location "%{folderDirGLFW}"
 
 	files
 	{
-		"%{folderDir}" .. "include/GLFW/glfw3.h",
-		"%{folderDir}" .. "include/GLFW/glfw3native.h",
-		"%{folderDir}" .. "src/glfw_config.h",
-		"%{folderDir}" .. "src/context.c",
-		"%{folderDir}" .. "src/init.c",
-		"%{folderDir}" .. "src/input.c",
-		"%{folderDir}" .. "src/monitor.c",
-		"%{folderDir}" .. "src/vulkan.c",
-		"%{folderDir}" .. "src/window.c",
-		"%{folderDir}" .. "src/platform.c",
+		folderDirGLFW .. "include/GLFW/glfw3.h",
+		folderDirGLFW .. "include/GLFW/glfw3native.h",
+		folderDirGLFW .. "src/glfw_config.h",
+		folderDirGLFW .. "src/context.c",
+		folderDirGLFW .. "src/init.c",
+		folderDirGLFW .. "src/input.c",
+		folderDirGLFW .. "src/monitor.c",
+		folderDirGLFW .. "src/vulkan.c",
+		folderDirGLFW .. "src/window.c",
+		folderDirGLFW .. "src/platform.c",
 
-		"%{folderDir}" .. "src/null_init.c",
-		"%{folderDir}" .. "src/null_window.c",
-		"%{folderDir}" .. "src/null_joystick.c",
-		"%{folderDir}" .. "src/null_monitor.c",
+		folderDirGLFW .. "src/null_init.c",
+		folderDirGLFW .. "src/null_window.c",
+		folderDirGLFW .. "src/null_joystick.c",
+		folderDirGLFW .. "src/null_monitor.c",
 	}
 
 	filter "system:linux"
@@ -36,17 +36,17 @@ project "GLFW"
 
 		files
 		{
-			"%{folderDir}" .. "src/x11_init.c",
-			"%{folderDir}" .. "src/x11_monitor.c",
-			"%{folderDir}" .. "src/x11_window.c",
-			"%{folderDir}" .. "src/xkb_unicode.c",
-			"%{folderDir}" .. "src/posix_time.c",
-			"%{folderDir}" .. "src/posix_thread.c",
-			"%{folderDir}" .. "src/posix_module.c",
-			"%{folderDir}" .. "src/glx_context.c",
-			"%{folderDir}" .. "src/egl_context.c",
-			"%{folderDir}" .. "src/osmesa_context.c",
-			"%{folderDir}" .. "src/linux_joystick.c"
+			folderDirGLFW .. "src/x11_init.c",
+			folderDirGLFW .. "src/x11_monitor.c",
+			folderDirGLFW .. "src/x11_window.c",
+			folderDirGLFW .. "src/xkb_unicode.c",
+			folderDirGLFW .. "src/posix_time.c",
+			folderDirGLFW .. "src/posix_thread.c",
+			folderDirGLFW .. "src/posix_module.c",
+			folderDirGLFW .. "src/glx_context.c",
+			folderDirGLFW .. "src/egl_context.c",
+			folderDirGLFW .. "src/osmesa_context.c",
+			folderDirGLFW .. "src/linux_joystick.c"
 		}
 
 		defines
@@ -59,16 +59,16 @@ project "GLFW"
 
 		files
 		{
-			folderDir .. "src/win32_init.c",
-			folderDir .. "src/win32_joystick.c",
-			folderDir .. "src/win32_monitor.c",
-			folderDir .. "src/win32_time.c",
-			folderDir .. "src/win32_thread.c",
-			folderDir .. "src/win32_window.c",
-			folderDir .. "src/win32_module.c",
-			folderDir .. "src/wgl_context.c",
-			folderDir .. "src/egl_context.c",
-			folderDir .. "src/osmesa_context.c"
+			folderDirGLFW .. "src/win32_init.c",
+			folderDirGLFW .. "src/win32_joystick.c",
+			folderDirGLFW .. "src/win32_monitor.c",
+			folderDirGLFW .. "src/win32_time.c",
+			folderDirGLFW .. "src/win32_thread.c",
+			folderDirGLFW .. "src/win32_window.c",
+			folderDirGLFW .. "src/win32_module.c",
+			folderDirGLFW .. "src/wgl_context.c",
+			folderDirGLFW .. "src/egl_context.c",
+			folderDirGLFW .. "src/osmesa_context.c"
 		}
 
 		defines 

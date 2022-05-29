@@ -22,11 +22,11 @@ project "glm"
 
     files 
     { 
-        "%{folderDir}" .. "glm/**.hpp", 
-        "%{folderDir}" .. "glm/**.inl", 
-        "%{folderDir}" .. "glm/**.h", 
-        "%{folderDir}" .. "glm/**.cpp",
-        "%{folderDir}" .. "glm/**.c",
+        folderDir .. "glm/**.hpp", 
+        folderDir .. "glm/**.inl", 
+        folderDir .. "glm/**.h", 
+        folderDir .. "glm/**.cpp",
+        folderDir .. "glm/**.c",
     }
 
     filter "configurations:Debug"

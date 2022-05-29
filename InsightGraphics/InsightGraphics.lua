@@ -49,6 +49,7 @@ project "InsightGraphics"
     links
     {
         "InsightCore",
+        "assimp",
         "GLFW",
         "glm",
         "imgui",
@@ -85,7 +86,6 @@ project "InsightGraphics"
             "SPIRV-Toolsd.lib",
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
-            "assimp-vc143-mtd.lib",
             "Optickcore.lib",
         }
 
