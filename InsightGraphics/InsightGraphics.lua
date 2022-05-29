@@ -112,7 +112,6 @@ project "InsightGraphics"
             "GenericCodeGen.lib",
             "OGLCompiler.lib",
             "OSDependent.lib",
-            "assimp-vc143-mt.lib",
             "Optickcore.lib",
         }
 
@@ -125,6 +124,6 @@ project "InsightGraphics"
 
         postbuildcommands
         {
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            "{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
