@@ -1,6 +1,7 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
 namespace Insight
@@ -38,7 +39,19 @@ namespace Insight
 
 			void RHI_Texture_DX12::Upload(void* data, int sizeInBytes)
 			{
+				// We need a staging buffer to upload data from CPU to GPU.
+				RHI_Buffer_DX12 stagingBuffer;
+				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0);
+				stagingBuffer.Upload(data, sizeInBytes, 0);
 
+				RHI_CommandList* cmdList = m_context->GetFrameResouce().CommandListManager.GetCommandList();
+				cmdList->CopyBufferToImage(this, &stagingBuffer);
+				cmdList->Close();
+
+				m_context->SubmitCommandListAndWait(cmdList);
+				m_context->GetFrameResouce().CommandListManager.ReturnCommandList(cmdList);
+
+				stagingBuffer.Release();
 			}
 
 			std::vector<Byte> RHI_Texture_DX12::Download(void* data, int sizeInBytes)

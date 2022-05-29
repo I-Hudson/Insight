@@ -40,14 +40,14 @@ namespace Insight
 		{
 			if (m_vertexBuffer)
 			{
-				m_vertexBuffer->Release();
-				m_vertexBuffer.Reset();
+				Renderer::FreeVertexBuffer(m_vertexBuffer.Get());
+				m_vertexBuffer.Release();
 			}
 			
 			if (m_indexBuffer)
 			{
-				m_indexBuffer->Release();
-				m_indexBuffer.Reset();
+				Renderer::FreeIndexBuffer(m_indexBuffer.Get());
+				m_indexBuffer.Release();
 			}
 		}
 
@@ -100,8 +100,6 @@ namespace Insight
 		void Mesh::Draw() const
 		{
 			OPTICK_EVENT();
-
-			int indexOffset = 0;
 			for (Submesh* submesh : m_submeshes)
 			{
 				submesh->Draw();

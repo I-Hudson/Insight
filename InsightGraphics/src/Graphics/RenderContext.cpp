@@ -80,7 +80,10 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
-			m_vertexBuffer.ReleaseAll();
+			for (auto& buffer : m_buffers)
+			{
+				buffer.second.ReleaseAll();
+			}
 			m_descriptorLayoutManager.ReleaseAll();
 			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();

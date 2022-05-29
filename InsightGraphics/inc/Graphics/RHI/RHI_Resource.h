@@ -65,8 +65,11 @@ namespace Insight
 				{
 					if (pair.second)
 					{
-						pair.second->Release();
-						DeleteTracked(pair.second);
+						if (pair.second)
+						{
+							pair.second->Release();
+							DeleteTracked(pair.second);
+						}
 					}
 				}
 				m_objects.clear();

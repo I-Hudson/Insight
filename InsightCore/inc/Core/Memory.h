@@ -127,6 +127,7 @@ struct UPtr
 	}
 	void Release() { m_ptr = nullptr; }
 	bool IsValid() const { return m_ptr != nullptr; }
+	T* Get() const { return m_ptr; }
 
 	bool operator==(const UPtr& other) const { return m_ptr == other.m_ptr; }
 	bool operator==(const UPtr* other) const { return m_ptr == other; }

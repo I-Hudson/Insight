@@ -3,6 +3,7 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 
 #include "optick.h"
 
@@ -93,6 +94,29 @@ namespace Insight
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
 			{
+				RHI_Texture_DX12* dstDX12 = dynamic_cast<RHI_Texture_DX12*>(dst);
+				RHI_Buffer_DX12* srcDX12 = dynamic_cast<RHI_Buffer_DX12*>(src);
+
+				u64 requriedSize = 0;
+				std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 1> layouts;
+				std::array<u64, 1> rowSizeInBytes;
+				std::array<UINT, 1> numRows;
+				RenderContextDX12()->GetDevice()->GetCopyableFootprints(
+					&dstDX12->GetResouce()->GetDesc(),
+					0,
+					1, 
+					0, 
+					layouts.data(),
+					numRows.data(),
+					rowSizeInBytes.data(),
+					&requriedSize);
+
+				assert(requriedSize == (dstDX12->GetWidth() * dstDX12->GetHeight() * 4));
+				assert(requriedSize == srcDX12->GetSize());
+
+				CD3DX12_TEXTURE_COPY_LOCATION Dst(dstDX12->GetResouce(), 0);
+				CD3DX12_TEXTURE_COPY_LOCATION Src(srcDX12->GetResouce(), layouts[0]);
+				m_commandList->CopyTextureRegion(&Dst, 0, 0, 0, &Src, nullptr);
 			}
 
 			void RHI_CommandList_DX12::Release()

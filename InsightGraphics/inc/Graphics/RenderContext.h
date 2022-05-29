@@ -63,7 +63,6 @@ namespace Insight
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 
-			RHI_ResourceManager<RHI_Buffer> m_vertexBuffer;
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;
 			RHI_ShaderManager m_shaderManager;
