@@ -19,6 +19,7 @@ namespace Insight
 			GPUQueue Queue = GPUQueue_Graphics;
 
 			std::vector<RenderTarget*> RenderTargets;
+			RenderTarget* DepthStencil = nullptr;
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
 			PolygonMode PolygonMode;
@@ -52,6 +53,7 @@ namespace Insight
 				{
 					HashCombine(hash, rt);
 				}
+				HashCombine(hash, DepthStencil);
 
 				HashCombine(hash, PrimitiveTopologyType);
 				HashCombine(hash, PolygonMode);

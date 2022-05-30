@@ -6,6 +6,8 @@
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/Window.h"
 
+#include "Graphics/RenderTarget.h"
+
 #include "optick.h"
 
 namespace Insight
@@ -190,7 +192,7 @@ namespace Insight
 				if (!m_activeRenderpass)
 				{
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)Window::Instance().GetWidth(), (u32)Window::Instance().GetHeight() });
-					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets});
+					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets, m_pso.DepthStencil});
 					std::vector<vk::ImageView> imageViews;
 					std::vector<vk::ClearValue> clearColours;
 					if (m_pso.Swapchain)
@@ -208,6 +210,17 @@ namespace Insight
 					else
 					{
 						IS_CORE_ERROR("[CommandList_Vulkan::CanDraw] TODO");
+					}
+
+					if (pso.DepthStencil)
+					{
+						RHI_Texture_Vulkan* depthVulkan = static_cast<RHI_Texture_Vulkan*>(pso.DepthStencil->GetTexture());
+						imageViews.push_back(depthVulkan->GetImageView());
+
+						vk::ClearDepthStencilValue clearValue;
+						clearValue.depth = 1.0f;
+						clearValue.stencil = 0.0f;
+						clearColours.push_back(clearValue);
 					}
 
 					vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);

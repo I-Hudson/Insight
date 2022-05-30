@@ -8,6 +8,7 @@ namespace Insight
 	{
 		class RHI_Buffer;
 		class RHI_Texture;
+		class RenderTarget;
 
 		struct UBO_Camera
 		{
@@ -31,6 +32,7 @@ namespace Insight
 
 			Mesh m_testMesh;
 			RHI_Texture* m_testTexture = nullptr;
+			RenderTarget* m_depthTarget = nullptr;
 
 			RHI_Buffer* m_vertexBuffer = nullptr;
 			RHI_Buffer* m_indexBuffer = nullptr;

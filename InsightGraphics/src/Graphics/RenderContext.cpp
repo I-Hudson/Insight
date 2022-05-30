@@ -4,6 +4,8 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
+#include "Graphics/RenderTarget.h"
+
 #include "backends/imgui_impl_glfw.h"
 #include "Core/Memory.h"
 
@@ -124,6 +126,18 @@ namespace Insight
 		{
 			m_textures.FreeResource(texture);
 		}
+
+		Graphics::RenderTarget* RenderContext::CreateRenderTarget()
+		{
+			m_renderTargets.push_back(NewTracked(RenderTarget));
+			return m_renderTargets.back();
+		}
+
+		void RenderContext::FreeRenderTarget(Graphics::RenderTarget* renderTarget)
+		{
+			auto itr = std::find(m_renderTargets.begin(), m_renderTargets.end(), renderTarget);
+			DeleteTracked(*itr);
+		}
 		
 		void FrameResouce::Reset()
 		{
@@ -210,6 +224,16 @@ namespace Insight
 	void Renderer::FreeTexture(Graphics::RHI_Texture* texture)
 	{
 		s_context->FreeTexture(texture);
+	}
+
+	Graphics::RenderTarget* Renderer::CreateRenderTarget()
+	{
+		return s_context->CreateRenderTarget();
+	}
+
+	void Renderer::FreeRenderTarget(Graphics::RenderTarget* renderTarget)
+	{
+		s_context->FreeRenderTarget(renderTarget);
 	}
 
 	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)

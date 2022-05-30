@@ -8,6 +8,8 @@
 
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
+#include "Graphics/RenderTarget.h"
+
 #include <iostream>
 
 namespace Insight
@@ -197,7 +199,7 @@ namespace Insight
 					&pipelineColorBlendStateCreateInfo,															// pColorBlendState
 					&pipelineDynamicStateCreateInfo,															// pDynamicState
 					layout,																						// layout
-					m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets })				// renderPass
+					m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil })				// renderPass
 				);
 
 				vk::ResultValue<vk::Pipeline> result = m_context->GetDevice().createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
@@ -238,7 +240,8 @@ namespace Insight
 				std::vector<vk::AttachmentDescription> attachmentDescriptions;
 				std::vector<vk::AttachmentReference> colorAttachments;
 				vk::AttachmentReference depthAttachment;
-				
+				std::vector<vk::SubpassDependency> subpassDependenices;
+
 				if (desc.RenderTargets.size() > 0)
 				{
 					for (const auto* rt : desc.RenderTargets)
@@ -274,15 +277,58 @@ namespace Insight
 					//depthAttachment = vk::AttachmentReference(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 				}
 
+				subpassDependenices.push_back(
+					vk::SubpassDependency(
+						VK_SUBPASS_EXTERNAL,
+						0u,
+						vk::PipelineStageFlagBits::eColorAttachmentOutput,
+						vk::PipelineStageFlagBits::eColorAttachmentOutput,
+						vk::AccessFlagBits::eNoneKHR,
+						vk::AccessFlagBits::eColorAttachmentWrite,
+						{ }
+					));
+
+				if (desc.DepthStencil)
+				{
+					attachmentDescriptions.emplace_back(
+						vk::AttachmentDescriptionFlags(),
+						PixelFormatToVulkan(desc.DepthStencil->GetTexture()->GetFormat()),
+						vk::SampleCountFlagBits::e1,								// Sample count
+						vk::AttachmentLoadOp::eClear,								// load op
+						vk::AttachmentStoreOp::eStore,								// store op
+						vk::AttachmentLoadOp::eDontCare,							// stencil load op
+						vk::AttachmentStoreOp::eDontCare,							// stencil store op
+						vk::ImageLayout::eUndefined,								// initial layout
+						vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	// final layout
+
+					depthAttachment.attachment = static_cast<int>(attachmentDescriptions.size() - 1ull);
+					depthAttachment.layout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+
+					subpassDependenices.push_back(
+						vk::SubpassDependency(
+							VK_SUBPASS_EXTERNAL,
+							0u,
+							vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
+							vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
+							vk::AccessFlagBits::eNoneKHR,
+							vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+							{ }
+						));
+				}
+					 
 				vk::SubpassDescription  subpassDescription(
 					vk::SubpassDescriptionFlags(),
 					vk::PipelineBindPoint::eGraphics,
 					{},
 					colorAttachments,
 					{},
-					nullptr/*(depthAttachment.layout != vk::ImageLayout::eUndefined) ? &depthAttachment : nullptr*/);
+					desc.DepthStencil ? &depthAttachment : nullptr);
 
-				vk::RenderPass renderPass = m_context->GetDevice().createRenderPass(vk::RenderPassCreateInfo(vk::RenderPassCreateFlags(), attachmentDescriptions, subpassDescription));
+				vk::RenderPass renderPass = m_context->GetDevice().createRenderPass(
+					vk::RenderPassCreateInfo(vk::RenderPassCreateFlags(), 
+						attachmentDescriptions, 
+						subpassDescription, 
+						subpassDependenices));
 				m_renderpasses[hash] = renderPass;
 				return renderPass;
 			}

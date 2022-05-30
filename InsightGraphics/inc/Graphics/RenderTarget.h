@@ -11,7 +11,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RenderTargetManager;
-		class GPUImage;
+		class RHI_Texture;
 
 		struct RenderTargetDesc
 		{
@@ -39,16 +39,17 @@ namespace Insight
 			RenderTarget();
 			~RenderTarget();
 
-			RenderTargetDesc GetDesc() const { return m_desc; }
-			GPUImage* GetImage() const { return m_image; }
-
-		private:
 			void Create(std::string key, RenderTargetDesc desc);
 			void Destroy();
 
+			RenderTargetDesc GetDesc() const { return m_desc; }
+			RHI_Texture* GetTexture() const { return m_texture; }
+
+		private:
+
 		private:
 			RenderTargetDesc m_desc;
-			GPUImage* m_image{ nullptr };
+			RHI_Texture* m_texture{ nullptr };
 
 			friend class RenderTargetManager;
 		};

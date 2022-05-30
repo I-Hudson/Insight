@@ -33,7 +33,7 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
+			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
 			currentGraphicsAPI = (int)m_sharedData.GraphicsAPI;
 
 			m_renderContext = RenderContext::New();

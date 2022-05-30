@@ -3,6 +3,8 @@
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsManager.h"
 
+#include "Graphics/RenderTarget.h"
+
 #include "optick.h"
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -52,6 +54,13 @@ namespace Insight
 				m_testTexture->LoadFromFile("./Resources/testTexture.png");
 				m_testTexture->SetName(L"TestTexture");
 			}
+
+			if (!m_depthTarget)
+			{
+				m_depthTarget = Renderer::CreateRenderTarget();
+				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::D32_Float, { 1, 0, 0, 1 });
+				m_depthTarget->Create("StandardDepth", desc);
+			}
 		}
 
 		void Renderpass::Render()
@@ -81,6 +90,12 @@ namespace Insight
 				m_testTexture = nullptr;
 			}
 
+			if (m_depthTarget)
+			{
+				Renderer::FreeRenderTarget(m_depthTarget);
+				m_depthTarget = nullptr;
+			}
+
 			m_testMesh.Destroy();
 		}
 
@@ -108,6 +123,7 @@ namespace Insight
 				pso.CullMode = CullMode::None;
 				pso.RenderTargets.clear();
 				pso.Swapchain = true;
+				pso.DepthStencil = m_depthTarget;
 				Renderer::SetPipelineStateObject(pso);
 			}
 

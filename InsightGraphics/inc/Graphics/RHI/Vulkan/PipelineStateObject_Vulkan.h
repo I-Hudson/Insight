@@ -47,7 +47,8 @@ namespace Insight
 			struct RenderpassDesc_Vulkan
 			{
 				std::vector<RenderTarget*> RenderTargets;
-			
+				RenderTarget* DepthStencil = nullptr;
+
 				u64 GetHash() const
 				{
 					u64 hash = 0;
@@ -56,6 +57,7 @@ namespace Insight
 					{
 						HashCombine(hash, rt);
 					}
+					HashCombine(hash, DepthStencil);
 			
 					return hash;
 				}

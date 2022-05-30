@@ -21,6 +21,7 @@ namespace Insight
 	{
 		class RenderContext;
 		class RHI_Texture;
+		class RenderTarget;
 
 		class RenderContext
 		{
@@ -58,6 +59,9 @@ namespace Insight
 			RHI_Texture* CreateTextre();
 			void FreeTexture(RHI_Texture* texture);
 
+			Graphics::RenderTarget* CreateRenderTarget();
+			void FreeRenderTarget(Graphics::RenderTarget* renderTarget);
+
 		protected:
 			const static int c_FrameCount = 3;
 
@@ -65,6 +69,7 @@ namespace Insight
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;
+			std::vector<RenderTarget*> m_renderTargets;
 			RHI_ShaderManager m_shaderManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
@@ -104,6 +109,9 @@ namespace Insight
 
 		static Graphics::RHI_Texture* CreateTexture();
 		static void FreeTexture(Graphics::RHI_Texture* texture);
+
+		static Graphics::RenderTarget* CreateRenderTarget();
+		static void FreeRenderTarget(Graphics::RenderTarget* renderTarget);
 
 		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);

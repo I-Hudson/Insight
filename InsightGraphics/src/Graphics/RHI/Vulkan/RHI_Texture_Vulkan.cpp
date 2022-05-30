@@ -47,6 +47,21 @@ namespace Insight
 					&m_imageAllocation,
 					&allocInfo));
 
+				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
+					{ },
+					m_image,
+					vk::ImageViewType::e2D,
+					imageCreateInfo.format,
+					vk::ComponentMapping(),
+					vk::ImageSubresourceRange(
+						createInfo.ImageUsage == ImageUsageFlagsBits::DepthStencilAttachment ?
+						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
+						0,
+						1,
+						0,
+						1)
+				);
+				m_imageView = m_context->GetDevice().createImageView(viewCreateInfo);
 			}
 
 			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
