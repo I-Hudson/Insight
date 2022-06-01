@@ -4,6 +4,7 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 
 namespace Insight
 {
@@ -84,7 +85,7 @@ namespace Insight
 				{
 					HashCombine(hash, descriptor.GetHash(true));
 
-					if (!descriptor.BufferView.IsValid())
+					if (!descriptor.BufferView.IsValid() && !descriptor.Texture)
 					{
 						continue;
 					}
@@ -95,13 +96,41 @@ namespace Insight
 					}
 					else if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
 					{
+						const RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(descriptor.Texture);
 
+						static vk::Sampler sampler;
+						if (!sampler)
+						{
+							vk::SamplerCreateInfo samplerCreateInfo = vk::SamplerCreateInfo(
+								{},
+								vk::Filter::eLinear,
+								vk::Filter::eLinear,
+								vk::SamplerMipmapMode::eLinear,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								0.0f, 
+								false,
+								1.0f,
+								false,
+								vk::CompareOp::eNever,
+								0.0f,
+								0.0f,
+								vk::BorderColor::eFloatOpaqueWhite);
+							sampler = m_context->GetDevice().createSampler(samplerCreateInfo);
+						}
+
+						vk::DescriptorImageInfo& imageInfo = image_infos[descriptorWriteIndex];
+						imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+						imageInfo.setImageView(textureVulkan->GetImageView());
+						imageInfo.setSampler(sampler);
 					}
 					else if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
-						buffer_infos[descriptorWriteIndex].setBuffer( dynamic_cast<RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer());
-						buffer_infos[descriptorWriteIndex].setOffset(descriptor.BufferView.GetOffset());
-						buffer_infos[descriptorWriteIndex].setRange(descriptor.BufferView.GetSize());
+						vk::DescriptorBufferInfo& bufferInfo = buffer_infos[descriptorWriteIndex];
+						bufferInfo.setBuffer( dynamic_cast<RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer());
+						bufferInfo.setOffset(descriptor.BufferView.GetOffset());
+						bufferInfo.setRange(descriptor.BufferView.GetSize());
 					}
 
 					write_descriptor_sets[descriptorWriteIndex].setDstSet(m_set);

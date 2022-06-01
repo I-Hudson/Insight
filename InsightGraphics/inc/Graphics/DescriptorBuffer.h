@@ -10,6 +10,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class DescriptorBuffer;
+		class RHI_Texture;
 
 		struct Descriptor
 		{
@@ -65,6 +66,7 @@ namespace Insight
 			DescriptorResourceType ResourceType = DescriptorResourceType::Unknown;
 			
 			RHI_BufferView BufferView;
+			RHI_Texture* Texture = nullptr;
 
 			u64 GetHash(bool includeResource) const
 			{
@@ -76,7 +78,14 @@ namespace Insight
 				HashCombine(hash, static_cast<u64>(Type));
 				if (includeResource)
 				{
-					HashCombine(hash, BufferView);
+					if (BufferView.IsValid())
+					{
+						HashCombine(hash, BufferView);
+					}
+					if (Texture)
+					{
+						HashCombine(hash, Texture);
+					}
 				}
 				return hash;
 			}

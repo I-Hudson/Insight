@@ -5,6 +5,7 @@
 #include "Graphics/PipelineStateObject.h"
 #include "vulkan/vulkan.hpp"
 #include <map>
+#include <array>
 
 namespace Insight
 {
@@ -46,7 +47,7 @@ namespace Insight
 
 			struct RenderpassDesc_Vulkan
 			{
-				std::vector<RenderTarget*> RenderTargets;
+				std::array<RenderTarget*, 8> RenderTargets;
 				RenderTarget* DepthStencil = nullptr;
 
 				u64 GetHash() const

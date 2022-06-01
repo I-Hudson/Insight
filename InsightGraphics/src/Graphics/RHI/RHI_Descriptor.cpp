@@ -108,6 +108,11 @@ namespace Insight
 			std::vector<Descriptor> descriptors = shader->GetDescriptors();
 			for (const Descriptor& desc : descriptors)
 			{
+				if (desc.Type == DescriptorType::Sampler)
+				{
+					continue;
+				}
+
 				m_descriptors[desc.Set].push_back(desc);
 			}
 			for (auto& descs : m_descriptors)
@@ -128,6 +133,17 @@ namespace Insight
 				return;
 			}
 			descriptors[binding].BufferView = view;
+		}
+
+		void DescriptorAllocator::SetTexture(int set, int binding, RHI_Texture* texture)
+		{
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (binding >= (int)descriptors.size())
+			{
+				IS_CORE_ERROR("[GPUDescriptorAllocator::SetTexture] Binding: '{0}' is out of range.", binding);
+				return;
+			}
+			descriptors[binding].Texture = texture;
 		}
 
 

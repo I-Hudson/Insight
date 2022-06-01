@@ -35,6 +35,7 @@ namespace Insight
 
 			virtual void SetPipeline(PipelineStateObject pso) = 0;
 			virtual void SetUniform(int set, int binding, DescriptorBufferView view) = 0;
+			virtual void SetTexture(int set, int binding, RHI_Texture* texture) = 0;
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;
 

@@ -55,6 +55,13 @@ namespace Insight
 				m_testTexture->SetName(L"TestTexture");
 			}
 
+			if (!m_colourTarget)
+			{
+				m_colourTarget = Renderer::CreateRenderTarget();
+				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::B8G8R8A8_UNorm, { 1, 0, 0, 1 });
+				m_colourTarget->Create("StandardColour", desc);
+			}
+
 			if (!m_depthTarget)
 			{
 				m_depthTarget = Renderer::CreateRenderTarget();
@@ -106,25 +113,24 @@ namespace Insight
 		{
 			OPTICK_EVENT();
 
-			RHI_Shader* shader = nullptr;
+			RHI_Shader* gbufferShader = nullptr;
 			{
-				//ZoneScopedN("GetShader");
+				OPTICK_EVENT("GBuffer-GetShader");
 				ShaderDesc shaderDesc;
-				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-				shader = Renderer::GetShader(shaderDesc);
+				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+				gbufferShader = Renderer::GetShader(shaderDesc);
 			}
-
-			PipelineStateObject pso{};
+			PipelineStateObject gbufferPso{};
 			{
-				//ZoneScopedN("SetPipelineStateObject");
-				pso.Name = L"Swapchain_PSO";
-				pso.Shader = shader;
-				pso.CullMode = CullMode::None;
-				pso.RenderTargets.clear();
-				pso.Swapchain = true;
-				pso.DepthStencil = m_depthTarget;
-				Renderer::SetPipelineStateObject(pso);
+				OPTICK_EVENT("GBuffer-SetPipelineStateObject");
+				gbufferPso.Name = L"GBuffer_PSO";
+				gbufferPso.Shader = gbufferShader;
+				gbufferPso.CullMode = CullMode::Front;
+				gbufferPso.Swapchain = false;
+				gbufferPso.RenderTargets = { m_colourTarget };
+				gbufferPso.DepthStencil = m_depthTarget;
+				Renderer::SetPipelineStateObject(gbufferPso);
 			}
 
 			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -136,7 +142,7 @@ namespace Insight
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
-				//ZoneScopedN("SetUniform");
+				OPTICK_EVENT("GBuffer-SetUniform");
 				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
 				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 				Renderer::SetUniform(0, 2, &m_camera, sizeof(m_camera));
@@ -144,8 +150,32 @@ namespace Insight
 
 			m_testMesh.Draw();
 
-			//Renderer::Draw(3, 1, 0, 0);
-			//Renderer::DrawIndexed(3, 1, 0, 0, 0);
+			RHI_Shader* swapchainShader = nullptr;
+			{
+				OPTICK_EVENT("Swapchain-GetShader");
+				ShaderDesc shaderDesc;
+				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+				swapchainShader = Renderer::GetShader(shaderDesc);
+			}
+
+			PipelineStateObject swapchainPso{};
+			{
+				OPTICK_EVENT("Swapchain-SetPipelineStateObject");
+				swapchainPso.Name = L"Swapchain_PSO";
+				swapchainPso.Shader = swapchainShader;
+				swapchainPso.CullMode = CullMode::None;
+				swapchainPso.Swapchain = true;
+				//pso.DepthStencil = m_depthTarget;
+				Renderer::SetPipelineStateObject(swapchainPso);
+			}
+
+			{
+				OPTICK_EVENT("Swapchain-SetUniform");
+				Renderer::SetTexture(0, 0, m_colourTarget->GetTexture());
+			}
+
+			Renderer::Draw(3, 1, 0, 0);
 		}
 
 		float previousTime = 0;

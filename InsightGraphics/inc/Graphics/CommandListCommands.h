@@ -24,6 +24,7 @@ namespace Insight
 			SetPipelineStateObject,
 			SetUniformBuffer,
 			SetUniform,
+			SetTexture,
 			SetViewport,
 			SetScissor,
 			SetVertexBuffer,
@@ -76,6 +77,20 @@ namespace Insight
 			DescriptorBufferView View;
 		};
 
+		struct CMD_SetTexture : public ICommand
+		{
+			virtual u64 GetSize() override { return sizeof(CMD_SetTexture); }
+			CMD_SetTexture(int set, int binding, RHI_Texture* texture)
+			{
+				CommandType = CommandType::SetTexture;
+				Set = set;
+				Binding = binding;
+				Texture = texture;
+			}
+			int Set;
+			int Binding;
+			RHI_Texture* Texture;
+		};
 
 		struct CMD_SetViewport : public ICommand
 		{

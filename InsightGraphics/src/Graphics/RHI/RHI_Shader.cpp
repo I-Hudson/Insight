@@ -136,6 +136,8 @@ namespace Insight
 			arguments.push_back(L"-Zs");
 			arguments.push_back(L"-Od");
 
+			//arguments.push_back(L"-fvk-bind-register");
+
 			// Compile shader
 			ThrowIfFailed(DXCompiler->Compile(
 				&Source,                // Source buffer.
@@ -369,6 +371,11 @@ namespace Insight
 			for (size_t i = 0; i < inputCount; i++)
 			{
 				SpvReflectInterfaceVariable* interfaceVariable = inputVars.at(i);
+				if (interfaceVariable->built_in != -1)
+				{
+					continue;
+
+				}
 				std::string name = interfaceVariable->name;
 				name = name.substr(name.find_last_of('.') + 1);
 
@@ -423,7 +430,7 @@ namespace Insight
 			{
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:						return DescriptorType::Sampler;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:		return DescriptorType::Combined_Image_Sampler;
-			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Sampled_Image;
+			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Combined_Image_Sampler;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:			return DescriptorType::Uniform_Texel_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:			return DescriptorType::Storage_Texel_Buffer;

@@ -60,6 +60,14 @@ namespace Insight
 					break;
 				}
 
+				case CommandType::SetTexture:
+				{
+					//ZoneScopedN("SetUniform");
+					const CMD_SetTexture* cmd = dynamic_cast<const CMD_SetTexture*>(command);
+					SetTexture(cmd->Set, cmd->Binding, cmd->Texture);
+					break;
+				}
+
 				case CommandType::SetViewport:
 				{
 					//ZoneScopedN("SetViewport");
@@ -116,6 +124,7 @@ namespace Insight
 				default:
 				{
 					IS_CORE_ERROR("[CommandList_DX12::Record] Unknown command.");
+					assert(false);
 					break;
 				}
 				}

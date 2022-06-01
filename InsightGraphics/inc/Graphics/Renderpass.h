@@ -30,9 +30,11 @@ namespace Insight
 
 			void UpdateCamera();
 
+			RenderTarget* m_depthTarget = nullptr;
+			RenderTarget* m_colourTarget = nullptr;
+
 			Mesh m_testMesh;
 			RHI_Texture* m_testTexture = nullptr;
-			RenderTarget* m_depthTarget = nullptr;
 
 			RHI_Buffer* m_vertexBuffer = nullptr;
 			RHI_Buffer* m_indexBuffer = nullptr;

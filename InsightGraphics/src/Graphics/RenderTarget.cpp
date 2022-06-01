@@ -36,7 +36,9 @@ namespace Insight
 			}
 			else
 			{
-				textureInfo.ImageUsage = ImageUsageFlagsBits::ColourAttachment;
+				textureInfo.ImageUsage = 
+					ImageUsageFlagsBits::ColourAttachment
+					| ImageUsageFlagsBits::Sampled;
 			}
 			m_texture->Create(GraphicsManager::Instance().GetRenderContext(), textureInfo);
 

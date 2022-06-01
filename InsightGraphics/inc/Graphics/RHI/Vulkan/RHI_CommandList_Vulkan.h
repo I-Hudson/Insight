@@ -41,6 +41,7 @@ namespace Insight
 				// RHI_CommandList
 				virtual void SetPipeline(PipelineStateObject pso) override;
 				virtual void SetUniform(int set, int binding, DescriptorBufferView view) override;
+				virtual void SetTexture(int set, int binding, RHI_Texture* texture) override;
 				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;
 
@@ -61,7 +62,7 @@ namespace Insight
 			private:
 				vk::CommandBuffer m_commandList{ nullptr };
 				RHI_CommandListAllocator_Vulkan* m_allocator{ nullptr };
-				vk::Framebuffer m_framebuffer{ nullptr };
+				std::unordered_map<u64, vk::Framebuffer> m_framebuffers;
 
 				friend class RHI_CommandListAllocator_Vulkan;
 			};

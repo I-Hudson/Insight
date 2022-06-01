@@ -15,6 +15,7 @@ namespace Insight
 	{
 		class RHI_Buffer;
 		class RHI_Shader;
+		class RHI_Texture;
 
 		class CommandList
 		{
@@ -47,6 +48,7 @@ namespace Insight
 			void SetScissor(int width, int height);
 
 			void SetUniform(int set, int binding, void* data, int sizeInBytes);
+			void SetTexture(int set, int binding, RHI_Texture* texture);
 
 			void SetVertexBuffer(RHI_Buffer* buffer);
 			void SetIndexBuffer(RHI_Buffer* buffer);

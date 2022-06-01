@@ -153,7 +153,7 @@ namespace Insight
 
 		void CommandList::ClearRenderTargets()
 		{
-			m_pso.RenderTargets.clear();
+			m_pso.RenderTargets = { };
 			AddCommand(CMD_SetPipelineStateObject(m_pso));
 		}
 
@@ -171,6 +171,11 @@ namespace Insight
 		{
 			DescriptorBufferView view = m_descriptorBuffer.SetUniform(set, binding, data, sizeInBytes);
 			AddCommand(CMD_SetUniform(set, binding, view));
+		}
+
+		void CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
+		{
+			AddCommand(CMD_SetTexture(set, binding, texture));
 		}
 
 		void CommandList::SetVertexBuffer(RHI_Buffer* buffer)

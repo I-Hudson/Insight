@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Graphics/Enums.h"
-#include <vector>
+#include <array>
 #include <memory>
 
 namespace Insight
@@ -18,7 +18,7 @@ namespace Insight
 			RHI_Shader* Shader = nullptr;
 			GPUQueue Queue = GPUQueue_Graphics;
 
-			std::vector<RenderTarget*> RenderTargets;
+			std::array<RenderTarget*, 8> RenderTargets;
 			RenderTarget* DepthStencil = nullptr;
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;

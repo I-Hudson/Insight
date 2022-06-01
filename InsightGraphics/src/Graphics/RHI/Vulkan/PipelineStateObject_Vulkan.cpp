@@ -48,6 +48,11 @@ namespace Insight
 
 				for (const Descriptor& descriptor : descriptors)
 				{
+					if (descriptor.Type == DescriptorType::Sampler)
+					{
+						continue;
+					}
+
 					if (currentSet != descriptor.Set)
 					{
 						RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentSet, currentDescriptors));
@@ -237,23 +242,38 @@ namespace Insight
 					return itr->second;
 				}
 
-				std::vector<vk::AttachmentDescription> attachmentDescriptions;
-				std::vector<vk::AttachmentReference> colorAttachments;
+				std::array<vk::AttachmentDescription, 8> attachmentDescriptions;
+				std::array<vk::AttachmentReference, 8> colorAttachments;
 				vk::AttachmentReference depthAttachment;
 				std::vector<vk::SubpassDependency> subpassDependenices;
 
-				if (desc.RenderTargets.size() > 0)
+				int attachmentIndex = 0;
+				int colourIndex = 0;
+				for (RenderTarget* rt : desc.RenderTargets)
 				{
-					for (const auto* rt : desc.RenderTargets)
+					if (rt)
 					{
-						// TODO: 
+						attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
+							vk::AttachmentDescriptionFlags(),
+							PixelFormatToVulkan(rt->GetTexture()->GetFormat()),
+							vk::SampleCountFlagBits::e1,
+							vk::AttachmentLoadOp::eClear,
+							vk::AttachmentStoreOp::eStore,
+							vk::AttachmentLoadOp::eDontCare,
+							vk::AttachmentStoreOp::eDontCare,
+							vk::ImageLayout::eUndefined,
+							vk::ImageLayout::ePresentSrcKHR);
+						colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
+						++attachmentIndex;
+						++colourIndex;
 					}
 				}
-				else
+
+				// No render targets, guess we are swapchain.
+				if (attachmentIndex == 0)
 				{
-					
 					// Assume this is a swapchain render pass as no user defined render targets are added.
-					attachmentDescriptions.emplace_back(
+					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
 						vk::AttachmentDescriptionFlags(),
 						m_context->GetSwapchainColourFormat(),
 						vk::SampleCountFlagBits::e1,
@@ -263,18 +283,9 @@ namespace Insight
 						vk::AttachmentStoreOp::eDontCare,
 						vk::ImageLayout::eUndefined,
 						vk::ImageLayout::ePresentSrcKHR);
-					colorAttachments.push_back(vk::AttachmentReference(0, vk::ImageLayout::eColorAttachmentOptimal));
-
-					//attachmentDescriptions.emplace_back(vk::AttachmentDescriptionFlags(),
-					//	vk::Format::eD16Unorm,
-					//	vk::SampleCountFlagBits::e1,
-					//	vk::AttachmentLoadOp::eClear,
-					//	vk::AttachmentStoreOp::eDontCare,
-					//	vk::AttachmentLoadOp::eDontCare,
-					//	vk::AttachmentStoreOp::eDontCare,
-					//	vk::ImageLayout::eUndefined,
-					//	vk::ImageLayout::eDepthStencilAttachmentOptimal);
-					//depthAttachment = vk::AttachmentReference(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+					colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
+					++attachmentIndex;
+					++colourIndex;
 				}
 
 				subpassDependenices.push_back(
@@ -290,7 +301,7 @@ namespace Insight
 
 				if (desc.DepthStencil)
 				{
-					attachmentDescriptions.emplace_back(
+					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
 						vk::AttachmentDescriptionFlags(),
 						PixelFormatToVulkan(desc.DepthStencil->GetTexture()->GetFormat()),
 						vk::SampleCountFlagBits::e1,								// Sample count
@@ -301,8 +312,9 @@ namespace Insight
 						vk::ImageLayout::eUndefined,								// initial layout
 						vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	// final layout
 
-					depthAttachment.attachment = static_cast<int>(attachmentDescriptions.size() - 1ull);
+					depthAttachment.attachment = static_cast<int>(attachmentIndex);
 					depthAttachment.layout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+					++attachmentIndex;
 
 					subpassDependenices.push_back(
 						vk::SubpassDependency(
@@ -319,16 +331,18 @@ namespace Insight
 				vk::SubpassDescription  subpassDescription(
 					vk::SubpassDescriptionFlags(),
 					vk::PipelineBindPoint::eGraphics,
-					{},
-					colorAttachments,
-					{},
-					desc.DepthStencil ? &depthAttachment : nullptr);
+					0, nullptr,
+					colourIndex, colorAttachments.data(),
+					nullptr,
+					desc.DepthStencil ? &depthAttachment : nullptr,
+					0, nullptr);
 
 				vk::RenderPass renderPass = m_context->GetDevice().createRenderPass(
-					vk::RenderPassCreateInfo(vk::RenderPassCreateFlags(), 
-						attachmentDescriptions, 
-						subpassDescription, 
-						subpassDependenices));
+					vk::RenderPassCreateInfo(
+						vk::RenderPassCreateFlags(),
+						attachmentIndex, attachmentDescriptions.data(),
+						1, &subpassDescription, 
+						1, subpassDependenices.data()));
 				m_renderpasses[hash] = renderPass;
 				return renderPass;
 			}

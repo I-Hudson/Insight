@@ -275,6 +275,7 @@ namespace Insight
 
 	void Renderer::SetTexture(int set, int binding, Graphics::RHI_Texture* texture)
 	{
+		s_FrameCommandList.SetTexture(set, binding, texture);
 	}
 
 	void Renderer::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)

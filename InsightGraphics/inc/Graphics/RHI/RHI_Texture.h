@@ -28,11 +28,12 @@ namespace Insight
 
 			void LoadFromFile(std::string filePath);
 
-			int GetWidth() const			{ return m_info.Width; }
-			int GetHeight() const			{ return m_info.Height; }
-			int GetChannels() const			{ return 4; }
-			TextureType GetType() const		{ return m_info.TextureType; }
-			PixelFormat GetFormat() const	{ return m_info.Format; }
+			RHI_TextureCreateInfo GetInfo() const { return m_info; }
+			int GetWidth()					const { return m_info.Width; }
+			int GetHeight()					const { return m_info.Height; }
+			int GetChannels()				const { return 4; }
+			TextureType GetType()			const { return m_info.TextureType; }
+			PixelFormat GetFormat()			const { return m_info.Format; }
 
 			virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) = 0;
 

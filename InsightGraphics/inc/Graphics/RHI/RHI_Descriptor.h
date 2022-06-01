@@ -14,6 +14,7 @@ namespace Insight
 	{
 		class RenderContext;
 		class RHI_DescriptorLayoutManager;
+		class RHI_Texture;
 
 		class RHI_DescriptorLayout : public RHI_Resource
 		{
@@ -60,6 +61,7 @@ namespace Insight
 			void SetPipeline(PipelineStateObject pso);
 
 			void SetUniform(int set, int binding, RHI_BufferView view);
+			void SetTexture(int set, int binding, RHI_Texture* texture);
 
 			Descriptor GetDescriptor(int set, int binding);
 

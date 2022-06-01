@@ -155,6 +155,12 @@ namespace Insight
 				FrameResourceDX12()->DescriptorAllocator.SetUniform(set, binding, bufferView);
 			}
 
+			void RHI_CommandList_DX12::SetTexture(int set, int binding, RHI_Texture* texture)
+			{
+				OPTICK_EVENT();
+				FrameResourceDX12()->DescriptorAllocator.SetTexture(set, binding, texture);
+			}
+
 			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
 				OPTICK_EVENT();
