@@ -25,7 +25,7 @@ namespace Insight
 		void Engine::Update()
 		{
 #ifdef WAIT_FOR_PROFILE_CONNECTION
-			while (!Optick::IsActive()) { }
+			Core::WaitForProfiler();
 #endif
 			while (!Graphics::Window::Instance().ShouldClose() && !m_shouldClose)
 			{
