@@ -4,8 +4,8 @@
 #include "Graphics/Window.h"
 
 #include "Core/Memory.h"
+#include "Core/Profiler.h"
 
-#include "optick.h"
 #include "doctest.h"
 
 namespace Insight
@@ -54,7 +54,7 @@ namespace Insight
 
 		void GraphicsManager::Update(const float deltaTime)
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			if (!m_renderContext)
 			{

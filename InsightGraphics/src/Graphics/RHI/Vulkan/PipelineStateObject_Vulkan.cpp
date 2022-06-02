@@ -10,6 +10,7 @@
 
 #include "Graphics/RenderTarget.h"
 
+#include "vulkan/vulkan.hpp"
 #include <iostream>
 
 namespace Insight

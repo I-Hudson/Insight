@@ -4,7 +4,7 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
 
 #include "backends/imgui_impl_glfw.h"
 
@@ -209,7 +209,7 @@ namespace Insight
 
 			void RenderContext_DX12::Render(CommandList cmdList)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				ImGuiRender();
 
 				FrameResource_DX12& frame = m_frames[m_frameIndex];
@@ -236,27 +236,27 @@ namespace Insight
 				cmdListDX12->Record(cmdList, &frame);
 
 				{
-					OPTICK_EVENT("ImGui_DescriptorHeap");
+					IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
 					std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
 					IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
 					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
 				}
 
 				{
-					OPTICK_EVENT("ResourceBarrier_swapchain_present");
+					IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
 					// Set back buffer texture/image back to present so we can use it within the swapchain.
 					cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 				}
 				cmdListDX12->Close();
 
 				{
-					OPTICK_EVENT("ExecuteCommandLists");
+					IS_PROFILE_SCOPE("ExecuteCommandLists");
 					ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 					m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				}
 
 				{
-					OPTICK_EVENT("Present");
+					IS_PROFILE_SCOPE("Present");
 					//ZoneScopedN("Present");
 					// Present the frame.
 					ThrowIfFailed(m_swapchain->Present(0, 0));
@@ -266,14 +266,14 @@ namespace Insight
 
 				if (Window::Instance().GetSize() != m_swapchainSize)
 				{
-					OPTICK_EVENT("Swapchain resize");
+					IS_PROFILE_SCOPE("Swapchain resize");
 					WaitForGpu();
 					m_swapchainSize = Window::Instance().GetSize();
 					ResizeSwapchainBuffers();
 				}
 
 				{
-					OPTICK_EVENT("Imgui End frame");
+					IS_PROFILE_SCOPE("Imgui End frame");
 					IMGUI_VALID(ImGui::EndFrame());
 					IMGUI_VALID(ImGui_ImplDX12_NewFrame());
 					IMGUI_VALID(ImGuiBeginFrame());
@@ -495,7 +495,7 @@ namespace Insight
 
 			void RenderContext_DX12::WaitForNextFrame()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				// Schedule a Signal command in the queue.
 				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));

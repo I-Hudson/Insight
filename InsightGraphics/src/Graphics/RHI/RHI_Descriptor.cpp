@@ -5,6 +5,8 @@
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Graphics

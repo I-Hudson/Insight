@@ -1,6 +1,6 @@
 #include "App/Engine.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
 
 #include "doctest.h"
 
@@ -29,7 +29,7 @@ namespace Insight
 #endif
 			while (!Graphics::Window::Instance().ShouldClose() && !m_shouldClose)
 			{
-				OPTICK_FRAME("MainThread");
+				IS_PROFILE_FRAME("MainThread");
 				m_graphicsManager.Update(0.0f);
 				Graphics::Window::Instance().Update();
 			}
@@ -38,7 +38,6 @@ namespace Insight
 		void Engine::Destroy()
 		{
 			OnDestroy();
-
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
 		}

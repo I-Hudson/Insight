@@ -107,7 +107,7 @@ namespace Insight
 
 		RHI_BufferView RHI_DynamicBuffer::Upload(void* data, int sizeInBytes)
 		{
-			sizeInBytes = std::max(0, sizeInBytes);
+			sizeInBytes = max(0, sizeInBytes);
 			if (sizeInBytes == 0 || data == nullptr)
 			{
 				return RHI_BufferView(nullptr, 0, 0);

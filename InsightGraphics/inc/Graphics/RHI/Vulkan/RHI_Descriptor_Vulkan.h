@@ -5,7 +5,7 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/PipelineStateObject.h"
 
-#include "vulkan/vulkan.hpp"
+#include <vulkan/vulkan.hpp>
 #include <unordered_set>
 #include <queue>
 
@@ -33,7 +33,7 @@ namespace Insight
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };
-				vk::DescriptorSetLayout m_layout{ nullptr };
+				vk::DescriptorSetLayout m_layout;
 			};
 
 			class RHI_Descriptor_Vulkan : public RHI_Descriptor
@@ -52,7 +52,7 @@ namespace Insight
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };
-				vk::DescriptorSet m_set{ nullptr };
+				vk::DescriptorSet m_set;
 				DescriptorPoolPage_Vulkan* m_pool{ nullptr };
 
 				u64 m_hash = 0;

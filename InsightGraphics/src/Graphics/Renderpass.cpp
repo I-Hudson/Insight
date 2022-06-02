@@ -5,7 +5,8 @@
 
 #include "Graphics/RenderTarget.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -72,7 +73,7 @@ namespace Insight
 
 		void Renderpass::Render()
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 			UpdateCamera();
 			Sample();
 		}
@@ -111,11 +112,11 @@ namespace Insight
 
 		void Renderpass::Sample()
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			RHI_Shader* gbufferShader = nullptr;
 			{
-				OPTICK_EVENT("GBuffer-GetShader");
+				IS_PROFILE_SCOPE("GBuffer-GetShader");
 				ShaderDesc shaderDesc;
 				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
 				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
@@ -123,7 +124,7 @@ namespace Insight
 			}
 			PipelineStateObject gbufferPso{};
 			{
-				OPTICK_EVENT("GBuffer-SetPipelineStateObject");
+				IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 				gbufferPso.Name = L"GBuffer_PSO";
 				gbufferPso.Shader = gbufferShader;
 				gbufferPso.CullMode = CullMode::Front;
@@ -142,7 +143,7 @@ namespace Insight
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
-				OPTICK_EVENT("GBuffer-SetUniform");
+				IS_PROFILE_SCOPE("GBuffer-SetUniform");
 				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
 				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
 				Renderer::SetUniform(0, 2, &m_camera, sizeof(m_camera));
@@ -152,7 +153,7 @@ namespace Insight
 
 			RHI_Shader* swapchainShader = nullptr;
 			{
-				OPTICK_EVENT("Swapchain-GetShader");
+				IS_PROFILE_SCOPE("Swapchain-GetShader");
 				ShaderDesc shaderDesc;
 				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
@@ -161,7 +162,7 @@ namespace Insight
 
 			PipelineStateObject swapchainPso{};
 			{
-				OPTICK_EVENT("Swapchain-SetPipelineStateObject");
+				IS_PROFILE_SCOPE("Swapchain-SetPipelineStateObject");
 				swapchainPso.Name = L"Swapchain_PSO";
 				swapchainPso.Shader = swapchainShader;
 				swapchainPso.CullMode = CullMode::None;
@@ -171,7 +172,7 @@ namespace Insight
 			}
 
 			{
-				OPTICK_EVENT("Swapchain-SetUniform");
+				IS_PROFILE_SCOPE("Swapchain-SetUniform");
 				Renderer::SetTexture(0, 0, m_colourTarget->GetTexture());
 			}
 

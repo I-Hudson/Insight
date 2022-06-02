@@ -2,6 +2,8 @@
 #include "Core/Memory.h"
 #include <assert.h>
 
+#include <algorithm>
+
 namespace Insight
 {
 	namespace Graphics

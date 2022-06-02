@@ -5,7 +5,7 @@
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -117,7 +117,7 @@ namespace Insight
 
 			bool RenderContext_Vulkan::Init()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				if (m_instnace && m_device)
 				{
@@ -231,7 +231,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::Destroy()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				m_device.waitIdle();
 
@@ -392,7 +392,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::DestroyImGui()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				ImGui_ImplVulkan_Shutdown();
 				ImGui_ImplGlfw_Shutdown();
@@ -412,15 +412,19 @@ namespace Insight
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
-				ImGuiRender();
-
+				{
+					IS_PROFILE_SCOPE("ImGui Render");
+					ImGuiRender();
+				}
 				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
 
-				vk::Result waitResult = m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
-				assert(waitResult == vk::Result::eSuccess);
-
+				{
+					IS_PROFILE_SCOPE("Fence wait");
+					vk::Result waitResult = m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
+					assert(waitResult == vk::Result::eSuccess);
+				}
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					WaitForGpu();
@@ -432,7 +436,7 @@ namespace Insight
 				m_device.resetFences({ frame.SubmitFence });
 
 				frame.Reset();
-				
+
 				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 				cmdListVulkan->Record(cmdList, &frame);
 				cmdListVulkan->GetCommandList().endRenderPass();
@@ -444,7 +448,7 @@ namespace Insight
 				}
 
 				std::array<vk::ImageView, 1> imguiFramebufferViews = { GetSwapchainImageView() };
-				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, 
+				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({},
 					m_imguiRenderpass,
 					imguiFramebufferViews,
 					m_swapchainBufferSize.x,
@@ -457,23 +461,25 @@ namespace Insight
 				clearValue.color.float32[2] = 0;
 				clearValue.color.float32[3] = 1;
 
-				VkRenderPassBeginInfo info = {};
-				info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-				info.renderPass = m_imguiRenderpass;
-				info.framebuffer = m_imguiFramebuffers[m_currentFrame];
-				info.renderArea.extent.width = m_swapchainBufferSize.x;
-				info.renderArea.extent.height = m_swapchainBufferSize.y;
-				info.clearValueCount = 1;
-				info.pClearValues = &clearValue;
-				cmdListVulkan->GetCommandList().beginRenderPass(info, vk::SubpassContents::eInline);
-				// Record dear imgui primitives into command buffer
-				ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan->GetCommandList());
-				cmdListVulkan->GetCommandList().endRenderPass();
-				cmdListVulkan->GetCommandList().end();
-
+				{
+					IS_PROFILE_SCOPE("ImGui Draw");
+					VkRenderPassBeginInfo info = {};
+					info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+					info.renderPass = m_imguiRenderpass;
+					info.framebuffer = m_imguiFramebuffers[m_currentFrame];
+					info.renderArea.extent.width = m_swapchainBufferSize.x;
+					info.renderArea.extent.height = m_swapchainBufferSize.y;
+					info.clearValueCount = 1;
+					info.pClearValues = &clearValue;
+					cmdListVulkan->GetCommandList().beginRenderPass(info, vk::SubpassContents::eInline);
+					// Record dear imgui primitives into command buffer
+					ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan->GetCommandList());
+					cmdListVulkan->GetCommandList().endRenderPass();
+					cmdListVulkan->GetCommandList().end();
+				}
 				std::array<vk::Semaphore, 1> waitSemaphores = { frame.SwapchainAcquire };
 				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-				std::array<vk::CommandBuffer , 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 				std::array<vk::Semaphore, 1> signalSemaphore = { frame.SignalSemaphore };
 
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(
@@ -481,19 +487,27 @@ namespace Insight
 					dstStageFlgs,
 					commandBuffers,
 					signalSemaphore);
-				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, frame.SubmitFence);
-
+				{
+					IS_PROFILE_SCOPE("Submit");
+					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, frame.SubmitFence);
+				}
 				std::array<vk::Semaphore, 1> signalSemaphores = { frame.SignalSemaphore };
 				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
 				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
 
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
-				vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+				{
+					IS_PROFILE_SCOPE("Present");
 
+					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+				}
 				m_currentFrame = (m_currentFrame + 1) % c_FrameCount;
 
-				ImGui_ImplVulkan_NewFrame();
-				ImGuiBeginFrame();
+				{
+					IS_PROFILE_SCOPE("ImGui NewFrame");
+					ImGui_ImplVulkan_NewFrame();
+					ImGuiBeginFrame();
+				}
 			}
 
 			void RenderContext_Vulkan::GpuWaitForIdle()
@@ -503,6 +517,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::SubmitCommandListAndWait(RHI_CommandList* cmdList)
 			{
+				IS_PROFILE_FUNCTION();
 				const RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(cmdList);
 
 				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
@@ -519,6 +534,8 @@ namespace Insight
 
 			void RenderContext_Vulkan::SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType)
 			{
+				IS_PROFILE_FUNCTION();
+
 				std::string str;
 				std::transform(name.begin(), name.end(), std::back_inserter(str), [](wchar_t c) {
 					return (char)c;
@@ -530,14 +547,14 @@ namespace Insight
 
 			void RenderContext_Vulkan::WaitForGpu()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				m_device.waitIdle();
 			}
 
 			vk::Instance RenderContext_Vulkan::CreateInstance()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
 					"ApplciationName",
@@ -593,7 +610,7 @@ namespace Insight
 
 			vk::PhysicalDevice RenderContext_Vulkan::FindAdapter()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				std::vector<vk::PhysicalDevice> physicalDevices = m_instnace.enumeratePhysicalDevices();
 				vk::PhysicalDevice adapter(nullptr);
@@ -698,7 +715,7 @@ namespace Insight
 			
 			void RenderContext_Vulkan::CreateSwapchain()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
 				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
@@ -857,7 +874,7 @@ namespace Insight
 
 			void FrameResource_Vulkan::Destroy()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				CommandListManager.Destroy();
 				DescriptorAllocator.Destroy();
 				UniformBuffer.Release();
@@ -869,7 +886,7 @@ namespace Insight
 			
 			void FrameResource_Vulkan::Reset()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				FrameResouce::Reset();
 				DescriptorAllocator.Reset();
 			}

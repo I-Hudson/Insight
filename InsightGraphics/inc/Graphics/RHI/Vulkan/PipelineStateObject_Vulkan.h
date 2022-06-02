@@ -3,9 +3,16 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/PipelineStateObject.h"
-#include "vulkan/vulkan.hpp"
 #include <map>
 #include <array>
+
+// Try and reduce compile time with not including vulkan.hpp in this header.
+namespace vk
+{
+	class Pipeline;
+	class PipelineLayout;
+	class RenderPass;
+}
 
 namespace Insight
 {

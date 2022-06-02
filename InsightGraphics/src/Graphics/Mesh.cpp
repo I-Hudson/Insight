@@ -1,7 +1,8 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
+#include "Core/Logger.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
@@ -61,7 +62,7 @@ namespace Insight
 
 		bool Mesh::LoadFromFile(std::string filePath)
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			vertexOffset = 0;
 			indexOffset = 0;
@@ -99,7 +100,7 @@ namespace Insight
 
 		void Mesh::Draw() const
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 			for (Submesh* submesh : m_submeshes)
 			{
 				submesh->Draw();
@@ -108,7 +109,7 @@ namespace Insight
 
 		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath)
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			int vertexCount = 0;
 			int indexCount = 0;
@@ -144,7 +145,7 @@ namespace Insight
 
 		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			if (aiNode->mNumMeshes > 0)
 			{
@@ -206,7 +207,7 @@ namespace Insight
 
 		void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices)
 		{
-			OPTICK_EVENT();
+			IS_PROFILE_FUNCTION();
 
 			glm::vec4 vertexColour;
 			vertexColour.x = (rand() % 100 + 1) * 0.01f;

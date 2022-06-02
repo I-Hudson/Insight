@@ -8,7 +8,7 @@
 
 #include "Graphics/RenderTarget.h"
 
-#include "optick.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -132,33 +132,33 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetPipeline(PipelineStateObject pso)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				m_pso = pso;
 				FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_Vulkan::SetUniform(int set, int binding, DescriptorBufferView view)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				FrameResourceVulkan()->DescriptorAllocator.SetUniform(set, binding, FrameResourceVulkan()->UniformBuffer.GetView(view.Offset, view.SizeInBytes));
 			}
 
 			void RHI::Vulkan::RHI_CommandList_Vulkan::SetTexture(int set, int binding, RHI_Texture* texture)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				FrameResourceVulkan()->DescriptorAllocator.SetTexture(set, binding, texture);
 			}
 
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
 				m_commandList.setViewport(0, viewports);
 			}
 
 			void RHI_CommandList_Vulkan::SetScissor(int x, int y, int width, int height)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				std::array<vk::Rect2D, 1> scissors = { vk::Rect2D(vk::Offset2D(x, y),
 					vk::Extent2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height))) };
 				m_commandList.setScissor(0, scissors);
@@ -166,7 +166,7 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
 				std::array<vk::Buffer, 1> buffers = { bufferVulkan->GetBuffer() };
 				std::array<vk::DeviceSize, 1> offsets = { 0 };
@@ -175,26 +175,26 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
 				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
 			}
 
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
 			}
 
 			void RHI_CommandList_Vulkan::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 			}
 
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				u64 psoHash = pso.GetHash();
 				assert(m_framebuffers.find(psoHash) == m_framebuffers.end());
 
@@ -309,7 +309,7 @@ namespace Insight
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 
 				std::vector<RHI_Descriptor*> descriptors;
 				bool result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
@@ -335,14 +335,14 @@ namespace Insight
 
 			RenderContext_Vulkan* RHI_CommandList_Vulkan::RenderContextVulkan()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				assert(m_context);
 				return dynamic_cast<RenderContext_Vulkan*>(m_context);
 			}
 
 			FrameResource_Vulkan* RHI_CommandList_Vulkan::FrameResourceVulkan()
 			{
-				OPTICK_EVENT();
+				IS_PROFILE_FUNCTION();
 				assert(m_frameResouces);
 				return static_cast<FrameResource_Vulkan*>(m_frameResouces);
 			}
