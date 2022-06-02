@@ -1,3 +1,5 @@
+local profileTool="tracy"
+
 workspace "Insight"
     architecture "x64"
     startproject "InsightEditor"
@@ -17,7 +19,6 @@ workspace "Insight"
 
     defines
     {
-        "IS_PROFILE_OPTICK",
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
         "PLATFORM_X64",
@@ -31,13 +32,21 @@ workspace "Insight"
     includedirs
     {
         "%{IncludeDirs.optick}",
+        "%{IncludeDirs.tracy}",
         "%{IncludeDirs.doctest}",
     }
 
+    if (profileTool == "tracy") then
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS" }
+        editandcontinue "off"
+    end
+    if (profileTool == "optick") then
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
+    end
+
     libdirs
     {
-        "%{LibDirs.deps_lib_debug}",
-        "%{LibDirs.deps_lib_release}",
+        "%{LibDirs.deps_lib}",
     }
 
     filter "configurations:Debug"
@@ -52,10 +61,6 @@ workspace "Insight"
         {
             "_DEBUG"
         }
-        libdirs
-        {
-            "%{LibDirs.deps_lib_debug}",
-        }
 
     filter "configurations:Release"
         buildoptions "/MD"
@@ -63,10 +68,6 @@ workspace "Insight"
         {
             "NDEBUG",
             "DOCTEST_CONFIG_DISABLE",
-        }
-        libdirs
-        {
-            "%{LibDirs.deps_lib_release}",
         }
 
 
@@ -80,6 +81,7 @@ workspace "Insight"
             "VK_USE_PLATFORM_WIN32_KHR",
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
+            "NOMINMAX",
         }
 
 
@@ -124,12 +126,12 @@ IncludeDirs["spirv_reflect"] = "%{wks.location}/vendor/SPIRV-Reflect"
 IncludeDirs["dxcompiler"] = "%{wks.location}/vendor/dxcompiler/win_debug/inc"
 IncludeDirs["assimp"] = "%{wks.location}/vendor/assimp/include"
 IncludeDirs["optick"] = "%{wks.location}/vendor/optick/src"
+IncludeDirs["tracy"] = "%{wks.location}/vendor/tracy"
 IncludeDirs["stb_image"] = "%{wks.location}/vendor/stb"
 
 LibDirs = {}
 
-LibDirs["deps_lib_debug"] = "%{wks.location}/deps/lib/debug/"
-LibDirs["deps_lib_release"] = "%{wks.location}/deps/lib/debug/"
+LibDirs["deps_lib"] = "%{wks.location}/deps/" .. outputdir .. "/lib/"
 
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"
 LibDirs["glslang_win"] = "%{wks.location}/vendor/glslang/win_release/lib"
@@ -144,6 +146,7 @@ group "Dependices"
         include "premakeFiles/glm.lua"
         include "premakeFiles/imgui.lua"
         include "premakeFiles/optick.lua"
+        include "premakeFiles/tracy.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"

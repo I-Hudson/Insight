@@ -29,6 +29,7 @@ project "InsightCore"
 
     links
     {
+        "tracy.lib",
     }
 
     libdirs
@@ -38,7 +39,8 @@ project "InsightCore"
 
     postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/InsightCore.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
     }
 
     filter "configurations:Debug or configurations:Testing"

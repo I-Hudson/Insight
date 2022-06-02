@@ -48,16 +48,19 @@ project "InsightGraphics"
 
     links
     {
-        "InsightCore",
-        "assimp",
-        "GLFW",
-        "glm",
-        "imgui",
+        "InsightCore.lib",
+        "InsightCore.lib",
+        "assimp.lib",
+        "GLFW.lib",
+        "glm.lib",
+        "imgui.lib",
         "vulkan-1.lib",
         "D3d12.lib",
         "DXGI.lib",
         "dxguid.lib",
         "dxcompiler.lib",
+        "Optickcore.lib",
+        "tracy.lib",
     }
 
     libdirs
@@ -67,7 +70,8 @@ project "InsightGraphics"
 
     postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/InsightGraphics.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
     }
 
     filter "configurations:Debug or configurations:Testing"
@@ -86,15 +90,8 @@ project "InsightGraphics"
             "SPIRV-Toolsd.lib",
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
-            "Optickcore.lib",
         }
 
-        libdirs
-        {
-            "%{LibDirs.glslang_win_d}",
-            "%{LibDirs.dxcompiler_win_d}",
-            "%{wks.location}/deps/lib/debug",
-        }
 
         postbuildcommands
         {
@@ -113,13 +110,7 @@ project "InsightGraphics"
             "OGLCompiler.lib",
             "OSDependent.lib",
             "Optickcore.lib",
-        }
-
-        libdirs
-        {
-            "%{LibDirs.glslang_win}",
-            "%{LibDirs.dxcompiler_win}",
-            "%{wks.location}/deps/lib/release",
+            "tracy.lib",
         }
 
         postbuildcommands

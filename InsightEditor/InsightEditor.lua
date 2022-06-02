@@ -62,10 +62,6 @@ project "InsightEditor"
         {
             "%{wks.location}/deps/lib/debug",
         }
-        postbuildcommands
-        {
-            "{COPYDIR} \"%{wks.location}/deps/dll/debug/\" \"%{cfg.targetdir}\"",
-        }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
@@ -77,8 +73,4 @@ project "InsightEditor"
         libdirs
         {
             "%{wks.location}/deps/lib/release",
-        }
-        postbuildcommands
-        {
-            "{COPYDIR} \"%{wks.location}/deps/dll/release/\" \"%{cfg.targetdir}\"",
         }
