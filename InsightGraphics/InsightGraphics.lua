@@ -50,7 +50,6 @@ project "InsightGraphics"
     {
         "InsightCore.lib",
         "InsightCore.lib",
-        "assimp.lib",
         "GLFW.lib",
         "glm.lib",
         "imgui.lib",
@@ -90,6 +89,7 @@ project "InsightGraphics"
             "SPIRV-Toolsd.lib",
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
+            "assimpd.lib",
         }
 
 
@@ -111,6 +111,7 @@ project "InsightGraphics"
             "OSDependent.lib",
             "Optickcore.lib",
             "tracy.lib",
+            "assimp.lib",
         }
 
         postbuildcommands

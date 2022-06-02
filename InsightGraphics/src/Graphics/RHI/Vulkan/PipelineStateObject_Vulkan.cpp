@@ -193,19 +193,19 @@ namespace Insight
 				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
 			
 				vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
-					vk::PipelineCreateFlags(),																	// flags
-					pipelineShaderStageCreateInfos,																// stages
-					&pipelineVertexInputStateCreateInfo.CreateInfo,												// pVertexInputState
-					&pipelineInputAssemblyStateCreateInfo,														// pInputAssemblyState
-					nullptr,																					// pTessellationState
-					&pipelineViewportStateCreateInfo,															// pViewportState
-					&pipelineRasterizationStateCreateInfo,														// pRasterizationState
-					&pipelineMultisampleStateCreateInfo,														// pMultisampleState
-					&pipelineDepthStencilStateCreateInfo,														// pDepthStencilState
-					&pipelineColorBlendStateCreateInfo,															// pColorBlendState
-					&pipelineDynamicStateCreateInfo,															// pDynamicState
-					layout,																						// layout
-					m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil })				// renderPass
+					vk::PipelineCreateFlags(),																						// flags
+					pipelineShaderStageCreateInfos,																					// stages
+					&pipelineVertexInputStateCreateInfo.CreateInfo,																	// pVertexInputState
+					&pipelineInputAssemblyStateCreateInfo,																			// pInputAssemblyState
+					nullptr,																										// pTessellationState
+					&pipelineViewportStateCreateInfo,																				// pViewportState
+					&pipelineRasterizationStateCreateInfo,																			// pRasterizationState
+					&pipelineMultisampleStateCreateInfo,																			// pMultisampleState
+					&pipelineDepthStencilStateCreateInfo,																			// pDepthStencilState
+					&pipelineColorBlendStateCreateInfo,																				// pColorBlendState
+					&pipelineDynamicStateCreateInfo,																				// pDynamicState
+					layout,																											// layout
+					m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil, pso.Swapchain })	// renderPass
 				);
 
 				vk::ResultValue<vk::Pipeline> result = m_context->GetDevice().createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
@@ -263,7 +263,7 @@ namespace Insight
 							vk::AttachmentLoadOp::eDontCare,
 							vk::AttachmentStoreOp::eDontCare,
 							vk::ImageLayout::eUndefined,
-							vk::ImageLayout::ePresentSrcKHR);
+							vk::ImageLayout::eShaderReadOnlyOptimal);
 						colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
 						++attachmentIndex;
 						++colourIndex;
@@ -271,7 +271,7 @@ namespace Insight
 				}
 
 				// No render targets, guess we are swapchain.
-				if (attachmentIndex == 0)
+				if (attachmentIndex == 0 && desc.Swapchain)
 				{
 					// Assume this is a swapchain render pass as no user defined render targets are added.
 					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(

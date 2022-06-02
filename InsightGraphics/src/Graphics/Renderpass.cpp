@@ -56,6 +56,15 @@ namespace Insight
 				m_testTexture->SetName(L"TestTexture");
 			}
 
+			if (!m_shadowTarget)
+			{
+				m_shadowTarget = Renderer::CreateRenderTarget();
+				int const oneK = 1024;
+				int const textureSize = oneK * 4;
+				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(textureSize, textureSize, PixelFormat::D32_Float, { 1, 0, 0, 1 });
+				m_shadowTarget->Create("ShadowPassDepth", desc);
+			}
+
 			if (!m_colourTarget)
 			{
 				m_colourTarget = Renderer::CreateRenderTarget();
@@ -75,6 +84,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			UpdateCamera();
+			ShadowPass();
 			Sample();
 		}
 
@@ -110,6 +120,41 @@ namespace Insight
 		glm::vec2 swapchainColour = { 0,0 };
 		glm::vec2 swapchainColour2 = { 0,0 };
 
+		void Renderpass::ShadowPass()
+		{
+			RHI_Shader* shaderPassShader = nullptr;
+			{
+				IS_PROFILE_SCOPE("ShaderPass-GetShader");
+				ShaderDesc shaderDesc;
+				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Shadow.hlsl";
+				shaderPassShader = Renderer::GetShader(shaderDesc);
+			}
+
+			PipelineStateObject shaderPassPso{};
+			{
+				IS_PROFILE_SCOPE("ShaderPass-SetPipelineStateObject");
+				shaderPassPso.Name = L"ShaderPass_PSO";
+				shaderPassPso.Shader = shaderPassShader;
+				shaderPassPso.CullMode = CullMode::None;
+				shaderPassPso.Swapchain = false;
+				shaderPassPso.DepthStencil = m_shadowTarget;
+				Renderer::SetPipelineStateObject(shaderPassPso);
+			}
+
+			int const shadowTargetWidth = m_shadowTarget->GetDesc().Width;
+			int const shadowTargetHeight = m_shadowTarget->GetDesc().Height;
+
+			Renderer::SetViewport(shadowTargetWidth, shadowTargetHeight);
+			Renderer::SetScissor(shadowTargetWidth, shadowTargetHeight);
+
+			Renderer::SetUniform(0, 0, &m_camera, sizeof(m_camera));
+
+			Renderer::BindVertexBuffer(m_vertexBuffer);
+			Renderer::BindIndexBuffer(m_indexBuffer);
+
+			m_testMesh.Draw();
+		}
+
 		void Renderpass::Sample()
 		{
 			IS_PROFILE_FUNCTION();
@@ -144,9 +189,8 @@ namespace Insight
 			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
 				IS_PROFILE_SCOPE("GBuffer-SetUniform");
-				Renderer::SetUniform(0, 0, &swapchainColour, sizeof(swapchainColour));
-				Renderer::SetUniform(0, 1, &swapchainColour2, sizeof(swapchainColour2));
-				Renderer::SetUniform(0, 2, &m_camera, sizeof(m_camera));
+				Renderer::SetUniform(0, 0, &m_camera, sizeof(m_camera));
+				Renderer::SetTexture(0, 1, m_depthTarget->GetTexture());
 			}
 
 			m_testMesh.Draw();
@@ -167,7 +211,6 @@ namespace Insight
 				swapchainPso.Shader = swapchainShader;
 				swapchainPso.CullMode = CullMode::None;
 				swapchainPso.Swapchain = true;
-				//pso.DepthStencil = m_depthTarget;
 				Renderer::SetPipelineStateObject(swapchainPso);
 			}
 

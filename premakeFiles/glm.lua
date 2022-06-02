@@ -29,6 +29,11 @@ project "glm"
         folderDir .. "glm/**.c",
     }
 
+    postbuildcommands
+    {
+       "{COPYFILE} \"%{cfg.targetdir}/glm.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+    }
+
     filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On" 

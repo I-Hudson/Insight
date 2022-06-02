@@ -59,6 +59,11 @@ project "ImGui"
 		"vulkan-1",
 	}
 
+	postbuildcommands
+    {
+		"{COPYFILE} \"%{cfg.targetdir}/ImGui.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+    }
+
 	filter "system:linux"
 		pic "On"
 

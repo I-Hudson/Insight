@@ -56,6 +56,7 @@ namespace Insight
 			{
 				std::array<RenderTarget*, 8> RenderTargets;
 				RenderTarget* DepthStencil = nullptr;
+				bool Swapchain = false;
 
 				u64 GetHash() const
 				{
@@ -66,6 +67,7 @@ namespace Insight
 						HashCombine(hash, rt);
 					}
 					HashCombine(hash, DepthStencil);
+					HashCombine(hash, Swapchain);
 			
 					return hash;
 				}

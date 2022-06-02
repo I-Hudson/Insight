@@ -138,7 +138,8 @@ namespace Insight
 			constexpr u32 GetCapacity() const { return m_capacity; }
 
 			const std::unordered_map<int, std::unordered_map<int, std::vector<Uniform>>>& GetUniforms() const { return m_uniforms; }
-			std::vector<Descriptor> GetDescriptors() const;
+			// Only get the signature of the descriptors as a set/binding could have more than one descriptor added.
+			std::vector<Descriptor> GetDescriptorsSignature() const;
 
 			void Reset();
 			void Release();

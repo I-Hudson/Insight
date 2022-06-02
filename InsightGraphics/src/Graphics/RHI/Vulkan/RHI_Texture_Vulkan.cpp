@@ -54,7 +54,7 @@ namespace Insight
 					imageCreateInfo.format,
 					vk::ComponentMapping(),
 					vk::ImageSubresourceRange(
-						createInfo.ImageUsage == ImageUsageFlagsBits::DepthStencilAttachment ?
+						createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
 						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
 						0,
 						1,

@@ -49,6 +49,7 @@ namespace Insight
 
 		private:
 			RenderTargetDesc m_desc;
+			std::string m_key;
 			RHI_Texture* m_texture{ nullptr };
 
 			friend class RenderTargetManager;

@@ -77,6 +77,11 @@ project "GLFW"
 			"_CRT_SECURE_NO_WARNINGS"
 		}
 
+		postbuildcommands
+		{
+			"{COPYFILE} \"%{cfg.targetdir}/GLFW.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+		}
+
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"

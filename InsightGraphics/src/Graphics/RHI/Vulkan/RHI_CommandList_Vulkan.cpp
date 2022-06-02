@@ -237,7 +237,7 @@ namespace Insight
 							const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
 
 							vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
-								vk::AccessFlagBits::eShaderRead,
+								vk::AccessFlagBits::eMemoryRead,
 								vk::AccessFlagBits::eColorAttachmentWrite,
 								vk::ImageLayout::eUndefined,
 								vk::ImageLayout::eColorAttachmentOptimal,
@@ -250,7 +250,7 @@ namespace Insight
 					}
 
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)Window::Instance().GetWidth(), (u32)Window::Instance().GetHeight() });
-					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets, m_pso.DepthStencil});
+					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets, m_pso.DepthStencil, pso.Swapchain});
 					std::vector<vk::ImageView> imageViews;
 					std::vector<vk::ClearValue> clearColours;
 					if (m_pso.Swapchain)

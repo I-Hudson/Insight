@@ -20,6 +20,7 @@ namespace Insight
 		void RenderTarget::Create(std::string key, RenderTargetDesc desc)
 		{
 			Destroy();
+			m_key = key;
 			m_desc = desc;
 
 			m_texture = Renderer::CreateTexture();
@@ -32,7 +33,9 @@ namespace Insight
 
 			if (PixelFormatExtensions::IsDepth(textureInfo.Format))
 			{
-				textureInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment;
+				textureInfo.ImageUsage = 
+					ImageUsageFlagsBits::DepthStencilAttachment
+					| ImageUsageFlagsBits::Sampled;
 			}
 			else
 			{

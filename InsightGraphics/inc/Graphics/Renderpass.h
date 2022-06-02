@@ -26,9 +26,12 @@ namespace Insight
 			void Destroy();
 
 		private:
+			void ShadowPass();
 			void Sample();
 
 			void UpdateCamera();
+
+			RenderTarget* m_shadowTarget;
 
 			RenderTarget* m_depthTarget = nullptr;
 			RenderTarget* m_colourTarget = nullptr;

@@ -154,16 +154,24 @@ project "assimp"
         folderDirAssimp .. "contrib/zlib",
         folderDirAssimp .. "contrib/rapidjson/include",
     }
-  
+
      filter  "configurations:Debug"
          runtime "Debug"
          symbols "on"
          targetname "assimpd"
-  
+         postbuildcommands
+         {
+             "{COPYFILE} \"%{cfg.targetdir}/assimpd.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+         }
+
      filter  "configurations:Release"
          runtime "Release"
          optimize "on"
          targetname "assimp"
+        postbuildcommands
+        {
+            "{COPYFILE} \"%{cfg.targetdir}/assimp.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+        }
 
 premake.modules.lua = {}
 local m = premake.modules.lua

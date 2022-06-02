@@ -79,8 +79,7 @@ namespace Insight
 
 			bool IsValid() const
 			{
-				return !VertexFilePath.empty()
-					&& !PixelFilePath.empty();
+				return !VertexFilePath.empty();
 			}
 		};
 

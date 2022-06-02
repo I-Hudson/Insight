@@ -132,7 +132,7 @@ namespace Insight
 			TrackPtr(m_buffer);
 		}
 
-		std::vector<Descriptor> DescriptorBuffer::GetDescriptors() const
+		std::vector<Descriptor> DescriptorBuffer::GetDescriptorsSignature() const
 		{
 			std::vector<Descriptor> descriptors;
 			for (const auto& sets : m_uniforms)
@@ -143,10 +143,7 @@ namespace Insight
 					const int bindingIndex = bindings.first;
 					const int descriptorStartIndex = (int)descriptors.size();
 
-					for (const auto& desc : bindings.second)
-					{
-						descriptors.push_back(Descriptor(setIndex, bindingIndex, 0, desc.Size, DescriptorType::Unifom_Buffer, DescriptorResourceType::CBV));
-					}
+					descriptors.push_back(Descriptor(setIndex, bindingIndex, 0, 0, DescriptorType::Unifom_Buffer, DescriptorResourceType::CBV));
 
 					std::sort(descriptors.begin() + descriptorStartIndex, descriptors.end(), [](const Descriptor& d1, const Descriptor& d2)
 						{

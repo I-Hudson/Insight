@@ -149,7 +149,7 @@ namespace Insight
 			if (m_pso.GetHash() != m_activePSO.GetHash())
 			{
 				m_activePSO = m_pso;
-				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(0, cmdList.GetDescriptorBuffer().GetDescriptors());
+				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(0, cmdList.GetDescriptorBuffer().GetDescriptorsSignature());
 				BindPipeline(m_activePSO, layout);
 			}
 			return BindDescriptorSets();

@@ -34,8 +34,8 @@ project "OptickCore"
 	
 	postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/OptickCore.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
-       "{COPY} \"%{cfg.targetdir}/OptickCore.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
     }
 
 	filter "configurations:Debug"
