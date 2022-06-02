@@ -6,6 +6,8 @@
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -148,6 +150,7 @@ namespace Insight
 
 				if (hash != m_hash)
 				{
+					IS_PROFILE_SCOPE("updateDescriptorSets");
 					m_context->GetDevice().updateDescriptorSets(descriptorWriteIndex, write_descriptor_sets.data(), 0, {});
 					m_hash = hash;
 				}

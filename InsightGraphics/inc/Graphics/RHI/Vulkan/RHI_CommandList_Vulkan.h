@@ -64,6 +64,8 @@ namespace Insight
 				RHI_CommandListAllocator_Vulkan* m_allocator{ nullptr };
 				std::unordered_map<u64, vk::Framebuffer> m_framebuffers;
 
+				u64 m_boundDescriptors;
+
 				friend class RHI_CommandListAllocator_Vulkan;
 			};
 

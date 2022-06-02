@@ -312,23 +312,35 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				std::vector<RHI_Descriptor*> descriptors;
-				bool result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
+				bool result;
+				
+				{ 
+					IS_PROFILE_SCOPE("DescriptorAllocator-GetDescriptors");
+					result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
+				}
 				const int descriptorCount = static_cast<int>(descriptors.size());
 
 				if (result && descriptorCount > 0)
 				{
+					IS_PROFILE_SCOPE("vk::bindDescriptorSets");
 					vk::PipelineLayout layout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 
+					u64 descriptorsToBind = 0;
 					std::vector<vk::DescriptorSet> sets;
 					sets.resize(descriptorCount);
 					for (size_t i = 0; i < descriptorCount; ++i)
 					{
 						RHI_Descriptor_Vulkan* descriptorVulkan = dynamic_cast<RHI_Descriptor_Vulkan*>(descriptors.at(i));
 						sets[i] = descriptorVulkan->GetSet();
+						HashCombine(descriptorsToBind, descriptorVulkan);
 					}
 
-					std::vector<u32> dynamicOffsets = {};
-					m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets, dynamicOffsets);
+					if (m_boundDescriptors != descriptorsToBind)
+					{
+						std::vector<u32> dynamicOffsets = {};
+						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets, dynamicOffsets);
+						m_boundDescriptors = descriptorsToBind;
+					}
 				}
 				return result && descriptorCount > 0;
 			}
