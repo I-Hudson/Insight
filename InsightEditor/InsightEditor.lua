@@ -8,6 +8,11 @@ project "InsightEditor"
     objdir ("%{wks.location}" .. outputdir_obj .. "/%{prj.name}")
     debugdir ("%{wks.location}" .. outputdir_debug .. "/%{prj.name}")
 
+    dependson 
+    {
+        "InsightApp",
+    }
+
     defines
     {
         ""

@@ -8,6 +8,17 @@ project "InsightApp"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
+    dependson 
+    {
+        "InsightCore",
+        "InsightGraphics",
+        "tracy",
+        "OptickCore",
+        "GLFW",
+        "glm",
+        "ImGui",
+    }
+
     defines
     {
         "IS_EXPORT_APP_DLL"

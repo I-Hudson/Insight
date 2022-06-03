@@ -8,6 +8,16 @@ project "InsightGraphics"
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
+    dependson 
+    {
+        "InsightCore",
+        "tracy",
+        "OptickCore",
+        "GLFW",
+        "glm",
+        "ImGui",
+    }
+
     defines
     {
         "IS_EXPORT_GRAPHICS_DLL"
@@ -48,7 +58,6 @@ project "InsightGraphics"
 
     links
     {
-        "InsightCore.lib",
         "InsightCore.lib",
         "GLFW.lib",
         "glm.lib",
