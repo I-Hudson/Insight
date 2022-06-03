@@ -2,8 +2,9 @@
 
 #include "Defines.h"
 #include <string>
-#include "glm/glm.hpp"
-#include "GLFW/glfw3.h"
+
+#include <glm/ext/vector_int2.hpp>
+#include <GLFW/glfw3.h>
 
 namespace Insight
 {
