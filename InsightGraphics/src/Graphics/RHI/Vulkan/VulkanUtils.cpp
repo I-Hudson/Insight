@@ -673,6 +673,24 @@ namespace Insight
             return vk::BlendOp::eAdd;
         }
 
+        vk::CompareOp CompareOpToVulkan(CompareOp op)
+        {
+            switch (op)
+            {
+            case CompareOp::Never:          return vk::CompareOp::eNever;
+            case CompareOp::Less:           return vk::CompareOp::eLess;
+            case CompareOp::Equal:          return vk::CompareOp::eEqual;
+            case CompareOp::LessOrEqual:    return vk::CompareOp::eLessOrEqual;
+            case CompareOp::Greater:        return vk::CompareOp::eGreater;
+            case CompareOp::NotEqual:       return vk::CompareOp::eNotEqual;
+            case CompareOp::GreaterOrEqual: return vk::CompareOp::eGreaterOrEqual;
+            case CompareOp::Always:         return vk::CompareOp::eAlways;
+            default:
+                break;
+            }
+            return vk::CompareOp::eNever;
+        }
+
         vk::BufferUsageFlags BufferTypeToVulkanBufferUsageFlags(BufferType type)
         {
             switch (type)

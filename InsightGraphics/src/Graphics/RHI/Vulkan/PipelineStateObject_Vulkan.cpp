@@ -162,7 +162,7 @@ namespace Insight
 					vk::PipelineDepthStencilStateCreateFlags(),  // flags
 					pso.DepthTest,								 // depthTestEnable
 					pso.DepthWrite,								 // depthWriteEnable
-					vk::CompareOp::eLessOrEqual,                 // depthCompareOp
+					CompareOpToVulkan(pso.DepthCompareOp),		 // depthCompareOp
 					false,                                       // depthBoundTestEnable
 					false,                                       // stencilTestEnable
 					stencilOpState,                              // front
@@ -263,7 +263,7 @@ namespace Insight
 							vk::AttachmentLoadOp::eDontCare,
 							vk::AttachmentStoreOp::eDontCare,
 							vk::ImageLayout::eUndefined,
-							vk::ImageLayout::eShaderReadOnlyOptimal);
+							vk::ImageLayout::eColorAttachmentOptimal);
 						colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
 						++attachmentIndex;
 						++colourIndex;

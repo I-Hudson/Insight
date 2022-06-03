@@ -127,7 +127,7 @@ namespace Insight
 				{
 					std::vector<Byte> data = Download();
 					Release();
-					Create(m_context, m_bufferType, newSizeInBytes, m_stride);
+					Create(m_context, m_bufferType, newSizeInBytes, (int)m_stride);
 					Upload(data.data(), (int)data.size(), 0);
 				}
 			}

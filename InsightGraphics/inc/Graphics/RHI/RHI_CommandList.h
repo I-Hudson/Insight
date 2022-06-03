@@ -4,6 +4,8 @@
 #include "Graphics/RHI/RHI_Resource.h"
 #include <unordered_set>
 
+#include <glm/vec2.hpp>
+
 namespace Insight
 {
 	namespace Graphics
@@ -12,6 +14,13 @@ namespace Insight
 		struct FrameResouce;
 
 		class RHI_Texture;
+
+		// Store relevant draw data.
+		struct RHI_CommandListCurrentDrawData
+		{
+			glm::vec2 Viewport;
+			glm::ivec2 Siccsior;
+		};
 
 		class RHI_CommandList : public RHI_Resource
 		{
@@ -52,6 +61,8 @@ namespace Insight
 			bool m_activeRenderpass = false;
 			PipelineStateObject m_pso;
 			PipelineStateObject m_activePSO;
+
+			RHI_CommandListCurrentDrawData m_drawData;
 		};
 
 		class RHI_CommandListAllocator : public RHI_Resource

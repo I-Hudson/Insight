@@ -47,7 +47,7 @@ namespace Insight
 
 			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			const u64 textureSize = width * height * channels;
-			Upload(data, textureSize);
+			Upload(data, (int)textureSize);
 
 			stbi_image_free(data);
 		}

@@ -147,6 +147,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				FrameResourceVulkan()->DescriptorAllocator.SetTexture(set, binding, texture);
+
 			}
 
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
@@ -154,6 +155,8 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
 				m_commandList.setViewport(0, viewports);
+				m_drawData.Viewport.x = width;
+				m_drawData.Viewport.y = height;
 			}
 
 			void RHI_CommandList_Vulkan::SetScissor(int x, int y, int width, int height)
@@ -162,6 +165,8 @@ namespace Insight
 				std::array<vk::Rect2D, 1> scissors = { vk::Rect2D(vk::Offset2D(x, y),
 					vk::Extent2D(static_cast<uint32_t>(width), static_cast<uint32_t>(height))) };
 				m_commandList.setScissor(0, scissors);
+				m_drawData.Siccsior.x = width;
+				m_drawData.Siccsior.y = height;
 			}
 
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
@@ -203,7 +208,7 @@ namespace Insight
 					m_commandList.endRenderPass();
 
 					// After rendering everything, make sure all our RenderTargets are shader read for if they are read from.
-					for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
+					/*for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
 					{
 						const RenderTarget* rt = pso.RenderTargets.at(i);
 						if (rt)
@@ -221,35 +226,35 @@ namespace Insight
 								vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 							PipelineBarrierImage(PipelineStageFlagBits::ColourAttachmentOutput, PipelineStageFlagBits::FragmentShader, { barrier });
 						}
-					}
+					}*/
 
 					m_activeRenderpass = false;
 				}
 
 				if (!m_activeRenderpass)
 				{
-					// Before rendering anything, make sure all our RenderTargets are in the correct layout.
-					for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
-					{
-						const RenderTarget* rt = pso.RenderTargets.at(i);
-						if (rt)
-						{
-							const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
+					//// Before rendering anything, make sure all our RenderTargets are in the correct layout.
+					//for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
+					//{
+					//	const RenderTarget* rt = pso.RenderTargets.at(i);
+					//	if (rt)
+					//	{
+					//		const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
 
-							vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
-								vk::AccessFlagBits::eMemoryRead,
-								vk::AccessFlagBits::eColorAttachmentWrite,
-								vk::ImageLayout::eUndefined,
-								vk::ImageLayout::eColorAttachmentOptimal,
-								RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-								RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-								textureVulkan->GetImage(),
-								vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-							PipelineBarrierImage(PipelineStageFlagBits::FragmentShader, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
-						}
-					}
+					//		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
+					//			vk::AccessFlagBits::eNoneKHR,
+					//			vk::AccessFlagBits::eColorAttachmentWrite,
+					//			vk::ImageLayout::eUndefined,
+					//			vk::ImageLayout::eColorAttachmentOptimal,
+					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					//			textureVulkan->GetImage(),
+					//			vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					//		PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
+					//	}
+					//}
 
-					vk::Rect2D rect = vk::Rect2D({ }, { (u32)Window::Instance().GetWidth(), (u32)Window::Instance().GetHeight() });
+					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
 					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets, m_pso.DepthStencil, pso.Swapchain});
 					std::vector<vk::ImageView> imageViews;
 					std::vector<vk::ClearValue> clearColours;
@@ -290,8 +295,8 @@ namespace Insight
 						imageViews.push_back(depthVulkan->GetImageView());
 
 						vk::ClearDepthStencilValue clearValue;
-						clearValue.depth = 1.0f;
-						clearValue.stencil = 0.0f;
+						clearValue.depth = pso.DepthSteniclClearValue.x;
+						clearValue.stencil = pso.DepthSteniclClearValue.y;
 						clearColours.push_back(clearValue);
 					}
 

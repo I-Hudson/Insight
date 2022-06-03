@@ -16,23 +16,24 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		std::string DeviceExtensionToVulkan(DeviceExtension extension);
-		vk::ImageUsageFlags ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
-		vk::Format PixelFormatToVulkan(PixelFormat format);
-		vk::PipelineBindPoint GPUQueueToVulkanBindPoint(GPUQueue queue);
-		vk::PipelineStageFlags PipelineStageFlagsToVulkan(PipelineStageFlags flags);
-		vk::ShaderStageFlagBits ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
-		vk::ShaderStageFlags ShaderStageFlagsToVulkan(ShaderStageFlags flags);
-		vk::PrimitiveTopology PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);
-		vk::ColorComponentFlags ColourComponentFlagsToVulkan(ColourComponentFlags flags);
-		vk::BlendFactor BlendFactorToVulkan(BlendFactor factor);
-		vk::BlendOp BlendOpToVulkan(BlendOp op);
-		vk::BufferUsageFlags BufferTypeToVulkanBufferUsageFlags(BufferType type);
-		vk::CullModeFlags CullModeToVulkan(CullMode cullMode);
-		vk::DescriptorType DescriptorTypeToVulkan(DescriptorType type);
+		std::string					DeviceExtensionToVulkan(DeviceExtension extension);
+		vk::ImageUsageFlags			ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
+		vk::Format					PixelFormatToVulkan(PixelFormat format);
+		vk::PipelineBindPoint		GPUQueueToVulkanBindPoint(GPUQueue queue);
+		vk::PipelineStageFlags		PipelineStageFlagsToVulkan(PipelineStageFlags flags);
+		vk::ShaderStageFlagBits		ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
+		vk::ShaderStageFlags		ShaderStageFlagsToVulkan(ShaderStageFlags flags);
+		vk::PrimitiveTopology		PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);
+		vk::ColorComponentFlags		ColourComponentFlagsToVulkan(ColourComponentFlags flags);
+		vk::BlendFactor				BlendFactorToVulkan(BlendFactor factor);
+		vk::BlendOp					BlendOpToVulkan(BlendOp op);
+		vk::CompareOp				CompareOpToVulkan(CompareOp op);
+		vk::BufferUsageFlags		BufferTypeToVulkanBufferUsageFlags(BufferType type);
+		vk::CullModeFlags			CullModeToVulkan(CullMode cullMode);
+		vk::DescriptorType			DescriptorTypeToVulkan(DescriptorType type);
 
-		VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type);
-		VmaMemoryUsage BufferTypeToVMAUsage(BufferType type);
+		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
+		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);
 
 		/*
 		std::string VkErrorToString(VkResult errorCode)

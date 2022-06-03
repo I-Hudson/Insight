@@ -9,7 +9,7 @@
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "VmaUsage.h"
 
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 #include <vulkan/vulkan.hpp>
 #include <unordered_map>
 #include <set>

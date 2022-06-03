@@ -237,6 +237,19 @@ namespace Insight
 		};
 		std::string BlendOpToString(BlendOp op);
 
+		enum class CompareOp
+		{
+			Never,
+			Less,
+			Equal,
+			LessOrEqual,
+			Greater,
+			NotEqual,
+			GreaterOrEqual,
+			Always
+		};
+		std::string CompareOpToString(CompareOp op);
+
         /// <summary>
         /// Define the image usage flags which a input within the 
         /// rendering pipeline can be.

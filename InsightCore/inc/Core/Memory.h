@@ -185,12 +185,16 @@ struct RPtr : RefCount
 	}
 	void Release() { m_ptr = nullptr; m_refCount->Dec(); m_refCount = nullptr; }
 	bool IsValid() const { return m_ptr; }
+	T* Get() const { return m_ptr; }
 
 	bool operator==(const RPtr& other) const { return m_ptr == other.m_ptr; }
 	bool operator==(const RPtr* other) const { return m_ptr == other; }
 
 	T* operator->() const { return m_ptr; }
 	T* operator*() const { return m_ptr; }
+
+	T** operator&() { return &m_ptr; }
+	const T** operator&() const { return &m_ptr; }
 
 private:
 	T* m_ptr;

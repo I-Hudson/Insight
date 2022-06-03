@@ -4,6 +4,9 @@
 #include <array>
 #include <memory>
 
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
+
 namespace Insight
 {
 	namespace Graphics
@@ -14,12 +17,17 @@ namespace Insight
 		// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
 		{
+			static const int RenderTargetCount = 8;
+
 			const wchar_t* Name;
 			RHI_Shader* Shader = nullptr;
 			GPUQueue Queue = GPUQueue_Graphics;
 
-			std::array<RenderTarget*, 8> RenderTargets;
+			std::array<RenderTarget*, RenderTargetCount> RenderTargets;
+			glm::vec4 RenderTargetClearValues[RenderTargetCount];
+
 			RenderTarget* DepthStencil = nullptr;
+			glm::vec2 DepthSteniclClearValue = glm::vec2(1.0f, 0.0f);
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
 			PolygonMode PolygonMode;
@@ -28,6 +36,7 @@ namespace Insight
 
 			bool DepthTest = true;
 			bool DepthWrite = true;
+			CompareOp DepthCompareOp = CompareOp::LessOrEqual;
 			bool DepthBaisEnabled = false;
 			bool DepthClampEnabled = false;
 
@@ -62,6 +71,7 @@ namespace Insight
 
 				HashCombine(hash, DepthTest);
 				HashCombine(hash, DepthWrite);
+				HashCombine(hash, DepthCompareOp);
 				HashCombine(hash, DepthBaisEnabled);
 				HashCombine(hash, DepthClampEnabled);
 

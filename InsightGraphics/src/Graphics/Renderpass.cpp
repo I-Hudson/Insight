@@ -61,8 +61,9 @@ namespace Insight
 				m_shadowTarget = Renderer::CreateRenderTarget();
 				int const oneK = 1024;
 				int const textureSize = oneK * 4;
-				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(textureSize, textureSize, PixelFormat::D32_Float, { 1, 0, 0, 1 });
+				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(textureSize, textureSize, PixelFormat::D16_UNorm, { 1, 0, 0, 1 });
 				m_shadowTarget->Create("ShadowPassDepth", desc);
+				m_shadowTarget->GetTexture()->SetName(L"ShadowPassDepth");
 			}
 
 			if (!m_colourTarget)
@@ -70,6 +71,7 @@ namespace Insight
 				m_colourTarget = Renderer::CreateRenderTarget();
 				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::B8G8R8A8_UNorm, { 1, 0, 0, 1 });
 				m_colourTarget->Create("StandardColour", desc);
+				m_shadowTarget->GetTexture()->SetName(L"StandardColour");
 			}
 
 			if (!m_depthTarget)
@@ -77,6 +79,7 @@ namespace Insight
 				m_depthTarget = Renderer::CreateRenderTarget();
 				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::D32_Float, { 1, 0, 0, 1 });
 				m_depthTarget->Create("StandardDepth", desc);
+				m_shadowTarget->GetTexture()->SetName(L"StandardDepth");
 			}
 		}
 
@@ -138,6 +141,7 @@ namespace Insight
 				shaderPassPso.CullMode = CullMode::None;
 				shaderPassPso.Swapchain = false;
 				shaderPassPso.DepthStencil = m_shadowTarget;
+				shaderPassPso.DepthSteniclClearValue = glm::vec2(1.0f, 0.0f);
 				Renderer::SetPipelineStateObject(shaderPassPso);
 			}
 
@@ -147,6 +151,26 @@ namespace Insight
 			Renderer::SetViewport(shadowTargetWidth, shadowTargetHeight);
 			Renderer::SetScissor(shadowTargetWidth, shadowTargetHeight);
 
+			//UBO_Camera shadowCamera = m_camera;
+
+			//float const zNear = 0.1f;
+			//float const zFar = 5000.0f;
+
+			//float h = 1.0 / glm::tan(glm::radians(90.0f) * 0.5f);
+			//float aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+			//float w = h / aspect;
+			//float a = -zNear / (zFar - zNear);
+			//float b = (zNear * zFar) / (zFar - zNear);
+
+			//shadowCamera.Projection = glm::mat4(
+			//	w, 0.0f, 0.0f, 0.0f,
+			//	0.0f, -h, 0.0f, 0.0f,
+			//	0.0f, 0.0f, a, 0.0f,
+			//	0.0f, 0.0f, b, 0.0f);
+			//shadowCamera.Projection = glm::perspective(glm::radians(90.0f), aspect, zFar, zNear);
+			//shadowCamera.ProjView = shadowCamera.Projection * glm::inverse(shadowCamera.View);
+
+			//Renderer::SetUniform(0, 0, &shadowCamera, sizeof(shadowCamera));
 			Renderer::SetUniform(0, 0, &m_camera, sizeof(m_camera));
 
 			Renderer::BindVertexBuffer(m_vertexBuffer);

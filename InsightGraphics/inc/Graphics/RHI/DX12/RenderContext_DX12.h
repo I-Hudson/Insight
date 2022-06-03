@@ -8,7 +8,6 @@
 #include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Core/Logger.h"
-#include <glm/glm.hpp>
 
 namespace Insight
 {

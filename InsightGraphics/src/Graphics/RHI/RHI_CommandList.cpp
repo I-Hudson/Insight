@@ -142,6 +142,7 @@ namespace Insight
 		{
 			m_pso = {};
 			m_activePSO = {};
+			m_drawData = { };
 		}
 
 		bool RHI_CommandList::CanDraw(CommandList& cmdList)
