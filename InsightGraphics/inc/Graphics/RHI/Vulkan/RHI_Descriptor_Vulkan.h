@@ -5,9 +5,10 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/PipelineStateObject.h"
 
-#include <vulkan/vulkan.hpp>
 #include <unordered_set>
 #include <queue>
+
+#include <vulkan/vulkan.hpp>
 
 namespace Insight
 {

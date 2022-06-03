@@ -8,6 +8,8 @@
 
 #include "Core/Profiler.h"
 
+#include <vulkan/vulkan.hpp>
+
 namespace Insight
 {
 	namespace Graphics

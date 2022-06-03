@@ -2,6 +2,8 @@
 
 #include "Graphics/Mesh.h"
 
+#include <glm/mat4x4.hpp>
+
 namespace Insight
 {
 	namespace Graphics
