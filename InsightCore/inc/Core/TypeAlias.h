@@ -10,10 +10,10 @@ using u64 = uint64_t;
 
 using Byte = unsigned char;
 
-#ifdef PLATFORM_X64
+#ifdef IS_PLATFORM_X64
 constexpr int log2_64(u64 value);
 constexpr int log2(u64 value) { return log2_64(value); }
-#elif PLATFORM_X32
+#elif IS_PLATFORM_X32
 constexpr int log2_32(u32 value);
 constexpr int log2(u64 value) { return log2_32((u32)value); }
 #endif

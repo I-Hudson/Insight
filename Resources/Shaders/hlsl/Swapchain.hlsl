@@ -16,6 +16,11 @@ VertexOutput VSMain(uint id : SV_VertexID)
 	return o;
 }
 
+float LinearDepth(float d, float zNear, float zFar)
+{
+	return zNear * zFar / (zFar + d * (zNear - zFar));
+}
+
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
 	float4 result = GTexture.Sample(GSampler, input.UV);

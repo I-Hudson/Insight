@@ -21,7 +21,7 @@ workspace "Insight"
     {
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
-        "PLATFORM_X64",
+        "IS_PLATFORM_X64",
     }
 
     files 

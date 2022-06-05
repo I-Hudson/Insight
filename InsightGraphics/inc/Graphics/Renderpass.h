@@ -29,14 +29,18 @@ namespace Insight
 
 		private:
 			void ShadowPass();
-			void Sample();
+			void Sample(UBO_Camera& camera);
+			void Composite();
+			void Swapchain();
 
-			void UpdateCamera();
+			void UpdateCamera(UBO_Camera& camera);
 
 			RenderTarget* m_shadowTarget;
 
 			RenderTarget* m_depthTarget = nullptr;
 			RenderTarget* m_colourTarget = nullptr;
+
+			RenderTarget* m_compositeTarget = nullptr;
 
 			Mesh m_testMesh;
 			RHI_Texture* m_testTexture = nullptr;
@@ -45,6 +49,7 @@ namespace Insight
 			RHI_Buffer* m_indexBuffer = nullptr;
 
 			UBO_Camera m_camera;
+			UBO_Camera m_shadowCamera;
 		};
 	}
 }
