@@ -49,6 +49,26 @@ namespace Insight
 
 			m_renderpass.Create();
 
+#ifdef IS_EXP_ENABLE_THREADED_RENDERING
+			m_renderThread = std::thread([this]()
+			{
+				while (m_multiThreadRender)
+				{
+					if (m_triggerRender)
+					{
+						m_frameOffset = 0;
+						CommandList renderList;
+						{
+							std::lock_guard lock(m_renderCommandListMutex);
+							renderList = m_renderCommandList;
+						}
+						m_renderContext->Render(std::move(renderList));
+						m_triggerRender = false;
+					}
+				}
+			});
+#endif
+
 			return true;
 		}
 
@@ -91,14 +111,36 @@ namespace Insight
 			IMGUI_VALID(ImGui::End());
 
 			m_renderpass.Render();
+			
+#ifdef IS_EXP_ENABLE_THREADED_RENDERING
+			{
+				while (m_frameOffset > 2)
+				{ }
+
+				{
+					std::lock_guard lock(m_renderCommandListMutex);
+					m_renderCommandList = Renderer::s_FrameCommandList;
+				}
+				m_triggerRender = true;
+				++m_frameOffset;
+			}
+#else
 			m_renderContext->Render(Renderer::s_FrameCommandList);
 			Renderer::s_FrameCommandList.Reset();
+#endif
+				Renderer::s_FrameCommandList.Reset();
+				std::this_thread::sleep_for(std::chrono::seconds(60));
 		}
 
 		void GraphicsManager::Destroy()
 		{
 			if (m_renderContext)
 			{
+#ifdef IS_EXP_ENABLE_THREADED_RENDERING
+				m_multiThreadRender = false;
+				m_renderThread.join();
+#endif
+
 				m_renderContext->GpuWaitForIdle();
 
 				m_renderpass.Destroy();

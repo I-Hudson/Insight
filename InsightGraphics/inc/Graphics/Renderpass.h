@@ -19,6 +19,11 @@ namespace Insight
 			glm::mat4 View;
 		};
 
+		struct UBO_ShadowCamera : public UBO_Camera
+		{
+			glm::vec2 TextureSize;
+		};
+
 		class Renderpass
 		{
 		public:
@@ -49,7 +54,7 @@ namespace Insight
 			RHI_Buffer* m_indexBuffer = nullptr;
 
 			UBO_Camera m_camera;
-			UBO_Camera m_shadowCamera;
+			UBO_ShadowCamera m_shadowCamera;
 		};
 	}
 }

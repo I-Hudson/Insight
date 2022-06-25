@@ -4,6 +4,7 @@
 
 // -- Managers --
 #include "Graphics/GraphicsManager.h"
+#include "Scene/SceneManager.h"
 
 #include "Graphics/Window.h"
 
@@ -11,6 +12,10 @@
 
 namespace Insight
 {
+	namespace Core
+	{
+		class EventManager;
+	}
 	namespace App
 	{
 		/*
@@ -32,6 +37,9 @@ namespace Insight
 		private:
 			Graphics::GraphicsManager m_graphicsManager;
 			bool m_shouldClose = false;
+
+			UPtr<SceneManager> m_sceneManager;
+			UPtr<Core::EventManager> m_eventManager;
 		};
 	}
 }

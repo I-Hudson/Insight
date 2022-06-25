@@ -7,6 +7,8 @@
 
 #include "Core/Profiler.h"
 
+#include "Event/EventManager.h"
+
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
 
@@ -416,6 +418,14 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				if (Window::Instance().GetSize() != m_swapchainBufferSize)
+				{
+					WaitForGpu();
+					CreateSwapchain();
+					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+					return;
+				}
+
 				{
 					IS_PROFILE_SCOPE("ImGui Render");
 					ImGuiRender();
@@ -426,11 +436,6 @@ namespace Insight
 					IS_PROFILE_SCOPE("Fence wait");
 					vk::Result waitResult = m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
 					assert(waitResult == vk::Result::eSuccess);
-				}
-				if (Window::Instance().GetSize() != m_swapchainBufferSize)
-				{
-					WaitForGpu();
-					CreateSwapchain();
 				}
 
 				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, frame.SwapchainAcquire);
@@ -530,7 +535,7 @@ namespace Insight
 					{ });
 				vk::Fence waitFence = m_device.createFence(vk::FenceCreateInfo());
 				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, waitFence);
-				m_device.waitForFences({ waitFence }, 1, INFINITE);
+				vk::Result waitForFenceResult = m_device.waitForFences({ waitFence }, 1, INFINITE);
 				m_device.destroyFence(waitFence);
 			}
 

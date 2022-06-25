@@ -3,6 +3,7 @@
 #include "Defines.h"
 #include <unordered_map>
 #include <array>
+#include <mutex>
 
 namespace Insight
 {
@@ -54,6 +55,7 @@ namespace Insight
 		private:
 			std::unordered_map<void*, MemoryTrackedAlloc> m_allocations;
 			bool m_symInitialize = false;
+			std::mutex m_lock;
 		};
 	}
 }

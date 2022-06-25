@@ -296,7 +296,7 @@ namespace Insight
 
 						vk::ClearDepthStencilValue clearValue;
 						clearValue.depth = pso.DepthSteniclClearValue.x;
-						clearValue.stencil = pso.DepthSteniclClearValue.y;
+						clearValue.stencil = static_cast<u32>(pso.DepthSteniclClearValue.y);
 						clearColours.push_back(clearValue);
 					}
 

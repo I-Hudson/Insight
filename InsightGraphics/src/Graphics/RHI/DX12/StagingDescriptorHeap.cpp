@@ -57,9 +57,8 @@ namespace Insight
             {
                 if (mActiveHandleCount != 0)
                 {
-                    throw std::logic_error("There were active handles when the descriptor heap was destroyed. Look for leaks.");
+                    ASSERT_MSG(false, "[StagingDescriptorHeap::~StagingDescriptorHeap] There were active handles when the descriptor heap was destroyed. Look for leaks.");
                 }
-
                 mFreeDescriptors.clear();
             }
 

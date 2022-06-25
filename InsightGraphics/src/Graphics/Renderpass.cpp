@@ -13,7 +13,7 @@
 namespace Insight
 {
 	const float ShadowZNear = 1.0f;
-	const float ShadowZFar = 512.0f;
+	const float ShadowZFar = 512.0f * 4;
 	const float ShadowFOV = 45.0f;
 
 	namespace Graphics
@@ -29,7 +29,7 @@ namespace Insight
 				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 				m_camera.View = glm::mat4(1.0f);
 
-				m_shadowCamera = m_camera;
+				m_shadowCamera = { m_camera };
 				m_shadowCamera.Projection = glm::perspective(glm::radians(ShadowFOV), aspect, ShadowZNear, ShadowZFar);
 			}
 
@@ -134,10 +134,28 @@ namespace Insight
 				m_testTexture = nullptr;
 			}
 
+			if (m_shadowTarget)
+			{
+				Renderer::FreeRenderTarget(m_shadowTarget);
+				m_shadowTarget = nullptr;
+			}
+
+			if (m_colourTarget)
+			{
+				Renderer::FreeRenderTarget(m_colourTarget);
+				m_colourTarget = nullptr;
+			}
+
 			if (m_depthTarget)
 			{
 				Renderer::FreeRenderTarget(m_depthTarget);
 				m_depthTarget = nullptr;
+			}
+
+			if (m_compositeTarget)
+			{
+				Renderer::FreeRenderTarget(m_compositeTarget);
+				m_compositeTarget = nullptr;
 			}
 
 			m_testMesh.Destroy();
@@ -156,9 +174,9 @@ namespace Insight
 				0.0f, 0.0f, zNear, 0.0f);
 		}
 
-		UBO_Camera GetReverseZDepthCamera(UBO_Camera camera)
+		UBO_ShadowCamera GetReverseZDepthCamera(UBO_ShadowCamera camera, bool inverse)
 		{
-			UBO_Camera shadowCamera = camera;
+			UBO_ShadowCamera shadowCamera = camera;
 
 			/*float h = 1.0 / glm::tan(glm::radians(45.0f) * 0.5f);
 			float aspect = (float)m_depthTarget->GetDesc().Width / (float)m_depthTarget->GetDesc().Height;
@@ -176,7 +194,7 @@ namespace Insight
 			reverseZProj[2][2] = -1;
 			reverseZProj[2][3] = 1;
 			shadowCamera.Projection = MakeInfReversedZProjRH(glm::radians(ShadowFOV), 1.0f, ShadowZNear);
-			shadowCamera.ProjView = shadowCamera.Projection * glm::inverse(shadowCamera.View);
+			shadowCamera.ProjView = shadowCamera.Projection * (inverse ? glm::inverse(shadowCamera.View) : shadowCamera.View);
 
 			return shadowCamera;
 		}
@@ -210,7 +228,7 @@ namespace Insight
 			Renderer::SetViewport(shadowTargetWidth, shadowTargetHeight);
 			Renderer::SetScissor(shadowTargetWidth, shadowTargetHeight);
 
-			UBO_Camera shadowCamera = GetReverseZDepthCamera(m_shadowCamera);
+			UBO_Camera shadowCamera = GetReverseZDepthCamera(m_shadowCamera, false);
 			Renderer::SetUniform(0, 0, &shadowCamera, sizeof(shadowCamera));
 
 			Renderer::BindVertexBuffer(m_vertexBuffer);
@@ -231,7 +249,7 @@ namespace Insight
 				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
 				gbufferShader = Renderer::GetShader(shaderDesc);
 			}
-			PipelineStateObject gbufferPso{};
+			PipelineStateObject gbufferPso= { };
 			{
 				IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 				gbufferPso.Name = L"GBuffer_PSO";
@@ -249,12 +267,11 @@ namespace Insight
 			Renderer::BindVertexBuffer(m_vertexBuffer);
 			Renderer::BindIndexBuffer(m_indexBuffer);
 
-			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour", &swapchainColour.x, 0.01f, 0.0f, 1.0f));
-			IMGUI_VALID(ImGui::DragFloat2("Swapchain colour2", &swapchainColour2.x, 0.01f, 0.0f, 1.0f));
 			{
 				IS_PROFILE_SCOPE("GBuffer-SetUniform");
 				Renderer::SetUniform(0, 0, &camera, sizeof(camera));
-				UBO_Camera shadowCamera = GetReverseZDepthCamera(m_shadowCamera);
+				UBO_ShadowCamera shadowCamera = GetReverseZDepthCamera(m_shadowCamera, false);
+				shadowCamera.TextureSize = { m_shadowTarget->GetDesc().Width, m_shadowTarget->GetDesc().Height };
 				Renderer::SetUniform(0, 1, &shadowCamera, sizeof(shadowCamera));
 				Renderer::SetTexture(0, 2, m_shadowTarget->GetTexture());
 			}

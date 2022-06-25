@@ -29,6 +29,8 @@ namespace Insight
 
 		void MemoryTracker::Destroy()
 		{
+			std::lock_guard lock(m_lock);
+
 			if (m_allocations.size() > 0)
 			{
 				for (const auto& pair :m_allocations)
@@ -61,6 +63,8 @@ namespace Insight
 
 		void MemoryTracker::Track(void* ptr, MemoryTrackAllocationType type)
 		{
+			std::lock_guard lock(m_lock);
+
 			auto itr = m_allocations.find(ptr);
 			if (itr != m_allocations.end())
 			{
@@ -72,6 +76,8 @@ namespace Insight
 
 		void MemoryTracker::UnTrack(void* ptr)
 		{
+			std::lock_guard lock(m_lock);
+
 			auto itr = m_allocations.find(ptr);
 			if (itr != m_allocations.end())
 			{

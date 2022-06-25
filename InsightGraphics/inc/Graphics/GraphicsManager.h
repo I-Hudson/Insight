@@ -3,6 +3,13 @@
 #include "Defines.h"
 #include "Core/ManagerInterface.h"
 #include "Graphics/Renderpass.h"
+#include "Graphics/CommandList.h"
+
+#include <thread>
+#include <mutex>
+#include <atomic>
+
+//#define IS_EXP_ENABLE_THREADED_RENDERING
 
 namespace Insight
 {
@@ -48,6 +55,14 @@ namespace Insight
 			static GraphicsManagerData m_sharedData;
 			static GraphicsManager* s_instance;
 
+#ifdef IS_EXP_ENABLE_THREADED_RENDERING
+			std::thread m_renderThread;
+			std::atomic<bool> m_triggerRender = false;
+			std::atomic<bool> m_multiThreadRender = true;
+			std::atomic<int> m_frameOffset = 0;
+			CommandList m_renderCommandList;
+			std::mutex m_renderCommandListMutex;
+#endif
 			RenderContext* m_renderContext{ nullptr };
 			Renderpass m_renderpass;
 		};

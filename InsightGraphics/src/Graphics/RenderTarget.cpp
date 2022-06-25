@@ -4,16 +4,26 @@
 
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Event/EventManager.h"
+
 namespace Insight
 {
 	namespace Graphics
 	{
 		RenderTarget::RenderTarget()
 		{
+			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& e)
+				{
+					const Core::GraphcisSwapchainResize& event = static_cast<const Core::GraphcisSwapchainResize&>(e);
+					m_desc.Width = event.Width;
+					m_desc.Height = event.Height;
+					Create(m_key, m_desc);
+				});
 		}
 
 		RenderTarget::~RenderTarget()
 		{
+			Core::EventManager::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
 			Destroy();
 		}
 
