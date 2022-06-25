@@ -126,10 +126,8 @@ namespace Insight
 			}
 #else
 			m_renderContext->Render(Renderer::s_FrameCommandList);
-			Renderer::s_FrameCommandList.Reset();
 #endif
 				Renderer::s_FrameCommandList.Reset();
-				std::this_thread::sleep_for(std::chrono::seconds(60));
 		}
 
 		void GraphicsManager::Destroy()

@@ -10,6 +10,8 @@ using u64 = uint64_t;
 
 using Byte = unsigned char;
 
+using Handle = u64;
+
 #ifdef IS_PLATFORM_X64
 constexpr int log2_64(u64 value);
 constexpr int log2(u64 value) { return log2_64(value); }

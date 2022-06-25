@@ -172,10 +172,17 @@ namespace Insight
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+				const RHI_Buffer_Vulkan* bufferVulkan = nullptr;
+				{
+					IS_PROFILE_SCOPE("dynamic_cast");
+					bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+				}
 				std::array<vk::Buffer, 1> buffers = { bufferVulkan->GetBuffer() };
 				std::array<vk::DeviceSize, 1> offsets = { 0 };
-				m_commandList.bindVertexBuffers(0, buffers, offsets);
+				{
+					IS_PROFILE_SCOPE("bindVertexBuffers");
+					m_commandList.bindVertexBuffers(0, buffers, offsets);
+				}
 			}
 
 			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)

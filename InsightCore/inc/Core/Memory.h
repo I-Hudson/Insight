@@ -206,6 +206,20 @@ public:
 		m_ptr = other.m_ptr;
 		other.Release();
 	}
+
+	template<typename T2, std::enable_if_t<std::_SP_pointer_compatible<T2, T>::value, int> = 0>
+	UPtr(T2* ptr)
+	{
+		m_ptr = ptr;
+	}
+
+	template<typename T2, std::enable_if_t<std::_SP_pointer_compatible<T2, T>::value, int> = 0>
+	UPtr(UPtr<T2>&& other)
+	{
+		m_ptr = other.m_ptr;
+		other.m_ptr = nullptr;
+	}
+
 	~UPtr()
 	{
 		Reset();
@@ -221,11 +235,23 @@ public:
 
 	// Can't copy UPtr.
 	UPtr(const UPtr& other) = delete;
+	template<typename T2, std::enable_if_t<std::_SP_pointer_compatible<T2, T>::value, int> = 0>
+	UPtr(const UPtr<T2>& other) = delete;
 	UPtr& operator=(const UPtr& other) = delete;
+	template<typename T2>
+	UPtr& operator=(const UPtr<T2>& other) = delete;
 
 	UPtr& operator=(std::nullptr_t) noexcept
 	{
 		Reset();
+		return *this;
+	}
+	template<typename T2>
+	UPtr& operator=(UPtr<T2>&& other)
+	{
+		Reset();
+		m_ptr = other.m_ptr;
+		other.m_ptr = nullptr;
 		return *this;
 	}
 
@@ -249,6 +275,9 @@ public:
 
 private:
 	T* m_ptr = nullptr;
+
+	template<typename>
+	friend class UPtr;
 };
 
 template<typename T>

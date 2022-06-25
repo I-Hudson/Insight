@@ -1,5 +1,6 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
+#include "Graphics/GraphicsManager.h"
 #include "Core/Logger.h"
 
 #include "Core/Profiler.h"
@@ -20,16 +21,16 @@ namespace Insight
 
 		void Submesh::Draw() const
 		{
-			Renderer::BindVertexBuffer(*m_vertexBuffer);
+			Renderer::BindVertexBuffer(m_vertexInfo.Buffer);
 			Renderer::BindIndexBuffer(*m_indexBuffer);
 
 			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
-			Renderer::DrawIndexed(indexCount, 1, 0, 0, 0);
+			Renderer::DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
 		}
 
-		void Submesh::SetVertexBuffer(RHI_Buffer* buffer)
+		void Submesh::SetVertexInfo(SubmeshVertexInfo info)
 		{
-			m_vertexBuffer = UPtr<RHI_Buffer>(buffer);
+			m_vertexInfo = info;
 		}
 
 		void Submesh::SetIndexBuffer(RHI_Buffer* buffer)
@@ -39,11 +40,12 @@ namespace Insight
 
 		void Submesh::Destroy()
 		{
-			if (m_vertexBuffer)
-			{
-				Renderer::FreeVertexBuffer(m_vertexBuffer.Get());
-				m_vertexBuffer.Release();
-			}
+			//if (m_vertexBuffer)
+			//{
+			//	Renderer::FreeVertexBuffer(m_vertexBuffer.Get());
+			//	m_vertexBuffer.Release();
+			//}
+			m_vertexInfo = {};
 			
 			if (m_indexBuffer)
 			{
@@ -82,8 +84,17 @@ namespace Insight
 				return false;
 			}
 
-			CreateGPUBuffers(scene, filePath);
-			ProcessNode(scene->mRootNode, scene, "");
+			std::vector<Vertex> vertices;
+
+			CreateGPUBuffers(scene, filePath, vertices);
+			ProcessNode(scene->mRootNode, scene, "", vertices);
+
+			const u64 expectedVertexByteSize = m_vertexBuffer->GetSize();
+			const u64 vertexByteSize = vertices.size() * sizeof(Vertex);
+
+			ASSERT(expectedVertexByteSize == vertexByteSize);
+
+			m_vertexBuffer->Upload(vertices.data(), vertexByteSize);
 
 			return true;
 		}
@@ -95,6 +106,13 @@ namespace Insight
 				submesh->Destroy();
 				DeleteTracked(submesh);
 			}
+
+			if (m_vertexBuffer)
+			{
+				m_vertexBuffer->Release();
+				m_vertexBuffer.Reset();
+			}
+
 			m_submeshes.clear();
 		}
 
@@ -107,7 +125,7 @@ namespace Insight
 			}
 		}
 
-		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath)
+		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -135,6 +153,11 @@ namespace Insight
 			};
 			getVertexAndIndexCount(scene->mRootNode, scene);
 
+			const u64 vertexByteSize = vertexCount * sizeof(Vertex);
+
+			m_vertexBuffer = UPtr(RHI_Buffer::New());
+			m_vertexBuffer->Create(GraphicsManager::Instance().GetRenderContext(), BufferType::Vertex, vertexByteSize, sizeof(Vertex));
+
 			std::string_view shortFilePath = filePath.substr(filePath.find_last_of('/') + 1);
 			std::wstring wShortFileName;
 			std::transform(shortFilePath.begin(), shortFilePath.end(), std::back_inserter(wShortFileName), [](const char c)
@@ -143,37 +166,36 @@ namespace Insight
 				});
 		}
 
-		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory)
+		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices)
 		{
 			IS_PROFILE_FUNCTION();
 
 			if (aiNode->mNumMeshes > 0)
 			{
+				SubmeshVertexInfo submeshVertexInfo = { };
+				submeshVertexInfo.VertexOffset = static_cast<int>(vertices.size());
+				submeshVertexInfo.Buffer = m_vertexBuffer.Get();
+
 				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				{
 					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 
-					std::vector<Vertex> vertices;
-					vertices.reserve(aiMesh->mNumVertices);
 					std::vector<int> indices;
 					ProcessMesh(aiMesh, aiScene, vertices, indices);
 
 					const int vertexSizeBytes = (int)vertices.size() * (int)sizeof(Vertex);
 					const int indexSizeBytes = (int)indices.size() * (int)sizeof(int);
 
-					RHI_Buffer* vBuffer = Renderer::CreateVertexBuffer(vertexSizeBytes, sizeof(Vertex));
-					{
-						//ZoneScopedN("Vertex_Upload");
-						vBuffer->Upload(vertices.data(), vertexSizeBytes, 0);
-					}
 					RHI_Buffer* iBuffer = Renderer::CreateIndexBuffer(indexSizeBytes);
 					{
 						//ZoneScopedN("Index_Upload");
 						iBuffer->Upload(indices.data(), indexSizeBytes, 0);
 					}
 
+					submeshVertexInfo.VertexCount = static_cast<int>(vertices.size()) - submeshVertexInfo.VertexOffset;
+
 					Submesh* subMesh = NewArgsTracked(Submesh, this);
-					subMesh->SetVertexBuffer(vBuffer);
+					subMesh->SetVertexInfo(submeshVertexInfo);
 					subMesh->SetIndexBuffer(iBuffer);
 					m_submeshes.push_back(std::move(subMesh));
 				}
@@ -201,7 +223,7 @@ namespace Insight
 			// then do the same for each of its children
 			for (u32 i = 0; i < aiNode->mNumChildren; i++)
 			{
-				ProcessNode(aiNode->mChildren[i], aiScene, directory);
+				ProcessNode(aiNode->mChildren[i], aiScene, directory, vertices);
 			}
 		}
 

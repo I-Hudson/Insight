@@ -35,6 +35,13 @@ namespace Insight
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
 
+		struct SubmeshVertexInfo
+		{
+			int VertexOffset = 0;
+			int VertexCount = 0;
+			RHI_Buffer* Buffer = nullptr;
+		};
+
 		/// <summary>
 		/// Sub mesh. 
 		/// </summary>
@@ -47,16 +54,16 @@ namespace Insight
 
 			void Draw() const;
 
-			void SetVertexBuffer(RHI_Buffer* buffer);
+			void SetVertexInfo(SubmeshVertexInfo info);
 			void SetIndexBuffer(RHI_Buffer* buffer);
 
-			int GetVertexCount() const { return (int)(m_vertexBuffer->GetSize() / sizeof(Vertex)); }
+			int GetVertexCount() const { return m_vertexInfo.VertexCount; }
 			int GetIndexCount() const { return (int)(m_indexBuffer->GetSize() / sizeof(int)); }
 
 			void Destroy();
 
 		private:
-			UPtr<RHI_Buffer> m_vertexBuffer;
+			SubmeshVertexInfo m_vertexInfo;
 			UPtr<RHI_Buffer> m_indexBuffer;
 			Mesh* m_mesh = nullptr;
 		};
@@ -75,11 +82,12 @@ namespace Insight
 			void Draw() const;
 		
 		private:
-			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath);
-			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory);
+			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices);
+			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices);
 			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices);
 		
 		private:
+			UPtr<RHI_Buffer> m_vertexBuffer;
 			std::vector<Submesh*> m_submeshes;
 		};
 	}

@@ -32,7 +32,7 @@ namespace Insight
 		private:
 			// Store all entites 
 			std::string m_sceneName = "";
-			ECS* m_ecs = nullptr;
+			UPtr<ECS> m_ecs = nullptr;
 		};
 
 		class SceneManager : public Core::Singleton<SceneManager>

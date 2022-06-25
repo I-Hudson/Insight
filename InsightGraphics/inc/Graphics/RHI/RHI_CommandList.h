@@ -20,6 +20,9 @@ namespace Insight
 		{
 			glm::vec2 Viewport;
 			glm::ivec2 Siccsior;
+
+			RHI_Buffer* VertexBuffer = nullptr;
+			RHI_Buffer* IndexBuffer = nullptr;
 		};
 
 		class RHI_CommandList : public RHI_Resource

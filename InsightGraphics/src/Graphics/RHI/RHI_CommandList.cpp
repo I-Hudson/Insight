@@ -9,6 +9,25 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
+//TODO: Remove this whole class.
+/*
+	We should be using a simple struct like
+	struct RenderDrawData
+	{
+		Pso PipelineStateObject
+
+		RHI_Buffer* VertexBuffer
+		RHI_Buffer* IndexBuffer
+
+		UniformGroup Uniforms
+
+		int VertexIndex
+		int IndexIndex
+	};
+
+	to keep track of the draw data we want to use.
+*/
+
 namespace Insight
 {
 	namespace Graphics
@@ -47,7 +66,7 @@ namespace Insight
 				case CommandType::SetPipelineStateObject:
 				{
 					//ZoneScopedN("SetPipelineStateObject");
-					const CMD_SetPipelineStateObject* cmd = dynamic_cast<const CMD_SetPipelineStateObject*>(command);
+					const CMD_SetPipelineStateObject* cmd = static_cast<const CMD_SetPipelineStateObject*>(command);
 					m_pso = cmd->Pso;
 					SetPipeline(m_pso);
 					break;
@@ -56,7 +75,7 @@ namespace Insight
 				case CommandType::SetUniform:
 				{
 					//ZoneScopedN("SetUniform");
-					const CMD_SetUniform* cmd = dynamic_cast<const CMD_SetUniform*>(command);
+					const CMD_SetUniform* cmd = static_cast<const CMD_SetUniform*>(command);
 					SetUniform(cmd->Set, cmd->Binding, cmd->View);
 					break;
 				}
@@ -64,7 +83,7 @@ namespace Insight
 				case CommandType::SetTexture:
 				{
 					//ZoneScopedN("SetUniform");
-					const CMD_SetTexture* cmd = dynamic_cast<const CMD_SetTexture*>(command);
+					const CMD_SetTexture* cmd = static_cast<const CMD_SetTexture*>(command);
 					SetTexture(cmd->Set, cmd->Binding, cmd->Texture);
 					break;
 				}
@@ -72,7 +91,7 @@ namespace Insight
 				case CommandType::SetViewport:
 				{
 					//ZoneScopedN("SetViewport");
-					const CMD_SetViewport* cmd = dynamic_cast<const CMD_SetViewport*>(command);
+					const CMD_SetViewport* cmd = static_cast<const CMD_SetViewport*>(command);
 					SetViewport(0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f);
 					break;
 				}
@@ -80,22 +99,32 @@ namespace Insight
 				case CommandType::SetScissor:
 				{
 					//ZoneScopedN("SetScissor");
-					const CMD_SetScissor* cmd = dynamic_cast<const CMD_SetScissor*>(command);
+					const CMD_SetScissor* cmd = static_cast<const CMD_SetScissor*>(command);
 					SetScissor(0, 0, cmd->Width, cmd->Height);
 					break;
 				}
 
 				case CommandType::SetVertexBuffer:
 				{
-					const CMD_SetVertexBuffer* cmd = dynamic_cast<const CMD_SetVertexBuffer*>(command);
-					SetVertexBuffer(cmd->Buffer);
+					IS_PROFILE_SCOPE("[RHI] SetVertexBuffer")
+					const CMD_SetVertexBuffer* cmd = static_cast<const CMD_SetVertexBuffer*>(command);
+					if (cmd->Buffer != m_drawData.VertexBuffer)
+					{
+						m_drawData.VertexBuffer = cmd->Buffer;
+						SetVertexBuffer(cmd->Buffer);
+					}
 					break;
 				}
 
 				case CommandType::SetIndexBuffer:
 				{
-					const CMD_SetIndexBuffer* cmd = dynamic_cast<const CMD_SetIndexBuffer*>(command);
-					SetIndexBuffer(cmd->Buffer);
+					IS_PROFILE_SCOPE("[RHI] SetIndexBuffer")
+					const CMD_SetIndexBuffer* cmd = static_cast<const CMD_SetIndexBuffer*>(command);
+					if (cmd->Buffer != m_drawData.VertexBuffer)
+					{
+						m_drawData.IndexBuffer = cmd->Buffer;
+						SetIndexBuffer(cmd->Buffer);
+					}
 					break;
 				}
 
@@ -142,7 +171,7 @@ namespace Insight
 		{
 			m_pso = {};
 			m_activePSO = {};
-			m_drawData = { };
+			m_drawData = {};
 		}
 
 		bool RHI_CommandList::CanDraw(CommandList& cmdList)

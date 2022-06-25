@@ -5,6 +5,7 @@
 #include "Graphics/PixelFormatExtensions.h"
 
 #include "Event/EventManager.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -14,6 +15,7 @@ namespace Insight
 		{
 			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& e)
 				{
+					IS_PROFILE_SCOPE("RenderTarget-Graphics_Swapchain_Resize");
 					const Core::GraphcisSwapchainResize& event = static_cast<const Core::GraphcisSwapchainResize&>(e);
 					m_desc.Width = event.Width;
 					m_desc.Height = event.Height;

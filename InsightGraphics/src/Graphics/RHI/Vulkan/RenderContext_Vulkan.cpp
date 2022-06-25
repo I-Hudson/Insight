@@ -420,6 +420,7 @@ namespace Insight
 
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
+					IS_PROFILE_SCOPE("Swapchain resize");
 					WaitForGpu();
 					CreateSwapchain();
 					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));

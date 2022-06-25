@@ -1,4 +1,5 @@
 #include "Scene/SceneManager.h"
+#include "ECS/ECS.h"
 
 #include "Core/Profiler.h"
 
@@ -8,11 +9,14 @@ namespace Insight
 	{
 		Scene::Scene()
 			: m_sceneName("Default")
-		{ }
+		{
+			m_ecs = MakeUPtr<ECS>();
+		}
 
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
+			m_ecs = MakeUPtr<ECS>();
 		}
 
 		Scene::Scene(Scene&& other)
@@ -32,7 +36,7 @@ namespace Insight
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			//m_ecs->Update(deltaTime);
+			m_ecs->Update(deltaTime);
 		}
 
 		void Scene::Render()
