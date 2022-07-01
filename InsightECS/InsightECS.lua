@@ -1,4 +1,4 @@
-project "InsightApp"  
+project "InsightECS"  
     kind "SharedLib"   
     language "C++"
     cppdialect "C++17"
@@ -9,53 +9,38 @@ project "InsightApp"
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
     dependson 
-    {
-        "InsightCore",
-        "InsightGraphics",
-        "InsightECS",
-        "tracy",
-        "OptickCore",
-        "GLFW",
-        "glm",
-        "ImGui",
-    }
+    { }
 
     defines
     {
-        "IS_EXPORT_APP_DLL"
+        "IS_EXPORT_ECS_DLL"
     }
     
     includedirs
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightGraphics}",
-        "%{IncludeDirs.InsightECS}",
-
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.optick}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp",
+        "src/**.cpp" 
     }
 
     links
     {
         "InsightCore.lib",
-        "InsightGraphics.lib",
-        "InsightECS.lib",
         "glm",
         "tracy.lib",
     }
 
     libdirs
     {
-        "%{wks.location}/vendor/glfw/lib",
+        "%{wks.location}/deps/lib",
     }
 
     postbuildcommands
@@ -63,7 +48,7 @@ project "InsightApp"
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
     }
-    
+
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
         symbols "On" 

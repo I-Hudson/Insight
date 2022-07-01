@@ -3,14 +3,14 @@
 #include "Core/Singleton.h"
 #include "Core/Memory.h"
 
+#include "ECS/ECSWorld.h"
+
 #include <vector>
 
 namespace Insight
 {
 	namespace App
 	{
-		class ECS;
-
 		class Scene
 		{
 		public:
@@ -32,7 +32,7 @@ namespace Insight
 		private:
 			// Store all entites 
 			std::string m_sceneName = "";
-			UPtr<ECS> m_ecs = nullptr;
+			UPtr<ECS::ECSWorld> m_ecsWorld = nullptr;
 		};
 
 		class SceneManager : public Core::Singleton<SceneManager>

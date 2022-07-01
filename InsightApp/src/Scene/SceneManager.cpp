@@ -1,5 +1,4 @@
 #include "Scene/SceneManager.h"
-#include "ECS/ECS.h"
 
 #include "Core/Profiler.h"
 
@@ -10,13 +9,20 @@ namespace Insight
 		Scene::Scene()
 			: m_sceneName("Default")
 		{
-			m_ecs = MakeUPtr<ECS>();
+			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 		}
 
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
-			m_ecs = MakeUPtr<ECS>();
+			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
+
+			ECS::Entity e = m_ecsWorld->AddEntity();
+			IS_CORE_INFO("{}", e.GetName());
+			e.SetName("TestEntity");
+			IS_CORE_INFO("{}", e.GetName());
+
+			m_ecsWorld->RemoveEntity(e);
 		}
 
 		Scene::Scene(Scene&& other)
@@ -36,7 +42,7 @@ namespace Insight
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			m_ecs->Update(deltaTime);
+			m_ecsWorld->Update(deltaTime);
 		}
 
 		void Scene::Render()

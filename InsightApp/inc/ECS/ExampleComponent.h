@@ -2,6 +2,10 @@
 
 #include "ECS/ECS.h"
 
+#include <iostream>
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #ifdef IS_EXP_ECS
 namespace Insight
 {
@@ -12,19 +16,39 @@ namespace Insight
 			float floatData;
 			int intData;
 		};
-
 		template<>
-		class ECSSystem<ExampleComponent> : public IECSSystem
+		class ECSSystemImpl<ExampleComponent>
 		{
 		public:
-			virtual void Update(IECSComponentArray* componentArray, float deltaTime) override
+			static void Update(ECS& ecs, Entity ownerEnttity, ExampleComponent& component, float deltaTime)
 			{
-				ECSComponentArray<ExampleComponent>* compoenentArray = static_cast<ECSComponentArray<ExampleComponent>*>(componentArray);
-				for (size_t i = 0; i < compoenentArray->m_componentData.size(); ++i)
-				{
-					ExampleComponent& component = compoenentArray->m_componentData[i];
-				}
+				component.intData++;
 			}
+		};
+
+		struct ExampleComponentPrint
+		{ };
+		template<>
+		class ECSSystemImpl<ExampleComponentPrint>
+		{
+		public:
+			static void Update(ECS& ecs, Entity ownerEnttity, ExampleComponentPrint& component, float deltaTime)
+			{
+				ExampleComponent com = ecs.GetComponent<ExampleComponent>(ownerEnttity);
+				std::cout << "Example: " << com.intData;
+			}
+		};
+
+		struct TransformComponent
+		{
+			glm::vec3 Position;
+			glm::quat Qauternion;
+			glm::vec3 Scale;
+		};
+
+		struct TagComponent
+		{
+			std::vector<std::string> Tags;
 		};
 	}
 }

@@ -23,6 +23,7 @@ project "InsightEditor"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.InsightECS}",
         "%{IncludeDirs.InsightApp}",
     
         "%{IncludeDirs.glfw}",

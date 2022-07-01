@@ -112,6 +112,7 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 IncludeDirs = {}
 IncludeDirs["InsightCore"] = "%{wks.location}/InsightCore/inc"
 IncludeDirs["InsightGraphics"] = "%{wks.location}/InsightGraphics/inc"
+IncludeDirs["InsightECS"] = "%{wks.location}/InsightECS/inc"
 IncludeDirs["InsightApp"] = "%{wks.location}/InsightApp/inc"
 IncludeDirs["InsightEditor"] = "%{wks.location}/InsightEditor/inc"
 
@@ -150,6 +151,7 @@ group "Dependices"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"
+        include "InsightECS/InsightECS.lua"
         include "InsightApp/InsightApp.lua"
 group "Editor"
     include "InsightEditor/InsightEditor.lua"
