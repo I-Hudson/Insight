@@ -11,11 +11,11 @@ project "InsightGraphics"
     dependson 
     {
         "InsightCore",
-        "tracy",
-        "OptickCore",
-        "GLFW",
-        "glm",
-        "ImGui",
+        --"tracy",
+        --"OptickCore",
+        --"GLFW",
+        --"glm",
+        --"ImGui",
     }
 
     defines
@@ -127,4 +127,14 @@ project "InsightGraphics"
         {
             --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
             --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
+        }
+
+    filter "configurations:Testing" 
+        links
+        {
+            "doctest.lib",
+        }
+        libdirs
+        {
+            "%{LibDirs.deps_testing_lib}",
         }

@@ -1,15 +1,20 @@
 #pragma once
 
+#ifdef IS_PLATFORM_WINDOWS
 #include "Platform/Windows/PlatformWindows.h"
+#define SAFE_BREAK __debugbreak()
+#elif IS_PLATFORM_LINUX
+#define SAFE_BREAK(void)
+#endif
 #include "Core/Logger.h"
 
 namespace Insight
 {
 #ifdef IS_PLATFORM_WINDOWS
-		using Platform = Windows::PlatformWindows;
+	using Platform = Windows::PlatformWindows;
+#elif IS_PLATFORM_LINUX
+	using Platform = Linux::PlatformLinux;
 #endif
-
-#define SAFE_BREAK __debugbreak()
 
 #define IS_ASSERT_ENABLED
 #ifdef IS_ASSERT_ENABLED

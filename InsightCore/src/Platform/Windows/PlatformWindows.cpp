@@ -7,7 +7,9 @@
 #include <windows.h>
 #include <intrin.h>
 #include <dbghelp.h>
-#pragma comment(lib, "dbghelp.lib")
+
+#include <rpc.h>
+#include <Objbase.h>
 
 namespace Insight
 {
@@ -46,7 +48,7 @@ namespace Insight
 		// https://gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
 		inline std::string basename(const std::string& file)
 		{
-			unsigned int i = file.find_last_of("\\/");
+			unsigned int i = static_cast<int>(file.find_last_of("\\/"));
 			if (i == std::string::npos)
 			{
 				return file;
@@ -195,6 +197,22 @@ namespace Insight
 			SymCleanup(process);
 
 			return frames;
+		}
+
+		Core::GUID PlatformWindows::CreateGUID()
+		{
+			Core::GUID guid;
+			AssignGUID(guid);
+			return guid;
+		}
+
+		void PlatformWindows::AssignGUID(Core::GUID& guid)
+		{
+			_GUID gidReference;
+			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
+			guid = Core::GUID(gidReference.Data1, gidReference.Data2, gidReference.Data3, 
+				{ gidReference.Data4[0], gidReference.Data4[1], gidReference.Data4[2], gidReference.Data4[3],
+				 gidReference.Data4[4], gidReference.Data4[5], gidReference.Data4[6], gidReference.Data4[7] });
 		}
 	}
 }

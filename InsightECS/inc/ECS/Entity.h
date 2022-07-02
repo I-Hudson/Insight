@@ -3,14 +3,17 @@
 #include "Core/TypeAlias.h"
 #include "Platform/Platform.h"
 #include "ECS/Defines.h"
+#include "Core/GUID.h"
 
 #include <string>
+#include <unordered_set>
 
 namespace Insight
 {
 	namespace ECS
 	{
-		class IS_ECS EntityManager;
+		class EntityManager;
+		class ECSWorld;
 
 		/// <summary>
 		/// Store all relevant data for an entity.
@@ -19,7 +22,8 @@ namespace Insight
 		struct IS_ECS EntityData
 		{
 			std::string Name;
-			u64 GUID;
+			Core::GUID GUID = Core::GUID::s_InvalidGUID;
+			std::unordered_map<u64, std::unordered_set<int>> Components;
 		};
 
 		/// <summary>
@@ -32,22 +36,16 @@ namespace Insight
 
 			void SetName(std::string name);
 
-
 			std::string GetName() const;
 			int GetId() const;
-			u64 GetGuid() const;
+			Core::GUID GetGuid() const;
 
 			bool IsVaild() const;
-			template<typename Component>
-			bool HasComponent() const
-			{
-
-				return false;
-			}
 
 		private:
 			int m_id = -1;
 			EntityManager* m_entityManager = nullptr;
+			ECSWorld* m_ecsWorld = nullptr;
 			friend class EntityManager;
 		};
 

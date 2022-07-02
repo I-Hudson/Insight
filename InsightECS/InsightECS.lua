@@ -9,7 +9,9 @@ project "InsightECS"
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
     dependson 
-    { }
+    { 
+        "InsightCore",
+    }
 
     defines
     {
@@ -34,8 +36,9 @@ project "InsightECS"
     links
     {
         "InsightCore.lib",
-        "glm",
+        "glm.lib",
         "tracy.lib",
+        "OptickCore.lib",
     }
 
     libdirs
@@ -71,4 +74,10 @@ project "InsightECS"
         libdirs
         {
             "%{wks.location}/deps/lib/release",
+        }
+
+    filter "configurations:Testing" 
+        links
+        {
+            "doctest.lib",
         }

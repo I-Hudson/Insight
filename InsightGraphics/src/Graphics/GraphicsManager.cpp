@@ -6,8 +6,6 @@
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
 
-#include "doctest.h"
-
 namespace Insight
 {
 	namespace Graphics
@@ -150,6 +148,7 @@ namespace Insight
 }
 
 #ifdef TESTING
+#include "doctest.h"
 namespace test
 {
 	TEST_SUITE("Create RHI Resources")
@@ -162,37 +161,37 @@ namespace test
 			CHECK(Insight::Graphics::Window::Instance().Init());
 			CHECK(graphicsManager.Init() == true);
 		}
-
+		
 		TEST_CASE("Create Vertex RHI_Buffer")
 		{
 			RHI_Buffer* buffer = Renderer::CreateVertexBuffer(128, 128);
 			CHECK(buffer != nullptr);
-
+		
 			int wantedBufferCount = Renderer::GetVertexBufferCount() - 1;
 			Renderer::FreeVertexBuffer(buffer);
 			CHECK(Renderer::GetVertexBufferCount() == wantedBufferCount);
 		}
-
+		
 		TEST_CASE("Create Index RHI_Buffer")
 		{
 			RHI_Buffer* buffer = Renderer::CreateIndexBuffer(128);
 			CHECK(buffer != nullptr);
-
+		
 			int wantedBufferCount = Renderer::GetIndexBufferCount() - 1;
 			Renderer::FreeIndexBuffer(buffer);
 			CHECK(Renderer::GetIndexBufferCount() == wantedBufferCount);
 		}
-
+		
 		TEST_CASE("Create Uniform RHI_Buffer")
 		{
 			RHI_Buffer* buffer = Renderer::CreateUniformBuffer(128);
 			CHECK(buffer != nullptr);
-
+		
 			int wantedBufferCount = Renderer::GetUniformBufferCount() - 1;
 			Renderer::FreeUniformBuffer(buffer);
 			CHECK(Renderer::GetUniformBufferCount() == wantedBufferCount);
 		}
-
+		
 		TEST_CASE("Destroy render context")
 		{
 			graphicsManager.Destroy();

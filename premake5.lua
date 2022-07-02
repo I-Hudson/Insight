@@ -11,6 +11,11 @@ workspace "Insight"
         "Release",
         "Testing",
     }
+    platforms 
+    { 
+        "Win64", 
+        "Linux" 
+    }
 
     flags
     {
@@ -22,11 +27,6 @@ workspace "Insight"
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
         "IS_PLATFORM_X64",
-    }
-
-    files 
-    { 
-        "vendor/doctest/doctest/doctest.h",
     }
 
     includedirs
@@ -70,7 +70,6 @@ workspace "Insight"
             "DOCTEST_CONFIG_DISABLE",
         }
 
-
     filter "system:Windows"
     	system "windows"
     	toolset("msc-v143")
@@ -91,6 +90,10 @@ workspace "Insight"
             "TESTING",
             "DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
         }
+        files 
+        { 
+            "vendor/doctest/doctest/doctest.h",
+        } 
     	
     
     filter "system:Unix"
@@ -133,6 +136,7 @@ IncludeDirs["stb_image"] = "%{wks.location}/vendor/stb"
 LibDirs = {}
 
 LibDirs["deps_lib"] = "%{wks.location}/deps/" .. outputdir .. "/lib/"
+LibDirs["deps_testing_lib"] = "%{wks.location}/deps/Debug-windows-x86_64/lib/"
 
 LibDirs["glslang_win_d"] = "%{wks.location}/vendor/glslang/win_debug/lib"
 LibDirs["glslang_win"] = "%{wks.location}/vendor/glslang/win_release/lib"
@@ -148,6 +152,7 @@ group "Dependices"
         include "premakeFiles/imgui.lua"
         include "premakeFiles/optick.lua"
         include "premakeFiles/tracy.lua"
+        include "premakeFiles/doctest.lua"
 group "Runtime"
         include "InsightCore/InsightCore.lua"
         include "InsightGraphics/InsightGraphics.lua"

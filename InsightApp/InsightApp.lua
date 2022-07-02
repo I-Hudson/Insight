@@ -13,11 +13,11 @@ project "InsightApp"
         "InsightCore",
         "InsightGraphics",
         "InsightECS",
-        "tracy",
-        "OptickCore",
-        "GLFW",
-        "glm",
-        "ImGui",
+        --"tracy",
+        --"OptickCore",
+        --"GLFW",
+        --"glm",
+        --"ImGui",
     }
 
     defines
@@ -49,7 +49,7 @@ project "InsightApp"
         "InsightCore.lib",
         "InsightGraphics.lib",
         "InsightECS.lib",
-        "glm",
+        "glm.lib",
         "tracy.lib",
     }
 
@@ -86,4 +86,10 @@ project "InsightApp"
         libdirs
         {
             "%{wks.location}/deps/lib/release",
+        }
+
+    filter "configurations:Testing" 
+        links
+        {
+            "doctest.lib",
         }

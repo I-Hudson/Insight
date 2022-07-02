@@ -2,7 +2,6 @@ project "InsightCore"
     kind "SharedLib"   
     language "C++"
     cppdialect "C++17"
-    configurations { "Debug", "Release" } 
 
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -10,8 +9,8 @@ project "InsightCore"
 
     dependson 
     {
-        "tracy",
-        "OptickCore",
+        --"tracy",
+        --"OptickCore",
     }
 
     defines
@@ -36,6 +35,7 @@ project "InsightCore"
     links
     {
         "tracy.lib",
+        "OptickCore.lib",
     }
 
     libdirs
@@ -71,4 +71,18 @@ project "InsightCore"
         libdirs
         {
             "%{wks.location}/deps/lib/release",
+        }
+
+    filter "platforms:Win64"
+        links
+        {
+            "Ole32.lib",
+            "dbghelp.lib",
+            "Rpcrt4.lib",
+        }
+
+    filter "configurations:Testing" 
+        links
+        {
+            "doctest.lib",
         }

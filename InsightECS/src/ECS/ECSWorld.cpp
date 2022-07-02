@@ -21,5 +21,11 @@ namespace Insight
 		{
 			m_entityManager.RemoveEntity(entity);
 		}
+		
+		void ECSWorld::RemoveComponent(Entity entity, ComponentHandle& handle)
+		{
+			m_entityManager.RemoveComponentFromEntity(entity, handle);
+			m_componentArrayManager.RemoveComponent(entity, handle);
+		}
 	}
 }

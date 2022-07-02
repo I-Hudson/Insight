@@ -4,6 +4,8 @@
 
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
+#include "Core/GUID.h"
+
 #include <string>
 #include <vector>
 
@@ -23,6 +25,9 @@ namespace Insight
 			static bool WStrCompare(const wchar_t* wstr1, const wchar_t* wstr2);
 
 			static std::vector<std::string> GetCallStack(int frameCount = 32);
+
+			static Core::GUID CreateGUID();
+			static void AssignGUID(Core::GUID& guid);
 		};
 
 	}

@@ -12,17 +12,16 @@ namespace Insight
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 		}
 
+		struct COM
+		{
+		};
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 
 			ECS::Entity e = m_ecsWorld->AddEntity();
-			IS_CORE_INFO("{}", e.GetName());
-			e.SetName("TestEntity");
-			IS_CORE_INFO("{}", e.GetName());
-
-			m_ecsWorld->RemoveEntity(e);
+			m_ecsWorld->AddComponent<COM>(e);
 		}
 
 		Scene::Scene(Scene&& other)
@@ -125,12 +124,16 @@ namespace Insight
 			}
 			return WPtr<Scene>();
 		}
+	}
+}
 
 #ifdef TESTING
 #include "doctest.h"
 #include "Core/Memory.h"
 		TEST_SUITE("SceneManagerSingleton")
 		{
+			using namespace Insight::App;
+
 			UPtr<SceneManager> sceneManager;
 			TEST_CASE("Make SceneManger UPtr")
 			{
@@ -144,5 +147,3 @@ namespace Insight
 			}
 		}
 #endif
-	}
-}

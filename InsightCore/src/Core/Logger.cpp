@@ -5,24 +5,8 @@
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
-#define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest.h"
-
 namespace Insight
 {
-	struct TestStruct
-	{
-		TestStruct()
-		{
-			IS_CORE_INFO("TestStruct_C");
-		}
-
-		~TestStruct()
-		{
-			IS_CORE_INFO("TestStruct_D");
-		}
-	};
-
 	namespace Core
 	{
 		std::shared_ptr<spdlog::logger> Logger::s_CoreLogger;

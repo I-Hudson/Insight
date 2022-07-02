@@ -64,30 +64,31 @@ namespace Insight
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
 		}
+	}
+}
 
 #ifdef TESTING
 #include "doctest.h"
 		TEST_SUITE("App Run")
 		{
-			Graphics::GraphicsManager graphicsManager;
-			TEST_CASE("Init")
-			{
-				CHECK(Graphics::Window::Instance().Init() == true);
-				CHECK(graphicsManager.Init());
-			}
-
-			TEST_CASE("Update")
-			{
-				graphicsManager.Update(0.0f);
-				Graphics::Window::Instance().Update();
-			}
-
-			TEST_CASE("Destroy")
-			{
-				graphicsManager.Destroy();
-				Graphics::Window::Instance().Destroy();
-			}
+			//using namespace Insight;
+			//Graphics::GraphicsManager graphicsManager;
+			//TEST_CASE("Init")
+			//{
+			//	CHECK(Graphics::Window::Instance().Init() == true);
+			//	CHECK(graphicsManager.Init());
+			//}
+			//
+			//TEST_CASE("Update")
+			//{
+			//	graphicsManager.Update(0.0f);
+			//	Graphics::Window::Instance().Update();
+			//}
+			//
+			//TEST_CASE("Destroy")
+			//{
+			//	graphicsManager.Destroy();
+			//	Graphics::Window::Instance().Destroy();
+			//}
 		}
 #endif
-	}
-}

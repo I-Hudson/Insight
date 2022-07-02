@@ -20,6 +20,17 @@ namespace Insight
 			return m_id != -1;
 		}
 
+		//bool Entity::HasComponent(u64 componentType) const
+		//{
+		//	if (!IsVaild())
+		//	{
+		//		return false;
+		//	}
+		//	ASSERT(m_entityManager)
+		//	const EntityData& data = m_entityManager->GetEntityData(*this);
+		//	return data.Components.find(componentType) != data.Components.end()l;
+		//}
+
 		std::string Entity::GetName() const
 		{
 			if (!IsVaild())
@@ -35,11 +46,11 @@ namespace Insight
 			return m_id;
 		}
 
-		u64 Entity::GetGuid() const
+		Core::GUID Entity::GetGuid() const
 		{
 			if (!IsVaild())
 			{
-				return static_cast<u64>(-1);
+				return Core::GUID::s_InvalidGUID;
 			}
 			ASSERT(m_entityManager); 
 			return m_entityManager->GetEntityData(*this).GUID;

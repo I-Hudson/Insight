@@ -78,3 +78,9 @@ constexpr int log2_32(u32 value)
     value |= value >> 16;
     return tab32[(u32)(value * 0x07C4ACDD) >> 27];
 }
+
+template<typename... Ts>
+void for_each_in_tuple()
+{
+
+}

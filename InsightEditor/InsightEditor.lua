@@ -40,10 +40,10 @@ project "InsightEditor"
 
     links
     {
-        "InsightCore",
-        "InsightGraphics",
-        "InsightApp",
-        "glm",
+        "InsightCore.lib",
+        "InsightGraphics.lib",
+        "InsightApp.lib",
+        "glm.lib",
     }
 
     libdirs
@@ -79,4 +79,10 @@ project "InsightEditor"
         libdirs
         {
             "%{wks.location}/deps/lib/release",
+        }
+
+    filter "configurations:Testing" 
+        links
+        {
+            "doctest.lib",
         }
