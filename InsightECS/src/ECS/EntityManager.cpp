@@ -15,24 +15,29 @@ namespace Insight
 
 		Entity EntityManager::AddNewEntity()
 		{
-			std::lock_guard lock(m_lock);
-
-			if (m_freeEntities.size() == 0)
+			int freeEntity = -1;
 			{
-				const int entitiesSize = static_cast<int>(m_entities.size());
-				m_entities.push_back(EntityData());
-				m_freeEntities.push(entitiesSize);
+				std::lock_guard lock(m_lock);
+
+				if (m_freeEntities.size() == 0)
+				{
+					const int entitiesSize = static_cast<int>(m_entities.size());
+					m_entities.push_back(EntityData());
+					m_freeEntities.push(entitiesSize);
+				}
+
+				freeEntity = m_freeEntities.front();
+				m_freeEntities.pop();
 			}
-
-			const int freeEntity = m_freeEntities.front();
-			m_freeEntities.pop();
-
 			Entity e;
 			e.m_id = freeEntity;
 			e.m_entityManager = this;
 			e.m_ecsWorld = m_ecsWorld;
 
-			GetEntityData(e).GUID.GetNewGUID();
+			{
+				EntityData& data = GetEntityData(e);
+				data.GUID.GetNewGUID();
+			}
 
 			return e;
 		}
@@ -55,46 +60,51 @@ namespace Insight
 
 		void EntityManager::AddComponentToEntity(Entity entity, ComponentHandle handle)
 		{
-			std::lock_guard lock(m_lock);
-
 			if (!entity.IsVaild())
 			{
 				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Entity '{}', is invalid.", entity.GetId());
 				return;
 			}
 
-			if (!EntityHasComponent(entity, handle))
+			if (EntityHasComponent(entity, handle))
 			{
-				GetEntityData(entity).Components[handle.GetType()].insert(handle.GetIndex());
+				return;
 			}
+
+			EntityData& data = GetEntityData(entity);
+			std::lock_guard lock(m_lock);
+			data.Components[handle.GetType()].insert(handle.GetIndex());
 		}
 
 		void EntityManager::RemoveComponentFromEntity(Entity entity, ComponentHandle handle)
 		{
-			std::lock_guard lock(m_lock);
-
 			if (!entity.IsVaild())
 			{
 				IS_CORE_ERROR("[EntityManager::RemoveComponentFromEntity] Entity '{}', is invalid.", entity.GetId());
 				return;
 			}
 
-			if (EntityHasComponent(entity, handle))
+			if (!EntityHasComponent(entity, handle))
 			{
-				GetEntityData(entity).Components[handle.GetType()].erase(handle.GetIndex());
+				return;
+			}
+			{
+				EntityData& data = GetEntityData(entity);
+				std::lock_guard lock(m_lock);
+				data.Components[handle.GetType()].erase(handle.GetIndex());
 			}
 		}
 
 		bool EntityManager::EntityHasComponent(Entity entity, ComponentHandle handle) const
 		{
-			std::shared_lock lock(const_cast<std::shared_mutex&>(m_lock));
-
 			if (!entity.IsVaild())
 			{
 				IS_CORE_ERROR("[EntityManager::EntityHasComponent] Entity '{}', is invalid.", entity.GetId());
 				return false;
 			}
 			const EntityData& data = GetEntityData(entity);
+
+			std::shared_lock lock(const_cast<std::shared_mutex&>(m_lock));
 			auto componentSet = data.Components.find(handle.GetType());
 			if (componentSet == data.Components.end() 
 				|| componentSet->second.find(handle.GetIndex()) == componentSet->second.end())

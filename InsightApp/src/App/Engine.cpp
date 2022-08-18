@@ -45,7 +45,6 @@ namespace Insight
 				float deltaTime = static_cast<float>(frameTimer.GetElapsedTimeMill().count() / 1000);
 				frameTimer.Start();
 
-
 				{
 					IS_PROFILE_SCOPE("Game Update");
 					m_eventManager->Update();

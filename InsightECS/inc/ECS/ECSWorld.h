@@ -46,6 +46,7 @@ namespace Insight
 		class IS_ECS ECSWorld
 		{
 		public:
+			ECSWorld();
 			~ECSWorld();
 
 			void Update(float deltaTime);

@@ -4,12 +4,17 @@ namespace Insight
 {
 	namespace ECS
 	{
+		ECSWorld::ECSWorld()
+			: m_componentArrayManager(ComponentArrayManager(this))
+		{ }
+
 		ECSWorld::~ECSWorld()
 		{
 		}
 
 		void ECSWorld::Update(float deltaTime)
 		{
+			m_componentArrayManager.Update(deltaTime);
 		}
 
 		Entity ECSWorld::AddEntity()

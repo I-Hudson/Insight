@@ -16,6 +16,7 @@ namespace Insight
 	{
 		class EventManager;
 	}
+
 	namespace App
 	{
 		/*

@@ -21,7 +21,10 @@ namespace Insight
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 
 			ECS::Entity e = m_ecsWorld->AddEntity();
-			m_ecsWorld->AddComponent<COM>(e);
+			for (size_t i = 0; i < 0; ++i)
+			{
+				m_ecsWorld->AddComponent<COM>(e);
+			}
 		}
 
 		Scene::Scene(Scene&& other)

@@ -17,6 +17,35 @@ namespace Insight
 		class RHI_Shader;
 		class RHI_Texture;
 
+#ifdef COMMAND_LIST_RENDER_BATCH
+
+		struct RenderDraw
+		{
+			RHI_Buffer* VertexBuffer = nullptr; // Optional
+			RHI_Buffer* IndexBuffer = nullptr; // Optional
+		};
+
+		/// <summary>
+		/// Describe 
+		/// </summary>
+		struct RenderBatch
+		{
+
+		};
+
+		/// <summary>
+		/// Define a render state (pso, and view port etc.) and all the draw calls
+		/// </summary>
+		struct RenderPipelineData
+		{
+			PipelineStateObject PSO;
+			glm::vec2 Viewport;
+			glm::ivec2 Siccsior;
+
+			std::vector<RenderDraw> Draws;
+		};
+#endif
+
 		class CommandList
 		{
 		public:
@@ -58,6 +87,10 @@ namespace Insight
 			void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance);
 			void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance);
 
+#ifdef COMMAND_LIST_RENDER_BATCH
+			void AddRenderData(RenderPipelineData renderData) { m_renderData.push_back(renderData); }
+#endif
+
 		private:
 			template<typename T>
 			void AddCommand(T command)
@@ -91,6 +124,10 @@ namespace Insight
 			DescriptorBuffer m_descriptorBuffer;
 
 			PipelineStateObject m_pso;
+
+#ifdef COMMAND_LIST_RENDER_BATCH
+			std::vector<RenderPipelineData> m_renderData;
+#endif
 		};
 	}
 }
