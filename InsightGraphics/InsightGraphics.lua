@@ -20,7 +20,8 @@ project "InsightGraphics"
 
     defines
     {
-        "IS_EXPORT_GRAPHICS_DLL"
+        "IS_EXPORT_GRAPHICS_DLL",
+        "COMMAND_LIST_RENDER_BATCH"
     }
     
     includedirs
@@ -80,6 +81,8 @@ project "InsightGraphics"
     {
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/bin/".. outputdir..  "/" .. output_executable .. "\"",
     }
 
     filter "configurations:Debug or configurations:Testing"

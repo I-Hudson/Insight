@@ -250,13 +250,13 @@ namespace Insight
 
 				int attachmentIndex = 0;
 				int colourIndex = 0;
-				for (RenderTarget* rt : desc.RenderTargets)
+				for (RHI_Texture* rt : desc.RenderTargets)
 				{
 					if (rt)
 					{
 						attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
 							vk::AttachmentDescriptionFlags(),
-							PixelFormatToVulkan(rt->GetTexture()->GetFormat()),
+							PixelFormatToVulkan(rt->GetFormat()),
 							vk::SampleCountFlagBits::e1,
 							vk::AttachmentLoadOp::eClear,
 							vk::AttachmentStoreOp::eStore,
@@ -304,7 +304,7 @@ namespace Insight
 				{
 					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
 						vk::AttachmentDescriptionFlags(),
-						PixelFormatToVulkan(desc.DepthStencil->GetTexture()->GetFormat()),
+						PixelFormatToVulkan(desc.DepthStencil->GetFormat()),
 						vk::SampleCountFlagBits::e1,								// Sample count
 						vk::AttachmentLoadOp::eClear,								// load op
 						vk::AttachmentStoreOp::eStore,								// store op

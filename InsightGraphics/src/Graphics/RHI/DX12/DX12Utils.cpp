@@ -4,42 +4,42 @@
 
 DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
 {
-    DXGI_FORMAT_UNKNOWN,
+    DXGI_FORMAT_UNKNOWN,                //0
 
-    DXGI_FORMAT_R32G32B32A32_TYPELESS,
-    DXGI_FORMAT_R32G32B32A32_FLOAT,
-    DXGI_FORMAT_R32G32B32A32_UINT,
-    DXGI_FORMAT_R32G32B32A32_SINT,
+    DXGI_FORMAT_R32G32B32A32_TYPELESS,  //1
+    DXGI_FORMAT_R32G32B32A32_FLOAT,     //2
+    DXGI_FORMAT_R32G32B32A32_UINT,      //3
+    DXGI_FORMAT_R32G32B32A32_SINT,      //4
 
-    DXGI_FORMAT_R32G32B32_TYPELESS,
+    DXGI_FORMAT_R32G32B32_TYPELESS,     //5
     DXGI_FORMAT_R32G32B32_FLOAT,
     DXGI_FORMAT_R32G32B32_UINT,
     DXGI_FORMAT_R32G32B32_SINT,
 
-   DXGI_FORMAT_R16G16B16A16_TYPELESS,
-   DXGI_FORMAT_R16G16B16A16_FLOAT,
-   DXGI_FORMAT_R16G16B16A16_UNORM,
-   DXGI_FORMAT_R16G16B16A16_UINT,
-   DXGI_FORMAT_R16G16B16A16_SNORM,
-   DXGI_FORMAT_R16G16B16A16_SINT,
+    DXGI_FORMAT_R16G16B16A16_TYPELESS,
+    DXGI_FORMAT_R16G16B16A16_FLOAT,
+    DXGI_FORMAT_R16G16B16A16_UNORM,
+    DXGI_FORMAT_R16G16B16A16_UINT,
+    DXGI_FORMAT_R16G16B16A16_SNORM,
+    DXGI_FORMAT_R16G16B16A16_SINT,
 
-   DXGI_FORMAT_R32G32_TYPELESS,
-   DXGI_FORMAT_R32G32_FLOAT,
-   DXGI_FORMAT_R32G32_UINT,
-   DXGI_FORMAT_R32G32_SINT,
+    DXGI_FORMAT_R32G32_TYPELESS,
+    DXGI_FORMAT_R32G32_FLOAT,
+    DXGI_FORMAT_R32G32_UINT,
+    DXGI_FORMAT_R32G32_SINT,
 
-   DXGI_FORMAT_R32G8X24_TYPELESS, // TODO: R32G8X24_Typeless
-   DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
-   DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,  // TODO: R32_Float_X8X24_Typeless
-   DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, // TODO: X32_Typeless_G8X24_UInt
+    DXGI_FORMAT_R32G8X24_TYPELESS, // TODO: R32G8X24_Typeless
+    DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
+    DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,  // TODO: R32_Float_X8X24_Typeless
+    DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, // TODO: X32_Typeless_G8X24_UInt
 
-   DXGI_FORMAT_R10G10B10A2_TYPELESS,
-   DXGI_FORMAT_R10G10B10A2_UNORM,
-   DXGI_FORMAT_R10G10B10A2_UINT,
+    DXGI_FORMAT_R10G10B10A2_TYPELESS,
+    DXGI_FORMAT_R10G10B10A2_UNORM,
+    DXGI_FORMAT_R10G10B10A2_UINT,
 
-   DXGI_FORMAT_R11G11B10_FLOAT,
+    DXGI_FORMAT_R11G11B10_FLOAT,
 
-   DXGI_FORMAT_R8G8B8A8_TYPELESS,
+    DXGI_FORMAT_R8G8B8A8_TYPELESS,
     DXGI_FORMAT_R8G8B8A8_UNORM,
     DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
     DXGI_FORMAT_R8G8B8A8_UINT,
@@ -53,8 +53,8 @@ DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
     DXGI_FORMAT_R16G16_SNORM,
     DXGI_FORMAT_R16G16_SINT,
    
-    DXGI_FORMAT_R32_TYPELESS,
     DXGI_FORMAT_D32_FLOAT,
+    DXGI_FORMAT_R32_TYPELESS,
     DXGI_FORMAT_R32_FLOAT,
     DXGI_FORMAT_R32_UINT,
     DXGI_FORMAT_R32_SINT,
@@ -217,9 +217,9 @@ namespace Insight
             switch (type)
             {
             case Insight::Graphics::DescriptorType::Sampler:                    return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Combined_Image_Sampler:     return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Sampled_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Storage_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Combined_Image_Sampler:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case Insight::Graphics::DescriptorType::Sampled_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case Insight::Graphics::DescriptorType::Storage_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case Insight::Graphics::DescriptorType::Unifom_Buffer:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -239,9 +239,9 @@ namespace Insight
             switch (type)
             {
             case Insight::Graphics::DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case Insight::Graphics::DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case Insight::Graphics::DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case Insight::Graphics::DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
             case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
             case Insight::Graphics::DescriptorType::Unifom_Buffer:          return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;

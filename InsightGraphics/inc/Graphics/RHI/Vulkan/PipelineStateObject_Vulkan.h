@@ -54,8 +54,8 @@ namespace Insight
 
 			struct RenderpassDesc_Vulkan
 			{
-				std::array<RenderTarget*, 8> RenderTargets;
-				RenderTarget* DepthStencil = nullptr;
+				std::array<RHI_Texture*, 8> RenderTargets;
+				RHI_Texture* DepthStencil = nullptr;
 				bool Swapchain = false;
 
 				u64 GetHash() const

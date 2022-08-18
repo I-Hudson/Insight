@@ -217,5 +217,49 @@ namespace Insight
 			}
 			return str;
 		}
+
+		std::string AccessFlagBitsToString(AccessFlagBits flags)
+		{
+			std::string str;
+
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::IndirectCommandRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::IndexRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::VertexAttributeRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::UniformRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::InputAttachmentRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::ShaderRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::ShaderWrite);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::ColorAttachmentRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::ColorAttachmentWrite);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::DepthStencilAttachmentRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::DepthStencilAttachmentWrite);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::TransferRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::TransferWrite);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::HostRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::HostWrite);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::MemoryRead);
+			IF_FLAG_BITS_STR(flags, AccessFlagBits::MemoryWrite);
+
+			if (!str.empty())
+			{
+				str.pop_back();
+			}
+			return str;
+		}
+
+		std::string ImageAspectFlagsToString(ImageAspectFlags flags)
+		{
+			std::string str;
+
+			IF_FLAG_BITS_STR(flags, ImageAspectFlagBits::Colour);
+			IF_FLAG_BITS_STR(flags, ImageAspectFlagBits::Depth);
+			IF_FLAG_BITS_STR(flags, ImageAspectFlagBits::Stencil);
+
+			if (!str.empty())
+			{
+				str.pop_back();
+			}
+			return str;
+		}
 	}
 }

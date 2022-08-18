@@ -41,10 +41,6 @@ namespace Insight
 
 			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
 
-		protected:
-			bool CanDraw(CommandList& cmdList);
-			virtual bool BindDescriptorSets();
-
 			virtual void SetPipeline(PipelineStateObject pso) = 0;
 			virtual void SetUniform(int set, int binding, DescriptorBufferView view) = 0;
 			virtual void SetTexture(int set, int binding, RHI_Texture* texture) = 0;
@@ -58,6 +54,10 @@ namespace Insight
 			virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) = 0;
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
+
+		protected:
+			bool CanDraw();
+			virtual bool BindDescriptorSets();
 
 			RenderContext* m_context{ nullptr };
 			FrameResouce* m_frameResouces;

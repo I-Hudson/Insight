@@ -18,6 +18,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class Mesh;
+		class RHI_CommandList;
 
 		struct Vertex
 		{
@@ -53,7 +54,9 @@ namespace Insight
 			~Submesh();
 
 			void Draw() const;
-
+#ifdef RENDER_GRAPH_ENABLED
+			void Draw(RHI_CommandList* cmdList) const;
+#endif //RENDER_GRAPH_ENABLED
 			void SetVertexInfo(SubmeshVertexInfo info);
 			void SetIndexBuffer(RHI_Buffer* buffer);
 
@@ -79,8 +82,13 @@ namespace Insight
 			bool LoadFromFile(std::string filePath);
 			void Destroy();
 		
+			std::vector<Submesh*> GetSubMeshes() const { return m_submeshes; }
+
 			void Draw() const;
-		
+#ifdef RENDER_GRAPH_ENABLED
+			void Draw(RHI_CommandList* cmdList) const;
+#endif //RENDER_GRAPH_ENABLED
+
 		private:
 			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices);
 			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices);

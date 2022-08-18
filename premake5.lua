@@ -27,6 +27,7 @@ workspace "Insight"
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
         "IS_PLATFORM_X64",
+        "RENDER_GRAPH_ENABLED",
     }
 
     includedirs
@@ -109,6 +110,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_obj = "/bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_debug = "bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+output_executable = "InsightEditor"
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 

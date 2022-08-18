@@ -4,6 +4,7 @@
 #include "Core/ManagerInterface.h"
 #include "Graphics/Renderpass.h"
 #include "Graphics/CommandList.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <thread>
 #include <mutex>
@@ -63,6 +64,10 @@ namespace Insight
 			CommandList m_renderCommandList;
 			std::mutex m_renderCommandListMutex;
 #endif
+#ifdef RENDER_GRAPH_ENABLED
+			RenderGraph m_renderGraph;
+#endif
+
 			RenderContext* m_renderContext{ nullptr };
 			Renderpass m_renderpass;
 		};

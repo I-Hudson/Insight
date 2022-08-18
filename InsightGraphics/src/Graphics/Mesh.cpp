@@ -1,6 +1,9 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/GraphicsManager.h"
+#ifdef RENDER_GRAPH_ENABLED
+#include "Graphics/RHI/RHI_CommandList.h"
+#endif
 #include "Core/Logger.h"
 
 #include "Core/Profiler.h"
@@ -27,6 +30,16 @@ namespace Insight
 			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
 			Renderer::DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
 		}
+
+#ifdef RENDER_GRAPH_ENABLED
+		void Submesh::Draw(RHI_CommandList* cmdList) const
+		{
+			cmdList->SetVertexBuffer(m_vertexInfo.Buffer);
+			cmdList->SetIndexBuffer(*m_indexBuffer);
+			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
+			cmdList->DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
+		}
+#endif // RENDER_GRAPH_ENABLED
 
 		void Submesh::SetVertexInfo(SubmeshVertexInfo info)
 		{
@@ -124,6 +137,17 @@ namespace Insight
 				submesh->Draw();
 			}
 		}
+
+#ifdef RENDER_GRAPH_ENABLED
+		void Mesh::Draw(RHI_CommandList* cmdList) const
+		{
+			IS_PROFILE_FUNCTION();
+			for (Submesh* submesh : m_submeshes)
+			{
+				submesh->Draw(cmdList);
+			}
+		}
+#endif //RENDER_GRAPH_ENABLED
 
 		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices)
 		{

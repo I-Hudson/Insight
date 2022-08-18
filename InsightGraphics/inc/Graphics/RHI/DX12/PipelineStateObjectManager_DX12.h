@@ -21,9 +21,10 @@ namespace Insight
 				PipelineStateObjectManager_DX12();
 				~PipelineStateObjectManager_DX12();
 
+				void Destroy();
+
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
 				ID3D12PipelineState* GetOrCreatePSO(PipelineStateObject pso);
-				void Destroy();
 
 			private:
 				std::map<u64, ComPtr<ID3D12PipelineState>> m_pipelines;

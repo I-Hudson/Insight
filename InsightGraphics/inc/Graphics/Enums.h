@@ -8,6 +8,8 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		using RGTextureHandle = int;
+
 		template<typename E, E V> 
 		constexpr bool IsValid() 
 		{
@@ -307,6 +309,59 @@ namespace Insight
 
 			Unknown
 		};
+
+		enum AccessFlagBits
+		{
+			IndirectCommandRead				= 1 << 0,
+			IndexRead						= 1 << 1,
+			VertexAttributeRead				= 1 << 2,
+			UniformRead						= 1 << 3,
+			InputAttachmentRead				= 1 << 4,
+			ShaderRead						= 1 << 5,
+			ShaderWrite						= 1 << 6,
+			ColorAttachmentRead				= 1 << 7,
+			ColorAttachmentWrite			= 1 << 8,
+			DepthStencilAttachmentRead		= 1 << 9,
+			DepthStencilAttachmentWrite		= 1 << 10,
+			TransferRead					= 1 << 11,
+			TransferWrite					= 1 << 12,
+			HostRead						= 1 << 13,
+			HostWrite						= 1 << 14,
+			MemoryRead						= 1 << 15,
+			MemoryWrite						= 1 << 16,
+			None							= 1 << 17,
+		};
+		using AccessFlags = Flags<AccessFlagBits>;
+		std::string AccessFlagBitsToString(AccessFlagBits flags);
+
+		enum class ImageLayout
+		{
+			Undefined,
+			General,
+			ColourAttachment,
+			DepthStencilAttachment,
+			DepthStencilAttachmentReadOnly,
+			ShaderReadOnly,
+			TransforSrc,
+			TransforDst,
+			Preinitialised,
+			DepthReadOnlyStencilAttacment,
+			DepthAttachmentStencilReadOnly,
+			DepthAttachmentOnly,
+			DepthReadOnly,
+			StencilAttacment,
+			StencilReadOnly,
+			PresentSrc
+		};
+
+		enum ImageAspectFlagBits
+		{
+			Colour		= 1 << 0,
+			Depth		= 1 << 1,
+			Stencil		= 1 << 2,
+		};
+		using ImageAspectFlags = Flags<ImageAspectFlagBits>;
+		std::string ImageAspectFlagsToString(ImageAspectFlags flags);
 
 		enum class DescriptorResourceType
 		{

@@ -15,6 +15,7 @@ namespace Insight
 			class RenderContext_DX12;
 			class CommandList_DX12;
 			class DescriptorHeap_DX12;
+			class RHI_CommandList_DX12;
 
 			class RHI_DescriptorLayout_DX12 : public RHI_DescriptorLayout
 			{
@@ -133,7 +134,7 @@ namespace Insight
 				std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
 				void SetDescriptors(CommandList_DX12* cmdList);
 
-				void SetDescriptorTables();
+				void SetDescriptorTables(RHI_CommandList_DX12* cmdList);
 				void BindDescriptorTables(ID3D12GraphicsCommandList* cmdList);
 				void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
 
@@ -150,6 +151,7 @@ namespace Insight
 
 				std::vector<std::pair<int, DescriptorHeapHandle_DX12>> m_descrptorTables;
 				std::unordered_map<int, std::unordered_map<int, u64>> m_boundDescriptors;
+				std::unordered_map<u64, DescriptorHeapHandle_DX12> m_boundDescriptorsHandle;
 			};
 		}
 	}

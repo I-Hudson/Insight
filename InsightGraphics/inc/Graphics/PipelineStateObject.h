@@ -12,7 +12,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RHI_Shader;
-		class RenderTarget;
+		class RHI_Texture;
 
 		// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
@@ -23,10 +23,10 @@ namespace Insight
 			RHI_Shader* Shader = nullptr;
 			GPUQueue Queue = GPUQueue_Graphics;
 
-			std::array<RenderTarget*, RenderTargetCount> RenderTargets;
+			std::array<RHI_Texture*, RenderTargetCount> RenderTargets;
 			glm::vec4 RenderTargetClearValues[RenderTargetCount];
 
-			RenderTarget* DepthStencil = nullptr;
+			RHI_Texture* DepthStencil = nullptr;
 			glm::vec2 DepthSteniclClearValue = glm::vec2(1.0f, 0.0f);
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
@@ -58,7 +58,7 @@ namespace Insight
 				HashCombine(hash, Shader);
 				HashCombine(hash, Queue);
 
-				for (const RenderTarget* rt : RenderTargets)
+				for (const RHI_Texture* rt : RenderTargets)
 				{
 					HashCombine(hash, rt);
 				}

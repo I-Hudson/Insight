@@ -259,7 +259,13 @@ namespace Insight
 					IS_PROFILE_SCOPE("Present");
 					//ZoneScopedN("Present");
 					// Present the frame.
-					ThrowIfFailed(m_swapchain->Present(0, 0));
+					if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
+					{
+						if (hr == 0x0)
+						{
+							m_device->GetDeviceRemovedReason();
+						}
+					}
 				}
 
 				WaitForNextFrame();

@@ -37,7 +37,6 @@ namespace Insight
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
-			protected:
 				// RHI_CommandList
 				virtual void SetPipeline(PipelineStateObject pso) override;
 				virtual void SetUniform(int set, int binding, DescriptorBufferView view) override;
@@ -53,6 +52,7 @@ namespace Insight
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 
+			protected:
 				virtual bool BindDescriptorSets() override;
 
 			private:

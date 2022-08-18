@@ -21,6 +21,7 @@ namespace Insight
 			public:
 
 				void ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers);
+				void ResourceBarrierImage(ID3D12Resource* resource, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState);
 
 				void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects);
 				void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, int Stencil, int NumRects, D3D12_RECT* rects);
@@ -43,7 +44,6 @@ namespace Insight
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
-			protected:
 				// RHI_CommandList
 				virtual void SetPipeline(PipelineStateObject pso) override;
 				virtual void SetUniform(int set, int binding, DescriptorBufferView view) override;
@@ -59,6 +59,7 @@ namespace Insight
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 
+			protected:
 				virtual bool BindDescriptorSets() override;
 
 			private:
@@ -68,6 +69,8 @@ namespace Insight
 			private:
 				ComPtr<ID3D12GraphicsCommandList> m_commandList;
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
+
+				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_resouceBarriers;
 
 				friend class RHI_CommandListAllocator_DX12;
 			};

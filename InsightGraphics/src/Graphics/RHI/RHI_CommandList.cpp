@@ -58,6 +58,7 @@ namespace Insight
 			for (int i = 0; i < cmdList.GetCommandCount(); ++i)
 			{
 				//ZoneScopedN("Single Command");
+				//ZoneScopedN("Single Command");
 				ICommand* command = cmdList.GetCurrentCommand();
 				switch (command->CommandType)
 				{
@@ -131,7 +132,7 @@ namespace Insight
 				case CommandType::Draw:
 				{
 					//ZoneScopedN("Draw");
-					if (!CanDraw(cmdList))
+					if (!CanDraw())
 					{
 						break;
 					}
@@ -142,7 +143,7 @@ namespace Insight
 
 				case CommandType::DrawIndexed:
 				{
-					if (!CanDraw(cmdList))
+					if (!CanDraw())
 					{
 						break;
 					}
@@ -174,12 +175,13 @@ namespace Insight
 			m_drawData = {};
 		}
 
-		bool RHI_CommandList::CanDraw(CommandList& cmdList)
+		bool RHI_CommandList::CanDraw()
 		{
 			if (m_pso.GetHash() != m_activePSO.GetHash())
 			{
 				m_activePSO = m_pso;
-				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(0, cmdList.GetDescriptorBuffer().GetDescriptorsSignature());
+				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(0, m_activePSO.Shader->GetDescriptors()
+				/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
 				BindPipeline(m_activePSO, layout);
 			}
 			return BindDescriptorSets();

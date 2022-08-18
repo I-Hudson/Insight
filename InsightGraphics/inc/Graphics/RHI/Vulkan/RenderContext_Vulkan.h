@@ -8,6 +8,7 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "VmaUsage.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <glm/vec2.hpp>
 #include <vulkan/vulkan.hpp>
@@ -51,6 +52,9 @@ namespace Insight
 				virtual void DestroyImGui() override;
 
 				virtual void Render(CommandList cmdList) override;
+
+				virtual void PrepareRender() override;
+				virtual void PostRender(RHI_CommandList* cmdList) override;
 
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
@@ -111,6 +115,11 @@ namespace Insight
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
 
+#ifdef RENDER_GRAPH_ENABLED
+				FrameResource<vk::Fence> m_submitFences;
+				FrameResource<vk::Semaphore> m_swapchainAcquires;
+				FrameResource<vk::Semaphore> m_signalSemaphores;
+#endif
 				FrameResource_Vulkan m_frames[c_FrameCount];
 			};
 		}

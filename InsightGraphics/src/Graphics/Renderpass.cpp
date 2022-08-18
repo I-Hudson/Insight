@@ -7,6 +7,8 @@
 
 #include "Core/Profiler.h"
 
+#include "Graphics/RenderGraph/RenderGraph.h"
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -108,10 +110,14 @@ namespace Insight
 			IMGUI_VALID(ImGui::Checkbox("Move shadow camera", &useShadowCamera));
 
 			UpdateCamera(useShadowCamera ? m_shadowCamera : m_camera);
-			ShadowPass();
+			//ShadowPass();
 			Sample(useShadowCamera ? m_shadowCamera : m_camera);
 			//Composite();
 			Swapchain();
+
+#ifdef RENDER_GRAPH_ENABLED
+			RenderGraph::Instance().Execute();
+#endif //#ifdef RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::Destroy()
@@ -159,6 +165,10 @@ namespace Insight
 			}
 
 			m_testMesh.Destroy();
+
+#ifdef RENDER_GRAPH_ENABLED
+			RenderGraph::Instance().Release();
+#endif //#ifdef RENDER_GRAPH_ENABLED
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -216,7 +226,7 @@ namespace Insight
 				shaderPassPso.Shader = shaderPassShader;
 				shaderPassPso.CullMode = CullMode::None;
 				shaderPassPso.Swapchain = false;
-				shaderPassPso.DepthStencil = m_shadowTarget;
+				shaderPassPso.DepthStencil = m_shadowTarget->GetTexture();
 				shaderPassPso.DepthCompareOp = CompareOp::GreaterOrEqual;
 				shaderPassPso.DepthSteniclClearValue = glm::vec2(0.0f, 0.0f);
 				Renderer::SetPipelineStateObject(shaderPassPso);
@@ -256,8 +266,8 @@ namespace Insight
 				gbufferPso.Shader = gbufferShader;
 				gbufferPso.CullMode = CullMode::Front;
 				gbufferPso.Swapchain = false;
-				gbufferPso.RenderTargets = { m_colourTarget };
-				gbufferPso.DepthStencil = m_depthTarget;
+				gbufferPso.RenderTargets = { m_colourTarget->GetTexture()};
+				gbufferPso.DepthStencil = m_depthTarget->GetTexture();
 				Renderer::SetPipelineStateObject(gbufferPso);
 			}
 
@@ -276,7 +286,72 @@ namespace Insight
 				Renderer::SetTexture(0, 2, m_shadowTarget->GetTexture());
 			}
 
-			m_testMesh.Draw();
+			//m_testMesh.Draw();
+
+#ifdef COMMAND_LIST_RENDER_BATCH
+			RenderPipelineData renderData;
+			renderData.PSO = gbufferPso;
+			renderData.Viewport = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+			renderData.Siccsior = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+
+			Renderer::s_FrameCommandList.AddRenderData(renderData);
+#endif
+
+#ifdef RENDER_GRAPH_ENABLED
+			struct TestPassData
+			{
+				Mesh& TestMesh;
+			};
+			TestPassData passData =
+			{
+				m_testMesh
+			};
+
+			RenderGraph::Instance().AddPass<TestPassData>("GBuffer", [](TestPassData& data , RenderGraphBuilder& builder)
+				{
+					RHI_TextureCreateInfo textureCreateInfo = { };
+					textureCreateInfo.Width = Window::Instance().GetWidth();
+					textureCreateInfo.Height = Window::Instance().GetHeight();
+					textureCreateInfo.Depth = 1;
+					textureCreateInfo.TextureType = TextureType::Tex2D;
+					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::ColourAttachment;
+					textureCreateInfo.Format = PixelFormat::R8G8B8A8_SNorm;
+					RGTextureHandle colourRT = builder.CreateTexture("ColourRT", textureCreateInfo);
+					builder.WriteTexture(colourRT);
+
+					textureCreateInfo.Format = PixelFormat::D16_UNorm;
+					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment;
+					RGTextureHandle depthStencil = builder.CreateTexture("DepthStencil", textureCreateInfo);
+					builder.WriteDepthStencil(depthStencil);
+
+					ShaderDesc shaderDesc;
+					{
+						IS_PROFILE_SCOPE("GBuffer-GetShader");
+						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+					}
+					builder.SetShader(shaderDesc);
+
+					PipelineStateObject gbufferPso = { };
+					{
+						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
+						gbufferPso.Name = L"GBuffer_PSO";
+						gbufferPso.CullMode = CullMode::Front;
+						gbufferPso.Swapchain = false;
+					}
+					builder.SetPipeline(gbufferPso);
+
+					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+				},
+				[](TestPassData& data, RenderContext* context, RHI_CommandList* cmdList)
+				{
+
+
+					data.TestMesh.Draw(cmdList);
+
+				}, std::move(passData));
+#endif //RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::Composite()
@@ -296,7 +371,7 @@ namespace Insight
 				compositePso.Name = L"CompositePso_PSO";
 				compositePso.Shader = compositeShader;
 				compositePso.CullMode = CullMode::None;
-				compositePso.RenderTargets = { m_compositeTarget };
+				compositePso.RenderTargets = { m_compositeTarget->GetTexture()};
 				Renderer::SetPipelineStateObject(compositePso);
 			}
 
@@ -336,6 +411,34 @@ namespace Insight
 			}
 
 			Renderer::Draw(3, 1, 0, 0);
+
+#ifdef RENDER_GRAPH_ENABLED
+			struct TestPassData
+			{ };
+			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
+				{
+					RGTextureHandle colourRT = builder.GetTexture("ColourRT");
+					builder.ReadTexture(colourRT);
+
+					ShaderDesc shaderDesc;
+					shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+					shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+					builder.SetShader(shaderDesc);
+
+					PipelineStateObject swapchainPso = { };
+					swapchainPso.Name = L"Swapchain_PSO";
+					swapchainPso.CullMode = CullMode::None;
+					swapchainPso.Swapchain = true;
+					builder.SetPipeline(swapchainPso);
+
+					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+				},
+				[](TestPassData& data, RenderContext* context, RHI_CommandList* cmdList)
+				{
+					cmdList->Draw(3, 1, 0, 0);
+				});
+#endif //RENDER_GRAPH_ENABLED
 		}
 
 		float previousTime = 0;

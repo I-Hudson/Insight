@@ -36,12 +36,16 @@ namespace Insight
 
 			virtual void Render(CommandList cmdList) = 0;
 
+			virtual void PrepareRender() = 0;
+			virtual void PostRender(RHI_CommandList* cmdList) = 0;
+
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 
 			bool HasExtension(DeviceExtension extension);
 
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
+			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 
 		protected:
 			void ImGuiBeginFrame();

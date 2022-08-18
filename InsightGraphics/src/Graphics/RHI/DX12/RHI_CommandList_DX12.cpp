@@ -5,6 +5,8 @@
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 
+#include "Graphics/RenderTarget.h"
+
 #include "Core/Profiler.h"
 
 namespace Insight
@@ -24,6 +26,18 @@ namespace Insight
 				{
 					m_commandList->ResourceBarrier(count, barriers);
 				}
+			}
+
+			void RHI_CommandList_DX12::ResourceBarrierImage(ID3D12Resource* resource, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState)
+			{
+				D3D12_RESOURCE_BARRIER barrierdesc = {};
+				barrierdesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				barrierdesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				barrierdesc.Transition.pResource = resource;
+				barrierdesc.Transition.StateBefore = srcState;
+				barrierdesc.Transition.StateAfter = dstState;
+				barrierdesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+				ResourceBarrier(1, &barrierdesc);
 			}
 
 			void RHI_CommandList_DX12::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects)
@@ -214,6 +228,15 @@ namespace Insight
 			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
 				IS_PROFILE_FUNCTION();
+			
+				for (RHI_Texture* rt : m_activePSO.RenderTargets)
+				{
+					if (rt)
+					{
+						//ResourceBarrierImage(dynamic_cast<RHI_Texture_DX12*>(rt->GetTexture())->GetResouce(), );
+					}
+				}
+				
 				ID3D12PipelineState* pipeline = RenderContextDX12()->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
 				m_commandList->SetPipelineState(pipeline);
 
@@ -228,7 +251,7 @@ namespace Insight
 				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
 				//FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
 				
-				FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables();
+				FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
 
 				std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
 				if (result && descriptors.size() > 0)

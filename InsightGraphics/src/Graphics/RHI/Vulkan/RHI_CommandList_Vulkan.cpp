@@ -195,13 +195,19 @@ namespace Insight
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+				if (CanDraw())
+				{
+					m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+				}
 			}
 
 			void RHI_CommandList_Vulkan::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+				if (CanDraw())
+				{
+					m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+				}
 			}
 
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
@@ -279,11 +285,11 @@ namespace Insight
 					}
 					else
 					{
-						for (RenderTarget* rt : pso.RenderTargets)
+						for (RHI_Texture* rt : pso.RenderTargets)
 						{
 							if (rt)
 							{
-								RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt->GetTexture());
+								RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
 								imageViews.push_back(textureVulkan->GetImageView());
 
 								vk::ClearValue clearValue;
@@ -298,7 +304,7 @@ namespace Insight
 
 					if (pso.DepthStencil)
 					{
-						RHI_Texture_Vulkan* depthVulkan = static_cast<RHI_Texture_Vulkan*>(pso.DepthStencil->GetTexture());
+						RHI_Texture_Vulkan* depthVulkan = static_cast<RHI_Texture_Vulkan*>(pso.DepthStencil);
 						imageViews.push_back(depthVulkan->GetImageView());
 
 						vk::ClearDepthStencilValue clearValue;
