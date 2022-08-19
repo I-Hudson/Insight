@@ -41,6 +41,9 @@ namespace Insight
 
 			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
 
+			virtual void BeginRenderpass() = 0;
+			virtual void EndRenderpass() = 0;
+
 			virtual void SetPipeline(PipelineStateObject pso) = 0;
 			virtual void SetUniform(int set, int binding, DescriptorBufferView view) = 0;
 			virtual void SetTexture(int set, int binding, RHI_Texture* texture) = 0;
@@ -105,8 +108,8 @@ namespace Insight
 			void ReturnSingleUseCommandList(RHI_CommandList* cmdList);
 
 		private:
-			RenderContext* m_context{ nullptr };
-			RHI_CommandListAllocator* m_allocator;
+			RenderContext* m_context = nullptr;
+			RHI_CommandListAllocator* m_allocator = nullptr;
 		};
 	}
 }

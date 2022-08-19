@@ -198,6 +198,35 @@ namespace Insight
 			return str;
 		}
 
+		std::string AttachmentLoadOpToString(AttachmentLoadOp op)
+		{
+			std::string str;
+
+			IF_FLAG_STR(op, AttachmentLoadOp::Load);
+			IF_FLAG_STR(op, AttachmentLoadOp::Clear);
+			IF_FLAG_STR(op, AttachmentLoadOp::DontCare);
+
+			if (!str.empty())
+			{
+				str.pop_back();
+			}
+			return str;
+		}
+
+		std::string AttacmentStoreOpToString(AttachmentStoreOp op)
+		{
+			std::string str;
+
+			IF_FLAG_STR(op, AttachmentStoreOp::Store);
+			IF_FLAG_STR(op, AttachmentStoreOp::DontCare);
+
+			if (!str.empty())
+			{
+				str.pop_back();
+			}
+			return str;
+		}
+
 		std::string ImageUsageFlagsToString(ImageUsageFlags flags)
 		{
 			std::string str;

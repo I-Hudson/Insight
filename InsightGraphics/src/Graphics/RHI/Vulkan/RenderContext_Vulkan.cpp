@@ -230,6 +230,24 @@ namespace Insight
 
 				InitImGui();
 
+#ifdef RENDER_GRAPH_ENABLED
+				m_submitFences.Setup();
+				m_submitFences.ForEach([this](vk::Fence& fence)
+					{
+						fence = m_device.createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
+					});
+				m_swapchainAcquires.Setup();
+				m_swapchainAcquires.ForEach([this](vk::Semaphore& semaphore)
+					{
+						semaphore = m_device.createSemaphore(vk::SemaphoreCreateInfo());
+					});
+				m_signalSemaphores.Setup();
+				m_signalSemaphores.ForEach([this](vk::Semaphore& semaphore)
+					{
+						semaphore = m_device.createSemaphore(vk::SemaphoreCreateInfo());
+					});
+#endif
+
 				return true;
 			}
 
@@ -240,6 +258,21 @@ namespace Insight
 				m_device.waitIdle();
 
 				DestroyImGui();
+
+#ifdef RENDER_GRAPH_ENABLED
+				m_submitFences.ForEach([this](vk::Fence& fence)
+					{
+						m_device.destroyFence(fence);
+					});
+				m_swapchainAcquires.ForEach([this](vk::Semaphore& semaphore)
+					{
+						m_device.destroySemaphore(semaphore);
+					});
+				m_signalSemaphores.ForEach([this](vk::Semaphore& semaphore)
+					{
+						m_device.destroySemaphore(semaphore);
+					});
+#endif
 
 				for (FrameResource_Vulkan& frame : m_frames)
 				{
@@ -444,11 +477,11 @@ namespace Insight
 				m_device.resetFences({ frame.SubmitFence });
 
 				frame.Reset();
-				PrepareRender();
 
 				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
 				cmdListVulkan->Record(cmdList, &frame);
 				cmdListVulkan->GetCommandList().endRenderPass();
+
 
 				// Render imgui.
 				if (m_imguiFramebuffers[m_currentFrame])
@@ -486,45 +519,12 @@ namespace Insight
 					cmdListVulkan->GetCommandList().endRenderPass();
 					cmdListVulkan->GetCommandList().end();
 				}
+
 				std::array<vk::Semaphore, 1> waitSemaphores = { frame.SwapchainAcquire };
 				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 				std::array<vk::Semaphore, 1> signalSemaphore = { frame.SignalSemaphore };
-			}
 
-			void RenderContext_Vulkan::PrepareRender()
-			{
-#ifdef RENDER_GRAPH_ENABLED
-				IS_PROFILE_FUNCTION();
-
-				if (Window::Instance().GetSize() != m_swapchainBufferSize)
-				{
-					IS_PROFILE_SCOPE("Swapchain resize");
-					WaitForGpu();
-					CreateSwapchain();
-					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
-					return;
-				}
-
-				{
-					IS_PROFILE_SCOPE("ImGui Render");
-					ImGuiRender();
-				}
-
-				{
-					IS_PROFILE_SCOPE("Fence wait");
-					vk::Result waitResult = m_device.waitForFences({ *m_submitFences.Get() }, 1, 0xFFFFFFFF);
-					assert(waitResult == vk::Result::eSuccess);
-				}
-
-				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, *m_swapchainAcquires.Get() );
-				m_availableSwapchainImage = nextImage.value;
-				m_device.resetFences({ *m_submitFences.Get() });
-#endif
-			}
-
-			void RenderContext_Vulkan::PostRender()
-			{
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(
 					waitSemaphores,
 					dstStageFlgs,
@@ -551,6 +551,77 @@ namespace Insight
 					ImGui_ImplVulkan_NewFrame();
 					ImGuiBeginFrame();
 				}
+			}
+
+			bool RenderContext_Vulkan::PrepareRender()
+			{
+#ifdef RENDER_GRAPH_ENABLED
+				IS_PROFILE_FUNCTION();
+
+				if (Window::Instance().GetSize() != m_swapchainBufferSize)
+				{
+					IS_PROFILE_SCOPE("Swapchain resize");
+					WaitForGpu();
+					CreateSwapchain();
+					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+					return false;
+				}
+
+				{
+					IS_PROFILE_SCOPE("ImGui Render");
+					ImGuiRender();
+				}
+
+				{
+					IS_PROFILE_SCOPE("Fence wait");
+					vk::Result waitResult = m_device.waitForFences({ *m_submitFences.Get() }, 1, 0xFFFFFFFF);
+					assert(waitResult == vk::Result::eSuccess);
+				}
+
+				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, *m_swapchainAcquires.Get() );
+				m_availableSwapchainImage = nextImage.value;
+				m_device.resetFences({ *m_submitFences.Get() });
+#endif
+				return true;
+			}
+
+			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
+			{
+#ifdef RENDER_GRAPH_ENABLED
+				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
+
+				std::array<vk::Semaphore, 1> waitSemaphores = { *m_swapchainAcquires.Get() };
+				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+				std::array<vk::Semaphore, 1> signalSemaphore = { *m_signalSemaphores.Get() };
+
+				vk::SubmitInfo submitInfo = vk::SubmitInfo(
+					waitSemaphores,
+					dstStageFlgs,
+					commandBuffers,
+					signalSemaphore);
+				{
+					IS_PROFILE_SCOPE("Submit");
+					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, *m_submitFences.Get());
+				}
+				std::array<vk::Semaphore, 1> signalSemaphores = { *m_signalSemaphores.Get() };
+				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
+				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
+
+				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
+				{
+					IS_PROFILE_SCOPE("Present");
+
+					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+				}
+				m_currentFrame = (m_currentFrame + 1) % c_FrameCount;
+
+				{
+					IS_PROFILE_SCOPE("ImGui NewFrame");
+					ImGui_ImplVulkan_NewFrame();
+					ImGuiBeginFrame();
+				}
+#endif
 			}
 
 			void RenderContext_Vulkan::GpuWaitForIdle()

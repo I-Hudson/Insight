@@ -9,6 +9,15 @@
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
+#ifdef IS_VULKAN_ENABLED
+#include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
+#endif
+#ifdef IS_DX12_ENABLED
+#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
+#endif
+#include <backends/imgui_impl_vulkan.h>
+#include <backends/imgui_impl_dx12.h>
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 
@@ -35,6 +44,7 @@ namespace Insight
 				m_shadowCamera.Projection = glm::perspective(glm::radians(ShadowFOV), aspect, ShadowZNear, ShadowZFar);
 			}
 
+#ifndef RENDER_GRAPH_ENABLED
 			if (!m_vertexBuffer)
 			{
 				//ZoneScopedN("CreateVertexBuffer");
@@ -99,6 +109,7 @@ namespace Insight
 				m_compositeTarget->Create("CompositeTarget", desc);
 				m_compositeTarget->GetTexture()->SetName(L"CompositeTarget");
 			}
+#endif
 		}
 
 		bool useShadowCamera = false;
@@ -114,14 +125,12 @@ namespace Insight
 			Sample(useShadowCamera ? m_shadowCamera : m_camera);
 			//Composite();
 			Swapchain();
-
-#ifdef RENDER_GRAPH_ENABLED
-			RenderGraph::Instance().Execute();
-#endif //#ifdef RENDER_GRAPH_ENABLED
+			ImGuiPass();
 		}
 
 		void Renderpass::Destroy()
 		{
+#ifndef RENDER_GRAPH_ENABLED
 			if (m_vertexBuffer)
 			{
 				Renderer::FreeVertexBuffer(m_vertexBuffer);
@@ -163,6 +172,7 @@ namespace Insight
 				Renderer::FreeRenderTarget(m_compositeTarget);
 				m_compositeTarget = nullptr;
 			}
+#endif 
 
 			m_testMesh.Destroy();
 
@@ -211,6 +221,7 @@ namespace Insight
 
 		void Renderpass::ShadowPass()
 		{
+#ifndef RENDER_GRAPH_ENABLED
 			RHI_Shader* shaderPassShader = nullptr;
 			{
 				IS_PROFILE_SCOPE("ShaderPass-GetShader");
@@ -245,12 +256,14 @@ namespace Insight
 			Renderer::BindIndexBuffer(m_indexBuffer);
 
 			m_testMesh.Draw();
+#endif
 		}
 
 		void Renderpass::Sample(UBO_Camera& camera)
 		{
 			IS_PROFILE_FUNCTION();
 
+#ifndef RENDER_GRAPH_ENABLED
 			RHI_Shader* gbufferShader = nullptr;
 			{
 				IS_PROFILE_SCOPE("GBuffer-GetShader");
@@ -287,14 +300,15 @@ namespace Insight
 			}
 
 			//m_testMesh.Draw();
+#endif
 
 #ifdef COMMAND_LIST_RENDER_BATCH
-			RenderPipelineData renderData;
-			renderData.PSO = gbufferPso;
-			renderData.Viewport = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			renderData.Siccsior = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-
-			Renderer::s_FrameCommandList.AddRenderData(renderData);
+			//RenderPipelineData renderData;
+			//renderData.PSO = gbufferPso;
+			//renderData.Viewport = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+			//renderData.Siccsior = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+			//
+			//Renderer::s_FrameCommandList.AddRenderData(renderData);
 #endif
 
 #ifdef RENDER_GRAPH_ENABLED
@@ -344,11 +358,13 @@ namespace Insight
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
-				[](TestPassData& data, RenderContext* context, RHI_CommandList* cmdList)
+				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
+					cmdList->BeginRenderpass();
+					cmdList->BindPipeline(pass.m_pso, nullptr);
+					cmdList->EndRenderpass();
 
-
-					data.TestMesh.Draw(cmdList);
+					//data.TestMesh.Draw(cmdList);
 
 				}, std::move(passData));
 #endif //RENDER_GRAPH_ENABLED
@@ -356,6 +372,7 @@ namespace Insight
 
 		void Renderpass::Composite()
 		{
+#ifndef RENDER_GRAPH_ENABLED
 			RHI_Shader* compositeShader = nullptr;
 			{
 				IS_PROFILE_SCOPE("Composite-GetShader");
@@ -382,10 +399,12 @@ namespace Insight
 			}
 
 			Renderer::Draw(3, 1, 0, 0);
+#endif
 		}
 
 		void Renderpass::Swapchain()
 		{
+#ifndef RENDER_GRAPH_ENABLED
 			RHI_Shader* swapchainShader = nullptr;
 			{
 				IS_PROFILE_SCOPE("Swapchain-GetShader");
@@ -411,6 +430,7 @@ namespace Insight
 			}
 
 			Renderer::Draw(3, 1, 0, 0);
+#endif
 
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
@@ -419,24 +439,62 @@ namespace Insight
 				{
 					RGTextureHandle colourRT = builder.GetTexture("ColourRT");
 					builder.ReadTexture(colourRT);
-
+			
 					ShaderDesc shaderDesc;
 					shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 					shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 					builder.SetShader(shaderDesc);
-
+			
 					PipelineStateObject swapchainPso = { };
 					swapchainPso.Name = L"Swapchain_PSO";
 					swapchainPso.CullMode = CullMode::None;
-					swapchainPso.Swapchain = true;
 					builder.SetPipeline(swapchainPso);
-
+			
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+
+					builder.SetAsRenderToSwapchain();
 				},
-				[](TestPassData& data, RenderContext* context, RHI_CommandList* cmdList)
+				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
+					cmdList->BeginRenderpass();
 					cmdList->Draw(3, 1, 0, 0);
+					cmdList->EndRenderpass();
+				});
+#endif //RENDER_GRAPH_ENABLED
+		}
+
+		void Renderpass::ImGuiPass()
+		{
+#ifdef RENDER_GRAPH_ENABLED
+			struct TestPassData
+			{ };
+			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [](TestPassData& data, RenderGraphBuilder& builder)
+				{
+					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetAsRenderToSwapchain();
+
+					RenderpassDescription renderpassDescription = { };
+					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
+					builder.SetRenderpass(renderpassDescription);
+				},
+				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
+				{
+					cmdList->BeginRenderpass();
+#ifdef IS_VULKAN_ENABLED
+					if (GraphicsManager::Instance().IsVulkan())
+					{
+						ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmdList)->GetCommandList());
+					}
+#endif
+#ifdef IS_DX12_ENABLED
+					if (GraphicsManager::Instance().IsDX12())
+					{
+						ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmdList)->GetCommandList());
+					}
+#endif
+					cmdList->EndRenderpass();
 				});
 #endif //RENDER_GRAPH_ENABLED
 		}
@@ -550,13 +608,13 @@ namespace Insight
 
 			if (useShadowCamera)
 			{
-				aspect = (float)m_shadowTarget->GetDesc().Width / (float)m_shadowTarget->GetDesc().Height;
+				aspect = 1.0f;
 				camera.Projection = glm::perspective(glm::radians(ShadowFOV), aspect, ShadowZNear, ShadowZFar);
 				camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			}
 			else
 			{
-				aspect = (float)m_colourTarget->GetDesc().Width / (float)m_colourTarget->GetDesc().Height;
+				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 				camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 				camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			}

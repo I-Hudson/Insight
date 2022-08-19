@@ -6,6 +6,8 @@
 #include "Graphics/GraphicsManager.h"
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Event/EventManager.h"
+
 #include <set>
 
 namespace Insight
@@ -15,9 +17,29 @@ namespace Insight
 		u32 RenderGraph::s_FarmeCount = 2;
 
 		RenderGraph::RenderGraph()
+		{ }
+
+		void RenderGraph::Init(RenderContext* context)
 		{
+			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
+				{
+					Release();
+					m_commandListManager.ForEach([this](CommandListManager& manager)
+						{
+							manager.Create(m_context);
+						});
+				});
+
+			m_context = context;
+
 			m_textureCaches.Setup();
 			m_commandListManager.Setup();
+
+			m_commandListManager.Setup();
+			m_commandListManager.ForEach([this](CommandListManager& manager)
+			{
+				manager.Create(m_context);
+			});
 		}
 
 		void RenderGraph::Execute()
@@ -42,7 +64,7 @@ namespace Insight
 			Render();
 			Clear();
 
-			++m_frameIndex;
+			m_frameIndex = (m_frameIndex + 1) % s_FarmeCount;
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureCreateInfo info)
@@ -63,14 +85,19 @@ namespace Insight
 
 			m_textureCaches.ForEach([](RHI_ResouceCache<RHI_Texture>& cache)
 				{
-					cache.ReleaseAll();
+					cache.Reset();
+				});
+
+			m_commandListManager.ForEach([](CommandListManager& manager)
+				{
+					manager.Destroy();
 				});
 		}
 
 		void RenderGraph::Build()
 		{
 			RenderGraphBuilder builder(this);
-			// This should be threaded. Leave as single thread for now.
+			// TODO: This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
 				builder.SetPass(pass.Get());
@@ -99,6 +126,8 @@ namespace Insight
 					++rtIndex;
 				}
 				pso.DepthStencil = m_textureCaches->Get(pass.Get()->m_depthStencilWrite);
+
+				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
 			}
 		}
 
@@ -190,7 +219,27 @@ namespace Insight
 
 		void RenderGraph::Render()
 		{
-			m_context->PrepareRender();
+			if (m_context->PrepareRender())
+			{
+				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
+
+				// TODO: Could be threaded? Leave as it is for now as it works.
+				for (UPtr<RenderGraphPassBase>& pass : m_passes)
+				{
+					cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f);
+					cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
+
+					pass->m_pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass->m_shader);
+					pass->m_pso.Swapchain = pass->m_swapchainPass;
+					cmdList->SetPipeline(pass->m_pso);
+
+					pass->Execute(cmdList);
+				}
+
+				cmdList->Close();
+
+				m_context->PostRender(cmdList);
+			}
 		}
 
 		void RenderGraph::Clear()

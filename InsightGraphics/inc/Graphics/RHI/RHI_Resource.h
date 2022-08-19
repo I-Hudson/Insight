@@ -135,6 +135,14 @@ namespace Insight
 				return -1;
 			}
 
+			void Reset()
+			{
+				m_itemLookup.clear();
+				m_idToStrLookup.clear();
+				m_currentMaxId = 0;
+				ReleaseAll();
+			}
+
 		private:
 			int GetFreeId()
 			{

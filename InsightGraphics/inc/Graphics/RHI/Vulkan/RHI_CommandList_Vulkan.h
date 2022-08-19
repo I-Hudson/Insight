@@ -38,6 +38,9 @@ namespace Insight
 				virtual void SetName(std::wstring name) override;
 
 				// RHI_CommandList
+				virtual void BeginRenderpass() override;
+				virtual void EndRenderpass() override;
+
 				virtual void SetPipeline(PipelineStateObject pso) override;
 				virtual void SetUniform(int set, int binding, DescriptorBufferView view) override;
 				virtual void SetTexture(int set, int binding, RHI_Texture* texture) override;
@@ -58,6 +61,8 @@ namespace Insight
 			private:
 				RenderContext_Vulkan* RenderContextVulkan();
 				FrameResource_Vulkan* FrameResourceVulkan();
+
+				void CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours);
 
 			private:
 				vk::CommandBuffer m_commandList{ nullptr };

@@ -7,6 +7,7 @@
 #include "Graphics/ShaderDesc.h"
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/RHI/RHI_Texture.h"
+#include "Graphics/RHI/RHI_Renderpass.h"
 
 #include <functional>
 #include <vector>
@@ -76,16 +77,21 @@ namespace Insight
 
 		protected:
 			virtual void Setup(RenderGraphBuilder& builder) = 0;
-			virtual void Execute(RenderContext* context, RHI_CommandList* cmdList) = 0;
+			virtual void Execute(RHI_CommandList* cmdList) = 0;
 
-		private:
+		public:
 			std::vector<std::pair<RGTextureHandle, RHI_TextureCreateInfo>> m_textureCreates;
 			std::vector<RGTextureHandle> m_textureReads;
 			std::vector<RGTextureHandle> m_textureWrites;
 			RGTextureHandle m_depthStencilWrite = -1;
 		
-			ShaderDesc m_shader;
-			PipelineStateObject m_pso;
+			// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.
+			RenderpassDescription m_renderpassDescription = { };
+
+			bool m_swapchainPass = false; // Does this render straight to the swap chain.
+
+			ShaderDesc m_shader = { };
+			PipelineStateObject m_pso = { };
 
 			glm::ivec2 m_viewport;
 			glm::ivec2 m_scissor;
@@ -101,7 +107,7 @@ namespace Insight
 		{
 		public:
 			using SetupFunc = std::function<void(TPassData&, RenderGraphBuilder&)>;
-			using ExecuteFunc = std::function<void(TPassData&, RenderContext*, RHI_CommandList*)>;
+			using ExecuteFunc = std::function<void(TPassData&, RenderGraphPassBase&, RHI_CommandList*)>;
 
 			RenderGraphPass(std::string passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
 				: m_passName(std::move(passName))
@@ -117,9 +123,9 @@ namespace Insight
 			{
 				m_setupFunc(m_passData, builder);
 			}
-			virtual void Execute(RenderContext* context, RHI_CommandList* cmdList) override
+			virtual void Execute(RHI_CommandList* cmdList) override
 			{
-				m_executeFunc(m_passData, context, cmdList);
+				m_executeFunc(m_passData, *this, cmdList);
 			}
 
 		private:

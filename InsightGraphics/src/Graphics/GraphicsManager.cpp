@@ -31,7 +31,7 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
+			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
 			currentGraphicsAPI = (int)m_sharedData.GraphicsAPI;
 
 			m_renderContext = RenderContext::New();
@@ -46,7 +46,7 @@ namespace Insight
 			}
 
 #ifdef RENDER_GRAPH_ENABLED
-			m_renderGraph.SetRenderContext(m_renderContext);
+			m_renderGraph.Init(m_renderContext);
 #endif //#ifdef RENDER_GRAPH_ENABLED
 
 			m_renderpass.Create();
@@ -111,7 +111,8 @@ namespace Insight
 						Renderer::s_FrameCommandList.Reset();
 
 #ifdef RENDER_GRAPH_ENABLED
-						m_renderGraph.SetRenderContext(m_renderContext);
+						m_renderGraph.Release();
+						m_renderGraph.Init(m_renderContext);
 #endif //#ifdef RENDER_GRAPH_ENABLED
 						return;
 					}
@@ -134,9 +135,15 @@ namespace Insight
 				++m_frameOffset;
 			}
 #else
+
+#ifdef RENDER_GRAPH_ENABLED
+			RenderGraph::Instance().Execute();
+#else
 			m_renderContext->Render(Renderer::s_FrameCommandList);
+#endif//#ifdef RENDER_GRAPH_ENABLED
+
 #endif
-				Renderer::s_FrameCommandList.Reset();
+			Renderer::s_FrameCommandList.Reset();
 		}
 
 		void GraphicsManager::Destroy()
@@ -149,8 +156,8 @@ namespace Insight
 #endif
 
 				m_renderContext->GpuWaitForIdle();
-
 				m_renderpass.Destroy();
+				m_renderGraph.Release();
 				m_renderContext->Destroy();
 				DeleteTracked(m_renderContext);
 			}

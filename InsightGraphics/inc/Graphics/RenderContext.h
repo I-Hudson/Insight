@@ -10,6 +10,7 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
+#include "Graphics/RHI/RHI_Renderpass.h"
 
 #include "Core/Collections/FactoryMap.h"
 
@@ -36,7 +37,7 @@ namespace Insight
 
 			virtual void Render(CommandList cmdList) = 0;
 
-			virtual void PrepareRender() = 0;
+			virtual bool PrepareRender() = 0;
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
 			virtual void GpuWaitForIdle() = 0;
@@ -46,6 +47,7 @@ namespace Insight
 
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
+			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -74,7 +76,9 @@ namespace Insight
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;
 			std::vector<RenderTarget*> m_renderTargets;
+
 			RHI_ShaderManager m_shaderManager;
+			RHI_RenderpassManager m_renderpassManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
 

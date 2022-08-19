@@ -6,6 +6,7 @@
 #include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/ShaderDesc.h"
+#include "Graphics/RHI/RHI_Renderpass.h"
 
 namespace Insight
 {
@@ -22,6 +23,9 @@ namespace Insight
 			RenderGraphBuilder(RenderGraph* rg);
 
 			void SetPass(RenderGraphPassBase* pass);
+			void SetAsRenderToSwapchain();
+
+			void SetRenderpass(RenderpassDescription description);
 
 			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureCreateInfo desc);
 			RGTextureHandle GetTexture(std::string textureName);

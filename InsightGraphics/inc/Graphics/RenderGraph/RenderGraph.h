@@ -59,7 +59,7 @@ namespace Insight
 		public:
 			RenderGraph();
 
-			void SetRenderContext(RenderContext* context) { m_context = context; }
+			void Init(RenderContext* context);
 			void Execute();
 
 			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureCreateInfo info);

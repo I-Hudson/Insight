@@ -693,6 +693,19 @@ namespace Insight
             return vk::CompareOp::eNever;
         }
 
+        vk::AttachmentLoadOp AttachmentLoadOpToVulkan(AttachmentLoadOp op)
+        {
+            switch (op)
+            {
+            case Insight::Graphics::AttachmentLoadOp::Load: return vk::AttachmentLoadOp::eLoad;
+            case Insight::Graphics::AttachmentLoadOp::Clear: return vk::AttachmentLoadOp::eClear;
+            case Insight::Graphics::AttachmentLoadOp::DontCare: return vk::AttachmentLoadOp::eDontCare;
+            default:
+                break;
+            }
+            return vk::AttachmentLoadOp::eClear;
+        }
+
         vk::BufferUsageFlags BufferTypeToVulkanBufferUsageFlags(BufferType type)
         {
             switch (type)
@@ -744,6 +757,32 @@ namespace Insight
                 break;
             }
             return vk::DescriptorType::eCombinedImageSampler;
+        }
+
+        vk::ImageLayout ImageLayoutToVulkan(ImageLayout layout)
+        {
+            switch (layout)
+            {
+            case Insight::Graphics::ImageLayout::Undefined: return vk::ImageLayout::eUndefined;
+            case Insight::Graphics::ImageLayout::General: return vk::ImageLayout::eGeneral;
+            case Insight::Graphics::ImageLayout::ColourAttachment: return vk::ImageLayout::eAttachmentOptimalKHR;
+            case Insight::Graphics::ImageLayout::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+            case Insight::Graphics::ImageLayout::DepthStencilAttachmentReadOnly: return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
+            case Insight::Graphics::ImageLayout::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
+            case Insight::Graphics::ImageLayout::TransforSrc: return vk::ImageLayout::eTransferSrcOptimal;
+            case Insight::Graphics::ImageLayout::TransforDst: return vk::ImageLayout::eTransferDstOptimal;
+            case Insight::Graphics::ImageLayout::Preinitialised: return vk::ImageLayout::ePreinitialized;
+            case Insight::Graphics::ImageLayout::DepthReadOnlyStencilAttacment: return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
+            case Insight::Graphics::ImageLayout::DepthAttachmentStencilReadOnly: return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+            case Insight::Graphics::ImageLayout::DepthAttachmentOnly: return vk::ImageLayout::eDepthAttachmentOptimal;
+            case Insight::Graphics::ImageLayout::DepthReadOnly: return vk::ImageLayout::eDepthReadOnlyOptimal;
+            case Insight::Graphics::ImageLayout::StencilAttacment: return vk::ImageLayout::eStencilAttachmentOptimal;
+            case Insight::Graphics::ImageLayout::StencilReadOnly: return vk::ImageLayout::eStencilReadOnlyOptimal;
+            case Insight::Graphics::ImageLayout::PresentSrc: return vk::ImageLayout::ePresentSrcKHR;
+            default:
+                break;
+            }
+            return vk::ImageLayout::eUndefined;
         }
 
         VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)

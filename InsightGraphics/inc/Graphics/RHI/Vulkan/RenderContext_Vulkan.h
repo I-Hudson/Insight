@@ -53,7 +53,7 @@ namespace Insight
 
 				virtual void Render(CommandList cmdList) override;
 
-				virtual void PrepareRender() override;
+				virtual bool PrepareRender() override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
 				virtual void GpuWaitForIdle() override;

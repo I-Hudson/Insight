@@ -37,6 +37,7 @@ namespace Insight
 			void Sample(UBO_Camera& camera);
 			void Composite();
 			void Swapchain();
+			void ImGuiPass();
 
 			void UpdateCamera(UBO_Camera& camera);
 

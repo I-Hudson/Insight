@@ -33,6 +33,7 @@ namespace Insight
 			::Insight::Renderer::s_context = context;
 			context->m_shaderManager.SetRenderContext(context);
 			context->m_descriptorLayoutManager.SetRenderContext(context);
+			context->m_renderpassManager.SetRenderContext(context);
 
 			if (ENABLE_IMGUI)
 			{

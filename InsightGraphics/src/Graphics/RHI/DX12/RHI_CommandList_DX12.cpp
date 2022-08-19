@@ -155,6 +155,18 @@ namespace Insight
 				}
 			}
 
+			void RHI_CommandList_DX12::BeginRenderpass()
+			{
+				IS_PROFILE_FUNCTION();
+
+			}
+
+			void RHI_CommandList_DX12::EndRenderpass()
+			{
+				IS_PROFILE_FUNCTION();
+
+			}
+
 			void RHI_CommandList_DX12::SetPipeline(PipelineStateObject pso)
 			{
 				IS_PROFILE_FUNCTION();
@@ -228,14 +240,6 @@ namespace Insight
 			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
 				IS_PROFILE_FUNCTION();
-			
-				for (RHI_Texture* rt : m_activePSO.RenderTargets)
-				{
-					if (rt)
-					{
-						//ResourceBarrierImage(dynamic_cast<RHI_Texture_DX12*>(rt->GetTexture())->GetResouce(), );
-					}
-				}
 				
 				ID3D12PipelineState* pipeline = RenderContextDX12()->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
 				m_commandList->SetPipelineState(pipeline);

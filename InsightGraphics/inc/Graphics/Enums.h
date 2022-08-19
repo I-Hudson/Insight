@@ -252,6 +252,21 @@ namespace Insight
 		};
 		std::string CompareOpToString(CompareOp op);
 
+		enum class AttachmentLoadOp
+		{
+			Load,
+			Clear,
+			DontCare
+		};
+		std::string AttachmentLoadOpToString(AttachmentLoadOp op);
+
+		enum class AttachmentStoreOp
+		{
+			Store,
+			DontCare,
+		};
+		std::string AttacmentStoreOpToString(AttachmentStoreOp op);
+
         /// <summary>
         /// Define the image usage flags which a input within the 
         /// rendering pipeline can be.
@@ -420,6 +435,5 @@ namespace Insight
 
 			DeviceExtensionCount
 		};
-
 	}
 }

@@ -19,6 +19,16 @@ namespace Insight
 			ASSERT(m_pass);
 		}
 
+		void RenderGraphBuilder::SetAsRenderToSwapchain()
+		{
+			m_pass->m_swapchainPass = true;
+		}
+
+		void RenderGraphBuilder::SetRenderpass(RenderpassDescription description)
+		{
+			m_pass->m_renderpassDescription = std::move(description);
+		}
+
 		RGTextureHandle RenderGraphBuilder::CreateTexture(std::string textureName, RHI_TextureCreateInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
@@ -53,7 +63,7 @@ namespace Insight
 
 		void RenderGraphBuilder::SetPipeline(PipelineStateObject pso)
 		{
-			m_pass->m_pso = pso;
+			m_pass->m_pso = std::move(pso);
 		}
 
 		void RenderGraphBuilder::SetViewport(u32 width, u32 height)

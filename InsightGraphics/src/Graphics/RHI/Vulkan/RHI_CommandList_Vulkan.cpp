@@ -54,6 +54,11 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::Close()
 			{
+				if (m_activeRenderpass)
+				{
+					EndRenderpass();
+				}
+
 				if (m_commandList)
 				{
 					m_commandList.end();
@@ -130,11 +135,85 @@ namespace Insight
 				RenderContextVulkan()->SetObejctName(name, (u64)m_commandList.operator VkCommandBuffer(), m_commandList.objectType);
 			}
 
+			void RHI_CommandList_Vulkan::BeginRenderpass()
+			{
+				IS_PROFILE_FUNCTION();
+
+				if (!m_activeRenderpass)
+				{
+					//// Before rendering anything, make sure all our RenderTargets are in the correct layout.
+					//for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
+					//{
+					//	const RenderTarget* rt = pso.RenderTargets.at(i);
+					//	if (rt)
+					//	{
+					//		const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
+
+					//		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
+					//			vk::AccessFlagBits::eNoneKHR,
+					//			vk::AccessFlagBits::eColorAttachmentWrite,
+					//			vk::ImageLayout::eUndefined,
+					//			vk::ImageLayout::eColorAttachmentOptimal,
+					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					//			textureVulkan->GetImage(),
+					//			vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					//		PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
+					//	}
+					//}
+
+					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
+					//vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{ m_pso.RenderTargets, m_pso.DepthStencil, m_pso.Swapchain });
+					
+					RenderpassDescription renderpassDescription = { };
+					renderpassDescription.DepthStencil = m_pso.DepthStencil;
+
+					if (m_pso.Swapchain)
+					{
+						AttachmentDescription description = AttachmentDescription::Default(VkFormatToPixelFormat[(int)RenderContextVulkan()->GetSwapchainColourFormat()], ImageLayout::PresentSrc);
+						renderpassDescription.Attachments.push_back(description);
+					}
+					else
+					{
+					std::for_each(m_pso.RenderTargets.begin(), m_pso.RenderTargets.end(),
+						[&renderpassDescription](RHI_Texture* texture)
+						{
+							if (texture)
+							{
+								renderpassDescription.ColourAttachments.push_back(texture);
+							}
+						});
+					}
+					RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
+					vk::RenderPass vkRenderpass = *reinterpret_cast<vk::RenderPass*>(&renderpass);
+
+					std::vector<vk::ClearValue> clearColours;
+					CreateFramebuffer(vkRenderpass, rect, clearColours);
+
+					const u64 psoHash = m_pso.GetHash();
+					vk::RenderPassBeginInfo info = vk::RenderPassBeginInfo(vkRenderpass, m_framebuffers[psoHash], rect, clearColours);
+					m_commandList.beginRenderPass(info, vk::SubpassContents::eInline);
+					m_activeRenderpass = true;
+				}
+			}
+
+			void RHI_CommandList_Vulkan::EndRenderpass()
+			{
+				IS_PROFILE_FUNCTION();
+				if (m_activeRenderpass)
+				{
+					m_commandList.endRenderPass();
+					m_activeRenderpass = false;
+				}
+			}
+
 			void RHI_CommandList_Vulkan::SetPipeline(PipelineStateObject pso)
 			{
 				IS_PROFILE_FUNCTION();
 				m_pso = pso;
+#ifndef RENDER_GRAPH_ENABLED
 				FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
+#endif
 			}
 
 			void RHI_CommandList_Vulkan::SetUniform(int set, int binding, DescriptorBufferView view)
@@ -214,11 +293,10 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				u64 psoHash = pso.GetHash();
-				assert(m_framebuffers.find(psoHash) == m_framebuffers.end());
 
 				if (m_activeRenderpass && m_framebuffers.find(psoHash) == m_framebuffers.end())
 				{
-					m_commandList.endRenderPass();
+					EndRenderpass();
 
 					// After rendering everything, make sure all our RenderTargets are shader read for if they are read from.
 					/*for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
@@ -241,84 +319,11 @@ namespace Insight
 						}
 					}*/
 
-					m_activeRenderpass = false;
 				}
 
 				if (!m_activeRenderpass)
 				{
-					//// Before rendering anything, make sure all our RenderTargets are in the correct layout.
-					//for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
-					//{
-					//	const RenderTarget* rt = pso.RenderTargets.at(i);
-					//	if (rt)
-					//	{
-					//		const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
-
-					//		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
-					//			vk::AccessFlagBits::eNoneKHR,
-					//			vk::AccessFlagBits::eColorAttachmentWrite,
-					//			vk::ImageLayout::eUndefined,
-					//			vk::ImageLayout::eColorAttachmentOptimal,
-					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-					//			textureVulkan->GetImage(),
-					//			vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-					//		PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
-					//	}
-					//}
-
-					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
-					vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{m_pso.RenderTargets, m_pso.DepthStencil, pso.Swapchain});
-					std::vector<vk::ImageView> imageViews;
-					std::vector<vk::ClearValue> clearColours;
-					if (m_pso.Swapchain)
-					{
-						vk::SwapchainKHR swapchainVulkan = RenderContextVulkan()->GetSwapchain();
-						imageViews.push_back(RenderContextVulkan()->GetSwapchainImageView());
-
-						vk::ClearValue clearValue;
-						clearValue.color.float32[0] = 0;
-						clearValue.color.float32[1] = 0;
-						clearValue.color.float32[2] = 0;
-						clearValue.color.float32[3] = 1;
-						clearColours.push_back(clearValue);
-					}
-					else
-					{
-						for (RHI_Texture* rt : pso.RenderTargets)
-						{
-							if (rt)
-							{
-								RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
-								imageViews.push_back(textureVulkan->GetImageView());
-
-								vk::ClearValue clearValue;
-								clearValue.color.float32[0] = 1;
-								clearValue.color.float32[1] = 0;
-								clearValue.color.float32[2] = 0;
-								clearValue.color.float32[3] = 1;
-								clearColours.push_back(clearValue);
-							}
-						}
-					}
-
-					if (pso.DepthStencil)
-					{
-						RHI_Texture_Vulkan* depthVulkan = static_cast<RHI_Texture_Vulkan*>(pso.DepthStencil);
-						imageViews.push_back(depthVulkan->GetImageView());
-
-						vk::ClearDepthStencilValue clearValue;
-						clearValue.depth = pso.DepthSteniclClearValue.x;
-						clearValue.stencil = static_cast<u32>(pso.DepthSteniclClearValue.y);
-						clearColours.push_back(clearValue);
-					}
-
-					vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);
-					m_framebuffers[psoHash] = RenderContextVulkan()->GetDevice().createFramebuffer(frameBufferInfo);
-
-					vk::RenderPassBeginInfo info = vk::RenderPassBeginInfo(renderpass, m_framebuffers[psoHash], rect, clearColours);
-					m_commandList.beginRenderPass(info, vk::SubpassContents::eInline);
-					m_activeRenderpass = true;
+					BeginRenderpass();
 				}
 
 				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
@@ -375,6 +380,56 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				assert(m_frameResouces);
 				return static_cast<FrameResource_Vulkan*>(m_frameResouces);
+			}
+
+			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)
+			{
+				const u64 psoHash = m_pso.GetHash();
+				std::vector<vk::ImageView> imageViews;
+				if (m_pso.Swapchain)
+				{
+					vk::SwapchainKHR swapchainVulkan = RenderContextVulkan()->GetSwapchain();
+					imageViews.push_back(RenderContextVulkan()->GetSwapchainImageView());
+
+					vk::ClearValue clearValue;
+					clearValue.color.float32[0] = 0;
+					clearValue.color.float32[1] = 0;
+					clearValue.color.float32[2] = 0;
+					clearValue.color.float32[3] = 1;
+					clearColours.push_back(clearValue);
+				}
+				else
+				{
+					for (RHI_Texture* rt : m_pso.RenderTargets)
+					{
+						if (rt)
+						{
+							RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
+							imageViews.push_back(textureVulkan->GetImageView());
+
+							vk::ClearValue clearValue;
+							clearValue.color.float32[0] = 1;
+							clearValue.color.float32[1] = 0;
+							clearValue.color.float32[2] = 0;
+							clearValue.color.float32[3] = 1;
+							clearColours.push_back(clearValue);
+						}
+					}
+				}
+
+				if (m_pso.DepthStencil)
+				{
+					RHI_Texture_Vulkan* depthVulkan = static_cast<RHI_Texture_Vulkan*>(m_pso.DepthStencil);
+					imageViews.push_back(depthVulkan->GetImageView());
+
+					vk::ClearDepthStencilValue clearValue;
+					clearValue.depth = m_pso.DepthSteniclClearValue.x;
+					clearValue.stencil = static_cast<u32>(m_pso.DepthSteniclClearValue.y);
+					clearColours.push_back(clearValue);
+				}
+
+				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);
+				m_framebuffers[psoHash] = RenderContextVulkan()->GetDevice().createFramebuffer(frameBufferInfo);
 			}
 
 

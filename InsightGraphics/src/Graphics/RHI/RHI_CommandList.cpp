@@ -184,7 +184,11 @@ namespace Insight
 				/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
 				BindPipeline(m_activePSO, layout);
 			}
+#ifdef RENDER_GRAPH_ENABLED
+			return true;
+#else
 			return BindDescriptorSets();
+#endif
 		}
 
 		bool RHI_CommandList::BindDescriptorSets()
