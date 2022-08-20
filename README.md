@@ -14,7 +14,7 @@ Some features are:
 - [DirectXShaderCompiler](DirectXShaderCompiler)
 - [doctest](https://github.com/doctest/doctest)
 - [glfw](https://www.glfw.org)
-- [glm]([glm](https://github.com/g-truc/glm))
+- [glm](https://github.com/g-truc/glm)
 - [glslang](https://github.com/ocornut/imgui)
 - [imgui](https://github.com/ocornut/imgui)
 - [optick](optick)
