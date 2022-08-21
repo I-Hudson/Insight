@@ -58,11 +58,11 @@ namespace Insight
 				return *this;
 			}
 
-			int Set = 0;
-			int Binding = 0;
-			int Stage = 0;
-			int Size = 0;
 			DescriptorType Type = DescriptorType::Unknown;
+			u32 Set = 0;
+			u32 Binding = 0;
+			u32 Stage = 0;
+			int Size = 0;
 			DescriptorResourceType ResourceType = DescriptorResourceType::Unknown;
 			
 			RHI_BufferView BufferView;
@@ -89,66 +89,6 @@ namespace Insight
 				}
 				return hash;
 			}
-		};
-
-		struct Uniform
-		{
-			Uniform() { }
-			Uniform(int offset, int size, int set, int binding)
-				: Offset(offset), Size(size), Set(set), Binding(binding)
-			{ }
-
-			int Offset = 0;
-			int Size = 0;
-			int Set = -1;
-			int Binding = -1;
-		};
-
-		struct DescriptorBufferView
-		{
-			DescriptorBufferView() { }
-			DescriptorBufferView(DescriptorBuffer* buffer, int offset, int sizeInBytes)
-				: Buffer(buffer), Offset(offset), SizeInBytes(sizeInBytes)
-			{ }
-
-			DescriptorBuffer* Buffer = nullptr;
-			int Offset = 0;
-			int SizeInBytes = 0;
-		};
-
-		/// <summary>
-		/// Handle CPU side uniform buffer to prepare for upload to GPU if required.
-		/// </summary>
-		class DescriptorBuffer
-		{
-		public:
-			DescriptorBuffer();
-			DescriptorBuffer(const DescriptorBuffer& other);
-			DescriptorBuffer(DescriptorBuffer&& other);
-			~DescriptorBuffer();
-
-			DescriptorBuffer& operator=(const DescriptorBuffer& other);
-			DescriptorBuffer& operator=(DescriptorBuffer&& other);
-
-			DescriptorBufferView SetUniform(int set, int binding, void* data, int sizeInBytes);
-			void Resize(int newCapacity);
-
-			constexpr Byte* GetData() const { return m_buffer; }
-			constexpr u32 GetSize() const { return m_size; }
-			constexpr u32 GetCapacity() const { return m_capacity; }
-
-			const std::unordered_map<int, std::unordered_map<int, std::vector<Uniform>>>& GetUniforms() const { return m_uniforms; }
-			// Only get the signature of the descriptors as a set/binding could have more than one descriptor added.
-			std::vector<Descriptor> GetDescriptorsSignature() const;
-
-			void Reset();
-			void Release();
-
-		private:
-			Byte* m_buffer = nullptr;
-			int m_size = 0;
-			int m_capacity = 0;
-			std::unordered_map<int, std::unordered_map<int, std::vector<Uniform>>> m_uniforms;
 		};
 	}
 }

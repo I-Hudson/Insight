@@ -21,7 +21,7 @@ namespace Insight
 			struct FrameResource_DX12 : public FrameResouce
 			{
 				RenderContext_DX12* Context;
-				DescriptorAllocator_DX12 DescriptorAllocator;
+				//DescriptorAllocator_DX12 DescriptorAllocator;
 
 				void Init(RenderContext_DX12* context);
 				void Destroy();
@@ -45,8 +45,6 @@ namespace Insight
 
 				virtual void InitImGui() override;
 				virtual void DestroyImGui() override;
-
-				virtual void Render(CommandList cmdList) override;
 
 				virtual bool PrepareRender() override { return true; }
 				virtual void PostRender(RHI_CommandList* cmdList) override { }
