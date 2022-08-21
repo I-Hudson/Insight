@@ -79,6 +79,7 @@ namespace Insight
 				{
 					m_resource->SetName(name.c_str());
 				}
+				m_name = std::move(name);
 			}
 		}
 	}

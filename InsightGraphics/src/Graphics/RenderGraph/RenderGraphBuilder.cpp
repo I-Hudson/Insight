@@ -29,14 +29,14 @@ namespace Insight
 			m_pass->m_renderpassDescription = std::move(description);
 		}
 
-		RGTextureHandle RenderGraphBuilder::CreateTexture(std::string textureName, RHI_TextureCreateInfo desc)
+		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
 			m_pass->m_textureCreates.push_back(std::make_pair(handle, desc));
 			return handle;
 		}
 
-		RGTextureHandle RenderGraphBuilder::GetTexture(std::string textureName)
+		RGTextureHandle RenderGraphBuilder::GetTexture(std::wstring textureName)
 		{
 			return m_rg->GetTexture(textureName);
 		}

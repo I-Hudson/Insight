@@ -21,11 +21,16 @@ namespace Insight
 			virtual void Release() = 0;
 			virtual bool ValidResouce() = 0;
 			virtual void SetName(std::wstring name) = 0;
+
+		public:
+			std::wstring m_name;
 		};
 
 		template<typename T>
 		class RHI_ResourceManager
 		{
+			static_assert(std::is_base_of_v<RHI_Resource, T>);
+
 		public:
 			using Type = T;
 			using TypePtr = Type*;
@@ -81,8 +86,10 @@ namespace Insight
 		};
 
 		template<typename TValue>
-		class RHI_ResouceCache : public RHI_ResourceManager<TValue>
+		class RHI_ResourceCache : public RHI_ResourceManager<TValue>
 		{
+			static_assert(std::is_base_of_v<RHI_Resource, TValue>);
+
 			struct Item
 			{
 				TypePtr	ItemPtr;
@@ -91,7 +98,7 @@ namespace Insight
 
 		public:
 
-			int AddOrReturn(std::string str)
+			int AddOrReturn(std::wstring str)
 			{
 				auto itr = m_itemLookup.find(str);
 				if (itr != m_itemLookup.end())
@@ -100,6 +107,7 @@ namespace Insight
 				}
 
 				TypePtr ptr = CreateResource();
+				ptr->SetName(str);
 				int id = GetFreeId();
 
 				m_itemLookup[str] = Item { ptr, id };
@@ -108,7 +116,7 @@ namespace Insight
 				return id;
 			}
 
-			TypePtr Get(std::string key) const
+			TypePtr Get(std::wstring key) const
 			{
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
 				{
@@ -126,7 +134,7 @@ namespace Insight
 				return nullptr;
 			}
 
-			int GetId(std::string key) const
+			int GetId(std::wstring key) const
 			{
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
 				{
@@ -161,11 +169,11 @@ namespace Insight
 			}
 
 		private:
-			std::unordered_map<std::string, Item> m_itemLookup;
+			std::unordered_map<std::wstring, Item> m_itemLookup;
 
 			int m_currentMaxId = 0;
 			std::queue<int> m_freeIds;
-			std::unordered_map<int, std::string> m_idToStrLookup;
+			std::unordered_map<int, std::wstring> m_idToStrLookup;
 		};
 	}
 }

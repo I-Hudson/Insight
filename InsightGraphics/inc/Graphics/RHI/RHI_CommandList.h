@@ -3,8 +3,9 @@
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
 #include "Graphics/PipelineStateObject.h"
-#include <unordered_set>
+#include "Graphics/PipelineBarrier.h"
 
+#include <unordered_set>
 #include <glm/vec2.hpp>
 
 namespace Insight
@@ -41,6 +42,8 @@ namespace Insight
 			virtual void Reset();
 
 			virtual void Close() = 0;
+
+			virtual void PipelineBarrier(PipelineBarrier barrier) = 0;
 
 			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;
 			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) { CopyBufferToBuffer(dst, src, 0); }

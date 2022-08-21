@@ -32,7 +32,9 @@ namespace Insight
 		vk::BufferUsageFlags		BufferTypeToVulkanBufferUsageFlags(BufferType type);
 		vk::CullModeFlags			CullModeToVulkan(CullMode cullMode);
 		vk::DescriptorType			DescriptorTypeToVulkan(DescriptorType type);
+		vk::AccessFlags				AccessFlagsToVulkan(AccessFlags flags);
 		vk::ImageLayout				ImageLayoutToVulkan(ImageLayout layout);
+		vk::ImageAspectFlags		ImageAspectFlagsToVulkan(ImageAspectFlags flags);
 
 		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
 		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);

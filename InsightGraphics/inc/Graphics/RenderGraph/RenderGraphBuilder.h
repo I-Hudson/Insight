@@ -27,8 +27,8 @@ namespace Insight
 
 			void SetRenderpass(RenderpassDescription description);
 
-			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureCreateInfo desc);
-			RGTextureHandle GetTexture(std::string textureName);
+			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc);
+			RGTextureHandle GetTexture(std::wstring textureName);
 
 			void ReadTexture(RGTextureHandle handle);
 			void WriteTexture(RGTextureHandle handle);

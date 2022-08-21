@@ -77,14 +77,19 @@ namespace Insight
 			m_frameIndex = (m_frameIndex + 1) % s_FarmeCount;
 		}
 
-		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureCreateInfo info)
+		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info)
 		{
 			return m_textureCaches->AddOrReturn(textureName);
 		}
 
-		RGTextureHandle RenderGraph::GetTexture(std::string textureName) const
+		RGTextureHandle RenderGraph::GetTexture(std::wstring textureName) const
 		{
 			return m_textureCaches->GetId(textureName);
+		}
+
+		RHI_Texture* RenderGraph::GetRHITexture(RGTextureHandle handle) const
+		{
+			return m_textureCaches->Get(handle);
 		}
 
 		void RenderGraph::Release()
@@ -94,7 +99,7 @@ namespace Insight
 
 			m_passes.clear();
 
-			m_textureCaches.ForEach([](RHI_ResouceCache<RHI_Texture>& cache)
+			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
 				{
 					cache.Reset();
 				});
@@ -127,14 +132,15 @@ namespace Insight
 					if (!tex->ValidResouce())
 					{
 						tex->Create(m_context, pair.second);
+						tex->SetName(tex->m_name);
 					}
 				}
 
+				PipelineStateObject& pso = pass.Get()->m_pso;
+
 				// Build the shader here but no need to cache a reference to it as we 
 				// can lookup it up later. Just make sure it exists.
-				m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
-			
-				PipelineStateObject& pso = pass.Get()->m_pso;
+				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
 
 				int rtIndex = 0;
 				for (auto const& rt : pass.Get()->m_textureWrites)
@@ -197,8 +203,14 @@ namespace Insight
 				depthPipelineBarrier.DstStage = PipelineStageFlagBits::EarlyFramgmentShader;
 				depthPipelineBarrier.ImageBarriers = depthImageBarriers;
 
-				pass->m_textureIncomingBarriers.push_back(colorPipelineBarrier);
-				pass->m_textureIncomingBarriers.push_back(depthPipelineBarrier);
+				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
+				{
+					pass->m_textureIncomingBarriers.push_back(colorPipelineBarrier);
+				}
+				if (depthPipelineBarrier.ImageBarriers.size() > 0 || depthPipelineBarrier.BufferBarriers.size() > 0)
+				{
+					pass->m_textureIncomingBarriers.push_back(depthPipelineBarrier);
+				}
 
 				colorPipelineBarrier = { };
 				depthPipelineBarrier = { };
@@ -234,9 +246,15 @@ namespace Insight
 				depthPipelineBarrier.SrcStage = PipelineStageFlagBits::EarlyFramgmentShader;
 				depthPipelineBarrier.DstStage = PipelineStageFlagBits::FragmentShader;
 				depthPipelineBarrier.ImageBarriers = std::move(depthImageBarriers);
-
-				pass->m_textureIncomingBarriers.push_back(colorPipelineBarrier);
-				pass->m_textureIncomingBarriers.push_back(depthPipelineBarrier);
+				
+				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
+				{
+					pass->m_textureIncomingBarriers.push_back(colorPipelineBarrier);
+				}
+				if (depthPipelineBarrier.ImageBarriers.size() > 0 || depthPipelineBarrier.BufferBarriers.size() > 0)
+				{
+					pass->m_textureIncomingBarriers.push_back(depthPipelineBarrier);
+				}
 
 				++passIndex;
 			}
@@ -254,6 +272,8 @@ namespace Insight
 				// TODO: Could be threaded? Leave as it is for now as it works.
 				for (UPtr<RenderGraphPassBase>& pass : m_passes)
 				{
+					PlaceBarriersInToPipeline(pass.Get(), cmdList);
+
 					IS_PROFILE_SCOPE("Single pass");
 					cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f);
 					cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
@@ -265,7 +285,7 @@ namespace Insight
 					cmdList->SetPipeline(pass->m_pso);
 
 					cmdList->BeginRenderpass(pass->m_renderpassDescription);
-					pass->Execute(cmdList);
+					pass->Execute(*this, cmdList);
 					cmdList->EndRenderpass();
 				}
 
@@ -279,6 +299,14 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			m_passes.clear();
+		}
+
+		void RenderGraph::PlaceBarriersInToPipeline(RenderGraphPassBase* pass, RHI_CommandList* cmdList)
+		{
+			for (auto& barrier : pass->m_textureIncomingBarriers)
+			{
+				cmdList->PipelineBarrier(barrier);
+			}
 		}
 	}
 }

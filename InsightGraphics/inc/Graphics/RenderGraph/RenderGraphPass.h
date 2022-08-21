@@ -9,6 +9,8 @@
 #include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
 
+#include "Graphics/PipelineBarrier.h"
+
 #include <functional>
 #include <vector>
 
@@ -25,48 +27,6 @@ namespace Insight
 		class RenderGraph;
 		class RenderGraphBuilder;
 
-		struct BufferBarrier
-		{ };
-
-		struct ImageSubresourceRange
-		{
-			ImageAspectFlags AspectMask;
-			u32 BaseMipLevel;
-			u32 LevelCount;
-			u32 BaseArrayLayer;
-			u32 LayerCount;
-
-			static ImageSubresourceRange SingleMipAndLayer(ImageAspectFlags aspectMask)
-			{
-				return ImageSubresourceRange
-				{
-					aspectMask, 
-					0, 
-					1, 
-					0, 
-					1
-				};
-			}
-		};
-
-		struct ImageBarrier
-		{
-			AccessFlags SrcAccessFlags;
-			AccessFlags DstAccessFlags;
-			ImageLayout OldLayout;
-			ImageLayout NewLayout;
-			RHI_Texture* Image;
-			ImageSubresourceRange SubresourceRange;
-		};
-
-		struct PipelineBarrier
-		{
-			PipelineStageFlags SrcStage;
-			PipelineStageFlags DstStage;
-
-			std::vector<BufferBarrier> BufferBarriers;
-			std::vector<ImageBarrier> ImageBarriers;
-		};
 
 		/// <summary>
 		/// 
@@ -77,7 +37,7 @@ namespace Insight
 
 		protected:
 			virtual void Setup(RenderGraphBuilder& builder) = 0;
-			virtual void Execute(RHI_CommandList* cmdList) = 0;
+			virtual void Execute(RenderGraph& renderGraph, RHI_CommandList* cmdList) = 0;
 
 		public:
 			std::vector<std::pair<RGTextureHandle, RHI_TextureCreateInfo>> m_textureCreates;
@@ -107,7 +67,7 @@ namespace Insight
 		{
 		public:
 			using SetupFunc = std::function<void(TPassData&, RenderGraphBuilder&)>;
-			using ExecuteFunc = std::function<void(TPassData&, RenderGraphPassBase&, RHI_CommandList*)>;
+			using ExecuteFunc = std::function<void(TPassData&, RenderGraph&, RHI_CommandList*)>;
 
 			RenderGraphPass(std::string passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
 				: m_passName(std::move(passName))
@@ -123,9 +83,9 @@ namespace Insight
 			{
 				m_setupFunc(m_passData, builder);
 			}
-			virtual void Execute(RHI_CommandList* cmdList) override
+			virtual void Execute(RenderGraph& renderGraph, RHI_CommandList* cmdList) override
 			{
-				m_executeFunc(m_passData, *this, cmdList);
+				m_executeFunc(m_passData, renderGraph, cmdList);
 			}
 
 		private:

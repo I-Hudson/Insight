@@ -123,6 +123,7 @@ namespace Insight
 				{
 					m_context->SetObejctName(name, reinterpret_cast<u64>(m_image.operator VkImage()), vk::ObjectType::eImage);
 				}
+				m_name = std::move(name);
 			}
 		}
 	}

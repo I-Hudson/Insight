@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Enums.h"
+#include "Graphics/ShaderDesc.h"
 #include <array>
 #include <memory>
 
@@ -21,6 +22,7 @@ namespace Insight
 
 			const wchar_t* Name;
 			RHI_Shader* Shader = nullptr;
+			ShaderDesc ShaderDescription;
 			GPUQueue Queue = GPUQueue_Graphics;
 
 			std::array<RHI_Texture*, RenderTargetCount> RenderTargets;
@@ -56,7 +58,7 @@ namespace Insight
 			{
 				u64 hash = 0;
 
-				HashCombine(hash, Shader);
+				HashCombine(hash, ShaderDescription.GetHash());
 				HashCombine(hash, Queue);
 
 				for (const RHI_Texture* rt : RenderTargets)

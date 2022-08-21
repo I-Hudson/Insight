@@ -37,7 +37,7 @@ namespace Insight
 			if (m_camera.View == glm::mat4(0.0f))
 			{
 				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
+				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
 				m_camera.View = glm::mat4(1.0f);
 
 				m_shadowCamera = { m_camera };
@@ -200,6 +200,7 @@ namespace Insight
 			struct TestPassData
 			{
 				Mesh& TestMesh;
+				PipelineStateObject Pso;
 			};
 			TestPassData passData =
 			{
@@ -213,14 +214,14 @@ namespace Insight
 					textureCreateInfo.Height = Window::Instance().GetHeight();
 					textureCreateInfo.Depth = 1;
 					textureCreateInfo.TextureType = TextureType::Tex2D;
-					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::ColourAttachment;
+					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled;
 					textureCreateInfo.Format = PixelFormat::R8G8B8A8_UNorm;
-					RGTextureHandle colourRT = builder.CreateTexture("ColourRT", textureCreateInfo);
+					RGTextureHandle colourRT = builder.CreateTexture(L"ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
-					textureCreateInfo.Format = PixelFormat::D16_UNorm;
+					textureCreateInfo.Format = PixelFormat::D32_Float;
 					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment;
-					RGTextureHandle depthStencil = builder.CreateTexture("DepthStencil", textureCreateInfo);
+					RGTextureHandle depthStencil = builder.CreateTexture(L"DepthStencil", textureCreateInfo);
 					builder.WriteDepthStencil(depthStencil);
 
 					ShaderDesc shaderDesc;
@@ -236,16 +237,17 @@ namespace Insight
 						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 						gbufferPso.Name = L"GBuffer_PSO";
 						gbufferPso.CullMode = CullMode::Front;
-						gbufferPso.Swapchain = false;
+						gbufferPso.ShaderDescription = shaderDesc;
 					}
 					builder.SetPipeline(gbufferPso);
+					data.Pso = gbufferPso;
 
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
-				[&camera](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
+				[&camera](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
-					cmdList->BindPipeline(pass.m_pso, nullptr);
+					cmdList->BindPipeline(data.Pso, nullptr);
 
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetUniform");
@@ -322,12 +324,17 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
-			{ };
+			{
+				RGTextureHandle ColourRT;
+				PipelineStateObject Pso;
+			};
+
 			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
-					RGTextureHandle colourRT = builder.GetTexture("ColourRT");
+					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
 					builder.ReadTexture(colourRT);
-			
+					data.ColourRT = colourRT;
+
 					ShaderDesc shaderDesc;
 					shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
 					shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
@@ -336,15 +343,19 @@ namespace Insight
 					PipelineStateObject swapchainPso = { };
 					swapchainPso.Name = L"Swapchain_PSO";
 					swapchainPso.CullMode = CullMode::None;
+					swapchainPso.ShaderDescription = shaderDesc;
 					builder.SetPipeline(swapchainPso);
-			
+					data.Pso = swapchainPso;
+
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
 					builder.SetAsRenderToSwapchain();
 				},
-				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
+				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
+					cmdList->BindPipeline(data.Pso, nullptr);
+					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.ColourRT));
 					cmdList->Draw(3, 1, 0, 0);
 				});
 #endif //RENDER_GRAPH_ENABLED
@@ -365,7 +376,7 @@ namespace Insight
 					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
 					builder.SetRenderpass(GraphicsManager::Instance().GetRenderContext()->GetImGuiRenderpassDescription());
 				},
-				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
+				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 #ifdef IS_VULKAN_ENABLED
 					if (GraphicsManager::Instance().IsVulkan())

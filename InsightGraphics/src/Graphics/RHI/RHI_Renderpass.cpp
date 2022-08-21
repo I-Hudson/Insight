@@ -160,7 +160,7 @@ namespace Insight
 								attachment = &descriptions.at(i);
 							}
 							resultAttachments.push_back(CreateColour(textures.at(i), attachment));
-							resultReferences.push_back(vk::AttachmentReference(i, vk::ImageLayout::eColorAttachmentOptimal));
+							resultReferences.push_back(vk::AttachmentReference(static_cast<u32>(i), vk::ImageLayout::eColorAttachmentOptimal));
 						}
 
 						if (textures.size() == 0 && descriptions.size() > 0)
@@ -171,7 +171,7 @@ namespace Insight
 								resultAttachments.at(i).format = resultAttachments.at(i).format != vk::Format::eUndefined ?
 									resultAttachments.at(i).format
 									: static_cast<RHI::Vulkan::RenderContext_Vulkan*>(GraphicsManager::Instance().GetRenderContext())->GetSwapchainColourFormat();
-								resultReferences.push_back(vk::AttachmentReference(i, vk::ImageLayout::eColorAttachmentOptimal));
+								resultReferences.push_back(vk::AttachmentReference(static_cast<u32>(i), vk::ImageLayout::eColorAttachmentOptimal));
 							}
 						}
 
@@ -241,13 +241,13 @@ namespace Insight
 					if (renderpassAttachments.size() == 0 && description.Attachments.size() > 0)
 					{
 						renderpassAttachments.push_back(AttachmentCreation::CreateCustom(nullptr, &description.Attachments.at(0)));
-						colourReferences.push_back(vk::AttachmentReference(renderpassAttachments.size() - 1, vk::ImageLayout::eColorAttachmentOptimal));
+						colourReferences.push_back(vk::AttachmentReference(static_cast<u32>(renderpassAttachments.size() - 1), vk::ImageLayout::eColorAttachmentOptimal));
 					}
 					else if (renderpassAttachments.size() == 0)
 					{
 						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr, 
 							&AttachmentDescription::Default(VkFormatToPixelFormat[(int)contextVulkan->GetSwapchainColourFormat()], ImageLayout::PresentSrc)));
-						colourReferences.push_back(vk::AttachmentReference(renderpassAttachments.size() - 1, vk::ImageLayout::eColorAttachmentOptimal));
+						colourReferences.push_back(vk::AttachmentReference(static_cast<u32>(renderpassAttachments.size() - 1), vk::ImageLayout::eColorAttachmentOptimal));
 					}
 				}
 

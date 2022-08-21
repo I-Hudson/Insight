@@ -759,6 +759,32 @@ namespace Insight
             return vk::DescriptorType::eCombinedImageSampler;
         }
 
+        vk::AccessFlags AccessFlagsToVulkan(AccessFlags flags)
+        {
+            vk::AccessFlags result;
+
+            if (flags & vk::AccessFlagBits::eIndirectCommandRead)           { result |= vk::AccessFlagBits::eIndirectCommandRead; }
+            if (flags & vk::AccessFlagBits::eIndexRead)                     { result |= vk::AccessFlagBits::eIndexRead; }
+            if (flags & vk::AccessFlagBits::eVertexAttributeRead)           { result |= vk::AccessFlagBits::eVertexAttributeRead; }
+            if (flags & vk::AccessFlagBits::eUniformRead)                   { result |= vk::AccessFlagBits::eUniformRead; }
+            if (flags & vk::AccessFlagBits::eInputAttachmentRead)           { result |= vk::AccessFlagBits::eInputAttachmentRead; }
+            if (flags & vk::AccessFlagBits::eShaderRead)                    { result |= vk::AccessFlagBits::eShaderRead; }
+            if (flags & vk::AccessFlagBits::eShaderWrite)                   { result |= vk::AccessFlagBits::eShaderWrite; }
+            if (flags & vk::AccessFlagBits::eColorAttachmentRead)           { result |= vk::AccessFlagBits::eColorAttachmentRead; }
+            if (flags & vk::AccessFlagBits::eColorAttachmentWrite)          { result |= vk::AccessFlagBits::eColorAttachmentWrite; }
+            if (flags & vk::AccessFlagBits::eDepthStencilAttachmentRead)    { result |= vk::AccessFlagBits::eDepthStencilAttachmentRead; }
+            if (flags & vk::AccessFlagBits::eDepthStencilAttachmentWrite)   { result |= vk::AccessFlagBits::eDepthStencilAttachmentWrite; }
+            if (flags & vk::AccessFlagBits::eTransferRead)                  { result |= vk::AccessFlagBits::eTransferRead; }
+            if (flags & vk::AccessFlagBits::eTransferWrite)                 { result |= vk::AccessFlagBits::eTransferWrite; }
+            if (flags & vk::AccessFlagBits::eHostRead)                      { result |= vk::AccessFlagBits::eHostRead; }
+            if (flags & vk::AccessFlagBits::eHostWrite)                     { result |= vk::AccessFlagBits::eHostWrite; }
+            if (flags & vk::AccessFlagBits::eMemoryRead)                    { result |= vk::AccessFlagBits::eMemoryRead; }
+            if (flags & vk::AccessFlagBits::eMemoryWrite)                   { result |= vk::AccessFlagBits::eMemoryWrite; }
+            if (flags & vk::AccessFlagBits::eNoneKHR)                       { result |= vk::AccessFlagBits::eNoneKHR; }
+
+            return result;
+        }
+
         vk::ImageLayout ImageLayoutToVulkan(ImageLayout layout)
         {
             switch (layout)
@@ -783,6 +809,17 @@ namespace Insight
                 break;
             }
             return vk::ImageLayout::eUndefined;
+        }
+
+        vk::ImageAspectFlags ImageAspectFlagsToVulkan(ImageAspectFlags flags)
+        {
+            vk::ImageAspectFlags result;
+
+            if (flags & vk::ImageAspectFlagBits::eColor) { result |= vk::ImageAspectFlagBits::eColor; }
+            if (flags & vk::ImageAspectFlagBits::eDepth) { result |= vk::ImageAspectFlagBits::eDepth; }
+            if (flags & vk::ImageAspectFlagBits::eStencil) { result |= vk::ImageAspectFlagBits::eStencil; }
+                
+            return result;
         }
 
         VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)

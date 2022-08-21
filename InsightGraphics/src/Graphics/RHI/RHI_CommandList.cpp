@@ -173,6 +173,7 @@ namespace Insight
 
 		void RHI_CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
 		{
+			m_descriptorAllocator->SetTexture(set, binding, texture);
 		}
 }
 }

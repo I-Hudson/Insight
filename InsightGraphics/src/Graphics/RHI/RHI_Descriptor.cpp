@@ -8,6 +8,7 @@
 
 #if defined(IS_VULKAN_ENABLED)
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
@@ -208,17 +209,43 @@ namespace Insight
 
 					if (descriptor.Texture)
 					{
+						// TODO: Remove this and make a sampler manager to store all type of samplers.
+						static vk::Sampler sampler;
+						if (!sampler)
+						{
+							vk::SamplerCreateInfo samplerCreateInfo = vk::SamplerCreateInfo(
+								{},
+								vk::Filter::eLinear,
+								vk::Filter::eLinear,
+								vk::SamplerMipmapMode::eLinear,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								vk::SamplerAddressMode::eMirroredRepeat,
+								0.0f,
+								false,
+								1.0f,
+								false,
+								vk::CompareOp::eNever,
+								0.0f,
+								0.0f,
+								vk::BorderColor::eFloatOpaqueWhite);
+							sampler = contextVulkan->GetDevice().createSampler(samplerCreateInfo);
+						}
+
+						imageInfo[imageInfoIndex].imageView = static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
+						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+						imageInfo[imageInfoIndex].sampler = sampler;
 						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 						++imageInfoIndex;
 					}
 
 					if (descriptor.BufferView.IsValid())
 					{
-						bufferInfo[bufferInfoIndex] = vk::DescriptorBufferInfo(
-							static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer()
-							, descriptor.BufferView.GetOffset()
-							, descriptor.BufferView.GetSize());
-						writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
+						bufferInfo[bufferInfoIndex].buffer = static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer();	
+						bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
+						bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
+						
+							writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
 						++bufferInfoIndex;
 					}
 
@@ -280,8 +307,6 @@ namespace Insight
 				}
 			}
 
-
-
 			RHI_DescriptorSet* newSet = NewArgsTracked(RHI_DescriptorSet, GraphicsManager::Instance().GetRenderContext()
 				, descriptors
 				, GraphicsManager::Instance().GetRenderContext()->GetDescriptorLayoutManager().GetLayout(descriptors));
@@ -320,15 +345,13 @@ namespace Insight
 		}
 
 
-		DescriptorAllocator::DescriptorAllocator()
-		{
-			m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
-		}
-
 		/// <summary>
 		/// DescriptorAllocator
 		/// </summary>
 		/// <param name="pso"></param>
+		DescriptorAllocator::DescriptorAllocator()
+		{ }
+
 		void DescriptorAllocator::SetPipeline(PipelineStateObject pso)
 		{
 			RHI_Shader* shader = pso.Shader;
@@ -365,8 +388,9 @@ namespace Insight
 			{
 				IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
 				return;
-			}		
-			RHI_BufferView view = m_uniformBuffer->Upload(data, size, m_uniformBufferOffset);
+			}
+			CreateUniformBufferIfNoExist();
+			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
 			m_uniformBufferOffset += size;
 			descriptors[binding].BufferView = view;
 		}
@@ -423,6 +447,14 @@ namespace Insight
 		{
 			Renderer::FreeUniformBuffer(m_uniformBuffer.Get());
 			m_uniformBuffer.Release();
+		}
+
+		void DescriptorAllocator::CreateUniformBufferIfNoExist()
+		{
+			if (!m_uniformBuffer)
+			{
+				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
+			}
 		}
 	}
 }

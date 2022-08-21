@@ -22,9 +22,12 @@ namespace Insight
 
 				vk::CommandBuffer GetCommandList() const { return m_commandList; };
 
-				void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier);
-				void PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier);
-				void PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier);
+				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override;
+
+				void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage
+					, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier);
+				void PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier);
+				void PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier);
 
 				// RHI_CommandList
 				virtual void Reset() override;

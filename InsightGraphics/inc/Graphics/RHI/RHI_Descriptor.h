@@ -113,6 +113,9 @@ namespace Insight
 			void Reset();
 			void Destroy();
 
+		private:
+			void CreateUniformBufferIfNoExist();
+
 		protected:
 			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; // Current descriptors information. 
 			UPtr<RHI_Buffer> m_uniformBuffer;

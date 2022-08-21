@@ -64,8 +64,10 @@ namespace Insight
 			void Init(RenderContext* context);
 			void Execute();
 
-			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureCreateInfo info);
-			RGTextureHandle GetTexture(std::string textureName) const;
+			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info);
+
+			RGTextureHandle GetTexture(std::wstring textureName) const;
+			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
 			void Release();
 
@@ -86,12 +88,14 @@ namespace Insight
 			void Render();
 			void Clear();
 
+			void PlaceBarriersInToPipeline(RenderGraphPassBase* pass, RHI_CommandList* cmdList);
+
 		private:
 			RenderContext* m_context = nullptr;
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
 
 			u32 m_frameIndex = 0;
-			FrameResource<RHI_ResouceCache<RHI_Texture>> m_textureCaches;
+			FrameResource<RHI_ResourceCache<RHI_Texture>> m_textureCaches;
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};

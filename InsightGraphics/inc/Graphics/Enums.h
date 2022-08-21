@@ -90,6 +90,8 @@ namespace Insight
 			CONSTEXPR bool operator!() const { return !m_mask; }
 
 			// Bitwise
+			template<typename TOther>
+			CONSTEXPR LocalFlag operator&(TOther const& rhs) NO_EXPECT { return LocalFlag(m_mask & static_cast<MaskType>(rhs)); }
 			CONSTEXPR LocalFlag operator&(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask & rhs.m_mask); }
 			CONSTEXPR LocalFlag operator|(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask | rhs.m_mask); }
 			CONSTEXPR LocalFlag operator^(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ^ rhs.m_mask); }

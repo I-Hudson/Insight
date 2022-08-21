@@ -16,25 +16,63 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
-			void RHI_CommandList_Vulkan::PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier)
+			void RHI_CommandList_Vulkan::PipelineBarrier(Graphics::PipelineBarrier barrier)
 			{
-				vk::ArrayProxy<const vk::BufferMemoryBarrier> bufferMemory(bufferMemoryBarrier.GetSize(), bufferMemoryBarrier.GetBegin());
-				vk::ArrayProxy<const vk::ImageMemoryBarrier>imageMemory(imageMemoryBarrier.GetSize(), imageMemoryBarrier.GetBegin());
+				std::vector<vk::BufferMemoryBarrier> bufferBarriers;
+				for (const BufferBarrier& bufferBarrier : barrier.BufferBarriers)
+				{
+					vk::BufferMemoryBarrier b = { };
+					b.srcAccessMask = AccessFlagsToVulkan(bufferBarrier.SrcAccessFlags);
+					b.dstAccessMask = AccessFlagsToVulkan(bufferBarrier.DstAccessFlags);
+					b.buffer = static_cast<RHI_Buffer_Vulkan*>(bufferBarrier.Buffer)->GetBuffer();
+					b.offset = bufferBarrier.Offset;
+					b.size = bufferBarrier.Size;
+
+					bufferBarriers.push_back(std::move(b));
+				}
+
+				std::vector<vk::ImageMemoryBarrier> imageBarriers;
+				for (const ImageBarrier& imageBarrier : barrier.ImageBarriers)
+				{
+					vk::ImageMemoryBarrier b = { };
+					b.srcAccessMask = AccessFlagsToVulkan(imageBarrier.SrcAccessFlags);
+					b.dstAccessMask = AccessFlagsToVulkan(imageBarrier.DstAccessFlags);
+					b.oldLayout = ImageLayoutToVulkan(imageBarrier.OldLayout);
+					b.newLayout = ImageLayoutToVulkan(imageBarrier.NewLayout);
+					b.image = static_cast<RHI_Texture_Vulkan*>(imageBarrier.Image)->GetImage();
+
+					b.subresourceRange.aspectMask = ImageAspectFlagsToVulkan(imageBarrier.SubresourceRange.AspectMask);
+					b.subresourceRange.baseMipLevel = imageBarrier.SubresourceRange.BaseMipLevel;
+					b.subresourceRange.levelCount = imageBarrier.SubresourceRange.LevelCount;
+					b.subresourceRange.baseArrayLayer = imageBarrier.SubresourceRange.BaseArrayLayer;
+					b.subresourceRange.layerCount = imageBarrier.SubresourceRange.LayerCount;
+
+					imageBarriers.push_back(std::move(b));
+				}
+				PipelineBarrier(barrier.SrcStage
+					, barrier.DstStage
+					, bufferBarriers
+				, imageBarriers);
+			}
+
+			void RHI_CommandList_Vulkan::PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage
+				, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier)
+			{
 				m_commandList.pipelineBarrier(
 					PipelineStageFlagsToVulkan(srcStage), 
 					PipelineStageFlagsToVulkan(dstStage), 
 					vk::DependencyFlagBits::eByRegion, 
 					{ },
-					bufferMemory,
-					imageMemory);
+					bufferMemoryBarrier,
+					imageMemoryBarrier);
 			}
 
-			void RHI_CommandList_Vulkan::PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::BufferMemoryBarrier> bufferMemoryBarrier)
+			void RHI_CommandList_Vulkan::PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier)
 			{
 				PipelineBarrier(srcStage, dstStage, bufferMemoryBarrier, { });
 			}
 
-			void RHI_CommandList_Vulkan::PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, Core::Slice<vk::ImageMemoryBarrier> imageMemoryBarrier)
+			void RHI_CommandList_Vulkan::PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier)
 			{
 				PipelineBarrier(srcStage, dstStage, { }, imageMemoryBarrier);
 			}
@@ -259,41 +297,15 @@ namespace Insight
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
 				IS_PROFILE_FUNCTION();
-				u64 psoHash = pso.GetHash();
-
-				if (m_activeRenderpass && m_framebuffers.find(psoHash) == m_framebuffers.end())
-				{
-					EndRenderpass();
-
-					// After rendering everything, make sure all our RenderTargets are shader read for if they are read from.
-					/*for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
-					{
-						const RenderTarget* rt = pso.RenderTargets.at(i);
-						if (rt)
-						{
-							const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
-
-							vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
-								vk::AccessFlagBits::eColorAttachmentWrite,
-								vk::AccessFlagBits::eShaderRead,
-								vk::ImageLayout::eColorAttachmentOptimal,
-								vk::ImageLayout::eShaderReadOnlyOptimal,
-								RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-								RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-								textureVulkan->GetImage(),
-								vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-							PipelineBarrierImage(PipelineStageFlagBits::ColourAttachmentOutput, PipelineStageFlagBits::FragmentShader, { barrier });
-						}
-					}*/
-
-				}
-
 				ASSERT_MSG(m_activeRenderpass, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
+
+				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription);
 
 				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
 
+				m_pso = pso;
 				m_activePSO = pso;
 			}
 
