@@ -360,10 +360,7 @@ namespace Insight
 				},
 				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
-					cmdList->BeginRenderpass();
 					cmdList->BindPipeline(pass.m_pso, nullptr);
-					cmdList->EndRenderpass();
-
 					//data.TestMesh.Draw(cmdList);
 
 				}, std::move(passData));
@@ -457,9 +454,7 @@ namespace Insight
 				},
 				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
-					cmdList->BeginRenderpass();
 					cmdList->Draw(3, 1, 0, 0);
-					cmdList->EndRenderpass();
 				});
 #endif //RENDER_GRAPH_ENABLED
 		}
@@ -469,7 +464,7 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{ };
-			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [](TestPassData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -477,11 +472,10 @@ namespace Insight
 
 					RenderpassDescription renderpassDescription = { };
 					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
-					builder.SetRenderpass(renderpassDescription);
+					builder.SetRenderpass(GraphicsManager::Instance().GetRenderContext()->GetImGuiRenderpassDescription());
 				},
 				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
-					cmdList->BeginRenderpass();
 #ifdef IS_VULKAN_ENABLED
 					if (GraphicsManager::Instance().IsVulkan())
 					{
@@ -494,7 +488,6 @@ namespace Insight
 						ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmdList)->GetCommandList());
 					}
 #endif
-					cmdList->EndRenderpass();
 				});
 #endif //RENDER_GRAPH_ENABLED
 		}

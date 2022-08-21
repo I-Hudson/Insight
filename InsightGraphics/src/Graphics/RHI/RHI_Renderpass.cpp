@@ -11,6 +11,8 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #endif // #ifdef IS_DX12_ENABLED
 
+#include "Core/Profiler.h"
+
 #include <tuple>
 
 namespace Insight
@@ -31,6 +33,16 @@ namespace Insight
 			return AddRenderpass(description);
 		}
 
+		RHI_Renderpass RHI_RenderpassManager::GetRenderpass(u64 hash) const
+		{
+			if (auto itr = m_renderpasses.find(hash); itr != m_renderpasses.end())
+			{
+				return itr->second;
+			}
+			return { };
+		}
+
+
 		void RHI_RenderpassManager::Release(u64 hash, bool remove)
 		{
 			if (auto itr = m_renderpasses.find(hash); itr != m_renderpasses.end())
@@ -39,8 +51,8 @@ namespace Insight
 				if (GraphicsManager::IsVulkan())
 				{
 					RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
-					vk::RenderPass* renderpassVulkan = reinterpret_cast<vk::RenderPass*>(itr->second.Resource);
-					contextVulkan->GetDevice().destroyRenderPass(*renderpassVulkan);
+					vk::RenderPass renderpassVulkan = *reinterpret_cast<vk::RenderPass*>(&itr->second);
+					contextVulkan->GetDevice().destroyRenderPass(renderpassVulkan);
 					itr->second.Resource = nullptr;
 				}
 #endif
@@ -68,6 +80,7 @@ namespace Insight
 
 		RHI_Renderpass RHI_RenderpassManager::AddRenderpass(RenderpassDescription description)
 		{
+			IS_PROFILE_FUNCTION();
 			const u64 hash = description.GetHash();
 			ASSERT(m_renderpasses.find(hash) == m_renderpasses.end());
 
@@ -217,7 +230,28 @@ namespace Insight
 					}
 				};
 
-				auto [renderpassAttachments, colourReferences] = AttachmentCreation::CreateAllColour(description.ColourAttachments, description.Attachments);
+				std::pair<std::vector<vk::AttachmentDescription>, std::vector<vk::AttachmentReference>> colourAttachmentsAndRefs
+					= AttachmentCreation::CreateAllColour(description.ColourAttachments, description.Attachments);
+				std::vector<vk::AttachmentDescription>& renderpassAttachments = colourAttachmentsAndRefs.first;
+				std::vector<vk::AttachmentReference>& colourReferences = colourAttachmentsAndRefs.second;
+
+				if (description.SwapchainPass)
+				{
+					// If there are no render attachments added and we have a custom attachment add custom attachment.
+					if (renderpassAttachments.size() == 0 && description.Attachments.size() > 0)
+					{
+						renderpassAttachments.push_back(AttachmentCreation::CreateCustom(nullptr, &description.Attachments.at(0)));
+						colourReferences.push_back(vk::AttachmentReference(renderpassAttachments.size() - 1, vk::ImageLayout::eColorAttachmentOptimal));
+					}
+					else if (renderpassAttachments.size() == 0)
+					{
+						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr, 
+							&AttachmentDescription::Default(VkFormatToPixelFormat[(int)contextVulkan->GetSwapchainColourFormat()], ImageLayout::PresentSrc)));
+						colourReferences.push_back(vk::AttachmentReference(renderpassAttachments.size() - 1, vk::ImageLayout::eColorAttachmentOptimal));
+					}
+				}
+
+
 				vk::AttachmentReference depthReference = AttachmentCreation::CreateDepthStencil(renderpassAttachments, description.DepthStencil, { });
 
 				std::vector<vk::SubpassDependency> subpassDependencies = SubpassCreation::CreateDependencies(description.DepthStencil != nullptr);
@@ -235,9 +269,7 @@ namespace Insight
 				createInfo.setDependencies(subpassDependencies);
 
 				vk::RenderPass renderpass = contextVulkan->GetDevice().createRenderPass(createInfo);
-				VkRenderPass rawPass = *reinterpret_cast<VkRenderPass*>(&renderpass);
-				RHI_Renderpass newPass = { };
-				newPass.Resource = rawPass;
+				RHI_Renderpass newPass = *reinterpret_cast<RHI_Renderpass*>(&renderpass);
 
 				m_renderpasses[hash] = newPass;
 			}

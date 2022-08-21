@@ -38,7 +38,7 @@ namespace Insight
 				virtual void SetName(std::wstring name) override;
 
 				// RHI_CommandList
-				virtual void BeginRenderpass() override;
+				virtual void BeginRenderpass(RenderpassDescription renderDescription) override;
 				virtual void EndRenderpass() override;
 
 				virtual void SetPipeline(PipelineStateObject pso) override;

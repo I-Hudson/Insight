@@ -2,6 +2,7 @@
 
 #include "Graphics/CommandList.h"
 #include "Graphics/RHI/RHI_Resource.h"
+#include "Graphics/RHI/RHI_Renderpass.h"
 #include <unordered_set>
 
 #include <glm/vec2.hpp>
@@ -41,7 +42,7 @@ namespace Insight
 
 			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
 
-			virtual void BeginRenderpass() = 0;
+			virtual void BeginRenderpass(RenderpassDescription renderDescription) = 0;
 			virtual void EndRenderpass() = 0;
 
 			virtual void SetPipeline(PipelineStateObject pso) = 0;

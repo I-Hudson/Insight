@@ -135,7 +135,7 @@ namespace Insight
 				RenderContextVulkan()->SetObejctName(name, (u64)m_commandList.operator VkCommandBuffer(), m_commandList.objectType);
 			}
 
-			void RHI_CommandList_Vulkan::BeginRenderpass()
+			void RHI_CommandList_Vulkan::BeginRenderpass(RenderpassDescription renderDescription)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -163,28 +163,8 @@ namespace Insight
 					//}
 
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
-					//vk::RenderPass renderpass = RenderContextVulkan()->GetRenderpassManager().GetOrCreateRenderpass(RenderpassDesc_Vulkan{ m_pso.RenderTargets, m_pso.DepthStencil, m_pso.Swapchain });
-					
-					RenderpassDescription renderpassDescription = { };
-					renderpassDescription.DepthStencil = m_pso.DepthStencil;
 
-					if (m_pso.Swapchain)
-					{
-						AttachmentDescription description = AttachmentDescription::Default(VkFormatToPixelFormat[(int)RenderContextVulkan()->GetSwapchainColourFormat()], ImageLayout::PresentSrc);
-						renderpassDescription.Attachments.push_back(description);
-					}
-					else
-					{
-					std::for_each(m_pso.RenderTargets.begin(), m_pso.RenderTargets.end(),
-						[&renderpassDescription](RHI_Texture* texture)
-						{
-							if (texture)
-							{
-								renderpassDescription.ColourAttachments.push_back(texture);
-							}
-						});
-					}
-					RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
+					RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderDescription);
 					vk::RenderPass vkRenderpass = *reinterpret_cast<vk::RenderPass*>(&renderpass);
 
 					std::vector<vk::ClearValue> clearColours;
@@ -321,10 +301,7 @@ namespace Insight
 
 				}
 
-				if (!m_activeRenderpass)
-				{
-					BeginRenderpass();
-				}
+				ASSERT_MSG(m_activeRenderpass, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
 
 				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);

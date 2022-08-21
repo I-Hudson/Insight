@@ -110,7 +110,7 @@ namespace Insight
 
 				vk::DescriptorPool m_imguiDescriptorPool;
 				vk::RenderPass m_imguiRenderpass;
-				std::array<vk::Framebuffer, c_FrameCount> m_imguiFramebuffers;
+				std::array<vk::Framebuffer, 0> m_imguiFramebuffers;
 
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
@@ -120,7 +120,7 @@ namespace Insight
 				FrameResource<vk::Semaphore> m_swapchainAcquires;
 				FrameResource<vk::Semaphore> m_signalSemaphores;
 #endif
-				FrameResource_Vulkan m_frames[c_FrameCount];
+				std::vector<FrameResource_Vulkan> m_frames;
 			};
 		}
 	}

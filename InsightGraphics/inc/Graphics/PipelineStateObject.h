@@ -50,6 +50,7 @@ namespace Insight
 			BlendOp AplhaBlendOp = {};
 
 			bool Swapchain = false;
+			u64 Renderpass = 0;
 
 			u64 GetHash() const
 			{

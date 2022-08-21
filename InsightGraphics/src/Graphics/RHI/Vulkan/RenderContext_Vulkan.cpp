@@ -223,6 +223,7 @@ namespace Insight
 				allocatorInfo.device = m_device;
 				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
+				m_frames.resize(RenderGraph::s_FarmeCount);
 				for (FrameResource_Vulkan& frame : m_frames)
 				{
 					frame.Init(this);
@@ -345,38 +346,14 @@ namespace Insight
 
 				// Create the Render Pass
 				{
-					VkAttachmentDescription attachment = {};
-					attachment.format = (VkFormat)m_swapchainFormat;
-					attachment.samples = VK_SAMPLE_COUNT_1_BIT;
-					attachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-					attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-					attachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-					attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-					attachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-					attachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-					VkAttachmentReference color_attachment = {};
-					color_attachment.attachment = 0;
-					color_attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-					VkSubpassDescription subpass = {};
-					subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-					subpass.colorAttachmentCount = 1;
-					subpass.pColorAttachments = &color_attachment;
-					VkSubpassDependency dependency = {};
-					dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-					dependency.dstSubpass = 0;
-					dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-					dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-					dependency.srcAccessMask = 0;
-					dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-					VkRenderPassCreateInfo info = {};
-					info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-					info.attachmentCount = 1;
-					info.pAttachments = &attachment;
-					info.subpassCount = 1;
-					info.pSubpasses = &subpass;
-					info.dependencyCount = 1;
-					info.pDependencies = &dependency;
-					m_imguiRenderpass = m_device.createRenderPass(info);
+					RenderpassDescription renderpassDescription;
+					renderpassDescription.SwapchainPass = true;
+					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(VkFormatToPixelFormat[(int)GetSwapchainColourFormat()], ImageLayout::PresentSrc));
+					RHI_Renderpass renderpass = ((RenderContext*)this)->GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
+
+					m_imguiRenderpassDescription = renderpassDescription;
+
+					m_imguiRenderpass = *reinterpret_cast<VkRenderPass*>(&renderpass.Resource);
 
 					// Render imgui straight on top of what ever is on the swap chain image.
 				}
@@ -392,8 +369,8 @@ namespace Insight
 				init_info.PipelineCache = nullptr;
 				init_info.DescriptorPool = m_imguiDescriptorPool;
 				init_info.Subpass = 0;
-				init_info.MinImageCount = c_FrameCount;
-				init_info.ImageCount = c_FrameCount;
+				init_info.MinImageCount = RenderGraph::s_FarmeCount;
+				init_info.ImageCount = RenderGraph::s_FarmeCount;
 				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 				init_info.Allocator = nullptr;
 				init_info.CheckVkResultFn = [](VkResult error)
@@ -443,8 +420,6 @@ namespace Insight
 
 				m_device.destroyDescriptorPool(m_imguiDescriptorPool);
 				m_imguiDescriptorPool = nullptr;
-				m_device.destroyRenderPass(m_imguiRenderpass);
-				m_imguiRenderpass = nullptr;
 			}
 
 			void RenderContext_Vulkan::Render(CommandList cmdList)
@@ -544,7 +519,7 @@ namespace Insight
 
 					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
 				}
-				m_currentFrame = (m_currentFrame + 1) % c_FrameCount;
+				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_FarmeCount;
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
@@ -578,9 +553,12 @@ namespace Insight
 					assert(waitResult == vk::Result::eSuccess);
 				}
 
-				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, *m_swapchainAcquires.Get() );
-				m_availableSwapchainImage = nextImage.value;
-				m_device.resetFences({ *m_submitFences.Get() });
+				{
+					IS_PROFILE_SCOPE("acquireNextImageKHR");
+					vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, *m_swapchainAcquires.Get());
+					m_availableSwapchainImage = nextImage.value;
+					m_device.resetFences({ *m_submitFences.Get() });
+				}
 #endif
 				return true;
 			}
@@ -614,7 +592,7 @@ namespace Insight
 
 					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
 				}
-				m_currentFrame = (m_currentFrame + 1) % c_FrameCount;
+				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_FarmeCount;
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
@@ -832,7 +810,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
-				const int imageCount = std::max(c_FrameCount, (int)surfaceCapabilites.minImageCount);
+				const int imageCount = (int)std::max(RenderGraph::s_FarmeCount, surfaceCapabilites.minImageCount);
 
 				vk::Extent2D swapchainExtent = {};
 				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain

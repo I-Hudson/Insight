@@ -7,6 +7,9 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
+
+#include "Graphics/RenderGraph/RenderGraph.h"
+
 #include "Core/Logger.h"
 
 namespace Insight
@@ -84,7 +87,7 @@ namespace Insight
 
 				HANDLE m_fenceEvent;
 				ComPtr<ID3D12Fence> m_swapchainFence{ nullptr };
-				u64 m_swapchainFenceValues[c_FrameCount];
+				std::vector<u64> m_swapchainFenceValues;
 
 				DescriptorHeap_DX12 m_rtvHeap;
 				DescriptorHeap_DX12 m_dsvHeap;
@@ -93,7 +96,7 @@ namespace Insight
 				int m_currentFrame = 0;
 				int m_frameIndex = 0;
 
-				FrameResource_DX12 m_frames[c_FrameCount];
+				std::vector<FrameResource_DX12> m_frames;
 			};
 		}
 	}

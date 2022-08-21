@@ -4,11 +4,13 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
-#include "Core/Logger.h"
 
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
 #include "Graphics/RenderTarget.h"
+
+#include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include "vulkan/vulkan.hpp"
 #include <iostream>
@@ -27,6 +29,7 @@ namespace Insight
 
 			vk::PipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout(PipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
 				assert(m_context != nullptr);
 
 				const std::vector<Descriptor> descriptors = pso.Shader->GetDescriptors();
@@ -80,6 +83,8 @@ namespace Insight
 
 			void PipelineLayoutManager_Vulkan::Destroy()
 			{
+				IS_PROFILE_FUNCTION();
+
 				for (const auto pair : m_layouts)
 				{
 					m_context->GetDevice().destroyPipelineLayout(pair.second);
@@ -95,6 +100,8 @@ namespace Insight
 
 			vk::Pipeline PipelineStateObjectManager_Vulkan::GetOrCreatePSO(PipelineStateObject pso)
 			{
+				IS_PROFILE_FUNCTION();
+
 				assert(m_context != nullptr);
 
 				const u64 psoHash = pso.GetHash();
@@ -192,6 +199,17 @@ namespace Insight
 				std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
 				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
 			
+				vk::RenderPass renderpass = nullptr;
+				if (pso.Renderpass == 0)
+				{
+					renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil, pso.Swapchain });
+				}
+				else
+				{
+					RenderContext* context = (RenderContext*)m_context;
+					RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
+					renderpass = *reinterpret_cast<vk::RenderPass*>(&rhiRenderpass);
+				}
 				vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
 					vk::PipelineCreateFlags(),																						// flags
 					pipelineShaderStageCreateInfos,																					// stages
@@ -205,7 +223,7 @@ namespace Insight
 					&pipelineColorBlendStateCreateInfo,																				// pColorBlendState
 					&pipelineDynamicStateCreateInfo,																				// pDynamicState
 					layout,																											// layout
-					m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil, pso.Swapchain })	// renderPass
+					renderpass																										// renderPass
 				);
 
 				vk::ResultValue<vk::Pipeline> result = m_context->GetDevice().createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
@@ -216,6 +234,8 @@ namespace Insight
 
 			void PipelineStateObjectManager_Vulkan::Destroy()
 			{
+				IS_PROFILE_FUNCTION();
+
 				for (const auto pair : m_pipelineStateObjects)
 				{
 					m_context->GetDevice().destroyPipeline(pair.second);
@@ -234,6 +254,8 @@ namespace Insight
 
 			vk::RenderPass RenderpassManager_Vulkan::GetOrCreateRenderpass(RenderpassDesc_Vulkan desc)
 			{
+				IS_PROFILE_FUNCTION();
+
 				assert(m_context != nullptr);
 
 				const u64 hash = desc.GetHash();
@@ -350,6 +372,8 @@ namespace Insight
 
 			void RenderpassManager_Vulkan::Destroy()
 			{
+				IS_PROFILE_FUNCTION();
+
 				for (const auto& pair : m_renderpasses)
 				{
 					m_context->GetDevice().destroyRenderPass(pair.second);

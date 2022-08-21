@@ -8,19 +8,22 @@
 
 #include "Event/EventManager.h"
 
+#include "Core/Profiler.h"
+
 #include <set>
 
 namespace Insight
 {
 	namespace Graphics
 	{
-		u32 RenderGraph::s_FarmeCount = 2;
+		u32 RenderGraph::s_FarmeCount = 3;
 
 		RenderGraph::RenderGraph()
 		{ }
 
 		void RenderGraph::Init(RenderContext* context)
 		{
+			IS_PROFILE_FUNCTION();
 			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
 				{
 					Release();
@@ -44,6 +47,7 @@ namespace Insight
 
 		void RenderGraph::Execute()
 		{
+			IS_PROFILE_FUNCTION();
 			/*
 			* BUILD
 			* Build each path. This should first create and make all textures on the GPU.
@@ -79,6 +83,7 @@ namespace Insight
 
 		void RenderGraph::Release()
 		{
+			IS_PROFILE_FUNCTION();
 			m_context->GpuWaitForIdle();
 
 			m_passes.clear();
@@ -96,6 +101,7 @@ namespace Insight
 
 		void RenderGraph::Build()
 		{
+			IS_PROFILE_FUNCTION();
 			RenderGraphBuilder builder(this);
 			// TODO: This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
@@ -124,15 +130,23 @@ namespace Insight
 				{
 					pso.RenderTargets[rtIndex] = m_textureCaches->Get(rt);
 					++rtIndex;
+
+					pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches->Get(rt));
 				}
 				pso.DepthStencil = m_textureCaches->Get(pass.Get()->m_depthStencilWrite);
+				pass->m_renderpassDescription.DepthStencil = pso.DepthStencil;
 
+				pass->m_renderpassDescription.SwapchainPass = pass->m_swapchainPass;
+
+				pass->m_pso.Renderpass = pass->m_renderpassDescription.GetHash();
 				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
 			}
 		}
 
 		void RenderGraph::PlaceBarriers()
 		{
+			IS_PROFILE_FUNCTION();
+
 			int passIndex = 0;
 			// This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
@@ -219,6 +233,7 @@ namespace Insight
 
 		void RenderGraph::Render()
 		{
+			IS_PROFILE_FUNCTION();
 			if (m_context->PrepareRender())
 			{
 				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
@@ -226,14 +241,19 @@ namespace Insight
 				// TODO: Could be threaded? Leave as it is for now as it works.
 				for (UPtr<RenderGraphPassBase>& pass : m_passes)
 				{
+					IS_PROFILE_SCOPE("Single pass");
 					cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f);
 					cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
+					// Maybe remove these lines. Maybe the pass it self should set the pipeline
+					// as a single pass could have more than on pipeline.
 					pass->m_pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass->m_shader);
 					pass->m_pso.Swapchain = pass->m_swapchainPass;
 					cmdList->SetPipeline(pass->m_pso);
 
+					cmdList->BeginRenderpass(pass->m_renderpassDescription);
 					pass->Execute(cmdList);
+					cmdList->EndRenderpass();
 				}
 
 				cmdList->Close();
@@ -244,6 +264,7 @@ namespace Insight
 
 		void RenderGraph::Clear()
 		{
+			IS_PROFILE_FUNCTION();
 			m_passes.clear();
 		}
 	}

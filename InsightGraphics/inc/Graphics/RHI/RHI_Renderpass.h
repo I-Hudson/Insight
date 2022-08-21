@@ -13,6 +13,8 @@ namespace Insight
 	{
 		class RenderContext;
 		class RHI_Texture;
+		class RHI_RenderpassManager;
+		class RenderGraph;
 
 		struct AttachmentDescription
 		{
@@ -102,8 +104,18 @@ namespace Insight
 					HashCombine(hash, DepthStencilAttachment.GetHash());
 				}
 
+				HashCombine(hash, SwapchainPass);
+
 				return hash;
 			}
+
+			// [PRIVATE] This should not be set manually by the user. RenderContext's and other graphics
+			// API use this.
+			bool SwapchainPass = false;
+		private:
+
+			friend class RHI_RenderpassManager;
+			friend class RenderGraph;
 		};
 
 		struct RHI_Renderpass
@@ -118,6 +130,7 @@ namespace Insight
 			void SetRenderContext(RenderContext* context);
 
 			RHI_Renderpass GetOrCreateRenderpass(RenderpassDescription description);
+			RHI_Renderpass GetRenderpass(u64 hash) const;
 
 			void Release(u64 hash, bool remove = true);
 			void Release(RenderpassDescription description, bool remove = true);

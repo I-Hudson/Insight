@@ -5,6 +5,8 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Platform/Platform.h"
 
+#include "Core/Profiler.h"
+
 #include "VmaUsage.h"
 
 namespace Insight
@@ -20,6 +22,7 @@ namespace Insight
 
 			void RHI_Texture_Vulkan::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
 			{
+				IS_PROFILE_FUNCTION();
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
 				m_info = createInfo;
 
@@ -66,6 +69,7 @@ namespace Insight
 
 			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
 			{
+				IS_PROFILE_FUNCTION();
 				// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_Vulkan stagingBuffer;
 				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0);
@@ -83,11 +87,13 @@ namespace Insight
 
 			std::vector<Byte> RHI_Texture_Vulkan::Download(void* data, int sizeInBytes)
 			{
+				IS_PROFILE_FUNCTION();
 				return std::vector<Byte>();
 			}
 
 			void RHI_Texture_Vulkan::Release()
 			{
+				IS_PROFILE_FUNCTION();
 				if (m_imageView)
 				{
 					m_context->GetDevice().destroyImageView(m_imageView);

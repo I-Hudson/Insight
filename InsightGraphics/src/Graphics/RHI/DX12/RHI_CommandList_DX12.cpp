@@ -155,7 +155,7 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::BeginRenderpass()
+			void RHI_CommandList_DX12::BeginRenderpass(RenderpassDescription renderDescription)
 			{
 				IS_PROFILE_FUNCTION();
 
