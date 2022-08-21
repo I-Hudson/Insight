@@ -6,8 +6,9 @@
 
 #include "Graphics/RenderTarget.h"
 
-#include "backends/imgui_impl_glfw.h"
 #include "Core/Memory.h"
+
+#include "backends/imgui_impl_glfw.h"
 
 namespace Insight
 {
@@ -33,6 +34,7 @@ namespace Insight
 			context->m_shaderManager.SetRenderContext(context);
 			context->m_descriptorLayoutManager.SetRenderContext(context);
 			context->m_renderpassManager.SetRenderContext(context);
+			context->m_descriptorSetManager.Setup();
 
 			if (ENABLE_IMGUI)
 			{
@@ -90,6 +92,10 @@ namespace Insight
 			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
+			m_descriptorSetManager.ForEach([](RHI_DescriptorSetManager& setManager)
+				{
+					setManager.ReleaseAll();
+				});
 		}
 
 		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride)
@@ -143,16 +149,19 @@ namespace Insight
 
 	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes, int stride)
 	{
+		ASSERT(s_context);
 		return s_context->CreateBuffer(Graphics::BufferType::Vertex, sizeBytes, stride);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
 	{
+		ASSERT(s_context);
 		return s_context->CreateBuffer(Graphics::BufferType::Index, sizeBytes, 0);
 	}
 
 	Graphics::RHI_Buffer* Renderer::CreateUniformBuffer(u64 sizeBytes)
 	{
+		ASSERT(s_context);
 		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes, 0);
 	}
 
@@ -163,24 +172,28 @@ namespace Insight
 
 	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		ASSERT(s_context);
 		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::FreeIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		assert(buffer->GetType() == Graphics::BufferType::Index);
+		ASSERT(s_context);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::FreeUniformBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		assert(buffer->GetType() == Graphics::BufferType::Uniform);
+		ASSERT(s_context);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Uniform);
 		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::FreeRawBuffer(Graphics::RHI_Buffer* buffer)
 	{
-		assert(buffer->GetType() == Graphics::BufferType::Index);
+		ASSERT(s_context);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);
 	}
 

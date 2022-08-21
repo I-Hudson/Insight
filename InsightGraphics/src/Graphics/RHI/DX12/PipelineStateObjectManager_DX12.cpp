@@ -61,7 +61,7 @@ namespace Insight
 
 				RHI_Shader_DX12* shader = dynamic_cast<RHI_Shader_DX12*>(pso.Shader);
 
-				RHI_DescriptorLayout_DX12* layout = dynamic_cast<RHI_DescriptorLayout_DX12*>(m_context->GetDescriptorLayoutManager().GetLayout(0, shader->GetDescriptors()));
+				RHI_DescriptorLayout_DX12* layout = dynamic_cast<RHI_DescriptorLayout_DX12*>(m_context->GetDescriptorLayoutManager().GetLayout(shader->GetDescriptors()));
 
 				D3D12_RASTERIZER_DESC rasterizerState;
 				rasterizerState.FillMode = PolygonModeToDX12(pso.PolygonMode);

@@ -196,19 +196,6 @@ namespace Insight
 #endif
 			}
 
-			void RHI_CommandList_Vulkan::SetUniform(int set, int binding, DescriptorBufferView view)
-			{
-				IS_PROFILE_FUNCTION();
-				FrameResourceVulkan()->DescriptorAllocator.SetUniform(set, binding, FrameResourceVulkan()->UniformBuffer.GetView(view.Offset, view.SizeInBytes));
-			}
-
-			void RHI::Vulkan::RHI_CommandList_Vulkan::SetTexture(int set, int binding, RHI_Texture* texture)
-			{
-				IS_PROFILE_FUNCTION();
-				FrameResourceVulkan()->DescriptorAllocator.SetTexture(set, binding, texture);
-
-			}
-
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
 			{
 				IS_PROFILE_FUNCTION();
@@ -305,12 +292,39 @@ namespace Insight
 
 				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
+				m_descriptorAllocator->SetPipeline(pso);
+
+				m_activePSO = pso;
 			}
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()
 			{
 				IS_PROFILE_FUNCTION();
 
+#ifdef RENDER_GRAPH_ENABLED
+				std::vector<RHI_DescriptorSet*> descriptorSets;
+				if (m_descriptorAllocator->GetDescriptorSets(descriptorSets))
+				{
+					vk::PipelineLayout pipelineLayout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+
+					std::vector<vk::DescriptorSet> sets;
+					for (const auto& s : descriptorSets)
+					{
+						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+					}
+
+					std::vector<u32> dynamicOffsets = {};
+					m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
+						, pipelineLayout
+						, 0
+						, sets
+						, dynamicOffsets);
+					return true;
+				}
+
+				return false;
+#else
+				return BindDescriptorSets();
 				std::vector<RHI_Descriptor*> descriptors;
 				bool result;
 				
@@ -343,6 +357,7 @@ namespace Insight
 					}
 				}
 				return result && descriptorCount > 0;
+#endif
 			}
 
 			RenderContext_Vulkan* RHI_CommandList_Vulkan::RenderContextVulkan()
@@ -385,7 +400,7 @@ namespace Insight
 							imageViews.push_back(textureVulkan->GetImageView());
 
 							vk::ClearValue clearValue;
-							clearValue.color.float32[0] = 1;
+							clearValue.color.float32[0] = 0;
 							clearValue.color.float32[1] = 0;
 							clearValue.color.float32[2] = 0;
 							clearValue.color.float32[3] = 1;

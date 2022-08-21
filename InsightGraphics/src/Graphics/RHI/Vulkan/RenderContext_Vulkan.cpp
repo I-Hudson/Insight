@@ -229,6 +229,20 @@ namespace Insight
 					frame.Init(this);
 				}
 
+				{
+					std::array<vk::DescriptorPoolSize, 2> pool_sizes =
+					{
+						vk::DescriptorPoolSize{ vk::DescriptorType::eCombinedImageSampler,	1024 },
+						vk::DescriptorPoolSize{ vk::DescriptorType::eUniformBuffer,			1024 },
+					};
+
+					vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo = { };
+					descriptorPoolCreateInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+					descriptorPoolCreateInfo.maxSets = 2048;
+					descriptorPoolCreateInfo.setPoolSizes(pool_sizes);
+					m_descriptor_pool = *reinterpret_cast<VkDescriptorPool*>(&m_device.createDescriptorPool(descriptorPoolCreateInfo));
+				}
+
 				InitImGui();
 
 #ifdef RENDER_GRAPH_ENABLED
@@ -281,6 +295,9 @@ namespace Insight
 				}
 
 				BaseDestroy();
+
+				m_device.destroyDescriptorPool(*reinterpret_cast<VkDescriptorPool*>(&m_descriptor_pool));
+				m_descriptor_pool = nullptr;
 
 				m_pipelineStateObjectManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
@@ -422,112 +439,6 @@ namespace Insight
 				m_imguiDescriptorPool = nullptr;
 			}
 
-			void RenderContext_Vulkan::Render(CommandList cmdList)
-			{
-				IS_PROFILE_FUNCTION();
-
-				if (Window::Instance().GetSize() != m_swapchainBufferSize)
-				{
-					IS_PROFILE_SCOPE("Swapchain resize");
-					WaitForGpu();
-					CreateSwapchain();
-					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
-					return;
-				}
-
-				{
-					IS_PROFILE_SCOPE("ImGui Render");
-					ImGuiRender();
-				}
-				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
-
-				{
-					IS_PROFILE_SCOPE("Fence wait");
-					vk::Result waitResult = m_device.waitForFences({ frame.SubmitFence }, 1, 0xFFFFFFFF);
-					assert(waitResult == vk::Result::eSuccess);
-				}
-
-				vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, frame.SwapchainAcquire);
-				m_availableSwapchainImage = nextImage.value;
-				m_device.resetFences({ frame.SubmitFence });
-
-				frame.Reset();
-
-				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
-				cmdListVulkan->Record(cmdList, &frame);
-				cmdListVulkan->GetCommandList().endRenderPass();
-
-
-				// Render imgui.
-				if (m_imguiFramebuffers[m_currentFrame])
-				{
-					m_device.destroyFramebuffer(m_imguiFramebuffers[m_currentFrame]);
-				}
-
-				std::array<vk::ImageView, 1> imguiFramebufferViews = { GetSwapchainImageView() };
-				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({},
-					m_imguiRenderpass,
-					imguiFramebufferViews,
-					m_swapchainBufferSize.x,
-					m_swapchainBufferSize.y, 1);
-				m_imguiFramebuffers[m_currentFrame] = m_device.createFramebuffer(frameBufferInfo);
-
-				VkClearValue clearValue;
-				clearValue.color.float32[0] = 0;
-				clearValue.color.float32[1] = 0;
-				clearValue.color.float32[2] = 0;
-				clearValue.color.float32[3] = 1;
-
-				{
-					IS_PROFILE_SCOPE("ImGui Draw");
-					VkRenderPassBeginInfo info = {};
-					info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-					info.renderPass = m_imguiRenderpass;
-					info.framebuffer = m_imguiFramebuffers[m_currentFrame];
-					info.renderArea.extent.width = m_swapchainBufferSize.x;
-					info.renderArea.extent.height = m_swapchainBufferSize.y;
-					info.clearValueCount = 1;
-					info.pClearValues = &clearValue;
-					cmdListVulkan->GetCommandList().beginRenderPass(info, vk::SubpassContents::eInline);
-					// Record dear imgui primitives into command buffer
-					ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmdListVulkan->GetCommandList());
-					cmdListVulkan->GetCommandList().endRenderPass();
-					cmdListVulkan->GetCommandList().end();
-				}
-
-				std::array<vk::Semaphore, 1> waitSemaphores = { frame.SwapchainAcquire };
-				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				std::array<vk::Semaphore, 1> signalSemaphore = { frame.SignalSemaphore };
-
-				vk::SubmitInfo submitInfo = vk::SubmitInfo(
-					waitSemaphores,
-					dstStageFlgs,
-					commandBuffers,
-					signalSemaphore);
-				{
-					IS_PROFILE_SCOPE("Submit");
-					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, frame.SubmitFence);
-				}
-				std::array<vk::Semaphore, 1> signalSemaphores = { frame.SignalSemaphore };
-				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
-				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
-
-				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
-				{
-					IS_PROFILE_SCOPE("Present");
-
-					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
-				}
-				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_FarmeCount;
-
-				{
-					IS_PROFILE_SCOPE("ImGui NewFrame");
-					ImGui_ImplVulkan_NewFrame();
-					ImGuiBeginFrame();
-				}
-			}
-
 			bool RenderContext_Vulkan::PrepareRender()
 			{
 #ifdef RENDER_GRAPH_ENABLED
@@ -560,6 +471,8 @@ namespace Insight
 					m_device.resetFences({ *m_submitFences.Get() });
 				}
 #endif
+				m_descriptorSetManager->Reset();
+
 				return true;
 			}
 
@@ -953,7 +866,6 @@ namespace Insight
 				Context = context;
 
 				CommandListManager.Create(context);
-				DescriptorAllocator.SetRenderContext(Context);
 				UniformBuffer.Create(Context);
 
 				vk::SemaphoreCreateInfo semaphoreInfo = vk::SemaphoreCreateInfo();
@@ -968,7 +880,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				CommandListManager.Destroy();
-				DescriptorAllocator.Destroy();
+
 				UniformBuffer.Release();
 
 				Context->GetDevice().destroySemaphore(SwapchainAcquire);
@@ -980,7 +892,6 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				FrameResouce::Reset();
-				DescriptorAllocator.Reset();
 			}
 }
 	}

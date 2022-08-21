@@ -47,127 +47,6 @@ namespace Insight
 			return nullptr;
 		}
 
-		void RHI_CommandList::Record(CommandList& cmdList, FrameResouce* frameResouces)
-		{
-			IS_PROFILE_FUNCTION();
-
-			m_frameResouces = frameResouces;
-			m_frameResouces->UniformBuffer.Resize(cmdList.GetDescriptorBuffer().GetCapacity());
-			m_frameResouces->UniformBuffer.Upload(cmdList.GetDescriptorBuffer().GetData(), cmdList.GetDescriptorBuffer().GetSize());
-
-			for (int i = 0; i < cmdList.GetCommandCount(); ++i)
-			{
-				//ZoneScopedN("Single Command");
-				//ZoneScopedN("Single Command");
-				ICommand* command = cmdList.GetCurrentCommand();
-				switch (command->CommandType)
-				{
-				case CommandType::None:
-
-				case CommandType::SetPipelineStateObject:
-				{
-					//ZoneScopedN("SetPipelineStateObject");
-					const CMD_SetPipelineStateObject* cmd = static_cast<const CMD_SetPipelineStateObject*>(command);
-					m_pso = cmd->Pso;
-					SetPipeline(m_pso);
-					break;
-				}
-
-				case CommandType::SetUniform:
-				{
-					//ZoneScopedN("SetUniform");
-					const CMD_SetUniform* cmd = static_cast<const CMD_SetUniform*>(command);
-					SetUniform(cmd->Set, cmd->Binding, cmd->View);
-					break;
-				}
-
-				case CommandType::SetTexture:
-				{
-					//ZoneScopedN("SetUniform");
-					const CMD_SetTexture* cmd = static_cast<const CMD_SetTexture*>(command);
-					SetTexture(cmd->Set, cmd->Binding, cmd->Texture);
-					break;
-				}
-
-				case CommandType::SetViewport:
-				{
-					//ZoneScopedN("SetViewport");
-					const CMD_SetViewport* cmd = static_cast<const CMD_SetViewport*>(command);
-					SetViewport(0.0f, 0.0f, (float)cmd->Width, (float)cmd->Height, 0.0f, 1.0f);
-					break;
-				}
-
-				case CommandType::SetScissor:
-				{
-					//ZoneScopedN("SetScissor");
-					const CMD_SetScissor* cmd = static_cast<const CMD_SetScissor*>(command);
-					SetScissor(0, 0, cmd->Width, cmd->Height);
-					break;
-				}
-
-				case CommandType::SetVertexBuffer:
-				{
-					IS_PROFILE_SCOPE("[RHI] SetVertexBuffer")
-					const CMD_SetVertexBuffer* cmd = static_cast<const CMD_SetVertexBuffer*>(command);
-					if (cmd->Buffer != m_drawData.VertexBuffer)
-					{
-						m_drawData.VertexBuffer = cmd->Buffer;
-						SetVertexBuffer(cmd->Buffer);
-					}
-					break;
-				}
-
-				case CommandType::SetIndexBuffer:
-				{
-					IS_PROFILE_SCOPE("[RHI] SetIndexBuffer")
-					const CMD_SetIndexBuffer* cmd = static_cast<const CMD_SetIndexBuffer*>(command);
-					if (cmd->Buffer != m_drawData.VertexBuffer)
-					{
-						m_drawData.IndexBuffer = cmd->Buffer;
-						SetIndexBuffer(cmd->Buffer);
-					}
-					break;
-				}
-
-				case CommandType::Draw:
-				{
-					//ZoneScopedN("Draw");
-					if (!CanDraw())
-					{
-						break;
-					}
-					const CMD_Draw* cmd = dynamic_cast<const CMD_Draw*>(command);
-					Draw(cmd->VertexCount, cmd->InstanceCount, cmd->FirstVertex, cmd->FirstInstance);
-					break;
-				}
-
-				case CommandType::DrawIndexed:
-				{
-					if (!CanDraw())
-					{
-						break;
-					}
-					const CMD_DrawIndexed* cmd = dynamic_cast<const CMD_DrawIndexed*>(command);
-					DrawIndexed(cmd->IndexCount, cmd->InstanceCount, cmd->FirstIndex, cmd->VertexOffset, cmd->FirstInstance);
-					break;
-				}
-
-				default:
-				{
-					IS_CORE_ERROR("[CommandList_DX12::Record] Unknown command.");
-					assert(false);
-					break;
-				}
-				}
-				cmdList.NextCommand();
-			}
-
-			if (m_activeRenderpass)
-			{
-				m_activeRenderpass = false;
-			}
-		}
-
 		void RHI_CommandList::Reset()
 		{
 			m_pso = {};
@@ -180,15 +59,11 @@ namespace Insight
 			if (m_pso.GetHash() != m_activePSO.GetHash())
 			{
 				m_activePSO = m_pso;
-				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(0, m_activePSO.Shader->GetDescriptors()
+				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
 				/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
 				BindPipeline(m_activePSO, layout);
 			}
-#ifdef RENDER_GRAPH_ENABLED
-			return true;
-#else
 			return BindDescriptorSets();
-#endif
 		}
 
 		bool RHI_CommandList::BindDescriptorSets()
@@ -290,5 +165,14 @@ namespace Insight
 			assert(m_allocator);
 			m_allocator->ReturnSingleSubmitCommandList(cmdList);
 		}
-	}
+
+		void RHI_CommandList::SetUniform(int set, int binding, void* data, u32 size)
+		{
+			m_descriptorAllocator->SetUniform(set, binding, data, size);
+		}
+
+		void RHI_CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
+		{
+		}
+}
 }

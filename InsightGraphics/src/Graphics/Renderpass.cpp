@@ -43,73 +43,6 @@ namespace Insight
 				m_shadowCamera = { m_camera };
 				m_shadowCamera.Projection = glm::perspective(glm::radians(ShadowFOV), aspect, ShadowZNear, ShadowZFar);
 			}
-
-#ifndef RENDER_GRAPH_ENABLED
-			if (!m_vertexBuffer)
-			{
-				//ZoneScopedN("CreateVertexBuffer");
-
-				Vertex vertices[3] =
-				{
-					Vertex( glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
-					Vertex( glm::vec4(0.0f, 1.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
-					Vertex( glm::vec4(1.0f, 0.0f, 0.0f, 0.0f),	glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f) ),
-				};
-				m_vertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
-				m_vertexBuffer->Upload(vertices, sizeof(vertices));
-				m_vertexBuffer->SetName(L"TriangleMesh_Vertex_Buffer");
-			}
-
-			if (!m_indexBuffer)
-			{
-				int indices[3] = { 0, 1, 2, };
-				m_indexBuffer = Renderer::CreateIndexBuffer(sizeof(int) * ARRAYSIZE(indices));
-				m_indexBuffer->Upload(indices, sizeof(indices));
-				m_indexBuffer->SetName(L"TriangleMesh_Index_Buffer");
-			}
-
-			if (!m_testTexture)
-			{
-				m_testTexture = Renderer::CreateTexture();
-				m_testTexture->LoadFromFile("./Resources/testTexture.png");
-				m_testTexture->SetName(L"TestTexture");
-			}
-
-			if (!m_shadowTarget)
-			{
-				m_shadowTarget = Renderer::CreateRenderTarget();
-				int const oneK = 1024;
-				int const textureSize = oneK * 8;
-				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(textureSize, textureSize, PixelFormat::D32_Float, { 1, 0, 0, 1 });
-				//Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::D32_Float, { 1, 0, 0, 1 });
-				m_shadowTarget->Create("ShadowPassDepth", desc);
-				m_shadowTarget->GetTexture()->SetName(L"ShadowPassDepth");
-			}
-
-			if (!m_colourTarget)
-			{
-				m_colourTarget = Renderer::CreateRenderTarget();
-				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::B8G8R8A8_UNorm, { 1, 0, 0, 1 });
-				m_colourTarget->Create("StandardColour", desc);
-				m_colourTarget->GetTexture()->SetName(L"GBufferColour");
-			}
-
-			if (!m_depthTarget)
-			{
-				m_depthTarget = Renderer::CreateRenderTarget();
-				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::D32_Float, { 1, 0, 0, 1 });
-				m_depthTarget->Create("StandardDepth", desc);
-				m_depthTarget->GetTexture()->SetName(L"GBufferDepth");
-			}
-
-			if (!m_compositeTarget)
-			{
-				m_compositeTarget = Renderer::CreateRenderTarget();
-				Graphics::RenderTargetDesc desc = Graphics::RenderTargetDesc(Window::Instance().GetWidth(), Window::Instance().GetHeight(), PixelFormat::B8G8R8A8_UNorm, { 1, 0, 0, 1 });
-				m_compositeTarget->Create("CompositeTarget", desc);
-				m_compositeTarget->GetTexture()->SetName(L"CompositeTarget");
-			}
-#endif
 		}
 
 		bool useShadowCamera = false;
@@ -130,55 +63,7 @@ namespace Insight
 
 		void Renderpass::Destroy()
 		{
-#ifndef RENDER_GRAPH_ENABLED
-			if (m_vertexBuffer)
-			{
-				Renderer::FreeVertexBuffer(m_vertexBuffer);
-				m_vertexBuffer = nullptr;
-			}
-
-			if (m_indexBuffer)
-			{
-				Renderer::FreeIndexBuffer(m_indexBuffer);
-				m_indexBuffer = nullptr;
-			}
-
-			if (m_testTexture)
-			{
-				Renderer::FreeTexture(m_testTexture);
-				m_testTexture = nullptr;
-			}
-
-			if (m_shadowTarget)
-			{
-				Renderer::FreeRenderTarget(m_shadowTarget);
-				m_shadowTarget = nullptr;
-			}
-
-			if (m_colourTarget)
-			{
-				Renderer::FreeRenderTarget(m_colourTarget);
-				m_colourTarget = nullptr;
-			}
-
-			if (m_depthTarget)
-			{
-				Renderer::FreeRenderTarget(m_depthTarget);
-				m_depthTarget = nullptr;
-			}
-
-			if (m_compositeTarget)
-			{
-				Renderer::FreeRenderTarget(m_compositeTarget);
-				m_compositeTarget = nullptr;
-			}
-#endif 
-
 			m_testMesh.Destroy();
-
-#ifdef RENDER_GRAPH_ENABLED
-			RenderGraph::Instance().Release();
-#endif //#ifdef RENDER_GRAPH_ENABLED
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -329,7 +214,7 @@ namespace Insight
 					textureCreateInfo.Depth = 1;
 					textureCreateInfo.TextureType = TextureType::Tex2D;
 					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::ColourAttachment;
-					textureCreateInfo.Format = PixelFormat::R8G8B8A8_SNorm;
+					textureCreateInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 					RGTextureHandle colourRT = builder.CreateTexture("ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
@@ -358,10 +243,16 @@ namespace Insight
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
-				[](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
+				[&camera](TestPassData& data, RenderGraphPassBase& pass, RHI_CommandList* cmdList)
 				{
 					cmdList->BindPipeline(pass.m_pso, nullptr);
-					//data.TestMesh.Draw(cmdList);
+
+					{
+						IS_PROFILE_SCOPE("GBuffer-SetUniform");
+						cmdList->SetUniform(0, 0, &camera, sizeof(camera));
+					}
+
+					data.TestMesh.Draw(cmdList);
 
 				}, std::move(passData));
 #endif //RENDER_GRAPH_ENABLED

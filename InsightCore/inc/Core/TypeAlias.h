@@ -12,6 +12,11 @@ using Byte = unsigned char;
 
 using Handle = u64;
 
+inline auto operator""_B(u64 const x) { return x; }
+inline auto operator""_KB(u64 const x) { return 1024 * x; }
+inline auto operator""_MB(u64 const x) { return 1024 * 1024 * x; }
+inline auto operator""_GB(u64 const x) { return 1024 * 1024 * 1024 * x; }
+
 #ifdef IS_PLATFORM_X64
 constexpr int log2_64(u64 value);
 constexpr int log2(u64 value) { return log2_64(value); }

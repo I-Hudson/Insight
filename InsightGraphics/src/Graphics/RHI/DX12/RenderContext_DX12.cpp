@@ -207,84 +207,84 @@ namespace Insight
 				m_srcImGuiHeap = nullptr;
 			}
 
-			void RenderContext_DX12::Render(CommandList cmdList)
-			{
-				IS_PROFILE_FUNCTION();
-				ImGuiRender();
+			//void RenderContext_DX12::Render(CommandList cmdList)
+			//{
+			//	IS_PROFILE_FUNCTION();
+			//	ImGuiRender();
 
-				FrameResource_DX12& frame = m_frames[m_frameIndex];
+			//	FrameResource_DX12& frame = m_frames[m_frameIndex];
 
-				frame.Reset();
+			//	frame.Reset();
 
-				// Record cmd buffers and execute
-				RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
+			//	// Record cmd buffers and execute
+			//	RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
-				// Set back buffer texture/image to render target so we can render to it.
-				cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+			//	// Set back buffer texture/image to render target so we can render to it.
+			//	cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-				D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_swapchainImages[m_frameIndex].ColourHandle.GetCPUHandle();
-				D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = m_swapchainImages[m_frameIndex].DepthStencilHandle.GetCPUHandle();
+			//	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_swapchainImages[m_frameIndex].ColourHandle.GetCPUHandle();
+			//	D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = m_swapchainImages[m_frameIndex].DepthStencilHandle.GetCPUHandle();
 
-				ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-				const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+			//	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+			//	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
 
-				cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
-				cmdListDX12->ClearDepthStencilView(depthStencilHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+			//	cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
+			//	cmdListDX12->ClearDepthStencilView(depthStencilHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-				cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
+			//	cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
 
-				cmdListDX12->Record(cmdList, &frame);
+			//	cmdListDX12->Record(cmdList, &frame);
 
-				{
-					IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
-					std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-					IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
-					IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
-				}
+			//	{
+			//		IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
+			//		std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
+			//		IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
+			//		IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
+			//	}
 
-				{
-					IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
-					// Set back buffer texture/image back to present so we can use it within the swapchain.
-					cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-				}
-				cmdListDX12->Close();
+			//	{
+			//		IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
+			//		// Set back buffer texture/image back to present so we can use it within the swapchain.
+			//		cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+			//	}
+			//	cmdListDX12->Close();
 
-				{
-					IS_PROFILE_SCOPE("ExecuteCommandLists");
-					ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-					m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-				}
+			//	{
+			//		IS_PROFILE_SCOPE("ExecuteCommandLists");
+			//		ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
+			//		m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+			//	}
 
-				{
-					IS_PROFILE_SCOPE("Present");
-					//ZoneScopedN("Present");
-					// Present the frame.
-					if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
-					{
-						if (hr == 0x0)
-						{
-							m_device->GetDeviceRemovedReason();
-						}
-					}
-				}
+			//	{
+			//		IS_PROFILE_SCOPE("Present");
+			//		//ZoneScopedN("Present");
+			//		// Present the frame.
+			//		if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
+			//		{
+			//			if (hr == 0x0)
+			//			{
+			//				m_device->GetDeviceRemovedReason();
+			//			}
+			//		}
+			//	}
 
-				WaitForNextFrame();
+			//	WaitForNextFrame();
 
-				if (Window::Instance().GetSize() != m_swapchainSize)
-				{
-					IS_PROFILE_SCOPE("Swapchain resize");
-					WaitForGpu();
-					m_swapchainSize = Window::Instance().GetSize();
-					ResizeSwapchainBuffers();
-				}
+			//	if (Window::Instance().GetSize() != m_swapchainSize)
+			//	{
+			//		IS_PROFILE_SCOPE("Swapchain resize");
+			//		WaitForGpu();
+			//		m_swapchainSize = Window::Instance().GetSize();
+			//		ResizeSwapchainBuffers();
+			//	}
 
-				{
-					IS_PROFILE_SCOPE("Imgui End frame");
-					IMGUI_VALID(ImGui::EndFrame());
-					IMGUI_VALID(ImGui_ImplDX12_NewFrame());
-					IMGUI_VALID(ImGuiBeginFrame());
-				}
-			}
+			//	{
+			//		IS_PROFILE_SCOPE("Imgui End frame");
+			//		IMGUI_VALID(ImGui::EndFrame());
+			//		IMGUI_VALID(ImGui_ImplDX12_NewFrame());
+			//		IMGUI_VALID(ImGuiBeginFrame());
+			//	}
+			//}
 
 			void RenderContext_DX12::GpuWaitForIdle()
 			{
@@ -539,20 +539,20 @@ namespace Insight
 				Context = context;
 				CommandListManager.Create(Context);
 				UniformBuffer.Create(Context);
-				DescriptorAllocator.SetRenderContext(Context);
+				//DescriptorAllocator.SetRenderContext(Context);
 			}
 
 			void FrameResource_DX12::Destroy()
 			{
 				CommandListManager.Destroy();
 				UniformBuffer.Release();
-				DescriptorAllocator.Destroy();
+				//DescriptorAllocator.Destroy();
 			}
 
 			void FrameResource_DX12::Reset()
 			{
 				FrameResouce::Reset();
-				DescriptorAllocator.Reset();
+				//DescriptorAllocator.Reset();
 			}
 		}
 	}

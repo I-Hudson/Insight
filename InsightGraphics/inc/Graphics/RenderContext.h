@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Graphics/Defines.h"
-#include "Graphics/CommandList.h"
 #include "Graphics/Enums.h"
 #include "imgui.h"
 
@@ -11,6 +10,8 @@
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
+
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Core/Collections/FactoryMap.h"
 
@@ -35,8 +36,6 @@ namespace Insight
 			virtual void InitImGui() = 0;
 			virtual void DestroyImGui() = 0;
 
-			virtual void Render(CommandList cmdList) = 0;
-
 			virtual bool PrepareRender() = 0;
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
@@ -50,6 +49,7 @@ namespace Insight
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
+			RHI_DescriptorSetManager& GetDescriptorSetManager() { return *m_descriptorSetManager.Get(); }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -67,9 +67,6 @@ namespace Insight
 			RHI_Texture* CreateTextre();
 			void FreeTexture(RHI_Texture* texture);
 
-			Graphics::RenderTarget* CreateRenderTarget();
-			void FreeRenderTarget(Graphics::RenderTarget* renderTarget);
-
 		protected:
 			//const static int c_FrameCount = 3;
 
@@ -80,6 +77,7 @@ namespace Insight
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
 			RenderpassDescription m_imguiRenderpassDescription;
+			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
 

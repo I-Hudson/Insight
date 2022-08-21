@@ -114,19 +114,19 @@ namespace Insight
 				std::unordered_map<u64, DescriptorPoolPage_Vulkan> m_pools;
 			};
 
-			class DescriptorAllocator_Vulkan : public DescriptorAllocator
-			{
-			public:
-				virtual void SetRenderContext(RenderContext* context) override;
-				virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
+			//class DescriptorAllocator_Vulkan : public DescriptorAllocator
+			//{
+			//public:
+			//	virtual void SetRenderContext(RenderContext* context) override;
+			//	virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
 
-				virtual void Reset() override;
-				virtual void Destroy() override;
+			//	virtual void Reset() override;
+			//	virtual void Destroy() override;
 
-			private:
-				RenderContext_Vulkan* m_context = nullptr;
-				DescriptorPool_Vulkan m_pool;
-			};
+			//private:
+			//	RenderContext_Vulkan* m_context = nullptr;
+			//	DescriptorPool_Vulkan m_pool;
+			//};
 		}
 	}
 }

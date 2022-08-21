@@ -59,7 +59,7 @@ namespace Insight
 
 					if (currentSet != descriptor.Set)
 					{
-						RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentSet, currentDescriptors));
+						RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
 						currentDescriptors.clear();
 						currentSet = descriptor.Set;
 
@@ -67,7 +67,7 @@ namespace Insight
 					}
 					currentDescriptors.push_back(descriptor);
 				}
-				RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentSet, currentDescriptors));
+				RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
 				setLayouts.push_back(layoutVulkan->GetLayout());
 
 

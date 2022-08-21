@@ -254,7 +254,7 @@ namespace Insight
 				newDescriptor->m_context = m_context;
 				newDescriptor->m_pool = this;
 
-				RHI_DescriptorLayout_Vulkan* layout = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptors[0].Set, descriptors));
+				RHI_DescriptorLayout_Vulkan* layout = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptors));
 				std::array<vk::DescriptorSetLayout, 1> layouts = { layout->GetLayout()};
 
 				vk::DescriptorSetAllocateInfo createInfo = { };
@@ -392,34 +392,34 @@ namespace Insight
 			/// DescriptorAllocator_Vulkan
 			/// </summary>
 			/// <param name="pso"></param>
-			void DescriptorAllocator_Vulkan::SetRenderContext(RenderContext* context)
-			{
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
-				m_pool.Create(m_context);
-			}
+			//void DescriptorAllocator_Vulkan::SetRenderContext(RenderContext* context)
+			//{
+			//	m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+			//	m_pool.Create(m_context);
+			//}
 
-			bool DescriptorAllocator_Vulkan::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
-			{
-				for (const auto& pair : m_descriptors)
-				{
-					const int setIndex = pair.first;
-					RHI_Descriptor* descriptor = m_pool.GetDescriptor(pair.second);
-					descriptor->Update(pair.second);
-					descriptors.push_back(descriptor);
-				}
+			//bool DescriptorAllocator_Vulkan::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
+			//{
+			//	for (const auto& pair : m_descriptors)
+			//	{
+			//		const int setIndex = pair.first;
+			//		RHI_Descriptor* descriptor = m_pool.GetDescriptor(pair.second);
+			//		descriptor->Update(pair.second);
+			//		descriptors.push_back(descriptor);
+			//	}
 
-				return true;
-			}
+			//	return true;
+			//}
 
-			void DescriptorAllocator_Vulkan::Reset()
-			{
-				m_pool.Reset();
-			}
+			//void DescriptorAllocator_Vulkan::Reset()
+			//{
+			//	m_pool.Reset();
+			//}
 
-			void DescriptorAllocator_Vulkan::Destroy()
-			{
-				m_pool.Destroy();
-			}
+			//void DescriptorAllocator_Vulkan::Destroy()
+			//{
+			//	m_pool.Destroy();
+			//}
 		}
 	}
 }

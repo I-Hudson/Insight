@@ -171,20 +171,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				m_pso = pso;
-				FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
-			}
-
-			void RHI_CommandList_DX12::SetUniform(int set, int binding, DescriptorBufferView view)
-			{
-				IS_PROFILE_FUNCTION();
-				RHI_BufferView bufferView = FrameResourceDX12()->UniformBuffer.GetView(view.Offset, view.SizeInBytes);
-				FrameResourceDX12()->DescriptorAllocator.SetUniform(set, binding, bufferView);
-			}
-
-			void RHI_CommandList_DX12::SetTexture(int set, int binding, RHI_Texture* texture)
-			{
-				IS_PROFILE_FUNCTION();
-				FrameResourceDX12()->DescriptorAllocator.SetTexture(set, binding, texture);
+				//FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
@@ -255,16 +242,16 @@ namespace Insight
 				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
 				//FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
 				
-				FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
+				//FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
 
-				std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
-				if (result && descriptors.size() > 0)
+				//std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
+				//if (result && descriptors.size() > 0)
 				{
 					// Set our descriptor heaps.
-					m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
+					//m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
 
 					// Set all our descriptors tables.
-					FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
+					//FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
 				}
 				return true;
 			}

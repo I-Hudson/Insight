@@ -31,7 +31,7 @@ namespace Insight
 			struct FrameResource_Vulkan : public FrameResouce
 			{
 				RenderContext_Vulkan* Context;
-				DescriptorAllocator_Vulkan DescriptorAllocator;
+				//DescriptorAllocator_Vulkan DescriptorAllocator;
 
 				vk::Semaphore SwapchainAcquire;
 				vk::Semaphore SignalSemaphore;
@@ -50,8 +50,6 @@ namespace Insight
 
 				virtual void InitImGui() override;
 				virtual void DestroyImGui() override;
-
-				virtual void Render(CommandList cmdList) override;
 
 				virtual bool PrepareRender() override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
@@ -114,6 +112,11 @@ namespace Insight
 
 				int m_currentFrame = 0;
 				int m_availableSwapchainImage = 0;
+
+			public:
+				void* m_descriptor_pool = nullptr;
+
+			private:
 
 #ifdef RENDER_GRAPH_ENABLED
 				FrameResource<vk::Fence> m_submitFences;

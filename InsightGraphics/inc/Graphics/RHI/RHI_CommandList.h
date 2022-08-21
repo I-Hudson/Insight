@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Graphics/CommandList.h"
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
+#include "Graphics/PipelineStateObject.h"
 #include <unordered_set>
 
 #include <glm/vec2.hpp>
@@ -11,10 +11,16 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		class RHI_Buffer;
+		class RHI_Texture;
+		class RHI_DescriptorLayout;
+
 		class RenderContext;
+		class RenderGraph;
+		class DescriptorAllocator;
+
 		struct FrameResouce;
 
-		class RHI_Texture;
 
 		// Store relevant draw data.
 		struct RHI_CommandListCurrentDrawData
@@ -32,7 +38,6 @@ namespace Insight
 
 			static RHI_CommandList* New();
 
-			void Record(CommandList& cmdList, FrameResouce* frameResouces);
 			virtual void Reset();
 
 			virtual void Close() = 0;
@@ -46,8 +51,10 @@ namespace Insight
 			virtual void EndRenderpass() = 0;
 
 			virtual void SetPipeline(PipelineStateObject pso) = 0;
-			virtual void SetUniform(int set, int binding, DescriptorBufferView view) = 0;
-			virtual void SetTexture(int set, int binding, RHI_Texture* texture) = 0;
+
+			void SetUniform(int set, int binding, void* data, u32 size);
+			void SetTexture(int set, int binding, RHI_Texture* texture);
+
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;
 
@@ -70,6 +77,10 @@ namespace Insight
 			PipelineStateObject m_activePSO;
 
 			RHI_CommandListCurrentDrawData m_drawData;
+
+			DescriptorAllocator* m_descriptorAllocator = nullptr;
+
+			friend class RenderGraph;
 		};
 
 		class RHI_CommandListAllocator : public RHI_Resource

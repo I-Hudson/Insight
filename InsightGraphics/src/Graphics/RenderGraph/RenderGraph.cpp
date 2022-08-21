@@ -16,7 +16,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		u32 RenderGraph::s_FarmeCount = 3;
+		u32 RenderGraph::s_FarmeCount = 2;
 
 		RenderGraph::RenderGraph()
 		{ }
@@ -43,6 +43,12 @@ namespace Insight
 			{
 				manager.Create(m_context);
 			});
+
+			m_descriptorManagers.Setup();
+			m_descriptorManagers.ForEach([this](DescriptorAllocator& alloc)
+				{
+					alloc.SetRenderContext(m_context);
+				});
 		}
 
 		void RenderGraph::Execute()
@@ -96,6 +102,11 @@ namespace Insight
 			m_commandListManager.ForEach([](CommandListManager& manager)
 				{
 					manager.Destroy();
+				});
+
+			m_descriptorManagers.ForEach([](DescriptorAllocator& allocator)
+				{
+					allocator.Destroy();
 				});
 		}
 
@@ -237,6 +248,8 @@ namespace Insight
 			if (m_context->PrepareRender())
 			{
 				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
+				cmdList->m_descriptorAllocator = m_descriptorManagers.Get();
+				cmdList->m_descriptorAllocator->Reset();
 
 				// TODO: Could be threaded? Leave as it is for now as it works.
 				for (UPtr<RenderGraphPassBase>& pass : m_passes)

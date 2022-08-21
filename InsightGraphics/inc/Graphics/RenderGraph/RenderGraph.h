@@ -7,6 +7,7 @@
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RHI/RHI_CommandList.h"
+#include "Graphics/RHI/RHI_Descriptor.h"
 
 namespace Insight
 {
@@ -33,11 +34,12 @@ namespace Insight
 
 			TValue* operator->() const
 			{
-				return m_valuePtrs.at(RenderGraph::Instance().GetFrameIndex());
+				return Get();
 			}
 
 			TValue* Get() const
 			{
+				ASSERT(!m_valuePtrs.empty());
 				return m_valuePtrs.at(RenderGraph::Instance().GetFrameIndex());
 			}
 
@@ -91,6 +93,7 @@ namespace Insight
 			u32 m_frameIndex = 0;
 			FrameResource<RHI_ResouceCache<RHI_Texture>> m_textureCaches;
 			FrameResource<CommandListManager> m_commandListManager;
+			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};
 	}
 }
