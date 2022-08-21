@@ -5,6 +5,8 @@
 #include "spdlog/sinks/base_sink.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
+#include <filesystem>
+
 namespace Insight
 {
 	namespace Core
@@ -16,8 +18,14 @@ namespace Insight
 		{
 			spdlog::set_pattern("%^[%T] %n: %v%$");
 
+			constexpr char* InsightFile = "Insight.txt";
+			constexpr char* AppFile = "App.txt";
+
+			std::filesystem::remove(InsightFile);
+			std::filesystem::remove(AppFile);
+
 			std::vector<spdlog::sink_ptr> sinks;
-			sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Insight.txt"));
+			sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(InsightFile));
 			sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
 
 			s_CoreLogger = std::make_shared<spdlog::logger>("Insight", begin(sinks), end(sinks));
@@ -26,7 +34,7 @@ namespace Insight
 					throw std::runtime_error(msg);
 				});
 
-			sinks[0] = std::make_shared<spdlog::sinks::basic_file_sink_mt>("App.txt");
+			sinks[0] = std::make_shared<spdlog::sinks::basic_file_sink_mt>(AppFile);
 			s_ClientLogger = std::make_shared<spdlog::logger>("App", begin(sinks), end(sinks));
 			s_ClientLogger->set_error_handler([](const std::string& msg)
 				{
