@@ -45,6 +45,8 @@ namespace Insight
 
 			bool HasExtension(DeviceExtension extension);
 
+			RenderpassDescription GetImGuiRenderpassDescription() const { return m_imguiRenderpassDescription; }
+
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
@@ -69,16 +71,15 @@ namespace Insight
 			void FreeRenderTarget(Graphics::RenderTarget* renderTarget);
 
 		protected:
-			const static int c_FrameCount = 3;
+			//const static int c_FrameCount = 3;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;
-			std::vector<RenderTarget*> m_renderTargets;
-
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
+			RenderpassDescription m_imguiRenderpassDescription;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
 
@@ -117,27 +118,6 @@ namespace Insight
 
 		static Graphics::RHI_Texture* CreateTexture();
 		static void FreeTexture(Graphics::RHI_Texture* texture);
-
-		static Graphics::RenderTarget* CreateRenderTarget();
-		static void FreeRenderTarget(Graphics::RenderTarget* renderTarget);
-
-		static void BindVertexBuffer(Graphics::RHI_Buffer* buffer);
-		static void BindIndexBuffer(Graphics::RHI_Buffer* buffer);
-
-		static Graphics::RHI_Shader* GetShader(Graphics::ShaderDesc desc);
-
-		static void SetPipelineStateObject(Graphics::PipelineStateObject pso);
-
-		static void SetViewport(int width, int height);
-		static void SetScissor(int width, int height);
-
-		static void SetUniform(int set, int binding, void* data, int sizeInBytes);
-		static void SetTexture(int set, int binding, Graphics::RHI_Texture* texture);
-
-		static void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance);
-		static void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance);
-
-		static Graphics::CommandList s_FrameCommandList;
 
 	private:
 		static Graphics::RenderContext* s_context;

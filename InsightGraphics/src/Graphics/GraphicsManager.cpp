@@ -108,7 +108,6 @@ namespace Insight
 						m_renderContext = RenderContext::New();
 						m_renderContext->Init();
 						m_renderpass.Create();
-						Renderer::s_FrameCommandList.Reset();
 
 #ifdef RENDER_GRAPH_ENABLED
 						m_renderGraph.Release();
@@ -138,12 +137,9 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			RenderGraph::Instance().Execute();
-#else
-			m_renderContext->Render(Renderer::s_FrameCommandList);
 #endif//#ifdef RENDER_GRAPH_ENABLED
 
 #endif
-			Renderer::s_FrameCommandList.Reset();
 		}
 
 		void GraphicsManager::Destroy()

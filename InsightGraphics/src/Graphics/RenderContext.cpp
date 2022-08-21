@@ -11,7 +11,6 @@
 
 namespace Insight
 {
-	Graphics::CommandList Renderer::s_FrameCommandList;
 	Graphics::RenderContext* Renderer::s_context;
 	
 #define ENABLE_IMGUI 1
@@ -23,7 +22,7 @@ namespace Insight
 			RenderContext* context = nullptr;
 			if (GraphicsManager::IsVulkan()) { context = NewTracked(RHI::Vulkan::RenderContext_Vulkan); }
 			else if (GraphicsManager::IsDX12()) { context = NewTracked(RHI::DX12::RenderContext_DX12); }
-			
+
 			if (!context)
 			{
 				IS_CORE_ERROR("[RenderContext* RenderContext::New] Unable to create a RenderContext.");
@@ -90,6 +89,7 @@ namespace Insight
 			m_descriptorLayoutManager.ReleaseAll();
 			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
+			m_renderpassManager.ReleaseAll();
 		}
 
 		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride)
@@ -128,18 +128,6 @@ namespace Insight
 			m_textures.FreeResource(texture);
 		}
 
-		Graphics::RenderTarget* RenderContext::CreateRenderTarget()
-		{
-			m_renderTargets.push_back(NewTracked(RenderTarget));
-			return m_renderTargets.back();
-		}
-
-		void RenderContext::FreeRenderTarget(Graphics::RenderTarget* renderTarget)
-		{
-			auto itr = std::find(m_renderTargets.begin(), m_renderTargets.end(), renderTarget);
-			DeleteTracked(*itr);
-		}
-		
 		void FrameResouce::Reset()
 		{
 			CommandListManager.Update();
@@ -147,7 +135,6 @@ namespace Insight
 		}
 	}
 
-	
 	// Renderer
 	void Renderer::SetImGUIContext(ImGuiContext*& context)
 	{
@@ -225,67 +212,5 @@ namespace Insight
 	void Renderer::FreeTexture(Graphics::RHI_Texture* texture)
 	{
 		s_context->FreeTexture(texture);
-	}
-
-	Graphics::RenderTarget* Renderer::CreateRenderTarget()
-	{
-		return s_context->CreateRenderTarget();
-	}
-
-	void Renderer::FreeRenderTarget(Graphics::RenderTarget* renderTarget)
-	{
-		s_context->FreeRenderTarget(renderTarget);
-	}
-
-	void Renderer::BindVertexBuffer(Graphics::RHI_Buffer* buffer)
-	{
-		assert(buffer->GetType() == Graphics::BufferType::Vertex);
-		s_FrameCommandList.SetVertexBuffer(buffer);
-	}
-
-	void Renderer::BindIndexBuffer(Graphics::RHI_Buffer* buffer)
-	{
-		assert(buffer->GetType() == Graphics::BufferType::Index);
-		s_FrameCommandList.SetIndexBuffer(buffer);
-	}
-
-	Graphics::RHI_Shader* Renderer::GetShader(Graphics::ShaderDesc desc)
-	{
-		return s_context->m_shaderManager.GetOrCreateShader(desc);
-	}
-
-	void Renderer::SetPipelineStateObject(Graphics::PipelineStateObject pso)
-	{
-		s_FrameCommandList.SetPipelineStateObject(pso);
-	}
-
-	void Renderer::SetViewport(int width, int height)
-	{
-		s_FrameCommandList.SetViewport(width, height);
-	}
-
-	void Renderer::SetScissor(int width, int height)
-	{
-		s_FrameCommandList.SetScissor(width, height);
-	}
-
-	void Renderer::SetUniform(int set, int binding, void* data, int sizeInBytes)
-	{
-		s_FrameCommandList.SetUniform(set, binding, data, sizeInBytes);
-	}
-
-	void Renderer::SetTexture(int set, int binding, Graphics::RHI_Texture* texture)
-	{
-		s_FrameCommandList.SetTexture(set, binding, texture);
-	}
-
-	void Renderer::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
-	{
-		s_FrameCommandList.Draw(vertexCount, instanceCount, firstVertex, firstInstance);
-	}
-
-	void Renderer::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
-	{
-		s_FrameCommandList.DrawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 	}
 }

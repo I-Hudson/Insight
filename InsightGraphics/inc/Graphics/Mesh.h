@@ -53,7 +53,6 @@ namespace Insight
 			Submesh(Mesh* mesh) { m_mesh = mesh; }
 			~Submesh();
 
-			void Draw() const;
 #ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
 #endif //RENDER_GRAPH_ENABLED
@@ -84,7 +83,6 @@ namespace Insight
 		
 			std::vector<Submesh*> GetSubMeshes() const { return m_submeshes; }
 
-			void Draw() const;
 #ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
 #endif //RENDER_GRAPH_ENABLED

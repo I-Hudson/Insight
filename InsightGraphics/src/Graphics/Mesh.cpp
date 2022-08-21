@@ -22,15 +22,6 @@ namespace Insight
 			Destroy();
 		}
 
-		void Submesh::Draw() const
-		{
-			Renderer::BindVertexBuffer(m_vertexInfo.Buffer);
-			Renderer::BindIndexBuffer(*m_indexBuffer);
-
-			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
-			Renderer::DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
-		}
-
 #ifdef RENDER_GRAPH_ENABLED
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
@@ -127,15 +118,6 @@ namespace Insight
 			}
 
 			m_submeshes.clear();
-		}
-
-		void Mesh::Draw() const
-		{
-			IS_PROFILE_FUNCTION();
-			for (Submesh* submesh : m_submeshes)
-			{
-				submesh->Draw();
-			}
 		}
 
 #ifdef RENDER_GRAPH_ENABLED
