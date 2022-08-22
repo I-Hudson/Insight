@@ -202,15 +202,66 @@ namespace Insight
 
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
 
-					RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderDescription);
-					vk::RenderPass vkRenderpass = *reinterpret_cast<vk::RenderPass*>(&renderpass);
+					if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+					{
+						std::vector<vk::RenderingAttachmentInfo> colourAttachments;
+						vk::RenderingAttachmentInfo depthAttachment;
+						vk::RenderingAttachmentInfo detencilAttacment;
 
-					std::vector<vk::ClearValue> clearColours;
-					CreateFramebuffer(vkRenderpass, rect, clearColours);
+						std::array<u32, 4> clearColourValues = { 0, 0, 0, 1 };
 
-					const u64 psoHash = m_pso.GetHash();
-					vk::RenderPassBeginInfo info = vk::RenderPassBeginInfo(vkRenderpass, m_framebuffers[psoHash], rect, clearColours);
-					m_commandList.beginRenderPass(info, vk::SubpassContents::eInline);
+						auto makeRenderingAttachment = 
+						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachmentDescription)
+						{
+							vk::RenderingAttachmentInfo attachment = { };
+							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView());
+							attachment.imageLayout = ImageLayoutToVulkan(attachmentDescription.FinalLayout);
+							attachment.resolveMode = vk::ResolveModeFlagBits::eNone;
+							attachment.loadOp = AttachmentLoadOpToVulkan(attachmentDescription.LoadOp);
+							attachment.storeOp = vk::AttachmentStoreOp::eStore;
+							attachment.clearValue = vk::ClearValue(clearColourValues);
+
+							attachment.imageLayout = attachment.imageLayout == vk::ImageLayout::ePresentSrcKHR ?
+								vk::ImageLayout::eColorAttachmentOptimal : attachment.imageLayout;
+
+							return attachment;
+						};
+
+						vk::RenderingInfo renderingInfo = { };
+						//renderingInfo.flags = vk::RenderingFlagBits::eSuspending;
+						renderingInfo.renderArea = rect;
+						renderingInfo.layerCount = 1;
+
+						int descriptionIndex = 0;
+						for (const RHI_Texture* texture : renderDescription.ColourAttachments)
+						{
+							vk::RenderingAttachmentInfo attachment = makeRenderingAttachment(texture, renderDescription.Attachments.at(descriptionIndex));
+							colourAttachments.push_back(attachment);
+							++descriptionIndex;
+						}
+						renderingInfo.setColorAttachments(colourAttachments);
+
+						if (renderDescription.DepthStencil)
+						{
+							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
+							renderingInfo.setPDepthAttachment(&depthAttachment);
+							renderingInfo.setPStencilAttachment(&detencilAttacment);
+						}
+
+						m_commandList.beginRendering(renderingInfo);
+					}
+					else
+					{
+						RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderDescription);
+						vk::RenderPass vkRenderpass = *reinterpret_cast<vk::RenderPass*>(&renderpass);
+
+						std::vector<vk::ClearValue> clearColours;
+						CreateFramebuffer(vkRenderpass, rect, clearColours);
+
+						const u64 psoHash = m_pso.GetHash();
+						vk::RenderPassBeginInfo info = vk::RenderPassBeginInfo(vkRenderpass, m_framebuffers[psoHash], rect, clearColours);
+						m_commandList.beginRenderPass(info, vk::SubpassContents::eInline);
+					}
 					m_activeRenderpass = true;
 				}
 			}
@@ -220,7 +271,14 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				if (m_activeRenderpass)
 				{
-					m_commandList.endRenderPass();
+					if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+					{
+						m_commandList.endRendering();
+					}
+					else
+					{
+						m_commandList.endRenderPass();
+					}
 					m_activeRenderpass = false;
 				}
 			}
@@ -297,16 +355,14 @@ namespace Insight
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
 				IS_PROFILE_FUNCTION();
-				ASSERT_MSG(m_activeRenderpass, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
+				//ASSERT_MSG(m_, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
 
-				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription);
+				m_pso = pso;
+				m_activePSO = pso;
 
 				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
-
-				m_pso = pso;
-				m_activePSO = pso;
 			}
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()

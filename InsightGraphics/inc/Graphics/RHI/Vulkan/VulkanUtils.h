@@ -39,6 +39,9 @@ namespace Insight
 		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
 		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);
 
+		ImageLayout					VkToImageLayout(vk::ImageLayout layout);
+		AttachmentLoadOp			VkToAttachmentLoadOp(vk::AttachmentLoadOp op);
+
 		/*
 		std::string VkErrorToString(VkResult errorCode)
 		{

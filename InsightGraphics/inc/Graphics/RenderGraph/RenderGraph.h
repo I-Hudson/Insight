@@ -69,12 +69,15 @@ namespace Insight
 			RGTextureHandle GetTexture(std::wstring textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
+			RenderpassDescription GetRenderpassDescription(std::wstring_view passName) const;
+			PipelineStateObject GetPipelineStateObject(std::wstring_view passName) const;
+
 			void Release();
 
 			u32 GetFrameIndex() const { return m_frameIndex; }
 
 			template<typename TData>
-			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
+			void AddPass(std::wstring passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
 				m_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));

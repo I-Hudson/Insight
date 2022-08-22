@@ -92,6 +92,32 @@ namespace Insight
 			return m_textureCaches->Get(handle);
 		}
 
+		RenderpassDescription RenderGraph::GetRenderpassDescription(std::wstring_view passName) const
+		{
+			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
+				{
+					return pass->m_passName == passName;
+				});
+			if (itr != m_passes.end())
+			{
+				return (*itr)->m_renderpassDescription;
+			}
+			return { };
+		}
+
+		PipelineStateObject RenderGraph::GetPipelineStateObject(std::wstring_view passName) const
+		{
+			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
+				{
+					return pass->m_passName == passName;
+				});
+			if (itr != m_passes.end())
+			{
+				return (*itr)->m_pso;
+			}
+			return { };
+		}
+
 		void RenderGraph::Release()
 		{
 			IS_PROFILE_FUNCTION();
@@ -137,6 +163,7 @@ namespace Insight
 				}
 
 				PipelineStateObject& pso = pass.Get()->m_pso;
+				pass->m_pso.Swapchain = pass->m_swapchainPass;
 
 				// Build the shader here but no need to cache a reference to it as we 
 				// can lookup it up later. Just make sure it exists.
@@ -155,8 +182,8 @@ namespace Insight
 
 				pass->m_renderpassDescription.SwapchainPass = pass->m_swapchainPass;
 
-				pass->m_pso.Renderpass = pass->m_renderpassDescription.GetHash();
 				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
+				pass->m_pso.Renderpass = pass->m_renderpassDescription.GetHash();
 			}
 		}
 
@@ -278,15 +305,27 @@ namespace Insight
 					cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f);
 					cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
-					// Maybe remove these lines. Maybe the pass it self should set the pipeline
-					// as a single pass could have more than on pipeline.
-					pass->m_pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass->m_shader);
-					pass->m_pso.Swapchain = pass->m_swapchainPass;
-					cmdList->SetPipeline(pass->m_pso);
 
-					cmdList->BeginRenderpass(pass->m_renderpassDescription);
+					//cmdList->BeginRenderpass(pass->m_renderpassDescription);
 					pass->Execute(*this, cmdList);
-					cmdList->EndRenderpass();
+					//cmdList->EndRenderpass();
+				}
+
+				if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+				{
+					PipelineBarrier barrier = { };
+					barrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
+					barrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
+
+					ImageBarrier imageBarrier = { };
+					imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					imageBarrier.DstAccessFlags = AccessFlagBits::ColorAttachmentRead;
+					imageBarrier.Image = m_context->GetSwaphchainIamge();
+					imageBarrier.NewLayout = ImageLayout::PresentSrc;
+					imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+
+					barrier.ImageBarriers.push_back(std::move(imageBarrier));
+					cmdList->PipelineBarrier(barrier);
 				}
 
 				cmdList->Close();

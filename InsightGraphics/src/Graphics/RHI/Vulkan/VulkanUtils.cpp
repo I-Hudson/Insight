@@ -202,6 +202,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
+    //50
     PixelFormat::B8G8R8A8_UNorm_sRGB,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -212,6 +213,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::R16_UNorm,
     PixelFormat::R16_SNorm,
+    //60
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::R16_UInt,
@@ -222,6 +224,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R16G16_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
+    // 70
     PixelFormat::R16G16_UInt,
     PixelFormat::R16G16_SInt,
     PixelFormat::Unknown,
@@ -232,6 +235,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
+    // 80
     PixelFormat::Unknown,
     PixelFormat::R16G16B16A16_UNorm,
     PixelFormat::R16G16B16A16_SNorm,
@@ -242,6 +246,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::R32_UInt,
     PixelFormat::R32_SInt,
+    // 90
     PixelFormat::Unknown,
     PixelFormat::R32G32_UInt,
     PixelFormat::R32G32_SInt,
@@ -791,7 +796,7 @@ namespace Insight
             {
             case Insight::Graphics::ImageLayout::Undefined: return vk::ImageLayout::eUndefined;
             case Insight::Graphics::ImageLayout::General: return vk::ImageLayout::eGeneral;
-            case Insight::Graphics::ImageLayout::ColourAttachment: return vk::ImageLayout::eAttachmentOptimalKHR;
+            case Insight::Graphics::ImageLayout::ColourAttachment: return vk::ImageLayout::eColorAttachmentOptimal;
             case Insight::Graphics::ImageLayout::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
             case Insight::Graphics::ImageLayout::DepthStencilAttachmentReadOnly: return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
             case Insight::Graphics::ImageLayout::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -854,6 +859,46 @@ namespace Insight
                 break;
             }
             return VmaMemoryUsage::VMA_MEMORY_USAGE_AUTO;
+        }
+
+
+        ImageLayout VkToImageLayout(vk::ImageLayout layout)
+        {
+            switch (layout)
+            {
+            case vk::ImageLayout::eUndefined:                               return ImageLayout::Undefined;
+            case vk::ImageLayout::eGeneral:                                 return ImageLayout::General;
+            case vk::ImageLayout::eColorAttachmentOptimal:                  return ImageLayout::ColourAttachment;
+            case vk::ImageLayout::eDepthStencilAttachmentOptimal:           return ImageLayout::DepthStencilAttachment;
+            case vk::ImageLayout::eDepthStencilReadOnlyOptimal:             return ImageLayout::DepthStencilAttachmentReadOnly;
+            case vk::ImageLayout::eShaderReadOnlyOptimal:                   return ImageLayout::ShaderReadOnly;
+            case vk::ImageLayout::eTransferSrcOptimal:                      return ImageLayout::TransforSrc;
+            case vk::ImageLayout::eTransferDstOptimal:                      return ImageLayout::TransforDst;
+            case vk::ImageLayout::ePreinitialized:                          return ImageLayout::Preinitialised;
+            case vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal:   return ImageLayout::DepthReadOnlyStencilAttacment;
+            case vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal:   return ImageLayout::DepthAttachmentStencilReadOnly;
+            case vk::ImageLayout::eDepthAttachmentOptimal:                  return ImageLayout::DepthAttachmentOnly;
+            case vk::ImageLayout::eDepthReadOnlyOptimal:                    return ImageLayout::DepthReadOnly;
+            case vk::ImageLayout::eStencilAttachmentOptimal:                return ImageLayout::StencilAttacment;
+            case vk::ImageLayout::eStencilReadOnlyOptimal:                  return ImageLayout::StencilReadOnly;
+            case vk::ImageLayout::ePresentSrcKHR:                           return ImageLayout::PresentSrc;
+            default:
+                break;
+            }
+            assert(false);
+        }
+
+        AttachmentLoadOp VkToAttachmentLoadOp(vk::AttachmentLoadOp op)
+        {
+            switch (op)
+            {
+            case vk::AttachmentLoadOp::eLoad:       return AttachmentLoadOp::Load;
+            case vk::AttachmentLoadOp::eClear:      return AttachmentLoadOp::Clear;
+            case vk::AttachmentLoadOp::eDontCare:   return AttachmentLoadOp::DontCare;
+            default:
+                break;
+            }
+            assert(false);
         }
     }
 }

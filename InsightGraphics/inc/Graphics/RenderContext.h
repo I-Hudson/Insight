@@ -42,7 +42,12 @@ namespace Insight
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 
-			bool HasExtension(DeviceExtension extension);
+			virtual RHI_Texture* GetSwaphchainIamge() const = 0;
+
+			bool HasExtension(DeviceExtension extension) const;
+			bool IsExtensionEnabled(DeviceExtension extension) const;
+			void EnableExtension(DeviceExtension extension);
+			void DisableExtension(DeviceExtension extension);
 
 			RenderpassDescription GetImGuiRenderpassDescription() const { return m_imguiRenderpassDescription; }
 
@@ -71,6 +76,7 @@ namespace Insight
 			//const static int c_FrameCount = 3;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
+			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_enabledDeviceExtensions;
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;

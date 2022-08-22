@@ -64,9 +64,24 @@ namespace Insight
 			return context;
 		}
 
-		bool RenderContext::HasExtension(DeviceExtension extension)
+		bool RenderContext::HasExtension(DeviceExtension extension) const
 		{
 			return m_deviceExtensions[(u32)extension] == 1;
+		}
+
+		bool RenderContext::IsExtensionEnabled(DeviceExtension extension) const
+		{
+			return m_enabledDeviceExtensions[(u32)extension] == 1;
+		}
+
+		void RenderContext::EnableExtension(DeviceExtension extension)
+		{
+			m_enabledDeviceExtensions[(u32)extension] = 1;
+		}
+
+		void RenderContext::DisableExtension(DeviceExtension extension)
+		{
+			m_enabledDeviceExtensions[(u32)extension] = 0;
 		}
 
 		void RenderContext::ImGuiBeginFrame()

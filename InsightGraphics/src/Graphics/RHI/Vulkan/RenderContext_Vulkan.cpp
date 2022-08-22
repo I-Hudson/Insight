@@ -2,6 +2,7 @@
 
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/Window.h"
 #include "Core/Logger.h"
 
@@ -40,16 +41,20 @@ namespace Insight
 				VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
 				#endif
 
-				#if VK_KHR_sampler_mirror_clamp_to_edge && !VK_VERSION_1_2
+				#if VK_KHR_sampler_mirror_clamp_to_edge
 				VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_EXTENSION_NAME,
 				#endif
 
-				#if VK_KHR_maintenance3 && !VK_VERSION_1_1
+				#if VK_KHR_maintenance3
 				VK_KHR_MAINTENANCE3_EXTENSION_NAME,
 				#endif
 
-				#if VK_EXT_descriptor_indexing && !VK_VERSION_1_2
+				#if VK_EXT_descriptor_indexing
 				VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+				#endif
+
+				#if VK_KHR_dynamic_rendering
+				VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 				#endif
 			};
 
@@ -183,17 +188,28 @@ namespace Insight
 				std::vector<const char*> deviceLayersCC = StringVectorToConstChar(deviceLayers);
 				std::vector<const char*> deviceExtensionsCC = StringVectorToConstChar(deviceExtensions);
 
-				const vk::PhysicalDeviceFeatures deviceFeatures = m_adapter.getFeatures();
+				vk::PhysicalDeviceVulkan13Features deviceFeaturesToEnable13 = { };
 
-				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, &deviceFeatures);
+				vk::PhysicalDeviceVulkan12Features deviceFeaturesToEnable12 = { };
+				deviceFeaturesToEnable12.pNext = &deviceFeaturesToEnable13;
 
-				vk::PhysicalDeviceDescriptorIndexingFeaturesEXT physicalDeviceDescriptorIndexingFeatures = {};
+				vk::PhysicalDeviceFeatures2 deviceFeaturesToEnable = m_adapter.getFeatures2();
+				deviceFeaturesToEnable.pNext = &deviceFeaturesToEnable12;
+
 				if (HasExtension(DeviceExtension::BindlessDescriptors))
 				{
-					physicalDeviceDescriptorIndexingFeatures.descriptorBindingPartiallyBound = VK_TRUE;
-					deviceCreateInfo.setPNext(&physicalDeviceDescriptorIndexingFeatures);
+					deviceFeaturesToEnable12.descriptorBindingPartiallyBound = VK_TRUE;
+					deviceFeaturesToEnable12.descriptorIndexing = VK_TRUE;
+					deviceFeaturesToEnable12.samplerMirrorClampToEdge = VK_TRUE;
+					EnableExtension(DeviceExtension::BindlessDescriptors);
+				}
+				if (HasExtension(DeviceExtension::VulkanDynamicRendering))
+				{
+					deviceFeaturesToEnable13.dynamicRendering = VK_TRUE;
+					//EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				}
 
+				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, nullptr, &deviceFeaturesToEnable);
 				m_device = m_adapter.createDevice(deviceCreateInfo);
 
 				vk::DynamicLoader dl;
@@ -294,8 +310,6 @@ namespace Insight
 					frame.Destroy();
 				}
 
-				BaseDestroy();
-
 				m_device.destroyDescriptorPool(*reinterpret_cast<VkDescriptorPool*>(&m_descriptor_pool));
 				m_descriptor_pool = nullptr;
 
@@ -305,11 +319,13 @@ namespace Insight
 
 				if (m_swapchain)
 				{
-					for (vk::ImageView& view : m_swapchainImageViews)
+					for (RHI_Texture*& tex : m_swapchainImages)
 					{
-						m_device.destroyImageView(view);
+						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = vk::Image();
+						tex->Release();
+						Renderer::FreeTexture(tex);
 					}
-					m_swapchainImageViews.clear();
+					m_swapchainImages.clear();
 					m_device.destroySwapchainKHR(m_swapchain);
 					m_swapchainImages.resize(0);
 				}
@@ -318,6 +334,8 @@ namespace Insight
 				{
 					m_instnace.destroySurfaceKHR(m_surface);
 				}
+
+				BaseDestroy();
 
 				vmaDestroyAllocator(m_vmaAllocator);
 				m_vmaAllocator = VK_NULL_HANDLE;
@@ -550,6 +568,16 @@ namespace Insight
 				m_device.setDebugUtilsObjectNameEXT(info, debugDispatcher);
 			}
 
+			RHI_Texture* RenderContext_Vulkan::GetSwaphchainIamge() const
+			{ 
+				return m_swapchainImages[m_availableSwapchainImage];
+			}
+
+			vk::ImageView RenderContext_Vulkan::GetSwapchainImageView() const
+			{
+				return static_cast<RHI_Texture_Vulkan*>(m_swapchainImages[m_availableSwapchainImage])->GetImageView();
+			}
+
 			void RenderContext_Vulkan::WaitForGpu()
 			{
 				IS_PROFILE_FUNCTION();
@@ -561,6 +589,26 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				// Get sdk version
+				uint32_t sdk_version = VK_HEADER_VERSION_COMPLETE;
+
+				// Get driver version
+				uint32_t driver_version = 0;
+				{
+					// Per LunarG, if vkEnumerateInstanceVersion is not present, we are running on Vulkan 1.0
+					// https://www.lunarg.com/wp-content/uploads/2019/02/Vulkan-1.1-Compatibility-Statement_01_19.pdf
+					auto eiv = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
+
+					if (eiv)
+					{
+						eiv(&driver_version);
+					}
+					else
+					{
+						driver_version = VK_API_VERSION_1_0;
+					}
+				}
+
 				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
 					"ApplciationName",
 					0,
@@ -568,42 +616,61 @@ namespace Insight
 					0,
 					VK_API_VERSION_1_2);
 
+				applicationInfo.setApiVersion(std::min(sdk_version, driver_version));
+
 				std::vector<const char*> enabledLayerNames =
 				{
 					"VK_LAYER_KHRONOS_validation",
 				};
-				std::vector<const char*> enabledExtensionNames =
-				{
+				std::vector<const char*> enabledExtensionNames;
 #if VK_KHR_surface
-					VK_KHR_SURFACE_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_KHR_SURFACE_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+					}
 #endif
 
 #ifdef IS_PLATFORM_WIN32
 #if VK_KHR_win32_surface
-					VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+					}
 #endif
 #endif
 
 #if VK_KHR_display
-					VK_KHR_DISPLAY_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_KHR_DISPLAY_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
+					}
 #endif
 
+
 #if VK_KHR_get_display_properties2
-					VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME);
+					}
 #endif        
 
 #if VK_EXT_debug_utils
-					VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+					}
 #endif
 
 #if VK_KHR_get_surface_capabilities2
-					VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME,
+					if (CheckInstanceExtension(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME))
+					{
+						enabledExtensionNames.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
+					}
 #endif
 
 #if VK_KHR_get_physical_device_properties2 && !VK_VERSION_1_1
 					VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #endif
-				};
 
 				vk::InstanceCreateInfo instanceCreateInfo = vk::InstanceCreateInfo(
 					{ },
@@ -828,17 +895,19 @@ namespace Insight
 
 				if (m_swapchain)
 				{
-					for (vk::ImageView& view : m_swapchainImageViews)
+					for (RHI_Texture*& tex : m_swapchainImages)
 					{
-						m_device.destroyImageView(view);
+						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = vk::Image();
+						tex->Release();
+						Renderer::FreeTexture(tex);
 					}
-					m_swapchainImageViews.clear();
+					m_swapchainImages.clear();
 					m_device.destroySwapchainKHR(m_swapchain);
 					m_swapchain = nullptr;
 				}
 
-				m_swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
-				for (vk::Image& image : m_swapchainImages)
+				std::vector<vk::Image> swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
+				for (vk::Image& image : swapchainImages)
 				{
 					vk::ImageViewCreateInfo info = vk::ImageViewCreateInfo(
 						{},
@@ -846,7 +915,25 @@ namespace Insight
 						vk::ImageViewType::e2D,
 						m_swapchainFormat);
 					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-					m_swapchainImageViews.push_back(m_device.createImageView(info));
+
+					vk::ImageView imageView = m_device.createImageView(info);
+					RHI_Texture* tex = Renderer::CreateTexture();
+
+					RHI_TextureCreateInfo texCreateInfo = { };
+					texCreateInfo.TextureType = TextureType::Tex2D;
+					texCreateInfo.Width = swapchainExtent.width;
+					texCreateInfo.Height = swapchainExtent.height;
+					texCreateInfo.Depth = 1;
+					texCreateInfo.Format = VkFormatToPixelFormat[(int)m_swapchainFormat];
+					texCreateInfo.ImageUsage = 0;
+
+					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
+					texVulkan->m_context = this;
+					texVulkan->m_imageView = imageView;
+					texVulkan->m_image = image;
+					texVulkan->m_info = texCreateInfo;
+
+					m_swapchainImages.push_back(tex);
 				}
 				m_swapchain = swapchain;
 			}
@@ -859,6 +946,24 @@ namespace Insight
 
 				m_deviceExtensions[(u8)DeviceExtension::BindlessDescriptors] = deviceExts.find(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != deviceExts.end();
 				m_deviceExtensions[(u8)DeviceExtension::ExclusiveFullScreen] = deviceExts.find(VK_EXT_FULL_SCREEN_EXCLUSIVE_EXTENSION_NAME) != deviceExts.end();
+				m_deviceExtensions[(u8)DeviceExtension::VulkanDynamicRendering] = deviceExts.find(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) != deviceExts.end();
+			}
+
+			bool RenderContext_Vulkan::CheckInstanceExtension(const char* extension)
+			{
+				static std::set<std::string> instanceExtensions;
+				if (instanceExtensions.empty())
+				{
+					uint32_t count;
+					vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); //get number of extensions
+					std::vector<VkExtensionProperties> extensions(count);
+					vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()); //populate buffer
+					for (auto& extension : extensions) 
+					{
+						instanceExtensions.insert(extension.extensionName);
+					}
+				}
+				return instanceExtensions.find(extension) != instanceExtensions.end();
 			}
 
 			void FrameResource_Vulkan::Init(RenderContext_Vulkan* context)

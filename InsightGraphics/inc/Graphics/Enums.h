@@ -258,7 +258,9 @@ namespace Insight
 		{
 			Load,
 			Clear,
-			DontCare
+			DontCare,
+
+			Count
 		};
 		std::string AttachmentLoadOpToString(AttachmentLoadOp op);
 
@@ -368,7 +370,9 @@ namespace Insight
 			DepthReadOnly,
 			StencilAttacment,
 			StencilReadOnly,
-			PresentSrc
+			PresentSrc,
+
+			Count
 		};
 
 		enum ImageAspectFlagBits
@@ -434,6 +438,8 @@ namespace Insight
 		{
 			BindlessDescriptors,
 			ExclusiveFullScreen,
+
+			VulkanDynamicRendering,
 
 			DeviceExtensionCount
 		};

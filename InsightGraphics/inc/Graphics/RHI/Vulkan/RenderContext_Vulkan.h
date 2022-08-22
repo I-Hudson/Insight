@@ -4,9 +4,10 @@
 
 #include "Graphics/RenderContext.h"
 #include "Core/Logger.h"
-#include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
+
 #include "VmaUsage.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
@@ -63,7 +64,8 @@ namespace Insight
 
 				u32 GetFamilyQueueIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }
 
-				vk::ImageView GetSwapchainImageView() const { return m_swapchainImageViews[m_availableSwapchainImage]; }
+				virtual RHI_Texture* GetSwaphchainIamge() const override;
+				vk::ImageView GetSwapchainImageView() const;
 				vk::Format GetSwapchainColourFormat() const { return m_swapchainFormat; }
 				vk::SwapchainKHR GetSwapchain() const { return m_swapchain; }
 
@@ -84,6 +86,7 @@ namespace Insight
 				void CreateSwapchain();
 
 				void SetDeviceExtensions();
+				bool CheckInstanceExtension(const char* extension);
 
 			private:
 				vk::Instance m_instnace{ nullptr };
@@ -95,8 +98,7 @@ namespace Insight
 				vk::SurfaceKHR m_surface{ nullptr };
 				vk::SwapchainKHR m_swapchain{ nullptr };
 				vk::Format m_swapchainFormat;
-				std::vector<vk::Image> m_swapchainImages;
-				std::vector<vk::ImageView> m_swapchainImageViews;
+				std::vector<RHI_Texture*> m_swapchainImages;
 				glm::ivec2 m_swapchainBufferSize;
 
 				std::unordered_map<GPUQueue, vk::Queue> m_commandQueues;

@@ -200,14 +200,13 @@ namespace Insight
 			struct TestPassData
 			{
 				Mesh& TestMesh;
-				PipelineStateObject Pso;
 			};
 			TestPassData passData =
 			{
 				m_testMesh
 			};
 
-			RenderGraph::Instance().AddPass<TestPassData>("GBuffer", [](TestPassData& data , RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", [](TestPassData& data , RenderGraphBuilder& builder)
 				{
 					RHI_TextureCreateInfo textureCreateInfo = { };
 					textureCreateInfo.Width = Window::Instance().GetWidth();
@@ -240,14 +239,15 @@ namespace Insight
 						gbufferPso.ShaderDescription = shaderDesc;
 					}
 					builder.SetPipeline(gbufferPso);
-					data.Pso = gbufferPso;
 
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
 				[&camera](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
-					cmdList->BindPipeline(data.Pso, nullptr);
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"GBuffer");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"GBuffer"));
 
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetUniform");
@@ -255,7 +255,7 @@ namespace Insight
 					}
 
 					data.TestMesh.Draw(cmdList);
-
+					cmdList->EndRenderpass();
 				}, std::move(passData));
 #endif //RENDER_GRAPH_ENABLED
 		}
@@ -326,10 +326,9 @@ namespace Insight
 			struct TestPassData
 			{
 				RGTextureHandle ColourRT;
-				PipelineStateObject Pso;
 			};
 
-			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>(L"SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
 					builder.ReadTexture(colourRT);
@@ -345,7 +344,6 @@ namespace Insight
 					swapchainPso.CullMode = CullMode::None;
 					swapchainPso.ShaderDescription = shaderDesc;
 					builder.SetPipeline(swapchainPso);
-					data.Pso = swapchainPso;
 
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -354,9 +352,13 @@ namespace Insight
 				},
 				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
-					cmdList->BindPipeline(data.Pso, nullptr);
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"SwapchainPass");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"SwapchainPass"));
+
 					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.ColourRT));
 					cmdList->Draw(3, 1, 0, 0);
+					cmdList->EndRenderpass();
 				});
 #endif //RENDER_GRAPH_ENABLED
 		}
@@ -365,8 +367,10 @@ namespace Insight
 		{
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
-			{ };
-			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
+			{
+				PipelineStateObject Pso;
+			};
+			RenderGraph::Instance().AddPass<TestPassData>(L"ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -376,8 +380,20 @@ namespace Insight
 					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
 					builder.SetRenderpass(GraphicsManager::Instance().GetRenderContext()->GetImGuiRenderpassDescription());
 				},
-				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[this](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
+#ifdef IS_VULKAN_ENABLED
+					//GraphicsManager::Instance().GetRenderContext()->DisableExtension(DeviceExtension::VulkanDynamicRendering);
+					// TODO: HACK, THIS NEEDS REMOVING. THINK OF A BETTER WAY OF DOING IMGUI.
+					// Maybe setup imgui manually?
+					if (GraphicsManager::Instance().IsVulkan())
+					{			
+						static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmdList)->GetCommandList().bindPipeline(
+							vk::PipelineBindPoint::eGraphics, ImGui_ImplVulkan_GetPipeline());
+					}
+#endif
+
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"ImGuiPass"));
 #ifdef IS_VULKAN_ENABLED
 					if (GraphicsManager::Instance().IsVulkan())
 					{
@@ -390,6 +406,8 @@ namespace Insight
 						ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmdList)->GetCommandList());
 					}
 #endif
+					cmdList->EndRenderpass();
+					//GraphicsManager::Instance().GetRenderContext()->EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				});
 #endif //RENDER_GRAPH_ENABLED
 		}

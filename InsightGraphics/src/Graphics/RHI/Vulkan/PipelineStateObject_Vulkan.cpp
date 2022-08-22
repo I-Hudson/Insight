@@ -226,6 +226,37 @@ namespace Insight
 					renderpass																										// renderPass
 				);
 
+				if (pso.Swapchain)
+				{
+					pso.RenderTargets[0] = m_context->GetSwaphchainIamge();
+				}
+
+				std::vector<vk::Format> colourAttachmentFormats;
+				vk::Format depthAttachmentFormat = vk::Format::eUndefined;
+				vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
+				for (const RHI_Texture* tex : pso.RenderTargets)
+				{
+					if (tex)
+					{
+						colourAttachmentFormats.push_back(PixelFormatToVkFormat[(int)tex->GetFormat()]);
+					}
+				}
+				if (pso.DepthStencil)
+				{
+					depthAttachmentFormat = PixelFormatToVkFormat[(int)pso.DepthStencil->GetFormat()];
+				}
+
+				vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo = { };
+				pipelineRenderingCreateInfo.setColorAttachmentFormats(colourAttachmentFormats);
+				pipelineRenderingCreateInfo.setDepthAttachmentFormat(depthAttachmentFormat);
+				pipelineRenderingCreateInfo.setStencilAttachmentFormat(stencilAttachmentFormat);
+
+				if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+				{
+					graphicsPipelineCreateInfo.setPNext(&pipelineRenderingCreateInfo);
+					graphicsPipelineCreateInfo.renderPass = VK_NULL_HANDLE;
+				}
+
 				vk::ResultValue<vk::Pipeline> result = m_context->GetDevice().createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
 				m_pipelineStateObjects[psoHash] = result.value;
 

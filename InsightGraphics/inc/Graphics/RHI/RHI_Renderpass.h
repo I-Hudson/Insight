@@ -129,7 +129,7 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context);
 
-			RHI_Renderpass GetOrCreateRenderpass(RenderpassDescription description);
+			RHI_Renderpass GetOrCreateRenderpass(RenderpassDescription& description);
 			RHI_Renderpass GetRenderpass(u64 hash) const;
 
 			void Release(u64 hash, bool remove = true);
@@ -137,7 +137,8 @@ namespace Insight
 			void ReleaseAll();
 
 		private:
-			RHI_Renderpass AddRenderpass(RenderpassDescription description);
+			void PrepreRenderpass(RenderpassDescription& description);
+			RHI_Renderpass AddRenderpass(RenderpassDescription& description);
 
 		private:
 			RenderContext* m_context = nullptr;

@@ -54,14 +54,14 @@ namespace Insight
 					bindingInfo.setStageFlags(ShaderStageFlagsToVulkan(desc.Stage));
 
 					bindingCreateInfos.push_back(bindingInfo);
-					if (m_context->HasExtension(DeviceExtension::BindlessDescriptors))
+					if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))
 					{
 						bindingEXTFlags.push_back(vk::DescriptorBindingFlagBitsEXT::ePartiallyBound);
 					}
 				}
 
 				vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT setEXT = {};
-				if (m_context->HasExtension(DeviceExtension::BindlessDescriptors))
+				if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))
 				{
 					setEXT.setBindingFlags(bindingEXTFlags);
 					setCreateInfo.setPNext(&setEXT);

@@ -52,6 +52,8 @@ namespace Insight
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
+				virtual RHI_Texture* GetSwaphchainIamge() const override { return nullptr; }
+
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 

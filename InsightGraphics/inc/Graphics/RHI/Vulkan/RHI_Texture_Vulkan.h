@@ -34,6 +34,8 @@ namespace Insight
 				vk::Image m_image{ nullptr };
 				vk::ImageView m_imageView{ nullptr };
 				VmaAllocation m_imageAllocation = nullptr;
+
+				friend class RenderContext_Vulkan;
 			};
 		}
 	}
