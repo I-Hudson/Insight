@@ -54,6 +54,16 @@ namespace Insight
 			m_drawData = {};
 		}
 
+		void RHI_CommandList::SetUniform(int set, int binding, void* data, u32 size)
+		{
+			m_descriptorAllocator->SetUniform(set, binding, data, size);
+		}
+
+		void RHI_CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
+		{
+			m_descriptorAllocator->SetTexture(set, binding, texture);
+		}
+
 		bool RHI_CommandList::CanDraw()
 		{
 			if (m_pso.GetHash() != m_activePSO.GetHash())
@@ -144,36 +154,32 @@ namespace Insight
 
 		RHI_CommandList* CommandListManager::GetCommandList()
 		{
-			assert(m_allocator);
+			ASSERT(m_allocator);
 			return m_allocator->GetCommandList();
 		}
 
 		RHI_CommandList* CommandListManager::GetSingleUseCommandList()
 		{
-			assert(m_allocator);
+			ASSERT(m_allocator);
 			return m_allocator->GetSingleSubmitCommandList();
 		}
 
 		void CommandListManager::ReturnCommandList(RHI_CommandList* cmdList)
 		{
-			assert(m_allocator);
+			ASSERT(m_allocator);
 			m_allocator->ReturnCommandList(cmdList);
 		}
 
 		void CommandListManager::ReturnSingleUseCommandList(RHI_CommandList* cmdList)
 		{
-			assert(m_allocator);
+			ASSERT(m_allocator);
 			m_allocator->ReturnSingleSubmitCommandList(cmdList);
 		}
 
-		void RHI_CommandList::SetUniform(int set, int binding, void* data, u32 size)
+		void CommandListManager::Reset()
 		{
-			m_descriptorAllocator->SetUniform(set, binding, data, size);
+			ASSERT(m_allocator);
+			m_allocator->Reset();
 		}
-
-		void RHI_CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
-		{
-			m_descriptorAllocator->SetTexture(set, binding, texture);
-		}
-}
+	}
 }

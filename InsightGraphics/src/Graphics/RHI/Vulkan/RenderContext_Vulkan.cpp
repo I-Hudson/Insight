@@ -310,13 +310,6 @@ namespace Insight
 					frame.Destroy();
 				}
 
-				m_device.destroyDescriptorPool(*reinterpret_cast<VkDescriptorPool*>(&m_descriptor_pool));
-				m_descriptor_pool = nullptr;
-
-				m_pipelineStateObjectManager.Destroy();
-				m_pipelineLayoutManager.Destroy();
-				m_renderpassManager.Destroy();
-
 				if (m_swapchain)
 				{
 					for (RHI_Texture*& tex : m_swapchainImages)
@@ -330,12 +323,19 @@ namespace Insight
 					m_swapchainImages.resize(0);
 				}
 
+				BaseDestroy();
+
+				m_device.destroyDescriptorPool(*reinterpret_cast<VkDescriptorPool*>(&m_descriptor_pool));
+				m_descriptor_pool = nullptr;
+
+				m_pipelineStateObjectManager.Destroy();
+				m_pipelineLayoutManager.Destroy();
+				m_renderpassManager.Destroy();
+
 				if (m_surface)
 				{
 					m_instnace.destroySurfaceKHR(m_surface);
 				}
-
-				BaseDestroy();
 
 				vmaDestroyAllocator(m_vmaAllocator);
 				m_vmaAllocator = VK_NULL_HANDLE;

@@ -345,6 +345,8 @@ namespace Insight
 			{
 				if (m_allocator)
 				{
+					Reset();
+
 					for (auto list : m_allocLists)
 					{
 						list->Release();

@@ -292,6 +292,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			if (m_context->PrepareRender())
 			{
+				m_commandListManager->Reset();
 				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
 				cmdList->m_descriptorAllocator = m_descriptorManagers.Get();
 				cmdList->m_descriptorAllocator->Reset();

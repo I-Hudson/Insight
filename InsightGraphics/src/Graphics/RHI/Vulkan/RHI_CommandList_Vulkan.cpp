@@ -16,6 +16,9 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
+			/// <summary>
+			/// RHI_CommandList_Vulkan
+			/// </summary>
 			void RHI_CommandList_Vulkan::PipelineBarrier(Graphics::PipelineBarrier barrier)
 			{
 				std::vector<vk::BufferMemoryBarrier> bufferBarriers;
@@ -77,9 +80,6 @@ namespace Insight
 				PipelineBarrier(srcStage, dstStage, { }, imageMemoryBarrier);
 			}
 
-			/// <summary>
-			/// RHI_CommandList_Vulkan
-			/// </summary>
 			void RHI_CommandList_Vulkan::Reset()
 			{
 				RHI_CommandList::Reset();
@@ -445,6 +445,11 @@ namespace Insight
 			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)
 			{
 				const u64 psoHash = m_pso.GetHash();
+				if (m_framebuffers.find(psoHash) != m_framebuffers.end())
+				{
+					return;
+				}
+
 				std::vector<vk::ImageView> imageViews;
 				if (m_pso.Swapchain)
 				{
@@ -490,6 +495,7 @@ namespace Insight
 
 				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);
 				m_framebuffers[psoHash] = RenderContextVulkan()->GetDevice().createFramebuffer(frameBufferInfo);
+				RenderContextVulkan()->SetObejctName(L"Framebuffer " + std::to_wstring(psoHash), (u64)m_framebuffers[psoHash].operator VkFramebuffer(), vk::ObjectType::eFramebuffer);
 			}
 
 
@@ -557,6 +563,8 @@ namespace Insight
 			{
 				if (m_allocator)
 				{
+					Reset();
+
 					for (auto list : m_allocLists)
 					{
 						list->Release();

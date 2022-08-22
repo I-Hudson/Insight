@@ -122,6 +122,8 @@ namespace Insight
 			void ReturnCommandList(RHI_CommandList* cmdList);
 			void ReturnSingleUseCommandList(RHI_CommandList* cmdList);
 
+			void Reset();
+
 		private:
 			RenderContext* m_context = nullptr;
 			RHI_CommandListAllocator* m_allocator = nullptr;
