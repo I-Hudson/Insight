@@ -1,0 +1,104 @@
+project "tracyProfiler"
+	kind "WindowedApp"
+	language "C++"
+    cppdialect "C++17"
+    configurations { "Debug", "Release" } 
+
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+
+	folderDirTracy = "../vendor/tracy/"
+	location "%{folderDirTracy}"
+
+	files 
+	{
+        folderDirTracy.. "public/common/**.hpp", 
+        folderDirTracy.. "public/common/**.h", 
+        folderDirTracy.. "public/common/**.cpp", 
+
+        folderDirTracy.. "imgui/**.h", 
+        folderDirTracy.. "imgui/**.cpp",
+
+		folderDirTracy.. "nfd/nfd.h", 
+        folderDirTracy.. "nfd/nfd_win.cpp",
+
+        folderDirTracy.. "server/**.hpp",
+        folderDirTracy.. "server/**.h",
+        folderDirTracy.. "server/**.cpp",
+
+		folderDirTracy.. "profiler/src/**.hpp",
+		folderDirTracy.. "profiler/src/**.h",
+        folderDirTracy.. "profiler/src/**.cpp",
+
+        folderDirTracy.. "zstd/**.h",
+        folderDirTracy.. "zstd/**.c",
+
+        folderDirTracy.. "profiler/build/win32/DebugVis.matvis",
+        folderDirTracy.. "profiler/build/win32/Tracy.manifest",
+        folderDirTracy.. "profiler/build/win32/Tracy.rc",
+	}
+
+	includedirs
+	{
+		folderDirTracy,
+		folderDirTracy.. "imgui",
+		folderDirTracy.. "nfd",
+		folderDirTracy.. "server",
+		folderDirTracy.. "profiler/src",
+		folderDirTracy.. "zstd",
+
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/brotli",
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/capstone",
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/freetype",
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/GLFW",
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include/libpng16",
+		folderDirTracy.. "vcpkg_installed/x64-windows-static/include",
+	}
+
+	links
+	{
+		"brotlicommon-static.lib",
+		"brotlidec-static.lib",
+		"brotlienc-static.lib",
+		"bz2.lib",
+		"capstone.lib",
+		"freetype.lib",
+		"glfw3.lib",
+		"libpng16.lib",
+		"zlib.lib",
+
+		"ws2_32.lib",
+		"Dbghelp.lib",
+	}
+
+	defines 
+	{ 
+		"NDEBUG",
+		"_CRT_SECURE_NO_DEPRECATE",
+		"_CRT_NONSTDC_NO_DEPRECATE",
+		"WIN32_LEAN_AND_MEAN",
+		"NOMINMAX",
+		"_USE_MATH_DEFINES",
+		"IMGUI_ENABLE_FREETYPE",
+	}
+	removedefines "TRACY_IMPORTS"
+
+	filter "configurations:Debug"
+		libdirs
+		{
+			folderDirTracy.. "vcpkg_installed/x64-windows-static/debug/lib"
+		}
+		defines
+		{ 
+		}
+
+	filter "configurations:Release"
+		optimize "Speed"
+		libdirs
+		{
+			folderDirTracy.. "vcpkg_installed/x64-windows-static/lib"
+		}
+		defines
+		{ 
+		}

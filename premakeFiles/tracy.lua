@@ -13,7 +13,7 @@ project "tracy"
 
 	files 
 	{
-        folderDirTracy.. "TracyClient.cpp", 
+        folderDirTracy.. "public/TracyClient.cpp", 
 	}
 
 	includedirs

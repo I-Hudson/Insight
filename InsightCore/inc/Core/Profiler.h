@@ -18,7 +18,7 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)	OPTICK_FRAME(frame_name)
 #elif defined(IS_PROFILE_TRACY)
 #define TRACY_ENABLE
-	#include "Tracy.hpp"
+	#include "public/tracy/Tracy.hpp"
 	#define IS_PROFILE_FUNCTION()			ZoneScoped
 	#define IS_PROFILE_SCOPE(name)			ZoneScopedN(name)
 	#define IS_PROFILE_FRAME(frame_name)	FrameMarkNamed(frame_name)
