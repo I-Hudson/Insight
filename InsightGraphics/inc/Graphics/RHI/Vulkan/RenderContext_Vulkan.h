@@ -87,6 +87,7 @@ namespace Insight
 
 				void SetDeviceExtensions();
 				bool CheckInstanceExtension(const char* extension);
+				bool CheckForDeviceExtension(const char* extension);
 
 			private:
 				vk::Instance m_instnace{ nullptr };

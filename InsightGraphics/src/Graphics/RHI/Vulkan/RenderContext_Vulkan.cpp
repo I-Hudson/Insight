@@ -620,7 +620,9 @@ namespace Insight
 
 				std::vector<const char*> enabledLayerNames =
 				{
+#ifdef DEBUG
 					"VK_LAYER_KHRONOS_validation",
+#endif
 				};
 				std::vector<const char*> enabledExtensionNames;
 #if VK_KHR_surface
@@ -736,21 +738,6 @@ namespace Insight
 				std::vector<vk::LayerProperties> layerProperties = m_adapter.enumerateDeviceLayerProperties();
 				std::vector<vk::ExtensionProperties> extensionProperties = m_adapter.enumerateDeviceExtensionProperties();
 
-#if defined(_DEBUG)
-				const char* vkLayerKhronosValidation = "VK_LAYER_KHRONOS_validation";
-				bool hasKhronosStandardValidationLayer = std::find_if(layerProperties.begin(), layerProperties.end(), [vkLayerKhronosValidation](const vk::LayerProperties& layer)
-					{
-						return strcmp(layer.layerName, vkLayerKhronosValidation);
-					}) != layerProperties.end();
-
-				if (hasKhronosStandardValidationLayer)
-				{
-					if (true/*(bool)CONFIG_VAL(Config::GraphicsConfig.Validation)*/)
-					{
-						layers.insert(vkLayerKhronosValidation);
-					}
-				}
-#endif
 				IS_CORE_INFO("Device layers:");
 				for (size_t i = 0; i < layerProperties.size(); ++i)
 				{
@@ -779,7 +766,10 @@ namespace Insight
 								return strcmp(extnesion.extensionName, ext);
 							}) != extensionProperties.end())
 						{
-							extensions.insert(ext);
+							if (CheckForDeviceExtension(ext))
+							{
+								extensions.insert(ext);
+							}
 						}
 					}
 				}
@@ -964,6 +954,20 @@ namespace Insight
 					}
 				}
 				return instanceExtensions.find(extension) != instanceExtensions.end();
+			}
+
+			bool RHI::Vulkan::RenderContext_Vulkan::CheckForDeviceExtension(const char* extension)
+			{
+				static std::set<std::string> deviceExtensions;
+				if (deviceExtensions.empty())
+				{
+					std::vector<vk::ExtensionProperties> extensions = m_adapter.enumerateDeviceExtensionProperties();
+					for (auto& extension : extensions)
+					{
+						deviceExtensions.insert(extension.extensionName);
+					}
+				}
+				return deviceExtensions.find(extension) != deviceExtensions.end();
 			}
 
 			void FrameResource_Vulkan::Init(RenderContext_Vulkan* context)

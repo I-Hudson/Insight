@@ -88,6 +88,7 @@ namespace Insight
 					RenderContextVulkan()->GetDevice().destroyFramebuffer(pair.second);
 				}
 				m_framebuffers.clear();
+				m_boundDescriptors = 0;
 			}
 
 			void RHI_CommandList_Vulkan::Close()
@@ -348,7 +349,10 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				if (CanDraw())
 				{
-					m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+					{
+						IS_PROFILE_SCOPE("API call");
+						m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+					}
 				}
 			}
 
@@ -360,7 +364,11 @@ namespace Insight
 				m_pso = pso;
 				m_activePSO = pso;
 
-				vk::Pipeline pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
+				vk::Pipeline pipeline;
+				{
+					IS_PROFILE_SCOPE("GetOrCreatePSO");
+					pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
+				}
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
 			}
@@ -375,18 +383,24 @@ namespace Insight
 				{
 					vk::PipelineLayout pipelineLayout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 
+					u64 hash = 0;
 					std::vector<vk::DescriptorSet> sets;
 					for (const auto& s : descriptorSets)
 					{
 						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+						HashCombine(hash, s);
 					}
 
-					std::vector<u32> dynamicOffsets = {};
-					m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
-						, pipelineLayout
-						, 0
-						, sets
-						, dynamicOffsets);
+					if (m_boundDescriptors != hash)
+					{
+						m_boundDescriptors = hash;
+						std::vector<u32> dynamicOffsets = {};
+						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
+							, pipelineLayout
+							, 0
+							, sets
+							, dynamicOffsets);
+					}
 					return true;
 				}
 

@@ -66,12 +66,16 @@ namespace Insight
 
 		bool RHI_CommandList::CanDraw()
 		{
+			IS_PROFILE_FUNCTION();
 			if (m_pso.GetHash() != m_activePSO.GetHash())
 			{
 				m_activePSO = m_pso;
 				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
 				/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
-				BindPipeline(m_activePSO, layout);
+				{
+					IS_PROFILE_SCOPE("Bind pipeline");
+					BindPipeline(m_activePSO, layout);
+				}
 			}
 			return BindDescriptorSets();
 		}
