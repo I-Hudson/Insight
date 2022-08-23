@@ -885,7 +885,8 @@ namespace Insight
             default:
                 break;
             }
-            assert(false);
+            assert(false); 
+            return ImageLayout::Undefined;
         }
 
         AttachmentLoadOp VkToAttachmentLoadOp(vk::AttachmentLoadOp op)
@@ -899,6 +900,7 @@ namespace Insight
                 break;
             }
             assert(false);
+            return AttachmentLoadOp::Clear;
         }
     }
 }

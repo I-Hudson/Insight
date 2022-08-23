@@ -214,32 +214,12 @@ namespace Insight
 
 					if (descriptor.Texture)
 					{
-						// TODO: Remove this and make a sampler manager to store all type of samplers.
-						static vk::Sampler sampler;
-						if (!sampler)
-						{
-							vk::SamplerCreateInfo samplerCreateInfo = vk::SamplerCreateInfo(
-								{},
-								vk::Filter::eLinear,
-								vk::Filter::eLinear,
-								vk::SamplerMipmapMode::eLinear,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								0.0f,
-								false,
-								1.0f,
-								false,
-								vk::CompareOp::eNever,
-								0.0f,
-								0.0f,
-								vk::BorderColor::eFloatOpaqueWhite);
-							sampler = contextVulkan->GetDevice().createSampler(samplerCreateInfo);
-						}
+						RHI_Sampler rhi_sampler = m_context->GetSamplerManager().GetOrCreateSampler({});
+						vk::Sampler sampler_vulkan = *reinterpret_cast<vk::Sampler*>(&rhi_sampler);
 
 						imageInfo[imageInfoIndex].imageView = static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
 						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-						imageInfo[imageInfoIndex].sampler = sampler;
+						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 						++imageInfoIndex;
 					}

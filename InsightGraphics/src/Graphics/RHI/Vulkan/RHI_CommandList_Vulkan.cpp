@@ -74,6 +74,7 @@ namespace Insight
 					{ },
 					bufferMemoryBarrier,
 					imageMemoryBarrier);
+				RenderStats::Instance().PipelineBarriers++;
 			}
 
 			void RHI_CommandList_Vulkan::PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier)
@@ -331,6 +332,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("bindVertexBuffers");
 					m_commandList.bindVertexBuffers(0, buffers, offsets);
+					RenderStats::Instance().VertexBufferBindings++;
 				}
 			}
 
@@ -339,6 +341,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
 				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
+				RenderStats::Instance().IndexBufferBindings++;
 			}
 
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
@@ -347,6 +350,7 @@ namespace Insight
 				if (CanDraw())
 				{
 					m_commandList.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+					RenderStats::Instance().DrawCalls++;
 				}
 			}
 
@@ -358,6 +362,7 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("API call");
 						m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+						RenderStats::Instance().DrawIndexedCalls++;
 					}
 				}
 			}
@@ -383,7 +388,6 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-#ifdef RENDER_GRAPH_ENABLED
 				std::vector<RHI_DescriptorSet*> descriptorSets;
 				if (m_descriptorAllocator->GetDescriptorSets(descriptorSets))
 				{
@@ -409,47 +413,12 @@ namespace Insight
 								, 0
 								, sets
 								, dynamicOffsets);
+							RenderStats::Instance().DescriptorSetBindings++;
 						}
 					}
 					return true;
 				}
-
 				return false;
-#else
-				return BindDescriptorSets();
-				std::vector<RHI_Descriptor*> descriptors;
-				bool result;
-				
-				{ 
-					IS_PROFILE_SCOPE("DescriptorAllocator-GetDescriptors");
-					result = FrameResourceVulkan()->DescriptorAllocator.GetDescriptors(descriptors);
-				}
-				const int descriptorCount = static_cast<int>(descriptors.size());
-
-				if (result && descriptorCount > 0)
-				{
-					IS_PROFILE_SCOPE("vk::bindDescriptorSets");
-					vk::PipelineLayout layout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-
-					u64 descriptorsToBind = 0;
-					std::vector<vk::DescriptorSet> sets;
-					sets.resize(descriptorCount);
-					for (size_t i = 0; i < descriptorCount; ++i)
-					{
-						RHI_Descriptor_Vulkan* descriptorVulkan = dynamic_cast<RHI_Descriptor_Vulkan*>(descriptors.at(i));
-						sets[i] = descriptorVulkan->GetSet();
-						HashCombine(descriptorsToBind, descriptorVulkan);
-					}
-
-					if (m_boundDescriptors != descriptorsToBind)
-					{
-						std::vector<u32> dynamicOffsets = {};
-						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, layout, 0, sets, dynamicOffsets);
-						m_boundDescriptors = descriptorsToBind;
-					}
-				}
-				return result && descriptorCount > 0;
-#endif
 			}
 
 			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)

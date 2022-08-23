@@ -31,11 +31,15 @@ namespace Insight
 			}
 
 			::Insight::Renderer::s_context = context;
+			context->m_samplerManager = RHI_SamplerManager::New();
+			
+			context->m_descriptorSetManager.Setup();
+			context->m_commandListManager.Setup();
+
 			context->m_shaderManager.SetRenderContext(context);
 			context->m_descriptorLayoutManager.SetRenderContext(context);
 			context->m_renderpassManager.SetRenderContext(context);
-			context->m_descriptorSetManager.Setup();
-			context->m_commandListManager.Setup();
+			context->m_samplerManager->SetRenderContext(context);
 
 			if (ENABLE_IMGUI)
 			{
@@ -90,6 +94,8 @@ namespace Insight
 			IMGUI_VALID(ImGui_ImplGlfw_NewFrame());
 			IMGUI_VALID(ImGui::NewFrame());
 			IMGUI_VALID(ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode));
+
+			IMGUI_VALID(RenderStats::Instance().Draw());
 		}
 
 		void RenderContext::ImGuiRender()
@@ -116,6 +122,9 @@ namespace Insight
 				{
 					manager.Destroy();
 				});
+
+			m_samplerManager->ReleaseAll();
+			DeleteTracked(m_samplerManager);
 		}
 
 		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride)

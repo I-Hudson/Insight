@@ -255,6 +255,8 @@ namespace Insight
 					}
 
 					data.TestMesh.Draw(cmdList);
+					data.TestMesh.Draw(cmdList);
+
 					cmdList->EndRenderpass();
 				}, std::move(passData));
 #endif //RENDER_GRAPH_ENABLED

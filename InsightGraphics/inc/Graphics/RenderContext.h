@@ -10,8 +10,11 @@
 #include "Graphics/RHI/RHI_Shader.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
+#include "Graphics/RHI/RHI_Sampler.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
+
+#include "Graphics/RenderStats.h"
 
 #include "Core/Collections/FactoryMap.h"
 
@@ -51,11 +54,12 @@ namespace Insight
 
 			RenderpassDescription GetImGuiRenderpassDescription() const { return m_imguiRenderpassDescription; }
 
+			CommandListManager& GetCommandListManager() { return *m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
 			RHI_DescriptorSetManager& GetDescriptorSetManager() { return *m_descriptorSetManager.Get(); }
-			CommandListManager& GetCommandListManager() { return *m_commandListManager.Get(); }
+			RHI_SamplerManager& GetSamplerManager() { return *m_samplerManager; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -83,12 +87,15 @@ namespace Insight
 			RHI_ResourceManager<RHI_Texture> m_textures;
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
-			RenderpassDescription m_imguiRenderpassDescription;
+			RHI_SamplerManager* m_samplerManager;
 
+			RenderpassDescription m_imguiRenderpassDescription;
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;
+
+			RenderStats m_renderStats;
 
 			friend class Renderer;
 		};

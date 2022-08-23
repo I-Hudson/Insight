@@ -5,6 +5,7 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Sampler_Vulkan.h"
 
 #include "Core/Profiler.h"
 
@@ -102,32 +103,13 @@ namespace Insight
 					{
 						const RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(descriptor.Texture);
 
-						static vk::Sampler sampler;
-						if (!sampler)
-						{
-							vk::SamplerCreateInfo samplerCreateInfo = vk::SamplerCreateInfo(
-								{},
-								vk::Filter::eLinear,
-								vk::Filter::eLinear,
-								vk::SamplerMipmapMode::eLinear,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								vk::SamplerAddressMode::eMirroredRepeat,
-								0.0f, 
-								false,
-								1.0f,
-								false,
-								vk::CompareOp::eNever,
-								0.0f,
-								0.0f,
-								vk::BorderColor::eFloatOpaqueWhite);
-							sampler = m_context->GetDevice().createSampler(samplerCreateInfo);
-						}
+						RHI_Sampler rhi_sampler = m_context->GetSamplerManager().GetOrCreateSampler({});
+						vk::Sampler sampler_vulkan = *reinterpret_cast<vk::Sampler*>(&rhi_sampler);
 
 						vk::DescriptorImageInfo& imageInfo = image_infos[descriptorWriteIndex];
 						imageInfo.setImageLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 						imageInfo.setImageView(textureVulkan->GetImageView());
-						imageInfo.setSampler(sampler);
+						imageInfo.setSampler(sampler_vulkan);
 					}
 					else if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
