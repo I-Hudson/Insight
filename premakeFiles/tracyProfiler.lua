@@ -61,12 +61,8 @@ project "tracyProfiler"
 		"brotlicommon-static.lib",
 		"brotlidec-static.lib",
 		"brotlienc-static.lib",
-		"bz2.lib",
 		"capstone.lib",
-		"freetype.lib",
 		"glfw3.lib",
-		"libpng16.lib",
-		"zlib.lib",
 
 		"ws2_32.lib",
 		"Dbghelp.lib",
@@ -89,6 +85,14 @@ project "tracyProfiler"
 		{
 			folderDirTracy.. "vcpkg_installed/x64-windows-static/debug/lib"
 		}
+		links
+		{
+			"bz2d.lib",
+			"freetyped.lib",
+			"libpng16d.lib",
+			"zlibd.lib",
+		}
+
 		defines
 		{ 
 		}
@@ -98,6 +102,13 @@ project "tracyProfiler"
 		libdirs
 		{
 			folderDirTracy.. "vcpkg_installed/x64-windows-static/lib"
+		}
+		links
+		{
+			"bz2.lib",
+			"freetype.lib",
+			"libpng16.lib",
+			"zlib.lib",
 		}
 		defines
 		{ 
