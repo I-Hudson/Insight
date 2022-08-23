@@ -518,6 +518,7 @@ namespace Insight
 				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
 
 				vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo();
+				poolCreateInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 				m_allocator = m_context->GetDevice().createCommandPool(poolCreateInfo);
 			}
 
@@ -528,13 +529,15 @@ namespace Insight
 					RHI_CommandList* list = *m_freeLists.begin();
 					m_freeLists.erase(m_freeLists.begin());
 					m_allocLists.insert(list);
+					list->Reset();
 
-					dynamic_cast<RHI_CommandList_Vulkan*>(list)->GetCommandList().begin(vk::CommandBufferBeginInfo());
+					static_cast<RHI_CommandList_Vulkan*>(list)->GetCommandList().begin(vk::CommandBufferBeginInfo());
 					return list;
 				}
 
 				vk::CommandBufferAllocateInfo info = vk::CommandBufferAllocateInfo(m_allocator);
 				info.setCommandBufferCount(1);
+
 				RHI_CommandList_Vulkan* list = dynamic_cast<RHI_CommandList_Vulkan*>(RHI_CommandList::New());
 				list->Create(m_context);
 				list->m_allocator = this;
@@ -546,12 +549,12 @@ namespace Insight
 				return list;
 			}
 
-			RHI_CommandList* RHI::Vulkan::RHI_CommandListAllocator_Vulkan::GetSingleSubmitCommandList()
+			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetSingleSubmitCommandList()
 			{
 				return GetCommandList();
 			}
 
-			void RHI::Vulkan::RHI_CommandListAllocator_Vulkan::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
+			void RHI_CommandListAllocator_Vulkan::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
 			{
 				return ReturnCommandList(cmdList);
 			}
@@ -593,7 +596,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI::Vulkan::RHI_CommandListAllocator_Vulkan::ValidResouce()
+			bool RHI_CommandListAllocator_Vulkan::ValidResouce()
 			{
 				return m_allocator;
 			}

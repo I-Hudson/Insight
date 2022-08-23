@@ -122,7 +122,6 @@ namespace Insight
 				return;
 			}
 			m_freeLists.insert(cmdList);
-			cmdList->Reset();
 		}
 
 		/// <summary>
