@@ -15,6 +15,7 @@
 #endif
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -49,6 +50,8 @@ namespace Insight
 
 		RHI_DescriptorLayout* RHI_DescriptorLayoutManager::GetLayout(std::vector<Descriptor> descriptors)
 		{
+			IS_PROFILE_FUNCTION();
+
 			u64 hash = 0;
 			int set = 0;
 
@@ -177,6 +180,8 @@ namespace Insight
 
 		void RHI_DescriptorSet::Update(const std::vector<Descriptor>& descriptors)
 		{
+			IS_PROFILE_FUNCTION();
+		
 			u64 hash = 0;
 			for (const auto& d : descriptors)
 			{
@@ -276,6 +281,8 @@ namespace Insight
 		/// <returns></returns>
 		RHI_DescriptorSet* RHI_DescriptorSetManager::GetSet(const std::vector<Descriptor>& descriptors)
 		{
+			IS_PROFILE_FUNCTION();
+
 			u64 hash = 0;
 			u64 hashWithResource = 0;
 			for (const auto& d : descriptors)
@@ -425,6 +432,7 @@ namespace Insight
 
 		bool DescriptorAllocator::GetDescriptorSets(std::vector<RHI_DescriptorSet*>& sets)
 		{
+			IS_PROFILE_FUNCTION();
 			for (const auto& set : m_descriptors)
 			{
 				sets.push_back(m_context->GetDescriptorSetManager().GetSet(set.second));

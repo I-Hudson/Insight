@@ -20,7 +20,8 @@ namespace Insight
 			{
 			public:
 
-				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override { }
+				virtual void Create(RenderContext* context) override { ASSERT(false); }
+				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override { ASSERT(false); }
 
 				void ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers);
 				void ResourceBarrierImage(ID3D12Resource* resource, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState);

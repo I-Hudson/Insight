@@ -43,6 +43,7 @@ namespace Insight
 
 			virtual void Close() = 0;
 
+			virtual void Create(RenderContext* context) = 0;
 			virtual void PipelineBarrier(PipelineBarrier barrier) = 0;
 
 			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;

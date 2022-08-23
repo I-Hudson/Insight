@@ -115,7 +115,7 @@ namespace Insight
 				// Create descriptor set layout
 				vk::PipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 
-				RHI_Shader_Vulkan* shaderVulkan = dynamic_cast<RHI_Shader_Vulkan*>(pso.Shader);
+				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
 				std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
 				std::array<std::string, ShaderStageCount> shaderFuncNames;
 				for (int i = 0; i < ShaderStageCount; ++i)

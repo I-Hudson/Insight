@@ -17,8 +17,14 @@ namespace Insight
 		namespace RHI::Vulkan
 		{
 			/// <summary>
-			/// RHI_CommandList_Vulkan
+			// RHI_CommandList_Vulkan
 			/// </summary>
+			void RHI_CommandList_Vulkan::Create(RenderContext* context)
+			{
+				m_context = context;
+				m_context_vulkan = static_cast<RenderContext_Vulkan*>(context);
+			}
+
 			void RHI_CommandList_Vulkan::PipelineBarrier(Graphics::PipelineBarrier barrier)
 			{
 				std::vector<vk::BufferMemoryBarrier> bufferBarriers;
@@ -85,7 +91,7 @@ namespace Insight
 				RHI_CommandList::Reset();
 				for (auto& pair : m_framebuffers)
 				{
-					RenderContextVulkan()->GetDevice().destroyFramebuffer(pair.second);
+					m_context_vulkan->GetDevice().destroyFramebuffer(pair.second);
 				}
 				m_framebuffers.clear();
 				m_boundDescriptors = 0;
@@ -134,8 +140,8 @@ namespace Insight
 					vk::AccessFlagBits::eTransferWrite,
 					vk::ImageLayout::eUndefined,
 					vk::ImageLayout::eTransferDstOptimal,
-					RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-					RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					m_context_vulkan->GetFamilyQueueIndex(GPUQueue_Graphics),
+					m_context_vulkan->GetFamilyQueueIndex(GPUQueue_Graphics),
 					dstVulkan->GetImage(),
 					vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
@@ -155,11 +161,11 @@ namespace Insight
 				{
 					for (auto& pair : m_framebuffers)
 					{
-						RenderContextVulkan()->GetDevice().destroyFramebuffer(pair.second);
+						m_context_vulkan->GetDevice().destroyFramebuffer(pair.second);
 					}
 					m_framebuffers.clear();
 
-					RenderContextVulkan()->GetDevice().freeCommandBuffers(m_allocator->GetAllocator(), { m_commandList });
+					m_context_vulkan->GetDevice().freeCommandBuffers(m_allocator->GetAllocator(), { m_commandList });
 					m_commandList = nullptr;
 				}
 
@@ -171,7 +177,7 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetName(std::wstring name)
 			{
-				RenderContextVulkan()->SetObejctName(name, (u64)m_commandList.operator VkCommandBuffer(), m_commandList.objectType);
+				m_context_vulkan->SetObejctName(name, (u64)m_commandList.operator VkCommandBuffer(), m_commandList.objectType);
 			}
 
 			void RHI_CommandList_Vulkan::BeginRenderpass(RenderpassDescription renderDescription)
@@ -367,7 +373,7 @@ namespace Insight
 				vk::Pipeline pipeline;
 				{
 					IS_PROFILE_SCOPE("GetOrCreatePSO");
-					pipeline = RenderContextVulkan()->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
+					pipeline = m_context_vulkan->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				}
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
@@ -381,12 +387,13 @@ namespace Insight
 				std::vector<RHI_DescriptorSet*> descriptorSets;
 				if (m_descriptorAllocator->GetDescriptorSets(descriptorSets))
 				{
-					vk::PipelineLayout pipelineLayout = RenderContextVulkan()->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+					vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 
 					u64 hash = 0;
 					std::vector<vk::DescriptorSet> sets;
 					for (const auto& s : descriptorSets)
 					{
+						IS_PROFILE_SCOPE("reinterpret_cast");
 						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
 						HashCombine(hash, s);
 					}
@@ -395,11 +402,14 @@ namespace Insight
 					{
 						m_boundDescriptors = hash;
 						std::vector<u32> dynamicOffsets = {};
-						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
-							, pipelineLayout
-							, 0
-							, sets
-							, dynamicOffsets);
+						{
+							IS_PROFILE_SCOPE("API call");
+							m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
+								, pipelineLayout
+								, 0
+								, sets
+								, dynamicOffsets);
+						}
 					}
 					return true;
 				}
@@ -442,20 +452,6 @@ namespace Insight
 #endif
 			}
 
-			RenderContext_Vulkan* RHI_CommandList_Vulkan::RenderContextVulkan()
-			{
-				IS_PROFILE_FUNCTION();
-				assert(m_context);
-				return dynamic_cast<RenderContext_Vulkan*>(m_context);
-			}
-
-			FrameResource_Vulkan* RHI_CommandList_Vulkan::FrameResourceVulkan()
-			{
-				IS_PROFILE_FUNCTION();
-				assert(m_frameResouces);
-				return static_cast<FrameResource_Vulkan*>(m_frameResouces);
-			}
-
 			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)
 			{
 				const u64 psoHash = m_pso.GetHash();
@@ -467,8 +463,8 @@ namespace Insight
 				std::vector<vk::ImageView> imageViews;
 				if (m_pso.Swapchain)
 				{
-					vk::SwapchainKHR swapchainVulkan = RenderContextVulkan()->GetSwapchain();
-					imageViews.push_back(RenderContextVulkan()->GetSwapchainImageView());
+					vk::SwapchainKHR swapchainVulkan = m_context_vulkan->GetSwapchain();
+					imageViews.push_back(m_context_vulkan->GetSwapchainImageView());
 
 					vk::ClearValue clearValue;
 					clearValue.color.float32[0] = 0;
@@ -508,8 +504,8 @@ namespace Insight
 				}
 
 				vk::FramebufferCreateInfo frameBufferInfo = vk::FramebufferCreateInfo({}, renderpass, imageViews, rect.extent.width, rect.extent.height, 1);
-				m_framebuffers[psoHash] = RenderContextVulkan()->GetDevice().createFramebuffer(frameBufferInfo);
-				RenderContextVulkan()->SetObejctName(L"Framebuffer " + std::to_wstring(psoHash), (u64)m_framebuffers[psoHash].operator VkFramebuffer(), vk::ObjectType::eFramebuffer);
+				m_framebuffers[psoHash] = m_context_vulkan->GetDevice().createFramebuffer(frameBufferInfo);
+				m_context_vulkan->SetObejctName(L"Framebuffer " + std::to_wstring(psoHash), (u64)m_framebuffers[psoHash].operator VkFramebuffer(), vk::ObjectType::eFramebuffer);
 			}
 
 
@@ -540,7 +536,7 @@ namespace Insight
 				vk::CommandBufferAllocateInfo info = vk::CommandBufferAllocateInfo(m_allocator);
 				info.setCommandBufferCount(1);
 				RHI_CommandList_Vulkan* list = dynamic_cast<RHI_CommandList_Vulkan*>(RHI_CommandList::New());
-				list->m_context = m_context;
+				list->Create(m_context);
 				list->m_allocator = this;
 				list->m_commandList = m_context->GetDevice().allocateCommandBuffers(info)[0];
 				

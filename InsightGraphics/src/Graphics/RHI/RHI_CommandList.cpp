@@ -67,7 +67,14 @@ namespace Insight
 		bool RHI_CommandList::CanDraw()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_pso.GetHash() != m_activePSO.GetHash())
+			u64 hash = 0;
+			u64 activeHash = 0;
+			{
+				IS_PROFILE_SCOPE("Get hash");
+				hash = m_pso.GetHash();
+				activeHash = m_activePSO.GetHash();
+			}
+			if (hash != activeHash)
 			{
 				m_activePSO = m_pso;
 				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()

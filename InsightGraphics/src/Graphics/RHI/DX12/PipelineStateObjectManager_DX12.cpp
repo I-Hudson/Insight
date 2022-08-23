@@ -59,7 +59,7 @@ namespace Insight
 					return itr->second.Get();
 				}
 
-				RHI_Shader_DX12* shader = dynamic_cast<RHI_Shader_DX12*>(pso.Shader);
+				RHI_Shader_DX12* shader = static_cast<RHI_Shader_DX12*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
 
 				RHI_DescriptorLayout_DX12* layout = dynamic_cast<RHI_DescriptorLayout_DX12*>(m_context->GetDescriptorLayoutManager().GetLayout(shader->GetDescriptors()));
 

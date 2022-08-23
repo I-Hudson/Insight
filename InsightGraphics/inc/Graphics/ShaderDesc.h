@@ -1,7 +1,10 @@
 #pragma once
 
-#include <string>
 #include "Graphics/PixelFormat.h"
+
+#include "Core/Profiler.h"
+
+#include <string>
 
 namespace Insight
 {
@@ -55,13 +58,31 @@ namespace Insight
 			u64 GetHash() const
 			{
 				u64 hash = 0;
-
-				HashCombine(hash, VertexFilePath);
-				HashCombine(hash, TesselationControlFilePath);
-				HashCombine(hash, TesselationEvaluationVertexFilePath);
-				HashCombine(hash, GeoemtyFilePath);
-				HashCombine(hash, PixelFilePath);
-				HashCombine(hash, MainFunc);
+				
+				if (!VertexFilePath.empty())
+				{
+					HashCombine(hash, VertexFilePath);
+				}
+				if (!TesselationControlFilePath.empty())
+				{
+					HashCombine(hash, TesselationControlFilePath);
+				}
+				if (!TesselationEvaluationVertexFilePath.empty())
+				{
+					HashCombine(hash, TesselationEvaluationVertexFilePath);
+				} 
+				if (!GeoemtyFilePath.empty())
+				{
+					HashCombine(hash, GeoemtyFilePath);
+				}
+				if (!PixelFilePath.empty())
+				{
+					HashCombine(hash, PixelFilePath);
+				}
+				if (!MainFunc.empty())
+				{
+					HashCombine(hash, MainFunc);
+				}
 				return hash;
 			}
 

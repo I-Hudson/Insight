@@ -22,6 +22,7 @@ namespace Insight
 
 				vk::CommandBuffer GetCommandList() const { return m_commandList; };
 
+				virtual void Create(RenderContext* context) override;
 				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override;
 
 				void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage
@@ -60,12 +61,11 @@ namespace Insight
 				virtual bool BindDescriptorSets() override;
 
 			private:
-				RenderContext_Vulkan* RenderContextVulkan();
-				FrameResource_Vulkan* FrameResourceVulkan();
-
 				void CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours);
 
 			private:
+				RenderContext_Vulkan* m_context_vulkan = nullptr;
+
 				vk::CommandBuffer m_commandList{ nullptr };
 				RHI_CommandListAllocator_Vulkan* m_allocator{ nullptr };
 				std::unordered_map<u64, vk::Framebuffer> m_framebuffers;
