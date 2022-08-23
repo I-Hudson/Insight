@@ -110,18 +110,19 @@ namespace Insight
 
 		void RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)
 		{
-			//if (m_allocLists.find(cmdList) == m_allocLists.end())
-			//{
-			//	IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
-			//}
-			//m_allocLists.erase(cmdList);
-			//
-			//if (m_freeLists.find(cmdList) != m_freeLists.end())
-			//{
-			//	IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
-			//	return;
-			//}
-			//m_freeLists.insert(cmdList);
+			if (m_allocLists.find(cmdList) == m_allocLists.end())
+			{
+				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
+			}
+			m_allocLists.erase(cmdList);
+			
+			if (m_freeLists.find(cmdList) != m_freeLists.end())
+			{
+				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
+				return;
+			}
+			m_freeLists.insert(cmdList);
+			cmdList->Reset();
 		}
 
 		/// <summary>

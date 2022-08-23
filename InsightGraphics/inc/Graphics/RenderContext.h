@@ -55,6 +55,7 @@ namespace Insight
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
 			RHI_DescriptorSetManager& GetDescriptorSetManager() { return *m_descriptorSetManager.Get(); }
+			CommandListManager& GetCommandListManager() { return *m_commandListManager.Get(); }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -83,6 +84,8 @@ namespace Insight
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
 			RenderpassDescription m_imguiRenderpassDescription;
+
+			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;
 
 			RHI_DescriptorLayoutManager m_descriptorLayoutManager;

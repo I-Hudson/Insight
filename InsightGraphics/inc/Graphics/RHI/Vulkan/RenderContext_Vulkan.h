@@ -29,20 +29,6 @@ namespace Insight
 				GPUQueue Queue;
 			};
 
-			struct FrameResource_Vulkan : public FrameResouce
-			{
-				RenderContext_Vulkan* Context;
-				//DescriptorAllocator_Vulkan DescriptorAllocator;
-
-				vk::Semaphore SwapchainAcquire;
-				vk::Semaphore SignalSemaphore;
-				vk::Fence SubmitFence;
-
-				void Init(RenderContext_Vulkan* context);
-				void Destroy();
-				void Reset();
-			};
-
 			class RenderContext_Vulkan : public RenderContext
 			{
 			public:
@@ -71,9 +57,6 @@ namespace Insight
 
 				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
 				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
-				RenderpassManager_Vulkan& GetRenderpassManager() { return m_renderpassManager; }
-
-				FrameResource_Vulkan& GetFrameResouce() { return m_frames[m_currentFrame]; }
 
 			protected:
 				virtual void WaitForGpu() override;
@@ -107,7 +90,6 @@ namespace Insight
 
 				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
 				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;
-				RenderpassManager_Vulkan m_renderpassManager;
 
 				vk::DescriptorPool m_imguiDescriptorPool;
 				vk::RenderPass m_imguiRenderpass;
@@ -126,7 +108,6 @@ namespace Insight
 				FrameResource<vk::Semaphore> m_swapchainAcquires;
 				FrameResource<vk::Semaphore> m_signalSemaphores;
 #endif
-				std::vector<FrameResource_Vulkan> m_frames;
 			};
 		}
 	}

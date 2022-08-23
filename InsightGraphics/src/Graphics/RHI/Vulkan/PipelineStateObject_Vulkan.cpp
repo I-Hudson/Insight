@@ -199,17 +199,10 @@ namespace Insight
 				std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
 				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
 			
-				vk::RenderPass renderpass = nullptr;
-				if (pso.Renderpass == 0)
-				{
-					renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass({ pso.RenderTargets, pso.DepthStencil, pso.Swapchain });
-				}
-				else
-				{
-					RenderContext* context = (RenderContext*)m_context;
-					RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
-					renderpass = *reinterpret_cast<vk::RenderPass*>(&rhiRenderpass);
-				}
+				RenderContext* context = (RenderContext*)m_context;
+				RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
+				vk::RenderPass renderpass = *reinterpret_cast<vk::RenderPass*>(&rhiRenderpass);
+
 				vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
 					vk::PipelineCreateFlags(),																						// flags
 					pipelineShaderStageCreateInfos,																					// stages
@@ -272,144 +265,6 @@ namespace Insight
 					m_context->GetDevice().destroyPipeline(pair.second);
 				}
 				m_pipelineStateObjects.clear();
-			}
-
-
-			RenderpassManager_Vulkan::~RenderpassManager_Vulkan()
-			{
-				if (m_renderpasses.size() > 0)
-				{
-					IS_CORE_ERROR("[GPURenderpassManager_Vulkan::~GPURenderpassManager_Vulkan] Not all renderpass have not been destroyed.");
-				}
-			}
-
-			vk::RenderPass RenderpassManager_Vulkan::GetOrCreateRenderpass(RenderpassDesc_Vulkan desc)
-			{
-				IS_PROFILE_FUNCTION();
-
-				assert(m_context != nullptr);
-
-				const u64 hash = desc.GetHash();
-				auto itr = m_renderpasses.find(hash);
-				if (itr != m_renderpasses.end())
-				{
-					return itr->second;
-				}
-
-				std::array<vk::AttachmentDescription, 8> attachmentDescriptions;
-				std::array<vk::AttachmentReference, 8> colorAttachments;
-				vk::AttachmentReference depthAttachment;
-				std::vector<vk::SubpassDependency> subpassDependenices;
-
-				int attachmentIndex = 0;
-				int colourIndex = 0;
-				for (RHI_Texture* rt : desc.RenderTargets)
-				{
-					if (rt)
-					{
-						attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
-							vk::AttachmentDescriptionFlags(),
-							PixelFormatToVulkan(rt->GetFormat()),
-							vk::SampleCountFlagBits::e1,
-							vk::AttachmentLoadOp::eClear,
-							vk::AttachmentStoreOp::eStore,
-							vk::AttachmentLoadOp::eDontCare,
-							vk::AttachmentStoreOp::eDontCare,
-							vk::ImageLayout::eUndefined,
-							vk::ImageLayout::eColorAttachmentOptimal);
-						colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
-						++attachmentIndex;
-						++colourIndex;
-					}
-				}
-
-				// No render targets, guess we are swapchain.
-				if (attachmentIndex == 0 && desc.Swapchain)
-				{
-					// Assume this is a swapchain render pass as no user defined render targets are added.
-					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
-						vk::AttachmentDescriptionFlags(),
-						m_context->GetSwapchainColourFormat(),
-						vk::SampleCountFlagBits::e1,
-						vk::AttachmentLoadOp::eClear,
-						vk::AttachmentStoreOp::eStore,
-						vk::AttachmentLoadOp::eDontCare,
-						vk::AttachmentStoreOp::eDontCare,
-						vk::ImageLayout::eUndefined,
-						vk::ImageLayout::ePresentSrcKHR);
-					colorAttachments[colourIndex] = vk::AttachmentReference(vk::AttachmentReference(attachmentIndex, vk::ImageLayout::eColorAttachmentOptimal));
-					++attachmentIndex;
-					++colourIndex;
-				}
-
-				subpassDependenices.push_back(
-					vk::SubpassDependency(
-						VK_SUBPASS_EXTERNAL,
-						0u,
-						vk::PipelineStageFlagBits::eColorAttachmentOutput,
-						vk::PipelineStageFlagBits::eColorAttachmentOutput,
-						vk::AccessFlagBits::eNoneKHR,
-						vk::AccessFlagBits::eColorAttachmentWrite,
-						{ }
-					));
-
-				if (desc.DepthStencil)
-				{
-					attachmentDescriptions[attachmentIndex] = vk::AttachmentDescription(
-						vk::AttachmentDescriptionFlags(),
-						PixelFormatToVulkan(desc.DepthStencil->GetFormat()),
-						vk::SampleCountFlagBits::e1,								// Sample count
-						vk::AttachmentLoadOp::eClear,								// load op
-						vk::AttachmentStoreOp::eStore,								// store op
-						vk::AttachmentLoadOp::eDontCare,							// stencil load op
-						vk::AttachmentStoreOp::eDontCare,							// stencil store op
-						vk::ImageLayout::eUndefined,								// initial layout
-						vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	// final layout
-
-					depthAttachment.attachment = static_cast<int>(attachmentIndex);
-					depthAttachment.layout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-					++attachmentIndex;
-
-					subpassDependenices.push_back(
-						vk::SubpassDependency(
-							VK_SUBPASS_EXTERNAL,
-							0u,
-							vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
-							vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
-							vk::AccessFlagBits::eNoneKHR,
-							vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-							{ }
-						));
-				}
-					 
-				vk::SubpassDescription  subpassDescription(
-					vk::SubpassDescriptionFlags(),
-					vk::PipelineBindPoint::eGraphics,
-					0, nullptr,
-					colourIndex, colorAttachments.data(),
-					nullptr,
-					desc.DepthStencil ? &depthAttachment : nullptr,
-					0, nullptr);
-
-				vk::RenderPass renderPass = m_context->GetDevice().createRenderPass(
-					vk::RenderPassCreateInfo(
-						vk::RenderPassCreateFlags(),
-						attachmentIndex, attachmentDescriptions.data(),
-						1, &subpassDescription, 
-						1, subpassDependenices.data()));
-				m_renderpasses[hash] = renderPass;
-				return renderPass;
-			}
-
-			void RenderpassManager_Vulkan::Destroy()
-			{
-				IS_PROFILE_FUNCTION();
-
-				for (const auto& pair : m_renderpasses)
-				{
-					m_context->GetDevice().destroyRenderPass(pair.second);
-				}
-				m_renderpasses.clear();
 			}
 		}
 	}

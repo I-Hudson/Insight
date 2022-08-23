@@ -239,12 +239,6 @@ namespace Insight
 				allocatorInfo.device = m_device;
 				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
-				m_frames.resize(RenderGraph::s_FarmeCount);
-				for (FrameResource_Vulkan& frame : m_frames)
-				{
-					frame.Init(this);
-				}
-
 				{
 					std::array<vk::DescriptorPoolSize, 2> pool_sizes =
 					{
@@ -257,6 +251,11 @@ namespace Insight
 					descriptorPoolCreateInfo.maxSets = 2048;
 					descriptorPoolCreateInfo.setPoolSizes(pool_sizes);
 					m_descriptor_pool = *reinterpret_cast<VkDescriptorPool*>(&m_device.createDescriptorPool(descriptorPoolCreateInfo));
+
+					m_commandListManager.ForEach([this](CommandListManager& manager)
+						{
+							manager.Create(this);
+						});
 				}
 
 				InitImGui();
@@ -305,11 +304,6 @@ namespace Insight
 					});
 #endif
 
-				for (FrameResource_Vulkan& frame : m_frames)
-				{
-					frame.Destroy();
-				}
-
 				if (m_swapchain)
 				{
 					for (RHI_Texture*& tex : m_swapchainImages)
@@ -330,7 +324,6 @@ namespace Insight
 
 				m_pipelineStateObjectManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
-				m_renderpassManager.Destroy();
 
 				if (m_surface)
 				{
@@ -414,12 +407,10 @@ namespace Insight
 					{
 						IS_CORE_ERROR("[IMGUI] Error: {}", error);
 					}
-					};
+				};
 				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
 
-				FrameResource_Vulkan& frame = m_frames[m_currentFrame];
-				frame.CommandListManager.Update();
-				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(frame.CommandListManager.GetCommandList());
+				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
 
 				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
 
@@ -433,7 +424,8 @@ namespace Insight
 				m_device.waitIdle();
 
 				ImGui_ImplVulkan_DestroyFontUploadObjects();
-				frame.CommandListManager.Update();
+				m_commandListManager->ReturnCommandList(cmdListVulkan);
+				m_commandListManager->Reset();
 
 				ImGui_ImplVulkan_NewFrame();
 				ImGuiBeginFrame();
@@ -490,6 +482,7 @@ namespace Insight
 				}
 #endif
 				m_descriptorSetManager->Reset();
+				m_commandListManager->Reset();
 
 				return true;
 			}
@@ -569,7 +562,7 @@ namespace Insight
 			}
 
 			RHI_Texture* RenderContext_Vulkan::GetSwaphchainIamge() const
-			{ 
+			{
 				return m_swapchainImages[m_availableSwapchainImage];
 			}
 
@@ -626,59 +619,59 @@ namespace Insight
 				};
 				std::vector<const char*> enabledExtensionNames;
 #if VK_KHR_surface
-					if (CheckInstanceExtension(VK_KHR_SURFACE_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_KHR_SURFACE_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+				}
 #endif
 
 #ifdef IS_PLATFORM_WIN32
 #if VK_KHR_win32_surface
-					if (CheckInstanceExtension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_KHR_WIN32_SURFACE_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+				}
 #endif
 #endif
 
 #if VK_KHR_display
-					if (CheckInstanceExtension(VK_KHR_DISPLAY_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_KHR_DISPLAY_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_KHR_DISPLAY_EXTENSION_NAME);
+				}
 #endif
 
 
 #if VK_KHR_get_display_properties2
-					if (CheckInstanceExtension(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_KHR_GET_DISPLAY_PROPERTIES_2_EXTENSION_NAME);
+				}
 #endif        
 
 #if VK_EXT_debug_utils
-					if (CheckInstanceExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_EXT_DEBUG_UTILS_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+				}
 #endif
 
 #if VK_KHR_get_surface_capabilities2
-					if (CheckInstanceExtension(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME))
-					{
-						enabledExtensionNames.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
-					}
+				if (CheckInstanceExtension(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME))
+				{
+					enabledExtensionNames.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
+				}
 #endif
 
 #if VK_KHR_get_physical_device_properties2 && !VK_VERSION_1_1
-					VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+				VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #endif
 
-				vk::InstanceCreateInfo instanceCreateInfo = vk::InstanceCreateInfo(
-					{ },
-					&applicationInfo,
-					enabledLayerNames,
-					enabledExtensionNames);
+					vk::InstanceCreateInfo instanceCreateInfo = vk::InstanceCreateInfo(
+						{ },
+						&applicationInfo,
+						enabledLayerNames,
+						enabledExtensionNames);
 				return vk::createInstance(instanceCreateInfo);
 			}
 
@@ -697,7 +690,7 @@ namespace Insight
 					}
 				}
 				return adapter;
-			}
+		}
 
 			std::vector<vk::DeviceQueueCreateInfo> RenderContext_Vulkan::GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo)
 			{
@@ -774,7 +767,7 @@ namespace Insight
 					}
 				}
 			}
-			
+
 			void RenderContext_Vulkan::CreateSwapchain()
 			{
 				IS_PROFILE_FUNCTION();
@@ -881,7 +874,7 @@ namespace Insight
 				createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
 				createInfo.setPresentMode(presentMode);
 				createInfo.setOldSwapchain(m_swapchain);
-				vk::SwapchainKHR swapchain =  m_device.createSwapchainKHR(createInfo);
+				vk::SwapchainKHR swapchain = m_device.createSwapchainKHR(createInfo);
 
 				if (m_swapchain)
 				{
@@ -948,7 +941,7 @@ namespace Insight
 					vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); //get number of extensions
 					std::vector<VkExtensionProperties> extensions(count);
 					vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()); //populate buffer
-					for (auto& extension : extensions) 
+					for (auto& extension : extensions)
 					{
 						instanceExtensions.insert(extension.extensionName);
 					}
@@ -969,40 +962,7 @@ namespace Insight
 				}
 				return deviceExtensions.find(extension) != deviceExtensions.end();
 			}
-
-			void FrameResource_Vulkan::Init(RenderContext_Vulkan* context)
-			{
-				Context = context;
-
-				CommandListManager.Create(context);
-				UniformBuffer.Create(Context);
-
-				vk::SemaphoreCreateInfo semaphoreInfo = vk::SemaphoreCreateInfo();
-				SwapchainAcquire = Context->GetDevice().createSemaphore(semaphoreInfo);
-				SignalSemaphore = Context->GetDevice().createSemaphore(semaphoreInfo);
-
-				vk::FenceCreateInfo fenceCreateInfo = vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled);
-				SubmitFence = context->GetDevice().createFence(fenceCreateInfo);
-			}
-
-			void FrameResource_Vulkan::Destroy()
-			{
-				IS_PROFILE_FUNCTION();
-				CommandListManager.Destroy();
-
-				UniformBuffer.Release();
-
-				Context->GetDevice().destroySemaphore(SwapchainAcquire);
-				Context->GetDevice().destroySemaphore(SignalSemaphore);
-				Context->GetDevice().destroyFence(SubmitFence);
-			}
-			
-			void FrameResource_Vulkan::Reset()
-			{
-				IS_PROFILE_FUNCTION();
-				FrameResouce::Reset();
-			}
-}
+		}
 	}
 }
 

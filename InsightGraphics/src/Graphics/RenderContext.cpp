@@ -35,6 +35,7 @@ namespace Insight
 			context->m_descriptorLayoutManager.SetRenderContext(context);
 			context->m_renderpassManager.SetRenderContext(context);
 			context->m_descriptorSetManager.Setup();
+			context->m_commandListManager.Setup();
 
 			if (ENABLE_IMGUI)
 			{
@@ -110,6 +111,10 @@ namespace Insight
 			m_descriptorSetManager.ForEach([](RHI_DescriptorSetManager& setManager)
 				{
 					setManager.ReleaseAll();
+				});
+			m_commandListManager.ForEach([](CommandListManager& manager)
+				{
+					manager.Destroy();
 				});
 		}
 
