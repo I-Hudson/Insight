@@ -3,12 +3,17 @@ project "ImGui"
 	language "C++"
 	staticruntime "on"
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir (outputdir_target .. "/%{prj.name}")
+    objdir (outputdir_obj.. "/%{prj.name}")
+    debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirImGui = "../vendor/imgui/"
 	location "%{folderDirImGui}"
+
+	dependson
+	{
+		"glfw"
+	}
 
 	files
 	{
@@ -36,20 +41,16 @@ project "ImGui"
 		folderDirImGui .. "backends/imgui_impl_dx12.cpp",
 	}
 
-	defines
-	{
-	}
-
 	includedirs
 	{
 		folderDirImGui .. "./",
-		folderDirImGui .. "%{IncludeDirs.glfw}",
-		folderDirImGui .. "%{IncludeDirs.vulkan}",
+		"%{IncludeDirs.glfw}",
+		"%{IncludeDirs.vulkan}",
 	}
 
     libdirs
     {
-        "%{wks.location}/vendor/glfw/lib",
+        "%{LibDirs.glfw}",
         "%{LibDirs.vulkan}",
     }
 
@@ -61,7 +62,7 @@ project "ImGui"
 
 	postbuildcommands
     {
-		"{COPYFILE} \"%{cfg.targetdir}/ImGui.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/ImGui.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "system:linux"

@@ -4,9 +4,9 @@ project "tracy"
     cppdialect "C++14"
     configurations { "Debug", "Release" } 
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir (outputdir_target .. "/%{prj.name}")
+    objdir (outputdir_obj.. "/%{prj.name}")
+    debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirTracy = "../vendor/tracy/"
 	location "%{folderDirTracy}"
@@ -30,8 +30,8 @@ project "tracy"
 	
 	postbuildcommands
     {
-       "{COPY} \"%{cfg.targetdir}/tracy.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
-       "{COPY} \"%{cfg.targetdir}/tracy.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+       "{COPY} \"%{cfg.targetdir}/tracy.dll\" \"" .. output_deps .. "/dll/\"",
+       "{COPY} \"%{cfg.targetdir}/tracy.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

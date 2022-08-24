@@ -4,9 +4,9 @@ project "glm"
     cppdialect "C++17"
     configurations { "Debug", "Release" } 
 
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir (outputdir_target .. "/%{prj.name}")
+    objdir (outputdir_obj.. "/%{prj.name}")
+    debugdir (outputdir_debug .. "/%{prj.name}")
 
     folderDir = "../vendor/glm/"
 	location "%{folderDir}"
@@ -31,7 +31,7 @@ project "glm"
 
     postbuildcommands
     {
-       "{COPYFILE} \"%{cfg.targetdir}/glm.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+       "{COPYFILE} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
     filter "configurations:Debug"

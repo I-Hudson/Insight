@@ -2,9 +2,9 @@ project "GLFW"
 	kind "StaticLib"
 	language "C"
 	
-    targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir (outputdir_target .. "/%{prj.name}")
+    objdir (outputdir_obj.. "/%{prj.name}")
+    debugdir (outputdir_debug .. "/%{prj.name}")
 	
 	folderDirGLFW = "../vendor/glfw/"
 	location "%{folderDirGLFW}"
@@ -79,7 +79,7 @@ project "GLFW"
 
 		postbuildcommands
 		{
-			"{COPYFILE} \"%{cfg.targetdir}/GLFW.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+			"{COPYFILE} \"%{cfg.targetdir}/GLFW.lib\" \"" .. output_deps .. "/lib/\"",
 		}
 
 	filter "configurations:Debug"

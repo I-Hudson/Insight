@@ -5,9 +5,9 @@ project "OptickCore"
     cppdialect "C++14"
     configurations { "Debug", "Release" } 
 
-	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir (outputdir_target .. "/%{prj.name}")
+    objdir (outputdir_obj.. "/%{prj.name}")
+    debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirOptick = "../vendor/optick/"
 	location "%{folderDirOptick}"
@@ -34,8 +34,8 @@ project "OptickCore"
 	
 	postbuildcommands
     {
-		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
-		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.dll\" \"" .. output_deps .. "/dll/\"",
+		"{COPYFILE} \"%{cfg.targetdir}/OptickCore.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"
