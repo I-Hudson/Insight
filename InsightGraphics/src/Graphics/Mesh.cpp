@@ -131,7 +131,7 @@ namespace Insight
 		}
 #endif //RENDER_GRAPH_ENABLED
 
-		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices)
+		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -161,6 +161,7 @@ namespace Insight
 
 			const u64 vertexByteSize = vertexCount * sizeof(Vertex);
 
+			vertices.reserve(vertexCount);
 			m_vertexBuffer = UPtr(RHI_Buffer::New());
 			m_vertexBuffer->Create(GraphicsManager::Instance().GetRenderContext(), BufferType::Vertex, vertexByteSize, sizeof(Vertex));
 
@@ -189,12 +190,11 @@ namespace Insight
 					std::vector<int> indices;
 					ProcessMesh(aiMesh, aiScene, vertices, indices);
 
-					const int vertexSizeBytes = (int)vertices.size() * (int)sizeof(Vertex);
-					const int indexSizeBytes = (int)indices.size() * (int)sizeof(int);
+					const int vertexSizeBytes = static_cast<int>(vertices.size() * sizeof(Vertex));
+					const int indexSizeBytes = static_cast<int>(indices.size() * sizeof(int));
 
 					RHI_Buffer* iBuffer = Renderer::CreateIndexBuffer(indexSizeBytes);
 					{
-						//ZoneScopedN("Index_Upload");
 						iBuffer->Upload(indices.data(), indexSizeBytes, 0);
 					}
 
@@ -246,6 +246,8 @@ namespace Insight
 			// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
+				IS_PROFILE_SCOPE("Add Vertex");
+
 				Vertex vertex = { };
 				glm::vec4 vector = { }; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
 				// positions
@@ -320,7 +322,10 @@ namespace Insight
 				aiFace face = mesh->mFaces[i];
 				// retrieve all indices of the face and store them in the indices vector
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
+				{
+					IS_PROFILE_SCOPE("Add index");
 					indices.push_back(face.mIndices[j]);
+				}
 			}
 
 			// process materials

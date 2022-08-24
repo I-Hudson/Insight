@@ -61,7 +61,7 @@ namespace Insight
 			/// <param name="descriptors"></param>
 			void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, std::vector<Descriptor> descriptors)
 			{
-				m_context = dynamic_cast<RenderContext_DX12*>(context);
+				m_context = static_cast<RenderContext_DX12*>(context);
 
 				// Reference: https://github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
 
@@ -236,7 +236,7 @@ namespace Insight
 				}
 				m_heaps.back().GetNewHandle(handle);
 
-				RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
+				RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC bufferViewDesc = {};
 				bufferViewDesc.BufferLocation = bufferDX12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
@@ -343,7 +343,7 @@ namespace Insight
 
 		//		DescriptorHeapHandle_DX12 handle = m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].GetNewHandle();
 
-		//		RHI_Buffer_DX12* buffer_dx12 = dynamic_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
+		//		RHI_Buffer_DX12* buffer_dx12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 
 		//		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
 		//		cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + bufferView.GetOffset();
@@ -377,7 +377,7 @@ namespace Insight
 
 		//					if (descriptor.Type == DescriptorType::Unifom_Buffer)
 		//					{
-		//						RHI_Buffer_DX12* const buffer_dx12 = dynamic_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
+		//						RHI_Buffer_DX12* const buffer_dx12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
 		//						D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
 		//						cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
@@ -386,7 +386,7 @@ namespace Insight
 		//					}
 		//					else if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
 		//					{
-		//						RHI_Texture_DX12* const texture = dynamic_cast<RHI_Texture_DX12*>(descriptor.Texture);
+		//						RHI_Texture_DX12* const texture = static_cast<RHI_Texture_DX12*>(descriptor.Texture);
 
 		//						cmdList->ResourceBarrierImage(texture->GetResouce(), D3D12_RESOURCE_STATE_COPY_DEST,
 		//							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -422,7 +422,7 @@ namespace Insight
 
 		//	void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
 		//	{
-		//		m_context = dynamic_cast<RenderContext_DX12*>(context);
+		//		m_context = static_cast<RenderContext_DX12*>(context);
 
 		//		//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		//		//m_heaps[heapType].SetRenderContext(m_context);

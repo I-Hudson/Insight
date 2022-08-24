@@ -84,6 +84,9 @@ namespace Insight
 
 			DescriptorAllocator* m_descriptorAllocator = nullptr;
 
+			RHI_Buffer* m_bound_vertex_buffer = nullptr;
+			RHI_Buffer* m_bound_index_buffer = nullptr;
+
 			friend class RenderGraph;
 		};
 

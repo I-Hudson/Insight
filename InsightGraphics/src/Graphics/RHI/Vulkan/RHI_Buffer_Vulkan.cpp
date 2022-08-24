@@ -19,7 +19,7 @@ namespace Insight
 
 			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride)
 			{
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+				m_context = static_cast<RenderContext_Vulkan*>(context);
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
 				m_stride = stride;

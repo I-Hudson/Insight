@@ -38,6 +38,10 @@ namespace Insight
 				{
 					HashCombine(hash, descriptor.GetHash(false));
 				}
+				PushConstant push_constant = pso.Shader->GetPushConstant();
+				HashCombine(hash, push_constant.ShaderStages);
+				HashCombine(hash, push_constant.Offset);
+				HashCombine(hash, push_constant.Size);
 
 				auto itr = m_layouts.find(hash);
 				if (itr != m_layouts.end())
@@ -59,7 +63,7 @@ namespace Insight
 
 					if (currentSet != descriptor.Set)
 					{
-						RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
+						RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
 						currentDescriptors.clear();
 						currentSet = descriptor.Set;
 
@@ -67,14 +71,19 @@ namespace Insight
 					}
 					currentDescriptors.push_back(descriptor);
 				}
-				RHI_DescriptorLayout_Vulkan* layoutVulkan = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
+				RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
 				setLayouts.push_back(layoutVulkan->GetLayout());
 
+				std::vector<vk::PushConstantRange> push_constants;
+				if (push_constant.Size > 0)
+				{
+					push_constants.push_back(vk::PushConstantRange(ShaderStageFlagsToVulkan(push_constant.ShaderStages), push_constant.Offset, push_constant.Size));
+				}
 
 				vk::PipelineLayoutCreateInfo createInfo = vk::PipelineLayoutCreateInfo(
 					{},
 					setLayouts,
-					{});
+					push_constants);
 				vk::PipelineLayout layout = m_context->GetDevice().createPipelineLayout(createInfo);
 				m_layouts[hash] = layout;
 

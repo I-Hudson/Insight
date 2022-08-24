@@ -16,7 +16,7 @@ namespace Insight
 			
 			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride)
 			{
-				m_context = dynamic_cast<RenderContext_DX12*>(context);
+				m_context = static_cast<RenderContext_DX12*>(context);
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
 				m_stride = stride;

@@ -9,8 +9,6 @@ project "InsightCore"
 
     dependson 
     {
-        --"tracy",
-        --"OptickCore",
     }
 
     defines

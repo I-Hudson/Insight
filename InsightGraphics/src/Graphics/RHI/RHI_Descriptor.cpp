@@ -129,7 +129,7 @@ namespace Insight
 #ifdef IS_VULKAN_ENABLED
 			if (GraphicsManager::IsVulkan())
 			{
-				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = dynamic_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
+				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 				contextVulkan->GetDevice().freeDescriptorSets(*reinterpret_cast<vk::DescriptorPool*>(&contextVulkan->m_descriptor_pool)
 					, { *reinterpret_cast<vk::DescriptorSet*>(&m_resource) });
 			}
@@ -157,9 +157,9 @@ namespace Insight
 #ifdef IS_VULKAN_ENABLED
 			if (GraphicsManager::IsVulkan())
 			{
-				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = dynamic_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
+				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
-				vk::DescriptorSetLayout setLayout = dynamic_cast<RHI::Vulkan::RHI_DescriptorLayout_Vulkan*>(layout)->GetLayout();
+				vk::DescriptorSetLayout setLayout = static_cast<RHI::Vulkan::RHI_DescriptorLayout_Vulkan*>(layout)->GetLayout();
 
 				vk::DescriptorSetAllocateInfo allocInfo = {};
 				allocInfo.descriptorPool = *reinterpret_cast<vk::DescriptorPool*>(&contextVulkan->m_descriptor_pool);
@@ -191,7 +191,7 @@ namespace Insight
 #ifdef IS_VULKAN_ENABLED
 			if (GraphicsManager::IsVulkan())
 			{
-				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = dynamic_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
+				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
 				u32 bufferInfoIndex = 0;
 				u32 imageInfoIndex = 0;

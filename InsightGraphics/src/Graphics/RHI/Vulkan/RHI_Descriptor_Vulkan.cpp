@@ -40,7 +40,7 @@ namespace Insight
 
 			void RHI_DescriptorLayout_Vulkan::Create(RenderContext* context, int set, std::vector<Descriptor> descriptors)
 			{
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+				m_context = static_cast<RenderContext_Vulkan*>(context);
 
 				vk::DescriptorSetLayoutCreateInfo setCreateInfo = {};
 				std::vector<vk::DescriptorSetLayoutBinding> bindingCreateInfos = {};
@@ -114,7 +114,7 @@ namespace Insight
 					else if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
 						vk::DescriptorBufferInfo& bufferInfo = buffer_infos[descriptorWriteIndex];
-						bufferInfo.setBuffer( dynamic_cast<RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer());
+						bufferInfo.setBuffer( static_cast<RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer());
 						bufferInfo.setOffset(descriptor.BufferView.GetOffset());
 						bufferInfo.setRange(descriptor.BufferView.GetSize());
 					}
@@ -232,11 +232,11 @@ namespace Insight
 
 				++m_size;
 				// No in use decriptor found and no free one to resue so make a new descriptor.
-				RHI_Descriptor_Vulkan* newDescriptor = dynamic_cast<RHI_Descriptor_Vulkan*>(RHI_Descriptor::New());
+				RHI_Descriptor_Vulkan* newDescriptor = static_cast<RHI_Descriptor_Vulkan*>(RHI_Descriptor::New());
 				newDescriptor->m_context = m_context;
 				newDescriptor->m_pool = this;
 
-				RHI_DescriptorLayout_Vulkan* layout = dynamic_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptors));
+				RHI_DescriptorLayout_Vulkan* layout = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptors));
 				std::array<vk::DescriptorSetLayout, 1> layouts = { layout->GetLayout()};
 
 				vk::DescriptorSetAllocateInfo createInfo = { };
@@ -376,7 +376,7 @@ namespace Insight
 			/// <param name="pso"></param>
 			//void DescriptorAllocator_Vulkan::SetRenderContext(RenderContext* context)
 			//{
-			//	m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+			//	m_context = static_cast<RenderContext_Vulkan*>(context);
 			//	m_pool.Create(m_context);
 			//}
 

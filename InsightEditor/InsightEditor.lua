@@ -53,7 +53,6 @@ project "InsightEditor"
 
     prebuildcommands
     {
-        --"{COPY} \"%{wks.location}/vendor/glfw/lib/glfw3.dll\" \"%{cfg.targetdir}\"",
         "{COPYDIR} \"%{wks.location}/deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"",
     }
 

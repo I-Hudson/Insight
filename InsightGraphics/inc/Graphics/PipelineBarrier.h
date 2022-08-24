@@ -50,6 +50,12 @@ namespace Insight
 			ImageLayout NewLayout;
 			RHI_Texture* Image;
 			ImageSubresourceRange SubresourceRange;
+
+			bool IsValid() const
+			{
+				return NewLayout != ImageLayout::Undefined;
+			}
+			RGTextureHandle TextureHandle;
 		};
 
 		struct PipelineBarrier

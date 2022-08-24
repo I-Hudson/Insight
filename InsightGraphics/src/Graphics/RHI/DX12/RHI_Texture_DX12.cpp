@@ -12,7 +12,7 @@ namespace Insight
 		{
 			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
 			{
-				m_context = dynamic_cast<RenderContext_DX12*>(context);
+				m_context = static_cast<RenderContext_DX12*>(context);
 				m_info = createInfo;
 
 				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(

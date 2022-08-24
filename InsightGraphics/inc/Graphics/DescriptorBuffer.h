@@ -90,5 +90,12 @@ namespace Insight
 				return hash;
 			}
 		};
+
+		struct PushConstant
+		{
+			ShaderStageFlags ShaderStages;
+			u32 Offset = 0;
+			u32 Size = 0;
+		};
 	}
 }

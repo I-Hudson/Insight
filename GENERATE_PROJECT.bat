@@ -2,8 +2,9 @@
 @setlocal enableextensions
 @cd /d "%~dp0"
 
+SET vsVersion=%1
 
-call vendor\premake\premake5.exe vs2019
+call vendor\premake\premake5.exe %vsVersion%
 echo Project sucessfully generated
 
 set output_debug=%cd%\bin\Debug-windows-x86_64\InsightEditor

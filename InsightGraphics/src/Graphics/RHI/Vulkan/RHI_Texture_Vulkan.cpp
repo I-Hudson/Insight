@@ -23,7 +23,7 @@ namespace Insight
 			void RHI_Texture_Vulkan::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
 			{
 				IS_PROFILE_FUNCTION();
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+				m_context = static_cast<RenderContext_Vulkan*>(context);
 				m_info = createInfo;
 
 				vk::ImageCreateInfo imageCreateInfo = vk::ImageCreateInfo(

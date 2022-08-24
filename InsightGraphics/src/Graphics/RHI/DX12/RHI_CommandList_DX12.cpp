@@ -101,15 +101,15 @@ namespace Insight
 
 			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset)
 			{
-				RHI_Buffer_DX12* dstDX12 = dynamic_cast<RHI_Buffer_DX12*>(dst);
-				RHI_Buffer_DX12* srcDX12 = dynamic_cast<RHI_Buffer_DX12*>(src);
+				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
+				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 				m_commandList->CopyBufferRegion(dstDX12->GetResouce(), offset, srcDX12->GetResouce(), 0, src->GetSize());
 			}
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
 			{
-				RHI_Texture_DX12* dstDX12 = dynamic_cast<RHI_Texture_DX12*>(dst);
-				RHI_Buffer_DX12* srcDX12 = dynamic_cast<RHI_Buffer_DX12*>(src);
+				RHI_Texture_DX12* dstDX12 = static_cast<RHI_Texture_DX12*>(dst);
+				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 
 				u64 requriedSize = 0;
 				std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 1> layouts;
@@ -193,7 +193,7 @@ namespace Insight
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
+				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),
 					(UINT)bufferDX12->GetStride() }};
@@ -203,7 +203,7 @@ namespace Insight
 			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_Buffer_DX12* bufferDX12 = dynamic_cast<RHI_Buffer_DX12*>(buffer);
+				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),  
 					DXGI_FORMAT_R32_UINT };
@@ -231,7 +231,7 @@ namespace Insight
 				ID3D12PipelineState* pipeline = RenderContextDX12()->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
 				m_commandList->SetPipelineState(pipeline);
 
-				RHI_DescriptorLayout_DX12* layout_DX12 = dynamic_cast<RHI_DescriptorLayout_DX12*>(layout);
+				RHI_DescriptorLayout_DX12* layout_DX12 = static_cast<RHI_DescriptorLayout_DX12*>(layout);
 				m_commandList->SetGraphicsRootSignature(layout_DX12->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
 			}
@@ -260,7 +260,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				assert(m_context);
-				return dynamic_cast<RenderContext_DX12*>(m_context);
+				return static_cast<RenderContext_DX12*>(m_context);
 			}
 
 			FrameResource_DX12* RHI_CommandList_DX12::FrameResourceDX12()
@@ -278,7 +278,7 @@ namespace Insight
 			/// <param name="context"></param>
 			void RHI_CommandListAllocator_DX12::Create(RenderContext* context)
 			{
-				m_context = dynamic_cast<RenderContext_DX12*>(context);
+				m_context = static_cast<RenderContext_DX12*>(context);
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_allocator)));
 			}
 
@@ -292,7 +292,7 @@ namespace Insight
 					return list;
 				}
 
-				RHI_CommandList_DX12* list = dynamic_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
+				RHI_CommandList_DX12* list = static_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
 				list->m_context = m_context;
 				list->m_allocator = this;
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
@@ -306,7 +306,7 @@ namespace Insight
 				ComPtr<ID3D12CommandAllocator> allocator;
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)));
 				
-				RHI_CommandList_DX12* list = dynamic_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
+				RHI_CommandList_DX12* list = static_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
 				
 				m_singleUseCommandLists[list] = std::make_pair(list, allocator);

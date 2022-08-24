@@ -27,6 +27,7 @@ namespace Insight
 
 			bool IsCompiled() const { return m_compiled; }
 			std::vector<Descriptor> GetDescriptors() const { return m_descriptors; }
+			PushConstant GetPushConstant() const { return m_push_constant; }
 			int GetShaderInputLayoutStride() const { return m_shaderInputLayputStride; }
 
 		private:
@@ -37,6 +38,7 @@ namespace Insight
 		protected:
 			bool m_compiled = false;
 			std::vector<Descriptor> m_descriptors;
+			PushConstant m_push_constant;
 			std::vector<ShaderInputLayout> m_shaderInputLayout;
 			int m_shaderInputLayputStride = 0;
 
@@ -75,7 +77,7 @@ namespace Insight
 			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
 
 			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
-			void GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors);
+			void GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant);
 			std::vector<ShaderInputLayout> GetInputLayout();
 
 			DescriptorType SpvReflectDescriptorTypeToDescriptorType(SpvReflectDescriptorType type);

@@ -88,7 +88,7 @@ namespace Insight
 #endif //RENDER_GRAPH_ENABLED
 
 		private:
-			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, const std::vector<Vertex>& vertices);
+			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices);
 			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices);
 			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices);
 		

@@ -11,11 +11,6 @@ project "InsightGraphics"
     dependson 
     {
         "InsightCore",
-        --"tracy",
-        --"OptickCore",
-        --"GLFW",
-        --"glm",
-        --"ImGui",
     }
 
     defines
@@ -104,13 +99,6 @@ project "InsightGraphics"
             "assimpd.lib",
         }
 
-
-        postbuildcommands
-        {
-            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_debug/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-        }
-
     filter "configurations:Release"  
         defines { "NDEBUG" }    
         optimize "On"   
@@ -124,12 +112,6 @@ project "InsightGraphics"
             "Optickcore.lib",
             "tracy.lib",
             "assimp.lib",
-        }
-
-        postbuildcommands
-        {
-            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxcompiler.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
-            --"{COPY} \"%{wks.location}/vendor/dxcompiler/win_release/bin/x64/dxil.dll\" \"%{wks.location}/bin/".. outputdir..  "/InsightEditor/\"",
         }
 
     filter "configurations:Testing" 

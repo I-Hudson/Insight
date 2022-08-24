@@ -217,7 +217,7 @@ namespace Insight
 			//	frame.Reset();
 
 			//	// Record cmd buffers and execute
-			//	RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
+			//	RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
 			//	// Set back buffer texture/image to render target so we can render to it.
 			//	cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
@@ -293,7 +293,7 @@ namespace Insight
 
 			void RenderContext_DX12::SubmitCommandListAndWait(RHI_CommandList* cmdList)
 			{
-				const RHI_CommandList_DX12* cmdListDX12 = dynamic_cast<RHI_CommandList_DX12*>(cmdList);
+				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
 				ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				GpuWaitForIdle();

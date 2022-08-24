@@ -98,6 +98,7 @@ namespace Insight
 			//constexpr LocalFlag operator~(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ~ rhs.m_mask); }
 
 			// Assigment 
+			CONSTEXPR LocalFlag& operator=(MaskType const& rhs) NO_EXPECT { m_mask = static_cast<MaskType>(rhs); return *this; }
 			CONSTEXPR LocalFlag& operator=(LocalFlag const& rhs) NO_EXPECT { m_mask = rhs.m_mask; return *this; }
 			CONSTEXPR LocalFlag& operator|=(LocalFlag const& rhs) NO_EXPECT { m_mask |= rhs.m_mask; return *this; }
 			CONSTEXPR LocalFlag& operator^=(LocalFlag const& rhs) NO_EXPECT { m_mask ^= rhs.m_mask; return *this; }

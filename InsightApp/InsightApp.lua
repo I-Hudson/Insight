@@ -13,11 +13,6 @@ project "InsightApp"
         "InsightCore",
         "InsightGraphics",
         "InsightECS",
-        --"tracy",
-        --"OptickCore",
-        --"GLFW",
-        --"glm",
-        --"ImGui",
     }
 
     defines

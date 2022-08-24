@@ -187,15 +187,6 @@ namespace Insight
 			//m_testMesh.Draw();
 #endif
 
-#ifdef COMMAND_LIST_RENDER_BATCH
-			//RenderPipelineData renderData;
-			//renderData.PSO = gbufferPso;
-			//renderData.Viewport = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			//renderData.Siccsior = glm::vec2(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			//
-			//Renderer::s_FrameCommandList.AddRenderData(renderData);
-#endif
-
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{
@@ -255,8 +246,6 @@ namespace Insight
 					}
 
 					data.TestMesh.Draw(cmdList);
-					data.TestMesh.Draw(cmdList);
-
 					cmdList->EndRenderpass();
 				}, std::move(passData));
 #endif //RENDER_GRAPH_ENABLED
@@ -335,6 +324,8 @@ namespace Insight
 					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
 					builder.ReadTexture(colourRT);
 					data.ColourRT = colourRT;
+
+					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc;
 					shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";

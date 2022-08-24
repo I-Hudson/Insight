@@ -18,7 +18,7 @@ namespace Insight
 
 			void RHI_Shader_DX12::Create(RenderContext* context, ShaderDesc desc)
 			{
-				m_context = dynamic_cast<RenderContext_DX12*>(context);
+				m_context = static_cast<RenderContext_DX12*>(context);
 				m_shaderDesc = desc;
 
 				if (!desc.VertexFilePath.empty()) { CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, desc.VertexFilePath, 0); }
@@ -46,7 +46,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				RHI::DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Hlsl);
-				compiler.GetDescriptors(stage, m_descriptors);
+				compiler.GetDescriptors(stage, m_descriptors, m_push_constant);
 				m_modules[moduleIndex] = code;
 			}
 

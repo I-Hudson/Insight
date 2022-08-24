@@ -113,8 +113,8 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset)
 			{
-				RHI_Buffer_Vulkan* dstVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(dst);
-				RHI_Buffer_Vulkan* srcVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(src);
+				RHI_Buffer_Vulkan* dstVulkan = static_cast<RHI_Buffer_Vulkan*>(dst);
+				RHI_Buffer_Vulkan* srcVulkan = static_cast<RHI_Buffer_Vulkan*>(src);
 				std::array<vk::BufferCopy, 1> copyRegion =
 				{
 					vk::BufferCopy(0, offset, src->GetSize())
@@ -124,8 +124,8 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
 			{
-				RHI_Texture_Vulkan* dstVulkan = dynamic_cast<RHI_Texture_Vulkan*>(dst);
-				RHI_Buffer_Vulkan* srcVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(src);
+				RHI_Texture_Vulkan* dstVulkan = static_cast<RHI_Texture_Vulkan*>(dst);
+				RHI_Buffer_Vulkan* srcVulkan = static_cast<RHI_Buffer_Vulkan*>(src);
 				std::array<vk::BufferImageCopy, 1> copyRegion =
 				{
 					vk::BufferImageCopy(
@@ -216,7 +216,7 @@ namespace Insight
 						vk::RenderingAttachmentInfo depthAttachment;
 						vk::RenderingAttachmentInfo detencilAttacment;
 
-						std::array<u32, 4> clearColourValues = { 0, 0, 0, 1 };
+						std::array<u32, 4> clearColourValues = { 1, 0, 0, 1 };
 
 						auto makeRenderingAttachment = 
 						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachmentDescription)
@@ -224,7 +224,6 @@ namespace Insight
 							vk::RenderingAttachmentInfo attachment = { };
 							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView());
 							attachment.imageLayout = ImageLayoutToVulkan(attachmentDescription.FinalLayout);
-							attachment.resolveMode = vk::ResolveModeFlagBits::eNone;
 							attachment.loadOp = AttachmentLoadOpToVulkan(attachmentDescription.LoadOp);
 							attachment.storeOp = vk::AttachmentStoreOp::eStore;
 							attachment.clearValue = vk::ClearValue(clearColourValues);
@@ -322,11 +321,14 @@ namespace Insight
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_Buffer_Vulkan* bufferVulkan = nullptr;
+
+				if (buffer == m_bound_vertex_buffer)
 				{
-					IS_PROFILE_SCOPE("dynamic_cast");
-					bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+					return;
 				}
+
+				m_bound_vertex_buffer = buffer;
+				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
 				std::array<vk::Buffer, 1> buffers = { bufferVulkan->GetBuffer() };
 				std::array<vk::DeviceSize, 1> offsets = { 0 };
 				{
@@ -339,7 +341,14 @@ namespace Insight
 			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_Buffer_Vulkan* bufferVulkan = dynamic_cast<RHI_Buffer_Vulkan*>(buffer);
+
+				if (buffer == m_bound_index_buffer)
+				{
+					return;
+				}
+
+				m_bound_index_buffer = buffer;
+				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
 				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
 				RenderStats::Instance().IndexBufferBindings++;
 			}
@@ -389,36 +398,34 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				std::vector<RHI_DescriptorSet*> descriptorSets;
-				if (m_descriptorAllocator->GetDescriptorSets(descriptorSets))
+				bool result = m_descriptorAllocator->GetDescriptorSets(descriptorSets);
+				vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+
+				u64 hash = 0;
+				std::vector<vk::DescriptorSet> sets;
+				sets.reserve(descriptorSets.size());
+				for (const auto& s : descriptorSets)
 				{
-					vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-
-					u64 hash = 0;
-					std::vector<vk::DescriptorSet> sets;
-					for (const auto& s : descriptorSets)
-					{
-						IS_PROFILE_SCOPE("reinterpret_cast");
-						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
-						HashCombine(hash, s);
-					}
-
-					if (m_boundDescriptors != hash)
-					{
-						m_boundDescriptors = hash;
-						std::vector<u32> dynamicOffsets = {};
-						{
-							IS_PROFILE_SCOPE("API call");
-							m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
-								, pipelineLayout
-								, 0
-								, sets
-								, dynamicOffsets);
-							RenderStats::Instance().DescriptorSetBindings++;
-						}
-					}
-					return true;
+					IS_PROFILE_SCOPE("reinterpret_cast");
+					sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+					HashCombine(hash, s);
 				}
-				return false;
+
+				if (descriptorSets.size() > 0 && m_boundDescriptors != hash)
+				{
+					m_boundDescriptors = hash;
+					std::vector<u32> dynamicOffsets = {};
+					{
+						IS_PROFILE_SCOPE("API call");
+						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
+							, pipelineLayout
+							, 0
+							, sets
+							, dynamicOffsets);
+						RenderStats::Instance().DescriptorSetBindings++;
+					}
+				}
+				return result;
 			}
 
 			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)
@@ -484,7 +491,7 @@ namespace Insight
 			/// <param name="context"></param>
 			void RHI_CommandListAllocator_Vulkan::Create(RenderContext* context)
 			{
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+				m_context = static_cast<RenderContext_Vulkan*>(context);
 
 				vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo();
 				poolCreateInfo.setFlags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
@@ -507,7 +514,7 @@ namespace Insight
 				vk::CommandBufferAllocateInfo info = vk::CommandBufferAllocateInfo(m_allocator);
 				info.setCommandBufferCount(1);
 
-				RHI_CommandList_Vulkan* list = dynamic_cast<RHI_CommandList_Vulkan*>(RHI_CommandList::New());
+				RHI_CommandList_Vulkan* list = static_cast<RHI_CommandList_Vulkan*>(RHI_CommandList::New());
 				list->Create(m_context);
 				list->m_allocator = this;
 				list->m_commandList = m_context->GetDevice().allocateCommandBuffers(info)[0];

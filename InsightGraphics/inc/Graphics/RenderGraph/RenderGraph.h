@@ -80,6 +80,7 @@ namespace Insight
 			void AddPass(std::wstring passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
+				IS_PROFILE_FUNCTION();
 				m_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 

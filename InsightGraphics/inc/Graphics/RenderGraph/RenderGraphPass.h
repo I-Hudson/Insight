@@ -72,8 +72,8 @@ namespace Insight
 			using ExecuteFunc = std::function<void(TPassData&, RenderGraph&, RHI_CommandList*)>;
 
 			RenderGraphPass(std::wstring passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
-				: m_setupFunc(setupFunc)
-				, m_executeFunc(executeFunc)
+				: m_setupFunc(std::move(setupFunc))
+				, m_executeFunc(std::move(executeFunc))
 				, m_passData(std::move(initalData))
 			{
 				m_passName = std::move(passName);

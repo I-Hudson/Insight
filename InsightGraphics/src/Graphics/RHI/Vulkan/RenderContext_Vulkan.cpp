@@ -41,19 +41,19 @@ namespace Insight
 				VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
 				#endif
 
-				#if VK_KHR_sampler_mirror_clamp_to_edge
+				#if VK_KHR_sampler_mirror_clamp_to_edge && (VK_VERSION_1_2 == 0)
 				VK_KHR_SAMPLER_MIRROR_CLAMP_TO_EDGE_EXTENSION_NAME,
 				#endif
 
-				#if VK_KHR_maintenance3
+				#if VK_KHR_maintenance3 && (VK_VERSION_1_1 == 0)
 				VK_KHR_MAINTENANCE3_EXTENSION_NAME,
 				#endif
 
-				#if VK_EXT_descriptor_indexing
+				#if VK_EXT_descriptor_indexing && (VK_VERSION_1_2 == 0)
 				VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
 				#endif
 
-				#if VK_KHR_dynamic_rendering
+				#if VK_KHR_dynamic_rendering && VK_VERSION_1_3 == 0
 				VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
 				#endif
 			};
@@ -376,7 +376,8 @@ namespace Insight
 				{
 					RenderpassDescription renderpassDescription;
 					renderpassDescription.SwapchainPass = true;
-					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(VkFormatToPixelFormat[(int)GetSwapchainColourFormat()], ImageLayout::PresentSrc));
+					renderpassDescription.AddAttachment(AttachmentDescription::Load(VkFormatToPixelFormat[(int)GetSwapchainColourFormat()], ImageLayout::PresentSrc));
+					renderpassDescription.Attachments[0].InitalLayout = ImageLayout::ColourAttachment;
 					RHI_Renderpass renderpass = ((RenderContext*)this)->GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
 
 					m_imguiRenderpassDescription = renderpassDescription;
@@ -408,9 +409,16 @@ namespace Insight
 						IS_CORE_ERROR("[IMGUI] Error: {}", error);
 					}
 				};
-				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
+				if (IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+				{
+					ImGui_ImplVulkan_Init(&init_info, nullptr);
+				}
+				else
+				{
+					ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
+				}
 
-				RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
+				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
 
 				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
 
@@ -534,7 +542,7 @@ namespace Insight
 			void RenderContext_Vulkan::SubmitCommandListAndWait(RHI_CommandList* cmdList)
 			{
 				IS_PROFILE_FUNCTION();
-				const RHI_CommandList_Vulkan* cmdListVulkan = dynamic_cast<RHI_CommandList_Vulkan*>(cmdList);
+				const RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
 				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(
@@ -672,6 +680,17 @@ namespace Insight
 						&applicationInfo,
 						enabledLayerNames,
 						enabledExtensionNames);
+
+#if defined(VK_EXT_validation_features) && defined(_DEBUG)
+				std::vector<vk::ValidationFeatureEnableEXT> validation_features_enabled;
+				validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eBestPractices);
+				//validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
+				//validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eGpuAssisted);
+
+				vk::ValidationFeaturesEXT validation_features = { };
+				validation_features.setEnabledValidationFeatures(validation_features_enabled);
+				instanceCreateInfo.setPNext(&validation_features);
+#endif
 				return vk::createInstance(instanceCreateInfo);
 			}
 

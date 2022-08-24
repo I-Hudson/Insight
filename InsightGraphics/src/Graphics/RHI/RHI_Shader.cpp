@@ -189,7 +189,7 @@ namespace Insight
 			return code;
 		}
 
-		void ShaderCompiler::GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors)
+		void ShaderCompiler::GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant)
 		{
 			RHI::DX12::ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
@@ -264,6 +264,23 @@ namespace Insight
 						descriptors.push_back(descriptor);
 					}
 				}
+			}
+
+			u32 push_constant_blocks_count = 0;
+			result = spvReflectEnumeratePushConstantBlocks(&module, &push_constant_blocks_count, NULL);
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			ASSERT(push_constant_blocks_count <= 1);
+
+			std::vector<SpvReflectBlockVariable*> push_constants;
+			push_constants.resize(push_constant_blocks_count);
+			result = spvReflectEnumeratePushConstantBlocks(&module, &push_constant_blocks_count, push_constants.data());
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			for (size_t i = 0; i < push_constants.size(); ++i)
+			{
+				SpvReflectBlockVariable* block = push_constants.at(i);
+				push_constant.Size = block->size;
+				push_constant.ShaderStages |= stage;
 			}
 
 			// Destroy the reflection data when no longer required.

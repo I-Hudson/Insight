@@ -30,7 +30,7 @@ namespace Insight
 
 			void RHI_Shader_Vulkan::Create(RenderContext* context, ShaderDesc desc)
 			{
-				m_context = dynamic_cast<RenderContext_Vulkan*>(context);
+				m_context = static_cast<RenderContext_Vulkan*>(context);
 
 				if (!desc.VertexFilePath.empty())						{ CompileStage(ShaderStageFlagBits::ShaderStage_Vertex, desc.VertexFilePath, 0); }
 				if (!desc.TesselationControlFilePath.empty())			{ CompileStage(ShaderStageFlagBits::ShaderStage_TessControl, desc.TesselationControlFilePath, 1); }
@@ -57,7 +57,7 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				DX12::ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Spirv);
-				compiler.GetDescriptors(stage, m_descriptors);
+				compiler.GetDescriptors(stage, m_descriptors, m_push_constant);
 				if (!code)
 				{
 					return;

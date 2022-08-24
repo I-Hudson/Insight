@@ -52,6 +52,8 @@ namespace Insight
 			m_pso = {};
 			m_activePSO = {};
 			m_drawData = {};
+			m_bound_vertex_buffer = nullptr;
+			m_bound_index_buffer = nullptr;
 		}
 
 		void RHI_CommandList::SetUniform(int set, int binding, void* data, u32 size)
@@ -67,23 +69,23 @@ namespace Insight
 		bool RHI_CommandList::CanDraw()
 		{
 			IS_PROFILE_FUNCTION();
-			u64 hash = 0;
-			u64 activeHash = 0;
-			{
-				IS_PROFILE_SCOPE("Get hash");
-				hash = m_pso.GetHash();
-				activeHash = m_activePSO.GetHash();
-			}
-			if (hash != activeHash)
-			{
-				m_activePSO = m_pso;
-				RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
-				/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
-				{
-					IS_PROFILE_SCOPE("Bind pipeline");
-					BindPipeline(m_activePSO, layout);
-				}
-			}
+			//u64 hash = 0;
+			//u64 activeHash = 0;
+			//{
+			//	IS_PROFILE_SCOPE("Get hash");
+			//	hash = m_pso.GetHash();
+			//	activeHash = m_activePSO.GetHash();
+			//}
+			//if (hash != activeHash)
+			//{
+			//	m_activePSO = m_pso;
+			//	RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
+			//	/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
+			//	{
+			//		IS_PROFILE_SCOPE("Bind pipeline");
+			//		BindPipeline(m_activePSO, layout);
+			//	}
+			//}
 			return BindDescriptorSets();
 		}
 
