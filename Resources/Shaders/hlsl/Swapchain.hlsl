@@ -1,6 +1,7 @@
-
-Texture2D GTexture : register(t0);
-SamplerState GSampler : register(s0);
+[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+Texture2D<float4> FullScreenTexture : register(t0);
+[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+SamplerState FullScreenSampler : register(s0);
 
 struct VertexOutput
 {
@@ -16,13 +17,9 @@ VertexOutput VSMain(uint id : SV_VertexID)
 	return o;
 }
 
-float LinearDepth(float d, float zNear, float zFar)
-{
-	return zNear * zFar / (zFar + d * (zNear - zFar));
-}
-
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
-	float4 result = GTexture.Sample(GSampler, input.UV);
+	float4 result = FullScreenTexture.Sample(FullScreenSampler, input.UV);
 	return float4(result.xyz, 1);
+	//return float4(0.5, 1.0, 1.0, 1.0);
 }
