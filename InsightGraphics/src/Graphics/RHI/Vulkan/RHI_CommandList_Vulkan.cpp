@@ -406,7 +406,6 @@ namespace Insight
 				sets.reserve(descriptorSets.size());
 				for (const auto& s : descriptorSets)
 				{
-					IS_PROFILE_SCOPE("reinterpret_cast");
 					sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
 					HashCombine(hash, s);
 				}

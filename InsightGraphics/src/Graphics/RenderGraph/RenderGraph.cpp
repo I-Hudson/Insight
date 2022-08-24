@@ -172,10 +172,12 @@ namespace Insight
 				int rtIndex = 0;
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{
-					pso.RenderTargets[rtIndex] = m_textureCaches->Get(rt);
-					++rtIndex;
-
-					pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches->Get(rt));
+					if (rt != -1)
+					{
+						pso.RenderTargets[rtIndex] = m_textureCaches->Get(rt);
+						++rtIndex;
+						pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches->Get(rt));
+					}
 				}
 				pso.DepthStencil = m_textureCaches->Get(pass.Get()->m_depthStencilWrite);
 				pass->m_renderpassDescription.DepthStencil = pso.DepthStencil;
@@ -191,6 +193,29 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			struct FindImageBarrier
+			{
+				static ImageBarrier FindPrevious(const std::vector<UPtr<RenderGraphPassBase>>& passes, int currentPassIndex, RGTextureHandle handleToFind)
+				{
+					for (int i = currentPassIndex - 1; i >= 0; --i)
+					{
+						RenderGraphPassBase* pass = passes.at(i).Get();
+						int textureIndex = 0;
+						for (const auto& pipelineBarriers : pass->m_textureIncomingBarriers)
+						{
+							for (const auto& imageBarrier : pipelineBarriers.ImageBarriers)
+							{
+								if (imageBarrier.TextureHandle == handleToFind)
+								{
+									return imageBarrier;
+								}
+							}
+						}
+					}
+					return { };
+				}
+			};
+
 			int passIndex = 0;
 			// This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
@@ -202,14 +227,20 @@ namespace Insight
 				std::vector<ImageBarrier> depthImageBarriers;
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{
+					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+
 					ImageBarrier barrier;
-					barrier.Image = m_textureCaches->Get(rt);
+					barrier.TextureHandle = rt;
+					barrier.Image = texture;
 					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
 
-					barrier.SrcAccessFlags = AccessFlagBits::None;
-					barrier.OldLayout = ImageLayout::Undefined;
+					barrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
 
-					barrier.DstAccessFlags = isDepth ? AccessFlagBits::DepthStencilAttachmentWrite  : AccessFlagBits::ColorAttachmentWrite;
+					barrier.DstAccessFlags = isDepth ? 
+						AccessFlagBits::DepthStencilAttachmentWrite | AccessFlagBits::DepthStencilAttachmentRead :
+						AccessFlagBits::ColorAttachmentWrite | AccessFlagBits::ColorAttachmentRead;
 					barrier.NewLayout = isDepth ? ImageLayout::DepthStencilAttachment : ImageLayout::ColourAttachment;
 					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(isDepth ? ImageAspectFlagBits::Depth : ImageAspectFlagBits::Colour);
 
@@ -222,7 +253,7 @@ namespace Insight
 						colorImageBarriers.push_back(std::move(barrier));
 					}
 				}
-				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::TopOfPipe;
+				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
@@ -246,12 +277,15 @@ namespace Insight
 
 				for (auto const& rt : pass.Get()->m_textureReads)
 				{
+					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+
 					ImageBarrier barrier;
-					barrier.Image = m_textureCaches->Get(rt);
+					barrier.Image = texture;
 					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
 
-					barrier.SrcAccessFlags = AccessFlagBits::None;
-					barrier.OldLayout = ImageLayout::Undefined;
+					barrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
 
 					barrier.DstAccessFlags = AccessFlagBits::ShaderRead;
 					barrier.NewLayout = ImageLayout::ShaderReadOnly;
