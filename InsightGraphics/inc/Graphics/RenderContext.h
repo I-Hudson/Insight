@@ -52,8 +52,6 @@ namespace Insight
 			void EnableExtension(DeviceExtension extension);
 			void DisableExtension(DeviceExtension extension);
 
-			RenderpassDescription GetImGuiRenderpassDescription() const { return m_imguiRenderpassDescription; }
-
 			CommandListManager& GetCommandListManager() { return *m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
@@ -89,7 +87,6 @@ namespace Insight
 			RHI_RenderpassManager m_renderpassManager;
 			RHI_SamplerManager* m_samplerManager;
 
-			RenderpassDescription m_imguiRenderpassDescription;
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;
 

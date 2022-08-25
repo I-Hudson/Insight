@@ -174,7 +174,7 @@ namespace Insight
 				//FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
-			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
+			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y)
 			{
 				IS_PROFILE_FUNCTION();
 				assert(m_commandList);
@@ -200,7 +200,7 @@ namespace Insight
 				m_commandList->IASetVertexBuffers(0, 1, views);
 			}
 
-			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer)
+			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);

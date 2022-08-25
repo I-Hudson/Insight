@@ -69,10 +69,20 @@ namespace Insight
 			* EXECUTE ALL PASSES
 			*/
 
-			Build();
-			PlaceBarriers();
-			Render();
-			Clear();
+			if (m_context->PrepareRender())
+			{
+				Build();
+				PlaceBarriers();
+
+				m_commandListManager->Reset();
+				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
+				cmdList->m_descriptorAllocator = m_descriptorManagers.Get();
+				cmdList->m_descriptorAllocator->Reset();
+				Render(cmdList);
+				
+				m_context->PostRender(cmdList);
+				Clear();
+			}
 
 			m_frameIndex = (m_frameIndex + 1) % s_FarmeCount;
 		}
@@ -225,6 +235,8 @@ namespace Insight
 
 				std::vector<ImageBarrier> colorImageBarriers;
 				std::vector<ImageBarrier> depthImageBarriers;
+
+				// Colour writes
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{
 					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
@@ -233,29 +245,39 @@ namespace Insight
 					ImageBarrier barrier;
 					barrier.TextureHandle = rt;
 					barrier.Image = texture;
-					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
 
-					barrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					barrier.SrcAccessFlags = AccessFlagBits::None;
 					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
 
-					barrier.DstAccessFlags = isDepth ? 
-						AccessFlagBits::DepthStencilAttachmentWrite | AccessFlagBits::DepthStencilAttachmentRead :
-						AccessFlagBits::ColorAttachmentWrite | AccessFlagBits::ColorAttachmentRead;
-					barrier.NewLayout = isDepth ? ImageLayout::DepthStencilAttachment : ImageLayout::ColourAttachment;
-					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(isDepth ? ImageAspectFlagBits::Depth : ImageAspectFlagBits::Colour);
-
-					if (isDepth)
-					{
-						depthImageBarriers.push_back(std::move(barrier));
-					}
-					else
-					{
-						colorImageBarriers.push_back(std::move(barrier));
-					}
+					barrier.DstAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					barrier.NewLayout = ImageLayout::ColourAttachment;
+					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer( ImageAspectFlagBits::Colour);
+					
+					colorImageBarriers.push_back(std::move(barrier));
 				}
-				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
+				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::TopOfPipe;
 				colorPipelineBarrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
+
+				// Depth write
+				if (pass->m_depthStencilWrite != -1)
+				{
+					RHI_Texture* texture = m_textureCaches->Get(pass->m_depthStencilWrite);
+					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, pass->m_depthStencilWrite);
+
+					ImageBarrier barrier;
+					barrier.TextureHandle = pass->m_depthStencilWrite;
+					barrier.Image = texture;
+
+					barrier.SrcAccessFlags = AccessFlagBits::None;
+					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
+
+					barrier.DstAccessFlags = AccessFlagBits::DepthStencilAttachmentWrite;
+					barrier.NewLayout = ImageLayout::DepthStencilAttachment;
+					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Depth);
+					
+					depthImageBarriers.push_back(std::move(barrier));
+				}
 
 				depthPipelineBarrier.SrcStage = PipelineStageFlagBits::TopOfPipe;
 				depthPipelineBarrier.DstStage = PipelineStageFlagBits::EarlyFramgmentShader;
@@ -275,6 +297,7 @@ namespace Insight
 				colorImageBarriers = { };
 				depthImageBarriers = { };
 
+				// Texture reads 
 				for (auto const& rt : pass.Get()->m_textureReads)
 				{
 					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
@@ -284,7 +307,7 @@ namespace Insight
 					barrier.Image = texture;
 					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
 
-					barrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+					barrier.SrcAccessFlags = isDepth ? AccessFlagBits::DepthStencilAttachmentWrite : AccessFlagBits::ColorAttachmentWrite;
 					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
 
 					barrier.DstAccessFlags = AccessFlagBits::ShaderRead;
@@ -321,52 +344,49 @@ namespace Insight
 			}
 		}
 
-		void RenderGraph::Render()
+		void RenderGraph::Render(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_context->PrepareRender())
+
+			// TODO: Could be threaded? Leave as it is for now as it works.
+			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
-				m_commandListManager->Reset();
-				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
-				cmdList->m_descriptorAllocator = m_descriptorManagers.Get();
-				cmdList->m_descriptorAllocator->Reset();
+				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 
-				// TODO: Could be threaded? Leave as it is for now as it works.
-				for (UPtr<RenderGraphPassBase>& pass : m_passes)
+				IS_PROFILE_SCOPE("Single pass");
+				bool invert_y = false;
+				if (GraphicsManager::IsVulkan())
 				{
-					PlaceBarriersInToPipeline(pass.Get(), cmdList);
-
-					IS_PROFILE_SCOPE("Single pass");
-					cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f);
-					cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
-
-
-					//cmdList->BeginRenderpass(pass->m_renderpassDescription);
-					pass->Execute(*this, cmdList);
-					//cmdList->EndRenderpass();
+					invert_y = true;
 				}
+				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, invert_y);
+				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
-				if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
-				{
-					PipelineBarrier barrier = { };
-					barrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
-					barrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
 
-					ImageBarrier imageBarrier = { };
-					imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
-					imageBarrier.DstAccessFlags = AccessFlagBits::ColorAttachmentRead;
-					imageBarrier.Image = m_context->GetSwaphchainIamge();
-					imageBarrier.NewLayout = ImageLayout::PresentSrc;
-					imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
-
-					barrier.ImageBarriers.push_back(std::move(imageBarrier));
-					cmdList->PipelineBarrier(barrier);
-				}
-
-				cmdList->Close();
-
-				m_context->PostRender(cmdList);
+				//cmdList->BeginRenderpass(pass->m_renderpassDescription);
+				pass->Execute(*this, cmdList);
+				//cmdList->EndRenderpass();
 			}
+
+			if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+			{
+				PipelineBarrier barrier = { };
+				barrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
+				barrier.DstStage = PipelineStageFlagBits::BottomOfPipe;
+
+				ImageBarrier imageBarrier = { };
+				imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+				imageBarrier.DstAccessFlags = AccessFlagBits::None;
+				imageBarrier.Image = m_context->GetSwaphchainIamge();
+				imageBarrier.OldLayout = ImageLayout::ColourAttachment;
+				imageBarrier.NewLayout = ImageLayout::PresentSrc;
+				imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+
+				barrier.ImageBarriers.push_back(std::move(imageBarrier));
+				cmdList->PipelineBarrier(barrier);
+			}
+
+			cmdList->Close();
 		}
 
 		void RenderGraph::Clear()

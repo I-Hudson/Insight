@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/Mesh.h"
+#include "Graphics/ImGuiPass.h"
 
 #include <glm/mat4x4.hpp>
 
@@ -43,6 +44,7 @@ namespace Insight
 
 			Mesh m_testMesh;
 
+			Graphics::ImGuiPass m_imgui_pass;
 			UBO_Camera m_camera;
 			UBO_ShadowCamera m_shadowCamera;
 		};

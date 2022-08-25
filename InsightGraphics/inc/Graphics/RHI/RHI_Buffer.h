@@ -46,7 +46,8 @@ namespace Insight
 
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes) { return Upload(data, sizeInBytes, 0); }
 			virtual std::vector<Byte> Download() = 0;
-			
+			virtual void Resize(u64 newSizeBytes) = 0;
+
 			RHI_BufferView GetView(int offset, int size);
 			u64 GetSize() const { return m_size; }
 			u64 GetStride() const { return m_stride; }

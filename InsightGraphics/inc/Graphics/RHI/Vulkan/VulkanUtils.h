@@ -35,12 +35,14 @@ namespace Insight
 		vk::AccessFlags				AccessFlagsToVulkan(AccessFlags flags);
 		vk::ImageLayout				ImageLayoutToVulkan(ImageLayout layout);
 		vk::ImageAspectFlags		ImageAspectFlagsToVulkan(ImageAspectFlags flags);
+		vk::IndexType				IndexTypeToVulkan(IndexType index_type);
 
 		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
 		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);
 
 		ImageLayout					VkToImageLayout(vk::ImageLayout layout);
 		AttachmentLoadOp			VkToAttachmentLoadOp(vk::AttachmentLoadOp op);
+		
 
 		/*
 		std::string VkErrorToString(VkResult errorCode)

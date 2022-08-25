@@ -83,9 +83,16 @@ namespace Insight
 
 			void RHI_Shader_Vulkan::CreateVertexInputLayout(const ShaderDesc& desc)
 			{
-				ShaderCompiler compiler;
-				compiler.Compile(ShaderStage_Vertex, desc.VertexFilePath, ShaderCompilerLanguage::Spirv);
-				m_shaderInputLayout = compiler.GetInputLayout();
+				if (!desc.InputLayout.empty())
+				{
+					m_shaderInputLayout = desc.InputLayout;
+				}
+				else
+				{
+					ShaderCompiler compiler;
+					compiler.Compile(ShaderStage_Vertex, desc.VertexFilePath, ShaderCompilerLanguage::Spirv);
+					m_shaderInputLayout = compiler.GetInputLayout();
+				}
 
 				m_vertexInputLayout = {};
 				int stride = 0;

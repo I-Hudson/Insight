@@ -21,6 +21,7 @@ namespace Insight
 				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride) override;
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;
 				virtual std::vector<Byte> Download() override;
+				virtual void Resize(u64 newSizeBytes) override;
 
 				// RHI_Resource
 				virtual void Release() override;

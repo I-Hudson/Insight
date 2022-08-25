@@ -5,6 +5,7 @@
 #include "Core/Profiler.h"
 
 #include <string>
+#include <vector>
 
 namespace Insight
 {
@@ -30,11 +31,11 @@ namespace Insight
 				HashCombine(hash, Binding);
 				HashCombine(hash, Format);
 				HashCombine(hash, Stride);
-				HashCombine(hash, Name);
 
 				return hash;
 			}
 		};
+
 		struct ShaderDesc
 		{
 			ShaderDesc()
@@ -54,6 +55,7 @@ namespace Insight
 			std::wstring GeoemtyFilePath = L"";
 			std::wstring PixelFilePath = L"";
 			std::string MainFunc = "Main";
+			std::vector<ShaderInputLayout> InputLayout; // Optioanl, if left empty reflection will happen on the shader code.
 
 			u64 GetHash() const
 			{
@@ -83,6 +85,12 @@ namespace Insight
 				{
 					HashCombine(hash, MainFunc);
 				}
+				
+				for (const ShaderInputLayout& layout : InputLayout)
+				{
+					HashCombine(hash, layout.GetHash());
+				}
+
 				return hash;
 			}
 

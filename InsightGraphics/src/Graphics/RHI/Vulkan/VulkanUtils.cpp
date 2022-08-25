@@ -715,11 +715,11 @@ namespace Insight
         {
             switch (type)
             {
-            case BufferType::Vertex:     return vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case BufferType::Index:      return vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case BufferType::Uniform:    return vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case BufferType::Storage:    return vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst;
-            case BufferType::Raw:        return vk::BufferUsageFlagBits::eTransferDst;
+            case BufferType::Vertex:     return vk::BufferUsageFlagBits::eVertexBuffer  | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::Index:      return vk::BufferUsageFlagBits::eIndexBuffer   | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::Uniform:    return vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::Storage:    return vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc;
+            case BufferType::Raw:        return vk::BufferUsageFlagBits::eTransferDst   | vk::BufferUsageFlagBits::eTransferSrc;
             case BufferType::Staging:    return vk::BufferUsageFlagBits::eTransferSrc;
             case BufferType::Readback:   return vk::BufferUsageFlagBits::eTransferDst;
             default:
@@ -825,6 +825,19 @@ namespace Insight
             if (flags & vk::ImageAspectFlagBits::eStencil) { result |= vk::ImageAspectFlagBits::eStencil; }
                 
             return result;
+        }
+
+        vk::IndexType IndexTypeToVulkan(IndexType index_type)
+        {
+            switch (index_type)
+            {
+            case IndexType::Uint16: return vk::IndexType::eUint16;
+            case IndexType::Uint32: return vk::IndexType::eUint32;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::IndexType::eUint16;
         }
 
         VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)

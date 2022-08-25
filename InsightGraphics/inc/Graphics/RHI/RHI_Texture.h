@@ -27,6 +27,7 @@ namespace Insight
 			static RHI_Texture* New();
 
 			void LoadFromFile(std::string filePath);
+			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
 			RHI_TextureCreateInfo GetInfo() const { return m_info; }
 			int GetWidth()					const { return m_info.Width; }

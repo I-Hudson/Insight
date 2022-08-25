@@ -38,7 +38,7 @@ namespace Insight
 				#endif
 
 				#if VK_EXT_validation_cache
-				VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
+				//VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
 				#endif
 
 				#if VK_KHR_sampler_mirror_clamp_to_edge && (VK_VERSION_1_2 == 0)
@@ -206,7 +206,7 @@ namespace Insight
 				if (HasExtension(DeviceExtension::VulkanDynamicRendering))
 				{
 					deviceFeaturesToEnable13.dynamicRendering = VK_TRUE;
-					//EnableExtension(DeviceExtension::VulkanDynamicRendering);
+					EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				}
 
 				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, nullptr, &deviceFeaturesToEnable);
@@ -371,21 +371,6 @@ namespace Insight
 				pool_info.poolSizeCount = (u32)std::size(pool_sizes);
 				pool_info.pPoolSizes = pool_sizes;
 				m_imguiDescriptorPool = m_device.createDescriptorPool(pool_info);
-
-				// Create the Render Pass
-				{
-					RenderpassDescription renderpassDescription;
-					renderpassDescription.SwapchainPass = true;
-					renderpassDescription.AddAttachment(AttachmentDescription::Load(VkFormatToPixelFormat[(int)GetSwapchainColourFormat()], ImageLayout::PresentSrc));
-					renderpassDescription.Attachments[0].InitalLayout = ImageLayout::ColourAttachment;
-					RHI_Renderpass renderpass = ((RenderContext*)this)->GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
-
-					m_imguiRenderpassDescription = renderpassDescription;
-
-					m_imguiRenderpass = *reinterpret_cast<VkRenderPass*>(&renderpass.Resource);
-
-					// Render imgui straight on top of what ever is on the swap chain image.
-				}
 
 				// Setup Platform/Renderer backends
 				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), true);
@@ -909,6 +894,7 @@ namespace Insight
 				}
 
 				std::vector<vk::Image> swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
+				int image_index = 0;
 				for (vk::Image& image : swapchainImages)
 				{
 					vk::ImageViewCreateInfo info = vk::ImageViewCreateInfo(
@@ -920,6 +906,7 @@ namespace Insight
 
 					vk::ImageView imageView = m_device.createImageView(info);
 					RHI_Texture* tex = Renderer::CreateTexture();
+					tex->SetName(L"Swapchain_Image: " + std::to_wstring(image_index++));
 
 					RHI_TextureCreateInfo texCreateInfo = { };
 					texCreateInfo.TextureType = TextureType::Tex2D;

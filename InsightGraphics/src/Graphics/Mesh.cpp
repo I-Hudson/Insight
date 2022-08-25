@@ -26,7 +26,7 @@ namespace Insight
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
 			cmdList->SetVertexBuffer(m_vertexInfo.Buffer);
-			cmdList->SetIndexBuffer(*m_indexBuffer);
+			cmdList->SetIndexBuffer(*m_indexBuffer, IndexType::Uint32);
 			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
 			cmdList->DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
 		}

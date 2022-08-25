@@ -46,11 +46,13 @@ namespace Insight
 				virtual void EndRenderpass() override;
 
 				virtual void SetPipeline(PipelineStateObject pso) override;
-				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
+				virtual void SetPushConstant(u32 offset, u32 size, void* data) override;
+
+				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;
 
 				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
-				virtual void SetIndexBuffer(RHI_Buffer* buffer) override;
+				virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) override;
 
 				virtual void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) override;
 				virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) override;

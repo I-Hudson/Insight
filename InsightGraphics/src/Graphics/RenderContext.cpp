@@ -201,12 +201,20 @@ namespace Insight
 
 	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		if (!buffer)
+		{
+			return;
+		}
 		ASSERT(s_context);
 		s_context->FreeBuffer(buffer);
 	}
 
 	void Renderer::FreeIndexBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		if (!buffer)
+		{
+			return;
+		}
 		ASSERT(s_context);
 		ASSERT(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);
@@ -214,6 +222,10 @@ namespace Insight
 
 	void Renderer::FreeUniformBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		if (!buffer)
+		{
+			return;
+		}
 		ASSERT(s_context);
 		ASSERT(buffer->GetType() == Graphics::BufferType::Uniform);
 		s_context->FreeBuffer(buffer);
@@ -221,6 +233,10 @@ namespace Insight
 
 	void Renderer::FreeRawBuffer(Graphics::RHI_Buffer* buffer)
 	{
+		if (!buffer)
+		{
+			return;
+		}
 		ASSERT(s_context);
 		ASSERT(buffer->GetType() == Graphics::BufferType::Index);
 		s_context->FreeBuffer(buffer);

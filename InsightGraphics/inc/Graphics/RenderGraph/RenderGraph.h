@@ -89,7 +89,7 @@ namespace Insight
 		private:
 			void Build();
 			void PlaceBarriers();
-			void Render();
+			void Render(RHI_CommandList* cmdList);
 			void Clear();
 
 			void PlaceBarriersInToPipeline(RenderGraphPassBase* pass, RHI_CommandList* cmdList);

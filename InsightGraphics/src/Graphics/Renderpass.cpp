@@ -63,6 +63,7 @@ namespace Insight
 
 		void Renderpass::Destroy()
 		{
+			m_imgui_pass.Release();
 			m_testMesh.Destroy();
 		}
 
@@ -285,34 +286,6 @@ namespace Insight
 
 		void Renderpass::Swapchain()
 		{
-#ifndef RENDER_GRAPH_ENABLED
-			RHI_Shader* swapchainShader = nullptr;
-			{
-				IS_PROFILE_SCOPE("Swapchain-GetShader");
-				ShaderDesc shaderDesc;
-				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-				swapchainShader = Renderer::GetShader(shaderDesc);
-			}
-
-			PipelineStateObject swapchainPso{};
-			{
-				IS_PROFILE_SCOPE("Swapchain-SetPipelineStateObject");
-				swapchainPso.Name = L"Swapchain_PSO";
-				swapchainPso.Shader = swapchainShader;
-				swapchainPso.CullMode = CullMode::None;
-				swapchainPso.Swapchain = true;
-				Renderer::SetPipelineStateObject(swapchainPso);
-			}
-
-			{
-				IS_PROFILE_SCOPE("Swapchain-SetUniform");
-				Renderer::SetTexture(0, 0, m_colourTarget->GetTexture());
-			}
-
-			Renderer::Draw(3, 1, 0, 0);
-#endif
-
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{
@@ -351,6 +324,7 @@ namespace Insight
 
 					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.ColourRT));
 					cmdList->Draw(3, 1, 0, 0);
+
 					cmdList->EndRenderpass();
 				});
 #endif //RENDER_GRAPH_ENABLED
@@ -359,6 +333,13 @@ namespace Insight
 		void Renderpass::ImGuiPass()
 		{
 #ifdef RENDER_GRAPH_ENABLED
+
+			if (GraphicsManager::Instance().GetRenderContext()->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+			{
+				m_imgui_pass.Render();
+				return;
+			}
+
 			struct TestPassData
 			{
 				PipelineStateObject Pso;
@@ -371,7 +352,7 @@ namespace Insight
 
 					RenderpassDescription renderpassDescription = { };
 					renderpassDescription.AddAttachment(AttachmentDescription::DontCare(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
-					builder.SetRenderpass(GraphicsManager::Instance().GetRenderContext()->GetImGuiRenderpassDescription());
+					builder.SetRenderpass(renderpassDescription);
 				},
 				[this](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{

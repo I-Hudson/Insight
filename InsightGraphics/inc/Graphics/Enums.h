@@ -418,6 +418,12 @@ namespace Insight
 			Tex3DArray,
 		};
 
+		enum class IndexType
+		{
+			Uint16,
+			Uint32
+		};
+
 		//enum GUPBufferFlagBits
 		//{
 		//	None = 1 << 0,

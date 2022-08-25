@@ -51,5 +51,25 @@ namespace Insight
 
 			stbi_image_free(data);
 		}
+
+		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels)
+		{
+			const u64 size_in_bytes = width * height * depth * channels;
+			if (data == nullptr || size_in_bytes == 0)
+			{
+				return;
+			}
+
+			RHI_TextureCreateInfo createInfo = { };
+			createInfo.TextureType = TextureType::Tex2D;
+			createInfo.Width = width;
+			createInfo.Height = height;
+			createInfo.Depth = depth;
+			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
+			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
+
+			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
+			Upload(data, static_cast<int>(size_in_bytes));
+		}
 	}
 }

@@ -216,17 +216,17 @@ namespace Insight
 						vk::RenderingAttachmentInfo depthAttachment;
 						vk::RenderingAttachmentInfo detencilAttacment;
 
-						std::array<u32, 4> clearColourValues = { 1, 0, 0, 1 };
+						std::array<float, 4> clearColourValues = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 						auto makeRenderingAttachment = 
-						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachmentDescription)
+						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachmentDescription) -> vk::RenderingAttachmentInfo
 						{
 							vk::RenderingAttachmentInfo attachment = { };
 							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView());
 							attachment.imageLayout = ImageLayoutToVulkan(attachmentDescription.FinalLayout);
 							attachment.loadOp = AttachmentLoadOpToVulkan(attachmentDescription.LoadOp);
 							attachment.storeOp = vk::AttachmentStoreOp::eStore;
-							attachment.clearValue = vk::ClearValue(clearColourValues);
+							attachment.clearValue.color = vk::ClearColorValue(clearColourValues);
 
 							attachment.imageLayout = attachment.imageLayout == vk::ImageLayout::ePresentSrcKHR ?
 								vk::ImageLayout::eColorAttachmentOptimal : attachment.imageLayout;
@@ -235,7 +235,6 @@ namespace Insight
 						};
 
 						vk::RenderingInfo renderingInfo = { };
-						//renderingInfo.flags = vk::RenderingFlagBits::eSuspending;
 						renderingInfo.renderArea = rect;
 						renderingInfo.layerCount = 1;
 
@@ -251,6 +250,8 @@ namespace Insight
 						if (renderDescription.DepthStencil)
 						{
 							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
+							depthAttachment.clearValue = { };
+							depthAttachment.clearValue.depthStencil = vk::ClearDepthStencilValue(1.0f, 0.0f);
 							renderingInfo.setPDepthAttachment(&depthAttachment);
 							renderingInfo.setPStencilAttachment(&detencilAttacment);
 						}
@@ -299,10 +300,22 @@ namespace Insight
 #endif
 			}
 
-			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth)
+			void RHI_CommandList_Vulkan::SetPushConstant(u32 offset, u32 size, void* data)
+			{
+				vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+				PushConstant pc = m_pso.Shader->GetPushConstant();
+
+				m_commandList.pushConstants(pipelineLayout, ShaderStageFlagsToVulkan(pc.ShaderStages), offset, size, data);
+			}
+
+			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y)
 			{
 				IS_PROFILE_FUNCTION();
-				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
+				std::array<vk::Viewport, 1> viewports = { vk::Viewport(x, y, width, height, minDepth, maxDepth) };
+				if (invert_y)
+				{
+					viewports = { vk::Viewport(x, height - y, width, -height, minDepth, maxDepth) };
+				}
 				m_commandList.setViewport(0, viewports);
 				m_drawData.Viewport.x = width;
 				m_drawData.Viewport.y = height;
@@ -338,7 +351,7 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer)
+			void RHI_CommandList_Vulkan::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -349,7 +362,7 @@ namespace Insight
 
 				m_bound_index_buffer = buffer;
 				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
-				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, vk::IndexType::eUint32);
+				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, IndexTypeToVulkan(index_type));
 				RenderStats::Instance().IndexBufferBindings++;
 			}
 

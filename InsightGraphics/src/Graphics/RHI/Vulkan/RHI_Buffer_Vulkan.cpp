@@ -75,7 +75,43 @@ namespace Insight
 
 			std::vector<Byte> RHI_Buffer_Vulkan::Download()
 			{
-				return std::vector<Byte>();
+				const u64 current_buffer_size = GetSize();
+				std::vector<Byte> data;
+				data.resize(current_buffer_size);
+
+				if (m_mappedData)
+				{
+					Platform::MemCopy((Byte*)data.data(), m_mappedData, current_buffer_size);
+				}
+				else
+				{
+					// We need a staging buffer to upload data from CPU to GPU.
+					RHI_Buffer_Vulkan readback_buffer;
+					readback_buffer.Create(m_context, BufferType::Readback, current_buffer_size, GetStride());
+
+					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
+					cmdList->CopyBufferToBuffer(&readback_buffer, this, 0);
+					cmdList->Close();
+
+					m_context->SubmitCommandListAndWait(cmdList);
+					m_context->GetCommandListManager().ReturnCommandList(cmdList);
+
+					data = readback_buffer.Download();
+
+					readback_buffer.Release();
+				}
+				return data;
+			}
+
+			void RHI_Buffer_Vulkan::Resize(u64 newSizeBytes)
+			{
+				std::vector<Byte> data = Download();
+				const u64 data_size = GetSize();
+				
+				Release();
+				Create(m_context, m_bufferType, newSizeBytes, m_stride);
+
+				Upload(data.data(), data_size, 0);
 			}
 
 			void RHI_Buffer_Vulkan::Release()
