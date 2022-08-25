@@ -1,8 +1,9 @@
 #pragma once
 
-#include <new>
 #include "MemoryTracker.h"
 #include "Platform/Platform.h"
+
+#include <new>
 #include <atomic>
 #include <type_traits>
 #include <utility>

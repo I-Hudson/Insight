@@ -1,5 +1,7 @@
 #include "Core/MemoryTracker.h"
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
+
 #include "Platform/Platform.h"
 
 #include <iostream>
@@ -29,6 +31,7 @@ namespace Insight
 
 		void MemoryTracker::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_lock);
 
 			if (m_allocations.size() > 0)
@@ -63,6 +66,7 @@ namespace Insight
 
 		void MemoryTracker::Track(void* ptr, MemoryTrackAllocationType type)
 		{
+			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
@@ -76,6 +80,7 @@ namespace Insight
 
 		void MemoryTracker::UnTrack(void* ptr)
 		{
+			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
@@ -88,6 +93,7 @@ namespace Insight
 #define MEMORY_TRACK_CALLSTACK
 		std::array<std::string, c_CallStackCount> MemoryTracker::GetCallStack()
 		{
+			IS_PROFILE_FUNCTION();
 			//std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
 
@@ -100,7 +106,10 @@ namespace Insight
 			//}
 
 			//return callStack;
-#if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK)
+
+			// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten
+			// if there is a crash? Look at third party options for getting the callstack. Disabled for non debug due to performance.
+#if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK) && defined(_DEBUG)
 			
 			const ULONG framesToSkip = 0;
 			const ULONG framesToCapture = c_CallStackCount;
