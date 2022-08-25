@@ -18,16 +18,6 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			struct FrameResource_DX12 : public FrameResouce
-			{
-				RenderContext_DX12* Context;
-				//DescriptorAllocator_DX12 DescriptorAllocator;
-
-				void Init(RenderContext_DX12* context);
-				void Destroy();
-				virtual void Reset() override;
-			};
-
 			struct SwapchainImage
 			{
 				ComPtr<ID3D12Resource> Colour;
@@ -56,8 +46,6 @@ namespace Insight
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
-
-				FrameResource_DX12& GetFrameResouce() { return m_frames[m_frameIndex]; }
 
 			protected:
 				virtual void WaitForGpu() override;
@@ -95,8 +83,6 @@ namespace Insight
 
 				int m_currentFrame = 0;
 				int m_frameIndex = 0;
-
-				std::vector<FrameResource_DX12> m_frames;
 			};
 		}
 	}

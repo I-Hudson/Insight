@@ -263,14 +263,6 @@ namespace Insight
 				return static_cast<RenderContext_DX12*>(m_context);
 			}
 
-			FrameResource_DX12* RHI_CommandList_DX12::FrameResourceDX12()
-			{
-				IS_PROFILE_FUNCTION();
-				assert(m_frameResouces);
-				return static_cast<FrameResource_DX12*>(m_frameResouces);
-			}
-
-
 
 			/// <summary>
 			/// RHI_CommandListAllocator_DX12

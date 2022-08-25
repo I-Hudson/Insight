@@ -127,10 +127,10 @@ namespace Insight
 			DeleteTracked(m_samplerManager);
 		}
 
-		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride)
+		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides)
 		{
 			RHI_Buffer* buffer = m_buffers[bufferType].CreateResource();
-			buffer->Create(this, bufferType, sizeBytes, stride);
+			buffer->Create(this, bufferType, sizeBytes, stride, buffer_overrides);
 			return buffer;
 		}
 
@@ -162,12 +162,6 @@ namespace Insight
 		{
 			m_textures.FreeResource(texture);
 		}
-
-		void FrameResouce::Reset()
-		{
-			CommandListManager.Update();
-			UniformBuffer.Reset();
-		}
 	}
 
 	// Renderer
@@ -176,27 +170,27 @@ namespace Insight
 		context = ImGui::GetCurrentContext();
 	}
 
-	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes, int stride)
+	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
 		ASSERT(s_context);
-		return s_context->CreateBuffer(Graphics::BufferType::Vertex, sizeBytes, stride);
+		return s_context->CreateBuffer(Graphics::BufferType::Vertex, sizeBytes, stride, buffer_overrides);
 	}
 
-	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateIndexBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
 		ASSERT(s_context);
-		return s_context->CreateBuffer(Graphics::BufferType::Index, sizeBytes, 0);
+		return s_context->CreateBuffer(Graphics::BufferType::Index, sizeBytes, 0, buffer_overrides);
 	}
 
-	Graphics::RHI_Buffer* Renderer::CreateUniformBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateUniformBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
 		ASSERT(s_context);
-		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes, 0);
+		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes, 0, buffer_overrides);
 	}
 
-	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes)
+	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
-		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes, 0);
+		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes, 0, buffer_overrides);
 	}
 
 	void Renderer::FreeVertexBuffer(Graphics::RHI_Buffer* buffer)

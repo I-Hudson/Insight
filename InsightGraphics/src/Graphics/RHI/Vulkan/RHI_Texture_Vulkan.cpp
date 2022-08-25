@@ -72,7 +72,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_Vulkan stagingBuffer;
-				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0);
+				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 				stagingBuffer.Upload(data, sizeInBytes, 0);
 
 				RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();

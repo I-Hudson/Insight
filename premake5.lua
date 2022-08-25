@@ -1,4 +1,4 @@
-local profileTool="optick"
+local profileTool="tracy"
 
 workspace "Insight"
     architecture "x64"

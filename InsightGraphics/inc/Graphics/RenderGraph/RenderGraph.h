@@ -9,6 +9,8 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 
+#include <type_traits>
+
 namespace Insight
 {
 	namespace Graphics
@@ -23,24 +25,23 @@ namespace Insight
 			void Setup()
 			{
 				m_values.clear();
-				m_valuePtrs.clear();
-
 				m_values.resize(RenderGraph::s_FarmeCount);
-				for (size_t i = 0; i < RenderGraph::s_FarmeCount; ++i)
-				{
-					m_valuePtrs.push_back(&m_values.at(i));
-				}
 			}
 
 			TValue* operator->() const
 			{
-				return Get();
+				return const_cast<TValue*>(&m_values.at(RenderGraph::Instance().GetFrameIndex()));
 			}
 
-			TValue* Get() const
+			TValue& Get()
 			{
-				ASSERT(!m_valuePtrs.empty());
-				return m_valuePtrs.at(RenderGraph::Instance().GetFrameIndex());
+				ASSERT(!m_values.empty());
+				return m_values.at(RenderGraph::Instance().GetFrameIndex());
+			}
+
+			u64 Size() const
+			{
+				return m_values.size();
 			}
 
 			void ForEach(std::function<void(TValue& value)> func)
@@ -53,7 +54,6 @@ namespace Insight
 
 		private:
 			std::vector<TValue> m_values;
-			std::vector<TValue*> m_valuePtrs;
 		};
 
 		class RenderGraph : public Core::Singleton<RenderGraph>

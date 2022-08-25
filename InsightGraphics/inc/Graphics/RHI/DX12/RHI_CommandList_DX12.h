@@ -14,7 +14,6 @@ namespace Insight
 		{
 			class RenderContext_DX12;
 			class RHI_CommandListAllocator_DX12;
-			struct FrameResource_DX12;
 
 			class RHI_CommandList_DX12 : public RHI_CommandList
 			{
@@ -70,7 +69,6 @@ namespace Insight
 
 			private:
 				RenderContext_DX12* RenderContextDX12();
-				FrameResource_DX12* FrameResourceDX12();
 
 			private:
 				ComPtr<ID3D12GraphicsCommandList> m_commandList;

@@ -463,15 +463,15 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Fence wait");
-					vk::Result waitResult = m_device.waitForFences({ *m_submitFences.Get() }, 1, 0xFFFFFFFF);
+					vk::Result waitResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0xFFFFFFFF);
 					assert(waitResult == vk::Result::eSuccess);
 				}
 
 				{
 					IS_PROFILE_SCOPE("acquireNextImageKHR");
-					vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, *m_swapchainAcquires.Get());
+					vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, m_swapchainAcquires.Get());
 					m_availableSwapchainImage = nextImage.value;
-					m_device.resetFences({ *m_submitFences.Get() });
+					m_device.resetFences({ m_submitFences.Get() });
 				}
 #endif
 				m_descriptorSetManager->Reset();
@@ -485,10 +485,10 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
-				std::array<vk::Semaphore, 1> waitSemaphores = { *m_swapchainAcquires.Get() };
+				std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };
 				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				std::array<vk::Semaphore, 1> signalSemaphore = { *m_signalSemaphores.Get() };
+				std::array<vk::Semaphore, 1> signalSemaphore = { m_signalSemaphores.Get() };
 
 				vk::SubmitInfo submitInfo = vk::SubmitInfo(
 					waitSemaphores,
@@ -497,9 +497,9 @@ namespace Insight
 					signalSemaphore);
 				{
 					IS_PROFILE_SCOPE("Submit");
-					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, *m_submitFences.Get());
+					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
 				}
-				std::array<vk::Semaphore, 1> signalSemaphores = { *m_signalSemaphores.Get() };
+				std::array<vk::Semaphore, 1> signalSemaphores = { m_signalSemaphores.Get() };
 				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
 				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
 

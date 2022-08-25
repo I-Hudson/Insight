@@ -52,11 +52,11 @@ namespace Insight
 			void EnableExtension(DeviceExtension extension);
 			void DisableExtension(DeviceExtension extension);
 
-			CommandListManager& GetCommandListManager() { return *m_commandListManager.Get(); }
+			CommandListManager& GetCommandListManager() { return m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
-			RHI_DescriptorSetManager& GetDescriptorSetManager() { return *m_descriptorSetManager.Get(); }
+			RHI_DescriptorSetManager& GetDescriptorSetManager() { return m_descriptorSetManager.Get(); }
 			RHI_SamplerManager& GetSamplerManager() { return *m_samplerManager; }
 
 		protected:
@@ -68,7 +68,7 @@ namespace Insight
 			void BaseDestroy();
 
 		private:
-			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride);
+			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides);
 			void FreeBuffer(RHI_Buffer* buffer);
 			int GetBufferCount(BufferType bufferType) const;
 
@@ -96,14 +96,6 @@ namespace Insight
 
 			friend class Renderer;
 		};
-
-		struct FrameResouce
-		{
-			RHI_DynamicBuffer UniformBuffer;
-			CommandListManager CommandListManager;
-
-			virtual void Reset();
-		};
 	}
 
 	// Utility class for all other engine systems to call into.
@@ -112,10 +104,10 @@ namespace Insight
 	public:
 		static void SetImGUIContext(ImGuiContext*& context);
 
-		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes, int stride);
-		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes);
-		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes);
-		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes);
+		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
+		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
+		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
+		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 
 		static void FreeVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);

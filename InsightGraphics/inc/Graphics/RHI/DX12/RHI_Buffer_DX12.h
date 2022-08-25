@@ -17,7 +17,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Buffer_DX12() override;
 
-				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride) override;
+				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides) override;
 				virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) override;
 				virtual std::vector<Byte> Download() override;
 				virtual void Resize(u64 newSizeBytes) override { ASSERT(false); }

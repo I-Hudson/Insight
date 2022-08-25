@@ -11,13 +11,23 @@ namespace Insight
 	{
 		void ImGuiPass::Render()
 		{
-			if (m_vertex_buffer == nullptr)
+			RHI_Buffer_Overrides buffer_overrides = {};
+			buffer_overrides.Force_Host_Writeable = true;
+			if (m_vertex_buffer.Size() == 0)
 			{
-				m_vertex_buffer = Renderer::CreateVertexBuffer(sizeof(ImDrawVert), sizeof(ImDrawVert));
+				m_vertex_buffer.Setup();
+				m_vertex_buffer.ForEach([buffer_overrides](RHI_Buffer*& buffer)
+					{
+						buffer = Renderer::CreateVertexBuffer(sizeof(ImDrawVert), sizeof(ImDrawVert), buffer_overrides);
+					}); 
 			}
-			if (m_index_buffer == nullptr)
+			if (m_index_buffer.Size() == 0)
 			{
-				m_index_buffer = Renderer::CreateIndexBuffer(sizeof(ImDrawIdx));
+				m_index_buffer.Setup();
+				m_index_buffer.ForEach([buffer_overrides](RHI_Buffer*& buffer)
+					{
+						buffer = Renderer::CreateIndexBuffer(sizeof(ImDrawIdx), buffer_overrides);
+					});
 			}
 			if (m_font_texture == nullptr)
 			{
@@ -78,7 +88,7 @@ namespace Insight
 					renderpassDescription.Attachments.back().InitalLayout = ImageLayout::ColourAttachment;
 					builder.SetRenderpass(renderpassDescription);
 				},
-				[this](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"ImGuiPass");
 					cmdList->BindPipeline(pso, nullptr);
@@ -94,13 +104,13 @@ namespace Insight
 
 					size_t vertex_size = draw_data->TotalVtxCount * sizeof(ImDrawVert);
 					size_t index_size = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
-					if (vertex_size > m_vertex_buffer->GetSize())
+					if (vertex_size > m_vertex_buffer.Get()->GetSize())
 					{
-						m_vertex_buffer->Resize(vertex_size);
+						m_vertex_buffer.Get()->Resize(vertex_size);
 					}
-					if (index_size > m_index_buffer->GetSize())
+					if (index_size > m_index_buffer.Get()->GetSize())
 					{
-						m_index_buffer->Resize(index_size);
+						m_index_buffer.Get()->Resize(index_size);
 					}
 
 					int vtx_dst_offset = 0;
@@ -111,14 +121,14 @@ namespace Insight
 						const u64 vertex_buffer_size_bytes = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert);
 						const u64 index_buffer_size_bytes = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
 
-						m_vertex_buffer->Upload(cmd_list->VtxBuffer.Data, vertex_buffer_size_bytes, vtx_dst_offset);
-						m_index_buffer->Upload(cmd_list->IdxBuffer.Data, index_buffer_size_bytes, idx_dst_offset);
+						m_vertex_buffer.Get()->Upload(cmd_list->VtxBuffer.Data, vertex_buffer_size_bytes, vtx_dst_offset);
+						m_index_buffer.Get()->Upload(cmd_list->IdxBuffer.Data, index_buffer_size_bytes, idx_dst_offset);
 						vtx_dst_offset += vertex_buffer_size_bytes;
 						idx_dst_offset += index_buffer_size_bytes;
 					}
 
-					cmdList->SetVertexBuffer(m_vertex_buffer);
-					cmdList->SetIndexBuffer(m_index_buffer, IndexType::Uint16);
+					cmdList->SetVertexBuffer(m_vertex_buffer.Get());
+					cmdList->SetIndexBuffer(m_index_buffer.Get(), IndexType::Uint16);
 					cmdList->SetViewport(0, 0, Window::Instance().GetWidth(), Window::Instance().GetHeight(), 0.0f, 1.0f);
 
 					// Setup scale and translation:
@@ -190,8 +200,14 @@ namespace Insight
 
 		void ImGuiPass::Release()
 		{
-			Renderer::FreeVertexBuffer(m_vertex_buffer);
-			Renderer::FreeIndexBuffer(m_index_buffer);
+			m_vertex_buffer.ForEach([](RHI_Buffer*& buffer)
+				{
+					Renderer::FreeVertexBuffer(buffer);
+				});
+			m_index_buffer.ForEach([](RHI_Buffer*& buffer)
+				{
+					Renderer::FreeVertexBuffer(buffer);
+				});
 			Renderer::FreeTexture(m_font_texture);
 		}
 	}

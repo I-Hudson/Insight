@@ -107,11 +107,6 @@ namespace Insight
 					ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 				}
 
-				for (FrameResource_DX12& frame : m_frames)
-				{
-					frame.Init(this);
-				}
-
 				m_pipelineStateObjectManager.SetRenderContext(this);
 
 				InitImGui();
@@ -131,11 +126,6 @@ namespace Insight
 
 				m_rtvHeap = { };
 				m_dsvHeap = { };
-
-				for (FrameResource_DX12& frame : m_frames)
-				{
-					frame.Destroy();
-				}
 
 				BaseDestroy();
 
@@ -531,28 +521,6 @@ namespace Insight
 
 				// Increment the fence value for the current frame.
 				m_swapchainFenceValues[m_frameIndex]++;
-			}
-
-
-			void FrameResource_DX12::Init(RenderContext_DX12* context)
-			{
-				Context = context;
-				CommandListManager.Create(Context);
-				UniformBuffer.Create(Context);
-				//DescriptorAllocator.SetRenderContext(Context);
-			}
-
-			void FrameResource_DX12::Destroy()
-			{
-				CommandListManager.Destroy();
-				UniformBuffer.Release();
-				//DescriptorAllocator.Destroy();
-			}
-
-			void FrameResource_DX12::Reset()
-			{
-				FrameResouce::Reset();
-				//DescriptorAllocator.Reset();
 			}
 		}
 	}

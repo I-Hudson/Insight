@@ -20,9 +20,6 @@ namespace Insight
 		class RenderGraph;
 		class DescriptorAllocator;
 
-		struct FrameResouce;
-
-
 		// Store relevant draw data.
 		struct RHI_CommandListCurrentDrawData
 		{
@@ -77,7 +74,6 @@ namespace Insight
 			virtual bool BindDescriptorSets();
 
 			RenderContext* m_context{ nullptr };
-			FrameResouce* m_frameResouces;
 			bool m_activeRenderpass = false;
 			PipelineStateObject m_pso;
 			PipelineStateObject m_activePSO;

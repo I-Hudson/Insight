@@ -163,7 +163,7 @@ namespace Insight
 
 			vertices.reserve(vertexCount);
 			m_vertexBuffer = UPtr(RHI_Buffer::New());
-			m_vertexBuffer->Create(GraphicsManager::Instance().GetRenderContext(), BufferType::Vertex, vertexByteSize, sizeof(Vertex));
+			m_vertexBuffer->Create(GraphicsManager::Instance().GetRenderContext(), BufferType::Vertex, vertexByteSize, sizeof(Vertex), { });
 
 			std::string_view shortFilePath = filePath.substr(filePath.find_last_of('/') + 1);
 			std::wstring wShortFileName;

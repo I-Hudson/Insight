@@ -74,9 +74,9 @@ namespace Insight
 				Build();
 				PlaceBarriers();
 
-				m_commandListManager->Reset();
-				RHI_CommandList* cmdList = m_commandListManager->GetCommandList();
-				cmdList->m_descriptorAllocator = m_descriptorManagers.Get();
+				m_commandListManager.Get().Reset();
+				RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
+				cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
 				cmdList->m_descriptorAllocator->Reset();
 				Render(cmdList);
 				

@@ -9,6 +9,14 @@ namespace Insight
 		class RenderContext;
 		class RHI_Buffer;
 
+		/// <summary>
+		/// Override default behavior for RHI_Buffer when created.
+		/// </summary>
+		struct RHI_Buffer_Overrides
+		{
+			bool Force_Host_Writeable = false;
+		};
+
 		class RHI_BufferView
 		{
 		public:
@@ -41,7 +49,7 @@ namespace Insight
 
 			virtual ~RHI_Buffer() { }
 
-			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride) = 0;
+			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides) = 0;
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes, int offset) = 0;
 
 			virtual RHI_BufferView Upload(void* data, int sizeInBytes) { return Upload(data, sizeInBytes, 0); }
@@ -60,6 +68,7 @@ namespace Insight
 			BufferType m_bufferType;
 			u64 m_size = 0;
 			u64 m_stride = 0;
+			RHI_Buffer_Overrides m_overrides = { };
 
 			friend class RenderContext;
 			friend class RHI_DynamicBuffer;
