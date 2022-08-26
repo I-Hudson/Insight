@@ -377,8 +377,14 @@ namespace Insight
 				return;
 			}
 			CreateUniformBufferIfNoExist();
+			
 			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
 			m_uniformBufferOffset += size;
+
+			// Align the size to minUniformBufferOffsetAlignment.
+			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
+			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
+
 			descriptors[binding].BufferView = view;
 		}
 

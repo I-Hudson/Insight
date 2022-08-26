@@ -26,6 +26,10 @@ namespace Insight
 			ImageLayout InitalLayout = ImageLayout::Undefined;
 			ImageLayout FinalLayout = ImageLayout::Undefined;
 
+			//===================================================================
+			// Used for rendering 
+			u8 Layer_Array_Index = 0;
+
 			bool IsValid() const
 			{
 				return FinalLayout != ImageLayout::Undefined;

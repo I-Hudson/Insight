@@ -28,11 +28,11 @@ namespace Insight
 
 				vk::ImageCreateInfo imageCreateInfo = vk::ImageCreateInfo(
 					{},
-					vk::ImageType::e2D,
+					TextureTypeToVulkan(m_info.TextureType),
 					PixelFormatToVulkan(m_info.Format),
 					vk::Extent3D(m_info.Width, m_info.Height, 1),
-					1,	// mip levels 
-					1,	// array layers
+					m_info.Mip_Count,								// mip levels 
+					m_info.Layer_Count,								// array layers
 					vk::SampleCountFlagBits::e1,
 					vk::ImageTiling::eOptimal,
 					ImageUsageFlagsToVulkan(m_info.ImageUsage),
@@ -50,21 +50,10 @@ namespace Insight
 					&m_imageAllocation,
 					&allocInfo));
 
-				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
-					{ },
-					m_image,
-					vk::ImageViewType::e2D,
-					imageCreateInfo.format,
-					vk::ComponentMapping(),
-					vk::ImageSubresourceRange(
-						createInfo.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
-						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
-						0,
-						1,
-						0,
-						1)
-				);
-				m_imageView = m_context->GetDevice().createImageView(viewCreateInfo);
+				for (size_t i = 0; i < createInfo.Layer_Count; ++i)
+				{
+					CreateImageView(0, 1, 1, i);
+				}
 			}
 
 			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
@@ -94,11 +83,15 @@ namespace Insight
 			void RHI_Texture_Vulkan::Release()
 			{
 				IS_PROFILE_FUNCTION();
-				if (m_imageView)
+				for (u32 i = 0; i < m_image_views.size(); ++i)
 				{
-					m_context->GetDevice().destroyImageView(m_imageView);
-					m_imageView = nullptr;
+					vk::ImageView& view = m_image_views.at(i);
+					if (view)
+					{
+						m_context->GetDevice().destroyImageView(view);
+					}
 				}
+				m_image_views.clear();
 
 				if (m_image)
 				{
@@ -114,9 +107,13 @@ namespace Insight
 
 			void RHI_Texture_Vulkan::SetName(std::wstring name)
 			{
-				if (m_imageView)
+				for (u32 i = 0; i < m_image_views.size(); ++i)
 				{
-					m_context->SetObejctName(name, reinterpret_cast<u64>(m_imageView.operator VkImageView()), vk::ObjectType::eImageView);
+					vk::ImageView& view = m_image_views.at(i);
+					if (view)
+					{
+						m_context->SetObejctName(name + std::to_wstring(i), reinterpret_cast<u64>(view.operator VkImageView()), vk::ObjectType::eImageView);
+					}
 				}
 
 				if (m_image)
@@ -124,6 +121,30 @@ namespace Insight
 					m_context->SetObejctName(name, reinterpret_cast<u64>(m_image.operator VkImage()), vk::ObjectType::eImage);
 				}
 				m_name = std::move(name);
+			}
+
+			vk::ImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
+			{
+				return m_image_views.at(array_layer_index);
+			}
+
+			void RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
+			{
+				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
+					{ },
+					m_image,
+					TextureViewTypeToVulkan(m_info.TextureType),
+					PixelFormatToVulkan(m_info.Format),
+					vk::ComponentMapping(),
+					vk::ImageSubresourceRange(
+						m_info.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
+						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
+						mip_index,
+						mip_count,
+						layer_index,
+						layer_count)
+				);
+				m_image_views.push_back(m_context->GetDevice().createImageView(viewCreateInfo));
 			}
 		}
 	}

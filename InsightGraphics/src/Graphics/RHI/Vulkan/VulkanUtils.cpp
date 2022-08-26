@@ -840,6 +840,42 @@ namespace Insight
             return vk::IndexType::eUint16;
         }
 
+        vk::ImageType TextureTypeToVulkan(TextureType type)
+        {
+            switch (type)
+            {
+            case TextureType::Unknown:       return vk::ImageType::e2D;
+            case TextureType::Tex1D:         return vk::ImageType::e1D;
+            case TextureType::Tex2D:         return vk::ImageType::e2D;
+            case TextureType::Tex3D:         return vk::ImageType::e3D;
+            case TextureType::TexCube:       return vk::ImageType::e2D;
+            case TextureType::Tex2DArray:    return vk::ImageType::e2D;
+            case TextureType::Tex3DArray:    return vk::ImageType::e3D;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::ImageType::e2D;
+        }
+
+        vk::ImageViewType TextureViewTypeToVulkan(TextureType type)
+        {
+            switch (type)
+            {
+            case TextureType::Unknown:       return vk::ImageViewType::e2D;
+            case TextureType::Tex1D:         return vk::ImageViewType::e1D;
+            case TextureType::Tex2D:         return vk::ImageViewType::e2D;
+            case TextureType::Tex3D:         return vk::ImageViewType::e3D;
+            case TextureType::TexCube:       return vk::ImageViewType::eCube;
+            case TextureType::Tex2DArray:    return vk::ImageViewType::e2DArray;
+            case TextureType::Tex3DArray:
+            default:
+                break;
+            }
+            assert(false);
+            return vk::ImageViewType::e2D;
+        }
+
         VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)
         {
             switch (type)

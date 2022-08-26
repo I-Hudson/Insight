@@ -693,6 +693,14 @@ namespace Insight
 						break;
 					}
 				}
+
+				vk::PhysicalDeviceProperties properties = adapter.getProperties();
+				m_physical_device_info.Name = std::wstring(properties.deviceName.begin(), properties.deviceName.end());
+				m_physical_device_info.Vendor_Id = properties.vendorID;
+				m_physical_device_info.SetVendorName();
+
+				m_physical_device_info.MinUniformBufferAlignment = properties.limits.minUniformBufferOffsetAlignment;
+
 				return adapter;
 		}
 
@@ -918,7 +926,7 @@ namespace Insight
 
 					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
 					texVulkan->m_context = this;
-					texVulkan->m_imageView = imageView;
+					texVulkan->m_image_views.push_back(imageView);
 					texVulkan->m_image = image;
 					texVulkan->m_info = texCreateInfo;
 

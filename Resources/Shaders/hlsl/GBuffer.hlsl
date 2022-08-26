@@ -81,7 +81,13 @@ float LinearizeDepth(float depth, float near_plane, float far_plane)
 	return (2.0 * near_plane * far_plane) / (far_plane + near_plane - z * (far_plane - near_plane));
 }
 
-float4 PSMain(VertexOutput input) : SV_TARGET
+struct PixelOutput
+{
+	float4 Colour : SV_TARGET0;
+	float4 WorldPosition : SV_TARGET1;
+};
+
+PixelOutput PSMain(VertexOutput input)
 {	
 	//float4 shadowUV = GetShadowCoord(input.ShadowWorldPos);
 	//float shadow = GetShadowValue(shadowUV, float2(0, 0));
@@ -90,5 +96,8 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	//shadow = LinearizeDepth(shadow, 1.0, 512.0);
 	//return float4(shadowUV.x, shadowUV.y, shadowUV.z, 1);
 
-	return float4(input.Colour.xyz, 1.0);
+	PixelOutput Out;
+	Out.Colour = input.Colour;
+	Out.WorldPosition = input.WorldPos;
+	return Out;
 }

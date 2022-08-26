@@ -19,6 +19,33 @@ namespace Insight
 			int Depth = -1;
 			PixelFormat Format = PixelFormat::Unknown;
 			ImageUsageFlags ImageUsage = 0;
+
+			u32 Mip_Count = 1;
+			u32 Layer_Count = 1;
+
+			static RHI_TextureCreateInfo Tex2D(int width, int height, PixelFormat format, ImageUsageFlags usage)
+			{
+				RHI_TextureCreateInfo info = { };
+				info.TextureType = TextureType::Tex2D;
+				info.Width = width;
+				info.Height = height;
+				info.Depth = 1;
+				info.Format = format;
+				info.ImageUsage = usage;
+				return info;
+			}
+			static RHI_TextureCreateInfo Tex2DArray(int width, int height, PixelFormat format, ImageUsageFlags usage, u32 layer_count)
+			{
+				RHI_TextureCreateInfo info = { };
+				info.TextureType = TextureType::Tex2DArray;
+				info.Width = width;
+				info.Height = height;
+				info.Depth = 1;
+				info.Format = format;
+				info.ImageUsage = usage;
+				info.Layer_Count = layer_count;
+				return info;
+			}
 		};
 
 		class RHI_Texture : public RHI_Resource

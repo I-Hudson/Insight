@@ -186,22 +186,47 @@ namespace Insight
 				);
 			
 				vk::ColorComponentFlags colorComponentFlags = ColourComponentFlagsToVulkan(pso.ColourWriteMask);
-				vk::PipelineColorBlendAttachmentState pipelineColorBlendAttachmentState(
-					pso.BlendEnable ,									// blendEnable
-					BlendFactorToVulkan(pso.SrcColourBlendFactor),		// srcColorBlendFactor
-					BlendFactorToVulkan(pso.DstColourBlendFactor),		// dstColorBlendFactor
-					BlendOpToVulkan(pso.ColourBlendOp),					// colorBlendOp
-					BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		// srcAlphaBlendFactor
-					BlendFactorToVulkan(pso.DstAplhaBlendFactor),		// dstAlphaBlendFactor
-					BlendOpToVulkan(pso.AplhaBlendOp),					// alphaBlendOp
-					colorComponentFlags									// colorWriteMask
-				);
-			
+				std::vector<vk::PipelineColorBlendAttachmentState> pipeline_colour_blend_attachment_states;
+				if (pso.Swapchain)
+				{
+					vk::PipelineColorBlendAttachmentState blend_state(
+						pso.BlendEnable,									// blendEnable
+						BlendFactorToVulkan(pso.SrcColourBlendFactor),		// srcColorBlendFactor
+						BlendFactorToVulkan(pso.DstColourBlendFactor),		// dstColorBlendFactor
+						BlendOpToVulkan(pso.ColourBlendOp),					// colorBlendOp
+						BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		// srcAlphaBlendFactor
+						BlendFactorToVulkan(pso.DstAplhaBlendFactor),		// dstAlphaBlendFactor
+						BlendOpToVulkan(pso.AplhaBlendOp),					// alphaBlendOp
+						colorComponentFlags									// colorWriteMask
+					);
+					pipeline_colour_blend_attachment_states.push_back(blend_state);
+				}
+				else
+				{
+					for (const RHI_Texture* tex : pso.RenderTargets)
+					{
+						if (tex)
+						{
+							vk::PipelineColorBlendAttachmentState blend_state(
+								pso.BlendEnable,									// blendEnable
+								BlendFactorToVulkan(pso.SrcColourBlendFactor),		// srcColorBlendFactor
+								BlendFactorToVulkan(pso.DstColourBlendFactor),		// dstColorBlendFactor
+								BlendOpToVulkan(pso.ColourBlendOp),					// colorBlendOp
+								BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		// srcAlphaBlendFactor
+								BlendFactorToVulkan(pso.DstAplhaBlendFactor),		// dstAlphaBlendFactor
+								BlendOpToVulkan(pso.AplhaBlendOp),					// alphaBlendOp
+								colorComponentFlags									// colorWriteMask
+							);
+							pipeline_colour_blend_attachment_states.push_back(blend_state);
+						}
+					}
+				}
+
 				vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
 					vk::PipelineColorBlendStateCreateFlags(),  // flags
 					false,                                     // logicOpEnable
 					vk::LogicOp::eNoOp,                        // logicOp
-					pipelineColorBlendAttachmentState,         // attachments
+					pipeline_colour_blend_attachment_states,   // attachments
 					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             // blendConstants
 				);
 			

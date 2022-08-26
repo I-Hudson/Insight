@@ -219,12 +219,12 @@ namespace Insight
 						std::array<float, 4> clearColourValues = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 						auto makeRenderingAttachment = 
-						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachmentDescription) -> vk::RenderingAttachmentInfo
+						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> vk::RenderingAttachmentInfo
 						{
 							vk::RenderingAttachmentInfo attachment = { };
-							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView());
-							attachment.imageLayout = ImageLayoutToVulkan(attachmentDescription.FinalLayout);
-							attachment.loadOp = AttachmentLoadOpToVulkan(attachmentDescription.LoadOp);
+							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView(attachment_description.Layer_Array_Index));
+							attachment.imageLayout = ImageLayoutToVulkan(attachment_description.FinalLayout);
+							attachment.loadOp = AttachmentLoadOpToVulkan(attachment_description.LoadOp);
 							attachment.storeOp = vk::AttachmentStoreOp::eStore;
 							attachment.clearValue.color = vk::ClearColorValue(clearColourValues);
 

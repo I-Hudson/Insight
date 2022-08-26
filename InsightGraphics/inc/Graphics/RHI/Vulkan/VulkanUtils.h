@@ -36,6 +36,8 @@ namespace Insight
 		vk::ImageLayout				ImageLayoutToVulkan(ImageLayout layout);
 		vk::ImageAspectFlags		ImageAspectFlagsToVulkan(ImageAspectFlags flags);
 		vk::IndexType				IndexTypeToVulkan(IndexType index_type);
+		vk::ImageType				TextureTypeToVulkan(TextureType type);
+		vk::ImageViewType			TextureViewTypeToVulkan(TextureType type);
 
 		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
 		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);

@@ -20,9 +20,14 @@ namespace Insight
 			glm::mat4 View;
 		};
 
-		struct UBO_ShadowCamera : public UBO_Camera
+		struct UBO_ShadowCamera
 		{
-			glm::vec2 TextureSize;
+			glm::mat4 ProjView;
+			glm::mat4 Projection;
+			glm::mat4 View;
+			float SplitDepth;
+
+			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount);
 		};
 
 		class Renderpass
@@ -46,7 +51,6 @@ namespace Insight
 
 			Graphics::ImGuiPass m_imgui_pass;
 			UBO_Camera m_camera;
-			UBO_ShadowCamera m_shadowCamera;
 		};
 	}
 }
