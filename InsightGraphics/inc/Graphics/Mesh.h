@@ -2,12 +2,13 @@
 
 #include "Graphics/Defines.h"
 #include "Graphics/RHI/RHI_Buffer.h"
-#include <memory>
-
+#include "Graphics/BoundingBox.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+
+#include <memory>
 #include <vector>
 
 struct aiNode;
@@ -23,7 +24,7 @@ namespace Insight
 
 		struct Vertex
 		{
-			Vertex() 
+			Vertex()
 			{ }
 			Vertex(glm::vec4 pos, glm::vec4 nor, glm::vec4 col, glm::vec2 uv)
 				: Position(pos), Normal(nor), Colour(col), UV(uv)
@@ -36,6 +37,7 @@ namespace Insight
 
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
+
 
 		struct SubmeshDrawInfo
 		{
@@ -64,6 +66,7 @@ namespace Insight
 #endif //RENDER_GRAPH_ENABLED
 			void SetDrawInfo(SubmeshDrawInfo info);
 
+			BoundingBox GetBoundingBox() const { return m_bounding_box.Transform(m_draw_info.Transform); }
 			u32 GetVertexCount() const { return m_draw_info.Vertex_Count; }
 			u32 GetIndexCount() const { return m_draw_info.Index_Count; }
 
@@ -72,6 +75,9 @@ namespace Insight
 		private:
 			SubmeshDrawInfo m_draw_info;
 			Mesh* m_mesh = nullptr;
+			BoundingBox m_bounding_box;
+
+			friend class Mesh;
 		};
 
 		/// <summary>
@@ -96,6 +102,8 @@ namespace Insight
 			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 		
+			void Optimize(std::vector<Vertex>& src_vertices, std::vector<u32>& src_indices);
+
 		private:
 			UPtr<RHI_Buffer> m_vertex_buffer;
 			UPtr<RHI_Buffer> m_index_buffer;

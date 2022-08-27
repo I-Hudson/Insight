@@ -8,6 +8,7 @@
 #include "Core/Profiler.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/Frustum.h"
 
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
@@ -33,8 +34,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -197,7 +198,15 @@ namespace Insight
 
 						cmdList->SetUniform(0, 0, &data.Cameras.at(i), sizeof(data.Cameras.at(i)));
 
-						data.Mesh.Draw(cmdList);
+						Frustum camera_frustum(data.Cameras.at(i).View, data.Cameras.at(i).Projection,	1000.0f);
+						for (Submesh* sub_mesh : data.Mesh.GetSubMeshes())
+						{
+							BoundingBox bounding_box = sub_mesh->GetBoundingBox();
+							//if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
+							{
+								sub_mesh->Draw(cmdList);
+							}
+						}
 
 						cmdList->EndRenderpass();
 					}
@@ -315,7 +324,15 @@ namespace Insight
 						cmdList->SetUniform(0, 0, &camera, sizeof(camera));
 					}
 
-					data.TestMesh.Draw(cmdList);
+					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
+					for (Submesh* sub_mesh : data.TestMesh.GetSubMeshes())
+					{
+						BoundingBox bounding_box = sub_mesh->GetBoundingBox();
+						//if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
+						{
+							sub_mesh->Draw(cmdList);
+						}
+					}
 
 					cmdList->EndRenderpass();
 				}, std::move(passData));

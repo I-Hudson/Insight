@@ -13,6 +13,8 @@
 #include "Assimp/mesh.h"
 #include "assimp/postprocess.h"
 
+#include "meshoptimizer.h"
+
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Insight
@@ -109,17 +111,23 @@ namespace Insight
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 
-			CreateGPUBuffers(scene, filePath, vertices, indices);
 			ProcessNode(scene->mRootNode, scene, "", vertices, indices);
 
-			const u64 expected_vertex_byte_size = m_vertex_buffer->GetSize();
 			const u64 vertex_byte_size = vertices.size() * sizeof(Vertex);
-
-			const u64 expected_index_byte_size = m_index_buffer->GetSize();
 			const u64 index_byte_size = indices.size() * sizeof(u32);
 
-			ASSERT(expected_vertex_byte_size == vertex_byte_size);
-			ASSERT(expected_index_byte_size == index_byte_size);
+			// Create our gpu buffers so they can be set for each sub mesh.
+			m_vertex_buffer = Renderer::CreateVertexBuffer(vertex_byte_size, sizeof(Vertex));
+			m_index_buffer = Renderer::CreateIndexBuffer(index_byte_size);
+
+			// Set the vertex and index buffers for all our sub meshes. Doing this here
+			// allows us to create the gpu buffers after all the mesh processing has compelted
+			// and only do that once so no need to resize the gpu buffers.
+			for (Submesh* sub_mesh : m_submeshes)
+			{
+				sub_mesh->m_draw_info.Vertex_Buffer = m_vertex_buffer.Get();
+				sub_mesh->m_draw_info.Index_Buffer = m_index_buffer.Get();
+			}
 
 			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
 			m_index_buffer->Upload(indices.data(), index_byte_size);
@@ -209,23 +217,33 @@ namespace Insight
 			{
 				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				{
+					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
+
+					std::vector<Vertex> vertices_optomized;
+					std::vector<u32> indices_optomized;
+					ProcessMesh(aiMesh, aiScene, vertices_optomized, indices_optomized);
+					Optimize(vertices_optomized, indices_optomized);
+
+					BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), vertices_optomized.size());
+
 					SubmeshDrawInfo submesh_draw_info = { };
 					submesh_draw_info.Vertex_Offset = static_cast<u32>(vertices.size());
 					submesh_draw_info.First_Index = static_cast<u32>(indices.size());
 
+					// Move our vertices/indices which have been optimized, into the overall vectors.
+					std::move(vertices_optomized.begin(), vertices_optomized.end(), std::back_inserter(vertices));
+					std::move(indices_optomized.begin(), indices_optomized.end(), std::back_inserter(indices));
+
 					submesh_draw_info.Vertex_Buffer = m_vertex_buffer.Get();
 					submesh_draw_info.Index_Buffer = m_index_buffer.Get();
 
-					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
-
-					ProcessMesh(aiMesh, aiScene, vertices, indices);
 					submesh_draw_info.Transform = ConvertMatrix(aiNode->mTransformation);
-
 					submesh_draw_info.Vertex_Count = static_cast<u32>(vertices.size()) - submesh_draw_info.Vertex_Offset;
 					submesh_draw_info.Index_Count = static_cast<u32>(indices.size()) - submesh_draw_info.First_Index;
 
 					Submesh* subMesh = NewArgsTracked(Submesh, this);
 					subMesh->SetDrawInfo(submesh_draw_info);
+					subMesh->m_bounding_box = bounding_box;
 					m_submeshes.push_back(std::move(subMesh));
 				}
 
@@ -373,6 +391,42 @@ namespace Insight
 			// 4. height maps
 			//std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 			//textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+		}
+		
+		void Mesh::Optimize(std::vector<Vertex>& src_vertices, std::vector<u32>& src_indices)
+		{
+			const u64 vertex_byte_size = src_vertices.size() * sizeof(Vertex);
+			const u64 index_byte_size = src_indices.size() * sizeof(u32);
+
+			const u64 vertex_count = vertex_byte_size / sizeof(Vertex);
+			const u64 vertex_size = sizeof(Vertex);
+			const u64 index_count = index_byte_size / sizeof(u32);
+
+			// The optimization order is important
+
+			std::vector<u32> remap(index_count); // allocate temporary memory for the remap table
+			size_t total_vertices_optimized = meshopt_generateVertexRemap(remap.data(), src_indices.data(), index_count, src_vertices.data(), index_count, sizeof(Vertex));
+
+			std::vector<Vertex> dst_vertices(total_vertices_optimized);
+			std::vector<u32> dst_indices(index_count);
+
+			meshopt_remapIndexBuffer(dst_indices.data(), src_indices.data(), index_count, remap.data());
+			meshopt_remapVertexBuffer(dst_vertices.data(), src_vertices.data(), index_count, sizeof(Vertex), remap.data());
+
+			// Vertex cache optimization - reordering triangles to maximize cache locality
+			IS_INFO("Optimizing vertex cache...");
+			meshopt_optimizeVertexCache(dst_indices.data(), dst_indices.data(), index_count, total_vertices_optimized);
+
+			// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
+			IS_INFO("Optimizing overdraw...");
+			meshopt_optimizeOverdraw(dst_indices.data(), dst_indices.data(), index_count, glm::value_ptr(src_vertices.data()->Position), total_vertices_optimized, vertex_size, 1.05f);
+
+			// Vertex fetch optimization - reorders triangles to maximize memory access locality
+			IS_INFO("Optimizing vertex fetch...");
+			meshopt_optimizeVertexFetch(dst_vertices.data(), dst_indices.data(), index_count, dst_vertices.data(), total_vertices_optimized, vertex_size);
+
+			src_vertices = dst_vertices;
+			src_indices = dst_indices;
 		}
 	}
 }

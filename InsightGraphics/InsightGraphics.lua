@@ -38,6 +38,7 @@ project "InsightGraphics"
         "%{IncludeDirs.assimp}/../build/include",
         "%{IncludeDirs.optick}",
         "%{IncludeDirs.stb_image}",
+        "%{IncludeDirs.meshoptimizer}",
     }
 
     files 
@@ -65,6 +66,7 @@ project "InsightGraphics"
         "dxcompiler.lib",
         "Optickcore.lib",
         "tracy.lib",
+        "meshoptimizer.lib",
     }
 
     libdirs
