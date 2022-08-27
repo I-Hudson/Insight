@@ -20,9 +20,19 @@ cbuffer ubo_camera : register(b0)
 	float DpethSplit;
 }
 
+struct PushConstant
+{
+	float4x4 Transform;
+};
+[[vk::push_constant]] PushConstant push_constant;
+
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = mul(ProjView, float4(input.Pos.xyz, 1));
+	vsOut.Pos = float4(input.Pos.xyz, 1);
+
+	vsOut.Pos = mul(push_constant.Transform, vsOut.Pos);
+	vsOut.Pos = mul(ProjView, vsOut.Pos);
+
 	return vsOut;
 }

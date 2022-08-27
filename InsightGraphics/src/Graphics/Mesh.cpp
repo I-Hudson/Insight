@@ -13,6 +13,8 @@
 #include "Assimp/mesh.h"
 #include "assimp/postprocess.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Insight
 {
 	namespace Graphics
@@ -35,6 +37,17 @@ namespace Insight
 			aiProcess_GenUVCoords;               // Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels
 
 
+		static glm::mat4 ConvertMatrix(const aiMatrix4x4& transform)
+		{
+			return glm::mat4
+			(
+				transform.a1, transform.b1, transform.c1, transform.d1,
+				transform.a2, transform.b2, transform.c2, transform.d2,
+				transform.a3, transform.b3, transform.c3, transform.d3,
+				transform.a4, transform.b4, transform.c4, transform.d4
+			);
+		}
+
 		Submesh::~Submesh()
 		{
 			Destroy();
@@ -43,39 +56,23 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
-			//cmdList->SetVertexBuffer(m_vertexInfo.Buffer);
-			cmdList->SetVertexBuffer(*m_vertex_buffer);
-			cmdList->SetIndexBuffer(*m_indexBuffer, IndexType::Uint32);
-			//const u64 vertex_count = m_vertex_buffer->GetSize() / sizeof(Vertex);
-			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
-			cmdList->DrawIndexed(indexCount, 1, 0, 0, 0);
+			// TODO: To be removed when entities are added with components
+			cmdList->SetPushConstant(0, sizeof(glm::mat4), static_cast<const void*>(glm::value_ptr(m_draw_info.Transform)));
+
+			cmdList->SetVertexBuffer(m_draw_info.Vertex_Buffer);
+			cmdList->SetIndexBuffer(m_draw_info.Index_Buffer, IndexType::Uint32);
+			cmdList->DrawIndexed(m_draw_info.Index_Count, 1, m_draw_info.First_Index, m_draw_info.Vertex_Offset, 0);
 		}
 #endif // RENDER_GRAPH_ENABLED
 
-		void Submesh::SetVertexInfo(SubmeshVertexInfo info)
+		void Submesh::SetDrawInfo(SubmeshDrawInfo info)
 		{
-			m_vertexInfo = info;
-		}
-
-		void Submesh::SetIndexBuffer(RHI_Buffer* buffer)
-		{
-			m_indexBuffer = UPtr<RHI_Buffer>(buffer);
+			m_draw_info = info;
 		}
 
 		void Submesh::Destroy()
 		{
-			//if (m_vertexBuffer)
-			//{
-			//	Renderer::FreeVertexBuffer(m_vertexBuffer.Get());
-			//	m_vertexBuffer.Release();
-			//}
-			m_vertexInfo = {};
-			
-			if (m_indexBuffer)
-			{
-				Renderer::FreeIndexBuffer(m_indexBuffer.Get());
-				m_indexBuffer.Release();
-			}
+			m_draw_info = { };
 		}
 
 		int vertexOffset = 0;
@@ -98,8 +95,7 @@ namespace Insight
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
 			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
-			// Enable progress tracking
-			importer.SetPropertyBool(AI_CONFIG_GLOB_MEASURE_TIME, true);
+
 			const aiScene* scene = importer.ReadFile(filePath,
 				importer_flags
 			);
@@ -111,16 +107,22 @@ namespace Insight
 			}
 
 			std::vector<Vertex> vertices;
+			std::vector<u32> indices;
 
-			CreateGPUBuffers(scene, filePath, vertices);
-			ProcessNode(scene->mRootNode, scene, "", vertices);
+			CreateGPUBuffers(scene, filePath, vertices, indices);
+			ProcessNode(scene->mRootNode, scene, "", vertices, indices);
 
-			const u64 expectedVertexByteSize = m_vertexBuffer->GetSize();
-			const u64 vertexByteSize = vertices.size() * sizeof(Vertex);
+			const u64 expected_vertex_byte_size = m_vertex_buffer->GetSize();
+			const u64 vertex_byte_size = vertices.size() * sizeof(Vertex);
 
-			//ASSERT(expectedVertexByteSize == vertexByteSize);
+			const u64 expected_index_byte_size = m_index_buffer->GetSize();
+			const u64 index_byte_size = indices.size() * sizeof(u32);
 
-			//m_vertexBuffer->Upload(vertices.data(), vertexByteSize);
+			ASSERT(expected_vertex_byte_size == vertex_byte_size);
+			ASSERT(expected_index_byte_size == index_byte_size);
+
+			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
+			m_index_buffer->Upload(indices.data(), index_byte_size);
 
 			return true;
 		}
@@ -133,11 +135,11 @@ namespace Insight
 				DeleteTracked(submesh);
 			}
 
-			if (m_vertexBuffer)
-			{
-				m_vertexBuffer->Release();
-				m_vertexBuffer.Reset();
-			}
+			Renderer::FreeVertexBuffer(*m_vertex_buffer);
+			Renderer::FreeIndexBuffer(*m_index_buffer);
+
+			m_vertex_buffer.Release();
+			m_index_buffer.Release();
 
 			m_submeshes.clear();
 		}
@@ -146,37 +148,32 @@ namespace Insight
 		void Mesh::Draw(RHI_CommandList* cmdList) const
 		{
 			IS_PROFILE_FUNCTION();
-			int i = 0;
 			for (Submesh* submesh : m_submeshes)
 			{
 				submesh->Draw(cmdList);
-				if (i >= 1)
-				{
-					return;
-				}
-				//++i;
 			}
 		}
 #endif //RENDER_GRAPH_ENABLED
 
-		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices)
+		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices)
 		{
 			IS_PROFILE_FUNCTION();
 
-			int vertexCount = 0;
-			int indexCount = 0;
+			u32 vertex_count = 0;
+			u32 index_count = 0;
+
 			std::function<void(aiNode* node, const aiScene* scene)> getVertexAndIndexCount;
-			getVertexAndIndexCount = [&getVertexAndIndexCount, &vertexCount, &indexCount](aiNode* node, const aiScene* scene)
+			getVertexAndIndexCount = [&getVertexAndIndexCount, &vertex_count, &index_count](aiNode* node, const aiScene* scene)
 			{
 				// process all the node's meshes (if any)
 				for (unsigned int i = 0; i < node->mNumMeshes; i++)
 				{
 					aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-					vertexCount += mesh->mNumVertices;
+					vertex_count += mesh->mNumVertices;
 					for (size_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex)
 					{
 						aiFace face = mesh->mFaces[faceIndex];
-						indexCount += face.mNumIndices;
+						index_count += face.mNumIndices;
 					}
 				}
 				// then do the same for each of its children
@@ -187,11 +184,14 @@ namespace Insight
 			};
 			getVertexAndIndexCount(scene->mRootNode, scene);
 
-			const u64 vertexByteSize = vertexCount * sizeof(Vertex);
+			const u64 vertex_byte_size = vertex_count * sizeof(Vertex);
+			const u64 index_byte_size = index_count * sizeof(u32);
 
-			vertices.reserve(vertexCount);
-			m_vertexBuffer = UPtr(RHI_Buffer::New());
-			m_vertexBuffer->Create(GraphicsManager::Instance().GetRenderContext(), BufferType::Vertex, vertexByteSize, sizeof(Vertex), { });
+			vertices.reserve(vertex_count);
+			m_vertex_buffer = UPtr(Renderer::CreateVertexBuffer(vertex_byte_size, sizeof(Vertex)));
+
+			indices.reserve(index_count);
+			m_index_buffer = UPtr(Renderer::CreateIndexBuffer(index_byte_size));
 
 			std::string_view shortFilePath = filePath.substr(filePath.find_last_of('/') + 1);
 			std::wstring wShortFileName;
@@ -201,42 +201,31 @@ namespace Insight
 				});
 		}
 
-		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices)
+		void Mesh::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices, std::vector<u32>& indices)
 		{
 			IS_PROFILE_FUNCTION();
 
 			if (aiNode->mNumMeshes > 0)
 			{
-				SubmeshVertexInfo submeshVertexInfo = { };
-				submeshVertexInfo.VertexOffset = static_cast<int>(vertices.size());
-				submeshVertexInfo.Buffer = m_vertexBuffer.Get();
-
 				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				{
+					SubmeshDrawInfo submesh_draw_info = { };
+					submesh_draw_info.Vertex_Offset = static_cast<u32>(vertices.size());
+					submesh_draw_info.First_Index = static_cast<u32>(indices.size());
+
+					submesh_draw_info.Vertex_Buffer = m_vertex_buffer.Get();
+					submesh_draw_info.Index_Buffer = m_index_buffer.Get();
+
 					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 
-					std::vector<Vertex> vertices_local;
-					std::vector<int> indices;
-					ProcessMesh(aiMesh, aiScene, vertices_local, indices);
+					ProcessMesh(aiMesh, aiScene, vertices, indices);
+					submesh_draw_info.Transform = ConvertMatrix(aiNode->mTransformation);
 
-					const int vertexSizeBytes = static_cast<int>(vertices_local.size() * sizeof(Vertex));
-					const int indexSizeBytes = static_cast<int>(indices.size() * sizeof(int));
-
-					RHI_Buffer* v_Buffer = Renderer::CreateVertexBuffer(vertexSizeBytes, sizeof(Vertex));
-					{
-						v_Buffer->Upload(vertices_local.data(), vertexSizeBytes, 0);
-					}
-					RHI_Buffer* iBuffer = Renderer::CreateIndexBuffer(indexSizeBytes);
-					{
-						iBuffer->Upload(indices.data(), indexSizeBytes, 0);
-					}
-
-					submeshVertexInfo.VertexCount = static_cast<int>(vertices.size()) - submeshVertexInfo.VertexOffset;
+					submesh_draw_info.Vertex_Count = static_cast<u32>(vertices.size()) - submesh_draw_info.Vertex_Offset;
+					submesh_draw_info.Index_Count = static_cast<u32>(indices.size()) - submesh_draw_info.First_Index;
 
 					Submesh* subMesh = NewArgsTracked(Submesh, this);
-					subMesh->SetVertexInfo(submeshVertexInfo);
-					subMesh->SetIndexBuffer(iBuffer);
-					subMesh->m_vertex_buffer = std::move(UPtr(v_Buffer));
+					subMesh->SetDrawInfo(submesh_draw_info);
 					m_submeshes.push_back(std::move(subMesh));
 				}
 
@@ -263,11 +252,11 @@ namespace Insight
 			// then do the same for each of its children
 			for (u32 i = 0; i < aiNode->mNumChildren; i++)
 			{
-				ProcessNode(aiNode->mChildren[i], aiScene, directory, vertices);
+				ProcessNode(aiNode->mChildren[i], aiScene, directory, vertices, indices);
 			}
 		}
 
-		void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices)
+		void Mesh::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<u32>& indices)
 		{
 			IS_PROFILE_FUNCTION();
 

@@ -56,7 +56,7 @@ namespace Insight
 			m_bound_index_buffer = nullptr;
 		}
 
-		void RHI_CommandList::SetUniform(int set, int binding, void* data, u32 size)
+		void RHI_CommandList::SetUniform(int set, int binding, const void* data, u32 size)
 		{
 			m_descriptorAllocator->SetUniform(set, binding, data, size);
 		}

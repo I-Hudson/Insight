@@ -65,7 +65,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_DX12::Upload(void* data, int sizeInBytes, int offset)
+			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, int sizeInBytes, int offset)
 			{
 				if (m_mappedData)
 				{

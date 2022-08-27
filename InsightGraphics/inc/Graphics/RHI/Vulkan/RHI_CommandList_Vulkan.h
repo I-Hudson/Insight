@@ -46,7 +46,7 @@ namespace Insight
 				virtual void EndRenderpass() override;
 
 				virtual void SetPipeline(PipelineStateObject pso) override;
-				virtual void SetPushConstant(u32 offset, u32 size, void* data) override;
+				virtual void SetPushConstant(u32 offset, u32 size, const void* data) override;
 
 				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;

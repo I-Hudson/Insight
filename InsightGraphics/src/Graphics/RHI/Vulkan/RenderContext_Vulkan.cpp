@@ -251,7 +251,7 @@ namespace Insight
 
 					vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo = { };
 					descriptorPoolCreateInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
-					descriptorPoolCreateInfo.maxSets = 2048;
+					descriptorPoolCreateInfo.maxSets = 2048 * 4;
 					descriptorPoolCreateInfo.setPoolSizes(pool_sizes);
 					m_descriptor_pool = *reinterpret_cast<VkDescriptorPool*>(&m_device.createDescriptorPool(descriptorPoolCreateInfo));
 

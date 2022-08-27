@@ -7,6 +7,7 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
 #include <vector>
 
 struct aiNode;
@@ -36,11 +37,16 @@ namespace Insight
 			constexpr int GetStride() { return sizeof(Vertex); }
 		};
 
-		struct SubmeshVertexInfo
+		struct SubmeshDrawInfo
 		{
-			int VertexOffset = 0;
-			int VertexCount = 0;
-			RHI_Buffer* Buffer = nullptr;
+			u32 Index_Count = 0;
+			u32 First_Index = 0;
+			u32 Vertex_Offset = 0;
+			u32 Vertex_Count = 0;
+			glm::mat4 Transform = glm::mat4(1);
+
+			RHI_Buffer* Vertex_Buffer = nullptr;
+			RHI_Buffer* Index_Buffer = nullptr;
 		};
 
 		/// <summary>
@@ -56,17 +62,15 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
 #endif //RENDER_GRAPH_ENABLED
-			void SetVertexInfo(SubmeshVertexInfo info);
-			void SetIndexBuffer(RHI_Buffer* buffer);
+			void SetDrawInfo(SubmeshDrawInfo info);
 
-			int GetVertexCount() const { return m_vertexInfo.VertexCount; }
-			int GetIndexCount() const { return (int)(m_indexBuffer->GetSize() / sizeof(int)); }
+			u32 GetVertexCount() const { return m_draw_info.Vertex_Count; }
+			u32 GetIndexCount() const { return m_draw_info.Index_Count; }
 
 			void Destroy();
 
 		private:
-			SubmeshVertexInfo m_vertexInfo;
-			UPtr<RHI_Buffer> m_indexBuffer;
+			SubmeshDrawInfo m_draw_info;
 			Mesh* m_mesh = nullptr;
 		};
 
@@ -88,12 +92,13 @@ namespace Insight
 #endif //RENDER_GRAPH_ENABLED
 
 		private:
-			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices);
-			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices);
-			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<int>& indices);
+			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices);
+			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices, std::vector<u32>& indices);
+			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 		
 		private:
-			UPtr<RHI_Buffer> m_vertexBuffer;
+			UPtr<RHI_Buffer> m_vertex_buffer;
+			UPtr<RHI_Buffer> m_index_buffer;
 			std::vector<Submesh*> m_submeshes;
 		};
 	}

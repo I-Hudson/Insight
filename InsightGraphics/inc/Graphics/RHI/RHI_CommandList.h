@@ -53,9 +53,9 @@ namespace Insight
 
 			virtual void SetPipeline(PipelineStateObject pso) = 0;
 
-			virtual void SetPushConstant(u32 offset, u32 size, void* data) = 0;
+			virtual void SetPushConstant(u32 offset, u32 size, const void* data) = 0;
 
-			void SetUniform(int set, int binding, void* data, u32 size);
+			void SetUniform(int set, int binding, const void* data, u32 size);
 			void SetTexture(int set, int binding, RHI_Texture* texture);
 
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) = 0;

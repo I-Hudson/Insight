@@ -227,6 +227,7 @@ namespace Insight
 				{
 					m_currentDescriptorHash = hash;
 					contextVulkan->GetDevice().updateDescriptorSets(writeIndex, &writes[0], 0, nullptr, {});
+					RenderStats::Instance().DescriptorSetUpdates++;
 				}
 			}
 #endif
@@ -353,7 +354,7 @@ namespace Insight
 			}
 		}
 
-		void DescriptorAllocator::SetUniform(int set, int binding, void* data, u32 size)
+		void DescriptorAllocator::SetUniform(int set, int binding, const void* data, u32 size)
 		{
 			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			if (binding >= (int)descriptors.size())

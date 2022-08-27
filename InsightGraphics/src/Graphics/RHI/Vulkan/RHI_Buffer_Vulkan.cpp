@@ -52,7 +52,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_Vulkan::Upload(void* data, int sizeInBytes, int offset)
+			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, int sizeInBytes, int offset)
 			{
 				IS_PROFILE_FUNCTION();
 

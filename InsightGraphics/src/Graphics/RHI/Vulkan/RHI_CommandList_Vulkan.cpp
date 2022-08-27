@@ -300,7 +300,7 @@ namespace Insight
 #endif
 			}
 
-			void RHI_CommandList_Vulkan::SetPushConstant(u32 offset, u32 size, void* data)
+			void RHI_CommandList_Vulkan::SetPushConstant(u32 offset, u32 size, const void* data)
 			{
 				vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 				PushConstant pc = m_pso.Shader->GetPushConstant();
@@ -435,6 +435,7 @@ namespace Insight
 							, sets
 							, dynamicOffsets);
 						RenderStats::Instance().DescriptorSetBindings++;
+						RenderStats::Instance().DescriptorSetUsedCount += sets.size();
 					}
 				}
 				return result;

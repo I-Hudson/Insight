@@ -28,6 +28,7 @@ workspace "Insight"
         "GLM_FORCE_SWIZZLE",
         "IS_PLATFORM_X64",
         "RENDER_GRAPH_ENABLED",
+        "TRACY_ON_DEMAND",
     }
 
     includedirs

@@ -32,6 +32,12 @@ cbuffer shadow_camera : register(b1)
 	float2 Shadow_TextureSize;
 }
 
+struct PushConstant
+{
+	float4x4 Transform;
+};
+[[vk::push_constant]] PushConstant push_constant;
+
 [[vk::combinedImageSampler]][[vk::binding(2, 0)]]
 Texture2D<float4> ShadowTexture : register(t0);
 [[vk::combinedImageSampler]][[vk::binding(2, 0)]]
@@ -42,6 +48,8 @@ VertexOutput VSMain(const VertexInput input)
 	VertexOutput vsOut;
 	vsOut.WorldPos = float4(input.Pos.xyz, 1);
 	vsOut.Colour = input.Colour;
+
+	vsOut.WorldPos = mul(push_constant.Transform, vsOut.WorldPos);
 	vsOut.Pos = mul(ProjView, vsOut.WorldPos);
 
 	// Invert our view matrix as we invert the view port. 

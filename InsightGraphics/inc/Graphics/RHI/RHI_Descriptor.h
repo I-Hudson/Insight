@@ -92,7 +92,7 @@ namespace Insight
 
 			void SetPipeline(PipelineStateObject pso);
 
-			void SetUniform(int set, int binding, void* data, u32 size);
+			void SetUniform(int set, int binding, const void* data, u32 size);
 			void SetTexture(int set, int binding, RHI_Texture* texture);
 
 			Descriptor GetDescriptor(int set, int binding);

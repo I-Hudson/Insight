@@ -29,6 +29,8 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			u32 VertexBufferBindings = 0;
 
 			u32 DescriptorSetBindings = 0;
+			u32 DescriptorSetUpdates = 0;
+			u32 DescriptorSetUsedCount = 0;
 			u32 PipelineBarriers = 0;
 
 			FORMAT_STAT(DrawCalls, "Draw Calls: ");
@@ -37,6 +39,8 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			FORMAT_STAT(IndexBufferBindings, "Index Buffer Bindings Calls: ");
 			FORMAT_STAT(VertexBufferBindings, "Vertex Buffer Bindings Calls: ");
 			FORMAT_STAT(DescriptorSetBindings, "Descriptor Set Bindings Calls: ");
+			FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
+			FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");
 			FORMAT_STAT(PipelineBarriers, "Pipline barriers Calls: ");
 
 			void Draw();
