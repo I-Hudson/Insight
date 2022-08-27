@@ -28,7 +28,6 @@ workspace "Insight"
         "GLM_FORCE_SWIZZLE",
         "IS_PLATFORM_X64",
         "RENDER_GRAPH_ENABLED",
-        "TRACY_ON_DEMAND",
     }
 
     includedirs
@@ -39,7 +38,7 @@ workspace "Insight"
     }
 
     if (profileTool == "tracy") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS" }
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
         editandcontinue "off"
     end
     if (profileTool == "optick") then

@@ -50,7 +50,7 @@ namespace Insight
 					&m_imageAllocation,
 					&allocInfo));
 
-				for (size_t i = 0; i < createInfo.Layer_Count; ++i)
+				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
 					CreateImageView(0, 1, 1, i);
 				}

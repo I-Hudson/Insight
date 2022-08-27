@@ -18,8 +18,8 @@ namespace Insight
 			public:
 				virtual ~RHI_Buffer_Vulkan() override;
 
-				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides) override;
-				virtual RHI_BufferView Upload(const void* data, int sizeInBytes, int offset) override;
+				virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) override;
+				virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes, u64 offset) override;
 				virtual std::vector<Byte> Download() override;
 				virtual void Resize(u64 newSizeBytes) override;
 
@@ -29,9 +29,6 @@ namespace Insight
 				virtual void SetName(std::wstring name) override;
 
 				vk::Buffer GetBuffer() const { return m_buffer; }
-
-			protected:
-				virtual void Resize(int newSizeInBytes) override;
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;

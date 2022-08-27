@@ -240,7 +240,7 @@ namespace Insight
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC bufferViewDesc = {};
 				bufferViewDesc.BufferLocation = bufferDX12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
-				bufferViewDesc.SizeInBytes = descriptor.BufferView.GetSize();
+				bufferViewDesc.SizeInBytes = static_cast<UINT>(descriptor.BufferView.GetSize());
 				m_context->GetDevice()->CreateConstantBufferView(&bufferViewDesc, handle.CPUPtr);
 
 				m_descriptorHashToHandleIndex[descHash] = handle.HandleIndex;

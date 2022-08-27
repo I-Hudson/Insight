@@ -21,7 +21,7 @@ namespace Insight
 		{
 		public:
 			RHI_BufferView();
-			RHI_BufferView(RHI_Buffer* buffer, int offset, int size);
+			RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size);
 			RHI_BufferView(const RHI_BufferView& other);
 			RHI_BufferView(RHI_BufferView&& other);
 
@@ -31,14 +31,13 @@ namespace Insight
 			bool IsValid() const { return m_buffer; }
 
 			constexpr RHI_Buffer* GetBuffer() const { return m_buffer; }
-			constexpr int GetOffset() const { return m_offset; }
-			constexpr int GetSize() const { return m_size; }
+			constexpr u64 GetOffset() const { return m_offset; }
+			constexpr u64 GetSize() const { return m_size; }
 
 		private:
 			RHI_Buffer* m_buffer = nullptr;
-			int m_offset = 0;
-			int m_size = 0;
-
+			u64 m_offset = 0;
+			u64 m_size = 0;
 			friend std::hash<RHI_BufferView>;
 		};
 
@@ -49,20 +48,17 @@ namespace Insight
 
 			virtual ~RHI_Buffer() { }
 
-			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides) = 0;
-			virtual RHI_BufferView Upload(const void* data, int sizeInBytes, int offset) = 0;
+			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) = 0;
+			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes, u64 offset) = 0;
 
-			virtual RHI_BufferView Upload(const void* data, int sizeInBytes) { return Upload(data, sizeInBytes, 0); }
+			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes) { return Upload(data, sizeInBytes, 0); }
 			virtual std::vector<Byte> Download() = 0;
 			virtual void Resize(u64 newSizeBytes) = 0;
 
-			RHI_BufferView GetView(int offset, int size);
+			RHI_BufferView GetView(u64 offset, u64 size);
 			u64 GetSize() const { return m_size; }
 			u64 GetStride() const { return m_stride; }
 			BufferType GetType() const { return m_bufferType; }
-
-		protected:
-			virtual void Resize(int newSizeInBytes) = 0;
 
 		protected:
 			BufferType m_bufferType;
@@ -80,18 +76,18 @@ namespace Insight
 			void Create(RenderContext* context);
 			void Release();
 
-			RHI_BufferView Upload(void* data, int sizeInBytes);
+			RHI_BufferView Upload(const void* data, u64 sizeInBytes);
 
 			RHI_Buffer* GetBuffer() const { return m_buffer; }
-			RHI_BufferView GetView(int offset, int size) const;
-			void Resize(int newSizeInBytes);
+			RHI_BufferView GetView(u64 offset, u64 size) const;
+			void Resize(u64 newSizeInBytes);
 			void Reset();
 
 		private:
 			RenderContext* m_context = nullptr;
 			RHI_Buffer* m_buffer = nullptr;
-			int m_size = 0;
-			int m_capacity = 0;
+			u64 m_size = 0;
+			u64 m_capacity = 0;
 		};
 	}
 }

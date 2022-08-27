@@ -14,7 +14,7 @@ namespace Insight
 				Release();
 			}
 			
-			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides)
+			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 				m_bufferType = bufferType;
@@ -65,7 +65,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, int sizeInBytes, int offset)
+			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, u64 sizeInBytes, u64 offset)
 			{
 				if (m_mappedData)
 				{
@@ -95,6 +95,17 @@ namespace Insight
 				return std::vector<Byte>();
 			}
 
+			void RHI_Buffer_DX12::Resize(u64 newSizeInBytes)
+			{
+				std::vector<Byte> data = Download();
+				const u64 data_size = GetSize();
+
+				Release();
+				Create(m_context, m_bufferType, newSizeInBytes, m_stride, m_overrides);
+
+				Upload(data.data(), data_size, 0);
+			}
+
 			void RHI_Buffer_DX12::Release()
 			{
 				if (m_resource)
@@ -118,17 +129,6 @@ namespace Insight
 				if (m_resource)
 				{
 					m_resource->SetName(name.c_str());
-				}
-			}
-
-			void RHI_Buffer_DX12::Resize(int newSizeInBytes)
-			{
-				if (m_resource && m_size < newSizeInBytes)
-				{
-					std::vector<Byte> data = Download();
-					Release();
-					Create(m_context, m_bufferType, newSizeInBytes, (int)m_stride, { });
-					Upload(data.data(), (int)data.size(), 0);
 				}
 			}
 		}

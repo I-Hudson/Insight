@@ -251,7 +251,7 @@ namespace Insight
 						{
 							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
 							depthAttachment.clearValue = { };
-							depthAttachment.clearValue.depthStencil = vk::ClearDepthStencilValue(1.0f, 0.0f);
+							depthAttachment.clearValue.depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
 							renderingInfo.setPDepthAttachment(&depthAttachment);
 							renderingInfo.setPStencilAttachment(&detencilAttacment);
 						}
@@ -435,7 +435,7 @@ namespace Insight
 							, sets
 							, dynamicOffsets);
 						RenderStats::Instance().DescriptorSetBindings++;
-						RenderStats::Instance().DescriptorSetUsedCount += sets.size();
+						RenderStats::Instance().DescriptorSetUsedCount += static_cast<u32>(sets.size());
 					}
 				}
 				return result;

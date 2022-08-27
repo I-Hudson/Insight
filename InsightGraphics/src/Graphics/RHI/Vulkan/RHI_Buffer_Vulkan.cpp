@@ -17,7 +17,7 @@ namespace Insight
 				Release();
 			}
 
-			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, int stride, RHI_Buffer_Overrides overrides)
+			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides)
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 				m_bufferType = bufferType;
@@ -52,7 +52,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, int sizeInBytes, int offset)
+			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -142,17 +142,6 @@ namespace Insight
 			void RHI_Buffer_Vulkan::SetName(std::wstring name)
 			{
 				m_context->SetObejctName(name, (u64)m_buffer.operator VkBuffer(), vk::Buffer::objectType);
-			}
-
-			void RHI_Buffer_Vulkan::Resize(int newSizeInBytes)
-			{
-				if (m_buffer && m_size < newSizeInBytes)
-				{
-					std::vector<Byte> data = Download();
-					Release();
-					Create(m_context, m_bufferType, newSizeInBytes, (int)m_stride, { });
-					Upload(data.data(), (int)data.size(), 0);
-				}
 			}
 		}
 	}

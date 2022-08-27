@@ -117,8 +117,8 @@ namespace Insight
 						m_index_buffer.Get()->Resize(index_size);
 					}
 
-					int vtx_dst_offset = 0;
-					int idx_dst_offset = 0;
+					u64 vtx_dst_offset = 0;
+					u64 idx_dst_offset = 0;
 					for (int n = 0; n < draw_data->CmdListsCount; n++)
 					{
 						const ImDrawList* cmd_list = draw_data->CmdLists[n];
@@ -133,7 +133,9 @@ namespace Insight
 
 					cmdList->SetVertexBuffer(m_vertex_buffer.Get());
 					cmdList->SetIndexBuffer(m_index_buffer.Get(), IndexType::Uint16);
-					cmdList->SetViewport(0, 0, Window::Instance().GetWidth(), Window::Instance().GetHeight(), 0.0f, 1.0f);
+					cmdList->SetViewport(0, 0
+						, static_cast<float>(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())
+						, 0.0f, 1.0f);
 
 					// Setup scale and translation:
 					// Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.

@@ -23,7 +23,7 @@ namespace Insight
 			return nullptr;
 		}
 
-		RHI_BufferView RHI_Buffer::GetView(int offset, int size)
+		RHI_BufferView RHI_Buffer::GetView(u64 offset, u64 size)
 		{
 			return RHI_BufferView(this, offset, size);
 		}
@@ -38,7 +38,7 @@ namespace Insight
 		/// <param name="buffer"></param>
 		/// <param name="offset"></param>
 		/// <param name="size"></param>
-		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer, int offset, int size)
+		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size)
 			: m_buffer(buffer), m_offset(offset), m_size(size)
 		{ }
 
@@ -105,9 +105,9 @@ namespace Insight
 			}
 		}
 
-		RHI_BufferView RHI_DynamicBuffer::Upload(void* data, int sizeInBytes)
+		RHI_BufferView RHI_DynamicBuffer::Upload(const void* data, u64 sizeInBytes)
 		{
-			sizeInBytes = std::max(0, sizeInBytes);
+			sizeInBytes = std::max(0ull, sizeInBytes);
 			if (sizeInBytes == 0 || data == nullptr)
 			{
 				return RHI_BufferView(nullptr, 0, 0);
@@ -122,7 +122,7 @@ namespace Insight
 			return view;
 		}
 
-		RHI_BufferView RHI_DynamicBuffer::GetView(int offset, int size) const
+		RHI_BufferView RHI_DynamicBuffer::GetView(u64 offset, u64 size) const
 		{
 			if (m_buffer)
 			{
@@ -131,7 +131,7 @@ namespace Insight
 			return RHI_BufferView();
 		}
 
-		void RHI_DynamicBuffer::Resize(int newSizeInBytes)
+		void RHI_DynamicBuffer::Resize(u64 newSizeInBytes)
 		{
 			if (m_buffer)
 			{
