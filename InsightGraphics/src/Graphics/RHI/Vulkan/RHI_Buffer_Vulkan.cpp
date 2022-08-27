@@ -142,6 +142,7 @@ namespace Insight
 			void RHI_Buffer_Vulkan::SetName(std::wstring name)
 			{
 				m_context->SetObejctName(name, (u64)m_buffer.operator VkBuffer(), vk::Buffer::objectType);
+				m_name = std::move(name);
 			}
 		}
 	}

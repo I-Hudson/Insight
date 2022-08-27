@@ -132,6 +132,14 @@ namespace Insight
 			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
 			m_index_buffer->Upload(indices.data(), index_byte_size);
 
+			const u32 file_name_start = filePath.find_last_of('/');
+			const u32 file_name_end = filePath.find_last_of('.');
+			std::string file_name = filePath.substr(file_name_start, file_name_end - file_name_start);
+
+			std::wstring file_name_w = Platform::WStringFromString(file_name);
+			m_vertex_buffer->SetName(file_name_w + L" Vertex_Buffer");
+			m_index_buffer->SetName(file_name_w + L" Index_Buffer");
+
 			return true;
 		}
 

@@ -99,7 +99,7 @@ namespace Insight
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
 
 			u32 m_frameIndex = 0;
-			FrameResource<RHI_ResourceCache<RHI_Texture>> m_textureCaches;
+			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};

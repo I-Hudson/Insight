@@ -29,13 +29,17 @@ namespace Insight
 	const float ShadowZFar = 512.0f * 4;
 	const float ShadowFOV = 45.0f;
 
+	bool Render_Size_Related_To_Window_Size = true;
+	float Render_Width = 640.0f;
+	float Render_Height = 720.0f;
+
 	namespace Graphics
 	{
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -52,6 +56,12 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			IMGUI_VALID(ImGui::Checkbox("Move shadow camera", &useShadowCamera));
+
+			if (Render_Size_Related_To_Window_Size)
+			{
+				Render_Width = Window::Instance().GetWidth();
+				Render_Height = Window::Instance().GetHeight();
+			}
 
 			UpdateCamera(m_camera);
 			ShadowPass();
@@ -107,43 +117,6 @@ namespace Insight
 
 		void Renderpass::ShadowPass()
 		{
-#ifndef RENDER_GRAPH_ENABLED
-			RHI_Shader* shaderPassShader = nullptr;
-			{
-				IS_PROFILE_SCOPE("ShaderPass-GetShader");
-				ShaderDesc shaderDesc;
-				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Shadow.hlsl";
-				shaderPassShader = Renderer::GetShader(shaderDesc);
-			}
-
-			PipelineStateObject shaderPassPso{};
-			{
-				IS_PROFILE_SCOPE("ShaderPass-SetPipelineStateObject");
-				shaderPassPso.Name = L"ShaderPass_PSO";
-				shaderPassPso.Shader = shaderPassShader;
-				shaderPassPso.CullMode = CullMode::None;
-				shaderPassPso.Swapchain = false;
-				shaderPassPso.DepthStencil = m_shadowTarget->GetTexture();
-				shaderPassPso.DepthCompareOp = CompareOp::GreaterOrEqual;
-				shaderPassPso.DepthSteniclClearValue = glm::vec2(0.0f, 0.0f);
-				Renderer::SetPipelineStateObject(shaderPassPso);
-			}
-
-			int const shadowTargetWidth = m_shadowTarget->GetDesc().Width;
-			int const shadowTargetHeight = m_shadowTarget->GetDesc().Height;
-
-			Renderer::SetViewport(shadowTargetWidth, shadowTargetHeight);
-			Renderer::SetScissor(shadowTargetWidth, shadowTargetHeight);
-
-			UBO_Camera shadowCamera = GetReverseZDepthCamera(m_shadowCamera, false);
-			Renderer::SetUniform(0, 0, &shadowCamera, sizeof(shadowCamera));
-
-			Renderer::BindVertexBuffer(m_vertexBuffer);
-			Renderer::BindIndexBuffer(m_indexBuffer);
-
-			m_testMesh.Draw();
-#endif
-
 			struct PassData
 			{
 				Mesh& Mesh;
@@ -271,16 +244,16 @@ namespace Insight
 					IS_PROFILE_SCOPE("GBuffer pass setup");
 
 					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						  Window::Instance().GetWidth()
-						, Window::Instance().GetHeight()
+						  Render_Width
+						, Render_Height
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle colourRT = builder.CreateTexture(L"ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						Window::Instance().GetWidth()
-						, Window::Instance().GetHeight()
+						  Render_Width
+						, Render_Height
 						, PixelFormat::R32G32B32A32_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle world_pos_rt = builder.CreateTexture(L"WorldPosRT", textureCreateInfo);

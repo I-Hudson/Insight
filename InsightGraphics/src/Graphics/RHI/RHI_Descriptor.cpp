@@ -434,6 +434,7 @@ namespace Insight
 			if (!m_uniformBuffer)
 			{
 				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
+				m_uniformBuffer->SetName(L"Descriptor_Uniform_Buffer");
 			}
 		}
 	}

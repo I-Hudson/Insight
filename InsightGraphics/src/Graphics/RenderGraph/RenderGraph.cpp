@@ -35,7 +35,8 @@ namespace Insight
 
 			m_context = context;
 
-			m_textureCaches.Setup();
+			m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+			//m_textureCaches.Setup();
 			m_commandListManager.Setup();
 
 			m_commandListManager.Setup();
@@ -135,10 +136,12 @@ namespace Insight
 
 			m_passes.clear();
 
-			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
-				{
-					cache.Reset();
-				});
+			m_textureCaches->Reset();
+			DeleteTracked(m_textureCaches);
+			//m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
+			//	{
+			//		cache.Reset();
+			//	});
 
 			m_commandListManager.ForEach([](CommandListManager& manager)
 				{
