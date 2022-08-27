@@ -1,4 +1,5 @@
 #include "Graphics/RenderStats.h"
+#include "Graphics/RenderContext.h"
 
 #include <imgui.h>
 
@@ -26,6 +27,12 @@ namespace Insight
 				averageRenderTimer += AverageRenderTime[i];
 			}
 			averageRenderTimer = averageRenderTimer / AverageRenderTimeCount;
+
+			std::string vendor_name = Platform::StringFromWString(PhysicalDeviceInformation::Instance().Vendor);
+			std::string device_name = Platform::StringFromWString(PhysicalDeviceInformation::Instance().Device_Name);
+			ImGui::Text("Vendor: %s", vendor_name.data());
+			ImGui::Text("Device: %s", device_name.data());
+			ImGui::Text("VRAM: %u MB", PhysicalDeviceInformation::Instance().VRam_Size / 1024 / 1024);
 
 			ImGui::Text("Render Timer: %f", renderTime);
 			ImGui::Text("Average Render Timer: %f", averageRenderTimer);

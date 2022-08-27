@@ -97,21 +97,6 @@ namespace Insight
 
 
 		/// <summary>
-		/// RHI_Descriptor
-		/// </summary>
-		/// <returns></returns>
-		RHI_Descriptor* RHI_Descriptor::New()
-		{
-#if defined(IS_VULKAN_ENABLED)
-			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Descriptor_Vulkan); }
-#endif
-#if defined(IS_DX12_ENABLED)
-			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Descriptor_DX12); }
-#endif
-			return nullptr;
-		}
-
-		/// <summary>
 		/// RHI_DescriptorSet
 		/// </summary>
 		/// <param name="context"></param>

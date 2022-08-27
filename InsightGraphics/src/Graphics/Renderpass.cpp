@@ -33,7 +33,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -154,6 +155,8 @@ namespace Insight
 			RenderGraph::Instance().AddPass<PassData>(L"Cascade shadow pass",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
+					IS_PROFILE_SCOPE("Cascade shadow pass setup");
+
 					const u32 depth_tex_size = 1024 * 4;
 					const u32 width = depth_tex_size;
 					const u32 height = depth_tex_size;
@@ -180,6 +183,8 @@ namespace Insight
 				},
 				[](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
+					IS_PROFILE_SCOPE("Cascade shadow pass execute");
+
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
@@ -254,6 +259,8 @@ namespace Insight
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
+					IS_PROFILE_SCOPE("GBuffer pass setup");
+
 					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
 						  Window::Instance().GetWidth()
 						, Window::Instance().GetHeight()
@@ -297,6 +304,8 @@ namespace Insight
 				},
 				[&camera](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
+					IS_PROFILE_SCOPE("GBuffer pass execute");
+
 					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"GBuffer");
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"GBuffer"));
@@ -355,6 +364,8 @@ namespace Insight
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
+					IS_PROFILE_SCOPE("Swapchain pass setup");
+
 					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
 					builder.ReadTexture(colourRT);
 					data.ColourRT = colourRT;
@@ -379,6 +390,8 @@ namespace Insight
 				},
 				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
+					IS_PROFILE_SCOPE("Swapchain pass execute");
+
 					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"SwapchainPass");
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"SwapchainPass"));

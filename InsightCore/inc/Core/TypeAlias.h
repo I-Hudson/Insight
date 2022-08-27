@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <string>
 
 using u8 = uint8_t;
 using u16 = uint16_t;
@@ -82,10 +83,4 @@ constexpr int log2_32(u32 value)
     value |= value >> 8;
     value |= value >> 16;
     return tab32[(u32)(value * 0x07C4ACDD) >> 27];
-}
-
-template<typename... Ts>
-void for_each_in_tuple()
-{
-
 }

@@ -239,6 +239,9 @@ namespace Insight
 				allocatorInfo.device = m_device;
 				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
+				char* stats;
+				vmaBuildStatsString(m_vmaAllocator, &stats, true);
+
 				{
 					std::array<vk::DescriptorPoolSize, 2> pool_sizes =
 					{
@@ -695,8 +698,11 @@ namespace Insight
 				}
 
 				vk::PhysicalDeviceProperties properties = adapter.getProperties();
-				m_physical_device_info.Name = std::wstring(properties.deviceName.begin(), properties.deviceName.end());
+				vk::PhysicalDeviceMemoryProperties memory_properties = adapter.getMemoryProperties();
+
+				m_physical_device_info.Device_Name = std::wstring(properties.deviceName.begin(), properties.deviceName.end());
 				m_physical_device_info.Vendor_Id = properties.vendorID;
+				m_physical_device_info.VRam_Size += memory_properties.memoryHeaps.at(0).size;
 				m_physical_device_info.SetVendorName();
 
 				m_physical_device_info.MinUniformBufferAlignment = properties.limits.minUniformBufferOffsetAlignment;

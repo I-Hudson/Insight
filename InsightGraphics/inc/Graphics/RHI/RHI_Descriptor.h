@@ -46,15 +46,6 @@ namespace Insight
 			RenderContext* m_context{ nullptr };
 		};
 
-		class RHI_Descriptor : public RHI_Resource
-		{
-		public:
-			static RHI_Descriptor* New();
-
-			virtual void Update(const std::vector<Descriptor>& descriptors) = 0;
-			virtual u64 GetHash(bool includeResouce = false) = 0;
-		};
-
 		class RHI_DescriptorSet : public RHI_Resource
 		{
 		public:

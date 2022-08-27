@@ -26,6 +26,9 @@ namespace Insight
 
 			static std::vector<std::string> GetCallStack(int frameCount = 32);
 
+			static std::string StringFromWString(const std::wstring& wstring);
+			static std::wstring WStringFromString(const std::string& string);
+
 			static Core::GUID CreateGUID();
 			static void AssignGUID(Core::GUID& guid);
 		};

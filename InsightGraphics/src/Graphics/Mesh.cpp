@@ -17,6 +17,24 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		static const uint32_t importer_flags =
+			// Switch to engine conventions
+			aiProcess_FlipUVs | // DirectX style.
+			// Validate and clean up
+			aiProcess_ValidateDataStructure | // Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
+			aiProcess_FindDegenerates | // Convert degenerate primitives to proper lines or points.
+			aiProcess_FindInvalidData | // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes / fixes them
+			aiProcess_RemoveRedundantMaterials | // Searches for redundant/unreferenced materials and removes them
+			aiProcess_Triangulate | // Triangulates all faces of all meshes
+			aiProcess_JoinIdenticalVertices | // Triangulates all faces of all meshes
+			aiProcess_SortByPType | // Splits meshes with more than one primitive type in homogeneous sub-meshes.
+			aiProcess_FindInstances | // This step searches for duplicate meshes and replaces them with references to the first mesh
+			// Generate missing normals or UVs
+			aiProcess_CalcTangentSpace | // Calculates the tangents and bitangents for the imported meshes
+			aiProcess_GenSmoothNormals | // Ignored if the mesh already has normals
+			aiProcess_GenUVCoords;               // Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels
+
+
 		Submesh::~Submesh()
 		{
 			Destroy();
@@ -25,10 +43,12 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
-			cmdList->SetVertexBuffer(m_vertexInfo.Buffer);
+			//cmdList->SetVertexBuffer(m_vertexInfo.Buffer);
+			cmdList->SetVertexBuffer(*m_vertex_buffer);
 			cmdList->SetIndexBuffer(*m_indexBuffer, IndexType::Uint32);
+			//const u64 vertex_count = m_vertex_buffer->GetSize() / sizeof(Vertex);
 			const int indexCount = (int)(m_indexBuffer->GetSize() / sizeof(int));
-			cmdList->DrawIndexed(indexCount, 1, 0, m_vertexInfo.VertexOffset, 0);
+			cmdList->DrawIndexed(indexCount, 1, 0, 0, 0);
 		}
 #endif // RENDER_GRAPH_ENABLED
 
@@ -74,12 +94,14 @@ namespace Insight
 			indexOffset = 0;
 
 			Assimp::Importer importer;
+			// Remove points and lines.
+			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
+			// Remove cameras and lights
+			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
+			// Enable progress tracking
+			importer.SetPropertyBool(AI_CONFIG_GLOB_MEASURE_TIME, true);
 			const aiScene* scene = importer.ReadFile(filePath,
-				aiProcess_Triangulate
-				| aiProcess_FlipUVs
-				| aiProcess_GenNormals
-				| aiProcess_OptimizeMeshes
-				//| aiProcess_OptimizeGraph
+				importer_flags
 			);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -96,9 +118,9 @@ namespace Insight
 			const u64 expectedVertexByteSize = m_vertexBuffer->GetSize();
 			const u64 vertexByteSize = vertices.size() * sizeof(Vertex);
 
-			ASSERT(expectedVertexByteSize == vertexByteSize);
+			//ASSERT(expectedVertexByteSize == vertexByteSize);
 
-			m_vertexBuffer->Upload(vertices.data(), vertexByteSize);
+			//m_vertexBuffer->Upload(vertices.data(), vertexByteSize);
 
 			return true;
 		}
@@ -124,9 +146,15 @@ namespace Insight
 		void Mesh::Draw(RHI_CommandList* cmdList) const
 		{
 			IS_PROFILE_FUNCTION();
+			int i = 0;
 			for (Submesh* submesh : m_submeshes)
 			{
 				submesh->Draw(cmdList);
+				if (i >= 1)
+				{
+					return;
+				}
+				//++i;
 			}
 		}
 #endif //RENDER_GRAPH_ENABLED
@@ -187,12 +215,17 @@ namespace Insight
 				{
 					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 
+					std::vector<Vertex> vertices_local;
 					std::vector<int> indices;
-					ProcessMesh(aiMesh, aiScene, vertices, indices);
+					ProcessMesh(aiMesh, aiScene, vertices_local, indices);
 
-					const int vertexSizeBytes = static_cast<int>(vertices.size() * sizeof(Vertex));
+					const int vertexSizeBytes = static_cast<int>(vertices_local.size() * sizeof(Vertex));
 					const int indexSizeBytes = static_cast<int>(indices.size() * sizeof(int));
 
+					RHI_Buffer* v_Buffer = Renderer::CreateVertexBuffer(vertexSizeBytes, sizeof(Vertex));
+					{
+						v_Buffer->Upload(vertices_local.data(), vertexSizeBytes, 0);
+					}
 					RHI_Buffer* iBuffer = Renderer::CreateIndexBuffer(indexSizeBytes);
 					{
 						iBuffer->Upload(indices.data(), indexSizeBytes, 0);
@@ -203,6 +236,7 @@ namespace Insight
 					Submesh* subMesh = NewArgsTracked(Submesh, this);
 					subMesh->SetVertexInfo(submeshVertexInfo);
 					subMesh->SetIndexBuffer(iBuffer);
+					subMesh->m_vertex_buffer = std::move(UPtr(v_Buffer));
 					m_submeshes.push_back(std::move(subMesh));
 				}
 
@@ -249,7 +283,8 @@ namespace Insight
 				IS_PROFILE_SCOPE("Add Vertex");
 
 				Vertex vertex = { };
-				glm::vec4 vector = { }; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+				glm::vec4 vector = { }; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
+				// so we transfer the data to this placeholder glm::vec3 first.
 				// positions
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;

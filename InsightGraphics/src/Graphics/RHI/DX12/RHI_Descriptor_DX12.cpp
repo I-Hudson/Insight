@@ -39,18 +39,18 @@ namespace Insight
 			}
 
 
-			/// <summary>
-			/// RHI_Descriptor_DX12
-			/// </summary>
-			/// <param name="descriptors"></param>
-			void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
-			{
-			}
+			///// <summary>
+			///// RHI_Descriptor_DX12
+			///// </summary>
+			///// <param name="descriptors"></param>
+			//void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
+			//{
+			//}
 
-			u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
-			{
-				return 0;
-			}
+			//u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
+			//{
+			//	return 0;
+			//}
 
 
 			/// <summary>
@@ -265,21 +265,21 @@ namespace Insight
 				m_heaps.push_back(heap);
 			}
 
-			/// <summary>
-			/// RHI_Descriptor_DX12
-			/// </summary>
-			void RHI_Descriptor_DX12::Release()
-			{
-			}
+			///// <summary>
+			///// RHI_Descriptor_DX12
+			///// </summary>
+			//void RHI_Descriptor_DX12::Release()
+			//{
+			//}
 
-			bool RHI_Descriptor_DX12::ValidResouce()
-			{
-				return false;
-			}
+			//bool RHI_Descriptor_DX12::ValidResouce()
+			//{
+			//	return false;
+			//}
 
-			void RHI_Descriptor_DX12::SetName(std::wstring name)
-			{
-			}
+			//void RHI_Descriptor_DX12::SetName(std::wstring name)
+			//{
+			//}
 
 		//	bool DescriptorAllocator_DX12::SetupDescriptors()
 		//	{

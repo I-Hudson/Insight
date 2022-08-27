@@ -48,6 +48,8 @@ namespace Insight
 			};
 			RenderGraph::Instance().AddPass<TestPassData>(L"ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
 				{
+					IS_PROFILE_SCOPE("ImGui pass setup");
+
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetAsRenderToSwapchain();
@@ -90,6 +92,8 @@ namespace Insight
 				},
 				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
+					IS_PROFILE_SCOPE("ImGui pass execute");
+
 					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"ImGuiPass");
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"ImGuiPass"));

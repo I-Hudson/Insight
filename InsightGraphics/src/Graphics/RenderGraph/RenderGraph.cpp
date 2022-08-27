@@ -353,7 +353,6 @@ namespace Insight
 			{
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 
-				IS_PROFILE_SCOPE("Single pass");
 				bool invert_y = false;
 				if (GraphicsManager::IsVulkan())
 				{

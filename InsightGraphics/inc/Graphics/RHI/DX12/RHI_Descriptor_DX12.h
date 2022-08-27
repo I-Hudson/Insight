@@ -35,21 +35,21 @@ namespace Insight
 				ComPtr<ID3D12RootSignature> m_layout{ nullptr };
 			};
 
-			class RHI_Descriptor_DX12 : public RHI_Descriptor
-			{
-			public:
+			//class RHI_Descriptor_DX12 : public RHI_Descriptor
+			//{
+			//public:
 
-				virtual void Update(const std::vector<Descriptor>& descriptors) override;
-				virtual u64 GetHash(bool includeResouce = false) override;
+			//	virtual void Update(const std::vector<Descriptor>& descriptors) override;
+			//	virtual u64 GetHash(bool includeResouce = false) override;
 
-				// RHI_Resouce
-				virtual void Release() override;
-				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+			//	// RHI_Resouce
+			//	virtual void Release() override;
+			//	virtual bool ValidResouce() override;
+			//	virtual void SetName(std::wstring name) override;
 
-			private:
-				RenderContext_DX12* m_context{ nullptr };
-			};
+			//private:
+			//	RenderContext_DX12* m_context{ nullptr };
+			//};
 
 			struct DescriptorHeapHandle_DX12
 			{

@@ -33,10 +33,10 @@ namespace Insight
 		/// </summary>
 		struct PhysicalDeviceInformation : public Core::Singleton<PhysicalDeviceInformation>
 		{
-			std::wstring Name;
+			std::wstring Device_Name;
 			std::wstring Vendor;
 			u32 Vendor_Id = 0;
-			std::wstring VRam_Size;
+			u64 VRam_Size;
 
 			u64 MinUniformBufferAlignment = 0;
 
@@ -45,10 +45,10 @@ namespace Insight
 				ASSERT(Vendor_Id != 0);
 				switch (Vendor_Id)
 				{
-				case 0x1002: Vendor = L"AMD";
-				case 0x8086: Vendor = L"INTEL";
-				case 0x10DE: Vendor = L"NVIDIA";
-				case 0x1414: Vendor = L"MICROSOFT";
+				case 0x1002: Vendor = L"AMD"; break;
+				case 0x8086: Vendor = L"INTEL"; break;
+				case 0x10DE: Vendor = L"NVIDIA"; break;
+				case 0x1414: Vendor = L"MICROSOFT"; break;
 				default:
 					break;
 				}
