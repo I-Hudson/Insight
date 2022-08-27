@@ -134,6 +134,7 @@ IncludeDirs["assimp"] = "%{wks.location}/vendor/assimp/include"
 IncludeDirs["optick"] = "%{wks.location}/vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}/vendor/tracy"
 IncludeDirs["stb_image"] = "%{wks.location}/vendor/stb"
+IncludeDirs["meshoptimizer"] = "%{wks.location}/vendor/meshoptimizer/src"
 
 LibDirs = {}
 

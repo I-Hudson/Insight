@@ -10,6 +10,8 @@ echo Starting dependencies builds
 echo Generating premake projects and soltuion
 call ..\vendor\premake\premake5.exe %vsVersion% 
 
+if %msBuildType% == GOTO END
+
 SET vsDevCmd2022="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\Tools\VsDevCmd.bat"
 SET vsDevCmd2019="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
 

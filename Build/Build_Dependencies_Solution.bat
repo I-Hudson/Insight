@@ -1,0 +1,1 @@
+call build_dependencies.bat vs2019
