@@ -11,6 +11,7 @@ namespace Insight
 	{
 		class DescriptorBuffer;
 		class RHI_Texture;
+		class RHI_Sampler;
 
 		struct Descriptor
 		{
@@ -66,7 +67,8 @@ namespace Insight
 			DescriptorResourceType ResourceType = DescriptorResourceType::Unknown;
 			
 			RHI_BufferView BufferView;
-			RHI_Texture* Texture = nullptr;
+			const RHI_Texture* Texture = nullptr;
+			const RHI_Sampler* Sampler = nullptr;
 
 			u64 GetHash(bool includeResource) const
 			{
@@ -85,6 +87,10 @@ namespace Insight
 					if (Texture)
 					{
 						HashCombine(hash, Texture);
+					}
+					if (Sampler)
+					{
+						HashCombine(hash, Sampler);
 					}
 				}
 				return hash;

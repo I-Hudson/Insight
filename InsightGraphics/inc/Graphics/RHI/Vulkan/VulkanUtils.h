@@ -28,9 +28,14 @@ namespace Insight
 		vk::BlendFactor				BlendFactorToVulkan(BlendFactor factor);
 		vk::BlendOp					BlendOpToVulkan(BlendOp op);
 		vk::CompareOp				CompareOpToVulkan(CompareOp op);
+		vk::Filter					FilterToVulkan(Filter filter);
+		vk::SamplerMipmapMode		SamplerMipmapModeToVulkan(SamplerMipmapMode sampler_mipmap_mode);
+		vk::SamplerAddressMode		SamplerAddressModeToVulkan(SamplerAddressMode sampler_address_mode);
+		vk::BorderColor				BorderColourToVulkan(BorderColour border_colour);
 		vk::AttachmentLoadOp		AttachmentLoadOpToVulkan(AttachmentLoadOp op);
 		vk::BufferUsageFlags		BufferTypeToVulkanBufferUsageFlags(BufferType type);
 		vk::CullModeFlags			CullModeToVulkan(CullMode cullMode);
+		vk::FrontFace				FrontFaceToVulkan(FrontFace front_face);
 		vk::DescriptorType			DescriptorTypeToVulkan(DescriptorType type);
 		vk::AccessFlags				AccessFlagsToVulkan(AccessFlags flags);
 		vk::ImageLayout				ImageLayoutToVulkan(ImageLayout layout);

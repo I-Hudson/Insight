@@ -198,6 +198,79 @@ namespace Insight
 			return str;
 		}
 
+		std::string CompareOpToString(CompareOp op)
+		{
+			switch (op)
+			{
+			case Insight::Graphics::CompareOp::Never:			return "Never";
+			case Insight::Graphics::CompareOp::Less:			return "Less";
+			case Insight::Graphics::CompareOp::Equal:			return "Equal";
+			case Insight::Graphics::CompareOp::LessOrEqual:		return "Less Or Equal";
+			case Insight::Graphics::CompareOp::Greater:			return "Greater";
+			case Insight::Graphics::CompareOp::GreaterOrEqual:	return "Greater Or Equal";
+			case Insight::Graphics::CompareOp::Always:			return "Always";
+			default:
+				break;
+			}
+			return "";
+		}
+
+
+		std::string FilterToString(Filter filter)
+		{
+			switch (filter)
+			{
+			case Insight::Graphics::Filter::Nearest:	return "Nearest";
+			case Insight::Graphics::Filter::Linear:		return "Linear";
+			default:
+				break;
+			}
+			return "";
+		}
+
+		std::string SamplerMipmapModeToString(SamplerMipmapMode sampler_mipmap_mode)
+		{
+			switch (sampler_mipmap_mode)
+			{
+			case SamplerMipmapMode::Nearest:	return "Nearest";
+			case SamplerMipmapMode::Linear:		return "Linear";
+			default:
+				break;
+			}
+			return "";
+		}
+
+		std::string SamplerAddressModeToString(SamplerAddressMode sampler_address_mode)
+		{
+			switch (sampler_address_mode)
+			{
+			case SamplerAddressMode::Repeat:			return "Repeat";
+			case SamplerAddressMode::MirroredRepeat:	return "Mirrored Repeat";
+			case SamplerAddressMode::ClampToEdge:		return "Clamp To Edge";
+			case SamplerAddressMode::ClampToBoarder:	return "Clamp To Boarder";
+			case SamplerAddressMode::MirrorClampToEdge:	return "Mirror Clamp To Edge";
+			default:
+				break;
+			}
+			return "";
+		}
+
+		std::string BoarderColourToString(BorderColour boarder_colour)
+		{
+			switch (boarder_colour)
+			{
+			case BorderColour::FloatTransparentBlack:	return "Float Transparent Black";
+			case BorderColour::IntTransparentBlack:		return "Int Transparent Black";
+			case BorderColour::FloatOpaqueBlack:		return "Float Opaque Black";
+			case BorderColour::IntOpaqueBlack:			return "Int Opaque Black";
+			case BorderColour::FloatOpaqueWhite:		return "Float Opaque White";
+			case BorderColour::IntOpaqueWhite:			return "Int Opaque White";
+			default:
+				break;
+			}
+			return "";
+		}
+
 		std::string AttachmentLoadOpToString(AttachmentLoadOp op)
 		{
 			std::string str;

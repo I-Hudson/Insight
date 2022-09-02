@@ -216,7 +216,7 @@ namespace Insight
 						vk::RenderingAttachmentInfo depthAttachment;
 						vk::RenderingAttachmentInfo detencilAttacment;
 
-						std::array<float, 4> clearColourValues = { 1.0f, 0.0f, 0.0f, 1.0f };
+						std::array<float, 4> clearColourValues = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 						auto makeRenderingAttachment = 
 						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> vk::RenderingAttachmentInfo
@@ -329,6 +329,11 @@ namespace Insight
 				m_commandList.setScissor(0, scissors);
 				m_drawData.Siccsior.x = width;
 				m_drawData.Siccsior.y = height;
+			}
+
+			void RHI_CommandList_Vulkan::SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor)
+			{
+				m_commandList.setDepthBias(depth_bias_constant_factor, depth_bias_clamp, depth_bias_slope_factor);
 			}
 
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)

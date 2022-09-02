@@ -16,7 +16,7 @@ namespace Insight
 			public:
 
 				virtual void SetRenderContext(RenderContext* context) override;
-				virtual RHI_Sampler GetOrCreateSampler(RHI_SamplerCreateInfo info) override;
+				virtual RHI_Sampler* GetOrCreateSampler(RHI_SamplerCreateInfo info) override;
 				virtual void ReleaseAll() override;
 
 			private:

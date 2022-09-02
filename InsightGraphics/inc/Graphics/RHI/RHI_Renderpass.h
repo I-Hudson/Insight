@@ -28,7 +28,7 @@ namespace Insight
 
 			//===================================================================
 			// Used for rendering 
-			u8 Layer_Array_Index = 0;
+			u32 Layer_Array_Index = 0;
 
 			bool IsValid() const
 			{

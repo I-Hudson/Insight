@@ -25,9 +25,11 @@ workspace "Insight"
     defines
     {
         "_CRT_SECURE_NO_WARNINGS",
-        "GLM_FORCE_SWIZZLE",
         "IS_PLATFORM_X64",
         "RENDER_GRAPH_ENABLED",
+        "GLM_FORCE_SWIZZLE",
+        "GLM_FORCE_LEFT_HANDED",
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
     }
 
     includedirs
@@ -79,7 +81,7 @@ workspace "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "VK_USE_PLATFORM_WIN32_KHR",
-            "IS_DX12_ENABLED",
+            --"IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "NOMINMAX",
         }

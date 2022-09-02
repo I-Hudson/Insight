@@ -48,6 +48,11 @@ namespace Insight
 
 				for (const Descriptor& desc : descriptors)
 				{
+					if (desc.Type == DescriptorType::Unknown)
+					{
+						continue;
+					}
+
 					vk::DescriptorSetLayoutBinding bindingInfo = {};
 					bindingInfo.setBinding(desc.Binding);
 					bindingInfo.setDescriptorCount(1);

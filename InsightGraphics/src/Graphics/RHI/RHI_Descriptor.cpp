@@ -53,17 +53,20 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			u64 hash = 0;
-			int set = 0;
-
-			if (!descriptors.empty())
-			{
-				set = descriptors.at(0).Set;
-			}
+			int set = -1;
 
 			for (const Descriptor& descriptor : descriptors)
 			{
-				HashCombine(hash, descriptor.GetHash(false));
-				ASSERT(set == descriptor.Set);
+				if (descriptor.Type != DescriptorType::Unknown)
+				{
+					if (set == -1)
+					{
+						set = descriptor.Set;
+					}
+
+					HashCombine(hash, descriptor.GetHash(false));
+					ASSERT(set == descriptor.Set);
+				}
 			}
 
 			auto itr = m_layouts.find(hash);
@@ -73,7 +76,6 @@ namespace Insight
 			}
 
 			RHI_DescriptorLayout* newLayout = RHI_DescriptorLayout::New();
-			//assert(newLayout);
 			m_layouts[hash] = newLayout;
 			if (newLayout)
 			{
@@ -170,7 +172,10 @@ namespace Insight
 			u64 hash = 0;
 			for (const auto& d : descriptors)
 			{
-				HashCombine(hash, d.GetHash(true));
+				if (d.Type != DescriptorType::Unknown)
+				{
+					HashCombine(hash, d.GetHash(true));
+				}
 			}
 
 #ifdef IS_VULKAN_ENABLED
@@ -190,6 +195,13 @@ namespace Insight
 
 				for (const Descriptor& descriptor : descriptors)
 				{
+					if (descriptor.Type == DescriptorType::Unknown)
+					{
+						continue;
+					}
+
+					bool add_write = false;
+
 					vk::WriteDescriptorSet writeDescriptorSet = { };
 					writeDescriptorSet.dstSet = *reinterpret_cast<VkDescriptorSet*>(&m_resource);
 					writeDescriptorSet.dstBinding = descriptor.Binding;
@@ -197,30 +209,67 @@ namespace Insight
 					writeDescriptorSet.descriptorCount = 1;
 					writeDescriptorSet.descriptorType = DescriptorTypeToVulkan(descriptor.Type);
 
-					if (descriptor.Texture)
+					if (descriptor.Type == DescriptorType::Sampler)
 					{
-						RHI_Sampler rhi_sampler = m_context->GetSamplerManager().GetOrCreateSampler({});
-						vk::Sampler sampler_vulkan = *reinterpret_cast<vk::Sampler*>(&rhi_sampler);
+						const RHI_Sampler* rhi_sampler = descriptor.Sampler;
+						vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
 
-						imageInfo[imageInfoIndex].imageView = static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
+						imageInfo[imageInfoIndex].imageView = vk::ImageView();
+						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eUndefined;
+						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
+						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+						++imageInfoIndex;
+
+						add_write = true;
+					}
+
+					if (descriptor.Type == DescriptorType::Sampled_Image)
+					{
+						imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
+						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+						imageInfo[imageInfoIndex].sampler = vk::Sampler();
+						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+						++imageInfoIndex;
+						add_write = true;
+					}
+
+					if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
+					{
+						const RHI_Sampler* rhi_sampler = descriptor.Sampler == nullptr ?
+							m_context->GetSamplerManager().GetOrCreateSampler({}) : descriptor.Sampler;
+						vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
+
+						imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
 						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 						++imageInfoIndex;
+
+						add_write = true;
 					}
 
-					if (descriptor.BufferView.IsValid())
+					if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
-						bufferInfo[bufferInfoIndex].buffer = static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer())->GetBuffer();	
-						bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
-						bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
-						
+						RHI::Vulkan::RHI_Buffer_Vulkan* buffer_vulkan = descriptor.BufferView.IsValid() ?
+							static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer()) : nullptr;
+						if (buffer_vulkan != nullptr)
+						{
+							bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
+							bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
+							bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
+
 							writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
-						++bufferInfoIndex;
+							++bufferInfoIndex;
+
+							add_write = true;
+						}
 					}
 
-					writes[writeIndex] = std::move(writeDescriptorSet);
-					++writeIndex;
+					if (add_write)
+					{
+						writes[writeIndex] = std::move(writeDescriptorSet);
+						++writeIndex;
+					}
 				}
 
 				if (hash != m_currentDescriptorHash)
@@ -253,8 +302,11 @@ namespace Insight
 			u64 hashWithResource = 0;
 			for (const auto& d : descriptors)
 			{
-				HashCombine(hash, d.GetHash(false));
-				HashCombine(hashWithResource, d.GetHash(true));
+				if (d.Type != DescriptorType::Unknown)
+				{
+					HashCombine(hash, d.GetHash(false));
+					HashCombine(hashWithResource, d.GetHash(true));
+				}
 			}
 
 			// Is there a set which is already in use with the same resources reuse that set.
@@ -338,11 +390,6 @@ namespace Insight
 			std::vector<Descriptor> descriptors = shader->GetDescriptors();
 			for (const Descriptor& desc : descriptors)
 			{
-				if (desc.Type == DescriptorType::Sampler)
-				{
-					continue;
-				}
-
 				m_descriptors[desc.Set].push_back(desc);
 			}
 			for (auto& descs : m_descriptors)
@@ -352,16 +399,36 @@ namespace Insight
 						return d1.Binding < d2.Binding;
 					});
 			}
+
+			// Fill in missing descriptors.
+			for (auto& pair : m_descriptors)
+			{
+				if (pair.second.size() > 0)
+				{
+					u32 first_binding = pair.second.at(0).Binding;
+					for (size_t i = 0; i < first_binding; ++i)
+					{
+						pair.second.insert(pair.second.begin(), Descriptor());
+					}
+				}
+			}
 		}
 
-		void DescriptorAllocator::SetUniform(int set, int binding, const void* data, u32 size)
+		void DescriptorAllocator::SetUniform(u32 set, u32 binding, const void* data, u32 size)
 		{
 			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			if (binding >= (int)descriptors.size())
 			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
+				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
 				return;
 			}
+			Descriptor& descriptor = descriptors.at(binding);
+			if (descriptor.Size != size)
+			{
+				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'."
+					, descriptor.Size, size);
+			}
+
 			CreateUniformBufferIfNoExist();
 			
 			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
@@ -371,10 +438,10 @@ namespace Insight
 			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
 			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
 
-			descriptors[binding].BufferView = view;
+			descriptor.BufferView = view;
 		}
 
-		void DescriptorAllocator::SetTexture(int set, int binding, RHI_Texture* texture)
+		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
 		{
 			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			if (binding >= (int)descriptors.size())
@@ -383,6 +450,18 @@ namespace Insight
 				return;
 			}
 			descriptors[binding].Texture = texture;
+			descriptors[binding].Sampler = sampler != nullptr ? sampler : nullptr;
+		}
+
+		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
+		{
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (binding >= (int)descriptors.size())
+			{
+				IS_CORE_ERROR("[GPUDescriptorAllocator::SetSampler] Binding: '{0}' is out of range.", binding);
+				return;
+			}
+			descriptors[binding].Sampler = sampler;
 		}
 
 

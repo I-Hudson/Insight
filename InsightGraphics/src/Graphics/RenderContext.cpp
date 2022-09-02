@@ -21,8 +21,12 @@ namespace Insight
 		RenderContext* RenderContext::New()
 		{
 			RenderContext* context = nullptr;
+#ifdef IS_VULKAN_ENABLED
 			if (GraphicsManager::IsVulkan()) { context = NewTracked(RHI::Vulkan::RenderContext_Vulkan); }
+#endif
+#ifdef IS_DX12_ENABLED
 			else if (GraphicsManager::IsDX12()) { context = NewTracked(RHI::DX12::RenderContext_DX12); }
+#endif
 
 			if (!context)
 			{

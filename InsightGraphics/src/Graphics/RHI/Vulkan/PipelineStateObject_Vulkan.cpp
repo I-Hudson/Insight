@@ -56,11 +56,6 @@ namespace Insight
 
 				for (const Descriptor& descriptor : descriptors)
 				{
-					if (descriptor.Type == DescriptorType::Sampler)
-					{
-						continue;
-					}
-
 					if (currentSet != descriptor.Set)
 					{
 						RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
@@ -159,7 +154,7 @@ namespace Insight
 					false,															// rasterizerDiscardEnable
 					vk::PolygonMode::eFill,											// polygonMode
 					CullModeToVulkan(pso.CullMode),									// cullMode
-					vk::FrontFace::eClockwise,										// frontFace
+					FrontFaceToVulkan(pso.FrontFace),								// frontFace
 					pso.DepthBaisEnabled,											// depthBiasEnable
 					0.0f,															// depthBiasConstantFactor
 					0.0f,															// depthBiasClamp
@@ -230,7 +225,7 @@ namespace Insight
 					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             // blendConstants
 				);
 			
-				std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+				std::array<vk::DynamicState, 3> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor, vk::DynamicState::eDepthBias };
 				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
 			
 				RenderContext* context = (RenderContext*)m_context;

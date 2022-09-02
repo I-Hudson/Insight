@@ -56,14 +56,24 @@ namespace Insight
 			m_bound_index_buffer = nullptr;
 		}
 
-		void RHI_CommandList::SetUniform(int set, int binding, const void* data, u32 size)
+		void RHI_CommandList::SetUniform(u32 set, u32 binding, const void* data, u32 size)
 		{
 			m_descriptorAllocator->SetUniform(set, binding, data, size);
 		}
 
-		void RHI_CommandList::SetTexture(int set, int binding, RHI_Texture* texture)
+		void RHI_CommandList::SetTexture(u32 set, u32 binding, const RHI_Texture* texture)
 		{
-			m_descriptorAllocator->SetTexture(set, binding, texture);
+			m_descriptorAllocator->SetTexture(set, binding, texture, nullptr);
+		}
+
+		void RHI_CommandList::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
+		{
+			m_descriptorAllocator->SetTexture(set, binding, texture, sampler);
+		}
+
+		void RHI_CommandList::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
+		{
+			m_descriptorAllocator->SetSampler(set, binding, sampler);
 		}
 
 		bool RHI_CommandList::CanDraw()
@@ -117,7 +127,7 @@ namespace Insight
 				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
 			}
 			m_allocLists.erase(cmdList);
-			
+
 			if (m_freeLists.find(cmdList) != m_freeLists.end())
 			{
 				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");

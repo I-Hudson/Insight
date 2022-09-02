@@ -16,7 +16,7 @@ namespace Insight
 		class RHI_DescriptorLayoutManager;
 		class RHI_DescriptorSetManager;
 		class RHI_Texture;
-
+		class RHI_Sampler;
 
 		class RHI_DescriptorLayout : public RHI_Resource
 		{
@@ -92,8 +92,9 @@ namespace Insight
 
 			void SetPipeline(PipelineStateObject pso);
 
-			void SetUniform(int set, int binding, const void* data, u32 size);
-			void SetTexture(int set, int binding, RHI_Texture* texture);
+			void SetUniform(u32 set, u32 binding, const void* data, u32 size);
+			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
+			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
 
 			Descriptor GetDescriptor(int set, int binding);
 

@@ -698,6 +698,65 @@ namespace Insight
             return vk::CompareOp::eNever;
         }
 
+        vk::Filter FilterToVulkan(Filter filter)
+        {
+            switch (filter)
+            {
+            case Filter::Nearest:    return vk::Filter::eNearest;
+            case Filter::Linear:     return vk::Filter::eLinear;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::Filter::eNearest;
+        }
+
+        vk::SamplerMipmapMode SamplerMipmapModeToVulkan(SamplerMipmapMode sampler_mipmap_mode)
+        {
+            switch (sampler_mipmap_mode)
+            {
+            case SamplerMipmapMode::Nearest:    return vk::SamplerMipmapMode::eNearest;
+            case SamplerMipmapMode::Linear:     return vk::SamplerMipmapMode::eLinear;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::SamplerMipmapMode::eNearest;
+        }
+
+        vk::SamplerAddressMode SamplerAddressModeToVulkan(SamplerAddressMode sampler_address_mode)
+        {
+            switch (sampler_address_mode)
+            {
+            case SamplerAddressMode::Repeat:                return vk::SamplerAddressMode::eRepeat;
+            case SamplerAddressMode::MirroredRepeat:        return vk::SamplerAddressMode::eMirroredRepeat;
+            case SamplerAddressMode::ClampToEdge:           return vk::SamplerAddressMode::eClampToEdge;
+            case SamplerAddressMode::ClampToBoarder:        return vk::SamplerAddressMode::eClampToBorder;
+            case SamplerAddressMode::MirrorClampToEdge:     return vk::SamplerAddressMode::eMirrorClampToEdge;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::SamplerAddressMode::eMirroredRepeat;
+        }
+
+        vk::BorderColor BorderColourToVulkan(BorderColour border_colour)
+        {
+            switch (border_colour)
+            {
+            case BorderColour::FloatTransparentBlack:    return vk::BorderColor::eFloatTransparentBlack;
+            case BorderColour::IntTransparentBlack:      return vk::BorderColor::eIntTransparentBlack;
+            case BorderColour::FloatOpaqueBlack:         return vk::BorderColor::eFloatOpaqueBlack;
+            case BorderColour::IntOpaqueBlack:           return vk::BorderColor::eIntOpaqueBlack;
+            case BorderColour::FloatOpaqueWhite:         return vk::BorderColor::eFloatOpaqueWhite;
+            case BorderColour::IntOpaqueWhite:           return vk::BorderColor::eIntOpaqueWhite;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::BorderColor::eFloatOpaqueWhite;
+        }
+
         vk::AttachmentLoadOp AttachmentLoadOpToVulkan(AttachmentLoadOp op)
         {
             switch (op)
@@ -732,32 +791,43 @@ namespace Insight
         {
             switch (cullMode)
             {
-            case Insight::Graphics::CullMode::None: return vk::CullModeFlagBits::eNone;
-            case Insight::Graphics::CullMode::Front: return vk::CullModeFlagBits::eFront;
-            case Insight::Graphics::CullMode::Back: return vk::CullModeFlagBits::eBack;
-            case Insight::Graphics::CullMode::FrontAndBack: return vk::CullModeFlagBits::eFrontAndBack;
+            case CullMode::None: return vk::CullModeFlagBits::eNone;
+            case CullMode::Front: return vk::CullModeFlagBits::eFront;
+            case CullMode::Back: return vk::CullModeFlagBits::eBack;
+            case CullMode::FrontAndBack: return vk::CullModeFlagBits::eFrontAndBack;
             default:
                 break;
             }
             return vk::CullModeFlagBits::eNone;
         }
 
+        vk::FrontFace FrontFaceToVulkan(FrontFace front_face)
+        {
+            switch (front_face)
+            {
+            case FrontFace::CounterClockwise:    return vk::FrontFace::eCounterClockwise;
+            case FrontFace::Clockwise:           return vk::FrontFace::eCounterClockwise;
+            default:
+                break;
+            }
+        }
+
         vk::DescriptorType DescriptorTypeToVulkan(DescriptorType type)
         {
             switch (type)
             {
-            case Insight::Graphics::DescriptorType::Sampler:                    return vk::DescriptorType::eSampler;
-            case Insight::Graphics::DescriptorType::Combined_Image_Sampler:     return vk::DescriptorType::eCombinedImageSampler;
-            case Insight::Graphics::DescriptorType::Sampled_Image:              return vk::DescriptorType::eSampledImage;
-            case Insight::Graphics::DescriptorType::Storage_Image:              return vk::DescriptorType::eStorageImage;
-            case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:       return vk::DescriptorType::eUniformTexelBuffer;
-            case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:       return vk::DescriptorType::eStorageTexelBuffer;
-            case Insight::Graphics::DescriptorType::Unifom_Buffer:              return vk::DescriptorType::eUniformBuffer;
-            case Insight::Graphics::DescriptorType::Storage_Buffer:             return vk::DescriptorType::eStorageBuffer;
-            case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic:     return vk::DescriptorType::eUniformBufferDynamic;
-            case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic:     return vk::DescriptorType::eStorageBufferDynamic;
-            case Insight::Graphics::DescriptorType::Input_Attachment:           return vk::DescriptorType::eInputAttachment;
-            case Insight::Graphics::DescriptorType::Unknown:                    return vk::DescriptorType::eCombinedImageSampler;
+            case DescriptorType::Sampler:                    return vk::DescriptorType::eSampler;
+            case DescriptorType::Combined_Image_Sampler:     return vk::DescriptorType::eCombinedImageSampler;
+            case DescriptorType::Sampled_Image:              return vk::DescriptorType::eSampledImage;
+            case DescriptorType::Storage_Image:              return vk::DescriptorType::eStorageImage;
+            case DescriptorType::Uniform_Texel_Buffer:       return vk::DescriptorType::eUniformTexelBuffer;
+            case DescriptorType::Storage_Texel_Buffer:       return vk::DescriptorType::eStorageTexelBuffer;
+            case DescriptorType::Unifom_Buffer:              return vk::DescriptorType::eUniformBuffer;
+            case DescriptorType::Storage_Buffer:             return vk::DescriptorType::eStorageBuffer;
+            case DescriptorType::Uniform_Buffer_Dynamic:     return vk::DescriptorType::eUniformBufferDynamic;
+            case DescriptorType::Storage_Buffer_Dyanmic:     return vk::DescriptorType::eStorageBufferDynamic;
+            case DescriptorType::Input_Attachment:           return vk::DescriptorType::eInputAttachment;
+            case DescriptorType::Unknown:                    return vk::DescriptorType::eCombinedImageSampler;
             default:
                 break;
             }
@@ -794,22 +864,22 @@ namespace Insight
         {
             switch (layout)
             {
-            case Insight::Graphics::ImageLayout::Undefined: return vk::ImageLayout::eUndefined;
-            case Insight::Graphics::ImageLayout::General: return vk::ImageLayout::eGeneral;
-            case Insight::Graphics::ImageLayout::ColourAttachment: return vk::ImageLayout::eColorAttachmentOptimal;
-            case Insight::Graphics::ImageLayout::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
-            case Insight::Graphics::ImageLayout::DepthStencilAttachmentReadOnly: return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
-            case Insight::Graphics::ImageLayout::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
-            case Insight::Graphics::ImageLayout::TransforSrc: return vk::ImageLayout::eTransferSrcOptimal;
-            case Insight::Graphics::ImageLayout::TransforDst: return vk::ImageLayout::eTransferDstOptimal;
-            case Insight::Graphics::ImageLayout::Preinitialised: return vk::ImageLayout::ePreinitialized;
-            case Insight::Graphics::ImageLayout::DepthReadOnlyStencilAttacment: return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
-            case Insight::Graphics::ImageLayout::DepthAttachmentStencilReadOnly: return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
-            case Insight::Graphics::ImageLayout::DepthAttachmentOnly: return vk::ImageLayout::eDepthAttachmentOptimal;
-            case Insight::Graphics::ImageLayout::DepthReadOnly: return vk::ImageLayout::eDepthReadOnlyOptimal;
-            case Insight::Graphics::ImageLayout::StencilAttacment: return vk::ImageLayout::eStencilAttachmentOptimal;
-            case Insight::Graphics::ImageLayout::StencilReadOnly: return vk::ImageLayout::eStencilReadOnlyOptimal;
-            case Insight::Graphics::ImageLayout::PresentSrc: return vk::ImageLayout::ePresentSrcKHR;
+            case ImageLayout::Undefined: return vk::ImageLayout::eUndefined;
+            case ImageLayout::General: return vk::ImageLayout::eGeneral;
+            case ImageLayout::ColourAttachment: return vk::ImageLayout::eColorAttachmentOptimal;
+            case ImageLayout::DepthStencilAttachment: return vk::ImageLayout::eDepthStencilAttachmentOptimal;
+            case ImageLayout::DepthStencilAttachmentReadOnly: return vk::ImageLayout::eDepthStencilReadOnlyOptimal;
+            case ImageLayout::ShaderReadOnly: return vk::ImageLayout::eShaderReadOnlyOptimal;
+            case ImageLayout::TransforSrc: return vk::ImageLayout::eTransferSrcOptimal;
+            case ImageLayout::TransforDst: return vk::ImageLayout::eTransferDstOptimal;
+            case ImageLayout::Preinitialised: return vk::ImageLayout::ePreinitialized;
+            case ImageLayout::DepthReadOnlyStencilAttacment: return vk::ImageLayout::eDepthReadOnlyStencilAttachmentOptimal;
+            case ImageLayout::DepthAttachmentStencilReadOnly: return vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+            case ImageLayout::DepthAttachmentOnly: return vk::ImageLayout::eDepthAttachmentOptimal;
+            case ImageLayout::DepthReadOnly: return vk::ImageLayout::eDepthReadOnlyOptimal;
+            case ImageLayout::StencilAttacment: return vk::ImageLayout::eStencilAttachmentOptimal;
+            case ImageLayout::StencilReadOnly: return vk::ImageLayout::eStencilReadOnlyOptimal;
+            case ImageLayout::PresentSrc: return vk::ImageLayout::ePresentSrcKHR;
             default:
                 break;
             }

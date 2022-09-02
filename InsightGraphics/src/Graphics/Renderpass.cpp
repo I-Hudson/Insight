@@ -22,6 +22,7 @@
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Insight
 {
@@ -30,16 +31,20 @@ namespace Insight
 	const float ShadowFOV = 45.0f;
 
 	bool Render_Size_Related_To_Window_Size = true;
-	float Render_Width = 640.0f;
-	float Render_Height = 720.0f;
+	int Render_Width = 640;
+	int Render_Height = 720;
+
+	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
 	namespace Graphics
 	{
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
+			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -66,7 +71,7 @@ namespace Insight
 			UpdateCamera(m_camera);
 			ShadowPass();
 			Sample(m_camera);
-			//Composite();
+			Composite();
 			Swapchain();
 			ImGuiPass();
 		}
@@ -115,6 +120,22 @@ namespace Insight
 			return shadowCamera;
 		}
 
+		void ImGuiMat4(glm::mat4& matrix)
+		{
+			float x_row[4] = { matrix[0].x, matrix[0].y, matrix[0].z, matrix[0].w };
+			float y_row[4] = { matrix[1].x, matrix[1].y, matrix[1].z, matrix[1].w };
+			float z_row[4] = { matrix[2].x, matrix[2].y, matrix[2].z, matrix[2].w };
+			float w_row[4] = { matrix[3].x, matrix[3].y, matrix[3].z, matrix[3].w };
+			ImGui::DragFloat4("Camera X Row", x_row);
+			ImGui::DragFloat4("Camera Y Row", y_row);
+			ImGui::DragFloat4("Camera Z Row", z_row);
+			ImGui::DragFloat4("Camera W Row", w_row);
+			matrix[0] = glm::vec4(x_row[0], x_row[1], x_row[2], x_row[3]);
+			matrix[1] = glm::vec4(y_row[0], y_row[1], y_row[2], y_row[3]);
+			matrix[2] = glm::vec4(z_row[0], z_row[1], z_row[2], z_row[3]);
+			matrix[3] = glm::vec4(w_row[0], w_row[1], w_row[2], w_row[3]);
+		}
+
 		void Renderpass::ShadowPass()
 		{
 			struct PassData
@@ -126,6 +147,26 @@ namespace Insight
 			PassData data = { m_testMesh };
 			data.Cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
 
+			ImGui::Begin("Directional Light Direction");
+			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
+			if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
+			{
+				dir_light_direction = glm::vec3(dir[0], dir[1], dir[2]);
+			}
+
+			ImGuiMat4(m_camera.View);
+			for (UBO_ShadowCamera& c : data.Cameras)
+			{
+				ImGui::Begin("Shadow Camera View");
+				ImGuiMat4(c.View);
+				ImGui::Separator();
+				ImGui::Separator();
+				ImGui::End();
+			}
+
+			ImGui::End();
+
+			// Look into "panking" for dir light https://www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
 			RenderGraph::Instance().AddPass<PassData>(L"Cascade shadow pass",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
@@ -152,7 +193,9 @@ namespace Insight
 					PipelineStateObject pso = { };
 					pso.Name = L"Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
-					pso.CullMode = CullMode::Front;
+					pso.CullMode = CullMode::Back;
+					pso.FrontFace = FrontFace::CounterClockwise;
+					pso.DepthClampEnabled = false;
 					builder.SetPipeline(pso);
 				},
 				[](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
@@ -162,11 +205,17 @@ namespace Insight
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
+					const float m_thread_group_count = 8.0f;
+					const float m_depth_bias = 0.004f; // bias that's applied directly into the depth buffer
+					const float m_depth_bias_clamp = 0.0f;
+					const float m_depth_bias_slope_scaled = 2.0f;
+					cmdList->SetDepthBias(m_depth_bias * 0.1f, m_depth_bias_clamp, m_depth_bias_slope_scaled);
+
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
-					for (size_t i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
+					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
 					{
 						RenderpassDescription renderpass_description = render_graph.GetRenderpassDescription(L"Cascade shadow pass");
-						renderpass_description.DepthStencilAttachment.Layer_Array_Index = i;
+						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
 						cmdList->SetUniform(0, 0, &data.Cameras.at(i), sizeof(data.Cameras.at(i)));
@@ -239,6 +288,14 @@ namespace Insight
 				m_testMesh
 			};
 
+			static int camera_index = 0;
+			static const char* camera_names[] = { "Default", "Shadow 0", "Shadow 1", "Shadow 2", "Shadow 3" };
+			ImGui::Begin("Camera index");
+			ImGui::ListBox("Cameras", &camera_index, camera_names, ARRAY_COUNT(camera_names));
+			ImGui::End();
+
+			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
+
 			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("GBuffer pass setup");
@@ -254,15 +311,33 @@ namespace Insight
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
 						  Render_Width
 						, Render_Height
+						, PixelFormat::R16G16B16A16_Float
+						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
+					RGTextureHandle normal_rt = builder.CreateTexture(L"NormalRT", textureCreateInfo);
+					builder.WriteTexture(normal_rt);
+
+					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+						  Render_Width
+						, Render_Height
 						, PixelFormat::R32G32B32A32_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle world_pos_rt = builder.CreateTexture(L"WorldPosRT", textureCreateInfo);
 					builder.WriteTexture(world_pos_rt);
 
+					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+						  Render_Width
+						, Render_Height
+						, PixelFormat::R16G16_Float
+						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
+					RGTextureHandle velocity_rt = builder.CreateTexture(L"VelocityRT", textureCreateInfo);
+					builder.WriteTexture(velocity_rt);
+
 					textureCreateInfo.Format = PixelFormat::D32_Float;
 					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment;
 					RGTextureHandle depthStencil = builder.CreateTexture(L"DepthStencil", textureCreateInfo);
 					builder.WriteDepthStencil(depthStencil);
+
+					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
 					ShaderDesc shaderDesc;
 					{
@@ -276,7 +351,8 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 						gbufferPso.Name = L"GBuffer_PSO";
-						gbufferPso.CullMode = CullMode::Front;
+						gbufferPso.CullMode = CullMode::Back;
+						gbufferPso.FrontFace = FrontFace::Clockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
 					}
 					builder.SetPipeline(gbufferPso);
@@ -284,17 +360,42 @@ namespace Insight
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
-				[&camera](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[&camera, shader_cameras](TestPassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("GBuffer pass execute");
 
-					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"GBuffer");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"GBuffer");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"GBuffer"));
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"GBuffer"));
 
+					UBO_Camera camera_to_bind;
+					if (camera_index == 0)
+					{
+						camera_to_bind = camera;
+					}
+					else if (camera_index == 1)
+					{
+						const u32 i = 0;
+						camera_to_bind = { shader_cameras.at(i).ProjView, shader_cameras.at(i).Projection, shader_cameras.at(i).View };
+					}
+					else if (camera_index == 2)
+					{
+						const u32 i = 1;
+						camera_to_bind = { shader_cameras.at(i).ProjView, shader_cameras.at(i).Projection, shader_cameras.at(i).View };
+					}
+					else if (camera_index == 3)
+					{
+						const u32 i = 2;
+						camera_to_bind = { shader_cameras.at(i).ProjView, shader_cameras.at(i).Projection, shader_cameras.at(i).View };
+					}
+					else if (camera_index == 4)
+					{
+						const u32 i = 3;
+						camera_to_bind = { shader_cameras.at(i).ProjView, shader_cameras.at(i).Projection, shader_cameras.at(i).View };
+					}
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetUniform");
-						cmdList->SetUniform(0, 0, &camera, sizeof(camera));
+						cmdList->SetUniform(0, 0, &camera_to_bind, sizeof(camera_to_bind));
 					}
 
 					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
@@ -342,6 +443,86 @@ namespace Insight
 
 			Renderer::Draw(3, 1, 0, 0);
 #endif
+
+			struct PassData
+			{ };
+
+			static int output_texture;
+			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space" };
+			ImGui::Begin("Composite pass");
+			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
+			ImGui::End();
+
+			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
+			for (UBO_ShadowCamera& camera : shader_cameras)
+			{
+				camera.Projection[1][1] *= -1;
+				camera.ProjView = camera.Projection * camera.View;
+			}
+
+			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass", 
+				[](PassData& data, RenderGraphBuilder& builder)
+				{		
+					builder.ReadTexture(builder.GetTexture(L"ColourRT"));
+					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
+					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
+
+					RHI_TextureCreateInfo create_info = RHI_TextureCreateInfo::Tex2D(
+						Render_Width
+						, Render_Height
+						, PixelFormat::R32G32B32A32_Float
+						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
+					RGTextureHandle composite_handle = builder.CreateTexture(L"Composite_Tex", create_info);
+					builder.WriteTexture(composite_handle);
+
+					ShaderDesc shader_description = { };
+					shader_description.VertexFilePath = L"./Resources/Shaders/hlsl/Composite.hlsl";
+					shader_description.PixelFilePath = L"./Resources/Shaders/hlsl/Composite.hlsl";
+					builder.SetShader(shader_description);
+
+					PipelineStateObject pso = { };
+					pso.Name = L"Composite_PSO";
+					pso.ShaderDescription = shader_description;
+					pso.DepthTest = false;
+					pso.PolygonMode = PolygonMode::Fill;
+					pso.CullMode = CullMode::None;
+					pso.FrontFace = FrontFace::CounterClockwise;
+					builder.SetPipeline(pso);
+
+					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+				},
+				[this, shader_cameras](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Composite_Pass");
+					cmd_list->BindPipeline(pso, nullptr);
+					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription(L"Composite_Pass"));
+
+					UBO_Camera camera = m_camera;
+					cmd_list->SetUniform(0, 0, &camera, sizeof(camera));
+					cmd_list->SetUniform(0, 1, shader_cameras.data(), static_cast<u32>(shader_cameras.size() * sizeof(UBO_ShadowCamera)));
+
+					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
+					cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
+					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"WorldPosRT")));
+
+					RHI_SamplerCreateInfo sampler_create_info = { };
+					//sampler_create_info.MagFilter = Filter::Linear;
+					//sampler_create_info.MinFilter = Filter::Linear;
+					//sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
+					//sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
+					//sampler_create_info.CompareEnabled = true;
+					//sampler_create_info.CompareOp = CompareOp::Less;
+					RHI_Sampler* shadow_sampler = GraphicsManager::Instance().GetRenderContext()->GetSamplerManager().GetOrCreateSampler(sampler_create_info);
+
+					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
+					cmd_list->SetSampler(1, 4, shadow_sampler);
+
+					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
+
+					cmd_list->Draw(3, 1, 0, 0);
+					cmd_list->EndRenderpass();
+				});
 		}
 
 		void Renderpass::Swapchain()
@@ -349,16 +530,16 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{
-				RGTextureHandle ColourRT;
+				RGTextureHandle RenderTarget;
 			};
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Swapchain pass setup");
 
-					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
-					builder.ReadTexture(colourRT);
-					data.ColourRT = colourRT;
+					RGTextureHandle rt = builder.GetTexture(L"Composite_Tex");
+					builder.ReadTexture(rt);
+					data.RenderTarget = rt;
 
 					builder.WriteTexture(-1);
 
@@ -386,7 +567,7 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"SwapchainPass"));
 
-					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.ColourRT));
+					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();
@@ -422,11 +603,11 @@ namespace Insight
 			// Translate camera
 			if (glfwGetKey(Window::Instance().GetRawWindow(), GLFW_KEY_W))
 			{
-				vTranslation -= vForward * frameSpeed;
+				vTranslation += vForward * frameSpeed;
 			}
 			if (glfwGetKey(Window::Instance().GetRawWindow(), GLFW_KEY_S))
 			{
-				vTranslation += vForward * frameSpeed;
+				vTranslation -= vForward * frameSpeed;
 			}
 			if (glfwGetKey(Window::Instance().GetRawWindow(), GLFW_KEY_D))
 			{
@@ -475,14 +656,7 @@ namespace Insight
 				// pitch
 				if (iDeltaY != 0)
 				{
-					if (GraphicsManager::IsVulkan())
-					{
-						mMat = glm::axisAngleMatrix(vRight.xyz(), (float)-iDeltaY / 150.0f);
-					}
-					else
-					{
-						mMat = glm::axisAngleMatrix(vRight.xyz(), (float)-iDeltaY / 150.0f);
-					}
+					mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;
@@ -491,7 +665,7 @@ namespace Insight
 				// yaw
 				if (iDeltaX != 0)
 				{
-					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), (float)-iDeltaX / 150.0f);
+					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), (float)iDeltaX / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;
@@ -508,27 +682,9 @@ namespace Insight
 				sbMouseButtonDown = false;
 			}
 
-			if (useShadowCamera)
-			{
-				aspect = 1.0f;
-				camera.Projection = glm::perspective(glm::radians(ShadowFOV), aspect, ShadowZNear, ShadowZFar);
-				camera.ProjView = camera.Projection * glm::inverse(camera.View);
-			}
-			else
-			{
-				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-				camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
-				camera.ProjView = camera.Projection * glm::inverse(camera.View);
-			}
-
-			glm::vec4 point = glm::vec4(2, 0, 5, 1);
-
-			glm::mat4 transformMatrix = glm::mat4(1);
-			transformMatrix[3] = glm::vec4(10, 00, 3, 1);
-			glm::mat4 invTransformMatrix = glm::inverse(transformMatrix);
-
-			glm::vec4 finalPoint = transformMatrix * point;
-			glm::vec4 invFinalPoint = invTransformMatrix * point;
+			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
+			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 		}
 
 		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount)
@@ -538,18 +694,18 @@ namespace Insight
 			std::vector<UBO_ShadowCamera> outCascades;
 			outCascades.resize(cascadeCount);
 
-			float nearClip = 0.1f;
-			float farClip = 1000.0f;
-			float clipRange = farClip - nearClip;
+			const float nearClip = 1.0f;
+			const float farClip = 512.0f;
+			const float clipRange = farClip - nearClip;
 
-			float minZ = nearClip;
-			float maxZ = nearClip + clipRange;
+			const float minZ = nearClip;
+			const float maxZ = nearClip + clipRange;
 
-			float range = maxZ - minZ;
-			float ratio = maxZ / minZ;
+			const float range = maxZ - minZ;
+			const float ratio = maxZ / minZ;
 
 			const float cascadeSplitLambda = 0.95f;
-
+ 
 			// Calculate split depths based on view camera frustum
 			// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
 			for (int i = 0; i < cascadeCount; i++)
@@ -579,7 +735,7 @@ namespace Insight
 				};
 
 				// Project frustum corners into world space
-				glm::mat4 invCam = glm::inverse(camera.Projection * camera.View);
+				glm::mat4 invCam = glm::inverse(camera.ProjView);
 				for (uint32_t i = 0; i < 8; ++i)
 				{
 					glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
@@ -612,23 +768,20 @@ namespace Insight
 				glm::vec3 maxExtents = glm::vec3(radius);
 				glm::vec3 minExtents = -maxExtents;
 
-				glm::vec3 lightDirection = glm::vec3(0.5f, 0.5f, 0.5f);
+				// Construct our matries requried for the light.
+				glm::vec3 lightDirection = dir_light_direction;
 				float lightExtension = -minExtents.z;
 				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * lightExtension;
 				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
-				//if (::Graphics::IsVulkan())
-				//{
-				//	//lightOrthoMatrix[1][1] *= -1;
-				//}
-
-				// Store split distance and matrix in cascade
-				outCascades[i].SplitDepth = (1.0f + splitDist * clipRange) * -1.0f;
-				outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
-				outCascades[i].Projection = lightOrthoMatrix;
-				outCascades[i].View = lightViewMatrix;
-
+				{
+					// Store split distance and matrix in cascade
+					outCascades[i].SplitDepth = (1.0f + splitDist * clipRange) * -1.0f;
+					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
+					outCascades[i].Projection = lightOrthoMatrix;
+					outCascades[i].View = lightViewMatrix;
+				}
 				lastSplitDist = cascadeSplits[i];
 			}
 			return outCascades;

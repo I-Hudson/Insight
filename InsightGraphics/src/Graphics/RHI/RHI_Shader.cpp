@@ -88,18 +88,18 @@ namespace Insight
 		{
 		}
 
-		RHI::DX12::ComPtr<IDxcBlob> ShaderCompiler::Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo)
+		ComPtr<IDxcBlob> ShaderCompiler::Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo)
 		{
 			m_languageToCompileTo = languageToCompileTo;
 
 			// Create default include handler. (You can create your own...)
-			RHI::DX12::ComPtr<IDxcIncludeHandler> pIncludeHandler;
-			ThrowIfFailed(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler));
+			ComPtr<IDxcIncludeHandler> pIncludeHandler;
+			ASSERT(SUCCEEDED(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler)));
 
 			// Load the HLSL text shader from disk
 			uint32_t codePage = CP_UTF8;
-			RHI::DX12::ComPtr<IDxcBlobEncoding> sourceBlob;
-			ThrowIfFailed(DXUtils->LoadFile(filePath.data(), nullptr, &sourceBlob));
+			ComPtr<IDxcBlobEncoding> sourceBlob;
+			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePath.data(), nullptr, &sourceBlob)));
 
 			DxcBuffer Source;
 			Source.Ptr = sourceBlob->GetBufferPointer();
@@ -133,32 +133,36 @@ namespace Insight
 			arguments.push_back(L"-T");
 			arguments.push_back(targetProfile.c_str());
 
-			arguments.push_back(L"-Zs");
-			arguments.push_back(L"-Od");
+			arguments.push_back(L"-I");
+			arguments.push_back(L"Resources/Shaders/hlsl");
+
+			arguments.push_back(DXC_ARG_DEBUG); //-Zi
+			//arguments.push_back(L"-Zs"); // Generate small PDB with just sourcesand compile options.Cannot be used together with - Zi
+			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 
 			//arguments.push_back(L"-fvk-bind-register");
 
 			// Compile shader
-			ThrowIfFailed(DXCompiler->Compile(
+			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,                // Source buffer.
 				arguments.data(),       // Array of pointers to arguments.
 				(UINT)arguments.size(),		// Number of arguments.
 				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
 				IID_PPV_ARGS(&ShaderCompileResults) // Compiler output status, buffer, and errors.
-			));
+			)));
 
 			arguments.push_back(L"-spirv");
-			ThrowIfFailed(DXCompiler->Compile(
+			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,                // Source buffer.
 				arguments.data(),       // Array of pointers to arguments.
 				(UINT)arguments.size(),		// Number of arguments.
 				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
 				IID_PPV_ARGS(&ShaderReflectionResults) // Compiler output status, buffer, and errors.
-			));
+			)));
 
 			// Print errors if present.
-			RHI::DX12::ComPtr<IDxcBlobUtf8> pErrors = nullptr;
-			ThrowIfFailed(ShaderCompileResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr));
+			ComPtr<IDxcBlobUtf8> pErrors = nullptr;
+			ASSERT(SUCCEEDED(ShaderCompileResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
 			// Note that d3dcompiler would return null if no errors or warnings are present.  
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
@@ -167,7 +171,7 @@ namespace Insight
 			}
 
 			// Get compilation result
-			RHI::DX12::ComPtr<IDxcBlob> code;
+			ComPtr<IDxcBlob> code;
 			ShaderCompileResults->GetResult(&code);
 
 			// Write shader to disk.
@@ -191,7 +195,7 @@ namespace Insight
 
 		void ShaderCompiler::GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant)
 		{
-			RHI::DX12::ComPtr<IDxcBlob> code;
+			ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
 			// Generate reflection data for a shader
@@ -363,7 +367,7 @@ namespace Insight
 
 		std::vector<ShaderInputLayout> ShaderCompiler::GetInputLayout()
 		{
-			RHI::DX12::ComPtr<IDxcBlob> code;
+			ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
 			// Generate reflection data for a shader
@@ -447,7 +451,7 @@ namespace Insight
 			{
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:						return DescriptorType::Sampler;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:		return DescriptorType::Combined_Image_Sampler;
-			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Combined_Image_Sampler;
+			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Sampled_Image;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:			return DescriptorType::Uniform_Texel_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:			return DescriptorType::Storage_Texel_Buffer;

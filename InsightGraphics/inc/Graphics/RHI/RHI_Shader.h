@@ -76,7 +76,7 @@ namespace Insight
 			std::wstring StageToFuncName(ShaderStageFlagBits stage);
 			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
 
-			RHI::DX12::ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
+			ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
 			void GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant);
 			std::vector<ShaderInputLayout> GetInputLayout();
 
@@ -85,11 +85,11 @@ namespace Insight
 
 			ShaderCompilerLanguage m_languageToCompileTo;
 
-			RHI::DX12::ComPtr<IDxcUtils> DXUtils;
-			RHI::DX12::ComPtr<IDxcCompiler3> DXCompiler;
+			ComPtr<IDxcUtils> DXUtils;
+			ComPtr<IDxcCompiler3> DXCompiler;
 
-			RHI::DX12::ComPtr<IDxcResult> ShaderCompileResults;
-			RHI::DX12::ComPtr<IDxcResult> ShaderReflectionResults;
+			ComPtr<IDxcResult> ShaderCompileResults;
+			ComPtr<IDxcResult> ShaderReflectionResults;
 		};
 	}
 }

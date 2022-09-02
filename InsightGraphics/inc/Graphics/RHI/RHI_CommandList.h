@@ -14,6 +14,7 @@ namespace Insight
 	{
 		class RHI_Buffer;
 		class RHI_Texture;
+		class RHI_Sampler;
 		class RHI_DescriptorLayout;
 
 		class RenderContext;
@@ -55,11 +56,14 @@ namespace Insight
 
 			virtual void SetPushConstant(u32 offset, u32 size, const void* data) = 0;
 
-			void SetUniform(int set, int binding, const void* data, u32 size);
-			void SetTexture(int set, int binding, RHI_Texture* texture);
+			void SetUniform(u32 set, u32 binding, const void* data, u32 size);
+			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
+			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
+			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
 
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;
+			virtual void SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor) = 0;
 
 			virtual void SetVertexBuffer(RHI_Buffer* buffer) = 0;
 			virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) = 0;

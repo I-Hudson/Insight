@@ -16,6 +16,7 @@
 #include "meshoptimizer.h"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/glm.hpp>
 
 namespace Insight
 {
@@ -24,6 +25,7 @@ namespace Insight
 		static const uint32_t importer_flags =
 			// Switch to engine conventions
 			aiProcess_FlipUVs | // DirectX style.
+			aiProcess_MakeLeftHanded | // DirectX style.
 			// Validate and clean up
 			aiProcess_ValidateDataStructure | // Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
 			aiProcess_FindDegenerates | // Convert degenerate primitives to proper lines or points.
@@ -35,7 +37,8 @@ namespace Insight
 			aiProcess_FindInstances | // This step searches for duplicate meshes and replaces them with references to the first mesh
 			// Generate missing normals or UVs
 			aiProcess_CalcTangentSpace | // Calculates the tangents and bitangents for the imported meshes
-			aiProcess_GenSmoothNormals | // Ignored if the mesh already has normals
+			//aiProcess_GenSmoothNormals | // Ignored if the mesh already has normals
+			aiProcess_GenNormals |
 			aiProcess_GenUVCoords;               // Converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels
 
 
@@ -59,7 +62,9 @@ namespace Insight
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
 			// TODO: To be removed when entities are added with components
-			cmdList->SetPushConstant(0, sizeof(glm::mat4), static_cast<const void*>(glm::value_ptr(m_draw_info.Transform)));
+			glm::mat4 transform = m_draw_info.Transform;
+			//transform = glm::scale(transform, glm::vec3(5, 5, 5));
+			cmdList->SetPushConstant(0, sizeof(glm::mat4), static_cast<const void*>(glm::value_ptr(transform)));
 
 			cmdList->SetVertexBuffer(m_draw_info.Vertex_Buffer);
 			cmdList->SetIndexBuffer(m_draw_info.Index_Buffer, IndexType::Uint32);
@@ -88,6 +93,8 @@ namespace Insight
 		bool Mesh::LoadFromFile(std::string filePath)
 		{
 			IS_PROFILE_FUNCTION();
+
+			Destroy();
 
 			vertexOffset = 0;
 			indexOffset = 0;
@@ -132,8 +139,8 @@ namespace Insight
 			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
 			m_index_buffer->Upload(indices.data(), index_byte_size);
 
-			const u32 file_name_start = filePath.find_last_of('/');
-			const u32 file_name_end = filePath.find_last_of('.');
+			const u64 file_name_start = filePath.find_last_of('/');
+			const u64 file_name_end = filePath.find_last_of('.');
 			std::string file_name = filePath.substr(file_name_start, file_name_end - file_name_start);
 
 			std::wstring file_name_w = Platform::WStringFromString(file_name);
@@ -232,7 +239,7 @@ namespace Insight
 					ProcessMesh(aiMesh, aiScene, vertices_optomized, indices_optomized);
 					Optimize(vertices_optomized, indices_optomized);
 
-					BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), vertices_optomized.size());
+					BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), static_cast<u32>(vertices_optomized.size()));
 
 					SubmeshDrawInfo submesh_draw_info = { };
 					submesh_draw_info.Vertex_Offset = static_cast<u32>(vertices.size());
@@ -309,9 +316,12 @@ namespace Insight
 				// normals
 				if (mesh->HasNormals())
 				{
+					vector = { };
 					vector.x = mesh->mNormals[i].x;
 					vector.y = mesh->mNormals[i].y;
 					vector.z = mesh->mNormals[i].z;
+					vector.w = 1.0f;
+					vector = glm::normalize(vector);
 					vertex.Normal = vector;
 				}
 				vector = { };

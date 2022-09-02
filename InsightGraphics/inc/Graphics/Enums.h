@@ -255,6 +255,41 @@ namespace Insight
 		};
 		std::string CompareOpToString(CompareOp op);
 
+		enum class Filter
+		{
+			Nearest,
+			Linear,
+		};
+		std::string FilterToString(Filter filter);
+
+		enum class SamplerMipmapMode
+		{
+			Nearest,
+			Linear
+		};
+		std::string SamplerMipmapModeToString(SamplerMipmapMode sampler_mipmap_mode);
+
+		enum class SamplerAddressMode
+		{
+			Repeat,
+			MirroredRepeat,
+			ClampToEdge,
+			ClampToBoarder,
+			MirrorClampToEdge,
+		};
+		std::string SamplerAddressModeToString(SamplerAddressMode sampler_address_mode);
+
+		enum class BorderColour
+		{
+			FloatTransparentBlack,
+			IntTransparentBlack,
+			FloatOpaqueBlack,
+			IntOpaqueBlack,
+			FloatOpaqueWhite,
+			IntOpaqueWhite,
+		};
+		std::string BoarderColourToString(BorderColour boarder_colour);
+
 		enum class AttachmentLoadOp
 		{
 			Load,

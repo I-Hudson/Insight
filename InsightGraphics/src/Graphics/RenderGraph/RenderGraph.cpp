@@ -30,6 +30,7 @@ namespace Insight
 					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
 							manager.Create(m_context);
+							m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
 						});
 				});
 
@@ -311,7 +312,8 @@ namespace Insight
 					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
 
 					barrier.SrcAccessFlags = isDepth ? AccessFlagBits::DepthStencilAttachmentWrite : AccessFlagBits::ColorAttachmentWrite;
-					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
+					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : isDepth ?
+						ImageLayout::DepthStencilAttachment : ImageLayout::ColourAttachment;
 
 					barrier.DstAccessFlags = AccessFlagBits::ShaderRead;
 					barrier.NewLayout = ImageLayout::ShaderReadOnly;

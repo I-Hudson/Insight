@@ -1,9 +1,5 @@
 #pragma once
 
-#if defined(IS_DX12_ENABLED)
-
-#include "Graphics/RHI/RHI_PhysicalDevice.h"
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers.
 #endif
@@ -14,9 +10,22 @@
 #include <D3Dcompiler.h>
 #include <dxgidebug.h>
 
-#include <string>
 #include <wrl.h>
 #include <shellapi.h>
+
+// Note that while ComPtr is used to manage the lifetime of resources on the CPU,
+// it has no understanding of the lifetime of resources on the GPU. Apps must account
+// for the GPU lifetime of resources to avoid destroying objects that may still be
+// referenced by the GPU.
+// An example of this can be found in the class method: OnDestroy().
+using Microsoft::WRL::ComPtr;
+
+
+#if defined(IS_DX12_ENABLED)
+
+#include "Graphics/RHI/RHI_PhysicalDevice.h"
+
+#include <string>
 
 namespace Insight
 {
@@ -24,13 +33,6 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			// Note that while ComPtr is used to manage the lifetime of resources on the CPU,
-			// it has no understanding of the lifetime of resources on the GPU. Apps must account
-			// for the GPU lifetime of resources to avoid destroying objects that may still be
-			// referenced by the GPU.
-			// An example of this can be found in the class method: OnDestroy().
-			using Microsoft::WRL::ComPtr;
-
 			class RHI_PhysicalDevice_DX12 : public RHI_PhysicalDevice
 			{
 			public:

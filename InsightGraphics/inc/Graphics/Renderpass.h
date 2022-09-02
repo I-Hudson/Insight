@@ -26,6 +26,9 @@ namespace Insight
 			glm::mat4 Projection;
 			glm::mat4 View;
 			float SplitDepth;
+			float pad1;
+			float pad2;
+			float pad3;
 
 			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount);
 		};
