@@ -196,6 +196,7 @@ namespace Insight
 					pso.CullMode = CullMode::Back;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
+					pso.DepthBaisEnabled = true;
 					builder.SetPipeline(pso);
 				},
 				[](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
@@ -209,7 +210,7 @@ namespace Insight
 					const float m_depth_bias = 0.004f; // bias that's applied directly into the depth buffer
 					const float m_depth_bias_clamp = 0.0f;
 					const float m_depth_bias_slope_scaled = 2.0f;
-					cmdList->SetDepthBias(m_depth_bias * 0.1f, m_depth_bias_clamp, m_depth_bias_slope_scaled);
+					cmdList->SetDepthBias(10.0f, m_depth_bias_clamp, 1.5f);
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)

@@ -89,15 +89,12 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	float gbuffer_depth 	= GBuffer_Shadow.Sample(GBuffer_Shadow_Sampler, input.UV).r;
 
 	float3 reconstruct_world_position = reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
-	reconstruct_world_position = reconstruct_world_position + bias_normal_offset(
-		Get_Normal_Dot_Light_Direction(world_normal, shadow_cameras[0].Shadow_Light_Direction)
-		, 0.5, 4096,world_normal);
 
 	float3 world_pos 		= world_position.xyz / world_position.w; 
 	float4 position_view_space = float4(world_to_ndc(world_pos, Main_Camera_View), 1.0);
 	float4 shadow = 0;
 	
-    for (uint cascade = 0; cascade < 1; cascade++)
+    for (uint cascade = 0; cascade < 2; cascade++)
     {
 		Shadow_Camera shadow_camera = shadow_cameras[cascade];
 		// Project into light space
@@ -107,7 +104,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 		// Ensure not out of bound
     	if (is_saturated(shadow_uv))
     	{
- 			Apply_Bias(shadow_pos_ndc, world_normal.xyz, shadow_camera.Shadow_Light_Direction, cascade + 1);
+ 			//Apply_Bias(shadow_pos_ndc, world_normal.xyz, shadow_camera.Shadow_Light_Direction, cascade + 1);
 
 			float shadow_sample = 
 			Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
@@ -117,13 +114,6 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 			shadow = float4(shadow_sample, shadow_sample, shadow_sample, 1.0);
 			break;
 		}
-		//shadow_camera[cascade].Shadow_Camera_ProjView;
-		//float3 shadow_pos_ndc = world_to_ndc(world_pos, shadow_space_matrix);
-		//float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
-
-		//float shadow_sample = Cascade_Shadow.Sample(Cascade_Shadow_Sampler, float3(shadow_uv.x, shadow_uv.y, cascade)).r;
-		//shadow = float4(shadow_sample, shadow_sample, shadow_sample, 1.0);
-		//shadow = float4(shadow_uv, 0.0, 1.0);
 	}
 	float4 result;
 
