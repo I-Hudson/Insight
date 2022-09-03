@@ -10,6 +10,7 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 
 #include <type_traits>
+#include <unordered_map>
 
 namespace Insight
 {
@@ -99,7 +100,10 @@ namespace Insight
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
 
 			u32 m_frameIndex = 0;
+
 			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
+			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> m_texture_barrier_history;
+
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};

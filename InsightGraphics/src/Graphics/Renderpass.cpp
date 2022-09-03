@@ -333,8 +333,8 @@ namespace Insight
 					builder.WriteTexture(velocity_rt);
 
 					textureCreateInfo.Format = PixelFormat::D32_Float;
-					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment;
-					RGTextureHandle depthStencil = builder.CreateTexture(L"DepthStencil", textureCreateInfo);
+					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled;
+					RGTextureHandle depthStencil = builder.CreateTexture(L"GBuffer_DepthStencil", textureCreateInfo);
 					builder.WriteDepthStencil(depthStencil);
 
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
@@ -448,7 +448,7 @@ namespace Insight
 			{ };
 
 			static int output_texture;
-			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space" };
+			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space", "GBuffer_Depth", "reconstruct_position" };
 			ImGui::Begin("Composite pass");
 			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
 			ImGui::End();
@@ -465,6 +465,8 @@ namespace Insight
 				{		
 					builder.ReadTexture(builder.GetTexture(L"ColourRT"));
 					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
+					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
+					builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
 					RHI_TextureCreateInfo create_info = RHI_TextureCreateInfo::Tex2D(
@@ -505,18 +507,19 @@ namespace Insight
 					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
 					cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
 					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"WorldPosRT")));
+					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
 
 					RHI_SamplerCreateInfo sampler_create_info = { };
-					//sampler_create_info.MagFilter = Filter::Linear;
-					//sampler_create_info.MinFilter = Filter::Linear;
-					//sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
-					//sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
-					//sampler_create_info.CompareEnabled = true;
-					//sampler_create_info.CompareOp = CompareOp::Less;
+					sampler_create_info.MagFilter = Filter::Linear;
+					sampler_create_info.MinFilter = Filter::Linear;
+					sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
+					sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
+					sampler_create_info.CompareEnabled = true;
+					sampler_create_info.CompareOp = CompareOp::Less;
 					RHI_Sampler* shadow_sampler = GraphicsManager::Instance().GetRenderContext()->GetSamplerManager().GetOrCreateSampler(sampler_create_info);
 
-					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
-					cmd_list->SetSampler(1, 4, shadow_sampler);
+					cmd_list->SetTexture(1, 4, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
+					cmd_list->SetSampler(1, 5, shadow_sampler);
 
 					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
 
@@ -685,6 +688,7 @@ namespace Insight
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
+			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
 		}
 
 		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount)
@@ -781,6 +785,7 @@ namespace Insight
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;
 					outCascades[i].View = lightViewMatrix;
+					outCascades[i].Light_Direction = glm::normalize(lightDirection);
 				}
 				lastSplitDist = cascadeSplits[i];
 			}

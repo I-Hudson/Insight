@@ -32,7 +32,14 @@ namespace Insight
 		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
-			m_pass->m_textureCreates.push_back(std::make_pair(handle, desc));
+			if (std::find_if(m_pass->m_textureCreates.begin(), m_pass->m_textureCreates.end(),
+				[handle](const std::pair<RGTextureHandle, RHI_TextureCreateInfo>& pair)
+				{
+					return handle == pair.first;
+				}) == m_pass->m_textureCreates.end())
+			{
+				m_pass->m_textureCreates.push_back(std::make_pair(handle, desc));
+			}
 			return handle;
 		}
 
@@ -43,12 +50,18 @@ namespace Insight
 
 		void RenderGraphBuilder::ReadTexture(RGTextureHandle handle)
 		{
-			m_pass->m_textureReads.push_back(handle);
+			if (std::find(m_pass->m_textureReads.begin(), m_pass->m_textureReads.end(), handle) == m_pass->m_textureReads.end())
+			{
+				m_pass->m_textureReads.push_back(handle);
+			}
 		}
 
 		void RenderGraphBuilder::WriteTexture(RGTextureHandle handle)
 		{
-			m_pass->m_textureWrites.push_back(handle);
+			if (std::find(m_pass->m_textureWrites.begin(), m_pass->m_textureWrites.end(), handle) == m_pass->m_textureWrites.end())
+			{
+				m_pass->m_textureWrites.push_back(handle);
+			}
 		}
 
 		void RenderGraphBuilder::WriteDepthStencil(RGTextureHandle handle)
