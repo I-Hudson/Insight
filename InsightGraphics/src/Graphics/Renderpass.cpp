@@ -41,7 +41,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
@@ -155,14 +156,20 @@ namespace Insight
 			}
 
 			ImGuiMat4(m_camera.View);
+			ImGui::Begin("Shadow pass");
+			ImGui::Text("Cameras");
 			for (UBO_ShadowCamera& c : data.Cameras)
 			{
-				ImGui::Begin("Shadow Camera View");
 				ImGuiMat4(c.View);
 				ImGui::Separator();
 				ImGui::Separator();
-				ImGui::End();
 			}
+			static float depth_constant_factor = 4.0f;
+			static float depth_slope_factor = 1.5f;
+			ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
+			ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
+
+			ImGui::End();
 
 			ImGui::End();
 
@@ -193,7 +200,7 @@ namespace Insight
 					PipelineStateObject pso = { };
 					pso.Name = L"Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
-					pso.CullMode = CullMode::Back;
+					pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
@@ -206,11 +213,7 @@ namespace Insight
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
-					const float m_thread_group_count = 8.0f;
-					const float m_depth_bias = 0.004f; // bias that's applied directly into the depth buffer
-					const float m_depth_bias_clamp = 0.0f;
-					const float m_depth_bias_slope_scaled = 2.0f;
-					cmdList->SetDepthBias(10.0f, m_depth_bias_clamp, 1.5f);
+					//cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
@@ -449,9 +452,12 @@ namespace Insight
 			{ };
 
 			static int output_texture;
+			static int cascade_override;
 			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space", "GBuffer_Depth", "reconstruct_position" };
+			const char* cascade_override_items[] = { "0", "1", "2", "3" };
 			ImGui::Begin("Composite pass");
 			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
+			ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items));
 			ImGui::End();
 
 			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
@@ -523,6 +529,7 @@ namespace Insight
 					cmd_list->SetSampler(1, 5, shadow_sampler);
 
 					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
+					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
 
 					cmd_list->Draw(3, 1, 0, 0);
 					cmd_list->EndRenderpass();
@@ -687,6 +694,7 @@ namespace Insight
 			}
 
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+			aspect = std::max(0.1f, aspect);
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
@@ -786,9 +794,13 @@ namespace Insight
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;
 					outCascades[i].View = lightViewMatrix;
-					outCascades[i].Light_Direction = glm::normalize(lightDirection);
+					outCascades[i].Light_Direction = glm::normalize(frustumCenter - lightPosition);
 				}
 				lastSplitDist = cascadeSplits[i];
+			}
+			for (size_t i = 0; i < outCascades.size(); ++i)
+			{
+				outCascades[i] = outCascades[1];
 			}
 			return outCascades;
 		}

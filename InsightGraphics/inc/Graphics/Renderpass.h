@@ -23,14 +23,13 @@ namespace Insight
 
 		struct UBO_ShadowCamera
 		{
-			glm::mat4 ProjView;
-			glm::mat4 Projection;
-			glm::mat4 View;
+			glm::mat4 ProjView;		
+			glm::mat4 Projection;	
+			glm::mat4 View;			
 			glm::vec3 Light_Direction;
+			glm::vec2 Resolution;	
 			float SplitDepth;
-			glm::vec2 Resolution;
-			float pad1;
-			float pad2;
+			float pad0;
 
 			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount);
 		};

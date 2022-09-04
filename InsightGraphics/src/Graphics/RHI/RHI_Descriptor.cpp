@@ -425,8 +425,8 @@ namespace Insight
 			Descriptor& descriptor = descriptors.at(binding);
 			if (descriptor.Size != size)
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'."
-					, descriptor.Size, size);
+				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
+					, descriptor.Size, size, set, binding);
 			}
 
 			CreateUniformBufferIfNoExist();

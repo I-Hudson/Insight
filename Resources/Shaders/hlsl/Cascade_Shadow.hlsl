@@ -14,10 +14,14 @@ struct VertexOutput
 [[vk::binding(0, 0)]]
 cbuffer ubo_camera : register(b0)
 {
-	float4x4 ProjView;
-	float4x4 Projection;
-	float4x4 View;
-	float DpethSplit;
+	float4x4 Shadow_Camera_ProjView;
+	float4x4 Shadow_Camera_Projection;
+	float4x4 Shadow_Camera_View;
+	float3 Shadow_Light_Direction;
+	float Shadow_CameraSplit_Depth;
+	float2 Shadow_Resolution;
+	float pad0;
+	float pad1;
 }
 
 struct PushConstant
@@ -32,7 +36,7 @@ VertexOutput VSMain(const VertexInput input)
 	vsOut.Pos = float4(input.Pos.xyz, 1);
 
 	vsOut.Pos = mul(push_constant.Transform, vsOut.Pos);
-	vsOut.Pos = mul(ProjView, vsOut.Pos);
+	vsOut.Pos = mul(Shadow_Camera_ProjView, vsOut.Pos);
 
 	return vsOut;
 }

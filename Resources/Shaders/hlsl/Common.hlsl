@@ -13,10 +13,9 @@ struct Shadow_Camera
 	float4x4 Shadow_Camera_Projection;
 	float4x4 Shadow_Camera_View;
 	float3 Shadow_Light_Direction;
-	float Shadow_CameraSplit_Depth;
 	float2 Shadow_Resolution;
-	float pad1;
-	float pad2;
+	float Shadow_CameraSplit_Depth;
+	float pad0;
 };
 [[vk::binding(1, 0)]] 
 cbuffer Cascade_Shadow_Camera : register(b1)

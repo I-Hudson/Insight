@@ -5,6 +5,7 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/GraphicsManager.h"
 #include "Graphics/PixelFormatExtensions.h"
+#include "Graphics/Window.h"
 
 #include "Event/EventManager.h"
 
@@ -30,8 +31,8 @@ namespace Insight
 					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
 							manager.Create(m_context);
-							m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
 						});
+					m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
 				});
 
 			m_context = context;

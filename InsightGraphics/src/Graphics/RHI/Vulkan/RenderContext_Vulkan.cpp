@@ -450,6 +450,11 @@ namespace Insight
 #ifdef RENDER_GRAPH_ENABLED
 				IS_PROFILE_FUNCTION();
 
+				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
+				{
+					return false;
+				}
+
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
