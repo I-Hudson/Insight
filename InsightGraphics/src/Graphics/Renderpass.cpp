@@ -34,6 +34,8 @@ namespace Insight
 	int Render_Width = 640;
 	int Render_Height = 720;
 
+	float cascade_split_lambda = 0.95f;
+
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
 	namespace Graphics
@@ -146,7 +148,7 @@ namespace Insight
 				RGTextureHandle Depth_Tex;
 			};
 			PassData data = { m_testMesh };
-			data.Cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
+			data.Cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
 
 			ImGui::Begin("Directional Light Direction");
 			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
@@ -160,6 +162,11 @@ namespace Insight
 			ImGui::Text("Cameras");
 			for (UBO_ShadowCamera& c : data.Cameras)
 			{
+				ImGui::Text("Projection View");
+				ImGuiMat4(c.ProjView);
+				ImGui::Text("Projection");
+				ImGuiMat4(c.Projection);
+				ImGui::Text("View");
 				ImGuiMat4(c.View);
 				ImGui::Separator();
 				ImGui::Separator();
@@ -168,6 +175,7 @@ namespace Insight
 			static float depth_slope_factor = 1.5f;
 			ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
 			ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
+			ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f);
 
 			ImGui::End();
 
@@ -242,45 +250,6 @@ namespace Insight
 		void Renderpass::Sample(UBO_Camera& camera)
 		{
 			IS_PROFILE_FUNCTION();
-
-#ifndef RENDER_GRAPH_ENABLED
-			RHI_Shader* gbufferShader = nullptr;
-			{
-				IS_PROFILE_SCOPE("GBuffer-GetShader");
-				ShaderDesc shaderDesc;
-				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
-				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
-				gbufferShader = Renderer::GetShader(shaderDesc);
-			}
-			PipelineStateObject gbufferPso = { };
-			{
-				IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
-				gbufferPso.Name = L"GBuffer_PSO";
-				gbufferPso.Shader = gbufferShader;
-				gbufferPso.CullMode = CullMode::Front;
-				gbufferPso.Swapchain = false;
-				gbufferPso.RenderTargets = { m_colourTarget->GetTexture() };
-				gbufferPso.DepthStencil = m_depthTarget->GetTexture();
-				Renderer::SetPipelineStateObject(gbufferPso);
-			}
-
-			Renderer::SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-			Renderer::SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-
-			Renderer::BindVertexBuffer(m_vertexBuffer);
-			Renderer::BindIndexBuffer(m_indexBuffer);
-
-			{
-				IS_PROFILE_SCOPE("GBuffer-SetUniform");
-				Renderer::SetUniform(0, 0, &camera, sizeof(camera));
-				UBO_ShadowCamera shadowCamera = GetReverseZDepthCamera(m_shadowCamera, false);
-				shadowCamera.TextureSize = { m_shadowTarget->GetDesc().Width, m_shadowTarget->GetDesc().Height };
-				Renderer::SetUniform(0, 1, &shadowCamera, sizeof(shadowCamera));
-				Renderer::SetTexture(0, 2, m_shadowTarget->GetTexture());
-			}
-
-			//m_testMesh.Draw();
-#endif
 
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
@@ -419,35 +388,6 @@ namespace Insight
 
 		void Renderpass::Composite()
 		{
-#ifndef RENDER_GRAPH_ENABLED
-			RHI_Shader* compositeShader = nullptr;
-			{
-				IS_PROFILE_SCOPE("Composite-GetShader");
-				ShaderDesc shaderDesc;
-				shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Composite.hlsl";
-				shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Composite.hlsl";
-				compositeShader = Renderer::GetShader(shaderDesc);
-			}
-
-			PipelineStateObject compositePso{};
-			{
-				IS_PROFILE_SCOPE("Composite-SetPipelineStateObject");
-				compositePso.Name = L"CompositePso_PSO";
-				compositePso.Shader = compositeShader;
-				compositePso.CullMode = CullMode::None;
-				compositePso.RenderTargets = { m_compositeTarget->GetTexture() };
-				Renderer::SetPipelineStateObject(compositePso);
-			}
-
-			{
-				IS_PROFILE_SCOPE("Composite-SetUniform");
-				Renderer::SetTexture(0, 0, m_colourTarget->GetTexture());
-				Renderer::SetTexture(0, 1, m_shadowTarget->GetTexture());
-			}
-
-			Renderer::Draw(3, 1, 0, 0);
-#endif
-
 			struct PassData
 			{ };
 
@@ -460,11 +400,14 @@ namespace Insight
 			ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items));
 			ImGui::End();
 
-			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
-			for (UBO_ShadowCamera& camera : shader_cameras)
+			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
+			if (GraphicsManager::IsVulkan())
 			{
-				camera.Projection[1][1] *= -1;
-				camera.ProjView = camera.Projection * camera.View;
+				for (UBO_ShadowCamera& camera : shader_cameras)
+				{
+					camera.Projection[1][1] *= -1;
+					camera.ProjView = camera.Projection * camera.View;
+				}
 			}
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass", 
@@ -513,20 +456,19 @@ namespace Insight
 
 					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
 					cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
-					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"WorldPosRT")));
-					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
+					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
 
 					RHI_SamplerCreateInfo sampler_create_info = { };
-					sampler_create_info.MagFilter = Filter::Linear;
-					sampler_create_info.MinFilter = Filter::Linear;
-					sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
-					sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
-					sampler_create_info.CompareEnabled = true;
-					sampler_create_info.CompareOp = CompareOp::Less;
+					//sampler_create_info.MagFilter = Filter::Linear;
+					//sampler_create_info.MinFilter = Filter::Linear;
+					//sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
+					//sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
+					//sampler_create_info.CompareEnabled = true;
+					//sampler_create_info.CompareOp = CompareOp::Less;
 					RHI_Sampler* shadow_sampler = GraphicsManager::Instance().GetRenderContext()->GetSamplerManager().GetOrCreateSampler(sampler_create_info);
 
-					cmd_list->SetTexture(1, 4, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
-					cmd_list->SetSampler(1, 5, shadow_sampler);
+					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
+					cmd_list->SetSampler(1, 4, shadow_sampler);
 
 					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
 					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
@@ -700,7 +642,7 @@ namespace Insight
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
 		}
 
-		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount)
+		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount, float split_lambda)
 		{
 			std::vector<float> cascadeSplits;
 			cascadeSplits.resize(cascadeCount);
@@ -717,7 +659,7 @@ namespace Insight
 			const float range = maxZ - minZ;
 			const float ratio = maxZ / minZ;
 
-			const float cascadeSplitLambda = 0.95f;
+			const float cascadeSplitLambda = split_lambda;
  
 			// Calculate split depths based on view camera frustum
 			// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
@@ -794,13 +736,9 @@ namespace Insight
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;
 					outCascades[i].View = lightViewMatrix;
-					outCascades[i].Light_Direction = glm::normalize(frustumCenter - lightPosition);
+					outCascades[i].Light_Direction = glm::vec4(glm::normalize(frustumCenter - lightPosition), 0.0);
 				}
 				lastSplitDist = cascadeSplits[i];
-			}
-			for (size_t i = 0; i < outCascades.size(); ++i)
-			{
-				outCascades[i] = outCascades[1];
 			}
 			return outCascades;
 		}

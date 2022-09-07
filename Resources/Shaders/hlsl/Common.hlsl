@@ -12,7 +12,7 @@ struct Shadow_Camera
 	float4x4 Shadow_Camera_ProjView;
 	float4x4 Shadow_Camera_Projection;
 	float4x4 Shadow_Camera_View;
-	float3 Shadow_Light_Direction;
+	float4 Shadow_Light_Direction;
 	float2 Shadow_Resolution;
 	float Shadow_CameraSplit_Depth;
 	float pad0;

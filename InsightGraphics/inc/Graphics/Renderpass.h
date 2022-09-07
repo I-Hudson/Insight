@@ -26,12 +26,12 @@ namespace Insight
 			glm::mat4 ProjView;		
 			glm::mat4 Projection;	
 			glm::mat4 View;			
-			glm::vec3 Light_Direction;
+			glm::vec4 Light_Direction;
 			glm::vec2 Resolution;	
 			float SplitDepth;
-			float pad0;
+			float pad0 = -1.0f;
 
-			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount);
+			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount, float split_lambda = 0.95f);
 		};
 
 		class Renderpass

@@ -13,19 +13,14 @@ Texture2D<float4> GBuffer_World_Normal: register(t1);
 SamplerState GBuffer_World_Normal_Sampler : register(s1);
 
 [[vk::combinedImageSampler]][[vk::binding(2, 1)]]
-Texture2D<float4> GBuffer_World_Position : register(t2);
+Texture2D<float4> GBuffer_Shadow : register(t2);
 [[vk::combinedImageSampler]][[vk::binding(2, 1)]]
-SamplerState GBuffer_World_Position_Sampler : register(s2);
+SamplerState GBuffer_Shadow_Sampler : register(s2);
 
-[[vk::combinedImageSampler]][[vk::binding(3, 1)]]
-Texture2D<float4> GBuffer_Shadow : register(t3);
-[[vk::combinedImageSampler]][[vk::binding(3, 1)]]
-SamplerState GBuffer_Shadow_Sampler : register(s3);
-
+[[vk::binding(3, 1)]]
+Texture2DArray<float> Cascade_Shadow : register(t3);
 [[vk::binding(4, 1)]]
-Texture2DArray<float> Cascade_Shadow : register(t4);
-[[vk::binding(5, 1)]]
-SamplerComparisonState Cascade_Shadow_Sampler : register(s4);
+SamplerState Cascade_Shadow_Sampler : register(s3);
 
 /*------------------------------------------------------------------------------
     SETTINGS
@@ -108,9 +103,9 @@ float Technique_Pcf(float3 uv, float compare)
         for (float x = -g_pcf_filter_size; x <= g_pcf_filter_size; x++)
         {
             float2 offset = float2(x, y) * texel_size;
-            shadow        += Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-																, uv + float3(offset, 0.0)
-																, compare).r;
+            //shadow        += Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+			//													, uv + float3(offset, 0.0)
+			//													, compare).r;
         }
     }
     
@@ -121,7 +116,6 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 {	
 	float4 colour 			= GBuffer_Colour.Sample(GBuffer_Colour_Sampler, input.UV);
 	float4 world_normal 	= GBuffer_World_Normal.Sample(GBuffer_World_Normal_Sampler, input.UV);
-	float4 world_position 	= GBuffer_World_Position.Sample(GBuffer_World_Position_Sampler, input.UV);
 	float gbuffer_depth 	= GBuffer_Shadow.Sample(GBuffer_Shadow_Sampler, input.UV).r;
 
 	float3 reconstruct_world_position = reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
@@ -139,11 +133,10 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 		// Ensure not out of bound
     	if (is_saturated(shadow_uv))
     	{
- 			//Apply_Bias(shadow_pos_ndc, world_normal.xyz, shadow_camera.Shadow_Light_Direction, cascade + 1);
+ 			//Apply_Bias(shadow_pos_ndc, world_normal.xyz, shadow_camera.Shadow_Light_Direction.xyz, cascade + 1);
 
-			float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-																, float3(shadow_uv, cascade)
-																, shadow_pos_ndc.z).r;
+			float shadow_sample = Cascade_Shadow.Sample(Cascade_Shadow_Sampler
+																, float3(shadow_uv.xy, 1)).r;
 			//Technique_Pcf(float3(shadow_uv, cascade), shadow_pos_ndc.z);
 
 			shadow = shadow * shadow_sample;
@@ -166,7 +159,7 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	}
 	else if(push_constant.Output_Texture == 2)
 	{
-		result = world_position;
+		result = float4(reconstruct_world_position, 1.0);
 	}
 	else if(push_constant.Output_Texture == 3)
 	{
