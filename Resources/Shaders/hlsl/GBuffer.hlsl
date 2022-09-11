@@ -48,8 +48,7 @@ struct PixelOutput
 {
 	float4 Colour : SV_TARGET0;
 	float4 World_Normal : SV_TARGET1;
-	float4 WorldPosition : SV_TARGET2;
-	float2 Velocity : SV_TARGET3;
+	float2 Velocity : SV_TARGET2;
 };
 
 PixelOutput PSMain(VertexOutput input)
@@ -61,7 +60,6 @@ PixelOutput PSMain(VertexOutput input)
 	PixelOutput Out;
 	Out.Colour = input.Colour;
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
-	Out.WorldPosition = input.WorldPos;
 	Out.Velocity = float2(0, 0); // velocity_uv
 
 	return Out;

@@ -13,7 +13,11 @@ VertexOutput VSMain(uint id : SV_VertexID)
 {
 	VertexOutput o;
 	o.UV = float2((id << 1) & 2, id & 2);
-	o.Position = float4(o.UV * float2(2, -2) + float2(-1, 1), 0, 1);
+//#ifdef VULKAN
+    o.Position 	= float4(o.UV * 2.0f + -1.0f, 0.0f, 1.0f);
+//#else
+    //o.Position 	= float4(o.UV * 2.0f + float2(-1.0f, 1.0f), 0.0f, 1.0f);
+//#endif
 	return o;
 }
 

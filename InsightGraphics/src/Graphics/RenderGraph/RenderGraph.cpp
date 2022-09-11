@@ -380,7 +380,7 @@ namespace Insight
 				bool invert_y = false;
 				if (GraphicsManager::IsVulkan())
 				{
-					invert_y = true;
+					//invert_y = true;
 				}
 				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, invert_y);
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
