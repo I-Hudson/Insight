@@ -112,9 +112,9 @@ namespace Insight
 			std::vector<LPCWCHAR> arguments;
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
 			{
-				arguments.push_back(L"-spirv");
 				arguments.push_back(L"-D");
 				arguments.push_back(L"VULKAN");
+				arguments.push_back(L"-spirv");
 			}
 			else
 			{
@@ -133,7 +133,8 @@ namespace Insight
 			arguments.push_back(L"-T");
 			arguments.push_back(targetProfile.c_str());
 
-			arguments.push_back(L"-I");
+			const wchar_t* c_Include_Directory = L"-I";
+			arguments.push_back(c_Include_Directory);
 			arguments.push_back(L"Resources/Shaders/hlsl");
 
 			arguments.push_back(DXC_ARG_DEBUG); //-Zi
@@ -144,18 +145,18 @@ namespace Insight
 
 			// Compile shader
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,                // Source buffer.
-				arguments.data(),       // Array of pointers to arguments.
-				(UINT)arguments.size(),		// Number of arguments.
-				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderCompileResults) // Compiler output status, buffer, and errors.
+				&Source,									// Source buffer.
+				arguments.data(),							// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),		// Number of arguments.
+				pIncludeHandler.Get(),						// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderCompileResults)			// Compiler output status, buffer, and errors.
 			)));
 
 			arguments.push_back(L"-spirv");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,                // Source buffer.
 				arguments.data(),       // Array of pointers to arguments.
-				(UINT)arguments.size(),		// Number of arguments.
+				static_cast<UINT>(arguments.size()),		// Number of arguments.
 				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
 				IID_PPV_ARGS(&ShaderReflectionResults) // Compiler output status, buffer, and errors.
 			)));

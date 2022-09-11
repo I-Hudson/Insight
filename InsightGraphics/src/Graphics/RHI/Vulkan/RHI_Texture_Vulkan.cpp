@@ -50,9 +50,12 @@ namespace Insight
 					&m_imageAllocation,
 					&allocInfo));
 
+				m_image_view = CreateImageView(0, 1, m_info.Layer_Count, 0);
+
+				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
-					CreateImageView(0, 1, 1, i);
+					m_single_layer_image_views.push_back(CreateImageView(0, 1, 1, i));
 				}
 			}
 
@@ -83,15 +86,21 @@ namespace Insight
 			void RHI_Texture_Vulkan::Release()
 			{
 				IS_PROFILE_FUNCTION();
-				for (u32 i = 0; i < m_image_views.size(); ++i)
+				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
 				{
-					vk::ImageView& view = m_image_views.at(i);
+					vk::ImageView& view = m_single_layer_image_views.at(i);
 					if (view)
 					{
 						m_context->GetDevice().destroyImageView(view);
 					}
 				}
-				m_image_views.clear();
+				m_single_layer_image_views.clear();
+
+				if (m_image_view)
+				{
+					m_context->GetDevice().destroyImageView(m_image_view);
+					m_image_view = nullptr;
+				}
 
 				if (m_image)
 				{
@@ -107,12 +116,17 @@ namespace Insight
 
 			void RHI_Texture_Vulkan::SetName(std::wstring name)
 			{
-				for (u32 i = 0; i < m_image_views.size(); ++i)
+				if (m_image_view)
 				{
-					vk::ImageView& view = m_image_views.at(i);
+					m_context->SetObejctName(name + L"_Image_View", reinterpret_cast<u64>(m_image_view.operator VkImageView()), vk::ObjectType::eImageView);
+				}
+
+				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
+				{
+					vk::ImageView& view = m_single_layer_image_views.at(i);
 					if (view)
 					{
-						m_context->SetObejctName(name + std::to_wstring(i), reinterpret_cast<u64>(view.operator VkImageView()), vk::ObjectType::eImageView);
+						m_context->SetObejctName(name + L"_Image_View_" + std::to_wstring(i), reinterpret_cast<u64>(view.operator VkImageView()), vk::ObjectType::eImageView);
 					}
 				}
 
@@ -123,12 +137,17 @@ namespace Insight
 				m_name = std::move(name);
 			}
 
-			vk::ImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
+			vk::ImageView RHI_Texture_Vulkan::GetImageView() const
 			{
-				return m_image_views.at(array_layer_index);
+				return m_image_view;
 			}
 
-			void RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
+			vk::ImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
+			{
+				return m_single_layer_image_views.at(array_layer_index);
+			}
+
+			vk::ImageView RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
 			{
 				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
 					{ },
@@ -144,7 +163,7 @@ namespace Insight
 						layer_index,
 						layer_count)
 				);
-				m_image_views.push_back(m_context->GetDevice().createImageView(viewCreateInfo));
+				return m_context->GetDevice().createImageView(viewCreateInfo);
 			}
 		}
 	}

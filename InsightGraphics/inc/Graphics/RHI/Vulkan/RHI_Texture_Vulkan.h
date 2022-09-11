@@ -27,15 +27,17 @@ namespace Insight
 				virtual void SetName(std::wstring name) override;
 
 				vk::Image GetImage() const { return m_image; }
-				vk::ImageView GetImageView(u32 array_layer_index = 0) const;
+				vk::ImageView GetImageView() const;
+				vk::ImageView GetImageView(u32 array_layer_index) const;
 
 			private:
-				void CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);
+				NO_DISCARD vk::ImageView CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
 				vk::Image m_image{ nullptr };
-				std::vector<vk::ImageView> m_image_views;
+				vk::ImageView m_image_view;								// Image view for all layers.
+				std::vector<vk::ImageView> m_single_layer_image_views;	// Image view for each layer.
 				VmaAllocation m_imageAllocation = nullptr;
 
 				friend class RenderContext_Vulkan;

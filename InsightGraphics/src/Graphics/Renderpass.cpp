@@ -29,12 +29,16 @@ namespace Insight
 	const float ShadowZNear = 1.0f;
 	const float ShadowZFar = 512.0f * 4;
 	const float ShadowFOV = 45.0f;
+	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
+
+	const float Main_Camera_Near_Plane = 0.1f;
+	const float Main_Camera_Far_Plane = 1024.0f;
 
 	bool Render_Size_Related_To_Window_Size = true;
 	int Render_Width = 640;
 	int Render_Height = 720;
 
-	float cascade_split_lambda = 0.95f;
+	float cascade_split_lambda = 0.25f;
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
@@ -187,19 +191,15 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass setup");
 
-					const u32 depth_tex_size = 1024 * 4;
-					const u32 width = depth_tex_size;
-					const u32 height = depth_tex_size;
-
-					RHI_TextureCreateInfo tex_create_info = RHI_TextureCreateInfo::Tex2DArray(width, height,
+					RHI_TextureCreateInfo tex_create_info = RHI_TextureCreateInfo::Tex2DArray(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size,
 						PixelFormat::D32_Float, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled, 4);
 
 					RGTextureHandle depth_tex = builder.CreateTexture(L"Cascade_Shadow_Tex", tex_create_info);
 					builder.WriteDepthStencil(depth_tex);
 					data.Depth_Tex = depth_tex;
 
-					builder.SetViewport(depth_tex_size, depth_tex_size);
-					builder.SetScissor(depth_tex_size, depth_tex_size);
+					builder.SetViewport(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
+					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 
 					ShaderDesc shader_description = { };
 					shader_description.VertexFilePath = L"./Resources/Shaders/hlsl/Cascade_Shadow.hlsl";
@@ -208,10 +208,11 @@ namespace Insight
 					PipelineStateObject pso = { };
 					pso.Name = L"Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
-					pso.CullMode = CullMode::Front;
+					//pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
+					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor, DynamicState::DepthBias };
 					builder.SetPipeline(pso);
 				},
 				[](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
@@ -221,7 +222,7 @@ namespace Insight
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
-					//cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
+					cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
@@ -267,7 +268,7 @@ namespace Insight
 			ImGui::ListBox("Cameras", &camera_index, camera_names, ARRAY_COUNT(camera_names));
 			ImGui::End();
 
-			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4);
+			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
@@ -288,14 +289,6 @@ namespace Insight
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle normal_rt = builder.CreateTexture(L"NormalRT", textureCreateInfo);
 					builder.WriteTexture(normal_rt);
-
-					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						  Render_Width
-						, Render_Height
-						, PixelFormat::R32G32B32A32_Float
-						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
-					RGTextureHandle world_pos_rt = builder.CreateTexture(L"WorldPosRT", textureCreateInfo);
-					builder.WriteTexture(world_pos_rt);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
 						  Render_Width
@@ -393,21 +386,18 @@ namespace Insight
 
 			static int output_texture;
 			static int cascade_override;
-			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space", "GBuffer_Depth", "reconstruct_position" };
+			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space", "GBuffer_Depth", "reconstruct_position", "display_shadow_texture" };
 			const char* cascade_override_items[] = { "0", "1", "2", "3" };
+
 			ImGui::Begin("Composite pass");
 			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
 			ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items));
 			ImGui::End();
 
 			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
-			if (GraphicsManager::IsVulkan())
+			for (UBO_ShadowCamera& c : shader_cameras)
 			{
-				for (UBO_ShadowCamera& camera : shader_cameras)
-				{
-					camera.Projection[1][1] *= -1;
-					camera.ProjView = camera.Projection * camera.View;
-				}
+				//c = shader_cameras[2];
 			}
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass", 
@@ -437,7 +427,7 @@ namespace Insight
 					pso.ShaderDescription = shader_description;
 					pso.DepthTest = false;
 					pso.PolygonMode = PolygonMode::Fill;
-					pso.CullMode = CullMode::None;
+					pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					builder.SetPipeline(pso);
 
@@ -451,7 +441,7 @@ namespace Insight
 					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription(L"Composite_Pass"));
 
 					UBO_Camera camera = m_camera;
-					cmd_list->SetUniform(0, 0, &camera, sizeof(camera));
+					cmd_list->SetUniform(0, 0, camera);
 					cmd_list->SetUniform(0, 1, shader_cameras.data(), static_cast<u32>(shader_cameras.size() * sizeof(UBO_ShadowCamera)));
 
 					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
@@ -459,12 +449,12 @@ namespace Insight
 					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
 
 					RHI_SamplerCreateInfo sampler_create_info = { };
-					//sampler_create_info.MagFilter = Filter::Linear;
-					//sampler_create_info.MinFilter = Filter::Linear;
-					//sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
-					//sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
-					//sampler_create_info.CompareEnabled = true;
-					//sampler_create_info.CompareOp = CompareOp::Less;
+					sampler_create_info.MagFilter = Filter::Linear;
+					sampler_create_info.MinFilter = Filter::Linear;
+					sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
+					sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
+					sampler_create_info.CompareEnabled = true;
+					sampler_create_info.CompareOp = CompareOp::Less;
 					RHI_Sampler* shadow_sampler = GraphicsManager::Instance().GetRenderContext()->GetSamplerManager().GetOrCreateSampler(sampler_create_info);
 
 					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
@@ -541,6 +531,7 @@ namespace Insight
 		{
 			float deltaTime = (float)glfwGetTime() - previousTime;
 			previousTime = (float)glfwGetTime();
+			bool negative_viewport = false;
 
 			glm::mat4 viewMatrix = camera.View;
 
@@ -609,7 +600,12 @@ namespace Insight
 				// pitch
 				if (iDeltaY != 0)
 				{
-					mMat = glm::axisAngleMatrix(vRight.xyz(), (float)iDeltaY / 150.0f);
+					float i_delta_y = static_cast<float>(iDeltaY);
+					if (negative_viewport)
+					{
+						i_delta_y = -i_delta_y;
+					}
+					mMat = glm::axisAngleMatrix(vRight.xyz(), i_delta_y / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;
@@ -618,7 +614,8 @@ namespace Insight
 				// yaw
 				if (iDeltaX != 0)
 				{
-					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), (float)iDeltaX / 150.0f);
+					float i_delta_x = static_cast<float>(iDeltaX);
+					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), i_delta_x / 150.0f);
 					vRight = mMat * vRight;
 					vUp = mMat * vUp;
 					vForward = mMat * vForward;
@@ -637,9 +634,18 @@ namespace Insight
 
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			aspect = std::max(0.1f, aspect);
-			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 5000.0f);
+			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
+
+			// Setup the inverted projection view matrix.
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
+
+			if (GraphicsManager::IsVulkan())
+			{
+				// Then invert the projection if vulkan.
+				camera.Projection[1][1] *= -1;
+				camera.ProjView = camera.Projection * glm::inverse(camera.View);
+			}
 		}
 
 		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount, float split_lambda)
@@ -731,8 +737,14 @@ namespace Insight
 				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
 				{
+					if (GraphicsManager::IsVulkan())
+					{
+						// Invert the projection if vulkan.
+						lightOrthoMatrix[1][1] *= -1;
+					}
+
 					// Store split distance and matrix in cascade
-					outCascades[i].SplitDepth = (1.0f + splitDist * clipRange) * -1.0f;
+					outCascades[i].SplitDepth = (1.0f + splitDist * clipRange);
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;
 					outCascades[i].View = lightViewMatrix;

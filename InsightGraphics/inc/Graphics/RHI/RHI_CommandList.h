@@ -57,6 +57,8 @@ namespace Insight
 			virtual void SetPushConstant(u32 offset, u32 size, const void* data) = 0;
 
 			void SetUniform(u32 set, u32 binding, const void* data, u32 size);
+			template<typename T>
+			void SetUniform(u32 set, u32 binding, const T& data) { SetUniform(set, binding, static_cast<const void*>(&data), sizeof(T)); }
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);

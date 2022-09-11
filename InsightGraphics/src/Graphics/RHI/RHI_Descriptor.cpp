@@ -219,7 +219,6 @@ namespace Insight
 						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 						++imageInfoIndex;
-
 						add_write = true;
 					}
 
@@ -244,7 +243,6 @@ namespace Insight
 						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 						++imageInfoIndex;
-
 						add_write = true;
 					}
 
@@ -257,10 +255,8 @@ namespace Insight
 							bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
 							bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
 							bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
-
 							writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
 							++bufferInfoIndex;
-
 							add_write = true;
 						}
 					}
