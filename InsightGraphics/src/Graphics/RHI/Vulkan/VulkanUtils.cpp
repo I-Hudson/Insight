@@ -810,6 +810,8 @@ namespace Insight
             default:
                 break;
             }
+            assert(false);
+            return vk::FrontFace::eCounterClockwise;
         }
 
         vk::DescriptorType DescriptorTypeToVulkan(DescriptorType type)
@@ -944,6 +946,31 @@ namespace Insight
             }
             assert(false);
             return vk::ImageViewType::e2D;
+        }
+
+        vk::DynamicState DynamicStateToVulkan(DynamicState dynamic_state)
+        {
+            switch (dynamic_state)
+            {
+            case Insight::Graphics::DynamicState::Viewport:     return vk::DynamicState::eViewport;
+            case Insight::Graphics::DynamicState::Scissor:      return vk::DynamicState::eScissor;
+            case Insight::Graphics::DynamicState::DepthBias:    return vk::DynamicState::eDepthBias;
+            case Insight::Graphics::DynamicState::LineWidth:    return vk::DynamicState::eLineWidth;
+            default:
+                break;
+            }
+            assert(false);
+            return vk::DynamicState::eViewport;
+        }
+
+        std::vector<vk::DynamicState> DynamicStatesToVulkan(std::vector<DynamicState> dynamic_states)
+        {
+            std::vector<vk::DynamicState> states;
+            for (const DynamicState ds : dynamic_states)
+            {
+                states.push_back(DynamicStateToVulkan(ds));
+            }
+            return states;
         }
 
         VmaAllocationCreateFlags BufferTypeToVMAAllocCreateFlags(BufferType type)

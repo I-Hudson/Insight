@@ -225,7 +225,7 @@ namespace Insight
 					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             // blendConstants
 				);
 			
-				std::array<vk::DynamicState, 2> dynamicStates = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+				std::vector<vk::DynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
 				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
 			
 				RenderContext* context = (RenderContext*)m_context;

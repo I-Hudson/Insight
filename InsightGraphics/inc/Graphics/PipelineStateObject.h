@@ -53,6 +53,8 @@ namespace Insight
 			BlendFactor DstAplhaBlendFactor = {};
 			BlendOp AplhaBlendOp = {};
 
+			std::vector<DynamicState> Dynamic_States{ DynamicState::Viewport, DynamicState::Scissor };
+
 			// Private members. Should not be touched.
 			bool Swapchain = false;
 			RHI_Shader* Shader = nullptr;

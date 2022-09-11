@@ -476,6 +476,15 @@ namespace Insight
 		//using GUPBufferFlags = u32;
 		//std::string GUPBufferFlagsToString(GUPBufferFlags flags);
 	
+		enum class DynamicState
+		{
+			Viewport, 
+			Scissor,
+			DepthBias,
+			LineWidth,
+		};
+		std::string DynamicStateToString(DynamicState dynamic_state);
+
 		enum class DeviceExtension : u32
 		{
 			BindlessDescriptors,

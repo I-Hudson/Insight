@@ -363,5 +363,20 @@ namespace Insight
 			}
 			return str;
 		}
+
+	std::string DynamicStateToString(DynamicState dynamic_state)
+	{
+		switch (dynamic_state)
+		{
+		case Insight::Graphics::DynamicState::Viewport:		return "Viewport";
+		case Insight::Graphics::DynamicState::Scissor:		return "Scissor";
+		case Insight::Graphics::DynamicState::DepthBias:	return "DepthBias";
+		case Insight::Graphics::DynamicState::LineWidth:	return "LineWidth";
+		default:
+			break;
+		}
+		return "";
+	}
+
 	}
 }

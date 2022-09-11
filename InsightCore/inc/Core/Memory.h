@@ -1,7 +1,6 @@
 #pragma once
 
 #include "MemoryTracker.h"
-#include "Platform/Platform.h"
 
 #include <new>
 #include <atomic>
@@ -72,6 +71,8 @@ template<typename T>
 class RPtr;
 template<typename T>
 class WPtr;
+template<typename T>
+class Ptr;
 
 namespace Insight
 {
@@ -89,106 +90,6 @@ namespace Insight
 		std::atomic<int> m_strongRefs = 0;
 		std::atomic<int> m_weakRefs = 0;
 	};
-
-	//template<typename T>
-	//class PtrBase
-	//{
-	//private:
-	//	using TPtr = T*;
-	//	using RefCountPtr = RefCount*;
-
-	//protected:
-	//	void ConstructFromPtr(T* ptr)
-	//	{
-	//		m_ptr = ptr;
-	//		m_refCount = NewTracked(RefCount);
-	//		Inc();
-	//	}
-
-	//	template<typename T2>
-	//	void ConstructFromCopy(const PtrBase<T2>& other)
-	//	{
-	//		m_ptr = other.m_ptr;
-	//		m_refCount = other.m_refCount;
-	//		Inc();
-	//	}
-
-	//	template <class T2>
-	//	void MoveFromOther(PtrBase<T2>&& other)
-	//	{
-	//		//std::swap(m_ptr, other.m_ptr);
-	//		std::swap(m_refCount, other.m_refCount);
-	//	}
-
-	//	template <class T2>
-	//	void ConstructWeakFromOther(const PtrBase<T2>& other)
-	//	{
-	//		m_ptr = other.m_ptr;
-	//		m_refCount = other.m_refCount;
-	//		IncW();
-	//	}
-	//	template<typename T2>
-	//	void ConstructFromWeak(const PtrBase<T2>& other)
-	//	{
-	//		m_ptr = other.m_ptr;
-	//		m_refCount = other.m_refCount;
-	//		Inc();
-	//	}
-
-	//	void Inc()
-	//	{
-	//		if (m_refCount)
-	//		{
-	//			m_refCount->Inc();
-	//		}
-	//	}
-	//	void Dec()
-	//	{
-	//		if (m_refCount)
-	//		{
-	//			m_refCount->Dec();
-	//		}
-
-	//		if (m_refCount->HasRefs())
-	//		{
-	//			DeleteTracked(m_ptr);
-	//			DeleteTracked(m_refCount);
-	//		}
-	//	}
-
-	//	void IncW()
-	//	{
-	//		if (m_refCount)
-	//		{
-	//			m_refCount->IncW();
-	//		}
-	//	}
-	//	void DecW()
-	//	{
-	//		if (m_refCount)
-	//		{
-	//			m_refCount->DecW();
-	//		}
-	//	}
-
-	//	void Swap(PtrBase& other)
-	//	{
-	//		std::swap(m_ptr, other.m_ptr);
-	//		std::swap(m_refCount, other.m_refCount);
-	//	}
-
-	//	TPtr GetPtr() const { return m_ptr; }
-
-	//protected:
-	//	TPtr m_ptr = nullptr;
-	//	RefCountPtr m_refCount = nullptr;
-
-	//	template <class T0>
-	//	friend class _Ptr_base;
-
-	//	friend class RPtr<T>;
-	//	friend class WPtr<T>;
-	//};
 }
 
 template<typename T>
@@ -574,6 +475,21 @@ private:
 	friend class WPtr;
 	template<typename>
 	friend class RPtr;
+};
+
+/// <summary>
+/// Wrapper around a raw pointer.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+template<typename T>
+class Ptr
+{
+public:
+
+
+
+private:
+	T* m_ptr = nullptr;;
 };
 
 namespace Insight::Core
