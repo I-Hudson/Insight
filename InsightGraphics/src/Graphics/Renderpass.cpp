@@ -27,12 +27,12 @@
 namespace Insight
 {
 	const float ShadowZNear = 1.0f;
-	const float ShadowZFar = 512.0f * 4;
+	const float ShadowZFar = 1024.0f;
 	const float ShadowFOV = 45.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
 
 	const float Main_Camera_Near_Plane = 0.1f;
-	const float Main_Camera_Far_Plane = 1024.0f;
+	const float Main_Camera_Far_Plane = 5000.0f;
 
 	bool Render_Size_Related_To_Window_Size = true;
 	int Render_Width = 640;

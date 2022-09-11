@@ -126,28 +126,26 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 
 	float3 reconstruct_world_position = reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
 	float4 shadow 				= 1.0;
+	float cascade_index = 0;
 
-	uint cascade = push_constant.Cascade_Override;
-    //for (uint cascade = 0; cascade < 4; cascade++)
+	//uint cascade = push_constant.Cascade_Override;
+    for (uint cascade = 0; cascade < 4; cascade++)
     {
+		cascade_index = cascade;
 		Shadow_Camera shadow_camera = shadow_cameras[cascade];
 		// Project into light space
 		float4x4 shadow_space_matrix = shadow_camera.Shadow_Camera_ProjView;
         float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
-		
-		if (reconstruct_world_position.z < shadow_camera.Shadow_CameraSplit_Depth)
-		{
-			float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
+		float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
 
-			// Ensure not out of bound
-    		if (is_saturated(shadow_uv))
-    		{
-				float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+		// Ensure not out of bound
+    	if (is_saturated(shadow_uv))
+    	{
+			float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
 																, float3(shadow_uv.xy, cascade)
 																, shadow_pos_ndc.z).r;
-				shadow = shadow * shadow_sample;
-				//break;
-			}
+			shadow = shadow * shadow_sample;
+			break;
 		}
 	}
 
@@ -171,6 +169,25 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	else if(push_constant.Output_Texture == 4)
 	{
 		result = colour * shadow;
+	}
+	else if(push_constant.Output_Texture == 5)
+	{
+		if (cascade_index == 0)
+		{
+			result = float4(1, 0, 0, 1);
+		}
+		if (cascade_index == 1)
+		{
+			result = float4(0, 1, 0, 1);
+		}
+		if (cascade_index == 2)
+		{
+			result = float4(0, 0, 1, 1);
+		}
+		if (cascade_index == 3)
+		{
+			result = float4(1, 1, 1, 1);
+		}
 	}
 	return result;
 }

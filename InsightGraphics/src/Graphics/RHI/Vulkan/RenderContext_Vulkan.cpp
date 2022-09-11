@@ -937,7 +937,8 @@ namespace Insight
 
 					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
 					texVulkan->m_context = this;
-					texVulkan->m_image_views.push_back(imageView);
+					texVulkan->m_image_view = imageView;
+					texVulkan->m_single_layer_image_views.push_back(imageView);
 					texVulkan->m_image = image;
 					texVulkan->m_info = texCreateInfo;
 

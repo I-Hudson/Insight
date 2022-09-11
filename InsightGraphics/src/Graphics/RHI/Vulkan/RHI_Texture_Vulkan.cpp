@@ -98,7 +98,6 @@ namespace Insight
 
 				if (m_image_view)
 				{
-					m_context->GetDevice().destroyImageView(m_image_view);
 					m_image_view = nullptr;
 				}
 
