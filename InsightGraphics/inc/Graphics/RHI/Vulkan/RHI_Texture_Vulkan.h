@@ -26,9 +26,9 @@ namespace Insight
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
-				vk::Image GetImage() const { return m_image; }
-				vk::ImageView GetImageView() const;
-				vk::ImageView GetImageView(u32 array_layer_index) const;
+				NO_DISCARD vk::Image GetImage() const { return m_image; }
+				NO_DISCARD vk::ImageView GetImageView() const;
+				NO_DISCARD vk::ImageView GetImageView(u32 array_layer_index) const;
 
 			private:
 				NO_DISCARD vk::ImageView CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);

@@ -26,13 +26,13 @@
 
 namespace Insight
 {
-	const float ShadowZNear = 1.0f;
+	const float ShadowZNear = 0.1f;
 	const float ShadowZFar = 1024.0f;
 	const float ShadowFOV = 45.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
 
 	const float Main_Camera_Near_Plane = 0.1f;
-	const float Main_Camera_Far_Plane = 5000.0f;
+	const float Main_Camera_Far_Plane = 2048.0f;
 
 	bool Render_Size_Related_To_Window_Size = true;
 	int Render_Width = 640;
@@ -655,8 +655,8 @@ namespace Insight
 			std::vector<UBO_ShadowCamera> outCascades;
 			outCascades.resize(cascadeCount);
 
-			const float nearClip = 1.0f;
-			const float farClip = 512.0f;
+			const float nearClip = Main_Camera_Near_Plane;
+			const float farClip = Main_Camera_Far_Plane;
 			const float clipRange = farClip - nearClip;
 
 			const float minZ = nearClip;
@@ -680,30 +680,31 @@ namespace Insight
 
 			// Calculate orthographic projection matrix for each cascade
 			float lastSplitDist = 0.0;
-			for (int i = 0; i < cascadeCount; i++)
+			for (u32 i = 0; i < cascadeCount; i++)
 			{
 				float splitDist = cascadeSplits[i];
 
-				glm::vec3 frustumCorners[8] = {
+				glm::vec3 frustumCorners[8] = 
+				{
 					glm::vec3(-1.0f,  1.0f, -1.0f),
-					glm::vec3(1.0f,  1.0f, -1.0f),
-					glm::vec3(1.0f, -1.0f, -1.0f),
+					glm::vec3( 1.0f,  1.0f, -1.0f),
+					glm::vec3( 1.0f, -1.0f, -1.0f),
 					glm::vec3(-1.0f, -1.0f, -1.0f),
 					glm::vec3(-1.0f,  1.0f,  1.0f),
-					glm::vec3(1.0f,  1.0f,  1.0f),
-					glm::vec3(1.0f, -1.0f,  1.0f),
+					glm::vec3( 1.0f,  1.0f,  1.0f),
+					glm::vec3( 1.0f, -1.0f,  1.0f),
 					glm::vec3(-1.0f, -1.0f,  1.0f),
 				};
 
 				// Project frustum corners into world space
 				glm::mat4 invCam = glm::inverse(camera.ProjView);
-				for (uint32_t i = 0; i < 8; ++i)
+				for (u32 i = 0; i < 8; ++i)
 				{
 					glm::vec4 invCorner = invCam * glm::vec4(frustumCorners[i], 1.0f);
 					frustumCorners[i] = invCorner / invCorner.w;
 				}
 
-				for (uint32_t i = 0; i < 4; ++i)
+				for (u32 i = 0; i < 4; ++i)
 				{
 					glm::vec3 dist = frustumCorners[i + 4] - frustumCorners[i];
 					frustumCorners[i + 4] = frustumCorners[i] + (dist * splitDist);
@@ -712,14 +713,14 @@ namespace Insight
 
 				// Get frustum center
 				glm::vec3 frustumCenter = glm::vec3(0.0f);
-				for (uint32_t i = 0; i < 8; i++)
+				for (u32 i = 0; i < 8; ++i)
 				{
 					frustumCenter += frustumCorners[i];
 				}
 				frustumCenter /= 8.0f;
 
 				float radius = 0.0f;
-				for (uint32_t i = 0; i < 8; ++i)
+				for (u32 i = 0; i < 8; ++i)
 				{
 					float distance = glm::length(frustumCorners[i] - frustumCenter);
 					radius = glm::max(radius, distance);
@@ -729,22 +730,21 @@ namespace Insight
 				glm::vec3 maxExtents = glm::vec3(radius);
 				glm::vec3 minExtents = -maxExtents;
 
-				// Construct our matries requried for the light.
+				// Construct our matrixs required for the light.
 				glm::vec3 lightDirection = dir_light_direction;
-				float lightExtension = -minExtents.z;
-				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * lightExtension;
+				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * minExtents.z;
 				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 
 				{
 					if (GraphicsManager::IsVulkan())
 					{
-						// Invert the projection if vulkan.
+						// Invert the projection if vulkan. This is because vulkan's coord space is from top left, not bottom left.
 						lightOrthoMatrix[1][1] *= -1;
 					}
 
 					// Store split distance and matrix in cascade
-					outCascades[i].SplitDepth = (1.0f + splitDist * clipRange);
+					outCascades[i].SplitDepth = (Main_Camera_Near_Plane + splitDist * clipRange) * -1.0f;
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;
 					outCascades[i].View = lightViewMatrix;
