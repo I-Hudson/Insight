@@ -13,6 +13,7 @@ namespace Insight
 	{
 		class ECSWorld;
 
+#ifdef IS_ECS_ENABLED
 		// THREAD_SAFE
 
 		class IS_ECS EntityManager
@@ -38,5 +39,27 @@ namespace Insight
 
 			std::shared_mutex m_lock;
 		};
+#else
+
+		class IS_ECS EntityManager
+		{
+		public:
+			EntityManager();
+			EntityManager(ECSWorld* ecsWorld);
+
+			Entity* AddNewEntity();
+			Entity* AddNewEntity(std::string entity_name);
+			void RemoveEntity(Entity*& entity);
+
+			void Update(const float delta_time);
+
+		private:
+			ECSWorld* m_ecsWorld = nullptr;
+			std::vector<UPtr<Entity>> m_entities;
+
+			std::shared_mutex m_lock;
+		};
+
+#endif
 	}
 }

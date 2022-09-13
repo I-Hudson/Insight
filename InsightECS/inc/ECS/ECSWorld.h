@@ -8,6 +8,7 @@ namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		//using ECSCommandBufferCmd = std::function<void()>;
 		///// <summary>
 		///// Buffer to store all commands which have been queued to be executed next 
@@ -68,5 +69,23 @@ namespace Insight
 			EntityManager m_entityManager;
 			ComponentArrayManager m_componentArrayManager;
 		};
+#else 
+
+		class IS_ECS ECSWorld
+		{
+		public:
+			ECSWorld();
+
+			void Update(const float deltaTime);
+
+			Entity* AddEntity();
+			Entity* AddEntity(std::string entity_name);
+			void RemoveEntity(Entity*& entity);
+
+		private:
+			EntityManager m_entityManager;
+		};
+
+#endif
 	}
 }

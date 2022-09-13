@@ -12,24 +12,16 @@ namespace Insight
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 		}
 
-		struct COM
-		{
-		};
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
-
-			ECS::Entity e = m_ecsWorld->AddEntity();
-			for (size_t i = 0; i < 0; ++i)
-			{
-				m_ecsWorld->AddComponent<COM>(e);
-			}
 		}
 
 		Scene::Scene(Scene&& other)
 		{
-
+			m_sceneName = std::move(other.m_sceneName);
+			m_ecsWorld = std::move(other.m_ecsWorld);
 		}
 
 		Scene::~Scene()

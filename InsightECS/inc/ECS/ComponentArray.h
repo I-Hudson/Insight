@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef IS_ECS_ENABLED
 #include "Core/TypeAlias.h"
 #include "ECS/ComponentHandle.h"
 #include "ECS/Entity.h"
@@ -10,11 +11,13 @@
 #include <unordered_map>
 #include <queue>
 #include <shared_mutex>
+#endif
 
 namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		/*
 		/// <summary>
 		/// This acts like string_view. This should only "look" into a component array
@@ -181,5 +184,6 @@ namespace Insight
 			std::unordered_map<u64, UPtr<IComponentArray>> m_componentArrays;
 			std::shared_mutex m_lock;
 		};
+#endif
 	}
 }

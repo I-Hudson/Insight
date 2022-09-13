@@ -5,13 +5,20 @@
 #include "ECS/Defines.h"
 #include "Core/GUID.h"
 
+#include "Core/Memory.h"
+
 #include <string>
+#include <vector>
+
+#ifdef IS_ECS_ENABLED
 #include <unordered_set>
+#endif
 
 namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		class EntityManager;
 		class ECSWorld;
 
@@ -50,5 +57,65 @@ namespace Insight
 		};
 
 		const Entity c_InvalidEntity = Entity();
+#else
+		class EntityManager;
+
+		class IS_ECS Component
+		{
+		public:
+			Component() { }
+			~Component() { }
+
+			// Called on creation.
+			virtual void OnCreate() { }
+			// Called on destruction.
+			virtual void OnDestroy() { }
+
+			// Called before first update (Only called once).
+			virtual void OnBegin() { }
+			// Called after last update (Only called once).
+			virtual void OnEnd() { }
+
+			// Called before any update.
+			virtual void OnEarlyUpdate() { }
+			// Called once per-frame 
+			virtual void OnUpdate(const float delta_time) { }
+			// Called after every udpate.
+			virtual void OnLateUpdate() { }
+
+
+
+		private:
+
+		};
+
+		class IS_ECS Entity
+		{
+		public:
+			Entity()  = default;
+			Entity(std::string name);
+
+			Component* AddComponentByName(std::string_view component_type);
+			Component* GetComponentByName(std::string_view component_type) const;
+			void RemoveComponentByName(std::string_view component_type);
+
+			Core::GUID GetGUID() const { return m_guid; }
+
+			std::string GetName() const { return m_name; }
+			void SetName(std::string entity_name) { m_name = std::move(m_name); }
+
+		private:
+			void Update(const float delta_time);
+
+		private:
+			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
+			std::string m_name;
+
+			std::vector<RPtr<Component>> m_components;
+
+			friend class EntityManager;
+		};
+
+#endif
 	}
 }

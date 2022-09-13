@@ -4,6 +4,7 @@ namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		class ECSWorld;
 
 		struct ECSSystemOnAddedData
@@ -38,5 +39,6 @@ namespace Insight
 
 			}
 		};
+#endif
 	}
 }

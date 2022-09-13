@@ -5,6 +5,7 @@ namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		void Entity::SetName(std::string name)
 		{
 			if (!IsVaild())
@@ -54,6 +55,31 @@ namespace Insight
 			}
 			ASSERT(m_entityManager); 
 			return m_entityManager->GetEntityData(*this).GUID;
+		}
+#else 
+
+
+#endif
+		Entity::Entity(std::string name)
+			: m_name(std::move(name))
+		{ }
+
+		Component* Entity::AddComponentByName(std::string_view component_type)
+		{
+			return nullptr;
+		}
+
+		Component* Entity::GetComponentByName(std::string_view component_type) const
+		{
+			return nullptr;
+		}
+
+		void Entity::RemoveComponentByName(std::string_view component_type)
+		{
+		}
+
+		void Entity::Update(const float delta_time)
+		{
 		}
 	}
 }

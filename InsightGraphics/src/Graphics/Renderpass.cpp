@@ -671,7 +671,7 @@ namespace Insight
 			// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
 			for (int i = 0; i < cascadeCount; i++)
 			{
-				float p = (i + 1) / static_cast<float>(cascadeCount);
+				float p = (static_cast<float>(i) + 1.0f) / static_cast<float>(cascadeCount);
 				float log = minZ * std::pow(ratio, p);
 				float uniform = minZ + range * p;
 				float d = cascadeSplitLambda * (log - uniform) + uniform;
@@ -732,7 +732,7 @@ namespace Insight
 
 				// Construct our matrixs required for the light.
 				glm::vec3 lightDirection = dir_light_direction;
-				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * minExtents.z;
+				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * -minExtents.z;
 				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
 

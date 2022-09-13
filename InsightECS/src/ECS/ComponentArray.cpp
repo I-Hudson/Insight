@@ -6,6 +6,7 @@ namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		ComponentArrayManager::ComponentArrayManager(ECSWorld* const ecsWorld)
 			: m_ecsWorld(ecsWorld)
 		{ }
@@ -29,5 +30,6 @@ namespace Insight
 			}
 			componentArray->RemoveComponent(entity, handle);
 		}
+#endif
 	}
 }

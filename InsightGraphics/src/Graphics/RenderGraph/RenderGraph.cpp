@@ -160,7 +160,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			RenderGraphBuilder builder(this);
-			// TODO: This should be threaded. Leave as single thread for now.
+			// TODO This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
 				builder.SetPass(pass.Get());
@@ -377,12 +377,7 @@ namespace Insight
 			{
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 
-				bool invert_y = false;
-				if (GraphicsManager::IsVulkan())
-				{
-					//invert_y = true;
-				}
-				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, invert_y);
+				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
 

@@ -485,11 +485,19 @@ template<typename T>
 class Ptr
 {
 public:
+	Ptr() = default;
+	Ptr(T* pointer) { Reset(); m_ptr = pointer; }
 
-
+	void Reset()
+	{
+		if (m_ptr)
+		{
+			DeleteTracked(m_ptr);
+		}
+	}
 
 private:
-	T* m_ptr = nullptr;;
+	T* m_ptr = nullptr;
 };
 
 namespace Insight::Core

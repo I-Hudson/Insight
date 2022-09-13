@@ -7,6 +7,7 @@ namespace Insight
 {
 	namespace ECS
 	{
+#ifdef IS_ECS_ENABLED
 		template<typename Component>
 		u64 GetComponentId()
 		{
@@ -37,5 +38,6 @@ namespace Insight
 			template<typename>
 			friend class ComponentArray;
 		};
+#endif
 	}
 }
