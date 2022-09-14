@@ -12,12 +12,12 @@ namespace Insight
 		/// <summary>
 		/// Override default behavior for RHI_Buffer when created.
 		/// </summary>
-		struct RHI_Buffer_Overrides
+		struct IS_GRAPHICS RHI_Buffer_Overrides
 		{
 			bool Force_Host_Writeable = false;
 		};
 
-		class RHI_BufferView
+		class IS_GRAPHICS RHI_BufferView
 		{
 		public:
 			RHI_BufferView();
@@ -41,7 +41,7 @@ namespace Insight
 			friend std::hash<RHI_BufferView>;
 		};
 
-		class RHI_Buffer : public RHI_Resource
+		class IS_GRAPHICS RHI_Buffer : public RHI_Resource
 		{
 		public:
 			static RHI_Buffer* New();

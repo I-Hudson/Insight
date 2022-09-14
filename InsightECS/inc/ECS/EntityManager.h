@@ -51,7 +51,9 @@ namespace Insight
 			Entity* AddNewEntity(std::string entity_name);
 			void RemoveEntity(Entity*& entity);
 
-			void Update(const float delta_time);
+			void EarlyUpdate();
+			void Update(const float deltaTime);
+			void LateUpdate();
 
 		private:
 			ECSWorld* m_ecsWorld = nullptr;

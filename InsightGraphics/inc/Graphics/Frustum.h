@@ -21,6 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include "Graphics/Defines.h"
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
 
@@ -28,7 +29,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-        class Plane
+        class IS_GRAPHICS Plane
         {
         public:
             Plane() = default;
@@ -60,7 +61,7 @@ namespace Insight
             Intersects
         };
 
-		class Frustum
+		class IS_GRAPHICS Frustum
 		{
         public:
             Frustum() = default;

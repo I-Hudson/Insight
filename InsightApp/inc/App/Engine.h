@@ -5,6 +5,7 @@
 // -- Managers --
 #include "Graphics/GraphicsManager.h"
 #include "Scene/SceneManager.h"
+#include "Event/EventManager.h"
 
 #include "Graphics/Window.h"
 
@@ -12,11 +13,6 @@
 
 namespace Insight
 {
-	namespace Core
-	{
-		class EventManager;
-	}
-
 	namespace App
 	{
 		/*

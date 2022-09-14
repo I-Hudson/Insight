@@ -8,7 +8,9 @@
 #include "Core/Memory.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
+#include <unordered_map>
 
 #ifdef IS_ECS_ENABLED
 #include <unordered_set>
@@ -58,7 +60,9 @@ namespace Insight
 
 		const Entity c_InvalidEntity = Entity();
 #else
+		class ECSWorld;
 		class EntityManager;
+		class Entity;
 
 		class IS_ECS Component
 		{
@@ -83,17 +87,47 @@ namespace Insight
 			// Called after every udpate.
 			virtual void OnLateUpdate() { }
 
+			virtual const char* GetTypeName() = 0;
 
+		protected:
+			// Allow multiple of the same component to be added to a single entity.
+			// Default is false
+			bool m_allow_multiple = false;
+			// Allow the component to be removed from an entity.
+			// Default is true.
+			bool m_removeable = true;
 
 		private:
+			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
+			//TODO Must add type information.
 
+			friend class Entity;
+		};
+
+		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component*()>>;
+		class ComponentRegistry
+		{
+		public:
+			static void RegisterComponent(std::string_view component_type, std::function<Component*()> func);
+			static Component* CreateComponent(std::string_view component_type);
+		private:
+			static ComponentRegistryMap m_register_funcs;
 		};
 
 		class IS_ECS Entity
 		{
 		public:
-			Entity()  = default;
-			Entity(std::string name);
+			Entity(ECSWorld* ecs_world);
+			Entity(ECSWorld* ecs_world, std::string name);
+
+			Ptr<Entity> AddChild();
+			Ptr<Entity> AddChild(std::string entity_name);
+
+			void RemoveChild(u32 index);
+
+			Ptr<Entity> GetFirstChild() const;
+			Ptr<Entity> GetLastChild() const;
+			Ptr<Entity> GetChild(u32 index) const;
 
 			Component* AddComponentByName(std::string_view component_type);
 			Component* GetComponentByName(std::string_view component_type) const;
@@ -105,12 +139,17 @@ namespace Insight
 			void SetName(std::string entity_name) { m_name = std::move(m_name); }
 
 		private:
+			void EarlyUpdate();
 			void Update(const float delta_time);
+			void LateUpdate();
 
 		private:
 			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
 			std::string m_name;
 
+			ECSWorld* m_ecsWorld = nullptr;
+
+			std::vector<Ptr<Entity>> m_children;
 			std::vector<RPtr<Component>> m_components;
 
 			friend class EntityManager;

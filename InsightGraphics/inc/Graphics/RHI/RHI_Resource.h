@@ -3,6 +3,7 @@
 #include "Core/Memory.h"
 #include "Core/TypeAlias.h"
 #include "Graphics/Enums.h"
+#include "Graphics/Defines.h"
 #include <type_traits>
 #include <queue>
 #include <unordered_map>
@@ -13,7 +14,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		class RHI_Resource
+		class IS_GRAPHICS RHI_Resource
 		{
 		public:
 			virtual ~RHI_Resource() { }

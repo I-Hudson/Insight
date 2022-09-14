@@ -24,6 +24,7 @@ project "InsightECS"
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.optick}",
+        "%{IncludeDirs.glm}",
     }
 
     files 

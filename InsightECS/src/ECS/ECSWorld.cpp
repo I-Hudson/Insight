@@ -1,5 +1,7 @@
 #include "ECS/ECSWorld.h"
 
+#include "ECS/Components/TransformComponent.h"
+
 namespace Insight
 {
 	namespace ECS
@@ -36,11 +38,23 @@ namespace Insight
 #else
 
 		ECSWorld::ECSWorld()
-		{ }
+		{
+			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name, []() { return NewTracked(TransformComponent); });
+		}
+
+		void ECSWorld::EarlyUpdate()
+		{
+			m_entityManager.EarlyUpdate();
+		}
 
 		void ECSWorld::Update(float deltaTime)
 		{
 			m_entityManager.Update(deltaTime);
+		}
+
+		void ECSWorld::LateUpdate()
+		{
+			m_entityManager.LateUpdate();
 		}
 
 		Entity* ECSWorld::AddEntity()

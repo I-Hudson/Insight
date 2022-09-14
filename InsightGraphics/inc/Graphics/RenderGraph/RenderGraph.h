@@ -57,7 +57,7 @@ namespace Insight
 			std::vector<TValue> m_values;
 		};
 
-		class RenderGraph : public Core::Singleton<RenderGraph>
+		class IS_GRAPHICS RenderGraph : public Core::Singleton<RenderGraph>
 		{
 		public:
 			RenderGraph();

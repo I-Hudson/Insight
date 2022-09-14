@@ -478,7 +478,10 @@ private:
 };
 
 /// <summary>
-/// Wrapper around a raw pointer.
+/// Wrapper around a raw pointer. Should be used like a "view" to the pointer.
+/// Shouldn't allow deletion of the pointer. 
+/// (Similar to a weak pointer. But I don't want this to be able to have any form of ownership
+/// over the pointer)
 /// </summary>
 /// <typeparam name="T"></typeparam>
 template<typename T>
@@ -486,15 +489,24 @@ class Ptr
 {
 public:
 	Ptr() = default;
-	Ptr(T* pointer) { Reset(); m_ptr = pointer; }
+	Ptr(T* pointer)								{ m_ptr = pointer; }
+	Ptr(Ptr const& other) : m_ptr(other.m_ptr)	{ }
+	Ptr(Ptr&& other)							{ m_ptr = other.m_ptr; other.m_ptr = nullptr; }
+	~Ptr()										{ m_ptr = nullptr; }
 
-	void Reset()
-	{
-		if (m_ptr)
-		{
-			DeleteTracked(m_ptr);
-		}
-	}
+	// Assign
+	Ptr& operator=(Ptr const& other)			{ m_ptr = other.m_ptr; return *this; }
+	Ptr& operator=(T* other)					{ m_ptr = other; return *this; }
+
+	// Compare
+	bool operator==(Ptr const& other)			{ m_ptr = other.m_ptr; }
+	bool operator==(T* other)					{ m_ptr = other; }
+	
+	bool operator()()							{ return m_ptr = nullptr; }
+
+	// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
+	// in higher level systems.
+	T* Get() const								{ return m_ptr; }
 
 private:
 	T* m_ptr = nullptr;

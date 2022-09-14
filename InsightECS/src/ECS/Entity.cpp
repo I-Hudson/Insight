@@ -1,5 +1,5 @@
 #include "ECS/Entity.h"
-#include "ECS/EntityManager.h"
+#include "ECS/ECSWorld.h"
 
 namespace Insight
 {
@@ -57,29 +57,169 @@ namespace Insight
 			return m_entityManager->GetEntityData(*this).GUID;
 		}
 #else 
+		ComponentRegistryMap ComponentRegistry::m_register_funcs;
+
+		void ComponentRegistry::RegisterComponent(std::string_view component_type, std::function<Component*()> func)
+		{
+			if (auto itr = m_register_funcs.find(std::string(component_type));
+				itr != m_register_funcs.end())
+			{
+				IS_CORE_ERROR("[ComponentRegistry::RegisterComponent] ComponentType: '{0}' is already registered.", component_type);
+				return;
+			}
+			m_register_funcs[std::string(component_type)] = std::move(func);
+		}
+
+		Component* ComponentRegistry::CreateComponent(std::string_view component_type)
+		{
+			if (auto itr = m_register_funcs.find(std::string(component_type)); 
+				itr != m_register_funcs.end())
+			{
+				return itr->second();
+			}
+			IS_CORE_ERROR("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
+			return nullptr;
+		}
 
 
-#endif
-		Entity::Entity(std::string name)
-			: m_name(std::move(name))
+		Entity::Entity(ECSWorld* ecs_world)
+			: m_ecsWorld(ecs_world)
 		{ }
+
+		Entity::Entity(ECSWorld* ecs_world, std::string name)
+			: m_ecsWorld(ecs_world)
+			, m_name(std::move(name))
+		{ }
+
+		Ptr<Entity> Entity::AddChild()
+		{
+			return AddChild("Child");
+		}
+
+		Ptr<Entity> Entity::AddChild(std::string entity_name)
+		{
+			Ptr<Entity> entity = m_ecsWorld->AddEntity(entity_name);
+			m_children.push_back(entity);
+			return entity;
+		}
+
+		void Entity::RemoveChild(u32 index)
+		{
+			if (index >= m_children.size())
+			{
+				IS_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
+				return;
+			}
+			// Remove the entity from the ecs world (delete the entity from memory)
+			// the remove it from this entity's child vector.
+			std::vector<Ptr<Entity>>::iterator entity_itr = m_children.begin() + index;
+			Entity* entity_ptr = entity_itr->Get();
+			m_ecsWorld->RemoveEntity(entity_ptr);
+			m_children.erase(entity_itr);
+		}
+
+		Ptr<Entity> Entity::GetFirstChild() const
+		{
+			if (m_children.size() > 0)
+			{
+				return m_children.at(0);
+			}
+			return nullptr;
+		}
+
+		Ptr<Entity> Entity::GetLastChild() const
+		{
+			if (m_children.size() > 0)
+			{
+				return m_children.back();
+			}
+			return nullptr;
+		}
+
+		Ptr<Entity> Entity::GetChild(u32 index) const
+		{
+			if (index >= m_children.size())
+			{
+				IS_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
+				return nullptr;
+			}
+			return m_children.at(index);
+		}
 
 		Component* Entity::AddComponentByName(std::string_view component_type)
 		{
-			return nullptr;
+			if (Component* component = GetComponentByName(component_type);
+				!component->m_allow_multiple)
+			{
+				IS_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", component_type);
+				return component;
+			}
+			
+			Component* component = ComponentRegistry::CreateComponent(component_type);
+			if (component != nullptr)
+			{
+				m_components.push_back(component);
+			}
+			return component;
 		}
 
 		Component* Entity::GetComponentByName(std::string_view component_type) const
 		{
+			for (const RPtr<Component>& component : m_components)
+			{
+				if (component->GetTypeName() == component_type) 
+				{
+					return component.Get();
+				}
+			}
 			return nullptr;
 		}
 
 		void Entity::RemoveComponentByName(std::string_view component_type)
 		{
+			u32 index = 0;
+			for (const RPtr<Component>& component : m_components)
+			{
+				if (component->m_removeable
+					&& component->GetTypeName() == component_type)
+				{
+					break;
+				}
+				++index;
+			}
+			if (index < m_components.size())
+			{
+				m_components.erase(m_components.begin() + index);
+			}
+			else
+			{
+				IS_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", component_type);
+			}
+		}
+
+		void Entity::EarlyUpdate()
+		{
+			for (RPtr<Component>& component : m_components)
+			{
+				component->OnEarlyUpdate();
+			}
 		}
 
 		void Entity::Update(const float delta_time)
 		{
+			for (RPtr<Component>& component : m_components)
+			{
+				component->OnUpdate(delta_time);
+			}
 		}
+
+		void Entity::LateUpdate()
+		{
+			for (RPtr<Component>& component : m_components)
+			{
+				component->OnLateUpdate();
+			}
+		}
+#endif
 	}
 }

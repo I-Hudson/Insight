@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphics/Defines.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
 namespace Insight
@@ -9,7 +10,7 @@ namespace Insight
 		class RHI_Buffer;
 		class RHI_Texture;
 
-		class ImGuiPass
+		class IS_GRAPHICS ImGuiPass
 		{
 		public:
 

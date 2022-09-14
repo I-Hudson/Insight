@@ -31,5 +31,11 @@ namespace Insight
 		IS_CORE_ERROR("ASSERT: \n\tFILE: '{0}', \n\tLINE: '{1}', \n\tCondition: '{2}', \n\tMessage: '{4}'", __FILE__, __LINE__, #condition, message);	\
 		SAFE_BREAK;																																		\
 	}
+
+#define FAIL_ASSERT(condition)																									\
+		ASSERT(false)
+
+#define FAIL_ASSERT_MSG(message)																									\
+		ASSERT_MSG(false, message)
 #endif
 }

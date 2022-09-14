@@ -2,6 +2,8 @@
 
 #include "Core/Logger.h"
 
+#include "ECS/Components/TransformComponent.h"
+
 namespace Insight
 {
 	namespace ECS
@@ -142,7 +144,6 @@ namespace Insight
 			return m_entities.at(entity.GetId());
 		}
 #else
-
 		EntityManager::EntityManager()
 		{ }
 
@@ -157,8 +158,13 @@ namespace Insight
 
 		Entity* EntityManager::AddNewEntity(std::string entity_name)
 		{
-			UPtr<Entity> new_entity = MakeUPtr<Entity>(entity_name);
-			m_entities.emplace_back(std::move(new_entity));
+			UPtr<Entity> new_entity = MakeUPtr<Entity>(m_ecsWorld, entity_name);
+			new_entity->AddComponentByName(TransformComponent::Type_Name);
+
+			{
+				std::lock_guard lock(m_lock);
+				m_entities.emplace_back(std::move(new_entity));
+			}
 			return m_entities.back().Get();
 		}
 
@@ -178,6 +184,22 @@ namespace Insight
 			}
 			ASSERT(entity == nullptr);
 			m_entities.erase(m_entities.begin() + index);
+		}
+
+		void EntityManager::EarlyUpdate()
+		{
+			for (UPtr<Entity>& entity : m_entities)
+			{
+				entity->EarlyUpdate();
+			}
+		}
+
+		void EntityManager::LateUpdate()
+		{
+			for (UPtr<Entity>& entity : m_entities)
+			{
+				entity->LateUpdate();
+			}
 		}
 
 		void EntityManager::Update(const float delta_time)

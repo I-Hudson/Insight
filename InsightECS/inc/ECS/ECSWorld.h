@@ -76,11 +76,13 @@ namespace Insight
 		public:
 			ECSWorld();
 
-			void Update(const float deltaTime);
-
 			Entity* AddEntity();
 			Entity* AddEntity(std::string entity_name);
 			void RemoveEntity(Entity*& entity);
+
+			void EarlyUpdate();
+			void Update(const float deltaTime);
+			void LateUpdate();
 
 		private:
 			EntityManager m_entityManager;

@@ -31,7 +31,7 @@ namespace Insight
 			RHI_Buffer* IndexBuffer = nullptr;
 		};
 
-		class RHI_CommandList : public RHI_Resource
+		class IS_GRAPHICS RHI_CommandList : public RHI_Resource
 		{
 		public:
 

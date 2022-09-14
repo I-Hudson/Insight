@@ -22,7 +22,7 @@ namespace Insight
 		class Mesh;
 		class RHI_CommandList;
 
-		struct Vertex
+		struct IS_GRAPHICS Vertex
 		{
 			Vertex()
 			{ }
@@ -39,7 +39,7 @@ namespace Insight
 		};
 
 
-		struct SubmeshDrawInfo
+		struct IS_GRAPHICS SubmeshDrawInfo
 		{
 			u32 Index_Count = 0;
 			u32 First_Index = 0;

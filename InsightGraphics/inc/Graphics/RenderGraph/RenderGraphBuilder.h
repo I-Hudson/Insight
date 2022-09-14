@@ -17,7 +17,7 @@ namespace Insight
 		class RenderGraphPassBase;
 		class RenderGraph;
 
-		class RenderGraphBuilder
+		class IS_GRAPHICS RenderGraphBuilder
 		{
 		public:
 			RenderGraphBuilder(RenderGraph* rg);
