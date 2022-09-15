@@ -1,17 +1,22 @@
 #pragma once
 
+#include "Graphics/Defines.h"
+
 #include "Graphics/PixelFormat.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/Enums.h"
 #include "Graphics/ShaderDesc.h"
 
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
-#include "dxc/dxcapi.h"
-#include "spirv_reflect.h"
 
 #include <vector>
 #include <map>
 #include <unordered_map>
+
+struct IDxcBlob;
+struct IDxcUtils;
+struct IDxcCompiler3;
+struct IDxcResult;
 
 namespace Insight
 {
@@ -20,7 +25,7 @@ namespace Insight
 		class RHI_ShaderManager;
 		class RenderContext;
 
-		class RHI_Shader
+		class IS_GRAPHICS RHI_Shader
 		{
 		public:
 			virtual ~RHI_Shader() { }
@@ -80,8 +85,8 @@ namespace Insight
 			void GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant);
 			std::vector<ShaderInputLayout> GetInputLayout();
 
-			DescriptorType SpvReflectDescriptorTypeToDescriptorType(SpvReflectDescriptorType type);
-			DescriptorResourceType SpvReflectDescriptorResourceTypeToDescriptorResourceType(SpvReflectResourceType type);
+			DescriptorType SpvReflectDescriptorTypeToDescriptorType(u32 type);
+			DescriptorResourceType SpvReflectDescriptorResourceTypeToDescriptorResourceType(u32 type);
 
 			ShaderCompilerLanguage m_languageToCompileTo;
 

@@ -4,12 +4,15 @@
 #include "Core/Timer.h"
 
 #include "Event/EventManager.h"
+#include "Input/InputManager.h"
 
 namespace Insight
 {
 	namespace App
 	{
 //#define WAIT_FOR_PROFILE_CONNECTION
+
+		Core::Timer Engine::s_FrameTimer;
 
 		bool Engine::Init()
 		{
@@ -19,6 +22,8 @@ namespace Insight
 
 			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
 			RETURN_IF_FALSE(m_graphicsManager.Init());
+
+			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
 
 			m_sceneManager = MakeUPtr<SceneManager>();
 
@@ -35,15 +40,14 @@ namespace Insight
 #ifdef WAIT_FOR_PROFILE_CONNECTION
 			Core::WaitForProfiler();
 #endif
-			Core::Timer frameTimer;
-			frameTimer.Start();
+			s_FrameTimer.Start();
 
 			while (!Graphics::Window::Instance().ShouldClose() && !m_shouldClose)
 			{
 				IS_PROFILE_FRAME("MainThread");
-				frameTimer.Stop();
-				float deltaTime = static_cast<float>(frameTimer.GetElapsedTimeMill().count() / 1000);
-				frameTimer.Start();
+				s_FrameTimer.Stop();
+				float deltaTime = static_cast<float>(s_FrameTimer.GetElapsedTimeMill().count() / 1000);
+				s_FrameTimer.Start();
 
 				{
 					IS_PROFILE_SCOPE("Game Update");
@@ -52,6 +56,7 @@ namespace Insight
 				}
 
 				m_graphicsManager.Update(0.0f);
+				Input::InputManager::Update();
 				Graphics::Window::Instance().Update();
 			}
 		}

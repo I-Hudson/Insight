@@ -6,6 +6,9 @@
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "dxc/dxcapi.h"
+#include "spirv_reflect.h"
+
 #include <fstream>
 
 namespace Insight
@@ -446,7 +449,7 @@ namespace Insight
 			return L"";
 		}
 
-		DescriptorType ShaderCompiler::SpvReflectDescriptorTypeToDescriptorType(SpvReflectDescriptorType type)
+		DescriptorType ShaderCompiler::SpvReflectDescriptorTypeToDescriptorType(u32 type)
 		{
 			switch (type)
 			{
@@ -468,7 +471,7 @@ namespace Insight
 			return DescriptorType::Unknown;
 		}
 
-		DescriptorResourceType ShaderCompiler::SpvReflectDescriptorResourceTypeToDescriptorResourceType(SpvReflectResourceType type)
+		DescriptorResourceType ShaderCompiler::SpvReflectDescriptorResourceTypeToDescriptorResourceType(u32 type)
 		{
 			switch (type)
 			{

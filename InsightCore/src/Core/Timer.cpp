@@ -12,6 +12,7 @@ namespace Insight
 		void Timer::Stop()
 		{
 			m_stopTimePoint = std::chrono::high_resolution_clock::now();
+			m_elapsed_duration = GetElapsedTimeNano();
 		}
 
 		void Timer::Continue()
@@ -32,7 +33,7 @@ namespace Insight
 
 		DurationNano Timer::GetElapsedTimeNano() const
 		{
-			return m_stopTimePoint.time_since_epoch() - m_startTimePoint.time_since_epoch();
+			return m_elapsed_duration;
 		}
 
 		DurationMill Timer::GetElapsedTimeMill() const

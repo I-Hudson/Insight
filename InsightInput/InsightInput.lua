@@ -1,4 +1,4 @@
-project "InsightECS"  
+project "InsightInput"  
     kind "SharedLib"   
     language "C++"
     cppdialect "C++17"
@@ -9,79 +9,76 @@ project "InsightECS"
     debugdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 
     dependson 
-    { 
+    {
         "InsightCore",
-        "InsightInput",
+        "InsightGraphics",
     }
 
     defines
     {
-        "IS_EXPORT_ECS_DLL"
+        "IS_EXPORT_INPUT_DLL",
     }
     
     includedirs
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightInput}",
-        "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.optick}",
+        "%{IncludeDirs.InsightGraphics}",
+
+        "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.spdlog}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
     }
 
     links
     {
         "InsightCore.lib",
-        "InsightInput.lib",
+        "InsightGraphics.lib",
+        "GLFW.lib",
         "glm.lib",
-        "tracy.lib",
-        "OptickCore.lib",
+        "imgui.lib",
     }
 
     libdirs
     {
-        "%{wks.location}/deps/lib",
     }
 
     postbuildcommands
     {
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
         "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
+
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/bin/".. outputdir..  "/" .. output_executable .. "\"",
     }
 
     filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }  
+        defines { "DEBUG" }
         symbols "On" 
         links
         {
-            "OptickCore.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
         }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
-        optimize "On" 
+        optimize "On"   
         links
         {
-            "OptickCore.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/release",
         }
 
     filter "configurations:Testing" 
         links
         {
             "doctest.lib",
+        }
+        libdirs
+        {
+            "%{LibDirs.deps_testing_lib}",
         }

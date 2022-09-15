@@ -12,6 +12,7 @@ project "InsightApp"
     {
         "InsightCore",
         "InsightGraphics",
+        "InsightInput",
         "InsightECS",
     }
 
@@ -25,11 +26,13 @@ project "InsightApp"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.InsightInput}",
         "%{IncludeDirs.InsightECS}",
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.imgui}",
     }
 
     files 
@@ -43,9 +46,11 @@ project "InsightApp"
     {
         "InsightCore.lib",
         "InsightGraphics.lib",
+        "InsightInput.lib",
         "InsightECS.lib",
         "glm.lib",
         "tracy.lib",
+        "imgui.lib",
     }
 
     libdirs

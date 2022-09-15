@@ -5,6 +5,10 @@
 #include "Graphics/PixelFormat.h"
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
+
+#include "dxc/dxcapi.h"
+#include "spirv_reflect.h"
+
 #include <fstream>
 
 // PDB not found for glslang
