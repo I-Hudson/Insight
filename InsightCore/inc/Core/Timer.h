@@ -25,6 +25,8 @@ namespace Insight
 			DurationNano GetElapsedTimeNano() const;
 			DurationMill GetElapsedTimeMill() const;
 
+			float GetElapsedTimeMillFloat() const;
+
 		private:
 			// Start time.
 			TimePoint m_startTimePoint;

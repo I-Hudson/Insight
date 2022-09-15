@@ -376,7 +376,7 @@ namespace Insight
 				m_imguiDescriptorPool = m_device.createDescriptorPool(pool_info);
 
 				// Setup Platform/Renderer backends
-				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), true);
+				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), false);
 				ImGui_ImplVulkan_InitInfo init_info = {};
 				init_info.Instance = m_instnace;
 				init_info.PhysicalDevice = m_adapter;

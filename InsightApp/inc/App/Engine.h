@@ -8,6 +8,8 @@
 #include "Scene/SceneManager.h"
 #include "Event/EventManager.h"
 
+#include "Renderpass.h"
+
 #include "Graphics/Window.h"
 
 
@@ -36,6 +38,8 @@ namespace Insight
 			static Core::Timer s_FrameTimer;
 		private:
 			Graphics::GraphicsManager m_graphicsManager;
+			Graphics::Renderpass m_renderpasses;
+
 			bool m_shouldClose = false;
 
 			UPtr<SceneManager> m_sceneManager;

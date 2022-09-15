@@ -1,4 +1,5 @@
 #include "Core/Timer.h"
+#include "Core/TypeAlias.h"
 
 namespace Insight
 {
@@ -12,7 +13,7 @@ namespace Insight
 		void Timer::Stop()
 		{
 			m_stopTimePoint = std::chrono::high_resolution_clock::now();
-			m_elapsed_duration = GetElapsedTimeNano();
+			m_elapsed_duration = m_stopTimePoint - m_startTimePoint;
 		}
 
 		void Timer::Continue()
@@ -39,6 +40,13 @@ namespace Insight
 		DurationMill Timer::GetElapsedTimeMill() const
 		{
 			return std::chrono::duration_cast<DurationMill>(GetElapsedTimeNano());
+		}
+
+		float Timer::GetElapsedTimeMillFloat() const
+		{
+			u32 raw_time = static_cast<u32>(GetElapsedTimeMill().count());
+			float float_time = static_cast<float>(raw_time);
+			return float_time / 1000.0f;
 		}
 	}
 }

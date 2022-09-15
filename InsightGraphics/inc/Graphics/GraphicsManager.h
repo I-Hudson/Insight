@@ -2,7 +2,7 @@
 
 #include "Defines.h"
 #include "Core/ManagerInterface.h"
-#include "Graphics/Renderpass.h"
+//#include "Graphics/Renderpass.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <thread>
@@ -10,6 +10,9 @@
 #include <atomic>
 
 //#define IS_EXP_ENABLE_THREADED_RENDERING
+
+struct ImGuiContext;
+struct ImGuiIO;
 
 namespace Insight
 {
@@ -51,6 +54,8 @@ namespace Insight
 			virtual void Update(const float deltaTime) override;
 			virtual void Destroy() override;
 
+			void SetImGuiContext(ImGuiContext** context, ImGuiIO** io);
+
 		private:
 			static GraphicsManagerData m_sharedData;
 			static GraphicsManager* s_instance;
@@ -68,7 +73,7 @@ namespace Insight
 #endif
 
 			RenderContext* m_renderContext{ nullptr };
-			Renderpass m_renderpass;
+			//Renderpass m_renderpass;
 		};
 	}
 }

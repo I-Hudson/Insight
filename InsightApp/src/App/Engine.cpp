@@ -6,6 +6,8 @@
 #include "Event/EventManager.h"
 #include "Input/InputManager.h"
 
+#include "imgui.h"
+
 namespace Insight
 {
 	namespace App
@@ -22,8 +24,15 @@ namespace Insight
 
 			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
 			RETURN_IF_FALSE(m_graphicsManager.Init());
+			m_renderpasses.Create();
 
 			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
+
+			ImGuiContext* context = nullptr;
+			ImGuiIO* io = nullptr;
+			Graphics::GraphicsManager::Instance().SetImGuiContext(&context, &io);
+			ImGui::SetCurrentContext(context);
+			ImGui::GetIO() = *io;
 
 			m_sceneManager = MakeUPtr<SceneManager>();
 
@@ -46,15 +55,16 @@ namespace Insight
 			{
 				IS_PROFILE_FRAME("MainThread");
 				s_FrameTimer.Stop();
-				float deltaTime = static_cast<float>(s_FrameTimer.GetElapsedTimeMill().count() / 1000);
+				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
 				s_FrameTimer.Start();
 
 				{
 					IS_PROFILE_SCOPE("Game Update");
 					m_eventManager->Update();
-					m_sceneManager->Update(deltaTime);
+					m_sceneManager->Update(delta_time);
 				}
 
+				m_renderpasses.Render();
 				m_graphicsManager.Update(0.0f);
 				Input::InputManager::Update();
 				Graphics::Window::Instance().Update();
@@ -65,6 +75,7 @@ namespace Insight
 		{
 			OnDestroy();
 			m_sceneManager.Reset();
+			m_renderpasses.Destroy();
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
 		}

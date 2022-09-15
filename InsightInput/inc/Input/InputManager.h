@@ -57,6 +57,9 @@ namespace Insight
 			static bool IsKeyReleased(u32 key);
 			static bool IsKeyHeld(u32 key);
 
+			static bool IsMouseButtonPressed(u32 key);
+			static bool IsMouseButtonReleased(u32 key);
+			static bool IsMouseButtonHeld(u32 key);
 			static void GetMousePosition(float& x_position, float& y_position);
 
 			static void RegisterKeyCallback(InputKeyCallbackFunc callback)                 { m_key_callback_funcs.push_back(callback); }
