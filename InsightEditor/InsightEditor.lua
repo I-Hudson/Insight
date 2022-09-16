@@ -54,9 +54,7 @@ project "InsightEditor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
-    if (monolith_build == "false") then
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
-    end
+    prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
