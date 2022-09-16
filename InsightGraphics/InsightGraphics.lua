@@ -1,3 +1,5 @@
+local local_post_build_commands = post_build_commands
+
 project "InsightGraphics"  
     --kind "SharedLib"   
     language "C++"
@@ -73,6 +75,8 @@ project "InsightGraphics"
     {
         "%{LibDirs.vulkan}",
     }
+
+    postbuildcommands "%{concat_table(local_post_build_commands)}"
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }

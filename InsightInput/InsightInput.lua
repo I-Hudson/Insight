@@ -1,3 +1,5 @@
+local local_post_build_commands = post_build_commands
+
 project "InsightInput"  
     --kind "SharedLib"   
     language "C++"
@@ -51,6 +53,8 @@ project "InsightInput"
     libdirs
     {
     }
+
+    postbuildcommands "%{concat_table(local_post_build_commands)}"
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }

@@ -1,3 +1,5 @@
+local local_post_build_commands = {}
+
 project "InsightEditor"  
     kind "ConsoleApp"   
     language "C++"
@@ -52,10 +54,9 @@ project "InsightEditor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
-    prebuildcommands
-    {
-        "{COPYDIR} \"%{wks.location}/deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"",
-    }
+    if (monolith_build == "false") then
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
+    end
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  

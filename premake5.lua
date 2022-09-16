@@ -1,5 +1,5 @@
 local profileTool="tracy"
-local monolith_build="true"
+local monolith_build="false"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -7,6 +7,36 @@ outputdir_obj = "/bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_debug = "bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 output_executable = "InsightEditor"
 output_project_subfix = ""
+
+post_build_commands = {}
+function concat_table(table_to_concat)
+    return table.concat(table_to_concat, " ")
+end
+
+function tprint (tbl, indent)
+    if not indent then indent = 0 end
+    local toprint = string.rep(" ", indent) .. "{\r\n"
+    indent = indent + 2 
+    for k, v in pairs(tbl) do
+      toprint = toprint .. string.rep(" ", indent)
+      if (type(k) == "number") then
+        toprint = toprint .. "[" .. k .. "] = "
+      elseif (type(k) == "string") then
+        toprint = toprint  .. k ..  "= "   
+      end
+      if (type(v) == "number") then
+        toprint = toprint .. v .. ",\r\n"
+      elseif (type(v) == "string") then
+        toprint = toprint .. "\"" .. v .. "\",\r\n"
+      elseif (type(v) == "table") then
+        toprint = toprint .. tprint(v, indent + 2) .. ",\r\n"
+      else
+        toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
+      end
+    end
+    toprint = toprint .. string.rep(" ", indent-2) .. "}"
+    return toprint
+  end
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
@@ -92,32 +122,23 @@ workspace "Insight"
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
     end
 
-    if (monolith_build == "false") then
-        kind "SharedLib"
-
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/deps/".. outputdir..  "/dll/\"",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}.dll\" \"%{wks.location}/bin/".. outputdir..  "/" .. output_executable .. "\"",
-        }
-    end
-    if (monolith_build == "true") then
-        defines { "IS_MONOLITH" }
-        kind "StaticLib"
-        output_project_subfix = "_monolith"
-
-        postbuildcommands
-        {
-            "{COPY} \"%{cfg.targetdir}/%{prj.name}.lib\" \"%{wks.location}/deps/".. outputdir..  "/lib/\"",
-        }
-    end
-
     libdirs
     {
         "%{LibDirs.deps_lib}",
     }
 
+    if (monolith_build == "false") then
+        kind "SharedLib"
+        table.insert(post_build_commands, "{COPYDIR} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n")
+        table.insert(post_build_commands, "{COPYDIR} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n")
+        table.insert(post_build_commands, "{COPYDIR} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "\"\n")
+    end
+    if (monolith_build == "true") then
+        defines { "IS_MONOLITH" }
+        kind "StaticLib"
+        output_project_subfix = "_monolith"
+        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"")
+    end
 
     filter "configurations:Debug"
         defines
@@ -181,5 +202,6 @@ group "Runtime"
     include "InsightInput/InsightInput.lua"
     include "InsightECS/InsightECS.lua"
     include "InsightApp/InsightApp.lua"
+
 group "Editor"
     include "InsightEditor/InsightEditor.lua"

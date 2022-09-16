@@ -1,4 +1,4 @@
-local post_build_commands = require "post_build_commnads"
+local_post_build_commands = post_build_commands
 
 project "InsightCore"  
     --kind "SharedLib"   
@@ -44,7 +44,7 @@ project "InsightCore"
         "%{wks.location}/deps/lib",
     }
 
-    post_build_commands.post_build_commnads()
+    postbuildcommands "%{concat_table(local_post_build_commands)}"
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  

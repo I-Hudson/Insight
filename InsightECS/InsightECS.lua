@@ -1,3 +1,5 @@
+local local_post_build_commands = post_build_commands
+
 project "InsightECS"  
     --kind "SharedLib"   
     language "C++"
@@ -50,6 +52,8 @@ project "InsightECS"
     {
         "%{wks.location}/deps/lib",
     }
+
+    postbuildcommands "%{concat_table(local_post_build_commands)}"
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  

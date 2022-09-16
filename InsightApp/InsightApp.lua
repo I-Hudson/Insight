@@ -1,3 +1,5 @@
+local_post_build_commands = post_build_commands
+
 project "InsightApp"  
     --kind "SharedLib"   
     language "C++"
@@ -59,6 +61,8 @@ project "InsightApp"
         "%{wks.location}/vendor/glfw/lib",
     }
     
+    postbuildcommands "%{concat_table(local_post_build_commands)}"
+
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
         symbols "On" 
