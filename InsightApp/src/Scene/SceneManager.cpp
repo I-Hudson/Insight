@@ -43,6 +43,11 @@ namespace Insight
 		{
 		}
 
+		std::vector<Ptr<ECS::Entity>> Scene::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		{
+			return m_ecsWorld->GetAllEntitiesWithComponentByName(component_type);
+		}
+
 		SceneManager::SceneManager()
 		{
 		}

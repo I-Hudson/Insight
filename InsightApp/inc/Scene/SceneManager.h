@@ -26,8 +26,9 @@ namespace Insight
 			void Render();
 
 			void SetSceneName(std::string sceneName) { m_sceneName = m_sceneName; }
-
 			std::string_view GetSceneName() const { return m_sceneName; }
+
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 
 		private:
 			// Store all entites 

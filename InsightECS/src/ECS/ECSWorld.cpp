@@ -72,6 +72,16 @@ namespace Insight
 			m_entityManager.RemoveEntity(entity);
 		}
 
+		Ptr<Entity> ECSWorld::GetEntityByName(std::string_view entity_name) const
+		{
+			return m_entityManager.GetEntityByName(entity_name);
+		}
+
+		std::vector<Ptr<ECS::Entity>> ECSWorld::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		{
+			return m_entityManager.GetAllEntitiesWithComponentByName(component_type);
+		}
+
 #endif
 	}
 }

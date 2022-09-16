@@ -209,6 +209,32 @@ namespace Insight
 				entity->Update(delta_time);
 			}
 		}
+
+		Ptr<Entity> EntityManager::GetEntityByName(std::string_view entity_name) const
+		{
+			for (const UPtr<Entity>& e : m_entities)
+			{
+				if (e->GetName() == entity_name) 
+				{
+					return e;
+				}
+			}
+			return nullptr;
+		}
+
+		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntitiesWithComponentByName(std::string_view component_type) const
+		{
+			std::vector<Ptr<ECS::Entity>> entities;
+			for (const UPtr<Entity>& e : m_entities)
+			{
+				if (e->GetComponentByName(component_type) != nullptr)
+				{
+					entities.push_back(e);
+				}
+			}
+			return entities;
+		}
+
 #endif
 	}
 }

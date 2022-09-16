@@ -302,6 +302,7 @@ public:
 	bool operator==(const RPtr<T2>& other) const { return Get() == other.Get(); }
 	template<typename T2>
 	bool operator==(const RPtr<T2>* other) const { return Get() == other->Get(); }
+	operator bool() { return IsValid(); }
 
 	T* operator->() const { return Get(); }
 	T* operator*() const { return Get(); }
@@ -424,6 +425,7 @@ public:
 	bool operator==(const WPtr<T2>& other) const { return Get() == other.Get(); }
 	template<typename T2>
 	bool operator==(const RPtr<T2>& other) const { return Get() == other.Get(); }
+	operator bool() { return IsValid(); }
 
 	void IncW()
 	{
@@ -489,10 +491,11 @@ class Ptr
 {
 public:
 	Ptr() = default;
-	Ptr(T* pointer)								{ m_ptr = pointer; }
-	Ptr(Ptr const& other) : m_ptr(other.m_ptr)	{ }
-	Ptr(Ptr&& other)							{ m_ptr = other.m_ptr; other.m_ptr = nullptr; }
-	~Ptr()										{ m_ptr = nullptr; }
+	Ptr(T* pointer)								        { m_ptr = pointer; }
+	Ptr(Ptr const& other)		: m_ptr(other.m_ptr)	{ }
+	Ptr(const UPtr<T>& other)	: m_ptr(other.Get())	{ }
+	Ptr(Ptr&& other)							        { m_ptr = other.m_ptr; other.m_ptr = nullptr; }
+	~Ptr()										        { m_ptr = nullptr; }
 
 	// Assign
 	Ptr& operator=(Ptr const& other)			{ m_ptr = other.m_ptr; return *this; }
@@ -502,7 +505,7 @@ public:
 	bool operator==(Ptr const& other)			{ m_ptr = other.m_ptr; }
 	bool operator==(T* other)					{ m_ptr = other; }
 	
-	bool operator()()							{ return m_ptr = nullptr; }
+	operator bool()								{ return Get() != nullptr; }
 
 	// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
 	// in higher level systems.
