@@ -1,3 +1,5 @@
+local post_build_commands = require "post_build_commnads"
+
 project "InsightCore"  
     --kind "SharedLib"   
     language "C++"
@@ -41,6 +43,8 @@ project "InsightCore"
     {
         "%{wks.location}/deps/lib",
     }
+
+    post_build_commands.post_build_commnads()
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
