@@ -95,6 +95,21 @@ namespace Insight
 
 		void RenderContext::ImGuiBeginFrame()
 		{
+			if (m_font_texture == nullptr)
+			{
+				m_font_texture = Renderer::CreateTexture();
+
+				unsigned char* pixels;
+				int width, height;
+
+				ImGuiIO& io = ImGui::GetIO();
+				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
+
+				ImTextureID texture_id = m_font_texture;
+				io.Fonts->SetTexID(texture_id);
+			}
+
 			IMGUI_VALID(ImGui_ImplGlfw_NewFrame());
 			IMGUI_VALID(ImGui::NewFrame());
 			IMGUI_VALID(ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode));
@@ -129,6 +144,12 @@ namespace Insight
 
 			m_samplerManager->ReleaseAll();
 			DeleteTracked(m_samplerManager);
+
+			if (m_font_texture)
+			{
+				Renderer::FreeTexture(m_font_texture);
+				m_font_texture = nullptr;
+			}
 		}
 
 		RHI_Buffer* RenderContext::CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides)

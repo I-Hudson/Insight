@@ -423,7 +423,6 @@ namespace Insight
 				m_commandListManager->ReturnCommandList(cmdListVulkan);
 				m_commandListManager->Reset();
 
-				ImGui_ImplVulkan_NewFrame();
 				ImGuiBeginFrame();
 			}
 

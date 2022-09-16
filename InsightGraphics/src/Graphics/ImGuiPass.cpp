@@ -9,7 +9,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		void ImGuiPass::Render()
+		void ImGuiPass::Create()
 		{
 			RHI_Buffer_Overrides buffer_overrides = {};
 			buffer_overrides.Force_Host_Writeable = true;
@@ -19,7 +19,7 @@ namespace Insight
 				m_vertex_buffer.ForEach([buffer_overrides](RHI_Buffer*& buffer)
 					{
 						buffer = Renderer::CreateVertexBuffer(sizeof(ImDrawVert), sizeof(ImDrawVert), buffer_overrides);
-					}); 
+					});
 			}
 			if (m_index_buffer.Size() == 0)
 			{
@@ -29,19 +29,10 @@ namespace Insight
 						buffer = Renderer::CreateIndexBuffer(sizeof(ImDrawIdx), buffer_overrides);
 					});
 			}
-			if (m_font_texture == nullptr)
-			{
-				m_font_texture = Renderer::CreateTexture();
+		}
 
-				unsigned char* pixels;
-				int width, height;
-
-				ImGuiIO& io = ImGui::GetIO();
-				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
-				io.Fonts->SetTexID(m_font_texture);
-			}
-
+		void ImGuiPass::Render()
+		{
 			struct TestPassData
 			{
 				PipelineStateObject Pso;
@@ -214,7 +205,6 @@ namespace Insight
 				{
 					Renderer::FreeVertexBuffer(buffer);
 				});
-			Renderer::FreeTexture(m_font_texture);
 		}
 	}
 }

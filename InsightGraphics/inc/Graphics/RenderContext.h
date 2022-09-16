@@ -122,6 +122,8 @@ namespace Insight
 			PhysicalDeviceInformation m_physical_device_info;
 			RenderStats m_renderStats;
 
+			RHI_Texture* m_font_texture = nullptr;
+
 			friend class Renderer;
 		};
 	}

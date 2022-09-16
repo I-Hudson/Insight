@@ -12,6 +12,9 @@
 
 #include "Input/InputManager.h"
 
+#include "Scene/SceneManager.h"
+#include "ECS/Components/TransformComponent.h"
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -52,6 +55,7 @@ namespace Insight
 				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
 				m_camera.View = glm::mat4(1.0f);
 			}
+			m_imgui_pass.Create();
 		}
 
 		bool useShadowCamera = false;
@@ -216,6 +220,13 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 
 					cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
+						
+					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
+					if (RPtr<App::Scene> scene = w_scene.Lock())
+					{
+						std::vector<Ptr<ECS::Entity>> entities = scene->GetAllEntitiesWithComponentByName(ECS::TransformComponent::Type_Name);
+
+					}
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)

@@ -14,13 +14,13 @@ namespace Insight
 		{
 		public:
 
+			void Create();
 			void Render();
 			void Release();
 
 		private:
 			FrameResource<RHI_Buffer*> m_vertex_buffer;
 			FrameResource<RHI_Buffer*> m_index_buffer;
-			RHI_Texture* m_font_texture = nullptr;
 		};
 	}
 }
