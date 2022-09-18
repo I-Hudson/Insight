@@ -15,7 +15,7 @@
 
 #ifdef IS_PLATFORM_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers.
+#define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
 #endif
 #include <Windows.h>
 #include <vulkan/vulkan_win32.h>
@@ -38,7 +38,7 @@ namespace Insight
 				#endif
 
 				#if VK_EXT_validation_cache
-				//VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
+				///VK_EXT_VALIDATION_CACHE_EXTENSION_NAME,
 				#endif
 
 				#if VK_KHR_sampler_mirror_clamp_to_edge && (VK_VERSION_1_2 == 0)
@@ -118,9 +118,9 @@ namespace Insight
 					IS_CORE_ERROR("Id: {}\n Name: {}\n Msg: {}", pCallbackData->messageIdNumber, pCallbackData->pMessageIdName, pCallbackData->pMessage);
 				}
 
-				// The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
-				// We return VK_FALSE as we DON'T want Vulkan calls that cause a validation message to abort
-				// If you instead want to have calls abort, pass in VK_TRUE and the function will return VK_ERROR_VALIDATION_FAILED_EXT 
+				/// The return value of this callback controls whether the Vulkan call that caused the validation message will be aborted or not
+				/// We return VK_FALSE as we DON'T want Vulkan calls that cause a validation message to abort
+				/// If you instead want to have calls abort, pass in VK_TRUE and the function will return VK_ERROR_VALIDATION_FAILED_EXT 
 				return VK_FALSE;
 			}
 
@@ -232,7 +232,7 @@ namespace Insight
 				m_pipelineStateObjectManager.SetRenderContext(this);
 				m_renderpassManager.SetRenderContext(this);
 
-				// Initialise vulkan memory allocator
+				/// Initialise vulkan memory allocator
 				VmaAllocatorCreateInfo allocatorInfo{};
 				allocatorInfo.instance = m_instnace;
 				allocatorInfo.physicalDevice = m_adapter;
@@ -350,8 +350,8 @@ namespace Insight
 
 			void RenderContext_Vulkan::InitImGui()
 			{
-				//1: create descriptor pool for IMGUI
-				// the size of the pool is very oversize, but it's copied from imgui demo itself.
+				///1: create descriptor pool for IMGUI
+				/// the size of the pool is very oversize, but it's copied from imgui demo itself.
 				VkDescriptorPoolSize pool_sizes[] =
 				{
 					{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -375,7 +375,7 @@ namespace Insight
 				pool_info.pPoolSizes = pool_sizes;
 				m_imguiDescriptorPool = m_device.createDescriptorPool(pool_info);
 
-				// Setup Platform/Renderer backends
+				/// Setup Platform/Renderer backends
 				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), false);
 				ImGui_ImplVulkan_InitInfo init_info = {};
 				init_info.Instance = m_instnace;
@@ -582,14 +582,14 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				// Get sdk version
+				/// Get sdk version
 				uint32_t sdk_version = VK_HEADER_VERSION_COMPLETE;
 
-				// Get driver version
+				/// Get driver version
 				uint32_t driver_version = 0;
 				{
-					// Per LunarG, if vkEnumerateInstanceVersion is not present, we are running on Vulkan 1.0
-					// https://www.lunarg.com/wp-content/uploads/2019/02/Vulkan-1.1-Compatibility-Statement_01_19.pdf
+					/// Per LunarG, if vkEnumerateInstanceVersion is not present, we are running on Vulkan 1.0
+					/// https:///www.lunarg.com/wp-content/uploads/2019/02/Vulkan-1.1-Compatibility-Statement_01_19.pdf
 					auto eiv = reinterpret_cast<PFN_vkEnumerateInstanceVersion>(vkGetInstanceProcAddr(nullptr, "vkEnumerateInstanceVersion"));
 
 					if (eiv)
@@ -676,8 +676,8 @@ namespace Insight
 #if defined(VK_EXT_validation_features) && defined(_DEBUG)
 				std::vector<vk::ValidationFeatureEnableEXT> validation_features_enabled;
 				validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eBestPractices);
-				//validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
-				//validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eGpuAssisted);
+				///validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
+				///validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eGpuAssisted);
 
 				vk::ValidationFeaturesEXT validation_features = { };
 				validation_features.setEnabledValidationFeatures(validation_features_enabled);
@@ -798,26 +798,26 @@ namespace Insight
 				const int imageCount = (int)std::max(RenderGraph::s_FarmeCount, surfaceCapabilites.minImageCount);
 
 				vk::Extent2D swapchainExtent = {};
-				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+				/// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
 				if (surfaceCapabilites.currentExtent == vk::Extent2D{ 0xFFFFFFFF, 0xFFFFFFFF })
 				{
-					// If the surface size is undefined, the size is set to
-					// the size of the images requested.
+					/// If the surface size is undefined, the size is set to
+					/// the size of the images requested.
 					swapchainExtent.width = Window::Instance().GetWidth();
 					swapchainExtent.height = Window::Instance().GetHeight();
 				}
 				else
 				{
-					// If the surface size is defined, the swap chain size must match
+					/// If the surface size is defined, the swap chain size must match
 					swapchainExtent = surfaceCapabilites.currentExtent;
 				}
 				m_swapchainBufferSize = { swapchainExtent.width, swapchainExtent.height };
 
-				// Select a present mode for the swapchain
+				/// Select a present mode for the swapchain
 
 				std::vector<vk::PresentModeKHR> presentModes = m_adapter.getSurfacePresentModesKHR(m_surface);
-				// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
-				// This mode waits for the vertical blank ("v-sync")
+				/// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
+				/// This mode waits for the vertical blank ("v-sync")
 				vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo;
 				if (true)
 				{
@@ -852,8 +852,8 @@ namespace Insight
 				vk::Format surfaceFormat;
 				vk::ColorSpaceKHR surfaceColourSpace;
 				std::vector<vk::SurfaceFormatKHR> formats = m_adapter.getSurfaceFormatsKHR(m_surface);
-				// If the surface format list only includes one entry with VK_FORMAT_UNDEFINED,
-				// there is no preferred format, so we assume VK_FORMAT_B8G8R8A8_UNORM
+				/// If the surface format list only includes one entry with VK_FORMAT_UNDEFINED,
+				/// there is no preferred format, so we assume VK_FORMAT_B8G8R8A8_UNORM
 				if ((formats.size() == 1) && (formats[0].format == vk::Format::eUndefined))
 				{
 					surfaceFormat = vk::Format::eR8G8B8A8Unorm;
@@ -861,12 +861,12 @@ namespace Insight
 				}
 				else
 				{
-					// iterate over the list of available surface format and
-					// check for the presence of VK_FORMAT_B8G8R8A8_UNORM
+					/// iterate over the list of available surface format and
+					/// check for the presence of VK_FORMAT_B8G8R8A8_UNORM
 					bool found_B8G8R8A8_UNORM = false;
 					for (auto&& format : formats)
 					{
-						if (format.format == vk::Format::eB8G8R8A8Unorm)// VK_FORMAT_B8G8R8A8_UNORM)
+						if (format.format == vk::Format::eB8G8R8A8Unorm)/// VK_FORMAT_B8G8R8A8_UNORM)
 						{
 							surfaceFormat = format.format;
 							surfaceColourSpace = format.colorSpace;
@@ -875,8 +875,8 @@ namespace Insight
 						}
 					}
 
-					// in case VK_FORMAT_B8G8R8A8_UNORM is not available
-					// select the first available color format
+					/// in case VK_FORMAT_B8G8R8A8_UNORM is not available
+					/// select the first available color format
 					if (!found_B8G8R8A8_UNORM)
 					{
 						surfaceFormat = formats[0].format;
@@ -963,9 +963,9 @@ namespace Insight
 				if (instanceExtensions.empty())
 				{
 					uint32_t count;
-					vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); //get number of extensions
+					vkEnumerateInstanceExtensionProperties(nullptr, &count, nullptr); ///get number of extensions
 					std::vector<VkExtensionProperties> extensions(count);
-					vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()); //populate buffer
+					vkEnumerateInstanceExtensionProperties(nullptr, &count, extensions.data()); ///populate buffer
 					for (auto& extension : extensions)
 					{
 						instanceExtensions.insert(extension.extensionName);
@@ -991,4 +991,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

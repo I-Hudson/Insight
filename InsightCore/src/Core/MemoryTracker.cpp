@@ -10,7 +10,7 @@
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers.
+#define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
 #endif
 #include <Windows.h>
 #pragma warning(push)
@@ -72,7 +72,7 @@ namespace Insight
 			auto itr = m_allocations.find(ptr);
 			if (itr != m_allocations.end())
 			{
-				// Allocation already tracked.
+				/// Allocation already tracked.
 				return;
 			}
 			m_allocations[ptr] = MemoryTrackedAlloc(ptr, type, GetCallStack());
@@ -94,21 +94,21 @@ namespace Insight
 		std::array<std::string, c_CallStackCount> MemoryTracker::GetCallStack()
 		{
 			IS_PROFILE_FUNCTION();
-			//std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
+			///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
 
-			//for (size_t i = 0; i < c_CallStackCount; ++i)
-			//{
-			//	if (i < callStackVector.size())
-			//	{
-			//		callStack[i] = std::move(callStackVector[i]);
-			//	}
-			//}
+			///for (size_t i = 0; i < c_CallStackCount; ++i)
+			///{
+			///	if (i < callStackVector.size())
+			///	{
+			///		callStack[i] = std::move(callStackVector[i]);
+			///	}
+			///}
 
-			//return callStack;
+			///return callStack;
 
-			// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten
-			// if there is a crash? Look at third party options for getting the callstack. Disabled for non debug due to performance.
+			/// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten
+			/// if there is a crash? Look at third party options for getting the callstack. Disabled for non debug due to performance.
 #if defined(IS_PLATFORM_WINDOWS) && defined(MEMORY_TRACK_CALLSTACK) && defined(_DEBUG)
 			
 			const ULONG framesToSkip = 0;

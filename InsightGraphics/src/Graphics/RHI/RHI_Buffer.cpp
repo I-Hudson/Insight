@@ -32,12 +32,12 @@ namespace Insight
 		RHI_BufferView::RHI_BufferView()
 		{ }
 
-		/// <summary>
-		/// RHI_BufferView
-		/// </summary>
-		/// <param name="buffer"></param>
-		/// <param name="offset"></param>
-		/// <param name="size"></param>
+		//// <summary>
+		//// RHI_BufferView
+		//// </summary>
+		//// <param name="buffer"></param>
+		//// <param name="offset"></param>
+		//// <param name="size"></param>
 		RHI_BufferView::RHI_BufferView(RHI_Buffer* buffer, u64 offset, u64 size)
 			: m_buffer(buffer), m_offset(offset), m_size(size)
 		{ }
@@ -82,9 +82,9 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// RHI_BufferView
-		/// </summary>
+		//// <summary>
+		//// RHI_BufferView
+		//// </summary>
 		
 		void RHI_DynamicBuffer::Create(RenderContext* context)
 		{ 

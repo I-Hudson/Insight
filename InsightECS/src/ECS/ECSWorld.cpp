@@ -1,6 +1,7 @@
 #include "ECS/ECSWorld.h"
 
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/TagComponent.h"
 
 namespace Insight
 {
@@ -40,6 +41,7 @@ namespace Insight
 		ECSWorld::ECSWorld()
 		{
 			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name, []() { return NewTracked(TransformComponent); });
+			ComponentRegistry::RegisterComponent(TagComponent::Type_Name, []() { return NewTracked(TagComponent); });
 		}
 
 		void ECSWorld::EarlyUpdate()
@@ -55,6 +57,11 @@ namespace Insight
 		void ECSWorld::LateUpdate()
 		{
 			m_entityManager.LateUpdate();
+		}
+
+		void ECSWorld::Destroy()
+		{
+			m_entityManager.Destroy();
 		}
 
 		Entity* ECSWorld::AddEntity()

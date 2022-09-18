@@ -36,42 +36,42 @@ namespace Insight
 		class IS_GRAPHICS BoundingBox
 		{
 		public:
-			// Construct with zero size.
+			/// Construct with zero size.
 			BoundingBox();
 
-			// Construct from minimum and maximum vectors.
+			/// Construct from minimum and maximum vectors.
 			BoundingBox(const glm::vec3& min, const glm::vec3& max);
 
-			// Construct from points
+			/// Construct from points
 			BoundingBox(const glm::vec3* vertices, const uint32_t point_count);
 
-			// Construct from vertices
+			/// Construct from vertices
 			BoundingBox(const Vertex* vertices, const uint32_t vertex_count);
 
 			~BoundingBox() = default;
 
-			// Assign from bounding box
+			/// Assign from bounding box
 			BoundingBox& operator =(const BoundingBox& rhs) = default;
 
-			// Returns the center
+			/// Returns the center
 			glm::vec3 GetCenter() const { return (m_max + m_min) * 0.5f; }
 
-			// Returns the size
+			/// Returns the size
 			glm::vec3 GetSize() const { return m_max - m_min; }
 
-			// Returns extents
+			/// Returns extents
 			glm::vec3 GetExtents() const { return (m_max - m_min) * 0.5f; }
 
-			// Test if a point is inside
+			/// Test if a point is inside
 			Intersection IsInside(const glm::vec3& point) const;
 
-			// Test if a bounding box is inside
+			/// Test if a bounding box is inside
 			Intersection IsInside(const BoundingBox& box) const;
 
-			// Returns a transformed bounding box
+			/// Returns a transformed bounding box
 			BoundingBox Transform(const glm::mat4& transform) const;
 
-			// Merge with another bounding box
+			/// Merge with another bounding box
 			void Merge(const BoundingBox& box);
 
 			const glm::vec3& GetMin() const { return m_min; }

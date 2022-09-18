@@ -115,8 +115,8 @@ namespace Insight
 					return itr->second;
 				}
 
-				// Create pipeline layout.
-				// Create descriptor set layout
+				/// Create pipeline layout.
+				/// Create descriptor set layout
 				vk::PipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 
 				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
@@ -149,35 +149,35 @@ namespace Insight
 				vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo(vk::PipelineViewportStateCreateFlags(), 1, nullptr, 1, nullptr);
 			
 				vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo(
-					vk::PipelineRasterizationStateCreateFlags(),					// flags
-					pso.DepthClampEnabled,											// depthClampEnable
-					false,															// rasterizerDiscardEnable
-					vk::PolygonMode::eFill,											// polygonMode
-					CullModeToVulkan(pso.CullMode),									// cullMode
-					FrontFaceToVulkan(pso.FrontFace),								// frontFace
-					pso.DepthBaisEnabled,											// depthBiasEnable
-					0.0f,															// depthBiasConstantFactor
-					0.0f,															// depthBiasClamp
-					0.0f,															// depthBiasSlopeFactor
-					1.0f															// lineWidth
+					vk::PipelineRasterizationStateCreateFlags(),					/// flags
+					pso.DepthClampEnabled,											/// depthClampEnable
+					false,															/// rasterizerDiscardEnable
+					vk::PolygonMode::eFill,											/// polygonMode
+					CullModeToVulkan(pso.CullMode),									/// cullMode
+					FrontFaceToVulkan(pso.FrontFace),								/// frontFace
+					pso.DepthBaisEnabled,											/// depthBiasEnable
+					0.0f,															/// depthBiasConstantFactor
+					0.0f,															/// depthBiasClamp
+					0.0f,															/// depthBiasSlopeFactor
+					1.0f															/// lineWidth
 				);
 			
 				vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo(
-					vk::PipelineMultisampleStateCreateFlags(),  // flags
-					vk::SampleCountFlagBits::e1                 // rasterizationSamples
-																// other values can be default
+					vk::PipelineMultisampleStateCreateFlags(),  /// flags
+					vk::SampleCountFlagBits::e1                 /// rasterizationSamples
+																/// other values can be default
 				);
 			
 				vk::StencilOpState stencilOpState(vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::CompareOp::eAlways);
 				vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
-					vk::PipelineDepthStencilStateCreateFlags(),  // flags
-					pso.DepthTest,								 // depthTestEnable
-					pso.DepthWrite,								 // depthWriteEnable
-					CompareOpToVulkan(pso.DepthCompareOp),		 // depthCompareOp
-					false,                                       // depthBoundTestEnable
-					false,                                       // stencilTestEnable
-					stencilOpState,                              // front
-					stencilOpState                               // back
+					vk::PipelineDepthStencilStateCreateFlags(),  /// flags
+					pso.DepthTest,								 /// depthTestEnable
+					pso.DepthWrite,								 /// depthWriteEnable
+					CompareOpToVulkan(pso.DepthCompareOp),		 /// depthCompareOp
+					false,                                       /// depthBoundTestEnable
+					false,                                       /// stencilTestEnable
+					stencilOpState,                              /// front
+					stencilOpState                               /// back
 				);
 			
 				vk::ColorComponentFlags colorComponentFlags = ColourComponentFlagsToVulkan(pso.ColourWriteMask);
@@ -185,14 +185,14 @@ namespace Insight
 				if (pso.Swapchain)
 				{
 					vk::PipelineColorBlendAttachmentState blend_state(
-						pso.BlendEnable,									// blendEnable
-						BlendFactorToVulkan(pso.SrcColourBlendFactor),		// srcColorBlendFactor
-						BlendFactorToVulkan(pso.DstColourBlendFactor),		// dstColorBlendFactor
-						BlendOpToVulkan(pso.ColourBlendOp),					// colorBlendOp
-						BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		// srcAlphaBlendFactor
-						BlendFactorToVulkan(pso.DstAplhaBlendFactor),		// dstAlphaBlendFactor
-						BlendOpToVulkan(pso.AplhaBlendOp),					// alphaBlendOp
-						colorComponentFlags									// colorWriteMask
+						pso.BlendEnable,									/// blendEnable
+						BlendFactorToVulkan(pso.SrcColourBlendFactor),		/// srcColorBlendFactor
+						BlendFactorToVulkan(pso.DstColourBlendFactor),		/// dstColorBlendFactor
+						BlendOpToVulkan(pso.ColourBlendOp),					/// colorBlendOp
+						BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		/// srcAlphaBlendFactor
+						BlendFactorToVulkan(pso.DstAplhaBlendFactor),		/// dstAlphaBlendFactor
+						BlendOpToVulkan(pso.AplhaBlendOp),					/// alphaBlendOp
+						colorComponentFlags									/// colorWriteMask
 					);
 					pipeline_colour_blend_attachment_states.push_back(blend_state);
 				}
@@ -203,14 +203,14 @@ namespace Insight
 						if (tex)
 						{
 							vk::PipelineColorBlendAttachmentState blend_state(
-								pso.BlendEnable,									// blendEnable
-								BlendFactorToVulkan(pso.SrcColourBlendFactor),		// srcColorBlendFactor
-								BlendFactorToVulkan(pso.DstColourBlendFactor),		// dstColorBlendFactor
-								BlendOpToVulkan(pso.ColourBlendOp),					// colorBlendOp
-								BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		// srcAlphaBlendFactor
-								BlendFactorToVulkan(pso.DstAplhaBlendFactor),		// dstAlphaBlendFactor
-								BlendOpToVulkan(pso.AplhaBlendOp),					// alphaBlendOp
-								colorComponentFlags									// colorWriteMask
+								pso.BlendEnable,									/// blendEnable
+								BlendFactorToVulkan(pso.SrcColourBlendFactor),		/// srcColorBlendFactor
+								BlendFactorToVulkan(pso.DstColourBlendFactor),		/// dstColorBlendFactor
+								BlendOpToVulkan(pso.ColourBlendOp),					/// colorBlendOp
+								BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		/// srcAlphaBlendFactor
+								BlendFactorToVulkan(pso.DstAplhaBlendFactor),		/// dstAlphaBlendFactor
+								BlendOpToVulkan(pso.AplhaBlendOp),					/// alphaBlendOp
+								colorComponentFlags									/// colorWriteMask
 							);
 							pipeline_colour_blend_attachment_states.push_back(blend_state);
 						}
@@ -218,11 +218,11 @@ namespace Insight
 				}
 
 				vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
-					vk::PipelineColorBlendStateCreateFlags(),  // flags
-					false,                                     // logicOpEnable
-					vk::LogicOp::eNoOp,                        // logicOp
-					pipeline_colour_blend_attachment_states,   // attachments
-					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             // blendConstants
+					vk::PipelineColorBlendStateCreateFlags(),  /// flags
+					false,                                     /// logicOpEnable
+					vk::LogicOp::eNoOp,                        /// logicOp
+					pipeline_colour_blend_attachment_states,   /// attachments
+					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             /// blendConstants
 				);
 			
 				std::vector<vk::DynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
@@ -233,19 +233,19 @@ namespace Insight
 				vk::RenderPass renderpass = *reinterpret_cast<vk::RenderPass*>(&rhiRenderpass);
 
 				vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
-					vk::PipelineCreateFlags(),																						// flags
-					pipelineShaderStageCreateInfos,																					// stages
-					&pipelineVertexInputStateCreateInfo.CreateInfo,																	// pVertexInputState
-					&pipelineInputAssemblyStateCreateInfo,																			// pInputAssemblyState
-					nullptr,																										// pTessellationState
-					&pipelineViewportStateCreateInfo,																				// pViewportState
-					&pipelineRasterizationStateCreateInfo,																			// pRasterizationState
-					&pipelineMultisampleStateCreateInfo,																			// pMultisampleState
-					&pipelineDepthStencilStateCreateInfo,																			// pDepthStencilState
-					&pipelineColorBlendStateCreateInfo,																				// pColorBlendState
-					&pipelineDynamicStateCreateInfo,																				// pDynamicState
-					layout,																											// layout
-					renderpass																										// renderPass
+					vk::PipelineCreateFlags(),																						/// flags
+					pipelineShaderStageCreateInfos,																					/// stages
+					&pipelineVertexInputStateCreateInfo.CreateInfo,																	/// pVertexInputState
+					&pipelineInputAssemblyStateCreateInfo,																			/// pInputAssemblyState
+					nullptr,																										/// pTessellationState
+					&pipelineViewportStateCreateInfo,																				/// pViewportState
+					&pipelineRasterizationStateCreateInfo,																			/// pRasterizationState
+					&pipelineMultisampleStateCreateInfo,																			/// pMultisampleState
+					&pipelineDepthStencilStateCreateInfo,																			/// pDepthStencilState
+					&pipelineColorBlendStateCreateInfo,																				/// pColorBlendState
+					&pipelineDynamicStateCreateInfo,																				/// pDynamicState
+					layout,																											/// layout
+					renderpass																										/// renderPass
 				);
 
 				if (pso.Swapchain)
@@ -299,4 +299,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

@@ -3,6 +3,7 @@
 #include "Core/Logger.h"
 
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/TagComponent.h"
 
 namespace Insight
 {
@@ -160,6 +161,7 @@ namespace Insight
 		{
 			UPtr<Entity> new_entity = MakeUPtr<Entity>(m_ecsWorld, entity_name);
 			new_entity->AddComponentByName(TransformComponent::Type_Name);
+			new_entity->AddComponentByName(TagComponent::Type_Name);
 
 			{
 				std::lock_guard lock(m_lock);
@@ -194,6 +196,14 @@ namespace Insight
 			}
 		}
 
+		void EntityManager::Update(const float delta_time)
+		{
+			for (UPtr<Entity>& entity : m_entities)
+			{
+				entity->Update(delta_time);
+			}
+		}
+
 		void EntityManager::LateUpdate()
 		{
 			for (UPtr<Entity>& entity : m_entities)
@@ -202,12 +212,14 @@ namespace Insight
 			}
 		}
 
-		void EntityManager::Update(const float delta_time)
+		void EntityManager::Destroy()
 		{
-			for (UPtr<Entity>& entity : m_entities)
+			for (UPtr<Entity>& e :  m_entities)
 			{
-				entity->Update(delta_time);
+				e->Destroy(); 
+				e.Reset();
 			}
+			m_entities.resize(0);
 		}
 
 		Ptr<Entity> EntityManager::GetEntityByName(std::string_view entity_name) const

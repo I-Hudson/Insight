@@ -7,6 +7,7 @@ namespace Insight
 		TagComponent::TagComponent()
 		{
 			m_tags.push_back("Default");
+			m_removeable = false;
 		}
 
 		TagComponent::~TagComponent()

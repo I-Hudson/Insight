@@ -31,12 +31,25 @@ namespace Insight
 
 		void Scene::Destroy()
 		{
+			m_ecsWorld->Destroy();
+		}
+
+		void Scene::EarlyUpdate()
+		{
+			IS_PROFILE_FUNCTION();
+			m_ecsWorld->EarlyUpdate();
 		}
 
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
 			m_ecsWorld->Update(deltaTime);
+		}
+
+		void Scene::LateUpdate()
+		{
+			IS_PROFILE_FUNCTION();
+			m_ecsWorld->LateUpdate();
 		}
 
 		void Scene::Render()
@@ -57,12 +70,30 @@ namespace Insight
 			Destroy();
 		}
 
+		void SceneManager::EarlyUpdate()
+		{
+			IS_PROFILE_FUNCTION();
+			if (m_activeScene.IsValid())
+			{
+				m_activeScene->EarlyUpdate();
+			}
+		}
+
 		void SceneManager::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
 			if (m_activeScene.IsValid())
 			{
 				m_activeScene->Update(deltaTime);
+			}
+		}
+
+		void SceneManager::LateUpdate()
+		{
+			IS_PROFILE_FUNCTION();
+			if (m_activeScene.IsValid())
+			{
+				m_activeScene->LateUpdate();
 			}
 		}
 

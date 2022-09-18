@@ -24,7 +24,7 @@ namespace Insight
 			public:
 				vk::DescriptorSetLayout GetLayout() const { return m_layout; }
 
-				// RHI_Resouce
+				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -40,4 +40,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

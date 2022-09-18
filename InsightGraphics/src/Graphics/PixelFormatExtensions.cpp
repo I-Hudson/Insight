@@ -18,7 +18,7 @@ namespace
 
 void PixelFormatExtensions::Init()
 {
-    // Clear lookup table
+    /// Clear lookup table
     memset(sizeOfInBits, 0, sizeof(sizeOfInBits));
 
     PixelFormat formats1[] = {
@@ -200,7 +200,7 @@ u32 PixelFormatExtensions::AlphaSizeInBits(const PixelFormat format)
     case PixelFormat::BC1_Typeless:
     case PixelFormat::BC1_UNorm:
     case PixelFormat::BC1_UNorm_sRGB:
-        return 1; // or 0
+        return 1; /// or 0
     case PixelFormat::BC2_Typeless:
     case PixelFormat::BC2_UNorm:
     case PixelFormat::BC2_UNorm_sRGB:
@@ -212,7 +212,7 @@ u32 PixelFormatExtensions::AlphaSizeInBits(const PixelFormat format)
     case PixelFormat::BC7_Typeless:
     case PixelFormat::BC7_UNorm:
     case PixelFormat::BC7_UNorm_sRGB:
-        return 8; // or 0
+        return 8; /// or 0
     default:
         return 0;
     }

@@ -6,7 +6,7 @@
 #include <map>
 #include <array>
 
-// Try and reduce compile time with not including vulkan.hpp in this header.
+/// Try and reduce compile time with not including vulkan.hpp in this header.
 namespace vk
 {
 	class Pipeline;
@@ -55,4 +55,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

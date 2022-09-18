@@ -45,7 +45,7 @@ namespace Insight
 			return wcscmp(wstr1, wstr1);
 		}
 
-		// https://gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
+		/// https:///gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
 		inline std::string basename(const std::string& file)
 		{
 			unsigned int i = static_cast<int>(file.find_last_of("\\/"));
@@ -168,7 +168,7 @@ namespace Insight
 				else
 				{
 					DWORD error = GetLastError();
-					//IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address {}: {}\n", frame.AddrPC.Offset, error);
+					///IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve address {}: {}\n", frame.AddrPC.Offset, error);
 					f.name = "Unknown Function";
 				}
 
@@ -184,7 +184,7 @@ namespace Insight
 				else
 				{
 					DWORD error = GetLastError();
-					//IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve line for: {0:x}, {}\n", frame.AddrPC.Offset, error);
+					///IS_CORE_ERROR("[PlatformWindows::GetCallStack] Failed to resolve line for: {0:x}, {}\n", frame.AddrPC.Offset, error);
 					f.line = 0;
 				}
 
@@ -234,4 +234,4 @@ namespace Insight
 		}
 	}
 }
-#endif // IS_PLATFORM_WINDOWS
+#endif /// IS_PLATFORM_WINDOWS

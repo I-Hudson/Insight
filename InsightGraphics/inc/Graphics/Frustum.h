@@ -36,10 +36,10 @@ namespace Insight
 
             Plane(const glm::vec3& normal, float d);
 
-            // Construct from a normal vector and a point on the plane
+            /// Construct from a normal vector and a point on the plane
             Plane(const glm::vec3& normal, const glm::vec3& point);
 
-            // Construct from 3 vertices
+            /// Construct from 3 vertices
             Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
 
             ~Plane() = default;
@@ -51,7 +51,7 @@ namespace Insight
             static float Dot(const Plane& p, const glm::vec3& v);
 
             glm::vec3 normal = glm::vec3(0, 0, 0);
-            float d = 0.0f; // distance from origin
+            float d = 0.0f; /// distance from origin
         };
 
         enum class Intersection

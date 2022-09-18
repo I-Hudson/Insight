@@ -19,11 +19,11 @@ namespace Insight
 	{
 #ifdef IS_ECS_ENABLED
 		/*
-		/// <summary>
-		/// This acts like string_view. This should only "look" into a component array
-		/// but shouldn't take any form of ownership.
-		/// </summary>
-		/// <typeparam name="Component"></typeparam>
+		//// <summary>
+		//// This acts like string_view. This should only "look" into a component array
+		//// but shouldn't take any form of ownership.
+		//// </summary>
+		//// <typeparam name="Component"></typeparam>
 		template<typename Component>
 		class ComponentArrayView
 		{
@@ -52,9 +52,9 @@ namespace Insight
 
 		class ECSWorld;
 
-		/// <summary>
-		/// Base class for a templated component array.
-		/// </summary>
+		//// <summary>
+		//// Base class for a templated component array.
+		//// </summary>
 		class IComponentArray
 		{
 		public:
@@ -80,12 +80,12 @@ namespace Insight
 			std::queue<int> m_freeComponents;
 		};
 
-		/// <summary>
-		/// Component array is a class which stores all components of a type.
-		/// This should be used as mainly a store nothing else.
-		/// You can add a component, remove, or get a ComponentArrayView.
-		/// </summary>
-		/// <typeparam name="Component"></typeparam>
+		//// <summary>
+		//// Component array is a class which stores all components of a type.
+		//// This should be used as mainly a store nothing else.
+		//// You can add a component, remove, or get a ComponentArrayView.
+		//// </summary>
+		//// <typeparam name="Component"></typeparam>
 		template<typename Component>
 		class ComponentArray : public IComponentArray
 		{

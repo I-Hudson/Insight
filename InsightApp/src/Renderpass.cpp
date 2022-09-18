@@ -44,10 +44,10 @@ namespace Insight
 		void Renderpass::Create()
 		{
 			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			///m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
+			///m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
+			///m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			///m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -82,6 +82,7 @@ namespace Insight
 
 		void Renderpass::Destroy()
 		{
+			GraphicsManager::Instance().GetRenderContext()->GpuWaitForIdle();
 			m_imgui_pass.Release();
 			m_testMesh.Destroy();
 		}
@@ -182,7 +183,7 @@ namespace Insight
 
 			IMGUI_VALID(ImGui::End());
 
-			// Look into "panking" for dir light https://www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
+			/// Look into "panking" for dir light https:///www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
 			RenderGraph::Instance().AddPass<PassData>(L"Cascade shadow pass",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
@@ -205,7 +206,7 @@ namespace Insight
 					PipelineStateObject pso = { };
 					pso.Name = L"Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
-					//pso.CullMode = CullMode::Front;
+					///pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
@@ -241,7 +242,7 @@ namespace Insight
 						for (Submesh* sub_mesh : data.Mesh.GetSubMeshes())
 						{
 							BoundingBox bounding_box = sub_mesh->GetBoundingBox();
-							//if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
+							///if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
 							{
 								sub_mesh->Draw(cmdList);
 							}
@@ -372,7 +373,7 @@ namespace Insight
 					for (Submesh* sub_mesh : data.TestMesh.GetSubMeshes())
 					{
 						BoundingBox bounding_box = sub_mesh->GetBoundingBox();
-						//if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
+						///if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
 						{
 							sub_mesh->Draw(cmdList);
 						}
@@ -380,7 +381,7 @@ namespace Insight
 
 					cmdList->EndRenderpass();
 				}, std::move(passData));
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::Composite()
@@ -401,7 +402,7 @@ namespace Insight
 			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
 			for (UBO_ShadowCamera& c : shader_cameras)
 			{
-				//c = shader_cameras[2];
+				///c = shader_cameras[2];
 			}
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass", 
@@ -519,14 +520,14 @@ namespace Insight
 
 					cmdList->EndRenderpass();
 				});
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::ImGuiPass()
 		{
 #ifdef RENDER_GRAPH_ENABLED
 			m_imgui_pass.Render();
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		float previousTime = 0;
@@ -538,16 +539,16 @@ namespace Insight
 
 			glm::mat4 viewMatrix = camera.View;
 
-			// Get the camera's forward, right, up, and location vectors
+			/// Get the camera's forward, right, up, and location vectors
 			glm::vec4 vForward = viewMatrix[2];
 			glm::vec4 vRight = viewMatrix[0];
 			glm::vec4 vUp = viewMatrix[1];
 			glm::vec4 vTranslation = viewMatrix[3];
 
 			float frameSpeed = Input::InputManager::IsKeyPressed(IS_KEY_LEFT_SHIFT) ? deltaTime * 200 : deltaTime * 25;
-			//Input::IsKeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
+			///Input::IsKeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
 
-			// Translate camera
+			/// Translate camera
 			if (Input::InputManager::IsKeyPressed(IS_KEY_W))
 			{
 				vTranslation += vForward * frameSpeed;
@@ -573,7 +574,7 @@ namespace Insight
 				vTranslation -= vUp * frameSpeed;
 			}
 
-			// check for camera rotation
+			/// check for camera rotation
 			static bool sbMouseButtonDown = false;
 			bool mouseDown = Input::InputManager::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT);
 			if (mouseDown)
@@ -600,7 +601,7 @@ namespace Insight
 
 				glm::mat4 mMat;
 
-				// pitch
+				/// pitch
 				if (iDeltaY != 0)
 				{
 					float i_delta_y = static_cast<float>(iDeltaY);
@@ -614,7 +615,7 @@ namespace Insight
 					vForward = mMat * vForward;
 				}
 
-				// yaw
+				/// yaw
 				if (iDeltaX != 0)
 				{
 					float i_delta_x = static_cast<float>(iDeltaX);
@@ -639,13 +640,13 @@ namespace Insight
 			aspect = std::max(0.1f, aspect);
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
 
-			// Setup the inverted projection view matrix.
+			/// Setup the inverted projection view matrix.
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
 
 			if (GraphicsManager::IsVulkan())
 			{
-				// Then invert the projection if vulkan.
+				/// Then invert the projection if vulkan.
 				camera.Projection[1][1] *= -1;
 				camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			}
@@ -670,8 +671,8 @@ namespace Insight
 
 			const float cascadeSplitLambda = split_lambda;
  
-			// Calculate split depths based on view camera frustum
-			// Based on method presented in https://developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
+			/// Calculate split depths based on view camera frustum
+			/// Based on method presented in https:///developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
 			for (int i = 0; i < cascadeCount; i++)
 			{
 				float p = (static_cast<float>(i) + 1.0f) / static_cast<float>(cascadeCount);
@@ -681,7 +682,7 @@ namespace Insight
 				cascadeSplits[i] = (d - nearClip) / clipRange;
 			}
 
-			// Calculate orthographic projection matrix for each cascade
+			/// Calculate orthographic projection matrix for each cascade
 			float lastSplitDist = 0.0;
 			for (u32 i = 0; i < cascadeCount; i++)
 			{
@@ -699,7 +700,7 @@ namespace Insight
 					glm::vec3(-1.0f, -1.0f,  1.0f),
 				};
 
-				// Project frustum corners into world space
+				/// Project frustum corners into world space
 				glm::mat4 invCam = glm::inverse(camera.ProjView);
 				for (u32 i = 0; i < 8; ++i)
 				{
@@ -714,7 +715,7 @@ namespace Insight
 					frustumCorners[i] = frustumCorners[i] + (dist * lastSplitDist);
 				}
 
-				// Get frustum center
+				/// Get frustum center
 				glm::vec3 frustumCenter = glm::vec3(0.0f);
 				for (u32 i = 0; i < 8; ++i)
 				{
@@ -733,7 +734,7 @@ namespace Insight
 				glm::vec3 maxExtents = glm::vec3(radius);
 				glm::vec3 minExtents = -maxExtents;
 
-				// Construct our matrixs required for the light.
+				/// Construct our matrixs required for the light.
 				glm::vec3 lightDirection = dir_light_direction;
 				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * -minExtents.z;
 				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -742,11 +743,11 @@ namespace Insight
 				{
 					if (GraphicsManager::IsVulkan())
 					{
-						// Invert the projection if vulkan. This is because vulkan's coord space is from top left, not bottom left.
+						/// Invert the projection if vulkan. This is because vulkan's coord space is from top left, not bottom left.
 						lightOrthoMatrix[1][1] *= -1;
 					}
 
-					// Store split distance and matrix in cascade
+					/// Store split distance and matrix in cascade
 					outCascades[i].SplitDepth = (Main_Camera_Near_Plane + splitDist * clipRange) * -1.0f;
 					outCascades[i].ProjView = lightOrthoMatrix * lightViewMatrix;
 					outCascades[i].Projection = lightOrthoMatrix;

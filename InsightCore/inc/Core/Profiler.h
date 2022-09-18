@@ -6,6 +6,7 @@ namespace Insight
 {
 	namespace Core
 	{
+		/// Wait for the profiler to be a attached.
 		void IS_CORE WaitForProfiler();
 	}
 }

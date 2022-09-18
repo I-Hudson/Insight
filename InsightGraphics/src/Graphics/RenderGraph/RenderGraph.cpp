@@ -38,7 +38,7 @@ namespace Insight
 			m_context = context;
 
 			m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
-			//m_textureCaches.Setup();
+			///m_textureCaches.Setup();
 			m_commandListManager.Setup();
 
 			m_commandListManager.Setup();
@@ -140,10 +140,10 @@ namespace Insight
 
 			m_textureCaches->Reset();
 			DeleteTracked(m_textureCaches);
-			//m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
-			//	{
-			//		cache.Reset();
-			//	});
+			///m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
+			///	{
+			///		cache.Reset();
+			///	});
 
 			m_commandListManager.ForEach([](CommandListManager& manager)
 				{
@@ -160,13 +160,13 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			RenderGraphBuilder builder(this);
-			// TODO This should be threaded. Leave as single thread for now.
+			/// TODO This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
 				builder.SetPass(pass.Get());
 				pass->Setup(builder);
 				
-				// Build all our textures.
+				/// Build all our textures.
 				for (auto const& pair : pass.Get()->m_textureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches->Get(pair.first);
@@ -180,8 +180,8 @@ namespace Insight
 				PipelineStateObject& pso = pass.Get()->m_pso;
 				pass->m_pso.Swapchain = pass->m_swapchainPass;
 
-				// Build the shader here but no need to cache a reference to it as we 
-				// can lookup it up later. Just make sure it exists.
+				/// Build the shader here but no need to cache a reference to it as we 
+				/// can lookup it up later. Just make sure it exists.
 				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
 
 				int rtIndex = 0;
@@ -235,12 +235,12 @@ namespace Insight
 			{
 				static void PlaceBarrier(RHI_Texture* texture, std::vector<ImageBarrier>& previous_barriers)
 				{
-					// Check if 
+					/// Check if 
 				}
 			};
 
 			int passIndex = 0;
-			// This should be threaded. Leave as single thread for now.
+			/// This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
 				PipelineBarrier colorPipelineBarrier;
@@ -249,7 +249,7 @@ namespace Insight
 				std::vector<ImageBarrier> colorImageBarriers;
 				std::vector<ImageBarrier> depthImageBarriers;
 
-				// Colour writes
+				/// Colour writes
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{
 					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
@@ -275,7 +275,7 @@ namespace Insight
 				colorPipelineBarrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
-				// Depth write
+				/// Depth write
 				if (pass->m_depthStencilWrite != -1)
 				{
 					RHI_Texture* texture = m_textureCaches->Get(pass->m_depthStencilWrite);
@@ -316,7 +316,7 @@ namespace Insight
 				colorImageBarriers = { };
 				depthImageBarriers = { };
 
-				// Texture reads 
+				/// Texture reads 
 				for (auto const& rt : pass.Get()->m_textureReads)
 				{
 					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
@@ -372,7 +372,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			// TODO: Could be threaded? Leave as it is for now as it works.
+			/// TODO: Could be threaded? Leave as it is for now as it works.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
@@ -381,9 +381,9 @@ namespace Insight
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
 
-				//cmdList->BeginRenderpass(pass->m_renderpassDescription);
+				///cmdList->BeginRenderpass(pass->m_renderpassDescription);
 				pass->Execute(*this, cmdList);
-				//cmdList->EndRenderpass();
+				///cmdList->EndRenderpass();
 			}
 
 			if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
@@ -423,4 +423,4 @@ namespace Insight
 	}
 }
 
-#endif // RENDER_GRAPH_ENABLED
+#endif /// RENDER_GRAPH_ENABLED

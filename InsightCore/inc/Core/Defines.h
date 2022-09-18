@@ -16,7 +16,7 @@
 
 #define IS_UNUSED(x) (void)x
 
-// Static array size
+/// Static array size
 #define ARRAY_COUNT(array) (sizeof(array) / sizeof(array[0]))
 
 /*

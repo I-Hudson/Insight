@@ -6,10 +6,10 @@
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
-#endif // #ifdef IS_VULKAN_ENABLED
+#endif /// #ifdef IS_VULKAN_ENABLED
 #ifdef IS_DX12_ENABLED
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
-#endif // #ifdef IS_DX12_ENABLED
+#endif /// #ifdef IS_DX12_ENABLED
 
 #include "Core/Profiler.h"
 
@@ -84,8 +84,8 @@ namespace Insight
 			u32 colourImageIndex = 0;
 			for (const auto& colourImage : description.ColourAttachments)
 			{
-				// Find if an image is missing an attachment. If so then add a default 
-				// attachment. This needs to be done as the attachments are used later in rendering.
+				/// Find if an image is missing an attachment. If so then add a default 
+				/// attachment. This needs to be done as the attachments are used later in rendering.
 				if (description.Attachments.size() <= colourImageIndex)
 				{
 					description.Attachments.push_back(AttachmentDescription::Default(colourImage->GetFormat(), ImageLayout::ColourAttachment));
@@ -166,13 +166,13 @@ namespace Insight
 							return vk::AttachmentDescription(
 								vk::AttachmentDescriptionFlags(),
 								PixelFormatToVulkan(texture->GetFormat()),
-								vk::SampleCountFlagBits::e1,								// Sample count
-								vk::AttachmentLoadOp::eClear,								// load op
-								vk::AttachmentStoreOp::eStore,								// store op
-								vk::AttachmentLoadOp::eDontCare,							// stencil load op
-								vk::AttachmentStoreOp::eDontCare,							// stencil store op
-								vk::ImageLayout::eUndefined,								// initial layout
-								vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	// final layout
+								vk::SampleCountFlagBits::e1,								/// Sample count
+								vk::AttachmentLoadOp::eClear,								/// load op
+								vk::AttachmentStoreOp::eStore,								/// store op
+								vk::AttachmentLoadOp::eDontCare,							/// stencil load op
+								vk::AttachmentStoreOp::eDontCare,							/// stencil store op
+								vk::ImageLayout::eUndefined,								/// initial layout
+								vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	/// final layout
 						}
 						vk::AttachmentDescription desc = CreateCustom(texture, attachment);
 						desc.finalLayout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
@@ -182,7 +182,7 @@ namespace Insight
 					static void AddRenderpassDescriptionAttachmentData(std::vector<AttachmentDescription>& descriptions, vk::AttachmentDescription descriptionVulkan)
 					{
 						AttachmentDescription newDescription = { };
-						newDescription.Format = PixelFormat::D32_Float;// VkFormatToPixelFormat[(int)descriptionVulkan.format];
+						newDescription.Format = PixelFormat::D32_Float;/// VkFormatToPixelFormat[(int)descriptionVulkan.format];
 						newDescription.LoadOp = VkToAttachmentLoadOp(descriptionVulkan.loadOp);
 						newDescription.StoreOp = AttachmentStoreOp::Store;
 						newDescription.StencilLoadOp = VkToAttachmentLoadOp(descriptionVulkan.stencilLoadOp);
@@ -293,7 +293,7 @@ namespace Insight
 
 				if (description.SwapchainPass)
 				{
-					// If there are no render attachments added and we have a custom attachment add custom attachment.
+					/// If there are no render attachments added and we have a custom attachment add custom attachment.
 					if (renderpassAttachments.size() == 0 && description.Attachments.size() > 0)
 					{
 						renderpassAttachments.push_back(AttachmentCreation::CreateCustom(nullptr, &description.Attachments.at(0)));
@@ -337,7 +337,7 @@ namespace Insight
 
 				m_renderpasses[hash] = newPass;
 			}
-#endif // #ifdef IS_VULKAN_ENABLED
+#endif /// #ifdef IS_VULKAN_ENABLED
 
 			return m_renderpasses[hash];
 		}

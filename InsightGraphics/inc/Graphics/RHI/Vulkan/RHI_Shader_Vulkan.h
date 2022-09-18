@@ -48,4 +48,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

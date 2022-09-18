@@ -18,16 +18,16 @@ namespace Insight
 
 	namespace Input
 	{
-		/// <summary>
-		/// State of a single key.
-		/// </summary>
+		//// <summary>
+		//// State of a single key.
+		//// </summary>
 		struct KeyState
 		{
 			void Reset();
 
-			u8 Pressed	: 1;		// Has a key been pressed this frame. This is reset at the end of the frame.
-			u8 Released : 1;		// Has a key been released this frame. This is reset at the end of the frame.
-			u8 Held		: 1;		// Has this key been pressed for longer than a single frame.
+			u8 Pressed	: 1;		/// Has a key been pressed this frame. This is reset at the end of the frame.
+			u8 Released : 1;		/// Has a key been released this frame. This is reset at the end of the frame.
+			u8 Held		: 1;		/// Has this key been pressed for longer than a single frame.
 			u8 Mod		: 1;
 		};
 
@@ -48,9 +48,9 @@ namespace Insight
 		class IS_INPUT InputManager
 		{
 		public:
-			// [INTERNAL] Call with a valid window to setup all the glfw callbacks.
+			/// [INTERNAL] Call with a valid window to setup all the glfw callbacks.
 			static bool InitWithWindow(Graphics::Window* window);
-			// [INTERNAL] Must be called before window update (this resets certain values).
+			/// [INTERNAL] Must be called before window update (this resets certain values).
 			static void Update();
 
 			static bool IsKeyPressed(u32 key);

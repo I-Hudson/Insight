@@ -23,7 +23,7 @@ namespace Insight
 				virtual std::vector<Byte> Download() override;
 				virtual void Resize(u64 newSizeBytes) override;
 
-				// RHI_Resource
+				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -40,4 +40,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

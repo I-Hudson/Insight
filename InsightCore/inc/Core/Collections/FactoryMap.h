@@ -30,21 +30,21 @@ namespace Core
 		static constexpr bool value = std::is_same<decltype(test<T>(0)), yes>::value;
 	};
 
-	/// <summary>
-	/// struct used to get the 'static T New()' function for Type.
-	/// </summary>
-	/// <typeparam name="T"></typeparam>
+	//// <summary>
+	//// struct used to get the 'static T New()' function for Type.
+	//// </summary>
+	//// <typeparam name="T"></typeparam>
 	template<typename T>
 	struct FactoryMapFuncType
 	{
 		using Type = std::remove_pointer_t<T>;
 
-		static decltype(&Type::New) get() { return &Type::New; } // Class is missing a 'static T* New()' function.
+		static decltype(&Type::New) get() { return &Type::New; } /// Class is missing a 'static T* New()' function.
 	};
 
-	/// <summary>
-	/// Manage objects via hash with a custom facroy funciton.
-	/// </summary>
+	//// <summary>
+	//// Manage objects via hash with a custom facroy funciton.
+	//// </summary>
 	template<typename THash, typename T, typename TDestrcutorStruct = DefaultFactoryMapObjectDestructor>
 	class FactoryMap
 	{
@@ -91,7 +91,7 @@ namespace Core
 				return itr->second;
 			}
 
-			// Get our static New function.
+			/// Get our static New function.
 			auto factoryFunc = FactoryMapFuncType<Type>::get();
 			T newObject = factoryFunc();
 			m_objects[hash] = newObject;
@@ -105,7 +105,7 @@ namespace Core
 
 	private:
 		std::map<THash, T> m_objects;
-		//FactoryFunc m_factoryFunc;
+		///FactoryFunc m_factoryFunc;
 		TDestrcutorStruct m_destrcutorStruct;
 	};
 }

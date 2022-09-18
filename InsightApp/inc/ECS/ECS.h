@@ -9,7 +9,7 @@
 #include <typeinfo>
 #include <functional>
 
-//#define IS_EXP_ECS
+///#define IS_EXP_ECS
 
 namespace Insight
 {
@@ -82,7 +82,7 @@ namespace Insight
 				ComponentType ComponentType;
 				Entity Entity;
 			};
-			//static_assert(std::is_pod_v<ComponentType>, "[ECSComponentArray] 'ComponentType' must be plain of data.");
+			///static_assert(std::is_pod_v<ComponentType>, "[ECSComponentArray] 'ComponentType' must be plain of data.");
 		public:
 			virtual void Init() override 
 			{ 
@@ -147,7 +147,7 @@ namespace Insight
 			}
 
 		public:
-			// Dynamic array of POD component data.
+			/// Dynamic array of POD component data.
 			std::vector<ComponentData> m_componentData;
 			std::unordered_map<int, int> m_componentToEntity;
 			std::queue<int> m_freeSlots;
@@ -221,9 +221,9 @@ namespace Insight
 			std::vector<ECSRequestFunction> RemoveRequests;
 		};
 
-		/// <summary>
-		/// Store a copy of the previous frames data so the ECS can be threaded.
-		/// </summary>
+		//// <summary>
+		//// Store a copy of the previous frames data so the ECS can be threaded.
+		//// </summary>
 		class ECSFrameUpdateData
 		{
 		private:
@@ -266,12 +266,12 @@ namespace Insight
 				IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
 				ComponentHandle handle = componentArray->AddComponent(entity);
 				m_entityManager.AddComponentToEntity(entity, handle);
-				//m_requests.AddRequests.push_back([this, entity]()
-				//	{
-				//		IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
-				//		ComponentHandle handle = componentArray->AddComponent();
-				//		m_entityManager.AddComponentToEntity(entity, handle);
-				//	});
+				///m_requests.AddRequests.push_back([this, entity]()
+				///	{
+				///		IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
+				///		ComponentHandle handle = componentArray->AddComponent();
+				///		m_entityManager.AddComponentToEntity(entity, handle);
+				///	});
 			}
 			template<typename ComponentType>
 			void RemoveComponent(Entity entity)
@@ -287,14 +287,14 @@ namespace Insight
 				IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
 				componentArray->RemoveComponent(handle);
 
-				//m_requests.RemoveRequests.push_back([this, entity, componentTypeId]()
-				//	{
-				//		ComponentHandle handle = m_entityManager.GetComponent(entity, componentTypeId);
-				//		m_entityManager.RemoveComponentFromEntity(entity, handle);
-				//
-				//		IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
-				//		componentArray->RemoveComponent(handle);
-				//	});
+				///m_requests.RemoveRequests.push_back([this, entity, componentTypeId]()
+				///	{
+				///		ComponentHandle handle = m_entityManager.GetComponent(entity, componentTypeId);
+				///		m_entityManager.RemoveComponentFromEntity(entity, handle);
+				///
+				///		IECSComponentArray* componentArray = GetComponentArray<ComponentType>();
+				///		componentArray->RemoveComponent(handle);
+				///	});
 			}
 
 			template<typename ComponentType>
@@ -364,6 +364,6 @@ namespace Insight
 		public:
 			void Update(float deltaTime) { }
 		};
-#endif //#ifdef IS_EXP_ECS
+#endif ///#ifdef IS_EXP_ECS
 	}
 }

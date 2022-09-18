@@ -91,9 +91,9 @@ namespace Insight
 
 		inline void ThrowIfFailed(VkResult errorCode)
 		{
-			assert(errorCode == VK_SUCCESS);//&& VkErrorToString(errorCode).c_str());
+			assert(errorCode == VK_SUCCESS);///&& VkErrorToString(errorCode).c_str());
 		}
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

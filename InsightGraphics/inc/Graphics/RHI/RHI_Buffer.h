@@ -9,9 +9,9 @@ namespace Insight
 		class RenderContext;
 		class RHI_Buffer;
 
-		/// <summary>
-		/// Override default behavior for RHI_Buffer when created.
-		/// </summary>
+		//// <summary>
+		//// Override default behavior for RHI_Buffer when created.
+		//// </summary>
 		struct IS_GRAPHICS RHI_Buffer_Overrides
 		{
 			bool Force_Host_Writeable = false;

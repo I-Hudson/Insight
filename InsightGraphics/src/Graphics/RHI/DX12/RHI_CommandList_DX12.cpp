@@ -15,11 +15,11 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			/// <summary>
-			/// RHI_CommandList_DX12
-			/// </summary>
-			/// <param name="count"></param>
-			/// <param name="barriers"></param>
+			//// <summary>
+			//// RHI_CommandList_DX12
+			//// </summary>
+			//// <param name="count"></param>
+			//// <param name="barriers"></param>
 			void RHI_CommandList_DX12::ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers)
 			{
 				if (m_commandList)
@@ -171,7 +171,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				m_pso = pso;
-				//FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
+				///FrameResourceDX12()->DescriptorAllocator.SetPipeline(m_pso);
 			}
 
 			void RHI_CommandList_DX12::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y)
@@ -239,19 +239,19 @@ namespace Insight
 			bool RHI_CommandList_DX12::BindDescriptorSets()
 			{
 				IS_PROFILE_FUNCTION();
-				bool result = true;// m_frameResouces->DescriptorAllocator.SetupDescriptors();
-				//FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
+				bool result = true;/// m_frameResouces->DescriptorAllocator.SetupDescriptors();
+				///FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
 				
-				//FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
+				///FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
 
-				//std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
-				//if (result && descriptors.size() > 0)
+				///std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
+				///if (result && descriptors.size() > 0)
 				{
-					// Set our descriptor heaps.
-					//m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
+					/// Set our descriptor heaps.
+					///m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
 
-					// Set all our descriptors tables.
-					//FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
+					/// Set all our descriptors tables.
+					///FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
 				}
 				return true;
 			}
@@ -264,10 +264,10 @@ namespace Insight
 			}
 
 
-			/// <summary>
-			/// RHI_CommandListAllocator_DX12
-			/// </summary>
-			/// <param name="context"></param>
+			//// <summary>
+			//// RHI_CommandListAllocator_DX12
+			//// </summary>
+			//// <param name="context"></param>
 			void RHI_CommandListAllocator_DX12::Create(RenderContext* context)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
@@ -373,4 +373,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

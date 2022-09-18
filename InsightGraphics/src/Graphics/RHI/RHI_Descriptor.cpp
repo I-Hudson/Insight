@@ -21,10 +21,10 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		/// <summary>
-		/// RH_DescriptorLayout
-		/// </summary>
-		/// <returns></returns>
+		//// <summary>
+		//// RH_DescriptorLayout
+		//// </summary>
+		//// <returns></returns>
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
@@ -36,9 +36,9 @@ namespace Insight
 			return nullptr;
 		}
 
-		/// <summary>
-		/// RHI_DescriptorLayoutManager
-		/// </summary>
+		//// <summary>
+		//// RHI_DescriptorLayoutManager
+		//// </summary>
 		RHI_DescriptorLayoutManager::RHI_DescriptorLayoutManager()
 		{
 		}
@@ -98,12 +98,12 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// RHI_DescriptorSet
-		/// </summary>
-		/// <param name="context"></param>
-		/// <param name="descriptors"></param>
-		/// <param name="layout"></param>
+		//// <summary>
+		//// RHI_DescriptorSet
+		//// </summary>
+		//// <param name="context"></param>
+		//// <param name="descriptors"></param>
+		//// <param name="layout"></param>
 		RHI_DescriptorSet::RHI_DescriptorSet(RenderContext* context, const std::vector<Descriptor>& descriptors, RHI_DescriptorLayout* layout)
 		{
 			m_context = context;
@@ -285,11 +285,11 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// RHI_DescriptorSetManager
-		/// </summary>
-		/// <param name="descriptors"></param>
-		/// <returns></returns>
+		//// <summary>
+		//// RHI_DescriptorSetManager
+		//// </summary>
+		//// <param name="descriptors"></param>
+		//// <returns></returns>
 		RHI_DescriptorSet* RHI_DescriptorSetManager::GetSet(const std::vector<Descriptor>& descriptors)
 		{
 			IS_PROFILE_FUNCTION();
@@ -305,7 +305,7 @@ namespace Insight
 				}
 			}
 
-			// Is there a set which is already in use with the same resources reuse that set.
+			/// Is there a set which is already in use with the same resources reuse that set.
 			if (auto itr = m_usedSets.find(hash); itr != m_usedSets.end())
 			{
 				if (auto itrWithResource = itr->second.find(hashWithResource); 
@@ -315,7 +315,7 @@ namespace Insight
 				}
 			}
 
-			// No set in use with the same resources, try and find a new set.
+			/// No set in use with the same resources, try and find a new set.
 			if (auto itr = m_freeSets.find(hash); itr != m_freeSets.end())
 			{
 				if (!itr->second.empty())
@@ -366,10 +366,10 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// DescriptorAllocator
-		/// </summary>
-		/// <param name="pso"></param>
+		//// <summary>
+		//// DescriptorAllocator
+		//// </summary>
+		//// <param name="pso"></param>
 		DescriptorAllocator::DescriptorAllocator()
 		{ }
 
@@ -396,7 +396,7 @@ namespace Insight
 					});
 			}
 
-			// Fill in missing descriptors.
+			/// Fill in missing descriptors.
 			for (auto& pair : m_descriptors)
 			{
 				if (pair.second.size() > 0)
@@ -430,7 +430,7 @@ namespace Insight
 			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
 			m_uniformBufferOffset += size;
 
-			// Align the size to minUniformBufferOffsetAlignment.
+			/// Align the size to minUniformBufferOffsetAlignment.
 			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
 			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
 

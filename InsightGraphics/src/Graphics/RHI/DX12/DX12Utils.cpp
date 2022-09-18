@@ -4,14 +4,14 @@
 
 DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
 {
-    DXGI_FORMAT_UNKNOWN,                //0
+    DXGI_FORMAT_UNKNOWN,                ///0
 
-    DXGI_FORMAT_R32G32B32A32_TYPELESS,  //1
-    DXGI_FORMAT_R32G32B32A32_FLOAT,     //2
-    DXGI_FORMAT_R32G32B32A32_UINT,      //3
-    DXGI_FORMAT_R32G32B32A32_SINT,      //4
+    DXGI_FORMAT_R32G32B32A32_TYPELESS,  ///1
+    DXGI_FORMAT_R32G32B32A32_FLOAT,     ///2
+    DXGI_FORMAT_R32G32B32A32_UINT,      ///3
+    DXGI_FORMAT_R32G32B32A32_SINT,      ///4
 
-    DXGI_FORMAT_R32G32B32_TYPELESS,     //5
+    DXGI_FORMAT_R32G32B32_TYPELESS,     ///5
     DXGI_FORMAT_R32G32B32_FLOAT,
     DXGI_FORMAT_R32G32B32_UINT,
     DXGI_FORMAT_R32G32B32_SINT,
@@ -28,10 +28,10 @@ DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
     DXGI_FORMAT_R32G32_UINT,
     DXGI_FORMAT_R32G32_SINT,
 
-    DXGI_FORMAT_R32G8X24_TYPELESS, // TODO: R32G8X24_Typeless
+    DXGI_FORMAT_R32G8X24_TYPELESS, /// TODO: R32G8X24_Typeless
     DXGI_FORMAT_D32_FLOAT_S8X24_UINT,
-    DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,  // TODO: R32_Float_X8X24_Typeless
-    DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, // TODO: X32_Typeless_G8X24_UInt
+    DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS,  /// TODO: R32_Float_X8X24_Typeless
+    DXGI_FORMAT_X32_TYPELESS_G8X24_UINT, /// TODO: X32_Typeless_G8X24_UInt
 
     DXGI_FORMAT_R10G10B10A2_TYPELESS,
     DXGI_FORMAT_R10G10B10A2_UNORM,
@@ -167,7 +167,7 @@ namespace Insight
             case Insight::Graphics::PrimitiveTopologyType::LineStrip: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP;
             case Insight::Graphics::PrimitiveTopologyType::TriangleList: return D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
             case Insight::Graphics::PrimitiveTopologyType::TriangleStrip: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
-            //case Insight::Graphics::PrimitiveTopologyType::TriangleFan: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+            ///case Insight::Graphics::PrimitiveTopologyType::TriangleFan: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
             case Insight::Graphics::PrimitiveTopologyType::LineListWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
             case Insight::Graphics::PrimitiveTopologyType::LineStripWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
             case Insight::Graphics::PrimitiveTopologyType::TriangleListWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
@@ -258,4 +258,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

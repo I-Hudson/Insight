@@ -35,4 +35,4 @@ namespace Insight
 
 	}
 }
-#endif // IS_PLATFORM_WINDOWS
+#endif /// IS_PLATFORM_WINDOWS

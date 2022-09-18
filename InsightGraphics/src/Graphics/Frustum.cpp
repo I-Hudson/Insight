@@ -27,11 +27,11 @@ namespace Insight
 {
 	namespace Graphics
 	{
-        /// <summary>
-        /// Plane
-        /// </summary>
-        /// <param name="normal"></param>
-        /// <param name="d"></param>
+        //// <summary>
+        //// Plane
+        //// </summary>
+        //// <param name="normal"></param>
+        //// <param name="d"></param>
         Plane::Plane(const glm::vec3& normal, float d)
         {
             this->normal = normal;
@@ -86,60 +86,60 @@ namespace Insight
             return newPlane.Dot(v);
         }
 
-        /// <summary>
-        /// Frustum
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="projection"></param>
-        /// <param name="screen_depth"></param>
+        //// <summary>
+        //// Frustum
+        //// </summary>
+        //// <param name="view"></param>
+        //// <param name="projection"></param>
+        //// <param name="screen_depth"></param>
         Frustum::Frustum(const glm::mat4& view, const glm::mat4& projection, float screen_depth)
         {
-            // Calculate the minimum Z distance in the frustum.
+            /// Calculate the minimum Z distance in the frustum.
             const float z_min = -projection[3][2] / projection[2][2];
             const float r = screen_depth / (screen_depth - z_min);
             glm::mat4 projection_updated = projection;
             projection_updated[2][2] = r;
             projection_updated[3][2] = -r * z_min;
 
-            // Create the frustum matrix from the view matrix and updated projection matrix.
+            /// Create the frustum matrix from the view matrix and updated projection matrix.
             const glm::mat4 view_projection = view * projection_updated;
 
-            // Calculate near plane of frustum.
+            /// Calculate near plane of frustum.
             m_planes[0].normal.x = view_projection[0][3] + view_projection[0][2];
             m_planes[0].normal.y = view_projection[1][3] + view_projection[1][2];
             m_planes[0].normal.z = view_projection[2][3] + view_projection[2][2];
             m_planes[0].d = view_projection[3][3] + view_projection[3][2];
             m_planes[0].Normalize();
 
-            // Calculate far plane of frustum.
+            /// Calculate far plane of frustum.
             m_planes[1].normal.x = view_projection[0][3] - view_projection[0][2];
             m_planes[1].normal.y = view_projection[1][3] - view_projection[1][2];
             m_planes[1].normal.z = view_projection[2][3] - view_projection[2][2];
             m_planes[1].d = view_projection[3][3] - view_projection[3][2];
             m_planes[1].Normalize();
 
-            // Calculate left plane of frustum.
+            /// Calculate left plane of frustum.
             m_planes[2].normal.x = view_projection[0][3] + view_projection[0][0];
             m_planes[2].normal.y = view_projection[1][3] + view_projection[1][0];
             m_planes[2].normal.z = view_projection[2][3] + view_projection[2][0];
             m_planes[2].d = view_projection[3][3] + view_projection[3][0];
             m_planes[2].Normalize();
 
-            // Calculate right plane of frustum.
+            /// Calculate right plane of frustum.
             m_planes[3].normal.x = view_projection[0][3] - view_projection[0][0];
             m_planes[3].normal.y = view_projection[1][3] - view_projection[1][0];
             m_planes[3].normal.z = view_projection[2][3] - view_projection[2][0];
             m_planes[3].d = view_projection[3][3] - view_projection[3][0];
             m_planes[3].Normalize();
 
-            // Calculate top plane of frustum.
+            /// Calculate top plane of frustum.
             m_planes[4].normal.x = view_projection[0][3] - view_projection[0][1];
             m_planes[4].normal.y = view_projection[1][3] - view_projection[1][1];
             m_planes[4].normal.z = view_projection[2][3] - view_projection[2][1];
             m_planes[4].d = view_projection[3][3] + view_projection[3][1];
             m_planes[4].Normalize();
 
-            // Calculate bottom plane of frustum.
+            /// Calculate bottom plane of frustum.
             m_planes[5].normal.x = view_projection[0][3] + view_projection[0][1];
             m_planes[5].normal.y = view_projection[1][3] + view_projection[1][1];
             m_planes[5].normal.z = view_projection[2][3] + view_projection[2][1];
@@ -157,11 +157,11 @@ namespace Insight
             }
             else
             {
-                constexpr float z = std::numeric_limits<float>::infinity(); // reverse-z only (but I must read form Renderer)
+                constexpr float z = std::numeric_limits<float>::infinity(); /// reverse-z only (but I must read form Renderer)
                 radius = glm::max(extent.x, glm::max(extent.y, z));
             }
 
-            // Check sphere first as it's cheaper
+            /// Check sphere first as it's cheaper
             if (CheckSphere(center, radius) != Intersection::Outside)
                 return true;
 
@@ -176,7 +176,7 @@ namespace Insight
             Intersection result = Intersection::Inside;
             Plane plane_abs;
 
-            // Check if any one point of the cube is in the view frustum.
+            /// Check if any one point of the cube is in the view frustum.
 
             for (const Plane& plane : m_planes)
             {
@@ -206,22 +206,22 @@ namespace Insight
 
         Intersection Frustum::CheckSphere(const glm::vec3& center, float radius) const
         {
-            // calculate our distances to each of the planes
+            /// calculate our distances to each of the planes
             for (const auto& plane : m_planes)
             {
-                // find the distance to this plane
+                /// find the distance to this plane
                 const float distance = glm::dot(plane.normal, center) + plane.d;
 
-                // if this distance is < -sphere.radius, we are outside
+                /// if this distance is < -sphere.radius, we are outside
                 if (distance < -radius)
                     return Intersection::Outside;
 
-                // else if the distance is between +- radius, then we intersect
+                /// else if the distance is between +- radius, then we intersect
                 if (static_cast<float>(glm::abs(distance)) < radius)
                     return Intersection::Intersects;
             }
 
-            // otherwise we are fully in view
+            /// otherwise we are fully in view
             return Intersection::Inside;
         }
 	}

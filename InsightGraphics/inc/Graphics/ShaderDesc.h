@@ -55,7 +55,7 @@ namespace Insight
 			std::wstring GeoemtyFilePath = L"";
 			std::wstring PixelFilePath = L"";
 			std::string MainFunc = "Main";
-			std::vector<ShaderInputLayout> InputLayout; // Optioanl, if left empty reflection will happen on the shader code.
+			std::vector<ShaderInputLayout> InputLayout; /// Optioanl, if left empty reflection will happen on the shader code.
 
 			u64 GetHash() const
 			{

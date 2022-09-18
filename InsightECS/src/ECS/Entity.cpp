@@ -21,16 +21,16 @@ namespace Insight
 			return m_id != -1;
 		}
 
-		//bool Entity::HasComponent(u64 componentType) const
-		//{
-		//	if (!IsVaild())
-		//	{
-		//		return false;
-		//	}
-		//	ASSERT(m_entityManager)
-		//	const EntityData& data = m_entityManager->GetEntityData(*this);
-		//	return data.Components.find(componentType) != data.Components.end()l;
-		//}
+		///bool Entity::HasComponent(u64 componentType) const
+		///{
+		///	if (!IsVaild())
+		///	{
+		///		return false;
+		///	}
+		///	ASSERT(m_entityManager)
+		///	const EntityData& data = m_entityManager->GetEntityData(*this);
+		///	return data.Components.find(componentType) != data.Components.end()l;
+		///}
 
 		std::string Entity::GetName() const
 		{
@@ -58,6 +58,16 @@ namespace Insight
 		}
 #else 
 		ComponentRegistryMap ComponentRegistry::m_register_funcs;
+
+		Component::Component()
+			: m_allow_multiple(false)
+			, m_removeable(true)
+			, m_on_begin_called(false)
+			, m_on_end_called(0)
+		{ }
+
+		Component::~Component()
+		{ }
 
 		void ComponentRegistry::RegisterComponent(std::string_view component_type, std::function<Component*()> func)
 		{
@@ -110,8 +120,8 @@ namespace Insight
 				IS_CORE_WARN("[Entity::RemoveChild] No child entity at index '{}'.", index);
 				return;
 			}
-			// Remove the entity from the ecs world (delete the entity from memory)
-			// the remove it from this entity's child vector.
+			/// Remove the entity from the ecs world (delete the entity from memory)
+			/// the remove it from this entity's child vector.
 			std::vector<Ptr<Entity>>::iterator entity_itr = m_children.begin() + index;
 			Entity* entity_ptr = entity_itr->Get();
 			m_ecsWorld->RemoveEntity(entity_ptr);
@@ -148,16 +158,17 @@ namespace Insight
 
 		Component* Entity::AddComponentByName(std::string_view component_type)
 		{
-			if (Component* component = GetComponentByName(component_type);
-				!component->m_allow_multiple)
+			Component* component = GetComponentByName(component_type);
+			if (component && !component->m_allow_multiple)
 			{
 				IS_CORE_WARN("[Entity::AddComponentByName] Trying to add '{}'. ComponentType can not have multiple attached.", component_type);
 				return component;
 			}
 			
-			Component* component = ComponentRegistry::CreateComponent(component_type);
-			if (component != nullptr)
+			if (component == nullptr)
 			{
+				component = ComponentRegistry::CreateComponent(component_type);
+				component->OnCreate();
 				m_components.push_back(component);
 			}
 			return component;
@@ -201,6 +212,11 @@ namespace Insight
 		{
 			for (RPtr<Component>& component : m_components)
 			{
+				if (!component->m_on_begin_called)
+				{
+					component->m_on_begin_called = true;
+					component->OnBegin();
+				}
 				component->OnEarlyUpdate();
 			}
 		}
@@ -217,8 +233,23 @@ namespace Insight
 		{
 			for (RPtr<Component>& component : m_components)
 			{
+				if (!component->m_on_end_called)
+				{
+					component->m_on_end_called = true;
+					component->OnEnd();
+				}
 				component->OnLateUpdate();
 			}
+		}
+
+		void Entity::Destroy()
+		{
+			for (RPtr<Component>& component : m_components)
+			{
+				component->OnDestroy();
+				component.Reset();
+			}
+			m_components.clear();
 		}
 #endif
 	}

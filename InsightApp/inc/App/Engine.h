@@ -3,7 +3,7 @@
 #include "Defines.h"
 #include "Core/Timer.h"
 
-// -- Managers --
+/// -- Managers --
 #include "Graphics/GraphicsManager.h"
 #include "Scene/SceneManager.h"
 #include "Event/EventManager.h"
@@ -13,7 +13,7 @@
 #include "Graphics/Window.h"
 
 
-//#define TESTING
+///#define TESTING
 
 namespace Insight
 {

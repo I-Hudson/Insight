@@ -18,12 +18,12 @@ namespace Insight
 
 				ID3D12Resource* GetResouce() const { return m_resource.Get(); }
 
-				// RHI_Texture
+				/// RHI_Texture
 				virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) override;
 				virtual void Upload(void* data, int sizeInBytes) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 
-				// RHI_Resouce
+				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -36,4 +36,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

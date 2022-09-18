@@ -24,10 +24,10 @@ namespace Insight
 		class EntityManager;
 		class ECSWorld;
 
-		/// <summary>
-		/// Store all relevant data for an entity.
-		/// This is not stored on the Entity as the 
-		/// </summary>
+		//// <summary>
+		//// Store all relevant data for an entity.
+		//// This is not stored on the Entity as the 
+		//// </summary>
 		struct IS_ECS EntityData
 		{
 			std::string Name;
@@ -35,10 +35,10 @@ namespace Insight
 			std::unordered_map<u64, std::unordered_set<int>> Components;
 		};
 
-		/// <summary>
-		/// Entity is a simple handle for an entity. This class
-		/// shouldn't hold/store any critical data.
-		/// </summary>
+		//// <summary>
+		//// Entity is a simple handle for an entity. This class
+		//// shouldn't hold/store any critical data.
+		//// </summary>
 		class IS_ECS Entity
 		{
 		public:
@@ -67,39 +67,43 @@ namespace Insight
 		class IS_ECS Component
 		{
 		public:
-			Component() { }
-			~Component() { }
+			Component();
+			~Component();
 
-			// Called on creation.
+			/// @brief Called on creation (When the object is newed).
 			virtual void OnCreate() { }
-			// Called on destruction.
+			/// @brief Called on destruction (Just before the object is deleted).
 			virtual void OnDestroy() { }
 
-			// Called before first update (Only called once).
+			/// @brief  Called before first update (Only called once. Is called after Update but before Early Update).
 			virtual void OnBegin() { }
-			// Called after last update (Only called once).
+			/// @brief  Called after last update (Only called once, Is called after Update but before Late Update).
 			virtual void OnEnd() { }
 
-			// Called before any update.
+			/// @brief  Called before any update.
 			virtual void OnEarlyUpdate() { }
-			// Called once per-frame 
+			/// @brief  Called once per-frame 
 			virtual void OnUpdate(const float delta_time) { }
-			// Called after every udpate.
+			/// @brief  Called after every udpate.
 			virtual void OnLateUpdate() { }
-
+			/// @brief  Return the component's type name.
 			virtual const char* GetTypeName() = 0;
 
 		protected:
-			// Allow multiple of the same component to be added to a single entity.
-			// Default is false
-			bool m_allow_multiple = false;
-			// Allow the component to be removed from an entity.
-			// Default is true.
-			bool m_removeable = true;
+			/// @brief  Allow multiple of the same component to be added to a single entity. Default is false
+			bool m_allow_multiple : 1;
+			/// @brief  Allow the component to be removed from an entity. Default is true.
+			bool m_removeable : 1;
+
+			/// @brief Track when OnBegin has been called (Should only be called once, for each time this object is Enabled).
+			bool m_on_begin_called : 1;
+			/// @brief Track when OnEnd has been called (Should only be called once, for each time this object is Enabled).
+			bool m_on_end_called : 1;
 
 		private:
+			/// @brief Store the unique ID for the component.
 			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
-			//TODO Must add type information.
+			// TODO Must add type information.
 
 			friend class Entity;
 		};
@@ -143,6 +147,8 @@ namespace Insight
 			void Update(const float delta_time);
 			void LateUpdate();
 
+			void Destroy();
+
 		private:
 			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
 			std::string m_name;
@@ -150,6 +156,8 @@ namespace Insight
 			ECSWorld* m_ecsWorld = nullptr;
 
 			std::vector<Ptr<Entity>> m_children;
+			// TODO: Currently the Entity owns its components. Maybe a component manager should own all components
+			// TODO: and the entity should just hold a view/pointer to it. (Need to think about lifetime, RPtr?)
 			std::vector<RPtr<Component>> m_components;
 
 			friend class EntityManager;

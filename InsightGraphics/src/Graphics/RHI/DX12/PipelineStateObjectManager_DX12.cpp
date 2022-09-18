@@ -92,7 +92,7 @@ namespace Insight
 					blendState.RenderTarget[i] = defaultRenderTargetBlendDesc;
 				}
 
-				// Describe and create the graphics pipeline state object (PSO).
+				/// Describe and create the graphics pipeline state object (PSO).
 				D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 				psoDesc.InputLayout = shader->GetInputLayout();
 				psoDesc.pRootSignature = layout->GetRootSignature();
@@ -106,7 +106,7 @@ namespace Insight
 				psoDesc.DepthStencilState.DepthEnable = pso.DepthTest;
 				psoDesc.DepthStencilState.DepthWriteMask = pso.DepthTest ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
 				psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-				const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = // a stencil operation structure, again does not really matter since stencil testing is turned off
+				const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp = /// a stencil operation structure, again does not really matter since stencil testing is turned off
 				{ D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
 				psoDesc.DepthStencilState.FrontFace = defaultStencilOp;
 				psoDesc.DepthStencilState.BackFace = defaultStencilOp;
@@ -136,4 +136,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

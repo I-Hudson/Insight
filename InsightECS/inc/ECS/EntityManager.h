@@ -14,7 +14,7 @@ namespace Insight
 		class ECSWorld;
 
 #ifdef IS_ECS_ENABLED
-		// THREAD_SAFE
+		/// THREAD_SAFE
 
 		class IS_ECS EntityManager
 		{
@@ -54,6 +54,8 @@ namespace Insight
 			void EarlyUpdate();
 			void Update(const float deltaTime);
 			void LateUpdate();
+
+			void Destroy();
 
 			Ptr<Entity> GetEntityByName(std::string_view entity_name) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;

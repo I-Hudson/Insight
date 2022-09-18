@@ -12,7 +12,7 @@ namespace Insight
 {
 	namespace Core
 	{
-		//using EventFunc = void(*)(Event& e);
+		///using EventFunc = void(*)(Event& e);
 		using EventFunc = std::function<void(Event& e)>;
 
 		class IS_CORE EventManager : public Singleton<EventManager>

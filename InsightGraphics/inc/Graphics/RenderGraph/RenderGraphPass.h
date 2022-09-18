@@ -28,9 +28,9 @@ namespace Insight
 		class RenderGraphBuilder;
 
 
-		/// <summary>
-		/// 
-		/// </summary>
+		//// <summary>
+		//// 
+		//// </summary>
 		class RenderGraphPassBase
 		{
 		public:
@@ -48,10 +48,10 @@ namespace Insight
 
 			RGTextureHandle m_depthStencilWrite = -1;
 		
-			// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.
+			/// Optional, define a custom render pass. Otherwise we create it and/or fill in the blanks.
 			RenderpassDescription m_renderpassDescription = { };
 
-			bool m_swapchainPass = false; // Does this render straight to the swap chain.
+			bool m_swapchainPass = false; /// Does this render straight to the swap chain.
 
 			ShaderDesc m_shader = { };
 			PipelineStateObject m_pso = { };
@@ -59,7 +59,7 @@ namespace Insight
 			glm::ivec2 m_viewport;
 			glm::ivec2 m_scissor;
 
-			std::vector<PipelineBarrier> m_textureIncomingBarriers; // These should be done before rendering.
+			std::vector<PipelineBarrier> m_textureIncomingBarriers; /// These should be done before rendering.
 
 			friend class RenderGraphBuilder;
 			friend class RenderGraph;
@@ -100,4 +100,4 @@ namespace Insight
 		};
 	}
 }
-#endif // RENDER_GRAPH_ENABLED
+#endif /// RENDER_GRAPH_ENABLED

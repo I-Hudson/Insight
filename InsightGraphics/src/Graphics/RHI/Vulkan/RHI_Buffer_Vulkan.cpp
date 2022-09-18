@@ -62,7 +62,7 @@ namespace Insight
 				}
 				else
 				{
-					// We need a staging buffer to upload data from CPU to GPU.
+					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_Vulkan stagingBuffer;
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 					stagingBuffer.Upload(data, sizeInBytes, 0);
@@ -91,7 +91,7 @@ namespace Insight
 				}
 				else
 				{
-					// We need a staging buffer to upload data from CPU to GPU.
+					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_Vulkan readback_buffer;
 					readback_buffer.Create(m_context, BufferType::Readback, current_buffer_size, GetStride(), { });
 
@@ -148,4 +148,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

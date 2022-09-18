@@ -17,9 +17,9 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
-			/// <summary>
-			/// RHI_DescriptorLayout_Vulkan
-			/// </summary>
+			//// <summary>
+			//// RHI_DescriptorLayout_Vulkan
+			//// </summary>
 			void RHI_DescriptorLayout_Vulkan::Release()
 			{
 				if (m_layout)
@@ -79,4 +79,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

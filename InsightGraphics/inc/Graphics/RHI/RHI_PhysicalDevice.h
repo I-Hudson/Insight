@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		// GPU vendors IDs
+		/// GPU vendors IDs
 #define GPU_VENDOR_ID_AMD 0x1002
 #define GPU_VENDOR_ID_INTEL 0x8086
 #define GPU_VENDOR_ID_NVIDIA 0x10DE

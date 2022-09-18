@@ -2,14 +2,14 @@
 
 #include "Defines.h"
 #include "Core/ManagerInterface.h"
-//#include "Graphics/Renderpass.h"
+///#include "Graphics/Renderpass.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <thread>
 #include <mutex>
 #include <atomic>
 
-//#define IS_EXP_ENABLE_THREADED_RENDERING
+///#define IS_EXP_ENABLE_THREADED_RENDERING
 
 struct ImGuiContext;
 struct ImGuiIO;
@@ -73,7 +73,7 @@ namespace Insight
 #endif
 
 			RenderContext* m_renderContext{ nullptr };
-			//Renderpass m_renderpass;
+			///Renderpass m_renderpass;
 		};
 	}
 }

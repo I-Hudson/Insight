@@ -26,8 +26,8 @@ namespace Insight
 			ImageLayout InitalLayout = ImageLayout::Undefined;
 			ImageLayout FinalLayout = ImageLayout::Undefined;
 
-			//===================================================================
-			// Used for rendering 
+			///===================================================================
+			/// Used for rendering 
 			u32 Layer_Array_Index = 0;
 
 			bool IsValid() const
@@ -113,8 +113,8 @@ namespace Insight
 				return hash;
 			}
 
-			// [PRIVATE] This should not be set manually by the user. RenderContext's and other graphics
-			// API use this.
+			/// [PRIVATE] This should not be set manually by the user. RenderContext's and other graphics
+			/// API use this.
 			bool SwapchainPass = false;
 		private:
 

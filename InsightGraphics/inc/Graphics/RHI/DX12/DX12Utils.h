@@ -51,18 +51,18 @@ namespace Insight
 		struct SceneConstantBuffer
 		{
 			float offset[4];
-			float padding[60]; // Padding so the constant buffer is 256-byte aligned.
+			float padding[60]; /// Padding so the constant buffer is 256-byte aligned.
 		};
 		static_assert((sizeof(SceneConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		inline constexpr UINT D3D12CalcSubresource(UINT MipSlice, UINT ArraySlice, UINT PlaneSlice, UINT MipLevels, UINT ArraySize) noexcept
 		{
 			return MipSlice + ArraySlice * MipLevels + PlaneSlice * MipLevels * ArraySize;
 		}
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		template <typename T, typename U, typename V>
 		inline void D3D12DecomposeSubresource(UINT Subresource, UINT MipLevels, UINT ArraySize, _Out_ T& MipSlice, _Out_ U& ArraySlice, _Out_ V& PlaneSlice) noexcept
 		{
@@ -71,7 +71,7 @@ namespace Insight
 			PlaneSlice = static_cast<V>(Subresource / (MipLevels * ArraySize));
 		}
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		inline UINT8 D3D12GetFormatPlaneCount(
 			_In_ ID3D12Device* pDevice,
 			DXGI_FORMAT Format
@@ -85,8 +85,8 @@ namespace Insight
 			return formatInfo.PlaneCount;
 		}
 
-		//------------------------------------------------------------------------------------------------
-		// Returns required size of a buffer to be used for data upload
+		///------------------------------------------------------------------------------------------------
+		/// Returns required size of a buffer to be used for data upload
 		inline UINT64 GetRequiredIntermediateSize(
 			_In_ ID3D12Resource* pDestinationResource,
 			_In_range_(0, D3D12_REQ_SUBRESOURCES) UINT FirstSubresource,
@@ -103,7 +103,7 @@ namespace Insight
 			return RequiredSize;
 		}
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_RANGE : public D3D12_RANGE
 		{
 			CD3DX12_RANGE() = default;
@@ -119,7 +119,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_RESOURCE_DESC : public D3D12_RESOURCE_DESC
 		{
 			CD3DX12_RESOURCE_DESC() = default;
@@ -246,7 +246,7 @@ namespace Insight
 			return !(l == r);
 		}
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_RESOURCE_DESC1 : public D3D12_RESOURCE_DESC1
 		{
 			CD3DX12_RESOURCE_DESC1() = default;
@@ -386,7 +386,7 @@ namespace Insight
 			return !(l == r);
 		}
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_TEXTURE_COPY_LOCATION : public D3D12_TEXTURE_COPY_LOCATION
 		{
 			CD3DX12_TEXTURE_COPY_LOCATION() = default;
@@ -414,7 +414,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_HEAP_PROPERTIES : public D3D12_HEAP_PROPERTIES
 		{
 			CD3DX12_HEAP_PROPERTIES() = default;
@@ -569,7 +569,7 @@ namespace Insight
 
 		struct CD3DX12_DEFAULT {};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_ROOT_DESCRIPTOR_TABLE1 : public D3D12_ROOT_DESCRIPTOR_TABLE1
 		{
 			CD3DX12_ROOT_DESCRIPTOR_TABLE1() = default;
@@ -600,7 +600,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_ROOT_CONSTANTS : public D3D12_ROOT_CONSTANTS
 		{
 			CD3DX12_ROOT_CONSTANTS() = default;
@@ -635,7 +635,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_ROOT_DESCRIPTOR1 : public D3D12_ROOT_DESCRIPTOR1
 		{
 			CD3DX12_ROOT_DESCRIPTOR1() = default;
@@ -670,7 +670,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_DESCRIPTOR_RANGE1 : public D3D12_DESCRIPTOR_RANGE1
 		{
 			CD3DX12_DESCRIPTOR_RANGE1() = default;
@@ -720,7 +720,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_ROOT_PARAMETER1 : public D3D12_ROOT_PARAMETER1
 		{
 			CD3DX12_ROOT_PARAMETER1() = default;
@@ -832,7 +832,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC : public D3D12_VERSIONED_ROOT_SIGNATURE_DESC
 		{
 			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC() = default;
@@ -925,7 +925,7 @@ namespace Insight
 			}
 		};
 
-		//------------------------------------------------------------------------------------------------
+		///------------------------------------------------------------------------------------------------
 		struct CD3DX12_ROOT_SIGNATURE_DESC : public D3D12_ROOT_SIGNATURE_DESC
 		{
 			CD3DX12_ROOT_SIGNATURE_DESC() = default;
@@ -972,11 +972,11 @@ namespace Insight
 			}
 		};
 
-        //------------------------------------------------------------------------------------------------
-		// D3D12 exports a new method for serializing root signatures in the Windows 10 Anniversary Update.
-		// To help enable root signature 1.1 features when they are available and not require maintaining
-		// two code paths for building root signatures, this helper method reconstructs a 1.0 signature when
-		// 1.1 is not supported.
+        ///------------------------------------------------------------------------------------------------
+		/// D3D12 exports a new method for serializing root signatures in the Windows 10 Anniversary Update.
+		/// To help enable root signature 1.1 features when they are available and not require maintaining
+		/// two code paths for building root signatures, this helper method reconstructs a 1.0 signature when
+		/// 1.1 is not supported.
         inline HRESULT D3DX12SerializeVersionedRootSignature(
             _In_ const D3D12_VERSIONED_ROOT_SIGNATURE_DESC* pRootSignatureDesc,
             D3D_ROOT_SIGNATURE_VERSION MaxVersion,
@@ -1095,4 +1095,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

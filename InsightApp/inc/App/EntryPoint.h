@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	app->Destroy();
 	DeleteTracked(app);
 
-	//Insight::Core::MemoryTracker::Instance().Destroy();
+	///Insight::Core::MemoryTracker::Instance().Destroy();
 	return 0;
 #endif
 }

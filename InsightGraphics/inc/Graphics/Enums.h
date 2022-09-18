@@ -13,13 +13,13 @@ namespace Insight
 		template<typename E, E V> 
 		constexpr bool IsValid() 
 		{
-			// When compiled with clang, `name` will contain a prettified function name,
-			// including the enum value name for `V` if valid. For example:
-			// "bool IsValid() [E = Fruit, V = Fruit::BANANA]" for valid enum values, or:
-			// "bool IsValid() [E = Fruit, V = 10]" for invalid enum values.
+			/// When compiled with clang, `name` will contain a prettified function name,
+			/// including the enum value name for `V` if valid. For example:
+			/// "bool IsValid() [E = Fruit, V = Fruit::BANANA]" for valid enum values, or:
+			/// "bool IsValid() [E = Fruit, V = 10]" for invalid enum values.
 			constexpr const char* name = FUNCTION;
 			int i = strlen(name);
-			// Find the final space character in the pretty name.
+			/// Find the final space character in the pretty name.
 			for (; i >= 0; --i)
 			{
 				if (name[i] == ' ') 
@@ -27,8 +27,8 @@ namespace Insight
 					break;
 				}
 			}
-			// The character after the final space will indicate if
-			// it's a valid value or not.
+			/// The character after the final space will indicate if
+			/// it's a valid value or not.
 			char c = name[i + 1];
 			if (c >= '0' && c <= '9') 
 			{
@@ -79,7 +79,7 @@ namespace Insight
 			CONSTEXPR Flags(LocalFlag&& rhs) NO_EXPECT : m_mask(rhs.m_mask) { }
 			CONSTEXPR explicit Flags(MaskType flags) NO_EXPECT : m_mask(flags) {}
 
-			// Comparison
+			/// Comparison
 			CONSTEXPR bool operator < (LocalFlag const& rhs) const { return m_mask < rhs.m_mask; }
 			CONSTEXPR bool operator <=(LocalFlag const& rhs) const { return m_mask <= rhs.m_mask; }
 			CONSTEXPR bool operator > (LocalFlag const& rhs) const { return m_mask >= rhs.m_mask; }
@@ -89,15 +89,15 @@ namespace Insight
 
 			CONSTEXPR bool operator!() const { return !m_mask; }
 
-			// Bitwise
+			/// Bitwise
 			template<typename TOther>
 			CONSTEXPR LocalFlag operator&(TOther const& rhs) NO_EXPECT { return LocalFlag(m_mask & static_cast<MaskType>(rhs)); }
 			CONSTEXPR LocalFlag operator&(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask & rhs.m_mask); }
 			CONSTEXPR LocalFlag operator|(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask | rhs.m_mask); }
 			CONSTEXPR LocalFlag operator^(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ^ rhs.m_mask); }
-			//constexpr LocalFlag operator~(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ~ rhs.m_mask); }
+			///constexpr LocalFlag operator~(LocalFlag const& rhs) NO_EXPECT { return LocalFlag(m_mask ~ rhs.m_mask); }
 
-			// Assigment 
+			/// Assigment 
 			CONSTEXPR LocalFlag& operator=(MaskType const& rhs) NO_EXPECT { m_mask = static_cast<MaskType>(rhs); return *this; }
 			CONSTEXPR LocalFlag& operator=(LocalFlag const& rhs) NO_EXPECT { m_mask = rhs.m_mask; return *this; }
 			CONSTEXPR LocalFlag& operator|=(LocalFlag const& rhs) NO_EXPECT { m_mask |= rhs.m_mask; return *this; }
@@ -307,10 +307,10 @@ namespace Insight
 		};
 		std::string AttacmentStoreOpToString(AttachmentStoreOp op);
 
-        /// <summary>
-        /// Define the image usage flags which a input within the 
-        /// rendering pipeline can be.
-        /// </summary>
+        //// <summary>
+        //// Define the image usage flags which a input within the 
+        //// rendering pipeline can be.
+        //// </summary>
         enum ImageUsageFlagsBits
         {
             TransferSrc					= 1 << 0,
@@ -459,22 +459,22 @@ namespace Insight
 			Uint32
 		};
 
-		//enum GUPBufferFlagBits
-		//{
-		//	None = 1 << 0,
-		//	TransferSrc = 1 << 1,
-		//	TransferDst = 1 << 2,
-		//	UniformTexel = 1 << 3,
-		//	StorageTexel = 1 << 4,
-		//	Uniform = 1 << 5,
-		//	Storage = 1 << 6,
-		//	Index = 1 << 7,
-		//	Vertex = 1 << 8,
-		//	Indirect = 1 << 9,
-		//	ShaderDeviceAddress = 1 << 10,
-		//};
-		//using GUPBufferFlags = u32;
-		//std::string GUPBufferFlagsToString(GUPBufferFlags flags);
+		///enum GUPBufferFlagBits
+		///{
+		///	None = 1 << 0,
+		///	TransferSrc = 1 << 1,
+		///	TransferDst = 1 << 2,
+		///	UniformTexel = 1 << 3,
+		///	StorageTexel = 1 << 4,
+		///	Uniform = 1 << 5,
+		///	Storage = 1 << 6,
+		///	Index = 1 << 7,
+		///	Vertex = 1 << 8,
+		///	Indirect = 1 << 9,
+		///	ShaderDeviceAddress = 1 << 10,
+		///};
+		///using GUPBufferFlags = u32;
+		///std::string GUPBufferFlagsToString(GUPBufferFlags flags);
 	
 		enum class DynamicState
 		{

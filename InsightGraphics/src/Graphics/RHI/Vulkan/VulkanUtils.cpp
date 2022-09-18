@@ -4,7 +4,7 @@
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers.
+#define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
 #endif
 #include <Windows.h>
 #include "vulkan/vulkan_win32.h"
@@ -37,10 +37,10 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
     vk::Format::eR32G32Uint,
     vk::Format::eR32G32Sint,
 
-    vk::Format::eUndefined, // TODO: R32G8X24_Typeless
+    vk::Format::eUndefined, /// TODO: R32G8X24_Typeless
     vk::Format::eD32SfloatS8Uint,
-    vk::Format::eUndefined,  // TODO: R32_Float_X8X24_Typeless
-    vk::Format::eUndefined, // TODO: X32_Typeless_G8X24_UInt
+    vk::Format::eUndefined,  /// TODO: R32_Float_X8X24_Typeless
+    vk::Format::eUndefined, /// TODO: X32_Typeless_G8X24_UInt
 
     vk::Format::eA2R10G10B10UnormPack32,
     vk::Format::eA2R10G10B10UnormPack32,
@@ -96,13 +96,13 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
     vk::Format::eR8Snorm,
     vk::Format::eR8Sint,
     
-    vk::Format::eUndefined, // TODO: A8_UNorm
-    vk::Format::eUndefined, // TODO: R1_UNorm
+    vk::Format::eUndefined, /// TODO: A8_UNorm
+    vk::Format::eUndefined, /// TODO: R1_UNorm
 
     vk::Format::eE5B9G9R9UfloatPack32,
 
-    vk::Format::eUndefined, // TODO: R8G8_B8G8_UNorm
-    vk::Format::eUndefined, // TODO: G8R8_G8B8_UNorm
+    vk::Format::eUndefined, /// TODO: R8G8_B8G8_UNorm
+    vk::Format::eUndefined, /// TODO: G8R8_G8B8_UNorm
 
     vk::Format::eBc1RgbaUnormBlock,
     vk::Format::eBc1RgbaUnormBlock,
@@ -129,7 +129,7 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
 
     vk::Format::eB8G8R8A8Unorm,
     vk::Format::eB8G8R8A8Unorm,
-    vk::Format::eUndefined, // TODO: R10G10B10_Xr_Bias_A2_UNorm
+    vk::Format::eUndefined, /// TODO: R10G10B10_Xr_Bias_A2_UNorm
 
     vk::Format::eB8G8R8A8Unorm,
     vk::Format::eB8G8R8A8Srgb,
@@ -158,7 +158,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::R8_UNorm,
-    // 10
+    /// 10
     PixelFormat::R8_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -169,7 +169,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R8G8_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 20
+    /// 20
     PixelFormat::R8G8_UInt,
     PixelFormat::R8G8_SInt,
     PixelFormat::Unknown,
@@ -180,7 +180,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 30
+    /// 30
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -191,7 +191,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R8G8B8A8_UNorm,
     PixelFormat::R8G8B8A8_SNorm,
     PixelFormat::Unknown,
-    // 40
+    /// 40
     PixelFormat::Unknown,
     PixelFormat::R8G8B8A8_UInt,
     PixelFormat::R8G8B8A8_SInt,
@@ -202,7 +202,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    //50
+    ///50
     PixelFormat::B8G8R8A8_UNorm_sRGB,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -213,7 +213,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::R16_UNorm,
     PixelFormat::R16_SNorm,
-    //60
+    ///60
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::R16_UInt,
@@ -224,7 +224,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R16G16_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 70
+    /// 70
     PixelFormat::R16G16_UInt,
     PixelFormat::R16G16_SInt,
     PixelFormat::Unknown,
@@ -235,7 +235,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 80
+    /// 80
     PixelFormat::Unknown,
     PixelFormat::R16G16B16A16_UNorm,
     PixelFormat::R16G16B16A16_SNorm,
@@ -246,7 +246,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::R32_UInt,
     PixelFormat::R32_SInt,
-    // 90
+    /// 90
     PixelFormat::Unknown,
     PixelFormat::R32G32_UInt,
     PixelFormat::R32G32_SInt,
@@ -285,10 +285,10 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
     vk::Format::eR32G32Uint,
     vk::Format::eR32G32Sint,
 
-    vk::Format::eUndefined, // TODO: R32G8X24_Typeless
+    vk::Format::eUndefined, /// TODO: R32G8X24_Typeless
     vk::Format::eD32SfloatS8Uint,
-    vk::Format::eUndefined,  // TODO: R32_Float_X8X24_Typeless
-    vk::Format::eUndefined, // TODO: X32_Typeless_G8X24_UInt
+    vk::Format::eUndefined,  /// TODO: R32_Float_X8X24_Typeless
+    vk::Format::eUndefined, /// TODO: X32_Typeless_G8X24_UInt
 
     vk::Format::eA2R10G10B10UnormPack32,
     vk::Format::eA2R10G10B10UnormPack32,
@@ -344,13 +344,13 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
     vk::Format::eR8Snorm,
     vk::Format::eR8Sint,
     
-    vk::Format::eUndefined, // TODO: A8_UNorm
-    vk::Format::eUndefined, // TODO: R1_UNorm
+    vk::Format::eUndefined, /// TODO: A8_UNorm
+    vk::Format::eUndefined, /// TODO: R1_UNorm
 
     vk::Format::eE5B9G9R9UfloatPack32,
 
-    vk::Format::eUndefined, // TODO: R8G8_B8G8_UNorm
-    vk::Format::eUndefined, // TODO: G8R8_G8B8_UNorm
+    vk::Format::eUndefined, /// TODO: R8G8_B8G8_UNorm
+    vk::Format::eUndefined, /// TODO: G8R8_G8B8_UNorm
 
     vk::Format::eBc1RgbaUnormBlock,
     vk::Format::eBc1RgbaUnormBlock,
@@ -377,7 +377,7 @@ vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)] =
 
     vk::Format::eB8G8R8A8Unorm,
     vk::Format::eB8G8R8A8Unorm,
-    vk::Format::eUndefined, // TODO: R10G10B10_Xr_Bias_A2_UNorm
+    vk::Format::eUndefined, /// TODO: R10G10B10_Xr_Bias_A2_UNorm
 
     vk::Format::eB8G8R8A8Unorm,
     vk::Format::eB8G8R8A8Srgb,
@@ -406,7 +406,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::R8_UNorm,
-    // 10
+    /// 10
     PixelFormat::R8_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -417,7 +417,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R8G8_SNorm,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 20
+    /// 20
     PixelFormat::R8G8_UInt,
     PixelFormat::R8G8_SInt,
     PixelFormat::Unknown,
@@ -428,7 +428,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
-    // 30
+    /// 30
     PixelFormat::Unknown,
     PixelFormat::Unknown,
     PixelFormat::Unknown,
@@ -439,7 +439,7 @@ PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)] =
     PixelFormat::R8G8B8A8_UNorm,
     PixelFormat::R8G8B8A8_SNorm,
     PixelFormat::Unknown,
-    // 40
+    /// 40
     PixelFormat::Unknown,
     PixelFormat::R8G8B8A8_UInt,
     PixelFormat::R8G8B8A8_SInt,
@@ -1051,4 +1051,4 @@ namespace Insight
     }
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

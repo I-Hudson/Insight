@@ -21,7 +21,7 @@ namespace Insight
 		class RenderGraph;
 		class DescriptorAllocator;
 
-		// Store relevant draw data.
+		/// Store relevant draw data.
 		struct RHI_CommandListCurrentDrawData
 		{
 			glm::vec2 Viewport;

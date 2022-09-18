@@ -17,10 +17,18 @@ namespace Insight
 			TransformComponent();
 			~TransformComponent();
 
+			/// @brief Return the transform.
+			/// @return glm::mat4.
 			glm::mat4 GetTransform() const { return m_transform; }
+			/// @brief Return the Position.
+			/// @return glm::vec3.
 			glm::vec3 GetPosition() const { return m_transform[3].xyz; }
 
+			/// @brief Set the Transform.
+			/// @param transform 
 			void SetTransform(glm::mat4 transform) { m_transform = transform; }
+			/// @brief Set the Position.
+			/// @param position 
 			void SetPosition(glm::vec3 position) { m_transform[3] = glm::vec4(position, 1.0f); }
 
 		private:

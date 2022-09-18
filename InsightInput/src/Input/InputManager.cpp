@@ -23,9 +23,9 @@ namespace Insight
 
 		void KeyState::Reset()
 		{
-			Pressed = Released == 1 ? 0 : Pressed;	// If the was pressed and hasn't been released, then it is still pressed.
-			Released = 0;							// If we have released the key, then reset this. You can only release a key for one frame.
-			Held = Released == 1 ? 0 : Held;		// If the was held and hasn't been released, then it is still held.
+			Pressed = Released == 1 ? 0 : Pressed;	/// If the was pressed and hasn't been released, then it is still pressed.
+			Released = 0;							/// If we have released the key, then reset this. You can only release a key for one frame.
+			Held = Released == 1 ? 0 : Held;		/// If the was held and hasn't been released, then it is still held.
 		}
 
 		bool InputManager::InitWithWindow(Graphics::Window* window)
@@ -43,7 +43,7 @@ namespace Insight
 			}
 			m_is_initialised = true;
 
-			// Set all out callback funcs, and call all our internal callbacks.
+			/// Set all out callback funcs, and call all our internal callbacks.
 
 			glfwInit();
 
@@ -115,12 +115,12 @@ namespace Insight
 		{
 			for (auto& pair : m_key_map)
 			{
-				//pair.second.Reset();
+				///pair.second.Reset();
 			}
 
 			for (KeyState& button_state : m_mouse_state.Buttons)
 			{
-				//button_state.Reset();
+				///button_state.Reset();
 			}
 		}
 

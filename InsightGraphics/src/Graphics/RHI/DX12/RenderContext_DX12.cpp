@@ -25,14 +25,14 @@ namespace Insight
 				UINT dxgiFactoryFlags = 0;
 
 #if defined(_DEBUG)
-				// Enable the debug layer (requires the Graphics Tools "optional feature").
-				// NOTE: Enabling the debug layer after device creation will invalidate the active device.
+				/// Enable the debug layer (requires the Graphics Tools "optional feature").
+				/// NOTE: Enabling the debug layer after device creation will invalidate the active device.
 				{
 					if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 					{
 						m_debugController->EnableDebugLayer();
 
-						// Enable additional debug layers.
+						/// Enable additional debug layers.
 						dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
 					}
@@ -53,7 +53,7 @@ namespace Insight
 					IID_PPV_ARGS(&m_device)
 				));
 
-				// Describe and create the command queue.
+				/// Describe and create the command queue.
 				D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 				queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 				queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -100,7 +100,7 @@ namespace Insight
 				ThrowIfFailed(m_device->CreateFence(m_swapchainFenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_swapchainFence)));
 				m_swapchainFenceValues[m_frameIndex]++;
 
-				// Create an event handle to use for frame synchronization.
+				/// Create an event handle to use for frame synchronization.
 				m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 				if (m_fenceEvent == nullptr)
 				{
@@ -197,84 +197,84 @@ namespace Insight
 				m_srcImGuiHeap = nullptr;
 			}
 
-			//void RenderContext_DX12::Render(CommandList cmdList)
-			//{
-			//	IS_PROFILE_FUNCTION();
-			//	ImGuiRender();
+			///void RenderContext_DX12::Render(CommandList cmdList)
+			///{
+			///	IS_PROFILE_FUNCTION();
+			///	ImGuiRender();
 
-			//	FrameResource_DX12& frame = m_frames[m_frameIndex];
+			///	FrameResource_DX12& frame = m_frames[m_frameIndex];
 
-			//	frame.Reset();
+			///	frame.Reset();
 
-			//	// Record cmd buffers and execute
-			//	RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
+			///	/// Record cmd buffers and execute
+			///	RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
 
-			//	// Set back buffer texture/image to render target so we can render to it.
-			//	cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+			///	/// Set back buffer texture/image to render target so we can render to it.
+			///	cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-			//	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_swapchainImages[m_frameIndex].ColourHandle.GetCPUHandle();
-			//	D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = m_swapchainImages[m_frameIndex].DepthStencilHandle.GetCPUHandle();
+			///	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_swapchainImages[m_frameIndex].ColourHandle.GetCPUHandle();
+			///	D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = m_swapchainImages[m_frameIndex].DepthStencilHandle.GetCPUHandle();
 
-			//	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-			//	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
+			///	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+			///	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
 
-			//	cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
-			//	cmdListDX12->ClearDepthStencilView(depthStencilHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+			///	cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
+			///	cmdListDX12->ClearDepthStencilView(depthStencilHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-			//	cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
+			///	cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
 
-			//	cmdListDX12->Record(cmdList, &frame);
+			///	cmdListDX12->Record(cmdList, &frame);
 
-			//	{
-			//		IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
-			//		std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-			//		IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
-			//		IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
-			//	}
+			///	{
+			///		IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
+			///		std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
+			///		IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
+			///		IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
+			///	}
 
-			//	{
-			//		IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
-			//		// Set back buffer texture/image back to present so we can use it within the swapchain.
-			//		cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-			//	}
-			//	cmdListDX12->Close();
+			///	{
+			///		IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
+			///		/// Set back buffer texture/image back to present so we can use it within the swapchain.
+			///		cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+			///	}
+			///	cmdListDX12->Close();
 
-			//	{
-			//		IS_PROFILE_SCOPE("ExecuteCommandLists");
-			//		ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-			//		m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-			//	}
+			///	{
+			///		IS_PROFILE_SCOPE("ExecuteCommandLists");
+			///		ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
+			///		m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+			///	}
 
-			//	{
-			//		IS_PROFILE_SCOPE("Present");
-			//		//ZoneScopedN("Present");
-			//		// Present the frame.
-			//		if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
-			//		{
-			//			if (hr == 0x0)
-			//			{
-			//				m_device->GetDeviceRemovedReason();
-			//			}
-			//		}
-			//	}
+			///	{
+			///		IS_PROFILE_SCOPE("Present");
+			///		///ZoneScopedN("Present");
+			///		/// Present the frame.
+			///		if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
+			///		{
+			///			if (hr == 0x0)
+			///			{
+			///				m_device->GetDeviceRemovedReason();
+			///			}
+			///		}
+			///	}
 
-			//	WaitForNextFrame();
+			///	WaitForNextFrame();
 
-			//	if (Window::Instance().GetSize() != m_swapchainSize)
-			//	{
-			//		IS_PROFILE_SCOPE("Swapchain resize");
-			//		WaitForGpu();
-			//		m_swapchainSize = Window::Instance().GetSize();
-			//		ResizeSwapchainBuffers();
-			//	}
+			///	if (Window::Instance().GetSize() != m_swapchainSize)
+			///	{
+			///		IS_PROFILE_SCOPE("Swapchain resize");
+			///		WaitForGpu();
+			///		m_swapchainSize = Window::Instance().GetSize();
+			///		ResizeSwapchainBuffers();
+			///	}
 
-			//	{
-			//		IS_PROFILE_SCOPE("Imgui End frame");
-			//		IMGUI_VALID(ImGui::EndFrame());
-			//		IMGUI_VALID(ImGui_ImplDX12_NewFrame());
-			//		IMGUI_VALID(ImGuiBeginFrame());
-			//	}
-			//}
+			///	{
+			///		IS_PROFILE_SCOPE("Imgui End frame");
+			///		IMGUI_VALID(ImGui::EndFrame());
+			///		IMGUI_VALID(ImGui_ImplDX12_NewFrame());
+			///		IMGUI_VALID(ImGuiBeginFrame());
+			///	}
+			///}
 
 			void RenderContext_DX12::GpuWaitForIdle()
 			{
@@ -312,13 +312,13 @@ namespace Insight
 
 						if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 						{
-							// Don't select the Basic Render Driver adapter.
-							// If you want a software adapter, pass in "/warp" on the command line.
+							/// Don't select the Basic Render Driver adapter.
+							/// If you want a software adapter, pass in "/warp" on the command line.
 							continue;
 						}
 
-						// Check to see whether the adapter supports Direct3D 12, but don't create the
-						// actual device yet.
+						/// Check to see whether the adapter supports Direct3D 12, but don't create the
+						/// actual device yet.
 						if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
 						{
 							break;
@@ -335,13 +335,13 @@ namespace Insight
 
 						if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 						{
-							// Don't select the Basic Render Driver adapter.
-							// If you want a software adapter, pass in "/warp" on the command line.
+							/// Don't select the Basic Render Driver adapter.
+							/// If you want a software adapter, pass in "/warp" on the command line.
 							continue;
 						}
 
-						// Check to see whether the adapter supports Direct3D 12, but don't create the
-						// actual device yet.
+						/// Check to see whether the adapter supports Direct3D 12, but don't create the
+						/// actual device yet.
 						if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
 						{
 							break;
@@ -364,13 +364,13 @@ namespace Insight
 				IDXGIFactory4* factory = m_factory.Get();
 				ID3D12Device* device = m_device.Get();
 
-				// Describe and create a render target view (RTV) descriptor heap.
-				//D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-				//rtvHeapDesc.NumDescriptors = RenderGraph::s_FarmeCount;
-				//rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-				//rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-				//ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-				//m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+				/// Describe and create a render target view (RTV) descriptor heap.
+				///D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
+				///rtvHeapDesc.NumDescriptors = RenderGraph::s_FarmeCount;
+				///rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+				///rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+				///ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+				///m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 				m_swapchainSize = { Window::Instance().GetWidth(), Window::Instance().GetHeight() };
 
@@ -404,7 +404,7 @@ namespace Insight
 					swapchainImage.Colour.Reset();
 					swapchainImage.DepthStencil.Reset();
 
-					// Get the back buffer from the swapchain.
+					/// Get the back buffer from the swapchain.
 					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour)));
 					device->CreateRenderTargetView(swapchainImage.Colour.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 
@@ -440,18 +440,18 @@ namespace Insight
 
 			void RenderContext_DX12::ResizeSwapchainBuffers()
 			{
-				// Release all our previous render targets from the swapchain.
+				/// Release all our previous render targets from the swapchain.
 				for (size_t i = 0; i < m_swapchainImages.size(); ++i)
 				{
 					m_swapchainImages[i].Colour.Reset();
 					m_swapchainImages[i].DepthStencil.Reset();
 				}
 
-				// Resize our swap chain buffers.
+				/// Resize our swap chain buffers.
 				m_swapchain->ResizeBuffers(RenderGraph::s_FarmeCount, m_swapchainSize.x, m_swapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
 				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
-				// Create new render targets for the swapchain.
+				/// Create new render targets for the swapchain.
 				for (u32 i = 0; i < RenderGraph::s_FarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
@@ -492,38 +492,38 @@ namespace Insight
 			void RenderContext_DX12::WaitForNextFrame()
 			{
 				IS_PROFILE_FUNCTION();
-				// Schedule a Signal command in the queue.
+				/// Schedule a Signal command in the queue.
 				const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));
 
-				// Update the frame index.
+				/// Update the frame index.
 				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
-				// If the next frame is not ready to be rendered yet, wait until it is ready.
+				/// If the next frame is not ready to be rendered yet, wait until it is ready.
 				if (m_swapchainFence->GetCompletedValue() < currentFenceValue)
 				{
 					ThrowIfFailed(m_swapchainFence->SetEventOnCompletion(currentFenceValue, m_fenceEvent));
 					WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 				}
 
-				// Set the fence value for the next frame.
+				/// Set the fence value for the next frame.
 				m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
 			}
 
 			void RenderContext_DX12::WaitForGpu()
 			{
-				// Schedule a Signal command in the queue.
+				/// Schedule a Signal command in the queue.
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), m_swapchainFenceValues[m_frameIndex]));
 
-				// Wait until the fence has been processed.
+				/// Wait until the fence has been processed.
 				ThrowIfFailed(m_swapchainFence->SetEventOnCompletion(m_swapchainFenceValues[m_frameIndex], m_fenceEvent));
 				WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 
-				// Increment the fence value for the current frame.
+				/// Increment the fence value for the current frame.
 				m_swapchainFenceValues[m_frameIndex]++;
 			}
 		}
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

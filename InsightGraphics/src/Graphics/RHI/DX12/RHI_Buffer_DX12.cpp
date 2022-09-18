@@ -29,23 +29,23 @@ namespace Insight
 					|| bufferType == BufferType::Index)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
+					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
 					resouceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 				}
 				else if (bufferType == BufferType::Uniform)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); // must be a multiple 256 bytes
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
+					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); /// must be a multiple 256 bytes
+					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
 				}
 				else if (bufferType == BufferType::Staging)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); // CB size is required to be 256-byte aligned.
+					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
 					resouceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
 				}
 
-				// Create the constant buffer.
+				/// Create the constant buffer.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
 					&heapProperties,
 					D3D12_HEAP_FLAG_NONE,
@@ -60,7 +60,7 @@ namespace Insight
 					|| m_bufferType == BufferType::Staging
 					|| m_bufferType == BufferType::Readback)
 				{
-					CD3DX12_RANGE readRange(0, 0);        // We do not intend to read from this resource on the CPU.
+					CD3DX12_RANGE readRange(0, 0);        /// We do not intend to read from this resource on the CPU.
 					ThrowIfFailed(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedData)));
 				}
 			}
@@ -73,7 +73,7 @@ namespace Insight
 				}
 				else
 				{
-					// We need a staging buffer to upload data from CPU to GPU.
+					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_DX12 stagingBuffer;
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 					stagingBuffer.Upload(data, sizeInBytes, 0);
@@ -135,4 +135,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

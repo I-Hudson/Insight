@@ -7,11 +7,11 @@
 #include <type_traits>
 #include <utility>
 
-// Helper macro for making a new pointer with tracking.
+/// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
-// Helper macro for making a new pointer with args and tracking.
+/// Helper macro for making a new pointer with args and tracking.
 #define NewArgsTracked(Type, ...)	static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
-// // Helper macro for tracking a exists pointer.
+/// /// Helper macro for tracking a exists pointer.
 #define TrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
 #define DeleteTracked(Ptr)								\
@@ -23,7 +23,7 @@ if (Ptr)												\
 };
 #define UntrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
-//#define IS_MEMORY_OVERRIDES
+///#define IS_MEMORY_OVERRIDES
 #ifdef IS_MEMORY_OVERRIDES
 void* operator new(size_t size)
 {
@@ -95,10 +95,10 @@ namespace Insight
 	};
 }
 
-/// <summary>
-/// Custom unique pointer implementaion.
-/// </summary>
-/// <typeparam name="T"></typeparam>
+//// <summary>
+//// Custom unique pointer implementaion.
+//// </summary>
+//// <typeparam name="T"></typeparam>
 template<typename T>
 class UPtr
 {
@@ -142,7 +142,7 @@ public:
 		return *this;
 	}
 
-	// Can't copy UPtr.
+	/// Can't copy UPtr.
 	UPtr(const UPtr& other) = delete;
 	template<typename T2, std::enable_if_t<std::_SP_pointer_compatible<T2, T>::value, int> = 0>
 	UPtr(const UPtr<T2>& other) = delete;
@@ -189,10 +189,10 @@ private:
 	friend class UPtr;
 };
 
-/// <summary>
-/// Custom shared pointer implmentation.
-/// </summary>
-/// <typeparam name="T"></typeparam>
+//// <summary>
+//// Custom shared pointer implmentation.
+//// </summary>
+//// <typeparam name="T"></typeparam>
 template<typename T>
 class RPtr
 {
@@ -344,10 +344,10 @@ private:
 	friend class WPtr;
 };
 
-/// <summary>
-/// Custom weak pointer implmentaiton.
-/// </summary>
-/// <typeparam name="T"></typeparam>
+//// <summary>
+//// Custom weak pointer implmentaiton.
+//// </summary>
+//// <typeparam name="T"></typeparam>
 template<typename T>
 class WPtr
 {
@@ -469,7 +469,7 @@ public:
 		std::swap(m_refCount, other.m_refCount);
 	}
 
-	// Take ownership of 'm_ptr' via a reference pointer.
+	/// Take ownership of 'm_ptr' via a reference pointer.
 	RPtr<T> Lock()
 	{
 		RPtr<T> rPtr;
@@ -494,13 +494,13 @@ private:
 	friend class RPtr;
 };
 
-/// <summary>
-/// Wrapper around a raw pointer. Should be used like a "view" to the pointer.
-/// Shouldn't allow deletion of the pointer. 
-/// (Similar to a weak pointer. But I don't want this to be able to have any form of ownership
-/// over the pointer)
-/// </summary>
-/// <typeparam name="T"></typeparam>
+//// <summary>
+//// Wrapper around a raw pointer. Should be used like a "view" to the pointer.
+//// Shouldn't allow deletion of the pointer. 
+//// (Similar to a weak pointer. But I don't want this to be able to have any form of ownership
+//// over the pointer)
+//// </summary>
+//// <typeparam name="T"></typeparam>
 template<typename T>
 class Ptr
 {
@@ -512,19 +512,20 @@ public:
 	Ptr(Ptr&& other)							        { m_ptr = other.m_ptr; other.m_ptr = nullptr; }
 	~Ptr()										        { m_ptr = nullptr; }
 
-	// Assign
-	Ptr& operator=(Ptr const& other)			{ m_ptr = other.m_ptr; return *this; }
-	Ptr& operator=(T* other)					{ m_ptr = other; return *this; }
+	/// Assign
+	Ptr& operator=(Ptr const& other)			        { m_ptr = other.m_ptr; return *this; }
+	Ptr& operator=(T* other)					        { m_ptr = other; return *this; }
 
-	// Compare
-	bool operator==(Ptr const& other)			{ m_ptr = other.m_ptr; }
-	bool operator==(T* other)					{ m_ptr = other; }
+	/// Compare
+	bool operator==(Ptr const& other) const			    { m_ptr = other.m_ptr; }
+	bool operator==(T* other) const					    { m_ptr = other; }
 	
-	operator bool()								{ return Get() != nullptr; }
+	operator bool() const								{ return Get() != nullptr; }
+	T* operator->() const                               { return m_ptr; }
 
-	// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
-	// in higher level systems.
-	T* Get() const								{ return m_ptr; }
+	/// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
+	/// in higher level systems.
+	T* Get() const										{ return m_ptr; }
 
 private:
 	T* m_ptr = nullptr;
@@ -539,13 +540,13 @@ namespace Insight::Core
 	};
 }
 
-/// <summary>
-/// Return a UPtr.
-/// </summary>
-/// <typeparam name="T"></typeparam>
-/// <typeparam name="...Args"></typeparam>
-/// <param name="...args"></param>
-/// <returns></returns>
+//// <summary>
+//// Return a UPtr.
+//// </summary>
+//// <typeparam name="T"></typeparam>
+//// <typeparam name="...Args"></typeparam>
+//// <param name="...args"></param>
+//// <returns></returns>
 template<typename T, typename... Args>
 UPtr<T> MakeUPtr(Args&&... args)
 {
@@ -559,13 +560,13 @@ UPtr<T> MakeUPtr(Args&&... args)
 	}
 }
 
-/// <summary>
-/// Return a RPtr.
-/// </summary>
-/// <typeparam name="T"></typeparam>
-/// <typeparam name="...Args"></typeparam>
-/// <param name="...args"></param>
-/// <returns></returns>
+//// <summary>
+//// Return a RPtr.
+//// </summary>
+//// <typeparam name="T"></typeparam>
+//// <typeparam name="...Args"></typeparam>
+//// <param name="...args"></param>
+//// <returns></returns>
 template<typename T, typename... Args>
 RPtr<T> MakeRPtr(Args&&... args)
 {

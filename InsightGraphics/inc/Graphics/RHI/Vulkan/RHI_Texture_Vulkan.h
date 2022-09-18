@@ -16,12 +16,12 @@ namespace Insight
 			public:
 				virtual ~RHI_Texture_Vulkan() override;
 
-				// RHI_Texture
+				/// RHI_Texture
 				virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) override;
 				virtual void Upload(void* data, int sizeInBytes) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 
-				// RHI_Resource
+				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -36,8 +36,8 @@ namespace Insight
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
 				vk::Image m_image{ nullptr };
-				vk::ImageView m_image_view;								// Image view for all layers.
-				std::vector<vk::ImageView> m_single_layer_image_views;	// Image view for each layer.
+				vk::ImageView m_image_view;								/// Image view for all layers.
+				std::vector<vk::ImageView> m_single_layer_image_views;	/// Image view for each layer.
 				VmaAllocation m_imageAllocation = nullptr;
 
 				friend class RenderContext_Vulkan;
@@ -46,4 +46,4 @@ namespace Insight
 	}
 }
 
-#endif // defined(IS_VULKAN_ENABLED)
+#endif /// defined(IS_VULKAN_ENABLED)

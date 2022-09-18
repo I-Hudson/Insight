@@ -91,7 +91,7 @@ namespace Insight
 
 					ImDrawData* draw_data = ImGui::GetDrawData();
 
-					// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
+					/// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 					int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
 					int fb_height = (int)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
 					if (fb_width <= 0 || fb_height <= 0)
@@ -128,8 +128,8 @@ namespace Insight
 						, static_cast<float>(Window::Instance().GetWidth()), static_cast<float>(Window::Instance().GetHeight())
 						, 0.0f, 1.0f);
 
-					// Setup scale and translation:
-					// Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
+					/// Setup scale and translation:
+					/// Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
 					{
 						float scale[2];
 						scale[0] = 2.0f / draw_data->DisplaySize.x;
@@ -141,12 +141,12 @@ namespace Insight
 						cmdList->SetPushConstant(sizeof(scale), sizeof(translate), translate);
 					}
 
-					// Will project scissor/clipping rectangles into framebuffer space
-					ImVec2 clip_off = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
-					ImVec2 clip_scale = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
+					/// Will project scissor/clipping rectangles into framebuffer space
+					ImVec2 clip_off = draw_data->DisplayPos;         /// (0,0) unless using multi-viewports
+					ImVec2 clip_scale = draw_data->FramebufferScale; /// (1,1) unless using retina display which are often (2,2)
 
-					// Render command lists
-					// (Because we merged all buffers into a single one, we maintain our own offset into them)
+					/// Render command lists
+					/// (Because we merged all buffers into a single one, we maintain our own offset into them)
 					int global_vtx_offset = 0;
 					int global_idx_offset = 0;
 					for (int n = 0; n < draw_data->CmdListsCount; n++)
@@ -161,11 +161,11 @@ namespace Insight
 							}
 							else
 							{
-								// Project scissor/clipping rectangles into framebuffer space
+								/// Project scissor/clipping rectangles into framebuffer space
 								ImVec2 clip_min((pcmd->ClipRect.x - clip_off.x)* clip_scale.x, (pcmd->ClipRect.y - clip_off.y)* clip_scale.y);
 								ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x)* clip_scale.x, (pcmd->ClipRect.w - clip_off.y)* clip_scale.y);
 
-								// Clamp to viewport as vkCmdSetScissor() won't accept values that are off bounds
+								/// Clamp to viewport as vkCmdSetScissor() won't accept values that are off bounds
 								if (clip_min.x < 0.0f) { clip_min.x = 0.0f; }
 								if (clip_min.y < 0.0f) { clip_min.y = 0.0f; }
 								if (clip_max.x > fb_width) { clip_max.x = (float)fb_width; }
@@ -175,7 +175,7 @@ namespace Insight
 									continue;
 								}
 
-								// Apply scissor/clipping rectangle
+								/// Apply scissor/clipping rectangle
 								int scissor_offset_x = (int32_t)(clip_min.x);
 								int scissor_offset_y = (int32_t)(clip_min.y);
 								int scissor_extent_width = (uint32_t)(clip_max.x - clip_min.x);

@@ -35,18 +35,18 @@ namespace Insight
 
 				ID3D12GraphicsCommandList* GetCommandList() const;
 
-				// RHI_CommandList
+				/// RHI_CommandList
 				virtual void Reset() override;
 				virtual void Close() override;
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
 				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) override;
 
-				// RHI_Resouce
+				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
-				// RHI_CommandList
+				/// RHI_CommandList
 				virtual void BeginRenderpass(RenderpassDescription renderDescription) override;
 				virtual void EndRenderpass() override;
 
@@ -85,7 +85,7 @@ namespace Insight
 
 				ID3D12CommandAllocator* GetAllocator() const { return m_allocator.Get(); }
 
-				// RHI_CommandListAllocator
+				/// RHI_CommandListAllocator
 				virtual void Create(RenderContext* context) override;
 				
 				virtual void Reset() override;
@@ -95,7 +95,7 @@ namespace Insight
 
 				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
-				// RHI_Resouce
+				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -110,4 +110,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

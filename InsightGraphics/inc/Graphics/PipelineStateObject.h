@@ -18,7 +18,7 @@ namespace Insight
 		class RHI_Shader;
 		class RHI_Texture;
 
-		// Pipeline state object struct. Store all current information about the render pass.
+		/// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
 		{
 			static const int RenderTargetCount = 8;
@@ -55,7 +55,7 @@ namespace Insight
 
 			std::vector<DynamicState> Dynamic_States{ DynamicState::Viewport, DynamicState::Scissor };
 
-			// Private members. Should not be touched.
+			/// Private members. Should not be touched.
 			bool Swapchain = false;
 			RHI_Shader* Shader = nullptr;
 			u64 Renderpass = 0;

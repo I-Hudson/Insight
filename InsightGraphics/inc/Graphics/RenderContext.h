@@ -28,9 +28,9 @@ namespace Insight
 		class RHI_Texture;
 		class RenderTarget;
 
-		/// <summary>
-		/// Store any and all details about the physical device being used.
-		/// </summary>
+		//// <summary>
+		//// Store any and all details about the physical device being used.
+		//// </summary>
 		struct PhysicalDeviceInformation : public Core::Singleton<PhysicalDeviceInformation>
 		{
 			std::wstring Device_Name;
@@ -103,7 +103,7 @@ namespace Insight
 			void FreeTexture(RHI_Texture* texture);
 
 		protected:
-			//const static int c_FrameCount = 3;
+			///const static int c_FrameCount = 3;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_enabledDeviceExtensions;
@@ -128,7 +128,7 @@ namespace Insight
 		};
 	}
 
-	// Utility class for all other engine systems to call into.
+	/// Utility class for all other engine systems to call into.
 	class IS_GRAPHICS Renderer
 	{
 	public:

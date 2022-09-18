@@ -28,9 +28,9 @@ namespace Insight
 			float GetElapsedTimeMillFloat() const;
 
 		private:
-			// Start time.
+			/// Start time.
 			TimePoint m_startTimePoint;
-			// End time.
+			/// End time.
 			TimePoint m_stopTimePoint;
 			DurationNano m_elapsed_duration;
 		};

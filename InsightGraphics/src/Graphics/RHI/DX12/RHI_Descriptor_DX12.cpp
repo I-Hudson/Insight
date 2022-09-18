@@ -14,9 +14,9 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			/// <summary>
-			/// RHI_DescriptorLayout_DX12
-			/// </summary>
+			//// <summary>
+			//// RHI_DescriptorLayout_DX12
+			//// </summary>
 			void RHI_DescriptorLayout_DX12::Release()
 			{
 				if (m_layout)
@@ -39,50 +39,50 @@ namespace Insight
 			}
 
 
-			///// <summary>
-			///// RHI_Descriptor_DX12
-			///// </summary>
-			///// <param name="descriptors"></param>
-			//void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
-			//{
-			//}
+			/////// <summary>
+			/////// RHI_Descriptor_DX12
+			/////// </summary>
+			/////// <param name="descriptors"></param>
+			///void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
+			///{
+			///}
 
-			//u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
-			//{
-			//	return 0;
-			//}
+			///u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
+			///{
+			///	return 0;
+			///}
 
 
-			/// <summary>
-			/// RHI_DescriptorLayout_DX12
-			/// </summary>
-			/// <param name="context"></param>
-			/// <param name="set"></param>
-			/// <param name="descriptors"></param>
+			//// <summary>
+			//// RHI_DescriptorLayout_DX12
+			//// </summary>
+			//// <param name="context"></param>
+			//// <param name="set"></param>
+			//// <param name="descriptors"></param>
 			void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, std::vector<Descriptor> descriptors)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 
-				// Reference: https://github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
+				/// Reference: https:///github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
 
-				//std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
-				//rootParameters.resize(descriptors.size());
-				//CD3DX12_ROOT_PARAMETER1 rootParameter = {};
-				//rootParameters[0].InitAsDescriptorTable(1, &ranges[0]);
-				//rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
-				//rootParameters.push_back(rootParameter);
+				///std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
+				///rootParameters.resize(descriptors.size());
+				///CD3DX12_ROOT_PARAMETER1 rootParameter = {};
+				///rootParameters[0].InitAsDescriptorTable(1, &ranges[0]);
+				///rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+				///rootParameters.push_back(rootParameter);
 
-				//int baseRegister = 0;
-				//for (const Descriptor& descriptor : descriptors)
-				//{
-				//	CD3DX12_DESCRIPTOR_RANGE1 range = {};
-				//	range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, baseRegister++);
-				//	ranges.push_back(range);
-				//
-				//	CD3DX12_ROOT_PARAMETER1 rootParameter = {};
-				//	rootParameter.InitAsDescriptorTable(1, &ranges.back());
-				//	rootParameters.push_back(rootParameter);
-				//}
+				///int baseRegister = 0;
+				///for (const Descriptor& descriptor : descriptors)
+				///{
+				///	CD3DX12_DESCRIPTOR_RANGE1 range = {};
+				///	range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, baseRegister++);
+				///	ranges.push_back(range);
+				///
+				///	CD3DX12_ROOT_PARAMETER1 rootParameter = {};
+				///	rootParameter.InitAsDescriptorTable(1, &ranges.back());
+				///	rootParameters.push_back(rootParameter);
+				///}
 
 				std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
 				for (const Descriptor& desc : descriptors)
@@ -103,7 +103,7 @@ namespace Insight
 				CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
 				rootSignatureDesc.Init_1_1((UINT)rootParameters.size(), rootParameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 				
-				// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+				/// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
 				D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 
@@ -121,9 +121,9 @@ namespace Insight
 				ThrowIfFailed(m_context->GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_layout)));
 			}
 
-			/// <summary>
-			/// DescriptorHeapPage_DX12
-			/// </summary>
+			//// <summary>
+			//// DescriptorHeapPage_DX12
+			//// </summary>
 			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12()
 			{
 			}
@@ -201,10 +201,10 @@ namespace Insight
 			}
 
 
-			/// <summary>
-			/// DescriptorHeap_DX12
-			/// </summary>
-			/// <param name="heapType"></param>
+			//// <summary>
+			//// DescriptorHeap_DX12
+			//// </summary>
+			//// <param name="heapType"></param>
 			void DescriptorHeap_DX12::Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType)
 			{
 				m_heapType = heapType;
@@ -230,7 +230,7 @@ namespace Insight
 				auto descItr = m_descriptorHashToHandleIndex.find(descHash);
 				if (descItr != m_descriptorHashToHandleIndex.end())
 				{
-					// Found descriptor hash.
+					/// Found descriptor hash.
 					handle = m_descriptorHeapHandle.find(descItr->second)->second;
 					return true;
 				}
@@ -265,205 +265,205 @@ namespace Insight
 				m_heaps.push_back(heap);
 			}
 
-			///// <summary>
-			///// RHI_Descriptor_DX12
-			///// </summary>
-			//void RHI_Descriptor_DX12::Release()
-			//{
-			//}
+			/////// <summary>
+			/////// RHI_Descriptor_DX12
+			/////// </summary>
+			///void RHI_Descriptor_DX12::Release()
+			///{
+			///}
 
-			//bool RHI_Descriptor_DX12::ValidResouce()
-			//{
-			//	return false;
-			//}
+			///bool RHI_Descriptor_DX12::ValidResouce()
+			///{
+			///	return false;
+			///}
 
-			//void RHI_Descriptor_DX12::SetName(std::wstring name)
-			//{
-			//}
+			///void RHI_Descriptor_DX12::SetName(std::wstring name)
+			///{
+			///}
 
-		//	bool DescriptorAllocator_DX12::SetupDescriptors()
-		//	{
-		//		for (const auto& set : m_descriptors)
-		//		{
-		//			const std::vector<Descriptor>& descriptos = set.second;
-		//			for (const auto& desc : descriptos)
-		//			{
-		//				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
-		//				if (m_heaps.find(descTypeDX12) == m_heaps.end())
-		//				{
-		//					// Create intital heap if needed.
-		//					m_heaps[descTypeDX12].SetRenderContext(m_context);
-		//					m_heaps[descTypeDX12].Create(descTypeDX12);
-		//				}
+		///	bool DescriptorAllocator_DX12::SetupDescriptors()
+		///	{
+		///		for (const auto& set : m_descriptors)
+		///		{
+		///			const std::vector<Descriptor>& descriptos = set.second;
+		///			for (const auto& desc : descriptos)
+		///			{
+		///				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
+		///				if (m_heaps.find(descTypeDX12) == m_heaps.end())
+		///				{
+		///					/// Create intital heap if needed.
+		///					m_heaps[descTypeDX12].SetRenderContext(m_context);
+		///					m_heaps[descTypeDX12].Create(descTypeDX12);
+		///				}
 
-		//				DescriptorHeapHandle_DX12 handle = {};
-		//				m_heaps[descTypeDX12].FindDescriptor(desc, handle);
-		//			}
-		//		}
-		//		return true;
-		//	}
+		///				DescriptorHeapHandle_DX12 handle = {};
+		///				m_heaps[descTypeDX12].FindDescriptor(desc, handle);
+		///			}
+		///		}
+		///		return true;
+		///	}
 
-		//	std::vector<ID3D12DescriptorHeap*> DescriptorAllocator_DX12::GetHeaps() const
-		//	{
-		//		std::vector<ID3D12DescriptorHeap*> result;
-		//		for (const auto& pair : m_heaps)
-		//		{
-		//			for (const auto& heap : pair.second.GetHeaps())
-		//			{
-		//				result.push_back(heap.GetHeap());
-		//			}
-		//		}
-		//		return result;
-		//	}
+		///	std::vector<ID3D12DescriptorHeap*> DescriptorAllocator_DX12::GetHeaps() const
+		///	{
+		///		std::vector<ID3D12DescriptorHeap*> result;
+		///		for (const auto& pair : m_heaps)
+		///		{
+		///			for (const auto& heap : pair.second.GetHeaps())
+		///			{
+		///				result.push_back(heap.GetHeap());
+		///			}
+		///		}
+		///		return result;
+		///	}
 
-		//	void DescriptorAllocator_DX12::SetDescriptors(CommandList_DX12* cmdList)
-		//	{
-		//		for (const auto& set : m_descriptors)
-		//		{
-		//			const std::vector<Descriptor>& descriptos = set.second;
-		//			for (const auto& desc : descriptos)
-		//			{
-		//				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
+		///	void DescriptorAllocator_DX12::SetDescriptors(CommandList_DX12* cmdList)
+		///	{
+		///		for (const auto& set : m_descriptors)
+		///		{
+		///			const std::vector<Descriptor>& descriptos = set.second;
+		///			for (const auto& desc : descriptos)
+		///			{
+		///				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
 
-		//				DescriptorHeapHandle_DX12 handle = {};
-		//				assert(m_heaps.find(descTypeDX12)->second.FindDescriptor(desc, handle));
-		//				//cmdList->GetCommandBuffer()->SetGraphicsRootDescriptorTable(desc.Binding, handle.GPUPtr);
-		//			}
-		//		}
-		//	}
+		///				DescriptorHeapHandle_DX12 handle = {};
+		///				assert(m_heaps.find(descTypeDX12)->second.FindDescriptor(desc, handle));
+		///				///cmdList->GetCommandBuffer()->SetGraphicsRootDescriptorTable(desc.Binding, handle.GPUPtr);
+		///			}
+		///		}
+		///	}
 
-		//	void DescriptorAllocator_DX12::BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex)
-		//	{
-		//		if (m_heaps.find(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) == m_heaps.end())
-		//		{
-		//			// Create intital heap if needed.
-		//			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].SetRenderContext(m_context);
-		//			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		//		}
+		///	void DescriptorAllocator_DX12::BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex)
+		///	{
+		///		if (m_heaps.find(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) == m_heaps.end())
+		///		{
+		///			/// Create intital heap if needed.
+		///			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].SetRenderContext(m_context);
+		///			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		///		}
 
-		//		DescriptorHeapHandle_DX12 handle = m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].GetNewHandle();
+		///		DescriptorHeapHandle_DX12 handle = m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].GetNewHandle();
 
-		//		RHI_Buffer_DX12* buffer_dx12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
+		///		RHI_Buffer_DX12* buffer_dx12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 
-		//		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		//		cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + bufferView.GetOffset();
-		//		cbvDesc.SizeInBytes = AlignUp(bufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		//		m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
+		///		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
+		///		cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + bufferView.GetOffset();
+		///		cbvDesc.SizeInBytes = AlignUp(bufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		///		m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
 
-		//		cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
-		//	}
+		///		cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
+		///	}
 
-		//	void DescriptorAllocator_DX12::SetDescriptorTables(RHI_CommandList_DX12* cmdList)
-		//	{
-		//		for (const auto& sets : m_descriptors)
-		//		{
-		//			int rootParaemterIndex = 0;
-		//			for (const Descriptor& descriptor : sets.second)
-		//			{
-		//				D3D12_DESCRIPTOR_HEAP_TYPE heapType = DescriptorTypeToDX12(descriptor.Type);
-		//				if (m_heaps.find(heapType) == m_heaps.end())
-		//				{
-		//					// Create intital heap if needed.
-		//					m_heaps[heapType].SetRenderContext(m_context);
-		//					m_heaps[heapType].Create(heapType);
-		//				}
+		///	void DescriptorAllocator_DX12::SetDescriptorTables(RHI_CommandList_DX12* cmdList)
+		///	{
+		///		for (const auto& sets : m_descriptors)
+		///		{
+		///			int rootParaemterIndex = 0;
+		///			for (const Descriptor& descriptor : sets.second)
+		///			{
+		///				D3D12_DESCRIPTOR_HEAP_TYPE heapType = DescriptorTypeToDX12(descriptor.Type);
+		///				if (m_heaps.find(heapType) == m_heaps.end())
+		///				{
+		///					/// Create intital heap if needed.
+		///					m_heaps[heapType].SetRenderContext(m_context);
+		///					m_heaps[heapType].Create(heapType);
+		///				}
 
-		//				u64 hash = descriptor.GetHash(true);
-		//				DescriptorHeapHandle_DX12 handle = m_boundDescriptorsHandle[hash];
+		///				u64 hash = descriptor.GetHash(true);
+		///				DescriptorHeapHandle_DX12 handle = m_boundDescriptorsHandle[hash];
 
-		//				if (m_boundDescriptors[sets.first][descriptor.Binding] != hash)
-		//				{
-		//					handle = m_heaps[heapType].GetNewHandle();
+		///				if (m_boundDescriptors[sets.first][descriptor.Binding] != hash)
+		///				{
+		///					handle = m_heaps[heapType].GetNewHandle();
 
-		//					if (descriptor.Type == DescriptorType::Unifom_Buffer)
-		//					{
-		//						RHI_Buffer_DX12* const buffer_dx12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
+		///					if (descriptor.Type == DescriptorType::Unifom_Buffer)
+		///					{
+		///						RHI_Buffer_DX12* const buffer_dx12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
-		//						D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		//						cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
-		//						cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		//						m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
-		//					}
-		//					else if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
-		//					{
-		//						RHI_Texture_DX12* const texture = static_cast<RHI_Texture_DX12*>(descriptor.Texture);
+		///						D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
+		///						cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
+		///						cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
+		///						m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
+		///					}
+		///					else if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
+		///					{
+		///						RHI_Texture_DX12* const texture = static_cast<RHI_Texture_DX12*>(descriptor.Texture);
 
-		//						cmdList->ResourceBarrierImage(texture->GetResouce(), D3D12_RESOURCE_STATE_COPY_DEST,
-		//							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		///						cmdList->ResourceBarrierImage(texture->GetResouce(), D3D12_RESOURCE_STATE_COPY_DEST,
+		///							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
-		//						D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
-		//						srvDesc.Format = PixelFormatToDX12(
-		//							PixelFormatExtensions::IsDepth(texture->GetFormat()) ?
-		//							(texture->GetFormat() == PixelFormat::D32_Float ?
-		//								PixelFormat::R32_Float : texture->GetFormat())
-		//							: texture->GetFormat());
-		//						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		//						srvDesc.Texture2D.MipLevels = 1;
-		//						srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		//						m_context->GetDevice()->CreateShaderResourceView(texture->GetResouce(), &srvDesc, handle.CPUPtr);
-		//					}
+		///						D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
+		///						srvDesc.Format = PixelFormatToDX12(
+		///							PixelFormatExtensions::IsDepth(texture->GetFormat()) ?
+		///							(texture->GetFormat() == PixelFormat::D32_Float ?
+		///								PixelFormat::R32_Float : texture->GetFormat())
+		///							: texture->GetFormat());
+		///						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		///						srvDesc.Texture2D.MipLevels = 1;
+		///						srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		///						m_context->GetDevice()->CreateShaderResourceView(texture->GetResouce(), &srvDesc, handle.CPUPtr);
+		///					}
 
-		//					m_boundDescriptors[sets.first][descriptor.Binding] = hash;
-		//					m_boundDescriptorsHandle[hash] = handle;
-		//				}
-		//				m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
-		//				++rootParaemterIndex;
-		//			}
-		//		}
-		//	}
+		///					m_boundDescriptors[sets.first][descriptor.Binding] = hash;
+		///					m_boundDescriptorsHandle[hash] = handle;
+		///				}
+		///				m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
+		///				++rootParaemterIndex;
+		///			}
+		///		}
+		///	}
 
-		//	void DescriptorAllocator_DX12::BindDescriptorTables(ID3D12GraphicsCommandList* cmdList)
-		//	{
-		//		for (const auto& pair : m_descrptorTables)
-		//		{
-		//			cmdList->SetGraphicsRootDescriptorTable(pair.first, pair.second.GetGPUHandle());
-		//		}
-		//	}
+		///	void DescriptorAllocator_DX12::BindDescriptorTables(ID3D12GraphicsCommandList* cmdList)
+		///	{
+		///		for (const auto& pair : m_descrptorTables)
+		///		{
+		///			cmdList->SetGraphicsRootDescriptorTable(pair.first, pair.second.GetGPUHandle());
+		///		}
+		///	}
 
-		//	void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
-		//	{
-		//		m_context = static_cast<RenderContext_DX12*>(context);
+		///	void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
+		///	{
+		///		m_context = static_cast<RenderContext_DX12*>(context);
 
-		//		//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		//		//m_heaps[heapType].SetRenderContext(m_context);
-		//		//m_heaps[heapType].Create(heapType);
-		//		//
-		//		//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-		//		//m_heaps[heapType].SetRenderContext(m_context);
-		//		//m_heaps[heapType].Create(heapType);
-		//		//
-		//		//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		//		//m_heaps[heapType].SetRenderContext(m_context);
-		//		//m_heaps[heapType].Create(heapType);
-		//		//
-		//		//D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		//		//m_heaps[heapType].SetRenderContext(m_context);
-		//		//m_heaps[heapType].Create(heapType);
-		//	}
+		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		///		///m_heaps[heapType].SetRenderContext(m_context);
+		///		///m_heaps[heapType].Create(heapType);
+		///		///
+		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+		///		///m_heaps[heapType].SetRenderContext(m_context);
+		///		///m_heaps[heapType].Create(heapType);
+		///		///
+		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		///		///m_heaps[heapType].SetRenderContext(m_context);
+		///		///m_heaps[heapType].Create(heapType);
+		///		///
+		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		///		///m_heaps[heapType].SetRenderContext(m_context);
+		///		///m_heaps[heapType].Create(heapType);
+		///	}
 
-		//	bool DescriptorAllocator_DX12::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
-		//	{
-		//		return false;
-		//	}
+		///	bool DescriptorAllocator_DX12::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
+		///	{
+		///		return false;
+		///	}
 
-		//	void DescriptorAllocator_DX12::Reset()
-		//	{
-		//		// Release all buffer views.
-		//		for (auto& heap : m_heaps)
-		//		{
-		//			heap.second.Reset();
-		//		}
-		//		m_descrptorTables.clear();
-		//		m_boundDescriptors.clear();
-		//		m_boundDescriptorsHandle.clear();
-		//	}
+		///	void DescriptorAllocator_DX12::Reset()
+		///	{
+		///		/// Release all buffer views.
+		///		for (auto& heap : m_heaps)
+		///		{
+		///			heap.second.Reset();
+		///		}
+		///		m_descrptorTables.clear();
+		///		m_boundDescriptors.clear();
+		///		m_boundDescriptorsHandle.clear();
+		///	}
 
-		//	void DescriptorAllocator_DX12::Destroy()
-		//	{
-		//		m_heaps.clear();
-		//	}
+		///	void DescriptorAllocator_DX12::Destroy()
+		///	{
+		///		m_heaps.clear();
+		///	}
 		}
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

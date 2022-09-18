@@ -66,20 +66,20 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// ShaderCompiler
-		/// </summary>
+		//// <summary>
+		//// ShaderCompiler
+		//// </summary>
 		ShaderCompiler::ShaderCompiler()
 		{
 			HRESULT hres;
-			// Initialize DXC library
+			/// Initialize DXC library
 			hres = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&DXUtils));
 			if (FAILED(hres)) 
 			{
 				throw std::runtime_error("Could not init DXC Library");
 			}
 
-			// Initialize the DXC compiler
+			/// Initialize the DXC compiler
 			hres = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&DXCompiler));
 			if (FAILED(hres))
 			{
@@ -95,11 +95,11 @@ namespace Insight
 		{
 			m_languageToCompileTo = languageToCompileTo;
 
-			// Create default include handler. (You can create your own...)
+			/// Create default include handler. (You can create your own...)
 			ComPtr<IDxcIncludeHandler> pIncludeHandler;
 			ASSERT(SUCCEEDED(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler)));
 
-			// Load the HLSL text shader from disk
+			/// Load the HLSL text shader from disk
 			uint32_t codePage = CP_UTF8;
 			ComPtr<IDxcBlobEncoding> sourceBlob;
 			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePath.data(), nullptr, &sourceBlob)));
@@ -107,11 +107,11 @@ namespace Insight
 			DxcBuffer Source;
 			Source.Ptr = sourceBlob->GetBufferPointer();
 			Source.Size = sourceBlob->GetBufferSize();
-			Source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
+			Source.Encoding = DXC_CP_ACP; /// Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
-			// Set up arguments to be passed to the shader compiler
+			/// Set up arguments to be passed to the shader compiler
 
-			// Tell the compiler to output SPIR-V
+			/// Tell the compiler to output SPIR-V
 			std::vector<LPCWCHAR> arguments;
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
 			{
@@ -128,11 +128,11 @@ namespace Insight
 			std::wstring mainFunc = StageToFuncName(stage);
 			std::wstring targetProfile = StageToProfileTarget(stage);
 
-			// Entry point
+			/// Entry point
 			arguments.push_back(L"-E");
 			arguments.push_back(mainFunc.c_str());
 
-			// Select target profile based on shader file extension
+			/// Select target profile based on shader file extension
 			arguments.push_back(L"-T");
 			arguments.push_back(targetProfile.c_str());
 
@@ -140,45 +140,45 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(L"Resources/Shaders/hlsl");
 
-			arguments.push_back(DXC_ARG_DEBUG); //-Zi
-			//arguments.push_back(L"-Zs"); // Generate small PDB with just sourcesand compile options.Cannot be used together with - Zi
+			arguments.push_back(DXC_ARG_DEBUG); ///-Zi
+			///arguments.push_back(L"-Zs"); /// Generate small PDB with just sourcesand compile options.Cannot be used together with - Zi
 			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 
-			//arguments.push_back(L"-fvk-bind-register");
+			///arguments.push_back(L"-fvk-bind-register");
 
-			// Compile shader
+			/// Compile shader
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,									// Source buffer.
-				arguments.data(),							// Array of pointers to arguments.
-				static_cast<UINT>(arguments.size()),		// Number of arguments.
-				pIncludeHandler.Get(),						// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderCompileResults)			// Compiler output status, buffer, and errors.
+				&Source,									/// Source buffer.
+				arguments.data(),							/// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),		/// Number of arguments.
+				pIncludeHandler.Get(),						/// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderCompileResults)			/// Compiler output status, buffer, and errors.
 			)));
 
 			arguments.push_back(L"-spirv");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,                // Source buffer.
-				arguments.data(),       // Array of pointers to arguments.
-				static_cast<UINT>(arguments.size()),		// Number of arguments.
-				pIncludeHandler.Get(),	// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderReflectionResults) // Compiler output status, buffer, and errors.
+				&Source,                /// Source buffer.
+				arguments.data(),       /// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),		/// Number of arguments.
+				pIncludeHandler.Get(),	/// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderReflectionResults) /// Compiler output status, buffer, and errors.
 			)));
 
-			// Print errors if present.
+			/// Print errors if present.
 			ComPtr<IDxcBlobUtf8> pErrors = nullptr;
 			ASSERT(SUCCEEDED(ShaderCompileResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
-			// Note that d3dcompiler would return null if no errors or warnings are present.  
-			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
+			/// Note that d3dcompiler would return null if no errors or warnings are present.  
+			/// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
 				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
 			}
 
-			// Get compilation result
+			/// Get compilation result
 			ComPtr<IDxcBlob> code;
 			ShaderCompileResults->GetResult(&code);
 
-			// Write shader to disk.
+			/// Write shader to disk.
 			std::ofstream shaderDisk;
 
 			int startShaderFile = (int)filePath.find_last_of('/') + 1;
@@ -202,12 +202,12 @@ namespace Insight
 			ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
-			// Generate reflection data for a shader
+			/// Generate reflection data for a shader
 			SpvReflectShaderModule module;
 			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			// Enumerate and extract shader's input variables
+			/// Enumerate and extract shader's input variables
 			uint32_t var_count = 0;
 			result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
@@ -216,8 +216,8 @@ namespace Insight
 			result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			// Output variables, descriptor bindings, descriptor sets, and push constants
-			// can be enumerated and extracted using a similar mechanism.
+			/// Output variables, descriptor bindings, descriptor sets, and push constants
+			/// can be enumerated and extracted using a similar mechanism.
 
 			u32 descriptorSetCount = 0;
 			result = spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, NULL);
@@ -291,10 +291,10 @@ namespace Insight
 				push_constant.ShaderStages |= stage;
 			}
 
-			// Destroy the reflection data when no longer required.
+			/// Destroy the reflection data when no longer required.
 			spvReflectDestroyShaderModule(&module);
 
-			// Sort all descriptors from 0 to n, by Set then Binding.
+			/// Sort all descriptors from 0 to n, by Set then Binding.
 			std::sort(descriptors.begin(), descriptors.end(), [](const Descriptor& d1, const Descriptor& d2)
 				{
 					return d1.Set != d2.Set ? d1.Set < d2.Set
@@ -374,19 +374,19 @@ namespace Insight
 			ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
-			// Generate reflection data for a shader
+			/// Generate reflection data for a shader
 			SpvReflectShaderModule module;
 			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			// Enumerate and extract shader's input variables
+			/// Enumerate and extract shader's input variables
 			uint32_t inputCount = 0;
 			result = spvReflectEnumerateInputVariables(&module, &inputCount, NULL);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 			std::vector<SpvReflectInterfaceVariable*> inputVars;
 			inputVars.resize(inputCount);
 
-			//SpvReflectInterfaceVariable** input_vars = inputVars (SpvReflectInterfaceVariable**)malloc(inputCount * sizeof(SpvReflectInterfaceVariable*));
+			///SpvReflectInterfaceVariable** input_vars = inputVars (SpvReflectInterfaceVariable**)malloc(inputCount * sizeof(SpvReflectInterfaceVariable*));
 			result = spvReflectEnumerateInputVariables(&module, &inputCount, inputVars.data());
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
 
@@ -414,7 +414,7 @@ namespace Insight
 				stride += SpvFormatToByteSize(interfaceVariable->format);
 			}
 
-			// Destroy the reflection data when no longer required.
+			/// Destroy the reflection data when no longer required.
 			spvReflectDestroyShaderModule(&module);
 
 			return inputLayout;

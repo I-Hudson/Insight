@@ -6,9 +6,9 @@ namespace Insight
 {
 	namespace Input
 	{
-		///
-		// Taken from GLFW.
-		///
+		////
+		/// Taken from GLFW.
+		////
 		/* The unknown key */
 #define IS_KEY_UNKNOWN            -1
 

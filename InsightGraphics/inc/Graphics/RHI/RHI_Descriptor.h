@@ -54,7 +54,7 @@ namespace Insight
 
 			void* GetResource() const { return m_resource; }
 
-			// RHI_Resource
+			/// RHI_Resource
 			virtual void Release() override;
 			virtual bool ValidResouce() override;
 			virtual void SetName(std::wstring name) override;
@@ -109,7 +109,7 @@ namespace Insight
 			void CreateUniformBufferIfNoExist();
 
 		protected:
-			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; // Current descriptors information. 
+			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; /// Current descriptors information. 
 			UPtr<RHI_Buffer> m_uniformBuffer;
 			u64 m_uniformBufferOffset = 0;
 

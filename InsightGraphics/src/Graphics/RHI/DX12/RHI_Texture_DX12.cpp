@@ -27,7 +27,7 @@ namespace Insight
 					D3D12_TEXTURE_LAYOUT_UNKNOWN,
 					0);
 
-				// Create the texture.
+				/// Create the texture.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
 					&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 					D3D12_HEAP_FLAG_NONE,
@@ -39,7 +39,7 @@ namespace Insight
 
 			void RHI_Texture_DX12::Upload(void* data, int sizeInBytes)
 			{
-				// We need a staging buffer to upload data from CPU to GPU.
+				/// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_DX12 stagingBuffer;
 				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 				stagingBuffer.Upload(data, sizeInBytes, 0);
@@ -85,4 +85,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

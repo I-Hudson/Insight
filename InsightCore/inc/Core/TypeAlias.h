@@ -40,7 +40,7 @@ constexpr T AlignUp(T x, T align)
 	return r ? x + (align - r) : x;
 }
 
-// https://stackoverflow.com/a/21624122
+/// https:///stackoverflow.com/a/21624122
 constexpr int BitFlagsToIndex(u64 flags)
 {
 	int index = static_cast<int>(log2(flags - (flags & flags - 1)));

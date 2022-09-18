@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers.
+#define WIN32_LEAN_AND_MEAN             /// Exclude rarely-used stuff from Windows headers.
 #endif
 #include <windows.h>
 
@@ -13,11 +13,11 @@
 #include <wrl.h>
 #include <shellapi.h>
 
-// Note that while ComPtr is used to manage the lifetime of resources on the CPU,
-// it has no understanding of the lifetime of resources on the GPU. Apps must account
-// for the GPU lifetime of resources to avoid destroying objects that may still be
-// referenced by the GPU.
-// An example of this can be found in the class method: OnDestroy().
+/// Note that while ComPtr is used to manage the lifetime of resources on the CPU,
+/// it has no understanding of the lifetime of resources on the GPU. Apps must account
+/// for the GPU lifetime of resources to avoid destroying objects that may still be
+/// referenced by the GPU.
+/// An example of this can be found in the class method: OnDestroy().
 using Microsoft::WRL::ComPtr;
 
 
@@ -58,4 +58,4 @@ namespace Insight
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

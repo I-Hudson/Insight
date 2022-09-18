@@ -9,7 +9,7 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-//TODO: Remove this whole class.
+///TODO: Remove this whole class.
 /*
 	We should be using a simple struct like
 	struct RenderDrawData
@@ -32,10 +32,10 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		/// <summary>
-		/// RHI_CommandList
-		/// </summary>
-		/// <returns></returns>
+		//// <summary>
+		//// RHI_CommandList
+		//// </summary>
+		//// <returns></returns>
 		RHI_CommandList* RHI_CommandList::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
@@ -79,23 +79,23 @@ namespace Insight
 		bool RHI_CommandList::CanDraw()
 		{
 			IS_PROFILE_FUNCTION();
-			//u64 hash = 0;
-			//u64 activeHash = 0;
-			//{
-			//	IS_PROFILE_SCOPE("Get hash");
-			//	hash = m_pso.GetHash();
-			//	activeHash = m_activePSO.GetHash();
-			//}
-			//if (hash != activeHash)
-			//{
-			//	m_activePSO = m_pso;
-			//	RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
-			//	/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
-			//	{
-			//		IS_PROFILE_SCOPE("Bind pipeline");
-			//		BindPipeline(m_activePSO, layout);
-			//	}
-			//}
+			///u64 hash = 0;
+			///u64 activeHash = 0;
+			///{
+			///	IS_PROFILE_SCOPE("Get hash");
+			///	hash = m_pso.GetHash();
+			///	activeHash = m_activePSO.GetHash();
+			///}
+			///if (hash != activeHash)
+			///{
+			///	m_activePSO = m_pso;
+			///	RHI_DescriptorLayout* layout = m_context->GetDescriptorLayoutManager().GetLayout(m_activePSO.Shader->GetDescriptors()
+			///	/*cmdList.GetDescriptorBuffer().GetDescriptorsSignature()*/);
+			///	{
+			///		IS_PROFILE_SCOPE("Bind pipeline");
+			///		BindPipeline(m_activePSO, layout);
+			///	}
+			///}
 			return BindDescriptorSets();
 		}
 
@@ -105,10 +105,10 @@ namespace Insight
 		}
 
 
-		/// <summary>
-		/// RHI_CommandListAllocator
-		/// </summary>
-		/// <returns></returns>
+		//// <summary>
+		//// RHI_CommandListAllocator
+		//// </summary>
+		//// <returns></returns>
 		RHI_CommandListAllocator* RHI_CommandListAllocator::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
@@ -136,9 +136,9 @@ namespace Insight
 			m_freeLists.insert(cmdList);
 		}
 
-		/// <summary>
-		/// CommandListManager
-		/// </summary>
+		//// <summary>
+		//// CommandListManager
+		//// </summary>
 		CommandListManager::CommandListManager()
 		{
 		}

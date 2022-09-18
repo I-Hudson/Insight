@@ -109,4 +109,4 @@ namespace Insight
 		};
 	}
 }
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED

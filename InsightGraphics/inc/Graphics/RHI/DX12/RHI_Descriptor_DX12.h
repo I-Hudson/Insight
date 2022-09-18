@@ -22,7 +22,7 @@ namespace Insight
 			public:
 				ID3D12RootSignature* GetRootSignature() { return m_layout.Get(); }
 
-				// RHI_Resouce
+				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
@@ -35,21 +35,21 @@ namespace Insight
 				ComPtr<ID3D12RootSignature> m_layout{ nullptr };
 			};
 
-			//class RHI_Descriptor_DX12 : public RHI_Descriptor
-			//{
-			//public:
+			///class RHI_Descriptor_DX12 : public RHI_Descriptor
+			///{
+			///public:
 
-			//	virtual void Update(const std::vector<Descriptor>& descriptors) override;
-			//	virtual u64 GetHash(bool includeResouce = false) override;
+			///	virtual void Update(const std::vector<Descriptor>& descriptors) override;
+			///	virtual u64 GetHash(bool includeResouce = false) override;
 
-			//	// RHI_Resouce
-			//	virtual void Release() override;
-			//	virtual bool ValidResouce() override;
-			//	virtual void SetName(std::wstring name) override;
+			///	/// RHI_Resouce
+			///	virtual void Release() override;
+			///	virtual bool ValidResouce() override;
+			///	virtual void SetName(std::wstring name) override;
 
-			//private:
-			//	RenderContext_DX12* m_context{ nullptr };
-			//};
+			///private:
+			///	RenderContext_DX12* m_context{ nullptr };
+			///};
 
 			struct DescriptorHeapHandle_DX12
 			{
@@ -123,38 +123,38 @@ namespace Insight
 				std::vector<DescriptorHeapPage_DX12> m_heaps;
 
 				std::unordered_map<int, DescriptorHeapHandle_DX12> m_descriptorHeapHandle;
-				std::unordered_map<u64, int> m_descriptorHashToHandleIndex; // Keep track of all the slots for the descriptors.
+				std::unordered_map<u64, int> m_descriptorHashToHandleIndex; /// Keep track of all the slots for the descriptors.
 			};
 
-			//class DescriptorAllocator_DX12 : public DescriptorAllocator
-			//{
-			//public:
+			///class DescriptorAllocator_DX12 : public DescriptorAllocator
+			///{
+			///public:
 
-			//	bool SetupDescriptors();
-			//	std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
-			//	void SetDescriptors(CommandList_DX12* cmdList);
+			///	bool SetupDescriptors();
+			///	std::vector<ID3D12DescriptorHeap*> GetHeaps() const;
+			///	void SetDescriptors(CommandList_DX12* cmdList);
 
-			//	void SetDescriptorTables(RHI_CommandList_DX12* cmdList);
-			//	void BindDescriptorTables(ID3D12GraphicsCommandList* cmdList);
-			//	void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
+			///	void SetDescriptorTables(RHI_CommandList_DX12* cmdList);
+			///	void BindDescriptorTables(ID3D12GraphicsCommandList* cmdList);
+			///	void BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex);
 
-			//	// DescriptorAllocator
-			//	virtual void SetRenderContext(RenderContext* context) override;
-			//	virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
-			//	virtual void Reset() override;
-			//	virtual void Destroy() override;
+			///	/// DescriptorAllocator
+			///	virtual void SetRenderContext(RenderContext* context) override;
+			///	virtual bool GetDescriptors(std::vector<RHI_Descriptor*>& descriptors) override;
+			///	virtual void Reset() override;
+			///	virtual void Destroy() override;
 
-			//private:
-			//	RenderContext_DX12* m_context = nullptr;
-			//	std::unordered_map<D3D12_DESCRIPTOR_HEAP_TYPE, DescriptorHeap_DX12> m_heaps;
-			//	PipelineStateObject m_pso;
+			///private:
+			///	RenderContext_DX12* m_context = nullptr;
+			///	std::unordered_map<D3D12_DESCRIPTOR_HEAP_TYPE, DescriptorHeap_DX12> m_heaps;
+			///	PipelineStateObject m_pso;
 
-			//	std::vector<std::pair<int, DescriptorHeapHandle_DX12>> m_descrptorTables;
-			//	std::unordered_map<int, std::unordered_map<int, u64>> m_boundDescriptors;
-			//	std::unordered_map<u64, DescriptorHeapHandle_DX12> m_boundDescriptorsHandle;
-			//};
+			///	std::vector<std::pair<int, DescriptorHeapHandle_DX12>> m_descrptorTables;
+			///	std::unordered_map<int, std::unordered_map<int, u64>> m_boundDescriptors;
+			///	std::unordered_map<u64, DescriptorHeapHandle_DX12> m_boundDescriptorsHandle;
+			///};
 		}
 	}
 }
 
-#endif // if defined(IS_DX12_ENABLED)
+#endif /// if defined(IS_DX12_ENABLED)

@@ -11,9 +11,9 @@ namespace Insight
 {
 	namespace Core
 	{
-		/// <summary>
-		/// GUID. Used to store a unique ID which can be compared to other GUIDs.
-		/// </summary>
+		//// <summary>
+		//// GUID. Used to store a unique ID which can be compared to other GUIDs.
+		//// </summary>
 		class IS_CORE GUID
 		{
 		public:
@@ -22,7 +22,6 @@ namespace Insight
 			GUID(const GUID& other) NO_EXPECT;
 			GUID(GUID&& other) NO_EXPECT;
 
-
 			GUID& operator=(const GUID& other) NO_EXPECT;
 			GUID& operator=(GUID&& other) NO_EXPECT;
 
@@ -30,10 +29,10 @@ namespace Insight
 			bool operator!=(const GUID& other) const;
 
 			void GetNewGUID();
-			// Check if the GUID is a valid.
+			//// @brief Check if the GUID is a valid.
 			bool IsValid() const { return *this != s_InvalidGUID; }
 
-			// Return a string reposentation of the GUID.
+			//// @brief Return a string reposentation of the GUID.
 			std::string ToString() const;
 
 			static GUID s_InvalidGUID;
@@ -51,9 +50,9 @@ namespace Insight
 
 namespace std
 {
-	/// <summary>
-	/// Custom std::has function for GUID struct.
-	/// </summary>
+	//// <summary>
+	//// Custom std::has function for GUID struct.
+	//// </summary>
 	template<>
 	struct hash<Insight::Core::GUID>
 	{

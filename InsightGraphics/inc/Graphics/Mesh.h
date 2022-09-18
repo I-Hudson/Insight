@@ -51,9 +51,9 @@ namespace Insight
 			RHI_Buffer* Index_Buffer = nullptr;
 		};
 
-		/// <summary>
-		/// Sub mesh. 
-		/// </summary>
+		//// <summary>
+		//// Sub mesh. 
+		//// </summary>
 		class IS_GRAPHICS Submesh
 		{
 		public:
@@ -63,7 +63,7 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED
 			void SetDrawInfo(SubmeshDrawInfo info);
 
 			BoundingBox GetBoundingBox() const { return m_bounding_box.Transform(m_draw_info.Transform); }
@@ -80,9 +80,9 @@ namespace Insight
 			friend class Mesh;
 		};
 
-		/// <summary>
-		/// Mesh. Contains the vertex and index buffer for all sub meshes.
-		/// </summary>
+		//// <summary>
+		//// Mesh. Contains the vertex and index buffer for all sub meshes.
+		//// </summary>
 		class IS_GRAPHICS Mesh
 		{
 		public:
@@ -95,7 +95,7 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
-#endif //RENDER_GRAPH_ENABLED
+#endif ///RENDER_GRAPH_ENABLED
 
 		private:
 			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices);

@@ -16,9 +16,9 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
-			/// <summary>
-			// RHI_CommandList_Vulkan
-			/// </summary>
+			//// <summary>
+			/// RHI_CommandList_Vulkan
+			//// </summary>
 			void RHI_CommandList_Vulkan::Create(RenderContext* context)
 			{
 				m_context = context;
@@ -187,26 +187,26 @@ namespace Insight
 
 				if (!m_activeRenderpass)
 				{
-					//// Before rendering anything, make sure all our RenderTargets are in the correct layout.
-					//for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
-					//{
-					//	const RenderTarget* rt = pso.RenderTargets.at(i);
-					//	if (rt)
-					//	{
-					//		const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
+					////// Before rendering anything, make sure all our RenderTargets are in the correct layout.
+					///for (size_t i = 0; i < pso.RenderTargets.size(); ++i)
+					///{
+					///	const RenderTarget* rt = pso.RenderTargets.at(i);
+					///	if (rt)
+					///	{
+					///		const RHI_Texture_Vulkan* textureVulkan = static_cast<const RHI_Texture_Vulkan*>(rt->GetTexture());
 
-					//		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
-					//			vk::AccessFlagBits::eNoneKHR,
-					//			vk::AccessFlagBits::eColorAttachmentWrite,
-					//			vk::ImageLayout::eUndefined,
-					//			vk::ImageLayout::eColorAttachmentOptimal,
-					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-					//			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
-					//			textureVulkan->GetImage(),
-					//			vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-					//		PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
-					//	}
-					//}
+					///		vk::ImageMemoryBarrier barrier = vk::ImageMemoryBarrier(
+					///			vk::AccessFlagBits::eNoneKHR,
+					///			vk::AccessFlagBits::eColorAttachmentWrite,
+					///			vk::ImageLayout::eUndefined,
+					///			vk::ImageLayout::eColorAttachmentOptimal,
+					///			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					///			RenderContextVulkan()->GetFamilyQueueIndex(GPUQueue_Graphics),
+					///			textureVulkan->GetImage(),
+					///			vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					///		PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::ColourAttachmentOutput, { barrier });
+					///	}
+					///}
 
 					vk::Rect2D rect = vk::Rect2D({ }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y });
 
@@ -397,7 +397,7 @@ namespace Insight
 			void RHI_CommandList_Vulkan::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
 				IS_PROFILE_FUNCTION();
-				//ASSERT_MSG(m_, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
+				///ASSERT_MSG(m_, "[RHI_CommandList_Vulkan::BindPipeline] Must be in an active renderpass.");
 
 				m_pso = pso;
 				m_activePSO = pso;
@@ -503,10 +503,10 @@ namespace Insight
 			}
 
 
-			/// <summary>
-			/// RHI_CommandListAllocator_Vulkan
-			/// </summary>
-			/// <param name="context"></param>
+			//// <summary>
+			//// RHI_CommandListAllocator_Vulkan
+			//// </summary>
+			//// <param name="context"></param>
 			void RHI_CommandListAllocator_Vulkan::Create(RenderContext* context)
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
@@ -603,4 +603,4 @@ namespace Insight
 	}
 }
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)

@@ -25,8 +25,8 @@ namespace Insight
 				s_instance = nullptr;
 			}
 
-			Singleton(const Singleton& other) = delete; // Can't copy a singleton.
-			Singleton(Singleton&& other) = delete; // Can't move a singleton.
+			Singleton(const Singleton& other) = delete; /// Can't copy a singleton.
+			Singleton(Singleton&& other) = delete; /// Can't move a singleton.
 			
 			static TRef Instance() { ASSERT_MSG(s_instance != nullptr, "[Singleton::Instance] 's_instance' must be a valid pointer."); return *s_instance; }
 			static bool IsValidInstance() { return s_instance != nullptr; }

@@ -47,9 +47,9 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			m_renderGraph.Init(m_renderContext);
-#endif //#ifdef RENDER_GRAPH_ENABLED
+#endif ///#ifdef RENDER_GRAPH_ENABLED
 
-			//m_renderpass.Create();
+			///m_renderpass.Create();
 
 #ifdef IS_EXP_ENABLE_THREADED_RENDERING
 			m_renderThread = std::thread([this]()
@@ -94,9 +94,9 @@ namespace Insight
 				{
 					if (currentGraphicsAPI != previousGrapicsAPI)
 					{
-						// New API
+						/// New API
 						m_renderContext->GpuWaitForIdle();
-						//m_renderpass.Destroy();
+						///m_renderpass.Destroy();
 
 						m_renderContext->Destroy();
 						DeleteTracked(m_renderContext);
@@ -107,19 +107,19 @@ namespace Insight
 						m_sharedData.GraphicsAPI = (GraphicsAPI)currentGraphicsAPI;
 						m_renderContext = RenderContext::New();
 						m_renderContext->Init();
-						//m_renderpass.Create();
+						///m_renderpass.Create();
 
 #ifdef RENDER_GRAPH_ENABLED
 						m_renderGraph.Release();
 						m_renderGraph.Init(m_renderContext);
-#endif //#ifdef RENDER_GRAPH_ENABLED
+#endif ///#ifdef RENDER_GRAPH_ENABLED
 						return;
 					}
 				}
 			}
 			IMGUI_VALID(ImGui::End());
 
-			//m_renderpass.Render();
+			///m_renderpass.Render();
 			
 #ifdef IS_EXP_ENABLE_THREADED_RENDERING
 			{
@@ -137,7 +137,7 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			RenderGraph::Instance().Execute();
-#endif//#ifdef RENDER_GRAPH_ENABLED
+#endif///#ifdef RENDER_GRAPH_ENABLED
 
 #endif
 		}
@@ -152,7 +152,7 @@ namespace Insight
 #endif
 
 				m_renderContext->GpuWaitForIdle();
-				//m_renderpass.Destroy();
+				///m_renderpass.Destroy();
 				m_renderGraph.Release();
 				m_renderContext->Destroy();
 				DeleteTracked(m_renderContext);

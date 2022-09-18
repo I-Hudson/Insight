@@ -11,7 +11,7 @@
 
 #include <fstream>
 
-// PDB not found for glslang
+/// PDB not found for glslang
 #pragma warning( disable : 4099 )
 
 namespace Insight
@@ -128,4 +128,4 @@ namespace Insight
 
 #pragma warning( default : 4099 )
 
-#endif //#if defined(IS_VULKAN_ENABLED)
+#endif ///#if defined(IS_VULKAN_ENABLED)
