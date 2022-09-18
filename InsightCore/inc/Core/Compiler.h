@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+* Compiler defines for different compilers.
+*/
+
 #if defined(__clang__)
 
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))

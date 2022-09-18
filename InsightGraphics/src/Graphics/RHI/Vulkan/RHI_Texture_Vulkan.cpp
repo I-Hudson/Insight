@@ -101,7 +101,7 @@ namespace Insight
 					//if (m_info.Layer_Count > 1)
 					{
 						// We must have a multi layer image. Destroy the corresponding view which looks into all layers.
-						m_context->GetDevice().destroyImageView(m_image_view);
+						//m_context->GetDevice().destroyImageView(m_image_view);
 					}
 					m_image_view = nullptr;
 				}

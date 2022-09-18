@@ -7,8 +7,11 @@
 #include <type_traits>
 #include <utility>
 
+// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
+// Helper macro for making a new pointer with args and tracking.
 #define NewArgsTracked(Type, ...)	static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
+// // Helper macro for tracking a exists pointer.
 #define TrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
 #define DeleteTracked(Ptr)								\
@@ -92,6 +95,10 @@ namespace Insight
 	};
 }
 
+/// <summary>
+/// Custom unique pointer implementaion.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 template<typename T>
 class UPtr
 {
@@ -182,6 +189,10 @@ private:
 	friend class UPtr;
 };
 
+/// <summary>
+/// Custom shared pointer implmentation.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 template<typename T>
 class RPtr
 {
@@ -333,6 +344,10 @@ private:
 	friend class WPtr;
 };
 
+/// <summary>
+/// Custom weak pointer implmentaiton.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 template<typename T>
 class WPtr
 {
@@ -524,6 +539,13 @@ namespace Insight::Core
 	};
 }
 
+/// <summary>
+/// Return a UPtr.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <typeparam name="...Args"></typeparam>
+/// <param name="...args"></param>
+/// <returns></returns>
 template<typename T, typename... Args>
 UPtr<T> MakeUPtr(Args&&... args)
 {
@@ -537,6 +559,13 @@ UPtr<T> MakeUPtr(Args&&... args)
 	}
 }
 
+/// <summary>
+/// Return a RPtr.
+/// </summary>
+/// <typeparam name="T"></typeparam>
+/// <typeparam name="...Args"></typeparam>
+/// <param name="...args"></param>
+/// <returns></returns>
 template<typename T, typename... Args>
 RPtr<T> MakeRPtr(Args&&... args)
 {

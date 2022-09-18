@@ -7,6 +7,9 @@ namespace Insight
 {
 	namespace Core
 	{
+		/// <summary>
+		/// Logger. Setup spdlog to be used within core systems and client systems.
+		/// </summary>
 		class IS_CORE Logger
 		{
 		public:

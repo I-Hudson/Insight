@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+* DLL defines.
+*/
+
 #ifndef IS_MONOLITH
 #ifdef IS_EXPORT_CORE_DLL
 #define IS_CORE __declspec(dllexport)
