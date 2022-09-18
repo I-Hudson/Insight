@@ -5,6 +5,8 @@
 /CompileScoreData
 /deps
 /Resources/models
+/Documentation/Doxygen/gen_docs
+/Documentation/Doxygen/themes
 *.sln
 *.vcxproj
 *.vcxproj.filters
