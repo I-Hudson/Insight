@@ -1,8 +1,8 @@
 #include "App/Engine.h"
 
+#include "Core/ImGuiSystem.h"
 #include "Core/Profiler.h"
 #include "Core/Timer.h"
-#include "Core/ImGuiSystem.h"
 
 #include "Event/EventManager.h"
 #include "Input/InputManager.h"
@@ -20,8 +20,10 @@ namespace Insight
 
 		Core::Timer Engine::s_FrameTimer;
 
-		bool Engine::Init()
+		bool Engine::Init(int argc, char** argv)
 		{
+			Core::CommandLineArgs::ParseCommandLine(argc, argv);
+
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			
 			Core::ImGuiSystem::Init();
@@ -35,12 +37,12 @@ namespace Insight
 
 			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
 
-
 			m_sceneManager = MakeUPtr<SceneManager>();
-
 			WPtr<Scene> newScene = m_sceneManager->CreateScene("New Scene");
 			SceneManager::Instance().SetActiveScene(newScene);
 
+#define SCENE_TEST
+#ifdef SCENE_TEST
 			Ptr<ECS::ECSWorld> ecs_world = newScene.Lock()->GetECSWorld();
 			ECS::Entity* e = ecs_world->AddEntity("Test_Entity");
 			ECS::TagComponent* tag_component = static_cast<ECS::TagComponent*>(e->GetComponentByName(ECS::TagComponent::Type_Name));
@@ -48,6 +50,8 @@ namespace Insight
 
 			Ptr<ECS::Entity> test_entity = ecs_world->GetEntityByName("Test_Entity");
 			auto all_tags = static_cast<ECS::TagComponent*>(e->GetComponentByName(ECS::TagComponent::Type_Name))->GetAllTags();
+#endif
+#undef SCENE_TEST
 
 			OnInit();
 

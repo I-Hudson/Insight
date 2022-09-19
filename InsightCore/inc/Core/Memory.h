@@ -506,7 +506,7 @@ class Ptr
 {
 public:
 	Ptr() = default;
-	Ptr(T* pointer)								        { m_ptr = pointer; }
+	Ptr(T* pointer)										{ m_ptr = pointer; }
 	Ptr(Ptr const& other)		: m_ptr(other.m_ptr)	{ }
 	Ptr(const UPtr<T>& other)	: m_ptr(other.Get())	{ }
 	Ptr(Ptr&& other)							        { m_ptr = other.m_ptr; other.m_ptr = nullptr; }

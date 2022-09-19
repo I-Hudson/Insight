@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 	return doctest::Context(ARRAYSIZE(args), args).run();
 #else
 	Insight::App::Engine* app = CreateApplication();
-	if (app->Init())
+	if (app->Init(argc, argv))
 	{
 		app->Update();
 	}

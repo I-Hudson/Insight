@@ -3,6 +3,8 @@
 #include "Defines.h"
 #include "Core/Timer.h"
 
+#include "Core/CommandLineArgs.h"
+
 /// -- Managers --
 #include "Graphics/GraphicsManager.h"
 #include "Scene/SceneManager.h"
@@ -26,7 +28,7 @@ namespace Insight
 		{
 		public:
 
-			bool Init();
+			bool Init(int argc, char** argv);
 			void Update();
 			void Destroy();
 

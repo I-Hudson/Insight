@@ -6,6 +6,7 @@
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
 #include "Core/ImGuiSystem.h"
+#include "Core/CommandLineArgs.h"
 
 namespace Insight
 {
@@ -32,7 +33,19 @@ namespace Insight
 		{
 			PixelFormatExtensions::Init();
 
-			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			if (Core::CommandLineArgs::GetCommandLineValue("graphicsapi")->GetString() == "vulkan")
+			{
+				m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			}
+			else if (Core::CommandLineArgs::GetCommandLineValue("graphicsapi")->GetString() == "dx12")
+			{
+				m_sharedData.GraphicsAPI = GraphicsAPI::DX12;
+			}
+			else
+			{
+				m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
+			}
+
 			currentGraphicsAPI = (int)m_sharedData.GraphicsAPI;
 			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
 

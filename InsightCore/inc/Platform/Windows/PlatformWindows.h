@@ -21,6 +21,7 @@ namespace Insight
 			static void MemSet(void* dst, int value, u64 size);
 			static void MemClear(void* dst, u64 size);
 			static bool MemCompare(const void* buf1, const void* buf2, u64 size);
+
 			static bool StrCompare(const char* str1, const char* str2);
 			static bool WStrCompare(const wchar_t* wstr1, const wchar_t* wstr2);
 
