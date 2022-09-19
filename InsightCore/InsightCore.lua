@@ -24,6 +24,7 @@ project "InsightCore"
         "inc",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.optick}",
+        "%{IncludeDirs.imgui}",
     }
 
     files 
@@ -35,6 +36,7 @@ project "InsightCore"
 
     links
     {
+        "imgui.lib",
         "tracy.lib",
         "OptickCore.lib",
     }

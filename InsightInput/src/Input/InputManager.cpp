@@ -1,6 +1,7 @@
 #include "Input/InputManager.h"
 
 #include "Core/Logger.h"
+#include "Core/ImGuiSystem.h"
 
 #include "Graphics/Window.h"
 #include "Graphics/GraphicsManager.h"
@@ -47,11 +48,7 @@ namespace Insight
 
 			glfwInit();
 
-			ImGuiContext* context = nullptr;
-			ImGuiIO* io = nullptr;
-			Graphics::GraphicsManager::Instance().SetImGuiContext(&context, &io);
-			ImGui::SetCurrentContext(context);
-			ImGui::GetIO() = *io;
+			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
 
 			glfwSetKeyCallback(window->GetRawWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
 				{

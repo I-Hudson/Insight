@@ -2,6 +2,7 @@
 
 #include "Core/Profiler.h"
 #include "Core/Timer.h"
+#include "Core/ImGuiSystem.h"
 
 #include "Event/EventManager.h"
 #include "Input/InputManager.h"
@@ -23,6 +24,9 @@ namespace Insight
 		{
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			
+			Core::ImGuiSystem::Init();
+			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
+
 			m_eventManager = MakeUPtr<Core::EventManager>();
 
 			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
@@ -31,11 +35,6 @@ namespace Insight
 
 			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
 
-			ImGuiContext* context = nullptr;
-			ImGuiIO* io = nullptr;
-			Graphics::GraphicsManager::Instance().SetImGuiContext(&context, &io);
-			ImGui::SetCurrentContext(context);
-			ImGui::GetIO() = *io;
 
 			m_sceneManager = MakeUPtr<SceneManager>();
 
@@ -92,6 +91,7 @@ namespace Insight
 			m_renderpasses.Destroy();
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
+			Core::ImGuiSystem::Shutdown();
 		}
 	}
 }

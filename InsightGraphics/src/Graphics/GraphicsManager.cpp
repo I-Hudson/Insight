@@ -5,6 +5,7 @@
 
 #include "Core/Memory.h"
 #include "Core/Profiler.h"
+#include "Core/ImGuiSystem.h"
 
 namespace Insight
 {
@@ -33,6 +34,7 @@ namespace Insight
 
 			m_sharedData.GraphicsAPI = GraphicsAPI::Vulkan;
 			currentGraphicsAPI = (int)m_sharedData.GraphicsAPI;
+			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
 
 			m_renderContext = RenderContext::New();
 			if (!m_renderContext)
