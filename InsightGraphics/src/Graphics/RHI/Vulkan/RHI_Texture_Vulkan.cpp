@@ -31,8 +31,8 @@ namespace Insight
 					TextureTypeToVulkan(m_info.TextureType),
 					PixelFormatToVulkan(m_info.Format),
 					vk::Extent3D(m_info.Width, m_info.Height, 1),
-					m_info.Mip_Count,								/// mip levels 
-					m_info.Layer_Count,								/// array layers
+					m_info.Mip_Count,								// mip levels 
+					m_info.Layer_Count,								// array layers
 					vk::SampleCountFlagBits::e1,
 					vk::ImageTiling::eOptimal,
 					ImageUsageFlagsToVulkan(m_info.ImageUsage),
@@ -52,7 +52,7 @@ namespace Insight
 
 				m_image_view = CreateImageView(0, 1, m_info.Layer_Count, 0);
 
-				/// Create a image view for each layer. (Use image views when rendering to different layers).
+				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
 					m_single_layer_image_views.push_back(CreateImageView(0, 1, 1, i));
@@ -98,10 +98,10 @@ namespace Insight
 
 				if (m_image_view)
 				{
-					///if (m_info.Layer_Count > 1)
+					//if (m_info.Layer_Count > 1)
 					{
-						/// We must have a multi layer image. Destroy the corresponding view which looks into all layers.
-						///m_context->GetDevice().destroyImageView(m_image_view);
+						// We must have a multi layer image. Destroy the corresponding view which looks into all layers.
+						m_context->GetDevice().destroyImageView(m_image_view);
 					}
 					m_image_view = nullptr;
 				}
@@ -173,4 +173,4 @@ namespace Insight
 	}
 }
 
-#endif /// defined(IS_VULKAN_ENABLED)
+#endif // defined(IS_VULKAN_ENABLED)

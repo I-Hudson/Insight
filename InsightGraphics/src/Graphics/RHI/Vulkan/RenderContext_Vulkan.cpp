@@ -922,7 +922,12 @@ namespace Insight
 						m_swapchainFormat);
 					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
-					vk::ImageView imageView = m_device.createImageView(info);
+					// We create two views into the same image as this is how the API is designed.
+					// The first view (image_view), is used for all layers.
+					// The second view (single_layer_image_view) is used for a single layer. In this case the first layer.
+					vk::ImageView image_view = m_device.createImageView(info);
+					vk::ImageView single_layer_image_view = m_device.createImageView(info);
+					
 					RHI_Texture* tex = Renderer::CreateTexture();
 					tex->SetName(L"Swapchain_Image: " + std::to_wstring(image_index++));
 
@@ -936,8 +941,8 @@ namespace Insight
 
 					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
 					texVulkan->m_context = this;
-					texVulkan->m_image_view = imageView;
-					texVulkan->m_single_layer_image_views.push_back(imageView);
+					texVulkan->m_image_view = image_view;
+					texVulkan->m_single_layer_image_views.push_back(single_layer_image_view);
 					texVulkan->m_image = image;
 					texVulkan->m_info = texCreateInfo;
 
