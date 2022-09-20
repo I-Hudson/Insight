@@ -14,6 +14,7 @@
 
 #include "Scene/SceneManager.h"
 #include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/MeshComponent.h"
 
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -38,6 +39,8 @@ namespace Insight
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
+#define ECS_RENDER
+
 	namespace Graphics
 	{
 		float aspect = 0.0f;
@@ -48,6 +51,11 @@ namespace Insight
 			///m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			///m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			///m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+
+			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
+			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
+			ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
+			mesh_component->SetMesh(&m_testMesh);
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -223,10 +231,10 @@ namespace Insight
 					cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
 						
 					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
+					std::vector<Ptr<ECS::Entity>> entities;
 					if (RPtr<App::Scene> scene = w_scene.Lock())
 					{
-						std::vector<Ptr<ECS::Entity>> entities = scene->GetAllEntitiesWithComponentByName(ECS::TransformComponent::Type_Name);
-
+						entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 					}
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
@@ -239,6 +247,12 @@ namespace Insight
 						cmdList->SetUniform(0, 0, &data.Cameras.at(i), sizeof(data.Cameras.at(i)));
 
 						Frustum camera_frustum(data.Cameras.at(i).View, data.Cameras.at(i).Projection,	1000.0f);
+#ifdef ECS_RENDER
+						for (const Ptr<ECS::Entity> e : entities)
+						{
+							static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name))->GetMesh()->Draw(cmdList);
+						}
+#else
 						for (Submesh* sub_mesh : data.Mesh.GetSubMeshes())
 						{
 							BoundingBox bounding_box = sub_mesh->GetBoundingBox();
@@ -247,6 +261,7 @@ namespace Insight
 								sub_mesh->Draw(cmdList);
 							}
 						}
+#endif
 
 						cmdList->EndRenderpass();
 					}
@@ -369,7 +384,21 @@ namespace Insight
 						cmdList->SetUniform(0, 0, &camera_to_bind, sizeof(camera_to_bind));
 					}
 
+					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
+					std::vector<Ptr<ECS::Entity>> entities;
+					if (RPtr<App::Scene> scene = w_scene.Lock())
+					{
+						entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+					}
+
 					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
+					
+#ifdef ECS_RENDER
+					for (const Ptr<ECS::Entity> e : entities)
+					{
+						static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name))->GetMesh()->Draw(cmdList);
+					}
+#else
 					for (Submesh* sub_mesh : data.TestMesh.GetSubMeshes())
 					{
 						BoundingBox bounding_box = sub_mesh->GetBoundingBox();
@@ -378,6 +407,7 @@ namespace Insight
 							sub_mesh->Draw(cmdList);
 						}
 					}
+#endif
 
 					cmdList->EndRenderpass();
 				}, std::move(passData));

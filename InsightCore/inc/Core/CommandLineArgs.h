@@ -43,6 +43,7 @@ namespace Insight
 
 		private:
 			static std::unordered_map<std::string, CommandLineValue> m_args;
+			static CommandLineValue s_default_command_line_value;
 		};
 	}
 }

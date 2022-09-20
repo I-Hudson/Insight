@@ -63,7 +63,7 @@ namespace Insight
 			: m_allow_multiple(false)
 			, m_removeable(true)
 			, m_on_begin_called(false)
-			, m_on_end_called(0)
+			, m_on_end_called(false)
 		{ }
 
 		Component::~Component()
@@ -88,6 +88,7 @@ namespace Insight
 				return itr->second();
 			}
 			IS_CORE_ERROR("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
+			FAIL_ASSERT();
 			return nullptr;
 		}
 

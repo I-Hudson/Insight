@@ -1,6 +1,7 @@
 #include "ECS/EntityManager.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/TagComponent.h"
@@ -159,6 +160,7 @@ namespace Insight
 
 		Entity* EntityManager::AddNewEntity(std::string entity_name)
 		{
+			IS_PROFILE_FUNCTION();
 			UPtr<Entity> new_entity = MakeUPtr<Entity>(m_ecsWorld, entity_name);
 			new_entity->AddComponentByName(TransformComponent::Type_Name);
 			new_entity->AddComponentByName(TagComponent::Type_Name);
@@ -198,6 +200,7 @@ namespace Insight
 
 		void EntityManager::Update(const float delta_time)
 		{
+			IS_PROFILE_FUNCTION();
 			for (UPtr<Entity>& entity : m_entities)
 			{
 				entity->Update(delta_time);
@@ -206,6 +209,7 @@ namespace Insight
 
 		void EntityManager::LateUpdate()
 		{
+			IS_PROFILE_FUNCTION();
 			for (UPtr<Entity>& entity : m_entities)
 			{
 				entity->LateUpdate();
@@ -214,6 +218,7 @@ namespace Insight
 
 		void EntityManager::Destroy()
 		{
+			IS_PROFILE_FUNCTION();
 			for (UPtr<Entity>& e :  m_entities)
 			{
 				e->Destroy(); 
@@ -224,6 +229,7 @@ namespace Insight
 
 		Ptr<Entity> EntityManager::GetEntityByName(std::string_view entity_name) const
 		{
+			IS_PROFILE_FUNCTION();
 			for (const UPtr<Entity>& e : m_entities)
 			{
 				if (e->GetName() == entity_name) 
@@ -236,6 +242,8 @@ namespace Insight
 
 		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntitiesWithComponentByName(std::string_view component_type) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::vector<Ptr<ECS::Entity>> entities;
 			for (const UPtr<Entity>& e : m_entities)
 			{

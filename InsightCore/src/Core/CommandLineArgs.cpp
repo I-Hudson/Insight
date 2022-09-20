@@ -8,6 +8,7 @@ namespace Insight
 	namespace Core
 	{
 		std::unordered_map<std::string, CommandLineValue> CommandLineArgs::m_args;
+		CommandLineValue CommandLineArgs::s_default_command_line_value;
 
 		CommandLineValue::CommandLineValue(std::string key, std::string value)
 			: Key(std::move(key))
@@ -81,7 +82,7 @@ namespace Insight
 			{
 				return &const_cast<CommandLineValue&>(itr->second);
 			}
-			return nullptr;
+			return &s_default_command_line_value;
 		}
 	}
 }

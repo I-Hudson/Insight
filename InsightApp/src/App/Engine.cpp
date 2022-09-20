@@ -10,6 +10,8 @@
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
+#include "Graphics/Mesh.h"
+
 #include "imgui.h"
 
 namespace Insight
@@ -33,13 +35,14 @@ namespace Insight
 
 			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
 			RETURN_IF_FALSE(m_graphicsManager.Init());
-			m_renderpasses.Create();
 
 			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
 
 			m_sceneManager = MakeUPtr<SceneManager>();
 			WPtr<Scene> newScene = m_sceneManager->CreateScene("New Scene");
 			SceneManager::Instance().SetActiveScene(newScene);
+
+			m_renderpasses.Create();
 
 #define SCENE_TEST
 #ifdef SCENE_TEST

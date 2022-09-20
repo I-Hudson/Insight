@@ -32,7 +32,7 @@ namespace Insight
 		SAFE_BREAK;																																		\
 	}
 
-#define FAIL_ASSERT(condition)																									\
+#define FAIL_ASSERT()																									\
 		ASSERT(false)
 
 #define FAIL_ASSERT_MSG(message)																									\

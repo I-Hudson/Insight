@@ -2,6 +2,7 @@
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/TagComponent.h"
+#include "ECS/Components/MeshComponent.h"
 
 namespace Insight
 {
@@ -42,6 +43,7 @@ namespace Insight
 		{
 			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name, []() { return NewTracked(TransformComponent); });
 			ComponentRegistry::RegisterComponent(TagComponent::Type_Name, []() { return NewTracked(TagComponent); });
+			ComponentRegistry::RegisterComponent(MeshComponent::Type_Name, []() { return NewTracked(MeshComponent); });
 		}
 
 		void ECSWorld::EarlyUpdate()

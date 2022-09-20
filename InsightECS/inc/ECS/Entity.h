@@ -70,6 +70,12 @@ namespace Insight
 			Component();
 			~Component();
 
+			/*
+			*	Each component should have a type name and override GetTypeName.
+				static constexpr char* Type_Name = "ComponentClass";
+				virtual const char* GetTypeName() override { return Type_Name; }
+			*/
+
 			/// @brief Called on creation (When the object is newed).
 			virtual void OnCreate() { }
 			/// @brief Called on destruction (Just before the object is deleted).

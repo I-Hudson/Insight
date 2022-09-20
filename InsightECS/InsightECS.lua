@@ -14,6 +14,7 @@ project "InsightECS"
     dependson 
     { 
         "InsightCore",
+        "InsightGraphics",
         "InsightInput",
     }
 
@@ -26,6 +27,7 @@ project "InsightECS"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightInput}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.optick}",
@@ -42,6 +44,7 @@ project "InsightECS"
     links
     {
         "InsightCore.lib",
+        "InsightGraphics.lib",
         "InsightInput.lib",
         "glm.lib",
         "tracy.lib",
