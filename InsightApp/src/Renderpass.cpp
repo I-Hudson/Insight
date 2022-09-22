@@ -24,8 +24,8 @@
 namespace Insight
 {
 	const float ShadowZNear = 0.1f;
-	const float ShadowZFar = 1024.0f;
-	const float ShadowFOV = 45.0f;
+	const float ShadowZFar = 2048.0f;
+	const float ShadowFOV = 65.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
 
 	const float Main_Camera_Near_Plane = 0.1f;
@@ -46,11 +46,11 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
-			///m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
-			///m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
-			///m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			///m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");

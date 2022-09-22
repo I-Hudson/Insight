@@ -168,7 +168,8 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	}
 	else if(push_constant.Output_Texture == 4)
 	{
-		result = colour * shadow;
+		float4 ambient = 0.25 * colour;
+		result = colour * (shadow + ambient);
 	}
 	else if(push_constant.Output_Texture == 5)
 	{
