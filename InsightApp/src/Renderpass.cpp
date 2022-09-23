@@ -46,10 +46,10 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
-			m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
@@ -421,7 +421,7 @@ namespace Insight
 
 			static int output_texture;
 			static int cascade_override;
-			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "View space", "GBuffer_Depth", "reconstruct_position", "display_shadow_texture" };
+			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "Colour + Shadow", "View Position", "Cascade splits", "Shadow NDC Z"};
 			const char* cascade_override_items[] = { "0", "1", "2", "3" };
 
 			IMGUI_VALID(ImGui::Begin("Composite pass"));
@@ -430,10 +430,6 @@ namespace Insight
 			IMGUI_VALID(ImGui::End());
 
 			std::vector<UBO_ShadowCamera> shader_cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
-			for (UBO_ShadowCamera& c : shader_cameras)
-			{
-				///c = shader_cameras[2];
-			}
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass", 
 				[](PassData& data, RenderGraphBuilder& builder)
@@ -659,24 +655,26 @@ namespace Insight
 				viewMatrix[1] = vUp;
 				viewMatrix[2] = vForward;
 
-				camera.View = viewMatrix;
 			}
 			else
 			{
 				sbMouseButtonDown = false;
 			}
 
+			camera.View = viewMatrix;
+			camera.View_Inverted = glm::inverse(viewMatrix);
+
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			aspect = std::max(0.1f, aspect);
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
 
-			/// Setup the inverted projection view matrix.
+			// Setup the inverted projection view matrix.
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
 
 			if (GraphicsManager::IsVulkan())
 			{
-				/// Then invert the projection if vulkan.
+				// Then invert the projection if vulkan.
 				camera.Projection[1][1] *= -1;
 				camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			}

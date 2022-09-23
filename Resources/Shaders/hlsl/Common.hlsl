@@ -4,6 +4,7 @@ cbuffer Main_Camera : register(b0)
 	float4x4 Main_Camera_Proj_View;
 	float4x4 Main_Camera_Projection;
 	float4x4 Main_Camera_View;
+	float4x4 Main_Camera_View_Inverted;
 	float4x4 Main_Camera_Projection_View_Inverted;
 }
 

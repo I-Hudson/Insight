@@ -18,6 +18,7 @@ namespace Insight
 			glm::mat4 ProjView;
 			glm::mat4 Projection;
 			glm::mat4 View;
+			glm::mat4 View_Inverted;
 			glm::mat4 Projection_View_Inverted;
 		};
 

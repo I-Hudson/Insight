@@ -120,14 +120,45 @@ float Technique_Pcf(float3 uv, float compare)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
-	float4 colour 			= GBuffer_Colour.Sample(GBuffer_Colour_Sampler, input.UV);
-	float4 world_normal 	= GBuffer_World_Normal.Sample(GBuffer_World_Normal_Sampler, input.UV);
-	float gbuffer_depth 	= GBuffer_Shadow.Sample(GBuffer_Shadow_Sampler, input.UV).r;
+	float4 colour 						= GBuffer_Colour.Sample(GBuffer_Colour_Sampler, input.UV);
+	float4 world_normal 				= GBuffer_World_Normal.Sample(GBuffer_World_Normal_Sampler, input.UV);
+	float gbuffer_depth 				= GBuffer_Shadow.Sample(GBuffer_Shadow_Sampler, input.UV).r;
 
-	float3 reconstruct_world_position = reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
-	float4 shadow 				= 1.0;
-	float cascade_index = 0;
+	float3 reconstruct_world_position 	= reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
+	float3 reconstruct_view_position 	= mul(Main_Camera_View_Inverted, float4(reconstruct_world_position, 1)).xyz;
 
+	float4 shadow 						= 1.0;
+	float cascade_index 				= 0.0;
+	float cascade_split_index 			= 0.0;
+	float shadow_npc_z 					= 0.0;
+	float3 shadow_ndc 					= 0.0;
+
+{
+    for (uint cascade = 0; cascade < 4; cascade++)
+    {
+		cascade_index = cascade;
+		Shadow_Camera shadow_camera = shadow_cameras[cascade];
+
+		if (reconstruct_view_position.z < -shadow_camera.Shadow_CameraSplit_Depth)
+		{
+			cascade_split_index = cascade;
+			break;
+		}
+	}
+	cascade_index = 0;
+	Shadow_Camera shadow_camera = shadow_cameras[cascade_split_index];
+	// Project into light space
+	float4x4 shadow_space_matrix = shadow_camera.Shadow_Camera_ProjView;
+    float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
+	float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
+
+	float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+																, float3(shadow_uv.xy, cascade_split_index)
+																, shadow_pos_ndc.z).r;
+	shadow = shadow * shadow_sample;
+}
+{
+/*
 	//uint cascade = push_constant.Cascade_Override;
     for (uint cascade = 0; cascade < 4; cascade++)
     {
@@ -148,7 +179,8 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 			break;
 		}
 	}
-
+	*/
+}
 	float4 result;
 	if(push_constant.Output_Texture == 0)
 	{
@@ -171,24 +203,33 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 		float4 ambient = 0.25 * colour;
 		result = colour * (shadow + ambient);
 	}
-	else if(push_constant.Output_Texture == 5)
+	else if (push_constant.Output_Texture == 5)
 	{
-		if (cascade_index == 0)
+		result = float4(reconstruct_view_position, 1);
+	}
+	else if(push_constant.Output_Texture == 6)
+	{
+		if (cascade_split_index == 0)
 		{
 			result = float4(1, 0, 0, 1);
 		}
-		if (cascade_index == 1)
+		if (cascade_split_index == 1)
 		{
 			result = float4(0, 1, 0, 1);
 		}
-		if (cascade_index == 2)
+		if (cascade_split_index == 2)
 		{
 			result = float4(0, 0, 1, 1);
 		}
-		if (cascade_index == 3)
+		if (cascade_split_index == 3)
 		{
 			result = float4(1, 1, 1, 1);
 		}
+	}
+	else if (push_constant.Output_Texture == 7)
+	{
+		//result = float4(shadow_npc_z, shadow_npc_z, shadow_npc_z, 1);
+		result = float4(shadow_ndc, 1);
 	}
 	return result;
 }
