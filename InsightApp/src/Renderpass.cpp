@@ -35,7 +35,7 @@ namespace Insight
 	int Render_Width = 640;
 	int Render_Height = 720;
 
-	float cascade_split_lambda = 0.55f;
+	float cascade_split_lambda = 0.85f;
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
