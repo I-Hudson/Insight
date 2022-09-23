@@ -22,6 +22,11 @@ struct VertexOutput
     [[vk::location(7)]] float4 position_screen_space : POSITION3;
 };
 
+[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
+Texture2D<float4> Diffuse_Texture : register(t0);
+[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
+SamplerState Diffuse_Sampler : register(s0);
+
 struct PushConstant
 {
 	float4x4 Transform;
@@ -58,7 +63,7 @@ PixelOutput PSMain(VertexOutput input)
     float2 velocity_uv          = position_uv_current - position_uv_previous;
 
 	PixelOutput Out;
-	Out.Colour = input.Colour;
+	Out.Colour = Diffuse_Texture.Sample(Diffuse_Sampler, input.UV);
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
 	Out.Velocity = float2(0, 0); // velocity_uv
 

@@ -2,6 +2,7 @@
 
 #include "Graphics/Defines.h"
 #include "Graphics/RHI/RHI_Buffer.h"
+#include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/BoundingBox.h"
 
 #include <glm/vec2.hpp>
@@ -14,6 +15,8 @@
 struct aiNode;
 struct aiScene;
 struct aiMesh;
+struct aiMaterial;
+enum aiTextureType;
 
 namespace Insight
 {
@@ -49,6 +52,8 @@ namespace Insight
 
 			RHI_Buffer* Vertex_Buffer = nullptr;
 			RHI_Buffer* Index_Buffer = nullptr;
+
+			std::vector<Ptr<RHI_Texture>> Textures;
 		};
 
 		//// <summary>
@@ -101,12 +106,18 @@ namespace Insight
 			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 			void ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, std::vector<Vertex>& vertices, std::vector<u32>& indices);
 			void ProcessMesh(aiMesh* mesh, const aiScene* aiScene, std::vector<Vertex>& vertices, std::vector<u32>& indices);
-		
+			std::vector<Ptr<RHI_Texture>> LoadMaterialTextures(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* texture_id);
+
 			void Optimize(std::vector<Vertex>& src_vertices, std::vector<u32>& src_indices);
 
 		private:
+			std::string m_file_path;
+			std::string m_file_name;
+
 			UPtr<RHI_Buffer> m_vertex_buffer;
 			UPtr<RHI_Buffer> m_index_buffer;
+			std::vector<Ptr<RHI_Texture>> m_textures; //TODO This should be a resource Texture not graphics texture later when asset models are implementated.
+			std::vector<std::string> m_texture_paths;
 			std::vector<Submesh*> m_submeshes;
 		};
 	}

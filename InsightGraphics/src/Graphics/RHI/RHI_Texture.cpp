@@ -46,7 +46,7 @@ namespace Insight
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
 			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
-			const u64 textureSize = width * height * channels;
+			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
 
 			stbi_image_free(data);

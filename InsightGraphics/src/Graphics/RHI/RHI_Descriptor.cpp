@@ -439,7 +439,13 @@ namespace Insight
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
 		{
-			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (set >= m_descriptors.size())
+			{
+				//IS_CORE_WARN("[GPUDescriptorAllocator::SetTexture] Set: '{}' is out of range.", set);
+				return;
+			}
+
+			std::vector<Descriptor>& descriptors = m_descriptors.at(set);
 			if (binding >= (int)descriptors.size())
 			{
 				IS_CORE_ERROR("[GPUDescriptorAllocator::SetTexture] Binding: '{0}' is out of range.", binding);

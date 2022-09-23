@@ -66,6 +66,11 @@ namespace Insight
 			///transform = glm::scale(transform, glm::vec3(5, 5, 5));
 			cmdList->SetPushConstant(0, sizeof(glm::mat4), static_cast<const void*>(glm::value_ptr(transform)));
 
+			if (m_draw_info.Textures.size() > 0)
+			{
+				cmdList->SetTexture(1, 0, m_draw_info.Textures.at(0).Get());
+			}
+
 			cmdList->SetVertexBuffer(m_draw_info.Vertex_Buffer);
 			cmdList->SetIndexBuffer(m_draw_info.Index_Buffer, IndexType::Uint32);
 			cmdList->DrawIndexed(m_draw_info.Index_Count, 1, m_draw_info.First_Index, m_draw_info.Vertex_Offset, 0);
@@ -84,6 +89,19 @@ namespace Insight
 
 		int vertexOffset = 0;
 		int indexOffset = 0;
+
+		std::string GetFileNameFromPath(const std::string& path)
+		{
+			const u64 file_name_start = path.find_last_of('/') + 1;
+			const u64 file_name_end = path.find_last_of('.');
+			return path.substr(file_name_start, file_name_end - file_name_start);
+		}
+		std::wstring GetFileNameFromPath(const std::wstring& path)
+		{
+			const u64 file_name_start = path.find_last_of('/') + 1;
+			const u64 file_name_end = path.find_last_of('.');
+			return path.substr(file_name_start, file_name_end - file_name_start);
+		}
 
 		Mesh::Mesh()
 		{
@@ -115,6 +133,14 @@ namespace Insight
 				return false;
 			}
 
+			const u64 file_path_start = 0;
+			const u64 file_path_end = filePath.find_last_of('/');
+			const u64 file_name_start = filePath.find_last_of('/') + 1;
+			const u64 file_name_end = filePath.find_last_of('.');
+
+			m_file_path = filePath.substr(file_path_start, file_path_end - file_path_start);
+			m_file_name = filePath.substr(file_name_start, file_name_end - file_name_start);
+
 			std::vector<Vertex> vertices;
 			std::vector<u32> indices;
 
@@ -139,11 +165,7 @@ namespace Insight
 			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
 			m_index_buffer->Upload(indices.data(), index_byte_size);
 
-			const u64 file_name_start = filePath.find_last_of('/');
-			const u64 file_name_end = filePath.find_last_of('.');
-			std::string file_name = filePath.substr(file_name_start, file_name_end - file_name_start);
-
-			std::wstring file_name_w = Platform::WStringFromString(file_name);
+			std::wstring file_name_w = Platform::WStringFromString(m_file_name);
 			m_vertex_buffer->SetName(file_name_w + L" Vertex_Buffer");
 			m_index_buffer->SetName(file_name_w + L" Index_Buffer");
 
@@ -163,6 +185,13 @@ namespace Insight
 
 			m_vertex_buffer.Release();
 			m_index_buffer.Release();
+
+			for (Ptr<RHI_Texture>& texture : m_textures)
+			{
+				Renderer::FreeTexture(texture.Get());
+			}
+			m_textures.clear();
+			m_texture_paths.clear();
 
 			m_submeshes.clear();
 		}
@@ -256,6 +285,16 @@ namespace Insight
 					submesh_draw_info.Vertex_Count = static_cast<u32>(vertices.size()) - submesh_draw_info.Vertex_Offset;
 					submesh_draw_info.Index_Count = static_cast<u32>(indices.size()) - submesh_draw_info.First_Index;
 
+					/// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
+					/// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+					/// Same applies to other texture as the following list summarizes:
+					/// diffuse: texture_diffuseN
+					/// specular: texture_specularN
+					/// normal: texture_normalN
+					
+					std::vector<Ptr<RHI_Texture>> diffuse_textures = LoadMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], aiTextureType_DIFFUSE, "texture_diffuse");
+					submesh_draw_info.Textures.insert(submesh_draw_info.Textures.end(), diffuse_textures.begin(), diffuse_textures.end());
+
 					Submesh* subMesh = NewArgsTracked(Submesh, this);
 					subMesh->SetDrawInfo(submesh_draw_info);
 					subMesh->m_bounding_box = bounding_box;
@@ -346,12 +385,12 @@ namespace Insight
 				if (mesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
 				{
 					glm::vec2 vec;
-					/// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
-					/// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
+					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
-					///vertex.UV = vec;
-					/// tangent
+					vertex.UV = vec;
+					// tangent
 					if (mesh->mTangents)
 					{
 						vector.x = mesh->mTangents[i].x;
@@ -366,7 +405,7 @@ namespace Insight
 						vector.y = mesh->mBitangents[i].y;
 						vector.z = mesh->mBitangents[i].z;
 					}
-					///vertex.Bitangent = vector;
+					//vertex.Bitangent = vector;
 				}
 				else
 				{
@@ -386,29 +425,45 @@ namespace Insight
 					IS_PROFILE_SCOPE("Add index");
 					indices.push_back(face.mIndices[j]);
 				}
+			}			
+		}
+
+		std::vector<Ptr<RHI_Texture>> Mesh::LoadMaterialTextures(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* texture_id)
+		{
+			std::vector<Ptr<RHI_Texture>> textures;
+			for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
+			{
+				aiString str;
+				ai_material->GetTexture(ai_texture_type, i, &str);
+				std::string file_path = str.C_Str();
+
+				if (file_path.find("./") != std::string::npos)
+				{
+					file_path = file_path.substr(2);
+				}
+
+				bool skip = false;
+				for (u32 texture_path_index = 0; texture_path_index < m_texture_paths.size(); ++texture_path_index)
+				{
+					if (m_texture_paths.at(texture_path_index) == file_path)
+					{
+						textures.push_back(m_textures.at(texture_path_index));
+						skip = true;
+						break;
+					}
+				}
+
+				if (!skip)
+				{
+					Ptr<RHI_Texture> texture = Ptr(Renderer::CreateTexture());
+					texture->LoadFromFile(m_file_path + "/" + file_path);
+					texture->SetName(Platform::WStringFromString(GetFileNameFromPath(file_path)) + L"_" + Platform::WStringFromString(texture_id));
+					m_textures.push_back(texture);
+					m_texture_paths.push_back(file_path);
+					textures.push_back(m_textures.back());
+				}
 			}
-
-			/// process materials
-			aiMaterial* material = aiScene->mMaterials[mesh->mMaterialIndex];
-			/// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-			/// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-			/// Same applies to other texture as the following list summarizes:
-			/// diffuse: texture_diffuseN
-			/// specular: texture_specularN
-			/// normal: texture_normalN
-
-			/// 1. diffuse maps
-			///vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-			///textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			/// 2. specular maps
-			///vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
-			///textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-			/// 3. normal maps
-			///std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-			///textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-			/// 4. height maps
-			///std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-			///textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+			return textures;
 		}
 		
 		void Mesh::Optimize(std::vector<Vertex>& src_vertices, std::vector<u32>& src_indices)

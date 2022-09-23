@@ -35,7 +35,7 @@ namespace Insight
 	int Render_Width = 640;
 	int Render_Height = 720;
 
-	float cascade_split_lambda = 0.25f;
+	float cascade_split_lambda = 0.55f;
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
@@ -46,11 +46,12 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/survival_guitar_backpack_fbx/source/Survival_BackPack_2.fbx");
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
