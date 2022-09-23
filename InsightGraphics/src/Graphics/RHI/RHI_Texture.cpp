@@ -25,13 +25,18 @@ namespace Insight
 
 		void RHI_Texture::LoadFromFile(std::string filePath)
 		{
+			IS_PROFILE_FUNCTION();
 			if (filePath.empty() || !std::filesystem::exists(filePath))
 			{
 				return;
 			}
 
 			int width, height, channels;
-			Byte* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			Byte* data = nullptr;
+			{
+				IS_PROFILE_SCOPE("stbi_load");
+				data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			}
 			if (!data)
 			{
 				return;

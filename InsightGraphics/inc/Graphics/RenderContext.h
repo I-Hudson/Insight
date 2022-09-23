@@ -18,6 +18,8 @@
 
 #include "Core/Collections/FactoryMap.h"
 
+#include <mutex>
+
 namespace Insight
 {
 	class Renderer;
@@ -104,6 +106,8 @@ namespace Insight
 
 		protected:
 			///const static int c_FrameCount = 3;
+
+			std::mutex m_lock;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_enabledDeviceExtensions;

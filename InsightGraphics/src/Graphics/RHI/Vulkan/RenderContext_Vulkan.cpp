@@ -127,6 +127,7 @@ namespace Insight
 			bool RenderContext_Vulkan::Init()
 			{
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_lock);
 
 				if (m_instnace && m_device)
 				{
@@ -287,6 +288,7 @@ namespace Insight
 			void RenderContext_Vulkan::Destroy()
 			{
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_lock);
 
 				m_device.waitIdle();
 
@@ -448,6 +450,7 @@ namespace Insight
 			{
 #ifdef RENDER_GRAPH_ENABLED
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_lock);
 
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
 				{
@@ -490,6 +493,8 @@ namespace Insight
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
 			{
 #ifdef RENDER_GRAPH_ENABLED
+				std::lock_guard lock(m_lock);
+
 				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
 				std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };

@@ -111,6 +111,7 @@ namespace Insight
 			virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) = 0;
 
 		protected:
+			std::mutex m_lock;
 			std::unordered_set<RHI_CommandList*> m_allocLists;
 			std::unordered_set<RHI_CommandList*> m_freeLists;
 		};

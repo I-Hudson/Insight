@@ -6,6 +6,8 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Core/Slice.h"
 
+#include <mutex>
+
 namespace Insight
 {
 	namespace Graphics
@@ -81,7 +83,7 @@ namespace Insight
 			class RHI_CommandListAllocator_Vulkan : public RHI_CommandListAllocator
 			{
 			public:
-
+				THREAD_SAFE;
 				vk::CommandPool GetAllocator() const { return m_allocator; }
 
 				/// RHI_CommandListAllocator

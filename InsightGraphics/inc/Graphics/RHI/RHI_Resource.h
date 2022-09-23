@@ -4,6 +4,8 @@
 #include "Core/TypeAlias.h"
 #include "Graphics/Enums.h"
 #include "Graphics/Defines.h"
+
+#include <mutex>
 #include <type_traits>
 #include <queue>
 #include <unordered_map>
@@ -30,6 +32,7 @@ namespace Insight
 		template<typename T>
 		class RHI_ResourceManager
 		{
+			THREAD_SAFE;
 			static_assert(std::is_base_of_v<RHI_Resource, T>);
 
 		public:
@@ -48,6 +51,7 @@ namespace Insight
 
 			TypePtr CreateResource()
 			{
+				std::lock_guard lock(m_lock);
 				TypePtr object = Type::New();
 				m_objects.insert(object);
 				return object;
@@ -55,6 +59,7 @@ namespace Insight
 
 			void FreeResource(TypePtr object)
 			{
+				std::lock_guard lock(m_lock);
 				auto itr = m_objects.find(object);
 				if (itr != m_objects.end())
 				{
@@ -69,6 +74,7 @@ namespace Insight
 
 			void ReleaseAll()
 			{
+				std::lock_guard lock(m_lock);
 				for (auto obj : m_objects)
 				{
 					if (obj)
@@ -84,11 +90,13 @@ namespace Insight
 
 		protected:
 			std::unordered_set<TypePtr> m_objects;
+			std::mutex m_lock;
 		};
 
 		template<typename TValue>
 		class RHI_ResourceCache : public RHI_ResourceManager<TValue>
 		{
+			THREAD_SAFE;
 			static_assert(std::is_base_of_v<RHI_Resource, TValue>);
 
 			struct Item
@@ -101,6 +109,7 @@ namespace Insight
 
 			int AddOrReturn(std::wstring str)
 			{
+				std::lock_guard lock(m_lock);
 				auto itr = m_itemLookup.find(str);
 				if (itr != m_itemLookup.end())
 				{
@@ -117,8 +126,9 @@ namespace Insight
 				return id;
 			}
 
-			TypePtr Get(std::wstring key) const
+			TypePtr Get(std::wstring key)
 			{
+				std::lock_guard lock(m_lock);
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
 				{
 					return itr->second.ItemPtr;
@@ -126,8 +136,9 @@ namespace Insight
 				return nullptr;
 			}
 
-			TypePtr Get(int key) const
+			TypePtr Get(int key)
 			{
+				std::lock_guard lock(m_lock);
 				if (auto itr = m_idToStrLookup.find(key); itr != m_idToStrLookup.end())
 				{
 					return m_itemLookup.at(itr->second).ItemPtr;
@@ -135,8 +146,9 @@ namespace Insight
 				return nullptr;
 			}
 
-			int GetId(std::wstring key) const
+			int GetId(std::wstring key)
 			{
+				std::lock_guard lock(m_lock);
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
 				{
 					return m_itemLookup.at(key).Id;
@@ -146,6 +158,7 @@ namespace Insight
 
 			void Reset()
 			{
+				std::lock_guard lock(m_lock);
 				m_itemLookup.clear();
 				m_idToStrLookup.clear();
 				m_currentMaxId = 0;
@@ -155,6 +168,7 @@ namespace Insight
 		private:
 			int GetFreeId()
 			{
+				// Must be locked externally.
 				if (m_freeIds.empty())
 				{
 					m_freeIds.push(m_currentMaxId++);
@@ -166,10 +180,12 @@ namespace Insight
 
 			void ReturnId(int id)
 			{
+				// Must be locked externally.
 				m_freeIds.push(id);
 			}
 
 		private:
+			std::mutex m_lock;
 			std::unordered_map<std::wstring, Item> m_itemLookup;
 
 			int m_currentMaxId = 0;

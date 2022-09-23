@@ -41,6 +41,8 @@
 	*/
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
+#define THREAD_SAFE
+
 #if defined(__clang__)
 
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))

@@ -509,6 +509,7 @@ namespace Insight
 			//// <param name="context"></param>
 			void RHI_CommandListAllocator_Vulkan::Create(RenderContext* context)
 			{
+				std::lock_guard lock(m_lock);
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 
 				vk::CommandPoolCreateInfo poolCreateInfo = vk::CommandPoolCreateInfo();
@@ -518,6 +519,7 @@ namespace Insight
 
 			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetCommandList()
 			{
+				std::lock_guard lock(m_lock);
 				if (m_freeLists.size() > 0)
 				{
 					RHI_CommandList* list = *m_freeLists.begin();
@@ -568,6 +570,8 @@ namespace Insight
 
 			void RHI_CommandListAllocator_Vulkan::Release()
 			{
+				std::lock_guard lock(m_lock);
+
 				if (m_allocator)
 				{
 					Reset();

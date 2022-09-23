@@ -109,13 +109,20 @@ float Technique_Pcf(float3 uv, float compare)
         for (float x = -g_pcf_filter_size; x <= g_pcf_filter_size; x++)
         {
             float2 offset = float2(x, y) * texel_size;
-            //shadow        += Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-			//													, uv + float3(offset, 0.0)
-			//													, compare).r;
+            shadow        += Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+																, uv + float3(offset, 0.0)
+																, compare).r;
         }
     }
     
     return shadow * g_shadow_samples_rpc;
+}
+
+float SampleShadow(float3 uv, float compare)
+{
+return Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+										, uv
+										, compare).r;
 }
 
 float4 PSMain(VertexOutput input) : SV_TARGET
@@ -152,9 +159,8 @@ float4 PSMain(VertexOutput input) : SV_TARGET
     float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
 	float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
 
-	float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-																, float3(shadow_uv.xy, cascade_split_index)
-																, shadow_pos_ndc.z).r;
+	//float shadow_sample = SampleShadow(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
+	float shadow_sample = Technique_Pcf(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
 	shadow = shadow * shadow_sample;
 }
 {

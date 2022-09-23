@@ -18,6 +18,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
+#include <ppl.h>
+
 namespace Insight
 {
 	namespace Graphics
@@ -52,6 +54,8 @@ namespace Insight
 				transform.a4, transform.b4, transform.c4, transform.d4
 			);
 		}
+
+		std::vector<std::function<void()>> defered_process;
 
 		Submesh::~Submesh()
 		{
@@ -114,6 +118,7 @@ namespace Insight
 
 			Destroy();
 
+			defered_process.clear();
 			vertexOffset = 0;
 			indexOffset = 0;
 
@@ -146,6 +151,13 @@ namespace Insight
 
 			ProcessNode(scene->mRootNode, scene, "", vertices, indices);
 
+			// EXPERIMENTAL: Trying to load textures in parallel. 
+			concurrency::task_group task_group;
+			for (size_t i = 0; i < defered_process.size(); ++i)
+			{
+				task_group.run(defered_process.at(i));
+			}
+
 			const u64 vertex_byte_size = vertices.size() * sizeof(Vertex);
 			const u64 index_byte_size = indices.size() * sizeof(u32);
 
@@ -168,6 +180,8 @@ namespace Insight
 			std::wstring file_name_w = Platform::WStringFromString(m_file_name);
 			m_vertex_buffer->SetName(file_name_w + L" Vertex_Buffer");
 			m_index_buffer->SetName(file_name_w + L" Index_Buffer");
+
+			task_group.wait();
 
 			return true;
 		}
@@ -261,6 +275,7 @@ namespace Insight
 			{
 				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				{
+					IS_PROFILE_SCOPE("Mesh evaluated");
 					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 
 					std::vector<Vertex> vertices_optomized;
@@ -291,14 +306,16 @@ namespace Insight
 					/// diffuse: texture_diffuseN
 					/// specular: texture_specularN
 					/// normal: texture_normalN
-					
 					std::vector<Ptr<RHI_Texture>> diffuse_textures = LoadMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], aiTextureType_DIFFUSE, "texture_diffuse");
 					submesh_draw_info.Textures.insert(submesh_draw_info.Textures.end(), diffuse_textures.begin(), diffuse_textures.end());
 
-					Submesh* subMesh = NewArgsTracked(Submesh, this);
-					subMesh->SetDrawInfo(submesh_draw_info);
-					subMesh->m_bounding_box = bounding_box;
-					m_submeshes.push_back(std::move(subMesh));
+					{
+						IS_PROFILE_SCOPE("New Submesh");
+						Submesh* subMesh = NewArgsTracked(Submesh, this);
+						subMesh->SetDrawInfo(submesh_draw_info);
+						subMesh->m_bounding_box = bounding_box;
+						m_submeshes.push_back(std::move(subMesh));
+					}
 				}
 
 				///Mesh* mesh = ::New<Mesh, MemoryCategory::Core>(&model, static_cast<u32>(model.m_meshes.size()));
@@ -430,6 +447,8 @@ namespace Insight
 
 		std::vector<Ptr<RHI_Texture>> Mesh::LoadMaterialTextures(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* texture_id)
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::vector<Ptr<RHI_Texture>> textures;
 			for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
 			{
@@ -455,9 +474,14 @@ namespace Insight
 
 				if (!skip)
 				{
+					IS_PROFILE_SCOPE("Create new texture");
 					Ptr<RHI_Texture> texture = Ptr(Renderer::CreateTexture());
-					texture->LoadFromFile(m_file_path + "/" + file_path);
-					texture->SetName(Platform::WStringFromString(GetFileNameFromPath(file_path)) + L"_" + Platform::WStringFromString(texture_id));
+					defered_process.push_back([this, texture, file_path, texture_id]()
+						{
+							texture->LoadFromFile(m_file_path + "/" + file_path);
+							texture->SetName(Platform::WStringFromString(GetFileNameFromPath(file_path)) + L"_" + Platform::WStringFromString(texture_id));
+						});
+
 					m_textures.push_back(texture);
 					m_texture_paths.push_back(file_path);
 					textures.push_back(m_textures.back());
@@ -468,6 +492,8 @@ namespace Insight
 		
 		void Mesh::Optimize(std::vector<Vertex>& src_vertices, std::vector<u32>& src_indices)
 		{
+			IS_PROFILE_FUNCTION();
+
 			const u64 vertex_byte_size = src_vertices.size() * sizeof(Vertex);
 			const u64 index_byte_size = src_indices.size() * sizeof(u32);
 
