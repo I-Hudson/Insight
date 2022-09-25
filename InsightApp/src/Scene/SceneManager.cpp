@@ -9,19 +9,28 @@ namespace Insight
 		Scene::Scene()
 			: m_sceneName("Default")
 		{
+#ifdef ECS_ENABLED
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
+#else
+#endif
 		}
 
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
+#ifdef ECS_ENABLED
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
+#else
+#endif
 		}
 
 		Scene::Scene(Scene&& other)
 		{
 			m_sceneName = std::move(other.m_sceneName);
+#ifdef ECS_ENABLED
 			m_ecsWorld = std::move(other.m_ecsWorld);
+#else
+#endif
 		}
 
 		Scene::~Scene()
@@ -31,34 +40,44 @@ namespace Insight
 
 		void Scene::Destroy()
 		{
+#ifdef ECS_ENABLED
 			m_ecsWorld->Destroy();
+#else
+#endif
 		}
 
 		void Scene::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef ECS_ENABLED
 			m_ecsWorld->EarlyUpdate();
+#else
+#endif
 		}
 
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef ECS_ENABLED
 			m_ecsWorld->Update(deltaTime);
+#else
+#endif
 		}
 
 		void Scene::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef ECS_ENABLED
 			m_ecsWorld->LateUpdate();
-		}
-
-		void Scene::Render()
-		{
+#else
+#endif
 		}
 
 		std::vector<Ptr<ECS::Entity>> Scene::GetAllEntitiesWithComponentByName(std::string_view component_type) const
 		{
+#ifdef ECS_ENABLED
 			return m_ecsWorld->GetAllEntitiesWithComponentByName(component_type);
+#endif
 		}
 
 		SceneManager::SceneManager()

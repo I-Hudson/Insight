@@ -26,19 +26,29 @@ namespace Insight
 			void Update(const float deltaTime);
 			void LateUpdate();
 
-			void Render();
-
 			void SetSceneName(std::string sceneName) { m_sceneName = m_sceneName; }
 			std::string_view GetSceneName() const { return m_sceneName; }
 
+#ifdef ECS_ENABLED
 			Ptr<ECS::ECSWorld> GetECSWorld() const { return m_ecsWorld; }
-
+#else
+			Ptr<ECS::Entity> AddEntity();
+			Ptr<ECS::Entity> AddEntity(std::string entity_name);
+			Ptr<ECS::Entity> GetEntityByName(std::string entity_name) const;
+			void RemoveEntity(Ptr<ECS::Entity>& entity);
+#endif
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 
 		private:
 			/// Store all entites 
 			std::string m_sceneName = "";
+#ifdef ECS_ENABLED
 			UPtr<ECS::ECSWorld> m_ecsWorld = nullptr;
+#else
+			//
+			std::vector<Ptr<ECS::Entity>> m_root_entities;
+			ECS::EntityManager m_entityManager;
+#endif
 		};
 
 		class SceneManager : public Core::Singleton<SceneManager>

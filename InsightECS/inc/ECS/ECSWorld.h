@@ -90,6 +90,7 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 
 		private:
+			std::vector<Ptr<Entity>> m_root_entities;
 			EntityManager m_entityManager;
 		};
 
