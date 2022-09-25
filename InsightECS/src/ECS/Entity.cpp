@@ -94,11 +94,11 @@ namespace Insight
 
 
 		Entity::Entity(ECSWorld* ecs_world)
-			: m_ecsWorld(ecs_world)
+			: m_ecs_world(ecs_world)
 		{ }
 
 		Entity::Entity(ECSWorld* ecs_world, std::string name)
-			: m_ecsWorld(ecs_world)
+			: m_ecs_world(ecs_world)
 			, m_name(std::move(name))
 		{ }
 
@@ -109,7 +109,8 @@ namespace Insight
 
 		Ptr<Entity> Entity::AddChild(std::string entity_name)
 		{
-			Ptr<Entity> entity = m_ecsWorld->AddEntity(entity_name);
+			Ptr<Entity> entity = m_ecs_world->AddEntity(entity_name);
+			entity->m_parent = this;
 			m_children.push_back(entity);
 			return entity;
 		}
@@ -125,7 +126,7 @@ namespace Insight
 			/// the remove it from this entity's child vector.
 			std::vector<Ptr<Entity>>::iterator entity_itr = m_children.begin() + index;
 			Entity* entity_ptr = entity_itr->Get();
-			m_ecsWorld->RemoveEntity(entity_ptr);
+			m_ecs_world->RemoveEntity(entity_ptr);
 			m_children.erase(entity_itr);
 		}
 

@@ -159,7 +159,8 @@ namespace Insight
 			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
 			std::string m_name;
 
-			ECSWorld* m_ecsWorld = nullptr;
+			Ptr<Entity> m_parent = nullptr;
+			ECSWorld* m_ecs_world = nullptr;
 
 			std::vector<Ptr<Entity>> m_children;
 			// TODO: Currently the Entity owns its components. Maybe a component manager should own all components
