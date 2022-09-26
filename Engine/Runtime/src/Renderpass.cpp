@@ -50,13 +50,13 @@ namespace Insight
 			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/survival_guitar_backpack_fbx/source/Survival_BackPack_2.fbx");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
 
-			/*RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
+			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
 			ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-			mesh_component->SetMesh(&m_testMesh);*/
+			mesh_component->SetMesh(&m_testMesh);
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{

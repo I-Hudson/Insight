@@ -1,6 +1,6 @@
 local local_post_build_commands = {}
 
-project "Editor"  
+project "Insight_Editor"  
     kind "ConsoleApp"   
     language "C++"
     cppdialect "C++17"
@@ -14,7 +14,9 @@ project "Editor"
 
     dependson 
     {
-        "InsightApp",
+        "Insight_Core",
+        "Insight_Graphics",
+        "Insight_Runtime",
     }
 
     defines
@@ -43,9 +45,10 @@ project "Editor"
 
     links
     {
-        "InsightCore.lib",
-        "InsightGraphics.lib",
-        "InsightApp.lib",
+        "Insight_Core.lib",
+        "Insight_Graphics.lib",
+        "Insight_Runtime.lib",
+
         "glm.lib",
     }
 

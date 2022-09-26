@@ -407,6 +407,7 @@ namespace Insight
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
 					vertex.UV = vec;
+
 					// tangent
 					if (mesh->mTangents)
 					{

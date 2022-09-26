@@ -1,7 +1,9 @@
-set output_debug=%cd%..\..\bin\Debug-windows-x86_64\InsightEditor
-set output_release=%cd%..\..\bin\Release-windows-x86_64\InsightEditor
-set output_testing=%cd%..\..\bin\Testing-windows-x86_64\InsightEditor
-set resource_path=%cd%..\..\Resources
+echo off
+ 
+set output_debug=%cd%/../../bin\Debug-windows-x86_64/Insight_Editor
+set output_release=%cd%/../../bin\Release-windows-x86_64/Insight_Editor
+set output_testing=%cd%/../../bin\Testing-windows-x86_64/Insight_Editor
+set resource_path=%cd%/../../Resources
 
 if exist "%output_debug%" (
     echo "Creating symlinks debug"

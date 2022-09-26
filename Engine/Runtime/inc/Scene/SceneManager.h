@@ -29,8 +29,8 @@ namespace Insight
 			void SetSceneName(std::string sceneName) { m_sceneName = m_sceneName; }
 			std::string_view GetSceneName() const { return m_sceneName; }
 
-#ifdef ECS_ENABLED
 			Ptr<ECS::ECSWorld> GetECSWorld() const { return m_ecsWorld; }
+#ifdef ECS_ENABLED
 #else
 			Ptr<ECS::Entity> AddEntity();
 			Ptr<ECS::Entity> AddEntity(std::string entity_name);
@@ -42,8 +42,8 @@ namespace Insight
 		private:
 			/// Store all entites 
 			std::string m_sceneName = "";
-#ifdef ECS_ENABLED
 			UPtr<ECS::ECSWorld> m_ecsWorld = nullptr;
+#ifdef ECS_ENABLED
 #else
 			//
 			std::vector<Ptr<ECS::Entity>> m_root_entities;

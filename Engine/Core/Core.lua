@@ -1,6 +1,6 @@
 local_post_build_commands = post_build_commands
 
-project "Core"  
+project "Insight_Core"  
     language "C++"
     cppdialect "C++17"
     location "./"

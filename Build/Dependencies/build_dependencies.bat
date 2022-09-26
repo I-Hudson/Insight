@@ -32,8 +32,8 @@ GOTO END
 
 :MSBUILD
 SET solutionFile="Dependencies.sln"
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Debug" /p:Platform=Win64 %solutionFile%
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Release" /p:Platform=Win64 %solutionFile%
+msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Debug" /p:Platform=win64 %solutionFile%
+msbuild -maxCpuCount /t:%msBuildType% /p:Configuration="Release" /p:Platform=win64 %solutionFile%
 GOTO END
 
 :END

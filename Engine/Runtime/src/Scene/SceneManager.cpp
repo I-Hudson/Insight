@@ -9,8 +9,8 @@ namespace Insight
 		Scene::Scene()
 			: m_sceneName("Default")
 		{
-#ifdef ECS_ENABLED
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -18,8 +18,8 @@ namespace Insight
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
-#ifdef ECS_ENABLED
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -27,8 +27,8 @@ namespace Insight
 		Scene::Scene(Scene&& other)
 		{
 			m_sceneName = std::move(other.m_sceneName);
-#ifdef ECS_ENABLED
 			m_ecsWorld = std::move(other.m_ecsWorld);
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -40,8 +40,8 @@ namespace Insight
 
 		void Scene::Destroy()
 		{
-#ifdef ECS_ENABLED
 			m_ecsWorld->Destroy();
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -49,8 +49,8 @@ namespace Insight
 		void Scene::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-#ifdef ECS_ENABLED
 			m_ecsWorld->EarlyUpdate();
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -58,8 +58,8 @@ namespace Insight
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-#ifdef ECS_ENABLED
 			m_ecsWorld->Update(deltaTime);
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
@@ -67,18 +67,17 @@ namespace Insight
 		void Scene::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-#ifdef ECS_ENABLED
 			m_ecsWorld->LateUpdate();
+#ifdef ECS_ENABLED
 #else
 #endif
 		}
 
 		std::vector<Ptr<ECS::Entity>> Scene::GetAllEntitiesWithComponentByName(std::string_view component_type) const
 		{
-#ifdef ECS_ENABLED
 			return m_ecsWorld->GetAllEntitiesWithComponentByName(component_type);
+#ifdef ECS_ENABLED
 #endif
-			return { };
 		}
 
 		SceneManager::SceneManager()

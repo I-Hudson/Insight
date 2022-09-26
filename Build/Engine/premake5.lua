@@ -214,6 +214,8 @@ newaction{
         os.rmdir("../../bin")
         print("Removeing internediate binaries")
         os.rmdir("../../bin-int")
+        print("Removing dependencies")
+        os.rmdir("../../deps")
         print("Removeing project files")
         os.rmdir("../../.vs")
         os.remove("../../**.sln")

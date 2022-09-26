@@ -1,6 +1,6 @@
 local local_post_build_commands = post_build_commands
 
-project "Input"  
+project "Insight_Input"  
     language "C++"
     cppdialect "C++17"
     configurations { "Debug", "Release" } 
@@ -13,8 +13,8 @@ project "Input"
 
     dependson 
     {
-        "InsightCore",
-        "InsightGraphics",
+        "Insight_Core",
+        "Insight_Graphics",
     }
 
     defines
@@ -43,8 +43,9 @@ project "Input"
 
     links
     {
-        "InsightCore.lib",
-        "InsightGraphics.lib",
+        "Insight_Core.lib",
+        "Insight_Graphics.lib",
+
         "GLFW.lib",
         "glm.lib",
         "imgui.lib",
