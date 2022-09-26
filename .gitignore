@@ -431,3 +431,6 @@ vendor/
 /compileData.scor
 /compileData.scor.incl
 /compileData.scor.t0000
+/premakeFiles/config.h
+/premakeFiles/revision.h
+/premakeFiles/zconf.h

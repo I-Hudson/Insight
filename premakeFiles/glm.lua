@@ -33,7 +33,7 @@ project "glm"
 
     postbuildcommands
     {
-       "{COPYFILE} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPY} \"%{cfg.targetdir}/glm.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
     filter "configurations:Debug"

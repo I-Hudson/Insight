@@ -62,7 +62,7 @@ project "ImGui"
 
 	postbuildcommands
     {
-		"{COPYFILE} \"%{cfg.targetdir}/ImGui.lib\" \"" .. output_deps .. "/lib/\"",
+		"{COPY} \"%{cfg.targetdir}/ImGui.lib\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "system:linux"

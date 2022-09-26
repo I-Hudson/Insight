@@ -26,8 +26,6 @@ CALL :SymlinkData "%output_testing%\Resources", "%resource_path%"
     echo "Dir %output_testing% has not been created."
 )
 
-pause
-
 :SymlinkData
 SET desDir=%~1
 SET linkDir=%~2
