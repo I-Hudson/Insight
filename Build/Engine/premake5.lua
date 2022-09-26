@@ -210,6 +210,8 @@ newaction{
     trigger = "clean",
     description = "Remove all binaries and intermediate binaries, and vs files.",
     execute = function()
+        print("Removing symlinks")
+        os.execute("Remove_Symlinks.bat")
         print("Removeing binaries")
         os.rmdir("../../bin")
         print("Removeing internediate binaries")
