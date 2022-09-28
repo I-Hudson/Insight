@@ -99,13 +99,13 @@ namespace Insight
 			
 			m_renderpasses.Destroy();
 			m_sceneManager.Reset();
+			m_resource_manager.UnloadAll();
+			m_eventManager.Reset();
 
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
 			Core::ImGuiSystem::Shutdown();
 
-			m_resource_manager.UnloadAll();
-			m_eventManager.Reset();
 		}
 	}
 }

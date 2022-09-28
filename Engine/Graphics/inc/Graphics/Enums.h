@@ -121,13 +121,6 @@ namespace Insight
 		};
 		std::string ResourceTypeToString(ResourceType type);
 
-		enum ResourceState
-		{
-			ResourceState_Present,
-			ResourceState_Render_Target
-		};
-		std::string ResourceStateToString(ResourceState state);
-
 		enum GPUQueue
 		{
 			GPUQueue_Graphics,

@@ -1,20 +1,19 @@
 #pragma once
 
 #include "Resource/Resource.h"
-#include "Graphics/PixelFormat.h"
+
+#include "Graphics/Mesh.h"
 
 namespace Insight
 {
 	namespace Runtime
 	{
-		class Texture : public IResource
+		class Model : public IResource
 		{
+			REGISTER_RESOURCE(Model);
 		public:
 
-			u32 GetWidth() const;
-			u32 GetHeight() const;
-			u32 GetDepth() const;
-			PixelFormat GetFormat() const;
+			Ptr<Graphics::Mesh> GetMesh() const;
 
 		private:
 			/// @brief Handle loading the resource from disk.
@@ -24,10 +23,8 @@ namespace Insight
 			virtual void UnLoad() override;
 
 		private:
-			u32 m_width = 0;
-			u32 m_height = 0;
-			u32 m_depth = 0;
-			PixelFormat m_format;
+			UPtr<Graphics::Mesh> m_mesh;
+			// std::vector<Materials> m_materials
 		};
 	}
 }

@@ -11,7 +11,7 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		class Resource;
+		class IResource;
 
 		/// @brief Define a unique resource type.
 		class ResourceTypeId
@@ -34,11 +34,11 @@ namespace Insight
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
 		class ResourceTypeIdToResource
 		{
-			using CreateFunc = std::function<Resource*()>;
+			using CreateFunc = std::function<IResource*()>;
 		public:
 			static void RegisterResource(ResourceTypeId type_id, CreateFunc func);
 
-			static Resource* CreateResource(ResourceTypeId);
+			static IResource* CreateResource(ResourceTypeId type_id);
 
 		private:
 			static std::unordered_map<ResourceTypeId, CreateFunc> m_map;

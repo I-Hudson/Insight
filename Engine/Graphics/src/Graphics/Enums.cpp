@@ -17,16 +17,6 @@ namespace Insight
 			return str;
 		}
 
-		std::string ResourceStateToString(ResourceState state)
-		{
-			std::string str;
-
-			IF_FLAG_BITS_STR(state, ResourceState::ResourceState_Present);
-			IF_FLAG_BITS_STR(state, ResourceState::ResourceState_Render_Target);
-
-			return str;
-		}
-
 		std::string GPUQueueToString(GPUQueue queue)
 		{
 			std::string str;

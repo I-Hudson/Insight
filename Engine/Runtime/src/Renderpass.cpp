@@ -16,6 +16,8 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
 
+#include "Resource/Model.h"
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -52,13 +54,15 @@ namespace Insight
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
-			Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
-				, Runtime::Resource::GetResourceTypeId());
+			Ptr<Runtime::Model> model = Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
+				, Runtime::Model::GetStaticResourceTypeId()).CastTo<Runtime::Model>();
+
+			IS_CORE_INFO("Model state: {}.", ERsourceStateToString(model->GetResourceState()));
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
 			ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-			mesh_component->SetMesh(&m_testMesh);
+			mesh_component->SetMesh(model->GetMesh().Get());
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{

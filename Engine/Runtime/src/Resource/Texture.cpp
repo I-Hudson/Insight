@@ -24,7 +24,7 @@ namespace Insight
 			return m_format;
 		}
 
-		void Texture::Load(std::string file_path)
+		void Texture::Load()
 		{
 
 		}

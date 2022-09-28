@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Runtime/Defines.h"
+#include "Resource/ResourceTypeId.h"
+
 #include "Core/Singleton.h"
 #include "Core/Memory.h"
-
-#include "Resource/ResourceTypeId.h"
 
 #include <string>
 
@@ -16,15 +17,24 @@ namespace Insight
 		enum class EResoruceState
 		{
 			Not_Found,
+
 			Loaded,
+			Loading,
 			Not_Loaded,
+			
+			Failed_To_Load,
+			Unloaded,
+			Unloading,
+
 		};
 		std::string ERsourceStateToString(EResoruceState state);
 
+		//TODO Resources will need reference counting.
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
-		class IResource
+		class IS_RUNTIME IResource
 		{
 		public:
+			IResource();
 			/// @brief Always call unload when object is being destroyed.
 			virtual ~IResource();
 
@@ -35,17 +45,19 @@ namespace Insight
 			bool IsNotFound() const;
 			bool IsLoaded() const;
 			bool IsNotLoaded() const;
+			bool IsFailedToLoad() const;
+			bool IsUnloaded() const;
 
 			virtual ResourceTypeId GetResourceTypeId() const;
 
 		private:
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
-			virtual void Load(std::string file_path);
+			virtual void Load();
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();
 
-		private:
+		protected:
 			/// @brief Full file path.
 			std::string m_file_path;
 			/// @brief Current state of the resource.
@@ -53,14 +65,11 @@ namespace Insight
 
 			friend class ResourceManager;
 		};
-#define REGISTER_RESOURCE(type_name) public: \
-static ResourceTypeId GetStaticResourceTypeId() const { return ResourceTypeId(#type_name); } \
-ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); } \
 
-
-		class ResourceManager : public Core::Singleton<ResourceManager>
+		class IS_RUNTIME ResourceManager : public Core::Singleton<ResourceManager>
 		{
 		public:
+			ResourceManager();
 			/// @brief Unload all resources currently loaded. (Use with caution).
 			virtual ~ResourceManager() override;
 
@@ -84,3 +93,7 @@ ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceType
 		};
 	}
 }
+
+#define REGISTER_RESOURCE(type_name) public: \
+static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); } \
+Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); } \
