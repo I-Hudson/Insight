@@ -35,13 +35,17 @@ project "Insight_Runtime"
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glfw}",
+        "%{IncludeDirs.stb_image}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
+
+        "../../vendor/stb/stb_image.h",
+        "../../vendor/stb/stb_image_write.h",
     }
 
     links

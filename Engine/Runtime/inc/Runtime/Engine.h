@@ -8,7 +8,9 @@
 /// -- Managers --
 #include "Graphics/GraphicsManager.h"
 #include "Scene/SceneManager.h"
+
 #include "Event/EventManager.h"
+#include "Resource/Resource.h"
 
 #include "Renderpass.h"
 
@@ -46,6 +48,7 @@ namespace Insight
 
 			UPtr<SceneManager> m_sceneManager;
 			UPtr<Core::EventManager> m_eventManager;
+			Runtime::ResourceManager m_resource_manager;
 
 		};
 	}

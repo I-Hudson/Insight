@@ -1,4 +1,5 @@
 #include "Runtime/Engine.h"
+#include "Runtime/CommandLineDefines.h"
 
 #include "Core/ImGuiSystem.h"
 #include "Core/Profiler.h"
@@ -18,13 +19,12 @@ namespace Insight
 {
 	namespace App
 	{
-///#define WAIT_FOR_PROFILE_CONNECTION
-
 		Core::Timer Engine::s_FrameTimer;
 
 		bool Engine::Init(int argc, char** argv)
 		{
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
+			Core::CommandLineArgs::ParseCommandLine("./cmdline.txt");
 
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			
@@ -63,9 +63,11 @@ namespace Insight
 
 		void Engine::Update()
 		{
-#ifdef WAIT_FOR_PROFILE_CONNECTION
-			Core::WaitForProfiler();
-#endif
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_PROFILER)->GetBool())
+			{
+				Core::WaitForProfiler();
+			}
+
 			s_FrameTimer.Start();
 
 			while (!Graphics::Window::Instance().ShouldClose() && !m_shouldClose)
@@ -94,11 +96,16 @@ namespace Insight
 		void Engine::Destroy()
 		{
 			OnDestroy();
-			m_sceneManager.Reset();
+			
 			m_renderpasses.Destroy();
+			m_sceneManager.Reset();
+
 			m_graphicsManager.Destroy();
 			Graphics::Window::Instance().Destroy();
 			Core::ImGuiSystem::Shutdown();
+
+			m_resource_manager.UnloadAll();
+			m_eventManager.Reset();
 		}
 	}
 }

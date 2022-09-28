@@ -3,6 +3,9 @@
 
 #include "Core/StringUtils.h"
 
+#include <fstream>
+#include <sstream>
+
 namespace Insight
 {
 	namespace Core
@@ -36,10 +39,10 @@ namespace Insight
 			return std::stoi(Value);
 		}
 
-		void CommandLineArgs::ParseCommandLine(int argc, char** argv)
+		void CommandLineArgs::ParseCommandLine(int const argc, char** const argv)
 		{
 			// Start at one as the first command line args is the path to the .exe
-			for (int i = 1; i < argc; ++i)
+			for (int i = 0; i < argc; ++i)
 			{
 				std::string arg = argv[i];
 				const u64 equal_index = arg.find('=');
@@ -73,6 +76,46 @@ namespace Insight
 
 				m_args[key] = CommandLineValue(key, value);
 			}
+		}
+
+		void CommandLineArgs::ParseCommandLine(const char* file_path)
+		{
+			std::vector<std::string> args;
+			std::vector<char*> c_args;
+
+			std::ifstream file;
+			file.open(file_path);
+			if (!file.is_open())
+			{
+				IS_CORE_WARN("[CommandLineArgs::ParseCommandLine] File '{} was unabled to be opened.'", file_path);
+				return;
+			}
+			std::stringstream buffer;
+			buffer << file.rdbuf();
+			file.close();
+
+			std::string file_data = buffer.str();
+			u32 offset = 0;
+			while (offset < file_data.size())
+			{
+				const u32 next_space = file_data.find(' ', offset);
+				const u32 next_new_line = file_data.find('\n', offset);
+				const u32 new_offset = next_space < next_new_line ? next_space : next_new_line;
+
+				std::string arg = file_data.substr(offset, new_offset - offset);
+				if (!arg.empty())
+				{
+					args.push_back(std::move(arg));
+				}
+				offset = new_offset + 1;
+			}
+
+			for (size_t i = 0; i < args.size(); ++i)
+			{
+				c_args.push_back(&args[i].front());
+			}
+
+			ParseCommandLine(static_cast<int>(args.size()), c_args.data());
 		}
 
 		Ptr<CommandLineValue> CommandLineArgs::GetCommandLineValue(std::string key)

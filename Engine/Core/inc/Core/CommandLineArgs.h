@@ -30,8 +30,8 @@ namespace Insight
 			/// @return bool
 			bool GetBool() const;
 
-			std::string Key;
-			std::string Value;
+			std::string Key = "";
+			std::string Value = "";
 		};
 
 		/// @brief Helper class for parsing the command line args.
@@ -39,6 +39,7 @@ namespace Insight
 		{
 		public:
 			static void ParseCommandLine(int argc, char** argv);
+			static void ParseCommandLine(const char* file_path);
 			static Ptr<CommandLineValue> GetCommandLineValue(std::string key);
 
 		private:

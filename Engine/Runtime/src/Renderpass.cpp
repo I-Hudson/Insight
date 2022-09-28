@@ -52,6 +52,8 @@ namespace Insight
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
+			Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
+				, Runtime::Resource::GetResourceTypeId());
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
