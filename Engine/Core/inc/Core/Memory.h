@@ -176,7 +176,9 @@ public:
 	T* Get() const { return m_ptr; }
 
 	bool operator==(const UPtr& other) const { return m_ptr == other.m_ptr; }
-	bool operator==(const UPtr* other) const { return m_ptr == other; }
+	bool operator==(const T* other) const { return m_ptr == other; }
+
+
 	operator bool() const { return m_ptr; }
 
 	T* operator->() const { return m_ptr; }
@@ -526,6 +528,9 @@ public:
 	/// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
 	/// in higher level systems.
 	T* Get() const										{ return m_ptr; }
+
+	template<typename T2>
+	Ptr<T2> CastTo() { return static_cast<T2*>(m_ptr); }
 
 private:
 	T* m_ptr = nullptr;

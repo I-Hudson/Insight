@@ -25,17 +25,29 @@ namespace Insight
 
 		i32 CommandLineValue::GetI32() const
 		{
+			if (Value.empty())
+			{
+				return 0;
+			}
 			return std::stoi(Value);
 		}
 
 		u32 CommandLineValue::GetU32() const
 		{
+			if (Value.empty())
+			{
+				return 0;
+			}
 			return std::stoul(Value);
 		}
 
 		bool CommandLineValue::GetBool() const
 		{
 			// Bool should be defined as 0/1 not true and false as it works better in code.
+			if (Value.empty())
+			{
+				return false;
+			}
 			return std::stoi(Value);
 		}
 
