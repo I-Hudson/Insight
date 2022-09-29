@@ -9,6 +9,8 @@ namespace Insight
 	{
 		class Texture : public IResource
 		{
+			REGISTER_RESOURCE(Texture);
+
 		public:
 
 			u32 GetWidth() const;

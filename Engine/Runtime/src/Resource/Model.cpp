@@ -1,4 +1,5 @@
 #include "Resource/Model.h"
+#include "Resource/Texture.h"
 
 #include <filesystem>
 
@@ -17,17 +18,18 @@ namespace Insight
 			m_mesh = MakeUPtr<Graphics::Mesh>();
 			if (!m_mesh->LoadFromFile(m_file_path))
 			{
-				m_resource_state = EResoruceState::Failed_To_Load;
+				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
 			}
-			m_resource_state = EResoruceState::Loaded;
+			m_resource_state = EResoruceStates::Loaded;
+
 		}
 
 		void Model::UnLoad()
 		{
 			m_mesh->Destroy();
 			m_mesh.Reset();
-			m_resource_state = EResoruceState::Unloaded;
+			m_resource_state = EResoruceStates::Unloaded;
 		}
 	}
 }

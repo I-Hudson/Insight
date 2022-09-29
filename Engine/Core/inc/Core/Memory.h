@@ -507,30 +507,30 @@ template<typename T>
 class Ptr
 {
 public:
-	Ptr() = default;
-	Ptr(T* pointer)										{ m_ptr = pointer; }
-	Ptr(Ptr const& other)		: m_ptr(other.m_ptr)	{ }
-	Ptr(const UPtr<T>& other)	: m_ptr(other.Get())	{ }
-	Ptr(Ptr&& other)							        { m_ptr = other.m_ptr; other.m_ptr = nullptr; }
-	~Ptr()										        { m_ptr = nullptr; }
+	CONSTEXPR Ptr() = default;
+	CONSTEXPR Ptr(T* pointer)									{ m_ptr = pointer; }
+	CONSTEXPR Ptr(Ptr const& other)		: m_ptr(other.m_ptr)	{ }
+	CONSTEXPR Ptr(const UPtr<T>& other)	: m_ptr(other.Get())	{ }
+	CONSTEXPR Ptr(Ptr&& other)							        { m_ptr = other.m_ptr; other.m_ptr = nullptr; }
+	~Ptr()														{ m_ptr = nullptr; }
 
 	/// Assign
-	Ptr& operator=(Ptr const& other)			        { m_ptr = other.m_ptr; return *this; }
-	Ptr& operator=(T* other)					        { m_ptr = other; return *this; }
+	CONSTEXPR Ptr& operator=(Ptr const& other)			        { m_ptr = other.m_ptr; return *this; }
+	CONSTEXPR Ptr& operator=(T* other)					        { m_ptr = other; return *this; }
 
 	/// Compare
-	bool operator==(Ptr const& other) const			    { m_ptr = other.m_ptr; }
-	bool operator==(T* other) const					    { m_ptr = other; }
+	CONSTEXPR bool operator==(Ptr const& other) const			    { m_ptr = other.m_ptr; }
+	CONSTEXPR bool operator==(T* other) const					    { m_ptr = other; }
 	
-	operator bool() const								{ return Get() != nullptr; }
-	T* operator->() const                               { return m_ptr; }
+	CONSTEXPR operator bool() const								{ return Get() != nullptr; }
+	CONSTEXPR T* operator->() const                               { return m_ptr; }
 
 	/// [INTERNAL] Used for compatibility with low level code. Should be used to a minimum
 	/// in higher level systems.
-	T* Get() const										{ return m_ptr; }
+	CONSTEXPR T* Get() const										{ return m_ptr; }
 
 	template<typename T2>
-	Ptr<T2> CastTo() { return static_cast<T2*>(m_ptr); }
+	CONSTEXPR Ptr<T2> CastTo() { return static_cast<T2*>(m_ptr); }
 
 private:
 	T* m_ptr = nullptr;

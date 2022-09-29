@@ -11,6 +11,7 @@ namespace Insight
 		using DurationMill = std::chrono::milliseconds;
 		using DurationSec = std::chrono::seconds;
 		using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock, DurationNano>;
+		using HighResClock = std::chrono::high_resolution_clock;
 
 		class IS_CORE Timer
 		{

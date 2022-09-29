@@ -54,8 +54,8 @@ namespace Insight
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
 			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
-			Ptr<Runtime::Model> model = Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
-				, Runtime::Model::GetStaticResourceTypeId()).CastTo<Runtime::Model>();
+			Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
+				, Runtime::Model::GetStaticResourceTypeId()));
 
 			IS_CORE_INFO("Model state: {}.", ERsourceStateToString(model->GetResourceState()));
 

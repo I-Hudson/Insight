@@ -22,6 +22,8 @@ namespace Insight
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad() override;
 
+
+
 		private:
 			UPtr<Graphics::Mesh> m_mesh;
 			// std::vector<Materials> m_materials
