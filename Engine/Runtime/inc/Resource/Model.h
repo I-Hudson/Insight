@@ -2,18 +2,20 @@
 
 #include "Resource/Resource.h"
 
-#include "Graphics/Mesh.h"
 
 namespace Insight
 {
 	namespace Runtime
 	{
+		class Mesh;
+
 		class Model : public IResource
 		{
 			REGISTER_RESOURCE(Model);
 		public:
 
-			Ptr<Graphics::Mesh> GetMesh() const;
+			Mesh* GetMesh() const;
+			Mesh* GetMeshByIndex(u32 index) const;
 
 		private:
 			/// @brief Handle loading the resource from disk.
@@ -25,7 +27,7 @@ namespace Insight
 
 
 		private:
-			UPtr<Graphics::Mesh> m_mesh;
+			std::vector<Mesh*> m_meshes;
 			// std::vector<Materials> m_materials
 		};
 	}

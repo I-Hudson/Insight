@@ -36,6 +36,10 @@ project "Insight_Runtime"
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.stb_image}",
+        
+        "%{IncludeDirs.assimp}",
+        "%{IncludeDirs.assimp}/../build/include",
+        "%{IncludeDirs.meshoptimizer}",
     }
 
     files 
@@ -58,6 +62,7 @@ project "Insight_Runtime"
         "imgui.lib",
         "tracy.lib",
         "OptickCore.lib",
+        "meshoptimizer.lib",
     }
 
     libdirs
@@ -73,6 +78,7 @@ project "Insight_Runtime"
         links
         {
             "OptickCore.lib",
+            "assimpd.lib",
         }
         libdirs
         {
@@ -85,6 +91,7 @@ project "Insight_Runtime"
         links
         {
             "OptickCore.lib",
+            "assimp.lib",
         }
         libdirs
         {

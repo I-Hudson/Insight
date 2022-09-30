@@ -48,7 +48,7 @@ namespace Insight
 			}
 		};
 
-		class RHI_Texture : public RHI_Resource
+		class IS_GRAPHICS RHI_Texture : public RHI_Resource
 		{
 		public:
 			static RHI_Texture* New();

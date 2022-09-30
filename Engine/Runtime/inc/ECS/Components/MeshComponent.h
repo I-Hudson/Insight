@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ECS/Entity.h"
-#include "Graphics/Mesh.h"
+#include "Resource/Mesh.h"
 
 namespace Insight
 {
@@ -16,11 +16,11 @@ namespace Insight
 			static constexpr char* Type_Name = "MeshComponent";
 			virtual const char* GetTypeName() override { return Type_Name; }
 
-			void SetMesh(Graphics::Mesh* mesh) { m_mesh = mesh; }
-			Graphics::Mesh* GetMesh() const { return m_mesh; }
+			void SetMesh(Runtime::Mesh* mesh) { m_mesh = mesh; }
+			Runtime::Mesh* GetMesh() const { return m_mesh; }
 
 		private:
-			Graphics::Mesh* m_mesh = nullptr;
+			Runtime::Mesh* m_mesh = nullptr;
 		};
 	}
 }

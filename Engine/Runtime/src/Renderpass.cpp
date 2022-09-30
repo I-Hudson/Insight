@@ -62,7 +62,7 @@ namespace Insight
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
 			ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-			mesh_component->SetMesh(model->GetMesh().Get());
+			mesh_component->SetMesh(model->GetMesh());
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{

@@ -548,6 +548,7 @@ namespace Insight
 					commandBuffers,
 					{ });
 				vk::Fence waitFence = m_device.createFence(vk::FenceCreateInfo());
+				std::lock_guard lock(m_command_queue_mutexs[GPUQueue_Graphics]);
 				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, waitFence);
 				vk::Result waitForFenceResult = m_device.waitForFences({ waitFence }, 1, INFINITE);
 				m_device.destroyFence(waitFence);

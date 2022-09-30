@@ -1,4 +1,5 @@
 #include "Resource/Mesh.h"
+#include "Resource/Loaders/AssimpLoader.h"
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/RHI_CommandList.h"
@@ -23,7 +24,11 @@ namespace Insight
 			// If loading a multi-part mesh with the mesh class then the mesh will be collapsed down to a single mesh.
 			// It is recomend to always load a "Model" instead due to this. "Model" will kepp the hierarchy "Mesh" will not. 
 		
-			
+			if (!AssimpLoader::LoadMesh(this, m_file_path, AssimpLoader::Default_Mesh_Importer_Flags))
+			{
+				m_resource_state = EResoruceStates::Failed_To_Load;
+			}
+			m_resource_state = EResoruceStates::Loaded;
 		}
 
 		void Mesh::LoadFromMemory(const void* data, u64 size_in_bytes)

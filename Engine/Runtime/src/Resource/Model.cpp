@@ -1,5 +1,7 @@
 #include "Resource/Model.h"
+#include "Resource/Mesh.h"
 #include "Resource/Texture.h"
+#include "Resource/Loaders/AssimpLoader.h"
 
 #include <filesystem>
 
@@ -7,28 +9,35 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		Ptr<Graphics::Mesh> Model::GetMesh() const
+		Mesh* Model::GetMesh() const
 		{
-			return m_mesh.Get();
+			return GetMeshByIndex(0);
+		}
+
+		Mesh* Model::GetMeshByIndex(u32 index) const
+		{
+			return m_meshes.at(index);
 		}
 
 		void Model::Load()
 		{
-			ASSERT(m_mesh == nullptr);
-			m_mesh = MakeUPtr<Graphics::Mesh>();
-			if (!m_mesh->LoadFromFile(m_file_path))
+			ASSERT(m_meshes.size() == 0);
+			if (!AssimpLoader::LoadModel(this, m_file_path, AssimpLoader::Default_Model_Importer_Flags))
 			{
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
 			}
 			m_resource_state = EResoruceStates::Loaded;
-
 		}
 
 		void Model::UnLoad()
 		{
-			m_mesh->Destroy();
-			m_mesh.Reset();
+			// Unload all our memory meshes.
+			for (Mesh* mesh : m_meshes)
+			{
+				ResourceManager::Instance().Unload(mesh);
+			}
+			m_meshes.clear();
 			m_resource_state = EResoruceStates::Unloaded;
 		}
 	}

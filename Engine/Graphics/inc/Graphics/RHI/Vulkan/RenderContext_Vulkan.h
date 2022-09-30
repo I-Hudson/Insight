@@ -86,6 +86,7 @@ namespace Insight
 				glm::ivec2 m_swapchainBufferSize;
 
 				std::unordered_map<GPUQueue, vk::Queue> m_commandQueues;
+				std::unordered_map<GPUQueue, std::mutex> m_command_queue_mutexs;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;
 
 				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
