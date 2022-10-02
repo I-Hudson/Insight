@@ -27,6 +27,17 @@ namespace Insight
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
 			}
+
+			// Add all our meshes as dependents of this model. (Tied to this model)
+			for (Mesh* mesh : m_meshes)
+			{
+				if (ResourceManager::Instance().HasResource(mesh->GetFilePath()))
+				{
+					//if (mesh->GetFilePath().back() >= '0' |)
+					//TODO Add a number if this resource already exists.
+				}
+				AddDependentResrouce(mesh, mesh->GetFilePath(), ResourceStorageTypes::Memory);
+			}
 			m_resource_state = EResoruceStates::Loaded;
 		}
 

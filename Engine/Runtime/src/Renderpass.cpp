@@ -56,8 +56,7 @@ namespace Insight
 			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
 			Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
 				, Runtime::Model::GetStaticResourceTypeId()));
-
-			IS_CORE_INFO("Model state: {}.", ERsourceStateToString(model->GetResourceState()));
+			Runtime::ResourceManager::Instance().Print();
 
 			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
 			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
@@ -687,7 +686,7 @@ namespace Insight
 			}
 		}
 
-		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, int cascadeCount, float split_lambda)
+		std::vector<UBO_ShadowCamera> UBO_ShadowCamera::GetCascades(const UBO_Camera& camera, u32 cascadeCount, float split_lambda)
 		{
 			std::vector<float> cascadeSplits;
 			cascadeSplits.resize(cascadeCount);

@@ -32,7 +32,7 @@ namespace Insight
 			float SplitDepth;
 			float pad0 = -1.0f;
 
-			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, int cascadeCount, float split_lambda = 0.95f);
+			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, u32 cascadeCount, float split_lambda = 0.95f);
 		};
 
 		class Renderpass

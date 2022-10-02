@@ -23,6 +23,7 @@ namespace Insight
 			Disk,		/// @brief Resource is storage on disk (This should always be the default).
 			Memory,		/// @brief Resource is storage in memory only (This resource must be apart of another one).
 		};
+		CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type);
 
 		enum class EResoruceStates
 		{
@@ -37,7 +38,7 @@ namespace Insight
 			Unloading,		/// @brief Resource is been unloaded.
 
 		};
-		std::string ERsourceStateToString(EResoruceStates state);
+		CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state);
 
 		enum class ResourceReferenceLinkType
 		{
@@ -87,6 +88,9 @@ namespace Insight
 			bool IsFailedToLoad() const;
 			bool IsUnloaded() const;
 
+			/// @brief Print information about this resource to the output log.
+			void Print() const;
+
 			virtual ResourceTypeId GetResourceTypeId() const;
 
 		protected:
@@ -102,6 +106,11 @@ namespace Insight
 			/// @param type_id 
 			/// @return IResource*
 			IResource* AddDependentResourceFromMemory(const void* data, u64 data_size_in_bytes, ResourceTypeId type_id);
+
+			/// @brief 
+			/// @param resource 
+			/// @param storage_type 
+			void AddDependentResrouce(IResource* resource, std::string file_path, ResourceStorageTypes storage_type);
 
 			/// @brief Add a reference resource (this does will not own the resource) to this one. Reference resource 
 			/// can only be loaded from disk as there are non owning.
@@ -126,6 +135,8 @@ namespace Insight
 			virtual void UnLoad();
 
 		protected:
+			/// @brief On disk file path. (In most cases this will be the same as 'm_file_path')
+			std::string m_source_file_path;
 			/// @brief Full file path.
 			std::string m_file_path;
 			/// @brief The current state of the resource.
@@ -166,18 +177,30 @@ namespace Insight
 
 			u32 GetLoadedResourcesCount() const;
 
+			/// @brief Check if a resource exists with a given file path.
+			/// @return bool
+			bool HasResource(std::string_view file_path) const;
+
 			/// @brief Export all the time stats for resource loading to a file.
 			/// @param file_path 
 			void ExportStatsToFile(std::string file_path);
+
+			/// @brief Print current resources info to the output log.
+			void Print();
 
 		private:
 			/// @brief Handle loading resources from disk and memory.
 			IResource* Load(std::string file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id);
 
+			/// @brief Add an existing resource (resoruce generated not form loading). This should be use with caution.
+			/// @param resource
+			/// @param file_path
+			void AddExistingResource(IResource* resource, std::string file_path);
 
 		private:
 			/// @brief Handle general data access;
-			std::mutex m_lock;
+			mutable std::mutex m_lock;
+			/// @brief Load count of resources (from disk only).
 			u32 m_loaded_resource_count = 0;
 			std::unordered_map<std::string, UPtr<IResource>> m_resources;
 

@@ -107,19 +107,19 @@ namespace Insight
 			file.close();
 
 			std::string file_data = buffer.str();
-			u32 offset = 0;
+			u64 offset = 0;
 			while (offset < file_data.size())
 			{
-				const u32 next_space = file_data.find(' ', offset);
-				const u32 next_new_line = file_data.find('\n', offset);
-				const u32 new_offset = next_space < next_new_line ? next_space : next_new_line;
+				const u64 next_space	= file_data.find(' ', offset);
+				const u64 next_new_line = file_data.find('\n', offset);
+				const u64 new_offset	= next_space < next_new_line ? next_space : next_new_line;
 
 				std::string arg = file_data.substr(offset, new_offset - offset);
 				if (!arg.empty())
 				{
 					args.push_back(std::move(arg));
 				}
-				offset = new_offset + 1;
+				offset = new_offset + 1ull;
 			}
 
 			for (size_t i = 0; i < args.size(); ++i)

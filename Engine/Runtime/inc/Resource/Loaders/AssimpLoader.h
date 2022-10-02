@@ -72,6 +72,11 @@ namespace Insight
 				std::vector<u32> Indices;
 				std::vector<std::string> Texture_File_Paths;
 				std::vector<Graphics::RHI_Texture*> Textures;
+
+				std::string Directoy;
+
+				Model* Model = nullptr;
+				Mesh* Mesh = nullptr;
 			};
 
 			/// @brief Load a complete model.
@@ -106,8 +111,10 @@ namespace Insight
 			/// @param ai_material 
 			/// @param ai_texture_type 
 			/// @param texture_id 
-			static void ExtractMaterialTextures(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* texture_id, AssimpLoaderData& loader_data);
+			static void ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& loader_data);
 			
+			static void ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, AssimpLoaderData& loader_data);
+
 			/// @brief Load the textures which have been extracted.
 			/// @param loader_data 
 			static void LoadMaterialTextures(AssimpLoaderData& loader_data);
@@ -115,6 +122,10 @@ namespace Insight
 			/// @brief Optimize the vertices and indics data.
 			/// @param loader_data 
 			static void Optimize(AssimpLoaderData& loader_data);
+
+			/// @brief Resize the GPU buffers for the model/mesh and upload all the data.
+			/// @param loader_data 
+			static void UploadGPUData(AssimpLoaderData& loader_data);
 		};
 	}
 }

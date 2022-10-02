@@ -9,7 +9,21 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		std::string ERsourceStateToString(EResoruceStates state)
+		CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type)
+		{
+			switch (storage_type)
+			{
+			case Insight::Runtime::ResourceStorageTypes::Unknown:	return "Unknown";
+			case Insight::Runtime::ResourceStorageTypes::Disk:		return "Disk";
+			case Insight::Runtime::ResourceStorageTypes::Memory:	return "Memory";
+			default:
+				break;
+			}
+			FAIL_ASSERT();
+			return "";
+		}
+
+		CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state)
 		{
 			switch (state)
 			{
@@ -95,6 +109,16 @@ namespace Insight
 			return ResourceTypeId("Unknown");
 		}
 
+		void IResource::Print() const
+		{
+			IS_CORE_INFO("Resource:");
+			IS_CORE_INFO("\tType: {}", GetResourceTypeId().GetTypeName());
+			IS_CORE_INFO("\tSource path: {}", m_source_file_path);
+			IS_CORE_INFO("\tFile path: {}", m_file_path);
+			IS_CORE_INFO("\tState: {}", ERsourceStatesToString(m_resource_state));
+			IS_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
+		}
+
 		IResource* IResource::AddDependentResourceFromDisk(std::string file_path, ResourceTypeId type_id)
 		{
 			return AddDependentResource(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
@@ -105,9 +129,20 @@ namespace Insight
 			return AddDependentResource("", data, data_size_in_bytes, ResourceStorageTypes::Memory, type_id);
 		}
 
-		IResource* IResource::AddDependentResource(std::string file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		void IResource::AddDependentResrouce(IResource* resource, std::string file_path, ResourceStorageTypes storage_type)
 		{
-			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
+			if (resource)
+			{
+				ResourceManager::Instance().AddExistingResource(resource, file_path);
+				resource->m_storage_type = storage_type;
+				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
+				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent_Owner, this, resource));
+			}
+		}
+
+		IResource* IResource::AddReferenceResource(std::string file_path, ResourceTypeId type_id)
+		{
+			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
 			if (resource)
 			{
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
@@ -116,9 +151,9 @@ namespace Insight
 			return resource;
 		}
 
-		IResource* IResource::AddReferenceResource(std::string file_path, ResourceTypeId type_id)
+		IResource* IResource::AddDependentResource(std::string file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
-			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
+			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
 			if (resource)
 			{
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
@@ -174,7 +209,7 @@ namespace Insight
 			if (resource->GetResourceState() != EResoruceStates::Loaded)
 			{
 				IS_CORE_WARN("[ResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
-					, ERsourceStateToString(resource->GetResourceState()));
+					, ERsourceStatesToString(resource->GetResourceState()));
 			}
 
 			// Unload the resource,
@@ -201,36 +236,58 @@ namespace Insight
 			return m_loaded_resource_count;
 		}
 
+		bool ResourceManager::HasResource(std::string_view file_path) const
+		{
+			std::lock_guard lock(m_lock);
+			return m_resources.find(file_path.data()) != m_resources.end();
+		}
+
 		void ResourceManager::ExportStatsToFile(std::string file_path)
 		{
 			std::lock_guard lock(m_lock);
 		}
 
-		IResource* ResourceManager::Load(std::string file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		void ResourceManager::Print()
 		{
 			std::lock_guard lock(m_lock);
+			for (const auto& pair : m_resources)
+			{
+				const IResource* resource = pair.second.Get();
+				resource->Print();
+			}
+		}
 
+		IResource* ResourceManager::Load(std::string file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		{
 			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
 			std::string abs_file_path = abs_file_system_path.u8string();
+			IResource* resource = nullptr;
 
-			if (auto itr = m_resources.find(abs_file_path); itr == m_resources.end())
 			{
-				IResource* resource = ResourceTypeIdToResource::CreateResource(type_id);
-				if (!resource)
+				std::lock_guard lock(m_lock);
+				if (auto itr = m_resources.find(abs_file_path); itr == m_resources.end())
 				{
-					IS_CORE_WARN("[ResourceManager::Load] Unable to create resource for id '{}'.", type_id.GetTypeName());
-					return nullptr;
+					IResource* resource = ResourceTypeIdToResource::CreateResource(type_id);
+					if (!resource)
+					{
+						IS_CORE_WARN("[ResourceManager::Load] Unable to create resource for id '{}'.", type_id.GetTypeName());
+						return nullptr;
+					}
+					resource->m_file_path = abs_file_path;
+					resource->m_resource_state = EResoruceStates::Not_Loaded;
+					resource->m_storage_type = storage_type;
+					resource->m_request_timer.Start();
+					m_resources[abs_file_path] = resource;
 				}
-				resource->m_file_path = abs_file_path;
-				resource->m_resource_state = EResoruceStates::Not_Loaded;
-				resource->m_storage_type = storage_type;
-				resource->m_request_timer.Start();
-				m_resources[abs_file_path] = resource;
+
+				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
+				{
+					resource = itr->second.Get();
+				}
 			}
 
-			if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
+			if (resource)
 			{
-				IResource* resource = itr->second.Get();
 				if (resource->IsLoaded())
 				{
 					// Item is already loaded, just return it.
@@ -251,16 +308,17 @@ namespace Insight
 						{
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
-							itr->second->m_load_timer.Start();
+							resource->m_load_timer.Start();
 							resource->Load();
-							itr->second->m_load_timer.Stop();
+							resource->m_load_timer.Stop();
 						}
 					}
 					else
 					{
-						itr->second->m_load_timer.Start();
+						FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resrouce is being loaded from disk it should handle loading memory resources.");
+						resource->m_load_timer.Start();
 						resource->LoadFromMemory(data, data_size_in_bytes);
-						itr->second->m_load_timer.Stop();
+						resource->m_load_timer.Stop();
 					}
 				}
 
@@ -269,10 +327,27 @@ namespace Insight
 					// Resource loaded successfully.
 					++m_loaded_resource_count;
 				}
-				return resource;
 			}
 			// Something went wrong at somepoint.
-			return nullptr;
+			return resource;
+		}
+
+		void ResourceManager::AddExistingResource(IResource* resource, std::string file_path)
+		{
+
+			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
+			std::string abs_file_path = abs_file_system_path.u8string();
+
+			{
+				std::lock_guard lock(m_lock);
+				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
+				{
+					IS_CORE_ERROR("[ResourceManager::AddResource] There is already a resource with the file path of '{}'.", file_path);
+					return;
+				}
+				m_resources[abs_file_path] = resource;
+			}
+			resource->m_resource_state = EResoruceStates::Loaded;
 		}
 	}
 }

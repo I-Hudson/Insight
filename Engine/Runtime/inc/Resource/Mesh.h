@@ -14,6 +14,8 @@ namespace Insight
 
 	namespace Runtime
 	{
+		class AssimpLoader;
+
 		/// @brief Define the data used to create a mesh from a model.
 		struct MeshFromModelData
 		{
@@ -44,11 +46,17 @@ namespace Insight
 			virtual void UnLoad();
 
 		private:
+			u32 m_vertex_offset = 0;
 			u32 m_vertex_count = 0;
+			u32 m_first_index = 0;
 			u32 m_index_count = 0;
 
 			Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
 			Graphics::RHI_Buffer* m_index_buffer = nullptr;
+
+			std::string m_mesh_name;
+
+			friend class AssimpLoader;
 		};
 	}
 }

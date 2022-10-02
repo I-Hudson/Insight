@@ -1,4 +1,6 @@
 #include "Resource/Loaders/AssimpLoader.h"
+#include "Resource/Model.h"
+#include "Resource/Mesh.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -23,9 +25,9 @@ namespace Insight
 		bool AssimpLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
 			Assimp::Importer importer;
-			/// Remove points and lines.
+			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
-			/// Remove cameras and lights
+			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 
 			const aiScene* scene = importer.ReadFile(file_path,
@@ -38,8 +40,17 @@ namespace Insight
 				return false;
 			}
 
+			model->m_source_file_path = file_path;
+			model->m_file_path = file_path;
+
 			AssimpLoaderData loader_data;
+			loader_data.Model = model;
+			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('\\'));
+			loader_data.Model->m_vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
+			loader_data.Model->m_index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
+			UploadGPUData(loader_data);
+			LoadMaterialTextures(loader_data);
 
 			return true;
 		}
@@ -47,9 +58,9 @@ namespace Insight
 		bool AssimpLoader::LoadMesh(Mesh* mesh, std::string file_path, u32 importer_flags)
 		{
 			Assimp::Importer importer;
-			/// Remove points and lines.
+			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
-			/// Remove cameras and lights
+			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 
 			const aiScene* scene = importer.ReadFile(file_path,
@@ -63,24 +74,230 @@ namespace Insight
 			}
 
 			AssimpLoaderData loader_data;
+			loader_data.Mesh = mesh;
+			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
+			loader_data.Mesh->m_vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
+			loader_data.Mesh->m_index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data, false);
+			UploadGPUData(loader_data);
+			LoadMaterialTextures(loader_data);
 
 			return true;
 		}
 
 		void AssimpLoader::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, AssimpLoaderData& loader_data, bool recursive)
 		{
+			IS_PROFILE_FUNCTION();
+			if (aiNode->mNumMeshes > 0)
+			{
+				for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
+				{
+					IS_PROFILE_SCOPE("Mesh evaluated");
+					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
+
+					AssimpLoaderData mesh_data;					
+					ProcessMesh(aiMesh, aiScene, mesh_data);
+					Optimize(mesh_data);
+					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
+					{
+						ExtractMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], loader_data);
+					}
+
+					if (loader_data.Model)
+					{
+						//TODO Link the mesh as a resrouce and link all the textures as resources.
+						// We are in the process of loading a model, add a new mesh to the model.
+						Mesh* new_mesh = NewTracked(Mesh);
+						loader_data.Model->m_meshes.push_back(new_mesh);
+						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
+						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
+						new_mesh->m_file_path = loader_data.Directoy + "\\" + new_mesh->m_mesh_name;
+
+						new_mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
+						new_mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
+
+						// Move our vertices/indices which have been optimized, into the overall vectors.
+						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
+						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
+
+						new_mesh->m_vertex_buffer = loader_data.Model->m_vertex_buffer;
+						new_mesh->m_index_buffer = loader_data.Model->m_index_buffer;
+
+						new_mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - new_mesh->m_vertex_offset;
+						new_mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - new_mesh->m_first_index;
+					}
+					else if (loader_data.Mesh)
+					{
+						loader_data.Mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
+						loader_data.Mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
+
+						// Move our vertices/indices which have been optimized, into the overall vectors.
+						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
+						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
+
+						loader_data.Mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_vertex_offset;
+						loader_data.Mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_first_index;
+					}
+
+					//BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), static_cast<u32>(vertices_optomized.size()));
+					//SubmeshDrawInfo submesh_draw_info = { };
+					//submesh_draw_info.Vertex_Offset = static_cast<u32>(vertices.size());
+					//submesh_draw_info.First_Index = static_cast<u32>(indices.size());
+
+					//submesh_draw_info.Transform = ConvertMatrix(aiNode->mTransformation);
+					//submesh_draw_info.Vertex_Count = static_cast<u32>(vertices.size()) - submesh_draw_info.Vertex_Offset;
+					//submesh_draw_info.Index_Count = static_cast<u32>(indices.size()) - submesh_draw_info.First_Index;
+
+					/// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
+					/// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
+					/// Same applies to other texture as the following list summarizes:
+					/// diffuse: texture_diffuseN
+					/// specular: texture_specularN
+					/// normal: texture_normalN
+					//std::vector<Ptr<RHI_Texture>> diffuse_textures = LoadMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], aiTextureType_DIFFUSE, "texture_diffuse");
+					//submesh_draw_info.Textures.insert(submesh_draw_info.Textures.end(), diffuse_textures.begin(), diffuse_textures.end());
+				}
+
+				///Mesh* mesh = ::New<Mesh, MemoryCategory::Core>(&model, static_cast<u32>(model.m_meshes.size()));
+				///Animation::Skeleton* skeleton = ::New<Animation::Skeleton, MemoryCategory::Core>();;
+				////// process all the node's meshes (if any)
+				///for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
+				///{
+				///	aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
+				///	mesh->m_subMeshes.push_back(ProcessMesh(*mesh, aiMesh, aiNode, aiScene, directory));
+
+				///	ExtractSkeleton(*skeleton, mesh->m_vertices, aiMesh, aiScene, mesh);
+				///}
+				///model.m_meshes.push_back(mesh);
+				///model.m_skeletons.push_back(skeleton);
+
+				///if (skeleton->GetBoneCount() > 0)
+				///{
+				///	model.m_meshToSkeleton.emplace((u32)model.m_meshes.size() - 1, (u32)model.m_skeletons.size() - 1);
+				///	model.m_skeletonToMesh.emplace((u32)model.m_skeletons.size() - 1, (u32)model.m_meshes.size() - 1);
+				///}
+			}
+
+			// Then do the same for each of its children
+			for (u32 i = 0; i < aiNode->mNumChildren; i++)
+			{
+				if (recursive || loader_data.Vertices.size() == 0)
+				{
+					ProcessNode(aiNode->mChildren[i], aiScene, directory, loader_data);
+				}
+			}
 		}
 
 		void AssimpLoader::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, AssimpLoaderData& loader_data)
 		{
-		}
-
-
-		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* texture_id, AssimpLoaderData& loader_data)
-		{
 			IS_PROFILE_FUNCTION();
 
+			glm::vec4 vertexColour;
+			vertexColour.x = (rand() % 100 + 1) * 0.01f;
+			vertexColour.y = (rand() % 100 + 1) * 0.01f;
+			vertexColour.z = (rand() % 100 + 1) * 0.01f;
+			vertexColour.w = 1.0f;
+
+			/// walk through each of the mesh's vertices
+			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
+			{
+				IS_PROFILE_SCOPE("Add Vertex");
+
+				Graphics::Vertex vertex = { };
+				glm::vec4 vector = { }; /// we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class 
+				/// so we transfer the data to this placeholder glm::vec3 first.
+				/// positions
+				vector.x = mesh->mVertices[i].x;
+				vector.y = mesh->mVertices[i].y;
+				vector.z = mesh->mVertices[i].z;
+				vertex.Position = vector;
+
+				/// normals
+				if (mesh->HasNormals())
+				{
+					vector = { };
+					vector.x = mesh->mNormals[i].x;
+					vector.y = mesh->mNormals[i].y;
+					vector.z = mesh->mNormals[i].z;
+					vector.w = 1.0f;
+					vector = glm::normalize(vector);
+					vertex.Normal = vector;
+				}
+				vector = { };
+				if (mesh->mColors[0])
+				{
+					vector.x = mesh->mColors[0]->r;
+					vector.y = mesh->mColors[0]->g;
+					vector.z = mesh->mColors[0]->b;
+					vector.w = mesh->mColors[0]->a;
+					vertex.Normal = vector;
+				}
+				else
+				{
+					vector.x = (rand() % 100 + 1) * 0.01f;
+					vector.y = (rand() % 100 + 1) * 0.01f;
+					vector.z = (rand() % 100 + 1) * 0.01f;
+					vector.w = 1.0f;
+					vertex.Colour = vertexColour;
+				}
+				vector = { };
+				/// texture coordinates
+				if (mesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
+				{
+					glm::vec2 vec;
+					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
+					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
+					vec.x = mesh->mTextureCoords[0][i].x;
+					vec.y = mesh->mTextureCoords[0][i].y;
+					vertex.UV = vec;
+
+					// tangent
+					if (mesh->mTangents)
+					{
+						vector.x = mesh->mTangents[i].x;
+						vector.y = mesh->mTangents[i].y;
+						vector.z = mesh->mTangents[i].z;
+					}
+					///vertex.Tangent = vector;
+					/// bitangent
+					if (mesh->mBitangents)
+					{
+						vector.x = mesh->mBitangents[i].x;
+						vector.y = mesh->mBitangents[i].y;
+						vector.z = mesh->mBitangents[i].z;
+					}
+					//vertex.Bitangent = vector;
+				}
+				else
+				{
+					///vertex.UV = glm::vec2(0.0f, 0.0f);
+				}
+
+				loader_data.Vertices.push_back(vertex);
+			}
+
+			/// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+			{
+				aiFace face = mesh->mFaces[i];
+				/// retrieve all indices of the face and store them in the indices vector
+				for (unsigned int j = 0; j < face.mNumIndices; j++)
+				{
+					IS_PROFILE_SCOPE("Add index");
+					loader_data.Indices.push_back(face.mIndices[j]);
+				}
+			}
+		}
+
+		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& loader_data)
+		{
+			IS_PROFILE_FUNCTION();
+			ExtractMaterialType(ai_material, aiTextureType_DIFFUSE, "texture_diffuse", loader_data);
+			ExtractMaterialType(ai_material, aiTextureType_NORMALS, "texture_normal", loader_data);
+		}
+
+		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, AssimpLoaderData& loader_data)
+		{
 			for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
 			{
 				aiString str;
@@ -92,12 +309,17 @@ namespace Insight
 					file_path = file_path.substr(2);
 				}
 
+				// Use absolute paths.
+				// TODO: Should probably change this to be relative. Paths lengths are getting very long.
+				//file_path = loader_data.Directoy + '\\' + file_path;
+
 				bool skip = false;
 				for (u32 texture_path_index = 0; texture_path_index < loader_data.Texture_File_Paths.size(); ++texture_path_index)
 				{
 					if (loader_data.Texture_File_Paths.at(texture_path_index) == file_path)
 					{
 						loader_data.Textures.push_back(loader_data.Textures.at(texture_path_index));
+						loader_data.Texture_File_Paths.push_back("");
 						skip = true;
 						break;
 					}
@@ -127,7 +349,6 @@ namespace Insight
 			return path.substr(file_name_start, file_name_end - file_name_start);
 		}
 
-
 		void AssimpLoader::LoadMaterialTextures(AssimpLoaderData& loader_data)
 		{
 			/// EXPERIMENTAL: Trying to load textures in parallel.
@@ -139,11 +360,14 @@ namespace Insight
 			{
 				Graphics::RHI_Texture* texture = loader_data.Textures.at(i);
 				std::string texture_file_path = loader_data.Texture_File_Paths.at(i);
-				task_group.run([texture, texture_file_path]()
+				if (!texture_file_path.empty())
 				{
-					texture->LoadFromFile(texture_file_path);
-					texture->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
-				});
+					task_group.run([texture, texture_file_path]()
+						{
+							texture->LoadFromFile(texture_file_path);
+							texture->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
+						});
+				}
 			}
 			task_group.wait();
 		}
@@ -184,6 +408,40 @@ namespace Insight
 
 			loader_data.Vertices = dst_vertices;
 			loader_data.Indices = dst_indices;
+		}
+
+		void AssimpLoader::UploadGPUData(AssimpLoaderData& loader_data)
+		{
+			Graphics::RHI_Buffer* vertex_buffer = nullptr;
+			Graphics::RHI_Buffer* index_buffer = nullptr;
+			if (loader_data.Model)
+			{
+				vertex_buffer = loader_data.Model->m_vertex_buffer;
+				index_buffer = loader_data.Model->m_index_buffer;
+			}
+			else if (loader_data.Mesh)
+			{
+				vertex_buffer = loader_data.Mesh->m_vertex_buffer;
+				index_buffer = loader_data.Mesh->m_index_buffer;
+			}
+
+			const u64 cpu_vertex_buffer_size = sizeof(Graphics::Vertex) * loader_data.Vertices.size();
+			const u64 cpu_index_buffer_size = sizeof(u32) * loader_data.Indices.size();
+
+			if (cpu_vertex_buffer_size > vertex_buffer->GetSize())
+			{
+				// Resize buffer as it is too small.
+				vertex_buffer->Resize(cpu_vertex_buffer_size);
+			}
+			if (cpu_index_buffer_size > index_buffer->GetSize())
+			{
+				// Resize buffer as it is too small.
+				index_buffer->Resize(cpu_index_buffer_size);
+			}
+
+			// Upload the vertices and indics data to the GPU.
+			vertex_buffer->Upload(loader_data.Vertices.data(), cpu_vertex_buffer_size);
+			index_buffer->Upload(loader_data.Indices.data(), cpu_index_buffer_size);
 		}
 	}
 }
