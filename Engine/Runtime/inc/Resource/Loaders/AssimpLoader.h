@@ -20,6 +20,7 @@ namespace Insight
 	{
 		class Model;
 		class Mesh;
+		class Texture2D;
 
 		/// @brief Utility class to help with anything related to loading from assimp.
 		class AssimpLoader
@@ -71,7 +72,7 @@ namespace Insight
 				std::vector<Graphics::Vertex> Vertices;
 				std::vector<u32> Indices;
 				std::vector<std::string> Texture_File_Paths;
-				std::vector<Graphics::RHI_Texture*> Textures;
+				std::vector<Texture2D*> Textures;
 
 				std::string Directoy;
 
@@ -92,6 +93,8 @@ namespace Insight
 			/// @return bool
 			static bool LoadMesh(Mesh* mesh, std::string file_path, u32 importer_flags);
 
+			static bool ExportModel(Model* model, const std::string& file_path);
+
 		private:
 			/// @brief Process a single node from the aiScene.
 			/// @param aiNode 
@@ -111,9 +114,9 @@ namespace Insight
 			/// @param ai_material 
 			/// @param ai_texture_type 
 			/// @param texture_id 
-			static void ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& loader_data);
+			static void ExtractMaterialTextures(aiMaterial* ai_material, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data);
 			
-			static void ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, AssimpLoaderData& loader_data);
+			static void ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data);
 
 			/// @brief Load the textures which have been extracted.
 			/// @param loader_data 

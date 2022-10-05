@@ -32,7 +32,7 @@ namespace Insight
 			void SetPosition(glm::vec3 position) { m_transform[3] = glm::vec4(position, 1.0f); }
 
 		private:
-			glm::mat4 m_transform;
+			glm::mat4 m_transform = glm::mat4(1.0f);
 		};
 	}
 }

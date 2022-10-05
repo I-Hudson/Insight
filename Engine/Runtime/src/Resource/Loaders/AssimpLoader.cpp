@@ -1,6 +1,7 @@
 #include "Resource/Loaders/AssimpLoader.h"
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
+#include "Resource/Texture2D.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -10,6 +11,7 @@
 #include "Graphics/RenderContext.h"
 
 #include <assimp/Importer.hpp>
+//#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <meshoptimizer.h>
@@ -22,6 +24,17 @@ namespace Insight
 {
 	namespace Runtime
 	{
+		static glm::mat4 ConvertMatrix(const aiMatrix4x4& transform)
+		{
+			return glm::mat4
+			(
+				transform.a1, transform.b1, transform.c1, transform.d1,
+				transform.a2, transform.b2, transform.c2, transform.d2,
+				transform.a3, transform.b3, transform.c3, transform.d3,
+				transform.a4, transform.b4, transform.c4, transform.d4
+			);
+		}
+
 		bool AssimpLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
 			Assimp::Importer importer;
@@ -85,6 +98,17 @@ namespace Insight
 			return true;
 		}
 
+		bool AssimpLoader::ExportModel(Model* model, const std::string& file_path)
+		{
+			//Assimp::Exporter exporter;
+			//if (exporter.Export(nullptr, "", file_path) != aiReturn_SUCCESS)
+			//{
+			//	IS_CORE_ERROR("[AssimpLoader::ExportModel] Assimp error code '{}'.", exporter.GetErrorString());
+				return false;
+			//}
+			//return true;
+		}
+
 		void AssimpLoader::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, AssimpLoaderData& loader_data, bool recursive)
 		{
 			IS_PROFILE_FUNCTION();
@@ -100,14 +124,15 @@ namespace Insight
 					Optimize(mesh_data);
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
-						ExtractMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], loader_data);
+						ExtractMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], loader_data, mesh_data);
 					}
 
+					Mesh* new_mesh = nullptr;
 					if (loader_data.Model)
 					{
 						//TODO Link the mesh as a resrouce and link all the textures as resources.
 						// We are in the process of loading a model, add a new mesh to the model.
-						Mesh* new_mesh = NewTracked(Mesh);
+						new_mesh = NewTracked(Mesh);
 						loader_data.Model->m_meshes.push_back(new_mesh);
 						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
@@ -128,16 +153,38 @@ namespace Insight
 					}
 					else if (loader_data.Mesh)
 					{
-						loader_data.Mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
-						loader_data.Mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
+						new_mesh = loader_data.Mesh;
+						new_mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
+						new_mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
 
 						// Move our vertices/indices which have been optimized, into the overall vectors.
 						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
 						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
 
-						loader_data.Mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_vertex_offset;
-						loader_data.Mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_first_index;
+						new_mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_vertex_offset;
+						new_mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_first_index;
 					}
+
+					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
+
+					for (u64 texture_index = 0; texture_index < mesh_data.Textures.size(); ++texture_index)
+					{
+						new_mesh->AddReferenceResource(mesh_data.Textures.at(i), mesh_data.Textures.at(i)->GetFilePath());
+					}
+					std::for_each(mesh_data.Textures.begin(), mesh_data.Textures.end(), [&loader_data](Texture2D* texture)
+						{
+							if (std::find(loader_data.Textures.begin(), loader_data.Textures.end(), texture) == loader_data.Textures.end())
+							{
+								loader_data.Textures.push_back(texture);
+							}
+						});
+					std::for_each(mesh_data.Texture_File_Paths.begin(), mesh_data.Texture_File_Paths.end(), [&loader_data](const std::string texture_file_path)
+						{
+							if (std::find(loader_data.Texture_File_Paths.begin(), loader_data.Texture_File_Paths.end(), texture_file_path) == loader_data.Texture_File_Paths.end())
+							{
+								loader_data.Texture_File_Paths.push_back(texture_file_path);
+							}
+						});
 
 					//BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), static_cast<u32>(vertices_optomized.size()));
 					//SubmeshDrawInfo submesh_draw_info = { };
@@ -289,14 +336,15 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& loader_data)
+		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
 		{
 			IS_PROFILE_FUNCTION();
-			ExtractMaterialType(ai_material, aiTextureType_DIFFUSE, "texture_diffuse", loader_data);
-			ExtractMaterialType(ai_material, aiTextureType_NORMALS, "texture_normal", loader_data);
+			ExtractMaterialType(ai_material, aiTextureType_DIFFUSE, "texture_diffuse", known_data, mesh_data);
+			ExtractMaterialType(ai_material, aiTextureType_NORMALS, "texture_normal", known_data, mesh_data);
+			ExtractMaterialType(ai_material, aiTextureType_SPECULAR, "texture_specular", known_data, mesh_data);
 		}
 
-		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, AssimpLoaderData& loader_data)
+		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
 		{
 			for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
 			{
@@ -311,15 +359,27 @@ namespace Insight
 
 				// Use absolute paths.
 				// TODO: Should probably change this to be relative. Paths lengths are getting very long.
-				//file_path = loader_data.Directoy + '\\' + file_path;
+				file_path = known_data.Directoy + '\\' + file_path;
 
 				bool skip = false;
-				for (u32 texture_path_index = 0; texture_path_index < loader_data.Texture_File_Paths.size(); ++texture_path_index)
+				// Check if mesh_data knows about the texture.
+				for (u32 texture_path_index = 0; texture_path_index < mesh_data.Texture_File_Paths.size(); ++texture_path_index)
 				{
-					if (loader_data.Texture_File_Paths.at(texture_path_index) == file_path)
+					if (mesh_data.Texture_File_Paths.at(texture_path_index) == file_path)
 					{
-						loader_data.Textures.push_back(loader_data.Textures.at(texture_path_index));
-						loader_data.Texture_File_Paths.push_back("");
+						mesh_data.Textures.push_back(mesh_data.Textures.at(texture_path_index));
+						mesh_data.Texture_File_Paths.push_back("");
+						skip = true;
+						break;
+					}
+				}
+				// Check if known_data knows about the texture.
+				for (u32 texture_path_index = 0; texture_path_index < known_data.Texture_File_Paths.size(); ++texture_path_index)
+				{
+					if (known_data.Texture_File_Paths.at(texture_path_index) == file_path)
+					{
+						mesh_data.Textures.push_back(known_data.Textures.at(texture_path_index));
+						mesh_data.Texture_File_Paths.push_back("");
 						skip = true;
 						break;
 					}
@@ -328,10 +388,9 @@ namespace Insight
 				if (!skip)
 				{
 					IS_PROFILE_SCOPE("Create new texture");
-					Graphics::RHI_Texture* texture = Renderer::CreateTexture();
-
-					loader_data.Textures.push_back(texture);
-					loader_data.Texture_File_Paths.push_back(file_path);
+					Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(file_path, Texture2D::GetStaticResourceTypeId()));
+					mesh_data.Textures.push_back(texture);
+					mesh_data.Texture_File_Paths.push_back(file_path);
 				}
 			}
 		}
@@ -358,14 +417,14 @@ namespace Insight
 			concurrency::task_group task_group;
 			for (size_t i = 0; i < loader_data.Textures.size(); ++i)
 			{
-				Graphics::RHI_Texture* texture = loader_data.Textures.at(i);
+				Texture2D* texture = loader_data.Textures.at(i);
 				std::string texture_file_path = loader_data.Texture_File_Paths.at(i);
 				if (!texture_file_path.empty())
 				{
 					task_group.run([texture, texture_file_path]()
 						{
-							texture->LoadFromFile(texture_file_path);
-							texture->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
+							//texture->LoadFromFile(texture_file_path);
+							texture->GetRHITexture()->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
 						});
 				}
 			}
