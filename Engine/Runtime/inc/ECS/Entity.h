@@ -18,6 +18,11 @@
 
 namespace Insight
 {
+	namespace App
+	{
+		class Scene;
+	}
+
 	namespace ECS
 	{
 #ifdef IS_ECS_ENABLED
@@ -120,6 +125,9 @@ namespace Insight
 		public:
 			static void RegisterComponent(std::string_view component_type, std::function<Component*()> func);
 			static Component* CreateComponent(std::string_view component_type);
+
+			static void RegisterInternalComponents();
+
 		private:
 			static ComponentRegistryMap m_register_funcs;
 		};
@@ -127,8 +135,13 @@ namespace Insight
 		class IS_RUNTIME Entity
 		{
 		public:
+#ifdef ECS_ENABLED
 			Entity(ECSWorld* ecs_world);
 			Entity(ECSWorld* ecs_world, std::string name);
+#else
+			Entity(EntityManager* entity_manager);
+			Entity(EntityManager* entity_manager, std::string name);
+#endif
 
 			Ptr<Entity> AddChild();
 			Ptr<Entity> AddChild(std::string entity_name);
@@ -160,7 +173,11 @@ namespace Insight
 			std::string m_name;
 
 			Ptr<Entity> m_parent = nullptr;
+#ifdef ECS_ENABLED
 			ECSWorld* m_ecs_world = nullptr;
+#else
+			EntityManager* m_entity_manager = nullptr;
+#endif
 
 			std::vector<Ptr<Entity>> m_children;
 			// TODO: Currently the Entity owns its components. Maybe a component manager should own all components

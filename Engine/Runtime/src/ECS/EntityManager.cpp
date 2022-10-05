@@ -147,11 +147,37 @@ namespace Insight
 		}
 #else
 		EntityManager::EntityManager()
-		{ }
+		{
+			ComponentRegistry::RegisterInternalComponents();
+		}
 
+		EntityManager::EntityManager(EntityManager&& other)
+		{
+			ComponentRegistry::RegisterInternalComponents();
+#ifdef ECS_ENABLED
+			m_ecsWorld = other.m_ecsWorld;
+			other.m_ecsWorld = nullptr;
+#else
+			m_scene = other.m_scene;
+			other.m_scene = nullptr;
+#endif
+			std::for_each(other.m_entities.begin(), other.m_entities.end(), [this](UPtr<Entity>& entity)
+				{
+					m_entities.push_back(std::move(entity));
+				});
+			other.m_entities.clear();
+		}
+
+#ifdef ECS_ENABLED
 		EntityManager::EntityManager(ECSWorld* ecsWorld)
 			: m_ecsWorld(ecsWorld)
 		{ }
+#else
+		void EntityManager::SetScene(App::Scene* scene)
+		{
+			m_scene = scene;
+		}
+#endif
 
 		Entity* EntityManager::AddNewEntity()
 		{
@@ -161,7 +187,12 @@ namespace Insight
 		Entity* EntityManager::AddNewEntity(std::string entity_name)
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef ECS_ENABLED
 			UPtr<Entity> new_entity = MakeUPtr<Entity>(m_ecsWorld, entity_name);
+#else
+			UPtr<Entity> new_entity = MakeUPtr<Entity>(this, entity_name);
+
+#endif
 			new_entity->AddComponentByName(TransformComponent::Type_Name);
 			new_entity->AddComponentByName(TagComponent::Type_Name);
 

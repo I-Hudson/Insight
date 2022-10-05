@@ -9,6 +9,11 @@
 
 namespace Insight
 {
+	namespace App
+	{
+		class Scene;
+	}
+
 	namespace ECS
 	{
 		class ECSWorld;
@@ -45,7 +50,14 @@ namespace Insight
 		{
 		public:
 			EntityManager();
+			EntityManager(const EntityManager& other) = delete;
+			EntityManager(EntityManager&& other);
+
+#ifdef ECS_ENABLED
 			EntityManager(ECSWorld* ecsWorld);
+#else
+			void SetScene(App::Scene* scene);
+#endif
 
 			Entity* AddNewEntity();
 			Entity* AddNewEntity(std::string entity_name);
@@ -61,9 +73,12 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 
 		private:
+#ifdef ECS_ENABLED
 			ECSWorld* m_ecsWorld = nullptr;
+#else
+			App::Scene* m_scene = nullptr;
+#endif
 			std::vector<UPtr<Entity>> m_entities;
-
 			std::shared_mutex m_lock;
 		};
 

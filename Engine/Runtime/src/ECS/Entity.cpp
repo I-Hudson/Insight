@@ -1,6 +1,13 @@
 #include "ECS/Entity.h"
 #include "ECS/ECSWorld.h"
 
+#include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/TagComponent.h"
+#include "ECS/Components/MeshComponent.h"
+
+#include "Scene/SceneManager.h"
+
+
 namespace Insight
 {
 	namespace ECS
@@ -92,7 +99,14 @@ namespace Insight
 			return nullptr;
 		}
 
+		void ComponentRegistry::RegisterInternalComponents()
+		{
+			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name, []() { return NewTracked(TransformComponent); });
+			ComponentRegistry::RegisterComponent(TagComponent::Type_Name, []() { return NewTracked(TagComponent); });
+			ComponentRegistry::RegisterComponent(MeshComponent::Type_Name, []() { return NewTracked(MeshComponent); });
+		}
 
+#ifdef ECS_ENABLED
 		Entity::Entity(ECSWorld* ecs_world)
 			: m_ecs_world(ecs_world)
 		{ }
@@ -101,7 +115,16 @@ namespace Insight
 			: m_ecs_world(ecs_world)
 			, m_name(std::move(name))
 		{ }
+#else
+		Entity::Entity(EntityManager* entity_manager)
+			: m_entity_manager(entity_manager)
+		{ }
 
+		Entity::Entity(EntityManager* entity_manager, std::string name)
+			: m_entity_manager(entity_manager)
+			, m_name(std::move(name))
+		{ }
+#endif
 		Ptr<Entity> Entity::AddChild()
 		{
 			return AddChild("Child");
@@ -109,7 +132,11 @@ namespace Insight
 
 		Ptr<Entity> Entity::AddChild(std::string entity_name)
 		{
+#ifdef ECS_ENABLED
 			Ptr<Entity> entity = m_ecs_world->AddEntity(entity_name);
+#else
+			Ptr<Entity> entity = m_entity_manager->AddNewEntity(entity_name);
+#endif
 			entity->m_parent = this;
 			m_children.push_back(entity);
 			return entity;
@@ -126,7 +153,11 @@ namespace Insight
 			/// the remove it from this entity's child vector.
 			std::vector<Ptr<Entity>>::iterator entity_itr = m_children.begin() + index;
 			Entity* entity_ptr = entity_itr->Get();
+#ifdef ECS_ENABLED
 			m_ecs_world->RemoveEntity(entity_ptr);
+#else
+			m_entity_manager->RemoveEntity(entity_ptr);
+#endif
 			m_children.erase(entity_itr);
 		}
 

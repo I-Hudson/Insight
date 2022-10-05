@@ -9,27 +9,20 @@ namespace Insight
 		Scene::Scene()
 			: m_sceneName("Default")
 		{
-			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 #ifdef ECS_ENABLED
+			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
 #else
+			m_entityManager.SetScene(this);
 #endif
 		}
 
 		Scene::Scene(std::string sceneName)
 			: m_sceneName(std::move(sceneName))
 		{
+#ifdef ECS_ENABLED
 			m_ecsWorld = MakeUPtr<ECS::ECSWorld>();
-#ifdef ECS_ENABLED
 #else
-#endif
-		}
-
-		Scene::Scene(Scene&& other)
-		{
-			m_sceneName = std::move(other.m_sceneName);
-			m_ecsWorld = std::move(other.m_ecsWorld);
-#ifdef ECS_ENABLED
-#else
+			m_entityManager.SetScene(this);
 #endif
 		}
 
@@ -40,8 +33,8 @@ namespace Insight
 
 		void Scene::Destroy()
 		{
-			m_ecsWorld->Destroy();
 #ifdef ECS_ENABLED
+			m_ecsWorld->Destroy();
 #else
 #endif
 		}
@@ -49,34 +42,78 @@ namespace Insight
 		void Scene::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			m_ecsWorld->EarlyUpdate();
 #ifdef ECS_ENABLED
+			m_ecsWorld->EarlyUpdate();
 #else
+			m_entityManager.EarlyUpdate();
 #endif
 		}
 
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			m_ecsWorld->Update(deltaTime);
 #ifdef ECS_ENABLED
+			m_ecsWorld->Update(deltaTime);
 #else
+			m_entityManager.Update(deltaTime);
 #endif
 		}
 
 		void Scene::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			m_ecsWorld->LateUpdate();
 #ifdef ECS_ENABLED
+			m_ecsWorld->LateUpdate();
 #else
+			m_entityManager.LateUpdate();
+#endif
+		}
+
+		Ptr<ECS::Entity> Scene::AddEntity()
+		{
+			return AddEntity("");
+		}
+
+		Ptr<ECS::Entity> Scene::AddEntity(std::string entity_name)
+		{
+#ifdef ECS_ENABLED
+			return m_ecsWorld->AddEntity(entity_name);
+#else
+			Ptr<ECS::Entity> e = m_entityManager.AddNewEntity(entity_name);
+			m_root_entities.push_back(e);
+			return e;
+#endif
+		}
+
+		Ptr<ECS::Entity> Scene::GetEntityByName(std::string entity_name) const
+		{
+#ifdef ECS_ENABLED
+			return m_ecsWorld->GetEntityByName(entity_name);
+#else
+			return m_entityManager.GetEntityByName(entity_name);
+#endif
+		}
+
+		void Scene::RemoveEntity(Ptr<ECS::Entity>& entity)
+		{
+			ECS::Entity* e = entity.Get();
+#ifdef ECS_ENABLED
+			m_ecsWorld->RemoveEntity(e);
+#else
+			std::remove_if(m_root_entities.begin(), m_root_entities.end(), [e](const Ptr<ECS::Entity>& other_entity)
+				{
+					return e == other_entity.Get();
+				});
+			m_entityManager.RemoveEntity(e);
 #endif
 		}
 
 		std::vector<Ptr<ECS::Entity>> Scene::GetAllEntitiesWithComponentByName(std::string_view component_type) const
 		{
-			return m_ecsWorld->GetAllEntitiesWithComponentByName(component_type);
 #ifdef ECS_ENABLED
+			return m_ecsWorld->GetAllEntitiesWithComponentByName(component_type);
+#else
+			return m_entityManager.GetAllEntitiesWithComponentByName(component_type);
 #endif
 		}
 
