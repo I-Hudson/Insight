@@ -51,22 +51,16 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_100.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow_20.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
-			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
-			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow.gltf");
-			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
-			Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
-				, Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			Runtime::ResourceManager::Instance().Print();
 
-			//RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
-			//ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
-			//ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-			//mesh_component->SetMesh(model->GetMesh());
+			Runtime::Model* model = model_sponza;
+			while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
+			{ }
 			model->CreateEntityHierarchy();
 
 			if (m_camera.View == glm::mat4(0.0f))
@@ -104,7 +98,6 @@ namespace Insight
 		{
 			GraphicsManager::Instance().GetRenderContext()->GpuWaitForIdle();
 			m_imgui_pass.Release();
-			m_testMesh.Destroy();
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -165,11 +158,10 @@ namespace Insight
 		{
 			struct PassData
 			{
-				Mesh& Mesh;
 				std::vector<UBO_ShadowCamera> Cameras;
 				RGTextureHandle Depth_Tex;
 			};
-			PassData data = { m_testMesh };
+			PassData data;
 			data.Cameras = UBO_ShadowCamera::GetCascades(m_camera, 4, cascade_split_lambda);
 
 			IMGUI_VALID(ImGui::Begin("Directional Light Direction"));
@@ -259,7 +251,6 @@ namespace Insight
 						cmdList->SetUniform(0, 0, &data.Cameras.at(i), sizeof(data.Cameras.at(i)));
 
 						Frustum camera_frustum(data.Cameras.at(i).View, data.Cameras.at(i).Projection,	1000.0f);
-#ifdef ECS_RENDER
 						for (const Ptr<ECS::Entity> e : entities)
 						{
 							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
@@ -273,17 +264,6 @@ namespace Insight
 							}
 							mesh_component->GetMesh()->Draw(cmdList);
 						}
-#else
-						for (Submesh* sub_mesh : data.Mesh.GetSubMeshes())
-						{
-							BoundingBox bounding_box = sub_mesh->GetBoundingBox();
-							///if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
-							{
-								sub_mesh->Draw(cmdList);
-							}
-						}
-#endif
-
 						cmdList->EndRenderpass();
 					}
 				}, std::move(data));
@@ -295,13 +275,7 @@ namespace Insight
 
 #ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
-			{
-				Mesh& TestMesh;
-			};
-			TestPassData passData =
-			{
-				m_testMesh
-			};
+			{ };
 
 			static int camera_index = 0;
 			static const char* camera_names[] = { "Default", "Shadow 0", "Shadow 1", "Shadow 2", "Shadow 3" };
@@ -452,7 +426,7 @@ namespace Insight
 #endif
 
 					cmdList->EndRenderpass();
-				}, std::move(passData));
+				});
 #endif ///RENDER_GRAPH_ENABLED
 		}
 

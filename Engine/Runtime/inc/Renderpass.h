@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Graphics/Mesh.h"
 #include "Graphics/ImGuiPass.h"
 
 #include <glm/mat4x4.hpp>
@@ -51,8 +50,6 @@ namespace Insight
 			void ImGuiPass();
 
 			void UpdateCamera(UBO_Camera& camera);
-
-			Mesh m_testMesh;
 
 			Graphics::ImGuiPass m_imgui_pass;
 			UBO_Camera m_camera;
