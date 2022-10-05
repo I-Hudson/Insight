@@ -5,8 +5,22 @@
 
 namespace Insight
 {
+	namespace Graphics
+	{
+		class RHI_Texture;
+	}
+
 	namespace Runtime
 	{
+		enum class TextureTypes
+		{
+			Diffuse,
+			Normal,
+			Specular,
+
+			Count
+		};
+
 		class Texture : public IResource
 		{
 			REGISTER_RESOURCE(Texture);
@@ -18,18 +32,15 @@ namespace Insight
 			u32 GetDepth() const;
 			PixelFormat GetFormat() const;
 
-		private:
-			/// @brief Handle loading the resource from disk.
-			/// @param file_path 
-			virtual void Load() override;
-			/// @brief Handle unloading the resource from memory.
-			virtual void UnLoad() override;
+			Graphics::RHI_Texture* GetRHITexture() const;
 
-		private:
+		protected:
 			u32 m_width = 0;
 			u32 m_height = 0;
 			u32 m_depth = 0;
 			PixelFormat m_format;
+
+			Graphics::RHI_Texture* m_rhi_texture = nullptr;
 		};
 	}
 }

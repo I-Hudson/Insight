@@ -12,7 +12,12 @@ namespace Insight
 		{
 			cmd_list->SetVertexBuffer(m_vertex_buffer);
 			cmd_list->SetIndexBuffer(m_index_buffer, Graphics::IndexType::Uint32);
-			cmd_list->DrawIndexed(m_index_count, 1, 0, 0, 0);
+			cmd_list->DrawIndexed(m_index_count, 1, m_first_index, m_vertex_offset, 0);
+		}
+
+		glm::mat4 Mesh::GetTransform() const
+		{
+			return m_transform_offset;
 		}
 
 		void Mesh::Load()
@@ -57,8 +62,19 @@ namespace Insight
 		{
 			ASSERT(m_vertex_buffer);
 			ASSERT(m_index_buffer);
-			Renderer::FreeVertexBuffer(m_vertex_buffer);
-			Renderer::FreeIndexBuffer(m_index_buffer);
+			if (std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
+				}) == m_reference_links.end())
+			{
+				Renderer::FreeVertexBuffer(m_vertex_buffer);
+				Renderer::FreeIndexBuffer(m_index_buffer);
+			}
+			else
+			{
+				m_vertex_buffer = nullptr;
+				m_index_buffer = nullptr;
+			}
 		}
 	}
 }

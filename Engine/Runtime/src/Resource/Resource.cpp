@@ -2,8 +2,11 @@
 
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
+#include "Resource/Material.h"
+#include "Resource/Texture2D.h"
 
 #include <filesystem>
+#include <ppltasks.h>
 
 namespace Insight
 {
@@ -70,7 +73,7 @@ namespace Insight
 
 		std::string IResource::GetFileName() const
 		{
-			return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
+			return m_file_path.substr(m_file_path.find_last_of('\\'), m_file_path.find('.') - m_file_path.find_last_of('\\'));
 		}
 
 		EResoruceStates IResource::GetResourceState() const
@@ -103,6 +106,38 @@ namespace Insight
 			return m_resource_state == EResoruceStates::Unloaded;
 		}
 
+		bool IResource::IsDependentOnAnotherResource() const
+		{
+			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
+				}) != m_reference_links.end();
+		}
+
+		bool IResource::IsDependentOnAnotherResource(IResource* resource) const
+		{
+			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent && link.GetLinkResource() == resource;
+				}) != m_reference_links.end();
+		}
+
+		bool IResource::IsDependentOwnerOnAnotherResource() const
+		{
+			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner;
+				}) != m_reference_links.end();
+		}
+
+		bool IResource::IsDependentOwnerOnAnotherResource(IResource* resource) const
+		{
+			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner && link.GetLinkResource() == resource;
+				}) != m_reference_links.end();
+		}
+
 		ResourceTypeId IResource::GetResourceTypeId() const
 		{
 			FAIL_ASSERT_MSG("[Resource::GetResourceType] Resource is missing 'REGISTER_RESOURCE' marco.");
@@ -119,7 +154,7 @@ namespace Insight
 			IS_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
 		}
 
-		IResource* IResource::AddDependentResourceFromDisk(std::string file_path, ResourceTypeId type_id)
+		IResource* IResource::AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id)
 		{
 			return AddDependentResource(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
 		}
@@ -129,7 +164,7 @@ namespace Insight
 			return AddDependentResource("", data, data_size_in_bytes, ResourceStorageTypes::Memory, type_id);
 		}
 
-		void IResource::AddDependentResrouce(IResource* resource, std::string file_path, ResourceStorageTypes storage_type)
+		void IResource::AddDependentResrouce(IResource* resource, const std::string& file_path, ResourceStorageTypes storage_type)
 		{
 			if (resource)
 			{
@@ -140,18 +175,28 @@ namespace Insight
 			}
 		}
 
-		IResource* IResource::AddReferenceResource(std::string file_path, ResourceTypeId type_id)
+		IResource* IResource::AddReferenceResource(const std::string& file_path, ResourceTypeId type_id)
 		{
 			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
 			if (resource)
 			{
-				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
-				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent_Owner, this, resource));
+				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
+				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
 			}
 			return resource;
 		}
 
-		IResource* IResource::AddDependentResource(std::string file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		void IResource::AddReferenceResource(IResource* resource, const std::string& file_path)
+		{
+			if (resource)
+			{
+				ResourceManager::Instance().AddExistingResource(resource, file_path);
+				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
+				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
+			}
+		}
+
+		IResource* IResource::AddDependentResource(const std::string& file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
 			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
 			if (resource)
@@ -177,14 +222,21 @@ namespace Insight
 			FAIL_ASSERT_MSG("[Resource::UnLoad] Must be implemented.");
 		}
 
+		void IResource::Save(const std::string& file_path)
+		{
+			FAIL_ASSERT_MSG("[Resource::Save] Must be implemented.");
+		}
+
 
 		//--------------------------------------------------------------------------
 		// ResourceManager
 		//--------------------------------------------------------------------------
 		ResourceManager::ResourceManager()
 		{
-			ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(), []() { return NewTracked(Model); });
-			ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(), []() { return NewTracked(Mesh); });
+			ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),	[]() { return NewTracked(Model); });
+			ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),		[]() { return NewTracked(Mesh); });
+			ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(), []() { return NewTracked(Material); });
+			ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
 		}
 
 		ResourceManager::~ResourceManager()
@@ -193,7 +245,7 @@ namespace Insight
 			m_resources.clear();
 		}
 
-		IResource* ResourceManager::Load(std::string file_path, ResourceTypeId type_id)
+		IResource* ResourceManager::Load(const std::string& file_path, ResourceTypeId type_id)
 		{
 			return Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
 		}
@@ -206,10 +258,17 @@ namespace Insight
 				return;
 			}
 
+			if (!HasResource(resource->GetFilePath()))
+			{
+				//NOTE Resource not being tracked (is this something that should be allowed).
+				return;
+			}
+
 			if (resource->GetResourceState() != EResoruceStates::Loaded)
 			{
 				IS_CORE_WARN("[ResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
 					, ERsourceStatesToString(resource->GetResourceState()));
+				return;
 			}
 
 			// Unload the resource,
@@ -219,16 +278,34 @@ namespace Insight
 			resource->UnLoad();
 			resource->m_unload_timer.Stop();
 			resource->m_resource_state = EResoruceStates::Unloaded;
-			--m_loaded_resource_count;
+			if (resource->m_storage_type == ResourceStorageTypes::Disk)
+			{
+				--m_loaded_resource_count;
+			}
 		}
 
 		void ResourceManager::UnloadAll()
 		{
-			std::lock_guard lock(m_lock);
+			std::shared_lock lock(m_lock);
 			for (auto& pair : m_resources)
 			{
-				Unload(pair.second.Get());
+				if (!pair.second->IsDependentOnAnotherResource())
+				{
+					/// Only unload resource which are not dependent on other resources 
+					/// as those resources should unload the dependent ones.
+					Unload(pair.second.Get());
+				}
 			}
+		}
+
+		void ResourceManager::Save(const std::string& file_path, IResource* resource)
+		{
+			if (!resource)
+			{
+				IS_CORE_WARN("[ResourceManager::Save] 'resource' must be a valid resource.");
+				return;
+			}
+			resource->Save(file_path);
 		}
 
 		u32 ResourceManager::GetLoadedResourcesCount() const
@@ -238,18 +315,19 @@ namespace Insight
 
 		bool ResourceManager::HasResource(std::string_view file_path) const
 		{
-			std::lock_guard lock(m_lock);
+			std::shared_lock lock(m_lock);
 			return m_resources.find(file_path.data()) != m_resources.end();
 		}
 
-		void ResourceManager::ExportStatsToFile(std::string file_path)
+		void ResourceManager::ExportStatsToFile(const std::string& file_path)
 		{
-			std::lock_guard lock(m_lock);
+			std::shared_lock lock(m_lock);
 		}
 
 		void ResourceManager::Print()
 		{
-			std::lock_guard lock(m_lock);
+			m_running_loads.wait();
+			std::shared_lock lock(m_lock);
 			for (const auto& pair : m_resources)
 			{
 				const IResource* resource = pair.second.Get();
@@ -257,7 +335,7 @@ namespace Insight
 			}
 		}
 
-		IResource* ResourceManager::Load(std::string file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		IResource* ResourceManager::Load(const std::string& file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
 			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
 			std::string abs_file_path = abs_file_system_path.u8string();
@@ -309,8 +387,23 @@ namespace Insight
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
 							resource->m_load_timer.Start();
-							resource->Load();
-							resource->m_load_timer.Stop();
+							{
+								std::lock_guard lock(m_lock);
+								m_running_loads.run([=]()
+									{
+										resource->Load();
+										resource->m_load_timer.Stop();
+										{
+											std::lock_guard lock(m_lock);
+											if (resource->IsLoaded())
+											{
+												// Resource loaded successfully.
+												++m_loaded_resource_count;
+											}
+										}
+									});
+							}
+							
 						}
 					}
 					else
@@ -321,28 +414,21 @@ namespace Insight
 						resource->m_load_timer.Stop();
 					}
 				}
-
-				if (resource->IsLoaded())
-				{
-					// Resource loaded successfully.
-					++m_loaded_resource_count;
-				}
 			}
 			// Something went wrong at somepoint.
 			return resource;
 		}
 
-		void ResourceManager::AddExistingResource(IResource* resource, std::string file_path)
+		void ResourceManager::AddExistingResource(IResource* resource, const std::string& file_path)
 		{
 
 			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
 			std::string abs_file_path = abs_file_system_path.u8string();
-
 			{
 				std::lock_guard lock(m_lock);
 				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
 				{
-					IS_CORE_ERROR("[ResourceManager::AddResource] There is already a resource with the file path of '{}'.", file_path);
+					IS_CORE_WARN("[ResourceManager::AddResource] There is already a resource with the file path of '{}'.", file_path);
 					return;
 				}
 				m_resources[abs_file_path] = resource;

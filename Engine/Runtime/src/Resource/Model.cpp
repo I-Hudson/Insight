@@ -3,6 +3,11 @@
 #include "Resource/Texture.h"
 #include "Resource/Loaders/AssimpLoader.h"
 
+#include "Scene/SceneManager.h"
+
+#include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/MeshComponent.h"
+
 #include <filesystem>
 
 namespace Insight
@@ -17,6 +22,23 @@ namespace Insight
 		Mesh* Model::GetMeshByIndex(u32 index) const
 		{
 			return m_meshes.at(index);
+		}
+
+		ECS::Entity* Model::CreateEntityHierarchy()
+		{
+			WPtr<App::Scene> active_scene_weak = App::SceneManager::Instance().GetActiveScene();
+			if (RPtr<App::Scene> active_scene = active_scene_weak.Lock())
+			{
+				Ptr<ECS::Entity> root_entity = active_scene->AddEntity(GetFileName());
+				for (Mesh* mesh : m_meshes)
+				{
+					Ptr<ECS::Entity> entity = root_entity->AddChild(mesh->GetFileName());
+					static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
+					static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(mesh);
+				}
+				return root_entity.Get();
+			}
+			return nullptr;
 		}
 
 		void Model::Load()
@@ -36,7 +58,7 @@ namespace Insight
 					//if (mesh->GetFilePath().back() >= '0' |)
 					//TODO Add a number if this resource already exists.
 				}
-				AddDependentResrouce(mesh, mesh->GetFilePath(), ResourceStorageTypes::Memory);
+				//AddDependentResrouce(mesh, mesh->GetFilePath(), ResourceStorageTypes::Memory);
 			}
 			m_resource_state = EResoruceStates::Loaded;
 		}
@@ -47,9 +69,18 @@ namespace Insight
 			for (Mesh* mesh : m_meshes)
 			{
 				ResourceManager::Instance().Unload(mesh);
+				DeleteTracked(mesh);
 			}
 			m_meshes.clear();
 			m_resource_state = EResoruceStates::Unloaded;
+		}
+
+		void Model::Save(const std::string& file_path)
+		{
+			if (!AssimpLoader::ExportModel(this, file_path))
+			{
+				IS_CORE_ERROR("[Model::Save] Model failed to save to disk. Filepath '{}'.", file_path);
+			}
 		}
 	}
 }

@@ -32,6 +32,10 @@ namespace Insight
 
 			void Draw(Graphics::RHI_CommandList* cmd_list);
 
+			/// @brief Return the transform from orgin from the model file.
+			/// @return glm::mat4
+			glm::mat4 GetTransform() const;
+
 		private:
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
@@ -55,6 +59,8 @@ namespace Insight
 			Graphics::RHI_Buffer* m_index_buffer = nullptr;
 
 			std::string m_mesh_name;
+			/// @brief Transform offset from the imported model.
+			glm::mat4 m_transform_offset = glm::mat4(1.0f);
 
 			friend class AssimpLoader;
 		};

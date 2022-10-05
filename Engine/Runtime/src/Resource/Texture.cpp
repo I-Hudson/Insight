@@ -24,14 +24,9 @@ namespace Insight
 			return m_format;
 		}
 
-		void Texture::Load()
+		Graphics::RHI_Texture* Texture::GetRHITexture() const
 		{
-
-		}
-
-		void Texture::UnLoad()
-		{
-
+			return m_rhi_texture;
 		}
 	}
 }

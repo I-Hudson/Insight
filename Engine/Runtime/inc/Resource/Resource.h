@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Defines.h"
 #include "Runtime/Defines.h"
 #include "Resource/ResourceTypeId.h"
 
@@ -9,6 +10,8 @@
 
 #include <string>
 #include <atomic>
+#include <ppl.h>
+#include <shared_mutex>
 
 namespace Insight
 {
@@ -82,6 +85,13 @@ namespace Insight
 			/// @brief Return the current state of this resource.
 			EResoruceStates GetResourceState() const;
 
+			/// @brief Check if this resource is dependent on another resource (owned).
+			/// @return bool 
+			bool IsDependentOnAnotherResource() const;
+			bool IsDependentOnAnotherResource(IResource* resource) const;
+			bool IsDependentOwnerOnAnotherResource() const;
+			bool IsDependentOwnerOnAnotherResource(IResource* resource) const;
+
 			bool IsNotFound() const;
 			bool IsLoaded() const;
 			bool IsNotLoaded() const;
@@ -98,7 +108,7 @@ namespace Insight
 			/// @param file_path 
 			/// @param type_id 
 			/// @return IResource*
-			IResource* AddDependentResourceFromDisk(std::string file_path, ResourceTypeId type_id);
+			IResource* AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id);
 
 			/// @brief Add a new resource which depends upon this resource. But is stored in memory only. This could be a mesh which is a part of 
 			/// a model. The mesh it self is not stored on disk as it self but as part of the model file.
@@ -110,17 +120,22 @@ namespace Insight
 			/// @brief 
 			/// @param resource 
 			/// @param storage_type 
-			void AddDependentResrouce(IResource* resource, std::string file_path, ResourceStorageTypes storage_type);
+			void AddDependentResrouce(IResource* resource, const std::string& file_path, ResourceStorageTypes storage_type);
 
 			/// @brief Add a reference resource (this does will not own the resource) to this one. Reference resource 
 			/// can only be loaded from disk as there are non owning.
 			/// @param file_path 
 			/// @param type_id
 			/// @return IResource*
-			IResource* AddReferenceResource(std::string file_path, ResourceTypeId type_id);
+			IResource* AddReferenceResource(const std::string& file_path, ResourceTypeId type_id);
+			/// @brief 
+			/// @param resource
+			/// @param file_path
+			/// @param storage_type
+			void AddReferenceResource(IResource* resource, const std::string& file_path);
 
 		private:
-			IResource* AddDependentResource(std::string file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id);
+			IResource* AddDependentResource(const std::string& file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id);
 			
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
@@ -133,6 +148,9 @@ namespace Insight
 
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();
+
+			/// @brief Save resrouce to disk.
+			virtual void Save(const std::string& file_path);
 
 		protected:
 			/// @brief On disk file path. (In most cases this will be the same as 'm_file_path')
@@ -166,7 +184,7 @@ namespace Insight
 			/// @brief Load resource at path 'file_path'. (This will first check if the resource is already loaded, if so then return the cached pointer.)
 			/// @param file_path 
 			/// @return Ptr<Resource>
-			IResource* Load(std::string file_path, ResourceTypeId type_id);
+			IResource* Load(const std::string& file_path, ResourceTypeId type_id);
 
 			/// @brief Unload a resource from memory.
 			/// @param resouce 
@@ -174,6 +192,11 @@ namespace Insight
 
 			/// @brief Unload all currently loaded resources. (Use with caution).
 			void UnloadAll();
+
+			/// @brief Save a resource to disk.
+			/// @param file_path 
+			/// @param resource 
+			void Save(const std::string& file_path, IResource* resource);
 
 			u32 GetLoadedResourcesCount() const;
 
@@ -183,26 +206,28 @@ namespace Insight
 
 			/// @brief Export all the time stats for resource loading to a file.
 			/// @param file_path 
-			void ExportStatsToFile(std::string file_path);
+			void ExportStatsToFile(const std::string& file_path);
 
 			/// @brief Print current resources info to the output log.
 			void Print();
 
 		private:
 			/// @brief Handle loading resources from disk and memory.
-			IResource* Load(std::string file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id);
+			IResource* Load(const std::string& file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id);
 
 			/// @brief Add an existing resource (resoruce generated not form loading). This should be use with caution.
 			/// @param resource
 			/// @param file_path
-			void AddExistingResource(IResource* resource, std::string file_path);
+			void AddExistingResource(IResource* resource, const std::string& file_path);
 
 		private:
 			/// @brief Handle general data access;
-			mutable std::mutex m_lock;
+			mutable std::shared_mutex m_lock;
 			/// @brief Load count of resources (from disk only).
 			u32 m_loaded_resource_count = 0;
 			std::unordered_map<std::string, UPtr<IResource>> m_resources;
+			/// @brief Group of current resources being loaded.
+			concurrency::task_group m_running_loads;
 
 			friend class IResource;
 		};
@@ -212,3 +237,4 @@ namespace Insight
 #define REGISTER_RESOURCE(type_name) public: \
 static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); } \
 Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); } \
+constexpr const char* GetResourceFileExtension() { return STRINGIZE(PPCAT(.IS, type_name)); }
