@@ -17,6 +17,9 @@
 #include "ECS/Components/MeshComponent.h"
 
 #include "Resource/Model.h"
+#include "Resource/Mesh.h"
+#include "Resource/Texture2D.h"
+#include "Resource/Material.h"
 
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -53,15 +56,18 @@ namespace Insight
 			//m_testMesh.LoadFromFile("./Resources/models/plane.gltf");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
 			//m_testMesh.LoadFromFile("./Resources/models/sponza/NewSponza_Main_Blender_glTF.gltf");
+			//m_testMesh.LoadFromFile("./Resources/models/sponza_old/sponza.obj");
+			//m_testMesh.LoadFromFile("./Resources/models/vulkanscene_shadow.gltf");
 			m_testMesh.LoadFromFile("./Resources/models/Survival_BackPack_2/backpack.obj");
 			Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj"
 				, Runtime::Model::GetStaticResourceTypeId()));
 			Runtime::ResourceManager::Instance().Print();
 
-			RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
-			ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
-			ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
-			mesh_component->SetMesh(model->GetMesh());
+			//RPtr<App::Scene> active_scene = App::SceneManager::Instance().GetActiveScene().Lock();
+			//ECS::Entity* Test_mesh_entity = active_scene->GetECSWorld()->AddEntity("Test Mesh Entity");
+			//ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(Test_mesh_entity->AddComponentByName(ECS::MeshComponent::Type_Name));
+			//mesh_component->SetMesh(model->GetMesh());
+			model->CreateEntityHierarchy();
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -256,7 +262,16 @@ namespace Insight
 #ifdef ECS_RENDER
 						for (const Ptr<ECS::Entity> e : entities)
 						{
-							static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name))->GetMesh()->Draw(cmdList);
+							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+							glm::mat4 transform = transform_component->GetTransform();
+							cmdList->SetPushConstant(0, sizeof(transform), glm::value_ptr(transform));
+
+							ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+							if (!mesh_component)
+							{
+								continue;
+							}
+							mesh_component->GetMesh()->Draw(cmdList);
 						}
 #else
 						for (Submesh* sub_mesh : data.Mesh.GetSubMeshes())
@@ -402,7 +417,28 @@ namespace Insight
 #ifdef ECS_RENDER
 					for (const Ptr<ECS::Entity> e : entities)
 					{
-						static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name))->GetMesh()->Draw(cmdList);
+						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+						if (!mesh_component)
+						{
+							continue;
+						}
+
+						Runtime::Material* material = mesh_component->GetMaterial();
+						if (!material)
+						{
+							//continue;
+						}
+
+						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+						glm::mat4 transform = transform_component->GetTransform();
+						cmdList->SetPushConstant(0, sizeof(transform), glm::value_ptr(transform));
+
+						// Theses shouldn't chagne.
+						//cmdList->SetTexture(1, 0, material->GetTexture(Runtime::TextureTypes::Diffuse)->GetRHITexture());
+						//cmdList->SetTexture(1, 1, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
+						//cmdList->SetTexture(1, 2, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
+
+						mesh_component->GetMesh()->Draw(cmdList);
 					}
 #else
 					for (Submesh* sub_mesh : data.TestMesh.GetSubMeshes())

@@ -107,6 +107,7 @@ namespace Insight
 
 		private:
 			void CreateUniformBufferIfNoExist();
+			bool CheckSetAndBindingBounds(u32 set, u32 binding);
 
 		protected:
 			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; /// Current descriptors information. 

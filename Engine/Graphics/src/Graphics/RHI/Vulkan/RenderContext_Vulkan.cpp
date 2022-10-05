@@ -490,6 +490,12 @@ namespace Insight
 				return true;
 			}
 
+			void RenderContext_Vulkan::PreRender(RHI_CommandList* cmdList)
+			{
+				// Go through out defered manager and call all the functions which have been queued up.
+				m_gpu_defered_manager.Update(cmdList);
+			}
+
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
 			{
 #ifdef RENDER_GRAPH_ENABLED

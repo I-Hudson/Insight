@@ -412,12 +412,12 @@ namespace Insight
 
 		void DescriptorAllocator::SetUniform(u32 set, u32 binding, const void* data, u32 size)
 		{
-			std::vector<Descriptor>& descriptors = m_descriptors[set];
-			if (binding >= (int)descriptors.size())
+			if (!CheckSetAndBindingBounds(set, binding))
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
 				return;
 			}
+
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			Descriptor& descriptor = descriptors.at(binding);
 			if (descriptor.Size != size)
 			{
@@ -439,42 +439,33 @@ namespace Insight
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
 		{
-			if (set >= m_descriptors.size())
+			if (!CheckSetAndBindingBounds(set, binding))
 			{
-				//IS_CORE_WARN("[GPUDescriptorAllocator::SetTexture] Set: '{}' is out of range.", set);
 				return;
 			}
-
 			std::vector<Descriptor>& descriptors = m_descriptors.at(set);
-			if (binding >= (int)descriptors.size())
-			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::SetTexture] Binding: '{0}' is out of range.", binding);
-				return;
-			}
 			descriptors[binding].Texture = texture;
 			descriptors[binding].Sampler = sampler != nullptr ? sampler : nullptr;
 		}
 
 		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
 		{
-			std::vector<Descriptor>& descriptors = m_descriptors[set];
-			if (binding >= (int)descriptors.size())
+			if (!CheckSetAndBindingBounds(set, binding))
 			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::SetSampler] Binding: '{0}' is out of range.", binding);
 				return;
 			}
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			descriptors[binding].Sampler = sampler;
 		}
 
 
 		Descriptor DescriptorAllocator::GetDescriptor(int set, int binding)
 		{
-			std::vector<Descriptor>& descriptors = m_descriptors[set];
-			if (binding >= (int)descriptors.size())
+			if (!CheckSetAndBindingBounds(set, binding))
 			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::SetUniform] Binding: '{0}' is out of range.", binding);
 				return { };
 			}
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			return descriptors[binding];
 		}
 
@@ -517,6 +508,22 @@ namespace Insight
 				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
 				m_uniformBuffer->SetName(L"Descriptor_Uniform_Buffer");
 			}
+		}
+		bool DescriptorAllocator::CheckSetAndBindingBounds(u32 set, u32 binding)
+		{
+			if (set >= m_descriptors.size())
+			{
+				IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
+				return false;
+			}
+
+			std::vector<Descriptor>& descriptors = m_descriptors[set];
+			if (binding >= (int)descriptors.size())
+			{
+				IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
+				return false;
+			}
+			return true;
 		}
 	}
 }

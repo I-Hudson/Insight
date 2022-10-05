@@ -2,6 +2,7 @@
 
 #include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
+#include "Graphics/GPUDeferedManager.h"
 #include "imgui.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
@@ -69,6 +70,7 @@ namespace Insight
 			virtual void DestroyImGui() = 0;
 
 			virtual bool PrepareRender() = 0;
+			virtual void PreRender(RHI_CommandList* cmdList) = 0;
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
 			virtual void GpuWaitForIdle() = 0;
@@ -117,6 +119,7 @@ namespace Insight
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
 			RHI_SamplerManager* m_samplerManager;
+			GPUDeferedManager m_gpu_defered_manager;
 
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;

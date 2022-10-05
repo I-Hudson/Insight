@@ -39,6 +39,7 @@ namespace Insight
 				virtual void DestroyImGui() override;
 
 				virtual bool PrepareRender() override;
+				virtual void PreRender(RHI_CommandList* cmdList) override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
 				virtual void GpuWaitForIdle() override;
