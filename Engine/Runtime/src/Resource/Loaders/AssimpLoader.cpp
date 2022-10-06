@@ -65,6 +65,30 @@ namespace Insight
 			UploadGPUData(loader_data);
 			LoadMaterialTextures(loader_data);
 
+			bool all_asserts_loaded = false;
+			while (!all_asserts_loaded)
+			{
+				all_asserts_loaded = true;
+				for (size_t i = 0; i < loader_data.Textures.size(); ++i)
+				{
+					Texture2D* texture = loader_data.Textures.at(i);
+					if (texture->GetResourceState() == EResoruceStates::Loading)
+					{
+						all_asserts_loaded = false;
+						break;
+					}
+				}
+			}
+
+			for (size_t i = 0; i < loader_data.Textures.size(); ++i)
+			{
+				Texture2D* texture = loader_data.Textures.at(i);
+				if (texture->GetResourceState() != EResoruceStates::Loading)
+				{
+					FAIL_ASSERT();
+				}
+			}
+
 			return true;
 		}
 

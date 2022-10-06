@@ -228,6 +228,7 @@ namespace Insight
 		}
 
 
+
 		//--------------------------------------------------------------------------
 		// ResourceManager
 		//--------------------------------------------------------------------------
@@ -239,7 +240,7 @@ namespace Insight
 			ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
 		}
 
-		ResourceManager::~ResourceManager()
+		ResourceManager::~ResourceManager() NO_EXPECT
 		{
 			UnloadAll();
 			m_resources.clear();

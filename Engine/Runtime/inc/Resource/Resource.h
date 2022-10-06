@@ -10,7 +10,6 @@
 
 #include <string>
 #include <atomic>
-#include <ppl.h>
 #include <shared_mutex>
 
 namespace Insight
@@ -179,7 +178,7 @@ namespace Insight
 		public:
 			ResourceManager();
 			/// @brief Unload all resources currently loaded. (Use with caution. Should really only be called when the app is exiting).
-			virtual ~ResourceManager() override;
+			virtual ~ResourceManager() NO_EXPECT override;
 
 			/// @brief Load resource at path 'file_path'. (This will first check if the resource is already loaded, if so then return the cached pointer.)
 			/// @param file_path 
@@ -226,10 +225,13 @@ namespace Insight
 			/// @brief Load count of resources (from disk only).
 			u32 m_loaded_resource_count = 0;
 			std::unordered_map<std::string, UPtr<IResource>> m_resources;
-			/// @brief Group of current resources being loaded.
-			concurrency::task_group m_running_loads;
+			/// @brief Vector of resources being requested to be loaded.
+			std::vector<IResource*> m_request_load_resource;
+			/// @brief Current number of tasks which are running.
+			std::vector<ResourceLoadTask*> m_number_of_loading_tasks;
 
 			friend class IResource;
+			friend class ResourceLoadTask;
 		};
 	}
 }

@@ -13,14 +13,14 @@ namespace Insight
 			using TRef = T&;
 
 		public:
-			Singleton()
+			Singleton() noexcept
 			{
 				ASSERT(s_instance == nullptr);
 				s_instance = static_cast<T*>(this);
 				ASSERT(s_instance != nullptr);
 			}
 
-			virtual ~Singleton()
+			virtual ~Singleton() NO_EXPECT
 			{
 				s_instance = nullptr;
 			}
