@@ -1,5 +1,4 @@
-![Alt text](https://github.com/I-Hudson/Insight/blob/main/Resources/Insight/vector/default.svg)
-<img src="https://github.com/I-Hudson/Insight/blob/main/Resources/Insight/vector/default.svg">
+<img src="https://github.com/I-Hudson/Insight/blob/main/Resources/Insight/vector/default.svg" width=75% height=50%>
 
 # Insight
 This is a small project used for video game engine (runtime) development. This project's main purpose is for an area to try and implement my own ideas and versions of techniques.
