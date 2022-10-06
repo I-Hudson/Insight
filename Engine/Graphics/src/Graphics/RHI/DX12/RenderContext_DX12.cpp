@@ -87,8 +87,8 @@ namespace Insight
 				m_dsvHeap.SetRenderContext(this);
 				m_dsvHeap.Create(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 				
-				m_swapchainImages.resize(RenderGraph::s_FarmeCount);
-				for (size_t i = 0; i < RenderGraph::s_FarmeCount; ++i)
+				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
+				for (size_t i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					m_swapchainImages[i].ColourHandle = m_rtvHeap.GetNewHandle();
 					m_swapchainImages[i].DepthStencilHandle = m_dsvHeap.GetNewHandle();
@@ -177,7 +177,7 @@ namespace Insight
 				IMGUI_VALID(ThrowIfFailed(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srcImGuiHeap))));
 
 				IMGUI_VALID(ImGui_ImplDX12_Init(m_device.Get(),
-					RenderGraph::s_FarmeCount,
+					RenderGraph::s_MaxFarmeCount,
 					DXGI_FORMAT_R8G8B8A8_UNORM,
 					m_srcImGuiHeap.Get(),
 					m_srcImGuiHeap->GetCPUDescriptorHandleForHeapStart(),
@@ -366,7 +366,7 @@ namespace Insight
 
 				/// Describe and create a render target view (RTV) descriptor heap.
 				///D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-				///rtvHeapDesc.NumDescriptors = RenderGraph::s_FarmeCount;
+				///rtvHeapDesc.NumDescriptors = RenderGraph::s_MaxFarmeCount;
 				///rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 				///rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 				///ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
@@ -375,7 +375,7 @@ namespace Insight
 				m_swapchainSize = { Window::Instance().GetWidth(), Window::Instance().GetHeight() };
 
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-				swapChainDesc.BufferCount = RenderGraph::s_FarmeCount;
+				swapChainDesc.BufferCount = RenderGraph::s_MaxFarmeCount;
 				swapChainDesc.Width = m_swapchainSize.x;
 				swapChainDesc.Height = m_swapchainSize.y;
 				swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -397,8 +397,8 @@ namespace Insight
 
 				swapchain.As(&m_swapchain);
 
-				m_swapchainImages.resize(RenderGraph::s_FarmeCount);
-				for (u32 i = 0; i < RenderGraph::s_FarmeCount; ++i)
+				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
+				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
 					swapchainImage.Colour.Reset();
@@ -448,11 +448,11 @@ namespace Insight
 				}
 
 				/// Resize our swap chain buffers.
-				m_swapchain->ResizeBuffers(RenderGraph::s_FarmeCount, m_swapchainSize.x, m_swapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
+				m_swapchain->ResizeBuffers(RenderGraph::s_MaxFarmeCount, m_swapchainSize.x, m_swapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
 				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
 				/// Create new render targets for the swapchain.
-				for (u32 i = 0; i < RenderGraph::s_FarmeCount; ++i)
+				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
 

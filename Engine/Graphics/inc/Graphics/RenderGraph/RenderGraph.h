@@ -26,7 +26,7 @@ namespace Insight
 			void Setup()
 			{
 				m_values.clear();
-				m_values.resize(RenderGraph::s_FarmeCount);
+				m_values.resize(RenderGraph::s_MaxFarmeCount);
 			}
 
 			TValue* operator->() const
@@ -76,6 +76,7 @@ namespace Insight
 			void Release();
 
 			u32 GetFrameIndex() const { return m_frameIndex; }
+			u64 GetFrameCount() const { return m_frame_count; }
 
 			template<typename TData>
 			void AddPass(std::wstring passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
@@ -85,7 +86,7 @@ namespace Insight
 				m_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 
-			static u32 s_FarmeCount;
+			static u32 s_MaxFarmeCount;
 
 		private:
 			void Build();
@@ -100,6 +101,8 @@ namespace Insight
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
 
 			u32 m_frameIndex = 0;
+			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).
+			u64 m_frame_count = 0;
 
 			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
 			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> m_texture_barrier_history;

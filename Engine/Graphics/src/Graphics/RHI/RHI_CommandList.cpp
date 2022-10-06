@@ -64,11 +64,13 @@ namespace Insight
 		void RHI_CommandList::SetTexture(u32 set, u32 binding, const RHI_Texture* texture)
 		{
 			m_descriptorAllocator->SetTexture(set, binding, texture, nullptr);
+			m_context->GetResourceRenderTracker().TrackResource(texture);
 		}
 
 		void RHI_CommandList::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
 		{
 			m_descriptorAllocator->SetTexture(set, binding, texture, sampler);
+			m_context->GetResourceRenderTracker().TrackResource(texture);
 		}
 
 		void RHI_CommandList::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)

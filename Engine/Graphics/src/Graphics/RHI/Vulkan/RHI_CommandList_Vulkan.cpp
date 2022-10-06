@@ -171,6 +171,7 @@ namespace Insight
 				}
 
 			}
+
 			bool RHI_CommandList_Vulkan::ValidResouce()
 			{
 				return m_commandList;
@@ -353,6 +354,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("bindVertexBuffers");
 					m_commandList.bindVertexBuffers(0, buffers, offsets);
 					RenderStats::Instance().VertexBufferBindings++;
+					m_context->GetResourceRenderTracker().TrackResource(buffer);
 				}
 			}
 
@@ -369,6 +371,7 @@ namespace Insight
 				const RHI_Buffer_Vulkan* bufferVulkan = static_cast<RHI_Buffer_Vulkan*>(buffer);
 				m_commandList.bindIndexBuffer(bufferVulkan->GetBuffer(), 0, IndexTypeToVulkan(index_type));
 				RenderStats::Instance().IndexBufferBindings++;
+				m_context->GetResourceRenderTracker().TrackResource(buffer);
 			}
 
 			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)

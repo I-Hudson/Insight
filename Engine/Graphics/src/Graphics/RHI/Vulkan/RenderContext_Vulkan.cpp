@@ -388,8 +388,8 @@ namespace Insight
 				init_info.PipelineCache = nullptr;
 				init_info.DescriptorPool = m_imguiDescriptorPool;
 				init_info.Subpass = 0;
-				init_info.MinImageCount = RenderGraph::s_FarmeCount;
-				init_info.ImageCount = RenderGraph::s_FarmeCount;
+				init_info.MinImageCount = RenderGraph::s_MaxFarmeCount;
+				init_info.ImageCount = RenderGraph::s_MaxFarmeCount;
 				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 				init_info.Allocator = nullptr;
 				init_info.CheckVkResultFn = [](VkResult error)
@@ -487,6 +487,8 @@ namespace Insight
 				m_descriptorSetManager->Reset();
 				m_commandListManager->Reset();
 
+				m_resource_tracker.BeginFrame();
+
 				return true;
 			}
 
@@ -524,16 +526,17 @@ namespace Insight
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 				{
 					IS_PROFILE_SCOPE("Present");
-
 					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
 				}
-				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_FarmeCount;
+				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
 					ImGui_ImplVulkan_NewFrame();
 					ImGuiBeginFrame();
 				}
+
+				m_resource_tracker.EndFrame();
 #endif
 			}
 
@@ -807,7 +810,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
-				const int imageCount = (int)std::max(RenderGraph::s_FarmeCount, surfaceCapabilites.minImageCount);
+				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
 
 				vk::Extent2D swapchainExtent = {};
 				/// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain

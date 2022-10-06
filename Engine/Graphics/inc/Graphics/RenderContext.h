@@ -12,6 +12,7 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
 #include "Graphics/RHI/RHI_Sampler.h"
+#include "Graphics/RHI/RHI_ResourceRenderTracker.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
@@ -89,6 +90,7 @@ namespace Insight
 			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
 			RHI_DescriptorSetManager& GetDescriptorSetManager() { return m_descriptorSetManager.Get(); }
 			RHI_SamplerManager& GetSamplerManager() { return *m_samplerManager; }
+			RHI_ResourceRenderTracker& GetResourceRenderTracker() { return m_resource_tracker; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -116,6 +118,8 @@ namespace Insight
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;
+			RHI_ResourceRenderTracker m_resource_tracker;
+
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
 			RHI_SamplerManager* m_samplerManager;

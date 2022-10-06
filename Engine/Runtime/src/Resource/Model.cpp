@@ -3,6 +3,8 @@
 #include "Resource/Texture.h"
 #include "Resource/Loaders/AssimpLoader.h"
 
+#include "Graphics/RenderContext.h"
+
 #include "Scene/SceneManager.h"
 
 #include "ECS/Components/TransformComponent.h"
@@ -72,6 +74,10 @@ namespace Insight
 				DeleteTracked(mesh);
 			}
 			m_meshes.clear();
+
+			Renderer::FreeVertexBuffer(m_vertex_buffer);
+			Renderer::FreeVertexBuffer(m_index_buffer);
+
 			m_resource_state = EResoruceStates::Unloaded;
 		}
 

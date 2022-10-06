@@ -80,6 +80,16 @@ namespace Insight
 
 			IMGUI_VALID(ImGui::Checkbox("Move shadow camera", &useShadowCamera));
 
+			if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
+			{
+				Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+				auto entities = App::SceneManager::Instance().GetActiveScene().Lock()->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+				for (auto entity : entities)
+				{
+					static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(nullptr);
+				}
+			}
+
 			if (Render_Size_Related_To_Window_Size)
 			{
 				Render_Width = Window::Instance().GetWidth();
@@ -258,7 +268,8 @@ namespace Insight
 							cmdList->SetPushConstant(0, sizeof(transform), glm::value_ptr(transform));
 
 							ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-							if (!mesh_component)
+							if (!mesh_component 
+								|| !mesh_component->GetMesh())
 							{
 								continue;
 							}
@@ -392,7 +403,8 @@ namespace Insight
 					for (const Ptr<ECS::Entity> e : entities)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-						if (!mesh_component)
+						if (!mesh_component
+							|| !mesh_component->GetMesh())
 						{
 							continue;
 						}

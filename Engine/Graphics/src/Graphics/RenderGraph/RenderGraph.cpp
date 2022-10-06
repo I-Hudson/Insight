@@ -17,7 +17,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		u32 RenderGraph::s_FarmeCount = 2;
+		u32 RenderGraph::s_MaxFarmeCount = 2;
 
 		RenderGraph::RenderGraph()
 		{ }
@@ -87,9 +87,10 @@ namespace Insight
 				
 				m_context->PostRender(cmdList);
 				Clear();
+				++m_frame_count;
 			}
 
-			m_frameIndex = (m_frameIndex + 1) % s_FarmeCount;
+			m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info)
