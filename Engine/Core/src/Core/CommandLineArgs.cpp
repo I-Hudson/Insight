@@ -112,7 +112,11 @@ namespace Insight
 			{
 				const u64 next_space	= file_data.find(' ', offset);
 				const u64 next_new_line = file_data.find('\n', offset);
-				const u64 new_offset	= next_space < next_new_line ? next_space : next_new_line;
+				u64 new_offset	= next_space < next_new_line ? next_space : next_new_line;
+				if (new_offset == std::string::npos)
+				{
+					new_offset = file_data.size();
+				}
 
 				std::string arg = file_data.substr(offset, new_offset - offset);
 				if (!arg.empty())

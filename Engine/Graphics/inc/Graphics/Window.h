@@ -29,6 +29,8 @@ namespace Insight
 			std::string_view GetTitle() const { return m_title; }
 			void SetTite(std::string title);
 
+			void SetIcon(const std::string& file_path);
+
 			int GetX() const { return m_position.x; }
 			int GetY() const { return m_position.y; }
 			glm::ivec2 GetPosition() const { return m_position; }
@@ -44,6 +46,9 @@ namespace Insight
 			void SetWidth(int width);
 			void SetHeight(int height);
 			void SetSize(glm::ivec2 size);
+
+			void Show();
+			void Hide();
 
 			bool ShouldClose() const;
 

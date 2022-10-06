@@ -1,0 +1,1 @@
+start_window_minimised=true

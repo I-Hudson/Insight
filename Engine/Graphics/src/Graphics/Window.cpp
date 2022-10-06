@@ -1,8 +1,12 @@
 #include "Graphics/Window.h"
+
 #include "Core/Logger.h"
+#include "Core/CommandLineArgs.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
+
+#include <stb_image.h>
 
 #include <iostream>
 
@@ -10,6 +14,8 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		constexpr char* CMD_START_WINDOW_MINIMISED = "start_window_minimised";
+
 		bool Window::Init(int width, int height, std::string title)
 		{
 			if (m_glfwInit)
@@ -32,6 +38,11 @@ namespace Insight
 					IS_CORE_ERROR("ErrorCode: {}\n Description: {}", error_code, description);
 				});
 
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_START_WINDOW_MINIMISED)->GetBool())
+			{
+				glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+			}
+
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			m_glfwWindow = glfwCreateWindow(m_size.x, m_size.y, m_title.c_str(), NULL, NULL);
 
@@ -46,35 +57,6 @@ namespace Insight
 			glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* window, int width, int height)
 				{
 					Window::Instance().SetSize({ width, height });
-				});
-
-			glfwSetWindowFocusCallback(m_glfwWindow, [](GLFWwindow* window, int focused)
-				{
-				});
-
-			glfwSetCursorEnterCallback(m_glfwWindow, [](GLFWwindow* window, int entered)
-				{
-				});
-			glfwSetCursorPosCallback(m_glfwWindow, [](GLFWwindow* window, double xpos, double ypos)
-				{
-				});
-
-			glfwSetMouseButtonCallback(m_glfwWindow, [](GLFWwindow* window, int button, int action, int mod)
-				{
-				});
-			glfwSetScrollCallback(m_glfwWindow, [](GLFWwindow* window, double xoffset, double yoffset)
-				{
-				});
-
-			glfwSetKeyCallback(m_glfwWindow, [](GLFWwindow* window, int key, int scanCode, int action, int mod)
-				{
-				});
-			glfwSetCharCallback(m_glfwWindow, [](GLFWwindow* window, unsigned int c)
-				{
-				});
-
-			glfwSetMonitorCallback([](GLFWmonitor* monitor, int event)
-				{
 				});
 
 			return true;
@@ -119,6 +101,23 @@ namespace Insight
 			glfwSetWindowTitle(m_glfwWindow, m_title.c_str());
 		}
 
+		void Window::SetIcon(const std::string& file_path)
+		{
+			int width, height, channels;
+			void* pixels = stbi_load(file_path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			if (!pixels)
+			{
+				return;
+			}
+			GLFWimage image;
+			image.width = width;
+			image.height = height;
+			image.pixels = static_cast<unsigned char*>(pixels);
+			glfwSetWindowIcon(m_glfwWindow, 1, &image);
+
+			stbi_image_free(pixels);
+		}
+
 		void Window::SetX(int x)
 		{
 
@@ -146,6 +145,16 @@ namespace Insight
 		{
 			m_size = size;
 			glfwSetWindowSize(m_glfwWindow, m_size.x, m_size.y);
+		}
+
+		void Window::Show()
+		{
+			glfwShowWindow(m_glfwWindow);
+		}
+
+		void Window::Hide()
+		{
+			glfwHideWindow(m_glfwWindow);
 		}
 
 		bool Window::ShouldClose() const

@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr char* CMD_WAIT_FOR_PROFILER = "waitforprofiler"; 
-constexpr char* CMD_GRAPHICS_API = "graphicsapi"; 
-constexpr char* CMD_WINDOW_SIZE_WIDTH = "windowsizewidth"; 
-constexpr char* CMD_WINDOW_SIZE_HEIGHT = "windowsizeheight";
+constexpr char* CMD_WAIT_FOR_PROFILER = "wait_for_profiler"; 
+constexpr char* CMD_GRAPHICS_API = "graphics_api"; 
+constexpr char* CMD_WINDOW_SIZE_WIDTH = "window_size_width"; 
+constexpr char* CMD_WINDOW_SIZE_HEIGHT = "window_size_height"; 
