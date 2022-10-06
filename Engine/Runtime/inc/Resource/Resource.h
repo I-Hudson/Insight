@@ -225,10 +225,6 @@ namespace Insight
 			/// @brief Load count of resources (from disk only).
 			u32 m_loaded_resource_count = 0;
 			std::unordered_map<std::string, UPtr<IResource>> m_resources;
-			/// @brief Vector of resources being requested to be loaded.
-			std::vector<IResource*> m_request_load_resource;
-			/// @brief Current number of tasks which are running.
-			std::vector<ResourceLoadTask*> m_number_of_loading_tasks;
 
 			friend class IResource;
 			friend class ResourceLoadTask;

@@ -65,6 +65,7 @@ namespace Insight
 			UploadGPUData(loader_data);
 			LoadMaterialTextures(loader_data);
 
+			// Wait for all textures to be loaded.
 			bool all_asserts_loaded = false;
 			while (!all_asserts_loaded)
 			{
@@ -80,12 +81,13 @@ namespace Insight
 				}
 			}
 
+			// All textures have been laoded. Check there current status.
 			for (size_t i = 0; i < loader_data.Textures.size(); ++i)
 			{
 				Texture2D* texture = loader_data.Textures.at(i);
-				if (texture->GetResourceState() != EResoruceStates::Loading)
+				if (texture->GetResourceState() != EResoruceStates::Loaded)
 				{
-					FAIL_ASSERT();
+					IS_CORE_ERROR("[AssimpLoader::LoadModel] Texture '{}' state is not 'Loaded'. Current state is '{}'.", texture->GetFilePath(), ERsourceStatesToString(texture->GetResourceState()));
 				}
 			}
 
@@ -195,6 +197,7 @@ namespace Insight
 					{
 						new_mesh->AddReferenceResource(mesh_data.Textures.at(i), mesh_data.Textures.at(i)->GetFilePath());
 					}
+
 					std::for_each(mesh_data.Textures.begin(), mesh_data.Textures.end(), [&loader_data](Texture2D* texture)
 						{
 							if (std::find(loader_data.Textures.begin(), loader_data.Textures.end(), texture) == loader_data.Textures.end())
@@ -206,7 +209,10 @@ namespace Insight
 						{
 							if (std::find(loader_data.Texture_File_Paths.begin(), loader_data.Texture_File_Paths.end(), texture_file_path) == loader_data.Texture_File_Paths.end())
 							{
-								loader_data.Texture_File_Paths.push_back(texture_file_path);
+								if (!texture_file_path.empty())
+								{
+									loader_data.Texture_File_Paths.push_back(texture_file_path);
+								}
 							}
 						});
 

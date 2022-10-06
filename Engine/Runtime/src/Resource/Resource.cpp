@@ -152,6 +152,7 @@ namespace Insight
 			IS_CORE_INFO("\tFile path: {}", m_file_path);
 			IS_CORE_INFO("\tState: {}", ERsourceStatesToString(m_resource_state));
 			IS_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
+			IS_CORE_INFO("\n");
 		}
 
 		IResource* IResource::AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id)
@@ -327,7 +328,6 @@ namespace Insight
 
 		void ResourceManager::Print()
 		{
-			m_running_loads.wait();
 			std::shared_lock lock(m_lock);
 			for (const auto& pair : m_resources)
 			{
@@ -387,22 +387,17 @@ namespace Insight
 						{
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
+							//TODO Needs threading of somekind.
 							resource->m_load_timer.Start();
+							resource->Load();
+							resource->m_load_timer.Stop();
 							{
 								std::lock_guard lock(m_lock);
-								m_running_loads.run([=]()
-									{
-										resource->Load();
-										resource->m_load_timer.Stop();
-										{
-											std::lock_guard lock(m_lock);
-											if (resource->IsLoaded())
-											{
-												// Resource loaded successfully.
-												++m_loaded_resource_count;
-											}
-										}
-									});
+								if (resource->IsLoaded())
+								{
+									// Resource loaded successfully.
+									++m_loaded_resource_count;
+								}
 							}
 							
 						}
