@@ -7,7 +7,7 @@ project "GLFW"
     debugdir (outputdir_debug .. "/%{prj.name}")
 	
 	folderDirGLFW = "../vendor/glfw/"
-	location "%{folderDirGLFW}"
+	location "../Engine/Vendor/glfw"
 
 	files
 	{

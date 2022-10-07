@@ -8,7 +8,7 @@ project "ImGui"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirImGui = "../vendor/imgui/"
-	location "%{folderDirImGui}"
+	location "../Engine/Vendor/imgui"
 
 	dependson
 	{

@@ -10,7 +10,7 @@ project "meshoptimizer"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirMeshOptimizer = "../vendor/meshoptimizer/"
-	location "%{folderDirMeshOptimizer}"
+	location "../Engine/Vendor/meshoptimizer"
 
 	files 
 	{

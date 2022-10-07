@@ -9,7 +9,7 @@ project "glm"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
     folderDir = "../vendor/glm/"
-	location "%{folderDir}"
+	location "../Engine/Vendor/glm"
     
     defines
     {

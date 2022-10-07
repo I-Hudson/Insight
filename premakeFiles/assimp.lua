@@ -9,7 +9,7 @@ project "assimp"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
     folderDirAssimp = "../vendor/assimp/"
-	location "%{folderDirAssimp}"
+	location "../Engine/Vendor/assimp"
     
     defines 
     {

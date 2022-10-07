@@ -9,7 +9,7 @@ project "doctest"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirDoctest = "../vendor/doctest/"
-	location "%{folderDirDoctest}"
+	location "../Engine/Vendor/doctest"
 
 	files 
 	{

@@ -9,7 +9,7 @@ project "tracy"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirTracy = "../vendor/tracy/"
-	location "%{folderDirTracy}"
+	location "../Engine/Vendor/tracy"
 
 	files 
 	{

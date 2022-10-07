@@ -10,7 +10,7 @@ project "OptickCore"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirOptick = "../vendor/optick/"
-	location "%{folderDirOptick}"
+	location "../Engine/Vendor/optick"
 
 	files 
 	{
