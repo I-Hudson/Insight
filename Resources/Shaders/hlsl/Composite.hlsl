@@ -96,6 +96,13 @@ float3 bias_normal_offset(float3 n_dot_l, float normal_bias, float2 shadow_resol
     return normal * (1.0f - saturate(n_dot_l)) * normal_bias * texel_size * 10;
 }
 
+float SampleShadow(float3 uv, float compare)
+{
+	return Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+											, uv
+											, compare).r;
+}
+
 /*------------------------------------------------------------------------------
     TECHNIQUE - PCF
 ------------------------------------------------------------------------------*/
@@ -109,20 +116,11 @@ float Technique_Pcf(float3 uv, float compare)
         for (float x = -g_pcf_filter_size; x <= g_pcf_filter_size; x++)
         {
             float2 offset = float2(x, y) * texel_size;
-            shadow        += Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-																, uv + float3(offset, 0.0)
-																, compare).r;
+            shadow        += SampleShadow(uv + float3(offset, 0.0), compare);
         }
     }
     
     return shadow * g_shadow_samples_rpc;
-}
-
-float SampleShadow(float3 uv, float compare)
-{
-return Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-										, uv
-										, compare).r;
 }
 
 float4 PSMain(VertexOutput input) : SV_TARGET

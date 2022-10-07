@@ -147,7 +147,7 @@ namespace Insight
 
 					AssimpLoaderData mesh_data;					
 					ProcessMesh(aiMesh, aiScene, mesh_data);
-					Optimize(mesh_data);
+					//Optimize(mesh_data);
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
 					{
 						ExtractMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], loader_data, mesh_data);
@@ -195,7 +195,7 @@ namespace Insight
 
 					for (u64 texture_index = 0; texture_index < mesh_data.Textures.size(); ++texture_index)
 					{
-						new_mesh->AddReferenceResource(mesh_data.Textures.at(i), mesh_data.Textures.at(i)->GetFilePath());
+						new_mesh->AddReferenceResource(mesh_data.Textures.at(texture_index), mesh_data.Textures.at(texture_index)->GetFilePath());
 					}
 
 					std::for_each(mesh_data.Textures.begin(), mesh_data.Textures.end(), [&loader_data](Texture2D* texture)
@@ -324,8 +324,12 @@ namespace Insight
 					glm::vec2 vec;
 					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-					vec.x = mesh->mTextureCoords[0][i].x;
-					vec.y = mesh->mTextureCoords[0][i].y;
+					vec.x = mesh->mTextureCoords[0][i].x < 0.0f ? 0.0f : 
+						mesh->mTextureCoords[0][i].x > 1.0f ? 1.0f :
+						mesh->mTextureCoords[0][i].x;
+					vec.y = mesh->mTextureCoords[0][i].y < 0.0f ? 0.0f :
+						mesh->mTextureCoords[0][i].y > 1.0f ? 1.0f :
+						mesh->mTextureCoords[0][i].y;
 					vertex.UV = vec;
 
 					// tangent
@@ -465,22 +469,19 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			const u64 vertex_byte_size = loader_data.Vertices.size() * sizeof(Graphics::Vertex);
-			const u64 index_byte_size = loader_data.Indices.size() * sizeof(u32);
-
-			const u64 vertex_count = vertex_byte_size / sizeof(Graphics::Vertex);
+			const u64 vertex_count = loader_data.Vertices.size();
 			const u64 vertex_size = sizeof(Graphics::Vertex);
-			const u64 index_count = index_byte_size / sizeof(u32);
+			const u64 index_count = loader_data.Indices.size();
 
 			/// The optimization order is important
 
 			std::vector<u32> remap(index_count); /// allocate temporary memory for the remap table
-			size_t total_vertices_optimized = meshopt_generateVertexRemap(remap.data(), loader_data.Indices.data(), index_count, loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex));
+			size_t total_vertices_optimized = meshopt_generateVertexRemap(remap.data(), NULL, index_count, loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex));
 
 			std::vector<Graphics::Vertex> dst_vertices(total_vertices_optimized);
 			std::vector<u32> dst_indices(index_count);
 
-			meshopt_remapIndexBuffer(dst_indices.data(), loader_data.Indices.data(), index_count, remap.data());
+			meshopt_remapIndexBuffer(dst_indices.data(), NULL, index_count, remap.data());
 			meshopt_remapVertexBuffer(dst_vertices.data(), loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex), remap.data());
 
 			/// Vertex cache optimization - reordering triangles to maximize cache locality

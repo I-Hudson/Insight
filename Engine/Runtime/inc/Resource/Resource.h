@@ -84,6 +84,8 @@ namespace Insight
 			/// @brief Return the current state of this resource.
 			EResoruceStates GetResourceState() const;
 
+			const ResourceReferenceLink* GetReferenceLink(u32 index) const;
+
 			/// @brief Check if this resource is dependent on another resource (owned).
 			/// @return bool 
 			bool IsDependentOnAnotherResource() const;

@@ -217,11 +217,16 @@ namespace Insight
 						vk::RenderingAttachmentInfo depthAttachment;
 						vk::RenderingAttachmentInfo detencilAttacment;
 
-						std::array<float, 4> clearColourValues = { 0.0f, 0.0f, 0.0f, 0.0f };
-
 						auto makeRenderingAttachment = 
-						[&clearColourValues](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> vk::RenderingAttachmentInfo
+						[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> vk::RenderingAttachmentInfo
 						{
+							std::array<float, 4> clearColourValues = {
+								attachment_description.ClearColour.x
+								, attachment_description.ClearColour.y
+								, attachment_description.ClearColour.z
+								, attachment_description.ClearColour.w };
+
+
 							vk::RenderingAttachmentInfo attachment = { };
 							attachment.setImageView(static_cast<const RHI_Texture_Vulkan*>(texture)->GetImageView(attachment_description.Layer_Array_Index));
 							attachment.imageLayout = ImageLayoutToVulkan(attachment_description.FinalLayout);
@@ -252,7 +257,9 @@ namespace Insight
 						{
 							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
 							depthAttachment.clearValue = { };
-							depthAttachment.clearValue.depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
+							depthAttachment.clearValue.depthStencil = vk::ClearDepthStencilValue(
+								renderDescription.DepthStencilAttachment.DepthStencilClear.x, 
+								static_cast<u32>(renderDescription.DepthStencilAttachment.DepthStencilClear.y));
 							renderingInfo.setPDepthAttachment(&depthAttachment);
 							renderingInfo.setPStencilAttachment(&detencilAttacment);
 						}
@@ -420,20 +427,25 @@ namespace Insight
 
 				std::vector<RHI_DescriptorSet*> descriptorSets;
 				bool result = m_descriptorAllocator->GetDescriptorSets(descriptorSets);
-				vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-
 				u64 hash = 0;
-				std::vector<vk::DescriptorSet> sets;
-				sets.reserve(descriptorSets.size());
 				for (const auto& s : descriptorSets)
 				{
-					sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
 					HashCombine(hash, s);
 				}
 
 				if (descriptorSets.size() > 0 && m_boundDescriptors != hash)
 				{
 					m_boundDescriptors = hash;
+
+					vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+
+					std::vector<vk::DescriptorSet> sets;
+					sets.reserve(descriptorSets.size());
+					for (const auto& s : descriptorSets)
+					{
+						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+					}
+
 					std::vector<u32> dynamicOffsets = {};
 					{
 						IS_PROFILE_SCOPE("API call");

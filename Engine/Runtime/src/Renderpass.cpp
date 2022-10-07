@@ -32,6 +32,7 @@ namespace Insight
 	const float ShadowZFar = 2048.0f;
 	const float ShadowFOV = 65.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
+	const bool Reverse_Z_For_Depth = false;
 
 	const float Main_Camera_Near_Plane = 0.1f;
 	const float Main_Camera_Far_Plane = 2048.0f;
@@ -52,7 +53,8 @@ namespace Insight
 		void Renderpass::Create()
 		{
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
@@ -62,6 +64,8 @@ namespace Insight
 			while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{ }
 			model->CreateEntityHierarchy();
+			//model->CreateEntityHierarchy();
+			//model->CreateEntityHierarchy();
 
 			if (m_camera.View == glm::mat4(0.0f))
 			{
@@ -232,6 +236,15 @@ namespace Insight
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
+					if (Reverse_Z_For_Depth)
+					{
+						pso.DepthSteniclClearValue = glm::vec2(0.0f, 0.0f);
+						pso.DepthCompareOp = CompareOp::GreaterOrEqual;
+					}
+					else
+					{
+						pso.DepthCompareOp = CompareOp::LessOrEqual;
+					}
 					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor, DynamicState::DepthBias };
 					builder.SetPipeline(pso);
 				},
@@ -242,8 +255,15 @@ namespace Insight
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
-					cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
-						
+					if (Reverse_Z_For_Depth)
+					{
+						cmdList->SetDepthBias(-depth_constant_factor, 0.0f, -depth_slope_factor);
+					}
+					else
+					{
+						cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
+					}
+
 					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
 					std::vector<Ptr<ECS::Entity>> entities;
 					if (RPtr<App::Scene> scene = w_scene.Lock())
@@ -419,11 +439,15 @@ namespace Insight
 						glm::mat4 transform = transform_component->GetTransform();
 						cmdList->SetPushConstant(0, sizeof(transform), glm::value_ptr(transform));
 
-						// Theses shouldn't chagne.
-						//cmdList->SetTexture(1, 0, material->GetTexture(Runtime::TextureTypes::Diffuse)->GetRHITexture());
-						//cmdList->SetTexture(1, 1, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
-						//cmdList->SetTexture(1, 2, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
-
+						// Theses sets and bindings shouldn't chagne.
+						const Runtime::ResourceReferenceLink* diffuse_link = mesh_component->GetMesh()->GetReferenceLink(0);
+						if (diffuse_link)
+						{
+							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(diffuse_link->GetLinkResource());
+							cmdList->SetTexture(1, 0, diffuse_texture->GetRHITexture());
+						}
+							//cmdList->SetTexture(1, 1, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
+							//cmdList->SetTexture(1, 2, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 						mesh_component->GetMesh()->Draw(cmdList);
 					}
 #else
@@ -513,7 +537,14 @@ namespace Insight
 					sampler_create_info.MipmapMode = SamplerMipmapMode::Nearest;
 					sampler_create_info.AddressMode = SamplerAddressMode::ClampToEdge;
 					sampler_create_info.CompareEnabled = true;
+					if (Reverse_Z_For_Depth)
+					{
+						sampler_create_info.CompareOp = CompareOp::Greater;
+					}
+					else
+					{
 					sampler_create_info.CompareOp = CompareOp::Less;
+					}
 					RHI_Sampler* shadow_sampler = GraphicsManager::Instance().GetRenderContext()->GetSamplerManager().GetOrCreateSampler(sampler_create_info);
 
 					cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
@@ -790,11 +821,22 @@ namespace Insight
 				glm::vec3 maxExtents = glm::vec3(radius);
 				glm::vec3 minExtents = -maxExtents;
 
+				glm::mat4 reverse_z = glm::mat4(1.0f);
+				reverse_z[2][2] = -1;
+				reverse_z[2][3] = 1;
+
 				/// Construct our matrixs required for the light.
 				glm::vec3 lightDirection = dir_light_direction;
 				glm::vec3 lightPosition = frustumCenter - glm::normalize(lightDirection) * -minExtents.z;
 				glm::mat4 lightViewMatrix = glm::lookAt(lightPosition, frustumCenter, glm::vec3(0.0f, 1.0f, 0.0f));
 				glm::mat4 lightOrthoMatrix = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, 0.0f, maxExtents.z - minExtents.z);
+
+				if (Reverse_Z_For_Depth)
+				{
+					glm::mat4 proj = glm::ortho(minExtents.x, maxExtents.x, minExtents.y, maxExtents.y, maxExtents.z - minExtents.z, 0.0f);
+					lightOrthoMatrix = reverse_z * lightOrthoMatrix;
+					lightOrthoMatrix = proj;
+				}
 
 				{
 					if (GraphicsManager::IsVulkan())

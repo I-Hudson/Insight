@@ -81,6 +81,15 @@ namespace Insight
 			return m_resource_state;
 		}
 
+		const ResourceReferenceLink* IResource::GetReferenceLink(u32 index) const
+		{
+			if (index < m_reference_links.size())
+			{
+				return &m_reference_links.at(index);
+			}
+			return nullptr;
+		}
+
 		bool IResource::IsNotFound() const
 		{
 			return m_resource_state == EResoruceStates::Not_Found;

@@ -3,6 +3,8 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 
+#include <glm/glm.hpp>
+
 #include <unordered_map>
 #include <array>
 #include <vector>
@@ -15,6 +17,7 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_RenderpassManager;
 		class RenderGraph;
+		struct PipelineStateObject;
 
 		struct AttachmentDescription
 		{
@@ -29,6 +32,8 @@ namespace Insight
 			///===================================================================
 			/// Used for rendering 
 			u32 Layer_Array_Index = 0;
+			glm::vec4 ClearColour = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			glm::vec2 DepthStencilClear = glm::vec2(1.0f, 0.0f);
 
 			bool IsValid() const
 			{
@@ -116,6 +121,7 @@ namespace Insight
 			/// [PRIVATE] This should not be set manually by the user. RenderContext's and other graphics
 			/// API use this.
 			bool SwapchainPass = false;
+			PipelineStateObject* Pso = nullptr;
 		private:
 
 			friend class RHI_RenderpassManager;

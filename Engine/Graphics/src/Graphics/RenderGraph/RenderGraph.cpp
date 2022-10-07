@@ -182,6 +182,7 @@ namespace Insight
 
 				PipelineStateObject& pso = pass.Get()->m_pso;
 				pass->m_pso.Swapchain = pass->m_swapchainPass;
+				pass->m_renderpassDescription.Pso = &pso;
 
 				/// Build the shader here but no need to cache a reference to it as we 
 				/// can lookup it up later. Just make sure it exists.

@@ -296,44 +296,56 @@ namespace Insight
 
 			u64 hash = 0;
 			u64 hashWithResource = 0;
-			for (const auto& d : descriptors)
 			{
-				if (d.Type != DescriptorType::Unknown)
+				IS_PROFILE_SCOPE("Get hashes");
+				for (const auto& d : descriptors)
 				{
-					HashCombine(hash, d.GetHash(false));
-					HashCombine(hashWithResource, d.GetHash(true));
+					if (d.Type != DescriptorType::Unknown)
+					{
+						HashCombine(hash, d.GetHash(false));
+						HashCombine(hashWithResource, d.GetHash(true));
+					}
 				}
 			}
 
 			/// Is there a set which is already in use with the same resources reuse that set.
-			if (auto itr = m_usedSets.find(hash); itr != m_usedSets.end())
 			{
-				if (auto itrWithResource = itr->second.find(hashWithResource); 
-					itrWithResource != itr->second.end())
+				IS_PROFILE_SCOPE("Return in use set");
+				if (auto itr = m_usedSets.find(hash); itr != m_usedSets.end())
 				{
-					return itrWithResource->second;
+					if (auto itrWithResource = itr->second.find(hashWithResource);
+						itrWithResource != itr->second.end())
+					{
+						return itrWithResource->second;
+					}
 				}
 			}
 
 			/// No set in use with the same resources, try and find a new set.
-			if (auto itr = m_freeSets.find(hash); itr != m_freeSets.end())
 			{
-				if (!itr->second.empty())
+				IS_PROFILE_SCOPE("Return in free set");
+				if (auto itr = m_freeSets.find(hash); itr != m_freeSets.end())
 				{
-					RHI_DescriptorSet* set = itr->second.front();
-					itr->second.pop_front();
-					m_usedSets[hash][hashWithResource] = set;
-					set->Update(descriptors);
-					return set;
+					if (!itr->second.empty())
+					{
+						RHI_DescriptorSet* set = itr->second.front();
+						itr->second.pop_front();
+						m_usedSets[hash][hashWithResource] = set;
+						set->Update(descriptors);
+						return set;
+					}
 				}
 			}
 
-			RHI_DescriptorSet* newSet = NewArgsTracked(RHI_DescriptorSet, GraphicsManager::Instance().GetRenderContext()
-				, descriptors
-				, GraphicsManager::Instance().GetRenderContext()->GetDescriptorLayoutManager().GetLayout(descriptors));
+			RHI_DescriptorSet* newSet = nullptr;
+			{
+				IS_PROFILE_SCOPE("New set");
+				newSet = NewArgsTracked(RHI_DescriptorSet, GraphicsManager::Instance().GetRenderContext()
+					, descriptors
+					, GraphicsManager::Instance().GetRenderContext()->GetDescriptorLayoutManager().GetLayout(descriptors));
 
-			m_usedSets[hash][hashWithResource] = newSet;
-
+				m_usedSets[hash][hashWithResource] = newSet;
+			}
 			return newSet;
 		}
 
@@ -479,6 +491,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			for (const auto& set : m_descriptors)
 			{
+				IS_PROFILE_SCOPE("Get single set");
 				sets.push_back(m_context->GetDescriptorSetManager().GetSet(set.second));
 			}
 			return sets.size() > 0 ? true : false;
