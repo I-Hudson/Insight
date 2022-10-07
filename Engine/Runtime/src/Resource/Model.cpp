@@ -10,6 +10,8 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
 
+#include "Core/Logger.h"
+
 #include <filesystem>
 
 namespace Insight

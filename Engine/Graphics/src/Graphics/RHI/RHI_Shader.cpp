@@ -1,10 +1,12 @@
 #include "Graphics/RHI/RHI_Shader.h"
-#include "Core/Memory.h"
 #include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
 #include "Graphics/RHI/DX12/RHI_Shader_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
+
+#include "Core/Memory.h"
+#include "Core/Logger.h"
 
 #include "dxc/dxcapi.h"
 #include "spirv_reflect.h"

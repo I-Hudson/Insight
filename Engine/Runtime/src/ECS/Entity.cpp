@@ -7,6 +7,7 @@
 
 #include "Scene/SceneManager.h"
 
+#include "Core/Logger.h"
 
 namespace Insight
 {

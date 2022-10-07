@@ -1,5 +1,7 @@
 #include "Event/EventManager.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Core

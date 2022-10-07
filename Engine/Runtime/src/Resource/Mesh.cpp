@@ -4,6 +4,8 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/RHI_CommandList.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Runtime

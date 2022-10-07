@@ -3,7 +3,6 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/RenderContext.h"
-#include "Core/Logger.h"
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"

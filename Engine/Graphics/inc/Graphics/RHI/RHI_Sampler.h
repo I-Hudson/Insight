@@ -18,12 +18,12 @@ namespace Insight
 			Filter MagFilter = Filter::Linear;
 			Filter MinFilter = Filter::Linear;
 			SamplerMipmapMode MipmapMode = SamplerMipmapMode::Linear;
-			SamplerAddressMode AddressMode = SamplerAddressMode::MirroredRepeat;
+			SamplerAddressMode AddressMode = SamplerAddressMode::Repeat;
 			float MipLoadBias = 0.0f;
 			bool AnisotropyEnabled = false;
 			float MaxAnisotropy = 1.0f;
 			bool CompareEnabled = false;
-			CompareOp CompareOp = CompareOp::Less;
+			CompareOp CompareOp = CompareOp::Always;
 			float MinLod = 0.0f;
 			float MaxLod = 0.0f;
 			BorderColour BoarderColour = BorderColour::FloatOpaqueWhite;
