@@ -1,6 +1,7 @@
 workspace "Dependencies"
     architecture "x64"
     staticruntime "off"
+    location "../../Engine/Vendor"
 
     configurations
     {

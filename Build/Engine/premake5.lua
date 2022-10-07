@@ -220,10 +220,10 @@ newaction{
         os.rmdir("../../deps")
         print("Removeing project files")
         os.rmdir("../../.vs")
-        os.remove("../../**.sln")
-        os.remove("../../**.vcxproj")
-        os.remove("../../**.vcxproj.filters")
-        os.remove("../../**.vcxproj.user")
+        os.remove("../../Engine/**.sln")
+        os.remove("../../Engine/**.vcxproj")
+        os.remove("../../Engine/**.vcxproj.filters")
+        os.remove("../../Engine/**.vcxproj.user")
         print("Done")
     end
 } 
