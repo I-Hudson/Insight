@@ -15,6 +15,7 @@
 #ifdef IS_ECS_ENABLED
 #include <unordered_set>
 #endif
+#include <functional>
 
 namespace Insight
 {

@@ -7,6 +7,7 @@
 #include "Graphics/RenderTarget.h"
 
 #include "Core/Memory.h"
+#include "Core/Logger.h"
 
 #include "backends/imgui_impl_glfw.h"
 

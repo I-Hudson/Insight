@@ -5,6 +5,8 @@
 #include "Resource/Material.h"
 #include "Resource/Texture2D.h"
 
+#include "Core/Logger.h"
+
 #include <filesystem>
 #include <ppltasks.h>
 

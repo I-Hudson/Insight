@@ -118,6 +118,7 @@ namespace Insight
 			loader_data.Mesh->m_vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
 			loader_data.Mesh->m_index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data, false);
+			Optimize(loader_data);
 			UploadGPUData(loader_data);
 			LoadMaterialTextures(loader_data);
 
@@ -324,12 +325,8 @@ namespace Insight
 					glm::vec2 vec;
 					// a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't 
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-					vec.x = mesh->mTextureCoords[0][i].x < 0.0f ? 0.0f : 
-						mesh->mTextureCoords[0][i].x > 1.0f ? 1.0f :
-						mesh->mTextureCoords[0][i].x;
-					vec.y = mesh->mTextureCoords[0][i].y < 0.0f ? 0.0f :
-						mesh->mTextureCoords[0][i].y > 1.0f ? 1.0f :
-						mesh->mTextureCoords[0][i].y;
+					vec.x = mesh->mTextureCoords[0][i].x;
+					vec.y = mesh->mTextureCoords[0][i].y;
 					vertex.UV = vec;
 
 					// tangent
@@ -475,29 +472,29 @@ namespace Insight
 
 			/// The optimization order is important
 
-			std::vector<u32> remap(index_count); /// allocate temporary memory for the remap table
-			size_t total_vertices_optimized = meshopt_generateVertexRemap(remap.data(), NULL, index_count, loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex));
+			//std::vector<u32> remap(index_count); /// allocate temporary memory for the remap table
+			//size_t total_vertices_optimized = meshopt_generateVertexRemap(remap.data(), NULL, index_count, loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex));
 
-			std::vector<Graphics::Vertex> dst_vertices(total_vertices_optimized);
-			std::vector<u32> dst_indices(index_count);
+			std::vector<Graphics::Vertex> temp_vertices = loader_data.Vertices;//(total_vertices_optimized);
+			std::vector<u32> temp_indices = loader_data.Indices; //(index_count);
 
-			meshopt_remapIndexBuffer(dst_indices.data(), NULL, index_count, remap.data());
-			meshopt_remapVertexBuffer(dst_vertices.data(), loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex), remap.data());
+			//meshopt_remapIndexBuffer(dst_indices.data(), NULL, index_count, remap.data());
+			//meshopt_remapVertexBuffer(dst_vertices.data(), loader_data.Vertices.data(), index_count, sizeof(Graphics::Vertex), remap.data());
 
 			/// Vertex cache optimization - reordering triangles to maximize cache locality
 			IS_INFO("Optimizing vertex cache...");
-			meshopt_optimizeVertexCache(dst_indices.data(), dst_indices.data(), index_count, total_vertices_optimized);
+			meshopt_optimizeVertexCache(temp_indices.data(), loader_data.Indices.data(), index_count, vertex_count);
 
 			/// Overdraw optimizations - reorders triangles to minimize overdraw from all directions
 			IS_INFO("Optimizing overdraw...");
-			meshopt_optimizeOverdraw(dst_indices.data(), dst_indices.data(), index_count, glm::value_ptr(loader_data.Vertices.data()->Position), total_vertices_optimized, vertex_size, 1.05f);
+			meshopt_optimizeOverdraw(loader_data.Indices.data(), temp_indices.data(), index_count, glm::value_ptr(loader_data.Vertices.data()->Position), vertex_count, vertex_size, 1.05f);
 
 			/// Vertex fetch optimization - reorders triangles to maximize memory access locality
 			IS_INFO("Optimizing vertex fetch...");
-			meshopt_optimizeVertexFetch(dst_vertices.data(), dst_indices.data(), index_count, dst_vertices.data(), total_vertices_optimized, vertex_size);
+			meshopt_optimizeVertexFetch(loader_data.Vertices.data(), loader_data.Indices.data(), index_count, temp_vertices.data(), vertex_count, vertex_size);
 
-			loader_data.Vertices = dst_vertices;
-			loader_data.Indices = dst_indices;
+			//loader_data.Vertices = dst_vertices;
+			//loader_data.Indices = dst_indices;
 		}
 
 		void AssimpLoader::UploadGPUData(AssimpLoaderData& loader_data)
