@@ -5,7 +5,7 @@ project "doctest"
     configurations { "Testing" } 
 
     targetdir (outputdir_target .. "/%{prj.name}")
-    objdir (outputdir_obj.. "/%{prj.name}")
+    objdir (outputdir_obj .. "/%{prj.name}")
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirDoctest = "../vendor/doctest/"

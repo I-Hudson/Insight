@@ -26,9 +26,9 @@ workspace "Dependencies"
     }
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_target = "../../bin/" .. outputdir
-outputdir_obj = "../../bin-int/" .. outputdir
-outputdir_debug = "../../bin/" .. outputdir
+outputdir_target = "../bin/" .. outputdir
+outputdir_obj = "../bin-int/" .. outputdir
+outputdir_debug = "../bin/" .. outputdir
 output_deps = "../../../deps/".. outputdir
 
 VULKAN_SDK = os.getenv("VULKAN_SDK")
