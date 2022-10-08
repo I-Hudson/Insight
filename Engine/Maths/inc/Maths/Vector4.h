@@ -2,6 +2,10 @@
 
 #include "Maths/Defines.h"
 
+#ifdef IS_MATHS_DIRECTX_MATHS
+#include <DirectXMath.h>
+#endif 
+
 namespace Insight
 {
 	namespace Maths
@@ -21,6 +25,11 @@ namespace Insight
 
 			Vector4(const Vector4& other);
 			Vector4(Vector4&& other);
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+			Vector4(const DirectX::XMVECTOR& other);
+			Vector4(DirectX::XMVECTOR&& other);
+#endif
 
 			~Vector4();
 
@@ -71,6 +80,9 @@ namespace Insight
 				struct { float x, y, z, w; };
 				struct { float r, g, b, a; };
 				struct { float data[4]; };
+#ifdef IS_MATHS_DIRECTX_MATHS
+				struct { DirectX::XMVECTOR xmvector; };
+#endif
 			};
 
 			static const Vector4 One;

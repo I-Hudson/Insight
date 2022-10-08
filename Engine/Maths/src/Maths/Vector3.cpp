@@ -15,38 +15,80 @@ namespace Insight
 		const Vector3 Vector3::InfinityNeg	= Vector3(-std::numeric_limits<float>::infinity());
 
 		Vector3::Vector3()
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmvector(DirectX::XMVectorReplicate(0.0f))
+#else
 			: x(0.0f), y(0.0f), z(0.0f)
+#endif
 		{ }
 		Vector3::Vector3(float x, float y, float z)
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmvector(DirectX::XMVectorSet(x, y, z, 0.0f))
+#else
 			: x(x), y(y), z(z)
+#endif
 		{ }
 		Vector3::Vector3(float value)
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmvector(DirectX::XMVectorSet(value,value, value, 0.0f))
+#else
 			: x(value), y(value), z(value)
+#endif
 		{ }
 
 		Vector3::Vector3(const Vector3& other)
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmvector(other.xmvector)
+#else
 			: x(other.x), y(other.y), z(other.z)
+#endif
 		{ }
 		Vector3::Vector3(Vector3&& other)
+#ifdef IS_MATHS_DIRECTX_MATHS
+			: xmvector(other.xmvector)
+#else
 			: x(other.x), y(other.y), z(other.z)
+#endif
 		{
 			other = 0;
 		}
+
+#ifdef IS_MATHS_DIRECTX_MATHS
+		Vector3::Vector3(const DirectX::XMVECTOR& other)
+			: xmvector(other)
+		{ }
+		Vector3::Vector3(DirectX::XMVECTOR&& other)
+			: xmvector(other)
+		{
+			other = DirectX::XMVectorReplicate(0.0f);
+		}
+#endif
 
 		Vector3::~Vector3()
 		{ }
 
 		float Vector3::Length() const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVector3Length(xmvector).m128_f32[0];
+#else
 			return static_cast<float>(sqrt(LengthSquared()));
+#endif
 		}
 		float Vector3::LengthSquared() const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVector3LengthSq(xmvector).m128_f32[0];
+#else
 			return (x * x) + (y * y) + (z * z);
+#endif
 		}
 
 		void Vector3::Normalise()
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			 xmvector = DirectX::XMVector3Normalize(xmvector);
+#else
 			const float length_squared = LengthSquared();
 			if (!(length_squared == 1.0f) && length_squared > 0.0f)
 			{
@@ -55,9 +97,13 @@ namespace Insight
 				y *= length_inverted;
 				z *= length_inverted;
 			}
+#endif
 		}
 		Vector3 Vector3::Normalised() const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVector3Normalize(xmvector));
+#else
 			const auto length_squared = LengthSquared();
 			if (!(length_squared == 1.0f) && length_squared > 0.0f)
 			{
@@ -68,11 +114,16 @@ namespace Insight
 			{
 				return *this;
 			}
+#endif
 		}
 
 		float Vector3::Dot(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVector3Dot(xmvector, other.xmvector).m128_f32[0];
+#else
 			return (x * other.x) + (y * other.y) + (z * other.z);
+#endif
 		}
 
 		float& Vector3::operator[](int i)
@@ -87,7 +138,11 @@ namespace Insight
 
 		bool Vector3::operator==(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return DirectX::XMVectorEqual(xmvector, other.xmvector).m128_f32[0];
+#else
 			return Equals(x, other.x) && Equals(y, other.y) && Equals(z, other.z);
+#endif
 		}
 		bool Vector3::operator!=(const Vector3& other) const
 		{
@@ -96,53 +151,93 @@ namespace Insight
 
 		Vector3 Vector3::operator=(float value)
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = DirectX::XMVectorSet(value, value, value, 0.0f);
+#else
 			x = value;
 			y = value;
 			z = value;
+#endif
 			return *this;
 		}
 		Vector3 Vector3::operator=(const Vector3& other)
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			xmvector = other.xmvector;
+#else
 			x = other.x;
 			y = other.y;
 			z = other.z;
+#endif
 			return *this;
 		}
 
 		Vector3 Vector3::operator*(float value) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+#else
 			return Vector3(x * value, y * value, z * value);
+#endif
 		}
 		Vector3 Vector3::operator*(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorMultiply(xmvector, other.xmvector));
+#else
 			return Vector3(x * other.x, y * other.y, z * other.z);
+#endif
 		}
 
 		Vector3 Vector3::operator/(float value) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+#else
 			return Vector3(x / value, y / value, z / value);
+#endif
 		}
 		Vector3 Vector3::operator/(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorDivide(xmvector, other.xmvector));
+#else
 			return Vector3(x / other.x, y / other.y, z / other.z);
+#endif
 		}
 
 		Vector3 Vector3::operator+(float value) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+#else
 			return Vector3(x + value, y + value, z + value);
+#endif
 		}
 		Vector3 Vector3::operator+(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorAdd(xmvector, other.xmvector));
+#else
 			return Vector3(x + other.x, y + other.y, z + other.z);
+#endif
 		}
 
 		Vector3 Vector3::operator-(float value) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+#else
 			return Vector3(x - value, y - value, z - value);
+#endif
 		}
 		Vector3 Vector3::operator-(const Vector3& other) const
 		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Vector3(DirectX::XMVectorSubtract(xmvector, other.xmvector));
+#else
 			return Vector3(x - other.x, y - other.y, z - other.z);
+#endif
 		}
 
 		Vector3 Vector3::operator*=(float value)
