@@ -1,11 +1,10 @@
-local local_post_build_commands = post_build_commands
+local_post_build_commands = post_build_commands
 
-project "Insight_Input"  
+project "Insight_Maths"  
     language "C++"
     cppdialect "C++17"
-    configurations { "Debug", "Release" } 
     location "./"
-    
+
     targetname ("%{prj.name}" .. output_project_subfix)
     targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
     objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -13,49 +12,38 @@ project "Insight_Input"
 
     dependson 
     {
-        "Insight_Core",
-        "Insight_Maths",
-        "Insight_Graphics",
     }
 
     defines
     {
-        "IS_EXPORT_INPUT_DLL",
+        "IS_EXPORT_MATHS_DLL"
     }
     
     includedirs
     {
         "inc",
-        "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightGraphics}",
-
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.glm}",
-        "%{IncludeDirs.imgui}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.optick}",
+        "%{IncludeDirs.imgui}",
     }
 
     files 
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp",
+        "src/**.cpp" 
     }
 
     links
     {
-        "Insight_Core.lib",
-        "Insight_Maths.lib",
-        "Insight_Graphics.lib",
-
-        "GLFW.lib",
-        "glm.lib",
         "imgui.lib",
+        "tracy.lib",
+        "OptickCore.lib",
     }
 
     libdirs
     {
+        "%{wks.location}/deps/lib",
     }
 
     --postbuildcommands "%{concat_table(local_post_build_commands)}"
@@ -67,17 +55,35 @@ project "Insight_Input"
     }
     
     filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }
+        defines { "DEBUG" }  
         symbols "On" 
         links
         {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
         }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
-        optimize "On"   
+        optimize "On" 
         links
         {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/release",
+        }
+
+    filter "platforms:Win64"
+        links
+        {
+            "Ole32.lib",
+            "dbghelp.lib",
+            "Rpcrt4.lib",
         }
 
     filter "configurations:Testing" 
@@ -85,7 +91,4 @@ project "Insight_Input"
         {
             "doctest.lib",
         }
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }
+         

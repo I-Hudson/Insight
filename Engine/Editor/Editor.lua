@@ -15,6 +15,7 @@ project "Insight_Editor"
     dependson 
     {
         "Insight_Core",
+        "Insight_Maths",
         "Insight_Graphics",
         "Insight_Runtime",
     }
@@ -27,6 +28,7 @@ project "Insight_Editor"
     includedirs
     {
         "inc",
+        "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightRuntime}",
@@ -46,6 +48,7 @@ project "Insight_Editor"
     links
     {
         "Insight_Core.lib",
+        "Insight_Maths.lib",
         "Insight_Graphics.lib",
         "Insight_Runtime.lib",
 
@@ -57,9 +60,8 @@ project "Insight_Editor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
-    prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
 
-    filter "configurations:Debug or configurations:Testing"
+    filter "configurations:Debug"
         defines { "DEBUG" }  
         symbols "On"
         links
@@ -70,6 +72,7 @@ project "Insight_Editor"
         {
             "%{wks.location}/deps/lib/debug",
         }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
@@ -82,9 +85,25 @@ project "Insight_Editor"
         {
             "%{wks.location}/deps/lib/release",
         }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
+
 
     filter "configurations:Testing" 
         links
         {
             "doctest.lib",
         }
+
+    filter "configurations:Testing"
+        defines { "DEBUG" }  
+        symbols "On"
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
+        }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/Debug-windows-x86_64/dll\" \"%{cfg.targetdir}\"", }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }

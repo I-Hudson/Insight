@@ -14,6 +14,7 @@ project "Insight_Graphics"
     dependson 
     {
         "Insight_Core",
+        "Insight_Maths",
     }
 
     defines
@@ -26,6 +27,7 @@ project "Insight_Graphics"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.Maths}",
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
@@ -58,6 +60,7 @@ project "Insight_Graphics"
     links
     {
         "Insight_Core.lib",
+        "Insight_Maths.lib",
         
         "GLFW.lib",
         "glm.lib",
@@ -77,7 +80,13 @@ project "Insight_Graphics"
         "%{LibDirs.vulkan}",
     }
 
-    postbuildcommands "%{concat_table(local_post_build_commands)}"
+    --postbuildcommands "%{concat_table(local_post_build_commands)}"
+    postbuildcommands
+    {
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
+    }
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }

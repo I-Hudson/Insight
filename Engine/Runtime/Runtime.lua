@@ -14,6 +14,7 @@ project "Insight_Runtime"
     dependson 
     { 
         "Insight_Core",
+        "Insight_Maths",
         "Insight_Graphics",
         "Insight_Input",
     }
@@ -27,6 +28,7 @@ project "Insight_Runtime"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.Maths}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightInput}",
 
@@ -55,6 +57,7 @@ project "Insight_Runtime"
     links
     {
         "Insight_Core.lib",
+        "Insight_Maths.lib",
         "Insight_Graphics.lib",
         "Insight_Input.lib",
         
@@ -70,7 +73,13 @@ project "Insight_Runtime"
         "%{wks.location}/deps/lib",
     }
 
-    postbuildcommands "%{concat_table(local_post_build_commands)}"
+    --postbuildcommands "%{concat_table(local_post_build_commands)}"
+    postbuildcommands
+    {
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
+    }
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  

@@ -52,6 +52,15 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
+			//const Matrix2 Matrix_Test(
+			//	4, 7,
+			//	2, 6);
+			//Matrix2 two = Matrix2(2, 5,
+			//	3, 4);
+			glm::mat2 one(4, 7, 2, 6);
+			glm::mat2 two(2, 5, 3, 4);
+			glm::mat2 result = one / two;
+
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
 			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
@@ -72,6 +81,8 @@ namespace Insight
 				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
 				m_camera.View = glm::mat4(1.0f);
+
+				m_camera.View /= glm::mat4();
 			}
 			m_imgui_pass.Create();
 		}

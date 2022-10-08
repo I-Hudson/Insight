@@ -125,6 +125,9 @@ namespace Insight
 
         void BoundingBox::Merge(const BoundingBox& box)
         {
+            glm::mat2 matrix;
+            auto x = matrix[0];
+
             m_min.x = glm::min(m_min.x, box.m_min.x);
             m_min.y = glm::min(m_min.y, box.m_min.y);
             m_min.z = glm::min(m_min.z, box.m_min.z);

@@ -46,7 +46,13 @@ project "Insight_Core"
         "%{wks.location}/deps/lib",
     }
 
-    postbuildcommands "%{concat_table(local_post_build_commands)}"
+    --postbuildcommands "%{concat_table(local_post_build_commands)}"
+    postbuildcommands
+    {
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n",
+    }
 
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }  
@@ -84,4 +90,16 @@ project "Insight_Core"
         links
         {
             "doctest.lib",
+        }
+
+    filter "configurations:Debug or configurations:Testing"
+        defines { "DEBUG" }  
+        symbols "On" 
+        links
+        {
+            "OptickCore.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/debug",
         }

@@ -132,7 +132,7 @@ workspace "Insight"
         kind "SharedLib"
         table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n")
         table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n")
-        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "\"\n")
+        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n")
     end
     if (monolith_build == "true") then
         defines { "IS_MONOLITH" }
@@ -179,13 +179,18 @@ workspace "Insight"
     filter "configurations:Testing"
         defines
         {
-            "TESTING",
-            "DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
+            --"TESTING",
+            "TEST_ENABLED",
+            --"DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
         }
         files 
         { 
             "vendor/doctest/doctest/doctest.h",
         } 
+        libdirs
+        {
+            "%{LibDirs.deps_testing_lib}",
+        }
     	
     
     filter "system:Unix"
@@ -199,6 +204,7 @@ workspace "Insight"
 
 group "Runtime"
     include "../../Engine/Core/Core.lua"
+    include "../../Engine/Maths/Maths.lua"
     include "../../Engine/Graphics/Graphics.lua"
     include "../../Engine/Input/Input.lua"
     include "../../Engine/Runtime/Runtime.lua"

@@ -46,6 +46,10 @@ namespace Insight
 
 		static glm::mat4 ConvertMatrix(const aiMatrix4x4& transform)
 		{
+			glm::mat2 m;
+			glm::vec2 v;
+			v * m;
+			m -= v;
 			return glm::mat4
 			(
 				transform.a1, transform.b1, transform.c1, transform.d1,
@@ -109,7 +113,6 @@ namespace Insight
 
 		Mesh::Mesh()
 		{
-
 		}
 
 		bool Mesh::LoadFromFile(std::string filePath)
