@@ -28,7 +28,7 @@ project "Insight_Runtime"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.Maths}",
+        "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightInput}",
 

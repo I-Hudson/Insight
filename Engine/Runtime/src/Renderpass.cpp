@@ -21,6 +21,9 @@
 #include "Resource/Texture2D.h"
 #include "Resource/Material.h"
 
+#include "Maths/Matrix4.h"
+#include "Maths/Matrix3.h"
+
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -52,14 +55,19 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//const Matrix2 Matrix_Test(
-			//	4, 7,
-			//	2, 6);
-			//Matrix2 two = Matrix2(2, 5,
-			//	3, 4);
-			glm::mat2 one(4, 7, 2, 6);
-			glm::mat2 two(2, 5, 3, 4);
-			glm::mat2 result = one / two;
+			glm::mat3 glm_matrix(
+				2, 3, 1,
+				7, 4, 1,
+				9, -2, 1);
+			glm::vec3 glm_vec(5, 7, 10);
+			glm::vec3 glm_result = glm_matrix * glm_vec;
+
+			Maths::Matrix3 matrix(
+				2, 3, 1,
+				7, 4, 1,
+				9, -2, 1);
+			Maths::Vector3 vec(5, 7, 10);
+			Maths::Vector3 result = matrix * vec;
 
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));

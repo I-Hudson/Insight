@@ -29,7 +29,7 @@ project "Insight_Editor"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightRuntime}",
     

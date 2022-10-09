@@ -27,7 +27,7 @@ project "Insight_Graphics"
     {
         "inc",
         "%{IncludeDirs.InsightCore}",
-        "%{IncludeDirs.Maths}",
+        "%{IncludeDirs.InsightMaths}",
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
