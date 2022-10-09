@@ -42,6 +42,7 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
 IncludeDirs["InsightCore"] = "%{wks.location}Engine/Core/inc"
+IncludeDirs["InsightMaths"] = "%{wks.location}Engine/Maths/inc"
 IncludeDirs["InsightGraphics"] = "%{wks.location}Engine/Graphics/inc"
 IncludeDirs["InsightInput"] = "%{wks.location}Engine/Input/inc"
 IncludeDirs["InsightRuntime"] = "%{wks.location}Engine/Runtime/inc"
@@ -169,7 +170,7 @@ workspace "Insight"
         {
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
-            "IS_MATHS_DIRECTX_MATHS",
+            --"IS_MATHS_DIRECTX_MATHS",
             --"IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             

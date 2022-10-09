@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file MathsUtils.h
+ *
+ * Util file for any maths functions.
+ *
+ */
+
 #include <limits>
 
 namespace Insight
@@ -17,7 +24,18 @@ namespace Insight
         constexpr float DEG_TO_RAD = PI / 180.0f;
         constexpr float RAD_TO_DEG = 180.0f / PI;
 
-        // Check for equality but allow for a small error
+        enum class MathsLibrary
+        {
+            Insight,
+            DirectXMath
+        };
+
+        /// @brief Return an enum value of type 'MathsLibrary' with the enabled maths library in use. 
+        /// @return MathsLibrary
+        constexpr MathsLibrary EnabledMathsLibrary();
+
+        /// @brief Check for equality but allow for a small error
+        /// @return bool
         template <class T>
         constexpr bool Equals(T lhs, T rhs, T error = std::numeric_limits<T>::epsilon()) { return (std::abs(lhs - rhs) <= error); }
 	}
