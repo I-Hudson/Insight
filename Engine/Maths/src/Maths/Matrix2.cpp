@@ -137,9 +137,13 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return Vector2(DirectX::XMVector2Transform(other.xmvector, xmmatrix));
 #else
-			return Vector2(
-					  (m_00 * other.x) + (m_10 * other.y)
-					, (m_01 * other.x) + (m_11 * other.y));
+			const Vector2 vec_y = Vector2(other.y);
+			const Vector2 vec_x = Vector2(other.x);
+
+			Vector2 result;
+			result = vec_y * Vector2(data[1].x, data[1].y) + result;
+			result = vec_x * Vector2(data[0].x, data[0].y) + result;
+			return result;
 #endif
 		}
 		Matrix2 Matrix2::operator*(const Matrix2& other)
@@ -244,7 +248,6 @@ namespace test
 		TEST_CASE("Constructors")
 		{
 			Matrix2 matrix;
-
 		}
 
 		TEST_CASE("Inverse")

@@ -37,6 +37,8 @@ namespace Insight
 
 			float& operator[](int i);
 			float& operator[](unsigned int i);
+			const float& operator[](int i) const;
+			const float& operator[](unsigned int i) const;
 
 			bool operator==(const Vector3& other) const;
 			bool operator!=(const Vector3& other) const;

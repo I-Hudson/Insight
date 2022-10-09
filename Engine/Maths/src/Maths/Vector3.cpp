@@ -1,7 +1,5 @@
 #include "Maths/Vector3.h"
-
 #include "Maths/MathsUtils.h"
-
 
 #include <limits>
 
@@ -70,7 +68,7 @@ namespace Insight
 		float Vector3::Length() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector3Length(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector3Length(xmvector));
 #else
 			return static_cast<float>(sqrt(LengthSquared()));
 #endif
@@ -78,7 +76,7 @@ namespace Insight
 		float Vector3::LengthSquared() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector3LengthSq(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(xmvector));
 #else
 			return (x * x) + (y * y) + (z * z);
 #endif
@@ -120,7 +118,7 @@ namespace Insight
 		float Vector3::Dot(const Vector3& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector3Dot(xmvector, other.xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector3Dot(xmvector, other.xmvector));
 #else
 			return (x * other.x) + (y * other.y) + (z * other.z);
 #endif
@@ -135,11 +133,19 @@ namespace Insight
 		{
 			return data[i];
 		}
+		const float& Vector3::operator[](int i) const
+		{
+			return data[i];
+		}
+		const float& Vector3::operator[](unsigned int i) const
+		{
+			return data[i];
+		}
 
 		bool Vector3::operator==(const Vector3& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVectorEqual(xmvector, other.xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVectorEqual(xmvector, other.xmvector));
 #else
 			return Equals(x, other.x) && Equals(y, other.y) && Equals(z, other.z);
 #endif

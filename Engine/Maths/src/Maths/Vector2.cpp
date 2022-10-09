@@ -32,7 +32,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(DirectX::XMVectorSet(value, value, 0.0f, 0.0f))
 #else
-			: x(x), y(y)
+			: x(value), y(value)
 #endif
 		{ }
 
@@ -40,17 +40,17 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(other.xmvector)
 #else
-			: x(x), y(y)
+			: x(other.x), y(other.y)
 #endif
 		{ }
 		Vector2::Vector2(Vector2&& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmvector(other.xmvector)
 #else
-			: x(x), y(y)
+			: x(other.x), y(other.y)
 #endif
 		{
-			other.xmvector = DirectX::XMVectorReplicate(0.0f);
+			other = 0.0f;
 		}
 
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -70,7 +70,7 @@ namespace Insight
 		float Vector2::Length() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector2Length(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector2Length(xmvector));
 #else
 			return static_cast<float>(sqrt(LengthSquared()));
 #endif
@@ -78,7 +78,7 @@ namespace Insight
 		float Vector2::LengthSquared() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector2LengthSq(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector2LengthSq(xmvector));
 #else
 			return (x * x) + (y * y);
 #endif
@@ -119,7 +119,7 @@ namespace Insight
 		float Vector2::Dot(const Vector2& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector2Dot(xmvector, other.xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector2Dot(xmvector, other.xmvector));
 #else
 			return (x * other.x) + (y * other.y);
 #endif
@@ -138,7 +138,7 @@ namespace Insight
 		bool Vector2::operator==(const Vector2& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVectorEqual(xmvector, other.xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVectorEqual(xmvector, other.xmvector));
 #else
 			return Equals(x, other.x) && Equals(y, other.y);
 #endif
@@ -338,6 +338,13 @@ namespace test
 
 			CHECK(result.x == one.x);
 			CHECK(result.y == one.y);
+		}
+
+		TEST_CASE("Length")
+		{
+			Vector2 one = Vector2(10.0f, 5.0f);
+			CHECK(Equals(one.Length(), 11.180f, 0.001f));
+			CHECK(Equals(one.LengthSquared(), 125.00f, 0.001f));
 		}
 
 		TEST_CASE("Dot")

@@ -88,7 +88,7 @@ namespace Insight
 		float Vector4::Length() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector4Length(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector4Length(xmvector));
 #else
 			return static_cast<float>(sqrt(LengthSquared()));
 #endif
@@ -96,7 +96,7 @@ namespace Insight
 		float Vector4::LengthSquared() const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector4LengthSq(xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector4LengthSq(xmvector));
 #else
 			return (x * x) + (y * y) + (z * z) + (w * w);
 #endif
@@ -139,7 +139,7 @@ namespace Insight
 		float Vector4::Dot(const Vector4& other) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return DirectX::XMVector4Dot(xmvector, other.xmvector).m128_f32[0];
+			return DirectX::XMVectorGetX(DirectX::XMVector4Dot(xmvector, other.xmvector));
 #else
 			return (x * other.x) + (y * other.y) + (z * other.z) + (w * other.w);
 #endif
