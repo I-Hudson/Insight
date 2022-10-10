@@ -14,21 +14,21 @@ namespace Insight
 
 		struct UBO_Camera
 		{
-			glm::mat4 ProjView;
-			glm::mat4 Projection;
-			glm::mat4 View;
-			glm::mat4 View_Inverted;
-			glm::mat4 Projection_View_Inverted;
+			glm::mat4 ProjView = { };
+			glm::mat4 Projection = { };
+			glm::mat4 View = { };
+			glm::mat4 View_Inverted = { };
+			glm::mat4 Projection_View_Inverted = { };
 		};
 
 		struct UBO_ShadowCamera
 		{
-			glm::mat4 ProjView;		
-			glm::mat4 Projection;	
-			glm::mat4 View;			
-			glm::vec4 Light_Direction;
-			glm::vec2 Resolution;	
-			float SplitDepth;
+			glm::mat4 ProjView = { };
+			glm::mat4 Projection = { };
+			glm::mat4 View = { };
+			glm::vec4 Light_Direction = { };
+			glm::vec2 Resolution = { };
+			float SplitDepth = 0.0f;
 			float pad0 = -1.0f;
 
 			static std::vector<UBO_ShadowCamera> GetCascades(const UBO_Camera& camera, u32 cascadeCount, float split_lambda = 0.95f);
@@ -44,6 +44,7 @@ namespace Insight
 
 		private:
 			void ShadowPass();
+			void DepthPrepass(UBO_Camera& camera);
 			void Sample(UBO_Camera& camera);
 			void Composite();
 			void Swapchain();

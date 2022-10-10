@@ -399,18 +399,18 @@ namespace Insight
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
 							//TODO Needs threading of somekind.
-							resource->m_load_timer.Start();
-							resource->Load();
-							resource->m_load_timer.Stop();
-							{
-								std::lock_guard lock(m_lock);
-								if (resource->IsLoaded())
+							concurrency::create_task([this, resource]()
 								{
-									// Resource loaded successfully.
-									++m_loaded_resource_count;
-								}
-							}
-							
+									resource->m_load_timer.Start();
+									resource->Load();
+									resource->m_load_timer.Stop();
+									if (resource->IsLoaded())
+									{
+										std::lock_guard lock(m_lock);
+										// Resource loaded successfully.
+										++m_loaded_resource_count;
+									}
+								});
 						}
 					}
 					else

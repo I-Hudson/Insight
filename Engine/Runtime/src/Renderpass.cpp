@@ -21,10 +21,6 @@
 #include "Resource/Texture2D.h"
 #include "Resource/Material.h"
 
-#include "Maths/MathsUtils.h"
-#include "Maths/Matrix4.h"
-#include "Maths/Matrix3.h"
-
 #include <glm/gtx/matrix_interpolation.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
@@ -36,7 +32,10 @@ namespace Insight
 	const float ShadowZFar = 2048.0f;
 	const float ShadowFOV = 65.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
-	const bool Reverse_Z_For_Depth = false;
+
+
+	constexpr bool Reverse_Z_For_Depth = false;
+	constexpr bool Depth_Prepass = false;
 
 	const float Main_Camera_Near_Plane = 0.1f;
 	const float Main_Camera_Far_Plane = 2048.0f;
@@ -56,43 +55,26 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			glm::mat3 glm_matrix(
-				2, 3, 1,
-				7, 4, 1,
-				9, -2, 1);
-			glm::vec3 glm_vec(5, 7, 10);
-			glm::vec3 glm_result = glm_matrix * glm_vec;
-
-			Maths::Matrix3 matrix(
-				2, 3, 1,
-				7, 4, 1,
-				9, -2, 1);
-			Maths::Vector3 vec(5, 7, 10);
-			Maths::Vector3 result = matrix * vec;
-
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::ResourceManager::Instance().Print();
 
-			//Runtime::Model* model = model_sponza;
-			//while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
-			//{ }
-			//model->CreateEntityHierarchy();
-			//model->CreateEntityHierarchy();
-			//model->CreateEntityHierarchy();
-
-			if (m_camera.View == glm::mat4(0.0f))
+			Runtime::Model* model = model_sponza;
+			while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{
-				aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-				m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
-				m_camera.View = glm::mat4(1.0f);
-
-				m_camera.View /= glm::mat4();
 			}
+			Runtime::ResourceManager::Instance().Print();
+			model->CreateEntityHierarchy();
+			//model->CreateEntityHierarchy();
+			//model->CreateEntityHierarchy();
+
+			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
+			m_camera.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+			m_camera.View = glm::mat4(1.0f);
+
 			m_imgui_pass.Create();
 		}
 
@@ -122,6 +104,10 @@ namespace Insight
 
 			UpdateCamera(m_camera);
 			ShadowPass();
+			if (Depth_Prepass)
+			{
+				DepthPrepass(m_camera);
+			}
 			Sample(m_camera);
 			Composite();
 			Swapchain();
@@ -320,6 +306,91 @@ namespace Insight
 				}, std::move(data));
 		}
 
+		void Renderpass::DepthPrepass(UBO_Camera& camera)
+		{
+			IS_PROFILE_FUNCTION();
+
+			struct TestPassData
+			{ };
+
+			RenderGraph::Instance().AddPass<TestPassData>(L"Depth_Prepass", [](TestPassData& data, RenderGraphBuilder& builder)
+				{
+					IS_PROFILE_SCOPE("Depth_Prepass pass setup");
+
+					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+						Render_Width
+						, Render_Height
+						, PixelFormat::D32_Float
+						, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled);
+					RGTextureHandle depthStencil = builder.CreateTexture(L"Depth_Prepass_DepthStencil", textureCreateInfo);
+					builder.WriteDepthStencil(depthStencil);
+
+					ShaderDesc shaderDesc;
+					{
+						IS_PROFILE_SCOPE("Depth_Prepass_GetShader");
+						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Depth_Prepass.hlsl";
+					}
+					builder.SetShader(shaderDesc);
+
+					PipelineStateObject depth_Prepass_pso = { };
+					{
+						IS_PROFILE_SCOPE("Depth_Prepass_SetPipelineStateObject");
+						depth_Prepass_pso.Name = L"Depth_Prepass_PSO";
+						depth_Prepass_pso.CullMode = CullMode::Back;
+						depth_Prepass_pso.FrontFace = FrontFace::CounterClockwise;
+						depth_Prepass_pso.ShaderDescription = shaderDesc;
+
+						depth_Prepass_pso.DepthTest = true;
+						depth_Prepass_pso.DepthWrite = true;
+						depth_Prepass_pso.DepthCompareOp = CompareOp::LessOrEqual;
+					}
+					builder.SetPipeline(depth_Prepass_pso);
+
+					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+				},
+				[&camera](TestPassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
+				{
+					IS_PROFILE_SCOPE("Depth_Prepass pass execute");
+
+					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Depth_Prepass");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"Depth_Prepass"));
+
+					{
+						IS_PROFILE_SCOPE("Depth_Prepass-SetUniform");
+						cmdList->SetUniform(0, 0, &camera, sizeof(camera));
+					}
+
+					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
+					std::vector<Ptr<ECS::Entity>> entities;
+					if (RPtr<App::Scene> scene = w_scene.Lock())
+					{
+						entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+					}
+
+					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
+
+					for (const Ptr<ECS::Entity> e : entities)
+					{
+						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+						if (!mesh_component
+							|| !mesh_component->GetMesh())
+						{
+							continue;
+						}
+
+						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+						glm::mat4 transform = transform_component->GetTransform();
+						cmdList->SetPushConstant(0, sizeof(transform), glm::value_ptr(transform));
+
+						mesh_component->GetMesh()->Draw(cmdList);
+					}
+
+					cmdList->EndRenderpass();
+				});
+		}
+
 		void Renderpass::Sample(UBO_Camera& camera)
 		{
 			IS_PROFILE_FUNCTION();
@@ -341,7 +412,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("GBuffer pass setup");
 
 					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						  Render_Width
+						Render_Width
 						, Render_Height
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
@@ -349,7 +420,7 @@ namespace Insight
 					builder.WriteTexture(colourRT);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						  Render_Width
+						Render_Width
 						, Render_Height
 						, PixelFormat::R16G16B16A16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
@@ -357,7 +428,7 @@ namespace Insight
 					builder.WriteTexture(normal_rt);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						  Render_Width
+						Render_Width
 						, Render_Height
 						, PixelFormat::R16G16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
@@ -366,9 +437,16 @@ namespace Insight
 
 					textureCreateInfo.Format = PixelFormat::D32_Float;
 					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled;
-					RGTextureHandle depthStencil = builder.CreateTexture(L"GBuffer_DepthStencil", textureCreateInfo);
-					builder.WriteDepthStencil(depthStencil);
-
+					if (Depth_Prepass)
+					{
+						RGTextureHandle depth_prepass = builder.GetTexture(L"Depth_Prepass_DepthStencil");
+						builder.WriteDepthStencil(depth_prepass);
+					}
+					else
+					{
+						RGTextureHandle depthStencil = builder.CreateTexture(L"GBuffer_DepthStencil", textureCreateInfo);
+						builder.WriteDepthStencil(depthStencil);
+					}
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
 					ShaderDesc shaderDesc;
@@ -386,8 +464,22 @@ namespace Insight
 						gbufferPso.CullMode = CullMode::Back;
 						gbufferPso.FrontFace = FrontFace::Clockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
+						gbufferPso.DepthCompareOp = CompareOp::LessOrEqual;
+
+						if (Depth_Prepass)
+						{
+							gbufferPso.DepthWrite = false;
+						}
 					}
 					builder.SetPipeline(gbufferPso);
+
+					if (Depth_Prepass)
+					{
+						RenderpassDescription renderpass_description = { };
+						renderpass_description.DepthStencilAttachment = AttachmentDescription::Load(PixelFormat::D32_Float, Graphics::ImageLayout::DepthAttachmentStencilReadOnly);
+						renderpass_description.DepthStencilAttachment.InitalLayout = ImageLayout::DepthAttachmentStencilReadOnly;
+						builder.SetRenderpass(renderpass_description);
+					}
 
 					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -509,7 +601,14 @@ namespace Insight
 					builder.ReadTexture(builder.GetTexture(L"ColourRT"));
 					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
 					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
-					builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
+					if (Depth_Prepass)
+					{
+						builder.ReadTexture(builder.GetTexture(L"Depth_Prepass_DepthStencil"));
+					}
+					else
+					{
+						builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
+					}
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
 					RHI_TextureCreateInfo create_info = RHI_TextureCreateInfo::Tex2D(
@@ -549,7 +648,14 @@ namespace Insight
 
 					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
 					cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
-					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
+					if (Depth_Prepass)
+					{
+						cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"Depth_Prepass_DepthStencil")));
+					}
+					else
+					{
+						cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
+					}
 
 					RHI_SamplerCreateInfo sampler_create_info = { };
 					sampler_create_info.MagFilter = Filter::Linear;
@@ -746,8 +852,6 @@ namespace Insight
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			aspect = std::max(0.1f, aspect);
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
-			Maths::Matrix4 proj_lh = Maths::CreatePerspectiveLH(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
-			Maths::Matrix4 proj_rh = Maths::CreatePerspectiveRH(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
 			
 			// Setup the inverted projection view matrix.
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);

@@ -63,7 +63,6 @@ namespace Insight
 			loader_data.Model->m_index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
 			UploadGPUData(loader_data);
-			LoadMaterialTextures(loader_data);
 
 			// Wait for all textures to be loaded.
 			bool all_asserts_loaded = false;
@@ -76,6 +75,7 @@ namespace Insight
 					if (texture->GetResourceState() == EResoruceStates::Loading)
 					{
 						all_asserts_loaded = false;
+						std::this_thread::sleep_for(std::chrono::milliseconds(16));
 						break;
 					}
 				}
@@ -90,6 +90,8 @@ namespace Insight
 					IS_CORE_ERROR("[AssimpLoader::LoadModel] Texture '{}' state is not 'Loaded'. Current state is '{}'.", texture->GetFilePath(), ERsourceStatesToString(texture->GetResourceState()));
 				}
 			}
+
+			LoadMaterialTextures(loader_data);
 
 			return true;
 		}
