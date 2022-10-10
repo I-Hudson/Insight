@@ -7,6 +7,12 @@
  *
  */
 
+#ifdef IS_MATHS_DIRECTX_MATHS
+#include <DirectXMath.h>
+#endif
+
+#include "Maths/Matrix4.h"
+
 #include <limits>
 
 namespace Insight
@@ -18,6 +24,7 @@ namespace Insight
         constexpr float PI = 3.14159265359f;
         constexpr float PI_2 = 6.28318530718f;
         constexpr float PI_4 = 12.5663706144f;
+        constexpr float PI_1_DIV_2 = 0.159154943f;
         constexpr float PI_DIV_2 = 1.57079632679f;
         constexpr float PI_DIV_4 = 0.78539816339f;
         constexpr float PI_INV = 0.31830988618f;
@@ -32,11 +39,19 @@ namespace Insight
 
         /// @brief Return an enum value of type 'MathsLibrary' with the enabled maths library in use. 
         /// @return MathsLibrary
-        constexpr MathsLibrary EnabledMathsLibrary();
+        IS_MATHS constexpr MathsLibrary EnabledMathsLibrary();
 
         /// @brief Check for equality but allow for a small error
         /// @return bool
         template <class T>
         constexpr bool Equals(T lhs, T rhs, T error = std::numeric_limits<T>::epsilon()) { return (std::abs(lhs - rhs) <= error); }
+
+        IS_MATHS Matrix4 CreatePerspectiveLH(float fov, float aspect, float near, float far);
+        IS_MATHS Matrix4 CreatePerspectiveRH(float fov, float aspect, float near, float far);
+
+        IS_MATHS Matrix4 AxisAngleMatrix(Vector4 vec, float angle);
+        IS_MATHS Matrix4 Matrix4RotationNormal(Vector4 normalAxis, float Angle);
+
+        void ScalerSinCos(float* pSin, float* pCos, float  Value);
 	}
 }

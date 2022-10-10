@@ -21,6 +21,7 @@
 #include "Resource/Texture2D.h"
 #include "Resource/Material.h"
 
+#include "Maths/MathsUtils.h"
 #include "Maths/Matrix4.h"
 #include "Maths/Matrix3.h"
 
@@ -71,16 +72,16 @@ namespace Insight
 
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			Runtime::ResourceManager::Instance().Print();
 
-			Runtime::Model* model = model_sponza;
-			while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
-			{ }
-			model->CreateEntityHierarchy();
+			//Runtime::Model* model = model_sponza;
+			//while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
+			//{ }
+			//model->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 
@@ -745,7 +746,9 @@ namespace Insight
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			aspect = std::max(0.1f, aspect);
 			camera.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
-
+			Maths::Matrix4 proj_lh = Maths::CreatePerspectiveLH(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
+			Maths::Matrix4 proj_rh = Maths::CreatePerspectiveRH(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
+			
 			// Setup the inverted projection view matrix.
 			camera.ProjView = camera.Projection * glm::inverse(camera.View);
 			camera.Projection_View_Inverted = glm::inverse(camera.ProjView);
