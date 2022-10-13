@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef RENDER_GRAPH_ENABLED
-
 #include "Graphics/Enums.h"
 #include "Graphics/RenderTarget.h"
 #include "Graphics/ShaderDesc.h"
@@ -100,4 +98,3 @@ namespace Insight
 		};
 	}
 }
-#endif /// RENDER_GRAPH_ENABLED

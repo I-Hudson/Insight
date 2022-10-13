@@ -1,9 +1,8 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/GraphicsManager.h"
-#ifdef RENDER_GRAPH_ENABLED
 #include "Graphics/RHI/RHI_CommandList.h"
-#endif
+
 #include "Core/Logger.h"
 
 #include "Core/Profiler.h"
@@ -66,7 +65,6 @@ namespace Insight
 			Destroy();
 		}
 
-#ifdef RENDER_GRAPH_ENABLED
 		void Submesh::Draw(RHI_CommandList* cmdList) const
 		{
 			/// TODO: To be removed when entities are added with components
@@ -83,7 +81,6 @@ namespace Insight
 			cmdList->SetIndexBuffer(m_draw_info.Index_Buffer, IndexType::Uint32);
 			cmdList->DrawIndexed(m_draw_info.Index_Count, 1, m_draw_info.First_Index, m_draw_info.Vertex_Offset, 0);
 		}
-#endif /// RENDER_GRAPH_ENABLED
 
 		void Submesh::SetDrawInfo(SubmeshDrawInfo info)
 		{
@@ -213,7 +210,6 @@ namespace Insight
 			m_submeshes.clear();
 		}
 
-#ifdef RENDER_GRAPH_ENABLED
 		void Mesh::Draw(RHI_CommandList* cmdList) const
 		{
 			IS_PROFILE_FUNCTION();
@@ -222,7 +218,6 @@ namespace Insight
 				submesh->Draw(cmdList);
 			}
 		}
-#endif ///RENDER_GRAPH_ENABLED
 
 		void Mesh::CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices)
 		{

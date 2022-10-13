@@ -399,8 +399,8 @@ namespace Insight
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
 							//TODO Needs threading of somekind.
-							concurrency::create_task([this, resource]()
-								{
+							//concurrency::create_task([this, resource]()
+								//{
 									resource->m_load_timer.Start();
 									resource->Load();
 									resource->m_load_timer.Stop();
@@ -410,7 +410,7 @@ namespace Insight
 										// Resource loaded successfully.
 										++m_loaded_resource_count;
 									}
-								});
+								//});
 						}
 					}
 					else

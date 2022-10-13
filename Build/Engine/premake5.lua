@@ -106,7 +106,6 @@ workspace "Insight"
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
-        "IS_EXPORT_DLL",
     }
 
     includedirs
@@ -130,6 +129,7 @@ workspace "Insight"
     }
 
     if (monolith_build == "false") then
+        defines{ "IS_EXPORT_DLL", }
         kind "SharedLib"
         table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n")
         table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n")

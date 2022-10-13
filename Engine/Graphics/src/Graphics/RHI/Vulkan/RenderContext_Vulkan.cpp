@@ -264,7 +264,6 @@ namespace Insight
 
 				InitImGui();
 
-#ifdef RENDER_GRAPH_ENABLED
 				m_submitFences.Setup();
 				m_submitFences.ForEach([this](vk::Fence& fence)
 					{
@@ -280,7 +279,6 @@ namespace Insight
 					{
 						semaphore = m_device.createSemaphore(vk::SemaphoreCreateInfo());
 					});
-#endif
 
 				return true;
 			}
@@ -294,7 +292,6 @@ namespace Insight
 
 				DestroyImGui();
 
-#ifdef RENDER_GRAPH_ENABLED
 				m_submitFences.ForEach([this](vk::Fence& fence)
 					{
 						m_device.destroyFence(fence);
@@ -307,7 +304,6 @@ namespace Insight
 					{
 						m_device.destroySemaphore(semaphore);
 					});
-#endif
 
 				if (m_swapchain)
 				{
@@ -448,7 +444,6 @@ namespace Insight
 
 			bool RenderContext_Vulkan::PrepareRender()
 			{
-#ifdef RENDER_GRAPH_ENABLED
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_lock);
 
@@ -483,7 +478,7 @@ namespace Insight
 					m_availableSwapchainImage = nextImage.value;
 					m_device.resetFences({ m_submitFences.Get() });
 				}
-#endif
+
 				m_descriptorSetManager->Reset();
 				m_commandListManager->Reset();
 
@@ -500,9 +495,6 @@ namespace Insight
 
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
 			{
-#ifdef RENDER_GRAPH_ENABLED
-				std::lock_guard lock(m_lock);
-
 				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
 				std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };
@@ -517,7 +509,11 @@ namespace Insight
 					signalSemaphore);
 				{
 					IS_PROFILE_SCOPE("Submit");
-					m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
+					std::lock_guard lock(m_lock);
+					if (!cmdList->IsDiscard())
+					{
+						m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
+					}
 				}
 				std::array<vk::Semaphore, 1> signalSemaphores = { m_signalSemaphores.Get() };
 				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
@@ -526,9 +522,13 @@ namespace Insight
 				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 				{
 					IS_PROFILE_SCOPE("Present");
-					vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+					std::lock_guard lock(m_lock);
+					if (!cmdList->IsDiscard())
+					{
+						vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
+						m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
+					}
 				}
-				m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
@@ -537,7 +537,6 @@ namespace Insight
 				}
 
 				m_resource_tracker.EndFrame();
-#endif
 			}
 
 			void RenderContext_Vulkan::GpuWaitForIdle()
@@ -574,6 +573,14 @@ namespace Insight
 
 				vk::DebugUtilsObjectNameInfoEXT info = vk::DebugUtilsObjectNameInfoEXT(objectType, handle, str.c_str());
 				m_device.setDebugUtilsObjectNameEXT(info, debugDispatcher);
+			}
+
+			void RenderContext_Vulkan::BeginDebugMarker(std::string_view block_name)
+			{
+			}
+
+			void RenderContext_Vulkan::EndDebugMarker()
+			{
 			}
 
 			RHI_Texture* RenderContext_Vulkan::GetSwaphchainIamge() const

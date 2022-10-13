@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef RENDER_GRAPH_ENABLED
-
 #include "Graphics/RenderTarget.h"
 #include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/PipelineStateObject.h"
@@ -47,4 +45,3 @@ namespace Insight
 		};
 	}
 }
-#endif /// RENDER_GRAPH_ENABLED

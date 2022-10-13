@@ -45,6 +45,9 @@ namespace Insight
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
 				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
+				void BeginDebugMarker(std::string_view block_name);
+				void EndDebugMarker();
+
 				vk::Device GetDevice() const { return m_device; }
 				VmaAllocator GetVMA() const { return m_vmaAllocator; }
 
@@ -104,11 +107,9 @@ namespace Insight
 
 			private:
 
-#ifdef RENDER_GRAPH_ENABLED
 				FrameResource<vk::Fence> m_submitFences;
 				FrameResource<vk::Semaphore> m_swapchainAcquires;
 				FrameResource<vk::Semaphore> m_signalSemaphores;
-#endif
 			};
 		}
 	}

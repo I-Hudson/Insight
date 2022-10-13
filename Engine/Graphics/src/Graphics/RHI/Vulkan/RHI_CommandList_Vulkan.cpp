@@ -303,9 +303,6 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				m_pso = pso;
-#ifndef RENDER_GRAPH_ENABLED
-				FrameResourceVulkan()->DescriptorAllocator.SetPipeline(m_pso);
-#endif
 			}
 
 			void RHI_CommandList_Vulkan::SetPushConstant(u32 offset, u32 size, const void* data)
@@ -419,6 +416,16 @@ namespace Insight
 				}
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
+			}
+
+			void RHI_CommandList_Vulkan::BeginTimeBlock(const char* block_name)
+			{
+				m_context_vulkan->BeginDebugMarker(block_name);
+			}
+
+			void RHI_CommandList_Vulkan::EndTimeBlock()
+			{
+
 			}
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()

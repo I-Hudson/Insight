@@ -1,5 +1,3 @@
-#ifdef RENDER_GRAPH_ENABLED
-
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderContext.h"
@@ -64,33 +62,73 @@ namespace Insight
 			* -
 			* Build all shaders, this could be done in a similar fashion to textures.
 			* Build all PSO.
-			* 
+			*
 			* PLACE BARRIERS
 			* Go through each pass and work out which textures/resources need barriers. This should then add to a barrier
 			* list which should be done for each pass. Passes should have an incoming and outgoing list.
-			* 
+			*
 			* EXECUTE ALL PASSES
 			*/
 
-			if (m_context->PrepareRender())
+#ifdef RENDER_GRAPH_RENDER_THREAD
+			if (m_render_thread_enabled && m_render_task)
 			{
-				Build();
-				PlaceBarriers();
-				m_commandListManager.Get().Reset();
-				RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
-
-				m_context->PreRender(cmdList);
-
-				cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
-				cmdList->m_descriptorAllocator->Reset();
-				Render(cmdList);
-				
-				m_context->PostRender(cmdList);
-				Clear();
-				++m_frame_count;
+				m_render_task->wait();
 			}
+#endif
 
-			m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
+			m_passes.clear();
+			m_passes = std::move(m_pending_passes);
+			m_pending_passes.clear();
+#ifdef RENDER_GRAPH_RENDER_THREAD
+			if (m_render_thread_enabled)
+			{
+				m_render_task = &concurrency::create_task([this]()
+					{
+						if (m_context->PrepareRender())
+						{
+							Build();
+							PlaceBarriers();
+							m_commandListManager.Get().Reset();
+							RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
+
+							m_context->PreRender(cmdList);
+
+							cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
+							cmdList->m_descriptorAllocator->Reset();
+							Render(cmdList);
+
+							m_context->PostRender(cmdList);
+							//Clear();
+							++m_frame_count;
+						}
+
+						m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
+					});
+			}
+			else
+#endif
+			{
+				if (m_context->PrepareRender())
+				{
+					Build();
+					PlaceBarriers();
+					m_commandListManager.Get().Reset();
+					RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
+
+					m_context->PreRender(cmdList);
+
+					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
+					cmdList->m_descriptorAllocator->Reset();
+					Render(cmdList);
+
+					m_context->PostRender(cmdList);
+					//Clear();
+					++m_frame_count;
+				}
+
+				m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
+			}
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info)
@@ -137,6 +175,15 @@ namespace Insight
 		void RenderGraph::Release()
 		{
 			IS_PROFILE_FUNCTION();
+
+#ifdef RENDER_GRAPH_RENDER_THREAD
+			if (m_render_thread_enabled)
+			{
+				m_shutdown_render_thread = true;
+				m_render_thread.join();
+			}
+#endif
+
 			m_context->GpuWaitForIdle();
 
 			m_passes.clear();
@@ -426,5 +473,3 @@ namespace Insight
 		}
 	}
 }
-
-#endif /// RENDER_GRAPH_ENABLED

@@ -59,8 +59,8 @@ project "Insight_Graphics"
 
     links
     {
-        "Insight_Core.lib",
-        "Insight_Maths.lib",
+        "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Maths" .. output_project_subfix .. ".lib",
         
         "GLFW.lib",
         "glm.lib",

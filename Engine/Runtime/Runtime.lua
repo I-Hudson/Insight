@@ -56,10 +56,10 @@ project "Insight_Runtime"
 
     links
     {
-        "Insight_Core.lib",
-        "Insight_Maths.lib",
-        "Insight_Graphics.lib",
-        "Insight_Input.lib",
+        "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Graphics" .. output_project_subfix .. ".lib",
+        "Insight_Input" .. output_project_subfix .. ".lib",
         
         "glm.lib",
         "imgui.lib",

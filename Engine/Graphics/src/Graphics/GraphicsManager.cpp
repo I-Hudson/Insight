@@ -60,9 +60,7 @@ namespace Insight
 				return false;
 			}
 
-#ifdef RENDER_GRAPH_ENABLED
 			m_renderGraph.Init(m_renderContext);
-#endif ///#ifdef RENDER_GRAPH_ENABLED
 
 			///m_renderpass.Create();
 
@@ -124,10 +122,8 @@ namespace Insight
 						m_renderContext->Init();
 						///m_renderpass.Create();
 
-#ifdef RENDER_GRAPH_ENABLED
 						m_renderGraph.Release();
 						m_renderGraph.Init(m_renderContext);
-#endif ///#ifdef RENDER_GRAPH_ENABLED
 						return;
 					}
 				}
@@ -150,9 +146,7 @@ namespace Insight
 			}
 #else
 
-#ifdef RENDER_GRAPH_ENABLED
 			RenderGraph::Instance().Execute();
-#endif///#ifdef RENDER_GRAPH_ENABLED
 
 #endif
 		}

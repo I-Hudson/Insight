@@ -75,12 +75,20 @@ namespace Insight
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
 
+			virtual void BeginTimeBlock(const char* block_name);
+			virtual void EndTimeBlock();
+
+			bool IsDiscard() const { return m_discard; }
+
 		protected:
 			bool CanDraw();
 			virtual bool BindDescriptorSets();
 
 			RenderContext* m_context{ nullptr };
 			bool m_activeRenderpass = false;
+			/// @brief Discard this command list. Something has happened which no longer allows us to use this command list this frame.
+			bool m_discard = false;
+
 			PipelineStateObject m_pso;
 			PipelineStateObject m_activePSO;
 

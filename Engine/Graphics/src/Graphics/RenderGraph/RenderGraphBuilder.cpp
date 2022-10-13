@@ -1,5 +1,3 @@
-#ifdef RENDER_GRAPH_ENABLED
-
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
@@ -90,4 +88,3 @@ namespace Insight
 		}
 	}
 }
-#endif /// RENDER_GRAPH_ENABLED

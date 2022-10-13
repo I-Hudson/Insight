@@ -59,6 +59,9 @@ namespace Insight
 				return *this;
 			}
 
+			u64 Hash = 0;
+			u64 HashWithResource = 0;
+
 			DescriptorType Type = DescriptorType::Unknown;
 			u32 Set = 0;
 			u32 Binding = 0;

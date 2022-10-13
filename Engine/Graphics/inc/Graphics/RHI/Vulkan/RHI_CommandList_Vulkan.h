@@ -62,6 +62,9 @@ namespace Insight
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 
+				virtual void BeginTimeBlock(const char* block_name) override;
+				virtual void EndTimeBlock() override;
+
 			protected:
 				virtual bool BindDescriptorSets() override;
 

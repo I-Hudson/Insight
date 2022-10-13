@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef RENDER_GRAPH_ENABLED
-
 #include "Core/Memory.h"
 #include "Core/Singleton.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
@@ -11,6 +9,7 @@
 
 #include <type_traits>
 #include <unordered_map>
+#include <ppltasks.h>
 
 namespace Insight
 {
@@ -83,7 +82,7 @@ namespace Insight
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
 				IS_PROFILE_FUNCTION();
-				m_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
+				m_pending_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 
 			static u32 s_MaxFarmeCount;
@@ -98,7 +97,25 @@ namespace Insight
 
 		private:
 			RenderContext* m_context = nullptr;
+			std::vector<UPtr<RenderGraphPassBase>> m_pending_passes;
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
+
+
+#ifdef RENDER_GRAPH_RENDER_THREAD
+			concurrency::task<void>* m_render_task = nullptr;
+
+			std::mutex m_trigger_render_thread_lock;
+			std::condition_variable m_trigger_render_thread_cv;
+			bool m_trigger_render_thread_ready = false;
+
+			std::mutex m_render_thread_finished_lock;
+			std::condition_variable m_render_thread_finished_cv;
+			bool m_render_thread_finished_ready = false;
+
+			std::thread m_render_thread;
+			std::atomic<bool> m_shutdown_render_thread = false;
+			const bool m_render_thread_enabled = false;
+#endif
 
 			u32 m_frameIndex = 0;
 			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).
@@ -112,4 +129,3 @@ namespace Insight
 		};
 	}
 }
-#endif ///RENDER_GRAPH_ENABLED

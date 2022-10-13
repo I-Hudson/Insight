@@ -263,6 +263,7 @@ namespace Insight
 						SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type),
 						SpvReflectDescriptorResourceTypeToDescriptorResourceType(binding.resource_type)
 					);
+					descriptor.Hash = descriptor.GetHash(false);
 
 					auto [foundDescriptor, descriptorFound] = findPreviousDescriptor(descriptor, descriptors);
 					if (foundDescriptor)

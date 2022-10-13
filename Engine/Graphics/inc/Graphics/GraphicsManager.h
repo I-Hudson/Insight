@@ -68,9 +68,7 @@ namespace Insight
 			CommandList m_renderCommandList;
 			std::mutex m_renderCommandListMutex;
 #endif
-#ifdef RENDER_GRAPH_ENABLED
 			RenderGraph m_renderGraph;
-#endif
 
 			RenderContext* m_renderContext{ nullptr };
 			///Renderpass m_renderpass;

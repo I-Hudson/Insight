@@ -54,6 +54,7 @@ namespace Insight
 			m_drawData = {};
 			m_bound_vertex_buffer = nullptr;
 			m_bound_index_buffer = nullptr;
+			m_discard = true;
 		}
 
 		void RHI_CommandList::SetUniform(u32 set, u32 binding, const void* data, u32 size)
@@ -76,6 +77,16 @@ namespace Insight
 		void RHI_CommandList::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
 		{
 			m_descriptorAllocator->SetSampler(set, binding, sampler);
+		}
+
+		void RHI_CommandList::BeginTimeBlock(const char* block_name)
+		{
+			FAIL_ASSERT();
+		}
+
+		void RHI_CommandList::EndTimeBlock()
+		{
+			FAIL_ASSERT();
 		}
 
 		bool RHI_CommandList::CanDraw()

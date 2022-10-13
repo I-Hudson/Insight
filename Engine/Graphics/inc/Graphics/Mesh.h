@@ -66,9 +66,7 @@ namespace Insight
 			Submesh(Mesh* mesh) { m_mesh = mesh; }
 			~Submesh();
 
-#ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
-#endif ///RENDER_GRAPH_ENABLED
 			void SetDrawInfo(SubmeshDrawInfo info);
 
 			BoundingBox GetBoundingBox() const { return m_bounding_box.Transform(m_draw_info.Transform); }
@@ -98,9 +96,7 @@ namespace Insight
 		
 			std::vector<Submesh*> GetSubMeshes() const { return m_submeshes; }
 
-#ifdef RENDER_GRAPH_ENABLED
 			void Draw(RHI_CommandList* cmdList) const;
-#endif ///RENDER_GRAPH_ENABLED
 
 		private:
 			void CreateGPUBuffers(const aiScene* scene, std::string_view filePath, std::vector<Vertex>& vertices, std::vector<u32>& indices);

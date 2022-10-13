@@ -48,6 +48,8 @@ namespace Insight
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
+	std::vector<Ptr<ECS::Entity>> entities_to_render;
+
 #define ECS_RENDER
 
 	namespace Graphics
@@ -58,16 +60,18 @@ namespace Insight
 			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
 			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 
-			Runtime::Model* model = model_sponza;
-			while (model->GetResourceState() != Runtime::EResoruceStates::Loaded)
+			while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded 
+				&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{
 			}
 			Runtime::ResourceManager::Instance().Print();
-			model->CreateEntityHierarchy();
+			model_sponza->CreateEntityHierarchy();
+			model_sponza_curtains->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 
@@ -100,6 +104,12 @@ namespace Insight
 			{
 				Render_Width = Window::Instance().GetWidth();
 				Render_Height = Window::Instance().GetHeight();
+			}
+
+			WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
+			if (RPtr<App::Scene> scene = w_scene.Lock())
+			{
+				entities_to_render = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 			}
 
 			UpdateCamera(m_camera);
@@ -362,16 +372,11 @@ namespace Insight
 						cmdList->SetUniform(0, 0, &camera, sizeof(camera));
 					}
 
-					WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
-					std::vector<Ptr<ECS::Entity>> entities;
-					if (RPtr<App::Scene> scene = w_scene.Lock())
-					{
-						entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
-					}
+					
 
 					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
 
-					for (const Ptr<ECS::Entity> e : entities)
+					for (const Ptr<ECS::Entity> e : entities_to_render)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 						if (!mesh_component
@@ -395,7 +400,6 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-#ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{ };
 
@@ -531,7 +535,7 @@ namespace Insight
 
 					Frustum camera_frustum(camera.View, camera.Projection, 1000.0f);
 					
-#ifdef ECS_RENDER
+
 					for (const Ptr<ECS::Entity> e : entities)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
@@ -562,20 +566,9 @@ namespace Insight
 							//cmdList->SetTexture(1, 2, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 						mesh_component->GetMesh()->Draw(cmdList);
 					}
-#else
-					for (Submesh* sub_mesh : data.TestMesh.GetSubMeshes())
-					{
-						BoundingBox bounding_box = sub_mesh->GetBoundingBox();
-						///if (camera_frustum.IsVisible(bounding_box.GetCenter(), bounding_box.GetExtents()))
-						{
-							sub_mesh->Draw(cmdList);
-						}
-					}
-#endif
 
 					cmdList->EndRenderpass();
 				});
-#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::Composite()
@@ -686,7 +679,6 @@ namespace Insight
 
 		void Renderpass::Swapchain()
 		{
-#ifdef RENDER_GRAPH_ENABLED
 			struct TestPassData
 			{
 				RGTextureHandle RenderTarget;
@@ -731,14 +723,11 @@ namespace Insight
 
 					cmdList->EndRenderpass();
 				});
-#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		void Renderpass::ImGuiPass()
 		{
-#ifdef RENDER_GRAPH_ENABLED
 			m_imgui_pass.Render();
-#endif ///RENDER_GRAPH_ENABLED
 		}
 
 		float previousTime = 0;
