@@ -114,6 +114,7 @@ namespace Insight
 
 			UpdateCamera(m_camera);
 			ShadowPass();
+			//ShadowCullingPass();
 			if (Depth_Prepass)
 			{
 				DepthPrepass(m_camera);
@@ -314,6 +315,20 @@ namespace Insight
 						cmdList->EndRenderpass();
 					}
 				}, std::move(data));
+		}
+
+		void Renderpass::ShadowCullingPass()
+		{
+			struct TData
+			{ };
+			RenderGraph::Instance().AddPass<TData>(L"Shadow_Culling", [](TData& data, RenderGraphBuilder& builder)
+				{
+
+				},
+				[](TData& data , RenderGraph& rg, RHI_CommandList* cmd_list)
+				{
+
+				});
 		}
 
 		void Renderpass::DepthPrepass(UBO_Camera& camera)

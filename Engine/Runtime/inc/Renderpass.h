@@ -44,6 +44,7 @@ namespace Insight
 
 		private:
 			void ShadowPass();
+			void ShadowCullingPass();
 			void DepthPrepass(UBO_Camera& camera);
 			void Sample(UBO_Camera& camera);
 			void Composite();

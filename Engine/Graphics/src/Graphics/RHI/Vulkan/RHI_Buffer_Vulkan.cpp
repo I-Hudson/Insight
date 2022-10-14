@@ -5,6 +5,7 @@
 #include "Platform/Platform.h"
 
 #include "VmaUsage.h"
+#include <Core/Logger.h>
 
 namespace Insight
 {
@@ -55,6 +56,12 @@ namespace Insight
 			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset)
 			{
 				IS_PROFILE_FUNCTION();
+
+				if (sizeInBytes > GetSize())
+				{
+					IS_CORE_ERROR("[RHI_Buffer_Vulkan::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
+					return {};
+				}
 
 				if (m_mappedData)
 				{
@@ -132,6 +139,7 @@ namespace Insight
 					vmaDestroyBuffer(m_context->GetVMA(), m_buffer, m_vmaAllocation);
 					m_buffer = nullptr;
 				}
+				m_size = 0;
 			}
 
 			bool RHI_Buffer_Vulkan::ValidResouce()
