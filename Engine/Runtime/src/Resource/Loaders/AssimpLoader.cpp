@@ -59,10 +59,14 @@ namespace Insight
 			AssimpLoaderData loader_data;
 			loader_data.Model = model;
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('\\'));
-			loader_data.Model->m_vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
-			loader_data.Model->m_index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
 			UploadGPUData(loader_data);
+
+			for (size_t i = 0; i < model->m_meshes.size(); ++i)
+			{
+				model->m_meshes.at(i)->m_vertex_buffer = model->m_vertex_buffer;
+				model->m_meshes.at(i)->m_index_buffer = model->m_index_buffer;
+			}
 
 			// Wait for all textures to be loaded.
 			bool all_asserts_loaded = false;
@@ -318,7 +322,7 @@ namespace Insight
 					vector.y = (rand() % 100 + 1) * 0.01f;
 					vector.z = (rand() % 100 + 1) * 0.01f;
 					vector.w = 1.0f;
-					vertex.Colour = vertexColour;
+					//vertex.Colour = vertexColour;
 				}
 				vector = { };
 				/// texture coordinates
@@ -501,36 +505,45 @@ namespace Insight
 
 		void AssimpLoader::UploadGPUData(AssimpLoaderData& loader_data)
 		{
-			Graphics::RHI_Buffer* vertex_buffer = nullptr;
-			Graphics::RHI_Buffer* index_buffer = nullptr;
+			Graphics::RHI_Buffer** vertex_buffer = nullptr;
+			Graphics::RHI_Buffer** index_buffer = nullptr;
 			if (loader_data.Model)
 			{
-				vertex_buffer = loader_data.Model->m_vertex_buffer;
-				index_buffer = loader_data.Model->m_index_buffer;
+				vertex_buffer = &loader_data.Model->m_vertex_buffer;
+				index_buffer = &loader_data.Model->m_index_buffer;
 			}
 			else if (loader_data.Mesh)
 			{
-				vertex_buffer = loader_data.Mesh->m_vertex_buffer;
-				index_buffer = loader_data.Mesh->m_index_buffer;
+				vertex_buffer = &loader_data.Mesh->m_vertex_buffer;
+				index_buffer = &loader_data.Mesh->m_index_buffer;
 			}
 
 			const u64 cpu_vertex_buffer_size = sizeof(Graphics::Vertex) * loader_data.Vertices.size();
 			const u64 cpu_index_buffer_size = sizeof(u32) * loader_data.Indices.size();
 
-			if (cpu_vertex_buffer_size > vertex_buffer->GetSize())
+			if (!(*vertex_buffer))
 			{
-				// Resize buffer as it is too small.
-				vertex_buffer->Resize(cpu_vertex_buffer_size);
+				*vertex_buffer = Renderer::CreateVertexBuffer(cpu_vertex_buffer_size, sizeof(Graphics::Vertex));
 			}
-			if (cpu_index_buffer_size > index_buffer->GetSize())
+			if (!(*index_buffer))
+			{
+				*index_buffer = Renderer::CreateIndexBuffer(cpu_index_buffer_size);
+			}
+
+			if (cpu_vertex_buffer_size > (*vertex_buffer)->GetSize())
 			{
 				// Resize buffer as it is too small.
-				index_buffer->Resize(cpu_index_buffer_size);
+				(*vertex_buffer)->Resize(cpu_vertex_buffer_size);
+			}
+			if (cpu_index_buffer_size > (*index_buffer)->GetSize())
+			{
+				// Resize buffer as it is too small.
+				(*index_buffer)->Resize(cpu_index_buffer_size);
 			}
 
 			// Upload the vertices and indics data to the GPU.
-			vertex_buffer->Upload(loader_data.Vertices.data(), cpu_vertex_buffer_size);
-			index_buffer->Upload(loader_data.Indices.data(), cpu_index_buffer_size);
+			(*vertex_buffer)->Upload(loader_data.Vertices.data(), cpu_vertex_buffer_size);
+			(*index_buffer)->Upload(loader_data.Indices.data(), cpu_index_buffer_size);
 		}
 	}
 }

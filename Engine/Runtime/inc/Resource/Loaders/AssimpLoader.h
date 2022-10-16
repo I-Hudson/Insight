@@ -28,8 +28,8 @@ namespace Insight
 		public:
 			static const uint32_t Default_Model_Importer_Flags =
 				// Switch to engine conventions
-				aiProcess_FlipUVs                   |	/// DirectX style.
-				aiProcess_MakeLeftHanded            |	/// DirectX style.
+				//aiProcess_FlipUVs                   |	/// DirectX style.
+				aiProcess_MakeLeftHanded            |	
 				// Validate and clean up
 				aiProcess_ValidateDataStructure     |	/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
 				aiProcess_FindDegenerates           |	/// Convert degenerate primitives to proper lines or points.
