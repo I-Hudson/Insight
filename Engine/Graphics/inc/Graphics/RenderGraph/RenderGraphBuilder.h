@@ -25,6 +25,9 @@ namespace Insight
 
 			void SetRenderpass(RenderpassDescription description);
 
+			glm::ivec2 GetRenderResolution() const;
+			glm::ivec2 GetOutputResolution() const;
+
 			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc);
 			RGTextureHandle GetTexture(std::wstring textureName);
 

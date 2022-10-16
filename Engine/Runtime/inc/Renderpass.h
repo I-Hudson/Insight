@@ -24,8 +24,13 @@ namespace Insight
 			glm::mat4 Projection_View_Inverted = { };
 
 			glm::vec2 Render_Resolution = {};
+			float pad0;
+			float pad1;
+
 			glm::vec2 Ouput_Resolution = {};
 			float Delta_Time;
+			
+			float pad2;
 		};
 
 		struct BufferSamplers

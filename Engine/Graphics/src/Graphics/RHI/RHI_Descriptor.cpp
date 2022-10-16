@@ -545,7 +545,7 @@ namespace Insight
 			std::vector<Descriptor>& descriptors = m_descriptors[set];
 			if (binding >= (int)descriptors.size())
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
+				//IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
 				return false;
 			}
 			return true;

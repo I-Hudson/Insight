@@ -40,10 +40,6 @@ namespace Insight
 	const float Main_Camera_Near_Plane = 0.1f;
 	const float Main_Camera_Far_Plane = 2048.0f;
 
-	bool Render_Size_Related_To_Window_Size = true;
-	int Render_Width = 640;
-	int Render_Height = 720;
-
 	float cascade_split_lambda = 0.85f;
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
@@ -126,19 +122,19 @@ namespace Insight
 				}
 			}
 
-			if (Render_Size_Related_To_Window_Size)
-			{
-				Render_Width = Window::Instance().GetWidth();
-				Render_Height = Window::Instance().GetHeight();
-			}
-
 			WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
 			if (RPtr<App::Scene> scene = w_scene.Lock())
 			{
 				entities_to_render = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 			}
 
+			RenderGraph::Instance().SetRenderResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+			RenderGraph::Instance().SetOutputResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+
 			UpdateCamera(m_buffer_frame);
+			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+
 			ShadowPass();
 			//ShadowCullingPass();
 			if (Depth_Prepass)
@@ -358,8 +354,8 @@ namespace Insight
 					IS_PROFILE_SCOPE("Depth_Prepass pass setup");
 
 					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						Render_Width
-						, Render_Height
+						  builder.GetRenderResolution().x
+						, builder.GetRenderResolution().y
 						, PixelFormat::D32_Float
 						, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle depthStencil = builder.CreateTexture(L"Depth_Prepass_DepthStencil", textureCreateInfo);
@@ -450,24 +446,24 @@ namespace Insight
 					IS_PROFILE_SCOPE("GBuffer pass setup");
 
 					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						Render_Width
-						, Render_Height
+						  builder.GetRenderResolution().x
+						, builder.GetRenderResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle colourRT = builder.CreateTexture(L"ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						Render_Width
-						, Render_Height
+						  builder.GetRenderResolution().x
+						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16B16A16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle normal_rt = builder.CreateTexture(L"NormalRT", textureCreateInfo);
 					builder.WriteTexture(normal_rt);
 
 					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
-						Render_Width
-						, Render_Height
+						  builder.GetRenderResolution().x
+						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle velocity_rt = builder.CreateTexture(L"VelocityRT", textureCreateInfo);
@@ -565,10 +561,10 @@ namespace Insight
 						if (diffuse_link)
 						{
 							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(diffuse_link->GetLinkResource());
-							cmdList->SetTexture(1, 0, diffuse_texture->GetRHITexture());
+							cmdList->SetTexture(1, 2, diffuse_texture->GetRHITexture());
 						}
-						//cmdList->SetTexture(1, 1, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
-						//cmdList->SetTexture(1, 2, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
+						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
+						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 						mesh_component->GetMesh()->Draw(cmdList);
 					}
 
@@ -616,8 +612,8 @@ namespace Insight
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
 					RHI_TextureCreateInfo create_info = RHI_TextureCreateInfo::Tex2D(
-						Render_Width
-						, Render_Height
+						  builder.GetRenderResolution().x
+						, builder.GetRenderResolution().y
 						, PixelFormat::R32G32B32A32_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle composite_handle = builder.CreateTexture(L"Composite_Tex", create_info);
@@ -650,19 +646,18 @@ namespace Insight
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
 					cmd_list->SetUniform(1, 0, data.Cascade_Cameras);
 
-					cmd_list->SetTexture(0, 6, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
-
-
-					cmd_list->SetTexture(0, 7, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
-					cmd_list->SetTexture(0, 8, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
+					const u8 texture_offset = 5;
+					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
+					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
 					if (Depth_Prepass)
 					{
-						cmd_list->SetTexture(0, 9, render_graph.GetRHITexture(render_graph.GetTexture(L"Depth_Prepass_DepthStencil")));
+						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture(L"Depth_Prepass_DepthStencil")));
 					}
 					else
 					{
-						cmd_list->SetTexture(0, 9, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
+						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
 					}
+					cmd_list->SetTexture(0, texture_offset + 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
 
 					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
 					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
@@ -734,7 +729,6 @@ namespace Insight
 			cmd_list->SetSampler(0, 3, buffer_samplers.Repeat_Sampler);
 			cmd_list->SetSampler(0, 4, buffer_samplers.Clamp_Sampler);
 			cmd_list->SetSampler(0, 5, buffer_samplers.MirroredRepeat_Sampler);
-
 		}
 
 		float previousTime = 0;

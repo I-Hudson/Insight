@@ -322,7 +322,7 @@ namespace Insight
 					vector.y = (rand() % 100 + 1) * 0.01f;
 					vector.z = (rand() % 100 + 1) * 0.01f;
 					vector.w = 1.0f;
-					//vertex.Colour = vertexColour;
+					vertex.Colour = vertexColour;
 				}
 				vector = { };
 				/// texture coordinates

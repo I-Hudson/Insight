@@ -85,6 +85,12 @@ namespace Insight
 				m_pending_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 
+			void SetRenderResolution(glm::ivec2 render_resolution) { m_render_resolution = render_resolution; }
+			glm::ivec2 GetRenderResolution() const { return m_render_resolution; }
+
+			void SetOutputResolution(glm::ivec2 output_resolution) { m_output_resolution = output_resolution; }
+			glm::ivec2 GetOutputResolution() const { return m_render_resolution; }
+
 			static u32 s_MaxFarmeCount;
 
 		private:
@@ -99,7 +105,6 @@ namespace Insight
 			RenderContext* m_context = nullptr;
 			std::vector<UPtr<RenderGraphPassBase>> m_pending_passes;
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
-
 
 #ifdef RENDER_GRAPH_RENDER_THREAD
 			concurrency::task<void>* m_render_task = nullptr;
@@ -116,6 +121,10 @@ namespace Insight
 			std::atomic<bool> m_shutdown_render_thread = false;
 			const bool m_render_thread_enabled = false;
 #endif
+			/// @brief General render resolution to be used for all render passes. Can be overwritten.
+			glm::ivec2 m_render_resolution = {};
+			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
+			glm::ivec2 m_output_resolution = {};
 
 			u32 m_frameIndex = 0;
 			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).

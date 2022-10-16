@@ -27,6 +27,16 @@ namespace Insight
 			m_pass->m_renderpassDescription = std::move(description);
 		}
 
+		glm::ivec2 RenderGraphBuilder::GetRenderResolution() const
+		{
+			return m_rg->GetRenderResolution();
+		}
+
+		glm::ivec2 RenderGraphBuilder::GetOutputResolution() const
+		{
+			return m_rg->GetOutputResolution();
+		}
+
 		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
