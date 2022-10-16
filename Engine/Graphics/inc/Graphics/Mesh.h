@@ -29,13 +29,12 @@ namespace Insight
 		{
 			Vertex()
 			{ }
-			Vertex(glm::vec4 pos, glm::vec4 nor, glm::vec4 col, glm::vec2 uv)
-				: Position(pos), Normal(nor), Colour(col), UV(uv)
+			Vertex(glm::vec4 pos, glm::vec4 nor, glm::vec2 uv)
+				: Position(pos), Normal(nor), UV(uv)
 			{ }
 
 			glm::vec4 Position;
 			glm::vec4 Normal;
-			glm::vec4 Colour;
 			glm::vec2 UV;
 
 			constexpr int GetStride() { return sizeof(Vertex); }

@@ -54,7 +54,7 @@ namespace Insight
 			m_drawData = {};
 			m_bound_vertex_buffer = nullptr;
 			m_bound_index_buffer = nullptr;
-			m_discard = true;
+			m_discard = false;
 		}
 
 		void RHI_CommandList::SetUniform(u32 set, u32 binding, const void* data, u32 size)

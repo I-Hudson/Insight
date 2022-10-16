@@ -211,53 +211,65 @@ namespace Insight
 
 					if (descriptor.Type == DescriptorType::Sampler)
 					{
-						const RHI_Sampler* rhi_sampler = descriptor.Sampler;
-						vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
+						if (descriptor.Sampler)
+						{
+							const RHI_Sampler* rhi_sampler = descriptor.Sampler;
+							vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
 
-						imageInfo[imageInfoIndex].imageView = vk::ImageView();
-						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eUndefined;
-						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
-						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
-						++imageInfoIndex;
-						add_write = true;
+							imageInfo[imageInfoIndex].imageView = vk::ImageView();
+							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eUndefined;
+							imageInfo[imageInfoIndex].sampler = sampler_vulkan;
+							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+							++imageInfoIndex;
+							add_write = true;
+						}
 					}
 
 					if (descriptor.Type == DescriptorType::Sampled_Image)
 					{
-						imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
-						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-						imageInfo[imageInfoIndex].sampler = vk::Sampler();
-						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
-						++imageInfoIndex;
-						add_write = true;
+						if (descriptor.Texture)
+						{
+							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
+							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+							imageInfo[imageInfoIndex].sampler = vk::Sampler();
+							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+							++imageInfoIndex;
+							add_write = true;
+						}
 					}
 
 					if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
 					{
-						const RHI_Sampler* rhi_sampler = descriptor.Sampler == nullptr ?
-							m_context->GetSamplerManager().GetOrCreateSampler({}) : descriptor.Sampler;
-						vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
+						if (descriptor.Texture)
+						{
+							const RHI_Sampler* rhi_sampler = descriptor.Sampler == nullptr ?
+								m_context->GetSamplerManager().GetOrCreateSampler({}) : descriptor.Sampler;
+							vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
 
-						imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
-						imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-						imageInfo[imageInfoIndex].sampler = sampler_vulkan;
-						writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
-						++imageInfoIndex;
-						add_write = true;
+							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.Texture)->GetImageView();
+							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+							imageInfo[imageInfoIndex].sampler = sampler_vulkan;
+							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
+							++imageInfoIndex;
+							add_write = true;
+						}
 					}
 
 					if (descriptor.Type == DescriptorType::Unifom_Buffer)
 					{
-						RHI::Vulkan::RHI_Buffer_Vulkan* buffer_vulkan = descriptor.BufferView.IsValid() ?
-							static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer()) : nullptr;
-						if (buffer_vulkan != nullptr)
+						if (descriptor.BufferView.IsValid())
 						{
-							bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
-							bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
-							bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
-							writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
-							++bufferInfoIndex;
-							add_write = true;
+							RHI::Vulkan::RHI_Buffer_Vulkan* buffer_vulkan = descriptor.BufferView.IsValid() ?
+								static_cast<RHI::Vulkan::RHI_Buffer_Vulkan*>(descriptor.BufferView.GetBuffer()) : nullptr;
+							if (buffer_vulkan != nullptr)
+							{
+								bufferInfo[bufferInfoIndex].buffer = buffer_vulkan ? buffer_vulkan->GetBuffer() : nullptr;
+								bufferInfo[bufferInfoIndex].offset = descriptor.BufferView.GetOffset();
+								bufferInfo[bufferInfoIndex].range = descriptor.BufferView.GetSize();
+								writeDescriptorSet.pBufferInfo = &bufferInfo[bufferInfoIndex];
+								++bufferInfoIndex;
+								add_write = true;
+							}
 						}
 					}
 
