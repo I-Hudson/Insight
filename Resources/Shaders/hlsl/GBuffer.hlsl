@@ -10,60 +10,48 @@ struct VertexInput
 
 struct VertexOutput
 {
-	float4 Pos : SV_POSITION;
-	[[vk::location(0)]] float4 Colour : COLOR0;
-	[[vk::location(1)]] float4 WorldPos : POSITION1;
-	[[vk::location(2)]] float4 ShadowWorldPos : POSITION2;
-	[[vk::location(3)]] float4 WorldNormal : NORMAL0;
-	[[vk::location(4)]] float2 UV : TEXCOORD0;
+	[[vk::location(0)]] float4 Pos 						: SV_POSITION;
+	[[vk::location(1)]] float4 Colour 					: COLOR0;
+	[[vk::location(2)]] float4 WorldPos 				: POSITION1;
+	[[vk::location(3)]] float4 WorldNormal 				: NORMAL0;
+	[[vk::location(4)]] float2 UV 						: TEXCOORD0;
 
-	[[vk::location(5)]] float4 position_ss_current  : SCREEN_POS;
-    [[vk::location(6)]] float4 position_ss_previous : SCREEN_POS_PREVIOUS;
-    [[vk::location(7)]] float4 position_screen_space : POSITION3;
+	[[vk::location(5)]] float4 position_ss_current  	: SCREEN_POS;
+    [[vk::location(6)]] float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
 };
 
-[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
+[[vk::binding(2, 1)]]
 Texture2D<float4> Diffuse_Texture : register(t0);
-[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
-SamplerState Diffuse_Sampler : register(s0);
-
-[[vk::combinedImageSampler]][[vk::binding(1, 1)]]
-Texture2D<float4> Normal_Texture : register(t0);
-[[vk::combinedImageSampler]][[vk::binding(1, 1)]]
-SamplerState Normal_Sampler : register(s0);
-
-[[vk::combinedImageSampler]][[vk::binding(2, 1)]]
-Texture2D<float4> Specular_Texture : register(t0);
-[[vk::combinedImageSampler]][[vk::binding(2, 1)]]
-SamplerState Specular_Sampler : register(s0);
-
-struct PushConstant
-{
-	float4x4 Transform;
-};
-[[vk::push_constant]] PushConstant push_constant;
+[[vk::binding(3, 1)]]
+Texture2D<float4> Normal_Texture : register(t1);
+[[vk::binding(4, 1)]]
+Texture2D<float4> Specular_Texture : register(t2);
 
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.WorldPos = float4(input.Pos.xyz, 1);
+	vsOut.Pos = float4(input.Pos.xyz, 1);
 	vsOut.Colour = input.Colour;
 
-	vsOut.WorldPos = mul(push_constant.Transform, vsOut.WorldPos);
-	vsOut.Pos = mul(Main_Camera_Proj_View, vsOut.WorldPos);
-	vsOut.position_screen_space = mul(Main_Camera_View, vsOut.WorldPos);
-
-	vsOut.WorldNormal = normalize(mul(push_constant.Transform, float4(input.Normal.xyz, 0.0)));
+	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
+	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
+	
+	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(input.Normal.xyz, 0.0)));
 	vsOut.UV = input.UV;
+
+	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);
+
+	float4 world_pos_previous = mul(bpo_Previous_Transform, float4(input.Pos.xyz, 1));
+	vsOut.position_ss_previous = mul(bf_Camera_View, world_pos_previous);
 
 	return vsOut;
 }
 
 struct PixelOutput
 {
-	float4 Colour : SV_TARGET0;
-	float4 World_Normal : SV_TARGET1;
-	float2 Velocity : SV_TARGET2;
+	float4 Colour 			: SV_TARGET0;
+	float4 World_Normal 	: SV_TARGET1;
+	float2 Velocity 		: SV_TARGET2;
 };
 
 PixelOutput PSMain(VertexOutput input)
@@ -73,9 +61,9 @@ PixelOutput PSMain(VertexOutput input)
     float2 velocity_uv          = position_uv_current - position_uv_previous;
 
 	PixelOutput Out;
-	Out.Colour = Diffuse_Texture.Sample(Diffuse_Sampler, input.UV);
+	Out.Colour = Diffuse_Texture.Sample(Clamp_Sampler, input.UV);
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
-	Out.Velocity = float2(0, 0); // velocity_uv
+	Out.Velocity = velocity_uv;
 
 	return Out;
 }

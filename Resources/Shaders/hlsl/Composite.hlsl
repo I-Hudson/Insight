@@ -2,25 +2,14 @@
 
 // Define all our textures needed
 
-[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
+[[vk::binding(6, 0)]]
 Texture2D<float4> GBuffer_Colour : register(t0);
-[[vk::combinedImageSampler]][[vk::binding(0, 1)]]
-SamplerState GBuffer_Colour_Sampler : register(s0);
-
-[[vk::combinedImageSampler]][[vk::binding(1, 1)]]
+[[vk::binding(7, 0)]]
 Texture2D<float4> GBuffer_World_Normal: register(t1);
-[[vk::combinedImageSampler]][[vk::binding(1, 1)]]
-SamplerState GBuffer_World_Normal_Sampler : register(s1);
-
-[[vk::combinedImageSampler]][[vk::binding(2, 1)]]
+[[vk::binding(8, 0)]]
 Texture2D<float4> GBuffer_Shadow : register(t2);
-[[vk::combinedImageSampler]][[vk::binding(2, 1)]]
-SamplerState GBuffer_Shadow_Sampler : register(s2);
-
-[[vk::binding(3, 1)]]
+[[vk::binding(9, 0)]]
 Texture2DArray<float> Cascade_Shadow : register(t3);
-[[vk::binding(4, 1)]]
-SamplerComparisonState Cascade_Shadow_Sampler : register(s3);
 
 /*------------------------------------------------------------------------------
     SETTINGS
@@ -98,7 +87,7 @@ float3 bias_normal_offset(float3 n_dot_l, float normal_bias, float2 shadow_resol
 
 float SampleShadow(float3 uv, float compare)
 {
-	return Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
+	return Cascade_Shadow.SampleCmpLevelZero(Shadow_Sampler
 											, uv
 											, compare).r;
 }
@@ -125,115 +114,37 @@ float Technique_Pcf(float3 uv, float compare)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
-	float4 colour 						= GBuffer_Colour.Sample(GBuffer_Colour_Sampler, input.UV);
-	float4 world_normal 				= GBuffer_World_Normal.Sample(GBuffer_World_Normal_Sampler, input.UV);
-	float gbuffer_depth 				= GBuffer_Shadow.Sample(GBuffer_Shadow_Sampler, input.UV).r;
+	float4 colour 						= GBuffer_Colour.Sample(Clamp_Sampler, input.UV);
+	float4 world_normal 				= GBuffer_World_Normal.Sample(Clamp_Sampler, input.UV);
+	float gbuffer_depth 				= GBuffer_Shadow.Sample(Clamp_Sampler, input.UV).r;
 
-	float3 reconstruct_world_position 	= reconstruct_position(input.UV, gbuffer_depth, Main_Camera_Projection_View_Inverted);
-	float3 reconstruct_view_position 	= mul(Main_Camera_View_Inverted, float4(reconstruct_world_position, 1)).xyz;
+	float3 reconstruct_world_position 	= reconstruct_position(input.UV, gbuffer_depth, bf_Camera_Projection_View_Inverted);
+	float3 reconstruct_view_position 	= mul(bf_Camera_View_Inverted, float4(reconstruct_world_position, 1)).xyz;
 
 	float4 shadow 						= 1.0;
-	float cascade_index 				= 0.0;
 	float cascade_split_index 			= 0.0;
-	float shadow_npc_z 					= 0.0;
-	float3 shadow_ndc 					= 0.0;
 
-{
-    for (uint cascade = 0; cascade < 4; cascade++)
+    for (uint cascade = 0; cascade < s_Cascade_Count; cascade++)
     {
-		cascade_index = cascade;
-		Shadow_Camera shadow_camera = shadow_cameras[cascade];
-
-		if (reconstruct_view_position.z < -shadow_camera.Shadow_CameraSplit_Depth)
+		if (reconstruct_view_position.z < -bl_Light_Split_Depth[cascade])
 		{
 			cascade_split_index = cascade;
 			break;
 		}
 	}
-	cascade_index = 0;
-	Shadow_Camera shadow_camera = shadow_cameras[cascade_split_index];
+
 	// Project into light space
-	float4x4 shadow_space_matrix = shadow_camera.Shadow_Camera_ProjView;
+	float4x4 shadow_space_matrix = bl_Camera_Proj_View[cascade_split_index];
     float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
 	float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
 
 	//float shadow_sample = SampleShadow(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
 	float shadow_sample = Technique_Pcf(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
 	shadow = shadow * shadow_sample;
-}
-{
-/*
-	//uint cascade = push_constant.Cascade_Override;
-    for (uint cascade = 0; cascade < 4; cascade++)
-    {
-		cascade_index = cascade;
-		Shadow_Camera shadow_camera = shadow_cameras[cascade];
-		// Project into light space
-		float4x4 shadow_space_matrix = shadow_camera.Shadow_Camera_ProjView;
-        float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
-		float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
 
-		// Ensure not out of bound
-    	if (is_saturated(shadow_uv))
-    	{
-			float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Cascade_Shadow_Sampler
-																, float3(shadow_uv.xy, cascade)
-																, shadow_pos_ndc.z).r;
-			shadow = shadow * shadow_sample;
-			break;
-		}
-	}
-	*/
-}
 	float4 result;
-	if(push_constant.Output_Texture == 0)
-	{
-		result = colour;
-	}
-	else if(push_constant.Output_Texture == 1)
-	{
-		result = float4(remap_to_0_to_1(world_normal.xyz), 1.0); //Remap normal to 0-1.
-	}
-	else if(push_constant.Output_Texture == 2)
-	{
-		result = float4(reconstruct_world_position, 1.0);
-	}
-	else if(push_constant.Output_Texture == 3)
-	{
-		result = shadow;
-	}
-	else if(push_constant.Output_Texture == 4)
-	{
-		float4 ambient = 0.25 * colour;
-		result = colour * (shadow + ambient);
-	}
-	else if (push_constant.Output_Texture == 5)
-	{
-		result = float4(reconstruct_view_position, 1);
-	}
-	else if(push_constant.Output_Texture == 6)
-	{
-		if (cascade_split_index == 0)
-		{
-			result = float4(1, 0, 0, 1);
-		}
-		if (cascade_split_index == 1)
-		{
-			result = float4(0, 1, 0, 1);
-		}
-		if (cascade_split_index == 2)
-		{
-			result = float4(0, 0, 1, 1);
-		}
-		if (cascade_split_index == 3)
-		{
-			result = float4(1, 1, 1, 1);
-		}
-	}
-	else if (push_constant.Output_Texture == 7)
-	{
-		//result = float4(shadow_npc_z, shadow_npc_z, shadow_npc_z, 1);
-		result = float4(shadow_ndc, 1);
-	}
+	
+    result = colour;
+
 	return result;
 }

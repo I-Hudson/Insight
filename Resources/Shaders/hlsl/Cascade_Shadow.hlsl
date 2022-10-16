@@ -1,3 +1,5 @@
+#include "Common.hlsl"
+
 struct VertexInput
 {
 	[[vk::location(0)]] float4 Pos : POSITION;
@@ -11,31 +13,20 @@ struct VertexOutput
 	float4 Pos : SV_POSITION;
 };
 
-[[vk::binding(0, 0)]]
-cbuffer ubo_camera : register(b0)
+struct Push_Constant
 {
-	float4x4 Shadow_Camera_ProjView;
-	float4x4 Shadow_Camera_Projection;
-	float4x4 Shadow_Camera_View;
-	float4 Shadow_Light_Direction;
-	float2 Shadow_Resolution;
-	float Shadow_CameraSplit_Depth;
-	float pad0;
-}
-
-struct PushConstant
-{
-	float4x4 Transform;
+	int Buffer_Light_Camera_Index;
 };
-[[vk::push_constant]] PushConstant push_constant;
+
+[[vk::push_constant]] Push_Constant push_constant;
 
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Pos = float4(input.Pos.xyz, 1);
 
-	vsOut.Pos = mul(push_constant.Transform, vsOut.Pos);
-	vsOut.Pos = mul(Shadow_Camera_ProjView, vsOut.Pos);
+	vsOut.Pos = mul(bpo_Transform, vsOut.Pos);
+	vsOut.Pos = mul(bl_Camera_Proj_View[push_constant.Buffer_Light_Camera_Index], vsOut.Pos);
 
 	return vsOut;
 }

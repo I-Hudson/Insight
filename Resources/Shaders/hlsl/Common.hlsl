@@ -1,28 +1,5 @@
-[[vk::binding(0, 0)]]
-cbuffer Main_Camera : register(b0)
-{
-	float4x4 Main_Camera_Proj_View;
-	float4x4 Main_Camera_Projection;
-	float4x4 Main_Camera_View;
-	float4x4 Main_Camera_View_Inverted;
-	float4x4 Main_Camera_Projection_View_Inverted;
-}
-
-struct Shadow_Camera
-{
-	float4x4 Shadow_Camera_ProjView;
-	float4x4 Shadow_Camera_Projection;
-	float4x4 Shadow_Camera_View;
-	float4 Shadow_Light_Direction;
-	float2 Shadow_Resolution;
-	float Shadow_CameraSplit_Depth;
-	float pad0;
-};
-[[vk::binding(1, 0)]] 
-cbuffer Cascade_Shadow_Camera : register(b1)
-{
-	Shadow_Camera shadow_cameras[4]; 
-}
+#include "Common_Buffers.hlsl"
+#include "Common_Samplers.hlsl"
 
 static float4x4 biasMat = float4x4( 
 	0.5, 0.0, 0.0, 0.0,
