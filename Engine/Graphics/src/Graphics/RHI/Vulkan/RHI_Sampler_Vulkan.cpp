@@ -43,6 +43,7 @@ namespace Insight
 
 				RHI_Sampler* new_sampler = NewTracked(RHI_Sampler);
 				new_sampler->Resource = *reinterpret_cast<VkSampler*>(&sampler);
+				new_sampler->Create_Info = info;
 
 				m_samplers.emplace(hash, UPtr<RHI_Sampler>(new_sampler));
 				return m_samplers.at(hash).Get();

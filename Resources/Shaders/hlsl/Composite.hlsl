@@ -143,8 +143,9 @@ float4 PSMain(VertexOutput input) : SV_TARGET
 	shadow = shadow * shadow_sample;
 
 	float4 result;
-	
-    result = colour;
+
+	float4 ambient = 0.25 * (bl_Light_Colour * colour);
+	result = ambient + (colour * shadow);
 
 	return result;
 }

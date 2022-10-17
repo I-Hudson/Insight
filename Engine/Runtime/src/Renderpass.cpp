@@ -29,7 +29,7 @@
 namespace Insight
 {
 	const float ShadowZNear = 0.1f;
-	const float ShadowZFar = 2048.0f;
+	const float ShadowZFar = 512.0f;
 	const float ShadowFOV = 65.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
 
@@ -38,7 +38,7 @@ namespace Insight
 	constexpr bool Depth_Prepass = false;
 
 	const float Main_Camera_Near_Plane = 0.1f;
-	const float Main_Camera_Far_Plane = 2048.0f;
+	const float Main_Camera_Far_Plane = 1024.0f;
 
 	float cascade_split_lambda = 0.85f;
 
@@ -53,11 +53,11 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 
 			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
@@ -67,7 +67,8 @@ namespace Insight
 			Runtime::ResourceManager::Instance().Print();
 			//model_sponza->CreateEntityHierarchy();
 			//model_sponza_curtains->CreateEntityHierarchy();
-			model_backpack->CreateEntityHierarchy();
+			//model_backpack->CreateEntityHierarchy();
+			model_vulklan_scene->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 
@@ -436,9 +437,21 @@ namespace Insight
 			};
 			TestPassData Pass_Data = {};
 			Pass_Data.Buffer_Frame = m_buffer_frame;
+			Pass_Data.Buffer_Samplers = m_buffer_samplers;
 			Pass_Data.Entities = entities_to_render;
 
 			BufferLight shader_cameras = BufferLight::GetCascades(m_buffer_frame, 4, cascade_split_lambda);
+
+			static int camera_index = 0;
+			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
+			ImGui::Begin("Cameras");
+			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
+			ImGui::End();
+
+			if (camera_index > 0)
+			{
+				Pass_Data.Buffer_Frame.Proj_View = shader_cameras.ProjView[camera_index - 1];
+			}
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", 
 				[](TestPassData& data, RenderGraphBuilder& builder)
@@ -554,7 +567,6 @@ namespace Insight
 						BufferPerObject object = {};
 						object.Transform = transform;
 						object.Previous_Transform = transform;
-						cmdList->SetUniform(1, 1, object);
 
 						// Theses sets and bindings shouldn't chagne.
 						const Runtime::ResourceReferenceLink* diffuse_link = mesh_component->GetMesh()->GetReferenceLink(0);
@@ -562,9 +574,13 @@ namespace Insight
 						{
 							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(diffuse_link->GetLinkResource());
 							cmdList->SetTexture(1, 2, diffuse_texture->GetRHITexture());
+							object.Textures_Set |= 1 << 0;
 						}
 						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
 						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
+
+						cmdList->SetUniform(1, 1, object);
+
 						mesh_component->GetMesh()->Draw(cmdList);
 					}
 
@@ -594,6 +610,23 @@ namespace Insight
 			IMGUI_VALID(ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items)));
 			IMGUI_VALID(ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items)));
 			IMGUI_VALID(ImGui::End());
+
+			ImGui::Begin("Directional light colour");
+			float light_colour[3] =
+			{
+				m_directional_light.Light_Colour.x,
+				m_directional_light.Light_Colour.y,
+				m_directional_light.Light_Colour.z
+			};
+			if (ImGui::ColorPicker3("Light Colour", light_colour))
+			{
+				m_directional_light.Light_Colour.x = light_colour[0];
+				m_directional_light.Light_Colour.y = light_colour[1];
+				m_directional_light.Light_Colour.z = light_colour[2];
+			}
+			ImGui::End();
+
+			pass_data.Cascade_Cameras.Light_Colour = m_directional_light.Light_Colour;
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass",
 				[](PassData& data, RenderGraphBuilder& builder)
@@ -664,7 +697,7 @@ namespace Insight
 
 					cmd_list->Draw(3, 1, 0, 0);
 					cmd_list->EndRenderpass();
-				});
+				}, std::move(pass_data));
 		}
 
 		void Renderpass::Swapchain()
@@ -725,9 +758,9 @@ namespace Insight
 		{
 			cmd_list->SetUniform(0, 0, buffer_frame);
 
-			cmd_list->SetSampler(0, 2, buffer_samplers.Shadow_Sampler);
-			cmd_list->SetSampler(0, 3, buffer_samplers.Repeat_Sampler);
-			cmd_list->SetSampler(0, 4, buffer_samplers.Clamp_Sampler);
+			cmd_list->SetSampler(0, 1, buffer_samplers.Shadow_Sampler);
+			cmd_list->SetSampler(0, 2, buffer_samplers.Repeat_Sampler);
+			cmd_list->SetSampler(0, 3, buffer_samplers.Clamp_Sampler);
 			cmd_list->SetSampler(0, 5, buffer_samplers.MirroredRepeat_Sampler);
 		}
 

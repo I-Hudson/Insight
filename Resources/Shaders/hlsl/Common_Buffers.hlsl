@@ -23,6 +23,7 @@ cbuffer BufferLight : register(b0)
 	float4x4 bl_Camera_Proj_View[s_Cascade_Count];
     float4 bl_Light_Split_Depth;
     float4 bl_Light_Direction;
+    float4 bl_Light_Colour;
     float2 bl_Shadow_Resolution;
 }
 
@@ -31,4 +32,6 @@ cbuffer BufferPerObject : register(b2)
 {
     float4x4 bpo_Transform;
     float4x4 bpo_Previous_Transform;
+
+    uint bpo_Textures_Set;
 }

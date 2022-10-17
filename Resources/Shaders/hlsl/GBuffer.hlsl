@@ -62,6 +62,7 @@ PixelOutput PSMain(VertexOutput input)
 
 	PixelOutput Out;
 	Out.Colour = Diffuse_Texture.Sample(Clamp_Sampler, input.UV);
+	Out.Colour = input.Colour;
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
 	Out.Velocity = velocity_uv;
 

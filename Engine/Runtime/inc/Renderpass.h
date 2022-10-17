@@ -24,13 +24,13 @@ namespace Insight
 			glm::mat4 Projection_View_Inverted = { };
 
 			glm::vec2 Render_Resolution = {};
-			float pad0;
-			float pad1;
+			float pad0 = 0.0f;
+			float pad1 = 0.0f;
 
 			glm::vec2 Ouput_Resolution = {};
 			float Delta_Time;
 			
-			float pad2;
+			float pad2 = 0.0f;
 		};
 
 		struct BufferSamplers
@@ -48,10 +48,11 @@ namespace Insight
 			float SplitDepth[s_Cascade_Count];
 
 			glm::vec4 Light_Direction = { };
+			glm::vec4 Light_Colour = { };
 			glm::vec2 Resolution = { };
 
-			float pad0;
-			float pad1;
+			float pad0 = 0.0f;
+			float pad1 = 0.0f;
 
 			static BufferLight GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda = 0.95f);
 		};
@@ -60,6 +61,11 @@ namespace Insight
 		{
 			glm::mat4 Transform = {};
 			glm::mat4 Previous_Transform = { };
+
+			u32 Textures_Set = 0;
+			float pad0 = 0.0f;
+			float pad1 = 0.0f;
+			float pad2 = 0.0f;
 		};
 
 		class Renderpass
@@ -86,6 +92,7 @@ namespace Insight
 			Graphics::ImGuiPass m_imgui_pass;
 
 			BufferFrame m_buffer_frame;
+			BufferLight m_directional_light;
 			BufferSamplers m_buffer_samplers;
 		};
 	}
