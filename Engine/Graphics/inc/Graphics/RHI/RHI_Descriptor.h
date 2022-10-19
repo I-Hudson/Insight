@@ -4,7 +4,7 @@
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/Enums.h"
-#include "Graphics/DescriptorBuffer.h"
+#include "Graphics/Descriptors.h"
 #include "Graphics/PipelineStateObject.h"
 #include <unordered_map>
 
