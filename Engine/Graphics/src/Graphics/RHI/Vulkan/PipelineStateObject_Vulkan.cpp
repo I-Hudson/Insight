@@ -149,17 +149,17 @@ namespace Insight
 				vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo(vk::PipelineViewportStateCreateFlags(), 1, nullptr, 1, nullptr);
 			
 				vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo(
-					vk::PipelineRasterizationStateCreateFlags(),					/// flags
-					pso.DepthClampEnabled,											/// depthClampEnable
-					false,															/// rasterizerDiscardEnable
-					vk::PolygonMode::eFill,											/// polygonMode
-					CullModeToVulkan(pso.CullMode),									/// cullMode
-					FrontFaceToVulkan(pso.FrontFace),								/// frontFace
-					pso.DepthBaisEnabled,											/// depthBiasEnable
-					0.0f,															/// depthBiasConstantFactor
-					0.0f,															/// depthBiasClamp
-					0.0f,															/// depthBiasSlopeFactor
-					1.0f															/// lineWidth
+					vk::PipelineRasterizationStateCreateFlags(),					// flags
+					pso.DepthClampEnabled,											// depthClampEnable
+					false,															// rasterizerDiscardEnable
+					PolygonModeToVulkan(pso.PolygonMode),											// polygonMode
+					CullModeToVulkan(pso.CullMode),									// cullMode
+					FrontFaceToVulkan(pso.FrontFace),								// frontFace
+					pso.DepthBaisEnabled,											// depthBiasEnable
+					0.0f,															// depthBiasConstantFactor
+					0.0f,															// depthBiasClamp
+					0.0f,															// depthBiasSlopeFactor
+					1.0f															// lineWidth
 				);
 			
 				vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo(

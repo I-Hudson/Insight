@@ -34,6 +34,7 @@ namespace Insight
 		vk::BorderColor					BorderColourToVulkan(BorderColour border_colour);
 		vk::AttachmentLoadOp			AttachmentLoadOpToVulkan(AttachmentLoadOp op);
 		vk::BufferUsageFlags			BufferTypeToVulkanBufferUsageFlags(BufferType type);
+		vk::PolygonMode					PolygonModeToVulkan(PolygonMode mode);
 		vk::CullModeFlags				CullModeToVulkan(CullMode cullMode);
 		vk::FrontFace					FrontFaceToVulkan(FrontFace front_face);
 		vk::DescriptorType				DescriptorTypeToVulkan(DescriptorType type);

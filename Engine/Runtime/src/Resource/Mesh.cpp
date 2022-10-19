@@ -10,11 +10,21 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list)
+		Mesh::Mesh()
 		{
-			cmd_list->SetVertexBuffer(m_vertex_buffer);
-			cmd_list->SetIndexBuffer(m_index_buffer, Graphics::IndexType::Uint32);
-			cmd_list->DrawIndexed(m_index_count, 1, m_first_index, m_vertex_offset, 0);
+			m_lods.push_back(MeshLOD());
+		}
+
+		Mesh::~Mesh()
+		{
+
+		}
+
+		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index)
+		{
+			cmd_list->SetVertexBuffer(m_lods.at(lod_index).Vertex_buffer);
+			cmd_list->SetIndexBuffer(m_lods.at(lod_index).Index_buffer, Graphics::IndexType::Uint32);
+			cmd_list->DrawIndexed(m_lods.at(lod_index).Index_count, 1, m_lods.at(lod_index).First_index, m_lods.at(lod_index).Vertex_offset, 0);
 		}
 
 		glm::mat4 Mesh::GetTransform() const
@@ -24,8 +34,8 @@ namespace Insight
 
 		void Mesh::Load()
 		{
-			ASSERT(!m_vertex_buffer);
-			ASSERT(!m_index_buffer);
+			//ASSERT(!m_vertex_buffer);
+			//ASSERT(!m_index_buffer);
 
 			// Loading this mesh from a file. Only import mesh information.
 			// If loading a multi-part mesh with the mesh class then the mesh will be collapsed down to a single mesh.
@@ -40,8 +50,8 @@ namespace Insight
 
 		void Mesh::LoadFromMemory(const void* data, u64 size_in_bytes)
 		{
-			ASSERT(!m_vertex_buffer);
-			ASSERT(!m_index_buffer);
+			//ASSERT(!m_vertex_buffer);
+			//ASSERT(!m_index_buffer);
 
 			// Could be loading a mesh from a file or model.
 			MeshFromModelData const* mesh_data = static_cast<const MeshFromModelData*>(data);
@@ -54,29 +64,28 @@ namespace Insight
 			u64 const vertex_buffer_size = sizeof(Graphics::Vertex) * mesh_data->Vertices.size();
 			u64 const index_buffer_size = sizeof(u32) * mesh_data->Indcies.size();
 
-			m_vertex_buffer = Renderer::CreateVertexBuffer(vertex_buffer_size, sizeof(Graphics::Vertex));
-			m_index_buffer = Renderer::CreateIndexBuffer(index_buffer_size);
-			m_vertex_buffer->Upload(mesh_data->Vertices.data(), vertex_buffer_size);
-			m_index_buffer->Upload(mesh_data->Indcies.data(), index_buffer_size);
+			m_lods.push_back(MeshLOD());
+			MeshLOD& lod_0 = m_lods.back();
+
+			lod_0.Vertex_buffer = Renderer::CreateVertexBuffer(vertex_buffer_size, sizeof(Graphics::Vertex));
+			lod_0.Index_buffer = Renderer::CreateIndexBuffer(index_buffer_size);
+			lod_0.Vertex_buffer->Upload(mesh_data->Vertices.data(), vertex_buffer_size);
+			lod_0.Index_buffer->Upload(mesh_data->Indcies.data(), index_buffer_size);
 		}
 
 		void Mesh::UnLoad()
 		{
-			ASSERT(m_vertex_buffer);
-			ASSERT(m_index_buffer);
+			//ASSERT(m_vertex_buffer);
+			//ASSERT(m_index_buffer);
 			if (std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
 				}) == m_reference_links.end())
 			{
-				Renderer::FreeVertexBuffer(m_vertex_buffer);
-				Renderer::FreeIndexBuffer(m_index_buffer);
+				Renderer::FreeVertexBuffer(m_lods.at(0).Vertex_buffer);
+				Renderer::FreeIndexBuffer(m_lods.at(0).Index_buffer);
 			}
-			else
-			{
-				m_vertex_buffer = nullptr;
-				m_index_buffer = nullptr;
-			}
+			m_lods.clear();
 		}
 	}
 }

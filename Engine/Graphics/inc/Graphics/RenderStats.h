@@ -28,6 +28,8 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			u32 IndexBufferBindings = 0;
 			u32 VertexBufferBindings = 0;
 
+			u64 DrawIndexedIndicesCount = 0;
+
 			u32 DescriptorSetBindings = 0;
 			u32 DescriptorSetUpdates = 0;
 			u32 DescriptorSetUsedCount = 0;
@@ -38,6 +40,7 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			FORMAT_STAT(DispatchCalls, "Dispatch Calls: ");
 			FORMAT_STAT(IndexBufferBindings, "Index Buffer Bindings Calls: ");
 			FORMAT_STAT(VertexBufferBindings, "Vertex Buffer Bindings Calls: ");
+			FORMAT_STAT(DrawIndexedIndicesCount, "Draw indcies count: ");
 			FORMAT_STAT(DescriptorSetBindings, "Descriptor Set Bindings Calls: ");
 			FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
 			FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");

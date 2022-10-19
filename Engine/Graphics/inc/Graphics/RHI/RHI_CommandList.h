@@ -70,8 +70,8 @@ namespace Insight
 			virtual void SetVertexBuffer(RHI_Buffer* buffer) = 0;
 			virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) = 0;
 
-			virtual void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) = 0;
-			virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) = 0;
+			virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) = 0;
+			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
 

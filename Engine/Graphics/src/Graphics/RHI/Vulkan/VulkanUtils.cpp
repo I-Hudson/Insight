@@ -787,6 +787,19 @@ namespace Insight
             return vk::BufferUsageFlags();
         }
 
+        vk::PolygonMode PolygonModeToVulkan(PolygonMode mode)
+        {
+            switch (mode)
+            {
+            case PolygonMode::Fill:     return vk::PolygonMode::eFill;
+            case PolygonMode::Line:     return vk::PolygonMode::eLine;
+            case PolygonMode::Point:    return vk::PolygonMode::ePoint;
+            default:
+                break;
+            }
+            return vk::PolygonMode::eFill;
+        }
+
         vk::CullModeFlags CullModeToVulkan(CullMode cullMode)
         {
             switch (cullMode)

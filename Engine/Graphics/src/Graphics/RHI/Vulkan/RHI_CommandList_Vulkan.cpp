@@ -378,7 +378,7 @@ namespace Insight
 				m_context->GetResourceRenderTracker().TrackResource(buffer);
 			}
 
-			void RHI_CommandList_Vulkan::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+			void RHI_CommandList_Vulkan::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
 				if (CanDraw())
@@ -388,7 +388,7 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_Vulkan::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+			void RHI_CommandList_Vulkan::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
 				if (CanDraw())
@@ -397,6 +397,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("API call");
 						m_commandList.drawIndexed(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 						RenderStats::Instance().DrawIndexedCalls++;
+						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
 					}
 				}
 			}

@@ -434,6 +434,7 @@ namespace Insight
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 				std::vector<Ptr<ECS::Entity>> Entities;
+				int Mesh_Lod = 0;
 			};
 			TestPassData Pass_Data = {};
 			Pass_Data.Buffer_Frame = m_buffer_frame;
@@ -443,15 +444,19 @@ namespace Insight
 			BufferLight shader_cameras = BufferLight::GetCascades(m_buffer_frame, 4, cascade_split_lambda);
 
 			static int camera_index = 0;
+			static int mesh_lod_index = 0;
 			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
-			ImGui::Begin("Cameras");
+			const char* mesh_lods[] = { "LOD_0", "LOD_1" };
+			ImGui::Begin("GBuffer");
 			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
+			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods, ARRAYSIZE(mesh_lods));
 			ImGui::End();
 
 			if (camera_index > 0)
 			{
 				Pass_Data.Buffer_Frame.Proj_View = shader_cameras.ProjView[camera_index - 1];
 			}
+			Pass_Data.Mesh_Lod = mesh_lod_index;
 
 			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", 
 				[](TestPassData& data, RenderGraphBuilder& builder)
@@ -581,7 +586,7 @@ namespace Insight
 
 						cmdList->SetUniform(1, 1, object);
 
-						mesh_component->GetMesh()->Draw(cmdList);
+						mesh_component->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
 
 					cmdList->EndRenderpass();

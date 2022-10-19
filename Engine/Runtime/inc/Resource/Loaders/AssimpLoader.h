@@ -69,8 +69,17 @@ namespace Insight
 			/// @brief Store all the current data used when importing a model/mesh.
 			struct AssimpLoaderData
 			{
+				struct LOD
+				{
+					u64 FirstIndex = 0;
+					u64 IndexCount = 0;
+				};
+
 				std::vector<Graphics::Vertex> Vertices;
 				std::vector<u32> Indices;
+
+				std::vector<LOD> LODs;
+
 				std::vector<std::string> Texture_File_Paths;
 				std::vector<Texture2D*> Textures;
 
@@ -125,6 +134,8 @@ namespace Insight
 			/// @brief Optimize the vertices and indics data.
 			/// @param loader_data 
 			static void Optimize(AssimpLoaderData& loader_data);
+
+			static void GenerateLODs(AssimpLoaderData& loader_data);
 
 			/// @brief Resize the GPU buffers for the model/mesh and upload all the data.
 			/// @param loader_data 

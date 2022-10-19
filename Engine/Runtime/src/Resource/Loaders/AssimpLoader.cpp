@@ -60,12 +60,16 @@ namespace Insight
 			loader_data.Model = model;
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('\\'));
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
+			GenerateLODs(loader_data);
 			UploadGPUData(loader_data);
 
 			for (size_t i = 0; i < model->m_meshes.size(); ++i)
 			{
-				model->m_meshes.at(i)->m_vertex_buffer = model->m_vertex_buffer;
-				model->m_meshes.at(i)->m_index_buffer = model->m_index_buffer;
+				for (auto& lod : model->m_meshes.at(i)->m_lods)
+				{
+					lod.Vertex_buffer = model->m_vertex_buffer;
+					lod.Index_buffer = model->m_index_buffer;
+				}
 			}
 
 			// Wait for all textures to be loaded.
@@ -121,8 +125,8 @@ namespace Insight
 			AssimpLoaderData loader_data;
 			loader_data.Mesh = mesh;
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
-			loader_data.Mesh->m_vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
-			loader_data.Mesh->m_index_buffer = Renderer::CreateIndexBuffer(1);
+			loader_data.Mesh->m_lods.at(0).Vertex_buffer = Renderer::CreateVertexBuffer(1, 0);
+			loader_data.Mesh->m_lods.at(0).Index_buffer = Renderer::CreateIndexBuffer(1);
 			ProcessNode(scene->mRootNode, scene, "", loader_data, false);
 			Optimize(loader_data);
 			UploadGPUData(loader_data);
@@ -171,31 +175,31 @@ namespace Insight
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
 						new_mesh->m_file_path = loader_data.Directoy + "\\" + new_mesh->m_mesh_name;
 
-						new_mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
-						new_mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
+						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
+						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
 
 						// Move our vertices/indices which have been optimized, into the overall vectors.
 						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
 						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
 
-						new_mesh->m_vertex_buffer = loader_data.Model->m_vertex_buffer;
-						new_mesh->m_index_buffer = loader_data.Model->m_index_buffer;
+						new_mesh->m_lods.at(0).Vertex_buffer = loader_data.Model->m_vertex_buffer;
+						new_mesh->m_lods.at(0).Index_buffer = loader_data.Model->m_index_buffer;
 
-						new_mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - new_mesh->m_vertex_offset;
-						new_mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - new_mesh->m_first_index;
+						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(loader_data.Vertices.size()) - new_mesh->m_lods.at(0).Vertex_offset;
+						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(loader_data.Indices.size()) - new_mesh->m_lods.at(0).First_index;
 					}
 					else if (loader_data.Mesh)
 					{
 						new_mesh = loader_data.Mesh;
-						new_mesh->m_vertex_offset = static_cast<u32>(loader_data.Vertices.size());
-						new_mesh->m_first_index = static_cast<u32>(loader_data.Indices.size());
+						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
+						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
 
 						// Move our vertices/indices which have been optimized, into the overall vectors.
 						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
 						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
 
-						new_mesh->m_vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_vertex_offset;
-						new_mesh->m_index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_first_index;
+						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_lods.at(0).Vertex_offset;
+						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_lods.at(0).First_index;
 					}
 
 					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
@@ -468,6 +472,62 @@ namespace Insight
 			task_group.wait();
 		}
 
+		void AssimpLoader::GenerateLODs(AssimpLoaderData& loader_data)
+		{
+			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
+			{
+				for (auto& mesh : loader_data.Model->m_meshes)
+				{
+					std::vector<u32> indcies_to_lod;
+
+					const float error_rate = 1.05f;
+					const u32 target_index_count = static_cast<u32>(static_cast<float>(mesh->m_lods.at(0).Index_count) * (1.0f - (0.4f * lod_index)));
+
+					const u64 indices_start = mesh->m_lods.at(0).First_index;
+					const u64 indices_count = mesh->m_lods.at(0).Index_count;
+					const u64 vertex_start = mesh->m_lods.at(0).Vertex_offset;
+					const u64 vertex_count = mesh->m_lods.at(0).Vertex_count;
+
+					std::vector<u32>::iterator indices_begin = loader_data.Indices.begin() + indices_start;
+					std::vector<u32> result_lod;
+					result_lod.resize(indices_count);
+
+					// Try and simplify the mesh, try and preserve mesh topology.
+					u64 result_index_count = meshopt_simplify(
+						  result_lod.data()
+						, &*indices_begin
+						, static_cast<u64>(indices_count)
+						, &(loader_data.Vertices.data() + vertex_start)->Position.x
+						, vertex_count
+						, sizeof(Graphics::Vertex)
+						, target_index_count
+						, error_rate);
+
+					if (result_index_count > target_index_count)
+					{
+						// Try and simplify the mesh, doesn't preserve mesh topology.
+						result_index_count = meshopt_simplifySloppy(
+							  result_lod.data()
+							, &*indices_begin
+							, static_cast<u64>(indices_count)
+							, &(loader_data.Vertices.data() + vertex_start)->Position.x
+							, vertex_count
+							, sizeof(Graphics::Vertex)
+							, target_index_count
+							, error_rate);
+					}
+					result_lod.resize(result_index_count);
+
+					mesh->m_lods.push_back(mesh->m_lods.at(0));
+					MeshLOD& mesh_lod = mesh->m_lods.back();
+					mesh_lod.First_index = static_cast<u32>(loader_data.Indices.size());
+					mesh_lod.Index_count = static_cast<u32>(result_index_count);
+
+					std::move(result_lod.begin(), result_lod.end(), std::back_inserter(loader_data.Indices));
+				}
+			}
+		}
+
 		void AssimpLoader::Optimize(AssimpLoaderData& loader_data)
 		{
 			IS_PROFILE_FUNCTION();
@@ -514,8 +574,8 @@ namespace Insight
 			}
 			else if (loader_data.Mesh)
 			{
-				vertex_buffer = &loader_data.Mesh->m_vertex_buffer;
-				index_buffer = &loader_data.Mesh->m_index_buffer;
+				vertex_buffer = &loader_data.Mesh->m_lods.at(0).Vertex_buffer;
+				index_buffer = &loader_data.Mesh->m_lods.at(0).Index_buffer;
 			}
 
 			const u64 cpu_vertex_buffer_size = sizeof(Graphics::Vertex) * loader_data.Vertices.size();
