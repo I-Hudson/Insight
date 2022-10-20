@@ -38,7 +38,7 @@ namespace Insight
 			{
 			}
 
-			void RHI_DescriptorLayout_Vulkan::Create(RenderContext* context, int set, std::vector<Descriptor> descriptors)
+			void RHI_DescriptorLayout_Vulkan::Create(RenderContext* context, int set, DescriptorSet descriptor_sets)
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 
@@ -46,7 +46,7 @@ namespace Insight
 				std::vector<vk::DescriptorSetLayoutBinding> bindingCreateInfos = {};
 				std::vector<vk::DescriptorBindingFlagsEXT> bindingEXTFlags = {};
 
-				for (const Descriptor& desc : descriptors)
+				for (const DescriptorBinding& desc : descriptor_sets.Bindings)
 				{
 					if (desc.Type == DescriptorType::Unknown)
 					{
@@ -57,7 +57,7 @@ namespace Insight
 					bindingInfo.setBinding(desc.Binding);
 					bindingInfo.setDescriptorCount(1);
 					bindingInfo.setDescriptorType(DescriptorTypeToVulkan(desc.Type));
-					bindingInfo.setStageFlags(ShaderStageFlagsToVulkan(desc.Stage));
+					bindingInfo.setStageFlags(ShaderStageFlagsToVulkan(desc.Stages));
 
 					bindingCreateInfos.push_back(bindingInfo);
 					if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))

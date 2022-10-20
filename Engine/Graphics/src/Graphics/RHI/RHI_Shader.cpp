@@ -199,84 +199,101 @@ namespace Insight
 			return code;
 		}
 
-		void ShaderCompiler::GetDescriptors(ShaderStageFlagBits stage, std::vector<Descriptor>& descriptors, PushConstant& push_constant)
+		void ShaderCompiler::GetDescriptorSets(ShaderStageFlagBits stage, std::vector<DescriptorSet>& descriptor_sets, PushConstant& push_constant)
 		{
+			if (!ShaderReflectionResults)
+			{
+				IS_CORE_ERROR("[ShaderCompiler::GetDescriptorSets] Trying to extract descriptors but no shader has been compiled.");
+				return;
+			}
+
 			ComPtr<IDxcBlob> code;
 			ShaderReflectionResults->GetResult(&code);
 
-			/// Generate reflection data for a shader
+			// Generate reflection data for a shader
 			SpvReflectShaderModule module;
 			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
-			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			/// Enumerate and extract shader's input variables
-			uint32_t var_count = 0;
-			result = spvReflectEnumerateInputVariables(&module, &var_count, NULL);
-			assert(result == SPV_REFLECT_RESULT_SUCCESS);
-			SpvReflectInterfaceVariable** input_vars =
-				(SpvReflectInterfaceVariable**)malloc(var_count * sizeof(SpvReflectInterfaceVariable*));
-			result = spvReflectEnumerateInputVariables(&module, &var_count, input_vars);
-			assert(result == SPV_REFLECT_RESULT_SUCCESS);
-
-			/// Output variables, descriptor bindings, descriptor sets, and push constants
-			/// can be enumerated and extracted using a similar mechanism.
+			// Output variables, descriptor bindings, descriptor sets, and push constants
+			// can be enumerated and extracted using a similar mechanism.
 
 			u32 descriptorSetCount = 0;
 			result = spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, NULL);
-			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
 
 			std::vector<SpvReflectDescriptorSet*> descriptorSets;
 			descriptorSets.resize(descriptorSetCount);
 			result = spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data());
-			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
 
-			auto findPreviousDescriptor = [](const Descriptor& descriptoToFind, const std::vector<Descriptor>& descriptorsToFindIn) 
-				-> std::pair<bool, Descriptor*>
+			auto findPreviousDescriptor = [](const DescriptorBinding& descriptoToFind, const DescriptorSet& descriptor_set)
+				-> std::pair<bool, DescriptorBinding*>
 			{
-				for (auto& desc : descriptorsToFindIn)
+				for (auto& desc : descriptor_set.Bindings)
 				{
 					if (descriptoToFind.Set == desc.Set
 						&& descriptoToFind.Binding == desc.Binding
 						&& descriptoToFind.Size == desc.Size
-						&& descriptoToFind.Type == desc.Type
-						&& descriptoToFind.ResourceType == desc.ResourceType)
+						&& descriptoToFind.Type == desc.Type)
 					{
-						return std::make_pair(true, &const_cast<Descriptor&>(desc));
+						return std::make_pair(true, &const_cast<DescriptorBinding&>(desc));
 					}
 				}
 				return std::make_pair(false, nullptr);
 			};
 
+			auto get_descriptor_set = [](int set, std::vector<DescriptorSet>& descriptor_sets) -> DescriptorSet*
+			{
+				for (size_t i = 0; i < descriptor_sets.size(); ++i)
+				{
+					if (descriptor_sets.at(i).Set == set) 
+					{
+						return &descriptor_sets.at(i);
+					}
+				}
+				return nullptr;
+			};
+
 			for (size_t i = 0; i < descriptorSets.size(); ++i)
 			{
 				const SpvReflectDescriptorSet& descriptorSet = *descriptorSets[i];
+				DescriptorSet* descriptor_set = get_descriptor_set(descriptorSet.set, descriptor_sets);
+				if (descriptor_set == nullptr)
+				{
+					descriptor_sets.push_back(DescriptorSet("", descriptorSet.set, {}));
+					descriptor_set = &descriptor_sets.back();
+				}
+				descriptor_set->Stages |= stage;
+
 				for (size_t j = 0; j < descriptorSet.binding_count; ++j)
 				{
 					const SpvReflectDescriptorBinding& binding = *descriptorSet.bindings[j];
 					const SpvReflectBlockVariable& block = descriptorSet.bindings[j]->block;
 
-					Descriptor descriptor(
+					DescriptorBinding descriptor(
 						binding.set,
 						binding.binding,
 						stage,
 						block.size,
-						SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type),
-						SpvReflectDescriptorResourceTypeToDescriptorResourceType(binding.resource_type)
+						SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type)
 					);
-					descriptor.Hash = descriptor.GetHash(false);
+					descriptor.SetHashs();
 
-					auto [foundDescriptor, descriptorFound] = findPreviousDescriptor(descriptor, descriptors);
+					auto [foundDescriptor, descriptorFound] = findPreviousDescriptor(descriptor, *descriptor_set);
 					if (foundDescriptor)
 					{
-						descriptorFound->Stage |= stage;
+						descriptorFound->Stages |= stage;
 					}
 					else
 					{
-						descriptors.push_back(descriptor);
+						descriptor_set->Bindings.push_back(descriptor);
 					}
 				}
+				descriptor_set->SetHashs();
 			}
 
+			// Get the push constants.
 			u32 push_constant_blocks_count = 0;
 			result = spvReflectEnumeratePushConstantBlocks(&module, &push_constant_blocks_count, NULL);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
@@ -297,11 +314,19 @@ namespace Insight
 			/// Destroy the reflection data when no longer required.
 			spvReflectDestroyShaderModule(&module);
 
-			/// Sort all descriptors from 0 to n, by Set then Binding.
-			std::sort(descriptors.begin(), descriptors.end(), [](const Descriptor& d1, const Descriptor& d2)
+			// Order all the bindings within the sets.
+			for (size_t i = 0; i < descriptor_sets.size(); ++i)
+			{
+				std::sort(descriptor_sets.at(i).Bindings.begin(), descriptor_sets.at(i).Bindings.end(), [](const DescriptorBinding& b1, const DescriptorBinding& b2)
+					{
+						return b1.Binding < b2.Binding;
+					});
+			}
+
+			// Order all the sets.
+			std::sort(descriptor_sets.begin(), descriptor_sets.end(), [](const DescriptorSet& set1, const DescriptorSet& set2)
 				{
-					return d1.Set != d2.Set ? d1.Set < d2.Set
-						: d1.Binding < d2.Binding;
+					return set1.Set < set2.Set;
 				});
 		}
 

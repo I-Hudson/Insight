@@ -30,7 +30,7 @@ namespace Insight
 				virtual void SetName(std::wstring name) override;
 
 			protected:
-				virtual void Create(RenderContext* context, int set, std::vector<Descriptor> descriptors) override;
+				virtual void Create(RenderContext* context, int set, DescriptorSet descriptor_sets) override;
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };

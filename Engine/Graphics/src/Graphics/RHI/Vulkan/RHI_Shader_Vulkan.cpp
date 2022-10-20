@@ -61,11 +61,12 @@ namespace Insight
 			{
 				ShaderCompiler compiler;
 				ComPtr<IDxcBlob> code = compiler.Compile(stage, path, ShaderCompilerLanguage::Spirv);
-				compiler.GetDescriptors(stage, m_descriptors, m_push_constant);
 				if (!code)
 				{
 					return;
 				}
+
+				compiler.GetDescriptorSets(stage, m_descriptor_sets, m_push_constant);
 
 				vk::ShaderModuleCreateInfo createInfo = vk::ShaderModuleCreateInfo({}, {});
 				createInfo.setCodeSize(code->GetBufferSize());

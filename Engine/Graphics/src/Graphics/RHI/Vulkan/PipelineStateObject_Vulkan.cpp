@@ -32,12 +32,13 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				assert(m_context != nullptr);
 
-				const std::vector<Descriptor> descriptors = pso.Shader->GetDescriptors();
+				const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
 				u64 hash = 0;
-				for (const Descriptor& descriptor : descriptors)
+				for (const DescriptorSet& descriptor_set : descriptor_sets)
 				{
-					HashCombine(hash, descriptor.GetHash(false));
+					HashCombine(hash, descriptor_set.GetHash(false));
 				}
+
 				PushConstant push_constant = pso.Shader->GetPushConstant();
 				HashCombine(hash, push_constant.ShaderStages);
 				HashCombine(hash, push_constant.Offset);
@@ -49,25 +50,14 @@ namespace Insight
 					return itr->second;
 				}
 
-				std::vector<vk::DescriptorSetLayout> setLayouts = {};
+				std::vector<vk::DescriptorSetLayout> set_layouts = {};
+				std::vector<DescriptorSet> current_descriptor_sets;
 
-				int currentSet = 0;
-				std::vector<Descriptor> currentDescriptors;
-
-				for (const Descriptor& descriptor : descriptors)
+				for (const DescriptorSet& descriptor_set : descriptor_sets)
 				{
-					if (currentSet != descriptor.Set)
-					{
-						RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
-						currentDescriptors.clear();
-						currentSet = descriptor.Set;
-
-						setLayouts.push_back(layoutVulkan->GetLayout());
-					}
-					currentDescriptors.push_back(descriptor);
+					RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptor_set));
+					set_layouts.push_back(layoutVulkan->GetLayout());
 				}
-				RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(currentDescriptors));
-				setLayouts.push_back(layoutVulkan->GetLayout());
 
 				std::vector<vk::PushConstantRange> push_constants;
 				if (push_constant.Size > 0)
@@ -77,7 +67,7 @@ namespace Insight
 
 				vk::PipelineLayoutCreateInfo createInfo = vk::PipelineLayoutCreateInfo(
 					{},
-					setLayouts,
+					set_layouts,
 					push_constants);
 				vk::PipelineLayout layout = m_context->GetDevice().createPipelineLayout(createInfo);
 				m_layouts[hash] = layout;

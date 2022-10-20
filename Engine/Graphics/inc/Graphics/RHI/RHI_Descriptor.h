@@ -24,7 +24,7 @@ namespace Insight
 			static RHI_DescriptorLayout* New();
 
 		protected:
-			virtual void Create(RenderContext* context, int set, std::vector<Descriptor> descriptors) = 0;
+			virtual void Create(RenderContext* context, int set, DescriptorSet descriptor_set) = 0;
 
 			friend class RHI_DescriptorLayoutManager;
 		};
@@ -37,7 +37,7 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context) { m_context = context; }
 
-			RHI_DescriptorLayout* GetLayout(std::vector<Descriptor> descriptors);
+			RHI_DescriptorLayout* GetLayout(const DescriptorSet& descriptor_set);
 
 			void ReleaseAll();
 
@@ -50,7 +50,7 @@ namespace Insight
 		{
 		public:
 			RHI_DescriptorSet() = default;
-			RHI_DescriptorSet(RenderContext* context, const std::vector<Descriptor>& descriptors, RHI_DescriptorLayout* layout);
+			RHI_DescriptorSet(RenderContext* context, const DescriptorSet& descriptor_set, RHI_DescriptorLayout* layout);
 
 			void* GetResource() const { return m_resource; }
 
@@ -61,7 +61,7 @@ namespace Insight
 
 		private:
 			void Create(RHI_DescriptorLayout* layout);
-			void Update(const std::vector<Descriptor>& descriptors);
+			void Update(const DescriptorSet& descriptor_set);
 
 		private:
 			RenderContext* m_context = nullptr;
@@ -75,7 +75,7 @@ namespace Insight
 		{
 		public:
 
-			RHI_DescriptorSet* GetSet(const std::vector<Descriptor>& descriptors);
+			RHI_DescriptorSet* GetSet(const DescriptorSet& descriptor_set);
 			void Reset();
 			
 			void ReleaseAll();
@@ -96,8 +96,6 @@ namespace Insight
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
 
-			Descriptor GetDescriptor(int set, int binding);
-
 			void SetRenderContext(RenderContext* context);
 			bool GetDescriptorSets(std::vector<RHI_DescriptorSet*>& descriptors);
 
@@ -110,7 +108,7 @@ namespace Insight
 			bool CheckSetAndBindingBounds(u32 set, u32 binding);
 
 		protected:
-			std::unordered_map<u32, std::vector<Descriptor>> m_descriptors; /// Current descriptors information. 
+			std::vector<DescriptorSet> m_descriptor_sets; /// Current descriptors information. 
 			UPtr<RHI_Buffer> m_uniformBuffer;
 			u64 m_uniformBufferOffset = 0;
 

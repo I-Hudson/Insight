@@ -28,6 +28,9 @@ namespace Insight
 			RHI_BufferView& operator=(const RHI_BufferView& other);
 			RHI_BufferView& operator=(RHI_BufferView&& other);
 
+			bool operator==(const RHI_BufferView& other) const;
+			bool operator!=(const RHI_BufferView& other) const;
+
 			bool IsValid() const { return m_buffer; }
 
 			constexpr RHI_Buffer* GetBuffer() const { return m_buffer; }

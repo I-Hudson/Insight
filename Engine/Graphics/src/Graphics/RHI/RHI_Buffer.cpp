@@ -81,6 +81,18 @@ namespace Insight
 			return *this;
 		}
 
+		bool RHI_BufferView::operator==(const RHI_BufferView& other) const
+		{
+			return m_buffer == other.m_buffer
+				&& m_offset == other.m_offset
+				&& m_size == other.m_size;
+		}
+
+		bool RHI_BufferView::operator!=(const RHI_BufferView& other) const
+		{
+			return !(*this == other);
+		}
+
 
 		//// <summary>
 		//// RHI_BufferView
