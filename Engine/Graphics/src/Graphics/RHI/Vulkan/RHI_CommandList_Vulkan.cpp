@@ -307,10 +307,8 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::SetPushConstant(u32 offset, u32 size, const void* data)
 			{
-				vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 				PushConstant pc = m_pso.Shader->GetPushConstant();
-
-				m_commandList.pushConstants(pipelineLayout, ShaderStageFlagsToVulkan(pc.ShaderStages), offset, size, data);
+				m_commandList.pushConstants(m_bound_pipeline_layout, ShaderStageFlagsToVulkan(pc.ShaderStages), offset, size, data);
 			}
 
 			void RHI_CommandList_Vulkan::SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y)
@@ -415,6 +413,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("GetOrCreatePSO");
 					pipeline = m_context_vulkan->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
 				}
+				m_bound_pipeline_layout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 				m_commandList.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
 				m_descriptorAllocator->SetPipeline(pso);
 			}
@@ -445,20 +444,22 @@ namespace Insight
 				{
 					//m_boundDescriptors = hash;
 
-					vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-
+					
 					std::vector<vk::DescriptorSet> sets;
 					sets.reserve(descriptorSets.size());
-					for (const auto& s : descriptorSets)
 					{
-						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+						IS_PROFILE_SCOPE("reinterpret_cast to vulkan");
+						for (const auto& s : descriptorSets)
+						{
+							sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
+						}
 					}
 
 					std::vector<u32> dynamicOffsets = m_descriptorAllocator->GetDynamicOffsets();
 					{
 						IS_PROFILE_SCOPE("API call");
 						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics
-							, pipelineLayout
+							, m_bound_pipeline_layout
 							, 0
 							, sets
 							, dynamicOffsets);

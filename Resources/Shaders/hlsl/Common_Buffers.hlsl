@@ -28,7 +28,7 @@ cbuffer BufferLight : register(b0)
 }
 
 [[vk::binding(1, 1)]]
-cbuffer BufferPerObject : register(b2)
+cbuffer BufferPerObject__dynamic__ : register(b2)
 {
     float4x4 bpo_Transform;
     float4x4 bpo_Previous_Transform;
