@@ -98,6 +98,7 @@ namespace Insight
 
 			void SetRenderContext(RenderContext* context);
 			bool GetDescriptorSets(std::vector<RHI_DescriptorSet*>& descriptors);
+			std::vector<u32> GetDynamicOffsets() const;
 
 			void ClearDescriptors();
 			void Reset();
@@ -108,7 +109,7 @@ namespace Insight
 			bool CheckSetAndBindingBounds(u32 set, u32 binding);
 
 		protected:
-			std::vector<DescriptorSet> m_descriptor_sets; /// Current descriptors information. 
+			std::vector<DescriptorSet> m_descriptor_sets; // Current descriptors information. 
 			UPtr<RHI_Buffer> m_uniformBuffer;
 			u64 m_uniformBufferOffset = 0;
 

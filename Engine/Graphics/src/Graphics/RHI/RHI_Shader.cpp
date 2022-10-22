@@ -17,6 +17,8 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		constexpr char* SHADER_DYNAMIC_TAG = "__dynamic__";
+
 		RHI_Shader* RHI_Shader::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
@@ -271,13 +273,18 @@ namespace Insight
 					const SpvReflectDescriptorBinding& binding = *descriptorSet.bindings[j];
 					const SpvReflectBlockVariable& block = descriptorSet.bindings[j]->block;
 
+					DescriptorType descriptor_type = SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type);
+					if (std::string(binding.name).find(SHADER_DYNAMIC_TAG) != std::string::npos)
+					{
+						//descriptor_type = DescriptorType::Uniform_Buffer_Dynamic;
+					}
+
 					DescriptorBinding descriptor(
 						binding.set,
 						binding.binding,
 						stage,
 						block.size,
-						SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type)
-					);
+						descriptor_type);
 					descriptor.SetHashs();
 
 					auto [foundDescriptor, descriptorFound] = findPreviousDescriptor(descriptor, *descriptor_set);
@@ -487,7 +494,8 @@ namespace Insight
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:			return DescriptorType::Uniform_Texel_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:			return DescriptorType::Storage_Texel_Buffer;
-			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:				return DescriptorType::Unifom_Buffer;
+			//case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:				return DescriptorType::Unifom_Buffer;
+			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:				return DescriptorType::Uniform_Buffer_Dynamic;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:				return DescriptorType::Storage_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:		return DescriptorType::Uniform_Buffer_Dynamic;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:		return DescriptorType::Storage_Buffer_Dyanmic;

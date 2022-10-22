@@ -50,7 +50,7 @@ namespace Insight
 			/// @return glm::mat4
 			glm::mat4 GetTransform() const;
 
-			static const u32 s_LOD_Count = 2;
+			static const u32 s_LOD_Count = 3;
 
 		private:
 			/// @brief Handle loading the resource from disk.

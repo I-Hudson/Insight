@@ -317,7 +317,8 @@ namespace Insight
 				}
 			}
 
-			/// Is there a set which is already in use with the same resources reuse that set.
+			// Is there a set which is already in use with the same resources reuse that set.
+			// This will also return the correct set if dynamic buffers are being used.
 			{
 				IS_PROFILE_SCOPE("Return in use set");
 				if (auto itr = m_usedSets.find(hash); itr != m_usedSets.end())
@@ -330,7 +331,7 @@ namespace Insight
 				}
 			}
 
-			/// No set in use with the same resources, try and find a new set.
+			// No set in use with the same resources, try and find a new set.
 			{
 				IS_PROFILE_SCOPE("Return in free set");
 				if (auto itr = m_freeSets.find(hash); itr != m_freeSets.end())
@@ -467,6 +468,22 @@ namespace Insight
 				sets.push_back(m_context->GetDescriptorSetManager().GetSet(set));
 			}
 			return sets.size() > 0 ? true : false;
+		}
+
+		std::vector<u32> DescriptorAllocator::GetDynamicOffsets() const
+		{
+			std::vector<u32> offsets;
+			for (const auto& set : m_descriptor_sets)
+			{
+				for (const auto& binding : set.Bindings)
+				{
+					if (binding.Type == DescriptorType::Uniform_Buffer_Dynamic) 
+					{
+						offsets.push_back(binding.RHI_Buffer_View.GetOffset());
+					}
+				}
+			}
+			return offsets;
 		}
 
 		void DescriptorAllocator::ClearDescriptors()

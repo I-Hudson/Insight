@@ -480,7 +480,7 @@ namespace Insight
 				{
 					std::vector<u32> indcies_to_lod;
 
-					const float error_rate = 1.05f;
+					const float error_rate = 2.0f;
 					const u32 target_index_count = static_cast<u32>(static_cast<float>(mesh->m_lods.at(0).Index_count) * (1.0f - (0.4f * lod_index)));
 
 					const u64 indices_start = mesh->m_lods.at(0).First_index;
@@ -503,7 +503,7 @@ namespace Insight
 						, target_index_count
 						, error_rate);
 
-					if (result_index_count > target_index_count)
+					if (false && result_index_count > target_index_count)
 					{
 						// Try and simplify the mesh, doesn't preserve mesh topology.
 						result_index_count = meshopt_simplifySloppy(

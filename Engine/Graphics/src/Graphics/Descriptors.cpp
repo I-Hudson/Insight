@@ -92,7 +92,15 @@ namespace Insight
 			{
 				if (RHI_Buffer_View.IsValid())
 				{
-					HashCombine(hash, RHI_Buffer_View);
+					if (Type == DescriptorType::Uniform_Buffer_Dynamic)
+					{
+						HashCombine(hash, RHI_Buffer_View.GetBuffer());
+						HashCombine(hash, RHI_Buffer_View.GetSize());
+					}
+					else
+					{
+						HashCombine(hash, RHI_Buffer_View);
+					}
 				}
 				if (RHI_Texture)
 				{
@@ -178,7 +186,10 @@ namespace Insight
 			u64 hash = 0;
 			for (size_t i = 0; i < Bindings.size(); ++i)
 			{
-				HashCombine(hash, Bindings.at(i).GetHash(includeResource));
+				if (Bindings.at(i).Type != DescriptorType::Unknown)
+				{
+					HashCombine(hash, Bindings.at(i).GetHash(includeResource));
+				}
 			}
 			return hash;
 		}

@@ -441,9 +441,9 @@ namespace Insight
 					HashCombine(hash, s);
 				}
 
-				if (descriptorSets.size() > 0 && m_boundDescriptors != hash)
+				if (descriptorSets.size() > 0)// && m_boundDescriptors != hash)
 				{
-					m_boundDescriptors = hash;
+					//m_boundDescriptors = hash;
 
 					vk::PipelineLayout pipelineLayout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
 
@@ -454,7 +454,7 @@ namespace Insight
 						sets.push_back(reinterpret_cast<VkDescriptorSet>(s->GetResource()));
 					}
 
-					std::vector<u32> dynamicOffsets = {};
+					std::vector<u32> dynamicOffsets = m_descriptorAllocator->GetDynamicOffsets();
 					{
 						IS_PROFILE_SCOPE("API call");
 						m_commandList.bindDescriptorSets(vk::PipelineBindPoint::eGraphics

@@ -446,10 +446,18 @@ namespace Insight
 			static int camera_index = 0;
 			static int mesh_lod_index = 0;
 			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
-			const char* mesh_lods[] = { "LOD_0", "LOD_1" };
+
+			std::array<std::string, Runtime::Mesh::s_LOD_Count> mesh_lods;
+			std::array<const char*, Runtime::Mesh::s_LOD_Count> mesh_lods_const_char;
+			for (size_t i = 0; i < Runtime::Mesh::s_LOD_Count; ++i)
+			{
+				mesh_lods[i] = "LOD_" + std::to_string(i);
+				mesh_lods_const_char[i] = mesh_lods[i].c_str();
+			}
+
 			ImGui::Begin("GBuffer");
 			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
-			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods, ARRAYSIZE(mesh_lods));
+			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), mesh_lods_const_char.size());
 			ImGui::End();
 
 			if (camera_index > 0)

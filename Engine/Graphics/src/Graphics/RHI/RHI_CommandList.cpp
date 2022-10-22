@@ -9,25 +9,6 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-///TODO: Remove this whole class.
-/*
-	We should be using a simple struct like
-	struct RenderDrawData
-	{
-		Pso PipelineStateObject
-
-		RHI_Buffer* VertexBuffer
-		RHI_Buffer* IndexBuffer
-
-		UniformGroup Uniforms
-
-		int VertexIndex
-		int IndexIndex
-	};
-
-	to keep track of the draw data we want to use.
-*/
-
 namespace Insight
 {
 	namespace Graphics
