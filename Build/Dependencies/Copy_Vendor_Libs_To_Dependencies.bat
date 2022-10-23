@@ -32,6 +32,13 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\oneTBB\oneapi-tbb-2021.6.0\redist\intel64
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\oneTBB\oneapi-tbb-2021.6.0\redist\intel64\vc14\tbbmalloc_debug.dll"			"dll"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\oneTBB\oneapi-tbb-2021.6.0\redist\intel64\vc14\tbbmalloc_proxy_debug.dll"	"dll"
 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_x64.lib"						"lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_vk_x64.lib"					"lib"
+
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_x64.lib"						"lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\FidelityFX-FSR2\bin\ffx_fsr2_api\ffx_fsr2_api_vk_x64.lib"					"lib"
+
+
 pause
 
 :COPY_TO_DEBUG_DEPS

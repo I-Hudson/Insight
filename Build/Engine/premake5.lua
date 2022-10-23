@@ -62,6 +62,7 @@ IncludeDirs["optick"] = "%{wks.location}vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
 IncludeDirs["stb_image"] = "%{wks.location}vendor/stb"
 IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
+IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
 
 LibDirs = {}
 

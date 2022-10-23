@@ -43,6 +43,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.optick}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.meshoptimizer}",
+        "%{IncludeDirs.FFR2}",
     }
 
     files 
@@ -73,6 +74,9 @@ project "Insight_Graphics"
         "Optickcore.lib",
         "tracy.lib",
         "meshoptimizer.lib",
+
+        "ffx_fsr2_api_x64.lib",
+        "ffx_fsr2_api_vk_x64.lib",
     }
 
     libdirs
