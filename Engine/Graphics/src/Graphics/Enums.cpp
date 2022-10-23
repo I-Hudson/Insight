@@ -1,4 +1,7 @@
 #include "Graphics/Enums.h"
+#include "Graphics/PixelFormatExtensions.h"
+
+#include "Platform/Platform.h"
 
 namespace Insight
 {
@@ -290,6 +293,82 @@ namespace Insight
 			return str;
 		}
 
+		AccessFlags ImageLayoutToAccessMask(ImageLayout layout)
+		{
+			AccessFlags access_flags;
+			switch (layout)
+			{
+			case Insight::Graphics::ImageLayout::Undefined:
+				FAIL_ASSERT();
+				break;
+
+			case Insight::Graphics::ImageLayout::General:
+				access_flags = AccessFlagBits::ShaderRead | AccessFlagBits::ShaderWrite;
+				break;
+
+			case Insight::Graphics::ImageLayout::ColourAttachment:
+				access_flags = AccessFlagBits::ColorAttachmentRead | AccessFlagBits::ColorAttachmentWrite;
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthStencilAttachment:
+				access_flags = AccessFlagBits::DepthStencilAttachmentRead | AccessFlagBits::DepthStencilAttachmentWrite;
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthStencilAttachmentReadOnly:
+				access_flags = AccessFlagBits::DepthStencilAttachmentRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::ShaderReadOnly:
+				access_flags = AccessFlagBits::ShaderRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::TransforSrc:
+				access_flags |= AccessFlagBits::TransferRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::TransforDst:
+				access_flags |= AccessFlagBits::TransferWrite;
+				break;
+
+			case Insight::Graphics::ImageLayout::Preinitialised:
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthReadOnlyStencilAttacment:
+				access_flags = AccessFlagBits::DepthStencilAttachmentRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthAttachmentStencilReadOnly:
+				access_flags = AccessFlagBits::DepthStencilAttachmentRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthAttachmentOnly:
+				access_flags = AccessFlagBits::DepthStencilAttachmentRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::DepthReadOnly:
+				access_flags = AccessFlagBits::ShaderRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::StencilAttacment:
+				FAIL_ASSERT();
+				break;
+
+			case Insight::Graphics::ImageLayout::StencilReadOnly:
+				access_flags |= AccessFlagBits::MemoryRead;
+				break;
+
+			case Insight::Graphics::ImageLayout::PresentSrc:
+				access_flags |= AccessFlagBits::MemoryRead;
+				break;
+
+			default:
+				FAIL_ASSERT();
+				break;
+			}
+
+			return access_flags;
+		}
+
 		std::string ImageUsageFlagsToString(ImageUsageFlags flags)
 		{
 			std::string str;
@@ -354,19 +433,123 @@ namespace Insight
 			return str;
 		}
 
-	std::string DynamicStateToString(DynamicState dynamic_state)
-	{
-		switch (dynamic_state)
+		PipelineStageFlags AccessFlagBitsToPipelineStageFlag(AccessFlags flags)
 		{
-		case Insight::Graphics::DynamicState::Viewport:		return "Viewport";
-		case Insight::Graphics::DynamicState::Scissor:		return "Scissor";
-		case Insight::Graphics::DynamicState::DepthBias:	return "DepthBias";
-		case Insight::Graphics::DynamicState::LineWidth:	return "LineWidth";
-		default:
-			break;
-		}
-		return "";
-	}
+			PipelineStageFlags pipeline_flags = 0;
+			u32 access_flags = flags;
+			while (access_flags != 0)
+			{
+				AccessFlagBits access_flag_bit = static_cast<AccessFlagBits>(access_flags & (~(access_flags - 1)));
+				ASSERT(access_flag_bit != 0 && (access_flag_bit & (access_flag_bit - 1)) == 0);
+				access_flags &= ~access_flag_bit;
 
+				switch (access_flag_bit)
+				{
+				case AccessFlagBits::IndirectCommandRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::DrawIndirect);
+					break;
+
+				case AccessFlagBits::IndexRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::VertexInput);
+					break;
+
+				case AccessFlagBits::VertexAttributeRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::VertexInput);
+					break;
+
+				case AccessFlagBits::UniformRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::ComputeShader);
+					break;
+
+				case AccessFlagBits::InputAttachmentRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::FragmentShader);
+					break;
+
+					// Shader
+				case AccessFlagBits::ShaderRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::ComputeShader);
+					break;
+
+				case AccessFlagBits::ShaderWrite:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::ComputeShader);
+					break;
+
+					// Color attachments
+				case AccessFlagBits::ColorAttachmentRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
+					break;
+
+				case AccessFlagBits::ColorAttachmentWrite:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::ColourAttachmentOutput);
+					break;
+
+					// Depth stencil attachments
+				case AccessFlagBits::DepthStencilAttachmentRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::FragmentShader);
+					break;
+
+				case AccessFlagBits::DepthStencilAttachmentWrite:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::LateFramgmentShader);
+					break;
+
+					// Transfer
+				case AccessFlagBits::TransferRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::Transfer);
+					break;
+
+				case AccessFlagBits::TransferWrite:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::Transfer);
+					break;
+
+					// Host
+				case AccessFlagBits::HostRead:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::Host);
+					break;
+
+				case AccessFlagBits::HostWrite:
+					pipeline_flags |= static_cast<u32>(PipelineStageFlagBits::Host);
+					break;
+				}
+			}
+			return pipeline_flags;
+		}
+
+		ImageAspectFlags PixelFormatToAspectFlags(PixelFormat format)
+		{
+			ImageAspectFlags aspect_flags;
+
+			if (!PixelFormatExtensions::IsDepthStencil(format))
+			{
+				aspect_flags |= ImageAspectFlagBits::Colour;
+			}
+			else
+			{
+				if (PixelFormatExtensions::IsDepth(format))
+				{
+					aspect_flags |= ImageAspectFlagBits::Depth;
+				}
+
+				if (PixelFormatExtensions::IsDepthStencil(format))
+				{
+					aspect_flags = ImageAspectFlagBits::Depth | ImageAspectFlagBits::Stencil;
+				}
+			}
+
+			return aspect_flags;
+		}
+
+		std::string DynamicStateToString(DynamicState dynamic_state)
+		{
+			switch (dynamic_state)
+			{
+			case Insight::Graphics::DynamicState::Viewport:		return "Viewport";
+			case Insight::Graphics::DynamicState::Scissor:		return "Scissor";
+			case Insight::Graphics::DynamicState::DepthBias:	return "DepthBias";
+			case Insight::Graphics::DynamicState::LineWidth:	return "LineWidth";
+			default:
+				break;
+			}
+			return "";
+		}
 	}
 }

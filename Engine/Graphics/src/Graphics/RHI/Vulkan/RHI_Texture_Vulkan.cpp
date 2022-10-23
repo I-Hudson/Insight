@@ -20,22 +20,25 @@ namespace Insight
 				Release();
 			}
 
-			void RHI_Texture_Vulkan::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
+			void RHI_Texture_Vulkan::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
 				IS_PROFILE_FUNCTION();
 				m_context = static_cast<RenderContext_Vulkan*>(context);
-				m_info = createInfo;
+				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
+				{
+					m_infos.push_back(createInfo);
+				}
 
 				vk::ImageCreateInfo imageCreateInfo = vk::ImageCreateInfo(
 					{},
-					TextureTypeToVulkan(m_info.TextureType),
-					PixelFormatToVulkan(m_info.Format),
-					vk::Extent3D(m_info.Width, m_info.Height, 1),
-					m_info.Mip_Count,								// mip levels 
-					m_info.Layer_Count,								// array layers
+					TextureTypeToVulkan(m_infos.at(0).TextureType),
+					PixelFormatToVulkan(m_infos.at(0).Format),
+					vk::Extent3D(m_infos.at(0).Width, m_infos.at(0).Height, 1),
+					m_infos.at(0).Mip_Count,								// mip levels 
+					m_infos.at(0).Layer_Count,								// array layers
 					vk::SampleCountFlagBits::e1,
 					vk::ImageTiling::eOptimal,
-					ImageUsageFlagsToVulkan(m_info.ImageUsage),
+					ImageUsageFlagsToVulkan(m_infos.at(0).ImageUsage),
 					vk::SharingMode::eExclusive
 				);
 
@@ -50,7 +53,7 @@ namespace Insight
 					&m_imageAllocation,
 					&allocInfo));
 
-				m_image_view = CreateImageView(0, 1, m_info.Layer_Count, 0);
+				m_image_view = CreateImageView(0, 1, m_infos.at(0).Layer_Count, 0);
 
 				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
@@ -156,11 +159,11 @@ namespace Insight
 				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
 					{ },
 					m_image,
-					TextureViewTypeToVulkan(m_info.TextureType),
-					PixelFormatToVulkan(m_info.Format),
+					TextureViewTypeToVulkan(m_infos.at(mip_index).TextureType),
+					PixelFormatToVulkan(m_infos.at(mip_index).Format),
 					vk::ComponentMapping(),
 					vk::ImageSubresourceRange(
-						m_info.ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
+						m_infos.at(mip_index).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
 						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
 						mip_index,
 						mip_count,

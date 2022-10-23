@@ -67,6 +67,7 @@ namespace Insight
 
 			protected:
 				virtual bool BindDescriptorSets() override;
+				virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) override;
 
 			private:
 				void CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours);

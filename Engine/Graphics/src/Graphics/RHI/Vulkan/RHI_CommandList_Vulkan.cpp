@@ -146,14 +146,14 @@ namespace Insight
 					dstVulkan->GetImage(),
 					vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
-				PipelineBarrierImage(PipelineStageFlagBits::TopOfPipe, PipelineStageFlagBits::Transfer, { memoryBarriers });
+				PipelineBarrierImage(+PipelineStageFlagBits::TopOfPipe, +PipelineStageFlagBits::Transfer, { memoryBarriers });
 				m_commandList.copyBufferToImage(srcVulkan->GetBuffer(), dstVulkan->GetImage(), vk::ImageLayout::eTransferDstOptimal, copyRegion);
 
 				memoryBarriers.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
 				memoryBarriers.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 				memoryBarriers.oldLayout = vk::ImageLayout::eTransferDstOptimal;
 				memoryBarriers.newLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-				PipelineBarrierImage(PipelineStageFlagBits::Transfer, PipelineStageFlagBits::FragmentShader, { memoryBarriers });
+				PipelineBarrierImage(+PipelineStageFlagBits::Transfer, +PipelineStageFlagBits::FragmentShader, { memoryBarriers });
 			}
 
 			void RHI_CommandList_Vulkan::Release()
@@ -468,6 +468,43 @@ namespace Insight
 					}
 				}
 				return result;
+			}
+
+			void RHI_CommandList_Vulkan::SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout)
+			{
+				ImageLayout image_layout = texture->GetLayout();
+				Graphics::PipelineBarrier pipeline_barrier;
+
+				ImageBarrier image_barrer;
+				image_barrer.OldLayout = image_layout;
+				image_barrer.NewLayout = layout;
+				image_barrer.SrcAccessFlags = ImageLayoutToAccessMask(image_barrer.OldLayout);
+				image_barrer.DstAccessFlags = ImageLayoutToAccessMask(image_barrer.NewLayout);
+				image_barrer.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(PixelFormatToAspectFlags(texture->GetFormat()));
+
+				if (image_layout == ImageLayout::PresentSrc)
+				{
+					pipeline_barrier.SrcStage = +PipelineStageFlagBits::BottomOfPipe;
+				}
+				else if (image_layout == ImageLayout::Undefined)
+				{
+					pipeline_barrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+				}
+				else
+				{
+					pipeline_barrier.SrcStage = AccessFlagBitsToPipelineStageFlag(image_barrer.SrcAccessFlags);
+				}
+
+				if (image_layout == ImageLayout::PresentSrc)
+				{
+					pipeline_barrier.DstStage = +PipelineStageFlagBits::TopOfPipe;
+				}
+				else
+				{
+					pipeline_barrier.DstStage = AccessFlagBitsToPipelineStageFlag(image_barrer.DstAccessFlags);
+				}
+
+				PipelineBarrier(pipeline_barrier);
 			}
 
 			void RHI_CommandList_Vulkan::CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours)

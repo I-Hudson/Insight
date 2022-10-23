@@ -10,8 +10,9 @@ namespace Insight
 	namespace Graphics
 	{
 		class RenderContext;
+		class RHI_CommandList;
 
-		struct RHI_TextureCreateInfo
+		struct RHI_TextureInfo
 		{
 			TextureType TextureType = TextureType::Unknown;
 			int Width = -1;
@@ -23,9 +24,11 @@ namespace Insight
 			u32 Mip_Count = 1;
 			u32 Layer_Count = 1;
 
-			static RHI_TextureCreateInfo Tex2D(int width, int height, PixelFormat format, ImageUsageFlags usage)
+			ImageLayout Layout = ImageLayout::Undefined;
+
+			static RHI_TextureInfo Tex2D(int width, int height, PixelFormat format, ImageUsageFlags usage)
 			{
-				RHI_TextureCreateInfo info = { };
+				RHI_TextureInfo info = { };
 				info.TextureType = TextureType::Tex2D;
 				info.Width = width;
 				info.Height = height;
@@ -34,9 +37,9 @@ namespace Insight
 				info.ImageUsage = usage;
 				return info;
 			}
-			static RHI_TextureCreateInfo Tex2DArray(int width, int height, PixelFormat format, ImageUsageFlags usage, u32 layer_count)
+			static RHI_TextureInfo Tex2DArray(int width, int height, PixelFormat format, ImageUsageFlags usage, u32 layer_count)
 			{
-				RHI_TextureCreateInfo info = { };
+				RHI_TextureInfo info = { };
 				info.TextureType = TextureType::Tex2DArray;
 				info.Width = width;
 				info.Height = height;
@@ -56,20 +59,24 @@ namespace Insight
 			void LoadFromFile(std::string filePath);
 			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
-			RHI_TextureCreateInfo GetInfo() const { return m_info; }
-			int GetWidth()					const { return m_info.Width; }
-			int GetHeight()					const { return m_info.Height; }
-			int GetChannels()				const { return 4; }
-			TextureType GetType()			const { return m_info.TextureType; }
-			PixelFormat GetFormat()			const { return m_info.Format; }
+			RHI_TextureInfo GetInfo(u32 mip = 0)	    const { return m_infos.at(mip); }
+			int GetWidth                 (u32 mip = 0)	const { return m_infos.at(mip).Width; }
+			int GetHeight                (u32 mip = 0)	const { return m_infos.at(mip).Height; }
+			int GetChannels              (u32 mip = 0)	const { return 4; }
+			TextureType GetType          (u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
+			PixelFormat GetFormat		 (u32 mip = 0)	const { return m_infos.at(mip).Format; }
+			ImageLayout GetLayout        (u32 mip = 0)	const { return m_infos.at(mip).Layout; }
 
-			virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) = 0;
+			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
 			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
 			virtual void Upload(void* data, int sizeInBytes) = 0;
 			virtual std::vector<Byte> Download(void* data, int sizeInBytes) = 0;
 
 		protected:
-			RHI_TextureCreateInfo m_info = { };
+			/// @brief Define the info for all mips of the image.
+			std::vector<RHI_TextureInfo> m_infos = { };
+
+			friend class RHI_CommandList;
 		};
 	}
 }

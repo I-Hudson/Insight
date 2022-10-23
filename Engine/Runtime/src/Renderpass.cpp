@@ -256,7 +256,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass setup");
 
-					RHI_TextureCreateInfo tex_create_info = RHI_TextureCreateInfo::Tex2DArray(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size,
+					RHI_TextureInfo tex_create_info = RHI_TextureInfo::Tex2DArray(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size,
 						PixelFormat::D32_Float, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled, 4);
 
 					RGTextureHandle depth_tex = builder.CreateTexture(L"Cascade_Shadow_Tex", tex_create_info);
@@ -369,7 +369,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Depth_Prepass pass setup");
 
-					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+					RHI_TextureInfo textureCreateInfo = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::D32_Float
@@ -484,7 +484,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("GBuffer pass setup");
 
-					RHI_TextureCreateInfo textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+					RHI_TextureInfo textureCreateInfo = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
@@ -492,7 +492,7 @@ namespace Insight
 					RGTextureHandle colourRT = builder.CreateTexture(L"ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
-					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+					textureCreateInfo = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16B16A16_Float
@@ -500,7 +500,7 @@ namespace Insight
 					RGTextureHandle normal_rt = builder.CreateTexture(L"NormalRT", textureCreateInfo);
 					builder.WriteTexture(normal_rt);
 
-					textureCreateInfo = RHI_TextureCreateInfo::Tex2D(
+					textureCreateInfo = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16_Float
@@ -666,7 +666,7 @@ namespace Insight
 					}
 					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
 
-					RHI_TextureCreateInfo create_info = RHI_TextureCreateInfo::Tex2D(
+					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R32G32B32A32_Float

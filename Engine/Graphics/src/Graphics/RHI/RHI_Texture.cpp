@@ -42,7 +42,7 @@ namespace Insight
 				return;
 			}
 
-			RHI_TextureCreateInfo createInfo = { };
+			RHI_TextureInfo createInfo = { };
 			createInfo.TextureType = TextureType::Tex2D;
 			createInfo.Width = width;
 			createInfo.Height = height;
@@ -65,7 +65,7 @@ namespace Insight
 				return;
 			}
 
-			RHI_TextureCreateInfo createInfo = { };
+			RHI_TextureInfo createInfo = { };
 			createInfo.TextureType = TextureType::Tex2D;
 			createInfo.Width = width;
 			createInfo.Height = height;

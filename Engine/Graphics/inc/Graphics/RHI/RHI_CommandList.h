@@ -51,6 +51,8 @@ namespace Insight
 
 			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
 
+			void SetImageLayout(RHI_Texture* texture, ImageLayout layout);
+
 			virtual void BeginRenderpass(RenderpassDescription renderDescription) = 0;
 			virtual void EndRenderpass() = 0;
 
@@ -102,6 +104,8 @@ namespace Insight
 		protected:
 			bool CanDraw();
 			virtual bool BindDescriptorSets();
+
+			virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) = 0;
 
 			RenderContext* m_context{ nullptr };
 			bool m_activeRenderpass = false;

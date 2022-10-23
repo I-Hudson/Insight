@@ -37,11 +37,11 @@ namespace Insight
 			return m_rg->GetOutputResolution();
 		}
 
-		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo desc)
+		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
 			if (std::find_if(m_pass->m_textureCreates.begin(), m_pass->m_textureCreates.end(),
-				[handle](const std::pair<RGTextureHandle, RHI_TextureCreateInfo>& pair)
+				[handle](const std::pair<RGTextureHandle, RHI_TextureInfo>& pair)
 				{
 					return handle == pair.first;
 				}) == m_pass->m_textureCreates.end())

@@ -10,7 +10,7 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureCreateInfo createInfo)
+			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 				m_info = createInfo;

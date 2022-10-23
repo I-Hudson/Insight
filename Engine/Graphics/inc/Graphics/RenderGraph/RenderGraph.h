@@ -66,7 +66,7 @@ namespace Insight
 			void Init(RenderContext* context);
 			void Execute();
 
-			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info);
+			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureInfo info);
 
 			RGTextureHandle GetTexture(std::wstring textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;

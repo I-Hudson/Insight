@@ -2,6 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
+#include "Graphics/PixelFormat.h"
 #include <string>
 
 namespace Insight
@@ -111,6 +112,16 @@ namespace Insight
 			MaskType m_mask  = 0;
 		};
 
+		/// @brief HACK. Use '+' to convert a strongly typed enum to it's underlying type (u32).
+		/// @tparam T 
+		/// @param e 
+		/// @return u32
+		template <typename T>
+		constexpr auto operator+(T e) noexcept
+			-> std::enable_if_t<std::is_enum<T>::value, std::underlying_type_t<T>>
+		{
+			return static_cast<std::underlying_type_t<T>>(e);
+		}
 
 		enum class ResourceType
 		{
@@ -318,7 +329,7 @@ namespace Insight
         using ImageUsageFlags = u32;
         std::string ImageUsageFlagsToString(ImageUsageFlags flags);
 
-		enum class PipelineStageFlagBits
+		enum class PipelineStageFlagBits : u32
 		{
 			TopOfPipe						= 1 << 0,
 			DrawIndirect					= 1 << 1,
@@ -338,7 +349,7 @@ namespace Insight
 			AllGraphics						= 1 << 15,
 			AllCommands						= 1 << 16,
 		};
-		using PipelineStageFlags = Flags<PipelineStageFlagBits>;
+		using PipelineStageFlags = u32;
 		std::string PipelineStageFlagsToString(PipelineStageFlags flags);
 
 		enum class DescriptorType
@@ -379,8 +390,9 @@ namespace Insight
 			MemoryWrite						= 1 << 16,
 			None							= 1 << 17,
 		};
-		using AccessFlags = Flags<AccessFlagBits>;
+		using AccessFlags = u32;
 		std::string AccessFlagBitsToString(AccessFlagBits flags);
+		PipelineStageFlags AccessFlagBitsToPipelineStageFlag(AccessFlags flags);
 
 		enum class ImageLayout
 		{
@@ -403,6 +415,7 @@ namespace Insight
 
 			Count
 		};
+		AccessFlags ImageLayoutToAccessMask(ImageLayout layout);
 
 		enum ImageAspectFlagBits
 		{
@@ -410,8 +423,9 @@ namespace Insight
 			Depth		= 1 << 1,
 			Stencil		= 1 << 2,
 		};
-		using ImageAspectFlags = Flags<ImageAspectFlagBits>;
+		using ImageAspectFlags = u32;
 		std::string ImageAspectFlagsToString(ImageAspectFlags flags);
+		ImageAspectFlags PixelFormatToAspectFlags(PixelFormat format);
 
 		enum class DescriptorResourceType
 		{

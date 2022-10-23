@@ -38,6 +38,30 @@ namespace Insight
 			m_discard = false;
 		}
 
+		void RHI_CommandList::SetImageLayout(RHI_Texture* texture, ImageLayout layout)
+		{
+			RHI_TextureInfo create_info = texture->GetInfo();
+			bool transition_requried = false;
+
+			for (size_t i = 0; i < create_info.Mip_Count; ++i)
+			{
+				if (texture->GetLayout(i) != layout)
+				{
+					transition_requried = true;
+				}
+			}
+
+			if (transition_requried)
+			{
+				SetImageLayoutTransition(texture, layout);
+
+				for (size_t i = 0; i < create_info.Mip_Count; ++i)
+				{
+					texture->m_infos[i].Layout = layout;
+				}
+			}
+		}
+
 		void RHI_CommandList::SetUniform(u32 set, u32 binding, const void* data, u32 size)
 		{
 			m_descriptorAllocator->SetUniform(set, binding, data, size);

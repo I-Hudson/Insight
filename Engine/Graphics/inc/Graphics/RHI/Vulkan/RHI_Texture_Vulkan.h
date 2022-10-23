@@ -17,7 +17,7 @@ namespace Insight
 				virtual ~RHI_Texture_Vulkan() override;
 
 				/// RHI_Texture
-				virtual void Create(RenderContext* context, RHI_TextureCreateInfo createInfo) override;
+				virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) override;
 				virtual void Upload(void* data, int sizeInBytes) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 

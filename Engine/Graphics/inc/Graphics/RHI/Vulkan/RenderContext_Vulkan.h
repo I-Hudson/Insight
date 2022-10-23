@@ -49,6 +49,7 @@ namespace Insight
 				void EndDebugMarker();
 
 				vk::Device GetDevice() const { return m_device; }
+				vk::PhysicalDevice GetPhysicalDevice() const { return m_adapter; }
 				VmaAllocator GetVMA() const { return m_vmaAllocator; }
 
 				u32 GetFamilyQueueIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }

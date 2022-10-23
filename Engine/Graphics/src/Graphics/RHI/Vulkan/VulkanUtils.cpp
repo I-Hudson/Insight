@@ -555,23 +555,23 @@ namespace Insight
         {
             vk::PipelineStageFlags result;
 
-            if (flags & PipelineStageFlagBits::TopOfPipe)                       { result |= vk::PipelineStageFlagBits::eTopOfPipe; }
-            if (flags & PipelineStageFlagBits::DrawIndirect)                    { result |= vk::PipelineStageFlagBits::eDrawIndirect; }
-            if (flags & PipelineStageFlagBits::VertexInput)                     { result |= vk::PipelineStageFlagBits::eVertexInput; }
-            if (flags & PipelineStageFlagBits::VertexShader)                    { result |= vk::PipelineStageFlagBits::eVertexShader; }
-            if (flags & PipelineStageFlagBits::TessesllationControlShader)      { result |= vk::PipelineStageFlagBits::eTessellationControlShader; }
-            if (flags & PipelineStageFlagBits::TessesllationEvaluationShader)   { result |= vk::PipelineStageFlagBits::eTessellationEvaluationShader; }
-            if (flags & PipelineStageFlagBits::GeometryShader)                  { result |= vk::PipelineStageFlagBits::eGeometryShader; }
-            if (flags & PipelineStageFlagBits::FragmentShader)                  { result |= vk::PipelineStageFlagBits::eFragmentShader; }
-            if (flags & PipelineStageFlagBits::EarlyFramgmentShader)            { result |= vk::PipelineStageFlagBits::eEarlyFragmentTests; }
-            if (flags & PipelineStageFlagBits::LateFramgmentShader)             { result |= vk::PipelineStageFlagBits::eLateFragmentTests; }
-            if (flags & PipelineStageFlagBits::ColourAttachmentOutput)          { result |= vk::PipelineStageFlagBits::eColorAttachmentOutput; }
-            if (flags & PipelineStageFlagBits::ComputeShader)                   { result |= vk::PipelineStageFlagBits::eComputeShader; }
-            if (flags & PipelineStageFlagBits::Transfer)                        { result |= vk::PipelineStageFlagBits::eTransfer; }
-            if (flags & PipelineStageFlagBits::BottomOfPipe)                    { result |= vk::PipelineStageFlagBits::eBottomOfPipe; }
-            if (flags & PipelineStageFlagBits::Host)                            { result |= vk::PipelineStageFlagBits::eHost; }
-            if (flags & PipelineStageFlagBits::AllGraphics)                     { result |= vk::PipelineStageFlagBits::eAllGraphics; }
-            if (flags & PipelineStageFlagBits::AllCommands)                     { result |= vk::PipelineStageFlagBits::eAllCommands; }
+            if (flags & +PipelineStageFlagBits::TopOfPipe)                       { result |= vk::PipelineStageFlagBits::eTopOfPipe; }
+            if (flags & +PipelineStageFlagBits::DrawIndirect)                    { result |= vk::PipelineStageFlagBits::eDrawIndirect; }
+            if (flags & +PipelineStageFlagBits::VertexInput)                     { result |= vk::PipelineStageFlagBits::eVertexInput; }
+            if (flags & +PipelineStageFlagBits::VertexShader)                    { result |= vk::PipelineStageFlagBits::eVertexShader; }
+            if (flags & +PipelineStageFlagBits::TessesllationControlShader)      { result |= vk::PipelineStageFlagBits::eTessellationControlShader; }
+            if (flags & +PipelineStageFlagBits::TessesllationEvaluationShader)   { result |= vk::PipelineStageFlagBits::eTessellationEvaluationShader; }
+            if (flags & +PipelineStageFlagBits::GeometryShader)                  { result |= vk::PipelineStageFlagBits::eGeometryShader; }
+            if (flags & +PipelineStageFlagBits::FragmentShader)                  { result |= vk::PipelineStageFlagBits::eFragmentShader; }
+            if (flags & +PipelineStageFlagBits::EarlyFramgmentShader)            { result |= vk::PipelineStageFlagBits::eEarlyFragmentTests; }
+            if (flags & +PipelineStageFlagBits::LateFramgmentShader)             { result |= vk::PipelineStageFlagBits::eLateFragmentTests; }
+            if (flags & +PipelineStageFlagBits::ColourAttachmentOutput)          { result |= vk::PipelineStageFlagBits::eColorAttachmentOutput; }
+            if (flags & +PipelineStageFlagBits::ComputeShader)                   { result |= vk::PipelineStageFlagBits::eComputeShader; }
+            if (flags & +PipelineStageFlagBits::Transfer)                        { result |= vk::PipelineStageFlagBits::eTransfer; }
+            if (flags & +PipelineStageFlagBits::BottomOfPipe)                    { result |= vk::PipelineStageFlagBits::eBottomOfPipe; }
+            if (flags & +PipelineStageFlagBits::Host)                            { result |= vk::PipelineStageFlagBits::eHost; }
+            if (flags & +PipelineStageFlagBits::AllGraphics)                     { result |= vk::PipelineStageFlagBits::eAllGraphics; }
+            if (flags & +PipelineStageFlagBits::AllCommands)                     { result |= vk::PipelineStageFlagBits::eAllCommands; }
 
             return result;
         }
@@ -853,24 +853,24 @@ namespace Insight
         {
             vk::AccessFlags result;
 
-            if (flags & vk::AccessFlagBits::eIndirectCommandRead)           { result |= vk::AccessFlagBits::eIndirectCommandRead; }
-            if (flags & vk::AccessFlagBits::eIndexRead)                     { result |= vk::AccessFlagBits::eIndexRead; }
-            if (flags & vk::AccessFlagBits::eVertexAttributeRead)           { result |= vk::AccessFlagBits::eVertexAttributeRead; }
-            if (flags & vk::AccessFlagBits::eUniformRead)                   { result |= vk::AccessFlagBits::eUniformRead; }
-            if (flags & vk::AccessFlagBits::eInputAttachmentRead)           { result |= vk::AccessFlagBits::eInputAttachmentRead; }
-            if (flags & vk::AccessFlagBits::eShaderRead)                    { result |= vk::AccessFlagBits::eShaderRead; }
-            if (flags & vk::AccessFlagBits::eShaderWrite)                   { result |= vk::AccessFlagBits::eShaderWrite; }
-            if (flags & vk::AccessFlagBits::eColorAttachmentRead)           { result |= vk::AccessFlagBits::eColorAttachmentRead; }
-            if (flags & vk::AccessFlagBits::eColorAttachmentWrite)          { result |= vk::AccessFlagBits::eColorAttachmentWrite; }
-            if (flags & vk::AccessFlagBits::eDepthStencilAttachmentRead)    { result |= vk::AccessFlagBits::eDepthStencilAttachmentRead; }
-            if (flags & vk::AccessFlagBits::eDepthStencilAttachmentWrite)   { result |= vk::AccessFlagBits::eDepthStencilAttachmentWrite; }
-            if (flags & vk::AccessFlagBits::eTransferRead)                  { result |= vk::AccessFlagBits::eTransferRead; }
-            if (flags & vk::AccessFlagBits::eTransferWrite)                 { result |= vk::AccessFlagBits::eTransferWrite; }
-            if (flags & vk::AccessFlagBits::eHostRead)                      { result |= vk::AccessFlagBits::eHostRead; }
-            if (flags & vk::AccessFlagBits::eHostWrite)                     { result |= vk::AccessFlagBits::eHostWrite; }
-            if (flags & vk::AccessFlagBits::eMemoryRead)                    { result |= vk::AccessFlagBits::eMemoryRead; }
-            if (flags & vk::AccessFlagBits::eMemoryWrite)                   { result |= vk::AccessFlagBits::eMemoryWrite; }
-            if (flags & vk::AccessFlagBits::eNoneKHR)                       { result |= vk::AccessFlagBits::eNoneKHR; }
+            if (flags & +vk::AccessFlagBits::eIndirectCommandRead)           { result |= vk::AccessFlagBits::eIndirectCommandRead; }
+            if (flags & +vk::AccessFlagBits::eIndexRead)                     { result |= vk::AccessFlagBits::eIndexRead; }
+            if (flags & +vk::AccessFlagBits::eVertexAttributeRead)           { result |= vk::AccessFlagBits::eVertexAttributeRead; }
+            if (flags & +vk::AccessFlagBits::eUniformRead)                   { result |= vk::AccessFlagBits::eUniformRead; }
+            if (flags & +vk::AccessFlagBits::eInputAttachmentRead)           { result |= vk::AccessFlagBits::eInputAttachmentRead; }
+            if (flags & +vk::AccessFlagBits::eShaderRead)                    { result |= vk::AccessFlagBits::eShaderRead; }
+            if (flags & +vk::AccessFlagBits::eShaderWrite)                   { result |= vk::AccessFlagBits::eShaderWrite; }
+            if (flags & +vk::AccessFlagBits::eColorAttachmentRead)           { result |= vk::AccessFlagBits::eColorAttachmentRead; }
+            if (flags & +vk::AccessFlagBits::eColorAttachmentWrite)          { result |= vk::AccessFlagBits::eColorAttachmentWrite; }
+            if (flags & +vk::AccessFlagBits::eDepthStencilAttachmentRead)    { result |= vk::AccessFlagBits::eDepthStencilAttachmentRead; }
+            if (flags & +vk::AccessFlagBits::eDepthStencilAttachmentWrite)   { result |= vk::AccessFlagBits::eDepthStencilAttachmentWrite; }
+            if (flags & +vk::AccessFlagBits::eTransferRead)                  { result |= vk::AccessFlagBits::eTransferRead; }
+            if (flags & +vk::AccessFlagBits::eTransferWrite)                 { result |= vk::AccessFlagBits::eTransferWrite; }
+            if (flags & +vk::AccessFlagBits::eHostRead)                      { result |= vk::AccessFlagBits::eHostRead; }
+            if (flags & +vk::AccessFlagBits::eHostWrite)                     { result |= vk::AccessFlagBits::eHostWrite; }
+            if (flags & +vk::AccessFlagBits::eMemoryRead)                    { result |= vk::AccessFlagBits::eMemoryRead; }
+            if (flags & +vk::AccessFlagBits::eMemoryWrite)                   { result |= vk::AccessFlagBits::eMemoryWrite; }
+            if (flags & +vk::AccessFlagBits::eNoneKHR)                       { result |= vk::AccessFlagBits::eNoneKHR; }
 
             return result;
         }
@@ -905,9 +905,9 @@ namespace Insight
         {
             vk::ImageAspectFlags result;
 
-            if (flags & vk::ImageAspectFlagBits::eColor) { result |= vk::ImageAspectFlagBits::eColor; }
-            if (flags & vk::ImageAspectFlagBits::eDepth) { result |= vk::ImageAspectFlagBits::eDepth; }
-            if (flags & vk::ImageAspectFlagBits::eStencil) { result |= vk::ImageAspectFlagBits::eStencil; }
+            if (flags & +vk::ImageAspectFlagBits::eColor) { result |= vk::ImageAspectFlagBits::eColor; }
+            if (flags & +vk::ImageAspectFlagBits::eDepth) { result |= vk::ImageAspectFlagBits::eDepth; }
+            if (flags & +vk::ImageAspectFlagBits::eStencil) { result |= vk::ImageAspectFlagBits::eStencil; }
                 
             return result;
         }

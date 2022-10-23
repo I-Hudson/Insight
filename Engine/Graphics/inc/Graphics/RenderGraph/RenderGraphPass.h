@@ -40,7 +40,7 @@ namespace Insight
 		public:
 			std::wstring m_passName;
 
-			std::vector<std::pair<RGTextureHandle, RHI_TextureCreateInfo>> m_textureCreates;
+			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> m_textureCreates;
 			std::vector<RGTextureHandle> m_textureReads;
 			std::vector<RGTextureHandle> m_textureWrites;
 

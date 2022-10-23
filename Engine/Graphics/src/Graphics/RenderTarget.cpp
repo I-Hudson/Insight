@@ -37,7 +37,7 @@ namespace Insight
 
 			m_texture = Renderer::CreateTexture();
 
-			Graphics::RHI_TextureCreateInfo textureInfo = {};
+			Graphics::RHI_TextureInfo textureInfo = {};
 			textureInfo.TextureType = TextureType::Tex2D;
 			textureInfo.Width = m_desc.Width;
 			textureInfo.Height = m_desc.Height;

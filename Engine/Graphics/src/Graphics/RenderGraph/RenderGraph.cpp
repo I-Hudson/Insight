@@ -136,7 +136,7 @@ namespace Insight
 			}
 		}
 
-		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureCreateInfo info)
+		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureInfo info)
 		{
 			return m_textureCaches->AddOrReturn(textureName);
 		}
@@ -322,13 +322,13 @@ namespace Insight
 
 					barrier.DstAccessFlags = AccessFlagBits::ColorAttachmentWrite;
 					barrier.NewLayout = ImageLayout::ColourAttachment;
-					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer( ImageAspectFlagBits::Colour);
+					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
 					
 					m_texture_barrier_history[texture].push_back(barrier);
 					colorImageBarriers.push_back(std::move(barrier));
 				}
-				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::TopOfPipe;
-				colorPipelineBarrier.DstStage = PipelineStageFlagBits::ColourAttachmentOutput;
+				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::ColourAttachmentOutput;
 				colorPipelineBarrier.ImageBarriers = colorImageBarriers;
 
 				/// Depth write
@@ -354,8 +354,8 @@ namespace Insight
 					depthImageBarriers.push_back(std::move(barrier));
 				}
 
-				depthPipelineBarrier.SrcStage = PipelineStageFlagBits::TopOfPipe;
-				depthPipelineBarrier.DstStage = PipelineStageFlagBits::EarlyFramgmentShader;
+				depthPipelineBarrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+				depthPipelineBarrier.DstStage = +PipelineStageFlagBits::EarlyFramgmentShader;
 				depthPipelineBarrier.ImageBarriers = depthImageBarriers;
 
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
@@ -403,12 +403,12 @@ namespace Insight
 						colorImageBarriers.push_back(std::move(barrier));
 					}
 				}
-				colorPipelineBarrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
-				colorPipelineBarrier.DstStage = PipelineStageFlagBits::FragmentShader;
+				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;
+				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::FragmentShader;
 				colorPipelineBarrier.ImageBarriers = std::move(colorImageBarriers);
 
-				depthPipelineBarrier.SrcStage = PipelineStageFlagBits::EarlyFramgmentShader;
-				depthPipelineBarrier.DstStage = PipelineStageFlagBits::FragmentShader;
+				depthPipelineBarrier.SrcStage = +PipelineStageFlagBits::EarlyFramgmentShader;
+				depthPipelineBarrier.DstStage = +PipelineStageFlagBits::FragmentShader;
 				depthPipelineBarrier.ImageBarriers = std::move(depthImageBarriers);
 				
 				if (colorPipelineBarrier.ImageBarriers.size() > 0 || colorPipelineBarrier.BufferBarriers.size() > 0)
@@ -445,8 +445,8 @@ namespace Insight
 			if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 			{
 				PipelineBarrier barrier = { };
-				barrier.SrcStage = PipelineStageFlagBits::ColourAttachmentOutput;
-				barrier.DstStage = PipelineStageFlagBits::BottomOfPipe;
+				barrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;
+				barrier.DstStage = +PipelineStageFlagBits::BottomOfPipe;
 
 				ImageBarrier imageBarrier = { };
 				imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;

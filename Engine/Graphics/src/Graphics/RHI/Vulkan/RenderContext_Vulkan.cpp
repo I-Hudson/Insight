@@ -953,7 +953,7 @@ namespace Insight
 					RHI_Texture* tex = Renderer::CreateTexture();
 					tex->SetName(L"Swapchain_Image: " + std::to_wstring(image_index++));
 
-					RHI_TextureCreateInfo texCreateInfo = { };
+					RHI_TextureInfo texCreateInfo = { };
 					texCreateInfo.TextureType = TextureType::Tex2D;
 					texCreateInfo.Width = swapchainExtent.width;
 					texCreateInfo.Height = swapchainExtent.height;
@@ -966,7 +966,10 @@ namespace Insight
 					texVulkan->m_image_view = image_view;
 					texVulkan->m_single_layer_image_views.push_back(single_layer_image_view);
 					texVulkan->m_image = image;
-					texVulkan->m_info = texCreateInfo;
+					for (size_t i = 0; i < texCreateInfo.Mip_Count; ++i)
+					{
+						texVulkan->m_infos.push_back(texCreateInfo);
+					}
 
 					m_swapchainImages.push_back(tex);
 				}
