@@ -31,8 +31,12 @@ namespace Insight
 			/// @param position 
 			void SetPosition(glm::vec3 position) { m_transform[3] = glm::vec4(position, 1.0f); }
 
+			// Component
+			virtual void OnUpdate(const float delta_time) override;
+
 		private:
 			glm::mat4 m_transform = glm::mat4(1.0f);
+			glm::mat4 m_previous_transform = glm::mat4(1.0f);
 		};
 	}
 }

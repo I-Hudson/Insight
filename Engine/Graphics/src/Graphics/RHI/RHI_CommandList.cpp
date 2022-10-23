@@ -60,6 +60,16 @@ namespace Insight
 			m_descriptorAllocator->SetSampler(set, binding, sampler);
 		}
 
+		RHI_BufferView RHI_CommandList::UploadUniform(const void* data, u32 size)
+		{
+			return m_descriptorAllocator->UploadUniform(data, size);
+		}
+
+		void RHI_CommandList::SetUniform(u32 set, u32 binding, RHI_BufferView buffer)
+		{
+			m_descriptorAllocator->SetUniform(set, binding, buffer);
+		}
+
 		void RHI_CommandList::BeginTimeBlock(const char* block_name)
 		{
 			FAIL_ASSERT();

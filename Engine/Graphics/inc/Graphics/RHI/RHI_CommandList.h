@@ -2,6 +2,8 @@
 
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
+#include "Graphics/RHI/RHI_Buffer.h"
+
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/PipelineBarrier.h"
 
@@ -63,6 +65,22 @@ namespace Insight
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
+
+			/// @brief Upload data to the frame uniform buffer. Does not bind.
+			/// @param set 
+			/// @param binding 
+			/// @param data 
+			/// @param size 
+			/// @return RHI_BufferView
+			RHI_BufferView UploadUniform(const void* data, u32 size);
+			template<typename T>
+			RHI_BufferView UploadUniform(const T& data) { return UploadUniform(static_cast<const void*>(&data), sizeof(T)); }
+
+			/// @brief Binds a uploaded buffer to a uniform.
+			/// @param set 
+			/// @param binding 
+			/// @param buffer 
+			void SetUniform(u32 set, u32 binding, RHI_BufferView buffer);
 
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;

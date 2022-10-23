@@ -120,6 +120,11 @@ namespace Insight
 
 					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
 					cmdList->m_descriptorAllocator->Reset();
+
+					if (m_pre_render_func)
+					{
+						m_pre_render_func(*this, cmdList);
+					}
 					Render(cmdList);
 
 					m_context->PostRender(cmdList);

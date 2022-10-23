@@ -46,10 +46,16 @@ namespace Insight
 
 	std::vector<Ptr<ECS::Entity>> entities_to_render;
 
-#define ECS_RENDER
-
 	namespace Graphics
 	{
+
+		struct GlobalResources
+		{
+			RHI_BufferView Buffer_Frame_View = { };
+			RHI_BufferView Buffer_Directional_Light_View = { };
+		};
+		GlobalResources g_global_resources = {};
+
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
@@ -136,6 +142,16 @@ namespace Insight
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
 
+			g_global_resources = { };
+			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+
+			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
+					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
+
+				});
+
 			ShadowPass();
 			//ShadowCullingPass();
 			if (Depth_Prepass)
@@ -145,6 +161,7 @@ namespace Insight
 			Sample();
 			Composite();
 			Swapchain();
+
 			ImGuiPass();
 		}
 
@@ -212,13 +229,11 @@ namespace Insight
 		{
 			struct PassData
 			{
-				BufferLight Cascade_Cameras;
 				RGTextureHandle Depth_Tex;
 				std::vector<Ptr<ECS::Entity>> Entities;
 			};
 			PassData data;
 			data.Entities = entities_to_render;
-			data.Cascade_Cameras = BufferLight::GetCascades(m_buffer_frame, 4, cascade_split_lambda);
 
 			IMGUI_VALID(ImGui::Begin("Directional Light Direction"));
 			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
@@ -290,7 +305,7 @@ namespace Insight
 						cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
 					}
 
-					cmdList->SetUniform(1, 0, data.Cascade_Cameras);
+					cmdList->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
@@ -396,7 +411,7 @@ namespace Insight
 
 					{
 						IS_PROFILE_SCOPE("Depth_Prepass-SetUniform");
-						cmdList->SetUniform(0, 0, &data.Buffer_Frame, sizeof(data.Buffer_Frame));
+						cmdList->SetUniform(0, 0, g_global_resources.Buffer_Frame_View);
 					}
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
@@ -441,8 +456,6 @@ namespace Insight
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
 			Pass_Data.Entities = entities_to_render;
 
-			BufferLight shader_cameras = BufferLight::GetCascades(m_buffer_frame, 4, cascade_split_lambda);
-
 			static int camera_index = 0;
 			static int mesh_lod_index = 0;
 			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
@@ -462,7 +475,7 @@ namespace Insight
 
 			if (camera_index > 0)
 			{
-				Pass_Data.Buffer_Frame.Proj_View = shader_cameras.ProjView[camera_index - 1];
+				Pass_Data.Buffer_Frame.Proj_View = m_directional_light.ProjView[camera_index - 1];
 			}
 			Pass_Data.Mesh_Lod = mesh_lod_index;
 
@@ -607,12 +620,10 @@ namespace Insight
 			{
 				BufferFrame Buffer_Frame;
 				BufferSamplers Buffer_Samplers;
-				BufferLight Cascade_Cameras;
 			};
 			PassData pass_data = {};
 			pass_data.Buffer_Frame = m_buffer_frame;
 			pass_data.Buffer_Samplers = m_buffer_samplers;
-			pass_data.Cascade_Cameras = BufferLight::GetCascades(m_buffer_frame, 4, cascade_split_lambda);
 
 			static int output_texture;
 			static int cascade_override;
@@ -638,8 +649,6 @@ namespace Insight
 				m_directional_light.Light_Colour.z = light_colour[2];
 			}
 			ImGui::End();
-
-			pass_data.Cascade_Cameras.Light_Colour = m_directional_light.Light_Colour;
 
 			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass",
 				[](PassData& data, RenderGraphBuilder& builder)
@@ -690,7 +699,7 @@ namespace Insight
 
 
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
-					cmd_list->SetUniform(1, 0, data.Cascade_Cameras);
+					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
 					const u8 texture_offset = 5;
 					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
@@ -769,7 +778,7 @@ namespace Insight
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)
 		{
-			cmd_list->SetUniform(0, 0, buffer_frame);
+			cmd_list->SetUniform(0, 0, g_global_resources.Buffer_Frame_View);
 
 			cmd_list->SetSampler(0, 1, buffer_samplers.Shadow_Sampler);
 			cmd_list->SetSampler(0, 2, buffer_samplers.Repeat_Sampler);
@@ -1014,6 +1023,13 @@ namespace Insight
 				lastSplitDist = cascadeSplits[i];
 			}
 			return outCascades;
+		}
+		
+		void BufferLight::GetCascades(BufferLight& buffer_light, const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)
+		{
+			BufferLight light = GetCascades(buffer_frame, cascade_count, split_lambda);
+			std::move(std::begin(light.ProjView), std::end(light.ProjView), buffer_light.ProjView);
+			std::move(std::begin(light.SplitDepth), std::end(light.SplitDepth), buffer_light.SplitDepth);
 		}
 	}
 }

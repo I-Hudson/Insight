@@ -11,5 +11,10 @@ namespace Insight
 
 		TransformComponent::~TransformComponent()
 		{ }
+
+		void TransformComponent::OnUpdate(const float delta_time)
+		{
+			m_previous_transform = m_transform;
+		}
 	}
 }

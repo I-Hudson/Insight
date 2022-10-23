@@ -9,6 +9,7 @@
 
 #include <type_traits>
 #include <unordered_map>
+#include <functional>
 #include <ppltasks.h>
 
 namespace Insight
@@ -58,6 +59,7 @@ namespace Insight
 
 		class IS_GRAPHICS RenderGraph : public Core::Singleton<RenderGraph>
 		{
+			using RenderGraphSetPreRenderFunc = std::function<void(RenderGraph&, RHI_CommandList*)>;
 		public:
 			RenderGraph();
 
@@ -76,6 +78,8 @@ namespace Insight
 
 			u32 GetFrameIndex() const { return m_frameIndex; }
 			u64 GetFrameCount() const { return m_frame_count; }
+
+			void SetPreRender(RenderGraphSetPreRenderFunc func) { m_pre_render_func = std::move(func); }
 
 			template<typename TData>
 			void AddPass(std::wstring passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
@@ -103,6 +107,7 @@ namespace Insight
 
 		private:
 			RenderContext* m_context = nullptr;
+			RenderGraphSetPreRenderFunc m_pre_render_func = nullptr;
 			std::vector<UPtr<RenderGraphPassBase>> m_pending_passes;
 			std::vector<UPtr<RenderGraphPassBase>> m_passes;
 

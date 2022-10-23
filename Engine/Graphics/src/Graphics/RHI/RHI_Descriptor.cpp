@@ -406,6 +406,20 @@ namespace Insight
 			m_descriptor_sets = pso.Shader->GetDescriptorSets();
 		}
 
+		RHI_BufferView DescriptorAllocator::UploadUniform(const void* data, u32 size)
+		{
+			CreateUniformBufferIfNoExist();
+
+			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
+			m_uniformBufferOffset += size;
+
+			/// Align the size to minUniformBufferOffsetAlignment.
+			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
+			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
+
+			return view;
+		}
+
 		void DescriptorAllocator::SetUniform(u32 set, u32 binding, const void* data, u32 size)
 		{
 			if (!CheckSetAndBindingBounds(set, binding))
@@ -421,16 +435,25 @@ namespace Insight
 					, descriptor_binding.Size, size, set, binding);
 			}
 
-			CreateUniformBufferIfNoExist();
-			
-			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
-			m_uniformBufferOffset += size;
+			descriptor_binding.RHI_Buffer_View = UploadUniform(data, size);
+		}
 
-			/// Align the size to minUniformBufferOffsetAlignment.
-			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
-			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
+		void DescriptorAllocator::SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view)
+		{
+			if (!CheckSetAndBindingBounds(set, binding))
+			{
+				return;
+			}
 
-			descriptor_binding.RHI_Buffer_View = view;
+			if (!buffer_view.IsValid())
+			{
+				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Trying to set a uniform which buffer view is invalid.");
+				return;
+			}
+
+			DescriptorSet& descriptor_set = m_descriptor_sets[set];
+			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
+			descriptor_binding.RHI_Buffer_View = buffer_view;
 		}
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)

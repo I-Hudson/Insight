@@ -92,7 +92,10 @@ namespace Insight
 
 			void SetPipeline(PipelineStateObject pso);
 
+			RHI_BufferView UploadUniform(const void* data, u32 size);
+
 			void SetUniform(u32 set, u32 binding, const void* data, u32 size);
+			void SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view);
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
 

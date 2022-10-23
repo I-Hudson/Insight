@@ -55,6 +55,7 @@ namespace Insight
 			float pad1 = 0.0f;
 
 			static BufferLight GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda = 0.95f);
+			static void GetCascades(BufferLight& buffer_light, const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda = 0.95f);
 		};
 
 		struct BufferPerObject

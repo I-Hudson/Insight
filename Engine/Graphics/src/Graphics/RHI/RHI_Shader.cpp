@@ -276,7 +276,7 @@ namespace Insight
 					DescriptorType descriptor_type = SpvReflectDescriptorTypeToDescriptorType(binding.descriptor_type);
 					if (std::string(binding.name).find(SHADER_DYNAMIC_TAG) != std::string::npos)
 					{
-						//descriptor_type = DescriptorType::Uniform_Buffer_Dynamic;
+						descriptor_type = DescriptorType::Uniform_Buffer_Dynamic;
 					}
 
 					DescriptorBinding descriptor(
