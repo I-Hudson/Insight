@@ -33,6 +33,10 @@ namespace Insight
 						});
 					m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
 					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
+					if (m_set_render_resolution_to_window_resolution_auto)
+					{
+						SetRenderResolution(m_output_resolution);
+					}
 				});
 
 			m_context = context;

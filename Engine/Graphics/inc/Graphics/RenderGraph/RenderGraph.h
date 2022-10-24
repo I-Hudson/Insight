@@ -137,6 +137,8 @@ namespace Insight
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
+			/// @brief Set the render resolution to the window resolution when the window resolution has changed automaticly.
+			bool m_set_render_resolution_to_window_resolution_auto = true;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
 
