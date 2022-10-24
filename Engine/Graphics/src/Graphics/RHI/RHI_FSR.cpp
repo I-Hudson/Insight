@@ -16,27 +16,42 @@
 #ifdef IS_DX12_ENABLED
 #endif
 
+#include <ffx-fsr2-api/ffx_fsr2.h>
 #include <ffx-fsr2-api/vk/ffx_fsr2_vk.h>
 
 namespace Insight
 {
 	namespace Graphics
 	{
+        FfxFsr2Context              RHI_FSR::m_ffx_fsr2_context;
+        FfxFsr2ContextDescription   RHI_FSR::m_ffx_fsr2_context_description;
+        FfxFsr2DispatchDescription  RHI_FSR::m_ffx_fsr2_dispatch_description;
+
         void RHI_FSR::Init()
         {
             Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
                 {
                     RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
-
-                   
+                    glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                    glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                    CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                 });
+            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
         }
 
         void RHI_FSR::Destroy()
         {
             Core::EventManager::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
-            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+            if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
+            {
+                ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
+                m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
+            }
         }
+           
 
 		void RHI_FSR::GenerateJitterSample(float* x, float* y)
 		{
@@ -97,13 +112,16 @@ namespace Insight
                     , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImageView(), resolution_output_x, resolution_output_y
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_output->GetFormat())), name_output, FFX_RESOURCE_STATE_UNORDERED_ACCESS);
 
+                m_ffx_fsr2_dispatch_description.exposure                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_InputExposure");
+                m_ffx_fsr2_dispatch_description.reactive                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyInputReactiveMap");
+                m_ffx_fsr2_dispatch_description.transparencyAndComposition  = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyTransparencyAndCompositionMap");            
             }
             else if (GraphicsManager::Instance().IsDX12())
             {
 
             }
-            m_ffx_fsr2_dispatch_description.jitterOffset.x          = 0;
-            m_ffx_fsr2_dispatch_description.jitterOffset.y          = 0;
+
+            GenerateJitterSample(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y);
             m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
             m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
             m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.

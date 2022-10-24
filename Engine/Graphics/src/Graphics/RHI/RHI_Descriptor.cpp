@@ -502,7 +502,7 @@ namespace Insight
 				{
 					if (binding.Type == DescriptorType::Uniform_Buffer_Dynamic) 
 					{
-						offsets.push_back(binding.RHI_Buffer_View.GetOffset());
+						offsets.push_back(static_cast<u32>(binding.RHI_Buffer_View.GetOffset()));
 					}
 				}
 			}

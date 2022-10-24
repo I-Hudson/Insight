@@ -108,6 +108,7 @@ namespace Insight
 				if (m_commandList)
 				{
 					m_commandList.end();
+					m_state = RHI_CommandListStates::Ended;
 				}
 			}
 
@@ -588,7 +589,10 @@ namespace Insight
 					m_allocLists.insert(list);
 					list->Reset();
 
-					static_cast<RHI_CommandList_Vulkan*>(list)->GetCommandList().begin(vk::CommandBufferBeginInfo());
+					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(list);
+					cmdListVulkan->GetCommandList().begin(vk::CommandBufferBeginInfo());
+					cmdListVulkan->m_state = RHI_CommandListStates::Recording;
+
 					return list;
 				}
 

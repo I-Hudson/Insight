@@ -41,6 +41,9 @@ namespace Insight
 				virtual void PreRender(RHI_CommandList* cmdList) override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
+				virtual void SetSwaphchainResolution(glm::ivec2 resolution) override;
+				virtual glm::ivec2 GetSwaphchainResolution() const override;
+
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
@@ -70,7 +73,7 @@ namespace Insight
 				vk::PhysicalDevice FindAdapter();
 				std::vector<vk::DeviceQueueCreateInfo> GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo);
 				void GetDeviceExtensionAndLayers(std::set<std::string>& extensions, std::set<std::string>& layers, bool includeAll = false);
-				void CreateSwapchain();
+				void CreateSwapchain(u32 width, u32 height);
 
 				void SetDeviceExtensions();
 				bool CheckInstanceExtension(const char* extension);
@@ -100,14 +103,15 @@ namespace Insight
 				vk::RenderPass m_imguiRenderpass;
 				std::array<vk::Framebuffer, 0> m_imguiFramebuffers;
 
-				int m_currentFrame = 0;
-				int m_availableSwapchainImage = 0;
+				u32 m_currentFrame = 0;
+				u32 m_availableSwapchainImage = 0;
 
 			public:
 				void* m_descriptor_pool = nullptr;
 
 			private:
 
+				FrameResource<u8> m_frameWasSubmitted;
 				FrameResource<vk::Fence> m_submitFences;
 				FrameResource<vk::Semaphore> m_swapchainAcquires;
 				FrameResource<vk::Semaphore> m_signalSemaphores;

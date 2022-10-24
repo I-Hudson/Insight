@@ -82,6 +82,7 @@ namespace Insight
 				vk::PipelineLayout m_bound_pipeline_layout;
 				u64 m_boundDescriptors;
 
+				friend class RenderContext_Vulkan;
 				friend class RHI_CommandListAllocator_Vulkan;
 			};
 

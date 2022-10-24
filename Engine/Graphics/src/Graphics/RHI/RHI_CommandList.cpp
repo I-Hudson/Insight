@@ -43,7 +43,7 @@ namespace Insight
 			RHI_TextureInfo create_info = texture->GetInfo();
 			bool transition_requried = false;
 
-			for (size_t i = 0; i < create_info.Mip_Count; ++i)
+			for (u32 i = 0; i < create_info.Mip_Count; ++i)
 			{
 				if (texture->GetLayout(i) != layout)
 				{
