@@ -25,12 +25,14 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
 				{
+					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 					Release();
 					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
 							manager.Create(m_context);
 						});
 					m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
 				});
 
 			m_context = context;
@@ -78,8 +80,21 @@ namespace Insight
 #endif
 
 			m_passes.clear();
+
+			if (m_render_resolution_has_changed)
+			{
+				m_render_resolution_has_changed = false;
+				Release();
+				m_commandListManager.ForEach([this](CommandListManager& manager)
+					{
+						manager.Create(m_context);
+					});
+				m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+			}
+
 			m_passes = std::move(m_pending_passes);
 			m_pending_passes.clear();
+
 #ifdef RENDER_GRAPH_RENDER_THREAD
 			if (m_render_thread_enabled)
 			{
@@ -109,12 +124,14 @@ namespace Insight
 			else
 #endif
 			{
+				RHI_CommandList* cmdList = nullptr;
 				if (m_context->PrepareRender())
 				{
+					m_commandListManager.Get().Reset();
+					cmdList = m_commandListManager.Get().GetCommandList();
+
 					Build();
 					PlaceBarriers();
-					m_commandListManager.Get().Reset();
-					RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
 
 					m_context->PreRender(cmdList);
 
@@ -127,10 +144,10 @@ namespace Insight
 					}
 					Render(cmdList);
 
-					m_context->PostRender(cmdList);
 					//Clear();
 					++m_frame_count;
 				}
+				m_context->PostRender(cmdList);
 
 				m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
 			}
@@ -195,10 +212,6 @@ namespace Insight
 
 			m_textureCaches->Reset();
 			DeleteTracked(m_textureCaches);
-			///m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>& cache)
-			///	{
-			///		cache.Reset();
-			///	});
 
 			m_commandListManager.ForEach([](CommandListManager& manager)
 				{
@@ -458,6 +471,7 @@ namespace Insight
 
 				barrier.ImageBarriers.push_back(std::move(imageBarrier));
 				cmdList->PipelineBarrier(barrier);
+				//cmdList->SetImageLayout(m_context->GetSwaphchainIamge(), ImageLayout::PresentSrc);
 			}
 
 			cmdList->Close();
@@ -475,6 +489,12 @@ namespace Insight
 			{
 				cmdList->PipelineBarrier(barrier);
 			}
+		}
+
+		void RenderGraph::SetOutputResolution(glm::ivec2 output_resolution)
+		{
+			m_context->SetSwaphchainResolution(output_resolution);
+			m_output_resolution = m_context->GetSwaphchainResolution();
 		}
 	}
 }

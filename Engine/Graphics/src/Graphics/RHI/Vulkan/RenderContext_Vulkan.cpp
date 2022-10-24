@@ -227,7 +227,7 @@ namespace Insight
 				VkSurfaceKHR surfaceKHR;
 				VkResult res = glfwCreateWindowSurface(m_instnace, Window::Instance().GetRawWindow(), nullptr, &surfaceKHR);
 				m_surface = vk::SurfaceKHR(surfaceKHR);
-				CreateSwapchain();
+				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineStateObjectManager.SetRenderContext(this);
@@ -447,6 +447,11 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_lock);
 
+				{
+					IS_PROFILE_SCOPE("ImGui Render");
+					ImGuiRender();
+				}
+
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
 				{
 					return false;
@@ -455,28 +460,35 @@ namespace Insight
 				if (Window::Instance().GetSize() != m_swapchainBufferSize)
 				{
 					IS_PROFILE_SCOPE("Swapchain resize");
-					WaitForGpu();
-					CreateSwapchain();
-					Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+					SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
 					return false;
 				}
 
 				{
-					IS_PROFILE_SCOPE("ImGui Render");
-					ImGuiRender();
-				}
-
-				{
 					IS_PROFILE_SCOPE("Fence wait");
-					vk::Result waitResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0xFFFFFFFF);
-					assert(waitResult == vk::Result::eSuccess);
+					// First get the status of the fence. Then if it has not finished, wait on it.
+					vk::Result fenceStatusResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0);
+					if (fenceStatusResult == vk::Result::eTimeout)
+					{
+						vk::Result waitResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0xFFFFFFFF);
+						ASSERT(waitResult == vk::Result::eSuccess);
+					}
+
 				}
 
 				{
 					IS_PROFILE_SCOPE("acquireNextImageKHR");
-					vk::ResultValue nextImage = m_device.acquireNextImageKHR(m_swapchain, 0xFFFFFFFF, m_swapchainAcquires.Get());
-					m_availableSwapchainImage = nextImage.value;
+					VkResult acquireNextImageResult = vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), 0xFFFFFFFF, static_cast<VkSemaphore>(m_swapchainAcquires.Get())
+						, 0, &m_availableSwapchainImage);
+
 					m_device.resetFences({ m_submitFences.Get() });
+
+
+					if (acquireNextImageResult != VK_SUCCESS)
+					{
+						SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+						return false;
+					}
 				}
 
 				m_descriptorSetManager->Reset();
@@ -495,38 +507,43 @@ namespace Insight
 
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
 			{
-				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
-
-				std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };
-				std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				std::array<vk::Semaphore, 1> signalSemaphore = { m_signalSemaphores.Get() };
-
-				vk::SubmitInfo submitInfo = vk::SubmitInfo(
-					waitSemaphores,
-					dstStageFlgs,
-					commandBuffers,
-					signalSemaphore);
+				if (cmdList != nullptr)
 				{
-					IS_PROFILE_SCOPE("Submit");
-					std::lock_guard lock(m_lock);
-					if (!cmdList->IsDiscard())
-					{
-						m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
-					}
-				}
-				std::array<vk::Semaphore, 1> signalSemaphores = { m_signalSemaphores.Get() };
-				std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
-				std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
+					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
-				vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
-				{
-					IS_PROFILE_SCOPE("Present");
-					std::lock_guard lock(m_lock);
-					if (!cmdList->IsDiscard())
+					std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };
+					std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+					std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+					std::array<vk::Semaphore, 1> signalSemaphore = { m_signalSemaphores.Get() };
+
+					vk::SubmitInfo submitInfo = vk::SubmitInfo(
+						waitSemaphores,
+						dstStageFlgs,
+						commandBuffers,
+						signalSemaphore);
+
+					std::array<vk::Semaphore, 1> signalSemaphores = { m_signalSemaphores.Get() };
+					std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
+					std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
+
+					vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
 					{
-						vk::Result presentResult = m_commandQueues[GPUQueue_Graphics].presentKHR(presentInfo);
-						m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
+						IS_PROFILE_SCOPE("Present");
+						std::lock_guard lock(m_lock);
+						if (!cmdList->IsDiscard())
+						{
+							RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
+							cmdListVulkan->m_state = RHI_CommandListStates::Submitted;
+
+							m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
+							VkResult presentResult = vkQueuePresentKHR(m_commandQueues[GPUQueue_Graphics], reinterpret_cast<const VkPresentInfoKHR*>(&presentInfo));
+
+							if (presentResult != VK_SUCCESS)
+							{
+								SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+							}
+							m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
+						}
 					}
 				}
 
@@ -537,6 +554,18 @@ namespace Insight
 				}
 
 				m_resource_tracker.EndFrame();
+			}
+
+			void RenderContext_Vulkan::SetSwaphchainResolution(glm::ivec2 resolution)
+			{
+				WaitForGpu();
+				CreateSwapchain(resolution.x, resolution.y);
+				Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+			}
+
+			glm::ivec2 RenderContext_Vulkan::GetSwaphchainResolution() const
+			{
+				return m_swapchainBufferSize;
 			}
 
 			void RenderContext_Vulkan::GpuWaitForIdle()
@@ -812,7 +841,7 @@ namespace Insight
 				}
 			}
 
-			void RenderContext_Vulkan::CreateSwapchain()
+			void RenderContext_Vulkan::CreateSwapchain(u32 width, u32 height)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -820,22 +849,22 @@ namespace Insight
 				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
 
 				vk::Extent2D swapchainExtent = {};
-				/// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
 				if (surfaceCapabilites.currentExtent == vk::Extent2D{ 0xFFFFFFFF, 0xFFFFFFFF })
 				{
-					/// If the surface size is undefined, the size is set to
-					/// the size of the images requested.
-					swapchainExtent.width = Window::Instance().GetWidth();
-					swapchainExtent.height = Window::Instance().GetHeight();
+					// If the surface size is undefined, the size is set to
+					// the size of the images requested.
+					swapchainExtent.width = width;
+					swapchainExtent.height = height;
 				}
 				else
 				{
-					/// If the surface size is defined, the swap chain size must match
+					// If the surface size is defined, the swap chain size must match
 					swapchainExtent = surfaceCapabilites.currentExtent;
 				}
 				m_swapchainBufferSize = { swapchainExtent.width, swapchainExtent.height };
 
-				/// Select a present mode for the swapchain
+				// Select a present mode for the swapchain
 
 				std::vector<vk::PresentModeKHR> presentModes = m_adapter.getSurfacePresentModesKHR(m_surface);
 				/// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec

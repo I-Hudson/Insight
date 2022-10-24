@@ -109,8 +109,8 @@ namespace Insight
 			sampler_create_info.AddressMode = SamplerAddressMode::MirroredRepeat;
 			m_buffer_samplers.MirroredRepeat_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
 
-			const u32 width = Window::Instance().GetWidth() * 0.5f;
-			const u32 height = Window::Instance().GetWidth() * 0.5f;
+			const u32 width = Window::Instance().GetWidth();
+			const u32 height = Window::Instance().GetWidth();
 			RenderGraph::Instance().SetRenderResolution({ width, height });
 			RenderGraph::Instance().SetOutputResolution({ width, height });
 

@@ -111,7 +111,6 @@ namespace Insight
 
 			private:
 
-				FrameResource<u8> m_frameWasSubmitted;
 				FrameResource<vk::Fence> m_submitFences;
 				FrameResource<vk::Semaphore> m_swapchainAcquires;
 				FrameResource<vk::Semaphore> m_signalSemaphores;
