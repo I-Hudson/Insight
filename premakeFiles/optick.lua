@@ -36,6 +36,7 @@ project "OptickCore"
     {
 		"{COPY} \"%{cfg.targetdir}/OptickCore.dll\" \"" .. output_deps .. "/dll/\"",
 		"{COPY} \"%{cfg.targetdir}/OptickCore.lib\" \"" .. output_deps .. "/lib/\"",
+		"{COPY} \"%{cfg.targetdir}/OptickCore.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/ImGuiPass.h"
+#include "Graphics/RHI/RHI_FSR.h"
 
 #include "Core/TypeAlias.h"
 
@@ -83,6 +84,7 @@ namespace Insight
 			void DepthPrepass();
 			void Sample();
 			void Composite();
+			void FSR2();
 			void Swapchain();
 			void ImGuiPass();
 
@@ -91,6 +93,7 @@ namespace Insight
 			void UpdateCamera(BufferFrame& camera);
 
 			Graphics::ImGuiPass m_imgui_pass;
+			Graphics::RHI_FSR m_fsr;
 
 			BufferFrame m_buffer_frame;
 			BufferLight m_directional_light;

@@ -74,6 +74,9 @@ namespace Insight
 			virtual void PreRender(RHI_CommandList* cmdList) = 0;
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
+			virtual void SetSwaphchainResolution(glm::ivec2 resolution) = 0;
+			virtual glm::ivec2 GetSwaphchainResolution() const = 0;
+
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 

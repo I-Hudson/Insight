@@ -74,9 +74,6 @@ project "Insight_Graphics"
         "Optickcore.lib",
         "tracy.lib",
         "meshoptimizer.lib",
-
-        "ffx_fsr2_api_x64.lib",
-        "ffx_fsr2_api_vk_x64.lib",
     }
 
     libdirs
@@ -109,6 +106,9 @@ project "Insight_Graphics"
             "SPIRV-Tools-optd.lib",
             "SPVRemapperd.lib",
             "assimpd.lib",
+
+            "ffx_fsr2_api_x64d.lib",
+            "ffx_fsr2_api_vk_x64d.lib",
         }
 
     filter "configurations:Release"  
@@ -124,6 +124,9 @@ project "Insight_Graphics"
             "Optickcore.lib",
             "tracy.lib",
             "assimp.lib",
+
+            "ffx_fsr2_api_x64.lib",
+            "ffx_fsr2_api_vk_x64.lib",
         }
 
     filter "configurations:Testing" 

@@ -33,6 +33,7 @@ project "tracy"
     {
        "{COPY} \"%{cfg.targetdir}/tracy.dll\" \"" .. output_deps .. "/dll/\"",
        "{COPY} \"%{cfg.targetdir}/tracy.lib\" \"" .. output_deps .. "/lib/\"",
+       "{COPY} \"%{cfg.targetdir}/tracy.pdb\" \"" .. output_deps .. "/lib/\"",
     }
 
 	filter "configurations:Debug"

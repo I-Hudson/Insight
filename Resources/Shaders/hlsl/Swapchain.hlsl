@@ -22,7 +22,7 @@ VertexOutput VSMain(uint id : SV_VertexID)
 }
 
 float4 PSMain(VertexOutput input) : SV_TARGET
-{	
+{
 	float4 result = FullScreenTexture.Sample(FullScreenSampler, input.UV);
 	return float4(result.xyz, 1);
 	//return float4(0.5, 1.0, 1.0, 1.0);

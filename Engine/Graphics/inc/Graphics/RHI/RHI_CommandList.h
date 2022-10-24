@@ -18,10 +18,19 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 		class RHI_DescriptorLayout;
+		class RHI_CommandListAllocator;
 
 		class RenderContext;
 		class RenderGraph;
 		class DescriptorAllocator;
+
+		enum class RHI_CommandListStates : uint8_t
+		{
+			Idle,
+			Recording,
+			Ended,
+			Submitted
+		};
 
 		/// Store relevant draw data.
 		struct RHI_CommandListCurrentDrawData
@@ -114,6 +123,8 @@ namespace Insight
 
 			PipelineStateObject m_pso;
 			PipelineStateObject m_activePSO;
+
+			RHI_CommandListStates m_state = RHI_CommandListStates::Idle;
 
 			RHI_CommandListCurrentDrawData m_drawData;
 

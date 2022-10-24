@@ -46,6 +46,8 @@ namespace Insight
 
 	std::vector<Ptr<ECS::Entity>> entities_to_render;
 
+	int pendingRenderResolution[2] = { 0, 0 };
+
 	namespace Graphics
 	{
 
@@ -59,21 +61,20 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_obj = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 
 			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
-			{
-			}
+			{ }
 			Runtime::ResourceManager::Instance().Print();
-			model_sponza->CreateEntityHierarchy();
-			model_sponza_curtains->CreateEntityHierarchy();
-			//model_backpack->CreateEntityHierarchy();
+			model_backpack->CreateEntityHierarchy();
+			//model_sponza->CreateEntityHierarchy();
+			//model_sponza_curtains->CreateEntityHierarchy();
 			//model_vulklan_scene->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
@@ -108,16 +109,29 @@ namespace Insight
 			sampler_create_info.AddressMode = SamplerAddressMode::MirroredRepeat;
 			m_buffer_samplers.MirroredRepeat_Sampler = sampler_manager.GetOrCreateSampler(sampler_create_info);
 
-			m_imgui_pass.Create();
-		}
+			const u32 width = Window::Instance().GetWidth() * 0.5f;
+			const u32 height = Window::Instance().GetWidth() * 0.5f;
+			RenderGraph::Instance().SetRenderResolution({ width, height });
+			RenderGraph::Instance().SetOutputResolution({ width, height });
 
-		bool useShadowCamera = false;
+			pendingRenderResolution[0] = RenderGraph::Instance().GetRenderResolution().x;
+			pendingRenderResolution[1] = RenderGraph::Instance().GetRenderResolution().y;
+
+			m_imgui_pass.Create();
+			//Graphics::RHI_FSR::Instance().Init();
+		}
 
 		void Renderpass::Render()
 		{
 			IS_PROFILE_FUNCTION();
 
-			IMGUI_VALID(ImGui::Checkbox("Move shadow camera", &useShadowCamera));
+			ImGui::Begin("Render");
+			ImGui::DragInt2("Render Resolution", pendingRenderResolution);
+			if (ImGui::Button("Apply Render Resolution"))
+			{
+				RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+			}
+			ImGui::End();
 
 			if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
 			{
@@ -134,9 +148,6 @@ namespace Insight
 			{
 				entities_to_render = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 			}
-
-			RenderGraph::Instance().SetRenderResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
-			RenderGraph::Instance().SetOutputResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
 
 			UpdateCamera(m_buffer_frame);
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
@@ -160,6 +171,7 @@ namespace Insight
 			}
 			Sample();
 			Composite();
+			FSR2();
 			Swapchain();
 
 			ImGuiPass();
@@ -169,6 +181,7 @@ namespace Insight
 		{
 			GraphicsManager::Instance().GetRenderContext()->GpuWaitForIdle();
 			m_imgui_pass.Release();
+			Graphics::RHI_FSR::Instance().Destroy();
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -554,8 +567,8 @@ namespace Insight
 						builder.SetRenderpass(renderpass_description);
 					}
 
-					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+					builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
 				},
 				[this](TestPassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
@@ -688,7 +701,8 @@ namespace Insight
 					pso.FrontFace = FrontFace::CounterClockwise;
 					builder.SetPipeline(pso);
 
-					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+					//builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
 					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 				},
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
@@ -722,6 +736,25 @@ namespace Insight
 				}, std::move(pass_data));
 		}
 
+		void Renderpass::FSR2()
+		{
+			struct PassData
+			{
+			};
+			if (false)
+			{
+				RenderGraph::Instance().AddPass<PassData>(L"FSR2",
+					[](PassData& data, RenderGraphBuilder& builder)
+					{
+
+					},
+					[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
+					{
+
+					});
+			}
+		}
+
 		void Renderpass::Swapchain()
 		{
 			struct TestPassData
@@ -750,12 +783,12 @@ namespace Insight
 					swapchainPso.ShaderDescription = shaderDesc;
 					builder.SetPipeline(swapchainPso);
 
-					builder.SetViewport(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetViewport(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+					builder.SetScissor(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
 
 					builder.SetAsRenderToSwapchain();
 				},
-				[](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[this](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("Swapchain pass execute");
 
@@ -763,7 +796,7 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"SwapchainPass"));
 
-					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
+					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget), m_buffer_samplers.Clamp_Sampler);
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();

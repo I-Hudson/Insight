@@ -89,11 +89,19 @@ namespace Insight
 				m_pending_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 
-			void SetRenderResolution(glm::ivec2 render_resolution) { m_render_resolution = render_resolution; }
+			/// @brief Set the render resolution size.
+			/// @param render_resolution 
+			void SetRenderResolution(glm::ivec2 render_resolution) { m_render_resolution = render_resolution; m_render_resolution_has_changed = true; }
+			/// @brief Return the render resoltuion size.
+			/// @return glm::ivec2
 			glm::ivec2 GetRenderResolution() const { return m_render_resolution; }
 
-			void SetOutputResolution(glm::ivec2 output_resolution) { m_output_resolution = output_resolution; }
-			glm::ivec2 GetOutputResolution() const { return m_render_resolution; }
+			/// @brief Attempt to set the output resolution. This is restricted by the window size (Best to leave alone).
+			/// @param output_resolution 
+			void SetOutputResolution(glm::ivec2 output_resolution);
+			/// @brief Return then output size.
+			/// @return glm::ivec2
+			glm::ivec2 GetOutputResolution() const { return m_output_resolution; }
 
 			static u32 s_MaxFarmeCount;
 
@@ -128,6 +136,7 @@ namespace Insight
 #endif
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_render_resolution = {};
+			bool m_render_resolution_has_changed = false;
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
 

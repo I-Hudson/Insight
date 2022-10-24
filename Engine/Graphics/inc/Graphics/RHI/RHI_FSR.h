@@ -1,9 +1,14 @@
 #pragma once
 
+#include "Graphics/Defines.h"
+
 #include "Core/Singleton.h"
 
 #include <glm/vec2.hpp>
-#include <ffx-fsr2-api/ffx_fsr2.h>
+
+struct FfxFsr2Context;
+struct FfxFsr2ContextDescription;
+struct FfxFsr2DispatchDescription;
 
 namespace Insight
 {
@@ -13,7 +18,7 @@ namespace Insight
         class RHI_CommandList;
         class RHI_Texture;
 
-		class RHI_FSR : public Core::Singleton<RHI_FSR>
+		class IS_GRAPHICS RHI_FSR : public Core::Singleton<RHI_FSR>
 		{
 		public:
 
@@ -39,9 +44,9 @@ namespace Insight
             void CreateContext(u32 renderWidth, u32 renderHeight, u32 displayWidth, u32 displayHeight);
 
 		private:
-			FfxFsr2Context m_ffx_fsr2_context;
-			FfxFsr2ContextDescription m_ffx_fsr2_context_description;
-			FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
+			static FfxFsr2Context m_ffx_fsr2_context;
+			static FfxFsr2ContextDescription m_ffx_fsr2_context_description;
+			static FfxFsr2DispatchDescription m_ffx_fsr2_dispatch_description;
 		};
 	}
 }
