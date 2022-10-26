@@ -38,7 +38,9 @@ namespace Insight
 				{
 					Ptr<ECS::Entity> entity = root_entity->AddChild(mesh->GetFileName());
 					static_cast<ECS::TransformComponent*>(entity->GetComponentByName(ECS::TransformComponent::Type_Name))->SetTransform(mesh->GetTransform());
-					static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(mesh);
+					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->AddComponentByName(ECS::MeshComponent::Type_Name));
+					meshComponent->SetMesh(mesh);
+					meshComponent->SetMaterial(mesh->GetMaterial());
 				}
 				return root_entity.Get();
 			}
@@ -76,6 +78,14 @@ namespace Insight
 				DeleteTracked(mesh);
 			}
 			m_meshes.clear();
+
+			for (Material* material : m_materials)
+			{
+				//ResourceManager::Instance().Unload(material);
+				DeleteTracked(material);
+			}
+			m_meshes.clear();
+
 
 			Renderer::FreeVertexBuffer(m_vertex_buffer);
 			Renderer::FreeVertexBuffer(m_index_buffer);

@@ -20,7 +20,9 @@ namespace Insight
 	{
 		class Model;
 		class Mesh;
+		class Material;
 		class Texture2D;
+		enum class TextureTypes;
 
 		/// @brief Utility class to help with anything related to loading from assimp.
 		class AssimpLoader
@@ -28,7 +30,7 @@ namespace Insight
 		public:
 			static const uint32_t Default_Model_Importer_Flags =
 				// Switch to engine conventions
-				//aiProcess_FlipUVs                   |	/// DirectX style.
+				//aiProcess_FlipUVs                 |	/// DirectX style.
 				aiProcess_MakeLeftHanded            |	
 				// Validate and clean up
 				aiProcess_ValidateDataStructure     |	/// Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct
@@ -79,9 +81,7 @@ namespace Insight
 				std::vector<u32> Indices;
 
 				std::vector<LOD> LODs;
-
-				std::vector<std::string> Texture_File_Paths;
-				std::vector<Texture2D*> Textures;
+				std::vector<Material*> Materials;
 
 				std::string Directoy;
 
@@ -123,9 +123,10 @@ namespace Insight
 			/// @param ai_material 
 			/// @param ai_texture_type 
 			/// @param texture_id 
-			static void ExtractMaterialTextures(aiMaterial* ai_material, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data);
+			static void ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& known_data, AssimpLoaderData& mesh_data);
 			
-			static void ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data);
+			static void ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type_pbr, aiTextureType ai_texture_type_legcy, const char* material_id, 
+				const std::string& directory, TextureTypes textureType, Material* material);
 
 			/// @brief Load the textures which have been extracted.
 			/// @param loader_data 

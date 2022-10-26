@@ -44,7 +44,8 @@ namespace Insight
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
-	std::vector<Ptr<ECS::Entity>> entities_to_render;
+	std::vector<Ptr<ECS::Entity>> opaque_entities_to_render;
+	std::vector<Ptr<ECS::Entity>> transparent_entities_to_render;
 
 	int pendingRenderResolution[2] = { 0, 0 };
 
@@ -146,7 +147,20 @@ namespace Insight
 			WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
 			if (RPtr<App::Scene> scene = w_scene.Lock())
 			{
-				entities_to_render = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+				std::vector<Ptr<ECS::Entity>> entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+				for (Ptr<ECS::Entity> entity : entities)
+				{
+					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
+					Runtime::Material* material = meshComponent->GetMaterial();
+					if (material->GetProperty(Runtime::MaterialProperty::Colour_A) < 1.0f)
+					{
+						transparent_entities_to_render.push_back(entity);
+					}
+					else
+					{
+						opaque_entities_to_render.push_back(entity);
+					}
+				}
 			}
 
 			UpdateCamera(m_buffer_frame);
@@ -243,10 +257,10 @@ namespace Insight
 			struct PassData
 			{
 				RGTextureHandle Depth_Tex;
-				std::vector<Ptr<ECS::Entity>> Entities;
+				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
 			};
 			PassData data;
-			data.Entities = entities_to_render;
+			data.OpaqueEntities = opaque_entities_to_render;
 
 			IMGUI_VALID(ImGui::Begin("Directional Light Direction"));
 			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
@@ -329,7 +343,7 @@ namespace Insight
 
 						cmdList->SetPushConstant(0, sizeof(int), &i);
 
-						for (const Ptr<ECS::Entity> e : data.Entities)
+						for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 						{
 							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
 							glm::mat4 transform = transform_component->GetTransform();
@@ -429,7 +443,7 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
 
-					for (const Ptr<ECS::Entity> e : entities_to_render)
+					for (const Ptr<ECS::Entity> e : opaque_entities_to_render)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 						if (!mesh_component
@@ -461,13 +475,13 @@ namespace Insight
 			{
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
-				std::vector<Ptr<ECS::Entity>> Entities;
+				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
 				int Mesh_Lod = 0;
 			};
 			TestPassData Pass_Data = {};
 			Pass_Data.Buffer_Frame = m_buffer_frame;
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
-			Pass_Data.Entities = entities_to_render;
+			Pass_Data.OpaqueEntities = opaque_entities_to_render;
 
 			static int camera_index = 0;
 			static int mesh_lod_index = 0;
@@ -547,11 +561,14 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 						gbufferPso.Name = L"GBuffer_PSO";
-						gbufferPso.CullMode = CullMode::Back;
-						gbufferPso.FrontFace = FrontFace::Clockwise;
+						gbufferPso.CullMode = CullMode::None;
+						gbufferPso.FrontFace = FrontFace::CounterClockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
-						gbufferPso.DepthCompareOp = CompareOp::LessOrEqual;
-
+						
+						if (Reverse_Z_For_Depth)
+						{
+							gbufferPso.DepthCompareOp = CompareOp::GreaterOrEqual;
+						}
 						if (Depth_Prepass)
 						{
 							gbufferPso.DepthWrite = false;
@@ -585,7 +602,7 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
 
-					for (const Ptr<ECS::Entity> e : data.Entities)
+					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 						if (!mesh_component
@@ -597,7 +614,7 @@ namespace Insight
 						Runtime::Material* material = mesh_component->GetMaterial();
 						if (!material)
 						{
-							//continue;
+							continue;
 						}
 
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
@@ -611,7 +628,7 @@ namespace Insight
 						const Runtime::ResourceReferenceLink* diffuse_link = mesh_component->GetMesh()->GetReferenceLink(0);
 						if (diffuse_link)
 						{
-							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(diffuse_link->GetLinkResource());
+							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
 							cmdList->SetTexture(1, 2, diffuse_texture->GetRHITexture());
 							object.Textures_Set |= 1 << 0;
 						}

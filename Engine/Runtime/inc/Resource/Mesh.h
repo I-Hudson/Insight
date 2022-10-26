@@ -14,6 +14,7 @@ namespace Insight
 
 	namespace Runtime
 	{
+		class Material;
 		class AssimpLoader;
 
 		/// @brief Define the data used to create a mesh from a model.
@@ -49,6 +50,9 @@ namespace Insight
 			/// @brief Return the transform from orgin from the model file.
 			/// @return glm::mat4
 			glm::mat4 GetTransform() const;
+			
+			void SetMaterial(Material* material);
+			Material* GetMaterial() const;
 
 			static const u32 s_LOD_Count = 3;
 
@@ -67,6 +71,7 @@ namespace Insight
 
 		private:
 			std::vector<MeshLOD> m_lods;
+			Material* m_material = nullptr;
 
 			//u32 m_vertex_offset = 0;
 			//u32 m_vertex_count = 0;

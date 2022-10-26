@@ -2,6 +2,7 @@
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
 #include "Resource/Texture2D.h"
+#include "Resource/Material.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -73,31 +74,31 @@ namespace Insight
 			}
 
 			// Wait for all textures to be loaded.
-			bool all_asserts_loaded = false;
-			while (!all_asserts_loaded)
-			{
-				all_asserts_loaded = true;
-				for (size_t i = 0; i < loader_data.Textures.size(); ++i)
-				{
-					Texture2D* texture = loader_data.Textures.at(i);
-					if (texture->GetResourceState() == EResoruceStates::Loading)
-					{
-						all_asserts_loaded = false;
-						std::this_thread::sleep_for(std::chrono::milliseconds(16));
-						break;
-					}
-				}
-			}
+			//bool all_asserts_loaded = false;
+			//while (!all_asserts_loaded)
+			//{
+			//	all_asserts_loaded = true;
+			//	for (size_t i = 0; i < loader_data.Textures.size(); ++i)
+			//	{
+			//		Texture2D* texture = loader_data.Textures.at(i);
+			//		if (texture->GetResourceState() == EResoruceStates::Loading)
+			//		{
+			//			all_asserts_loaded = false;
+			//			std::this_thread::sleep_for(std::chrono::milliseconds(16));
+			//			break;
+			//		}
+			//	}
+			//}
 
-			// All textures have been laoded. Check there current status.
-			for (size_t i = 0; i < loader_data.Textures.size(); ++i)
-			{
-				Texture2D* texture = loader_data.Textures.at(i);
-				if (texture->GetResourceState() != EResoruceStates::Loaded)
-				{
-					IS_CORE_ERROR("[AssimpLoader::LoadModel] Texture '{}' state is not 'Loaded'. Current state is '{}'.", texture->GetFilePath(), ERsourceStatesToString(texture->GetResourceState()));
-				}
-			}
+			//// All textures have been laoded. Check there current status.
+			//for (size_t i = 0; i < loader_data.Textures.size(); ++i)
+			//{
+			//	Texture2D* texture = loader_data.Textures.at(i);
+			//	if (texture->GetResourceState() != EResoruceStates::Loaded)
+			//	{
+			//		IS_CORE_ERROR("[AssimpLoader::LoadModel] Texture '{}' state is not 'Loaded'. Current state is '{}'.", texture->GetFilePath(), ERsourceStatesToString(texture->GetResourceState()));
+			//	}
+			//}
 
 			LoadMaterialTextures(loader_data);
 
@@ -204,28 +205,11 @@ namespace Insight
 
 					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
 
-					for (u64 texture_index = 0; texture_index < mesh_data.Textures.size(); ++texture_index)
+					for (size_t material_index = 0; material_index < mesh_data.Materials.size(); ++material_index)
 					{
-						new_mesh->AddReferenceResource(mesh_data.Textures.at(texture_index), mesh_data.Textures.at(texture_index)->GetFilePath());
+						new_mesh->AddReferenceResource(mesh_data.Materials.at(material_index), mesh_data.Materials.at(material_index)->GetFilePath());
+						new_mesh->SetMaterial(mesh_data.Materials.at(material_index));
 					}
-
-					std::for_each(mesh_data.Textures.begin(), mesh_data.Textures.end(), [&loader_data](Texture2D* texture)
-						{
-							if (std::find(loader_data.Textures.begin(), loader_data.Textures.end(), texture) == loader_data.Textures.end())
-							{
-								loader_data.Textures.push_back(texture);
-							}
-						});
-					std::for_each(mesh_data.Texture_File_Paths.begin(), mesh_data.Texture_File_Paths.end(), [&loader_data](const std::string texture_file_path)
-						{
-							if (std::find(loader_data.Texture_File_Paths.begin(), loader_data.Texture_File_Paths.end(), texture_file_path) == loader_data.Texture_File_Paths.end())
-							{
-								if (!texture_file_path.empty())
-								{
-									loader_data.Texture_File_Paths.push_back(texture_file_path);
-								}
-							}
-						});
 
 					//BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), static_cast<u32>(vertices_optomized.size()));
 					//SubmeshDrawInfo submesh_draw_info = { };
@@ -377,63 +361,125 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
+		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
 		{
 			IS_PROFILE_FUNCTION();
-			ExtractMaterialType(ai_material, aiTextureType_DIFFUSE, "texture_diffuse", known_data, mesh_data);
-			ExtractMaterialType(ai_material, aiTextureType_NORMALS, "texture_normal", known_data, mesh_data);
-			ExtractMaterialType(ai_material, aiTextureType_SPECULAR, "texture_specular", known_data, mesh_data);
+
+			Material* material = NewTracked(Material);
+
+			aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
+			aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
+
+			aiColor4D opacity(1.0f, 1.0f, 1.0f, 1.0f);
+			aiGetMaterialColor(ai_material, AI_MATKEY_OPACITY, &opacity);
+
+			material->SetProperty(MaterialProperty::Colour_R, color_diffuse.r);
+			material->SetProperty(MaterialProperty::Colour_G, color_diffuse.g);
+			material->SetProperty(MaterialProperty::Colour_B, color_diffuse.b);
+			material->SetProperty(MaterialProperty::Colour_A, opacity.r);
+
+			ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);
+			ExtractMaterialType(ai_material, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, "texture_normal", known_data.Directoy, TextureTypes::Normal, material);
+
+			if (auto itr = std::find_if(known_data.Materials.begin(), known_data.Materials.end(), [&material](const Material* mat)
+				{
+					return *material == *mat;
+				}); itr != known_data.Materials.end())
+			{
+				DeleteTracked(material);
+				mesh_data.Materials.push_back(*itr);
+			}
+			else
+			{
+				known_data.Materials.push_back(material);
+				mesh_data.Materials.push_back(material);
+			}
 		}
 
-		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type, const char* material_id, const AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
+		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type_pbr, aiTextureType ai_texture_type_legcy, const char* material_id, 
+			const std::string& directory, TextureTypes textureType, Material* material)
 		{
-			for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
+			// Determine if this is a pbr material or not
+			aiTextureType ai_texture_type = aiTextureType_NONE;
+			ai_texture_type = ai_material->GetTextureCount(ai_texture_type_pbr) > 0 ? ai_texture_type_pbr : ai_texture_type;
+			ai_texture_type = (ai_texture_type == aiTextureType_NONE) ? (ai_material->GetTextureCount(ai_texture_type_legcy) > 0 ? ai_texture_type_legcy : ai_texture_type) : ai_texture_type;
+
+			const u32 texture_count = ai_material->GetTextureCount(ai_texture_type);
+			if (texture_count == 0)
 			{
-				aiString str;
-				ai_material->GetTexture(ai_texture_type, i, &str);
-				std::string file_path = str.C_Str();
-
-				if (file_path.find("./") != std::string::npos)
-				{
-					file_path = file_path.substr(2);
-				}
-
-				// Use absolute paths.
-				// TODO: Should probably change this to be relative. Paths lengths are getting very long.
-				file_path = known_data.Directoy + '\\' + file_path;
-
-				bool skip = false;
-				// Check if mesh_data knows about the texture.
-				for (u32 texture_path_index = 0; texture_path_index < mesh_data.Texture_File_Paths.size(); ++texture_path_index)
-				{
-					if (mesh_data.Texture_File_Paths.at(texture_path_index) == file_path)
-					{
-						mesh_data.Textures.push_back(mesh_data.Textures.at(texture_path_index));
-						mesh_data.Texture_File_Paths.push_back("");
-						skip = true;
-						break;
-					}
-				}
-				// Check if known_data knows about the texture.
-				for (u32 texture_path_index = 0; texture_path_index < known_data.Texture_File_Paths.size(); ++texture_path_index)
-				{
-					if (known_data.Texture_File_Paths.at(texture_path_index) == file_path)
-					{
-						mesh_data.Textures.push_back(known_data.Textures.at(texture_path_index));
-						mesh_data.Texture_File_Paths.push_back("");
-						skip = true;
-						break;
-					}
-				}
-
-				if (!skip)
-				{
-					IS_PROFILE_SCOPE("Create new texture");
-					Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(file_path, Texture2D::GetStaticResourceTypeId()));
-					mesh_data.Textures.push_back(texture);
-					mesh_data.Texture_File_Paths.push_back(file_path);
-				}
+				return;
 			}
+
+			aiString ai_material_path;
+			ai_material->GetTexture(ai_texture_type, 0, &ai_material_path);
+			if (ai_material_path.length == 0)
+			{
+				return;
+			}
+			std::string material_file_path = ai_material_path.C_Str();
+
+			if (material_file_path.find("./") != std::string::npos)
+			{
+				material_file_path = material_file_path.substr(2);
+			}
+
+			// Use absolute paths.
+			// TODO: Should probably change this to be relative. Paths lengths are getting very long.
+			material_file_path = directory + '\\' + material_file_path;
+
+			{
+				IS_PROFILE_SCOPE("Create new texture");
+				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(material_file_path, Texture2D::GetStaticResourceTypeId()));
+				material->SetTexture(textureType, texture);
+			}
+
+			//for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
+			//{
+			//	aiString str;
+			//	ai_material->GetTexture(ai_texture_type, i, &str);
+			//	std::string file_path = str.C_Str();
+
+			//	if (file_path.find("./") != std::string::npos)
+			//	{
+			//		file_path = file_path.substr(2);
+			//	}
+
+			//	// Use absolute paths.
+			//	// TODO: Should probably change this to be relative. Paths lengths are getting very long.
+			//	file_path = known_data.Directoy + '\\' + file_path;
+
+			//	bool skip = false;
+			//	// Check if mesh_data knows about the texture.
+			//	for (u32 texture_path_index = 0; texture_path_index < mesh_data.Texture_File_Paths.size(); ++texture_path_index)
+			//	{
+			//		if (mesh_data.Texture_File_Paths.at(texture_path_index) == file_path)
+			//		{
+			//			mesh_data.Textures.push_back(mesh_data.Textures.at(texture_path_index));
+			//			mesh_data.Texture_File_Paths.push_back("");
+			//			skip = true;
+			//			break;
+			//		}
+			//	}
+			//	// Check if known_data knows about the texture.
+			//	for (u32 texture_path_index = 0; texture_path_index < known_data.Texture_File_Paths.size(); ++texture_path_index)
+			//	{
+			//		if (known_data.Texture_File_Paths.at(texture_path_index) == file_path)
+			//		{
+			//			mesh_data.Textures.push_back(known_data.Textures.at(texture_path_index));
+			//			mesh_data.Texture_File_Paths.push_back("");
+			//			skip = true;
+			//			break;
+			//		}
+			//	}
+
+			//	if (!skip)
+			//	{
+			//		IS_PROFILE_SCOPE("Create new texture");
+			//		Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(file_path, Texture2D::GetStaticResourceTypeId()));
+			//		mesh_data.Textures.push_back(texture);
+			//		mesh_data.Texture_File_Paths.push_back(file_path);
+			//	}
+			//}
 		}
 
 		std::string GetFileNameFromPath(const std::string& path)
@@ -455,21 +501,21 @@ namespace Insight
 			// TODO: Texture loading is one of the main issues of performance. (The uploading takes a lot of time)
 			/// Maybe add a new system to defer GPU resource uploads, this would require something on CPU/Host
 			/// side to track the current state of a resource. Or the GPU resource could track this it self??? Thoughts?
-			concurrency::task_group task_group;
-			for (size_t i = 0; i < loader_data.Textures.size(); ++i)
-			{
-				Texture2D* texture = loader_data.Textures.at(i);
-				std::string texture_file_path = loader_data.Texture_File_Paths.at(i);
-				if (!texture_file_path.empty())
-				{
-					task_group.run([texture, texture_file_path]()
-						{
-							//texture->LoadFromFile(texture_file_path);
-							texture->GetRHITexture()->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
-						});
-				}
-			}
-			task_group.wait();
+			//concurrency::task_group task_group;
+			//for (size_t i = 0; i < loader_data.Textures.size(); ++i)
+			//{
+			//	Texture2D* texture = loader_data.Textures.at(i);
+			//	std::string texture_file_path = loader_data.Texture_File_Paths.at(i);
+			//	if (!texture_file_path.empty())
+			//	{
+			//		task_group.run([texture, texture_file_path]()
+			//			{
+			//				//texture->LoadFromFile(texture_file_path);
+			//				texture->GetRHITexture()->SetName(Platform::WStringFromString(GetFileNameFromPath(texture_file_path)));
+			//			});
+			//	}
+			//}
+			//task_group.wait();
 		}
 
 		void AssimpLoader::GenerateLODs(AssimpLoaderData& loader_data)

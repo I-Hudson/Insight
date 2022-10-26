@@ -32,6 +32,16 @@ namespace Insight
 			return m_transform_offset;
 		}
 
+		void Mesh::SetMaterial(Material* material)
+		{
+			m_material = material;
+		}
+
+		Material* Mesh::GetMaterial() const
+		{
+			return m_material;
+		}
+
 		void Mesh::Load()
 		{
 			//ASSERT(!m_vertex_buffer);

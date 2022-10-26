@@ -14,6 +14,40 @@ namespace Insight
 			return m_textures.at(static_cast<u32>(texture_type));
 		}
 
+		void Material::SetProperty(MaterialProperty property, float value)
+		{
+			m_properties.at(static_cast<u32>(property)) = value;
+		}
+
+		float Material::GetProperty(MaterialProperty property) const
+		{
+			return m_properties.at(static_cast<u32>(property));
+		}
+
+		bool Material::operator==(const Material& other) const
+		{
+			for (size_t i = 0; i < static_cast<u64>(TextureTypes::Count); ++i)
+			{
+				if (m_textures.at(i) != other.m_textures.at(i))
+				{
+					return false;
+				}
+			}
+			for (size_t i = 0; i < static_cast<u64>(MaterialProperty::Count); ++i)
+			{
+				if (m_properties.at(i) != other.m_properties.at(i))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		bool Material::operator!=(const Material& other) const
+		{
+			return !(*this == other);
+		}
+
 		void Material::Load()
 		{
 		}

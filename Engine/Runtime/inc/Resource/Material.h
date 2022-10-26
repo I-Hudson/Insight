@@ -11,6 +11,19 @@ namespace Insight
 	{
 		class Texture2D;
 
+		enum class MaterialProperty
+		{
+			Colour_R,
+			Colour_G,
+			Colour_B,
+			Colour_A,
+
+			UV_Tilling_X,
+			UV_Tilling_Y,
+
+			Count
+		};
+
 		class Material : public IResource
 		{
 			REGISTER_RESOURCE(Material);
@@ -18,6 +31,12 @@ namespace Insight
 
 			void SetTexture(TextureTypes texture_type, Texture2D* texture);
 			Texture2D* GetTexture(TextureTypes texture_type) const;
+
+			void SetProperty(MaterialProperty property, float value);
+			float GetProperty(MaterialProperty property) const;
+
+			bool operator==(const Material& other) const;
+			bool operator!=(const Material& other) const;
 
 		private:
 			/// @brief Handle loading the resource from disk.
@@ -34,6 +53,8 @@ namespace Insight
 
 		private:
 			std::array<Texture2D*, static_cast<u32>(TextureTypes::Count)> m_textures;
+			std::array<float, static_cast<u32>(MaterialProperty::Count)> m_properties;
+
 		};
 	}
 }
