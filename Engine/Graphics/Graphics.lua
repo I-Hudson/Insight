@@ -20,7 +20,8 @@ project "Insight_Graphics"
     defines
     {
         "IS_EXPORT_GRAPHICS_DLL",
-        "COMMAND_LIST_RENDER_BATCH"
+        "COMMAND_LIST_RENDER_BATCH",
+        "IS_NVIDIA_AFTERMATH_ENABLED",
     }
     
     includedirs
@@ -44,6 +45,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.FFR2}",
+        "%{IncludeDirs.Aftermath}",
     }
 
     files 
@@ -74,6 +76,7 @@ project "Insight_Graphics"
         "Optickcore.lib",
         "tracy.lib",
         "meshoptimizer.lib",
+        "GFSDK_Aftermath_Lib.x64.lib",
     }
 
     libdirs
