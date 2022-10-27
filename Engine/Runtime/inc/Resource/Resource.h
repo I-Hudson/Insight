@@ -203,7 +203,7 @@ namespace Insight
 
 			/// @brief Check if a resource exists with a given file path.
 			/// @return bool
-			bool HasResource(std::string_view file_path) const;
+			bool HasResource(const std::string& file_path) const;
 
 			/// @brief Export all the time stats for resource loading to a file.
 			/// @param file_path 

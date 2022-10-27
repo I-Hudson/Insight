@@ -9,6 +9,7 @@
 #include "Graphics/Window.h"
 
 #include "Core/Profiler.h"
+#include "Core/Logger.h"
 
 #include "Input/InputManager.h"
 
@@ -62,9 +63,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_sponza_obj = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
@@ -73,8 +73,8 @@ namespace Insight
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{ }
 			Runtime::ResourceManager::Instance().Print();
-			model_backpack->CreateEntityHierarchy();
-			//model_sponza->CreateEntityHierarchy();
+			//model_backpack->CreateEntityHierarchy();
+			model_sponza->CreateEntityHierarchy();
 			//model_sponza_curtains->CreateEntityHierarchy();
 			//model_vulklan_scene->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
@@ -607,33 +607,30 @@ namespace Insight
 
 					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 					{
-						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-						if (!mesh_component
-							|| !mesh_component->GetMesh())
+						ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+						if (!meshComponent
+							|| !meshComponent->GetMesh())
 						{
 							continue;
 						}
 
-						Runtime::Material* material = mesh_component->GetMaterial();
+						Runtime::Material* material = meshComponent->GetMaterial();
 						if (!material)
 						{
 							continue;
 						}
 
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-						glm::mat4 transform = transform_component->GetTransform();
 
 						BufferPerObject object = {};
-						object.Transform = transform;
-						object.Previous_Transform = transform;
+						object.Transform = transform_component->GetTransform();
+						object.Previous_Transform = transform_component->GetPreviousTransform();
 
 						// Theses sets and bindings shouldn't chagne.
-						const Runtime::ResourceReferenceLink* diffuse_link = mesh_component->GetMesh()->GetReferenceLink(0);
-						ASSERT(diffuse_link);
-						if (diffuse_link)
+						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
+						if (diffuseTexture)
 						{
-							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
-							cmdList->SetTexture(1, 2, diffuse_texture->GetRHITexture());
+							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
 							object.Textures_Set |= 1 << 0;
 						}
 						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
@@ -641,7 +638,7 @@ namespace Insight
 
 						cmdList->SetUniform(1, 1, object);
 
-						mesh_component->GetMesh()->Draw(cmdList, data.Mesh_Lod);
+						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
 
 					cmdList->EndRenderpass();

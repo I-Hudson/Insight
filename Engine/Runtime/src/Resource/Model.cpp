@@ -1,6 +1,8 @@
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
 #include "Resource/Texture.h"
+#include "Resource/Material.h"
+
 #include "Resource/Loaders/AssimpLoader.h"
 
 #include "Graphics/RenderContext.h"
@@ -81,10 +83,10 @@ namespace Insight
 
 			for (Material* material : m_materials)
 			{
-				//ResourceManager::Instance().Unload(material);
+				ResourceManager::Instance().Unload(material);
 				DeleteTracked(material);
 			}
-			m_meshes.clear();
+			m_materials.clear();
 
 
 			Renderer::FreeVertexBuffer(m_vertex_buffer);

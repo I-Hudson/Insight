@@ -59,10 +59,12 @@ namespace Insight
 
 			AssimpLoaderData loader_data;
 			loader_data.Model = model;
-			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('\\'));
+			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
 			GenerateLODs(loader_data);
 			UploadGPUData(loader_data);
+
+			loader_data.Model->m_materials = loader_data.Materials;
 
 			for (size_t i = 0; i < model->m_meshes.size(); ++i)
 			{
@@ -174,7 +176,7 @@ namespace Insight
 						loader_data.Model->m_meshes.push_back(new_mesh);
 						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
-						new_mesh->m_file_path = loader_data.Directoy + "\\" + new_mesh->m_mesh_name;
+						new_mesh->m_file_path = loader_data.Directoy + '/' + new_mesh->m_mesh_name;
 
 						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
 						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
@@ -207,7 +209,7 @@ namespace Insight
 
 					for (size_t material_index = 0; material_index < mesh_data.Materials.size(); ++material_index)
 					{
-						new_mesh->AddReferenceResource(mesh_data.Materials.at(material_index), mesh_data.Materials.at(material_index)->GetFilePath());
+						//new_mesh->AddReferenceResource(mesh_data.Materials.at(material_index), mesh_data.Materials.at(material_index)->GetFilePath());
 						new_mesh->SetMaterial(mesh_data.Materials.at(material_index));
 					}
 
@@ -365,34 +367,35 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			Material* material = NewTracked(Material);
-
-			aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
-			aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
-
-			aiColor4D opacity(1.0f, 1.0f, 1.0f, 1.0f);
-			aiGetMaterialColor(ai_material, AI_MATKEY_OPACITY, &opacity);
-
-			material->SetProperty(MaterialProperty::Colour_R, color_diffuse.r);
-			material->SetProperty(MaterialProperty::Colour_G, color_diffuse.g);
-			material->SetProperty(MaterialProperty::Colour_B, color_diffuse.b);
-			material->SetProperty(MaterialProperty::Colour_A, opacity.r);
-
-			ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);
-			ExtractMaterialType(ai_material, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, "texture_normal", known_data.Directoy, TextureTypes::Normal, material);
-
-			if (auto itr = std::find_if(known_data.Materials.begin(), known_data.Materials.end(), [&material](const Material* mat)
-				{
-					return *material == *mat;
-				}); itr != known_data.Materials.end())
+			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
+			if (ResourceManager::Instance().HasResource(material_path))
 			{
-				DeleteTracked(material);
-				mesh_data.Materials.push_back(*itr);
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Instance().Load(material_path, Material::GetStaticResourceTypeId())));
 			}
 			else
 			{
-				known_data.Materials.push_back(material);
+				Material* material = NewTracked(Material);
+				material->m_file_path = material_path;
+
+				aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
+				aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
+
+				aiColor4D opacity(1.0f, 1.0f, 1.0f, 1.0f);
+				aiGetMaterialColor(ai_material, AI_MATKEY_OPACITY, &opacity);
+
+				material->SetProperty(MaterialProperty::Colour_R, color_diffuse.r);
+				material->SetProperty(MaterialProperty::Colour_G, color_diffuse.g);
+				material->SetProperty(MaterialProperty::Colour_B, color_diffuse.b);
+				material->SetProperty(MaterialProperty::Colour_A, opacity.r);
+
+				ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);
+				ExtractMaterialType(ai_material, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, "texture_normal", known_data.Directoy, TextureTypes::Normal, material);
+
+				material->m_resource_state = Runtime::EResoruceStates::Loaded;
+				material->m_storage_type = Runtime::ResourceStorageTypes::Memory;
+
 				mesh_data.Materials.push_back(material);
+				known_data.Materials.push_back(material);
 			}
 		}
 
@@ -425,12 +428,13 @@ namespace Insight
 
 			// Use absolute paths.
 			// TODO: Should probably change this to be relative. Paths lengths are getting very long.
-			material_file_path = directory + '\\' + material_file_path;
+			material_file_path = directory + '/' + material_file_path;
 
 			{
 				IS_PROFILE_SCOPE("Create new texture");
 				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(material_file_path, Texture2D::GetStaticResourceTypeId()));
 				material->SetTexture(textureType, texture);
+				material->AddReferenceResource(texture, texture->GetFilePath());
 			}
 
 			//for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)
@@ -446,7 +450,7 @@ namespace Insight
 
 			//	// Use absolute paths.
 			//	// TODO: Should probably change this to be relative. Paths lengths are getting very long.
-			//	file_path = known_data.Directoy + '\\' + file_path;
+			//	file_path = known_data.Directoy + '/' + file_path;
 
 			//	bool skip = false;
 			//	// Check if mesh_data knows about the texture.

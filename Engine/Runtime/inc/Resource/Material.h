@@ -10,6 +10,7 @@ namespace Insight
 	namespace Runtime
 	{
 		class Texture2D;
+		class AssimpLoader;
 
 		enum class MaterialProperty
 		{
@@ -28,6 +29,9 @@ namespace Insight
 		{
 			REGISTER_RESOURCE(Material);
 		public:
+			Material();
+			virtual ~Material() override;
+
 
 			void SetTexture(TextureTypes texture_type, Texture2D* texture);
 			Texture2D* GetTexture(TextureTypes texture_type) const;
@@ -55,6 +59,7 @@ namespace Insight
 			std::array<Texture2D*, static_cast<u32>(TextureTypes::Count)> m_textures;
 			std::array<float, static_cast<u32>(MaterialProperty::Count)> m_properties;
 
+			friend class AssimpLoader;
 		};
 	}
 }

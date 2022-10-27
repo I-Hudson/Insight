@@ -4,6 +4,14 @@ namespace Insight
 {
 	namespace Runtime
 	{
+		Material::Material()
+			: m_textures({ nullptr, nullptr, nullptr })
+			, m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
+		{ }
+
+		Material::~Material()
+		{ }
+
 		void Material::SetTexture(TextureTypes texture_type, Texture2D* texture)
 		{
 			m_textures.at(static_cast<u32>(texture_type)) = texture;

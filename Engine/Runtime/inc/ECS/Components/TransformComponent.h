@@ -19,10 +19,13 @@ namespace Insight
 
 			/// @brief Return the transform.
 			/// @return glm::mat4.
-			glm::mat4 GetTransform() const { return m_transform; }
+			glm::mat4 GetTransform()         const { return m_transform; }
+			/// @brief Return thr previous frame transform.
+			/// @return 
+			glm::mat4 GetPreviousTransform() const { return m_previous_transform; }
 			/// @brief Return the Position.
 			/// @return glm::vec3.
-			glm::vec3 GetPosition() const { return m_transform[3].xyz; }
+			glm::vec3 GetPosition()          const { return m_transform[3].xyz; }
 
 			/// @brief Set the Transform.
 			/// @param transform 

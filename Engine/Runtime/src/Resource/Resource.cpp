@@ -75,7 +75,7 @@ namespace Insight
 
 		std::string IResource::GetFileName() const
 		{
-			return m_file_path.substr(m_file_path.find_last_of('\\'), m_file_path.find('.') - m_file_path.find_last_of('\\'));
+			return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
 		}
 
 		EResoruceStates IResource::GetResourceState() const
@@ -326,10 +326,10 @@ namespace Insight
 			return m_loaded_resource_count;
 		}
 
-		bool ResourceManager::HasResource(std::string_view file_path) const
+		bool ResourceManager::HasResource(const std::string& file_path) const
 		{
 			std::shared_lock lock(m_lock);
-			return m_resources.find(file_path.data()) != m_resources.end();
+			return m_resources.find(file_path) != m_resources.end();
 		}
 
 		void ResourceManager::ExportStatsToFile(const std::string& file_path)
@@ -351,6 +351,7 @@ namespace Insight
 		{
 			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
 			std::string abs_file_path = abs_file_system_path.u8string();
+			std::replace(abs_file_path.begin(), abs_file_path.end(), '\\', '/');
 			IResource* resource = nullptr;
 
 			{
@@ -428,14 +429,15 @@ namespace Insight
 
 		void ResourceManager::AddExistingResource(IResource* resource, const std::string& file_path)
 		{
-
+			ASSERT(!file_path.empty());
 			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
 			std::string abs_file_path = abs_file_system_path.u8string();
+			std::replace(abs_file_path.begin(), abs_file_path.end(), '\\', '/');
 			{
 				std::lock_guard lock(m_lock);
 				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
 				{
-					IS_CORE_WARN("[ResourceManager::AddResource] There is already a resource with the file path of '{}'.", file_path);
+					IS_CORE_WARN("[ResourceManager::AddResource] There is already a resource with the file path of '{0}'.", file_path.c_str());
 					return;
 				}
 				m_resources[abs_file_path] = resource;
