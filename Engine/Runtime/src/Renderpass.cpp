@@ -144,6 +144,9 @@ namespace Insight
 				}
 			}
 
+			opaque_entities_to_render.clear();
+			transparent_entities_to_render.clear();
+
 			WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
 			if (RPtr<App::Scene> scene = w_scene.Lock())
 			{
@@ -626,6 +629,7 @@ namespace Insight
 
 						// Theses sets and bindings shouldn't chagne.
 						const Runtime::ResourceReferenceLink* diffuse_link = mesh_component->GetMesh()->GetReferenceLink(0);
+						ASSERT(diffuse_link);
 						if (diffuse_link)
 						{
 							Runtime::Texture2D* diffuse_texture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
@@ -719,8 +723,7 @@ namespace Insight
 					builder.SetPipeline(pso);
 
 					builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
-					//builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
-					builder.SetScissor(Window::Instance().GetWidth(), Window::Instance().GetHeight());
+					builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
 				},
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
