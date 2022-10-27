@@ -6,6 +6,7 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
+#include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
 #include "VmaUsage.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
@@ -105,6 +106,8 @@ namespace Insight
 
 				u32 m_currentFrame = 0;
 				u32 m_availableSwapchainImage = 0;
+
+				Insight::Graphics::RHI_GPUCrashTracker* m_gpuCrashTracker = nullptr;
 
 			public:
 				void* m_descriptor_pool = nullptr;

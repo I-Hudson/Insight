@@ -149,6 +149,12 @@ namespace Insight
 
 				m_adapter = FindAdapter();
 
+				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
+				if (m_gpuCrashTracker)
+				{
+					m_gpuCrashTracker->Init();
+				}
+
 				std::vector<QueueInfo> queueInfo = {};
 				std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = GetDeviceQueueCreateInfos(queueInfo);
 				int queueSize = 0;
@@ -336,6 +342,12 @@ namespace Insight
 
 				m_device.destroy();
 				m_device = nullptr;
+
+				if (m_gpuCrashTracker)
+				{
+					m_gpuCrashTracker->Destroy();
+					DeleteTracked(m_gpuCrashTracker);
+				}
 
 				if (debugUtilsMessenger)
 				{
@@ -658,7 +670,7 @@ namespace Insight
 					0,
 					"Insight",
 					0,
-					VK_API_VERSION_1_2);
+					VK_API_VERSION_1_3);
 
 				applicationInfo.setApiVersion(std::min(sdk_version, driver_version));
 
@@ -732,7 +744,7 @@ namespace Insight
 
 				vk::ValidationFeaturesEXT validation_features = { };
 				validation_features.setEnabledValidationFeatures(validation_features_enabled);
-				instanceCreateInfo.setPNext(&validation_features);
+				//instanceCreateInfo.setPNext(&validation_features);
 #endif
 				return vk::createInstance(instanceCreateInfo);
 			}
