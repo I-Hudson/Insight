@@ -92,7 +92,7 @@ namespace Insight
 
 			/// @brief Set the render resolution size.
 			/// @param render_resolution 
-			void SetRenderResolution(glm::ivec2 render_resolution) { m_render_resolution = render_resolution; m_render_resolution_has_changed = true; }
+			void SetRenderResolution(glm::ivec2 render_resolution);
 			/// @brief Return the render resoltuion size.
 			/// @return glm::ivec2
 			glm::ivec2 GetRenderResolution() const { return m_render_resolution; }

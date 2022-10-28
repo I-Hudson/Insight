@@ -328,26 +328,29 @@ namespace Insight
 				std::vector<ImageBarrier> depthImageBarriers;
 
 				/// Colour writes
-				for (auto const& rt : pass.Get()->m_textureWrites)
+				if (!pass->m_skipTextureWriteBarriers)
 				{
-					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
-					PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
+					for (auto const& rt : pass.Get()->m_textureWrites)
+					{
+						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
 
-					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
 
-					ImageBarrier barrier;
-					barrier.TextureHandle = rt;
-					barrier.Image = texture;
+						ImageBarrier barrier;
+						barrier.TextureHandle = rt;
+						barrier.Image = texture;
 
-					barrier.SrcAccessFlags = AccessFlagBits::None;
-					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
+						barrier.SrcAccessFlags = AccessFlagBits::None;
+						barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
 
-					barrier.DstAccessFlags = AccessFlagBits::ColorAttachmentWrite;
-					barrier.NewLayout = ImageLayout::ColourAttachment;
-					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
-					
-					m_texture_barrier_history[texture].push_back(barrier);
-					colorImageBarriers.push_back(std::move(barrier));
+						barrier.DstAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+						barrier.NewLayout = ImageLayout::ColourAttachment;
+						barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+
+						m_texture_barrier_history[texture].push_back(barrier);
+						colorImageBarriers.push_back(std::move(barrier));
+					}
 				}
 				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
 				colorPipelineBarrier.DstStage = +PipelineStageFlagBits::ColourAttachmentOutput;
@@ -498,6 +501,13 @@ namespace Insight
 			{
 				cmdList->PipelineBarrier(barrier);
 			}
+		}
+
+		void RenderGraph::SetRenderResolution(glm::ivec2 render_resolution)
+		{
+			m_render_resolution = render_resolution;
+			m_render_resolution_has_changed = true;
+			Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
 		}
 
 		void RenderGraph::SetOutputResolution(glm::ivec2 output_resolution)

@@ -106,5 +106,10 @@ namespace Insight
 		{
 			m_pass->m_scissor = glm::ivec2(width, height);
 		}
+
+		void RenderGraphBuilder::SkipTextureWriteBarriers()
+		{
+			m_pass->m_skipTextureWriteBarriers = true;
+		}
 	}
 }

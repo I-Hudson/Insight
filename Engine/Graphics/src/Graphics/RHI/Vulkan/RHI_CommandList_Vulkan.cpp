@@ -56,6 +56,8 @@ namespace Insight
 					b.subresourceRange.baseArrayLayer = imageBarrier.SubresourceRange.BaseArrayLayer;
 					b.subresourceRange.layerCount = imageBarrier.SubresourceRange.LayerCount;
 
+					imageBarrier.Image->SetLayout(imageBarrier.NewLayout);
+
 					imageBarriers.push_back(std::move(b));
 				}
 				PipelineBarrier(barrier.SrcStage
@@ -246,10 +248,11 @@ namespace Insight
 						renderingInfo.layerCount = 1;
 
 						int descriptionIndex = 0;
-						for (const RHI_Texture* texture : renderDescription.ColourAttachments)
+						for (RHI_Texture* texture : renderDescription.ColourAttachments)
 						{
 							vk::RenderingAttachmentInfo attachment = makeRenderingAttachment(texture, renderDescription.Attachments.at(descriptionIndex));
 							colourAttachments.push_back(attachment);
+							texture->SetLayout(renderDescription.Attachments.at(descriptionIndex).FinalLayout);
 							++descriptionIndex;
 						}
 						renderingInfo.setColorAttachments(colourAttachments);
@@ -263,6 +266,8 @@ namespace Insight
 								static_cast<u32>(renderDescription.DepthStencilAttachment.DepthStencilClear.y));
 							renderingInfo.setPDepthAttachment(&depthAttachment);
 							renderingInfo.setPStencilAttachment(&detencilAttacment);
+
+							renderDescription.DepthStencil->SetLayout(renderDescription.DepthStencilAttachment.FinalLayout);
 						}
 
 						m_commandList.beginRendering(renderingInfo);

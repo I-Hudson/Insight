@@ -59,13 +59,15 @@ namespace Insight
 			void LoadFromFile(std::string filePath);
 			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
-			RHI_TextureInfo GetInfo(u32 mip = 0)	    const { return m_infos.at(mip); }
-			int GetWidth                 (u32 mip = 0)	const { return m_infos.at(mip).Width; }
-			int GetHeight                (u32 mip = 0)	const { return m_infos.at(mip).Height; }
-			int GetChannels              (u32 mip = 0)	const { return 4; }
-			TextureType GetType          (u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
-			PixelFormat GetFormat		 (u32 mip = 0)	const { return m_infos.at(mip).Format; }
-			ImageLayout GetLayout        (u32 mip = 0)	const { return m_infos.at(mip).Layout; }
+			RHI_TextureInfo GetInfo(u32 mip = 0)					const { return m_infos.at(mip); }
+			int				GetWidth                (u32 mip = 0)	const { return m_infos.at(mip).Width; }
+			int				GetHeight               (u32 mip = 0)	const { return m_infos.at(mip).Height; }
+			int				GetChannels             (u32 mip = 0)	const { return 4; }
+			TextureType		GetType					(u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
+			PixelFormat		GetFormat				(u32 mip = 0)	const { return m_infos.at(mip).Format; }
+			ImageLayout		GetLayout				(u32 mip = 0)	const { return m_infos.at(mip).Layout; }
+
+			void			SetLayout				(ImageLayout newLayout, u32 mip = 0) { m_infos.at(mip).Layout = newLayout; }
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
 			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.

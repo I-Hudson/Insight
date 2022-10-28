@@ -299,7 +299,7 @@ namespace Insight
 			switch (layout)
 			{
 			case Insight::Graphics::ImageLayout::Undefined:
-				FAIL_ASSERT();
+				access_flags = AccessFlagBits::None;
 				break;
 
 			case Insight::Graphics::ImageLayout::General:

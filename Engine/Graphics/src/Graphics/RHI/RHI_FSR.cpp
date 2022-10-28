@@ -36,6 +36,14 @@ namespace Insight
                     glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
                     CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                 });
+            Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
+                {
+                    RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+                    glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                    glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                    CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+                });
+
             glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
             glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
@@ -122,7 +130,7 @@ namespace Insight
             }
 
             GenerateJitterSample(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y);
-            m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
+            m_ffx_fsr2_dispatch_description.motionVectorScale.x     = -static_cast<float>(resolution_render_x);
             m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
             m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.
             m_ffx_fsr2_dispatch_description.enableSharpening        = sharpness != 0.0f;

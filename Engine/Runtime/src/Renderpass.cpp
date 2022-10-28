@@ -63,8 +63,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
@@ -73,8 +73,8 @@ namespace Insight
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{ }
 			Runtime::ResourceManager::Instance().Print();
-			//model_backpack->CreateEntityHierarchy();
-			model_sponza->CreateEntityHierarchy();
+			model_backpack->CreateEntityHierarchy();
+			//model_sponza->CreateEntityHierarchy();
 			//model_sponza_curtains->CreateEntityHierarchy();
 			//model_vulklan_scene->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
@@ -119,7 +119,7 @@ namespace Insight
 			pendingRenderResolution[1] = RenderGraph::Instance().GetRenderResolution().y;
 
 			m_imgui_pass.Create();
-			//Graphics::RHI_FSR::Instance().Init();
+			Graphics::RHI_FSR::Instance().Init();
 		}
 
 		void Renderpass::Render()
@@ -201,7 +201,7 @@ namespace Insight
 			GBuffer();
 			TransparentGBuffer();
 			Composite();
-			FSR2();
+			//FSR2();
 			Swapchain();
 
 			ImGuiPass();
@@ -887,7 +887,7 @@ namespace Insight
 					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
-						, PixelFormat::R32G32B32A32_Float
+						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
 					RGTextureHandle composite_handle = builder.CreateTexture(L"Composite_Tex", create_info);
 					builder.WriteTexture(composite_handle);
@@ -942,21 +942,53 @@ namespace Insight
 
 		void Renderpass::FSR2()
 		{
+			if (RenderGraph::Instance().GetRenderResolution() == RenderGraph::Instance().GetOutputResolution())
+			{
+				return;
+			}
+
 			struct PassData
 			{
+				BufferFrame BufferFrame;
 			};
-			if (false)
-			{
-				RenderGraph::Instance().AddPass<PassData>(L"FSR2",
-					[](PassData& data, RenderGraphBuilder& builder)
-					{
+			PassData passData = {};
+			passData.BufferFrame = m_buffer_frame;
 
-					},
-					[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
-					{
+			RenderGraph::Instance().AddPass<PassData>(L"FSR2",
+				[](PassData& data, RenderGraphBuilder& builder)
+				{
+					builder.ReadTexture(builder.GetTexture(L"Composite_Tex"));
+					builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
+					builder.ReadTexture(builder.GetTexture(L"VelocityRT"));
 
-					});
-			}
+					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
+						builder.GetOutputResolution().x
+						, builder.GetOutputResolution().y
+						, PixelFormat::R8G8B8A8_UNorm
+						, ImageUsageFlagsBits::Storage | ImageUsageFlagsBits::Sampled);
+					RGTextureHandle textureHandle = builder.CreateTexture(L"FSR_Output", create_info);
+					builder.WriteTexture(textureHandle);
+
+					builder.SetViewport(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
+					builder.SetScissor(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
+
+					builder.SkipTextureWriteBarriers();
+				},
+				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+					RHI_FSR::Instance().Dispatch(cmd_list
+						, render_graph.GetRHITexture(L"Composite_Tex")
+						, render_graph.GetRHITexture(L"GBuffer_DepthStencil")
+						, render_graph.GetRHITexture(L"VelocityRT")
+						, render_graph.GetRHITexture(L"FSR_Output")
+						, Main_Camera_Near_Plane
+						, Main_Camera_Far_Plane
+						, 90.0f
+						, App::Engine::s_FrameTimer.GetElapsedTimeMillFloat()
+						, 1.0f
+						, false);
+				}, std::move(passData));
+
 		}
 
 		void Renderpass::Swapchain()
