@@ -144,6 +144,13 @@ namespace Insight
 				}
 			}
 
+			UpdateCamera(m_buffer_frame);
+			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+
+			g_global_resources = { };
+			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+
 			opaque_entities_to_render.clear();
 			transparent_entities_to_render.clear();
 
@@ -166,12 +173,17 @@ namespace Insight
 				}
 			}
 
-			UpdateCamera(m_buffer_frame);
-			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
-			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+			std::sort(transparent_entities_to_render.begin(), transparent_entities_to_render.end(), [this](const Ptr<ECS::Entity>& entity1, const Ptr<ECS::Entity>& entity2)
+				{
+					ECS::TransformComponent* transformComponent1 = static_cast<ECS::TransformComponent*>(entity1->GetComponentByName(ECS::TransformComponent::Type_Name));
+					ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
 
-			g_global_resources = { };
-			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+					glm::vec3 position1 = transformComponent1->GetPosition();
+					glm::vec3 position2 = transformComponent2->GetPosition();
+					glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
+
+					return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
+				});
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
@@ -186,7 +198,8 @@ namespace Insight
 			{
 				DepthPrepass();
 			}
-			Sample();
+			GBuffer();
+			TransparentGBuffer();
 			Composite();
 			FSR2();
 			Swapchain();
@@ -470,7 +483,7 @@ namespace Insight
 				}, std::move(pass_data));
 		}
 
-		void Renderpass::Sample()
+		void Renderpass::GBuffer()
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -637,6 +650,181 @@ namespace Insight
 						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 
 						cmdList->SetUniform(1, 1, object);
+						{
+							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+						}
+
+						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
+					}
+					
+					cmdList->EndRenderpass();
+				}, std::move(Pass_Data));
+		}
+
+		void Renderpass::TransparentGBuffer()
+		{
+			IS_PROFILE_FUNCTION();
+
+			struct TestPassData
+			{
+				BufferFrame Buffer_Frame = { };
+				BufferSamplers Buffer_Samplers = { };
+				std::vector<Ptr<ECS::Entity>> TransparentEntities;
+				int Mesh_Lod = 0;
+			};
+			TestPassData Pass_Data = {};
+			Pass_Data.Buffer_Frame = m_buffer_frame;
+			Pass_Data.Buffer_Samplers = m_buffer_samplers;
+			Pass_Data.TransparentEntities = transparent_entities_to_render;
+
+			static int camera_index = 0;
+			static int mesh_lod_index = 0;
+			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
+
+			std::array<std::string, Runtime::Mesh::s_LOD_Count> mesh_lods;
+			std::array<const char*, Runtime::Mesh::s_LOD_Count> mesh_lods_const_char;
+			for (size_t i = 0; i < Runtime::Mesh::s_LOD_Count; ++i)
+			{
+				mesh_lods[i] = "LOD_" + std::to_string(i);
+				mesh_lods_const_char[i] = mesh_lods[i].c_str();
+			}
+
+			ImGui::Begin("GBuffer");
+			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
+			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), mesh_lods_const_char.size());
+			ImGui::End();
+
+			if (camera_index > 0)
+			{
+				Pass_Data.Buffer_Frame.Proj_View = m_directional_light.ProjView[camera_index - 1];
+			}
+			Pass_Data.Mesh_Lod = mesh_lod_index;
+
+			RenderGraph::Instance().AddPass<TestPassData>(L"Transparent_GBuffer",
+				[](TestPassData& data, RenderGraphBuilder& builder)
+				{
+					IS_PROFILE_SCOPE("Transparent_GBuffer pass setup");
+
+					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
+					builder.WriteTexture(colourRT);
+					RGTextureHandle normal_rt = builder.GetTexture(L"NormalRT");
+					builder.WriteTexture(normal_rt);
+					RGTextureHandle velocity_rt = builder.GetTexture(L"VelocityRT");
+					builder.WriteTexture(velocity_rt);
+
+					RGTextureHandle depth = {};
+					if (Depth_Prepass)
+					{
+						depth = builder.GetTexture(L"Depth_Prepass_DepthStencil");
+						builder.WriteDepthStencil(depth);
+					}
+					else
+					{
+						depth = builder.GetTexture(L"GBuffer_DepthStencil");
+						builder.WriteDepthStencil(depth);
+					}
+					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
+
+					RenderpassDescription renderpassDescription = {};
+					renderpassDescription.AddAttachment(AttachmentDescription::Load(builder.GetRHITexture(colourRT)->GetFormat(), ImageLayout::ColourAttachment));
+					renderpassDescription.AddAttachment(AttachmentDescription::Load(builder.GetRHITexture(normal_rt)->GetFormat(), ImageLayout::ColourAttachment));
+					renderpassDescription.AddAttachment(AttachmentDescription::Load(builder.GetRHITexture(velocity_rt)->GetFormat(), ImageLayout::ColourAttachment));
+					for (AttachmentDescription& attachment : renderpassDescription.Attachments)
+					{
+						attachment.InitalLayout = ImageLayout::ColourAttachment;
+					}
+
+					renderpassDescription.DepthStencilAttachment = AttachmentDescription::Load(builder.GetRHITexture(depth)->GetFormat(), ImageLayout::DepthStencilAttachment);
+					renderpassDescription.DepthStencilAttachment.InitalLayout = ImageLayout::DepthStencilAttachment;
+					builder.SetRenderpass(renderpassDescription);
+
+					ShaderDesc shaderDesc;
+					{
+						IS_PROFILE_SCOPE("GetShader");
+						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+					}
+					builder.SetShader(shaderDesc);
+
+					PipelineStateObject pso = { };
+					{
+						IS_PROFILE_SCOPE("SetPipelineStateObject");
+						pso.ShaderDescription = shaderDesc;
+						pso.Name = L"Transparent_GBuffer";
+						pso.CullMode = CullMode::None;
+						pso.FrontFace = FrontFace::CounterClockwise;
+						pso.BlendEnable = true;
+						pso.SrcColourBlendFactor = BlendFactor::SrcAlpha;
+						pso.DstColourBlendFactor = BlendFactor::OneMinusSrcAlpha;
+						pso.ColourBlendOp = BlendOp::Add;
+						pso.SrcAplhaBlendFactor = BlendFactor::One;
+						pso.DstAplhaBlendFactor = BlendFactor::One;
+						pso.AplhaBlendOp = BlendOp::Add;
+
+						if (Reverse_Z_For_Depth)
+						{
+							pso.DepthCompareOp = CompareOp::GreaterOrEqual;
+						}
+						if (Depth_Prepass)
+						{
+							pso.DepthWrite = false;
+						}
+					}
+					builder.SetPipeline(pso);
+
+					builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+					builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+				},
+				[this](TestPassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
+				{
+					IS_PROFILE_SCOPE("GBuffer pass execute");
+
+					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Transparent_GBuffer");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"Transparent_GBuffer"));
+
+					{
+						IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+						BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+					}
+
+					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
+
+					for (const Ptr<ECS::Entity> e : data.TransparentEntities)
+					{
+						ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+						if (!meshComponent
+							|| !meshComponent->GetMesh())
+						{
+							continue;
+						}
+
+						Runtime::Material* material = meshComponent->GetMaterial();
+						if (!material)
+						{
+							continue;
+						}
+
+						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+
+						BufferPerObject object = {};
+						object.Transform = transform_component->GetTransform();
+						object.Previous_Transform = transform_component->GetPreviousTransform();
+
+						// Theses sets and bindings shouldn't chagne.
+						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
+						if (diffuseTexture)
+						{
+							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
+							object.Textures_Set |= 1 << 0;
+						}
+
+						cmdList->SetUniform(1, 1, object);
+						{
+							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+						}
 
 						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
@@ -685,7 +873,6 @@ namespace Insight
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
 					builder.ReadTexture(builder.GetTexture(L"ColourRT"));
-					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
 					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
 					if (Depth_Prepass)
 					{

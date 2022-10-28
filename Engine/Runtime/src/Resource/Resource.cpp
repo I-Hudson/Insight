@@ -246,9 +246,9 @@ namespace Insight
 		//--------------------------------------------------------------------------
 		ResourceManager::ResourceManager()
 		{
-			ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),	[]() { return NewTracked(Model); });
-			ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),		[]() { return NewTracked(Mesh); });
-			ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(), []() { return NewTracked(Material); });
+			ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return NewTracked(Material); });
+			ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),		 []() { return NewTracked(Mesh); });
+			ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),	 []() { return NewTracked(Model); });
 			ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
 		}
 

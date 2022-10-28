@@ -167,6 +167,11 @@ namespace Insight
 			return m_textureCaches->GetId(textureName);
 		}
 
+		RHI_Texture* RenderGraph::GetRHITexture(std::wstring textureName) const
+		{
+			return GetRHITexture(GetTexture(textureName));
+		}
+
 		RHI_Texture* RenderGraph::GetRHITexture(RGTextureHandle handle) const
 		{
 			return m_textureCaches->Get(handle);

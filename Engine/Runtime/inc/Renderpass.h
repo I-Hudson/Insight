@@ -82,7 +82,8 @@ namespace Insight
 			void ShadowPass();
 			void ShadowCullingPass();
 			void DepthPrepass();
-			void Sample();
+			void GBuffer();
+			void TransparentGBuffer();
 			void Composite();
 			void FSR2();
 			void Swapchain();

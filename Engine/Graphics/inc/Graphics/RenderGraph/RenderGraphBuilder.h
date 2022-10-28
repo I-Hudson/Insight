@@ -31,6 +31,9 @@ namespace Insight
 			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureInfo desc);
 			RGTextureHandle GetTexture(std::wstring textureName);
 
+			RHI_Texture* GetRHITexture(std::wstring textureName);
+			RHI_Texture* GetRHITexture(RGTextureHandle textureHandle);
+
 			void ReadTexture(RGTextureHandle handle);
 			void WriteTexture(RGTextureHandle handle);
 

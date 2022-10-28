@@ -56,6 +56,16 @@ namespace Insight
 			return m_rg->GetTexture(textureName);
 		}
 
+		RHI_Texture* RenderGraphBuilder::GetRHITexture(std::wstring textureName)
+		{
+			return GetRHITexture(GetTexture(textureName));
+		}
+
+		RHI_Texture* RenderGraphBuilder::GetRHITexture(RGTextureHandle textureHandle)
+		{
+			return m_rg->GetRHITexture(textureHandle);
+		}
+
 		void RenderGraphBuilder::ReadTexture(RGTextureHandle handle)
 		{
 			if (std::find(m_pass->m_textureReads.begin(), m_pass->m_textureReads.end(), handle) == m_pass->m_textureReads.end())

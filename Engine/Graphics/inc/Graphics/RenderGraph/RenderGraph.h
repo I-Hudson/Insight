@@ -69,6 +69,7 @@ namespace Insight
 			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureInfo info);
 
 			RGTextureHandle GetTexture(std::wstring textureName) const;
+			RHI_Texture* GetRHITexture(std::wstring textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
 			RenderpassDescription GetRenderpassDescription(std::wstring_view passName) const;
