@@ -21,6 +21,8 @@ cbuffer BufferFrame : register(b0)
 cbuffer BufferLight : register(b0)
 {
 	float4x4 bl_Camera_Proj_View[s_Cascade_Count];
+	float4x4 bl_Camera_Projection[s_Cascade_Count];
+	float4x4 bl_Camera_View[s_Cascade_Count];
     float4 bl_Light_Split_Depth;
     float4 bl_Light_Direction;
     float4 bl_Light_Colour;

@@ -147,6 +147,10 @@ namespace Insight
 						m_pre_render_func(*this, cmdList);
 					}
 					Render(cmdList);
+					if (m_post_render_func)
+					{
+						m_post_render_func(*this, cmdList);
+					}
 
 					//Clear();
 					++m_frame_count;
@@ -397,35 +401,38 @@ namespace Insight
 				colorImageBarriers = { };
 				depthImageBarriers = { };
 
-				/// Texture reads 
-				for (auto const& rt : pass.Get()->m_textureReads)
+				/// Texture reads
+				if (!pass->m_skipTextureReadBarriers)
 				{
-					RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
-					PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
-
-					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
-
-					ImageBarrier barrier;
-					barrier.Image = texture;
-					barrier.TextureHandle = rt;
-					bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
-
-					barrier.SrcAccessFlags = isDepth ? AccessFlagBits::DepthStencilAttachmentWrite : AccessFlagBits::ColorAttachmentWrite;
-					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : isDepth ?
-						ImageLayout::DepthStencilAttachment : ImageLayout::ColourAttachment;
-
-					barrier.DstAccessFlags = AccessFlagBits::ShaderRead;
-					barrier.NewLayout = ImageLayout::ShaderReadOnly;
-					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(isDepth ? ImageAspectFlagBits::Depth : ImageAspectFlagBits::Colour);
-
-					m_texture_barrier_history[texture].push_back(barrier);
-					if (isDepth)
+					for (auto const& rt : pass.Get()->m_textureReads)
 					{
-						depthImageBarriers.push_back(std::move(barrier));
-					}
-					else
-					{
-						colorImageBarriers.push_back(std::move(barrier));
+						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
+
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+
+						ImageBarrier barrier;
+						barrier.Image = texture;
+						barrier.TextureHandle = rt;
+						bool isDepth = PixelFormatExtensions::IsDepth(barrier.Image->GetFormat());
+
+						barrier.SrcAccessFlags = isDepth ? AccessFlagBits::DepthStencilAttachmentWrite : AccessFlagBits::ColorAttachmentWrite;
+						barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : isDepth ?
+							ImageLayout::DepthStencilAttachment : ImageLayout::ColourAttachment;
+
+						barrier.DstAccessFlags = AccessFlagBits::ShaderRead;
+						barrier.NewLayout = ImageLayout::ShaderReadOnly;
+						barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(isDepth ? ImageAspectFlagBits::Depth : ImageAspectFlagBits::Colour);
+
+						m_texture_barrier_history[texture].push_back(barrier);
+						if (isDepth)
+						{
+							depthImageBarriers.push_back(std::move(barrier));
+						}
+						else
+						{
+							colorImageBarriers.push_back(std::move(barrier));
+						}
 					}
 				}
 				colorPipelineBarrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;

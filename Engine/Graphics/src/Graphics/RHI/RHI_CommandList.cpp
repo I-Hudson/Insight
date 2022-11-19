@@ -55,10 +55,10 @@ namespace Insight
 			{
 				SetImageLayoutTransition(texture, layout);
 
-				for (size_t i = 0; i < create_info.Mip_Count; ++i)
-				{
-					texture->m_infos[i].Layout = layout;
-				}
+				//for (size_t i = 0; i < create_info.Mip_Count; ++i)
+				//{
+				//	texture->m_infos[i].Layout = layout;
+				//}
 			}
 		}
 

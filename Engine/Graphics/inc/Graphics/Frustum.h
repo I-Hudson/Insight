@@ -22,8 +22,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "Graphics/Defines.h"
+#include "Graphics/BoundingBox.h"
+
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
+
+#include <array>
 
 namespace Insight
 {
@@ -36,10 +40,10 @@ namespace Insight
 
             Plane(const glm::vec3& normal, float d);
 
-            /// Construct from a normal vector and a point on the plane
+            // Construct from a normal vector and a point on the plane
             Plane(const glm::vec3& normal, const glm::vec3& point);
 
-            /// Construct from 3 vertices
+            // Construct from 3 vertices
             Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
 
             ~Plane() = default;
@@ -51,14 +55,7 @@ namespace Insight
             static float Dot(const Plane& p, const glm::vec3& v);
 
             glm::vec3 normal = glm::vec3(0, 0, 0);
-            float d = 0.0f; /// distance from origin
-        };
-
-        enum class Intersection
-        {
-            Outside,
-            Inside,
-            Intersects
+            float d = 0.0f; // distance from origin
         };
 
 		class IS_GRAPHICS Frustum
@@ -69,12 +66,17 @@ namespace Insight
             ~Frustum() = default;
 
             bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;
+            bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
+            std::array<glm::vec3, 8> GetWorldPoints() const;
 
         private:
             Intersection CheckCube(const glm::vec3& center, const glm::vec3& extent) const;
             Intersection CheckSphere(const glm::vec3& center, float radius) const;
 
             Plane m_planes[6];
+
+            glm::mat4 m_view;
+            glm::mat4 m_projection;
 		};
 	}
 }

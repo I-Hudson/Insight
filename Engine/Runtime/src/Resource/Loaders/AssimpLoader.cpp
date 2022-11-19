@@ -177,6 +177,7 @@ namespace Insight
 						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
 						new_mesh->m_file_path = loader_data.Directoy + '/' + new_mesh->m_mesh_name;
+						new_mesh->m_boundingBox = Graphics::BoundingBox(mesh_data.Vertices.data(), mesh_data.Vertices.size());
 
 						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
 						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
@@ -194,8 +195,11 @@ namespace Insight
 					else if (loader_data.Mesh)
 					{
 						new_mesh = loader_data.Mesh;
+						new_mesh->m_boundingBox = Graphics::BoundingBox(mesh_data.Vertices.data(), static_cast<u32>(mesh_data.Vertices.size()));
+
 						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
 						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
+
 
 						// Move our vertices/indices which have been optimized, into the overall vectors.
 						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));

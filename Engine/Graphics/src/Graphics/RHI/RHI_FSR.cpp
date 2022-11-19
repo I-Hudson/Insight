@@ -29,8 +29,19 @@ namespace Insight
 
         void RHI_FSR::Init()
         {
+            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+
             Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
                 {
+                    if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
+                    {
+                        ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                        free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
+                        m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
+                    }
+
                     RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
                     glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
                     glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
@@ -38,15 +49,18 @@ namespace Insight
                 });
             Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
                 {
+                    if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
+                    {
+                        ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                        free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
+                        m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
+                    }
+
                     RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
                     glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
                     glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
                     CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                 });
-
-            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
         }
 
         void RHI_FSR::Destroy()
@@ -102,6 +116,7 @@ namespace Insight
             m_ffx_fsr2_dispatch_description = {};
             if (GraphicsManager::Instance().IsVulkan())
             {
+#ifdef IS_VULKAN_ENABLED
                 m_ffx_fsr2_dispatch_description.commandList   = ffxGetCommandListVK(static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmd_list)->GetCommandList().operator VkCommandBuffer());
 
                 m_ffx_fsr2_dispatch_description.color         = ffxGetTextureResourceVK(&m_ffx_fsr2_context, static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImage()
@@ -109,24 +124,26 @@ namespace Insight
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_input->GetFormat())), name_input, FFX_RESOURCE_STATE_COMPUTE_READ);
 
                 m_ffx_fsr2_dispatch_description.depth         = ffxGetTextureResourceVK(&m_ffx_fsr2_context, static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_depth)->GetImage()
-                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImageView(), resolution_render_x, resolution_render_y
+                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_depth)->GetImageView(), resolution_render_x, resolution_render_y
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_depth->GetFormat())), name_depth, FFX_RESOURCE_STATE_COMPUTE_READ);
 
                 m_ffx_fsr2_dispatch_description.motionVectors = ffxGetTextureResourceVK(&m_ffx_fsr2_context, static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_velocity)->GetImage()
-                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImageView(), resolution_render_x, resolution_render_y
+                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_velocity)->GetImageView(), resolution_render_x, resolution_render_y
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_velocity->GetFormat())), name_velocity, FFX_RESOURCE_STATE_COMPUTE_READ);
 
                 m_ffx_fsr2_dispatch_description.output        = ffxGetTextureResourceVK(&m_ffx_fsr2_context, static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_output)->GetImage()
-                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImageView(), resolution_output_x, resolution_output_y
+                    , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_output)->GetImageView(), resolution_output_x, resolution_output_y
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_output->GetFormat())), name_output, FFX_RESOURCE_STATE_UNORDERED_ACCESS);
 
                 m_ffx_fsr2_dispatch_description.exposure                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_InputExposure");
                 m_ffx_fsr2_dispatch_description.reactive                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyInputReactiveMap");
                 m_ffx_fsr2_dispatch_description.transparencyAndComposition  = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyTransparencyAndCompositionMap");            
+#endif
             }
             else if (GraphicsManager::Instance().IsDX12())
             {
-
+#ifdef IS_DX12_ENABLED
+#endif
             }
 
             GenerateJitterSample(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y);
@@ -135,7 +152,7 @@ namespace Insight
             m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.
             m_ffx_fsr2_dispatch_description.enableSharpening        = sharpness != 0.0f;
             m_ffx_fsr2_dispatch_description.sharpness               = sharpness;
-            m_ffx_fsr2_dispatch_description.frameTimeDelta          = delta_time;                               // Seconds to milliseconds.
+            m_ffx_fsr2_dispatch_description.frameTimeDelta          = delta_time * 1000.0f;                     // Seconds to milliseconds.
             m_ffx_fsr2_dispatch_description.preExposure             = 1.0f;                                     // The exposure value if not using FFX_FSR2_ENABLE_AUTO_EXPOSURE.
             m_ffx_fsr2_dispatch_description.renderSize.width        = resolution_render_x;
             m_ffx_fsr2_dispatch_description.renderSize.height       = resolution_render_y;
@@ -144,11 +161,15 @@ namespace Insight
             m_ffx_fsr2_dispatch_description.cameraFovAngleVertical  = camera_vertical_fov;
 
             ASSERT(ffxFsr2ContextDispatch(&m_ffx_fsr2_context, &m_ffx_fsr2_dispatch_description) == FFX_OK);
+
+            cmd_list->SetImageLayout(tex_input, ImageLayout::ColourAttachment);
+            cmd_list->SetImageLayout(tex_output, ImageLayout::ShaderReadOnly);
 		}
 
         void RHI_FSR::CreateContext(u32 renderWidth, u32 renderHeight, u32 displayWidth, u32 displayHeight)
         {
             RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+            render_context->GpuWaitForIdle();
             if (GraphicsManager::IsVulkan())
             {
 #ifdef IS_VULKAN_ENABLED

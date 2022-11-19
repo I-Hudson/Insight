@@ -46,6 +46,8 @@ namespace Insight
 		struct BufferLight
 		{
 			glm::mat4 ProjView[s_Cascade_Count];
+			glm::mat4 Projection[s_Cascade_Count];
+			glm::mat4 View[s_Cascade_Count];
 			float SplitDepth[s_Cascade_Count];
 
 			glm::vec4 Light_Direction = { };
@@ -86,6 +88,7 @@ namespace Insight
 			void TransparentGBuffer();
 			void Composite();
 			void FSR2();
+			void GFXHelper();
 			void Swapchain();
 			void ImGuiPass();
 

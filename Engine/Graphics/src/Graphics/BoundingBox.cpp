@@ -74,6 +74,11 @@ namespace Insight
             }
         }
 
+        float BoundingBox::GetRadius() const
+        {
+            return std::max(m_max.x - m_min.x, std::max(m_max.y - m_min.y, m_max.z - m_min.z));
+        }
+
         Intersection BoundingBox::IsInside(const glm::vec3& point) const
         {
             if (point.x < m_min.x || point.x > m_max.x ||

@@ -45,6 +45,7 @@ namespace Insight
 			std::vector<RGTextureHandle> m_textureWrites;
 
 			bool m_skipTextureWriteBarriers = false; // HACK:
+			bool m_skipTextureReadBarriers = false; // HACK:
 
 			RGTextureHandle m_depthStencilWrite = -1;
 		

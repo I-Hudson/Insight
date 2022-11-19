@@ -138,8 +138,14 @@ float4 PSMain(VertexOutput input) : SV_TARGET
     float3 shadow_pos_ndc = world_to_ndc(reconstruct_world_position, shadow_space_matrix);
 	float2 shadow_uv = ndc_to_uv(shadow_pos_ndc);
 
-	//float shadow_sample = SampleShadow(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
-	float shadow_sample = Technique_Pcf(float3(shadow_uv, cascade_split_index), shadow_pos_ndc.z);
+	float3 shadow_sample_uv = float3(shadow_uv, cascade_split_index);
+	float shadow_compare = shadow_pos_ndc.z;
+
+	float shadow_sample = Cascade_Shadow.SampleCmpLevelZero(Shadow_Sampler
+											, shadow_sample_uv
+											, shadow_compare).r;
+	//float shadow_sample = SampleShadow(float3(shadow_uv, cascade_split_index), shadow_compare);
+	//float shadow_sample = Technique_Pcf(shadow_sample_uv, shadow_compare);
 	shadow = shadow * shadow_sample;
 
 	float4 result;

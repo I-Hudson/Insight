@@ -46,6 +46,7 @@ namespace Insight
 			void SetScissor(u32 width, u32 height);
 
 			void SkipTextureWriteBarriers();
+			void SkipTextureReadBarriers();
 
 		private:
 			RenderGraphPassBase* m_pass = nullptr;

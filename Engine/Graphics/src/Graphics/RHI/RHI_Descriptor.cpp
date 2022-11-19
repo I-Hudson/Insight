@@ -415,7 +415,7 @@ namespace Insight
 
 			/// Align the size to minUniformBufferOffsetAlignment.
 			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
-			m_uniformBufferOffset = m_uniformBufferOffset + (-m_uniformBufferOffset & mask);
+			m_uniformBufferOffset = m_uniformBufferOffset + (-static_cast<i64>(m_uniformBufferOffset) & mask);
 
 			return view;
 		}

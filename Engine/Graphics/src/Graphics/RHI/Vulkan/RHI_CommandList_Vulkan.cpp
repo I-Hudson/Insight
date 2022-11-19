@@ -46,6 +46,8 @@ namespace Insight
 					vk::ImageMemoryBarrier b = { };
 					b.srcAccessMask = AccessFlagsToVulkan(imageBarrier.SrcAccessFlags);
 					b.dstAccessMask = AccessFlagsToVulkan(imageBarrier.DstAccessFlags);
+					b.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+					b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 					b.oldLayout = ImageLayoutToVulkan(imageBarrier.OldLayout);
 					b.newLayout = ImageLayoutToVulkan(imageBarrier.NewLayout);
 					b.image = static_cast<RHI_Texture_Vulkan*>(imageBarrier.Image)->GetImage();
@@ -345,6 +347,11 @@ namespace Insight
 				m_commandList.setDepthBias(depth_bias_constant_factor, depth_bias_clamp, depth_bias_slope_factor);
 			}
 
+			void RHI_CommandList_Vulkan::SetLineWidth(float width)
+			{
+				m_commandList.setLineWidth(width);
+			}
+
 			void RHI_CommandList_Vulkan::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
@@ -479,13 +486,14 @@ namespace Insight
 			void RHI_CommandList_Vulkan::SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout)
 			{
 				ImageLayout image_layout = texture->GetLayout();
-				Graphics::PipelineBarrier pipeline_barrier;
+				Graphics::PipelineBarrier pipeline_barrier = { };
 
 				ImageBarrier image_barrer;
+				image_barrer.SrcAccessFlags = ImageLayoutToAccessMask(image_layout);
+				image_barrer.DstAccessFlags = ImageLayoutToAccessMask(layout);
 				image_barrer.OldLayout = image_layout;
 				image_barrer.NewLayout = layout;
-				image_barrer.SrcAccessFlags = ImageLayoutToAccessMask(image_barrer.OldLayout);
-				image_barrer.DstAccessFlags = ImageLayoutToAccessMask(image_barrer.NewLayout);
+				image_barrer.Image = texture;
 				image_barrer.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(PixelFormatToAspectFlags(texture->GetFormat()));
 
 				if (image_layout == ImageLayout::PresentSrc)
@@ -510,6 +518,7 @@ namespace Insight
 					pipeline_barrier.DstStage = AccessFlagBitsToPipelineStageFlag(image_barrer.DstAccessFlags);
 				}
 
+				pipeline_barrier.ImageBarriers.push_back(image_barrer);
 				PipelineBarrier(pipeline_barrier);
 			}
 

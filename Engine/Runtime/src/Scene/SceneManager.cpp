@@ -100,10 +100,10 @@ namespace Insight
 #ifdef ECS_ENABLED
 			m_ecsWorld->RemoveEntity(e);
 #else
-			std::remove_if(m_root_entities.begin(), m_root_entities.end(), [e](const Ptr<ECS::Entity>& other_entity)
+			IS_UNUSED(std::remove_if(m_root_entities.begin(), m_root_entities.end(), [e](const Ptr<ECS::Entity>& other_entity)
 				{
 					return e == other_entity.Get();
-				});
+				}));
 			m_entityManager.RemoveEntity(e);
 #endif
 		}

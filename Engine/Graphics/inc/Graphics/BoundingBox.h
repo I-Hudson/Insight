@@ -22,7 +22,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #pragma once
 
 #include "Graphics/Defines.h"
-#include "Frustum.h"
 
 #include <glm/vec3.hpp>
 #include <glm/mat4x4.hpp>
@@ -32,6 +31,13 @@ namespace Insight
 	namespace Graphics
 	{
 		struct Vertex;
+
+		enum class Intersection
+		{
+			Outside,
+			Inside,
+			Intersects
+		};
 
 		class IS_GRAPHICS BoundingBox
 		{
@@ -58,6 +64,9 @@ namespace Insight
 
 			/// Returns the size
 			glm::vec3 GetSize() const { return m_max - m_min; }
+
+			// Get the radius
+			float GetRadius() const;
 
 			/// Returns extents
 			glm::vec3 GetExtents() const { return (m_max - m_min) * 0.5f; }

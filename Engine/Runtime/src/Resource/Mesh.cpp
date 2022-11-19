@@ -42,6 +42,11 @@ namespace Insight
 			return m_material;
 		}
 
+		Graphics::BoundingBox Mesh::GetBoundingBox() const
+		{
+			return m_boundingBox;
+		}
+
 		void Mesh::Load()
 		{
 			//ASSERT(!m_vertex_buffer);

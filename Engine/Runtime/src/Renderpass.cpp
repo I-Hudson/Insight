@@ -7,6 +7,7 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/Frustum.h"
 #include "Graphics/Window.h"
+#include "Graphics/GFXHelper.h"
 
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
@@ -50,6 +51,8 @@ namespace Insight
 
 	int pendingRenderResolution[2] = { 0, 0 };
 
+	Graphics::Frustum MainCameraFrustum = {};
+
 	namespace Graphics
 	{
 
@@ -63,8 +66,8 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//Runtime::Model* model_backpack = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			Runtime::Model* model_sponza = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
@@ -73,8 +76,8 @@ namespace Insight
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
 			{ }
 			Runtime::ResourceManager::Instance().Print();
-			model_backpack->CreateEntityHierarchy();
-			//model_sponza->CreateEntityHierarchy();
+			//model_backpack->CreateEntityHierarchy();
+			model_sponza->CreateEntityHierarchy();
 			//model_sponza_curtains->CreateEntityHierarchy();
 			//model_vulklan_scene->CreateEntityHierarchy();
 			//model->CreateEntityHierarchy();
@@ -84,6 +87,7 @@ namespace Insight
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
 			m_buffer_frame.Projection = glm::perspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
 			m_buffer_frame.View = glm::mat4(1.0f);
+			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
 			RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
 			RHI_SamplerManager& sampler_manager = render_context->GetSamplerManager();
@@ -191,6 +195,11 @@ namespace Insight
 					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 
 				});
+			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+					GFXHelper::Reset();
+
+				});
 
 			ShadowPass();
 			//ShadowCullingPass();
@@ -201,9 +210,11 @@ namespace Insight
 			GBuffer();
 			TransparentGBuffer();
 			Composite();
-			//FSR2();
+			FSR2();
 			Swapchain();
 
+			// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
+			GFXHelper();
 			ImGuiPass();
 		}
 
@@ -332,7 +343,7 @@ namespace Insight
 					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor, DynamicState::DepthBias };
 					builder.SetPipeline(pso);
 				},
-				[](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
+				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass execute");
 
@@ -350,9 +361,12 @@ namespace Insight
 
 					cmdList->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
+
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
 					{
+						Graphics::Frustum camera_frustum(m_directional_light.View[i], m_directional_light.Projection[i], ShadowZFar);
+
 						RenderpassDescription renderpass_description = render_graph.GetRenderpassDescription(L"Cascade shadow pass");
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
@@ -364,18 +378,27 @@ namespace Insight
 							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
 							glm::mat4 transform = transform_component->GetTransform();
 
-							BufferPerObject object = {};
-							object.Transform = transform;
-							object.Previous_Transform = transform;
-							cmdList->SetUniform(1, 1, object);
-
 							ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 							if (!mesh_component
 								|| !mesh_component->GetMesh())
 							{
 								continue;
 							}
-							mesh_component->GetMesh()->Draw(cmdList);
+							Runtime::Mesh* mesh = mesh_component->GetMesh();
+
+							Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
+							boundingBox = boundingBox.Transform(transform_component->GetTransform());
+							// Transform bounding box to world space from local space.
+							if (!camera_frustum.IsVisible(boundingBox))
+							{
+								continue;
+							}
+
+							BufferPerObject object = {};
+							object.Transform = transform;
+							object.Previous_Transform = transform;
+							cmdList->SetUniform(1, 1, object);
+							mesh->Draw(cmdList);
 						}
 						cmdList->EndRenderpass();
 					}
@@ -514,7 +537,13 @@ namespace Insight
 			ImGui::Begin("GBuffer");
 			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
 			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), mesh_lods_const_char.size());
+			if (ImGui::Button("Set Visual Frustum"))
+			{
+				MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
+			}
 			ImGui::End();
+
+			GFXHelper::AddFrustum(MainCameraFrustum);
 
 			if (camera_index > 0)
 			{
@@ -616,7 +645,7 @@ namespace Insight
 						BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
 					}
 
-					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
+					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
 					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 					{
@@ -626,6 +655,8 @@ namespace Insight
 						{
 							continue;
 						}
+						Runtime::Mesh* mesh = meshComponent->GetMesh();
+
 
 						Runtime::Material* material = meshComponent->GetMaterial();
 						if (!material)
@@ -633,7 +664,15 @@ namespace Insight
 							continue;
 						}
 
+
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+						Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
+						boundingBox = boundingBox.Transform(transform_component->GetTransform());
+						// Transform bounding box to world space from local space.
+						if (!camera_frustum.IsVisible(boundingBox))
+						{
+							continue;
+						}
 
 						BufferPerObject object = {};
 						object.Transform = transform_component->GetTransform();
@@ -692,7 +731,7 @@ namespace Insight
 
 			ImGui::Begin("GBuffer");
 			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
-			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), mesh_lods_const_char.size());
+			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), static_cast<int>(mesh_lods_const_char.size()));
 			ImGui::End();
 
 			if (camera_index > 0)
@@ -778,7 +817,7 @@ namespace Insight
 				},
 				[this](TestPassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
 				{
-					IS_PROFILE_SCOPE("GBuffer pass execute");
+					IS_PROFILE_SCOPE("Transparent_GBuffer pass execute");
 
 					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Transparent_GBuffer");
 					cmdList->BindPipeline(pso, nullptr);
@@ -789,7 +828,7 @@ namespace Insight
 						BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
 					}
 
-					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
+					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
 					for (const Ptr<ECS::Entity> e : data.TransparentEntities)
 					{
@@ -799,6 +838,7 @@ namespace Insight
 						{
 							continue;
 						}
+						Runtime::Mesh* mesh = meshComponent->GetMesh();
 
 						Runtime::Material* material = meshComponent->GetMaterial();
 						if (!material)
@@ -807,6 +847,14 @@ namespace Insight
 						}
 
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+
+						Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
+						boundingBox = boundingBox.Transform(transform_component->GetTransform());
+						// Transform bounding box to world space from local space.
+						if (!camera_frustum.IsVisible(boundingBox))
+						{
+							continue;
+						}
 
 						BufferPerObject object = {};
 						object.Transform = transform_component->GetTransform();
@@ -888,7 +936,7 @@ namespace Insight
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
-						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
+						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::Storage);
 					RGTextureHandle composite_handle = builder.CreateTexture(L"Composite_Tex", create_info);
 					builder.WriteTexture(composite_handle);
 
@@ -940,9 +988,20 @@ namespace Insight
 				}, std::move(pass_data));
 		}
 
+		static bool enableFSR = false;
+		static float fsrSharpness = 1.0f;
+
 		void Renderpass::FSR2()
 		{
 			if (RenderGraph::Instance().GetRenderResolution() == RenderGraph::Instance().GetOutputResolution())
+			{
+				return;
+			}
+
+			ImGui::Checkbox("Enable FSR", &enableFSR);
+			ImGui::DragFloat("FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
+
+			if (!enableFSR)
 			{
 				return;
 			}
@@ -957,17 +1016,12 @@ namespace Insight
 			RenderGraph::Instance().AddPass<PassData>(L"FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
-					builder.ReadTexture(builder.GetTexture(L"Composite_Tex"));
-					builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
-					builder.ReadTexture(builder.GetTexture(L"VelocityRT"));
-
 					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
 						builder.GetOutputResolution().x
 						, builder.GetOutputResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
-						, ImageUsageFlagsBits::Storage | ImageUsageFlagsBits::Sampled);
+						, ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::Storage);
 					RGTextureHandle textureHandle = builder.CreateTexture(L"FSR_Output", create_info);
-					builder.WriteTexture(textureHandle);
 
 					builder.SetViewport(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
 					builder.SetScissor(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
@@ -983,12 +1037,144 @@ namespace Insight
 						, render_graph.GetRHITexture(L"FSR_Output")
 						, Main_Camera_Near_Plane
 						, Main_Camera_Far_Plane
-						, 90.0f
+						, glm::radians(90.0f)
 						, App::Engine::s_FrameTimer.GetElapsedTimeMillFloat()
-						, 1.0f
+						, fsrSharpness
 						, false);
 				}, std::move(passData));
 
+		}
+
+		void Renderpass::GFXHelper()
+		{
+			struct TestPassData
+			{
+				BufferFrame Buffer_Frame;
+				BufferSamplers Buffer_Samplers;
+			};
+			TestPassData passData = {};
+			passData.Buffer_Frame = m_buffer_frame;
+			passData.Buffer_Samplers = m_buffer_samplers;
+
+			RenderGraph::Instance().AddPass<TestPassData>(L"GFXHelperPass", [this](TestPassData& data, RenderGraphBuilder& builder)
+				{
+					IS_PROFILE_SCOPE("GFXHelper pass setup");
+
+					builder.SetViewport(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+					builder.SetScissor(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+					builder.SetAsRenderToSwapchain();
+
+					builder.WriteTexture(-1);
+
+					ShaderDesc shaderDesc = { };
+					shaderDesc.VertexFilePath = L"./Resources/Shaders/hlsl/GFXHelper.hlsl";
+					shaderDesc.PixelFilePath = L"./Resources/Shaders/hlsl/GFXHelper.hlsl";
+					builder.SetShader(shaderDesc);
+
+					PipelineStateObject pso = { };
+					pso.Name = L"GFXHelper_PSO";
+					pso.ShaderDescription = shaderDesc;
+
+					pso.PrimitiveTopologyType = PrimitiveTopologyType::LineList;
+					pso.PolygonMode = PolygonMode::Line;
+					pso.CullMode = CullMode::None;
+					pso.FrontFace = FrontFace::CounterClockwise;
+					pso.Dynamic_States.push_back(DynamicState::LineWidth);
+
+					builder.SetPipeline(pso);
+
+					RenderpassDescription renderpassDescription = { };
+					renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
+					renderpassDescription.Attachments.back().InitalLayout = ImageLayout::ColourAttachment;
+					builder.SetRenderpass(renderpassDescription);
+				},
+				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				{
+					IS_PROFILE_SCOPE("GFXHelper pass execute");
+
+					if (GFXHelper::m_lines.size() == 0)
+					{
+						return;
+					}
+
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"GFXHelperPass");
+					cmdList->BindPipeline(pso, nullptr);
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"GFXHelperPass"));
+
+					{
+						IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+						BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+					}
+
+					struct Line
+					{
+						Line(glm::vec3 pos, glm::vec4 color)
+							: Pos(glm::vec4(pos, 1.0f)), Color(color)
+						{}
+						glm::vec4 Pos;
+						glm::vec4 Color;
+					};
+
+					struct GFXHelperDrawCall
+					{
+						int VertexCount;
+						int InstanceCount;
+						int FirstVertex;
+						int FirstInstance;
+					};
+
+					int drawCallVertexStart = 0;
+					std::vector<Line> gizmoLineData;
+					std::vector<GFXHelperDrawCall> gizmoDrawCall;
+					gizmoDrawCall.reserve(GFXHelper::m_lines.size());
+
+					{
+						IS_PROFILE_SCOPE("[GFXHelper pass] Directions");
+						for (const GFXHelperLine& line : GFXHelper::m_lines)
+						{
+							std::array<Line, 2> lines
+							{
+								Line(line.Start, line.Colour),
+								Line(line.End, line.Colour)
+							};
+
+							gizmoLineData.insert(gizmoLineData.end(), lines.begin(), lines.end());
+							gizmoDrawCall.push_back({ 2, 1, drawCallVertexStart, 0 });
+							drawCallVertexStart += 2;
+						}
+					}
+
+
+					static RHI_Buffer* vBuffer = nullptr;
+					if (!vBuffer)
+					{
+						vBuffer = Renderer::CreateVertexBuffer(sizeof(Line)* gizmoLineData.size(), sizeof(Line));
+					}
+
+					if (vBuffer->GetSize() < sizeof(Line) * gizmoLineData.size())
+					{
+						vBuffer->Resize(sizeof(Line)* gizmoLineData.size());
+					}
+
+					{
+						IS_PROFILE_SCOPE("[Gizmos] Upload vertex buffer");
+
+						vBuffer->Upload(gizmoLineData.data(), sizeof(Line) * gizmoLineData.size());
+					}
+
+					RHI_Buffer* vBuffers[] = { vBuffer };
+					u32 offsets[] = { 0 };
+					cmdList->SetVertexBuffer(vBuffer);
+					cmdList->SetLineWidth(1.0f);
+					{
+						IS_PROFILE_SCOPE("[Gizmos] Draw");
+						for (const GFXHelperDrawCall& dc : gizmoDrawCall)
+						{
+							cmdList->Draw(dc.VertexCount, dc.InstanceCount, dc.FirstVertex, dc.FirstInstance);
+						}
+					}
+					cmdList->EndRenderpass();
+				}, std::move(passData));
 		}
 
 		void Renderpass::Swapchain()
@@ -1002,7 +1188,16 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Swapchain pass setup");
 
-					RGTextureHandle rt = builder.GetTexture(L"Composite_Tex");
+					RGTextureHandle rt = 0;
+					if (enableFSR)
+					{
+						rt = builder.GetTexture(L"FSR_Output");
+						builder.SkipTextureReadBarriers();
+					}
+					else
+					{
+						rt = builder.GetTexture(L"Composite_Tex");
+					}
 					builder.ReadTexture(rt);
 					data.RenderTarget = rt;
 
@@ -1176,6 +1371,7 @@ namespace Insight
 				// Then invert the projection if vulkan.
 				buffer_frame.Projection[1][1] *= -1;
 				buffer_frame.Proj_View = buffer_frame.Projection * glm::inverse(buffer_frame.View);
+				buffer_frame.Projection[1][1] *= -1;
 			}
 		}
 
@@ -1287,6 +1483,8 @@ namespace Insight
 					/// Store split distance and matrix in cascade
 					outCascades.SplitDepth[i] = (Main_Camera_Near_Plane + splitDist * clipRange) * -1.0f;
 					outCascades.ProjView[i] = lightOrthoMatrix * lightViewMatrix;
+					outCascades.Projection[i] = lightOrthoMatrix;
+					outCascades.View[i] = lightViewMatrix;
 					outCascades.Light_Direction = glm::vec4(glm::normalize(frustumCenter - lightPosition), 0.0);
 				}
 				lastSplitDist = cascadeSplits[i];

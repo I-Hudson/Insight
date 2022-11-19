@@ -111,5 +111,10 @@ namespace Insight
 		{
 			m_pass->m_skipTextureWriteBarriers = true;
 		}
+
+		void RenderGraphBuilder::SkipTextureReadBarriers()
+		{
+			m_pass->m_skipTextureReadBarriers = true;
+		}
 	}
 }

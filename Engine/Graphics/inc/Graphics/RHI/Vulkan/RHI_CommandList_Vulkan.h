@@ -53,6 +53,7 @@ namespace Insight
 				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;
 				virtual void SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor) override;
+				virtual void SetLineWidth(float width) override;
 
 				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
 				virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) override;

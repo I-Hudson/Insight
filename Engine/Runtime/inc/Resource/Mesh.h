@@ -4,6 +4,7 @@
 
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/Mesh.h"
+#include "Graphics/BoundingBox.h"
 
 namespace Insight
 {
@@ -53,6 +54,7 @@ namespace Insight
 			
 			void SetMaterial(Material* material);
 			Material* GetMaterial() const;
+			Graphics::BoundingBox GetBoundingBox() const;
 
 			static const u32 s_LOD_Count = 3;
 
@@ -72,6 +74,7 @@ namespace Insight
 		private:
 			std::vector<MeshLOD> m_lods;
 			Material* m_material = nullptr;
+			Graphics::BoundingBox m_boundingBox;
 
 			//u32 m_vertex_offset = 0;
 			//u32 m_vertex_count = 0;
