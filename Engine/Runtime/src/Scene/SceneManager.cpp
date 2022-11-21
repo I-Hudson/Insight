@@ -1,6 +1,7 @@
 #include "Scene/SceneManager.h"
 
 #include "Core/Profiler.h"
+#include "Core/Logger.h"
 
 namespace Insight
 {
@@ -69,6 +70,11 @@ namespace Insight
 #endif
 		}
 
+		void Scene::SetOnlySearchable(bool onlySearchable)
+		{
+			m_onlySearchable = onlySearchable;
+		}
+
 		Ptr<ECS::Entity> Scene::AddEntity()
 		{
 			return AddEntity("");
@@ -129,27 +135,36 @@ namespace Insight
 		void SceneManager::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_activeScene.IsValid())
+			for (size_t sceneIdx = 0; sceneIdx < m_activeScenes.size(); ++sceneIdx)
 			{
-				m_activeScene->EarlyUpdate();
+				if (m_activeScenes.at(sceneIdx).IsValid())
+				{
+					m_activeScenes.at(sceneIdx)->EarlyUpdate();
+				}
 			}
 		}
 
 		void SceneManager::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_activeScene.IsValid())
+			for (size_t sceneIdx = 0; sceneIdx < m_activeScenes.size(); ++sceneIdx)
 			{
-				m_activeScene->Update(deltaTime);
+				if (m_activeScenes.at(sceneIdx).IsValid())
+				{
+					m_activeScenes.at(sceneIdx)->Update(deltaTime);
+				}
 			}
 		}
 
 		void SceneManager::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_activeScene.IsValid())
+			for (size_t sceneIdx = 0; sceneIdx < m_activeScenes.size(); ++sceneIdx)
 			{
-				m_activeScene->LateUpdate();
+				if (m_activeScenes.at(sceneIdx).IsValid())
+				{
+					m_activeScenes.at(sceneIdx)->LateUpdate();
+				}
 			}
 		}
 
@@ -169,11 +184,42 @@ namespace Insight
 			return m_scenes.back();
 		}
 
+		WPtr<Scene> SceneManager::CreatePersistentScene(std::string sceneName)
+		{
+			WPtr<Scene> scene = CreateScene(sceneName);
+			scene.Lock()->m_persistentScene = true;
+			AddActiveScene(scene);
+			return scene;
+		}
+
 		void SceneManager::SetActiveScene(WPtr<Scene> scene)
 		{
-			if (RPtr<Scene> newActiveScene = scene.Lock(); newActiveScene.IsValid())
+			std::vector<RPtr<Scene>> scenesToRemove;
+			for (size_t sceneIdx = 0; sceneIdx < m_activeScenes.size(); ++sceneIdx)
 			{
-				m_activeScene = std::move(newActiveScene);
+				if (m_activeScenes.at(sceneIdx).IsValid() && !m_activeScenes.at(sceneIdx)->IsPersistentScene())
+				{
+					scenesToRemove.push_back(m_activeScenes.at(sceneIdx));
+				}
+			}
+
+			// Remove all non persistent scenes
+			for (size_t i = 0; i < scenesToRemove.size(); ++i)
+			{
+				RemoveScene(scenesToRemove.at(i));
+			}
+
+			m_activeScenes.push_back(scene.Lock());
+		}
+
+		void SceneManager::AddActiveScene(WPtr<Scene> scene)
+		{
+			if (std::find_if(m_activeScenes.begin(), m_activeScenes.end(), [&scene](const RPtr<Scene>& activeScene)
+				{
+					return activeScene == scene.Lock();
+				}) == m_activeScenes.end())
+			{
+				m_activeScenes.push_back(scene.Lock());
 			}
 		}
 
@@ -193,11 +239,30 @@ namespace Insight
 			RPtr<Scene> toRemoveScene = std::move(m_scenes.at(index));
 			m_scenes.erase(m_scenes.begin() + index);
 
-			if (toRemoveScene == m_activeScene)
+			auto activeSceneItr = std::find_if(m_activeScenes.begin(), m_activeScenes.end(), [&toRemoveScene](const RPtr<Scene>& scene)
+				{
+					return toRemoveScene == scene;
+				});
+
+			if (activeSceneItr != m_activeScenes.end())
 			{
-				m_activeScene.Reset();
+				activeSceneItr->Reset();
+				m_activeScenes.erase(activeSceneItr);
 			}
 			toRemoveScene->Destroy();
+		}
+
+		WPtr<Scene> SceneManager::GetActiveScene() const
+		{
+			for (size_t sceneIdx = 0; sceneIdx < m_activeScenes.size(); ++sceneIdx)
+			{
+				if (m_activeScenes.at(sceneIdx).IsValid() && !m_activeScenes.at(sceneIdx)->IsOnlySearchable())
+				{
+					return m_activeScenes.at(sceneIdx);
+				}
+			}
+			IS_CORE_ERROR("[SceneManager::GetActiveScene] No active scene found.");
+			return WPtr<Scene>();
 		}
 
 		WPtr<Scene> SceneManager::FindSceneByName(std::string_view sceneName)

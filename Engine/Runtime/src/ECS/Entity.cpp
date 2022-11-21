@@ -1,9 +1,11 @@
 #include "ECS/Entity.h"
 #include "ECS/ECSWorld.h"
 
+#include "ECS/Components/CameraComponent.h"
+#include "ECS/Components/FreeCameraControllerComponent.h"
+#include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/TagComponent.h"
-#include "ECS/Components/MeshComponent.h"
 
 #include "Scene/SceneManager.h"
 
@@ -80,12 +82,10 @@ namespace Insight
 		void ComponentRegistry::RegisterComponent(std::string_view component_type, std::function<Component*()> func)
 		{
 			if (auto itr = m_register_funcs.find(std::string(component_type));
-				itr != m_register_funcs.end())
+				itr == m_register_funcs.end())
 			{
-				IS_CORE_ERROR("[ComponentRegistry::RegisterComponent] ComponentType: '{0}' is already registered.", component_type);
-				return;
+				m_register_funcs[std::string(component_type)] = std::move(func);
 			}
-			m_register_funcs[std::string(component_type)] = std::move(func);
 		}
 
 		Component* ComponentRegistry::CreateComponent(std::string_view component_type)
@@ -102,9 +102,11 @@ namespace Insight
 
 		void ComponentRegistry::RegisterInternalComponents()
 		{
-			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name, []() { return NewTracked(TransformComponent); });
-			ComponentRegistry::RegisterComponent(TagComponent::Type_Name, []() { return NewTracked(TagComponent); });
-			ComponentRegistry::RegisterComponent(MeshComponent::Type_Name, []() { return NewTracked(MeshComponent); });
+			ComponentRegistry::RegisterComponent(CameraComponent::Type_Name,                []() { return NewTracked(CameraComponent); });
+			ComponentRegistry::RegisterComponent(FreeCameraControllerComponent::Type_Name,	[]() { return NewTracked(FreeCameraControllerComponent); });
+			ComponentRegistry::RegisterComponent(MeshComponent::Type_Name,		            []() { return NewTracked(MeshComponent); });
+			ComponentRegistry::RegisterComponent(TagComponent::Type_Name,		            []() { return NewTracked(TagComponent); });
+			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name,             []() { return NewTracked(TransformComponent); });
 		}
 
 #ifdef ECS_ENABLED
@@ -202,6 +204,7 @@ namespace Insight
 			if (component == nullptr)
 			{
 				component = ComponentRegistry::CreateComponent(component_type);
+				component->m_ownerEntity = this;
 				component->OnCreate();
 				m_components.push_back(component);
 			}

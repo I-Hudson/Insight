@@ -15,7 +15,7 @@ namespace Insight
 			virtual const char* GetTypeName() override { return Type_Name; }
 
 			TransformComponent();
-			~TransformComponent();
+			virtual ~TransformComponent() override;
 
 			/// @brief Return the transform.
 			/// @return glm::mat4.

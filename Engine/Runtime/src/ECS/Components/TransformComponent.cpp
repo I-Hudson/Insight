@@ -7,6 +7,7 @@ namespace Insight
 		TransformComponent::TransformComponent()
 		{ 
 			m_removeable = false;
+			m_allow_multiple = false;
 			m_previous_transform = glm::mat4(1.0f);
 		}
 

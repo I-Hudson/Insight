@@ -3,6 +3,8 @@
 #include "Graphics/ImGuiPass.h"
 #include "Graphics/RHI/RHI_FSR.h"
 
+#include "ECS/Components/CameraComponent.h"
+
 #include "Core/TypeAlias.h"
 
 #include <glm/mat4x4.hpp>
@@ -94,14 +96,15 @@ namespace Insight
 
 			void BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers);
 
-			void UpdateCamera(BufferFrame& camera);
-
 			Graphics::ImGuiPass m_imgui_pass;
 			Graphics::RHI_FSR m_fsr;
 
 			BufferFrame m_buffer_frame;
 			BufferLight m_directional_light;
 			BufferSamplers m_buffer_samplers;
+
+			ECS::Entity* m_editorCameraEntity;
+			ECS::CameraComponent* m_editorCameraComponent;
 		};
 	}
 }

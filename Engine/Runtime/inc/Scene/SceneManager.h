@@ -11,6 +11,8 @@ namespace Insight
 {
 	namespace App
 	{
+		class SceneManager;
+
 		class IS_RUNTIME Scene
 		{
 		public:
@@ -28,6 +30,11 @@ namespace Insight
 
 			void SetSceneName(std::string sceneName) { m_sceneName = m_sceneName; }
 			std::string_view GetSceneName() const { return m_sceneName; }
+
+			bool IsPersistentScene() const { return m_persistentScene; }
+
+			void SetOnlySearchable(bool onlySearchable);
+			bool IsOnlySearchable() const { return m_onlySearchable; }
 
 #ifdef ECS_ENABLED
 			Ptr<ECS::ECSWorld> GetECSWorld() const { return m_ecsWorld; }
@@ -49,6 +56,12 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> m_root_entities;
 			ECS::EntityManager m_entityManager;
 #endif
+			// Is this scene persistent. If 'true' then the scene can not be unloaded even if asked. The scene must be deleted to be removed. 
+			bool m_persistentScene = false;
+			// Can this scene only be found if searched for. This stops 'GetActiveScene' returning the scenes which might want to stay "hidden".
+			bool m_onlySearchable = false;
+
+			friend class SceneManager;
 		};
 
 		class SceneManager : public Core::Singleton<SceneManager>
@@ -64,14 +77,21 @@ namespace Insight
 			void Destroy();
 
 			WPtr<Scene> CreateScene(std::string sceneName = "");
+			// Create a new scene which can not be unloaded. This scene will alway be loaded.
+			WPtr<Scene> CreatePersistentScene(std::string sceneName = "");
+
+			// Set a single scene as active.
 			void SetActiveScene(WPtr<Scene> scene);
+			// Add a scene to be active.
+			void AddActiveScene(WPtr<Scene> scene);
+			// Remove a scene from being active.
 			void RemoveScene(WPtr<Scene> scene);
 
-			WPtr<Scene> GetActiveScene() const { return m_activeScene; }
+			WPtr<Scene> GetActiveScene() const;
 			WPtr<Scene> FindSceneByName(std::string_view sceneName);
 
 		private:
-			RPtr<Scene> m_activeScene;
+			std::vector<RPtr<Scene>> m_activeScenes;
 			std::vector<RPtr<Scene>> m_scenes;
 		};
 	}

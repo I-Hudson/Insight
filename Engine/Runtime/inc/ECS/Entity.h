@@ -74,7 +74,7 @@ namespace Insight
 		{
 		public:
 			Component();
-			~Component();
+			virtual ~Component();
 
 			/*
 			*	Each component should have a type name and override GetTypeName.
@@ -101,8 +101,10 @@ namespace Insight
 			/// @brief  Return the component's type name.
 			virtual const char* GetTypeName() = 0;
 
+			Entity* GetOwnerEntity() const { return m_ownerEntity; }
+
 		protected:
-			/// @brief  Allow multiple of the same component to be added to a single entity. Default is false
+			/// @brief  Allow multiple of the same component to be added to a single entity. Default is true
 			bool m_allow_multiple : 1;
 			/// @brief  Allow the component to be removed from an entity. Default is true.
 			bool m_removeable : 1;
@@ -115,10 +117,14 @@ namespace Insight
 		private:
 			/// @brief Store the unique ID for the component.
 			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
+			Entity* m_ownerEntity = nullptr;
 			// TODO Must add type information.
 
 			friend class Entity;
 		};
+#define IS_COMPONENT(Component) \
+		static constexpr char* Type_Name = #Component; \
+		virtual const char* GetTypeName() override { return Type_Name; }
 
 		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component*()>>;
 		class ComponentRegistry

@@ -15,11 +15,11 @@ namespace Insight
 		class MeshComponent : public Component
 		{
 		public:
-			MeshComponent();
-			~MeshComponent();
-
 			static constexpr char* Type_Name = "MeshComponent";
 			virtual const char* GetTypeName() override { return Type_Name; }
+
+			MeshComponent();
+			virtual ~MeshComponent() override;
 
 			void				SetMesh(Runtime::Mesh* mesh)				{ m_mesh = mesh; }
 			Runtime::Mesh*		GetMesh()						const		{ return m_mesh; }

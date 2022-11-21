@@ -17,6 +17,7 @@
 #include "Scene/SceneManager.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/FreeCameraControllerComponent.h"
 
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
@@ -35,7 +36,6 @@ namespace Insight
 	const float ShadowFOV = 65.0f;
 	const u32 Shadow_Depth_Tex_Size = 1024 * 4;
 
-
 	constexpr bool Reverse_Z_For_Depth = false;
 	constexpr bool Depth_Prepass = false;
 
@@ -52,6 +52,7 @@ namespace Insight
 	int pendingRenderResolution[2] = { 0, 0 };
 
 	Graphics::Frustum MainCameraFrustum = {};
+	bool UseCustomFrustum = false;
 
 	namespace Graphics
 	{
@@ -89,6 +90,16 @@ namespace Insight
 			m_buffer_frame.View = glm::mat4(1.0f);
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
+#if true//IS_EDITOR
+			WPtr<App::Scene> editorScene = App::SceneManager::Instance().CreatePersistentScene("EditorScene");
+			editorScene.Lock()->SetOnlySearchable(true);
+			m_editorCameraEntity = editorScene.Lock()->AddEntity("EditorCamera").Get();
+
+			m_editorCameraEntity->AddComponentByName(ECS::TransformComponent::Type_Name);
+			m_editorCameraComponent = static_cast<ECS::CameraComponent*>(m_editorCameraEntity->AddComponentByName(ECS::CameraComponent::Type_Name));
+			m_editorCameraComponent->CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+			m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
+#endif
 			RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
 			RHI_SamplerManager& sampler_manager = render_context->GetSamplerManager();
 
@@ -148,7 +159,13 @@ namespace Insight
 				}
 			}
 
-			UpdateCamera(m_buffer_frame);
+			m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
+			m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
+			m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
+			
+			m_buffer_frame.View_Inverted = glm::inverse(m_buffer_frame.View);
+			m_buffer_frame.Projection_View_Inverted = glm::inverse(m_buffer_frame.Proj_View);
+			
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
 
@@ -223,6 +240,8 @@ namespace Insight
 			GraphicsManager::Instance().GetRenderContext()->GpuWaitForIdle();
 			m_imgui_pass.Release();
 			Graphics::RHI_FSR::Instance().Destroy();
+
+			App::SceneManager::Instance().RemoveScene(App::SceneManager::Instance().FindSceneByName("EditorScene"));
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -536,11 +555,12 @@ namespace Insight
 
 			ImGui::Begin("GBuffer");
 			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
-			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), mesh_lods_const_char.size());
-			if (ImGui::Button("Set Visual Frustum"))
+			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), static_cast<u32>(mesh_lods_const_char.size()));
+			//if (ImGui::Button("Set Visual Frustum"))
 			{
 				MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 			}
+			ImGui::Checkbox("Use Custum frustum", &UseCustomFrustum);
 			ImGui::End();
 
 			GFXHelper::AddFrustum(MainCameraFrustum);
@@ -645,7 +665,15 @@ namespace Insight
 						BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
 					}
 
-					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
+					Frustum camera_frustum;
+					if (UseCustomFrustum)
+					{
+						Frustum camera_frustum = MainCameraFrustum;
+					}
+					else
+					{
+						camera_frustum = Frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
+					}
 
 					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 					{
@@ -671,6 +699,7 @@ namespace Insight
 						// Transform bounding box to world space from local space.
 						if (!camera_frustum.IsVisible(boundingBox))
 						{
+							//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
 							continue;
 						}
 
@@ -1250,131 +1279,6 @@ namespace Insight
 			cmd_list->SetSampler(0, 5, buffer_samplers.MirroredRepeat_Sampler);
 		}
 
-		float previousTime = 0;
-
-		void Renderpass::UpdateCamera(BufferFrame& buffer_frame)
-		{
-			const float deltaTime = App::Engine::s_FrameTimer.GetElapsedTimeMillFloat();
-			bool negative_viewport = false;
-
-			glm::mat4 viewMatrix = buffer_frame.View;
-
-			/// Get the camera's forward, right, up, and location vectors
-			glm::vec4 vForward = viewMatrix[2];
-			glm::vec4 vRight = viewMatrix[0];
-			glm::vec4 vUp = viewMatrix[1];
-			glm::vec4 vTranslation = viewMatrix[3];
-
-			float frameSpeed = Input::InputManager::IsKeyPressed(IS_KEY_LEFT_SHIFT) ? deltaTime * 200 : deltaTime * 25;
-			///Input::IsKeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
-
-			/// Translate camera
-			if (Input::InputManager::IsKeyPressed(IS_KEY_W))
-			{
-				vTranslation += vForward * frameSpeed;
-			}
-			if (Input::InputManager::IsKeyPressed(GLFW_KEY_S))
-			{
-				vTranslation -= vForward * frameSpeed;
-			}
-			if (Input::InputManager::IsKeyPressed(GLFW_KEY_D))
-			{
-				vTranslation += vRight * frameSpeed;
-			}
-			if (Input::InputManager::IsKeyPressed(GLFW_KEY_A))
-			{
-				vTranslation -= vRight * frameSpeed;
-			}
-			if (Input::InputManager::IsKeyPressed(GLFW_KEY_Q))
-			{
-				vTranslation += vUp * frameSpeed;
-			}
-			if (Input::InputManager::IsKeyPressed(GLFW_KEY_E))
-			{
-				vTranslation -= vUp * frameSpeed;
-			}
-
-			/// check for camera rotation
-			static bool sbMouseButtonDown = false;
-			bool mouseDown = Input::InputManager::IsMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT);
-			if (mouseDown)
-			{
-				viewMatrix[3] = vTranslation;
-
-				static float siPrevMouseX = 0;
-				static float siPrevMouseY = 0;
-
-				if (sbMouseButtonDown == false)
-				{
-					sbMouseButtonDown = true;
-					Input::InputManager::GetMousePosition(siPrevMouseX, siPrevMouseY);
-				}
-
-				float mouseX = 0, mouseY = 0;
-				Input::InputManager::GetMousePosition(mouseX, mouseY);
-
-				float iDeltaX = mouseX - siPrevMouseX;
-				float iDeltaY = mouseY - siPrevMouseY;
-
-				siPrevMouseX = mouseX;
-				siPrevMouseY = mouseY;
-
-				glm::mat4 mMat;
-
-				/// pitch
-				if (iDeltaY != 0)
-				{
-					float i_delta_y = static_cast<float>(iDeltaY);
-					if (negative_viewport)
-					{
-						i_delta_y = -i_delta_y;
-					}
-					mMat = glm::axisAngleMatrix(vRight.xyz(), i_delta_y / 150.0f);
-					vRight = mMat * vRight;
-					vUp = mMat * vUp;
-					vForward = mMat * vForward;
-				}
-
-				/// yaw
-				if (iDeltaX != 0)
-				{
-					float i_delta_x = static_cast<float>(iDeltaX);
-					mMat = glm::axisAngleMatrix(glm::vec3(0, 1, 0), i_delta_x / 150.0f);
-					vRight = mMat * vRight;
-					vUp = mMat * vUp;
-					vForward = mMat * vForward;
-				}
-
-				viewMatrix[0] = vRight;
-				viewMatrix[1] = vUp;
-				viewMatrix[2] = vForward;
-
-			}
-			else
-			{
-				sbMouseButtonDown = false;
-			}
-
-			buffer_frame.View = viewMatrix;
-			buffer_frame.View_Inverted = glm::inverse(viewMatrix);
-
-			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
-			aspect = std::max(0.1f, aspect);
-			buffer_frame.Projection = glm::perspective(glm::radians(90.0f), aspect, Main_Camera_Near_Plane, Main_Camera_Far_Plane);
-
-			// Setup the inverted projection view matrix.
-			buffer_frame.Proj_View = buffer_frame.Projection * glm::inverse(buffer_frame.View);
-			buffer_frame.Projection_View_Inverted = glm::inverse(buffer_frame.Proj_View);
-
-			if (GraphicsManager::IsVulkan())
-			{
-				// Then invert the projection if vulkan.
-				buffer_frame.Projection[1][1] *= -1;
-				buffer_frame.Proj_View = buffer_frame.Projection * glm::inverse(buffer_frame.View);
-				buffer_frame.Projection[1][1] *= -1;
-			}
-		}
-
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)
 		{
 			std::vector<float> cascadeSplits;
@@ -1395,7 +1299,7 @@ namespace Insight
 
 			/// Calculate split depths based on view camera frustum
 			/// Based on method presented in https:///developer.nvidia.com/gpugems/GPUGems3/gpugems3_ch10.html
-			for (int i = 0; i < cascade_count; i++)
+			for (u32 i = 0; i < cascade_count; ++i)
 			{
 				float p = (static_cast<float>(i) + 1.0f) / static_cast<float>(cascade_count);
 				float log = minZ * std::pow(ratio, p);

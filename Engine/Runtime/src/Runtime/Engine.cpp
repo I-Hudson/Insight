@@ -40,7 +40,7 @@ namespace Insight
 
 			m_sceneManager = MakeUPtr<SceneManager>();
 			WPtr<Scene> newScene = m_sceneManager->CreateScene("New Scene");
-			SceneManager::Instance().SetActiveScene(newScene);
+			SceneManager::Instance().AddActiveScene(newScene);
 
 			m_renderpasses.Create();
 
