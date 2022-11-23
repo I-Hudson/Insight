@@ -8,6 +8,7 @@
 #include <mutex>
 #include <type_traits>
 #include <queue>
+#include <mutex>
 #include <unordered_map>
 #include <unordered_set>
 #include <string>
@@ -27,6 +28,9 @@ namespace Insight
 
 		public:
 			std::wstring m_name;
+
+		protected:
+			mutable std::mutex m_mutex;
 		};
 
 		template<typename T>

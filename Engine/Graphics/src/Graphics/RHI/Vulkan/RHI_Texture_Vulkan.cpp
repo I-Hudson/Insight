@@ -23,6 +23,8 @@ namespace Insight
 			void RHI_Texture_Vulkan::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
 				IS_PROFILE_FUNCTION();
+				std::unique_lock lock(m_mutex);
+
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
 				{
@@ -52,19 +54,28 @@ namespace Insight
 					reinterpret_cast<VkImage*>(&m_image),
 					&m_imageAllocation,
 					&allocInfo));
+				lock.unlock();
 
-				m_image_view = CreateImageView(0, 1, m_infos.at(0).Layer_Count, 0);
+				vk::ImageView imageView = CreateImageView(0, 1, m_infos.at(0).Layer_Count, 0);
+				lock.lock();
+				m_image_view = imageView;
+				lock.unlock();
 
 				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
-					m_single_layer_image_views.push_back(CreateImageView(0, 1, 1, i));
+					vk::ImageView imageView = CreateImageView(0, 1, 1, i);
+					lock.lock();
+					m_single_layer_image_views.push_back(imageView);
+					lock.unlock();
 				}
 			}
 
 			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
 			{
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_mutex);
+
 				/// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_Vulkan stagingBuffer;
 				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
@@ -83,12 +94,16 @@ namespace Insight
 			std::vector<Byte> RHI_Texture_Vulkan::Download(void* data, int sizeInBytes)
 			{
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_mutex);
+
 				return std::vector<Byte>();
 			}
 
 			void RHI_Texture_Vulkan::Release()
 			{
 				IS_PROFILE_FUNCTION();
+				std::lock_guard lock(m_mutex);
+
 				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
 				{
 					vk::ImageView& view = m_single_layer_image_views.at(i);
@@ -118,11 +133,14 @@ namespace Insight
 
 			bool RHI_Texture_Vulkan::ValidResouce()
 			{
+				std::lock_guard lock(m_mutex);
 				return m_image;
 			}
 
 			void RHI_Texture_Vulkan::SetName(std::wstring name)
 			{
+				std::lock_guard lock(m_mutex);
+
 				if (m_image_view)
 				{
 					m_context->SetObejctName(name + L"_Image_View", reinterpret_cast<u64>(m_image_view.operator VkImageView()), vk::ObjectType::eImageView);
@@ -146,16 +164,20 @@ namespace Insight
 
 			vk::ImageView RHI_Texture_Vulkan::GetImageView() const
 			{
+				std::lock_guard lock(m_mutex);
 				return m_image_view;
 			}
 
 			vk::ImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
 			{
+				std::lock_guard lock(m_mutex);
 				return m_single_layer_image_views.at(array_layer_index);
 			}
 
 			vk::ImageView RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
 			{
+				std::lock_guard lock(m_mutex);
+
 				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
 					{ },
 					m_image,

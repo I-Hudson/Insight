@@ -95,6 +95,8 @@ namespace Insight
 			RHI_SamplerManager& GetSamplerManager() { return *m_samplerManager; }
 			RHI_ResourceRenderTracker& GetResourceRenderTracker() { return m_resource_tracker; }
 
+			GPUDeferedManager& GetDeferredManager() { return m_gpu_defered_manager; }
+
 		protected:
 			void ImGuiBeginFrame();
 			void ImGuiRender();

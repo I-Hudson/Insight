@@ -26,10 +26,12 @@ namespace Insight
 		void RHI_Texture::LoadFromFile(std::string filePath)
 		{
 			IS_PROFILE_FUNCTION();
+			std::unique_lock lock(m_mutex);
 			if (filePath.empty() || !std::filesystem::exists(filePath))
 			{
 				return;
 			}
+			lock.unlock();
 
 			int width, height, channels;
 			Byte* data = nullptr;
@@ -42,6 +44,7 @@ namespace Insight
 				return;
 			}
 
+			TrackPtr(data);
 			RHI_TextureInfo createInfo = { };
 			createInfo.TextureType = TextureType::Tex2D;
 			createInfo.Width = width;
@@ -50,11 +53,25 @@ namespace Insight
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
+//#define RHI_TEXTURE_DEFER_ENABLED
+#ifdef RHI_TEXTURE_DEFER_ENABLED
+			GraphicsManager::Instance().GetRenderContext()->GetDeferredManager().Push([this, createInfo, width, height, data](RHI_CommandList* cmdList)
+				{
+					Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
+					const u64 textureSize = width * height * STBI_rgb_alpha;
+					Upload(data, (int)textureSize);
+
+					stbi_image_free(data);
+					UntrackPtr(data);
+				});
+#else
 			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
-
+			
 			stbi_image_free(data);
+			UntrackPtr(data);
+#endif
 		}
 
 		void RHI_Texture::LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels)

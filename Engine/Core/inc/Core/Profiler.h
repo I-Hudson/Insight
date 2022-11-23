@@ -17,15 +17,18 @@ namespace Insight
 	#define IS_PROFILE_FUNCTION()			OPTICK_EVENT()
 	#define IS_PROFILE_SCOPE(name)			OPTICK_EVENT(name)
 	#define IS_PROFILE_FRAME(frame_name)	OPTICK_FRAME(frame_name)
+	#define IS_PROFILE_THREAD(name)			OPTICK_THREAD(name)
 #elif defined(IS_PROFILE_TRACY)
 #define TRACY_ENABLE
 	#include "public/tracy/Tracy.hpp"
 	#define IS_PROFILE_FUNCTION()			ZoneScoped
 	#define IS_PROFILE_SCOPE(name)			ZoneScopedN(name)
 	#define IS_PROFILE_FRAME(frame_name)	FrameMarkNamed(frame_name)
+	#define IS_PROFILE_THREAD(name)			::tracy::SetThreadName(name);
 #endif
 #else
 	#define IS_PROFILE_FUNCTION()		
 	#define IS_PROFILE_SCOPE(name)		
 	#define IS_PROFILE_FRAME(frame_name)
+	#define IS_PROFILE_THREAD(name)
 #endif
