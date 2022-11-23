@@ -6,6 +6,8 @@
 #include "Core/CommandLineArgs.h"
 
 /// -- Managers --
+#include "Threading/TaskManager.h"
+
 #include "Graphics/GraphicsManager.h"
 #include "Scene/SceneManager.h"
 
@@ -45,6 +47,8 @@ namespace Insight
 			Graphics::Renderpass m_renderpasses;
 
 			bool m_shouldClose = false;
+
+			Threading::TaskManager m_taskManger;
 
 			UPtr<SceneManager> m_sceneManager;
 			UPtr<Core::EventManager> m_eventManager;

@@ -7,6 +7,8 @@
 
 #include "Core/Logger.h"
 
+#include "Threading/TaskManager.h"
+
 #include <filesystem>
 #include <ppltasks.h>
 
@@ -70,21 +72,25 @@ namespace Insight
 
 		std::string IResource::GetFilePath() const
 		{
+			std::lock_guard lock(m_mutex);
 			return m_file_path;
 		}
 
 		std::string IResource::GetFileName() const
 		{
+			std::lock_guard lock(m_mutex);
 			return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
 		}
 
 		EResoruceStates IResource::GetResourceState() const
 		{
+			std::lock_guard lock(m_mutex);
 			return m_resource_state;
 		}
 
 		const ResourceReferenceLink* IResource::GetReferenceLink(u32 index) const
 		{
+			std::lock_guard lock(m_mutex);
 			if (index < m_reference_links.size())
 			{
 				return &m_reference_links.at(index);
@@ -92,33 +98,40 @@ namespace Insight
 			return nullptr;
 		}
 
+		ResourceStorageTypes IResource::GetResourceStorageType() const
+		{
+			std::lock_guard lock(m_mutex);
+			return m_storage_type;
+		}
+
 		bool IResource::IsNotFound() const
 		{
-			return m_resource_state == EResoruceStates::Not_Found;
+			return m_resource_state.load() == EResoruceStates::Not_Found;
 		}
 
 		bool IResource::IsLoaded() const
 		{
-			return m_resource_state == EResoruceStates::Loaded;
+			return m_resource_state.load() == EResoruceStates::Loaded;
 		}
 
 		bool IResource::IsNotLoaded() const
 		{
-			return m_resource_state == EResoruceStates::Not_Loaded;
+			return m_resource_state.load() == EResoruceStates::Not_Loaded;
 		}
 
 		bool IResource::IsFailedToLoad() const
 		{
-			return m_resource_state == EResoruceStates::Failed_To_Load;
+			return m_resource_state.load() == EResoruceStates::Failed_To_Load;
 		}
 
 		bool IResource::IsUnloaded() const
 		{
-			return m_resource_state == EResoruceStates::Unloaded;
+			return m_resource_state.load() == EResoruceStates::Unloaded;
 		}
 
 		bool IResource::IsDependentOnAnotherResource() const
 		{
+			std::lock_guard lock(m_mutex);
 			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
@@ -127,6 +140,7 @@ namespace Insight
 
 		bool IResource::IsDependentOnAnotherResource(IResource* resource) const
 		{
+			std::lock_guard lock(m_mutex);
 			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent && link.GetLinkResource() == resource;
@@ -135,6 +149,7 @@ namespace Insight
 
 		bool IResource::IsDependentOwnerOnAnotherResource() const
 		{
+			std::lock_guard lock(m_mutex);
 			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner;
@@ -143,6 +158,7 @@ namespace Insight
 
 		bool IResource::IsDependentOwnerOnAnotherResource(IResource* resource) const
 		{
+			std::lock_guard lock(m_mutex);
 			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner && link.GetLinkResource() == resource;
@@ -157,6 +173,7 @@ namespace Insight
 
 		void IResource::Print() const
 		{
+			std::lock_guard lock(m_mutex);
 			IS_CORE_INFO("Resource:");
 			IS_CORE_INFO("\tType: {}", GetResourceTypeId().GetTypeName());
 			IS_CORE_INFO("\tSource path: {}", m_source_file_path);
@@ -178,6 +195,7 @@ namespace Insight
 
 		void IResource::AddDependentResrouce(IResource* resource, const std::string& file_path, ResourceStorageTypes storage_type)
 		{
+			std::lock_guard lock(m_mutex);
 			if (resource)
 			{
 				ResourceManager::Instance().AddExistingResource(resource, file_path);
@@ -189,6 +207,7 @@ namespace Insight
 
 		IResource* IResource::AddReferenceResource(const std::string& file_path, ResourceTypeId type_id)
 		{
+			std::lock_guard lock(m_mutex);
 			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
 			if (resource)
 			{
@@ -200,6 +219,7 @@ namespace Insight
 
 		void IResource::AddReferenceResource(IResource* resource, const std::string& file_path)
 		{
+			std::lock_guard lock(m_mutex);
 			if (resource)
 			{
 				ResourceManager::Instance().AddExistingResource(resource, file_path);
@@ -210,6 +230,7 @@ namespace Insight
 
 		IResource* IResource::AddDependentResource(const std::string& file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
+			std::lock_guard lock(m_mutex);
 			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
 			if (resource)
 			{
@@ -237,6 +258,42 @@ namespace Insight
 		void IResource::Save(const std::string& file_path)
 		{
 			FAIL_ASSERT_MSG("[Resource::Save] Must be implemented.");
+		}
+
+		void IResource::StartRequestTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_request_timer.Start();
+		}
+
+		void IResource::StopRequestTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_request_timer.Stop();
+		}
+
+		void IResource::StartLoadTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_load_timer.Start();
+		}
+
+		void IResource::StopLoadTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_load_timer.Stop();
+		}
+
+		void IResource::StartUnloadTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_unload_timer.Start();
+		}
+
+		void IResource::StopUnloadTimer()
+		{
+			std::lock_guard lock(m_mutex);
+			m_unload_timer.Stop();
 		}
 
 
@@ -287,11 +344,14 @@ namespace Insight
 			// Unload the resource,
 			// Remove the resoruce from the loaded map,
 			resource->m_resource_state = EResoruceStates::Unloading;
-			resource->m_unload_timer.Start();
-			resource->UnLoad();
-			resource->m_unload_timer.Stop();
+			resource->StartUnloadTimer();
+			{
+				std::lock_guard resourceLock(resource->m_mutex);
+				resource->UnLoad();
+			}
+			resource->StopUnloadTimer();
 			resource->m_resource_state = EResoruceStates::Unloaded;
-			if (resource->m_storage_type == ResourceStorageTypes::Disk)
+			if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
 			{
 				--m_loaded_resource_count;
 			}
@@ -318,11 +378,13 @@ namespace Insight
 				IS_CORE_WARN("[ResourceManager::Save] 'resource' must be a valid resource.");
 				return;
 			}
+			std::lock_guard resourceLock(resource->m_mutex);
 			resource->Save(file_path);
 		}
 
 		u32 ResourceManager::GetLoadedResourcesCount() const
 		{
+			std::shared_lock lock(m_lock);
 			return m_loaded_resource_count;
 		}
 
@@ -364,10 +426,12 @@ namespace Insight
 						IS_CORE_WARN("[ResourceManager::Load] Unable to create resource for id '{}'.", type_id.GetTypeName());
 						return nullptr;
 					}
-					resource->m_file_path = abs_file_path;
+					{
+						std::lock_guard resourceLock(resource->m_mutex);
+						resource->m_file_path = abs_file_path;
+						resource->m_storage_type = storage_type;
+					}
 					resource->m_resource_state = EResoruceStates::Not_Loaded;
-					resource->m_storage_type = storage_type;
-					resource->m_request_timer.Start();
 					m_resources[abs_file_path] = resource;
 				}
 
@@ -387,7 +451,7 @@ namespace Insight
 
 				if (resource->IsNotLoaded() || resource->IsUnloaded())
 				{
-					if (resource->m_storage_type == ResourceStorageTypes::Disk)
+					if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
 					{
 						if (!std::filesystem::exists(abs_file_path))
 						{
@@ -400,11 +464,14 @@ namespace Insight
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
 							//TODO Needs threading of somekind.
-							//concurrency::create_task([this, resource]()
+							//auto task = Threading::TaskManager::CreateTask([this, resource]()
 								//{
-									resource->m_load_timer.Start();
-									resource->Load();
-									resource->m_load_timer.Stop();
+									resource->StartLoadTimer();
+									{
+										std::lock_guard resourceLock(resource->m_mutex);
+										resource->Load();
+									}
+									resource->StopLoadTimer();
 									if (resource->IsLoaded())
 									{
 										std::lock_guard lock(m_lock);
@@ -417,9 +484,9 @@ namespace Insight
 					else
 					{
 						FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resrouce is being loaded from disk it should handle loading memory resources.");
-						resource->m_load_timer.Start();
+						resource->StartLoadTimer();
 						resource->LoadFromMemory(data, data_size_in_bytes);
-						resource->m_load_timer.Stop();
+						resource->StopLoadTimer();
 					}
 				}
 			}

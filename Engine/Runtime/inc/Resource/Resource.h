@@ -77,6 +77,8 @@ namespace Insight
 			IResource();
 			virtual ~IResource();
 
+			THREAD_SAFE;
+
 			/// @brief Return thr full file path (From drive letter C:\\).
 			std::string GetFilePath() const;
 			/// @brief Return the file name.
@@ -85,6 +87,7 @@ namespace Insight
 			EResoruceStates GetResourceState() const;
 
 			const ResourceReferenceLink* GetReferenceLink(u32 index) const;
+			ResourceStorageTypes GetResourceStorageType() const;
 
 			/// @brief Check if this resource is dependent on another resource (owned).
 			/// @return bool 
@@ -153,6 +156,15 @@ namespace Insight
 			/// @brief Save resrouce to disk.
 			virtual void Save(const std::string& file_path);
 
+			void StartRequestTimer();
+			void StopRequestTimer();
+
+			void StartLoadTimer();
+			void StopLoadTimer();
+
+			void StartUnloadTimer();
+			void StopUnloadTimer();
+
 		protected:
 			/// @brief On disk file path. (In most cases this will be the same as 'm_file_path')
 			std::string m_source_file_path;
@@ -172,6 +184,8 @@ namespace Insight
 			/// @brief Timer for the latest time the resource was unloaded.
 			Core::Timer m_unload_timer;
 
+			mutable std::mutex m_mutex;
+
 			friend class ResourceManager;
 		};
 
@@ -181,6 +195,8 @@ namespace Insight
 			ResourceManager();
 			/// @brief Unload all resources currently loaded. (Use with caution. Should really only be called when the app is exiting).
 			virtual ~ResourceManager() NO_EXPECT override;
+
+			THREAD_SAFE;
 
 			/// @brief Load resource at path 'file_path'. (This will first check if the resource is already loaded, if so then return the cached pointer.)
 			/// @param file_path 
