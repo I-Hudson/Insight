@@ -70,12 +70,10 @@ namespace Insight
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
-			if (itr != m_allocations.end())
+			if (itr == m_allocations.end())
 			{
-				/// Allocation already tracked.
-				return;
+				m_allocations[ptr] = MemoryTrackedAlloc(ptr, type, GetCallStack());
 			}
-			m_allocations[ptr] = MemoryTrackedAlloc(ptr, type, GetCallStack());
 		}
 
 		void MemoryTracker::UnTrack(void* ptr)

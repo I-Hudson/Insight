@@ -25,9 +25,12 @@ namespace Insight
 			template<typename Func, typename... Args>
 			static auto CreateTask(Func func, Args&&... args)
 			{
-				TaskFuncWrapper<Func, Args...>* taskWrapper = new TaskFuncWrapper<Func, Args...>(std::move(func), std::move(args)...);//NewArgsTracked(TaskFuncWrapper<ResultType, Func, Args...>, std::move(func), std::move(args)...);
+				using ResultType = std::invoke_result_t<Func, Args...>;
+				TaskResult<ResultType>* taskResult = NewTracked(TaskResult<ResultType>);
+				TaskFuncWrapper<ResultType, Func, Args...>* taskWrapper = new TaskFuncWrapper<ResultType, Func, Args...>(taskResult, std::move(func), std::move(args)...);
 				TrackPtr(taskWrapper);
-				TaskSharedPtr taskShared = NewArgsTracked(Task, taskWrapper);
+
+				TaskWithResultShared<ResultType> taskShared = MakeRPtr<TaskWithResult<ResultType>>(taskResult, taskWrapper);
 				std::unique_lock lock(TaskManager::Instance().m_mutex);
 				TaskManager::Instance().m_queuedTasks.push(taskShared);
 				lock.unlock();

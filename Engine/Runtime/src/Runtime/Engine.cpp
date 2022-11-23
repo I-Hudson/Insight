@@ -42,13 +42,13 @@ namespace Insight
 			//	});
 
 
-			//Threading::TaskSharedPtr task20 = Threading::TaskManager::CreateTask([]()
-			//	{
-			//		IS_PROFILE_SCOPE("Task20");
-			//		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-			//		IS_CORE_INFO("Thread sleep for 20 ms.");
-			//		return 45;
-			//	});
+			Threading::TaskManager::CreateTask([]()
+				{
+					IS_PROFILE_SCOPE("Task20");
+					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+					IS_CORE_INFO("Thread sleep for 20 ms.");
+					return 45;
+				});
 
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			

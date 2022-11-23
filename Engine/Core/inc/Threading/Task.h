@@ -12,7 +12,12 @@ namespace Insight
 	{
 		class TaskManager;
 		class Task;
+		template<typename ResultType>
+		class TaskWithResult;
+
 		using TaskSharedPtr = RPtr<Task>;
+		template<typename ResultType>
+		using TaskWithResultShared = RPtr<TaskWithResult<ResultType>>;
 
 		enum class TaskStates
 		{
@@ -52,6 +57,23 @@ namespace Insight
 			std::mutex m_mutex;
 
 			friend class TaskManager;
+		};
+
+		template<typename ResultType>
+		class TaskWithResult : public Task
+		{
+		public:
+			TaskWithResult() = default;
+			TaskWithResult(TaskResult<ResultType>* taskResult, ITaskFuncWrapper* funcWrapper)
+				: Task(funcWrapper)
+				, m_taskResult(taskResult)
+			{ }
+			~TaskWithResult()
+			{
+				DeleteTracked(m_taskResult);
+			}
+		private:
+			TaskResult<ResultType>* m_taskResult;
 		};
 	}
 }
