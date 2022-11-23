@@ -1,0 +1,57 @@
+#pragma once
+
+#include "Threading/TaskFuncWrapper.h"
+#include "Core/Memory.h"
+
+#include <atomic>
+#include <memory>
+
+namespace Insight
+{
+	namespace Threading
+	{
+		class TaskManager;
+		class Task;
+		using TaskSharedPtr = RPtr<Task>;
+
+		enum class TaskStates
+		{
+			Queued,
+			Running,
+			Waiting,
+			Finished,
+			Canceled,
+		};
+
+		// Task with no result.
+		class IS_CORE Task
+		{
+		public:
+			Task();
+			Task(ITaskFuncWrapper* funcWrapper);
+			virtual ~Task();
+
+			bool IsQueued() const { return m_state.load() == TaskStates::Queued; }
+			bool IsStarted() const { return m_state.load() == TaskStates::Queued; }
+			bool IsRunning() const { return m_state.load() == TaskStates::Running; }
+			bool IsWaiting() const { return m_state.load() == TaskStates::Running; }
+			bool IsFinished() const { return m_state.load() == TaskStates::Finished; }
+			bool IsCancled() const { return m_state.load() == TaskStates::Canceled; }
+			TaskStates GetState() { return m_state.load(); }
+
+			void Wait();
+
+		private:
+			virtual void Call();
+
+		private:
+			std::atomic<TaskStates> m_state;
+			ITaskFuncWrapper* m_functionWrapper = nullptr;
+
+			std::condition_variable m_cv;
+			std::mutex m_mutex;
+
+			friend class TaskManager;
+		};
+	}
+}
