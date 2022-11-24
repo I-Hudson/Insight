@@ -34,15 +34,18 @@ namespace Insight
 			void SetAspect(float aspect);
 			void SetFovY(float fovy);
 
-			glm::mat4 GetProjectionViewMatrix() const { return m_projectionView; }
-			glm::mat4 GetProjectionMatrix()     const { return m_projection; }
-			glm::mat4 GetViewMatrix()           const { return m_view; }
+			glm::mat4 GetProjectionViewMatrix()         const { return m_projectionView; }
+			glm::mat4 GetProjectionMatrix()             const { return m_projection; }
+			glm::mat4 GetViewMatrix()                   const { return m_view; }
 
-			CameraType GetCameraType()          const { return m_cameraType; }
-			float GetNearPlane()                const { return m_nearPlane; }
-			float GetFarPlane()                 const { return m_farPlane; }
-			float GetAspect()                   const { return m_aspect; }
-			float GetFovY()                     const { return m_fovY; }
+			glm::mat4 GetInvertedProjectionViewMatrix()	const;
+			glm::mat4 GetInvertedViewMatrix()	        const { return glm::inverse(m_view); }
+
+			CameraType GetCameraType()                  const { return m_cameraType; }
+			float GetNearPlane()                        const { return m_nearPlane; }
+			float GetFarPlane()                         const { return m_farPlane; }
+			float GetAspect()                           const { return m_aspect; }
+			float GetFovY()                             const { return m_fovY; }
 
 		private:
 			void ComputeProjectionMatrix();
@@ -82,17 +85,20 @@ namespace Insight
 			void SetAspect(float aspect);
 			void SetFovY(float fovy);
 
-			glm::mat4 GetProjectionMatrix() const { return m_camera.GetProjectionMatrix(); }
-			glm::mat4 GetViewMatrix()       const;
+			glm::mat4 GetProjectionViewMatrix()         const;
+			glm::mat4 GetProjectionMatrix()             const { return m_camera.GetProjectionMatrix(); }
+			glm::mat4 GetViewMatrix()                   const;
 
-			CameraType GetCameraType()      const { return m_camera.GetCameraType(); }
-			float GetNearPlane()            const { return m_camera.GetNearPlane(); }
-			float GetFarPlane()             const { return m_camera.GetFarPlane(); }
-			float GetAspect()               const { return m_camera.GetAspect(); }
-			float GetFovY()                 const { return m_camera.GetFovY(); }
+			glm::mat4 GetInvertedProjectionViewMatrix()	const { return m_camera.GetInvertedProjectionViewMatrix(); }
+			glm::mat4 GetInvertedViewMatrix()	        const { return m_camera.GetInvertedViewMatrix(); }
+
+			CameraType GetCameraType()                  const { return m_camera.GetCameraType(); }
+			float GetNearPlane()                        const { return m_camera.GetNearPlane(); }
+			float GetFarPlane()                         const { return m_camera.GetFarPlane(); }
+			float GetAspect()                           const { return m_camera.GetAspect(); }
+			float GetFovY()                             const { return m_camera.GetFovY(); }
 
 			Graphics::Frustum GetFrustum()  const;
-			glm::mat4 GetProjectionViewMatrix();
 
 		private:
 			Camera m_camera;

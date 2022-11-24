@@ -162,10 +162,10 @@ namespace Insight
 			m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
 			m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
 			m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
-			
-			m_buffer_frame.View_Inverted = glm::inverse(m_buffer_frame.View);
-			m_buffer_frame.Projection_View_Inverted = glm::inverse(m_buffer_frame.Proj_View);
-			
+
+			m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
+			m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
+
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
 

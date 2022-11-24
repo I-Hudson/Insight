@@ -196,6 +196,7 @@ namespace Insight
 		void IResource::AddDependentResrouce(IResource* resource, const std::string& file_path, ResourceStorageTypes storage_type)
 		{
 			std::lock_guard lock(m_mutex);
+			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
 				ResourceManager::Instance().AddExistingResource(resource, file_path);
@@ -207,8 +208,10 @@ namespace Insight
 
 		IResource* IResource::AddReferenceResource(const std::string& file_path, ResourceTypeId type_id)
 		{
-			std::lock_guard lock(m_mutex);
 			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
+
+			std::lock_guard lock(m_mutex);
+			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
@@ -220,6 +223,7 @@ namespace Insight
 		void IResource::AddReferenceResource(IResource* resource, const std::string& file_path)
 		{
 			std::lock_guard lock(m_mutex);
+			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
 				ResourceManager::Instance().AddExistingResource(resource, file_path);
@@ -230,8 +234,10 @@ namespace Insight
 
 		IResource* IResource::AddDependentResource(const std::string& file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
-			std::lock_guard lock(m_mutex);
 			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
+
+			std::lock_guard lock(m_mutex);
+			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));

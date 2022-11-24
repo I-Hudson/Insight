@@ -65,6 +65,18 @@ namespace Insight
 			ComputeProjectionMatrix();
 		}
 
+		glm::mat4 Camera::GetInvertedProjectionViewMatrix() const
+		{
+			if (m_invertView)
+			{
+				return glm::inverse(m_projection * glm::inverse(m_view));
+			}
+			else
+			{
+				return glm::inverse(m_projection * m_view);
+			}
+		}
+
 		void Camera::ComputeProjectionMatrix()
 		{
 			if (m_cameraType == CameraType::Perspective)
@@ -136,6 +148,13 @@ namespace Insight
 			m_camera.SetFovY(fovy);
 		}
 
+		glm::mat4 CameraComponent::GetProjectionViewMatrix() const
+		{
+			// Call 'GetViewMatrix' to update the camera's view matrix.
+			GetViewMatrix();
+			return m_camera.GetProjectionViewMatrix();
+		}
+
 		glm::mat4 CameraComponent::GetViewMatrix() const
 		{
 			TransformComponent* transformComponent = static_cast<TransformComponent*>(GetOwnerEntity()->GetComponentByName(TransformComponent::Type_Name));
@@ -153,13 +172,6 @@ namespace Insight
 		Graphics::Frustum CameraComponent::GetFrustum() const
 		{
 			return Graphics::Frustum(GetViewMatrix(), m_camera.GetProjectionMatrix(), GetFarPlane());
-		}
-
-		glm::mat4 CameraComponent::GetProjectionViewMatrix()
-		{
-			// Call 'GetViewMatrix' to update the camera's view matrix.
-			GetViewMatrix();
-			return m_camera.GetProjectionViewMatrix();
 		}
 	}
 }

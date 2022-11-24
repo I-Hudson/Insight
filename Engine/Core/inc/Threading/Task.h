@@ -72,6 +72,9 @@ namespace Insight
 			{
 				DeleteTracked(m_taskResult);
 			}
+
+			TaskResult<ResultType>& GetResult() const { return *m_taskResult; }
+
 		private:
 			TaskResult<ResultType>* m_taskResult;
 		};
