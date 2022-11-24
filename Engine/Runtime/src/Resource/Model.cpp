@@ -61,6 +61,7 @@ namespace Insight
 			// Add all our meshes as dependents of this model. (Tied to this model)
 			for (Mesh* mesh : m_meshes)
 			{
+				mesh->OnLoaded(mesh);
 				if (ResourceManager::Instance().HasResource(mesh->GetFilePath()))
 				{
 					//if (mesh->GetFilePath().back() >= '0' |)
@@ -77,6 +78,7 @@ namespace Insight
 			for (Mesh* mesh : m_meshes)
 			{
 				ResourceManager::Instance().Unload(mesh);
+				mesh->OnUnloaded(mesh);
 				DeleteTracked(mesh);
 			}
 			m_meshes.clear();

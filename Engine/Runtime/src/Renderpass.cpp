@@ -151,12 +151,13 @@ namespace Insight
 
 			if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
 			{
-				Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-				auto entities = App::SceneManager::Instance().GetActiveScene().Lock()->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
-				for (auto entity : entities)
-				{
-					static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(nullptr);
-				}
+				//Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+				Runtime::ResourceManager::Instance().UnloadAll();
+				//auto entities = App::SceneManager::Instance().GetActiveScene().Lock()->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+				//for (auto entity : entities)
+				//{
+				//	static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(nullptr);
+				//}
 			}
 
 			m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
@@ -183,13 +184,16 @@ namespace Insight
 				{
 					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
 					Runtime::Material* material = meshComponent->GetMaterial();
-					if (material->GetProperty(Runtime::MaterialProperty::Colour_A) < 1.0f)
+					if (material)
 					{
-						transparent_entities_to_render.push_back(entity);
-					}
-					else
-					{
-						opaque_entities_to_render.push_back(entity);
+						if (material->GetProperty(Runtime::MaterialProperty::Colour_A) < 1.0f)
+						{
+							transparent_entities_to_render.push_back(entity);
+						}
+						else
+						{
+							opaque_entities_to_render.push_back(entity);
+						}
 					}
 				}
 			}

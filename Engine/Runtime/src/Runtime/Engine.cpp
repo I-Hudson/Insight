@@ -5,6 +5,7 @@
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
 #include "Core/Timer.h"
+#include "Core/Delegate.h"
 
 #include "Event/EventManager.h"
 #include "Input/InputManager.h"
@@ -22,6 +23,8 @@ namespace Insight
 	{
 		Core::Timer Engine::s_FrameTimer;
 
+		auto square(int x) -> int { return x * x; }
+
 		bool Engine::Init(int argc, char** argv)
 		{
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
@@ -33,6 +36,20 @@ namespace Insight
 			}
 
 			m_taskManger.Init();
+
+			Core::Delegate testDelegate = Core::Delegate<int(int)>();
+			testDelegate.bind<&square>();
+			assert(testDelegate(2) == 4);
+			testDelegate.bind([](int x) -> int
+				{
+					return x * x;
+				});
+			assert(testDelegate(5) == 25);
+
+			auto str = std::string{ "Hello" };
+			auto testDelegateString = Core::Delegate<std::string::size_type()>{};
+			testDelegateString.bind<std::string, &std::string::size>(&str);
+			assert(testDelegateString() == str.size());
 
 			//Threading::TaskSharedPtr task100 = Threading::TaskManager::CreateTask([]()
 			//	{

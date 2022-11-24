@@ -357,22 +357,32 @@ namespace Insight
 			}
 			resource->StopUnloadTimer();
 			resource->m_resource_state = EResoruceStates::Unloaded;
+			resource->OnUnloaded(resource);
+
 			if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
 			{
+				std::lock_guard lock(m_lock);
 				--m_loaded_resource_count;
 			}
 		}
 
 		void ResourceManager::UnloadAll()
 		{
-			std::shared_lock lock(m_lock);
+			std::unordered_map<std::string, IResource*> currentlyLoadedReources;
+			std::unique_lock lock(m_lock);
 			for (auto& pair : m_resources)
+			{
+				currentlyLoadedReources[pair.first] = pair.second.Get();
+			}
+			lock.unlock();
+
+			for (auto& pair : currentlyLoadedReources)
 			{
 				if (!pair.second->IsDependentOnAnotherResource())
 				{
 					/// Only unload resource which are not dependent on other resources 
 					/// as those resources should unload the dependent ones.
-					Unload(pair.second.Get());
+					Unload(pair.second);
 				}
 			}
 		}
@@ -480,6 +490,7 @@ namespace Insight
 									resource->StopLoadTimer();
 									if (resource->IsLoaded())
 									{
+										resource->OnLoaded(resource);
 										std::lock_guard lock(m_lock);
 										// Resource loaded successfully.
 										++m_loaded_resource_count;

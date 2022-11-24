@@ -8,6 +8,7 @@ namespace Insight
 	{
 		class Mesh;
 		class Material;
+		class IResource;
 	}
 
 	namespace ECS
@@ -21,10 +22,14 @@ namespace Insight
 			MeshComponent();
 			virtual ~MeshComponent() override;
 
-			void				SetMesh(Runtime::Mesh* mesh)				{ m_mesh = mesh; }
+			void				SetMesh(Runtime::Mesh* mesh);
 			Runtime::Mesh*		GetMesh()						const		{ return m_mesh; }
-			void				SetMaterial(Runtime::Material* material)	{ m_material = material; }
+			void				SetMaterial(Runtime::Material* material);
 			Runtime::Material*	GetMaterial()					const		{ return m_material; }
+
+		private:
+			void OnMeshUnload(Runtime::IResource* resource);
+			void OnMaterialUnload(Runtime::IResource* resource);
 
 		private:
 			Runtime::Mesh* m_mesh = nullptr;
