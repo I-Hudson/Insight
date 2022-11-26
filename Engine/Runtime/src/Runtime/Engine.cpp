@@ -38,9 +38,10 @@ namespace Insight
 			m_taskManger.Init();
 
 			Core::Delegate testDelegate = Core::Delegate<int(int)>();
-			testDelegate.bind<&square>();
+			testDelegate.Bind<&square>();
 			assert(testDelegate(2) == 4);
-			testDelegate.bind([](int x) -> int
+			testDelegate.Unbind<&square>();
+			testDelegate.Bind([](int x) -> int
 				{
 					return x * x;
 				});
@@ -48,8 +49,9 @@ namespace Insight
 
 			auto str = std::string{ "Hello" };
 			auto testDelegateString = Core::Delegate<std::string::size_type()>{};
-			testDelegateString.bind<std::string, &std::string::size>(&str);
+			testDelegateString.Bind<&std::string::size>(&str);
 			assert(testDelegateString() == str.size());
+			testDelegateString.Unbind<&std::string::size>(&str);
 
 			//Threading::TaskSharedPtr task100 = Threading::TaskManager::CreateTask([]()
 			//	{
@@ -57,7 +59,6 @@ namespace Insight
 			//		std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 20));
 			//		IS_CORE_INFO("Thread sleep for 100 ms.");
 			//	});
-
 
 			Threading::TaskManager::CreateTask([]()
 				{

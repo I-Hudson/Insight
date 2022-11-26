@@ -2,6 +2,9 @@
 
 #include "ECS/Entity.h"
 
+#include "Resource/Mesh.h"
+#include "Resource/ResourceLifeTimeHandle.h"
+
 namespace Insight
 {
 	namespace Runtime
@@ -28,11 +31,10 @@ namespace Insight
 			Runtime::Material*	GetMaterial()					const		{ return m_material; }
 
 		private:
-			void OnMeshUnload(Runtime::IResource* resource);
 			void OnMaterialUnload(Runtime::IResource* resource);
 
 		private:
-			Runtime::Mesh* m_mesh = nullptr;
+			Runtime::ResourceLFHandle<Runtime::Mesh> m_mesh;
 			Runtime::Material* m_material = nullptr;
 		};
 	}

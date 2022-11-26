@@ -17,31 +17,24 @@ namespace Insight
 		{
 			if (m_mesh)
 			{
-				m_mesh->OnUnloaded.Unbind();
+				m_mesh->OnUnloaded.Unbind<&MeshComponent::OnMaterialUnload>(this);
 			}
 			m_mesh = mesh;
-			m_mesh->OnUnloaded.bind<MeshComponent, &MeshComponent::OnMeshUnload>(this);
 		}
 
 		void MeshComponent::SetMaterial(Runtime::Material* material)
 		{
 			if (m_material)
 			{
-				m_material->OnUnloaded.Unbind();
+				m_material->OnUnloaded.Unbind<&MeshComponent::OnMaterialUnload>(this);
 			}
 			m_material = material;
-			m_material->OnUnloaded.bind<MeshComponent, &MeshComponent::OnMaterialUnload>(this);
-		}
-
-		void MeshComponent::OnMeshUnload(Runtime::IResource* resource)
-		{
-			m_mesh->OnUnloaded.Unbind();
-			m_mesh = nullptr;
+			m_material->OnUnloaded.Bind<&MeshComponent::OnMaterialUnload>(this);
 		}
 
 		void MeshComponent::OnMaterialUnload(Runtime::IResource* resource)
 		{
-			m_material->OnUnloaded.Unbind();
+			m_material->OnUnloaded.Unbind<&MeshComponent::OnMaterialUnload>(this);
 			m_material = nullptr;
 		}
 	}

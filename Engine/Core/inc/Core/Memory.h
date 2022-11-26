@@ -584,3 +584,162 @@ RPtr<T> MakeRPtr(Args&&... args)
 		return RPtr<T>(NewTracked(T));
 	}
 }
+
+#include "Core/Delegate.h"
+
+template<typename T>
+class TObjectOwnPtr;
+template<typename T>
+using TObjectOPtr = TObjectOwnPtr<T>;
+
+template<typename T>
+class TObjectPtr;
+
+class ReferenceCountObject
+{
+public:
+	void Incr() { ++m_refCount; }
+	void Decr() { --m_refCount; }
+
+	bool IsValid() const { return m_refCount > 0; }
+	int GetCount() const { return m_refCount; }
+	void Reset() { m_refCount = 0; }
+
+private:
+	std::atomic<int> m_refCount = 0;
+};
+
+/// <summary>
+/// 
+/// </summary>
+/// <typeparam name="T"></typeparam>
+template<typename T>
+class TObjectOwnPtr
+{
+	using Ptr = T*;
+	using Ref = T&;
+
+public:
+	TObjectOwnPtr() { m_refCount = NewTracked(ReferenceCountObject); }
+	TObjectOwnPtr(Ptr pointer)
+	{
+		m_refCount = NewTracked(ReferenceCountObject);
+		m_ptr = pointer;
+		Incr();
+	}
+	TObjectOwnPtr(const TObjectOwnPtr& other) = delete;
+	template<typename TOther>
+	TObjectOwnPtr(const TObjectOwnPtr<TOther>& other) = delete;
+	TObjectOwnPtr(TObjectOwnPtr&& other)
+	{
+		m_ptr = other.m_ptr;
+		m_refCount = other.m_refCount;
+		other.m_ptr = nullptr;
+		other.m_refCount = nullptr;
+
+	}
+	template<typename TOther>
+	TObjectOwnPtr(TObjectOwnPtr<TOther>&& other)
+	{
+		static_assert(std::is_convertible_v<T, TOther>, "[TObjectOwnPtr] Unable to convert to TOther.");
+		m_ptr = static_cast<Ptr>(other.m_ptr);
+		m_refCount = other.m_refCount;
+		other.m_ptr = nullptr;
+		other.m_refCount = nullptr;
+
+	}
+	virtual ~TObjectOwnPtr()
+	{
+		Reset();
+	}
+
+	operator bool() const { return m_ptr != nullptr; }
+	operator Ptr() const { return m_ptr; }
+
+	TObjectOwnPtr& operator=(const TObjectOwnPtr& pointer) = delete;
+	template<typename TOther>
+	TObjectOwnPtr& operator=(const TObjectOwnPtr<TOther>& pointer) = delete;
+	TObjectOwnPtr& operator=(TObjectOwnPtr&& other)
+	{ 
+		Reset(); 
+		m_ptr = other.m_ptr; 
+		m_refCount = other.m_refCount;
+		other.m_ptr = nullptr;
+		other.m_refCount = nullptr;
+		return *this; 
+	}
+	template<typename TOther>
+	TObjectOwnPtr& operator=(TObjectOwnPtr&& other)
+	{ 
+		static_assert(std::is_convertible_v<T, TOther>, "[TObjectOwnPtr] Unable to convert to TOther."); 
+		Reset(); 
+		m_ptr = static_cast<Ptr>(other.m_ptr); 
+		m_refCount = other.m_refCount;
+		other.m_ptr = nullptr;
+		other.m_refCount = nullptr;
+		return *this; 
+	}
+
+	bool operator==(const TObjectOwnPtr& other) const
+	{ return m_ptr == other.m_ptr; }
+	template<typename TOther>
+	bool operator==(const TObjectOwnPtr<TOther>& other) const
+	{ return m_ptr == other.m_ptr; }
+
+	bool operator!=(const TObjectOwnPtr& other) const
+	{ return !(*this == other) }
+	template<typename TOther>
+	bool operator!=(const TObjectOwnPtr<TOther>& other) const
+	{ return !(*this == other) }
+
+	void Reset()
+	{
+		if (m_refCount)
+		{
+			DeleteTracked(m_refCount);
+		}
+
+		if (m_ptr)
+		{
+			DeleteTracked(m_ptr);
+		}
+	}
+
+private:
+	void Incr()
+	{
+		if (m_refCount)
+		{
+			m_refCount->Incr();
+		}
+	}
+	void Decr()
+	{
+		if (m_refCount)
+		{
+			m_refCount->Decr();
+		}
+	}
+
+
+private:
+	ReferenceCountObject* m_refCount = 0;
+	Ptr m_ptr = nullptr;
+	Insight::Core::Delegate<void()> m_onReset;
+
+	template<typename>
+	friend class TObjectOwnPtr;
+};
+
+/// <summary>
+/// 
+/// </summary>
+/// <typeparam name="T"></typeparam>
+template<typename T>
+class TObjectPtr : public ReferenceCountObject
+{
+public:
+
+private:
+
+};
