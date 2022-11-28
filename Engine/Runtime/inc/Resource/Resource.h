@@ -246,7 +246,7 @@ namespace Insight
 			mutable std::shared_mutex m_lock;
 			/// @brief Load count of resources (from disk only).
 			u32 m_loaded_resource_count = 0;
-			std::unordered_map<std::string, UPtr<IResource>> m_resources;
+			std::unordered_map<std::string, TObjectOPtr<IResource>> m_resources;
 
 			friend class IResource;
 			friend class ResourceLoadTask;

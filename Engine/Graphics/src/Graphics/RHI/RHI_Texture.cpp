@@ -59,13 +59,12 @@ namespace Insight
 				{
 					Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 					const u64 textureSize = width * height * STBI_rgb_alpha;
-					Upload(data, (int)textureSize);
+					Upload(data, (int)textureSize, cmdList);
 
 					stbi_image_free(data);
 					UntrackPtr(data);
 				});
 #else
-			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
 			
@@ -92,6 +91,11 @@ namespace Insight
 
 			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			Upload(data, static_cast<int>(size_in_bytes));
+		}
+
+		void RHI_Texture::Upload(void* data, int sizeInBytes)
+		{
+			Upload(data, sizeInBytes, nullptr);
 		}
 	}
 }

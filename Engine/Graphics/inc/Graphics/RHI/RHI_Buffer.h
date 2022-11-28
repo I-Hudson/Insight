@@ -59,6 +59,10 @@ namespace Insight
 			virtual void Resize(u64 newSizeBytes) = 0;
 
 			RHI_BufferView GetView(u64 offset, u64 size);
+			/// <summary>
+			/// Returns the size of the buffer in bytes.
+			/// </summary>
+			/// <returns></returns>
 			u64 GetSize() const { return m_size; }
 			u64 GetStride() const { return m_stride; }
 			BufferType GetType() const { return m_bufferType; }

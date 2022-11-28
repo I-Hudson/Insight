@@ -18,7 +18,7 @@ namespace Insight
 
 				/// RHI_Texture
 				virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) override;
-				virtual void Upload(void* data, int sizeInBytes) override;
+				virtual void Upload(void* data, int sizeInBytes, RHI_CommandList* cmdList) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 
 				/// RHI_Resource

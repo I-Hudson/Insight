@@ -38,6 +38,8 @@ namespace Insight
 				m_function = &StaticFreeFunctionStub;
 			}
 
+			operator bool() const { return m_function != nullptr; }
+
 			// Bind a static/free function function.
 			template<ReturnType(*Function)(Args...)>
 			void Bind()
@@ -134,8 +136,8 @@ namespace Insight
 			}
 
 		private:
-			const void* m_callee;
-			StubSignature m_function;
+			const void* m_callee = nullptr;
+			StubSignature m_function = nullptr;
 		};
 
 		template<typename Return, typename... Args>
@@ -148,13 +150,14 @@ namespace Insight
 			Delegate() = default;
 			Delegate(const Delegate& other) = default;
 
+			operator bool() const { return m_function; }
+
 			auto operator=(const Delegate& other) ->Delegate& = default;
 
 			auto operator()(Args&&... args) const->Return
 			{
 				return m_function(std::forward<Args>(args)...);
 			}
-
 			template <typename... UArgs,
 				typename = std::enable_if_t<std::is_invocable_v<Return(Args...), UArgs...>>>
 			auto operator()(UArgs&&... args) const -> Return

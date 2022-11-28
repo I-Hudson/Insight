@@ -7,6 +7,8 @@
 #include "Graphics/PipelineStateObject.h"
 #include "Graphics/PipelineBarrier.h"
 
+#include "Core/Delegate.h"
+
 #include <unordered_set>
 #include <glm/vec2.hpp>
 
@@ -58,7 +60,8 @@ namespace Insight
 			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;
 			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) { CopyBufferToBuffer(dst, src, 0); }
 
-			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) = 0;
+			void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) { CopyBufferToImage(dst, src, 0); }
+			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset) = 0;
 
 			void SetImageLayout(RHI_Texture* texture, ImageLayout layout);
 
@@ -111,6 +114,11 @@ namespace Insight
 
 			bool IsDiscard() const { return m_discard; }
 
+			/// <summary>
+			/// This delegate is called when this command buffer has completed all work on the GPU.
+			/// </summary>
+			Core::Delegate<void()> OnWorkCompleted;
+
 		protected:
 			bool CanDraw();
 			virtual bool BindDescriptorSets();
@@ -133,6 +141,7 @@ namespace Insight
 
 			RHI_Buffer* m_bound_vertex_buffer = nullptr;
 			RHI_Buffer* m_bound_index_buffer = nullptr;
+
 
 			friend class RenderGraph;
 		};

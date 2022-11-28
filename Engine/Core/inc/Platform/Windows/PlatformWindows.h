@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <thread>
 
 namespace Insight
 {
@@ -16,6 +17,8 @@ namespace Insight
 		class IS_CORE PlatformWindows
 		{
 		public:
+
+			static void Initialise();
 
 			static void MemCopy(void* dst, void const* src, u64 size);
 			static void MemSet(void* dst, int value, u64 size);
@@ -32,6 +35,11 @@ namespace Insight
 
 			static Core::GUID CreateGUID();
 			static void AssignGUID(Core::GUID& guid);
+
+			static bool IsMainThread();
+
+		private:
+			static std::thread::id s_mainThreadId;
 		};
 
 	}

@@ -368,11 +368,11 @@ namespace Insight
 
 		void ResourceManager::UnloadAll()
 		{
-			std::unordered_map<std::string, IResource*> currentlyLoadedReources;
+			std::unordered_map<std::string, TObjectPtr<IResource>> currentlyLoadedReources;
 			std::unique_lock lock(m_lock);
 			for (auto& pair : m_resources)
 			{
-				currentlyLoadedReources[pair.first] = pair.second.Get();
+				currentlyLoadedReources[pair.first] = pair.second;
 			}
 			lock.unlock();
 
@@ -420,7 +420,7 @@ namespace Insight
 			std::shared_lock lock(m_lock);
 			for (const auto& pair : m_resources)
 			{
-				const IResource* resource = pair.second.Get();
+				const TObjectPtr<IResource> resource = pair.second;
 				resource->Print();
 			}
 		}
@@ -453,7 +453,7 @@ namespace Insight
 
 				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
 				{
-					resource = itr->second.Get();
+					resource = itr->second;
 				}
 			}
 

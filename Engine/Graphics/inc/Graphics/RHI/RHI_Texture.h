@@ -71,7 +71,8 @@ namespace Insight
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
 			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
-			virtual void Upload(void* data, int sizeInBytes) = 0;
+			void Upload(void* data, int sizeInBytes);
+			virtual void Upload(void* data, int sizeInBytes, RHI_CommandList* cmdList) = 0;
 			virtual std::vector<Byte> Download(void* data, int sizeInBytes) = 0;
 
 		protected:

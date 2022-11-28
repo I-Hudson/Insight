@@ -27,6 +27,8 @@ namespace Insight
 
 		bool Engine::Init(int argc, char** argv)
 		{
+			Platform::Initialise();
+
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
 			Core::CommandLineArgs::ParseCommandLine("./cmdline.txt");
 

@@ -15,6 +15,13 @@ namespace Insight
 {
 	namespace Windows
 	{
+		std::thread::id PlatformWindows::s_mainThreadId;
+
+		void PlatformWindows::Initialise()
+		{
+			s_mainThreadId = std::this_thread::get_id();
+		}
+
 		void PlatformWindows::MemCopy(void* dst, void const* src, u64 size)
 		{
 			memcpy(dst, src, size);
@@ -231,6 +238,11 @@ namespace Insight
 			guid = Core::GUID(gidReference.Data1, gidReference.Data2, gidReference.Data3, 
 				{ gidReference.Data4[0], gidReference.Data4[1], gidReference.Data4[2], gidReference.Data4[3],
 				 gidReference.Data4[4], gidReference.Data4[5], gidReference.Data4[6], gidReference.Data4[7] });
+		}
+
+		bool PlatformWindows::IsMainThread()
+		{
+			return std::this_thread::get_id() == s_mainThreadId;
 		}
 	}
 }

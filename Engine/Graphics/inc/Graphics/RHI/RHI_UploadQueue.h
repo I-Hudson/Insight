@@ -1,0 +1,88 @@
+#pragma once
+
+#include "Core/Memory.h"
+#include "Core/TypeAlias.h"
+
+#include <vector>
+#include <functional>
+
+namespace Insight
+{
+	namespace Graphics
+	{
+		class RHI_CommandList;
+		class RHI_Buffer;
+		class RHI_Texture;
+		struct RHI_UploadQueueRequestInternal;
+
+		using RHI_UploadQueueFunction = std::function<void(const RHI_UploadQueueRequestInternal& request, RHI_CommandList*)>;
+
+		enum class DeviceUploadStatus
+		{
+			Unknown,
+			Queued,
+			Uploading,
+			Completed
+		};
+
+		/// <summary>
+		/// Struct returned with the current status of the uploaded resource.
+		/// </summary>
+		struct RHI_UploadQueueRequest
+		{
+			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::Unknown;
+		};
+
+		struct RHI_UploadQueueRequestInternal
+		{
+			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, u64 sizeInBytes);
+			RHI_UploadQueueFunction UploadFunction;
+			u64 SizeInBytes;
+			RPtr<RHI_UploadQueueRequest> Request;
+		};
+
+		/// <summary>
+		/// Helper class for uploading any resource from host (RAM) to device (GPU).
+		/// </summary>
+		class RHI_UploadQueue
+		{
+		public:
+
+			RHI_UploadQueue();
+			RHI_UploadQueue(const RHI_UploadQueue& other) = delete;
+			RHI_UploadQueue(RHI_UploadQueue&& other) = delete;
+			~RHI_UploadQueue();
+
+			/// <summary>
+			/// Add a new upload request for a texture to the queue.
+			/// </summary>
+			/// <param name="data"></param>
+			/// <param name="sizeInBytes"></param>
+			RPtr<RHI_UploadQueueRequest> UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture);
+			/// <summary>
+			/// Upload the data to the device.
+			/// </summary>
+			/// <param name="cmdList"></param>
+			void UploadToDevice(RHI_CommandList* cmdList);
+
+		private:
+			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes);
+
+		private:
+			/// <summary>
+			/// All queued uploads to be completed.
+			/// </summary>
+			std::vector<RHI_UploadQueueRequestInternal> m_queuedUploads;
+			/// <summary>
+			/// Buffer to store all data to be uploaded. (This is used for staging resources).
+			/// </summary>
+			TObjectOwnPtr<RHI_Buffer> m_uploadStagingBuffer;
+			u64 m_stagingBufferOffset = 0;
+
+			/// <summary>
+			/// The current offset this frame when uploading all the resources.
+			/// </summary>
+			u64 m_frameUploadOffset = 0;
+		};
+	}
+}

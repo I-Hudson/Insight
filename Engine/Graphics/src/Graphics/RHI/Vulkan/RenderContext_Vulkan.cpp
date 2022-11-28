@@ -270,20 +270,12 @@ namespace Insight
 
 				InitImGui();
 
-				m_submitFences.Setup();
-				m_submitFences.ForEach([this](vk::Fence& fence)
+				m_submitFrameContexts.Setup();
+				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
-						fence = m_device.createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
-					});
-				m_swapchainAcquires.Setup();
-				m_swapchainAcquires.ForEach([this](vk::Semaphore& semaphore)
-					{
-						semaphore = m_device.createSemaphore(vk::SemaphoreCreateInfo());
-					});
-				m_signalSemaphores.Setup();
-				m_signalSemaphores.ForEach([this](vk::Semaphore& semaphore)
-					{
-						semaphore = m_device.createSemaphore(vk::SemaphoreCreateInfo());
+						context.SubmitFences = m_device.createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
+						context.SignalSemaphores = m_device.createSemaphore(vk::SemaphoreCreateInfo());
+						context.SwapchainAcquires = m_device.createSemaphore(vk::SemaphoreCreateInfo());
 					});
 
 				return true;
@@ -298,17 +290,11 @@ namespace Insight
 
 				DestroyImGui();
 
-				m_submitFences.ForEach([this](vk::Fence& fence)
+				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
-						m_device.destroyFence(fence);
-					});
-				m_swapchainAcquires.ForEach([this](vk::Semaphore& semaphore)
-					{
-						m_device.destroySemaphore(semaphore);
-					});
-				m_signalSemaphores.ForEach([this](vk::Semaphore& semaphore)
-					{
-						m_device.destroySemaphore(semaphore);
+						m_device.destroyFence(context.SubmitFences);
+						m_device.destroySemaphore(context.SignalSemaphores);
+						m_device.destroySemaphore(context.SwapchainAcquires);
 					});
 
 				if (m_swapchain)
@@ -479,10 +465,10 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Fence wait");
 					// First get the status of the fence. Then if it has not finished, wait on it.
-					vk::Result fenceStatusResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0);
+					vk::Result fenceStatusResult = m_device.waitForFences({ m_submitFrameContexts.Get().SubmitFences }, 1, 0);
 					if (fenceStatusResult == vk::Result::eTimeout)
 					{
-						vk::Result waitResult = m_device.waitForFences({ m_submitFences.Get() }, 1, 0xFFFFFFFF);
+						vk::Result waitResult = m_device.waitForFences({ m_submitFrameContexts.Get().SubmitFences }, 1, 0xFFFFFFFF);
 						ASSERT(waitResult == vk::Result::eSuccess);
 					}
 
@@ -490,11 +476,15 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("acquireNextImageKHR");
-					VkResult acquireNextImageResult = vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), 0xFFFFFFFF, static_cast<VkSemaphore>(m_swapchainAcquires.Get())
+					VkResult acquireNextImageResult = 
+						vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), 0xFFFFFFFF, static_cast<VkSemaphore>(m_submitFrameContexts.Get().SwapchainAcquires)
 						, 0, &m_availableSwapchainImage);
 
-					m_device.resetFences({ m_submitFences.Get() });
-
+					m_device.resetFences({ m_submitFrameContexts.Get().SubmitFences });
+					for (const RHI_CommandList* cmdList : m_submitFrameContexts.Get().CommandLists)
+					{
+						cmdList->OnWorkCompleted();
+					}
 
 					if (acquireNextImageResult != VK_SUCCESS)
 					{
@@ -523,10 +513,10 @@ namespace Insight
 				{
 					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
-					std::array<vk::Semaphore, 1> waitSemaphores = { m_swapchainAcquires.Get() };
+					std::array<vk::Semaphore, 1> waitSemaphores = { m_submitFrameContexts.Get().SwapchainAcquires };
 					std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
 					std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-					std::array<vk::Semaphore, 1> signalSemaphore = { m_signalSemaphores.Get() };
+					std::array<vk::Semaphore, 1> signalSemaphore = { m_submitFrameContexts.Get().SignalSemaphores };
 
 					vk::SubmitInfo submitInfo = vk::SubmitInfo(
 						waitSemaphores,
@@ -534,7 +524,7 @@ namespace Insight
 						commandBuffers,
 						signalSemaphore);
 
-					std::array<vk::Semaphore, 1> signalSemaphores = { m_signalSemaphores.Get() };
+					std::array<vk::Semaphore, 1> signalSemaphores = { m_submitFrameContexts.Get().SignalSemaphores };
 					std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
 					std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
 
@@ -544,10 +534,12 @@ namespace Insight
 						std::lock_guard lock(m_lock);
 						if (!cmdList->IsDiscard())
 						{
+							m_submitFrameContexts.Get().CommandLists.push_back(cmdListVulkan);
+
 							RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 							cmdListVulkan->m_state = RHI_CommandListStates::Submitted;
 
-							m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFences.Get());
+							m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFrameContexts.Get().SubmitFences);
 							VkResult presentResult = vkQueuePresentKHR(m_commandQueues[GPUQueue_Graphics], reinterpret_cast<const VkPresentInfoKHR*>(&presentInfo));
 
 							if (presentResult != VK_SUCCESS)

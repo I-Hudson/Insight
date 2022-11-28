@@ -127,14 +127,14 @@ namespace Insight
 				m_commandList.copyBuffer(srcVulkan->GetBuffer(), dstVulkan->GetBuffer(), copyRegion);
 			}
 
-			void RHI_CommandList_Vulkan::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
+			void RHI_CommandList_Vulkan::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset)
 			{
 				RHI_Texture_Vulkan* dstVulkan = static_cast<RHI_Texture_Vulkan*>(dst);
 				RHI_Buffer_Vulkan* srcVulkan = static_cast<RHI_Buffer_Vulkan*>(src);
 				std::array<vk::BufferImageCopy, 1> copyRegion =
 				{
 					vk::BufferImageCopy(
-						0,
+						offset,
 						0,
 						0,
 						vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),

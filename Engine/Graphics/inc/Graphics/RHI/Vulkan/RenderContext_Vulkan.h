@@ -29,6 +29,17 @@ namespace Insight
 				GPUQueue Queue;
 			};
 
+			/// <summary>
+			/// Store all the objects needed for a single frame submit.
+			/// </summary>
+			struct FrameSubmitContext
+			{
+				std::vector<RHI_CommandList*> CommandLists;
+				vk::Fence SubmitFences;
+				vk::Semaphore SwapchainAcquires;
+				vk::Semaphore SignalSemaphores;
+			};
+
 			class RenderContext_Vulkan : public RenderContext
 			{
 			public:
@@ -114,9 +125,7 @@ namespace Insight
 
 			private:
 
-				FrameResource<vk::Fence> m_submitFences;
-				FrameResource<vk::Semaphore> m_swapchainAcquires;
-				FrameResource<vk::Semaphore> m_signalSemaphores;
+				FrameResource<FrameSubmitContext> m_submitFrameContexts;
 			};
 		}
 	}
