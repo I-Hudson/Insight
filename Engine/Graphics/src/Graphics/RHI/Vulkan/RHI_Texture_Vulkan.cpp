@@ -69,28 +69,27 @@ namespace Insight
 					m_single_layer_image_views.push_back(imageView);
 					lock.unlock();
 				}
+				m_uploadStatus = createInfo.InitalStatus;
 			}
 
-			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes, RHI_CommandList* cmdList)
+			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
 			{
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_mutex);
+				// We need a staging buffer to upload data from CPU to GPU.
+				RHI_Buffer_Vulkan stagingBuffer;
+				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
+				stagingBuffer.Upload(data, sizeInBytes, 0);
 
-				if (!cmdList)
-				{
-					// We need a staging buffer to upload data from CPU to GPU.
-					RHI_Buffer_Vulkan stagingBuffer;
-					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
-					stagingBuffer.Upload(data, sizeInBytes, 0);
+				RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
+				m_uploadStatus = DeviceUploadStatus::Uploading;
+				cmdList->CopyBufferToImage(this, &stagingBuffer);
+				cmdList->Close();
 
-					cmdList = m_context->GetCommandListManager().GetCommandList();
-					cmdList->CopyBufferToImage(this, &stagingBuffer);
-					cmdList->Close();
-
-					m_context->SubmitCommandListAndWait(cmdList);
-					m_context->GetCommandListManager().ReturnCommandList(cmdList);
-					stagingBuffer.Release();
-				}
+				m_context->SubmitCommandListAndWait(cmdList);
+				m_context->GetCommandListManager().ReturnCommandList(cmdList);
+				stagingBuffer.Release();
+				m_uploadStatus = DeviceUploadStatus::Completed;
 			}
 
 			std::vector<Byte> RHI_Texture_Vulkan::Download(void* data, int sizeInBytes)

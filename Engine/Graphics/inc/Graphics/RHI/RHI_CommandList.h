@@ -117,7 +117,7 @@ namespace Insight
 			/// <summary>
 			/// This delegate is called when this command buffer has completed all work on the GPU.
 			/// </summary>
-			Core::Delegate<void()> OnWorkCompleted;
+			Core::Delegate<> OnWorkCompleted;
 
 		protected:
 			bool CanDraw();

@@ -3,6 +3,8 @@
 #include "Core/Memory.h"
 #include "Core/TypeAlias.h"
 
+#include "Graphics/Enums.h"
+
 #include <vector>
 #include <functional>
 
@@ -14,16 +16,9 @@ namespace Insight
 		class RHI_Buffer;
 		class RHI_Texture;
 		struct RHI_UploadQueueRequestInternal;
+		class RHI_UploadQueue;
 
-		using RHI_UploadQueueFunction = std::function<void(const RHI_UploadQueueRequestInternal& request, RHI_CommandList*)>;
-
-		enum class DeviceUploadStatus
-		{
-			Unknown,
-			Queued,
-			Uploading,
-			Completed
-		};
+		using RHI_UploadQueueFunction = std::function<void(const RHI_UploadQueueRequestInternal*, RHI_CommandList*)>;
 
 		/// <summary>
 		/// Struct returned with the current status of the uploaded resource.
@@ -31,6 +26,7 @@ namespace Insight
 		struct RHI_UploadQueueRequest
 		{
 			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::Unknown;
+			Core::Delegate<RHI_UploadQueueRequest*> OnUploadCompleted;
 		};
 
 		struct RHI_UploadQueueRequestInternal
@@ -39,6 +35,12 @@ namespace Insight
 			RHI_UploadQueueFunction UploadFunction;
 			u64 SizeInBytes;
 			RPtr<RHI_UploadQueueRequest> Request;
+			RHI_CommandList* CommandList;
+
+		private:
+			void OnWorkComplete();
+
+			friend class RHI_UploadQueue;
 		};
 
 		/// <summary>
@@ -52,6 +54,9 @@ namespace Insight
 			RHI_UploadQueue(const RHI_UploadQueue& other) = delete;
 			RHI_UploadQueue(RHI_UploadQueue&& other) = delete;
 			~RHI_UploadQueue();
+
+			void Init();
+			void Destroy();
 
 			/// <summary>
 			/// Add a new upload request for a texture to the queue.
@@ -72,11 +77,12 @@ namespace Insight
 			/// <summary>
 			/// All queued uploads to be completed.
 			/// </summary>
-			std::vector<RHI_UploadQueueRequestInternal> m_queuedUploads;
+			std::vector<RPtr<RHI_UploadQueueRequestInternal>> m_queuedUploads;
+			std::vector<RPtr<RHI_UploadQueueRequestInternal>> m_runningUploads;
 			/// <summary>
 			/// Buffer to store all data to be uploaded. (This is used for staging resources).
 			/// </summary>
-			TObjectOwnPtr<RHI_Buffer> m_uploadStagingBuffer;
+			RHI_Buffer* m_uploadStagingBuffer = nullptr;
 			u64 m_stagingBufferOffset = 0;
 
 			/// <summary>

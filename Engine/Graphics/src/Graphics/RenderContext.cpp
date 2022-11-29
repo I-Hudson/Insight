@@ -101,6 +101,8 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
+			m_uploadQueue.Destroy();
+
 			for (auto& buffer : m_buffers)
 			{
 				buffer.second.ReleaseAll();
@@ -254,7 +256,7 @@ namespace Insight
 			return;
 		}
 		ASSERT(s_context);
-		ASSERT(buffer->GetType() == Graphics::BufferType::Index);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Raw);
 		s_context->FreeBuffer(buffer);
 	}
 

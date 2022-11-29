@@ -227,7 +227,7 @@ namespace Insight
 
 					if (descriptor.Type == DescriptorType::Sampled_Image)
 					{
-						if (descriptor.RHI_Texture)
+						if (descriptor.RHI_Texture && descriptor.RHI_Texture->GetUploadStatus() == DeviceUploadStatus::Completed)
 						{
 							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.RHI_Texture)->GetImageView();
 							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
@@ -240,7 +240,7 @@ namespace Insight
 
 					if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
 					{
-						if (descriptor.RHI_Texture)
+						if (descriptor.RHI_Texture && descriptor.RHI_Texture->GetUploadStatus() == DeviceUploadStatus::Completed)
 						{
 							const RHI_Sampler* rhi_sampler = descriptor.RHI_Sampler == nullptr ?
 								m_context->GetSamplerManager().GetOrCreateSampler({}) : descriptor.RHI_Sampler;

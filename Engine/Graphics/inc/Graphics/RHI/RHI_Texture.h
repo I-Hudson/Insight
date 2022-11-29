@@ -3,7 +3,10 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 #include "Graphics/RHI/RHI_Resource.h"
+#include "Graphics/RHI/RHI_UploadQueue.h"
+
 #include <vector>
+
 
 namespace Insight
 {
@@ -11,6 +14,7 @@ namespace Insight
 	{
 		class RenderContext;
 		class RHI_CommandList;
+		struct RHI_UploadQueueRequest;
 
 		struct RHI_TextureInfo
 		{
@@ -25,6 +29,7 @@ namespace Insight
 			u32 Layer_Count = 1;
 
 			ImageLayout Layout = ImageLayout::Undefined;
+			DeviceUploadStatus InitalStatus = DeviceUploadStatus::Unknown;
 
 			static RHI_TextureInfo Tex2D(int width, int height, PixelFormat format, ImageUsageFlags usage)
 			{
@@ -71,13 +76,23 @@ namespace Insight
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
 			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
-			void Upload(void* data, int sizeInBytes);
-			virtual void Upload(void* data, int sizeInBytes, RHI_CommandList* cmdList) = 0;
+			virtual void Upload(void* data, int sizeInBytes) = 0;
+			/// <summary>
+			/// Add the upload to the RHI_UploadQueue. This will upload just before all rendering. This doesn't garuntee that the upload will have completed.
+			/// </summary>
+			/// <param name="data"></param>
+			/// <param name="sizeInBytes"></param>
+			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes);
 			virtual std::vector<Byte> Download(void* data, int sizeInBytes) = 0;
+
+		private:
+			void OnUploadComplete(RHI_UploadQueueRequest* request);
 
 		protected:
 			/// @brief Define the info for all mips of the image.
 			std::vector<RHI_TextureInfo> m_infos = { };
+
+			void* m_uploadData = nullptr;
 
 			friend class RHI_CommandList;
 		};

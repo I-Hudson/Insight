@@ -501,5 +501,13 @@ namespace Insight
 
 			DeviceExtensionCount
 		};
+
+		enum class DeviceUploadStatus
+		{
+			Unknown,
+			Queued,
+			Uploading,
+			Completed
+		};
 	}
 }

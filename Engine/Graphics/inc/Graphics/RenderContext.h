@@ -13,6 +13,7 @@
 #include "Graphics/RHI/RHI_Renderpass.h"
 #include "Graphics/RHI/RHI_Sampler.h"
 #include "Graphics/RHI/RHI_ResourceRenderTracker.h"
+#include "Graphics/RHI/RHI_UploadQueue.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
@@ -96,6 +97,7 @@ namespace Insight
 			RHI_ResourceRenderTracker& GetResourceRenderTracker() { return m_resource_tracker; }
 
 			GPUDeferedManager& GetDeferredManager() { return m_gpu_defered_manager; }
+			RHI_UploadQueue& GetUploadQueue() { return m_uploadQueue; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -129,6 +131,7 @@ namespace Insight
 			RHI_RenderpassManager m_renderpassManager;
 			RHI_SamplerManager* m_samplerManager;
 			GPUDeferedManager m_gpu_defered_manager;
+			RHI_UploadQueue m_uploadQueue;
 
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;

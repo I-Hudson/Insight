@@ -53,18 +53,21 @@ namespace Insight
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
-//#define RHI_TEXTURE_DEFER_ENABLED
+#define RHI_TEXTURE_DEFER_ENABLED
 #ifdef RHI_TEXTURE_DEFER_ENABLED
 			GraphicsManager::Instance().GetRenderContext()->GetDeferredManager().Push([this, createInfo, width, height, data](RHI_CommandList* cmdList)
 				{
 					Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 					const u64 textureSize = width * height * STBI_rgb_alpha;
-					Upload(data, (int)textureSize, cmdList);
 
-					stbi_image_free(data);
-					UntrackPtr(data);
+					m_uploadStatus = DeviceUploadStatus::Uploading;
+					m_uploadData = data;
+					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)textureSize);
+					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
+
 				});
 #else
+			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
 			
@@ -93,9 +96,18 @@ namespace Insight
 			Upload(data, static_cast<int>(size_in_bytes));
 		}
 
-		void RHI_Texture::Upload(void* data, int sizeInBytes)
+		RPtr<RHI_UploadQueueRequest> RHI_Texture::QueueUpload(void* data, int sizeInBytes)
 		{
-			Upload(data, sizeInBytes, nullptr);
+			return GraphicsManager::Instance().GetRenderContext()->GetUploadQueue().UploadTexture(data, sizeInBytes, this);
+		}
+
+		void RHI_Texture::OnUploadComplete(RHI_UploadQueueRequest* request)
+		{
+			request->OnUploadCompleted.Unbind<&RHI_Texture::OnUploadComplete>(this);
+			stbi_image_free(m_uploadData);
+			UntrackPtr(m_uploadData);
+			m_uploadData = nullptr;
+			m_uploadStatus = DeviceUploadStatus::Completed;
 		}
 	}
 }

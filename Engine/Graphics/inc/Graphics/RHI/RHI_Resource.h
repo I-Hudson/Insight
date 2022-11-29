@@ -26,10 +26,13 @@ namespace Insight
 			virtual bool ValidResouce() = 0;
 			virtual void SetName(std::wstring name) = 0;
 
+			DeviceUploadStatus GetUploadStatus() const { return m_uploadStatus; }
+
 		public:
 			std::wstring m_name;
 
 		protected:
+			DeviceUploadStatus m_uploadStatus = DeviceUploadStatus::Unknown;
 			mutable std::mutex m_mutex;
 		};
 

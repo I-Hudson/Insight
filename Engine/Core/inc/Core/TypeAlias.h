@@ -14,6 +14,7 @@ using i32   = int32_t;
 using i64   = int64_t;
 
 using Byte = unsigned char;
+using IntPtr = intptr_t;
 
 using Handle = u64;
 

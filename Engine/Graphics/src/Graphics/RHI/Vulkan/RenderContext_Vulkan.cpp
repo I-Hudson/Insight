@@ -278,6 +278,8 @@ namespace Insight
 						context.SwapchainAcquires = m_device.createSemaphore(vk::SemaphoreCreateInfo());
 					});
 
+				m_uploadQueue.Init();
+
 				return true;
 			}
 
@@ -483,7 +485,10 @@ namespace Insight
 					m_device.resetFences({ m_submitFrameContexts.Get().SubmitFences });
 					for (const RHI_CommandList* cmdList : m_submitFrameContexts.Get().CommandLists)
 					{
-						cmdList->OnWorkCompleted();
+						if (cmdList)
+						{
+							cmdList->OnWorkCompleted();
+						}
 					}
 
 					if (acquireNextImageResult != VK_SUCCESS)
@@ -505,10 +510,13 @@ namespace Insight
 			{
 				// Go through out defered manager and call all the functions which have been queued up.
 				m_gpu_defered_manager.Update(cmdList);
+				m_uploadQueue.UploadToDevice(cmdList);
 			}
 
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
 			{
+				m_submitFrameContexts.Get().CommandLists.clear();
+
 				if (cmdList != nullptr)
 				{
 					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
@@ -534,7 +542,7 @@ namespace Insight
 						std::lock_guard lock(m_lock);
 						if (!cmdList->IsDiscard())
 						{
-							m_submitFrameContexts.Get().CommandLists.push_back(cmdListVulkan);
+							m_submitFrameContexts.Get().CommandLists.push_back(cmdList);
 
 							RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 							cmdListVulkan->m_state = RHI_CommandListStates::Submitted;

@@ -612,7 +612,7 @@ private:
 
 struct Destructible
 {
-	Insight::Core::Delegate<void()> OnDestroyed;
+	Insight::Core::Delegate<> OnDestroyed;
 };
 
 /// <summary>

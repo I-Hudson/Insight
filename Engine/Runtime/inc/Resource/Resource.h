@@ -108,8 +108,8 @@ namespace Insight
 
 			virtual ResourceTypeId GetResourceTypeId() const;
 
-			Core::Delegate<void(IResource*)> OnLoaded;
-			Core::Delegate<void(IResource*)> OnUnloaded;
+			Core::Delegate<IResource*> OnLoaded;
+			Core::Delegate<IResource*> OnUnloaded;
 
 		protected:
 			/// @brief Add a new resource which depends upon this resource. (Texture could depend upon the Model loaded).

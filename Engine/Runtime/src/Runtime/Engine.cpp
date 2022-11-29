@@ -24,6 +24,7 @@ namespace Insight
 		Core::Timer Engine::s_FrameTimer;
 
 		auto square(int x) -> int { return x * x; }
+		auto divide(int x) -> int { return x / x; }
 
 		bool Engine::Init(int argc, char** argv)
 		{
@@ -39,8 +40,9 @@ namespace Insight
 
 			m_taskManger.Init();
 
-			Core::Delegate testDelegate = Core::Delegate<int(int)>();
+			auto testDelegate = Core::Action<int(int)>();
 			testDelegate.Bind<&square>();
+			testDelegate.Bind<&divide>();
 			assert(testDelegate(2) == 4);
 			testDelegate.Unbind<&square>();
 			testDelegate.Bind([](int x) -> int
@@ -50,7 +52,7 @@ namespace Insight
 			assert(testDelegate(5) == 25);
 
 			auto str = std::string{ "Hello" };
-			auto testDelegateString = Core::Delegate<std::string::size_type()>{};
+			auto testDelegateString = Core::Action<std::string::size_type()>{};
 			testDelegateString.Bind<&std::string::size>(&str);
 			assert(testDelegateString() == str.size());
 			testDelegateString.Unbind<&std::string::size>(&str);

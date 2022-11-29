@@ -26,17 +26,18 @@ namespace Insight
 			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
 				{
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
-					Release();
-					m_commandListManager.ForEach([this](CommandListManager& manager)
-						{
-							manager.Create(m_context);
-						});
-					m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+
+					m_context->GpuWaitForIdle();
+					m_passes.clear();
+					
+					// Release all textures as the size they need to be has changed.
+					m_textureCaches->Reset();
+
 					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
 					if (m_set_render_resolution_to_window_resolution_auto)
 					{
 						SetRenderResolution(m_output_resolution);
-					}
+					}	
 				});
 
 			m_context = context;
@@ -88,12 +89,12 @@ namespace Insight
 			if (m_render_resolution_has_changed)
 			{
 				m_render_resolution_has_changed = false;
-				Release();
-				m_commandListManager.ForEach([this](CommandListManager& manager)
-					{
-						manager.Create(m_context);
-					});
-				m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+
+				m_context->GpuWaitForIdle();
+				m_passes.clear();
+
+				// Release all current textures.
+				m_textureCaches->Reset();
 			}
 
 			m_passes = std::move(m_pending_passes);
@@ -248,11 +249,12 @@ namespace Insight
 				pass->Setup(builder);
 				
 				/// Build all our textures.
-				for (auto const& pair : pass.Get()->m_textureCreates)
+				for (auto& pair : pass.Get()->m_textureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches->Get(pair.first);
 					if (!tex->ValidResouce())
 					{
+						pair.second.InitalStatus = DeviceUploadStatus::Completed;
 						tex->Create(m_context, pair.second);
 						tex->SetName(tex->m_name);
 					}
