@@ -31,7 +31,7 @@ namespace Insight
 
 			virtual void Call() override
 			{
-				if (std::is_void_v<ResultType>)
+				if constexpr (std::is_void_v<ResultType>)
 				{
 					std::apply(m_func, m_args);
 				}
@@ -46,8 +46,5 @@ namespace Insight
 			Func m_func;
 			std::tuple<Args...> m_args;
 		};
-
-		template<typename Func, typename... Args>
-		class TaskFuncWrapper<void, Func, Args...>;
 	}
 }

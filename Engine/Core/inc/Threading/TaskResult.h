@@ -14,8 +14,8 @@ namespace Insight
 			ITaskResult() = default;
 			~ITaskResult() = default;
 
-			ResultType& GetResult() { FAIL_ASSERT_MSG("[ITaskResult::GetResult] CAn't call 'GetResult' on 'void' result."); }
-			void SetResult(ResultType result) { }
+			void GetResult() { FAIL_ASSERT_MSG("[ITaskResult::GetResult] CAn't call 'GetResult' on 'void' result."); }
+			//void SetResult(ResultType result) { }
 
 		private:
 		};

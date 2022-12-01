@@ -163,7 +163,7 @@ namespace Insight
 
 			auto operator=(const DelegateBase& other)->DelegateBase& = default;
 
-			auto operator()(Args&&... args) const->Return
+			auto operator()(Args... args) const->Return
 			{
 				if constexpr (std::is_void_v<Return>)
 				{
@@ -186,7 +186,7 @@ namespace Insight
 			}
 			template <typename... UArgs,
 				typename = std::enable_if_t<std::is_invocable_v<Return(Args...), UArgs...>>>
-			auto operator()(UArgs&&... args) const -> Return
+			auto operator()(UArgs... args) const -> Return
 			{
 				if constexpr (std::is_void_v<Return>)
 				{

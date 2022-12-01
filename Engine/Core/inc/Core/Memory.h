@@ -702,10 +702,6 @@ public:
 
 	void Reset()
 	{
-		if (OnDestroyed)
-		{
-			OnDestroyed();
-		}
 		if (m_refCount)
 		{
 			DeleteTracked(m_refCount);
