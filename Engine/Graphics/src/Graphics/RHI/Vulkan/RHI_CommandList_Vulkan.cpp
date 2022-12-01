@@ -23,6 +23,9 @@ namespace Insight
 			{
 				m_context = context;
 				m_context_vulkan = static_cast<RenderContext_Vulkan*>(context);
+
+				m_cmdBeginDebugUtilsLabelEXT = static_cast<PFN_vkCmdBeginDebugUtilsLabelEXT>(m_context_vulkan->GetExtensionFunction("vkCmdBeginDebugUtilsLabelEXT"));
+				m_cmdEndDebugUtilsLabelEXT = static_cast<PFN_vkCmdEndDebugUtilsLabelEXT>(m_context_vulkan->GetExtensionFunction("vkCmdEndDebugUtilsLabelEXT"));
 			}
 
 			void RHI_CommandList_Vulkan::PipelineBarrier(Graphics::PipelineBarrier barrier)
@@ -174,7 +177,6 @@ namespace Insight
 					m_context_vulkan->GetDevice().freeCommandBuffers(m_allocator->GetAllocator(), { m_commandList });
 					m_commandList = nullptr;
 				}
-
 			}
 
 			bool RHI_CommandList_Vulkan::ValidResouce()
@@ -431,14 +433,28 @@ namespace Insight
 				m_descriptorAllocator->SetPipeline(pso);
 			}
 
-			void RHI_CommandList_Vulkan::BeginTimeBlock(const char* block_name)
+			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName)
 			{
-				m_context_vulkan->BeginDebugMarker(block_name);
+				BeginTimeBlock(blockName, glm::vec4(1, 1, 1, 1));
+			}
+
+			void RHI_CommandList_Vulkan::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
+			{
+				ASSERT(m_state == RHI_CommandListStates::Recording);
+				ASSERT_MSG(m_activeDebugUtilsLabel == vk::DebugUtilsLabelEXT(), "[RHI_CommandList_Vulkan::BeginTimeBlock] Time block must be ended before a new one can start.");
+
+				vk::DebugUtilsLabelEXT label = {};
+				label.setPLabelName(blockName.c_str());
+				label.setColor({ colour.x, colour.y,colour.z,colour.w });
+
+				m_activeDebugUtilsLabel = label;
+				m_cmdBeginDebugUtilsLabelEXT(m_commandList, reinterpret_cast<vk::DebugUtilsLabelEXT::NativeType*>(&m_activeDebugUtilsLabel));
 			}
 
 			void RHI_CommandList_Vulkan::EndTimeBlock()
 			{
-
+				m_cmdEndDebugUtilsLabelEXT(m_commandList);
+				m_activeDebugUtilsLabel = vk::DebugUtilsLabelEXT();
 			}
 
 			bool RHI_CommandList_Vulkan::BindDescriptorSets()
@@ -619,6 +635,7 @@ namespace Insight
 				list->m_commandList = m_context->GetDevice().allocateCommandBuffers(info)[0];
 				
 				list->GetCommandList().begin(vk::CommandBufferBeginInfo());
+				list->m_state = RHI_CommandListStates::Recording;
 				m_allocLists.insert(list);
 				list->SetName(L"CommandList");
 				return list;

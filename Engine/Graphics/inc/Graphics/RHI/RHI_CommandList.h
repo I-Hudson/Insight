@@ -109,7 +109,8 @@ namespace Insight
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
 
-			virtual void BeginTimeBlock(const char* block_name);
+			virtual void BeginTimeBlock(const std::string& blockName);
+			virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour);
 			virtual void EndTimeBlock();
 
 			bool IsDiscard() const { return m_discard; }

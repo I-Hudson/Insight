@@ -60,8 +60,6 @@ namespace Insight
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
 				void SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType);
-				void BeginDebugMarker(std::string_view block_name);
-				void EndDebugMarker();
 
 				vk::Device GetDevice() const { return m_device; }
 				vk::PhysicalDevice GetPhysicalDevice() const { return m_adapter; }
@@ -76,6 +74,8 @@ namespace Insight
 
 				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
 				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
+
+				void* GetExtensionFunction(const char* function);
 
 			protected:
 				virtual void WaitForGpu() override;

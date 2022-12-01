@@ -465,14 +465,18 @@ namespace Insight
 			/// TODO: Could be threaded? Leave as it is for now as it works.
 			for (UPtr<RenderGraphPassBase>& pass : m_passes)
 			{
+				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
+				cmdList->EndTimeBlock();
 
 				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
-
+				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
 				///cmdList->BeginRenderpass(pass->m_renderpassDescription);
+				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
 				pass->Execute(*this, cmdList);
+				cmdList->EndTimeBlock();
 				///cmdList->EndRenderpass();
 			}
 

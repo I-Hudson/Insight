@@ -63,7 +63,8 @@ namespace Insight
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 
-				virtual void BeginTimeBlock(const char* block_name) override;
+				virtual void BeginTimeBlock(const std::string& blockName) override;
+				virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour) override;
 				virtual void EndTimeBlock() override;
 
 			protected:
@@ -82,6 +83,10 @@ namespace Insight
 
 				vk::PipelineLayout m_bound_pipeline_layout;
 				u64 m_boundDescriptors;
+
+				PFN_vkCmdBeginDebugUtilsLabelEXT m_cmdBeginDebugUtilsLabelEXT;
+				PFN_vkCmdEndDebugUtilsLabelEXT m_cmdEndDebugUtilsLabelEXT;
+				vk::DebugUtilsLabelEXT m_activeDebugUtilsLabel = vk::DebugUtilsLabelEXT();
 
 				friend class RenderContext_Vulkan;
 				friend class RHI_CommandListAllocator_Vulkan;
