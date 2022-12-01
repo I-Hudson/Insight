@@ -32,6 +32,7 @@ namespace Insight
 
 		void RHI_UploadQueue::Init()
 		{
+			std::lock_guard lock(m_mutex);
 			if (!m_uploadStagingBuffer)
 			{
 				m_uploadStagingBuffer = Renderer::CreateRawBuffer(1_MB,
@@ -44,17 +45,31 @@ namespace Insight
 
 		void RHI_UploadQueue::Destroy()
 		{
+			std::lock_guard lock(m_mutex);
 			m_queuedUploads.clear();
 			Renderer::FreeRawBuffer(m_uploadStagingBuffer);
 			m_uploadStagingBuffer = nullptr;
 		}
 
-		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
+		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer)
 		{
+			IS_PROFILE_FUNCTION();
 			ASSERT(Platform::IsMainThread());
 
 			UploadDataToStagingBuffer(data, sizeInBytes);
 
+			std::lock_guard lock(m_mutex);
+			return RPtr<RHI_UploadQueueRequest>();
+		}
+
+		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
+		{
+			IS_PROFILE_FUNCTION();
+			ASSERT(Platform::IsMainThread());
+
+			UploadDataToStagingBuffer(data, sizeInBytes);
+
+			std::lock_guard lock(m_mutex);
 			m_queuedUploads.push_back(MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
@@ -69,14 +84,33 @@ namespace Insight
 
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{
+			IS_PROFILE_FUNCTION();
+			ASSERT(Platform::IsMainThread());
+
 			m_frameUploadOffset = 0;
 
 			// Remove all completed requests from m_runningUploads.
-			auto unusedItr = std::remove_if(m_runningUploads.begin(), m_runningUploads.end(), [](RPtr<RHI_UploadQueueRequestInternal>& uploadRequest)
+
+			std::vector<RHI_UploadQueueRequestInternal*> completedRequests;
+			for (auto const& uploadRequest : m_runningUploads)
+			{
+				if (uploadRequest->Request->Status == DeviceUploadStatus::Completed)
 				{
-					return uploadRequest->Request->Status == DeviceUploadStatus::Completed;
-				});
-			IS_UNUSED(unusedItr);
+					completedRequests.push_back(uploadRequest.Get());
+				}
+			}
+
+			for (auto const& requestToRemove : completedRequests)
+			{
+				auto itr = std::find_if(m_runningUploads.begin(), m_runningUploads.end(), [&requestToRemove](const RPtr<RHI_UploadQueueRequestInternal>& request)
+					{
+						return requestToRemove == request.Get();
+					});
+				if (itr != m_runningUploads.end())
+				{
+					m_runningUploads.erase(itr);
+				}
+			}
 
 			// Bind our work completed function.
 			for (size_t i = 0; i < m_queuedUploads.size(); ++i)
@@ -95,6 +129,10 @@ namespace Insight
 
 		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes)
 		{
+			IS_PROFILE_FUNCTION();
+			ASSERT(Platform::IsMainThread());
+
+			std::lock_guard lock(m_mutex);
 			// Check we have enough space.
 			if (m_stagingBufferOffset + sizeInBytes > m_uploadStagingBuffer->GetSize())
 			{

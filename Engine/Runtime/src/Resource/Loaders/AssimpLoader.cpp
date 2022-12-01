@@ -10,6 +10,7 @@
 #include "Platform/Platform.h"
 
 #include "Graphics/RenderContext.h"
+#include "Graphics/GraphicsManager.h"
 
 #include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
@@ -62,45 +63,40 @@ namespace Insight
 			loader_data.Directoy = file_path.substr(0, file_path.find_last_of('/'));
 			ProcessNode(scene->mRootNode, scene, "", loader_data);
 			GenerateLODs(loader_data);
-			UploadGPUData(loader_data);
-
 			loader_data.Model->m_materials = loader_data.Materials;
 
-			for (size_t i = 0; i < model->m_meshes.size(); ++i)
-			{
-				for (auto& lod : model->m_meshes.at(i)->m_lods)
+			Graphics::GraphicsManager::Instance().GetRenderContext()->GetDeferredManager().Instance().Push([model, loader_data](Graphics::RHI_CommandList* cmdList)
 				{
-					lod.Vertex_buffer = model->m_vertex_buffer;
-					lod.Index_buffer = model->m_index_buffer;
+					UploadGPUData(const_cast<AssimpLoaderData&>(loader_data));
+
+					for (size_t i = 0; i < model->m_meshes.size(); ++i)
+					{
+						for (auto& lod : model->m_meshes.at(i)->m_lods)
+						{
+							lod.Vertex_buffer = model->m_vertex_buffer;
+							lod.Index_buffer = model->m_index_buffer;
+						}
+					}
+				});
+
+			bool allTexturesLoaded = false;
+			while (!allTexturesLoaded)
+			{
+				allTexturesLoaded = true;
+				for (size_t i = 0; i < model->m_materials.size(); ++i)
+				{
+					const Material* mat = model->m_materials.at(i);
+					for (size_t textureTypeIdx = 0; textureTypeIdx < (size_t)TextureTypes::Count; ++textureTypeIdx)
+					{
+						Texture2D* texture = mat->GetTexture((TextureTypes)textureTypeIdx);
+						if (texture != nullptr && texture->GetResourceState() != EResoruceStates::Loaded)
+						{
+							allTexturesLoaded = false;
+							break;
+						}
+					}
 				}
 			}
-
-			// Wait for all textures to be loaded.
-			//bool all_asserts_loaded = false;
-			//while (!all_asserts_loaded)
-			//{
-			//	all_asserts_loaded = true;
-			//	for (size_t i = 0; i < loader_data.Textures.size(); ++i)
-			//	{
-			//		Texture2D* texture = loader_data.Textures.at(i);
-			//		if (texture->GetResourceState() == EResoruceStates::Loading)
-			//		{
-			//			all_asserts_loaded = false;
-			//			std::this_thread::sleep_for(std::chrono::milliseconds(16));
-			//			break;
-			//		}
-			//	}
-			//}
-
-			//// All textures have been laoded. Check there current status.
-			//for (size_t i = 0; i < loader_data.Textures.size(); ++i)
-			//{
-			//	Texture2D* texture = loader_data.Textures.at(i);
-			//	if (texture->GetResourceState() != EResoruceStates::Loaded)
-			//	{
-			//		IS_CORE_ERROR("[AssimpLoader::LoadModel] Texture '{}' state is not 'Loaded'. Current state is '{}'.", texture->GetFilePath(), ERsourceStatesToString(texture->GetResourceState()));
-			//	}
-			//}
 
 			LoadMaterialTextures(loader_data);
 

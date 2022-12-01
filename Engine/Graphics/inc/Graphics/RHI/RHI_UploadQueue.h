@@ -3,6 +3,7 @@
 #include "Core/Memory.h"
 #include "Core/TypeAlias.h"
 
+#include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
 
 #include <vector>
@@ -23,7 +24,7 @@ namespace Insight
 		/// <summary>
 		/// Struct returned with the current status of the uploaded resource.
 		/// </summary>
-		struct RHI_UploadQueueRequest
+		struct IS_GRAPHICS RHI_UploadQueueRequest
 		{
 			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::Unknown;
 			Core::Delegate<RHI_UploadQueueRequest*> OnUploadCompleted;
@@ -46,7 +47,7 @@ namespace Insight
 		/// <summary>
 		/// Helper class for uploading any resource from host (RAM) to device (GPU).
 		/// </summary>
-		class RHI_UploadQueue
+		class IS_GRAPHICS RHI_UploadQueue
 		{
 		public:
 
@@ -58,6 +59,7 @@ namespace Insight
 			void Init();
 			void Destroy();
 
+			RPtr<RHI_UploadQueueRequest> UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer);
 			/// <summary>
 			/// Add a new upload request for a texture to the queue.
 			/// </summary>
@@ -89,6 +91,8 @@ namespace Insight
 			/// The current offset this frame when uploading all the resources.
 			/// </summary>
 			u64 m_frameUploadOffset = 0;
+
+			std::mutex m_mutex;
 		};
 	}
 }

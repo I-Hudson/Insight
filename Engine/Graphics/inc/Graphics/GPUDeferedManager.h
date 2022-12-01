@@ -1,9 +1,12 @@
 #pragma once
 
+#include "Graphics/Defines.h"
+
 #include "Core/Singleton.h"
 
 #include <vector>
 #include <functional>
+#include <mutex>
 
 namespace Insight
 {
@@ -11,7 +14,7 @@ namespace Insight
 	{
 		class RHI_CommandList;
 		/// @brief Manage anything which is defered for GPU items.
-		class GPUDeferedManager : public Core::Singleton<GPUDeferedManager>
+		class IS_GRAPHICS GPUDeferedManager : public Core::Singleton<GPUDeferedManager>
 		{
 			using GPUDeferedFunc = std::function<void(RHI_CommandList*)>;
 		public:
@@ -19,6 +22,7 @@ namespace Insight
 			void Update(RHI_CommandList* cmd_list);
 		private:
 			std::vector<GPUDeferedFunc> m_queue;
+			std::mutex m_mutex;
 		};
 	}
 }

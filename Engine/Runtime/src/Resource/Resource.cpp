@@ -16,6 +16,8 @@ namespace Insight
 {
 	namespace Runtime
 	{
+#define RESOURCE_LOAD_THREAD
+
 		CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type)
 		{
 			switch (storage_type)
@@ -84,7 +86,6 @@ namespace Insight
 
 		EResoruceStates IResource::GetResourceState() const
 		{
-			std::lock_guard lock(m_mutex);
 			return m_resource_state;
 		}
 
@@ -479,9 +480,10 @@ namespace Insight
 						{
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
-							//TODO Needs threading of somekind.
-							//auto task = Threading::TaskManager::CreateTask([this, resource]()
-								//{
+#ifdef RESOURCE_LOAD_THREAD
+							Threading::TaskManager::CreateTask([this, resource]()
+								{
+#endif
 									resource->StartLoadTimer();
 									{
 										std::lock_guard resourceLock(resource->m_mutex);
@@ -495,7 +497,9 @@ namespace Insight
 										// Resource loaded successfully.
 										++m_loaded_resource_count;
 									}
-								//});
+#ifdef RESOURCE_LOAD_THREAD
+								});
+#endif
 						}
 					}
 					else
