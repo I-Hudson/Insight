@@ -75,7 +75,9 @@ namespace Insight
 			void RHI_Texture_Vulkan::Upload(void* data, int sizeInBytes)
 			{
 				IS_PROFILE_FUNCTION();
+				ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
+
 				// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_Vulkan stagingBuffer;
 				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
@@ -95,6 +97,7 @@ namespace Insight
 			std::vector<Byte> RHI_Texture_Vulkan::Download(void* data, int sizeInBytes)
 			{
 				IS_PROFILE_FUNCTION();
+				ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
 
 				return std::vector<Byte>();

@@ -101,12 +101,6 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
-			m_uploadQueue.Destroy();
-
-			for (auto& buffer : m_buffers)
-			{
-				buffer.second.ReleaseAll();
-			}
 			m_descriptorLayoutManager.ReleaseAll();
 			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
@@ -127,6 +121,13 @@ namespace Insight
 			{
 				Renderer::FreeTexture(m_font_texture);
 				m_font_texture = nullptr;
+			}
+
+			m_uploadQueue.Destroy();
+
+			for (auto& buffer : m_buffers)
+			{
+				buffer.second.ReleaseAll();
 			}
 		}
 

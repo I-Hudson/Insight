@@ -81,6 +81,7 @@ namespace Insight
 		{
 			if (m_cameraType == CameraType::Perspective)
 			{
+				m_aspect = std::max(0.1f, m_aspect);
 				m_projection = glm::perspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
 				ComputeProjectionViewMatrix();
 			}

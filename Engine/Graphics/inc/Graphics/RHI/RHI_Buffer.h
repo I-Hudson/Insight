@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/RHI/RHI_Resource.h"
+#include "Graphics/RHI/RHI_UploadQueue.h"
 
 namespace Insight
 {
@@ -54,7 +55,9 @@ namespace Insight
 			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) = 0;
 			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes, u64 offset) = 0;
 
-			virtual RHI_BufferView Upload(const void* data, u64 sizeInBytes) { return Upload(data, sizeInBytes, 0); }
+			RHI_BufferView Upload(const void* data, u64 sizeInBytes) { return Upload(data, sizeInBytes, 0); }
+			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes);
+
 			virtual std::vector<Byte> Download() = 0;
 			virtual void Resize(u64 newSizeBytes) = 0;
 
@@ -66,6 +69,9 @@ namespace Insight
 			u64 GetSize() const { return m_size; }
 			u64 GetStride() const { return m_stride; }
 			BufferType GetType() const { return m_bufferType; }
+
+		private:
+			void OnUploadComplete(RHI_UploadQueueRequest* request);
 
 		protected:
 			BufferType m_bufferType;

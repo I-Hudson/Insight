@@ -23,9 +23,20 @@ namespace Insight
 			return nullptr;
 		}
 
+		RPtr<RHI_UploadQueueRequest> RHI_Buffer::QueueUpload(void* data, int sizeInBytes)
+		{
+			return GraphicsManager::Instance().GetRenderContext()->GetUploadQueue().UploadBuffer(data, sizeInBytes, this);
+		}
+
 		RHI_BufferView RHI_Buffer::GetView(u64 offset, u64 size)
 		{
 			return RHI_BufferView(this, offset, size);
+		}
+
+		void RHI_Buffer::OnUploadComplete(RHI_UploadQueueRequest* request)
+		{
+			request->OnUploadCompleted.Unbind<&RHI_Buffer::OnUploadComplete>(this);
+			m_uploadStatus = DeviceUploadStatus::Completed;
 		}
 
 

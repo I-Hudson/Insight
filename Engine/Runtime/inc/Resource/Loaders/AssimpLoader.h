@@ -16,6 +16,11 @@ enum aiTextureType;
 
 namespace Insight
 {
+	namespace Graphics
+	{
+		class RHI_CommandList;
+	}
+
 	namespace Runtime
 	{
 		class Model;

@@ -94,7 +94,12 @@ namespace Insight
 			m_descriptorAllocator->SetUniform(set, binding, buffer);
 		}
 
-		void RHI_CommandList::BeginTimeBlock(const char* block_name)
+		void RHI_CommandList::BeginTimeBlock(const std::string& blockName)
+		{
+			FAIL_ASSERT();
+		}
+
+		void RHI_CommandList::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
 		{
 			FAIL_ASSERT();
 		}
@@ -124,6 +129,20 @@ namespace Insight
 			///		BindPipeline(m_activePSO, layout);
 			///	}
 			///}
+
+			if (!m_bound_vertex_buffer
+				|| !m_bound_index_buffer)
+			{
+				return false;
+			}
+
+			// Make sure our buffers are good to go.
+			if ((m_bound_vertex_buffer && m_bound_vertex_buffer->GetUploadStatus() != DeviceUploadStatus::Completed)
+				|| (m_bound_index_buffer && m_bound_index_buffer->GetUploadStatus() != DeviceUploadStatus::Completed))
+			{
+				return false;
+			}
+			 
 			return BindDescriptorSets();
 		}
 

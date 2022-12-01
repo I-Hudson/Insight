@@ -20,6 +20,8 @@ namespace Insight
 
 			void RHI_Buffer_Vulkan::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides)
 			{
+				std::lock_guard lock(m_mutex);
+
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
@@ -50,12 +52,15 @@ namespace Insight
 					|| vmaInfo.usage == VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE)
 				{
 					vmaMapMemory(m_context->GetVMA(), m_vmaAllocation, &m_mappedData);
+					m_uploadStatus = DeviceUploadStatus::Completed;
 				}
 			}
 
 			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset)
 			{
 				IS_PROFILE_FUNCTION();
+				ASSERT(Platform::IsMainThread());
+				std::lock_guard lock(m_mutex);
 
 				if (sizeInBytes > GetSize())
 				{
@@ -65,16 +70,19 @@ namespace Insight
 
 				if (m_mappedData)
 				{
+					IS_PROFILE_SCOPE("Memcpy");
 					Platform::MemCopy((Byte*)m_mappedData + offset, data, sizeInBytes);
 				}
 				else
 				{
+					IS_PROFILE_SCOPE("Staging");
 					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_Vulkan stagingBuffer;
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 					stagingBuffer.Upload(data, sizeInBytes, 0);
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
+					m_uploadStatus = DeviceUploadStatus::Uploading;
 					cmdList->CopyBufferToBuffer(this, &stagingBuffer, offset);
 					cmdList->Close();
 
@@ -82,12 +90,17 @@ namespace Insight
 					m_context->GetCommandListManager().ReturnCommandList(cmdList);
 
 					stagingBuffer.Release();
+					m_uploadStatus = DeviceUploadStatus::Completed;
 				}
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 
 			std::vector<Byte> RHI_Buffer_Vulkan::Download()
 			{
+				IS_PROFILE_FUNCTION();
+				ASSERT(Platform::IsMainThread());
+				std::lock_guard lock(m_mutex);
+
 				const u64 current_buffer_size = GetSize();
 				std::vector<Byte> data;
 				data.resize(current_buffer_size);
@@ -119,6 +132,7 @@ namespace Insight
 			void RHI_Buffer_Vulkan::Resize(u64 newSizeBytes)
 			{
 				std::vector<Byte> data = Download();
+
 				const u64 data_size = GetSize();
 				
 				Release();
@@ -129,6 +143,7 @@ namespace Insight
 
 			void RHI_Buffer_Vulkan::Release()
 			{
+				std::lock_guard lock(m_mutex);
 				if (m_buffer)
 				{
 					if (m_mappedData)

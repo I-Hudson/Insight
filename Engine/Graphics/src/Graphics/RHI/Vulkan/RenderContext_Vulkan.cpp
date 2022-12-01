@@ -616,14 +616,6 @@ namespace Insight
 				m_device.setDebugUtilsObjectNameEXT(info, debugDispatcher);
 			}
 
-			void RenderContext_Vulkan::BeginDebugMarker(std::string_view block_name)
-			{
-			}
-
-			void RenderContext_Vulkan::EndDebugMarker()
-			{
-			}
-
 			RHI_Texture* RenderContext_Vulkan::GetSwaphchainIamge() const
 			{
 				return m_swapchainImages[m_availableSwapchainImage];
@@ -632,6 +624,11 @@ namespace Insight
 			vk::ImageView RenderContext_Vulkan::GetSwapchainImageView() const
 			{
 				return static_cast<RHI_Texture_Vulkan*>(m_swapchainImages[m_availableSwapchainImage])->GetImageView();
+			}
+
+			void* RenderContext_Vulkan::GetExtensionFunction(const char* function)
+			{
+				return vkGetInstanceProcAddr(m_instnace, function);
 			}
 
 			void RenderContext_Vulkan::WaitForGpu()
