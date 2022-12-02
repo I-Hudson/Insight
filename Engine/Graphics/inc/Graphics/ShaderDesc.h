@@ -41,7 +41,7 @@ namespace Insight
 			ShaderDesc()
 			{ }
 
-			ShaderDesc(std::wstring vertex, std::wstring pixel)
+			ShaderDesc(std::string vertex, std::string pixel)
 				: VertexFilePath(vertex), PixelFilePath(pixel)
 			{ }
 
@@ -49,11 +49,11 @@ namespace Insight
 			{
 			}
 
-			std::wstring VertexFilePath = L"";
-			std::wstring TesselationControlFilePath = L"";
-			std::wstring TesselationEvaluationVertexFilePath = L"";
-			std::wstring GeoemtyFilePath = L"";
-			std::wstring PixelFilePath = L"";
+			std::string VertexFilePath = "";
+			std::string TesselationControlFilePath = "";
+			std::string TesselationEvaluationVertexFilePath = "";
+			std::string GeoemtyFilePath = "";
+			std::string PixelFilePath = "";
 			std::string MainFunc = "Main";
 			std::vector<ShaderInputLayout> InputLayout; /// Optioanl, if left empty reflection will happen on the shader code.
 

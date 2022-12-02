@@ -21,6 +21,8 @@
 #include <vulkan/vulkan_win32.h>
 #endif
 
+#include <VmaUsage.h>
+
 namespace Insight
 {
 	namespace Graphics
@@ -95,9 +97,6 @@ namespace Insight
 				}
 			};
 
-			void ThrowIfFailed(VkResult res)
-			{ }
-
 			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
 			PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
 			PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
@@ -146,7 +145,11 @@ namespace Insight
 				debugUtilsMessengerCI.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
 				debugUtilsMessengerCI.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
 				debugUtilsMessengerCI.pfnUserCallback = DebugUtilsMessengerCallback;
-				VkResult result = vkCreateDebugUtilsMessengerEXT(m_instnace, &debugUtilsMessengerCI, nullptr, &debugUtilsMessenger);
+				ASSERT_MSG(vkCreateDebugUtilsMessengerEXT, "[RenderContext_Vulkan::Init] Unable to call 'vkCreateDebugUtilsMessengerEXT'.");
+				if (vkCreateDebugUtilsMessengerEXT)
+				{
+					ThrowIfFailed(vkCreateDebugUtilsMessengerEXT(m_instnace, &debugUtilsMessengerCI, nullptr, &debugUtilsMessenger));
+				}
 
 				m_adapter = FindAdapter();
 
@@ -200,9 +203,10 @@ namespace Insight
 				deviceFeaturesToEnable13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 
 				VkPhysicalDeviceVulkan12Features deviceFeaturesToEnable12 = { };
+				deviceFeaturesToEnable12.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
 				deviceFeaturesToEnable12.pNext = &deviceFeaturesToEnable13;
 
-				VkPhysicalDeviceFeatures2 deviceFeaturesToEnable;
+				VkPhysicalDeviceFeatures2 deviceFeaturesToEnable = { };
 				deviceFeaturesToEnable.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 				vkGetPhysicalDeviceFeatures2(m_adapter, &deviceFeaturesToEnable);
 				deviceFeaturesToEnable.pNext = &deviceFeaturesToEnable12;
@@ -220,17 +224,20 @@ namespace Insight
 					EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				}
 
-				VkDeviceCreateInfo deviceCreateInfo;
+				VkDeviceCreateInfo deviceCreateInfo = { };
 				deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+				deviceCreateInfo.pNext = &deviceFeaturesToEnable;
 				deviceCreateInfo.pQueueCreateInfos = deviceQueueCreateInfos.data();
 				deviceCreateInfo.queueCreateInfoCount = static_cast<u32>(deviceQueueCreateInfos.size());
 				deviceCreateInfo.ppEnabledLayerNames = deviceLayersCC.data();
 				deviceCreateInfo.enabledLayerCount = static_cast<u32>(deviceLayersCC.size());
 				deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionsCC.data();
 				deviceCreateInfo.enabledExtensionCount = static_cast<u32>(deviceExtensionsCC.size());
-				deviceCreateInfo.pNext = &deviceFeaturesToEnable;
 				deviceCreateInfo.pEnabledFeatures = nullptr;
-				vkCreateDevice(m_adapter, &deviceCreateInfo, nullptr, &m_device);
+				ThrowIfFailed(vkCreateDevice(m_adapter, &deviceCreateInfo, nullptr, &m_device));
+
+				SetObjectName(m_physical_device_info.Device_Name.c_str(), (u64)m_adapter, VK_OBJECT_TYPE_PHYSICAL_DEVICE);
+				SetObjectName(m_physical_device_info.Device_Name, (u64)m_device, VK_OBJECT_TYPE_DEVICE);
 
 				for (size_t i = 0; i < queueInfo.size(); ++i)
 				{
@@ -255,6 +262,7 @@ namespace Insight
 				allocatorInfo.instance = m_instnace;
 				allocatorInfo.physicalDevice = m_adapter;
 				allocatorInfo.device = m_device;
+
 				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
 				char* stats;
@@ -268,11 +276,12 @@ namespace Insight
 					};
 
 					VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { };
+					descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 					descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 					descriptorPoolCreateInfo.maxSets = 2048 * 4;
 					descriptorPoolCreateInfo.pPoolSizes = pool_sizes.data();
 					descriptorPoolCreateInfo.poolSizeCount = static_cast<u32>(pool_sizes.size());
-					vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_descriptor_pool);
+					ThrowIfFailed(vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_descriptor_pool));
 
 					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
@@ -285,15 +294,15 @@ namespace Insight
 				m_submitFrameContexts.Setup();
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
-						VkFenceCreateInfo fenceCreateInfo;
+						VkFenceCreateInfo fenceCreateInfo = {};
 						fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 						fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-						vkCreateFence(m_device, &fenceCreateInfo, nullptr, &context.SubmitFences);
+						ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &context.SubmitFences));
 
-						VkSemaphoreCreateInfo semaphoreCreateInfo;
+						VkSemaphoreCreateInfo semaphoreCreateInfo = {};
 						semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-						vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SignalSemaphores);
-						vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SwapchainAcquires);
+						ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SignalSemaphores));
+						ThrowIfFailed(vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SwapchainAcquires));
 					});
 
 				m_uploadQueue.Init();
@@ -362,7 +371,11 @@ namespace Insight
 
 				if (debugUtilsMessenger)
 				{
-					vkDestroyDebugUtilsMessengerEXT(m_instnace, debugUtilsMessenger, nullptr);
+					ASSERT_MSG(vkDestroyDebugUtilsMessengerEXT, "[RenderContext_Vulkan::Destroy] 'vkDestroyDebugUtilsMessengerEXT' is null.")
+					if (vkDestroyDebugUtilsMessengerEXT)
+					{
+						vkDestroyDebugUtilsMessengerEXT(m_instnace, debugUtilsMessenger, nullptr);
+					}
 					debugUtilsMessenger = nullptr;
 				}
 
@@ -408,7 +421,7 @@ namespace Insight
 				pool_info.maxSets = 1000;
 				pool_info.poolSizeCount = (u32)std::size(pool_sizes);
 				pool_info.pPoolSizes = pool_sizes;
-				vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imguiDescriptorPool);
+				ThrowIfFailed(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imguiDescriptorPool));
 
 				/// Setup Platform/Renderer backends
 				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), false);
@@ -566,7 +579,7 @@ namespace Insight
 					std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
 					std::array<VkSemaphore, 1> signalSemaphore = { m_submitFrameContexts.Get().SignalSemaphores };
 
-					VkSubmitInfo submitInfo;
+					VkSubmitInfo submitInfo = {};
 					submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 					submitInfo.waitSemaphoreCount = static_cast<u32>(waitSemaphores.size());
 					submitInfo.pWaitSemaphores = waitSemaphores.data();
@@ -580,7 +593,7 @@ namespace Insight
 					std::array<VkSwapchainKHR, 1> presentSwapchains = { m_swapchain };
 					std::array<u32, 1> presentSwapchainImageIndex = { (u32)m_availableSwapchainImage };
 
-					VkPresentInfoKHR presentInfo;
+					VkPresentInfoKHR presentInfo = {};
 					presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 					presentInfo.waitSemaphoreCount = static_cast<u32>(presentWaitSemaphores.size());
 					presentInfo.pWaitSemaphores = presentWaitSemaphores.data();
@@ -642,7 +655,8 @@ namespace Insight
 				const RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
 				std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				VkSubmitInfo submitInfo;
+				
+				VkSubmitInfo submitInfo = {};
 				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 				submitInfo.waitSemaphoreCount = 0;
 				submitInfo.pWaitSemaphores = nullptr;
@@ -652,35 +666,30 @@ namespace Insight
 				submitInfo.signalSemaphoreCount = 0;
 				submitInfo.pSignalSemaphores = nullptr;
 
-				VkFenceCreateInfo fenceCreateInfo;
+				VkFenceCreateInfo fenceCreateInfo = {};
 				fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
 				VkFence waitFence;
-				vkCreateFence(m_device, &fenceCreateInfo, nullptr, &waitFence);
+				ThrowIfFailed(vkCreateFence(m_device, &fenceCreateInfo, nullptr, &waitFence));
 
 				std::lock_guard lock(m_command_queue_mutexs[GPUQueue_Graphics]);
 				
-				vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, waitFence);
+				ThrowIfFailed(vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, waitFence));
 
-				vkWaitForFences(m_device, 1, &waitFence, 1, INFINITE);
+				ThrowIfFailed(vkWaitForFences(m_device, 1, &waitFence, 1, INFINITE));
 				vkDestroyFence(m_device, waitFence, nullptr);
 				waitFence = nullptr;
 			}
 
-			void RenderContext_Vulkan::SetObjectName(std::wstring_view name, u64 handle, VkObjectType objectType)
+			void RenderContext_Vulkan::SetObjectName(std::string_view name, u64 handle, VkObjectType objectType)
 			{
 				IS_PROFILE_FUNCTION();
 
-				std::string str;
-				std::transform(name.begin(), name.end(), std::back_inserter(str), [](wchar_t c) {
-					return (char)c;
-					});
-
-				VkDebugUtilsObjectNameInfoEXT info;
+				VkDebugUtilsObjectNameInfoEXT info = {};
 				info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
 				info.objectType = objectType;
 				info.objectHandle = handle;
-				info.pObjectName = str.c_str();
+				info.pObjectName = name.data();
 
 				if (vkSetDebugUtilsObjectNameEXT)
 				{
@@ -733,7 +742,7 @@ namespace Insight
 					}
 				}
 
-				VkApplicationInfo applicationInfo;
+				VkApplicationInfo applicationInfo = { };
 				applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 				applicationInfo.pApplicationName = "ApplciationName";
 				applicationInfo.applicationVersion = 0;
@@ -797,8 +806,9 @@ namespace Insight
 				VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #endif
 
-				VkInstanceCreateInfo instanceCreateInfo;
+				VkInstanceCreateInfo instanceCreateInfo = { };
 				instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+				instanceCreateInfo.pNext = nullptr;
 				instanceCreateInfo.flags = 0;
 				instanceCreateInfo.pApplicationInfo = &applicationInfo;
 				instanceCreateInfo.enabledLayerCount = static_cast<u32>(enabledLayerNames.size());
@@ -818,7 +828,7 @@ namespace Insight
 				validation_features.pEnabledValidationFeatures = validation_features_enabled.data();
 				//instanceCreateInfo.setPNext(&validation_features);
 #endif
-				vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace);
+				ThrowIfFailed(vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace));
 			}
 
 			VkPhysicalDevice RenderContext_Vulkan::FindAdapter()
@@ -877,7 +887,7 @@ namespace Insight
 				{
 					const VkQueueFamilyProperties& queueProp = queueFamilyProperties[i];
 
-					VkDeviceQueueCreateInfo queueCreateInfo;
+					VkDeviceQueueCreateInfo queueCreateInfo = {};
 					queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 					queueCreateInfo.queueFamilyIndex = static_cast<u32>(i);
 					queueCreateInfo.queueCount = queueProp.queueCount;
@@ -962,11 +972,11 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				VkSurfaceCapabilitiesKHR surfaceCapabilites;
+				VkSurfaceCapabilitiesKHR surfaceCapabilites = { };
 				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_adapter, m_surface, &surfaceCapabilites);
 				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
 
-				VkExtent2D swapchainExtent = {};
+				VkExtent2D swapchainExtent = { };
 				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
 				if (surfaceCapabilites.currentExtent.width == 0xFFFFFFFF
 					&& surfaceCapabilites.currentExtent.height == 0xFFFFFFFF)
@@ -1067,7 +1077,7 @@ namespace Insight
 				}
 				m_swapchainFormat = surfaceFormat;
 
-				VkSwapchainCreateInfoKHR swapchainCreateInfo;
+				VkSwapchainCreateInfoKHR swapchainCreateInfo = { };
 				swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 				swapchainCreateInfo.surface = m_surface;
 				swapchainCreateInfo.minImageCount = static_cast<u32>(imageCount);
@@ -1077,11 +1087,13 @@ namespace Insight
 				swapchainCreateInfo.imageArrayLayers = 1ul;
 				swapchainCreateInfo.imageUsage = imageUsage;
 				swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+				swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+				swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 				swapchainCreateInfo.presentMode = presentMode;
 				swapchainCreateInfo.oldSwapchain = m_swapchain;
 
 				VkSwapchainKHR swapchain;
-				vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain);
+				ThrowIfFailed(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain));
 
 				if (m_swapchain)
 				{
@@ -1106,14 +1118,14 @@ namespace Insight
 				int image_index = 0;
 				for (VkImage& image : swapchainImages)
 				{
-					VkImageSubresourceRange imageSubresourceRange;
+					VkImageSubresourceRange imageSubresourceRange = { };
 					imageSubresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
 					imageSubresourceRange.baseMipLevel = 0;
 					imageSubresourceRange.levelCount = 1;
 					imageSubresourceRange.baseArrayLayer = 0;
 					imageSubresourceRange.layerCount = 1;
 
-					VkImageViewCreateInfo viewCreateInfo;
+					VkImageViewCreateInfo viewCreateInfo = { };
 					viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 					viewCreateInfo.image = image;
 					viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -1125,12 +1137,12 @@ namespace Insight
 					// The first view (image_view), is used for all layers.
 					// The second view (single_layer_image_view) is used for a single layer. In this case the first layer.
 					VkImageView image_view;
-					vkCreateImageView(m_device, &viewCreateInfo, nullptr, &image_view);
+					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &image_view));
 					VkImageView single_layer_image_view;
-					vkCreateImageView(m_device, &viewCreateInfo, nullptr, &single_layer_image_view);
+					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &single_layer_image_view));
 
 					RHI_Texture* tex = Renderer::CreateTexture();
-					tex->SetName(L"Swapchain_Image: " + std::to_wstring(image_index++));
+					tex->SetName("Swapchain_Image: " + std::to_string(image_index++));
 
 					RHI_TextureInfo texCreateInfo = { };
 					texCreateInfo.TextureType = TextureType::Tex2D;

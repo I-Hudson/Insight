@@ -93,20 +93,46 @@ namespace Insight
 
 		ShaderCompiler::~ShaderCompiler()
 		{
+			if (DXUtils)
+			{
+				DXUtils->Release();
+			}
+			if (DXCompiler)
+			{
+				DXCompiler->Release();
+			}
+			if (ShaderCompileResults)
+			{
+				ShaderCompileResults->Release();
+			}
+			if (ShaderReflectionResults)
+			{
+				ShaderReflectionResults->Release();
+			}
 		}
 
-		ComPtr<IDxcBlob> ShaderCompiler::Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo)
+		IDxcBlob* ShaderCompiler::Compile(ShaderStageFlagBits stage, std::string_view filePath, ShaderCompilerLanguage languageToCompileTo)
 		{
 			m_languageToCompileTo = languageToCompileTo;
 
+			if (ShaderCompileResults)
+			{
+				ShaderCompileResults->Release();
+			}
+			if (ShaderReflectionResults)
+			{
+				ShaderReflectionResults->Release();
+			}
+
 			/// Create default include handler. (You can create your own...)
-			ComPtr<IDxcIncludeHandler> pIncludeHandler;
+			IDxcIncludeHandler* pIncludeHandler;
 			ASSERT(SUCCEEDED(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler)));
 
 			/// Load the HLSL text shader from disk
 			uint32_t codePage = CP_UTF8;
-			ComPtr<IDxcBlobEncoding> sourceBlob;
-			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePath.data(), nullptr, &sourceBlob)));
+			IDxcBlobEncoding* sourceBlob;
+			std::wstring filePathW = Platform::WStringFromStringView(filePath);
+			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePathW.c_str(), nullptr, &sourceBlob)));
 
 			DxcBuffer Source;
 			Source.Ptr = sourceBlob->GetBufferPointer();
@@ -129,8 +155,8 @@ namespace Insight
 				arguments.push_back(L"DX12");
 			}
 
-			std::wstring mainFunc = StageToFuncName(stage);
-			std::wstring targetProfile = StageToProfileTarget(stage);
+			std::wstring mainFunc = Platform::WStringFromString(StageToFuncName(stage));
+			std::wstring targetProfile = Platform::WStringFromString(StageToProfileTarget(stage));
 
 			/// Entry point
 			arguments.push_back(L"-E");
@@ -155,21 +181,21 @@ namespace Insight
 				&Source,									/// Source buffer.
 				arguments.data(),							/// Array of pointers to arguments.
 				static_cast<UINT>(arguments.size()),		/// Number of arguments.
-				pIncludeHandler.Get(),						/// User-provided interface to handle #include directives (optional).
+				pIncludeHandler,							/// User-provided interface to handle #include directives (optional).
 				IID_PPV_ARGS(&ShaderCompileResults)			/// Compiler output status, buffer, and errors.
 			)));
 
 			arguments.push_back(L"-spirv");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,                /// Source buffer.
-				arguments.data(),       /// Array of pointers to arguments.
-				static_cast<UINT>(arguments.size()),		/// Number of arguments.
-				pIncludeHandler.Get(),	/// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderReflectionResults) /// Compiler output status, buffer, and errors.
+				&Source,								/// Source buffer.
+				arguments.data(),						/// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),	/// Number of arguments.
+				pIncludeHandler,						/// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderReflectionResults)	/// Compiler output status, buffer, and errors.
 			)));
 
 			/// Print errors if present.
-			ComPtr<IDxcBlobUtf8> pErrors = nullptr;
+			IDxcBlobUtf8* pErrors = nullptr;
 			ASSERT(SUCCEEDED(ShaderCompileResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
 			/// Note that d3dcompiler would return null if no errors or warnings are present.  
 			/// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
@@ -177,9 +203,10 @@ namespace Insight
 			{
 				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
 			}
+			pErrors->Release();
 
 			/// Get compilation result
-			ComPtr<IDxcBlob> code;
+			IDxcBlob* code;
 			ShaderCompileResults->GetResult(&code);
 
 			/// Write shader to disk.
@@ -188,8 +215,8 @@ namespace Insight
 			int startShaderFile = (int)filePath.find_last_of('/') + 1;
 			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
 
-			std::wstring_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
-			std::wstring shaderToDisk = std::wstring(shaderToDiskView) + L".cso";
+			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
+			std::string shaderToDisk = std::string(shaderToDiskView) + ".cso";
 
 			shaderDisk.open(shaderToDisk.c_str());
 			if (shaderDisk.is_open())
@@ -197,6 +224,9 @@ namespace Insight
 				shaderDisk.write((const char*)code->GetBufferPointer(), code->GetBufferSize());
 				shaderDisk.close();
 			}
+
+			pIncludeHandler->Release();
+			sourceBlob->Release();
 
 			return code;
 		}
@@ -209,13 +239,15 @@ namespace Insight
 				return;
 			}
 
-			ComPtr<IDxcBlob> code;
+			IDxcBlob* code;
 			ShaderReflectionResults->GetResult(&code);
 
 			// Generate reflection data for a shader
 			SpvReflectShaderModule module;
 			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
 			ASSERT(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			code->Release();
 
 			// Output variables, descriptor bindings, descriptor sets, and push constants
 			// can be enumerated and extracted using a similar mechanism.
@@ -406,13 +438,15 @@ namespace Insight
 
 		std::vector<ShaderInputLayout> ShaderCompiler::GetInputLayout()
 		{
-			ComPtr<IDxcBlob> code;
+			IDxcBlob* code;
 			ShaderReflectionResults->GetResult(&code);
 
 			/// Generate reflection data for a shader
 			SpvReflectShaderModule module;
 			SpvReflectResult result = spvReflectCreateShaderModule(code->GetBufferSize(), code->GetBufferPointer(), &module);
 			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			code->Release();
 
 			/// Enumerate and extract shader's input variables
 			uint32_t inputCount = 0;
@@ -456,32 +490,32 @@ namespace Insight
 		}
 
 
-		std::wstring ShaderCompiler::StageToFuncName(ShaderStageFlagBits stage)
+		std::string ShaderCompiler::StageToFuncName(ShaderStageFlagBits stage)
 		{
 			switch (stage)
 			{
-			case ShaderStageFlagBits::ShaderStage_Vertex: return L"VSMain";
-			case ShaderStageFlagBits::ShaderStage_TessControl: return L"TSMain";
-			case ShaderStageFlagBits::ShaderStage_TessEval: return L"TEMain";
-			case ShaderStageFlagBits::ShaderStage_Geometry: return L"GSMain";
-			case ShaderStageFlagBits::ShaderStage_Pixel: return L"PSMain";
+			case ShaderStageFlagBits::ShaderStage_Vertex: return "VSMain";
+			case ShaderStageFlagBits::ShaderStage_TessControl: return "TSMain";
+			case ShaderStageFlagBits::ShaderStage_TessEval: return "TEMain";
+			case ShaderStageFlagBits::ShaderStage_Geometry: return "GSMain";
+			case ShaderStageFlagBits::ShaderStage_Pixel: return "PSMain";
 				break;
 			}
-			return L"";
+			return "";
 		}
 
-		std::wstring ShaderCompiler::StageToProfileTarget(ShaderStageFlagBits stage)
+		std::string ShaderCompiler::StageToProfileTarget(ShaderStageFlagBits stage)
 		{
 			switch (stage)
 			{
-			case ShaderStageFlagBits::ShaderStage_Vertex: return L"vs_6_1";
-			case ShaderStageFlagBits::ShaderStage_TessControl: return L"hs_6_1";
-			case ShaderStageFlagBits::ShaderStage_TessEval: return L"te_6_1";
-			case ShaderStageFlagBits::ShaderStage_Geometry: return L"gs_6_1";
-			case ShaderStageFlagBits::ShaderStage_Pixel: return L"ps_6_1";
+			case ShaderStageFlagBits::ShaderStage_Vertex: return "vs_6_1";
+			case ShaderStageFlagBits::ShaderStage_TessControl: return "hs_6_1";
+			case ShaderStageFlagBits::ShaderStage_TessEval: return "te_6_1";
+			case ShaderStageFlagBits::ShaderStage_Geometry: return "gs_6_1";
+			case ShaderStageFlagBits::ShaderStage_Pixel: return "ps_6_1";
 				break;
 			}
-			return L"";
+			return "";
 		}
 
 		DescriptorType ShaderCompiler::SpvReflectDescriptorTypeToDescriptorType(u32 type)

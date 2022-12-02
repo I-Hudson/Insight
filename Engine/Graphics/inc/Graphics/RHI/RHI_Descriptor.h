@@ -57,7 +57,7 @@ namespace Insight
 			/// RHI_Resource
 			virtual void Release() override;
 			virtual bool ValidResouce() override;
-			virtual void SetName(std::wstring name) override;
+			virtual void SetName(std::string name) override;
 
 		private:
 			void Create(RHI_DescriptorLayout* layout);

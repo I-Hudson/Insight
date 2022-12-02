@@ -137,7 +137,7 @@ namespace Insight
 			return m_resource != nullptr;
 		}
 
-		void RHI_DescriptorSet::SetName(std::wstring name)
+		void RHI_DescriptorSet::SetName(std::string name)
 		{
 		}
 
@@ -208,6 +208,7 @@ namespace Insight
 					bool add_write = false;
 
 					VkWriteDescriptorSet writeDescriptorSet = { };
+					writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 					writeDescriptorSet.dstSet = *reinterpret_cast<VkDescriptorSet*>(&m_resource);
 					writeDescriptorSet.dstBinding = descriptor.Binding;
 					writeDescriptorSet.dstArrayElement = 0;
@@ -536,7 +537,7 @@ namespace Insight
 			if (!m_uniformBuffer)
 			{
 				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
-				m_uniformBuffer->SetName(L"Descriptor_Uniform_Buffer");
+				m_uniformBuffer->SetName("Descriptor_Uniform_Buffer");
 			}
 		}
 		bool DescriptorAllocator::CheckSetAndBindingBounds(u32 set, u32 binding)

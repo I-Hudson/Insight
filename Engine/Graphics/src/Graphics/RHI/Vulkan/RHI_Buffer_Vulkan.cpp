@@ -28,7 +28,7 @@ namespace Insight
 				m_stride = stride;
 				m_overrides = overrides;
 
-				VkBufferCreateInfo createInfo;
+				VkBufferCreateInfo createInfo = {};
 				createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 				createInfo.size = m_size;
 				createInfo.usage = BufferTypeToVulkanBufferUsageFlags(bufferType);
@@ -163,7 +163,7 @@ namespace Insight
 				return m_buffer;
 			}
 
-			void RHI_Buffer_Vulkan::SetName(std::wstring name)
+			void RHI_Buffer_Vulkan::SetName(std::string name)
 			{
 				m_context->SetObjectName(name, (u64)m_buffer, VK_OBJECT_TYPE_BUFFER);
 				m_name = std::move(name);

@@ -34,6 +34,7 @@ namespace Insight
 				for (const BufferBarrier& bufferBarrier : barrier.BufferBarriers)
 				{
 					VkBufferMemoryBarrier b = { };
+					b.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
 					b.srcAccessMask = AccessFlagsToVulkan(bufferBarrier.SrcAccessFlags);
 					b.dstAccessMask = AccessFlagsToVulkan(bufferBarrier.DstAccessFlags);
 					b.buffer = static_cast<RHI_Buffer_Vulkan*>(bufferBarrier.Buffer)->GetBuffer();
@@ -47,6 +48,7 @@ namespace Insight
 				for (const ImageBarrier& imageBarrier : barrier.ImageBarriers)
 				{
 					VkImageMemoryBarrier b = { };
+					b.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 					b.srcAccessMask = AccessFlagsToVulkan(imageBarrier.SrcAccessFlags);
 					b.dstAccessMask = AccessFlagsToVulkan(imageBarrier.DstAccessFlags);
 					b.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -145,8 +147,8 @@ namespace Insight
 						VkOffset3D{ 0, 0, 0 },
 						VkExtent3D{ static_cast<u32>(dst->GetWidth()), static_cast<u32>(dst->GetHeight()), 1 } }
 				};
-				VkImageMemoryBarrier memoryBarriers;
-				memoryBarriers.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+				VkImageMemoryBarrier memoryBarriers = {};
+				memoryBarriers.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 				memoryBarriers.srcAccessMask = VK_ACCESS_NONE;
 				memoryBarriers.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 				memoryBarriers.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -186,7 +188,7 @@ namespace Insight
 				return m_commandList;
 			}
 
-			void RHI_CommandList_Vulkan::SetName(std::wstring name)
+			void RHI_CommandList_Vulkan::SetName(std::string name)
 			{
 				m_context_vulkan->SetObjectName(name, (u64)m_commandList, VK_OBJECT_TYPE_COMMAND_BUFFER);
 			}
@@ -223,8 +225,10 @@ namespace Insight
 					if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 					{
 						std::vector<VkRenderingAttachmentInfo> colourAttachments;
-						VkRenderingAttachmentInfo depthAttachment;
-						VkRenderingAttachmentInfo detencilAttacment;
+						VkRenderingAttachmentInfo depthAttachment = {};
+						depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+						VkRenderingAttachmentInfo detencilAttacment = {};
+						detencilAttacment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 
 						auto makeRenderingAttachment = 
 						[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
@@ -254,6 +258,7 @@ namespace Insight
 						};
 
 						VkRenderingInfo renderingInfo = { };
+						renderingInfo.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
 						renderingInfo.renderArea = rect;
 						renderingInfo.layerCount = 1;
 
@@ -292,7 +297,7 @@ namespace Insight
 						CreateFramebuffer(vkRenderpass, rect, clearColours);
 
 						const u64 psoHash = m_pso.GetHash();
-						VkRenderPassBeginInfo renderpassInfo;
+						VkRenderPassBeginInfo renderpassInfo = {};
 						renderpassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 						renderpassInfo.renderPass = vkRenderpass;
 						renderpassInfo.framebuffer = m_framebuffers[psoHash];
@@ -461,6 +466,7 @@ namespace Insight
 				ASSERT_MSG(m_activeDebugUtilsLabel.pLabelName == VkDebugUtilsLabelEXT().pLabelName, "[RHI_CommandList_Vulkan::BeginTimeBlock] Time block must be ended before a new one can start.");
 
 				VkDebugUtilsLabelEXT label = {};
+				label.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_LABEL_EXT;
 				label.pLabelName = blockName.c_str();
 				label.color[0] = colour[0];
 				label.color[1] = colour[1];
@@ -468,12 +474,18 @@ namespace Insight
 				label.color[3] = colour[3];
 
 				m_activeDebugUtilsLabel = label;
-				m_cmdBeginDebugUtilsLabelEXT(m_commandList, &m_activeDebugUtilsLabel);
+				if (m_cmdBeginDebugUtilsLabelEXT)
+				{
+					m_cmdBeginDebugUtilsLabelEXT(m_commandList, &m_activeDebugUtilsLabel);
+				}
 			}
 
 			void RHI_CommandList_Vulkan::EndTimeBlock()
 			{
-				m_cmdEndDebugUtilsLabelEXT(m_commandList);
+				if (m_cmdEndDebugUtilsLabelEXT)
+				{
+					m_cmdEndDebugUtilsLabelEXT(m_commandList);
+				}
 				m_activeDebugUtilsLabel = VkDebugUtilsLabelEXT();
 			}
 
@@ -521,7 +533,7 @@ namespace Insight
 				ImageLayout image_layout = texture->GetLayout();
 				Graphics::PipelineBarrier pipeline_barrier = { };
 
-				ImageBarrier image_barrer;
+				ImageBarrier image_barrer = {};
 				image_barrer.SrcAccessFlags = ImageLayoutToAccessMask(image_layout);
 				image_barrer.DstAccessFlags = ImageLayoutToAccessMask(layout);
 				image_barrer.OldLayout = image_layout;
@@ -606,7 +618,7 @@ namespace Insight
 					clearColours.push_back(clearValue);
 				}
 
-				VkFramebufferCreateInfo frameBufferInfo;
+				VkFramebufferCreateInfo frameBufferInfo = {};
 				frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 				frameBufferInfo.renderPass = renderpass;
 				frameBufferInfo.pAttachments = imageViews.data();
@@ -616,10 +628,10 @@ namespace Insight
 				frameBufferInfo.layers = 1;
 
 				VkFramebuffer framebuffer;
-				vkCreateFramebuffer(m_context_vulkan->GetDevice(), &frameBufferInfo, nullptr, &framebuffer);
+				ThrowIfFailed(vkCreateFramebuffer(m_context_vulkan->GetDevice(), &frameBufferInfo, nullptr, &framebuffer));
 				m_framebuffers[psoHash] = framebuffer;
 
-				m_context_vulkan->SetObjectName(L"Framebuffer " + std::to_wstring(psoHash), (u64)framebuffer, VK_OBJECT_TYPE_FRAMEBUFFER);
+				m_context_vulkan->SetObjectName("Framebuffer " + std::to_string(psoHash), (u64)framebuffer, VK_OBJECT_TYPE_FRAMEBUFFER);
 			}
 
 
@@ -632,10 +644,10 @@ namespace Insight
 				std::lock_guard lock(m_lock);
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 
-				VkCommandPoolCreateInfo poolCreateInfo = VkCommandPoolCreateInfo();
+				VkCommandPoolCreateInfo poolCreateInfo = {};
 				poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 				poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-				vkCreateCommandPool(m_context->GetDevice(), &poolCreateInfo, nullptr, &m_allocator);
+				ThrowIfFailed(vkCreateCommandPool(m_context->GetDevice(), &poolCreateInfo, nullptr, &m_allocator));
 			}
 
 			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetCommandList()
@@ -649,15 +661,15 @@ namespace Insight
 					list->Reset();
 
 					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(list);
-					VkCommandBufferBeginInfo beginInfo;
+					VkCommandBufferBeginInfo beginInfo = {};
 					beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-					vkBeginCommandBuffer(cmdListVulkan->GetCommandList(), &beginInfo);
+					ThrowIfFailed(vkBeginCommandBuffer(cmdListVulkan->GetCommandList(), &beginInfo));
 					cmdListVulkan->m_state = RHI_CommandListStates::Recording;
 
 					return list;
 				}
 
-				VkCommandBufferAllocateInfo bufferAllocateInfo; 
+				VkCommandBufferAllocateInfo bufferAllocateInfo = {};
 				bufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 				bufferAllocateInfo.commandBufferCount = 1;
 				bufferAllocateInfo.commandPool = m_allocator;
@@ -668,13 +680,13 @@ namespace Insight
 				list->m_allocator = this;
 				vkAllocateCommandBuffers(m_context->GetDevice(), &bufferAllocateInfo, &list->m_commandList);
 				
-				VkCommandBufferBeginInfo beginInfo;
+				VkCommandBufferBeginInfo beginInfo = {};
 				beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 				vkBeginCommandBuffer(list->GetCommandList(), &beginInfo);
 
 				list->m_state = RHI_CommandListStates::Recording;
 				m_allocLists.insert(list);
-				list->SetName(L"CommandList");
+				list->SetName("CommandList");
 				return list;
 			}
 
@@ -732,7 +744,7 @@ namespace Insight
 				return m_allocator;
 			}
 
-			void RHI_CommandListAllocator_Vulkan::SetName(std::wstring name)
+			void RHI_CommandListAllocator_Vulkan::SetName(std::string name)
 			{
 				m_context->SetObjectName(name, (u64)m_allocator, VK_OBJECT_TYPE_COMMAND_POOL);
 			}

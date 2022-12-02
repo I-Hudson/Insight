@@ -503,7 +503,7 @@ namespace Insight
 
         VkImageUsageFlags ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags)
         {
-            VkImageUsageFlags flags;
+            VkImageUsageFlags flags = {};
             if (imageUsageFlags & ImageUsageFlagsBits::TransferSrc)            { flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; }
             if (imageUsageFlags & ImageUsageFlagsBits::TransferDst)            { flags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; }
             if (imageUsageFlags & ImageUsageFlagsBits::Sampled)                { flags |= VK_IMAGE_USAGE_SAMPLED_BIT; }
@@ -534,7 +534,7 @@ namespace Insight
 
         VkPipelineStageFlags PipelineStageFlagsToVulkan(PipelineStageFlags flags)
         {
-            VkPipelineStageFlags result;
+            VkPipelineStageFlags result = {};
 
             if (flags & +PipelineStageFlagBits::TopOfPipe)                       { result |= VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; }
             if (flags & +PipelineStageFlagBits::DrawIndirect)                    { result |= VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; }
@@ -609,7 +609,7 @@ namespace Insight
 
         VkColorComponentFlags ColourComponentFlagsToVulkan(ColourComponentFlags flags)
         {
-            VkColorComponentFlags flag(0);
+            VkColorComponentFlags flag = {};
             if (flags & ColourComponentR) { flag |= VK_COLOR_COMPONENT_R_BIT; }
             if (flags & ColourComponentG) { flag |= VK_COLOR_COMPONENT_G_BIT; }
             if (flags & ColourComponentB) { flag |= VK_COLOR_COMPONENT_B_BIT; }
@@ -833,7 +833,7 @@ namespace Insight
 
         VkAccessFlags AccessFlagsToVulkan(AccessFlags flags)
         {
-            VkAccessFlags result;
+            VkAccessFlags result = {};
             COMPARE_AND_SET_BIT(flags, VK_ACCESS_INDIRECT_COMMAND_READ_BIT, result);
             COMPARE_AND_SET_BIT(flags, VK_ACCESS_INDEX_READ_BIT, result);
             COMPARE_AND_SET_BIT(flags, VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT, result);
@@ -883,7 +883,7 @@ namespace Insight
 
         VkImageAspectFlags ImageAspectFlagsToVulkan(ImageAspectFlags flags)
         {
-            VkImageAspectFlags result;
+            VkImageAspectFlags result = {};
             COMPARE_AND_SET_BIT(flags, VK_IMAGE_ASPECT_COLOR_BIT, result);
             COMPARE_AND_SET_BIT(flags, VK_IMAGE_ASPECT_DEPTH_BIT, result);
             COMPARE_AND_SET_BIT(flags, VK_IMAGE_ASPECT_STENCIL_BIT, result);                

@@ -26,7 +26,7 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				VkBuffer GetBuffer() const { return m_buffer; }
 

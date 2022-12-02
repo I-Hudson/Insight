@@ -58,7 +58,7 @@ namespace Insight
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
-				void SetObjectName(std::wstring_view name, u64 handle, VkObjectType objectType);
+				void SetObjectName(std::string_view name, u64 handle, VkObjectType objectType);
 
 				VkDevice GetDevice() const { return m_device; }
 				VkPhysicalDevice GetPhysicalDevice() const { return m_adapter; }

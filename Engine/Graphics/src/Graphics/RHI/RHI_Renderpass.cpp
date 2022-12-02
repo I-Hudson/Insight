@@ -53,7 +53,7 @@ namespace Insight
 				if (GraphicsManager::IsVulkan())
 				{
 					RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
-					VkRenderPass renderpassVulkan = reinterpret_cast<VkRenderPass>(&itr->second.Resource);
+					VkRenderPass renderpassVulkan = reinterpret_cast<VkRenderPass>(itr->second.Resource);
 					vkDestroyRenderPass(contextVulkan->GetDevice(), renderpassVulkan, nullptr);
 					itr->second.Resource = nullptr;
 				}
@@ -129,7 +129,7 @@ namespace Insight
 				{
 					static VkAttachmentDescription CreateCustom(const RHI_Texture* texture, const AttachmentDescription* attachment)
 					{
-						VkAttachmentDescription description;
+						VkAttachmentDescription description = {};
 						description.format = texture != nullptr ?
 							PixelFormatToVulkan(texture->GetFormat())
 							: PixelFormatToVulkan(attachment->Format);
@@ -147,7 +147,7 @@ namespace Insight
 					{
 						if (attachment == nullptr)
 						{
-							VkAttachmentDescription description;
+							VkAttachmentDescription description = {};
 							description.format = texture != nullptr ?
 								PixelFormatToVulkan(texture->GetFormat())
 								: PixelFormatToVulkan(attachment->Format);
@@ -168,7 +168,7 @@ namespace Insight
 					{
 						if (attachment == nullptr)
 						{
-							VkAttachmentDescription description;
+							VkAttachmentDescription description = {};
 							description.format = texture != nullptr ?
 								PixelFormatToVulkan(texture->GetFormat())
 								: PixelFormatToVulkan(attachment->Format);
@@ -347,7 +347,7 @@ namespace Insight
 				createInfo.pDependencies = subpassDependencies.data();
 
 				VkRenderPass renderpass;
-				vkCreateRenderPass(contextVulkan->GetDevice(), &createInfo, nullptr, &renderpass);
+				ThrowIfFailed(vkCreateRenderPass(contextVulkan->GetDevice(), &createInfo, nullptr, &renderpass));
 				RHI_Renderpass newPass;
 				newPass.Resource = renderpass;
 				m_renderpasses[hash] = newPass;

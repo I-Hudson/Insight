@@ -101,12 +101,6 @@ namespace Insight
 			const u64 file_name_end = path.find_last_of('.');
 			return path.substr(file_name_start, file_name_end - file_name_start);
 		}
-		std::wstring GetFileNameFromPath(const std::wstring& path)
-		{
-			const u64 file_name_start = path.find_last_of('/') + 1;
-			const u64 file_name_end = path.find_last_of('.');
-			return path.substr(file_name_start, file_name_end - file_name_start);
-		}
 
 		Mesh::Mesh()
 		{
@@ -177,9 +171,8 @@ namespace Insight
 			m_vertex_buffer->Upload(vertices.data(), vertex_byte_size);
 			m_index_buffer->Upload(indices.data(), index_byte_size);
 
-			std::wstring file_name_w = Platform::WStringFromString(m_file_name);
-			m_vertex_buffer->SetName(file_name_w + L" Vertex_Buffer");
-			m_index_buffer->SetName(file_name_w + L" Index_Buffer");
+			m_vertex_buffer->SetName(m_file_name + " Vertex_Buffer");
+			m_index_buffer->SetName(m_file_name + " Index_Buffer");
 
 			task_group.wait();
 
@@ -478,7 +471,7 @@ namespace Insight
 					defered_process.push_back([this, texture, file_path, texture_id]()
 						{
 							texture->LoadFromFile(m_file_path + "/" + file_path);
-							texture->SetName(Platform::WStringFromString(GetFileNameFromPath(file_path)) + L"_" + Platform::WStringFromString(texture_id));
+							texture->SetName(GetFileNameFromPath(file_path) + "_" + texture_id);
 						});
 
 					m_textures.push_back(texture);

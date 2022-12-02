@@ -27,7 +27,7 @@ namespace Insight
 				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			protected:
 				virtual void Create(RenderContext* context, int set, DescriptorSet descriptor_sets) override;

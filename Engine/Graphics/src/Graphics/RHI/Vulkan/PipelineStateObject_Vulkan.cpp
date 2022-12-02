@@ -61,14 +61,14 @@ namespace Insight
 				std::vector<VkPushConstantRange> push_constants;
 				if (push_constant.Size > 0)
 				{
-					VkPushConstantRange pushConstantRange;
+					VkPushConstantRange pushConstantRange = {};
 					pushConstantRange.stageFlags = ShaderStageFlagsToVulkan(push_constant.ShaderStages);
 					pushConstantRange.offset = push_constant.Offset;
 					pushConstantRange.size = push_constant.Size;
 					push_constants.push_back(pushConstantRange);
 				}
 
-				VkPipelineLayoutCreateInfo createInfo;
+				VkPipelineLayoutCreateInfo createInfo = {};
 				createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 				createInfo.pSetLayouts = set_layouts.data();
 				createInfo.setLayoutCount = static_cast<u32>(set_layouts.size());
@@ -76,7 +76,7 @@ namespace Insight
 				createInfo.pushConstantRangeCount = static_cast<u32>(push_constants.size());
 
 				VkPipelineLayout layout;
-				vkCreatePipelineLayout(m_context->GetDevice(), &createInfo, nullptr, &layout);
+				ThrowIfFailed(vkCreatePipelineLayout(m_context->GetDevice(), &createInfo, nullptr, &layout));
 				m_layouts[hash] = layout;
 
 				return layout;
@@ -133,27 +133,27 @@ namespace Insight
 						shaderFuncNames[i].push_back((char)wChar);
 					}
 
-					VkPipelineShaderStageCreateInfo info;
+					VkPipelineShaderStageCreateInfo info = {};
 					info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-					info.flags = ShaderStageFlagBitsToVulkan(shaderStage);
+					info.stage = ShaderStageFlagBitsToVulkan(shaderStage);
 					info.module = shaderModule;
 					info.pName = shaderFuncNames[i].c_str();
 					pipelineShaderStageCreateInfos.push_back(info);
 				}
-				const VertexInputLayout_Vulkan& pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();
+				const VertexInputLayout_Vulkan pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();
 
-				VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo; 
+				VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = {};
 				pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 				pipelineInputAssemblyStateCreateInfo.topology = PrimitiveTopologyTypeToVulkan(pso.PrimitiveTopologyType);
 
-				VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
+				VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = {};
 				pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 				pipelineViewportStateCreateInfo.viewportCount = 1;
 				pipelineViewportStateCreateInfo.pViewports = nullptr;
 				pipelineViewportStateCreateInfo.scissorCount = 1;
 				pipelineViewportStateCreateInfo.pScissors = nullptr;
 			
-				VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
+				VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = {};
 				pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 				pipelineRasterizationStateCreateInfo.depthClampEnable = pso.DepthClampEnabled;
 				pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = false;
@@ -166,17 +166,17 @@ namespace Insight
 				pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 				pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 			
-				VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
+				VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = {};
 				pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 				pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 			
-				VkStencilOpState stencilOpState; 
+				VkStencilOpState stencilOpState = {};
 				stencilOpState.failOp = VK_STENCIL_OP_KEEP;
 				stencilOpState.passOp = VK_STENCIL_OP_KEEP;
 				stencilOpState.depthFailOp = VK_STENCIL_OP_KEEP;
 				stencilOpState.compareOp = VK_COMPARE_OP_ALWAYS;
 
-				VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo;
+				VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = {};
 				pipelineDepthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 				pipelineDepthStencilStateCreateInfo.depthTestEnable = pso.DepthTest;
 				pipelineDepthStencilStateCreateInfo.depthWriteEnable = pso.DepthWrite;
@@ -191,7 +191,7 @@ namespace Insight
 				std::vector<VkPipelineColorBlendAttachmentState> pipeline_colour_blend_attachment_states;
 				if (pso.Swapchain)
 				{
-					VkPipelineColorBlendAttachmentState blend_state;
+					VkPipelineColorBlendAttachmentState blend_state = {};
 					blend_state.blendEnable = pso.BlendEnable;
 					blend_state.srcColorBlendFactor = BlendFactorToVulkan(pso.SrcColourBlendFactor);
 					blend_state.dstColorBlendFactor = BlendFactorToVulkan(pso.DstColourBlendFactor);
@@ -209,7 +209,7 @@ namespace Insight
 					{
 						if (tex)
 						{
-							VkPipelineColorBlendAttachmentState blend_state;
+							VkPipelineColorBlendAttachmentState blend_state = {};
 							blend_state.blendEnable = pso.BlendEnable;
 							blend_state.srcColorBlendFactor = BlendFactorToVulkan(pso.SrcColourBlendFactor);
 							blend_state.dstColorBlendFactor = BlendFactorToVulkan(pso.DstColourBlendFactor);
@@ -224,7 +224,7 @@ namespace Insight
 					}
 				}
 
-				VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
+				VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = {};
 				pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 				pipelineColorBlendStateCreateInfo.logicOpEnable = false;
 				pipelineColorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_NO_OP;
@@ -236,7 +236,7 @@ namespace Insight
 				pipelineColorBlendStateCreateInfo.blendConstants[3] = 1.0f;
 			
 				std::vector<VkDynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
-				VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
+				VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = {};
 				pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 				pipelineDynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 				pipelineDynamicStateCreateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
@@ -245,7 +245,7 @@ namespace Insight
 				RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
 				VkRenderPass renderpass = *reinterpret_cast<VkRenderPass*>(&rhiRenderpass);
 
-				VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
+				VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = { };
 				graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 				graphicsPipelineCreateInfo.pStages = pipelineShaderStageCreateInfos.data();
 				graphicsPipelineCreateInfo.stageCount = static_cast<u32>(pipelineShaderStageCreateInfos.size());
@@ -281,7 +281,7 @@ namespace Insight
 					depthAttachmentFormat = PixelFormatToVkFormat[(int)pso.DepthStencil->GetFormat()];
 				}
 
-				VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo;
+				VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo = {};
 				pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
 				pipelineRenderingCreateInfo.pColorAttachmentFormats = colourAttachmentFormats.data();
 				pipelineRenderingCreateInfo.colorAttachmentCount = static_cast<u32>(colourAttachmentFormats.size());
@@ -295,7 +295,8 @@ namespace Insight
 				}
 
 				VkPipeline createdPipeline = nullptr;
-				vkCreateGraphicsPipelines(m_context->GetDevice(), nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &createdPipeline);
+				ThrowIfFailed(vkCreateGraphicsPipelines(m_context->GetDevice(), nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &createdPipeline));
+				m_context->SetObjectName(pso.Name, (u64)createdPipeline, VK_OBJECT_TYPE_PIPELINE);
 				m_pipelineStateObjects[psoHash] = createdPipeline;
 
 				return createdPipeline;

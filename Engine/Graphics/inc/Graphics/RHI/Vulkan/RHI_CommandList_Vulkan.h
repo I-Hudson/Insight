@@ -43,7 +43,7 @@ namespace Insight
 				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				/// RHI_CommandList
 				virtual void BeginRenderpass(RenderpassDescription renderDescription) override;
@@ -113,7 +113,7 @@ namespace Insight
 				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };

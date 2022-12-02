@@ -28,10 +28,10 @@ namespace Insight
 			glm::ivec2 GetRenderResolution() const;
 			glm::ivec2 GetOutputResolution() const;
 
-			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureInfo desc);
-			RGTextureHandle GetTexture(std::wstring textureName);
+			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo desc);
+			RGTextureHandle GetTexture(std::string textureName);
 
-			RHI_Texture* GetRHITexture(std::wstring textureName);
+			RHI_Texture* GetRHITexture(std::string textureName);
 			RHI_Texture* GetRHITexture(RGTextureHandle textureHandle);
 
 			void ReadTexture(RGTextureHandle handle);

@@ -22,7 +22,7 @@ namespace Insight
 					return itr->second.Get();
 				}
 
-				VkSamplerCreateInfo create_info;
+				VkSamplerCreateInfo create_info = {};
 				create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 				create_info.magFilter = FilterToVulkan(info.MagFilter);
 				create_info.minFilter = FilterToVulkan(info.MinFilter);
@@ -40,7 +40,7 @@ namespace Insight
 				create_info.borderColor = BorderColourToVulkan(info.BoarderColour);
 
 				VkSampler sampler = nullptr;
-				vkCreateSampler(m_context_vulkan->GetDevice(), &create_info, nullptr, &sampler);
+				ThrowIfFailed(vkCreateSampler(m_context_vulkan->GetDevice(), &create_info, nullptr, &sampler));
 
 				RHI_Sampler* new_sampler = NewTracked(RHI_Sampler);
 				new_sampler->Resource = sampler;

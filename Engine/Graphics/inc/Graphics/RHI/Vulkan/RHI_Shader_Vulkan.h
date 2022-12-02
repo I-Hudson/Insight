@@ -29,19 +29,19 @@ namespace Insight
 
 				VkShaderModule GetStage(ShaderStageFlagBits stage) const;
 				VertexInputLayout_Vulkan GetVertexInputLayout() const { return m_vertexInputLayout; }
-				std::wstring_view GetMainFuncName(ShaderStageFlagBits stage) const;
+				std::string_view GetMainFuncName(ShaderStageFlagBits stage) const;
 
 			private:
 				virtual void Create(RenderContext* context, ShaderDesc desc) override;
 				virtual void Destroy() override;
 
-				void CompileStage(ShaderStageFlagBits stage, std::wstring_view path, int moduleIndex);
+				void CompileStage(ShaderStageFlagBits stage, std::string_view path, int moduleIndex);
 				void CreateVertexInputLayout(const ShaderDesc& desc);
 
 			private:
 				VertexInputLayout_Vulkan m_vertexInputLayout;
 				std::array<VkShaderModule, 5> m_modules;
-				std::array<std::wstring, 5> m_mainFuncNames;
+				std::array<std::string, 5> m_mainFuncNames;
 				RenderContext_Vulkan* m_context{ nullptr };
 			};
 		}

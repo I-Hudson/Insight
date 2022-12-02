@@ -31,7 +31,7 @@ namespace Insight
 					m_infos.push_back(createInfo);
 				}
 
-				VkImageCreateInfo imageCreateInfo;
+				VkImageCreateInfo imageCreateInfo = {};
 				imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 				imageCreateInfo.imageType = TextureTypeToVulkan(m_infos.at(0).TextureType);
 				imageCreateInfo.format = PixelFormatToVulkan(m_infos.at(0).Format);
@@ -142,13 +142,13 @@ namespace Insight
 				return m_image;
 			}
 
-			void RHI_Texture_Vulkan::SetName(std::wstring name)
+			void RHI_Texture_Vulkan::SetName(std::string name)
 			{
 				std::lock_guard lock(m_mutex);
 
 				if (m_image_view)
 				{
-					m_context->SetObjectName(name + L"_Image_View", reinterpret_cast<u64>(m_image_view), VK_OBJECT_TYPE_IMAGE_VIEW);
+					m_context->SetObjectName(name + "_Image_View", reinterpret_cast<u64>(m_image_view), VK_OBJECT_TYPE_IMAGE_VIEW);
 				}
 
 				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
@@ -156,7 +156,7 @@ namespace Insight
 					VkImageView& view = m_single_layer_image_views.at(i);
 					if (view)
 					{
-						m_context->SetObjectName(name + L"_Image_View_" + std::to_wstring(i), reinterpret_cast<u64>(view), VK_OBJECT_TYPE_IMAGE_VIEW);
+						m_context->SetObjectName(name + "_Image_View_" + std::to_string(i), reinterpret_cast<u64>(view), VK_OBJECT_TYPE_IMAGE_VIEW);
 					}
 				}
 
@@ -183,7 +183,7 @@ namespace Insight
 			{
 				std::lock_guard lock(m_mutex);
 
-				VkImageSubresourceRange imageSubresourceRange;
+				VkImageSubresourceRange imageSubresourceRange = {};
 				imageSubresourceRange.aspectMask = m_infos.at(mip_index).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
 					VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT : VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
 				imageSubresourceRange.baseMipLevel = mip_index;
@@ -191,7 +191,7 @@ namespace Insight
 				imageSubresourceRange.baseArrayLayer = layer_index;
 				imageSubresourceRange.layerCount = layer_count;
 
-				VkImageViewCreateInfo viewCreateInfo;
+				VkImageViewCreateInfo viewCreateInfo = {};
 				viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 				viewCreateInfo.image = m_image;
 				viewCreateInfo.viewType = TextureViewTypeToVulkan(m_infos.at(mip_index).TextureType);
@@ -200,7 +200,7 @@ namespace Insight
 				viewCreateInfo.subresourceRange = imageSubresourceRange;
 
 				VkImageView imageView = nullptr;
-				vkCreateImageView(m_context->GetDevice(), &viewCreateInfo, nullptr, &imageView);
+				ThrowIfFailed(vkCreateImageView(m_context->GetDevice(), &viewCreateInfo, nullptr, &imageView));
 				return imageView;
 			}
 		}

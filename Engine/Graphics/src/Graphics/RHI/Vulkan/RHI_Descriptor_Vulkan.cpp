@@ -32,7 +32,7 @@ namespace Insight
 				return m_layout;
 			}
 
-			void RHI_DescriptorLayout_Vulkan::SetName(std::wstring name)
+			void RHI_DescriptorLayout_Vulkan::SetName(std::string name)
 			{
 			}
 
@@ -40,7 +40,7 @@ namespace Insight
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 
-				VkDescriptorSetLayoutCreateInfo setCreateInfo;
+				VkDescriptorSetLayoutCreateInfo setCreateInfo = {};
 				setCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 				std::vector<VkDescriptorSetLayoutBinding> bindingCreateInfos = {};
 				std::vector<VkDescriptorBindingFlagsEXT> bindingEXTFlags = {};
@@ -65,7 +65,7 @@ namespace Insight
 					}
 				}
 
-				VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setEXT;
+				VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setEXT = {};
 				setEXT.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
 				if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))
 				{
@@ -75,7 +75,7 @@ namespace Insight
 				}
 				setCreateInfo.pBindings = bindingCreateInfos.data();
 				setCreateInfo.bindingCount = static_cast<u32>(bindingCreateInfos.size());
-				vkCreateDescriptorSetLayout(m_context->GetDevice(), &setCreateInfo, nullptr, &m_layout);
+				ThrowIfFailed(vkCreateDescriptorSetLayout(m_context->GetDevice(), &setCreateInfo, nullptr, &m_layout));
 			}
 		}
 	}

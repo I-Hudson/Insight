@@ -24,7 +24,7 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				NO_DISCARD VkImage GetImage() const { return m_image; }
 				NO_DISCARD VkImageView GetImageView() const;

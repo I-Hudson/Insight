@@ -339,7 +339,7 @@ namespace Insight
 			IMGUI_VALID(ImGui::End());
 
 			/// Look into "panking" for dir light https:///www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
-			RenderGraph::Instance().AddPass<PassData>(L"Cascade shadow pass",
+			RenderGraph::Instance().AddPass<PassData>("Cascade shadow pass",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass setup");
@@ -347,7 +347,7 @@ namespace Insight
 					RHI_TextureInfo tex_create_info = RHI_TextureInfo::Tex2DArray(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size,
 						PixelFormat::D32_Float, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled, 4);
 
-					RGTextureHandle depth_tex = builder.CreateTexture(L"Cascade_Shadow_Tex", tex_create_info);
+					RGTextureHandle depth_tex = builder.CreateTexture("Cascade_Shadow_Tex", tex_create_info);
 					builder.WriteDepthStencil(depth_tex);
 					data.Depth_Tex = depth_tex;
 
@@ -355,11 +355,11 @@ namespace Insight
 					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 
 					ShaderDesc shader_description = { };
-					shader_description.VertexFilePath = L"./Resources/Shaders/hlsl/Cascade_Shadow.hlsl";
+					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Cascade_Shadow.hlsl";
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
-					pso.Name = L"Cascade_Shadow_PSO";
+					pso.Name = "Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
 					//pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
@@ -381,7 +381,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass execute");
 
-					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Cascade shadow pass");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject("Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
 
 					if (Reverse_Z_For_Depth)
@@ -401,7 +401,7 @@ namespace Insight
 					{
 						Graphics::Frustum camera_frustum(m_directional_light.View[i], m_directional_light.Projection[i], ShadowZFar);
 
-						RenderpassDescription renderpass_description = render_graph.GetRenderpassDescription(L"Cascade shadow pass");
+						RenderpassDescription renderpass_description = render_graph.GetRenderpassDescription("Cascade shadow pass");
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
@@ -443,7 +443,7 @@ namespace Insight
 		{
 			struct TData
 			{ };
-			RenderGraph::Instance().AddPass<TData>(L"Shadow_Culling", [](TData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TData>("Shadow_Culling", [](TData& data, RenderGraphBuilder& builder)
 				{
 
 				},
@@ -464,7 +464,7 @@ namespace Insight
 			PassData pass_data = {};
 			pass_data.Buffer_Frame = m_buffer_frame;
 
-			RenderGraph::Instance().AddPass<PassData>(L"Depth_Prepass", 
+			RenderGraph::Instance().AddPass<PassData>("Depth_Prepass", 
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Depth_Prepass pass setup");
@@ -474,20 +474,20 @@ namespace Insight
 						, builder.GetRenderResolution().y
 						, PixelFormat::D32_Float
 						, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled);
-					RGTextureHandle depthStencil = builder.CreateTexture(L"Depth_Prepass_DepthStencil", textureCreateInfo);
+					RGTextureHandle depthStencil = builder.CreateTexture("Depth_Prepass_DepthStencil", textureCreateInfo);
 					builder.WriteDepthStencil(depthStencil);
 
 					ShaderDesc shaderDesc;
 					{
 						IS_PROFILE_SCOPE("Depth_Prepass_GetShader");
-						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Depth_Prepass.hlsl";
+						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Depth_Prepass.hlsl";
 					}
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject depth_Prepass_pso = { };
 					{
 						IS_PROFILE_SCOPE("Depth_Prepass_SetPipelineStateObject");
-						depth_Prepass_pso.Name = L"Depth_Prepass_PSO";
+						depth_Prepass_pso.Name = "Depth_Prepass_PSO";
 						depth_Prepass_pso.CullMode = CullMode::Back;
 						depth_Prepass_pso.FrontFace = FrontFace::CounterClockwise;
 						depth_Prepass_pso.ShaderDescription = shaderDesc;
@@ -505,9 +505,9 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Depth_Prepass pass execute");
 
-					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Depth_Prepass");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject("Depth_Prepass");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"Depth_Prepass"));
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("Depth_Prepass"));
 
 					{
 						IS_PROFILE_SCOPE("Depth_Prepass-SetUniform");
@@ -584,7 +584,7 @@ namespace Insight
 			}
 			Pass_Data.Mesh_Lod = mesh_lod_index;
 
-			RenderGraph::Instance().AddPass<TestPassData>(L"GBuffer", 
+			RenderGraph::Instance().AddPass<TestPassData>("GBuffer", 
 				[](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("GBuffer pass setup");
@@ -594,7 +594,7 @@ namespace Insight
 						, builder.GetRenderResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
-					RGTextureHandle colourRT = builder.CreateTexture(L"ColourRT", textureCreateInfo);
+					RGTextureHandle colourRT = builder.CreateTexture("ColourRT", textureCreateInfo);
 					builder.WriteTexture(colourRT);
 
 					textureCreateInfo = RHI_TextureInfo::Tex2D(
@@ -602,7 +602,7 @@ namespace Insight
 						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16B16A16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
-					RGTextureHandle normal_rt = builder.CreateTexture(L"NormalRT", textureCreateInfo);
+					RGTextureHandle normal_rt = builder.CreateTexture("NormalRT", textureCreateInfo);
 					builder.WriteTexture(normal_rt);
 
 					textureCreateInfo = RHI_TextureInfo::Tex2D(
@@ -610,35 +610,35 @@ namespace Insight
 						, builder.GetRenderResolution().y
 						, PixelFormat::R16G16_Float
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled);
-					RGTextureHandle velocity_rt = builder.CreateTexture(L"VelocityRT", textureCreateInfo);
+					RGTextureHandle velocity_rt = builder.CreateTexture("VelocityRT", textureCreateInfo);
 					builder.WriteTexture(velocity_rt);
 
 					textureCreateInfo.Format = PixelFormat::D32_Float;
 					textureCreateInfo.ImageUsage = ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled;
 					if (Depth_Prepass)
 					{
-						RGTextureHandle depth_prepass = builder.GetTexture(L"Depth_Prepass_DepthStencil");
+						RGTextureHandle depth_prepass = builder.GetTexture("Depth_Prepass_DepthStencil");
 						builder.WriteDepthStencil(depth_prepass);
 					}
 					else
 					{
-						RGTextureHandle depthStencil = builder.CreateTexture(L"GBuffer_DepthStencil", textureCreateInfo);
+						RGTextureHandle depthStencil = builder.CreateTexture("GBuffer_DepthStencil", textureCreateInfo);
 						builder.WriteDepthStencil(depthStencil);
 					}
-					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
+					builder.ReadTexture(builder.GetTexture("Cascade_Shadow_Tex"));
 
 					ShaderDesc shaderDesc;
 					{
 						IS_PROFILE_SCOPE("GBuffer-GetShader");
-						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 					}
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject gbufferPso = { };
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
-						gbufferPso.Name = L"GBuffer_PSO";
+						gbufferPso.Name = "GBuffer_PSO";
 						gbufferPso.CullMode = CullMode::None;
 						gbufferPso.FrontFace = FrontFace::CounterClockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
@@ -669,9 +669,9 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("GBuffer pass execute");
 
-					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"GBuffer");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject("GBuffer");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"GBuffer"));
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("GBuffer"));
 
 					{
 						IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
@@ -782,30 +782,30 @@ namespace Insight
 			}
 			Pass_Data.Mesh_Lod = mesh_lod_index;
 
-			RenderGraph::Instance().AddPass<TestPassData>(L"Transparent_GBuffer",
+			RenderGraph::Instance().AddPass<TestPassData>("Transparent_GBuffer",
 				[](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Transparent_GBuffer pass setup");
 
-					RGTextureHandle colourRT = builder.GetTexture(L"ColourRT");
+					RGTextureHandle colourRT = builder.GetTexture("ColourRT");
 					builder.WriteTexture(colourRT);
-					RGTextureHandle normal_rt = builder.GetTexture(L"NormalRT");
+					RGTextureHandle normal_rt = builder.GetTexture("NormalRT");
 					builder.WriteTexture(normal_rt);
-					RGTextureHandle velocity_rt = builder.GetTexture(L"VelocityRT");
+					RGTextureHandle velocity_rt = builder.GetTexture("VelocityRT");
 					builder.WriteTexture(velocity_rt);
 
 					RGTextureHandle depth = {};
 					if (Depth_Prepass)
 					{
-						depth = builder.GetTexture(L"Depth_Prepass_DepthStencil");
+						depth = builder.GetTexture("Depth_Prepass_DepthStencil");
 						builder.WriteDepthStencil(depth);
 					}
 					else
 					{
-						depth = builder.GetTexture(L"GBuffer_DepthStencil");
+						depth = builder.GetTexture("GBuffer_DepthStencil");
 						builder.WriteDepthStencil(depth);
 					}
-					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
+					builder.ReadTexture(builder.GetTexture("Cascade_Shadow_Tex"));
 
 					RenderpassDescription renderpassDescription = {};
 					renderpassDescription.AddAttachment(AttachmentDescription::Load(builder.GetRHITexture(colourRT)->GetFormat(), ImageLayout::ColourAttachment));
@@ -823,8 +823,8 @@ namespace Insight
 					ShaderDesc shaderDesc;
 					{
 						IS_PROFILE_SCOPE("GetShader");
-						shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 					}
 					builder.SetShader(shaderDesc);
 
@@ -832,7 +832,7 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("SetPipelineStateObject");
 						pso.ShaderDescription = shaderDesc;
-						pso.Name = L"Transparent_GBuffer";
+						pso.Name = "Transparent_GBuffer";
 						pso.CullMode = CullMode::None;
 						pso.FrontFace = FrontFace::CounterClockwise;
 						pso.BlendEnable = true;
@@ -861,9 +861,9 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Transparent_GBuffer pass execute");
 
-					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Transparent_GBuffer");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject("Transparent_GBuffer");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription(L"Transparent_GBuffer"));
+					cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("Transparent_GBuffer"));
 
 					{
 						IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
@@ -959,36 +959,36 @@ namespace Insight
 			}
 			ImGui::End();
 
-			RenderGraph::Instance().AddPass<PassData>(L"Composite_Pass",
+			RenderGraph::Instance().AddPass<PassData>("Composite_Pass",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
-					builder.ReadTexture(builder.GetTexture(L"ColourRT"));
-					builder.ReadTexture(builder.GetTexture(L"NormalRT"));
+					builder.ReadTexture(builder.GetTexture("ColourRT"));
+					builder.ReadTexture(builder.GetTexture("NormalRT"));
 					if (Depth_Prepass)
 					{
-						builder.ReadTexture(builder.GetTexture(L"Depth_Prepass_DepthStencil"));
+						builder.ReadTexture(builder.GetTexture("Depth_Prepass_DepthStencil"));
 					}
 					else
 					{
-						builder.ReadTexture(builder.GetTexture(L"GBuffer_DepthStencil"));
+						builder.ReadTexture(builder.GetTexture("GBuffer_DepthStencil"));
 					}
-					builder.ReadTexture(builder.GetTexture(L"Cascade_Shadow_Tex"));
+					builder.ReadTexture(builder.GetTexture("Cascade_Shadow_Tex"));
 
 					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
 						  builder.GetRenderResolution().x
 						, builder.GetRenderResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::ColourAttachment | ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::Storage);
-					RGTextureHandle composite_handle = builder.CreateTexture(L"Composite_Tex", create_info);
+					RGTextureHandle composite_handle = builder.CreateTexture("Composite_Tex", create_info);
 					builder.WriteTexture(composite_handle);
 
 					ShaderDesc shader_description = { };
-					shader_description.VertexFilePath = L"./Resources/Shaders/hlsl/Composite.hlsl";
-					shader_description.PixelFilePath = L"./Resources/Shaders/hlsl/Composite.hlsl";
+					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
+					shader_description.PixelFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
-					pso.Name = L"Composite_PSO";
+					pso.Name = "Composite_PSO";
 					pso.ShaderDescription = shader_description;
 					pso.DepthTest = false;
 					pso.PolygonMode = PolygonMode::Fill;
@@ -1001,26 +1001,26 @@ namespace Insight
 				},
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
-					PipelineStateObject pso = render_graph.GetPipelineStateObject(L"Composite_Pass");
+					PipelineStateObject pso = render_graph.GetPipelineStateObject("Composite_Pass");
 					cmd_list->BindPipeline(pso, nullptr);
-					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription(L"Composite_Pass"));
+					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription("Composite_Pass"));
 
 
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
 					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
 					const u8 texture_offset = 5;
-					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture(L"ColourRT")));
-					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture(L"NormalRT")));
+					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
+					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
 					if (Depth_Prepass)
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture(L"Depth_Prepass_DepthStencil")));
+						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
 					}
 					else
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture(L"GBuffer_DepthStencil")));
+						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("GBuffer_DepthStencil")));
 					}
-					cmd_list->SetTexture(0, texture_offset + 3, render_graph.GetRHITexture(render_graph.GetTexture(L"Cascade_Shadow_Tex")));
+					cmd_list->SetTexture(0, texture_offset + 3, render_graph.GetRHITexture(render_graph.GetTexture("Cascade_Shadow_Tex")));
 
 					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
 					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
@@ -1055,7 +1055,7 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			RenderGraph::Instance().AddPass<PassData>(L"FSR2",
+			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)
 				{
 					RHI_TextureInfo create_info = RHI_TextureInfo::Tex2D(
@@ -1063,7 +1063,7 @@ namespace Insight
 						, builder.GetOutputResolution().y
 						, PixelFormat::R8G8B8A8_UNorm
 						, ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::Storage);
-					RGTextureHandle textureHandle = builder.CreateTexture(L"FSR_Output", create_info);
+					RGTextureHandle textureHandle = builder.CreateTexture("FSR_Output", create_info);
 
 					builder.SetViewport(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
 					builder.SetScissor(RenderGraph::Instance().GetOutputResolution().x, RenderGraph::Instance().GetOutputResolution().y);
@@ -1073,10 +1073,10 @@ namespace Insight
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					RHI_FSR::Instance().Dispatch(cmd_list
-						, render_graph.GetRHITexture(L"Composite_Tex")
-						, render_graph.GetRHITexture(L"GBuffer_DepthStencil")
-						, render_graph.GetRHITexture(L"VelocityRT")
-						, render_graph.GetRHITexture(L"FSR_Output")
+						, render_graph.GetRHITexture("Composite_Tex")
+						, render_graph.GetRHITexture("GBuffer_DepthStencil")
+						, render_graph.GetRHITexture("VelocityRT")
+						, render_graph.GetRHITexture("FSR_Output")
 						, Main_Camera_Near_Plane
 						, Main_Camera_Far_Plane
 						, glm::radians(90.0f)
@@ -1098,7 +1098,7 @@ namespace Insight
 			passData.Buffer_Frame = m_buffer_frame;
 			passData.Buffer_Samplers = m_buffer_samplers;
 
-			RenderGraph::Instance().AddPass<TestPassData>(L"GFXHelperPass", [this](TestPassData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>("GFXHelperPass", [this](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("GFXHelper pass setup");
 
@@ -1109,12 +1109,12 @@ namespace Insight
 					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc = { };
-					shaderDesc.VertexFilePath = L"./Resources/Shaders/hlsl/GFXHelper.hlsl";
-					shaderDesc.PixelFilePath = L"./Resources/Shaders/hlsl/GFXHelper.hlsl";
+					shaderDesc.VertexFilePath = "./Resources/Shaders/hlsl/GFXHelper.hlsl";
+					shaderDesc.PixelFilePath = "./Resources/Shaders/hlsl/GFXHelper.hlsl";
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
-					pso.Name = L"GFXHelper_PSO";
+					pso.Name = "GFXHelper_PSO";
 					pso.ShaderDescription = shaderDesc;
 
 					pso.PrimitiveTopologyType = PrimitiveTopologyType::LineList;
@@ -1139,9 +1139,9 @@ namespace Insight
 						return;
 					}
 
-					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"GFXHelperPass");
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject("GFXHelperPass");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"GFXHelperPass"));
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("GFXHelperPass"));
 
 					{
 						IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
@@ -1226,19 +1226,19 @@ namespace Insight
 				RGTextureHandle RenderTarget;
 			};
 
-			RenderGraph::Instance().AddPass<TestPassData>(L"SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Swapchain pass setup");
 
 					RGTextureHandle rt = 0;
 					if (enableFSR)
 					{
-						rt = builder.GetTexture(L"FSR_Output");
+						rt = builder.GetTexture("FSR_Output");
 						builder.SkipTextureReadBarriers();
 					}
 					else
 					{
-						rt = builder.GetTexture(L"Composite_Tex");
+						rt = builder.GetTexture("Composite_Tex");
 					}
 					builder.ReadTexture(rt);
 					data.RenderTarget = rt;
@@ -1246,12 +1246,12 @@ namespace Insight
 					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc;
-					shaderDesc.VertexFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
-					shaderDesc.PixelFilePath = L"Resources/Shaders/hlsl/Swapchain.hlsl";
+					shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
+					shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject swapchainPso = { };
-					swapchainPso.Name = L"Swapchain_PSO";
+					swapchainPso.Name = "Swapchain_PSO";
 					swapchainPso.CullMode = CullMode::None;
 					swapchainPso.ShaderDescription = shaderDesc;
 					builder.SetPipeline(swapchainPso);
@@ -1265,9 +1265,9 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Swapchain pass execute");
 
-					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"SwapchainPass");
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject("SwapchainPass");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"SwapchainPass"));
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
 
 					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget), m_buffer_samplers.Clamp_Sampler);
 					cmdList->Draw(3, 1, 0, 0);

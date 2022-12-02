@@ -7,8 +7,6 @@
 #include "Graphics/Enums.h"
 #include "Graphics/ShaderDesc.h"
 
-#include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
-
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -78,10 +76,10 @@ namespace Insight
 			ShaderCompiler(ShaderCompiler&& other) = delete;
 			~ShaderCompiler();
 
-			std::wstring StageToFuncName(ShaderStageFlagBits stage);
-			std::wstring StageToProfileTarget(ShaderStageFlagBits stage);
+			std::string StageToFuncName(ShaderStageFlagBits stage);
+			std::string StageToProfileTarget(ShaderStageFlagBits stage);
 
-			ComPtr<IDxcBlob> Compile(ShaderStageFlagBits stage, std::wstring_view filePath, ShaderCompilerLanguage languageToCompileTo);
+			IDxcBlob* Compile(ShaderStageFlagBits stage, std::string_view filePath, ShaderCompilerLanguage languageToCompileTo);
 			void GetDescriptorSets(ShaderStageFlagBits stage, std::vector<DescriptorSet>& descriptor_sets, PushConstant& push_constant);
 			std::vector<ShaderInputLayout> GetInputLayout();
 
@@ -90,11 +88,11 @@ namespace Insight
 
 			ShaderCompilerLanguage m_languageToCompileTo;
 
-			ComPtr<IDxcUtils> DXUtils;
-			ComPtr<IDxcCompiler3> DXCompiler;
+			IDxcUtils* DXUtils;
+			IDxcCompiler3* DXCompiler;
 
-			ComPtr<IDxcResult> ShaderCompileResults;
-			ComPtr<IDxcResult> ShaderReflectionResults;
+			IDxcResult* ShaderCompileResults;
+			IDxcResult* ShaderReflectionResults;
 		};
 	}
 }
