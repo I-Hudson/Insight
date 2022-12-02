@@ -70,8 +70,6 @@ LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
 LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
 
-LibDirs["glslang_win_d"] = "%{wks.location}vendor/glslang/win_debug/lib"
-LibDirs["glslang_win"] = "%{wks.location}vendor/glslang/win_release/lib"
 LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
 LibDirs["dxcompiler_win_d"] = "%{wks.location}vendor/dxcompiler/win_debug/lib/x64"
 LibDirs["dxcompiler_win"] = "%{wks.location}vendor/dxcompiler/win_release/lib/x64"
