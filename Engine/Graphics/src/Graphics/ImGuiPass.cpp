@@ -37,7 +37,7 @@ namespace Insight
 			{
 				PipelineStateObject Pso;
 			};
-			RenderGraph::Instance().AddPass<TestPassData>(L"ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
+			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("ImGui pass setup");
 
@@ -48,8 +48,8 @@ namespace Insight
 					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc = { };
-					shaderDesc.VertexFilePath = L"./Resources/Shaders/hlsl/ImGui.hlsl";
-					shaderDesc.PixelFilePath = L"./Resources/Shaders/hlsl/ImGui.hlsl";
+					shaderDesc.VertexFilePath = "./Resources/Shaders/hlsl/ImGui.hlsl";
+					shaderDesc.PixelFilePath = "./Resources/Shaders/hlsl/ImGui.hlsl";
 					shaderDesc.InputLayout =
 					{
 						ShaderInputLayout(0, PixelFormat::R32G32_Float, 0),
@@ -59,7 +59,7 @@ namespace Insight
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
-					pso.Name = L"ImGui_PSO";
+					pso.Name = "ImGui_PSO";
 					pso.ShaderDescription = shaderDesc;
 
 					pso.PolygonMode = PolygonMode::Fill;
@@ -85,9 +85,9 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("ImGui pass execute");
 
-					PipelineStateObject pso = renderGraph.GetPipelineStateObject(L"ImGuiPass");
+					PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
 					cmdList->BindPipeline(pso, nullptr);
-					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription(L"ImGuiPass"));
+					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("ImGuiPass"));
 
 					ImDrawData* draw_data = ImGui::GetDrawData();
 

@@ -117,7 +117,7 @@ namespace Insight
             if (GraphicsManager::Instance().IsVulkan())
             {
 #ifdef IS_VULKAN_ENABLED
-                m_ffx_fsr2_dispatch_description.commandList   = ffxGetCommandListVK(static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmd_list)->GetCommandList().operator VkCommandBuffer());
+                m_ffx_fsr2_dispatch_description.commandList   = ffxGetCommandListVK(static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmd_list)->GetCommandList());
 
                 m_ffx_fsr2_dispatch_description.color         = ffxGetTextureResourceVK(&m_ffx_fsr2_context, static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImage()
                     , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_input)->GetImageView(), resolution_render_x, resolution_render_y

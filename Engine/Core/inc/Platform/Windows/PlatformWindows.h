@@ -32,7 +32,8 @@ namespace Insight
 
 			static std::string StringFromWString(const std::wstring& wstring);
 			static std::wstring WStringFromString(const std::string& string);
-
+			static std::wstring WStringFromStringView(std::string_view string);
+			
 			static Core::GUID CreateGUID();
 			static void AssignGUID(Core::GUID& guid);
 

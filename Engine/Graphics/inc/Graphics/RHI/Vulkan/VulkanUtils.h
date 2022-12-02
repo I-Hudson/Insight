@@ -4,10 +4,12 @@
 
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
-#include <vulkan/vulkan.hpp>
 #include "VmaUsage.h"
 
-extern vk::Format PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)];
+#include <vector>
+#include <assert.h>
+
+extern VkFormat PixelFormatToVkFormat[static_cast<int>(PixelFormat::MAX)];
 extern PixelFormat VkFormatToPixelFormat[static_cast<int>(PixelFormat::MAX)];
 using VmaAllocationCreateFlags = uint32_t;
 enum VmaMemoryUsage;
@@ -17,41 +19,41 @@ namespace Insight
 	namespace Graphics
 	{
 		std::string						DeviceExtensionToVulkan(DeviceExtension extension);
-		vk::ImageUsageFlags				ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
-		vk::Format						PixelFormatToVulkan(PixelFormat format);
-		vk::PipelineBindPoint			GPUQueueToVulkanBindPoint(GPUQueue queue);
-		vk::PipelineStageFlags			PipelineStageFlagsToVulkan(PipelineStageFlags flags);
-		vk::ShaderStageFlagBits			ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
-		vk::ShaderStageFlags			ShaderStageFlagsToVulkan(ShaderStageFlags flags);
-		vk::PrimitiveTopology			PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);
-		vk::ColorComponentFlags			ColourComponentFlagsToVulkan(ColourComponentFlags flags);
-		vk::BlendFactor					BlendFactorToVulkan(BlendFactor factor);
-		vk::BlendOp						BlendOpToVulkan(BlendOp op);
-		vk::CompareOp					CompareOpToVulkan(CompareOp op);
-		vk::Filter						FilterToVulkan(Filter filter);
-		vk::SamplerMipmapMode			SamplerMipmapModeToVulkan(SamplerMipmapMode sampler_mipmap_mode);
-		vk::SamplerAddressMode			SamplerAddressModeToVulkan(SamplerAddressMode sampler_address_mode);
-		vk::BorderColor					BorderColourToVulkan(BorderColour border_colour);
-		vk::AttachmentLoadOp			AttachmentLoadOpToVulkan(AttachmentLoadOp op);
-		vk::BufferUsageFlags			BufferTypeToVulkanBufferUsageFlags(BufferType type);
-		vk::PolygonMode					PolygonModeToVulkan(PolygonMode mode);
-		vk::CullModeFlags				CullModeToVulkan(CullMode cullMode);
-		vk::FrontFace					FrontFaceToVulkan(FrontFace front_face);
-		vk::DescriptorType				DescriptorTypeToVulkan(DescriptorType type);
-		vk::AccessFlags					AccessFlagsToVulkan(AccessFlags flags);
-		vk::ImageLayout					ImageLayoutToVulkan(ImageLayout layout);
-		vk::ImageAspectFlags			ImageAspectFlagsToVulkan(ImageAspectFlags flags);
-		vk::IndexType					IndexTypeToVulkan(IndexType index_type);
-		vk::ImageType					TextureTypeToVulkan(TextureType type);
-		vk::ImageViewType				TextureViewTypeToVulkan(TextureType type);
-		vk::DynamicState				DynamicStateToVulkan(DynamicState dynamic_state);
-		std::vector<vk::DynamicState>	DynamicStatesToVulkan(std::vector<DynamicState> dynamic_states);
+		VkImageUsageFlags				ImageUsageFlagsToVulkan(ImageUsageFlags imageUsageFlags);
+		VkFormat						PixelFormatToVulkan(PixelFormat format);
+		VkPipelineBindPoint				GPUQueueToVulkanBindPoint(GPUQueue queue);
+		VkPipelineStageFlags			PipelineStageFlagsToVulkan(PipelineStageFlags flags);
+		VkShaderStageFlagBits			ShaderStageFlagBitsToVulkan(ShaderStageFlagBits stage);
+		VkShaderStageFlags				ShaderStageFlagsToVulkan(ShaderStageFlags flags);
+		VkPrimitiveTopology				PrimitiveTopologyTypeToVulkan(PrimitiveTopologyType type);
+		VkColorComponentFlags			ColourComponentFlagsToVulkan(ColourComponentFlags flags);
+		VkBlendFactor					BlendFactorToVulkan(BlendFactor factor);
+		VkBlendOp						BlendOpToVulkan(BlendOp op);
+		VkCompareOp						CompareOpToVulkan(CompareOp op);
+		VkFilter						FilterToVulkan(Filter filter);
+		VkSamplerMipmapMode				SamplerMipmapModeToVulkan(SamplerMipmapMode sampler_mipmap_mode);
+		VkSamplerAddressMode			SamplerAddressModeToVulkan(SamplerAddressMode sampler_address_mode);
+		VkBorderColor					BorderColourToVulkan(BorderColour border_colour);
+		VkAttachmentLoadOp				AttachmentLoadOpToVulkan(AttachmentLoadOp op);
+		VkBufferUsageFlags				BufferTypeToVulkanBufferUsageFlags(BufferType type);
+		VkPolygonMode					PolygonModeToVulkan(PolygonMode mode);
+		VkCullModeFlags					CullModeToVulkan(CullMode cullMode);
+		VkFrontFace						FrontFaceToVulkan(FrontFace front_face);
+		VkDescriptorType				DescriptorTypeToVulkan(DescriptorType type);
+		VkAccessFlags					AccessFlagsToVulkan(AccessFlags flags);
+		VkImageLayout					ImageLayoutToVulkan(ImageLayout layout);
+		VkImageAspectFlags				ImageAspectFlagsToVulkan(ImageAspectFlags flags);
+		VkIndexType						IndexTypeToVulkan(IndexType index_type);
+		VkImageType						TextureTypeToVulkan(TextureType type);
+		VkImageViewType					TextureViewTypeToVulkan(TextureType type);
+		VkDynamicState					DynamicStateToVulkan(DynamicState dynamic_state);
+		std::vector<VkDynamicState>		DynamicStatesToVulkan(std::vector<DynamicState> dynamic_states);
 
-		VmaAllocationCreateFlags	BufferTypeToVMAAllocCreateFlags(BufferType type);
-		VmaMemoryUsage				BufferTypeToVMAUsage(BufferType type);
+		VmaAllocationCreateFlags		BufferTypeToVMAAllocCreateFlags(BufferType type);
+		VmaMemoryUsage					BufferTypeToVMAUsage(BufferType type);
 
-		ImageLayout					VkToImageLayout(vk::ImageLayout layout);
-		AttachmentLoadOp			VkToAttachmentLoadOp(vk::AttachmentLoadOp op);
+		ImageLayout						VkToImageLayout(VkImageLayout layout);
+		AttachmentLoadOp				VkToAttachmentLoadOp(VkAttachmentLoadOp op);
 		
 
 		/*

@@ -224,6 +224,15 @@ namespace Insight
 			return wstrTo;
 		}
 
+		std::wstring PlatformWindows::WStringFromStringView(std::string_view string)
+		{
+			if (string.empty()) return std::wstring();
+			int size_needed = MultiByteToWideChar(CP_UTF8, 0, &string[0], static_cast<int>(string.size()), NULL, 0);
+			std::wstring wstrTo(size_needed, 0);
+			MultiByteToWideChar(CP_UTF8, 0, &string[0], static_cast<int>(string.size()), &wstrTo[0], size_needed);
+			return wstrTo;
+		}
+
 		Core::GUID PlatformWindows::CreateGUID()
 		{
 			Core::GUID guid;

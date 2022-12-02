@@ -68,14 +68,14 @@ namespace Insight
 			void Init(RenderContext* context);
 			void Execute();
 
-			RGTextureHandle CreateTexture(std::wstring textureName, RHI_TextureInfo info);
+			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo info);
 
-			RGTextureHandle GetTexture(std::wstring textureName) const;
-			RHI_Texture* GetRHITexture(std::wstring textureName) const;
+			RGTextureHandle GetTexture(std::string textureName) const;
+			RHI_Texture* GetRHITexture(std::string textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
-			RenderpassDescription GetRenderpassDescription(std::wstring_view passName) const;
-			PipelineStateObject GetPipelineStateObject(std::wstring_view passName) const;
+			RenderpassDescription GetRenderpassDescription(std::string_view passName) const;
+			PipelineStateObject GetPipelineStateObject(std::string_view passName) const;
 
 			void Release();
 
@@ -86,7 +86,7 @@ namespace Insight
 			void SetPostRender(RenderGraphSetPreRenderFunc func) { m_post_render_func = std::move(func); }
 
 			template<typename TData>
-			void AddPass(std::wstring passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
+			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
 				IS_PROFILE_FUNCTION();
