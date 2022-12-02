@@ -9,8 +9,6 @@
 
 #include "Core/Profiler.h"
 
-#include <vulkan/vulkan.hpp>
-
 namespace Insight
 {
 	namespace Graphics
@@ -24,7 +22,7 @@ namespace Insight
 			{
 				if (m_layout)
 				{
-					m_context->GetDevice().destroyDescriptorSetLayout(m_layout);
+					vkDestroyDescriptorSetLayout(m_context->GetDevice(), m_layout, nullptr);
 					m_layout = nullptr;
 				}
 			}
@@ -34,7 +32,7 @@ namespace Insight
 				return m_layout;
 			}
 
-			void RHI_DescriptorLayout_Vulkan::SetName(std::wstring name)
+			void RHI_DescriptorLayout_Vulkan::SetName(std::string name)
 			{
 			}
 
@@ -42,9 +40,10 @@ namespace Insight
 			{
 				m_context = static_cast<RenderContext_Vulkan*>(context);
 
-				vk::DescriptorSetLayoutCreateInfo setCreateInfo = {};
-				std::vector<vk::DescriptorSetLayoutBinding> bindingCreateInfos = {};
-				std::vector<vk::DescriptorBindingFlagsEXT> bindingEXTFlags = {};
+				VkDescriptorSetLayoutCreateInfo setCreateInfo = {};
+				setCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+				std::vector<VkDescriptorSetLayoutBinding> bindingCreateInfos = {};
+				std::vector<VkDescriptorBindingFlagsEXT> bindingEXTFlags = {};
 
 				for (const DescriptorBinding& desc : descriptor_sets.Bindings)
 				{
@@ -53,27 +52,30 @@ namespace Insight
 						continue;
 					}
 
-					vk::DescriptorSetLayoutBinding bindingInfo = {};
-					bindingInfo.setBinding(desc.Binding);
-					bindingInfo.setDescriptorCount(1);
-					bindingInfo.setDescriptorType(DescriptorTypeToVulkan(desc.Type));
-					bindingInfo.setStageFlags(ShaderStageFlagsToVulkan(desc.Stages));
+					VkDescriptorSetLayoutBinding bindingInfo = {};
+					bindingInfo.binding = desc.Binding;
+					bindingInfo.descriptorCount = 1;
+					bindingInfo.descriptorType = DescriptorTypeToVulkan(desc.Type);
+					bindingInfo.stageFlags = ShaderStageFlagsToVulkan(desc.Stages);
 
 					bindingCreateInfos.push_back(bindingInfo);
 					if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))
 					{
-						bindingEXTFlags.push_back(vk::DescriptorBindingFlagBitsEXT::ePartiallyBound);
+						bindingEXTFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
 					}
 				}
 
-				vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT setEXT = {};
+				VkDescriptorSetLayoutBindingFlagsCreateInfoEXT setEXT = {};
+				setEXT.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
 				if (m_context->IsExtensionEnabled(DeviceExtension::BindlessDescriptors))
 				{
-					setEXT.setBindingFlags(bindingEXTFlags);
-					setCreateInfo.setPNext(&setEXT);
+					setEXT.pBindingFlags = bindingEXTFlags.data();
+					setEXT.bindingCount = static_cast<u32>(bindingEXTFlags.size());
+					setCreateInfo.pNext = &setEXT;
 				}
-				setCreateInfo.setBindings(bindingCreateInfos);
-				m_layout = m_context->GetDevice().createDescriptorSetLayout(setCreateInfo);
+				setCreateInfo.pBindings = bindingCreateInfos.data();
+				setCreateInfo.bindingCount = static_cast<u32>(bindingCreateInfos.size());
+				ThrowIfFailed(vkCreateDescriptorSetLayout(m_context->GetDevice(), &setCreateInfo, nullptr, &m_layout));
 			}
 		}
 	}

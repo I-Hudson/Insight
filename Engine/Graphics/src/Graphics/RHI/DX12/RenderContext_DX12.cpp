@@ -433,7 +433,7 @@ namespace Insight
 						&depthOptimizedClearValue,
 						IID_PPV_ARGS(&swapchainImage.DepthStencil)
 					);
-					swapchainImage.DepthStencil->SetName((std::wstring(L"Depth/Stencil Resource Heap_Frame_") + std::to_wstring(i)).c_str());
+					swapchainImage.DepthStencil->SetName((std::wstring("Depth/Stencil Resource Heap_Frame_") + std::to_wstring(i)).c_str());
 					device->CreateDepthStencilView(swapchainImage.DepthStencil.Get(), &depthStencilDesc, swapchainImage.DepthStencilHandle.GetCPUHandle());
 				}
 			}
@@ -484,7 +484,7 @@ namespace Insight
 						&depthOptimizedClearValue,
 						IID_PPV_ARGS(&swapchainImage.DepthStencil)
 					);
-					swapchainImage.DepthStencil->SetName((std::wstring(L"Depth/Stencil Resource Heap_Frame_") + std::to_wstring(i)).c_str());
+					swapchainImage.DepthStencil->SetName((std::wstring("Depth/Stencil Resource Heap_Frame_") + std::to_wstring(i)).c_str());
 					m_device->CreateDepthStencilView(swapchainImage.DepthStencil.Get(), &depthStencilDesc, swapchainImage.DepthStencilHandle.GetCPUHandle());
 				}
 			}

@@ -24,20 +24,20 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
-				NO_DISCARD vk::Image GetImage() const { return m_image; }
-				NO_DISCARD vk::ImageView GetImageView() const;
-				NO_DISCARD vk::ImageView GetImageView(u32 array_layer_index) const;
+				NO_DISCARD VkImage GetImage() const { return m_image; }
+				NO_DISCARD VkImageView GetImageView() const;
+				NO_DISCARD VkImageView GetImageView(u32 array_layer_index) const;
 
 			private:
-				NO_DISCARD vk::ImageView CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);
+				NO_DISCARD VkImageView CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
-				vk::Image m_image{ nullptr };
-				vk::ImageView m_image_view;								/// Image view for all layers.
-				std::vector<vk::ImageView> m_single_layer_image_views;	/// Image view for each layer.
+				VkImage m_image{ nullptr };
+				VkImageView m_image_view;								/// Image view for all layers.
+				std::vector<VkImageView> m_single_layer_image_views;	/// Image view for each layer.
 				VmaAllocation m_imageAllocation = nullptr;
 
 				friend class RenderContext_Vulkan;

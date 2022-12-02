@@ -114,7 +114,7 @@ namespace Insight
 			Release();
 			m_context = context; 
 			m_buffer = Renderer::CreateUniformBuffer(512);
-			m_buffer->SetName(L"Constent_Dynamic_Buffer");
+			m_buffer->SetName("Constent_Dynamic_Buffer");
 			m_size = 0;
 			m_capacity = 512;
 		}

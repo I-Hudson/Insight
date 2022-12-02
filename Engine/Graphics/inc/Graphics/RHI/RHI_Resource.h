@@ -24,12 +24,12 @@ namespace Insight
 
 			virtual void Release() = 0;
 			virtual bool ValidResouce() = 0;
-			virtual void SetName(std::wstring name) = 0;
+			virtual void SetName(std::string name) = 0;
 
 			DeviceUploadStatus GetUploadStatus() const { return m_uploadStatus; }
 
 		public:
-			std::wstring m_name;
+			std::string m_name;
 
 		protected:
 			DeviceUploadStatus m_uploadStatus = DeviceUploadStatus::Unknown;
@@ -114,7 +114,7 @@ namespace Insight
 
 		public:
 
-			int AddOrReturn(std::wstring str)
+			int AddOrReturn(std::string str)
 			{
 				std::lock_guard lock(m_lock);
 				auto itr = m_itemLookup.find(str);
@@ -133,7 +133,7 @@ namespace Insight
 				return id;
 			}
 
-			TypePtr Get(std::wstring key)
+			TypePtr Get(std::string key)
 			{
 				std::lock_guard lock(m_lock);
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
@@ -153,7 +153,7 @@ namespace Insight
 				return nullptr;
 			}
 
-			int GetId(std::wstring key)
+			int GetId(std::string key)
 			{
 				std::lock_guard lock(m_lock);
 				if (auto itr = m_itemLookup.find(key); itr != m_itemLookup.end())
@@ -193,11 +193,11 @@ namespace Insight
 
 		private:
 			std::mutex m_lock;
-			std::unordered_map<std::wstring, Item> m_itemLookup;
+			std::unordered_map<std::string, Item> m_itemLookup;
 
 			int m_currentMaxId = 0;
 			std::queue<int> m_freeIds;
-			std::unordered_map<int, std::wstring> m_idToStrLookup;
+			std::unordered_map<int, std::string> m_idToStrLookup;
 		};
 	}
 }

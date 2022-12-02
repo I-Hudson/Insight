@@ -28,8 +28,8 @@ namespace Insight
 			}
 			averageRenderTimer = averageRenderTimer / AverageRenderTimeCount;
 
-			std::string vendor_name = Platform::StringFromWString(PhysicalDeviceInformation::Instance().Vendor);
-			std::string device_name = Platform::StringFromWString(PhysicalDeviceInformation::Instance().Device_Name);
+			std::string vendor_name = PhysicalDeviceInformation::Instance().Vendor;
+			std::string device_name = PhysicalDeviceInformation::Instance().Device_Name;
 			ImGui::Text("Vendor: %s", vendor_name.data());
 			ImGui::Text("Device: %s", device_name.data());
 			ImGui::Text("VRAM: %u MB", PhysicalDeviceInformation::Instance().VRam_Size / 1024 / 1024);

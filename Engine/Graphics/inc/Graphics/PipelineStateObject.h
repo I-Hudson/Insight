@@ -23,7 +23,7 @@ namespace Insight
 		{
 			static const int RenderTargetCount = 8;
 
-			const wchar_t* Name;
+			std::string Name;
 			ShaderDesc ShaderDescription;
 			GPUQueue Queue = GPUQueue_Graphics;
 

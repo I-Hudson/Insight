@@ -28,9 +28,10 @@ namespace Insight
 				m_stride = stride;
 				m_overrides = overrides;
 
-				vk::BufferCreateInfo createInfo = {};
-				createInfo.setSize(m_size);
-				createInfo.setUsage(BufferTypeToVulkanBufferUsageFlags(bufferType));
+				VkBufferCreateInfo createInfo = {};
+				createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+				createInfo.size = m_size;
+				createInfo.usage = BufferTypeToVulkanBufferUsageFlags(bufferType);
 
 				VmaAllocationCreateInfo vmaInfo = { };
 				vmaInfo.flags = BufferTypeToVMAAllocCreateFlags(m_bufferType);
@@ -43,7 +44,7 @@ namespace Insight
 				}
 
 				ThrowIfFailed(vmaCreateBuffer(m_context->GetVMA(), 
-					reinterpret_cast<const VkBufferCreateInfo*>(&createInfo), 
+					&createInfo, 
 					&vmaInfo, 
 					reinterpret_cast<VkBuffer*>(&m_buffer), 
 					&m_vmaAllocation, nullptr));
@@ -162,9 +163,9 @@ namespace Insight
 				return m_buffer;
 			}
 
-			void RHI_Buffer_Vulkan::SetName(std::wstring name)
+			void RHI_Buffer_Vulkan::SetName(std::string name)
 			{
-				m_context->SetObejctName(name, (u64)m_buffer.operator VkBuffer(), vk::Buffer::objectType);
+				m_context->SetObjectName(name, (u64)m_buffer, VK_OBJECT_TYPE_BUFFER);
 				m_name = std::move(name);
 			}
 		}

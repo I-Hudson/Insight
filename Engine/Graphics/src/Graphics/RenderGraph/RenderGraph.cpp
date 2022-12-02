@@ -162,17 +162,17 @@ namespace Insight
 			}
 		}
 
-		RGTextureHandle RenderGraph::CreateTexture(std::wstring textureName, RHI_TextureInfo info)
+		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)
 		{
 			return m_textureCaches->AddOrReturn(textureName);
 		}
 
-		RGTextureHandle RenderGraph::GetTexture(std::wstring textureName) const
+		RGTextureHandle RenderGraph::GetTexture(std::string textureName) const
 		{
 			return m_textureCaches->GetId(textureName);
 		}
 
-		RHI_Texture* RenderGraph::GetRHITexture(std::wstring textureName) const
+		RHI_Texture* RenderGraph::GetRHITexture(std::string textureName) const
 		{
 			return GetRHITexture(GetTexture(textureName));
 		}
@@ -182,7 +182,7 @@ namespace Insight
 			return m_textureCaches->Get(handle);
 		}
 
-		RenderpassDescription RenderGraph::GetRenderpassDescription(std::wstring_view passName) const
+		RenderpassDescription RenderGraph::GetRenderpassDescription(std::string_view passName) const
 		{
 			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
 				{
@@ -195,7 +195,7 @@ namespace Insight
 			return { };
 		}
 
-		PipelineStateObject RenderGraph::GetPipelineStateObject(std::wstring_view passName) const
+		PipelineStateObject RenderGraph::GetPipelineStateObject(std::string_view passName) const
 		{
 			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
 				{

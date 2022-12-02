@@ -8,6 +8,8 @@
 
 #include <mutex>
 
+#include <vulkan/vulkan.h>
+
 namespace Insight
 {
 	namespace Graphics
@@ -22,15 +24,15 @@ namespace Insight
 			{
 			public:
 
-				vk::CommandBuffer GetCommandList() const { return m_commandList; };
+				VkCommandBuffer GetCommandList() const { return m_commandList; };
 
 				virtual void Create(RenderContext* context) override;
 				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override;
 
 				void PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage
-					, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier);
-				void PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::BufferMemoryBarrier> const& bufferMemoryBarrier);
-				void PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<vk::ImageMemoryBarrier> const& imageMemoryBarrier);
+					, std::vector<VkBufferMemoryBarrier> const& bufferMemoryBarrier, std::vector<VkImageMemoryBarrier> const& imageMemoryBarrier);
+				void PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<VkBufferMemoryBarrier> const& bufferMemoryBarrier);
+				void PipelineBarrierImage(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<VkImageMemoryBarrier> const& imageMemoryBarrier);
 
 				/// RHI_CommandList
 				virtual void Reset() override;
@@ -41,7 +43,7 @@ namespace Insight
 				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				/// RHI_CommandList
 				virtual void BeginRenderpass(RenderpassDescription renderDescription) override;
@@ -72,21 +74,21 @@ namespace Insight
 				virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) override;
 
 			private:
-				void CreateFramebuffer(vk::RenderPass renderpass, vk::Rect2D rect, std::vector<vk::ClearValue>& clearColours);
+				void CreateFramebuffer(VkRenderPass renderpass, VkRect2D rect, std::vector<VkClearValue>& clearColours);
 
 			private:
 				RenderContext_Vulkan* m_context_vulkan = nullptr;
 
-				vk::CommandBuffer m_commandList{ nullptr };
+				VkCommandBuffer m_commandList{ nullptr };
 				RHI_CommandListAllocator_Vulkan* m_allocator{ nullptr };
-				std::unordered_map<u64, vk::Framebuffer> m_framebuffers;
+				std::unordered_map<u64, VkFramebuffer> m_framebuffers;
 
-				vk::PipelineLayout m_bound_pipeline_layout;
+				VkPipelineLayout m_bound_pipeline_layout;
 				u64 m_boundDescriptors;
 
 				PFN_vkCmdBeginDebugUtilsLabelEXT m_cmdBeginDebugUtilsLabelEXT;
 				PFN_vkCmdEndDebugUtilsLabelEXT m_cmdEndDebugUtilsLabelEXT;
-				vk::DebugUtilsLabelEXT m_activeDebugUtilsLabel = vk::DebugUtilsLabelEXT();
+				VkDebugUtilsLabelEXT m_activeDebugUtilsLabel = VkDebugUtilsLabelEXT();
 
 				friend class RenderContext_Vulkan;
 				friend class RHI_CommandListAllocator_Vulkan;
@@ -96,7 +98,7 @@ namespace Insight
 			{
 			public:
 				THREAD_SAFE;
-				vk::CommandPool GetAllocator() const { return m_allocator; }
+				VkCommandPool GetAllocator() const { return m_allocator; }
 
 				/// RHI_CommandListAllocator
 				virtual void Create(RenderContext* context) override;
@@ -111,11 +113,11 @@ namespace Insight
 				/// RHI_Resouce
 				virtual void Release() override;
 				virtual bool ValidResouce() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };
-				vk::CommandPool m_allocator{ nullptr };
+				VkCommandPool m_allocator{ nullptr };
 			};
 		}
 	}

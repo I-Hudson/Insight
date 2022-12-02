@@ -22,27 +22,28 @@ namespace Insight
 					return itr->second.Get();
 				}
 
-				vk::SamplerCreateInfo create_info = vk::SamplerCreateInfo(
-					{},
-					FilterToVulkan(info.MagFilter),
-					FilterToVulkan(info.MinFilter),
-					SamplerMipmapModeToVulkan(info.MipmapMode),
-					SamplerAddressModeToVulkan(info.AddressMode),
-					SamplerAddressModeToVulkan(info.AddressMode),
-					SamplerAddressModeToVulkan(info.AddressMode),
-					info.MipLoadBias,
-					info.AnisotropyEnabled,
-					info.MaxAnisotropy,
-					info.CompareEnabled,
-					CompareOpToVulkan(info.CompareOp),
-					info.MinLod,
-					info.MaxLod,
-					BorderColourToVulkan(info.BoarderColour));
+				VkSamplerCreateInfo create_info = {};
+				create_info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+				create_info.magFilter = FilterToVulkan(info.MagFilter);
+				create_info.minFilter = FilterToVulkan(info.MinFilter);
+				create_info.mipmapMode = SamplerMipmapModeToVulkan(info.MipmapMode);
+				create_info.addressModeU = SamplerAddressModeToVulkan(info.AddressMode);
+				create_info.addressModeV = SamplerAddressModeToVulkan(info.AddressMode);
+				create_info.addressModeW = SamplerAddressModeToVulkan(info.AddressMode);
+				create_info.mipLodBias = info.MipLoadBias;
+				create_info.anisotropyEnable = info.AnisotropyEnabled;
+				create_info.maxAnisotropy = info.MaxAnisotropy;
+				create_info.compareEnable = info.CompareEnabled;
+				create_info.compareOp = CompareOpToVulkan(info.CompareOp);
+				create_info.minLod = info.MinLod;
+				create_info.maxLod = info.MaxLod;
+				create_info.borderColor = BorderColourToVulkan(info.BoarderColour);
 
-				vk::Sampler sampler = m_context_vulkan->GetDevice().createSampler(create_info);
+				VkSampler sampler = nullptr;
+				ThrowIfFailed(vkCreateSampler(m_context_vulkan->GetDevice(), &create_info, nullptr, &sampler));
 
 				RHI_Sampler* new_sampler = NewTracked(RHI_Sampler);
-				new_sampler->Resource = *reinterpret_cast<VkSampler*>(&sampler);
+				new_sampler->Resource = sampler;
 				new_sampler->Create_Info = info;
 
 				m_samplers.emplace(hash, UPtr<RHI_Sampler>(new_sampler));
@@ -53,8 +54,8 @@ namespace Insight
 			{
 				for (auto& pair : m_samplers)
 				{
-					vk::Sampler sampler = *reinterpret_cast<vk::Sampler*>(&pair.second->Resource);
-					m_context_vulkan->GetDevice().destroySampler(sampler);
+					VkSampler sampler = static_cast<VkSampler>(pair.second->Resource);
+					vkDestroySampler(m_context_vulkan->GetDevice(), sampler, nullptr);
 				}
 				m_samplers.clear();
 			}

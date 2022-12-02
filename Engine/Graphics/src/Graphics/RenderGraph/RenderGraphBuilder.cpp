@@ -37,7 +37,7 @@ namespace Insight
 			return m_rg->GetOutputResolution();
 		}
 
-		RGTextureHandle RenderGraphBuilder::CreateTexture(std::wstring textureName, RHI_TextureInfo desc)
+		RGTextureHandle RenderGraphBuilder::CreateTexture(std::string textureName, RHI_TextureInfo desc)
 		{
 			RGTextureHandle handle = m_rg->CreateTexture(textureName, desc);
 			if (std::find_if(m_pass->m_textureCreates.begin(), m_pass->m_textureCreates.end(),
@@ -51,12 +51,12 @@ namespace Insight
 			return handle;
 		}
 
-		RGTextureHandle RenderGraphBuilder::GetTexture(std::wstring textureName)
+		RGTextureHandle RenderGraphBuilder::GetTexture(std::string textureName)
 		{
 			return m_rg->GetTexture(textureName);
 		}
 
-		RHI_Texture* RenderGraphBuilder::GetRHITexture(std::wstring textureName)
+		RHI_Texture* RenderGraphBuilder::GetRHITexture(std::string textureName)
 		{
 			return GetRHITexture(GetTexture(textureName));
 		}

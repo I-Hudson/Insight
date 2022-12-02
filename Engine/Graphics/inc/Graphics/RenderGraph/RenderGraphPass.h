@@ -38,7 +38,7 @@ namespace Insight
 			virtual void Execute(RenderGraph& renderGraph, RHI_CommandList* cmdList) = 0;
 
 		public:
-			std::wstring m_passName;
+			std::string m_passName;
 
 			std::vector<std::pair<RGTextureHandle, RHI_TextureInfo>> m_textureCreates;
 			std::vector<RGTextureHandle> m_textureReads;
@@ -73,7 +73,7 @@ namespace Insight
 			using SetupFunc = std::function<void(TPassData&, RenderGraphBuilder&)>;
 			using ExecuteFunc = std::function<void(TPassData&, RenderGraph&, RHI_CommandList*)>;
 
-			RenderGraphPass(std::wstring passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
+			RenderGraphPass(std::string passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
 				: m_setupFunc(std::move(setupFunc))
 				, m_executeFunc(std::move(executeFunc))
 				, m_passData(std::move(initalData))
