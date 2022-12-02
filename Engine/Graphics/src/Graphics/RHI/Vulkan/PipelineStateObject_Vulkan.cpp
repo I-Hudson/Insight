@@ -12,7 +12,6 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-#include "vulkan/vulkan.hpp"
 #include <iostream>
 
 namespace Insight
@@ -27,7 +26,7 @@ namespace Insight
 			PipelineLayoutManager_Vulkan::~PipelineLayoutManager_Vulkan()
 			{ }
 
-			vk::PipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout(PipelineStateObject pso)
+			VkPipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout(PipelineStateObject pso)
 			{
 				IS_PROFILE_FUNCTION();
 				assert(m_context != nullptr);
@@ -50,7 +49,7 @@ namespace Insight
 					return itr->second;
 				}
 
-				std::vector<vk::DescriptorSetLayout> set_layouts = {};
+				std::vector<VkDescriptorSetLayout> set_layouts = {};
 				std::vector<DescriptorSet> current_descriptor_sets;
 
 				for (const DescriptorSet& descriptor_set : descriptor_sets)
@@ -59,17 +58,25 @@ namespace Insight
 					set_layouts.push_back(layoutVulkan->GetLayout());
 				}
 
-				std::vector<vk::PushConstantRange> push_constants;
+				std::vector<VkPushConstantRange> push_constants;
 				if (push_constant.Size > 0)
 				{
-					push_constants.push_back(vk::PushConstantRange(ShaderStageFlagsToVulkan(push_constant.ShaderStages), push_constant.Offset, push_constant.Size));
+					VkPushConstantRange pushConstantRange;
+					pushConstantRange.stageFlags = ShaderStageFlagsToVulkan(push_constant.ShaderStages);
+					pushConstantRange.offset = push_constant.Offset;
+					pushConstantRange.size = push_constant.Size;
+					push_constants.push_back(pushConstantRange);
 				}
 
-				vk::PipelineLayoutCreateInfo createInfo = vk::PipelineLayoutCreateInfo(
-					{},
-					set_layouts,
-					push_constants);
-				vk::PipelineLayout layout = m_context->GetDevice().createPipelineLayout(createInfo);
+				VkPipelineLayoutCreateInfo createInfo;
+				createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+				createInfo.pSetLayouts = set_layouts.data();
+				createInfo.setLayoutCount = static_cast<u32>(set_layouts.size());
+				createInfo.pPushConstantRanges = push_constants.data();
+				createInfo.pushConstantRangeCount = static_cast<u32>(push_constants.size());
+
+				VkPipelineLayout layout;
+				vkCreatePipelineLayout(m_context->GetDevice(), &createInfo, nullptr, &layout);
 				m_layouts[hash] = layout;
 
 				return layout;
@@ -81,7 +88,7 @@ namespace Insight
 
 				for (const auto pair : m_layouts)
 				{
-					m_context->GetDevice().destroyPipelineLayout(pair.second);
+					vkDestroyPipelineLayout(m_context->GetDevice(), pair.second, nullptr);
 				}
 				m_layouts.clear();
 			}
@@ -92,7 +99,7 @@ namespace Insight
 			PipelineStateObjectManager_Vulkan::~PipelineStateObjectManager_Vulkan()
 			{ }
 
-			vk::Pipeline PipelineStateObjectManager_Vulkan::GetOrCreatePSO(PipelineStateObject pso)
+			VkPipeline PipelineStateObjectManager_Vulkan::GetOrCreatePSO(PipelineStateObject pso)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -107,15 +114,15 @@ namespace Insight
 
 				/// Create pipeline layout.
 				/// Create descriptor set layout
-				vk::PipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
+				VkPipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 
 				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
-				std::vector<vk::PipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
+				std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
 				std::array<std::string, ShaderStageCount> shaderFuncNames;
 				for (int i = 0; i < ShaderStageCount; ++i)
 				{
 					ShaderStageFlagBits shaderStage =static_cast<ShaderStageFlagBits>(1 << i);
-					vk::ShaderModule shaderModule = shaderVulkan->GetStage(shaderStage);
+					VkShaderModule shaderModule = shaderVulkan->GetStage(shaderStage);
 					if (!shaderModule)
 					{
 						continue;
@@ -126,64 +133,74 @@ namespace Insight
 						shaderFuncNames[i].push_back((char)wChar);
 					}
 
-					vk::PipelineShaderStageCreateInfo info({}, ShaderStageFlagBitsToVulkan(shaderStage),
-						shaderModule, 
-						shaderFuncNames[i].c_str());
+					VkPipelineShaderStageCreateInfo info;
+					info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+					info.flags = ShaderStageFlagBitsToVulkan(shaderStage);
+					info.module = shaderModule;
+					info.pName = shaderFuncNames[i].c_str();
 					pipelineShaderStageCreateInfos.push_back(info);
 				}
 				const VertexInputLayout_Vulkan& pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();
 
-				vk::PipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo(vk::PipelineInputAssemblyStateCreateFlags(),
-					PrimitiveTopologyTypeToVulkan(pso.PrimitiveTopologyType));
+				VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo; 
+				pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+				pipelineInputAssemblyStateCreateInfo.topology = PrimitiveTopologyTypeToVulkan(pso.PrimitiveTopologyType);
+
+				VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo;
+				pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+				pipelineViewportStateCreateInfo.viewportCount = 1;
+				pipelineViewportStateCreateInfo.pViewports = nullptr;
+				pipelineViewportStateCreateInfo.scissorCount = 1;
+				pipelineViewportStateCreateInfo.pScissors = nullptr;
 			
-				vk::PipelineViewportStateCreateInfo pipelineViewportStateCreateInfo(vk::PipelineViewportStateCreateFlags(), 1, nullptr, 1, nullptr);
+				VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo;
+				pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+				pipelineRasterizationStateCreateInfo.depthClampEnable = pso.DepthClampEnabled;
+				pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = false;
+				pipelineRasterizationStateCreateInfo.polygonMode = PolygonModeToVulkan(pso.PolygonMode);
+				pipelineRasterizationStateCreateInfo.cullMode = CullModeToVulkan(pso.CullMode);
+				pipelineRasterizationStateCreateInfo.frontFace = FrontFaceToVulkan(pso.FrontFace);
+				pipelineRasterizationStateCreateInfo.depthBiasEnable = pso.DepthBaisEnabled;
+				pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+				pipelineRasterizationStateCreateInfo.depthBiasClamp = 0.0f;
+				pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
+				pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 			
-				vk::PipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo(
-					vk::PipelineRasterizationStateCreateFlags(),					// flags
-					pso.DepthClampEnabled,											// depthClampEnable
-					false,															// rasterizerDiscardEnable
-					PolygonModeToVulkan(pso.PolygonMode),											// polygonMode
-					CullModeToVulkan(pso.CullMode),									// cullMode
-					FrontFaceToVulkan(pso.FrontFace),								// frontFace
-					pso.DepthBaisEnabled,											// depthBiasEnable
-					0.0f,															// depthBiasConstantFactor
-					0.0f,															// depthBiasClamp
-					0.0f,															// depthBiasSlopeFactor
-					1.0f															// lineWidth
-				);
+				VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo;
+				pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+				pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 			
-				vk::PipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo(
-					vk::PipelineMultisampleStateCreateFlags(),  /// flags
-					vk::SampleCountFlagBits::e1                 /// rasterizationSamples
-																/// other values can be default
-				);
+				VkStencilOpState stencilOpState; 
+				stencilOpState.failOp = VK_STENCIL_OP_KEEP;
+				stencilOpState.passOp = VK_STENCIL_OP_KEEP;
+				stencilOpState.depthFailOp = VK_STENCIL_OP_KEEP;
+				stencilOpState.compareOp = VK_COMPARE_OP_ALWAYS;
+
+				VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo;
+				pipelineDepthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+				pipelineDepthStencilStateCreateInfo.depthTestEnable = pso.DepthTest;
+				pipelineDepthStencilStateCreateInfo.depthWriteEnable = pso.DepthWrite;
+				pipelineDepthStencilStateCreateInfo.depthCompareOp = CompareOpToVulkan(pso.DepthCompareOp);
+				pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable = false;
+				pipelineDepthStencilStateCreateInfo.stencilTestEnable = false;
+				pipelineDepthStencilStateCreateInfo.front = stencilOpState;
+				pipelineDepthStencilStateCreateInfo.back = stencilOpState;
+
 			
-				vk::StencilOpState stencilOpState(vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::StencilOp::eKeep, vk::CompareOp::eAlways);
-				vk::PipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo(
-					vk::PipelineDepthStencilStateCreateFlags(),  /// flags
-					pso.DepthTest,								 /// depthTestEnable
-					pso.DepthWrite,								 /// depthWriteEnable
-					CompareOpToVulkan(pso.DepthCompareOp),		 /// depthCompareOp
-					false,                                       /// depthBoundTestEnable
-					false,                                       /// stencilTestEnable
-					stencilOpState,                              /// front
-					stencilOpState                               /// back
-				);
-			
-				vk::ColorComponentFlags colorComponentFlags = ColourComponentFlagsToVulkan(pso.ColourWriteMask);
-				std::vector<vk::PipelineColorBlendAttachmentState> pipeline_colour_blend_attachment_states;
+				VkColorComponentFlags colorComponentFlags = ColourComponentFlagsToVulkan(pso.ColourWriteMask);
+				std::vector<VkPipelineColorBlendAttachmentState> pipeline_colour_blend_attachment_states;
 				if (pso.Swapchain)
 				{
-					vk::PipelineColorBlendAttachmentState blend_state(
-						pso.BlendEnable,									/// blendEnable
-						BlendFactorToVulkan(pso.SrcColourBlendFactor),		/// srcColorBlendFactor
-						BlendFactorToVulkan(pso.DstColourBlendFactor),		/// dstColorBlendFactor
-						BlendOpToVulkan(pso.ColourBlendOp),					/// colorBlendOp
-						BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		/// srcAlphaBlendFactor
-						BlendFactorToVulkan(pso.DstAplhaBlendFactor),		/// dstAlphaBlendFactor
-						BlendOpToVulkan(pso.AplhaBlendOp),					/// alphaBlendOp
-						colorComponentFlags									/// colorWriteMask
-					);
+					VkPipelineColorBlendAttachmentState blend_state;
+					blend_state.blendEnable = pso.BlendEnable;
+					blend_state.srcColorBlendFactor = BlendFactorToVulkan(pso.SrcColourBlendFactor);
+					blend_state.dstColorBlendFactor = BlendFactorToVulkan(pso.DstColourBlendFactor);
+					blend_state.colorBlendOp = BlendOpToVulkan(pso.ColourBlendOp);
+					blend_state.srcAlphaBlendFactor = BlendFactorToVulkan(pso.SrcAplhaBlendFactor);
+					blend_state.dstAlphaBlendFactor = BlendFactorToVulkan(pso.DstAplhaBlendFactor);
+					blend_state.alphaBlendOp = BlendOpToVulkan(pso.AplhaBlendOp);
+					blend_state.colorWriteMask = colorComponentFlags;
+
 					pipeline_colour_blend_attachment_states.push_back(blend_state);
 				}
 				else
@@ -192,60 +209,66 @@ namespace Insight
 					{
 						if (tex)
 						{
-							vk::PipelineColorBlendAttachmentState blend_state(
-								pso.BlendEnable,									/// blendEnable
-								BlendFactorToVulkan(pso.SrcColourBlendFactor),		/// srcColorBlendFactor
-								BlendFactorToVulkan(pso.DstColourBlendFactor),		/// dstColorBlendFactor
-								BlendOpToVulkan(pso.ColourBlendOp),					/// colorBlendOp
-								BlendFactorToVulkan(pso.SrcAplhaBlendFactor),		/// srcAlphaBlendFactor
-								BlendFactorToVulkan(pso.DstAplhaBlendFactor),		/// dstAlphaBlendFactor
-								BlendOpToVulkan(pso.AplhaBlendOp),					/// alphaBlendOp
-								colorComponentFlags									/// colorWriteMask
-							);
+							VkPipelineColorBlendAttachmentState blend_state;
+							blend_state.blendEnable = pso.BlendEnable;
+							blend_state.srcColorBlendFactor = BlendFactorToVulkan(pso.SrcColourBlendFactor);
+							blend_state.dstColorBlendFactor = BlendFactorToVulkan(pso.DstColourBlendFactor);
+							blend_state.colorBlendOp = BlendOpToVulkan(pso.ColourBlendOp);
+							blend_state.srcAlphaBlendFactor = BlendFactorToVulkan(pso.SrcAplhaBlendFactor);
+							blend_state.dstAlphaBlendFactor = BlendFactorToVulkan(pso.DstAplhaBlendFactor);
+							blend_state.alphaBlendOp = BlendOpToVulkan(pso.AplhaBlendOp);
+							blend_state.colorWriteMask = colorComponentFlags;
+
 							pipeline_colour_blend_attachment_states.push_back(blend_state);
 						}
 					}
 				}
 
-				vk::PipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo(
-					vk::PipelineColorBlendStateCreateFlags(),  /// flags
-					false,                                     /// logicOpEnable
-					vk::LogicOp::eNoOp,                        /// logicOp
-					pipeline_colour_blend_attachment_states,   /// attachments
-					{ { 1.0f, 1.0f, 1.0f, 1.0f } }             /// blendConstants
-				);
+				VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo;
+				pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+				pipelineColorBlendStateCreateInfo.logicOpEnable = false;
+				pipelineColorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_NO_OP;
+				pipelineColorBlendStateCreateInfo.pAttachments = pipeline_colour_blend_attachment_states.data();
+				pipelineColorBlendStateCreateInfo.attachmentCount = static_cast<u32>(pipeline_colour_blend_attachment_states.size());
+				pipelineColorBlendStateCreateInfo.blendConstants[0] = 1.0f;
+				pipelineColorBlendStateCreateInfo.blendConstants[1] = 1.0f;
+				pipelineColorBlendStateCreateInfo.blendConstants[2] = 1.0f;
+				pipelineColorBlendStateCreateInfo.blendConstants[3] = 1.0f;
 			
-				std::vector<vk::DynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
-				vk::PipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo(vk::PipelineDynamicStateCreateFlags(), dynamicStates);
+				std::vector<VkDynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
+				VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo;
+				pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+				pipelineDynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
+				pipelineDynamicStateCreateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
 			
 				RenderContext* context = (RenderContext*)m_context;
 				RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
-				vk::RenderPass renderpass = *reinterpret_cast<vk::RenderPass*>(&rhiRenderpass);
+				VkRenderPass renderpass = *reinterpret_cast<VkRenderPass*>(&rhiRenderpass);
 
-				vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
-					vk::PipelineCreateFlags(),																						/// flags
-					pipelineShaderStageCreateInfos,																					/// stages
-					&pipelineVertexInputStateCreateInfo.CreateInfo,																	/// pVertexInputState
-					&pipelineInputAssemblyStateCreateInfo,																			/// pInputAssemblyState
-					nullptr,																										/// pTessellationState
-					&pipelineViewportStateCreateInfo,																				/// pViewportState
-					&pipelineRasterizationStateCreateInfo,																			/// pRasterizationState
-					&pipelineMultisampleStateCreateInfo,																			/// pMultisampleState
-					&pipelineDepthStencilStateCreateInfo,																			/// pDepthStencilState
-					&pipelineColorBlendStateCreateInfo,																				/// pColorBlendState
-					&pipelineDynamicStateCreateInfo,																				/// pDynamicState
-					layout,																											/// layout
-					renderpass																										/// renderPass
-				);
+				VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo;
+				graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+				graphicsPipelineCreateInfo.pStages = pipelineShaderStageCreateInfos.data();
+				graphicsPipelineCreateInfo.stageCount = static_cast<u32>(pipelineShaderStageCreateInfos.size());
+				graphicsPipelineCreateInfo.pVertexInputState = &pipelineVertexInputStateCreateInfo.CreateInfo;
+				graphicsPipelineCreateInfo.pInputAssemblyState = &pipelineInputAssemblyStateCreateInfo;
+				graphicsPipelineCreateInfo.pTessellationState = nullptr;
+				graphicsPipelineCreateInfo.pViewportState = &pipelineViewportStateCreateInfo;
+				graphicsPipelineCreateInfo.pRasterizationState = &pipelineRasterizationStateCreateInfo;
+				graphicsPipelineCreateInfo.pMultisampleState = &pipelineMultisampleStateCreateInfo;
+				graphicsPipelineCreateInfo.pDepthStencilState = &pipelineDepthStencilStateCreateInfo;
+				graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
+				graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
+				graphicsPipelineCreateInfo.layout = layout;
+				graphicsPipelineCreateInfo.renderPass = renderpass;
 
 				if (pso.Swapchain)
 				{
 					pso.RenderTargets[0] = m_context->GetSwaphchainIamge();
 				}
 
-				std::vector<vk::Format> colourAttachmentFormats;
-				vk::Format depthAttachmentFormat = vk::Format::eUndefined;
-				vk::Format stencilAttachmentFormat = vk::Format::eUndefined;
+				std::vector<VkFormat> colourAttachmentFormats;
+				VkFormat depthAttachmentFormat = VK_FORMAT_UNDEFINED;
+				VkFormat stencilAttachmentFormat = VK_FORMAT_UNDEFINED;
 				for (const RHI_Texture* tex : pso.RenderTargets)
 				{
 					if (tex)
@@ -258,21 +281,24 @@ namespace Insight
 					depthAttachmentFormat = PixelFormatToVkFormat[(int)pso.DepthStencil->GetFormat()];
 				}
 
-				vk::PipelineRenderingCreateInfo pipelineRenderingCreateInfo = { };
-				pipelineRenderingCreateInfo.setColorAttachmentFormats(colourAttachmentFormats);
-				pipelineRenderingCreateInfo.setDepthAttachmentFormat(depthAttachmentFormat);
-				pipelineRenderingCreateInfo.setStencilAttachmentFormat(stencilAttachmentFormat);
+				VkPipelineRenderingCreateInfo pipelineRenderingCreateInfo;
+				pipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+				pipelineRenderingCreateInfo.pColorAttachmentFormats = colourAttachmentFormats.data();
+				pipelineRenderingCreateInfo.colorAttachmentCount = static_cast<u32>(colourAttachmentFormats.size());
+				pipelineRenderingCreateInfo.depthAttachmentFormat = depthAttachmentFormat;
+				pipelineRenderingCreateInfo.stencilAttachmentFormat = stencilAttachmentFormat;
 
 				if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 				{
-					graphicsPipelineCreateInfo.setPNext(&pipelineRenderingCreateInfo);
+					graphicsPipelineCreateInfo.pNext = &pipelineRenderingCreateInfo;
 					graphicsPipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 				}
 
-				vk::ResultValue<vk::Pipeline> result = m_context->GetDevice().createGraphicsPipeline(nullptr, graphicsPipelineCreateInfo);
-				m_pipelineStateObjects[psoHash] = result.value;
+				VkPipeline createdPipeline = nullptr;
+				vkCreateGraphicsPipelines(m_context->GetDevice(), nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &createdPipeline);
+				m_pipelineStateObjects[psoHash] = createdPipeline;
 
-				return result.value;
+				return createdPipeline;
 			}
 
 			void PipelineStateObjectManager_Vulkan::Destroy()
@@ -281,7 +307,7 @@ namespace Insight
 
 				for (const auto pair : m_pipelineStateObjects)
 				{
-					m_context->GetDevice().destroyPipeline(pair.second);
+					vkDestroyPipeline(m_context->GetDevice(), pair.second, nullptr);
 				}
 				m_pipelineStateObjects.clear();
 			}

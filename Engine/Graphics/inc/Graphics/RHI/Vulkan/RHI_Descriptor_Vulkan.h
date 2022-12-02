@@ -5,10 +5,10 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/PipelineStateObject.h"
 
+#include <vulkan/vulkan.h>
+
 #include <unordered_set>
 #include <queue>
-
-#include <vulkan/vulkan.hpp>
 
 namespace Insight
 {
@@ -22,7 +22,7 @@ namespace Insight
 			class RHI_DescriptorLayout_Vulkan : public RHI_DescriptorLayout
 			{
 			public:
-				vk::DescriptorSetLayout GetLayout() const { return m_layout; }
+				VkDescriptorSetLayout GetLayout() const { return m_layout; }
 
 				/// RHI_Resouce
 				virtual void Release() override;
@@ -34,7 +34,7 @@ namespace Insight
 
 			private:
 				RenderContext_Vulkan* m_context{ nullptr };
-				vk::DescriptorSetLayout m_layout;
+				VkDescriptorSetLayout m_layout;
 			};
 		}
 	}

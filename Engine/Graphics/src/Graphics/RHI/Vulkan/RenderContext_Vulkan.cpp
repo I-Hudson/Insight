@@ -100,8 +100,8 @@ namespace Insight
 
 			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT;
 			PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT;
+			PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT;
 			VkDebugUtilsMessengerEXT debugUtilsMessenger;
-			vk::DispatchLoaderDynamic debugDispatcher;
 
 			VKAPI_ATTR VkBool32 VKAPI_CALL DebugUtilsMessengerCallback(
 				VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -135,10 +135,11 @@ namespace Insight
 					return true;
 				}
 
-				m_instnace = CreateInstance();
+				CreateInstance();
 
 				vkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_instnace, "vkCreateDebugUtilsMessengerEXT"));
 				vkDestroyDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(m_instnace, "vkDestroyDebugUtilsMessengerEXT"));
+				vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(GetExtensionFunction("vkSetDebugUtilsObjectNameEXT"));
 
 				VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCI{};
 				debugUtilsMessengerCI.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -156,11 +157,11 @@ namespace Insight
 				}
 
 				std::vector<QueueInfo> queueInfo = {};
-				std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos = GetDeviceQueueCreateInfos(queueInfo);
+				std::vector<VkDeviceQueueCreateInfo> deviceQueueCreateInfos = GetDeviceQueueCreateInfos(queueInfo);
 				int queueSize = 0;
 				for (size_t i = 0; i < deviceQueueCreateInfos.size(); ++i)
 				{
-					vk::DeviceQueueCreateInfo& createInfo = deviceQueueCreateInfos[i];
+					VkDeviceQueueCreateInfo& createInfo = deviceQueueCreateInfos[i];
 					queueSize += createInfo.queueCount;
 				}
 
@@ -169,7 +170,7 @@ namespace Insight
 				queueSize = 0;
 				for (size_t i = 0; i < deviceQueueCreateInfos.size(); ++i)
 				{
-					vk::DeviceQueueCreateInfo& createInfo = deviceQueueCreateInfos[i];
+					VkDeviceQueueCreateInfo& createInfo = deviceQueueCreateInfos[i];
 					createInfo.pQueuePriorities = queuePriorities.data() + queueSize;
 					for (size_t j = 0; j < createInfo.queueCount; ++j)
 					{
@@ -195,12 +196,15 @@ namespace Insight
 				std::vector<const char*> deviceLayersCC = StringVectorToConstChar(deviceLayers);
 				std::vector<const char*> deviceExtensionsCC = StringVectorToConstChar(deviceExtensions);
 
-				vk::PhysicalDeviceVulkan13Features deviceFeaturesToEnable13 = { };
+				VkPhysicalDeviceVulkan13Features deviceFeaturesToEnable13 = { };
+				deviceFeaturesToEnable13.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
 
-				vk::PhysicalDeviceVulkan12Features deviceFeaturesToEnable12 = { };
+				VkPhysicalDeviceVulkan12Features deviceFeaturesToEnable12 = { };
 				deviceFeaturesToEnable12.pNext = &deviceFeaturesToEnable13;
 
-				vk::PhysicalDeviceFeatures2 deviceFeaturesToEnable = m_adapter.getFeatures2();
+				VkPhysicalDeviceFeatures2 deviceFeaturesToEnable;
+				deviceFeaturesToEnable.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+				vkGetPhysicalDeviceFeatures2(m_adapter, &deviceFeaturesToEnable);
 				deviceFeaturesToEnable.pNext = &deviceFeaturesToEnable12;
 
 				if (HasExtension(DeviceExtension::BindlessDescriptors))
@@ -216,23 +220,30 @@ namespace Insight
 					EnableExtension(DeviceExtension::VulkanDynamicRendering);
 				}
 
-				vk::DeviceCreateInfo deviceCreateInfo = vk::DeviceCreateInfo({}, deviceQueueCreateInfos, deviceLayersCC, deviceExtensionsCC, nullptr, &deviceFeaturesToEnable);
-				m_device = m_adapter.createDevice(deviceCreateInfo);
-
-				vk::DynamicLoader dl;
-				PFN_vkGetInstanceProcAddr getInstanceProcAddr = dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
-				debugDispatcher = vk::DispatchLoaderDynamic(m_instnace, getInstanceProcAddr, m_device);
+				VkDeviceCreateInfo deviceCreateInfo;
+				deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+				deviceCreateInfo.pQueueCreateInfos = deviceQueueCreateInfos.data();
+				deviceCreateInfo.queueCreateInfoCount = static_cast<u32>(deviceQueueCreateInfos.size());
+				deviceCreateInfo.ppEnabledLayerNames = deviceLayersCC.data();
+				deviceCreateInfo.enabledLayerCount = static_cast<u32>(deviceLayersCC.size());
+				deviceCreateInfo.ppEnabledExtensionNames = deviceExtensionsCC.data();
+				deviceCreateInfo.enabledExtensionCount = static_cast<u32>(deviceExtensionsCC.size());
+				deviceCreateInfo.pNext = &deviceFeaturesToEnable;
+				deviceCreateInfo.pEnabledFeatures = nullptr;
+				vkCreateDevice(m_adapter, &deviceCreateInfo, nullptr, &m_device);
 
 				for (size_t i = 0; i < queueInfo.size(); ++i)
 				{
 					const QueueInfo& info = queueInfo[i];
-					m_commandQueues[info.Queue] = m_device.getQueue(info.FamilyQueueIndex, info.FamilyQueueIndex);
+					VkQueue queue;
+					vkGetDeviceQueue(m_device, info.FamilyQueueIndex, info.FamilyQueueIndex, &queue);
+					m_commandQueues[info.Queue] = queue;
 					m_queueFamilyLookup[info.Queue] = info.FamilyQueueIndex;
 				}
 
 				VkSurfaceKHR surfaceKHR;
 				VkResult res = glfwCreateWindowSurface(m_instnace, Window::Instance().GetRawWindow(), nullptr, &surfaceKHR);
-				m_surface = vk::SurfaceKHR(surfaceKHR);
+				m_surface = VkSurfaceKHR(surfaceKHR);
 				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
 				m_pipelineLayoutManager.SetRenderContext(this);
@@ -250,17 +261,18 @@ namespace Insight
 				vmaBuildStatsString(m_vmaAllocator, &stats, true);
 
 				{
-					std::array<vk::DescriptorPoolSize, 2> pool_sizes =
+					std::array<VkDescriptorPoolSize, 2> pool_sizes =
 					{
-						vk::DescriptorPoolSize{ vk::DescriptorType::eCombinedImageSampler,	1024 },
-						vk::DescriptorPoolSize{ vk::DescriptorType::eUniformBuffer,			1024 },
+						VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,	1024 },
+						VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,			1024 },
 					};
 
-					vk::DescriptorPoolCreateInfo descriptorPoolCreateInfo = { };
-					descriptorPoolCreateInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
+					VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { };
+					descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 					descriptorPoolCreateInfo.maxSets = 2048 * 4;
-					descriptorPoolCreateInfo.setPoolSizes(pool_sizes);
-					m_descriptor_pool = *reinterpret_cast<VkDescriptorPool*>(&m_device.createDescriptorPool(descriptorPoolCreateInfo));
+					descriptorPoolCreateInfo.pPoolSizes = pool_sizes.data();
+					descriptorPoolCreateInfo.poolSizeCount = static_cast<u32>(pool_sizes.size());
+					vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_descriptor_pool);
 
 					m_commandListManager.ForEach([this](CommandListManager& manager)
 						{
@@ -273,9 +285,15 @@ namespace Insight
 				m_submitFrameContexts.Setup();
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
-						context.SubmitFences = m_device.createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
-						context.SignalSemaphores = m_device.createSemaphore(vk::SemaphoreCreateInfo());
-						context.SwapchainAcquires = m_device.createSemaphore(vk::SemaphoreCreateInfo());
+						VkFenceCreateInfo fenceCreateInfo;
+						fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+						fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+						vkCreateFence(m_device, &fenceCreateInfo, nullptr, &context.SubmitFences);
+
+						VkSemaphoreCreateInfo semaphoreCreateInfo;
+						semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+						vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SignalSemaphores);
+						vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &context.SwapchainAcquires);
 					});
 
 				m_uploadQueue.Init();
@@ -288,33 +306,37 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				std::lock_guard lock(m_lock);
 
-				m_device.waitIdle();
+				GpuWaitForIdle();
 
 				DestroyImGui();
 
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
-						m_device.destroyFence(context.SubmitFences);
-						m_device.destroySemaphore(context.SignalSemaphores);
-						m_device.destroySemaphore(context.SwapchainAcquires);
+						vkDestroyFence(m_device, context.SubmitFences, nullptr);
+						context.SubmitFences = nullptr;
+						vkDestroySemaphore(m_device, context.SignalSemaphores, nullptr);
+						context.SignalSemaphores = nullptr;
+						vkDestroySemaphore(m_device, context.SwapchainAcquires, nullptr);
+						context.SwapchainAcquires = nullptr;
 					});
 
 				if (m_swapchain)
 				{
 					for (RHI_Texture*& tex : m_swapchainImages)
 					{
-						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = vk::Image();
+						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
 						tex->Release();
 						Renderer::FreeTexture(tex);
 					}
 					m_swapchainImages.clear();
-					m_device.destroySwapchainKHR(m_swapchain);
+					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+					m_swapchain = nullptr;
 					m_swapchainImages.resize(0);
 				}
 
 				BaseDestroy();
 
-				m_device.destroyDescriptorPool(*reinterpret_cast<VkDescriptorPool*>(&m_descriptor_pool));
+				vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
 				m_descriptor_pool = nullptr;
 
 				m_pipelineStateObjectManager.Destroy();
@@ -322,13 +344,14 @@ namespace Insight
 
 				if (m_surface)
 				{
-					m_instnace.destroySurfaceKHR(m_surface);
+					vkDestroySurfaceKHR(m_instnace, m_surface, nullptr);
+					m_surface = nullptr;
 				}
 
 				vmaDestroyAllocator(m_vmaAllocator);
 				m_vmaAllocator = VK_NULL_HANDLE;
 
-				m_device.destroy();
+				vkDestroyDevice(m_device, nullptr);
 				m_device = nullptr;
 
 				if (m_gpuCrashTracker)
@@ -340,9 +363,23 @@ namespace Insight
 				if (debugUtilsMessenger)
 				{
 					vkDestroyDebugUtilsMessengerEXT(m_instnace, debugUtilsMessenger, nullptr);
+					debugUtilsMessenger = nullptr;
 				}
 
-				m_instnace.destroy();
+				if (vkCreateDebugUtilsMessengerEXT)
+				{
+					vkCreateDebugUtilsMessengerEXT = nullptr;
+				}
+				if (vkDestroyDebugUtilsMessengerEXT)
+				{
+					vkDestroyDebugUtilsMessengerEXT = nullptr;
+				}
+				if (vkSetDebugUtilsObjectNameEXT)
+				{
+					vkSetDebugUtilsObjectNameEXT = nullptr;
+				}
+
+				vkDestroyInstance(m_instnace, nullptr);
 				m_instnace = nullptr;
 			}
 
@@ -371,7 +408,7 @@ namespace Insight
 				pool_info.maxSets = 1000;
 				pool_info.poolSizeCount = (u32)std::size(pool_sizes);
 				pool_info.pPoolSizes = pool_sizes;
-				m_imguiDescriptorPool = m_device.createDescriptorPool(pool_info);
+				vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imguiDescriptorPool);
 
 				/// Setup Platform/Renderer backends
 				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), false);
@@ -408,14 +445,16 @@ namespace Insight
 
 				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
 
-				cmdListVulkan->GetCommandList().end();
+				cmdListVulkan->Close();
 
-				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				vk::SubmitInfo submitInfo = vk::SubmitInfo();
-				submitInfo.setCommandBuffers(commandBuffers);
-				m_commandQueues[GPUQueue_Graphics].submit(submitInfo);
+				std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+				VkSubmitInfo submitInfo = VkSubmitInfo();
+				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+				submitInfo.pCommandBuffers = commandBuffers.data();
+				submitInfo.commandBufferCount = static_cast<u32>(commandBuffers.size());
+				vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, VK_NULL_HANDLE);
 
-				m_device.waitIdle();
+				GpuWaitForIdle();
 
 				ImGui_ImplVulkan_DestroyFontUploadObjects();
 				m_commandListManager->ReturnCommandList(cmdListVulkan);
@@ -432,13 +471,13 @@ namespace Insight
 				ImGui_ImplGlfw_Shutdown();
 			
 
-				for (vk::Framebuffer& frameBuffer : m_imguiFramebuffers)
+				for (VkFramebuffer& frameBuffer : m_imguiFramebuffers)
 				{
-					m_device.destroyFramebuffer(frameBuffer);
+					vkDestroyFramebuffer(m_device, frameBuffer, nullptr);
 					frameBuffer = nullptr;
 				}
 
-				m_device.destroyDescriptorPool(m_imguiDescriptorPool);
+				vkDestroyDescriptorPool(m_device, m_imguiDescriptorPool, nullptr);
 				m_imguiDescriptorPool = nullptr;
 			}
 
@@ -467,11 +506,12 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Fence wait");
 					// First get the status of the fence. Then if it has not finished, wait on it.
-					vk::Result fenceStatusResult = m_device.waitForFences({ m_submitFrameContexts.Get().SubmitFences }, 1, 0);
-					if (fenceStatusResult == vk::Result::eTimeout)
-					{
-						vk::Result waitResult = m_device.waitForFences({ m_submitFrameContexts.Get().SubmitFences }, 1, 0xFFFFFFFF);
-						ASSERT(waitResult == vk::Result::eSuccess);
+					
+					VkResult fenceStatusResult = vkWaitForFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences, 1, 0);
+					if (fenceStatusResult == VK_TIMEOUT)
+					{						
+						VkResult waitResult = vkWaitForFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences, 1, INFINITE);
+						ASSERT(waitResult == VK_SUCCESS);
 					}
 
 				}
@@ -482,7 +522,7 @@ namespace Insight
 						vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), 0xFFFFFFFF, static_cast<VkSemaphore>(m_submitFrameContexts.Get().SwapchainAcquires)
 						, 0, &m_availableSwapchainImage);
 
-					m_device.resetFences({ m_submitFrameContexts.Get().SubmitFences });
+					vkResetFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences);
 					for (const RHI_CommandList* cmdList : m_submitFrameContexts.Get().CommandLists)
 					{
 						if (cmdList)
@@ -521,22 +561,33 @@ namespace Insight
 				{
 					RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
-					std::array<vk::Semaphore, 1> waitSemaphores = { m_submitFrameContexts.Get().SwapchainAcquires };
-					std::array<vk::PipelineStageFlags, 1> dstStageFlgs = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
-					std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-					std::array<vk::Semaphore, 1> signalSemaphore = { m_submitFrameContexts.Get().SignalSemaphores };
+					std::array<VkSemaphore, 1> waitSemaphores = { m_submitFrameContexts.Get().SwapchainAcquires };
+					std::array<VkPipelineStageFlags, 1> dstStageFlgs = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+					std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+					std::array<VkSemaphore, 1> signalSemaphore = { m_submitFrameContexts.Get().SignalSemaphores };
 
-					vk::SubmitInfo submitInfo = vk::SubmitInfo(
-						waitSemaphores,
-						dstStageFlgs,
-						commandBuffers,
-						signalSemaphore);
+					VkSubmitInfo submitInfo;
+					submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+					submitInfo.waitSemaphoreCount = static_cast<u32>(waitSemaphores.size());
+					submitInfo.pWaitSemaphores = waitSemaphores.data();
+					submitInfo.pWaitDstStageMask = dstStageFlgs.data();
+					submitInfo.commandBufferCount = static_cast<u32>(commandBuffers.size());
+					submitInfo.pCommandBuffers = commandBuffers.data();
+					submitInfo.signalSemaphoreCount = static_cast<u32>(signalSemaphore.size());
+					submitInfo.pSignalSemaphores = signalSemaphore.data();
 
-					std::array<vk::Semaphore, 1> signalSemaphores = { m_submitFrameContexts.Get().SignalSemaphores };
-					std::array<vk::SwapchainKHR, 1> swapchains = { m_swapchain };
-					std::array<u32, 1> swapchainImageIndex = { (u32)m_availableSwapchainImage };
+					std::array<VkSemaphore, 1> presentWaitSemaphores = { m_submitFrameContexts.Get().SignalSemaphores };
+					std::array<VkSwapchainKHR, 1> presentSwapchains = { m_swapchain };
+					std::array<u32, 1> presentSwapchainImageIndex = { (u32)m_availableSwapchainImage };
 
-					vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR(signalSemaphores, swapchains, swapchainImageIndex);
+					VkPresentInfoKHR presentInfo;
+					presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+					presentInfo.waitSemaphoreCount = static_cast<u32>(presentWaitSemaphores.size());
+					presentInfo.pWaitSemaphores = presentWaitSemaphores.data();
+					presentInfo.swapchainCount = static_cast<u32>(presentSwapchains.size());
+					presentInfo.pSwapchains = presentSwapchains.data();
+					presentInfo.pImageIndices = presentSwapchainImageIndex.data();
+
 					{
 						IS_PROFILE_SCOPE("Present");
 						std::lock_guard lock(m_lock);
@@ -547,8 +598,8 @@ namespace Insight
 							RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 							cmdListVulkan->m_state = RHI_CommandListStates::Submitted;
 
-							m_commandQueues[GPUQueue_Graphics].submit(submitInfo, m_submitFrameContexts.Get().SubmitFences);
-							VkResult presentResult = vkQueuePresentKHR(m_commandQueues[GPUQueue_Graphics], reinterpret_cast<const VkPresentInfoKHR*>(&presentInfo));
+							vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, m_submitFrameContexts.Get().SubmitFences);
+							VkResult presentResult = vkQueuePresentKHR(m_commandQueues[GPUQueue_Graphics], &presentInfo);
 
 							if (presentResult != VK_SUCCESS)
 							{
@@ -582,7 +633,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::GpuWaitForIdle()
 			{
-				m_device.waitIdle();
+				vkDeviceWaitIdle(m_device);
 			}
 
 			void RenderContext_Vulkan::SubmitCommandListAndWait(RHI_CommandList* cmdList)
@@ -590,20 +641,33 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				const RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(cmdList);
 
-				std::array<vk::CommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				vk::SubmitInfo submitInfo = vk::SubmitInfo(
-					{ },
-					{ },
-					commandBuffers,
-					{ });
-				vk::Fence waitFence = m_device.createFence(vk::FenceCreateInfo());
+				std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
+				VkSubmitInfo submitInfo;
+				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+				submitInfo.waitSemaphoreCount = 0;
+				submitInfo.pWaitSemaphores = nullptr;
+				submitInfo.pWaitDstStageMask = 0;
+				submitInfo.commandBufferCount = static_cast<u32>(commandBuffers.size());
+				submitInfo.pCommandBuffers = commandBuffers.data();
+				submitInfo.signalSemaphoreCount = 0;
+				submitInfo.pSignalSemaphores = nullptr;
+
+				VkFenceCreateInfo fenceCreateInfo;
+				fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+				VkFence waitFence;
+				vkCreateFence(m_device, &fenceCreateInfo, nullptr, &waitFence);
+
 				std::lock_guard lock(m_command_queue_mutexs[GPUQueue_Graphics]);
-				m_commandQueues[GPUQueue_Graphics].submit(submitInfo, waitFence);
-				vk::Result waitForFenceResult = m_device.waitForFences({ waitFence }, 1, INFINITE);
-				m_device.destroyFence(waitFence);
+				
+				vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, waitFence);
+
+				vkWaitForFences(m_device, 1, &waitFence, 1, INFINITE);
+				vkDestroyFence(m_device, waitFence, nullptr);
+				waitFence = nullptr;
 			}
 
-			void RenderContext_Vulkan::SetObejctName(std::wstring_view name, u64 handle, vk::ObjectType objectType)
+			void RenderContext_Vulkan::SetObjectName(std::wstring_view name, u64 handle, VkObjectType objectType)
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -612,8 +676,16 @@ namespace Insight
 					return (char)c;
 					});
 
-				vk::DebugUtilsObjectNameInfoEXT info = vk::DebugUtilsObjectNameInfoEXT(objectType, handle, str.c_str());
-				m_device.setDebugUtilsObjectNameEXT(info, debugDispatcher);
+				VkDebugUtilsObjectNameInfoEXT info;
+				info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+				info.objectType = objectType;
+				info.objectHandle = handle;
+				info.pObjectName = str.c_str();
+
+				if (vkSetDebugUtilsObjectNameEXT)
+				{
+					vkSetDebugUtilsObjectNameEXT(m_device, &info);
+				}
 			}
 
 			RHI_Texture* RenderContext_Vulkan::GetSwaphchainIamge() const
@@ -621,7 +693,7 @@ namespace Insight
 				return m_swapchainImages[m_availableSwapchainImage];
 			}
 
-			vk::ImageView RenderContext_Vulkan::GetSwapchainImageView() const
+			VkImageView RenderContext_Vulkan::GetSwapchainImageView() const
 			{
 				return static_cast<RHI_Texture_Vulkan*>(m_swapchainImages[m_availableSwapchainImage])->GetImageView();
 			}
@@ -634,11 +706,10 @@ namespace Insight
 			void RenderContext_Vulkan::WaitForGpu()
 			{
 				IS_PROFILE_FUNCTION();
-
-				m_device.waitIdle();
+				vkDeviceWaitIdle(m_device);
 			}
 
-			vk::Instance RenderContext_Vulkan::CreateInstance()
+			void RenderContext_Vulkan::CreateInstance()
 			{
 				IS_PROFILE_FUNCTION();
 
@@ -662,14 +733,13 @@ namespace Insight
 					}
 				}
 
-				vk::ApplicationInfo applicationInfo = vk::ApplicationInfo(
-					"ApplciationName",
-					0,
-					"Insight",
-					0,
-					VK_API_VERSION_1_3);
-
-				applicationInfo.setApiVersion(std::min(sdk_version, driver_version));
+				VkApplicationInfo applicationInfo;
+				applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+				applicationInfo.pApplicationName = "ApplciationName";
+				applicationInfo.applicationVersion = 0;
+				applicationInfo.pEngineName = "Insight";
+				applicationInfo.engineVersion = 0;
+				applicationInfo.apiVersion = std::min(sdk_version, driver_version);
 
 				std::vector<const char*> enabledLayerNames =
 				{
@@ -727,82 +797,109 @@ namespace Insight
 				VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
 #endif
 
-					vk::InstanceCreateInfo instanceCreateInfo = vk::InstanceCreateInfo(
-						{ },
-						&applicationInfo,
-						enabledLayerNames,
-						enabledExtensionNames);
+				VkInstanceCreateInfo instanceCreateInfo;
+				instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+				instanceCreateInfo.flags = 0;
+				instanceCreateInfo.pApplicationInfo = &applicationInfo;
+				instanceCreateInfo.enabledLayerCount = static_cast<u32>(enabledLayerNames.size());
+				instanceCreateInfo.ppEnabledLayerNames = enabledLayerNames.data();
+				instanceCreateInfo.enabledExtensionCount = static_cast<u32>(enabledExtensionNames.size());
+				instanceCreateInfo.ppEnabledExtensionNames = enabledExtensionNames.data();
 
 #if defined(VK_EXT_validation_features) && defined(_DEBUG)
-				std::vector<vk::ValidationFeatureEnableEXT> validation_features_enabled;
-				validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eBestPractices);
-				///validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eSynchronizationValidation);
-				///validation_features_enabled.push_back(vk::ValidationFeatureEnableEXT::eGpuAssisted);
+				std::vector<VkValidationFeatureEnableEXT> validation_features_enabled;
+				validation_features_enabled.push_back(VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT);
+				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eSynchronizationValidation);
+				///validation_features_enabled.push_back(VkValidationFeatureEnableEXT::eGpuAssisted);
 
-				vk::ValidationFeaturesEXT validation_features = { };
-				validation_features.setEnabledValidationFeatures(validation_features_enabled);
+				VkValidationFeaturesEXT validation_features;
+				validation_features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+				validation_features.enabledValidationFeatureCount = static_cast<u32>(validation_features_enabled.size());
+				validation_features.pEnabledValidationFeatures = validation_features_enabled.data();
 				//instanceCreateInfo.setPNext(&validation_features);
 #endif
-				return vk::createInstance(instanceCreateInfo);
+				vkCreateInstance(&instanceCreateInfo, nullptr, &m_instnace);
 			}
 
-			vk::PhysicalDevice RenderContext_Vulkan::FindAdapter()
+			VkPhysicalDevice RenderContext_Vulkan::FindAdapter()
 			{
 				IS_PROFILE_FUNCTION();
+				
+				u32 physicalDeviceCount = 0;
+				vkEnumeratePhysicalDevices(m_instnace, &physicalDeviceCount, nullptr);
 
-				std::vector<vk::PhysicalDevice> physicalDevices = m_instnace.enumeratePhysicalDevices();
-				vk::PhysicalDevice adapter(nullptr);
+				std::vector<VkPhysicalDevice> physicalDevices;
+				physicalDevices.resize(physicalDeviceCount);
+				vkEnumeratePhysicalDevices(m_instnace, &physicalDeviceCount, physicalDevices.data());
+
+				VkPhysicalDevice adapter(nullptr);
 				for (auto& gpu : physicalDevices)
 				{
 					adapter = gpu;
-					if (adapter.getProperties().deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+					VkPhysicalDeviceProperties deviceProperties;
+					vkGetPhysicalDeviceProperties(adapter, &deviceProperties);
+					if (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
 					{
 						break;
 					}
 				}
 
-				vk::PhysicalDeviceProperties properties = adapter.getProperties();
-				vk::PhysicalDeviceMemoryProperties memory_properties = adapter.getMemoryProperties();
+				VkPhysicalDeviceProperties deviceProperties;
+				vkGetPhysicalDeviceProperties(adapter, &deviceProperties);
+				VkPhysicalDeviceMemoryProperties deviceMemoryProperties;
+				vkGetPhysicalDeviceMemoryProperties(adapter, &deviceMemoryProperties);
 
-				m_physical_device_info.Device_Name = std::wstring(properties.deviceName.begin(), properties.deviceName.end());
-				m_physical_device_info.Vendor_Id = properties.vendorID;
-				m_physical_device_info.VRam_Size += memory_properties.memoryHeaps.at(0).size;
+				m_physical_device_info.Device_Name = deviceProperties.deviceName;
+				m_physical_device_info.Vendor_Id = deviceProperties.vendorID;
+				m_physical_device_info.VRam_Size += deviceMemoryProperties.memoryHeaps[0].size;
 				m_physical_device_info.SetVendorName();
 
-				m_physical_device_info.MinUniformBufferAlignment = properties.limits.minUniformBufferOffsetAlignment;
+				m_physical_device_info.MinUniformBufferAlignment = deviceProperties.limits.minUniformBufferOffsetAlignment;
 
 				return adapter;
 		}
 
-			std::vector<vk::DeviceQueueCreateInfo> RenderContext_Vulkan::GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo)
+			std::vector<VkDeviceQueueCreateInfo> RenderContext_Vulkan::GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo)
 			{
-				std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos = {};
-				std::vector<vk::QueueFamilyProperties> queueFamilyProperties = m_adapter.getQueueFamilyProperties();
+				u32 queueFmailyPropertiesCount = 0;
+				vkGetPhysicalDeviceQueueFamilyProperties(m_adapter, &queueFmailyPropertiesCount, nullptr);
+
+				std::vector<VkQueueFamilyProperties> queueFamilyProperties;
+				queueFamilyProperties.resize(queueFmailyPropertiesCount);
+				vkGetPhysicalDeviceQueueFamilyProperties(m_adapter, &queueFmailyPropertiesCount, queueFamilyProperties.data());
+
+				std::vector<VkDeviceQueueCreateInfo> queueCreateInfos = {};
 				int graphicsQueue = -1;
 				int computeQueue = -1;
 				int transferQueue = -1;
+
 				for (size_t i = 0; i < queueFamilyProperties.size(); ++i)
 				{
-					const vk::QueueFamilyProperties& queueProp = queueFamilyProperties[i];
-					vk::DeviceQueueCreateInfo createInfo = vk::DeviceQueueCreateInfo({}, static_cast<u32>(i), queueProp.queueCount);
-					if ((queueProp.queueFlags & vk::QueueFlagBits::eGraphics) == vk::QueueFlagBits::eGraphics)
+					const VkQueueFamilyProperties& queueProp = queueFamilyProperties[i];
+
+					VkDeviceQueueCreateInfo queueCreateInfo;
+					queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+					queueCreateInfo.queueFamilyIndex = static_cast<u32>(i);
+					queueCreateInfo.queueCount = queueProp.queueCount;
+
+					if ((queueProp.queueFlags & VK_QUEUE_GRAPHICS_BIT) == VK_QUEUE_GRAPHICS_BIT)
 					{
 						queueInfo.push_back(QueueInfo{ static_cast<int>(i), GPUQueue::GPUQueue_Graphics });
 						graphicsQueue = static_cast<int>(i);
 					}
-					if ((queueProp.queueFlags & vk::QueueFlagBits::eCompute) == vk::QueueFlagBits::eCompute && computeQueue == -1 && graphicsQueue != i)
+					if ((queueProp.queueFlags & VK_QUEUE_COMPUTE_BIT) == VK_QUEUE_COMPUTE_BIT && computeQueue == -1 && graphicsQueue != i)
 					{
 						queueInfo.push_back(QueueInfo{ static_cast<int>(i), GPUQueue::GPUQueue_Compute });
 						computeQueue = static_cast<int>(i);
 					}
-					if ((queueProp.queueFlags & vk::QueueFlagBits::eTransfer) == vk::QueueFlagBits::eTransfer &&
-						transferQueue == -1 && (queueProp.queueFlags & vk::QueueFlagBits::eGraphics) != vk::QueueFlagBits::eGraphics &&
-						(queueProp.queueFlags & vk::QueueFlagBits::eCompute) != vk::QueueFlagBits::eCompute)
+					if ((queueProp.queueFlags & VK_QUEUE_TRANSFER_BIT) == VK_QUEUE_TRANSFER_BIT &&
+						transferQueue == -1 && (queueProp.queueFlags & VK_QUEUE_GRAPHICS_BIT) != VK_QUEUE_GRAPHICS_BIT &&
+						(queueProp.queueFlags & VK_QUEUE_COMPUTE_BIT) != VK_QUEUE_COMPUTE_BIT)
 					{
 						queueInfo.push_back(QueueInfo{ static_cast<int>(i), GPUQueue::GPUQueue_Transfer });
 						transferQueue = static_cast<int>(i);
 					}
-					queueCreateInfos.push_back(createInfo);
+					queueCreateInfos.push_back(queueCreateInfo);
 				}
 
 				return queueCreateInfos;
@@ -810,8 +907,19 @@ namespace Insight
 
 			void RenderContext_Vulkan::GetDeviceExtensionAndLayers(std::set<std::string>& extensions, std::set<std::string>& layers, bool includeAll)
 			{
-				std::vector<vk::LayerProperties> layerProperties = m_adapter.enumerateDeviceLayerProperties();
-				std::vector<vk::ExtensionProperties> extensionProperties = m_adapter.enumerateDeviceExtensionProperties();
+				u32 propertyCount = 0;
+				vkEnumerateDeviceLayerProperties(m_adapter, &propertyCount, nullptr);
+
+				std::vector<VkLayerProperties> layerProperties;
+				layerProperties.resize(propertyCount);
+				vkEnumerateDeviceLayerProperties(m_adapter, &propertyCount, layerProperties.data());
+
+				u32 extensionCount = 0;
+				vkEnumerateDeviceExtensionProperties(m_adapter, nullptr, &extensionCount, nullptr);
+
+				std::vector<VkExtensionProperties> extensionProperties;
+				extensionProperties.resize(extensionCount);
+				vkEnumerateDeviceExtensionProperties(m_adapter, nullptr, &extensionCount, extensionProperties.data());
 
 				IS_CORE_INFO("Device layers:");
 				for (size_t i = 0; i < layerProperties.size(); ++i)
@@ -836,7 +944,7 @@ namespace Insight
 					for (size_t i = 0; i < ARRAY_COUNT(g_DeviceExtensions); i++)
 					{
 						const char* ext = g_DeviceExtensions[i];
-						if (std::find_if(extensionProperties.begin(), extensionProperties.end(), [ext](const vk::ExtensionProperties& extnesion)
+						if (std::find_if(extensionProperties.begin(), extensionProperties.end(), [ext](const VkExtensionProperties& extnesion)
 							{
 								return strcmp(extnesion.extensionName, ext);
 							}) != extensionProperties.end())
@@ -854,12 +962,14 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				vk::SurfaceCapabilitiesKHR surfaceCapabilites = m_adapter.getSurfaceCapabilitiesKHR(m_surface);
+				VkSurfaceCapabilitiesKHR surfaceCapabilites;
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_adapter, m_surface, &surfaceCapabilites);
 				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
 
-				vk::Extent2D swapchainExtent = {};
+				VkExtent2D swapchainExtent = {};
 				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-				if (surfaceCapabilites.currentExtent == vk::Extent2D{ 0xFFFFFFFF, 0xFFFFFFFF })
+				if (surfaceCapabilites.currentExtent.width == 0xFFFFFFFF
+					&& surfaceCapabilites.currentExtent.height == 0xFFFFFFFF)
 				{
 					// If the surface size is undefined, the size is set to
 					// the size of the images requested.
@@ -875,31 +985,37 @@ namespace Insight
 
 				// Select a present mode for the swapchain
 
-				std::vector<vk::PresentModeKHR> presentModes = m_adapter.getSurfacePresentModesKHR(m_surface);
+				u32 presentModeCount = 0;
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, nullptr);
+
+				std::vector<VkPresentModeKHR> presentModes;
+				presentModes.resize(presentModeCount);
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, presentModes.data());
+
 				/// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
 				/// This mode waits for the vertical blank ("v-sync")
-				vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo;
+				VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 				if (true)
 				{
 					for (size_t i = 0; i < presentModes.size(); ++i)
 					{
-						if (presentModes[i] == vk::PresentModeKHR::eMailbox)
+						if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
 						{
-							presentMode = vk::PresentModeKHR::eMailbox;
+							presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 							break;
 						}
-						if (presentMode != vk::PresentModeKHR::eMailbox && presentModes[i] == vk::PresentModeKHR::eImmediate)
+						if (presentMode != VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR && presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
 						{
-							presentMode = vk::PresentModeKHR::eImmediate;
+							presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
 						}
 					}
 				}
 
-				vk::ImageUsageFlags imageUsage = vk::ImageUsageFlagBits::eColorAttachment;
-				const vk::ImageUsageFlagBits imageUsageBits[] =
+				VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+				const VkImageUsageFlagBits imageUsageBits[] =
 				{
-					vk::ImageUsageFlagBits::eTransferSrc,
-					vk::ImageUsageFlagBits::eTransferDst
+					VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+					VK_IMAGE_USAGE_TRANSFER_DST_BIT
 				};
 				for (const auto& flag : imageUsageBits)
 				{
@@ -909,14 +1025,20 @@ namespace Insight
 					}
 				}
 
-				vk::Format surfaceFormat;
-				vk::ColorSpaceKHR surfaceColourSpace;
-				std::vector<vk::SurfaceFormatKHR> formats = m_adapter.getSurfaceFormatsKHR(m_surface);
+				u32 surfaceFormatCount = 0;
+				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, nullptr);
+
+				std::vector<VkSurfaceFormatKHR> formats;
+				formats.resize(surfaceFormatCount);
+				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, formats.data());
+
+				VkFormat surfaceFormat;
+				VkColorSpaceKHR surfaceColourSpace;
 				/// If the surface format list only includes one entry with VK_FORMAT_UNDEFINED,
 				/// there is no preferred format, so we assume VK_FORMAT_B8G8R8A8_UNORM
-				if ((formats.size() == 1) && (formats[0].format == vk::Format::eUndefined))
+				if ((formats.size() == 1) && (formats[0].format == VK_FORMAT_UNDEFINED))
 				{
-					surfaceFormat = vk::Format::eR8G8B8A8Unorm;
+					surfaceFormat = VK_FORMAT_R8G8B8A8_UNORM;
 					surfaceColourSpace = formats[0].colorSpace;
 				}
 				else
@@ -926,7 +1048,7 @@ namespace Insight
 					bool found_B8G8R8A8_UNORM = false;
 					for (auto&& format : formats)
 					{
-						if (format.format == vk::Format::eB8G8R8A8Unorm)/// VK_FORMAT_B8G8R8A8_UNORM)
+						if (format.format == VK_FORMAT_B8G8R8A8_UNORM)/// VK_FORMAT_B8G8R8A8_UNORM)
 						{
 							surfaceFormat = format.format;
 							surfaceColourSpace = format.colorSpace;
@@ -945,49 +1067,68 @@ namespace Insight
 				}
 				m_swapchainFormat = surfaceFormat;
 
-				vk::SwapchainCreateInfoKHR createInfo = vk::SwapchainCreateInfoKHR();
-				createInfo.surface = m_surface;
-				createInfo.setMinImageCount(static_cast<u32>(imageCount));
-				createInfo.setImageFormat(m_swapchainFormat);
-				createInfo.setImageColorSpace(vk::ColorSpaceKHR::eSrgbNonlinear);
-				createInfo.setImageExtent({ swapchainExtent });
-				createInfo.setImageArrayLayers(static_cast<u32>(1));
-				createInfo.setImageUsage(imageUsage);
-				createInfo.setImageSharingMode(vk::SharingMode::eExclusive);
-				createInfo.setPresentMode(presentMode);
-				createInfo.setOldSwapchain(m_swapchain);
-				vk::SwapchainKHR swapchain = m_device.createSwapchainKHR(createInfo);
+				VkSwapchainCreateInfoKHR swapchainCreateInfo;
+				swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+				swapchainCreateInfo.surface = m_surface;
+				swapchainCreateInfo.minImageCount = static_cast<u32>(imageCount);
+				swapchainCreateInfo.imageFormat = m_swapchainFormat;
+				swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+				swapchainCreateInfo.imageExtent = swapchainExtent;
+				swapchainCreateInfo.imageArrayLayers = 1ul;
+				swapchainCreateInfo.imageUsage = imageUsage;
+				swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+				swapchainCreateInfo.presentMode = presentMode;
+				swapchainCreateInfo.oldSwapchain = m_swapchain;
+
+				VkSwapchainKHR swapchain;
+				vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain);
 
 				if (m_swapchain)
 				{
 					for (RHI_Texture*& tex : m_swapchainImages)
 					{
-						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = vk::Image();
+						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
 						tex->Release();
 						Renderer::FreeTexture(tex);
 					}
 					m_swapchainImages.clear();
-					m_device.destroySwapchainKHR(m_swapchain);
+					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 					m_swapchain = nullptr;
 				}
 
-				std::vector<vk::Image> swapchainImages = m_device.getSwapchainImagesKHR(swapchain);
+				u32 swapchainImageCount = 0;
+				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, nullptr);
+
+				std::vector<VkImage> swapchainImages;
+				swapchainImages.resize(swapchainImageCount);
+				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, swapchainImages.data());
+
 				int image_index = 0;
-				for (vk::Image& image : swapchainImages)
+				for (VkImage& image : swapchainImages)
 				{
-					vk::ImageViewCreateInfo info = vk::ImageViewCreateInfo(
-						{},
-						image,
-						vk::ImageViewType::e2D,
-						m_swapchainFormat);
-					info.setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+					VkImageSubresourceRange imageSubresourceRange;
+					imageSubresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+					imageSubresourceRange.baseMipLevel = 0;
+					imageSubresourceRange.levelCount = 1;
+					imageSubresourceRange.baseArrayLayer = 0;
+					imageSubresourceRange.layerCount = 1;
+
+					VkImageViewCreateInfo viewCreateInfo;
+					viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+					viewCreateInfo.image = image;
+					viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+					viewCreateInfo.format = m_swapchainFormat;
+					viewCreateInfo.components = VkComponentMapping();
+					viewCreateInfo.subresourceRange = imageSubresourceRange;
 
 					// We create two views into the same image as this is how the API is designed.
 					// The first view (image_view), is used for all layers.
 					// The second view (single_layer_image_view) is used for a single layer. In this case the first layer.
-					vk::ImageView image_view = m_device.createImageView(info);
-					vk::ImageView single_layer_image_view = m_device.createImageView(info);
-					
+					VkImageView image_view;
+					vkCreateImageView(m_device, &viewCreateInfo, nullptr, &image_view);
+					VkImageView single_layer_image_view;
+					vkCreateImageView(m_device, &viewCreateInfo, nullptr, &single_layer_image_view);
+
 					RHI_Texture* tex = Renderer::CreateTexture();
 					tex->SetName(L"Swapchain_Image: " + std::to_wstring(image_index++));
 
@@ -1047,7 +1188,13 @@ namespace Insight
 				static std::set<std::string> deviceExtensions;
 				if (deviceExtensions.empty())
 				{
-					std::vector<vk::ExtensionProperties> extensions = m_adapter.enumerateDeviceExtensionProperties();
+					u32 extensionCount = 0;
+					vkEnumerateDeviceExtensionProperties(m_adapter, nullptr, &extensionCount, nullptr);
+
+					std::vector<VkExtensionProperties> extensions;
+					extensions.resize(extensionCount);
+					vkEnumerateDeviceExtensionProperties(m_adapter, nullptr, &extensionCount, extensions.data());
+
 					for (auto& extension : extensions)
 					{
 						deviceExtensions.insert(extension.extensionName);

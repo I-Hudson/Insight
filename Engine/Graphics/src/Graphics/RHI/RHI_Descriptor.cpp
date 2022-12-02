@@ -117,8 +117,10 @@ namespace Insight
 			if (GraphicsManager::IsVulkan())
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
-				contextVulkan->GetDevice().freeDescriptorSets(*reinterpret_cast<vk::DescriptorPool*>(&contextVulkan->m_descriptor_pool)
-					, { *reinterpret_cast<vk::DescriptorSet*>(&m_resource) });
+				vkFreeDescriptorSets(contextVulkan->GetDevice(), 
+					contextVulkan->m_descriptor_pool,
+					1,
+					reinterpret_cast<VkDescriptorSet*>(&m_resource));
 			}
 #endif
 #ifdef IS_DX12_ENABLED
@@ -146,15 +148,18 @@ namespace Insight
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
-				vk::DescriptorSetLayout setLayout = static_cast<RHI::Vulkan::RHI_DescriptorLayout_Vulkan*>(layout)->GetLayout();
+				VkDescriptorSetLayout setLayout = static_cast<RHI::Vulkan::RHI_DescriptorLayout_Vulkan*>(layout)->GetLayout();
 
-				vk::DescriptorSetAllocateInfo allocInfo = {};
-				allocInfo.descriptorPool = *reinterpret_cast<vk::DescriptorPool*>(&contextVulkan->m_descriptor_pool);
+				VkDescriptorSetAllocateInfo allocInfo = {};
+				allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+				allocInfo.descriptorPool = contextVulkan->m_descriptor_pool;
 				allocInfo.descriptorSetCount = 1;
 				allocInfo.pSetLayouts = &setLayout;
 
-				std::vector<vk::DescriptorSet> sets = contextVulkan->GetDevice().allocateDescriptorSets(allocInfo);
-				m_resource = *reinterpret_cast<VkDescriptorSet*>(&sets.at(0));
+				std::vector<VkDescriptorSet> sets;
+				sets.resize(allocInfo.descriptorSetCount);
+				vkAllocateDescriptorSets(contextVulkan->GetDevice(), &allocInfo, sets.data());
+				m_resource = reinterpret_cast<VkDescriptorSet>(sets.at(0));
 			}
 #endif
 #ifdef IS_DX12_ENABLED
@@ -189,9 +194,9 @@ namespace Insight
 
 				const u32 c_MaxWrites = 32;
 
-				vk::DescriptorBufferInfo bufferInfo[c_MaxWrites];
-				vk::DescriptorImageInfo imageInfo[c_MaxWrites];
-				vk::WriteDescriptorSet writes[c_MaxWrites];
+				VkDescriptorBufferInfo bufferInfo[c_MaxWrites];
+				VkDescriptorImageInfo imageInfo[c_MaxWrites];
+				VkWriteDescriptorSet writes[c_MaxWrites];
 
 				for (const DescriptorBinding& descriptor : descriptor_set.Bindings)
 				{
@@ -202,7 +207,7 @@ namespace Insight
 
 					bool add_write = false;
 
-					vk::WriteDescriptorSet writeDescriptorSet = { };
+					VkWriteDescriptorSet writeDescriptorSet = { };
 					writeDescriptorSet.dstSet = *reinterpret_cast<VkDescriptorSet*>(&m_resource);
 					writeDescriptorSet.dstBinding = descriptor.Binding;
 					writeDescriptorSet.dstArrayElement = 0;
@@ -214,10 +219,10 @@ namespace Insight
 						if (descriptor.RHI_Sampler)
 						{
 							const RHI_Sampler* rhi_sampler = descriptor.RHI_Sampler;
-							vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
+							VkSampler sampler_vulkan = *reinterpret_cast<const VkSampler*>(&rhi_sampler->Resource);
 
-							imageInfo[imageInfoIndex].imageView = vk::ImageView();
-							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eUndefined;
+							imageInfo[imageInfoIndex].imageView = VkImageView();
+							imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 							imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 							++imageInfoIndex;
@@ -230,8 +235,8 @@ namespace Insight
 						if (descriptor.RHI_Texture && descriptor.RHI_Texture->GetUploadStatus() == DeviceUploadStatus::Completed)
 						{
 							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.RHI_Texture)->GetImageView();
-							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-							imageInfo[imageInfoIndex].sampler = vk::Sampler();
+							imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+							imageInfo[imageInfoIndex].sampler = VkSampler();
 							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 							++imageInfoIndex;
 							add_write = true;
@@ -244,10 +249,10 @@ namespace Insight
 						{
 							const RHI_Sampler* rhi_sampler = descriptor.RHI_Sampler == nullptr ?
 								m_context->GetSamplerManager().GetOrCreateSampler({}) : descriptor.RHI_Sampler;
-							vk::Sampler sampler_vulkan = *reinterpret_cast<const vk::Sampler*>(&rhi_sampler->Resource);
+							VkSampler sampler_vulkan = *reinterpret_cast<const VkSampler*>(&rhi_sampler->Resource);
 
 							imageInfo[imageInfoIndex].imageView = static_cast<const RHI::Vulkan::RHI_Texture_Vulkan*>(descriptor.RHI_Texture)->GetImageView();
-							imageInfo[imageInfoIndex].imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+							imageInfo[imageInfoIndex].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 							imageInfo[imageInfoIndex].sampler = sampler_vulkan;
 							writeDescriptorSet.pImageInfo = &imageInfo[imageInfoIndex];
 							++imageInfoIndex;
@@ -280,7 +285,7 @@ namespace Insight
 				if (hash != m_currentDescriptorHash)
 				{
 					m_currentDescriptorHash = hash;
-					contextVulkan->GetDevice().updateDescriptorSets(writeIndex, &writes[0], 0, nullptr, {});
+					vkUpdateDescriptorSets(contextVulkan->GetDevice(), writeIndex, &writes[0], 0, nullptr);
 					RenderStats::Instance().DescriptorSetUpdates++;
 				}
 			}

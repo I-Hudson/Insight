@@ -28,12 +28,12 @@ namespace Insight
 				virtual bool ValidResouce() override;
 				virtual void SetName(std::wstring name) override;
 
-				vk::Buffer GetBuffer() const { return m_buffer; }
+				VkBuffer GetBuffer() const { return m_buffer; }
 
 			private:
 				RenderContext_Vulkan* m_context = nullptr;
 				void* m_mappedData = nullptr;
-				vk::Buffer m_buffer;
+				VkBuffer m_buffer;
 				VmaAllocation m_vmaAllocation;
 			};
 		}

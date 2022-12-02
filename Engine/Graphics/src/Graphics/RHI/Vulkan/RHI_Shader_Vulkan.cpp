@@ -20,7 +20,7 @@ namespace Insight
 	{
 		namespace RHI::Vulkan
 		{
-			vk::ShaderModule RHI_Shader_Vulkan::GetStage(ShaderStageFlagBits stage) const
+			VkShaderModule RHI_Shader_Vulkan::GetStage(ShaderStageFlagBits stage) const
 			{
 				int index = BitFlagsToIndex(stage);
 				return m_modules.at(index);
@@ -47,12 +47,12 @@ namespace Insight
 
 			void RHI_Shader_Vulkan::Destroy()
 			{
-				for (vk::ShaderModule& mod : m_modules)
+				for (VkShaderModule& mod : m_modules)
 				{
 					if (mod)
 					{
-						m_context->GetDevice().destroyShaderModule(mod);
-						mod = vk::ShaderModule(nullptr);
+						vkDestroyShaderModule(m_context->GetDevice(), mod, nullptr);
+						mod = nullptr;
 					}
 				}
 			}
@@ -68,15 +68,21 @@ namespace Insight
 
 				compiler.GetDescriptorSets(stage, m_descriptor_sets, m_push_constant);
 
-				vk::ShaderModuleCreateInfo createInfo = vk::ShaderModuleCreateInfo({}, {});
-				createInfo.setCodeSize(code->GetBufferSize());
-				createInfo.setPCode((u32*)code->GetBufferPointer());
+				VkShaderModuleCreateInfo createInfo;
+				createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+				createInfo.codeSize = code->GetBufferSize();
+				createInfo.pCode = static_cast<u32*>(code->GetBufferPointer());
 
 				if (m_modules[moduleIndex])
 				{
-					m_context->GetDevice().destroyShaderModule(m_modules[moduleIndex]);
+					vkDestroyShaderModule(m_context->GetDevice(), m_modules[moduleIndex], nullptr);
+					m_modules[moduleIndex] = nullptr;
 				}
-				m_modules[moduleIndex] = m_context->GetDevice().createShaderModule(createInfo);
+
+				VkShaderModule shaderModule = nullptr;
+				vkCreateShaderModule(m_context->GetDevice(), &createInfo, nullptr, &shaderModule);
+				m_modules[moduleIndex] = shaderModule;
+
 				m_mainFuncNames[moduleIndex] = compiler.StageToFuncName(stage);
 				if (!m_modules[moduleIndex])
 				{
@@ -103,7 +109,7 @@ namespace Insight
 				int stride = 0;
 				for (const auto& input : m_shaderInputLayout)
 				{
-					vk::VertexInputAttributeDescription attri = {};
+					VkVertexInputAttributeDescription attri;
 					attri.location = input.Binding;
 					attri.binding = 0;
 					attri.format = PixelFormatToVulkan(input.Format);
@@ -115,12 +121,19 @@ namespace Insight
 
 				if (m_vertexInputLayout.Attributes.size() > 0)
 				{
-					vk::VertexInputBindingDescription inputDesc = {};
+					VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
+					pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+					pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = m_vertexInputLayout.Bindings.data();
+					pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<u32>(m_vertexInputLayout.Bindings.size());
+					pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = m_vertexInputLayout.Attributes.data();
+					pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<u32>(m_vertexInputLayout.Attributes.size());
+
+					VkVertexInputBindingDescription inputDesc = {};
 					inputDesc.binding = 0;
 					inputDesc.stride = stride;
-					inputDesc.inputRate = vk::VertexInputRate::eVertex;
+					inputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 					m_vertexInputLayout.Bindings.push_back(inputDesc);
-					m_vertexInputLayout.CreateInfo = vk::PipelineVertexInputStateCreateInfo({}, m_vertexInputLayout.Bindings, m_vertexInputLayout.Attributes);
+					m_vertexInputLayout.CreateInfo = pipelineVertexInputStateCreateInfo;
 				}
 			}
 		}

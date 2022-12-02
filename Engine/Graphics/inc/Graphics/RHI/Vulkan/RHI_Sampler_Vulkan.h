@@ -7,6 +7,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RenderContext;
+
 		namespace RHI::Vulkan
 		{
 			class RenderContext_Vulkan;

@@ -17,9 +17,9 @@ namespace Insight
 		{
 			struct VertexInputLayout_Vulkan
 			{
-				std::vector<vk::VertexInputBindingDescription> Bindings;
-				std::vector<vk::VertexInputAttributeDescription> Attributes;
-				vk::PipelineVertexInputStateCreateInfo CreateInfo;
+				std::vector<VkVertexInputBindingDescription> Bindings;
+				std::vector<VkVertexInputAttributeDescription> Attributes;
+				VkPipelineVertexInputStateCreateInfo CreateInfo;
 			};
 
 			class RHI_Shader_Vulkan : public RHI_Shader
@@ -27,7 +27,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Shader_Vulkan() override { Destroy(); }
 
-				vk::ShaderModule GetStage(ShaderStageFlagBits stage) const;
+				VkShaderModule GetStage(ShaderStageFlagBits stage) const;
 				VertexInputLayout_Vulkan GetVertexInputLayout() const { return m_vertexInputLayout; }
 				std::wstring_view GetMainFuncName(ShaderStageFlagBits stage) const;
 
@@ -40,7 +40,7 @@ namespace Insight
 
 			private:
 				VertexInputLayout_Vulkan m_vertexInputLayout;
-				std::array<vk::ShaderModule, 5> m_modules;
+				std::array<VkShaderModule, 5> m_modules;
 				std::array<std::wstring, 5> m_mainFuncNames;
 				RenderContext_Vulkan* m_context{ nullptr };
 			};

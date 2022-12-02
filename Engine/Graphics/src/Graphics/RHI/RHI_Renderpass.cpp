@@ -6,6 +6,7 @@
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
+#include <vulkan/vulkan.hpp>
 #endif /// #ifdef IS_VULKAN_ENABLED
 #ifdef IS_DX12_ENABLED
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
@@ -52,8 +53,8 @@ namespace Insight
 				if (GraphicsManager::IsVulkan())
 				{
 					RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
-					vk::RenderPass renderpassVulkan = *reinterpret_cast<vk::RenderPass*>(&itr->second);
-					contextVulkan->GetDevice().destroyRenderPass(renderpassVulkan);
+					VkRenderPass renderpassVulkan = reinterpret_cast<VkRenderPass>(&itr->second.Resource);
+					vkDestroyRenderPass(contextVulkan->GetDevice(), renderpassVulkan, nullptr);
 					itr->second.Resource = nullptr;
 				}
 #endif
@@ -126,62 +127,66 @@ namespace Insight
 
 				struct AttachmentCreation
 				{
-					static vk::AttachmentDescription CreateCustom(const RHI_Texture* texture, const AttachmentDescription* attachment)
+					static VkAttachmentDescription CreateCustom(const RHI_Texture* texture, const AttachmentDescription* attachment)
 					{
-						return vk::AttachmentDescription(
-							vk::AttachmentDescriptionFlags(),
-							texture != nullptr ? 
+						VkAttachmentDescription description;
+						description.format = texture != nullptr ?
 							PixelFormatToVulkan(texture->GetFormat())
-							: PixelFormatToVulkan(attachment->Format),
-							vk::SampleCountFlagBits::e1,
-							AttachmentLoadOpToVulkan(attachment->LoadOp),
-							vk::AttachmentStoreOp::eStore,
-							AttachmentLoadOpToVulkan(attachment->StencilLoadOp),
-							vk::AttachmentStoreOp::eDontCare,
-							ImageLayoutToVulkan(attachment->InitalLayout),
-							ImageLayoutToVulkan(attachment->FinalLayout));
+							: PixelFormatToVulkan(attachment->Format);
+						description.samples = VK_SAMPLE_COUNT_1_BIT;
+						description.loadOp = AttachmentLoadOpToVulkan(attachment->LoadOp);
+						description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+						description.stencilLoadOp = AttachmentLoadOpToVulkan(attachment->StencilLoadOp);
+						description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+						description.initialLayout = ImageLayoutToVulkan(attachment->InitalLayout);
+						description.finalLayout = ImageLayoutToVulkan(attachment->FinalLayout);
+						return description;
 					}
 
-					static vk::AttachmentDescription CreateColour(const RHI_Texture* texture, const AttachmentDescription* attachment)
+					static VkAttachmentDescription CreateColour(const RHI_Texture* texture, const AttachmentDescription* attachment)
 					{
 						if (attachment == nullptr)
 						{
-							return vk::AttachmentDescription(
-								vk::AttachmentDescriptionFlags(),
-								PixelFormatToVulkan(texture->GetFormat()),
-								vk::SampleCountFlagBits::e1,
-								vk::AttachmentLoadOp::eClear,
-								vk::AttachmentStoreOp::eStore,
-								vk::AttachmentLoadOp::eDontCare,
-								vk::AttachmentStoreOp::eDontCare,
-								vk::ImageLayout::eUndefined,
-								vk::ImageLayout::eColorAttachmentOptimal);
+							VkAttachmentDescription description;
+							description.format = texture != nullptr ?
+								PixelFormatToVulkan(texture->GetFormat())
+								: PixelFormatToVulkan(attachment->Format);
+							description.samples = VK_SAMPLE_COUNT_1_BIT;
+							description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+							description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+							description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+							description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+							description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+							description.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+							return description;
 						}
-						vk::AttachmentDescription desc = CreateCustom(texture, attachment);
+						VkAttachmentDescription desc = CreateCustom(texture, attachment);
 						return desc;
 					}
 
-					static vk::AttachmentDescription CreateDepthStencil(const RHI_Texture* texture, const AttachmentDescription* attachment)
+					static VkAttachmentDescription CreateDepthStencil(const RHI_Texture* texture, const AttachmentDescription* attachment)
 					{
 						if (attachment == nullptr)
 						{
-							return vk::AttachmentDescription(
-								vk::AttachmentDescriptionFlags(),
-								PixelFormatToVulkan(texture->GetFormat()),
-								vk::SampleCountFlagBits::e1,								/// Sample count
-								vk::AttachmentLoadOp::eClear,								/// load op
-								vk::AttachmentStoreOp::eStore,								/// store op
-								vk::AttachmentLoadOp::eDontCare,							/// stencil load op
-								vk::AttachmentStoreOp::eDontCare,							/// stencil store op
-								vk::ImageLayout::eUndefined,								/// initial layout
-								vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal);	/// final layout
+							VkAttachmentDescription description;
+							description.format = texture != nullptr ?
+								PixelFormatToVulkan(texture->GetFormat())
+								: PixelFormatToVulkan(attachment->Format);
+							description.samples = VK_SAMPLE_COUNT_1_BIT;
+							description.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+							description.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+							description.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+							description.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+							description.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+							description.finalLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
+							return description;
 						}
-						vk::AttachmentDescription desc = CreateCustom(texture, attachment);
-						desc.finalLayout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+						VkAttachmentDescription desc = CreateCustom(texture, attachment);
+						desc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
 						return desc;
 					}
 
-					static void AddRenderpassDescriptionAttachmentData(std::vector<AttachmentDescription>& descriptions, vk::AttachmentDescription descriptionVulkan)
+					static void AddRenderpassDescriptionAttachmentData(std::vector<AttachmentDescription>& descriptions, VkAttachmentDescription descriptionVulkan)
 					{
 						AttachmentDescription newDescription = { };
 						newDescription.Format = PixelFormat::D32_Float;/// VkFormatToPixelFormat[(int)descriptionVulkan.format];
@@ -194,11 +199,11 @@ namespace Insight
 						descriptions.push_back(newDescription);
 					}
 
-					static std::pair<std::vector<vk::AttachmentDescription>, std::vector<vk::AttachmentReference>>
+					static std::pair<std::vector<VkAttachmentDescription>, std::vector<VkAttachmentReference>>
 						CreateAllColour(std::vector<RHI_Texture*>& textures, std::vector<AttachmentDescription>& descriptions)
 					{
-						std::vector<vk::AttachmentDescription> resultAttachments;
-						std::vector<vk::AttachmentReference> resultReferences;
+						std::vector<VkAttachmentDescription> resultAttachments;
+						std::vector<VkAttachmentReference> resultReferences;
 
 						for (size_t i = 0; i < textures.size(); ++i)
 						{
@@ -208,7 +213,7 @@ namespace Insight
 								attachment = &descriptions.at(i);
 							}
 							resultAttachments.push_back(CreateColour(textures.at(i), attachment));
-							resultReferences.push_back(vk::AttachmentReference(static_cast<u32>(i), vk::ImageLayout::eColorAttachmentOptimal));
+							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(i), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL } );
 							if (!attachment)
 							{
 								AddRenderpassDescriptionAttachmentData(descriptions, resultAttachments.at(resultAttachments.size() - 1ull));
@@ -218,25 +223,25 @@ namespace Insight
 						if (textures.size() == 0 && descriptions.size() > 0)
 						{
 							resultAttachments.push_back(CreateColour(nullptr, &descriptions.at(0)));
-							resultAttachments.at(0).format = resultAttachments.at(0).format != vk::Format::eUndefined ?
+							resultAttachments.at(0).format = resultAttachments.at(0).format != VkFormat::VK_FORMAT_UNDEFINED ?
 								resultAttachments.at(0).format
 								: static_cast<RHI::Vulkan::RenderContext_Vulkan*>(GraphicsManager::Instance().GetRenderContext())->GetSwapchainColourFormat();
-							resultReferences.push_back(vk::AttachmentReference(static_cast<u32>(0), vk::ImageLayout::eColorAttachmentOptimal));
+							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(0), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL } );
 						}
 
 						return { resultAttachments, resultReferences };
 					}
 
-					static vk::AttachmentReference CreateDepthStencil(std::vector<vk::AttachmentDescription>& attachmentDescriptions
+					static VkAttachmentReference CreateDepthStencil(std::vector<VkAttachmentDescription>& attachmentDescriptions
 						, RHI_Texture* texture
 						, AttachmentDescription& attachmentDescription)
 					{
-						vk::AttachmentReference result = { };
+						VkAttachmentReference result = { };
 
 						if (texture)
 						{
 							result.attachment = static_cast<u32>(attachmentDescriptions.size());
-							result.layout = vk::ImageLayout::eDepthAttachmentStencilReadOnlyOptimal;
+							result.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
 							attachmentDescriptions.push_back(CreateDepthStencil(texture, attachmentDescription.IsValid() ? 
 								&attachmentDescription : nullptr));
 
@@ -255,43 +260,45 @@ namespace Insight
 
 				struct SubpassCreation
 				{
-					static std::vector<vk::SubpassDependency> CreateDependencies(bool hasDepthStencil)
+					static std::vector<VkSubpassDependency> CreateDependencies(bool hasDepthStencil)
 					{
-						std::vector<vk::SubpassDependency> result;
+						std::vector<VkSubpassDependency> result;
 
 						result.push_back(
-							vk::SubpassDependency(
+							VkSubpassDependency
+							{
 								VK_SUBPASS_EXTERNAL,
 								0u,
-								vk::PipelineStageFlagBits::eColorAttachmentOutput,
-								vk::PipelineStageFlagBits::eColorAttachmentOutput,
-								vk::AccessFlagBits::eNoneKHR,
-								vk::AccessFlagBits::eColorAttachmentWrite,
+								VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+								VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+								VK_ACCESS_NONE,
+								VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 								{ }
-						));
+							});
 
 						if (hasDepthStencil)
 						{
 							result.push_back(
-								vk::SubpassDependency(
+								VkSubpassDependency
+								{
 									VK_SUBPASS_EXTERNAL,
 									0u,
-									vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
-									vk::PipelineStageFlagBits::eEarlyFragmentTests | vk::PipelineStageFlagBits::eLateFragmentTests,
-									vk::AccessFlagBits::eNoneKHR,
-									vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+									VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+									VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+									VK_ACCESS_NONE,
+									VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 									{ }
-							));
+								});
 						}
 
 						return result;
 					}
 				};
 
-				std::pair<std::vector<vk::AttachmentDescription>, std::vector<vk::AttachmentReference>> colourAttachmentsAndRefs
+				std::pair<std::vector<VkAttachmentDescription>, std::vector<VkAttachmentReference>> colourAttachmentsAndRefs
 					= AttachmentCreation::CreateAllColour(description.ColourAttachments, description.Attachments);
-				std::vector<vk::AttachmentDescription>& renderpassAttachments = colourAttachmentsAndRefs.first;
-				std::vector<vk::AttachmentReference>& colourReferences = colourAttachmentsAndRefs.second;
+				std::vector<VkAttachmentDescription>& renderpassAttachments = colourAttachmentsAndRefs.first;
+				std::vector<VkAttachmentReference>& colourReferences = colourAttachmentsAndRefs.second;
 
 				if (description.SwapchainPass)
 				{
@@ -300,43 +307,49 @@ namespace Insight
 					{
 						renderpassAttachments.push_back(AttachmentCreation::CreateCustom(nullptr, &description.Attachments.at(0)));
 
-						colourReferences.push_back(vk::AttachmentReference(static_cast<u32>(renderpassAttachments.size() - 1), vk::ImageLayout::eColorAttachmentOptimal));
+						colourReferences.push_back(VkAttachmentReference{ static_cast<u32>(renderpassAttachments.size() - 1), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 
 						description.ColourAttachments.push_back(contextVulkan->GetSwaphchainIamge());
 					}
 					else if (renderpassAttachments.size() == 0)
 					{
-						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr, 
+						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr,
 							&AttachmentDescription::Default(VkFormatToPixelFormat[(int)contextVulkan->GetSwapchainColourFormat()], ImageLayout::PresentSrc)));
 
-						colourReferences.push_back(vk::AttachmentReference(static_cast<u32>(renderpassAttachments.size() - 1), vk::ImageLayout::eColorAttachmentOptimal));
+						colourReferences.push_back(VkAttachmentReference{ static_cast<u32>(renderpassAttachments.size() - 1), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 						AttachmentCreation::AddRenderpassDescriptionAttachmentData(description.Attachments, renderpassAttachments.at(renderpassAttachments.size() - 1ull));
 
 						description.ColourAttachments.push_back(contextVulkan->GetSwaphchainIamge());
 					}
 				}
 
-				vk::AttachmentReference depthReference = AttachmentCreation::CreateDepthStencil(renderpassAttachments
+				VkAttachmentReference depthReference = AttachmentCreation::CreateDepthStencil(renderpassAttachments
 					, description.DepthStencil
 					, description.DepthStencilAttachment);
 
-				std::vector<vk::SubpassDependency> subpassDependencies = SubpassCreation::CreateDependencies(description.DepthStencil != nullptr);
+				std::vector<VkSubpassDependency> subpassDependencies = SubpassCreation::CreateDependencies(description.DepthStencil != nullptr);
 
-				vk::SubpassDescription  subpassDescription = { };
-				subpassDescription.setColorAttachments(colourReferences);
+				VkSubpassDescription  subpassDescription = { };
+				subpassDescription.colorAttachmentCount = static_cast<u32>(colourReferences.size());
+				subpassDescription.pColorAttachments = colourReferences.data();
 				if (description.DepthStencil)
 				{
-					subpassDescription.setPDepthStencilAttachment(&depthReference);
+					subpassDescription.pDepthStencilAttachment = &depthReference;
 				}
 
-				vk::RenderPassCreateInfo createInfo = { };
-				createInfo.setAttachments(renderpassAttachments);
-				createInfo.setSubpasses(subpassDescription);
-				createInfo.setDependencies(subpassDependencies);
+				VkRenderPassCreateInfo createInfo = { };
+				createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+				createInfo.attachmentCount = static_cast<u32>(renderpassAttachments.size());
+				createInfo.pAttachments = renderpassAttachments.data();
+				createInfo.subpassCount = 1ul;
+				createInfo.pSubpasses = &subpassDescription;
+				createInfo.dependencyCount = static_cast<u32>(subpassDependencies.size());
+				createInfo.pDependencies = subpassDependencies.data();
 
-				vk::RenderPass renderpass = contextVulkan->GetDevice().createRenderPass(createInfo);
-				RHI_Renderpass newPass = *reinterpret_cast<RHI_Renderpass*>(&renderpass);
-
+				VkRenderPass renderpass;
+				vkCreateRenderPass(contextVulkan->GetDevice(), &createInfo, nullptr, &renderpass);
+				RHI_Renderpass newPass;
+				newPass.Resource = renderpass;
 				m_renderpasses[hash] = newPass;
 			}
 #endif /// #ifdef IS_VULKAN_ENABLED

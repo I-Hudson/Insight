@@ -31,18 +31,17 @@ namespace Insight
 					m_infos.push_back(createInfo);
 				}
 
-				vk::ImageCreateInfo imageCreateInfo = vk::ImageCreateInfo(
-					{},
-					TextureTypeToVulkan(m_infos.at(0).TextureType),
-					PixelFormatToVulkan(m_infos.at(0).Format),
-					vk::Extent3D(m_infos.at(0).Width, m_infos.at(0).Height, 1),
-					m_infos.at(0).Mip_Count,								// mip levels 
-					m_infos.at(0).Layer_Count,								// array layers
-					vk::SampleCountFlagBits::e1,
-					vk::ImageTiling::eOptimal,
-					ImageUsageFlagsToVulkan(m_infos.at(0).ImageUsage),
-					vk::SharingMode::eExclusive
-				);
+				VkImageCreateInfo imageCreateInfo;
+				imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+				imageCreateInfo.imageType = TextureTypeToVulkan(m_infos.at(0).TextureType);
+				imageCreateInfo.format = PixelFormatToVulkan(m_infos.at(0).Format);
+				imageCreateInfo.extent = VkExtent3D { static_cast<u32>(m_infos.at(0).Width), static_cast<u32>(m_infos.at(0).Height), 1 };
+				imageCreateInfo.mipLevels = m_infos.at(0).Mip_Count;
+				imageCreateInfo.arrayLayers = m_infos.at(0).Layer_Count;
+				imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+				imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+				imageCreateInfo.usage = ImageUsageFlagsToVulkan(m_infos.at(0).ImageUsage);
+				imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
 				VmaAllocationCreateInfo vmaAllocCreateInfo = {};
 				vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -56,7 +55,7 @@ namespace Insight
 					&allocInfo));
 				lock.unlock();
 
-				vk::ImageView imageView = CreateImageView(0, 1, m_infos.at(0).Layer_Count, 0);
+				VkImageView imageView = CreateImageView(0, 1, m_infos.at(0).Layer_Count, 0);
 				lock.lock();
 				m_image_view = imageView;
 				lock.unlock();
@@ -64,7 +63,7 @@ namespace Insight
 				// Create a image view for each layer. (Use image views when rendering to different layers).
 				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
 				{
-					vk::ImageView imageView = CreateImageView(0, 1, 1, i);
+					VkImageView imageView = CreateImageView(0, 1, 1, i);
 					lock.lock();
 					m_single_layer_image_views.push_back(imageView);
 					lock.unlock();
@@ -110,10 +109,11 @@ namespace Insight
 
 				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
 				{
-					vk::ImageView& view = m_single_layer_image_views.at(i);
+					VkImageView& view = m_single_layer_image_views.at(i);
 					if (view)
 					{
-						m_context->GetDevice().destroyImageView(view);
+						vkDestroyImageView(m_context->GetDevice(), view, nullptr);
+						view = nullptr;
 					}
 				}
 				m_single_layer_image_views.clear();
@@ -123,7 +123,8 @@ namespace Insight
 					//if (m_info.Layer_Count > 1)
 					{
 						// We must have a multi layer image. Destroy the corresponding view which looks into all layers.
-						m_context->GetDevice().destroyImageView(m_image_view);
+						vkDestroyImageView(m_context->GetDevice(), m_image_view, nullptr);
+						m_image_view = nullptr;
 					}
 					m_image_view = nullptr;
 				}
@@ -147,56 +148,60 @@ namespace Insight
 
 				if (m_image_view)
 				{
-					m_context->SetObejctName(name + L"_Image_View", reinterpret_cast<u64>(m_image_view.operator VkImageView()), vk::ObjectType::eImageView);
+					m_context->SetObjectName(name + L"_Image_View", reinterpret_cast<u64>(m_image_view), VK_OBJECT_TYPE_IMAGE_VIEW);
 				}
 
 				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
 				{
-					vk::ImageView& view = m_single_layer_image_views.at(i);
+					VkImageView& view = m_single_layer_image_views.at(i);
 					if (view)
 					{
-						m_context->SetObejctName(name + L"_Image_View_" + std::to_wstring(i), reinterpret_cast<u64>(view.operator VkImageView()), vk::ObjectType::eImageView);
+						m_context->SetObjectName(name + L"_Image_View_" + std::to_wstring(i), reinterpret_cast<u64>(view), VK_OBJECT_TYPE_IMAGE_VIEW);
 					}
 				}
 
 				if (m_image)
 				{
-					m_context->SetObejctName(name, reinterpret_cast<u64>(m_image.operator VkImage()), vk::ObjectType::eImage);
+					m_context->SetObjectName(name, reinterpret_cast<u64>(m_image), VK_OBJECT_TYPE_IMAGE);
 				}
 				m_name = std::move(name);
 			}
 
-			vk::ImageView RHI_Texture_Vulkan::GetImageView() const
+			VkImageView RHI_Texture_Vulkan::GetImageView() const
 			{
 				std::lock_guard lock(m_mutex);
 				return m_image_view;
 			}
 
-			vk::ImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
+			VkImageView RHI_Texture_Vulkan::GetImageView(u32 array_layer_index) const
 			{
 				std::lock_guard lock(m_mutex);
 				return m_single_layer_image_views.at(array_layer_index);
 			}
 
-			vk::ImageView RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
+			VkImageView RHI_Texture_Vulkan::CreateImageView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
 			{
 				std::lock_guard lock(m_mutex);
 
-				vk::ImageViewCreateInfo viewCreateInfo = vk::ImageViewCreateInfo(
-					{ },
-					m_image,
-					TextureViewTypeToVulkan(m_infos.at(mip_index).TextureType),
-					PixelFormatToVulkan(m_infos.at(mip_index).Format),
-					vk::ComponentMapping(),
-					vk::ImageSubresourceRange(
-						m_infos.at(mip_index).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
-						vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor,
-						mip_index,
-						mip_count,
-						layer_index,
-						layer_count)
-				);
-				return m_context->GetDevice().createImageView(viewCreateInfo);
+				VkImageSubresourceRange imageSubresourceRange;
+				imageSubresourceRange.aspectMask = m_infos.at(mip_index).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment ?
+					VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT : VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+				imageSubresourceRange.baseMipLevel = mip_index;
+				imageSubresourceRange.levelCount = mip_count;
+				imageSubresourceRange.baseArrayLayer = layer_index;
+				imageSubresourceRange.layerCount = layer_count;
+
+				VkImageViewCreateInfo viewCreateInfo;
+				viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+				viewCreateInfo.image = m_image;
+				viewCreateInfo.viewType = TextureViewTypeToVulkan(m_infos.at(mip_index).TextureType);
+				viewCreateInfo.format = PixelFormatToVulkan(m_infos.at(mip_index).Format);
+				viewCreateInfo.components = VkComponentMapping();
+				viewCreateInfo.subresourceRange = imageSubresourceRange;
+
+				VkImageView imageView = nullptr;
+				vkCreateImageView(m_context->GetDevice(), &viewCreateInfo, nullptr, &imageView);
+				return imageView;
 			}
 		}
 	}
