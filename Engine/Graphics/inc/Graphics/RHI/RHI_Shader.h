@@ -69,6 +69,7 @@ namespace Insight
 			Hlsl
 		};
 
+		// TODO: Replace IDxc* with a ref counter object. (This needs to be custom due to compile time)
 		struct ShaderCompiler
 		{
 			ShaderCompiler();
@@ -88,11 +89,11 @@ namespace Insight
 
 			ShaderCompilerLanguage m_languageToCompileTo;
 
-			IDxcUtils* DXUtils;
-			IDxcCompiler3* DXCompiler;
+			IDxcUtils* DXUtils = nullptr;
+			IDxcCompiler3* DXCompiler = nullptr;
 
-			IDxcResult* ShaderCompileResults;
-			IDxcResult* ShaderReflectionResults;
+			IDxcResult* ShaderCompileResults = nullptr;
+			IDxcResult* ShaderReflectionResults = nullptr;
 		};
 	}
 }

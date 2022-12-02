@@ -438,6 +438,12 @@ namespace Insight
 
 		std::vector<ShaderInputLayout> ShaderCompiler::GetInputLayout()
 		{
+			if (!ShaderReflectionResults)
+			{
+				IS_CORE_ERROR("[ShaderCompiler::GetInputLayout] Trying to get the input layout but no shader has been compiled.");
+				return std::vector<ShaderInputLayout>();
+			}
+
 			IDxcBlob* code;
 			ShaderReflectionResults->GetResult(&code);
 

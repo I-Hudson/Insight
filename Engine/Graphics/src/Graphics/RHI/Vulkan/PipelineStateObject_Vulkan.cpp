@@ -140,7 +140,7 @@ namespace Insight
 					info.pName = shaderFuncNames[i].c_str();
 					pipelineShaderStageCreateInfos.push_back(info);
 				}
-				const VertexInputLayout_Vulkan pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();
+				const VertexInputLayout_Vulkan& pipelineVertexInputStateCreateInfo = shaderVulkan->GetVertexInputLayout();
 
 				VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = {};
 				pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;

@@ -128,16 +128,16 @@ namespace Insight
 					inputDesc.stride = stride;
 					inputDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 					m_vertexInputLayout.Bindings.push_back(inputDesc);
-
-					VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = {};
-					pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-					pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = m_vertexInputLayout.Bindings.data();
-					pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<u32>(m_vertexInputLayout.Bindings.size());
-					pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = m_vertexInputLayout.Attributes.data();
-					pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<u32>(m_vertexInputLayout.Attributes.size());
-
-					m_vertexInputLayout.CreateInfo = pipelineVertexInputStateCreateInfo;
 				}
+
+				VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = {};
+				pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+				pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = m_vertexInputLayout.Bindings.data();
+				pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = static_cast<u32>(m_vertexInputLayout.Bindings.size());
+				pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = m_vertexInputLayout.Attributes.data();
+				pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = static_cast<u32>(m_vertexInputLayout.Attributes.size());
+
+				m_vertexInputLayout.CreateInfo = pipelineVertexInputStateCreateInfo;
 			}
 		}
 	}

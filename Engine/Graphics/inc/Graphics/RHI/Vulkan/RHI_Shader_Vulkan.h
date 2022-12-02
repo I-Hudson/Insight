@@ -28,7 +28,7 @@ namespace Insight
 				virtual ~RHI_Shader_Vulkan() override { Destroy(); }
 
 				VkShaderModule GetStage(ShaderStageFlagBits stage) const;
-				VertexInputLayout_Vulkan GetVertexInputLayout() const { return m_vertexInputLayout; }
+				const VertexInputLayout_Vulkan& GetVertexInputLayout() const { return m_vertexInputLayout; }
 				std::string_view GetMainFuncName(ShaderStageFlagBits stage) const;
 
 			private:
