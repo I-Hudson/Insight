@@ -78,13 +78,18 @@ namespace Insight
 		void RHI_FSR::GenerateJitterSample(float* x, float* y)
 		{
 			// Get render and output resolution from the context description (safe to do as we are not using dynamic resolution)
-			u32 resolution_render_x = static_cast<uint32_t>(m_ffx_fsr2_context_description.maxRenderSize.width);
+            u32 resolution_render_x = static_cast<uint32_t>(m_ffx_fsr2_context_description.maxRenderSize.width);
+            u32 resolution_render_y = static_cast<uint32_t>(m_ffx_fsr2_context_description.maxRenderSize.height);
+
             u32 resolution_output_x = static_cast<uint32_t>(m_ffx_fsr2_context_description.displaySize.width);
 
 			// Generate jitter sample
 			static uint32_t index = 0; index++;
 			const int32_t jitter_phase_count = ffxFsr2GetJitterPhaseCount(resolution_render_x, resolution_output_x);
 			ASSERT(ffxFsr2GetJitterOffset(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y, index, jitter_phase_count) == FFX_OK);
+
+            m_ffx_fsr2_dispatch_description.jitterOffset.x = (m_ffx_fsr2_dispatch_description.jitterOffset.x / resolution_render_x);
+            m_ffx_fsr2_dispatch_description.jitterOffset.y = (m_ffx_fsr2_dispatch_description.jitterOffset.y / resolution_render_y);
 
 			// Out
 			*x = m_ffx_fsr2_dispatch_description.jitterOffset.x;

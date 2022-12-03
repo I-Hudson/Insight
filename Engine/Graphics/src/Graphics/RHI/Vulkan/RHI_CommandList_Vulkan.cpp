@@ -230,8 +230,8 @@ namespace Insight
 						VkRenderingAttachmentInfo detencilAttacment = {};
 						detencilAttacment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
 
-						auto makeRenderingAttachment = 
-						[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
+						auto makeRenderingAttachment =
+							[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
 						{
 							std::array<float, 4> clearColourValues = {
 								attachment_description.ClearColour.x
@@ -265,6 +265,7 @@ namespace Insight
 						int descriptionIndex = 0;
 						for (RHI_Texture* texture : renderDescription.ColourAttachments)
 						{
+							IS_PROFILE_SCOPE("Colour attachments");
 							VkRenderingAttachmentInfo attachment = makeRenderingAttachment(texture, renderDescription.Attachments.at(descriptionIndex));
 							colourAttachments.push_back(attachment);
 							texture->SetLayout(renderDescription.Attachments.at(descriptionIndex).FinalLayout);
@@ -275,6 +276,8 @@ namespace Insight
 
 						if (renderDescription.DepthStencil)
 						{
+							IS_PROFILE_SCOPE("Depth Stencil attachments");
+
 							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
 							depthAttachment.clearValue = { };
 							depthAttachment.clearValue.depthStencil = VkClearDepthStencilValue{
@@ -286,7 +289,10 @@ namespace Insight
 							renderDescription.DepthStencil->SetLayout(renderDescription.DepthStencilAttachment.FinalLayout);
 						}
 
-						vkCmdBeginRendering(m_commandList, &renderingInfo);
+						{
+							IS_PROFILE_SCOPE("vkCmdBeginRendering");
+							vkCmdBeginRendering(m_commandList, &renderingInfo);
+						}
 					}
 					else
 					{
