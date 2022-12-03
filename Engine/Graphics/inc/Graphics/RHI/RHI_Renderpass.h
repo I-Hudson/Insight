@@ -91,6 +91,8 @@ namespace Insight
 			RHI_Texture* DepthStencil = nullptr;
 			AttachmentDescription DepthStencilAttachment;
 
+			bool AllowDynamicRendering = true;
+
 			void AddAttachment(AttachmentDescription description)
 			{
 				Attachments.push_back(description);

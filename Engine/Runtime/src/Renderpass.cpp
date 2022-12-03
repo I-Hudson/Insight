@@ -302,10 +302,10 @@ namespace Insight
 			float y_row[4] = { matrix[1].x, matrix[1].y, matrix[1].z, matrix[1].w };
 			float z_row[4] = { matrix[2].x, matrix[2].y, matrix[2].z, matrix[2].w };
 			float w_row[4] = { matrix[3].x, matrix[3].y, matrix[3].z, matrix[3].w };
-			IMGUI_VALID(ImGui::DragFloat4("Camera X Row", x_row));
-			IMGUI_VALID(ImGui::DragFloat4("Camera Y Row", y_row));
-			IMGUI_VALID(ImGui::DragFloat4("Camera Z Row", z_row));
-			IMGUI_VALID(ImGui::DragFloat4("Camera W Row", w_row));
+			ImGui::DragFloat4("Camera X Row", x_row);
+			ImGui::DragFloat4("Camera Y Row", y_row);
+			ImGui::DragFloat4("Camera Z Row", z_row);
+			ImGui::DragFloat4("Camera W Row", w_row);
 			matrix[0] = glm::vec4(x_row[0], x_row[1], x_row[2], x_row[3]);
 			matrix[1] = glm::vec4(y_row[0], y_row[1], y_row[2], y_row[3]);
 			matrix[2] = glm::vec4(z_row[0], z_row[1], z_row[2], z_row[3]);
@@ -322,20 +322,20 @@ namespace Insight
 			PassData data;
 			data.OpaqueEntities = opaque_entities_to_render;
 
-			IMGUI_VALID(ImGui::Begin("Directional Light Direction"));
+			ImGui::Begin("Directional Light Direction");
 			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
-			IMGUI_VALID(if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
+			if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
 			{
 				dir_light_direction = glm::vec3(dir[0], dir[1], dir[2]);
-			});
+			}
 
 			static float depth_constant_factor = 4.0f;
 			static float depth_slope_factor = 1.5f;
-			IMGUI_VALID(ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f));
-			IMGUI_VALID(ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f));
-			IMGUI_VALID(ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f));
+			ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
+			ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
+			ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f);
 
-			IMGUI_VALID(ImGui::End());
+			ImGui::End();
 
 			/// Look into "panking" for dir light https:///www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
 			RenderGraph::Instance().AddPass<PassData>("Cascade shadow pass",
@@ -938,10 +938,10 @@ namespace Insight
 			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "Colour + Shadow", "View Position", "Cascade splits", "Shadow NDC Z" };
 			const char* cascade_override_items[] = { "0", "1", "2", "3" };
 
-			IMGUI_VALID(ImGui::Begin("Composite pass"));
-			IMGUI_VALID(ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items)));
-			IMGUI_VALID(ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items)));
-			IMGUI_VALID(ImGui::End());
+			ImGui::Begin("Composite pass");
+			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
+			ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items));
+			ImGui::End();
 
 			ImGui::Begin("Directional light colour");
 			float light_colour[3] =

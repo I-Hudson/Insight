@@ -100,7 +100,7 @@ namespace Insight
 			std::string currentAPI = "Graphics API: " + std::to_string(currentGraphicsAPI);
 			const int previousGrapicsAPI = currentGraphicsAPI;
 			const char* graphicsAPIs[] = { "Vulkan", "DX12" };
-			IMGUI_VALID(ImGui::Begin(currentAPI.c_str()));
+			ImGui::Begin(currentAPI.c_str());
 			if (ImGui::GetCurrentContext())
 			{
 				if (ImGui::ListBox("Graphcis API", &currentGraphicsAPI, graphicsAPIs, _countof(graphicsAPIs)))
@@ -128,7 +128,7 @@ namespace Insight
 					}
 				}
 			}
-			IMGUI_VALID(ImGui::End());
+			ImGui::End();
 
 			///m_renderpass.Render();
 			

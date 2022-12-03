@@ -222,8 +222,11 @@ namespace Insight
 
 					VkRect2D rect = VkRect2D{ { }, { (u32)m_drawData.Viewport.x, (u32)m_drawData.Viewport.y } };
 
-					if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+					if (renderDescription.AllowDynamicRendering 
+						&& m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 					{
+						m_dynamicRendering = true;
+
 						std::vector<VkRenderingAttachmentInfo> colourAttachments;
 						VkRenderingAttachmentInfo depthAttachment = {};
 						depthAttachment.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
@@ -296,6 +299,7 @@ namespace Insight
 					}
 					else
 					{
+						m_dynamicRendering = false;
 						RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderDescription);
 						VkRenderPass vkRenderpass = reinterpret_cast<VkRenderPass>(renderpass.Resource);
 
@@ -322,7 +326,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				if (m_activeRenderpass)
 				{
-					if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+					if (m_dynamicRendering)
 					{
 						vkCmdEndRendering(m_commandList);
 					}

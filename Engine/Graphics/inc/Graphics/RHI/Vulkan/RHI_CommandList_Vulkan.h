@@ -83,6 +83,7 @@ namespace Insight
 				RHI_CommandListAllocator_Vulkan* m_allocator{ nullptr };
 				std::unordered_map<u64, VkFramebuffer> m_framebuffers;
 
+				bool m_dynamicRendering;
 				VkPipelineLayout m_bound_pipeline_layout;
 				u64 m_boundDescriptors;
 

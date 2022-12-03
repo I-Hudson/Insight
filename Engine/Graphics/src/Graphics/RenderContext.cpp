@@ -86,17 +86,17 @@ namespace Insight
 				io.Fonts->SetTexID(texture_id);
 			}
 
-			IMGUI_VALID(ImGui_ImplGlfw_NewFrame());
-			IMGUI_VALID(ImGui::NewFrame());
-			IMGUI_VALID(ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode));
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
 
-			IMGUI_VALID(RenderStats::Instance().Draw());
+			RenderStats::Instance().Draw();
 		}
 
 		void RenderContext::ImGuiRender()
 		{
-			IMGUI_VALID(ImGui::Render());
-			IMGUI_VALID(ImGui::UpdatePlatformWindows());
+			ImGui::Render();
+			ImGui::UpdatePlatformWindows();
 		}
 
 		void RenderContext::BaseDestroy()

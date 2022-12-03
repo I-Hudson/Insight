@@ -445,14 +445,7 @@ namespace Insight
 						IS_CORE_ERROR("[IMGUI] Error: {}", error);
 					}
 				};
-				if (IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
-				{
-					ImGui_ImplVulkan_Init(&init_info, nullptr);
-				}
-				else
-				{
-					ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
-				}
+				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
 
 				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
 
