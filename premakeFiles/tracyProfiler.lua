@@ -16,9 +16,11 @@ project "tracyProfiler"
         folderDirTracy.. "public/common/**.hpp", 
         folderDirTracy.. "public/common/**.h", 
         folderDirTracy.. "public/common/**.cpp", 
+        folderDirTracy.. "public/common/**.c", 
 
         folderDirTracy.. "imgui/**.h", 
         folderDirTracy.. "imgui/**.cpp",
+        folderDirTracy.. "imgui/**.c",
 
 		folderDirTracy.. "nfd/nfd.h", 
         folderDirTracy.. "nfd/nfd_win.cpp",
@@ -26,12 +28,16 @@ project "tracyProfiler"
         folderDirTracy.. "server/**.hpp",
         folderDirTracy.. "server/**.h",
         folderDirTracy.. "server/**.cpp",
+        folderDirTracy.. "server/**.c",
 
 		folderDirTracy.. "profiler/src/**.hpp",
 		folderDirTracy.. "profiler/src/**.h",
         folderDirTracy.. "profiler/src/**.cpp",
+        folderDirTracy.. "profiler/src/**.c",
 
+        folderDirTracy.. "zstd/**.hpp",
         folderDirTracy.. "zstd/**.h",
+        folderDirTracy.. "zstd/**.cpp",
         folderDirTracy.. "zstd/**.c",
 
         folderDirTracy.. "profiler/build/win32/DebugVis.matvis",
@@ -42,6 +48,7 @@ project "tracyProfiler"
 	includedirs
 	{
 		folderDirTracy,
+		folderDirTracy.. "public",
 		folderDirTracy.. "imgui",
 		folderDirTracy.. "nfd",
 		folderDirTracy.. "server",
@@ -112,4 +119,12 @@ project "tracyProfiler"
 		}
 		defines
 		{ 
+		}
+		
+    filter "system:Windows"
+		removefiles 
+		{
+			folderDirTracy.. "profiler/src/wayland/**.c",
+			folderDirTracy.. "profiler/src/wayland/**.h",
+			folderDirTracy.. "profiler/src/BackendWayland.cpp",
 		}
