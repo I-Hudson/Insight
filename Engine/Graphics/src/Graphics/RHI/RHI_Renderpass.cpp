@@ -20,6 +20,45 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		u64 AttachmentDescription::GetHash() const
+		{
+			u64 hash = 0;
+
+			HashCombine(hash, Format);
+			HashCombine(hash, LoadOp);
+			HashCombine(hash, StoreOp);
+			HashCombine(hash, StencilLoadOp);
+			HashCombine(hash, StencilStoreOp);
+			HashCombine(hash, InitalLayout);
+			HashCombine(hash, FinalLayout);
+
+			return hash;
+		}
+
+		u64 RenderpassDescription::GetHash() const
+		{
+			u64 hash = 0;
+			for (const auto& texture : ColourAttachments)
+			{
+				HashCombine(hash, texture->GetInfo().Format);
+			}
+			for (const auto& attachment : Attachments)
+			{
+				HashCombine(hash, attachment.GetHash());
+			}
+
+			if (DepthStencil)
+			{
+				HashCombine(hash, DepthStencil);
+				HashCombine(hash, DepthStencilAttachment.GetHash());
+			}
+
+			HashCombine(hash, AllowDynamicRendering);
+			HashCombine(hash, SwapchainPass);
+
+			return hash;
+		}
+
 		void RHI_RenderpassManager::SetRenderContext(RenderContext* context)
 		{
 			m_context = context;
@@ -117,9 +156,6 @@ namespace Insight
 		RHI_Renderpass RHI_RenderpassManager::AddRenderpass(RenderpassDescription& description)
 		{
 			IS_PROFILE_FUNCTION();
-			const u64 hash = description.GetHash();
-			ASSERT(m_renderpasses.find(hash) == m_renderpasses.end());
-
 #ifdef IS_VULKAN_ENABLED
 			if (GraphicsManager::IsVulkan())
 			{
@@ -213,7 +249,7 @@ namespace Insight
 								attachment = &descriptions.at(i);
 							}
 							resultAttachments.push_back(CreateColour(textures.at(i), attachment));
-							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(i), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL } );
+							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(i), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 							if (!attachment)
 							{
 								AddRenderpassDescriptionAttachmentData(descriptions, resultAttachments.at(resultAttachments.size() - 1ull));
@@ -226,7 +262,7 @@ namespace Insight
 							resultAttachments.at(0).format = resultAttachments.at(0).format != VkFormat::VK_FORMAT_UNDEFINED ?
 								resultAttachments.at(0).format
 								: static_cast<RHI::Vulkan::RenderContext_Vulkan*>(GraphicsManager::Instance().GetRenderContext())->GetSwapchainColourFormat();
-							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(0), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL } );
+							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(0), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 						}
 
 						return { resultAttachments, resultReferences };
@@ -242,7 +278,7 @@ namespace Insight
 						{
 							result.attachment = static_cast<u32>(attachmentDescriptions.size());
 							result.layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_STENCIL_READ_ONLY_OPTIMAL;
-							attachmentDescriptions.push_back(CreateDepthStencil(texture, attachmentDescription.IsValid() ? 
+							attachmentDescriptions.push_back(CreateDepthStencil(texture, attachmentDescription.IsValid() ?
 								&attachmentDescription : nullptr));
 
 							if (!attachmentDescription.IsValid())
@@ -350,11 +386,14 @@ namespace Insight
 				ThrowIfFailed(vkCreateRenderPass(contextVulkan->GetDevice(), &createInfo, nullptr, &renderpass));
 				RHI_Renderpass newPass;
 				newPass.Resource = renderpass;
+
+				const u64 hash = description.GetHash();
+				ASSERT(m_renderpasses.find(hash) == m_renderpasses.end());
 				m_renderpasses[hash] = newPass;
 			}
 #endif /// #ifdef IS_VULKAN_ENABLED
 
-			return m_renderpasses[hash];
+			return m_renderpasses[description.GetHash()];
 		}
 	}
 }

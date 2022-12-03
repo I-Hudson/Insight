@@ -41,20 +41,7 @@ namespace Insight
 				return FinalLayout != ImageLayout::Undefined;
 			}
 
-			u64 GetHash() const
-			{
-				u64 hash = 0;
-			
-				HashCombine(hash, Format);
-				HashCombine(hash, LoadOp);
-				HashCombine(hash, StoreOp);
-				HashCombine(hash, StencilLoadOp);
-				HashCombine(hash, StencilStoreOp);
-				HashCombine(hash, InitalLayout);
-				HashCombine(hash, FinalLayout);
-
-				return hash;
-			}
+			u64 GetHash() const;
 
 			static AttachmentDescription Default(PixelFormat format, ImageLayout finalLayout)
 			{
@@ -97,29 +84,7 @@ namespace Insight
 			{
 				Attachments.push_back(description);
 			}
-
-			u64 GetHash() const
-			{
-				u64 hash = 0;
-				for (const auto& texture : ColourAttachments)
-				{
-					HashCombine(hash, texture);
-				}
-				for (const auto& attachment : Attachments)
-				{
-					HashCombine(hash, attachment.GetHash());
-				}
-
-				if (DepthStencil)
-				{
-					HashCombine(hash, DepthStencil);
-					HashCombine(hash, DepthStencilAttachment.GetHash());
-				}
-
-				HashCombine(hash, SwapchainPass);
-
-				return hash;
-			}
+			u64 GetHash() const;
 
 			/// [PRIVATE] This should not be set manually by the user. RenderContext's and other graphics
 			/// API use this.

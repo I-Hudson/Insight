@@ -480,7 +480,8 @@ namespace Insight
 				///cmdList->EndRenderpass();
 			}
 
-			if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+			// If our swap chain image is not in the 'PresentSrc' layout then transition it.
+			if (m_context->GetSwaphchainIamge()->GetLayout() != ImageLayout::PresentSrc)
 			{
 				PipelineBarrier barrier = { };
 				barrier.SrcStage = +PipelineStageFlagBits::ColourAttachmentOutput;

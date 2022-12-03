@@ -423,6 +423,15 @@ namespace Insight
 				pool_info.pPoolSizes = pool_sizes;
 				ThrowIfFailed(vkCreateDescriptorPool(m_device, &pool_info, nullptr, &m_imguiDescriptorPool));
 
+				// Create renderpass
+				RenderpassDescription renderpassDescription = { };
+				renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
+				renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
+				renderpassDescription.AllowDynamicRendering = false;
+				renderpassDescription.SwapchainPass = true;
+				RHI_Renderpass renderpass = GetRenderpassManager().GetOrCreateRenderpass(renderpassDescription);
+				SetObjectName("ImguiRenderPass", (u64)renderpass.Resource, VK_OBJECT_TYPE_RENDER_PASS);
+
 				/// Setup Platform/Renderer backends
 				ImGui_ImplGlfw_InitForVulkan(Window::Instance().GetRawWindow(), false);
 				ImGui_ImplVulkan_InitInfo init_info = {};
@@ -445,7 +454,7 @@ namespace Insight
 						IS_CORE_ERROR("[IMGUI] Error: {}", error);
 					}
 				};
-				ImGui_ImplVulkan_Init(&init_info, m_imguiRenderpass);
+				ImGui_ImplVulkan_Init(&init_info, static_cast<VkRenderPass>(renderpass.Resource));
 
 				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
 

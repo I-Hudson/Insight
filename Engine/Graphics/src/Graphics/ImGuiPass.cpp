@@ -73,12 +73,13 @@ namespace Insight
 					pso.SrcAplhaBlendFactor = BlendFactor::One;
 					pso.DstAplhaBlendFactor = BlendFactor::OneMinusSrcAlpha;
 					pso.AplhaBlendOp = BlendOp::Add;
+					pso.AllowDynamicRendering = false;
 
 					builder.SetPipeline(pso);
 
 					RenderpassDescription renderpassDescription = { };
 					renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
-					renderpassDescription.Attachments.back().InitalLayout = ImageLayout::ColourAttachment;
+					renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
 					renderpassDescription.AllowDynamicRendering = false;
 					builder.SetRenderpass(renderpassDescription);
 				},

@@ -55,6 +55,8 @@ namespace Insight
 
 			std::vector<DynamicState> Dynamic_States{ DynamicState::Viewport, DynamicState::Scissor };
 
+			bool AllowDynamicRendering = true;
+
 			/// Private members. Should not be touched.
 			bool Swapchain = false;
 			RHI_Shader* Shader = nullptr;

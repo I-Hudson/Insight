@@ -243,7 +243,7 @@ namespace Insight
 			
 				RenderContext* context = (RenderContext*)m_context;
 				RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
-				VkRenderPass renderpass = *reinterpret_cast<VkRenderPass*>(&rhiRenderpass);
+				VkRenderPass renderpass = reinterpret_cast<VkRenderPass>(rhiRenderpass.Resource);
 
 				VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = { };
 				graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -288,7 +288,8 @@ namespace Insight
 				pipelineRenderingCreateInfo.depthAttachmentFormat = depthAttachmentFormat;
 				pipelineRenderingCreateInfo.stencilAttachmentFormat = stencilAttachmentFormat;
 
-				if (m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
+				if (pso.AllowDynamicRendering 
+					&& m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 				{
 					graphicsPipelineCreateInfo.pNext = &pipelineRenderingCreateInfo;
 					graphicsPipelineCreateInfo.renderPass = VK_NULL_HANDLE;

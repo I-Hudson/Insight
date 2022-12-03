@@ -303,6 +303,17 @@ namespace Insight
 						RHI_Renderpass renderpass = m_context->GetRenderpassManager().GetOrCreateRenderpass(renderDescription);
 						VkRenderPass vkRenderpass = reinterpret_cast<VkRenderPass>(renderpass.Resource);
 
+						int descriptionIndex = 0;
+						for (RHI_Texture* texture : renderDescription.ColourAttachments)
+						{
+							texture->SetLayout(renderDescription.Attachments.at(descriptionIndex++).FinalLayout);
+						}
+
+						if (renderDescription.DepthStencil)
+						{
+							renderDescription.DepthStencil->SetLayout(renderDescription.DepthStencilAttachment.FinalLayout);
+						}
+
 						std::vector<VkClearValue> clearColours;
 						CreateFramebuffer(vkRenderpass, rect, clearColours);
 
