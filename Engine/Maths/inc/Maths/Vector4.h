@@ -18,7 +18,7 @@ namespace Insight
 		public:
 			Vector4();
 			Vector4(float x, float y, float z, float w);
-			Vector4(float value);
+			Vector4(float scalar);
 
 			Vector4(const Vector3& other, float w);
 			Vector4(Vector3&& other);
@@ -47,31 +47,31 @@ namespace Insight
 			bool operator==(const Vector4& other) const;
 			bool operator!=(const Vector4& other) const;
 
-			Vector4 operator=(float value);
+			Vector4 operator=(float scalar);
 			Vector4 operator=(const Vector4& other);
 
-			Vector4 operator*(float value) const;
+			Vector4 operator*(float scalar) const;
 			Vector4 operator*(const Vector4& other) const;
 
-			Vector4 operator/(float value) const;
+			Vector4 operator/(float scalar) const;
 			Vector4 operator/(const Vector4& other) const;
 
-			Vector4 operator+(float value) const;
+			Vector4 operator+(float scalar) const;
 			Vector4 operator+(const Vector4& other) const;
 
-			Vector4 operator-(float value) const;
+			Vector4 operator-(float scalar) const;
 			Vector4 operator-(const Vector4& other) const;
 
-			Vector4 operator*=(float value);
+			Vector4 operator*=(float scalar);
 			Vector4 operator*=(const Vector4& other);
 							 
-			Vector4 operator/=(float value);
+			Vector4 operator/=(float scalar);
 			Vector4 operator/=(const Vector4& other);
 							 
-			Vector4 operator+=(float value);
+			Vector4 operator+=(float scalar);
 			Vector4 operator+=(const Vector4& other);
 							 
-			Vector4 operator-=(float value);
+			Vector4 operator-=(float scalar);
 			Vector4 operator-=(const Vector4& other);
 
 			const float* Data() const { return &x; }

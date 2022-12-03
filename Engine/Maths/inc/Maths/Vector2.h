@@ -41,31 +41,31 @@ namespace Insight
 			bool operator==(const Vector2& other) const;
 			bool operator!=(const Vector2& other) const;
 
-			Vector2 operator=(float value);
+			Vector2 operator=(float scalar);
 			Vector2 operator=(const Vector2& other);
 
-			Vector2 operator*(float value) const;
+			Vector2 operator*(float scalar) const;
 			Vector2 operator*(const Vector2& other) const;
 
-			Vector2 operator/(float value) const;
+			Vector2 operator/(float scalar) const;
 			Vector2 operator/(const Vector2& other) const;
 
-			Vector2 operator+(float value) const;
+			Vector2 operator+(float scalar) const;
 			Vector2 operator+(const Vector2& other) const;
 
-			Vector2 operator-(float value) const;
+			Vector2 operator-(float scalar) const;
 			Vector2 operator-(const Vector2& other) const;
 
-			Vector2 operator*=(float value);
+			Vector2 operator*=(float scalar);
 			Vector2 operator*=(const Vector2& other);
 
-			Vector2 operator/=(float value);
+			Vector2 operator/=(float scalar);
 			Vector2 operator/=(const Vector2& other);
 
-			Vector2 operator+=(float value);
+			Vector2 operator+=(float scalar);
 			Vector2 operator+=(const Vector2& other);
 
-			Vector2 operator-=(float value);
+			Vector2 operator-=(float scalar);
 			Vector2 operator-=(const Vector2& other);
 
 			const float* Data() const { return &x; }

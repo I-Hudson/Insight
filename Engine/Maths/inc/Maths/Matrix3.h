@@ -80,7 +80,14 @@ namespace Insight
 			{
 #ifdef IS_MATHS_DIRECTX_MATHS
 				// Vector3 is off size XMVECTOR which is a vector 4.
-				struct { Vector3 data[4]; };
+				struct { DirectX::XMMATRIX xmmatrix; };
+				struct 
+				{ 
+					Vector3 v0; float e0;
+					Vector3 v1; float e1;
+					Vector3 v2; float e2;
+					Vector3 v3; float e3;
+				};
 				struct
 				{
 					float
@@ -89,7 +96,6 @@ namespace Insight
 						m_20, m_21, m_22, m_23,
 						m_30, m_31, m_32, m_33;
 				};
-				struct DirectX::XMMATRIX xmmatrix;
 #else
 				struct { Vector3 data[3]; };
 				struct

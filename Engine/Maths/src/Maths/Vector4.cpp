@@ -28,11 +28,11 @@ namespace Insight
 			: x(x), y(y), z(z), w(w)
 #endif
 		{ }
-		Vector4::Vector4(float value)
+		Vector4::Vector4(float scalar)
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(value, value, value, value))
+			: xmvector(DirectX::XMVectorSet(scalar, scalar, scalar, scalar))
 #else
-			: x(value), y(value), z(value), w(value)
+			: x(scalar), y(scalar), z(scalar), w(scalar)
 #endif
 		{ }
 
@@ -168,15 +168,15 @@ namespace Insight
 			return !(*this == other);
 		}
 
-		Vector4 Vector4::operator=(float value)
+		Vector4 Vector4::operator=(float scalar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			xmvector = DirectX::XMVectorReplicate(value);
+			xmvector = DirectX::XMVectorReplicate(scalar);
 #else
-			x = value;
-			x = value;
-			x = value;
-			w = value;
+			x = scalar;
+			x = scalar;
+			x = scalar;
+			w = scalar;
 #endif
 			return *this;
 		}
@@ -193,12 +193,12 @@ namespace Insight
 			return *this;
 		}
 
-		Vector4 Vector4::operator*(float value) const
+		Vector4 Vector4::operator*(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector4(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector4(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector4(x * value, y * value, z * value, w * value);
+			return Vector4(x * scalar, y * scalar, z * scalar, w * scalar);
 #endif
 		}
 		Vector4 Vector4::operator*(const Vector4& other) const
@@ -210,12 +210,12 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator/(float value) const
+		Vector4 Vector4::operator/(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector4(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector4(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector4(x / value, y / value, z / value, w / value);
+			return Vector4(x / scalar, y / scalar, z / scalar, w / scalar);
 #endif
 		}
 		Vector4 Vector4::operator/(const Vector4& other) const
@@ -227,12 +227,12 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator+(float value) const
+		Vector4 Vector4::operator+(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector4(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector4(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector4(x + value, y + value, z + value, w + value);
+			return Vector4(x + scalar, y + scalar, z + scalar, w + scalar);
 #endif
 		}
 		Vector4 Vector4::operator+(const Vector4& other) const
@@ -244,12 +244,12 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator-(float value) const
+		Vector4 Vector4::operator-(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector4(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector4(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector4(x - value, y - value, z - value, w - value);
+			return Vector4(x - scalar, y - scalar, z - scalar, w - scalar);
 #endif
 		}
 		Vector4 Vector4::operator-(const Vector4& other) const
@@ -261,9 +261,9 @@ namespace Insight
 #endif
 		}
 
-		Vector4 Vector4::operator*=(float value)
+		Vector4 Vector4::operator*=(float scalar)
 		{
-			*this = Vector4(*this) * value;
+			*this = Vector4(*this) * scalar;
 			return *this;
 		}
 		Vector4 Vector4::operator*=(const Vector4& other)
@@ -272,9 +272,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector4 Vector4::operator/=(float value)
+		Vector4 Vector4::operator/=(float scalar)
 		{
-			*this = Vector4(*this) / value;
+			*this = Vector4(*this) / scalar;
 			return *this;
 		}
 		Vector4 Vector4::operator/=(const Vector4& other)
@@ -283,9 +283,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector4 Vector4::operator+=(float value)
+		Vector4 Vector4::operator+=(float scalar)
 		{
-			*this = Vector4(*this) + value;
+			*this = Vector4(*this) + scalar;
 			return *this;
 		}
 		Vector4 Vector4::operator+=(const Vector4& other)
@@ -294,9 +294,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector4 Vector4::operator-=(float value)
+		Vector4 Vector4::operator-=(float scalar)
 		{
-			*this = Vector4(*this) - value;
+			*this = Vector4(*this) - scalar;
 			return *this;
 		}
 		Vector4 Vector4::operator-=(const Vector4& other)

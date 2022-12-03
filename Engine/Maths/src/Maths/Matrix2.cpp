@@ -102,11 +102,39 @@ namespace Insight
 
 		Vector2& Matrix2::operator[](int i)
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		Vector2& Matrix2::operator[](unsigned int i)
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
+		}
+		const Vector2& Matrix2::operator[](int i) const
+		{
+			return const_cast<Matrix2&>(*this)[i];
+		}
+		const Vector2& Matrix2::operator[](unsigned int i) const
+		{
+			return const_cast<Matrix2&>(*this)[i];
 		}
 
 		bool Matrix2::operator==(const Matrix2& other) const
@@ -182,8 +210,8 @@ namespace Insight
 
 		Matrix2 Matrix2::operator*=(const Vector2& other)
 		{
-			data[0] *= other.x;
-			data[1] *= other.y;
+			(*this)[0] *= other.x;
+			(*this)[1] *= other.y;
 			return *this;
 		}
 		Matrix2 Matrix2::operator*=(const Matrix2& other)
@@ -194,8 +222,8 @@ namespace Insight
 
 		Matrix2 Matrix2::operator/=(const Vector2& other)
 		{
-			data[0] /= other.x;
-			data[1] /= other.y;
+			(*this)[0] /= other.x;
+			(*this)[1] /= other.y;
 			return *this;
 		}
 		Matrix2 Matrix2::operator/=(const Matrix2& other)
@@ -206,8 +234,8 @@ namespace Insight
 
 		Matrix2 Matrix2::operator-=(const Vector2& other)
 		{
-			data[0] -= other.x;
-			data[1] -= other.y;
+			(*this)[0] -= other.x;
+			(*this)[1] -= other.y;
 			return *this;
 		}
 		Matrix2 Matrix2::operator-=(const Matrix2& other)
@@ -218,8 +246,8 @@ namespace Insight
 
 		Matrix2 Matrix2::operator+=(const Vector2& other)
 		{
-			data[0] += other.x;
-			data[1] += other.y;
+			(*this)[0] += other.x;
+			(*this)[1] += other.y;
 			return *this;
 		}
 		Matrix2 Matrix2::operator+=(const Matrix2& other)
@@ -230,7 +258,7 @@ namespace Insight
 
 		const float* Matrix2::Data() const
 		{
-			return data[0].Data();
+			return (*this)[0].Data();
 		}
 	}
 }

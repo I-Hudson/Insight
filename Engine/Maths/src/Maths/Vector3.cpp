@@ -26,11 +26,11 @@ namespace Insight
 			: x(x), y(y), z(z)
 #endif
 		{ }
-		Vector3::Vector3(float value)
+		Vector3::Vector3(float scalar)
 #ifdef IS_MATHS_DIRECTX_MATHS
-			: xmvector(DirectX::XMVectorSet(value,value, value, 0.0f))
+			: xmvector(DirectX::XMVectorSet(scalar,scalar, scalar, 0.0f))
 #else
-			: x(value), y(value), z(value)
+			: x(scalar), y(scalar), z(scalar)
 #endif
 		{ }
 
@@ -155,14 +155,14 @@ namespace Insight
 			return !(*this == other);
 		}
 
-		Vector3 Vector3::operator=(float value)
+		Vector3 Vector3::operator=(float scalar)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			xmvector = DirectX::XMVectorSet(value, value, value, 0.0f);
+			xmvector = DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f);
 #else
-			x = value;
-			y = value;
-			z = value;
+			x = scalar;
+			y = scalar;
+			z = scalar;
 #endif
 			return *this;
 		}
@@ -178,12 +178,12 @@ namespace Insight
 			return *this;
 		}
 
-		Vector3 Vector3::operator*(float value) const
+		Vector3 Vector3::operator*(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector3(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+			return Vector3(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
 #else
-			return Vector3(x * value, y * value, z * value);
+			return Vector3(x * scalar, y * scalar, z * scalar);
 #endif
 		}
 		Vector3 Vector3::operator*(const Vector3& other) const
@@ -195,12 +195,12 @@ namespace Insight
 #endif
 		}
 
-		Vector3 Vector3::operator/(float value) const
+		Vector3 Vector3::operator/(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector3(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+			return Vector3(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
 #else
-			return Vector3(x / value, y / value, z / value);
+			return Vector3(x / scalar, y / scalar, z / scalar);
 #endif
 		}
 		Vector3 Vector3::operator/(const Vector3& other) const
@@ -212,12 +212,12 @@ namespace Insight
 #endif
 		}
 
-		Vector3 Vector3::operator+(float value) const
+		Vector3 Vector3::operator+(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector3(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+			return Vector3(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
 #else
-			return Vector3(x + value, y + value, z + value);
+			return Vector3(x + scalar, y + scalar, z + scalar);
 #endif
 		}
 		Vector3 Vector3::operator+(const Vector3& other) const
@@ -229,12 +229,12 @@ namespace Insight
 #endif
 		}
 
-		Vector3 Vector3::operator-(float value) const
+		Vector3 Vector3::operator-(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector3(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorSet(value, value, value, 0.0f)));
+			return Vector3(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorSet(scalar, scalar, scalar, 0.0f)));
 #else
-			return Vector3(x - value, y - value, z - value);
+			return Vector3(x - scalar, y - scalar, z - scalar);
 #endif
 		}
 		Vector3 Vector3::operator-(const Vector3& other) const
@@ -246,9 +246,9 @@ namespace Insight
 #endif
 		}
 
-		Vector3 Vector3::operator*=(float value)
+		Vector3 Vector3::operator*=(float scalar)
 		{
-			*this = Vector3(*this) * value;
+			*this = Vector3(*this) * scalar;
 			return *this;
 		}
 		Vector3 Vector3::operator*=(const Vector3& other)
@@ -257,9 +257,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector3 Vector3::operator/=(float value)
+		Vector3 Vector3::operator/=(float scalar)
 		{
-			*this = Vector3(*this) / value;
+			*this = Vector3(*this) / scalar;
 			return *this;
 		}
 		Vector3 Vector3::operator/=(const Vector3& other)
@@ -268,9 +268,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector3 Vector3::operator+=(float value)
+		Vector3 Vector3::operator+=(float scalar)
 		{
-			*this = Vector3(*this) + value;
+			*this = Vector3(*this) + scalar;
 			return *this;
 		}
 		Vector3 Vector3::operator+=(const Vector3& other)
@@ -279,9 +279,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector3 Vector3::operator-=(float value)
+		Vector3 Vector3::operator-=(float scalar)
 		{
-			*this = Vector3(*this) - value;
+			*this = Vector3(*this) - scalar;
 			return *this;
 		}
 		Vector3 Vector3::operator-=(const Vector3& other)

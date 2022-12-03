@@ -42,6 +42,8 @@ namespace Insight
 
 			Vector2& operator[](int i);
 			Vector2& operator[](unsigned int i);
+			const Vector2& operator[](int i) const;
+			const Vector2& operator[](unsigned int i) const;
 
 			bool operator==(const Matrix2& other) const;
 			bool operator!=(const Matrix2& other) const;
@@ -76,7 +78,14 @@ namespace Insight
 			{
 #ifdef IS_MATHS_DIRECTX_MATHS
 				// Vector2 is off size XMVECTOR which is a vector 4.
-				struct { Vector2 data[4]; };
+				struct { DirectX::XMMATRIX xmmatrix; };
+				struct 
+				{ 
+					Vector2 v0; float e02;  float e03;
+					Vector2 v1; float e12;  float e13;
+					Vector2 v2; float e22;  float e23;
+					Vector2 v3; float e32;  float e33;
+				};
 				struct
 				{
 					float
@@ -85,7 +94,6 @@ namespace Insight
 						m_20, m_21, m_22, m_23,
 						m_30, m_31, m_32, m_33;
 				};
-				struct DirectX::XMMATRIX xmmatrix;
 #else
 				struct { Vector2 data[2]; };
 				struct

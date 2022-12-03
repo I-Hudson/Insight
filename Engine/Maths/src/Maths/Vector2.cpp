@@ -169,12 +169,12 @@ namespace Insight
 			return *this;
 		}
 
-		Vector2 Vector2::operator*(float value) const
+		Vector2 Vector2::operator*(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector2(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector2(DirectX::XMVectorMultiply(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector2(x * value, y * value);
+			return Vector2(x * scalar, y * scalar);
 #endif
 		}
 		Vector2 Vector2::operator*(const Vector2& other) const
@@ -186,12 +186,12 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator/(float value) const
+		Vector2 Vector2::operator/(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector2(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector2(DirectX::XMVectorDivide(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector2(x / value, y / value);
+			return Vector2(x / scalar, y / scalar);
 #endif
 		}
 		Vector2 Vector2::operator/(const Vector2& other) const
@@ -203,12 +203,12 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator+(float value) const
+		Vector2 Vector2::operator+(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector2(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector2(DirectX::XMVectorAdd(xmvector, DirectX::XMVectorReplicate(scalar)));
 #else
-			return Vector2(x + value, y + value);
+			return Vector2(x + scalar, y + scalar);
 #endif
 		}
 		Vector2 Vector2::operator+(const Vector2& other) const
@@ -220,13 +220,13 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator-(float value) const
+		Vector2 Vector2::operator-(float scalar) const
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
-			return Vector2(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(value)));
+			return Vector2(DirectX::XMVectorSubtract(xmvector, DirectX::XMVectorReplicate(scalar)));
 
 #else
-			return Vector2(x - value, y - value);
+			return Vector2(x - scalar, y - scalar);
 #endif
 		}
 		Vector2 Vector2::operator-(const Vector2& other) const
@@ -238,9 +238,9 @@ namespace Insight
 #endif
 		}
 
-		Vector2 Vector2::operator*=(float value)
+		Vector2 Vector2::operator*=(float scalar)
 		{
-			*this = Vector2(*this) * value;
+			*this = Vector2(*this) * scalar;
 			return *this;
 		}
 		Vector2 Vector2::operator*=(const Vector2& other)
@@ -249,9 +249,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector2 Vector2::operator/=(float value)
+		Vector2 Vector2::operator/=(float scalar)
 		{
-			*this = Vector2(*this) / value;
+			*this = Vector2(*this) / scalar;
 			return *this;
 		}
 		Vector2 Vector2::operator/=(const Vector2& other)
@@ -260,9 +260,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector2 Vector2::operator+=(float value)
+		Vector2 Vector2::operator+=(float scalar)
 		{
-			*this = Vector2(*this) + value;
+			*this = Vector2(*this) + scalar;
 			return *this;
 		}
 		Vector2 Vector2::operator+=(const Vector2& other)
@@ -271,9 +271,9 @@ namespace Insight
 			return *this;
 		}
 
-		Vector2 Vector2::operator-=(float value)
+		Vector2 Vector2::operator-=(float scalar)
 		{
-			*this = Vector2(*this) - value;
+			*this = Vector2(*this) - scalar;
 			return *this;
 		}
 		Vector2 Vector2::operator-=(const Vector2& other)

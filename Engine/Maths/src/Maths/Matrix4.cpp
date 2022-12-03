@@ -32,7 +32,12 @@ namespace Insight
 			, m_20(0.0f), m_21(0.0f), m_22(0.0f), m_23(0.0f)
 			, m_30(0.0f), m_31(0.0f), m_32(0.0f), m_33(0.0f)
 #endif
-		{ }
+		{
+			data[0] = Vector4::Zero;
+			data[1] = Vector4::Zero;
+			data[2] = Vector4::Zero;
+			data[3] = Vector4::Zero;
+		}
 		Matrix4::Matrix4(	float m00, float m01, float m02, float m03,
 							float m10, float m11, float m12, float m13,
 							float m20, float m21, float m22, float m23,
@@ -49,7 +54,12 @@ namespace Insight
 			, m_20(m20), m_21(m21), m_22(m22), m_23(m23)
 			, m_30(m30), m_31(m31), m_32(m32), m_33(m33)
 #endif
-		{ }
+		{
+			data[0] = Vector4(m00, m01, m02, m03);
+			data[1] = Vector4(m10, m11, m12, m13);
+			data[2] = Vector4(m20, m21, m22, m23);
+			data[3] = Vector4(m30, m31, m32, m33);
+		}
 		Matrix4::Matrix4(const Matrix4& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
 			: xmmatrix(other.xmmatrix)

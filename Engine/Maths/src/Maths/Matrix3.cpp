@@ -3,6 +3,8 @@
 
 #include "Maths/MathsUtils.h"
 
+#include <assert.h>
+
 namespace Insight
 {
 	namespace Maths
@@ -133,19 +135,43 @@ namespace Insight
 
 		Vector3& Matrix3::operator[](int i)
 		{
-			return data[i];
+			switch (i)	
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		Vector3& Matrix3::operator[](unsigned int i)
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		const Vector3& Matrix3::operator[](int i) const
 		{
-			return data[i];
+			return const_cast<Matrix3&>(*this)[i];
 		}
 		const Vector3& Matrix3::operator[](unsigned int i) const
 		{
-			return data[i];
+			return const_cast<Matrix3&>(*this)[i];
 		}
 
 		bool Matrix3::operator==(const Matrix3& other) const
@@ -246,9 +272,9 @@ namespace Insight
 
 		Matrix3 Matrix3::operator*=(const Vector3& other)
 		{
-			data[0] *= other.x;
-			data[1] *= other.y;
-			data[2] *= other.z;
+			(*this)[0] *= other.x;
+			(*this)[1] *= other.y;
+			(*this)[2] *= other.z;
 			return *this;
 		}
 		Matrix3 Matrix3::operator*=(const Matrix3& other)
@@ -259,9 +285,9 @@ namespace Insight
 
 		Matrix3 Matrix3::operator/=(const Vector3& other)
 		{
-			data[0] /= other.x;
-			data[1] /= other.y;
-			data[2] /= other.z;
+			(*this)[0] /= other.x;
+			(*this)[1] /= other.y;
+			(*this)[2] /= other.z;
 			return *this;
 		}
 		Matrix3 Matrix3::operator/=(const Matrix3& other)
@@ -272,9 +298,9 @@ namespace Insight
 
 		Matrix3 Matrix3::operator-=(const Vector3& other)
 		{
-			data[0] -= other.x;
-			data[1] -= other.y;
-			data[2] -= other.z;
+			(*this)[0] -= other.x;
+			(*this)[1] -= other.y;
+			(*this)[2] -= other.z;
 			return *this;
 		}
 		Matrix3 Matrix3::operator-=(const Matrix3& other)
@@ -285,9 +311,9 @@ namespace Insight
 
 		Matrix3 Matrix3::operator+=(const Vector3& other)
 		{
-			data[0] += other.x;
-			data[1] += other.y;
-			data[2] += other.z;
+			(*this)[0] += other.x;
+			(*this)[1] += other.y;
+			(*this)[2] += other.z;
 			return *this;
 		}
 		Matrix3 Matrix3::operator+=(const Matrix3& other)
@@ -298,7 +324,7 @@ namespace Insight
 
 		const float* Matrix3::Data() const
 		{
-			return data[0].Data();
+			return (*this)[0].Data();
 		}
 	}
 }
