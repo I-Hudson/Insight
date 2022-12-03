@@ -44,6 +44,11 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\NVIDIA_Nsight_Aftermath_SDK_2022.1.0.2208
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080\lib\x64\GFSDK_Aftermath_Lib.x64.lib"	"lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080\lib\x64\GFSDK_Aftermath_Lib.x64.dll"	"dll"
 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.lib"                                   "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.dll"		                            "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.lib"                                 "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.dll"		                            "dll"
+
 pause
 
 :COPY_TO_DEBUG_DEPS
