@@ -15,6 +15,7 @@ struct VertexOutput
 
 struct Push_Constant
 {
+	float4x4 Transform;
 	int Buffer_Light_Camera_Index;
 };
 
@@ -25,7 +26,7 @@ VertexOutput VSMain(const VertexInput input)
 	VertexOutput vsOut;
 	vsOut.Pos = float4(input.Pos.xyz, 1);
 
-	vsOut.Pos = mul(bpo_Transform, vsOut.Pos);
+	vsOut.Pos = mul(push_constant.Transform, vsOut.Pos);
 	vsOut.Pos = mul(bl_Camera_Proj_View[push_constant.Buffer_Light_Camera_Index], vsOut.Pos);
 
 	return vsOut;

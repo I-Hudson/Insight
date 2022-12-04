@@ -67,7 +67,13 @@ project "Insight_Runtime"
         "OptickCore.lib",
         "meshoptimizer.lib",
     }
-
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+    
     libdirs
     {
         "%{wks.location}/deps/lib",

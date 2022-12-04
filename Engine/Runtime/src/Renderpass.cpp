@@ -404,7 +404,6 @@ namespace Insight
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
-						cmdList->SetPushConstant(0, sizeof(int), &i);
 
 						for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 						{
@@ -427,10 +426,23 @@ namespace Insight
 								continue;
 							}
 
-							BufferPerObject object = {};
-							object.Transform = transform;
-							object.Previous_Transform = transform;
-							cmdList->SetUniform(1, 1, object);
+							//BufferPerObject object = {};
+							//object.Transform = transform;
+							//object.Previous_Transform = transform;
+							//cmdList->SetUniform(1, 1, object);
+							
+							struct Object
+							{
+								glm::mat4 Transform;
+								int CascadeIndex;
+							};
+							Object object =
+							{
+								transform,
+								i
+							};
+							cmdList->SetPushConstant(0, sizeof(object), &object);
+
 							mesh->Draw(cmdList);
 						}
 						cmdList->EndRenderpass();

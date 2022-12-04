@@ -2,8 +2,6 @@
 
 #include "Graphics/PixelFormat.h"
 
-#include "Core/Profiler.h"
-
 #include <string>
 #include <vector>
 

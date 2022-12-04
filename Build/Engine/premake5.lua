@@ -60,6 +60,7 @@ IncludeDirs["dxcompiler"] = "%{wks.location}vendor/dxcompiler/win_debug/inc"
 IncludeDirs["assimp"] = "%{wks.location}vendor/assimp/include"
 IncludeDirs["optick"] = "%{wks.location}vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
+IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"
 IncludeDirs["stb_image"] = "%{wks.location}vendor/stb"
 IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
 IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
@@ -113,6 +114,7 @@ workspace "Insight"
         "%{IncludeDirs.optick}",
         "%{IncludeDirs.tracy}",
         "%{IncludeDirs.doctest}",
+        "%{IncludeDirs.pix}",
     }
 
     if (profileTool == "tracy") then
@@ -121,6 +123,9 @@ workspace "Insight"
     end
     if (profileTool == "optick") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
+    end
+    if (profileTool == "pix") then
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }
     end
 
     libdirs

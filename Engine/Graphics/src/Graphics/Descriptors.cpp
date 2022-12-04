@@ -32,6 +32,8 @@ namespace Insight
 			RHI_Buffer_View = other.RHI_Buffer_View;
 			RHI_Texture = other.RHI_Texture;
 			RHI_Sampler = other.RHI_Sampler;
+			Hash_No_Resource = other.Hash_No_Resource;
+			Hash_Resource = other.Hash_Resource;
 
 			return *this;
 		}
@@ -45,6 +47,8 @@ namespace Insight
 			RHI_Buffer_View = other.RHI_Buffer_View;
 			RHI_Texture = other.RHI_Texture;
 			RHI_Sampler = other.RHI_Sampler;
+			Hash_No_Resource = other.Hash_No_Resource;
+			Hash_Resource = other.Hash_Resource;
 
 			other.Set = -1;
 			other.Binding = -1;
@@ -54,6 +58,8 @@ namespace Insight
 			other.RHI_Buffer_View = {};
 			other.RHI_Texture = nullptr;
 			other.RHI_Sampler = nullptr;
+			other.Hash_No_Resource = 0;
+			other.Hash_Resource = 0;
 
 			return *this;
 		}
@@ -83,7 +89,6 @@ namespace Insight
 		u64 DescriptorBinding::GetHash(bool includeResource) const
 		{
 			u64 hash = 0;
-
 			HashCombine(hash, Set);
 			HashCombine(hash, Binding);
 			HashCombine(hash, Stages);

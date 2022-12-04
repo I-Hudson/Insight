@@ -54,7 +54,13 @@ project "Insight_Editor"
 
         "glm.lib",
     }
-
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+    
     libdirs
     {
         "%{wks.location}/vendor/glfw/lib",

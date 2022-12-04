@@ -40,7 +40,13 @@ project "Insight_Maths"
         "tracy.lib",
         "OptickCore.lib",
     }
-
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+    
     libdirs
     {
         "%{wks.location}/deps/lib",

@@ -40,6 +40,12 @@ project "Insight_Core"
         "tracy.lib",
         "OptickCore.lib",
     }
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
 
     libdirs
     {

@@ -78,7 +78,13 @@ project "Insight_Graphics"
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }
-
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+    
     libdirs
     {
         "%{LibDirs.vulkan}",

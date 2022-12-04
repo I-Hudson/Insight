@@ -53,7 +53,13 @@ project "Insight_Input"
         "glm.lib",
         "imgui.lib",
     }
-
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+    
     libdirs
     {
     }
