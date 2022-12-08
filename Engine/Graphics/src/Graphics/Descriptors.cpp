@@ -130,29 +130,33 @@ namespace Insight
 			, Bindings(std::move(bindings))
 		{ }
 		DescriptorSet::DescriptorSet(const DescriptorSet& other) NO_EXPECT
-			: Name(other.Name)
-			, Set(other.Set)
-			, Bindings(other.Bindings)
-		{ }
+		{
+			*this = other;
+		}
 		DescriptorSet::DescriptorSet(DescriptorSet&& other) NO_EXPECT
-			: Name(std::move(other.Name))
-			, Set(std::move(other.Set))
-			, Bindings(std::move(other.Bindings))
-		{ }
+		{ 
+			*this = other;
+		}
 
 
 		DescriptorSet& DescriptorSet::operator=(const DescriptorSet& other) NO_EXPECT
 		{
 			Name = other.Name;
 			Set = other.Set;
+			Stages = other.Stages;
 			Bindings = other.Bindings;
+			Hash_No_Resource = other.Hash_No_Resource;
+			Hash_Resource = other.Hash_Resource;
 			return *this;
 		}
 		DescriptorSet& DescriptorSet::operator=(DescriptorSet&& other) NO_EXPECT
 		{
 			Name = std::move(other.Name);
 			Set = std::move(other.Set);
+			Stages = std::move(other.Stages);
 			Bindings = std::move(other.Bindings);
+			Hash_No_Resource = std::move(other.Hash_No_Resource);
+			Hash_Resource = std::move(other.Hash_Resource);
 			return *this;
 		}
 

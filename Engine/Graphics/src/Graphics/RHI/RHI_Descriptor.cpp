@@ -309,7 +309,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			u64 hash = 0;
+			u64 hash = descriptor_set.Hash_No_Resource;
 			u64 hashWithResource = 0;
 			{
 				IS_PROFILE_SCOPE("Get hashes");
@@ -317,7 +317,7 @@ namespace Insight
 				{
 					if (d.Type != DescriptorType::Unknown)
 					{
-						HashCombine(hash, d.GetHash(false));
+						//HashCombine(hash, d.GetHash(false));
 						HashCombine(hashWithResource, d.GetHash(true));
 					}
 				}

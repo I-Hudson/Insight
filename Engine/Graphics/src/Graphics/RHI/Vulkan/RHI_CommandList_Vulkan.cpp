@@ -525,8 +525,7 @@ namespace Insight
 				if (descriptorSets.size() > 0)// && m_boundDescriptors != hash)
 				{
 					//m_boundDescriptors = hash;
-
-					
+	
 					std::vector<VkDescriptorSet> sets;
 					sets.reserve(descriptorSets.size());
 					{

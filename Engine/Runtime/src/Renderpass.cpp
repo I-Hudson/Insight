@@ -394,7 +394,6 @@ namespace Insight
 
 					cmdList->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
-
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
 					{
@@ -404,8 +403,7 @@ namespace Insight
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
-
-						for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
+						for (const Ptr<ECS::Entity>& e : data.OpaqueEntities)
 						{
 							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
 							glm::mat4 transform = transform_component->GetTransform();
@@ -419,18 +417,13 @@ namespace Insight
 							Runtime::Mesh* mesh = mesh_component->GetMesh();
 
 							Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-							boundingBox = boundingBox.Transform(transform_component->GetTransform());
+							boundingBox = boundingBox.Transform(transform);
 							// Transform bounding box to world space from local space.
 							if (!camera_frustum.IsVisible(boundingBox))
 							{
 								continue;
 							}
 
-							//BufferPerObject object = {};
-							//object.Transform = transform;
-							//object.Previous_Transform = transform;
-							//cmdList->SetUniform(1, 1, object);
-							
 							struct Object
 							{
 								glm::mat4 Transform;
@@ -1424,6 +1417,8 @@ namespace Insight
 		{
 			BufferLight light = GetCascades(buffer_frame, cascade_count, split_lambda);
 			std::move(std::begin(light.ProjView), std::end(light.ProjView), buffer_light.ProjView);
+			std::move(std::begin(light.Projection), std::end(light.Projection), buffer_light.Projection);
+			std::move(std::begin(light.View), std::end(light.View), buffer_light.View);
 			std::move(std::begin(light.SplitDepth), std::end(light.SplitDepth), buffer_light.SplitDepth);
 		}
 	}
