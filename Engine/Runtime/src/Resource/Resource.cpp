@@ -11,7 +11,7 @@
 
 #include <filesystem>
 #include <ppltasks.h>
-
+#pragma optimize("", off)
 namespace Insight
 {
 	namespace Runtime
@@ -405,6 +405,20 @@ namespace Insight
 			return m_loaded_resource_count;
 		}
 
+		u32 Runtime::ResourceManager::GetLoadingCount() const
+		{
+			u32 loadingCount = 0;
+			std::shared_lock lock(m_lock);
+			for (auto& pair : m_resources)
+			{
+				if (pair.second->GetResourceState() == EResoruceStates::Loading)
+				{
+					++loadingCount;
+				}
+			}
+			return loadingCount;
+		}
+
 		bool ResourceManager::HasResource(const std::string& file_path) const
 		{
 			std::shared_lock lock(m_lock);
@@ -470,7 +484,8 @@ namespace Insight
 				{
 					if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
 					{
-						if (!std::filesystem::exists(abs_file_path))
+						std::error_code errorCode{};
+						if (!std::filesystem::exists(abs_file_path, errorCode))
 						{
 							// File does not exists. Set the resource state and return nullptr.
 							resource->m_resource_state = EResoruceStates::Not_Found;

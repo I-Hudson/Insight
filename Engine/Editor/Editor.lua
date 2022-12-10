@@ -36,6 +36,7 @@ project "Insight_Editor"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.imgui}",
     }
 
     files 
@@ -53,6 +54,7 @@ project "Insight_Editor"
         "Insight_Runtime" .. output_project_subfix .. ".lib",
 
         "glm.lib",
+        "imgui.lib",
     }
     if (profileTool == "pix") then
         links
@@ -78,7 +80,7 @@ project "Insight_Editor"
         {
             "%{wks.location}/deps/lib/debug",
         }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
     filter "configurations:Release"  
         defines { "NDEBUG" }    
@@ -91,7 +93,7 @@ project "Insight_Editor"
         {
             "%{wks.location}/deps/lib/release",
         }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }
 
 
     filter "configurations:Testing" 
@@ -112,4 +114,8 @@ project "Insight_Editor"
             "%{wks.location}/deps/lib/debug",
         }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/Debug-windows-x86_64/dll\" \"%{cfg.targetdir}\"", }
-        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", }
+        prebuildcommands 
+        { 
+            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
+            "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", 
+        }

@@ -39,6 +39,7 @@ namespace Insight
 			void ForceClose() { m_shouldClose = true; }
 
 			virtual void OnInit() { }
+			virtual void OnUpdate() { }
 			virtual void OnDestroy() { }
 
 			static Core::Timer s_FrameTimer;

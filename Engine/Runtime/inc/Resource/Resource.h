@@ -220,6 +220,7 @@ namespace Insight
 			void Save(const std::string& file_path, IResource* resource);
 
 			u32 GetLoadedResourcesCount() const;
+			u32 GetLoadingCount() const;
 
 			/// @brief Check if a resource exists with a given file path.
 			/// @return bool

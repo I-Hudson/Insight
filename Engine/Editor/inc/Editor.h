@@ -2,6 +2,8 @@
 
 #include "Runtime/Engine.h"
 
+#include "EditorWindows/EditorWindowManager.h"
+
 namespace Insight
 {
 	namespace Editor
@@ -11,10 +13,11 @@ namespace Insight
 		public:
 
 			virtual void OnInit() override;
+			virtual void OnUpdate() override;
 			virtual void OnDestroy() override;
 
 		private:
-
+			EditorWindowManager m_editorWindowManager;
 		};
 	}
 }

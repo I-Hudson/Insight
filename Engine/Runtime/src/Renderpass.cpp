@@ -421,7 +421,7 @@ namespace Insight
 							// Transform bounding box to world space from local space.
 							if (!camera_frustum.IsVisible(boundingBox))
 							{
-								continue;
+								//continue;
 							}
 
 							struct Object
@@ -1055,9 +1055,17 @@ namespace Insight
 			struct PassData
 			{
 				BufferFrame BufferFrame;
+				float NearPlane;
+				float FarPlane;
+				float FOVY;
 			};
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
+
+			Ptr<ECS::Entity> editorCamrea = App::SceneManager::Instance().FindSceneByName("EditorScene").Lock()->GetEntityByName("EdtiorCamera");
+			passData.NearPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetNearPlane();
+			passData.FarPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFarPlane();
+			passData.FOVY = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFovY();
 
 			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)
@@ -1081,9 +1089,9 @@ namespace Insight
 						, render_graph.GetRHITexture("GBuffer_DepthStencil")
 						, render_graph.GetRHITexture("VelocityRT")
 						, render_graph.GetRHITexture("FSR_Output")
-						, Main_Camera_Near_Plane
-						, Main_Camera_Far_Plane
-						, glm::radians(90.0f)
+						, data.NearPlane
+						, data.FarPlane
+						, data.FOVY
 						, App::Engine::s_FrameTimer.GetElapsedTimeMillFloat()
 						, fsrSharpness
 						, false);
@@ -1416,10 +1424,13 @@ namespace Insight
 		void BufferLight::GetCascades(BufferLight& buffer_light, const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)
 		{
 			BufferLight light = GetCascades(buffer_frame, cascade_count, split_lambda);
-			std::move(std::begin(light.ProjView), std::end(light.ProjView), buffer_light.ProjView);
-			std::move(std::begin(light.Projection), std::end(light.Projection), buffer_light.Projection);
-			std::move(std::begin(light.View), std::end(light.View), buffer_light.View);
-			std::move(std::begin(light.SplitDepth), std::end(light.SplitDepth), buffer_light.SplitDepth);
+			for (size_t i = 0; i < cascade_count; i++)
+			{
+				buffer_light.ProjView[i]   = light.ProjView[i];
+				buffer_light.Projection[i] = light.Projection[i];
+				buffer_light.View[i]       = light.View[i];
+				buffer_light.SplitDepth[i] = light.SplitDepth[i];
+			}
 		}
 	}
 }

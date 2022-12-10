@@ -118,7 +118,7 @@ workspace "Insight"
     }
 
     if (profileTool == "tracy") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
         editandcontinue "off"
     end
     if (profileTool == "optick") then

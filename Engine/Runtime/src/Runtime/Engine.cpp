@@ -37,6 +37,11 @@ namespace Insight
 			{
 				Core::WaitForProfiler();
 			}
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
+			{
+				while (!IsDebuggerPresent())
+				{ }
+			}
 
 			m_taskManger.Init();
 
@@ -121,6 +126,8 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Game Update");
 					m_eventManager->Update();
+
+					OnUpdate();
 
 					m_sceneManager->EarlyUpdate();
 					m_sceneManager->Update(delta_time);
