@@ -26,6 +26,42 @@ namespace Insight
 		{
 			ImGui::Text("Total resources loaded: %i", Runtime::ResourceManager::Instance().GetLoadedResourcesCount());
 			ImGui::Text("Total resources loading: %i", Runtime::ResourceManager::Instance().GetLoadingCount());
+
+			ImGui::Text("Resoruces:");
+			auto resources = Runtime::ResourceManager::Instance().GetResourcesMap();
+			for (const auto& pair : resources)
+			{
+				DrawSingleResource(pair.second);
+			}
+		}
+
+		void ResourceWindow::DrawSingleResource(Runtime::IResource* resource)
+		{
+			static constexpr ImVec4 resourceStateColours[] =
+			{
+				ImVec4(1, 1, 0, 1),	    // Not found
+				ImVec4(0, 1, 0, 1),	    // Loaded
+				ImVec4(0, 0.5f, 0, 1),	// Loading
+				ImVec4(1, 0, 1, 1),	    // Not loaded
+				ImVec4(1, 0, 0, 1),	    // Failed to load
+				ImVec4(0, 0, 1, 1),	    // Unloaded
+				ImVec4(0, 0, 0.5f, 1),	// Unloading
+			};
+
+			std::string fileName = resource->GetFileName();
+			std::string resourceState = Runtime::ERsourceStatesToString(resource->GetResourceState());
+			float loadTime = resource->GetLoadTimer().GetElapsedTimeMillFloat();
+			ImGui::PushStyleColor(ImGuiCol_Header, resourceStateColours[static_cast<int>(resource->GetResourceState())]);
+			if (ImGui::TreeNodeEx(static_cast<const void*>(resource), ImGuiTreeNodeFlags_Framed, "%s", fileName.c_str()))
+			{
+				ImGui::Text("State: %s, LoadTime: %f", resourceState.c_str(), loadTime);
+				if (ImGui::Button("Load"))
+				{
+					Runtime::ResourceManager::Instance().Load(resource->GetFilePath(), resource->GetResourceTypeId());
+				}
+				ImGui::TreePop();
+			}
+			ImGui::PopStyleColor();
 		}
 	}
 }

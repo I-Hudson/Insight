@@ -74,13 +74,13 @@ namespace Insight
 
 		std::string IResource::GetFilePath() const
 		{
-			std::lock_guard lock(m_mutex);
+			//std::lock_guard lock(m_mutex);
 			return m_file_path;
 		}
 
 		std::string IResource::GetFileName() const
 		{
-			std::lock_guard lock(m_mutex);
+			//std::lock_guard lock(m_mutex);
 			return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
 		}
 
@@ -408,15 +408,30 @@ namespace Insight
 		u32 Runtime::ResourceManager::GetLoadingCount() const
 		{
 			u32 loadingCount = 0;
-			std::shared_lock lock(m_lock);
-			for (auto& pair : m_resources)
 			{
-				if (pair.second->GetResourceState() == EResoruceStates::Loading)
+				std::shared_lock lock(m_lock);
+				for (const auto& pair : m_resources)
 				{
-					++loadingCount;
+					if (pair.second->GetResourceState() == EResoruceStates::Loading)
+					{
+						++loadingCount;
+					}
 				}
 			}
 			return loadingCount;
+		}
+
+		std::unordered_map<std::string, TObjectPtr<IResource>> Runtime::ResourceManager::GetResourcesMap() const
+		{
+			std::unordered_map<std::string, TObjectPtr<IResource>> map;
+			{
+				std::shared_lock lock(m_lock);
+				for (const auto& pair : m_resources)
+				{
+					map[pair.first] = pair.second;
+				}
+			}
+			return map;
 		}
 
 		bool ResourceManager::HasResource(const std::string& file_path) const

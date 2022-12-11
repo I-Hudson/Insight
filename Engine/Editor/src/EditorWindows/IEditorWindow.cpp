@@ -35,13 +35,13 @@ namespace Insight
 				ImVec2 windowSize = ImGui::GetWindowSize();
 				m_width = windowSize.x;
 				m_height = windowSize.y;
-				ImGui::End();
 
 				if (!m_isOpen)
 				{
 					EditorWindowManager::Instance().RemoveWindow(GetWindowName());
 				}
 			}
+			ImGui::End();
 		}
 	}
 }

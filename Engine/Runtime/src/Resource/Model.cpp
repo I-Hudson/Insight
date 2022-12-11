@@ -86,10 +86,10 @@ namespace Insight
 			for (Material* material : m_materials)
 			{
 				ResourceManager::Instance().Unload(material);
+				material->OnUnloaded(material);
 				DeleteTracked(material);
 			}
 			m_materials.clear();
-
 
 			Renderer::FreeVertexBuffer(m_vertex_buffer);
 			Renderer::FreeVertexBuffer(m_index_buffer);

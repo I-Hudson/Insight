@@ -4,6 +4,10 @@
 
 namespace Insight
 {
+	namespace Runtime
+	{
+		class IResource;
+	}
 	namespace Editor
 	{
 		class ResourceWindow : public IEditorWindow
@@ -16,6 +20,9 @@ namespace Insight
 
 			virtual void OnDraw() override;
 			EDITOR_WINDOW(ResourceWindow);
+
+		private:
+			void DrawSingleResource(Runtime::IResource* resource);
 
 		};
 	}

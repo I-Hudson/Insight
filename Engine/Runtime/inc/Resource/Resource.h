@@ -26,7 +26,7 @@ namespace Insight
 			Disk,		/// @brief Resource is storage on disk (This should always be the default).
 			Memory,		/// @brief Resource is storage in memory only (This resource must be apart of another one).
 		};
-		CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type);
+		IS_RUNTIME CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type);
 
 		enum class EResoruceStates
 		{
@@ -41,7 +41,7 @@ namespace Insight
 			Unloading,		/// @brief Resource is been unloaded.
 
 		};
-		CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state);
+		IS_RUNTIME CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state);
 
 		enum class ResourceReferenceLinkType
 		{
@@ -107,6 +107,8 @@ namespace Insight
 			void Print() const;
 
 			virtual ResourceTypeId GetResourceTypeId() const;
+
+			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
 			Core::Delegate<IResource*> OnLoaded;
 			Core::Delegate<IResource*> OnUnloaded;
@@ -221,6 +223,7 @@ namespace Insight
 
 			u32 GetLoadedResourcesCount() const;
 			u32 GetLoadingCount() const;
+			std::unordered_map<std::string, TObjectPtr<IResource>> GetResourcesMap() const;
 
 			/// @brief Check if a resource exists with a given file path.
 			/// @return bool

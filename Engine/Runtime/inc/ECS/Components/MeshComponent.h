@@ -3,17 +3,11 @@
 #include "ECS/Entity.h"
 
 #include "Resource/Mesh.h"
+#include "Resource/Material.h"
 #include "Resource/ResourceLifeTimeHandle.h"
 
 namespace Insight
 {
-	namespace Runtime
-	{
-		class Mesh;
-		class Material;
-		class IResource;
-	}
-
 	namespace ECS
 	{
 		class MeshComponent : public Component
@@ -35,7 +29,7 @@ namespace Insight
 
 		private:
 			Runtime::ResourceLFHandle<Runtime::Mesh> m_mesh;
-			Runtime::Material* m_material = nullptr;
+			Runtime::ResourceLFHandle<Runtime::Material> m_material;
 		};
 	}
 }
