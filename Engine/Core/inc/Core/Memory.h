@@ -24,6 +24,24 @@ if (Ptr)												\
 };
 #define UntrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
+template<typename T, typename... Params>
+NO_DISCARD FORCE_INLINE T* New(Params&&... params)
+{
+	T* ptr = new T(std::forward<Params>(params)...);
+	Insight::Core::MemoryTracker::Instance().Track(Ptr);
+	return ptr;
+}
+template<typename T>
+FORCE_INLINE void Delete(T*& pointer)
+{
+	if (pointer != nullptr)
+	{
+		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		delete pointer;
+	}
+	pointer = nullptr;
+}
+
 ///#define IS_MEMORY_OVERRIDES
 #ifdef IS_MEMORY_OVERRIDES
 void* operator new(size_t size)

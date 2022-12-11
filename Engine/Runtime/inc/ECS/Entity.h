@@ -116,7 +116,7 @@ namespace Insight
 
 		private:
 			/// @brief Store the unique ID for the component.
-			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
+			Core::GUID m_guid;
 			Entity* m_ownerEntity = nullptr;
 			// TODO Must add type information.
 
@@ -155,6 +155,7 @@ namespace Insight
 
 			void RemoveChild(u32 index);
 
+			u32 GetChildCount() const;
 			Ptr<Entity> GetFirstChild() const;
 			Ptr<Entity> GetLastChild() const;
 			Ptr<Entity> GetChild(u32 index) const;
@@ -176,7 +177,7 @@ namespace Insight
 			void Destroy();
 
 		private:
-			Core::GUID m_guid = Core::GUID::s_InvalidGUID;
+			Core::GUID m_guid;
 			std::string m_name;
 
 			Ptr<Entity> m_parent = nullptr;

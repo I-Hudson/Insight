@@ -4,6 +4,7 @@
 #include "Core/Memory.h"
 
 #include "EditorWindows/ResourceWindow.h"
+#include "EditorWindows/EntitiesWindow.h"
 
 namespace Insight
 {
@@ -21,6 +22,7 @@ namespace Insight
 		void EditorWindowManager::RegisterWindows()
 		{
 			m_windowRegistry[ResourceWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(NewTracked(ResourceWindow)); });
+			m_windowRegistry[EntitiesWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(NewTracked(EntitiesWindow)); });
 		}
 
 		void EditorWindowManager::AddWindow(const std::string& windowName)

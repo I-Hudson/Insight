@@ -729,7 +729,7 @@ namespace Insight
 						if (diffuseTexture)
 						{
 							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
-							object.Textures_Set |= 1 << 0;
+							object.Textures_Set[0] = 1;
 						}
 						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
 						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
@@ -911,7 +911,7 @@ namespace Insight
 						if (diffuseTexture)
 						{
 							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
-							object.Textures_Set |= 1 << 0;
+							object.Textures_Set[0] = 1;
 						}
 
 						cmdList->SetUniform(1, 1, object);

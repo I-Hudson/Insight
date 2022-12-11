@@ -24,6 +24,9 @@ namespace Insight
 			operator bool() const { return m_resourcePtr != nullptr; }
 			operator ResourceType* () const { return static_cast<ResourceType*>(m_resourcePtr); }
 
+			bool operator==(const ResourceLFHandle& other) const { return m_resourcePtr == other.m_resourcePtr; }
+			bool operator!=(const ResourceLFHandle& other) const { return !((*this) == other); }
+
 			ResourceType* operator->() const { return static_cast<ResourceType*>(m_resourcePtr); }
 
 			ResourceLFHandle& operator=(const ResourceLFHandle& other) { UnbindUnLoad(); m_resourcePtr = other.m_resourcePtr; BindUnload(); }

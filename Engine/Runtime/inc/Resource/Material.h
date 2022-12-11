@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Resource/Resource.h"
-#include "Resource/Texture.h"
+#include "Resource/Texture2D.h"
+#include "Resource/ResourceLifeTimeHandle.h"
 
 #include <array>
 
@@ -56,7 +57,7 @@ namespace Insight
 			virtual void Save(const std::string& file_path);
 
 		private:
-			std::array<Texture2D*, static_cast<u32>(TextureTypes::Count)> m_textures;
+			std::array<ResourceLFHandle<Texture2D>, static_cast<u32>(TextureTypes::Count)> m_textures;
 			std::array<float, static_cast<u32>(MaterialProperty::Count)> m_properties;
 
 			friend class AssimpLoader;

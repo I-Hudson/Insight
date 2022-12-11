@@ -1,5 +1,5 @@
 local profileTool="tracy"
-local monolith_build="true"
+local monolith_build="false"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "%{wks.location}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"

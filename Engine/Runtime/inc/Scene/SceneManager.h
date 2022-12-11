@@ -45,6 +45,11 @@ namespace Insight
 			void RemoveEntity(Ptr<ECS::Entity>& entity);
 #endif
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
+			/// <summary>
+			/// This only returns the roots entities.
+			/// </summary>
+			/// <returns></returns>
+			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
 
 		private:
 			/// Store all entites 
@@ -64,7 +69,7 @@ namespace Insight
 			friend class SceneManager;
 		};
 
-		class SceneManager : public Core::Singleton<SceneManager>
+		class IS_RUNTIME SceneManager : public Core::Singleton<SceneManager>
 		{
 		public:
 			SceneManager();
@@ -89,6 +94,8 @@ namespace Insight
 
 			WPtr<Scene> GetActiveScene() const;
 			WPtr<Scene> FindSceneByName(std::string_view sceneName);
+			WPtr<Scene> GetSceneFromIndex(u32 index) const;
+			std::vector<WPtr<Scene>> GetAllScenes() const;
 
 		private:
 			std::vector<RPtr<Scene>> m_activeScenes;

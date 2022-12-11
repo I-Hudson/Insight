@@ -53,7 +53,7 @@ namespace Insight
 			float SplitDepth[s_Cascade_Count];
 
 			glm::vec4 Light_Direction = { };
-			glm::vec4 Light_Colour = { };
+			glm::vec4 Light_Colour = glm::vec4(1, 1, 1, 1);
 			glm::vec2 Resolution = { };
 
 			float pad0 = 0.0f;
@@ -68,10 +68,7 @@ namespace Insight
 			glm::mat4 Transform = {};
 			glm::mat4 Previous_Transform = { };
 
-			u32 Textures_Set = 0;
-			float pad0 = 0.0f;
-			float pad1 = 0.0f;
-			float pad2 = 0.0f;
+			glm::vec4 Textures_Set;
 		};
 
 		class Renderpass

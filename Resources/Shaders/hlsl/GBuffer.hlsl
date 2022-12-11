@@ -61,7 +61,14 @@ PixelOutput PSMain(VertexOutput input)
     float2 velocity_uv          = position_uv_current - position_uv_previous;
 
 	PixelOutput Out;
-	Out.Colour = Diffuse_Texture.Sample(Reapt_Sampler, input.UV);
+	if(bpo_Textures_Set[0] == 1)
+	{
+		Out.Colour = Diffuse_Texture.Sample(Reapt_Sampler, input.UV);
+	}
+	else
+	{
+		Out.Colour = float4(0.94, 0, 1, 1);
+	}
 	//Out.Colour = input.Colour;
 	Out.World_Normal = float4(input.WorldNormal.xyz, 1.0);
 	Out.Velocity = velocity_uv;

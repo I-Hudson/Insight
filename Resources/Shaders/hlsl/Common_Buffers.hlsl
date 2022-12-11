@@ -35,5 +35,5 @@ cbuffer BufferPerObject : register(b2)
     float4x4 bpo_Transform;
     float4x4 bpo_Previous_Transform;
 
-    uint bpo_Textures_Set;
+    float4 bpo_Textures_Set;
 }

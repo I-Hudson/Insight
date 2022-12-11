@@ -5,8 +5,7 @@ namespace Insight
 	namespace Runtime
 	{
 		Material::Material()
-			: m_textures({ nullptr, nullptr, nullptr })
-			, m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
+			: m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
 		{ }
 
 		Material::~Material()

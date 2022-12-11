@@ -59,6 +59,10 @@ namespace Insight
 				{
 					Runtime::ResourceManager::Instance().Load(resource->GetFilePath(), resource->GetResourceTypeId());
 				}
+				if (ImGui::Button("Unload"))
+				{
+					Runtime::ResourceManager::Instance().Unload(resource);
+				}
 				ImGui::TreePop();
 			}
 			ImGui::PopStyleColor();

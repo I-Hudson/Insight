@@ -123,6 +123,12 @@ namespace Insight
 #endif
 		}
 
+		std::vector<Ptr<ECS::Entity>> Scene::GetAllEntities() const
+		{
+			return m_root_entities;
+		}
+
+
 		SceneManager::SceneManager()
 		{
 		}
@@ -275,6 +281,25 @@ namespace Insight
 				}
 			}
 			return WPtr<Scene>();
+		}
+	
+		WPtr<Scene> SceneManager::GetSceneFromIndex(u32 index) const
+		{
+			if (index < m_activeScenes.size())
+			{
+				return m_activeScenes.at(index);
+			}
+			return WPtr<Scene>();
+		}
+
+		std::vector<WPtr<Scene>> SceneManager::GetAllScenes() const
+		{
+			std::vector<WPtr<Scene>> scenes;
+			for (size_t i = 0; i < m_activeScenes.size(); ++i)
+			{
+				scenes.push_back(m_activeScenes.at(i));
+			}
+			return scenes;
 		}
 	}
 }

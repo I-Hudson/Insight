@@ -164,6 +164,11 @@ namespace Insight
 			m_children.erase(entity_itr);
 		}
 
+		u32 Entity::GetChildCount() const
+		{
+			return static_cast<u32>(m_children.size());
+		}
+
 		Ptr<Entity> Entity::GetFirstChild() const
 		{
 			if (m_children.size() > 0)

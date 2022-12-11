@@ -20,6 +20,7 @@ namespace Insight
 
 			EditorWindowManager::Instance().RegisterWindows();
 			EditorWindowManager::Instance().AddWindow("ResourceWindow");
+			EditorWindowManager::Instance().AddWindow("EntitiesWindow");
 		}
 
 		void Editor::OnUpdate()
