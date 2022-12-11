@@ -1,5 +1,5 @@
 local profileTool="tracy"
-local monolith_build="false"
+local monolith_build="true"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "%{wks.location}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
@@ -136,9 +136,10 @@ workspace "Insight"
     if (monolith_build == "false") then
         defines{ "IS_EXPORT_DLL", }
         kind "SharedLib"
-        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n")
-        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n")
-        table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n")
+        table.insert(post_build_commands, "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}deps/".. outputdir..  "/dll/\"\n")
+        table.insert(post_build_commands, "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n")
+        table.insert(post_build_commands, "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n")
+        table.insert(post_build_commands, "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".dll\" \"%{wks.location}bin/".. outputdir..  "/" .. output_executable .. "/\"\n")
     end
     if (monolith_build == "true") then
         defines { "IS_MONOLITH" }
@@ -211,15 +212,15 @@ workspace "Insight"
             "IS_VULKAN_ENABLED",
         }
 
+group "Editor"
+    include "../../Engine/Editor/Editor.lua"
+
 group "Runtime"
     include "../../Engine/Core/Core.lua"
     include "../../Engine/Maths/Maths.lua"
     include "../../Engine/Graphics/Graphics.lua"
     include "../../Engine/Input/Input.lua"
     include "../../Engine/Runtime/Runtime.lua"
-
-group "Editor"
-    include "../../Engine/Editor/Editor.lua"
 
 newaction{
     trigger = "clean",
