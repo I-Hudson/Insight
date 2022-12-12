@@ -13,6 +13,18 @@ namespace Insight
 	{
 		class SceneManager;
 
+		enum class WorldStates
+		{
+			Paused,			// World is paused, nothing is happening.
+			Running,		// Current world is running, things are being updated.
+		};
+
+		enum class WorldTypes
+		{
+			Game,	// World is for game use (default).
+			Tools	// World is for tool/development use (E.G: Editor).
+		};
+
 		class IS_RUNTIME Scene
 		{
 		public:
@@ -54,6 +66,9 @@ namespace Insight
 		private:
 			/// Store all entites 
 			std::string m_sceneName = "";
+			WorldStates m_worldState = WorldStates::Paused;
+			WorldTypes m_worldType = WorldTypes::Game;
+
 #ifdef ECS_ENABLED
 			UPtr<ECS::ECSWorld> m_ecsWorld = nullptr;
 #else
@@ -61,6 +76,8 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> m_root_entities;
 			ECS::EntityManager m_entityManager;
 #endif
+			Ptr<ECS::Entity> m_cameraEntity = nullptr;
+
 			// Is this scene persistent. If 'true' then the scene can not be unloaded even if asked. The scene must be deleted to be removed. 
 			bool m_persistentScene = false;
 			// Can this scene only be found if searched for. This stops 'GetActiveScene' returning the scenes which might want to stay "hidden".
@@ -81,9 +98,9 @@ namespace Insight
 
 			void Destroy();
 
-			WPtr<Scene> CreateScene(std::string sceneName = "");
+			WPtr<Scene> CreateScene(std::string sceneName = "", WorldTypes worldType = WorldTypes::Game);
 			// Create a new scene which can not be unloaded. This scene will alway be loaded.
-			WPtr<Scene> CreatePersistentScene(std::string sceneName = "");
+			WPtr<Scene> CreatePersistentScene(std::string sceneName = "", WorldTypes worldType = WorldTypes::Game);
 
 			// Set a single scene as active.
 			void SetActiveScene(WPtr<Scene> scene);

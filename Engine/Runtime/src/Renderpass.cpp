@@ -94,7 +94,7 @@ namespace Insight
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
 #if true//IS_EDITOR
-			WPtr<App::Scene> editorScene = App::SceneManager::Instance().CreatePersistentScene("EditorScene");
+			WPtr<App::Scene> editorScene = App::SceneManager::Instance().CreatePersistentScene("EditorScene", App::WorldTypes::Tools);
 			editorScene.Lock()->SetOnlySearchable(true);
 			m_editorCameraEntity = editorScene.Lock()->AddEntity("EditorCamera").Get();
 

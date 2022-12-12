@@ -43,6 +43,10 @@ namespace Insight
 		void Scene::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
+			if (m_worldState == WorldStates::Paused)
+			{
+				return;
+			}
 #ifdef ECS_ENABLED
 			m_ecsWorld->EarlyUpdate();
 #else
@@ -53,6 +57,10 @@ namespace Insight
 		void Scene::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
+			if (m_worldState == WorldStates::Paused)
+			{
+				return;
+			}
 #ifdef ECS_ENABLED
 			m_ecsWorld->Update(deltaTime);
 #else
@@ -63,6 +71,10 @@ namespace Insight
 		void Scene::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
+			if (m_worldState == WorldStates::Paused)
+			{
+				return;
+			}
 #ifdef ECS_ENABLED
 			m_ecsWorld->LateUpdate();
 #else
@@ -183,14 +195,15 @@ namespace Insight
 			m_scenes.clear();
 		}
 
-		WPtr<Scene> SceneManager::CreateScene(std::string sceneName)
+		WPtr<Scene> SceneManager::CreateScene(std::string sceneName, WorldTypes worldType)
 		{
 			RPtr<Scene> scene = MakeRPtr<Scene>(std::move(sceneName));
+			scene->m_worldType = worldType;
 			m_scenes.push_back(scene);
 			return m_scenes.back();
 		}
 
-		WPtr<Scene> SceneManager::CreatePersistentScene(std::string sceneName)
+		WPtr<Scene> SceneManager::CreatePersistentScene(std::string sceneName, WorldTypes worldType)
 		{
 			WPtr<Scene> scene = CreateScene(sceneName);
 			scene.Lock()->m_persistentScene = true;
