@@ -8,7 +8,7 @@ namespace Insight
 {
 	namespace Threading
 	{
-		class TaskManager;
+		class TaskSystem;
 		class Thread;
 
 		class TLS
@@ -27,9 +27,9 @@ namespace Insight
 		{
 		public:
 			ThreadData() = default;
-			ThreadData(Insight::Threading::TaskManager* taskManager, Insight::Threading::Thread* thread);
+			ThreadData(Insight::Threading::TaskSystem* taskManager, Insight::Threading::Thread* thread);
 
-			Insight::Threading::TaskManager* TaskManager = nullptr;
+			Insight::Threading::TaskSystem* TaskSystem = nullptr;
 			Insight::Threading::Thread* Thread = nullptr;
 		};
 
@@ -61,7 +61,7 @@ namespace Insight
 
 			Callback m_callback = nullptr;
 
-			friend class TaskManager;
+			friend class TaskSystem;
 		};
 	}
 }

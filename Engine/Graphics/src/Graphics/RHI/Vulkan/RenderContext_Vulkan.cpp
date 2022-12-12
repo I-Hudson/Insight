@@ -8,7 +8,7 @@
 
 #include "Core/Profiler.h"
 
-#include "Event/EventManager.h"
+#include "Event/EventSystem.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -638,7 +638,7 @@ namespace Insight
 			{
 				WaitForGpu();
 				CreateSwapchain(resolution.x, resolution.y);
-				Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
 			}
 
 			glm::ivec2 RenderContext_Vulkan::GetSwaphchainResolution() const

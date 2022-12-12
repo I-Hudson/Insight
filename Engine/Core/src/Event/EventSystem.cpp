@@ -1,4 +1,4 @@
-#include "Event/EventManager.h"
+#include "Event/EventSystem.h"
 
 #include "Core/Logger.h"
 
@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Core
 	{
-		void EventManager::AddEventListener(void* object, EventType eventType, EventFunc func)
+		void EventSystem::AddEventListener(void* object, EventType eventType, EventFunc func)
 		{
 			auto& eventFuncItr = m_eventListeners[eventType];
 			if (eventFuncItr.find(object) == eventFuncItr.end())
@@ -15,14 +15,14 @@ namespace Insight
 			}
 			else
 			{
-				IS_CORE_ERROR(R"([EventManager::AddEventListener] Trying to set an event func for event type '{}'. But one 
+				IS_CORE_ERROR(R"([EventSystem::AddEventListener] Trying to set an event func for event type '{}'. But one 
 					already exists)", (int)eventType);
 				return;
 			}
 
 		}
 
-		void EventManager::RemoveEventListener(void* object, EventType eventType)
+		void EventSystem::RemoveEventListener(void* object, EventType eventType)
 		{
 			auto eventFuncItr = m_eventListeners[eventType];
 			if (auto eventItr = eventFuncItr.find(object); eventItr != eventFuncItr.end())
@@ -31,12 +31,12 @@ namespace Insight
 			}
 		}
 
-		void EventManager::DispatchEvent(RPtr<Event> e)
+		void EventSystem::DispatchEvent(RPtr<Event> e)
 		{
 			m_queuedEvents.push_back(std::move(e));
 		}
 
-		void EventManager::Update()
+		void EventSystem::Update()
 		{
 			for (const RPtr<Event>& event : m_queuedEvents)
 			{

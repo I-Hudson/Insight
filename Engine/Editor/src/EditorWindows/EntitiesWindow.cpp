@@ -1,5 +1,5 @@
 #include "EditorWindows/EntitiesWindow.h"
-#include "Scene/SceneManager.h"
+#include "World/WorldSystem.h"
 #include "Input/InputManager.h"
 
 #include <imgui.h>
@@ -25,19 +25,19 @@ namespace Insight
 
 		void EntitiesWindow::OnDraw()
 		{
-			std::vector<WPtr<App::Scene>> scenes = App::SceneManager::Instance().GetAllScenes();
-			for (size_t i = 0; i < scenes.size(); ++i)
+			std::vector<TObjectPtr<Runtime::World>> worlds = Runtime::WorldSystem::Instance().GetAllWorlds();
+			for (size_t i = 0; i < worlds.size(); ++i)
 			{
-				if (auto scene = scenes.at(i).Lock())
+				if (auto world = worlds.at(i))
 				{
-					if (scene->GetSceneName().find("Editor") != std::string::npos)
+					if (world->GetWorldName().find("Editor") != std::string::npos)
 					{
 						continue;
 					}
 
-					if(ImGui::CollapsingHeader(scene->GetSceneName().data()))
+					if(ImGui::CollapsingHeader(world->GetWorldName().data()))
 					{
-						auto entities = scene->GetAllEntities();
+						auto entities = world->GetAllEntities();
 						for (size_t i = 0; i < entities.size(); ++i)
 						{
 							DrawSingleEntity(entities.at(i).Get());

@@ -2,7 +2,7 @@
 #include "Runtime/Engine.h"
 
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
+
 #include "Graphics/RenderTarget.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/Frustum.h"
@@ -14,7 +14,7 @@
 
 #include "Input/InputManager.h"
 
-#include "Scene/SceneManager.h"
+#include "World/WorldSystem.h"
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
@@ -94,16 +94,16 @@ namespace Insight
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
 #if true//IS_EDITOR
-			WPtr<App::Scene> editorScene = App::SceneManager::Instance().CreatePersistentScene("EditorScene", App::WorldTypes::Tools);
-			editorScene.Lock()->SetOnlySearchable(true);
-			m_editorCameraEntity = editorScene.Lock()->AddEntity("EditorCamera").Get();
+			TObjectPtr<Runtime::World> editorWorld = Runtime::WorldSystem::Instance().CreatePersistentWorld("EditorWorld", Runtime::WorldTypes::Tools);
+			editorWorld->SetOnlySearchable(true);
+			m_editorCameraEntity = editorWorld->AddEntity("EditorCamera").Get();
 
 			m_editorCameraEntity->AddComponentByName(ECS::TransformComponent::Type_Name);
 			m_editorCameraComponent = static_cast<ECS::CameraComponent*>(m_editorCameraEntity->AddComponentByName(ECS::CameraComponent::Type_Name));
 			m_editorCameraComponent->CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
 			m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
 #endif
-			RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+			RenderContext* render_context = &RenderContext::Instance();
 			RHI_SamplerManager& sampler_manager = render_context->GetSamplerManager();
 
 			RHI_SamplerCreateInfo sampler_create_info = { };
@@ -186,10 +186,10 @@ namespace Insight
 			opaque_entities_to_render.clear();
 			transparent_entities_to_render.clear();
 
-			WPtr<App::Scene> w_scene = App::SceneManager::Instance().GetActiveScene();
-			if (RPtr<App::Scene> scene = w_scene.Lock())
+			TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
+			if (world)
 			{
-				std::vector<Ptr<ECS::Entity>> entities = scene->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+				std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 				for (Ptr<ECS::Entity> entity : entities)
 				{
 					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
@@ -251,11 +251,11 @@ namespace Insight
 
 		void Renderpass::Destroy()
 		{
-			GraphicsManager::Instance().GetRenderContext()->GpuWaitForIdle();
+			RenderContext::Instance().GpuWaitForIdle();
 			m_imgui_pass.Release();
 			Graphics::RHI_FSR::Instance().Destroy();
 
-			App::SceneManager::Instance().RemoveScene(App::SceneManager::Instance().FindSceneByName("EditorScene"));
+			Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld"));
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -1062,7 +1062,7 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			Ptr<ECS::Entity> editorCamrea = App::SceneManager::Instance().FindSceneByName("EditorScene").Lock()->GetEntityByName("EdtiorCamera");
+			Ptr<ECS::Entity> editorCamrea = Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld")->GetEntityByName("EdtiorCamera");
 			passData.NearPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetNearPlane();
 			passData.FarPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFarPlane();
 			passData.FOVY = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFovY();
@@ -1403,7 +1403,7 @@ namespace Insight
 				}
 
 				{
-					if (GraphicsManager::IsVulkan())
+					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 					{
 						/// Invert the projection if vulkan. This is because vulkan's coord space is from top left, not bottom left.
 						lightOrthoMatrix[1][1] *= -1;

@@ -7,7 +7,7 @@
 
 #include "Graphics/RenderContext.h"
 
-#include "Scene/SceneManager.h"
+#include "World/WorldSystem.h"
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
@@ -32,10 +32,10 @@ namespace Insight
 
 		ECS::Entity* Model::CreateEntityHierarchy()
 		{
-			WPtr<App::Scene> active_scene_weak = App::SceneManager::Instance().GetActiveScene();
-			if (RPtr<App::Scene> active_scene = active_scene_weak.Lock())
+			TObjectPtr<World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
+			if (world)
 			{
-				Ptr<ECS::Entity> root_entity = active_scene->AddEntity(GetFileName());
+				Ptr<ECS::Entity> root_entity = world->AddEntity(GetFileName());
 				for (Mesh* mesh : m_meshes)
 				{
 					Ptr<ECS::Entity> entity = root_entity->AddChild(mesh->GetFileName());

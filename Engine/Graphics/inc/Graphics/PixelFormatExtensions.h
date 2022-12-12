@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphics/Defines.h"
 #include "PixelFormat.h"
 
 //// <summary>
@@ -12,7 +13,7 @@ public:
     //// <summary>
     //// Initializes cache.
     //// </summary>
-    static void Init();
+    IS_GRAPHICS static void Init();
 
 public:
 

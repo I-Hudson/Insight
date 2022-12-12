@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Defines.h"
+#include "Core/Singleton.h"
 #include <string>
 
 #include <glm/ext/vector_int2.hpp>
@@ -10,15 +11,9 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		class IS_GRAPHICS Window
+		class IS_GRAPHICS Window : public Core::Singleton<Window>
 		{
 		public:
-
-			static Window& Instance()
-			{
-				static Window instance;
-				return instance;
-			}
 
 			bool Init(int width = 640, int height = 720, std::string title = "DefaultTitle");
 			void Destroy();

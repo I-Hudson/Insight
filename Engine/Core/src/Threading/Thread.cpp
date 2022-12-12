@@ -10,8 +10,8 @@ namespace Insight
 {
 	namespace Threading
 	{
-		ThreadData::ThreadData(Insight::Threading::TaskManager* taskManager, Insight::Threading::Thread* thread)
-			: TaskManager(taskManager)
+		ThreadData::ThreadData(Insight::Threading::TaskSystem* taskManager, Insight::Threading::Thread* thread)
+			: TaskSystem(taskManager)
 			, Thread(thread)
 		{ }
 

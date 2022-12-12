@@ -7,7 +7,7 @@
 
 #include "Core/Logger.h"
 
-#include "Threading/TaskManager.h"
+#include "Threading/TaskSystem.h"
 
 #include <filesystem>
 #include <ppltasks.h>
@@ -511,7 +511,7 @@ namespace Insight
 							resource->m_resource_state = EResoruceStates::Loading;
 							// Try and load the resource as it exists.
 #ifdef RESOURCE_LOAD_THREAD
-							Threading::TaskManager::CreateTask([this, resource]()
+							Threading::TaskSystem::CreateTask([this, resource]()
 								{
 #endif
 									resource->StartLoadTimer();

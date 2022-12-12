@@ -1,12 +1,10 @@
 #include "Core/ImGuiSystem.h"
 
-#include <imgui.h>
-
 namespace Insight
 {
 	namespace Core
 	{
-		void ImGuiSystem::Init()
+		void ImGuiSystem::Initialise()
 		{
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -28,16 +26,28 @@ namespace Insight
 				style.WindowRounding = 0.0f;
 				style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 			}
+			m_state = SystemStates::Initialised;
 		}
 
 		void ImGuiSystem::Shutdown()
 		{
 			ImGui::DestroyContext();
+			m_state = SystemStates::Not_Initialised;
+		}
+
+		void ImGuiSystem::SetContext(ImGuiContext*& context)
+		{
+			context = GetCurrentContext();
 		}
 
 		ImGuiContext* ImGuiSystem::GetCurrentContext()
 		{
 			return ImGui::GetCurrentContext();
+		}
+
+		void ImGuiSystem::GetAllocatorFunctions(ImGuiMemAllocFunc& allocFunc, ImGuiMemFreeFunc& freeFunc, void*& pUserData)
+		{
+			return ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &pUserData);
 		}
 	}
 }

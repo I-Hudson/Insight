@@ -1,7 +1,7 @@
 #include "ECS/Components/CameraComponent.h"
 #include "ECS/Components/TransformComponent.h"
 
-#include "Graphics/GraphicsManager.h"
+#include "Graphics/RenderContext.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -90,7 +90,7 @@ namespace Insight
 		void Camera::ComputeProjectionViewMatrix()
 		{
 			glm::mat4 proj = m_projection;
-			if (Graphics::GraphicsManager::IsVulkan())
+			if (Graphics::RenderContext::Instance().GetGraphicsAPI() == Graphics::GraphicsAPI::Vulkan)
 			{
 				proj[1][1] *= -1;
 			}

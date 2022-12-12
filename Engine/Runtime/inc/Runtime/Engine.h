@@ -5,13 +5,18 @@
 
 #include "Core/CommandLineArgs.h"
 
+#include "Core/SystemRegistry.h"
+#include "Event/EventSystem.h"
+#include "Graphics/GraphicsSystem.h"
+#include "Core/ImGuiSystem.h"
+#include "World/WorldSystem.h"
+
 /// -- Managers --
-#include "Threading/TaskManager.h"
+#include "Threading/TaskSystem.h"
 
-#include "Graphics/GraphicsManager.h"
-#include "Scene/SceneManager.h"
 
-#include "Event/EventManager.h"
+
+#include "Event/EventSystem.h"
 #include "Resource/Resource.h"
 
 #include "Renderpass.h"
@@ -28,7 +33,7 @@ namespace Insight
 		/*
 			Main engine class.
 		*/
-		class IS_RUNTIME Engine
+		class IS_RUNTIME Engine : public Core::Singleton<Engine>
 		{
 		public:
 
@@ -42,19 +47,22 @@ namespace Insight
 			virtual void OnUpdate() { }
 			virtual void OnDestroy() { }
 
+			Core::SystemRegistry& GetSystemRegistry() { return m_systemRegistry; }
+
 			static Core::Timer s_FrameTimer;
 		private:
-			Graphics::GraphicsManager m_graphicsManager;
 			Graphics::Renderpass m_renderpasses;
 
 			bool m_shouldClose = false;
-
-			Threading::TaskManager m_taskManger;
-
-			UPtr<SceneManager> m_sceneManager;
-			UPtr<Core::EventManager> m_eventManager;
 			Runtime::ResourceManager m_resource_manager;
 
+			// Systems
+			Core::SystemRegistry m_systemRegistry;
+			Threading::TaskSystem m_taskSystem;
+			Core::EventSystem m_eventSystem;
+			Runtime::GraphicsSystem m_graphicsSystem;
+			Core::ImGuiSystem m_imguiSystem;
+			Runtime::WorldSystem m_worldSystem;
 		};
 	}
 }

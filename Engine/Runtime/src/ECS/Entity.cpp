@@ -7,7 +7,7 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/TagComponent.h"
 
-#include "Scene/SceneManager.h"
+#include "World/WorldSystem.h"
 
 #include "Core/Logger.h"
 

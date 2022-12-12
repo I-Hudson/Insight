@@ -1,17 +1,18 @@
 #pragma once
 
-#include "Core/Singleton.h"
-#include "Core/Memory.h"
+#include "Runtime/Defines.h"
+#include "Core/IObject.h"
 
-#include "ECS/ECSWorld.h"
+#include "ECS/Entity.h"
+#include "ECS/EntityManager.h"
 
-#include <vector>
+#include <string>
 
 namespace Insight
 {
-	namespace App
+	namespace Runtime
 	{
-		class SceneManager;
+		class WorldSystem;
 
 		enum class WorldStates
 		{
@@ -25,14 +26,18 @@ namespace Insight
 			Tools	// World is for tool/development use (E.G: Editor).
 		};
 
-		class IS_RUNTIME Scene
+		/// <summary>
+		/// Describes a single "world" within the engine.
+		/// A World contains all entities and requried date for it self to be processed.
+		/// </summary>
+		class IS_RUNTIME World : public IObject
 		{
 		public:
-			Scene();
-			Scene(std::string sceneName);
-			Scene(Scene const& other) = delete;
-			Scene(Scene&& other);
-			~Scene();
+			World();
+			World(std::string worldName);
+			World(World const& other) = delete;
+			World(World&& other);
+			~World();
 
 			void Destroy();
 
@@ -40,22 +45,19 @@ namespace Insight
 			void Update(const float deltaTime);
 			void LateUpdate();
 
-			void SetSceneName(std::string sceneName) { m_sceneName = m_sceneName; }
-			std::string_view GetSceneName() const { return m_sceneName; }
+			void SetWorldName(std::string worldName) { m_worldName = worldName; }
+			std::string_view GetWorldName() const { return m_worldName; }
 
 			bool IsPersistentScene() const { return m_persistentScene; }
 
 			void SetOnlySearchable(bool onlySearchable);
 			bool IsOnlySearchable() const { return m_onlySearchable; }
 
-#ifdef ECS_ENABLED
-			Ptr<ECS::ECSWorld> GetECSWorld() const { return m_ecsWorld; }
-#else
 			Ptr<ECS::Entity> AddEntity();
 			Ptr<ECS::Entity> AddEntity(std::string entity_name);
 			Ptr<ECS::Entity> GetEntityByName(std::string entity_name) const;
 			void RemoveEntity(Ptr<ECS::Entity>& entity);
-#endif
+
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 			/// <summary>
 			/// This only returns the roots entities.
@@ -65,17 +67,12 @@ namespace Insight
 
 		private:
 			/// Store all entites 
-			std::string m_sceneName = "";
+			std::string m_worldName = "";
 			WorldStates m_worldState = WorldStates::Paused;
 			WorldTypes m_worldType = WorldTypes::Game;
 
-#ifdef ECS_ENABLED
-			UPtr<ECS::ECSWorld> m_ecsWorld = nullptr;
-#else
-			//
 			std::vector<Ptr<ECS::Entity>> m_root_entities;
 			ECS::EntityManager m_entityManager;
-#endif
 			Ptr<ECS::Entity> m_cameraEntity = nullptr;
 
 			// Is this scene persistent. If 'true' then the scene can not be unloaded even if asked. The scene must be deleted to be removed. 
@@ -83,40 +80,7 @@ namespace Insight
 			// Can this scene only be found if searched for. This stops 'GetActiveScene' returning the scenes which might want to stay "hidden".
 			bool m_onlySearchable = false;
 
-			friend class SceneManager;
-		};
-
-		class IS_RUNTIME SceneManager : public Core::Singleton<SceneManager>
-		{
-		public:
-			SceneManager();
-			virtual ~SceneManager();
-
-			void EarlyUpdate();
-			void Update(const float deltaTime);
-			void LateUpdate();
-
-			void Destroy();
-
-			WPtr<Scene> CreateScene(std::string sceneName = "", WorldTypes worldType = WorldTypes::Game);
-			// Create a new scene which can not be unloaded. This scene will alway be loaded.
-			WPtr<Scene> CreatePersistentScene(std::string sceneName = "", WorldTypes worldType = WorldTypes::Game);
-
-			// Set a single scene as active.
-			void SetActiveScene(WPtr<Scene> scene);
-			// Add a scene to be active.
-			void AddActiveScene(WPtr<Scene> scene);
-			// Remove a scene from being active.
-			void RemoveScene(WPtr<Scene> scene);
-
-			WPtr<Scene> GetActiveScene() const;
-			WPtr<Scene> FindSceneByName(std::string_view sceneName);
-			WPtr<Scene> GetSceneFromIndex(u32 index) const;
-			std::vector<WPtr<Scene>> GetAllScenes() const;
-
-		private:
-			std::vector<RPtr<Scene>> m_activeScenes;
-			std::vector<RPtr<Scene>> m_scenes;
+			friend class WorldSystem;
 		};
 	}
 }

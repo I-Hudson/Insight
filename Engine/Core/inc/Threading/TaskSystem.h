@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Singleton.h"
+#include "Core/ISysytem.h"
 #include "Core/TypeAlias.h"
 
 #include "Threading/Task.h"
@@ -15,12 +16,13 @@ namespace Insight
 {
 	namespace Threading
 	{
-		class IS_CORE TaskManager : public Core::Singleton<TaskManager>
+		class IS_CORE TaskSystem : public Core::Singleton<TaskSystem>, public Core::ISystem
 		{
 		public:
+			IS_SYSTEM(TaskSystem);
 
-			void Init(u32 threadCount = 0);
-			void Destroy();
+			virtual void Initialise() override;
+			virtual void Shutdown() override;
 
 			template<typename Func, typename... Args>
 			static auto CreateTask(Func func, Args&&... args)
@@ -31,8 +33,8 @@ namespace Insight
 				TrackPtr(taskWrapper);
 
 				TaskWithResultShared<ResultType> taskShared = MakeRPtr<TaskWithResult<ResultType>>(taskResult, taskWrapper);
-				std::unique_lock lock(TaskManager::Instance().m_mutex);
-				TaskManager::Instance().m_queuedTasks.push(taskShared);
+				std::unique_lock lock(TaskSystem::Instance().m_mutex);
+				TaskSystem::Instance().m_queuedTasks.push(taskShared);
 				lock.unlock();
 				return taskShared;
 			}

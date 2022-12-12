@@ -1,11 +1,11 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
+
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/Window.h"
 
-#include "Event/EventManager.h"
+#include "Event/EventSystem.h"
 
 #include "Core/Profiler.h"
 
@@ -23,7 +23,7 @@ namespace Insight
 		void RenderGraph::Init(RenderContext* context)
 		{
 			IS_PROFILE_FUNCTION();
-			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
+			Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
 				{
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 
@@ -521,7 +521,7 @@ namespace Insight
 		{
 			m_render_resolution = render_resolution;
 			m_render_resolution_has_changed = true;
-			Core::EventManager::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
+			Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphicsRenderResolutionChange>(m_render_resolution.x, m_render_resolution.y));
 		}
 
 		void RenderGraph::SetOutputResolution(glm::ivec2 output_resolution)

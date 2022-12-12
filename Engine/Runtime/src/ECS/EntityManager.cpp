@@ -158,8 +158,8 @@ namespace Insight
 			m_ecsWorld = other.m_ecsWorld;
 			other.m_ecsWorld = nullptr;
 #else
-			m_scene = other.m_scene;
-			other.m_scene = nullptr;
+			m_world = other.m_world;
+			other.m_world = nullptr;
 #endif
 			std::for_each(other.m_entities.begin(), other.m_entities.end(), [this](UPtr<Entity>& entity)
 				{
@@ -173,9 +173,9 @@ namespace Insight
 			: m_ecsWorld(ecsWorld)
 		{ }
 #else
-		void EntityManager::SetScene(App::Scene* scene)
+		void EntityManager::SetWorld(Runtime::World* world)
 		{
-			m_scene = scene;
+			m_world = world;
 		}
 #endif
 

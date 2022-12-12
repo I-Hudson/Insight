@@ -9,9 +9,9 @@
 
 namespace Insight
 {
-	namespace App
+	namespace Runtime
 	{
-		class Scene;
+		class World;
 	}
 
 	namespace ECS
@@ -56,7 +56,7 @@ namespace Insight
 #ifdef ECS_ENABLED
 			EntityManager(ECSWorld* ecsWorld);
 #else
-			void SetScene(App::Scene* scene);
+			void SetWorld(Runtime::World* world);
 #endif
 
 			Entity* AddNewEntity();
@@ -76,7 +76,7 @@ namespace Insight
 #ifdef ECS_ENABLED
 			ECSWorld* m_ecsWorld = nullptr;
 #else
-			App::Scene* m_scene = nullptr;
+			Runtime::World* m_world = nullptr;
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			std::shared_mutex m_lock;

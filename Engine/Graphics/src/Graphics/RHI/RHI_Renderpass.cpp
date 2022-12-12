@@ -1,5 +1,4 @@
 #include "Graphics/RHI/RHI_Renderpass.h"
-#include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/RHI_Texture.h"
 
@@ -89,7 +88,7 @@ namespace Insight
 			if (auto itr = m_renderpasses.find(hash); itr != m_renderpasses.end())
 			{
 #ifdef IS_VULKAN_ENABLED
-				if (GraphicsManager::IsVulkan())
+				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 				{
 					RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 					VkRenderPass renderpassVulkan = reinterpret_cast<VkRenderPass>(itr->second.Resource);
@@ -157,7 +156,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan())
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
@@ -261,7 +260,7 @@ namespace Insight
 							resultAttachments.push_back(CreateColour(nullptr, &descriptions.at(0)));
 							resultAttachments.at(0).format = resultAttachments.at(0).format != VkFormat::VK_FORMAT_UNDEFINED ?
 								resultAttachments.at(0).format
-								: static_cast<RHI::Vulkan::RenderContext_Vulkan*>(GraphicsManager::Instance().GetRenderContext())->GetSwapchainColourFormat();
+								: static_cast<RHI::Vulkan::RenderContext_Vulkan*>(&RenderContext::Instance())->GetSwapchainColourFormat();
 							resultReferences.push_back(VkAttachmentReference{ static_cast<u32>(0), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 						}
 

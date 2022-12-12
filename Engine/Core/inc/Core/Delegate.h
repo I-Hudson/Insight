@@ -46,8 +46,35 @@ namespace Insight
 				m_callee = (void*)method;
 				m_function = &StaticFreeFunctionStub;
 			}
+			Function(const Function& other)
+			{
+				m_callee = other.m_callee;
+				m_function = other.m_function;
+			}
+			Function(Function&& other)
+			{
+				m_callee = other.m_callee;
+				m_function = other.m_function;
+				other.m_callee = nullptr;
+				other.m_function = nullptr;
+			}
 
 			operator bool() const { return m_function != nullptr; }
+
+			Function& operator=(const Function& other)
+			{
+				m_callee = other.m_callee;
+				m_function = other.m_function;
+				return *this;
+			}
+			Function& operator=(Function&& other)
+			{
+				m_callee = other.m_callee;
+				m_function = other.m_function;
+				other.m_callee = nullptr;
+				other.m_function = nullptr;
+				return *this;
+			}
 
 			// Bind a static/free function function.
 			template<ReturnType(*Function)(Args...)>
@@ -157,11 +184,29 @@ namespace Insight
 
 		public:
 			DelegateBase() = default;
-			DelegateBase(const DelegateBase& other) = default;
+			DelegateBase(const DelegateBase& other)
+			{
+				m_functions = other.m_functions;
+			}
+			DelegateBase(DelegateBase&& other)
+			{
+				m_functions = std::move(other.m_functions);
+				other.m_functions = {};
+			}
 
 			operator bool() const { return m_functions.size() > 0; }
 
-			auto operator=(const DelegateBase& other)->DelegateBase& = default;
+			DelegateBase& operator=(const DelegateBase& other)
+			{
+				m_functions = other.m_functions;
+				return *this;
+			}
+			DelegateBase& operator=(DelegateBase&& other)
+			{
+				m_functions = std::move(other.m_functions);
+				other.m_functions = {};
+				return *this;
+			}
 
 			auto operator()(Args... args) const->Return
 			{
@@ -321,8 +366,6 @@ namespace Insight
 			}
 
 		private:
-			//std::vector<IntPtr> m_callees;
-			//std::vector<IntPtr> m_functions;
 			std::vector<Function<Return(Args...)>> m_functions;
 		};
 	}

@@ -4,7 +4,7 @@
 #include "Core/ImGuiSystem.h"
 
 #include "Graphics/Window.h"
-#include "Graphics/GraphicsManager.h"
+
 
 #include <GLFW/glfw3.h>
 #include <backends/imgui_impl_glfw.h>
@@ -47,8 +47,6 @@ namespace Insight
 			/// Set all out callback funcs, and call all our internal callbacks.
 
 			glfwInit();
-
-			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
 
 			glfwSetKeyCallback(window->GetRawWindow(), [](GLFWwindow* window, int key, int scancode, int action, int mods)
 				{

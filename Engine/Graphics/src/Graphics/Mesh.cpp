@@ -1,6 +1,6 @@
 #include "Graphics/Mesh.h"
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
+
 #include "Graphics/RHI/RHI_CommandList.h"
 
 #include "Core/Logger.h"

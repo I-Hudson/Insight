@@ -33,10 +33,18 @@ namespace Insight
 		class RHI_Texture;
 		class RenderTarget;
 
+		enum class GraphicsAPI
+		{
+			Vulkan,
+			DX12,
+
+			None,
+		};
+
 		//// <summary>
 		//// Store any and all details about the physical device being used.
 		//// </summary>
-		struct PhysicalDeviceInformation : public Core::Singleton<PhysicalDeviceInformation>
+		struct IS_GRAPHICS PhysicalDeviceInformation : public Core::Singleton<PhysicalDeviceInformation>
 		{
 			std::string Device_Name;
 			std::string Vendor;
@@ -60,10 +68,10 @@ namespace Insight
 			}
 		};
 
-		class RenderContext
+		class IS_GRAPHICS RenderContext : public Core::Singleton<RenderContext>
 		{
 		public:
-			static RenderContext* New();
+			static RenderContext* New(GraphicsAPI graphicsAPI);
 
 			virtual bool Init() = 0;
 			virtual void Destroy() = 0;
@@ -87,6 +95,7 @@ namespace Insight
 			bool IsExtensionEnabled(DeviceExtension extension) const;
 			void EnableExtension(DeviceExtension extension);
 			void DisableExtension(DeviceExtension extension);
+			GraphicsAPI GetGraphicsAPI() const { return m_graphicsAPI; }
 
 			CommandListManager& GetCommandListManager() { return m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
@@ -119,6 +128,7 @@ namespace Insight
 			///const static int c_FrameCount = 3;
 
 			std::mutex m_lock;
+			GraphicsAPI m_graphicsAPI = GraphicsAPI::None;
 
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
 			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_enabledDeviceExtensions;
@@ -151,8 +161,6 @@ namespace Insight
 	class IS_GRAPHICS Renderer
 	{
 	public:
-		static void SetImGUIContext(ImGuiContext*& context);
-
 		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
@@ -170,6 +178,8 @@ namespace Insight
 
 		static Graphics::RHI_Texture* CreateTexture();
 		static void FreeTexture(Graphics::RHI_Texture* texture);
+
+		static Graphics::GraphicsAPI GetGraphicsAPI();
 
 	private:
 		static Graphics::RenderContext* s_context;

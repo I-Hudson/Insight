@@ -1,7 +1,6 @@
 ﻿#include "Graphics/RHI/RHI_Buffer.h"
 #include "Core/Memory.h"
 
-#include "Graphics/GraphicsManager.h"
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
@@ -14,7 +13,7 @@ namespace Insight
 		RHI_Buffer* RHI_Buffer::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Buffer_Vulkan); }
+			if (Renderer::GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_Buffer_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Buffer_DX12); }
@@ -25,7 +24,7 @@ namespace Insight
 
 		RPtr<RHI_UploadQueueRequest> RHI_Buffer::QueueUpload(void* data, int sizeInBytes)
 		{
-			return GraphicsManager::Instance().GetRenderContext()->GetUploadQueue().UploadBuffer(data, sizeInBytes, this);
+			return RenderContext::Instance().GetUploadQueue().UploadBuffer(data, sizeInBytes, this);
 		}
 
 		RHI_BufferView RHI_Buffer::GetView(u64 offset, u64 size)
