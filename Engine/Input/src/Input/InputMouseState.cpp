@@ -13,7 +13,7 @@ namespace Insight
 		void InputMouseState::ClearFrame()
 		{
 			__super::ClearFrame();
-			m_scrollAmount = 0.0f
+			m_scrollAmount = 0.0f;
 		}
 
 		float InputMouseState::GetXPosition() const

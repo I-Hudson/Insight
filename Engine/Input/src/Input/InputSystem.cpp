@@ -2,6 +2,7 @@
 #include "Core/Memory.h"
 
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
+#include "Input/InputDevices/InputDeivce_Controller.h"
 
 namespace Insight
 {
@@ -100,7 +101,7 @@ namespace Insight
 			}
 			case Insight::Input::InputDeviceTypes::Controller:
 			{
-				//newInputDevice = New<>();
+				newInputDevice = New<InputDevice_Controller>();
 				break;
 			}
 			}

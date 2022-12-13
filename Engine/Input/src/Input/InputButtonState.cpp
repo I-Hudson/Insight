@@ -65,16 +65,18 @@ namespace Insight
 		}
 
 		void InputButton::SetState(ButtonStates newState)
-		{
-			m_state = newState;
-			
-			if (m_state == ButtonStates::Pressed)
+		{	
+			if ((m_state == ButtonStates::Pressed || m_state == ButtonStates::Held)
+				&& newState == ButtonStates::Released)
 			{
+				m_state = newState;
 				m_buttonUpdate = ButtonUpdate::UpdatedThisFrame;
 				m_heldTime = 0.0f;
 			}
-			else  if (m_state == ButtonStates::Released)
+			else  if ((m_state == ButtonStates::Released || m_state == ButtonStates::None)
+				&& newState == ButtonStates::Pressed)
 			{
+				m_state = newState;
 				m_buttonUpdate = ButtonUpdate::UpdatedThisFrame;
 				m_heldTime = 0.0f;
 			}

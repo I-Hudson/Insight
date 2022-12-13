@@ -3,15 +3,36 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 #include "Input/InputSystem.h"
+#include "Input/InputDevices/InputDeivce_Controller.h"
+#include "Input/InputButtonState.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <Xinput.h>
+#include <vector>
+#include <unordered_map>
 
 namespace Insight
 {
 	namespace Input
 	{
+		const std::unordered_map<int, ControllerButtons> XINPUT_BUTTON_TO_INTERNAL =
+		{
+			{ 0x0001, ControllerButtons::DPad_Up },
+			{ 0x0002, ControllerButtons::DPad_Down },
+			{ 0x0004, ControllerButtons::DPad_Left },
+			{ 0x0008, ControllerButtons::DPad_Right },
+
+			{ 0x0010, ControllerButtons::Start },
+			{ 0x0020, ControllerButtons::Select },
+			{ 0x0040, ControllerButtons::Joystick_Left },
+			{ 0x0080, ControllerButtons::Joystick_Right },
+			{ 0x0100, ControllerButtons::Bummer_Left },
+			{ 0x0200, ControllerButtons::Bummber_Right },
+
+			{ 0x1000, ControllerButtons::A },
+			{ 0x2000, ControllerButtons::B },
+			{ 0x4000, ControllerButtons::X },
+			{ 0x8000, ControllerButtons::Y },
+		};
+
 		void XInputManager::Initialise(InputSystem* inputSystem)
 		{
 			m_inputSystem = inputSystem;
@@ -41,6 +62,7 @@ namespace Insight
 						m_connectedPorts.at(i) = true;
 						m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
 					}
+					ProcessInput(i, state);
 				}
 				else
 				{
@@ -53,6 +75,30 @@ namespace Insight
 					}
 				}
 			}
+		}
+
+		void XInputManager::ProcessInput(u32 controllerIndex, XINPUT_STATE state)
+		{
+			std::vector<Input::GenericInput> inputs;
+
+			for (auto const& iter : XINPUT_BUTTON_TO_INTERNAL)
+			{
+				int mask = iter.first;
+				ControllerButtons controllerButton = iter.second;
+				int buttonState = state.Gamepad.wButtons & mask;
+				inputs.push_back(
+					Input::GenericInput
+					{
+						static_cast<u64>(controllerIndex),
+						InputDeviceTypes::Controller,
+						InputTypes::Button,
+						static_cast<u64>(controllerButton),
+						static_cast<u64>(buttonState == 0 ? ButtonStates::Released : ButtonStates::Pressed),
+						static_cast<u64>(0)
+					});
+			}
+
+			m_inputSystem->UpdateInputs(inputs);
 		}
 	}
 }
