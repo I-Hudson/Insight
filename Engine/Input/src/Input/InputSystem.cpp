@@ -19,8 +19,11 @@ namespace Insight
 		{
 			InputDevice_KeyboardMouse* keyboardDevice = New<InputDevice_KeyboardMouse>();
 			keyboardDevice->Initialise();
-
 			m_inputDevices.push_back(keyboardDevice);
+
+#ifdef IS_PLATFORM_WINDOWS
+			m_xinputManager.Initialise(this);
+#endif
 
 			m_state = Core::SystemStates::Initialised;
 		}
@@ -33,6 +36,10 @@ namespace Insight
 				Delete(device);
 			}
 			m_inputDevices.clear();
+
+#ifdef IS_PLATFORM_WINDOWS
+			m_xinputManager.Shutdown();
+#endif
 
 			m_state = Core::SystemStates::Not_Initialised;
 		}
@@ -65,6 +72,9 @@ namespace Insight
 
 		void InputSystem::Update(float const deltaTime)
 		{
+#ifdef IS_PLATFORM_WINDOWS
+			m_xinputManager.Update();
+#endif
 			for (auto& device: m_inputDevices)
 			{
 				device->Update(deltaTime);

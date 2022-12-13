@@ -72,6 +72,12 @@ project "Insight_Input"
             "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
         }
     
+    filter "platforms:Win64"
+        links
+        {
+            "Xinput.lib",
+        }
+
     filter "configurations:Debug or configurations:Testing"
         defines { "DEBUG" }
         symbols "On" 

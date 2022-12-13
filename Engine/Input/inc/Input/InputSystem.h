@@ -4,6 +4,7 @@
 #include "Core/Singleton.h"
 
 #include "Input/InputDevices/IInputDevice.h"
+#include "Input/XInputManager.h"
 
 #include <array>
 #include <vector>
@@ -33,6 +34,10 @@ namespace Insight
 
 		private:
 			std::vector<IInputDevice*> m_inputDevices;
+#ifdef IS_PLATFORM_WINDOWS
+			XInputManager m_xinputManager;
+			friend class XInputManager;
+#endif
 		};
 	}
 }
