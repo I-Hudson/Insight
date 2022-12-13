@@ -36,7 +36,7 @@ namespace Insight
 				{
 					if (pSystem->GetSystemId() == T::s_SystemId)
 					{
-						return reinterpret_cast<T*>(pSystem);
+						return static_cast<T*>(pSystem);
 					}
 				}
 				FAIL_ASSERT();

@@ -120,6 +120,7 @@ namespace Insight
 
             NumButtons,
         };
+        IS_INPUT CONSTEXPR const char* KeyboardButtonToString(KeyboardButtons button);
 
 		class IS_INPUT InputDevice_KeyboardMouse : public IInputDevice
 		{

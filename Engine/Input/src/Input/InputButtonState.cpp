@@ -27,7 +27,8 @@ namespace Insight
 
 		bool InputButton::WasHeld() const
 		{
-			return m_state == ButtonStates::Held && m_heldTime > 0.0f;
+			return (m_state == ButtonStates::Held && m_heldTime > 0.0f)
+				|| m_state == ButtonStates::Pressed;
 		}
 
 		float InputButton::GetHeldTIme() const

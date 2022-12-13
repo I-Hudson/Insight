@@ -12,6 +12,7 @@ namespace Insight
 			KeyboardMouse,
 			Controller
 		};
+		IS_INPUT const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType);
 
 		enum class InputTypes
 		{
@@ -20,6 +21,7 @@ namespace Insight
 			MouseButton,
 			Joystick
 		};
+		IS_INPUT const char* InputTypeToString(InputTypes inputTypes);
 
 		struct IS_INPUT GenericInput
 		{

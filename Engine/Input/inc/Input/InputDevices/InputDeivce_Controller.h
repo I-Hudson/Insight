@@ -25,10 +25,14 @@ namespace Insight
 			Select,
 			Share,
 
-			ButtonCount
+			NumButtons
 		};
+		IS_INPUT CONSTEXPR const char* ControllerButtonsToString(ControllerButtons button);
 
-		class InputDevice_Controller : public IInputDevice
+		/// <summary>
+		/// Controller based on Xbox one controller.
+		/// </summary>
+		class IS_INPUT InputDevice_Controller : public IInputDevice
 		{
 		public:
 			InputDevice_Controller() = default;
@@ -43,8 +47,12 @@ namespace Insight
 			virtual void Update(float const deltaTime) override;
 			virtual void ClearFrame() override;
 
+			bool WasPressed(ControllerButtons buttonIdx) const;
+			bool WasReleased(ControllerButtons buttonIdx) const;
+			bool WasHeld(ControllerButtons buttonIdx) const;
+
 		private:
-			InputButtonState<static_cast<u64>(ControllerButtons::ButtonCount)> m_buttons;
+			InputButtonState<static_cast<u64>(ControllerButtons::NumButtons)> m_buttons;
 		};
 	}
 }

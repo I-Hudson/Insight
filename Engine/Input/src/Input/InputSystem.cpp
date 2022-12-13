@@ -55,6 +55,26 @@ namespace Insight
 			return nullptr;
 		}
 
+		InputDevice_Controller* InputSystem::GetController(u32 index) const
+		{
+			int idx = 0;
+			for (auto& device : m_inputDevices)
+			{
+				if (device->GetDeviceType() == InputDeviceTypes::Controller
+					&& idx == index)
+				{
+					return static_cast<InputDevice_Controller*>(device);
+				}
+				++idx;
+			}
+			return nullptr;
+		}
+
+		std::vector<IInputDevice*> InputSystem::GetAllInputDevices() const
+		{
+			return m_inputDevices;
+		}
+
 		void InputSystem::UpdateInputs(std::vector<GenericInput> inputs)
 		{
 			for (auto& device : m_inputDevices)

@@ -80,7 +80,6 @@ namespace Insight
 		void XInputManager::ProcessInput(u32 controllerIndex, XINPUT_STATE state)
 		{
 			std::vector<Input::GenericInput> inputs;
-
 			for (auto const& iter : XINPUT_BUTTON_TO_INTERNAL)
 			{
 				int mask = iter.first;
@@ -97,7 +96,6 @@ namespace Insight
 						static_cast<u64>(0)
 					});
 			}
-
 			m_inputSystem->UpdateInputs(inputs);
 		}
 	}
