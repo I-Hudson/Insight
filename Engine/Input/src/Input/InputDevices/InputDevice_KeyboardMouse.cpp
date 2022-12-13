@@ -12,12 +12,14 @@ namespace Insight
 		InputDevice_KeyboardMouse::~InputDevice_KeyboardMouse()
 		{ }
 
-		void InputDevice_KeyboardMouse::Initialise()
+		void InputDevice_KeyboardMouse::Initialise(u32 id)
 		{
+			m_id = id;
 		}
 
 		void InputDevice_KeyboardMouse::Shutdown()
 		{
+			m_id = 0;
 		}
 
 		void InputDevice_KeyboardMouse::ProcessInput(GenericInput const& input)
@@ -64,6 +66,12 @@ namespace Insight
 		{
 			m_buttons.Update(deltaTime);
 			m_mouse.Update(deltaTime);
+		}
+
+		void InputDevice_KeyboardMouse::ClearFrame()
+		{
+			m_buttons.ClearFrame();
+			m_mouse.ClearFrame();
 		}
 
 		bool InputDevice_KeyboardMouse::WasPressed(KeyboardButtons buttonIdx) const

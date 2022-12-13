@@ -145,7 +145,8 @@ namespace Insight
 					IS_PROFILE_SCOPE("GraphicsSystem Render");
 					m_graphicsSystem.Render();
 				}
-				Graphics::Window::Instance().Update();
+
+				m_inputSystem.ClearFrame();
 			}
 		}
 

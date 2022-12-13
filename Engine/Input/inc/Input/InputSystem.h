@@ -31,6 +31,11 @@ namespace Insight
 
 			void UpdateInputs(std::vector<GenericInput> inputs);
 			void Update(float const deltaTime);
+			void ClearFrame();
+
+		private:
+			void AddInputDevice(InputDeviceTypes deviceType, u32 id);
+			void RemoveInputDevice(InputDeviceTypes deviceType, u32 id);
 
 		private:
 			std::vector<IInputDevice*> m_inputDevices;

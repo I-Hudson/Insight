@@ -17,9 +17,7 @@ namespace Insight
 
 		void InputSystem::Initialise()
 		{
-			InputDevice_KeyboardMouse* keyboardDevice = New<InputDevice_KeyboardMouse>();
-			keyboardDevice->Initialise();
-			m_inputDevices.push_back(keyboardDevice);
+			AddInputDevice(InputDeviceTypes::KeyboardMouse, 0);
 
 #ifdef IS_PLATFORM_WINDOWS
 			m_xinputManager.Initialise(this);
@@ -78,6 +76,53 @@ namespace Insight
 			for (auto& device: m_inputDevices)
 			{
 				device->Update(deltaTime);
+			}
+		}
+
+		void InputSystem::ClearFrame()
+		{
+			for (auto& device : m_inputDevices)
+			{
+				device->ClearFrame();
+			}
+		}
+
+
+		void InputSystem::AddInputDevice(InputDeviceTypes deviceType, u32 id)
+		{
+			IInputDevice* newInputDevice = nullptr;
+			switch (deviceType)
+			{
+			case Insight::Input::InputDeviceTypes::KeyboardMouse: 
+			{
+				newInputDevice = New<InputDevice_KeyboardMouse>();
+				break;
+			}
+			case Insight::Input::InputDeviceTypes::Controller:
+			{
+				//newInputDevice = New<>();
+				break;
+			}
+			}
+			ASSERT(newInputDevice);
+			newInputDevice->Initialise(id);
+			m_inputDevices.push_back(newInputDevice);
+		}
+
+		void InputSystem::RemoveInputDevice(InputDeviceTypes deviceType, u32 id)
+		{
+			int idx = 0;
+			for (auto& device : m_inputDevices)
+			{
+				if (device->GetDeviceType() == deviceType
+					&& device->GetId() == id)
+				{
+					device->Shutdown();
+					Delete(device);
+					m_inputDevices.erase(m_inputDevices.begin() + idx);
+					break;
+				}
+				++idx;
 			}
 		}
 	}

@@ -23,6 +23,8 @@ namespace Insight
 			InputMouseState();
 			~InputMouseState();
 
+			virtual void ClearFrame() override;
+
 			float GetXPosition() const;
 			float GetYPosition() const;
 			void MouseMoved(float xPosition, float yPosition);
@@ -30,6 +32,7 @@ namespace Insight
 		private:
 			float m_xPosition;
 			float m_yPosition;
+			float m_scrollAmount = 0.0f;
 		};
 	}
 }

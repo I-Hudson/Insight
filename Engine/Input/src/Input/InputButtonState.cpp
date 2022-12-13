@@ -60,6 +60,10 @@ namespace Insight
 			}
 		}
 
+		void InputButton::ClearFrame()
+		{
+		}
+
 		void InputButton::SetState(ButtonStates newState)
 		{
 			m_state = newState;
