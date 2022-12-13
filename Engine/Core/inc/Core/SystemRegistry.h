@@ -26,6 +26,7 @@ namespace Insight
 			void UnregisterSystem(ISystem* system);
 
 			void VerifyAllSystemsStates(SystemStates systemStateToVerify) const;
+			bool IsEmpty() const { return m_registeredSystems.size() == 0; }
 
 			template<typename T>
 			INLINE T* GetSystem() const

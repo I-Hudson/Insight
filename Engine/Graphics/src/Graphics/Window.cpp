@@ -3,11 +3,14 @@
 #include "Core/Logger.h"
 #include "Core/CommandLineArgs.h"
 
+#include "Input/InputSystem.h"
+#include "Input/InputButtonState.h"
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
+
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 
 #include <stb_image.h>
-
 #include <iostream>
 
 namespace Insight
@@ -16,8 +19,110 @@ namespace Insight
 	{
 		constexpr char* CMD_START_WINDOW_MINIMISED = "start_window_minimised";
 
-		bool Window::Init(int width, int height, std::string title)
+		const std::unordered_map<u32, Input::MouseButtons> GLFW_MOUSE_BUTTONS_TO_INTERNAL =
 		{
+			{ GLFW_MOUSE_BUTTON_LEFT  , Input::MouseButtons::Left },
+			{ GLFW_MOUSE_BUTTON_RIGHT , Input::MouseButtons::Right },
+			{ GLFW_MOUSE_BUTTON_MIDDLE, Input::MouseButtons::Middle },
+			{ GLFW_MOUSE_BUTTON_4     , Input::MouseButtons::Side0 },
+			{ GLFW_MOUSE_BUTTON_5     , Input::MouseButtons::Side1 },
+		};
+
+		const std::unordered_map<u32, Input::KeyboardButtons> GLFW_KEYBOARD_BUTTONS_TO_INTERNAL =
+		{
+			{ GLFW_KEY_SPACE            , Input::KeyboardButtons::Key_Space },
+			{ GLFW_KEY_APOSTROPHE       , Input::KeyboardButtons::Key_Quote },
+			{ GLFW_KEY_COMMA            , Input::KeyboardButtons::Key_Comma },
+			{ GLFW_KEY_MINUS            , Input::KeyboardButtons::Key_Minus },
+			{ GLFW_KEY_PERIOD           , Input::KeyboardButtons::Key_Period },
+			{ GLFW_KEY_SLASH            , Input::KeyboardButtons::Key_ForwardSlash },
+
+			{ GLFW_KEY_SEMICOLON        , Input::KeyboardButtons::Key_SemiColon },
+			{ GLFW_KEY_EQUAL            , Input::KeyboardButtons::Key_Equals },
+
+			{ GLFW_KEY_LEFT_BRACKET     , Input::KeyboardButtons::Key_LBracket },
+			{ GLFW_KEY_BACKSLASH        , Input::KeyboardButtons::Key_BackSlash },
+			{ GLFW_KEY_RIGHT_BRACKET    , Input::KeyboardButtons::Key_RBracket },
+			{ GLFW_KEY_GRAVE_ACCENT     , Input::KeyboardButtons::Key_Tilde },
+
+			{ GLFW_KEY_PRINT_SCREEN     , Input::KeyboardButtons::Key_PrintScreen },
+			{ GLFW_KEY_SCROLL_LOCK      , Input::KeyboardButtons::Key_ScrollLock },
+			{ GLFW_KEY_PAUSE            , Input::KeyboardButtons::Key_Pause },
+
+			{ GLFW_KEY_INSERT           , Input::KeyboardButtons::Key_Insert },
+			{ GLFW_KEY_HOME             , Input::KeyboardButtons::Key_Home },
+			{ GLFW_KEY_PAGE_UP          , Input::KeyboardButtons::Key_PageUp },
+			{ GLFW_KEY_DELETE           , Input::KeyboardButtons::Key_Delete },
+			{ GLFW_KEY_END              , Input::KeyboardButtons::Key_End },
+			{ GLFW_KEY_PAGE_DOWN        , Input::KeyboardButtons::Key_PageDown},
+
+			{ GLFW_KEY_LEFT_SHIFT       , Input::KeyboardButtons::Key_LShift },
+			{ GLFW_KEY_RIGHT_SHIFT      , Input::KeyboardButtons::Key_RShift},
+
+			{ GLFW_KEY_LEFT_CONTROL		, Input::KeyboardButtons::Key_LCtrl },
+			{ GLFW_KEY_RIGHT_CONTROL	, Input::KeyboardButtons::Key_RCtrl},
+
+			{ GLFW_KEY_F1               , Input::KeyboardButtons::Key_F1 },
+			{ GLFW_KEY_F2               , Input::KeyboardButtons::Key_F2 },
+			{ GLFW_KEY_F3               , Input::KeyboardButtons::Key_F3 },
+			{ GLFW_KEY_F4               , Input::KeyboardButtons::Key_F4 },
+			{ GLFW_KEY_F5               , Input::KeyboardButtons::Key_F5 },
+			{ GLFW_KEY_F6               , Input::KeyboardButtons::Key_F6 },
+			{ GLFW_KEY_F7               , Input::KeyboardButtons::Key_F7 },
+			{ GLFW_KEY_F8               , Input::KeyboardButtons::Key_F8 },
+			{ GLFW_KEY_F9               , Input::KeyboardButtons::Key_F9 },
+			{ GLFW_KEY_F10              , Input::KeyboardButtons::Key_F10 },
+			{ GLFW_KEY_F11              , Input::KeyboardButtons::Key_F11 },
+			{ GLFW_KEY_F12              , Input::KeyboardButtons::Key_F12 },
+
+			{ GLFW_KEY_0                , Input::KeyboardButtons::Key_0 },
+			{ GLFW_KEY_1                , Input::KeyboardButtons::Key_1 },
+			{ GLFW_KEY_2                , Input::KeyboardButtons::Key_2 },
+			{ GLFW_KEY_3                , Input::KeyboardButtons::Key_3 },
+			{ GLFW_KEY_4                , Input::KeyboardButtons::Key_4 },
+			{ GLFW_KEY_5                , Input::KeyboardButtons::Key_5 },
+			{ GLFW_KEY_6                , Input::KeyboardButtons::Key_6 },
+			{ GLFW_KEY_7                , Input::KeyboardButtons::Key_7 },
+			{ GLFW_KEY_8                , Input::KeyboardButtons::Key_8 },
+			{ GLFW_KEY_9                , Input::KeyboardButtons::Key_9 },
+
+			{ GLFW_KEY_A                , Input::KeyboardButtons::Key_A },
+			{ GLFW_KEY_B                , Input::KeyboardButtons::Key_B },
+			{ GLFW_KEY_C                , Input::KeyboardButtons::Key_C },
+			{ GLFW_KEY_D                , Input::KeyboardButtons::Key_D },
+			{ GLFW_KEY_E                , Input::KeyboardButtons::Key_E },
+			{ GLFW_KEY_F                , Input::KeyboardButtons::Key_F },
+			{ GLFW_KEY_G                , Input::KeyboardButtons::Key_G },
+			{ GLFW_KEY_H                , Input::KeyboardButtons::Key_H },
+			{ GLFW_KEY_I                , Input::KeyboardButtons::Key_I },
+			{ GLFW_KEY_J                , Input::KeyboardButtons::Key_J },
+
+			{ GLFW_KEY_K                , Input::KeyboardButtons::Key_K },
+			{ GLFW_KEY_L                , Input::KeyboardButtons::Key_L },
+			{ GLFW_KEY_M                , Input::KeyboardButtons::Key_M },
+			{ GLFW_KEY_N                , Input::KeyboardButtons::Key_N },
+			{ GLFW_KEY_O                , Input::KeyboardButtons::Key_O },
+			{ GLFW_KEY_P                , Input::KeyboardButtons::Key_P },
+			{ GLFW_KEY_Q                , Input::KeyboardButtons::Key_Q },
+			{ GLFW_KEY_R                , Input::KeyboardButtons::Key_R },
+			{ GLFW_KEY_S                , Input::KeyboardButtons::Key_S },
+			{ GLFW_KEY_T                , Input::KeyboardButtons::Key_T },
+
+			{ GLFW_KEY_U                , Input::KeyboardButtons::Key_U },
+			{ GLFW_KEY_V                , Input::KeyboardButtons::Key_V },
+			{ GLFW_KEY_W                , Input::KeyboardButtons::Key_W },
+			{ GLFW_KEY_X                , Input::KeyboardButtons::Key_X },
+			{ GLFW_KEY_Y                , Input::KeyboardButtons::Key_Y },
+			{ GLFW_KEY_Z                , Input::KeyboardButtons::Key_Z },
+		};
+
+		std::unordered_map<GLFWwindow*, WindowInputs> Window::m_windowInputs;
+
+		bool Window::Init(Input::InputSystem* inputSystem, int width, int height, std::string title)
+
+		{
+			m_inputSystem = inputSystem;
+
 			if (m_glfwInit)
 			{
 				IS_CORE_INFO("[Window::Init] Init already called.");
@@ -59,6 +164,9 @@ namespace Insight
 					Window::Instance().SetSize({ width, height });
 				});
 
+			m_windowInputs[m_glfwWindow] = WindowInputs{ m_glfwWindow };
+			SetCallbacks();
+
 			return true;
 		}
 
@@ -74,6 +182,7 @@ namespace Insight
 
 			if (m_glfwInit)
 			{
+				ImGui_ImplGlfw_Shutdown();
 				glfwTerminate();
 				m_glfwInit = false;
 			}
@@ -81,7 +190,18 @@ namespace Insight
 
 		void Window::Update()
 		{
+			ASSERT(Platform::IsMainThread());
+			for (auto& inputs: m_windowInputs)
+			{
+				inputs.second.Clear();
+			}
+
 			glfwPollEvents();
+
+			for (auto& inputs : m_windowInputs)
+			{
+				m_inputSystem->UpdateInputs(inputs.second.Inputs);
+			}
 		}
 
 		void Window::Rebuild()
@@ -91,7 +211,7 @@ namespace Insight
 			glm::ivec2 oldSize = m_size;
 
 			Destroy();
-			Init(oldSize.x, oldSize.y, oldTitle);
+			Init(m_inputSystem, oldSize.x, oldSize.y, oldTitle);
 			SetPosition(oldPosition);
 		}
 
@@ -164,6 +284,70 @@ namespace Insight
 				return true;
 			}
 			return glfwWindowShouldClose(m_glfwWindow);
+		}
+
+		void Window::SetCallbacks()
+		{
+			glfwSetKeyCallback(m_glfwWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+				{
+					auto iter = GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.find(static_cast<u32>(key));
+					ASSERT(iter != GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.end());
+					Input::KeyboardButtons keyboardButton = iter->second;
+
+					WindowInputs& inputs = m_windowInputs[window];
+					inputs.Inputs.push_back(
+						Input::GenericInput
+						{ 
+							static_cast<u64>(0),
+							Input::InputDeviceTypes::KeyboardMouse,
+							Input::InputTypes::Button,
+							static_cast<u64>(keyboardButton),
+							static_cast<u64>(action == GLFW_RELEASE ? Input::ButtonStates::Released : action == GLFW_PRESS ?  Input::ButtonStates::Pressed : Input::ButtonStates::None),
+							static_cast<u64>(mods)
+						});
+					ImGui_ImplGlfw_KeyCallback(Graphics::Window::Instance().GetRawWindow(), key, scancode, action, mods);
+				});
+
+			glfwSetMouseButtonCallback(m_glfwWindow, [](GLFWwindow* window, int button, int action, int mods)
+				{
+					auto iter = GLFW_MOUSE_BUTTONS_TO_INTERNAL.find(static_cast<u32>(button));
+					ASSERT(iter != GLFW_MOUSE_BUTTONS_TO_INTERNAL.end());
+					Input::MouseButtons mouseButton = iter->second;
+
+					WindowInputs& inputs = m_windowInputs[window];
+					inputs.Inputs.push_back(
+					Input::GenericInput
+					{
+						static_cast<u64>(0),
+						Input::InputDeviceTypes::KeyboardMouse,
+						Input::InputTypes::MouseButton,
+						static_cast<u64>(mouseButton),
+						static_cast<u64>(action == GLFW_RELEASE ? Input::ButtonStates::Released : action == GLFW_PRESS ? Input::ButtonStates::Pressed : Input::ButtonStates::None),
+						static_cast<u64>(mods)
+					});
+					ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+				});
+
+			glfwSetCursorPosCallback(m_glfwWindow, [](GLFWwindow* window, double xpos, double ypos)
+				{
+					u64 xPosition;
+					u64 yPosition;
+					Platform::MemCopy(&xPosition, &xpos, sizeof(xPosition));
+					Platform::MemCopy(&yPosition, &ypos, sizeof(yPosition));
+
+					WindowInputs& inputs = m_windowInputs[window];
+					inputs.Inputs.push_back(
+					Input::GenericInput
+					{
+						static_cast<u64>(0),
+						Input::InputDeviceTypes::KeyboardMouse,
+						Input::InputTypes::Mouse,
+						xPosition,
+						yPosition,
+						static_cast<u64>(0)
+					});
+					ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+				});
 		}
 	}
 }

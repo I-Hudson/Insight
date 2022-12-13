@@ -26,14 +26,7 @@ namespace test
 
 	TEST_SUITE("TObjectOwnPtr")
 	{
-		int* rawInt = new int{ 8 };
-		TObjectOwnPtr<int> intPtr(rawInt);
-		TEST_CASE("Equal")
-		{
-			//TObjectOwnPtr<float> floatPtr = std::move(intPtr);
-			CHECK(1 == 1);
-		}
-		//intPtr.Reset();
+		TObjectOwnPtr<int> intPtr(new int{ 1 });
 
 		TEST_CASE("Owner pointer to Object pointer")
 		{
@@ -50,6 +43,28 @@ namespace test
 
 			CHECK(derivedPtr->Str == TEST_STRING);
 			CHECK(basePtr->I == TEST_INT);
+
+			derivedPtr.Reset();
+			CHECK(basePtr == nullptr);
+		}
+
+		TEST_CASE("Owner in vector")
+		{
+			std::vector<TObjectOwnPtr<int>> OwnerPtrs;
+			OwnerPtrs.push_back(TObjectOwnPtr<int>(new int{ 255 }));
+			
+			TObjectPtr objectPtr = OwnerPtrs.back();
+			CHECK(objectPtr);
+			CHECK(OwnerPtrs.at(0).GetOnDestroyDelegate()->GetFunctionCount() == 1);
+
+			OwnerPtrs.push_back(TObjectOwnPtr<int>(new int{ 512 }));
+
+			CHECK(objectPtr);
+			CHECK(OwnerPtrs.at(0).GetOnDestroyDelegate()->GetFunctionCount() == 1);
+
+			OwnerPtrs.erase(OwnerPtrs.begin());
+
+			CHECK(!objectPtr);
 		}
 	}
 }

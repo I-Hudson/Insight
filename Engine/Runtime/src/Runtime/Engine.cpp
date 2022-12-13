@@ -14,7 +14,6 @@
 #include "Core/Delegate.h"
 
 #include "Event/EventSystem.h"
-#include "Input/InputManager.h"
 
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
@@ -55,7 +54,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
 			//m_systemRegistry.RegisterSystem(&m_resourceSystem);
-			//m_systemRegistry.RegisterSystem(&m_inputSystem);
+			m_systemRegistry.RegisterSystem(&m_inputSystem);
 			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
@@ -71,13 +70,11 @@ namespace Insight
 			GraphicsModule::Initialise(&m_imguiSystem);
 			InputModule::Initialise(&m_imguiSystem);
 
-			m_graphicsSystem.Initialise();
-
+			m_graphicsSystem.Initialise(&m_inputSystem);
+			m_inputSystem.Initialise();
 			m_worldSystem.Initialise();
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
-
-			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
 
 			m_renderpasses.Create();
 
@@ -116,6 +113,17 @@ namespace Insight
 						IS_PROFILE_SCOPE("EventSystem");
 						m_eventSystem.Update();
 					}
+
+					{
+						IS_PROFILE_SCOPE("GraphicsSystem Update");
+						m_graphicsSystem.Update();
+					}
+
+					{
+						IS_PROFILE_SCOPE("InputSsytem Update");
+						m_inputSystem.Update(delta_time);
+					}
+
 					OnUpdate();
 
 					{
@@ -124,19 +132,19 @@ namespace Insight
 					}
 					{
 						IS_PROFILE_SCOPE("Update");
-						m_worldSystem.EarlyUpdate();
 						m_worldSystem.Update(delta_time);
 					}
 					{
 						IS_PROFILE_SCOPE("LateUpdate");
-						m_worldSystem.EarlyUpdate();
 						m_worldSystem.LateUpdate();
 					}
 				}
 
 				m_renderpasses.Render();
-				m_graphicsSystem.Update();
-				Input::InputManager::Update();
+				{
+					IS_PROFILE_SCOPE("GraphicsSystem Render");
+					m_graphicsSystem.Render();
+				}
 				Graphics::Window::Instance().Update();
 			}
 		}
@@ -148,24 +156,24 @@ namespace Insight
 			m_renderpasses.Destroy();
 			m_resource_manager.UnloadAll();
 
-			Graphics::Window::Instance().Destroy();
-
 			m_worldSystem.Shutdown();
-
-			m_imguiSystem.Shutdown();
+			m_inputSystem.Shutdown();
 			m_graphicsSystem.Shutdown();
+			m_imguiSystem.Shutdown();
 			m_eventSystem.Shutdown();
 			m_taskSystem.Shutdown();
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
 			m_systemRegistry.UnregisterSystem(&m_worldSystem);
+			m_systemRegistry.UnregisterSystem(&m_inputSystem);
 			m_systemRegistry.UnregisterSystem(&m_imguiSystem);
 			m_systemRegistry.UnregisterSystem(&m_graphicsSystem);
-			//m_systemRegistry.UnregisterSystem(&m_inputSystem);
 			//m_systemRegistry.UnregisterSystem(&m_resourceSystem);
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
+
+			ASSERT(m_systemRegistry.IsEmpty());
 		}
 	}
 }

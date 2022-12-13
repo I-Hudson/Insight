@@ -2,20 +2,43 @@
 
 #include "Defines.h"
 #include "Core/Singleton.h"
+
+#include "Input/InputSystem.h"
+
 #include <string>
+#include <unordered_map>
 
 #include <glm/ext/vector_int2.hpp>
 #include <GLFW/glfw3.h>
 
 namespace Insight
 {
+	namespace Input
+	{
+		class InputSystem;
+	}
+
 	namespace Graphics
 	{
+		class Window;
+
+		class IS_GRAPHICS WindowInputs
+		{
+		public:
+			void Clear()
+			{
+				Inputs.clear();
+			}
+
+			GLFWwindow* Window = nullptr;
+			std::vector<Input::GenericInput> Inputs;
+		};
+
 		class IS_GRAPHICS Window : public Core::Singleton<Window>
 		{
 		public:
 
-			bool Init(int width = 640, int height = 720, std::string title = "DefaultTitle");
+			bool Init(Input::InputSystem* inputSystem, int width = 640, int height = 720, std::string title = "DefaultTitle");
 			void Destroy();
 			void Update();
 
@@ -50,12 +73,17 @@ namespace Insight
 			GLFWwindow* GetRawWindow() const { return m_glfwWindow; }
 
 		private:
+			void SetCallbacks();
 
+		private:
 			bool m_glfwInit = false;
 			std::string m_title;
 			glm::ivec2 m_position = {0,0};
 			glm::ivec2 m_size = {0,0};
 			GLFWwindow* m_glfwWindow = nullptr;
+
+			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
+			Input::InputSystem* m_inputSystem = nullptr;
 		};
 	}
 }

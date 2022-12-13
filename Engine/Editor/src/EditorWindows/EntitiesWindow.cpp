@@ -1,6 +1,8 @@
 #include "EditorWindows/EntitiesWindow.h"
 #include "World/WorldSystem.h"
-#include "Input/InputManager.h"
+
+#include "Input/InputSystem.h"
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
 #include <imgui.h>
 
@@ -62,7 +64,8 @@ namespace Insight
 			{
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 				{
-					if (Input::InputManager::IsKeyPressed(IS_KEY_LEFT_CONTROL))
+					Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+					if (inputDevice->WasHeld(Input::KeyboardButtons::Key_LCtrl))
 					{
 						m_selectedEntities.insert(entity->GetGUID());
 						for (u32 i = 0; i < entity->GetChildCount(); ++i)

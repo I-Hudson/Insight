@@ -30,7 +30,8 @@ namespace Insight
 		void World::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldState == WorldStates::Paused)
+			if (m_worldType == WorldTypes::Game
+				&& m_worldState == WorldStates::Paused)
 			{
 				return;
 			}
@@ -40,7 +41,8 @@ namespace Insight
 		void World::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldState == WorldStates::Paused)
+			if (m_worldType == WorldTypes::Game 
+				&& m_worldState == WorldStates::Paused)
 			{
 				return;
 			}
@@ -50,7 +52,8 @@ namespace Insight
 		void World::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldState == WorldStates::Paused)
+			if (m_worldType == WorldTypes::Game
+				&& m_worldState == WorldStates::Paused)
 			{
 				return;
 			}

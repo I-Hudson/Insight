@@ -78,7 +78,7 @@ namespace Insight
 
 		TObjectPtr<World> WorldSystem::CreatePersistentWorld(std::string worldName, WorldTypes worldType)
 		{
-			TObjectPtr<World> world = CreateWorld(worldName);
+			TObjectPtr<World> world = CreateWorld(worldName, worldType);
 			world->m_persistentScene = true;
 			AddActiveWorld(world);
 			return world;

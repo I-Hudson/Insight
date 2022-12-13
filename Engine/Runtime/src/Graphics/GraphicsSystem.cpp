@@ -15,8 +15,9 @@ namespace Insight
 		GraphicsSystem::~GraphicsSystem()
 		{ }
 
-		void GraphicsSystem::Initialise()
+		void GraphicsSystem::Initialise(Input::InputSystem* inputSystem)
 		{
+			m_inputSystem = inputSystem;
 			PixelFormatExtensions::Init();
 
 			Graphics::GraphicsAPI graphcisAPI = Graphics::GraphicsAPI::None;
@@ -33,7 +34,7 @@ namespace Insight
 				graphcisAPI = Graphics::GraphicsAPI::Vulkan;
 			}
 
-			m_window.Init();
+			m_window.Init(m_inputSystem);
 
 			m_context = Graphics::RenderContext::New(graphcisAPI);
 			ASSERT(m_context);
@@ -51,12 +52,19 @@ namespace Insight
 				m_renderGraph.Release();
 				m_context->Destroy();
 				Delete(m_context);
+
+				m_window.Destroy();
 			}
 
 			m_state = Core::SystemStates::Not_Initialised;
 		}
 
 		void GraphicsSystem::Update()
+		{
+			m_window.Update();
+		}
+
+		void GraphicsSystem::Render()
 		{
 			m_renderGraph.Execute();
 		}

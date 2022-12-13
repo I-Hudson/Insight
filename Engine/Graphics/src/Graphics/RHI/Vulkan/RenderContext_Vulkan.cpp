@@ -483,8 +483,6 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 
 				ImGui_ImplVulkan_Shutdown();
-				ImGui_ImplGlfw_Shutdown();
-			
 
 				for (VkFramebuffer& frameBuffer : m_imguiFramebuffers)
 				{

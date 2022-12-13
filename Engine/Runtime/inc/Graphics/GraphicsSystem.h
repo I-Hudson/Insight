@@ -8,13 +8,18 @@
 
 namespace Insight
 {
+	namespace Input
+	{
+		class InputSystem;
+	};
+
 	namespace Runtime
 	{
 		/// <summary>
 		/// System in charge of all things graphics.
 		/// This system should init a graphics device/context and window ready for rendering.
 		/// </summary>
-		class GraphicsSystem : public Core::Singleton<GraphicsSystem>, public Core::ISystem
+		class GraphicsSystem : public Core::ISystem
 		{
 		public:
 			GraphicsSystem();
@@ -22,15 +27,18 @@ namespace Insight
 
 			IS_SYSTEM(GraphicsSystem);
 
-			virtual void Initialise() override;
+			void Initialise(Input::InputSystem* inputSystem);
 			virtual void Shutdown() override;
 
 			void Update();
+			void Render();
 
 		private:
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
 			Graphics::RenderGraph m_renderGraph;
+
+			Input::InputSystem* m_inputSystem = nullptr;
 		};
 	}
 }

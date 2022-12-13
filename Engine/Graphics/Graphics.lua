@@ -15,6 +15,7 @@ project "Insight_Graphics"
     {
         "Insight_Core",
         "Insight_Maths",
+        "Insight_Input",
     }
 
     defines
@@ -29,6 +30,7 @@ project "Insight_Graphics"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
+        "%{IncludeDirs.InsightInput}",
 
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
@@ -64,6 +66,7 @@ project "Insight_Graphics"
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
         "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Input" .. output_project_subfix .. ".lib",
         
         "GLFW.lib",
         "glm.lib",

@@ -15,7 +15,6 @@ project "Insight_Input"
     {
         "Insight_Core",
         "Insight_Maths",
-        "Insight_Graphics",
     }
 
     defines
@@ -28,10 +27,7 @@ project "Insight_Input"
         "inc",
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
-        "%{IncludeDirs.InsightGraphics}",
 
-        "%{IncludeDirs.glfw}",
-        "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.spdlog}",
     }
@@ -47,10 +43,7 @@ project "Insight_Input"
     {
         "Insight_Core" .. output_project_subfix .. ".lib",
         "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Graphics" .. output_project_subfix .. ".lib",
 
-        "GLFW.lib",
-        "glm.lib",
         "imgui.lib",
     }
     if (profileTool == "pix") then

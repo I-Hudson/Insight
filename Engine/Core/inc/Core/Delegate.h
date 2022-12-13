@@ -46,35 +46,8 @@ namespace Insight
 				m_callee = (void*)method;
 				m_function = &StaticFreeFunctionStub;
 			}
-			Function(const Function& other)
-			{
-				m_callee = other.m_callee;
-				m_function = other.m_function;
-			}
-			Function(Function&& other)
-			{
-				m_callee = other.m_callee;
-				m_function = other.m_function;
-				other.m_callee = nullptr;
-				other.m_function = nullptr;
-			}
 
 			operator bool() const { return m_function != nullptr; }
-
-			Function& operator=(const Function& other)
-			{
-				m_callee = other.m_callee;
-				m_function = other.m_function;
-				return *this;
-			}
-			Function& operator=(Function&& other)
-			{
-				m_callee = other.m_callee;
-				m_function = other.m_function;
-				other.m_callee = nullptr;
-				other.m_function = nullptr;
-				return *this;
-			}
 
 			// Bind a static/free function function.
 			template<ReturnType(*Function)(Args...)>
@@ -82,26 +55,30 @@ namespace Insight
 			{
 				m_callee = nullptr;
 				m_function = &StaticFunctionStub<Function>;
+				m_functionHashCode = typeid(Function).hash_code();
 			}
 			// Bind a lambda.
 			void Bind(Signature function)
 			{
 				m_callee = (void*)function;
 				m_function = &StaticFreeFunctionStub;
+				m_functionHashCode = typeid(Function).hash_code();
 			}
 			// Bind a non const member function.
-			template<typename Class, ReturnType(Class::* Function)(Args...)>
+			template<typename Class, ReturnType(Class::*Function)(Args...)>
 			void Bind(Class* callee)
 			{
 				m_callee = callee;
 				m_function = &StaticMemberFunctionStub<Class, Function>;
+				m_functionHashCode = typeid(Function).hash_code();
 			}
 			// Bind a const member function.
-			template<typename Class, ReturnType(Class::* Function)(Args...) const>
+			template<typename Class, ReturnType(Class::*Function)(Args...) const>
 			void Bind(const Class* callee)
 			{
 				m_callee = callee;
-				m_function = &StaticMemberFunctionStub<Class, Function>;
+				m_function = &StaticConstMemberFunctionStub<Class, Function>;
+				m_functionHashCode = typeid(Function).hash_code();
 			}
 
 			void Unbind()
@@ -135,7 +112,8 @@ namespace Insight
 
 			FORCE_INLINE bool operator==(const Function& other) const
 			{
-				return m_function == other.m_function && m_callee == other.m_callee;
+				return m_callee == other.m_callee 
+					&& m_functionHashCode == other.m_functionHashCode;
 			}
 
 			FORCE_INLINE bool operator!=(const Function& other) const
@@ -158,21 +136,22 @@ namespace Insight
 			}
 
 			// Member function.
-			template<typename Class, ReturnType(Class::* Function)(Args...)>
+			template<typename Class, ReturnType(Class::*Function)(Args...)>
 			static ReturnType StaticMemberFunctionStub(const void* callee, Args... args)
 			{
 				return (reinterpret_cast<Class*>(const_cast<void*>(callee))->*Function)(std::forward<Args>(args)...);
 			}
 
 			// Const member function.
-			template<typename Class, ReturnType(Class::* Function)(Args...) const>
-			static ReturnType StaticMemberFunctionStub(const void* callee, Args... args)
+			template<typename Class, ReturnType(Class::*Function)(Args...) const>
+			static ReturnType StaticConstMemberFunctionStub(const void* callee, Args... args)
 			{
 				return (reinterpret_cast<const Class*>(callee)->*Function)(std::forward<Args>(args)...);
 			}
 
 		private:
 			const void* m_callee = nullptr;
+			u64 m_functionHashCode = 0;
 			StubSignature m_function = nullptr;
 		};
 
@@ -184,29 +163,9 @@ namespace Insight
 
 		public:
 			DelegateBase() = default;
-			DelegateBase(const DelegateBase& other)
-			{
-				m_functions = other.m_functions;
-			}
-			DelegateBase(DelegateBase&& other)
-			{
-				m_functions = std::move(other.m_functions);
-				other.m_functions = {};
-			}
 
 			operator bool() const { return m_functions.size() > 0; }
-
-			DelegateBase& operator=(const DelegateBase& other)
-			{
-				m_functions = other.m_functions;
-				return *this;
-			}
-			DelegateBase& operator=(DelegateBase&& other)
-			{
-				m_functions = std::move(other.m_functions);
-				other.m_functions = {};
-				return *this;
-			}
+			u32 GetFunctionCount() const { return static_cast<u32>(m_functions.size()); }
 
 			auto operator()(Args... args) const->Return
 			{
@@ -292,7 +251,7 @@ namespace Insight
 
 			void UnbindAll()
 			{
-				m_function.clear();
+				m_functions.clear();
 			}
 
 			// Free function unbind.

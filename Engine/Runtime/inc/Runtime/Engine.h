@@ -8,6 +8,7 @@
 #include "Core/SystemRegistry.h"
 #include "Event/EventSystem.h"
 #include "Graphics/GraphicsSystem.h"
+#include "Input/InputSystem.h"
 #include "Core/ImGuiSystem.h"
 #include "World/WorldSystem.h"
 
@@ -62,6 +63,7 @@ namespace Insight
 			Core::EventSystem m_eventSystem;
 			Runtime::GraphicsSystem m_graphicsSystem;
 			Core::ImGuiSystem m_imguiSystem;
+			Input::InputSystem m_inputSystem;
 			Runtime::WorldSystem m_worldSystem;
 		};
 	}
