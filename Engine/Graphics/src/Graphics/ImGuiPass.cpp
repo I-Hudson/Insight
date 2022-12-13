@@ -3,7 +3,8 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
-#include "Graphics/GraphicsManager.h"
+
+#include "Core/Profiler.h"
 
 namespace Insight
 {

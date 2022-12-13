@@ -411,7 +411,8 @@ namespace Insight
 	}
 }
 
-#ifdef TEST_ENABLED
+#if 0
+//#ifdef TEST_ENABLED
 #include "doctest.h"
 namespace test
 {

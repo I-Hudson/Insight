@@ -10,7 +10,7 @@ namespace Insight
 {
 	namespace Threading
 	{
-		class TaskManager;
+		class TaskSystem;
 		class Task;
 		template<typename ResultType>
 		class TaskWithResult;
@@ -56,7 +56,7 @@ namespace Insight
 			std::condition_variable m_cv;
 			std::mutex m_mutex;
 
-			friend class TaskManager;
+			friend class TaskSystem;
 		};
 
 		template<typename ResultType>

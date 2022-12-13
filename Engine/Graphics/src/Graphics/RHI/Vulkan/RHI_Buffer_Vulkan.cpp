@@ -4,8 +4,11 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Platform/Platform.h"
 
+#include "Core/Logger.h"
+#include "Core/Profiler.h"
+
+
 #include "VmaUsage.h"
-#include <Core/Logger.h>
 
 namespace Insight
 {

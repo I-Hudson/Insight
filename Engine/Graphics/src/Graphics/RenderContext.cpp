@@ -1,5 +1,5 @@
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
+
 
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
@@ -19,15 +19,25 @@ namespace Insight
 
 	namespace Graphics
 	{
-		RenderContext* RenderContext::New()
+		RenderContext* RenderContext::New(GraphicsAPI graphicsAPI)
 		{
 			RenderContext* context = nullptr;
+			switch (graphicsAPI)
+			{
+			case Insight::Graphics::GraphicsAPI::Vulkan:
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan()) { context = NewTracked(RHI::Vulkan::RenderContext_Vulkan); }
+				context = NewTracked(RHI::Vulkan::RenderContext_Vulkan);
 #endif
+				break;
+			case Insight::Graphics::GraphicsAPI::DX12:
 #ifdef IS_DX12_ENABLED
-			else if (GraphicsManager::IsDX12()) { context = NewTracked(RHI::DX12::RenderContext_DX12); }
+				context = NewTracked(RHI::DX12::RenderContext_DX12);
 #endif
+				break;
+			default:
+				FAIL_ASSERT();
+				break;
+			}
 
 			if (!context)
 			{
@@ -36,6 +46,7 @@ namespace Insight
 			}
 
 			::Insight::Renderer::s_context = context;
+			context->m_graphicsAPI = graphicsAPI;
 			context->m_samplerManager = RHI_SamplerManager::New();
 			
 			context->m_descriptorSetManager.Setup();
@@ -190,10 +201,6 @@ namespace Insight
 	}
 
 	/// Renderer
-	void Renderer::SetImGUIContext(ImGuiContext*& context)
-	{
-		context = ImGui::GetCurrentContext();
-	}
 
 	Graphics::RHI_Buffer* Renderer::CreateVertexBuffer(u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
@@ -289,5 +296,10 @@ namespace Insight
 	void Renderer::FreeTexture(Graphics::RHI_Texture* texture)
 	{
 		s_context->FreeTexture(texture);
+	}
+
+	Graphics::GraphicsAPI Renderer::GetGraphicsAPI()
+	{
+		return s_context->GetGraphicsAPI();
 	}
 }

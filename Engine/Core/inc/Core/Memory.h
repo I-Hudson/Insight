@@ -28,7 +28,7 @@ template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 {
 	T* ptr = new T(std::forward<Params>(params)...);
-	Insight::Core::MemoryTracker::Instance().Track(Ptr);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, Insight::Core::MemoryTrackAllocationType::Single);
 	return ptr;
 }
 template<typename T>
@@ -628,27 +628,24 @@ private:
 	std::atomic<int> m_refCount = 0;
 };
 
-struct Destructible
-{
-	Insight::Core::Delegate<> OnDestroyed;
-};
-
 /// <summary>
 /// Pointer warpper class to store a pointer which is derived from 'Object'.
 /// This is an owning pointer and when destroyed the pointer is deleted.
 /// </summary>
 /// <typeparam name="T"></typeparam>
 template<typename T>
-class TObjectOwnPtr : protected Destructible
+class TObjectOwnPtr
 {
 	using Ptr = T*;
 	using Ref = T&;
 
 public:
-	TObjectOwnPtr() { m_refCount = NewTracked(ReferenceCountObject); }
+	TObjectOwnPtr() { }
 	TObjectOwnPtr(Ptr pointer)
 	{
+		Reset();
 		m_refCount = NewTracked(ReferenceCountObject);
+		OnDestroyed = NewTracked(Insight::Core::Delegate<>);
 		m_ptr = pointer;
 		Incr();
 	}
@@ -657,21 +654,25 @@ public:
 	TObjectOwnPtr(const TObjectOwnPtr<TOther>& other) = delete;
 	TObjectOwnPtr(TObjectOwnPtr&& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-
+		other.OnDestroyed = nullptr;
 	}
 	template<typename TOther>
 	TObjectOwnPtr(TObjectOwnPtr<TOther>&& other)
 	{
 		static_assert(std::is_convertible_v<T, TOther>, "[TObjectOwnPtr] Unable to convert to TOther.");
+		Reset();
 		m_ptr = static_cast<Ptr>(other.m_ptr);
 		m_refCount = other.m_refCount;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-
+		other.OnDestroyed = nullptr;
 	}
 	virtual ~TObjectOwnPtr()
 	{
@@ -680,6 +681,7 @@ public:
 
 	operator bool() const { return m_ptr != nullptr; }
 	operator Ptr() const { return m_ptr; }
+	Ptr operator*() const { return m_ptr; }
 	Ptr operator->() const { return m_ptr; }
 
 	TObjectOwnPtr& operator=(const TObjectOwnPtr& pointer) = delete;
@@ -690,8 +692,10 @@ public:
 		Reset(); 
 		m_ptr = other.m_ptr; 
 		m_refCount = other.m_refCount;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
+		other.OnDestroyed = nullptr;
 		return *this; 
 	}
 	template<typename TOther>
@@ -701,17 +705,29 @@ public:
 		Reset(); 
 		m_ptr = static_cast<Ptr>(other.m_ptr); 
 		m_refCount = other.m_refCount;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
+		other.OnDestroyed = nullptr;
 		return *this; 
 	}
 
+	bool operator==(const TObjectPtr<T>& other) const
+	{ return m_ptr == other.m_ptr; }
+	template<typename TOther>
+	bool operator==(const TObjectPtr<TOther>& other) const
+	{ return m_ptr == other.m_ptr; }
 	bool operator==(const TObjectOwnPtr& other) const
 	{ return m_ptr == other.m_ptr; }
 	template<typename TOther>
 	bool operator==(const TObjectOwnPtr<TOther>& other) const
 	{ return m_ptr == other.m_ptr; }
 
+	bool operator!=(const TObjectPtr<T>& other) const
+	{ return !(*this == other) }
+	template<typename TOther>
+	bool operator!=(const TObjectPtr<TOther>& other) const
+	{ return !(*this == other) }
 	bool operator!=(const TObjectOwnPtr& other) const
 	{ return !(*this == other) }
 	template<typename TOther>
@@ -728,7 +744,19 @@ public:
 		{
 			DeleteTracked(m_ptr);
 		}
+		if (OnDestroyed)
+		{
+			(*OnDestroyed)();
+			(*OnDestroyed).UnbindAll();
+			DeleteTracked(OnDestroyed);
+		}
 	}
+
+#ifdef TEST_ENABLED
+	ReferenceCountObject*		GetReferenceCountObject()	const { return m_refCount; }
+	Ptr							GetPtr()					const { return m_ptr; }
+	Insight::Core::Delegate<>*	GetOnDestroyDelegate()		const { return OnDestroyed; }
+#endif
 
 private:
 	void Incr()
@@ -750,6 +778,7 @@ private:
 private:
 	ReferenceCountObject* m_refCount = nullptr;
 	Ptr m_ptr = nullptr;
+	Insight::Core::Delegate<>* OnDestroyed = nullptr;
 
 	template<typename>
 	friend class TObjectOwnPtr;
@@ -776,9 +805,10 @@ public:
 
 	TObjectPtr(const TObjectPtr& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 	}
@@ -786,43 +816,47 @@ public:
 	TObjectPtr(const TObjectPtr<TOther>& other)
 	{
 		static_assert(std::is_convertible_v<TOther, T>, "[TObjectPtr::ConstructorCopy] Must be able to convert from 'TOther' to 'T'.");
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 	}
 
 	TObjectPtr(TObjectPtr&& other)
 	{
-		m_ptr = static_cast<T>(other.m_ptr);
+		Reset();
+		m_ptr = static_cast<Ptr>(other.m_ptr);
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-		other.m_objectOwnPtr = nullptr;
 		other.UnbindCallbacks();
+		other.OnDestroyed = nullptr;
 		BindCallbacks();
 	}
 	template<typename TOther>
 	TObjectPtr(TObjectPtr<TOther>&& other)
 	{
 		static_assert(std::is_convertible_v<TOther, T>, "[TObjectPtr::ConstructorMove] Must be able to convert from 'TOther' to 'T'.");
-		m_ptr = static_cast<T>(other.m_ptr);
+		Reset();
+		m_ptr = static_cast<Ptr>(other.m_ptr);
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-		other.m_objectOwnPtr = nullptr;
 		other.UnbindCallbacks();
+		other.OnDestroyed = nullptr;
 		BindCallbacks();
 	}
 
 	TObjectPtr(const TObjectOwnPtr<T>& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = const_cast<Destructible*>(&static_cast<const Destructible&>(other));
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 	}
@@ -830,9 +864,10 @@ public:
 	TObjectPtr(const TObjectOwnPtr<TOther>& other)
 	{
 		static_assert(std::is_convertible_v<T, TOther> || std::is_convertible_v<TOther, T>, "[TObjectPtr::ConstructorCopy] Must be able to convert from 'TOther' to 'T'.");
+		Reset();
 		m_ptr = static_cast<Ptr>(other.m_ptr);
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = const_cast<Destructible*>(&static_cast<const Destructible&>(other));
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 	}
@@ -840,6 +875,11 @@ public:
 	TObjectPtr(TObjectOwnPtr<T>&& other) = delete;
 	template<typename TOther>
 	TObjectPtr(TObjectOwnPtr<TOther>&& other) = delete;
+
+	~TObjectPtr()
+	{
+		Reset();
+	}
 
 	operator bool() const { return m_ptr != nullptr; }
 	operator Ptr() const { return m_ptr; }
@@ -853,11 +893,12 @@ public:
 	/// <returns>TObjectPtr&</returns>
 	TObjectPtr& operator=(const TObjectPtr& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
-		BindCallbacks();
+		OnDestroyed = other.OnDestroyed;
 		Incr();
+		BindCallbacks();
 	}
 	/// <summary>
 	/// Assign copy operator for TObjectPtr tempalte.
@@ -869,9 +910,10 @@ public:
 	TObjectPtr& operator=(const TObjectPtr<TOther>& other)
 	{
 		static_assert(std::is_convertible_v<TOther, T>, "[TObjectPtr::operator=(Copy)] Must be able to convert from 'TOther' to 'T'.");
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 	}
@@ -886,11 +928,11 @@ public:
 		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-		other.m_objectOwnPtr = nullptr;
 		other.UnbindCallbacks();
+		other.OnDestroyed = nullptr;
 		BindCallbacks();
 		return *this;
 	}
@@ -907,11 +949,11 @@ public:
 		Reset();
 		m_ptr = static_cast<Ptr>(other.m_ptr);
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = other.m_objectOwnPtr;
+		OnDestroyed = other.OnDestroyed;
 		other.m_ptr = nullptr;
 		other.m_refCount = nullptr;
-		other.m_objectOwnPtr = nullptr;
 		other.UnbindCallbacks();
+		other.OnDestroyed = nullptr;
 		BindCallbacks();
 		return *this;
 	}
@@ -924,9 +966,10 @@ public:
 	/// <returns>TObjectPtr&</returns>
 	TObjectPtr& operator=(const TObjectOwnPtr<T>& other)
 	{
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = const_cast<Destructible*>(&static_cast<const Destructible&>(other));
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 		return *this;
@@ -941,9 +984,10 @@ public:
 	TObjectPtr& operator=(const TObjectOwnPtr<TOther>& other)
 	{
 		static_assert(std::is_convertible_v<TOther, T>, "[TObjectPtr::operator=(Copy)] Must be able to convert from 'TOther' to 'T'.");
+		Reset();
 		m_ptr = other.m_ptr;
 		m_refCount = other.m_refCount;
-		m_objectOwnPtr = const_cast<Destructible*>(&static_cast<const Destructible&>(other));
+		OnDestroyed = other.OnDestroyed;
 		Incr();
 		BindCallbacks();
 		return *this;
@@ -952,6 +996,9 @@ public:
 	TObjectPtr& operator=(TObjectOwnPtr<T>&& other) = delete;
 	template<typename TOther>
 	TObjectPtr& operator=(TObjectOwnPtr<TOther>&& other) = delete;
+
+	bool operator==(std::nullptr_t) const { return m_ptr == nullptr; }
+	bool operator!=(std::nullptr_t) const { return m_ptr != nullptr; }
 
 	bool operator==(const TObjectPtr& other) const
 	{
@@ -995,11 +1042,18 @@ public:
 
 	void Reset()
 	{
+		Decr();
 		UnbindCallbacks();
 		m_ptr = nullptr;
 		m_refCount = nullptr;
-		m_objectOwnPtr = nullptr;
+		OnDestroyed = nullptr;
 	}
+
+#ifdef TEST_ENABLED
+	ReferenceCountObject*		GetReferenceCountObject()	const { return m_refCount; }
+	Ptr							GetPtr()					const { return m_ptr; }
+	Insight::Core::Delegate<>*	GetOnDestroyDelegate()		const { return OnDestroyed; }
+#endif
 
 private:
 	void Incr()
@@ -1019,25 +1073,29 @@ private:
 
 	void BindCallbacks()
 	{
-		m_objectOwnPtr->OnDestroyed.Bind<&TObjectPtr<T>::OnOwnerReset>(this);
+		OnDestroyed->Bind<&TObjectPtr<T>::OnOwnerReset>(this);
 	}
 	void UnbindCallbacks()
 	{
-		if (m_objectOwnPtr)
+		if (OnDestroyed)
 		{
-			m_objectOwnPtr->OnDestroyed.Unbind<&TObjectPtr<T>::OnOwnerReset>(this);
+			OnDestroyed->Unbind<&TObjectPtr<T>::OnOwnerReset>(this);
 		}
 	}
 	void OnOwnerReset()
 	{
-		UnbindCallbacks();
 		m_refCount = nullptr;
 		m_ptr = nullptr;
-		m_objectOwnPtr = nullptr;
+		OnDestroyed = nullptr;
 	}
 
 private:
 	ReferenceCountObject* m_refCount = nullptr;
 	Ptr m_ptr = nullptr;
-	Destructible* m_objectOwnPtr = nullptr;
+	Insight::Core::Delegate<>* OnDestroyed = nullptr;
+
+	template<typename>
+	friend class TObjectOwnPtr;
+	template<typename>
+	friend class TObjectPtr;
 };

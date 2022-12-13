@@ -2,7 +2,8 @@
 #include "ECS/Components/CameraComponent.h"
 #include "ECS/Components/TransformComponent.h"
 
-#include "Input/InputManager.h"
+#include "Input/InputSystem.h"
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
 #include "Graphics/Window.h"
 
@@ -54,38 +55,39 @@ namespace Insight
 			glm::vec4 vUp = viewMatrix[1];
 			glm::vec4 vTranslation = viewMatrix[3];
 
-			float frameSpeed = Input::InputManager::IsKeyPressed(IS_KEY_LEFT_SHIFT) ? deltaTime * 200 : deltaTime * 25;
+			Input::InputDevice_KeyboardMouse* device = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+			float frameSpeed = device->WasHeld(Input::KeyboardButtons::Key_LShift) ? deltaTime * 200 : deltaTime * 25;
 			///Input::IsKeyDown(KEY_LEFT_SHIFT) ? a_deltaTime * m_cameraSpeed * 2 : a_deltaTime * m_cameraSpeed;
 
 			/// Translate camera
-			if (Input::InputManager::IsKeyPressed(IS_KEY_W))
+			if (device->WasHeld(Input::KeyboardButtons::Key_W))
 			{
 				vTranslation += vForward * frameSpeed;
 			}
-			if (Input::InputManager::IsKeyPressed(IS_KEY_S))
+			if (device->WasHeld(Input::KeyboardButtons::Key_S))
 			{
 				vTranslation -= vForward * frameSpeed;
 			}
-			if (Input::InputManager::IsKeyPressed(IS_KEY_D))
+			if (device->WasHeld(Input::KeyboardButtons::Key_D))
 			{
 				vTranslation += vRight * frameSpeed;
 			}
-			if (Input::InputManager::IsKeyPressed(IS_KEY_A))
+			if (device->WasHeld(Input::KeyboardButtons::Key_A))
 			{
 				vTranslation -= vRight * frameSpeed;
 			}
-			if (Input::InputManager::IsKeyPressed(IS_KEY_Q))
+			if (device->WasHeld(Input::KeyboardButtons::Key_Q))
 			{
 				vTranslation += vUp * frameSpeed;
 			}
-			if (Input::InputManager::IsKeyPressed(IS_KEY_E))
+			if (device->WasHeld(Input::KeyboardButtons::Key_E))
 			{
 				vTranslation -= vUp * frameSpeed;
 			}
 
 			/// check for camera rotation
 			static bool sbMouseButtonDown = false;
-			bool mouseDown = Input::InputManager::IsMouseButtonPressed(IS_MOUSE_BUTTON_RIGHT);
+			bool mouseDown = device->WasHeld(Input::MouseButtons::Right);
 			if (mouseDown)
 			{
 				viewMatrix[3] = vTranslation;
@@ -96,11 +98,13 @@ namespace Insight
 				if (sbMouseButtonDown == false)
 				{
 					sbMouseButtonDown = true;
-					Input::InputManager::GetMousePosition(siPrevMouseX, siPrevMouseY);
+					siPrevMouseX = device->GetMouseXPosition();
+					siPrevMouseY = device->GetMouseYPosition();
 				}
 
 				float mouseX = 0, mouseY = 0;
-				Input::InputManager::GetMousePosition(mouseX, mouseY);
+				mouseX = device->GetMouseXPosition();
+				mouseY = device->GetMouseYPosition();
 
 				float iDeltaX = mouseX - siPrevMouseX;
 				float iDeltaY = mouseY - siPrevMouseY;

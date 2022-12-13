@@ -1,8 +1,9 @@
 #include "Graphics/RHI/RHI_Texture.h"
-#include "Graphics/GraphicsManager.h"
 
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
+
+#include "Core/Profiler.h"
 
 #include <filesystem>
 #define STB_IMAGE_IMPLEMENTATION
@@ -15,7 +16,7 @@ namespace Insight
 		RHI_Texture* RHI_Texture::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_Texture_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_Texture_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_Texture_DX12); }
@@ -55,9 +56,9 @@ namespace Insight
 
 #define RHI_TEXTURE_DEFER_ENABLED
 #ifdef RHI_TEXTURE_DEFER_ENABLED
-			GraphicsManager::Instance().GetRenderContext()->GetDeferredManager().Push([this, createInfo, width, height, data](RHI_CommandList* cmdList)
+			RenderContext::Instance().GetDeferredManager().Push([this, createInfo, width, height, data](RHI_CommandList* cmdList)
 				{
-					Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
+					Create(&RenderContext::Instance(), createInfo);
 					const u64 textureSize = width * height * STBI_rgb_alpha;
 
 					m_uploadStatus = DeviceUploadStatus::Uploading;
@@ -92,13 +93,13 @@ namespace Insight
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
-			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
+			Create(&RenderContext::Instance(), createInfo);
 			Upload(data, static_cast<int>(size_in_bytes));
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_Texture::QueueUpload(void* data, int sizeInBytes)
 		{
-			return GraphicsManager::Instance().GetRenderContext()->GetUploadQueue().UploadTexture(data, sizeInBytes, this);
+			return RenderContext::Instance().GetUploadQueue().UploadTexture(data, sizeInBytes, this);
 		}
 
 		void RHI_Texture::OnUploadComplete(RHI_UploadQueueRequest* request)

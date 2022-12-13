@@ -2,11 +2,9 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Texture.h"
 
-#include "Graphics/GraphicsManager.h"
-
 #include "Platform/Platform.h"
 
-#include "Event/EventManager.h"
+#include "Event/EventSystem.h"
 
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
@@ -33,7 +31,7 @@ namespace Insight
             glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
 
-            Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
                 {
                     if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
                     {
@@ -42,12 +40,12 @@ namespace Insight
                         m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
                     }
 
-                    RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+                    RenderContext* render_context = &RenderContext::Instance();
                     glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
                     glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
                     CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
                 });
-            Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
                 {
                     if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
                     {
@@ -56,7 +54,7 @@ namespace Insight
                         m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
                     }
 
-                    RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+                    RenderContext* render_context = &RenderContext::Instance();
                     glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
                     glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
                     CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
@@ -65,7 +63,7 @@ namespace Insight
 
         void RHI_FSR::Destroy()
         {
-            Core::EventManager::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
+            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
             if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
             {
                 ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
@@ -119,7 +117,7 @@ namespace Insight
 
             // Fill in the dispatch description
             m_ffx_fsr2_dispatch_description = {};
-            if (GraphicsManager::Instance().IsVulkan())
+            if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
                 m_ffx_fsr2_dispatch_description.commandList   = ffxGetCommandListVK(static_cast<RHI::Vulkan::RHI_CommandList_Vulkan*>(cmd_list)->GetCommandList());
@@ -145,7 +143,7 @@ namespace Insight
                 m_ffx_fsr2_dispatch_description.transparencyAndComposition  = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyTransparencyAndCompositionMap");            
 #endif
             }
-            else if (GraphicsManager::Instance().IsDX12())
+            else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
 #endif
@@ -173,9 +171,9 @@ namespace Insight
 
         void RHI_FSR::CreateContext(u32 renderWidth, u32 renderHeight, u32 displayWidth, u32 displayHeight)
         {
-            RenderContext* render_context = GraphicsManager::Instance().GetRenderContext();
+            RenderContext* render_context = &RenderContext::Instance();
             render_context->GpuWaitForIdle();
-            if (GraphicsManager::IsVulkan())
+            if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
             {
 #ifdef IS_VULKAN_ENABLED
                 RHI::Vulkan::RenderContext_Vulkan* renderContextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(render_context);
@@ -197,7 +195,7 @@ namespace Insight
                 ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
 #endif
             }
-            if (GraphicsManager::IsDX12())
+            if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
 #endif

@@ -1,4 +1,10 @@
 #include "Runtime/Engine.h"
+
+#include "CoreModule.h"
+#include "MathsModule.h"
+#include "GraphicsModule.h"
+#include "InputModule.h"
+
 #include "Runtime/CommandLineDefines.h"
 
 #include "Core/ImGuiSystem.h"
@@ -7,8 +13,7 @@
 #include "Core/Timer.h"
 #include "Core/Delegate.h"
 
-#include "Event/EventManager.h"
-#include "Input/InputManager.h"
+#include "Event/EventSystem.h"
 
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
@@ -43,55 +48,33 @@ namespace Insight
 				{ }
 			}
 
-			m_taskManger.Init();
-
-			auto testDelegate = Core::Action<int(int)>();
-			testDelegate.Bind<&square>();
-			testDelegate.Bind<&divide>();
-			assert(testDelegate(2) == 4);
-			testDelegate.Unbind<&square>();
-			testDelegate.Bind([](int x) -> int
-				{
-					return x * x;
-				});
-			assert(testDelegate(5) == 25);
-
-			auto str = std::string{ "Hello" };
-			auto testDelegateString = Core::Action<std::string::size_type()>{};
-			testDelegateString.Bind<&std::string::size>(&str);
-			assert(testDelegateString() == str.size());
-			testDelegateString.Unbind<&std::string::size>(&str);
-
-			//Threading::TaskSharedPtr task100 = Threading::TaskManager::CreateTask([]()
-			//	{
-			//		IS_PROFILE_SCOPE("Task100");
-			//		std::this_thread::sleep_for(std::chrono::milliseconds(1000 * 20));
-			//		IS_CORE_INFO("Thread sleep for 100 ms.");
-			//	});
-
-			Threading::TaskManager::CreateTask([]()
-				{
-					IS_PROFILE_SCOPE("Task20");
-					std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-					IS_CORE_INFO("Thread sleep for 20 ms.");
-					return 45;
-				});
-
 #define RETURN_IF_FALSE(x) if (!x) { return false; }
 			
-			Core::ImGuiSystem::Init();
-			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
+			// Systems
+			m_systemRegistry.RegisterSystem(&m_taskSystem);
+			m_systemRegistry.RegisterSystem(&m_eventSystem);
+			//m_systemRegistry.RegisterSystem(&m_resourceSystem);
+			m_systemRegistry.RegisterSystem(&m_inputSystem);
+			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
+			m_systemRegistry.RegisterSystem(&m_imguiSystem);
+			m_systemRegistry.RegisterSystem(&m_worldSystem);
 
-			m_eventManager = MakeUPtr<Core::EventManager>();
+			m_taskSystem.Initialise();
+			m_eventSystem.Initialise();
+			m_imguiSystem.Initialise();
+			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
 
-			RETURN_IF_FALSE(Graphics::Window::Instance().Init());
-			RETURN_IF_FALSE(m_graphicsManager.Init());
+			// Initialise all other "modules" (DLLs)
+			CoreModule::Initialise();
+			MathsModule::Initialise();
+			GraphicsModule::Initialise(&m_imguiSystem);
+			InputModule::Initialise(&m_imguiSystem);
 
-			RETURN_IF_FALSE(Input::InputManager::InitWithWindow(&Graphics::Window::Instance()));
+			m_graphicsSystem.Initialise(&m_inputSystem);
+			m_inputSystem.Initialise();
+			m_worldSystem.Initialise();
 
-			m_sceneManager = MakeUPtr<SceneManager>();
-			WPtr<Scene> newScene = m_sceneManager->CreateScene("New Scene");
-			SceneManager::Instance().AddActiveScene(newScene);
+			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
 
 			m_renderpasses.Create();
 
@@ -125,18 +108,43 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Game Update");
-					m_eventManager->Update();
+
+					{
+						IS_PROFILE_SCOPE("EventSystem");
+						m_eventSystem.Update();
+					}
+
+					{
+						IS_PROFILE_SCOPE("GraphicsSystem Update");
+						m_graphicsSystem.Update();
+					}
+
+					{
+						IS_PROFILE_SCOPE("InputSsytem Update");
+						m_inputSystem.Update(delta_time);
+					}
 
 					OnUpdate();
 
-					m_sceneManager->EarlyUpdate();
-					m_sceneManager->Update(delta_time);
-					m_sceneManager->LateUpdate();
+					{
+						IS_PROFILE_SCOPE("EarlyUpdate");
+						m_worldSystem.EarlyUpdate();
+					}
+					{
+						IS_PROFILE_SCOPE("Update");
+						m_worldSystem.Update(delta_time);
+					}
+					{
+						IS_PROFILE_SCOPE("LateUpdate");
+						m_worldSystem.LateUpdate();
+					}
 				}
 
 				m_renderpasses.Render();
-				m_graphicsManager.Update(0.0f);
-				Input::InputManager::Update();
+				{
+					IS_PROFILE_SCOPE("GraphicsSystem Render");
+					m_graphicsSystem.Render();
+				}
 				Graphics::Window::Instance().Update();
 			}
 		}
@@ -146,15 +154,26 @@ namespace Insight
 			OnDestroy();
 			
 			m_renderpasses.Destroy();
-			m_sceneManager.Reset();
 			m_resource_manager.UnloadAll();
-			m_eventManager.Reset();
 
-			m_graphicsManager.Destroy();
-			Graphics::Window::Instance().Destroy();
-			Core::ImGuiSystem::Shutdown();
+			m_worldSystem.Shutdown();
+			m_inputSystem.Shutdown();
+			m_graphicsSystem.Shutdown();
+			m_imguiSystem.Shutdown();
+			m_eventSystem.Shutdown();
+			m_taskSystem.Shutdown();
 
-			m_taskManger.Destroy();
+			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
+
+			m_systemRegistry.UnregisterSystem(&m_worldSystem);
+			m_systemRegistry.UnregisterSystem(&m_inputSystem);
+			m_systemRegistry.UnregisterSystem(&m_imguiSystem);
+			m_systemRegistry.UnregisterSystem(&m_graphicsSystem);
+			//m_systemRegistry.UnregisterSystem(&m_resourceSystem);
+			m_systemRegistry.UnregisterSystem(&m_eventSystem);
+			m_systemRegistry.UnregisterSystem(&m_taskSystem);
+
+			ASSERT(m_systemRegistry.IsEmpty());
 		}
 	}
 }

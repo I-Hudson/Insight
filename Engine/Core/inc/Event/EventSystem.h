@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Singleton.h"
+#include "Core/ISysytem.h"
 #include "Event/Event.h"
 #include "Core/Memory.h"
 
@@ -15,9 +16,10 @@ namespace Insight
 		///using EventFunc = void(*)(Event& e);
 		using EventFunc = std::function<void(Event& e)>;
 
-		class IS_CORE EventManager : public Singleton<EventManager>
+		class IS_CORE EventSystem : public Singleton<EventSystem>, public Core::ISystem
 		{
 		public:
+			IS_SYSTEM(EventSystem);
 
 			void AddEventListener(void* object, EventType eventType, EventFunc func);
 			void RemoveEventListener(void* object, EventType eventType);

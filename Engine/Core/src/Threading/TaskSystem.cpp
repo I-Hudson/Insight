@@ -1,20 +1,16 @@
-#include "Threading/TaskManager.h"
+#include "Threading/TaskSystem.h"
 
 namespace Insight
 {
 	namespace Threading
 	{
 
-		void TaskManager::Init(u32 threadCount)
+		void TaskSystem::Initialise()
 		{
-			Destroy();
-
+			Shutdown();
 			m_destroy = false;
-			if (threadCount == 0)
-			{
-				threadCount = std::thread::hardware_concurrency();
-			}
 
+			u32 threadCount = std::thread::hardware_concurrency();
 			std::lock_guard lock(m_mutex);
 			m_threads.resize(threadCount);
 			for (size_t i = 0; i < m_threads.size(); ++i)
@@ -22,9 +18,10 @@ namespace Insight
 				m_threads.at(i).SetThreadIndex(static_cast<u8>(i));
 				m_threads.at(i).Spwan(ThreadWorker, ThreadData(this, &m_threads.at(i)));
 			}
+			m_state = Core::SystemStates::Initialised;
 		}
 
-		void TaskManager::Destroy()
+		void TaskSystem::Shutdown()
 		{
 			m_destroy = true;
 			std::lock_guard lock(m_mutex);
@@ -33,9 +30,10 @@ namespace Insight
 				m_threads.at(i).Join();
 			}
 			m_threads.clear();
+			m_state = Core::SystemStates::Not_Initialised;
 		}
 
-		bool TaskManager::GetTask(TaskSharedPtr& task)
+		bool TaskSystem::GetTask(TaskSharedPtr& task)
 		{
 			std::lock_guard lock(m_mutex);
 			if (m_queuedTasks.size() > 0)
@@ -51,17 +49,17 @@ namespace Insight
 			}
 		}
 
-		void TaskManager::ThreadWorker(ThreadData threadData)
+		void TaskSystem::ThreadWorker(ThreadData threadData)
 		{
-			while (!threadData.TaskManager->m_destroy.load())
+			while (!threadData.TaskSystem->m_destroy.load())
 			{
 				TaskSharedPtr task;
-				if (threadData.TaskManager->GetTask(task))
+				if (threadData.TaskSystem->GetTask(task))
 				{
 					task->Call();
 					{
-						std::lock_guard lock(threadData.TaskManager->m_mutex);
-						threadData.TaskManager->m_runningTasks.erase(task.Get());
+						std::lock_guard lock(threadData.TaskSystem->m_mutex);
+						threadData.TaskSystem->m_runningTasks.erase(task.Get());
 					}
 					task.Reset();
 				}

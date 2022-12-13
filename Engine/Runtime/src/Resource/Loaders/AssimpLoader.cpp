@@ -10,7 +10,6 @@
 #include "Platform/Platform.h"
 
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
 
 #include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
@@ -65,7 +64,7 @@ namespace Insight
 			GenerateLODs(loader_data);
 			loader_data.Model->m_materials = loader_data.Materials;
 
-			Graphics::GraphicsManager::Instance().GetRenderContext()->GetDeferredManager().Instance().Push([model, loader_data](Graphics::RHI_CommandList* cmdList)
+			Graphics::RenderContext::Instance().GetDeferredManager().Instance().Push([model, loader_data](Graphics::RHI_CommandList* cmdList)
 				{
 					UploadGPUData(const_cast<AssimpLoaderData&>(loader_data));
 

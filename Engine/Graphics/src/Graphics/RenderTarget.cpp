@@ -1,10 +1,10 @@
 #include "Graphics/RenderTarget.h"
 #include "Graphics/RenderContext.h"
-#include "Graphics/GraphicsManager.h"
+
 
 #include "Graphics/PixelFormatExtensions.h"
 
-#include "Event/EventManager.h"
+#include "Event/EventSystem.h"
 #include "Core/Profiler.h"
 
 namespace Insight
@@ -13,7 +13,7 @@ namespace Insight
 	{
 		RenderTarget::RenderTarget()
 		{
-			Core::EventManager::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& e)
+			Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& e)
 				{
 					IS_PROFILE_SCOPE("RenderTarget-Graphics_Swapchain_Resize");
 					const Core::GraphcisSwapchainResize& event = static_cast<const Core::GraphcisSwapchainResize&>(e);
@@ -25,7 +25,7 @@ namespace Insight
 
 		RenderTarget::~RenderTarget()
 		{
-			Core::EventManager::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
+			Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Graphics_Swapchain_Resize);
 			Destroy();
 		}
 
@@ -55,7 +55,7 @@ namespace Insight
 					ImageUsageFlagsBits::ColourAttachment
 					| ImageUsageFlagsBits::Sampled;
 			}
-			m_texture->Create(GraphicsManager::Instance().GetRenderContext(), textureInfo);
+			m_texture->Create(&RenderContext::Instance(), textureInfo);
 
 
 		}

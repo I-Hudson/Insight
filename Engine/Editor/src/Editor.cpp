@@ -16,7 +16,13 @@ namespace Insight
 		{
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
 			Graphics::Window::Instance().Show();
-			ImGui::SetCurrentContext(Core::ImGuiSystem::GetCurrentContext());
+
+			ImGui::SetCurrentContext(GetSystemRegistry().GetSystem<Core::ImGuiSystem>()->GetCurrentContext());
+			ImGuiMemAllocFunc allocFunc;
+			ImGuiMemFreeFunc freeFunc;
+			void* pUsedData;
+			GetSystemRegistry().GetSystem<Core::ImGuiSystem>()->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
+			ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
 
 			EditorWindowManager::Instance().RegisterWindows();
 			EditorWindowManager::Instance().AddWindow("ResourceWindow");

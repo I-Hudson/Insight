@@ -1,7 +1,7 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/RHI_Shader.h"
 
-#include "Graphics/GraphicsManager.h"
+
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
@@ -28,7 +28,7 @@ namespace Insight
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
 			else if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
@@ -114,7 +114,7 @@ namespace Insight
 		void RHI_DescriptorSet::Release()
 		{
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan())
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 				vkFreeDescriptorSets(contextVulkan->GetDevice(), 
@@ -144,7 +144,7 @@ namespace Insight
 		void RHI_DescriptorSet::Create(RHI_DescriptorLayout* layout)
 		{
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan())
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
@@ -184,7 +184,7 @@ namespace Insight
 			}
 
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan())
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
 				RHI::Vulkan::RenderContext_Vulkan* contextVulkan = static_cast<RHI::Vulkan::RenderContext_Vulkan*>(m_context);
 
@@ -356,9 +356,9 @@ namespace Insight
 			RHI_DescriptorSet* newSet = nullptr;
 			{
 				IS_PROFILE_SCOPE("New set");
-				newSet = NewArgsTracked(RHI_DescriptorSet, GraphicsManager::Instance().GetRenderContext()
+				newSet = NewArgsTracked(RHI_DescriptorSet, &RenderContext::Instance()
 					, descriptor_set
-					, GraphicsManager::Instance().GetRenderContext()->GetDescriptorLayoutManager().GetLayout(descriptor_set));
+					, RenderContext::Instance().GetDescriptorLayoutManager().GetLayout(descriptor_set));
 
 				m_usedSets[hash][hashWithResource] = newSet;
 			}

@@ -284,7 +284,8 @@ namespace Insight
 	}
 }
 
-#ifdef TEST_ENABLED
+#if 0
+//#ifdef TEST_ENABLED
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 #define DOCTEST_CONFIG_IMPLEMENT
 #include "doctest.h"

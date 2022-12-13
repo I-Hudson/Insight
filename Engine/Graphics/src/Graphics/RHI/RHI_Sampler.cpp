@@ -1,5 +1,5 @@
 #include "Graphics/RHI/RHI_Sampler.h"
-#include "Graphics/GraphicsManager.h"
+#include "Graphics/RenderContext.h"
 
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RHI_Sampler_Vulkan.h"
@@ -14,7 +14,7 @@ namespace Insight
 		RHI_SamplerManager* RHI_SamplerManager::RHI_SamplerManager::New()
 		{
 #ifdef IS_VULKAN_ENABLED
-			if (GraphicsManager::IsVulkan()) { return NewTracked(RHI::Vulkan::RHI_SamplerManager_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_SamplerManager_Vulkan); }
 #endif
 #ifdef IS_DX12_ENABLED
 			if (GraphicsManager::IsDX12()) { }

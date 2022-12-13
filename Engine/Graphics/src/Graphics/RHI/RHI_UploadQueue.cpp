@@ -1,6 +1,8 @@
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/RenderContext.h"
 
+#include "Core/Profiler.h"
+
 #include <iterator>
 
 namespace Insight
