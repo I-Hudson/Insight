@@ -1,4 +1,4 @@
-#include "Input/InputMouseState.h"
+#include "Input/InputStates/InputMouseState.h"
 
 namespace Insight
 {
@@ -10,10 +10,18 @@ namespace Insight
 		InputMouseState::~InputMouseState()
 		{ }
 
+		bool InputMouseState::HasInput() const
+		{
+			return __super::HasInput()
+				|| m_scrollXOffset != 0.0f 
+				|| m_scrollYOffset != 0.0f;
+		}
+
 		void InputMouseState::ClearFrame()
 		{
 			__super::ClearFrame();
-			m_scrollAmount = 0.0f;
+			m_scrollXOffset = 0.0f;
+			m_scrollYOffset = 0.0f;
 		}
 
 		float InputMouseState::GetXPosition() const
@@ -30,6 +38,12 @@ namespace Insight
 		{
 			m_xPosition = xPosition;
 			m_yPosition = yPosition;
+		}
+
+		void InputMouseState::MouseScrolled(float xOffset, float yOffset)
+		{
+			m_scrollXOffset = xOffset;
+			m_scrollYOffset = yOffset;
 		}
 	}
 }

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Input/InputDevices/IInputDevice.h"
-#include "Input/InputButtonState.h"
-#include "Input/InputMouseState.h"
+#include "Input/InputStates/InputButtonState.h"
+#include "Input/InputStates/InputMouseState.h"
 
 namespace Insight
 {
@@ -134,6 +134,7 @@ namespace Insight
 			virtual InputDeviceTypes GetDeviceType() const { return InputDeviceTypes::KeyboardMouse; }
 
 			virtual void ProcessInput(GenericInput const& input) override;
+            virtual bool HasInput() const override;
 			virtual void Update(float const deltaTime) override;
             virtual void ClearFrame() override;
 

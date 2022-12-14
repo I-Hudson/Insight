@@ -4,7 +4,7 @@ namespace Insight
 {
 	namespace Input
 	{
-		const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType)
+		CONSTEXPR const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType)
 		{
 			switch (inputDeviceType)
 			{
@@ -14,14 +14,15 @@ namespace Insight
 			return "";
 		}
 
-		const char* InputTypeToString(InputTypes inputTypes)
+		CONSTEXPR const char* InputTypeToString(InputTypes inputTypes)
 		{
 			switch (inputTypes)
 			{
 			case Insight::Input::InputTypes::Button:		return "Button";
 			case Insight::Input::InputTypes::Mouse:			return "Mouse";
 			case Insight::Input::InputTypes::MouseButton:	return "MouseButton";
-			case Insight::Input::InputTypes::Joystick:		return "Joystick";
+			case Insight::Input::InputTypes::Thumbstick:	return "Thumbstick";
+			case Insight::Input::InputTypes::Trigger:		return "Trigger";
 			}
 			return "";
 		}

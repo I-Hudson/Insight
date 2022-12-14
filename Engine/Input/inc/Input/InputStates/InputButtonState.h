@@ -39,6 +39,7 @@ namespace Insight
 			float GetHeldTIme() const;
 
 			void Update(float const deltaTime);
+			bool HasInput() const;
 			void ClearFrame();
 
 			void SetState(ButtonStates newState);
@@ -62,6 +63,15 @@ namespace Insight
 				{
 					button.Update(deltaTime);
 				}
+			}
+			virtual bool HasInput() const
+			{
+				bool hasInput = false;
+				for (auto& button : m_buttons)
+				{
+					hasInput |= button.HasInput();
+				}
+				return hasInput;
 			}
 			virtual void ClearFrame()
 			{

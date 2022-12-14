@@ -22,6 +22,7 @@ namespace Insight
 			u32 GetId() const { return m_id; }
 
 			virtual void ProcessInput(GenericInput const& input) = 0;
+			virtual bool HasInput() const = 0;
 			virtual void Update(float const deltaTime) = 0;
 			virtual void ClearFrame() = 0;
 
