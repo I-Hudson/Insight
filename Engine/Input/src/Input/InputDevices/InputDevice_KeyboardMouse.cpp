@@ -176,6 +176,19 @@ namespace Insight
 				Platform::MemCopy(&yPosition, &input.Data1, sizeof(yPosition));
 				m_mouse.MouseMoved(static_cast<float>(xPosition), static_cast<float>(yPosition));
 			}
+			else if (input.InputType == InputTypes::MouseScroll)
+			{
+				double xOffset;
+				double yOffset;
+				Platform::MemCopy(&xOffset, &input.Data0, sizeof(xOffset));
+				Platform::MemCopy(&yOffset, &input.Data1, sizeof(yOffset));
+				m_mouse.MouseScrolled(static_cast<float>(xOffset), static_cast<float>(yOffset));
+			}
+		}
+
+		bool InputDevice_KeyboardMouse::HasInput() const
+		{
+			return m_buttons.HasInput() || m_mouse.HasInput();
 		}
 
 		void InputDevice_KeyboardMouse::Update(float const deltaTime)

@@ -60,12 +60,14 @@ namespace Insight
 			int idx = 0;
 			for (auto& device : m_inputDevices)
 			{
-				if (device->GetDeviceType() == InputDeviceTypes::Controller
-					&& idx == index)
+				if (device->GetDeviceType() == InputDeviceTypes::Controller)
 				{
-					return static_cast<InputDevice_Controller*>(device);
+					if (idx == index)
+					{
+						return static_cast<InputDevice_Controller*>(device);
+					}
+					++idx;
 				}
-				++idx;
 			}
 			return nullptr;
 		}
@@ -75,13 +77,26 @@ namespace Insight
 			return m_inputDevices;
 		}
 
+		IInputDevice* InputSystem::GetLastUsedInputDevices() const
+		{
+			for (auto& device : m_inputDevices)
+			{
+				if (device->HasInput())
+				{
+					return device;
+				}
+			}
+			return nullptr;
+		}
+
 		void InputSystem::UpdateInputs(std::vector<GenericInput> inputs)
 		{
 			for (auto& device : m_inputDevices)
 			{
 				for (const auto& input : inputs)
 				{
-					if (device->GetDeviceType() == input.InputDevice)
+					if (device->GetDeviceType() == input.InputDevice
+						&& device->GetId() == input.DevieId)
 					{
 						device->ProcessInput(input);
 					}

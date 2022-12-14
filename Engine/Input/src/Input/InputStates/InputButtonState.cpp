@@ -1,4 +1,4 @@
-#include "Input/InputButtonState.h"
+#include "Input/InputStates/InputButtonState.h"
 
 namespace Insight
 {
@@ -59,6 +59,11 @@ namespace Insight
 			{
 				m_heldTime += deltaTime;
 			}
+		}
+
+		bool InputButton::HasInput() const
+		{
+			return WasPressed() || WasReleased() || WasHeld();
 		}
 
 		void InputButton::ClearFrame()

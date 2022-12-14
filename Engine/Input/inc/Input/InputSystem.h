@@ -29,6 +29,7 @@ namespace Insight
 
 			InputDevice_KeyboardMouse* GetKeyboardMouseDevice() const;
 			InputDevice_Controller* GetController(u32 index) const;
+			IInputDevice* GetLastUsedInputDevices() const;
 			std::vector<IInputDevice*> GetAllInputDevices() const;
 
 			void UpdateInputs(std::vector<GenericInput> inputs);

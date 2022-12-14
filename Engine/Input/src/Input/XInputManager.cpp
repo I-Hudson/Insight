@@ -4,9 +4,10 @@
 
 #include "Input/InputSystem.h"
 #include "Input/InputDevices/InputDeivce_Controller.h"
-#include "Input/InputButtonState.h"
+#include "Input/InputStates/InputButtonState.h"
 
-#include <vector>
+#include "Core/Logger.h"
+
 #include <unordered_map>
 
 namespace Insight
@@ -22,8 +23,8 @@ namespace Insight
 
 			{ 0x0010, ControllerButtons::Start },
 			{ 0x0020, ControllerButtons::Select },
-			{ 0x0040, ControllerButtons::Joystick_Left },
-			{ 0x0080, ControllerButtons::Joystick_Right },
+			{ 0x0040, ControllerButtons::Thumbstick_Left },
+			{ 0x0080, ControllerButtons::Thumbstick_Right },
 			{ 0x0100, ControllerButtons::Bummer_Left },
 			{ 0x0200, ControllerButtons::Bummber_Right },
 
@@ -63,6 +64,7 @@ namespace Insight
 						m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
 					}
 					ProcessInput(i, state);
+					ProcessVibration(i);
 				}
 				else
 				{
@@ -96,7 +98,69 @@ namespace Insight
 						static_cast<u64>(0)
 					});
 			}
+			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Left_X), static_cast<int>(state.Gamepad.sThumbLX), XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MAX);
+			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Left_Y), static_cast<int>(state.Gamepad.sThumbLY), XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MAX);
+			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Right_X), static_cast<int>(state.Gamepad.sThumbRX), XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MAX);
+			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Right_Y), static_cast<int>(state.Gamepad.sThumbRY), XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MAX);
+
+			AnalogInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Left), static_cast<int>(state.Gamepad.bLeftTrigger), XINPUT_GAMEPAD_TRIGGER_THRESHOLD, UCHAR_MAX);
+			AnalogInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Right), static_cast<int>(state.Gamepad.bRightTrigger), XINPUT_GAMEPAD_TRIGGER_THRESHOLD, UCHAR_MAX);
+
 			m_inputSystem->UpdateInputs(inputs);
+		}
+
+		void XInputManager::ProcessVibration(u32 controllerIndex)
+		{
+			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
+			if (!device)
+			{
+				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				return;
+			}
+			XINPUT_VIBRATION state = {};
+			state.wLeftMotorSpeed = static_cast<WORD>(device->GetRumbleValue(ControllerRumbles::Left) * _UI16_MAX);
+			state.wRightMotorSpeed = static_cast<WORD>(device->GetRumbleValue(ControllerRumbles::Right) * _UI16_MAX);
+			DWORD dwResult = XInputSetState(controllerIndex, &state);
+			if (dwResult != ERROR_SUCCESS)
+			{
+				IS_CORE_ERROR("[XInputManager::ProcessVibration] XInputSetState failed.");
+			}
+		}
+
+		void XInputManager::AnalogInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 id, int rawValue, int deadzone, int maxValue)
+		{
+			if (std::abs(rawValue) < deadzone)
+			{
+				return;
+			}
+
+			int sign = rawValue >= 0 ? 1 : - 1;
+			rawValue = std::abs(rawValue);
+
+			// Remap the value from deadzone -> maxValue, to 0 -> maxValue.
+			const float rawValueDeadZone = static_cast<float>(rawValue - deadzone);
+			const float maxValueDeadZone = static_cast<float>(maxValue - deadzone);
+
+			float scaledValue = rawValueDeadZone / maxValueDeadZone;
+			scaledValue = std::max(-1.0f, std::min(1.0f, scaledValue));
+
+			scaledValue *= sign;
+			rawValue *= sign;
+
+			u64 scaledAnalogValue = 0;
+			u64 rawAnalogValue = 0;
+			Platform::MemCopy(&scaledAnalogValue, &scaledValue, sizeof(scaledValue));
+			Platform::MemCopy(&rawAnalogValue, &rawValue, sizeof(rawValue));
+
+			inputs.push_back(Input::GenericInput
+				{
+					static_cast<u64>(controllerIndex),
+					InputDeviceTypes::Controller,
+					inputType,
+					static_cast<u64>(id),
+					scaledAnalogValue,
+					rawAnalogValue
+				});
 		}
 	}
 }

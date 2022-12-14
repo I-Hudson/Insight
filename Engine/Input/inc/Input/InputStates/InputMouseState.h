@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Input/InputButtonState.h"
+#include "Input/InputStates/InputButtonState.h"
 
 namespace Insight
 {
@@ -23,16 +23,19 @@ namespace Insight
 			InputMouseState();
 			~InputMouseState();
 
+			virtual bool HasInput() const override;
 			virtual void ClearFrame() override;
 
 			float GetXPosition() const;
 			float GetYPosition() const;
 			void MouseMoved(float xPosition, float yPosition);
+			void MouseScrolled(float xOffset, float yOffset);
 
 		private:
-			float m_xPosition;
-			float m_yPosition;
-			float m_scrollAmount = 0.0f;
+			float m_xPosition = 0.0f;
+			float m_yPosition = 0.0f;
+			float m_scrollXOffset = 0.0f;
+			float m_scrollYOffset = 0.0f;
 		};
 	}
 }

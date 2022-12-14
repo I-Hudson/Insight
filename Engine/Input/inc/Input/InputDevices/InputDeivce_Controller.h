@@ -1,7 +1,10 @@
 #pragma once
 
 #include "Input/InputDevices/IInputDevice.h"
-#include "Input/InputButtonState.h"
+#include "Input/InputStates/InputButtonState.h"
+#include "Input/InputStates/InputThumbstickState.h"
+#include "Input/InputStates/InputTriggerState.h"
+#include "Input/InputStates/InputRumbleState.h"
 
 namespace Insight
 {
@@ -13,8 +16,8 @@ namespace Insight
 			B, 
 			X, 
 			Y,
-			Joystick_Left,
-			Joystick_Right,
+			Thumbstick_Left,
+			Thumbstick_Right,
 			DPad_Up,
 			DPad_Right,
 			DPad_Down,
@@ -28,6 +31,36 @@ namespace Insight
 			NumButtons
 		};
 		IS_INPUT CONSTEXPR const char* ControllerButtonsToString(ControllerButtons button);
+
+		enum class ControllerThumbsticks : u16
+		{
+			Left_X,
+			Left_Y,
+			Right_X,
+			Right_Y,
+
+			NumThumbsticks
+		};
+		IS_INPUT CONSTEXPR const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick);
+
+		enum class ControllerTriggers : u16
+		{
+			Left,
+			Right,
+
+			NumTriggers
+		};
+		IS_INPUT CONSTEXPR const char* ControllerTriggerToString(ControllerTriggers trigger);
+
+		enum class ControllerRumbles : u16
+		{
+			Left,
+			Right,
+
+			NumRumbles
+		};
+		IS_INPUT CONSTEXPR const char* ControllerRumbleToString(ControllerRumbles rumble);
+
 
 		/// <summary>
 		/// Controller based on Xbox one controller.
@@ -44,6 +77,7 @@ namespace Insight
 			virtual InputDeviceTypes GetDeviceType() const { return InputDeviceTypes::Controller; }
 
 			virtual void ProcessInput(GenericInput const& input) override;
+			virtual bool HasInput() const override;
 			virtual void Update(float const deltaTime) override;
 			virtual void ClearFrame() override;
 
@@ -51,8 +85,23 @@ namespace Insight
 			bool WasReleased(ControllerButtons buttonIdx) const;
 			bool WasHeld(ControllerButtons buttonIdx) const;
 
+			float GetThumbstickValue(ControllerThumbsticks tumbstick) const;
+			i16 GetThumbstickRawValue(ControllerThumbsticks tumbstick) const;
+
+			float GetTriggerValue(ControllerTriggers trigger) const;
+			u8 GetTriggerRawValue(ControllerTriggers trigger) const;
+
+			void SetRumbleValue(ControllerRumbles rumble, float value);
+			float GetRumbleValue(ControllerRumbles rumble) const;
+			u16 GetRumbleRawValue(ControllerRumbles rumble) const;
+
 		private:
 			InputButtonState<static_cast<u64>(ControllerButtons::NumButtons)> m_buttons;
+			InputThumbstickState m_leftTumbstick;
+			InputThumbstickState m_rightTumbstick;
+			InputTriggerState m_leftTrigger;
+			InputTriggerState m_rightTrigger;
+			std::array<InputRumbleState, static_cast<u64>(ControllerRumbles::NumRumbles)> m_rumbles;
 		};
 	}
 }

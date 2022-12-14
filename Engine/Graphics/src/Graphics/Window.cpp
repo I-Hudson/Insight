@@ -4,7 +4,7 @@
 #include "Core/CommandLineArgs.h"
 
 #include "Input/InputSystem.h"
-#include "Input/InputButtonState.h"
+#include "Input/InputStates/InputButtonState.h"
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
 #include "imgui.h"
@@ -61,6 +61,10 @@ namespace Insight
 
 			{ GLFW_KEY_LEFT_CONTROL		, Input::KeyboardButtons::Key_LCtrl },
 			{ GLFW_KEY_RIGHT_CONTROL	, Input::KeyboardButtons::Key_RCtrl},
+
+			{ GLFW_KEY_TAB				, Input::KeyboardButtons::Key_Tab },
+			{ GLFW_KEY_CAPS_LOCK		, Input::KeyboardButtons::Key_CapsLock},
+			{ GLFW_KEY_ESCAPE			, Input::KeyboardButtons::Key_Escape},
 
 			{ GLFW_KEY_F1               , Input::KeyboardButtons::Key_F1 },
 			{ GLFW_KEY_F2               , Input::KeyboardButtons::Key_F2 },
@@ -347,6 +351,27 @@ namespace Insight
 						static_cast<u64>(0)
 					});
 					ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+				});
+
+			glfwSetScrollCallback(m_glfwWindow, [](GLFWwindow* window, double xoffset, double yoffset)
+				{
+					u64 xOffset;
+					u64 yOffset;
+					Platform::MemCopy(&xOffset, &xoffset, sizeof(xOffset));
+					Platform::MemCopy(&yOffset, &yoffset, sizeof(yOffset));
+
+					WindowInputs& inputs = m_windowInputs[window];
+					inputs.Inputs.push_back(
+						Input::GenericInput
+						{
+							static_cast<u64>(0),
+							Input::InputDeviceTypes::KeyboardMouse,
+							Input::InputTypes::MouseScroll,
+							xOffset,
+							yOffset,
+							static_cast<u64>(0)
+						});
+					ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 				});
 		}
 	}
