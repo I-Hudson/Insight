@@ -4,6 +4,22 @@ namespace Insight
 {
 	namespace Input
 	{
+		CONSTEXPR const char* MouseButtonToString(MouseButtons button)
+		{
+			switch (button)
+			{
+			case Insight::Input::MouseButtons::Left:	return "Left";
+			case Insight::Input::MouseButtons::Right:	return "Right";
+			case Insight::Input::MouseButtons::Middle:	return "Middle";
+			case Insight::Input::MouseButtons::Side0:	return "Side0";
+			case Insight::Input::MouseButtons::Side1:	return "Side1";
+			case Insight::Input::MouseButtons::NumButtons:
+			default:
+				break;
+			}
+			return "";
+		}
+
 		InputMouseState::InputMouseState()
 		{ }
 
@@ -32,6 +48,16 @@ namespace Insight
 		float InputMouseState::GetYPosition() const
 		{
 			return m_yPosition;
+		}
+
+		float InputMouseState::GetXScollOffset() const
+		{
+			return m_scrollXOffset;
+		}
+
+		float InputMouseState::GetYScollOffset() const
+		{
+			return m_scrollYOffset;
 		}
 
 		void InputMouseState::MouseMoved(float xPosition, float yPosition)

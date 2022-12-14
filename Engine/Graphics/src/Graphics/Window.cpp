@@ -295,7 +295,11 @@ namespace Insight
 			glfwSetKeyCallback(m_glfwWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods)
 				{
 					auto iter = GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.find(static_cast<u32>(key));
-					ASSERT(iter != GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.end());
+					if (iter == GLFW_KEYBOARD_BUTTONS_TO_INTERNAL.end())
+					{
+						IS_CORE_ERROR("[Window.glfwSetKeyCallback] Unrecognised key '{}'.", key);
+						return;
+					}
 					Input::KeyboardButtons keyboardButton = iter->second;
 
 					WindowInputs& inputs = m_windowInputs[window];

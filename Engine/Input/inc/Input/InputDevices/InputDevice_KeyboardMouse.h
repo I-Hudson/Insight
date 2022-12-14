@@ -144,6 +144,10 @@ namespace Insight
 
             float GetMouseXPosition() const;
             float GetMouseYPosition() const;
+
+            float GetMouseXScrollOffset() const;
+            float GetMouseYScrollOffset() const;
+
             bool WasPressed(MouseButtons buttonIdx) const;
             bool WasReleased(MouseButtons buttonIdx) const;
             bool WasHeld(MouseButtons buttonIdx) const;

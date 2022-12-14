@@ -228,6 +228,16 @@ namespace Insight
 			return m_mouse.GetYPosition();
 		}
 
+		float InputDevice_KeyboardMouse::GetMouseXScrollOffset() const
+		{
+			return m_mouse.GetXScollOffset();
+		}
+
+		float InputDevice_KeyboardMouse::GetMouseYScrollOffset() const
+		{
+			return m_mouse.GetYScollOffset();
+		}
+
 		bool InputDevice_KeyboardMouse::WasPressed(MouseButtons buttonIdx) const
 		{
 			return m_mouse.WasPressed(static_cast<u32>(buttonIdx));

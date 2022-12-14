@@ -52,41 +52,117 @@ namespace Insight
 				if (inputDevice->GetDeviceType() == Input::InputDeviceTypes::KeyboardMouse)
 				{
 					Input::InputDevice_KeyboardMouse const* device = static_cast<Input::InputDevice_KeyboardMouse const*>(inputDevice);
-					ImGui::Text("Buttons Pressed:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
 					{
-						if (device->WasPressed(static_cast<Input::KeyboardButtons>(i)))
-						{
-							ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
-						}
+						ImGui::Text("Mouse:");
+						ImGui::Separator();
 					}
-					ImGui::Unindent();
 
-					ImGui::Text("Buttons Released:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
 					{
-						if (device->WasReleased(static_cast<Input::KeyboardButtons>(i)))
-						{
-							ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
-						}
+						ImGui::Text("Position:");
+						ImGui::Separator();
+						ImGui::Indent();
+						ImGui::Text("X: '%f'.", device->GetMouseXPosition());
+						ImGui::Text("Y: '%f'.", device->GetMouseYPosition());
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
 
-					ImGui::Text("Buttons Held:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
 					{
-						if (device->WasHeld(static_cast<Input::KeyboardButtons>(i)))
-						{
-							ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
-						}
+						ImGui::Text("Scroll:");
+						ImGui::Separator();
+						ImGui::Indent();
+						ImGui::Text("X offset: '%f'.", device->GetMouseXScrollOffset());
+						ImGui::Text("Y offset: '%f'.", device->GetMouseYScrollOffset());
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
+
+					{
+						ImGui::Text("Buttons Pressed:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::MouseButtons::NumButtons); ++i)
+						{
+							if (device->WasPressed(static_cast<Input::MouseButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::MouseButtonToString(static_cast<Input::MouseButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Released:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::MouseButtons::NumButtons); ++i)
+						{
+							if (device->WasReleased(static_cast<Input::MouseButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::MouseButtonToString(static_cast<Input::MouseButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Held:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::MouseButtons::NumButtons); ++i)
+						{
+							if (device->WasHeld(static_cast<Input::MouseButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::MouseButtonToString(static_cast<Input::MouseButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Keyboard:");
+						ImGui::Separator();
+					}
+
+					{
+						ImGui::Text("Buttons Pressed:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
+						{
+							if (device->WasPressed(static_cast<Input::KeyboardButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Released:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
+						{
+							if (device->WasReleased(static_cast<Input::KeyboardButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Held:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::KeyboardButtons::NumButtons); ++i)
+						{
+							if (device->WasHeld(static_cast<Input::KeyboardButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::KeyboardButtonToString(static_cast<Input::KeyboardButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
 				}
 				else if (inputDevice->GetDeviceType() == Input::InputDeviceTypes::Controller)
 				{

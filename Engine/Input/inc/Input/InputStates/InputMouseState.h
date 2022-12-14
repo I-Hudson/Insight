@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Input/Defines.h"
 #include "Input/InputStates/InputButtonState.h"
 
 namespace Insight
@@ -14,10 +15,11 @@ namespace Insight
 			Side0,
 			Side1,
 
-			MouseButtonsCount
+			NumButtons
 		};
+		IS_INPUT CONSTEXPR const char* MouseButtonToString(MouseButtons button);
 
-		class InputMouseState : public InputButtonState<static_cast<u64>(MouseButtons::MouseButtonsCount)>
+		class InputMouseState : public InputButtonState<static_cast<u64>(MouseButtons::NumButtons)>
 		{
 		public:
 			InputMouseState();
@@ -28,6 +30,10 @@ namespace Insight
 
 			float GetXPosition() const;
 			float GetYPosition() const;
+
+			float GetXScollOffset() const;
+			float GetYScollOffset() const;
+			
 			void MouseMoved(float xPosition, float yPosition);
 			void MouseScrolled(float xOffset, float yOffset);
 
