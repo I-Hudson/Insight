@@ -10,6 +10,8 @@ namespace Insight
 {
 	namespace Input
 	{
+		class XInputManager;
+
 		enum class ControllerButtons : u16
 		{
 			A,
@@ -102,6 +104,10 @@ namespace Insight
 			InputTriggerState m_leftTrigger;
 			InputTriggerState m_rightTrigger;
 			std::array<InputRumbleState, static_cast<u64>(ControllerRumbles::NumRumbles)> m_rumbles;
+
+#ifdef IS_PLATFORM_WINDOWS
+			friend class XInputManager;
+#endif
 		};
 	}
 }

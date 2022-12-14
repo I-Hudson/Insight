@@ -10,6 +10,18 @@
 
 #include <unordered_map>
 
+struct XINPUT_CAPABILITIES_EX
+{
+	XINPUT_CAPABILITIES Capabilities;
+	WORD vendorId;
+	WORD productId;
+	WORD revisionId;
+	DWORD a4; //unknown
+};
+
+typedef DWORD(_stdcall* _XInputGetCapabilitiesEx)(DWORD a1, DWORD dwUserIndex, DWORD dwFlags, XINPUT_CAPABILITIES_EX* pCapabilities);
+_XInputGetCapabilitiesEx XInputGetCapabilitiesEx;
+
 namespace Insight
 {
 	namespace Input
@@ -62,6 +74,7 @@ namespace Insight
 						// New connection.
 						m_connectedPorts.at(i) = true;
 						m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
+						ExtractDeviceInfo(i);
 					}
 					ProcessInput(i, state);
 					ProcessVibration(i);
@@ -76,6 +89,33 @@ namespace Insight
 						m_inputSystem->RemoveInputDevice(InputDeviceTypes::Controller, i);
 					}
 				}
+			}
+		}
+
+		void XInputManager::ExtractDeviceInfo(u32 controllerIndex)
+		{
+			InputDevice_Controller* device = m_inputSystem->GetController(controllerIndex);
+			if (!device)
+			{
+				IS_CORE_ERROR("[XInputManager::ProcessVibration] Trying to process controller index '{}', controller at index is not valid.", controllerIndex);
+				return;
+			}
+
+			HMODULE moduleHandle = LoadLibrary(TEXT("XInput1_4.dll"));
+			if (moduleHandle)
+			{
+				XInputGetCapabilitiesEx = (_XInputGetCapabilitiesEx)GetProcAddress(moduleHandle, (char*)108);
+				if (XInputGetCapabilitiesEx)
+				{
+					XINPUT_CAPABILITIES_EX capsEx;
+					if (XInputGetCapabilitiesEx(1, controllerIndex, 0, &capsEx) == ERROR_SUCCESS)
+					{
+						Platform::MemCopy(&device->m_deviceInfo.VendorId, &capsEx.vendorId, sizeof(capsEx.vendorId));
+						Platform::MemCopy(&device->m_deviceInfo.ProductId, &capsEx.productId, sizeof(capsEx.productId));
+						Platform::MemCopy(&device->m_deviceInfo.RevisionId, &capsEx.revisionId, sizeof(capsEx.revisionId));
+					}
+				}
+				FreeLibrary(moduleHandle);
 			}
 		}
 

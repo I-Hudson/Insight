@@ -30,6 +30,7 @@ namespace Insight
 			void Update();
 
 		private:
+			void ExtractDeviceInfo(u32 controllerIndex);
 			void ProcessInput(u32 controllerIndex, XINPUT_STATE state);
 			void ProcessVibration(u32 controllerIndex);
 			void AnalogInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 id, int value, int deadzone, int maxValue);
