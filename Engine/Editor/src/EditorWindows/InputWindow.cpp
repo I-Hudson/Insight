@@ -167,87 +167,104 @@ namespace Insight
 				else if (inputDevice->GetDeviceType() == Input::InputDeviceTypes::Controller)
 				{
 					Input::InputDevice_Controller* device = const_cast<Input::InputDevice_Controller*>(static_cast<Input::InputDevice_Controller const*>(inputDevice));
-					ImGui::Text("Thumbsticks:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerThumbsticks::NumThumbsticks); ++i)
 					{
-						Input::ControllerThumbsticks currentThumbstick = static_cast<Input::ControllerThumbsticks>(i);
-						ImGui::Text("Thumbstick: '%s', value: '%f', raw value: '%i'.",
-							Input::ControllerThumbstickToString(currentThumbstick),
-							device->GetThumbstickValue(currentThumbstick),
-							device->GetThumbstickRawValue(currentThumbstick));
+						ImGui::Text("Controller sub type: '%s'.", Input::ControllerSubTypeToString(device->GetSubType()));
+						ImGui::Separator();
 					}
-					ImGui::Unindent();
-
-					ImGui::Text("Triggers:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerTriggers::NumTriggers); ++i)
+					
 					{
-						Input::ControllerTriggers currentTrigger = static_cast<Input::ControllerTriggers>(i);
-						ImGui::Text("Trigger: '%s', value: '%f', raw value: '%i'.", 
-							Input::ControllerTriggerToString(currentTrigger),
-							device->GetTriggerValue(currentTrigger),
-							device->GetTriggerRawValue(currentTrigger));
-					}
-					ImGui::Unindent();
-
-					ImGui::Text("Rumble:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerRumbles::NumRumbles); ++i)
-					{
-						Input::ControllerRumbles currentRumble = static_cast<Input::ControllerRumbles>(i);
-						ImGui::Text("Rumble: '%s', value: '%f', raw value: '%i'.",
-							Input::ControllerRumbleToString(currentRumble),
-							device->GetRumbleValue(currentRumble),
-							device->GetRumbleRawValue(currentRumble));
-						ImGui::NewLine();
-
-						float rumbleValue = device->GetRumbleValue(currentRumble);
-						ImGui::PushID(i);
-						ImGui::DragFloat("Rumble value", &rumbleValue, 0.001f, 0.0f, 1.0f);
-						ImGui::PopID();
-						device->SetRumbleValue(currentRumble, rumbleValue);
-					}
-					ImGui::Unindent();
-
-					ImGui::Text("Buttons Pressed:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
-					{
-						if (device->WasPressed(static_cast<Input::ControllerButtons>(i)))
+						ImGui::Text("Thumbsticks:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerThumbsticks::NumThumbsticks); ++i)
 						{
-							ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							Input::ControllerThumbsticks currentThumbstick = static_cast<Input::ControllerThumbsticks>(i);
+							ImGui::Text("Thumbstick: '%s', value: '%f', raw value: '%i'.",
+								Input::ControllerThumbstickToString(currentThumbstick),
+								device->GetThumbstickValue(currentThumbstick),
+								device->GetThumbstickRawValue(currentThumbstick));
 						}
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
 
-					ImGui::Text("Buttons Released:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
 					{
-						if (device->WasReleased(static_cast<Input::ControllerButtons>(i)))
+						ImGui::Text("Triggers:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerTriggers::NumTriggers); ++i)
 						{
-							ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							Input::ControllerTriggers currentTrigger = static_cast<Input::ControllerTriggers>(i);
+							ImGui::Text("Trigger: '%s', value: '%f', raw value: '%i'.",
+								Input::ControllerTriggerToString(currentTrigger),
+								device->GetTriggerValue(currentTrigger),
+								device->GetTriggerRawValue(currentTrigger));
 						}
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
 
-					ImGui::Text("Buttons Held:");
-					ImGui::Separator();
-					ImGui::Indent();
-					for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
 					{
-						if (device->WasHeld(static_cast<Input::ControllerButtons>(i)))
+						ImGui::Text("Rumble:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerRumbles::NumRumbles); ++i)
 						{
-							ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							Input::ControllerRumbles currentRumble = static_cast<Input::ControllerRumbles>(i);
+							ImGui::Text("Rumble: '%s', value: '%f', raw value: '%i'.",
+								Input::ControllerRumbleToString(currentRumble),
+								device->GetRumbleValue(currentRumble),
+								device->GetRumbleRawValue(currentRumble));
+							ImGui::NewLine();
+
+							float rumbleValue = device->GetRumbleValue(currentRumble);
+							ImGui::PushID(i);
+							ImGui::DragFloat("Rumble value", &rumbleValue, 0.001f, 0.0f, 1.0f);
+							ImGui::PopID();
+							device->SetRumbleValue(currentRumble, rumbleValue);
 						}
+						ImGui::Unindent();
 					}
-					ImGui::Unindent();
+
+					{
+						ImGui::Text("Buttons Pressed:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
+						{
+							if (device->WasPressed(static_cast<Input::ControllerButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Released:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
+						{
+							if (device->WasReleased(static_cast<Input::ControllerButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
+
+					{
+						ImGui::Text("Buttons Held:");
+						ImGui::Separator();
+						ImGui::Indent();
+						for (size_t i = 0; i < static_cast<u64>(Input::ControllerButtons::NumButtons); ++i)
+						{
+							if (device->WasHeld(static_cast<Input::ControllerButtons>(i)))
+							{
+								ImGui::Text("Button: '%s'.", Input::ControllerButtonsToString(static_cast<Input::ControllerButtons>(i)));
+							}
+						}
+						ImGui::Unindent();
+					}
 				}
 				ImGui::TreePop();
 			}

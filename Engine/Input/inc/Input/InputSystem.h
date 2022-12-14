@@ -37,11 +37,12 @@ namespace Insight
 			void ClearFrame();
 
 		private:
-			void AddInputDevice(InputDeviceTypes deviceType, u32 id);
+			IInputDevice* AddInputDevice(InputDeviceTypes deviceType, u32 id);
 			void RemoveInputDevice(InputDeviceTypes deviceType, u32 id);
 
 		private:
 			std::vector<IInputDevice*> m_inputDevices;
+			IInputDevice* m_lastUsedInputDeivce = nullptr;
 #ifdef IS_PLATFORM_WINDOWS
 			XInputManager m_xinputManager;
 			friend class XInputManager;

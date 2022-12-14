@@ -73,7 +73,9 @@ namespace Insight
 					{
 						// New connection.
 						m_connectedPorts.at(i) = true;
-						m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
+						IInputDevice* device = m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
+						InputDevice_Controller* deviceController = static_cast<InputDevice_Controller*>(device);
+						deviceController->m_subType = ControllerSubTypes::Xbox360;
 						ExtractDeviceInfo(i);
 					}
 					ProcessInput(i, state);

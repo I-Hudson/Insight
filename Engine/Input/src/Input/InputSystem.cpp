@@ -79,14 +79,7 @@ namespace Insight
 
 		IInputDevice* InputSystem::GetLastUsedInputDevices() const
 		{
-			for (auto& device : m_inputDevices)
-			{
-				if (device->HasInput())
-				{
-					return device;
-				}
-			}
-			return nullptr;
+			return m_lastUsedInputDeivce;
 		}
 
 		void InputSystem::UpdateInputs(std::vector<GenericInput> inputs)
@@ -112,6 +105,10 @@ namespace Insight
 			for (auto& device: m_inputDevices)
 			{
 				device->Update(deltaTime);
+				if (device->HasInput())
+				{
+					m_lastUsedInputDeivce = device;
+				}
 			}
 		}
 
@@ -124,7 +121,7 @@ namespace Insight
 		}
 
 
-		void InputSystem::AddInputDevice(InputDeviceTypes deviceType, u32 id)
+		IInputDevice* InputSystem::AddInputDevice(InputDeviceTypes deviceType, u32 id)
 		{
 			IInputDevice* newInputDevice = nullptr;
 			switch (deviceType)
@@ -143,6 +140,7 @@ namespace Insight
 			ASSERT(newInputDevice);
 			newInputDevice->Initialise(id);
 			m_inputDevices.push_back(newInputDevice);
+			return newInputDevice;
 		}
 
 		void InputSystem::RemoveInputDevice(InputDeviceTypes deviceType, u32 id)
@@ -154,6 +152,12 @@ namespace Insight
 					&& device->GetId() == id)
 				{
 					device->Shutdown();
+
+					if (device == m_lastUsedInputDeivce)
+					{
+						m_lastUsedInputDeivce = nullptr;
+					}
+
 					Delete(device);
 					m_inputDevices.erase(m_inputDevices.begin() + idx);
 					break;

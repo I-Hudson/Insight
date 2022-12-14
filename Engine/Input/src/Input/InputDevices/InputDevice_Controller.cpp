@@ -4,6 +4,19 @@ namespace Insight
 {
 	namespace Input
 	{
+		CONSTEXPR const char* ControllerSubTypeToString(ControllerSubTypes subType)
+		{
+			switch (subType)
+			{
+			case Insight::Input::ControllerSubTypes::Xbox360: return "Xbox360";
+			case Insight::Input::ControllerSubTypes::XboxOne: return "XboxOne";
+				break;
+			default:
+				break;
+			}
+			return "Unknown";
+		}
+
 		CONSTEXPR const char* ControllerButtonsToString(ControllerButtons button)
 		{
 			switch (button)
@@ -173,6 +186,11 @@ namespace Insight
 			m_rightTumbstick.ClearFrame();
 			m_leftTrigger.ClearFrame();
 			m_rightTrigger.ClearFrame();
+		}
+
+		ControllerSubTypes InputDevice_Controller::GetSubType() const
+		{
+			return m_subType;
 		}
 
 		bool InputDevice_Controller::WasPressed(ControllerButtons buttonIdx) const

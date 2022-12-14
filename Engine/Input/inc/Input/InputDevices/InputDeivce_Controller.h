@@ -12,6 +12,22 @@ namespace Insight
 	{
 		class XInputManager;
 
+		/// <summary>
+		/// Define the which controller "InputDevice_Controller" is.
+		/// Note: This defines the internal representation of the controller, this might not be the 
+		/// actual controller type. 
+		/// (Example if XInput is used then all controllers are defined as Xbox360 even if they are not Xbox360 controllers).
+		/// </summary>
+		enum class ControllerSubTypes : u16
+		{
+			Unknown,
+			Xbox360, 
+			XboxOne,
+
+			NumControllerSubTypes
+		};
+		IS_INPUT CONSTEXPR const char* ControllerSubTypeToString(ControllerSubTypes subType);
+
 		enum class ControllerButtons : u16
 		{
 			A,
@@ -83,6 +99,8 @@ namespace Insight
 			virtual void Update(float const deltaTime) override;
 			virtual void ClearFrame() override;
 
+			ControllerSubTypes GetSubType() const;
+
 			bool WasPressed(ControllerButtons buttonIdx) const;
 			bool WasReleased(ControllerButtons buttonIdx) const;
 			bool WasHeld(ControllerButtons buttonIdx) const;
@@ -104,6 +122,7 @@ namespace Insight
 			InputTriggerState m_leftTrigger;
 			InputTriggerState m_rightTrigger;
 			std::array<InputRumbleState, static_cast<u64>(ControllerRumbles::NumRumbles)> m_rumbles;
+			ControllerSubTypes m_subType;
 
 #ifdef IS_PLATFORM_WINDOWS
 			friend class XInputManager;
