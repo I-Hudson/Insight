@@ -1,5 +1,5 @@
-#include "EditorWindows/IEditorWindow.h"
-#include "EditorWindows/EditorWindowManager.h"
+#include "Editor/EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "imgui/imgui.h"
 

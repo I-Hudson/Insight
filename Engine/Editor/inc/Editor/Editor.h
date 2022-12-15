@@ -2,7 +2,8 @@
 
 #include "Runtime/Engine.h"
 
-#include "EditorWindows/EditorWindowManager.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
+#include "Editor/MenuBar.h"
 
 namespace Insight
 {
@@ -17,6 +18,7 @@ namespace Insight
 			virtual void OnDestroy() override;
 
 		private:
+			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 		};
 	}

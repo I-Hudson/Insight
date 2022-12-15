@@ -1,4 +1,4 @@
-#include "Editor.h"
+#include "Editor/Editor.h"
 
 #include "Runtime/EntryPoint.h"
 #include "Core/Memory.h"
@@ -24,6 +24,8 @@ namespace Insight
 			GetSystemRegistry().GetSystem<Core::ImGuiSystem>()->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
 			ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
 
+			m_menuBar.Initialise(&m_editorWindowManager);
+
 			EditorWindowManager::Instance().RegisterWindows();
 			EditorWindowManager::Instance().AddWindow("ResourceWindow");
 			EditorWindowManager::Instance().AddWindow("EntitiesWindow");
@@ -32,10 +34,7 @@ namespace Insight
 
 		void Editor::OnUpdate()
 		{
-			if (ImGui::Button("Resource window"))
-			{
-				EditorWindowManager::Instance().AddWindow("ResourceWindow");
-			}
+			m_menuBar.Draw();
 			EditorWindowManager::Instance().Update();
 		}
 

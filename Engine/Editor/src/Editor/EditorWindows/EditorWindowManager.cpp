@@ -1,11 +1,11 @@
-#include "EditorWindows/EditorWindowManager.h"
-#include "EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
+#include "Editor/EditorWindows/IEditorWindow.h"
+
+#include "Editor/EditorWindows/ResourceWindow.h"
+#include "Editor/EditorWindows/EntitiesWindow.h"
+#include "Editor/EditorWindows/InputWindow.h"
 
 #include "Core/Memory.h"
-
-#include "EditorWindows/ResourceWindow.h"
-#include "EditorWindows/EntitiesWindow.h"
-#include "EditorWindows/InputWindow.h"
 
 namespace Insight
 {

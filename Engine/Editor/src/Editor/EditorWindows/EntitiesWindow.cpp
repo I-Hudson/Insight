@@ -1,4 +1,4 @@
-#include "EditorWindows/EntitiesWindow.h"
+#include "Editor/EditorWindows/EntitiesWindow.h"
 #include "World/WorldSystem.h"
 
 #include "Input/InputSystem.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/IEditorWindow.h"
 
 namespace Insight
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/IEditorWindow.h"
 #include "Core/GUID.h"
 
 #include <unordered_set>

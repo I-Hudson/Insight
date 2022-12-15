@@ -1,4 +1,4 @@
-#include  "EditorWindows/ResourceWindow.h"
+#include "Editor/EditorWindows/ResourceWindow.h"
 #include "Resource/Resource.h"
 
 #include <imgui.h>
