@@ -206,7 +206,7 @@ namespace Insight
 						ImGui::Text("Rumble:");
 						ImGui::Separator();
 						ImGui::Indent();
-						for (size_t i = 0; i < static_cast<u64>(Input::ControllerRumbles::NumRumbles); ++i)
+						for (int i = 0; i < static_cast<u64>(Input::ControllerRumbles::NumRumbles); ++i)
 						{
 							Input::ControllerRumbles currentRumble = static_cast<Input::ControllerRumbles>(i);
 							ImGui::Text("Rumble: '%s', value: '%f', raw value: '%i'.",

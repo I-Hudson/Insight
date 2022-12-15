@@ -63,6 +63,8 @@ namespace Insight
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();
+
+                m_fileDialog.Update();
             }
         }
     }

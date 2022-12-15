@@ -33,8 +33,8 @@ namespace Insight
 			{
 				OnDraw();
 				ImVec2 windowSize = ImGui::GetWindowSize();
-				m_width = windowSize.x;
-				m_height = windowSize.y;
+				m_width = static_cast<u32>(windowSize.x);
+				m_height = static_cast<u32>(windowSize.y);
 
 				if (!m_isOpen)
 				{
