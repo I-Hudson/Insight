@@ -1,5 +1,7 @@
 #include "Resource/Texture.h"
 
+#include "Graphics/RHI/RHI_Texture.h"
+
 namespace Insight
 {
 	namespace Runtime

@@ -85,6 +85,8 @@ namespace Insight
 			RPtr<RHI_UploadQueueRequest> QueueUpload(void* data, int sizeInBytes);
 			virtual std::vector<Byte> Download(void* data, int sizeInBytes) = 0;
 
+			Core::Delegate<RHI_Texture*> OnUploadCompleted;
+
 		private:
 			void OnUploadComplete(RHI_UploadQueueRequest* request);
 

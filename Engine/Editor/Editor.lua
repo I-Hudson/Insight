@@ -39,6 +39,7 @@ project "Insight_Editor"
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.imgui_string}",
     }
 
     files 

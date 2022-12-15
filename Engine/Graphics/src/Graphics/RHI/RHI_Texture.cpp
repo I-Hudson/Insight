@@ -65,13 +65,12 @@ namespace Insight
 					m_uploadData = data;
 					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)textureSize);
 					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
-
 				});
 #else
 			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
 			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
-			
+
 			stbi_image_free(data);
 			UntrackPtr(data);
 #endif
@@ -109,6 +108,7 @@ namespace Insight
 			UntrackPtr(m_uploadData);
 			m_uploadData = nullptr;
 			m_uploadStatus = DeviceUploadStatus::Completed;
+			OnUploadCompleted(this);
 		}
 	}
 }

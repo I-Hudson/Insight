@@ -2,6 +2,7 @@
 
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
+#include "Core/Timer.h"
 
 #include <imgui.h>
 
@@ -34,15 +35,22 @@ namespace Insight
             FileDialogItem() = default;
             FileDialogItem(std::string path);
 
-            std::string GetPath() const;
-            std::string GetPathName() const;
+            void Clicked();
+            float GetTimeSinceLastClickMs() const;
+
+            const std::string& GetPath() const;
+            const std::string& GetPathName() const;
             Runtime::Texture2D* GetIcon() const;
             bool IsDirectory() const;
 
         private:
             std::string m_path;
+            std::string m_pathName;
             bool m_isDirectory;
             Runtime::Texture2D* m_icon;
+
+            Core::Timer m_clickedTimer;
+            std::chrono::milliseconds m_timeSinceLastClick;
         };
 
         class FileDialogNavigation
@@ -57,9 +65,11 @@ namespace Insight
             /// </summary>
             /// <param name="path"></param>
             void Navigate(const std::string& path);
+            void NavigateFromPathSelection(const u32 index);
             void Backwards();
             void Forwards();
 
+            const std::string& GetPath() const;
             u32 GetPathSectionSize() const;
             const std::vector<std::string>& GetPathSections() const;
             const std::string& GetPathSection(u32 index) const;
@@ -83,12 +93,13 @@ namespace Insight
             ~FileDialog() = default;
 
             void Show(const std::string& path, FileDialogOperations operation);
-            void Update();
+            bool Update();
+            bool Update(std::string* result);
 
         private:
-            void DrawTopBar();
+            void DrawTop();
             void DrawContents();
-            void DrawBottomBar();
+            void DrawBottom();
 
             void UpdateItems();
 
@@ -98,6 +109,13 @@ namespace Insight
             FileDialogOperations m_operation;
             FileDialogNavigation m_navigation;
             std::vector<FileDialogItem> m_items;
+
+            u32 m_displayItemCount;
+            std::string m_inputBox;
+            float m_offsetBottom = 0.0f;
+            
+            bool m_selectionMade = false;
+
             bool m_isDirty = false;
             bool m_isVisable = false;
         };

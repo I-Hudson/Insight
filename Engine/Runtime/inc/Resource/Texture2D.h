@@ -28,6 +28,7 @@ namespace Insight
 			virtual void Save(const std::string& file_path);
 
 		private:
+			void OnRHITextureUploadCompleted(Graphics::RHI_Texture* rhiTexture);
 		};
 	}
 }

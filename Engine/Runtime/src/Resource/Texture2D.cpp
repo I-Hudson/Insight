@@ -11,7 +11,10 @@ namespace Insight
 		{
 			ASSERT(!m_rhi_texture);
 			m_rhi_texture = Renderer::CreateTexture();
+
+			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
 			m_rhi_texture->LoadFromFile(m_file_path);
+
 			m_resource_state = EResoruceStates::Loaded;
 		}
 
@@ -29,6 +32,17 @@ namespace Insight
 		void Texture2D::Save(const std::string& file_path)
 		{
 			FAIL_ASSERT();
+		}
+
+		void Texture2D::OnRHITextureUploadCompleted(Graphics::RHI_Texture* rhiTexture)
+		{
+			ASSERT(rhiTexture == m_rhi_texture);
+
+			rhiTexture->OnUploadCompleted.Unbind<&Texture2D::OnRHITextureUploadCompleted>(this);
+			m_width = rhiTexture->GetWidth(0);
+			m_height = rhiTexture->GetHeight(0);
+			m_depth = rhiTexture->GetInfo(0).Depth;
+			m_format = rhiTexture->GetFormat();
 		}
 	}
 }
