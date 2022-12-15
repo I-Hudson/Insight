@@ -7,7 +7,7 @@ namespace Insight
 		class Entity;
 
 		/// @brief Interface for creating an entity hierarchy.
-		class ICreateEntityHierarchy
+		class IS_RUNTIME ICreateEntityHierarchy
 		{
 		public:
 			/// @brief Return the top parent entity and create a hierarchy.

@@ -21,7 +21,7 @@ namespace Insight
 			Count
 		};
 
-		class Texture : public IResource
+		class IS_RUNTIME Texture : public IResource
 		{
 			REGISTER_RESOURCE(Texture);
 

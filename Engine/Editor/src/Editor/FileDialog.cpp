@@ -1,5 +1,7 @@
 #include "Editor/FileDialog.h"
 
+#include "Core/TypeAlias.h"
+#include "Resource/Texture2D.h"
 
 namespace Insight
 {
@@ -8,7 +10,7 @@ namespace Insight
         FileDialogItem::FileDialogItem(std::string path)
             : m_path(std::move(path))
         {
-            m_icon = Runtime::ResourceManager::Instance().Load("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId());
+            m_icon = static_cast<Runtime::Texture2D*>(Runtime::ResourceManager::Instance().Load("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
 
         }
 
@@ -28,7 +30,7 @@ namespace Insight
             return m_path.substr(lastSlashChar, lastDotChar - lastSlashChar);
         }
 
-        TObjectPtr<Runtime::Texture2D> FileDialogItem::GetIcon() const
+        Runtime::Texture2D* FileDialogItem::GetIcon() const
         {
             return m_icon;
         }
@@ -36,6 +38,27 @@ namespace Insight
         bool FileDialogItem::IsDirectory() const
         {
             return false;
+        }
+
+        void FileDialog::Show(const std::string& path, FileDialogOperations operation)
+        {
+            m_operation = operation;
+        }
+
+        void FileDialog::DrawTopBar()
+        {
+        }
+
+        void FileDialog::DrawContents()
+        {
+        }
+
+        void FileDialog::DrawBottomBar()
+        {
+        }
+
+        void FileDialog::UpdateItems()
+        {
         }
     }
 }

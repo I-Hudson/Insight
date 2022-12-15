@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		class Texture2D : public Texture
+		class IS_RUNTIME Texture2D : public Texture
 		{
 			REGISTER_RESOURCE(Texture2D);
 		public:

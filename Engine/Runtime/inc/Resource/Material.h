@@ -26,7 +26,7 @@ namespace Insight
 			Count
 		};
 
-		class Material : public IResource
+		class IS_RUNTIME Material : public IResource
 		{
 			REGISTER_RESOURCE(Material);
 		public:

@@ -802,6 +802,7 @@ class TObjectPtr
 
 public:
 	TObjectPtr() { }
+	TObjectPtr(std::nullptr_t) { }
 
 	TObjectPtr(const TObjectPtr& other)
 	{
@@ -884,6 +885,11 @@ public:
 	operator bool() const { return m_ptr != nullptr; }
 	operator Ptr() const { return m_ptr; }
 	Ptr operator->() const { return m_ptr; }
+
+	TObjectPtr& operator=(std::nullptr_t)
+	{
+		Reset();
+	}
 
 	/// <summary>
 	/// Assign copy operator for TObjectPtr.

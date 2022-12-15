@@ -30,11 +30,11 @@ namespace Insight
                 {
                     if (ImGui::MenuItem("Save Project"))
                     {
-
+                        m_fileDialog.Show("./", FileDialogOperations::Save);
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {
-
+                        m_fileDialog.Show("./", FileDialogOperations::Load);
                     }
                     ImGui::EndMenu();
                 }

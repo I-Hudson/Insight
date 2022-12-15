@@ -13,7 +13,7 @@ namespace Insight
 		class Material;
 		class AssimpLoader;
 
-		class Model : public IResource, public ECS::ICreateEntityHierarchy
+		class IS_RUNTIME Model : public IResource, public ECS::ICreateEntityHierarchy
 		{
 			REGISTER_RESOURCE(Model);
 		public:

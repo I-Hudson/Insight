@@ -4,6 +4,8 @@
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 #include "Input/InputDevices/InputDeivce_Controller.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Input
@@ -18,7 +20,9 @@ namespace Insight
 
 		void InputSystem::Initialise()
 		{
+#ifdef IS_PLATFORM_DESKTOP
 			AddInputDevice(InputDeviceTypes::KeyboardMouse, 0);
+#endif // IS_PLATFORM_DESKTOP
 
 #ifdef IS_PLATFORM_WINDOWS
 			m_xinputManager.Initialise(this);
@@ -38,7 +42,7 @@ namespace Insight
 
 #ifdef IS_PLATFORM_WINDOWS
 			m_xinputManager.Shutdown();
-#endif
+#endif // IS_PLATFORM_WINDOWS
 
 			m_state = Core::SystemStates::Not_Initialised;
 		}
@@ -101,7 +105,7 @@ namespace Insight
 		{
 #ifdef IS_PLATFORM_WINDOWS
 			m_xinputManager.Update();
-#endif
+#endif // IS_PLATFORM_WINDOWS
 			for (auto& device: m_inputDevices)
 			{
 				device->Update(deltaTime);

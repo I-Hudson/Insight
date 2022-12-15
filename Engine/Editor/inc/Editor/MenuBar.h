@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Editor/FileDialog.h"
+
 namespace Insight
 {
     namespace Editor
@@ -18,6 +20,7 @@ namespace Insight
 
         private:
             EditorWindowManager* m_editorWindowManager;
+            FileDialog m_fileDialog;
         };
     }
 }
