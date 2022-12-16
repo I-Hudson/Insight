@@ -185,6 +185,20 @@ workspace "Insight"
             "VK_USE_PLATFORM_WIN32_KHR",
         }
 
+    filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
+        ignoredefaultlibraries
+        {
+            "libcmt.lib",
+            "msvcrt.lib",
+            "libcmtd.lib",
+        }
+    filter { "system:Windows", "configurations:Release" }
+        ignoredefaultlibraries
+        {
+            "libcmt.lib",
+            "libcmtd.lib",
+            "msvcrtd.lib",
+        }
 
     filter "configurations:Testing"
         defines
