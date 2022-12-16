@@ -3,7 +3,7 @@
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
 
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 #include <vector>
 
@@ -98,6 +98,11 @@ namespace Insight
 				{
 					return (*m_function)(m_callee, std::forward<Args>(args)...);
 				}
+
+				if CONSTEXPR(std::is_default_constructible_v<ReturnType>)
+				{
+					return {};
+				}
 			}
 
 			template <typename... UArgs,
@@ -107,6 +112,11 @@ namespace Insight
 				if (m_stub != nullptr)
 				{
 					return (*m_function)(m_instance, std::forward<Args>(args)...);
+				}
+
+				if CONSTEXPR(std::is_default_constructible_v<ReturnType>)
+				{
+					return {};
 				}
 			}
 
@@ -186,6 +196,11 @@ namespace Insight
 					{
 						return m_functions.at(0)(std::forward<Args>(args)...);
 					}
+				}
+
+				if CONSTEXPR(std::is_default_constructible_v<Return>)
+				{
+					return {};
 				}
 			}
 			template <typename... UArgs,
