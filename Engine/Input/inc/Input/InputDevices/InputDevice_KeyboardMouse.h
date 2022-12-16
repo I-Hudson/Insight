@@ -111,12 +111,15 @@ namespace Insight
             Key_PageUp,
             Key_PageDown,
             Key_Application,
+            Key_Menu,
             Key_LShift,
             Key_RShift,
             Key_LCtrl,
             Key_RCtrl,
             Key_LAlt,
             Key_RAlt,
+            Key_LSuper,
+            Key_RSuper,
 
             NumButtons,
         };

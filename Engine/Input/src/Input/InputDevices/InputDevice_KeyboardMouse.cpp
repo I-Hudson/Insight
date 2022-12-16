@@ -109,16 +109,20 @@ namespace Insight
 			case KeyboardButtons::Key_PageUp:        return "Key_PageUp";
 			case KeyboardButtons::Key_PageDown:      return "Key_PageDown";
 			case KeyboardButtons::Key_Application:   return "Key_Application";
+			case KeyboardButtons::Key_Menu:			 return "Key_Menu";
 			case KeyboardButtons::Key_LShift:        return "Key_LShift";
 			case KeyboardButtons::Key_RShift:        return "Key_RShift";
 			case KeyboardButtons::Key_LCtrl:         return "Key_LCtrl";
 			case KeyboardButtons::Key_RCtrl:         return "Key_RCtrl";
 			case KeyboardButtons::Key_LAlt:          return "Key_LAlt";
 			case KeyboardButtons::Key_RAlt:          return "Key_RAlt";
+			case KeyboardButtons::Key_LSuper:        return "Key_LSuper";
+			case KeyboardButtons::Key_RSuper:        return "Key_RSuper";
 			case KeyboardButtons::NumButtons:
 			default:
 				break;
 			}
+			FAIL_ASSERT();
 			return "";
 		}
 

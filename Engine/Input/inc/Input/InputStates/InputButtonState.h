@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 #include <array>
 

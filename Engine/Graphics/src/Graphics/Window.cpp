@@ -30,40 +30,6 @@ namespace Insight
 
 		const std::unordered_map<u32, Input::KeyboardButtons> GLFW_KEYBOARD_BUTTONS_TO_INTERNAL =
 		{
-			{ GLFW_KEY_SPACE            , Input::KeyboardButtons::Key_Space },
-			{ GLFW_KEY_APOSTROPHE       , Input::KeyboardButtons::Key_Quote },
-			{ GLFW_KEY_COMMA            , Input::KeyboardButtons::Key_Comma },
-			{ GLFW_KEY_MINUS            , Input::KeyboardButtons::Key_Minus },
-			{ GLFW_KEY_PERIOD           , Input::KeyboardButtons::Key_Period },
-			{ GLFW_KEY_SLASH            , Input::KeyboardButtons::Key_ForwardSlash },
-
-			{ GLFW_KEY_SEMICOLON        , Input::KeyboardButtons::Key_SemiColon },
-			{ GLFW_KEY_EQUAL            , Input::KeyboardButtons::Key_Equals },
-
-			{ GLFW_KEY_LEFT_BRACKET     , Input::KeyboardButtons::Key_LBracket },
-			{ GLFW_KEY_BACKSLASH        , Input::KeyboardButtons::Key_BackSlash },
-			{ GLFW_KEY_RIGHT_BRACKET    , Input::KeyboardButtons::Key_RBracket },
-			{ GLFW_KEY_GRAVE_ACCENT     , Input::KeyboardButtons::Key_Tilde },
-
-			{ GLFW_KEY_PRINT_SCREEN     , Input::KeyboardButtons::Key_PrintScreen },
-			{ GLFW_KEY_SCROLL_LOCK      , Input::KeyboardButtons::Key_ScrollLock },
-			{ GLFW_KEY_PAUSE            , Input::KeyboardButtons::Key_Pause },
-
-			{ GLFW_KEY_INSERT           , Input::KeyboardButtons::Key_Insert },
-			{ GLFW_KEY_HOME             , Input::KeyboardButtons::Key_Home },
-			{ GLFW_KEY_PAGE_UP          , Input::KeyboardButtons::Key_PageUp },
-			{ GLFW_KEY_DELETE           , Input::KeyboardButtons::Key_Delete },
-			{ GLFW_KEY_END              , Input::KeyboardButtons::Key_End },
-			{ GLFW_KEY_PAGE_DOWN        , Input::KeyboardButtons::Key_PageDown},
-
-			{ GLFW_KEY_LEFT_SHIFT       , Input::KeyboardButtons::Key_LShift },
-			{ GLFW_KEY_RIGHT_SHIFT      , Input::KeyboardButtons::Key_RShift},
-
-			{ GLFW_KEY_LEFT_CONTROL		, Input::KeyboardButtons::Key_LCtrl },
-			{ GLFW_KEY_RIGHT_CONTROL	, Input::KeyboardButtons::Key_RCtrl},
-
-			{ GLFW_KEY_TAB				, Input::KeyboardButtons::Key_Tab },
-			{ GLFW_KEY_CAPS_LOCK		, Input::KeyboardButtons::Key_CapsLock},
 			{ GLFW_KEY_ESCAPE			, Input::KeyboardButtons::Key_Escape},
 
 			{ GLFW_KEY_F1               , Input::KeyboardButtons::Key_F1 },
@@ -79,6 +45,12 @@ namespace Insight
 			{ GLFW_KEY_F11              , Input::KeyboardButtons::Key_F11 },
 			{ GLFW_KEY_F12              , Input::KeyboardButtons::Key_F12 },
 
+			{ GLFW_KEY_PRINT_SCREEN     , Input::KeyboardButtons::Key_PrintScreen },
+			{ GLFW_KEY_SCROLL_LOCK      , Input::KeyboardButtons::Key_ScrollLock },
+			{ GLFW_KEY_PAUSE            , Input::KeyboardButtons::Key_Pause },
+
+			{ GLFW_KEY_GRAVE_ACCENT     , Input::KeyboardButtons::Key_Tilde },
+
 			{ GLFW_KEY_0                , Input::KeyboardButtons::Key_0 },
 			{ GLFW_KEY_1                , Input::KeyboardButtons::Key_1 },
 			{ GLFW_KEY_2                , Input::KeyboardButtons::Key_2 },
@@ -89,6 +61,47 @@ namespace Insight
 			{ GLFW_KEY_7                , Input::KeyboardButtons::Key_7 },
 			{ GLFW_KEY_8                , Input::KeyboardButtons::Key_8 },
 			{ GLFW_KEY_9                , Input::KeyboardButtons::Key_9 },
+
+			{ GLFW_KEY_MINUS            , Input::KeyboardButtons::Key_Minus },
+			{ GLFW_KEY_EQUAL            , Input::KeyboardButtons::Key_Equals },
+			{ GLFW_KEY_BACKSPACE        , Input::KeyboardButtons::Key_Backspace },
+
+			{ GLFW_KEY_INSERT           , Input::KeyboardButtons::Key_Insert },
+			{ GLFW_KEY_HOME             , Input::KeyboardButtons::Key_Home },
+			{ GLFW_KEY_PAGE_UP          , Input::KeyboardButtons::Key_PageUp },
+			{ GLFW_KEY_DELETE           , Input::KeyboardButtons::Key_Delete },
+			{ GLFW_KEY_END              , Input::KeyboardButtons::Key_End },
+			{ GLFW_KEY_PAGE_DOWN        , Input::KeyboardButtons::Key_PageDown},
+
+			{ GLFW_KEY_UP				, Input::KeyboardButtons::Key_Up },
+			{ GLFW_KEY_RIGHT			, Input::KeyboardButtons::Key_Right },
+			{ GLFW_KEY_DOWN				, Input::KeyboardButtons::Key_Down },
+			{ GLFW_KEY_LEFT				, Input::KeyboardButtons::Key_Left },
+
+			{ GLFW_KEY_TAB				, Input::KeyboardButtons::Key_Tab },
+			{ GLFW_KEY_CAPS_LOCK		, Input::KeyboardButtons::Key_CapsLock},
+
+			{ GLFW_KEY_LEFT_SHIFT       , Input::KeyboardButtons::Key_LShift },
+			{ GLFW_KEY_LEFT_CONTROL		, Input::KeyboardButtons::Key_LCtrl },
+			{ GLFW_KEY_LEFT_SUPER		, Input::KeyboardButtons::Key_LSuper},
+			{ GLFW_KEY_LEFT_ALT			, Input::KeyboardButtons::Key_LAlt },
+			{ GLFW_KEY_SPACE            , Input::KeyboardButtons::Key_Space },
+			{ GLFW_KEY_RIGHT_ALT		, Input::KeyboardButtons::Key_RAlt },
+			{ GLFW_KEY_RIGHT_SUPER		, Input::KeyboardButtons::Key_RSuper},
+			{ GLFW_KEY_MENU				, Input::KeyboardButtons::Key_Menu},
+			{ GLFW_KEY_RIGHT_CONTROL	, Input::KeyboardButtons::Key_RCtrl},
+			{ GLFW_KEY_RIGHT_SHIFT      , Input::KeyboardButtons::Key_RShift},
+			{ GLFW_KEY_ENTER			, Input::KeyboardButtons::Key_Enter},
+
+			{ GLFW_KEY_LEFT_BRACKET     , Input::KeyboardButtons::Key_LBracket },
+			{ GLFW_KEY_RIGHT_BRACKET    , Input::KeyboardButtons::Key_LBracket },
+			{ GLFW_KEY_SEMICOLON        , Input::KeyboardButtons::Key_SemiColon },
+			{ GLFW_KEY_APOSTROPHE       , Input::KeyboardButtons::Key_Quote },
+			{ GLFW_KEY_BACKSLASH		, Input::KeyboardButtons::Key_Comma },
+			{ GLFW_KEY_COMMA            , Input::KeyboardButtons::Key_Comma },
+			{ GLFW_KEY_PERIOD           , Input::KeyboardButtons::Key_Period },
+			{ GLFW_KEY_SLASH            , Input::KeyboardButtons::Key_ForwardSlash },
+			{ GLFW_KEY_WORLD_2			, Input::KeyboardButtons::Key_BackSlash },
 
 			{ GLFW_KEY_A                , Input::KeyboardButtons::Key_A },
 			{ GLFW_KEY_B                , Input::KeyboardButtons::Key_B },
@@ -118,6 +131,25 @@ namespace Insight
 			{ GLFW_KEY_X                , Input::KeyboardButtons::Key_X },
 			{ GLFW_KEY_Y                , Input::KeyboardButtons::Key_Y },
 			{ GLFW_KEY_Z                , Input::KeyboardButtons::Key_Z },
+
+			{ GLFW_KEY_NUM_LOCK         , Input::KeyboardButtons::Key_NumLock },
+			{ GLFW_KEY_KP_DIVIDE        , Input::KeyboardButtons::Key_NumpadDivide },
+			{ GLFW_KEY_KP_MULTIPLY      , Input::KeyboardButtons::Key_NumpadMultiply },
+			{ GLFW_KEY_KP_SUBTRACT      , Input::KeyboardButtons::Key_NumpadMinus },
+			{ GLFW_KEY_KP_ADD			, Input::KeyboardButtons::Key_NumpadPlus },
+			{ GLFW_KEY_KP_ENTER			, Input::KeyboardButtons::Key_NumpadEnter },
+			{ GLFW_KEY_KP_DECIMAL		, Input::KeyboardButtons::Key_NumpadPeriod },
+
+			{ GLFW_KEY_KP_0				, Input::KeyboardButtons::Key_Numpad0 },
+			{ GLFW_KEY_KP_1				, Input::KeyboardButtons::Key_Numpad1 },
+			{ GLFW_KEY_KP_2				, Input::KeyboardButtons::Key_Numpad2 },
+			{ GLFW_KEY_KP_3				, Input::KeyboardButtons::Key_Numpad3 },
+			{ GLFW_KEY_KP_4				, Input::KeyboardButtons::Key_Numpad4 },
+			{ GLFW_KEY_KP_5				, Input::KeyboardButtons::Key_Numpad5 },
+			{ GLFW_KEY_KP_6				, Input::KeyboardButtons::Key_Numpad6 },
+			{ GLFW_KEY_KP_7				, Input::KeyboardButtons::Key_Numpad7 },
+			{ GLFW_KEY_KP_8				, Input::KeyboardButtons::Key_Numpad8 },
+			{ GLFW_KEY_KP_9				, Input::KeyboardButtons::Key_Numpad9 },
 		};
 
 		std::unordered_map<GLFWwindow*, WindowInputs> Window::m_windowInputs;
