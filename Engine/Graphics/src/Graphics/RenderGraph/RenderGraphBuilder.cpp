@@ -1,7 +1,7 @@
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

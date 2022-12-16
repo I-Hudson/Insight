@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Defines.h"
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

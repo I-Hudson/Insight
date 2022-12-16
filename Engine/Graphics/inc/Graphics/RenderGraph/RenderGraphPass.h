@@ -9,6 +9,8 @@
 
 #include "Graphics/PipelineBarrier.h"
 
+#include <glm/ext/vector_int2.hpp>
+
 #include <functional>
 #include <vector>
 

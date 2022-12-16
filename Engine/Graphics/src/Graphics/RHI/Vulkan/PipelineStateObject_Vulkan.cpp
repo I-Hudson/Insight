@@ -12,6 +12,8 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
+#include <vulkan/vulkan.h>
+
 #include <iostream>
 
 namespace Insight

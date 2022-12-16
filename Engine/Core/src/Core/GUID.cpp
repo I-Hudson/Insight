@@ -1,6 +1,6 @@
 #include "Core/GUID.h"
 
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

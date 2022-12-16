@@ -141,7 +141,7 @@ namespace Insight
 				u64 newSizeBytes = m_uploadStagingBuffer->GetSize();
 				while (newSizeBytes < m_stagingBufferOffset + sizeInBytes)
 				{
-					newSizeBytes *= 1.8f;
+					newSizeBytes = static_cast<u64>(1.8f * static_cast<float>(newSizeBytes));
 				}
 				m_uploadStagingBuffer->Resize(newSizeBytes);
 			}

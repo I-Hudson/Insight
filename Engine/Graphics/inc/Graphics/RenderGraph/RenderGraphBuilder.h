@@ -6,6 +6,8 @@
 #include "Graphics/ShaderDesc.h"
 #include "Graphics/RHI/RHI_Renderpass.h"
 
+#include <glm/ext/vector_int2.hpp>
+
 namespace Insight
 {
 	namespace Graphics

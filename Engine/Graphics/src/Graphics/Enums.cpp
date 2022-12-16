@@ -1,7 +1,7 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormatExtensions.h"
 
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 namespace Insight
 {

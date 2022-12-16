@@ -2,7 +2,7 @@
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
-#include "Platform/Platform.h"
+#include "Platforms/Platform.h"
 
 #include <iostream>
 #include <sstream>
