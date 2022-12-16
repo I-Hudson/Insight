@@ -1,5 +1,7 @@
 #include "Editor/Editor.h"
 
+#include "EditorModule.h"
+
 #include "Runtime/EntryPoint.h"
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
@@ -14,19 +16,14 @@ namespace Insight
 	{
 		void Editor::OnInit()
 		{
+			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
 			Graphics::Window::Instance().Show();
 
-			ImGui::SetCurrentContext(GetSystemRegistry().GetSystem<Core::ImGuiSystem>()->GetCurrentContext());
-			ImGuiMemAllocFunc allocFunc;
-			ImGuiMemFreeFunc freeFunc;
-			void* pUsedData;
-			GetSystemRegistry().GetSystem<Core::ImGuiSystem>()->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
-			ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);
-
+			EditorWindowManager::Instance().RegisterWindows();
 			m_menuBar.Initialise(&m_editorWindowManager);
 
-			EditorWindowManager::Instance().RegisterWindows();
 			EditorWindowManager::Instance().AddWindow("ResourceWindow");
 			EditorWindowManager::Instance().AddWindow("EntitiesWindow");
 			EditorWindowManager::Instance().AddWindow("InputWindow");

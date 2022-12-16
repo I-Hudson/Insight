@@ -50,6 +50,18 @@ namespace Insight
 			m_windowsToRemove.push_back(windowName);
 		}
 
+		bool EditorWindowManager::IsWindowVisable(const std::string& windowName) const
+		{
+			for (size_t i = 0; i < m_activeWindows.size(); ++i)
+			{
+				if (windowName == m_activeWindows.at(i)->GetWindowName())
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		void EditorWindowManager::Update()
 		{
 			RemoveQueuedWindows();

@@ -24,6 +24,8 @@ namespace Insight
 			void AddWindow(const std::string& windowName);
 			void RemoveWindow(const std::string& windowName);
 
+			bool IsWindowVisable(const std::string& windowName) const;
+
 			void Update();
 			void Destroy();
 

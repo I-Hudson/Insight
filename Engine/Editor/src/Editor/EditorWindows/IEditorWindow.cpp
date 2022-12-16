@@ -29,7 +29,8 @@ namespace Insight
 
 		void IEditorWindow::Draw()
 		{
-			if (ImGui::Begin(GetWindowName(), &m_isOpen))
+			const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
+			if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
 			{
 				OnDraw();
 				ImVec2 windowSize = ImGui::GetWindowSize();

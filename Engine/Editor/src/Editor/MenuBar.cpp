@@ -5,6 +5,8 @@
 #include "Editor/EditorWindows/InputWindow.h"
 #include "Editor/EditorWindows/ResourceWindow.h"
 
+#include "Platforms/Platform.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -30,11 +32,21 @@ namespace Insight
                 {
                     if (ImGui::MenuItem("Save Project"))
                     {
-                        m_fileDialog.Show("./", FileDialogOperations::Save);
+                        //m_fileDialog.Show("./", FileDialogOperations::Save);
+                        std::string item;
+                        PlatformFileDialog::ShowSave(&item);
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {
-                        m_fileDialog.Show("./", FileDialogOperations::Load);
+                        //m_fileDialog.Show("./", FileDialogOperations::Load);
+                        std::string item;
+                        PlatformFileDialog::ShowLoad(&item, 
+                            { 
+                                { "Model (*.model)",        "*.model"},
+                                { "Mesh (*.mesh)",          "*.mesh"},
+                                { "Texture (*.texture)",    "*.texture"},
+                                { "Material (*.material)",  "*.material"},
+                            });
                     }
                     ImGui::EndMenu();
                 }
@@ -48,15 +60,23 @@ namespace Insight
                 }
                 if (ImGui::BeginMenu("Windows"))
                 {
-                    if (ImGui::MenuItem(EntitiesWindow::WINDOW_NAME))
+                    std::string label = EntitiesWindow::WINDOW_NAME;
+                    label += m_editorWindowManager->IsWindowVisable(EntitiesWindow::WINDOW_NAME) ? " x" : "";
+                    if (ImGui::MenuItem(label.c_str()))
                     {
                         m_editorWindowManager->AddWindow(EntitiesWindow::WINDOW_NAME);
                     }
-                    if (ImGui::MenuItem(InputWindow::WINDOW_NAME))
+                    
+                    label = InputWindow::WINDOW_NAME;
+                    label += m_editorWindowManager->IsWindowVisable(InputWindow::WINDOW_NAME) ? " x" : "";
+                    if (ImGui::MenuItem(label.c_str()))
                     {
                         m_editorWindowManager->AddWindow(InputWindow::WINDOW_NAME);
                     }
-                    if (ImGui::MenuItem(ResourceWindow::WINDOW_NAME))
+
+                    label = ResourceWindow::WINDOW_NAME;
+                    label += m_editorWindowManager->IsWindowVisable(ResourceWindow::WINDOW_NAME) ? " x" : "";
+                    if (ImGui::MenuItem(label.c_str()))
                     {
                         m_editorWindowManager->AddWindow(ResourceWindow::WINDOW_NAME);
                     }
