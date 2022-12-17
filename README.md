@@ -28,3 +28,4 @@ Some features are:
 - [stb](https://github.com/nothings/stb)
 - [tracy](https://github.com/wolfpld/tracy)
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
+- [xxHash](https://github.com/Cyan4973/xxHash)
