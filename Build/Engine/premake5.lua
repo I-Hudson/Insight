@@ -65,6 +65,7 @@ IncludeDirs["stb_image"] = "%{wks.location}vendor/stb"
 IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
 IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
 IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
+IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
 
 LibDirs = {}
 
@@ -107,6 +108,7 @@ workspace "Insight"
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+        "TOBJECTPTR_REF_COUNTING",
     }
 
     includedirs

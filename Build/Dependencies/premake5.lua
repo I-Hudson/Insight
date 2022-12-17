@@ -51,4 +51,5 @@ group "Dependices"
         include "../../premakeFiles/tracyProfiler.lua"
         include "../../premakeFiles/doctest.lua"
         include "../../premakeFiles/meshoptimizer.lua"
+        include "../../premakeFiles/xxHash.lua"
 

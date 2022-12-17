@@ -25,6 +25,7 @@ project "Insight_Core"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.optick}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.xxHash}",
     }
 
     files 
@@ -73,6 +74,7 @@ project "Insight_Core"
         links
         {
             "OptickCore.lib",
+            "xxHashd.lib",
         }
         libdirs
         {
@@ -85,6 +87,7 @@ project "Insight_Core"
         links
         {
             "OptickCore.lib",
+            "xxHash.lib",
         }
         libdirs
         {
@@ -103,16 +106,4 @@ project "Insight_Core"
         links
         {
             "doctest.lib",
-        }
-
-    filter "configurations:Debug or configurations:Testing"
-        defines { "DEBUG" }  
-        symbols "On" 
-        links
-        {
-            "OptickCore.lib",
-        }
-        libdirs
-        {
-            "%{wks.location}/deps/lib/debug",
         }
