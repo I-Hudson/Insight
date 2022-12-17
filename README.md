@@ -21,7 +21,7 @@ Some features are:
 - [imgui](https://github.com/ocornut/imgui)
 - [meshoptimizer](https://github.com/zeux/meshoptimizer)
 - [Nvidia Aftermath](https://developer.nvidia.com/nsight-aftermath)
-- [optick]([optick](https://optick.dev))
+- [optick](https://optick.dev)
 - [premake](https://premake.github.io)
 - [spdlog](https://github.com/gabime/spdlog)
 - [SPIRV-Reflect](https://github.com/KhronosGroup/SPIRV-Reflect)
