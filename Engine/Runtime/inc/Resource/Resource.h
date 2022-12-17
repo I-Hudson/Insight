@@ -2,7 +2,7 @@
 
 #include "Core/Defines.h"
 #include "Runtime/Defines.h"
-#include "Resource/ResourceTypeId.h"
+#include "Resource/ResourceId.h"
 
 #include "Core/Delegate.h"
 #include "Core/Memory.h"
@@ -19,6 +19,8 @@ namespace Insight
 	{
 		class IResource;
 		class ResourceManager;
+		class ResourceManagerExt;
+		class ResourceDatabase;
 
 		enum class ResourceStorageTypes
 		{
@@ -183,6 +185,8 @@ namespace Insight
 			/// @brief Vector of all the reference links this resource has to other ones.
 			std::vector<ResourceReferenceLink> m_reference_links;
 
+			ResourceId m_resourceId;
+
 			/// @brief Timer for when the resource has been requested to end of life.
 			Core::Timer m_request_timer;
 			/// @brief Timer for the latest time the resource was loaded.
@@ -193,6 +197,8 @@ namespace Insight
 			mutable std::mutex m_mutex;
 
 			friend class ResourceManager;
+			friend class ResourceManagerExt; // Temp until old ResourceManager is removed.
+			friend class ResourceDatabase;
 		};
 
 		class IS_RUNTIME ResourceManager : public Core::Singleton<ResourceManager>
