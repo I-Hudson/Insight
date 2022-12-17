@@ -13,7 +13,7 @@ Some features are:
 
 ## Thrid Party
 - [Assimp](https://github.com/assimp/assimp)
-- [DirectXShaderCompiler](DirectXShaderCompiler)
+- [DirectXShaderCompiler](https://github.com/microsoft/DirectXShaderCompiler)
 - [doctest](https://github.com/doctest/doctest)
 - [FSR2](https://gpuopen.com/fidelityfx-superresolution-2/)
 - [glfw](https://www.glfw.org)
