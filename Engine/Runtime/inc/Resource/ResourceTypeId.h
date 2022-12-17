@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Runtime/Defines.h"
+
 #include "Core/TypeAlias.h"
 
 #include <string>
@@ -14,7 +16,7 @@ namespace Insight
 		class IResource;
 
 		/// @brief Define a unique resource type.
-		class ResourceTypeId
+		class IS_RUNTIME ResourceTypeId
 		{
 		public:
 			ResourceTypeId() = delete;
@@ -32,7 +34,7 @@ namespace Insight
 		};
 
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
-		class ResourceTypeIdToResource
+		class IS_RUNTIME ResourceTypeIdToResource
 		{
 			using CreateFunc = std::function<IResource*()>;
 		public:

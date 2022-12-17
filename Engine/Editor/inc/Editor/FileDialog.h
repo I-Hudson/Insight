@@ -3,6 +3,7 @@
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
 #include "Core/Timer.h"
+#include "Core/Memory.h"
 
 #include <imgui.h>
 
@@ -47,7 +48,7 @@ namespace Insight
             std::string m_path;
             std::string m_pathName;
             bool m_isDirectory;
-            Runtime::Texture2D* m_icon;
+            TObjectPtr<Runtime::Texture2D> m_icon;
 
             Core::Timer m_clickedTimer;
             std::chrono::milliseconds m_timeSinceLastClick;

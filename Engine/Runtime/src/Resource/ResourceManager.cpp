@@ -13,7 +13,7 @@ namespace Insight
 
         ResourceDatabase* ResourceManagerExt::m_database;
 
-        TObjectPtr<IResource> ResourceManagerExt::Load(ResourceId resourceId)
+        TObjectPtr<IResource> ResourceManagerExt::Load(ResourceId const& resourceId)
         {
             ASSERT(m_database);
 
@@ -77,7 +77,7 @@ namespace Insight
             return resource;
         }
 
-        void ResourceManagerExt::Unload(ResourceId resourceId)
+        void ResourceManagerExt::Unload(ResourceId const& resourceId)
         {
             ASSERT(m_database);
 
@@ -89,7 +89,7 @@ namespace Insight
 
             if (!resource)
             {
-                IS_CORE_ERROR("[ResourceManager::UnloadResource] The resource is not valid (null). The resource must be a valid pointer to a IResource.");
+                IS_CORE_WARN("[ResourceManager::UnloadResource] The resource '{0}' is not valid (null). The resouce isn't tracked by the ResouceDatabase.", resourceId.GetPath());
                 return;
             }
 
@@ -130,10 +130,37 @@ namespace Insight
             }
         }
 
-        ResourceDatabase::ResouceMap ResourceManagerExt::GetResouceMap()
+        bool ResourceManagerExt::HasResource(ResourceId const& resourceId)
         {
             ASSERT(m_database);
-            return m_database->GetResouceMap();
+            return m_database->HasResource(resourceId);
+        }
+
+        bool ResourceManagerExt::HasResource(TObjectPtr<IResource> resouce)
+        {
+            if (resouce)
+            {
+                return HasResource(resouce->GetResouceId());
+            }
+            return false;
+        }
+
+        ResourceDatabase::ResourceMap ResourceManagerExt::GetResourceMap()
+        {
+            ASSERT(m_database);
+            return m_database->GetResourceMap();
+        }
+
+        u32 ResourceManagerExt::GetLoadedResourcesCount()
+        {
+            ASSERT(m_database);
+            return m_database->GetLoadedResourceCount();
+        }
+
+        u32 ResourceManagerExt::GetLoadingCount()
+        {
+            ASSERT(m_database);
+            return m_database->GetLoadingResourceCount();
         }
     }
 }

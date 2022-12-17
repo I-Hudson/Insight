@@ -2,6 +2,7 @@
 #include "Resource/Mesh.h"
 #include "Resource/Texture.h"
 #include "Resource/Material.h"
+#include "Resource/ResourceManager.h"
 
 #include "Resource/Loaders/AssimpLoader.h"
 
@@ -62,7 +63,7 @@ namespace Insight
 			for (Mesh* mesh : m_meshes)
 			{
 				mesh->OnLoaded(mesh);
-				if (ResourceManager::Instance().HasResource(mesh->GetFilePath()))
+				if (ResourceManagerExt::HasResource(Runtime::ResourceId(mesh->GetFilePath(), Mesh::GetStaticResourceTypeId())))
 				{
 					//if (mesh->GetFilePath().back() >= '0' |)
 					//TODO Add a number if this resource already exists.
@@ -77,7 +78,7 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				ResourceManager::Instance().Unload(mesh);
+				ResourceManagerExt::Unload(mesh->GetResouceId());
 				mesh->OnUnloaded(mesh);
 				DeleteTracked(mesh);
 			}
@@ -85,7 +86,7 @@ namespace Insight
 
 			for (Material* material : m_materials)
 			{
-				ResourceManager::Instance().Unload(material);
+				ResourceManagerExt::Unload(material->GetResouceId());
 				material->OnUnloaded(material);
 				DeleteTracked(material);
 			}

@@ -1,5 +1,6 @@
 #include "Resource/Resource.h"
 
+#include "Resource/ResourceManager.h"
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
 #include "Resource/Material.h"
@@ -11,7 +12,7 @@
 
 #include <filesystem>
 #include <ppltasks.h>
-#pragma optimize("", off)
+
 namespace Insight
 {
 	namespace Runtime
@@ -172,6 +173,11 @@ namespace Insight
 			return ResourceTypeId("Unknown");
 		}
 
+		ResourceId IResource::GetResouceId() const
+		{
+			return m_resourceId;
+		}
+
 		void IResource::Print() const
 		{
 			std::lock_guard lock(m_mutex);
@@ -186,61 +192,56 @@ namespace Insight
 
 		IResource* IResource::AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id)
 		{
-			return AddDependentResource(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
+			return AddDependentResource(file_path, nullptr, ResourceStorageTypes::Disk, type_id);
 		}
 
-		IResource* IResource::AddDependentResourceFromMemory(const void* data, u64 data_size_in_bytes, ResourceTypeId type_id)
+		IResource* IResource::AddDependentResource(IResource* resource)
 		{
-			return AddDependentResource("", data, data_size_in_bytes, ResourceStorageTypes::Memory, type_id);
-		}
-
-		void IResource::AddDependentResrouce(IResource* resource, const std::string& file_path, ResourceStorageTypes storage_type)
-		{
-			std::lock_guard lock(m_mutex);
-			std::lock_guard resourceLock(resource->m_mutex);
-			if (resource)
-			{
-				ResourceManager::Instance().AddExistingResource(resource, file_path);
-				resource->m_storage_type = storage_type;
-				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
-				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent_Owner, this, resource));
-			}
+			return AddDependentResource("", resource, resource->GetResourceStorageType(), resource->GetResourceTypeId());
 		}
 
 		IResource* IResource::AddReferenceResource(const std::string& file_path, ResourceTypeId type_id)
 		{
-			IResource* resource = ResourceManager::Instance().Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
+			IResource* resource = ResourceManagerExt::Load(ResourceId(file_path, type_id));
 
-			std::lock_guard lock(m_mutex);
-			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
+				std::lock_guard lock(m_mutex);
+				std::lock_guard resourceLock(resource->m_mutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
+			}
+
+			if (resource
+				&& resource->GetResourceState() != EResoruceStates::Loading)
+			{
+				IS_CORE_ERROR("[IResource::AddReferenceResource] Attempted load on resource '{0}' failed.", file_path);
 			}
 			return resource;
 		}
 
-		void IResource::AddReferenceResource(IResource* resource, const std::string& file_path)
+		void IResource::AddReferenceResource(IResource* resource)
 		{
-			std::lock_guard lock(m_mutex);
-			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
-				ResourceManager::Instance().AddExistingResource(resource, file_path);
+				std::lock_guard lock(m_mutex);
+				std::lock_guard resourceLock(resource->m_mutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
 			}
 		}
 
-		IResource* IResource::AddDependentResource(const std::string& file_path, const void* data, const u64& data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
+		IResource* IResource::AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id)
 		{
-			IResource* resource = ResourceManager::Instance().Load(file_path, data, data_size_in_bytes, storage_type, type_id);
+			if (resource == nullptr)
+			{
+				resource = ResourceManagerExt::Load(ResourceId(file_path, type_id));
+			}
 
-			std::lock_guard lock(m_mutex);
-			std::lock_guard resourceLock(resource->m_mutex);
 			if (resource)
 			{
+				std::lock_guard lock(m_mutex);
+				std::lock_guard resourceLock(resource->m_mutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent_Owner, this, resource));
 			}
@@ -301,266 +302,6 @@ namespace Insight
 		{
 			std::lock_guard lock(m_mutex);
 			m_unload_timer.Stop();
-		}
-
-
-
-		//--------------------------------------------------------------------------
-		// ResourceManager
-		//--------------------------------------------------------------------------
-		ResourceManager::ResourceManager()
-		{
-			ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return NewTracked(Material); });
-			ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),		 []() { return NewTracked(Mesh); });
-			ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),	 []() { return NewTracked(Model); });
-			ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
-		}
-
-		ResourceManager::~ResourceManager() NO_EXPECT
-		{
-			UnloadAll();
-			m_resources.clear();
-		}
-
-		IResource* ResourceManager::Load(const std::string& file_path, ResourceTypeId type_id)
-		{
-			return Load(file_path, nullptr, 0, ResourceStorageTypes::Disk, type_id);
-		}
-
-		void ResourceManager::Unload(IResource* resource)
-		{
-			if (!resource)
-			{
-				IS_CORE_ERROR("[ResourceManager::UnloadResource] The resource is not valid (null). The resource must be a valid pointer to a IResource.");
-				return;
-			}
-
-			if (!HasResource(resource->GetFilePath()))
-			{
-				//NOTE Resource not being tracked (is this something that should be allowed).
-				return;
-			}
-
-			if (resource->GetResourceState() != EResoruceStates::Loaded)
-			{
-				IS_CORE_WARN("[ResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
-					, ERsourceStatesToString(resource->GetResourceState()));
-				return;
-			}
-
-			// Unload the resource,
-			// Remove the resoruce from the loaded map,
-			resource->m_resource_state = EResoruceStates::Unloading;
-			resource->StartUnloadTimer();
-			{
-				std::lock_guard resourceLock(resource->m_mutex);
-				resource->UnLoad();
-			}
-			resource->StopUnloadTimer();
-			resource->m_resource_state = EResoruceStates::Unloaded;
-			resource->OnUnloaded(resource);
-
-			if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
-			{
-				std::lock_guard lock(m_lock);
-				--m_loaded_resource_count;
-			}
-		}
-
-		void ResourceManager::UnloadAll()
-		{
-			std::unordered_map<std::string, TObjectPtr<IResource>> currentlyLoadedReources;
-			std::unique_lock lock(m_lock);
-			for (auto& pair : m_resources)
-			{
-				currentlyLoadedReources[pair.first] = pair.second;
-			}
-			lock.unlock();
-
-			for (auto& pair : currentlyLoadedReources)
-			{
-				if (!pair.second->IsDependentOnAnotherResource())
-				{
-					/// Only unload resource which are not dependent on other resources 
-					/// as those resources should unload the dependent ones.
-					Unload(pair.second);
-				}
-			}
-		}
-
-		void ResourceManager::Save(const std::string& file_path, IResource* resource)
-		{
-			if (!resource)
-			{
-				IS_CORE_WARN("[ResourceManager::Save] 'resource' must be a valid resource.");
-				return;
-			}
-			std::lock_guard resourceLock(resource->m_mutex);
-			resource->Save(file_path);
-		}
-
-		u32 ResourceManager::GetLoadedResourcesCount() const
-		{
-			std::shared_lock lock(m_lock);
-			return m_loaded_resource_count;
-		}
-
-		u32 Runtime::ResourceManager::GetLoadingCount() const
-		{
-			u32 loadingCount = 0;
-			{
-				std::shared_lock lock(m_lock);
-				for (const auto& pair : m_resources)
-				{
-					if (pair.second->GetResourceState() == EResoruceStates::Loading)
-					{
-						++loadingCount;
-					}
-				}
-			}
-			return loadingCount;
-		}
-
-		std::unordered_map<std::string, TObjectPtr<IResource>> Runtime::ResourceManager::GetResourcesMap() const
-		{
-			std::unordered_map<std::string, TObjectPtr<IResource>> map;
-			{
-				std::shared_lock lock(m_lock);
-				for (const auto& pair : m_resources)
-				{
-					map[pair.first] = pair.second;
-				}
-			}
-			return map;
-		}
-
-		bool ResourceManager::HasResource(const std::string& file_path) const
-		{
-			std::shared_lock lock(m_lock);
-			return m_resources.find(file_path) != m_resources.end();
-		}
-
-		void ResourceManager::ExportStatsToFile(const std::string& file_path)
-		{
-			std::shared_lock lock(m_lock);
-		}
-
-		void ResourceManager::Print()
-		{
-			std::shared_lock lock(m_lock);
-			for (const auto& pair : m_resources)
-			{
-				const TObjectPtr<IResource> resource = pair.second;
-				resource->Print();
-			}
-		}
-
-		IResource* ResourceManager::Load(const std::string& file_path, const void* data, u64 data_size_in_bytes, ResourceStorageTypes storage_type, ResourceTypeId type_id)
-		{
-			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
-			std::string abs_file_path = abs_file_system_path.u8string();
-			std::replace(abs_file_path.begin(), abs_file_path.end(), '\\', '/');
-			IResource* resource = nullptr;
-
-			{
-				std::lock_guard lock(m_lock);
-				if (auto itr = m_resources.find(abs_file_path); itr == m_resources.end())
-				{
-					IResource* resource = ResourceTypeIdToResource::CreateResource(type_id);
-					if (!resource)
-					{
-						IS_CORE_WARN("[ResourceManager::Load] Unable to create resource for id '{}'.", type_id.GetTypeName());
-						return nullptr;
-					}
-					{
-						std::lock_guard resourceLock(resource->m_mutex);
-						resource->m_file_path = abs_file_path;
-						resource->m_storage_type = storage_type;
-					}
-					resource->m_resource_state = EResoruceStates::Not_Loaded;
-					m_resources[abs_file_path] = resource;
-				}
-
-				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
-				{
-					resource = itr->second;
-				}
-			}
-
-			if (resource)
-			{
-				if (resource->IsLoaded())
-				{
-					// Item is already loaded, just return it.
-					return resource;
-				}
-
-				if (resource->IsNotLoaded() || resource->IsUnloaded())
-				{
-					if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
-					{
-						std::error_code errorCode{};
-						if (!std::filesystem::exists(abs_file_path, errorCode))
-						{
-							// File does not exists. Set the resource state and return nullptr.
-							resource->m_resource_state = EResoruceStates::Not_Found;
-							return nullptr;
-						}
-						else
-						{
-							resource->m_resource_state = EResoruceStates::Loading;
-							// Try and load the resource as it exists.
-#ifdef RESOURCE_LOAD_THREAD
-							Threading::TaskSystem::CreateTask([this, resource]()
-								{
-#endif
-									resource->StartLoadTimer();
-									{
-										std::lock_guard resourceLock(resource->m_mutex);
-										resource->Load();
-									}
-									resource->StopLoadTimer();
-									if (resource->IsLoaded())
-									{
-										resource->OnLoaded(resource);
-										std::lock_guard lock(m_lock);
-										// Resource loaded successfully.
-										++m_loaded_resource_count;
-									}
-#ifdef RESOURCE_LOAD_THREAD
-								});
-#endif
-						}
-					}
-					else
-					{
-						FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resrouce is being loaded from disk it should handle loading memory resources.");
-						resource->StartLoadTimer();
-						resource->LoadFromMemory(data, data_size_in_bytes);
-						resource->StopLoadTimer();
-					}
-				}
-			}
-			// Something went wrong at somepoint.
-			return resource;
-		}
-
-		void ResourceManager::AddExistingResource(IResource* resource, const std::string& file_path)
-		{
-			ASSERT(!file_path.empty());
-			std::filesystem::path abs_file_system_path = std::filesystem::absolute(file_path);
-			std::string abs_file_path = abs_file_system_path.u8string();
-			std::replace(abs_file_path.begin(), abs_file_path.end(), '\\', '/');
-			{
-				std::lock_guard lock(m_lock);
-				if (auto itr = m_resources.find(abs_file_path); itr != m_resources.end())
-				{
-					IS_CORE_WARN("[ResourceManager::AddResource] There is already a resource with the file path of '{0}'.", file_path.c_str());
-					return;
-				}
-				m_resources[abs_file_path] = resource;
-			}
-			resource->m_resource_state = EResoruceStates::Loaded;
 		}
 	}
 }

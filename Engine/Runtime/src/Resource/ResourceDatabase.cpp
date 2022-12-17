@@ -1,6 +1,11 @@
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourceManager.h"
 
+#include "Resource/Material.h"
+#include "Resource/Mesh.h"
+#include "Resource/Model.h"
+#include "Resource/Texture2D.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -8,6 +13,10 @@ namespace Insight
         void ResourceDatabase::Initialise()
         {
             ASSERT(Platform::IsMainThread());
+            ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return NewTracked(Material); });
+            ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),      []() { return NewTracked(Mesh); });
+            ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),     []() { return NewTracked(Model); });
+            ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
         }
 
         void ResourceDatabase::Shutdown()
@@ -20,7 +29,7 @@ namespace Insight
             m_resources.clear();
         }
 
-        TObjectPtr<IResource> ResourceDatabase::AddResouce(ResourceId resourceId)
+        TObjectPtr<IResource> ResourceDatabase::AddResouce(ResourceId const& resourceId)
         {
             TObjectPtr<IResource> resource;
             if (HasResource(resourceId))
@@ -33,6 +42,7 @@ namespace Insight
             }
 
             IResource* rawResource = ResourceTypeIdToResource::CreateResource(resourceId.GetTypeId());
+            ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);
                 rawResource->m_resourceId = resourceId;
@@ -73,7 +83,7 @@ namespace Insight
             }
         }
 
-        void ResourceDatabase::RemoveResource(ResourceId resourceId)
+        void ResourceDatabase::RemoveResource(ResourceId const& resourceId)
         {
             if (HasResource(resourceId))
             {
@@ -88,7 +98,7 @@ namespace Insight
             }
         }
 
-        TObjectPtr<IResource> ResourceDatabase::GetResource(ResourceId resourceId) const
+        TObjectPtr<IResource> ResourceDatabase::GetResource(ResourceId const& resourceId) const
         {
             TObjectPtr<IResource> resource;
             {
@@ -100,7 +110,7 @@ namespace Insight
             return resource;
         }
 
-        ResourceDatabase::ResouceMap ResourceDatabase::GetResouceMap() const
+        ResourceDatabase::ResourceMap ResourceDatabase::GetResourceMap() const
         {
             std::unordered_map<ResourceId, TObjectPtr<IResource>> resouceMap;
             {
@@ -113,7 +123,7 @@ namespace Insight
             return resouceMap;
         }
 
-        bool ResourceDatabase::HasResource(ResourceId resourceId) const
+        bool ResourceDatabase::HasResource(ResourceId const& resourceId) const
         {
             bool result;
             {
@@ -158,6 +168,22 @@ namespace Insight
                 result = m_loadedResourceCount;
             }
             return result;
+        }
+
+        u32 ResourceDatabase::GetLoadingResourceCount() const
+        {
+            u32 count = 0;
+            {
+                std::lock_guard lock(m_mutex);
+                for (const auto& pair : m_resources)
+                {
+                    if (pair.second->GetResourceState() == EResoruceStates::Loading)
+                    {
+                        ++count;
+                    }
+                }
+            }
+            return count;
         }
 
         void ResourceDatabase::DeleteResource(TObjectOPtr<IResource>& resource)

@@ -3,6 +3,7 @@
 #include "Resource/Mesh.h"
 #include "Resource/Texture2D.h"
 #include "Resource/Material.h"
+#include "Resource/ResourceManager.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -203,7 +204,8 @@ namespace Insight
 						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_lods.at(0).Vertex_offset;
 						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_lods.at(0).First_index;
 					}
-
+					new_mesh->m_resourceId = ResourceId(loader_data.Directoy + '/' + new_mesh->m_mesh_name, Mesh::GetStaticResourceTypeId());
+					new_mesh->m_storage_type = ResourceStorageTypes::Memory;
 					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
 
 					for (size_t material_index = 0; material_index < mesh_data.Materials.size(); ++material_index)
@@ -367,14 +369,16 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
-			if (ResourceManager::Instance().HasResource(material_path))
+			ResourceId materailResouceId(material_path, Material::GetStaticResourceTypeId());
+			if (ResourceManagerExt::HasResource(materailResouceId))
 			{
-				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Instance().Load(material_path, Material::GetStaticResourceTypeId())));
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManagerExt::Load(materailResouceId).operator Insight::Runtime::IResource *()));
 			}
 			else
 			{
 				Material* material = NewTracked(Material);
 				material->m_file_path = material_path;
+				material->m_resourceId = materailResouceId;
 
 				aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
 				aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
@@ -431,9 +435,9 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("Create new texture");
-				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Instance().Load(material_file_path, Texture2D::GetStaticResourceTypeId()));
+				Texture2D* texture = static_cast<Texture2D*>(ResourceManagerExt::Load(ResourceId(material_file_path, Texture2D::GetStaticResourceTypeId())).operator Insight::Runtime::IResource *());
 				material->SetTexture(textureType, texture);
-				material->AddReferenceResource(texture, texture->GetFilePath());
+				material->AddReferenceResource(texture);
 			}
 
 			//for (u32 i = 0; i < ai_material->GetTextureCount(ai_texture_type); ++i)

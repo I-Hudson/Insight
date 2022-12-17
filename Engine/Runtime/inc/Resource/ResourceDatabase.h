@@ -16,27 +16,29 @@ namespace Insight
         /// @brief Database to store all currently known resources.
         class ResourceDatabase
         {
-            using ResouceMap = std::unordered_map<ResourceId, TObjectPtr<IResource>>;
-            using ResouceOwningMap = std::unordered_map<ResourceId, TObjectOPtr<IResource>>;
         public:
+            using ResourceMap = std::unordered_map<ResourceId, TObjectPtr<IResource>>;
+            using ResourceOwningMap = std::unordered_map<ResourceId, TObjectOPtr<IResource>>;
+
             ResourceDatabase() = default;
             ~ResourceDatabase() = default;
 
             void Initialise();
             void Shutdown();
 
-            TObjectPtr<IResource> AddResouce(ResourceId resourceId);
+            TObjectPtr<IResource> AddResouce(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
-            void RemoveResource(ResourceId resourceId);
+            void RemoveResource(ResourceId const& resourceId);
 
-            TObjectPtr<IResource> GetResource(ResourceId resourceId) const;
-            ResouceMap GetResouceMap() const;
+            TObjectPtr<IResource> GetResource(ResourceId const& resourceId) const;
+            ResourceMap GetResourceMap() const;
             
-            bool HasResource(ResourceId resourceId) const;
+            bool HasResource(ResourceId const& resourceId) const;
             bool HasResource(TObjectPtr<IResource> resource) const;
 
             u32 GetResourceCount() const;
             u32 GetLoadedResourceCount() const;
+            u32 GetLoadingResourceCount() const;
 
         private:
             void DeleteResource(TObjectOPtr<IResource>& resource);
@@ -46,7 +48,7 @@ namespace Insight
             void OnResouceUnloaded(IResource* resouce);
 
         private:
-            ResouceOwningMap m_resources;
+            ResourceOwningMap m_resources;
             u32 m_loadedResourceCount = 0;
             mutable std::mutex m_mutex;
 

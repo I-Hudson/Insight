@@ -79,18 +79,6 @@ namespace Insight
 
 			m_renderpasses.Create();
 
-//#define SCENE_TEST
-#ifdef SCENE_TEST
-			Ptr<ECS::ECSWorld> ecs_world = newScene.Lock()->GetECSWorld();
-			ECS::Entity* e = ecs_world->AddEntity("Test_Entity");
-			ECS::TagComponent* tag_component = static_cast<ECS::TagComponent*>(e->GetComponentByName(ECS::TagComponent::Type_Name));
-			tag_component->AddTag("Test_Tag");
-
-			Ptr<ECS::Entity> test_entity = ecs_world->GetEntityByName("Test_Entity");
-			auto all_tags = static_cast<ECS::TagComponent*>(e->GetComponentByName(ECS::TagComponent::Type_Name))->GetAllTags();
-#endif
-#undef SCENE_TEST
-
 			OnInit();
 
 			return true;
@@ -156,7 +144,6 @@ namespace Insight
 			OnDestroy();
 			
 			m_renderpasses.Destroy();
-			m_resource_manager.UnloadAll();
 
 			m_resourceSystem.Shutdown();
 

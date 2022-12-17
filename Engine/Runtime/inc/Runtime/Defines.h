@@ -9,3 +9,5 @@
 #else
 #define IS_RUNTIME
 #endif
+
+#pragma warning( disable : 4251 )

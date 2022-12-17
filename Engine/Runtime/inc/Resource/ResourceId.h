@@ -10,7 +10,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class ResourceId
+        class IS_RUNTIME ResourceId
         {
         public:
             ResourceId();

@@ -1,6 +1,7 @@
 #include "Editor/FileDialog.h"
 
 #include "Resource/Texture2D.h"
+#include "Resource/ResourceManager.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -42,7 +43,7 @@ namespace Insight
             }
             m_pathName = m_path.substr(lastSlashChar);
 
-            m_icon = static_cast<Runtime::Texture2D*>(Runtime::ResourceManager::Instance().Load("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
+            m_icon = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
             m_isDirectory = FileSystem::FileSystem::IsDirectory(m_path);
             m_clickedTimer.Start();
         }

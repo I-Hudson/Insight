@@ -6,6 +6,7 @@
 #include "Core/CommandLineArgs.h"
 
 #include "Core/SystemRegistry.h"
+#include "Threading/TaskSystem.h"
 #include "Event/EventSystem.h"
 #include "Resource/ResourceSystem.h"
 #include "Graphics/GraphicsSystem.h"
@@ -13,17 +14,7 @@
 #include "Core/ImGuiSystem.h"
 #include "World/WorldSystem.h"
 
-/// -- Managers --
-#include "Threading/TaskSystem.h"
-
-
-
-#include "Event/EventSystem.h"
-#include "Resource/Resource.h"
-
 #include "Renderpass.h"
-
-#include "Graphics/Window.h"
 
 
 ///#define TESTING
@@ -56,7 +47,6 @@ namespace Insight
 			Graphics::Renderpass m_renderpasses;
 
 			bool m_shouldClose = false;
-			Runtime::ResourceManager m_resource_manager;
 
 			// Systems
 			Core::SystemRegistry m_systemRegistry;

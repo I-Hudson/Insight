@@ -937,6 +937,7 @@ public:
 #endif // TOBJECTPTR_REF_COUNTING
 		Incr();
 		BindCallbacks();
+		return *this;
 	}
 	/// <summary>
 	/// Assign copy operator for TObjectPtr tempalte.
@@ -956,6 +957,7 @@ public:
 #endif // TOBJECTPTR_REF_COUNTING
 		Incr();
 		BindCallbacks();
+		return *this;
 	}
 
 	/// <summary>
