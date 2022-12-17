@@ -17,11 +17,11 @@ namespace Insight
 
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);
             static void Unload(ResourceId const& resourceId);
-            static void Unload(TObjectPtr<IResource> resouce);
+            static void Unload(TObjectPtr<IResource> Resource);
             static void UnloadAll();
 
             static bool HasResource(ResourceId const& resourceId);
-            static bool HasResource(TObjectPtr<IResource> resouce);
+            static bool HasResource(TObjectPtr<IResource> Resource);
 
             static ResourceDatabase::ResourceMap GetResourceMap();
             static u32 GetLoadedResourcesCount();

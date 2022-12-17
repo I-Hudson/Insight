@@ -16,16 +16,16 @@ namespace Insight
 			{
 			public:
 
-				ID3D12Resource* GetResouce() const { return m_resource.Get(); }
+				ID3D12Resource* GetResource() const { return m_resource.Get(); }
 
 				/// RHI_Texture
 				virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) override;
 				virtual void Upload(void* data, int sizeInBytes) override;
 				virtual std::vector<Byte> Download(void* data, int sizeInBytes) override;
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::wstring name) override;
 
 			private:

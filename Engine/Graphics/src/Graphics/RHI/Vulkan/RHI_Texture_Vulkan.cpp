@@ -136,7 +136,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_Texture_Vulkan::ValidResouce()
+			bool RHI_Texture_Vulkan::ValidResource()
 			{
 				std::lock_guard lock(m_mutex);
 				return m_image;

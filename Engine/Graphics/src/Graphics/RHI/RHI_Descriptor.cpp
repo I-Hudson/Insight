@@ -132,7 +132,7 @@ namespace Insight
 			m_resource = nullptr;
 		}
 
-		bool RHI_DescriptorSet::ValidResouce()
+		bool RHI_DescriptorSet::ValidResource()
 		{
 			return m_resource != nullptr;
 		}

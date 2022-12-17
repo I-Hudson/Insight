@@ -25,7 +25,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_DescriptorLayout_DX12::ValidResouce()
+			bool RHI_DescriptorLayout_DX12::ValidResource()
 			{
 				return m_layout;
 			}
@@ -47,7 +47,7 @@ namespace Insight
 			///{
 			///}
 
-			///u64 RHI_Descriptor_DX12::GetHash(bool includeResouce)
+			///u64 RHI_Descriptor_DX12::GetHash(bool includeResource)
 			///{
 			///	return 0;
 			///}
@@ -239,7 +239,7 @@ namespace Insight
 				RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC bufferViewDesc = {};
-				bufferViewDesc.BufferLocation = bufferDX12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
+				bufferViewDesc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
 				bufferViewDesc.SizeInBytes = static_cast<UINT>(descriptor.BufferView.GetSize());
 				m_context->GetDevice()->CreateConstantBufferView(&bufferViewDesc, handle.CPUPtr);
 
@@ -272,7 +272,7 @@ namespace Insight
 			///{
 			///}
 
-			///bool RHI_Descriptor_DX12::ValidResouce()
+			///bool RHI_Descriptor_DX12::ValidResource()
 			///{
 			///	return false;
 			///}
@@ -346,7 +346,7 @@ namespace Insight
 		///		RHI_Buffer_DX12* buffer_dx12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
 
 		///		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		///		cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + bufferView.GetOffset();
+		///		cbvDesc.BufferLocation = buffer_dx12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset();
 		///		cbvDesc.SizeInBytes = AlignUp(bufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		///		m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
 
@@ -380,7 +380,7 @@ namespace Insight
 		///						RHI_Buffer_DX12* const buffer_dx12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
 
 		///						D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		///						cbvDesc.BufferLocation = buffer_dx12->GetResouce()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
+		///						cbvDesc.BufferLocation = buffer_dx12->GetResource()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
 		///						cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 		///						m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
 		///					}
@@ -388,7 +388,7 @@ namespace Insight
 		///					{
 		///						RHI_Texture_DX12* const texture = static_cast<RHI_Texture_DX12*>(descriptor.Texture);
 
-		///						cmdList->ResourceBarrierImage(texture->GetResouce(), D3D12_RESOURCE_STATE_COPY_DEST,
+		///						cmdList->ResourceBarrierImage(texture->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST,
 		///							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 
 		///						D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
@@ -400,7 +400,7 @@ namespace Insight
 		///						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		///						srvDesc.Texture2D.MipLevels = 1;
 		///						srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		///						m_context->GetDevice()->CreateShaderResourceView(texture->GetResouce(), &srvDesc, handle.CPUPtr);
+		///						m_context->GetDevice()->CreateShaderResourceView(texture->GetResource(), &srvDesc, handle.CPUPtr);
 		///					}
 
 		///					m_boundDescriptors[sets.first][descriptor.Binding] = hash;

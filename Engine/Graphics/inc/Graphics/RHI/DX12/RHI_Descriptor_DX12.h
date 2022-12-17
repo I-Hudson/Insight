@@ -22,9 +22,9 @@ namespace Insight
 			public:
 				ID3D12RootSignature* GetRootSignature() { return m_layout.Get(); }
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::wstring name) override;
 
 			protected:
@@ -40,11 +40,11 @@ namespace Insight
 			///public:
 
 			///	virtual void Update(const std::vector<Descriptor>& descriptors) override;
-			///	virtual u64 GetHash(bool includeResouce = false) override;
+			///	virtual u64 GetHash(bool includeResource = false) override;
 
-			///	/// RHI_Resouce
+			///	/// RHI_Resource
 			///	virtual void Release() override;
-			///	virtual bool ValidResouce() override;
+			///	virtual bool ValidResource() override;
 			///	virtual void SetName(std::wstring name) override;
 
 			///private:

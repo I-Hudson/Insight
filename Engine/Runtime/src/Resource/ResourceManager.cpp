@@ -24,7 +24,7 @@ namespace Insight
             }
             else
             {
-                resource = m_database->AddResouce(resourceId);
+                resource = m_database->AddResource(resourceId);
             }
 
             if (resource)
@@ -89,7 +89,7 @@ namespace Insight
 
             if (!resource)
             {
-                IS_CORE_WARN("[ResourceManager::UnloadResource] The resource '{0}' is not valid (null). The resouce isn't tracked by the ResouceDatabase.", resourceId.GetPath());
+                IS_CORE_WARN("[ResourceManager::UnloadResource] The resource '{0}' is not valid (null). The Resource isn't tracked by the ResourceDatabase.", resourceId.GetPath());
                 return;
             }
 
@@ -112,19 +112,19 @@ namespace Insight
             resource->OnUnloaded(resource);
         }
 
-        void ResourceManagerExt::Unload(TObjectPtr<IResource> resouce)
+        void ResourceManagerExt::Unload(TObjectPtr<IResource> Resource)
         {
-            if (resouce)
+            if (Resource)
             {
-                Unload(resouce->m_resourceId);
+                Unload(Resource->m_resourceId);
             }
         }
 
         void ResourceManagerExt::UnloadAll()
         {
             ASSERT(m_database);
-            std::vector<ResourceId> resouceIds = m_database->GetAllResouceIds();
-            for (const ResourceId& id : resouceIds)
+            std::vector<ResourceId> ResourceIds = m_database->GetAllResourceIds();
+            for (const ResourceId& id : ResourceIds)
             {
                 Unload(id);
             }
@@ -136,11 +136,11 @@ namespace Insight
             return m_database->HasResource(resourceId);
         }
 
-        bool ResourceManagerExt::HasResource(TObjectPtr<IResource> resouce)
+        bool ResourceManagerExt::HasResource(TObjectPtr<IResource> Resource)
         {
-            if (resouce)
+            if (Resource)
             {
-                return HasResource(resouce->GetResouceId());
+                return HasResource(Resource->GetResourceId());
             }
             return false;
         }

@@ -68,7 +68,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_Texture_DX12::ValidResouce()
+			bool RHI_Texture_DX12::ValidResource()
 			{
 				return m_resource;
 			}

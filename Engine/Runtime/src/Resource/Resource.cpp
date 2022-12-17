@@ -173,7 +173,7 @@ namespace Insight
 			return ResourceTypeId("Unknown");
 		}
 
-		ResourceId IResource::GetResouceId() const
+		ResourceId IResource::GetResourceId() const
 		{
 			return m_resourceId;
 		}

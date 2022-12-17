@@ -23,7 +23,7 @@ namespace Insight
 			virtual ~RHI_Resource() { }
 
 			virtual void Release() = 0;
-			virtual bool ValidResouce() = 0;
+			virtual bool ValidResource() = 0;
 			virtual void SetName(std::string name) = 0;
 
 			DeviceUploadStatus GetUploadStatus() const { return m_uploadStatus; }

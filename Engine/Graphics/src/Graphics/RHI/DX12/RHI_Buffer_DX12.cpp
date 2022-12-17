@@ -24,13 +24,13 @@ namespace Insight
 				CD3DX12_HEAP_PROPERTIES heapProperties = {};
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
-				D3D12_RESOURCE_STATES resouceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+				D3D12_RESOURCE_STATES ResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
 				if (bufferType == BufferType::Vertex 
 					|| bufferType == BufferType::Index)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-					resouceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+					ResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 				}
 				else if (bufferType == BufferType::Uniform)
 				{
@@ -42,7 +42,7 @@ namespace Insight
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-					resouceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
+					ResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
 				}
 
 				/// Create the constant buffer.
@@ -50,7 +50,7 @@ namespace Insight
 					&heapProperties,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
-					resouceStates,
+					ResourceStates,
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
 
@@ -119,7 +119,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_Buffer_DX12::ValidResouce()
+			bool RHI_Buffer_DX12::ValidResource()
 			{
 				return m_resource;
 			}

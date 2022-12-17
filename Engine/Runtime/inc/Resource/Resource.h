@@ -109,7 +109,7 @@ namespace Insight
 			void Print() const;
 
 			virtual ResourceTypeId GetResourceTypeId() const;
-			ResourceId GetResouceId() const;
+			ResourceId GetResourceId() const;
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
@@ -118,14 +118,14 @@ namespace Insight
 
 		protected:
 			/// @brief Add a new resource which depends upon this resource. (Texture could depend upon the Model loaded). 
-			/// This will load the resouce.
+			/// This will load the Resource.
 			/// @param file_path 
 			/// @param type_id 
 			/// @return IResource*
 			IResource* AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id);
 
-			/// @brief Add a new resource which depends upon this resource. This expects the resouce to already exists
-			/// be that from being loaded or created internally as a memory only resouce.
+			/// @brief Add a new resource which depends upon this resource. This expects the Resource to already exists
+			/// be that from being loaded or created internally as a memory only Resource.
 			/// @param file_path 
 			/// @param type_id 
 			/// @return IResource*

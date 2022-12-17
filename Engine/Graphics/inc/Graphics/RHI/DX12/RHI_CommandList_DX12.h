@@ -41,9 +41,9 @@ namespace Insight
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
 				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) override;
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::wstring name) override;
 
 				/// RHI_CommandList
@@ -74,7 +74,7 @@ namespace Insight
 				ComPtr<ID3D12GraphicsCommandList> m_commandList;
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
 
-				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_resouceBarriers;
+				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;
 
 				friend class RHI_CommandListAllocator_DX12;
 			};
@@ -95,9 +95,9 @@ namespace Insight
 
 				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::wstring name) override;
 
 			private:

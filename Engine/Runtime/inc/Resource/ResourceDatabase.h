@@ -26,7 +26,7 @@ namespace Insight
             void Initialise();
             void Shutdown();
 
-            TObjectPtr<IResource> AddResouce(ResourceId const& resourceId);
+            TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
             void RemoveResource(ResourceId const& resourceId);
 
@@ -43,9 +43,9 @@ namespace Insight
         private:
             void DeleteResource(TObjectOPtr<IResource>& resource);
 
-            std::vector<ResourceId> GetAllResouceIds() const;
-            void OnResouceLoaded(IResource* resouce);
-            void OnResouceUnloaded(IResource* resouce);
+            std::vector<ResourceId> GetAllResourceIds() const;
+            void OnResourceLoaded(IResource* Resource);
+            void OnResourceUnloaded(IResource* Resource);
 
         private:
             ResourceOwningMap m_resources;

@@ -29,7 +29,7 @@ namespace Insight
             m_resources.clear();
         }
 
-        TObjectPtr<IResource> ResourceDatabase::AddResouce(ResourceId const& resourceId)
+        TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
         {
             TObjectPtr<IResource> resource;
             if (HasResource(resourceId))
@@ -49,8 +49,8 @@ namespace Insight
                 rawResource->m_file_path = resourceId.GetPath();
                 rawResource->m_resource_state = EResoruceStates::Not_Loaded;
                 rawResource->m_storage_type = ResourceStorageTypes::Disk;
-                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResouceLoaded>(this);
-                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResouceUnloaded>(this);
+                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
+                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
             }
             TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
             {
@@ -112,15 +112,15 @@ namespace Insight
 
         ResourceDatabase::ResourceMap ResourceDatabase::GetResourceMap() const
         {
-            std::unordered_map<ResourceId, TObjectPtr<IResource>> resouceMap;
+            std::unordered_map<ResourceId, TObjectPtr<IResource>> ResourceMap;
             {
                 std::lock_guard lock(m_mutex);
                 for (const auto& pair : m_resources)
                 {
-                    resouceMap[pair.first] = pair.second;
+                    ResourceMap[pair.first] = pair.second;
                 }
             }
-            return resouceMap;
+            return ResourceMap;
         }
 
         bool ResourceDatabase::HasResource(ResourceId const& resourceId) const
@@ -194,13 +194,13 @@ namespace Insight
                 || resource->IsUnloaded());
             {
                 std::lock_guard resourceLock(resource->m_mutex);
-                resource->OnLoaded.Unbind<&ResourceDatabase::OnResouceLoaded>(this);
-                resource->OnUnloaded.Unbind<&ResourceDatabase::OnResouceUnloaded>(this);
+                resource->OnLoaded.Unbind<&ResourceDatabase::OnResourceLoaded>(this);
+                resource->OnUnloaded.Unbind<&ResourceDatabase::OnResourceUnloaded>(this);
             }
             resource.Reset();
         }
 
-        std::vector<ResourceId> ResourceDatabase::GetAllResouceIds() const
+        std::vector<ResourceId> ResourceDatabase::GetAllResourceIds() const
         {
             std::vector<ResourceId> result;
             {
@@ -213,13 +213,13 @@ namespace Insight
             return result;
         }
 
-        void ResourceDatabase::OnResouceLoaded(IResource* resouce)
+        void ResourceDatabase::OnResourceLoaded(IResource* Resource)
         {
             std::lock_guard lock(m_mutex);
             ++m_loadedResourceCount;
         }
 
-        void ResourceDatabase::OnResouceUnloaded(IResource* resouce)
+        void ResourceDatabase::OnResourceUnloaded(IResource* Resource)
         {
             std::lock_guard lock(m_mutex);
             --m_loadedResourceCount;

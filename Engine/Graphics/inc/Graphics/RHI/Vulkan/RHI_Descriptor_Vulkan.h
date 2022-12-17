@@ -24,9 +24,9 @@ namespace Insight
 			public:
 				VkDescriptorSetLayout GetLayout() const { return m_layout; }
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::string name) override;
 
 			protected:

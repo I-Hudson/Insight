@@ -369,16 +369,16 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
-			ResourceId materailResouceId(material_path, Material::GetStaticResourceTypeId());
-			if (ResourceManagerExt::HasResource(materailResouceId))
+			ResourceId materailResourceId(material_path, Material::GetStaticResourceTypeId());
+			if (ResourceManagerExt::HasResource(materailResourceId))
 			{
-				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManagerExt::Load(materailResouceId).operator Insight::Runtime::IResource *()));
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManagerExt::Load(materailResourceId).operator Insight::Runtime::IResource *()));
 			}
 			else
 			{
 				Material* material = NewTracked(Material);
 				material->m_file_path = material_path;
-				material->m_resourceId = materailResouceId;
+				material->m_resourceId = materailResourceId;
 
 				aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
 				aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);

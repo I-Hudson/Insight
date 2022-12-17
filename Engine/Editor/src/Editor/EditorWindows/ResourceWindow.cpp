@@ -62,7 +62,7 @@ namespace Insight
 				}
 				if (ImGui::Button("Unload"))
 				{
-					Runtime::ResourceManagerExt::Unload(resource->GetResouceId());
+					Runtime::ResourceManagerExt::Unload(resource->GetResourceId());
 				}
 				ImGui::TreePop();
 			}

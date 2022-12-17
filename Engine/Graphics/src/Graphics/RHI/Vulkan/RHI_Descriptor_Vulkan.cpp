@@ -27,7 +27,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_DescriptorLayout_Vulkan::ValidResouce()
+			bool RHI_DescriptorLayout_Vulkan::ValidResource()
 			{
 				return m_layout;
 			}

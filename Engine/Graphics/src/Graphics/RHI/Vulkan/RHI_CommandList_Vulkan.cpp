@@ -183,7 +183,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_CommandList_Vulkan::ValidResouce()
+			bool RHI_CommandList_Vulkan::ValidResource()
 			{
 				return m_commandList;
 			}
@@ -759,7 +759,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_CommandListAllocator_Vulkan::ValidResouce()
+			bool RHI_CommandListAllocator_Vulkan::ValidResource()
 			{
 				return m_allocator;
 			}

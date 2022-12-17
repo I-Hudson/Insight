@@ -23,10 +23,10 @@ namespace Insight
 				virtual void Resize(u64 newSizeBytes) override;
 
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::wstring name) override;
 
-				ID3D12Resource* GetResouce() const { return m_resource.Get(); }
+				ID3D12Resource* GetResource() const { return m_resource.Get(); }
 
 			private:
 				RenderContext_DX12* m_context = nullptr;

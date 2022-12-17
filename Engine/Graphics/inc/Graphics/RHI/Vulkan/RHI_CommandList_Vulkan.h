@@ -40,9 +40,9 @@ namespace Insight
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
 				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset) override;
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::string name) override;
 
 				/// RHI_CommandList
@@ -111,9 +111,9 @@ namespace Insight
 
 				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
-				/// RHI_Resouce
+				/// RHI_Resource
 				virtual void Release() override;
-				virtual bool ValidResouce() override;
+				virtual bool ValidResource() override;
 				virtual void SetName(std::string name) override;
 
 			private:

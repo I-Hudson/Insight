@@ -252,7 +252,7 @@ namespace Insight
 				for (auto& pair : pass.Get()->m_textureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches->Get(pair.first);
-					if (!tex->ValidResouce())
+					if (!tex->ValidResource())
 					{
 						pair.second.InitalStatus = DeviceUploadStatus::Completed;
 						tex->Create(m_context, pair.second);

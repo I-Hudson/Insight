@@ -161,7 +161,7 @@ namespace Insight
 				m_size = 0;
 			}
 
-			bool RHI_Buffer_Vulkan::ValidResouce()
+			bool RHI_Buffer_Vulkan::ValidResource()
 			{
 				return m_buffer;
 			}

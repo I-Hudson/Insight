@@ -103,7 +103,7 @@ namespace Insight
 			{
 				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
-				m_commandList->CopyBufferRegion(dstDX12->GetResouce(), offset, srcDX12->GetResouce(), 0, src->GetSize());
+				m_commandList->CopyBufferRegion(dstDX12->GetResource(), offset, srcDX12->GetResource(), 0, src->GetSize());
 			}
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
@@ -116,7 +116,7 @@ namespace Insight
 				std::array<u64, 1> rowSizeInBytes;
 				std::array<UINT, 1> numRows;
 				RenderContextDX12()->GetDevice()->GetCopyableFootprints(
-					&dstDX12->GetResouce()->GetDesc(),
+					&dstDX12->GetResource()->GetDesc(),
 					0,
 					1, 
 					0, 
@@ -128,8 +128,8 @@ namespace Insight
 				assert(requriedSize == (dstDX12->GetWidth() * dstDX12->GetHeight() * 4));
 				assert(requriedSize == srcDX12->GetSize());
 
-				CD3DX12_TEXTURE_COPY_LOCATION Dst(dstDX12->GetResouce(), 0);
-				CD3DX12_TEXTURE_COPY_LOCATION Src(srcDX12->GetResouce(), layouts[0]);
+				CD3DX12_TEXTURE_COPY_LOCATION Dst(dstDX12->GetResource(), 0);
+				CD3DX12_TEXTURE_COPY_LOCATION Src(srcDX12->GetResource(), layouts[0]);
 				m_commandList->CopyTextureRegion(&Dst, 0, 0, 0, &Src, nullptr);
 			}
 
@@ -142,7 +142,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_CommandList_DX12::ValidResouce()
+			bool RHI_CommandList_DX12::ValidResource()
 			{
 				return m_commandList;
 			}
@@ -194,7 +194,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
-				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
+				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResource()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),
 					(UINT)bufferDX12->GetStride() }};
 				m_commandList->IASetVertexBuffers(0, 1, views);
@@ -204,7 +204,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
-				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResouce()->GetGPUVirtualAddress(), 
+				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResource()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),  
 					DXGI_FORMAT_R32_UINT };
 				m_commandList->IASetIndexBuffer(&view);
@@ -239,7 +239,7 @@ namespace Insight
 			bool RHI_CommandList_DX12::BindDescriptorSets()
 			{
 				IS_PROFILE_FUNCTION();
-				bool result = true;/// m_frameResouces->DescriptorAllocator.SetupDescriptors();
+				bool result = true;/// m_frameResources->DescriptorAllocator.SetupDescriptors();
 				///FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
 				
 				///FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
@@ -357,7 +357,7 @@ namespace Insight
 				}
 			}
 
-			bool RHI_CommandListAllocator_DX12::ValidResouce()
+			bool RHI_CommandListAllocator_DX12::ValidResource()
 			{
 				return m_allocator;
 			}

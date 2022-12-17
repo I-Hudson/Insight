@@ -78,7 +78,7 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				ResourceManagerExt::Unload(mesh->GetResouceId());
+				//ResourceManagerExt::Unload(mesh->GetResourceId());
 				mesh->OnUnloaded(mesh);
 				DeleteTracked(mesh);
 			}
@@ -86,7 +86,7 @@ namespace Insight
 
 			for (Material* material : m_materials)
 			{
-				ResourceManagerExt::Unload(material->GetResouceId());
+				//ResourceManagerExt::Unload(material->GetResourceId());
 				material->OnUnloaded(material);
 				DeleteTracked(material);
 			}
