@@ -7,13 +7,14 @@
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
-#include "VmaUsage.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <glm/vec2.hpp>
 #include <unordered_map>
 #include <set>
 #include <string>
+
+struct VmaAllocator_T;
 
 namespace Insight
 {
@@ -61,7 +62,7 @@ namespace Insight
 
 				VkDevice GetDevice() const { return m_device; }
 				VkPhysicalDevice GetPhysicalDevice() const { return m_adapter; }
-				VmaAllocator GetVMA() const { return m_vmaAllocator; }
+				VmaAllocator_T* GetVMA() const { return m_vmaAllocator; }
 
 				u32 GetFamilyQueueIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }
 
@@ -91,7 +92,7 @@ namespace Insight
 				VkDevice m_device{ nullptr };
 				VkPhysicalDevice m_adapter{ nullptr };
 
-				VmaAllocator m_vmaAllocator{ nullptr };
+				VmaAllocator_T* m_vmaAllocator{ nullptr };
 
 				VkSurfaceKHR m_surface{ nullptr };
 				VkSwapchainKHR m_swapchain{ nullptr };
