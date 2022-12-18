@@ -10,7 +10,9 @@
 #include <type_traits>
 #include <unordered_map>
 #include <functional>
+#ifdef RENDER_GRAPH_RENDER_THREAD
 #include <ppltasks.h>
+#endif
 
 namespace Insight
 {

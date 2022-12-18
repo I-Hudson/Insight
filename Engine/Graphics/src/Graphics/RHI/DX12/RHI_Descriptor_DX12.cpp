@@ -30,11 +30,11 @@ namespace Insight
 				return m_layout;
 			}
 
-			void RHI_DescriptorLayout_DX12::SetName(std::wstring name)
+			void RHI_DescriptorLayout_DX12::SetName(std::string name)
 			{
 				if (m_layout)
 				{
-					m_layout->SetName(name.c_str());
+					m_context->SetObjectName(name, m_layout.Get());
 				}
 			}
 
@@ -59,7 +59,7 @@ namespace Insight
 			//// <param name="context"></param>
 			//// <param name="set"></param>
 			//// <param name="descriptors"></param>
-			void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, std::vector<Descriptor> descriptors)
+			void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, DescriptorSet descriptor_set)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 

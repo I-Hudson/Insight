@@ -25,10 +25,10 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResource() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			protected:
-				virtual void Create(RenderContext* context, int set, std::vector<Descriptor> descriptors) override;
+				virtual void Create(RenderContext* context, int set, DescriptorSet descriptor_set) override;
 
 			private:
 				RenderContext_DX12* m_context{ nullptr };

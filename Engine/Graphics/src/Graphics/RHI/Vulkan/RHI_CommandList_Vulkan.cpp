@@ -4,6 +4,8 @@
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Pipeline_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_PipelineLayout_Vulkan.h"
 #include "Graphics/Window.h"
 
 #include "Graphics/RenderTarget.h"
@@ -466,13 +468,18 @@ namespace Insight
 				m_pso = pso;
 				m_activePSO = pso;
 
-				VkPipeline pipeline;
+				VkPipeline pipelineVk;
 				{
 					IS_PROFILE_SCOPE("GetOrCreatePSO");
-					pipeline = m_context_vulkan->GetPipelineStateObjectManager().GetOrCreatePSO(m_pso);
+					RHI_Pipeline* pipeline = m_context_vulkan->GetPipelineManager().GetOrCreatePSO(m_pso);
+					pipelineVk = static_cast<RHI_Pipeline_Vulkan*>(pipeline)->GetPipeline();
 				}
-				m_bound_pipeline_layout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-				vkCmdBindPipeline(m_commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+				{
+					IS_PROFILE_SCOPE("Get pipeline layout");
+					RHI_PipelineLayout* layout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
+					m_bound_pipeline_layout = static_cast<RHI_PipelineLayout_Vulkan*>(layout)->GetPipelineLayout();
+				}
+				vkCmdBindPipeline(m_commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineVk);
 				m_descriptorAllocator->SetPipeline(pso);
 			}
 

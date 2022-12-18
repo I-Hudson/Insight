@@ -5,7 +5,7 @@
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/PipelineStateObject.h"
 
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 #include <unordered_set>
 #include <queue>

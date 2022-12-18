@@ -13,13 +13,16 @@ namespace Insight
 			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
-				m_info = createInfo;
+				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
+				{
+					m_infos.push_back(createInfo);
+				}
 
 				CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-					PixelFormatToDX12(m_info.Format),
-					m_info.Width,
-					m_info.Height,
-					1,
+					PixelFormatToDX12(m_infos.at(0).Format),
+					m_infos.at(0).Width,
+					m_infos.at(0).Height,
+					m_infos.at(0).Depth,
 					0,
 					1,
 					0,
@@ -73,11 +76,11 @@ namespace Insight
 				return m_resource;
 			}
 
-			void RHI_Texture_DX12::SetName(std::wstring name)
+			void RHI_Texture_DX12::SetName(std::string name)
 			{
 				if (m_resource)
 				{
-					m_resource->SetName(name.c_str());
+					m_context->SetObjectName(name, m_resource.Get());
 				}
 				m_name = std::move(name);
 			}

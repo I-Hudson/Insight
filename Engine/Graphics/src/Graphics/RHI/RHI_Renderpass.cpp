@@ -5,7 +5,6 @@
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
-#include <vulkan/vulkan.hpp>
 #endif /// #ifdef IS_VULKAN_ENABLED
 #ifdef IS_DX12_ENABLED
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"

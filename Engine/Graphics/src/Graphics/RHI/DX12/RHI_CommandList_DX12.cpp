@@ -9,12 +9,20 @@
 
 #include "Core/Profiler.h"
 
+#include <WinPixEventRuntime/pix3.h>
+
 namespace Insight
 {
 	namespace Graphics
 	{
 		namespace RHI::DX12
 		{
+			void RHI_CommandList_DX12::Create(RenderContext* context)
+			{
+				m_context = context;
+				m_contextDX12 = static_cast<RenderContext_DX12*>(m_context);
+			}
+
 			//// <summary>
 			//// RHI_CommandList_DX12
 			//// </summary>
@@ -106,7 +114,7 @@ namespace Insight
 				m_commandList->CopyBufferRegion(dstDX12->GetResource(), offset, srcDX12->GetResource(), 0, src->GetSize());
 			}
 
-			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src)
+			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset)
 			{
 				RHI_Texture_DX12* dstDX12 = static_cast<RHI_Texture_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
@@ -115,7 +123,7 @@ namespace Insight
 				std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 1> layouts;
 				std::array<u64, 1> rowSizeInBytes;
 				std::array<UINT, 1> numRows;
-				RenderContextDX12()->GetDevice()->GetCopyableFootprints(
+				m_contextDX12->GetDevice()->GetCopyableFootprints(
 					&dstDX12->GetResource()->GetDesc(),
 					0,
 					1, 
@@ -147,11 +155,11 @@ namespace Insight
 				return m_commandList;
 			}
 
-			void RHI_CommandList_DX12::SetName(std::wstring name)
+			void RHI_CommandList_DX12::SetName(std::string name)
 			{
 				if (m_commandList)
 				{
-					m_commandList->SetName(name.c_str());
+					m_contextDX12->SetObjectName(name, m_commandList.Get());
 				}
 			}
 
@@ -190,6 +198,16 @@ namespace Insight
 				m_commandList->RSSetScissorRects(1, rects);
 			}
 
+			void RHI_CommandList_DX12::SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor)
+			{
+				IS_CORE_INFO("[ RHI_CommandList_DX12::SetDepthBias] Not implemented.");
+			}
+
+			void RHI_CommandList_DX12::SetLineWidth(float width)
+			{
+				IS_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
+			}
+
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
@@ -210,14 +228,14 @@ namespace Insight
 				m_commandList->IASetIndexBuffer(&view);
 			}
 
-			void RHI_CommandList_DX12::Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance)
+			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
 				assert(m_commandList);
 				m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
 			}
 
-			void RHI_CommandList_DX12::DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance)
+			void RHI_CommandList_DX12::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
 				assert(m_commandList);
@@ -228,12 +246,30 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				
-				ID3D12PipelineState* pipeline = RenderContextDX12()->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
+				ID3D12PipelineState* pipeline = m_contextDX12->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
 				m_commandList->SetPipelineState(pipeline);
 
 				RHI_DescriptorLayout_DX12* layout_DX12 = static_cast<RHI_DescriptorLayout_DX12*>(layout);
 				m_commandList->SetGraphicsRootSignature(layout_DX12->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
+			}
+
+			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)
+			{
+				BeginTimeBlock(blockName, glm::vec4(1, 1, 1, 1));
+			}
+
+			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName, glm::vec4 colour)
+			{
+				colour.x = std::max(0.0f, std::min(1.0f, colour.x));
+				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
+				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
+				PIXBeginEvent(m_commandList.Get(), PIX_COLOR(colour.x * 255, colour.y * 255, colour.z * 255), blockName.c_str());
+			}
+
+			void RHI_CommandList_DX12::EndTimeBlock()
+			{
+				PIXEndEvent();
 			}
 
 			bool RHI_CommandList_DX12::BindDescriptorSets()
@@ -256,13 +292,10 @@ namespace Insight
 				return true;
 			}
 
-			RenderContext_DX12* RHI_CommandList_DX12::RenderContextDX12()
+			void RHI_CommandList_DX12::SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout)
 			{
-				IS_PROFILE_FUNCTION();
-				assert(m_context);
-				return static_cast<RenderContext_DX12*>(m_context);
+				FAIL_ASSERT();
 			}
-
 
 			//// <summary>
 			//// RHI_CommandListAllocator_DX12
@@ -285,7 +318,7 @@ namespace Insight
 				}
 
 				RHI_CommandList_DX12* list = static_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
-				list->m_context = m_context;
+				list->Create(m_context);
 				list->m_allocator = this;
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
 
@@ -362,11 +395,11 @@ namespace Insight
 				return m_allocator;
 			}
 
-			void RHI_CommandListAllocator_DX12::SetName(std::wstring name)
+			void RHI_CommandListAllocator_DX12::SetName(std::string name)
 			{
 				if (m_allocator)
 				{
-					m_allocator->SetName(name.c_str());
+					m_context->SetObjectName(name, m_allocator.Get());
 				}
 			}
 		}

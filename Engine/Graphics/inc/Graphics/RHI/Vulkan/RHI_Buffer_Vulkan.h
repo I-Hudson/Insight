@@ -5,6 +5,8 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 
+struct VmaAllocation_T;
+
 namespace Insight
 {
 	namespace Graphics
@@ -34,7 +36,7 @@ namespace Insight
 				RenderContext_Vulkan* m_context = nullptr;
 				void* m_mappedData = nullptr;
 				VkBuffer m_buffer;
-				VmaAllocation m_vmaAllocation;
+				VmaAllocation_T* m_vmaAllocation;
 			};
 		}
 	}

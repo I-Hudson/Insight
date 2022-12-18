@@ -1,135 +1,47 @@
 #if defined(IS_VULKAN_ENABLED)
 
-#include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_Pipeline_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
+#include "Graphics/RHI/Vulkan/RHI_PipelineLayout_Vulkan.h"
+
 #include "Graphics/RHI/Vulkan/RHI_Shader_Vulkan.h"
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 
-#include "Graphics/RHI/Vulkan/VulkanUtils.h"
-
-#include "Graphics/RenderTarget.h"
-
-#include "Core/Logger.h"
-#include "Core/Profiler.h"
-
-#include <vulkan/vulkan.h>
-
-#include <iostream>
-
 namespace Insight
 {
-	namespace Graphics
-	{
-		namespace RHI::Vulkan
-		{
-			PipelineLayoutManager_Vulkan::PipelineLayoutManager_Vulkan()
-			{ }
+    namespace Graphics
+    {
+        namespace RHI::Vulkan
+        {
+            RHI_Pipeline_Vulkan::~RHI_Pipeline_Vulkan()
+            {
+                Release();
+            }
 
-			PipelineLayoutManager_Vulkan::~PipelineLayoutManager_Vulkan()
-			{ }
+            VkPipeline RHI_Pipeline_Vulkan::GetPipeline() const
+            {
+                return m_pipeline;
+            }
 
-			VkPipelineLayout PipelineLayoutManager_Vulkan::GetOrCreateLayout(PipelineStateObject pso)
-			{
-				IS_PROFILE_FUNCTION();
-				assert(m_context != nullptr);
-
-				const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
-				u64 hash = 0;
-				for (const DescriptorSet& descriptor_set : descriptor_sets)
-				{
-					HashCombine(hash, descriptor_set.GetHash(false));
-				}
-
-				PushConstant push_constant = pso.Shader->GetPushConstant();
-				HashCombine(hash, push_constant.ShaderStages);
-				HashCombine(hash, push_constant.Offset);
-				HashCombine(hash, push_constant.Size);
-
-				auto itr = m_layouts.find(hash);
-				if (itr != m_layouts.end())
-				{
-					return itr->second;
-				}
-
-				std::vector<VkDescriptorSetLayout> set_layouts = {};
-				std::vector<DescriptorSet> current_descriptor_sets;
-
-				for (const DescriptorSet& descriptor_set : descriptor_sets)
-				{
-					RHI_DescriptorLayout_Vulkan* layoutVulkan = static_cast<RHI_DescriptorLayout_Vulkan*>(m_context->GetDescriptorLayoutManager().GetLayout(descriptor_set));
-					set_layouts.push_back(layoutVulkan->GetLayout());
-				}
-
-				std::vector<VkPushConstantRange> push_constants;
-				if (push_constant.Size > 0)
-				{
-					VkPushConstantRange pushConstantRange = {};
-					pushConstantRange.stageFlags = ShaderStageFlagsToVulkan(push_constant.ShaderStages);
-					pushConstantRange.offset = push_constant.Offset;
-					pushConstantRange.size = push_constant.Size;
-					push_constants.push_back(pushConstantRange);
-				}
-
-				VkPipelineLayoutCreateInfo createInfo = {};
-				createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-				createInfo.pSetLayouts = set_layouts.data();
-				createInfo.setLayoutCount = static_cast<u32>(set_layouts.size());
-				createInfo.pPushConstantRanges = push_constants.data();
-				createInfo.pushConstantRangeCount = static_cast<u32>(push_constants.size());
-
-				VkPipelineLayout layout;
-				ThrowIfFailed(vkCreatePipelineLayout(m_context->GetDevice(), &createInfo, nullptr, &layout));
-				m_layouts[hash] = layout;
-
-				return layout;
-			}
-
-			void PipelineLayoutManager_Vulkan::Destroy()
-			{
-				IS_PROFILE_FUNCTION();
-
-				for (const auto pair : m_layouts)
-				{
-					vkDestroyPipelineLayout(m_context->GetDevice(), pair.second, nullptr);
-				}
-				m_layouts.clear();
-			}
-
-			PipelineStateObjectManager_Vulkan::PipelineStateObjectManager_Vulkan()
-			{ }
-
-			PipelineStateObjectManager_Vulkan::~PipelineStateObjectManager_Vulkan()
-			{ }
-
-			VkPipeline PipelineStateObjectManager_Vulkan::GetOrCreatePSO(PipelineStateObject pso)
-			{
-				IS_PROFILE_FUNCTION();
-
-				assert(m_context != nullptr);
-
-				const u64 psoHash = pso.GetHash();
-				auto itr = m_pipelineStateObjects.find(psoHash);
-				if (itr != m_pipelineStateObjects.end())
-				{
-					return itr->second;
-				}
-
+            void RHI_Pipeline_Vulkan::Create(RenderContext* context, PipelineStateObject pso)
+            {
+                m_context = static_cast<RenderContext_Vulkan*>(context);
 				/// Create pipeline layout.
 				/// Create descriptor set layout
-				VkPipelineLayout layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
+				RHI_PipelineLayout* layout = m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 
 				RHI_Shader_Vulkan* shaderVulkan = static_cast<RHI_Shader_Vulkan*>(m_context->GetShaderManager().GetOrCreateShader(pso.ShaderDescription));
 				std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfos;
 				std::array<std::string, ShaderStageCount> shaderFuncNames;
 				for (int i = 0; i < ShaderStageCount; ++i)
 				{
-					ShaderStageFlagBits shaderStage =static_cast<ShaderStageFlagBits>(1 << i);
+					ShaderStageFlagBits shaderStage = static_cast<ShaderStageFlagBits>(1 << i);
 					VkShaderModule shaderModule = shaderVulkan->GetStage(shaderStage);
 					if (!shaderModule)
 					{
 						continue;
 					}
-			
+
 					for (const wchar_t wChar : shaderVulkan->GetMainFuncName(shaderStage))
 					{
 						shaderFuncNames[i].push_back((char)wChar);
@@ -154,7 +66,7 @@ namespace Insight
 				pipelineViewportStateCreateInfo.pViewports = nullptr;
 				pipelineViewportStateCreateInfo.scissorCount = 1;
 				pipelineViewportStateCreateInfo.pScissors = nullptr;
-			
+
 				VkPipelineRasterizationStateCreateInfo pipelineRasterizationStateCreateInfo = {};
 				pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 				pipelineRasterizationStateCreateInfo.depthClampEnable = pso.DepthClampEnabled;
@@ -167,11 +79,11 @@ namespace Insight
 				pipelineRasterizationStateCreateInfo.depthBiasClamp = 0.0f;
 				pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
 				pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
-			
+
 				VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = {};
 				pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 				pipelineMultisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-			
+
 				VkStencilOpState stencilOpState = {};
 				stencilOpState.failOp = VK_STENCIL_OP_KEEP;
 				stencilOpState.passOp = VK_STENCIL_OP_KEEP;
@@ -188,7 +100,7 @@ namespace Insight
 				pipelineDepthStencilStateCreateInfo.front = stencilOpState;
 				pipelineDepthStencilStateCreateInfo.back = stencilOpState;
 
-			
+
 				VkColorComponentFlags colorComponentFlags = ColourComponentFlagsToVulkan(pso.ColourWriteMask);
 				std::vector<VkPipelineColorBlendAttachmentState> pipeline_colour_blend_attachment_states;
 				if (pso.Swapchain)
@@ -236,14 +148,13 @@ namespace Insight
 				pipelineColorBlendStateCreateInfo.blendConstants[1] = 1.0f;
 				pipelineColorBlendStateCreateInfo.blendConstants[2] = 1.0f;
 				pipelineColorBlendStateCreateInfo.blendConstants[3] = 1.0f;
-			
+
 				std::vector<VkDynamicState> dynamicStates = DynamicStatesToVulkan(pso.Dynamic_States);
 				VkPipelineDynamicStateCreateInfo pipelineDynamicStateCreateInfo = {};
 				pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 				pipelineDynamicStateCreateInfo.pDynamicStates = dynamicStates.data();
 				pipelineDynamicStateCreateInfo.dynamicStateCount = static_cast<u32>(dynamicStates.size());
-			
-				RenderContext* context = (RenderContext*)m_context;
+
 				RHI_Renderpass rhiRenderpass = context->GetRenderpassManager().GetRenderpass(pso.Renderpass);
 				VkRenderPass renderpass = reinterpret_cast<VkRenderPass>(rhiRenderpass.Resource);
 
@@ -260,7 +171,7 @@ namespace Insight
 				graphicsPipelineCreateInfo.pDepthStencilState = &pipelineDepthStencilStateCreateInfo;
 				graphicsPipelineCreateInfo.pColorBlendState = &pipelineColorBlendStateCreateInfo;
 				graphicsPipelineCreateInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
-				graphicsPipelineCreateInfo.layout = layout;
+				graphicsPipelineCreateInfo.layout = static_cast<RHI_PipelineLayout_Vulkan*>(layout)->GetPipelineLayout();
 				graphicsPipelineCreateInfo.renderPass = renderpass;
 
 				if (pso.Swapchain)
@@ -290,33 +201,40 @@ namespace Insight
 				pipelineRenderingCreateInfo.depthAttachmentFormat = depthAttachmentFormat;
 				pipelineRenderingCreateInfo.stencilAttachmentFormat = stencilAttachmentFormat;
 
-				if (pso.AllowDynamicRendering 
+				if (pso.AllowDynamicRendering
 					&& m_context->IsExtensionEnabled(DeviceExtension::VulkanDynamicRendering))
 				{
 					graphicsPipelineCreateInfo.pNext = &pipelineRenderingCreateInfo;
 					graphicsPipelineCreateInfo.renderPass = VK_NULL_HANDLE;
 				}
 
-				VkPipeline createdPipeline = nullptr;
-				ThrowIfFailed(vkCreateGraphicsPipelines(m_context->GetDevice(), nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &createdPipeline));
-				m_context->SetObjectName(pso.Name, (u64)createdPipeline, VK_OBJECT_TYPE_PIPELINE);
-				m_pipelineStateObjects[psoHash] = createdPipeline;
+				ThrowIfFailed(vkCreateGraphicsPipelines(m_context->GetDevice(), nullptr, 1, &graphicsPipelineCreateInfo, nullptr, &m_pipeline));
+				SetName(pso.Name);
+            }
 
-				return createdPipeline;
-			}
+            void RHI_Pipeline_Vulkan::Release()
+            {
+                if (m_pipeline != VK_NULL_HANDLE)
+                {
+                    vkDestroyPipeline(m_context->GetDevice(), m_pipeline, nullptr);
+                    m_pipeline = VK_NULL_HANDLE;
+                }
+            }
 
-			void PipelineStateObjectManager_Vulkan::Destroy()
-			{
-				IS_PROFILE_FUNCTION();
+            bool RHI_Pipeline_Vulkan::ValidResource()
+            {
+                return  m_pipeline != VK_NULL_HANDLE;
+            }
 
-				for (const auto pair : m_pipelineStateObjects)
-				{
-					vkDestroyPipeline(m_context->GetDevice(), pair.second, nullptr);
-				}
-				m_pipelineStateObjects.clear();
-			}
-		}
-	}
+            void RHI_Pipeline_Vulkan::SetName(std::string name)
+            {
+                if (m_pipeline)
+                {
+                    m_context->SetObjectName(name, (u64)m_pipeline, VK_OBJECT_TYPE_PIPELINE);
+                }
+            }
+        }
+    }
 }
 
-#endif ///#if defined(IS_VULKAN_ENABLED)
+#endif // IS_VULKAN_ENABLED

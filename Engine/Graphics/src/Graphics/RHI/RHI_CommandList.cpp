@@ -1,10 +1,12 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RenderContext.h"
 
-
-
-#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
+#if defined(IS_VULKAN_ENABLED)
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
+#endif
+#if defined(IS_DX12_ENABLED)
+#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
+#endif
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -23,7 +25,7 @@ namespace Insight
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_CommandList_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_CommandList_DX12); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_CommandList_DX12); }
 #endif
 			return nullptr;
 		}
@@ -162,7 +164,7 @@ namespace Insight
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_CommandListAllocator_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (GraphicsManager::IsDX12()) { return NewTracked(RHI::DX12::RHI_CommandListAllocator_DX12); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_CommandListAllocator_DX12); }
 #endif
 			return nullptr;
 		}

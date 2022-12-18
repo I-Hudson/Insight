@@ -5,6 +5,8 @@
 #include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 
+struct VmaAllocation_T;
+
 namespace Insight
 {
 	namespace Graphics
@@ -38,7 +40,7 @@ namespace Insight
 				VkImage m_image{ nullptr };
 				VkImageView m_image_view;								/// Image view for all layers.
 				std::vector<VkImageView> m_single_layer_image_views;	/// Image view for each layer.
-				VmaAllocation m_imageAllocation = nullptr;
+				VmaAllocation_T* m_imageAllocation = nullptr;
 
 				friend class RenderContext_Vulkan;
 			};

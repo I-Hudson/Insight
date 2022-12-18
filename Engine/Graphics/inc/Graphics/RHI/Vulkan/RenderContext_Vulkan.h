@@ -4,17 +4,17 @@
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/RHI_Buffer.h"
-#include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
-#include "VmaUsage.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
 #include <glm/vec2.hpp>
 #include <unordered_map>
 #include <set>
 #include <string>
+
+struct VmaAllocator_T;
 
 namespace Insight
 {
@@ -62,7 +62,7 @@ namespace Insight
 
 				VkDevice GetDevice() const { return m_device; }
 				VkPhysicalDevice GetPhysicalDevice() const { return m_adapter; }
-				VmaAllocator GetVMA() const { return m_vmaAllocator; }
+				VmaAllocator_T* GetVMA() const { return m_vmaAllocator; }
 
 				u32 GetFamilyQueueIndex(GPUQueue queue) const { return m_queueFamilyLookup.at(queue); }
 
@@ -70,9 +70,6 @@ namespace Insight
 				VkImageView GetSwapchainImageView() const;
 				VkFormat GetSwapchainColourFormat() const { return m_swapchainFormat; }
 				VkSwapchainKHR GetSwapchain() const { return m_swapchain; }
-
-				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
-				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 
 				void* GetExtensionFunction(const char* function);
 
@@ -95,20 +92,16 @@ namespace Insight
 				VkDevice m_device{ nullptr };
 				VkPhysicalDevice m_adapter{ nullptr };
 
-				VmaAllocator m_vmaAllocator{ nullptr };
+				VmaAllocator_T* m_vmaAllocator{ nullptr };
 
 				VkSurfaceKHR m_surface{ nullptr };
 				VkSwapchainKHR m_swapchain{ nullptr };
 				VkFormat m_swapchainFormat;
 				std::vector<RHI_Texture*> m_swapchainImages;
-				glm::ivec2 m_swapchainBufferSize;
 
 				std::unordered_map<GPUQueue, VkQueue> m_commandQueues;
 				std::unordered_map<GPUQueue, std::mutex> m_command_queue_mutexs;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;
-
-				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
-				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;
 
 				VkDescriptorPool m_imguiDescriptorPool;
 				VkRenderPass m_imguiRenderpass;
