@@ -5,7 +5,6 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
-#include "Graphics/RHI/DX12/PipelineStateObjectManager_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
@@ -60,7 +59,6 @@ namespace Insight
 				virtual RHI_Texture* GetSwaphchainIamge() const override { return nullptr; }
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
-				PipelineStateObjectManager_DX12& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
 
 			protected:
 				virtual void WaitForGpu() override;
@@ -84,8 +82,6 @@ namespace Insight
 				u32 m_rtvDescriptorSize;
 
 				std::vector<SwapchainImage> m_swapchainImages;
-
-				PipelineStateObjectManager_DX12 m_pipelineStateObjectManager;
 
 				DescriptorHeap_DX12 m_rtvHeap;
 				DescriptorHeap_DX12 m_dsvHeap;

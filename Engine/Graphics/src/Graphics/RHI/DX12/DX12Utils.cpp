@@ -158,25 +158,46 @@ namespace Insight
 			return D3D12_COMMAND_LIST_TYPE_DIRECT;
 		}
 
-        D3D_PRIMITIVE_TOPOLOGY PrimitiveTopologyTypeToDX12(PrimitiveTopologyType type)
+        D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyTypeToDX12(PrimitiveTopologyType type)
         {
             switch (type)
             {
-            case Insight::Graphics::PrimitiveTopologyType::PointList: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_POINTLIST;
-            case Insight::Graphics::PrimitiveTopologyType::LineList: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST;
-            case Insight::Graphics::PrimitiveTopologyType::LineStrip: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleList: return D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleStrip: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+            case Insight::Graphics::PrimitiveTopologyType::PointList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+            case Insight::Graphics::PrimitiveTopologyType::LineList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case Insight::Graphics::PrimitiveTopologyType::LineStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case Insight::Graphics::PrimitiveTopologyType::TriangleList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case Insight::Graphics::PrimitiveTopologyType::TriangleStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
             ///case Insight::Graphics::PrimitiveTopologyType::TriangleFan: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::LineListWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::LineStripWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleListWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleStripWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY::D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::PatchList: return D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_10_CONTROL_POINT_PATCHLIST;
+            case Insight::Graphics::PrimitiveTopologyType::LineListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case Insight::Graphics::PrimitiveTopologyType::LineStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case Insight::Graphics::PrimitiveTopologyType::TriangleListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case Insight::Graphics::PrimitiveTopologyType::TriangleStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case Insight::Graphics::PrimitiveTopologyType::PatchList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
             default:
                 break;
             }
-            return D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        }
+
+        D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopologyToDX12(PrimitiveTopologyType type)
+        {
+            switch (type)
+            {
+            case PrimitiveTopologyType::PointList:                  return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+            case PrimitiveTopologyType::LineList:                   return D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+            case PrimitiveTopologyType::LineStrip:                  return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP;
+            case PrimitiveTopologyType::TriangleList:               return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            case PrimitiveTopologyType::TriangleStrip:              return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+            case PrimitiveTopologyType::TriangleFan:                return D3D_PRIMITIVE_TOPOLOGY_TRIANGLEFAN;
+            case PrimitiveTopologyType::LineListWithAdjacency:      return D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+            case PrimitiveTopologyType::LineStripWithAdjacency:     return D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ;
+            case PrimitiveTopologyType::TriangleListWithAdjacency:  return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+            case PrimitiveTopologyType::TriangleStripWithAdjacency: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
+            case PrimitiveTopologyType::PatchList:                  return D3D_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST;
+            default:
+                break;
+            }
+            return D3D12_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         }
 
         D3D12_FILL_MODE PolygonModeToDX12(PolygonMode polygonMode)

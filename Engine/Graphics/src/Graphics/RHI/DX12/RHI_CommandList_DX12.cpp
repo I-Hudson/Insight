@@ -4,6 +4,8 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
+#include "Graphics/RHI/DX12/RHI_PipelineLayout_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Pipeline_DX12.h"
 
 #include "Graphics/RenderTarget.h"
 
@@ -246,12 +248,12 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				
-				ID3D12PipelineState* pipeline = m_contextDX12->GetPipelineStateObjectManager().GetOrCreatePSO(pso);
+				ID3D12PipelineState* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso))->GetPipeline();
 				m_commandList->SetPipelineState(pipeline);
 
 				RHI_DescriptorLayout_DX12* layout_DX12 = static_cast<RHI_DescriptorLayout_DX12*>(layout);
 				m_commandList->SetGraphicsRootSignature(layout_DX12->GetRootSignature());
-				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyTypeToDX12(m_activePSO.PrimitiveTopologyType));
+				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 			}
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)

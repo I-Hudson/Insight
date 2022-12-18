@@ -110,7 +110,7 @@ namespace Insight
 				const std::vector<DescriptorHeapPage_DX12>& GetHeaps() const { return m_heaps; }
 
 				DescriptorHeapHandle_DX12 GetNewHandle();
-				bool FindDescriptor(const Descriptor& descriptor, DescriptorHeapHandle_DX12& handle);
+				bool FindDescriptor(const DescriptorBinding& descriptor, DescriptorHeapHandle_DX12& handle);
 
 				void Reset();
 

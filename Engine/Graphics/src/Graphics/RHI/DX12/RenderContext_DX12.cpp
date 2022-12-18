@@ -97,7 +97,8 @@ namespace Insight
 
 				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
-				m_pipelineStateObjectManager.SetRenderContext(this);
+				m_pipelineLayoutManager.SetRenderContext(this);
+				m_pipelineManager.SetRenderContext(this);
 
 				InitImGui();
 
@@ -131,7 +132,8 @@ namespace Insight
 						context.SubmitFence = nullptr;
 					});
 
-				m_pipelineStateObjectManager.Destroy();
+				m_pipelineManager.Destroy();
+				m_pipelineLayoutManager.Destroy();
 
 				m_rtvHeap = { };
 				m_dsvHeap = { };

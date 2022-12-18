@@ -85,7 +85,7 @@ namespace Insight
 				///}
 
 				std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
-				for (const Descriptor& desc : descriptors)
+				for (const DescriptorBinding& desc : descriptor_set.Bindings)
 				{
 					CD3DX12_DESCRIPTOR_RANGE1 range = {};
 					range.Init(DescriptorRangeTypeToDX12(desc.Type), 1, desc.Binding);
@@ -218,7 +218,7 @@ namespace Insight
 				return handle;
 			}
 
-			bool DescriptorHeap_DX12::FindDescriptor(const Descriptor& descriptor, DescriptorHeapHandle_DX12& handle)
+			bool DescriptorHeap_DX12::FindDescriptor(const DescriptorBinding & descriptor, DescriptorHeapHandle_DX12& handle)
 			{
 				if (m_heaps.size() == 0 || m_heaps.back().IsFull())
 				{
@@ -236,11 +236,11 @@ namespace Insight
 				}
 				m_heaps.back().GetNewHandle(handle);
 
-				RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
+				RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(descriptor.RHI_Buffer_View.GetBuffer());
 
 				D3D12_CONSTANT_BUFFER_VIEW_DESC bufferViewDesc = {};
-				bufferViewDesc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
-				bufferViewDesc.SizeInBytes = static_cast<UINT>(descriptor.BufferView.GetSize());
+				bufferViewDesc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + descriptor.RHI_Buffer_View.GetOffset();
+				bufferViewDesc.SizeInBytes = static_cast<UINT>(descriptor.RHI_Buffer_View.GetSize());
 				m_context->GetDevice()->CreateConstantBufferView(&bufferViewDesc, handle.CPUPtr);
 
 				m_descriptorHashToHandleIndex[descHash] = handle.HandleIndex;
