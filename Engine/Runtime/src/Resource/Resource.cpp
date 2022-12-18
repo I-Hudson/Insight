@@ -19,7 +19,7 @@ namespace Insight
 	{
 #define RESOURCE_LOAD_THREAD
 
-		CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type)
+		const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type)
 		{
 			switch (storage_type)
 			{
@@ -33,7 +33,7 @@ namespace Insight
 			return "";
 		}
 
-		CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state)
+		const char* ERsourceStatesToString(EResoruceStates state)
 		{
 			switch (state)
 			{

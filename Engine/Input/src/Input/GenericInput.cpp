@@ -4,7 +4,7 @@ namespace Insight
 {
 	namespace Input
 	{
-		CONSTEXPR const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType)
+		const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType)
 		{
 			switch (inputDeviceType)
 			{
@@ -14,7 +14,7 @@ namespace Insight
 			return "";
 		}
 
-		CONSTEXPR const char* InputTypeToString(InputTypes inputTypes)
+		const char* InputTypeToString(InputTypes inputTypes)
 		{
 			switch (inputTypes)
 			{

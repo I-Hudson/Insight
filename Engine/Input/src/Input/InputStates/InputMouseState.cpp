@@ -4,7 +4,7 @@ namespace Insight
 {
 	namespace Input
 	{
-		CONSTEXPR const char* MouseButtonToString(MouseButtons button)
+		const char* MouseButtonToString(MouseButtons button)
 		{
 			switch (button)
 			{

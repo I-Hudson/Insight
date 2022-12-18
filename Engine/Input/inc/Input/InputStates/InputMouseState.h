@@ -17,7 +17,7 @@ namespace Insight
 
 			NumButtons
 		};
-		IS_INPUT CONSTEXPR const char* MouseButtonToString(MouseButtons button);
+		IS_INPUT const char* MouseButtonToString(MouseButtons button);
 
 		class InputMouseState : public InputButtonState<static_cast<u64>(MouseButtons::NumButtons)>
 		{

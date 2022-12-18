@@ -4,7 +4,7 @@ namespace Insight
 {
 	namespace Input
 	{
-		CONSTEXPR const char* ControllerSubTypeToString(ControllerSubTypes subType)
+		const char* ControllerSubTypeToString(ControllerSubTypes subType)
 		{
 			switch (subType)
 			{
@@ -17,7 +17,7 @@ namespace Insight
 			return "Unknown";
 		}
 
-		CONSTEXPR const char* ControllerButtonsToString(ControllerButtons button)
+		const char* ControllerButtonsToString(ControllerButtons button)
 		{
 			switch (button)
 			{
@@ -43,7 +43,7 @@ namespace Insight
 			return "";
 		}
 
-		CONSTEXPR const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick)
+		const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick)
 		{
 			switch (thumbstick)
 			{
@@ -58,7 +58,7 @@ namespace Insight
 			return "";
 		}
 
-		CONSTEXPR const char* ControllerTriggerToString(ControllerTriggers trigger)
+		const char* ControllerTriggerToString(ControllerTriggers trigger)
 		{
 			switch (trigger)
 			{
@@ -72,7 +72,7 @@ namespace Insight
 			return "";
 		}
 
-		CONSTEXPR const char* ControllerRumbleToString(ControllerRumbles rumble)
+		const char* ControllerRumbleToString(ControllerRumbles rumble)
 		{
 			switch (rumble)
 			{

@@ -6,7 +6,7 @@ namespace Insight
 {
 	namespace Input
 	{
-		CONSTEXPR const char* KeyboardButtonToString(KeyboardButtons button)
+		const char* KeyboardButtonToString(KeyboardButtons button)
 		{
 			switch (button)
 			{

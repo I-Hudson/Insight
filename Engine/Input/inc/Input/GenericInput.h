@@ -13,7 +13,7 @@ namespace Insight
 			KeyboardMouse,
 			Controller
 		};
-		IS_INPUT CONSTEXPR const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType);
+		IS_INPUT const char* InputDeviceTypeToString(InputDeviceTypes inputDeviceType);
 
 		enum class InputTypes
 		{
@@ -24,7 +24,7 @@ namespace Insight
 			Thumbstick,
 			Trigger
 		};
-		IS_INPUT CONSTEXPR const char* InputTypeToString(InputTypes inputTypes);
+		IS_INPUT const char* InputTypeToString(InputTypes inputTypes);
 
 		struct IS_INPUT GenericInput
 		{

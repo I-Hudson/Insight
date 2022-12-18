@@ -9,13 +9,13 @@ namespace Insight
 {
 	namespace Algorithm
 	{
-        IS_CORE FORCE_INLINE u32 GetHash32(const char* cStr, u64 length);
-        IS_CORE FORCE_INLINE u32 GetHash32(const char* cStr);
-        IS_CORE FORCE_INLINE u32 GetHash32(const std::string& str);
+        IS_CORE u32 GetHash32(const char* cStr, u64 length);
+        IS_CORE u32 GetHash32(const char* cStr);
+        IS_CORE u32 GetHash32(const std::string& str);
 
-        IS_CORE FORCE_INLINE u64 GetHash64(const char* cStr, u64 length);
-        IS_CORE FORCE_INLINE u64 GetHash64(const char* cStr);
-        IS_CORE FORCE_INLINE u64 GetHash64(const std::string& str);
+        IS_CORE u64 GetHash64(const char* cStr, u64 length);
+        IS_CORE u64 GetHash64(const char* cStr);
+        IS_CORE u64 GetHash64(const std::string& str);
 
         namespace FNV1a
         {

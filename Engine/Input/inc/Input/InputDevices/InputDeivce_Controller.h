@@ -26,7 +26,7 @@ namespace Insight
 
 			NumControllerSubTypes
 		};
-		IS_INPUT CONSTEXPR const char* ControllerSubTypeToString(ControllerSubTypes subType);
+		IS_INPUT const char* ControllerSubTypeToString(ControllerSubTypes subType);
 
 		enum class ControllerButtons : u16
 		{
@@ -48,7 +48,7 @@ namespace Insight
 
 			NumButtons
 		};
-		IS_INPUT CONSTEXPR const char* ControllerButtonsToString(ControllerButtons button);
+		IS_INPUT const char* ControllerButtonsToString(ControllerButtons button);
 
 		enum class ControllerThumbsticks : u16
 		{
@@ -59,7 +59,7 @@ namespace Insight
 
 			NumThumbsticks
 		};
-		IS_INPUT CONSTEXPR const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick);
+		IS_INPUT const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick);
 
 		enum class ControllerTriggers : u16
 		{
@@ -68,7 +68,7 @@ namespace Insight
 
 			NumTriggers
 		};
-		IS_INPUT CONSTEXPR const char* ControllerTriggerToString(ControllerTriggers trigger);
+		IS_INPUT const char* ControllerTriggerToString(ControllerTriggers trigger);
 
 		enum class ControllerRumbles : u16
 		{
@@ -77,7 +77,7 @@ namespace Insight
 
 			NumRumbles
 		};
-		IS_INPUT CONSTEXPR const char* ControllerRumbleToString(ControllerRumbles rumble);
+		IS_INPUT const char* ControllerRumbleToString(ControllerRumbles rumble);
 
 
 		/// <summary>

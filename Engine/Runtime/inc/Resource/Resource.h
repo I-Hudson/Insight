@@ -28,7 +28,7 @@ namespace Insight
 			Disk,		/// @brief Resource is storage on disk (This should always be the default).
 			Memory,		/// @brief Resource is storage in memory only (This resource must be a part of a resource which has been loaded from disk).
 		};
-		IS_RUNTIME CONSTEXPR const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type);
+		IS_RUNTIME const char* ResourceStorageTypesToString(ResourceStorageTypes storage_type);
 
 		enum class EResoruceStates
 		{
@@ -43,7 +43,7 @@ namespace Insight
 			Unloading,		/// @brief Resource is been unloaded.
 
 		};
-		IS_RUNTIME CONSTEXPR const char* ERsourceStatesToString(EResoruceStates state);
+		IS_RUNTIME const char* ERsourceStatesToString(EResoruceStates state);
 
 		enum class ResourceReferenceLinkType
 		{
