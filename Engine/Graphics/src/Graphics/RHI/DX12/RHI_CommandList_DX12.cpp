@@ -252,8 +252,9 @@ namespace Insight
 				ID3D12PipelineState* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso))->GetPipeline();
 				m_commandList->SetPipelineState(pipeline);
 
-				RHI_DescriptorLayout_DX12* layout_DX12 = static_cast<RHI_DescriptorLayout_DX12*>(layout);
-				m_commandList->SetGraphicsRootSignature(layout_DX12->GetRootSignature());
+				
+				RHI_PipelineLayout_DX12* pipelineLayout = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
+				m_commandList->SetGraphicsRootSignature(pipelineLayout->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 			}
 
@@ -267,7 +268,7 @@ namespace Insight
 				colour.x = std::max(0.0f, std::min(1.0f, colour.x));
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
-				PIXBeginEvent(m_commandList.Get(), PIX_COLOR(colour.x * 255, colour.y * 255, colour.z * 255), blockName.c_str());
+				PIXBeginEvent(m_commandList.Get(), PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255)), blockName.c_str());
 			}
 
 			void RHI_CommandList_DX12::EndTimeBlock()

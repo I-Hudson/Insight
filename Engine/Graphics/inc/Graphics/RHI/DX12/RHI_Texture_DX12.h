@@ -15,6 +15,7 @@ namespace Insight
 			class RHI_Texture_DX12 : public RHI_Texture
 			{
 			public:
+				virtual ~RHI_Texture_DX12() = default;
 
 				ID3D12Resource* GetResource() const { return m_resource.Get(); }
 
@@ -31,6 +32,8 @@ namespace Insight
 			private:
 				ComPtr<ID3D12Resource> m_resource;
 				RenderContext_DX12* m_context = nullptr;
+
+				friend class RenderContext_DX12;
 			};
 		}
 	}

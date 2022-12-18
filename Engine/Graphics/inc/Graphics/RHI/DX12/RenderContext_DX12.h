@@ -9,18 +9,20 @@
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
+#include <array>
+
 namespace Insight
 {
 	namespace Graphics
 	{
 		namespace RHI::DX12
 		{
+			class RHI_Texture_DX12;
+			
 			struct SwapchainImage
 			{
-				ComPtr<ID3D12Resource> Colour;
+				RHI_Texture_DX12* Colour;
 				DescriptorHeapHandle_DX12 ColourHandle;
-				ComPtr<ID3D12Resource> DepthStencil;
-				DescriptorHeapHandle_DX12 DepthStencilHandle;
 			};
 
 			struct FrameSubmitContext_DX12
@@ -35,6 +37,7 @@ namespace Insight
 			class RenderContext_DX12 : public RenderContext
 			{
 			public:
+				virtual ~RenderContext_DX12();
 
 				virtual bool Init() override;
 				virtual void Destroy() override;
@@ -54,9 +57,10 @@ namespace Insight
 
 				void SetObjectName(std::string_view name, ID3D12Object* handle);
 
-				virtual RHI_Texture* GetSwaphchainIamge() const override { return nullptr; }
+				virtual RHI_Texture* GetSwaphchainIamge() const override;
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
+				DescriptorHeap_DX12& GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType);
 
 			protected:
 				virtual void WaitForGpu() override;
@@ -76,14 +80,12 @@ namespace Insight
 
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			
+				std::array<DescriptorHeap_DX12, static_cast<u64>(DescriptorHeapTypes::NumDescriptors)> m_descriptorHeaps;
+
 				ComPtr<IDXGISwapChain3> m_swapchain{ nullptr };
 				u32 m_rtvDescriptorSize;
 
 				std::vector<SwapchainImage> m_swapchainImages;
-
-				DescriptorHeap_DX12 m_rtvHeap;
-				DescriptorHeap_DX12 m_dsvHeap;
-				ComPtr<ID3D12DescriptorHeap> m_srcImGuiHeap{ nullptr };
 
 				int m_currentFrame = 0;
 

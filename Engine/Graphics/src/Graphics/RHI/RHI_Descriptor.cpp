@@ -33,7 +33,7 @@ namespace Insight
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
+			//else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
 #endif	
 			return nullptr;
 		}

@@ -1,5 +1,7 @@
 #pragma once
 
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/RHI_Sampler.h"
 
 namespace Insight
@@ -26,3 +28,4 @@ namespace Insight
 		}
 	}
 }
+#endif // IS_VULKAN_ENABLED

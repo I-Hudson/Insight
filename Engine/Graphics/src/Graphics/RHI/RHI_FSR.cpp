@@ -219,16 +219,17 @@ namespace Insight
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
-                RHI::DX12::RenderContext_DX12* renderContextVulkan = static_cast<RHI::DX12::RenderContext_DX12*>(render_context);
+                RHI::DX12::RenderContext_DX12* renderContextDX12 = static_cast<RHI::DX12::RenderContext_DX12*>(render_context);
                 const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
                 void* scratchBuffer = malloc(scratchBufferSize);
-                FfxErrorCode errorCode = ffxFsr2GetInterfaceDX12(&m_ffx_fsr2_context_description.callbacks
-                    , renderContextVulkan->GetDevice()
+                FfxErrorCode errorCode = ffxFsr2GetInterfaceDX12(
+                    &m_ffx_fsr2_context_description.callbacks
+                    , renderContextDX12->GetDevice()
                     , scratchBuffer
                     , scratchBufferSize);
                 ASSERT(errorCode == FFX_OK);
 
-                m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextVulkan->GetDevice());
+                m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextDX12->GetDevice());
                 m_ffx_fsr2_context_description.maxRenderSize.width = renderWidth;
                 m_ffx_fsr2_context_description.maxRenderSize.height = renderHeight;
                 m_ffx_fsr2_context_description.displaySize.width = displayWidth;

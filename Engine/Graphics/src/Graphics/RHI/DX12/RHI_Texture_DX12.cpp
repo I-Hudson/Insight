@@ -66,7 +66,6 @@ namespace Insight
 			{
 				if (m_resource)
 				{
-					m_resource->Release();
 					m_resource.Reset();
 				}
 			}

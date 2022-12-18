@@ -4,8 +4,11 @@
 
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
+
 #include <d3dx12.h>
 #include <stdexcept>
+
+#include <array>
 
 extern DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)];
 
@@ -39,6 +42,11 @@ namespace Insight
 	{
 		DXGI_FORMAT PixelFormatToDX12(PixelFormat format);
 		D3D12_COMMAND_LIST_TYPE GPUCommandListTypeToCommandListTypeDX12(GPUCommandListType type);
+
+		D3D12_FILTER FilterToDX12(Filter filter);
+		D3D12_TEXTURE_ADDRESS_MODE SamplerAddressModelToDX12(SamplerAddressMode addressMode);
+		D3D12_COMPARISON_FUNC CompareOpToDX12(CompareOp op);
+		std::array<FLOAT, 4> BorderColourToDX12(BorderColour boarderColour);
 
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyTypeToDX12(PrimitiveTopologyType type);
 		D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopologyToDX12(PrimitiveTopologyType type);

@@ -1,6 +1,7 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
@@ -22,6 +23,10 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			RenderContext_DX12::~RenderContext_DX12()
+			{
+			}
+
 			bool RenderContext_DX12::Init()
 			{
 				UINT dxgiFactoryFlags = 0;
@@ -82,18 +87,23 @@ namespace Insight
 					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_COPY, HrToString(createCommandQueueResult));
 				}
-
-				m_rtvHeap.SetRenderContext(this);
-				m_rtvHeap.Create(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
-				m_dsvHeap.SetRenderContext(this);
-				m_dsvHeap.Create(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 				
+				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).SetRenderContext(this);
+				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).SetRenderContext(this);
+				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+
+				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).SetRenderContext(this);
+				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Create(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
+				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).SetRenderContext(this);
+				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Create(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
 				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
 				for (size_t i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
-					m_swapchainImages[i].ColourHandle = m_rtvHeap.GetNewHandle();
-					m_swapchainImages[i].DepthStencilHandle = m_dsvHeap.GetNewHandle();
+					m_swapchainImages[i].ColourHandle = m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).GetNewHandle();
 				}
 
 				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
@@ -101,7 +111,10 @@ namespace Insight
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineManager.SetRenderContext(this);
 
-				InitImGui();
+				m_commandListManager.ForEach([this](CommandListManager& manager)
+					{
+						manager.Create(this);
+					});
 
 				m_submitFrameContexts.Setup();
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext_DX12& context)
@@ -114,6 +127,8 @@ namespace Insight
 							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 						}
 					});
+
+				InitImGui();
 
 				WaitForGpu();
 
@@ -136,17 +151,23 @@ namespace Insight
 				m_pipelineManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
 
-				m_rtvHeap = { };
-				m_dsvHeap = { };
+				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
 
 				BaseDestroy();
 
 				m_queues.clear();
 
+				for (auto& image : m_swapchainImages)
+				{
+					Renderer::FreeTexture(image.Colour);
+				}
+
 				if (m_swapchain)
 				{
 					m_swapchainImages.clear();
-					m_rtvHeap.Reset();
 					m_swapchain.Reset();
 					m_swapchain = nullptr;
 				}
@@ -173,20 +194,16 @@ namespace Insight
 
 			void RenderContext_DX12::InitImGui()
 			{
-				ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), true);
+				ImGui_ImplGlfw_InitForOther(Window::Instance().GetRawWindow(), false);
 
-				D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-				desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-				desc.NumDescriptors = 1;
-				desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				ThrowIfFailed(m_device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_srcImGuiHeap)));
+				DescriptorHeapHandle_DX12 handle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
 
 				ImGui_ImplDX12_Init(m_device.Get(),
 					RenderGraph::s_MaxFarmeCount,
 					DXGI_FORMAT_R8G8B8A8_UNORM,
-					m_srcImGuiHeap.Get(),
-					m_srcImGuiHeap->GetCPUDescriptorHandleForHeapStart(),
-					m_srcImGuiHeap->GetGPUDescriptorHandleForHeapStart());
+					m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetHeap(handle.HeapId),
+					handle.CPUPtr,
+					handle.GPUPtr);
 
 				ImGui_ImplDX12_NewFrame();
 				ImGuiBeginFrame();
@@ -195,9 +212,6 @@ namespace Insight
 			void RenderContext_DX12::DestroyImGui()
 			{
 				ImGui_ImplDX12_Shutdown();
-
-				m_srcImGuiHeap.Reset();
-				m_srcImGuiHeap = nullptr;
 			}
 
 			bool RenderContext_DX12::PrepareRender()
@@ -227,12 +241,12 @@ namespace Insight
 					// First get the status of the fence. Then if it has not finished, wait on it.
 
 					/// If the next frame is not ready to be rendered yet, wait until it is ready.
-					if (m_submitFrameContexts.Get().SubmitFence->GetCompletedValue() < m_submitFrameContexts.Get().SubmitFenceValue)
+					u64 fenceCompletedValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+					if (fenceCompletedValue < m_submitFrameContexts.Get().SubmitFenceValue)
 					{
 						ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 						WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 					}
-					++m_submitFrameContexts.Get().SubmitFenceValue;
 				}
 
 				m_descriptorSetManager->Reset();
@@ -277,7 +291,8 @@ namespace Insight
 								}
 							}
 
-							/// Schedule a Signal command in the queue.
+							// Schedule a Signal command in the queue.
+							++m_submitFrameContexts.Get().SubmitFenceValue;
 							const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
 							ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
@@ -408,6 +423,11 @@ namespace Insight
 				}
 			}
 
+			RHI_Texture* RenderContext_DX12::GetSwaphchainIamge() const
+			{
+				return m_swapchainImages[m_swapchain->GetCurrentBackBufferIndex()].Colour;
+			}
+
 			void RenderContext_DX12::FindPhysicalDevice(IDXGIAdapter1** ppAdapter)
 			{
 				*ppAdapter = nullptr;
@@ -488,8 +508,11 @@ namespace Insight
 			{
 				if (m_swapchain)
 				{
-					m_swapchainImages.clear();
-					m_rtvHeap.Reset();
+					for (auto& image : m_swapchainImages)
+					{
+						image.Colour->m_resource.Reset();
+						image.Colour->m_resource = nullptr;
+					}
 					m_swapchain.Reset();
 					m_swapchain = nullptr;
 				}
@@ -530,44 +553,33 @@ namespace Insight
 
 				swapchain.As(&m_swapchain);
 
-				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
+				//m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
 				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
-					swapchainImage.Colour.Reset();
-					swapchainImage.DepthStencil.Reset();
+
+					if (!swapchainImage.Colour)
+					{
+						RHI_Texture* tex = Renderer::CreateTexture();
+						tex->SetName("Swapchain_Image: " + std::to_string(i));
+						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
+						swapchainImage.Colour = textureDX12;
+
+						RHI_TextureInfo textureInfo = {};
+						textureInfo.TextureType = TextureType::Tex2D;
+						textureInfo.Width = swapChainDesc.Width;
+						textureInfo.Height = swapChainDesc.Height;
+						textureInfo.Depth = 1;
+						textureInfo.Format = PixelFormat::R8G8B8A8_UNorm;
+						textureInfo.ImageUsage = 0;
+						textureInfo.Layout = ImageLayout::PresentSrc;
+						textureInfo.InitalStatus = DeviceUploadStatus::Completed;
+						textureDX12->m_infos.push_back(textureInfo);
+					}
 
 					/// Get the back buffer from the swapchain.
-					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour)));
-					device->CreateRenderTargetView(swapchainImage.Colour.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
-
-					D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilDesc = {};
-					depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
-					depthStencilDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-					depthStencilDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-					D3D12_CLEAR_VALUE depthOptimizedClearValue = {};
-					depthOptimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-					depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
-					depthOptimizedClearValue.DepthStencil.Stencil = 0;
-
-					device->CreateCommittedResource(
-						&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-						D3D12_HEAP_FLAG_NONE,
-						&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, 
-							Window::Instance().GetWidth(), 
-							Window::Instance().GetHeight(), 
-							1, 
-							0, 
-							1, 
-							0, 
-							D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
-						D3D12_RESOURCE_STATE_DEPTH_WRITE,
-						&depthOptimizedClearValue,
-						IID_PPV_ARGS(&swapchainImage.DepthStencil)
-					);
-					SetObjectName("Depth/Stencil Resource Heap_Frame_" + std::to_string(i), swapchainImage.DepthStencil.Get());
-					device->CreateDepthStencilView(swapchainImage.DepthStencil.Get(), &depthStencilDesc, swapchainImage.DepthStencilHandle.GetCPUHandle());
+					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
+					device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
 			}
 
@@ -576,8 +588,8 @@ namespace Insight
 				/// Release all our previous render targets from the swapchain.
 				for (size_t i = 0; i < m_swapchainImages.size(); ++i)
 				{
-					m_swapchainImages[i].Colour.Reset();
-					m_swapchainImages[i].DepthStencil.Reset();
+					m_swapchainImages[i].Colour->m_resource.Reset();
+					m_swapchainImages[i].Colour->m_resource = nullptr;
 				}
 
 				/// Resize our swap chain buffers.
@@ -588,37 +600,8 @@ namespace Insight
 				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
-
-					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&m_swapchainImages[i].Colour)));
-					m_device->CreateRenderTargetView(m_swapchainImages[i].Colour.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
-
-					D3D12_DEPTH_STENCIL_VIEW_DESC depthStencilDesc = {};
-					depthStencilDesc.Format = DXGI_FORMAT_D32_FLOAT;
-					depthStencilDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-					depthStencilDesc.Flags = D3D12_DSV_FLAG_NONE;
-
-					D3D12_CLEAR_VALUE depthOptimizedClearValue = {};
-					depthOptimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-					depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
-					depthOptimizedClearValue.DepthStencil.Stencil = 0;
-
-					m_device->CreateCommittedResource(
-						&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-						D3D12_HEAP_FLAG_NONE,
-						&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT,
-							Window::Instance().GetWidth(),
-							Window::Instance().GetHeight(),
-							1,
-							0,
-							1,
-							0,
-							D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
-						D3D12_RESOURCE_STATE_DEPTH_WRITE,
-						&depthOptimizedClearValue,
-						IID_PPV_ARGS(&swapchainImage.DepthStencil)
-					);
-					SetObjectName("Depth/Stencil Resource Heap_Frame_" + std::to_string(i), swapchainImage.DepthStencil.Get());
-					m_device->CreateDepthStencilView(swapchainImage.DepthStencil.Get(), &depthStencilDesc, swapchainImage.DepthStencilHandle.GetCPUHandle());
+					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
+					m_device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
 			}
 
@@ -644,8 +627,17 @@ namespace Insight
 				//m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
 			}
 
+			DescriptorHeap_DX12& RenderContext_DX12::GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType)
+			{
+				return m_descriptorHeaps.at(descriptorHeapType);
+			}
+
 			void RenderContext_DX12::WaitForGpu()
 			{
+				// Increment the fence value for the current frame.
+				++m_submitFrameContexts.Get().SubmitFenceValue;
+				u64 currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+
 				// Schedule a Signal command in the queue.
 				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), m_submitFrameContexts.Get().SubmitFenceValue));
 
@@ -653,8 +645,7 @@ namespace Insight
 				ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 				WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 
-				// Increment the fence value for the current frame.
-				++m_submitFrameContexts.Get().SubmitFenceValue;
+				currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
 			}
 		}
 	}

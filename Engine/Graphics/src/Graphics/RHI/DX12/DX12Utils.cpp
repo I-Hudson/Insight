@@ -2,6 +2,8 @@
 
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Platforms/Platform.h"
+
 DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
 {
     DXGI_FORMAT_UNKNOWN,                ///0
@@ -157,6 +159,71 @@ namespace Insight
 			}
 			return D3D12_COMMAND_LIST_TYPE_DIRECT;
 		}
+
+        D3D12_FILTER FilterToDX12(Filter filter)
+        {
+            switch (filter)
+            {
+            case Insight::Graphics::Filter::Nearest:    return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+            case Insight::Graphics::Filter::Linear:     return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+        }
+
+        D3D12_TEXTURE_ADDRESS_MODE SamplerAddressModelToDX12(SamplerAddressMode addressMode)
+        {
+            switch (addressMode)
+            {
+            case Insight::Graphics::SamplerAddressMode::Repeat:             return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+            case Insight::Graphics::SamplerAddressMode::MirroredRepeat:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            case Insight::Graphics::SamplerAddressMode::ClampToEdge:        return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+            case Insight::Graphics::SamplerAddressMode::ClampToBoarder:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+            case Insight::Graphics::SamplerAddressMode::MirrorClampToEdge:  return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        }
+
+        D3D12_COMPARISON_FUNC CompareOpToDX12(CompareOp op)
+        {
+            switch (op)
+            {
+            case Insight::Graphics::CompareOp::Never:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+            case Insight::Graphics::CompareOp::Less:           return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
+            case Insight::Graphics::CompareOp::Equal:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
+            case Insight::Graphics::CompareOp::LessOrEqual:    return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
+            case Insight::Graphics::CompareOp::Greater:        return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
+            case Insight::Graphics::CompareOp::NotEqual:       return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
+            case Insight::Graphics::CompareOp::GreaterOrEqual: return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+            case Insight::Graphics::CompareOp::Always:         return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+        }
+
+        std::array<FLOAT, 4> BorderColourToDX12(BorderColour boarderColour)
+        {
+            switch (boarderColour)
+            {
+            case Insight::Graphics::BorderColour::FloatTransparentBlack: return { 0.0f, 0.0f, 0.0f, 0.0f };
+            case Insight::Graphics::BorderColour::IntTransparentBlack:   return { 0.0f, 0.0f, 0.0f, 0.0f };
+            case Insight::Graphics::BorderColour::FloatOpaqueBlack:      return { 0.0f, 0.0f, 0.0f, 1.0f };
+            case Insight::Graphics::BorderColour::IntOpaqueBlack:        return { 0.0f, 0.0f, 0.0f, 1.0f };
+            case Insight::Graphics::BorderColour::FloatOpaqueWhite:      return { 1.0f, 1.0f, 1.0f, 1.0f };
+            case Insight::Graphics::BorderColour::IntOpaqueWhite:        return { 1.0f, 1.0f, 1.0f, 1.0f };
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return { 0.0f, 0.0f, 0.0f, 0.0f };
+        }
 
         D3D12_PRIMITIVE_TOPOLOGY_TYPE PrimitiveTopologyTypeToDX12(PrimitiveTopologyType type)
         {

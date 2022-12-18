@@ -19,187 +19,153 @@ namespace Insight
 			//// <summary>
 			//// RHI_DescriptorLayout_DX12
 			//// </summary>
-			void RHI_DescriptorLayout_DX12::Release()
-			{
-				if (m_layout)
-				{
-					m_layout.Reset();
-				}
-			}
-
-			bool RHI_DescriptorLayout_DX12::ValidResource()
-			{
-				return m_layout;
-			}
-
-			void RHI_DescriptorLayout_DX12::SetName(std::string name)
-			{
-				if (m_layout)
-				{
-					m_context->SetObjectName(name, m_layout.Get());
-				}
-			}
-
-
-			/////// <summary>
-			/////// RHI_Descriptor_DX12
-			/////// </summary>
-			/////// <param name="descriptors"></param>
-			///void RHI_Descriptor_DX12::Update(const std::vector<Descriptor>& descriptors)
-			///{
-			///}
-
-			///u64 RHI_Descriptor_DX12::GetHash(bool includeResource)
-			///{
-			///	return 0;
-			///}
-
-
-			//// <summary>
-			//// RHI_DescriptorLayout_DX12
-			//// </summary>
 			//// <param name="context"></param>
 			//// <param name="set"></param>
 			//// <param name="descriptors"></param>
-			void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, DescriptorSet descriptor_set)
-			{
-				m_context = static_cast<RenderContext_DX12*>(context);
+			//void RHI_DescriptorLayout_DX12::Create(RenderContext* context, int set, DescriptorSet descriptor_set)
+			//{
+			//	m_context = static_cast<RenderContext_DX12*>(context);
+			//
+			//	/// Reference: https:///github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
+			//
+			//	///std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
+			//	///rootParameters.resize(descriptors.size());
+			//	///CD3DX12_ROOT_PARAMETER1 rootParameter = {};
+			//	///rootParameters[0].InitAsDescriptorTable(1, &ranges[0]);
+			//	///rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
+			//	///rootParameters.push_back(rootParameter);
+			//
+			//	///int baseRegister = 0;
+			//	///for (const Descriptor& descriptor : descriptors)
+			//	///{
+			//	///	CD3DX12_DESCRIPTOR_RANGE1 range = {};
+			//	///	range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, baseRegister++);
+			//	///	ranges.push_back(range);
+			//	///
+			//	///	CD3DX12_ROOT_PARAMETER1 rootParameter = {};
+			//	///	rootParameter.InitAsDescriptorTable(1, &ranges.back());
+			//	///	rootParameters.push_back(rootParameter);
+			//	///}
+			//
+			//	std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
+			//	for (const DescriptorBinding& desc : descriptor_set.Bindings)
+			//	{
+			//		CD3DX12_DESCRIPTOR_RANGE1 range = {};
+			//		range.Init(DescriptorRangeTypeToDX12(desc.Type), 1, desc.Binding);
+			//		ranges.push_back(range);
+			//	}
+			//
+			//	int rangeIndex = 0;
+			//	std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
+			//	rootParameters.resize(ranges.size());
+			//	for (CD3DX12_ROOT_PARAMETER1& root : rootParameters)
+			//	{
+			//		root.InitAsDescriptorTable(1, &ranges[rangeIndex++]);
+			//	}
+			//
+			//	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+			//	rootSignatureDesc.Init_1_1((UINT)rootParameters.size(), rootParameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			//	
+			//	/// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
+			//	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+			//	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+			//
+			//	if (FAILED(m_context->GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+			//	{
+			//		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+			//	}
+			//
+			//	ComPtr<ID3DBlob> signature;
+			//	ComPtr<ID3DBlob> error;
+			//	if(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error) != S_OK)
+			//	{
+			//		IS_CORE_ERROR("[RHI_DescriptorLayout_DX12::Create] Error: {}", error->GetBufferPointer());
+			//	}
+			//	ThrowIfFailed(m_context->GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_layout)));
+			//}
 
-				/// Reference: https:///github.com/shuhuai/DeferredShadingD3D12/blob/master/DeferredRender.cpp
-
-				///std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
-				///rootParameters.resize(descriptors.size());
-				///CD3DX12_ROOT_PARAMETER1 rootParameter = {};
-				///rootParameters[0].InitAsDescriptorTable(1, &ranges[0]);
-				///rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_STATIC, D3D12_SHADER_VISIBILITY_PIXEL);
-				///rootParameters.push_back(rootParameter);
-
-				///int baseRegister = 0;
-				///for (const Descriptor& descriptor : descriptors)
-				///{
-				///	CD3DX12_DESCRIPTOR_RANGE1 range = {};
-				///	range.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, baseRegister++);
-				///	ranges.push_back(range);
-				///
-				///	CD3DX12_ROOT_PARAMETER1 rootParameter = {};
-				///	rootParameter.InitAsDescriptorTable(1, &ranges.back());
-				///	rootParameters.push_back(rootParameter);
-				///}
-
-				std::vector<CD3DX12_DESCRIPTOR_RANGE1> ranges;
-				for (const DescriptorBinding& desc : descriptor_set.Bindings)
-				{
-					CD3DX12_DESCRIPTOR_RANGE1 range = {};
-					range.Init(DescriptorRangeTypeToDX12(desc.Type), 1, desc.Binding);
-					ranges.push_back(range);
-				}
-
-				int rangeIndex = 0;
-				std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters;
-				rootParameters.resize(ranges.size());
-				for (CD3DX12_ROOT_PARAMETER1& root : rootParameters)
-				{
-					root.InitAsDescriptorTable(1, &ranges[rangeIndex++]);
-				}
-
-				CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-				rootSignatureDesc.Init_1_1((UINT)rootParameters.size(), rootParameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-				
-				/// This is the highest version the sample supports. If CheckFeatureSupport succeeds, the HighestVersion returned will not be greater than this.
-				D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-
-				if (FAILED(m_context->GetDevice()->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-				{
-					featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-				}
-
-				ComPtr<ID3DBlob> signature;
-				ComPtr<ID3DBlob> error;
-				if(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error) != S_OK)
-				{
-					IS_CORE_ERROR("[RHI_DescriptorLayout_DX12::Create] Error: {}", error->GetBufferPointer());
-				}
-				ThrowIfFailed(m_context->GetDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&m_layout)));
-			}
+			u32 DescriptorHeap_DX12::s_currentHeapId = 0;
 
 			//// <summary>
 			//// DescriptorHeapPage_DX12
 			//// </summary>
 			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12()
-			{
-			}
+			{ }
 
-			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context)
+			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId)
 			{
-				m_capacity = capacity;
 				m_heapType = type;
+				m_capacity = static_cast<u32>(capacity);
+				m_heapId = heapId;
 
 				D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 				heapDesc.Type = m_heapType;
 				heapDesc.Flags = type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-				heapDesc.NumDescriptors = (UINT)m_capacity;
+				heapDesc.NumDescriptors = static_cast<UINT>(m_capacity);
 
 				context->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap));
 				m_descriptorSize = context->GetDevice()->GetDescriptorHandleIncrementSize(m_heapType);
 
 				m_descriptorHeapCPUStart = m_heap->GetCPUDescriptorHandleForHeapStart();
 				m_descriptorHeapGPUStart = m_heap->GetGPUDescriptorHandleForHeapStart();
+
+				for (size_t i = 0; i < m_capacity; ++i)
+				{
+					DescriptorHeapHandle_DX12 freeHandle = {};
+					freeHandle.CPUPtr.ptr = m_descriptorHeapCPUStart.ptr + (i * m_descriptorSize);
+					freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					freeHandle.HeapId = m_heapId;
+					m_freeHandles.push_back(freeHandle);
+				}
 			}
 
 			bool DescriptorHeapPage_DX12::GetNewHandle(DescriptorHeapHandle_DX12& handle)
 			{
-				int handleIndex = 0;
-				handle = { };
+				ASSERT(m_heap);
 
-				if (GetSize() >= GetCapacity())
+				if (m_freeHandles.empty())
 				{
 					IS_CORE_ERROR("[DescriptorHeapPage_DX12::GetNewHandle] Heap is full.");
 					return false;
 				}
-				else if (!m_freeSlots.empty())
-				{
-					handleIndex = m_freeSlots.back();
-					m_freeSlots.pop_back();
-				}
-				else if (!m_allocateIndexs.empty())
-				{
-					handleIndex = m_allocateIndexs.back() + 1;
-				}
 
-
-				D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = m_descriptorHeapCPUStart;
-				cpuHandle.ptr += handleIndex * m_descriptorSize;
-				D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = m_descriptorHeapGPUStart;
-				gpuHandle.ptr += handleIndex * m_descriptorSize;
-
-				handle.SetCPUHandle(cpuHandle);
-				handle.SetGPUHandle(gpuHandle);
-				handle.SetHeapIndex(handleIndex);
-
-				m_allocateIndexs.push_back(handleIndex);
-
-				++m_size;
+				handle = m_freeHandles.back();
+				m_freeHandles.pop_back();
 
 				return true;
 			}
 
 			void DescriptorHeapPage_DX12::FreeHandle(DescriptorHeapHandle_DX12 handle)
 			{
-				if (std::find(m_freeSlots.begin(), m_freeSlots.end(), handle.HandleIndex) != m_freeSlots.end())
+				ASSERT(m_heap);
+				if (handle.HeapId == m_heapId)
 				{
-					IS_CORE_ERROR("[DescriptorHeapPage_DX12::FreeHandle] Trying to free a handle which is already free.");
-					return;
+					m_freeHandles.push_back(handle);
 				}
-				m_freeSlots.push_back(handle.HandleIndex);
-				--m_size;
 			}
 
 			void DescriptorHeapPage_DX12::Reset()
 			{
-				m_freeSlots.clear();
-				m_allocateIndexs.clear();
-				m_size = 0;
+				m_freeHandles.clear();
+				for (size_t i = 0; i < m_capacity; ++i)
+				{
+					DescriptorHeapHandle_DX12 freeHandle = {};
+					freeHandle.CPUPtr.ptr = m_descriptorHeapCPUStart.ptr + (i * m_descriptorSize);
+					freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					freeHandle.HeapId = m_heapId;
+					m_freeHandles.push_back(freeHandle);
+				}
+			}
+
+			void DescriptorHeapPage_DX12::Destroy()
+			{
+				m_freeHandles.clear();
+				if (m_heap)
+				{
+					m_heap->Release();
+					m_heap.Reset();
+					m_heap = nullptr;
+				}
 			}
 
 
@@ -213,42 +179,36 @@ namespace Insight
 				AddNewHeap();
 			}
 
+			ID3D12DescriptorHeap* DescriptorHeap_DX12::GetHeap(u32 heapId) const
+			{
+				return m_heaps.at(heapId).GetHeap();
+			}
+
 			DescriptorHeapHandle_DX12 DescriptorHeap_DX12::GetNewHandle()
 			{
 				DescriptorHeapHandle_DX12 handle = { };
+				// Check for a handle from all heaps before creating a new one.
+				for (auto& heap : m_heaps)
+				{
+					if (heap.GetNewHandle(handle))
+					{
+						return handle;
+					}
+				}
+
+				// All heaps are full. Create a new heap and get a handle from.
+				AddNewHeap();
 				m_heaps.back().GetNewHandle(handle);
+
 				return handle;
 			}
 
-			bool DescriptorHeap_DX12::FindDescriptor(const DescriptorBinding & descriptor, DescriptorHeapHandle_DX12& handle)
+			void DescriptorHeap_DX12::FreeHandle(DescriptorHeapHandle_DX12& handle)
 			{
-				if (m_heaps.size() == 0 || m_heaps.back().IsFull())
+				for (auto heap : m_heaps)
 				{
-					assert(false);
-					AddNewHeap();
+					heap.FreeHandle(handle);
 				}
-
-				const u64 descHash = descriptor.GetHash(true);
-				auto descItr = m_descriptorHashToHandleIndex.find(descHash);
-				if (descItr != m_descriptorHashToHandleIndex.end())
-				{
-					/// Found descriptor hash.
-					handle = m_descriptorHeapHandle.find(descItr->second)->second;
-					return true;
-				}
-				m_heaps.back().GetNewHandle(handle);
-
-				RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(descriptor.RHI_Buffer_View.GetBuffer());
-
-				D3D12_CONSTANT_BUFFER_VIEW_DESC bufferViewDesc = {};
-				bufferViewDesc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + descriptor.RHI_Buffer_View.GetOffset();
-				bufferViewDesc.SizeInBytes = static_cast<UINT>(descriptor.RHI_Buffer_View.GetSize());
-				m_context->GetDevice()->CreateConstantBufferView(&bufferViewDesc, handle.CPUPtr);
-
-				m_descriptorHashToHandleIndex[descHash] = handle.HandleIndex;
-				m_descriptorHeapHandle[handle.HandleIndex] = handle;
-
-				return false;
 			}
 
 			void DescriptorHeap_DX12::Reset()
@@ -261,9 +221,18 @@ namespace Insight
 				}
 			}
 
+			void DescriptorHeap_DX12::Destroy()
+			{
+				Reset();
+				for (auto& heap : m_heaps)
+				{
+					heap.Destroy();
+				}
+			}
+
 			void DescriptorHeap_DX12::AddNewHeap()
 			{
-				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context);
+				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++);
 				m_heaps.push_back(heap);
 			}
 

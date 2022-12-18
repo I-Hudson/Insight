@@ -5,6 +5,7 @@
 #include "Graphics/RHI/Vulkan/RHI_Sampler_Vulkan.h"
 #endif
 #ifdef IS_DX12_ENABLED
+#include "Graphics/RHI/DX12/RHI_Sampler_DX12.h"
 #endif
 
 namespace Insight
@@ -17,7 +18,7 @@ namespace Insight
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_SamplerManager_Vulkan); }
 #endif
 #ifdef IS_DX12_ENABLED
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_SamplerManager_DX12); }
 #endif
 			ASSERT(false);
 			return nullptr;

@@ -1,3 +1,5 @@
+#if defined(IS_VULKAN_ENABLED)
+
 #include "Graphics/RHI/Vulkan/RHI_Sampler_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 
@@ -62,3 +64,4 @@ namespace Insight
 		}
 	}
 }
+#endif // IS_VULKAN_ENABLED

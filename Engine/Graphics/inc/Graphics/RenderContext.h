@@ -72,6 +72,8 @@ namespace Insight
 		class IS_GRAPHICS RenderContext : public Core::Singleton<RenderContext>
 		{
 		public:
+			virtual ~RenderContext() = default;
+
 			static RenderContext* New(GraphicsAPI graphicsAPI);
 
 			virtual bool Init() = 0;

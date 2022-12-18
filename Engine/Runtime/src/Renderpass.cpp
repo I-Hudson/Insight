@@ -57,6 +57,9 @@ namespace Insight
 	Runtime::Model* model = nullptr;
 	bool modelAddedToScene = false;
 
+	static bool enableFSR = false;
+	static float fsrSharpness = 1.0f;
+
 	namespace Graphics
 	{
 
@@ -137,14 +140,19 @@ namespace Insight
 			pendingRenderResolution[1] = RenderGraph::Instance().GetRenderResolution().y;
 
 			m_imgui_pass.Create();
-			Graphics::RHI_FSR::Instance().Init();
+
+			enableFSR = RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan;
+			if (enableFSR)
+			{
+				Graphics::RHI_FSR::Instance().Init();
+			}
 		}
 
 		void Renderpass::Render()
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (!modelAddedToScene 
+			if (!modelAddedToScene
 				&& model->GetResourceState() == Runtime::EResoruceStates::Loaded)
 			{
 				modelAddedToScene = true;
@@ -211,19 +219,19 @@ namespace Insight
 			std::sort(transparent_entities_to_render.begin(), transparent_entities_to_render.end(), [this](const Ptr<ECS::Entity>& entity1, const Ptr<ECS::Entity>& entity2)
 				{
 					ECS::TransformComponent* transformComponent1 = static_cast<ECS::TransformComponent*>(entity1->GetComponentByName(ECS::TransformComponent::Type_Name));
-					ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
+			ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
 
-					glm::vec3 position1 = transformComponent1->GetPosition();
-					glm::vec3 position2 = transformComponent2->GetPosition();
-					glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
+			glm::vec3 position1 = transformComponent1->GetPosition();
+			glm::vec3 position2 = transformComponent2->GetPosition();
+			glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
 
-					return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
+			return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
 				});
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
-					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
+			g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 
 				});
 			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
@@ -253,7 +261,10 @@ namespace Insight
 		{
 			RenderContext::Instance().GpuWaitForIdle();
 			m_imgui_pass.Release();
-			Graphics::RHI_FSR::Instance().Destroy();
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			{
+				Graphics::RHI_FSR::Instance().Destroy();
+			}
 
 			Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld"));
 		}
@@ -1034,9 +1045,6 @@ namespace Insight
 				}, std::move(pass_data));
 		}
 
-		static bool enableFSR = false;
-		static float fsrSharpness = 1.0f;
-
 		void Renderpass::FSR2()
 		{
 			if (RenderGraph::Instance().GetRenderResolution() == RenderGraph::Instance().GetOutputResolution())
@@ -1044,13 +1052,13 @@ namespace Insight
 				return;
 			}
 
-			ImGui::Checkbox("Enable FSR", &enableFSR);
-			ImGui::DragFloat("FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
-
 			if (!enableFSR)
 			{
 				return;
 			}
+
+			ImGui::Checkbox("Enable FSR", &enableFSR);
+			ImGui::DragFloat("FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
 			struct PassData
 			{
