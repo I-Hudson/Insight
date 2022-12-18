@@ -1,8 +1,6 @@
 #include "Platforms/Platform.h"
 
-#include "Core/Logger.h"
 #include <stdarg.h>
-
 
 namespace Insight
 {

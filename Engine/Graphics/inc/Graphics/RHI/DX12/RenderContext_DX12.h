@@ -9,8 +9,6 @@
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
-#include "Core/Logger.h"
-
 namespace Insight
 {
 	namespace Graphics

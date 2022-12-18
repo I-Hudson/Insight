@@ -9,6 +9,7 @@
 
 #include "Graphics/RenderTarget.h"
 
+#include "Core/Logger.h"
 #include "Core/Profiler.h"
 
 #include <WinPixEventRuntime/pix3.h>

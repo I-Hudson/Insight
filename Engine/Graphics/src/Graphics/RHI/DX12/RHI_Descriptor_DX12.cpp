@@ -8,6 +8,8 @@
 
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Graphics
