@@ -48,6 +48,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.FFR2}",
         "%{IncludeDirs.Aftermath}",
+        "%{IncludeDirs.DirectXHeaders}",
     }
 
     files 
@@ -81,12 +82,6 @@ project "Insight_Graphics"
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }
-    if (profileTool == "pix") then
-        links
-        {
-            "WinPixEventRuntime.lib"
-        }
-    end
     
     libdirs
     {
@@ -128,6 +123,7 @@ project "Insight_Graphics"
 
             "ffx_fsr2_api_x64d.lib",
             "ffx_fsr2_api_vk_x64d.lib",
+            "ffx_fsr2_api_dx12_x64d.lib",
         }
 
     filter "configurations:Release"  
@@ -146,6 +142,7 @@ project "Insight_Graphics"
 
             "ffx_fsr2_api_x64.lib",
             "ffx_fsr2_api_vk_x64.lib",
+            "ffx_fsr2_api_dx12_x64.lib",
         }
 
     filter "configurations:Testing" 

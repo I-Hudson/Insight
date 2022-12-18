@@ -66,6 +66,7 @@ IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
 IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
 IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
 IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
+IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
 
 LibDirs = {}
 
@@ -179,12 +180,16 @@ workspace "Insight"
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
             "IS_MATHS_DIRECTX_MATHS",
-            --"IS_DX12_ENABLED",
+            "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             
             "NOMINMAX",
             
             "VK_USE_PLATFORM_WIN32_KHR",
+        }
+        links
+        {
+            "WinPixEventRuntime.lib"
         }
 
     filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
