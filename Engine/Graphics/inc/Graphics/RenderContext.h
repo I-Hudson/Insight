@@ -14,6 +14,7 @@
 #include "Graphics/RHI/RHI_Sampler.h"
 #include "Graphics/RHI/RHI_ResourceRenderTracker.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
+#include "Graphics/RHI/RHI_PipelineManager.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
@@ -97,16 +98,19 @@ namespace Insight
 			void DisableExtension(DeviceExtension extension);
 			GraphicsAPI GetGraphicsAPI() const { return m_graphicsAPI; }
 
-			CommandListManager& GetCommandListManager() { return m_commandListManager.Get(); }
+			CommandListManager& GetCommandListManager()               { return m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
-			RHI_ShaderManager& GetShaderManager() { return m_shaderManager; }
-			RHI_RenderpassManager& GetRenderpassManager() { return m_renderpassManager; }
-			RHI_DescriptorSetManager& GetDescriptorSetManager() { return m_descriptorSetManager.Get(); }
-			RHI_SamplerManager& GetSamplerManager() { return *m_samplerManager; }
-			RHI_ResourceRenderTracker& GetResourceRenderTracker() { return m_resource_tracker; }
+			RHI_ShaderManager& GetShaderManager()                     { return m_shaderManager; }
+			RHI_RenderpassManager& GetRenderpassManager()             { return m_renderpassManager; }
+			RHI_DescriptorSetManager& GetDescriptorSetManager()       { return m_descriptorSetManager.Get(); }
+			RHI_SamplerManager& GetSamplerManager()                   { return *m_samplerManager; }
+			RHI_ResourceRenderTracker& GetResourceRenderTracker()     { return m_resource_tracker; }
 
-			GPUDeferedManager& GetDeferredManager() { return m_gpu_defered_manager; }
-			RHI_UploadQueue& GetUploadQueue() { return m_uploadQueue; }
+			RHI_PipelineManager& GetPipelineManager()                 { return m_pipelineManager; }
+			RHI_PipelineLayoutManager& GetPipelineLayoutManager()     { return m_pipelineLayoutManager; }
+
+			GPUDeferedManager& GetDeferredManager()                   { return m_gpu_defered_manager; }
+			RHI_UploadQueue& GetUploadQueue()                         { return m_uploadQueue; }
 
 		protected:
 			void ImGuiBeginFrame();
@@ -142,6 +146,9 @@ namespace Insight
 			RHI_SamplerManager* m_samplerManager;
 			GPUDeferedManager m_gpu_defered_manager;
 			RHI_UploadQueue m_uploadQueue;
+
+			RHI_PipelineManager m_pipelineManager;
+			RHI_PipelineLayoutManager m_pipelineLayoutManager;
 
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;

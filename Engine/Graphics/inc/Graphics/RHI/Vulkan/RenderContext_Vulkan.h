@@ -4,7 +4,6 @@
 
 #include "Graphics/RenderContext.h"
 #include "Graphics/RHI/RHI_Buffer.h"
-#include "Graphics/RHI/Vulkan/PipelineStateObject_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Descriptor_Vulkan.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
 
@@ -71,9 +70,6 @@ namespace Insight
 				VkFormat GetSwapchainColourFormat() const { return m_swapchainFormat; }
 				VkSwapchainKHR GetSwapchain() const { return m_swapchain; }
 
-				PipelineLayoutManager_Vulkan& GetPipelineLayoutManager() { return m_pipelineLayoutManager; }
-				PipelineStateObjectManager_Vulkan& GetPipelineStateObjectManager() { return m_pipelineStateObjectManager; }
-
 				void* GetExtensionFunction(const char* function);
 
 			protected:
@@ -105,9 +101,6 @@ namespace Insight
 				std::unordered_map<GPUQueue, VkQueue> m_commandQueues;
 				std::unordered_map<GPUQueue, std::mutex> m_command_queue_mutexs;
 				std::unordered_map<GPUQueue, u32> m_queueFamilyLookup;
-
-				PipelineLayoutManager_Vulkan m_pipelineLayoutManager;
-				PipelineStateObjectManager_Vulkan m_pipelineStateObjectManager;
 
 				VkDescriptorPool m_imguiDescriptorPool;
 				VkRenderPass m_imguiRenderpass;

@@ -254,7 +254,7 @@ namespace Insight
 				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
 				m_pipelineLayoutManager.SetRenderContext(this);
-				m_pipelineStateObjectManager.SetRenderContext(this);
+				m_pipelineManager.SetRenderContext(this);
 				m_renderpassManager.SetRenderContext(this);
 
 				/// Initialise vulkan memory allocator
@@ -348,7 +348,7 @@ namespace Insight
 				vkDestroyDescriptorPool(m_device, m_descriptor_pool, nullptr);
 				m_descriptor_pool = nullptr;
 
-				m_pipelineStateObjectManager.Destroy();
+				m_pipelineManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
 
 				if (m_surface)
