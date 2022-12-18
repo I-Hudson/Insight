@@ -19,7 +19,9 @@ namespace Insight
 			{
 			public:
 
-				virtual void Create(RenderContext* context) override { ASSERT(false); }
+				ID3D12GraphicsCommandList* GetCommandList() const;
+
+				virtual void Create(RenderContext* context) override;
 				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override { ASSERT(false); }
 
 				void ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers);
@@ -33,18 +35,17 @@ namespace Insight
 				void SetDescriptorHeaps(int count, ID3D12DescriptorHeap** heaps);
 				void SetDescriptorHeaps(std::vector<ID3D12DescriptorHeap*> heaps);
 
-				ID3D12GraphicsCommandList* GetCommandList() const;
 
 				/// RHI_CommandList
 				virtual void Reset() override;
 				virtual void Close() override;
 				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
-				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) override;
+				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset) override;
 
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResource() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				/// RHI_CommandList
 				virtual void BeginRenderpass(RenderpassDescription renderDescription) override;
@@ -55,22 +56,29 @@ namespace Insight
 
 				virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) override;
 				virtual void SetScissor(int x, int y, int width, int height) override;
+				virtual void SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor) override;
+				virtual void SetLineWidth(float width) override;
 
 				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
 				virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) override;
 
-				virtual void Draw(int vertexCount, int instanceCount, int firstVertex, int firstInstance) override;
-				virtual void DrawIndexed(int indexCount, int instanceCount, int firstIndex, int vertexOffset, int firstInstance) override;
+				virtual void Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance) override;
+				virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) override;
 
 				virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) override;
 
+				virtual void BeginTimeBlock(const std::string& blockName) override;
+				virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour) override;
+				virtual void EndTimeBlock() override;
+
 			protected:
 				virtual bool BindDescriptorSets() override;
+				virtual void SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout) override;
+
 
 			private:
-				RenderContext_DX12* RenderContextDX12();
+				RenderContext_DX12* m_contextDX12 = nullptr;
 
-			private:
 				ComPtr<ID3D12GraphicsCommandList> m_commandList;
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
 
@@ -98,7 +106,7 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResource() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			private:
 				RenderContext_DX12* m_context{ nullptr };

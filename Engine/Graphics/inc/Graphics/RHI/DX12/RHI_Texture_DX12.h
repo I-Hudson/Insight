@@ -26,7 +26,7 @@ namespace Insight
 				/// RHI_Resource
 				virtual void Release() override;
 				virtual bool ValidResource() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 			private:
 				ComPtr<ID3D12Resource> m_resource;

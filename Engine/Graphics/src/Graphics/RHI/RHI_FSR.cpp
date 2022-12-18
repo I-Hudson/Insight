@@ -6,16 +6,20 @@
 
 #include "Event/EventSystem.h"
 
+#include <ffx-fsr2-api/ffx_fsr2.h>
+
 #ifdef IS_VULKAN_ENABLED
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #include "Graphics/RHI/Vulkan/RHI_CommandList_Vulkan.h"
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
+#include <ffx-fsr2-api/vk/ffx_fsr2_vk.h>
 #endif
 #ifdef IS_DX12_ENABLED
+#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
+#include <ffx-fsr2-api/dx12/ffx_fsr2_dx12.h>
 #endif
 
-#include <ffx-fsr2-api/ffx_fsr2.h>
-#include <ffx-fsr2-api/vk/ffx_fsr2_vk.h>
 
 namespace Insight
 {
@@ -146,6 +150,23 @@ namespace Insight
             else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
+                m_ffx_fsr2_dispatch_description.commandList = ffxGetCommandListDX12(static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmd_list)->GetCommandList());
+
+                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_input)->GetResource()
+                    , name_input, FFX_RESOURCE_STATE_COMPUTE_READ);
+
+                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_depth)->GetResource()
+                    , name_depth, FFX_RESOURCE_STATE_COMPUTE_READ);
+
+                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_velocity)->GetResource()
+                    , name_velocity, FFX_RESOURCE_STATE_COMPUTE_READ);
+
+                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_output)->GetResource()
+                    , name_output, FFX_RESOURCE_STATE_UNORDERED_ACCESS);
+
+                m_ffx_fsr2_dispatch_description.exposure = ffxGetResourceDX12(&m_ffx_fsr2_context, nullptr, L"FSR2_InputExposure", FFX_RESOURCE_STATE_GENERIC_READ);
+                m_ffx_fsr2_dispatch_description.exposure = ffxGetResourceDX12(&m_ffx_fsr2_context, nullptr, L"FSR2_EmptyInputReactiveMap", FFX_RESOURCE_STATE_GENERIC_READ);
+                m_ffx_fsr2_dispatch_description.exposure = ffxGetResourceDX12(&m_ffx_fsr2_context, nullptr, L"FSR2_EmptyTransparencyAndCompositionMap", FFX_RESOURCE_STATE_GENERIC_READ);
 #endif
             }
 
@@ -198,6 +219,23 @@ namespace Insight
             if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
+                RHI::DX12::RenderContext_DX12* renderContextVulkan = static_cast<RHI::DX12::RenderContext_DX12*>(render_context);
+                const u64 scratchBufferSize = ffxFsr2GetScratchMemorySizeDX12();
+                void* scratchBuffer = malloc(scratchBufferSize);
+                FfxErrorCode errorCode = ffxFsr2GetInterfaceDX12(&m_ffx_fsr2_context_description.callbacks
+                    , renderContextVulkan->GetDevice()
+                    , scratchBuffer
+                    , scratchBufferSize);
+                ASSERT(errorCode == FFX_OK);
+
+                m_ffx_fsr2_context_description.device = ffxGetDeviceDX12(renderContextVulkan->GetDevice());
+                m_ffx_fsr2_context_description.maxRenderSize.width = renderWidth;
+                m_ffx_fsr2_context_description.maxRenderSize.height = renderHeight;
+                m_ffx_fsr2_context_description.displaySize.width = displayWidth;
+                m_ffx_fsr2_context_description.displaySize.height = displayHeight;
+                m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
+
+                ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
 #endif
             }
         }

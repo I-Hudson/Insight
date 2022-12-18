@@ -124,11 +124,11 @@ namespace Insight
 				return m_resource;
 			}
 
-			void RHI_Buffer_DX12::SetName(std::wstring name)
+			void RHI_Buffer_DX12::SetName(std::string name)
 			{
 				if (m_resource)
 				{
-					m_resource->SetName(name.c_str());
+					m_context->SetObjectName(name, m_resource.Get());
 				}
 			}
 		}

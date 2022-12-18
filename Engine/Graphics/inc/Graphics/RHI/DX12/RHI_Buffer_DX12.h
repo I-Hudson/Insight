@@ -24,7 +24,7 @@ namespace Insight
 
 				virtual void Release() override;
 				virtual bool ValidResource() override;
-				virtual void SetName(std::wstring name) override;
+				virtual void SetName(std::string name) override;
 
 				ID3D12Resource* GetResource() const { return m_resource.Get(); }
 

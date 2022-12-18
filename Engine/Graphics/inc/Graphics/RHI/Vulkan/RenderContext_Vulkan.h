@@ -101,7 +101,6 @@ namespace Insight
 				VkSwapchainKHR m_swapchain{ nullptr };
 				VkFormat m_swapchainFormat;
 				std::vector<RHI_Texture*> m_swapchainImages;
-				glm::ivec2 m_swapchainBufferSize;
 
 				std::unordered_map<GPUQueue, VkQueue> m_commandQueues;
 				std::unordered_map<GPUQueue, std::mutex> m_command_queue_mutexs;

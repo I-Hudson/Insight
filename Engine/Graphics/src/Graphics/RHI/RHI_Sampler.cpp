@@ -17,7 +17,7 @@ namespace Insight
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_SamplerManager_Vulkan); }
 #endif
 #ifdef IS_DX12_ENABLED
-			if (GraphicsManager::IsDX12()) { }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { }
 #endif
 			ASSERT(false);
 			return nullptr;

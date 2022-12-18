@@ -27,7 +27,7 @@ namespace Insight
 				virtual void Create(RenderContext* context, ShaderDesc desc) override;
 				virtual void Destroy() override;
 
-				void CompileStage(ShaderStageFlagBits stage, std::wstring_view path, int moduleIndex);
+				void CompileStage(ShaderStageFlagBits stage, std::string_view path, int moduleIndex);
 				void CreateVertexInputLayout(const ShaderDesc& desc);
 
 			private:
