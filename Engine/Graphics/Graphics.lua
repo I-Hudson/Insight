@@ -49,6 +49,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.FFR2}",
         "%{IncludeDirs.Aftermath}",
         "%{IncludeDirs.DirectXHeaders}",
+        "%{IncludeDirs.DirectXAgilityHeaders}",
     }
 
     files 

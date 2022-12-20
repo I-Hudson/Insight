@@ -67,6 +67,7 @@ IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
 IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
 IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
 IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
+IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
 
 LibDirs = {}
 
