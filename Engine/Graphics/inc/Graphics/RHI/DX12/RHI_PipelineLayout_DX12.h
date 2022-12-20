@@ -3,7 +3,9 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/RHI_PipelineLayout.h"
+#include "Graphics/Descriptors.h"
 
+#include <d3d12.h>
 #include <d3dx12.h>
 
 namespace Insight
@@ -28,6 +30,10 @@ namespace Insight
                 virtual void Release() override;
                 virtual bool ValidResource() override;
                 virtual void SetName(std::string name) override;
+
+            private:
+                bool CheckForRootDescriptors(const DescriptorSet& descriptorSet);
+                std::vector<CD3DX12_DESCRIPTOR_RANGE> GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet);
 
             private:
                 ID3D12RootSignature* m_rootSignature = nullptr;

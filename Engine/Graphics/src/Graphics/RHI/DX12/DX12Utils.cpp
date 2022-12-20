@@ -141,6 +141,9 @@ namespace Insight
 {
 	namespace Graphics
 	{
+#define COMPARE_AND_SET_BIT(value, bitToCompare, bitToSet, result) if (value & static_cast<u32>(bitToCompare)) { result |= bitToSet; }
+#define COMPARE_AND_SET(value, bitToCompare, bitToSet, result) if (value & static_cast<u32>(bitToCompare)) { result = bitToSet; }
+
 		DXGI_FORMAT PixelFormatToDX12(PixelFormat format)
 		{
 			return PixelFormatToDXFormat[(int)format];
@@ -150,22 +153,98 @@ namespace Insight
 		{
 			switch (type)
 			{
-			case Insight::Graphics::GPUCommandListType::Default: return D3D12_COMMAND_LIST_TYPE_DIRECT;
-			case Insight::Graphics::GPUCommandListType::Transient: return D3D12_COMMAND_LIST_TYPE_DIRECT;
-			case Insight::Graphics::GPUCommandListType::Compute: return D3D12_COMMAND_LIST_TYPE_COMPUTE;
-			case Insight::Graphics::GPUCommandListType::Reset: return D3D12_COMMAND_LIST_TYPE_DIRECT;
+			case GPUCommandListType::Default: return D3D12_COMMAND_LIST_TYPE_DIRECT;
+			case GPUCommandListType::Transient: return D3D12_COMMAND_LIST_TYPE_DIRECT;
+			case GPUCommandListType::Compute: return D3D12_COMMAND_LIST_TYPE_COMPUTE;
+			case GPUCommandListType::Reset: return D3D12_COMMAND_LIST_TYPE_DIRECT;
 			default:
 				break;
 			}
+            FAIL_ASSERT();
 			return D3D12_COMMAND_LIST_TYPE_DIRECT;
 		}
 
-        D3D12_FILTER FilterToDX12(Filter filter)
+        D3D12_BARRIER_SYNC PipelineStageFlagsToDX12(PipelineStageFlags flags)
+        {
+            D3D12_BARRIER_SYNC result = D3D12_BARRIER_SYNC_NONE;
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::TopOfPipe,                        D3D12_BARRIER_SYNC_ALL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::DrawIndirect,                     D3D12_BARRIER_SYNC_ALL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::VertexInput,                      D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::VertexShader,                     D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::TessesllationControlShader,       D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::TessesllationEvaluationShader,    D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::GeometryShader,                   D3D12_BARRIER_SYNC_VERTEX_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::FragmentShader,                   D3D12_BARRIER_SYNC_PIXEL_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::EarlyFramgmentShader,             D3D12_BARRIER_SYNC_DEPTH_STENCIL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::LateFramgmentShader,              D3D12_BARRIER_SYNC_DEPTH_STENCIL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::ColourAttachmentOutput,           D3D12_BARRIER_SYNC_RENDER_TARGET, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::ComputeShader,                    D3D12_BARRIER_SYNC_COMPUTE_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::Transfer,                         D3D12_BARRIER_SYNC_COPY, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::BottomOfPipe,                     D3D12_BARRIER_SYNC_ALL, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::Host,                             D3D12_BARRIER_SYNC_RESOLVE, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::AllGraphics,                      D3D12_BARRIER_SYNC_ALL_SHADING, result);
+            COMPARE_AND_SET(flags, PipelineStageFlagBits::AllCommands,                      D3D12_BARRIER_SYNC_ALL, result);
+            return result;
+        }
+
+        D3D12_BARRIER_ACCESS AccessFlagsToDX12(AccessFlags flags)
+        {
+            D3D12_BARRIER_ACCESS result = D3D12_BARRIER_ACCESS_NO_ACCESS;
+            COMPARE_AND_SET(flags, AccessFlagBits::IndirectCommandRead,             D3D12_BARRIER_ACCESS_INDIRECT_ARGUMENT, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::IndexRead,                       D3D12_BARRIER_ACCESS_INDEX_BUFFER, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::VertexAttributeRead,             D3D12_BARRIER_ACCESS_VERTEX_BUFFER, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::UniformRead,                     D3D12_BARRIER_ACCESS_CONSTANT_BUFFER, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::InputAttachmentRead,             D3D12_BARRIER_ACCESS_SHADER_RESOURCE, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::ShaderRead,                      D3D12_BARRIER_ACCESS_SHADER_RESOURCE, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::ShaderWrite,                     D3D12_BARRIER_ACCESS_UNORDERED_ACCESS, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::ColorAttachmentRead,             D3D12_BARRIER_ACCESS_RENDER_TARGET, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::ColorAttachmentWrite,            D3D12_BARRIER_ACCESS_RENDER_TARGET, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::DepthStencilAttachmentRead,      D3D12_BARRIER_ACCESS_DEPTH_STENCIL_READ, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::DepthStencilAttachmentWrite,     D3D12_BARRIER_ACCESS_DEPTH_STENCIL_WRITE, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::TransferRead,                    D3D12_BARRIER_ACCESS_COPY_SOURCE, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::TransferWrite,                   D3D12_BARRIER_ACCESS_COPY_DEST, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::HostRead,                        D3D12_BARRIER_ACCESS_COMMON, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::HostWrite,                       D3D12_BARRIER_ACCESS_COMMON, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::MemoryRead,                      D3D12_BARRIER_ACCESS_COMMON, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::MemoryWrite,                     D3D12_BARRIER_ACCESS_COMMON, result);
+            COMPARE_AND_SET(flags, AccessFlagBits::None,                            D3D12_BARRIER_ACCESS_NO_ACCESS, result);
+            return result;
+        }
+
+        D3D12_BARRIER_LAYOUT ImageLayoutToDX12(ImageLayout layout)
+        {
+            switch (layout)
+            {
+            case ImageLayout::Undefined:                        return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_UNDEFINED;
+            case ImageLayout::General:                          return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_UNORDERED_ACCESS;
+            case ImageLayout::ColourAttachment:                 return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+            case ImageLayout::DepthStencilAttachment:           return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+            case ImageLayout::DepthStencilAttachmentReadOnly:   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            case ImageLayout::ShaderReadOnly:                   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_SHADER_RESOURCE;
+            case ImageLayout::TransforSrc:                      return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_COPY_SOURCE;
+            case ImageLayout::TransforDst:                      return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_COPY_DEST;
+            case ImageLayout::Preinitialised:                   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_UNDEFINED;
+            case ImageLayout::DepthReadOnlyStencilAttacment:    return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            case ImageLayout::DepthAttachmentStencilReadOnly:   return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            case ImageLayout::DepthAttachmentOnly:              return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+            case ImageLayout::DepthReadOnly:                    return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            case ImageLayout::StencilAttacment:                 return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_WRITE;
+            case ImageLayout::StencilReadOnly:                  return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_DEPTH_STENCIL_READ;
+            case ImageLayout::PresentSrc:                       return D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_PRESENT;
+            case ImageLayout::Count:
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_BARRIER_LAYOUT_UNDEFINED;
+        }
+
+        D3D12_FILTER FilterToDX12(Filter filter, CompareOp op)
         {
             switch (filter)
             {
-            case Insight::Graphics::Filter::Nearest:    return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
-            case Insight::Graphics::Filter::Linear:     return D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+            case Filter::Nearest:    return op == CompareOp::Never ? D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT : D3D12_FILTER::D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+            case Filter::Linear:     return op == CompareOp::Never ? D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER::D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
             default:
                 break;
             }
@@ -177,11 +256,11 @@ namespace Insight
         {
             switch (addressMode)
             {
-            case Insight::Graphics::SamplerAddressMode::Repeat:             return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-            case Insight::Graphics::SamplerAddressMode::MirroredRepeat:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-            case Insight::Graphics::SamplerAddressMode::ClampToEdge:        return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-            case Insight::Graphics::SamplerAddressMode::ClampToBoarder:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-            case Insight::Graphics::SamplerAddressMode::MirrorClampToEdge:  return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+            case SamplerAddressMode::Repeat:             return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+            case SamplerAddressMode::MirroredRepeat:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+            case SamplerAddressMode::ClampToEdge:        return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+            case SamplerAddressMode::ClampToBoarder:     return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+            case SamplerAddressMode::MirrorClampToEdge:  return D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
             default:
                 break;
             }
@@ -193,14 +272,14 @@ namespace Insight
         {
             switch (op)
             {
-            case Insight::Graphics::CompareOp::Never:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
-            case Insight::Graphics::CompareOp::Less:           return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
-            case Insight::Graphics::CompareOp::Equal:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
-            case Insight::Graphics::CompareOp::LessOrEqual:    return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
-            case Insight::Graphics::CompareOp::Greater:        return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
-            case Insight::Graphics::CompareOp::NotEqual:       return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
-            case Insight::Graphics::CompareOp::GreaterOrEqual: return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-            case Insight::Graphics::CompareOp::Always:         return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
+            case CompareOp::Never:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+            case CompareOp::Less:           return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS;
+            case CompareOp::Equal:          return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL;
+            case CompareOp::LessOrEqual:    return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL;
+            case CompareOp::Greater:        return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER;
+            case CompareOp::NotEqual:       return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL;
+            case CompareOp::GreaterOrEqual: return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+            case CompareOp::Always:         return D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
             default:
                 break;
             }
@@ -212,12 +291,12 @@ namespace Insight
         {
             switch (boarderColour)
             {
-            case Insight::Graphics::BorderColour::FloatTransparentBlack: return { 0.0f, 0.0f, 0.0f, 0.0f };
-            case Insight::Graphics::BorderColour::IntTransparentBlack:   return { 0.0f, 0.0f, 0.0f, 0.0f };
-            case Insight::Graphics::BorderColour::FloatOpaqueBlack:      return { 0.0f, 0.0f, 0.0f, 1.0f };
-            case Insight::Graphics::BorderColour::IntOpaqueBlack:        return { 0.0f, 0.0f, 0.0f, 1.0f };
-            case Insight::Graphics::BorderColour::FloatOpaqueWhite:      return { 1.0f, 1.0f, 1.0f, 1.0f };
-            case Insight::Graphics::BorderColour::IntOpaqueWhite:        return { 1.0f, 1.0f, 1.0f, 1.0f };
+            case BorderColour::FloatTransparentBlack: return { 0.0f, 0.0f, 0.0f, 0.0f };
+            case BorderColour::IntTransparentBlack:   return { 0.0f, 0.0f, 0.0f, 0.0f };
+            case BorderColour::FloatOpaqueBlack:      return { 0.0f, 0.0f, 0.0f, 1.0f };
+            case BorderColour::IntOpaqueBlack:        return { 0.0f, 0.0f, 0.0f, 1.0f };
+            case BorderColour::FloatOpaqueWhite:      return { 1.0f, 1.0f, 1.0f, 1.0f };
+            case BorderColour::IntOpaqueWhite:        return { 1.0f, 1.0f, 1.0f, 1.0f };
             default:
                 break;
             }
@@ -229,20 +308,21 @@ namespace Insight
         {
             switch (type)
             {
-            case Insight::Graphics::PrimitiveTopologyType::PointList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-            case Insight::Graphics::PrimitiveTopologyType::LineList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-            case Insight::Graphics::PrimitiveTopologyType::LineStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-            ///case Insight::Graphics::PrimitiveTopologyType::TriangleFan: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
-            case Insight::Graphics::PrimitiveTopologyType::LineListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-            case Insight::Graphics::PrimitiveTopologyType::LineStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-            case Insight::Graphics::PrimitiveTopologyType::TriangleStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-            case Insight::Graphics::PrimitiveTopologyType::PatchList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+            case PrimitiveTopologyType::PointList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+            case PrimitiveTopologyType::LineList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case PrimitiveTopologyType::LineStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case PrimitiveTopologyType::TriangleList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case PrimitiveTopologyType::TriangleStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            ///case PrimitiveTopologyType::TriangleFan: return D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+            case PrimitiveTopologyType::LineListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case PrimitiveTopologyType::LineStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+            case PrimitiveTopologyType::TriangleListWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case PrimitiveTopologyType::TriangleStripWithAdjacency: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+            case PrimitiveTopologyType::PatchList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
             default:
                 break;
             }
+            FAIL_ASSERT();
             return D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         }
 
@@ -264,6 +344,7 @@ namespace Insight
             default:
                 break;
             }
+            FAIL_ASSERT();
             return D3D12_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         }
 
@@ -271,10 +352,11 @@ namespace Insight
         {
             switch (polygonMode)
             {
-            case Insight::Graphics::PolygonMode::Fill: return D3D12_FILL_MODE::D3D12_FILL_MODE_SOLID;
-            case Insight::Graphics::PolygonMode::Line: return D3D12_FILL_MODE::D3D12_FILL_MODE_SOLID;
-            case Insight::Graphics::PolygonMode::Point: {}
+            case PolygonMode::Fill: return D3D12_FILL_MODE::D3D12_FILL_MODE_SOLID;
+            case PolygonMode::Line: return D3D12_FILL_MODE::D3D12_FILL_MODE_SOLID;
+            case PolygonMode::Point: {}
             }
+            FAIL_ASSERT();
             return D3D12_FILL_MODE::D3D12_FILL_MODE_SOLID;
         }
 
@@ -282,43 +364,81 @@ namespace Insight
         {
             switch (cullMode)
             {
-            case Insight::Graphics::CullMode::None: return D3D12_CULL_MODE::D3D12_CULL_MODE_NONE;
-            case Insight::Graphics::CullMode::Front: return D3D12_CULL_MODE::D3D12_CULL_MODE_FRONT;
-            case Insight::Graphics::CullMode::Back: return D3D12_CULL_MODE::D3D12_CULL_MODE_BACK;
-            case Insight::Graphics::CullMode::FrontAndBack: {}
+            case CullMode::None: return D3D12_CULL_MODE::D3D12_CULL_MODE_NONE;
+            case CullMode::Front: return D3D12_CULL_MODE::D3D12_CULL_MODE_FRONT;
+            case CullMode::Back: return D3D12_CULL_MODE::D3D12_CULL_MODE_BACK;
+            case CullMode::FrontAndBack: {}
             }
+            FAIL_ASSERT();
             return D3D12_CULL_MODE::D3D12_CULL_MODE_NONE;
         }
 
         D3D12_BLEND BlendFactorToDX12(BlendFactor factor)
         {
-            return D3D12_BLEND();
+            switch (factor)
+            {
+            case BlendFactor::Zero:                     return D3D12_BLEND::D3D12_BLEND_ZERO;
+            case BlendFactor::One:                      return D3D12_BLEND::D3D12_BLEND_ONE;
+            case BlendFactor::SrcColour:                return D3D12_BLEND::D3D12_BLEND_SRC_COLOR;
+            case BlendFactor::OneMinusSrcColour:        return D3D12_BLEND::D3D12_BLEND_INV_SRC_COLOR;
+            case BlendFactor::DstColour:                return D3D12_BLEND::D3D12_BLEND_DEST_COLOR;
+            case BlendFactor::OneMinusDstColour:        return D3D12_BLEND::D3D12_BLEND_INV_DEST_COLOR;
+            case BlendFactor::SrcAlpha:                 return D3D12_BLEND::D3D12_BLEND_SRC_ALPHA;
+            case BlendFactor::OneMinusSrcAlpha:         return D3D12_BLEND::D3D12_BLEND_INV_SRC_ALPHA;
+            case BlendFactor::DstAlpha:                 return D3D12_BLEND::D3D12_BLEND_DEST_ALPHA;
+            case BlendFactor::OneMinusDstAlpha:         return D3D12_BLEND::D3D12_BLEND_INV_DEST_ALPHA;
+            case BlendFactor::ConstantColour:           return D3D12_BLEND::D3D12_BLEND_BLEND_FACTOR;
+            case BlendFactor::OneMinusConstantColour:   return D3D12_BLEND::D3D12_BLEND_BLEND_FACTOR;
+            case BlendFactor::ConstantAlpha:            return D3D12_BLEND::D3D12_BLEND_BLEND_FACTOR;
+            case BlendFactor::OneMinusConstantAlpha:    return D3D12_BLEND::D3D12_BLEND_BLEND_FACTOR;
+            case BlendFactor::SrcAplhaSaturate:         return D3D12_BLEND::D3D12_BLEND_BLEND_FACTOR;
+            case BlendFactor::Src1Colour:               return D3D12_BLEND::D3D12_BLEND_SRC1_COLOR;
+            case BlendFactor::OneMinusSrc1Colour:       return D3D12_BLEND::D3D12_BLEND_INV_SRC1_COLOR;
+            case BlendFactor::Src1Alpha:                return D3D12_BLEND::D3D12_BLEND_SRC1_ALPHA;
+            case BlendFactor::OneMinusSrc1Alpha:        return D3D12_BLEND::D3D12_BLEND_INV_SRC1_ALPHA;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_BLEND::D3D12_BLEND_ZERO;
         }
 
-        D3D12_BLEND_OP BlendOpToFX12(BlendOp op)
+        D3D12_BLEND_OP BlendOpToDX12(BlendOp op)
         {
-            return D3D12_BLEND_OP();
+            switch (op)
+            {
+            case BlendOp::Add:             return D3D12_BLEND_OP::D3D12_BLEND_OP_ADD;
+            case BlendOp::Subtract:        return D3D12_BLEND_OP::D3D12_BLEND_OP_SUBTRACT;
+            case BlendOp::ReverseSubtract: return D3D12_BLEND_OP::D3D12_BLEND_OP_REV_SUBTRACT;
+            case BlendOp::Min:             return D3D12_BLEND_OP::D3D12_BLEND_OP_MIN;
+            case BlendOp::Max:             return D3D12_BLEND_OP::D3D12_BLEND_OP_MAX;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_BLEND_OP::D3D12_BLEND_OP_ADD;
         }
 
         D3D12_DESCRIPTOR_HEAP_TYPE DescriptorTypeToDX12(DescriptorType type)
         {
             switch (type)
             {
-            case Insight::Graphics::DescriptorType::Sampler:                    return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Combined_Image_Sampler:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Sampled_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Storage_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Unifom_Buffer:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Storage_Buffer:             return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-            case Insight::Graphics::DescriptorType::Input_Attachment:           return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-            case Insight::Graphics::DescriptorType::Unknown:                    return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Sampler:                    return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+            case DescriptorType::Combined_Image_Sampler:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Sampled_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Storage_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Uniform_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Storage_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Unifom_Buffer:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Storage_Buffer:             return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Uniform_Buffer_Dynamic:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Storage_Buffer_Dyanmic:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case DescriptorType::Input_Attachment:           return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+            case DescriptorType::Unknown:                    return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             default:
                 break;
             }
+            FAIL_ASSERT();
             return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         }
 
@@ -326,21 +446,22 @@ namespace Insight
         {
             switch (type)
             {
-            case Insight::Graphics::DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            case Insight::Graphics::DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            case Insight::Graphics::DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            case Insight::Graphics::DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            case Insight::Graphics::DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-            case Insight::Graphics::DescriptorType::Storage_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-            case Insight::Graphics::DescriptorType::Unifom_Buffer:          return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-            case Insight::Graphics::DescriptorType::Storage_Buffer:         return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-            case Insight::Graphics::DescriptorType::Uniform_Buffer_Dynamic: return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-            case Insight::Graphics::DescriptorType::Storage_Buffer_Dyanmic: return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-            case Insight::Graphics::DescriptorType::Input_Attachment:       return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            case Insight::Graphics::DescriptorType::Unknown: break;
+            case DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+            case DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case DescriptorType::Storage_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case DescriptorType::Unifom_Buffer:          return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case DescriptorType::Storage_Buffer:         return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case DescriptorType::Uniform_Buffer_Dynamic: return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+            case DescriptorType::Storage_Buffer_Dyanmic: return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            case DescriptorType::Input_Attachment:       return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case DescriptorType::Unknown: break;
             default:
                 break;
             }
+            FAIL_ASSERT();
             return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
         }
 	}

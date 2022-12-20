@@ -22,10 +22,11 @@ namespace Insight
 				ID3D12GraphicsCommandList* GetCommandList() const;
 
 				virtual void Create(RenderContext* context) override;
-				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override { ASSERT(false); }
+				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override;
 
-				void ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers);
-				void ResourceBarrierImage(ID3D12Resource* resource, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState);
+				void PipelineBarrier(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier, std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier);
+				void PipelineBarrierBuffer(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier);
+				void PipelineBarrierImage(std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier);
 
 				void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects);
 				void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, int Stencil, int NumRects, D3D12_RECT* rects);
@@ -79,7 +80,7 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_contextDX12 = nullptr;
 
-				ComPtr<ID3D12GraphicsCommandList> m_commandList;
+				ID3D12GraphicsCommandList7* m_commandList;
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
 
 				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;

@@ -27,7 +27,7 @@ namespace Insight
 				std::array<float, 4> borderColour = BorderColourToDX12(info.BoarderColour);
 
 				D3D12_SAMPLER_DESC desc = { };
-				desc.Filter = FilterToDX12(info.MinFilter);
+				desc.Filter = FilterToDX12(info.MinFilter, info.CompareOp);
 				desc.AddressU = SamplerAddressModelToDX12(info.AddressMode);
 				desc.AddressV = SamplerAddressModelToDX12(info.AddressMode);
 				desc.AddressW = SamplerAddressModelToDX12(info.AddressMode);

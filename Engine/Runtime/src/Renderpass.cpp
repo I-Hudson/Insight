@@ -240,20 +240,23 @@ namespace Insight
 
 				});
 
-			ShadowPass();
-			//ShadowCullingPass();
-			if (Depth_Prepass)
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
-				DepthPrepass();
-			}
-			GBuffer();
-			TransparentGBuffer();
-			Composite();
-			FSR2();
-			Swapchain();
+				ShadowPass();
+				//ShadowCullingPass();
+				if (Depth_Prepass)
+				{
+					DepthPrepass();
+				}
+				GBuffer();
+				TransparentGBuffer();
+				Composite();
+				FSR2();
+				Swapchain();
 
-			// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
-			GFXHelper();
+				// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
+				GFXHelper();
+			}
 			ImGuiPass();
 		}
 

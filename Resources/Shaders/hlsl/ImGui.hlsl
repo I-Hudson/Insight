@@ -1,8 +1,17 @@
 struct VertexInput
 {
-	[[vk::location(0)]] float2 aPos : POSITION;
-	[[vk::location(1)]] float2 aUV : NORMAL0;
-	[[vk::location(2)]] float4 aColor : COLOR0;
+    #ifdef VULKAN
+	[[vk::location(0)]] 
+    #endif
+    float2 aPos : POSITION;
+	#ifdef VULKAN
+    [[vk::location(1)]] 
+    #endif
+    float2 aUV : NORMAL0;
+	#ifdef VULKAN
+    [[vk::location(2)]] 
+    #endif
+    float4 aColor : COLOR0;
 };
 
 struct VertexOutput
@@ -17,11 +26,22 @@ struct PushConsts
     float2 uScale;
     float2 uTranslate;
 };
-[[vk::push_constant]] PushConsts pushConstants;
-
+#ifdef VULKAN
+[[vk::push_constant]]
+PushConsts pushConstants;
+#elif DX12
+cbuffer PushConsts : register(b0)
+{
+    PushConsts pushConstants;
+}
+#endif
+#ifdef VULKAN
 [[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+#endif
 Texture2D<float4> sTexture : register(t0);
+#ifdef VULKAN
 [[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+#endif
 SamplerState sSampler : register(s0);
 
 VertexOutput VSMain(const VertexInput input)

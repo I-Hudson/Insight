@@ -92,28 +92,36 @@ namespace Insight
 			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12()
 			{ }
 
-			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId)
+			DescriptorHeapPage_DX12::DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId, bool gpuVisable)
 			{
 				m_heapType = type;
 				m_capacity = static_cast<u32>(capacity);
 				m_heapId = heapId;
+				m_gpuVisable = gpuVisable;
 
 				D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 				heapDesc.Type = m_heapType;
-				heapDesc.Flags = type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+				heapDesc.Flags = type == m_gpuVisable && D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ?
+					D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 				heapDesc.NumDescriptors = static_cast<UINT>(m_capacity);
 
 				context->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap));
 				m_descriptorSize = context->GetDevice()->GetDescriptorHandleIncrementSize(m_heapType);
 
 				m_descriptorHeapCPUStart = m_heap->GetCPUDescriptorHandleForHeapStart();
-				m_descriptorHeapGPUStart = m_heap->GetGPUDescriptorHandleForHeapStart();
+				if (m_gpuVisable)
+				{
+					m_descriptorHeapGPUStart = m_heap->GetGPUDescriptorHandleForHeapStart();
+				}
 
 				for (size_t i = 0; i < m_capacity; ++i)
 				{
 					DescriptorHeapHandle_DX12 freeHandle = {};
 					freeHandle.CPUPtr.ptr = m_descriptorHeapCPUStart.ptr + (i * m_descriptorSize);
-					freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					if (m_gpuVisable)
+					{
+						freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					}
 					freeHandle.HeapId = m_heapId;
 					m_freeHandles.push_back(freeHandle);
 				}
@@ -151,7 +159,10 @@ namespace Insight
 				{
 					DescriptorHeapHandle_DX12 freeHandle = {};
 					freeHandle.CPUPtr.ptr = m_descriptorHeapCPUStart.ptr + (i * m_descriptorSize);
-					freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					if (m_gpuVisable)
+					{
+						freeHandle.GPUPtr.ptr = m_descriptorHeapGPUStart.ptr + (i * m_descriptorSize);
+					}
 					freeHandle.HeapId = m_heapId;
 					m_freeHandles.push_back(freeHandle);
 				}
@@ -232,7 +243,7 @@ namespace Insight
 
 			void DescriptorHeap_DX12::AddNewHeap()
 			{
-				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++);
+				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++, false);
 				m_heaps.push_back(heap);
 			}
 

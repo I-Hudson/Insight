@@ -5,6 +5,7 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 
+#include <d3d12.h>
 #include <d3dx12.h>
 #include <stdexcept>
 
@@ -43,7 +44,13 @@ namespace Insight
 		DXGI_FORMAT PixelFormatToDX12(PixelFormat format);
 		D3D12_COMMAND_LIST_TYPE GPUCommandListTypeToCommandListTypeDX12(GPUCommandListType type);
 
-		D3D12_FILTER FilterToDX12(Filter filter);
+		D3D12_BARRIER_SYNC PipelineStageFlagsToDX12(PipelineStageFlags flags);
+		D3D12_BARRIER_ACCESS AccessFlagsToDX12(AccessFlags flags);
+		D3D12_BARRIER_LAYOUT ImageLayoutToDX12(ImageLayout layout);
+
+
+
+		D3D12_FILTER FilterToDX12(Filter filter, CompareOp op);
 		D3D12_TEXTURE_ADDRESS_MODE SamplerAddressModelToDX12(SamplerAddressMode addressMode);
 		D3D12_COMPARISON_FUNC CompareOpToDX12(CompareOp op);
 		std::array<FLOAT, 4> BorderColourToDX12(BorderColour boarderColour);
@@ -53,7 +60,7 @@ namespace Insight
 		D3D12_FILL_MODE PolygonModeToDX12(PolygonMode polygonMode);
 		D3D12_CULL_MODE CullModeToDX12(CullMode cullMode);
 		D3D12_BLEND BlendFactorToDX12(BlendFactor factor);
-		D3D12_BLEND_OP BlendOpToFX12(BlendOp op);
+		D3D12_BLEND_OP BlendOpToDX12(BlendOp op);
 		D3D12_DESCRIPTOR_HEAP_TYPE DescriptorTypeToDX12(DescriptorType type);
 		D3D12_DESCRIPTOR_RANGE_TYPE DescriptorRangeTypeToDX12(DescriptorType type);
 	}

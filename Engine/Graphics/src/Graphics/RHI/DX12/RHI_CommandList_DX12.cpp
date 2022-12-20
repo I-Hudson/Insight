@@ -26,29 +26,96 @@ namespace Insight
 				m_contextDX12 = static_cast<RenderContext_DX12*>(m_context);
 			}
 
-			//// <summary>
-			//// RHI_CommandList_DX12
-			//// </summary>
-			//// <param name="count"></param>
-			//// <param name="barriers"></param>
-			void RHI_CommandList_DX12::ResourceBarrier(int count, D3D12_RESOURCE_BARRIER* barriers)
+			void RHI_CommandList_DX12::PipelineBarrier(Graphics::PipelineBarrier barrier)
 			{
-				if (m_commandList)
+				D3D12_BARRIER_SYNC beforeSync = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
+				if ((barrier.SrcStage & (u32)PipelineStageFlagBits::TopOfPipe) == 0)
 				{
-					m_commandList->ResourceBarrier(count, barriers);
+					// If SrcStage is not Top of pipe then get our stage value.
+					beforeSync = PipelineStageFlagsToDX12(barrier.SrcStage);
 				}
+				D3D12_BARRIER_SYNC afterSync = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
+				if ((barrier.DstStage & (u32)PipelineStageFlagBits::BottomOfPipe) == 0)
+				{
+					// If DstStage is not bottom of pipe then get our stage value.
+					afterSync = PipelineStageFlagsToDX12(barrier.DstStage);
+				}
+
+				std::vector<D3D12_BUFFER_BARRIER> bufferBarriers;
+				for (const BufferBarrier& bufferBarrier : barrier.BufferBarriers)
+				{
+					RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferBarrier.Buffer);
+
+					D3D12_BARRIER_ACCESS accessBefore = AccessFlagsToDX12(bufferBarrier.SrcAccessFlags);
+					D3D12_BARRIER_ACCESS accessAfter = AccessFlagsToDX12(bufferBarrier.SrcAccessFlags);
+
+					ASSERT(beforeSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
+						&& accessBefore == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
+					ASSERT(afterSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
+						&& accessAfter == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
+
+					bufferBarriers.push_back(CD3DX12_BUFFER_BARRIER(
+						beforeSync,
+						afterSync,
+						accessBefore,
+						accessAfter,
+						bufferDX12->GetResource()
+					));
+				}
+
+				std::vector<D3D12_TEXTURE_BARRIER> imageBarriers;
+				for (const ImageBarrier& imageBarrier : barrier.ImageBarriers)
+				{
+					RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(imageBarrier.Image);
+
+					D3D12_BARRIER_ACCESS accessBefore = AccessFlagsToDX12(imageBarrier.SrcAccessFlags);
+					D3D12_BARRIER_ACCESS accessAfter = AccessFlagsToDX12(imageBarrier.DstAccessFlags);
+
+					ASSERT(beforeSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
+						&& accessBefore == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
+					ASSERT(afterSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
+						&& accessAfter == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
+
+					D3D12_BARRIER_SUBRESOURCE_RANGE subresources = CD3DX12_BARRIER_SUBRESOURCE_RANGE(
+						imageBarrier.SubresourceRange.BaseMipLevel,
+						imageBarrier.SubresourceRange.LevelCount,
+						imageBarrier.SubresourceRange.BaseArrayLayer,
+						imageBarrier.SubresourceRange.LayerCount
+					);
+					imageBarriers.push_back(CD3DX12_TEXTURE_BARRIER(
+						beforeSync,
+						afterSync,
+						accessBefore,
+						accessAfter,
+						ImageLayoutToDX12(imageBarrier.OldLayout),
+						ImageLayoutToDX12(imageBarrier.NewLayout),
+						textureDX12->GetResource(),
+						subresources
+					));
+
+					imageBarrier.Image->SetLayout(imageBarrier.NewLayout);					
+				}
+				PipelineBarrier(bufferBarriers, imageBarriers);
 			}
 
-			void RHI_CommandList_DX12::ResourceBarrierImage(ID3D12Resource* resource, D3D12_RESOURCE_STATES srcState, D3D12_RESOURCE_STATES dstState)
+			void RHI_CommandList_DX12::PipelineBarrier(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier, std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier)
 			{
-				D3D12_RESOURCE_BARRIER barrierdesc = {};
-				barrierdesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrierdesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrierdesc.Transition.pResource = resource;
-				barrierdesc.Transition.StateBefore = srcState;
-				barrierdesc.Transition.StateAfter = dstState;
-				barrierdesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-				ResourceBarrier(1, &barrierdesc);
+				CD3DX12_BARRIER_GROUP barrierGoup[] =
+				{
+					CD3DX12_BARRIER_GROUP(static_cast<UINT>(bufferMemoryBarrier.size()), bufferMemoryBarrier.data()),
+					CD3DX12_BARRIER_GROUP(static_cast<UINT>(imageMemoryBarrier.size()), imageMemoryBarrier.data()),
+				};
+				m_commandList->Barrier(ARRAY_COUNT(barrierGoup), barrierGoup);
+			}
+
+			void RHI_CommandList_DX12::PipelineBarrierBuffer(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier)
+			{
+				PipelineBarrier(bufferMemoryBarrier, {});
+			}
+
+			void RHI_CommandList_DX12::PipelineBarrierImage(std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier)
+			{
+				PipelineBarrier({}, imageMemoryBarrier);
 			}
 
 			void RHI_CommandList_DX12::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects)
@@ -90,7 +157,7 @@ namespace Insight
 
 			ID3D12GraphicsCommandList* RHI_CommandList_DX12::GetCommandList() const
 			{
-				return m_commandList.Get();
+				return m_commandList;
 			}
 
 			void RHI_CommandList_DX12::Reset()
@@ -148,7 +215,7 @@ namespace Insight
 			{
 				if (m_commandList)
 				{
-					m_commandList.Reset();
+					m_commandList->Release();
 					m_commandList = nullptr;
 				}
 			}
@@ -162,7 +229,7 @@ namespace Insight
 			{
 				if (m_commandList)
 				{
-					m_contextDX12->SetObjectName(name, m_commandList.Get());
+					m_contextDX12->SetObjectName(name, m_commandList);
 				}
 			}
 
@@ -268,7 +335,7 @@ namespace Insight
 				colour.x = std::max(0.0f, std::min(1.0f, colour.x));
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
-				PIXBeginEvent(m_commandList.Get(), PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255)), blockName.c_str());
+				PIXBeginEvent(m_commandList, PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255)), blockName.c_str());
 			}
 
 			void RHI_CommandList_DX12::EndTimeBlock()

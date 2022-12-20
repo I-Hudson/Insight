@@ -47,7 +47,7 @@ namespace Insight
 			{
 			public:
 				DescriptorHeapPage_DX12();
-				DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId);
+				DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId, bool gpuVisable);
 
 				ID3D12DescriptorHeap* GetHeap() const { return m_heap.Get(); }
 				D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType() const { return m_heapType; }
@@ -70,7 +70,7 @@ namespace Insight
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart;
 
 				u32 m_heapId = 0;
-
+				bool m_gpuVisable = false;
 				friend DescriptorHeap_DX12;
 			};
 
