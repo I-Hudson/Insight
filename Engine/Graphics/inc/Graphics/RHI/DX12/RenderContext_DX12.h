@@ -30,7 +30,8 @@ namespace Insight
 				ComPtr<ID3D12Fence> SubmitFence{ nullptr };
 				u64 SubmitFenceValue;
 				HANDLE SubmitFenceEvent;
-				SwapchainImage Images;
+				DescriptorHeapGPU_DX12 DescriptorHeapGPURes;
+				DescriptorHeap_DX12 DescriptorHeapSampler;
 				std::vector<RHI_CommandList*> CommandLists;
 			};
 
@@ -61,6 +62,8 @@ namespace Insight
 
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				DescriptorHeap_DX12& GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType);
+				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPU();
+				DescriptorHeap_DX12& GetFrameDescriptorHeapGPUSampler();
 
 			protected:
 				virtual void WaitForGpu() override;

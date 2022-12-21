@@ -66,6 +66,11 @@ namespace Insight
 				ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
 
+				if (data == nullptr)
+				{
+					return {};
+				}
+
 				if (sizeInBytes > GetSize())
 				{
 					IS_CORE_ERROR("[RHI_Buffer_Vulkan::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
@@ -136,7 +141,6 @@ namespace Insight
 			void RHI_Buffer_Vulkan::Resize(u64 newSizeBytes)
 			{
 				std::vector<Byte> data = Download();
-
 				const u64 data_size = GetSize();
 				
 				Release();

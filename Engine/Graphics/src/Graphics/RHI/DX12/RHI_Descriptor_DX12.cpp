@@ -243,207 +243,22 @@ namespace Insight
 
 			void DescriptorHeap_DX12::AddNewHeap()
 			{
-				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++, false);
+				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++, m_isGPUVisalbe);
 				m_heaps.push_back(heap);
 			}
 
-			/////// <summary>
-			/////// RHI_Descriptor_DX12
-			/////// </summary>
-			///void RHI_Descriptor_DX12::Release()
-			///{
-			///}
+			//---------------------------------------------
+			// DescriptorHeapGPU_DX12
+			//---------------------------------------------
+			DescriptorHeapGPU_DX12::DescriptorHeapGPU_DX12()
+			{
+				m_isGPUVisalbe = true;
+			}
 
-			///bool RHI_Descriptor_DX12::ValidResource()
-			///{
-			///	return false;
-			///}
-
-			///void RHI_Descriptor_DX12::SetName(std::wstring name)
-			///{
-			///}
-
-		///	bool DescriptorAllocator_DX12::SetupDescriptors()
-		///	{
-		///		for (const auto& set : m_descriptors)
-		///		{
-		///			const std::vector<Descriptor>& descriptos = set.second;
-		///			for (const auto& desc : descriptos)
-		///			{
-		///				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
-		///				if (m_heaps.find(descTypeDX12) == m_heaps.end())
-		///				{
-		///					/// Create intital heap if needed.
-		///					m_heaps[descTypeDX12].SetRenderContext(m_context);
-		///					m_heaps[descTypeDX12].Create(descTypeDX12);
-		///				}
-
-		///				DescriptorHeapHandle_DX12 handle = {};
-		///				m_heaps[descTypeDX12].FindDescriptor(desc, handle);
-		///			}
-		///		}
-		///		return true;
-		///	}
-
-		///	std::vector<ID3D12DescriptorHeap*> DescriptorAllocator_DX12::GetHeaps() const
-		///	{
-		///		std::vector<ID3D12DescriptorHeap*> result;
-		///		for (const auto& pair : m_heaps)
-		///		{
-		///			for (const auto& heap : pair.second.GetHeaps())
-		///			{
-		///				result.push_back(heap.GetHeap());
-		///			}
-		///		}
-		///		return result;
-		///	}
-
-		///	void DescriptorAllocator_DX12::SetDescriptors(CommandList_DX12* cmdList)
-		///	{
-		///		for (const auto& set : m_descriptors)
-		///		{
-		///			const std::vector<Descriptor>& descriptos = set.second;
-		///			for (const auto& desc : descriptos)
-		///			{
-		///				D3D12_DESCRIPTOR_HEAP_TYPE descTypeDX12 = DescriptorTypeToDX12(desc.Type);
-
-		///				DescriptorHeapHandle_DX12 handle = {};
-		///				assert(m_heaps.find(descTypeDX12)->second.FindDescriptor(desc, handle));
-		///				///cmdList->GetCommandBuffer()->SetGraphicsRootDescriptorTable(desc.Binding, handle.GPUPtr);
-		///			}
-		///		}
-		///	}
-
-		///	void DescriptorAllocator_DX12::BindTempConstentBuffer(ID3D12GraphicsCommandList* cmdList, RHI_BufferView bufferView, u32 rootParameterIndex)
-		///	{
-		///		if (m_heaps.find(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) == m_heaps.end())
-		///		{
-		///			/// Create intital heap if needed.
-		///			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].SetRenderContext(m_context);
-		///			m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		///		}
-
-		///		DescriptorHeapHandle_DX12 handle = m_heaps[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV].GetNewHandle();
-
-		///		RHI_Buffer_DX12* buffer_dx12 = static_cast<RHI_Buffer_DX12*>(bufferView.GetBuffer());
-
-		///		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		///		cbvDesc.BufferLocation = buffer_dx12->GetResource()->GetGPUVirtualAddress() + bufferView.GetOffset();
-		///		cbvDesc.SizeInBytes = AlignUp(bufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		///		m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
-
-		///		cmdList->SetGraphicsRootConstantBufferView(rootParameterIndex, cbvDesc.BufferLocation);
-		///	}
-
-		///	void DescriptorAllocator_DX12::SetDescriptorTables(RHI_CommandList_DX12* cmdList)
-		///	{
-		///		for (const auto& sets : m_descriptors)
-		///		{
-		///			int rootParaemterIndex = 0;
-		///			for (const Descriptor& descriptor : sets.second)
-		///			{
-		///				D3D12_DESCRIPTOR_HEAP_TYPE heapType = DescriptorTypeToDX12(descriptor.Type);
-		///				if (m_heaps.find(heapType) == m_heaps.end())
-		///				{
-		///					/// Create intital heap if needed.
-		///					m_heaps[heapType].SetRenderContext(m_context);
-		///					m_heaps[heapType].Create(heapType);
-		///				}
-
-		///				u64 hash = descriptor.GetHash(true);
-		///				DescriptorHeapHandle_DX12 handle = m_boundDescriptorsHandle[hash];
-
-		///				if (m_boundDescriptors[sets.first][descriptor.Binding] != hash)
-		///				{
-		///					handle = m_heaps[heapType].GetNewHandle();
-
-		///					if (descriptor.Type == DescriptorType::Unifom_Buffer)
-		///					{
-		///						RHI_Buffer_DX12* const buffer_dx12 = static_cast<RHI_Buffer_DX12*>(descriptor.BufferView.GetBuffer());
-
-		///						D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = { };
-		///						cbvDesc.BufferLocation = buffer_dx12->GetResource()->GetGPUVirtualAddress() + descriptor.BufferView.GetOffset();
-		///						cbvDesc.SizeInBytes = AlignUp(descriptor.BufferView.GetSize(), D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
-		///						m_context->GetDevice()->CreateConstantBufferView(&cbvDesc, handle.CPUPtr);
-		///					}
-		///					else if (descriptor.Type == DescriptorType::Combined_Image_Sampler)
-		///					{
-		///						RHI_Texture_DX12* const texture = static_cast<RHI_Texture_DX12*>(descriptor.Texture);
-
-		///						cmdList->ResourceBarrierImage(texture->GetResource(), D3D12_RESOURCE_STATE_COPY_DEST,
-		///							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-
-		///						D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
-		///						srvDesc.Format = PixelFormatToDX12(
-		///							PixelFormatExtensions::IsDepth(texture->GetFormat()) ?
-		///							(texture->GetFormat() == PixelFormat::D32_Float ?
-		///								PixelFormat::R32_Float : texture->GetFormat())
-		///							: texture->GetFormat());
-		///						srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		///						srvDesc.Texture2D.MipLevels = 1;
-		///						srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		///						m_context->GetDevice()->CreateShaderResourceView(texture->GetResource(), &srvDesc, handle.CPUPtr);
-		///					}
-
-		///					m_boundDescriptors[sets.first][descriptor.Binding] = hash;
-		///					m_boundDescriptorsHandle[hash] = handle;
-		///				}
-		///				m_descrptorTables.push_back(std::make_pair(rootParaemterIndex, handle));
-		///				++rootParaemterIndex;
-		///			}
-		///		}
-		///	}
-
-		///	void DescriptorAllocator_DX12::BindDescriptorTables(ID3D12GraphicsCommandList* cmdList)
-		///	{
-		///		for (const auto& pair : m_descrptorTables)
-		///		{
-		///			cmdList->SetGraphicsRootDescriptorTable(pair.first, pair.second.GetGPUHandle());
-		///		}
-		///	}
-
-		///	void DescriptorAllocator_DX12::SetRenderContext(RenderContext* context)
-		///	{
-		///		m_context = static_cast<RenderContext_DX12*>(context);
-
-		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		///		///m_heaps[heapType].SetRenderContext(m_context);
-		///		///m_heaps[heapType].Create(heapType);
-		///		///
-		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-		///		///m_heaps[heapType].SetRenderContext(m_context);
-		///		///m_heaps[heapType].Create(heapType);
-		///		///
-		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		///		///m_heaps[heapType].SetRenderContext(m_context);
-		///		///m_heaps[heapType].Create(heapType);
-		///		///
-		///		///D3D12_DESCRIPTOR_HEAP_TYPE heapType = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		///		///m_heaps[heapType].SetRenderContext(m_context);
-		///		///m_heaps[heapType].Create(heapType);
-		///	}
-
-		///	bool DescriptorAllocator_DX12::GetDescriptors(std::vector<RHI_Descriptor*>& descriptors)
-		///	{
-		///		return false;
-		///	}
-
-		///	void DescriptorAllocator_DX12::Reset()
-		///	{
-		///		/// Release all buffer views.
-		///		for (auto& heap : m_heaps)
-		///		{
-		///			heap.second.Reset();
-		///		}
-		///		m_descrptorTables.clear();
-		///		m_boundDescriptors.clear();
-		///		m_boundDescriptorsHandle.clear();
-		///	}
-
-		///	void DescriptorAllocator_DX12::Destroy()
-		///	{
-		///		m_heaps.clear();
-		///	}
+			DescriptorHeapGPU_DX12::~DescriptorHeapGPU_DX12()
+			{
+				Destroy();
+			}
 		}
 	}
 }

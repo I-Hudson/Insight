@@ -126,6 +126,9 @@ namespace Insight
 						{
 							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 						}
+
+						context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 					});
 
 				InitImGui();
@@ -146,6 +149,8 @@ namespace Insight
 						CloseHandle(context.SubmitFenceEvent);
 						context.SubmitFence.Reset();
 						context.SubmitFence = nullptr;
+						context.DescriptorHeapGPURes.Destroy();
+						context.DescriptorHeapSampler.Destroy();
 					});
 
 				m_pipelineManager.Destroy();
@@ -630,6 +635,16 @@ namespace Insight
 			DescriptorHeap_DX12& RenderContext_DX12::GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType)
 			{
 				return m_descriptorHeaps.at(descriptorHeapType);
+			}
+
+			DescriptorHeapGPU_DX12& RenderContext_DX12::GetFrameDescriptorHeapGPU()
+			{
+				return m_submitFrameContexts.Get().DescriptorHeapGPURes;
+			}
+
+			DescriptorHeap_DX12& RenderContext_DX12::GetFrameDescriptorHeapGPUSampler()
+			{
+				return m_submitFrameContexts.Get().DescriptorHeapSampler;
 			}
 
 			void RenderContext_DX12::WaitForGpu()

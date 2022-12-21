@@ -38,6 +38,7 @@ namespace Insight
 				std::vector<CD3DX12_ROOT_PARAMETER> rootParameters;
 				std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> rootDescriptors;
 				std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> descriptorRanges;
+				std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> descriptorSamplerRanges;
 
 				for (const DescriptorSet& set : descriptor_sets)
 				{
@@ -54,6 +55,7 @@ namespace Insight
 						// Root Tables
 						descriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 					}
+					descriptorSamplerRanges.push_back(GetSamplerRangesFromSet(set));
 				}
 
 				u32 rootParameterIdx = 0;
@@ -75,6 +77,16 @@ namespace Insight
 							static_cast<UINT>(range.size()), range.data());
 						rootParameters.push_back(paramter);
 					}
+
+					if (descriptorSamplerRanges.at(rootParameterIdx).size() > 0)
+					{
+						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = descriptorSamplerRanges.at(rootParameterIdx);
+						CD3DX12_ROOT_PARAMETER paramter;
+						paramter.InitAsDescriptorTable(
+							static_cast<UINT>(range.size()), range.data());
+						rootParameters.push_back(paramter);
+					}
+
 					++rootParameterIdx;
 				}
 
@@ -131,10 +143,39 @@ namespace Insight
 			std::vector<CD3DX12_DESCRIPTOR_RANGE> RHI_PipelineLayout_DX12::GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet)
 			{
 				std::vector<CD3DX12_DESCRIPTOR_RANGE> descriptorRanges;
-				for (const DescriptorBinding binding : descriptorSet.Bindings)
+				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
-					CD3DX12_DESCRIPTOR_RANGE range()
+					// Ignore the samples. Samplers can't be in the same descriptor table 
+					// as CBV/SRV/UAV.
+					if (binding.Type == DescriptorType::Sampler)
+					{
+						continue;
+					}
+
+					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
+						DescriptorRangeTypeToDX12(binding.Type), 
+						1, 
+						binding.Binding));
 				}
+				return descriptorRanges;
+			}
+
+			std::vector<CD3DX12_DESCRIPTOR_RANGE> RHI_PipelineLayout_DX12::GetSamplerRangesFromSet(const DescriptorSet& descriptorSet)
+			{
+				std::vector<CD3DX12_DESCRIPTOR_RANGE> descriptorRanges;
+				for (const DescriptorBinding& binding : descriptorSet.Bindings)
+				{
+					if (binding.Type != DescriptorType::Sampler)
+					{
+						continue;
+					}
+
+					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
+						DescriptorRangeTypeToDX12(binding.Type),
+						1,
+						binding.Binding));
+				}
+				return descriptorRanges;
 			}
 		}
 	}

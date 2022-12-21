@@ -77,6 +77,7 @@ namespace Insight
 			class DescriptorHeap_DX12
 			{
 			public:
+				virtual ~DescriptorHeap_DX12() = default;
 
 				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType);
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
@@ -93,6 +94,9 @@ namespace Insight
 			private:
 				void AddNewHeap();
 
+			protected:
+				bool m_isGPUVisalbe = false;
+			
 			private:
 				RenderContext_DX12* m_context = nullptr;
 				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
@@ -102,6 +106,13 @@ namespace Insight
 				std::unordered_map<u64, int> m_descriptorHashToHandleIndex; /// Keep track of all the slots for the descriptors.
 
 				static u32 s_currentHeapId;
+			};
+
+			class DescriptorHeapGPU_DX12 : public DescriptorHeap_DX12
+			{
+			public:
+				DescriptorHeapGPU_DX12();
+				virtual ~DescriptorHeapGPU_DX12() override;
 			};
 		}
 	}

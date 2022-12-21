@@ -21,18 +21,18 @@ struct VertexOutput
     float2 UV : TEXCOORD0;
 };
 
+#ifdef VULKAN
 struct PushConsts
 {
     float2 uScale;
     float2 uTranslate;
 };
-#ifdef VULKAN
 [[vk::push_constant]]
 PushConsts pushConstants;
 #elif DX12
-cbuffer PushConsts : register(b0)
+cbuffer UBO : register(b0)
 {
-    PushConsts pushConstants;
+    float4x4 ProjectionMatrix;
 }
 #endif
 #ifdef VULKAN
@@ -49,7 +49,11 @@ VertexOutput VSMain(const VertexInput input)
 	VertexOutput Out;
     Out.Color = input.aColor;
     Out.UV = input.aUV;
+    #ifdef VULKAN
     Out.Pos = float4(input.aPos * pushConstants.uScale + pushConstants.uTranslate, 0, 1);
+    #elif DX12
+    Out.Pos = mul(ProjectionMatrix, float4(input.aPos.xy, 0.f, 1.f));
+    #endif
 	return Out;
 }
 

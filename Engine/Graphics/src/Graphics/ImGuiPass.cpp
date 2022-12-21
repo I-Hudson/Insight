@@ -140,8 +140,38 @@ namespace Insight
 						float translate[2];
 						translate[0] = -1.0f - draw_data->DisplayPos.x * scale[0];
 						translate[1] = -1.0f - draw_data->DisplayPos.y * scale[1];
-						cmdList->SetPushConstant(0, sizeof(scale), scale);
-						cmdList->SetPushConstant(sizeof(scale), sizeof(translate), translate);
+						if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+						{
+							cmdList->SetPushConstant(0, sizeof(scale), scale);
+							cmdList->SetPushConstant(sizeof(scale), sizeof(translate), translate);
+						}
+						else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
+						{
+							struct VERTEX_CONSTANT_BUFFER_DX12
+							{
+								float   mvp[4][4];
+							};
+
+							// Setup orthographic projection matrix into our constant buffer
+							// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right).
+							VERTEX_CONSTANT_BUFFER_DX12 vertex_constant_buffer;
+							{
+								float L = draw_data->DisplayPos.x;
+								float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
+								float T = draw_data->DisplayPos.y;
+								float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
+								float mvp[4][4] =
+								{
+									{ 2.0f / (R - L),   0.0f,           0.0f,       0.0f },
+									{ 0.0f,         2.0f / (T - B),     0.0f,       0.0f },
+									{ 0.0f,         0.0f,           0.5f,       0.0f },
+									{ (R + L) / (L - R),  (T + B) / (B - T),    0.5f,       1.0f },
+								};
+								memcpy(&vertex_constant_buffer.mvp, mvp, sizeof(mvp));
+							}
+							RHI_BufferView view = cmdList->UploadUniform(vertex_constant_buffer);
+							cmdList->SetUniform(0, 0, view);
+						}
 					}
 
 					/// Will project scissor/clipping rectangles into framebuffer space

@@ -71,10 +71,14 @@ namespace Insight
 					D3D12_BARRIER_ACCESS accessBefore = AccessFlagsToDX12(imageBarrier.SrcAccessFlags);
 					D3D12_BARRIER_ACCESS accessAfter = AccessFlagsToDX12(imageBarrier.DstAccessFlags);
 
-					ASSERT(beforeSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
-						&& accessBefore == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
-					ASSERT(afterSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE
-						&& accessAfter == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS);
+					if (beforeSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE)
+					{
+						ASSERT(accessBefore == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS)
+					}
+					if (afterSync == D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE)
+					{
+						ASSERT(accessAfter == D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS)
+					}
 
 					D3D12_BARRIER_SUBRESOURCE_RANGE subresources = CD3DX12_BARRIER_SUBRESOURCE_RANGE(
 						imageBarrier.SubresourceRange.BaseMipLevel,
@@ -163,9 +167,11 @@ namespace Insight
 			void RHI_CommandList_DX12::Reset()
 			{
 				RHI_CommandList::Reset();
+			
 				if (m_commandList && m_allocator)
 				{
 					m_commandList->Reset(m_allocator->GetAllocator(), nullptr);
+					m_state = RHI_CommandListStates::Recording;
 				}
 			}
 
@@ -173,7 +179,9 @@ namespace Insight
 			{
 				if (m_commandList)
 				{
+					ASSERT(m_state == RHI_CommandListStates::Recording);
 					m_commandList->Close();
+					m_state = RHI_CommandListStates::Ended;
 				}
 			}
 
@@ -301,15 +309,20 @@ namespace Insight
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				assert(m_commandList);
+				ASSERT(m_commandList);
 				m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
 			}
 
 			void RHI_CommandList_DX12::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				assert(m_commandList);
-				m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+				if (CanDraw())
+				{
+					{
+						ASSERT(m_commandList);
+						m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+					}
+				}
 			}
 
 			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
@@ -346,20 +359,16 @@ namespace Insight
 			bool RHI_CommandList_DX12::BindDescriptorSets()
 			{
 				IS_PROFILE_FUNCTION();
-				bool result = true;/// m_frameResources->DescriptorAllocator.SetupDescriptors();
-				///FrameResourceDX12()->DescriptorAllocator.BindTempConstentBuffer(GetCommandList(), FrameResourceDX12()->DescriptorAllocator.GetDescriptor(0, 0).BufferView, 0);
-				
-				///FrameResourceDX12()->DescriptorAllocator.SetDescriptorTables(this);
 
-				///std::vector<ID3D12DescriptorHeap*> descriptors = FrameResourceDX12()->DescriptorAllocator.GetHeaps();
-				///if (result && descriptors.size() > 0)
+				ID3D12DescriptorHeap* heaps[] = 
 				{
-					/// Set our descriptor heaps.
-					///m_commandList->SetDescriptorHeaps(static_cast<UINT>(descriptors.size()), descriptors.data());
+					m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0)
+				};
+				m_commandList->SetDescriptorHeaps(ARRAY_COUNT(heaps), heaps);
+				std::vector<DescriptorHeapHandle_DX12> descriptorHeapHandles = m_descriptorAllocator->GetDescriptorHeapHandles();
 
-					/// Set all our descriptors tables.
-					///FrameResourceDX12()->DescriptorAllocator.BindDescriptorTables(GetCommandList());
-				}
+
+
 				return true;
 			}
 
@@ -385,6 +394,7 @@ namespace Insight
 					RHI_CommandList* list = *m_freeLists.begin();
 					m_freeLists.erase(m_freeLists.begin());
 					m_allocLists.insert(list);
+					list->Reset();
 					return list;
 				}
 
@@ -392,6 +402,7 @@ namespace Insight
 				list->Create(m_context);
 				list->m_allocator = this;
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
+				list->m_state = RHI_CommandListStates::Recording;
 
 				m_allocLists.insert(list);
 				return list;

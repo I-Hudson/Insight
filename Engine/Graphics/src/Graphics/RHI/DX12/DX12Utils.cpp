@@ -449,7 +449,7 @@ namespace Insight
             case DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
             case DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             case DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            case DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            case DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
             case DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
             case DescriptorType::Storage_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
             case DescriptorType::Unifom_Buffer:          return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;

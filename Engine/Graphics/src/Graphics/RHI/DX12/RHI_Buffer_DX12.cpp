@@ -3,6 +3,8 @@
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Core/Logger.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -44,6 +46,12 @@ namespace Insight
 					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
 					ResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
 				}
+				else if (bufferType == BufferType::Readback)
+				{
+					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK);
+					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
+					ResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+				}
 
 				/// Create the constant buffer.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
@@ -67,6 +75,17 @@ namespace Insight
 
 			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, u64 sizeInBytes, u64 offset)
 			{
+				if (data == nullptr)
+				{
+					return {};
+				}
+
+				if (sizeInBytes > GetSize())
+				{
+					IS_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
+					return {};
+				}
+
 				if (m_mappedData)
 				{
 					Platform::MemCopy(m_mappedData + offset, data, sizeInBytes);
@@ -92,7 +111,53 @@ namespace Insight
 
 			std::vector<Byte> RHI_Buffer_DX12::Download()
 			{
-				return std::vector<Byte>();
+				const u64 current_buffer_size = GetSize();
+				std::vector<Byte> data;
+				data.resize(current_buffer_size);
+
+				if (m_mappedData)
+				{
+					Platform::MemCopy((Byte*)data.data(), m_mappedData, current_buffer_size);
+				}
+				else
+				{
+					/// We need a staging buffer to upload data from CPU to GPU.
+					RHI_Buffer_DX12 readback_buffer;
+					readback_buffer.Create(m_context, BufferType::Readback, current_buffer_size, GetStride(), { });
+
+					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
+
+					RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
+
+					D3D12_BUFFER_BARRIER srcBarrier = CD3DX12_BUFFER_BARRIER(
+						D3D12_BARRIER_SYNC_NONE,
+						D3D12_BARRIER_SYNC_COPY,
+						D3D12_BARRIER_ACCESS_NO_ACCESS,
+						D3D12_BARRIER_ACCESS_COPY_SOURCE,
+						m_resource.Get());
+					std::vector<D3D12_BUFFER_BARRIER> barriers = { srcBarrier };
+					cmdListDX12->PipelineBarrierBuffer(barriers);
+					
+					cmdList->CopyBufferToBuffer(&readback_buffer, this, 0);
+					cmdList->Close();
+
+					//D3D12_BUFFER_BARRIER srcBarrier = CD3DX12_BUFFER_BARRIER(
+					//	D3D12_BARRIER_SYNC_COPY,
+					//	D3D12_BARRIER_SYNC_NONE,
+					//	D3D12_BARRIER_ACCESS_COPY_SOURCE,
+					//	D3D12_BARRIER_ACCESS_NO_ACCESS,
+					//	m_resource.Get());
+					//std::vector<D3D12_BUFFER_BARRIER> barriers = { srcBarrier };
+					//cmdListDX12->PipelineBarrierBuffer(barriers);
+
+					m_context->SubmitCommandListAndWait(cmdList);
+					m_context->GetCommandListManager().ReturnCommandList(cmdList);
+
+					data = readback_buffer.Download();
+
+					readback_buffer.Release();
+				}
+				return data;
 			}
 
 			void RHI_Buffer_DX12::Resize(u64 newSizeInBytes)

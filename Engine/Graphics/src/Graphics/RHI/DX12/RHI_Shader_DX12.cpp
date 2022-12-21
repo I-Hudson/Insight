@@ -60,10 +60,21 @@ namespace Insight
 				int stride = 0;
 				for (size_t i = 0; i < m_shaderInputLayout.size(); ++i)
 				{
-					const ShaderInputLayout& inputLayout = m_shaderInputLayout.at(i);
+					ShaderInputLayout& inputLayout = m_shaderInputLayout.at(i);
+					std::string semanticIndex;
+					while (inputLayout.Name.back() >= '0' && inputLayout.Name.back() <= '9')
+					{
+						semanticIndex += inputLayout.Name.back();
+						inputLayout.Name.pop_back();
+					}
+					if (semanticIndex.size() > 0)
+					{
+						std::reverse(semanticIndex.begin(), semanticIndex.end());
+					}
+
 					D3D12_INPUT_ELEMENT_DESC input;
 					input.SemanticName = inputLayout.Name.c_str();
-					input.SemanticIndex = 0;
+					input.SemanticIndex = semanticIndex.size() > 0 ? std::stoi(semanticIndex) : 0;
 					input.Format = PixelFormatToDX12(inputLayout.Format);
 					input.InputSlot = 0;
 					input.AlignedByteOffset = stride;
