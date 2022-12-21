@@ -26,6 +26,11 @@ namespace Insight
 				return m_rootSignature;
 			}
 
+			const RootSignatureParameters& RHI_PipelineLayout_DX12::GetRootSignatureParameters() const
+			{
+				return m_rootSignatureParameters;
+			}
+
 			void RHI_PipelineLayout_DX12::Create(RenderContext* context, PipelineStateObject pso)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
@@ -33,66 +38,62 @@ namespace Insight
 				const u64 RootSignitureMaxSlots = 64;
 				u64 RootSignitureCurrentSlotsUsed = 0;
 				const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
+				m_rootSignatureParameters = {};
 
 				u32 rootParamterIdx = 0;
-				std::vector<CD3DX12_ROOT_PARAMETER> rootParameters;
-				std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> rootDescriptors;
-				std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> descriptorRanges;
-				std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> descriptorSamplerRanges;
-
 				for (const DescriptorSet& set : descriptor_sets)
 				{
 					if (CheckForRootDescriptors(set))
 					{
-						descriptorRanges.push_back({});
+						m_rootSignatureParameters.DescriptorRanges.push_back({});
 						// Root Descriptors
-						rootDescriptors.push_back(std::vector<CD3DX12_ROOT_DESCRIPTOR>{});
+						m_rootSignatureParameters.RootDescriptors.push_back(std::vector<CD3DX12_ROOT_DESCRIPTOR>{});
 						FAIL_ASSERT();
 					}
 					else
 					{
-						rootDescriptors.push_back({});
+						m_rootSignatureParameters.RootDescriptors.push_back({});
 						// Root Tables
-						descriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
+						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 					}
-					descriptorSamplerRanges.push_back(GetSamplerRangesFromSet(set));
+					m_rootSignatureParameters.DescriptorSamplerRanges.push_back(GetSamplerRangesFromSet(set));
 				}
 
 				u32 rootParameterIdx = 0;
 				for (const DescriptorSet& set : descriptor_sets)
 				{
-					if (rootDescriptors.at(rootParameterIdx).size() > 0)
+					if (m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx).size() > 0)
 					{
-						std::vector<CD3DX12_ROOT_DESCRIPTOR> const& root = rootDescriptors.at(rootParameterIdx);
+						std::vector<CD3DX12_ROOT_DESCRIPTOR> const& root = m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx);
 						CD3DX12_ROOT_PARAMETER paramter;
 						paramter.InitAsConstantBufferView(0);
-						rootParameters.push_back(paramter);
+						m_rootSignatureParameters.RootParameters.push_back(paramter);
 						FAIL_ASSERT();
 					}
 					else
 					{
-						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = descriptorRanges.at(rootParameterIdx);
+						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = m_rootSignatureParameters.DescriptorRanges.at(rootParameterIdx);
 						CD3DX12_ROOT_PARAMETER paramter;
 						paramter.InitAsDescriptorTable(
 							static_cast<UINT>(range.size()), range.data());
-						rootParameters.push_back(paramter);
+						m_rootSignatureParameters.RootParameters.push_back(paramter);
 					}
 
-					if (descriptorSamplerRanges.at(rootParameterIdx).size() > 0)
+					if (m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx).size() > 0)
 					{
-						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = descriptorSamplerRanges.at(rootParameterIdx);
+						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx);
 						CD3DX12_ROOT_PARAMETER paramter;
 						paramter.InitAsDescriptorTable(
 							static_cast<UINT>(range.size()), range.data());
-						rootParameters.push_back(paramter);
+						m_rootSignatureParameters.RootParameters.push_back(paramter);
 					}
 
 					++rootParameterIdx;
 				}
 
 				CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC  signatureDesc(
-					static_cast<UINT>(rootParameters.size()),
-					rootParameters.data(),
+					static_cast<UINT>(m_rootSignatureParameters.RootParameters.size()),
+					m_rootSignatureParameters.RootParameters.data(),
 					0,
 					nullptr,
 					D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT

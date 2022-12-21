@@ -286,6 +286,16 @@ namespace Insight
 				IS_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
 			}
 
+			void RHI_CommandList_DX12::SetTexture(u32 set, u32 binding, const RHI_Texture* texture)
+			{
+				m_descriptorBinding.SetShaderResourceView(binding, texture);
+			}
+
+			void RHI_CommandList_DX12::SetUniform(u32 set, u32 binding, RHI_BufferView buffer)
+			{
+				m_descriptorBinding.SetConstantBufferView(binding, buffer);
+			}
+
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
@@ -332,10 +342,11 @@ namespace Insight
 				ID3D12PipelineState* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso))->GetPipeline();
 				m_commandList->SetPipelineState(pipeline);
 
-				
 				RHI_PipelineLayout_DX12* pipelineLayout = static_cast<RHI_PipelineLayout_DX12*>(m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso));
 				m_commandList->SetGraphicsRootSignature(pipelineLayout->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
+
+				m_descriptorBinding.SetPipeline(pipelineLayout);
 			}
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)
@@ -365,9 +376,6 @@ namespace Insight
 					m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0)
 				};
 				m_commandList->SetDescriptorHeaps(ARRAY_COUNT(heaps), heaps);
-				std::vector<DescriptorHeapHandle_DX12> descriptorHeapHandles = m_descriptorAllocator->GetDescriptorHeapHandles();
-
-
 
 				return true;
 			}

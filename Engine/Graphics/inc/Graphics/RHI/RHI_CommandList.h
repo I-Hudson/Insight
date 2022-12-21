@@ -76,9 +76,9 @@ namespace Insight
 
 			template<typename T>
 			void SetUniform(u32 set, u32 binding, const T& data) { SetUniform(set, binding, static_cast<const void*>(&data), sizeof(T)); }
-			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
-			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
-			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
+			virtual void SetTexture(u32 set, u32 binding, const RHI_Texture* texture);
+			virtual void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
+			virtual void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
 
 			/// @brief Upload data to the frame uniform buffer. Does not bind.
 			/// @param set 
@@ -94,7 +94,7 @@ namespace Insight
 			/// @param set 
 			/// @param binding 
 			/// @param buffer 
-			void SetUniform(u32 set, u32 binding, RHI_BufferView buffer);
+			virtual void SetUniform(u32 set, u32 binding, RHI_BufferView buffer);
 
 			virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth, bool invert_y = false) = 0;
 			virtual void SetScissor(int x, int y, int width, int height) = 0;

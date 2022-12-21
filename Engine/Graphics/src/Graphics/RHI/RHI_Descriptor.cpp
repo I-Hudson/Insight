@@ -517,13 +517,6 @@ namespace Insight
 			return offsets;
 		}
 
-#ifdef IS_DX12_ENABLED
-		std::vector<RHI::DX12::DescriptorHeapHandle_DX12> DescriptorAllocator::GetDescriptorHeapHandles()
-		{
-			return std::vector<RHI::DX12::DescriptorHeapHandle_DX12>();
-		}
-#endif
-
 		void DescriptorAllocator::ClearDescriptors()
 		{
 			m_descriptor_sets.clear();

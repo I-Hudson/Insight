@@ -31,7 +31,7 @@ namespace Insight
 			}
 			else
 			{
-				graphcisAPI = Graphics::GraphicsAPI::DX12;
+				graphcisAPI = Graphics::GraphicsAPI::Vulkan;
 			}
 
 			m_window.Init(m_inputSystem);

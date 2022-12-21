@@ -8,10 +8,6 @@
 #include "Graphics/PipelineStateObject.h"
 #include <unordered_map>
 
-#ifdef IS_DX12_ENABLED
-#include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
-#endif
-
 namespace Insight
 {
 	namespace Graphics
@@ -106,10 +102,6 @@ namespace Insight
 			void SetRenderContext(RenderContext* context);
 			bool GetDescriptorSets(std::vector<RHI_DescriptorSet*>& descriptors);
 			std::vector<u32> GetDynamicOffsets() const;
-
-#ifdef IS_DX12_ENABLED
-			std::vector<RHI::DX12::DescriptorHeapHandle_DX12> GetDescriptorHeapHandles();
-#endif
 
 			void ClearDescriptors();
 			void Reset();

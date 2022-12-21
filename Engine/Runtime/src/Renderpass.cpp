@@ -141,7 +141,7 @@ namespace Insight
 
 			m_imgui_pass.Create();
 
-			enableFSR = RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan;
+			enableFSR = false;// RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan;
 			if (enableFSR)
 			{
 				Graphics::RHI_FSR::Instance().Init();

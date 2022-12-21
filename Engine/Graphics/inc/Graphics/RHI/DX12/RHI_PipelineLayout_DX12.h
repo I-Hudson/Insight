@@ -16,12 +16,21 @@ namespace Insight
         {
             class RenderContext_DX12;
 
+            struct RootSignatureParameters
+            {
+                std::vector<CD3DX12_ROOT_PARAMETER> RootParameters;
+                std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> RootDescriptors;
+                std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorRanges;
+                std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorSamplerRanges;
+            };
+
             class RHI_PipelineLayout_DX12 : public RHI_PipelineLayout
             {
             public:
                 virtual ~RHI_PipelineLayout_DX12() override;
 
                 ID3D12RootSignature* GetRootSignature() const;
+                const RootSignatureParameters& GetRootSignatureParameters() const;
 
                 // RHI_Pipeline
                 virtual void Create(RenderContext* context, PipelineStateObject pso) override;
@@ -38,6 +47,7 @@ namespace Insight
 
             private:
                 ID3D12RootSignature* m_rootSignature = nullptr;
+                RootSignatureParameters m_rootSignatureParameters;
                 RenderContext_DX12* m_context;
             };
         }

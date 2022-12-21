@@ -6,6 +6,8 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 
+#include "Graphics/RHI/DX12/DescriptorBindingDX12.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -60,6 +62,9 @@ namespace Insight
 				virtual void SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor) override;
 				virtual void SetLineWidth(float width) override;
 
+				virtual void SetTexture(u32 set, u32 binding, const RHI_Texture* texture) override;
+				virtual void SetUniform(u32 set, u32 binding, RHI_BufferView buffer) override;
+
 				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
 				virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) override;
 
@@ -82,6 +87,8 @@ namespace Insight
 
 				ID3D12GraphicsCommandList7* m_commandList;
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
+
+				DescriptorBindingDX12 m_descriptorBinding;
 
 				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;
 
