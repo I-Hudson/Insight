@@ -127,7 +127,9 @@ namespace Insight
 							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 						}
 
+						context.DescriptorHeapGPURes.SetRenderContext(this);
 						context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						context.DescriptorHeapSampler.SetRenderContext(this);
 						context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 					});
 

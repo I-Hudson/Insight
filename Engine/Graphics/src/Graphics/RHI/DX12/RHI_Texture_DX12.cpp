@@ -10,6 +10,11 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetDescriptorHandle() const
+			{
+				return m_descriptorHandle;
+			}
+
 			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureInfo createInfo)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
@@ -38,6 +43,18 @@ namespace Insight
 					D3D12_RESOURCE_STATE_COPY_DEST,
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
+
+				m_descriptorHandle = m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
+				shaderResouceViewDesc.Format = PixelFormatToDX12(GetFormat());
+				shaderResouceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+				shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				shaderResouceViewDesc.Texture2D.MipLevels = m_infos.at(0).Mip_Count;
+				shaderResouceViewDesc.Texture2D.MostDetailedMip = 0;
+				shaderResouceViewDesc.Texture2D.PlaneSlice = 0;
+				shaderResouceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+				m_context->GetDevice()->CreateShaderResourceView(m_resource.Get(), &shaderResouceViewDesc, m_descriptorHandle.CPUPtr);
 			}
 
 			void RHI_Texture_DX12::Upload(void* data, int sizeInBytes)

@@ -101,7 +101,7 @@ namespace Insight
 
 				D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
 				heapDesc.Type = m_heapType;
-				heapDesc.Flags = type == m_gpuVisable && D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ?
+				heapDesc.Flags = (type == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV  && m_gpuVisable) ?
 					D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 				heapDesc.NumDescriptors = static_cast<UINT>(m_capacity);
 

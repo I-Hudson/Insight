@@ -5,6 +5,7 @@
 #include "Graphics/RHI/RHI_Texture.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 
 namespace Insight
 {
@@ -18,6 +19,7 @@ namespace Insight
 				virtual ~RHI_Texture_DX12() = default;
 
 				ID3D12Resource* GetResource() const { return m_resource.Get(); }
+				DescriptorHeapHandle_DX12 GetDescriptorHandle() const;
 
 				/// RHI_Texture
 				virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) override;
@@ -32,6 +34,7 @@ namespace Insight
 			private:
 				ComPtr<ID3D12Resource> m_resource;
 				RenderContext_DX12* m_context = nullptr;
+				DescriptorHeapHandle_DX12 m_descriptorHandle;
 
 				friend class RenderContext_DX12;
 			};

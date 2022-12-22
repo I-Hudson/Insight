@@ -1,6 +1,7 @@
 #ifdef IS_DX12_ENABLED
 
 #include "Graphics/RHI/DX12/DescriptorBindingDX12.h"
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
 namespace Insight
 {
@@ -10,6 +11,7 @@ namespace Insight
         {
             DescriptorBindingDX12::DescriptorBindingDX12()
             {
+                m_descriptorHeapRes.SetRenderContext(static_cast<RenderContext_DX12*>(&RenderContext::Instance()));
                 m_descriptorHeapRes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
             }
 
