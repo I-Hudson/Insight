@@ -2,6 +2,7 @@
 
 #include "Graphics/Enums.h"
 #include "Graphics/ShaderDesc.h"
+#include "Graphics/Descriptors.h"
 
 #include <array>
 #include <memory>
@@ -16,10 +17,19 @@ namespace Insight
 		class RHI_Shader;
 		class RHI_Texture;
 
+		/// @brief Define of a pipeline (this is the same as a root signature in DX12.)
+		struct PipelineLayout
+		{
+			std::vector<DescriptorSet> Sets;
+		};
+
 		/// Pipeline state object struct. Store all current information about the render pass.
 		struct PipelineStateObject
 		{
 			static const int RenderTargetCount = 8;
+
+			/// @brief The layout used for the Pipeline. Required.
+			PipelineLayout Layout;
 
 			std::string Name;
 			ShaderDesc ShaderDescription;

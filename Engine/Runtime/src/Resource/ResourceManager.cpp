@@ -9,7 +9,7 @@ namespace Insight
 {
     namespace Runtime
     {
-#define RESOURCE_LOAD_THREAD
+//#define RESOURCE_LOAD_THREAD
 
         ResourceDatabase* ResourceManagerExt::m_database;
 

@@ -141,6 +141,32 @@ namespace Insight
 
 			m_imgui_pass.Create();
 
+			// Bindings which are updated once a frame.
+			DescriptorSet frameSet = {};
+			// Frame buffer
+			frameSet.Bindings.push_back(DescriptorBinding(0, 0, ShaderStage_Vertex | ShaderStage_Pixel, sizeof(BufferFrame), DescriptorType::Unifom_Buffer));
+			// Cascade shadow buffer.
+			frameSet.Bindings.push_back(DescriptorBinding(0, 1, ShaderStage_Vertex | ShaderStage_Pixel, sizeof(BufferLight), DescriptorType::Unifom_Buffer));
+
+			// Samplers
+			frameSet.Bindings.push_back(DescriptorBinding(0, 4, ShaderStage_Pixel, 0, DescriptorType::Sampler));
+			frameSet.Bindings.push_back(DescriptorBinding(0, 5, ShaderStage_Pixel, 0, DescriptorType::Sampler));
+			frameSet.Bindings.push_back(DescriptorBinding(0, 6, ShaderStage_Pixel, 0, DescriptorType::Sampler));
+			frameSet.Bindings.push_back(DescriptorBinding(0, 7, ShaderStage_Pixel, 0, DescriptorType::Sampler));
+
+			// Cascade shadow map
+			frameSet.Bindings.push_back(DescriptorBinding(0, 9, ShaderStage_Pixel, 0, DescriptorType::Sampled_Image));
+
+			DescriptorSet perObjectSet = {};
+			perObjectSet.Bindings.push_back(DescriptorBinding(1, 0, ShaderStage_Pixel, sizeof(BufferPerObject), DescriptorType::Unifom_Buffer));
+			perObjectSet.Bindings.push_back(DescriptorBinding(1, 1, ShaderStage_Pixel, 0, DescriptorType::Sampled_Image));
+			perObjectSet.Bindings.push_back(DescriptorBinding(1, 2, ShaderStage_Pixel, 0, DescriptorType::Sampled_Image));
+			perObjectSet.Bindings.push_back(DescriptorBinding(1, 3, ShaderStage_Pixel, 0, DescriptorType::Sampled_Image));
+
+
+			m_defaultPipelineLayout.Sets.push_back(frameSet);
+			m_defaultPipelineLayout.Sets.push_back(perObjectSet);
+
 			enableFSR = false;// RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan;
 			if (enableFSR)
 			{
@@ -353,7 +379,7 @@ namespace Insight
 
 			/// Look into "panking" for dir light https:///www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
 			RenderGraph::Instance().AddPass<PassData>("Cascade shadow pass",
-				[](PassData& data, RenderGraphBuilder& builder)
+				[this](PassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("Cascade shadow pass setup");
 
@@ -372,6 +398,7 @@ namespace Insight
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
+					pso.Layout = m_defaultPipelineLayout;
 					pso.Name = "Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
 					//pso.CullMode = CullMode::Front;
@@ -406,7 +433,7 @@ namespace Insight
 						cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
 					}
 
-					cmdList->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
+					cmdList->SetUniform(0, 1, g_global_resources.Buffer_Directional_Light_View);
 
 					RHI_Texture* depth_tex = render_graph.GetRHITexture(data.Depth_Tex);
 					for (u32 i = 0; i < depth_tex->GetInfo().Layer_Count; ++i)
@@ -549,7 +576,7 @@ namespace Insight
 						BufferPerObject object = {};
 						object.Transform = transform;
 						object.Previous_Transform = transform;
-						cmdList->SetUniform(1, 1, object);
+						cmdList->SetUniform(1, 0, object);
 
 						mesh_component->GetMesh()->Draw(cmdList);
 					}
@@ -742,17 +769,13 @@ namespace Insight
 						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
 						if (diffuseTexture)
 						{
-							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
+							cmdList->SetTexture(1, 1, diffuseTexture->GetRHITexture());
 							object.Textures_Set[0] = 1;
 						}
 						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
 						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 
-						cmdList->SetUniform(1, 1, object);
-						{
-							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-						}
+						cmdList->SetUniform(1, 0, object);
 
 						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
@@ -924,15 +947,11 @@ namespace Insight
 						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
 						if (diffuseTexture)
 						{
-							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
+							cmdList->SetTexture(1, 1, diffuseTexture->GetRHITexture());
 							object.Textures_Set[0] = 1;
 						}
 
-						cmdList->SetUniform(1, 1, object);
-						{
-							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-						}
+						cmdList->SetUniform(1, 0, object);
 
 						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
@@ -1023,25 +1042,20 @@ namespace Insight
 					cmd_list->BindPipeline(pso, nullptr);
 					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription("Composite_Pass"));
 
-
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
-					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
+					cmd_list->SetUniform(0, 1, g_global_resources.Buffer_Directional_Light_View);
 
-					const u8 texture_offset = 5;
-					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
-					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
+					cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
+					cmd_list->SetTexture(1, 2, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
 					if (Depth_Prepass)
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
+						cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
 					}
 					else
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("GBuffer_DepthStencil")));
+						cmd_list->SetTexture(1, 3, render_graph.GetRHITexture(render_graph.GetTexture("GBuffer_DepthStencil")));
 					}
-					cmd_list->SetTexture(0, texture_offset + 3, render_graph.GetRHITexture(render_graph.GetTexture("Cascade_Shadow_Tex")));
-
-					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
-					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
+					cmd_list->SetTexture(0, 9, render_graph.GetRHITexture(render_graph.GetTexture("Cascade_Shadow_Tex")));
 
 					cmd_list->Draw(3, 1, 0, 0);
 					cmd_list->EndRenderpass();
@@ -1246,8 +1260,13 @@ namespace Insight
 		{
 			struct TestPassData
 			{
+				BufferFrame Buffer_Frame;
+				BufferSamplers Buffer_Samplers;
 				RGTextureHandle RenderTarget;
 			};
+			TestPassData pass_data = {};
+			pass_data.Buffer_Frame = m_buffer_frame;
+			pass_data.Buffer_Samplers = m_buffer_samplers;
 
 			RenderGraph::Instance().AddPass<TestPassData>("SwapchainPass", [](TestPassData& data, RenderGraphBuilder& builder)
 				{
@@ -1292,11 +1311,13 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
 
-					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget), m_buffer_samplers.Clamp_Sampler);
+					BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+
+					cmdList->SetTexture(1, 1, renderGraph.GetRHITexture(data.RenderTarget), m_buffer_samplers.Clamp_Sampler);
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();
-				});
+				}, std::move(pass_data));
 		}
 
 		void Renderpass::ImGuiPass()
@@ -1309,10 +1330,10 @@ namespace Insight
 		{
 			cmd_list->SetUniform(0, 0, g_global_resources.Buffer_Frame_View);
 
-			cmd_list->SetSampler(0, 1, buffer_samplers.Shadow_Sampler);
-			cmd_list->SetSampler(0, 2, buffer_samplers.Repeat_Sampler);
-			cmd_list->SetSampler(0, 3, buffer_samplers.Clamp_Sampler);
-			cmd_list->SetSampler(0, 5, buffer_samplers.MirroredRepeat_Sampler);
+			cmd_list->SetSampler(0, 4, buffer_samplers.Shadow_Sampler);
+			cmd_list->SetSampler(0, 5, buffer_samplers.Repeat_Sampler);
+			cmd_list->SetSampler(0, 6, buffer_samplers.Clamp_Sampler);
+			cmd_list->SetSampler(0, 7, buffer_samplers.MirroredRepeat_Sampler);
 		}
 
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)

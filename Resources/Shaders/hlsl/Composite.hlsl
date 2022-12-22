@@ -1,16 +1,5 @@
 #include "Common.hlsl"
 
-// Define all our textures needed
-
-[[vk::binding(6, 0)]]
-Texture2D<float4> GBuffer_Colour : register(t0);
-[[vk::binding(7, 0)]]
-Texture2D<float4> GBuffer_World_Normal: register(t1);
-[[vk::binding(8, 0)]]
-Texture2D<float4> GBuffer_Shadow : register(t2);
-[[vk::binding(9, 0)]]
-Texture2DArray<float> Cascade_Shadow : register(t3);
-
 /*------------------------------------------------------------------------------
     SETTINGS
 ------------------------------------------------------------------------------*/
@@ -114,9 +103,9 @@ float Technique_Pcf(float3 uv, float compare)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
-	float4 colour 						= GBuffer_Colour.Sample(Clamp_Sampler, input.UV);
-	float4 world_normal 				= GBuffer_World_Normal.Sample(Clamp_Sampler, input.UV);
-	float gbuffer_depth 				= GBuffer_Shadow.Sample(Clamp_Sampler, input.UV).r;
+	float4 colour 						= DiffuseTexture.Sample(Clamp_Sampler, input.UV);
+	float4 world_normal 				= NormalTexture.Sample(Clamp_Sampler, input.UV);
+	float gbuffer_depth 				= ShadowTexture.Sample(Clamp_Sampler, input.UV).r;
 
 	float3 reconstruct_world_position 	= reconstruct_position(input.UV, gbuffer_depth, bf_Camera_Projection_View_Inverted);
 	float3 reconstruct_view_position 	= mul(bf_Camera_View_Inverted, float4(reconstruct_world_position, 1)).xyz;

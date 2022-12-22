@@ -1,5 +1,6 @@
 #include "Common_Buffers.hlsl"
 #include "Common_Samplers.hlsl"
+#include "Common_Textures.hlsl"
 
 static float4x4 biasMat = float4x4( 
 	0.5, 0.0, 0.0, 0.0,

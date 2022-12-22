@@ -436,14 +436,19 @@ namespace Insight
 			}
 
 			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
-			if (descriptor_binding.Size != size)
+			for (DescriptorBinding& descriptorBinding : descriptor_set.Bindings)
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
-					, descriptor_binding.Size, size, set, binding);
+				if (descriptorBinding.Binding == binding)
+				{
+					if (descriptorBinding.Size != size)
+					{
+						IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
+							, descriptorBinding.Size, size, set, binding);
+					}
+					descriptorBinding.RHI_Buffer_View = UploadUniform(data, size);
+					break;
+				}
 			}
-
-			descriptor_binding.RHI_Buffer_View = UploadUniform(data, size);
 		}
 
 		void DescriptorAllocator::SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view)
@@ -460,8 +465,14 @@ namespace Insight
 			}
 
 			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
-			descriptor_binding.RHI_Buffer_View = buffer_view;
+			for (DescriptorBinding& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Buffer_View = buffer_view;
+					break;
+				}
+			}
 		}
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
@@ -471,8 +482,15 @@ namespace Insight
 				return;
 			}
 			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			descriptor_set.Bindings[binding].RHI_Texture = texture;
-			descriptor_set.Bindings[binding].RHI_Sampler = sampler != nullptr ? sampler : nullptr;
+			for (DescriptorBinding& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Texture = texture;
+					descriptorBinding.RHI_Sampler = sampler != nullptr ? sampler : nullptr;
+					break;
+				}
+			}
 		}
 
 		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
@@ -482,7 +500,14 @@ namespace Insight
 				return;
 			}
 			DescriptorSet& descriptor_set= m_descriptor_sets[set];
-			descriptor_set.Bindings[binding].RHI_Sampler = sampler;
+			for (DescriptorBinding& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Sampler = sampler;
+					break;
+				}
+			}
 		}
 
 		void DescriptorAllocator::SetRenderContext(RenderContext* context)
@@ -544,19 +569,31 @@ namespace Insight
 		}
 		bool DescriptorAllocator::CheckSetAndBindingBounds(u32 set, u32 binding)
 		{
-			if (set >= m_descriptor_sets.size())
+			bool foundSet = false;
+			for (const DescriptorSet& descriptorSet : m_descriptor_sets)
 			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
-				return false;
+				if (set == descriptorSet.Set)
+				{
+					foundSet = true;
+					for (const DescriptorBinding& descriptorBinding : descriptorSet.Bindings)
+					{
+						if (descriptorBinding.Binding == binding)
+						{
+							return true;
+						}
+					}
+				}
 			}
 
-			const DescriptorSet& descriptor_set = m_descriptor_sets.at(set);
-			if (binding >= static_cast<u32>(descriptor_set.Bindings.size()))
+			if (foundSet)
 			{
 				//IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
-				return false;
 			}
-			return true;
+			else
+			{
+				IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
+			}
+			return false;
 		}
 	}
 }

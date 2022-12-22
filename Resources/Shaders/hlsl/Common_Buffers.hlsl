@@ -1,6 +1,7 @@
 // Set 0 - per frame
 // Set 1 - Per object
 
+// Set 0, Binding 0
 [[vk::binding(0, 0)]]
 cbuffer BufferFrame : register(b0)
 {
@@ -17,7 +18,8 @@ cbuffer BufferFrame : register(b0)
 
 #define s_Cascade_Count 4
 
-[[vk::binding(0, 1)]]
+// Set 1, Binding 0
+[[vk::binding(1, 0)]]
 cbuffer BufferLight : register(b0)
 {
 	float4x4 bl_Camera_Proj_View[s_Cascade_Count];
@@ -29,7 +31,8 @@ cbuffer BufferLight : register(b0)
     float2 bl_Shadow_Resolution;
 }
 
-[[vk::binding(1, 1)]]
+// Set 1, Binding 0
+[[vk::binding(0, 1)]]
 cbuffer BufferPerObject : register(b2)
 {
     float4x4 bpo_Transform;

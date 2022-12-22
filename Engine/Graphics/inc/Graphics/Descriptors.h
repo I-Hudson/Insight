@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
-#include <unordered_map>
 #include "Graphics/RHI/RHI_Buffer.h"
+
+#include <unordered_map>
 
 namespace Insight
 {
@@ -13,7 +15,7 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 
-		struct DescriptorBinding
+		struct IS_GRAPHICS DescriptorBinding
 		{
 			DescriptorBinding() NO_EXPECT;
 			DescriptorBinding(int set, int binding, int stages, u32 size, DescriptorType type) NO_EXPECT;
@@ -43,7 +45,7 @@ namespace Insight
 			const RHI_Sampler* RHI_Sampler = nullptr;
 		};
 
-		struct DescriptorSet
+		struct IS_GRAPHICS DescriptorSet
 		{
 			DescriptorSet() NO_EXPECT;
 			DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings) NO_EXPECT;

@@ -20,13 +20,6 @@ struct VertexOutput
     [[vk::location(6)]] float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
 };
 
-[[vk::binding(2, 1)]]
-Texture2D<float4> Diffuse_Texture : register(t0);
-[[vk::binding(3, 1)]]
-Texture2D<float4> Normal_Texture : register(t1);
-[[vk::binding(4, 1)]]
-Texture2D<float4> Specular_Texture : register(t2);
-
 VertexOutput VSMain(const VertexInput input)
 {
 	VertexOutput vsOut;
@@ -63,7 +56,7 @@ PixelOutput PSMain(VertexOutput input)
 	PixelOutput Out;
 	if(bpo_Textures_Set[0] == 1)
 	{
-		Out.Colour = Diffuse_Texture.Sample(Reapt_Sampler, input.UV);
+		Out.Colour = DiffuseTexture.Sample(Reapt_Sampler, input.UV);
 	}
 	else
 	{

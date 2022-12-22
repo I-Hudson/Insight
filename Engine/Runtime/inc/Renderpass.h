@@ -27,13 +27,12 @@ namespace Insight
 			glm::mat4 Projection_View_Inverted = { };
 
 			glm::vec2 Render_Resolution = {};
-			float pad0 = 0.0f;
-			float pad1 = 0.0f;
-
 			glm::vec2 Ouput_Resolution = {};
 			float Delta_Time;
-			
-			float pad2 = 0.0f;
+
+			float pad0 = 0;
+			float pad1 = 0;
+			float pad2 = 0;
 		};
 
 		struct BufferSamplers
@@ -67,7 +66,6 @@ namespace Insight
 		{
 			glm::mat4 Transform = {};
 			glm::mat4 Previous_Transform = { };
-
 			glm::vec4 Textures_Set;
 		};
 
@@ -95,6 +93,7 @@ namespace Insight
 
 			Graphics::ImGuiPass m_imgui_pass;
 			Graphics::RHI_FSR m_fsr;
+			Graphics::PipelineLayout m_defaultPipelineLayout;
 
 			BufferFrame m_buffer_frame;
 			BufferLight m_directional_light;
