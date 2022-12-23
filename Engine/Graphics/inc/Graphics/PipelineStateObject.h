@@ -20,7 +20,12 @@ namespace Insight
 		/// @brief Define of a pipeline (this is the same as a root signature in DX12.)
 		struct PipelineLayout
 		{
+			/// @brief Define all descriptor sets (DX12 descriptor tables) for this layout (root signature).
 			std::vector<DescriptorSet> Sets;
+			/// @brief Define all push constants (DX12 Root descriptors) for this layout (root signature).
+			std::vector<PushConstant> PushConstants;
+
+			bool IsValid() const;
 		};
 
 		/// Pipeline state object struct. Store all current information about the render pass.

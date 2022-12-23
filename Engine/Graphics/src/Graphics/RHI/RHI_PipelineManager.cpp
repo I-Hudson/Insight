@@ -31,7 +31,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			assert(m_context != nullptr);
 
-			const std::vector<DescriptorSet> descriptor_sets = pso.Shader->GetDescriptorSets();
+			const std::vector<DescriptorSet> descriptor_sets = pso.Layout.Sets;
 			u64 hash = 0;
 			for (const DescriptorSet& descriptor_set : descriptor_sets)
 			{

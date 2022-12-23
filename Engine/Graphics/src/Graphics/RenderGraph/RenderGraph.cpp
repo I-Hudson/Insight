@@ -248,7 +248,7 @@ namespace Insight
 				builder.SetPass(pass.Get());
 				pass->Setup(builder);
 				
-				/// Build all our textures.
+				// Build all our textures.
 				for (auto& pair : pass.Get()->m_textureCreates)
 				{
 					RHI_Texture* tex = m_textureCaches->Get(pair.first);
@@ -264,10 +264,6 @@ namespace Insight
 				pass->m_pso.Swapchain = pass->m_swapchainPass;
 				pass->m_renderpassDescription.Pso = &pso;
 
-				/// Build the shader here but no need to cache a reference to it as we 
-				/// can lookup it up later. Just make sure it exists.
-				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
-
 				int rtIndex = 0;
 				for (auto const& rt : pass.Get()->m_textureWrites)
 				{
@@ -282,6 +278,12 @@ namespace Insight
 				pass->m_renderpassDescription.DepthStencil = pso.DepthStencil;
 
 				pass->m_renderpassDescription.SwapchainPass = pass->m_swapchainPass;
+
+				// Build the shader here but no need to cache a reference to it as we 
+				// can lookup it up later. Just make sure it exists.
+				m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
+				m_context->GetPipelineManager().GetOrCreatePSO(pso);
+				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
 
 				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
 				pass->m_pso.Renderpass = pass->m_renderpassDescription.GetHash();

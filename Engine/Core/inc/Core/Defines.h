@@ -43,6 +43,8 @@
 
 #define THREAD_SAFE
 
+#define OPTIONAL 
+
 #if defined(__clang__)
 
 #define DLLEXPORT __attribute__ ((__visibility__ ("default")))

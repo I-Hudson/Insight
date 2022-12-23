@@ -6,6 +6,12 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		bool PipelineLayout::IsValid() const
+		{
+			return Sets.size() > 0 
+				|| PushConstants.size() > 0;
+		}
+
 		u64 PipelineStateObject::GetHash() const
 		{
 			u64 hash = 0;

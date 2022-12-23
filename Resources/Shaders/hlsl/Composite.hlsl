@@ -14,13 +14,6 @@ static const float  g_penumbra_filter_size            = 128.0f;
 static const float g_pcf_filter_size    = (sqrt((float)g_shadow_samples) - 1.0f) / 2.0f;
 static const float g_shadow_samples_rpc = 1.0f / (float) g_shadow_samples;
 
-struct PushConstant
-{
-	int Output_Texture;
-	int Cascade_Override;
-};
-[[vk::push_constant]] PushConstant push_constant;
-
 struct VertexOutput
 {
 	float4 Position : SV_POSITION;

@@ -474,11 +474,6 @@ namespace Insight
 					RHI_Pipeline* pipeline = m_context_vulkan->GetPipelineManager().GetOrCreatePSO(m_pso);
 					pipelineVk = static_cast<RHI_Pipeline_Vulkan*>(pipeline)->GetPipeline();
 				}
-				{
-					IS_PROFILE_SCOPE("Get pipeline layout");
-					RHI_PipelineLayout* layout = m_context_vulkan->GetPipelineLayoutManager().GetOrCreateLayout(m_pso);
-					m_bound_pipeline_layout = static_cast<RHI_PipelineLayout_Vulkan*>(layout)->GetPipelineLayout();
-				}
 				vkCmdBindPipeline(m_commandList, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineVk);
 				m_descriptorAllocator->SetPipeline(pso);
 			}
