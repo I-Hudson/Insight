@@ -31,17 +31,31 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			assert(m_context != nullptr);
 
-			const std::vector<DescriptorSet> descriptor_sets = pso.Layout.Sets;
+			std::vector<DescriptorSet> descriptorSets;
+			std::vector<PushConstant> pushConstants;
+			if (pso.Layout.IsValid())
+			{
+				descriptorSets = pso.Layout.Sets;
+				pushConstants = pso.Layout.PushConstants;
+			}
+			else
+			{
+				descriptorSets = pso.Shader->GetDescriptorSets();
+				pushConstants.push_back(pso.Shader->GetPushConstant());
+			}
+
 			u64 hash = 0;
-			for (const DescriptorSet& descriptor_set : descriptor_sets)
+			for (const DescriptorSet& descriptor_set : descriptorSets)
 			{
 				HashCombine(hash, descriptor_set.GetHash(false));
 			}
 
-			PushConstant push_constant = pso.Shader->GetPushConstant();
-			HashCombine(hash, push_constant.ShaderStages);
-			HashCombine(hash, push_constant.Offset);
-			HashCombine(hash, push_constant.Size);
+			for (const PushConstant& pc : pushConstants)
+			{
+				HashCombine(hash, pc.ShaderStages);
+				HashCombine(hash, pc.Offset);
+				HashCombine(hash, pc.Size);
+			}
 
 			auto itr = m_layouts.find(hash);
 			if (itr != m_layouts.end())

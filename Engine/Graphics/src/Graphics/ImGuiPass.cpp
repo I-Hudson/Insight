@@ -81,7 +81,7 @@ namespace Insight
 					RenderpassDescription renderpassDescription = { };
 					renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
 					renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
-					renderpassDescription.AllowDynamicRendering = false;
+					renderpassDescription.SwapchainPass = true;
 					builder.SetRenderpass(renderpassDescription);
 				},
 				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)

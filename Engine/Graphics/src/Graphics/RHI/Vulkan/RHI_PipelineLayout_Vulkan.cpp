@@ -36,7 +36,7 @@ namespace Insight
 				}
 				else
 				{
-					pso.Layout.Sets = pso.Shader->GetDescriptorSets();
+					descriptorSets = pso.Shader->GetDescriptorSets();
 					pushConstants.push_back(pso.Shader->GetPushConstant());
 				}
 				

@@ -398,7 +398,6 @@ namespace Insight
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
-					pso.Layout = m_defaultPipelineLayout;
 					pso.Name = "Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
 					//pso.CullMode = CullMode::Front;

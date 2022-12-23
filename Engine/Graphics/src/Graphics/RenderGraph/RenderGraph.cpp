@@ -281,11 +281,11 @@ namespace Insight
 
 				// Build the shader here but no need to cache a reference to it as we 
 				// can lookup it up later. Just make sure it exists.
+				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
+				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
 				m_context->GetPipelineLayoutManager().GetOrCreateLayout(pso);
 				m_context->GetPipelineManager().GetOrCreatePSO(pso);
-				pso.Shader = m_context->GetShaderManager().GetOrCreateShader(pass.Get()->m_shader);
 
-				m_context->GetRenderpassManager().GetOrCreateRenderpass(pass->m_renderpassDescription);
 				pass->m_pso.Renderpass = pass->m_renderpassDescription.GetHash();
 			}
 		}
