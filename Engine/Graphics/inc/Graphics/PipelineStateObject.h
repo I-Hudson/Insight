@@ -33,7 +33,7 @@ namespace Insight
 		{
 			static const int RenderTargetCount = 8;
 
-			/// @brief The layout used for the Pipeline. Required.
+			/// @brief The layout used for the Pipeline. (If defined is used over shader reflection).
 			PipelineLayout Layout;
 
 			std::string Name;
