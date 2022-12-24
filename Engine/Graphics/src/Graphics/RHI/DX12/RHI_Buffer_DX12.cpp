@@ -22,35 +22,23 @@ namespace Insight
 				m_bufferType = bufferType;
 				m_size = sizeBytes;
 				m_stride = stride;
+				m_overrides = overrides;
 
-				CD3DX12_HEAP_PROPERTIES heapProperties = {};
+				CD3DX12_HEAP_PROPERTIES heapProperties = BufferTypeToDX12HeapProperties(m_bufferType);
+				D3D12_RESOURCE_STATES resourceState = BufferTypeToDX12ResourceState(m_bufferType);
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
-				D3D12_RESOURCE_STATES ResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
-				if (bufferType == BufferType::Vertex 
-					|| bufferType == BufferType::Index)
+				if (bufferType == BufferType::Uniform)
 				{
-					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-					ResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
+					// must be a multiple 256 bytes
+					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); 
 				}
-				else if (bufferType == BufferType::Uniform)
+
+				resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size);
+
+				if (overrides.Force_Host_Writeable)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-					m_size += (D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT - 1); /// must be a multiple 256 bytes
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-				}
-				else if (bufferType == BufferType::Staging)
-				{
-					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-					ResourceStates = D3D12_RESOURCE_STATE_GENERIC_READ;
-				}
-				else if (bufferType == BufferType::Readback)
-				{
-					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK);
-					resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_size); /// CB size is required to be 256-byte aligned.
-					ResourceStates = D3D12_RESOURCE_STATE_COPY_DEST;
 				}
 
 				/// Create the constant buffer.
@@ -58,7 +46,7 @@ namespace Insight
 					&heapProperties,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
-					ResourceStates,
+					resourceState,
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
 
@@ -68,8 +56,7 @@ namespace Insight
 					|| m_bufferType == BufferType::Staging
 					|| m_bufferType == BufferType::Readback)
 				{
-					CD3DX12_RANGE readRange(0, 0);        /// We do not intend to read from this resource on the CPU.
-					ThrowIfFailed(m_resource->Map(0, &readRange, reinterpret_cast<void**>(&m_mappedData)));
+					ThrowIfFailed(m_resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedData)));
 				}
 			}
 

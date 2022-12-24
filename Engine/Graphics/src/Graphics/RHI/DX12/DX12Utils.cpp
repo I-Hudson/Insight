@@ -239,6 +239,42 @@ namespace Insight
             return D3D12_BARRIER_LAYOUT_UNDEFINED;
         }
 
+        CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType)
+        {
+            switch (bufferType)
+            {
+            case BufferType::Vertex:  return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_DEFAULT);
+            case BufferType::Index:   return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_DEFAULT);
+            case BufferType::Uniform: return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_UPLOAD);
+            case BufferType::Storage: return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_UPLOAD);
+            case BufferType::Raw:     return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_DEFAULT);
+            case BufferType::Staging: return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_UPLOAD);
+            case BufferType::Readback:return CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_READBACK);
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return CD3DX12_HEAP_PROPERTIES();
+        }
+
+        D3D12_RESOURCE_STATES BufferTypeToDX12ResourceState(BufferType bufferType)
+        {
+            switch (bufferType)
+            {
+            case BufferType::Vertex:  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Index:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
+            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Raw:     return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
+            case BufferType::Readback:return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_RESOURCE_STATES();
+        }
+
         D3D12_FILTER FilterToDX12(Filter filter, CompareOp op)
         {
             switch (filter)

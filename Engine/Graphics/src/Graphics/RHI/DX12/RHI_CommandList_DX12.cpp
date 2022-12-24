@@ -168,7 +168,8 @@ namespace Insight
 			{
 				RHI_CommandList::Reset();
 			
-				if (m_commandList && m_allocator)
+				if (m_commandList && m_allocator
+					&& (m_state == RHI_CommandListStates::Ended || m_state == RHI_CommandListStates::Submitted))
 				{
 					m_commandList->Reset(m_allocator->GetAllocator(), nullptr);
 					m_state = RHI_CommandListStates::Recording;
@@ -210,9 +211,6 @@ namespace Insight
 					numRows.data(),
 					rowSizeInBytes.data(),
 					&requriedSize);
-
-				assert(requriedSize == (dstDX12->GetWidth() * dstDX12->GetHeight() * 4));
-				assert(requriedSize == srcDX12->GetSize());
 
 				CD3DX12_TEXTURE_COPY_LOCATION Dst(dstDX12->GetResource(), 0);
 				CD3DX12_TEXTURE_COPY_LOCATION Src(srcDX12->GetResource(), layouts[0]);

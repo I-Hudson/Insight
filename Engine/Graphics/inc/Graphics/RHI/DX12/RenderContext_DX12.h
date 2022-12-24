@@ -91,6 +91,7 @@ namespace Insight
 				std::vector<SwapchainImage> m_swapchainImages;
 
 				int m_currentFrame = 0;
+				u32 m_availableSwapchainImage = 0;
 
 				FrameResource<FrameSubmitContext_DX12> m_submitFrameContexts;
 			};

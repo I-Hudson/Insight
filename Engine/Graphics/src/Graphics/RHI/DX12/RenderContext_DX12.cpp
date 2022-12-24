@@ -135,6 +135,8 @@ namespace Insight
 
 				InitImGui();
 
+				m_uploadQueue.Init();
+
 				WaitForGpu();
 
 				return true;
@@ -247,13 +249,14 @@ namespace Insight
 					IS_PROFILE_SCOPE("Fence wait");
 					// First get the status of the fence. Then if it has not finished, wait on it.
 
-					/// If the next frame is not ready to be rendered yet, wait until it is ready.
+					// If the next frame is not ready to be rendered yet, wait until it is ready.
 					u64 fenceCompletedValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
 					if (fenceCompletedValue < m_submitFrameContexts.Get().SubmitFenceValue)
 					{
 						ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 						WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 					}
+					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
 				}
 
 				m_descriptorSetManager->Reset();
@@ -269,6 +272,27 @@ namespace Insight
 				// Go through out defered manager and call all the functions which have been queued up.
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);
+
+				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
+				
+				// Transition back-buffer to a writable state for rendering.
+				CD3DX12_TEXTURE_BARRIER barrier = {};
+				barrier.SyncBefore = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
+				barrier.SyncAfter = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_ALL;
+				barrier.AccessBefore = D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS;
+				barrier.AccessAfter = D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_RENDER_TARGET;
+				barrier.LayoutBefore = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_PRESENT;
+				barrier.LayoutAfter = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_RENDER_TARGET;
+				barrier.pResource = m_swapchainImages[m_availableSwapchainImage].Colour->GetResource();
+				cmdListDX12->PipelineBarrierImage({ barrier });
+
+				m_swapchainImages[m_availableSwapchainImage].Colour->SetLayout(ImageLayout::ColourAttachment);
+
+				// Clear the render target and depth stencils.
+				const float clearColour[4] = { 1.0f, 0.0f, 1.0f, 0.0f };
+				cmdListDX12->GetCommandList()->ClearRenderTargetView(
+					m_swapchainImages[m_availableSwapchainImage].ColourHandle.CPUPtr, 
+					clearColour, 0, nullptr);
 			}
 
 			void RenderContext_DX12::PostRender(RHI_CommandList* cmdList)
@@ -281,6 +305,7 @@ namespace Insight
 					if (!cmdListDX12->IsDiscard())
 					{
 						m_submitFrameContexts.Get().CommandLists.push_back(cmdList);
+
 						{
 							IS_PROFILE_SCOPE("ExecuteCommandLists");
 							ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };

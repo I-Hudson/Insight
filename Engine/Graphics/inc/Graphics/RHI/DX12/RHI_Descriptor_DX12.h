@@ -49,7 +49,7 @@ namespace Insight
 				DescriptorHeapPage_DX12();
 				DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId, bool gpuVisable);
 
-				ID3D12DescriptorHeap* GetHeap() const { return m_heap.Get(); }
+				ID3D12DescriptorHeap* GetHeap() const { return m_heap; }
 				D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType() const { return m_heapType; }
 				u32 GetDescriptorSize() const { return m_descriptorSize; }
 				bool GetNewHandle(DescriptorHeapHandle_DX12& handle);
@@ -59,7 +59,7 @@ namespace Insight
 				void Destroy();
 
 			private:
-				ComPtr<ID3D12DescriptorHeap> m_heap;
+				ID3D12DescriptorHeap* m_heap;
 				std::vector<DescriptorHeapHandle_DX12> m_freeHandles;
 
 				u32 m_capacity = 0;

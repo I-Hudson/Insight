@@ -256,8 +256,8 @@ namespace Insight
 
 				// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
 				GFXHelper();
+				ImGuiPass();
 			}
-			ImGuiPass();
 		}
 
 		void Renderpass::Destroy()

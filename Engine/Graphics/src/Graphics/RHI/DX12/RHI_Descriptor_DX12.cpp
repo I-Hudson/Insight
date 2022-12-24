@@ -174,7 +174,6 @@ namespace Insight
 				if (m_heap)
 				{
 					m_heap->Release();
-					m_heap.Reset();
 					m_heap = nullptr;
 				}
 			}
