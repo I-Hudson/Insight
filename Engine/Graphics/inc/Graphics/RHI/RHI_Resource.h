@@ -17,6 +17,8 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		struct RHI_UploadQueueRequestInternal;
+
 		class IS_GRAPHICS RHI_Resource
 		{
 		public:
@@ -34,6 +36,8 @@ namespace Insight
 		protected:
 			DeviceUploadStatus m_uploadStatus = DeviceUploadStatus::Unknown;
 			mutable std::mutex m_mutex;
+
+			friend struct RHI_UploadQueueRequestInternal;
 		};
 
 		template<typename T>

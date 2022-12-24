@@ -85,7 +85,7 @@ namespace Insight
 					stagingBuffer.Upload(data, sizeInBytes, 0);
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
-					cmdList->CopyBufferToBuffer(this, &stagingBuffer, offset);
+					cmdList->CopyBufferToBuffer(this, offset, &stagingBuffer, 0, sizeInBytes);
 					cmdList->Close();
 
 					m_context->SubmitCommandListAndWait(cmdList);
@@ -125,7 +125,7 @@ namespace Insight
 					std::vector<D3D12_BUFFER_BARRIER> barriers = { srcBarrier };
 					cmdListDX12->PipelineBarrierBuffer(barriers);
 					
-					cmdList->CopyBufferToBuffer(&readback_buffer, this, 0);
+					cmdList->CopyBufferToBuffer(&readback_buffer, 0, this, 0, GetSize());
 					cmdList->Close();
 
 					//D3D12_BUFFER_BARRIER srcBarrier = CD3DX12_BUFFER_BARRIER(

@@ -186,11 +186,11 @@ namespace Insight
 				}
 			}
 
-			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset)
+			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, u64 dstOffset, RHI_Buffer* src, u64 srcOffset, u64 sizeInBytes)
 			{
 				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
-				m_commandList->CopyBufferRegion(dstDX12->GetResource(), offset, srcDX12->GetResource(), 0, src->GetSize());
+				m_commandList->CopyBufferRegion(dstDX12->GetResource(), dstOffset, srcDX12->GetResource(), srcOffset, sizeInBytes);
 			}
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset)
@@ -302,6 +302,7 @@ namespace Insight
 					(UINT)bufferDX12->GetSize(),
 					(UINT)bufferDX12->GetStride() }};
 				m_commandList->IASetVertexBuffers(0, 1, views);
+				m_bound_vertex_buffer = buffer;
 			}
 
 			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
@@ -312,6 +313,7 @@ namespace Insight
 					(UINT)bufferDX12->GetSize(),  
 					DXGI_FORMAT_R32_UINT };
 				m_commandList->IASetIndexBuffer(&view);
+				m_bound_index_buffer = buffer;
 			}
 
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)

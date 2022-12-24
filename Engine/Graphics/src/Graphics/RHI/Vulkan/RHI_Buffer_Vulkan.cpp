@@ -92,7 +92,7 @@ namespace Insight
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
 					m_uploadStatus = DeviceUploadStatus::Uploading;
-					cmdList->CopyBufferToBuffer(this, &stagingBuffer, offset);
+					cmdList->CopyBufferToBuffer(this, offset, &stagingBuffer, 0, sizeInBytes);
 					cmdList->Close();
 
 					m_context->SubmitCommandListAndWait(cmdList);
@@ -125,7 +125,7 @@ namespace Insight
 					readback_buffer.Create(m_context, BufferType::Readback, current_buffer_size, GetStride(), { });
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
-					cmdList->CopyBufferToBuffer(&readback_buffer, this, 0);
+					cmdList->CopyBufferToBuffer(&readback_buffer, 0, this, 0, GetSize());
 					cmdList->Close();
 
 					m_context->SubmitCommandListAndWait(cmdList);

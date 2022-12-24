@@ -42,7 +42,7 @@ namespace Insight
 				/// RHI_CommandList
 				virtual void Reset() override;
 				virtual void Close() override;
-				virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) override;
+				virtual void CopyBufferToBuffer(RHI_Buffer* dst, u64 dstOffset, RHI_Buffer* src, u64 srcOffset, u64 sizeInBytes) override;
 				virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset) override;
 
 				/// RHI_Resource

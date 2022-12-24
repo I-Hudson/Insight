@@ -40,6 +40,12 @@ namespace Insight
 			m_discard = false;
 		}
 
+		void RHI_CommandList::CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src)
+		{
+			ASSERT(src->GetSize() <= dst->GetSize());
+			CopyBufferToBuffer(dst, 0, src, 0, src->GetSize());
+		}
+
 		void RHI_CommandList::SetImageLayout(RHI_Texture* texture, ImageLayout layout)
 		{
 			RHI_TextureInfo create_info = texture->GetInfo();

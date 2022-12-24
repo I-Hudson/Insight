@@ -1,6 +1,8 @@
 #include "Renderpass.h"
 #include "Runtime/Engine.h"
 
+#include "Graphics/DX12RenderPasses.h"
+
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RenderTarget.h"
@@ -257,6 +259,10 @@ namespace Insight
 				// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
 				GFXHelper();
 				ImGuiPass();
+			}
+			else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
+			{
+				Runtime::DX12RenderPasses::Render();
 			}
 		}
 

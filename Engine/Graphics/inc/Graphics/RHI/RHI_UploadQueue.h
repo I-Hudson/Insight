@@ -15,6 +15,7 @@ namespace Insight
 	{
 		class RHI_CommandList;
 		class RHI_Buffer;
+		class RHI_Resource;
 		class RHI_Texture;
 		struct RHI_UploadQueueRequestInternal;
 		class RHI_UploadQueue;
@@ -27,12 +28,13 @@ namespace Insight
 		struct IS_GRAPHICS RHI_UploadQueueRequest
 		{
 			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::Unknown;
+			RHI_Resource* Resource = nullptr;
 			Core::Delegate<RHI_UploadQueueRequest*> OnUploadCompleted;
 		};
 
 		struct RHI_UploadQueueRequestInternal
 		{
-			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, u64 sizeInBytes);
+			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes);
 			RHI_UploadQueueFunction UploadFunction;
 			u64 SizeInBytes;
 			RPtr<RHI_UploadQueueRequest> Request;

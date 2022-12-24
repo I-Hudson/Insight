@@ -1,5 +1,6 @@
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/RenderContext.h"
+#include "Graphics/RHI/RHI_Resource.h"
 
 #include "Core/Profiler.h"
 
@@ -9,17 +10,19 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, u64 sizeInBytes)
+		RHI_UploadQueueRequestInternal::RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes)
 			: UploadFunction(std::move(function))
 			, SizeInBytes(std::move(sizeInBytes))
 		{
 			Request = MakeRPtr<RHI_UploadQueueRequest>();
+			Request->Resource = resource;
 		}
 
 		void RHI_UploadQueueRequestInternal::OnWorkComplete()
 		{
 			CommandList->OnWorkCompleted.Unbind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(this);
 			Request->Status = DeviceUploadStatus::Completed;
+			Request->Resource->m_uploadStatus = DeviceUploadStatus::Completed;
 			Request->OnUploadCompleted(Request.Get());
 		}
 
@@ -61,7 +64,16 @@ namespace Insight
 			UploadDataToStagingBuffer(data, sizeInBytes);
 
 			std::lock_guard lock(m_mutex);
-			return RPtr<RHI_UploadQueueRequest>();
+			m_queuedUploads.push_back(MakeRPtr<
+				RHI_UploadQueueRequestInternal>(
+					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
+					{
+						request->Request->Status = DeviceUploadStatus::Uploading;
+						cmdList->CopyBufferToBuffer(buffer, 0, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
+						m_frameUploadOffset += request->SizeInBytes;
+					}, buffer, sizeInBytes));
+
+			return m_queuedUploads.back()->Request;
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
@@ -79,7 +91,7 @@ namespace Insight
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
 						m_frameUploadOffset += request->SizeInBytes;
-				}, sizeInBytes));
+				}, texture, sizeInBytes));
 
 			return m_queuedUploads.back()->Request;
 		}

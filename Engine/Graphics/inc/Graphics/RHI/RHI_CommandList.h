@@ -57,8 +57,8 @@ namespace Insight
 			virtual void Create(RenderContext* context) = 0;
 			virtual void PipelineBarrier(PipelineBarrier barrier) = 0;
 
-			virtual void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src, u64 offset) = 0;
-			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src) { CopyBufferToBuffer(dst, src, 0); }
+			virtual void CopyBufferToBuffer(RHI_Buffer* dst, u64 dstOffset, RHI_Buffer* src, u64 srcOffset, u64 sizeInBytes) = 0;
+			void CopyBufferToBuffer(RHI_Buffer* dst, RHI_Buffer* src);
 
 			void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src) { CopyBufferToImage(dst, src, 0); }
 			virtual void CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset) = 0;
