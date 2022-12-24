@@ -53,8 +53,8 @@ namespace Insight
 			{
 				for (auto& pair : m_samplers)
 				{
-					ID3D12Resource* sampler = static_cast<ID3D12Resource*>(pair.second->Resource);
-					sampler->Release();
+					RHI_Sampler_DX12* samplerDX12 = static_cast<RHI_Sampler_DX12*>(pair.second.Get());
+					m_context->GetDescriptorHeap(DescriptorHeapTypes::Sampler).FreeHandle(samplerDX12->Handle);
 				}
 				m_samplers.clear();
 			}

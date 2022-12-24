@@ -148,6 +148,11 @@ namespace Insight
 
 				DestroyImGui();
 
+				BaseDestroy();
+
+				m_pipelineManager.Destroy();
+				m_pipelineLayoutManager.Destroy();
+
 				m_submitFrameContexts.ForEach([](FrameSubmitContext_DX12& context)
 					{
 						CloseHandle(context.SubmitFenceEvent);
@@ -157,15 +162,11 @@ namespace Insight
 						context.DescriptorHeapSampler.Destroy();
 					});
 
-				m_pipelineManager.Destroy();
-				m_pipelineLayoutManager.Destroy();
-
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
 
-				BaseDestroy();
 
 				m_queues.clear();
 
@@ -256,6 +257,15 @@ namespace Insight
 						ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 						WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 					}
+
+					for (const RHI_CommandList* cmdList : m_submitFrameContexts.Get().CommandLists)
+					{
+						if (cmdList)
+						{
+							cmdList->OnWorkCompleted();
+						}
+					}
+
 					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
 				}
 
