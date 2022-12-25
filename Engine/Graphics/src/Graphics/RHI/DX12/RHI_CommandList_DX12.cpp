@@ -437,7 +437,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::EndTimeBlock()
 			{
-				PIXEndEvent();
+				PIXEndEvent(m_commandList);
 			}
 
 			bool RHI_CommandList_DX12::BindDescriptorSets()
