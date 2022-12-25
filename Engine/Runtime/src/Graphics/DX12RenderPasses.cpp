@@ -10,35 +10,38 @@ namespace Insight
         Graphics::RHI_Buffer* VertexBuffer = nullptr;
         Graphics::RHI_Buffer* IndexBuffer = nullptr;
 
+        struct Vertex
+        {
+            glm::vec4 Position;
+            glm::vec4 Colour;
+        };
+
         void DX12RenderPasses::Render()
         {
             using namespace Graphics;
 
             if (!VertexBuffer)
             {
-                glm::vec4 vertices[] =
+                Vertex vertices[] =
                 {
-                    glm::vec4(-50.0f, -50.0f, 0.0f, 1.0f),
-                    glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-
-                    glm::vec4(0.0f, 50.0f, 0.0f, 1.0f),
-                    glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-
-                    glm::vec4(50.0f, -50.0f, 0.0f, 1.0f),
-                    glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+                    Vertex { { 0.0f,  0.5f, 0.5f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f} },
+                    Vertex { { 0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
+                    Vertex { {-0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} },
                 };
-                VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(glm::vec4));
+                VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
                 VertexBuffer->QueueUpload(&vertices, sizeof(vertices));
+                VertexBuffer->SetName("TestVertexBuffer");
             }
 
             if (!IndexBuffer)
             {
                 u32 indices[] =
                 {
-                    0, 1, 2
+                    0, 2, 1
                 };
                 IndexBuffer = Renderer::CreateIndexBuffer(sizeof(indices));
                 IndexBuffer->QueueUpload(&indices, sizeof(indices));
+                IndexBuffer->SetName("TestIndexBuffer");
             }
 
             struct PassData
@@ -56,6 +59,9 @@ namespace Insight
                     PipelineStateObject pso = { };
                     pso.Name = "TestPass_PSO";
                     pso.ShaderDescription = shaders;
+                    pso.DepthWrite = false;
+                    pso.DepthTest = false;
+                    pso.FrontFace = FrontFace::Clockwise;
                     pso.Swapchain = true;
                     builder.SetPipeline(pso);
 

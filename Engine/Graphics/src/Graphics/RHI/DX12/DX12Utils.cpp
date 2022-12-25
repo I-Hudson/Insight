@@ -239,6 +239,34 @@ namespace Insight
             return D3D12_BARRIER_LAYOUT_UNDEFINED;
         }
 
+        D3D12_RESOURCE_STATES ImageLayoutToDX12ResouceState(ImageLayout layout)
+        {
+            switch (layout)
+            {
+            case ImageLayout::Undefined:                        return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case ImageLayout::General:                          return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case ImageLayout::ColourAttachment:                 return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_RENDER_TARGET;
+            case ImageLayout::DepthStencilAttachment:           return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+            case ImageLayout::DepthStencilAttachmentReadOnly:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+            case ImageLayout::ShaderReadOnly:                   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+            case ImageLayout::TransforSrc:                      return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
+            case ImageLayout::TransforDst:                      return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            case ImageLayout::Preinitialised:                   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case ImageLayout::DepthReadOnlyStencilAttacment:    return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+            case ImageLayout::DepthAttachmentStencilReadOnly:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+            case ImageLayout::DepthAttachmentOnly:              return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+            case ImageLayout::DepthReadOnly:                    return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+            case ImageLayout::StencilAttacment:                 return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+            case ImageLayout::StencilReadOnly:                  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_READ;
+            case ImageLayout::PresentSrc:                       return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case ImageLayout::Count:
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+        }
+
         CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType)
         {
             switch (bufferType)
@@ -257,16 +285,34 @@ namespace Insight
             return CD3DX12_HEAP_PROPERTIES();
         }
 
+        D3D12_RESOURCE_STATES BufferTypeToDX12InitialResourceState(BufferType bufferType)
+        {
+            switch (bufferType)
+            {
+            case BufferType::Vertex:  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Index:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
+            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Raw:     return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Readback:return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_RESOURCE_STATES();
+        }
+
         D3D12_RESOURCE_STATES BufferTypeToDX12ResourceState(BufferType bufferType)
         {
             switch (bufferType)
             {
             case BufferType::Vertex:  return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
             case BufferType::Index:   return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_INDEX_BUFFER;
-            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
-            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+            case BufferType::Uniform: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
+            case BufferType::Storage: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
             case BufferType::Raw:     return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
-            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE;
+            case BufferType::Staging: return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ;
             case BufferType::Readback:return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST;
             default:
                 break;

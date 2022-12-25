@@ -1,7 +1,7 @@
 struct VertexOutput
 {
 	float4 Position : SV_POSITION;
-	float4 Colour : COLOR0;
+	float4 Colour : COLOR;
 };
 
 VertexOutput VSMain(VertexOutput input)

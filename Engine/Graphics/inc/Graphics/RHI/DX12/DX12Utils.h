@@ -48,7 +48,10 @@ namespace Insight
 		D3D12_BARRIER_ACCESS AccessFlagsToDX12(AccessFlags flags);
 		D3D12_BARRIER_LAYOUT ImageLayoutToDX12(ImageLayout layout);
 
+		D3D12_RESOURCE_STATES ImageLayoutToDX12ResouceState(ImageLayout layout);
+
 		CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType);
+		D3D12_RESOURCE_STATES BufferTypeToDX12InitialResourceState(BufferType bufferType);
 		D3D12_RESOURCE_STATES BufferTypeToDX12ResourceState(BufferType bufferType);
 
 		D3D12_FILTER FilterToDX12(Filter filter, CompareOp op);

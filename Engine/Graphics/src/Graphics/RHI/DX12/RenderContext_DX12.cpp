@@ -285,6 +285,7 @@ namespace Insight
 
 				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
 				
+#ifdef DX12_ENHANCED_BARRIERS
 				// Transition back-buffer to a writable state for rendering.
 				CD3DX12_TEXTURE_BARRIER barrier = {};
 				barrier.SyncBefore = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
@@ -295,7 +296,12 @@ namespace Insight
 				barrier.LayoutAfter = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_RENDER_TARGET;
 				barrier.pResource = m_swapchainImages[m_availableSwapchainImage].Colour->GetResource();
 				cmdListDX12->PipelineBarrierImage({ barrier });
-
+#else
+				cmdListDX12->PipelineResourceBarriers({ CD3DX12_RESOURCE_BARRIER::Transition(
+					m_swapchainImages[m_availableSwapchainImage].Colour->GetResource(),
+					D3D12_RESOURCE_STATE_COMMON,
+					D3D12_RESOURCE_STATE_RENDER_TARGET) });
+#endif
 				m_swapchainImages[m_availableSwapchainImage].Colour->SetLayout(ImageLayout::ColourAttachment);
 
 				// Clear the render target and depth stencils.
@@ -606,6 +612,7 @@ namespace Insight
 						tex->SetName("Swapchain_Image: " + std::to_string(i));
 						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
 						swapchainImage.Colour = textureDX12;
+						textureDX12->m_descriptorHandle = swapchainImage.ColourHandle;
 
 						RHI_TextureInfo textureInfo = {};
 						textureInfo.TextureType = TextureType::Tex2D;

@@ -28,6 +28,7 @@ namespace Insight
 
 			void RHI_CommandList_DX12::PipelineBarrier(Graphics::PipelineBarrier barrier)
 			{
+#ifdef DX12_ENHANCED_BARRIERS
 				D3D12_BARRIER_SYNC beforeSync = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
 				if ((barrier.SrcStage & (u32)PipelineStageFlagBits::TopOfPipe) == 0)
 				{
@@ -100,7 +101,36 @@ namespace Insight
 					imageBarrier.Image->SetLayout(imageBarrier.NewLayout);					
 				}
 				PipelineBarrier(bufferBarriers, imageBarriers);
+#else
+				std::vector<D3D12_RESOURCE_BARRIER> resouceBarriers;
+				for (const BufferBarrier& bufferBarrier : barrier.BufferBarriers)
+				{
+					RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(bufferBarrier.Buffer);
+					FAIL_ASSERT();
+				}
+
+				for (const ImageBarrier& imageBarrier : barrier.ImageBarriers)
+				{
+					RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(imageBarrier.Image);
+
+					// Only transition a texture if the layout is different. If the new layout
+					// is the same as the current layout then don't place a barrier for the texture
+					// as no transition is needed.
+					if (textureDX12->GetLayout() != imageBarrier.NewLayout)
+					{
+						resouceBarriers.push_back(
+							CD3DX12_RESOURCE_BARRIER::Transition(
+								textureDX12->GetResource(),
+								ImageLayoutToDX12ResouceState(imageBarrier.OldLayout),
+								ImageLayoutToDX12ResouceState(imageBarrier.NewLayout)));
+					}
+				}
+
+				PipelineResourceBarriers(resouceBarriers);
+#endif
 			}
+
+#ifdef DX12_ENHANCED_BARRIERS
 
 			void RHI_CommandList_DX12::PipelineBarrier(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier, std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier)
 			{
@@ -120,6 +150,15 @@ namespace Insight
 			void RHI_CommandList_DX12::PipelineBarrierImage(std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier)
 			{
 				PipelineBarrier({}, imageMemoryBarrier);
+			}
+#endif
+
+			void RHI_CommandList_DX12::PipelineResourceBarriers(std::vector<D3D12_RESOURCE_BARRIER> const& resourceBarriers)
+			{
+				if (resourceBarriers.size() > 0ull)
+				{
+					m_commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), resourceBarriers.data());
+				}
 			}
 
 			void RHI_CommandList_DX12::ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects)
@@ -190,7 +229,26 @@ namespace Insight
 			{
 				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
+
+				std::vector<D3D12_RESOURCE_BARRIER> barriers =
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_DEST),
+					CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_SOURCE)
+				};
+				dstDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_DEST);
+				srcDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_SOURCE);
+				PipelineResourceBarriers(barriers);
+
 				m_commandList->CopyBufferRegion(dstDX12->GetResource(), dstOffset, srcDX12->GetResource(), srcOffset, sizeInBytes);
+			
+				barriers =
+				{
+					CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), BufferTypeToDX12ResourceState(dstDX12->GetType())),
+					CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), BufferTypeToDX12ResourceState(srcDX12->GetType()))
+				};
+				dstDX12->SetResourceState(BufferTypeToDX12ResourceState(dstDX12->GetType()));
+				srcDX12->SetResourceState(BufferTypeToDX12ResourceState(srcDX12->GetType()));
+				PipelineResourceBarriers(barriers);
 			}
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset)
@@ -243,6 +301,16 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				for (const RHI_Texture* image : renderDescription.ColourAttachments)
+				{
+					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(image);
+
+					D3D12_CPU_DESCRIPTOR_HANDLE handles[] =
+					{
+						textureDX12->GetDescriptorHandle().CPUPtr
+					};
+					OMSetRenderTargets(1, handles, true, nullptr);
+				}
 			}
 
 			void RHI_CommandList_DX12::EndRenderpass()
@@ -298,9 +366,14 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
-				const D3D12_VERTEX_BUFFER_VIEW views[] = { D3D12_VERTEX_BUFFER_VIEW{bufferDX12->GetResource()->GetGPUVirtualAddress(), 
-					(UINT)bufferDX12->GetSize(),
-					(UINT)bufferDX12->GetStride() }};
+				const D3D12_VERTEX_BUFFER_VIEW views[] = 
+				{ D3D12_VERTEX_BUFFER_VIEW
+					{
+						bufferDX12->GetResource()->GetGPUVirtualAddress(), 
+						(UINT)bufferDX12->GetSize(),
+						(UINT)bufferDX12->GetStride() 
+					}
+				};
 				m_commandList->IASetVertexBuffers(0, 1, views);
 				m_bound_vertex_buffer = buffer;
 			}

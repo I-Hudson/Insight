@@ -26,9 +26,13 @@ namespace Insight
 				virtual void Create(RenderContext* context) override;
 				virtual void PipelineBarrier(Graphics::PipelineBarrier barrier) override;
 
+#ifdef DX12_ENHANCED_BARRIERS
+
 				void PipelineBarrier(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier, std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier);
 				void PipelineBarrierBuffer(std::vector<D3D12_BUFFER_BARRIER> const& bufferMemoryBarrier);
 				void PipelineBarrierImage(std::vector<D3D12_TEXTURE_BARRIER> const& imageMemoryBarrier);
+#endif
+				void PipelineResourceBarriers(std::vector<D3D12_RESOURCE_BARRIER> const& resourceBarriers);
 
 				void ClearRenderTargetView(D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle, const float* clearColour, int numRects, D3D12_RECT* rects);
 				void ClearDepthStencilView(D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView, D3D12_CLEAR_FLAGS ClearFlags, float Depth, int Stencil, int NumRects, D3D12_RECT* rects);
@@ -85,7 +89,11 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_contextDX12 = nullptr;
 
+#ifdef DX12_ENHANCED_BARRIERS
 				ID3D12GraphicsCommandList7* m_commandList;
+#else
+				ID3D12GraphicsCommandList3* m_commandList;
+#endif
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
 
 				DescriptorBindingDX12 m_descriptorBinding;

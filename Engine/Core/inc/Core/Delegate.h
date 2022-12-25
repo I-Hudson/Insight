@@ -335,6 +335,7 @@ namespace Insight
 				}
 				if (indexToRemove != -1)
 				{
+					ASSERT(indexToRemove >= 0 && indexToRemove < m_functions.size());
 					m_functions.erase(m_functions.begin() + indexToRemove);
 				}
 			}

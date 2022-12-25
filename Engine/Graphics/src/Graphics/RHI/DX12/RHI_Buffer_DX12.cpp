@@ -1,6 +1,7 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
+#include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
 #include "Core/Logger.h"
@@ -15,6 +16,16 @@ namespace Insight
 			{
 				Release();
 			}
+
+			D3D12_RESOURCE_STATES RHI_Buffer_DX12::GetResourceState() const
+			{
+				return m_currentResouceState;
+			}
+
+			void RHI_Buffer_DX12::SetResourceState(D3D12_RESOURCE_STATES resourceState)
+			{
+				m_currentResouceState = resourceState;
+			}
 			
 			void RHI_Buffer_DX12::Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides)
 			{
@@ -25,7 +36,7 @@ namespace Insight
 				m_overrides = overrides;
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = BufferTypeToDX12HeapProperties(m_bufferType);
-				D3D12_RESOURCE_STATES resourceState = BufferTypeToDX12ResourceState(m_bufferType);
+				D3D12_RESOURCE_STATES resourceState = BufferTypeToDX12InitialResourceState(m_bufferType);
 				CD3DX12_RESOURCE_DESC resourceDesc = {};
 
 				if (bufferType == BufferType::Uniform)
@@ -39,8 +50,10 @@ namespace Insight
 				if (overrides.Force_Host_Writeable)
 				{
 					heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+					resourceState = D3D12_RESOURCE_STATE_GENERIC_READ;
 				}
 
+				m_currentResouceState = resourceState;
 				/// Create the constant buffer.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
 					&heapProperties,
@@ -84,7 +97,7 @@ namespace Insight
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
 					stagingBuffer.Upload(data, sizeInBytes, 0);
 
-					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
+					RHI_CommandList_DX12* cmdList = static_cast<RHI_CommandList_DX12*>(m_context->GetCommandListManager().GetCommandList());
 					cmdList->CopyBufferToBuffer(this, offset, &stagingBuffer, 0, sizeInBytes);
 					cmdList->Close();
 
@@ -112,19 +125,7 @@ namespace Insight
 					RHI_Buffer_DX12 readback_buffer;
 					readback_buffer.Create(m_context, BufferType::Readback, current_buffer_size, GetStride(), { });
 
-					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
-
-					RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
-
-					D3D12_BUFFER_BARRIER srcBarrier = CD3DX12_BUFFER_BARRIER(
-						D3D12_BARRIER_SYNC_NONE,
-						D3D12_BARRIER_SYNC_COPY,
-						D3D12_BARRIER_ACCESS_NO_ACCESS,
-						D3D12_BARRIER_ACCESS_COPY_SOURCE,
-						m_resource.Get());
-					std::vector<D3D12_BUFFER_BARRIER> barriers = { srcBarrier };
-					cmdListDX12->PipelineBarrierBuffer(barriers);
-					
+					RHI_CommandList_DX12* cmdList = static_cast<RHI_CommandList_DX12*>(m_context->GetCommandListManager().GetCommandList());
 					cmdList->CopyBufferToBuffer(&readback_buffer, 0, this, 0, GetSize());
 					cmdList->Close();
 
