@@ -100,6 +100,8 @@ namespace Insight
 
 				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;
 
+				ID3D12DescriptorHeap* m_boundResourceHeap = nullptr;
+
 				friend class RHI_CommandListAllocator_DX12;
 			};
 

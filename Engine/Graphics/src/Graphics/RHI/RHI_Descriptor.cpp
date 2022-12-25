@@ -13,6 +13,8 @@
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
 #endif
 #if defined(IS_DX12_ENABLED)
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 
 #endif
@@ -483,6 +485,11 @@ namespace Insight
 			}
 			DescriptorSet& descriptor_set= m_descriptor_sets[set];
 			descriptor_set.Bindings[binding].RHI_Sampler = sampler;
+		}
+
+		std::vector<DescriptorSet> const& DescriptorAllocator::GetAllocatorDescriptorSets() const
+		{
+			return m_descriptor_sets;
 		}
 
 		void DescriptorAllocator::SetRenderContext(RenderContext* context)

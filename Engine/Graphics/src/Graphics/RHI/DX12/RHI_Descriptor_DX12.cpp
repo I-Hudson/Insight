@@ -185,8 +185,13 @@ namespace Insight
 			//// <param name="heapType"></param>
 			void DescriptorHeap_DX12::Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType)
 			{
+				Create(heapType, 256);
+			}
+
+			void DescriptorHeap_DX12::Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType, u32 handleCount)
+			{
 				m_heapType = heapType;
-				AddNewHeap();
+				AddNewHeap(handleCount);
 			}
 
 			ID3D12DescriptorHeap* DescriptorHeap_DX12::GetHeap(u32 heapId) const
@@ -242,7 +247,12 @@ namespace Insight
 
 			void DescriptorHeap_DX12::AddNewHeap()
 			{
-				DescriptorHeapPage_DX12 heap(256, m_heapType, m_context, s_currentHeapId++, m_isGPUVisalbe);
+				AddNewHeap(256);
+			}
+
+			void DescriptorHeap_DX12::AddNewHeap(u32 handleCount)
+			{
+				DescriptorHeapPage_DX12 heap(handleCount, m_heapType, m_context, s_currentHeapId++, m_isGPUVisalbe);
 				m_heaps.push_back(heap);
 			}
 

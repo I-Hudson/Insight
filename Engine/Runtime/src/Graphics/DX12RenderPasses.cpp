@@ -85,6 +85,18 @@ namespace Insight
                     cmdList->BindPipeline(renderGraph.GetPipelineStateObject("TestPass"), nullptr);
                     cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("TestPass"));
 
+                    struct alignas(16) UBO
+                    {
+                        glm::vec4 OverrideColour;
+                        int Override;
+                    };
+                    UBO uniform
+                    {
+                        glm::vec4(1, 1, 1, 1),
+                        0
+                    };
+                    cmdList->SetUniform(0, 0, uniform);
+
                     cmdList->SetVertexBuffer(VertexBuffer);
                     cmdList->SetIndexBuffer(IndexBuffer, IndexType::Uint32);
 

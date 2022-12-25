@@ -42,6 +42,7 @@ namespace Insight
 
             private:
                 bool CheckForRootDescriptors(const DescriptorSet& descriptorSet);
+                std::vector<CD3DX12_ROOT_DESCRIPTOR> GetRootDescriptor(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_DESCRIPTOR_RANGE> GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_DESCRIPTOR_RANGE> GetSamplerRangesFromSet(const DescriptorSet& descriptorSet);
 

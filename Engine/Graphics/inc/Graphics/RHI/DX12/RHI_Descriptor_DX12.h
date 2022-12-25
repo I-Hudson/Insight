@@ -27,6 +27,13 @@ namespace Insight
 				NumDescriptors
 			};
 
+			enum class RootSignatureDescriptorTypes
+			{
+				RootConstant,
+				RootDescriptor,
+				DescriptorTable
+			};
+
 			struct DescriptorHeapHandle_DX12
 			{
 				D3D12_CPU_DESCRIPTOR_HANDLE CPUPtr{ 0 };
@@ -41,6 +48,12 @@ namespace Insight
 
 				bool IsValid() const { return CPUPtr.ptr != NULL; }
 				bool IsReferencedByShader() const { return GPUPtr.ptr != NULL; }
+			};
+
+			struct DescriptorCopiedHandleDX12
+			{
+				DescriptorHeapHandle_DX12 Handle;
+				RootSignatureDescriptorTypes Type;
 			};
 
 			class DescriptorHeapPage_DX12
@@ -80,6 +93,7 @@ namespace Insight
 				virtual ~DescriptorHeap_DX12() = default;
 
 				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType);
+				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType, u32 handleCount);
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
 
 				const std::vector<DescriptorHeapPage_DX12>& GetHeaps() const { return m_heaps; }
@@ -93,6 +107,7 @@ namespace Insight
 
 			private:
 				void AddNewHeap();
+				void AddNewHeap(u32 handleCount);
 
 			protected:
 				bool m_isGPUVisalbe = false;

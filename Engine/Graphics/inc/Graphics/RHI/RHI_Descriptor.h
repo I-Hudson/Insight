@@ -18,6 +18,11 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 
+		namespace RHI::DX12
+		{
+			class DescriptorHeapGPU_DX12;
+		}
+
 		class RHI_DescriptorLayout : public RHI_Resource
 		{
 		public:
@@ -98,6 +103,8 @@ namespace Insight
 			void SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view);
 			void SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler);
 			void SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler);
+
+			std::vector<DescriptorSet> const& GetAllocatorDescriptorSets() const;
 
 			void SetRenderContext(RenderContext* context);
 			bool GetDescriptorSets(std::vector<RHI_DescriptorSet*>& descriptors);

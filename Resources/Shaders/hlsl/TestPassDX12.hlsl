@@ -1,3 +1,9 @@
+cbuffer UBO : register(b0)
+{
+	float4 ubo_Colour;
+	int ubo_Override;
+}
+
 struct VertexOutput
 {
 	float4 Position : SV_POSITION;
@@ -14,5 +20,9 @@ VertexOutput VSMain(VertexOutput input)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-	return input.Colour;
+	if (ubo_Override == 0)
+	{
+		return input.Colour;
+	}
+	return ubo_Colour;
 }

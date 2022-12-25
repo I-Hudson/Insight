@@ -12,7 +12,7 @@ namespace Insight
             DescriptorBindingDX12::DescriptorBindingDX12()
             {
                 m_descriptorHeapRes.SetRenderContext(static_cast<RenderContext_DX12*>(&RenderContext::Instance()));
-                m_descriptorHeapRes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+                m_descriptorHeapRes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100000);
             }
 
             DescriptorBindingDX12::~DescriptorBindingDX12()
@@ -47,6 +47,7 @@ namespace Insight
                 {
                     return;
                 }
+
                 const RootSignatureParameters& rootParameters = m_rootSignature->GetRootSignatureParameters();
                 for (size_t rootParamIdx = 0; rootParamIdx < rootParameters.RootParameters.size(); ++rootParamIdx)
                 {

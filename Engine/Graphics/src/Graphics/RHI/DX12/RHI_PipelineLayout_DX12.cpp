@@ -47,8 +47,7 @@ namespace Insight
 					{
 						m_rootSignatureParameters.DescriptorRanges.push_back({});
 						// Root Descriptors
-						m_rootSignatureParameters.RootDescriptors.push_back(std::vector<CD3DX12_ROOT_DESCRIPTOR>{});
-						FAIL_ASSERT();
+						m_rootSignatureParameters.RootDescriptors.push_back(GetRootDescriptor(set));
 					}
 					else
 					{
@@ -64,11 +63,12 @@ namespace Insight
 				{
 					if (m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx).size() > 0)
 					{
-						std::vector<CD3DX12_ROOT_DESCRIPTOR> const& root = m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx);
-						CD3DX12_ROOT_PARAMETER paramter;
-						paramter.InitAsConstantBufferView(0);
-						m_rootSignatureParameters.RootParameters.push_back(paramter);
-						FAIL_ASSERT();
+						for (CD3DX12_ROOT_DESCRIPTOR const& root : m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx))
+						{
+							CD3DX12_ROOT_PARAMETER paramter;
+							paramter.InitAsConstantBufferView(root.ShaderRegister);
+							m_rootSignatureParameters.RootParameters.push_back(paramter);
+						}
 					}
 					else
 					{
@@ -139,6 +139,21 @@ namespace Insight
 					}
 				}
 				return descriptorSet.Bindings.size() < c_MaxRootDescriptorBindingSize;
+			}
+
+			std::vector<CD3DX12_ROOT_DESCRIPTOR> RHI_PipelineLayout_DX12::GetRootDescriptor(const DescriptorSet& descriptorSet)
+			{
+				std::vector<CD3DX12_ROOT_DESCRIPTOR> rootDescriptors;
+				for (const DescriptorBinding& binding : descriptorSet.Bindings)
+				{
+					// Ignore the samples. Samplers can't be in the same descriptor table 
+					// as CBV/SRV/UAV.
+					if (binding.Type == DescriptorType::Unifom_Buffer)
+					{
+						rootDescriptors.push_back(CD3DX12_ROOT_DESCRIPTOR(binding.Binding));
+					}
+				}
+				return rootDescriptors;
 			}
 
 			std::vector<CD3DX12_DESCRIPTOR_RANGE> RHI_PipelineLayout_DX12::GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet)

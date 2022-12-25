@@ -213,6 +213,8 @@ namespace Insight
 					m_commandList->Reset(m_allocator->GetAllocator(), nullptr);
 					m_state = RHI_CommandListStates::Recording;
 				}
+
+				m_boundResourceHeap = nullptr;
 			}
 
 			void RHI_CommandList_DX12::Close()
@@ -420,6 +422,7 @@ namespace Insight
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 
 				m_descriptorBinding.SetPipeline(pipelineLayout);
+				m_descriptorAllocator->SetPipeline(pso);
 			}
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)
@@ -444,11 +447,33 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
-				ID3D12DescriptorHeap* heaps[] = 
+				if (m_boundResourceHeap == nullptr)
 				{
-					m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0)
-				};
-				m_commandList->SetDescriptorHeaps(ARRAY_COUNT(heaps), heaps);
+					ID3D12DescriptorHeap* heaps[] =
+					{
+						m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0)
+					};
+					m_commandList->SetDescriptorHeaps(ARRAY_COUNT(heaps), heaps);
+					m_boundResourceHeap = m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0);
+				}
+
+				std::vector<DescriptorSet> const& descriptorSets = m_descriptorAllocator->GetAllocatorDescriptorSets();
+				for (const auto& set : descriptorSets)
+				{
+					if (set.Bindings.size() == 1
+						&& set.Bindings.at(0).Type == DescriptorType::Unifom_Buffer)
+					{
+						// Root descriptor
+						DescriptorBinding const& binding = set.Bindings.at(0);
+						RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+						m_commandList->SetGraphicsRootConstantBufferView(binding.Binding, bufferDX12->GetResource()->GetGPUVirtualAddress());
+					}
+					else
+					{
+						// Descriptor table
+					}
+				}
+
 
 				return true;
 			}

@@ -128,9 +128,9 @@ namespace Insight
 						}
 
 						context.DescriptorHeapGPURes.SetRenderContext(this);
-						context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+						context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100000);
 						context.DescriptorHeapSampler.SetRenderContext(this);
-						context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+						context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 100000);
 					});
 
 				InitImGui();
