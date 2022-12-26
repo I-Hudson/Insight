@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Graphics/Defines.h"
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 
@@ -20,8 +21,10 @@ namespace Insight
 		class RenderGraph;
 		struct PipelineStateObject;
 
-		struct AttachmentDescription
+		struct IS_GRAPHICS AttachmentDescription
 		{
+			AttachmentDescription();
+
 			PixelFormat Format;
 			AttachmentLoadOp LoadOp = AttachmentLoadOp::Clear;
 			AttachmentStoreOp StoreOp = AttachmentStoreOp::Store;
@@ -34,7 +37,18 @@ namespace Insight
 			/// Used for rendering 
 			u32 Layer_Array_Index = 0;
 			glm::vec4 ClearColour = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-			glm::vec2 DepthStencilClear = glm::vec2(1.0f, 0.0f);
+			union
+			{
+				struct
+				{
+					glm::vec2 DepthStencilClear;
+				};
+				struct
+				{
+					float Depth;
+					int Stencil;
+				};
+			};
 
 			bool IsValid() const
 			{

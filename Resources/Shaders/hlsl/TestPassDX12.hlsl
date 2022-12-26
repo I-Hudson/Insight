@@ -1,8 +1,12 @@
 cbuffer UBO : register(b0)
 {
+	float4 ubo_Transform;
 	float4 ubo_Colour;
 	int ubo_Override;
 }
+
+//Texture2D<float> Texture : register(t0);
+//SamplerState Sampler : register(s0);
 
 struct VertexOutput
 {
@@ -13,7 +17,7 @@ struct VertexOutput
 VertexOutput VSMain(VertexOutput input)
 {
 	VertexOutput o;
-    o.Position 	= input.Position;
+    o.Position 	= input.Position + ubo_Transform;
 	o.Colour = input.Colour;
 	return o;
 }

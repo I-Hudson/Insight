@@ -424,7 +424,7 @@ namespace Insight
 			m_uniformBufferOffset += size;
 
 			/// Align the size to minUniformBufferOffsetAlignment.
-			const u64 mask = PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1;
+			const u64 mask = std::min(0ull, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1);
 			m_uniformBufferOffset = m_uniformBufferOffset + (-static_cast<i64>(m_uniformBufferOffset) & mask);
 
 			return view;
@@ -441,7 +441,7 @@ namespace Insight
 			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
 			if (descriptor_binding.Size != size)
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
+				IS_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
 					, descriptor_binding.Size, size, set, binding);
 			}
 

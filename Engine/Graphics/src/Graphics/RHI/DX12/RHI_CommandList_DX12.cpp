@@ -14,6 +14,8 @@
 
 #include <WinPixEventRuntime/pix3.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Insight
 {
 	namespace Graphics
@@ -303,16 +305,44 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetHandles;
+				D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = { 0 };
+
+				u32 idx = 0;
 				for (const RHI_Texture* image : renderDescription.ColourAttachments)
 				{
 					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(image);
+					DescriptorHeapHandle_DX12 handle = textureDX12->GetDescriptorHandle();
 
-					D3D12_CPU_DESCRIPTOR_HANDLE handles[] =
+					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
+					if (description.LoadOp == AttachmentLoadOp::Clear)
 					{
-						textureDX12->GetDescriptorHandle().CPUPtr
-					};
-					OMSetRenderTargets(1, handles, true, nullptr);
+						ClearRenderTargetView(handle.CPUPtr, glm::value_ptr(description.ClearColour), 0, nullptr);
+					}
+
+					renderTargetHandles.push_back(handle.CPUPtr);
+					++idx;
 				}
+				idx = 0;
+
+				if (renderDescription.DepthStencil)
+				{
+					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(renderDescription.DepthStencil);
+					DescriptorHeapHandle_DX12 handle = textureDX12->GetDescriptorHandle();
+					if (renderDescription.DepthStencilAttachment.LoadOp == AttachmentLoadOp::Clear)
+					{
+						ClearDepthStencilView(handle.CPUPtr, 
+							D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+							renderDescription.DepthStencilAttachment.Depth, 
+							renderDescription.DepthStencilAttachment.Stencil, 
+							0, 
+							nullptr);
+
+						depthStencilHandle = handle.CPUPtr;
+					}
+				}
+
+				OMSetRenderTargets(static_cast<int>(renderTargetHandles.size()), renderTargetHandles.data(), false, depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
 			}
 
 			void RHI_CommandList_DX12::EndRenderpass()
@@ -466,7 +496,8 @@ namespace Insight
 						// Root descriptor
 						DescriptorBinding const& binding = set.Bindings.at(0);
 						RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-						m_commandList->SetGraphicsRootConstantBufferView(binding.Binding, bufferDX12->GetResource()->GetGPUVirtualAddress());
+						m_commandList->SetGraphicsRootConstantBufferView(binding.Binding, 
+							bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
 					}
 					else
 					{

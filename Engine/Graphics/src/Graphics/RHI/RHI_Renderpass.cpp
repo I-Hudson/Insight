@@ -18,6 +18,10 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		AttachmentDescription::AttachmentDescription()
+			: DepthStencilClear(glm::vec2(1.0f, 0.0f))
+		{ }
+
 		u64 AttachmentDescription::GetHash() const
 		{
 			u64 hash = 0;

@@ -303,12 +303,6 @@ namespace Insight
 					D3D12_RESOURCE_STATE_RENDER_TARGET) });
 #endif
 				m_swapchainImages[m_availableSwapchainImage].Colour->SetLayout(ImageLayout::ColourAttachment);
-
-				// Clear the render target and depth stencils.
-				const float clearColour[4] = { 1.0f, 0.0f, 1.0f, 0.0f };
-				cmdListDX12->GetCommandList()->ClearRenderTargetView(
-					m_swapchainImages[m_availableSwapchainImage].ColourHandle.CPUPtr, 
-					clearColour, 0, nullptr);
 			}
 
 			void RenderContext_DX12::PostRender(RHI_CommandList* cmdList)
@@ -546,7 +540,7 @@ namespace Insight
 					m_physical_device_info.VRam_Size += desc.DedicatedVideoMemory;
 					m_physical_device_info.SetVendorName();
 
-					m_physical_device_info.MinUniformBufferAlignment = 0;
+					m_physical_device_info.MinUniformBufferAlignment = 16;
 				}
 
 				*ppAdapter = adapter.Detach();

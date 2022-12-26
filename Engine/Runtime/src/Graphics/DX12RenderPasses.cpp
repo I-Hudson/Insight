@@ -3,6 +3,9 @@
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RenderContext.h"
 
+#include "Input/InputSystem.h"
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -16,6 +19,13 @@ namespace Insight
             glm::vec4 Colour;
         };
 
+        struct alignas(16) UBO
+        {
+            glm::vec4 Transform;
+            glm::vec4 OverrideColour;
+            int Override;
+        };
+
         void DX12RenderPasses::Render()
         {
             using namespace Graphics;
@@ -24,9 +34,9 @@ namespace Insight
             {
                 Vertex vertices[] =
                 {
-                    Vertex { { 0.0f,  0.5f, 0.5f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f} },
-                    Vertex { { 0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
-                    Vertex { {-0.5f, -0.5f, 0.5f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} },
+                    Vertex { { 0.0f,   0.25f, 0.25f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f} },
+                    Vertex { { 0.25f, -0.25f, 0.25f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f} },
+                    Vertex { {-0.25f, -0.25f, 0.25f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f} },
                 };
                 VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
                 VertexBuffer->QueueUpload(&vertices, sizeof(vertices));
@@ -37,7 +47,7 @@ namespace Insight
             {
                 u32 indices[] =
                 {
-                    0, 2, 1
+                    0, 1, 2
                 };
                 IndexBuffer = Renderer::CreateIndexBuffer(sizeof(indices));
                 IndexBuffer->QueueUpload(&indices, sizeof(indices));
@@ -61,14 +71,13 @@ namespace Insight
                     pso.ShaderDescription = shaders;
                     pso.DepthWrite = false;
                     pso.DepthTest = false;
-                    pso.FrontFace = FrontFace::Clockwise;
                     pso.Swapchain = true;
                     builder.SetPipeline(pso);
 
                     builder.SetAsRenderToSwapchain();
 
                     RenderpassDescription renderPassDescriptor = {};
-                    renderPassDescriptor.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, ImageLayout::ColourAttachment));
+                    renderPassDescriptor.AddAttachment(AttachmentDescription::Default(PixelFormat::Unknown, ImageLayout::ColourAttachment));
                     builder.SetRenderpass(renderPassDescriptor);
 
                     builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
@@ -85,21 +94,27 @@ namespace Insight
                     cmdList->BindPipeline(renderGraph.GetPipelineStateObject("TestPass"), nullptr);
                     cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("TestPass"));
 
-                    struct alignas(16) UBO
-                    {
-                        glm::vec4 OverrideColour;
-                        int Override;
-                    };
-                    UBO uniform
-                    {
-                        glm::vec4(1, 1, 1, 1),
-                        0
-                    };
-                    cmdList->SetUniform(0, 0, uniform);
-
                     cmdList->SetVertexBuffer(VertexBuffer);
                     cmdList->SetIndexBuffer(IndexBuffer, IndexType::Uint32);
 
+                    UBO uniform
+                    {
+                        glm::vec4(0, 0, 0, 0),
+                        glm::vec4(1, 1, 1, 1),
+                        Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_Space) ? 1 : 0
+                    };
+
+                    cmdList->SetUniform(0, 0, uniform);
+                    cmdList->DrawIndexed(3, 1, 0, 0, 0);
+
+                    uniform.Transform = glm::vec4(-0.75f, 0, 0, 0);
+                    uniform.OverrideColour = glm::vec4(1.0f, 0.5f, 0.16f, 1);
+                    cmdList->SetUniform(0, 0, uniform);
+                    cmdList->DrawIndexed(3, 1, 0, 0, 0);
+
+                    uniform.Transform = glm::vec4(0.75f, 0, 0, 0);
+                    uniform.OverrideColour = glm::vec4(0.5f, 0.23f, 0.85f, 1);
+                    cmdList->SetUniform(0, 0, uniform);
                     cmdList->DrawIndexed(3, 1, 0, 0, 0);
 
                     cmdList->EndRenderpass();
