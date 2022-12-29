@@ -235,6 +235,11 @@ namespace Insight
 			m_rightTrigger.ClearFrame();
 		}
 
+		ControllerVendors InputDevice_Controller::GetVendor() const
+		{
+			return m_vendor;
+		}
+
 		ControllerSubTypes InputDevice_Controller::GetSubType() const
 		{
 			return m_subType;

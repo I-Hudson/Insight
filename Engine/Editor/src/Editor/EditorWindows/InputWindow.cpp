@@ -169,6 +169,7 @@ namespace Insight
 				{
 					Input::InputDevice_Controller* device = const_cast<Input::InputDevice_Controller*>(static_cast<Input::InputDevice_Controller const*>(inputDevice));
 					{
+						ImGui::Text("Controller vendor: '%s'.", Input::ControllerVendorToString(device->GetVendor()));
 						ImGui::Text("Controller sub type: '%s'.", Input::ControllerSubTypeToString(device->GetSubType()));
 						ImGui::Separator();
 					}

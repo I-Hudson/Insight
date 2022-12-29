@@ -142,6 +142,7 @@ namespace Insight
 			virtual void Update(float const deltaTime) override;
 			virtual void ClearFrame() override;
 
+			ControllerVendors GetVendor() const;
 			ControllerSubTypes GetSubType() const;
 
 			bool WasPressed(ControllerButtons buttonIdx) const;

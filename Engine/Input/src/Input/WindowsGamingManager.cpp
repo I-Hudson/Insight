@@ -35,7 +35,12 @@ namespace Insight
 		{ }
 
 		WindowsGamingManager::~WindowsGamingManager()
-		{ }
+		{
+			for (size_t i = 0; i < m_connectControllers.size(); ++i)
+			{
+				m_connectControllers.at(i) = nullptr;
+			}
+		}
 
 		void WindowsGamingManager::Initialise(InputSystem* inputSystem)
 		{
@@ -84,6 +89,7 @@ namespace Insight
 					continue;
 				}
 				ProcessInput(i);
+				ProcessVibration(i);
 			}
 		}
 
