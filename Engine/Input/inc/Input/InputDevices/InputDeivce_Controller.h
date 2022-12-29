@@ -24,6 +24,7 @@ namespace Insight
 		constexpr u64 XBOX_CONTROLLER_ONE_ELITE            = 0x02E3;
 		constexpr u64 XBOX_CONTROLLER_ONE_BLUETOOTH		   = 0xB12;
 		constexpr u64 XBOX_CONTROLLER_ONE                  = 0x02D1;
+		constexpr u64 XBOX_CONTROLLER_ONE_1				   = 0x2FF;
 		constexpr u64 XBOX_CONTROLLER_ONE_2015             = 0x02DD;
 		constexpr u64 XBOX_CONTROLLER_360                  = 0x045E;
 

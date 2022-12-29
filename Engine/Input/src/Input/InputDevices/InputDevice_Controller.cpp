@@ -130,6 +130,7 @@ namespace Insight
 			case XBOX_CONTROLLER_ONE_ELITE:                  return ControllerSubTypes::XboxOneElite;
 			case XBOX_CONTROLLER_ONE_BLUETOOTH:              return ControllerSubTypes::XboxOne;
 			case XBOX_CONTROLLER_ONE:                        return ControllerSubTypes::XboxOne;
+			case XBOX_CONTROLLER_ONE_1:                      return ControllerSubTypes::XboxOne;
 			case XBOX_CONTROLLER_ONE_2015:                   return ControllerSubTypes::XboxOne;
 			case XBOX_CONTROLLER_360:                        return ControllerSubTypes::Xbox360;
 
