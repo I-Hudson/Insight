@@ -101,6 +101,7 @@ namespace Insight
 					stagingBuffer.Release();
 					m_uploadStatus = DeviceUploadStatus::Completed;
 				}
+				sizeInBytes = AlignUp(sizeInBytes, alignment);
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 

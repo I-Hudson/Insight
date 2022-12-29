@@ -126,7 +126,7 @@ namespace Insight
 
 			void RHI_CommandList_Vulkan::CopyBufferToBuffer(RHI_Buffer* dst, u64 dstOffset, RHI_Buffer* src, u64 srcOffset, u64 sizeInBytes)
 			{
-				ASSERT(sizeInBytes == 0);
+				ASSERT(sizeInBytes != 0);
 
 				RHI_Buffer_Vulkan* dstVulkan = static_cast<RHI_Buffer_Vulkan*>(dst);
 				RHI_Buffer_Vulkan* srcVulkan = static_cast<RHI_Buffer_Vulkan*>(src);

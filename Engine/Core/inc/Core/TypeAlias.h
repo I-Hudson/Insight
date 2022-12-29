@@ -50,6 +50,22 @@ constexpr T AlignUp(T x, T align)
 	return (x + align - 1) / align * align;
 }
 
+template<typename T,typename Y>
+constexpr T AlignUp(T x, Y align)
+{
+    static_assert((std::is_integral_v<T>));
+    static_assert((std::is_integral_v<Y>));
+
+    const u64 xValue = static_cast<u64>(x);
+    const u64 alignValue = static_cast<u64>(align);
+
+    if (alignValue == 0)
+    {
+        return x;
+    }
+    return (xValue + alignValue - 1) / alignValue * alignValue;
+}
+
 /// https:///stackoverflow.com/a/21624122
 constexpr int BitFlagsToIndex(u64 flags)
 {

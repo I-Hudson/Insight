@@ -420,8 +420,7 @@ namespace Insight
 		{
 			CreateUniformBufferIfNoExist();
 
-			const u64 mask = std::max(0ull, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
-			const u32 alignedSize = AlignUp(size, static_cast<u32>(mask));
+			const u32 alignedSize = AlignUp(size, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
 			if (m_uniformBufferOffset + alignedSize > m_uniformBuffer->GetSize())
 			{
 				FAIL_ASSERT();
