@@ -183,14 +183,16 @@ workspace "Insight"
             "IS_MATHS_DIRECTX_MATHS",
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
-            
+            "IS_CPP_WINRT"
+
             "NOMINMAX",
             
             "VK_USE_PLATFORM_WIN32_KHR",
         }
         links
         {
-            "WinPixEventRuntime.lib"
+            "WinPixEventRuntime.lib",
+            "cppwinrt_fast_forwarder.lib",
         }
 
     filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }

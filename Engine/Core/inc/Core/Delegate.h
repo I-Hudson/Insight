@@ -324,12 +324,12 @@ namespace Insight
 
 			void UnbindFunction(Function<Return(Args...)> f)
 			{
-				int indexToRemove = -1;
+				u64 indexToRemove = -1;
 				for (size_t i = 0; i < m_functions.size(); ++i)
 				{
 					if (f == m_functions.at(i))
 					{
-						indexToRemove = (int)i;
+						indexToRemove = i;
 						break;
 					}
 				}

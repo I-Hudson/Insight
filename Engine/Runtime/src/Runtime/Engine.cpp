@@ -165,6 +165,8 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
 
 			ASSERT(m_systemRegistry.IsEmpty());
+
+			Platform::Shutdown();
 		}
 	}
 }

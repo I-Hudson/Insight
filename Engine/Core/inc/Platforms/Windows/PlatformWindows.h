@@ -19,6 +19,7 @@ namespace Insight
 		public:
 
 			static void Initialise();
+			static void Shutdown();
 
 			static void MemCopy(void* dst, void const* src, u64 size);
 			static void MemSet(void* dst, int value, u64 size);

@@ -19,6 +19,33 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRun
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.lib"                                 "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.dll"		                            "dll"
 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                         "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\d3d12SDKLayers.dll"                    "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                       "dll"
+
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\concrt140d_app.dll"      "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\msvcp140_1d_app.dll"     "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\msvcp140_2d_app.dll"     "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\msvcp140d_app.dll"       "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\vcamp140d_app.dll"       "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\vccorlib140d_app.dll"    "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\vcomp140d_app.dll"       "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\vcruntime140_1d_app.dll" "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\vcruntime140d_app.dll"   "dll"
+
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\concrt140_app.dll"      "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\msvcp140_1_app.dll"     "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\msvcp140_2_app.dll"     "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\msvcp140_app.dll"       "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\vcamp140_app.dll"       "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\vccorlib140_app.dll"    "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\vcomp140_app.dll"       "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\vcruntime140_1_app.dll" "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\release\vcruntime140_app.dll"   "dll"
+
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"             "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"           "lib"
+
 pause
 
 :COPY_TO_DEBUG_DEPS

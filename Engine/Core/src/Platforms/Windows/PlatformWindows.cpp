@@ -3,6 +3,7 @@
 #ifdef IS_PLATFORM_WINDOWS
 
 #include "Core/Logger.h"
+#include "Platforms/Platform.h"
 
 #include <windows.h>
 #include <intrin.h>
@@ -20,6 +21,12 @@ namespace Insight
 		void PlatformWindows::Initialise()
 		{
 			s_mainThreadId = std::this_thread::get_id();
+			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
+		}
+
+		void PlatformWindows::Shutdown()
+		{
+			CoUninitialize();
 		}
 
 		void PlatformWindows::MemCopy(void* dst, void const* src, u64 size)
