@@ -73,7 +73,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, u64 sizeInBytes, u64 offset)
+			RHI_BufferView RHI_Buffer_DX12::Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment)
 			{
 				if (data == nullptr)
 				{
@@ -82,7 +82,7 @@ namespace Insight
 
 				if (sizeInBytes > GetSize())
 				{
-					IS_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big avaliable size '{}'.", sizeInBytes, GetSize());
+					IS_CORE_ERROR("[RHI_Buffer_DX12::Upload] Upload size '{}' is too big available size '{}'.", sizeInBytes, GetSize());
 					return {};
 				}
 
@@ -95,7 +95,7 @@ namespace Insight
 					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_DX12 stagingBuffer;
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
-					stagingBuffer.Upload(data, sizeInBytes, 0);
+					stagingBuffer.Upload(data, sizeInBytes, 0, 0);
 
 					RHI_CommandList_DX12* cmdList = static_cast<RHI_CommandList_DX12*>(m_context->GetCommandListManager().GetCommandList());
 					cmdList->CopyBufferToBuffer(this, offset, &stagingBuffer, 0, sizeInBytes);
@@ -106,6 +106,7 @@ namespace Insight
 
 					stagingBuffer.Release();
 				}
+				sizeInBytes = AlignUp(sizeInBytes, alignment);
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 
@@ -156,7 +157,7 @@ namespace Insight
 				Release();
 				Create(m_context, m_bufferType, newSizeInBytes, m_stride, m_overrides);
 
-				Upload(data.data(), data_size, 0);
+				Upload(data.data(), data_size, 0, 0);
 			}
 
 			void RHI_Buffer_DX12::Release()

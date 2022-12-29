@@ -420,12 +420,15 @@ namespace Insight
 		{
 			CreateUniformBufferIfNoExist();
 
-			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset));
-			m_uniformBufferOffset += size;
+			const u64 mask = std::max(0ull, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
+			const u32 alignedSize = AlignUp(size, static_cast<u32>(mask));
+			if (m_uniformBufferOffset + alignedSize > m_uniformBuffer->GetSize())
+			{
+				FAIL_ASSERT();
+			}
 
-			/// Align the size to minUniformBufferOffsetAlignment.
-			const u64 mask = std::min(0ull, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment - 1);
-			m_uniformBufferOffset = m_uniformBufferOffset + (-static_cast<i64>(m_uniformBufferOffset) & mask);
+			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset), PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
+			m_uniformBufferOffset += view.GetSize();
 
 			return view;
 		}

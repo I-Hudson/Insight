@@ -5,7 +5,7 @@ cbuffer UBO : register(b0)
 	int ubo_Override;
 }
 
-//Texture2D<float> Texture : register(t0);
+Texture2D<float> Texture : register(t0);
 //SamplerState Sampler : register(s0);
 
 struct VertexOutput

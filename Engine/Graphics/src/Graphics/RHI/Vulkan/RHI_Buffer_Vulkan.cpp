@@ -60,7 +60,7 @@ namespace Insight
 				}
 			}
 
-			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset)
+			RHI_BufferView RHI_Buffer_Vulkan::Upload(const void* data, u64 sizeInBytes, u64 offset, u64 alignment)
 			{
 				IS_PROFILE_FUNCTION();
 				ASSERT(Platform::IsMainThread());
@@ -88,7 +88,7 @@ namespace Insight
 					/// We need a staging buffer to upload data from CPU to GPU.
 					RHI_Buffer_Vulkan stagingBuffer;
 					stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
-					stagingBuffer.Upload(data, sizeInBytes, 0);
+					stagingBuffer.Upload(data, sizeInBytes, 0, 0);
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
 					m_uploadStatus = DeviceUploadStatus::Uploading;
@@ -146,7 +146,7 @@ namespace Insight
 				Release();
 				Create(m_context, m_bufferType, newSizeBytes, m_stride, m_overrides);
 
-				Upload(data.data(), data_size, 0);
+				Upload(data.data(), data_size, 0, 0);
 			}
 
 			void RHI_Buffer_Vulkan::Release()

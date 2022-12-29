@@ -477,11 +477,13 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				DescriptorHeapGPU_DX12& resouceHeap = m_contextDX12->GetFrameDescriptorHeapGPU();
+
 				if (m_boundResourceHeap == nullptr)
 				{
 					ID3D12DescriptorHeap* heaps[] =
 					{
-						m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0)
+						resouceHeap.GetHeap(0)
 					};
 					m_commandList->SetDescriptorHeaps(ARRAY_COUNT(heaps), heaps);
 					m_boundResourceHeap = m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap(0);
@@ -496,12 +498,43 @@ namespace Insight
 						// Root descriptor
 						DescriptorBinding const& binding = set.Bindings.at(0);
 						RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-						m_commandList->SetGraphicsRootConstantBufferView(binding.Binding, 
+						m_commandList->SetGraphicsRootConstantBufferView(binding.Binding,
 							bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
 					}
 					else
 					{
 						// Descriptor table
+						DescriptorHeapHandle_DX12 firstHandle;
+						
+						for (auto const& binding : set.Bindings)
+						{
+							DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNewHandle();
+
+							if (binding.Type == DescriptorType::Sampled_Image
+								&& binding.RHI_Texture)
+							{
+								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
+								DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
+								m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, srvHandle.CPUPtr, dstHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+							}
+							else if ( (binding.Type == DescriptorType::Unifom_Buffer
+								|| binding.Type == DescriptorType::Storage_Buffer) 
+								&& binding.RHI_Buffer_View.IsValid())
+							{
+								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+								D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
+								desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
+								desc.SizeInBytes = binding.RHI_Buffer_View.GetSize();
+								m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+							}
+
+							if (firstHandle.CPUPtr.ptr == 0)
+							{
+								firstHandle = dstHandle;
+							}
+						}
+
+						m_commandList->SetGraphicsRootDescriptorTable(set.Set, firstHandle.GPUPtr);
 					}
 				}
 

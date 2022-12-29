@@ -158,7 +158,7 @@ namespace Insight
 				m_uploadStagingBuffer->Resize(newSizeBytes);
 			}
 			// Upload the data.
-			m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset);
+			m_uploadStagingBuffer->Upload(data, sizeInBytes, m_stagingBufferOffset, 0);
 			m_stagingBufferOffset += sizeInBytes;
 		}
 	}

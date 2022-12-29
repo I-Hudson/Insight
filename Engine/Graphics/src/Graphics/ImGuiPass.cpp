@@ -119,8 +119,8 @@ namespace Insight
 						const u64 vertex_buffer_size_bytes = cmd_list->VtxBuffer.Size * sizeof(ImDrawVert);
 						const u64 index_buffer_size_bytes = cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx);
 
-						m_vertex_buffer.Get()->Upload(cmd_list->VtxBuffer.Data, vertex_buffer_size_bytes, vtx_dst_offset);
-						m_index_buffer.Get()->Upload(cmd_list->IdxBuffer.Data, index_buffer_size_bytes, idx_dst_offset);
+						m_vertex_buffer.Get()->Upload(cmd_list->VtxBuffer.Data, vertex_buffer_size_bytes, vtx_dst_offset, 0);
+						m_index_buffer.Get()->Upload(cmd_list->IdxBuffer.Data, index_buffer_size_bytes, idx_dst_offset, 0);
 						vtx_dst_offset += vertex_buffer_size_bytes;
 						idx_dst_offset += index_buffer_size_bytes;
 					}

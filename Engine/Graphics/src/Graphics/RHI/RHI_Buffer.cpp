@@ -139,7 +139,7 @@ namespace Insight
 			{
 				Resize(m_capacity * 2);
 			}
-			RHI_BufferView view = m_buffer->Upload(data, sizeInBytes, m_size);
+			RHI_BufferView view = m_buffer->Upload(data, sizeInBytes, m_size, 0);
 			m_size += sizeInBytes;
 			return view;
 		}

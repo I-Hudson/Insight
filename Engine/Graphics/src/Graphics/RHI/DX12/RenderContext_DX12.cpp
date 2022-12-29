@@ -540,7 +540,7 @@ namespace Insight
 					m_physical_device_info.VRam_Size += desc.DedicatedVideoMemory;
 					m_physical_device_info.SetVendorName();
 
-					m_physical_device_info.MinUniformBufferAlignment = 16;
+					m_physical_device_info.MinUniformBufferAlignment = D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT;
 				}
 
 				*ppAdapter = adapter.Detach();

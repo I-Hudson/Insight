@@ -43,8 +43,11 @@ template<typename T>
 constexpr T AlignUp(T x, T align)
 {
 	static_assert((std::is_integral_v<T>));
-	T r = x % align;
-	return r ? x + (align - r) : x;
+    if (align == 0)
+    {
+        return x;
+    }
+	return (x + align - 1) / align * align;
 }
 
 /// https:///stackoverflow.com/a/21624122
