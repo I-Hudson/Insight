@@ -524,7 +524,7 @@ namespace Insight
 								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 								D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
 								desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
-								desc.SizeInBytes = binding.RHI_Buffer_View.GetSize();
+								desc.SizeInBytes = static_cast<UINT>(binding.RHI_Buffer_View.GetSize());
 								m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
 							}
 

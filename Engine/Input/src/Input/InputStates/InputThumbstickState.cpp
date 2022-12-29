@@ -37,16 +37,6 @@ namespace Insight
             return m_y.GetValue();
         }
 
-        i16 InputThumbstickState::GetRawValueX() const
-        {
-            return m_x.GetRawValue();
-        }
-
-        i16 InputThumbstickState::GetRawValueY() const
-        {
-            return m_y.GetRawValue();
-        }
-
         void InputThumbstickState::SetValueX(float value)
         {
             m_x.SetValue(value);
@@ -55,16 +45,6 @@ namespace Insight
         void InputThumbstickState::SetValueY(float value)
         {
             m_y.SetValue(value);
-        }
-
-        void InputThumbstickState::SetRawValueX(i16 value)
-        {
-            m_x.SetRawValue(value);
-        }
-
-        void InputThumbstickState::SetRawValueY(i16 value)
-        {
-            m_y.SetRawValue(value);
         }
     }
 }

@@ -183,7 +183,7 @@ workspace "Insight"
             "IS_MATHS_DIRECTX_MATHS",
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
-            "IS_CPP_WINRT"
+            "IS_CPP_WINRT",
 
             "NOMINMAX",
             

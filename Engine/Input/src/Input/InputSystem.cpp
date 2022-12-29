@@ -25,8 +25,12 @@ namespace Insight
 #endif // IS_PLATFORM_DESKTOP
 
 #ifdef IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			m_windowsGamingManager.Initialise(this);
+#else
 			m_xinputManager.Initialise(this);
-#endif
+#endif // #ifdef IS_CPP_WINRT
+#endif // #ifdef IS_PLATFORM_WINDOWS
 
 			m_state = Core::SystemStates::Initialised;
 		}
@@ -41,7 +45,11 @@ namespace Insight
 			m_inputDevices.clear();
 
 #ifdef IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			m_windowsGamingManager.Shutdown();
+#else
 			m_xinputManager.Shutdown();
+#endif // #ifdef IS_CPP_WINRT
 #endif // IS_PLATFORM_WINDOWS
 
 			m_state = Core::SystemStates::Not_Initialised;
@@ -104,8 +112,13 @@ namespace Insight
 		void InputSystem::Update(float const deltaTime)
 		{
 #ifdef IS_PLATFORM_WINDOWS
-			m_xinputManager.Update();
-#endif // IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			m_windowsGamingManager.Update(deltaTime);
+#else
+			m_xinputManager.Update(deltaTime);
+#endif // #ifdef IS_CPP_WINRT
+#endif // #ifdef IS_PLATFORM_WINDOWS
+
 			for (auto& device: m_inputDevices)
 			{
 				device->Update(deltaTime);

@@ -16,10 +16,8 @@ namespace Insight
         /// <summary>
         /// Represent a single analog input value.
         /// </summary>
-        template<typename IntType>
         class InputAnalogState
         {
-            static_assert(std::is_integral_v<IntType>);
         public:
             InputAnalogState() = default;
             ~InputAnalogState() = default;
@@ -33,32 +31,22 @@ namespace Insight
             }
             bool HasInput() const
             {
-                return m_rawValue != 0;
+                return m_value != 0;
             }
             void ClearFrame()
             {
-                m_scaledValue = 0.0f;
-                m_rawValue = 0;
+                m_value = 0.0f;
             }
 
-            float GetValue() const { return m_scaledValue; }
-            IntType GetRawValue() const { return m_rawValue; }
+            float GetValue() const { return m_value; }
 
             void SetValue(float value)
             {
-                m_scaledValue = value;
-                m_scaledValue = std::max(-1.0f, std::min(1.0f, m_scaledValue));
-            }
-
-            void SetRawValue(IntType value)
-            {
-                m_rawValue = value;
-                m_update = AnalogStateUpdates::UpdatedThisFrame;
+                m_value = std::max(-1.0f, std::min(1.0f, value));
             }
 
         private:
-            float m_scaledValue = 0.0f; // Value between -1 to 1.
-            IntType m_rawValue = 0;
+            float m_value = 0.0f; // Value between -1 to 1.
             AnalogStateUpdates m_update;
         };
     }

@@ -5,6 +5,7 @@
 
 #include "Input/InputDevices/IInputDevice.h"
 #include "Input/XInputManager.h"
+#include "Input/WindowsGamingManager.h"
 
 #include <array>
 #include <vector>
@@ -44,9 +45,13 @@ namespace Insight
 			std::vector<IInputDevice*> m_inputDevices;
 			IInputDevice* m_lastUsedInputDeivce = nullptr;
 #ifdef IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			WindowsGamingManager m_windowsGamingManager;
+			friend class WindowsGamingManager;
+#endif // #ifdef IS_CPP_WINRT
 			XInputManager m_xinputManager;
 			friend class XInputManager;
-#endif
+#endif // #ifdef IS_PLATFORM_WINDOWS
 		};
 	}
 }

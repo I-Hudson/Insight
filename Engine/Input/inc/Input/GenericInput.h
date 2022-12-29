@@ -8,6 +8,8 @@ namespace Insight
 {
 	namespace Input
 	{
+		class InputSystem;
+
 		enum class InputDeviceTypes
 		{
 			KeyboardMouse,
@@ -34,6 +36,14 @@ namespace Insight
 			u64 Data0 = 0;
 			u64 Data1 = 0;
 			u64 Data2 = 0;
+		};
+
+		class InputManager
+		{
+		public:
+			virtual void Initialise(InputSystem* inputSystem) = 0;
+			virtual void Shutdown() = 0;
+			virtual void Update(float const deltaTime) = 0;
 		};
 	}
 }

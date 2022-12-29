@@ -29,20 +29,9 @@ namespace Insight
         {
             return m_trigger.GetValue();
         }
-
-        u8 InputTriggerState::GetRawValue() const
-        {
-            return m_trigger.GetRawValue();
-        }
-
         void InputTriggerState::SetValue(float value)
         {
             m_trigger.SetValue(value);
-        }
-
-        void InputTriggerState::SetRawValue(u8 value)
-        {
-            m_trigger.SetRawValue(value);
         }
     }
 }

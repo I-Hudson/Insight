@@ -180,10 +180,9 @@ namespace Insight
 						for (size_t i = 0; i < static_cast<u64>(Input::ControllerThumbsticks::NumThumbsticks); ++i)
 						{
 							Input::ControllerThumbsticks currentThumbstick = static_cast<Input::ControllerThumbsticks>(i);
-							ImGui::Text("Thumbstick: '%s', value: '%f', raw value: '%i'.",
+							ImGui::Text("Thumbstick: '%s', value: '%f'.",
 								Input::ControllerThumbstickToString(currentThumbstick),
-								device->GetThumbstickValue(currentThumbstick),
-								device->GetThumbstickRawValue(currentThumbstick));
+								device->GetThumbstickValue(currentThumbstick));
 						}
 						ImGui::Unindent();
 					}
@@ -195,10 +194,9 @@ namespace Insight
 						for (size_t i = 0; i < static_cast<u64>(Input::ControllerTriggers::NumTriggers); ++i)
 						{
 							Input::ControllerTriggers currentTrigger = static_cast<Input::ControllerTriggers>(i);
-							ImGui::Text("Trigger: '%s', value: '%f', raw value: '%i'.",
+							ImGui::Text("Trigger: '%s', value: '%f'.",
 								Input::ControllerTriggerToString(currentTrigger),
-								device->GetTriggerValue(currentTrigger),
-								device->GetTriggerRawValue(currentTrigger));
+								device->GetTriggerValue(currentTrigger));
 						}
 						ImGui::Unindent();
 					}
@@ -210,10 +208,9 @@ namespace Insight
 						for (int i = 0; i < static_cast<u64>(Input::ControllerRumbles::NumRumbles); ++i)
 						{
 							Input::ControllerRumbles currentRumble = static_cast<Input::ControllerRumbles>(i);
-							ImGui::Text("Rumble: '%s', value: '%f', raw value: '%i'.",
+							ImGui::Text("Rumble: '%s', value: '%f'.",
 								Input::ControllerRumbleToString(currentRumble),
-								device->GetRumbleValue(currentRumble),
-								device->GetRumbleRawValue(currentRumble));
+								device->GetRumbleValue(currentRumble));
 							ImGui::NewLine();
 
 							float rumbleValue = device->GetRumbleValue(currentRumble);

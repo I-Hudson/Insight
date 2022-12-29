@@ -20,17 +20,13 @@ namespace Insight
 
             float GetValueX() const;
             float GetValueY() const;
-            i16 GetRawValueX() const;
-            i16 GetRawValueY() const;
 
             void SetValueX(float value);
             void SetValueY(float value);
-            void SetRawValueX(i16 value);
-            void SetRawValueY(i16 value);
 
         private:
-            InputAnalogState<i16> m_x;
-            InputAnalogState<i16> m_y;
+            InputAnalogState m_x;
+            InputAnalogState m_y;
         };
     }
 }

@@ -4,12 +4,42 @@ namespace Insight
 {
 	namespace Input
 	{
+		char const* ControllerVendorToString(ControllerVendors vendor)
+		{
+			switch (vendor)
+			{
+			case Insight::Input::ControllerVendors::Microsoft: return "Microsoft";
+			case Insight::Input::ControllerVendors::Sony:	   return "Sony";
+			case Insight::Input::ControllerVendors::NumControllerVendors:
+			default:
+				break;
+			}
+			return "Unknown";
+		}
+
+		ControllerVendors VendorIdToControllerVendor(u32 vendorId)
+		{
+			switch (vendorId)
+			{
+			case MICROSOFT_VENDOR_ID:   return ControllerVendors::Microsoft;
+			case PLAYSTATION_VENDOR_ID: return ControllerVendors::Sony;
+			default:
+				break;
+			}
+			return ControllerVendors::Unknown;
+		}
+
 		const char* ControllerSubTypeToString(ControllerSubTypes subType)
 		{
 			switch (subType)
 			{
-			case Insight::Input::ControllerSubTypes::Xbox360: return "Xbox360";
-			case Insight::Input::ControllerSubTypes::XboxOne: return "XboxOne";
+			case Insight::Input::ControllerSubTypes::Xbox360:                 return "Xbox360";
+			case Insight::Input::ControllerSubTypes::XboxOne:                 return "XboxOne";
+			case Insight::Input::ControllerSubTypes::XboxOneS:                return "XboxOneS";
+			case Insight::Input::ControllerSubTypes::XboxOneElite:            return "XboxOneElite";
+			case Insight::Input::ControllerSubTypes::PlayStationDualSensePS5: return "PlayStationDualSensePS5";
+			case Insight::Input::ControllerSubTypes::PlayStationPS3:          return "PlayStationPS3";
+			case Insight::Input::ControllerSubTypes::PlayStationClassic:      return "PlayStationClassic";
 				break;
 			default:
 				break;
@@ -40,7 +70,8 @@ namespace Insight
 			default:
 				break;
 			}
-			return "";
+			FAIL_ASSERT();
+			return "Unknown";
 		}
 
 		const char* ControllerThumbstickToString(ControllerThumbsticks thumbstick)
@@ -69,7 +100,8 @@ namespace Insight
 			default:
 				break;
 			}
-			return "";
+			FAIL_ASSERT();
+			return "Unknown";
 		}
 
 		const char* ControllerRumbleToString(ControllerRumbles rumble)
@@ -78,12 +110,37 @@ namespace Insight
 			{
 			case Insight::Input::ControllerRumbles::Left: return "Left";
 			case Insight::Input::ControllerRumbles::Right: return "Right";
+			case Insight::Input::ControllerRumbles::LeftTrigger: return "LeftTrigger";
+			case Insight::Input::ControllerRumbles::RightTrigger: return "RightTrigger";
 			case Insight::Input::ControllerRumbles::NumRumbles:
 				break;
 			default:
 				break;
 			}
-			return "";
+			FAIL_ASSERT();
+			return "Unknown";
+		}
+
+		ControllerSubTypes DeviceIdToControllerSubType(u32 deviceId)
+		{
+			switch (deviceId)
+			{
+			case XBOX_CONTROLLER_ONE_S:                      return ControllerSubTypes::XboxOneS;
+			case XBOX_CONTROLLER_ONE_S_BLUETOOTH:            return ControllerSubTypes::XboxOneS;
+			case XBOX_CONTROLLER_ONE_ELITE:                  return ControllerSubTypes::XboxOneElite;
+			case XBOX_CONTROLLER_ONE_BLUETOOTH:              return ControllerSubTypes::XboxOne;
+			case XBOX_CONTROLLER_ONE:                        return ControllerSubTypes::XboxOne;
+			case XBOX_CONTROLLER_ONE_2015:                   return ControllerSubTypes::XboxOne;
+			case XBOX_CONTROLLER_360:                        return ControllerSubTypes::Xbox360;
+
+			case PLAYSTATION_CONTROLLER_DUALSENSE_PS5:       return ControllerSubTypes::PlayStationDualSensePS5;
+			case PLAYSTATION_CONTROLLER_PS3:                 return ControllerSubTypes::PlayStationPS3;
+			case PLAYSTATION_CONTROLLER_CLASSIC:             return ControllerSubTypes::PlayStationClassic;
+
+			default:
+				break;
+			}
+			return ControllerSubTypes::Unknown;
 		}
 
 
@@ -114,49 +171,39 @@ namespace Insight
 			else if (input.InputType == InputTypes::Thumbstick)
 			{
 				ControllerThumbsticks thumbstickIdx = static_cast<ControllerThumbsticks>(input.Data0);
-				float scaledValue;
-				i16 rawValue;
-				Platform::MemCopy(&scaledValue, &input.Data1, sizeof(scaledValue));
-				Platform::MemCopy(&rawValue, &input.Data2, sizeof(rawValue));
+				float value;
+				Platform::MemCopy(&value, &input.Data1, sizeof(value));
 
 				if (thumbstickIdx == ControllerThumbsticks::Left_X)
 				{
-					m_leftTumbstick.SetValueX(scaledValue);
-					m_leftTumbstick.SetRawValueX(rawValue);
+					m_leftTumbstick.SetValueX(value);
 				}
 				else if (thumbstickIdx == ControllerThumbsticks::Left_Y)
 				{
-					m_leftTumbstick.SetValueY(scaledValue);
-					m_leftTumbstick.SetRawValueY(rawValue);
+					m_leftTumbstick.SetValueY(value);
 				}
 				else if (thumbstickIdx == ControllerThumbsticks::Right_X)
 				{
-					m_rightTumbstick.SetValueX(scaledValue);
-					m_rightTumbstick.SetRawValueX(rawValue);
+					m_rightTumbstick.SetValueX(value);
 				}
 				else if (thumbstickIdx == ControllerThumbsticks::Right_Y)
 				{
-					m_rightTumbstick.SetValueY(scaledValue);
-					m_rightTumbstick.SetRawValueY(rawValue);
+					m_rightTumbstick.SetValueY(value);
 				}
 			}
 			else if (input.InputType == InputTypes::Trigger)
 			{
 				ControllerTriggers triggerIdx = static_cast<ControllerTriggers>(input.Data0);
-				float scaledValue;
-				u8 rawValue;
-				Platform::MemCopy(&scaledValue, &input.Data1, sizeof(scaledValue));
-				Platform::MemCopy(&rawValue, &input.Data2, sizeof(rawValue));
+				float value;
+				Platform::MemCopy(&value, &input.Data1, sizeof(value));
 
 				if (triggerIdx == ControllerTriggers::Left)
 				{
-					m_leftTrigger.SetValue(scaledValue);
-					m_leftTrigger.SetRawValue(rawValue);
+					m_leftTrigger.SetValue(value);
 				}
 				else if (triggerIdx == ControllerTriggers::Right)
 				{
-					m_rightTrigger.SetValue(scaledValue);
-					m_rightTrigger.SetRawValue(rawValue);
+					m_rightTrigger.SetValue(value);
 				}
 			}
 		}
@@ -223,21 +270,6 @@ namespace Insight
 			return 0.0f;
 		}
 
-		i16 InputDevice_Controller::GetThumbstickRawValue(ControllerThumbsticks tumbstick) const
-		{
-			switch (tumbstick)
-			{
-			case Insight::Input::ControllerThumbsticks::Left_X: return m_leftTumbstick.GetRawValueX();
-			case Insight::Input::ControllerThumbsticks::Left_Y: return m_leftTumbstick.GetRawValueY();
-			case Insight::Input::ControllerThumbsticks::Right_X: return m_rightTumbstick.GetRawValueX();
-			case Insight::Input::ControllerThumbsticks::Right_Y: return m_rightTumbstick.GetRawValueY();
-			case Insight::Input::ControllerThumbsticks::NumThumbsticks:
-			default:
-				break;
-			}
-			return 0;
-		}
-
 		float InputDevice_Controller::GetTriggerValue(ControllerTriggers trigger) const
 		{
 			switch (trigger)
@@ -251,19 +283,6 @@ namespace Insight
 			return 0.0f;
 		}
 
-		u8 InputDevice_Controller::GetTriggerRawValue(ControllerTriggers trigger) const
-		{
-			switch (trigger)
-			{
-			case Insight::Input::ControllerTriggers::Left: return m_leftTrigger.GetRawValue();
-			case Insight::Input::ControllerTriggers::Right: return m_rightTrigger.GetRawValue();
-			case Insight::Input::ControllerTriggers::NumTriggers:
-			default:
-				break;
-			}
-			return 0;
-		}
-
 		void InputDevice_Controller::SetRumbleValue(ControllerRumbles rumble, float value)
 		{
 			m_rumbles[static_cast<u64>(rumble)].SetValue(value);
@@ -275,6 +294,8 @@ namespace Insight
 			{
 			case Insight::Input::ControllerRumbles::Left:
 			case Insight::Input::ControllerRumbles::Right:
+			case Insight::Input::ControllerRumbles::LeftTrigger:
+			case Insight::Input::ControllerRumbles::RightTrigger:
 			{
 				return m_rumbles[static_cast<u64>(rumble)].GetValue();
 			}
@@ -282,23 +303,8 @@ namespace Insight
 			default:
 				break;
 			}
+			FAIL_ASSERT();
 			return 0.0f;
-		}
-
-		u16 InputDevice_Controller::GetRumbleRawValue(ControllerRumbles rumble) const
-		{
-			switch (rumble)
-			{
-			case Insight::Input::ControllerRumbles::Left:
-			case Insight::Input::ControllerRumbles::Right:
-			{
-				return m_rumbles[static_cast<u64>(rumble)].GetRawValue();
-			}
-			case Insight::Input::ControllerRumbles::NumRumbles:
-			default:
-				break;
-			}
-			return 0;
 		}
 	}
 }

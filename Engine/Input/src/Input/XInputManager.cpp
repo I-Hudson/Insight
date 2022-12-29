@@ -1,6 +1,6 @@
 #include "Input/XInputManager.h"
 
-#ifdef IS_PLATFORM_WINDOWS
+#if defined(IS_PLATFORM_WINDOWS) 
 
 #include "Input/InputSystem.h"
 #include "Input/InputDevices/InputDeivce_Controller.h"
@@ -55,7 +55,7 @@ namespace Insight
 		{
 		}
 
-		void XInputManager::Update()
+		void XInputManager::Update(float const deltaTime)
 		{
 			DWORD dwResult;
 			for (DWORD i = 0; i < XUSER_MAX_COUNT; ++i)
@@ -75,7 +75,6 @@ namespace Insight
 						m_connectedPorts.at(i) = true;
 						IInputDevice* device = m_inputSystem->AddInputDevice(InputDeviceTypes::Controller, i);
 						InputDevice_Controller* deviceController = static_cast<InputDevice_Controller*>(device);
-						deviceController->m_subType = ControllerSubTypes::Xbox360;
 						ExtractDeviceInfo(i);
 					}
 					ProcessInput(i, state);
@@ -91,6 +90,32 @@ namespace Insight
 						m_inputSystem->RemoveInputDevice(InputDeviceTypes::Controller, i);
 					}
 				}
+			}
+		}
+
+		void XInputManager::ThumbstickInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 idX, u32 idY, float valueX, float valueY, float deadzone, float maxValue)
+		{
+			// choose a deadzone -- readings inside this radius are ignored.
+			const float deadzoneRadius = deadzone;
+			const float deadzoneSquared = deadzoneRadius * deadzoneRadius;
+
+			// Pythagorean theorem -- for a right triangle, hypotenuse^2 = (opposite side)^2 + (adjacent side)^2
+			auto adjacentSquared = valueX * valueX;
+			auto oppositeSquared = valueY * valueY;
+
+			// accept and process input if true; otherwise, reject and ignore it.
+			if ((oppositeSquared + adjacentSquared) >= deadzoneSquared)
+			{
+				AnalogInput(inputs, controllerIndex, inputType, idX, valueX, deadzone, maxValue);
+				AnalogInput(inputs, controllerIndex, inputType, idY, valueY, deadzone, maxValue);
+			}
+		}
+
+		void XInputManager::TriggerInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 id, float value, float deadzone, float maxValue)
+		{
+			if (value >= deadzone)
+			{
+				AnalogInput(inputs, controllerIndex, inputType, id, value, deadzone, maxValue);
 			}
 		}
 
@@ -119,6 +144,9 @@ namespace Insight
 				}
 				FreeLibrary(moduleHandle);
 			}
+
+			device->m_vendor = VendorIdToControllerVendor(device->m_deviceInfo.VendorId);
+			device->m_subType = DeviceIdToControllerSubType(device->m_deviceInfo.ProductId);
 		}
 
 		void XInputManager::ProcessInput(u32 controllerIndex, XINPUT_STATE state)
@@ -140,13 +168,14 @@ namespace Insight
 						static_cast<u64>(0)
 					});
 			}
-			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Left_X), static_cast<int>(state.Gamepad.sThumbLX), XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MAX);
-			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Left_Y), static_cast<int>(state.Gamepad.sThumbLY), XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MAX);
-			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Right_X), static_cast<int>(state.Gamepad.sThumbRX), XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MAX);
-			AnalogInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Right_Y), static_cast<int>(state.Gamepad.sThumbRY), XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MAX);
-
-			AnalogInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Left), static_cast<int>(state.Gamepad.bLeftTrigger), XINPUT_GAMEPAD_TRIGGER_THRESHOLD, UCHAR_MAX);
-			AnalogInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Right), static_cast<int>(state.Gamepad.bRightTrigger), XINPUT_GAMEPAD_TRIGGER_THRESHOLD, UCHAR_MAX);
+			ThumbstickInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Left_X), static_cast<u32>(ControllerThumbsticks::Left_Y),
+				static_cast<float>(state.Gamepad.sThumbLX), static_cast<float>(state.Gamepad.sThumbLY), static_cast<float>(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE), static_cast<float>(SHRT_MAX));
+			ThumbstickInput(inputs, controllerIndex, InputTypes::Thumbstick, static_cast<u32>(ControllerThumbsticks::Right_X), static_cast<u32>(ControllerThumbsticks::Right_Y),
+				static_cast<float>(state.Gamepad.sThumbRX), static_cast<float>(state.Gamepad.sThumbRY), static_cast<float>(XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE), static_cast<float>(SHRT_MAX));
+			TriggerInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Left), static_cast<float>(state.Gamepad.bLeftTrigger), 
+				static_cast<float>(XINPUT_GAMEPAD_TRIGGER_THRESHOLD), static_cast<float>(UCHAR_MAX));
+			TriggerInput(inputs, controllerIndex, InputTypes::Trigger, static_cast<u32>(ControllerTriggers::Right), static_cast<float>(state.Gamepad.bRightTrigger),
+				static_cast<float>(XINPUT_GAMEPAD_TRIGGER_THRESHOLD), static_cast<float>(UCHAR_MAX));
 
 			m_inputSystem->UpdateInputs(inputs);
 		}
@@ -169,30 +198,31 @@ namespace Insight
 			}
 		}
 
-		void XInputManager::AnalogInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 id, int rawValue, int deadzone, int maxValue)
+		void XInputManager::AnalogInput(std::vector<GenericInput>& inputs, u32 controllerIndex, InputTypes inputType, u32 id, float value, float deadzone, float maxValue)
 		{
-			if (std::abs(rawValue) < deadzone)
-			{
-				return;
-			}
+			int sign = value >= 0 ? 1 : -1;
+			value = std::abs(value);
 
-			int sign = rawValue >= 0 ? 1 : - 1;
-			rawValue = std::abs(rawValue);
-
+#ifdef XINPUT_RESCALE_ANALOG_INPUT
 			// Remap the value from deadzone -> maxValue, to 0 -> maxValue.
-			const float rawValueDeadZone = static_cast<float>(rawValue - deadzone);
-			const float maxValueDeadZone = static_cast<float>(maxValue - deadzone);
+			const float rawValueDeadZone = value - deadzone;
+			const float maxValueDeadZone = maxValue - deadzone;
 
 			float scaledValue = rawValueDeadZone / maxValueDeadZone;
 			scaledValue = std::max(-1.0f, std::min(1.0f, scaledValue));
 
 			scaledValue *= sign;
-			rawValue *= sign;
+			value *= sign;
+#else 
+			if (maxValue > 1.0f)
+			{
+				value = value / maxValue;
+			}
 
-			u64 scaledAnalogValue = 0;
-			u64 rawAnalogValue = 0;
-			Platform::MemCopy(&scaledAnalogValue, &scaledValue, sizeof(scaledValue));
-			Platform::MemCopy(&rawAnalogValue, &rawValue, sizeof(rawValue));
+			value *= sign;
+#endif
+			u64 valueU64 = 0;
+			Platform::MemCopy(&valueU64, &value, sizeof(value));
 
 			inputs.push_back(Input::GenericInput
 				{
@@ -200,10 +230,9 @@ namespace Insight
 					InputDeviceTypes::Controller,
 					inputType,
 					static_cast<u64>(id),
-					scaledAnalogValue,
-					rawAnalogValue
+					valueU64
 				});
 		}
 	}
 }
-#endif
+#endif // #if defined(IS_PLATFORM_WINDOWS) 

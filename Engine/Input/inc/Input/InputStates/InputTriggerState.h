@@ -19,13 +19,10 @@ namespace Insight
             void ClearFrame();
 
             float GetValue() const;
-            u8 GetRawValue() const;
-
             void SetValue(float value);
-            void SetRawValue(u8 value);
 
         private:
-            InputAnalogState<u8> m_trigger;
+            InputAnalogState m_trigger;
         };
     }
 }

@@ -11,6 +11,39 @@ namespace Insight
 	namespace Input
 	{
 		class XInputManager;
+		class WindowsGamingManager;
+
+		// https://devicehunt.com/view/type/usb/vendor/045E#search-results-table
+		constexpr u64 MICROSOFT_VENDOR_ID                  = 0x045E;
+		constexpr u64 PLAYSTATION_VENDOR_ID                = 0x054C;
+
+
+		// Xbox controllers
+		constexpr u64 XBOX_CONTROLLER_ONE_S                = 0x02EA;
+		constexpr u64 XBOX_CONTROLLER_ONE_S_BLUETOOTH      = 0x02FD;
+		constexpr u64 XBOX_CONTROLLER_ONE_ELITE            = 0x02E3;
+		constexpr u64 XBOX_CONTROLLER_ONE_BLUETOOTH		   = 0xB12;
+		constexpr u64 XBOX_CONTROLLER_ONE                  = 0x02D1;
+		constexpr u64 XBOX_CONTROLLER_ONE_2015             = 0x02DD;
+		constexpr u64 XBOX_CONTROLLER_360                  = 0x045E;
+
+		// PlayStation controllers
+		constexpr u64 PLAYSTATION_CONTROLLER_DUALSENSE_PS5 = 0x0CE6;
+		constexpr u64 PLAYSTATION_CONTROLLER_PS3           = 0x0268;
+		constexpr u64 PLAYSTATION_CONTROLLER_CLASSIC       = 0x0CDA;
+
+
+		enum class ControllerVendors
+		{
+			Unknown,
+			Microsoft,
+			Sony,
+			NumControllerVendors
+		};
+		IS_INPUT const char* ControllerVendorToString(ControllerVendors vendor);
+
+		IS_INPUT ControllerVendors VendorIdToControllerVendor(u32 vendorId);
+
 
 		/// <summary>
 		/// Define the which controller "InputDevice_Controller" is.
@@ -23,6 +56,12 @@ namespace Insight
 			Unknown,
 			Xbox360, 
 			XboxOne,
+			XboxOneS,
+			XboxOneElite,
+
+			PlayStationDualSensePS5,
+			PlayStationPS3,
+			PlayStationClassic,
 
 			NumControllerSubTypes
 		};
@@ -30,6 +69,7 @@ namespace Insight
 
 		enum class ControllerButtons : u16
 		{
+			Unknown,
 			A,
 			B, 
 			X, 
@@ -74,11 +114,14 @@ namespace Insight
 		{
 			Left,
 			Right,
+			LeftTrigger,
+			RightTrigger,
 
 			NumRumbles
 		};
 		IS_INPUT const char* ControllerRumbleToString(ControllerRumbles rumble);
 
+		IS_INPUT ControllerSubTypes DeviceIdToControllerSubType(u32 deviceId);
 
 		/// <summary>
 		/// Controller based on Xbox one controller.
@@ -106,14 +149,10 @@ namespace Insight
 			bool WasHeld(ControllerButtons buttonIdx) const;
 
 			float GetThumbstickValue(ControllerThumbsticks tumbstick) const;
-			i16 GetThumbstickRawValue(ControllerThumbsticks tumbstick) const;
-
 			float GetTriggerValue(ControllerTriggers trigger) const;
-			u8 GetTriggerRawValue(ControllerTriggers trigger) const;
 
 			void SetRumbleValue(ControllerRumbles rumble, float value);
 			float GetRumbleValue(ControllerRumbles rumble) const;
-			u16 GetRumbleRawValue(ControllerRumbles rumble) const;
 
 		private:
 			InputButtonState<static_cast<u64>(ControllerButtons::NumButtons)> m_buttons;
@@ -122,11 +161,14 @@ namespace Insight
 			InputTriggerState m_leftTrigger;
 			InputTriggerState m_rightTrigger;
 			std::array<InputRumbleState, static_cast<u64>(ControllerRumbles::NumRumbles)> m_rumbles;
-			ControllerSubTypes m_subType;
+
+			ControllerVendors m_vendor = ControllerVendors::Unknown;
+			ControllerSubTypes m_subType = ControllerSubTypes::Unknown;
 
 #ifdef IS_PLATFORM_WINDOWS
+			friend class WindowsGamingManager;
 			friend class XInputManager;
-#endif
+#endif // #ifdef IS_PLATFORM_WINDOWS
 		};
 	}
 }

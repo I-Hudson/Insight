@@ -63,7 +63,7 @@ constexpr T AlignUp(T x, Y align)
     {
         return x;
     }
-    return (xValue + alignValue - 1) / alignValue * alignValue;
+    return static_cast<T>((xValue + alignValue - 1ull) / alignValue * alignValue);
 }
 
 /// https:///stackoverflow.com/a/21624122
