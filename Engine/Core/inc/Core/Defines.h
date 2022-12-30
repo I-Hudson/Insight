@@ -41,6 +41,8 @@
 	*/
 #define PPCAT(A, B) PPCAT_NX(A, B)
 
+#define BIT(x) 1 << x
+
 #define THREAD_SAFE
 
 #if defined(__clang__)

@@ -61,6 +61,12 @@ namespace Insight
 				{
 					OnRawControllerRemoved(sender, controller);
 				});
+
+			auto controllers = winrt::Windows::Gaming::Input::RawGameController::RawGameControllers();
+			for (u32 i = 0; i < controllers.Size(); ++i)
+			{
+				OnRawControllerAdded({ }, controllers.GetAt(i));
+			}
 		}
 
 		void WindowsGamingManager::Shutdown()
@@ -75,6 +81,15 @@ namespace Insight
 			{
 				winrt::Windows::Gaming::Input::RawGameController::RawGameControllerRemoved(m_onControllerRemovedEvent);
 				m_onControllerRemovedEvent = { 0 };
+			}
+
+			for (size_t i = 0; i < m_connectControllers.size(); ++i)
+			{
+				if (m_connectControllers.at(i))
+				{
+					m_inputSystem->RemoveInputDevice(InputDeviceTypes::Controller, static_cast<u32>(i));
+					m_connectControllers.at(i) = nullptr;
+				}
 			}
 		}
 
@@ -96,6 +111,12 @@ namespace Insight
 		{
 			for (u32 i = 0; i < m_connectControllers.size(); ++i)
 			{
+				if (m_connectControllers.at(static_cast<u64>(i)) == controller)
+				{
+					// Controller already tracked.
+					return;
+				}
+
 				if (m_connectControllers.at(static_cast<u64>(i)) == nullptr
 					&& winrt::Windows::Gaming::Input::Gamepad::FromGameController(controller) != nullptr)
 				{

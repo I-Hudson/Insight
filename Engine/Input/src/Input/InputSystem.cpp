@@ -10,6 +10,21 @@ namespace Insight
 {
 	namespace Input
 	{
+		const char* InputSystemInputManagerTypeToString(InputSystemInputManagerTypes type)
+		{
+			switch (type)
+			{
+			case Insight::Input::InputSystemInputManagerTypes::XInput:   return "XInput";
+			case Insight::Input::InputSystemInputManagerTypes::CppWinRT: return "CppWinRT";
+			case Insight::Input::InputSystemInputManagerTypes::NumInputSystemInputManagers:
+				break;
+			default:
+				break;
+			}
+			FAIL_ASSERT();
+			return "";
+		}
+
 		InputSystem::InputSystem()
 		{
 		}
@@ -26,9 +41,9 @@ namespace Insight
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifdef IS_CPP_WINRT
-			m_windowsGamingManager.Initialise(this);
+			SetInputManagerType(InputSystemInputManagerTypes::CppWinRT);
 #else
-			m_xinputManager.Initialise(this);
+			SetInputManager(InputSystemInputManagers::XInput);
 #endif // #ifdef IS_CPP_WINRT
 #endif // #ifdef IS_PLATFORM_WINDOWS
 
@@ -46,10 +61,15 @@ namespace Insight
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifdef IS_CPP_WINRT
-			m_windowsGamingManager.Shutdown();
-#else
-			m_xinputManager.Shutdown();
+			if (m_inputManagerType == InputSystemInputManagerTypes::CppWinRT)
+			{
+				m_windowsGamingManager.Shutdown();
+			}
 #endif // #ifdef IS_CPP_WINRT
+			if (m_inputManagerType == InputSystemInputManagerTypes::XInput)
+			{
+				m_xinputManager.Shutdown();
+			}
 #endif // IS_PLATFORM_WINDOWS
 
 			m_state = Core::SystemStates::Not_Initialised;
@@ -84,6 +104,57 @@ namespace Insight
 			return nullptr;
 		}
 
+		void InputSystem::SetInputManagerType(InputSystemInputManagerTypes inputManager)
+		{
+			if (m_inputManagerType == inputManager)
+			{
+				return;
+			}
+
+			// Shutdown the previous input manager used.
+			switch (m_inputManagerType)
+			{
+#ifdef IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			case InputSystemInputManagerTypes::CppWinRT:
+			{
+				m_windowsGamingManager.Shutdown();
+				break;
+			}
+#endif // #ifdef IS_CPP_WINRT
+			case InputSystemInputManagerTypes::XInput:
+			{
+				m_xinputManager.Shutdown();
+				break;
+			}
+#endif // #ifdef IS_PLATFORM_WINDOWS
+			default:
+				break;
+			}
+
+			m_inputManagerType = inputManager;
+
+			switch (m_inputManagerType)
+			{
+#ifdef IS_PLATFORM_WINDOWS
+#ifdef IS_CPP_WINRT
+			case InputSystemInputManagerTypes::CppWinRT:
+			{
+				m_windowsGamingManager.Initialise(this);
+				break;
+			}
+#endif // #ifdef IS_CPP_WINRT
+			case InputSystemInputManagerTypes::XInput:
+			{
+				m_xinputManager.Initialise(this);
+				break;
+			}
+#endif // #ifdef IS_PLATFORM_WINDOWS
+			default:
+				break;
+			}
+		}
+
 		std::vector<IInputDevice*> InputSystem::GetAllInputDevices() const
 		{
 			return m_inputDevices;
@@ -92,6 +163,11 @@ namespace Insight
 		IInputDevice* InputSystem::GetLastUsedInputDevices() const
 		{
 			return m_lastUsedInputDeivce;
+		}
+
+		InputSystemInputManagerTypes InputSystem::GetInputManagerType() const
+		{
+			return m_inputManagerType;
 		}
 
 		void InputSystem::UpdateInputs(std::vector<GenericInput> inputs)
@@ -113,13 +189,18 @@ namespace Insight
 		{
 #ifdef IS_PLATFORM_WINDOWS
 #ifdef IS_CPP_WINRT
-			m_windowsGamingManager.Update(deltaTime);
-#else
-			m_xinputManager.Update(deltaTime);
+			if (m_inputManagerType == InputSystemInputManagerTypes::CppWinRT)
+			{
+				m_windowsGamingManager.Update(deltaTime);
+			}
 #endif // #ifdef IS_CPP_WINRT
+			if (m_inputManagerType == InputSystemInputManagerTypes::XInput)
+			{
+				m_xinputManager.Update(deltaTime);
+			}
 #endif // #ifdef IS_PLATFORM_WINDOWS
 
-			for (auto& device: m_inputDevices)
+			for (auto& device : m_inputDevices)
 			{
 				device->Update(deltaTime);
 				if (device->HasInput())
@@ -143,7 +224,7 @@ namespace Insight
 			IInputDevice* newInputDevice = nullptr;
 			switch (deviceType)
 			{
-			case Insight::Input::InputDeviceTypes::KeyboardMouse: 
+			case Insight::Input::InputDeviceTypes::KeyboardMouse:
 			{
 				newInputDevice = New<InputDevice_KeyboardMouse>();
 				break;

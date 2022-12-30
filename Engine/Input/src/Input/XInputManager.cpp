@@ -53,6 +53,14 @@ namespace Insight
 
 		void XInputManager::Shutdown()
 		{
+			for (size_t i = 0; i < XUSER_MAX_COUNT; ++i)
+			{
+				if (m_connectedPorts.at(i))
+				{
+					m_inputSystem->RemoveInputDevice(InputDeviceTypes::Controller, static_cast<u32>(i));
+					m_connectedPorts.at(i) = false;
+				}
+			}
 		}
 
 		void XInputManager::Update(float const deltaTime)

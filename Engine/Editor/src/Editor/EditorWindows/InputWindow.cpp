@@ -29,6 +29,20 @@ namespace Insight
 			App::Engine* engine = &App::Engine::Instance();
 			Input::InputSystem* inputSystem = engine->GetSystemRegistry().GetSystem<Input::InputSystem>();
 
+			int currentInputManagerType = static_cast<int>(inputSystem->GetInputManagerType());
+			std::vector<const char*> inputManagerTypes;
+			inputManagerTypes.reserve(static_cast<u64>(Input::InputSystemInputManagerTypes::NumInputSystemInputManagers));
+
+			for (size_t i = 0; i < static_cast<u64>(Input::InputSystemInputManagerTypes::NumInputSystemInputManagers); ++i)
+			{
+				inputManagerTypes.push_back(Input::InputSystemInputManagerTypeToString(static_cast<Input::InputSystemInputManagerTypes>(i)));
+			}
+
+			if (ImGui::Combo("Current Input system", &currentInputManagerType, inputManagerTypes.data(), static_cast<int>(inputManagerTypes.size())))
+			{
+				inputSystem->SetInputManagerType(static_cast<Input::InputSystemInputManagerTypes>(currentInputManagerType));
+			}
+
 			Input::IInputDevice const* lastUsedDevice = inputSystem->GetLastUsedInputDevices();
 			std::string lastUsedDeviceLabel = "None";
 			if (lastUsedDevice)

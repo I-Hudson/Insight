@@ -17,6 +17,15 @@ namespace Insight
 		class InputDevice_KeyboardMouse;
 		class InputDevice_Controller;
 
+		enum class InputSystemInputManagerTypes
+		{
+			XInput,
+			CppWinRT,
+
+			NumInputSystemInputManagers
+		};
+		IS_INPUT const char* InputSystemInputManagerTypeToString(InputSystemInputManagerTypes type);
+
 		class IS_INPUT InputSystem : public Core::Singleton<InputSystem>,  public Core::ISystem
 		{
 		public:
@@ -27,6 +36,9 @@ namespace Insight
 
 			virtual void Initialise() override;
 			virtual void Shutdown() override;
+
+			void SetInputManagerType(InputSystemInputManagerTypes inputManager);
+			InputSystemInputManagerTypes GetInputManagerType() const;
 
 			InputDevice_KeyboardMouse* GetKeyboardMouseDevice() const;
 			InputDevice_Controller* GetController(u32 index) const;
@@ -44,6 +56,7 @@ namespace Insight
 		private:
 			std::vector<IInputDevice*> m_inputDevices;
 			IInputDevice* m_lastUsedInputDeivce = nullptr;
+			InputSystemInputManagerTypes m_inputManagerType;
 #ifdef IS_PLATFORM_WINDOWS
 #ifdef IS_CPP_WINRT
 			WindowsGamingManager m_windowsGamingManager;
