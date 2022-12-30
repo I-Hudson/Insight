@@ -146,7 +146,7 @@ namespace Insight
 			}
 
 			device->m_vendor = VendorIdToControllerVendor(device->m_deviceInfo.VendorId);
-			device->m_subType = DeviceIdToControllerSubType(device->m_deviceInfo.ProductId);
+			device->m_subType = ProductIdToControllerSubType(device->m_deviceInfo.ProductId);
 		}
 
 		void XInputManager::ProcessInput(u32 controllerIndex, XINPUT_STATE state)

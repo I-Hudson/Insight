@@ -9,9 +9,9 @@ namespace Insight
 	{
 		struct DeviceInfo
 		{
-			u32 VendorId = 0;
-			u32 ProductId = 0;
-			u32 RevisionId = 0;
+			u16 VendorId = 0;
+			u16 ProductId = 0;
+			u16 RevisionId = 0;
 		};
 
 		/// <summary>

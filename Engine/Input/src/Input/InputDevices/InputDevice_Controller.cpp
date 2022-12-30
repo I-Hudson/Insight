@@ -4,49 +4,6 @@ namespace Insight
 {
 	namespace Input
 	{
-		char const* ControllerVendorToString(ControllerVendors vendor)
-		{
-			switch (vendor)
-			{
-			case Insight::Input::ControllerVendors::Microsoft: return "Microsoft";
-			case Insight::Input::ControllerVendors::Sony:	   return "Sony";
-			case Insight::Input::ControllerVendors::NumControllerVendors:
-			default:
-				break;
-			}
-			return "Unknown";
-		}
-
-		ControllerVendors VendorIdToControllerVendor(u32 vendorId)
-		{
-			switch (vendorId)
-			{
-			case MICROSOFT_VENDOR_ID:   return ControllerVendors::Microsoft;
-			case PLAYSTATION_VENDOR_ID: return ControllerVendors::Sony;
-			default:
-				break;
-			}
-			return ControllerVendors::Unknown;
-		}
-
-		const char* ControllerSubTypeToString(ControllerSubTypes subType)
-		{
-			switch (subType)
-			{
-			case Insight::Input::ControllerSubTypes::Xbox360:                 return "Xbox360";
-			case Insight::Input::ControllerSubTypes::XboxOne:                 return "XboxOne";
-			case Insight::Input::ControllerSubTypes::XboxOneS:                return "XboxOneS";
-			case Insight::Input::ControllerSubTypes::XboxOneElite:            return "XboxOneElite";
-			case Insight::Input::ControllerSubTypes::PlayStationDualSensePS5: return "PlayStationDualSensePS5";
-			case Insight::Input::ControllerSubTypes::PlayStationPS3:          return "PlayStationPS3";
-			case Insight::Input::ControllerSubTypes::PlayStationClassic:      return "PlayStationClassic";
-				break;
-			default:
-				break;
-			}
-			return "Unknown";
-		}
-
 		const char* ControllerButtonsToString(ControllerButtons button)
 		{
 			switch (button)
@@ -120,30 +77,6 @@ namespace Insight
 			FAIL_ASSERT();
 			return "Unknown";
 		}
-
-		ControllerSubTypes DeviceIdToControllerSubType(u32 deviceId)
-		{
-			switch (deviceId)
-			{
-			case XBOX_CONTROLLER_ONE_S:                      return ControllerSubTypes::XboxOneS;
-			case XBOX_CONTROLLER_ONE_S_BLUETOOTH:            return ControllerSubTypes::XboxOneS;
-			case XBOX_CONTROLLER_ONE_ELITE:                  return ControllerSubTypes::XboxOneElite;
-			case XBOX_CONTROLLER_ONE_BLUETOOTH:              return ControllerSubTypes::XboxOne;
-			case XBOX_CONTROLLER_ONE:                        return ControllerSubTypes::XboxOne;
-			case XBOX_CONTROLLER_ONE_1:                      return ControllerSubTypes::XboxOne;
-			case XBOX_CONTROLLER_ONE_2015:                   return ControllerSubTypes::XboxOne;
-			case XBOX_CONTROLLER_360:                        return ControllerSubTypes::Xbox360;
-
-			case PLAYSTATION_CONTROLLER_DUALSENSE_PS5:       return ControllerSubTypes::PlayStationDualSensePS5;
-			case PLAYSTATION_CONTROLLER_PS3:                 return ControllerSubTypes::PlayStationPS3;
-			case PLAYSTATION_CONTROLLER_CLASSIC:             return ControllerSubTypes::PlayStationClassic;
-
-			default:
-				break;
-			}
-			return ControllerSubTypes::Unknown;
-		}
-
 
 		void InputDevice_Controller::Initialise(u32 id)
 		{

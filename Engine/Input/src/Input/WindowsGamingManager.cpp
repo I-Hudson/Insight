@@ -80,16 +80,15 @@ namespace Insight
 
 		void WindowsGamingManager::Update(float const deltaTime)
 		{
-			auto connectControllers = winrt::Windows::Gaming::Input::RawGameController::RawGameControllers();
-			for (u32 i = 0; i < connectControllers.Size(); ++i)
+			for (u64 i = 0; i < m_connectControllers.size(); ++i)
 			{
-				auto controller = connectControllers.GetAt(i);
+				auto controller = m_connectControllers.at(i);
 				if (controller == nullptr)
 				{
 					continue;
 				}
-				ProcessInput(i);
-				ProcessVibration(i);
+				ProcessInput(static_cast<u32>(i));
+				ProcessVibration(static_cast<u32>(i));
 			}
 		}
 
@@ -138,7 +137,7 @@ namespace Insight
 			device->m_deviceInfo.RevisionId = static_cast<u32>(0ul);
 
 			device->m_vendor = VendorIdToControllerVendor(device->m_deviceInfo.VendorId);
-			device->m_subType = DeviceIdToControllerSubType(device->m_deviceInfo.ProductId);
+			device->m_subType = ProductIdToControllerSubType(device->m_deviceInfo.ProductId);
 		}
 
 		void WindowsGamingManager::ProcessInput(u32 const controllerIndex)
