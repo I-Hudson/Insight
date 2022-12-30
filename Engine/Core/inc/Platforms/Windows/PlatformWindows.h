@@ -8,7 +8,6 @@
 
 #include <string>
 #include <vector>
-#include <thread>
 
 namespace Insight
 {
@@ -41,7 +40,7 @@ namespace Insight
 			static bool IsMainThread();
 
 		private:
-			static std::thread::id s_mainThreadId;
+			static u32 s_mainThreadId;
 		};
 
 	}

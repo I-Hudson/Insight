@@ -16,11 +16,11 @@ namespace Insight
 {
 	namespace Windows
 	{
-		std::thread::id PlatformWindows::s_mainThreadId;
+		u32 PlatformWindows::s_mainThreadId;
 
 		void PlatformWindows::Initialise()
 		{
-			s_mainThreadId = std::this_thread::get_id();
+			s_mainThreadId = GetCurrentThreadId();
 			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
 		}
 
@@ -258,7 +258,7 @@ namespace Insight
 
 		bool PlatformWindows::IsMainThread()
 		{
-			return std::this_thread::get_id() == s_mainThreadId;
+			return GetCurrentThreadId() == s_mainThreadId;
 		}
 	}
 }
