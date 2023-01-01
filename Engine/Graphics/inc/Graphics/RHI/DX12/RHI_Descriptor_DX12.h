@@ -123,11 +123,35 @@ namespace Insight
 				static u32 s_currentHeapId;
 			};
 
-			class DescriptorHeapGPU_DX12 : public DescriptorHeap_DX12
+			/// @brief GPU visible descriptor heap.
+			class DescriptorHeapGPU_DX12
 			{
 			public:
 				DescriptorHeapGPU_DX12();
-				virtual ~DescriptorHeapGPU_DX12() override;
+				~DescriptorHeapGPU_DX12();
+
+				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
+				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType, u32 handleCount);
+
+				DescriptorHeapHandle_DX12 GetNextHandle();
+
+				ID3D12DescriptorHeap* GetHeap() const;
+
+				void Reset();
+				void Destroy();
+
+			private:
+				RenderContext_DX12* m_context = nullptr;
+
+				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
+				ID3D12DescriptorHeap* m_heap = nullptr;
+				u32 m_currentDescriptorIndex = 0;
+
+				u32 m_capacity = 0;
+				u32 m_descriptorSize = 0;
+
+				D3D12_CPU_DESCRIPTOR_HANDLE m_descriptorHeapCPUStart{ 0 };
+				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart{ 0 };
 			};
 		}
 	}

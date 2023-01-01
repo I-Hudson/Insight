@@ -13,6 +13,8 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 
+//#define DX12_GROUP_SAMPLER_DESCRIPTORS
+
 		struct DescriptorBinding
 		{
 			DescriptorBinding() NO_EXPECT;

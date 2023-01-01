@@ -40,7 +40,7 @@ namespace Insight
 					&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
-					D3D12_RESOURCE_STATE_COPY_DEST,
+					ImageLayoutToDX12ResouceState(m_infos.at(0).Layout),
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
 

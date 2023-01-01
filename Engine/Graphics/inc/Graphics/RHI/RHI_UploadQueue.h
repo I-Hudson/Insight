@@ -22,6 +22,12 @@ namespace Insight
 
 		using RHI_UploadQueueFunction = std::function<void(const RHI_UploadQueueRequestInternal*, RHI_CommandList*)>;
 
+		enum class RHI_UploadTypes
+		{
+			Buffer,
+			Texture
+		};
+
 		/// <summary>
 		/// Struct returned with the current status of the uploaded resource.
 		/// </summary>
@@ -75,7 +81,7 @@ namespace Insight
 			void UploadToDevice(RHI_CommandList* cmdList);
 
 		private:
-			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes);
+			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType);
 
 		private:
 			/// <summary>

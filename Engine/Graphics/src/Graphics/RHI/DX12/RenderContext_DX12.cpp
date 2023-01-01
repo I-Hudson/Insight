@@ -23,6 +23,20 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			void FrameSubmitContext_DX12::OnCompleted()
+			{
+				for (const RHI_CommandList* cmdList : CommandLists)
+				{
+					if (cmdList)
+					{
+						cmdList->OnWorkCompleted();
+					}
+				}
+
+				DescriptorHeapGPURes.Reset();
+				DescriptorHeapSampler.Reset();
+			}
+
 			RenderContext_DX12::~RenderContext_DX12()
 			{
 			}
@@ -87,7 +101,7 @@ namespace Insight
 					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
 						(int)D3D12_COMMAND_LIST_TYPE_COPY, HrToString(createCommandQueueResult));
 				}
-				
+
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).SetRenderContext(this);
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
@@ -120,17 +134,17 @@ namespace Insight
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext_DX12& context)
 					{
 						ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.SubmitFence)));
-						context.SubmitFenceValue = 0;
-						context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-						if (context.SubmitFence == nullptr)
-						{
-							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-						}
+				context.SubmitFenceValue = 0;
+				context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+				if (context.SubmitFence == nullptr)
+				{
+					ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+				}
 
-						context.DescriptorHeapGPURes.SetRenderContext(this);
-						context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100000);
-						context.DescriptorHeapSampler.SetRenderContext(this);
-						context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 100000);
+				context.DescriptorHeapGPURes.SetRenderContext(this);
+				context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100000);
+				context.DescriptorHeapSampler.SetRenderContext(this);
+				context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 2048);
 					});
 
 				InitImGui();
@@ -156,10 +170,10 @@ namespace Insight
 				m_submitFrameContexts.ForEach([](FrameSubmitContext_DX12& context)
 					{
 						CloseHandle(context.SubmitFenceEvent);
-						context.SubmitFence.Reset();
-						context.SubmitFence = nullptr;
-						context.DescriptorHeapGPURes.Destroy();
-						context.DescriptorHeapSampler.Destroy();
+				context.SubmitFence.Reset();
+				context.SubmitFence = nullptr;
+				context.DescriptorHeapGPURes.Destroy();
+				context.DescriptorHeapSampler.Destroy();
 					});
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
@@ -257,14 +271,7 @@ namespace Insight
 						ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 						WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 					}
-
-					for (const RHI_CommandList* cmdList : m_submitFrameContexts.Get().CommandLists)
-					{
-						if (cmdList)
-						{
-							cmdList->OnWorkCompleted();
-						}
-					}
+					m_submitFrameContexts->OnCompleted();
 
 					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
 				}
@@ -284,7 +291,7 @@ namespace Insight
 				m_uploadQueue.UploadToDevice(cmdList);
 
 				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
-				
+
 #ifdef DX12_ENHANCED_BARRIERS
 				// Transition back-buffer to a writable state for rendering.
 				CD3DX12_TEXTURE_BARRIER barrier = {};
@@ -680,7 +687,7 @@ namespace Insight
 				return m_submitFrameContexts.Get().DescriptorHeapGPURes;
 			}
 
-			DescriptorHeap_DX12& RenderContext_DX12::GetFrameDescriptorHeapGPUSampler()
+			DescriptorHeapGPU_DX12& RenderContext_DX12::GetFrameDescriptorHeapGPUSampler()
 			{
 				return m_submitFrameContexts.Get().DescriptorHeapSampler;
 			}

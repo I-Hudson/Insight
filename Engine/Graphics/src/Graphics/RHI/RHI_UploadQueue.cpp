@@ -61,7 +61,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			ASSERT(Platform::IsMainThread());
 
-			UploadDataToStagingBuffer(data, sizeInBytes);
+			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Buffer);
 
 			std::lock_guard lock(m_mutex);
 			m_queuedUploads.push_back(MakeRPtr<
@@ -81,16 +81,46 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			ASSERT(Platform::IsMainThread());
 
-			UploadDataToStagingBuffer(data, sizeInBytes);
+			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture);
 
 			std::lock_guard lock(m_mutex);
 			m_queuedUploads.push_back(MakeRPtr<
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
+						PipelineBarrier barreir;
+						barreir.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+						barreir.DstStage = +PipelineStageFlagBits::Transfer;
+
+						ImageBarrier imageBarrier;
+						imageBarrier.SrcAccessFlags = AccessFlagBits::None;
+						imageBarrier.DstAccessFlags = AccessFlagBits::TransferWrite;
+						imageBarrier.OldLayout = texture->GetLayout();
+						imageBarrier.NewLayout = ImageLayout::TransforDst;
+						imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+						imageBarrier.Image = texture;
+						barreir.ImageBarriers.push_back(imageBarrier);
+
+						//cmdList->PipelineBarrier(barreir);
+						barreir = { };
+
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						cmdList->CopyBufferToImage(texture, m_uploadStagingBuffer, m_frameUploadOffset);
 						m_frameUploadOffset += request->SizeInBytes;
+
+						barreir.SrcStage = +PipelineStageFlagBits::Transfer;
+						barreir.DstStage = +PipelineStageFlagBits::TopOfPipe;
+
+						imageBarrier.SrcAccessFlags = AccessFlagBits::TransferWrite;
+						imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;
+						imageBarrier.OldLayout = texture->GetLayout();
+						imageBarrier.NewLayout = ImageLayout::ShaderReadOnly;
+						imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+						imageBarrier.Image = texture;
+
+						barreir.ImageBarriers.push_back(imageBarrier);
+						//cmdList->PipelineBarrier(barreir);
+
 				}, texture, sizeInBytes));
 
 			return m_queuedUploads.back()->Request;
@@ -141,7 +171,7 @@ namespace Insight
 			m_stagingBufferOffset = 0;
 		}
 
-		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes)
+		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType)
 		{
 			IS_PROFILE_FUNCTION();
 			ASSERT(Platform::IsMainThread());

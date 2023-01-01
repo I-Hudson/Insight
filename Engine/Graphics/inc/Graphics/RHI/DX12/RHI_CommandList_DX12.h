@@ -66,9 +66,6 @@ namespace Insight
 				virtual void SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor) override;
 				virtual void SetLineWidth(float width) override;
 
-				virtual void SetTexture(u32 set, u32 binding, const RHI_Texture* texture) override;
-				virtual void SetUniform(u32 set, u32 binding, RHI_BufferView buffer) override;
-
 				virtual void SetVertexBuffer(RHI_Buffer* buffer) override;
 				virtual void SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type) override;
 

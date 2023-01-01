@@ -31,8 +31,10 @@ namespace Insight
 				u64 SubmitFenceValue;
 				HANDLE SubmitFenceEvent;
 				DescriptorHeapGPU_DX12 DescriptorHeapGPURes;
-				DescriptorHeap_DX12 DescriptorHeapSampler;
+				DescriptorHeapGPU_DX12 DescriptorHeapSampler;
 				std::vector<RHI_CommandList*> CommandLists;
+
+				void OnCompleted();
 			};
 
 			class RenderContext_DX12 : public RenderContext
@@ -63,7 +65,7 @@ namespace Insight
 				ID3D12Device* GetDevice() const { return m_device.Get(); }
 				DescriptorHeap_DX12& GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType);
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPU();
-				DescriptorHeap_DX12& GetFrameDescriptorHeapGPUSampler();
+				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPUSampler();
 
 			protected:
 				virtual void WaitForGpu() override;

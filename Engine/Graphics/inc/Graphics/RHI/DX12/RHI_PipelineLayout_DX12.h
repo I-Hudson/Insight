@@ -21,7 +21,9 @@ namespace Insight
                 std::vector<CD3DX12_ROOT_PARAMETER> RootParameters;
                 std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> RootDescriptors;
                 std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorRanges;
+#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
                 std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorSamplerRanges;
+#endif
             };
 
             class RHI_PipelineLayout_DX12 : public RHI_PipelineLayout

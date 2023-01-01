@@ -4,6 +4,8 @@
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 
+#include "Algorithm/Vector.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -26,6 +28,33 @@ namespace Insight
 				if (!desc.TesselationEvaluationVertexFilePath.empty()) { CompileStage(ShaderStageFlagBits::ShaderStage_TessEval, desc.TesselationEvaluationVertexFilePath, 2); }
 				if (!desc.GeoemtyFilePath.empty()) { CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, desc.GeoemtyFilePath, 3); }
 				if (!desc.PixelFilePath.empty()) { CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, desc.PixelFilePath, 4); }
+
+#ifdef DX12_GROUP_SAMPLER_DESCRIPTORS
+				std::vector<DescriptorBinding> samplerBindings;
+				// Move all samples into a different set.
+				for (auto& set : m_descriptor_sets)
+				{
+					auto samplerBindingsIters = Algorithm::VectorFindAllIf(set.Bindings, [](DescriptorBinding const& binding)
+						{
+							return binding.Type == DescriptorType::Sampler;
+						});
+
+					for (size_t samplerIdx = 0; samplerIdx < samplerBindingsIters.size(); ++samplerIdx)
+					{
+						samplerBindings.push_back(*samplerBindingsIters.at(samplerIdx));
+						Algorithm::VectorRemove(set.Bindings, samplerBindingsIters.at(samplerIdx));
+					}
+				}
+
+				DescriptorSet samplerSet = { };
+				if (m_descriptor_sets.size() > 0)
+				{
+					samplerSet.Set = m_descriptor_sets.back().Set + 1;
+				}
+				samplerSet.Bindings = std::move(samplerBindings);
+				m_descriptor_sets.push_back(samplerSet);
+				samplerSet.SetHashs();
+#endif
 
 				CreateVertexInputLayout(m_shaderDesc);
 			}

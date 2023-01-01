@@ -55,7 +55,9 @@ namespace Insight
 						// Root Tables
 						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 					}
+#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
 					m_rootSignatureParameters.DescriptorSamplerRanges.push_back(GetSamplerRangesFromSet(set));
+#endif
 				}
 
 				u32 rootParameterIdx = 0;
@@ -78,7 +80,7 @@ namespace Insight
 							static_cast<UINT>(range.size()), range.data());
 						m_rootSignatureParameters.RootParameters.push_back(paramter);
 					}
-
+#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
 					if (m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx).size() > 0)
 					{
 						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx);
@@ -87,7 +89,7 @@ namespace Insight
 							static_cast<UINT>(range.size()), range.data());
 						m_rootSignatureParameters.RootParameters.push_back(paramter);
 					}
-
+#endif
 					++rootParameterIdx;
 				}
 
@@ -158,15 +160,29 @@ namespace Insight
 
 			std::vector<CD3DX12_DESCRIPTOR_RANGE> RHI_PipelineLayout_DX12::GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet)
 			{
+				bool isSamplerTable = false;
 				std::vector<CD3DX12_DESCRIPTOR_RANGE> descriptorRanges;
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
-					// Ignore the samples. Samplers can't be in the same descriptor table 
-					// as CBV/SRV/UAV.
+#ifdef DX12_GROUP_SAMPLER_DESCRIPTORS
+					if (!isSamplerTable)
+					{
+						if (binding.Type == DescriptorType::Sampler)
+						{
+							ASSERT(descriptorRanges.size() == 0);
+							isSamplerTable = true;
+						}
+					}
+					else
+					{
+						ASSERT(binding.Type == DescriptorType::Sampler);
+					}
+#else
 					if (binding.Type == DescriptorType::Sampler)
 					{
 						continue;
 					}
+#endif
 
 					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
 						DescriptorRangeTypeToDX12(binding.Type), 
