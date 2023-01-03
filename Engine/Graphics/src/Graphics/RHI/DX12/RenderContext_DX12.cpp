@@ -569,14 +569,6 @@ namespace Insight
 				IDXGIFactory4* factory = m_factory.Get();
 				ID3D12Device* device = m_device.Get();
 
-				/// Describe and create a render target view (RTV) descriptor heap.
-				///D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-				///rtvHeapDesc.NumDescriptors = RenderGraph::s_MaxFarmeCount;
-				///rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-				///rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-				///ThrowIfFailed(device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-				///m_rtvDescriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
 				m_swapchainBufferSize = { width, height };
 
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
@@ -613,7 +605,8 @@ namespace Insight
 						tex->SetName("Swapchain_Image: " + std::to_string(i));
 						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
 						swapchainImage.Colour = textureDX12;
-						textureDX12->m_descriptorHandle = swapchainImage.ColourHandle;
+						textureDX12->m_allLayerDescriptorHandle = swapchainImage.ColourHandle;
+						textureDX12->m_singleLayerDescriptorHandle.push_back(swapchainImage.ColourHandle);
 
 						RHI_TextureInfo textureInfo = {};
 						textureInfo.TextureType = TextureType::Tex2D;

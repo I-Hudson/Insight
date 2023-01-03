@@ -88,10 +88,11 @@ namespace Insight
 
 				m_infos.clear();
 				m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_allLayerDescriptorHandle);
-				for (size_t i = 0; i < m_singleLayerDescriptorHandle.size(); ++i)
+				for (size_t i = 1; i < m_singleLayerDescriptorHandle.size(); ++i)
 				{
 					m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_singleLayerDescriptorHandle.at(i));
-				}m_singleLayerDescriptorHandle.clear();
+				}
+				m_singleLayerDescriptorHandle.clear();
 			}
 
 			bool RHI_Texture_DX12::ValidResource()
@@ -113,8 +114,8 @@ namespace Insight
 				DescriptorHeapHandle_DX12 handle = m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
 
 				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
-				shaderResouceViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//PixelFormatToDX12(GetFormat());
-				shaderResouceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//TextureTypeToDX12(GetType());
+				shaderResouceViewDesc.Format = PixelFormatToDX12(GetFormat());
+				shaderResouceViewDesc.ViewDimension = TextureTypeToDX12(GetType());
 				shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 				if (GetType() == TextureType::Tex2D)
 				{
