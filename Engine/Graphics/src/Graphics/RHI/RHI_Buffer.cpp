@@ -22,6 +22,11 @@ namespace Insight
 			return nullptr;
 		}
 
+		Byte* RHI_Buffer::GetMappedData() const
+		{
+			return m_mappedData;
+		}
+
 		RPtr<RHI_UploadQueueRequest> RHI_Buffer::QueueUpload(void* data, int sizeInBytes)
 		{
 			return RenderContext::Instance().GetUploadQueue().UploadBuffer(data, sizeInBytes, this);

@@ -66,7 +66,7 @@ namespace Insight
 				D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType() const { return m_heapType; }
 				u32 GetDescriptorSize() const { return m_descriptorSize; }
 				bool GetNewHandle(DescriptorHeapHandle_DX12& handle);
-				void FreeHandle(DescriptorHeapHandle_DX12 handle);
+				void FreeHandle(DescriptorHeapHandle_DX12& handle);
 				void Reset();
 
 				void Destroy();

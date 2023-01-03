@@ -74,12 +74,13 @@ namespace Insight
 				return true;
 			}
 
-			void DescriptorHeapPage_DX12::FreeHandle(DescriptorHeapHandle_DX12 handle)
+			void DescriptorHeapPage_DX12::FreeHandle(DescriptorHeapHandle_DX12& handle)
 			{
 				ASSERT(m_heap);
 				if (handle.HeapId == m_heapId)
 				{
 					m_freeHandles.push_back(handle);
+					handle = {};
 				}
 			}
 

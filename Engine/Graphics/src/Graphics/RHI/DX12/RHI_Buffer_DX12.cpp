@@ -86,6 +86,7 @@ namespace Insight
 					return {};
 				}
 
+				m_uploadStatus = DeviceUploadStatus::Uploading;
 				if (m_mappedData)
 				{
 					Platform::MemCopy(m_mappedData + offset, data, sizeInBytes);
@@ -107,6 +108,7 @@ namespace Insight
 					stagingBuffer.Release();
 				}
 				sizeInBytes = AlignUp(sizeInBytes, alignment);
+				m_uploadStatus = DeviceUploadStatus::Completed;
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 

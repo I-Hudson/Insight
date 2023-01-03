@@ -32,9 +32,14 @@ namespace Insight
 				virtual void SetName(std::string name) override;
 
 			private:
+				DescriptorHeapHandle_DX12 CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index);
+
+			private:
 				ComPtr<ID3D12Resource> m_resource;
 				RenderContext_DX12* m_context = nullptr;
-				DescriptorHeapHandle_DX12 m_descriptorHandle;
+
+				DescriptorHeapHandle_DX12 m_allLayerDescriptorHandle;					// Image view for all layers.
+				std::vector<DescriptorHeapHandle_DX12> m_singleLayerDescriptorHandle;	// Image view for each layer.
 
 				friend class RenderContext_DX12;
 			};

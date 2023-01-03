@@ -263,6 +263,7 @@ namespace Insight
 		{
 			Nearest,
 			Linear,
+			Point,
 		};
 		std::string FilterToString(Filter filter);
 

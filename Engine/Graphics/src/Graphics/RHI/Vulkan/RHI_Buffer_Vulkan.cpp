@@ -77,6 +77,7 @@ namespace Insight
 					return {};
 				}
 
+				m_uploadStatus = DeviceUploadStatus::Uploading;
 				if (m_mappedData)
 				{
 					IS_PROFILE_SCOPE("Memcpy");
@@ -91,7 +92,6 @@ namespace Insight
 					stagingBuffer.Upload(data, sizeInBytes, 0, 0);
 
 					RHI_CommandList* cmdList = m_context->GetCommandListManager().GetCommandList();
-					m_uploadStatus = DeviceUploadStatus::Uploading;
 					cmdList->CopyBufferToBuffer(this, offset, &stagingBuffer, 0, sizeInBytes);
 					cmdList->Close();
 
@@ -99,9 +99,9 @@ namespace Insight
 					m_context->GetCommandListManager().ReturnCommandList(cmdList);
 
 					stagingBuffer.Release();
-					m_uploadStatus = DeviceUploadStatus::Completed;
 				}
 				sizeInBytes = AlignUp(sizeInBytes, alignment);
+				m_uploadStatus = DeviceUploadStatus::Completed;
 				return RHI_BufferView(this, offset, sizeInBytes);
 			}
 

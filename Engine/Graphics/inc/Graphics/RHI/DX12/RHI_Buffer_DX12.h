@@ -35,7 +35,6 @@ namespace Insight
 
 			private:
 				RenderContext_DX12* m_context = nullptr;
-				Byte* m_mappedData = nullptr;
 				D3D12_RESOURCE_STATES m_currentResouceState;
 				ComPtr<ID3D12Resource> m_resource;
 			};

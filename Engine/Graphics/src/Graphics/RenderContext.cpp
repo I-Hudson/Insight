@@ -112,10 +112,10 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
-			m_descriptorLayoutManager.ReleaseAll();
 			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
+			m_descriptorLayoutManager.ReleaseAll();
 			m_descriptorSetManager.ForEach([](RHI_DescriptorSetManager& setManager)
 				{
 					setManager.ReleaseAll();

@@ -213,8 +213,9 @@ namespace Insight
 		{
 			switch (filter)
 			{
-			case Insight::Graphics::Filter::Nearest:	return "Nearest";
-			case Insight::Graphics::Filter::Linear:		return "Linear";
+			case Filter::Nearest:	return "Nearest";
+			case Filter::Linear:	return "Linear";
+			case Filter::Point:		return "Point";
 			default:
 				break;
 			}

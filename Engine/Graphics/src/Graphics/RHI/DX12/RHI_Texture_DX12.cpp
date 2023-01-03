@@ -12,7 +12,7 @@ namespace Insight
 		{
 			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetDescriptorHandle() const
 			{
-				return m_descriptorHandle;
+				return m_allLayerDescriptorHandle;
 			}
 
 			void RHI_Texture_DX12::Create(RenderContext* context, RHI_TextureInfo createInfo)
@@ -27,8 +27,8 @@ namespace Insight
 					PixelFormatToDX12(m_infos.at(0).Format),
 					m_infos.at(0).Width,
 					m_infos.at(0).Height,
-					m_infos.at(0).Depth,
-					0,
+					m_infos.at(0).Layer_Count,
+					m_infos.at(0).Mip_Count,
 					1,
 					0,
 					D3D12_RESOURCE_FLAG_NONE,
@@ -44,21 +44,19 @@ namespace Insight
 					nullptr,
 					IID_PPV_ARGS(&m_resource)));
 
-				m_descriptorHandle = m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+				m_allLayerDescriptorHandle = CreateSharderResouceView(0, 1, m_infos.at(0).Layer_Count, 0);
 
-				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
-				shaderResouceViewDesc.Format = PixelFormatToDX12(GetFormat());
-				shaderResouceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-				shaderResouceViewDesc.Texture2D.MipLevels = m_infos.at(0).Mip_Count;
-				shaderResouceViewDesc.Texture2D.MostDetailedMip = 0;
-				shaderResouceViewDesc.Texture2D.PlaneSlice = 0;
-				shaderResouceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-				m_context->GetDevice()->CreateShaderResourceView(m_resource.Get(), &shaderResouceViewDesc, m_descriptorHandle.CPUPtr);
+				// Create a image view for each layer. (Use image views when rendering to different layers).
+				for (u32 i = 0; i < createInfo.Layer_Count; ++i)
+				{
+					m_singleLayerDescriptorHandle.push_back(CreateSharderResouceView(0, 1, 1, i));
+				}
 			}
 
 			void RHI_Texture_DX12::Upload(void* data, int sizeInBytes)
 			{
+				m_uploadStatus = DeviceUploadStatus::Uploading;
+
 				/// We need a staging buffer to upload data from CPU to GPU.
 				RHI_Buffer_DX12 stagingBuffer;
 				stagingBuffer.Create(m_context, BufferType::Staging, sizeInBytes, 0, { });
@@ -70,6 +68,8 @@ namespace Insight
 
 				m_context->SubmitCommandListAndWait(cmdList);
 				m_context->GetCommandListManager().ReturnCommandList(cmdList);
+
+				m_uploadStatus = DeviceUploadStatus::Completed;
 
 				stagingBuffer.Release();
 			}
@@ -85,6 +85,13 @@ namespace Insight
 				{
 					m_resource.Reset();
 				}
+
+				m_infos.clear();
+				m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_allLayerDescriptorHandle);
+				for (size_t i = 0; i < m_singleLayerDescriptorHandle.size(); ++i)
+				{
+					m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_singleLayerDescriptorHandle.at(i));
+				}m_singleLayerDescriptorHandle.clear();
 			}
 
 			bool RHI_Texture_DX12::ValidResource()
@@ -99,6 +106,32 @@ namespace Insight
 					m_context->SetObjectName(name, m_resource.Get());
 				}
 				m_name = std::move(name);
+			}
+
+			DescriptorHeapHandle_DX12 RHI_Texture_DX12::CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index)
+			{
+				DescriptorHeapHandle_DX12 handle = m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+
+				D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
+				shaderResouceViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;//PixelFormatToDX12(GetFormat());
+				shaderResouceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;//TextureTypeToDX12(GetType());
+				shaderResouceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				if (GetType() == TextureType::Tex2D)
+				{
+					shaderResouceViewDesc.Texture2D.MipLevels = mip_count;
+				}
+				else if (GetType() == TextureType::Tex2DArray)
+				{
+					shaderResouceViewDesc.Texture2DArray.ArraySize = layer_count;
+					shaderResouceViewDesc.Texture2DArray.FirstArraySlice = layer_index;
+					shaderResouceViewDesc.Texture2DArray.MipLevels = mip_count;
+					shaderResouceViewDesc.Texture2DArray.MostDetailedMip = 0u;
+					shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
+					shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+				}
+				m_context->GetDevice()->CreateShaderResourceView(m_resource.Get(), &shaderResouceViewDesc, handle.CPUPtr);
+
+				return handle;
 			}
 		}
 	}

@@ -57,7 +57,7 @@ namespace Insight
                 }
 
                 VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
-                VertexBuffer->QueueUpload(&vertices, sizeof(vertices));
+                VertexBuffer->Upload(&vertices, sizeof(vertices));
                 VertexBuffer->SetName("TestVertexBuffer");
             }
 
@@ -69,7 +69,7 @@ namespace Insight
                     0, 3, 2
                 };
                 IndexBuffer = Renderer::CreateIndexBuffer(sizeof(indices));
-                IndexBuffer->QueueUpload(&indices, sizeof(indices));
+                IndexBuffer->Upload(&indices, sizeof(indices));
                 IndexBuffer->SetName("TestIndexBuffer");
             }
 
@@ -83,6 +83,9 @@ namespace Insight
             {
                 RHI_SamplerCreateInfo desc = {};
                 desc.AddressMode = SamplerAddressMode::ClampToEdge;
+                desc.CompareOp = CompareOp::Never;
+                desc.MaxLod = FLT_MAX;
+                desc.BoarderColour = BorderColour::FloatTransparentBlack;
                 Sampler = RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(desc);
             }
 

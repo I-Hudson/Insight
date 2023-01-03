@@ -53,6 +53,7 @@ namespace Insight
 			createInfo.Depth = 1;
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
+			createInfo.Layout = ImageLayout::TransforDst;
 
 #define RHI_TEXTURE_DEFER_ENABLED
 #ifdef RHI_TEXTURE_DEFER_ENABLED
@@ -67,7 +68,7 @@ namespace Insight
 					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
 				});
 #else
-			Create(GraphicsManager::Instance().GetRenderContext(), createInfo);
+			Create(&RenderContext::Instance(), createInfo);
 			const u64 textureSize = width * height * STBI_rgb_alpha;
 			Upload(data, (int)textureSize);
 

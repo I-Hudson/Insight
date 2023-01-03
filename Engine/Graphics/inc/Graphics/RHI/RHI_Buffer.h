@@ -50,6 +50,8 @@ namespace Insight
 		public:
 			static RHI_Buffer* New();
 
+			Byte* GetMappedData() const;
+
 			virtual ~RHI_Buffer() { }
 
 			virtual void Create(RenderContext* context, BufferType bufferType, u64 sizeBytes, u64 stride, RHI_Buffer_Overrides overrides) = 0;
@@ -60,6 +62,7 @@ namespace Insight
 
 			virtual std::vector<Byte> Download() = 0;
 			virtual void Resize(u64 newSizeBytes) = 0;
+
 
 			RHI_BufferView GetView(u64 offset, u64 size);
 			/// <summary>
@@ -78,6 +81,8 @@ namespace Insight
 			u64 m_size = 0;
 			u64 m_stride = 0;
 			RHI_Buffer_Overrides m_overrides = { };
+			Byte* m_mappedData = nullptr;
+
 
 			friend class RenderContext;
 			friend class RHI_DynamicBuffer;

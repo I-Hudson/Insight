@@ -267,6 +267,24 @@ namespace Insight
             return D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
         }
 
+        D3D12_SRV_DIMENSION TextureTypeToDX12(TextureType type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::TextureType::Unknown:    return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_UNKNOWN;
+            case Insight::Graphics::TextureType::Tex1D:      return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE1D;
+            case Insight::Graphics::TextureType::Tex2D:      return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
+            case Insight::Graphics::TextureType::Tex3D:      return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE3D;
+            case Insight::Graphics::TextureType::TexCube:    return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURECUBE;
+            case Insight::Graphics::TextureType::Tex2DArray: return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+            case Insight::Graphics::TextureType::Tex3DArray: 
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_UNKNOWN;
+        }
+
         CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType)
         {
             switch (bufferType)
@@ -327,6 +345,7 @@ namespace Insight
             {
             case Filter::Nearest:    return op == CompareOp::Never ? D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT : D3D12_FILTER::D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
             case Filter::Linear:     return op == CompareOp::Never ? D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER::D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+            case Filter::Point:      return op == CompareOp::Never ? D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT : D3D12_FILTER::D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
             default:
                 break;
             }
