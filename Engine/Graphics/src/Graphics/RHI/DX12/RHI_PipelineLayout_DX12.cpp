@@ -46,11 +46,18 @@ namespace Insight
 						m_rootSignatureParameters.DescriptorRanges.push_back({});
 						// Root Descriptors
 						m_rootSignatureParameters.RootDescriptors.push_back(GetRootDescriptor(set));
+						std::vector<DescriptorType> descriptorTypes;
+						for (size_t i = 0; i < set.Bindings.size(); ++i)
+						{
+							descriptorTypes.push_back(set.Bindings.at(i).Type);
+						}
+						m_rootSignatureParameters.RootDescriptorTypes.push_back(descriptorTypes);
 						RootSignitureCurrentSlotsUsed += 2;
 					}
 					else
 					{
 						m_rootSignatureParameters.RootDescriptors.push_back({});
+						m_rootSignatureParameters.RootDescriptorTypes.push_back({});
 						// Root Tables
 						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
 						RootSignitureCurrentSlotsUsed += 1;
@@ -65,11 +72,36 @@ namespace Insight
 				{
 					if (m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx).size() > 0)
 					{
+						std::vector<DescriptorType> const& descriptorTypes = m_rootSignatureParameters.RootDescriptorTypes.at(rootParameterIdx);
+						u32 rootIdx = 0;
+
 						for (CD3DX12_ROOT_DESCRIPTOR const& root : m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx))
 						{
+							DescriptorType descriptorType = descriptorTypes.at(rootIdx);
 							CD3DX12_ROOT_PARAMETER paramter;
-							paramter.InitAsConstantBufferView(root.ShaderRegister, root.RegisterSpace);
+
+							switch (descriptorType)
+							{
+							case DescriptorType::Unifom_Buffer:
+							{
+								paramter.InitAsConstantBufferView(root.ShaderRegister, root.RegisterSpace);
+								break;
+							}
+							case DescriptorType::Sampled_Image:
+							{
+								paramter.InitAsShaderResourceView(root.ShaderRegister, root.RegisterSpace);
+								break;
+							}
+							case DescriptorType::Storage_Buffer:
+							case DescriptorType::Storage_Image:
+							{
+								paramter.InitAsUnorderedAccessView(root.ShaderRegister, root.RegisterSpace);
+								break;
+							}
+							}
+
 							m_rootSignatureParameters.RootParameters.push_back(paramter);
+							++rootIdx;
 						}
 					}
 					else
@@ -125,7 +157,10 @@ namespace Insight
 			{
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
-					if (binding.Type != DescriptorType::Unifom_Buffer)
+					if (binding.Type != DescriptorType::Unifom_Buffer
+						&& binding.Type != DescriptorType::Sampled_Image
+						&& binding.Type != DescriptorType::Storage_Buffer
+						&& binding.Type != DescriptorType::Storage_Image)
 					{
 						return false;
 					}
