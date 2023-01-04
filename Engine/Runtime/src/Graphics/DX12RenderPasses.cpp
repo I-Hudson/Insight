@@ -150,7 +150,7 @@ namespace Insight
                     uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_Space) ? 1 : uniform.Override;
                     uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_LShift) ? 2 : uniform.Override;
 
-                    cmdList->SetTexture(3, 0, Texture->GetRHITexture());
+                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
                     cmdList->SetSampler(2, 0, Sampler);
 
                     cmdList->SetUniform(0, 0, uniform);
