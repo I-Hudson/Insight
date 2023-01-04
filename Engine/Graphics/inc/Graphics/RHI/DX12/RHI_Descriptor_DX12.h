@@ -36,15 +36,16 @@ namespace Insight
 
 			struct DescriptorHeapHandle_DX12
 			{
+				DescriptorHeapHandle_DX12();
+				DescriptorHeapHandle_DX12(u64 cpuPtr, u64 gpuPtr, u32 headId, DescriptorHeapTypes heapType);
+
 				D3D12_CPU_DESCRIPTOR_HANDLE CPUPtr{ 0 };
 				D3D12_GPU_DESCRIPTOR_HANDLE GPUPtr{ 0 };
 				u32 HeapId = 0;
+				DescriptorHeapTypes HeapType;
 
 				D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle() const { return CPUPtr; }
 				D3D12_GPU_DESCRIPTOR_HANDLE GetGPUHandle() const { return GPUPtr; }
-
-				void SetCPUHandle(D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle) { CPUPtr = cpuHandle; }
-				void SetGPUHandle(D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle) { GPUPtr = gpuHandle; }
 
 				bool IsValid() const { return CPUPtr.ptr != NULL; }
 				bool IsReferencedByShader() const { return GPUPtr.ptr != NULL; }
@@ -60,10 +61,10 @@ namespace Insight
 			{
 			public:
 				DescriptorHeapPage_DX12();
-				DescriptorHeapPage_DX12(int capacity, D3D12_DESCRIPTOR_HEAP_TYPE type, RenderContext_DX12* context, u32 heapId, bool gpuVisable);
+				DescriptorHeapPage_DX12(int capacity, DescriptorHeapTypes type, RenderContext_DX12* context, u32 heapId, bool gpuVisable);
 
 				ID3D12DescriptorHeap* GetHeap() const { return m_heap; }
-				D3D12_DESCRIPTOR_HEAP_TYPE GetHeapType() const { return m_heapType; }
+				DescriptorHeapTypes GetHeapType() const { return m_heapType; }
 				u32 GetDescriptorSize() const { return m_descriptorSize; }
 				bool GetNewHandle(DescriptorHeapHandle_DX12& handle);
 				void FreeHandle(DescriptorHeapHandle_DX12& handle);
@@ -77,7 +78,7 @@ namespace Insight
 
 				u32 m_capacity = 0;
 				u32 m_descriptorSize = 0;
-				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
+				DescriptorHeapTypes m_heapType;
 
 				D3D12_CPU_DESCRIPTOR_HANDLE m_descriptorHeapCPUStart;
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart;
@@ -92,8 +93,8 @@ namespace Insight
 			public:
 				virtual ~DescriptorHeap_DX12() = default;
 
-				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType);
-				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType, u32 handleCount);
+				void Create(DescriptorHeapTypes heapType);
+				void Create(DescriptorHeapTypes heapType, u32 handleCount);
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
 
 				const std::vector<DescriptorHeapPage_DX12>& GetHeaps() const { return m_heaps; }
@@ -114,7 +115,7 @@ namespace Insight
 			
 			private:
 				RenderContext_DX12* m_context = nullptr;
-				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
+				DescriptorHeapTypes m_heapType;
 				std::vector<DescriptorHeapPage_DX12> m_heaps;
 
 				std::unordered_map<int, DescriptorHeapHandle_DX12> m_descriptorHeapHandle;
@@ -131,7 +132,7 @@ namespace Insight
 				~DescriptorHeapGPU_DX12();
 
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
-				void Create(D3D12_DESCRIPTOR_HEAP_TYPE heapType, u32 handleCount);
+				void Create(DescriptorHeapTypes heapType, u32 handleCount);
 
 				DescriptorHeapHandle_DX12 GetNextHandle();
 
@@ -143,7 +144,7 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_context = nullptr;
 
-				D3D12_DESCRIPTOR_HEAP_TYPE m_heapType;
+				DescriptorHeapTypes m_heapType;
 				ID3D12DescriptorHeap* m_heap = nullptr;
 				u32 m_currentDescriptorIndex = 0;
 

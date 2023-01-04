@@ -101,7 +101,7 @@ namespace Insight
 						imageBarrier.Image = texture;
 						barreir.ImageBarriers.push_back(imageBarrier);
 
-						//cmdList->PipelineBarrier(barreir);
+						cmdList->PipelineBarrier(barreir);
 						barreir = { };
 
 						request->Request->Status = DeviceUploadStatus::Uploading;
@@ -119,7 +119,7 @@ namespace Insight
 						imageBarrier.Image = texture;
 
 						barreir.ImageBarriers.push_back(imageBarrier);
-						//cmdList->PipelineBarrier(barreir);
+						cmdList->PipelineBarrier(barreir);
 
 				}, texture, sizeInBytes));
 

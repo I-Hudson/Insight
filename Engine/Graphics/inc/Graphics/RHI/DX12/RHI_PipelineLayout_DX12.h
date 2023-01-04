@@ -21,10 +21,11 @@ namespace Insight
                 std::vector<CD3DX12_ROOT_PARAMETER> RootParameters;
                 std::vector<std::vector<CD3DX12_ROOT_DESCRIPTOR>> RootDescriptors;
                 std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorRanges;
-#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
-                std::vector<std::vector<CD3DX12_DESCRIPTOR_RANGE>> DescriptorSamplerRanges;
-#endif
             };
+
+            // Define the max number of bindings a single set can have to be considered 
+            // for root descriptors.
+            constexpr u32 c_MaxRootDescriptorBindingForRootDescriptor = 1;
 
             class RHI_PipelineLayout_DX12 : public RHI_PipelineLayout
             {
@@ -46,7 +47,6 @@ namespace Insight
                 bool CheckForRootDescriptors(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_ROOT_DESCRIPTOR> GetRootDescriptor(const DescriptorSet& descriptorSet);
                 std::vector<CD3DX12_DESCRIPTOR_RANGE> GetDescriptoirRangesFromSet(const DescriptorSet& descriptorSet);
-                std::vector<CD3DX12_DESCRIPTOR_RANGE> GetSamplerRangesFromSet(const DescriptorSet& descriptorSet);
 
             private:
                 ID3D12RootSignature* m_rootSignature = nullptr;

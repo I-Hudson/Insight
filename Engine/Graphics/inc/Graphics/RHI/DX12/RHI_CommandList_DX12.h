@@ -6,8 +6,6 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 
-#include "Graphics/RHI/DX12/DescriptorBindingDX12.h"
-
 namespace Insight
 {
 	namespace Graphics
@@ -92,8 +90,6 @@ namespace Insight
 				ID3D12GraphicsCommandList3* m_commandList;
 #endif
 				RHI_CommandListAllocator_DX12* m_allocator{ nullptr };
-
-				DescriptorBindingDX12 m_descriptorBinding;
 
 				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;
 

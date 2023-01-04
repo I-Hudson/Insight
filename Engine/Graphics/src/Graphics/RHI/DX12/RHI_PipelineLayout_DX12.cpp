@@ -12,9 +12,7 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
-			// Define the max number of bindings a single set can have to be considered 
-			// for root descriptors.
-			constexpr u32 c_MaxRootDescriptorBindingSize = 5;
+
 
 			RHI_PipelineLayout_DX12::~RHI_PipelineLayout_DX12()
 			{
@@ -48,18 +46,20 @@ namespace Insight
 						m_rootSignatureParameters.DescriptorRanges.push_back({});
 						// Root Descriptors
 						m_rootSignatureParameters.RootDescriptors.push_back(GetRootDescriptor(set));
+						RootSignitureCurrentSlotsUsed += 2;
 					}
 					else
 					{
 						m_rootSignatureParameters.RootDescriptors.push_back({});
 						// Root Tables
 						m_rootSignatureParameters.DescriptorRanges.push_back(GetDescriptoirRangesFromSet(set));
+						RootSignitureCurrentSlotsUsed += 1;
 					}
-#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
-					m_rootSignatureParameters.DescriptorSamplerRanges.push_back(GetSamplerRangesFromSet(set));
-#endif
 				}
 
+				ASSERT(RootSignitureCurrentSlotsUsed < RootSignitureMaxSlots);
+
+				// Create our descriptor definitions.
 				u32 rootParameterIdx = 0;
 				for (const DescriptorSet& set : descriptor_sets)
 				{
@@ -68,7 +68,7 @@ namespace Insight
 						for (CD3DX12_ROOT_DESCRIPTOR const& root : m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx))
 						{
 							CD3DX12_ROOT_PARAMETER paramter;
-							paramter.InitAsConstantBufferView(root.ShaderRegister);
+							paramter.InitAsConstantBufferView(root.ShaderRegister, root.RegisterSpace);
 							m_rootSignatureParameters.RootParameters.push_back(paramter);
 						}
 					}
@@ -80,16 +80,6 @@ namespace Insight
 							static_cast<UINT>(range.size()), range.data());
 						m_rootSignatureParameters.RootParameters.push_back(paramter);
 					}
-#ifndef DX12_GROUP_SAMPLER_DESCRIPTORS
-					if (m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx).size() > 0)
-					{
-						std::vector<CD3DX12_DESCRIPTOR_RANGE> const& range = m_rootSignatureParameters.DescriptorSamplerRanges.at(rootParameterIdx);
-						CD3DX12_ROOT_PARAMETER paramter;
-						paramter.InitAsDescriptorTable(
-							static_cast<UINT>(range.size()), range.data());
-						m_rootSignatureParameters.RootParameters.push_back(paramter);
-					}
-#endif
 					++rootParameterIdx;
 				}
 
@@ -140,7 +130,7 @@ namespace Insight
 						return false;
 					}
 				}
-				return descriptorSet.Bindings.size() < c_MaxRootDescriptorBindingSize;
+				return descriptorSet.Bindings.size() <= c_MaxRootDescriptorBindingForRootDescriptor;
 			}
 
 			std::vector<CD3DX12_ROOT_DESCRIPTOR> RHI_PipelineLayout_DX12::GetRootDescriptor(const DescriptorSet& descriptorSet)
@@ -148,11 +138,12 @@ namespace Insight
 				std::vector<CD3DX12_ROOT_DESCRIPTOR> rootDescriptors;
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
-					// Ignore the samples. Samplers can't be in the same descriptor table 
-					// as CBV/SRV/UAV.
-					if (binding.Type == DescriptorType::Unifom_Buffer)
+					if (binding.Type == DescriptorType::Unifom_Buffer
+						|| binding.Type == DescriptorType::Sampled_Image
+						|| binding.Type == DescriptorType::Storage_Buffer
+						|| binding.Type == DescriptorType::Storage_Image)
 					{
-						rootDescriptors.push_back(CD3DX12_ROOT_DESCRIPTOR(binding.Binding));
+						rootDescriptors.push_back(CD3DX12_ROOT_DESCRIPTOR(binding.Binding, binding.Set));
 					}
 				}
 				return rootDescriptors;
@@ -164,48 +155,29 @@ namespace Insight
 				std::vector<CD3DX12_DESCRIPTOR_RANGE> descriptorRanges;
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
-#ifdef DX12_GROUP_SAMPLER_DESCRIPTORS
+					// Ensure samplers are not part of set with other descriptor types.
 					if (!isSamplerTable)
 					{
-						if (binding.Type == DescriptorType::Sampler)
+						if (descriptorRanges.size() == 0
+							&& binding.Type == DescriptorType::Sampler)
 						{
-							ASSERT(descriptorRanges.size() == 0);
 							isSamplerTable = true;
+						}
+						else
+						{
+							ASSERT(binding.Type != DescriptorType::Sampler);
 						}
 					}
 					else
 					{
 						ASSERT(binding.Type == DescriptorType::Sampler);
 					}
-#else
-					if (binding.Type == DescriptorType::Sampler)
-					{
-						continue;
-					}
-#endif
 
 					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
 						DescriptorRangeTypeToDX12(binding.Type), 
-						1, 
-						binding.Binding));
-				}
-				return descriptorRanges;
-			}
-
-			std::vector<CD3DX12_DESCRIPTOR_RANGE> RHI_PipelineLayout_DX12::GetSamplerRangesFromSet(const DescriptorSet& descriptorSet)
-			{
-				std::vector<CD3DX12_DESCRIPTOR_RANGE> descriptorRanges;
-				for (const DescriptorBinding& binding : descriptorSet.Bindings)
-				{
-					if (binding.Type != DescriptorType::Sampler)
-					{
-						continue;
-					}
-
-					descriptorRanges.push_back(CD3DX12_DESCRIPTOR_RANGE(
-						DescriptorRangeTypeToDX12(binding.Type),
 						1,
-						binding.Binding));
+						binding.Binding,
+						binding.Set));
 				}
 				return descriptorRanges;
 			}

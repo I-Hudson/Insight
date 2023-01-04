@@ -103,16 +103,16 @@ namespace Insight
 				}
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).SetRenderContext(this);
-				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Create(DescriptorHeapTypes::CBV_SRV_UAV);
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).SetRenderContext(this);
-				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Create(DescriptorHeapTypes::Sampler);
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).SetRenderContext(this);
-				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Create(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Create(DescriptorHeapTypes::RenderTargetView);
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).SetRenderContext(this);
-				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Create(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Create(DescriptorHeapTypes::DepthStencilView);
 
 				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
 				for (size_t i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
@@ -142,9 +142,9 @@ namespace Insight
 				}
 
 				context.DescriptorHeapGPURes.SetRenderContext(this);
-				context.DescriptorHeapGPURes.Create(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 100000);
+				context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000);
 				context.DescriptorHeapSampler.SetRenderContext(this);
-				context.DescriptorHeapSampler.Create(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER, 2048);
+				context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048);
 					});
 
 				InitImGui();
@@ -170,10 +170,10 @@ namespace Insight
 				m_submitFrameContexts.ForEach([](FrameSubmitContext_DX12& context)
 					{
 						CloseHandle(context.SubmitFenceEvent);
-				context.SubmitFence.Reset();
-				context.SubmitFence = nullptr;
-				context.DescriptorHeapGPURes.Destroy();
-				context.DescriptorHeapSampler.Destroy();
+						context.SubmitFence.Reset();
+						context.SubmitFence = nullptr;
+						context.DescriptorHeapGPURes.Destroy();
+						context.DescriptorHeapSampler.Destroy();
 					});
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
@@ -359,85 +359,6 @@ namespace Insight
 				m_resource_tracker.EndFrame();
 			}
 
-			//void RenderContext_DX12::Render(RHI_CommandList* cmdList)
-			//{
-			//	IS_PROFILE_FUNCTION();
-			//	ImGuiRender();
-			//
-			//	FrameResource_DX12& frame = m_frames[m_frameIndex];
-			//
-			//	frame.Reset();
-			//
-			//	/// Record cmd buffers and execute
-			//	RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(frame.CommandListManager.GetCommandList());
-			//
-			//	/// Set back buffer texture/image to render target so we can render to it.
-			//	cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-			//
-			//	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = m_swapchainImages[m_frameIndex].ColourHandle.GetCPUHandle();
-			//	D3D12_CPU_DESCRIPTOR_HANDLE depthStencilHandle = m_swapchainImages[m_frameIndex].DepthStencilHandle.GetCPUHandle();
-			//
-			//	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-			//	const float clear_color_with_alpha[4] = { clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w };
-			//
-			//	cmdListDX12->ClearRenderTargetView(rtvHandle, &clear_color_with_alpha[0], 0, NULL);
-			//	cmdListDX12->ClearDepthStencilView(depthStencilHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			//
-			//	cmdListDX12->OMSetRenderTargets(1, &rtvHandle, FALSE, &depthStencilHandle);
-			//
-			//	cmdListDX12->Record(cmdList, &frame);
-			//
-			//	{
-			//		IS_PROFILE_SCOPE("ImGui_DescriptorHeap");
-			//		std::array<ID3D12DescriptorHeap*, 1> imguiHeap = { m_srcImGuiHeap.Get() };
-			//		IMGUI_VALID(cmdListDX12->SetDescriptorHeaps(1, imguiHeap.data()));
-			//		IMGUI_VALID(ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdListDX12->GetCommandList()));
-			//	}
-			//
-			//	{
-			//		IS_PROFILE_SCOPE("ResourceBarrier_swapchain_present");
-			//		/// Set back buffer texture/image back to present so we can use it within the swapchain.
-			//		cmdListDX12->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_swapchainImages[m_frameIndex].Colour.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-			//	}
-			//	cmdListDX12->Close();
-			//
-			//	{
-			//		IS_PROFILE_SCOPE("ExecuteCommandLists");
-			//		ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-			//		m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-			//	}
-			//
-			//	{
-			//		IS_PROFILE_SCOPE("Present");
-			//		///ZoneScopedN("Present");
-			//		/// Present the frame.
-			//		if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
-			//		{
-			//			if (hr == 0x0)
-			//			{
-			//				m_device->GetDeviceRemovedReason();
-			//			}
-			//		}
-			//	}
-			//
-			//	WaitForNextFrame();
-			//
-			//	if (Window::Instance().GetSize() != m_swapchainSize)
-			//	{
-			//		IS_PROFILE_SCOPE("Swapchain resize");
-			//		WaitForGpu();
-			//		m_swapchainSize = Window::Instance().GetSize();
-			//		ResizeSwapchainBuffers();
-			//	}
-			//
-			//	{
-			//		IS_PROFILE_SCOPE("Imgui End frame");
-			//		IMGUI_VALID(ImGui::EndFrame());
-			//		IMGUI_VALID(ImGui_ImplDX12_NewFrame());
-			//		IMGUI_VALID(ImGuiBeginFrame());
-			//	}
-			//}
-
 			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
 			{
 				WaitForGpu();
@@ -604,6 +525,7 @@ namespace Insight
 						RHI_Texture* tex = Renderer::CreateTexture();
 						tex->SetName("Swapchain_Image: " + std::to_string(i));
 						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
+						textureDX12->m_context = this;
 						swapchainImage.Colour = textureDX12;
 						textureDX12->m_allLayerDescriptorHandle = swapchainImage.ColourHandle;
 						textureDX12->m_singleLayerDescriptorHandle.push_back(swapchainImage.ColourHandle);

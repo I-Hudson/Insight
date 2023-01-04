@@ -464,8 +464,14 @@ namespace Insight
 			}
 
 			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
-			descriptor_binding.RHI_Buffer_View = buffer_view;
+			for (auto& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Type == DescriptorType::Unifom_Buffer
+					&& descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Buffer_View = buffer_view;
+				}
+			}
 		}
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
@@ -475,8 +481,15 @@ namespace Insight
 				return;
 			}
 			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			descriptor_set.Bindings[binding].RHI_Texture = texture;
-			descriptor_set.Bindings[binding].RHI_Sampler = sampler != nullptr ? sampler : nullptr;
+			for (auto& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Type == DescriptorType::Sampled_Image
+					&& descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Texture = texture;
+					descriptorBinding.RHI_Sampler = sampler != nullptr ? sampler : nullptr;
+				}
+			}
 		}
 
 		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
@@ -486,7 +499,14 @@ namespace Insight
 				return;
 			}
 			DescriptorSet& descriptor_set= m_descriptor_sets[set];
-			descriptor_set.Bindings[binding].RHI_Sampler = sampler;
+			for (auto& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Type == DescriptorType::Sampler
+					&& descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Sampler = sampler;
+				}
+			}
 		}
 
 		std::vector<DescriptorSet> const& DescriptorAllocator::GetAllocatorDescriptorSets() const

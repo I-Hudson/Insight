@@ -1,12 +1,17 @@
-cbuffer UBO : register(b0)
+cbuffer UBO : register(b0, space0)
 {
 	float4 ubo_Transform;
 	float4 ubo_Colour;
 	int ubo_Override;
 }
 
-Texture2D<float> Texture : register(t1);
-SamplerState Sampler : register(s2);
+cbuffer BufferFrame : register(b0, space1)
+{
+	float4 bf_Colour;
+}
+
+Texture2D Texture : register(t0, space0);
+SamplerState Sampler : register(s0, space2);
 
 struct VertexOutput
 {
@@ -26,13 +31,13 @@ VertexOutput VSMain(VertexOutput input)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {
-		return Texture.Sample(Sampler, input.UV);
 	if (ubo_Override == 1)
 	{
 		return ubo_Colour;
 	}
 	else if (ubo_Override == 2)
 	{
+		return Texture.Sample(Sampler, input.UV);
 	}
-	return input.Colour;
+	return bf_Colour;
 }

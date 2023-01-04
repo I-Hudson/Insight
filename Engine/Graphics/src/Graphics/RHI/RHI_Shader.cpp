@@ -362,6 +362,16 @@ namespace Insight
 					{
 						return b1.Binding < b2.Binding;
 					});
+				std::sort(descriptor_sets.at(i).Bindings.begin(), descriptor_sets.at(i).Bindings.end(), [](const DescriptorBinding& b1, const DescriptorBinding& b2)
+					{
+						return b1.Binding != b2.Binding ? 0 : 
+						(b1.Type == DescriptorType::Unifom_Buffer 
+						|| b1.Type == DescriptorType::Storage_Buffer) 
+						&& 
+						(b2.Type != DescriptorType::Unifom_Buffer
+						|| b2.Type != DescriptorType::Storage_Buffer)
+						? -1 : 0;
+					});
 			}
 
 			// Order all the sets.

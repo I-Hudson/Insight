@@ -87,10 +87,10 @@ namespace Insight
 				}
 
 				m_infos.clear();
-				m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_allLayerDescriptorHandle);
-				for (size_t i = 1; i < m_singleLayerDescriptorHandle.size(); ++i)
+				m_context->GetDescriptorHeap(m_allLayerDescriptorHandle.HeapType).FreeHandle(m_allLayerDescriptorHandle);
+				for (size_t i = 0; i < m_singleLayerDescriptorHandle.size(); ++i)
 				{
-					m_context->GetDescriptorHeap(DescriptorHeapTypes::CBV_SRV_UAV).FreeHandle(m_singleLayerDescriptorHandle.at(i));
+					m_context->GetDescriptorHeap(m_singleLayerDescriptorHandle.at(i).HeapType).FreeHandle(m_singleLayerDescriptorHandle.at(i));
 				}
 				m_singleLayerDescriptorHandle.clear();
 			}

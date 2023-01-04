@@ -5,6 +5,8 @@
 #include "Graphics/Enums.h"
 #include "Graphics/PixelFormat.h"
 
+#include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
+
 #include <d3d12.h>
 #include <d3dx12.h>
 #include <stdexcept>
@@ -66,8 +68,10 @@ namespace Insight
 		D3D12_CULL_MODE CullModeToDX12(CullMode cullMode);
 		D3D12_BLEND BlendFactorToDX12(BlendFactor factor);
 		D3D12_BLEND_OP BlendOpToDX12(BlendOp op);
+
 		D3D12_DESCRIPTOR_HEAP_TYPE DescriptorTypeToDX12(DescriptorType type);
 		D3D12_DESCRIPTOR_RANGE_TYPE DescriptorRangeTypeToDX12(DescriptorType type);
+		D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapTypeToDX12(RHI::DX12::DescriptorHeapTypes type);
 	}
 }
 

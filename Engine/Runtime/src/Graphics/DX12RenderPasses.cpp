@@ -22,7 +22,7 @@ namespace Insight
         {
             glm::vec4 Position;
             glm::vec4 Colour;
-            glm::vec2 UV;
+            glm::vec4 UV;
         };
 
         struct alignas(16) UBO
@@ -46,10 +46,10 @@ namespace Insight
             {
                 Vertex vertices[] =
                 {
-                    Vertex { { -0.25f, -0.25f,  0.25f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
-                    Vertex { { -0.25f,  0.25f, 0.25f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f} },
-                    Vertex { {  0.25f,  0.25f, 0.25f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
-                    Vertex { {  0.25f,  -0.25f, 0.25f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 0.0f} },
+                    Vertex { { 0.0f,  0.0f,  0.25f, 1.0f}, { 1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
+                    Vertex { { 0.0f,  0.25f, 0.25f, 1.0f}, { 0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 0.0f} },
+                    Vertex { { 0.25f, 0.25f, 0.25f, 1.0f}, { 0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 0.0f} },
+                    Vertex { { 0.25f, 0.0f,  0.25f, 1.0f}, { 1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 0.0f} },
                 };
                 for (size_t i = 0; i < ARRAY_COUNT(vertices); ++i)
                 {
@@ -65,8 +65,8 @@ namespace Insight
             {
                 u32 indices[] =
                 {
-                    0, 2, 1,
-                    0, 3, 2
+                    0, 1, 2,
+                    0, 2, 3
                 };
                 IndexBuffer = Renderer::CreateIndexBuffer(sizeof(indices));
                 IndexBuffer->Upload(&indices, sizeof(indices));
@@ -113,6 +113,7 @@ namespace Insight
 
                     RenderpassDescription renderPassDescriptor = {};
                     renderPassDescriptor.AddAttachment(AttachmentDescription::Default(PixelFormat::Unknown, ImageLayout::ColourAttachment));
+                    renderPassDescriptor.Attachments.at(0).ClearColour = { 0.0f, 0.0f, 0.25f, 1.0f };
                     builder.SetRenderpass(renderPassDescriptor);
 
                     builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
@@ -133,6 +134,9 @@ namespace Insight
                     cmdList->SetVertexBuffer(VertexBuffer);
                     cmdList->SetIndexBuffer(IndexBuffer, IndexType::Uint32);
 
+                    glm::vec4 const bf_Colour = glm::vec4(255.0f / 255, 0.0f, 217.0f / 255.0f, 1.0f);
+                    cmdList->SetUniform(1, 0, bf_Colour);
+
                     UBO uniform
                     {
                         glm::vec4(0, 0, 0, 0),
@@ -143,22 +147,23 @@ namespace Insight
                     uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_LShift) ? 2 : uniform.Override;
 
                     cmdList->SetUniform(0, 0, uniform);
-                    cmdList->SetTexture(0, 1, Texture->GetRHITexture());
-                    cmdList->SetSampler(0, 2, Sampler);
+                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
+                    cmdList->SetSampler(2, 0, Sampler);
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
                     uniform.Transform = glm::vec4(-0.75f, 0, 0, 0);
                     uniform.OverrideColour = glm::vec4(1.0f, 0.5f, 0.16f, 1);
                     cmdList->SetUniform(0, 0, uniform);
-                    cmdList->SetTexture(0, 1, Texture->GetRHITexture());
-                    cmdList->SetSampler(0, 2, Sampler);
+                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
+                    cmdList->SetSampler(2, 0, Sampler);
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
                     uniform.Transform = glm::vec4(0.75f, 0, 0, 0);
                     uniform.OverrideColour = glm::vec4(0.5f, 0.23f, 0.85f, 1);
                     cmdList->SetUniform(0, 0, uniform);
-                    cmdList->SetTexture(0, 1, Texture->GetRHITexture());
-                    cmdList->SetSampler(0, 2, Sampler);
+
+                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
+                    cmdList->SetSampler(2, 0, Sampler);
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
                     cmdList->EndRenderpass();

@@ -565,6 +565,23 @@ namespace Insight
             FAIL_ASSERT();
             return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
         }
+
+        D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapTypeToDX12(RHI::DX12::DescriptorHeapTypes type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::RHI::DX12::CBV_SRV_UAV:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+            case Insight::Graphics::RHI::DX12::Sampler:           return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+            case Insight::Graphics::RHI::DX12::RenderTargetView:  return D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+            case Insight::Graphics::RHI::DX12::DepthStencilView:  return D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+            case Insight::Graphics::RHI::DX12::NumDescriptors:
+                break;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+        }
 	}
 }
 
