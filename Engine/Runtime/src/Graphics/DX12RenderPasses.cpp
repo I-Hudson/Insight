@@ -9,6 +9,8 @@
 #include "Resource/ResourceManager.h"
 #include "Resource/Texture2D.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -128,6 +130,8 @@ namespace Insight
                         return;
                     }
 
+                    IS_PROFILE_SCOPE("DX12 Test Pass");
+
                     cmdList->BindPipeline(renderGraph.GetPipelineStateObject("TestPass"), nullptr);
                     cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("TestPass"));
 
@@ -146,25 +150,26 @@ namespace Insight
                     uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_Space) ? 1 : uniform.Override;
                     uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_LShift) ? 2 : uniform.Override;
 
-                    cmdList->SetUniform(0, 0, uniform);
-                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
+                    cmdList->SetTexture(3, 0, Texture->GetRHITexture());
                     cmdList->SetSampler(2, 0, Sampler);
+
+                    cmdList->SetUniform(0, 0, uniform);
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
                     uniform.Transform = glm::vec4(-0.75f, 0, 0, 0);
                     uniform.OverrideColour = glm::vec4(1.0f, 0.5f, 0.16f, 1);
                     cmdList->SetUniform(0, 0, uniform);
-                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
-                    cmdList->SetSampler(2, 0, Sampler);
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
-                    uniform.Transform = glm::vec4(0.75f, 0, 0, 0);
-                    uniform.OverrideColour = glm::vec4(0.5f, 0.23f, 0.85f, 1);
-                    cmdList->SetUniform(0, 0, uniform);
+                    for (size_t i = 0; i < 2000; i++)
+                    {
+                        IS_PROFILE_SCOPE("Single complete draw");
 
-                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
-                    cmdList->SetSampler(2, 0, Sampler);
-                    cmdList->DrawIndexed(6, 1, 0, 0, 0);
+                        uniform.Transform = glm::vec4(0.75f, 0, 0, 0);
+                        uniform.OverrideColour = glm::vec4(0.5f, 0.23f, 0.85f, 1);
+                        cmdList->SetUniform(0, 0, uniform);
+                        cmdList->DrawIndexed(6, 1, 0, 0, 0);
+                    }
 
                     cmdList->EndRenderpass();
                 });

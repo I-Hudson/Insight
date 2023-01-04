@@ -426,7 +426,7 @@ namespace Insight
 				if (CanDraw())
 				{
 					{
-						ASSERT(m_commandList);
+						IS_PROFILE_SCOPE("DrawIndexedInstanced");
 						m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 					}
 				}
@@ -487,19 +487,44 @@ namespace Insight
 				for (const auto& set : descriptorSets)
 				{
 					if (set.Bindings.size() == c_MaxRootDescriptorBindingForRootDescriptor
-						&& set.Bindings.at(0).Type == DescriptorType::Unifom_Buffer)
+						&& (set.Bindings.at(0).Type == DescriptorType::Unifom_Buffer
+							|| set.Bindings.at(0).Type == DescriptorType::Storage_Buffer 
+							|| set.Bindings.at(0).Type == DescriptorType::Storage_Image))
 					{
 						// Root descriptor
 						DescriptorBinding const& binding = set.Bindings.at(0);
-						RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-						m_commandList->SetGraphicsRootConstantBufferView(descriptorRootIdx,
-							bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+
+						switch (set.Bindings.at(0).Type)
+						{
+						case DescriptorType::Unifom_Buffer:
+						{
+							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+							m_commandList->SetGraphicsRootConstantBufferView(descriptorRootIdx,
+								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+							break;
+						}
+						case DescriptorType::Storage_Buffer:
+						{
+							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx,
+								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+							break;
+						}
+						case DescriptorType::Storage_Image:
+						{
+							RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
+							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
+							break;
+						}
+						default:
+							break;
+						}
 					}
 					else
 					{
 						// Descriptor table
 						DescriptorHeapHandle_DX12 firstHandle;
-						
+
 						for (auto const& binding : set.Bindings)
 						{
 							if ((binding.Type == DescriptorType::Unifom_Buffer
@@ -519,8 +544,7 @@ namespace Insight
 								m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
 							}
 
-							if (binding.Type == DescriptorType::Sampled_Image
-								&& binding.RHI_Texture)
+							if (binding.Type == DescriptorType::Sampled_Image)
 							{
 								DescriptorHeapHandle_DX12 dstHandle = resouceHeap.GetNextHandle();
 								if (firstHandle.CPUPtr.ptr == 0)
@@ -528,11 +552,14 @@ namespace Insight
 									firstHandle = dstHandle;
 								}
 
-								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-								DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
-								m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+								if (binding.RHI_Texture)
+								{
+									RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
+									DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
+									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+								}
 							}
-							 
+
 							if (binding.Type == DescriptorType::Sampler
 								&& binding.RHI_Sampler)
 							{
@@ -546,7 +573,10 @@ namespace Insight
 								m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 							}
 						}
-						m_commandList->SetGraphicsRootDescriptorTable(set.Set, firstHandle.GPUPtr);
+						if (firstHandle.GPUPtr.ptr != 0)
+						{
+							m_commandList->SetGraphicsRootDescriptorTable(set.Set, firstHandle.GPUPtr);
+						}
 					}
 					++descriptorRootIdx;
 				}

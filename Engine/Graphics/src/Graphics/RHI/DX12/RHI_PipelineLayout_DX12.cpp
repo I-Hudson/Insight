@@ -87,11 +87,6 @@ namespace Insight
 								paramter.InitAsConstantBufferView(root.ShaderRegister, root.RegisterSpace);
 								break;
 							}
-							case DescriptorType::Sampled_Image:
-							{
-								paramter.InitAsShaderResourceView(root.ShaderRegister, root.RegisterSpace);
-								break;
-							}
 							case DescriptorType::Storage_Buffer:
 							case DescriptorType::Storage_Image:
 							{
@@ -158,7 +153,6 @@ namespace Insight
 				for (const DescriptorBinding& binding : descriptorSet.Bindings)
 				{
 					if (binding.Type != DescriptorType::Unifom_Buffer
-						&& binding.Type != DescriptorType::Sampled_Image
 						&& binding.Type != DescriptorType::Storage_Buffer
 						&& binding.Type != DescriptorType::Storage_Image)
 					{
