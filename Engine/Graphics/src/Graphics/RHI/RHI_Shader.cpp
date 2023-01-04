@@ -147,9 +147,9 @@ namespace Insight
 			std::vector<LPCWCHAR> arguments;
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
 			{
+				arguments.push_back(L"-spirv");
 				arguments.push_back(L"-D");
 				arguments.push_back(L"VULKAN");
-				arguments.push_back(L"-spirv");
 			}
 			else
 			{
@@ -187,7 +187,11 @@ namespace Insight
 				IID_PPV_ARGS(&ShaderCompileResults)			/// Compiler output status, buffer, and errors.
 			)));
 
-			arguments.push_back(L"-spirv");
+			if (languageToCompileTo != ShaderCompilerLanguage::Spirv)
+			{
+				arguments.push_back(L"-spirv");
+			}
+			arguments.push_back(L"-fspv-reflect");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,								/// Source buffer.
 				arguments.data(),						/// Array of pointers to arguments.
@@ -207,6 +211,16 @@ namespace Insight
 			}
 			pErrors->Release();
 
+			pErrors = nullptr;
+			ASSERT(SUCCEEDED(ShaderReflectionResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
+			/// Note that d3dcompiler would return null if no errors or warnings are present.  
+			/// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
+			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
+			{
+				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
+			}
+			pErrors->Release();
+
 			/// Get compilation result
 			IDxcBlob* code;
 			ShaderCompileResults->GetResult(&code);
@@ -218,7 +232,7 @@ namespace Insight
 			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
 
 			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
-			std::string shaderToDisk = std::string(shaderToDiskView) + ".cso";
+			std::string shaderToDisk = "./Shader_CSO/" + std::string(shaderToDiskView) + ".cso";
 
 			shaderDisk.open(shaderToDisk.c_str());
 			if (shaderDisk.is_open())
