@@ -257,7 +257,7 @@ namespace Insight
 				FSR2();
 				Swapchain();
 
-				// Post processing. Happens after the the main scene has finished rendering and the image has been surplised to the swapchain.
+				// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
 				GFXHelper();
 				ImGuiPass();
 			}
@@ -1288,6 +1288,7 @@ namespace Insight
 
 					builder.SetViewport(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
 					builder.SetScissor(builder.GetOutputResolution().x, builder.GetOutputResolution().y);
+
 
 					builder.SetAsRenderToSwapchain();
 				},
