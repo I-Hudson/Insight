@@ -533,6 +533,7 @@ namespace Insight
 			case ShaderStageFlagBits::ShaderStage_Pixel: return "ps_6_1";
 				break;
 			}
+			FAIL_ASSERT();
 			return "";
 		}
 
@@ -541,7 +542,6 @@ namespace Insight
 			switch (type)
 			{
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:						return DescriptorType::Sampler;
-			case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:		return DescriptorType::Combined_Image_Sampler;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:					return DescriptorType::Sampled_Image;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:					return DescriptorType::Storage_Buffer;
 			case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:			return DescriptorType::Uniform_Texel_Buffer;
@@ -555,6 +555,7 @@ namespace Insight
 			default:
 				break;
 			}
+			FAIL_ASSERT();
 			return DescriptorType::Unknown;
 		}
 
@@ -570,6 +571,7 @@ namespace Insight
 			default:
 				break;
 			}
+			FAIL_ASSERT();
 			return DescriptorResourceType::Unknown;
 		}
 	}

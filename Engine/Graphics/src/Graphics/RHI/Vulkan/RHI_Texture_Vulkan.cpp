@@ -42,6 +42,8 @@ namespace Insight
 				imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 				imageCreateInfo.usage = ImageUsageFlagsToVulkan(m_infos.at(0).ImageUsage);
 				imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+				imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				SetLayout(ImageLayout::Undefined);
 
 				VmaAllocationCreateInfo vmaAllocCreateInfo = {};
 				vmaAllocCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;

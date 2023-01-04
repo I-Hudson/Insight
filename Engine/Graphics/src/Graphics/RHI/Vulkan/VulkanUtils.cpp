@@ -813,7 +813,6 @@ namespace Insight
             switch (type)
             {
             case DescriptorType::Sampler:                    return VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLER;
-            case DescriptorType::Combined_Image_Sampler:     return VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             case DescriptorType::Sampled_Image:              return VkDescriptorType::VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case DescriptorType::Storage_Image:              return VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
             case DescriptorType::Uniform_Texel_Buffer:       return VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;

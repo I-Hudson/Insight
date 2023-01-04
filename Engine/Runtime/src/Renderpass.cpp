@@ -75,9 +75,9 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//model = model_backpack;
+			model = model_backpack;
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
@@ -1034,7 +1034,7 @@ namespace Insight
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
 					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
-					const u8 texture_offset = 5;
+					const u8 texture_offset = 6;
 					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
 					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
 					if (Depth_Prepass)
@@ -1299,7 +1299,8 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
 
-					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget), m_buffer_samplers.Clamp_Sampler);
+					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
+					cmdList->SetSampler(0, 1, m_buffer_samplers.Clamp_Sampler);
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();
@@ -1319,7 +1320,7 @@ namespace Insight
 			cmd_list->SetSampler(0, 1, buffer_samplers.Shadow_Sampler);
 			cmd_list->SetSampler(0, 2, buffer_samplers.Repeat_Sampler);
 			cmd_list->SetSampler(0, 3, buffer_samplers.Clamp_Sampler);
-			cmd_list->SetSampler(0, 5, buffer_samplers.MirroredRepeat_Sampler);
+			cmd_list->SetSampler(0, 4, buffer_samplers.MirroredRepeat_Sampler);
 		}
 
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)

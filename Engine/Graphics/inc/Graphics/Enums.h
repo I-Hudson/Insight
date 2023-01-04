@@ -356,7 +356,6 @@ namespace Insight
 		enum class DescriptorType
 		{
 			Sampler,
-			Combined_Image_Sampler,
 			Sampled_Image,
 			Storage_Image,
 			Uniform_Texel_Buffer,

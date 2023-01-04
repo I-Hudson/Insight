@@ -36,11 +36,11 @@ cbuffer UBO : register(b0)
 }
 #endif
 #ifdef VULKAN
-[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+[[vk::binding(0, 0)]]
 #endif
 Texture2D<float4> sTexture : register(t0);
 #ifdef VULKAN
-[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+[[vk::binding(1, 0)]]
 #endif
 SamplerState sSampler : register(s0);
 

@@ -109,7 +109,7 @@ namespace Insight
 						m_frameUploadOffset += request->SizeInBytes;
 
 						barreir.SrcStage = +PipelineStageFlagBits::Transfer;
-						barreir.DstStage = +PipelineStageFlagBits::TopOfPipe;
+						barreir.DstStage = +PipelineStageFlagBits::FragmentShader;
 
 						imageBarrier.SrcAccessFlags = AccessFlagBits::TransferWrite;
 						imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;

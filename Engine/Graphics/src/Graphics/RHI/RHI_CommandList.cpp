@@ -138,12 +138,6 @@ namespace Insight
 			///	}
 			///}
 
-			if (!m_bound_vertex_buffer
-				|| !m_bound_index_buffer)
-			{
-				return false;
-			}
-
 			// Make sure our buffers are good to go.
 			if ((m_bound_vertex_buffer && m_bound_vertex_buffer->GetUploadStatus() != DeviceUploadStatus::Completed)
 				|| (m_bound_index_buffer && m_bound_index_buffer->GetUploadStatus() != DeviceUploadStatus::Completed))

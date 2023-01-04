@@ -525,7 +525,6 @@ namespace Insight
             switch (type)
             {
             case DescriptorType::Sampler:                    return D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
-            case DescriptorType::Combined_Image_Sampler:     return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case DescriptorType::Sampled_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case DescriptorType::Storage_Image:              return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
             case DescriptorType::Uniform_Texel_Buffer:       return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -548,7 +547,6 @@ namespace Insight
             switch (type)
             {
             case DescriptorType::Sampler:                return D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
-            case DescriptorType::Combined_Image_Sampler: return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             case DescriptorType::Sampled_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
             case DescriptorType::Storage_Image:          return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
             case DescriptorType::Uniform_Texel_Buffer:   return D3D12_DESCRIPTOR_RANGE_TYPE_CBV;

@@ -1,6 +1,6 @@
-[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+[[vk::binding(0, 0)]]
 Texture2D<float4> FullScreenTexture : register(t0);
-[[vk::combinedImageSampler]][[vk::binding(0, 0)]]
+[[vk::binding(1, 0)]]
 SamplerState FullScreenSampler : register(s0);
 
 struct VertexOutput

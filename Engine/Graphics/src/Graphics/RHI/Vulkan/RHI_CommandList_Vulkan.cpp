@@ -65,9 +65,11 @@ namespace Insight
 					b.subresourceRange.baseArrayLayer = imageBarrier.SubresourceRange.BaseArrayLayer;
 					b.subresourceRange.layerCount = imageBarrier.SubresourceRange.LayerCount;
 
-					imageBarrier.Image->SetLayout(imageBarrier.NewLayout);
-
-					imageBarriers.push_back(std::move(b));
+					if (imageBarrier.Image->GetLayout() != imageBarrier.NewLayout)
+					{
+						imageBarrier.Image->SetLayout(imageBarrier.NewLayout);
+						imageBarriers.push_back(std::move(b));
+					}
 				}
 				PipelineBarrier(barrier.SrcStage
 					, barrier.DstStage
@@ -78,15 +80,19 @@ namespace Insight
 			void RHI_CommandList_Vulkan::PipelineBarrier(PipelineStageFlags srcStage, PipelineStageFlags dstStage
 				, std::vector<VkBufferMemoryBarrier> const& bufferMemoryBarrier, std::vector<VkImageMemoryBarrier> const& imageMemoryBarrier)
 			{
-				vkCmdPipelineBarrier(
-					m_commandList,
-					PipelineStageFlagsToVulkan(srcStage),
-					PipelineStageFlagsToVulkan(dstStage),
-					VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-					0, nullptr,
-					static_cast<u32>(bufferMemoryBarrier.size()), bufferMemoryBarrier.data(),
-					static_cast<u32>(imageMemoryBarrier.size()), imageMemoryBarrier.data());
-				RenderStats::Instance().PipelineBarriers++;
+				if (bufferMemoryBarrier.size() > 0
+					|| imageMemoryBarrier.size() > 0)
+				{
+					vkCmdPipelineBarrier(
+						m_commandList,
+						PipelineStageFlagsToVulkan(srcStage),
+						PipelineStageFlagsToVulkan(dstStage),
+						VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+						0, nullptr,
+						static_cast<u32>(bufferMemoryBarrier.size()), bufferMemoryBarrier.data(),
+						static_cast<u32>(imageMemoryBarrier.size()), imageMemoryBarrier.data());
+					RenderStats::Instance().PipelineBarriers++;
+				}
 			}
 
 			void RHI_CommandList_Vulkan::PipelineBarrierBuffer(PipelineStageFlags srcStage, PipelineStageFlags dstStage, std::vector<VkBufferMemoryBarrier> const& bufferMemoryBarrier)
@@ -163,6 +169,8 @@ namespace Insight
 				memoryBarriers.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
 
 				PipelineBarrierImage(+PipelineStageFlagBits::TopOfPipe, +PipelineStageFlagBits::Transfer, { memoryBarriers });
+				dst->SetLayout(ImageLayout::TransforDst);
+
 				vkCmdCopyBufferToImage(m_commandList, srcVulkan->GetBuffer(), dstVulkan->GetImage(), memoryBarriers.newLayout, static_cast<u32>(copyRegion.size()), copyRegion.data());
 
 				memoryBarriers.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -170,6 +178,7 @@ namespace Insight
 				memoryBarriers.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 				memoryBarriers.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 				PipelineBarrierImage(+PipelineStageFlagBits::Transfer, +PipelineStageFlagBits::FragmentShader, { memoryBarriers });
+				dst->SetLayout(ImageLayout::ShaderReadOnly);
 			}
 
 			void RHI_CommandList_Vulkan::Release()
