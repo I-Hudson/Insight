@@ -456,8 +456,6 @@ namespace Insight
 					break;
 				}
 			}
-			//DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
-			//descriptor_binding.RHI_Buffer_View = buffer_view;
 		}
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
@@ -486,16 +484,15 @@ namespace Insight
 				return;
 			}
 			DescriptorSet& descriptor_set= m_descriptor_sets[set];
-			//for (auto& descriptorBinding : descriptor_set.Bindings)
-			//{
-			//	if (descriptorBinding.Type == DescriptorType::Sampler
-			//		&& descriptorBinding.Binding == binding)
-			//	{
-			//		descriptorBinding.RHI_Sampler = sampler;
-			//		break;
-			//	}
-			//}
-			descriptor_set.Bindings[binding].RHI_Sampler = sampler;
+			for (auto& descriptorBinding : descriptor_set.Bindings)
+			{
+				if (descriptorBinding.Type == DescriptorType::Sampler
+					&& descriptorBinding.Binding == binding)
+				{
+					descriptorBinding.RHI_Sampler = sampler;
+					break;
+				}
+			}
 		}
 
 		std::vector<DescriptorSet> const& DescriptorAllocator::GetAllocatorDescriptorSets() const
@@ -562,17 +559,6 @@ namespace Insight
 		}
 		bool DescriptorAllocator::CheckSetAndBindingBounds(u32 set, u32 binding)
 		{
-			//if (set >= m_descriptor_sets.size())
-			//{
-			//	return false;
-			//}
-
-			//const DescriptorSet& descriptor_set = m_descriptor_sets.at(set);
-			//if (binding >= static_cast<u32>(descriptor_set.Bindings.size()))
-			//{
-			//	return false;
-			//}
-
 			DescriptorSet* descriptor_set = nullptr;
 			for (size_t i = 0; i < m_descriptor_sets.size(); ++i)
 			{
@@ -600,7 +586,7 @@ namespace Insight
 
 			if (!foundBinding)
 			{
-				//IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
+				IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
 				return false;
 			}
 			return true;
