@@ -11,6 +11,8 @@ Some features are:
 - Runtime shader creation (with descriptor reflection)
 
 ## Thrid Party
+
+##### Runtime
 - [Assimp](https://github.com/assimp/assimp)
 - [DirectXShaderCompiler](https://github.com/microsoft/DirectXShaderCompiler)
 - [FSR2](https://gpuopen.com/fidelityfx-superresolution-2/)
@@ -25,8 +27,10 @@ Some features are:
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 - [xxHash](https://github.com/Cyan4973/xxHash)
 
+##### Profiles
 - [tracy](https://github.com/wolfpld/tracy)
 - [optick)](https://optick.dev)
 
+##### Other
 - [doctest](https://github.com/doctest/doctest)
 - [premake](https://premake.github.io)
