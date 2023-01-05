@@ -397,7 +397,7 @@ namespace Insight
 					// use models where a vertex can have multiple texture coordinates so we always take the first set (0).
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
-					vertex.UV = vec;
+					vertex.UV = glm::vec4(vec, 0, 0);
 
 					// tangent
 					if (mesh->mTangents)

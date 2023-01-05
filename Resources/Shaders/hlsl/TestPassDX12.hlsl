@@ -46,7 +46,7 @@ PixelInput VSMain(VertexInput input)
 
 	o.Colour = input.Colour;
 
-	o.UV = input.UV;
+	o.UV = input.UV.xy;
 
 	return o;
 }
