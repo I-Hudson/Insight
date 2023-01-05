@@ -91,6 +91,8 @@ namespace Insight
 			while (!Graphics::Window::Instance().ShouldClose() && !m_shouldClose)
 			{
 				IS_PROFILE_FRAME("MainThread");
+				IS_PROFILE_SCOPE("Frame");
+
 				s_FrameTimer.Stop();
 				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
 				s_FrameTimer.Start();

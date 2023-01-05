@@ -41,6 +41,20 @@ namespace Insight
 
 			None,
 		};
+		IS_GRAPHICS constexpr const char* GraphicsAPIToString(GraphicsAPI api)
+		{
+			switch (api)
+			{
+			case Insight::Graphics::GraphicsAPI::Vulkan: return "Vulkan";
+			case Insight::Graphics::GraphicsAPI::DX12: return "DX12";
+			case Insight::Graphics::GraphicsAPI::None:
+				break;
+			default:
+				break;
+			}
+			FAIL_ASSERT();
+			return "";
+		}
 
 		//// <summary>
 		//// Store any and all details about the physical device being used.

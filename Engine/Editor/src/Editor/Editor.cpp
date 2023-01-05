@@ -7,6 +7,7 @@
 #include "Core/ImGuiSystem.h"
 
 #include "Graphics/Window.h"
+#include "Graphics/RenderContext.h"
 
 #include <imgui.h>
 
@@ -18,6 +19,11 @@ namespace Insight
 		{
 			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
+			std::string windowTitle = "Insight Editor (";
+			windowTitle += Graphics::GraphicsAPIToString(Graphics::RenderContext::Instance().GetGraphicsAPI());
+			windowTitle += ")";
+
+			Graphics::Window::Instance().SetTite(windowTitle);
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
 			Graphics::Window::Instance().Show();
 

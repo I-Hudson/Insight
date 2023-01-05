@@ -332,7 +332,7 @@ namespace Insight
 						{
 							IS_PROFILE_SCOPE("Present");
 							// Present the frame.
-							if (HRESULT hr = m_swapchain->Present(0, 0); FAILED(hr))
+							if (HRESULT hr = m_swapchain->Present(0, DXGI_PRESENT_ALLOW_TEARING); FAILED(hr))
 							{
 								if (hr == 0x0)
 								{
@@ -492,14 +492,43 @@ namespace Insight
 
 				m_swapchainBufferSize = { width, height };
 
+				BOOL allowTearing = FALSE;
+				bool tearingSupported = FALSE;
+
+				ComPtr<IDXGIFactory5> dxgiFactory5;
+				HRESULT hr = m_factory.As(&dxgiFactory5);
+				if (SUCCEEDED(hr))
+				{
+					hr = dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+				}
+
+				if (FAILED(hr) || !allowTearing)
+				{
+					tearingSupported = false;
+					IS_CORE_WARN("WARNING: Variable refresh rate displays not supported\n");
+				}
+				else
+				{
+					tearingSupported = true;
+				}
+
+				UINT swapChainFlags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+				if (tearingSupported)
+				{
+					swapChainFlags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+				}
+
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 				swapChainDesc.BufferCount = RenderGraph::s_MaxFarmeCount;
 				swapChainDesc.Width = static_cast<UINT>(m_swapchainBufferSize.x);
 				swapChainDesc.Height = static_cast<UINT>(m_swapchainBufferSize.y);
 				swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				swapChainDesc.SampleDesc.Count = 1;
+				swapChainDesc.SampleDesc.Quality = 0;
 				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-				swapChainDesc.SampleDesc.Count = 1;
+				swapChainDesc.Stereo = false;
+				swapChainDesc.Flags = swapChainFlags;
 
 				GLFWwindow* window = Window::Instance().GetRawWindow();
 				HWND hwmd = glfwGetWin32Window(window);
