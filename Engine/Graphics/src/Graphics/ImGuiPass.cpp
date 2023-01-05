@@ -53,15 +53,17 @@ namespace Insight
 					shaderDesc.PixelFilePath = "./Resources/Shaders/hlsl/ImGui.hlsl";
 					shaderDesc.InputLayout =
 					{
-						ShaderInputLayout(0, PixelFormat::R32G32_Float, 0),
-						ShaderInputLayout(1, PixelFormat::R32G32_Float, 8),
-						ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, 16),
+						ShaderInputLayout(0, PixelFormat::R32G32_Float, offsetof(ImDrawVert, pos), "POSITION"),
+						ShaderInputLayout(1, PixelFormat::R32G32_Float, offsetof(ImDrawVert, uv), "TEXCOORD0"),
+						ShaderInputLayout(2, PixelFormat::R8G8B8A8_UNorm, offsetof(ImDrawVert, col), "COLOR0"),
 					};
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
 					pso.Name = "ImGui_PSO";
 					pso.ShaderDescription = shaderDesc;
+					pso.DepthWrite = false;
+					pso.DepthTest = false;
 
 					pso.PolygonMode = PolygonMode::Fill;
 					pso.CullMode = CullMode::None;
@@ -82,6 +84,7 @@ namespace Insight
 					renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
 					renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
 					renderpassDescription.AllowDynamicRendering = false;
+
 					builder.SetRenderpass(renderpassDescription);
 				},
 				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
@@ -91,6 +94,16 @@ namespace Insight
 					PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("ImGuiPass"));
+
+					RHI_SamplerCreateInfo bilinearSamplerInfo = { };
+					bilinearSamplerInfo.MagFilter = Filter::Linear;
+					bilinearSamplerInfo.MinFilter = Filter::Linear;
+					bilinearSamplerInfo.MipmapMode = SamplerMipmapMode::Linear;
+					bilinearSamplerInfo.AddressMode = SamplerAddressMode::Repeat;
+					bilinearSamplerInfo.CompareEnabled = false;
+					RHI_Sampler* bilinearSampler = RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(bilinearSamplerInfo);
+
+					cmdList->SetSampler(2, 0, bilinearSampler);
 
 					ImDrawData* draw_data = ImGui::GetDrawData();
 
@@ -134,16 +147,20 @@ namespace Insight
 					/// Setup scale and translation:
 					/// Our visible imgui space lies from draw_data->DisplayPps (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayPos is (0,0) for single viewport apps.
 					{
-						float scale[2];
-						scale[0] = 2.0f / draw_data->DisplaySize.x;
-						scale[1] = 2.0f / draw_data->DisplaySize.y;
-						float translate[2];
-						translate[0] = -1.0f - draw_data->DisplayPos.x * scale[0];
-						translate[1] = -1.0f - draw_data->DisplayPos.y * scale[1];
 						if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 						{
-							cmdList->SetPushConstant(0, sizeof(scale), scale);
-							cmdList->SetPushConstant(sizeof(scale), sizeof(translate), translate);
+							struct UBO
+							{
+								float Scale[2];
+								float Translate[2];
+							};
+							UBO ubo = {};
+							ubo.Scale[0] = 2.0f / draw_data->DisplaySize.x;
+							ubo.Scale[1] = 2.0f / draw_data->DisplaySize.y;
+							ubo.Translate[0] = -1.0f - draw_data->DisplayPos.x * ubo.Scale[0];
+							ubo.Translate[1] = -1.0f - draw_data->DisplayPos.y * ubo.Scale[1];
+
+							cmdList->SetUniform(0, 0, ubo);
 						}
 						else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
 						{
@@ -194,9 +211,10 @@ namespace Insight
 							}
 							else
 							{
+
 								/// Project scissor/clipping rectangles into framebuffer space
-								ImVec2 clip_min((pcmd->ClipRect.x - clip_off.x)* clip_scale.x, (pcmd->ClipRect.y - clip_off.y)* clip_scale.y);
-								ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x)* clip_scale.x, (pcmd->ClipRect.w - clip_off.y)* clip_scale.y);
+								ImVec2 clip_min((pcmd->ClipRect.x - clip_off.x) * clip_scale.x, (pcmd->ClipRect.y - clip_off.y) * clip_scale.y);
+								ImVec2 clip_max((pcmd->ClipRect.z - clip_off.x) * clip_scale.x, (pcmd->ClipRect.w - clip_off.y) * clip_scale.y);
 
 								/// Clamp to viewport as vkCmdSetScissor() won't accept values that are off bounds
 								if (clip_min.x < 0.0f) { clip_min.x = 0.0f; }
@@ -213,10 +231,22 @@ namespace Insight
 								int scissor_offset_y = (int32_t)(clip_min.y);
 								int scissor_extent_width = (uint32_t)(clip_max.x - clip_min.x);
 								int scissor_extent_height = (uint32_t)(clip_max.y - clip_min.y);
-								cmdList->SetScissor(scissor_offset_x, scissor_offset_y, scissor_extent_width, scissor_extent_height);
+								if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+								{
+									//cmdList->SetScissor(scissor_offset_x, scissor_offset_y, scissor_extent_width, scissor_extent_height);
+								}
+								else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
+								{
+									/// Project scissor/clipping rectangles into framebuffer space
+									ImVec2 clip_min(pcmd->ClipRect.x - clip_off.x, pcmd->ClipRect.y - clip_off.y);
+									ImVec2 clip_max(pcmd->ClipRect.z - clip_off.x, pcmd->ClipRect.w - clip_off.y);
+									if (clip_max.x <= clip_min.x || clip_max.y <= clip_min.y)
+										continue;
 
-								cmdList->SetTexture(0, 0, static_cast<RHI_Texture*>(pcmd->TextureId));
+									cmdList->SetScissor((int)clip_min.x, (int)clip_min.y, (int)clip_max.x, (int)clip_max.y);
+								}
 
+								cmdList->SetTexture(1, 0, static_cast<RHI_Texture*>(pcmd->TextureId));
 								cmdList->DrawIndexed(pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
 							}
 						}

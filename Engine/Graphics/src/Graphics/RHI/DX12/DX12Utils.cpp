@@ -55,8 +55,8 @@ DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
     DXGI_FORMAT_R16G16_SNORM,
     DXGI_FORMAT_R16G16_SINT,
    
-    DXGI_FORMAT_D32_FLOAT,
     DXGI_FORMAT_R32_TYPELESS,
+    DXGI_FORMAT_D32_FLOAT,
     DXGI_FORMAT_R32_FLOAT,
     DXGI_FORMAT_R32_UINT,
     DXGI_FORMAT_R32_SINT,
@@ -163,6 +163,19 @@ namespace Insight
             FAIL_ASSERT();
 			return D3D12_COMMAND_LIST_TYPE_DIRECT;
 		}
+
+        DXGI_FORMAT IndexTypeToDX12(IndexType type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::IndexType::Uint16: return DXGI_FORMAT_R16_UINT;
+            case Insight::Graphics::IndexType::Uint32: return DXGI_FORMAT_R32_UINT;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return DXGI_FORMAT_R16_UINT;
+        }
 
         D3D12_BARRIER_SYNC PipelineStageFlagsToDX12(PipelineStageFlags flags)
         {
@@ -285,6 +298,22 @@ namespace Insight
             return D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_UNKNOWN;
         }
 
+        D3D12_DSV_DIMENSION TextureTypeToDX12DSVDimension(TextureType type)
+        {
+            switch (type)
+            {
+            case Insight::Graphics::TextureType::Unknown:    return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_UNKNOWN;
+            case Insight::Graphics::TextureType::Tex1D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE1D;
+            case Insight::Graphics::TextureType::Tex2D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2D;
+            case Insight::Graphics::TextureType::Tex2DArray: return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+            case Insight::Graphics::TextureType::Tex3DArray:
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_UNKNOWN;
+        }
+
         CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType)
         {
             switch (bufferType)
@@ -337,6 +366,20 @@ namespace Insight
             }
             FAIL_ASSERT();
             return D3D12_RESOURCE_STATES();
+        }
+
+        D3D12_RESOURCE_FLAGS ImageUsageFlagsToDX12(ImageUsageFlags flags)
+        {
+            D3D12_RESOURCE_FLAGS result = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::TransferSrc,            D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::TransferDst,            D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::Sampled,                D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::Storage,                D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::ColourAttachment,       D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::DepthStencilAttachment, D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::TransientAttachment,    D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE, result);
+            COMPARE_AND_SET_BIT(flags, ImageUsageFlagsBits::InputAttachment,        D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE, result);
+            return result;
         }
 
         D3D12_FILTER FilterToDX12(Filter filter, CompareOp op)

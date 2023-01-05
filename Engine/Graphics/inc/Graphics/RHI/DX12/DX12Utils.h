@@ -46,16 +46,21 @@ namespace Insight
 		DXGI_FORMAT PixelFormatToDX12(PixelFormat format);
 		D3D12_COMMAND_LIST_TYPE GPUCommandListTypeToCommandListTypeDX12(GPUCommandListType type);
 
+		DXGI_FORMAT IndexTypeToDX12(IndexType type);
+
 		D3D12_BARRIER_SYNC PipelineStageFlagsToDX12(PipelineStageFlags flags);
 		D3D12_BARRIER_ACCESS AccessFlagsToDX12(AccessFlags flags);
 		D3D12_BARRIER_LAYOUT ImageLayoutToDX12(ImageLayout layout);
 
 		D3D12_RESOURCE_STATES ImageLayoutToDX12ResouceState(ImageLayout layout);
 		D3D12_SRV_DIMENSION TextureTypeToDX12(TextureType type);
+		D3D12_DSV_DIMENSION TextureTypeToDX12DSVDimension(TextureType type);
 
 		CD3DX12_HEAP_PROPERTIES BufferTypeToDX12HeapProperties(BufferType bufferType);
 		D3D12_RESOURCE_STATES BufferTypeToDX12InitialResourceState(BufferType bufferType);
 		D3D12_RESOURCE_STATES BufferTypeToDX12ResourceState(BufferType bufferType);
+
+		D3D12_RESOURCE_FLAGS ImageUsageFlagsToDX12(ImageUsageFlags flags);
 
 		D3D12_FILTER FilterToDX12(Filter filter, CompareOp op);
 		D3D12_TEXTURE_ADDRESS_MODE SamplerAddressModelToDX12(SamplerAddressMode addressMode);

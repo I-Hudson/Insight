@@ -13,7 +13,7 @@ namespace Insight
 		{
 			ShaderInputLayout()
 			{ }
-			ShaderInputLayout(int binding, PixelFormat format, int stride, std::string name = "")
+			ShaderInputLayout(int binding, PixelFormat format, int stride, std::string name)
 				: Binding(binding), Format(format), Stride(stride), Name(std::move(name))
 			{ }
 
