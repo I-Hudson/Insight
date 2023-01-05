@@ -47,6 +47,8 @@ namespace Insight
 			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Variable;
 			m_context->CreateSwapchain(swapchainDesc);
 
+			m_context->InitImGui();
+
 			m_renderGraph.Init(m_context);
 
 			m_state = Core::SystemStates::Initialised;

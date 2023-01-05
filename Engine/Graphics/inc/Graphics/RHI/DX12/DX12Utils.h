@@ -77,6 +77,8 @@ namespace Insight
 		D3D12_DESCRIPTOR_HEAP_TYPE DescriptorTypeToDX12(DescriptorType type);
 		D3D12_DESCRIPTOR_RANGE_TYPE DescriptorRangeTypeToDX12(DescriptorType type);
 		D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapTypeToDX12(RHI::DX12::DescriptorHeapTypes type);
+
+		DXGI_SWAP_EFFECT SwapchainPresentModeToDX12(SwapchainPresentModes presentMode);
 	}
 }
 

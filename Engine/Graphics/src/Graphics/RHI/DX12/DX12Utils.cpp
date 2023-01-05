@@ -623,6 +623,20 @@ namespace Insight
             FAIL_ASSERT();
             return D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
         }
+
+        DXGI_SWAP_EFFECT SwapchainPresentModeToDX12(SwapchainPresentModes presentMode)
+        {
+            switch (presentMode)
+            {
+            case Insight::Graphics::SwapchainPresentModes::Immediate: return DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+            case Insight::Graphics::SwapchainPresentModes::VSync:     return DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+            case Insight::Graphics::SwapchainPresentModes::Variable:  return DXGI_SWAP_EFFECT_FLIP_DISCARD;
+            default:
+                break;
+            }            
+            FAIL_ASSERT();
+            return DXGI_SWAP_EFFECT_SEQUENTIAL;
+        }
 	}
 }
 

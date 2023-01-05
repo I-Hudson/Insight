@@ -145,8 +145,6 @@ namespace Insight
 						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048);
 					});
 
-				InitImGui();
-
 				m_uploadQueue.Init();
 
 				WaitForGpu();
@@ -330,11 +328,14 @@ namespace Insight
 						{
 							IS_PROFILE_SCOPE("Present");
 							// Present the frame.
-							if (HRESULT hr = m_swapchain->Present(0, DXGI_PRESENT_ALLOW_TEARING); FAILED(hr))
+							UINT presentSyncInterval = m_swapchainDesc.PresentMode == SwapchainPresentModes::Variable ? 0 : 1; 
+							UINT presentFlags = m_swapchainDesc.PresentMode == SwapchainPresentModes::Variable ? DXGI_PRESENT_ALLOW_TEARING : 0;
+							if (HRESULT hr = m_swapchain->Present(presentSyncInterval, presentFlags); FAILED(hr))
 							{
 								if (hr == 0x0)
 								{
-									m_device->GetDeviceRemovedReason();
+									HRESULT deviceRemovedReason = m_device->GetDeviceRemovedReason();
+									IS_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);
 								}
 							}
 
@@ -413,7 +414,7 @@ namespace Insight
 				swapChainDesc.SampleDesc.Count = 1;
 				swapChainDesc.SampleDesc.Quality = 0;
 				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+				swapChainDesc.SwapEffect = SwapchainPresentModeToDX12(desc.PresentMode);
 				swapChainDesc.Stereo = false;
 				swapChainDesc.Flags = swapChainFlags;
 

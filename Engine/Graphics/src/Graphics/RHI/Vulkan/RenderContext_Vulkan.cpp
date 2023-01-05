@@ -288,8 +288,6 @@ namespace Insight
 						});
 				}
 
-				InitImGui();
-
 				m_submitFrameContexts.Setup();
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext& context)
 					{
@@ -424,7 +422,7 @@ namespace Insight
 
 				// Create renderpass
 				RenderpassDescription renderpassDescription = { };
-				renderpassDescription.AddAttachment(AttachmentDescription::Load(PixelFormat::Unknown, Graphics::ImageLayout::PresentSrc));
+				renderpassDescription.AddAttachment(AttachmentDescription::Load(m_swapchainDesc.Format, Graphics::ImageLayout::PresentSrc));
 				renderpassDescription.Attachments.back().InitalLayout = Graphics::ImageLayout::ColourAttachment;
 				renderpassDescription.AllowDynamicRendering = false;
 				renderpassDescription.SwapchainPass = true;
@@ -699,7 +697,20 @@ namespace Insight
 				formats.resize(surfaceFormatCount);
 				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, formats.data());
 
-				VkFormat surfaceFormat = PixelFormatToVulkan(desc.Format);
+				bool isValidFormat = false;
+				for (auto const& format : formats)
+				{
+					if (format.format == PixelFormatToVulkan(desc.Format))
+					{
+						m_swapchainFormat = PixelFormatToVulkan(desc.Format);
+						isValidFormat = true;
+						break;
+					}
+				}
+				if (!isValidFormat)
+				{
+					m_swapchainFormat = VK_FORMAT_B8G8R8A8_UNORM;
+				}
 
 				VkSwapchainCreateInfoKHR swapchainCreateInfo = { };
 				swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
