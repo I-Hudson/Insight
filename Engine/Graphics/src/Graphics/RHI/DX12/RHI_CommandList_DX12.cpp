@@ -162,6 +162,7 @@ namespace Insight
 				if (resourceBarriers.size() > 0ull)
 				{
 					m_commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), resourceBarriers.data());
+					++RenderStats::Instance().PipelineBarriers;
 				}
 			}
 
@@ -410,6 +411,7 @@ namespace Insight
 				};
 				m_commandList->IASetVertexBuffers(0, 1, views);
 				m_bound_vertex_buffer = buffer;
+				++RenderStats::Instance().VertexBufferBindings;
 			}
 
 			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
@@ -424,6 +426,7 @@ namespace Insight
 				};
 				m_commandList->IASetIndexBuffer(&view);
 				m_bound_index_buffer = buffer;
+				++RenderStats::Instance().IndexBufferBindings;
 			}
 
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
@@ -431,6 +434,7 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				ASSERT(m_commandList);
 				m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
+				++RenderStats::Instance().DrawCalls;
 			}
 
 			void RHI_CommandList_DX12::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
@@ -441,6 +445,8 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("DrawIndexedInstanced");
 						m_commandList->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+						++RenderStats::Instance().DrawIndexedCalls;
+						RenderStats::Instance().DrawIndexedIndicesCount += indexCount;
 					}
 				}
 			}
@@ -514,6 +520,7 @@ namespace Insight
 							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 							m_commandList->SetGraphicsRootConstantBufferView(descriptorRootIdx,
 								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+							++RenderStats::Instance().DescriptorSetBindings;
 							break;
 						}
 						case DescriptorType::Storage_Buffer:
@@ -521,12 +528,14 @@ namespace Insight
 							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
 							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx,
 								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+							++RenderStats::Instance().DescriptorSetBindings;
 							break;
 						}
 						case DescriptorType::Storage_Image:
 						{
 							RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
 							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
+							++RenderStats::Instance().DescriptorSetBindings;
 							break;
 						}
 						default:
@@ -555,6 +564,7 @@ namespace Insight
 								desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
 								desc.SizeInBytes = static_cast<UINT>(binding.RHI_Buffer_View.GetSize());
 								m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+								++RenderStats::Instance().DescriptorSetUpdates;
 							}
 
 							if (binding.Type == DescriptorType::Sampled_Image)
@@ -570,6 +580,7 @@ namespace Insight
 									RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
 									DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
 									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+									++RenderStats::Instance().DescriptorSetUpdates;
 								}
 							}
 
@@ -584,11 +595,13 @@ namespace Insight
 								RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
 								DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
 								m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+								++RenderStats::Instance().DescriptorSetUpdates;
 							}
 						}
 						if (firstHandle.GPUPtr.ptr != 0)
 						{
 							m_commandList->SetGraphicsRootDescriptorTable(set.Set, firstHandle.GPUPtr);
+							++RenderStats::Instance().DescriptorSetBindings;
 						}
 					}
 					++descriptorRootIdx;
