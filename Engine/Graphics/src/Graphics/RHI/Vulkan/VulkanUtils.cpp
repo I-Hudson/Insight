@@ -1,6 +1,7 @@
 #if defined(IS_VULKAN_ENABLED)
 
 #include "Graphics/RHI/Vulkan/VulkanUtils.h"
+#include "Platforms/Platform.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
@@ -1042,6 +1043,20 @@ namespace Insight
             }
             assert(false);
             return AttachmentLoadOp::Clear;
+        }
+
+        VkPresentModeKHR SwapchainPresentModeToVulkan(SwapchainPresentModes presentMode)
+        {
+            switch (presentMode)
+            {
+            case Insight::Graphics::SwapchainPresentModes::Immediate:   return VK_PRESENT_MODE_IMMEDIATE_KHR;
+            case Insight::Graphics::SwapchainPresentModes::VSync:       return VK_PRESENT_MODE_FIFO_KHR;
+            case Insight::Graphics::SwapchainPresentModes::Variable:    return VK_PRESENT_MODE_MAILBOX_KHR;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return VK_PRESENT_MODE_IMMEDIATE_KHR;
         }
     
 #undef COMPARE_AND_SET_BIT

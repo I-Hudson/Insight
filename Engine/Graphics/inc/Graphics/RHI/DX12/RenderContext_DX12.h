@@ -52,6 +52,7 @@ namespace Insight
 				virtual void PreRender(RHI_CommandList* cmdList) override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
+				virtual void CreateSwapchain(SwapchainDesc desc) override;
 				virtual void SetSwaphchainResolution(glm::ivec2 resolution) override;
 				virtual glm::ivec2 GetSwaphchainResolution() const override;
 
@@ -72,7 +73,6 @@ namespace Insight
 
 			private:
 				void FindPhysicalDevice(IDXGIAdapter1** ppAdapter);
-				void CreateSwapchain(u32 width, u32 height);
 				void ResizeSwapchainBuffers();
 
 				void WaitForNextFrame();

@@ -39,6 +39,14 @@ namespace Insight
 			m_context = Graphics::RenderContext::New(graphcisAPI);
 			ASSERT(m_context);
 			ASSERT(m_context->Init());
+
+			Graphics::SwapchainDesc swapchainDesc = {};
+			swapchainDesc.Width = m_window.GetWidth();
+			swapchainDesc.Height = m_window.GetHeight();
+			swapchainDesc.Format = PixelFormat::R8G8B8A8_UNorm;
+			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Variable;
+			m_context->CreateSwapchain(swapchainDesc);
+
 			m_renderGraph.Init(m_context);
 
 			m_state = Core::SystemStates::Initialised;

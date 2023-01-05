@@ -55,6 +55,7 @@ namespace Insight
 		ImageLayout						VkToImageLayout(VkImageLayout layout);
 		AttachmentLoadOp				VkToAttachmentLoadOp(VkAttachmentLoadOp op);
 		
+		VkPresentModeKHR				SwapchainPresentModeToVulkan(SwapchainPresentModes presentMode);
 
 		/*
 		std::string VkErrorToString(VkResult errorCode)

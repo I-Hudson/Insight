@@ -83,6 +83,19 @@ namespace Insight
 			}
 		};
 
+		/// @brief Define values for the swapchain.
+		struct SwapchainDesc
+		{
+			u32 Width;
+			u32 Height;
+
+			PixelFormat Format;
+
+			SwapchainPresentModes PresentMode = SwapchainPresentModes::Variable;
+
+			bool AllowHDR = false;
+		};
+
 		class IS_GRAPHICS RenderContext : public Core::Singleton<RenderContext>
 		{
 		public:
@@ -100,6 +113,7 @@ namespace Insight
 			virtual void PreRender(RHI_CommandList* cmdList) = 0;
 			virtual void PostRender(RHI_CommandList* cmdList) = 0;
 
+			virtual void CreateSwapchain(SwapchainDesc desc) = 0;
 			virtual void SetSwaphchainResolution(glm::ivec2 resolution) = 0;
 			virtual glm::ivec2 GetSwaphchainResolution() const = 0;
 
@@ -158,6 +172,8 @@ namespace Insight
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;
 
 			std::array<u8, static_cast<u64>(RenderOptions::NumOfRenderOptions)> m_renderOptions;
+
+			SwapchainDesc m_swapchainDesc;
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;

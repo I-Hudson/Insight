@@ -516,5 +516,13 @@ namespace Insight
 			Uploading,
 			Completed
 		};
+
+		/// @brief Define all present modes available to the swap chain.
+		enum class SwapchainPresentModes
+		{
+			Immediate,
+			VSync,
+			Variable,
+		};
 	}
 }

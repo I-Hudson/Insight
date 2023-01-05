@@ -251,7 +251,6 @@ namespace Insight
 				VkSurfaceKHR surfaceKHR;
 				VkResult res = glfwCreateWindowSurface(m_instnace, Window::Instance().GetRawWindow(), nullptr, &surfaceKHR);
 				m_surface = VkSurfaceKHR(surfaceKHR);
-				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
 
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineManager.SetRenderContext(this);
@@ -632,10 +631,176 @@ namespace Insight
 				m_resource_tracker.EndFrame();
 			}
 
+			void RenderContext_Vulkan::CreateSwapchain(SwapchainDesc desc)
+			{
+				IS_PROFILE_FUNCTION();
+
+				VkSurfaceCapabilitiesKHR surfaceCapabilites = { };
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_adapter, m_surface, &surfaceCapabilites);
+				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
+
+				VkExtent2D swapchainExtent = { };
+				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+				if (surfaceCapabilites.currentExtent.width == 0xFFFFFFFF
+					&& surfaceCapabilites.currentExtent.height == 0xFFFFFFFF)
+				{
+					// If the surface size is undefined, the size is set to
+					// the size of the images requested.
+					swapchainExtent.width = desc.Width;
+					swapchainExtent.height = desc.Height;
+				}
+				else
+				{
+					// If the surface size is defined, the swap chain size must match
+					swapchainExtent = surfaceCapabilites.currentExtent;
+				}
+				m_swapchainBufferSize = { swapchainExtent.width, swapchainExtent.height };
+
+				// Select a present mode for the swapchain
+
+				u32 presentModeCount = 0;
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, nullptr);
+
+				std::vector<VkPresentModeKHR> presentModes;
+				presentModes.resize(presentModeCount);
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, presentModes.data());
+
+				// Try and find our desired present mode. 
+				VkPresentModeKHR desiredPresentMode = SwapchainPresentModeToVulkan(desc.PresentMode);
+				VkPresentModeKHR presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+				for (size_t i = 0; i < presentModes.size(); ++i)
+				{
+					if (presentModes[i] == desiredPresentMode)
+					{
+						presentMode = desiredPresentMode;
+						break;
+					}
+				}
+				
+
+				VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+				const VkImageUsageFlagBits imageUsageBits[] =
+				{
+					VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+					VK_IMAGE_USAGE_TRANSFER_DST_BIT
+				};
+				for (const auto& flag : imageUsageBits)
+				{
+					if (surfaceCapabilites.supportedUsageFlags & flag)
+					{
+						imageUsage |= flag;
+					}
+				}
+
+				u32 surfaceFormatCount = 0;
+				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, nullptr);
+
+				std::vector<VkSurfaceFormatKHR> formats;
+				formats.resize(surfaceFormatCount);
+				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, formats.data());
+
+				VkFormat surfaceFormat = PixelFormatToVulkan(desc.Format);
+
+				VkSwapchainCreateInfoKHR swapchainCreateInfo = { };
+				swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+				swapchainCreateInfo.surface = m_surface;
+				swapchainCreateInfo.minImageCount = static_cast<u32>(imageCount);
+				swapchainCreateInfo.imageFormat = m_swapchainFormat;
+				swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+				swapchainCreateInfo.imageExtent = swapchainExtent;
+				swapchainCreateInfo.imageArrayLayers = 1ul;
+				swapchainCreateInfo.imageUsage = imageUsage;
+				swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+				swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+				swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+				swapchainCreateInfo.presentMode = presentMode;
+				swapchainCreateInfo.oldSwapchain = m_swapchain;
+
+				VkSwapchainKHR swapchain;
+				ThrowIfFailed(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain));
+
+				if (m_swapchain)
+				{
+					for (RHI_Texture*& tex : m_swapchainImages)
+					{
+						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
+						tex->Release();
+						Renderer::FreeTexture(tex);
+					}
+					m_swapchainImages.clear();
+					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+					m_swapchain = nullptr;
+				}
+
+				u32 swapchainImageCount = 0;
+				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, nullptr);
+
+				std::vector<VkImage> swapchainImages;
+				swapchainImages.resize(swapchainImageCount);
+				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, swapchainImages.data());
+
+				int image_index = 0;
+				for (VkImage& image : swapchainImages)
+				{
+					VkImageSubresourceRange imageSubresourceRange = { };
+					imageSubresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+					imageSubresourceRange.baseMipLevel = 0;
+					imageSubresourceRange.levelCount = 1;
+					imageSubresourceRange.baseArrayLayer = 0;
+					imageSubresourceRange.layerCount = 1;
+
+					VkImageViewCreateInfo viewCreateInfo = { };
+					viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+					viewCreateInfo.image = image;
+					viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+					viewCreateInfo.format = m_swapchainFormat;
+					viewCreateInfo.components = VkComponentMapping();
+					viewCreateInfo.subresourceRange = imageSubresourceRange;
+
+					// We create two views into the same image as this is how the API is designed.
+					// The first view (image_view), is used for all layers.
+					// The second view (single_layer_image_view) is used for a single layer. In this case the first layer.
+					VkImageView image_view;
+					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &image_view));
+					VkImageView single_layer_image_view;
+					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &single_layer_image_view));
+
+					RHI_Texture* tex = Renderer::CreateTexture();
+					tex->SetName("Swapchain_Image: " + std::to_string(image_index++));
+
+					RHI_TextureInfo texCreateInfo = { };
+					texCreateInfo.TextureType = TextureType::Tex2D;
+					texCreateInfo.Width = swapchainExtent.width;
+					texCreateInfo.Height = swapchainExtent.height;
+					texCreateInfo.Depth = 1;
+					texCreateInfo.Format = VkFormatToPixelFormat[(int)m_swapchainFormat];
+					texCreateInfo.ImageUsage = 0;
+
+					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
+					texVulkan->m_context = this;
+					texVulkan->m_image_view = image_view;
+					texVulkan->m_single_layer_image_views.push_back(single_layer_image_view);
+					texVulkan->m_image = image;
+					for (size_t i = 0; i < texCreateInfo.Mip_Count; ++i)
+					{
+						texVulkan->m_infos.push_back(texCreateInfo);
+					}
+
+					m_swapchainImages.push_back(tex);
+				}
+				m_swapchain = swapchain;
+				m_swapchainDesc = desc;
+			}
+
 			void RenderContext_Vulkan::SetSwaphchainResolution(glm::ivec2 resolution)
 			{
 				WaitForGpu();
-				CreateSwapchain(resolution.x, resolution.y);
+
+				SwapchainDesc desc = m_swapchainDesc;
+				desc.Width = resolution.x;
+				desc.Height = resolution.y;
+				CreateSwapchain(desc);
+
 				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
 			}
 
@@ -966,205 +1131,6 @@ namespace Insight
 						}
 					}
 				}
-			}
-
-			void RenderContext_Vulkan::CreateSwapchain(u32 width, u32 height)
-			{
-				IS_PROFILE_FUNCTION();
-
-				VkSurfaceCapabilitiesKHR surfaceCapabilites = { };
-				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_adapter, m_surface, &surfaceCapabilites);
-				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
-
-				VkExtent2D swapchainExtent = { };
-				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-				if (surfaceCapabilites.currentExtent.width == 0xFFFFFFFF
-					&& surfaceCapabilites.currentExtent.height == 0xFFFFFFFF)
-				{
-					// If the surface size is undefined, the size is set to
-					// the size of the images requested.
-					swapchainExtent.width = width;
-					swapchainExtent.height = height;
-				}
-				else
-				{
-					// If the surface size is defined, the swap chain size must match
-					swapchainExtent = surfaceCapabilites.currentExtent;
-				}
-				m_swapchainBufferSize = { swapchainExtent.width, swapchainExtent.height };
-
-				// Select a present mode for the swapchain
-
-				u32 presentModeCount = 0;
-				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, nullptr);
-
-				std::vector<VkPresentModeKHR> presentModes;
-				presentModes.resize(presentModeCount);
-				vkGetPhysicalDeviceSurfacePresentModesKHR(m_adapter, m_surface, &presentModeCount, presentModes.data());
-
-				/// The VK_PRESENT_MODE_FIFO_KHR mode must always be present as per spec
-				/// This mode waits for the vertical blank ("v-sync")
-				VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
-				if (true)
-				{
-					for (size_t i = 0; i < presentModes.size(); ++i)
-					{
-						if (presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-						{
-							presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-							break;
-						}
-						if (presentMode != VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR && presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR)
-						{
-							presentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-						}
-					}
-				}
-
-				VkImageUsageFlags imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-				const VkImageUsageFlagBits imageUsageBits[] =
-				{
-					VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-					VK_IMAGE_USAGE_TRANSFER_DST_BIT
-				};
-				for (const auto& flag : imageUsageBits)
-				{
-					if (surfaceCapabilites.supportedUsageFlags & flag)
-					{
-						imageUsage |= flag;
-					}
-				}
-
-				u32 surfaceFormatCount = 0;
-				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, nullptr);
-
-				std::vector<VkSurfaceFormatKHR> formats;
-				formats.resize(surfaceFormatCount);
-				vkGetPhysicalDeviceSurfaceFormatsKHR(m_adapter, m_surface, &surfaceFormatCount, formats.data());
-
-				VkFormat surfaceFormat;
-				VkColorSpaceKHR surfaceColourSpace;
-				/// If the surface format list only includes one entry with VK_FORMAT_UNDEFINED,
-				/// there is no preferred format, so we assume VK_FORMAT_B8G8R8A8_UNORM
-				if ((formats.size() == 1) && (formats[0].format == VK_FORMAT_UNDEFINED))
-				{
-					surfaceFormat = VK_FORMAT_R8G8B8A8_UNORM;
-					surfaceColourSpace = formats[0].colorSpace;
-				}
-				else
-				{
-					/// iterate over the list of available surface format and
-					/// check for the presence of VK_FORMAT_B8G8R8A8_UNORM
-					bool found_B8G8R8A8_UNORM = false;
-					for (auto&& format : formats)
-					{
-						if (format.format == VK_FORMAT_B8G8R8A8_UNORM)/// VK_FORMAT_B8G8R8A8_UNORM)
-						{
-							surfaceFormat = format.format;
-							surfaceColourSpace = format.colorSpace;
-							found_B8G8R8A8_UNORM = true;
-							break;
-						}
-					}
-
-					/// in case VK_FORMAT_B8G8R8A8_UNORM is not available
-					/// select the first available color format
-					if (!found_B8G8R8A8_UNORM)
-					{
-						surfaceFormat = formats[0].format;
-						surfaceColourSpace = formats[0].colorSpace;
-					}
-				}
-				m_swapchainFormat = surfaceFormat;
-
-				VkSwapchainCreateInfoKHR swapchainCreateInfo = { };
-				swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-				swapchainCreateInfo.surface = m_surface;
-				swapchainCreateInfo.minImageCount = static_cast<u32>(imageCount);
-				swapchainCreateInfo.imageFormat = m_swapchainFormat;
-				swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-				swapchainCreateInfo.imageExtent = swapchainExtent;
-				swapchainCreateInfo.imageArrayLayers = 1ul;
-				swapchainCreateInfo.imageUsage = imageUsage;
-				swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-				swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-				swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-				swapchainCreateInfo.presentMode = presentMode;
-				swapchainCreateInfo.oldSwapchain = m_swapchain;
-
-				VkSwapchainKHR swapchain;
-				ThrowIfFailed(vkCreateSwapchainKHR(m_device, &swapchainCreateInfo, nullptr, &swapchain));
-
-				if (m_swapchain)
-				{
-					for (RHI_Texture*& tex : m_swapchainImages)
-					{
-						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
-						tex->Release();
-						Renderer::FreeTexture(tex);
-					}
-					m_swapchainImages.clear();
-					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
-					m_swapchain = nullptr;
-				}
-
-				u32 swapchainImageCount = 0;
-				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, nullptr);
-
-				std::vector<VkImage> swapchainImages;
-				swapchainImages.resize(swapchainImageCount);
-				vkGetSwapchainImagesKHR(m_device, swapchain, &swapchainImageCount, swapchainImages.data());
-
-				int image_index = 0;
-				for (VkImage& image : swapchainImages)
-				{
-					VkImageSubresourceRange imageSubresourceRange = { };
-					imageSubresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
-					imageSubresourceRange.baseMipLevel = 0;
-					imageSubresourceRange.levelCount = 1;
-					imageSubresourceRange.baseArrayLayer = 0;
-					imageSubresourceRange.layerCount = 1;
-
-					VkImageViewCreateInfo viewCreateInfo = { };
-					viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-					viewCreateInfo.image = image;
-					viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-					viewCreateInfo.format = m_swapchainFormat;
-					viewCreateInfo.components = VkComponentMapping();
-					viewCreateInfo.subresourceRange = imageSubresourceRange;
-
-					// We create two views into the same image as this is how the API is designed.
-					// The first view (image_view), is used for all layers.
-					// The second view (single_layer_image_view) is used for a single layer. In this case the first layer.
-					VkImageView image_view;
-					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &image_view));
-					VkImageView single_layer_image_view;
-					ThrowIfFailed(vkCreateImageView(m_device, &viewCreateInfo, nullptr, &single_layer_image_view));
-
-					RHI_Texture* tex = Renderer::CreateTexture();
-					tex->SetName("Swapchain_Image: " + std::to_string(image_index++));
-
-					RHI_TextureInfo texCreateInfo = { };
-					texCreateInfo.TextureType = TextureType::Tex2D;
-					texCreateInfo.Width = swapchainExtent.width;
-					texCreateInfo.Height = swapchainExtent.height;
-					texCreateInfo.Depth = 1;
-					texCreateInfo.Format = VkFormatToPixelFormat[(int)m_swapchainFormat];
-					texCreateInfo.ImageUsage = 0;
-
-					RHI_Texture_Vulkan* texVulkan = static_cast<RHI_Texture_Vulkan*>(tex);
-					texVulkan->m_context = this;
-					texVulkan->m_image_view = image_view;
-					texVulkan->m_single_layer_image_views.push_back(single_layer_image_view);
-					texVulkan->m_image = image;
-					for (size_t i = 0; i < texCreateInfo.Mip_Count; ++i)
-					{
-						texVulkan->m_infos.push_back(texCreateInfo);
-					}
-
-					m_swapchainImages.push_back(tex);
-				}
-				m_swapchain = swapchain;
 			}
 
 			void RenderContext_Vulkan::SetDeviceExtensions()

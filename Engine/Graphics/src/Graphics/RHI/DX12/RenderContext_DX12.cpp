@@ -120,8 +120,6 @@ namespace Insight
 					m_swapchainImages[i].ColourHandle = m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).GetNewHandle();
 				}
 
-				CreateSwapchain(Window::Instance().GetWidth(), Window::Instance().GetHeight());
-
 				m_pipelineLayoutManager.SetRenderContext(this);
 				m_pipelineManager.SetRenderContext(this);
 
@@ -134,17 +132,17 @@ namespace Insight
 				m_submitFrameContexts.ForEach([this](FrameSubmitContext_DX12& context)
 					{
 						ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&context.SubmitFence)));
-				context.SubmitFenceValue = 0;
-				context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-				if (context.SubmitFence == nullptr)
-				{
-					ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-				}
+						context.SubmitFenceValue = 0;
+						context.SubmitFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+						if (context.SubmitFence == nullptr)
+						{
+							ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
+						}
 
-				context.DescriptorHeapGPURes.SetRenderContext(this);
-				context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000);
-				context.DescriptorHeapSampler.SetRenderContext(this);
-				context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048);
+						context.DescriptorHeapGPURes.SetRenderContext(this);
+						context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000);
+						context.DescriptorHeapSampler.SetRenderContext(this);
+						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048);
 					});
 
 				InitImGui();
@@ -359,10 +357,123 @@ namespace Insight
 				m_resource_tracker.EndFrame();
 			}
 
+			void RenderContext_DX12::CreateSwapchain(SwapchainDesc desc)
+			{
+				if (m_swapchain)
+				{
+					for (auto& image : m_swapchainImages)
+					{
+						image.Colour->m_resource.Reset();
+						image.Colour->m_resource = nullptr;
+					}
+					m_swapchain.Reset();
+					m_swapchain = nullptr;
+				}
+
+				IDXGIFactory4* factory = m_factory.Get();
+				ID3D12Device* device = m_device.Get();
+
+				// Swap chain can not be 0.
+				desc.Width = std::max(1u, desc.Width);
+				desc.Height = std::max(1u, desc.Height);
+				m_swapchainBufferSize = { desc.Width, desc.Height };
+
+				BOOL allowTearing = FALSE;
+				bool tearingSupported = FALSE;
+
+				ComPtr<IDXGIFactory5> dxgiFactory5;
+				HRESULT hr = m_factory.As(&dxgiFactory5);
+				if (SUCCEEDED(hr))
+				{
+					hr = dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
+				}
+
+				if (FAILED(hr) || !allowTearing)
+				{
+					tearingSupported = false;
+					IS_CORE_WARN("WARNING: Variable refresh rate displays not supported\n");
+				}
+				else
+				{
+					tearingSupported = true;
+				}
+
+				UINT swapChainFlags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+				if (desc.PresentMode == SwapchainPresentModes::Variable 
+					&& tearingSupported)
+				{
+					swapChainFlags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+				}
+
+				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+				swapChainDesc.BufferCount = RenderGraph::s_MaxFarmeCount;
+				swapChainDesc.Width = static_cast<UINT>(m_swapchainBufferSize.x);
+				swapChainDesc.Height = static_cast<UINT>(m_swapchainBufferSize.y);
+				swapChainDesc.Format = PixelFormatToDX12(desc.Format);
+				swapChainDesc.SampleDesc.Count = 1;
+				swapChainDesc.SampleDesc.Quality = 0;
+				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+				swapChainDesc.Stereo = false;
+				swapChainDesc.Flags = swapChainFlags;
+
+				GLFWwindow* window = Window::Instance().GetRawWindow();
+				HWND hwmd = glfwGetWin32Window(window);
+
+				ComPtr<IDXGISwapChain1> swapchain;
+				ThrowIfFailed(factory->CreateSwapChainForHwnd(
+					m_queues[GPUQueue_Graphics].Get(),
+					hwmd,
+					&swapChainDesc,
+					nullptr,
+					nullptr,
+					&swapchain));
+
+				swapchain.As(&m_swapchain);
+
+				//m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
+				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
+				{
+					SwapchainImage& swapchainImage = m_swapchainImages[i];
+
+					if (!swapchainImage.Colour)
+					{
+						RHI_Texture* tex = Renderer::CreateTexture();
+						tex->SetName("Swapchain_Image: " + std::to_string(i));
+						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
+						textureDX12->m_context = this;
+						swapchainImage.Colour = textureDX12;
+						textureDX12->m_allLayerRenderTargetHandle = swapchainImage.ColourHandle;
+						textureDX12->m_singleLayerRenderTargetHandle.push_back(swapchainImage.ColourHandle);
+
+						RHI_TextureInfo textureInfo = {};
+						textureInfo.TextureType = TextureType::Tex2D;
+						textureInfo.Width = swapChainDesc.Width;
+						textureInfo.Height = swapChainDesc.Height;
+						textureInfo.Depth = 1;
+						textureInfo.Format = desc.Format;
+						textureInfo.ImageUsage = 0;
+						textureInfo.Layout = ImageLayout::PresentSrc;
+						textureInfo.InitalStatus = DeviceUploadStatus::Completed;
+						textureDX12->m_infos.push_back(textureInfo);
+					}
+
+					/// Get the back buffer from the swapchain.
+					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
+					device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
+				}
+				m_swapchainDesc = desc;
+			}
+
 			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
 			{
 				WaitForGpu();
-				CreateSwapchain(resolution.x, resolution.y);
+
+				SwapchainDesc desc = m_swapchainDesc;
+				desc.Width = resolution.x;
+				desc.Height = resolution.y;
+
+				CreateSwapchain(desc);
 				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
 			}
 
@@ -472,109 +583,6 @@ namespace Insight
 				}
 
 				*ppAdapter = adapter.Detach();
-			}
-
-			void  RenderContext_DX12::CreateSwapchain(u32 width, u32 height)
-			{
-				if (m_swapchain)
-				{
-					for (auto& image : m_swapchainImages)
-					{
-						image.Colour->m_resource.Reset();
-						image.Colour->m_resource = nullptr;
-					}
-					m_swapchain.Reset();
-					m_swapchain = nullptr;
-				}
-
-				IDXGIFactory4* factory = m_factory.Get();
-				ID3D12Device* device = m_device.Get();
-
-				m_swapchainBufferSize = { width, height };
-
-				BOOL allowTearing = FALSE;
-				bool tearingSupported = FALSE;
-
-				ComPtr<IDXGIFactory5> dxgiFactory5;
-				HRESULT hr = m_factory.As(&dxgiFactory5);
-				if (SUCCEEDED(hr))
-				{
-					hr = dxgiFactory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allowTearing, sizeof(allowTearing));
-				}
-
-				if (FAILED(hr) || !allowTearing)
-				{
-					tearingSupported = false;
-					IS_CORE_WARN("WARNING: Variable refresh rate displays not supported\n");
-				}
-				else
-				{
-					tearingSupported = true;
-				}
-
-				UINT swapChainFlags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-				if (tearingSupported)
-				{
-					swapChainFlags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-				}
-
-				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-				swapChainDesc.BufferCount = RenderGraph::s_MaxFarmeCount;
-				swapChainDesc.Width = static_cast<UINT>(m_swapchainBufferSize.x);
-				swapChainDesc.Height = static_cast<UINT>(m_swapchainBufferSize.y);
-				swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				swapChainDesc.SampleDesc.Count = 1;
-				swapChainDesc.SampleDesc.Quality = 0;
-				swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-				swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-				swapChainDesc.Stereo = false;
-				swapChainDesc.Flags = swapChainFlags;
-
-				GLFWwindow* window = Window::Instance().GetRawWindow();
-				HWND hwmd = glfwGetWin32Window(window);
-
-				ComPtr<IDXGISwapChain1> swapchain;
-				ThrowIfFailed(factory->CreateSwapChainForHwnd(
-					m_queues[GPUQueue_Graphics].Get(),
-					hwmd,
-					&swapChainDesc,
-					nullptr,
-					nullptr,
-					&swapchain));
-
-				swapchain.As(&m_swapchain);
-
-				//m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
-				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
-				{
-					SwapchainImage& swapchainImage = m_swapchainImages[i];
-
-					if (!swapchainImage.Colour)
-					{
-						RHI_Texture* tex = Renderer::CreateTexture();
-						tex->SetName("Swapchain_Image: " + std::to_string(i));
-						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
-						textureDX12->m_context = this;
-						swapchainImage.Colour = textureDX12;
-						textureDX12->m_allLayerRenderTargetHandle = swapchainImage.ColourHandle;
-						textureDX12->m_singleLayerRenderTargetHandle.push_back(swapchainImage.ColourHandle);
-
-						RHI_TextureInfo textureInfo = {};
-						textureInfo.TextureType = TextureType::Tex2D;
-						textureInfo.Width = swapChainDesc.Width;
-						textureInfo.Height = swapChainDesc.Height;
-						textureInfo.Depth = 1;
-						textureInfo.Format = PixelFormat::R8G8B8A8_UNorm;
-						textureInfo.ImageUsage = 0;
-						textureInfo.Layout = ImageLayout::PresentSrc;
-						textureInfo.InitalStatus = DeviceUploadStatus::Completed;
-						textureDX12->m_infos.push_back(textureInfo);
-					}
-
-					/// Get the back buffer from the swapchain.
-					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
-					device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
-				}
 			}
 
 			void RenderContext_DX12::ResizeSwapchainBuffers()

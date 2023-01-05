@@ -52,6 +52,7 @@ namespace Insight
 				virtual void PreRender(RHI_CommandList* cmdList) override;
 				virtual void PostRender(RHI_CommandList* cmdList) override;
 
+				virtual void CreateSwapchain(SwapchainDesc desc) override;
 				virtual void SetSwaphchainResolution(glm::ivec2 resolution) override;
 				virtual glm::ivec2 GetSwaphchainResolution() const override;
 
@@ -81,7 +82,6 @@ namespace Insight
 				VkPhysicalDevice FindAdapter();
 				std::vector<VkDeviceQueueCreateInfo> GetDeviceQueueCreateInfos(std::vector<QueueInfo>& queueInfo);
 				void GetDeviceExtensionAndLayers(std::set<std::string>& extensions, std::set<std::string>& layers, bool includeAll = false);
-				void CreateSwapchain(u32 width, u32 height);
 
 				void SetDeviceExtensions();
 				bool CheckInstanceExtension(const char* extension);
