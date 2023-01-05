@@ -100,6 +100,10 @@ namespace Insight
 			void DisableExtension(DeviceExtension extension);
 			GraphicsAPI GetGraphicsAPI() const { return m_graphicsAPI; }
 
+			bool IsRenderOptionsEnabled(RenderOptions option) const;
+			void EnabledRenderOption(RenderOptions option);
+			void DisableRenderOption(RenderOptions option);
+
 			CommandListManager& GetCommandListManager()               { return m_commandListManager.Get(); }
 			RHI_DescriptorLayoutManager& GetDescriptorLayoutManager() { return m_descriptorLayoutManager; }
 			RHI_ShaderManager& GetShaderManager()                     { return m_shaderManager; }
@@ -136,8 +140,10 @@ namespace Insight
 			std::mutex m_lock;
 			GraphicsAPI m_graphicsAPI = GraphicsAPI::None;
 
-			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_deviceExtensions;
-			std::array<u8, (size_t)DeviceExtension::DeviceExtensionCount> m_enabledDeviceExtensions;
+			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
+			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;
+
+			std::array<u8, static_cast<u64>(RenderOptions::NumOfRenderOptions)> m_renderOptions;
 
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 			RHI_ResourceManager<RHI_Texture> m_textures;

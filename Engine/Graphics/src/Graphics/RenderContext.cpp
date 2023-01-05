@@ -80,6 +80,21 @@ namespace Insight
 			m_enabledDeviceExtensions[(u32)extension] = 0;
 		}
 
+		bool RenderContext::IsRenderOptionsEnabled(RenderOptions option) const
+		{
+			return m_renderOptions.at(static_cast<u64>(option));
+		}
+
+		void RenderContext::EnabledRenderOption(RenderOptions option)
+		{
+			m_renderOptions.at(static_cast<u64>(option)) = true;
+		}
+
+		void RenderContext::DisableRenderOption(RenderOptions option)
+		{
+			m_renderOptions.at(static_cast<u64>(option)) = false;
+		}
+
 		void RenderContext::ImGuiBeginFrame()
 		{
 			if (m_font_texture == nullptr)

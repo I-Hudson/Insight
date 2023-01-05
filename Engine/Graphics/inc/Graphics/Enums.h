@@ -502,6 +502,13 @@ namespace Insight
 			DeviceExtensionCount
 		};
 
+		enum class RenderOptions
+		{
+			ReverseZ,
+
+			NumOfRenderOptions
+		};
+
 		enum class DeviceUploadStatus
 		{
 			Unknown,

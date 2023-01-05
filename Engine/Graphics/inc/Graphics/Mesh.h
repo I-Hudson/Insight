@@ -25,7 +25,7 @@ namespace Insight
 		class Mesh;
 		class RHI_CommandList;
 
-		struct IS_GRAPHICS Vertex
+		struct alignas(16) IS_GRAPHICS Vertex
 		{
 			Vertex()
 			{ }

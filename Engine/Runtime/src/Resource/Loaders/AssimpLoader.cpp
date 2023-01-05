@@ -285,6 +285,7 @@ namespace Insight
 				vector.x = mesh->mVertices[i].x;
 				vector.y = mesh->mVertices[i].y;
 				vector.z = mesh->mVertices[i].z;
+				vector.w = 1.0f;
 				vertex.Position = vector;
 
 				/// normals
