@@ -32,6 +32,7 @@ namespace Insight
 		void MemoryTracker::Destroy()
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef IS_MEMORY_TRACKING
 			std::lock_guard lock(m_lock);
 
 			if (m_allocations.size() > 0)
@@ -62,11 +63,13 @@ namespace Insight
 				SymCleanup(GetCurrentProcess());
 #endif
 			}
+#endif // IS_MEMORY_TRACKING
 		}
 
 		void MemoryTracker::Track(void* ptr, MemoryTrackAllocationType type)
 		{
 			IS_PROFILE_FUNCTION();
+#ifdef IS_MEMORY_TRACKING
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
@@ -74,11 +77,14 @@ namespace Insight
 			{
 				m_allocations[ptr] = MemoryTrackedAlloc(ptr, type, GetCallStack());
 			}
+#endif // IS_MEMORY_TRACKING
 		}
 
 		void MemoryTracker::UnTrack(void* ptr)
 		{
 			IS_PROFILE_FUNCTION();
+
+#ifdef IS_MEMORY_TRACKING
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
@@ -86,6 +92,7 @@ namespace Insight
 			{
 				m_allocations.erase(itr);
 			}
+#endif
 		}
 
 #define MEMORY_TRACK_CALLSTACK
@@ -95,6 +102,7 @@ namespace Insight
 			///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
 
+#ifdef IS_MEMORY_TRACKING
 			///for (size_t i = 0; i < c_CallStackCount; ++i)
 			///{
 			///	if (i < callStackVector.size())
@@ -161,7 +169,7 @@ namespace Insight
 				free(symbol);
 			}
 #endif
-
+#endif // IS_MEMORY_TRACKING
 			return callStack;
 		}
 	}

@@ -53,9 +53,11 @@ namespace Insight
 			std::array < std::string, c_CallStackCount> GetCallStack();
 
 		private:
+#ifdef IS_MEMORY_TRACKING
 			std::unordered_map<void*, MemoryTrackedAlloc> m_allocations;
 			bool m_symInitialize = false;
 			std::mutex m_lock;
+#endif // IS_MEMORY_TRACKING
 		};
 	}
 }

@@ -8,6 +8,16 @@
 
 #include "Resource/ResourceManager.h"
 #include "Resource/Texture2D.h"
+#include "Resource/Material.h"
+
+#include "World/World.h"
+#include "World/WorldSystem.h"
+
+#include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/TransformComponent.h"
+#include "ECS/Components/CameraComponent.h"
+
+#include "Renderpass.h"
 
 #include "Core/Profiler.h"
 
@@ -19,13 +29,6 @@ namespace Insight
         Graphics::RHI_Buffer* IndexBuffer = nullptr;
         TObjectPtr<Texture2D> Texture = nullptr;
         Graphics::RHI_Sampler* Sampler = nullptr;
-
-        struct Vertex
-        {
-            glm::vec4 Position;
-            glm::vec4 Colour;
-            glm::vec4 UV;
-        };
 
         struct alignas(16) UBO
         {
@@ -46,19 +49,20 @@ namespace Insight
 
             if (!VertexBuffer)
             {
-                Vertex vertices[] =
+                const float size = 2.5f;
+                Graphics::Vertex vertices[] =
                 {
-                    Vertex { { 0.0f,  0.0f,  0.25f, 1.0f}, { 1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f} },
-                    Vertex { { 0.0f,  0.25f, 0.25f, 1.0f}, { 0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 0.0f} },
-                    Vertex { { 0.25f, 0.25f, 0.25f, 1.0f}, { 0.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 0.0f} },
-                    Vertex { { 0.25f, 0.0f,  0.25f, 1.0f}, { 1.0f, 1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 0.0f} },
+                    Graphics::Vertex(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f)),
+                    Graphics::Vertex(glm::vec4(0.0f, size, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f)),
+                    Graphics::Vertex(glm::vec4(size, size, 0.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec4(0.0f, 0.0f, 1.0f, 1.0f), glm::vec2(1.0f, 1.0f)),
+                    Graphics::Vertex(glm::vec4(size, 0.0f, 0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec2(1.0f, 0.0f)),
                 };
                 for (size_t i = 0; i < ARRAY_COUNT(vertices); ++i)
                 {
                     vertices[i].UV.y = 1.0f - vertices[i].UV.y;
                 }
 
-                VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Vertex));
+                VertexBuffer = Renderer::CreateVertexBuffer(sizeof(vertices), sizeof(Graphics::Vertex));
                 VertexBuffer->Upload(&vertices, sizeof(vertices));
                 VertexBuffer->SetName("TestVertexBuffer");
             }
@@ -91,13 +95,62 @@ namespace Insight
                 Sampler = RenderContext::Instance().GetSamplerManager().GetOrCreateSampler(desc);
             }
 
+            std::vector<Ptr<ECS::Entity>> entitiesToRender;
+            TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
+            if (world)
+            {
+                std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
+                for (Ptr<ECS::Entity> entity : entities)
+                {
+                    ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
+                    Runtime::Material* material = meshComponent->GetMaterial();
+                    if (material)
+                    {
+                    }
+                        entitiesToRender.push_back(entity);
+                }
+            }
+
+            auto editorWorld = Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld");
+            auto editorCamera = editorWorld->GetEntityByName("EditorCamera");
+            auto cameraComponent = static_cast<ECS::CameraComponent*>(editorCamera->GetComponentByName(ECS::CameraComponent::Type_Name));
+
             struct PassData
-            { };
+            { 
+                BufferFrame BFrame;
+                std::vector<Ptr<ECS::Entity>> EntitiesToRender;
+            };
+
+            BufferFrame bFrame = {};
+            bFrame.Proj_View = cameraComponent->GetProjectionViewMatrix();
+            bFrame.Projection = cameraComponent->GetProjectionMatrix();
+            bFrame.View = cameraComponent->GetViewMatrix();
+
+            bFrame.View_Inverted = cameraComponent->GetInvertedViewMatrix();
+            bFrame.Projection_View_Inverted = cameraComponent->GetInvertedProjectionViewMatrix();
+
+            bFrame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+            bFrame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+
+            PassData passData
+            {
+                std::move(bFrame),
+                std::move(entitiesToRender)
+            };
+
             RenderGraph::Instance().AddPass<PassData>("TestPass",
                 [&](PassData& data, RenderGraphBuilder& builder)
                 {
+                    RHI_TextureInfo textureCreateInfo = RHI_TextureInfo::Tex2D(
+                        builder.GetRenderResolution().x
+                        , builder.GetRenderResolution().y
+                        , PixelFormat::D32_Float
+                        , ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled);
+                    RGTextureHandle depthTexture = builder.CreateTexture("DepthStencil", textureCreateInfo);
+
                     builder.WriteTexture(-1);
-            
+                    builder.WriteDepthStencil(depthTexture);
+
                     ShaderDesc shaders = {};
                     shaders.VertexFilePath = "./Resources/Shaders/hlsl/TestPassDX12.hlsl";
                     shaders.PixelFilePath = "./Resources/Shaders/hlsl/TestPassDX12.hlsl";
@@ -106,8 +159,8 @@ namespace Insight
                     PipelineStateObject pso = { };
                     pso.Name = "TestPass_PSO";
                     pso.ShaderDescription = shaders;
-                    pso.DepthWrite = false;
-                    pso.DepthTest = false;
+                    pso.DepthWrite = true;
+                    pso.DepthTest = true;
                     pso.Swapchain = true;
                     builder.SetPipeline(pso);
 
@@ -115,7 +168,7 @@ namespace Insight
 
                     RenderpassDescription renderPassDescriptor = {};
                     renderPassDescriptor.AddAttachment(AttachmentDescription::Default(PixelFormat::Unknown, ImageLayout::ColourAttachment));
-                    renderPassDescriptor.Attachments.at(0).ClearColour = { 0.0f, 0.0f, 0.25f, 1.0f };
+                    renderPassDescriptor.Attachments.at(0).ClearColour = { 0.14f, 0.38f, 0.78f, 1.0f };
                     builder.SetRenderpass(renderPassDescriptor);
 
                     builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
@@ -138,41 +191,31 @@ namespace Insight
                     cmdList->SetVertexBuffer(VertexBuffer);
                     cmdList->SetIndexBuffer(IndexBuffer, IndexType::Uint32);
 
-                    glm::vec4 const bf_Colour = glm::vec4(255.0f / 255, 0.0f, 217.0f / 255.0f, 1.0f);
-                    cmdList->SetUniform(1, 0, bf_Colour);
+                    cmdList->SetUniform(0, 0, data.BFrame);
 
-                    UBO uniform
-                    {
-                        glm::vec4(0, 0, 0, 0),
-                        glm::vec4(1, 1, 1, 1),
-                        0
-                    };
-                    uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_Space) ? 1 : uniform.Override;
-                    uniform.Override = Input::InputSystem::Instance().GetKeyboardMouseDevice()->WasHeld(Input::KeyboardButtons::Key_LShift) ? 2 : uniform.Override;
-
-                    cmdList->SetTexture(0, 0, Texture->GetRHITexture());
-                    cmdList->SetSampler(2, 0, Sampler);
-
-                    cmdList->SetUniform(0, 0, uniform);
+                    cmdList->SetUniform(1, 0, glm::mat4(1.0f));
                     cmdList->DrawIndexed(6, 1, 0, 0, 0);
 
-                    uniform.Transform = glm::vec4(-0.75f, 0, 0, 0);
-                    uniform.OverrideColour = glm::vec4(1.0f, 0.5f, 0.16f, 1);
-                    cmdList->SetUniform(0, 0, uniform);
-                    cmdList->DrawIndexed(6, 1, 0, 0, 0);
-
-                    for (size_t i = 0; i < 2000; i++)
+                    for (const Ptr<ECS::Entity>& e : data.EntitiesToRender)
                     {
-                        IS_PROFILE_SCOPE("Single complete draw");
+                        ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+                        glm::mat4 transform = transform_component->GetTransform();
 
-                        uniform.Transform = glm::vec4(0.75f, 0, 0, 0);
-                        uniform.OverrideColour = glm::vec4(0.5f, 0.23f, 0.85f, 1);
-                        cmdList->SetUniform(0, 0, uniform);
-                        cmdList->DrawIndexed(6, 1, 0, 0, 0);
+                        ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+                        if (!mesh_component
+                            || !mesh_component->GetMesh())
+                        {
+                            continue;
+                        }
+                        Runtime::Mesh* mesh = mesh_component->GetMesh();
+
+                        cmdList->SetUniform(1, 0, transform);
+
+                        mesh->Draw(cmdList);
                     }
 
                     cmdList->EndRenderpass();
-                });
+                }, std::move(passData));
         }
     }
 }

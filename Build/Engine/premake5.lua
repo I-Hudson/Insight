@@ -105,11 +105,13 @@ workspace "Insight"
     defines
     {
         "_CRT_SECURE_NO_WARNINGS",
-        "IS_PLATFORM_X64",
-        "RENDER_GRAPH_ENABLED",
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+
+        "IS_PLATFORM_X64",
+        "IS_MEMORY_TRACKING",
+        "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
     }
 
