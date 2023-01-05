@@ -81,9 +81,16 @@ namespace Insight
 
 			void RHI_Shader_DX12::CreateVertexInputLayout(const ShaderDesc& desc)
 			{
-				ShaderCompiler compiler;
-				compiler.Compile(ShaderStage_Vertex, desc.VertexFilePath, ShaderCompilerLanguage::Hlsl);
-				m_shaderInputLayout = compiler.GetInputLayout();
+				if (!desc.InputLayout.empty())
+				{
+					m_shaderInputLayout = desc.InputLayout;
+				}
+				else
+				{
+					ShaderCompiler compiler;
+					compiler.Compile(ShaderStage_Vertex, desc.VertexFilePath, ShaderCompilerLanguage::Hlsl);
+					m_shaderInputLayout = compiler.GetInputLayout();
+				}
 
 				m_inputElements = {};
 				int stride = 0;
@@ -91,7 +98,9 @@ namespace Insight
 				{
 					ShaderInputLayout& inputLayout = m_shaderInputLayout.at(i);
 					std::string semanticIndex;
-					while (inputLayout.Name.back() >= '0' && inputLayout.Name.back() <= '9')
+					while (inputLayout.Name.size() > 0 
+						&& inputLayout.Name.back() >= '0' 
+						&& inputLayout.Name.back() <= '9')
 					{
 						semanticIndex += inputLayout.Name.back();
 						inputLayout.Name.pop_back();

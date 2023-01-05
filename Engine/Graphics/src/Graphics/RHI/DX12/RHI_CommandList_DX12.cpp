@@ -126,6 +126,7 @@ namespace Insight
 								textureDX12->GetResource(),
 								ImageLayoutToDX12ResouceState(imageBarrier.OldLayout),
 								ImageLayoutToDX12ResouceState(imageBarrier.NewLayout)));
+						textureDX12->SetLayout(imageBarrier.NewLayout);
 					}
 				}
 
@@ -176,7 +177,7 @@ namespace Insight
 			{
 				if (m_commandList)
 				{
-					m_commandList->ClearDepthStencilView(DepthStencilView, ClearFlags, Depth, Stencil, NumRects, rects);
+					m_commandList->ClearDepthStencilView(DepthStencilView, ClearFlags, Depth, static_cast<UINT8>(Stencil), NumRects, rects);
 				}
 			}
 
@@ -235,24 +236,32 @@ namespace Insight
 				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 
-				std::vector<D3D12_RESOURCE_BARRIER> barriers =
+				std::vector<D3D12_RESOURCE_BARRIER> barriers = {};
+				if (dstDX12->GetResourceState() != D3D12_RESOURCE_STATE_COPY_DEST)
 				{
-					CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_DEST),
-					CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_SOURCE)
-				};
-				dstDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_DEST);
-				srcDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_SOURCE);
+					barriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_DEST));
+					dstDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_DEST);
+				}
+				if (srcDX12->GetResourceState() != D3D12_RESOURCE_STATE_COPY_SOURCE)
+				{
+					barriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), D3D12_RESOURCE_STATE_COPY_SOURCE));
+					srcDX12->SetResourceState(D3D12_RESOURCE_STATE_COPY_SOURCE);
+				}
 				PipelineResourceBarriers(barriers);
 
 				m_commandList->CopyBufferRegion(dstDX12->GetResource(), dstOffset, srcDX12->GetResource(), srcOffset, sizeInBytes);
 			
-				barriers =
+				barriers = {};
+				if (dstDX12->GetResourceState() != BufferTypeToDX12ResourceState(dstDX12->GetType()))
 				{
-					CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), BufferTypeToDX12ResourceState(dstDX12->GetType())),
-					CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), BufferTypeToDX12ResourceState(srcDX12->GetType()))
-				};
-				dstDX12->SetResourceState(BufferTypeToDX12ResourceState(dstDX12->GetType()));
-				srcDX12->SetResourceState(BufferTypeToDX12ResourceState(srcDX12->GetType()));
+					barriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(dstDX12->GetResource(), dstDX12->GetResourceState(), BufferTypeToDX12ResourceState(dstDX12->GetType())));
+					dstDX12->SetResourceState(BufferTypeToDX12ResourceState(dstDX12->GetType()));
+				}
+				if (srcDX12->GetResourceState() != BufferTypeToDX12ResourceState(srcDX12->GetType()))
+				{
+					barriers.push_back(CD3DX12_RESOURCE_BARRIER::Transition(srcDX12->GetResource(), srcDX12->GetResourceState(), BufferTypeToDX12ResourceState(srcDX12->GetType())));
+					srcDX12->SetResourceState(BufferTypeToDX12ResourceState(srcDX12->GetType()));
+				}
 				PipelineResourceBarriers(barriers);
 			}
 
@@ -314,15 +323,15 @@ namespace Insight
 				for (const RHI_Texture* image : renderDescription.ColourAttachments)
 				{
 					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(image);
-					DescriptorHeapHandle_DX12 handle = textureDX12->GetDescriptorHandle();
+					DescriptorHeapHandle_DX12 rtvHandle = textureDX12->GetRenderTargetHandle();
 
 					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
 					if (description.LoadOp == AttachmentLoadOp::Clear)
 					{
-						ClearRenderTargetView(handle.CPUPtr, glm::value_ptr(description.ClearColour), 0, nullptr);
+						ClearRenderTargetView(rtvHandle.CPUPtr, glm::value_ptr(description.ClearColour), 0, nullptr);
 					}
 
-					renderTargetHandles.push_back(handle.CPUPtr);
+					renderTargetHandles.push_back(rtvHandle.CPUPtr);
 					++idx;
 				}
 				idx = 0;
@@ -330,17 +339,17 @@ namespace Insight
 				if (renderDescription.DepthStencil)
 				{
 					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(renderDescription.DepthStencil);
-					DescriptorHeapHandle_DX12 handle = textureDX12->GetDescriptorHandle();
+					DescriptorHeapHandle_DX12 dsHandle = textureDX12->GetDepthStencilHandle();
 					if (renderDescription.DepthStencilAttachment.LoadOp == AttachmentLoadOp::Clear)
 					{
-						ClearDepthStencilView(handle.CPUPtr, 
+						ClearDepthStencilView(dsHandle.CPUPtr,
 							D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 							renderDescription.DepthStencilAttachment.Depth, 
 							renderDescription.DepthStencilAttachment.Stencil, 
 							0, 
 							nullptr);
 
-						depthStencilHandle = handle.CPUPtr;
+						depthStencilHandle = dsHandle.CPUPtr;
 					}
 				}
 
@@ -391,7 +400,8 @@ namespace Insight
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_VERTEX_BUFFER_VIEW views[] = 
-				{ D3D12_VERTEX_BUFFER_VIEW
+				{ 
+					D3D12_VERTEX_BUFFER_VIEW
 					{
 						bufferDX12->GetResource()->GetGPUVirtualAddress(), 
 						(UINT)bufferDX12->GetSize(),
@@ -406,9 +416,12 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
-				const D3D12_INDEX_BUFFER_VIEW view = { bufferDX12->GetResource()->GetGPUVirtualAddress(), 
+				const D3D12_INDEX_BUFFER_VIEW view = 
+				{ 
+					bufferDX12->GetResource()->GetGPUVirtualAddress(), 
 					(UINT)bufferDX12->GetSize(),  
-					DXGI_FORMAT_R32_UINT };
+					IndexTypeToDX12(index_type)
+				};
 				m_commandList->IASetIndexBuffer(&view);
 				m_bound_index_buffer = buffer;
 			}

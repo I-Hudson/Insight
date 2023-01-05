@@ -527,8 +527,8 @@ namespace Insight
 						RHI_Texture_DX12* textureDX12 = static_cast<RHI_Texture_DX12*>(tex);
 						textureDX12->m_context = this;
 						swapchainImage.Colour = textureDX12;
-						textureDX12->m_allLayerDescriptorHandle = swapchainImage.ColourHandle;
-						textureDX12->m_singleLayerDescriptorHandle.push_back(swapchainImage.ColourHandle);
+						textureDX12->m_allLayerRenderTargetHandle = swapchainImage.ColourHandle;
+						textureDX12->m_singleLayerRenderTargetHandle.push_back(swapchainImage.ColourHandle);
 
 						RHI_TextureInfo textureInfo = {};
 						textureInfo.TextureType = TextureType::Tex2D;

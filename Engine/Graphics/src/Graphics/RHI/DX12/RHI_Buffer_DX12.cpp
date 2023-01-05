@@ -67,7 +67,8 @@ namespace Insight
 					|| m_bufferType == BufferType::Storage
 					|| m_bufferType == BufferType::Raw
 					|| m_bufferType == BufferType::Staging
-					|| m_bufferType == BufferType::Readback)
+					|| m_bufferType == BufferType::Readback
+					|| overrides.Force_Host_Writeable)
 				{
 					ThrowIfFailed(m_resource->Map(0, nullptr, reinterpret_cast<void**>(&m_mappedData)));
 				}
