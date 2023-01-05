@@ -24,7 +24,7 @@ struct VertexInput
 	float4 Position : POSITION;
 	float4 Normal : NORMAL0;
 	float4 Colour : COLOR0;
-	float2 UV : TEXCOORD0;
+	float4 UV : TEXCOORD0;
 };
 
 struct PixelInput

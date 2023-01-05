@@ -4,7 +4,7 @@ struct VertexInput
 	float4 Pos : POSITION;
 	float4 Normal : NORMAL;
 	float4 Colour : COLOR;
-	float2 UV : TEXCOORD;
+	float4 UV : TEXCOORD;
 };
 
 struct VertexOutput
