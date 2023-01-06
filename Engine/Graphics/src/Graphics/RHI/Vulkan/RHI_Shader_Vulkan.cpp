@@ -42,6 +42,36 @@ namespace Insight
 				if (!desc.GeoemtyFilePath.empty())						{ CompileStage(ShaderStageFlagBits::ShaderStage_Geometry, desc.GeoemtyFilePath, 3); }
 				if (!desc.PixelFilePath.empty())						{ CompileStage(ShaderStageFlagBits::ShaderStage_Pixel, desc.PixelFilePath, 4); }
 
+				//for (DescriptorSet& set : m_descriptor_sets)
+				//{
+				//	u32 bindingIdx = 0;
+				//	for (DescriptorBinding& binding : set.Bindings)
+				//	{
+				//		if (binding.Type == DescriptorType::Sampled_Image)
+				//		{
+				//			// Sampled images shouldn't have the vertex stage set.
+				//			//binding.Stages &= ~(ShaderStageFlagBits::ShaderStage_Vertex);
+				//			if (bindingIdx == 0)
+				//			{
+				//				continue;
+				//			}
+
+				//			// If there is a uniform buffer with the same binding then unset the current stage flag.
+				//			// Need a better way of check for the same bindings, but different stages.
+				//			for (int reverseBindingIdx = static_cast<int>(bindingIdx) - 1; reverseBindingIdx >= 0; --reverseBindingIdx)
+				//			{
+				//				DescriptorBinding& reverseBinding = set.Bindings.at(reverseBindingIdx);
+				//				if (reverseBinding.Binding == binding.Binding
+				//					&& reverseBinding.Type == DescriptorType::Unifom_Buffer)
+				//				{
+				//					//reverseBinding.Stages &= ~(binding.Stages);
+				//				}
+				//			}
+				//		}
+
+				//		++bindingIdx;
+				//	}
+				//}
 				CreateVertexInputLayout(desc);
 			}
 

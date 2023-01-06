@@ -139,28 +139,18 @@ namespace Insight
 			DxcBuffer Source;
 			Source.Ptr = sourceBlob->GetBufferPointer();
 			Source.Size = sourceBlob->GetBufferSize();
-			Source.Encoding = DXC_CP_ACP; /// Assume BOM says UTF8 or UTF16 or this is ANSI text.
+			Source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
-			/// Set up arguments to be passed to the shader compiler
+			// Set up arguments to be passed to the shader compiler
 
-			/// Tell the compiler to output SPIR-V
 			std::vector<LPCWCHAR> arguments;
-			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
-			{
-				arguments.push_back(L"-spirv");
-				arguments.push_back(L"-D");
-				arguments.push_back(L"VULKAN");
-			}
-			else
-			{
-				arguments.push_back(L"-D");
-				arguments.push_back(L"DX12");
-			}
+			std::wstring filename = Platform::WStringFromStringView(filePath);
+			arguments.push_back(filename.c_str());
 
 			std::wstring mainFunc = Platform::WStringFromString(StageToFuncName(stage));
 			std::wstring targetProfile = Platform::WStringFromString(StageToProfileTarget(stage));
 
-			/// Entry point
+			// Entry point
 			arguments.push_back(L"-E");
 			arguments.push_back(mainFunc.c_str());
 
@@ -172,19 +162,36 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(L"Resources/Shaders/hlsl");
 
-			arguments.push_back(DXC_ARG_DEBUG); ///-Zi
-			///arguments.push_back(L"-Zs"); /// Generate small PDB with just sourcesand compile options.Cannot be used together with - Zi
-			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+			//arguments.push_back(DXC_ARG_DEBUG);
+			//arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+			
+			// Tell the compiler to output SPIR-V
+			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
+			{
+				arguments.push_back(L"-D");
+				arguments.push_back(L"VULKAN");
+				arguments.push_back(L"-spirv");
 
-			///arguments.push_back(L"-fvk-bind-register");
+				arguments.push_back(L"-fvk-auto-shift-bindings");
+				//arguments.push_back(L"-fspv-target-env=vulkan1.2");
+				//arguments.push_back(L"-fvk-b-shift"); arguments.push_back(L"1000"); arguments.push_back(L"0");
+				//arguments.push_back(L"-fvk-t-shift"); arguments.push_back(L"6"); arguments.push_back(L"0");
+				//arguments.push_back(L"-fvk-u-shift"); arguments.push_back(L"12"); arguments.push_back(L"0");
+			}
+			else
+			{
+				arguments.push_back(L"-D");
+				arguments.push_back(L"DX12");
+			}
 
-			/// Compile shader
+
+			// Compile shader
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,									/// Source buffer.
-				arguments.data(),							/// Array of pointers to arguments.
-				static_cast<UINT>(arguments.size()),		/// Number of arguments.
-				pIncludeHandler,							/// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderCompileResults)			/// Compiler output status, buffer, and errors.
+				&Source,									// Source buffer.
+				arguments.data(),							// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),		// Number of arguments.
+				pIncludeHandler,							// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderCompileResults)			// Compiler output status, buffer, and errors.
 			)));
 
 			if (languageToCompileTo != ShaderCompilerLanguage::Spirv)
@@ -193,18 +200,18 @@ namespace Insight
 			}
 			arguments.push_back(L"-fspv-reflect");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
-				&Source,								/// Source buffer.
-				arguments.data(),						/// Array of pointers to arguments.
-				static_cast<UINT>(arguments.size()),	/// Number of arguments.
-				pIncludeHandler,						/// User-provided interface to handle #include directives (optional).
-				IID_PPV_ARGS(&ShaderReflectionResults)	/// Compiler output status, buffer, and errors.
+				&Source,								// Source buffer.
+				arguments.data(),						// Array of pointers to arguments.
+				static_cast<UINT>(arguments.size()),	// Number of arguments.
+				pIncludeHandler,						// User-provided interface to handle #include directives (optional).
+				IID_PPV_ARGS(&ShaderReflectionResults)	// Compiler output status, buffer, and errors.
 			)));
 
-			/// Print errors if present.
+			// Print errors if present.
 			IDxcBlobUtf8* pErrors = nullptr;
 			ASSERT(SUCCEEDED(ShaderCompileResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
-			/// Note that d3dcompiler would return null if no errors or warnings are present.  
-			/// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
+			// Note that d3dcompiler would return null if no errors or warnings are present.  
+			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
 				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
@@ -213,19 +220,19 @@ namespace Insight
 
 			pErrors = nullptr;
 			ASSERT(SUCCEEDED(ShaderReflectionResults->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&pErrors), nullptr)));
-			/// Note that d3dcompiler would return null if no errors or warnings are present.  
-			/// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
+			// Note that d3dcompiler would return null if no errors or warnings are present.  
+			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
 				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
 			}
 			pErrors->Release();
 
-			/// Get compilation result
+			// Get compilation result
 			IDxcBlob* code;
 			ShaderCompileResults->GetResult(&code);
 
-			/// Write shader to disk.
+			// Write shader to disk.
 			std::ofstream shaderDisk;
 
 			int startShaderFile = (int)filePath.find_last_of('/') + 1;
@@ -314,6 +321,7 @@ namespace Insight
 					descriptor_sets.push_back(DescriptorSet("", descriptorSet.set, {}));
 					descriptor_set = &descriptor_sets.back();
 				}
+
 				descriptor_set->Stages |= stage;
 
 				for (size_t j = 0; j < descriptorSet.binding_count; ++j)
@@ -393,6 +401,21 @@ namespace Insight
 				{
 					return set1.Set < set2.Set;
 				});
+
+			bool filledInSets = false;
+			while (!filledInSets)
+			{
+				filledInSets = true;
+				for (size_t i = 0; i < descriptor_sets.size(); ++i)
+				{
+					if (descriptor_sets.at(i).Set != i)
+					{
+						filledInSets = false;
+						descriptor_sets.insert(descriptor_sets.begin() + i, DescriptorSet("Bindless", i, {}));
+						break;
+					}
+				}
+			}
 		}
 
 		u32 SpvFormatToByteSize(SpvReflectFormat format)

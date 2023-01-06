@@ -13,16 +13,16 @@ namespace Insight
 			, Size(size)
 			, Type(type)
 		{ }
-		DescriptorBinding::DescriptorBinding(const DescriptorBinding& other) NO_EXPECT
+		/*DescriptorBinding::DescriptorBinding(const DescriptorBinding& other) NO_EXPECT
 		{
 			*this = other;
 		}
 		DescriptorBinding::DescriptorBinding(DescriptorBinding&& other) NO_EXPECT
 		{
 			*this = std::move(other);
-		}
+		}*/
 
-		DescriptorBinding& DescriptorBinding::operator=(const DescriptorBinding& other) NO_EXPECT
+		/*DescriptorBinding& DescriptorBinding::operator=(const DescriptorBinding& other) NO_EXPECT
 		{
 			Set = other.Set;
 			Binding = other.Binding;
@@ -62,7 +62,7 @@ namespace Insight
 			other.Hash_Resource = 0;
 
 			return *this;
-		}
+		}*/
 
 		bool DescriptorBinding::operator==(const DescriptorBinding& other) const
 		{
@@ -129,17 +129,17 @@ namespace Insight
 			, Set(set)
 			, Bindings(std::move(bindings))
 		{ }
-		DescriptorSet::DescriptorSet(const DescriptorSet& other) NO_EXPECT
+		/*DescriptorSet::DescriptorSet(const DescriptorSet& other) NO_EXPECT
 		{
 			*this = other;
 		}
 		DescriptorSet::DescriptorSet(DescriptorSet&& other) NO_EXPECT
 		{ 
 			*this = other;
-		}
+		}*/
 
 
-		DescriptorSet& DescriptorSet::operator=(const DescriptorSet& other) NO_EXPECT
+		/*DescriptorSet& DescriptorSet::operator=(const DescriptorSet& other) NO_EXPECT
 		{
 			Name = other.Name;
 			Set = other.Set;
@@ -158,7 +158,7 @@ namespace Insight
 			Hash_No_Resource = std::move(other.Hash_No_Resource);
 			Hash_Resource = std::move(other.Hash_Resource);
 			return *this;
-		}
+		}*/
 
 		bool DescriptorSet::operator==(const DescriptorSet& other) const
 		{	

@@ -72,6 +72,14 @@ namespace Insight
 		};
 		GlobalResources g_global_resources = {};
 
+		std::vector<ShaderInputLayout> DefaultShaderInputLayout =
+		{
+			ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
+			ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "NORMAL0"),
+			ShaderInputLayout(2, PixelFormat::R32G32B32A32_Float, 32, "COLOR0"),
+			ShaderInputLayout(3, PixelFormat::R32G32B32A32_Float, 48, "TEXCOORD0"),
+		};
+
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
@@ -378,6 +386,7 @@ namespace Insight
 					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 
 					ShaderDesc shader_description = { };
+					shader_description.InputLayout = DefaultShaderInputLayout;
 					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Cascade_Shadow.hlsl";
 					builder.SetShader(shader_description);
 
@@ -661,6 +670,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("GBuffer-GetShader");
 						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.InputLayout = DefaultShaderInputLayout;
 					}
 					builder.SetShader(shaderDesc);
 
@@ -854,6 +864,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("GetShader");
 						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
+						shaderDesc.InputLayout = DefaultShaderInputLayout;
 					}
 					builder.SetShader(shaderDesc);
 
@@ -1014,6 +1025,7 @@ namespace Insight
 					ShaderDesc shader_description = { };
 					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
 					shader_description.PixelFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
+					shader_description.InputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32_UInt, 0, "SV_VertexID"));
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -1278,6 +1290,7 @@ namespace Insight
 					ShaderDesc shaderDesc;
 					shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
 					shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
+					shaderDesc.InputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32_UInt, 0, "SV_VertexID"));
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject swapchainPso = { };

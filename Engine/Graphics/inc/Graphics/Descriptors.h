@@ -19,11 +19,11 @@ namespace Insight
 		{
 			DescriptorBinding() NO_EXPECT;
 			DescriptorBinding(int set, int binding, int stages, u32 size, DescriptorType type) NO_EXPECT;
-			DescriptorBinding(const DescriptorBinding& other) NO_EXPECT;
-			DescriptorBinding(DescriptorBinding&& other) NO_EXPECT;
+			//DescriptorBinding(const DescriptorBinding& other) NO_EXPECT;
+			//DescriptorBinding(DescriptorBinding&& other) NO_EXPECT;
 
-			DescriptorBinding& operator=(const DescriptorBinding& other) NO_EXPECT;
-			DescriptorBinding& operator=(DescriptorBinding&& other) NO_EXPECT;
+			//DescriptorBinding& operator=(const DescriptorBinding& other) NO_EXPECT;
+			//DescriptorBinding& operator=(DescriptorBinding&& other) NO_EXPECT;
 
 			bool operator==(const DescriptorBinding& other) const;
 			bool operator!=(const DescriptorBinding& other) const;
@@ -33,7 +33,7 @@ namespace Insight
 
 			u32 Set = 0;
 			u32 Binding = 0;
-			u32 Stages = 0;
+			u32 Stages = -1;
 			u32 Size = 0;
 			DescriptorType Type = DescriptorType::Unknown;
 
@@ -49,11 +49,11 @@ namespace Insight
 		{
 			DescriptorSet() NO_EXPECT;
 			DescriptorSet(std::string name, int set, std::vector<DescriptorBinding> bindings) NO_EXPECT;
-			DescriptorSet(const DescriptorSet& other) NO_EXPECT;
-			DescriptorSet(DescriptorSet&& other) NO_EXPECT;
+			//DescriptorSet(const DescriptorSet& other) NO_EXPECT;
+			//DescriptorSet(DescriptorSet&& other) NO_EXPECT;
 
-			DescriptorSet& operator=(const DescriptorSet& other) NO_EXPECT;
-			DescriptorSet& operator=(DescriptorSet&& other) NO_EXPECT;
+			//DescriptorSet& operator=(const DescriptorSet& other) NO_EXPECT;
+			//DescriptorSet& operator=(DescriptorSet&& other) NO_EXPECT;
 
 			bool operator==(const DescriptorSet& other) const;
 			bool operator!=(const DescriptorSet& other) const;
