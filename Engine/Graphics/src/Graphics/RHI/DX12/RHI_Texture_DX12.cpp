@@ -119,11 +119,11 @@ namespace Insight
 					}
 					if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 					{
-						m_singleLayerDepthStencilHandle.push_back(CreateSharderResouceView(0, 1, i, 0, DescriptorHeapTypes::DepthStencilView));
+						m_singleLayerDepthStencilHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::DepthStencilView));
 					}
 					if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 					{
-						m_singleLayerRenderTargetHandle.push_back(CreateSharderResouceView(0, 1, i, 0, DescriptorHeapTypes::RenderTargetView));
+						m_singleLayerRenderTargetHandle.push_back(CreateSharderResouceView(0, 1, 1, i, DescriptorHeapTypes::RenderTargetView));
 					}
 				}
 			}

@@ -178,7 +178,8 @@ namespace Insight
                 {
                     if (VertexBuffer->GetUploadStatus() != DeviceUploadStatus::Completed
                     || IndexBuffer->GetUploadStatus() != DeviceUploadStatus::Completed
-                    || Texture->GetRHITexture()->GetUploadStatus() != DeviceUploadStatus::Completed)
+                    || Texture->GetResourceState() != Runtime::EResoruceStates::Loaded
+                    || (Texture->GetRHITexture() && Texture->GetRHITexture()->GetUploadStatus() != DeviceUploadStatus::Completed))
                     {
                         return;
                     }

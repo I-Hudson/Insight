@@ -323,8 +323,10 @@ namespace Insight
 				u32 idx = 0;
 				for (const RHI_Texture* image : renderDescription.ColourAttachments)
 				{
+					const AttachmentDescription attachmentDescription = renderDescription.Attachments.at(idx);
 					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(image);
-					DescriptorHeapHandle_DX12 rtvHandle = textureDX12->GetRenderTargetHandle();
+					DescriptorHeapHandle_DX12 rtvHandle = textureDX12->GetSingleLayerRenderTargetHandle(attachmentDescription.Layer_Array_Index);
+					ASSERT(rtvHandle.CPUPtr.ptr != 0);
 
 					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
 					if (description.LoadOp == AttachmentLoadOp::Clear)
@@ -340,7 +342,9 @@ namespace Insight
 				if (renderDescription.DepthStencil)
 				{
 					const RHI_Texture_DX12* textureDX12 = static_cast<const RHI_Texture_DX12*>(renderDescription.DepthStencil);
-					DescriptorHeapHandle_DX12 dsHandle = textureDX12->GetDepthStencilHandle();
+					DescriptorHeapHandle_DX12 dsHandle = textureDX12->GetSingleLayerDepthStencilHandle(renderDescription.DepthStencilAttachment.Layer_Array_Index);
+					ASSERT(dsHandle.CPUPtr.ptr != 0);
+
 					if (renderDescription.DepthStencilAttachment.LoadOp == AttachmentLoadOp::Clear)
 					{
 						ClearDepthStencilView(dsHandle.CPUPtr,
@@ -381,14 +385,14 @@ namespace Insight
 			void RHI_CommandList_DX12::SetScissor(int x, int y, int width, int height)
 			{
 				IS_PROFILE_FUNCTION();
-				assert(m_commandList);
+				ASSERT(m_commandList);
 				D3D12_RECT rects[1] = { D3D12_RECT{ x, y, width, height } };
 				m_commandList->RSSetScissorRects(1, rects);
 			}
 
 			void RHI_CommandList_DX12::SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor)
 			{
-				IS_CORE_INFO("[ RHI_CommandList_DX12::SetDepthBias] Not implemented.");
+				//IS_CORE_INFO("[ RHI_CommandList_DX12::SetDepthBias] Not implemented.");
 			}
 
 			void RHI_CommandList_DX12::SetLineWidth(float width)
@@ -501,7 +505,11 @@ namespace Insight
 					m_boundResourceHeap = m_contextDX12->GetFrameDescriptorHeapGPU().GetHeap();
 				}
 
-				u32 descriptorRootIdx = 0;
+				// While descriptor sets 'Set' value could be anything sets are arranged from 0 upwards.
+				// Because of this the root parameter index they have could be different from the 'Set' value.
+				// However the descriptor sets should be in the correct order so just increment 'rootParameterIdx'.
+				u32 rootParameterIdx = 0;
+
 				std::vector<DescriptorSet> const& descriptorSets = m_descriptorAllocator->GetAllocatorDescriptorSets();
 				for (const auto& set : descriptorSets)
 				{
@@ -517,25 +525,34 @@ namespace Insight
 						{
 						case DescriptorType::Unifom_Buffer:
 						{
-							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-							m_commandList->SetGraphicsRootConstantBufferView(descriptorRootIdx,
-								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
-							++RenderStats::Instance().DescriptorSetBindings;
+							if (binding.RHI_Buffer_View.IsValid())
+							{
+								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+								m_commandList->SetGraphicsRootConstantBufferView(rootParameterIdx,
+									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+								++RenderStats::Instance().DescriptorSetBindings;
+							}
 							break;
 						}
 						case DescriptorType::Storage_Buffer:
 						{
-							RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx,
-								bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
-							++RenderStats::Instance().DescriptorSetBindings;
+							if (binding.RHI_Buffer_View.IsValid())
+							{
+								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+								m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx,
+									bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset());
+								++RenderStats::Instance().DescriptorSetBindings;
+							}
 							break;
 						}
 						case DescriptorType::Storage_Image:
 						{
-							RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-							m_commandList->SetGraphicsRootUnorderedAccessView(descriptorRootIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
-							++RenderStats::Instance().DescriptorSetBindings;
+							if (binding.RHI_Texture)
+							{
+								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
+								m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
+								++RenderStats::Instance().DescriptorSetBindings;
+							}
 							break;
 						}
 						default:
@@ -559,12 +576,15 @@ namespace Insight
 									firstHandle = dstHandle;
 								}
 
-								RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
-								D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
-								desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
-								desc.SizeInBytes = static_cast<UINT>(binding.RHI_Buffer_View.GetSize());
-								m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
-								++RenderStats::Instance().DescriptorSetUpdates;
+								if (binding.RHI_Buffer_View.IsValid())
+								{
+									D3D12_CONSTANT_BUFFER_VIEW_DESC desc = {};
+									RHI::DX12::RHI_Buffer_DX12* bufferDX12 = static_cast<RHI::DX12::RHI_Buffer_DX12*>(binding.RHI_Buffer_View.GetBuffer());
+									desc.BufferLocation = bufferDX12->GetResource()->GetGPUVirtualAddress() + binding.RHI_Buffer_View.GetOffset();
+									desc.SizeInBytes = static_cast<UINT>(binding.RHI_Buffer_View.GetSize());
+									m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
+									++RenderStats::Instance().DescriptorSetUpdates;
+								}
 							}
 
 							if (binding.Type == DescriptorType::Sampled_Image)
@@ -592,19 +612,22 @@ namespace Insight
 								{
 									firstHandle = samplerHandle;
 								}
-								RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
-								DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
-								m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
-								++RenderStats::Instance().DescriptorSetUpdates;
+								if (binding.RHI_Sampler)
+								{
+									RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
+									DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
+									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+									++RenderStats::Instance().DescriptorSetUpdates;
+								}
 							}
 						}
 						if (firstHandle.GPUPtr.ptr != 0)
 						{
-							m_commandList->SetGraphicsRootDescriptorTable(set.Set, firstHandle.GPUPtr);
+							m_commandList->SetGraphicsRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
 							++RenderStats::Instance().DescriptorSetBindings;
 						}
 					}
-					++descriptorRootIdx;
+					++rootParameterIdx;
 				}
 				
 				return true;

@@ -1,7 +1,5 @@
-[[vk::binding(0, 0)]]
-Texture2D<float4> FullScreenTexture : register(t0);
-[[vk::binding(1, 0)]]
-SamplerState FullScreenSampler : register(s0);
+Texture2D<float4> FullScreenTexture : register(t0, space0);
+SamplerState FullScreenSampler : register(s0, space1);
 
 struct VertexOutput
 {
@@ -13,11 +11,11 @@ VertexOutput VSMain(uint id : SV_VertexID)
 {
 	VertexOutput o;
 	o.UV = float2((id << 1) & 2, id & 2);
-//#ifdef VULKAN
+#ifdef VULKAN
     o.Position 	= float4(o.UV * 2.0f + -1.0f, 0.0f, 1.0f);
-//#else
-    //o.Position 	= float4(o.UV * 2.0f + float2(-1.0f, 1.0f), 0.0f, 1.0f);
-//#endif
+#elif DX12
+    o.Position 	= float4(o.UV * 2.0f + float2(-1.0f, 1.0f), 0.0f, 1.0f);
+#endif
 	return o;
 }
 

@@ -2,14 +2,14 @@
 
 struct VertexInput
 {
-	[[vk::location(0)]] float4 Pos : POSITION;
-	[[vk::location(2)]] float4 Colour : COLOR0;
+	float4 Pos : POSITION;
+	float4 Colour : COLOR0;
 };
 
 struct VertexOutput
 {
-	[[vk::location(0)]] float4 Pos 						: SV_POSITION;
-	[[vk::location(1)]] float4 Colour 					: COLOR0;
+	float4 Pos 						: SV_POSITION;
+	float4 Colour 					: COLOR0;
 };
 
 VertexOutput VSMain(const VertexInput input)

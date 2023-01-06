@@ -1,16 +1,5 @@
 #include "Common.hlsl"
 
-// Define all our textures needed
-
-[[vk::binding(6, 0)]]
-Texture2D<float4> GBuffer_Colour : register(t0);
-[[vk::binding(7, 0)]]
-Texture2D<float4> GBuffer_World_Normal: register(t1);
-[[vk::binding(8, 0)]]
-Texture2D<float4> GBuffer_Shadow : register(t2);
-[[vk::binding(9, 0)]]
-Texture2DArray<float> Cascade_Shadow : register(t3);
-
 /*------------------------------------------------------------------------------
     SETTINGS
 ------------------------------------------------------------------------------*/
@@ -24,13 +13,6 @@ static const float  g_penumbra_filter_size            = 128.0f;
 // technique - pre-calculated
 static const float g_pcf_filter_size    = (sqrt((float)g_shadow_samples) - 1.0f) / 2.0f;
 static const float g_shadow_samples_rpc = 1.0f / (float) g_shadow_samples;
-
-struct PushConstant
-{
-	int Output_Texture;
-	int Cascade_Override;
-};
-[[vk::push_constant]] PushConstant push_constant;
 
 struct VertexOutput
 {
@@ -114,9 +96,9 @@ float Technique_Pcf(float3 uv, float compare)
 
 float4 PSMain(VertexOutput input) : SV_TARGET
 {	
-	float4 colour 						= GBuffer_Colour.Sample(Clamp_Sampler, input.UV);
-	float4 world_normal 				= GBuffer_World_Normal.Sample(Clamp_Sampler, input.UV);
-	float gbuffer_depth 				= GBuffer_Shadow.Sample(Clamp_Sampler, input.UV).r;
+	float4 colour 						= Diffuse_Texture.Sample(Clamp_Sampler, input.UV);
+	float4 world_normal 				= Normal_Texture.Sample(Clamp_Sampler, input.UV);
+	float gbuffer_depth 				= Depth_Texture.Sample(Clamp_Sampler, input.UV).r;
 
 	float3 reconstruct_world_position 	= reconstruct_position(input.UV, gbuffer_depth, bf_Camera_Projection_View_Inverted);
 	float3 reconstruct_view_position 	= mul(bf_Camera_View_Inverted, float4(reconstruct_world_position, 1)).xyz;

@@ -18,6 +18,9 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 
+		constexpr u32 c_VulkanTextureBindingShift = 6;
+		constexpr u32 c_VulkanSamplerBindingShift = c_VulkanTextureBindingShift + 6;
+
 		namespace RHI::DX12
 		{
 			class DescriptorHeapGPU_DX12;
@@ -117,6 +120,9 @@ namespace Insight
 		private:
 			void CreateUniformBufferIfNoExist();
 			bool CheckSetAndBindingBounds(u32 set, u32 binding);
+
+			DescriptorSet* GetDescriptorSet(u32 set);
+			DescriptorBinding* GetDescriptorBinding(DescriptorSet* set, u32 binding, DescriptorType descriptorType);
 
 		protected:
 			std::vector<DescriptorSet> m_descriptor_sets; // Current descriptors information. 

@@ -2,30 +2,23 @@
 
 struct VertexInput
 {
-	[[vk::location(0)]] float4 Pos : POSITION;
-	[[vk::location(1)]] float4 Normal : NORMAL0;
-	[[vk::location(2)]] float4 Colour : COLOR0;
-	[[vk::location(3)]] float4 UV : TEXCOORD0;
+	float4 Pos : POSITION;
+	float4 Normal : NORMAL0;
+	float4 Colour : COLOR0;
+	float4 UV : TEXCOORD0;
 };
 
 struct VertexOutput
 {
-	[[vk::location(0)]] float4 Pos 						: SV_POSITION;
-	[[vk::location(1)]] float4 Colour 					: COLOR0;
-	[[vk::location(2)]] float4 WorldPos 				: POSITION1;
-	[[vk::location(3)]] float4 WorldNormal 				: NORMAL0;
-	[[vk::location(4)]] float2 UV 						: TEXCOORD0;
+	float4 Pos 						: SV_POSITION;
+	float4 Colour 					: COLOR0;
+	float4 WorldPos 				: POSITION1;
+	float4 WorldNormal 				: NORMAL0;
+	float2 UV 						: TEXCOORD0;
 
-	[[vk::location(5)]] float4 position_ss_current  	: SCREEN_POS;
-    [[vk::location(6)]] float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
+	float4 position_ss_current  	: SCREEN_POS;
+    float4 position_ss_previous 	: SCREEN_POS_PREVIOUS;
 };
-
-[[vk::binding(2, 1)]]
-Texture2D<float4> Diffuse_Texture : register(t0);
-[[vk::binding(3, 1)]]
-Texture2D<float4> Normal_Texture : register(t1);
-[[vk::binding(4, 1)]]
-Texture2D<float4> Specular_Texture : register(t2);
 
 VertexOutput VSMain(const VertexInput input)
 {

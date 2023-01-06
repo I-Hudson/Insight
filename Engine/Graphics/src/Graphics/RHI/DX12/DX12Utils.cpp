@@ -302,11 +302,11 @@ namespace Insight
         {
             switch (type)
             {
-            case Insight::Graphics::TextureType::Unknown:    return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_UNKNOWN;
-            case Insight::Graphics::TextureType::Tex1D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE1D;
-            case Insight::Graphics::TextureType::Tex2D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2D;
-            case Insight::Graphics::TextureType::Tex2DArray: return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-            case Insight::Graphics::TextureType::Tex3DArray:
+            case TextureType::Unknown:    return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_UNKNOWN;
+            case TextureType::Tex1D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE1D;
+            case TextureType::Tex2D:      return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2D;
+            case TextureType::Tex2DArray: return D3D12_DSV_DIMENSION::D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
+            case TextureType::Tex3DArray:
             default:
                 break;
             }

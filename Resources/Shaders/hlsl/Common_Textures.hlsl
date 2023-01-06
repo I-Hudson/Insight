@@ -1,15 +1,13 @@
 // Set 0 - per frame
 // Set 1 - Per object
 
-[[vk::binding(6, 0)]]
-Texture2DArray<float> Cascade_Shadow : register(t0);
+#include "Defines.hlsl"
 
-[[vk::binding(7, 0)]]
-Texture2D<float4> GBuffer_Colour : register(t1);
+Texture2DArray<float> Cascade_Shadow : register(t0, PassSpace);
+Texture2D<float4> Depth_Texture : register(t1, PassSpace);
 
-[[vk::binding(8, 0)]]
-Texture2D<float4> GBuffer_Normal : register(t2);
+Texture2D<float4> Diffuse_Texture : register(t0, PerObjectSpace);
+Texture2D<float4> Normal_Texture : register(t1, PerObjectSpace);
+Texture2D<float4> Specular_Texture : register(t2, PerObjectSpace);
 
-[[vk::binding(9, 0)]]
-Texture2D<float4> GBuffer_Shadow : register(t3);
 

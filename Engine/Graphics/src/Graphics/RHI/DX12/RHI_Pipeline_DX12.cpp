@@ -103,7 +103,6 @@ namespace Insight
 				psoDesc.DepthStencilState = depthStencilDesc;
 				psoDesc.SampleMask = UINT_MAX;
 				psoDesc.PrimitiveTopologyType = PrimitiveTopologyTypeToDX12(pso.PrimitiveTopologyType);
-				psoDesc.NumRenderTargets = 1;
 				psoDesc.SampleDesc.Count = 1;
 
 				if (pso.Swapchain)
@@ -111,6 +110,7 @@ namespace Insight
 					pso.RenderTargets.at(0) = m_context->GetSwaphchainIamge();
 				}
 
+				u32 renderTargetCount = 0;
 				for (size_t i = 0; i < pso.RenderTargetCount; ++i)
 				{
 					RHI_Texture* renderTarget = pso.RenderTargets.at(i);
@@ -118,8 +118,12 @@ namespace Insight
 					{
 						RHI_Texture_DX12* renderTargetDX12 = static_cast<RHI_Texture_DX12*>(renderTarget);
 						psoDesc.RTVFormats[i] = PixelFormatToDX12(renderTargetDX12->GetFormat());
+						++renderTargetCount;
 					}
 				}
+				psoDesc.NumRenderTargets = renderTargetCount;
+
+
 				if (pso.DepthStencil)
 				{
 					RHI_Texture_DX12* depthTargetDX12 = static_cast<RHI_Texture_DX12*>(pso.DepthStencil);

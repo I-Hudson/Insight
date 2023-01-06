@@ -422,15 +422,18 @@ namespace Insight
 				return;
 			}
 
-			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			DescriptorBinding& descriptor_binding = descriptor_set.Bindings.at(binding);
-			if (descriptor_binding.Size != size)
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
 			{
-				IS_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
-					, descriptor_binding.Size, size, set, binding);
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Unifom_Buffer))
+				{
+					if (descriptorBinding->Size != size)
+					{
+						IS_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
+							, descriptorBinding->Size, size, set, binding);
+					}
+					descriptorBinding->RHI_Buffer_View = UploadUniform(data, size);
+				}
 			}
-
-			descriptor_binding.RHI_Buffer_View = UploadUniform(data, size);
 		}
 
 		void DescriptorAllocator::SetUniform(u32 set, u32 binding, RHI_BufferView buffer_view)
@@ -446,14 +449,11 @@ namespace Insight
 				return;
 			}
 
-			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			for (auto& descriptorBinding : descriptor_set.Bindings)
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
 			{
-				if (descriptorBinding.Type == DescriptorType::Unifom_Buffer
-					&& descriptorBinding.Binding == binding)
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Unifom_Buffer))
 				{
-					descriptorBinding.RHI_Buffer_View = buffer_view;
-					break;
+					descriptorBinding->RHI_Buffer_View = buffer_view;
 				}
 			}
 		}
@@ -464,17 +464,14 @@ namespace Insight
 			{
 				return;
 			}
-			DescriptorSet& descriptor_set = m_descriptor_sets[set];
-			for (auto& descriptorBinding : descriptor_set.Bindings)
+
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
 			{
-				if (descriptorBinding.Type == DescriptorType::Sampled_Image
-					&& descriptorBinding.Binding == binding)
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampled_Image))
 				{
-					descriptorBinding.RHI_Texture = texture;
-					break;
+					descriptorBinding->RHI_Texture = texture;
 				}
 			}
-			//descriptor_set.Bindings[binding].RHI_Texture = texture;
 		}
 
 		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
@@ -483,14 +480,12 @@ namespace Insight
 			{
 				return;
 			}
-			DescriptorSet& descriptor_set= m_descriptor_sets[set];
-			for (auto& descriptorBinding : descriptor_set.Bindings)
+
+			if (DescriptorSet* descriptorSet = GetDescriptorSet(set))
 			{
-				if (descriptorBinding.Type == DescriptorType::Sampler
-					&& descriptorBinding.Binding == binding)
+				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampler))
 				{
-					descriptorBinding.RHI_Sampler = sampler;
-					break;
+					descriptorBinding->RHI_Sampler = sampler;
 				}
 			}
 		}
@@ -590,6 +585,37 @@ namespace Insight
 				return false;
 			}
 			return true;
+		}
+
+		DescriptorSet* DescriptorAllocator::GetDescriptorSet(u32 set)
+		{
+			for (auto& descriptorSet : m_descriptor_sets)
+			{
+				if (descriptorSet.Set == set)
+				{
+					return &descriptorSet;
+				}
+			}
+			return nullptr;
+		}
+
+		DescriptorBinding* DescriptorAllocator::GetDescriptorBinding(DescriptorSet* set, u32 binding, DescriptorType descriptorType)
+		{
+			if (set == nullptr)
+			{
+				return nullptr;
+			}
+
+
+			for (auto& descriptorBinding : set->Bindings)
+			{
+				if (descriptorBinding.Binding == binding
+					&& descriptorBinding.Type == descriptorType)
+				{
+					return &descriptorBinding;
+				}
+			}
+			return nullptr;
 		}
 	}
 }

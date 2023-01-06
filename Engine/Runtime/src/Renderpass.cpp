@@ -264,6 +264,7 @@ namespace Insight
 			}
 			else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
 			{
+				ShadowPass();
 				Runtime::DX12RenderPasses::Render();
 				ImGuiPass();
 			}
@@ -448,7 +449,7 @@ namespace Insight
 								//continue;
 							}
 
-							struct Object
+							struct alignas(16) Object
 							{
 								glm::mat4 Transform;
 								int CascadeIndex;
@@ -458,7 +459,7 @@ namespace Insight
 								transform,
 								static_cast<int>(i)
 							};
-							cmdList->SetPushConstant(0, sizeof(object), &object);
+							cmdList->SetUniform(4, 0, object);
 
 							mesh->Draw(cmdList);
 						}
@@ -752,17 +753,17 @@ namespace Insight
 						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
 						if (diffuseTexture)
 						{
-							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
+							cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
 							object.Textures_Set[0] = 1;
 						}
 						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
 						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 
-						cmdList->SetUniform(1, 1, object);
-						{
-							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-						}
+						cmdList->SetUniform(2, 0, object);
+						//{
+						//	IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+						//	BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+						//}
 
 						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
@@ -934,11 +935,11 @@ namespace Insight
 						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
 						if (diffuseTexture)
 						{
-							cmdList->SetTexture(1, 2, diffuseTexture->GetRHITexture());
+							cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
 							object.Textures_Set[0] = 1;
 						}
 
-						cmdList->SetUniform(1, 1, object);
+						cmdList->SetUniform(2, 0, object);
 						{
 							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
 							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
@@ -1033,25 +1034,21 @@ namespace Insight
 					cmd_list->BindPipeline(pso, nullptr);
 					cmd_list->BeginRenderpass(render_graph.GetRenderpassDescription("Composite_Pass"));
 
-
 					BindCommonResources(cmd_list, data.Buffer_Frame, data.Buffer_Samplers);
 					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
-					const u8 texture_offset = 6;
-					cmd_list->SetTexture(0, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
-					cmd_list->SetTexture(0, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
+					const u8 texture_offset = 0;
+					cmd_list->SetTexture(2, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
+					cmd_list->SetTexture(2, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
 					if (Depth_Prepass)
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
+						cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
 					}
 					else
 					{
-						cmd_list->SetTexture(0, texture_offset + 2, render_graph.GetRHITexture(render_graph.GetTexture("GBuffer_DepthStencil")));
+						cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture("GBuffer_DepthStencil")));
 					}
-					cmd_list->SetTexture(0, texture_offset + 3, render_graph.GetRHITexture(render_graph.GetTexture("Cascade_Shadow_Tex")));
-
-					cmd_list->SetPushConstant(0, sizeof(int), &output_texture);
-					cmd_list->SetPushConstant(sizeof(int), sizeof(int), &cascade_override);
+					cmd_list->SetTexture(1, 0, render_graph.GetRHITexture(render_graph.GetTexture("Cascade_Shadow_Tex")));
 
 					cmd_list->Draw(3, 1, 0, 0);
 					cmd_list->EndRenderpass();
@@ -1304,7 +1301,7 @@ namespace Insight
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
 
 					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
-					cmdList->SetSampler(0, 1, m_buffer_samplers.Clamp_Sampler);
+					cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();
@@ -1321,10 +1318,10 @@ namespace Insight
 		{
 			cmd_list->SetUniform(0, 0, g_global_resources.Buffer_Frame_View);
 
-			cmd_list->SetSampler(0, 1, buffer_samplers.Shadow_Sampler);
-			cmd_list->SetSampler(0, 2, buffer_samplers.Repeat_Sampler);
-			cmd_list->SetSampler(0, 3, buffer_samplers.Clamp_Sampler);
-			cmd_list->SetSampler(0, 4, buffer_samplers.MirroredRepeat_Sampler);
+			cmd_list->SetSampler(3, 0, buffer_samplers.Shadow_Sampler);
+			cmd_list->SetSampler(3, 1, buffer_samplers.Repeat_Sampler);
+			cmd_list->SetSampler(3, 2, buffer_samplers.Clamp_Sampler);
+			cmd_list->SetSampler(3, 3, buffer_samplers.MirroredRepeat_Sampler);
 		}
 
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)

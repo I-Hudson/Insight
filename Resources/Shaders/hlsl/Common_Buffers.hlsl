@@ -1,8 +1,9 @@
 // Set 0 - per frame
 // Set 1 - Per object
 
-[[vk::binding(0, 0)]]
-cbuffer BufferFrame : register(b0)
+#include "Defines.hlsl"
+
+cbuffer BufferFrame : register(b0, FrameSpace)
 {
 	float4x4 bf_Camera_Proj_View;
 	float4x4 bf_Camera_Projection;
@@ -17,8 +18,7 @@ cbuffer BufferFrame : register(b0)
 
 #define s_Cascade_Count 4
 
-[[vk::binding(0, 1)]]
-cbuffer BufferLight : register(b0)
+cbuffer BufferLight : register(b0, PassSpace)
 {
 	float4x4 bl_Camera_Proj_View[s_Cascade_Count];
 	float4x4 bl_Camera_Projection[s_Cascade_Count];
@@ -29,8 +29,7 @@ cbuffer BufferLight : register(b0)
     float2 bl_Shadow_Resolution;
 }
 
-[[vk::binding(1, 1)]]
-cbuffer BufferPerObject : register(b2)
+cbuffer BufferPerObject : register(b0, PerObjectSpace)
 {
     float4x4 bpo_Transform;
     float4x4 bpo_Previous_Transform;
