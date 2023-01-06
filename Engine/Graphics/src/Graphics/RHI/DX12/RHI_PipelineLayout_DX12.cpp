@@ -41,6 +41,11 @@ namespace Insight
 				u32 rootParamterIdx = 0;
 				for (const DescriptorSet& set : descriptor_sets)
 				{
+					if (set.Bindings.size() == 0)
+					{
+						continue;
+					}
+
 					if (CheckForRootDescriptors(set))
 					{
 						m_rootSignatureParameters.DescriptorRanges.push_back({});
@@ -70,6 +75,11 @@ namespace Insight
 				u32 rootParameterIdx = 0;
 				for (const DescriptorSet& set : descriptor_sets)
 				{
+					if (set.Bindings.size() == 0)
+					{
+						continue;
+					}
+
 					if (m_rootSignatureParameters.RootDescriptors.at(rootParameterIdx).size() > 0)
 					{
 						std::vector<DescriptorType> const& descriptorTypes = m_rootSignatureParameters.RootDescriptorTypes.at(rootParameterIdx);
