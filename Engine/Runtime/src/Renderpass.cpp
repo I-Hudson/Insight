@@ -1025,7 +1025,6 @@ namespace Insight
 					ShaderDesc shader_description = { };
 					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
 					shader_description.PixelFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
-					shader_description.InputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32_UInt, 0, "SV_VertexID"));
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -1290,7 +1289,6 @@ namespace Insight
 					ShaderDesc shaderDesc;
 					shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
 					shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
-					shaderDesc.InputLayout.push_back(ShaderInputLayout(0, PixelFormat::R32_UInt, 0, "SV_VertexID"));
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject swapchainPso = { };

@@ -460,6 +460,13 @@ namespace Insight
 
 		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
 		{
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			{
+				// Apply an offset to our bindings as vulkan shaders are compiled with these offsets 
+				// due to the possible binding idx conflict.
+				binding += c_VulkanTextureBindingShift;
+			}
+
 			if (!CheckSetAndBindingBounds(set, binding))
 			{
 				return;
@@ -476,6 +483,13 @@ namespace Insight
 
 		void DescriptorAllocator::SetSampler(u32 set, u32 binding, const RHI_Sampler* sampler)
 		{
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			{
+				// Apply an offset to our bindings as vulkan shaders are compiled with these offsets 
+				// due to the possible binding idx conflict.
+				binding += c_VulkanSamplerBindingShift;
+			}
+
 			if (!CheckSetAndBindingBounds(set, binding))
 			{
 				return;
@@ -565,7 +579,7 @@ namespace Insight
 			}
 			if (!descriptor_set)
 			{
-				IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
+				//IS_CORE_ERROR("[GPUDescriptorAllocator::CheckSetAndBindingBounds] Set: '{}' is out of range.", set);
 				return false;
 			}
 
@@ -581,7 +595,7 @@ namespace Insight
 
 			if (!foundBinding)
 			{
-				IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
+				//IS_CORE_ERROR("[DescriptorAllocator::CheckSetAndBindingBounds] Binding: '{0}' is out of range.", binding);
 				return false;
 			}
 			return true;

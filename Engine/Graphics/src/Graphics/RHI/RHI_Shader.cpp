@@ -172,11 +172,11 @@ namespace Insight
 				arguments.push_back(L"VULKAN");
 				arguments.push_back(L"-spirv");
 
-				arguments.push_back(L"-fvk-auto-shift-bindings");
+				//arguments.push_back(L"-fvk-auto-shift-bindings");
 				//arguments.push_back(L"-fspv-target-env=vulkan1.2");
 				//arguments.push_back(L"-fvk-b-shift"); arguments.push_back(L"1000"); arguments.push_back(L"0");
-				//arguments.push_back(L"-fvk-t-shift"); arguments.push_back(L"6"); arguments.push_back(L"0");
-				//arguments.push_back(L"-fvk-u-shift"); arguments.push_back(L"12"); arguments.push_back(L"0");
+				arguments.push_back(L"-fvk-t-shift"); arguments.push_back(L"1000"); arguments.push_back(L"all");
+				arguments.push_back(L"-fvk-u-shift"); arguments.push_back(L"2000"); arguments.push_back(L"all");
 			}
 			else
 			{
@@ -198,7 +198,7 @@ namespace Insight
 			{
 				arguments.push_back(L"-spirv");
 			}
-			arguments.push_back(L"-fspv-reflect");
+			//arguments.push_back(L"-fspv-reflect");
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
 				&Source,								// Source buffer.
 				arguments.data(),						// Array of pointers to arguments.

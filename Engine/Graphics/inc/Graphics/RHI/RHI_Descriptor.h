@@ -18,8 +18,9 @@ namespace Insight
 		class RHI_Texture;
 		class RHI_Sampler;
 
-		constexpr u32 c_VulkanTextureBindingShift = 6;
-		constexpr u32 c_VulkanSamplerBindingShift = c_VulkanTextureBindingShift + 6;
+		constexpr u32 c_VulkanTextureBindingShift = 1000;
+		constexpr u32 c_VulkanUnorderedBindingShift = 2000;
+		constexpr u32 c_VulkanSamplerBindingShift = 0;
 
 		namespace RHI::DX12
 		{
