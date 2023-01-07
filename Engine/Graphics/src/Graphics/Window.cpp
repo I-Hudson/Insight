@@ -155,7 +155,11 @@ namespace Insight
 		std::unordered_map<GLFWwindow*, WindowInputs> Window::m_windowInputs;
 
 		bool Window::Init(Input::InputSystem* inputSystem, int width, int height, std::string title)
+		{
+			return Init(inputSystem, false, width, height, std::move(title));
+		}
 
+		bool Window::Init(Input::InputSystem* inputSystem, bool startHidden, int width, int height, std::string title)
 		{
 			m_inputSystem = inputSystem;
 
@@ -184,11 +188,16 @@ namespace Insight
 				glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 			}
 
+			if (startHidden)
+			{
+				glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+			}
+
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			m_glfwWindow = glfwCreateWindow(m_size.x, m_size.y, m_title.c_str(), NULL, NULL);
 
 			int windowPosX, windowPosY;
-			glfwGetWindowPos(m_glfwWindow, &windowPosX, & windowPosY);
+			glfwGetWindowPos(m_glfwWindow, &windowPosX, &windowPosY);
 			m_position = { windowPosX , windowPosY };
 
 			glfwSetWindowPosCallback(m_glfwWindow, [](GLFWwindow* window, int xpos, int ypos)

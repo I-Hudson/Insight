@@ -34,7 +34,7 @@ namespace Insight
 				graphcisAPI = Graphics::GraphicsAPI::Vulkan;
 			}
 
-			m_window.Init(m_inputSystem);
+			m_window.Init(m_inputSystem, true);
 
 			m_context = Graphics::RenderContext::New(graphcisAPI);
 			ASSERT(m_context);

@@ -65,6 +65,7 @@ IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
 IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
 IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
 IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
+IncludeDirs["splash"] = "%{wks.location}vendor/Splash/Splash/inc"
 IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
 IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
 IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompiler/inc"
@@ -186,6 +187,8 @@ workspace "Insight"
             "IS_CPP_WINRT",
 
             "NOMINMAX",
+
+            "SPLASH_PLATFORM_WINDOWS",
             
             "VK_USE_PLATFORM_WIN32_KHR",
         }

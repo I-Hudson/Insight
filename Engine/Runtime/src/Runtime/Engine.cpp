@@ -20,6 +20,8 @@
 
 #include "Graphics/Mesh.h"
 
+#include "SplashScreen.h"
+
 #include "imgui.h"
 
 namespace Insight
@@ -31,9 +33,15 @@ namespace Insight
 		auto square(int x) -> int { return x * x; }
 		auto divide(int x) -> int { return x / x; }
 
+		SplashScreen splashScreen;
+
 		bool Engine::Init(int argc, char** argv)
 		{
 			Platform::Initialise();
+
+			splashScreen.Init(860, 420);
+			splashScreen.SetBackgroundImage("./Resources/Insight/cover.png");
+			splashScreen.Show();
 
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
 			Core::CommandLineArgs::ParseCommandLine("./cmdline.txt");
@@ -80,6 +88,8 @@ namespace Insight
 			m_renderpasses.Create();
 
 			OnInit();
+
+			splashScreen.Destroy();
 
 			return true;
 		}

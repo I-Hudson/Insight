@@ -40,3 +40,6 @@
 [submodule "vendor/DirectX-Headers"]
 	path = vendor/DirectX-Headers
 	url = git@github.com:microsoft/DirectX-Headers.git
+[submodule "vendor/Splash"]
+	path = vendor/Splash
+	url = git@github.com:I-Hudson/Splash.git

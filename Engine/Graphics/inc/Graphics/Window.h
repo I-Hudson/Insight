@@ -39,6 +39,7 @@ namespace Insight
 		public:
 
 			bool Init(Input::InputSystem* inputSystem, int width = 640, int height = 720, std::string title = "DefaultTitle");
+			bool Init(Input::InputSystem* inputSystem, bool startHidden, int width = 640, int height = 720, std::string title = "DefaultTitle");
 			void Destroy();
 			void Update();
 

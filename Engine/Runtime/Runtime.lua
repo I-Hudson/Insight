@@ -38,6 +38,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.stb_image}",
+        "%{IncludeDirs.splash}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
@@ -101,6 +102,7 @@ project "Insight_Runtime"
         {
             "OptickCore.lib",
             "assimpd.lib",
+            "Splashd.lib",
         }
         libdirs
         {
@@ -114,6 +116,7 @@ project "Insight_Runtime"
         {
             "OptickCore.lib",
             "assimp.lib",
+            "Splash.lib",
         }
         libdirs
         {
