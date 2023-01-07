@@ -1,8 +1,6 @@
 require("premake5")
 
 project "Insight_Core"  
-    language "C++"
-    cppdialect "C++17"
     location "./"
 
     targetname ("%{prj.name}" .. output_project_subfix)

@@ -351,8 +351,8 @@ namespace Insight
 					}
 					else if (renderpassAttachments.size() == 0)
 					{
-						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr,
-							&AttachmentDescription::Default(VkFormatToPixelFormat[(int)contextVulkan->GetSwapchainColourFormat()], ImageLayout::PresentSrc)));
+						AttachmentDescription defaultAttachment = AttachmentDescription::Default(VkFormatToPixelFormat[(int)contextVulkan->GetSwapchainColourFormat()], ImageLayout::PresentSrc);
+						renderpassAttachments.push_back(AttachmentCreation::CreateColour(nullptr, &defaultAttachment));
 
 						colourReferences.push_back(VkAttachmentReference{ static_cast<u32>(renderpassAttachments.size() - 1), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL });
 						AttachmentCreation::AddRenderpassDescriptionAttachmentData(description.Attachments, renderpassAttachments.at(renderpassAttachments.size() - 1ull));

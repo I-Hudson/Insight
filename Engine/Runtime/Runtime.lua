@@ -1,8 +1,6 @@
 local local_post_build_commands = post_build_commands
 
 project "Insight_Runtime"  
-    language "C++"
-    cppdialect "C++17"
     configurations { "Debug", "Release" } 
     location "./"
     

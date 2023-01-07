@@ -109,9 +109,9 @@ namespace Insight
 				typename = std::enable_if_t<std::is_invocable_v<ReturnType(Args...), UArgs...>>>
 			ReturnType operator()(UArgs... args) const
 			{
-				if (m_stub != nullptr)
+				if (m_function != nullptr)
 				{
-					return (*m_function)(m_instance, std::forward<Args>(args)...);
+					return (*m_function)(m_callee, std::forward<Args>(args)...);
 				}
 
 				if CONSTEXPR(std::is_default_constructible_v<ReturnType>)

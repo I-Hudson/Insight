@@ -2,8 +2,6 @@ local local_post_build_commands = {}
 
 project "Insight_Editor"  
     kind "ConsoleApp"   
-    language "C++"
-    cppdialect "C++17"
     configurations { "Debug", "Release" } 
     location "./"
     

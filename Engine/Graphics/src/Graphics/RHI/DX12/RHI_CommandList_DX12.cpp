@@ -271,12 +271,14 @@ namespace Insight
 				RHI_Texture_DX12* dstDX12 = static_cast<RHI_Texture_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 
+				D3D12_RESOURCE_DESC desc = dstDX12->GetResource()->GetDesc();
+
 				u64 requriedSize = 0;
 				std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 1> layouts;
 				std::array<u64, 1> rowSizeInBytes;
 				std::array<UINT, 1> numRows;
 				m_contextDX12->GetDevice()->GetCopyableFootprints(
-					&dstDX12->GetResource()->GetDesc(),
+					&desc,
 					0,
 					1, 
 					0, 

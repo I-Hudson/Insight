@@ -72,14 +72,14 @@ namespace Core
 		FactoryMap& operator=(const FactoryMap& other)
 		{
 			m_objects = other.m_objects;
-			m_factoryFunc = other.m_factoryFunc;
+			//m_factoryFunc = other.m_factoryFunc;
 			m_destrcutorStruct = other.m_destrcutorStruct;
 		}
 
 		FactoryMap& operator=(FactoryMap&& other)
 		{
 			m_objects = other.m_objects;
-			m_factoryFunc = other.m_factoryFunc;
+			//m_factoryFunc = other.m_factoryFunc;
 			m_destrcutorStruct = other.m_destrcutorStruct;
 		}
 

@@ -142,9 +142,9 @@ namespace Insight
                     , static_cast<RHI::Vulkan::RHI_Texture_Vulkan*>(tex_output)->GetImageView(), resolution_output_x, resolution_output_y
                     , static_cast<VkFormat>(PixelFormatToVulkan(tex_output->GetFormat())), name_output, FFX_RESOURCE_STATE_UNORDERED_ACCESS);
 
-                m_ffx_fsr2_dispatch_description.exposure                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_InputExposure");
-                m_ffx_fsr2_dispatch_description.reactive                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyInputReactiveMap");
-                m_ffx_fsr2_dispatch_description.transparencyAndComposition  = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyTransparencyAndCompositionMap");            
+                //m_ffx_fsr2_dispatch_description.exposure                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_InputExposure");
+                //m_ffx_fsr2_dispatch_description.reactive                    = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyInputReactiveMap");
+                //m_ffx_fsr2_dispatch_description.transparencyAndComposition  = ffxGetTextureResourceVK(&m_ffx_fsr2_context, nullptr, nullptr, 1, 1, VK_FORMAT_UNDEFINED, L"FSR2_EmptyTransparencyAndCompositionMap");            
 #endif
             }
             else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)

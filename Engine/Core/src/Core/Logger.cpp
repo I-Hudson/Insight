@@ -18,8 +18,8 @@ namespace Insight
 		{
 			spdlog::set_pattern("%^[%T] %n: %v%$");
 
-			constexpr char* InsightFile = "Insight.txt";
-			constexpr char* AppFile = "App.txt";
+			constexpr const char* InsightFile = "Insight.txt";
+			constexpr const char* AppFile = "App.txt";
 
 			std::filesystem::remove(InsightFile);
 			std::filesystem::remove(AppFile);

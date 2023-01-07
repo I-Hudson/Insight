@@ -8,21 +8,30 @@
 #include <type_traits>
 #include <utility>
 
+namespace Insight::Core
+{
+	struct IS_CORE MemoryNewObject
+	{
+		MemoryNewObject(void* ptr);
+		void* Ptr;
+	};
+}
+
 /// Helper macro for making a new pointer with tracking.
-#define NewTracked(Type)			static_cast<Type*>(Insight::Core::MemoryNewObject(new Type()).Ptr)
+#define NewTracked(Type)			static_cast<Type*>(::Insight::Core::MemoryNewObject(new Type()).Ptr)
 /// Helper macro for making a new pointer with args and tracking.
-#define NewArgsTracked(Type, ...)	static_cast<Type*>(Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
+#define NewArgsTracked(Type, ...)	static_cast<Type*>(::Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
 /// /// Helper macro for tracking a exists pointer.
-#define TrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
+#define TrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
 #define DeleteTracked(Ptr)								\
-Insight::Core::MemoryTracker::Instance().UnTrack(Ptr);	\
+::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr);	\
 if (Ptr)												\
 {														\
 	delete Ptr;											\
 	Ptr = nullptr;										\
 };
-#define UntrackPtr(Ptr)				Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
+#define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
 template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
@@ -227,7 +236,7 @@ public:
 	RPtr(TPtr* ptr)
 	{
 		m_ptr = ptr;
-		m_refCount = NewTracked(RefCount);
+		m_refCount = NewTracked(Insight::RefCount);
 		Inc();
 	}
 	RPtr(const RPtr& other)
@@ -555,15 +564,6 @@ private:
 	T* m_ptr = nullptr;
 };
 
-namespace Insight::Core
-{
-	struct IS_CORE MemoryNewObject
-	{
-		MemoryNewObject(void* ptr);
-		void* Ptr;
-	};
-}
-
 //// <summary>
 //// Return a UPtr.
 //// </summary>
@@ -734,15 +734,23 @@ public:
 	{ return m_ptr == other.m_ptr; }
 
 	bool operator!=(const TObjectPtr<T>& other) const
-	{ return !(*this == other) }
+	{
+		return !(*this == other);
+	}
 	template<typename TOther>
 	bool operator!=(const TObjectPtr<TOther>& other) const
-	{ return !(*this == other) }
+	{
+		return !(*this == other);
+	}
 	bool operator!=(const TObjectOwnPtr& other) const
-	{ return !(*this == other) }
+	{
+		return !(*this == other);
+	}
 	template<typename TOther>
 	bool operator!=(const TObjectOwnPtr<TOther>& other) const
-	{ return !(*this == other) }
+	{
+		return !(*this == other);
+	}
 
 	void Reset()
 	{
@@ -1072,22 +1080,22 @@ public:
 
 	bool operator!=(const TObjectPtr& other) const
 	{
-		return !(*this == other)
+		return !(*this == other);
 	}
 	template<typename TOther>
 	bool operator!=(const TObjectPtr<TOther>& other) const
 	{
-		return !(*this == other)
+		return !(*this == other);
 	}
 
 	bool operator!=(const TObjectOwnPtr<T>& other) const
 	{
-		return !(*this == other)
+		return !(*this == other);
 	}
 	template<typename TOther>
 	bool operator!=(const TObjectOwnPtr<TOther>& other) const
 	{
-		return !(*this == other)
+		return !(*this == other);
 	}
 
 	void Reset()

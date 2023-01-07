@@ -43,7 +43,9 @@ namespace Insight
 
         std::string FileSystem::GetAbsolutePath(const std::string& path)
         {
-            return PathToUnix(std::filesystem::absolute(path).u8string());
+            std::filesystem::path fsPath = std::filesystem::absolute(std::filesystem::path(path));
+            std::string absPath = fsPath.string();
+            return PathToUnix(absPath);
         }
 
         std::string FileSystem::PathToUnix(std::string& path)

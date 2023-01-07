@@ -1,8 +1,6 @@
 local_post_build_commands = post_build_commands
 
 project "Insight_Maths"  
-    language "C++"
-    cppdialect "C++17"
     location "./"
 
     targetname ("%{prj.name}" .. output_project_subfix)

@@ -109,6 +109,9 @@ namespace Insight
 		{
 			THREAD_SAFE;
 			static_assert(std::is_base_of_v<RHI_Resource, TValue>);
+			static_assert(!std::is_pointer_v<TValue>);
+
+			using TypePtr = TValue*;
 
 			struct Item
 			{
@@ -127,7 +130,7 @@ namespace Insight
 					return itr->second.Id;
 				}
 
-				TypePtr ptr = CreateResource();
+				TypePtr ptr = RHI_ResourceManager<TValue>::CreateResource();
 				ptr->SetName(str);
 				int id = GetFreeId();
 
@@ -173,7 +176,7 @@ namespace Insight
 				m_itemLookup.clear();
 				m_idToStrLookup.clear();
 				m_currentMaxId = 0;
-				ReleaseAll();
+				RHI_ResourceManager<TValue>::ReleaseAll();
 			}
 
 		private:

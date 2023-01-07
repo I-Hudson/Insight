@@ -89,9 +89,10 @@ namespace Insight
 					Platform::MemCopy(defaultClearColour.Color, Color, sizeof(Color));
 				}
 
+				CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 				/// Create the texture.
 				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
-					&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+					&heapProperties,
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
 					ImageLayoutToDX12ResouceState(m_infos.at(0).Layout),

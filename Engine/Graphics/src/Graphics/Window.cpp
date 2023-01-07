@@ -17,7 +17,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		constexpr char* CMD_START_WINDOW_MINIMISED = "start_window_minimised";
+		constexpr const char* CMD_START_WINDOW_MINIMISED = "start_window_minimised";
 
 		const std::unordered_map<u32, Input::MouseButtons> GLFW_MOUSE_BUTTONS_TO_INTERNAL =
 		{

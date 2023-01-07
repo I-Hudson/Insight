@@ -19,7 +19,7 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		constexpr char* SHADER_DYNAMIC_TAG = "__dynamic__";
+		constexpr const char* SHADER_DYNAMIC_TAG = "__dynamic__";
 
 		RHI_Shader* RHI_Shader::New()
 		{

@@ -84,6 +84,10 @@ workspace "Insight"
     staticruntime "off"
     location "../../"
 
+    language ("C++")
+    cppdialect ("C++17")
+
+
     configurations
     {
         "Debug",
