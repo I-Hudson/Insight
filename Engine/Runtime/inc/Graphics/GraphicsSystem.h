@@ -34,6 +34,9 @@ namespace Insight
 			void Render();
 
 		private:
+			void InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI);
+
+		private:
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
 			Graphics::RenderGraph m_renderGraph;

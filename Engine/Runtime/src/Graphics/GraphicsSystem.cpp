@@ -36,18 +36,7 @@ namespace Insight
 
 			m_window.Init(m_inputSystem, true);
 
-			m_context = Graphics::RenderContext::New(graphcisAPI);
-			ASSERT(m_context);
-			ASSERT(m_context->Init());
-
-			Graphics::SwapchainDesc swapchainDesc = {};
-			swapchainDesc.Width = m_window.GetWidth();
-			swapchainDesc.Height = m_window.GetHeight();
-			swapchainDesc.Format = PixelFormat::R8G8B8A8_UNorm;
-			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Variable;
-			m_context->CreateSwapchain(swapchainDesc);
-
-			m_context->InitImGui();
+			InitialiseRenderContext(graphcisAPI);
 
 			m_renderGraph.Init(m_context);
 
@@ -77,6 +66,22 @@ namespace Insight
 		void GraphicsSystem::Render()
 		{
 			m_renderGraph.Execute();
+		}
+
+		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)
+		{
+			m_context = Graphics::RenderContext::New(graphicsAPI);
+			ASSERT(m_context);
+			ASSERT(m_context->Init());
+
+			Graphics::SwapchainDesc swapchainDesc = {};
+			swapchainDesc.Width = m_window.GetWidth();
+			swapchainDesc.Height = m_window.GetHeight();
+			swapchainDesc.Format = PixelFormat::R8G8B8A8_UNorm;
+			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Variable;
+			m_context->CreateSwapchain(swapchainDesc);
+
+			m_context->InitImGui();
 		}
 	}
 }
