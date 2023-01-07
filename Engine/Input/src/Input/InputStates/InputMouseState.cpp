@@ -30,7 +30,8 @@ namespace Insight
 		{
 			return __super::HasInput()
 				|| m_scrollXOffset != 0.0f 
-				|| m_scrollYOffset != 0.0f;
+				|| m_scrollYOffset != 0.0f
+				|| m_mouseMoved;
 		}
 
 		void InputMouseState::ClearFrame()
@@ -38,6 +39,7 @@ namespace Insight
 			__super::ClearFrame();
 			m_scrollXOffset = 0.0f;
 			m_scrollYOffset = 0.0f;
+			m_mouseMoved = false;
 		}
 
 		float InputMouseState::GetXPosition() const
@@ -64,6 +66,7 @@ namespace Insight
 		{
 			m_xPosition = xPosition;
 			m_yPosition = yPosition;
+			m_mouseMoved = true;
 		}
 
 		void InputMouseState::MouseScrolled(float xOffset, float yOffset)

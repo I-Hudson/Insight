@@ -57,7 +57,7 @@ namespace Insight
 			InputButtonState() { }
 			~InputButtonState() { }
 
-			void Update(float const deltaTime)
+			virtual void Update(float const deltaTime)
 			{
 				for (auto& button : m_buttons)
 				{

@@ -40,8 +40,11 @@ namespace Insight
 		private:
 			float m_xPosition = 0.0f;
 			float m_yPosition = 0.0f;
+
 			float m_scrollXOffset = 0.0f;
 			float m_scrollYOffset = 0.0f;
+
+			bool m_mouseMoved = false;
 		};
 	}
 }
