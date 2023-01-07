@@ -46,6 +46,14 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\w
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"             "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Windows.CppWinRT\build\native\lib\x64\cppwinrt_fast_forwarder.lib"           "lib"
 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"             "lib"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"             "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                   "dll"
+
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompiler.lib"           "lib"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"           "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                 "dll"
+
 pause
 
 :COPY_TO_DEBUG_DEPS

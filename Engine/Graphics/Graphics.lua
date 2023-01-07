@@ -40,7 +40,6 @@ project "Insight_Graphics"
         "%{IncludeDirs.glslang}win_debug/inc",
         "%{IncludeDirs.vulkan}",
         "%{IncludeDirs.spirv_reflect}",
-        "%{IncludeDirs.dxcompiler}",
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
         "%{IncludeDirs.optick}",
@@ -50,6 +49,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.Aftermath}",
         "%{IncludeDirs.DirectXHeaders}",
         "%{IncludeDirs.DirectXAgilityHeaders}",
+        "%{IncludeDirs.DirectXShaderCompiler}",
     }
 
     files 

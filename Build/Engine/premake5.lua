@@ -56,7 +56,6 @@ IncludeDirs["spdlog"] = "%{wks.location}vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 IncludeDirs["spirv_reflect"] = "%{wks.location}vendor/SPIRV-Reflect"
-IncludeDirs["dxcompiler"] = "%{wks.location}vendor/dxcompiler/win_debug/inc"
 IncludeDirs["assimp"] = "%{wks.location}vendor/assimp/include"
 IncludeDirs["optick"] = "%{wks.location}vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
@@ -68,6 +67,7 @@ IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_20
 IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
 IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
 IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
+IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompiler/inc"
 
 LibDirs = {}
 
@@ -75,8 +75,6 @@ LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
 LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
 
 LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
-LibDirs["dxcompiler_win_d"] = "%{wks.location}vendor/dxcompiler/win_debug/lib/x64"
-LibDirs["dxcompiler_win"] = "%{wks.location}vendor/dxcompiler/win_release/lib/x64"
 LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 
 workspace "Insight"
