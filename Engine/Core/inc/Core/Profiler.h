@@ -26,11 +26,13 @@ namespace Insight
 	#define IS_PROFILE_FRAME(frame_name)	FrameMarkNamed(frame_name)
 	#define IS_PROFILE_THREAD(name)			::tracy::SetThreadName(name);
 #elif defined(IS_PROFILE_PIX)
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #include "WinPixEventRuntime/pix3.h"
 #define IS_PROFILE_FUNCTION()			PIXScopedEvent(PIX_COLOR_DEFAULT, __FUNCTION__)
 #define IS_PROFILE_SCOPE(name)			PIXScopedEvent(PIX_COLOR_DEFAULT, name)
-#define IS_PROFILE_FRAME(frame_name)	FrameMarkNamed(frame_name)
-#define IS_PROFILE_THREAD(name)			::tracy::SetThreadName(name);
+#define IS_PROFILE_FRAME(frame_name)	PIXScopedEvent(PIX_COLOR_DEFAULT, frame_name)
+#define IS_PROFILE_THREAD(name)			
 #endif
 #else
 	#define IS_PROFILE_FUNCTION()		

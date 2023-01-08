@@ -18,7 +18,10 @@ namespace Insight
 			while (!Optick::IsActive())
 #elif defined(IS_PROFILE_TRACY)
 			while (!tracy::GetProfiler().IsConnected())
+#else
+			while(false)
 #endif
+			
 			{
 #if defined(IS_PROFILE_OPTICK)
 				Optick::Update();
