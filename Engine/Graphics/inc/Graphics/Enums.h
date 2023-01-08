@@ -487,7 +487,6 @@ namespace Insight
 		{
 			Viewport, 
 			Scissor,
-			DepthBias,
 			LineWidth,
 		};
 		std::string DynamicStateToString(DynamicState dynamic_state);

@@ -43,6 +43,9 @@ namespace Insight
 				HashCombine(hash, DepthCompareOp);
 				HashCombine(hash, DepthBaisEnabled);
 				HashCombine(hash, DepthClampEnabled);
+
+				HashCombine(hash, DepthConstantBaisValue);
+				HashCombine(hash, DepthSlopeBaisValue);
 			}
 
 			{

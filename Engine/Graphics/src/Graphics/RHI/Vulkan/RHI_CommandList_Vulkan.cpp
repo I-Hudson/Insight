@@ -400,11 +400,6 @@ namespace Insight
 				m_drawData.Siccsior.y = height;
 			}
 
-			void RHI_CommandList_Vulkan::SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor)
-			{
-				vkCmdSetDepthBias(m_commandList, depth_bias_constant_factor, depth_bias_clamp, depth_bias_slope_factor);
-			}
-
 			void RHI_CommandList_Vulkan::SetLineWidth(float width)
 			{
 				vkCmdSetLineWidth(m_commandList, width);

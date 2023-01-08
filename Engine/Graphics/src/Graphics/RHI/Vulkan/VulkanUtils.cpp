@@ -950,7 +950,6 @@ namespace Insight
             {
             case Insight::Graphics::DynamicState::Viewport:     return VK_DYNAMIC_STATE_VIEWPORT;
             case Insight::Graphics::DynamicState::Scissor:      return VK_DYNAMIC_STATE_SCISSOR;
-            case Insight::Graphics::DynamicState::DepthBias:    return VK_DYNAMIC_STATE_DEPTH_BIAS;
             case Insight::Graphics::DynamicState::LineWidth:    return VK_DYNAMIC_STATE_LINE_WIDTH;
             default:
                 break;

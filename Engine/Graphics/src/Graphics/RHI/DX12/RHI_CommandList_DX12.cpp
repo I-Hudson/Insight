@@ -392,11 +392,6 @@ namespace Insight
 				m_commandList->RSSetScissorRects(1, rects);
 			}
 
-			void RHI_CommandList_DX12::SetDepthBias(float depth_bias_constant_factor, float depth_bias_clamp, float depth_bias_slope_factor)
-			{
-				//IS_CORE_INFO("[ RHI_CommandList_DX12::SetDepthBias] Not implemented.");
-			}
-
 			void RHI_CommandList_DX12::SetLineWidth(float width)
 			{
 				IS_CORE_INFO("[ RHI_CommandList_DX12::SetLineWidth] Not implemented.");
@@ -438,9 +433,14 @@ namespace Insight
 			void RHI_CommandList_DX12::Draw(u32 vertexCount, u32 instanceCount, u32 firstVertex, u32 firstInstance)
 			{
 				IS_PROFILE_FUNCTION();
-				ASSERT(m_commandList);
-				m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
-				++RenderStats::Instance().DrawCalls;
+				if (CanDraw())
+				{
+					{
+						IS_PROFILE_SCOPE("DrawInstanced");
+						m_commandList->DrawInstanced(vertexCount, instanceCount, firstVertex, firstInstance);
+						++RenderStats::Instance().DrawCalls;
+					}
+				}
 			}
 
 			void RHI_CommandList_DX12::DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance)
@@ -515,6 +515,12 @@ namespace Insight
 				std::vector<DescriptorSet> const& descriptorSets = m_descriptorAllocator->GetAllocatorDescriptorSets();
 				for (const auto& set : descriptorSets)
 				{
+					if (set.Bindings.size() == 0)
+					{
+						// If the set is a 'bindless' set then just continue.
+						continue;
+					}
+
 					if (set.Bindings.size() == c_MaxRootDescriptorBindingForRootDescriptor
 						&& (set.Bindings.at(0).Type == DescriptorType::Unifom_Buffer
 							|| set.Bindings.at(0).Type == DescriptorType::Storage_Buffer 

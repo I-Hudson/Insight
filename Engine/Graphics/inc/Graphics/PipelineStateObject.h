@@ -42,6 +42,9 @@ namespace Insight
 			bool DepthBaisEnabled = false;
 			bool DepthClampEnabled = false;
 
+			float DepthConstantBaisValue = 0.0f;
+			float DepthSlopeBaisValue = 0.0f;
+
 			bool BlendEnable = false;
 			ColourComponentFlags ColourWriteMask = ColourComponentR | ColourComponentG | ColourComponentB | ColourComponentA;
 			BlendFactor SrcColourBlendFactor = {};

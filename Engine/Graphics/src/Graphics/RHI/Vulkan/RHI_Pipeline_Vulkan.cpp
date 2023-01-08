@@ -75,9 +75,9 @@ namespace Insight
 				pipelineRasterizationStateCreateInfo.cullMode = CullModeToVulkan(pso.CullMode);
 				pipelineRasterizationStateCreateInfo.frontFace = FrontFaceToVulkan(pso.FrontFace);
 				pipelineRasterizationStateCreateInfo.depthBiasEnable = pso.DepthBaisEnabled;
-				pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f;
+				pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = pso.DepthConstantBaisValue;
 				pipelineRasterizationStateCreateInfo.depthBiasClamp = 0.0f;
-				pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f;
+				pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = pso.DepthSlopeBaisValue;
 				pipelineRasterizationStateCreateInfo.lineWidth = 1.0f;
 
 				VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = {};
