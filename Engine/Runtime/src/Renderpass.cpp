@@ -83,11 +83,11 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			model = model_backpack;
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_vulklan_scene = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			model = model_vulklan_scene;
 
 			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
@@ -162,7 +162,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (    model
+			if (model
 				&& !modelAddedToScene
 				&& model->GetResourceState() == Runtime::EResoruceStates::Loaded)
 			{
@@ -252,30 +252,21 @@ namespace Insight
 
 				});
 
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+			ShadowPass();
+			//ShadowCullingPass();
+			if (Depth_Prepass)
 			{
-				ShadowPass();
-				//ShadowCullingPass();
-				if (Depth_Prepass)
-				{
-					DepthPrepass();
-				}
-				GBuffer();
-				TransparentGBuffer();
-				Composite();
-				FSR2();
-				Swapchain();
+				DepthPrepass();
+			}
+			GBuffer();
+			TransparentGBuffer();
+			Composite();
+			//FSR2();
+			Swapchain();
 
-				// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
-				GFXHelper();
-				ImGuiPass();
-			}
-			else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
-			{
-				ShadowPass();
-				Runtime::DX12RenderPasses::Render();
-				ImGuiPass();
-			}
+			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
+			GFXHelper();
+			ImGuiPass();
 		}
 
 		void Renderpass::Destroy()
@@ -397,6 +388,8 @@ namespace Insight
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
+					pso.DepthConstantBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -depth_constant_factor : depth_constant_factor;
+					pso.DepthSlopeBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -depth_slope_factor : depth_slope_factor;
 					if (Reverse_Z_For_Depth)
 					{
 						pso.DepthSteniclClearValue = glm::vec2(0.0f, 0.0f);
@@ -406,7 +399,7 @@ namespace Insight
 					{
 						pso.DepthCompareOp = CompareOp::LessOrEqual;
 					}
-					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor, DynamicState::DepthBias };
+					pso.Dynamic_States = { DynamicState::Viewport, DynamicState::Scissor };
 					builder.SetPipeline(pso);
 				},
 				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmdList)
@@ -415,15 +408,6 @@ namespace Insight
 
 					PipelineStateObject pso = render_graph.GetPipelineStateObject("Cascade shadow pass");
 					cmdList->BindPipeline(pso, nullptr);
-
-					if (Reverse_Z_For_Depth)
-					{
-						cmdList->SetDepthBias(-depth_constant_factor, 0.0f, -depth_slope_factor);
-					}
-					else
-					{
-						cmdList->SetDepthBias(depth_constant_factor, 0.0f, depth_slope_factor);
-					}
 
 					cmdList->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 

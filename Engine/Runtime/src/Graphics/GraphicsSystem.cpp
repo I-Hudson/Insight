@@ -21,11 +21,14 @@ namespace Insight
 			PixelFormatExtensions::Init();
 
 			Graphics::GraphicsAPI graphcisAPI = Graphics::GraphicsAPI::None;
-			if (Core::CommandLineArgs::GetCommandLineValue("graphicsapi")->GetString() == "vulkan")
+			std::string graphicsAPI_CMD = Core::CommandLineArgs::GetCommandLineValue("graphicsapi")->GetString();
+
+			if (graphicsAPI_CMD == "vulkan"
+				|| graphicsAPI_CMD == "v")
 			{
 				graphcisAPI = Graphics::GraphicsAPI::Vulkan;
 			}
-			else if (Core::CommandLineArgs::GetCommandLineValue("graphicsapi")->GetString() == "dx12")
+			else if (graphicsAPI_CMD == "dx12")
 			{
 				graphcisAPI = Graphics::GraphicsAPI::DX12;
 			}

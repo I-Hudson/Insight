@@ -348,7 +348,7 @@ namespace Insight
 						barrier.Image = texture;
 
 						barrier.SrcAccessFlags = AccessFlagBits::None;
-						barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
+						barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : texture->GetLayout();
 
 						barrier.DstAccessFlags = AccessFlagBits::ColorAttachmentWrite;
 						barrier.NewLayout = ImageLayout::ColourAttachment;
@@ -375,7 +375,7 @@ namespace Insight
 					barrier.Image = texture;
 
 					barrier.SrcAccessFlags = AccessFlagBits::None;
-					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : ImageLayout::Undefined;
+					barrier.OldLayout = previousBarrier.IsValid() ? previousBarrier.NewLayout : texture->GetLayout();
 
 					barrier.DstAccessFlags = AccessFlagBits::DepthStencilAttachmentWrite;
 					barrier.NewLayout = ImageLayout::DepthStencilAttachment;

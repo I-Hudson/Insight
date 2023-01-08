@@ -14,7 +14,7 @@ VertexOutput VSMain(uint id : SV_VertexID)
 #ifdef VULKAN
     o.Position 	= float4(o.UV * 2.0f + -1.0f, 0.0f, 1.0f);
 #elif DX12
-    o.Position 	= float4(o.UV * 2.0f + float2(-1.0f, 1.0f), 0.0f, 1.0f);
+    o.Position 	= float4(o.UV * float2(2.0f, -2.0f) + float2(-1.0f, 1.0f), 0.0f, 1.0f);
 #endif
 	return o;
 }
