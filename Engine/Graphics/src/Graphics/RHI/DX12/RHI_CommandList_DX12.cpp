@@ -356,9 +356,8 @@ namespace Insight
 							0, 
 							0, 
 							nullptr);
-
-						depthStencilHandle = dsHandle.CPUPtr;
 					}
+					depthStencilHandle = dsHandle.CPUPtr;
 				}
 
 				OMSetRenderTargets(static_cast<int>(renderTargetHandles.size()), renderTargetHandles.data(), false, depthStencilHandle.ptr != 0 ? &depthStencilHandle : nullptr);
