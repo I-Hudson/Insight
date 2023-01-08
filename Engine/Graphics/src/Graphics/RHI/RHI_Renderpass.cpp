@@ -19,7 +19,6 @@ namespace Insight
 	namespace Graphics
 	{
 		AttachmentDescription::AttachmentDescription()
-			: DepthStencilClear(glm::vec2(1.0f, 0.0f))
 		{ }
 
 		u64 AttachmentDescription::GetHash() const
@@ -131,7 +130,6 @@ namespace Insight
 				if (description.Attachments.size() <= colourImageIndex)
 				{
 					description.Attachments.push_back(AttachmentDescription::Default(colourImage->GetFormat(), ImageLayout::ColourAttachment));
-					description.Attachments.back().ClearColour = description.Pso->RenderTargetClearValues[colourImageIndex];
 				}
 				++colourImageIndex;
 			}
@@ -139,7 +137,6 @@ namespace Insight
 			if (description.DepthStencil && !description.DepthStencilAttachment.IsValid())
 			{
 				description.DepthStencilAttachment = AttachmentDescription::Default(description.DepthStencil->GetFormat(), ImageLayout::DepthStencilAttachment);
-				description.DepthStencilAttachment.DepthStencilClear = description.Pso->DepthSteniclClearValue;
 			}
 
 			if (description.SwapchainPass)

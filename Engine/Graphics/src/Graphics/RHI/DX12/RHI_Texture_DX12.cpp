@@ -73,21 +73,23 @@ namespace Insight
 					D3D12_TEXTURE_LAYOUT_UNKNOWN,
 					0);
 
-				D3D12_CLEAR_VALUE defaultClearColour = {};
-				defaultClearColour.Format = resourceDesc.Format;
+				D3D12_CLEAR_VALUE clearColour = {};
+				clearColour.Format = resourceDesc.Format;
 
-				bool enableOptimizeClearColour = m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment 
-					|| m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment;
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment)
 				{
-					defaultClearColour.DepthStencil.Depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
-					defaultClearColour.DepthStencil.Stencil = 0;
+					clearColour.DepthStencil.Depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
+					clearColour.DepthStencil.Stencil = 0;
 				}
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
-					FLOAT Color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-					Platform::MemCopy(defaultClearColour.Color, Color, sizeof(Color));
+					glm::vec4 const& textureClearColour = GetClearColour();
+					ASSERT(sizeof(clearColour.Color) == sizeof(textureClearColour));
+					Platform::MemCopy(clearColour.Color, &textureClearColour[0], sizeof(clearColour.Color));
 				}
+
+				bool optimiseClearColourEnabled = m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
+					|| m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment;
 
 				CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 				/// Create the texture.
@@ -96,7 +98,7 @@ namespace Insight
 					D3D12_HEAP_FLAG_NONE,
 					&resourceDesc,
 					ImageLayoutToDX12ResouceState(m_infos.at(0).Layout),
-					enableOptimizeClearColour ? &defaultClearColour : nullptr,
+					optimiseClearColourEnabled ? &clearColour : nullptr,
 					IID_PPV_ARGS(&m_resource)));
 
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)

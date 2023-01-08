@@ -84,10 +84,10 @@ namespace Insight
 		void Renderpass::Create()
 		{
 			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			model = model_vulklan_scene;
+			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			model = model_sponza;
 
 			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
@@ -392,7 +392,6 @@ namespace Insight
 					pso.DepthSlopeBaisValue = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? -depth_slope_factor : depth_slope_factor;
 					if (Reverse_Z_For_Depth)
 					{
-						pso.DepthSteniclClearValue = glm::vec2(0.0f, 0.0f);
 						pso.DepthCompareOp = CompareOp::GreaterOrEqual;
 					}
 					else

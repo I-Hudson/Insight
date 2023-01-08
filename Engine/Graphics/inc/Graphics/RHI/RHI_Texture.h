@@ -5,8 +5,10 @@
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
 
-#include <vector>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 
+#include <vector>
 
 namespace Insight
 {
@@ -27,6 +29,8 @@ namespace Insight
 
 			u32 Mip_Count = 1;
 			u32 Layer_Count = 1;
+
+			glm::vec4 ClearColour = glm::vec4(0, 0, 0, 1);
 
 			ImageLayout Layout = ImageLayout::Undefined;
 			DeviceUploadStatus InitalStatus = DeviceUploadStatus::Unknown;
@@ -64,13 +68,14 @@ namespace Insight
 			void LoadFromFile(std::string filePath);
 			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
-			RHI_TextureInfo GetInfo(u32 mip = 0)					const { return m_infos.at(mip); }
-			int				GetWidth                (u32 mip = 0)	const { return m_infos.at(mip).Width; }
-			int				GetHeight               (u32 mip = 0)	const { return m_infos.at(mip).Height; }
-			int				GetChannels             (u32 mip = 0)	const { return 4; }
-			TextureType		GetType					(u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
-			PixelFormat		GetFormat				(u32 mip = 0)	const { return m_infos.at(mip).Format; }
-			ImageLayout		GetLayout				(u32 mip = 0)	const { return m_infos.at(mip).Layout; }
+			RHI_TextureInfo  GetInfo					(u32 mip = 0)	const { return m_infos.at(mip); }
+			int				 GetWidth                   (u32 mip = 0)	const { return m_infos.at(mip).Width; }
+			int				 GetHeight                  (u32 mip = 0)	const { return m_infos.at(mip).Height; }
+			int				 GetChannels                (u32 mip = 0)	const { return 4; }
+			TextureType		 GetType					(u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
+			PixelFormat		 GetFormat				    (u32 mip = 0)	const { return m_infos.at(mip).Format; }
+			ImageLayout		 GetLayout				    (u32 mip = 0)	const { return m_infos.at(mip).Layout; }
+			glm::vec4 const& GetClearColour			    ()				const { return m_infos.at(0).ClearColour; }
 
 			void			SetLayout				(ImageLayout newLayout, u32 mip = 0) { m_infos.at(mip).Layout = newLayout; }
 

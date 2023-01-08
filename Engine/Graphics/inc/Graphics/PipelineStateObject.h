@@ -26,10 +26,7 @@ namespace Insight
 			GPUQueue Queue = GPUQueue_Graphics;
 
 			std::array<RHI_Texture*, RenderTargetCount> RenderTargets;
-			glm::vec4 RenderTargetClearValues[RenderTargetCount];
-
 			RHI_Texture* DepthStencil = nullptr;
-			glm::vec2 DepthSteniclClearValue = glm::vec2(1.0f, 0.0f);
 
 			PrimitiveTopologyType PrimitiveTopologyType = PrimitiveTopologyType::TriangleList;
 			PolygonMode PolygonMode;

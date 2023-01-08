@@ -333,7 +333,8 @@ namespace Insight
 					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
 					if (description.LoadOp == AttachmentLoadOp::Clear)
 					{
-						ClearRenderTargetView(rtvHandle.CPUPtr, glm::value_ptr(description.ClearColour), 0, nullptr);
+						glm::vec4 const& clearColour = textureDX12->GetClearColour();
+						ClearRenderTargetView(rtvHandle.CPUPtr, glm::value_ptr(clearColour), 0, nullptr);
 					}
 
 					renderTargetHandles.push_back(rtvHandle.CPUPtr);
@@ -351,8 +352,8 @@ namespace Insight
 					{
 						ClearDepthStencilView(dsHandle.CPUPtr,
 							D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
-							renderDescription.DepthStencilAttachment.Depth, 
-							renderDescription.DepthStencilAttachment.Stencil, 
+							RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f, 
+							0, 
 							0, 
 							nullptr);
 

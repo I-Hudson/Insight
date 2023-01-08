@@ -36,19 +36,6 @@ namespace Insight
 			///===================================================================
 			/// Used for rendering 
 			u32 Layer_Array_Index = 0;
-			glm::vec4 ClearColour = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-			union
-			{
-				struct
-				{
-					glm::vec2 DepthStencilClear;
-				};
-				struct
-				{
-					float Depth;
-					int Stencil;
-				};
-			};
 
 			bool IsValid() const
 			{

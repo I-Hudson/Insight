@@ -168,7 +168,6 @@ namespace Insight
 
                     RenderpassDescription renderPassDescriptor = {};
                     renderPassDescriptor.AddAttachment(AttachmentDescription::Default(PixelFormat::Unknown, ImageLayout::ColourAttachment));
-                    renderPassDescriptor.Attachments.at(0).ClearColour = { 0.14f, 0.38f, 0.78f, 1.0f };
                     builder.SetRenderpass(renderPassDescriptor);
 
                     builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);

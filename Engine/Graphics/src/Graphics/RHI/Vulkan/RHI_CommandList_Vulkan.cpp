@@ -249,11 +249,12 @@ namespace Insight
 						auto makeRenderingAttachment =
 							[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
 						{
+							glm::vec4 const& textureClearColour = texture->GetClearColour();
 							std::array<float, 4> clearColourValues = {
-								attachment_description.ClearColour.x
-								, attachment_description.ClearColour.y
-								, attachment_description.ClearColour.z
-								, attachment_description.ClearColour.w };
+								  textureClearColour.x
+								, textureClearColour.y
+								, textureClearColour.z
+								, textureClearColour.w };
 
 
 							VkRenderingAttachmentInfo attachment = { };
@@ -296,9 +297,12 @@ namespace Insight
 
 							depthAttachment = makeRenderingAttachment(renderDescription.DepthStencil, renderDescription.DepthStencilAttachment);
 							depthAttachment.clearValue = { };
-							depthAttachment.clearValue.depthStencil = VkClearDepthStencilValue{
-								renderDescription.DepthStencilAttachment.DepthStencilClear.x,
-								static_cast<u32>(renderDescription.DepthStencilAttachment.DepthStencilClear.y) };
+							depthAttachment.clearValue.depthStencil = 
+								VkClearDepthStencilValue
+							{
+								RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f,
+								0u 
+							};
 							renderingInfo.pDepthAttachment = &depthAttachment;
 							renderingInfo.pStencilAttachment = &detencilAttacment;
 
@@ -630,11 +634,13 @@ namespace Insight
 							RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
 							imageViews.push_back(textureVulkan->GetImageView());
 
+							glm::vec4 const& textureClearColour = rt->GetClearColour();
+
 							VkClearValue clearValue;
-							clearValue.color.float32[0] = 0;
-							clearValue.color.float32[1] = 0;
-							clearValue.color.float32[2] = 0;
-							clearValue.color.float32[3] = 1;
+							clearValue.color.float32[0] = textureClearColour.x;
+							clearValue.color.float32[1] = textureClearColour.y;
+							clearValue.color.float32[2] = textureClearColour.z;
+							clearValue.color.float32[3] = textureClearColour.w;
 							clearColours.push_back(clearValue);
 						}
 					}
@@ -646,8 +652,8 @@ namespace Insight
 					imageViews.push_back(depthVulkan->GetImageView());
 
 					VkClearValue clearValue;
-					clearValue.depthStencil.depth = m_pso.DepthSteniclClearValue.x;
-					clearValue.depthStencil.stencil = static_cast<u32>(m_pso.DepthSteniclClearValue.y);
+					clearValue.depthStencil.depth = RenderContext::Instance().IsRenderOptionsEnabled(RenderOptions::ReverseZ) ? 0.0f : 1.0f;
+					clearValue.depthStencil.stencil = 0u;
 					clearColours.push_back(clearValue);
 				}
 
