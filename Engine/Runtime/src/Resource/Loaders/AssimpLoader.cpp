@@ -371,9 +371,9 @@ namespace Insight
 
 			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
 			ResourceId materailResourceId(material_path, Material::GetStaticResourceTypeId());
-			if (ResourceManagerExt::HasResource(materailResourceId))
+			if (ResourceManager::HasResource(materailResourceId))
 			{
-				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManagerExt::Load(materailResourceId).operator Insight::Runtime::IResource *()));
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Load(materailResourceId).operator Insight::Runtime::IResource *()));
 			}
 			else
 			{
@@ -436,7 +436,7 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("Create new texture");
-				Texture2D* texture = static_cast<Texture2D*>(ResourceManagerExt::Load(ResourceId(material_file_path, Texture2D::GetStaticResourceTypeId())).operator Insight::Runtime::IResource *());
+				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::Load(ResourceId(material_file_path, Texture2D::GetStaticResourceTypeId())).operator Insight::Runtime::IResource *());
 				material->SetTexture(textureType, texture);
 				material->AddReferenceResource(texture);
 			}

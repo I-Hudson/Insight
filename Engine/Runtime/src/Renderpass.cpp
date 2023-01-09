@@ -56,7 +56,8 @@ namespace Insight
 	Graphics::Frustum MainCameraFrustum = {};
 	bool UseCustomFrustum = false;
 
-	Runtime::Model* model = nullptr;
+	std::vector<Runtime::Model*> modelsToAddToScene;
+	//Runtime::Model* model1 = nullptr;
 	bool modelAddedToScene = false;
 
 	static bool enableFSR = false;
@@ -83,22 +84,13 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			model = model_backpack;
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
-			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
-			{ }
-			//Runtime::ResourceManager::Instance().Print();
-			//model_backpack->CreateEntityHierarchy();
-			//model_sponza->CreateEntityHierarchy();
-			//model_sponza_curtains->CreateEntityHierarchy();
-			//model_vulklan_scene->CreateEntityHierarchy();
-			//model->CreateEntityHierarchy();
-			//model->CreateEntityHierarchy();
+			modelsToAddToScene.push_back(model_sponza);
+			modelsToAddToScene.push_back(model_sponza_curtains);
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -158,13 +150,16 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			if (model
-				&& !modelAddedToScene
-				&& model->GetResourceState() == Runtime::EResoruceStates::Loaded)
+			for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
 			{
-				modelAddedToScene = true;
-				model->CreateEntityHierarchy();
-				IS_CORE_INFO("Model created");
+				if (modelsToAddToScene.at(i)
+					&& !modelAddedToScene
+					&& modelsToAddToScene.at(i)->GetResourceState() == Runtime::EResoruceStates::Loaded)
+				{
+					modelAddedToScene = true;
+					modelsToAddToScene.at(i)->CreateEntityHierarchy();
+					IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i)->GetFileName());
+				}
 			}
 
 			ImGui::Begin("Render");

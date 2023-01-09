@@ -81,7 +81,7 @@ namespace Insight
 
             if (!Texture)
             {
-                Texture = ResourceManagerExt::Load(ResourceId("./Resources/Christmas_Cute_Roadhog.png", Texture2D::GetStaticResourceTypeId()));
+                Texture = ResourceManager::Load(ResourceId("./Resources/Christmas_Cute_Roadhog.png", Texture2D::GetStaticResourceTypeId()));
                 Texture->OnLoaded.Bind<&SetTextureName>();
             }
 

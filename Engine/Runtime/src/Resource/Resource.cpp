@@ -202,7 +202,7 @@ namespace Insight
 
 		IResource* IResource::AddReferenceResource(const std::string& file_path, ResourceTypeId type_id)
 		{
-			IResource* resource = ResourceManagerExt::Load(ResourceId(file_path, type_id));
+			IResource* resource = ResourceManager::Load(ResourceId(file_path, type_id));
 
 			if (resource)
 			{
@@ -235,7 +235,7 @@ namespace Insight
 		{
 			if (resource == nullptr)
 			{
-				resource = ResourceManagerExt::Load(ResourceId(file_path, type_id));
+				resource = ResourceManager::Load(ResourceId(file_path, type_id));
 			}
 
 			if (resource)

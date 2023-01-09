@@ -19,7 +19,6 @@ namespace Insight
 	{
 		class IResource;
 		class ResourceManager;
-		class ResourceManagerExt;
 		class ResourceDatabase;
 
 		enum class ResourceStorageTypes
@@ -194,7 +193,6 @@ namespace Insight
 			mutable std::mutex m_mutex;
 
 			friend class ResourceManager;
-			friend class ResourceManagerExt; // Temp until old ResourceManager is removed.
 			friend class ResourceDatabase;
 		};
 	}

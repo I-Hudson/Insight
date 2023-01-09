@@ -11,9 +11,9 @@ namespace Insight
     {
 #define RESOURCE_LOAD_THREAD
 
-        ResourceDatabase* ResourceManagerExt::m_database;
+        ResourceDatabase* ResourceManager::m_database;
 
-        TObjectPtr<IResource> ResourceManagerExt::Load(ResourceId const& resourceId)
+        TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
         {
             ASSERT(m_database);
 
@@ -77,7 +77,7 @@ namespace Insight
             return resource;
         }
 
-        void ResourceManagerExt::Unload(ResourceId const& resourceId)
+        void ResourceManager::Unload(ResourceId const& resourceId)
         {
             ASSERT(m_database);
 
@@ -112,7 +112,7 @@ namespace Insight
             resource->OnUnloaded(resource);
         }
 
-        void ResourceManagerExt::Unload(TObjectPtr<IResource> Resource)
+        void ResourceManager::Unload(TObjectPtr<IResource> Resource)
         {
             if (Resource)
             {
@@ -120,7 +120,7 @@ namespace Insight
             }
         }
 
-        void ResourceManagerExt::UnloadAll()
+        void ResourceManager::UnloadAll()
         {
             ASSERT(m_database);
             std::vector<ResourceId> ResourceIds = m_database->GetAllResourceIds();
@@ -130,13 +130,13 @@ namespace Insight
             }
         }
 
-        bool ResourceManagerExt::HasResource(ResourceId const& resourceId)
+        bool ResourceManager::HasResource(ResourceId const& resourceId)
         {
             ASSERT(m_database);
             return m_database->HasResource(resourceId);
         }
 
-        bool ResourceManagerExt::HasResource(TObjectPtr<IResource> Resource)
+        bool ResourceManager::HasResource(TObjectPtr<IResource> Resource)
         {
             if (Resource)
             {
@@ -145,19 +145,19 @@ namespace Insight
             return false;
         }
 
-        ResourceDatabase::ResourceMap ResourceManagerExt::GetResourceMap()
+        ResourceDatabase::ResourceMap ResourceManager::GetResourceMap()
         {
             ASSERT(m_database);
             return m_database->GetResourceMap();
         }
 
-        u32 ResourceManagerExt::GetLoadedResourcesCount()
+        u32 ResourceManager::GetLoadedResourcesCount()
         {
             ASSERT(m_database);
             return m_database->GetLoadedResourceCount();
         }
 
-        u32 ResourceManagerExt::GetLoadingCount()
+        u32 ResourceManager::GetLoadingCount()
         {
             ASSERT(m_database);
             return m_database->GetLoadingResourceCount();

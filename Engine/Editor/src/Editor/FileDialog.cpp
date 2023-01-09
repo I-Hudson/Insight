@@ -43,7 +43,7 @@ namespace Insight
             }
             m_pathName = m_path.substr(lastSlashChar);
 
-            m_icon = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
+            m_icon = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
             m_isDirectory = FileSystem::FileSystem::IsDirectory(m_path);
             m_clickedTimer.Start();
         }

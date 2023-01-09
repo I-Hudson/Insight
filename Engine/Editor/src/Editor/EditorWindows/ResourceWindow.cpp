@@ -25,11 +25,11 @@ namespace Insight
 
 		void ResourceWindow::OnDraw()
 		{
-			ImGui::Text("Total resources loaded: %i", Runtime::ResourceManagerExt::GetLoadedResourcesCount());
-			ImGui::Text("Total resources loading: %i", Runtime::ResourceManagerExt::GetLoadingCount());
+			ImGui::Text("Total resources loaded: %i", Runtime::ResourceManager::GetLoadedResourcesCount());
+			ImGui::Text("Total resources loading: %i", Runtime::ResourceManager::GetLoadingCount());
 
 			ImGui::Text("Resoruces:");
-			Runtime::ResourceDatabase::ResourceMap resources = Runtime::ResourceManagerExt::GetResourceMap();
+			Runtime::ResourceDatabase::ResourceMap resources = Runtime::ResourceManager::GetResourceMap();
 			for (const auto& pair : resources)
 			{
 				DrawSingleResource(pair.second);
@@ -58,11 +58,11 @@ namespace Insight
 				ImGui::Text("State: %s, LoadTime: %f", resourceState.c_str(), loadTime);
 				if (ImGui::Button("Load"))
 				{
-					Runtime::ResourceManagerExt::Load(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
+					Runtime::ResourceManager::Load(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
 				}
 				if (ImGui::Button("Unload"))
 				{
-					Runtime::ResourceManagerExt::Unload(resource->GetResourceId());
+					Runtime::ResourceManager::Unload(resource->GetResourceId());
 				}
 				ImGui::TreePop();
 			}

@@ -11,7 +11,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class ResourceManagerExt;
+        class ResourceManager;
 
         /// @brief Database to store all currently known resources.
         class ResourceDatabase
@@ -52,7 +52,7 @@ namespace Insight
             u32 m_loadedResourceCount = 0;
             mutable std::mutex m_mutex;
 
-            friend class ResourceManagerExt;
+            friend class ResourceManager;
         };
     }
 }

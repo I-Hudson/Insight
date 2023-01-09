@@ -11,7 +11,7 @@ namespace Insight
         class ResourceSystem;
 
         /// @brief Static class used to interact with resources.
-        class IS_RUNTIME ResourceManagerExt
+        class IS_RUNTIME ResourceManager
         {
         public:
 

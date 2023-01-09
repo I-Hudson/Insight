@@ -63,7 +63,7 @@ namespace Insight
 			for (Mesh* mesh : m_meshes)
 			{
 				mesh->OnLoaded(mesh);
-				if (ResourceManagerExt::HasResource(Runtime::ResourceId(mesh->GetFilePath(), Mesh::GetStaticResourceTypeId())))
+				if (ResourceManager::HasResource(Runtime::ResourceId(mesh->GetFilePath(), Mesh::GetStaticResourceTypeId())))
 				{
 					//if (mesh->GetFilePath().back() >= '0' |)
 					//TODO Add a number if this resource already exists.
@@ -78,7 +78,7 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				//ResourceManagerExt::Unload(mesh->GetResourceId());
+				//ResourceManager::Unload(mesh->GetResourceId());
 				mesh->OnUnloaded(mesh);
 				DeleteTracked(mesh);
 			}
@@ -86,7 +86,7 @@ namespace Insight
 
 			for (Material* material : m_materials)
 			{
-				//ResourceManagerExt::Unload(material->GetResourceId());
+				//ResourceManager::Unload(material->GetResourceId());
 				material->OnUnloaded(material);
 				DeleteTracked(material);
 			}
