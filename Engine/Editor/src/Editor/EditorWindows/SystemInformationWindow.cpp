@@ -31,7 +31,7 @@ namespace Insight
             ImGui::Text("CPU Vendor '%s'."       , cpuInfo.Vendor.c_str());
             ImGui::Text("CPU Model '%s'."        , cpuInfo.Model.c_str());
             ImGui::Text("CPU Architecture '%s'." , Core::CPUArchitectureToString(cpuInfo.CPUArchitecture));
-            ImGui::Text("CPU Speed GHz '%f'."    , speedInGHz);
+            ImGui::Text("CPU Speed GHz '%.2f'."    , speedInGHz);
             ImGui::Text("CPU HyperThreaded '%s'.", cpuInfo.IsHyperThreaded ? "True" : "False");
         }
     }

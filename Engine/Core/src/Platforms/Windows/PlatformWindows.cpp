@@ -420,7 +420,7 @@ namespace Insight
 				{
 					std::vector<PROCESSOR_POWER_INFORMATION> processInformation;
 					processInformation.resize(s_cpuInformation.LogicalCoreCount);
-					LONG result = CallNtPowerInformation(ProcessorInformation, NULL, 0, processInformation.data(), processInformation.size() * sizeof(PROCESSOR_POWER_INFORMATION));
+					LONG result = CallNtPowerInformation(ProcessorInformation, NULL, 0, processInformation.data(), static_cast<ULONG>(processInformation.size() * sizeof(PROCESSOR_POWER_INFORMATION)));
 					if (result == 0)
 					{
 						s_cpuInformation.SpeedInMHz = static_cast<u32>(processInformation.at(0).MaxMhz);
@@ -436,6 +436,18 @@ namespace Insight
 					s_cpuInformation.Model += std::string((const char*)&cpuID.EBX(), 4);
 					s_cpuInformation.Model += std::string((const char*)&cpuID.ECX(), 4);
 					s_cpuInformation.Model += std::string((const char*)&cpuID.EDX(), 4);
+				}
+
+				// Clean up the model name. Getting the model name can have trailing spaces.
+				// So we clean that up to remove unnecessary spaces.
+				if (s_cpuInformation.Model.size() > 0)
+				{
+					while (s_cpuInformation.Model.back() == ' '
+						|| s_cpuInformation.Model.back() == '\0')
+					{
+						s_cpuInformation.Model.pop_back();
+					}
+					s_cpuInformation.Model.push_back('\0');
 				}
 
 				SYSTEM_INFO systemInfo;
