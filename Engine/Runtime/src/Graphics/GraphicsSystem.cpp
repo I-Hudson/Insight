@@ -3,6 +3,8 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/PixelFormatExtensions.h"
 
+#include "Runtime/CommandLineDefines.h"
+
 #include "Core/CommandLineArgs.h"
 
 namespace Insight
@@ -75,7 +77,18 @@ namespace Insight
 		{
 			m_context = Graphics::RenderContext::New(graphicsAPI);
 			ASSERT(m_context);
-			ASSERT(m_context->Init());
+
+			Graphics::RenderContextDesc renderContextDesc = {};
+			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))
+			{
+				renderContextDesc.GPUValidation = Core::CommandLineArgs::GetCommandLineValue(CMD_GPU_VALIDATION)->GetBool();
+			}
+			
+			if (!m_context->Init(renderContextDesc))
+			{
+				m_context->Destroy();
+				exit(-1);
+			}
 
 			Graphics::SwapchainDesc swapchainDesc = {};
 			swapchainDesc.Width = m_window.GetWidth();

@@ -96,6 +96,12 @@ namespace Insight
 			bool AllowHDR = false;
 		};
 
+		/// @brief Define general options for the render context.
+		struct RenderContextDesc
+		{
+			bool GPUValidation = true;
+		};
+
 		class IS_GRAPHICS RenderContext : public Core::Singleton<RenderContext>
 		{
 		public:
@@ -103,7 +109,7 @@ namespace Insight
 
 			static RenderContext* New(GraphicsAPI graphicsAPI);
 
-			virtual bool Init() = 0;
+			virtual bool Init(RenderContextDesc desc) = 0;
 			virtual void Destroy() = 0;
 
 			virtual void InitImGui() = 0;
@@ -164,6 +170,8 @@ namespace Insight
 
 		protected:
 			///const static int c_FrameCount = 3;
+
+			RenderContextDesc m_desc;
 
 			std::mutex m_lock;
 			GraphicsAPI m_graphicsAPI = GraphicsAPI::None;

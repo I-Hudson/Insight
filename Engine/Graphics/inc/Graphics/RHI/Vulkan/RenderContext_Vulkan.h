@@ -42,7 +42,7 @@ namespace Insight
 			class RenderContext_Vulkan : public RenderContext
 			{
 			public:
-				virtual bool Init() override;
+				virtual bool Init(RenderContextDesc desc) override;
 				virtual void Destroy() override;
 
 				virtual void InitImGui() override;

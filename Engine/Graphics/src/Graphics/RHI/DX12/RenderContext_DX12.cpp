@@ -41,23 +41,27 @@ namespace Insight
 			{
 			}
 
-			bool RenderContext_DX12::Init()
+			bool RenderContext_DX12::Init(RenderContextDesc desc)
 			{
+				m_desc = desc;
 				UINT dxgiFactoryFlags = 0;
 
-//#if defined(_DEBUG)
-				/// Enable the debug layer (requires the Graphics Tools "optional feature").
-				/// NOTE: Enabling the debug layer after device creation will invalidate the active device.
+				if (m_desc.GPUValidation)
 				{
-					if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
+					//#if defined(_DEBUG)
+									/// Enable the debug layer (requires the Graphics Tools "optional feature").
+									/// NOTE: Enabling the debug layer after device creation will invalidate the active device.
 					{
-						m_debugController->EnableDebugLayer();
-						/// Enable additional debug layers.
-						dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
+						{
+							m_debugController->EnableDebugLayer();
+							/// Enable additional debug layers.
+							dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
+						}
 					}
+					//#endif
 				}
-//#endif
 
 				ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&m_factory)));
 				if (!m_factory)

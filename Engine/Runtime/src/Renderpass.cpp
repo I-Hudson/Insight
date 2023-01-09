@@ -60,7 +60,6 @@ namespace Insight
 	bool modelAddedToScene = false;
 
 	static bool enableFSR = false;
-	bool jitter = true;
 	static float fsrSharpness = 1.0f;
 
 	namespace Graphics
@@ -84,11 +83,11 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//Runtime::Model* model_sponza_curtains = static_cast<Runtime::Model*>(Runtime::ResourceManager::Instance().Load("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManagerExt::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			model = model_sponza;
+			model = model_backpack;
 
 			//while (model_sponza->GetResourceState() != Runtime::EResoruceStates::Loaded
 			//	&& model_sponza_curtains->GetResourceState() != Runtime::EResoruceStates::Loaded)
@@ -199,10 +198,7 @@ namespace Insight
 				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
 				glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
-				if (jitter)
-				{
-					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
-				}
+				m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
 
 				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 				{
@@ -1078,8 +1074,11 @@ namespace Insight
 				return;
 			}
 
-			ImGui::Checkbox("Enable FSR", &enableFSR);
-			ImGui::Checkbox("Aplly jitter", &jitter);
+			bool reset = false;
+			if (ImGui::Checkbox("Enable FSR", &enableFSR))
+			{
+				reset = true;
+			}
 			ImGui::DragFloat("FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
 			struct PassData
@@ -1111,7 +1110,7 @@ namespace Insight
 
 					builder.SkipTextureWriteBarriers();
 				},
-				[this](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				[this, reset](PassData& data, RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					RHI_FSR::Instance().Dispatch(cmd_list
 						, render_graph.GetRHITexture("Composite_Tex")
@@ -1123,7 +1122,7 @@ namespace Insight
 						, data.FOVY
 						, App::Engine::s_FrameTimer.GetElapsedTimeMillFloat()
 						, fsrSharpness
-						, false);
+						, reset);
 				}, std::move(passData));
 
 		}

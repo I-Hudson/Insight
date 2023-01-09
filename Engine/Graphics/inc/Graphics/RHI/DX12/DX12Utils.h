@@ -31,13 +31,7 @@ private:
 	const HRESULT m_hr;
 };
 
-inline void ThrowIfFailed(HRESULT hr)
-{
-	if (FAILED(hr))
-	{
-		throw HrException(hr);
-	}
-}
+void ThrowIfFailed(HRESULT hr);
 
 namespace Insight
 {

@@ -123,10 +123,12 @@ namespace Insight
 				return VK_FALSE;
 			}
 
-			bool RenderContext_Vulkan::Init()
+			bool RenderContext_Vulkan::Init(RenderContextDesc desc)
 			{
 				IS_PROFILE_FUNCTION();
+
 				std::lock_guard lock(m_lock);
+				m_desc = desc;
 
 				if (m_instnace && m_device)
 				{
@@ -926,12 +928,13 @@ namespace Insight
 				applicationInfo.engineVersion = 0;
 				applicationInfo.apiVersion = std::min(sdk_version, driver_version);
 
-				std::vector<const char*> enabledLayerNames =
+				std::vector<const char*> enabledLayerNames;
+
+				if (m_desc.GPUValidation)
 				{
-#ifdef DEBUG
-					"VK_LAYER_KHRONOS_validation",
-#endif
-				};
+					enabledLayerNames.push_back("VK_LAYER_KHRONOS_validation");
+				}
+
 				std::vector<const char*> enabledExtensionNames;
 #if VK_KHR_surface
 				if (CheckInstanceExtension(VK_KHR_SURFACE_EXTENSION_NAME))

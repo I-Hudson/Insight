@@ -1,8 +1,11 @@
 #if defined(IS_DX12_ENABLED)
 
 #include "Graphics/RHI/DX12/DX12Utils.h"
+#include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
 #include "Platforms/Platform.h"
+
+#include "Core/Logger.h"
 
 DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
 {
@@ -136,6 +139,17 @@ DXGI_FORMAT PixelFormatToDXFormat[static_cast<int>(PixelFormat::MAX)] =
     DXGI_FORMAT_BC7_UNORM,
     DXGI_FORMAT_BC7_UNORM_SRGB,
 };
+
+void ThrowIfFailed(HRESULT hr)
+{
+    if (FAILED(hr))
+    {
+        HRESULT deviceRemovedReason = static_cast<Insight::Graphics::RHI::DX12::RenderContext_DX12&>(Insight::Graphics::RenderContext::Instance()).GetDevice()->GetDeviceRemovedReason();
+        std::string deviceRemovedString = std::system_category().message(deviceRemovedReason);
+        IS_CORE_ERROR("Device removed reason: '{}', str: '{}'.", deviceRemovedReason, deviceRemovedString);
+        throw HrException(hr);
+    }
+}
 
 namespace Insight
 {

@@ -42,7 +42,7 @@ namespace Insight
 			public:
 				virtual ~RenderContext_DX12();
 
-				virtual bool Init() override;
+				virtual bool Init(RenderContextDesc desc) override;
 				virtual void Destroy() override;
 
 				virtual void InitImGui() override;
