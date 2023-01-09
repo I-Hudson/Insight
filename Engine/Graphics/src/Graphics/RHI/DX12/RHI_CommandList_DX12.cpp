@@ -643,7 +643,41 @@ namespace Insight
 
 			void RHI_CommandList_DX12::SetImageLayoutTransition(RHI_Texture* texture, ImageLayout layout)
 			{
-				FAIL_ASSERT();
+				ImageLayout image_layout = texture->GetLayout();
+				Graphics::PipelineBarrier pipeline_barrier = { };
+
+				ImageBarrier image_barrer = {};
+				image_barrer.SrcAccessFlags = ImageLayoutToAccessMask(image_layout);
+				image_barrer.DstAccessFlags = ImageLayoutToAccessMask(layout);
+				image_barrer.OldLayout = image_layout;
+				image_barrer.NewLayout = layout;
+				image_barrer.Image = texture;
+				image_barrer.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(PixelFormatToAspectFlags(texture->GetFormat()));
+
+				if (image_layout == ImageLayout::PresentSrc)
+				{
+					pipeline_barrier.SrcStage = +PipelineStageFlagBits::BottomOfPipe;
+				}
+				else if (image_layout == ImageLayout::Undefined)
+				{
+					pipeline_barrier.SrcStage = +PipelineStageFlagBits::TopOfPipe;
+				}
+				else
+				{
+					pipeline_barrier.SrcStage = AccessFlagBitsToPipelineStageFlag(image_barrer.SrcAccessFlags);
+				}
+
+				if (image_layout == ImageLayout::PresentSrc)
+				{
+					pipeline_barrier.DstStage = +PipelineStageFlagBits::TopOfPipe;
+				}
+				else
+				{
+					pipeline_barrier.DstStage = AccessFlagBitsToPipelineStageFlag(image_barrer.DstAccessFlags);
+				}
+
+				pipeline_barrier.ImageBarriers.push_back(image_barrer);
+				PipelineBarrier(pipeline_barrier);
 			}
 
 			//// <summary>

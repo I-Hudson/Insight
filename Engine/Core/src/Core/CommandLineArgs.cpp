@@ -143,5 +143,11 @@ namespace Insight
 			}
 			return &s_default_command_line_value;
 		}
+
+		bool CommandLineArgs::CommandListExists(std::string const& key)
+		{
+			return m_args.find(key) != m_args.end();
+		}
+
 	}
 }

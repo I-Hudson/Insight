@@ -357,6 +357,11 @@ namespace Insight
 					ImGui_ImplGlfw_KeyCallback(Graphics::Window::Instance().GetRawWindow(), key, scancode, action, mods);
 				});
 
+			glfwSetCharCallback(m_glfwWindow, [](GLFWwindow* window, unsigned int codepoint)
+				{
+					ImGui_ImplGlfw_CharCallback(window, codepoint);
+				});
+
 			glfwSetMouseButtonCallback(m_glfwWindow, [](GLFWwindow* window, int button, int action, int mods)
 				{
 					auto iter = GLFW_MOUSE_BUTTONS_TO_INTERNAL.find(static_cast<u32>(button));

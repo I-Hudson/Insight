@@ -26,6 +26,8 @@ namespace Insight
 			glm::mat4 View_Inverted = { };
 			glm::mat4 Projection_View_Inverted = { };
 
+
+
 			glm::vec2 Render_Resolution = {};
 			float pad0 = 0.0f;
 			float pad1 = 0.0f;
@@ -102,6 +104,9 @@ namespace Insight
 
 			ECS::Entity* m_editorCameraEntity;
 			ECS::CameraComponent* m_editorCameraComponent;
+
+			float m_taaJitterX;
+			float m_taaJitterY;
 		};
 	}
 }

@@ -60,6 +60,7 @@ namespace Insight
 	bool modelAddedToScene = false;
 
 	static bool enableFSR = false;
+	bool jitter = true;
 	static float fsrSharpness = 1.0f;
 
 	namespace Graphics
@@ -151,11 +152,7 @@ namespace Insight
 
 			m_imgui_pass.Create();
 
-			enableFSR = false;// RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan;
-			if (enableFSR)
-			{
-				Graphics::RHI_FSR::Instance().Init();
-			}
+			Graphics::RHI_FSR::Instance().Init();
 		}
 
 		void Renderpass::Render()
@@ -193,6 +190,31 @@ namespace Insight
 			m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
 			m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
 			m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
+
+			if (enableFSR)
+			{
+				glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+				RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
+				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
+				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
+
+				glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+				if (jitter)
+				{
+					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
+				}
+
+				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+				{
+					glm::mat4 proj = m_buffer_frame.Projection;
+					proj[1][1] *= -1;
+					m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+				}
+				else
+				{
+					m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+				}
+			}
 
 			m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
 			m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
@@ -261,7 +283,7 @@ namespace Insight
 			GBuffer();
 			TransparentGBuffer();
 			Composite();
-			//FSR2();
+			FSR2();
 			Swapchain();
 
 			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
@@ -1056,12 +1078,8 @@ namespace Insight
 				return;
 			}
 
-			if (!enableFSR)
-			{
-				return;
-			}
-
 			ImGui::Checkbox("Enable FSR", &enableFSR);
+			ImGui::Checkbox("Aplly jitter", &jitter);
 			ImGui::DragFloat("FSR sharpness", &fsrSharpness, 0.05f, 0.0f, 1.0f);
 
 			struct PassData
@@ -1074,10 +1092,9 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			Ptr<ECS::Entity> editorCamrea = Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld")->GetEntityByName("EdtiorCamera");
-			passData.NearPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetNearPlane();
-			passData.FarPlane = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFarPlane();
-			passData.FOVY = static_cast<ECS::CameraComponent*>(editorCamrea->GetComponentByName(ECS::CameraComponent::Type_Name))->GetFovY();
+			passData.NearPlane = m_editorCameraComponent->GetNearPlane();
+			passData.FarPlane = m_editorCameraComponent->GetFarPlane();
+			passData.FOVY = m_editorCameraComponent->GetFovY();
 
 			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)

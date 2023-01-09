@@ -40,7 +40,9 @@ namespace Insight
 		public:
 			static void ParseCommandLine(int argc, char** argv);
 			static void ParseCommandLine(const char* file_path);
+			
 			static Ptr<CommandLineValue> GetCommandLineValue(std::string key);
+			static bool CommandListExists(std::string const& key);
 
 		private:
 			static std::unordered_map<std::string, CommandLineValue> m_args;

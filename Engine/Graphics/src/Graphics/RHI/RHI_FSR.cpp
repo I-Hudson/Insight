@@ -170,7 +170,6 @@ namespace Insight
 #endif
             }
 
-            GenerateJitterSample(&m_ffx_fsr2_dispatch_description.jitterOffset.x, &m_ffx_fsr2_dispatch_description.jitterOffset.y);
             m_ffx_fsr2_dispatch_description.motionVectorScale.x     = -static_cast<float>(resolution_render_x);
             m_ffx_fsr2_dispatch_description.motionVectorScale.y     = -static_cast<float>(resolution_render_y);
             m_ffx_fsr2_dispatch_description.reset                   = reset;                                    // A boolean value which when set to true, indicates the camera has moved discontinuously.
