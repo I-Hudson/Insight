@@ -32,7 +32,9 @@ namespace Insight
 		enum class EResoruceStates
 		{
 			Not_Found,		/// @brief Resource has not been found on disk.
-									   
+			
+			Queued,			/// @brief Resource has been queued to be loaded.
+
 			Loaded,			/// @brief Resource has been loaded.
 			Loading,		/// @brief Resource is being loaded.
 			Not_Loaded,		/// @brief Resource has not been loaded yet.

@@ -4,6 +4,8 @@
 
 #include "Resource/ResourceDatabase.h"
 
+#include <queue>
+
 namespace Insight
 {
     namespace Runtime
@@ -24,11 +26,25 @@ namespace Insight
             static bool HasResource(TObjectPtr<IResource> Resource);
 
             static ResourceDatabase::ResourceMap GetResourceMap();
+            static u32 GetQueuedToLoadCount();
             static u32 GetLoadedResourcesCount();
             static u32 GetLoadingCount();
 
         private:
-            static ResourceDatabase* m_database;
+            static void Update(float const deltaTime);
+            static void StartLoading(IResource* resource);
+
+        private:
+            /// @brief Max number of resources which can be loading at a single time is 4. This
+            // is to not fill up the task system.
+            const static u32 c_MaxLoadingResources = -1;
+            static ResourceDatabase* s_database;
+
+            /// @brief Current resources being loaded.
+            static std::vector<IResource*> s_resourcesLoading;
+            /// @brief Resources queued to be loaded.
+            static std::queue<IResource*> s_queuedResoucesToLoad;
+            static std::mutex s_queuedResoucesToLoadMutex;
 
             friend class ResourceSystem;
         };

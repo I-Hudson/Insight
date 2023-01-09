@@ -2,6 +2,9 @@
 #include "Resource/ResourceDatabase.h"
 
 #include "Core/Logger.h"
+
+#include "Algorithm/Vector.h"
+
 #include "FileSystem/FileSystem.h"
 #include "Threading/TaskSystem.h"
 
@@ -11,20 +14,60 @@ namespace Insight
     {
 #define RESOURCE_LOAD_THREAD
 
-        ResourceDatabase* ResourceManager::m_database;
+        ResourceDatabase* ResourceManager::s_database;
+        std::vector<IResource*> ResourceManager::s_resourcesLoading;
+        std::queue<IResource*> ResourceManager::s_queuedResoucesToLoad;
+        std::mutex ResourceManager::s_queuedResoucesToLoadMutex;
+
+        void ResourceManager::Update(float const deltaTime)
+        {
+            u32 resourcesToLoad = 0;
+            std::vector<IResource*> resourceLoaded;
+
+            // Check for all loaded resources.
+            for (size_t i = 0; i < s_resourcesLoading.size(); ++i)
+            {
+                if (s_resourcesLoading.at(i)->IsLoaded())
+                {
+                    resourceLoaded.push_back(s_resourcesLoading.at(i));
+                    ++resourcesToLoad;
+                }
+            }
+
+            // Remove all loaded resources from s_resourcesLoading.
+            for (IResource* const resource : resourceLoaded)
+            {
+                Algorithm::VectorRemove(s_resourcesLoading, resource);
+            }
+
+            std::unique_lock queueLock(s_queuedResoucesToLoadMutex);
+            // Start loading more resources.
+            for (int i = resourcesToLoad; i >= 0 ; --i)
+            {
+                if (s_resourcesLoading.size() >= c_MaxLoadingResources
+                    || s_queuedResoucesToLoad.empty())
+                {
+                    break;
+                }
+                IResource* resourceToLoad = s_queuedResoucesToLoad.front();
+                s_queuedResoucesToLoad.pop();
+                StartLoading(resourceToLoad);
+            }
+            queueLock.unlock();
+        }
 
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
         {
-            ASSERT(m_database);
+            ASSERT(s_database);
 
             TObjectPtr<IResource> resource;
-            if (m_database->HasResource(resourceId))
+            if (s_database->HasResource(resourceId))
             {
-                resource = m_database->GetResource(resourceId);
+                resource = s_database->GetResource(resourceId);
             }
             else
             {
-                resource = m_database->AddResource(resourceId);
+                resource = s_database->AddResource(resourceId);
             }
 
             if (resource)
@@ -47,25 +90,11 @@ namespace Insight
                         }
                         else
                         {
-                            resource->m_resource_state = EResoruceStates::Loading;
+                            resource->m_resource_state = EResoruceStates::Queued;
                             // Try and load the resource as it exists.
-#ifdef RESOURCE_LOAD_THREAD
-                            Threading::TaskSystem::CreateTask([resource]()
-                                {
-#endif
-                                    resource->StartLoadTimer();
-                            {
-                                std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                                resource->Load();
-                            }
-                            resource->StopLoadTimer();
-                            if (resource->IsLoaded())
-                            {
-                                resource->OnLoaded(resource);
-                            }
-#ifdef RESOURCE_LOAD_THREAD
-                                });
-#endif
+                            std::unique_lock queueLock(s_queuedResoucesToLoadMutex);
+                            s_queuedResoucesToLoad.push(resource);
+                            queueLock.unlock();
                         }
                     }
                     else
@@ -79,12 +108,12 @@ namespace Insight
 
         void ResourceManager::Unload(ResourceId const& resourceId)
         {
-            ASSERT(m_database);
+            ASSERT(s_database);
 
             TObjectPtr<IResource> resource = nullptr;
-            if (m_database->HasResource(resourceId))
+            if (s_database->HasResource(resourceId))
             {
-                resource = m_database->GetResource(resourceId);
+                resource = s_database->GetResource(resourceId);
             }
 
             if (!resource)
@@ -122,8 +151,8 @@ namespace Insight
 
         void ResourceManager::UnloadAll()
         {
-            ASSERT(m_database);
-            std::vector<ResourceId> ResourceIds = m_database->GetAllResourceIds();
+            ASSERT(s_database);
+            std::vector<ResourceId> ResourceIds = s_database->GetAllResourceIds();
             for (const ResourceId& id : ResourceIds)
             {
                 Unload(id);
@@ -132,8 +161,8 @@ namespace Insight
 
         bool ResourceManager::HasResource(ResourceId const& resourceId)
         {
-            ASSERT(m_database);
-            return m_database->HasResource(resourceId);
+            ASSERT(s_database);
+            return s_database->HasResource(resourceId);
         }
 
         bool ResourceManager::HasResource(TObjectPtr<IResource> Resource)
@@ -147,20 +176,54 @@ namespace Insight
 
         ResourceDatabase::ResourceMap ResourceManager::GetResourceMap()
         {
-            ASSERT(m_database);
-            return m_database->GetResourceMap();
+            ASSERT(s_database);
+            return s_database->GetResourceMap();
+        }
+
+        u32 ResourceManager::GetQueuedToLoadCount()
+        {
+            u32 count = 0;
+            {
+                std::lock_guard lock(s_queuedResoucesToLoadMutex);
+                count = static_cast<u32>(s_queuedResoucesToLoad.size());
+            }
+            return count;
         }
 
         u32 ResourceManager::GetLoadedResourcesCount()
         {
-            ASSERT(m_database);
-            return m_database->GetLoadedResourceCount();
+            ASSERT(s_database);
+            return s_database->GetLoadedResourceCount();
         }
 
         u32 ResourceManager::GetLoadingCount()
         {
-            ASSERT(m_database);
-            return m_database->GetLoadingResourceCount();
+            ASSERT(s_database);
+            return s_database->GetLoadingResourceCount();
+        }
+
+        void ResourceManager::StartLoading(IResource* resource)
+        {
+            s_resourcesLoading.push_back(resource);
+            resource->m_resource_state = EResoruceStates::Loading;
+
+#ifdef RESOURCE_LOAD_THREAD
+            Threading::TaskSystem::CreateTask([resource]()
+            {
+#endif
+                resource->StartLoadTimer();
+            {
+                std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
+                resource->Load();
+            }
+            resource->StopLoadTimer();
+            if (resource->IsLoaded())
+            {
+                resource->OnLoaded(resource);
+            }
+#ifdef RESOURCE_LOAD_THREAD
+            });
+#endif
         }
     }
 }

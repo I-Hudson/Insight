@@ -37,13 +37,14 @@ namespace Insight
 		{
 			switch (state)
 			{
-			case Insight::Runtime::EResoruceStates::Not_Found:		return "Not Found";
-			case Insight::Runtime::EResoruceStates::Loaded:			return "Loaded";
-			case Insight::Runtime::EResoruceStates::Loading:			return "Loading";
-			case Insight::Runtime::EResoruceStates::Not_Loaded:		return "Not Loaded";
-			case Insight::Runtime::EResoruceStates::Failed_To_Load:	return "Failed To Load";
-			case Insight::Runtime::EResoruceStates::Unloaded:		return "Unloaded";
-			case Insight::Runtime::EResoruceStates::Unloading:		return "Unloading";
+			case EResoruceStates::Not_Found:		return "Not Found";
+			case EResoruceStates::Queued:			return "Queued";
+			case EResoruceStates::Loaded:			return "Loaded";
+			case EResoruceStates::Loading:		return "Loading";
+			case EResoruceStates::Not_Loaded:		return "Not Loaded";
+			case EResoruceStates::Failed_To_Load:	return "Failed To Load";
+			case EResoruceStates::Unloaded:		return "Unloaded";
+			case EResoruceStates::Unloading:		return "Unloading";
 			default:
 				break;
 			}

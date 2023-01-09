@@ -25,8 +25,9 @@ namespace Insight
 
 		void ResourceWindow::OnDraw()
 		{
-			ImGui::Text("Total resources loaded: %i", Runtime::ResourceManager::GetLoadedResourcesCount());
-			ImGui::Text("Total resources loading: %i", Runtime::ResourceManager::GetLoadingCount());
+			ImGui::Text("Resources queued to loading: %i.", Runtime::ResourceManager::GetQueuedToLoadCount());
+			ImGui::Text("Total resources loading: %i.", Runtime::ResourceManager::GetLoadingCount());
+			ImGui::Text("Total resources loaded: %i.", Runtime::ResourceManager::GetLoadedResourcesCount());
 
 			ImGui::Text("Resoruces:");
 			Runtime::ResourceDatabase::ResourceMap resources = Runtime::ResourceManager::GetResourceMap();
@@ -40,13 +41,14 @@ namespace Insight
 		{
 			static constexpr ImVec4 resourceStateColours[] =
 			{
-				ImVec4(1, 1, 0, 1),	    // Not found
-				ImVec4(0, 1, 0, 1),	    // Loaded
-				ImVec4(0, 0.5f, 0, 1),	// Loading
-				ImVec4(1, 0, 1, 1),	    // Not loaded
-				ImVec4(1, 0, 0, 1),	    // Failed to load
-				ImVec4(0, 0, 1, 1),	    // Unloaded
-				ImVec4(0, 0, 0.5f, 1),	// Unloading
+				ImVec4(1, 1, 0, 1),			// Not found
+				ImVec4(0, 0.5f, 0.5f, 1),	// Queued
+				ImVec4(0, 1, 0, 1),			// Loaded
+				ImVec4(0, 0.5f, 0, 1),		// Loading
+				ImVec4(1, 0, 1, 1),			// Not loaded
+				ImVec4(1, 0, 0, 1),			// Failed to load
+				ImVec4(0, 0, 1, 1),			// Unloaded
+				ImVec4(0, 0, 0.5f, 1),		// Unloading
 			};
 
 			std::string fileName = resource->GetFileName();
@@ -55,7 +57,7 @@ namespace Insight
 			ImGui::PushStyleColor(ImGuiCol_Header, resourceStateColours[static_cast<int>(resource->GetResourceState())]);
 			if (ImGui::TreeNodeEx(static_cast<const void*>(resource), ImGuiTreeNodeFlags_Framed, "%s", fileName.c_str()))
 			{
-				ImGui::Text("State: %s, LoadTime: %f", resourceState.c_str(), loadTime);
+				ImGui::Text("State: %s, LoadTime: %f.", resourceState.c_str(), loadTime);
 				if (ImGui::Button("Load"))
 				{
 					Runtime::ResourceManager::Load(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));

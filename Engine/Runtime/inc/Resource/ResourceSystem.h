@@ -16,6 +16,9 @@ namespace Insight
 
             IS_SYSTEM(ResourceSystem);
 
+            void Update(float const deltaTime);
+
+            // Core::ISystem
             virtual void Initialise() override;
             virtual void Shutdown() override;
 

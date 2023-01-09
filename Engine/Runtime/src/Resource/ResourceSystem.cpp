@@ -13,17 +13,22 @@ namespace Insight
         {
         }
 
+        void ResourceSystem::Update(float const deltaTime)
+        {
+            ResourceManager::Update(deltaTime);
+        }
+
         void ResourceSystem::Initialise()
         {
             m_database.Initialise();
-            ResourceManager::m_database = &m_database;
+            ResourceManager::s_database = &m_database;
             m_state = Core::SystemStates::Initialised;
         }
 
         void ResourceSystem::Shutdown()
         {
             ResourceManager::UnloadAll();
-            ResourceManager::m_database = nullptr;
+            ResourceManager::s_database = nullptr;
             m_database.Shutdown();
             m_state = Core::SystemStates::Not_Initialised;
         }

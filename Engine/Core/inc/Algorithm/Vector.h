@@ -123,5 +123,17 @@ namespace Insight
 			}
 			return vector.end();
 		}
+		template<typename T, typename V>
+		INLINE void VectorRemove(std::vector<T>& vector, V const& value)
+		{
+			for (size_t i = 0; i < vector.size(); ++i)
+			{
+				if (vector.at(i) == value) 
+				{
+					vector.erase(vector.begin() + i);
+					break;
+				}
+			}
+		}
 	}
 }

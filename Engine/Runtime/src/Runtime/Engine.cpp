@@ -125,6 +125,11 @@ namespace Insight
 						m_inputSystem.Update(delta_time);
 					}
 
+					{
+						IS_PROFILE_SCOPE("InputSsytem Update");
+						m_resourceSystem.Update(delta_time);
+					}
+
 					OnUpdate();
 
 					{
