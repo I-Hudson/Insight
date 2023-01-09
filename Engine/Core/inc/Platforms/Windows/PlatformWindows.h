@@ -6,6 +6,8 @@
 #include "Core/Defines.h"
 #include "Core/GUID.h"
 
+#include "Core/CPUInformation.h"
+
 #include <string>
 #include <vector>
 
@@ -39,8 +41,12 @@ namespace Insight
 
 			static bool IsMainThread();
 
+			static Core::CPUInformation GetCPUInformation();
+			static Core::MemoryInformation GetMemoryInformation();
+
 		private:
 			static u32 s_mainThreadId;
+			static Core::CPUInformation s_cpuInformation;
 		};
 
 	}

@@ -60,25 +60,15 @@ namespace Insight
                 }
                 if (ImGui::BeginMenu("Windows"))
                 {
-                    std::string label = EntitiesWindow::WINDOW_NAME;
-                    label += m_editorWindowManager->IsWindowVisable(EntitiesWindow::WINDOW_NAME) ? " x" : "";
-                    if (ImGui::MenuItem(label.c_str()))
+                    std::vector<std::string> allRegisteredWindows = m_editorWindowManager->GetAllRegisteredWindowNames();
+                    for (std::string const& windowName : allRegisteredWindows)
                     {
-                        m_editorWindowManager->AddWindow(EntitiesWindow::WINDOW_NAME);
-                    }
-                    
-                    label = InputWindow::WINDOW_NAME;
-                    label += m_editorWindowManager->IsWindowVisable(InputWindow::WINDOW_NAME) ? " x" : "";
-                    if (ImGui::MenuItem(label.c_str()))
-                    {
-                        m_editorWindowManager->AddWindow(InputWindow::WINDOW_NAME);
-                    }
-
-                    label = ResourceWindow::WINDOW_NAME;
-                    label += m_editorWindowManager->IsWindowVisable(ResourceWindow::WINDOW_NAME) ? " x" : "";
-                    if (ImGui::MenuItem(label.c_str()))
-                    {
-                        m_editorWindowManager->AddWindow(ResourceWindow::WINDOW_NAME);
+                        std::string label = windowName;
+                        label += m_editorWindowManager->IsWindowVisable(windowName) ? " x" : "";
+                        if (ImGui::MenuItem(label.c_str()))
+                        {
+                            m_editorWindowManager->AddWindow(windowName);
+                        }
                     }
                     ImGui::EndMenu();
                 }

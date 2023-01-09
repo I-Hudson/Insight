@@ -26,6 +26,9 @@ namespace Insight
 
 			bool IsWindowVisable(const std::string& windowName) const;
 
+			std::vector<std::string> GetAllRegisteredWindowNames() const;
+			std::vector<std::string> GetAllActiveWindowNames() const;
+
 			void Update();
 			void Destroy();
 

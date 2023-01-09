@@ -4,6 +4,7 @@
 #include "Editor/EditorWindows/ResourceWindow.h"
 #include "Editor/EditorWindows/EntitiesWindow.h"
 #include "Editor/EditorWindows/InputWindow.h"
+#include "Editor/EditorWindows/SystemInformationWindow.h"
 
 #include "Core/Memory.h"
 
@@ -22,9 +23,10 @@ namespace Insight
 
 		void EditorWindowManager::RegisterWindows()
 		{
-			m_windowRegistry[ResourceWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(NewTracked(ResourceWindow)); });
-			m_windowRegistry[EntitiesWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(NewTracked(EntitiesWindow)); });
-			m_windowRegistry[InputWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(NewTracked(InputWindow)); });
+			m_windowRegistry[ResourceWindow::WINDOW_NAME].Bind         ([]() { return static_cast<IEditorWindow*>(New<ResourceWindow>()); });
+			m_windowRegistry[EntitiesWindow::WINDOW_NAME].Bind         ([]() { return static_cast<IEditorWindow*>(New<EntitiesWindow>()); });
+			m_windowRegistry[InputWindow::WINDOW_NAME].Bind            ([]() { return static_cast<IEditorWindow*>(New<InputWindow>()); });
+			m_windowRegistry[SystemInformationWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(New<SystemInformationWindow>()); });
 		}
 
 		void EditorWindowManager::AddWindow(const std::string& windowName)
@@ -60,6 +62,26 @@ namespace Insight
 				}
 			}
 			return false;
+		}
+
+		std::vector<std::string> EditorWindowManager::GetAllRegisteredWindowNames() const
+		{
+			std::vector<std::string> result;
+			for (auto const& pair : m_windowRegistry)
+			{
+				result.push_back(pair.first);
+			}
+			return result;
+		}
+
+		std::vector<std::string> EditorWindowManager::GetAllActiveWindowNames() const
+		{
+			std::vector<std::string> result;
+			for (IEditorWindow const* window : m_activeWindows)
+			{
+				result.push_back(window->GetWindowName());
+			}
+			return result;
 		}
 
 		void EditorWindowManager::Update()
