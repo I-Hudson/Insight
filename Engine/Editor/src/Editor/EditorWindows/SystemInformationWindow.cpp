@@ -28,11 +28,36 @@ namespace Insight
             Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
             float speedInGHz = static_cast<float>(cpuInfo.SpeedInMHz) / 1000;
 
-            ImGui::Text("CPU Vendor '%s'."       , cpuInfo.Vendor.c_str());
-            ImGui::Text("CPU Model '%s'."        , cpuInfo.Model.c_str());
-            ImGui::Text("CPU Architecture '%s'." , Core::CPUArchitectureToString(cpuInfo.CPUArchitecture));
-            ImGui::Text("CPU Speed GHz '%.2f'."    , speedInGHz);
-            ImGui::Text("CPU HyperThreaded '%s'.", cpuInfo.IsHyperThreaded ? "True" : "False");
+            ImGui::Text("CPU Information");
+            ImGui::Separator();
+
+            ImGui::Indent(); 
+            ImGui::Text("Vendor '%s'.", cpuInfo.Vendor.c_str());
+            ImGui::Text("Model '%s'."         , cpuInfo.Model.c_str());
+            ImGui::Text("Architecture '%s'."  , Core::CPUArchitectureToString(cpuInfo.CPUArchitecture));
+            ImGui::Text("Physical Cores '%u'.", cpuInfo.PhysicalCoreCount);
+            ImGui::Text("Logical Cores '%u'." , cpuInfo.LogicalCoreCount);
+            ImGui::Text("Speed GHz '%.2f'."   , speedInGHz);
+            ImGui::Text("HyperThreaded '%s'." , cpuInfo.IsHyperThreaded ? "True" : "False");
+            ImGui::Unindent();
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Spacing();
+
+            Core::MemoryInformation memoryInfo = Platform::GetMemoryInformation();
+            ImGui::Text("Memory Information");
+            ImGui::Separator();
+
+            ImGui::Indent(); 
+            ImGui::Text("Process usage MB '%u'."        , Core::MemoryInformation::ToMB(memoryInfo.ProcessMemoryUsageBytes));
+            ImGui::Text("Process Pages '%u'."           , memoryInfo.ProcessNumOfPagesCommitted);
+            ImGui::Text("Process Page size KB '%u'."    , Core::MemoryInformation::ToKB(memoryInfo.PageSizeBytes));
+            ImGui::Text("Total RAM MB '%u'."            , Core::MemoryInformation::ToMB(memoryInfo.TotalPhyscialMemoryBytes));
+            ImGui::Text("Total Free RAM MB '%u'."       , Core::MemoryInformation::ToMB(memoryInfo.TotalPhyscialMemoryFreeBytes));
+            ImGui::Text("Total Used RAM MB '%u'."       , Core::MemoryInformation::ToMB(memoryInfo.TotalPhyscialMemoryUsedBytes));
+            ImGui::Unindent();
         }
     }
 }

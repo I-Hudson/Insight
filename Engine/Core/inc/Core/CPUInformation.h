@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Core/Defines.h"
 
 #include <string>
 
@@ -34,7 +35,7 @@ namespace Insight
         }
 
         /// @brief Store general information about the CPU of the system.
-        struct CPUInformation
+        struct IS_CORE CPUInformation
         {
             CPUInformation() = default;
 
@@ -60,9 +61,35 @@ namespace Insight
         };
 
         /// @brief Store general information about the memory of the system.
-        struct MemoryInformation
+        // All information is in bytes.
+        struct IS_CORE MemoryInformation
         {
+            constexpr static u64 ToKB(u64 value) { return value / 1024; }
+            constexpr static u64 ToMB(u64 value) { return value / 1024 / 1024; }
+            constexpr static u64 ToGB(u64 value) { return value / 1024 / 1024 / 1024; }
 
+            /// @brief System total RAM.
+            u64 TotalPhyscialMemoryBytes = 0;
+            u64 TotalVirtualMemoryBytes = 0;
+
+            /// @brief System free RAM.
+            u64 TotalPhyscialMemoryFreeBytes = 0;
+            u64 TotalVirtualMemoryFreeBytes = 0;
+
+            /// @brief System used RAM (not process/application).
+            u64 TotalPhyscialMemoryUsedBytes = 0;
+            u64 TotalVirtualMemoryUsedBytes = 0;
+
+            /// @brief Process (application) used RAM.
+            u64 ProcessMemoryUsageBytes = 0;
+            /// @brief Process (application) number of pages currently committed by the system.
+            u64 ProcessNumOfPagesCommitted = 0;
+
+            /// @brief Size in bytes of a single page from the system.
+            u64 PageSizeBytes = 0;
+
+            u64 LastUpdateTimeStamp = 0;
+            bool Initialised = false;
         };
     }
 }

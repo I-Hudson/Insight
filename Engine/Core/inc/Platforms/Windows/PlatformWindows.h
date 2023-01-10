@@ -45,8 +45,12 @@ namespace Insight
 			static Core::MemoryInformation GetMemoryInformation();
 
 		private:
-			static u32 s_mainThreadId;
+			static Core::MemoryInformation s_memoryInformation;
 			static Core::CPUInformation s_cpuInformation;
+
+			static u32 s_mainThreadId;
+			static unsigned long s_processId;
+			static void* s_memoryReadProcessHandle;
 		};
 
 	}

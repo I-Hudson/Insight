@@ -12,6 +12,8 @@
 #include <powerbase.h>
 #pragma comment(lib, "PowrProf.lib")
 
+#include <psapi.h>
+
 #include <rpc.h>
 #include <Objbase.h>
 
@@ -19,8 +21,12 @@ namespace Insight
 {
 	namespace Windows
 	{
-		u32 PlatformWindows::s_mainThreadId;
+		Core::MemoryInformation PlatformWindows::s_memoryInformation;
 		Core::CPUInformation PlatformWindows::s_cpuInformation;
+
+		u32 PlatformWindows::s_mainThreadId;
+		unsigned long PlatformWindows::s_processId;
+		void* PlatformWindows::s_memoryReadProcessHandle;
 
 		class CPUID 
 		{
@@ -56,14 +62,19 @@ namespace Insight
 
 		void PlatformWindows::Initialise()
 		{
-			s_mainThreadId = GetCurrentThreadId();
 			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
 
+			s_memoryInformation = GetMemoryInformation();
 			s_cpuInformation = GetCPUInformation();
+
+			s_mainThreadId = GetCurrentThreadId();
+			s_processId = GetCurrentProcessId();
+			s_memoryReadProcessHandle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, s_processId);
 		}
 
 		void PlatformWindows::Shutdown()
 		{
+			CloseHandle(s_memoryReadProcessHandle);
 			CoUninitialize();
 		}
 
@@ -393,12 +404,17 @@ namespace Insight
 							s_cpuInformation.PhysicalCoreCount = 1 + (CPUID(0x80000008, 0).ECX() & 0xFF);
 						}
 					}
+
 					if (s_cpuInformation.IsHyperThreaded)
 					{
 						if (!(s_cpuInformation.PhysicalCoreCount > 1)) 
 						{
 							s_cpuInformation.PhysicalCoreCount = 1;
 							s_cpuInformation.LogicalCoreCount = (s_cpuInformation.LogicalCoreCount >= 2 ? s_cpuInformation.LogicalCoreCount : 2);
+						}
+						else
+						{
+							s_cpuInformation.PhysicalCoreCount = s_cpuInformation.LogicalCoreCount / 2;
 						}
 					}
 					else
@@ -489,9 +505,45 @@ namespace Insight
 
 		Core::MemoryInformation PlatformWindows::GetMemoryInformation()
 		{
-			Core::MemoryInformation s_cpuInformation = {};
+			u64 const currentTimeStamp = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock().now().time_since_epoch()).count();
+			u64 const deltaFromLastUpdate = currentTimeStamp - s_memoryInformation.LastUpdateTimeStamp;
+			if (s_memoryInformation.Initialised && deltaFromLastUpdate < 10)
+			{
+				// Update memory usage every 10 seconds.
+				return s_memoryInformation;
+			}
+			s_memoryInformation.LastUpdateTimeStamp = currentTimeStamp;
 
-			return s_cpuInformation;
+			// Get the general state of the memory of the machine.
+			MEMORYSTATUSEX memoryStatus;
+			memoryStatus.dwLength = sizeof(memoryStatus);
+			GlobalMemoryStatusEx(&memoryStatus);
+
+			s_memoryInformation.TotalPhyscialMemoryBytes = static_cast<u64>(memoryStatus.ullTotalPhys);
+			s_memoryInformation.TotalVirtualMemoryBytes = static_cast<u64>(memoryStatus.ullTotalVirtual);
+
+			s_memoryInformation.TotalPhyscialMemoryFreeBytes = static_cast<u64>(memoryStatus.ullAvailPhys);
+			s_memoryInformation.TotalVirtualMemoryFreeBytes = static_cast<u64>(memoryStatus.ullAvailVirtual);
+
+			s_memoryInformation.TotalPhyscialMemoryUsedBytes = s_memoryInformation.TotalPhyscialMemoryBytes - s_memoryInformation.TotalPhyscialMemoryFreeBytes;
+			s_memoryInformation.TotalPhyscialMemoryUsedBytes = s_memoryInformation.TotalVirtualMemoryBytes - s_memoryInformation.TotalVirtualMemoryFreeBytes;
+
+			PROCESS_MEMORY_COUNTERS processMemoryCounters = {};
+			if (s_memoryReadProcessHandle
+				&& GetProcessMemoryInfo(s_memoryReadProcessHandle, &processMemoryCounters, sizeof(processMemoryCounters)))
+			{
+				s_memoryInformation.ProcessMemoryUsageBytes = static_cast<u64>(processMemoryCounters.WorkingSetSize);
+			}
+
+			_PERFORMANCE_INFORMATION performanceInfo = {};
+			if (GetPerformanceInfo(&performanceInfo, sizeof(performanceInfo)))
+			{
+				s_memoryInformation.ProcessNumOfPagesCommitted = static_cast<u64>(performanceInfo.CommitTotal);
+				s_memoryInformation.PageSizeBytes = static_cast<u64>(performanceInfo.PageSize);
+			}
+
+			s_memoryInformation.Initialised = true;
+			return s_memoryInformation;
 		}
 	}
 }

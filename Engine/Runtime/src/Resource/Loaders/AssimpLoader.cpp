@@ -534,7 +534,7 @@ namespace Insight
 				{
 					std::vector<u32> indcies_to_lod;
 
-					const float error_rate = 2.0f;
+					const float error_rate = 1.0f;
 					const u32 target_index_count = static_cast<u32>(static_cast<float>(mesh->m_lods.at(0).Index_count) * (1.0f - (0.4f * lod_index)));
 
 					const u64 indices_start = mesh->m_lods.at(0).First_index;
@@ -548,7 +548,7 @@ namespace Insight
 
 					// Try and simplify the mesh, try and preserve mesh topology.
 					u64 result_index_count = meshopt_simplify(
-						  result_lod.data()
+						result_lod.data()
 						, &*indices_begin
 						, static_cast<u64>(indices_count)
 						, &(loader_data.Vertices.data() + vertex_start)->Position.x
