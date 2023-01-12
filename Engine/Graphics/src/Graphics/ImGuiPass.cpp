@@ -117,11 +117,11 @@ namespace Insight
 					size_t index_size = draw_data->TotalIdxCount * sizeof(ImDrawIdx);
 					if (vertex_size > m_vertex_buffer.Get()->GetSize())
 					{
-						m_vertex_buffer.Get()->Resize(vertex_size);
+						m_vertex_buffer.Get()->Resize(vertex_size + (sizeof(ImDrawVert) * 1000));
 					}
 					if (index_size > m_index_buffer.Get()->GetSize())
 					{
-						m_index_buffer.Get()->Resize(index_size);
+						m_index_buffer.Get()->Resize(index_size + (sizeof(ImDrawIdx) * 1000));
 					}
 
 					u64 vtx_dst_offset = 0;

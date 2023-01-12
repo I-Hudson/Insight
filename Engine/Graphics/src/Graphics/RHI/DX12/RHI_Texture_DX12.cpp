@@ -11,6 +11,11 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			RHI_Texture_DX12::~RHI_Texture_DX12()
+			{
+				Release();
+			}
+
 			DescriptorHeapHandle_DX12 RHI_Texture_DX12::GetDescriptorHandle() const
 			{
 				return m_allLayerDescriptorHandle;

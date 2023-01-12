@@ -78,7 +78,7 @@ namespace Insight
 					if (object)
 					{
 						object->Release();
-						DeleteTracked(object);
+						Delete(object);
 					}
 				}
 			}

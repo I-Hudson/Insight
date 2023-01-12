@@ -16,7 +16,7 @@ namespace Insight
 			class RHI_Texture_DX12 : public RHI_Texture
 			{
 			public:
-				virtual ~RHI_Texture_DX12() = default;
+				virtual ~RHI_Texture_DX12() override;
 
 				ID3D12Resource* GetResource() const { return m_resource.Get(); }
 				DescriptorHeapHandle_DX12 GetDescriptorHandle() const;

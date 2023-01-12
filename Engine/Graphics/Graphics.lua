@@ -48,6 +48,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.DirectXHeaders}",
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",
+        "%{IncludeDirs.D3D12MemoryAllocator}",
     }
 
     files 
@@ -61,6 +62,13 @@ project "Insight_Graphics"
         "../../vendor/stb/stb_image.h",
         "../../vendor/stb/stb_image_write.h",
     }
+
+    filter "system:Windows"
+        files
+        {
+            "../../vendor/D3D12MemoryAllocator/src/D3D12MemAlloc.cpp",
+            "../../vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
+        }
 
     links
     {

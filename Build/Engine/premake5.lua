@@ -69,6 +69,7 @@ IncludeDirs["splash"] = "%{wks.location}vendor/Splash/Splash/inc"
 IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
 IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
 IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompiler/inc"
+IncludeDirs["D3D12MemoryAllocator"] = "%{wks.location}vendor/D3D12MemoryAllocator/include"
 
 LibDirs = {}
 

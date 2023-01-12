@@ -63,6 +63,9 @@ namespace Insight
 		class IS_GRAPHICS RHI_Texture : public RHI_Resource
 		{
 		public:
+			virtual ~RHI_Texture() { }
+
+
 			static RHI_Texture* New();
 
 			void LoadFromFile(std::string filePath);

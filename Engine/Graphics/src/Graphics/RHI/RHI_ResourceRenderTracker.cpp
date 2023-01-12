@@ -20,7 +20,8 @@ namespace Insight
 				// Not enough frames have passed.
 				return;
 			}
-			const u64 out_of_date_frame = current_frame - RenderGraph::s_MaxFarmeCount;
+
+			const u64 out_of_date_frame = current_frame - RenderGraph::s_MaxFarmeCount - 6;
 			std::vector<u64> frams_to_remove;
 
 			for (auto pair : m_defered_resources_to_release)
