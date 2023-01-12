@@ -8,6 +8,7 @@
 
 namespace Insight
 {
+	struct RenderMesh;
 	namespace Graphics
 	{
 		class RHI_CommandList;
@@ -89,6 +90,7 @@ namespace Insight
 			glm::mat4 m_transform_offset = glm::mat4(1.0f);
 
 			friend class AssimpLoader;
+			friend struct RenderMesh;
 		};
 	}
 }

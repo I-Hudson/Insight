@@ -56,12 +56,12 @@ namespace Insight
 	Graphics::Frustum MainCameraFrustum = {};
 	bool UseCustomFrustum = false;
 
-	std::vector<Runtime::Model*> modelsToAddToScene;
-	//Runtime::Model* model1 = nullptr;
-	bool modelAddedToScene = false;
+	std::vector<std::pair<Runtime::Model*, bool>> modelsToAddToScene;
 
 	static bool enableFSR = false;
 	static float fsrSharpness = 1.0f;
+
+	RenderFrame renderFrame;
 
 	namespace Graphics
 	{
@@ -84,13 +84,16 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back(model_sponza);
-			modelsToAddToScene.push_back(model_sponza_curtains);
+			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back(model_diana);
+			//modelsToAddToScene.push_back({ model_sponza, false });
+			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -152,13 +155,13 @@ namespace Insight
 
 			for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
 			{
-				if (modelsToAddToScene.at(i)
-					&& !modelAddedToScene
-					&& modelsToAddToScene.at(i)->GetResourceState() == Runtime::EResoruceStates::Loaded)
+				if (modelsToAddToScene.at(i).first
+					&& !modelsToAddToScene.at(i).second
+					&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
 				{
-					modelAddedToScene = true;
-					modelsToAddToScene.at(i)->CreateEntityHierarchy();
-					IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i)->GetFileName());
+					modelsToAddToScene.at(i).second = true;
+					modelsToAddToScene.at(i).first->CreateEntityHierarchy();
+					IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 				}
 			}
 
@@ -265,6 +268,11 @@ namespace Insight
 
 				});
 
+			{
+				IS_PROFILE_SCOPE("CreateRenderFrameFromWorldSystem");
+				renderFrame = CreateRenderFrameFromWorldSystem(&Runtime::WorldSystem::Instance());
+			}
+
 			ShadowPass();
 			//ShadowCullingPass();
 			if (Depth_Prepass)
@@ -286,10 +294,7 @@ namespace Insight
 		{
 			RenderContext::Instance().GpuWaitForIdle();
 			m_imgui_pass.Release();
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
-			{
-				Graphics::RHI_FSR::Instance().Destroy();
-			}
+			Graphics::RHI_FSR::Instance().Destroy();
 
 			Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld"));
 		}
@@ -354,9 +359,14 @@ namespace Insight
 			{
 				RGTextureHandle Depth_Tex;
 				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
+				RenderFrame const& RenderFrame;
 			};
-			PassData data;
-			data.OpaqueEntities = opaque_entities_to_render;
+			PassData data
+			{
+				-1,
+				opaque_entities_to_render,
+				renderFrame
+			};
 
 			ImGui::Begin("Directional Light Direction");
 			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
@@ -580,12 +590,13 @@ namespace Insight
 
 			struct TestPassData
 			{
+				RenderFrame const& RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
 				int Mesh_Lod = 0;
 			};
-			TestPassData Pass_Data = {};
+			TestPassData Pass_Data = { renderFrame };
 			Pass_Data.Buffer_Frame = m_buffer_frame;
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
 			Pass_Data.OpaqueEntities = opaque_entities_to_render;
@@ -784,12 +795,13 @@ namespace Insight
 
 			struct TestPassData
 			{
+				RenderFrame const& RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 				std::vector<Ptr<ECS::Entity>> TransparentEntities;
 				int Mesh_Lod = 0;
 			};
-			TestPassData Pass_Data = {};
+			TestPassData Pass_Data = { renderFrame };
 			Pass_Data.Buffer_Frame = m_buffer_frame;
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
 			Pass_Data.TransparentEntities = transparent_entities_to_render;

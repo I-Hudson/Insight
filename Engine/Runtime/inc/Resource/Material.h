@@ -39,6 +39,7 @@ namespace Insight
 
 			void SetProperty(MaterialProperty property, float value);
 			float GetProperty(MaterialProperty property) const;
+			std::array<float, static_cast<u32>(MaterialProperty::Count)> GetProperties() const;
 
 			bool operator==(const Material& other) const;
 			bool operator!=(const Material& other) const;

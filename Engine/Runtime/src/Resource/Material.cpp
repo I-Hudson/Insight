@@ -31,6 +31,11 @@ namespace Insight
 			return m_properties.at(static_cast<u32>(property));
 		}
 
+		std::array<float, static_cast<u32>(MaterialProperty::Count)> Material::GetProperties() const
+		{
+			return m_properties;
+		}
+
 		bool Material::operator==(const Material& other) const
 		{
 			for (size_t i = 0; i < static_cast<u64>(TextureTypes::Count); ++i)

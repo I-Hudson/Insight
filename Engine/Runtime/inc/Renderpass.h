@@ -2,6 +2,7 @@
 
 #include "Graphics/ImGuiPass.h"
 #include "Graphics/RHI/RHI_FSR.h"
+#include "Graphics/RenderFrame.h"
 
 #include "ECS/Components/CameraComponent.h"
 
