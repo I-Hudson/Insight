@@ -216,18 +216,6 @@ namespace Insight
 			return component;
 		}
 
-		Component* Entity::GetComponentByName(std::string_view component_type) const
-		{
-			for (const RPtr<Component>& component : m_components)
-			{
-				if (component->GetTypeName() == component_type) 
-				{
-					return component.Get();
-				}
-			}
-			return nullptr;
-		}
-
 		void Entity::RemoveComponentByName(std::string_view component_type)
 		{
 			u32 index = 0;
@@ -248,6 +236,24 @@ namespace Insight
 			{
 				IS_CORE_INFO("[Entity::RemoveComponentByName] Tried to remove component '{}'. Component doesn't exists.", component_type);
 			}
+		}
+
+		bool Entity::HasComponentByName(std::string_view component_type) const
+		{
+			return GetComponentByName(component_type) != nullptr;
+		}
+
+
+		Component* Entity::GetComponentByName(std::string_view component_type) const
+		{
+			for (const RPtr<Component>& component : m_components)
+			{
+				if (component->GetTypeName() == component_type) 
+				{
+					return component.Get();
+				}
+			}
+			return nullptr;
 		}
 
 		void Entity::EarlyUpdate()

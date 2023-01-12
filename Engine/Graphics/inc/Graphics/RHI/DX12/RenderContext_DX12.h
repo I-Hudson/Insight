@@ -71,6 +71,12 @@ namespace Insight
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPU();
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPUSampler();
 
+				DescriptorHeapHandle_DX12 GetDescriptorCBVNullHandle() const;
+				DescriptorHeapHandle_DX12 GetDescriptorSRVNullHandle() const;
+				DescriptorHeapHandle_DX12 GetDescriptorUAVNullHandle() const;
+				DescriptorHeapHandle_DX12 GetDescriptorSAMNullHandle() const;
+				
+
 				D3D12MA::Allocator* GetAllocator() const { return m_d3d12MA; }
 
 			protected:
@@ -96,6 +102,10 @@ namespace Insight
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			
 				std::array<DescriptorHeap_DX12, static_cast<u64>(DescriptorHeapTypes::NumDescriptors)> m_descriptorHeaps;
+				DescriptorHeapHandle_DX12 m_cbvNullHandle;
+				DescriptorHeapHandle_DX12 m_srvNullHandle;
+				DescriptorHeapHandle_DX12 m_uavNullHandle;
+				DescriptorHeapHandle_DX12 m_samNullHandle;
 
 				ComPtr<IDXGISwapChain3> m_swapchain{ nullptr };
 				u32 m_rtvDescriptorSize;

@@ -42,6 +42,7 @@ namespace Insight
 			{
 				m_heapType = type;
 				m_capacity = static_cast<u32>(capacity);
+				m_context = context;
 				m_heapId = heapId;
 				m_gpuVisable = gpuVisable;
 
@@ -50,8 +51,11 @@ namespace Insight
 				heapDesc.Flags = m_gpuVisable ? D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE : D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 				heapDesc.NumDescriptors = static_cast<UINT>(m_capacity);
 
-				context->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap));
-				m_descriptorSize = context->GetDevice()->GetDescriptorHandleIncrementSize(heapDesc.Type);
+				m_context->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap));
+				std::wstring heapName = Platform::WStringFromString(DescriptorHeapTypeToString(m_heapType)) + L"_" + std::to_wstring(heapId) + L"_GPUVisable_" + (gpuVisable ? L"True" : L"False");
+				m_heap->SetName(heapName.c_str());
+
+				m_descriptorSize = m_context->GetDevice()->GetDescriptorHandleIncrementSize(heapDesc.Type);
 
 				m_descriptorHeapCPUStart = m_heap->GetCPUDescriptorHandleForHeapStart();
 				if (m_gpuVisable)

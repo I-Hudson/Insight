@@ -26,6 +26,22 @@ namespace Insight
 
 				NumDescriptors
 			};
+			constexpr const char* DescriptorHeapTypeToString(DescriptorHeapTypes heapType)
+			{
+				switch (heapType)
+				{
+				case Insight::Graphics::RHI::DX12::CBV_SRV_UAV:      return "CBV_SRV_UAV";
+				case Insight::Graphics::RHI::DX12::Sampler:          return "Sampler";
+				case Insight::Graphics::RHI::DX12::RenderTargetView: return "RenderTargetView";
+				case Insight::Graphics::RHI::DX12::DepthStencilView: return "DepthStencilView";
+				case Insight::Graphics::RHI::DX12::NumDescriptors:
+					break;
+				default:
+					break;
+				}
+				FAIL_ASSERT();
+				return "";
+			}
 
 			enum class RootSignatureDescriptorTypes
 			{
@@ -73,6 +89,7 @@ namespace Insight
 				void Destroy();
 
 			private:
+				RenderContext_DX12* m_context = nullptr;
 				ID3D12DescriptorHeap* m_heap;
 				std::vector<DescriptorHeapHandle_DX12> m_freeHandles;
 
@@ -82,6 +99,7 @@ namespace Insight
 
 				D3D12_CPU_DESCRIPTOR_HANDLE m_descriptorHeapCPUStart;
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart;
+
 
 				u32 m_heapId = 0;
 				bool m_gpuVisable = false;

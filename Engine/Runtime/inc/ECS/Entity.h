@@ -161,8 +161,39 @@ namespace Insight
 			Ptr<Entity> GetChild(u32 index) const;
 
 			Component* AddComponentByName(std::string_view component_type);
-			Component* GetComponentByName(std::string_view component_type) const;
 			void RemoveComponentByName(std::string_view component_type);
+
+			bool HasComponentByName(std::string_view component_type) const;
+			template<typename T>
+			bool HasComponent() const
+			{
+				return GetComponent<T>() != nullptr;
+			}
+
+			Component* GetComponentByName(std::string_view component_type) const;
+			template<typename T>
+			T* GetComponentByName(std::string_view component_type) const
+			{
+				static_assert(std::is_base_of_v<Component, T>);
+				Component* component = GetComponentByName(component_type);
+				if (component)
+				{
+					return static_cast<T*>(component);
+				}
+				return nullptr;
+			}
+
+			template<typename T>
+			T* GetComponent() const
+			{
+				static_assert(std::is_base_of_v<Component, T>);
+				Component* component = GetComponentByName(T::Type_Name);
+				if (component)
+				{
+					return static_cast<T*>(component);
+				}
+				return nullptr;
+			}
 
 			Core::GUID GetGUID() const { return m_guid; }
 

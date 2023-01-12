@@ -45,7 +45,7 @@ namespace test
 			CHECK(basePtr->I == TEST_INT);
 
 			derivedPtr.Reset();
-			CHECK(basePtr == nullptr);
+			CHECK(!basePtr);
 		}
 
 		TEST_CASE("Owner in vector")
@@ -55,12 +55,10 @@ namespace test
 			
 			TObjectPtr objectPtr = OwnerPtrs.back();
 			CHECK(objectPtr);
-			CHECK(OwnerPtrs.at(0).GetOnDestroyDelegate()->GetFunctionCount() == 1);
 
 			OwnerPtrs.push_back(TObjectOwnPtr<int>(new int{ 512 }));
 
 			CHECK(objectPtr);
-			CHECK(OwnerPtrs.at(0).GetOnDestroyDelegate()->GetFunctionCount() == 1);
 
 			OwnerPtrs.erase(OwnerPtrs.begin());
 

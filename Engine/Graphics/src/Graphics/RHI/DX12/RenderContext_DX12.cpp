@@ -131,6 +131,34 @@ namespace Insight
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).SetRenderContext(this);
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Create(DescriptorHeapTypes::DepthStencilView);
 
+
+				// Create all our null handles for descriptors.
+				m_cbvNullHandle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+				D3D12_CONSTANT_BUFFER_VIEW_DESC cbv_desc = {};
+				m_device->CreateConstantBufferView(&cbv_desc, m_cbvNullHandle.CPUPtr);
+
+				m_srvNullHandle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+				D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+				srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+				srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				srv_desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+				m_device->CreateShaderResourceView(nullptr, &srv_desc, m_srvNullHandle.CPUPtr);
+
+				m_uavNullHandle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = {};
+				uav_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				uav_desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+				m_device->CreateUnorderedAccessView(nullptr, nullptr, &uav_desc, m_uavNullHandle.CPUPtr);
+
+				m_samNullHandle = m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).GetNewHandle();
+				D3D12_SAMPLER_DESC sampler_desc = {};
+				sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+				sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+				sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+				sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+				sampler_desc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+				m_device->CreateSampler(&sampler_desc, m_samNullHandle.CPUPtr);
+
 				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
 				for (size_t i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
@@ -672,6 +700,26 @@ namespace Insight
 			DescriptorHeapGPU_DX12& RenderContext_DX12::GetFrameDescriptorHeapGPUSampler()
 			{
 				return m_submitFrameContexts.Get().DescriptorHeapSampler;
+			}
+
+			DescriptorHeapHandle_DX12 RenderContext_DX12::GetDescriptorCBVNullHandle() const
+			{
+				return m_cbvNullHandle;
+			}
+
+			DescriptorHeapHandle_DX12 RenderContext_DX12::GetDescriptorSRVNullHandle() const
+			{
+				return m_srvNullHandle;
+			}
+
+			DescriptorHeapHandle_DX12 RenderContext_DX12::GetDescriptorUAVNullHandle() const
+			{
+				return m_uavNullHandle;
+			}
+
+			DescriptorHeapHandle_DX12 RenderContext_DX12::GetDescriptorSAMNullHandle() const
+			{
+				return m_samNullHandle;
 			}
 
 			void RenderContext_DX12::WaitForGpu()

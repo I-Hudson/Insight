@@ -146,10 +146,14 @@ namespace Insight
 					}
 				}
 
-				m_renderpasses.Render();
 				{
-					IS_PROFILE_SCOPE("GraphicsSystem Render");
-					m_graphicsSystem.Render();
+					IS_PROFILE_SCOPE("Render Update");
+
+					m_renderpasses.Render();
+					{
+						IS_PROFILE_SCOPE("GraphicsSystem Render");
+						m_graphicsSystem.Render();
+					}
 				}
 
 				m_inputSystem.ClearFrame();

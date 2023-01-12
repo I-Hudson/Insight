@@ -92,6 +92,7 @@ namespace Insight
 			glm::mat4 GetInvertedProjectionViewMatrix()	const { return m_camera.GetInvertedProjectionViewMatrix(); }
 			glm::mat4 GetInvertedViewMatrix()	        const { return m_camera.GetInvertedViewMatrix(); }
 
+			Camera GetCamera()							const { return m_camera; }
 			CameraType GetCameraType()                  const { return m_camera.GetCameraType(); }
 			float GetNearPlane()                        const { return m_camera.GetNearPlane(); }
 			float GetFarPlane()                         const { return m_camera.GetFarPlane(); }

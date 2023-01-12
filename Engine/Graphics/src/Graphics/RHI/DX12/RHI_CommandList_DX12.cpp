@@ -593,6 +593,11 @@ namespace Insight
 									m_contextDX12->GetDevice()->CreateConstantBufferView(&desc, dstHandle.CPUPtr);
 									++RenderStats::Instance().DescriptorSetUpdates;
 								}
+								else
+								{
+									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorCBVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+									++RenderStats::Instance().DescriptorSetUpdates;
+								}
 							}
 
 							if (binding.Type == DescriptorType::Sampled_Image)
@@ -610,6 +615,11 @@ namespace Insight
 									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 									++RenderStats::Instance().DescriptorSetUpdates;
 								}
+								else
+								{
+									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, m_contextDX12->GetDescriptorSRVNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+									++RenderStats::Instance().DescriptorSetUpdates;
+								}
 							}
 
 							if (binding.Type == DescriptorType::Sampler
@@ -625,6 +635,11 @@ namespace Insight
 									RHI_Sampler_DX12 const* samplerDX12 = static_cast<RHI_Sampler_DX12 const*>(binding.RHI_Sampler);
 									DescriptorHeapHandle_DX12 srvHandle = samplerDX12->Handle;
 									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+									++RenderStats::Instance().DescriptorSetUpdates;
+								}
+								else
+								{
+									m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, samplerHandle.CPUPtr, m_contextDX12->GetDescriptorSAMNullHandle().CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 									++RenderStats::Instance().DescriptorSetUpdates;
 								}
 							}

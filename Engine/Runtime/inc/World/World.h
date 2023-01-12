@@ -64,6 +64,12 @@ namespace Insight
 			/// </summary>
 			/// <returns></returns>
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
+			/// @brief Return all entities within the world. Including root and their children recursive.
+			/// @return 
+			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
+
+		private:
+			void AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const;
 
 		private:
 			/// Store all entites 

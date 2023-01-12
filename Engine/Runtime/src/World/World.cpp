@@ -101,5 +101,25 @@ namespace Insight
 		{
 			return m_root_entities;
 		}
+
+		std::vector<Ptr<ECS::Entity>> World::GetAllEntitiesFlatten() const
+		{
+			std::vector<Ptr<ECS::Entity>> entities;
+			for (size_t i = 0; i < m_root_entities.size(); ++i)
+			{
+				Ptr<ECS::Entity> const& entity = m_root_entities.at(i);
+				AddEntityAndChildrenToVector(entity, entities);
+			}
+			return entities;
+		}
+
+		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const
+		{
+			vector.push_back(entity);
+			for (u32 i = 0; i < entity->GetChildCount(); ++i)
+			{
+				AddEntityAndChildrenToVector(entity->GetChild(i), vector);
+			}
+		}
 	}
 }
