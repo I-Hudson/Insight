@@ -48,6 +48,7 @@ namespace Insight
     {
         ECS::Camera Camra; 
         glm::mat4 Transform;
+        bool IsSet = false;
     };
 
     /// @brief Represent the world for rendering.
@@ -65,6 +66,7 @@ namespace Insight
 
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
+        std::vector<RenderMesh> TransparentMeshes;
 
         glm::vec3 DirectionalLight = glm::vec3(0, 0, 0);
     };
@@ -73,6 +75,8 @@ namespace Insight
     struct RenderFrame
     {
         std::vector<RenderWorld> RenderWorlds;
+
+        void SortTransparentMeshes();
     };
 
     /// @brief Create our render frame from the world system.

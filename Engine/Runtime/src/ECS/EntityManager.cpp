@@ -286,6 +286,17 @@ namespace Insight
 			return entities;
 		}
 
+		std::vector<Ptr<ECS::Entity>> EntityManager::GetAllEntities() const
+		{
+			std::vector<Ptr<ECS::Entity>> entities;
+			entities.reserve(m_entities.size());
+			for (const UPtr<Entity>& e : m_entities)
+			{
+				entities.push_back(e);
+			}
+			return entities;
+		}
+
 #endif
 	}
 }

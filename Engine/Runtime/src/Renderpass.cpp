@@ -1,8 +1,6 @@
 #include "Renderpass.h"
 #include "Runtime/Engine.h"
 
-#include "Graphics/DX12RenderPasses.h"
-
 #include "Graphics/RenderContext.h"
 
 #include "Graphics/RenderTarget.h"
@@ -33,6 +31,8 @@
 
 namespace Insight
 {
+//#define SHADOW_PASS_SCENE_OBEJCTS
+
 	const float ShadowZNear = 0.1f;
 	const float ShadowZFar = 512.0f;
 	const float ShadowFOV = 65.0f;
@@ -84,16 +84,16 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			//modelsToAddToScene.push_back({ model_sponza, false });
-			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			modelsToAddToScene.push_back({ model_sponza, false });
+			modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -225,6 +225,7 @@ namespace Insight
 			TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
 			if (world)
 			{
+				IS_PROFILE_SCOPE("Separate opaque and transparent entities");
 				std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 				for (Ptr<ECS::Entity> entity : entities)
 				{
@@ -242,19 +243,21 @@ namespace Insight
 						}
 					}
 				}
-			}
-
-			std::sort(transparent_entities_to_render.begin(), transparent_entities_to_render.end(), [this](const Ptr<ECS::Entity>& entity1, const Ptr<ECS::Entity>& entity2)
 				{
-					ECS::TransformComponent* transformComponent1 = static_cast<ECS::TransformComponent*>(entity1->GetComponentByName(ECS::TransformComponent::Type_Name));
-			ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
+					IS_PROFILE_SCOPE("Sort transparent entities");
+					std::sort(transparent_entities_to_render.begin(), transparent_entities_to_render.end(), [this](const Ptr<ECS::Entity>& entity1, const Ptr<ECS::Entity>& entity2)
+						{
+							ECS::TransformComponent* transformComponent1 = static_cast<ECS::TransformComponent*>(entity1->GetComponentByName(ECS::TransformComponent::Type_Name));
+							ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
 
-			glm::vec3 position1 = transformComponent1->GetPosition();
-			glm::vec3 position2 = transformComponent2->GetPosition();
-			glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
+							glm::vec3 position1 = transformComponent1->GetPosition();
+							glm::vec3 position2 = transformComponent2->GetPosition();
+							glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
 
-			return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
-				});
+							return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
+						});
+				}
+			}
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
@@ -269,8 +272,14 @@ namespace Insight
 				});
 
 			{
-				IS_PROFILE_SCOPE("CreateRenderFrameFromWorldSystem");
+#ifndef SHADOW_PASS_SCENE_OBEJCTS
 				renderFrame = CreateRenderFrameFromWorldSystem(&Runtime::WorldSystem::Instance());
+				for (RenderWorld& world : renderFrame.RenderWorlds)
+				{
+					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
+				}
+				renderFrame.SortTransparentMeshes();
+#endif
 			}
 
 			ShadowPass();
@@ -443,6 +452,7 @@ namespace Insight
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
+#ifdef SHADOW_PASS_SCENE_OBEJCTS
 						for (const Ptr<ECS::Entity>& e : data.OpaqueEntities)
 						{
 							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
@@ -478,6 +488,48 @@ namespace Insight
 
 							mesh->Draw(cmdList);
 						}
+#else
+						for (RenderWorld const& world : data.RenderFrame.RenderWorlds)
+						{
+							for (RenderMesh const& mesh : world.Meshes)
+							{
+								//ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
+								//glm::mat4 transform = transform_component->GetTransform();
+
+								//ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
+								//if (!mesh_component
+								//	|| !mesh_component->GetMesh())
+								//{
+								//	continue;
+								//}
+								//Runtime::Mesh* mesh = mesh_component->GetMesh();
+
+								//Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
+								//boundingBox = boundingBox.Transform(transform);
+								//// Transform bounding box to world space from local space.
+								//if (!camera_frustum.IsVisible(boundingBox))
+								//{
+								//	//continue;
+								//}
+
+								struct alignas(16) Object
+								{
+									glm::mat4 Transform;
+									int CascadeIndex;
+								};
+								Object object =
+								{
+									mesh.Transform,
+									static_cast<int>(i)
+								};
+								cmdList->SetUniform(4, 0, object);
+
+								cmdList->SetVertexBuffer(mesh.MeshLods.at(0).Vertex_buffer);
+								cmdList->SetIndexBuffer(mesh.MeshLods.at(0).Index_buffer, Graphics::IndexType::Uint32);
+								cmdList->DrawIndexed(mesh.MeshLods.at(0).Index_count, 1, mesh.MeshLods.at(0).First_index, mesh.MeshLods.at(0).Vertex_offset, 0);
+							}
+						}
+#endif
 						cmdList->EndRenderpass();
 					}
 				}, std::move(data));

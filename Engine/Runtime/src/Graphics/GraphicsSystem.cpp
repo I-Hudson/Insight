@@ -94,7 +94,7 @@ namespace Insight
 			swapchainDesc.Width = m_window.GetWidth();
 			swapchainDesc.Height = m_window.GetHeight();
 			swapchainDesc.Format = PixelFormat::R8G8B8A8_UNorm;
-			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Variable;
+			swapchainDesc.PresentMode = Graphics::SwapchainPresentModes::Immediate;
 			m_context->CreateSwapchain(swapchainDesc);
 
 			m_context->InitImGui();

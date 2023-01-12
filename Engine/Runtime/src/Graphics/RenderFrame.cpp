@@ -6,6 +6,8 @@
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/MeshComponent.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     //=====================================================
@@ -19,7 +21,7 @@ namespace Insight
     void RenderMesh::SetMaterial(Runtime::Material* material)
     {
         Material = {};
-        if (material)
+        if (!material)
         {
             return;
         }
@@ -40,22 +42,24 @@ namespace Insight
     //=====================================================
     void RenderWorld::SetMainCamera(ECS::Camera mainCamera, glm::mat4 transform)
     {
-        MainCamera = RenderCamrea{ std::move(mainCamera), std::move(transform) };
+        MainCamera = RenderCamrea{ std::move(mainCamera), std::move(transform), true};
     }
 
     void RenderWorld::AddCamrea(ECS::Camera camera, glm::mat4 transform)
     {
-        Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform) });
+        Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform), true });
     }
 
     RenderFrame CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem)
     {
+        IS_PROFILE_FUNCTION();
         ASSERT(Platform::IsMainThread());
 
         RenderFrame renderFrame;
         std::vector<TObjectPtr<Runtime::World>> worlds = worldSystem->GetAllWorlds();
         for (TObjectPtr<Runtime::World> const& world : worlds)
         {
+            IS_PROFILE_SCOPE("RenderWorld");
             RenderWorld renderWorld;
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
 
@@ -63,6 +67,8 @@ namespace Insight
 
             for (Ptr<ECS::Entity>& entity : entities)
             {
+                IS_PROFILE_SCOPE("Evaluate Single Entity");
+
                 ECS::TransformComponent* transformComponent = entity->GetComponentByName<ECS::TransformComponent>(ECS::TransformComponent::Type_Name);
                 if (entity->HasComponentByName(ECS::CameraComponent::Type_Name))
                 {
@@ -88,11 +94,38 @@ namespace Insight
                     renderMesh.SetMesh(mesh);
                     renderMesh.SetMaterial(meshComponent->GetMaterial());
 
-                    renderWorld.Meshes.push_back(std::move(renderMesh));
+                    if (renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f)
+                    {
+                        renderWorld.TransparentMeshes.push_back(std::move(renderMesh));
+                    }
+                    else
+                    {
+                        renderWorld.Meshes.push_back(std::move(renderMesh));
+                    }
                 }
             }
             renderFrame.RenderWorlds.push_back(std::move(renderWorld));
         }
+        renderFrame.SortTransparentMeshes();
         return renderFrame;
+    }
+
+    void RenderFrame::SortTransparentMeshes()
+    {
+        IS_PROFILE_FUNCTION();
+        for (RenderWorld& world : RenderWorlds)
+        {
+            if (world.MainCamera.IsSet)
+            {
+                IS_PROFILE_SCOPE("Sort transparent meshes");
+                std::sort(world.TransparentMeshes.begin(), world.TransparentMeshes.end(), [&world](RenderMesh const& meshA, RenderMesh const& meshB)
+                    {
+                        glm::vec3 const& positionA = meshA.Transform[3].xyz;
+                        glm::vec3 const& positionB = meshB.Transform[3].xyz;
+                        glm::vec3 const& cameraPositon = world.MainCamera.Transform[3].xyz;
+                        return glm::distance(positionA, cameraPositon) < glm::distance(positionB, cameraPositon);
+                    });
+            }
+        }
     }
 }

@@ -25,6 +25,7 @@ namespace Insight
 
 			Graphics::Window::Instance().SetTite(windowTitle);
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
+			//Graphics::Window::Instance().SetFullScreen();
 			Graphics::Window::Instance().Show();
 
 			EditorWindowManager::Instance().RegisterWindows();

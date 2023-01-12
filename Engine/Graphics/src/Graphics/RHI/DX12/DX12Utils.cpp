@@ -642,7 +642,7 @@ namespace Insight
         {
             switch (presentMode)
             {
-            case Insight::Graphics::SwapchainPresentModes::Immediate: return DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+            case Insight::Graphics::SwapchainPresentModes::Immediate: return DXGI_SWAP_EFFECT_FLIP_DISCARD;
             case Insight::Graphics::SwapchainPresentModes::VSync:     return DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
             case Insight::Graphics::SwapchainPresentModes::Variable:  return DXGI_SWAP_EFFECT_FLIP_DISCARD;
             default:

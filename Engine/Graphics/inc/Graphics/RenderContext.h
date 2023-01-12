@@ -128,6 +128,8 @@ namespace Insight
 
 			virtual RHI_Texture* GetSwaphchainIamge() const = 0;
 
+			virtual void SetFullScreen() { }
+
 			bool HasExtension(DeviceExtension extension) const;
 			bool IsExtensionEnabled(DeviceExtension extension) const;
 			void EnableExtension(DeviceExtension extension);

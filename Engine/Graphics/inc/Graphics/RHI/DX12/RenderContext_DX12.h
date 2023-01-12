@@ -59,6 +59,8 @@ namespace Insight
 				virtual void SetSwaphchainResolution(glm::ivec2 resolution) override;
 				virtual glm::ivec2 GetSwaphchainResolution() const override;
 
+				virtual void SetFullScreen() override;
+
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 

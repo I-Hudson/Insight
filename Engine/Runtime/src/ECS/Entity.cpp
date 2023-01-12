@@ -240,7 +240,14 @@ namespace Insight
 
 		bool Entity::HasComponentByName(std::string_view component_type) const
 		{
-			return GetComponentByName(component_type) != nullptr;
+			for (RPtr<Component> const& component : m_components)
+			{
+				if (component->GetTypeName() == component_type)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
 
 

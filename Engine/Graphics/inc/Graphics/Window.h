@@ -66,6 +66,9 @@ namespace Insight
 			void SetHeight(int height);
 			void SetSize(glm::ivec2 size);
 
+			void SetFullScreen();
+			bool IsFullScreen() const { return m_isFullScreen; }
+
 			void Show();
 			void Hide();
 
@@ -82,6 +85,7 @@ namespace Insight
 			glm::ivec2 m_position = {0,0};
 			glm::ivec2 m_size = {0,0};
 			GLFWwindow* m_glfwWindow = nullptr;
+			bool m_isFullScreen = false;
 
 			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 			Input::InputSystem* m_inputSystem = nullptr;

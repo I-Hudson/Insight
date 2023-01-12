@@ -167,7 +167,14 @@ namespace Insight
 			template<typename T>
 			bool HasComponent() const
 			{
-				return GetComponent<T>() != nullptr;
+				for (RPtr<Component> const& component : m_components)
+				{
+					if (component->GetTypeName() == T::Type_Name) 
+					{
+						return true;
+					}
+				}
+				return false;
 			}
 
 			Component* GetComponentByName(std::string_view component_type) const;

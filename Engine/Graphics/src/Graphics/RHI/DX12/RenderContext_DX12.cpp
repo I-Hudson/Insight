@@ -386,7 +386,9 @@ namespace Insight
 							IS_PROFILE_SCOPE("Present");
 							// Present the frame.
 							UINT presentSyncInterval = m_swapchainDesc.PresentMode == SwapchainPresentModes::Variable ? 0 : 1; 
-							UINT presentFlags = m_swapchainDesc.PresentMode == SwapchainPresentModes::Variable ? DXGI_PRESENT_ALLOW_TEARING : 0;
+							UINT presentFlags = m_swapchainDesc.PresentMode == SwapchainPresentModes::Variable && !Window::Instance().IsFullScreen() 
+								? DXGI_PRESENT_ALLOW_TEARING : 0;
+							
 							if (HRESULT hr = m_swapchain->Present(presentSyncInterval, presentFlags); FAILED(hr))
 							{
 								if (hr == 0x0)
@@ -449,7 +451,8 @@ namespace Insight
 				if (FAILED(hr) || !allowTearing)
 				{
 					tearingSupported = false;
-					IS_CORE_WARN("WARNING: Variable refresh rate displays not supported\n");
+					IS_CORE_WARN("[RenderContext_DX12::CreateSwapchain]: Variable refresh rate displays not supported. Fallback to VSync.\n");
+					desc.PresentMode = SwapchainPresentModes::VSync;
 				}
 				else
 				{
@@ -538,6 +541,11 @@ namespace Insight
 			glm::ivec2 RenderContext_DX12::GetSwaphchainResolution() const
 			{
 				return m_swapchainBufferSize;
+			}
+
+			void RenderContext_DX12::SetFullScreen()
+			{
+				m_swapchain->SetFullscreenState(TRUE, nullptr);
 			}
 
 			void RenderContext_DX12::GpuWaitForIdle()

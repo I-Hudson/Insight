@@ -7,6 +7,8 @@
 #include "Input/InputStates/InputButtonState.h"
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
+#include "Graphics/RenderContext.h"
+
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 
@@ -194,6 +196,8 @@ namespace Insight
 			}
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
+
 			m_glfwWindow = glfwCreateWindow(m_size.x, m_size.y, m_title.c_str(), NULL, NULL);
 
 			int windowPosX, windowPosY;
@@ -310,6 +314,14 @@ namespace Insight
 		{
 			m_size = size;
 			glfwSetWindowSize(m_glfwWindow, m_size.x, m_size.y);
+		}
+
+		void Window::SetFullScreen()
+		{
+			const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			glfwSetWindowMonitor(m_glfwWindow, glfwGetPrimaryMonitor(), mode->width / 2, mode->height / 2, mode->width, mode->height, GLFW_DONT_CARE);
+			m_isFullScreen = true;
+			Graphics::RenderContext::Instance().SetFullScreen();
 		}
 
 		void Window::Show()
