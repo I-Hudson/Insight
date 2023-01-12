@@ -8,6 +8,9 @@
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RHI/RHI_GPUCrashTracker.h"
+
+#include "D3D12MemAlloc.h"
 
 #include <array>
 
@@ -68,6 +71,8 @@ namespace Insight
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPU();
 				DescriptorHeapGPU_DX12& GetFrameDescriptorHeapGPUSampler();
 
+				D3D12MA::Allocator* GetAllocator() const { return m_d3d12MA; }
+
 			protected:
 				virtual void WaitForGpu() override;
 
@@ -82,6 +87,11 @@ namespace Insight
 				ComPtr<IDXGIFactory4> m_factory{ nullptr };
 				ComPtr<ID3D12Device> m_device{ nullptr };
 				ComPtr<ID3D12Debug> m_debugController{ nullptr };
+
+				/// @brief D3D12 memory allocator used for all resource (buffer/textures) allocations.
+				D3D12MA::Allocator* m_d3d12MA = nullptr;
+
+				RHI_GPUCrashTracker* m_gpuCrashTracker = nullptr;
 
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			

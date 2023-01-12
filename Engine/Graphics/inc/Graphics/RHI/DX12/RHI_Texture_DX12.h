@@ -7,6 +7,8 @@
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
 
+#include "D3D12MemAlloc.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -18,7 +20,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Texture_DX12() override;
 
-				ID3D12Resource* GetResource() const { return m_resource.Get(); }
+				ID3D12Resource* GetResource() const { if (m_swapchainImage) { return m_swapchainImage.Get(); } return m_allocation->GetResource(); }
 				DescriptorHeapHandle_DX12 GetDescriptorHandle() const;
 				DescriptorHeapHandle_DX12 GetRenderTargetHandle() const;
 				DescriptorHeapHandle_DX12 GetDepthStencilHandle() const;
@@ -41,8 +43,11 @@ namespace Insight
 				DescriptorHeapHandle_DX12 CreateSharderResouceView(u32 mip_index, u32 mip_count, u32 layer_count, u32 layer_index, DescriptorHeapTypes heap);
 
 			private:
-				ComPtr<ID3D12Resource> m_resource;
+				D3D12MA::Allocation* m_allocation = nullptr;
 				RenderContext_DX12* m_context = nullptr;
+
+				/// @brief Backwards compatibility.
+				ComPtr<ID3D12Resource> m_swapchainImage = nullptr;
 
 				DescriptorHeapHandle_DX12 m_allLayerDescriptorHandle;					// Image view for all layers.
 				std::vector<DescriptorHeapHandle_DX12> m_singleLayerDescriptorHandle;	// Image view for each layer.

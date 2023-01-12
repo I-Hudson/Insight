@@ -96,15 +96,18 @@ namespace Insight
 				bool optimiseClearColourEnabled = m_infos.at(0).ImageUsage & ImageUsageFlagsBits::DepthStencilAttachment
 					|| m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment;
 
-				CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+				D3D12MA::ALLOCATION_DESC allocationDesc = {};
+				allocationDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
+
 				/// Create the texture.
-				ThrowIfFailed(m_context->GetDevice()->CreateCommittedResource(
-					&heapProperties,
-					D3D12_HEAP_FLAG_NONE,
+				ThrowIfFailed(m_context->GetAllocator()->CreateResource(
+					&allocationDesc,
 					&resourceDesc,
 					ImageLayoutToDX12ResouceState(m_infos.at(0).Layout),
 					optimiseClearColourEnabled ? &clearColour : nullptr,
-					IID_PPV_ARGS(&m_resource)));
+					&m_allocation,
+					IID_NULL, NULL));
+
 
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)
 				{
@@ -164,9 +167,10 @@ namespace Insight
 
 			void RHI_Texture_DX12::Release()
 			{
-				if (m_resource)
+				if (m_allocation)
 				{
-					m_resource.Reset();
+					m_allocation->Release();
+					m_allocation = nullptr;
 				}
 
 				m_infos.clear();
@@ -193,14 +197,14 @@ namespace Insight
 
 			bool RHI_Texture_DX12::ValidResource()
 			{
-				return m_resource;
+				return m_allocation && m_allocation->GetResource();
 			}
 
 			void RHI_Texture_DX12::SetName(std::string name)
 			{
-				if (m_resource)
+				if (m_allocation && m_allocation->GetResource())
 				{
-					m_context->SetObjectName(name, m_resource.Get());
+					m_context->SetObjectName(name, m_allocation->GetResource());
 				}
 				m_name = std::move(name);
 			}
@@ -235,11 +239,11 @@ namespace Insight
 						shaderResouceViewDesc.Texture2DArray.PlaneSlice = 0u;
 						shaderResouceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
 					}
-					m_context->GetDevice()->CreateShaderResourceView(m_resource.Get(), &shaderResouceViewDesc, handle.CPUPtr);
+					m_context->GetDevice()->CreateShaderResourceView(m_allocation->GetResource(), &shaderResouceViewDesc, handle.CPUPtr);
 				}
 				else if (heap == DescriptorHeapTypes::RenderTargetView)
 				{
-					m_context->GetDevice()->CreateRenderTargetView(m_resource.Get(), nullptr, handle.CPUPtr);
+					m_context->GetDevice()->CreateRenderTargetView(m_allocation->GetResource(), nullptr, handle.CPUPtr);
 				}
 				else if (heap == DescriptorHeapTypes::DepthStencilView)
 				{
@@ -258,7 +262,7 @@ namespace Insight
 						desc.Texture2DArray.ArraySize = layer_count;
 						desc.Texture2DArray.FirstArraySlice = layer_index;
 					}
-					m_context->GetDevice()->CreateDepthStencilView(m_resource.Get(), &desc, handle.CPUPtr);
+					m_context->GetDevice()->CreateDepthStencilView(m_allocation->GetResource(), &desc, handle.CPUPtr);
 				}
 				else
 				{

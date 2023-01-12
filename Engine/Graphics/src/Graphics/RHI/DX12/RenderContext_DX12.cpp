@@ -5,8 +5,11 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
+#include "Graphics/RHI/RHI_GPUCrashTracker.h"
+
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
+
 #include "Event/EventSystem.h"
 
 #include "backends/imgui_impl_glfw.h"
@@ -71,11 +74,22 @@ namespace Insight
 
 				FindPhysicalDevice(&m_physicalDevice.GetPhysicalDevice());
 
+				m_gpuCrashTracker = RHI_GPUCrashTracker::Create();
+				if (m_gpuCrashTracker)
+				{
+					m_gpuCrashTracker->Init();
+				}
+
 				ThrowIfFailed(D3D12CreateDevice(
 					m_physicalDevice.GetPhysicalDevice().Get(),
 					D3D_FEATURE_LEVEL_11_0,
 					IID_PPV_ARGS(&m_device)
 				));
+
+				D3D12MA::ALLOCATOR_DESC d3d12MA_AllocatorDesc = {};
+				d3d12MA_AllocatorDesc.pDevice = m_device.Get();
+				d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
+				ThrowIfFailed(D3D12MA::CreateAllocator(&d3d12MA_AllocatorDesc, &m_d3d12MA));
 
 				/// Describe and create the command queue.
 				D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -195,10 +209,22 @@ namespace Insight
 					m_swapchain = nullptr;
 				}
 
+				if (m_d3d12MA)
+				{
+					m_d3d12MA->Release();
+					m_d3d12MA = nullptr;
+				}
+
 				if (m_device)
 				{
 					m_device.Reset();
 					m_device = nullptr;
+				}
+
+				if (m_gpuCrashTracker)
+				{
+					m_gpuCrashTracker->Destroy();
+					DeleteTracked(m_gpuCrashTracker);
 				}
 
 				if (m_factory)
@@ -300,11 +326,11 @@ namespace Insight
 				barrier.AccessAfter = D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_RENDER_TARGET;
 				barrier.LayoutBefore = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_PRESENT;
 				barrier.LayoutAfter = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_RENDER_TARGET;
-				barrier.pResource = m_swapchainImages[m_availableSwapchainImage].Colour->GetResource();
+				barrier.pResource = m_swapchainImages[m_availableSwapchainImage].Colour->m_swapchainImage.Get();
 				cmdListDX12->PipelineBarrierImage({ barrier });
 #else
 				cmdListDX12->PipelineResourceBarriers({ CD3DX12_RESOURCE_BARRIER::Transition(
-					m_swapchainImages[m_availableSwapchainImage].Colour->GetResource(),
+					m_swapchainImages[m_availableSwapchainImage].Colour->m_swapchainImage.Get(),
 					D3D12_RESOURCE_STATE_COMMON,
 					D3D12_RESOURCE_STATE_RENDER_TARGET) });
 #endif
@@ -367,8 +393,8 @@ namespace Insight
 				{
 					for (auto& image : m_swapchainImages)
 					{
-						image.Colour->m_resource.Reset();
-						image.Colour->m_resource = nullptr;
+						image.Colour->m_swapchainImage.Reset();
+						image.Colour->m_swapchainImage = nullptr;
 					}
 					m_swapchain.Reset();
 					m_swapchain = nullptr;
@@ -463,8 +489,8 @@ namespace Insight
 					}
 
 					/// Get the back buffer from the swapchain.
-					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
-					device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
+					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_swapchainImage)));
+					device->CreateRenderTargetView(swapchainImage.Colour->m_swapchainImage.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
 				m_swapchainDesc = desc;
 			}
@@ -594,8 +620,8 @@ namespace Insight
 				/// Release all our previous render targets from the swapchain.
 				for (size_t i = 0; i < m_swapchainImages.size(); ++i)
 				{
-					m_swapchainImages[i].Colour->m_resource.Reset();
-					m_swapchainImages[i].Colour->m_resource = nullptr;
+					m_swapchainImages[i].Colour->m_swapchainImage.Reset();
+					m_swapchainImages[i].Colour->m_swapchainImage = nullptr;
 				}
 
 				/// Resize our swap chain buffers.
@@ -606,8 +632,8 @@ namespace Insight
 				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
-					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_resource)));
-					m_device->CreateRenderTargetView(swapchainImage.Colour->GetResource(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
+					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_swapchainImage)));
+					m_device->CreateRenderTargetView(swapchainImage.Colour->m_swapchainImage.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
 			}
 
