@@ -2,6 +2,8 @@
 
 #include "Core/Logger.h"
 
+#include "Algorithm/Vector.h"
+
 namespace Insight
 {
 	namespace Core
@@ -38,7 +40,10 @@ namespace Insight
 
 		void EventSystem::Update()
 		{
-			for (const RPtr<Event>& event : m_queuedEvents)
+			std::vector<RPtr<Event>> eventsToEvaluate = std::move(m_queuedEvents);
+			DiscardOutOfDateEvente(eventsToEvaluate);
+
+			for (const RPtr<Event>& event : eventsToEvaluate)
 			{
 				auto const& eventFuncItr = m_eventListeners[event->GetEventType()];
 				for (auto const& func : eventFuncItr)
@@ -46,7 +51,31 @@ namespace Insight
 					func.second(*event.Get());
 				}
 			}
-			m_queuedEvents.clear();
+		}
+
+		void EventSystem::DiscardOutOfDateEvente(std::vector<RPtr<Event>>& events)
+		{
+			std::unordered_map<EventType, std::vector<RPtr<Event>>> eventsToRemove;
+			for (int i = events.size() - 1; i >= 0; --i)
+			{
+				// Sort all events into their types. Newest to oldest.
+				eventsToRemove[events.at(i)->GetEventType()].push_back(events.at(i));
+			}
+
+			for (auto const& pair : eventsToRemove)
+			{	
+				if(pair.second.size() <= 1)
+				{
+					continue;
+				}
+
+				// Remove all old events. Event at index 0 is the Newest event so remove 
+				// all events after that one.
+				for (size_t i = 1; i < pair.second.size(); ++i)
+				{
+					Algorithm::VectorRemove(events, pair.second.at(i));
+				}
+			}
 		}
 	}
 }

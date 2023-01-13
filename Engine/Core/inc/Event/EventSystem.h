@@ -29,6 +29,12 @@ namespace Insight
 			void Update();
 
 		private:
+			/// @brief Take a vector of events and remove duplicate events of the same type.
+			// E.G: Two window size changes. The first size change is no longer up to date so 
+			// should be discarded.
+			void DiscardOutOfDateEvente(std::vector<RPtr<Event>>& events);
+
+		private:
 			std::unordered_map<EventType, std::unordered_map<void*, EventFunc>> m_eventListeners;
 			std::vector<RPtr<Event>> m_queuedEvents;
 		};

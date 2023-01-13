@@ -19,13 +19,18 @@ namespace Insight
 		{
 			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
-			std::string windowTitle = "Insight Editor (";
+			std::string windowTitle = "Insight Editor";
+#ifdef IS_DEBUG
+			windowTitle += " Debug ";
+#elif IS_RELEASE
+			windowTitle += " Release ";
+#endif
+			windowTitle += "(";
 			windowTitle += Graphics::GraphicsAPIToString(Graphics::RenderContext::Instance().GetGraphicsAPI());
 			windowTitle += ")";
 
 			Graphics::Window::Instance().SetTite(windowTitle);
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
-			//Graphics::Window::Instance().SetFullScreen();
 			Graphics::Window::Instance().Show();
 
 			EditorWindowManager::Instance().RegisterWindows();

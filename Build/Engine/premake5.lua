@@ -162,6 +162,7 @@ workspace "Insight"
         defines
         {
             "DOCTEST_CONFIG_DISABLE",
+            "IS_DEBUG",
         }
 
     filter { "configurations:Debug", "configurations:Testing" }
@@ -176,6 +177,7 @@ workspace "Insight"
         defines
         {
             "NDEBUG",
+            "IS_RELEASE",
             "DOCTEST_CONFIG_DISABLE",
         }
 
