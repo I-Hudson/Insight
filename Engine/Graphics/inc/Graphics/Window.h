@@ -50,23 +50,24 @@ namespace Insight
 
 			void SetIcon(const std::string& file_path);
 
-			int GetX() const { return m_position.x; }
-			int GetY() const { return m_position.y; }
-			glm::ivec2 GetPosition() const { return m_position; }
+			int GetX() const;
+			int GetY() const;
+			glm::ivec2 GetPosition() const;
 
 			void SetX(int x);
 			void SetY(int y);
 			void SetPosition(glm::ivec2 position);
 
-			int GetWidth() const { return m_size.x; }
-			int GetHeight() const { return m_size.y; }
-			glm::ivec2 GetSize() const { return m_size; }
+			int GetWidth() const;
+			int GetHeight() const;
+			glm::ivec2 GetSize() const;
 
 			void SetWidth(int width);
 			void SetHeight(int height);
 			void SetSize(glm::ivec2 size);
 
 			void SetFullScreen();
+			void SetWindowed();
 			bool IsFullScreen() const { return m_isFullScreen; }
 
 			void Show();
@@ -82,10 +83,13 @@ namespace Insight
 		private:
 			bool m_glfwInit = false;
 			std::string m_title;
-			glm::ivec2 m_position = {0,0};
-			glm::ivec2 m_size = {0,0};
 			GLFWwindow* m_glfwWindow = nullptr;
 			bool m_isFullScreen = false;
+
+			glm::ivec2 m_fullScreenSize = {0,0};
+			glm::ivec2 m_fullScreenPosition = {0,0};
+			glm::ivec2 m_windowedSize = { 0,0 };
+			glm::ivec2 m_windowedPosition = { 0,0 };
 
 			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 			Input::InputSystem* m_inputSystem = nullptr;

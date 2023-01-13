@@ -172,7 +172,7 @@ namespace Insight
 			}
 
 			m_title = std::move(title);
-			m_size = { width, height };
+			SetSize({ width, height });
 
 			m_glfwInit = glfwInit();
 			if (!m_glfwInit)
@@ -198,11 +198,11 @@ namespace Insight
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_REFRESH_RATE, GLFW_DONT_CARE);
 
-			m_glfwWindow = glfwCreateWindow(m_size.x, m_size.y, m_title.c_str(), NULL, NULL);
+			m_glfwWindow = glfwCreateWindow(GetSize().x, GetSize().y, m_title.c_str(), NULL, NULL);
 
 			int windowPosX, windowPosY;
 			glfwGetWindowPos(m_glfwWindow, &windowPosX, &windowPosY);
-			m_position = { windowPosX , windowPosY };
+			SetPosition({ windowPosX , windowPosY });
 
 			glfwSetWindowPosCallback(m_glfwWindow, [](GLFWwindow* window, int xpos, int ypos)
 				{
@@ -256,8 +256,8 @@ namespace Insight
 		void Window::Rebuild()
 		{
 			std::string oldTitle = m_title;
-			glm::ivec2 oldPosition = m_position;
-			glm::ivec2 oldSize = m_size;
+			glm::ivec2 oldPosition = GetPosition();
+			glm::ivec2 oldSize = GetSize();
 
 			Destroy();
 			Init(m_inputSystem, oldSize.x, oldSize.y, oldTitle);
@@ -287,51 +287,131 @@ namespace Insight
 			stbi_image_free(pixels);
 		}
 
+		int Window::GetX() const
+		{
+			return m_isFullScreen ? m_fullScreenPosition.x : m_windowedPosition.x;
+		}
+
+		int Window::GetY() const
+		{
+			return m_isFullScreen ? m_fullScreenPosition.y : m_windowedPosition.y;
+		}
+
+		glm::ivec2 Window::GetPosition() const
+		{
+			return m_isFullScreen ? m_fullScreenPosition : m_windowedPosition;
+		}
+
 		void Window::SetX(int x)
 		{
-
+			SetPosition({ x, m_windowedPosition.y });
 		}
 
 		void Window::SetY(int y)
 		{
+			SetPosition({ m_windowedPosition.x, y });
 		}
 
 		void Window::SetPosition(glm::ivec2 position)
 		{
-			glfwSetWindowPos(m_glfwWindow, position.x, position.y);
-			m_position = position;
+			if (IsFullScreen())
+			{
+				return;
+			}
+			m_windowedPosition = position;
+			if (m_glfwWindow)
+			{
+				glfwSetWindowPos(m_glfwWindow, position.x, position.y);
+			}
+		}
+
+		int Window::GetWidth() const
+		{
+			return m_isFullScreen ? m_fullScreenSize.x : m_windowedSize.x;
+		}
+
+		int Window::GetHeight() const
+		{
+			return m_isFullScreen ? m_fullScreenSize.y : m_windowedSize.y;
+		}
+
+		glm::ivec2 Window::GetSize() const
+		{
+			return m_isFullScreen ? m_fullScreenSize : m_windowedSize;
 		}
 
 		void Window::SetWidth(int width)
 		{
+			SetSize({ width, m_windowedSize.y });
 		}
 
 		void Window::SetHeight(int height)
 		{
+			SetSize({ m_windowedSize.x, height });
 		}
 
 		void Window::SetSize(glm::ivec2 size)
 		{
-			m_size = size;
-			glfwSetWindowSize(m_glfwWindow, m_size.x, m_size.y);
+			if (IsFullScreen())
+			{
+				return;
+			}
+			m_windowedSize = size;
+			if (m_glfwWindow)
+			{
+				glfwSetWindowSize(m_glfwWindow, m_windowedSize.x, m_windowedSize.y);
+			}
 		}
 
 		void Window::SetFullScreen()
 		{
-			const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-			glfwSetWindowMonitor(m_glfwWindow, glfwGetPrimaryMonitor(), mode->width / 2, mode->height / 2, mode->width, mode->height, GLFW_DONT_CARE);
+			if (m_isFullScreen || !m_glfwWindow)
+			{
+				return;
+			}
+
+			glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_FALSE);
+			glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_TRUE);
+			
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			//SetSize({ mode->width, mode->height });
+			//SetPosition({ 0, 0 });
+
+			m_fullScreenSize = { mode->width, mode->height };
+			m_fullScreenPosition = { 0, 0 };
+
+			glfwSetWindowMonitor(m_glfwWindow, monitor, 0, 0, mode->width, mode->height, GLFW_DONT_CARE);
 			m_isFullScreen = true;
 			Graphics::RenderContext::Instance().SetFullScreen();
 		}
 
+		void Window::SetWindowed()
+		{
+			if (!m_isFullScreen || !m_glfwWindow)
+			{
+				return;
+			}
+
+			glfwSetWindowAttrib(m_glfwWindow, GLFW_DECORATED, GLFW_TRUE);
+			glfwSetWindowAttrib(m_glfwWindow, GLFW_FLOATING, GLFW_FALSE);
+			m_isFullScreen = false;
+		}
+
 		void Window::Show()
 		{
-			glfwShowWindow(m_glfwWindow);
+			if (m_glfwWindow)
+			{
+				glfwShowWindow(m_glfwWindow);
+			}
 		}
 
 		void Window::Hide()
 		{
-			glfwHideWindow(m_glfwWindow);
+			if (m_glfwWindow)
+			{
+				glfwHideWindow(m_glfwWindow);
+			}
 		}
 
 		bool Window::ShouldClose() const

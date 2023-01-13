@@ -1,5 +1,7 @@
 #if defined(IS_DX12_ENABLED)
 
+#ifdef IS_PLATFORM_WINDOWS
+
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
@@ -14,7 +16,7 @@
 
 #include "backends/imgui_impl_glfw.h"
 
-#ifdef IS_PLATFORM_WINDOWS
+
 #include "backends/imgui_impl_dx12.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3native.h"
@@ -490,6 +492,29 @@ namespace Insight
 					nullptr,
 					&swapchain));
 
+				if (tearingSupported)
+				{
+					// When tearing support is enabled we will handle ALT+Enter key presses in the
+					// window message loop rather than let DXGI handle it by calling SetFullscreenState.
+					m_factory->MakeWindowAssociation(hwmd, DXGI_MWA_NO_ALT_ENTER);
+				}
+				else
+				{
+					if (Window::Instance().IsFullScreen())
+					{
+						BOOL fullscreenState;
+						ThrowIfFailed(swapchain->GetFullscreenState(&fullscreenState, nullptr));
+						if (FAILED(swapchain->SetFullscreenState(!fullscreenState, nullptr)))
+						{
+							// Transitions to fullscreen mode can fail when running apps over
+							// terminal services or for some other unexpected reason.  Consider
+							// notifying the user in some way when this happens.
+							IS_CORE_ERROR("[RenderContext_DX12::CreateSwapchain] Fullscreen transition failed.");
+							FAIL_ASSERT();
+						}
+					}
+				}
+
 				swapchain.As(&m_swapchain);
 
 				//m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
@@ -545,7 +570,8 @@ namespace Insight
 
 			void RenderContext_DX12::SetFullScreen()
 			{
-				m_swapchain->SetFullscreenState(TRUE, nullptr);
+				//m_swapchain->SetFullscreenState(TRUE, nullptr);
+				SetSwaphchainResolution(Window::Instance().GetSize());
 			}
 
 			void RenderContext_DX12::GpuWaitForIdle()
