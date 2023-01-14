@@ -44,6 +44,7 @@ namespace Insight
 			ImGui::Text(IndexBufferBindingsFormated().c_str());
 			ImGui::Text(VertexBufferBindingsFormated().c_str());
 			ImGui::Text(DrawIndexedIndicesCountFormated().c_str());
+			ImGui::Text(FrameUniformBufferSizeFormated().c_str());
 			ImGui::Text(DescriptorSetBindingsFormated().c_str());
 			ImGui::Text(DescriptorSetUpdatesFormated().c_str());
 			ImGui::Text(DescriptorSetUsedCountFormated().c_str());
@@ -62,6 +63,7 @@ namespace Insight
 			IndexBufferBindings = 0;
 			VertexBufferBindings = 0;
 			DrawIndexedIndicesCount = 0;
+			FrameUniformBufferSize = 0;
 			DescriptorSetBindings = 0;
 			DescriptorSetUpdates = 0;
 			DescriptorSetUsedCount = 0;

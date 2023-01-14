@@ -155,6 +155,10 @@ namespace Insight
 
 					//Clear();
 					++m_frame_count;
+					if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
+					{
+						cmdList->m_discard = true;
+					}
 				}
 				m_context->PostRender(cmdList);
 

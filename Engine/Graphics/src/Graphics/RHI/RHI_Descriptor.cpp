@@ -399,19 +399,61 @@ namespace Insight
 			m_descriptor_sets = pso.Shader->GetDescriptorSets();
 		}
 
+		bool DescriptorAllocator::WasUniformBufferResized() const
+		{
+			return m_uniformBufferResized;
+		}
+
 		RHI_BufferView DescriptorAllocator::UploadUniform(const void* data, u32 size)
 		{
 			CreateUniformBufferIfNoExist();
 
-			const u32 alignedSize = AlignUp(size, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
-			if (m_uniformBufferOffset + alignedSize > m_uniformBuffer->GetSize())
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
+			u64 hash = 0;
 			{
-				FAIL_ASSERT();
+				IS_PROFILE_SCOPE("[DescriptorAllocator::UploadUniform] Hash update data");
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA_BYTE
+				for (size_t i = 0; i < size; ++i)
+				{
+					const Byte* byteDataPtr = static_cast<const Byte*>(data) + i;
+					Byte byteDataValue = *byteDataPtr;
+					HashCombine(hash, byteDataValue);
+				}
+#elif defined(DESCRIPTOR_CACHE_UNIFOM_DATA_4_BYTE)
+				ASSERT(size % 4 == 0);
+				// Hash the data values of the data wanting to be uploaded.
+				for (size_t i = 0; i < size; i += 4)
+				{
+					const unsigned int* dataPtr = static_cast<const unsigned int*>(data) + i;
+					const unsigned int dataValue = *dataPtr;
+					HashCombine(hash, dataValue);
+				}
+#endif
+			}
+
+			// Check has this data already been uploaded to the uniform buffer to the GPU.
+			// if so then just return the same location. This reduces the amount being uploaded.
+			if (auto iter = m_cachedBufferData.find(hash); iter != m_cachedBufferData.end())
+			{
+				return iter->second;
+			}
+#endif
+
+			const u32 alignedSize = AlignUp(size, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
+			if (m_uniformBufferResized
+				|| m_uniformBufferOffset + alignedSize > m_uniformBuffer->GetSize())
+			{
+				m_uniformBufferResized = true;
+				m_uniformBufferOffset += m_uniformBufferOffset + alignedSize;
+				return {};
 			}
 
 			RHI_BufferView view = m_uniformBuffer->Upload(data, static_cast<int>(size), static_cast<int>(m_uniformBufferOffset), PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
+			RenderStats::Instance().FrameUniformBufferSize += view.GetSize();
 			m_uniformBufferOffset += view.GetSize();
-
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
+			m_cachedBufferData[hash] = view;
+#endif
 			return view;
 		}
 
@@ -549,7 +591,18 @@ namespace Insight
 		void DescriptorAllocator::Reset()
 		{
 			ClearDescriptors();
+
+			if (m_uniformBufferResized)
+			{
+				u64 newSize = m_uniformBufferOffset * 1.8f;
+				m_uniformBuffer->Resize(newSize);
+			}
+
 			m_uniformBufferOffset = 0;
+			m_uniformBufferResized = false;
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
+			m_cachedBufferData.clear();
+#endif
 		}
 
 		void DescriptorAllocator::Destroy()
@@ -562,10 +615,11 @@ namespace Insight
 		{
 			if (!m_uniformBuffer)
 			{
-				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(1_MB));
+				m_uniformBuffer = UPtr(Renderer::CreateUniformBuffer(32_MB));
 				m_uniformBuffer->SetName("Descriptor_Uniform_Buffer");
 			}
 		}
+
 		bool DescriptorAllocator::CheckSetAndBindingBounds(u32 set, u32 binding)
 		{
 			DescriptorSet* descriptor_set = nullptr;

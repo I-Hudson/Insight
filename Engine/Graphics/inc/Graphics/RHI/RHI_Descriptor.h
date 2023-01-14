@@ -80,6 +80,11 @@ namespace Insight
 			friend class RHI_DescriptorSetManager;
 		};
 
+#define DESCRIPTOR_CACHE_UNIFOM_DATA
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
+#define DESCRIPTOR_CACHE_UNIFOM_DATA_4_BYTE
+#endif 
+
 		class RHI_DescriptorSetManager
 		{
 		public:
@@ -101,6 +106,7 @@ namespace Insight
 
 			void SetPipeline(PipelineStateObject pso);
 
+			bool WasUniformBufferResized() const;
 			RHI_BufferView UploadUniform(const void* data, u32 size);
 
 			void SetUniform(u32 set, u32 binding, const void* data, u32 size);
@@ -128,6 +134,11 @@ namespace Insight
 		protected:
 			std::vector<DescriptorSet> m_descriptor_sets; // Current descriptors information. 
 			UPtr<RHI_Buffer> m_uniformBuffer;
+#ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
+			/// @brief Store a map of hash to buffer values to reduce the amount of copied data uploaded.
+			std::unordered_map<u64, RHI_BufferView> m_cachedBufferData;
+#endif
+			bool m_uniformBufferResized = false;
 			u64 m_uniformBufferOffset = 0;
 
 		private:
