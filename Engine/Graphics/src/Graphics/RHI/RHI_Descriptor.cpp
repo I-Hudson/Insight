@@ -479,8 +479,12 @@ namespace Insight
 						IS_CORE_WARN("[DescriptorAllocator::SetUniform] Size mismatch. Descriptor expects '{0}', provided '{1}'\n Set: {2}, Binding: {3}."
 							, descriptorBinding->Size, size, set, binding);
 					}
-					descriptorBinding->RHI_Buffer_View = UploadUniform(data, size);
-					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+					RHI_BufferView bufferView = UploadUniform(data, size);
+					if (descriptorBinding->RHI_Buffer_View != bufferView)
+					{
+						descriptorBinding->RHI_Buffer_View = bufferView;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+					}
 				}
 			}
 		}
@@ -502,13 +506,16 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Unifom_Buffer))
 				{
-					descriptorBinding->RHI_Buffer_View = buffer_view;
-					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+					if (descriptorBinding->RHI_Buffer_View != buffer_view)
+					{
+						descriptorBinding->RHI_Buffer_View = buffer_view;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
+					}
 				}
 			}
 		}
 
-		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture, const RHI_Sampler* sampler)
+		void DescriptorAllocator::SetTexture(u32 set, u32 binding, const RHI_Texture* texture)
 		{
 			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 			{
@@ -526,8 +533,11 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampled_Image))
 				{
-					descriptorBinding->RHI_Texture = texture;
-					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture);
+					if (descriptorBinding->RHI_Texture != texture)
+					{
+						descriptorBinding->RHI_Texture = texture;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture);
+					}
 				}
 			}
 		}
@@ -550,8 +560,11 @@ namespace Insight
 			{
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampler))
 				{
-					descriptorBinding->RHI_Sampler = sampler;
-					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler);
+					if (descriptorBinding->RHI_Sampler != sampler)
+					{
+						descriptorBinding->RHI_Sampler = sampler;
+						HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler);
+					}
 				}
 			}
 		}
