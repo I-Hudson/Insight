@@ -397,6 +397,12 @@ namespace Insight
 			}
 
 			m_descriptor_sets = pso.Shader->GetDescriptorSets();
+
+			// Reset the hash used for DX12.
+			for (DescriptorSet& set : m_descriptor_sets)
+			{
+				set.DX_Hash = 0;
+			}
 		}
 
 		bool DescriptorAllocator::WasUniformBufferResized() const
@@ -428,7 +434,7 @@ namespace Insight
 					const unsigned int dataValue = *dataPtr;
 					HashCombine(hash, dataValue);
 				}
-#endif
+#endif // DESCRIPTOR_CACHE_UNIFOM_DATA_BYTE || DESCRIPTOR_CACHE_UNIFOM_DATA_4_BYTE
 			}
 
 			// Check has this data already been uploaded to the uniform buffer to the GPU.
@@ -437,7 +443,7 @@ namespace Insight
 			{
 				return iter->second;
 			}
-#endif
+#endif //DESCRIPTOR_CACHE_UNIFOM_DATA
 
 			const u32 alignedSize = AlignUp(size, PhysicalDeviceInformation::Instance().MinUniformBufferAlignment);
 			if (m_uniformBufferResized
@@ -453,7 +459,7 @@ namespace Insight
 			m_uniformBufferOffset += view.GetSize();
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 			m_cachedBufferData[hash] = view;
-#endif
+#endif // DESCRIPTOR_CACHE_UNIFOM_DATA
 			return view;
 		}
 
@@ -474,6 +480,7 @@ namespace Insight
 							, descriptorBinding->Size, size, set, binding);
 					}
 					descriptorBinding->RHI_Buffer_View = UploadUniform(data, size);
+					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
 				}
 			}
 		}
@@ -496,6 +503,7 @@ namespace Insight
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Unifom_Buffer))
 				{
 					descriptorBinding->RHI_Buffer_View = buffer_view;
+					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Buffer_View);
 				}
 			}
 		}
@@ -519,6 +527,7 @@ namespace Insight
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampled_Image))
 				{
 					descriptorBinding->RHI_Texture = texture;
+					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Texture);
 				}
 			}
 		}
@@ -542,6 +551,7 @@ namespace Insight
 				if (DescriptorBinding* descriptorBinding = GetDescriptorBinding(descriptorSet, binding, DescriptorType::Sampler))
 				{
 					descriptorBinding->RHI_Sampler = sampler;
+					HashCombine(descriptorSet->DX_Hash, descriptorBinding->RHI_Sampler);
 				}
 			}
 		}
@@ -602,7 +612,7 @@ namespace Insight
 			m_uniformBufferResized = false;
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 			m_cachedBufferData.clear();
-#endif
+#endif // DESCRIPTOR_CACHE_UNIFOM_DATA
 		}
 
 		void DescriptorAllocator::Destroy()

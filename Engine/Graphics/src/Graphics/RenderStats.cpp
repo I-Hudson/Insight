@@ -50,6 +50,18 @@ namespace Insight
 			ImGui::Text(DescriptorSetUsedCountFormated().c_str());
 			ImGui::Text(PipelineBarriersFormated().c_str());
 
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
+			{
+				ImGui::Spacing();
+				ImGui::Spacing();
+				ImGui::Text("DX12");
+				ImGui::Separator();
+				ImGui::Text(DescriptorTableResourceCreationsFormated().c_str());
+				ImGui::Text(DescriptorTableResourceReuseFormated().c_str());
+				ImGui::Text(DescriptorTableSamplerCreationsFormated().c_str());
+				ImGui::Text(DescriptorTableSamplerReuseFormated().c_str());
+			}
+
 			ImGui::End();
 			Reset();
 		}
@@ -68,6 +80,11 @@ namespace Insight
 			DescriptorSetUpdates = 0;
 			DescriptorSetUsedCount = 0;
 			PipelineBarriers = 0;
+
+			DescriptorTableResourceCreations = 0;
+			DescriptorTableResourceReuse = 0;
+			DescriptorTableSamplerCreations = 0;
+			DescriptorTableSamplerReuse = 0;
 		}
 	}
 }

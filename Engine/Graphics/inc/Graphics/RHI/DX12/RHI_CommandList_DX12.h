@@ -6,6 +6,10 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 
+// Allow the RHI_CommandList_DX12 to reuse descriptor tables which have already been create
+// within the gpu descriptor heap.
+#define DX12_REUSE_DESCRIPTOR_TABLES
+
 namespace Insight
 {
 	namespace Graphics
@@ -93,6 +97,11 @@ namespace Insight
 				std::unordered_map<u64, D3D12_RESOURCE_BARRIER> m_ResourceBarriers;
 
 				ID3D12DescriptorHeap* m_boundResourceHeap = nullptr;
+
+#ifdef DX12_REUSE_DESCRIPTOR_TABLES
+				/// @brief Cache previous descriptor tables in the GPU heap.
+				std::unordered_map<u64, DescriptorHeapHandle_DX12> m_descriptorTableCache;
+#endif // DX12_REUSE_DESCRIPTOR_TABLES
 
 				friend class RHI_CommandListAllocator_DX12;
 			};

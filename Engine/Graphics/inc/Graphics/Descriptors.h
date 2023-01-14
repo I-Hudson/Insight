@@ -64,6 +64,8 @@ namespace Insight
 			u64 Hash_No_Resource = 0;
 			u64 Hash_Resource = 0;
 
+			u64 DX_Hash = 0;
+
 			std::string Name;
 			u32 Set = 0;
 			u32 Stages = 0;

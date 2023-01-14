@@ -40,6 +40,12 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			u64 DescriptorSetUsedCount = 0;
 			u64 PipelineBarriers = 0;
 
+			// DX12 Info
+			u64 DescriptorTableResourceCreations = 0;
+			u64 DescriptorTableResourceReuse = 0;
+			u64 DescriptorTableSamplerCreations = 0;
+			u64 DescriptorTableSamplerReuse = 0;
+
 			FORMAT_STAT(DrawCalls, "Draw Calls: ");
 			FORMAT_STAT(DrawIndexedCalls, "Draw Indexed Calls: ");
 			FORMAT_STAT(DispatchCalls, "Dispatch Calls: ");
@@ -51,6 +57,11 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 			FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
 			FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");
 			FORMAT_STAT(PipelineBarriers, "Pipline barriers Calls: ");
+
+			FORMAT_STAT(DescriptorTableResourceCreations, "Descriptor Table Resource Creation: ");
+			FORMAT_STAT(DescriptorTableResourceReuse, "Descriptor Table Resource Reuse: ");
+			FORMAT_STAT(DescriptorTableSamplerCreations, "Descriptor Table Sampler Creation: ");
+			FORMAT_STAT(DescriptorTableSamplerReuse, "Descriptor Table Sampler Reuse: ");
 
 			void Draw();
 			void Reset();

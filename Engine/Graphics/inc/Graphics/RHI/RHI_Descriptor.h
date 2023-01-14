@@ -83,7 +83,7 @@ namespace Insight
 #define DESCRIPTOR_CACHE_UNIFOM_DATA
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 #define DESCRIPTOR_CACHE_UNIFOM_DATA_4_BYTE
-#endif 
+#endif // DESCRIPTOR_CACHE_UNIFOM_DATA
 
 		class RHI_DescriptorSetManager
 		{
@@ -137,7 +137,7 @@ namespace Insight
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 			/// @brief Store a map of hash to buffer values to reduce the amount of copied data uploaded.
 			std::unordered_map<u64, RHI_BufferView> m_cachedBufferData;
-#endif
+#endif // DESCRIPTOR_CACHE_UNIFOM_DATA
 			bool m_uniformBufferResized = false;
 			u64 m_uniformBufferOffset = 0;
 
