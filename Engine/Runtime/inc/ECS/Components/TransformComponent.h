@@ -17,15 +17,18 @@ namespace Insight
 			TransformComponent();
 			virtual ~TransformComponent() override;
 
-			/// @brief Return the transform.
+			/// @brief Return the world transform.
 			/// @return glm::mat4.
-			glm::mat4 GetTransform()         const { return m_transform; }
-			/// @brief Return thr previous frame transform.
-			/// @return 
-			glm::mat4 GetPreviousTransform() const { return m_previous_transform; }
+			glm::mat4 GetTransform()         const;
+			/// @brief Get the local transform.
+			/// @return glm::mat4
+			glm::mat4 GetLocalTransform()    const;
 			/// @brief Return the Position.
 			/// @return glm::vec3.
-			glm::vec3 GetPosition()          const { return m_transform[3].xyz; }
+			glm::vec3 GetPosition()          const;
+			/// @brief Return the previous frame world transform.
+			/// @return 
+			glm::mat4 GetPreviousTransform() const { return m_previous_transform; }
 
 			/// @brief Set the Transform.
 			/// @param transform 

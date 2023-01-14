@@ -31,7 +31,7 @@
 
 namespace Insight
 {
-//#define SHADOW_PASS_SCENE_OBEJCTS
+#define SHADOW_PASS_SCENE_OBEJCTS
 
 	const float ShadowZNear = 0.1f;
 	const float ShadowZFar = 512.0f;
@@ -160,7 +160,15 @@ namespace Insight
 					&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
 				{
 					modelsToAddToScene.at(i).second = true;
-					modelsToAddToScene.at(i).first->CreateEntityHierarchy();
+					for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
+					{
+						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
+
+						glm::mat4 transform(1.0f);
+						transform[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+						entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
+					}
+
 					IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 				}
 			}
@@ -262,13 +270,11 @@ namespace Insight
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
-			g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
-
+					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 				});
 			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					GFXHelper::Reset();
-
 				});
 
 			{
