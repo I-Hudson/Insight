@@ -60,6 +60,12 @@ namespace Insight
 				| (isLeaf ? ImGuiTreeNodeFlags_Leaf : 0)
 				| (isSelected ? ImGuiTreeNodeFlags_Selected : 0);
 			
+			bool isEnabled = entity->IsEnabled();
+			if (ImGui::Checkbox(std::string("##" + entity->GetGUID().ToString()).c_str(), &isEnabled))
+			{
+				entity->SetEnabled(isEnabled);
+			}
+			ImGui::SameLine();
 			if (ImGui::TreeNodeEx(entity->GetName().c_str(), treeNodeFlags))
 			{
 				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
@@ -92,6 +98,7 @@ namespace Insight
 					DrawSingleEntity(entity->GetChild(i).Get());
 				}
 				ImGui::TreePop();
+			
 			}
 		}
 	}

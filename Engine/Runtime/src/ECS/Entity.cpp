@@ -263,6 +263,24 @@ namespace Insight
 			return nullptr;
 		}
 
+		bool Entity::IsEnabled() const
+		{
+			if (!m_isEnabled)
+			{
+				return false;
+			}
+			Entity* parentEntity = GetParent();
+			while (parentEntity)
+			{
+				if (!parentEntity->IsEnabled())
+				{
+					return false;
+				}
+				parentEntity = parentEntity->GetParent();
+			}
+			return true;
+		}
+
 		void Entity::EarlyUpdate()
 		{
 			for (RPtr<Component>& component : m_components)

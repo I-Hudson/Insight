@@ -3,6 +3,14 @@
 
 #include <imgui.h>
 
+std::string FormatU64ToCommaString(u64 value)
+{
+	std::stringstream ss;
+	ss.imbue(std::locale(std::locale(), new comma_numpunct()));
+	ss << std::fixed << value;
+	return ss.str();
+};
+
 namespace Insight
 {
 	namespace Graphics

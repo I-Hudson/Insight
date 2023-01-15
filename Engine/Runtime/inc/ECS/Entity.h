@@ -102,6 +102,8 @@ namespace Insight
 			virtual const char* GetTypeName() = 0;
 
 			Entity* GetOwnerEntity() const { return m_ownerEntity; }
+			bool IsEnabled() const { return m_isEnabled; }
+			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
 
 		protected:
 			/// @brief  Allow multiple of the same component to be added to a single entity. Default is true
@@ -115,10 +117,11 @@ namespace Insight
 			bool m_on_end_called : 1;
 
 		private:
+			// TODO Must add type information.
 			/// @brief Store the unique ID for the component.
 			Core::GUID m_guid;
 			Entity* m_ownerEntity = nullptr;
-			// TODO Must add type information.
+			bool m_isEnabled = true;
 
 			friend class Entity;
 		};
@@ -208,6 +211,9 @@ namespace Insight
 			std::string GetName() const { return m_name; }
 			void SetName(std::string entity_name) { m_name = std::move(m_name); }
 
+			bool IsEnabled() const;
+			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
+
 		private:
 			void EarlyUpdate();
 			void Update(const float delta_time);
@@ -225,6 +231,7 @@ namespace Insight
 #else
 			EntityManager* m_entity_manager = nullptr;
 #endif
+			bool m_isEnabled = true;
 
 			std::vector<Ptr<Entity>> m_children;
 			// TODO: Currently the Entity owns its components. Maybe a component manager should own all components

@@ -411,7 +411,7 @@ namespace Insight
 					if (descriptor_sets.at(i).Set != i)
 					{
 						filledInSets = false;
-						descriptor_sets.insert(descriptor_sets.begin() + i, DescriptorSet("Bindless", i, {}));
+						descriptor_sets.insert(descriptor_sets.begin() + i, DescriptorSet("Bindless", static_cast<int>(i), {}));
 						break;
 					}
 				}

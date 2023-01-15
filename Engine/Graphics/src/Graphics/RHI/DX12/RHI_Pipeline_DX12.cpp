@@ -61,7 +61,7 @@ namespace Insight
 					PolygonModeToDX12(pso.PolygonMode),
 					CullModeToDX12(pso.CullMode),
 					pso.FrontFace == FrontFace::CounterClockwise ? true : false,
-					pso.DepthConstantBaisValue,
+					static_cast<INT>(pso.DepthConstantBaisValue),
 					D3D12_DEFAULT_DEPTH_BIAS_CLAMP,
 					pso.DepthSlopeBaisValue,
 					TRUE,

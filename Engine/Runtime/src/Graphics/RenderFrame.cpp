@@ -68,6 +68,10 @@ namespace Insight
             for (Ptr<ECS::Entity>& entity : entities)
             {
                 IS_PROFILE_SCOPE("Evaluate Single Entity");
+                if (!entity->IsEnabled())
+                {
+                    continue;
+                }
 
                 ECS::TransformComponent* transformComponent = entity->GetComponentByName<ECS::TransformComponent>(ECS::TransformComponent::Type_Name);
                 if (entity->HasComponentByName(ECS::CameraComponent::Type_Name))
@@ -87,20 +91,23 @@ namespace Insight
                 if (entity->HasComponent<ECS::MeshComponent>())
                 {
                     ECS::MeshComponent* meshComponent = entity->GetComponent<ECS::MeshComponent>();
-                    Runtime::Mesh* mesh = meshComponent->GetMesh();
-
-                    RenderMesh renderMesh;
-                    renderMesh.Transform = transformComponent->GetTransform();
-                    renderMesh.SetMesh(mesh);
-                    renderMesh.SetMaterial(meshComponent->GetMaterial());
-
-                    if (renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f)
+                    if (meshComponent->IsEnabled())
                     {
-                        renderWorld.TransparentMeshes.push_back(std::move(renderMesh));
-                    }
-                    else
-                    {
-                        renderWorld.Meshes.push_back(std::move(renderMesh));
+                        Runtime::Mesh* mesh = meshComponent->GetMesh();
+
+                        RenderMesh renderMesh;
+                        renderMesh.Transform = transformComponent->GetTransform();
+                        renderMesh.SetMesh(mesh);
+                        renderMesh.SetMaterial(meshComponent->GetMaterial());
+
+                        if (renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f)
+                        {
+                            renderWorld.TransparentMeshes.push_back(std::move(renderMesh));
+                        }
+                        else
+                        {
+                            renderWorld.Meshes.push_back(std::move(renderMesh));
+                        }
                     }
                 }
             }

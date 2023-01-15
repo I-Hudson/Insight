@@ -403,6 +403,11 @@ namespace Insight
 			void RHI_CommandList_DX12::SetVertexBuffer(RHI_Buffer* buffer)
 			{
 				IS_PROFILE_FUNCTION();
+				if (buffer == m_bound_vertex_buffer)
+				{
+					return;
+				}
+
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_VERTEX_BUFFER_VIEW views[] = 
 				{ 
@@ -421,6 +426,11 @@ namespace Insight
 			void RHI_CommandList_DX12::SetIndexBuffer(RHI_Buffer* buffer, IndexType index_type)
 			{
 				IS_PROFILE_FUNCTION();
+				if (buffer == m_bound_index_buffer)
+				{
+					return;
+				}
+
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(buffer);
 				const D3D12_INDEX_BUFFER_VIEW view = 
 				{ 

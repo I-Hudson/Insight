@@ -160,7 +160,7 @@ namespace Insight
 					&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
 				{
 					modelsToAddToScene.at(i).second = true;
-					for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
+					for (size_t modelCreateIdx = 0; modelCreateIdx < 3; ++modelCreateIdx)
 					{
 						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
@@ -237,6 +237,11 @@ namespace Insight
 				std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 				for (Ptr<ECS::Entity> entity : entities)
 				{
+					if (!entity->IsEnabled())
+					{
+						continue;
+					}
+
 					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
 					Runtime::Material* material = meshComponent->GetMaterial();
 					if (material)
