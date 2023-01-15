@@ -482,6 +482,10 @@ namespace Insight
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 
 				m_descriptorAllocator->SetPipeline(pso);
+#ifdef DX12_REUSE_DESCRIPTOR_TABLES
+				m_boundDescriptorSets.clear();
+				m_boundDescriptorSets.resize(m_descriptorAllocator->GetAllocatorDescriptorSets().size());
+#endif // DX12_REUSE_DESCRIPTOR_TABLES
 			}
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)
@@ -678,8 +682,13 @@ namespace Insight
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
 						}
 
-						if (firstHandle.GPUPtr.ptr != 0)
+						if (firstHandle.GPUPtr.ptr != 0 
+#ifdef DX12_REUSE_DESCRIPTOR_TABLES
+							&& m_boundDescriptorSets.at(rootParameterIdx).GPUPtr.ptr != firstHandle.GPUPtr.ptr
+#endif // DX12_REUSE_DESCRIPTOR_TABLES
+							)
 						{
+							m_boundDescriptorSets.at(rootParameterIdx) = firstHandle;
 							m_commandList->SetGraphicsRootDescriptorTable(rootParameterIdx, firstHandle.GPUPtr);
 							++RenderStats::Instance().DescriptorSetBindings;
 						}

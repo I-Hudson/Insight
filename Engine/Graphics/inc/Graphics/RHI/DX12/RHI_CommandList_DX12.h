@@ -101,6 +101,7 @@ namespace Insight
 #ifdef DX12_REUSE_DESCRIPTOR_TABLES
 				/// @brief Cache previous descriptor tables in the GPU heap.
 				std::unordered_map<u64, DescriptorHeapHandle_DX12> m_descriptorTableCache;
+				std::vector<DescriptorHeapHandle_DX12> m_boundDescriptorSets;
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
 
 				friend class RHI_CommandListAllocator_DX12;
