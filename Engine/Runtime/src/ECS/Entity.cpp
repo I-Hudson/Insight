@@ -263,6 +263,20 @@ namespace Insight
 			return nullptr;
 		}
 
+		Component* Entity::GetComponentByIndex(u32 idx) const
+		{
+			if (idx < static_cast<u32>(m_components.size()))
+			{
+				return m_components.at(static_cast<u64>(idx)).Get();
+			}
+			return nullptr;
+		}
+
+		u32 Entity::GetComponentCount() const
+		{
+			return static_cast<u32>(m_components.size());
+		}
+
 		bool Entity::IsEnabled() const
 		{
 			if (!m_isEnabled)

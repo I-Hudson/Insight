@@ -37,7 +37,7 @@ namespace Insight
 						continue;
 					}
 
-					if(ImGui::CollapsingHeader(world->GetWorldName().data()))
+					if (ImGui::CollapsingHeader(world->GetWorldName().data()))
 					{
 						auto entities = world->GetAllEntities();
 						for (size_t i = 0; i < entities.size(); ++i)
@@ -47,6 +47,11 @@ namespace Insight
 					}
 				}
 			}
+		}
+
+		std::unordered_set<Core::GUID> const& EntitiesWindow::GetSelectedEntities() const
+		{
+			return m_selectedEntities;
 		}
 
 		void EntitiesWindow::DrawSingleEntity(ECS::Entity* entity)
@@ -59,7 +64,7 @@ namespace Insight
 				| ImGuiTreeNodeFlags_SpanAvailWidth
 				| (isLeaf ? ImGuiTreeNodeFlags_Leaf : 0)
 				| (isSelected ? ImGuiTreeNodeFlags_Selected : 0);
-			
+
 			bool isEnabled = entity->IsEnabled();
 			if (ImGui::Checkbox(std::string("##" + entity->GetGUID().ToString()).c_str(), &isEnabled))
 			{
@@ -68,37 +73,45 @@ namespace Insight
 			ImGui::SameLine();
 			if (ImGui::TreeNodeEx(entity->GetName().c_str(), treeNodeFlags))
 			{
-				if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-				{
-					Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
-					if (inputDevice->WasHeld(Input::KeyboardButtons::Key_LCtrl))
-					{
-						m_selectedEntities.insert(entity->GetGUID());
-						for (u32 i = 0; i < entity->GetChildCount(); ++i)
-						{
-							m_selectedEntities.insert(entity->GetChild(i)->GetGUID());
-						}
-					}
-					else
-					{
-						m_selectedEntities.clear();
-						if (!isSelected)
-						{
-							m_selectedEntities.insert(entity->GetGUID());
-							for (u32 i = 0; i < entity->GetChildCount(); ++i)
-							{
-								m_selectedEntities.insert(entity->GetChild(i)->GetGUID());
-							}
-						}
-					}
-				}
+				IsEntitySelected(entity, isSelected);
 
 				for (u32 i = 0; i < entity->GetChildCount(); ++i)
 				{
 					DrawSingleEntity(entity->GetChild(i).Get());
 				}
 				ImGui::TreePop();
-			
+			}
+			else
+			{
+				IsEntitySelected(entity, isSelected);
+			}
+		}
+
+		void EntitiesWindow::IsEntitySelected(ECS::Entity* entity, bool isSelected)
+		{
+			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+			{
+				Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+				if (inputDevice->WasHeld(Input::KeyboardButtons::Key_LCtrl))
+				{
+					m_selectedEntities.insert(entity->GetGUID());
+					for (u32 i = 0; i < entity->GetChildCount(); ++i)
+					{
+						//m_selectedEntities.insert(entity->GetChild(i)->GetGUID());
+					}
+				}
+				else
+				{
+					m_selectedEntities.clear();
+					if (!isSelected)
+					{
+						m_selectedEntities.insert(entity->GetGUID());
+						for (u32 i = 0; i < entity->GetChildCount(); ++i)
+						{
+							//m_selectedEntities.insert(entity->GetChild(i)->GetGUID());
+						}
+					}
+				}
 			}
 		}
 	}

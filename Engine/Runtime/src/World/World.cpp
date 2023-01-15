@@ -108,6 +108,11 @@ namespace Insight
 			return m_entityManager.GetAllEntities();
 		}
 
+		ECS::Entity* World::GetEntityByGUID(Core::GUID guid) const
+		{
+			return m_entityManager.GetEntityByGUID(guid);
+		}
+
 		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const
 		{
 			vector.push_back(entity);

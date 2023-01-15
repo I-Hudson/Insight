@@ -2,6 +2,7 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 
 #include "Editor/EditorWindows/ResourceWindow.h"
+#include "Editor/EditorWindows/EntitiyDescriptionWindow.h"
 #include "Editor/EditorWindows/EntitiesWindow.h"
 #include "Editor/EditorWindows/InputWindow.h"
 #include "Editor/EditorWindows/SystemInformationWindow.h"
@@ -23,10 +24,11 @@ namespace Insight
 
 		void EditorWindowManager::RegisterWindows()
 		{
-			m_windowRegistry[ResourceWindow::WINDOW_NAME].Bind         ([]() { return static_cast<IEditorWindow*>(New<ResourceWindow>()); });
-			m_windowRegistry[EntitiesWindow::WINDOW_NAME].Bind         ([]() { return static_cast<IEditorWindow*>(New<EntitiesWindow>()); });
-			m_windowRegistry[InputWindow::WINDOW_NAME].Bind            ([]() { return static_cast<IEditorWindow*>(New<InputWindow>()); });
-			m_windowRegistry[SystemInformationWindow::WINDOW_NAME].Bind([]() { return static_cast<IEditorWindow*>(New<SystemInformationWindow>()); });
+			m_windowRegistry[ResourceWindow::WINDOW_NAME].Bind				([]() { return static_cast<IEditorWindow*>(New<ResourceWindow>()); });
+			m_windowRegistry[EntitiyDescriptionWindow::WINDOW_NAME].Bind	([]() { return static_cast<IEditorWindow*>(New<EntitiyDescriptionWindow>()); });
+			m_windowRegistry[EntitiesWindow::WINDOW_NAME].Bind				([]() { return static_cast<IEditorWindow*>(New<EntitiesWindow>()); });
+			m_windowRegistry[InputWindow::WINDOW_NAME].Bind					([]() { return static_cast<IEditorWindow*>(New<InputWindow>()); });
+			m_windowRegistry[SystemInformationWindow::WINDOW_NAME].Bind		([]() { return static_cast<IEditorWindow*>(New<SystemInformationWindow>()); });
 		}
 
 		void EditorWindowManager::AddWindow(const std::string& windowName)
@@ -82,6 +84,18 @@ namespace Insight
 				result.push_back(window->GetWindowName());
 			}
 			return result;
+		}
+
+		IEditorWindow const* EditorWindowManager::GetActiveWindow(std::string_view windowName) const
+		{
+			for (IEditorWindow const* window : m_activeWindows)
+			{
+				if (window->GetWindowName() == windowName)
+				{
+					return window;
+				}
+			}
+			return nullptr;
 		}
 
 		void EditorWindowManager::Update()

@@ -297,6 +297,18 @@ namespace Insight
 			return entities;
 		}
 
+		ECS::Entity* EntityManager::GetEntityByGUID(Core::GUID guid) const
+		{
+			for (const UPtr<Entity>& e : m_entities)
+			{
+				if (e->GetGUID() == guid)
+				{
+					return e.Get();
+				}
+			}
+			return nullptr;
+		}
+
 #endif
 	}
 }

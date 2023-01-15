@@ -68,6 +68,8 @@ namespace Insight
 			/// @return 
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
 
+			ECS::Entity* GetEntityByGUID(Core::GUID guid) const;
+
 		private:
 			void AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const;
 

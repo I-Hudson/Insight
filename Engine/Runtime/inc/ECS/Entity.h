@@ -206,6 +206,9 @@ namespace Insight
 				return nullptr;
 			}
 
+			Component* GetComponentByIndex(u32 idx) const;
+			u32 GetComponentCount() const;
+
 			Core::GUID GetGUID() const { return m_guid; }
 
 			std::string GetName() const { return m_name; }

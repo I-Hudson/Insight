@@ -25,8 +25,11 @@ namespace Insight
 			virtual void OnDraw() override;
 			EDITOR_WINDOW(EntitiesWindow);
 
+			std::unordered_set<Core::GUID> const& GetSelectedEntities() const;
+
 		private:
 			void DrawSingleEntity(ECS::Entity* entity);
+			void IsEntitySelected(ECS::Entity* entity, bool isSelected);
 
 		private:
 			std::unordered_set<Core::GUID> m_selectedEntities;
