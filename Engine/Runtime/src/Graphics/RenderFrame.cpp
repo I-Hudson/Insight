@@ -15,6 +15,7 @@ namespace Insight
     //=====================================================
     void RenderMesh::SetMesh(Runtime::Mesh* mesh)
     {
+        BoudingBox = mesh->GetBoundingBox();
         MeshLods = mesh->m_lods;
     }
 

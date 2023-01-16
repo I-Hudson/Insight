@@ -135,19 +135,21 @@ namespace Insight
 					m_commandListManager.Get().Reset();
 					cmdList = m_commandListManager.Get().GetCommandList();
 
+					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
+					cmdList->m_descriptorAllocator->Reset();
+
 					Build();
 					PlaceBarriers();
 
 					m_context->PreRender(cmdList);
 
-					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
-					cmdList->m_descriptorAllocator->Reset();
-
 					if (m_pre_render_func)
 					{
 						m_pre_render_func(*this, cmdList);
 					}
+
 					Render(cmdList);
+
 					if (m_post_render_func)
 					{
 						m_post_render_func(*this, cmdList);

@@ -36,6 +36,7 @@ namespace Insight
     struct RenderMesh
     {
         glm::mat4 Transform;
+        Graphics::BoundingBox BoudingBox;
         /// @brief All render calls for this mesh.
         std::vector<Runtime::MeshLOD> MeshLods;
         RenderMaterial Material;

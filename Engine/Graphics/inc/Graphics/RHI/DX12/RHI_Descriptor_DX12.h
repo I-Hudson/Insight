@@ -4,7 +4,9 @@
 
 #include "Graphics/RHI/RHI_Descriptor.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
+
 #include <unordered_set>
+#include <mutex>
 
 namespace Insight
 {
@@ -142,6 +144,49 @@ namespace Insight
 				static u32 s_currentHeapId;
 			};
 
+#define IS_DESCRIPTOR_MULTITHREAD_DX12
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+
+			/// @brief 
+			class DescriptorSubHeapPageGPU_DX12
+			{
+			public:
+				DescriptorSubHeapPageGPU_DX12() = default;
+				DescriptorSubHeapPageGPU_DX12(u64 cpuStartPointer, u64 gpuStartPointer, u64 descriptorSize, u64 capacity);
+
+				u64 GetNextCPUHandle() const { return m_cpuStartPointer + (m_size * m_descriptorSize); }
+				u64 GetNextGPUHandle() const { return m_gpuStartPointer + (m_size * m_descriptorSize); }
+
+				bool IsFull() const { return m_size == m_capcaity; }
+
+			private:
+				u64 m_cpuStartPointer = 0;
+				u64 m_gpuStartPointer = 0;
+				u64 m_descriptorSize = 0;
+				/// @brief Current number of descriptor used.
+				u64 m_size = 0;
+				/// @brief Total amount of descriptor available.
+				u64 m_capcaity = 0;
+			};
+
+			/// @brief Manage a small subset of descriptor heaps from GPU memory.
+			// This object is designed to be transient, to be destroyed and created each frame.
+			class DescriptorSubHeapGPU_DX12
+			{
+			public:
+				DescriptorSubHeapGPU_DX12() = default;
+
+				bool IsActive() const { return m_pages.size() > 0; }
+
+			private:
+				void AddPage(DescriptorSubHeapPageGPU_DX12 page);
+
+			private:
+				std::vector<DescriptorSubHeapPageGPU_DX12> m_pages;
+
+				friend class DescriptorHeapGPU_DX12;
+			};
+#endif
 			/// @brief GPU visible descriptor heap.
 			class DescriptorHeapGPU_DX12
 			{
@@ -155,6 +200,11 @@ namespace Insight
 				DescriptorHeapHandle_DX12 GetNextHandle();
 
 				ID3D12DescriptorHeap* GetHeap() const;
+
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+				DescriptorSubHeapGPU_DX12 AllocateSubHeap();
+				void GrowSubHeap(DescriptorSubHeapGPU_DX12& subHeap);
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 
 				void Reset();
 				void Destroy();
@@ -171,6 +221,12 @@ namespace Insight
 
 				D3D12_CPU_DESCRIPTOR_HANDLE m_descriptorHeapCPUStart{ 0 };
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart{ 0 };
+
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+				std::mutex m_subAllocMutex;
+				u64 m_subHeapCPUOffset = 0;
+				u64 m_subHeapGPUOffset = 0;
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 			};
 		}
 	}

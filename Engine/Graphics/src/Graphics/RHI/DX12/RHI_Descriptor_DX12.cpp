@@ -201,6 +201,13 @@ namespace Insight
 			}
 
 			//---------------------------------------------
+			// DescriptorSubHeapGPU_DX12
+			//---------------------------------------------
+			void DescriptorSubHeapGPU_DX12::AddPage(DescriptorSubHeapPageGPU_DX12 page)
+			{
+			}
+
+			//---------------------------------------------
 			// DescriptorHeapGPU_DX12
 			//---------------------------------------------
 			DescriptorHeapGPU_DX12::DescriptorHeapGPU_DX12()
@@ -249,9 +256,36 @@ namespace Insight
 				return m_heap;
 			}
 
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+			DescriptorSubHeapGPU_DX12 DescriptorHeapGPU_DX12::AllocateSubHeap()
+			{
+				DescriptorSubHeapGPU_DX12 heap = {};
+				GrowSubHeap(heap);
+				return heap;
+			}
+
+			void DescriptorHeapGPU_DX12::GrowSubHeap(DescriptorSubHeapGPU_DX12& subHeap)
+			{
+				const u64 capacity = 2024;
+				std::unique_lock lock(m_subAllocMutex);
+				DescriptorSubHeapPageGPU_DX12 page(m_descriptorHeapCPUStart.ptr + m_subHeapCPUOffset, m_descriptorHeapGPUStart.ptr + m_subHeapGPUOffset, m_descriptorSize, capacity);
+				m_subHeapCPUOffset += (capacity * m_descriptorSize);
+				m_subHeapGPUOffset += (capacity * m_descriptorSize);
+				lock.unlock();
+				subHeap.AddPage(page);
+
+			}
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
+
 			void DescriptorHeapGPU_DX12::Reset()
 			{
 				m_currentDescriptorIndex = 0;
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+				std::unique_lock lock(m_subAllocMutex);
+				m_subHeapCPUOffset = 0;
+				m_subHeapGPUOffset = 0; 
+				lock.unlock();
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 			}
 
 			void DescriptorHeapGPU_DX12::Destroy()

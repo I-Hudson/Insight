@@ -104,6 +104,11 @@ namespace Insight
 				std::vector<DescriptorHeapHandle_DX12> m_boundDescriptorSets;
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
 
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+				DescriptorSubHeapGPU_DX12 m_subHeapRes;
+				DescriptorSubHeapGPU_DX12 m_subHeapSampler;
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
+
 				friend class RHI_CommandListAllocator_DX12;
 			};
 

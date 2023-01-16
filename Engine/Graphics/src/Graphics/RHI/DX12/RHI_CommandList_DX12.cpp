@@ -223,6 +223,11 @@ namespace Insight
 #ifdef DX12_REUSE_DESCRIPTOR_TABLES
 				m_descriptorTableCache.clear();
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+				m_subHeapRes = {};
+				m_subHeapSampler = {};
+#endif // IS_DESCRIPTOR_MULTITHREAD_DX12
+
 			}
 
 			void RHI_CommandList_DX12::Close()

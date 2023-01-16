@@ -31,7 +31,7 @@
 
 namespace Insight
 {
-#define SHADOW_PASS_SCENE_OBEJCTS
+//#define SHADOW_PASS_SCENE_OBEJCTS
 
 	const float ShadowZNear = 0.1f;
 	const float ShadowZFar = 512.0f;
@@ -160,7 +160,7 @@ namespace Insight
 					&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
 				{
 					modelsToAddToScene.at(i).second = true;
-					for (size_t modelCreateIdx = 0; modelCreateIdx < 3; ++modelCreateIdx)
+					for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
 					{
 						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
@@ -500,28 +500,15 @@ namespace Insight
 							mesh->Draw(cmdList);
 						}
 #else
+						const float CasacdeMinRaius[s_Cascade_Count] = { 0.0f, 2.5f, 5.0f, 8.5f };
 						for (RenderWorld const& world : data.RenderFrame.RenderWorlds)
 						{
 							for (RenderMesh const& mesh : world.Meshes)
 							{
-								//ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-								//glm::mat4 transform = transform_component->GetTransform();
-
-								//ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-								//if (!mesh_component
-								//	|| !mesh_component->GetMesh())
-								//{
-								//	continue;
-								//}
-								//Runtime::Mesh* mesh = mesh_component->GetMesh();
-
-								//Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-								//boundingBox = boundingBox.Transform(transform);
-								//// Transform bounding box to world space from local space.
-								//if (!camera_frustum.IsVisible(boundingBox))
-								//{
-								//	//continue;
-								//}
+								if (mesh.BoudingBox.GetRadius() < CasacdeMinRaius[i])
+								{
+									continue;
+								}
 
 								struct alignas(16) Object
 								{
@@ -1418,7 +1405,7 @@ namespace Insight
 			const float maxZ = nearClip + clipRange;
 
 			const float range = maxZ - minZ;
-			const float ratio = maxZ / minZ;
+			const float ratio = maxZ / minZ > 0 ? minZ : 1;
 
 			const float cascadeSplitLambda = split_lambda;
 
