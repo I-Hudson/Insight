@@ -223,7 +223,7 @@ namespace Insight
 				D3D12_GPU_DESCRIPTOR_HANDLE m_descriptorHeapGPUStart{ 0 };
 
 #ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
-				std::mutex m_subAllocMutex;
+				//std::mutex m_subAllocMutex;
 				u64 m_subHeapCPUOffset = 0;
 				u64 m_subHeapGPUOffset = 0;
 #endif // IS_DESCRIPTOR_MULTITHREAD_DX12

@@ -203,9 +203,26 @@ namespace Insight
 			//---------------------------------------------
 			// DescriptorSubHeapGPU_DX12
 			//---------------------------------------------
+#ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
+			DescriptorSubHeapPageGPU_DX12::DescriptorSubHeapPageGPU_DX12(u64 cpuStartPointer, u64 gpuStartPointer, u64 descriptorSize, u64 capacity)
+				: m_cpuStartPointer(cpuStartPointer)
+				, m_gpuStartPointer(gpuStartPointer)
+				, m_descriptorSize(descriptorSize)
+				, m_capcaity(capacity)
+				, m_size(0)
+			{ }
+
 			void DescriptorSubHeapGPU_DX12::AddPage(DescriptorSubHeapPageGPU_DX12 page)
 			{
 			}
+
+			DescriptorSubHeapGPU_DX12 DescriptorHeapGPU_DX12::AllocateSubHeap()
+			{
+				DescriptorSubHeapGPU_DX12 heap = {};
+				GrowSubHeap(heap);
+				return heap;
+			}
+#endif
 
 			//---------------------------------------------
 			// DescriptorHeapGPU_DX12
@@ -257,21 +274,14 @@ namespace Insight
 			}
 
 #ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
-			DescriptorSubHeapGPU_DX12 DescriptorHeapGPU_DX12::AllocateSubHeap()
-			{
-				DescriptorSubHeapGPU_DX12 heap = {};
-				GrowSubHeap(heap);
-				return heap;
-			}
-
 			void DescriptorHeapGPU_DX12::GrowSubHeap(DescriptorSubHeapGPU_DX12& subHeap)
 			{
 				const u64 capacity = 2024;
-				std::unique_lock lock(m_subAllocMutex);
+				//std::unique_lock lock(m_subAllocMutex);
 				DescriptorSubHeapPageGPU_DX12 page(m_descriptorHeapCPUStart.ptr + m_subHeapCPUOffset, m_descriptorHeapGPUStart.ptr + m_subHeapGPUOffset, m_descriptorSize, capacity);
 				m_subHeapCPUOffset += (capacity * m_descriptorSize);
 				m_subHeapGPUOffset += (capacity * m_descriptorSize);
-				lock.unlock();
+				//lock.unlock();
 				subHeap.AddPage(page);
 
 			}
@@ -281,10 +291,10 @@ namespace Insight
 			{
 				m_currentDescriptorIndex = 0;
 #ifdef IS_DESCRIPTOR_MULTITHREAD_DX12
-				std::unique_lock lock(m_subAllocMutex);
+				//std::unique_lock lock(m_subAllocMutex);
 				m_subHeapCPUOffset = 0;
 				m_subHeapGPUOffset = 0; 
-				lock.unlock();
+				//lock.unlock();
 #endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 			}
 
