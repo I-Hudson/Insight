@@ -2,13 +2,14 @@
 @setlocal enableextensions
 @cd /d "%~dp0"
 
-SET option=%1
+SET prmakeFile=%1
+SET option=%2
 
 IF "%option%" == "" GOTO PrintHelp
 IF "%option%" == "compile" GOTO Compile
 
 
-call ..\..\vendor\premake\premake5.exe %option%
+call ..\..\vendor\premake\premake5.exe --file=%prmakeFile% %option%
 call Generate_Symlinks.bat
 GOTO: END
 

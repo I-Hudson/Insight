@@ -1,30 +1,29 @@
-echo off
+@echo off
  
+set resource_path=%cd%/../../Resources
+
 set output_debug=%cd%/../../bin\Debug-windows-x86_64/Insight_Editor
 set output_release=%cd%/../../bin\Release-windows-x86_64/Insight_Editor
 set output_testing=%cd%/../../bin\Testing-windows-x86_64/Insight_Editor
-set resource_path=%cd%/../../Resources
 
-if exist "%output_debug%" (
-    echo "Creating symlinks debug"
-    CALL :SymlinkData "%output_debug%\Resources", "%resource_path%"
-) else (
-    echo "Dir %output_debug% has not been created."
-)
+set output_standalone_debug=%cd%/../../bin\Debug-windows-x86_64/InsightStandalone
+set output_standalone_release=%cd%/../../bin\Release-windows-x86_64/InsightStandalone
 
-if exist "%output_release%" (
-echo "Creating symlinks release"
-CALL :SymlinkData "%output_release%\Resources", "%resource_path%"
-) else (
-    echo "Dir %output_release% has not been created."
-)
 
-if exist "%output_testing%" (
-echo "Creating symlinks release"
-CALL :SymlinkData "%output_testing%\Resources", "%resource_path%"
-) else (
-    echo "Dir %output_testing% has not been created."
+CALL :CreateSymlink %output_debug% %resource_path%
+CALL :CreateSymlink %output_release% %resource_path%
+CALL :CreateSymlink %output_testing% %resource_path%
+CALL :CreateSymlink %output_standalone_debug% %resource_path%
+CALL :CreateSymlink %output_standalone_release% %resource_path%
+pause
+
+:CreateSymlink
+set ouputDir=%1
+set resourcePath=%2
+if not exist "%ouputDir%" (
+    mkdir "%ouputDir%"
 )
+CALL :SymlinkData "%ouputDir%\Resources", "%resourcePath%"
 
 :SymlinkData
 SET desDir=%~1
