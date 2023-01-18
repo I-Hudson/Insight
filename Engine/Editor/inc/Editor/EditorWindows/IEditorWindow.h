@@ -8,6 +8,13 @@ namespace Insight
 {
 	namespace Editor
 	{
+		enum class EditorWindowCategories
+		{
+			File,
+			Edit,
+			Windows
+		};
+
 		/// <summary>
 		/// Base class for all editor windows.
 		/// </summary>
@@ -23,6 +30,7 @@ namespace Insight
 
 			virtual void OnDraw() = 0;
 			virtual const char* GetWindowName() const = 0;
+			virtual EditorWindowCategories GetCategory() const = 0;
 
 		protected:
 			bool m_isOpen = true;
@@ -35,8 +43,10 @@ namespace Insight
 			u32 m_width = 0;
 			u32 m_height = 0;
 		};
-#define EDITOR_WINDOW(Name) \
-	static constexpr char* WINDOW_NAME = #Name; \
-	virtual const char* GetWindowName() const override { return WINDOW_NAME; }
+#define EDITOR_WINDOW(Name, WindowCategory)													\
+	static constexpr char* WINDOW_NAME = #Name;												\
+	virtual const char* GetWindowName() const override { return WINDOW_NAME; }				\
+	static constexpr EditorWindowCategories WINDOW_CATEGORY = WindowCategory;				\
+	virtual EditorWindowCategories GetCategory() const override { return WindowCategory; }
 	}
 }

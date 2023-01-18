@@ -22,7 +22,7 @@ namespace Insight
             EntitiyDescriptionWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);
             virtual ~EntitiyDescriptionWindow() override;
 
-            EDITOR_WINDOW(EntitiyDescriptionWindow);
+            EDITOR_WINDOW(EntitiyDescriptionWindow, EditorWindowCategories::Windows);
             virtual void OnDraw() override;
 
         private:

@@ -23,7 +23,7 @@ namespace Insight
 			~EntitiesWindow();
 
 			virtual void OnDraw() override;
-			EDITOR_WINDOW(EntitiesWindow);
+			EDITOR_WINDOW(EntitiesWindow, EditorWindowCategories::Windows);
 
 			std::unordered_set<Core::GUID> const& GetSelectedEntities() const;
 

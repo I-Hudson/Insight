@@ -14,7 +14,7 @@ namespace Insight
             SystemInformationWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);
             virtual ~SystemInformationWindow() override;
 
-            EDITOR_WINDOW(SystemInformationWindow);
+            EDITOR_WINDOW(SystemInformationWindow, EditorWindowCategories::Windows);
 
             // IEditorWindow
             virtual void OnDraw() override;

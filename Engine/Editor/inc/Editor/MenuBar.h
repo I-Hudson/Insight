@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Editor/FileDialog.h"
+#include "Editor/EditorWindows/IEditorWindow.h"
 
 namespace Insight
 {
@@ -17,6 +18,9 @@ namespace Insight
             void Initialise(EditorWindowManager* editorWindowManager);
 
             void Draw();
+
+        private:
+            void DrawAllRegisteredWindow(EditorWindowCategories category) const;
 
         private:
             EditorWindowManager* m_editorWindowManager;

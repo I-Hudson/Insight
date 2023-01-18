@@ -21,7 +21,7 @@ namespace Insight
 
 			virtual void OnDraw() override;
 
-			EDITOR_WINDOW(InputWindow);
+			EDITOR_WINDOW(InputWindow, EditorWindowCategories::Windows);
 
 		private:
 			void DrawSingleInputDevuce(Input::IInputDevice const* inputDevice);

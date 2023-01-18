@@ -19,7 +19,7 @@ namespace Insight
 			~ResourceWindow();
 
 			virtual void OnDraw() override;
-			EDITOR_WINDOW(ResourceWindow);
+			EDITOR_WINDOW(ResourceWindow, EditorWindowCategories::Windows);
 
 		private:
 			void DrawSingleResource(Runtime::IResource* resource);

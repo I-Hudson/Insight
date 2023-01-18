@@ -48,33 +48,36 @@ namespace Insight
                                 { "Material (*.material)",  "*.material"},
                             });
                     }
+                    DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Edit"))
                 {
-                    //if (ImGui::MenuItem(PreferencesWindow::WINDOW_NAME))
-                    {
-                       //m_editorWindowManager->AddWindow(PreferencesWindow::WINDOW_NAME);
-                    }
+                    DrawAllRegisteredWindow(EditorWindowCategories::Edit);
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Windows"))
                 {
-                    std::vector<std::string> allRegisteredWindows = m_editorWindowManager->GetAllRegisteredWindowNames();
-                    for (std::string const& windowName : allRegisteredWindows)
-                    {
-                        std::string label = windowName;
-                        label += m_editorWindowManager->IsWindowVisable(windowName) ? " x" : "";
-                        if (ImGui::MenuItem(label.c_str()))
-                        {
-                            m_editorWindowManager->AddWindow(windowName);
-                        }
-                    }
+                    DrawAllRegisteredWindow(EditorWindowCategories::Windows);
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();
 
                 m_fileDialog.Update();
+            }
+        }
+
+        void MenuBar::DrawAllRegisteredWindow(EditorWindowCategories category) const
+        {
+            std::vector<std::string> allRegisteredWindows = m_editorWindowManager->GetAllRegisteredWindowNames(category);
+            for (std::string const& windowName : allRegisteredWindows)
+            {
+                std::string label = windowName;
+                label += m_editorWindowManager->IsWindowVisable(windowName) ? " x" : "";
+                if (ImGui::MenuItem(label.c_str()))
+                {
+                    m_editorWindowManager->AddWindow(windowName);
+                }
             }
         }
     }
