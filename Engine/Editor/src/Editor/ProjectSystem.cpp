@@ -1,15 +1,16 @@
 ﻿#include "Editor/ProjectSystem.h"
 
 #include "FileSystem/FileSystem.h"
-
 #include "Platforms/Platform.h"
 
-#include <simdjson.h>
+#include <nlohmann/json.hpp>
 
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 #include <IconsFontAwesome5.h>
+
+#include <fstream>
 
 namespace Insight
 {
@@ -79,7 +80,7 @@ namespace Insight
                     fileDialog.Show(PlatformFileDialogOperations::SelectFolder, &m_projectInfo.ProjectPath);
                 }
 
-                if (ImGui::Button("Create Project"))
+                if (ImGui::Button("Create"))
                 {
                     if (!CanCreateProject())
                     {
@@ -100,7 +101,7 @@ namespace Insight
                     fileDialog.Show(PlatformFileDialogOperations::SelectFile, &m_projectInfo.ProjectPath, { PlatformDialogFileFilter(isproject, *.isproject)});
                 }
 
-                if (ImGui::Button("Open Project"))
+                if (ImGui::Button("Open"))
                 {
                     if (!CanOpenProject())
                     {
@@ -120,8 +121,18 @@ namespace Insight
 
         void ProjectSystem::GenerateProjectSolution()
         {
-            simdjson::ondemand::document jsonDoc;
-            jsonDoc["Version"] = 1;
+            
+            Serialisation::SerialiserObject<ProjectInfo> serialise{};
+            std::string serialisedData = serialise(m_projectInfo);
+
+            std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
+            std::fstream stream{};
+            stream.open(projectFullPath, std::ios::out | std::ios::trunc);
+            if (stream.is_open())
+            {
+                stream.write(serialisedData.c_str(), serialisedData.size());
+                stream.close();
+            }
         }
 
         bool ProjectSystem::CanOpenProject()

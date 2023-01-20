@@ -2,10 +2,14 @@
 
 #include "Core/ISysytem.h"
 
+#include "Serialisation/Serialiser.h"
+
 namespace Insight
 {
     namespace Editor
     {
+        constexpr const char* c_ProjectExtension = ".isproject";
+
         struct ProjectInfo
         {
             std::string ProjectPath;
@@ -42,4 +46,11 @@ namespace Insight
             ProjectInfo m_projectInfo;
         };
     }
+
+    SERIALISER_BEGIN(Editor::ProjectInfo, 1);
+        SERIALISER_PROPERTY(std::string,    ProjectPath,    1, 0);
+        SERIALISER_PROPERTY(std::string,    ProjectName,    1, 0);
+        SERIALISER_PROPERTY(u32,            ProjectVersion, 1, 0);
+        SERIALISER_PROPERTY(bool,           IsOpen,         1, 0);
+    SERIALISER_END();
 }

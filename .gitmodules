@@ -49,3 +49,6 @@
 [submodule "vendor/IconFontCppHeaders"]
 	path = vendor/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders.git
+[submodule "vendor/nlohmann_json"]
+	path = vendor/nlohmann_json
+	url = https://github.com/nlohmann/json.git

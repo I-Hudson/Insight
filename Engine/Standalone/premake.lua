@@ -56,6 +56,9 @@ project "InsightStandalone"
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",
         "%{IncludeDirs.D3D12MemoryAllocator}",
+
+        "%{IncludeDirs.IconFontCppHeaders}",
+        "%{IncludeDirs.nlohmann_json}",
     }
 
     files 
