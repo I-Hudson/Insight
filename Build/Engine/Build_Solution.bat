@@ -7,6 +7,7 @@ SET vsVersion=%2
 SET msBuildType=%3
 SET configuration=%4
 SET platform=%5
+SET outDirectory=%6
 
 if "%solution%" == "help" GOTO HELP
 
@@ -40,11 +41,22 @@ echo Parameter 2 = "VS version (vs 2019, vs 2022)"
 echo Parameter 3 = "build type (Build, Rebuid)"
 echo Parameter 4 = "Configuration (Debug, Release)"
 echo Parameter 5 = "Platform (win64, unix)"
+echo Parameter 6 = "(Optional) Ouptup Path"
 GOTO END
 
 :MSBUILD
 echo Start project build.
-msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% %solution%
+set msbuildOutDirectory=""
+
+echo Build type '%msBuildType%'
+echo Configuration '%configuration%'
+echo Platform '%platform%'
+if not "%outDirectory%" == "" ( 
+    set msbuildOutDirectory=/p:OutDir=%outDirectory% 
+    echo Out directory '%outDirectory%'
+)
+
+msbuild -maxCpuCount /t:%msBuildType% /p:Configuration=%configuration% /p:Platform=%platform% %msbuildOutDirectory% %solution% 
 GOTO END
 
 :END

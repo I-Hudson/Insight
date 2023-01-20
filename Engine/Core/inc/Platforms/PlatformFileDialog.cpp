@@ -6,8 +6,11 @@ namespace Insight
     {
         switch (operation)
         {
-        case Insight::PlatformFileDialogOperations::Load: return "Load";
-        case Insight::PlatformFileDialogOperations::Save: return "Save";
+        case Insight::PlatformFileDialogOperations::LoadFile:       return "LoadFile";
+        case Insight::PlatformFileDialogOperations::SaveFile:       return "SaveFile";
+        case Insight::PlatformFileDialogOperations::SelectFolder:   return "SelectFolder";
+        case Insight::PlatformFileDialogOperations::SelectFile:     return "SelectFile";
+        case Insight::PlatformFileDialogOperations::SelectAll:      return "SelectAll";
         default:
             break;
         }

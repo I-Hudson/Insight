@@ -8,6 +8,10 @@ namespace Insight
     {
         bool FileSystem::Exists(const std::string& path)
         {
+            return Exists(std::string_view(path));
+        }
+        bool FileSystem::Exists(std::string_view path)
+        {
             if (path.empty())
             {
                 return false;
@@ -18,6 +22,10 @@ namespace Insight
         }
 
         bool FileSystem::IsDirectory(const std::string& path)
+        {
+            return IsDirectory(std::string_view(path));
+        }
+        bool FileSystem::IsDirectory(std::string_view path)
         {
             if (path.empty())
             {
@@ -31,6 +39,10 @@ namespace Insight
 
         bool FileSystem::IsFile(const std::string& path)
         {
+            return IsFile(std::string_view(path));
+        }
+        bool FileSystem::IsFile(std::string_view path)
+        {
             if (path.empty())
             {
                 return false;
@@ -43,6 +55,10 @@ namespace Insight
 
         std::string FileSystem::GetAbsolutePath(const std::string& path)
         {
+            return GetAbsolutePath(std::string_view(path));
+        }
+        std::string FileSystem::GetAbsolutePath(std::string_view path)
+        {
             std::filesystem::path fsPath = std::filesystem::absolute(std::filesystem::path(path));
             std::string absPath = fsPath.string();
             return PathToUnix(absPath);
@@ -52,6 +68,16 @@ namespace Insight
         {
             std::replace(path.begin(), path.end(), '\\', '/');
             if (path.back() == '/')
+            {
+                path.pop_back();
+            }
+            return path;
+        }
+
+        std::string FileSystem::PathToWindow(std::string& path)
+        {
+            std::replace(path.begin(), path.end(), '/', '\\');
+            if (path.back() == '\\')
             {
                 path.pop_back();
             }

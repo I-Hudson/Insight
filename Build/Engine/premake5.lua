@@ -70,9 +70,9 @@ IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/d
 IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
 IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompiler/inc"
 IncludeDirs["D3D12MemoryAllocator"] = "%{wks.location}vendor/D3D12MemoryAllocator/include"
+IncludeDirs["IconFontCppHeaders"] = "%{wks.location}vendor/IconFontCppHeaders"
 
 LibDirs = {}
-
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
 LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
 
@@ -125,6 +125,7 @@ workspace "Insight"
         "%{IncludeDirs.tracy}",
         "%{IncludeDirs.doctest}",
         "%{IncludeDirs.pix}",
+        "%{IncludeDirs.IconFontCppHeaders}",
     }
 
     if (profileTool == "tracy") then

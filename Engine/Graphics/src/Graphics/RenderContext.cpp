@@ -10,6 +10,7 @@
 #include "Core/Logger.h"
 
 #include "backends/imgui_impl_glfw.h"
+#include <IconsFontAwesome5.h>
 
 namespace Insight
 {
@@ -105,6 +106,13 @@ namespace Insight
 				int width, height;
 
 				ImGuiIO& io = ImGui::GetIO();
+
+				// merge in icons from Font Awesome
+				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+				ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+				io.Fonts->AddFontFromFileTTF((std::string("./Resources/fonts/") + FONT_ICON_FILE_NAME_FAS).c_str(), 16.0f, &icons_config, icons_ranges);
+				// use FONT_ICON_FILE_NAME_FAR if you want regular instead of solid
+
 				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
 

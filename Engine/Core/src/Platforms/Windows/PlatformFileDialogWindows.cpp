@@ -1,14 +1,17 @@
 #include "Platforms/Windows/PlatformFileDialogWindows.h"
+#include "FileSystem/FileSystem.h"
 
 #ifdef IS_PLATFORM_WINDOWS
 
 #include <Windows.h>
+#include <shobjidl.h>     // for IFileDialogEvents and IFileDialogControlEvents
 
 #include "Platforms/Platform.h"
 #include "Core/Logger.h"
 #include "Core/StringUtils.h"
 
 #include <sstream>
+#include <Shlwapi.h>
 
 namespace Insight
 {
@@ -26,12 +29,12 @@ namespace Insight
 
         bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
         {
-            return Show(PlatformFileDialogOperations::Save, selectedItem, fileFilters);
+            return Show(PlatformFileDialogOperations::SaveFile, selectedItem, fileFilters);
         }
 
         bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
         {
-            return Show(PlatformFileDialogOperations::Load, selectedItem, fileFilters);
+            return Show(PlatformFileDialogOperations::LoadFile, selectedItem, fileFilters);
         }
 
         bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem)
@@ -61,44 +64,26 @@ namespace Insight
             filter += "!";
             std::replace(filter.begin(), filter.end(), '!', '\0');
 
-            // common dialog box structure, setting all fields to 0 is important
-            OPENFILENAMEA ofn = { 0 };
-            CHAR szFile[260] = { 0 };
-            // Initialize remaining fields of OPENFILENAME structure
-            ofn.lStructSize = sizeof(ofn);
-            ofn.hwndOwner = NULL;
-            ofn.lpstrFile = szFile;
-            ofn.nMaxFile = sizeof(szFile);
-            ofn.lpstrFilter = filter.c_str();
-            ofn.nFilterIndex = 1;
-            ofn.lpstrFileTitle = NULL;
-            ofn.nMaxFileTitle = 0;
-            ofn.lpstrInitialDir = NULL;
-            ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-            if (operation == PlatformFileDialogOperations::Load)
+            if (operation == PlatformFileDialogOperations::LoadFile 
+                || operation == PlatformFileDialogOperations::SelectFile 
+                || operation == PlatformFileDialogOperations::SelectFolder
+                || operation == PlatformFileDialogOperations::SelectAll)
             {
-                if (GetOpenFileNameA(&ofn) == TRUE)
+                if (OpenDialog(operation, selectedItem, fileFilters))
                 {
-                    // use ofn.lpstrFile here
-                    if (selectedItem)
-                    {
-                        *selectedItem = szFile;
-                    }
                     return true;
                 }
             }
-            else if (operation == PlatformFileDialogOperations::Save)
+            else if (operation == PlatformFileDialogOperations::SaveFile)
             {
-                if (GetSaveFileNameA(&ofn) == TRUE)
+                if (SaveDialog(operation, selectedItem, fileFilters))
                 {
-                    // use ofn.lpstrFile here
-                    if (selectedItem)
-                    {
-                        *selectedItem = szFile;
-                    }
                     return true;
                 }
+            }
+            else
+            {
+                FAIL_ASSERT();
             }
 
             DWORD errorCode = CommDlgExtendedError();
@@ -108,6 +93,118 @@ namespace Insight
             }
 
             return false;
+        }
+
+        u32 PlatformFileDialogWindows::PlatformFileDialogOperationsToFileDialogOptions(PlatformFileDialogOperations operation)
+        {
+            switch (operation)
+            {
+            case Insight::PlatformFileDialogOperations::LoadFile:     return FOF_FILESONLY;
+            case Insight::PlatformFileDialogOperations::SaveFile:     return FOF_FILESONLY;
+            case Insight::PlatformFileDialogOperations::SelectFolder: return FOS_PICKFOLDERS;
+            case Insight::PlatformFileDialogOperations::SelectFile:   return FOF_FILESONLY;
+            case Insight::PlatformFileDialogOperations::SelectAll:    return FOF_FILESONLY | FOS_PICKFOLDERS;
+            default:
+                break;
+            }
+            FAIL_ASSERT();
+            return 0;
+        }
+
+        bool PlatformFileDialogWindows::OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        {
+            IFileOpenDialog* openDialogHandle;
+            HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&openDialogHandle));
+            ASSERT(SUCCEEDED(hr));
+
+            openDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+
+            hr = openDialogHandle->Show(NULL);
+            if (hr != S_OK)
+            {
+                openDialogHandle->Release();
+                return false;
+            }
+
+            IShellItem* item;
+            hr = openDialogHandle->GetResult(&item);
+            if (hr != S_OK)
+            {
+                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
+                item->Release();
+                openDialogHandle->Release();
+                return false;
+            }
+
+            PWSTR filePath;
+            hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
+            if (hr != S_OK)
+            {
+                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
+                item->Release();
+                openDialogHandle->Release();
+                return false;
+            }
+
+            *selectedItem = Platform::StringFromWString(filePath);
+            if ((*selectedItem).back() == '\0')
+            {
+                (*selectedItem).pop_back();
+            }
+            (*selectedItem) = FileSystem::FileSystem::PathToUnix(*selectedItem);
+
+            item->Release();
+            openDialogHandle->Release();
+
+            return true;
+        }
+
+        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        {
+            IFileSaveDialog* saveDialogHandle;
+            HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
+            ASSERT(SUCCEEDED(hr));
+
+            saveDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+
+            hr = saveDialogHandle->Show(NULL);
+            if (hr != S_OK)
+            {
+                saveDialogHandle->Release();
+                return false;
+            }
+
+            IShellItem* item;
+            hr = saveDialogHandle->GetResult(&item);
+            if (hr != S_OK)
+            {
+                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item.");
+                item->Release();
+                saveDialogHandle->Release();
+                return false;
+            }
+
+            PWSTR filePath;
+            hr = item->GetDisplayName(SIGDN_FILESYSPATH, &filePath);
+            if (hr != S_OK)
+            {
+                IS_CORE_ERROR("[PlatformFileDialogWindows::OpenDialog] Unable to get selected item display name.");
+                item->Release();
+                saveDialogHandle->Release();
+                return false;
+            }
+
+            *selectedItem = Platform::StringFromWString(filePath);
+            if ((*selectedItem).back() == '\0')
+            {
+                (*selectedItem).pop_back();
+            }
+            (*selectedItem) = FileSystem::FileSystem::PathToUnix(*selectedItem);
+
+            item->Release();
+            saveDialogHandle->Release();
+
+            return true;
         }
     }
 }

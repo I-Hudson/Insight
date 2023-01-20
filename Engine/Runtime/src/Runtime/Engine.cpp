@@ -83,12 +83,10 @@ namespace Insight
 			m_inputSystem.Initialise();
 			m_worldSystem.Initialise();
 
+			OnInit();
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
 
 			m_renderpasses.Create();
-
-			OnInit();
-
 			splashScreen.Destroy();
 
 			return true;

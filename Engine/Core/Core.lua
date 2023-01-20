@@ -30,7 +30,7 @@ project "Insight_Core"
     { 
         "inc/**.hpp", 
         "inc/**.h", 
-        "src/**.cpp" 
+        "src/**.cpp",
     }
 
     links

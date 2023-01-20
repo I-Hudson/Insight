@@ -34,13 +34,15 @@ namespace Insight
                     {
                         //m_fileDialog.Show("./", FileDialogOperations::Save);
                         std::string item;
-                        PlatformFileDialog::ShowSave(&item);
+                        PlatformFileDialog fileDialog;
+                        fileDialog.ShowSave(&item);
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {
                         //m_fileDialog.Show("./", FileDialogOperations::Load);
                         std::string item;
-                        PlatformFileDialog::ShowLoad(&item, 
+                        PlatformFileDialog fileDialog;
+                        fileDialog.ShowLoad(&item,
                             { 
                                 { "Model (*.model)",        "*.model"},
                                 { "Mesh (*.mesh)",          "*.mesh"},

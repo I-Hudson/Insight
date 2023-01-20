@@ -434,3 +434,4 @@ vendor/
 /premakeFiles/config.h
 /premakeFiles/revision.h
 /premakeFiles/zconf.h
+/PackageBuild
