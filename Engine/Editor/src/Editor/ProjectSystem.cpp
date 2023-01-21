@@ -123,7 +123,11 @@ namespace Insight
         {
             
             Serialisation::SerialiserObject<ProjectInfo> serialise{};
-            std::string serialisedData = serialise(m_projectInfo);
+            for (size_t i = 0; i < 25; i++)
+            {
+                m_projectInfo.IntTestArray.push_back(i);
+            }
+            std::string serialisedData = serialise(m_projectInfo, false);
 
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
             std::fstream stream{};

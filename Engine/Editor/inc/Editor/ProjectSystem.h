@@ -16,6 +16,8 @@ namespace Insight
             std::string ProjectName;
             u32 ProjectVersion = 0;
             bool IsOpen = false;
+
+            std::vector<int> IntTestArray;
         };
 
         class ProjectSystem : public Core::ISystem
@@ -47,10 +49,20 @@ namespace Insight
         };
     }
 
+    OBJECT_SERIALISER(Editor::ProjectInfo, 1,
+        PROPERTY_SERIALISE(std::string, ProjectPath, 1, 0),
+        PROPERTY_SERIALISE(std::string, ProjectName, 1, 0),
+        PROPERTY_SERIALISE(u32, ProjectVersion, 1, 0),
+        PROPERTY_SERIALISE(bool, IsOpen, 1, 0),
+        PROPERTY_SERIALISE(int, IntTestArray, 1, 0),
+        );
+
+
     SERIALISER_BEGIN(Editor::ProjectInfo, 1);
-        SERIALISER_PROPERTY(std::string,    ProjectPath,    1, 0);
-        SERIALISER_PROPERTY(std::string,    ProjectName,    1, 0);
-        SERIALISER_PROPERTY(u32,            ProjectVersion, 1, 0);
-        SERIALISER_PROPERTY(bool,           IsOpen,         1, 0);
+        SERIALISER_OBJECT(std::string,                ProjectPath,    1, 0);
+        SERIALISER_OBJECT(std::string,                ProjectName,    1, 0);
+        SERIALISER_OBJECT(u32,                        ProjectVersion, 1, 0);
+        SERIALISER_OBJECT(bool,                       IsOpen,         1, 0);
+        SERIALISER_VECTOR(int,                        IntTestArray,   1, 0);
     SERIALISER_END();
 }
