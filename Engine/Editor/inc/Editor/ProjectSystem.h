@@ -50,19 +50,27 @@ namespace Insight
     }
 
     OBJECT_SERIALISER(Editor::ProjectInfo, 1,
-        PROPERTY_SERIALISE(std::string, ProjectPath, 1, 0),
-        PROPERTY_SERIALISE(std::string, ProjectName, 1, 0),
-        PROPERTY_SERIALISE(u32, ProjectVersion, 1, 0),
-        PROPERTY_SERIALISE(bool, IsOpen, 1, 0),
-        PROPERTY_SERIALISE(int, IntTestArray, 1, 0),
+        SERIALISER_OBJECT(std::string, ProjectPath, 1, 0)
+        SERIALISER_OBJECT(std::string, ProjectName, 1, 0)
+        SERIALISER_OBJECT(u32, ProjectVersion, 1, 0)
+        SERIALISER_OBJECT(bool, IsOpen,         1, 0)
+        SERIALISER_VECTOR(int, IntTestArray,   1, 0)
         );
 
+    OBJECT_DESERIALISER(Editor::ProjectInfo, 1,
+        DESERIALISER_VECTOR(int, IntTestArray, 1, 0)
+        DESERIALISER_OBJECT(std::string, ProjectPath, 1, 0)
+        DESERIALISER_OBJECT(std::string, ProjectName, 1, 0)
+        DESERIALISER_OBJECT(u32, ProjectVersion, 1, 0)
+        DESERIALISER_OBJECT(bool, IsOpen, 1, 0)
+    );
 
-    SERIALISER_BEGIN(Editor::ProjectInfo, 1);
-        SERIALISER_OBJECT(std::string,                ProjectPath,    1, 0);
-        SERIALISER_OBJECT(std::string,                ProjectName,    1, 0);
-        SERIALISER_OBJECT(u32,                        ProjectVersion, 1, 0);
-        SERIALISER_OBJECT(bool,                       IsOpen,         1, 0);
-        SERIALISER_VECTOR(int,                        IntTestArray,   1, 0);
-    SERIALISER_END();
+
+    //SERIALISER_BEGIN(Editor::ProjectInfo, 1);
+    //    SERIALISER_OBJECT(std::string,                ProjectPath,    1, 0);
+    //    SERIALISER_OBJECT(std::string,                ProjectName,    1, 0);
+    //    SERIALISER_OBJECT(u32,                        ProjectVersion, 1, 0);
+    //    SERIALISER_OBJECT(bool,                       IsOpen,         1, 0);
+    //    SERIALISER_VECTOR(int,                        IntTestArray,   1, 0);
+    //SERIALISER_END();
 }

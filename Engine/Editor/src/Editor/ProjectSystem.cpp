@@ -121,13 +121,12 @@ namespace Insight
 
         void ProjectSystem::GenerateProjectSolution()
         {
-            
             Serialisation::SerialiserObject<ProjectInfo> serialise{};
-            for (size_t i = 0; i < 25; i++)
+            for (size_t i = 0; i < 5; i++)
             {
                 m_projectInfo.IntTestArray.push_back(i);
             }
-            std::string serialisedData = serialise(m_projectInfo, false);
+            std::string serialisedData = serialise.Serialise(m_projectInfo);
 
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
             std::fstream stream{};
@@ -136,6 +135,25 @@ namespace Insight
             {
                 stream.write(serialisedData.c_str(), serialisedData.size());
                 stream.close();
+            }
+
+            ProjectInfo deserialisedInfo;
+            std::ifstream inStream;
+            inStream.open(projectFullPath, std::ios::in);
+            if (inStream.is_open())
+            {
+                inStream.seekg(0, std::ios::end);
+                u64 dataSize = inStream.tellg(); 
+                inStream.seekg(0, std::ios::beg);
+
+                std::string fileData;
+                fileData.resize(dataSize / sizeof(char));
+                inStream.read((char*)fileData.c_str(), fileData.size());
+                inStream.close();
+
+                Serialisation::DeserialiserObject<ProjectInfo> deserialise{};
+                deserialisedInfo = deserialise.Deserialise(fileData);
+                //deserialisedInfo = serialise.Deserialise(fileData);
             }
         }
 
