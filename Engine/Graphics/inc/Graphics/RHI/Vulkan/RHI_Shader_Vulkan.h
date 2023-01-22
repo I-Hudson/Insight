@@ -7,8 +7,6 @@
 #include <map>
 #include <array>
 
-
-
 namespace Insight
 {
 	namespace Graphics

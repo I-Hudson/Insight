@@ -3,6 +3,8 @@
 #include "FileSystem/FileSystem.h"
 #include "Platforms/Platform.h"
 
+#include "Serialisation/Archive.h"
+
 #include <nlohmann/json.hpp>
 
 #include <imgui.h>
@@ -129,13 +131,11 @@ namespace Insight
             std::string serialisedData = serialise.Serialise(m_projectInfo);
 
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
-            std::fstream stream{};
-            stream.open(projectFullPath, std::ios::out | std::ios::trunc);
-            if (stream.is_open())
-            {
-                stream.write(serialisedData.c_str(), serialisedData.size());
-                stream.close();
-            }
+
+            Archive archive(projectFullPath, ArchiveModes::Write);
+            archive.Write(serialisedData.c_str(), serialisedData.size() / sizeof(char));
+            archive.Close();
+
 
             ProjectInfo deserialisedInfo;
             std::ifstream inStream;

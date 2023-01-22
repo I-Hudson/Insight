@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Core/GUID.h"
 #include "Core/ISysytem.h"
 
 #include "Serialisation/Serialiser.h"
@@ -10,7 +11,12 @@ namespace Insight
     {
         constexpr const char* c_ProjectExtension = ".isproject";
 
-        struct ProjectInfo
+        struct BaseProjectInfo
+        {
+            Core::GUID GUID;
+        };
+
+        struct ProjectInfo : public BaseProjectInfo
         {
             std::string ProjectPath;
             std::string ProjectName;
@@ -49,20 +55,28 @@ namespace Insight
         };
     }
 
-    OBJECT_SERIALISER(Editor::ProjectInfo, 1,
-        SERIALISER_OBJECT(std::string, ProjectPath, 1, 0)
-        SERIALISER_OBJECT(std::string, ProjectName, 1, 0)
-        SERIALISER_OBJECT(u32, ProjectVersion, 1, 0)
-        SERIALISER_OBJECT(bool, IsOpen,         1, 0)
-        SERIALISER_VECTOR(int, IntTestArray,   1, 0)
-        );
+    OBJECT_SERIALISER(Editor::BaseProjectInfo, 1,
+        SERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
+    );
+    OBJECT_DESERIALISER(Editor::BaseProjectInfo, 1,
+        DESERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
+    );
 
-    OBJECT_DESERIALISER(Editor::ProjectInfo, 1,
-        DESERIALISER_VECTOR(int, IntTestArray, 1, 0)
-        DESERIALISER_OBJECT(std::string, ProjectPath, 1, 0)
-        DESERIALISER_OBJECT(std::string, ProjectName, 1, 0)
-        DESERIALISER_OBJECT(u32, ProjectVersion, 1, 0)
-        DESERIALISER_OBJECT(bool, IsOpen, 1, 0)
+    OBJECT_SERIALISER(Editor::ProjectInfo, 2,
+        SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
+        SERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
+        SERIALISE_OBJECT(std::string, ProjectName, 1, 0)
+        SERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
+        SERIALISE_OBJECT(bool, IsOpen,         1, 0)
+        SERIALISE_VECTOR(int, IntTestArray,   1, 0)
+        );
+    OBJECT_DESERIALISER(Editor::ProjectInfo, 2,
+        DESERIALISE_PARENT(Editor::BaseProjectInfo, 2, 0)
+        DESERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
+        DESERIALISE_OBJECT(std::string, ProjectName, 1, 0)
+        DESERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
+        DESERIALISE_OBJECT(bool, IsOpen, 1, 0)
+        DESERIALISE_VECTOR(int, IntTestArray, 1, 0)
     );
 
 

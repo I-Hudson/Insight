@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Serialisation/PropertySerialiser.h"
 #include "Serialisation/SerialiserBase.h"
 
 #include "Platforms/Platform.h"

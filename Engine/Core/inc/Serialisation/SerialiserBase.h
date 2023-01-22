@@ -23,21 +23,6 @@ namespace Insight
         { };
 
         template<typename T>
-        struct PropertySerialiser
-        {
-            std::string operator()(T const& object)
-            {
-                std::stringstream ss;
-                ss << object;
-                if (ss.fail())
-                {
-                    return "";
-                }
-                return ss.str();
-            }
-        };
-
-        template<typename T>
         struct VectorSerialiser
         {
             std::string operator()(std::vector<T> const& object)
@@ -57,15 +42,6 @@ namespace Insight
         template<typename T>
         struct DeserialiserObject
         { };
-
-        template<typename T>
-        struct PropertyDeserialiser
-        {
-            T operator()(std::string const& data)
-            {
-                return {};
-            }
-        };
 
         template<typename T>
         struct VectorDeserialiser
