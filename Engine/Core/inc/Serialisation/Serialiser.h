@@ -141,15 +141,15 @@ static_assert(CURRENT_VERSION >= 1);                                            
     This is similar to what a AAA engine I know of does. This would require some template specialisations to be made for user defined classes.
     Pros:
     - Would reduced code to write.
-    - Could remove the need to worry about versioning as the generated object would know what version variables where added and removed.
+    - Could remove the need to worry about versioning as the generated object would know what version variables were added and removed.
 
     Cons:
     - Complex macro structure needed to create the object.
     - Not easy to debug.
     - Would require template specialisations.
 
-    I'm trying Idea2 as it would be nice to just write and not worry about anything like versions or having to 
-    write the same code to serialise a GUID each time.
+    I'm trying Idea2 as it would be nice to just write and not worry about anything like versions or having to write the same code to serialise a GUID
+    each time for example.
 
    OBJECT_SERIALISER(Editor::ProjectInfo, 2,
         SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
@@ -167,4 +167,15 @@ static_assert(CURRENT_VERSION >= 1);                                            
         DESERIALISE_OBJECT(bool, IsOpen, 1, 0)
         DESERIALISE_VECTOR(int, IntTestArray, 1, 0)
     );
+
+    Initial testing with Idea 2 works.
+    Notes: A lot of code hidden by the macros used. Not nice to debug or try and work out what is happening. This would be something to look
+    into for the future.
+    ProertySerialiser and VectorSerialiser must return std::string and std::vector<std::string> respectively. On a technical note this does 
+    increase file size as for example serialising a single int isn't 4 bytes but 6 bytes. 4 bytes for the value and an additional 2 for each 
+    speech mark around the value as it is serialised as a string.
+
+    Would be nice to look into replacing the code hidden by the macros to template classes instead. Main reason for this would be 
+    maybe the serialised values could be saved as a json compatible format and checks could be made within the templated class/struct.
+    Doing this would also give a clearer idea of what is going on as it would be more readable.
 */
