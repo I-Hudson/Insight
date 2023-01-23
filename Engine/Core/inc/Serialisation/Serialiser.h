@@ -7,9 +7,14 @@ namespace Insight
 {
 #define SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME)\
         nlohmann::json PPCAT(OBJECT_TYPE_NAME, SerialisedData) = PPCAT(OBJECT_TYPE_NAME, SerialiserProperty).SerialiseToJsonObject(static_cast<OBJECT_TYPE const&>(object))
-#define SERIALISE_CALL(OBJECT_TYPE, PROPERTY) OBJECT_TYPE PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty)(PPCAT(object., PROPERTY))
 
-#define SERIALISE_METHOD(OBJECT_TYPE, PROPERTY, CALL)\
+#define SERIALISE_CALL_OBJECT(PROPERTY)\
+        nlohmann::json PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty).SerialiseToJsonObject(PPCAT(object., PROPERTY))
+
+#define SERIALISE_CALL(OBJECT_TYPE, PROPERTY)\
+        OBJECT_TYPE PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty)(PPCAT(object., PROPERTY))
+
+#define SERIALISE_METHOD(PROPERTY, CALL)\
     if (PPCAT(PROPERTY, _VersionRemoved) == 0)\
     {\
         CALL;\
@@ -26,19 +31,23 @@ namespace Insight
         static_assert(std::is_base_of_v<OBJECT_TYPE, ObjectType> && "[Object does not inherit]");\
         ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> PPCAT(OBJECT_TYPE_NAME, SerialiserProperty);\
         const u32 PPCAT(OBJECT_TYPE_NAME, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(OBJECT_TYPE, OBJECT_TYPE_NAME, SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME));
+        SERIALISE_METHOD(OBJECT_TYPE_NAME, SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME));
+
+#define SERIALISE_OBJECT_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, true> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, PROPERTY));
 
     // Marco magic. Just stepup a SerialiserProperty for the type. Then try and serialise the property.
 #define SERIALISE_OBJECT(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
         const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(OBJECT_TYPE, PROPERTY, SERIALISE_CALL(std::string, PROPERTY));
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::string, PROPERTY));
 
-#define SERIALISE_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
+#define SERIALISE_PROPERTY_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, false> PPCAT(PROPERTY, SerialiserProperty);\
         const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(std::vector<OBJECT_TYPE>, PROPERTY, SERIALISE_CALL(std::vector<std::string>, PROPERTY));
-
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::vector<std::string>, PROPERTY));
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
         std::string Serialise(OBJECT_TYPE const& object)\
@@ -48,6 +57,10 @@ namespace Insight
             serialisedData["SERIALISED_VERSION"] = currentVersion;\
             __VA_ARGS__\
             return serialisedData.dump();\
+        }\
+        std::string Serialise(OBJECT_TYPE const* object)\
+        {\
+            return Serialise(*object);\
         }\
         nlohmann::json SerialiseToJsonObject(OBJECT_TYPE const& object)\
         {\
@@ -88,10 +101,16 @@ static_assert(CURRENT_VERSION >= 1);\
         DESERIALISE_CALL(OBJECT_TYPE, PROPERTY);\
         DESERIALISE_SET_OFFSET(OBJECT_TYPE, PROPERTY);
 
-#define DESERIALISE_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        ::Insight::Serialisation::VectorDeserialiser<OBJECT_TYPE> PPCAT(PROPERTY, DeserialiserProperty);\
+#define DESERIALISE_OBJECT_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::VectorDeserialiser<OBJECT_TYPE, true> PPCAT(PROPERTY, DeserialiserProperty);\
         DESERIALISE_CALL(std::vector<OBJECT_TYPE>, PROPERTY);\
         DESERIALISE_SET_OFFSET(std::vector<OBJECT_TYPE>, PROPERTY);
+
+#define DESERIALISE_PROPERTY_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::VectorDeserialiser<OBJECT_TYPE, false> PPCAT(PROPERTY, DeserialiserProperty);\
+        DESERIALISE_CALL(std::vector<OBJECT_TYPE>, PROPERTY);\
+        DESERIALISE_SET_OFFSET(std::vector<OBJECT_TYPE>, PROPERTY);
+
 
 #define DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
         void Deserialise(std::string const& data, OBJECT_TYPE* object = nullptr)\

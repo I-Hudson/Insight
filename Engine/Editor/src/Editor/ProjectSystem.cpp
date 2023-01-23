@@ -65,7 +65,7 @@ namespace Insight
                 return;
             }
 
-            static int tabIndex = 0;
+            static u64 tabIndex = 0;
             constexpr const char* buttonLabels[] = { "Create Project", "Open Project" };
 
             ImGui::Begin("Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
@@ -133,10 +133,11 @@ namespace Insight
         void ProjectSystem::GenerateProjectSolution()
         {
             Serialisation::SerialiserObject<ProjectInfo> serialise{};
-            for (size_t i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 m_projectInfo.IntTestArray.push_back(i);
                 m_projectInfo.GUIDS.push_back(Core::GUID());
+                m_projectInfo.ProjectPointerData.push_back(new ProjectPointerData{45});
             }
             std::string serialisedData = serialise.Serialise(m_projectInfo);
 

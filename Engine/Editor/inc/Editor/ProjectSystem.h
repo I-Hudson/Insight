@@ -21,6 +21,11 @@ namespace Insight
             Core::GUID GUID;
         };
 
+        struct ProjectPointerData
+        {
+            int Age; // Project age
+        };
+
         struct ProjectInfo : public BaseProjectInfo
         {
             std::string ProjectPath;
@@ -29,6 +34,7 @@ namespace Insight
             bool IsOpen = false;
 
             std::vector<int> IntTestArray;
+            std::vector<ProjectPointerData*> ProjectPointerData;
 
             std::string GetAbsPathWithFile() const { return ProjectPath + "/" + ProjectName; }
         };
@@ -63,10 +69,10 @@ namespace Insight
     }
 
     OBJECT_SERIALISER(Editor::BaseBaseProjectInfo, 1,
-        SERIALISE_VECTOR(Core::GUID, GUIDS, 1, 0)
+        SERIALISE_PROPERTY_VECTOR(Core::GUID, GUIDS, 1, 0)
     );
     OBJECT_DESERIALISER(Editor::BaseBaseProjectInfo, 1,
-        DESERIALISE_VECTOR(Core::GUID, GUIDS, 1, 0)
+        DESERIALISE_PROPERTY_VECTOR(Core::GUID, GUIDS, 1, 0)
     );
 
     OBJECT_SERIALISER(Editor::BaseProjectInfo, 2,
@@ -78,21 +84,30 @@ namespace Insight
         DESERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
     );
 
-    OBJECT_SERIALISER(Editor::ProjectInfo, 2,
+    OBJECT_SERIALISER(Editor::ProjectPointerData, 1,
+        SERIALISE_OBJECT(int, Age, 1, 0)
+    );
+    OBJECT_DESERIALISER(Editor::ProjectPointerData, 1,
+        DESERIALISE_OBJECT(int, Age, 1, 0)
+    );
+
+    OBJECT_SERIALISER(Editor::ProjectInfo, 3,
+        SERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
         SERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
         SERIALISE_OBJECT(std::string, ProjectName, 1, 0)
         SERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
         SERIALISE_OBJECT(bool, IsOpen,         1, 0)
-        SERIALISE_VECTOR(int, IntTestArray,   1, 0)
+        SERIALISE_PROPERTY_VECTOR(int, IntTestArray,   1, 0)
         );
-    OBJECT_DESERIALISER(Editor::ProjectInfo, 2,
+    OBJECT_DESERIALISER(Editor::ProjectInfo, 3,
+        DESERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         DESERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
         DESERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
         DESERIALISE_OBJECT(std::string, ProjectName, 1, 0)
         DESERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
         DESERIALISE_OBJECT(bool, IsOpen, 1, 0)
-        DESERIALISE_VECTOR(int, IntTestArray, 1, 0)
+        DESERIALISE_PROPERTY_VECTOR(int, IntTestArray, 1, 0)
     );
 
 
