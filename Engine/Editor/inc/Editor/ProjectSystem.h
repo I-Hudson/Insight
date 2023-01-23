@@ -11,7 +11,12 @@ namespace Insight
     {
         constexpr const char* c_ProjectExtension = ".isproject";
 
-        struct BaseProjectInfo
+        struct BaseBaseProjectInfo
+        {
+            std::vector<Core::GUID> GUIDS;
+        };
+
+        struct BaseProjectInfo : public BaseBaseProjectInfo
         {
             Core::GUID GUID;
         };
@@ -24,6 +29,8 @@ namespace Insight
             bool IsOpen = false;
 
             std::vector<int> IntTestArray;
+
+            std::string GetAbsPathWithFile() const { return ProjectPath + "/" + ProjectName; }
         };
 
         class ProjectSystem : public Core::ISystem
@@ -55,10 +62,19 @@ namespace Insight
         };
     }
 
-    OBJECT_SERIALISER(Editor::BaseProjectInfo, 1,
+    OBJECT_SERIALISER(Editor::BaseBaseProjectInfo, 1,
+        SERIALISE_VECTOR(Core::GUID, GUIDS, 1, 0)
+    );
+    OBJECT_DESERIALISER(Editor::BaseBaseProjectInfo, 1,
+        DESERIALISE_VECTOR(Core::GUID, GUIDS, 1, 0)
+    );
+
+    OBJECT_SERIALISER(Editor::BaseProjectInfo, 2,
+        SERIALISE_PARENT(Editor::BaseBaseProjectInfo, BaseBaseProjectInfo, 2, 0)
         SERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
     );
-    OBJECT_DESERIALISER(Editor::BaseProjectInfo, 1,
+    OBJECT_DESERIALISER(Editor::BaseProjectInfo, 2,
+        DESERIALISE_PARENT(Editor::BaseBaseProjectInfo, BaseBaseProjectInfo, 2, 0)
         DESERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
     );
 
@@ -71,7 +87,7 @@ namespace Insight
         SERIALISE_VECTOR(int, IntTestArray,   1, 0)
         );
     OBJECT_DESERIALISER(Editor::ProjectInfo, 2,
-        DESERIALISE_PARENT(Editor::BaseProjectInfo, 2, 0)
+        DESERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
         DESERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
         DESERIALISE_OBJECT(std::string, ProjectName, 1, 0)
         DESERIALISE_OBJECT(u32, ProjectVersion, 1, 0)

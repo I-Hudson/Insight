@@ -77,23 +77,5 @@ namespace Insight
                 return data;
             }
         };
-
-
-        template<>
-        struct VectorDeserialiser<int>
-        {
-            std::vector<int> operator()(std::string const& data)
-            {
-                std::vector<int> result;
-                nlohmann::json json = nlohmann::json::parse(data);
-                ASSERT(json.is_array());
-                for (const std::string& v : json)
-                {
-                    result.push_back(std::stoi(v));
-
-                }
-                return result;
-            }
-        };
     }
 }

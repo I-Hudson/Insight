@@ -40,6 +40,17 @@ namespace Insight
 
         void ProjectSystem::OpenProject()
         {
+            Archive archive(m_projectInfo.ProjectPath, ArchiveModes::Read);
+            std::vector<Byte> data = archive.GetData();
+            if (data.size() == 0)
+            {
+                return;
+            }
+
+            Serialisation::DeserialiserObject<ProjectInfo> deserialise{};
+            ProjectInfo deserialisedInfo;
+            deserialise.Deserialise(std::string(data.begin(), data.end()), &deserialisedInfo);
+            IS_UNUSED(deserialisedInfo);
         }
 
         void ProjectSystem::CloseProject()
@@ -84,13 +95,12 @@ namespace Insight
 
                 if (ImGui::Button("Create"))
                 {
-                    if (!CanCreateProject())
+                    if (CanCreateProject())
                     {
-                        return;
+                        // Generate a project file with all required information.
+                        GenerateProjectSolution();
+                        //OpenProject();
                     }
-                    // Generate a project file with all required information.
-                    GenerateProjectSolution();
-                    OpenProject();
                 }
             }
             else if (tabIndex == 1)
@@ -105,11 +115,10 @@ namespace Insight
 
                 if (ImGui::Button("Open"))
                 {
-                    if (!CanOpenProject())
+                    if (CanOpenProject())
                     {
-                        return;
+                        OpenProject();
                     }
-                    OpenProject();
                 }
             }
 
@@ -127,6 +136,7 @@ namespace Insight
             for (size_t i = 0; i < 5; i++)
             {
                 m_projectInfo.IntTestArray.push_back(i);
+                m_projectInfo.GUIDS.push_back(Core::GUID());
             }
             std::string serialisedData = serialise.Serialise(m_projectInfo);
 
@@ -135,31 +145,11 @@ namespace Insight
             Archive archive(projectFullPath, ArchiveModes::Write);
             archive.Write(serialisedData.c_str(), serialisedData.size() / sizeof(char));
             archive.Close();
-
-
-            ProjectInfo deserialisedInfo;
-            std::ifstream inStream;
-            inStream.open(projectFullPath, std::ios::in);
-            if (inStream.is_open())
-            {
-                inStream.seekg(0, std::ios::end);
-                u64 dataSize = inStream.tellg(); 
-                inStream.seekg(0, std::ios::beg);
-
-                std::string fileData;
-                fileData.resize(dataSize / sizeof(char));
-                inStream.read((char*)fileData.c_str(), fileData.size());
-                inStream.close();
-
-                Serialisation::DeserialiserObject<ProjectInfo> deserialise{};
-                deserialisedInfo = deserialise.Deserialise(fileData);
-                //deserialisedInfo = serialise.Deserialise(fileData);
-            }
         }
 
         bool ProjectSystem::CanOpenProject()
         {
-            return false;
+            return true;
         }
     }
 }

@@ -6,93 +6,55 @@ namespace Insight
 {
 	namespace Core
 	{
-		GUID GUID::s_InvalidGUID = GUID(0, 0, 0, { 0,0,0,0,0,0,0,0 });
+		GUID GUID::s_InvalidGUID = GUID(nullptr);
 
 		GUID::GUID() NO_EXPECT
 		{
 			Platform::AssignGUID(*this);
 		}
 
-		GUID::GUID(unsigned long data1, unsigned short data2, unsigned short data3, std::array<unsigned char, 8> data4)
-			: m_data1(data1)
-			, m_data2(data2)
-			, m_data3(data3)
+		Core::GUID::GUID(std::nullptr_t)
 		{
-			for (size_t i = 0; i < 8; ++i)
-			{
-				m_data4[i] = data4[i];
-			}
+			Platform::MemSet(m_bytes, 0, c_GUID_BYTE_SIZE);
 		}
 
-		GUID::GUID(const GUID&other) NO_EXPECT
+		GUID::GUID(char bytes[c_GUID_BYTE_SIZE])
+			//: m_data1(data1)
+			//, m_data2(data2)
+			//, m_data3(data3)
 		{
-			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
-			for (size_t i = 0; i < 8; ++i)
-			{
-				m_data4[i] = other.m_data4[i];
-			}
+			ASSERT(bytes != nullptr);
+			Platform::MemCopy(m_bytes, bytes, c_GUID_BYTE_SIZE);
+		}
+
+		GUID::GUID(const GUID& other) NO_EXPECT
+		{
+			Platform::MemCopy(m_bytes, other.m_bytes, c_GUID_BYTE_SIZE);
 		}
 
 		GUID::GUID(GUID&& other) NO_EXPECT
 		{
-			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
-			for (size_t i = 0; i < 8; ++i)
-			{
-				m_data4[i] = other.m_data4[i];
-				other.m_data4[i] = 0;
-			}
-
-			other.m_data1 = 0;
-			other.m_data2 = 0;
-			other.m_data3 = 0;
+			Platform::MemCopy(m_bytes, other.m_bytes, c_GUID_BYTE_SIZE);
+			Platform::MemSet(other.m_bytes, 0, c_GUID_BYTE_SIZE);
 		}
 
 		GUID& GUID::operator=(const GUID& other) NO_EXPECT
 		{
-			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
-			for (size_t i = 0; i < 8; ++i)
-			{
-				m_data4[i] = other.m_data4[i];
-			}
+			Platform::MemCopy(m_bytes, other.m_bytes, c_GUID_BYTE_SIZE);
 			return *this;
 		}
 
 		GUID& GUID::operator=(GUID&& other) NO_EXPECT
 		{
-			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
-			for (size_t i = 0; i < 8; ++i)
-			{
-				m_data4[i] = other.m_data4[i];
-				other.m_data4[i] = 0;
-			}
-
-			other.m_data1 = 0;
-			other.m_data2 = 0;
-			other.m_data3 = 0;
+			Platform::MemCopy(m_bytes, other.m_bytes, c_GUID_BYTE_SIZE);
+			Platform::MemSet(other.m_bytes, 0, c_GUID_BYTE_SIZE);
 
 			return *this;
 		}
 
 		bool GUID::operator==(const GUID& other) const
 		{
-			bool result = m_data1 == other.m_data1
-						&& m_data3 == other.m_data2
-						&& m_data2 == other.m_data3;
-
-			for (size_t i = 0; i < 8; ++i)
-			{
-				result &= m_data4[i] == other.m_data4[i];
-			}
-
-			return result;
+			return Platform::MemCompare(m_bytes, other.m_bytes, c_GUID_BYTE_SIZE);
 		}
 
 		bool Insight::Core::GUID::operator!=(const GUID& other) const
@@ -107,15 +69,7 @@ namespace Insight
 
 		std::string GUID::ToString() const
 		{
-			char buffer[37];
-			sprintf(buffer, "%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX",
-				m_data1,	m_data2,	m_data3,
-				m_data4[0],	m_data4[1],	m_data4[2], m_data4[3],
-				m_data4[4],	m_data4[5],	m_data4[6], m_data4[7]);
-
-			buffer[36] = '\0';
-
-			return std::string(buffer, 37);
+			return std::string(std::begin(m_bytes), std::end(m_bytes));
 		}
 	}
 }

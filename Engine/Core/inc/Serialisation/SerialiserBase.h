@@ -25,15 +25,15 @@ namespace Insight
         template<typename T>
         struct VectorSerialiser
         {
-            std::string operator()(std::vector<T> const& object)
+            std::vector<std::string> operator()(std::vector<T> const& object)
             {
                 PropertySerialiser<T> serialiserProperty;
-                nlohmann::json json;
+                std::vector<std::string> strings;
                 for (size_t i = 0; i < object.size(); ++i)
                 {
-                    json.push_back(serialiserProperty(object.at(i)));
+                    strings.push_back(serialiserProperty(object.at(i)));
                 }
-                return nlohmann::to_string(json);
+                return strings;
             }
         };
 
@@ -46,9 +46,15 @@ namespace Insight
         template<typename T>
         struct VectorDeserialiser
         {
-            std::vector<T> operator()(std::string const& data)
+            std::vector<T> operator()(std::vector<std::string> const& data)
             {
-                return {};
+                PropertyDeserialiser<T> propertyDeserialiser;
+                std::vector<T> vector;
+                for (auto const& v : data)
+                {
+                    vector.push_back(propertyDeserialiser(v));
+                }
+                return vector;
             }
         };
     }

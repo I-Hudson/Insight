@@ -300,9 +300,14 @@ namespace Insight
 		{
 			_GUID gidReference;
 			HRESULT hCreateGuid = CoCreateGuid(&gidReference);
-			guid = Core::GUID(gidReference.Data1, gidReference.Data2, gidReference.Data3, 
-				{ gidReference.Data4[0], gidReference.Data4[1], gidReference.Data4[2], gidReference.Data4[3],
-				 gidReference.Data4[4], gidReference.Data4[5], gidReference.Data4[6], gidReference.Data4[7] });
+
+			char szGuid[Core::GUID::c_GUID_BYTE_SIZE] = {0};
+			sprintf(szGuid, "%08lX-%04hX-%04hX-%02hhX%02hhX-%02hhX%02hhX%02hhX%02hhX%02hhX%02hhX", 
+				gidReference.Data1, gidReference.Data2, gidReference.Data3,
+				gidReference.Data4[0], gidReference.Data4[1], gidReference.Data4[2], gidReference.Data4[3], 
+				gidReference.Data4[4], gidReference.Data4[5], gidReference.Data4[6], gidReference.Data4[7]);
+
+			guid = Core::GUID(szGuid);
 		}
 
 		bool PlatformWindows::IsMainThread()

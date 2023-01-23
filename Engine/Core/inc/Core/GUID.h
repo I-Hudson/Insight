@@ -19,8 +19,11 @@ namespace Insight
 		class IS_CORE GUID
 		{
 		public:
+			constexpr static u8 c_GUID_BYTE_SIZE = 37;
+
 			GUID() NO_EXPECT;
-			GUID(unsigned long data1, unsigned short data2, unsigned short data3, std::array<unsigned char, 8> data4);
+			GUID(std::nullptr_t);
+			GUID(char bytes[c_GUID_BYTE_SIZE]);
 			GUID(const GUID& other) NO_EXPECT;
 			GUID(GUID&& other) NO_EXPECT;
 
@@ -34,18 +37,20 @@ namespace Insight
 			//// @brief Check if the GUID is a valid.
 			bool IsValid() const { return *this != s_InvalidGUID; }
 
-			//// @brief Return a string reposentation of the GUID.
+			//// @brief Return a string representation of the GUID.
 			std::string ToString() const;
 
 			static GUID s_InvalidGUID;
 		private:
-			unsigned long  m_data1;
-			unsigned short m_data2;
-			unsigned short m_data3;
-			unsigned char  m_data4[8];
+			/// @brief Guid is store and formats as a string.
+			char m_bytes[c_GUID_BYTE_SIZE];
 
 			template<typename GUID>
 			friend struct std::hash;
+			template<typename GUID>
+			friend struct Serialisation::PropertySerialiser;
+			template<typename GUID>
+			friend struct Serialisation::PropertyDeserialiser;
 		};
 	}
 
@@ -56,10 +61,23 @@ namespace Insight
 		{
 			std::string operator()(Core::GUID const& object)
 			{
-				return object.ToString();
+				std::string str(std::begin(object.m_bytes), std::end(object.m_bytes) - 1);
+				return str;
 			}
 		};
-
+		template<>
+		struct PropertyDeserialiser<Core::GUID>
+		{
+			Core::GUID operator()(std::string const& data)
+			{
+				Core::GUID guid;
+				for (size_t i = 0; i < ARRAY_COUNT(guid.m_bytes) - 1; ++i)
+				{
+					memcpy(&guid.m_bytes[i], &data.at(i), sizeof(Byte));
+				}
+				return guid;
+			}
+		};
 	}
 }
 
@@ -74,12 +92,9 @@ namespace std
 		size_t operator()(const Insight::Core::GUID& guid) const
 		{
 			size_t hash;
-			HashCombine(hash, guid.m_data1);
-			HashCombine(hash, guid.m_data2);
-			HashCombine(hash, guid.m_data3);
-			for (size_t i = 0; i < 8; ++i)
+			for (size_t i = 0; i < ARRAY_COUNT(guid.m_bytes); ++i)
 			{
-				HashCombine(hash, guid.m_data4[i]);
+				HashCombine(hash, guid.m_bytes[i]);
 			}
 			return hash;
 		}

@@ -4,6 +4,7 @@
 #include "Platforms/Platform.h"
 
 #include <fstream>
+#include <istream>
 
 namespace Insight
 {
@@ -17,7 +18,22 @@ namespace Insight
         std::string absFilePath = FileSystem::FileSystem::GetAbsolutePath(filePath);
         if (mode == ArchiveModes::Read)
         {
+            std::ifstream inStream;
+            inStream.open(absFilePath, std::ios::in);
+            if (inStream.is_open())
+            {
+                inStream.seekg(0, std::ios::end);
+                u64 dataSize = inStream.tellg();
+                inStream.seekg(0, std::ios::beg);
 
+                m_data.resize(dataSize / sizeof(char));
+
+                inStream.read((char*)m_data.data(), m_data.size());
+                inStream.close();
+            }
+            m_dataPtr = m_data.data();
+            m_streamPos = 0;
+            Close();
         }
         else
         {
@@ -43,8 +59,9 @@ namespace Insight
                 stream.write((const char*)m_data.data(), static_cast<std::streamsize>(m_streamPos));
                 stream.close();
             }
+            m_data.clear();
         }
-        m_data.clear();
+        m_filePath = {};
         m_dataPtr = nullptr;
         m_streamPos = 0;
     }
@@ -62,6 +79,11 @@ namespace Insight
     u64 Archive::GetSize() const
     {
         return m_streamPos;
+    }
+
+    std::vector<Byte> Archive::GetData() const
+    {
+        return m_data;
     }
 
     void Archive::CreateEmpty()
