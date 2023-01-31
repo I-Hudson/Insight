@@ -4,6 +4,8 @@
 
 #include "Core/TypeAlias.h"
 
+#include "Serialisation/Serialiser.h"
+
 #include <string>
 #include <xhash>
 #include <unordered_map>
@@ -31,6 +33,9 @@ namespace Insight
 		private:
 			std::string m_type_name;
 			u64 m_hash = 0;
+
+			template<typename>
+			friend struct ::Insight::Serialisation::SerialiserObject;
 		};
 
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
@@ -46,6 +51,11 @@ namespace Insight
 			static std::unordered_map<ResourceTypeId, CreateFunc> m_map;
 		};
 	}
+
+	//OBJECT_SERIALISER(Runtime::ResourceTypeId, 1,
+	//	SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
+	//	SERIALISE_PROPERTY(u64, m_hash, 1, 0)
+	//	);
 }
 
 namespace std

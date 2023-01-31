@@ -2,17 +2,140 @@
 
 #include "Serialisation/SerialiserBase.h"
 #include "Serialisation/DeserialiserBasicTypes.h"
+#include "Serialisation/PropertySerialiserTypes.h"
+
+#include <stack>
 
 namespace Insight
 {
+    namespace Serialisation
+    {
+        class ISerialiser;
+
+        enum class SerialisationTypes
+        {
+            Json,
+            Binary
+        };
+
+        /// @brief Base class for all serialises used. This defines what data can be saved.
+        class IS_CORE ISerialiser
+        {
+            template<typename T>
+            using IsAllowedType =
+                std::is_same_v<T, u8>
+                || std::is_same_v<T, u16>
+                || std::is_same_v<T, u32>
+                || std::is_same_v<T, u64>
+                || std::is_same_v<T, i8>
+                || std::is_same_v<T, i16>
+                || std::is_same_v<T, i32>
+                || std::is_same_v<T, i64>;
+
+        public:
+            ISerialiser() = default;
+            ISerialiser(bool isReadMode);
+            virtual ~ISerialiser();
+
+            void SetVersion(u32 currentVersion);
+            u32 GetVersion() const;
+            bool IsReadMode() const;
+            virtual std::vector<Byte> GetSerialisedData() const = 0;
+
+            virtual ISerialiser* AddChildSerialiser() = 0;
+
+        protected:
+            virtual void Write(std::string_view tag, bool data) = 0;
+
+            virtual void Write(std::string_view tag, u8 data) = 0;
+            virtual void Write(std::string_view tag, u16 data) = 0;
+            virtual void Write(std::string_view tag, u32 data) = 0;
+            virtual void Write(std::string_view tag, u64 data) = 0;
+
+            virtual void Write(std::string_view tag, i8 data) = 0;
+            virtual void Write(std::string_view tag, i16 data) = 0;
+            virtual void Write(std::string_view tag, i32 data) = 0;
+            virtual void Write(std::string_view tag, i64 data) = 0;
+
+            virtual void Write(std::string_view tag, const char* cStr, u64 size) = 0;
+            void Write(std::string_view tag, std::string const& str) { Write(tag, str.c_str(), str.size()); }
+            
+            virtual void Read(std::string_view tag, bool& data) = 0;
+
+            virtual void Read(std::string_view tag, u8& data) = 0;
+            virtual void Read(std::string_view tag, u16& data) = 0;
+            virtual void Read(std::string_view tag, u32& data) = 0;
+            virtual void Read(std::string_view tag, u64& data) = 0;
+
+            virtual void Read(std::string_view tag, i8& data) = 0;
+            virtual void Read(std::string_view tag, i16& datan) = 0;
+            virtual void Read(std::string_view tag, i32& data) = 0;
+            virtual void Read(std::string_view tag, i64& data) = 0;
+
+            virtual void Read(std::string_view tag, const char* cStr, u64 size) = 0;
+            void Read(std::string_view tag, std::string& str) { Read(tag, str.c_str(), str.size()); }
+
+        protected:
+            bool m_isReadMode = false;
+            u32 m_version = -1;
+            std::vector<ISerialiser*> m_childSerialisers;
+        };
+    }
+
+#define SER(TAG, VALUE, VERSION_ADDED, VERSION_REMOVED)\
+    if(VERSION_REMOVED == 0 || (VERSION_REMOVED != 0 && serialiser->GetVersion() < VERSION_REMOVED))\
+    {\
+        if (serialiser->IsReadMode())\
+        {\
+            serialiser->Read(TAG, VALUE);\
+        }\
+        else\
+        {\
+            serialiser->Write(TAG, VALUE);\
+        }\
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define IS_SERIALISABLE(OBJECT_TYPE)\
+        template<typename>\
+        friend struct ::Insight::Serialisation::SerialiserObject;\
+        //virtual std::string Serialise()\
+        //{\
+        //    ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> serialiser;\
+        //     serialiser.Serilaise(this);\
+        // };\
+        //virtual void Deserialise() {  };\
+
+#define IS_SERIALISE_FRIEND\
+        template<typename>\
+        friend struct ::Insight::Serialisation::SerialiserObject; \
+
 #define SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME)\
         nlohmann::json PPCAT(OBJECT_TYPE_NAME, SerialisedData) = PPCAT(OBJECT_TYPE_NAME, SerialiserProperty).SerialiseToJsonObject(static_cast<OBJECT_TYPE const&>(object))
 
 #define SERIALISE_CALL_OBJECT(PROPERTY)\
         nlohmann::json PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty).SerialiseToJsonObject(PPCAT(object., PROPERTY))
 
-#define SERIALISE_CALL(OBJECT_TYPE, PROPERTY)\
-        OBJECT_TYPE PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty)(PPCAT(object., PROPERTY))
+#define SERIALISE_CALL(RESULT_OBJECT_TYPE, OBJECT_TYPE, PROPERTY)\
+        RESULT_OBJECT_TYPE PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty)(PPCAT(object., PROPERTY));
+
+#define SERIALISE_CALL_CAST(RESULT_OBJECT_TYPE, OBJECT_TYPE, PROPERTY)\
+        RESULT_OBJECT_TYPE PPCAT(PROPERTY, SerialisedData) = PPCAT(PROPERTY, SerialiserProperty)(static_cast<OBJECT_TYPE>(PPCAT(object., PROPERTY)));
 
 #define SERIALISE_METHOD(PROPERTY, CALL)\
     if (PPCAT(PROPERTY, _VersionRemoved) == 0)\
@@ -26,6 +149,22 @@ namespace Insight
         serialisedData[STRINGIZE(PROPERTY)] = "REMOVED";\
     }
 
+    // Marco magic. Just stepup a SerialiserProperty for the type. Then try and serialise the property.
+#define SERIALISE_PROPERTY(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::string, OBJECT_TYPE, PROPERTY));
+
+#define SERIALISE_PROPERTY_CAST(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL_CAST(std::string, OBJECT_TYPE, PROPERTY));
+
+#define SERIALISE_OBJECT(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL_OBJECT(PROPERTY));
+
     /// Serialise include another OBJECT_SERIALISER.
 #define SERIALISE_PARENT(OBJECT_TYPE, OBJECT_TYPE_NAME, VERSION_ADDED, VERSION_REMOVED)\
         static_assert(std::is_base_of_v<OBJECT_TYPE, ObjectType> && "[Object does not inherit]");\
@@ -33,24 +172,23 @@ namespace Insight
         const u32 PPCAT(OBJECT_TYPE_NAME, _VersionRemoved) = VERSION_REMOVED;\
         SERIALISE_METHOD(OBJECT_TYPE_NAME, SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME));
 
-#define SERIALISE_OBJECT_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, true> PPCAT(PROPERTY, SerialiserProperty);\
-        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, PROPERTY));
-
-    // Marco magic. Just stepup a SerialiserProperty for the type. Then try and serialise the property.
-#define SERIALISE_OBJECT(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
-        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::string, PROPERTY));
-
 #define SERIALISE_PROPERTY_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, false> PPCAT(PROPERTY, SerialiserProperty);\
         const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::vector<std::string>, PROPERTY));
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::vector<std::string>, std::vector<OBJECT_TYPE>, PROPERTY));
+
+#define SERIALISE_OBJECT_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, true> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, OBJECT_TYPE, PROPERTY));
+
+#define SERIALISE_PROPERTY_UMAP(KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        ::Insight::Serialisation::UMapSerialiser<KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
+        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
+        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, std::unordered_map<KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE>, PROPERTY));
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
-        std::string Serialise(OBJECT_TYPE const& object)\
+        std::string Serialise(OBJECT_TYPE const& object, ::Insight::Serialisation::SerialisationTypes type)\
         {\
             const u32 currentVersion = CURRENT_VERSION;\
             nlohmann::json serialisedData;\
@@ -96,7 +234,7 @@ static_assert(CURRENT_VERSION >= 1);\
         const u32 PPCAT(OBJECT_TYPE_NAME, _VersionRemoved) = VERSION_REMOVED;\
         DESERIALISE_CALL_PARENT(OBJECT_TYPE, OBJECT_TYPE_NAME);\
 
-#define DESERIALISE_OBJECT(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+#define DESERIALISE_PROPERTY(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         ::Insight::Serialisation::PropertyDeserialiser<OBJECT_TYPE> PPCAT(PROPERTY, DeserialiserProperty);\
         DESERIALISE_CALL(OBJECT_TYPE, PROPERTY);\
         DESERIALISE_SET_OFFSET(OBJECT_TYPE, PROPERTY);
@@ -172,18 +310,18 @@ static_assert(CURRENT_VERSION >= 1);                                            
 
    OBJECT_SERIALISER(Editor::ProjectInfo, 2,
         SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
-        SERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
-        SERIALISE_OBJECT(std::string, ProjectName, 1, 0)
-        SERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
-        SERIALISE_OBJECT(bool, IsOpen,         1, 0)
+        SERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
+        SERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
+        SERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
+        SERIALISE_PROPERTY(bool, IsOpen,         1, 0)
         SERIALISE_VECTOR(int, IntTestArray,   1, 0)
         );
     OBJECT_DESERIALISER(Editor::ProjectInfo, 2,
         DESERIALISE_PARENT(Editor::BaseProjectInfo, 2, 0)
-        DESERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
-        DESERIALISE_OBJECT(std::string, ProjectName, 1, 0)
-        DESERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
-        DESERIALISE_OBJECT(bool, IsOpen, 1, 0)
+        DESERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
+        DESERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
+        DESERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
+        DESERIALISE_PROPERTY(bool, IsOpen, 1, 0)
         DESERIALISE_VECTOR(int, IntTestArray, 1, 0)
     );
 

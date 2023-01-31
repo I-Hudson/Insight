@@ -34,8 +34,17 @@ namespace Insight
             std::string m_path;
             ResourceTypeId m_typeId;
             u64 m_id = 0;
+
+            template<typename>
+            friend struct ::Insight::Serialisation::SerialiserObject;
         };
     }
+
+    //OBJECT_SERIALISER(Runtime::ResourceId, 1,
+    //    SERIALISE_PROPERTY(std::string, m_path, 1, 0)
+    //    SERIALISE_OBJECT(Runtime::ResourceTypeId, m_typeId, 1, 0)
+    //    SERIALISE_PROPERTY(u64, m_id, 1, 0)
+    //    );
 }
 
 namespace std

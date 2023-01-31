@@ -4,6 +4,7 @@
 #include "Core/ISysytem.h"
 
 #include "Serialisation/Serialiser.h"
+#include "Serialisation/ISerialisable.h"
 
 namespace Insight
 {
@@ -16,9 +17,10 @@ namespace Insight
             std::vector<Core::GUID> GUIDS;
         };
 
-        struct BaseProjectInfo : public BaseBaseProjectInfo
+        struct BaseProjectInfo : public BaseBaseProjectInfo, public Serialisation::ISerialisable
         {
             Core::GUID GUID;
+            virtual void Serialise(Serialisation::ISerialiser* serialiser) override;
         };
 
         struct ProjectPointerData
@@ -26,7 +28,7 @@ namespace Insight
             int Age; // Project age
         };
 
-        struct ProjectInfo : public BaseProjectInfo
+        struct ProjectInfo : public BaseProjectInfo, public Serialisation::ISerialisable
         {
             std::string ProjectPath;
             std::string ProjectName;
@@ -37,6 +39,8 @@ namespace Insight
             std::vector<ProjectPointerData*> ProjectPointerData;
 
             std::string GetAbsPathWithFile() const { return ProjectPath + "/" + ProjectName; }
+
+            virtual void Serialise(Serialisation::ISerialiser* serialiser) override;
         };
 
         class ProjectSystem : public Core::ISystem
@@ -77,45 +81,36 @@ namespace Insight
 
     OBJECT_SERIALISER(Editor::BaseProjectInfo, 2,
         SERIALISE_PARENT(Editor::BaseBaseProjectInfo, BaseBaseProjectInfo, 2, 0)
-        SERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
+        SERIALISE_PROPERTY(Core::GUID, GUID, 1, 0)
     );
     OBJECT_DESERIALISER(Editor::BaseProjectInfo, 2,
         DESERIALISE_PARENT(Editor::BaseBaseProjectInfo, BaseBaseProjectInfo, 2, 0)
-        DESERIALISE_OBJECT(Core::GUID, GUID, 1, 0)
+        DESERIALISE_PROPERTY(Core::GUID, GUID, 1, 0)
     );
 
     OBJECT_SERIALISER(Editor::ProjectPointerData, 1,
-        SERIALISE_OBJECT(int, Age, 1, 0)
+        SERIALISE_PROPERTY(int, Age, 1, 0)
     );
     OBJECT_DESERIALISER(Editor::ProjectPointerData, 1,
-        DESERIALISE_OBJECT(int, Age, 1, 0)
+        DESERIALISE_PROPERTY(int, Age, 1, 0)
     );
 
     OBJECT_SERIALISER(Editor::ProjectInfo, 3,
         SERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
-        SERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
-        SERIALISE_OBJECT(std::string, ProjectName, 1, 0)
-        SERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
-        SERIALISE_OBJECT(bool, IsOpen,         1, 0)
+        SERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
+        SERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
+        SERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
+        SERIALISE_PROPERTY(bool, IsOpen,         1, 0)
         SERIALISE_PROPERTY_VECTOR(int, IntTestArray,   1, 0)
         );
     OBJECT_DESERIALISER(Editor::ProjectInfo, 3,
         DESERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         DESERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
-        DESERIALISE_OBJECT(std::string, ProjectPath, 1, 0)
-        DESERIALISE_OBJECT(std::string, ProjectName, 1, 0)
-        DESERIALISE_OBJECT(u32, ProjectVersion, 1, 0)
-        DESERIALISE_OBJECT(bool, IsOpen, 1, 0)
+        DESERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
+        DESERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
+        DESERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
+        DESERIALISE_PROPERTY(bool, IsOpen, 1, 0)
         DESERIALISE_PROPERTY_VECTOR(int, IntTestArray, 1, 0)
     );
-
-
-    //SERIALISER_BEGIN(Editor::ProjectInfo, 1);
-    //    SERIALISER_OBJECT(std::string,                ProjectPath,    1, 0);
-    //    SERIALISER_OBJECT(std::string,                ProjectName,    1, 0);
-    //    SERIALISER_OBJECT(u32,                        ProjectVersion, 1, 0);
-    //    SERIALISER_OBJECT(bool,                       IsOpen,         1, 0);
-    //    SERIALISER_VECTOR(int,                        IntTestArray,   1, 0);
-    //SERIALISER_END();
 }

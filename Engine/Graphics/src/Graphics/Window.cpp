@@ -3,6 +3,8 @@
 #include "Core/Logger.h"
 #include "Core/CommandLineArgs.h"
 
+#include "Serialisation/Archive.h"
+
 #include "Input/InputSystem.h"
 #include "Input/InputStates/InputButtonState.h"
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
@@ -235,6 +237,12 @@ namespace Insight
 				glfwTerminate();
 				m_glfwInit = false;
 			}
+
+			Serialisation::SerialiserObject<Window> serialiser;
+			std::string data = serialiser.Serialise(this);
+			Archive archive("./WindowSettings.txt", ArchiveModes::Write);
+			archive.Write(data.data(), data.size());
+			archive.Close();
 		}
 
 		void Window::Update()

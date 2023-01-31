@@ -3,7 +3,10 @@
 #include "Defines.h"
 #include "Core/Singleton.h"
 
+#include "Serialisation/Serialiser.h"
+
 #include "Input/InputSystem.h"
+
 
 #include <string>
 #include <unordered_map>
@@ -93,6 +96,17 @@ namespace Insight
 
 			static std::unordered_map<GLFWwindow*, WindowInputs> m_windowInputs;
 			Input::InputSystem* m_inputSystem = nullptr;
+
+			IS_SERIALISABLE(Window);
 		};
 	}
+
+	OBJECT_SERIALISER(Graphics::Window, 1,
+		SERIALISE_PROPERTY(std::string, m_title, 1, 0)
+		SERIALISE_PROPERTY(bool, m_isFullScreen, 1, 0)
+		SERIALISE_PROPERTY(glm::ivec2, m_fullScreenSize, 1, 0)
+		SERIALISE_PROPERTY(glm::ivec2, m_fullScreenPosition, 1, 0)
+		SERIALISE_PROPERTY(glm::ivec2, m_windowedSize, 1, 0)
+		SERIALISE_PROPERTY(glm::ivec2, m_windowedPosition, 1, 0)
+	);
 }

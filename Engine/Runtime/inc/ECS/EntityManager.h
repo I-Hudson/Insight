@@ -3,6 +3,8 @@
 #include "ECS/Entity.h"
 #include "ECS/ComponentHandle.h"
 
+#include "Serialisation/Serialiser.h"
+
 #include <vector>
 #include <queue>
 #include <shared_mutex>
@@ -82,8 +84,13 @@ namespace Insight
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			std::shared_mutex m_lock;
-		};
 
+			IS_SERIALISE_FRIEND;
+		};
 #endif
 	}
+
+	//OBJECT_SERIALISER(ECS::EntityManager, 1,
+	//	SERIALISE_OBJECT_VECTOR(UPtr<ECS::Entity>, m_entities, 1, 0)
+	//	);
 }

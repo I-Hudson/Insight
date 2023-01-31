@@ -4,6 +4,7 @@
 #include "Platforms/Platform.h"
 
 #include "Serialisation/Archive.h"
+#include "Serialisation/JsonSerialiser.h"
 
 #include <nlohmann/json.hpp>
 
@@ -110,7 +111,7 @@ namespace Insight
                 if (ImGui::Button(ICON_FA_FOLDER))
                 {
                     PlatformFileDialog fileDialog;
-                    fileDialog.Show(PlatformFileDialogOperations::SelectFile, &m_projectInfo.ProjectPath, { PlatformDialogFileFilter(isproject, *.isproject)});
+                    fileDialog.Show(PlatformFileDialogOperations::SelectFile, &m_projectInfo.ProjectPath, { PlatformDialogFileFilter(isproject, *.isproject) });
                 }
 
                 if (ImGui::Button("Open"))
@@ -132,19 +133,23 @@ namespace Insight
 
         void ProjectSystem::GenerateProjectSolution()
         {
-            Serialisation::SerialiserObject<ProjectInfo> serialise{};
-            for (int i = 0; i < 5; i++)
-            {
-                m_projectInfo.IntTestArray.push_back(i);
-                m_projectInfo.GUIDS.push_back(Core::GUID());
-                m_projectInfo.ProjectPointerData.push_back(new ProjectPointerData{45});
-            }
-            std::string serialisedData = serialise.Serialise(m_projectInfo);
+            //Serialisation::SerialiserObject<ProjectInfo> serialise{};
+            //for (int i = 0; i < 5; i++)
+            //{
+            //    m_projectInfo.IntTestArray.push_back(i);
+            //    m_projectInfo.GUIDS.push_back(Core::GUID());
+            //    m_projectInfo.ProjectPointerData.push_back(new ProjectPointerData{ 45 });
+            //}
+            //std::string serialisedData = serialise.Serialise(m_projectInfo);
 
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
 
+            Serialisation::JsonSerialiser serialiser(false);
+            m_projectInfo.Serialise(&serialiser);
+            std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
+
             Archive archive(projectFullPath, ArchiveModes::Write);
-            archive.Write(serialisedData.c_str(), serialisedData.size() / sizeof(char));
+            archive.Write(serialisedData.data(), serialisedData.size());
             archive.Close();
         }
 

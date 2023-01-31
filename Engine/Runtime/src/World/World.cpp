@@ -73,7 +73,7 @@ namespace Insight
 		Ptr<ECS::Entity> World::AddEntity(std::string entity_name)
 		{
 			Ptr<ECS::Entity> e = m_entityManager.AddNewEntity(entity_name);
-			m_root_entities.push_back(e);
+			m_root_entities_guids.push_back(e->GetGUID());
 			return e;
 		}
 
@@ -85,11 +85,15 @@ namespace Insight
 		void World::RemoveEntity(Ptr<ECS::Entity>& entity)
 		{
 			ECS::Entity* e = entity.Get();
-			IS_UNUSED(std::remove_if(m_root_entities.begin(), m_root_entities.end(), [e](const Ptr<ECS::Entity>& other_entity)
-				{
-					return e == other_entity.Get();
-				}));
-			m_entityManager.RemoveEntity(e);
+			if (e)
+			{
+				Core::GUID guid = e->GetGUID();
+				IS_UNUSED(std::remove_if(m_root_entities_guids.begin(), m_root_entities_guids.end(), [guid](const Core::GUID& otherGuid)
+					{
+						return guid == otherGuid;
+					}));
+				m_entityManager.RemoveEntity(e);
+			}
 		}
 
 		std::vector<Ptr<ECS::Entity>> World::GetAllEntitiesWithComponentByName(std::string_view component_type) const
@@ -99,7 +103,12 @@ namespace Insight
 
 		std::vector<Ptr<ECS::Entity>> World::GetAllEntities() const
 		{
-			return m_root_entities;
+			std::vector<Ptr<ECS::Entity>> entities;
+			for (Core::GUID const& g : m_root_entities_guids)
+			{
+				entities.push_back(m_entityManager.GetEntityByGUID(g));
+			}
+			return entities;
 		}
 
 		std::vector<Ptr<ECS::Entity>> World::GetAllEntitiesFlatten() const

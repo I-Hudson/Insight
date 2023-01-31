@@ -24,6 +24,7 @@ project "Insight_Core"
         "%{IncludeDirs.optick}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.xxHash}",
+        "%{IncludeDirs.glm}",
     }
 
     files 
@@ -38,6 +39,7 @@ project "Insight_Core"
         "imgui.lib",
         "tracy.lib",
         "OptickCore.lib",
+        "glm.lib",
     }
     if (profileTool == "pix") then
         links

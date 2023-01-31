@@ -31,13 +31,18 @@ namespace Insight
             auto operator()(std::vector<T> const& object)
             {
                 using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
+
                 if constexpr (ObjectSerialiser)
                 {
                     nlohmann::json json;
                     SerialiserObject<Type> objectSerialiser;
                     for (size_t i = 0; i < object.size(); ++i)
                     {
-                        if constexpr (std::is_pointer_v<T>)
+                        if constexpr (is_uptr<T>::value)
+                        {
+                            json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i).Get()));
+                        }
+                        else if constexpr (std::is_pointer_v<T>)
                         {
                             json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
                         }
@@ -64,6 +69,35 @@ namespace Insight
                         }
                     }
                     return strings;
+                }
+            }
+        };
+
+        template<typename TKey, typename TValue>
+        struct UMapSerialiser
+        {
+            nlohmann::json operator()(std::unordered_map<TKey, TValue> const& object)
+            {
+                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
+                constexpr bool c_KeyIsFundemental = std::is_fundamental_v<TKey>;
+                constexpr bool c_ValueIsFundemental = std::is_fundamental_v<TValue>;
+
+                if constexpr (ObjectSerialiser)
+                {
+                    nlohmann::json json;
+                    //SerialiserObject<Type> objectSerialiser;
+                    //for (size_t i = 0; i < object.size(); ++i)
+                    //{
+                    //    if constexpr (std::is_pointer_v<T>)
+                    //    {
+                    //        json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
+                    //    }
+                    //    else
+                    //    {
+                    //        json.push_back(objectSerialiser.SerialiseToJsonObject(object.at(i)));
+                    //    }
+                    //}
+                    return json;
                 }
             }
         };

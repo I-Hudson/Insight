@@ -5,6 +5,8 @@
 #include "Runtime/Defines.h"
 #include "Resource/Resource.h"
 
+#include "Serialisation/Serialiser.h"
+
 #include <mutex>
 
 namespace Insight
@@ -25,6 +27,8 @@ namespace Insight
 
             void Initialise();
             void Shutdown();
+
+            IS_SERIALISABLE(ResourceDatabase);
 
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
@@ -55,4 +59,8 @@ namespace Insight
             friend class ResourceManager;
         };
     }
+
+    //OBJECT_SERIALISER(Runtime::ResourceDatabase, 1,
+    //    SERIALISE_PROPERTY_UMAP(Runtime::ResourceId, TObjectOPtr<Runtime::IResource>, m_resources, 1, 0)
+    //    );
 }

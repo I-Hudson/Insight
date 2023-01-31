@@ -5,6 +5,8 @@
 
 #include "Platforms/Platform.h"
 
+#include <glm/glm.hpp>
+
 namespace Insight
 {
     namespace Serialisation
@@ -32,7 +34,7 @@ namespace Insight
         {
             u8 operator()(std::string const& data)
             {
-                return static_cast<u8>(std::stoi(data));
+                return static_cast<u8>(std::stoul(data));
             }
         };
         template<>
@@ -40,7 +42,7 @@ namespace Insight
         {
             u16 operator()(std::string const& data)
             {
-                return static_cast<u16>(std::stoi(data));
+                return static_cast<u16>(std::stoul(data));
             }
         };
         template<>
@@ -48,7 +50,7 @@ namespace Insight
         {
             u32 operator()(std::string const& data)
             {
-                return static_cast<u32>(std::stoi(data));
+                return static_cast<u32>(std::stoul(data));
             }
         };
         template<>
@@ -56,16 +58,40 @@ namespace Insight
         {
             u64 operator()(std::string const& data)
             {
-                return static_cast<u64>(std::stoi(data));
+                return static_cast<u64>(std::stoull(data));
             }
         };
 
         template<>
-        struct PropertyDeserialiser<int>
+        struct PropertyDeserialiser<i8>
         {
-            int operator()(std::string const& data)
+            i8 operator()(std::string const& data)
             {
-                return static_cast<int>(std::stoi(data));
+                return static_cast<i8>(std::stoi(data));
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<i16>
+        {
+            i16 operator()(std::string const& data)
+            {
+                return static_cast<i16>(std::stoi(data));
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<i32>
+        {
+            i32 operator()(std::string const& data)
+            {
+                return static_cast<i32>(std::stoi(data));
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<i64>
+        {
+            i64 operator()(std::string const& data)
+            {
+                return static_cast<i64>(std::stoll(data));
             }
         };
 
@@ -75,6 +101,172 @@ namespace Insight
             std::string operator()(std::string const& data)
             {
                 return data;
+            }
+        };
+
+        //================================================================
+        // GLM TYPES
+        //================================================================
+        template<>
+        struct PropertyDeserialiser<glm::vec2>
+        {
+            glm::vec2 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<float> propertyDeserialiser;
+                glm::vec2 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',')
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::vec3>
+        {
+            glm::vec3 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<float> propertyDeserialiser;
+                glm::vec3 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',')
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::vec4>
+        {
+            glm::vec4 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<float> propertyDeserialiser;
+                glm::vec4 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',')
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::ivec2>
+        {
+            glm::ivec2 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<int> propertyDeserialiser;
+                glm::ivec2 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',') 
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::ivec3>
+        {
+            glm::ivec3 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<int> propertyDeserialiser;
+                glm::ivec3 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',')
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::ivec4>
+        {
+            glm::ivec4 operator()(std::string const& data)
+            {
+                PropertyDeserialiser<int> propertyDeserialiser;
+                glm::ivec4 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ',')
+                    {
+                        vec[idx] = propertyDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = propertyDeserialiser(numString);
+
+                return vec;
             }
         };
     }

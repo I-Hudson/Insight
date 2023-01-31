@@ -6,6 +6,8 @@
 #include "ECS/Entity.h"
 #include "ECS/EntityManager.h"
 
+#include "Serialisation/Serialiser.h"
+
 #include <string>
 
 namespace Insight
@@ -59,10 +61,8 @@ namespace Insight
 			void RemoveEntity(Ptr<ECS::Entity>& entity);
 
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
-			/// <summary>
-			/// This only returns the roots entities.
-			/// </summary>
-			/// <returns></returns>
+			/// @brief This only returns the roots entities.
+			/// @return 
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
 			/// @brief Return all entities within the world. Including root and their children recursive.
 			/// @return 
@@ -79,9 +79,9 @@ namespace Insight
 			WorldStates m_worldState = WorldStates::Paused;
 			WorldTypes m_worldType = WorldTypes::Game;
 
-			std::vector<Ptr<ECS::Entity>> m_root_entities;
+			std::vector<Core::GUID> m_root_entities_guids;
 			ECS::EntityManager m_entityManager;
-			Ptr<ECS::Entity> m_cameraEntity = nullptr;
+			Core::GUID m_cameraEntity;
 
 			// Is this scene persistent. If 'true' then the scene can not be unloaded even if asked. The scene must be deleted to be removed. 
 			bool m_persistentScene = false;
@@ -89,6 +89,21 @@ namespace Insight
 			bool m_onlySearchable = false;
 
 			friend class WorldSystem;
+			template<typename>
+			friend struct Serialisation::SerialiserObject;
 		};
 	}
+
+	//OBJECT_SERIALISER(Runtime::World, 1, 
+	//	SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
+	//	SERIALISE_PROPERTY_CAST(u32, m_worldState, 1, 0)
+	//	SERIALISE_PROPERTY_CAST(u32, m_worldType, 1, 0)
+
+	//	SERIALISE_PROPERTY_VECTOR(Core::GUID, m_root_entities_guids, 1, 0)
+	//	SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
+	//	SERIALISE_PROPERTY(Core::GUID, m_cameraEntity, 1, 0)
+
+	//	SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
+	//	SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
+	//);
 }

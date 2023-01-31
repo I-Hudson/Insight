@@ -1,6 +1,8 @@
 #include "Resource/ResourceSystem.h"
 #include "Resource/ResourceManager.h"
 
+#include "Serialisation/Archive.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -27,6 +29,11 @@ namespace Insight
 
         void ResourceSystem::Shutdown()
         {
+            Archive archive("./ResouceDataBase", ArchiveModes::Write);
+            //std::string data = m_database.Serialise();
+            //archive.Write(data.data(), data.size());
+            //archive.Close();
+
             ResourceManager::UnloadAll();
             ResourceManager::s_database = nullptr;
             m_database.Shutdown();
