@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <assert.h>
 
 namespace Insight
 {
@@ -10,25 +11,15 @@ namespace Insight
         template<typename T>
         struct PropertySerialiser
         {
-            std::string operator()(T const& object)
+            auto operator()(T const& v)
             {
-                std::stringstream ss;
-                ss << object;
-                if (ss.fail())
-                {
-                    return "";
-                }
-                return ss.str();
+                assert(false);
+                return 0;
             }
         };
 
         template<typename T>
         struct PropertyDeserialiser
-        {
-            T operator()(std::string const& data)
-            {
-                return {};
-            }
-        };
+        { };
     }
 }

@@ -112,7 +112,6 @@ namespace Insight
         {
             glm::vec2 operator()(std::string const& data)
             {
-                PropertyDeserialiser<float> propertyDeserialiser;
                 glm::vec2 vec;
                 int idx = 0;
                 std::string numString;
@@ -120,7 +119,7 @@ namespace Insight
                 {
                     if (data.at(i) == ',')
                     {
-                        vec[idx] = propertyDeserialiser(numString);
+                        vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
@@ -129,7 +128,7 @@ namespace Insight
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = propertyDeserialiser(numString);
+                vec[idx] = std::stof(numString);
 
                 return vec;
             }
@@ -139,7 +138,6 @@ namespace Insight
         {
             glm::vec3 operator()(std::string const& data)
             {
-                PropertyDeserialiser<float> propertyDeserialiser;
                 glm::vec3 vec;
                 int idx = 0;
                 std::string numString;
@@ -147,7 +145,7 @@ namespace Insight
                 {
                     if (data.at(i) == ',')
                     {
-                        vec[idx] = propertyDeserialiser(numString);
+                        vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
@@ -156,7 +154,7 @@ namespace Insight
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = propertyDeserialiser(numString);
+                vec[idx] = std::stof(numString);
 
                 return vec;
             }
@@ -166,7 +164,6 @@ namespace Insight
         {
             glm::vec4 operator()(std::string const& data)
             {
-                PropertyDeserialiser<float> propertyDeserialiser;
                 glm::vec4 vec;
                 int idx = 0;
                 std::string numString;
@@ -174,7 +171,7 @@ namespace Insight
                 {
                     if (data.at(i) == ',')
                     {
-                        vec[idx] = propertyDeserialiser(numString);
+                        vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
@@ -183,7 +180,7 @@ namespace Insight
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = propertyDeserialiser(numString);
+                vec[idx] = std::stof(numString);
 
                 return vec;
             }

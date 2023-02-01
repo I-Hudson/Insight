@@ -1,25 +1,43 @@
 #include "Serialisation/JsonSerialiser.h"
 
+#include "Platforms/Platform.h"
+
+#include <functional>
+
 namespace Insight
 {
     namespace Serialisation
     {
         JsonSerialiser::JsonSerialiser()
-            : ISerialiser(false)
+            : ISerialiser(SerialisationTypes::Json, false)
         { 
         }
 
         JsonSerialiser::JsonSerialiser(bool isReadMode)
-            : ISerialiser(isReadMode)
+            : ISerialiser(SerialisationTypes::Json, isReadMode)
         {  }
 
-        std::vector<Byte> JsonSerialiser::GetSerialisedData() const
+        std::vector<Byte> JsonSerialiser::GetSerialisedData()
         {
-            for (size_t i = 0; i < m_childSerialisers.size(); ++i)
+            nlohmann::json root = m_json;
+
+            std::function<void(JsonSerialiser*, nlohmann::json*)> addChildJsonObjects;
+            
+            addChildJsonObjects = [&addChildJsonObjects](JsonSerialiser* serialiser, nlohmann::json* json)
             {
-                m_json.array().push_back(static_cast<JsonSerialiser const*>(m_childSerialisers.at(i))->m_json);
-            }
-            std::string jsonData = m_json.dump(4);
+                for (size_t i = 0; i < serialiser->m_childSerialisers.size(); ++i)
+                {
+                    JsonSerialiser* child = static_cast<JsonSerialiser*>(serialiser->m_childSerialisers.at(i));
+                    ASSERT(child);
+                    nlohmann::json childJson = child->m_json;
+                    addChildJsonObjects(child, &childJson);
+
+                    (*json)[std::string(child->GetName())] = childJson;
+                }
+            };
+            addChildJsonObjects(this, &root);
+
+            std::string jsonData = root.dump(4);
             return { jsonData.begin(), jsonData.end() };
         }
 
@@ -99,14 +117,8 @@ namespace Insight
         {
         }
 
-        void JsonSerialiser::Read(std::string_view tag, const char* cStr, u64 size){}
-
-        ISerialiser* JsonSerialiser::AddChildSerialiser()
+        void JsonSerialiser::Read(std::string_view tag, const char* cStr, u64 size)
         {
-            JsonSerialiser* ser = New<JsonSerialiser>();
-            m_childSerialisers.push_back(ser);
-            return ser;
         }
-
     }
 }

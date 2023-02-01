@@ -13,9 +13,7 @@ namespace Insight
 {
 	namespace Core
 	{
-		//// <summary>
-		//// GUID. Used to store a unique ID which can be compared to other GUIDs.
-		//// </summary>
+		/// @brief GUID. Used to store a unique ID which can be compared to other GUIDs.
 		class IS_CORE GUID
 		{
 		public:

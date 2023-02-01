@@ -16,84 +16,84 @@ namespace Insight
         template<>
         struct PropertySerialiser<bool>
         {
-            std::string operator()(bool v)
+            bool operator()(bool v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
 
         template<>
         struct PropertySerialiser<char>
         {
-            std::string operator()(char v)
+            char operator()(char v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
 
         template<>
         struct PropertySerialiser<u8>
         {
-            std::string operator()(u8 v)
+            u8 operator()(u8 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<u16>
         {
-            std::string operator()(u32 v)
+            u16 operator()(u16 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<u32>
         {
-            std::string operator()(u32 v)
+            u32 operator()(u32 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<u64>
         {
-            std::string operator()(u64 v)
+            u64 operator()(u64 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
 
         template<>
         struct PropertySerialiser<i8>
         {
-            std::string operator()(i8 v)
+            i8 operator()(i8 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<i16>
         {
-            std::string operator()(i16 v)
+            i16 operator()(i16 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<i32>
         {
-            std::string operator()(i32 v)
+            i32 operator()(i32 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
         template<>
         struct PropertySerialiser<i64>
         {
-            std::string operator()(i64 v)
+            i64 operator()(i64 v)
             {
-                return std::to_string(v);
+                return v;
             }
         };
 
@@ -115,11 +115,10 @@ namespace Insight
         {
             std::string operator()(glm::vec2 v)
             {
-                PropertySerialiser<float> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str += ",";
-                str += intSerilaiser(v.y) + ")";
+                str += std::to_string(v.y) + ")";
                 return str;
             }
         };
@@ -128,13 +127,12 @@ namespace Insight
         {
             std::string operator()(glm::vec3 v)
             {
-                PropertySerialiser<float> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str += ",";
-                str += intSerilaiser(v.y);
+                str += std::to_string(v.y);
                 str += ",";
-                str += intSerilaiser(v.z) + ")";
+                str += std::to_string(v.z) + ")";
                 return str;
             }
         };
@@ -143,15 +141,14 @@ namespace Insight
         {
             std::string operator()(glm::vec4 v)
             {
-                PropertySerialiser<float> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str += ",";
-                str += intSerilaiser(v.y);
+                str += std::to_string(v.y);
                 str += ",";
-                str += intSerilaiser(v.z);
+                str += std::to_string(v.z);
                 str += ",";
-                str += intSerilaiser(v.w) + ")";
+                str += std::to_string(v.w) + ")";
                 return str;
             }
         };
@@ -160,11 +157,10 @@ namespace Insight
         {
             std::string operator()(glm::ivec2 v)
             {
-                PropertySerialiser<int> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str +=",";
-                str += intSerilaiser(v.y) + ")";
+                str += std::to_string(v.y) + ")";
                 return str;
             }
         };
@@ -173,13 +169,12 @@ namespace Insight
         {
             std::string operator()(glm::ivec3 v)
             {
-                PropertySerialiser<int> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str += ",";
-                str += intSerilaiser(v.y);
+                str += std::to_string(v.y);
                 str += ",";
-                str += intSerilaiser(v.z) + ")";
+                str += std::to_string(v.z) + ")";
                 return str;
             }
         };
@@ -188,15 +183,14 @@ namespace Insight
         {
             std::string operator()(glm::ivec4 v)
             {
-                PropertySerialiser<int> intSerilaiser;
                 std::string str;
-                str += "(" + intSerilaiser(v.x);
+                str += "(" + std::to_string(v.x);
                 str += ",";
-                str += intSerilaiser(v.y);
+                str += std::to_string(v.y);
                 str += ",";
-                str += intSerilaiser(v.z);
+                str += std::to_string(v.z);
                 str += ",";
-                str += intSerilaiser(v.w) + ")";
+                str += std::to_string(v.w) + ")";
                 return str;
             }
         };

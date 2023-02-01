@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Serialisation/Serialiser.h"
+#include "Serialisation/Serialisers/ISerialiser.h"
 
-#include <stack>
+#include <nlohmann/json.hpp>
 
 namespace Insight
 {
@@ -14,7 +14,7 @@ namespace Insight
             JsonSerialiser();
             JsonSerialiser(bool isReadMode);
 
-            virtual std::vector<Byte> GetSerialisedData() const override;
+            virtual std::vector<Byte> GetSerialisedData() override;
 
             virtual void Write(std::string_view tag, bool data) override;
 
@@ -43,8 +43,6 @@ namespace Insight
             virtual void Read(std::string_view tag, i64& data) override;
 
             virtual void Read(std::string_view tag, const char* cStr, u64 size) override;
-
-            virtual ISerialiser* AddChildSerialiser() override;
 
         private:
             nlohmann::json m_json;

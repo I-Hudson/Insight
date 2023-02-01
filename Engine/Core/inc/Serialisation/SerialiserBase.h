@@ -6,6 +6,8 @@
 
 #include "Core/Memory.h"
 
+#include "Serialisation/Serialisers/ISerialiser.h"
+
 #include <nlohmann/json.hpp>
 
 #include <string>
@@ -14,16 +16,29 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <assert.h>
 
 namespace Insight
 {
     namespace Serialisation
     {
+        class ISerialiser;
+
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 
         template<typename T>
         struct SerialiserObject
-        { };
+        {
+            ISerialiser* Serialise(T const& object, SerialisationTypes type)
+            {
+                assert(false);
+                return nullptr;
+            }
+            ISerialiser* Serialise(T const* object, SerialisationTypes type)
+            {
+                return Serialise(*object, type); 
+            }
+        };
 
         template<typename T, bool ObjectSerialiser>
         struct VectorSerialiser

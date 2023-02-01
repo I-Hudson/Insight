@@ -1,0 +1,101 @@
+#pragma once
+
+#include "Core/Defines.h"
+#include "Core/TypeAlias.h"
+
+#include <vector>
+#include <string_view>
+
+namespace Insight
+{
+    namespace Serialisation
+    {
+        enum class SerialisationTypes
+        {
+            Json,
+            Binary
+        };
+
+        /// @brief Base class for all serialises used. This defines what data can be saved.
+        class IS_CORE ISerialiser
+        {
+        public:
+            ISerialiser(SerialisationTypes type);
+            ISerialiser(SerialisationTypes type, bool isReadMode);
+            virtual ~ISerialiser();
+
+            static ISerialiser* Create(SerialisationTypes type);
+
+            void SetName(std::string_view tag);
+            std::string_view GetName() const;
+
+            void SetVersion(u32 currentVersion);
+            u32 GetVersion() const;
+            SerialisationTypes GetType() const;
+            bool IsReadMode() const;
+            virtual std::vector<Byte> GetSerialisedData() = 0;
+
+            virtual void Write(std::string_view tag, bool data) = 0;
+
+            virtual void Write(std::string_view tag, u8 data) = 0;
+            virtual void Write(std::string_view tag, u16 data) = 0;
+            virtual void Write(std::string_view tag, u32 data) = 0;
+            virtual void Write(std::string_view tag, u64 data) = 0;
+
+            virtual void Write(std::string_view tag, i8 data) = 0;
+            virtual void Write(std::string_view tag, i16 data) = 0;
+            virtual void Write(std::string_view tag, i32 data) = 0;
+            virtual void Write(std::string_view tag, i64 data) = 0;
+
+            virtual void Write(std::string_view tag, const char* cStr, u64 size) = 0;
+            void Write(std::string_view tag, std::string const& str) { Write(tag, str.c_str(), str.size()); }
+
+            virtual void Read(std::string_view tag, bool& data) = 0;
+
+            virtual void Read(std::string_view tag, u8& data) = 0;
+            virtual void Read(std::string_view tag, u16& data) = 0;
+            virtual void Read(std::string_view tag, u32& data) = 0;
+            virtual void Read(std::string_view tag, u64& data) = 0;
+
+            virtual void Read(std::string_view tag, i8& data) = 0;
+            virtual void Read(std::string_view tag, i16& datan) = 0;
+            virtual void Read(std::string_view tag, i32& data) = 0;
+            virtual void Read(std::string_view tag, i64& data) = 0;
+
+            virtual void Read(std::string_view tag, const char* cStr, u64 size) = 0;
+            void Read(std::string_view tag, std::string& str) { Read(tag, str.c_str(), str.size()); }
+
+            ISerialiser* AddChildSerialiser();
+            void AddChildSerialiser(ISerialiser* serialiser);
+
+        protected:
+            bool m_isReadMode = false;
+            u32 m_version = -1;
+            SerialisationTypes m_type;
+            std::string m_name;
+            std::vector<ISerialiser*> m_childSerialisers;
+        };
+
+
+        //SFINAE - https://en.wikipedia.org/wiki/Substitution_failure_is_not_an_error
+        template<typename T> class ObjectSerialiserExists
+        {
+            template<typename> static std::false_type test(...);
+            template<typename U> static auto test(int)
+                -> decltype(std::declval<U>().Serialise(), std::true_type());
+        public:
+            static constexpr bool value
+                = std::is_same<decltype(test<T>(0)), std::true_type>::value;
+        };
+
+        template<typename T> class PropertySerialiserExists
+        {
+            template<typename> static std::false_type test(...);
+            template<typename U> static auto test(int)
+                -> decltype(std::declval<U>()({}), std::true_type());
+        public:
+            static constexpr bool value
+                = std::is_same<decltype(test<T>(0)), std::true_type>::value;
+        };
+    }
+}

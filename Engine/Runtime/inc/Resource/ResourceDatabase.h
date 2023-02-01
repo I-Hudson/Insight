@@ -28,7 +28,7 @@ namespace Insight
             void Initialise();
             void Shutdown();
 
-            IS_SERIALISABLE(ResourceDatabase);
+            //IS_SERIALISABLE(ResourceDatabase);
 
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);

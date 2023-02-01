@@ -238,11 +238,11 @@ namespace Insight
 				m_glfwInit = false;
 			}
 
-			Serialisation::SerialiserObject<Window> serialiser;
-			std::string data = serialiser.Serialise(this);
-			Archive archive("./WindowSettings.txt", ArchiveModes::Write);
-			archive.Write(data.data(), data.size());
-			archive.Close();
+			//Serialisation::SerialiserObject<Window> serialiser;
+			//std::string data = serialiser.Serialise(this);
+			//Archive archive("./WindowSettings.txt", ArchiveModes::Write);
+			//archive.Write(data.data(), data.size());
+			//archive.Close();
 		}
 
 		void Window::Update()

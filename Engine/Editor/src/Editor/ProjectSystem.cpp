@@ -19,6 +19,8 @@ namespace Insight
 {
     namespace Editor
     {
+        IS_SERIALISABLE_CPP(ProjectInfo)
+
         ProjectSystem::~ProjectSystem()
         {
         }
@@ -50,7 +52,7 @@ namespace Insight
 
             Serialisation::DeserialiserObject<ProjectInfo> deserialise{};
             ProjectInfo deserialisedInfo;
-            deserialise.Deserialise(std::string(data.begin(), data.end()), &deserialisedInfo);
+            //deserialise.Deserialise(std::string(data.begin(), data.end()), &deserialisedInfo);
             IS_UNUSED(deserialisedInfo);
         }
 
@@ -145,6 +147,7 @@ namespace Insight
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
 
             Serialisation::JsonSerialiser serialiser(false);
+            serialiser.SetVersion(1);
             m_projectInfo.Serialise(&serialiser);
             std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
 
