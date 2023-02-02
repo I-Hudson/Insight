@@ -66,7 +66,9 @@ namespace Insight
 		template<>
 		struct PropertyDeserialiser<Core::GUID>
 		{
-			Core::GUID operator()(std::string const& data)
+			using InType = std::string;
+			using OutType = Core::GUID;
+			OutType operator()(InType const& data)
 			{
 				Core::GUID guid;
 				for (size_t i = 0; i < ARRAY_COUNT(guid.m_bytes) - 1; ++i)

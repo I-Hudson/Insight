@@ -56,7 +56,7 @@ namespace Insight
 		void EventSystem::DiscardOutOfDateEvente(std::vector<RPtr<Event>>& events)
 		{
 			std::unordered_map<EventType, std::vector<RPtr<Event>>> eventsToRemove;
-			for (int i = events.size() - 1; i >= 0; --i)
+			for (int i = static_cast<int>(events.size()) - 1; i >= 0; --i)
 			{
 				// Sort all events into their types. Newest to oldest.
 				eventsToRemove[events.at(i)->GetEventType()].push_back(events.at(i));

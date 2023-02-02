@@ -28,11 +28,11 @@ namespace Insight
         }
 
 
-        ISerialiser* ISerialiser::Create(SerialisationTypes type)
+        ISerialiser* ISerialiser::Create(SerialisationTypes type, bool isReadMode)
         {
             switch (type)
             {
-            case Insight::Serialisation::SerialisationTypes::Json: return New<JsonSerialiser>(false);
+            case Insight::Serialisation::SerialisationTypes::Json: return New<JsonSerialiser>(isReadMode);
             case Insight::Serialisation::SerialisationTypes::Binary:
                 break;
             default:
@@ -49,7 +49,6 @@ namespace Insight
 
         std::string_view ISerialiser::GetName() const
         {
-            ASSERT(!m_name.empty());
             return m_name;
         }
 
@@ -73,9 +72,18 @@ namespace Insight
             return m_isReadMode;
         }
 
-        ISerialiser* ISerialiser::AddChildSerialiser()
+        ISerialiser* ISerialiser::GetChildSerialiser(u32 index) const
         {
-            ISerialiser* newSerialiser = ISerialiser::Create(m_type);
+            if (index < m_childSerialisers.size())
+            {
+                return m_childSerialisers.at(index);
+            }
+            return nullptr;
+        }
+
+        ISerialiser* ISerialiser::AddChildSerialiser(bool isReadMode)
+        {
+            ISerialiser* newSerialiser = ISerialiser::Create(m_type, isReadMode);
             AddChildSerialiser(newSerialiser);
             return newSerialiser;
         }

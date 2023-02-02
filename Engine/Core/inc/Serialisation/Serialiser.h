@@ -11,7 +11,8 @@
         template<typename>\
         friend struct ::Insight::Serialisation::SerialiserObject;\
         public:\
-        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser) override;
+        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser) override;\
+        virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser) override;
 
 #define IS_SERIALISABLE_CPP(TYPE)\
         void TYPE::Serialise(::Insight::Serialisation::ISerialiser* serialiser)\
@@ -19,50 +20,12 @@
             ::Insight::Serialisation::SerialiserObject<TYPE> serialiserObject;\
             ::Insight::Serialisation::ISerialiser* objectSerialiser = serialiserObject.Serialise(this, serialiser->GetType());\
             serialiser->AddChildSerialiser(objectSerialiser);\
+        }\
+        void TYPE::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)\
+        {\
+            ::Insight::Serialisation::SerialiserObject<TYPE> serialiserObject;\
+            serialiserObject.Deserialise(serialiser, *this);\
         }
-
-#define IS_SERIALISE_FRIEND
-
-    // Marco magic. Just stepup a SerialiserProperty for the type. Then try and serialise the property.
-//#define SERIALISE_PROPERTY(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::string, OBJECT_TYPE, PROPERTY));
-//
-//#define SERIALISE_PROPERTY_CAST(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::PropertySerialiser<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL_CAST(std::string, OBJECT_TYPE, PROPERTY));
-//
-//#define SERIALISE_OBJECT(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL_OBJECT(PROPERTY));
-//
-//    /// Serialise include another OBJECT_SERIALISER.
-//#define SERIALISE_PARENT(OBJECT_TYPE, OBJECT_TYPE_NAME, VERSION_ADDED, VERSION_REMOVED)\
-//        static_assert(std::is_base_of_v<OBJECT_TYPE, ObjectType> && "[Object does not inherit]");\
-//        ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> PPCAT(OBJECT_TYPE_NAME, SerialiserProperty);\
-//        const u32 PPCAT(OBJECT_TYPE_NAME, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(OBJECT_TYPE_NAME, SERIALISE_CALL_PARENT_OBJECT(OBJECT_TYPE, OBJECT_TYPE_NAME));
-//
-//#define SERIALISE_PROPERTY_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, false> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(std::vector<std::string>, std::vector<OBJECT_TYPE>, PROPERTY));
-//
-//#define SERIALISE_OBJECT_VECTOR(OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::VectorSerialiser<OBJECT_TYPE, true> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, OBJECT_TYPE, PROPERTY));
-//
-//#define SERIALISE_PROPERTY_UMAP(KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-//        ::Insight::Serialisation::UMapSerialiser<KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE> PPCAT(PROPERTY, SerialiserProperty);\
-//        const u32 PPCAT(PROPERTY, _VersionRemoved) = VERSION_REMOVED;\
-//        SERIALISE_METHOD(PROPERTY, SERIALISE_CALL(nlohmann::json, std::unordered_map<KEY_OBJECT_TYPE, VALUE_OBJECT_TYPE>, PROPERTY));
-
-//static_assert(HasSerialiserObject || HasPropertySerialiser, STRINGIZE(Unable to find either a SerialiserObject or PropertySerialiser for TYPE_SERIALISER)); \
-//serialiser->AddChildSerialiser(PPCAT(PROPERTY, ObjectSerialiser).Serialise(PPCAT(object., PROPERTY)));
 
 enum class SerialiserType
 {
@@ -75,20 +38,23 @@ enum class SerialiserType
     UMapObject,
 };
 
-#define SERIALISE_CALL_PROPERTY_SERIALISER(OBJECT_TYPE, PROPERTY)\
-        auto SerialisedData = PropertySerialiser(PPCAT(object., PROPERTY))
-
 // Serialise a single property. This would be thiings which only contain data for them self. 
 #define SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
             ::Insight::Serialisation::PropertySerialiser<TYPE_SERIALISER> PropertySerialiser; \
             const u32 VersionRemoved = VERSION_REMOVED; \
-            SERIALISE_CALL_PROPERTY_SERIALISER(TYPE_SERIALISER, PROPERTY); \
+            auto SerialisedData = PropertySerialiser(PPCAT(object., PROPERTY));\
             serialiser->Write(#PROPERTY_NAME, SerialisedData);\
         }\
         else\
         {\
+            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER> PropertyDeserialiser; \
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::InType data;\
+            serialiser->Read(#PROPERTY_NAME, data);\
+            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType resultData =  PropertyDeserialiser(data);\
+            *((::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType*)&PPCAT(object., PROPERTY)) = resultData;\
         }
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
@@ -101,12 +67,20 @@ enum class SerialiserType
         }\
         else\
         {\
+            ::Insight::Serialisation::ISerialiser* childSerialiser = serialiser->GetChildSerialiser(currentChildSerialiser);\
+            if (childSerialiser)\
+            {\
+                ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> ObjectSerialiser; \
+                TYPE_SERIALISER deserialiserdObject = ObjectSerialiser.Deserialise(childSerialiser);\
+                *((TYPE_SERIALISER*)&PPCAT(object., PROPERTY)) = deserialiserdObject;\
+            }\
+            ++currentChildSerialiser;\
         }
 
 #define SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            BASE_TYPE const* baseType = static_cast<BASE_TYPE const*>(&object);\
+            BASE_TYPE* baseType = static_cast<BASE_TYPE*>(&object);\
             ::Insight::Serialisation::SerialiserObject<BASE_TYPE> ObjectSerialiser; \
             ::Insight::Serialisation::ISerialiser* objISerialiser = ObjectSerialiser.Serialise(baseType, serialiserType);\
             objISerialiser->SetName(#BASE_TYPE);\
@@ -114,6 +88,15 @@ enum class SerialiserType
         }\
         else\
         {\
+            ::Insight::Serialisation::ISerialiser* childSerialiser = serialiser->GetChildSerialiser(currentChildSerialiser);\
+            if (childSerialiser)\
+            {\
+                ::Insight::Serialisation::SerialiserObject<BASE_TYPE> ObjectSerialiser; \
+                BASE_TYPE* baseTypePtr = static_cast<BASE_TYPE*>(&object);\
+                BASE_TYPE& baseTypeRef = *baseTypePtr;\
+                ObjectSerialiser.Deserialise(childSerialiser, baseTypeRef);\
+            }\
+            ++currentChildSerialiser;\
         }
 
 // Serialise a single property with a ProertySerialiser.
@@ -125,10 +108,11 @@ enum class SerialiserType
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
     public:\
-        ::Insight::Serialisation::ISerialiser* Serialise(OBJECT_TYPE const& object, ::Insight::Serialisation::SerialisationTypes serialiserType)\
+        ::Insight::Serialisation::ISerialiser* Serialise(OBJECT_TYPE& object, ::Insight::Serialisation::SerialisationTypes serialiserType)\
         {\
             const u32 currentVersion = CURRENT_VERSION;\
-            ::Insight::Serialisation::ISerialiser* serialiser = ::Insight::Serialisation::ISerialiser::Create(serialiserType);\
+            ::Insight::Serialisation::ISerialiser* serialiser = ::Insight::Serialisation::ISerialiser::Create(serialiserType, false);\
+            u32 currentChildSerialiser = 0;\
             if (!serialiser->IsReadMode())\
             {\
                 serialiser->SetName(#OBJECT_TYPE); \
@@ -137,7 +121,7 @@ enum class SerialiserType
             __VA_ARGS__\
             return serialiser;\
         }\
-        ::Insight::Serialisation::ISerialiser* Serialise(OBJECT_TYPE const* object, ::Insight::Serialisation::SerialisationTypes serialiserType)\
+        ::Insight::Serialisation::ISerialiser* Serialise(OBJECT_TYPE* object, ::Insight::Serialisation::SerialisationTypes serialiserType)\
         {\
             return Serialise(*object, serialiserType);\
         }\
@@ -146,15 +130,20 @@ enum class SerialiserType
         OBJECT_TYPE Deserialise(::Insight::Serialisation::ISerialiser* serialiser)\
         {\
             OBJECT_TYPE object;\
+            Deserialise(serialiser, object);\
+            return object;\
+        }\
+        void Deserialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object)\
+        {\
             ::Insight::Serialisation::SerialisationTypes serialiserType = serialiser->GetType();\
             u32 currentVersion = CURRENT_VERSION;\
             u32 serialisedVersion = 0;\
+            u32 currentChildSerialiser = 0;\
             if (serialiser->IsReadMode())\
             {\
                 serialiser->Read("SERIALISED_VERSION", serialisedVersion); \
             }\
             __VA_ARGS__\
-            return object;\
         }
 
 #define OBJECT_SERIALISER(OBJECT_TYPE, CURRENT_VERSION, ...)\

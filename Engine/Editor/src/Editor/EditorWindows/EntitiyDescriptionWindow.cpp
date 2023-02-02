@@ -74,7 +74,7 @@ namespace Insight
             bool isEnabled = entity->IsEnabled();
             if (ImGui::Checkbox("Entity Enabled: %s", &isEnabled)) { entity->SetEnabled(isEnabled); }
 
-            for (size_t i = 0; i < entity->GetComponentCount(); ++i)
+            for (u32 i = 0; i < entity->GetComponentCount(); ++i)
             {
                 ImGui::Spacing();
                 ImGui::Spacing();

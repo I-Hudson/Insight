@@ -10,6 +10,7 @@ namespace Insight
         {
         public:
             virtual void Serialise(ISerialiser* serialiser) = 0;
+            virtual void Deserialise(ISerialiser* serialiser) = 0;
         };
     }
 }

@@ -154,6 +154,13 @@ namespace Insight
             Archive archive(projectFullPath, ArchiveModes::Write);
             archive.Write(serialisedData.data(), serialisedData.size());
             archive.Close();
+
+            archive = Archive(projectFullPath, ArchiveModes::Read);
+            serialisedData = archive.GetData();
+            Serialisation::JsonSerialiser deserialiserJson(true);
+            deserialiserJson.Deserialise(serialisedData);
+            ProjectInfo deserialiseInfo;
+            deserialiseInfo.Deserialise(deserialiserJson.GetChildSerialiser(0));
         }
 
         bool ProjectSystem::CanOpenProject()

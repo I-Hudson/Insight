@@ -84,8 +84,6 @@ namespace Insight
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			std::shared_mutex m_lock;
-
-			IS_SERIALISE_FRIEND;
 		};
 #endif
 	}
