@@ -4,10 +4,17 @@
 
 #include <nlohmann/json.hpp>
 
+#include <stack>
+
 namespace Insight
 {
     namespace Serialisation
     {
+        constexpr char* c_ObjectName = "ObjectName";
+        constexpr char* c_ArrayName = "ArrayName";
+        constexpr char* c_SerialiserName = "SerialiserName";
+        constexpr char* c_ChildSerialiser = "ChildSerialiser";
+
         class IS_CORE JsonSerialiser : public ISerialiser
         {
         public:
@@ -16,6 +23,12 @@ namespace Insight
 
             virtual void Deserialise(std::vector<u8> data) override;
             virtual std::vector<Byte> GetSerialisedData() const override;
+
+            virtual void StartObject(std::string_view name) override;
+            virtual void StopObject() override;
+
+            virtual void StartArray(std::string_view name) override;
+            virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;
 
@@ -46,7 +59,157 @@ namespace Insight
             virtual void Read(std::string_view tag, std::string& string) override;
 
         private:
-            nlohmann::json m_json;
+            template<typename T>
+            void Write(std::string_view tag, T const& data)
+            {
+                if (m_writer.TopState() == NodeStates::Array)
+                {
+                    m_writer.TopNode().push_back(data);
+                }
+                else
+                {
+                    m_writer.TopNode()[tag] = data;
+                }
+            }
+
+        private:
+            enum class NodeStates { None, Object, Array };
+
+            struct JsonReader
+            {
+                struct JsonNode
+                {
+                    NodeStates NoneStats;
+                    u32 ArrayIndex = 0;
+                    nlohmann::json Node;
+                };
+
+                JsonNode& Top() { return Nodes.top(); }
+                nlohmann::json& TopNode() { return Nodes.top().Node; }
+                NodeStates& TopState() { return Nodes.top().NoneStats; }
+
+                void Push(std::string_view name, NodeStates state)
+                {
+                    if (Size() == 0)
+                    {
+                        Nodes.push(
+                            JsonNode
+                            {
+                                state,
+                                0,
+                                DeserialisedJson
+                            }
+                        );
+                    }
+                    else
+                    {
+                        if (TopState() == NodeStates::Array)
+                        {
+                            Nodes.push(
+                                JsonNode
+                                {
+                                    state,
+                                    0,
+                                    TopNode().at(Top().ArrayIndex)
+                                }
+                            );
+                        }
+                        else if (TopState() == NodeStates::Object)
+                        {
+                            Nodes.push(
+                                JsonNode
+                                {
+                                    state,
+                                    0,
+                                    TopNode()[name]
+                                }
+                            );
+                        }
+                        else
+                        {
+                            assert(false);
+                        }
+                    }
+                }
+                void Pop()
+                {
+                    if (Nodes.size() == 1)
+                    {
+                        return;
+                    }
+                    Nodes.pop();
+                    
+                    if (TopState() == NodeStates::Array)
+                    {
+                        ++Top().ArrayIndex;
+                    }
+                }
+
+                u32 Size() const { return static_cast<u32>(Nodes.size()); }
+
+                std::stack<JsonNode> Nodes;
+                nlohmann::json DeserialisedJson;
+            };
+            struct JsonWriter
+            {
+                struct JsonNode
+                {
+                    NodeStates NoneStats;
+                    std::string NodeName;
+                    nlohmann::json Node;
+                };
+                JsonNode& Top() { return Nodes.top(); }
+                nlohmann::json& TopNode() { return Nodes.top().Node; }
+                NodeStates& TopState() { return Nodes.top().NoneStats; }
+
+                JsonNode const& Top() const { return Nodes.top(); }
+                nlohmann::json const& TopNode() const { return Nodes.top().Node; }
+                NodeStates const& TopState() const { return Nodes.top().NoneStats; }
+
+                void Push(std::string_view name, NodeStates state)
+                {
+                    nlohmann::json jsonObject;
+
+                    Nodes.push(
+                        JsonNode
+                        {
+                            state,
+                            std::string(name),
+                            jsonObject
+                        }
+                    );
+                }
+                void Pop()
+                {
+                    if (Nodes.size() == 1)
+                    {
+                        return;
+                    }
+
+                    JsonNode node = Nodes.top();
+                    Nodes.pop();
+
+                    if (TopState() == NodeStates::Array)
+                    {
+                        Top().Node.push_back(node.Node);
+                    }
+                    else if (TopState() == NodeStates::Object)
+                    {
+                        Top().Node[node.NodeName] = node.Node;;
+                    }
+                    else
+                    {
+                        assert(false);
+                    }
+                }
+
+                u32 Size() const { return static_cast<u32>(Nodes.size()); }
+
+                std::stack<JsonNode> Nodes;
+            };
+
+            JsonReader m_reader;
+            JsonWriter m_writer;
         };
     }
 }

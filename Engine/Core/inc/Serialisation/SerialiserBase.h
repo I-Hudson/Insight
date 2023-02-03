@@ -24,98 +24,216 @@ namespace Insight
     {
         class ISerialiser;
 
+        enum class SerialiserType
+        {
+            Property,
+            Object,
+            Base,
+            VectorProperty,
+            VectorObject,
+            UMapProperty,
+            UMapObject,
+        };
+
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 
         template<typename T>
         struct SerialiserObject
         {
-            ISerialiser* Serialise(T const& object, SerialisationTypes type)
+            void Serialise(T& object, ISerialiser* serialiser)
             {
                 assert(false);
-                return nullptr;
             }
-            ISerialiser* Serialise(T const* object, SerialisationTypes type)
+            void Serialise(T* object, ISerialiser* serialiser)
             {
-                return Serialise(*object, type); 
+                assert(false);
             }
         };
 
-        template<typename T, bool ObjectSerialiser>
+        template<typename TVector, typename TypeSerialiser, SerialiserType SerialiserType>
         struct VectorSerialiser
         {
-            auto operator()(std::vector<T> const& object)
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<TVector>& object)
             {
-                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
+                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<TVector>>>;
+                if (!serialiser)
+                {
+                    return;
+                }
 
-                if constexpr (ObjectSerialiser)
+                serialiser->StartArray(name);
+                for (auto& v : object)
                 {
-                    nlohmann::json json;
-                    SerialiserObject<Type> objectSerialiser;
-                    for (size_t i = 0; i < object.size(); ++i)
+                    if constexpr (SerialiserType == SerialiserType::VectorProperty)
                     {
-                        if constexpr (is_uptr<T>::value)
-                        {
-                            json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i).Get()));
-                        }
-                        else if constexpr (std::is_pointer_v<T>)
-                        {
-                            json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
-                        }
-                        else
-                        {
-                            json.push_back(objectSerialiser.SerialiseToJsonObject(object.at(i)));
-                        }
+                        ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+                        auto SerialisedData = propertySerialiser(v);
+                        serialiser->Write("", SerialisedData);
                     }
-                    return json;
+                    else if (SerialiserType == SerialiserType::VectorObject)
+                    {
+                        ::Insight::Serialisation::SerialiserObject<Type> serialiserObject;
+                        serialiserObject.Serialise(v, serialiser);
+                    }
                 }
-                else
+                serialiser->StopArray();
+            }
+
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<TVector*>& object)
+            {
+                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<TVector>>>;
+                if (!serialiser)
                 {
-                    std::vector<std::string> strings;
-                    PropertySerialiser<Type> serialiserProperty;
-                    for (size_t i = 0; i < object.size(); ++i)
-                    {
-                        if constexpr (std::is_pointer_v<T>)
-                        {
-                            strings.push_back(serialiserProperty(*object.at(i)));
-                        }
-                        else
-                        {
-                            strings.push_back(serialiserProperty(object.at(i)));
-                        }
-                    }
-                    return strings;
+                    return;
                 }
+
+                serialiser->StartArray(name);
+                for (auto& v : object)
+                {
+                    if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                    {
+                        ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+                        auto SerialisedData = propertySerialiser(*v);
+                        serialiser->Write("", SerialisedData);
+                    }
+                    else if (SerialiserType == SerialiserType::VectorObject)
+                    {
+                        ::Insight::Serialisation::SerialiserObject<Type> serialiserObject;
+                        serialiserObject.Serialise(v, serialiser);
+                    }
+                }
+                serialiser->StopArray();
+            }
+
+            //=============================================
+            // Insight smart pointers
+            //=============================================
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<UPtr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    rawPoniters.push_back(ptr.Get());
+                }
+                operator()(serialiser, name, rawPoniters);
+            }
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<RPtr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    rawPoniters.push_back(ptr.Get());
+                }
+                operator()(serialiser, name, rawPoniters);
+            }
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<WPtr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    rawPoniters.push_back(ptr.Get());
+                }
+                operator()(serialiser, name, rawPoniters);
+            }
+
+            //=============================================
+            // STL smart pointers
+            //=============================================
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::unique_ptr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    rawPoniters.push_back(ptr.get());
+                }
+                operator()(serialiser, name, rawPoniters);
+            }
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::shared_ptr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    rawPoniters.push_back(ptr.get());
+                }
+                operator()(serialiser, name, rawPoniters);
+            }
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::weak_ptr<TVector>>& object)
+            {
+                std::vector<TVector*> rawPoniters;
+                rawPoniters.reserve(object.size());
+                for (auto& ptr : object)
+                {
+                    if (std::shared_ptr<T> sPtr = ptr.lock())
+                    {
+                        rawPoniters.push_back(sPtr.get());
+                    }
+                }
+                operator()(serialiser, name, rawPoniters);
             }
         };
 
-        template<typename TKey, typename TValue>
-        struct UMapSerialiser
-        {
-            nlohmann::json operator()(std::unordered_map<TKey, TValue> const& object)
-            {
-                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
-                constexpr bool c_KeyIsFundemental = std::is_fundamental_v<TKey>;
-                constexpr bool c_ValueIsFundemental = std::is_fundamental_v<TValue>;
+        //template<typename TKey, typename TValue>
+        //struct UMapSerialiser
+        //{
+        //    nlohmann::json operator()(std::unordered_map<TKey, TValue> const& object)
+        //    {
+        //        using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
+        //        constexpr bool c_KeyIsFundemental = std::is_fundamental_v<TKey>;
+        //        constexpr bool c_ValueIsFundemental = std::is_fundamental_v<TValue>;
 
-                if constexpr (ObjectSerialiser)
-                {
-                    nlohmann::json json;
-                    //SerialiserObject<Type> objectSerialiser;
-                    //for (size_t i = 0; i < object.size(); ++i)
-                    //{
-                    //    if constexpr (std::is_pointer_v<T>)
-                    //    {
-                    //        json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
-                    //    }
-                    //    else
-                    //    {
-                    //        json.push_back(objectSerialiser.SerialiseToJsonObject(object.at(i)));
-                    //    }
-                    //}
-                    return json;
-                }
-            }
-        };
+        //        if constexpr (ObjectSerialiser)
+        //        {
+        //            nlohmann::json json;
+        //            //SerialiserObject<Type> objectSerialiser;
+        //            //for (size_t i = 0; i < object.size(); ++i)
+        //            //{
+        //            //    if constexpr (std::is_pointer_v<T>)
+        //            //    {
+        //            //        json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
+        //            //    }
+        //            //    else
+        //            //    {
+        //            //        json.push_back(objectSerialiser.SerialiseToJsonObject(object.at(i)));
+        //            //    }
+        //            //}
+        //            return json;
+        //        }
+        //    }
+        //};
+
+        //template<typename TKey, typename TValue>
+        //struct UMapSerialiser
+        //{
+        //    nlohmann::json operator()(std::unordered_map<TKey, TValue> const& object)
+        //    {
+        //        using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
+        //        constexpr bool c_KeyIsFundemental = std::is_fundamental_v<TKey>;
+        //        constexpr bool c_ValueIsFundemental = std::is_fundamental_v<TValue>;
+
+        //        if constexpr (ObjectSerialiser)
+        //        {
+        //            nlohmann::json json;
+        //            //SerialiserObject<Type> objectSerialiser;
+        //            //for (size_t i = 0; i < object.size(); ++i)
+        //            //{
+        //            //    if constexpr (std::is_pointer_v<T>)
+        //            //    {
+        //            //        json.push_back(objectSerialiser.SerialiseToJsonObject(*object.at(i)));
+        //            //    }
+        //            //    else
+        //            //    {
+        //            //        json.push_back(objectSerialiser.SerialiseToJsonObject(object.at(i)));
+        //            //    }
+        //            //}
+        //            return json;
+        //        }
+        //    }
+        //};
 
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 

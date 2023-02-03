@@ -16,6 +16,12 @@ namespace Insight
             Binary
         };
 
+        enum class SerialiserWriteReadTypes
+        {
+            Property,
+            Object
+        };
+
         /// @brief Base class for all serialises used. This defines what data can be saved.
         class IS_CORE ISerialiser
         {
@@ -38,6 +44,12 @@ namespace Insight
 
             virtual void Deserialise(std::vector<u8> data) = 0;
             virtual std::vector<Byte> GetSerialisedData() const = 0;
+
+            virtual void StartObject(std::string_view name) = 0;
+            virtual void StopObject() = 0;
+
+            virtual void StartArray(std::string_view name) = 0;
+            virtual void StopArray() = 0;
 
             virtual void Write(std::string_view tag, bool data) = 0;
 

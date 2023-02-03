@@ -35,7 +35,8 @@ namespace Insight
             bool IsOpen = false;
             ProjectPointerData Data;
 
-            std::vector<int> IntTestArray;
+            std::vector<BaseProjectInfo> BaseProjectInfoTestArray;
+            std::vector<std::shared_ptr<BaseProjectInfo>> BaseProjectInfoTestSharedPtrArray;
             std::vector<ProjectPointerData*> ProjectPointerData;
 
             std::string GetAbsPathWithFile() const { return ProjectPath + "/" + ProjectName; }
@@ -94,13 +95,16 @@ namespace Insight
     //    DESERIALISE_PROPERTY(int, Age, 1, 0)
     //);
 
-    OBJECT_SERIALISER(Editor::ProjectInfo, 3,
-        SERIALISE_BASE(Editor::BaseProjectInfo, 3, 0)
+    OBJECT_SERIALISER(Editor::ProjectInfo, 2,
+        SERIALISE_BASE(Editor::BaseProjectInfo, 1, 0)
         SERIALISE_OBJECT(Editor::ProjectPointerData, Data, 2, 0)
         SERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
         SERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
         SERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
         SERIALISE_PROPERTY(bool, IsOpen, 1, 0)
+        SERIALISE_VECTOR_OBJECT(Editor::BaseProjectInfo, BaseProjectInfoTestArray, 1, 0)
+        SERIALISE_VECTOR_OBJECT(Editor::BaseProjectInfo, BaseProjectInfoTestSharedPtrArray, 1, 0)
+
         //SERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         //SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)
         //SERIALISE_PROPERTY_VECTOR(int, IntTestArray,   1, 0)

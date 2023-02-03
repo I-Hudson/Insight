@@ -159,4 +159,25 @@
 
 #endif
 
+// https://stackoverflow.com/a/56136573
+// This is fine to use in an unevaluated context
+template<class T> 
+T& reference_to()
+{
+	static T instance;
+	return instance;
+}
+
+// This one is the preferred one
+template<class Container>
+auto element_type(int) -> typename Container::element_type;
+
+// This one is the fallback if the preferred one doesn't work
+template<class Container>
+auto element_type(short) -> typename std::remove_pointer_t<std::remove_reference_t<decltype(*reference_to<Container>())>>;
+
+// We alias the return type
+template<class T>
+using element_type_t = decltype(element_type<T>(0));
+
 #pragma warning( disable : 4251 )

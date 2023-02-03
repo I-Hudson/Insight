@@ -146,10 +146,36 @@ namespace Insight
 
             std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
 
+            for (size_t i = 0; i < 3; ++i)
+            {
+                m_projectInfo.BaseProjectInfoTestSharedPtrArray.push_back(std::make_shared<BaseProjectInfo>());
+                m_projectInfo.BaseProjectInfoTestArray.push_back(BaseProjectInfo());
+            }
+
+            //using vectorType = std::underlying_type_t<std::vector<std::shared_ptr<BaseProjectInfo>>>;
+
+            std::vector<UPtr<BaseProjectInfo>> testVector;
+            using TVectorType = typename std::decay<decltype(*testVector.begin())>::type;
+            using TVectorRawType = typename std::remove_pointer_t<std::remove_reference_t<decltype(*reference_to<TVectorType>())>>;
+            using TVectorElementType = typename element_type_t<TVectorType>();
+            TVectorRawType t;
+
+            using vectorType = std::remove_reference<decltype(*std::vector<std::shared_ptr<BaseProjectInfo>>().begin())>;
+
+
+            vectorType typeInVector;
+
             Serialisation::JsonSerialiser serialiser(false);
+            serialiser.StartArray("ProjectInfoStructs");
             serialiser.SetVersion(1);
             m_projectInfo.Serialise(&serialiser);
+            m_projectInfo.Serialise(&serialiser);
+            m_projectInfo.Serialise(&serialiser);
+            m_projectInfo.Serialise(&serialiser);
+            serialiser.StopArray();
+
             std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
+            serialiser = {};
 
             Archive archive(projectFullPath, ArchiveModes::Write);
             archive.Write(serialisedData.data(), serialisedData.size());
@@ -160,7 +186,13 @@ namespace Insight
             Serialisation::JsonSerialiser deserialiserJson(true);
             deserialiserJson.Deserialise(serialisedData);
             ProjectInfo deserialiseInfo;
-            deserialiseInfo.Deserialise(deserialiserJson.GetChildSerialiser(0));
+
+            deserialiserJson.StartArray("ProjectInfoStructs");
+            deserialiseInfo.Deserialise(&deserialiserJson);
+            deserialiseInfo.Deserialise(&deserialiserJson);
+            deserialiseInfo.Deserialise(&deserialiserJson);
+            deserialiseInfo.Deserialise(&deserialiserJson);
+            deserialiserJson.StopArray();
         }
 
         bool ProjectSystem::CanOpenProject()
