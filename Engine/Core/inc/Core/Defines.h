@@ -159,25 +159,24 @@
 
 #endif
 
-// https://stackoverflow.com/a/56136573
-// This is fine to use in an unevaluated context
-template<class T> 
-T& reference_to()
+#include <type_traits>
+#include <utility>
+
+namespace detail 
 {
-	static T instance;
-	return instance;
+    // If `*(object of type T)` is valid, this is selected and
+    // the return type is `std::true_type`
+    template<class T>
+    decltype(static_cast<void>(*std::declval<T>()), std::true_type{})
+        can_be_dereferenced_impl(int);
+
+    // Otherwise the less specific function is selected,
+    // and the return type is `std::false_type`
+    template<class>
+    std::false_type can_be_dereferenced_impl(...);
 }
 
-// This one is the preferred one
-template<class Container>
-auto element_type(int) -> typename Container::element_type;
-
-// This one is the fallback if the preferred one doesn't work
-template<class Container>
-auto element_type(short) -> typename std::remove_pointer_t<std::remove_reference_t<decltype(*reference_to<Container>())>>;
-
-// We alias the return type
 template<class T>
-using element_type_t = decltype(element_type<T>(0));
+struct can_be_dereferenced : decltype(detail::can_be_dereferenced_impl<T>(0)) {};
 
 #pragma warning( disable : 4251 )

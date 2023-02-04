@@ -50,12 +50,11 @@ namespace Insight
             }
         };
 
-        template<typename TVector, typename TypeSerialiser, SerialiserType SerialiserType>
+        template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>
         struct VectorSerialiser
         {
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<TVector>& object)
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<T>& object)
             {
-                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<TVector>>>;
                 if (!serialiser)
                 {
                     return;
@@ -64,116 +63,52 @@ namespace Insight
                 serialiser->StartArray(name);
                 for (auto& v : object)
                 {
-                    if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                    if constexpr (is_insight_smart_pointer_v<T> || is_stl_smart_pointer_v<T>)
                     {
-                        ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-                        auto SerialisedData = propertySerialiser(v);
-                        serialiser->Write("", SerialisedData);
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+                            if constexpr (is_insight_smart_pointer_v<T>)
+                            {
+                                auto SerialisedData = propertySerialiser(v.Get());
+                                serialiser->Write("", SerialisedData);
+                            }
+                            else
+                            {
+                                auto SerialisedData = propertySerialiser(v.get());
+                                serialiser->Write("", SerialisedData);
+                            }
+                        }
+                        else if (SerialiserType == SerialiserType::VectorObject)
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+                            if constexpr (is_insight_smart_pointer_v<T>)
+                            {
+                                serialiserObject.Serialise(v.Get(), serialiser);
+                            }
+                            else
+                            {
+                                serialiserObject.Serialise(v.get(), serialiser);
+                            }
+
+                        }
                     }
-                    else if (SerialiserType == SerialiserType::VectorObject)
+                    else
                     {
-                        ::Insight::Serialisation::SerialiserObject<Type> serialiserObject;
-                        serialiserObject.Serialise(v, serialiser);
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+                            auto SerialisedData = propertySerialiser(v);
+                            serialiser->Write("", SerialisedData);
+                        }
+                        else if (SerialiserType == SerialiserType::VectorObject)
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+                            serialiserObject.Serialise(v, serialiser);
+                        }
                     }
                 }
                 serialiser->StopArray();
-            }
-
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<TVector*>& object)
-            {
-                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<TVector>>>;
-                if (!serialiser)
-                {
-                    return;
-                }
-
-                serialiser->StartArray(name);
-                for (auto& v : object)
-                {
-                    if constexpr (SerialiserType == SerialiserType::VectorProperty)
-                    {
-                        ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-                        auto SerialisedData = propertySerialiser(*v);
-                        serialiser->Write("", SerialisedData);
-                    }
-                    else if (SerialiserType == SerialiserType::VectorObject)
-                    {
-                        ::Insight::Serialisation::SerialiserObject<Type> serialiserObject;
-                        serialiserObject.Serialise(v, serialiser);
-                    }
-                }
-                serialiser->StopArray();
-            }
-
-            //=============================================
-            // Insight smart pointers
-            //=============================================
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<UPtr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    rawPoniters.push_back(ptr.Get());
-                }
-                operator()(serialiser, name, rawPoniters);
-            }
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<RPtr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    rawPoniters.push_back(ptr.Get());
-                }
-                operator()(serialiser, name, rawPoniters);
-            }
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<WPtr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    rawPoniters.push_back(ptr.Get());
-                }
-                operator()(serialiser, name, rawPoniters);
-            }
-
-            //=============================================
-            // STL smart pointers
-            //=============================================
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::unique_ptr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    rawPoniters.push_back(ptr.get());
-                }
-                operator()(serialiser, name, rawPoniters);
-            }
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::shared_ptr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    rawPoniters.push_back(ptr.get());
-                }
-                operator()(serialiser, name, rawPoniters);
-            }
-            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<std::weak_ptr<TVector>>& object)
-            {
-                std::vector<TVector*> rawPoniters;
-                rawPoniters.reserve(object.size());
-                for (auto& ptr : object)
-                {
-                    if (std::shared_ptr<T> sPtr = ptr.lock())
-                    {
-                        rawPoniters.push_back(sPtr.get());
-                    }
-                }
-                operator()(serialiser, name, rawPoniters);
             }
         };
 

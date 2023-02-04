@@ -78,7 +78,8 @@
 #define SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            ::Insight::Serialisation::VectorSerialiser<TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorSerialiser;\
+            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorSerialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }\
@@ -86,12 +87,21 @@
         {\
         }
 
+/*
+// https://stackoverflow.com/a/56136573
+// This is fine to use in an unevaluated context
+template<class T>
+T& reference_to();
+using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_t<decltype(*reference_to<TVectorType>())>>;\
+*/
+
+// https://stackoverflow.com/a/56136573
 #define SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            using TVectorType = typename std::decay<decltype(*m_projectInfo.BaseProjectInfoTestSharedPtrArray.begin())>::type;\
-            using TVectorElementType = element_type_t<TVectorType>;\
-            ::Insight::Serialisation::VectorSerialiser<TYPE_SERIALISER, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorObject> vectorSerialiser;\
+            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorObject> vectorSerialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }\
