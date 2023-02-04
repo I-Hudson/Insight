@@ -73,6 +73,22 @@ namespace Insight
         };
     }
 
+    namespace Serialisation
+    {
+        struct BaseProjectInfoToHash {};
+        template<>
+        struct PropertySerialiser<BaseProjectInfoToHash>
+        {
+            using InType = Editor::BaseProjectInfo;
+            using OutType = u64;
+            u64 operator()(InType& v) const
+            {
+                //return Algorithm::GetHash64(v.GUID.m_bytes, Core::GUID::c_GUID_BYTE_SIZE);
+                return 0;
+            }
+        };
+    }
+
     //OBJECT_SERIALISER(Editor::BaseBaseProjectInfo, 1,
     //    SERIALISE_PROPERTY_VECTOR(Core::GUID, GUIDS, 1, 0)
     //);
@@ -103,7 +119,7 @@ namespace Insight
         SERIALISE_PROPERTY(u32, ProjectVersion, 1, 0)
         SERIALISE_PROPERTY(bool, IsOpen, 1, 0)
         SERIALISE_VECTOR_OBJECT(Editor::BaseProjectInfo, BaseProjectInfoTestArray, 1, 0)
-        SERIALISE_VECTOR_OBJECT(Editor::BaseProjectInfo, BaseProjectInfoTestSharedPtrArray, 1, 0)
+        SERIALISE_VECTOR_PROPERTY(BaseProjectInfoToHash, BaseProjectInfoTestSharedPtrArray, 1, 0)
 
         //SERIALISE_OBJECT_VECTOR(Editor::ProjectPointerData*, ProjectPointerData, 3, 0)
         //SERIALISE_PARENT(Editor::BaseProjectInfo, BaseProjectInfo, 2, 0)

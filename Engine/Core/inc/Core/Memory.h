@@ -1126,28 +1126,50 @@ template<typename>
 constexpr bool is_insight_unique_pointer_v = false;
 template<typename T>
 constexpr bool is_insight_unique_pointer_v<UPtr<T>> = true;
+
 template<typename>
 constexpr bool is_insight_shared_pointer_v = false;
 template<typename T>
 constexpr bool is_insight_shared_pointer_v<RPtr<T>> = true;
+
 template<typename>
 constexpr bool is_insight_weak_pointer_v = false;
 template<typename T>
 constexpr bool is_insight_weak_pointer_v<WPtr<T>> = true;
+
+template<typename>
+constexpr bool is_insight_object_owning_pointer_v = false;
 template<typename T>
-constexpr bool is_insight_smart_pointer_v = is_insight_unique_pointer_v<T> || is_insight_shared_pointer_v<T> || is_insight_weak_pointer_v<T>;
+constexpr bool is_insight_object_owning_pointer_v<TObjectOwnPtr<T>> = true;
+
+template<typename>
+constexpr bool is_insight_object_pointer_v = false;
+template<typename T>
+constexpr bool is_insight_object_pointer_v<TObjectPtr<T>> = true;
+
+template<typename T>
+constexpr bool is_insight_smart_pointer_v = is_insight_unique_pointer_v<T> 
+										 || is_insight_shared_pointer_v<T> 
+										 || is_insight_weak_pointer_v<T>
+										 || is_insight_object_owning_pointer_v<T>
+										 || is_insight_object_pointer_v<T>;
 
 template<typename>
 constexpr bool is_stl_unique_pointer_v = false;
 template<typename T>
 constexpr bool is_stl_unique_pointer_v<std::unique_ptr<T>> = true;
+
 template<typename>
 constexpr bool is_stl_shared_pointer_v = false;
 template<typename T>
 constexpr bool is_stl_shared_pointer_v<std::shared_ptr<T>> = true;
+
 template<typename>
 constexpr bool is_stl_weak_pointer_v = false;
 template<typename T>
 constexpr bool is_stl_weak_pointer_v<std::weak_ptr<T>> = true;
+
 template<typename T>
-constexpr bool is_stl_smart_pointer_v = is_stl_unique_pointer_v<T> || is_stl_shared_pointer_v<T> || is_stl_weak_pointer_v<T>;
+constexpr bool is_stl_smart_pointer_v = is_stl_unique_pointer_v<T> 
+									 || is_stl_shared_pointer_v<T> 
+									 || is_stl_weak_pointer_v<T>;

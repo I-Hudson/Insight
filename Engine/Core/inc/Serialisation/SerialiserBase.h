@@ -2,21 +2,12 @@
 
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
-#include "Core/Logger.h"
 
 #include "Core/Memory.h"
 
 #include "Serialisation/Serialisers/ISerialiser.h"
 
-#include <nlohmann/json.hpp>
-
-#include <string>
-#include <sstream>
 #include <vector>
-
-#include <cstddef>
-#include <type_traits>
-#include <assert.h>
 
 namespace Insight
 {
@@ -70,12 +61,20 @@ namespace Insight
                             ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
                             if constexpr (is_insight_smart_pointer_v<T>)
                             {
-                                auto SerialisedData = propertySerialiser(v.Get());
+                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                                static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+
+                                auto SerialisedData = propertySerialiser(*v.Get());
                                 serialiser->Write("", SerialisedData);
                             }
                             else
                             {
-                                auto SerialisedData = propertySerialiser(v.get());
+                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                                static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+
+                                auto SerialisedData = propertySerialiser(*v.get());
                                 serialiser->Write("", SerialisedData);
                             }
                         }
@@ -84,13 +83,19 @@ namespace Insight
                             ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
                             if constexpr (is_insight_smart_pointer_v<T>)
                             {
-                                serialiserObject.Serialise(v.Get(), serialiser);
+                                using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                                static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
+                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+
+                                serialiserObject.Serialise(*v.Get(), serialiser);
                             }
                             else
                             {
-                                serialiserObject.Serialise(v.get(), serialiser);
+                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                                static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>, 
+                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+                                serialiserObject.Serialise(*v.get(), serialiser);
                             }
-
                         }
                     }
                     else
@@ -179,7 +184,7 @@ namespace Insight
         /// @brief Deserialise a vector.
         /// @tparam T 
         /// @tparam ObjectDesialiser 
-        template<typename T, bool ObjectDesialiser>
+        /*template<typename T, bool ObjectDesialiser>
         struct VectorDeserialiser
         {
             std::vector<T> operator()(std::vector<nlohmann::json> const& data)
@@ -226,6 +231,6 @@ namespace Insight
                     return vector;
                 }
             }
-        };
+        };*/
     }
 }
