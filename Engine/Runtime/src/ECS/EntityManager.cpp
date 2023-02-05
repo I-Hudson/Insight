@@ -153,7 +153,13 @@ namespace Insight
 
 		EntityManager::EntityManager(EntityManager&& other)
 		{
+			*(this) = std::move(other);
+		}
+
+		EntityManager& EntityManager::operator=(EntityManager&& other)
+		{
 			ComponentRegistry::RegisterInternalComponents();
+
 #ifdef ECS_ENABLED
 			m_ecsWorld = other.m_ecsWorld;
 			other.m_ecsWorld = nullptr;
@@ -166,6 +172,7 @@ namespace Insight
 					m_entities.push_back(std::move(entity));
 				});
 			other.m_entities.clear();
+			return *this;
 		}
 
 #ifdef ECS_ENABLED

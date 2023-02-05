@@ -55,6 +55,8 @@ namespace Insight
 			EntityManager(const EntityManager& other) = delete;
 			EntityManager(EntityManager&& other);
 
+			EntityManager& operator=(EntityManager&& other);
+
 #ifdef ECS_ENABLED
 			EntityManager(ECSWorld* ecsWorld);
 #else
@@ -84,11 +86,13 @@ namespace Insight
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			std::shared_mutex m_lock;
+
+			IS_SERIALISABLE_FRIEND
 		};
 #endif
 	}
 
-	//OBJECT_SERIALISER(ECS::EntityManager, 1,
-	//	SERIALISE_OBJECT_VECTOR(UPtr<ECS::Entity>, m_entities, 1, 0)
-	//	);
+	OBJECT_SERIALISER(ECS::EntityManager, 1,
+		SERIALISE_VECTOR_OBJECT(ECS::Entity, m_entities, 1, 0)
+	);
 }

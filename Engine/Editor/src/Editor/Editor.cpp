@@ -49,7 +49,7 @@ namespace Insight
 			m_projectSystem.Update();
 			if (!m_projectSystem.IsProjectOpen())
 			{
-				return;
+				//return;
 			}
 			m_menuBar.Draw();
 			EditorWindowManager::Instance().Update();

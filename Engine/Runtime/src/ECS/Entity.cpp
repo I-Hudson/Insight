@@ -338,6 +338,8 @@ namespace Insight
 			}
 			m_components.clear();
 		}
+
+		IS_SERIALISABLE_CPP(Entity)
 #endif
 	}
 }

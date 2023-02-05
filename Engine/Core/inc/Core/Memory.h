@@ -1147,12 +1147,18 @@ constexpr bool is_insight_object_pointer_v = false;
 template<typename T>
 constexpr bool is_insight_object_pointer_v<TObjectPtr<T>> = true;
 
+template<typename>
+constexpr bool is_insight_wrapper_pointer_v = false;
+template<typename T>
+constexpr bool is_insight_wrapper_pointer_v<Ptr<T>> = true;
+
 template<typename T>
 constexpr bool is_insight_smart_pointer_v = is_insight_unique_pointer_v<T> 
 										 || is_insight_shared_pointer_v<T> 
 										 || is_insight_weak_pointer_v<T>
 										 || is_insight_object_owning_pointer_v<T>
-										 || is_insight_object_pointer_v<T>;
+										 || is_insight_object_pointer_v<T>
+										 || is_insight_wrapper_pointer_v<T>;
 
 template<typename>
 constexpr bool is_stl_unique_pointer_v = false;

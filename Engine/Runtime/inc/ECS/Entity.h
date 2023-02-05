@@ -7,6 +7,9 @@
 
 #include "Core/Memory.h"
 
+#include "Serialisation/Serialiser.h"
+#include "Serialisation/ISerialisable.h"
+
 #include <string>
 #include <string_view>
 #include <vector>
@@ -129,11 +132,11 @@ namespace Insight
 		static constexpr char* Type_Name = #Component; \
 		virtual const char* GetTypeName() override { return Type_Name; }
 
-		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component*()>>;
+		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component* ()>>;
 		class ComponentRegistry
 		{
 		public:
-			static void RegisterComponent(std::string_view component_type, std::function<Component*()> func);
+			static void RegisterComponent(std::string_view component_type, std::function<Component* ()> func);
 			static Component* CreateComponent(std::string_view component_type);
 
 			static void RegisterInternalComponents();
@@ -142,13 +145,14 @@ namespace Insight
 			static ComponentRegistryMap m_register_funcs;
 		};
 
-		class IS_RUNTIME Entity
+		class IS_RUNTIME Entity : public Serialisation::ISerialisable
 		{
 		public:
 #ifdef ECS_ENABLED
 			Entity(ECSWorld* ecs_world);
 			Entity(ECSWorld* ecs_world, std::string name);
 #else
+			Entity() = default;
 			Entity(EntityManager* entity_manager);
 			Entity(EntityManager* entity_manager, std::string name);
 #endif
@@ -173,7 +177,7 @@ namespace Insight
 			{
 				for (RPtr<Component> const& component : m_components)
 				{
-					if (component->GetTypeName() == T::Type_Name) 
+					if (component->GetTypeName() == T::Type_Name)
 					{
 						return true;
 					}
@@ -217,6 +221,8 @@ namespace Insight
 			bool IsEnabled() const;
 			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
 
+			IS_SERIALISABLE_H(Entity)
+
 		private:
 			void EarlyUpdate();
 			void Update(const float delta_time);
@@ -243,7 +249,39 @@ namespace Insight
 
 			friend class EntityManager;
 		};
-
 #endif
 	}
+
+	namespace Serialisation
+	{
+		struct EntityToGuid {};
+		template<>
+		struct PropertySerialiser<EntityToGuid>
+		{
+			using InType = ECS::Entity;
+			using OutType = Core::GUID;
+			PropertySerialiser<OutType>::OutType operator()(Ptr<InType> const& v) const
+			{
+				if (v)
+				{
+					Insight::Serialisation::PropertySerialiser<OutType> guidSerialiser;
+					return guidSerialiser(v->GetGUID());
+				}
+				return {};
+			}
+			PropertySerialiser<OutType>::OutType operator()(InType const& v) const
+			{
+				Insight::Serialisation::PropertySerialiser<OutType> guidSerialiser;
+				return guidSerialiser(v.GetGUID());
+			}
+		};
+	}
+
+	OBJECT_SERIALISER(ECS::Entity, 1,
+		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
+		SERIALISE_PROPERTY(std::string, m_name, 1, 0)
+		SERIALISE_PROPERTY(Serialisation::EntityToGuid, m_parent, 1, 0)
+		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
+		SERIALISE_VECTOR_PROPERTY(Serialisation::EntityToGuid, m_children, 1, 0)
+	);
 }

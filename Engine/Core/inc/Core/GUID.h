@@ -17,11 +17,9 @@ namespace Insight
 		class IS_CORE GUID
 		{
 		public:
-			constexpr static u8 c_GUID_BYTE_SIZE = 37;
-
 			GUID() NO_EXPECT;
-			GUID(std::nullptr_t);
-			GUID(char bytes[c_GUID_BYTE_SIZE]);
+			GUID(u32 data1, u16 data2, u16 data3, std::array<u8, 8> data4);
+			GUID(u32 data1, u16 data2, u16 data3, u8 data4[8]);
 			GUID(const GUID& other) NO_EXPECT;
 			GUID(GUID&& other) NO_EXPECT;
 
@@ -35,13 +33,16 @@ namespace Insight
 			//// @brief Check if the GUID is a valid.
 			bool IsValid() const { return *this != s_InvalidGUID; }
 
+			void StringToGuid(std::string_view string);
 			//// @brief Return a string representation of the GUID.
 			std::string ToString() const;
 
 			static GUID s_InvalidGUID;
 		private:
-			/// @brief Guid is store and formats as a string.
-			char m_bytes[c_GUID_BYTE_SIZE];
+			u32 m_data1 = 0;
+			u16 m_data2 = 0;
+			u16 m_data3 = 0;
+			u8  m_data4[8] {0};
 
 			template<typename GUID>
 			friend struct std::hash;
@@ -57,10 +58,15 @@ namespace Insight
 		template<>
 		struct PropertySerialiser<Core::GUID>
 		{
+			using InType = Core::GUID;
+			using OutType = std::string;
 			std::string operator()(Core::GUID const& object)
 			{
-				std::string str(std::begin(object.m_bytes), std::end(object.m_bytes) - 1);
-				return str;
+				std::string guidString = object.ToString();
+				Core::GUID stringToGuid;
+				stringToGuid.StringToGuid(guidString);
+				assert(stringToGuid == object);
+				return object.ToString();
 			}
 		};
 		template<>
@@ -70,12 +76,9 @@ namespace Insight
 			using OutType = Core::GUID;
 			OutType operator()(InType const& data)
 			{
-				Core::GUID guid;
-				for (size_t i = 0; i < ARRAY_COUNT(guid.m_bytes) - 1; ++i)
-				{
-					memcpy(&guid.m_bytes[i], &data.at(i), sizeof(Byte));
-				}
-				return guid;
+				OutType result;
+				result.StringToGuid(data);
+				return result;
 			}
 		};
 	}
@@ -92,9 +95,12 @@ namespace std
 		size_t operator()(const Insight::Core::GUID& guid) const
 		{
 			size_t hash;
-			for (size_t i = 0; i < ARRAY_COUNT(guid.m_bytes); ++i)
+			HashCombine(hash, guid.m_data1);
+			HashCombine(hash, guid.m_data2);
+			HashCombine(hash, guid.m_data3);
+			for (size_t i = 0; i < 8; ++i)
 			{
-				HashCombine(hash, guid.m_bytes[i]);
+				HashCombine(hash, guid.m_data4[i]);
 			}
 			return hash;
 		}

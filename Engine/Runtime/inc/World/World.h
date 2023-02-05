@@ -7,6 +7,7 @@
 #include "ECS/EntityManager.h"
 
 #include "Serialisation/Serialiser.h"
+#include "Serialisation/ISerialisable.h"
 
 #include <string>
 
@@ -32,7 +33,7 @@ namespace Insight
 		/// Describes a single "world" within the engine.
 		/// A World contains all entities and requried date for it self to be processed.
 		/// </summary>
-		class IS_RUNTIME World : public IObject
+		class IS_RUNTIME World : public IObject, public Serialisation::ISerialisable
 		{
 		public:
 			World();
@@ -70,6 +71,8 @@ namespace Insight
 
 			ECS::Entity* GetEntityByGUID(Core::GUID guid) const;
 
+			IS_SERIALISABLE_H(World)
+
 		private:
 			void AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const;
 
@@ -89,21 +92,19 @@ namespace Insight
 			bool m_onlySearchable = false;
 
 			friend class WorldSystem;
-			template<typename>
-			friend struct Serialisation::SerialiserObject;
 		};
 	}
 
-	//OBJECT_SERIALISER(Runtime::World, 1, 
-	//	SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
-	//	SERIALISE_PROPERTY_CAST(u32, m_worldState, 1, 0)
-	//	SERIALISE_PROPERTY_CAST(u32, m_worldType, 1, 0)
+	OBJECT_SERIALISER(Runtime::World, 1, 
+		SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
+		SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 1, 0)
+		SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 1, 0)
 
-	//	SERIALISE_PROPERTY_VECTOR(Core::GUID, m_root_entities_guids, 1, 0)
-	//	SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
-	//	SERIALISE_PROPERTY(Core::GUID, m_cameraEntity, 1, 0)
+		SERIALISE_VECTOR_PROPERTY(Core::GUID, m_root_entities_guids, 1, 0)
+		SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
+		SERIALISE_PROPERTY(Core::GUID, m_cameraEntity, 1, 0)
 
-	//	SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
-	//	SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
-	//);
+		SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
+		SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
+	);
 }

@@ -15,7 +15,14 @@ namespace Insight
         {
             auto operator()(T const& v)
             {
-                assert(false);
+                if (std::is_enum_v<T>)
+                {
+                    return static_cast<int>(const_cast<T&>(v));
+                }
+                else
+                {
+                    assert(false);
+                }
                 return 0;
             }
         };

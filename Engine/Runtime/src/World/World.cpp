@@ -122,6 +122,8 @@ namespace Insight
 			return m_entityManager.GetEntityByGUID(guid);
 		}
 
+		IS_SERIALISABLE_CPP(World)
+
 		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const
 		{
 			vector.push_back(entity);

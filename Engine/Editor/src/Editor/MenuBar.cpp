@@ -7,6 +7,10 @@
 
 #include "Platforms/Platform.h"
 
+#include "Serialisation/Archive.h"
+#include "Serialisation/JsonSerialiser.h"
+#include "World/WorldSystem.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -49,6 +53,29 @@ namespace Insight
                                 { "Texture (*.texture)",    "*.texture"},
                                 { "Material (*.material)",  "*.material"},
                             });
+                    }
+                    if (ImGui::MenuItem("Save World"))
+                    {
+                        //m_fileDialog.Show("./", FileDialogOperations::Load);
+                        std::string item;
+                        PlatformFileDialog fileDialog;
+                        if (fileDialog.ShowSave(&item,
+                            {
+                                { "World", "*.isworld"},
+                            }))
+                        {
+                            TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+                            if (activeWorld)
+                            {
+                                Serialisation::JsonSerialiser serialiser(false);
+                                activeWorld->Serialise(&serialiser);
+
+                                std::vector<u8> serialisedData = serialiser.GetSerialisedData();
+                                Archive archive(item, ArchiveModes::Write);
+                                archive.Write(serialisedData.data(), serialisedData.size());
+                                archive.Close();
+                            }
+                        }
                     }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();

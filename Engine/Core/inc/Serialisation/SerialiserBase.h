@@ -61,7 +61,7 @@ namespace Insight
                             ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
                             if constexpr (is_insight_smart_pointer_v<T>)
                             {
-                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                                using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
                                 static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                                     "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
 

@@ -6,10 +6,13 @@
 
 #include <string>
 
-#define IS_SERIALISABLE_H(TYPE)\
+#define IS_SERIALISABLE_FRIEND\
         private:\
         template<typename>\
         friend struct ::Insight::Serialisation::SerialiserObject;\
+
+#define IS_SERIALISABLE_H(TYPE)\
+        IS_SERIALISABLE_FRIEND\
         public:\
         virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser) override;\
         virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser) override;
@@ -42,7 +45,7 @@
             ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::InType data;\
             serialiser->Read(#PROPERTY_NAME, data);\
             ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType resultData =  propertyDeserialiser(data);\
-            *((::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType*)&PPCAT(object., PROPERTY)) = resultData;\
+            *((::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType*)&PPCAT(object., PROPERTY)) = std::move(resultData);\
         }
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
@@ -55,7 +58,7 @@
         {\
             ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
             TYPE_SERIALISER deserialiserdObject = objectSerialiser.Deserialise(serialiser);\
-            *((TYPE_SERIALISER*)&PPCAT(object., PROPERTY)) = deserialiserdObject;\
+            *((TYPE_SERIALISER*)&PPCAT(object., PROPERTY)) = std::move(deserialiserdObject);\
         }
 
 #define SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
