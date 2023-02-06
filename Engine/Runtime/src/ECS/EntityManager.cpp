@@ -316,6 +316,22 @@ namespace Insight
 			return nullptr;
 		}
 
+		void EntityManager::Serialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			Serialisation::SerialiserObject<EntityManager > serialiserObject;
+			serialiserObject.Serialise(this, serialiser);
+		}
+
+		void EntityManager::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			serialiser->StartObject("EntityManager");
+			serialiser->StartArray("Entities");
+
+
+
+			serialiser->StopArray();
+			serialiser->StopObject();
+		}
 #endif
 	}
 }

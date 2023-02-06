@@ -48,7 +48,7 @@ namespace Insight
 		};
 #else
 
-		class IS_RUNTIME EntityManager
+		class IS_RUNTIME EntityManager : public Serialisation::ISerialisable
 		{
 		public:
 			EntityManager();
@@ -77,6 +77,8 @@ namespace Insight
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
 			ECS::Entity* GetEntityByGUID(Core::GUID guid) const;
+
+			IS_SERIALISABLE_H(EntityManager);
 
 		private:
 #ifdef ECS_ENABLED

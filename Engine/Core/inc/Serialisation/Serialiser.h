@@ -51,8 +51,16 @@
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
-            objectSerialiser.Serialise(PPCAT(object., PROPERTY), serialiser);\
+            using Type = typename std::decay<decltype(PPCAT(object., PROPERTY)>::type;\
+            if constexpr(std::is_base_of_v<::Insight::Serialisation::ISerialisable, Type>)\
+            {\
+                PPCAT(object., PROPERTY).Serialise(serialiser);\
+            }\
+            else\
+            {\
+                ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
+                objectSerialiser.Serialise(PPCAT(object., PROPERTY), serialiser);\
+            }\
         }\
         else\
         {\
@@ -112,6 +120,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
         }
 
+#define SERIALISE_NAMED_COMPLEX(TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
 // Serialise a single property with a ProertySerialiser.
 #define SERIALISE_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)           SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise a single property with a SerialiserObject.
@@ -122,6 +132,9 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_VECTOR_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)    SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise a vector property with a SerialiserObject.
 #define SERIALISE_VECTOR_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+// Serialise anything. This should be used when there is a certain requirement needed. 
+// An example could be loading entities.
+#define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)            SERIALISE_NAMED_COMPLEX(TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
     public:\
