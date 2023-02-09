@@ -6,34 +6,6 @@
 
 #include <string>
 
-namespace Insight
-{
-    namespace Serialisation
-    {
-        template<typename TypeSerialiser, typename T>
-        void SerialiseProperty(ISerialiser* serialiser, std::string_view propertyName, T& data)
-        {
-            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-            auto SerialisedData = propertySerialiser(data);
-            serialiser->Write(propertyName, SerialisedData);
-        }
-
-        template<typename Type>
-        void SerialiseObject(ISerialiser* serialiser, Type& data)
-        {
-            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
-            objectSerialiser.Serialise(data, serialiser);
-        }
-
-        template<typename Type>
-        void SerialiseObject(ISerialiser* serialiser, Type* data)
-        {
-            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
-            objectSerialiser.Serialise(data, serialiser);
-        }
-    }
-}
-
 #define IS_SERIALISABLE_FRIEND\
         private:\
         template<typename>\

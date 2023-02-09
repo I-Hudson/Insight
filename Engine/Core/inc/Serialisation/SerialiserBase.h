@@ -26,6 +26,28 @@ namespace Insight
             UMapObject,
         };
 
+        template<typename TypeSerialiser, typename T>
+        void SerialiseProperty(ISerialiser* serialiser, std::string_view propertyName, T& data)
+        {
+            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+            auto SerialisedData = propertySerialiser(data);
+            serialiser->Write(propertyName, SerialisedData);
+        }
+
+        template<typename Type>
+        void SerialiseObject(ISerialiser* serialiser, Type& data)
+        {
+            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
+            objectSerialiser.Serialise(data, serialiser);
+        }
+
+        template<typename Type>
+        void SerialiseObject(ISerialiser* serialiser, Type* data)
+        {
+            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
+            objectSerialiser.Serialise(data, serialiser);
+        }
+
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 
         template<typename T>
@@ -141,14 +163,11 @@ namespace Insight
                     {
                         if constexpr (SerialiserType == SerialiserType::VectorProperty)
                         {
-                            ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
-
                             using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
                             static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                                 "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
 
-                            auto SerialisedData = propertySerialiser(*v.Get());
-                            serialiser->Write("", SerialisedData);
+                            ::Insight::Serialisation::SerialiseProperty(serialiser, name, *v.Get());
                         }
                         else
                         {
@@ -165,14 +184,11 @@ namespace Insight
                     {
                         if constexpr (SerialiserType == SerialiserType::VectorProperty)
                         {
-                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-
                             using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
                             static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                                 "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
 
-                            auto SerialisedData = propertySerialiser(*v.get());
-                            serialiser->Write("", SerialisedData);
+                            ::Insight::Serialisation::SerialiseProperty(serialiser, name, *v.get());
                         }
                         else
                         {
@@ -189,9 +205,7 @@ namespace Insight
                     {
                         if constexpr (SerialiserType == SerialiserType::VectorProperty)
                         {
-                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-                            auto SerialisedData = propertySerialiser(v);
-                            serialiser->Write("", SerialisedData);
+                            ::Insight::Serialisation::SerialiseProperty(serialiser, name, v);
                         }
                         else if (SerialiserType == SerialiserType::VectorObject)
                         {
