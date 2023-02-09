@@ -304,7 +304,7 @@ namespace Insight
 			return entities;
 		}
 
-		ECS::Entity* EntityManager::GetEntityByGUID(Core::GUID guid) const
+		ECS::Entity* EntityManager::GetEntityByGUID(const Core::GUID& guid) const
 		{
 			for (const UPtr<Entity>& e : m_entities)
 			{
@@ -316,21 +316,21 @@ namespace Insight
 			return nullptr;
 		}
 
-		Entity* EntityManager::AddNewEntity(Core::GUID guid)
+		Entity* EntityManager::AddNewEntity(const Core::GUID& guid)
 		{
 			Entity* e = AddNewEntity();
 			e->m_guid = guid;
 			return e;
 		}
 
-		Entity* EntityManager::AddNewEntity(std::string entity_name, Core::GUID guid)
+		Entity* EntityManager::AddNewEntity(std::string entity_name, const Core::GUID& guid)
 		{
 			Entity* e = AddNewEntity(entity_name);
 			e->m_guid = guid;
 			return e;
 		}
 
-		Component* EntityManager::AddComponentToEntity(Core::GUID entityGuid, Core::GUID componentGuid, std::string componentTypeName)
+		Component* EntityManager::AddComponentToEntity(const Core::GUID& entityGuid, const Core::GUID& componentGuid, std::string componentTypeName)
 		{
 			Entity* e = GetEntityByGUID(entityGuid);
 			if (e == nullptr)

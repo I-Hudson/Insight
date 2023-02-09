@@ -51,51 +51,138 @@ namespace Insight
                     return;
                 }
 
-                serialiser->StartArray(name, object.size());
+                serialiser->Write(std::string(name) + c_ArraySize, object.size());
+                serialiser->StartArray(name);
                 for (auto& v : object)
                 {
-                    if constexpr (is_insight_smart_pointer_v<T> || is_stl_smart_pointer_v<T>)
+                    if constexpr (is_insight_smart_pointer_v<T>)
                     {
                         if constexpr (SerialiserType == SerialiserType::VectorProperty)
                         {
                             ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
-                            if constexpr (is_insight_smart_pointer_v<T>)
-                            {
-                                using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
-                                static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
-                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
 
-                                auto SerialisedData = propertySerialiser(*v.Get());
-                                serialiser->Write("", SerialisedData);
-                            }
-                            else
-                            {
-                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
-                                static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
-                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                            static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
 
-                                auto SerialisedData = propertySerialiser(*v.get());
-                                serialiser->Write("", SerialisedData);
-                            }
+                            auto SerialisedData = propertySerialiser(*v.Get());
+                            serialiser->Write("", SerialisedData);
+                        }
+                        else
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                            static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+
+                            serialiserObject.Serialise(*v.Get(), serialiser);
+                        }
+                    }
+                    else if constexpr (is_stl_smart_pointer_v<T>)
+                    {
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                            static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+
+                            auto SerialisedData = propertySerialiser(*v.get());
+                            serialiser->Write("", SerialisedData);
+                        }
+                        else
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                            static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+                            serialiserObject.Serialise(*v.get(), serialiser);
+
+                        }
+                    }
+                    else
+                    {
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+                            auto SerialisedData = propertySerialiser(v);
+                            serialiser->Write("", SerialisedData);
                         }
                         else if (SerialiserType == SerialiserType::VectorObject)
                         {
                             ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
-                            if constexpr (is_insight_smart_pointer_v<T>)
-                            {
-                                using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
-                                static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
-                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+                            serialiserObject.Serialise(v, serialiser);
+                        }
+                    }
+                }
+                serialiser->StopArray();
+            }
+        };
 
-                                serialiserObject.Serialise(*v.Get(), serialiser);
-                            }
-                            else
-                            {
-                                using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
-                                static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>, 
-                                    "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
-                                serialiserObject.Serialise(*v.get(), serialiser);
-                            }
+        template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>
+        struct VectorDeserialiser
+        {
+            void operator()(ISerialiser* serialiser, std::string_view name, std::vector<T>& object)
+            {
+                if (!serialiser)
+                {
+                    return;
+                }
+
+                u64 arraySize = 0;
+                serialiser->Read(std::string(name) + c_ArraySize, arraySize);
+                serialiser->StartArray(name);
+                for (auto& v : object)
+                {
+                    if constexpr (is_insight_smart_pointer_v<T>)
+                    {
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                            static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+
+                            auto SerialisedData = propertySerialiser(*v.Get());
+                            serialiser->Write("", SerialisedData);
+                        }
+                        else
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                            static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+
+                            serialiserObject.Serialise(*v.Get(), serialiser);
+                        }
+                    }
+                    else if constexpr (is_stl_smart_pointer_v<T>)
+                    {
+                        if constexpr (SerialiserType == SerialiserType::VectorProperty)
+                        {
+                            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                            static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
+
+                            auto SerialisedData = propertySerialiser(*v.get());
+                            serialiser->Write("", SerialisedData);
+                        }
+                        else
+                        {
+                            ::Insight::Serialisation::SerialiserObject<TypeSerialiser> serialiserObject;
+
+                            using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                            static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
+                                "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
+                            serialiserObject.Serialise(*v.get(), serialiser);
+
                         }
                     }
                     else

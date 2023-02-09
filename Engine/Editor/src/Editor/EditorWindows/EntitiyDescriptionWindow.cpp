@@ -46,7 +46,7 @@ namespace Insight
             }
         }
 
-        ECS::Entity* EntitiyDescriptionWindow::FindEntity(Core::GUID guid)
+        ECS::Entity* EntitiyDescriptionWindow::FindEntity(const Core::GUID& guid)
         {
             ECS::Entity* selectedEntity = nullptr;
             std::vector<TObjectPtr<Runtime::World>> worlds = Runtime::WorldSystem::Instance().GetAllWorlds();

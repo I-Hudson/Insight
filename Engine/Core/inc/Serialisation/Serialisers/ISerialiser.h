@@ -10,6 +10,12 @@ namespace Insight
 {
     namespace Serialisation
     {
+        constexpr char* c_ObjectName = "ObjectName";
+        constexpr char* c_ArrayName = "ArrayName";
+        constexpr char* c_SerialiserName = "SerialiserName";
+        constexpr char* c_ChildSerialiser = "ChildSerialiser";
+        constexpr char* c_ArraySize = "ArraySize";
+
         enum class SerialisationTypes
         {
             Json,
@@ -48,7 +54,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) = 0;
             virtual void StopObject() = 0;
 
-            virtual void StartArray(std::string_view name, u64 const size) = 0;
+            virtual void StartArray(std::string_view name) = 0;
             virtual void StopArray() = 0;
 
             virtual void Write(std::string_view tag, bool data) = 0;

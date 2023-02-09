@@ -39,10 +39,10 @@ namespace Insight
 
 			static GUID s_InvalidGUID;
 		private:
-			u32 m_data1 = 0;
-			u16 m_data2 = 0;
-			u16 m_data3 = 0;
-			u8  m_data4[8] {0};
+			unsigned long m_data1 = 0;
+			unsigned short m_data2 = 0;
+			unsigned short m_data3 = 0;
+			unsigned char  m_data4[8] {0};
 
 			template<typename>
 			friend struct std::hash;

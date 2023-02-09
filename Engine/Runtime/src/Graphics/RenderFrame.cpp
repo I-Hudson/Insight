@@ -95,6 +95,10 @@ namespace Insight
                     if (meshComponent->IsEnabled())
                     {
                         Runtime::Mesh* mesh = meshComponent->GetMesh();
+                        if (!mesh)
+                        {
+                            continue;
+                        }
 
                         RenderMesh renderMesh;
                         renderMesh.Transform = transformComponent->GetTransform();

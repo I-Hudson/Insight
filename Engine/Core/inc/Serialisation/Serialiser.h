@@ -6,6 +6,34 @@
 
 #include <string>
 
+namespace Insight
+{
+    namespace Serialisation
+    {
+        template<typename TypeSerialiser, typename T>
+        void SerialiseProperty(ISerialiser* serialiser, std::string_view propertyName, T& data)
+        {
+            ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
+            auto SerialisedData = propertySerialiser(data);
+            serialiser->Write(propertyName, SerialisedData);
+        }
+
+        template<typename Type>
+        void SerialiseObject(ISerialiser* serialiser, Type& data)
+        {
+            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
+            objectSerialiser.Serialise(data, serialiser);
+        }
+
+        template<typename Type>
+        void SerialiseObject(ISerialiser* serialiser, Type* data)
+        {
+            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
+            objectSerialiser.Serialise(data, serialiser);
+        }
+    }
+}
+
 #define IS_SERIALISABLE_FRIEND\
         private:\
         template<typename>\
@@ -37,10 +65,8 @@
 #define SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            ::Insight::Serialisation::PropertySerialiser<TYPE_SERIALISER> propertySerialiser; \
-            const u32 VersionRemoved = VERSION_REMOVED; \
-            auto SerialisedData = propertySerialiser(PPCAT(object., PROPERTY));\
-            serialiser->Write(#PROPERTY_NAME, SerialisedData);\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            ::Insight::Serialisation::SerialiseProperty<TYPE_SERIALISER>(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }\
         else\
         {\
@@ -56,8 +82,8 @@
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
-            objectSerialiser.Serialise(PPCAT(object., PROPERTY), serialiser);\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            ::Insight::Serialisation::SerialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
         }\
         else\
         {\
@@ -70,8 +96,7 @@
         if (!serialiser->IsReadMode())\
         {\
             BASE_TYPE* baseType = static_cast<BASE_TYPE*>(&object);\
-            ::Insight::Serialisation::SerialiserObject<BASE_TYPE> objectSerialiser; \
-            objectSerialiser.Serialise(baseType, serialiser);\
+            ::Insight::Serialisation::SerialiseObject<BASE_TYPE>(serialiser, baseType);\
         }\
         else\
         {\
@@ -93,6 +118,10 @@
         }\
         else\
         {\
+            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorSerialiser;\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }
 
 /*

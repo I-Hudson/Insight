@@ -100,6 +100,14 @@ namespace Insight
                             }
                         }
                     }
+                    if (ImGui::MenuItem("Clear World"))
+                    {
+                        TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+                        if (activeWorld)
+                        {
+                            activeWorld->Destroy();
+                        }
+                    }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();
                 }

@@ -58,7 +58,7 @@ namespace Insight
             }
         }
 
-        void JsonSerialiser::StartArray(std::string_view name, u64 const size)
+        void JsonSerialiser::StartArray(std::string_view name)
         {
             if (IsReadMode())
             {
@@ -66,7 +66,6 @@ namespace Insight
             }
             else
             {
-                Write(std::string(name) + c_ArraySize, size);
                 m_writer.Push(name, NodeStates::Array);
             }
         }

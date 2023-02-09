@@ -48,7 +48,7 @@ namespace Insight
 			void Update(const float deltaTime);
 			void LateUpdate();
 
-			void SetWorldName(std::string worldName) { m_worldName = worldName; }
+			void SetWorldName(std::string worldName);
 			std::string_view GetWorldName() const { return m_worldName; }
 
 			bool IsPersistentScene() const { return m_persistentScene; }
@@ -69,7 +69,7 @@ namespace Insight
 			/// @return 
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesFlatten() const;
 
-			ECS::Entity* GetEntityByGUID(Core::GUID guid) const;
+			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
 			IS_SERIALISABLE_H(World)
 

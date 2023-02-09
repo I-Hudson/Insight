@@ -155,7 +155,8 @@ namespace Insight
             }
 
             Serialisation::JsonSerialiser serialiser(false);
-            serialiser.StartArray("ProjectInfoStructs", 1);
+            serialiser.Write("ProjectInfoStructsArraySize", 1);
+            serialiser.StartArray("ProjectInfoStructs");
             serialiser.SetVersion(1);
             m_projectInfo.Serialise(&serialiser);
             serialiser.StopArray();
@@ -173,7 +174,9 @@ namespace Insight
             deserialiserJson.Deserialise(serialisedData);
             ProjectInfo deserialiseInfo;
 
-            deserialiserJson.StartArray("ProjectInfoStructs", 1);
+            int unused;
+            serialiser.Read("ProjectInfoStructsArraySize", unused);
+            deserialiserJson.StartArray("ProjectInfoStructs");
             deserialiseInfo.Deserialise(&deserialiserJson);
             deserialiserJson.StopArray();
         }

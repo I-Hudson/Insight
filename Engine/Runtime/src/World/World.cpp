@@ -24,7 +24,7 @@ namespace Insight
 
 		void World::Destroy()
 		{
-			m_worldName.clear();
+			m_worldName = "Default";
 			m_worldState = WorldStates::Paused;
 			m_worldType = WorldTypes::Game;
 			m_root_entities_guids.clear();
@@ -66,6 +66,12 @@ namespace Insight
 				return;
 			}
 			m_entityManager.LateUpdate();
+		}
+
+		void World::SetWorldName(std::string worldName)
+		{
+			ASSERT(!worldName.empty()); 
+			m_worldName = worldName;
 		}
 
 		void World::SetOnlySearchable(bool onlySearchable)
@@ -125,12 +131,23 @@ namespace Insight
 			return m_entityManager.GetAllEntities();
 		}
 
-		ECS::Entity* World::GetEntityByGUID(Core::GUID guid) const
+		ECS::Entity* World::GetEntityByGUID(const Core::GUID& guid) const
 		{
 			return m_entityManager.GetEntityByGUID(guid);
 		}
 
-		IS_SERIALISABLE_CPP(World)
+		void World::Serialise(Serialisation::ISerialiser* serialiser)
+		{
+			Serialisation::SerialiserObject<World> serialiserObject;
+			serialiserObject.Serialise(this, serialiser);
+		}
+
+		void World::Deserialise(Serialisation::ISerialiser* serialiser)
+		{
+			Serialisation::SerialiserObject<World> serialiserObject;
+			serialiserObject.Deserialise(serialiser, *this);
+			m_entityManager.SetWorld(this);
+		}
 
 		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const
 		{

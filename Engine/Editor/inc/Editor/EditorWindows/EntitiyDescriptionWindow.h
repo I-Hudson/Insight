@@ -26,7 +26,7 @@ namespace Insight
             virtual void OnDraw() override;
 
         private:
-            ECS::Entity* FindEntity(Core::GUID guid);
+            ECS::Entity* FindEntity(const Core::GUID& guid);
             void DrawEntity(ECS::Entity* entity);
             void DrawComponent(ECS::Component* component);
         };

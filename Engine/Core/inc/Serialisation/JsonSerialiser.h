@@ -10,12 +10,6 @@ namespace Insight
 {
     namespace Serialisation
     {
-        constexpr char* c_ObjectName = "ObjectName";
-        constexpr char* c_ArrayName = "ArrayName";
-        constexpr char* c_SerialiserName = "SerialiserName";
-        constexpr char* c_ChildSerialiser = "ChildSerialiser";
-        constexpr char* c_ArraySize = "ArraySize";
-
         class IS_CORE JsonSerialiser : public ISerialiser
         {
         public:
@@ -28,7 +22,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
 
-            virtual void StartArray(std::string_view name, u64 const size) override;
+            virtual void StartArray(std::string_view name) override;
             virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;

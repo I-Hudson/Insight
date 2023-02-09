@@ -76,14 +76,14 @@ namespace Insight
 			Ptr<Entity> GetEntityByName(std::string_view entity_name) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntitiesWithComponentByName(std::string_view component_type) const;
 			std::vector<Ptr<ECS::Entity>> GetAllEntities() const;
-			ECS::Entity* GetEntityByGUID(Core::GUID guid) const;
+			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
 			IS_SERIALISABLE_H(EntityManager);
 
 		private:
-			Entity* AddNewEntity(Core::GUID guid);
-			Entity* AddNewEntity(std::string entity_name, Core::GUID guid);
-			Component* AddComponentToEntity(Core::GUID entityGuid, Core::GUID componentGuid, std::string componentTypeName);
+			Entity* AddNewEntity(const Core::GUID& guid);
+			Entity* AddNewEntity(std::string entity_name, const Core::GUID& guid);
+			Component* AddComponentToEntity(const Core::GUID& entityGuid, const Core::GUID& componentGuid, std::string componentTypeName);
 
 		private:
 #ifdef ECS_ENABLED
@@ -113,10 +113,9 @@ namespace Insight
 
 					u64 entitiesCount;
 					serialiser->Read("EntitiesGuidsArraySize", entitiesCount);
-
 					entities.reserve(entitiesCount);
 
-					serialiser->StartArray("EntitiesGuids", entitiesCount);
+					serialiser->StartArray("EntitiesGuids");
 					// Create all entities and assign there guid.
 					for (size_t i = 0; i < entitiesCount; ++i)
 					{
@@ -125,14 +124,14 @@ namespace Insight
 						Core::GUID entityGuid;
 						entityGuid.StringToGuid(guid);
 
-						entityManager->AddNewEntity(guid);
+						entityManager->AddNewEntity(entityGuid);
 					}
 					serialiser->StopArray();
 
 					// Then create all components.
 					u64 componentCount = 0;
 					serialiser->Read("ComponentGuidsArraySize", componentCount);
-					serialiser->StartArray("ComponentGuids", componentCount);
+					serialiser->StartArray("ComponentGuids");
 					for (size_t componentIdx = 0; componentIdx < componentCount; ++componentIdx)
 					{
 						std::string entityGuidString;
@@ -159,7 +158,10 @@ namespace Insight
 					u64 componentGuidCount = 0;
 					// Save all entities guid's first.
 					PropertySerialiser<Core::GUID> guidSerialiser;
-					serialiser->StartArray("EntitiesGuids", entities.size());
+
+					serialiser->Write("EntitiesGuidsArraySize", entities.size());
+					serialiser->StartArray("EntitiesGuids");
+
 					for (auto const& e : entities)
 					{
 						serialiser->Write("", guidSerialiser(e->GetGUID()));
@@ -168,7 +170,9 @@ namespace Insight
 					serialiser->StopArray();
 
 					// Save all components guid's second.
-					serialiser->StartArray("ComponentGuids", componentGuidCount);
+					serialiser->Write("ComponentGuidsArraySize", entities.size());
+					serialiser->StartArray("ComponentGuids");
+
 					for (auto const& e : entities)
 					{
 						for (u32 componentIdx = 0; componentIdx < e->GetComponentCount(); ++componentIdx)
@@ -189,7 +193,8 @@ namespace Insight
 					serialiser->StopArray();
 
 					// Finally save all entities and their data.
-					serialiser->StartArray("Entities", entities.size());
+					serialiser->Write("EntitiesArraySize", entities.size());
+					serialiser->StartArray("Entities");
 					for (auto const& e : entities)
 					{
 						e->Serialise(serialiser);
