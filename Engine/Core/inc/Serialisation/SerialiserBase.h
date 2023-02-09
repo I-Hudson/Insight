@@ -51,7 +51,7 @@ namespace Insight
                     return;
                 }
 
-                serialiser->StartArray(name);
+                serialiser->StartArray(name, object.size());
                 for (auto& v : object)
                 {
                     if constexpr (is_insight_smart_pointer_v<T> || is_stl_smart_pointer_v<T>)
@@ -114,6 +114,15 @@ namespace Insight
                     }
                 }
                 serialiser->StopArray();
+            }
+        };
+
+        template<typename TypeSerialiser, typename T, typename TObjectType>
+        struct ComplexSerialiser
+        {
+            void operator()(T const& v, TObjectType* object, ISerialiser* serialiser) const
+            {
+                assert(false);
             }
         };
 

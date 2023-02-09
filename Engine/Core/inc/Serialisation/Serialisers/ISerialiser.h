@@ -39,8 +39,8 @@ namespace Insight
             u32 GetVersion() const;
             SerialisationTypes GetType() const;
             bool IsReadMode() const;
-            
-            ISerialiser* GetChildSerialiser(u32 index) const;
+
+            void Write(std::string_view tag, const char* string);
 
             virtual void Deserialise(std::vector<u8> data) = 0;
             virtual std::vector<Byte> GetSerialisedData() const = 0;
@@ -48,7 +48,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) = 0;
             virtual void StopObject() = 0;
 
-            virtual void StartArray(std::string_view name) = 0;
+            virtual void StartArray(std::string_view name, u64 const size) = 0;
             virtual void StopArray() = 0;
 
             virtual void Write(std::string_view tag, bool data) = 0;
@@ -79,15 +79,11 @@ namespace Insight
 
             virtual void Read(std::string_view tag, std::string& string) = 0;
 
-            ISerialiser* AddChildSerialiser(bool isReadMode);
-            void AddChildSerialiser(ISerialiser* serialiser);
-
         protected:
             bool m_isReadMode = false;
             u32 m_version = -1;
             SerialisationTypes m_type;
             std::string m_name;
-            std::vector<ISerialiser*> m_childSerialisers;
         };
 
 

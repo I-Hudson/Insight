@@ -58,7 +58,7 @@ namespace Insight
             }
         }
 
-        void JsonSerialiser::StartArray(std::string_view name)
+        void JsonSerialiser::StartArray(std::string_view name, u64 const size)
         {
             if (IsReadMode())
             {
@@ -66,6 +66,7 @@ namespace Insight
             }
             else
             {
+                Write(std::string(name) + c_ArraySize, size);
                 m_writer.Push(name, NodeStates::Array);
             }
         }
@@ -128,80 +129,46 @@ namespace Insight
 
         void JsonSerialiser::Read(std::string_view tag, bool& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue<bool>(tag, data);
         }
 
         void JsonSerialiser::Read(std::string_view tag, u8& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u16& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u32& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u64& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
 
         void JsonSerialiser::Read(std::string_view tag, i8& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i16& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i32& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i64& data)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                data = iter.value();
-            }
+            ReadValue(tag, data);
         }
 
         void JsonSerialiser::Read(std::string_view tag, std::string& string)
         {
-            if (auto iter = m_reader.TopNode().find(tag); iter != m_reader.TopNode().end())
-            {
-                if (!iter.value().is_string())
-                {
-                    return;
-                }
-                string = iter.value();
-            }
+            ReadValue(tag, string);
         }
     }
 }

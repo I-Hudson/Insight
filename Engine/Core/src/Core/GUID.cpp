@@ -38,8 +38,8 @@ namespace Insight
 		GUID::GUID(const GUID& other) NO_EXPECT
 		{
 			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
+			m_data2 = other.m_data2;
+			m_data3 = other.m_data3;
 			for (size_t i = 0; i < 8; ++i)
 			{
 				m_data4[i] = other.m_data4[i];
@@ -49,24 +49,24 @@ namespace Insight
 		GUID::GUID(GUID&& other) NO_EXPECT
 		{
 			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
+			m_data2 = other.m_data2;
+			m_data3 = other.m_data3;
 			for (size_t i = 0; i < 8; ++i)
 			{
 				m_data4[i] = other.m_data4[i];
-				other.m_data4[i] = 0;
 			}
 
 			other.m_data1 = 0;
 			other.m_data2 = 0;
 			other.m_data3 = 0;
+			Platform::MemSet(other.m_data4, 0, sizeof(other.m_data4));
 		}
 
 		GUID& GUID::operator=(const GUID& other) NO_EXPECT
 		{
 			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
+			m_data2 = other.m_data2;
+			m_data3 = other.m_data3;
 			for (size_t i = 0; i < 8; ++i)
 			{
 				m_data4[i] = other.m_data4[i];
@@ -77,8 +77,8 @@ namespace Insight
 		GUID& GUID::operator=(GUID&& other) NO_EXPECT
 		{
 			m_data1 = other.m_data1;
-			m_data3 = other.m_data2;
-			m_data2 = other.m_data3;
+			m_data2 = other.m_data2;
+			m_data3 = other.m_data3;
 			for (size_t i = 0; i < 8; ++i)
 			{
 				m_data4[i] = other.m_data4[i];
@@ -88,6 +88,7 @@ namespace Insight
 			other.m_data1 = 0;
 			other.m_data2 = 0;
 			other.m_data3 = 0;
+			Platform::MemSet(other.m_data4, 0, sizeof(other.m_data4));
 
 			return *this;
 		}

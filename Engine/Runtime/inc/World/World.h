@@ -97,8 +97,8 @@ namespace Insight
 
 	OBJECT_SERIALISER(Runtime::World, 1, 
 		SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
-		SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 1, 0)
-		SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 1, 0)
+		//SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 1, 0)
+		//SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 1, 0)
 
 		SERIALISE_VECTOR_PROPERTY(Core::GUID, m_root_entities_guids, 1, 0)
 		SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)

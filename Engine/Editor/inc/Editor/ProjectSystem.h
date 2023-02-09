@@ -80,7 +80,6 @@ namespace Insight
         struct PropertySerialiser<BaseProjectInfoToHash>
         {
             using InType = Editor::BaseProjectInfo;
-            using OutType = u64;
             u64 operator()(InType& v) const
             {
                 //return Algorithm::GetHash64(v.GUID.m_bytes, Core::GUID::c_GUID_BYTE_SIZE);

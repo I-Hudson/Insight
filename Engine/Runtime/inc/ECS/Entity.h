@@ -104,6 +104,8 @@ namespace Insight
 			/// @brief  Return the component's type name.
 			virtual const char* GetTypeName() = 0;
 
+			Core::GUID GetGuid() const { return m_guid; }
+
 			Entity* GetOwnerEntity() const { return m_ownerEntity; }
 			bool IsEnabled() const { return m_isEnabled; }
 			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
@@ -127,6 +129,7 @@ namespace Insight
 			bool m_isEnabled = true;
 
 			friend class Entity;
+			friend class EntityManager;
 		};
 #define IS_COMPONENT(Component) \
 		static constexpr char* Type_Name = #Component; \
@@ -259,19 +262,18 @@ namespace Insight
 		struct PropertySerialiser<EntityToGuid>
 		{
 			using InType = ECS::Entity;
-			using OutType = Core::GUID;
-			PropertySerialiser<OutType>::OutType operator()(Ptr<InType> const& v) const
+			std::string operator()(Ptr<InType> const& v) const
 			{
 				if (v)
 				{
-					Insight::Serialisation::PropertySerialiser<OutType> guidSerialiser;
+					Insight::Serialisation::PropertySerialiser<Core::GUID> guidSerialiser;
 					return guidSerialiser(v->GetGUID());
 				}
 				return {};
 			}
-			PropertySerialiser<OutType>::OutType operator()(InType const& v) const
+			std::string operator()(InType const& v) const
 			{
-				Insight::Serialisation::PropertySerialiser<OutType> guidSerialiser;
+				Insight::Serialisation::PropertySerialiser<Core::GUID> guidSerialiser;
 				return guidSerialiser(v.GetGUID());
 			}
 		};

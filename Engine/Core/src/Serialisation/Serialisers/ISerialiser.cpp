@@ -19,14 +19,7 @@ namespace Insight
 
         ISerialiser::~ISerialiser()
         {
-            for (size_t i = 0; i < m_childSerialisers.size(); ++i)
-            {
-                Delete(m_childSerialisers.at(i));
-            }
-            m_childSerialisers.clear();
-            m_childSerialisers.shrink_to_fit();
         }
-
 
         ISerialiser* ISerialiser::Create(SerialisationTypes type, bool isReadMode)
         {
@@ -72,31 +65,9 @@ namespace Insight
             return m_isReadMode;
         }
 
-        ISerialiser* ISerialiser::GetChildSerialiser(u32 index) const
+        void ISerialiser::Write(std::string_view tag, const char* string)
         {
-            if (index < m_childSerialisers.size())
-            {
-                return m_childSerialisers.at(index);
-            }
-            return nullptr;
-        }
-
-        ISerialiser* ISerialiser::AddChildSerialiser(bool isReadMode)
-        {
-            ISerialiser* newSerialiser = ISerialiser::Create(m_type, isReadMode);
-            AddChildSerialiser(newSerialiser);
-            return newSerialiser;
-        }
-
-        void ISerialiser::AddChildSerialiser(ISerialiser* serialiser)
-        {
-            if (serialiser == nullptr)
-            {
-                return;
-            }
-
-            ASSERT(m_type == serialiser->GetType())
-            m_childSerialisers.push_back(serialiser);
+            Write(tag, std::string(string));
         }
     }
 }

@@ -14,6 +14,7 @@ namespace Insight
         constexpr char* c_ArrayName = "ArrayName";
         constexpr char* c_SerialiserName = "SerialiserName";
         constexpr char* c_ChildSerialiser = "ChildSerialiser";
+        constexpr char* c_ArraySize = "ArraySize";
 
         class IS_CORE JsonSerialiser : public ISerialiser
         {
@@ -27,7 +28,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
 
-            virtual void StartArray(std::string_view name) override;
+            virtual void StartArray(std::string_view name, u64 const size) override;
             virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;
@@ -58,6 +59,7 @@ namespace Insight
 
             virtual void Read(std::string_view tag, std::string& string) override;
 
+
         private:
             template<typename T>
             void Write(std::string_view tag, T const& data)
@@ -69,6 +71,24 @@ namespace Insight
                 else
                 {
                     m_writer.TopNode()[tag] = data;
+                }
+            }
+
+            template<typename T>
+            void ReadValue(std::string_view tag, T& data)
+            {
+                JsonReader::JsonNode& node = m_reader.Top();
+                if (node.NoneStats == NodeStates::Array)
+                {
+                    data = node.Node.at(node.ArrayIndex);
+                    ++node.ArrayIndex;
+                }
+                else
+                {
+                    if (auto iter = node.Node.find(tag); iter != node.Node.end())
+                    {
+                        data = iter.value();
+                    }
                 }
             }
 

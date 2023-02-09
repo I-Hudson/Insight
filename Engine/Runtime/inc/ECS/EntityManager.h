@@ -81,6 +81,11 @@ namespace Insight
 			IS_SERIALISABLE_H(EntityManager);
 
 		private:
+			Entity* AddNewEntity(Core::GUID guid);
+			Entity* AddNewEntity(std::string entity_name, Core::GUID guid);
+			Component* AddComponentToEntity(Core::GUID entityGuid, Core::GUID componentGuid, std::string componentTypeName);
+
+		private:
 #ifdef ECS_ENABLED
 			ECSWorld* m_ecsWorld = nullptr;
 #else
@@ -88,13 +93,114 @@ namespace Insight
 #endif
 			std::vector<UPtr<Entity>> m_entities;
 			std::shared_mutex m_lock;
-
-			IS_SERIALISABLE_FRIEND
 		};
 #endif
 	}
 
+	namespace Serialisation
+	{
+		struct EntityManagerEntities1 {};
+		template<>
+		struct ComplexSerialiser<EntityManagerEntities1, std::vector<UPtr<ECS::Entity>>, ECS::EntityManager>
+		{
+			void operator()(std::vector<UPtr<ECS::Entity>>& entities, ECS::EntityManager* entityManager, ISerialiser* serialiser) const
+			{
+				ASSERT(serialiser);
+
+				if (serialiser->IsReadMode())
+				{
+					ASSERT(entityManager);
+
+					u64 entitiesCount;
+					serialiser->Read("EntitiesGuidsArraySize", entitiesCount);
+
+					entities.reserve(entitiesCount);
+
+					serialiser->StartArray("EntitiesGuids", entitiesCount);
+					// Create all entities and assign there guid.
+					for (size_t i = 0; i < entitiesCount; ++i)
+					{
+						std::string guid;
+						serialiser->Read("", guid);
+						Core::GUID entityGuid;
+						entityGuid.StringToGuid(guid);
+
+						entityManager->AddNewEntity(guid);
+					}
+					serialiser->StopArray();
+
+					// Then create all components.
+					u64 componentCount = 0;
+					serialiser->Read("ComponentGuidsArraySize", componentCount);
+					serialiser->StartArray("ComponentGuids", componentCount);
+					for (size_t componentIdx = 0; componentIdx < componentCount; ++componentIdx)
+					{
+						std::string entityGuidString;
+						std::string componentGuidString;
+						std::string componentTypeName;
+
+						serialiser->StartObject("ComponentToEntity");
+						serialiser->Read("EntityGuid", entityGuidString);
+						serialiser->Read("ComponentGuid", componentGuidString);
+						serialiser->Read("ComponentType", componentTypeName);
+						serialiser->StopObject();
+
+						Core::GUID entityGuid;
+						entityGuid.StringToGuid(entityGuidString);
+						Core::GUID componentGuid;
+						componentGuid.StringToGuid(componentGuidString);
+
+						entityManager->AddComponentToEntity(entityGuid, componentGuid, componentTypeName);
+					}
+					serialiser->StopArray();
+				}
+				else
+				{
+					u64 componentGuidCount = 0;
+					// Save all entities guid's first.
+					PropertySerialiser<Core::GUID> guidSerialiser;
+					serialiser->StartArray("EntitiesGuids", entities.size());
+					for (auto const& e : entities)
+					{
+						serialiser->Write("", guidSerialiser(e->GetGUID()));
+						componentGuidCount += e->GetComponentCount();
+					}
+					serialiser->StopArray();
+
+					// Save all components guid's second.
+					serialiser->StartArray("ComponentGuids", componentGuidCount);
+					for (auto const& e : entities)
+					{
+						for (u32 componentIdx = 0; componentIdx < e->GetComponentCount(); ++componentIdx)
+						{
+							ECS::Component* component = e->GetComponentByIndex(componentIdx);
+							if (component == nullptr)
+							{
+								continue;
+							}
+
+							serialiser->StartObject("ComponentToEntity");
+							serialiser->Write("EntityGuid", guidSerialiser(e->GetGUID()));
+							serialiser->Write("ComponentGuid", guidSerialiser(component->GetGuid()));
+							serialiser->Write("ComponentType", component->GetTypeName());
+							serialiser->StopObject();
+						}
+					}
+					serialiser->StopArray();
+
+					// Finally save all entities and their data.
+					serialiser->StartArray("Entities", entities.size());
+					for (auto const& e : entities)
+					{
+						e->Serialise(serialiser);
+					}
+					serialiser->StopArray();
+				}
+			}
+		};
+	}
+
 	OBJECT_SERIALISER(ECS::EntityManager, 1,
-		SERIALISE_VECTOR_OBJECT(ECS::Entity, m_entities, 1, 0)
+		SERIALISE_COMPLEX(Serialisation::EntityManagerEntities1, m_entities, 1, 0)
 	);
 }

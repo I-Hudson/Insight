@@ -17,115 +17,104 @@ namespace Insight
     namespace Serialisation
     {
         template<>
-        struct PropertyDeserialiser<bool>
+        struct PropertyDeserialiser<bool, bool>
         {
             using InType = bool;
-            using OutType = bool;
-            bool operator()(bool const data)
+            bool operator()(InType const data) const
             {
                 return data;
             }
         };
 
         template<>
-        struct PropertyDeserialiser<char>
+        struct PropertyDeserialiser<char, char>
         {
-            using InType = std::string;
-            using OutType = char;
-            char operator()(char const data)
+            using InType = char;
+            char operator()(InType const data) const
             {
                 return data;
             }
         };
 
         template<>
-        struct PropertyDeserialiser<u8>
+        struct PropertyDeserialiser<u8, u8>
         {
             using InType = u8;
-            using OutType = u8;
-            u8 operator()(u8 const data)
+            u8 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<u16>
+        struct PropertyDeserialiser<u16, u16>
         {
             using InType = u16;
-            using OutType = u16;
-            u16 operator()(u16 const data)
+            u16 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<u32>
+        struct PropertyDeserialiser<u32, u32>
         {
             using InType = u32;
-            using OutType = u32;
-            u32 operator()(u32 const data)
+            u32 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<u64>
+        struct PropertyDeserialiser<u64, u64>
         {
             using InType = u64;
-            using OutType = u64;
-            u64 operator()(u64 const data)
+            u64 operator()(InType const data) const
             {
                 return data;
             }
         };
 
         template<>
-        struct PropertyDeserialiser<i8>
+        struct PropertyDeserialiser<i8, i8>
         {
             using InType = i8;
-            using OutType = i8;
-            i8 operator()(i8 const data)
+            i8 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<i16>
+        struct PropertyDeserialiser<i16, i16>
         {
             using InType = i16;
-            using OutType = i16;
-            i16 operator()(i16 const data)
+            i16 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<i32>
+        struct PropertyDeserialiser<i32, i32>
         {
             using InType = i32;
-            using OutType = i32;
-            i32 operator()(i32 const data)
+            i32 operator()(InType const data) const
             {
                 return data;
             }
         };
         template<>
-        struct PropertyDeserialiser<i64>
+        struct PropertyDeserialiser<i64, i64>
         {
             using InType = i64;
-            using OutType = i64;
-            i64 operator()(i64 const data)
+            i64 operator()(InType const data) const
             {
                 return data;
             }
         };
 
         template<>
-        struct PropertyDeserialiser<std::string>
+        struct PropertyDeserialiser<std::string, std::string>
         {
             using InType = std::string;
-            using OutType = std::string;
-            std::string operator()(std::string const& data)
+            std::string operator()(InType const& data) const
             {
                 return data;
             }
@@ -135,11 +124,10 @@ namespace Insight
         // GLM TYPES
         //================================================================
         template<>
-        struct PropertyDeserialiser<glm::vec2>
+        struct PropertyDeserialiser<glm::vec2, glm::vec2>
         {
             using InType = std::string;
-            using OutType = glm::vec2;
-            glm::vec2 operator()(std::string const& data)
+            glm::vec2 operator()(std::string const& data) const
             {
                 glm::vec2 vec;
                 int idx = 0;
@@ -163,11 +151,10 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::vec3>
+        struct PropertyDeserialiser<glm::vec3, glm::vec3>
         {
             using InType = std::string;
-            using OutType = glm::vec3;
-            glm::vec3 operator()(std::string const& data)
+            glm::vec3 operator()(std::string const& data) const
             {
                 glm::vec3 vec;
                 int idx = 0;
@@ -191,11 +178,10 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::vec4>
+        struct PropertyDeserialiser<glm::vec4, glm::vec4>
         {
             using InType = std::string;
-            using OutType = glm::vec4;
-            glm::vec4 operator()(std::string const& data)
+            glm::vec4 operator()(std::string const& data) const
             {
                 glm::vec4 vec;
                 int idx = 0;
@@ -221,11 +207,10 @@ namespace Insight
 
 
         template<>
-        struct PropertyDeserialiser<glm::ivec2>
+        struct PropertyDeserialiser<glm::ivec2, glm::ivec2>
         {
             using InType = std::string;
-            using OutType = glm::ivec2;
-            glm::ivec2 operator()(std::string const& data)
+            glm::ivec2 operator()(std::string const& data) const
             {
                 glm::ivec2 vec;
                 int idx = 0;
@@ -249,11 +234,10 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::ivec3>
+        struct PropertyDeserialiser<glm::ivec3, glm::ivec3>
         {
             using InType = std::string;
-            using OutType = glm::ivec3;
-            glm::ivec3 operator()(std::string const& data)
+            glm::ivec3 operator()(std::string const& data) const
             {
                 glm::ivec3 vec;
                 int idx = 0;
@@ -277,11 +261,10 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::ivec4>
+        struct PropertyDeserialiser<glm::ivec4, glm::ivec4>
         {
             using InType = std::string;
-            using OutType = glm::ivec4;
-            glm::ivec4 operator()(std::string const& data)
+            glm::ivec4 operator()(std::string const& data) const
             {
                 glm::ivec4 vec;
                 int idx = 0;

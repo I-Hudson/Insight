@@ -10,6 +10,10 @@
         private:\
         template<typename>\
         friend struct ::Insight::Serialisation::SerialiserObject;\
+        template<typename, typename, typename>\
+        friend struct ::Insight::Serialisation::ComplexSerialiser;\
+        template<typename>\
+        friend struct ::Insight::Serialisation::PropertySerialiser;\
 
 #define IS_SERIALISABLE_H(TYPE)\
         IS_SERIALISABLE_FRIEND\
@@ -40,27 +44,20 @@
         }\
         else\
         {\
-            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER> propertyDeserialiser; \
+            using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
+            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER, PropertyType> propertyDeserialiser; \
             const u32 VersionRemoved = VERSION_REMOVED;\
-            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::InType data;\
+            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER, PropertyType>::InType data;\
             serialiser->Read(#PROPERTY_NAME, data);\
-            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType resultData =  propertyDeserialiser(data);\
-            *((::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::OutType*)&PPCAT(object., PROPERTY)) = std::move(resultData);\
+            PropertyType resultData =  propertyDeserialiser(data);\
+            *((PropertyType*)&PPCAT(object., PROPERTY)) = std::move(resultData);\
         }
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            using Type = typename std::decay<decltype(PPCAT(object., PROPERTY)>::type;\
-            if constexpr(std::is_base_of_v<::Insight::Serialisation::ISerialisable, Type>)\
-            {\
-                PPCAT(object., PROPERTY).Serialise(serialiser);\
-            }\
-            else\
-            {\
-                ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
-                objectSerialiser.Serialise(PPCAT(object., PROPERTY), serialiser);\
-            }\
+            ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
+            objectSerialiser.Serialise(PPCAT(object., PROPERTY), serialiser);\
         }\
         else\
         {\
@@ -120,7 +117,14 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
         }
 
-#define SERIALISE_NAMED_COMPLEX(TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+#define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        {\
+            using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
+            using ObjectType = typename std::decay<decltype(object)>::type;\
+            ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
+            const u32 VersionRemoved = VERSION_REMOVED; \
+            complexSerialiser(PPCAT(object., PROPERTY), &object, serialiser); \
+        }
 
 // Serialise a single property with a ProertySerialiser.
 #define SERIALISE_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)           SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
@@ -134,7 +138,7 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_VECTOR_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise anything. This should be used when there is a certain requirement needed. 
 // An example could be loading entities.
-#define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)            SERIALISE_NAMED_COMPLEX(TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+#define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)            SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
     public:\

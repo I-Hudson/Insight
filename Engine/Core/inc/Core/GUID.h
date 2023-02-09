@@ -44,11 +44,11 @@ namespace Insight
 			u16 m_data3 = 0;
 			u8  m_data4[8] {0};
 
-			template<typename GUID>
+			template<typename>
 			friend struct std::hash;
-			template<typename GUID>
+			template<typename>
 			friend struct Serialisation::PropertySerialiser;
-			template<typename GUID>
+			template<typename, typename>
 			friend struct Serialisation::PropertyDeserialiser;
 		};
 	}
@@ -59,7 +59,6 @@ namespace Insight
 		struct PropertySerialiser<Core::GUID>
 		{
 			using InType = Core::GUID;
-			using OutType = std::string;
 			std::string operator()(Core::GUID const& object)
 			{
 				std::string guidString = object.ToString();
@@ -70,13 +69,12 @@ namespace Insight
 			}
 		};
 		template<>
-		struct PropertyDeserialiser<Core::GUID>
+		struct PropertyDeserialiser<Core::GUID, Core::GUID>
 		{
 			using InType = std::string;
-			using OutType = Core::GUID;
-			OutType operator()(InType const& data)
+			Core::GUID operator()(InType const& data)
 			{
-				OutType result;
+				Core::GUID result;
 				result.StringToGuid(data);
 				return result;
 			}

@@ -316,22 +316,40 @@ namespace Insight
 			return nullptr;
 		}
 
-		void EntityManager::Serialise(::Insight::Serialisation::ISerialiser* serialiser)
+		Entity* EntityManager::AddNewEntity(Core::GUID guid)
 		{
-			Serialisation::SerialiserObject<EntityManager > serialiserObject;
-			serialiserObject.Serialise(this, serialiser);
+			Entity* e = AddNewEntity();
+			e->m_guid = guid;
+			return e;
 		}
 
-		void EntityManager::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)
+		Entity* EntityManager::AddNewEntity(std::string entity_name, Core::GUID guid)
 		{
-			serialiser->StartObject("EntityManager");
-			serialiser->StartArray("Entities");
-
-
-
-			serialiser->StopArray();
-			serialiser->StopObject();
+			Entity* e = AddNewEntity(entity_name);
+			e->m_guid = guid;
+			return e;
 		}
+
+		Component* EntityManager::AddComponentToEntity(Core::GUID entityGuid, Core::GUID componentGuid, std::string componentTypeName)
+		{
+			Entity* e = GetEntityByGUID(entityGuid);
+			if (e == nullptr)
+			{
+				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to find entity with guid '{}'.", entityGuid.ToString());
+				return nullptr;
+			}
+
+			ECS::Component* component = e->AddComponentByName(componentTypeName);
+			if (component == nullptr)
+			{
+				IS_CORE_ERROR("[EntityManager::AddComponentToEntity] Unable to add component with typename '{}'.", componentTypeName);
+				return nullptr;
+			}
+			component->m_guid = componentGuid;
+			return component;
+		}
+
+		IS_SERIALISABLE_CPP(EntityManager)
 #endif
 	}
 }

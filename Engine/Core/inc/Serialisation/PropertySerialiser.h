@@ -15,7 +15,7 @@ namespace Insight
         {
             auto operator()(T const& v)
             {
-                if (std::is_enum_v<T>)
+                if constexpr (std::is_enum_v<T>)
                 {
                     return static_cast<int>(const_cast<T&>(v));
                 }
@@ -27,15 +27,21 @@ namespace Insight
             }
         };
 
-        template<typename T>
+        template<typename TypeSerialiser, typename OutType>
         struct PropertyDeserialiser
         {
             using InType = u8;
-            using OutType = u8;
-            OutType operator()(InType const data)
+            OutType operator()(InType const v) const
             {
-                assert(false);
-                return data;
+                if constexpr (std::is_enum_v<OutType>)
+                {
+                    return static_cast<OutType>(v);
+                }
+                else
+                {
+                    assert(false);
+                }
+                return OutType();
             }
         };
     }

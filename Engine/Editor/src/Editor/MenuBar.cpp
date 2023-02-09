@@ -77,6 +77,29 @@ namespace Insight
                             }
                         }
                     }
+                    if (ImGui::MenuItem("Load World"))
+                    {
+                        //m_fileDialog.Show("./", FileDialogOperations::Load);
+                        std::string item;
+                        PlatformFileDialog fileDialog;
+                        if (fileDialog.ShowLoad(&item,
+                            {
+                                { "World", "*.isworld"},
+                            }))
+                        {
+                            TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+                            if (activeWorld)
+                            {
+                                Archive archive(item, ArchiveModes::Read);
+                                archive.Close();
+
+                                Serialisation::JsonSerialiser serialiser(true);
+                                serialiser.Deserialise(archive.GetData());
+
+                                activeWorld->Deserialise(&serialiser);
+                            }
+                        }
+                    }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();
                 }

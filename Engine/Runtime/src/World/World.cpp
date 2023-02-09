@@ -20,12 +20,20 @@ namespace Insight
 		}
 
 		World::~World()
-		{
-
-		}
+		{ }
 
 		void World::Destroy()
-		{ }
+		{
+			m_worldName.clear();
+			m_worldState = WorldStates::Paused;
+			m_worldType = WorldTypes::Game;
+			m_root_entities_guids.clear();
+			m_entityManager.Destroy();
+			m_cameraEntity = {};
+
+			m_persistentScene = false;
+			m_onlySearchable = false;
+		}
 
 		void World::EarlyUpdate()
 		{
