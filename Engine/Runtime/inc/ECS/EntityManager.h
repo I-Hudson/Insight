@@ -113,7 +113,6 @@ namespace Insight
 
 					u64 entitiesCount;
 					serialiser->Read("EntitiesGuidsArraySize", entitiesCount);
-					entities.reserve(entitiesCount);
 
 					serialiser->StartArray("EntitiesGuids");
 					// Create all entities and assign there guid.
@@ -150,6 +149,15 @@ namespace Insight
 						componentGuid.StringToGuid(componentGuidString);
 
 						entityManager->AddComponentToEntity(entityGuid, componentGuid, componentTypeName);
+					}
+					serialiser->StopArray();
+				
+					u64 entitiesArraySize = 0;
+					serialiser->Read("EntitiesArraySize", entitiesArraySize);
+					serialiser->StartArray("Entities");
+					for (auto const& e : entityManager->GetAllEntities())
+					{
+						e->Deserialise(serialiser);
 					}
 					serialiser->StopArray();
 				}

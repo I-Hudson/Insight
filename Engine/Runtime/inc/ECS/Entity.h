@@ -73,7 +73,7 @@ namespace Insight
 		class EntityManager;
 		class Entity;
 
-		class IS_RUNTIME Component
+		class IS_RUNTIME Component : public Serialisation::ISerialisable
 		{
 		public:
 			Component();
@@ -102,13 +102,15 @@ namespace Insight
 			/// @brief  Called after every udpate.
 			virtual void OnLateUpdate() { }
 			/// @brief  Return the component's type name.
-			virtual const char* GetTypeName() = 0;
+			virtual const char* GetTypeName() { return "Component"; };
 
 			Core::GUID GetGuid() const { return m_guid; }
 
 			Entity* GetOwnerEntity() const { return m_ownerEntity; }
 			bool IsEnabled() const { return m_isEnabled; }
 			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
+
+			IS_SERIALISABLE_H(Component)
 
 		protected:
 			/// @brief  Allow multiple of the same component to be added to a single entity. Default is true
@@ -262,28 +264,30 @@ namespace Insight
 		struct PropertySerialiser<EntityToGuid>
 		{
 			using InType = ECS::Entity;
-			std::string operator()(Ptr<InType> const& v) const
-			{
-				if (v)
-				{
-					Insight::Serialisation::PropertySerialiser<Core::GUID> guidSerialiser;
-					return guidSerialiser(v->GetGUID());
-				}
-				return {};
-			}
-			std::string operator()(InType const& v) const
-			{
-				Insight::Serialisation::PropertySerialiser<Core::GUID> guidSerialiser;
-				return guidSerialiser(v.GetGUID());
-			}
+			std::string operator()(Ptr<InType> const& v) const;
+			std::string operator()(InType const& v) const;
+		};
+
+		template<>
+		struct PropertyDeserialiser<EntityToGuid>
+		{
+			using InType = std::string;
+			ECS::Entity* operator()(InType const& v) const;
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::Entity, 1,
+	OBJECT_SERIALISER(ECS::Component, 2,
+		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
+		SERIALISE_PROPERTY(Serialisation::EntityToGuid, m_ownerEntity, 1, 0)
+		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
+	);
+
+	OBJECT_SERIALISER(ECS::Entity, 2,
 		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
 		SERIALISE_PROPERTY(std::string, m_name, 1, 0)
 		SERIALISE_PROPERTY(Serialisation::EntityToGuid, m_parent, 1, 0)
 		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
 		SERIALISE_VECTOR_PROPERTY(Serialisation::EntityToGuid, m_children, 1, 0)
+		SERIALISE_VECTOR_OBJECT(ECS::Component, m_components, 2, 0)
 	);
 }

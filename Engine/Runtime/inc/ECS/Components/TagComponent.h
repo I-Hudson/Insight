@@ -34,8 +34,14 @@ namespace Insight
 			/// @return std::vector<std::string>
 			std::vector<std::string> GetAllTags() const		{ return m_tags; }
 
+			IS_SERIALISABLE_H(TagComponent)
+
 		private:
 			std::vector<std::string> m_tags;
 		};
 	}
+
+	OBJECT_SERIALISER(ECS::TagComponent, 1,
+		SERIALISE_VECTOR_PROPERTY(std::string, m_tags, 1, 0)
+	);
 }

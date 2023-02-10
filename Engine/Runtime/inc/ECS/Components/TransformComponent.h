@@ -40,9 +40,14 @@ namespace Insight
 			// Component
 			virtual void OnUpdate(const float delta_time) override;
 
+			IS_SERIALISABLE_H(TransformComponent)
+
 		private:
 			glm::mat4 m_transform = glm::mat4(1.0f);
 			glm::mat4 m_previous_transform = glm::mat4(1.0f);
 		};
 	}
+	OBJECT_SERIALISER(ECS::TransformComponent, 2,
+		SERIALISE_PROPERTY(glm::mat4, m_transform, 2, 0)
+	);
 }

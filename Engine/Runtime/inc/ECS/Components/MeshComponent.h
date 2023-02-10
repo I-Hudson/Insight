@@ -24,6 +24,8 @@ namespace Insight
 			void				SetMaterial(Runtime::Material* material);
 			Runtime::Material*	GetMaterial()					const		{ return m_material; }
 
+			IS_SERIALISABLE_H(MeshComponent)
+
 		private:
 			void OnMaterialUnload(Runtime::IResource* resource);
 
@@ -32,4 +34,6 @@ namespace Insight
 			Runtime::ResourceLFHandle<Runtime::Material> m_material;
 		};
 	}
+	OBJECT_SERIALISER(ECS::MeshComponent, 1,
+	);
 }

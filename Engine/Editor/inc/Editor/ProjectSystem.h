@@ -86,6 +86,16 @@ namespace Insight
                 return 0;
             }
         };
+
+        template<>
+        struct PropertyDeserialiser<BaseProjectInfoToHash>
+        {
+            using InType = u64;
+            std::shared_ptr<Editor::BaseProjectInfo> operator()(u64) const
+            {
+                return std::make_shared<Editor::BaseProjectInfo>();
+            }
+        };
     }
 
     //OBJECT_SERIALISER(Editor::BaseBaseProjectInfo, 1,

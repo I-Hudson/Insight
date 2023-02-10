@@ -77,6 +77,8 @@ namespace Insight
 			CameraComponent();
 			virtual ~CameraComponent() override;
 
+			IS_SERIALISABLE_H(CameraComponent)
+
 			void CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane);
 			void CreateOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
@@ -105,4 +107,6 @@ namespace Insight
 			Camera m_camera;
 		};
 	}
+	OBJECT_SERIALISER(ECS::CameraComponent, 1,
+	);
 }

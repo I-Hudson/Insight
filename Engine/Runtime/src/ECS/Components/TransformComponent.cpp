@@ -41,5 +41,7 @@ namespace Insight
 		{
 			m_previous_transform = m_transform;
 		}
+
+		IS_SERIALISABLE_CPP(TransformComponent)
 	}
 }

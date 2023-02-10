@@ -11,13 +11,16 @@
 #include <glm/ext/vector_int2.hpp>
 #include <glm/ext/vector_int3.hpp>
 #include <glm/ext/vector_int4.hpp>
+#include <glm/ext/matrix_float2x2.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
 
 namespace Insight
 {
     namespace Serialisation
     {
         template<>
-        struct PropertyDeserialiser<bool, bool>
+        struct PropertyDeserialiser<bool>
         {
             using InType = bool;
             bool operator()(InType const data) const
@@ -27,7 +30,7 @@ namespace Insight
         };
 
         template<>
-        struct PropertyDeserialiser<char, char>
+        struct PropertyDeserialiser<char>
         {
             using InType = char;
             char operator()(InType const data) const
@@ -37,7 +40,7 @@ namespace Insight
         };
 
         template<>
-        struct PropertyDeserialiser<u8, u8>
+        struct PropertyDeserialiser<u8>
         {
             using InType = u8;
             u8 operator()(InType const data) const
@@ -46,7 +49,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<u16, u16>
+        struct PropertyDeserialiser<u16>
         {
             using InType = u16;
             u16 operator()(InType const data) const
@@ -55,7 +58,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<u32, u32>
+        struct PropertyDeserialiser<u32>
         {
             using InType = u32;
             u32 operator()(InType const data) const
@@ -64,7 +67,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<u64, u64>
+        struct PropertyDeserialiser<u64>
         {
             using InType = u64;
             u64 operator()(InType const data) const
@@ -74,7 +77,7 @@ namespace Insight
         };
 
         template<>
-        struct PropertyDeserialiser<i8, i8>
+        struct PropertyDeserialiser<i8>
         {
             using InType = i8;
             i8 operator()(InType const data) const
@@ -83,7 +86,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<i16, i16>
+        struct PropertyDeserialiser<i16>
         {
             using InType = i16;
             i16 operator()(InType const data) const
@@ -92,7 +95,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<i32, i32>
+        struct PropertyDeserialiser<i32>
         {
             using InType = i32;
             i32 operator()(InType const data) const
@@ -101,7 +104,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<i64, i64>
+        struct PropertyDeserialiser<i64>
         {
             using InType = i64;
             i64 operator()(InType const data) const
@@ -111,7 +114,7 @@ namespace Insight
         };
 
         template<>
-        struct PropertyDeserialiser<std::string, std::string>
+        struct PropertyDeserialiser<std::string>
         {
             using InType = std::string;
             std::string operator()(InType const& data) const
@@ -124,7 +127,7 @@ namespace Insight
         // GLM TYPES
         //================================================================
         template<>
-        struct PropertyDeserialiser<glm::vec2, glm::vec2>
+        struct PropertyDeserialiser<glm::vec2>
         {
             using InType = std::string;
             glm::vec2 operator()(std::string const& data) const
@@ -151,7 +154,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::vec3, glm::vec3>
+        struct PropertyDeserialiser<glm::vec3>
         {
             using InType = std::string;
             glm::vec3 operator()(std::string const& data) const
@@ -178,7 +181,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::vec4, glm::vec4>
+        struct PropertyDeserialiser<glm::vec4>
         {
             using InType = std::string;
             glm::vec4 operator()(std::string const& data) const
@@ -207,7 +210,7 @@ namespace Insight
 
 
         template<>
-        struct PropertyDeserialiser<glm::ivec2, glm::ivec2>
+        struct PropertyDeserialiser<glm::ivec2>
         {
             using InType = std::string;
             glm::ivec2 operator()(std::string const& data) const
@@ -234,7 +237,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::ivec3, glm::ivec3>
+        struct PropertyDeserialiser<glm::ivec3>
         {
             using InType = std::string;
             glm::ivec3 operator()(std::string const& data) const
@@ -261,7 +264,7 @@ namespace Insight
             }
         };
         template<>
-        struct PropertyDeserialiser<glm::ivec4, glm::ivec4>
+        struct PropertyDeserialiser<glm::ivec4>
         {
             using InType = std::string;
             glm::ivec4 operator()(std::string const& data) const
@@ -283,6 +286,91 @@ namespace Insight
                     }
                 }
                 vec[idx] = std::stoi(numString);
+
+                return vec;
+            }
+        };
+
+        template<>
+        struct PropertyDeserialiser<glm::mat2>
+        {
+            using InType = std::string;
+            glm::mat2 operator()(std::string const& data) const
+            {
+                PropertyDeserialiser<glm::vec2> vecDeserialiser;
+                glm::mat2 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ')')
+                    {
+                        vec[idx] = vecDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = vecDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::mat3>
+        {
+            using InType = std::string;
+            glm::mat2 operator()(std::string const& data) const
+            {
+                PropertyDeserialiser<glm::vec3> vecDeserialiser;
+                glm::mat3 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ')')
+                    {
+                        vec[idx] = vecDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = vecDeserialiser(numString);
+
+                return vec;
+            }
+        };
+        template<>
+        struct PropertyDeserialiser<glm::mat4>
+        {
+            using InType = std::string;
+            glm::mat4 operator()(std::string const& data) const
+            {
+                PropertyDeserialiser<glm::vec4> vecDeserialiser;
+                glm::mat4 vec;
+                int idx = 0;
+                std::string numString;
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    if (data.at(i) == ')')
+                    {
+                        vec[idx] = vecDeserialiser(numString);
+                        numString.clear();
+                        ++idx;
+                    }
+                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    {
+                        numString += data.at(i);
+                    }
+                }
+                vec[idx] = vecDeserialiser(numString);
 
                 return vec;
             }

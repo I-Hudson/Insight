@@ -133,41 +133,41 @@ namespace Insight
 
         void JsonSerialiser::Read(std::string_view tag, u8& data)
         {
-            ReadValue(tag, data);
+            ReadValue<u8>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u16& data)
         {
-            ReadValue(tag, data);
+            ReadValue<u16>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u32& data)
         {
-            ReadValue(tag, data);
+            ReadValue<u32>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, u64& data)
         {
-            ReadValue(tag, data);
+            ReadValue<u64>(tag, data);
         }
 
         void JsonSerialiser::Read(std::string_view tag, i8& data)
         {
-            ReadValue(tag, data);
+            ReadValue<i8>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i16& data)
         {
-            ReadValue(tag, data);
+            ReadValue<i16>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i32& data)
         {
-            ReadValue(tag, data);
+            ReadValue<i32>(tag, data);
         }
         void JsonSerialiser::Read(std::string_view tag, i64& data)
         {
-            ReadValue(tag, data);
+            ReadValue<i64>(tag, data);
         }
 
         void JsonSerialiser::Read(std::string_view tag, std::string& string)
         {
-            ReadValue(tag, string);
+            ReadValue<std::string>(tag, string);
         }
     }
 }

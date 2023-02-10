@@ -43,12 +43,8 @@
         else\
         {\
             using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
-            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER, PropertyType> propertyDeserialiser; \
             const u32 VersionRemoved = VERSION_REMOVED;\
-            ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER, PropertyType>::InType data;\
-            serialiser->Read(#PROPERTY_NAME, data);\
-            PropertyType resultData =  propertyDeserialiser(data);\
-            *((PropertyType*)&PPCAT(object., PROPERTY)) = std::move(resultData);\
+            PPCAT(object., PROPERTY) = std::move(::Insight::Serialisation::DeserialiseProperty<TYPE_SERIALISER, PropertyType>(serialiser, #PROPERTY_NAME));\
         }
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
@@ -59,9 +55,8 @@
         }\
         else\
         {\
-            ::Insight::Serialisation::SerialiserObject<TYPE_SERIALISER> objectSerialiser; \
-            TYPE_SERIALISER deserialiserdObject = objectSerialiser.Deserialise(serialiser);\
-            *((TYPE_SERIALISER*)&PPCAT(object., PROPERTY)) = std::move(deserialiserdObject);\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            ::Insight::Serialisation::DeserialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
         }
 
 #define SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
@@ -91,9 +86,9 @@
         else\
         {\
             using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorSerialiser;\
+            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorDeserialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
-            vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }
 
 /*

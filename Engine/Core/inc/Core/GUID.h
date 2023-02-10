@@ -48,7 +48,7 @@ namespace Insight
 			friend struct std::hash;
 			template<typename>
 			friend struct Serialisation::PropertySerialiser;
-			template<typename, typename>
+			template<typename>
 			friend struct Serialisation::PropertyDeserialiser;
 		};
 	}
@@ -69,7 +69,7 @@ namespace Insight
 			}
 		};
 		template<>
-		struct PropertyDeserialiser<Core::GUID, Core::GUID>
+		struct PropertyDeserialiser<Core::GUID>
 		{
 			using InType = std::string;
 			Core::GUID operator()(InType const& data)

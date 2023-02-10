@@ -13,5 +13,7 @@ namespace Insight
 
 		TagComponent::~TagComponent()
 		{ }
+
+		IS_SERIALISABLE_CPP(TagComponent)
 	}
 }

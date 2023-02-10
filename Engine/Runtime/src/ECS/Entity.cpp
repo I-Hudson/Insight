@@ -1,4 +1,6 @@
 #include "ECS/Entity.h"
+#include "ECS/Entity.inl"
+
 #include "ECS/ECSWorld.h"
 
 #include "ECS/Components/CameraComponent.h"
@@ -78,6 +80,8 @@ namespace Insight
 
 		Component::~Component()
 		{ }
+
+		IS_SERIALISABLE_CPP(Component)
 
 		void ComponentRegistry::RegisterComponent(std::string_view component_type, std::function<Component*()> func)
 		{

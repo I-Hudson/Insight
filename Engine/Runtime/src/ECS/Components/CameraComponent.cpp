@@ -119,6 +119,8 @@ namespace Insight
 		{
 		}
 
+		IS_SERIALISABLE_CPP(CameraComponent)
+
 		void CameraComponent::CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane)
 		{
 			m_camera.CreatePerspective(fovy, aspect, nearPlane, farPlane);

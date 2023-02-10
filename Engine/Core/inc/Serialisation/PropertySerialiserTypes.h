@@ -14,6 +14,10 @@
 #include <glm/ext/vector_int3.hpp>
 #include <glm/ext/vector_int4.hpp>
 
+#include <glm/ext/matrix_float2x2.hpp>
+#include <glm/ext/matrix_float3x3.hpp>
+#include <glm/ext/matrix_float4x4.hpp>
+
 namespace Insight
 {
     namespace Serialisation
@@ -196,6 +200,46 @@ namespace Insight
                 str += std::to_string(v.z);
                 str += ",";
                 str += std::to_string(v.w) + ")";
+                return str;
+            }
+        };
+
+        template<>
+        struct PropertySerialiser<glm::mat2>
+        {
+            std::string operator()(glm::mat2 v)
+            {
+                PropertySerialiser<glm::vec2> vecSerialiser;
+                std::string str;
+                str += vecSerialiser(v[0]);
+                str += vecSerialiser(v[1]);
+                return str;
+            }
+        };
+        template<>
+        struct PropertySerialiser<glm::mat3>
+        {
+            std::string operator()(glm::mat3 v)
+            {
+                PropertySerialiser<glm::vec3> vecSerialiser;
+                std::string str;
+                str += vecSerialiser(v[0]);
+                str += vecSerialiser(v[1]);
+                str += vecSerialiser(v[2]);
+                return str;
+            }
+        };
+        template<>
+        struct PropertySerialiser<glm::mat4>
+        {
+            std::string operator()(glm::mat4 v)
+            {
+                PropertySerialiser<glm::vec4> vecSerialiser;
+                std::string str;
+                str += vecSerialiser(v[0]);
+                str += vecSerialiser(v[1]);
+                str += vecSerialiser(v[2]);
+                str += vecSerialiser(v[3]);
                 return str;
             }
         };

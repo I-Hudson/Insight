@@ -22,5 +22,7 @@ namespace Insight
 		{
 			m_material = material;
 		}
+		
+		IS_SERIALISABLE_CPP(MeshComponent)
 	}
 }

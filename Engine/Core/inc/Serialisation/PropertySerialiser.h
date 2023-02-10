@@ -27,21 +27,21 @@ namespace Insight
             }
         };
 
-        template<typename TypeSerialiser, typename OutType>
+        template<typename TypeSerialiser>
         struct PropertyDeserialiser
         {
             using InType = u8;
-            OutType operator()(InType const v) const
+            u8 operator()(InType const v) const
             {
-                if constexpr (std::is_enum_v<OutType>)
+                if constexpr (std::is_enum_v<TypeSerialiser>)
                 {
-                    return static_cast<OutType>(v);
+                    return static_cast<TypeSerialiser>(v);
                 }
-                else
+                else constexpr
                 {
                     assert(false);
+                    return 0;
                 }
-                return OutType();
             }
         };
     }
