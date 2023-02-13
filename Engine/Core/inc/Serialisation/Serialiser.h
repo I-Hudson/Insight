@@ -63,7 +63,7 @@
         if (!serialiser->IsReadMode())\
         {\
             BASE_TYPE* baseType = static_cast<BASE_TYPE*>(&object);\
-            ::Insight::Serialisation::SerialiseObject<BASE_TYPE>(serialiser, baseType);\
+            ::Insight::Serialisation::SerialiseBase<BASE_TYPE>(serialiser, *baseType);\
         }\
         else\
         {\
@@ -111,6 +111,10 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         }\
         else\
         {\
+            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorObject> vectorDeserialiser;\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }
 
 #define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\

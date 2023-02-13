@@ -55,6 +55,14 @@ namespace Insight
             SerialiseObject(serialiser, *data);
         }
 
+        template<typename Type>
+        void SerialiseBase(ISerialiser* serialiser, Type& data)
+        {
+            ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
+            objectSerialiser.Serialise(data, serialiser);
+
+        }
+
         template<typename TypeSerialiser, typename T>
         T DeserialiseProperty(ISerialiser* serialiser, std::string_view propertyName)
         {
@@ -103,8 +111,8 @@ namespace Insight
                     return;
                 }
 
-                serialiser->Write(std::string(name) + c_ArraySize, object.size());
-                serialiser->StartArray(name);
+                u64 arraySize = object.size();
+                serialiser->StartArray(name, arraySize);
                 for (auto& v : object)
                 {
                     if constexpr (is_insight_smart_pointer_v<T>)
@@ -225,10 +233,9 @@ namespace Insight
                 }
 
                 u64 arraySize = 0;
-                serialiser->Read(std::string(name) + c_ArraySize, arraySize);
+                serialiser->StartArray(name, arraySize);
                 object.resize(arraySize);
 
-                serialiser->StartArray(name);
                 for (auto& v : object)
                 {
                     if constexpr (is_insight_smart_pointer_v<T>)
@@ -245,7 +252,8 @@ namespace Insight
                             //using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
                             //T newPointer = NewInsightPointer<TVectorElementType>();
                             //v = newPointer;
-                            ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, v);
+                            //::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, v);
+                            assert(false);
                         }
                     }
                     else if constexpr (is_stl_smart_pointer_v<T>)

@@ -151,13 +151,13 @@ namespace Insight
             std::string operator()(glm::vec4 v)
             {
                 std::string str;
-                str += "(" + std::to_string(v.x);
+                str += "(" + std::to_string(static_cast<float>(v.x));
                 str += ",";
-                str += std::to_string(v.y);
+                str += std::to_string(static_cast<float>(v.y));
                 str += ",";
-                str += std::to_string(v.z);
+                str += std::to_string(static_cast<float>(v.z));
                 str += ",";
-                str += std::to_string(v.w) + ")";
+                str += std::to_string(static_cast<float>(v.w)) + ")";
                 return str;
             }
         };

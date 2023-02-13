@@ -107,6 +107,7 @@ namespace Insight
 			Camera m_camera;
 		};
 	}
-	OBJECT_SERIALISER(ECS::CameraComponent, 1,
+	OBJECT_SERIALISER(ECS::CameraComponent, 2,
+		SERIALISE_BASE(ECS::Component, 2, 0)
 	);
 }

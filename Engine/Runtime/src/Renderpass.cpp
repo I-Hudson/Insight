@@ -165,7 +165,7 @@ namespace Insight
 						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
 						glm::mat4 transform(1.0f);
-						transform[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+						transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
 						entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 					}
 

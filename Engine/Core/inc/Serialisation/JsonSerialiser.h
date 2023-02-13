@@ -22,7 +22,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
 
-            virtual void StartArray(std::string_view name) override;
+            virtual void StartArray(std::string_view name, u64& size) override;
             virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;

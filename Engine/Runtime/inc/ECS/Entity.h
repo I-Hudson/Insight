@@ -274,6 +274,41 @@ namespace Insight
 			using InType = std::string;
 			ECS::Entity* operator()(InType const& v) const;
 		};
+
+		struct EntityComponent1 {};
+		template<>
+		struct ComplexSerialiser<EntityComponent1, std::vector<RPtr<ECS::Component>>, ECS::Entity>
+		{
+			void operator()(std::vector<RPtr<ECS::Component>>& components, ECS::Entity* entity, ISerialiser* serialiser) const
+			{
+				if (serialiser->IsReadMode())
+				{
+					u64 componentArraySize = 0;
+					serialiser->StartArray("Components", componentArraySize);
+					for (auto const& c : components)
+					{
+						Core::GUID guidBefore = c->GetGuid();
+						c->Deserialise(serialiser);
+						Core::GUID guidAfter = c->GetGuid();
+						std::string guid1 = guidBefore.ToString();
+						std::string guid2 = guidAfter.ToString();
+						std::string owner = c->GetOwnerEntity()->GetGUID().ToString();
+						assert(guidBefore == guidAfter);
+					}
+					serialiser->StopArray();
+				}
+				else
+				{
+					u64 componentArraySize = components.size();
+					serialiser->StartArray("Components", componentArraySize);
+					for (auto const& c : components)
+					{
+						c->Serialise(serialiser);
+					}
+					serialiser->StopArray();
+				}
+			}
+		};
 	}
 
 	OBJECT_SERIALISER(ECS::Component, 2,
@@ -282,12 +317,12 @@ namespace Insight
 		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
 	);
 
-	OBJECT_SERIALISER(ECS::Entity, 2,
+	OBJECT_SERIALISER(ECS::Entity, 3,
 		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
 		SERIALISE_PROPERTY(std::string, m_name, 1, 0)
 		SERIALISE_PROPERTY(Serialisation::EntityToGuid, m_parent, 1, 0)
 		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
 		SERIALISE_VECTOR_PROPERTY(Serialisation::EntityToGuid, m_children, 1, 0)
-		SERIALISE_VECTOR_OBJECT(ECS::Component, m_components, 2, 0)
+		SERIALISE_COMPLEX(Serialisation::EntityComponent1, m_components, 3, 0)
 	);
 }

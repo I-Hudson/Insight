@@ -41,7 +41,8 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::TagComponent, 1,
+	OBJECT_SERIALISER(ECS::TagComponent, 2,
 		SERIALISE_VECTOR_PROPERTY(std::string, m_tags, 1, 0)
+		SERIALISE_BASE(ECS::Component, 2, 0)
 	);
 }

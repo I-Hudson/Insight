@@ -137,15 +137,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',')
+                    const char c = data.at(i);
+
+                    if (c == ',')
                     {
                         vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c == '.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stof(numString);
@@ -164,15 +171,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',')
+                    const char c = data.at(i);
+
+                    if (c == ',')
                     {
                         vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c == '.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stof(numString);
@@ -191,15 +205,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',')
+                    const char c = data.at(i);
+
+                    if (c == ',')
                     {
                         vec[idx] = std::stof(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c=='.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stof(numString);
@@ -220,15 +241,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',') 
+                    const char c = data.at(i);
+
+                    if (c == ',') 
                     {
                         vec[idx] = std::stoi(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c == '.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stoi(numString);
@@ -247,15 +275,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',')
+                    const char c = data.at(i);
+
+                    if (c == ',')
                     {
                         vec[idx] = std::stoi(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c == '.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stoi(numString);
@@ -274,15 +309,22 @@ namespace Insight
                 std::string numString;
                 for (size_t i = 0; i < data.size(); ++i)
                 {
-                    if (data.at(i) == ',')
+                    const char c = data.at(i);
+
+                    if (c == ',')
                     {
                         vec[idx] = std::stoi(numString);
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (c >= '0' && c <= '9'
+                        || c == '.' || c == '-')
                     {
-                        numString += data.at(i);
+                        numString += c;
+                    }
+                    else
+                    {
+                        assert(false && "Ill-formatted string.");
                     }
                 }
                 vec[idx] = std::stoi(numString);
@@ -309,13 +351,11 @@ namespace Insight
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (data.at(i) != '(' && data.at(i) != ')')
                     {
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = vecDeserialiser(numString);
-
                 return vec;
             }
         };
@@ -337,13 +377,11 @@ namespace Insight
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (data.at(i) != '(' && data.at(i) != ')')
                     {
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = vecDeserialiser(numString);
-
                 return vec;
             }
         };
@@ -365,13 +403,11 @@ namespace Insight
                         numString.clear();
                         ++idx;
                     }
-                    else if (data.at(i) >= '0' && data.at(i) <= '9')
+                    else if (data.at(i) != '(' && data.at(i) != ')')
                     {
                         numString += data.at(i);
                     }
                 }
-                vec[idx] = vecDeserialiser(numString);
-
                 return vec;
             }
         };

@@ -112,9 +112,8 @@ namespace Insight
 					ASSERT(entityManager);
 
 					u64 entitiesCount;
-					serialiser->Read("EntitiesGuidsArraySize", entitiesCount);
+					serialiser->StartArray("EntitiesGuids", entitiesCount);
 
-					serialiser->StartArray("EntitiesGuids");
 					// Create all entities and assign there guid.
 					for (size_t i = 0; i < entitiesCount; ++i)
 					{
@@ -129,8 +128,7 @@ namespace Insight
 
 					// Then create all components.
 					u64 componentCount = 0;
-					serialiser->Read("ComponentGuidsArraySize", componentCount);
-					serialiser->StartArray("ComponentGuids");
+					serialiser->StartArray("ComponentGuids", componentCount);
 					for (size_t componentIdx = 0; componentIdx < componentCount; ++componentIdx)
 					{
 						std::string entityGuidString;
@@ -153,8 +151,7 @@ namespace Insight
 					serialiser->StopArray();
 				
 					u64 entitiesArraySize = 0;
-					serialiser->Read("EntitiesArraySize", entitiesArraySize);
-					serialiser->StartArray("Entities");
+					serialiser->StartArray("Entities", entitiesArraySize);
 					for (auto const& e : entityManager->GetAllEntities())
 					{
 						e->Deserialise(serialiser);
@@ -166,9 +163,9 @@ namespace Insight
 					u64 componentGuidCount = 0;
 					// Save all entities guid's first.
 					PropertySerialiser<Core::GUID> guidSerialiser;
-
-					serialiser->Write("EntitiesGuidsArraySize", entities.size());
-					serialiser->StartArray("EntitiesGuids");
+					
+					u64 entitiesCount = entities.size();
+					serialiser->StartArray("EntitiesGuids", entitiesCount);
 
 					for (auto const& e : entities)
 					{
@@ -178,8 +175,7 @@ namespace Insight
 					serialiser->StopArray();
 
 					// Save all components guid's second.
-					serialiser->Write("ComponentGuidsArraySize", entities.size());
-					serialiser->StartArray("ComponentGuids");
+					serialiser->StartArray("ComponentGuids", componentGuidCount);
 
 					for (auto const& e : entities)
 					{
@@ -201,8 +197,7 @@ namespace Insight
 					serialiser->StopArray();
 
 					// Finally save all entities and their data.
-					serialiser->Write("EntitiesArraySize", entities.size());
-					serialiser->StartArray("Entities");
+					serialiser->StartArray("Entities", entitiesCount);
 					for (auto const& e : entities)
 					{
 						e->Serialise(serialiser);

@@ -47,7 +47,8 @@ namespace Insight
 			glm::mat4 m_previous_transform = glm::mat4(1.0f);
 		};
 	}
-	OBJECT_SERIALISER(ECS::TransformComponent, 2,
+	OBJECT_SERIALISER(ECS::TransformComponent, 3,
 		SERIALISE_PROPERTY(glm::mat4, m_transform, 2, 0)
+		SERIALISE_BASE(ECS::Component, 3, 0)
 	);
 }

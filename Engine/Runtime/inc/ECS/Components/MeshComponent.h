@@ -34,6 +34,7 @@ namespace Insight
 			Runtime::ResourceLFHandle<Runtime::Material> m_material;
 		};
 	}
-	OBJECT_SERIALISER(ECS::MeshComponent, 1,
+	OBJECT_SERIALISER(ECS::MeshComponent, 2,
+		SERIALISE_BASE(ECS::Component, 2, 0)
 	);
 }
