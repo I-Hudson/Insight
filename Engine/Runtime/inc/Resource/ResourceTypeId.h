@@ -4,6 +4,7 @@
 
 #include "Core/TypeAlias.h"
 
+#include "Serialisation/ISerialisable.h"
 #include "Serialisation/Serialiser.h"
 
 #include <string>
@@ -18,11 +19,13 @@ namespace Insight
 		class IResource;
 
 		/// @brief Define a unique resource type.
-		class IS_RUNTIME ResourceTypeId
+		class IS_RUNTIME ResourceTypeId : public Serialisation::ISerialisable
 		{
 		public:
-			ResourceTypeId() = delete;
+			ResourceTypeId();
 			ResourceTypeId(const char* type_name);
+
+			IS_SERIALISABLE_H(ResourceTypeId)
 
 			std::string GetTypeName() const;
 			u64 GetHash() const;
@@ -52,10 +55,10 @@ namespace Insight
 		};
 	}
 
-	//OBJECT_SERIALISER(Runtime::ResourceTypeId, 1,
-	//	SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
-	//	SERIALISE_PROPERTY(u64, m_hash, 1, 0)
-	//	);
+	OBJECT_SERIALISER(Runtime::ResourceTypeId, 1,
+		SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
+		SERIALISE_PROPERTY(u64, m_hash, 1, 0)
+		);
 }
 
 namespace std

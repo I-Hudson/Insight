@@ -764,6 +764,8 @@ public:
 #endif // TOBJECTPTR_REF_COUNTING
 	}
 
+	Ptr Get() const { return m_ptr; }
+
 #ifdef TEST_ENABLED
 	ReferenceCountObject*		GetReferenceCountObject()	const { return m_refCount; }
 	Ptr							GetPtr()					const { return m_ptr; }
@@ -1084,6 +1086,8 @@ public:
 		m_refCount = nullptr;
 #endif
 	}
+
+	Ptr Get() const { return m_ptr; }
 
 #ifdef TEST_ENABLED
 	ReferenceCountObject*		GetReferenceCountObject()	const { return m_refCount; }

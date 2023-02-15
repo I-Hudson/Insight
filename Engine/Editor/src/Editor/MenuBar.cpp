@@ -11,6 +11,8 @@
 #include "Serialisation/JsonSerialiser.h"
 #include "World/WorldSystem.h"
 
+#include "Resource/ResourceManager.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -107,6 +109,18 @@ namespace Insight
                         {
                             activeWorld->Destroy();
                         }
+                    }
+                    if (ImGui::MenuItem("Save Resource Database"))
+                    {
+                        Runtime::ResourceManager::SaveDatabase();
+                    }
+                    if (ImGui::MenuItem("Load Resource Database"))
+                    {
+                        Runtime::ResourceManager::LoadDatabase();
+                    }
+                    if (ImGui::MenuItem("Clear Resource Database"))
+                    {
+                        Runtime::ResourceManager::ClearDatabase();
                     }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();

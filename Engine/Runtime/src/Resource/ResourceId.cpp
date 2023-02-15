@@ -44,6 +44,8 @@ namespace Insight
         ResourceId::~ResourceId()
         { }
 
+        IS_SERIALISABLE_CPP(ResourceId)
+
         const std::string& ResourceId::GetPath() const
         {
             return m_path;

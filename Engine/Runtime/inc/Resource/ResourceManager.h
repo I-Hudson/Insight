@@ -17,6 +17,10 @@ namespace Insight
         {
         public:
 
+            static void SaveDatabase();
+            static void LoadDatabase();
+            static void ClearDatabase();
+
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);

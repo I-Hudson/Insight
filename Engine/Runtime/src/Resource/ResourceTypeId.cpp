@@ -8,11 +8,16 @@ namespace Insight
 	{
 		std::unordered_map<ResourceTypeId, ResourceTypeIdToResource::CreateFunc> ResourceTypeIdToResource::m_map;
 
+		ResourceTypeId::ResourceTypeId()
+		{ }
+
 		ResourceTypeId::ResourceTypeId(const char* type_name)
 			: m_type_name(type_name)
 			, m_hash(std::hash<ResourceTypeId>()(*this))
 		{
 		}
+
+		IS_SERIALISABLE_CPP(ResourceTypeId)
 
 		std::string ResourceTypeId::GetTypeName() const
 		{

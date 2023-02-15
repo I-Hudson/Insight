@@ -71,8 +71,14 @@ namespace Insight
 			m_resource_state = EResoruceStates::Not_Loaded;
 		}
 
+		IResource::IResource(IResource const& other)
+		{
+		}
+
 		IResource::~IResource()
 		{ }
+
+		IS_SERIALISABLE_CPP(IResource)
 
 		std::string IResource::GetFilePath() const
 		{

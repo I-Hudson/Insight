@@ -8,6 +8,9 @@
 #include "FileSystem/FileSystem.h"
 #include "Threading/TaskSystem.h"
 
+#include "Serialisation/JsonSerialiser.h"
+#include "Serialisation/Archive.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -54,6 +57,39 @@ namespace Insight
                 StartLoading(resourceToLoad);
             }
             queueLock.unlock();
+        }
+
+        void ResourceManager::SaveDatabase()
+        {
+            if (!s_database)
+            {
+                return;
+            }
+            Serialisation::JsonSerialiser serialiser(false);
+            s_database->Serialise(&serialiser);
+            
+            Archive archive("./ResourceDatabase.isdatabase", ArchiveModes::Write);
+            archive.Write(serialiser.GetSerialisedData());
+            archive.Close();
+        }
+
+        void ResourceManager::LoadDatabase()
+        {
+            if (!s_database)
+            {
+                return;
+            }
+            Archive archive("./ResourceDatabase.isdatabase", ArchiveModes::Read);
+            archive.Close();
+
+            Serialisation::JsonSerialiser serialiser(true);
+            serialiser.Deserialise(archive.GetData());
+            s_database->Deserialise(&serialiser);
+        }
+
+        void ResourceManager::ClearDatabase()
+        {
+            s_database->Shutdown();
         }
 
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)

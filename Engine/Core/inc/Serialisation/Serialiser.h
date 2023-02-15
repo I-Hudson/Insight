@@ -79,14 +79,14 @@
         if (!serialiser->IsReadMode())\
         {\
             using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorSerialiser;\
+            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorSerialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }\
         else\
         {\
             using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorProperty> vectorDeserialiser;\
+            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorDeserialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }
@@ -105,16 +105,28 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         if (!serialiser->IsReadMode())\
         {\
             using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorObject> vectorSerialiser;\
+            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorSerialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
         }\
         else\
         {\
             using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::VectorObject> vectorDeserialiser;\
+            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorDeserialiser;\
             const u32 VersionRemoved = VERSION_REMOVED;\
             vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+        }
+
+#define SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        if (!serialiser->IsReadMode())\
+        {\
+            using TMapType = std::remove_const_t<typename std::decay<decltype(PPCAT(object., PROPERTY))>::type>;\
+            ::Insight::Serialisation::MapSerialiser<KEY_SERIALISER, VALUE_SERIALISER, TMapType, ::Insight::Serialisation::SerialiserType::Object> mapSerialiser;\
+            const u32 VersionRemoved = VERSION_REMOVED;\
+            mapSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+        }\
+        else\
+        {\
         }
 
 #define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
@@ -132,10 +144,15 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)             SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Cast the serialiser object to 'BASE_TYPE_SERIALISER' and use a SerialiserObject.
 #define SERIALISE_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)                               SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)
+
 // Serialise a vector property with a ProertySerialiser.
 #define SERIALISE_VECTOR_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)    SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise a vector property with a SerialiserObject.
 #define SERIALISE_VECTOR_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
+//
+#define SERIALISE_MAP_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED) SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
 // Serialise anything. This should be used when there is a certain requirement needed. 
 // An example could be loading entities.
 #define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)            SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)

@@ -1,4 +1,5 @@
 #include "Resource/ResourceDatabase.h"
+#include "Resource/ResourceDatabase.inl"
 #include "Resource/ResourceManager.h"
 
 #include "Resource/Material.h"
@@ -10,6 +11,12 @@ namespace Insight
 {
     namespace Runtime
     {
+        IS_SERIALISABLE_CPP(ResourceDatabase)
+
+        ResourceDatabase::ResourceDatabase(ResourceDatabase const& other)
+        {
+        }
+
         void ResourceDatabase::Initialise()
         {
             ASSERT(Platform::IsMainThread());
@@ -24,6 +31,10 @@ namespace Insight
             ASSERT(Platform::IsMainThread());
             for (auto& pair : m_resources)
             {
+                if (pair.second->IsLoaded())
+                {
+                    pair.second->UnLoad();
+                }
                 DeleteResource(pair.second);
             }
             m_resources.clear();

@@ -6,6 +6,7 @@
 #include "Resource/Resource.h"
 
 #include "Serialisation/Serialiser.h"
+#include "Serialisation/ISerialisable.h"
 
 #include <mutex>
 
@@ -16,19 +17,21 @@ namespace Insight
         class ResourceManager;
 
         /// @brief Database to store all currently known resources.
-        class ResourceDatabase
+        class ResourceDatabase : public Serialisation::ISerialisable
         {
         public:
             using ResourceMap = std::unordered_map<ResourceId, TObjectPtr<IResource>>;
             using ResourceOwningMap = std::unordered_map<ResourceId, TObjectOPtr<IResource>>;
 
             ResourceDatabase() = default;
+            ResourceDatabase(ResourceDatabase const& other);
+            ResourceDatabase(ResourceDatabase&& other) = default;
             ~ResourceDatabase() = default;
+
+            IS_SERIALISABLE_H(ResourceDatabase)
 
             void Initialise();
             void Shutdown();
-
-            //IS_SERIALISABLE(ResourceDatabase);
 
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
@@ -60,7 +63,17 @@ namespace Insight
         };
     }
 
-    //OBJECT_SERIALISER(Runtime::ResourceDatabase, 1,
-    //    SERIALISE_PROPERTY_UMAP(Runtime::ResourceId, TObjectOPtr<Runtime::IResource>, m_resources, 1, 0)
-    //    );
+    namespace Serialisation
+    {
+        struct ResourceDatabase1 {};
+        template<>
+        struct ComplexSerialiser<ResourceDatabase1, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
+        {
+            void operator()(Runtime::ResourceDatabase::ResourceOwningMap const& map, Runtime::ResourceDatabase* resourceDatabase, ISerialiser* serialiser) const;
+        };
+    }
+
+    OBJECT_SERIALISER(Runtime::ResourceDatabase, 1,
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabase1, m_resources, 1, 0)
+        );
 }

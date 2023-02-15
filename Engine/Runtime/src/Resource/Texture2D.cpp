@@ -27,6 +27,7 @@ namespace Insight
 		{
 			Renderer::FreeTexture(m_rhi_texture);
 			m_rhi_texture = nullptr;
+			m_resource_state = EResoruceStates::Unloaded;
 		}
 
 		void Texture2D::Save(const std::string& file_path)

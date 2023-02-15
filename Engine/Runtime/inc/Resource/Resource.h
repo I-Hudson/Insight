@@ -75,13 +75,16 @@ namespace Insight
 		};
 
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
-		class IS_RUNTIME IResource
+		class IS_RUNTIME IResource : public Serialisation::ISerialisable
 		{
 		public:
 			IResource();
+			IResource(IResource const& other);
 			virtual ~IResource();
 
 			THREAD_SAFE;
+
+			IS_SERIALISABLE_H(IResource)
 
 			/// @brief Return thr full file path (From drive letter C:\\).
 			std::string GetFilePath() const;
@@ -198,6 +201,12 @@ namespace Insight
 			friend class ResourceDatabase;
 		};
 	}
+
+	OBJECT_SERIALISER(Runtime::IResource, 1,
+		SERIALISE_PROPERTY(std::string, m_source_file_path, 1, 0)
+		SERIALISE_PROPERTY(std::string, m_file_path, 1, 0)
+		SERIALISE_OBJECT(Runtime::ResourceId, m_resourceId, 1, 0)
+	);
 }
 
 #define REGISTER_RESOURCE(type_name) public: \

@@ -43,6 +43,11 @@ namespace Insight
         void Write(const char* data, u64 size);
         void Write(const void* data, u64 size);
         void Write(const Byte* data, u64 size);
+        template<typename T>
+        void Write(std::vector<T> const& data)
+        {
+            Write(data.data(), data.size() * sizeof(T));
+        }
 
     private:
         void CreateEmpty();

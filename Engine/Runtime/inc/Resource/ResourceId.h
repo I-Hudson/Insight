@@ -10,7 +10,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class IS_RUNTIME ResourceId
+        class IS_RUNTIME ResourceId : public Serialisation::ISerialisable
         {
         public:
             ResourceId();
@@ -19,6 +19,8 @@ namespace Insight
             ResourceId(const ResourceId& other);
             ResourceId(ResourceId&& other);
             ~ResourceId();
+
+            IS_SERIALISABLE_H(ResourceId)
 
             const std::string& GetPath() const;
             const ResourceTypeId& GetTypeId() const;
@@ -40,11 +42,11 @@ namespace Insight
         };
     }
 
-    //OBJECT_SERIALISER(Runtime::ResourceId, 1,
-    //    SERIALISE_PROPERTY(std::string, m_path, 1, 0)
-    //    SERIALISE_OBJECT(Runtime::ResourceTypeId, m_typeId, 1, 0)
-    //    SERIALISE_PROPERTY(u64, m_id, 1, 0)
-    //    );
+    OBJECT_SERIALISER(Runtime::ResourceId, 1,
+        SERIALISE_PROPERTY(std::string, m_path, 1, 0)
+        SERIALISE_OBJECT(Runtime::ResourceTypeId, m_typeId, 1, 0)
+        SERIALISE_PROPERTY(u64, m_id, 1, 0)
+        );
 }
 
 namespace std
