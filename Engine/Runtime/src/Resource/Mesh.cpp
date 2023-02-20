@@ -20,6 +20,8 @@ namespace Insight
 
 		}
 
+		IS_SERIALISABLE_CPP(Mesh)
+
 		void Mesh::Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index)
 		{
 			lod_index = std::min(lod_index, static_cast<u32>(m_lods.size()));

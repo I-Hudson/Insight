@@ -21,6 +21,11 @@ namespace Insight
             static void LoadDatabase();
             static void ClearDatabase();
 
+            /// @brief Create a resource reference, but don't load it.
+            /// @param resourceId 
+            /// @return TObjectPtr<IResource>
+            static TObjectPtr<IResource> Create(ResourceId const& resourceId);
+
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);

@@ -168,8 +168,19 @@ namespace Insight
 					{
 						//TODO Link the mesh as a resrouce and link all the textures as resources.
 						// We are in the process of loading a model, add a new mesh to the model.
-						new_mesh = NewTracked(Mesh);
-						loader_data.Model->m_meshes.push_back(new_mesh);
+						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
+						{ 
+							new_mesh = NewTracked(Mesh);
+							loader_data.Model->m_meshes.push_back(new_mesh);
+						}
+						else
+						{
+							new_mesh = loader_data.Model->m_meshes.at(loader_data.MeshIndex);
+							std::string guid = new_mesh->GetGuid().ToString();
+							IS_UNUSED(guid);
+						}
+						++loader_data.MeshIndex;
+
 						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
 						new_mesh->m_file_path = loader_data.Directoy + '/' + new_mesh->m_mesh_name;

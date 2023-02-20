@@ -17,17 +17,21 @@ namespace Insight
             std::vector<Core::GUID> GUIDS;
         };
 
-        struct BaseProjectInfo : public BaseBaseProjectInfo
+        struct BaseProjectInfo : public Serialisation::ISerialisable, public BaseBaseProjectInfo
         {
             Core::GUID GUID;
+
+            IS_SERIALISABLE_H(BaseProjectInfo)
         };
 
-        struct ProjectPointerData
+        struct ProjectPointerData : public Serialisation::ISerialisable
         {
             int Age; // Project age
+            
+            IS_SERIALISABLE_H(ProjectPointerData)
         };
 
-        struct ProjectInfo : public BaseProjectInfo, public Serialisation::ISerialisable
+        struct ProjectInfo : public BaseProjectInfo
         {
             std::string ProjectPath;
             std::string ProjectName;

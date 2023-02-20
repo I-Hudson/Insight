@@ -13,33 +13,36 @@ namespace Insight
                 ASSERT(serialiser);
                 if (serialiser->IsReadMode())
                 {
-                    u64 resoucesToSave = 0;
-                    serialiser->StartArray("Resources", resoucesToSave);
-                    for (u64 i = 0; i < resoucesToSave; ++i)
+                    u64 resourcesToSave = 0;
+                    serialiser->StartArray("Resources", resourcesToSave);
+                    for (u64 i = 0; i < resourcesToSave; ++i)
                     {
                         Runtime::ResourceId resouceId;
                         resouceId.Deserialise(serialiser);
-                        Runtime::ResourceManager::Load(resouceId);
+
+                        TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Create(resouceId);
+                        resource->Deserialise(serialiser);
                     }
                     serialiser->StopArray();
                 }
                 else
                 {
-                    u64 resoucesToSave = 0;
+                    u64 resourcesToSave = 0;
                     for (auto const& pair : map)
                     {
                         if (!pair.second->IsDependentOnAnotherResource())
                         {
-                            ++resoucesToSave;
+                            ++resourcesToSave;
                         }
                     }
 
-                    serialiser->StartArray("Resources", resoucesToSave);
+                    serialiser->StartArray("Resources", resourcesToSave);
                     for (auto const& pair : map)
                     {
                         if (!pair.second->IsDependentOnAnotherResource())
                         {
                             const_cast<Runtime::ResourceId&>(pair.first).Serialise(serialiser);
+                            pair.second->Serialise(serialiser);
                         }
                     }
                     serialiser->StopArray();

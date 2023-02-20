@@ -97,6 +97,11 @@ namespace Insight
 			return m_resource_state;
 		}
 
+		Core::GUID IResource::GetGuid() const
+		{
+			return m_guid;
+		}
+
 		const ResourceReferenceLink* IResource::GetReferenceLink(u32 index) const
 		{
 			std::lock_guard lock(m_mutex);

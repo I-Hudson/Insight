@@ -25,7 +25,7 @@
         void TYPE::Serialise(::Insight::Serialisation::ISerialiser* serialiser)\
         {\
             ::Insight::Serialisation::SerialiserObject<TYPE> serialiserObject;\
-            serialiserObject.Serialise(this, serialiser);\
+            serialiserObject.Serialise(serialiser, *this);\
         }\
         void TYPE::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)\
         {\
@@ -37,40 +37,54 @@
 #define SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            ::Insight::Serialisation::SerialiseProperty<TYPE_SERIALISER>(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                ::Insight::Serialisation::SerialiseProperty<TYPE_SERIALISER>(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }\
         else\
         {\
-            using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            PPCAT(object., PROPERTY) = std::move(::Insight::Serialisation::DeserialiseProperty<TYPE_SERIALISER, PropertyType>(serialiser, #PROPERTY_NAME));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
+                PPCAT(object., PROPERTY) = std::move(::Insight::Serialisation::DeserialiseProperty<TYPE_SERIALISER, PropertyType>(serialiser, #PROPERTY_NAME));\
+            }\
         }
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            ::Insight::Serialisation::SerialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                ::Insight::Serialisation::SerialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
+            }\
         }\
         else\
         {\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            ::Insight::Serialisation::DeserialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                ::Insight::Serialisation::DeserialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
+            }\
         }
 
 #define SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            BASE_TYPE* baseType = static_cast<BASE_TYPE*>(&object);\
-            ::Insight::Serialisation::SerialiseBase<BASE_TYPE>(serialiser, *baseType);\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                BASE_TYPE* baseType = static_cast<BASE_TYPE*>(&object);\
+                ::Insight::Serialisation::SerialiseBase<BASE_TYPE>(serialiser, *baseType);\
+            }\
         }\
         else\
         {\
-            ::Insight::Serialisation::SerialiserObject<BASE_TYPE> objectSerialiser; \
-            BASE_TYPE* baseTypePtr = static_cast<BASE_TYPE*>(&object);\
-            BASE_TYPE& baseTypeRef = *baseTypePtr;\
-            objectSerialiser.Deserialise(serialiser, baseTypeRef);\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                ::Insight::Serialisation::SerialiserObject<BASE_TYPE> objectSerialiser; \
+                BASE_TYPE* baseTypePtr = static_cast<BASE_TYPE*>(&object);\
+                BASE_TYPE& baseTypeRef = *baseTypePtr;\
+                objectSerialiser.Deserialise(serialiser, baseTypeRef);\
+            }\
         }
 
 
@@ -78,17 +92,21 @@
 #define SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorSerialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorSerialiser;\
+                vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }\
         else\
         {\
-            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorDeserialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> vectorDeserialiser;\
+                vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }
 
 /*
@@ -104,26 +122,32 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorSerialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::VectorSerialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorSerialiser;\
+                vectorSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }\
         else\
         {\
-            using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
-            ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorDeserialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::VectorDeserialiser<TVectorType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> vectorDeserialiser;\
+                vectorDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }
 
 #define SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
-            using TMapType = std::remove_const_t<typename std::decay<decltype(PPCAT(object., PROPERTY))>::type>;\
-            ::Insight::Serialisation::MapSerialiser<KEY_SERIALISER, VALUE_SERIALISER, TMapType, ::Insight::Serialisation::SerialiserType::Object> mapSerialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED;\
-            mapSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TMapType = std::remove_const_t<typename std::decay<decltype(PPCAT(object., PROPERTY))>::type>;\
+                ::Insight::Serialisation::MapSerialiser<KEY_SERIALISER, VALUE_SERIALISER, TMapType, ::Insight::Serialisation::SerialiserType::Object> mapSerialiser;\
+                mapSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
         }\
         else\
         {\
@@ -131,11 +155,13 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 
 #define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         {\
-            using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
-            using ObjectType = typename std::decay<decltype(object)>::type;\
-            ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
-            const u32 VersionRemoved = VERSION_REMOVED; \
-            complexSerialiser(PPCAT(object., PROPERTY), &object, serialiser); \
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
+                using ObjectType = typename std::decay<decltype(object)>::type;\
+                ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
+                complexSerialiser(PPCAT(object., PROPERTY), &object, serialiser);\
+            }\
         }
 
 // Serialise a single property with a ProertySerialiser.
@@ -159,7 +185,7 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 
 #define SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
     public:\
-        void Serialise(OBJECT_TYPE& object, ::Insight::Serialisation::ISerialiser* serialiser)\
+        void Serialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object)\
         {\
             const u32 currentVersion = CURRENT_VERSION;\
             serialiser->StartObject(#OBJECT_TYPE);\
@@ -172,18 +198,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
             __VA_ARGS__\
             serialiser->StopObject();\
         }\
-        void Serialise(OBJECT_TYPE* object, ::Insight::Serialisation::ISerialiser* serialiser)\
-        {\
-            Serialise(*object, serialiser);\
-        }\
 
 #define DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
-        OBJECT_TYPE Deserialise(::Insight::Serialisation::ISerialiser* serialiser)\
-        {\
-            OBJECT_TYPE object;\
-            Deserialise(serialiser, object);\
-            return object;\
-        }\
         void Deserialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object)\
         {\
             u32 currentVersion = CURRENT_VERSION;\

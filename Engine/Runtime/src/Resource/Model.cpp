@@ -21,6 +21,18 @@ namespace Insight
 {
 	namespace Runtime
 	{
+		void Model::Serialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			::Insight::Serialisation::SerialiserObject<Model> serialiserObject;
+			serialiserObject.Serialise(serialiser, *this);
+		}
+
+		void Model::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			::Insight::Serialisation::SerialiserObject<Model> serialiserObject;
+			serialiserObject.Deserialise(serialiser, *this);
+		}
+
 		Mesh* Model::GetMesh() const
 		{
 			return GetMeshByIndex(0);
@@ -52,7 +64,6 @@ namespace Insight
 
 		void Model::Load()
 		{
-			ASSERT(m_meshes.size() == 0);
 			if (!AssimpLoader::LoadModel(this, m_file_path, AssimpLoader::Default_Model_Importer_Flags))
 			{
 				m_resource_state = EResoruceStates::Failed_To_Load;

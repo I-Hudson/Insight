@@ -19,6 +19,8 @@ namespace Insight
 {
     namespace Editor
     {
+        IS_SERIALISABLE_CPP(BaseProjectInfo)
+        IS_SERIALISABLE_CPP(ProjectPointerData)
         IS_SERIALISABLE_CPP(ProjectInfo)
 
         ProjectSystem::~ProjectSystem()

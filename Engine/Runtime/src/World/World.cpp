@@ -139,7 +139,7 @@ namespace Insight
 		void World::Serialise(Serialisation::ISerialiser* serialiser)
 		{
 			Serialisation::SerialiserObject<World> serialiserObject;
-			serialiserObject.Serialise(this, serialiser);
+			serialiserObject.Serialise(serialiser, *this);
 		}
 
 		void World::Deserialise(Serialisation::ISerialiser* serialiser)

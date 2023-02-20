@@ -90,6 +90,8 @@ namespace Insight
 
 				std::string Directoy;
 
+				u64 MeshIndex = 0;
+
 				Model* Model = nullptr;
 				Mesh* Mesh = nullptr;
 			};

@@ -18,6 +18,8 @@ namespace Insight
 			REGISTER_RESOURCE(Model);
 		public:
 
+			IS_SERIALISABLE_H(Model)
+
 			Mesh* GetMesh() const;
 			Mesh* GetMeshByIndex(u32 index) const;
 
@@ -47,4 +49,23 @@ namespace Insight
 			friend class AssimpLoader;
 		};
 	}
+
+	namespace Serialisation
+	{
+		struct MeshToGuid{ };
+		template<>
+		struct ComplexSerialiser<MeshToGuid, std::vector<Runtime::Mesh*>, Runtime::Model>
+		{
+			std::string operator()(std::vector<Runtime::Mesh*> const& meshes, Runtime::Model* model, ISerialiser* serialiser) const
+			{
+				return "";
+			}
+
+		};
+	}
+
+	OBJECT_SERIALISER(Runtime::Model, 2,
+		SERIALISE_BASE(Runtime::IResource, 1, 0)
+		SERIALISE_VECTOR_OBJECT(Runtime::Mesh, m_meshes, 2, 0)
+	);
 }

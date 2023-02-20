@@ -35,15 +35,8 @@ namespace Insight
         {
             // If the object derives from 'ISerialisable' then it might be over-ridden so
             // call the 'Serialise' function in case of this.
-            if constexpr (std::is_base_of_v<ISerialisable, Type>)
-            {
-                data.Serialise(serialiser);
-            }
-            else
-            {
-                ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
-                objectSerialiser.Serialise(data, serialiser);
-            }
+            static_assert(std::is_base_of_v<ISerialisable, Type>, "[SerialiseBase] 'Type' does not inherit 'ISerialisable'.");
+            data.Serialise(serialiser);
         }
         template<typename Type>
         void SerialiseObject(ISerialiser* serialiser, Type* data)
@@ -55,8 +48,7 @@ namespace Insight
         void SerialiseBase(ISerialiser* serialiser, Type& data)
         {
             ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
-            objectSerialiser.Serialise(data, serialiser);
-
+            objectSerialiser.Serialise(serialiser, data);
         }
 
         template<typename TypeSerialiser, typename TValue, SerialiserType SerialiserType>
@@ -66,14 +58,14 @@ namespace Insight
             {
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.Get())>>;
                     static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v.Get());
                 }
                 else
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v.Get())>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.Get())>>;
                     static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
                     ::Insight::Serialisation::SerialiseObject<TypeSerialiser>(serialiser, *v.Get());
@@ -83,14 +75,14 @@ namespace Insight
             {
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.get())>>;
                     static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v.get());
                 }
                 else
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v.get())>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.get())>>;
                     static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
                     ::Insight::Serialisation::SerialiseObject<TypeSerialiser>(serialiser, *v.Get());
@@ -100,14 +92,14 @@ namespace Insight
             {
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v)>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v)>>;
                     static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v);
                 }
                 else
                 {
-                    using TVectorElementType = std::remove_pointer_t<decltype(v)>;
+                    using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v)>>;
                     static_assert(std::is_same_v<TVectorElementType, TypeSerialiser>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser. Did you mean to use PropertySerialiser?");
                     ::Insight::Serialisation::SerialiseObject<TypeSerialiser>(serialiser, *v);
@@ -138,15 +130,8 @@ namespace Insight
         template<typename Type>
         void DeserialiseObject(ISerialiser* serialiser, Type& v)
         {
-            if constexpr (std::is_base_of_v<ISerialisable, Type>)
-            {
-                v.Deserialise(serialiser);
-            }
-            else
-            {
-                ::Insight::Serialisation::SerialiserObject<Type> objectSerialiser;
-                objectSerialiser.Deserialise(serialiser, v);
-            }
+            static_assert(std::is_base_of_v<ISerialisable, Type>, "[SerialiseBase] 'Type' does not inherit 'ISerialisable'.");
+            v.Deserialise(serialiser);
         }
 
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
@@ -154,11 +139,7 @@ namespace Insight
         template<typename T>
         struct SerialiserObject
         {
-            void Serialise(T& object, ISerialiser* serialiser)
-            {
-                assert(false);
-            }
-            void Serialise(T* object, ISerialiser* serialiser)
+            void Serialise(ISerialiser* serialiser, T& object)
             {
                 assert(false);
             }
@@ -278,13 +259,19 @@ namespace Insight
                     }
                     else if constexpr (std::is_pointer_v<T>)
                     {
+                        if (v == nullptr)
+                        {
+                            using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(*object.begin())>>;
+                            v = New<TVectorElementType>();
+                        }
+
                         if constexpr (SerialiserType == SerialiserType::Property)
                         {
                             v = std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, T>(serialiser, name));
                         }
                         else
                         {
-                            ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, v);
+                            ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, *v);
                         }
                     }
                     else

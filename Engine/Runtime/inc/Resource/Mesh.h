@@ -47,6 +47,8 @@ namespace Insight
 			Mesh();
 			virtual ~Mesh() override;
 
+			IS_SERIALISABLE_H(Mesh)
+
 			void Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index = 0);
 
 			/// @brief Return the transform from orgin from the model file.
@@ -93,4 +95,8 @@ namespace Insight
 			friend struct RenderMesh;
 		};
 	}
+
+	OBJECT_SERIALISER(Runtime::Mesh, 1,
+		SERIALISE_BASE(Runtime::IResource, 1, 0)
+	);
 }

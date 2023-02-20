@@ -92,6 +92,22 @@ namespace Insight
             s_database->Shutdown();
         }
 
+        TObjectPtr<IResource> ResourceManager::Create(ResourceId const& resourceId)
+        {
+            ASSERT(s_database);
+
+            TObjectPtr<IResource> resource;
+            if (s_database->HasResource(resourceId))
+            {
+                resource = s_database->GetResource(resourceId);
+            }
+            else
+            {
+                resource = s_database->AddResource(resourceId);
+            }
+            return resource;
+        }
+
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
         {
             ASSERT(s_database);
