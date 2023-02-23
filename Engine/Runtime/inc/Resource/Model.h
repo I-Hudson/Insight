@@ -50,20 +50,6 @@ namespace Insight
 		};
 	}
 
-	namespace Serialisation
-	{
-		struct MeshToGuid{ };
-		template<>
-		struct ComplexSerialiser<MeshToGuid, std::vector<Runtime::Mesh*>, Runtime::Model>
-		{
-			std::string operator()(std::vector<Runtime::Mesh*> const& meshes, Runtime::Model* model, ISerialiser* serialiser) const
-			{
-				return "";
-			}
-
-		};
-	}
-
 	OBJECT_SERIALISER(Runtime::Model, 2,
 		SERIALISE_BASE(Runtime::IResource, 1, 0)
 		SERIALISE_VECTOR_OBJECT(Runtime::Mesh, m_meshes, 2, 0)

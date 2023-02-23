@@ -1,4 +1,5 @@
 #include "ECS/Components/MeshComponent.h"
+#include "ECS/Components/MeshComponent.inl"
 
 #include "Resource/Mesh.h"
 #include "Resource/Material.h"

@@ -121,6 +121,23 @@ namespace Insight
             return resource;
         }
 
+        TObjectPtr<IResource> ResourceDatabase::GetResourceFromGuid(Core::GUID const& guid) const
+        {
+            TObjectPtr<IResource> resource;
+            {
+                std::lock_guard lock(m_mutex);
+                for (auto& pair : m_resources)
+                {
+                    if (pair.second->GetGuid() == guid) 
+                    {
+                        resource = pair.second;
+                        break;
+                    }
+                }
+            }
+            return resource;
+        }
+
         ResourceDatabase::ResourceMap ResourceDatabase::GetResourceMap() const
         {
             std::unordered_map<ResourceId, TObjectPtr<IResource>> ResourceMap;

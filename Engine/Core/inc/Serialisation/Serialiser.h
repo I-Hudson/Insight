@@ -160,7 +160,7 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
                 using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
                 using ObjectType = typename std::decay<decltype(object)>::type;\
                 ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
-                complexSerialiser(PPCAT(object., PROPERTY), &object, serialiser);\
+                complexSerialiser(serialiser, PPCAT(object., PROPERTY), &object);\
             }\
         }
 

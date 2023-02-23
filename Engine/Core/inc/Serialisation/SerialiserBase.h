@@ -326,7 +326,7 @@ namespace Insight
         template<typename TypeSerialiser, typename T, typename TObjectType>
         struct ComplexSerialiser
         {
-            void operator()(T const& v, TObjectType* object, ISerialiser* serialiser) const
+            void operator()(ISerialiser* serialiser, T& v, TObjectType* object) const
             {
                 assert(false);
             }

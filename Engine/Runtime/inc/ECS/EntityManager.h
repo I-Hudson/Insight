@@ -103,7 +103,7 @@ namespace Insight
 		template<>
 		struct ComplexSerialiser<EntityManagerEntities1, std::vector<UPtr<ECS::Entity>>, ECS::EntityManager>
 		{
-			void operator()(std::vector<UPtr<ECS::Entity>>& entities, ECS::EntityManager* entityManager, ISerialiser* serialiser) const
+			void operator()(ISerialiser* serialiser, std::vector<UPtr<ECS::Entity>>& entities, ECS::EntityManager* entityManager) const
 			{
 				ASSERT(serialiser);
 

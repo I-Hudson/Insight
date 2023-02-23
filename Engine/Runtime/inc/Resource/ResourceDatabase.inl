@@ -8,7 +8,7 @@ namespace Insight
     namespace Serialisation
     {
         void ComplexSerialiser<ResourceDatabase1, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>::operator()
-            (Runtime::ResourceDatabase::ResourceOwningMap const& map, Runtime::ResourceDatabase* resourceDatabase, ISerialiser* serialiser) const
+            (ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const
             {
                 ASSERT(serialiser);
                 if (serialiser->IsReadMode())

@@ -38,6 +38,8 @@ namespace Insight
             void RemoveResource(ResourceId const& resourceId);
 
             TObjectPtr<IResource> GetResource(ResourceId const& resourceId) const;
+            TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid) const;
+            
             ResourceMap GetResourceMap() const;
             
             bool HasResource(ResourceId const& resourceId) const;
@@ -69,7 +71,7 @@ namespace Insight
         template<>
         struct ComplexSerialiser<ResourceDatabase1, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
         {
-            void operator()(Runtime::ResourceDatabase::ResourceOwningMap const& map, Runtime::ResourceDatabase* resourceDatabase, ISerialiser* serialiser) const;
+            void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
         };
     }
 

@@ -279,7 +279,7 @@ namespace Insight
 		template<>
 		struct ComplexSerialiser<EntityComponent1, std::vector<RPtr<ECS::Component>>, ECS::Entity>
 		{
-			void operator()(std::vector<RPtr<ECS::Component>>& components, ECS::Entity* entity, ISerialiser* serialiser) const
+			void operator()(ISerialiser* serialiser, std::vector<RPtr<ECS::Component>>& components, ECS::Entity* entity) const
 			{
 				if (serialiser->IsReadMode())
 				{

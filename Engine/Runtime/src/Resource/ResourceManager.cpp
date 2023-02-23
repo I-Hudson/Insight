@@ -108,6 +108,12 @@ namespace Insight
             return resource;
         }
 
+        TObjectPtr<IResource> ResourceManager::GetResourceFromGuid(Core::GUID const& guid)
+        {
+            ASSERT(s_database);
+            return s_database->GetResourceFromGuid(guid);
+        }
+
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
         {
             ASSERT(s_database);
