@@ -48,6 +48,7 @@ namespace Insight
 
         void JsonSerialiser::StopObject()
         {
+            ASSERT(IsObjectNode());
             if (IsReadMode())
             {
                 m_reader.Pop();
@@ -69,11 +70,13 @@ namespace Insight
             {
                 Write(std::string(name) + c_ArraySize, size);
                 m_writer.Push(name, NodeStates::Array);
+                m_writer.Top().ArraySize = size;
             }
         }
 
         void JsonSerialiser::StopArray()
         {
+            ASSERT(IsArrayNode());
             if (IsReadMode())
             {
                 m_reader.Pop();
@@ -170,6 +173,30 @@ namespace Insight
         void JsonSerialiser::Read(std::string_view tag, std::string& string)
         {
             ReadValue<std::string>(tag, string);
+        }
+
+        bool JsonSerialiser::IsObjectNode() const
+        {
+            if (m_isReadMode)
+            {
+                return m_reader.TopState() == NodeStates::Object;
+            }
+            else
+            {
+                return m_writer.TopState() == NodeStates::Object;
+            }
+        }
+
+        bool JsonSerialiser::IsArrayNode() const
+        {
+            if (m_isReadMode)
+            {
+                return m_reader.TopState() == NodeStates::Array;
+            }
+            else
+            {
+                return m_writer.TopState() == NodeStates::Array;
+            }
         }
     }
 }

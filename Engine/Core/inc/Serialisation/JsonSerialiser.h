@@ -61,6 +61,7 @@ namespace Insight
                 if (m_writer.TopState() == NodeStates::Array)
                 {
                     m_writer.TopNode().push_back(data);
+                    ++m_writer.Top().ArrayIndex;
                 }
                 else
                 {
@@ -86,6 +87,9 @@ namespace Insight
                 }
             }
 
+            bool IsObjectNode() const;
+            bool IsArrayNode() const;
+
         private:
             enum class NodeStates { None, Object, Array };
 
@@ -99,8 +103,13 @@ namespace Insight
                 };
 
                 JsonNode& Top() { return Nodes.top(); }
+                JsonNode const& Top() const { return Nodes.top(); }
+
                 nlohmann::json& TopNode() { return Nodes.top().Node; }
+                nlohmann::json const& TopNode() const { return Nodes.top().Node; }
+
                 NodeStates& TopState() { return Nodes.top().NoneStats; }
+                NodeStates const& TopState() const { return Nodes.top().NoneStats; }
 
                 void Push(std::string_view name, NodeStates state)
                 {
@@ -171,6 +180,15 @@ namespace Insight
                     NodeStates NoneStats;
                     std::string NodeName;
                     nlohmann::json Node;
+
+                    union
+                    {
+                        struct
+                        {
+                            u32 ArraySize;
+                            u32 ArrayIndex;
+                        };
+                    };
                 };
                 JsonNode& Top() { return Nodes.top(); }
                 nlohmann::json& TopNode() { return Nodes.top().Node; }
@@ -206,6 +224,7 @@ namespace Insight
                     if (TopState() == NodeStates::Array)
                     {
                         Top().Node.push_back(node.Node);
+                        ++Top().ArrayIndex;
                     }
                     else if (TopState() == NodeStates::Object)
                     {

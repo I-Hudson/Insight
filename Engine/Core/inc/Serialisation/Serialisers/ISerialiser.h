@@ -28,6 +28,19 @@ namespace Insight
             Object
         };
 
+        template<typename T>
+        constexpr bool IsSerialiserAllowedType = 
+               std::is_same_v<bool, T> 
+            || std::is_same_v<u8, T>
+            || std::is_same_v<u16, T>
+            || std::is_same_v<u32, T>
+            || std::is_same_v<u64, T>
+            || std::is_same_v<i8, T>
+            || std::is_same_v<i16, T>
+            || std::is_same_v<i32, T>
+            || std::is_same_v<i64, T>
+            || std::is_same_v<std::string, T>;
+
         /// @brief Base class for all serialises used. This defines what data can be saved.
         class IS_CORE ISerialiser
         {
