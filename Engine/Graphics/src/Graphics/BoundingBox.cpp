@@ -22,6 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Graphics/BoundingBox.h"
 #include "Graphics/Mesh.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -116,6 +118,8 @@ namespace Insight
 
         BoundingBox BoundingBox::Transform(const glm::mat4& transform) const
         {
+            IS_PROFILE_FUNCTION();
+
             const glm::vec3 center_new = transform * glm::vec4(GetCenter(), 1);
             const glm::vec3 extent_old = GetExtents();
             const glm::vec3 extend_new = glm::vec3

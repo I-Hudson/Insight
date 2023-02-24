@@ -1,5 +1,7 @@
 #include "ECS/Components/TransformComponent.h"
 
+#include "Core/Profiler.h"
+
 namespace Insight
 {
 	namespace ECS
@@ -16,6 +18,7 @@ namespace Insight
 
 		glm::mat4 TransformComponent::GetTransform() const
 		{
+			IS_PROFILE_FUNCTION();
 			glm::mat4 transform = m_transform;
 			Entity* parentEntity = GetOwnerEntity()->GetParent();
 			while (parentEntity != nullptr)

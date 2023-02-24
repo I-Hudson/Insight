@@ -28,6 +28,7 @@ namespace Insight
 			m_nearPlane = nearPlane;
 			m_farPlane = farPlane;
 			m_projection = glm::ortho(left, right, bottom, top, m_nearPlane, m_farPlane);
+			ComputeProjectionMatrix();
 		}
 
 		void Camera::SetInvertViewMatrix(bool invertViewMatrix)
@@ -39,6 +40,7 @@ namespace Insight
 		{
 			m_view = viewMatrix;
 			ComputeProjectionViewMatrix();
+			ComputeFrustm();
 		}
 
 		void Camera::SetNearPlane(float nearPlane)
@@ -77,14 +79,25 @@ namespace Insight
 			}
 		}
 
+		bool Camera::IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane /*= false*/) const
+		{
+			return m_frusum.IsVisible(center, extent, ignore_near_plane);
+		}
+
+		bool Camera::IsVisible(const Graphics::BoundingBox& boundingbox) const
+		{
+			return IsVisible(boundingbox.GetCenter(), boundingbox.GetExtents());
+		}
+
 		void Camera::ComputeProjectionMatrix()
 		{
 			if (m_cameraType == CameraType::Perspective)
 			{
 				m_aspect = std::max(0.1f, m_aspect);
 				m_projection = glm::perspective(m_fovY, m_aspect, m_nearPlane, m_farPlane);
-				ComputeProjectionViewMatrix();
 			}
+			ComputeProjectionViewMatrix();
+			ComputeFrustm();
 		}
 
 		void Camera::ComputeProjectionViewMatrix()
@@ -103,7 +116,13 @@ namespace Insight
 			{
 				m_projectionView = proj * m_view;
 			}
-		} 
+		}
+
+		void Camera::ComputeFrustm()
+		{
+			m_frusum = Graphics::Frustum(m_view, m_projection, m_farPlane);
+		}
+
 
 
 		//----------------------------------------------------

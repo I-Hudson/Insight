@@ -84,16 +84,16 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			//modelsToAddToScene.push_back({ model_sponza, false });
-			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			modelsToAddToScene.push_back({ model_sponza, false });
+			modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -786,6 +786,8 @@ namespace Insight
 
 					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
 					{
+						IS_PROFILE_SCOPE("Draw Entity");
+
 						ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 						if (!meshComponent
 							|| !meshComponent->GetMesh())
@@ -804,27 +806,34 @@ namespace Insight
 
 						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
 						Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-						boundingBox = boundingBox.Transform(transform_component->GetTransform());
-						// Transform bounding box to world space from local space.
-						if (!camera_frustum.IsVisible(boundingBox))
 						{
-							//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
-							continue;
+							IS_PROFILE_SCOPE("Visible check");
+							boundingBox = boundingBox.Transform(transform_component->GetTransform());
+							// Transform bounding box to world space from local space.
+							if (!camera_frustum.IsVisible(boundingBox))
+							{
+								//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
+								continue;
+							}
 						}
 
 						BufferPerObject object = {};
 						object.Transform = transform_component->GetTransform();
 						object.Previous_Transform = transform_component->GetPreviousTransform();
 
-						// Theses sets and bindings shouldn't chagne.
-						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
-						if (diffuseTexture)
 						{
-							cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
-							object.Textures_Set[0] = 1;
+							IS_PROFILE_SCOPE("Set textures");
+
+							// Theses sets and bindings shouldn't chagne.
+							Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
+							if (diffuseTexture)
+							{
+								cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
+								object.Textures_Set[0] = 1;
+							}
+							//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
+							//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 						}
-						//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
-						//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 
 						cmdList->SetUniform(2, 0, object);
 						//{

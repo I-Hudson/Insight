@@ -47,9 +47,14 @@ namespace Insight
 			float GetAspect()                           const { return m_aspect; }
 			float GetFovY()                             const { return m_fovY; }
 
+			bool IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane = false) const;
+			bool IsVisible(const Graphics::BoundingBox& boundingbox) const;
+
 		private:
 			void ComputeProjectionMatrix();
 			void ComputeProjectionViewMatrix();
+			/// @brief Compute the camera frustum.
+			void ComputeFrustm();
 
 		private:
 			glm::mat4 m_projectionView = glm::mat4(1.0f);
@@ -57,6 +62,7 @@ namespace Insight
 			glm::mat4 m_view = glm::mat4(1.0f);
 
 			CameraType m_cameraType = CameraType::Unknown;
+			Graphics::Frustum m_frusum;
 
 			float m_nearPlane = 0.0f;
 			float m_farPlane = 1024.0f;

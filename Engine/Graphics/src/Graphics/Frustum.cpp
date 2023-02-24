@@ -22,6 +22,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Core/Defines.h"
 #include "Graphics/Frustum.h"
 
+#include "Core/Profiler.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -93,6 +95,7 @@ namespace Insight
             : m_view(view)
             , m_projection(projection)
         {
+            IS_PROFILE_FUNCTION();
             // Calculate the minimum Z distance in the frustum.
             const float z_min = -projection[3][2] / projection[2][2];
             const float r = screen_depth / (screen_depth - z_min);
@@ -190,6 +193,7 @@ namespace Insight
 
         bool Frustum::IsVisible(const glm::vec3& center, const glm::vec3& extent, bool ignore_near_plane /*= false*/) const
         {
+            IS_PROFILE_FUNCTION();
             float radius = 0.0f;
 
             if (!ignore_near_plane)
@@ -249,6 +253,7 @@ namespace Insight
 
         Intersection Frustum::CheckCube(const glm::vec3& center, const glm::vec3& extent) const
         {
+            IS_PROFILE_FUNCTION();
             Intersection result = Intersection::Inside;
             Plane plane_abs;
 
@@ -282,6 +287,8 @@ namespace Insight
 
         Intersection Frustum::CheckSphere(const glm::vec3& center, float radius) const
         {
+            IS_PROFILE_FUNCTION();
+
             // calculate our distances to each of the planes
             for (const auto& plane : m_planes)
             {

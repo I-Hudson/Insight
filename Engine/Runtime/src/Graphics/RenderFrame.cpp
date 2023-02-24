@@ -58,13 +58,28 @@ namespace Insight
 
         RenderFrame renderFrame;
         std::vector<TObjectPtr<Runtime::World>> worlds = worldSystem->GetAllWorlds();
+
         for (TObjectPtr<Runtime::World> const& world : worlds)
         {
             IS_PROFILE_SCOPE("RenderWorld");
             RenderWorld renderWorld;
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
 
-            bool foundMainCamera = false;
+            std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
+            for (Ptr<ECS::Entity>& entity : cameraEntities)
+            {
+                ECS::TransformComponent* transformComponent = entity->GetComponentByName<ECS::TransformComponent>
+                (ECS::TransformComponent::Type_Name);
+                ECS::CameraComponent* cameraComponent = entity->GetComponent<ECS::CameraComponent>();
+                if (renderWorld.MainCamera.IsSet)
+                {
+                    renderWorld.AddCamrea(cameraComponent->GetCamera(), transformComponent->GetTransform());
+                }
+                else
+                {
+                    renderWorld.SetMainCamera(cameraComponent->GetCamera(), transformComponent->GetTransform());
+                }
+            }
 
             for (Ptr<ECS::Entity>& entity : entities)
             {
@@ -75,19 +90,6 @@ namespace Insight
                 }
 
                 ECS::TransformComponent* transformComponent = entity->GetComponentByName<ECS::TransformComponent>(ECS::TransformComponent::Type_Name);
-                if (entity->HasComponentByName(ECS::CameraComponent::Type_Name))
-                {
-                    ECS::CameraComponent* cameraComponent = entity->GetComponent<ECS::CameraComponent>();
-                    if (foundMainCamera)
-                    {
-                        renderWorld.AddCamrea(cameraComponent->GetCamera(), transformComponent->GetTransform());
-                    }
-                    else
-                    {
-                        renderWorld.SetMainCamera(cameraComponent->GetCamera(), transformComponent->GetTransform());
-                        foundMainCamera = true;
-                    }
-                }
 
                 if (entity->HasComponent<ECS::MeshComponent>())
                 {
@@ -102,6 +104,22 @@ namespace Insight
 
                         RenderMesh renderMesh;
                         renderMesh.Transform = transformComponent->GetTransform();
+
+                        Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
+                        bool isVisible = true; 
+                        {
+                            IS_PROFILE_SCOPE("Visible check");
+                            boundingBox = boundingBox.Transform(renderMesh.Transform);
+                            isVisible = renderWorld.MainCamera.Camra.IsVisible(boundingBox);
+                        }
+                        if (!renderWorld.MainCamera.IsSet || !isVisible)
+                        {
+                            // TODO: Setup seperate scene and game worlds and then reenable this.
+                            // The "EditorWorld" should be it's own world then when play is pressed a runtime world 
+                            // should be created.
+                            //continue;
+                        }
+
                         renderMesh.SetMesh(mesh);
                         renderMesh.SetMaterial(meshComponent->GetMaterial());
 
