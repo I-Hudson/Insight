@@ -61,6 +61,7 @@ namespace Insight
 
         private:
             ResourceOwningMap m_resources;
+            ResourceOwningMap m_dependentResources;
             u32 m_loadedResourceCount = 0;
             mutable std::mutex m_mutex;
 

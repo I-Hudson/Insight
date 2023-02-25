@@ -96,6 +96,16 @@ namespace Insight
 
 		EResoruceStates IResource::GetResourceState() const
 		{
+			// If this resource is dependent on another then return that resource's current state.
+			auto iter = Algorithm::VectorFindIf(m_reference_links, [](ResourceReferenceLink const& link)
+				{
+					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
+				});
+
+			if (iter != m_reference_links.end())
+			{
+				return iter->GetLinkResource()->GetResourceState();
+			}
 			return m_resource_state;
 		}
 
@@ -147,8 +157,8 @@ namespace Insight
 
 		bool IResource::IsDependentOnAnotherResource() const
 		{
-			std::lock_guard lock(m_mutex);
-			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
+			//std::lock_guard lock(m_mutex);
+			return Algorithm::VectorFindIf(m_reference_links, [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
 				}) != m_reference_links.end();
@@ -157,7 +167,7 @@ namespace Insight
 		bool IResource::IsDependentOnAnotherResource(IResource* resource) const
 		{
 			std::lock_guard lock(m_mutex);
-			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
+			return Algorithm::VectorFindIf(m_reference_links, [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent && link.GetLinkResource() == resource;
 				}) != m_reference_links.end();
@@ -166,7 +176,7 @@ namespace Insight
 		bool IResource::IsDependentOwnerOnAnotherResource() const
 		{
 			std::lock_guard lock(m_mutex);
-			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [](const ResourceReferenceLink& link)
+			return Algorithm::VectorFindIf(m_reference_links, [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner;
 				}) != m_reference_links.end();
@@ -175,7 +185,7 @@ namespace Insight
 		bool IResource::IsDependentOwnerOnAnotherResource(IResource* resource) const
 		{
 			std::lock_guard lock(m_mutex);
-			return std::find_if(m_reference_links.begin(), m_reference_links.end(), [resource](const ResourceReferenceLink& link)
+			return Algorithm::VectorFindIf(m_reference_links, [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner && link.GetLinkResource() == resource;
 				}) != m_reference_links.end();

@@ -170,7 +170,7 @@ namespace Insight
 						// We are in the process of loading a model, add a new mesh to the model.
 						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
 						{ 
-							new_mesh = static_cast<Mesh*>(ResourceManager::CreateDependentResource(ResourceId("", Mesh::GetStaticResourceTypeId())).Get());
+							new_mesh = static_cast<Mesh*>(ResourceManager::CreateDependentResource(ResourceId(loader_data.Model->GetFilePath() + "/" + aiMesh->mName.C_Str(), Mesh::GetStaticResourceTypeId())).Get());
 							loader_data.Model->AddDependentResource(new_mesh);
 							loader_data.Model->m_meshes.push_back(new_mesh);
 						}

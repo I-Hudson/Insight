@@ -50,8 +50,19 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::Model, 2,
+	namespace Serialisation
+	{
+		struct ModelMesh {};
+		template<>
+		struct ComplexSerialiser<ModelMesh, std::vector<Runtime::Mesh*>, Runtime::Model>
+		{
+			void operator()(ISerialiser* serialiser, std::vector<Runtime::Mesh*>& meshes, Runtime::Model* model) const;
+		};
+	}
+
+	OBJECT_SERIALISER(Runtime::Model, 3,
 		SERIALISE_BASE(Runtime::IResource, 1, 0)
-		SERIALISE_VECTOR_OBJECT(Runtime::Mesh, m_meshes, 2, 0)
+		SERIALISE_VECTOR_OBJECT(Runtime::Mesh, m_meshes, 2, 3)
+		SERIALISE_COMPLEX(Serialisation::ModelMesh, m_meshes, 3, 0)
 	);
 }

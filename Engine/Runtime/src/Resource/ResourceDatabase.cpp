@@ -29,14 +29,28 @@ namespace Insight
         void ResourceDatabase::Shutdown()
         {
             ASSERT(Platform::IsMainThread());
+
+            std::vector<TObjectOPtr<IResource>> owningResources;
+
             for (auto& pair : m_resources)
             {
-                if (pair.second->IsLoaded())
+                if (pair.second->IsDependentOnAnotherResource())
                 {
-                    pair.second->UnLoad();
+                    continue;
                 }
-                DeleteResource(pair.second);
+
+                owningResources.push_back(std::move(pair.second));
             }
+
+            for (auto& resource : owningResources)
+            {
+                if (resource->IsLoaded())
+                {
+                    resource->UnLoad();
+                }
+                DeleteResource(resource);
+            }
+
             m_resources.clear();
         }
 
@@ -68,6 +82,8 @@ namespace Insight
                 std::lock_guard lock(m_mutex);
                 resource = m_resources[resourceId] = std::move(ownerResource);
             }
+
+
             return resource;
         }
 

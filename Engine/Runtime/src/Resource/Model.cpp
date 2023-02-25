@@ -1,4 +1,6 @@
 #include "Resource/Model.h"
+#include "Resource/Model.inl"
+
 #include "Resource/Mesh.h"
 #include "Resource/Texture.h"
 #include "Resource/Material.h"
@@ -83,11 +85,10 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
-
 				RemoveDependentResource(mesh);
 				mesh->OnUnloaded(mesh);
-				DeleteTracked(mesh);
+				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
+				//DeleteTracked(mesh);
 			}
 			m_meshes.clear();
 

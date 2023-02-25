@@ -271,7 +271,7 @@ namespace Insight
 #endif
                 resource->StartLoadTimer();
             {
-                std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
+                //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
                 resource->Load();
             }
             resource->StopLoadTimer();
