@@ -64,23 +64,17 @@ namespace Insight
 
 		void Model::Load()
 		{
+			if (m_resource_state == EResoruceStates::Loaded)
+			{
+				return;
+			}
+
 			if (!AssimpLoader::LoadModel(this, m_file_path, AssimpLoader::Default_Model_Importer_Flags))
 			{
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
 			}
 
-			// Add all our meshes as dependents of this model. (Tied to this model)
-			for (Mesh* mesh : m_meshes)
-			{
-				mesh->OnLoaded(mesh);
-				if (ResourceManager::HasResource(Runtime::ResourceId(mesh->GetFilePath(), Mesh::GetStaticResourceTypeId())))
-				{
-					//if (mesh->GetFilePath().back() >= '0' |)
-					//TODO Add a number if this resource already exists.
-				}
-				//AddDependentResrouce(mesh, mesh->GetFilePath(), ResourceStorageTypes::Memory);
-			}
 			m_resource_state = EResoruceStates::Loaded;
 		}
 
@@ -89,7 +83,9 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				//ResourceManager::Unload(mesh->GetResourceId());
+				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
+
+				RemoveDependentResource(mesh);
 				mesh->OnUnloaded(mesh);
 				DeleteTracked(mesh);
 			}

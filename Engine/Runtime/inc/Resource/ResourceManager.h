@@ -11,6 +11,7 @@ namespace Insight
     namespace Runtime
     {
         class ResourceSystem;
+        class AssimpLoader;
 
         /// @brief Static class used to interact with resources.
         class IS_RUNTIME ResourceManager
@@ -40,9 +41,13 @@ namespace Insight
             static u32 GetLoadedResourcesCount();
             static u32 GetLoadingCount();
 
+            static TObjectPtr<IResource> CreateDependentResource(ResourceId const& resourceId);
+            static void RemoveDependentResource(ResourceId const& resourceId);
+
         private:
             static void Update(float const deltaTime);
             static void StartLoading(IResource* resource);
+            
 
         private:
             /// @brief Max number of resources which can be loading at a single time is 4. This
@@ -57,6 +62,7 @@ namespace Insight
             static std::mutex s_queuedResoucesToLoadMutex;
 
             friend class ResourceSystem;
+            friend class AssimpLoader;
         };
     }
 }

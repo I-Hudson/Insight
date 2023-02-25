@@ -283,5 +283,17 @@ namespace Insight
             });
 #endif
         }
+
+        TObjectPtr<IResource> ResourceManager::CreateDependentResource(ResourceId const& resourceId)
+        {
+            ASSERT(s_database);
+            return s_database->CreateDependentResource(resourceId);
+        }
+
+        void ResourceManager::RemoveDependentResource(ResourceId const& resourceId)
+        {
+            ASSERT(s_database);
+            return s_database->RemoveDependentResource(resourceId);
+        }
     }
 }

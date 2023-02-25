@@ -149,6 +149,9 @@ namespace Insight
 			/// @param storage_type
 			void AddReferenceResource(IResource* resource);
 
+			void RemoveDependentResource(IResource* resource);
+			void RemoveReferenceResource(IResource* resource);
+
 		private:
 			IResource* AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id);
 			

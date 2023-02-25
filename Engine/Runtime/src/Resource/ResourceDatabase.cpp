@@ -252,5 +252,26 @@ namespace Insight
             std::lock_guard lock(m_mutex);
             --m_loadedResourceCount;
         }
+
+        TObjectPtr<IResource> ResourceDatabase::CreateDependentResource(ResourceId const& resourceId)
+        {
+            ASSERT(!HasResource(resourceId));
+            TObjectPtr<IResource> resource = AddResource(resourceId);
+            {
+                std::lock_guard resourceLock(resource->m_mutex);
+                resource->m_storage_type = ResourceStorageTypes::Memory;
+            }
+            return resource;
+        }
+
+        void ResourceDatabase::RemoveDependentResource(ResourceId const& resourceId)
+        {
+            std::lock_guard lock(m_mutex);
+            if (auto iter = m_resources.find(resourceId);
+                iter != m_resources.end())
+            {
+                m_resources.erase(iter);
+            }
+        }
     }
 }

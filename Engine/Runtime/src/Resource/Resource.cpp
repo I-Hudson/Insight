@@ -10,6 +10,8 @@
 
 #include "Threading/TaskSystem.h"
 
+#include "Algorithm/Vector.h"
+
 #include <filesystem>
 #include <ppltasks.h>
 
@@ -240,6 +242,56 @@ namespace Insight
 				std::lock_guard resourceLock(resource->m_mutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
+			}
+		}
+
+		void IResource::RemoveDependentResource(IResource* resource)
+		{
+			if (resource)
+			{
+				{
+					// Remove the link from the other resource to this resource.
+					std::lock_guard resourceLock(resource->m_mutex);
+					Algorithm::VectorRemoveIf(resource->m_reference_links, [&](ResourceReferenceLink const& link)
+						{
+							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent 
+								&& link.GetLinkResource() == this;
+						});
+				}
+				{
+					// Remove the link from this resource to the other resource.
+					std::lock_guard lock(m_mutex);
+					Algorithm::VectorRemoveIf(m_reference_links, [&](ResourceReferenceLink const& link)
+						{
+							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner
+								&& link.GetLinkResource() == resource;
+						});
+				}
+			}
+		}
+
+		void IResource::RemoveReferenceResource(IResource* resource)
+		{
+			if (resource)
+			{
+				{
+					// Remove the link from the other resource to this resource.
+					std::lock_guard resourceLock(resource->m_mutex);
+					Algorithm::VectorRemoveIf(resource->m_reference_links, [&](ResourceReferenceLink const& link)
+						{
+							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Reference
+								&& link.GetLinkResource() == this;
+						});
+				}
+				{
+					// Remove the link from this resource to the other resource.
+					std::lock_guard lock(m_mutex);
+					Algorithm::VectorRemoveIf(m_reference_links, [&](ResourceReferenceLink const& link)
+						{
+							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Reference
+								&& link.GetLinkResource() == resource;
+						});
+				}
 			}
 		}
 

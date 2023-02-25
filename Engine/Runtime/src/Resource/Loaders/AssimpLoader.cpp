@@ -166,16 +166,18 @@ namespace Insight
 					Mesh* new_mesh = nullptr;
 					if (loader_data.Model)
 					{
-						//TODO Link the mesh as a resrouce and link all the textures as resources.
+						//TODO Link the mesh as a resource and link all the textures as resources.
 						// We are in the process of loading a model, add a new mesh to the model.
 						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
 						{ 
-							new_mesh = NewTracked(Mesh);
+							new_mesh = static_cast<Mesh*>(ResourceManager::CreateDependentResource(ResourceId("", Mesh::GetStaticResourceTypeId())).Get());
+							loader_data.Model->AddDependentResource(new_mesh);
 							loader_data.Model->m_meshes.push_back(new_mesh);
 						}
 						else
 						{
 							new_mesh = loader_data.Model->m_meshes.at(loader_data.MeshIndex);
+							loader_data.Model->AddDependentResource(new_mesh);
 							std::string guid = new_mesh->GetGuid().ToString();
 							IS_UNUSED(guid);
 						}

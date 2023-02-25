@@ -56,6 +56,9 @@ namespace Insight
             void OnResourceLoaded(IResource* Resource);
             void OnResourceUnloaded(IResource* Resource);
 
+            TObjectPtr<IResource> CreateDependentResource(ResourceId const& resourceId);
+            void RemoveDependentResource(ResourceId const& resourceId);
+
         private:
             ResourceOwningMap m_resources;
             u32 m_loadedResourceCount = 0;
