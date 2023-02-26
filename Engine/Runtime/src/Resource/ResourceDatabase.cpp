@@ -119,9 +119,16 @@ namespace Insight
             TObjectPtr<IResource> resource;
             {
                 std::lock_guard lock(m_mutex);
-                auto iter = m_resources.find(resourceId);
-                ASSERT(iter != m_resources.end());
-                resource = iter->second;
+                if (auto iter = m_resources.find(resourceId);
+                    iter != m_resources.end())
+                {
+                    resource = iter->second;
+                }
+                else if (auto iter = m_dependentResources.find(resourceId);
+                    iter != m_dependentResources.end())
+                {
+                    resource = iter->second;
+                }
             }
             return resource;
         }
@@ -134,6 +141,14 @@ namespace Insight
                 for (auto& pair : m_resources)
                 {
                     if (pair.second->GetGuid() == guid) 
+                    {
+                        resource = pair.second;
+                        break;
+                    }
+                }
+                for (auto& pair : m_dependentResources)
+                {
+                    if (pair.second->GetGuid() == guid)
                     {
                         resource = pair.second;
                         break;
@@ -158,10 +173,11 @@ namespace Insight
 
         bool ResourceDatabase::HasResource(ResourceId const& resourceId) const
         {
-            bool result;
+            bool result = false;
             {
                 std::lock_guard lock(m_mutex);
-                result = m_resources.find(resourceId) != m_resources.end();
+                result |= m_resources.find(resourceId) != m_resources.end();
+                result |= m_dependentResources.find(resourceId) != m_dependentResources.end();
             }
             return result;
         }
@@ -172,6 +188,14 @@ namespace Insight
             {
                 std::lock_guard lock(m_mutex);
                 for (const auto& pair : m_resources)
+                {
+                    if (pair.second == resource)
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+                for (const auto& pair : m_dependentResources)
                 {
                     if (pair.second == resource)
                     {
