@@ -191,7 +191,7 @@ namespace Insight
             resource->m_resource_state = EResoruceStates::Unloading;
             resource->StartUnloadTimer();
             {
-                std::lock_guard resourceLock(resource->m_mutex);
+                //std::lock_guard resourceLock(resource->m_mutex);
                 resource->UnLoad();
             }
             resource->StopUnloadTimer();

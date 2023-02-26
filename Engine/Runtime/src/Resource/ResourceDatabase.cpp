@@ -30,28 +30,17 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
-            std::vector<TObjectOPtr<IResource>> owningResources;
-
             for (auto& pair : m_resources)
             {
-                if (pair.second->IsDependentOnAnotherResource())
+                if (pair.second->IsLoaded())
                 {
-                    continue;
+                    pair.second->UnLoad();
                 }
-
-                owningResources.push_back(std::move(pair.second));
-            }
-
-            for (auto& resource : owningResources)
-            {
-                if (resource->IsLoaded())
-                {
-                    resource->UnLoad();
-                }
-                DeleteResource(resource);
+                DeleteResource(pair.second);
             }
 
             m_resources.clear();
+            m_dependentResources.clear();
         }
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
@@ -271,22 +260,34 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::CreateDependentResource(ResourceId const& resourceId)
         {
-            ASSERT(!HasResource(resourceId));
-            TObjectPtr<IResource> resource = AddResource(resourceId);
+            ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
+
+            TObjectPtr<IResource> resource = nullptr;
+            IResource* rawResource = ResourceTypeIdToResource::CreateResource(resourceId.GetTypeId());
+            ASSERT(rawResource);
             {
-                std::lock_guard resourceLock(resource->m_mutex);
-                resource->m_storage_type = ResourceStorageTypes::Memory;
+                std::lock_guard resourceLock(rawResource->m_mutex);
+                rawResource->m_resourceId = resourceId;
+                rawResource->m_file_path = resourceId.GetPath();
+                rawResource->m_resource_state = EResoruceStates::Not_Loaded;
+                rawResource->m_storage_type = ResourceStorageTypes::Memory;
             }
+            TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
+            {
+                std::lock_guard lock(m_mutex);
+                resource = m_dependentResources[resourceId] = std::move(ownerResource);
+            }
+
             return resource;
         }
 
         void ResourceDatabase::RemoveDependentResource(ResourceId const& resourceId)
         {
             std::lock_guard lock(m_mutex);
-            if (auto iter = m_resources.find(resourceId);
-                iter != m_resources.end())
+            auto iter = m_dependentResources.find(resourceId);
+            if (iter != m_dependentResources.end())
             {
-                m_resources.erase(iter);
+                m_dependentResources.erase(iter);
             }
         }
     }

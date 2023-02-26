@@ -85,8 +85,8 @@ namespace Insight
 			// Unload all our memory meshes.
 			for (Mesh* mesh : m_meshes)
 			{
-				RemoveDependentResource(mesh);
 				mesh->OnUnloaded(mesh);
+				RemoveDependentResource(mesh);
 				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
 				//DeleteTracked(mesh);
 			}

@@ -169,8 +169,12 @@ namespace Insight
 						//TODO Link the mesh as a resource and link all the textures as resources.
 						// We are in the process of loading a model, add a new mesh to the model.
 						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
-						{ 
-							new_mesh = static_cast<Mesh*>(ResourceManager::CreateDependentResource(ResourceId(loader_data.Model->GetFilePath() + "/" + aiMesh->mName.C_Str(), Mesh::GetStaticResourceTypeId())).Get());
+						{
+							std::string path = loader_data.Model->GetFilePath() + "/";
+							path += std::string(aiMesh->mName.C_Str(), aiMesh->mName.length);
+
+							ResourceId meshResourceId(path, Mesh::GetStaticResourceTypeId());
+							new_mesh = static_cast<Mesh*>(ResourceManager::CreateDependentResource(meshResourceId).Get());
 							loader_data.Model->AddDependentResource(new_mesh);
 							loader_data.Model->m_meshes.push_back(new_mesh);
 						}
@@ -209,7 +213,6 @@ namespace Insight
 						new_mesh->m_lods.at(0).Vertex_offset = static_cast<u32>(loader_data.Vertices.size());
 						new_mesh->m_lods.at(0).First_index = static_cast<u32>(loader_data.Indices.size());
 
-
 						// Move our vertices/indices which have been optimized, into the overall vectors.
 						std::move(mesh_data.Vertices.begin(), mesh_data.Vertices.end(), std::back_inserter(loader_data.Vertices));
 						std::move(mesh_data.Indices.begin(), mesh_data.Indices.end(), std::back_inserter(loader_data.Indices));
@@ -217,7 +220,6 @@ namespace Insight
 						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_lods.at(0).Vertex_offset;
 						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_lods.at(0).First_index;
 					}
-					new_mesh->m_resourceId = ResourceId(loader_data.Directoy + '/' + new_mesh->m_mesh_name, Mesh::GetStaticResourceTypeId());
 					new_mesh->m_storage_type = ResourceStorageTypes::Memory;
 					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
 

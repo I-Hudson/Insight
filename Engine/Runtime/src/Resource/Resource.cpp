@@ -96,6 +96,7 @@ namespace Insight
 
 		EResoruceStates IResource::GetResourceState() const
 		{
+			std::lock_guard lock(m_mutex);
 			// If this resource is dependent on another then return that resource's current state.
 			auto iter = Algorithm::VectorFindIf(m_reference_links, [](ResourceReferenceLink const& link)
 				{
@@ -157,7 +158,7 @@ namespace Insight
 
 		bool IResource::IsDependentOnAnotherResource() const
 		{
-			//std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_mutex);
 			return Algorithm::VectorFindIf(m_reference_links, [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
