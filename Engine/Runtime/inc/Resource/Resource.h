@@ -217,6 +217,6 @@ namespace Insight
 }
 
 #define REGISTER_RESOURCE(type_name) public: \
-static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); } \
-Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); } \
+static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); }\
+virtual Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); }\
 constexpr const char* GetResourceFileExtension() { return STRINGIZE(PPCAT(.IS, type_name)); }

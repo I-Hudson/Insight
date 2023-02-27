@@ -21,7 +21,10 @@ namespace Insight
                     resouceId.Deserialise(serialiser);
 
                     TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Create(resouceId);
-                    resource->Deserialise(serialiser);
+                    if (resource)
+                    {
+                        resource->Deserialise(serialiser);
+                    }
                 }
                 serialiser->StopArray();
             }

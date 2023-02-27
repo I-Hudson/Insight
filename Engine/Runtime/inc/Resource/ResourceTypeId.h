@@ -28,7 +28,7 @@ namespace Insight
 			IS_SERIALISABLE_H(ResourceTypeId)
 
 			std::string GetTypeName() const;
-			u64 GetHash() const;
+			//u64 GetHash() const;
 
 			bool operator==(ResourceTypeId const& other) const;
 			bool operator!=(ResourceTypeId const& other) const;
@@ -55,9 +55,9 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::ResourceTypeId, 1,
+	OBJECT_SERIALISER(Runtime::ResourceTypeId, 2,
 		SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
-		SERIALISE_PROPERTY(u64, m_hash, 1, 0)
+		SERIALISE_PROPERTY(u64, m_hash, 1, 2)
 		);
 }
 

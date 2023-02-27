@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Algorithm/Hash.h"
 
 #include "Resource/ResourceTypeId.h"
 
@@ -24,7 +25,7 @@ namespace Insight
 
             const std::string& GetPath() const;
             const ResourceTypeId& GetTypeId() const;
-            u64 GetId() const;
+            //u64 GetId() const;
 
             bool operator==(ResourceId const& other) const;
             bool operator!=(ResourceId const& other) const;
@@ -42,10 +43,10 @@ namespace Insight
         };
     }
 
-    OBJECT_SERIALISER(Runtime::ResourceId, 1,
+    OBJECT_SERIALISER(Runtime::ResourceId, 2,
         SERIALISE_PROPERTY(std::string, m_path, 1, 0)
         SERIALISE_OBJECT(Runtime::ResourceTypeId, m_typeId, 1, 0)
-        SERIALISE_PROPERTY(u64, m_id, 1, 0)
+        SERIALISE_PROPERTY(u64, m_id, 1, 2)
         );
 }
 
@@ -56,7 +57,7 @@ namespace std
     {
         size_t operator()(Insight::Runtime::ResourceId const& ID) const
         {
-            return ID.GetId();
+            return Insight::Algorithm::GetHash64(ID.GetPath());
         }
     };
 }

@@ -41,6 +41,15 @@ namespace Insight
         };
 
         template<>
+        struct PropertySerialiser<float>
+        {
+            float operator()(float v)
+            {
+                return v;
+            }
+        };
+
+        template<>
         struct PropertySerialiser<u8>
         {
             u8 operator()(u8 v)

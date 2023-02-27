@@ -225,7 +225,6 @@ namespace Insight
 
 					for (size_t material_index = 0; material_index < mesh_data.Materials.size(); ++material_index)
 					{
-						//new_mesh->AddReferenceResource(mesh_data.Materials.at(material_index), mesh_data.Materials.at(material_index)->GetFilePath());
 						new_mesh->SetMaterial(mesh_data.Materials.at(material_index));
 					}
 
@@ -386,36 +385,44 @@ namespace Insight
 
 			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
 			ResourceId materailResourceId(material_path, Material::GetStaticResourceTypeId());
+
 			if (ResourceManager::HasResource(materailResourceId))
 			{
-				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Load(materailResourceId).operator Insight::Runtime::IResource *()));
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Load(materailResourceId).Get()));
+				return;
+			}
+
+			Material* material = nullptr;
+			if (known_data.Model->m_materials.size() <= known_data.MaterialIndex)
+			{
+				material = static_cast<Material*>(ResourceManager::CreateDependentResource(materailResourceId).Get());
+				known_data.Model->AddDependentResource(material);
 			}
 			else
 			{
-				Material* material = NewTracked(Material);
-				material->m_file_path = material_path;
-				material->m_resourceId = materailResourceId;
-
-				aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
-				aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
-
-				aiColor4D opacity(1.0f, 1.0f, 1.0f, 1.0f);
-				aiGetMaterialColor(ai_material, AI_MATKEY_OPACITY, &opacity);
-
-				material->SetProperty(MaterialProperty::Colour_R, color_diffuse.r);
-				material->SetProperty(MaterialProperty::Colour_G, color_diffuse.g);
-				material->SetProperty(MaterialProperty::Colour_B, color_diffuse.b);
-				material->SetProperty(MaterialProperty::Colour_A, opacity.r);
-
-				ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);
-				ExtractMaterialType(ai_material, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, "texture_normal", known_data.Directoy, TextureTypes::Normal, material);
-
-				material->m_resource_state = Runtime::EResoruceStates::Loaded;
-				material->m_storage_type = Runtime::ResourceStorageTypes::Memory;
-
-				mesh_data.Materials.push_back(material);
-				known_data.Materials.push_back(material);
+				material = known_data.Model->m_materials.at(known_data.MaterialIndex++);
 			}
+			ASSERT(material);
+
+			ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);
+			ExtractMaterialType(ai_material, aiTextureType_NORMAL_CAMERA, aiTextureType_NORMALS, "texture_normal", known_data.Directoy, TextureTypes::Normal, material);
+
+			aiColor4D color_diffuse(1.0f, 1.0f, 1.0f, 1.0f);
+			aiGetMaterialColor(ai_material, AI_MATKEY_COLOR_DIFFUSE, &color_diffuse);
+
+			aiColor4D opacity(1.0f, 1.0f, 1.0f, 1.0f);
+			aiGetMaterialColor(ai_material, AI_MATKEY_OPACITY, &opacity);
+
+			material->SetProperty(MaterialProperty::Colour_R, color_diffuse.r);
+			material->SetProperty(MaterialProperty::Colour_G, color_diffuse.g);
+			material->SetProperty(MaterialProperty::Colour_B, color_diffuse.b);
+			material->SetProperty(MaterialProperty::Colour_A, opacity.r);
+
+			material->m_resource_state = Runtime::EResoruceStates::Loaded;
+			material->m_storage_type = Runtime::ResourceStorageTypes::Memory;
+
+			mesh_data.Materials.push_back(material);
+			known_data.Materials.push_back(material);
 		}
 
 		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type_pbr, aiTextureType ai_texture_type_legcy, const char* material_id, 

@@ -58,11 +58,20 @@ namespace Insight
 		{
 			void operator()(ISerialiser* serialiser, std::vector<Runtime::Mesh*>& meshes, Runtime::Model* model) const;
 		};
+
+		struct ModelMaterial {};
+		template<>
+		struct ComplexSerialiser<ModelMaterial, std::vector<Runtime::Material*>, Runtime::Model>
+		{
+			void operator()(ISerialiser* serialiser, std::vector<Runtime::Material*>& materials, Runtime::Model* model) const;
+		};
 	}
 
-	OBJECT_SERIALISER(Runtime::Model, 3,
+	OBJECT_SERIALISER(Runtime::Model, 5,
 		SERIALISE_BASE(Runtime::IResource, 1, 0)
 		SERIALISE_VECTOR_OBJECT(Runtime::Mesh, m_meshes, 2, 3)
 		SERIALISE_COMPLEX(Serialisation::ModelMesh, m_meshes, 3, 0)
+		SERIALISE_VECTOR_OBJECT(Runtime::Material, m_materials, 4, 5)
+		SERIALISE_COMPLEX(Serialisation::ModelMaterial, m_materials, 5, 0)
 	);
 }

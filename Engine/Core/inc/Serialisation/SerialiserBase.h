@@ -290,6 +290,27 @@ namespace Insight
             }
         };
 
+        template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>
+        struct ArraySerialiser
+        {
+            void operator()(ISerialiser* serialiser, std::string_view name, T* object, u64 const size)
+            {
+                if (!serialiser)
+                {
+                    return;
+                }
+
+                u64 arraySize = size;
+                serialiser->StartArray(name, arraySize);
+                for (size_t i = 0; i < size; ++i)
+                {
+                    T* ptr = object + (sizeof(T) * i);
+                    ::Insight::Serialisation::Serialise<TypeSerialiser, T, SerialiserType>(serialiser, "", *ptr);
+                }
+                serialiser->StopArray();
+            }
+        };
+
         template<typename KeySerialiser, typename ValueSerialiser, typename TMap, SerialiserType SerialiserType>
         struct MapSerialiser
         {

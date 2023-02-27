@@ -30,7 +30,7 @@ namespace Insight
 
         std::vector<Byte> JsonSerialiser::GetSerialisedData() const
         {
-            std::string jsonData = m_writer.TopNode().dump(4);
+            std::string jsonData = m_writer.TopNode().dump();
             return { jsonData.begin(), jsonData.end() };
         }
 
@@ -90,6 +90,16 @@ namespace Insight
         void JsonSerialiser::Write(std::string_view tag, bool data)
         {
             Write<bool>(tag, data);
+        }
+
+        void JsonSerialiser::Write(std::string_view tag, char data)
+        {
+            Write<char>(tag, data);
+        }
+
+        void JsonSerialiser::Write(std::string_view tag, float data)
+        {
+            Write<float>(tag, data);
         }
 
         void JsonSerialiser::Write(std::string_view tag, u8 data)

@@ -94,9 +94,9 @@ namespace Insight
 
 			for (Material* material : m_materials)
 			{
-				//ResourceManager::Unload(material->GetResourceId());
 				material->OnUnloaded(material);
-				DeleteTracked(material);
+				RemoveDependentResource(material);
+				ResourceManager::RemoveDependentResource(material->GetResourceId());
 			}
 			m_materials.clear();
 

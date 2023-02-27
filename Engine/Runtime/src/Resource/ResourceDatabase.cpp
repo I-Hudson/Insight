@@ -7,6 +7,9 @@
 #include "Resource/Model.h"
 #include "Resource/Texture2D.h"
 
+#include "FileSystem/FileSystem.h"
+#include "Core/Logger.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -24,6 +27,8 @@ namespace Insight
             ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),      []() { return NewTracked(Mesh); });
             ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),     []() { return NewTracked(Model); });
             ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
+
+            ResourceManager::LoadDatabase();
         }
 
         void ResourceDatabase::Shutdown()
@@ -45,6 +50,12 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
         {
+            if (!FileSystem::FileSystem::Exists(resourceId.GetPath()))
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
+                return nullptr;
+            }
+
             TObjectPtr<IResource> resource;
             if (HasResource(resourceId))
             {

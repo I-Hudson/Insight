@@ -13,7 +13,7 @@ namespace Insight
 
 		ResourceTypeId::ResourceTypeId(const char* type_name)
 			: m_type_name(type_name)
-			, m_hash(std::hash<ResourceTypeId>()(*this))
+			//, m_hash(std::hash<ResourceTypeId>()(*this))
 		{
 		}
 
@@ -24,14 +24,15 @@ namespace Insight
 			return m_type_name;
 		}
 
-		u64 ResourceTypeId::GetHash() const
-		{
-			return m_hash;
-		}
+		//u64 ResourceTypeId::GetHash() const
+		//{
+		//	return m_hash;
+		//}
 
 		bool ResourceTypeId::operator==(ResourceTypeId const& other) const
 		{
-			return m_hash == other.m_hash;
+			//return m_hash == other.m_hash;
+			return m_type_name == other.m_type_name;
 		}
 
 		bool ResourceTypeId::operator!=(ResourceTypeId const& other) const

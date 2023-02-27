@@ -26,6 +26,8 @@ namespace Insight
             virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;
+            virtual void Write(std::string_view tag, char data) override;
+            virtual void Write(std::string_view tag, float data) override;
 
             virtual void Write(std::string_view tag, u8 data) override;
             virtual void Write(std::string_view tag, u16 data) override;

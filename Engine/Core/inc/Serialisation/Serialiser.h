@@ -139,6 +139,40 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
             }\
         }
 
+// Serialise a single property. This would be thiings which only contain data for them self. 
+#define SERIALISE_ARRAY_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        if (!serialiser->IsReadMode())\
+        {\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::ArraySerialiser<TArrayType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> arraySerialiser;\
+                arraySerialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(PPCAT(object., PROPERTY).data()), PPCAT(object., PROPERTY).size());\
+            }\
+        }\
+        else\
+        {\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+            }\
+        }
+#define SERIALISE_ARRAY_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+        if (!serialiser->IsReadMode())\
+        {\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::ArraySerialiser<TArrayType,TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Object> arraySerialiser;\
+                arraySerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY).data(), PPCAT(object., PROPERTY).size());\
+            }\
+        }\
+        else\
+        {\
+            if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
+            {\
+            }\
+        }
+
 #define SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!serialiser->IsReadMode())\
         {\
@@ -175,6 +209,12 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_VECTOR_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)    SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise a vector property with a SerialiserObject.
 #define SERIALISE_VECTOR_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_VECTOR_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
+// Serialise an array property with a ProertySerialiser.
+#define SERIALISE_ARRAY_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)    SERIALISE_ARRAY_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+// Serialise an array property with a SerialiserObject.
+#define SERIALISE_ARRAY_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_ARRAY_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
 
 //
 #define SERIALISE_MAP_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED) SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)

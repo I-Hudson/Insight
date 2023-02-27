@@ -1,4 +1,5 @@
 #include "Resource/Material.h"
+#include "Resource/Material.inl"
 
 namespace Insight
 {
@@ -10,6 +11,8 @@ namespace Insight
 
 		Material::~Material()
 		{ }
+
+		IS_SERIALISABLE_CPP(Material)
 
 		void Material::SetTexture(TextureTypes texture_type, Texture2D* texture)
 		{

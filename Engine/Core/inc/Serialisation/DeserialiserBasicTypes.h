@@ -40,6 +40,16 @@ namespace Insight
         };
 
         template<>
+        struct PropertyDeserialiser<float>
+        {
+            using InType = float;
+            float operator()(InType const data) const
+            {
+                return data;
+            }
+        };
+
+        template<>
         struct PropertyDeserialiser<u8>
         {
             using InType = u8;

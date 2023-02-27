@@ -33,6 +33,7 @@ namespace Insight
 			Material();
 			virtual ~Material() override;
 
+			IS_SERIALISABLE_H(Material)
 
 			void SetTexture(TextureTypes texture_type, Texture2D* texture);
 			Texture2D* GetTexture(TextureTypes texture_type) const;
@@ -64,4 +65,22 @@ namespace Insight
 			friend class AssimpLoader;
 		};
 	}
+
+	namespace Serialisation
+	{
+		struct MaterialTextureSerialise {};
+		template<>
+		struct ComplexSerialiser<MaterialTextureSerialise, std::array<Runtime::ResourceLFHandle<Runtime::Texture2D>, static_cast<u32>(Runtime::TextureTypes::Count)>, Runtime::Material>
+		{
+			void operator()(ISerialiser* serialiser
+				, std::array<Runtime::ResourceLFHandle<Runtime::Texture2D>, static_cast<u32>(Runtime::TextureTypes::Count)>& textures
+				, Runtime::Material* material) const;
+		};
+	}
+
+	OBJECT_SERIALISER(Runtime::Material, 1,
+		SERIALISE_BASE(Runtime::IResource, 1, 0)
+		SERIALISE_COMPLEX(Serialisation::MaterialTextureSerialise, m_textures, 1, 0)
+		SERIALISE_ARRAY_PROPERTY(float, m_properties, 1, 0)
+	);
 }

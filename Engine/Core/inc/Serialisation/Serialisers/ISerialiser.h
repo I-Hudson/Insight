@@ -31,6 +31,8 @@ namespace Insight
         template<typename T>
         constexpr bool IsSerialiserAllowedType = 
                std::is_same_v<bool, T> 
+            || std::is_same_v<char, T>
+            || std::is_same_v<float, T>
             || std::is_same_v<u8, T>
             || std::is_same_v<u16, T>
             || std::is_same_v<u32, T>
@@ -71,6 +73,8 @@ namespace Insight
             virtual void StopArray() = 0;
 
             virtual void Write(std::string_view tag, bool data) = 0;
+            virtual void Write(std::string_view tag, char data) = 0;
+            virtual void Write(std::string_view tag, float data) = 0;
 
             virtual void Write(std::string_view tag, u8 data) = 0;
             virtual void Write(std::string_view tag, u16 data) = 0;

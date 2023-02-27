@@ -22,8 +22,8 @@ namespace Insight
 
         void ResourceSystem::Initialise()
         {
-            m_database.Initialise();
             ResourceManager::s_database = &m_database;
+            m_database.Initialise();
             m_state = Core::SystemStates::Initialised;
         }
 
