@@ -89,6 +89,8 @@ namespace Insight
             virtual void Write(std::string_view tag, std::string const& string) = 0;
 
             virtual void Read(std::string_view tag, bool& data) = 0;
+            virtual void Read(std::string_view tag, char& data) = 0;
+            virtual void Read(std::string_view tag, float& data) = 0;
 
             virtual void Read(std::string_view tag, u8& data) = 0;
             virtual void Read(std::string_view tag, u16& data) = 0;

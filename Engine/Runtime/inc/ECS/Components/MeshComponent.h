@@ -43,10 +43,17 @@ namespace Insight
 		{
 			void operator()(ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Mesh>& mesh, ECS::MeshComponent* meshComponent) const;
 		};
+		struct MaterialToGuid {};
+		template<>
+		struct ComplexSerialiser<MaterialToGuid, Runtime::ResourceLFHandle<Runtime::Material>, ECS::MeshComponent>
+		{
+			void operator()(ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Material>& material, ECS::MeshComponent* meshComponent) const;
+		};
 	}
 
-	OBJECT_SERIALISER(ECS::MeshComponent, 3,
+	OBJECT_SERIALISER(ECS::MeshComponent, 4,
 		SERIALISE_BASE(ECS::Component, 2, 0)
 		SERIALISE_COMPLEX(Serialisation::MeshToGuid, m_mesh, 3, 0)
+		SERIALISE_COMPLEX(Serialisation::MaterialToGuid, m_material, 4, 0)
 	);
 }

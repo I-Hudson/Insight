@@ -26,6 +26,8 @@ namespace Insight
             /// @param resourceId 
             /// @return TObjectPtr<IResource>
             static TObjectPtr<IResource> Create(ResourceId const& resourceId);
+
+            static TObjectPtr<IResource> GetResource(ResourceId const& resourceId);
             static TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid);
 
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);

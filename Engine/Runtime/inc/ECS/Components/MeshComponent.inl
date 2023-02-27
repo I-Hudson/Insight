@@ -29,5 +29,29 @@ namespace Insight
 				serialiser->Write(c_MeshGuid, mesh ? guidSerialiser(mesh->GetGuid()) : "");
 			}
         }
+
+		void ComplexSerialiser<MaterialToGuid, Runtime::ResourceLFHandle<Runtime::Material>, ECS::MeshComponent>::operator()
+			(ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Material>& material, ECS::MeshComponent* meshComponent) const
+		{
+			constexpr char* c_MaterialGuid = "MaterialGuid";
+			if (serialiser->IsReadMode())
+			{
+				PropertyDeserialiser<Core::GUID> guidDeserialiser;
+				std::string serialisedGuid;
+				serialiser->Read(c_MaterialGuid, serialisedGuid);
+				if (!serialisedGuid.empty())
+				{
+					Core::GUID guid = guidDeserialiser(serialisedGuid);
+					// Load resource.
+					Runtime::IResource* meshResource = Runtime::ResourceManager::GetResourceFromGuid(guid);
+					material = static_cast<Runtime::Material*>(meshResource);
+				}
+			}
+			else
+			{
+				PropertySerialiser<Core::GUID> guidSerialiser;
+				serialiser->Write(c_MaterialGuid, material ? guidSerialiser(material->GetGuid()) : "");
+			}
+		}
     }
 }

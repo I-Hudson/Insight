@@ -23,6 +23,11 @@ namespace Insight
                 {
                     std::string serialisedGuid;
                     serialiser->Read("", serialisedGuid);
+                    if (serialisedGuid.empty())
+                    {
+                        continue;
+                    }
+
                     Core::GUID textureGuid = guidDeserialiser(serialisedGuid);
                     TObjectPtr<Runtime::IResource> texture = Runtime::ResourceManager::GetResourceFromGuid(textureGuid);
                     if (texture)
@@ -42,6 +47,10 @@ namespace Insight
                     if (texture)
                     {
                         serialiser->Write("", guidSerialiser(texture->GetGuid()));
+                    }
+                    else
+                    {
+                        serialiser->Write("", "");
                     }
                 }
                 serialiser->StopArray();

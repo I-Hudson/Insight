@@ -386,9 +386,9 @@ namespace Insight
 			std::string material_path = known_data.Directoy + '/' + ai_material->GetName().C_Str();
 			ResourceId materailResourceId(material_path, Material::GetStaticResourceTypeId());
 
-			if (ResourceManager::HasResource(materailResourceId))
+			if (ResourceManager::HasResource(materailResourceId) && ResourceManager::GetResource(materailResourceId)->IsLoaded())
 			{
-				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::Load(materailResourceId).Get()));
+				mesh_data.Materials.push_back(static_cast<Material*>(ResourceManager::GetResource(materailResourceId).Get()));
 				return;
 			}
 

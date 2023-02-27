@@ -61,7 +61,7 @@ namespace Insight
                     Runtime::ResourceId resourceId;
                     resourceId.Deserialise(serialiser);
 
-                    Runtime::IResource* resource = Runtime::ResourceManager::Create(resourceId).Get();
+                    Runtime::IResource* resource = Runtime::ResourceManager::CreateDependentResource(resourceId).Get();
                     ASSERT(resource);
 
                     model->AddDependentResource(resource);

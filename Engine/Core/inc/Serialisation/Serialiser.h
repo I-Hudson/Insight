@@ -154,6 +154,9 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         {\
             if(VERSION_REMOVED == 0 || (currentVersion >= VERSION_ADDED && currentVersion < VERSION_REMOVED))\
             {\
+                using TArrayType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::ArrayDeserialiser<TArrayType, TYPE_SERIALISER, ::Insight::Serialisation::SerialiserType::Property> arrayDeserialiser;\
+                arrayDeserialiser(serialiser, #PROPERTY_NAME, const_cast<TArrayType*>(PPCAT(object., PROPERTY).data()), PPCAT(object., PROPERTY).size());\
             }\
         }
 #define SERIALISE_ARRAY_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\

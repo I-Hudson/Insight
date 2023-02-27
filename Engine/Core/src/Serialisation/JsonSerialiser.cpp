@@ -146,6 +146,19 @@ namespace Insight
             ReadValue<bool>(tag, data);
         }
 
+        void JsonSerialiser::Read(std::string_view tag, char& data)
+        {
+            std::string str;
+            ReadValue<std::string>(tag, str);
+            ASSERT(str.size() <= 1);
+            data = str.front();
+        }
+
+        void JsonSerialiser::Read(std::string_view tag, float& data)
+        {
+            ReadValue<float>(tag, data);
+        }
+
         void JsonSerialiser::Read(std::string_view tag, u8& data)
         {
             ReadValue<u8>(tag, data);
