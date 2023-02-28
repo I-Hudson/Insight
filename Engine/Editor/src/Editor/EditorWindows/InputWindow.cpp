@@ -233,6 +233,9 @@ namespace Insight
 							ImGui::DragFloat("Rumble value", &rumbleValue, 0.001f, 0.0f, 1.0f);
 							ImGui::PopID();
 							device->SetRumbleValue(currentRumble, rumbleValue);
+
+							ImGui::NewLine();
+							ImGui::NewLine();
 						}
 						ImGui::Unindent();
 					}

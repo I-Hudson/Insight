@@ -18,19 +18,14 @@ namespace Insight::Core
 }
 
 /// Helper macro for making a new pointer with tracking.
-#define NewTracked(Type)			static_cast<Type*>(::Insight::Core::MemoryNewObject(new Type()).Ptr)
+#define NewTracked(Type)			::New<Type>()
 /// Helper macro for making a new pointer with args and tracking.
-#define NewArgsTracked(Type, ...)	static_cast<Type*>(::Insight::Core::MemoryNewObject(new Type(__VA_ARGS__)).Ptr)
+#define NewArgsTracked(Type, ...)	::New<Type>(__VA_ARGS__)
 /// /// Helper macro for tracking a exists pointer.
 #define TrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
 
-#define DeleteTracked(Ptr)								\
-::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr);	\
-if (Ptr)												\
-{														\
-	delete Ptr;											\
-	Ptr = nullptr;										\
-};
+#define DeleteTracked(Ptr) Delete(Ptr);
+
 #define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
 template<typename T, typename... Params>

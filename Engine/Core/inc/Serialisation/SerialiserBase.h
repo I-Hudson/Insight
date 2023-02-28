@@ -304,7 +304,7 @@ namespace Insight
                 serialiser->StartArray(name, arraySize);
                 for (size_t i = 0; i < size; ++i)
                 {
-                    T* ptr = object + (sizeof(T) * i);
+                    T* ptr = object + i;
                     ::Insight::Serialisation::Serialise<TypeSerialiser, T, SerialiserType>(serialiser, "", *ptr);
                 }
                 serialiser->StopArray();

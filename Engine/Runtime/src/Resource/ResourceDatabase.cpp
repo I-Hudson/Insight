@@ -23,7 +23,7 @@ namespace Insight
         void ResourceDatabase::Initialise()
         {
             ASSERT(Platform::IsMainThread());
-            ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return NewTracked(Material); });
+            ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return New<Material>(); });
             ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),      []() { return NewTracked(Mesh); });
             ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),     []() { return NewTracked(Model); });
             ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
@@ -34,6 +34,8 @@ namespace Insight
         void ResourceDatabase::Shutdown()
         {
             ASSERT(Platform::IsMainThread());
+
+            ResourceManager::SaveDatabase();
 
             for (auto& pair : m_resources)
             {

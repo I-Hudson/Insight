@@ -3,8 +3,10 @@
 
 #include "Graphics/RenderContext.h"
 
+#if defined(IS_VULKAN_ENABLED)
 #include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/Vulkan/RHI_Buffer_Vulkan.h"
+#endif
 
 namespace Insight
 {

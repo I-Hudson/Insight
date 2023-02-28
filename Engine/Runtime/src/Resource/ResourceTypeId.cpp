@@ -57,6 +57,7 @@ namespace Insight
 			{
 				return itr->second();
 			}
+			FAIL_ASSERT();
 			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] ");
 			return nullptr;
 		}

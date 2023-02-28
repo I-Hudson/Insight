@@ -35,6 +35,11 @@ namespace Insight
 			serialiserObject.Deserialise(serialiser, *this);
 		}
 
+		Model::~Model()
+		{
+			UnLoad();
+		}
+
 		Mesh* Model::GetMesh() const
 		{
 			return GetMeshByIndex(0);
@@ -92,11 +97,13 @@ namespace Insight
 			}
 			m_meshes.clear();
 
+			int materialIdx = 0;
 			for (Material* material : m_materials)
 			{
 				material->OnUnloaded(material);
 				RemoveDependentResource(material);
 				ResourceManager::RemoveDependentResource(material->GetResourceId());
+				++materialIdx;
 			}
 			m_materials.clear();
 

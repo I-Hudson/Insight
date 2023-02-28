@@ -34,9 +34,8 @@ namespace Insight
             //archive.Write(data.data(), data.size());
             //archive.Close();
 
-            ResourceManager::UnloadAll();
-            ResourceManager::s_database = nullptr;
             m_database.Shutdown();
+            ResourceManager::s_database = nullptr;
             m_state = Core::SystemStates::Not_Initialised;
         }
     }

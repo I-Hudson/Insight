@@ -82,9 +82,12 @@ namespace Insight
             Archive archive("./ResourceDatabase.isdatabase", ArchiveModes::Read);
             archive.Close();
 
-            Serialisation::JsonSerialiser serialiser(true);
-            serialiser.Deserialise(archive.GetData());
-            s_database->Deserialise(&serialiser);
+            if (!archive.GetData().empty())
+            {
+                Serialisation::JsonSerialiser serialiser(true);
+                serialiser.Deserialise(archive.GetData());
+                s_database->Deserialise(&serialiser);
+            }
         }
 
         void ResourceManager::ClearDatabase()
@@ -182,6 +185,12 @@ namespace Insight
             if (s_database->HasResource(resourceId))
             {
                 resource = s_database->GetResource(resourceId);
+            }
+
+            if (resource->IsDependentOnAnotherResource())
+            {
+                // Resource is dependent on another resource. The owning resource should handle unloading this resource.
+                return;
             }
 
             if (!resource)

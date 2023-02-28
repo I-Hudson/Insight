@@ -54,9 +54,9 @@ namespace Insight
             {
                 u64 arraySize = 0;
                 serialiser->StartArray(c_Materials, arraySize);
-                materials.resize(arraySize);
+                materials.clear();
 
-                for (Runtime::Material*& material : materials)
+                for (size_t i = 0; i < arraySize; i++)
                 {
                     Runtime::ResourceId resourceId;
                     resourceId.Deserialise(serialiser);
@@ -65,8 +65,10 @@ namespace Insight
                     ASSERT(resource);
 
                     model->AddDependentResource(resource);
-                    material = static_cast<Runtime::Material*>(resource);
+                    Runtime::Material* material = static_cast<Runtime::Material*>(resource);
                     material->Deserialise(serialiser);
+
+                    materials.push_back(material);
                 }
 
                 serialiser->StopArray();

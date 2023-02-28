@@ -220,7 +220,7 @@ namespace Insight
 						new_mesh->m_lods.at(0).Vertex_count = static_cast<u32>(loader_data.Vertices.size()) - loader_data.Mesh->m_lods.at(0).Vertex_offset;
 						new_mesh->m_lods.at(0).Index_count = static_cast<u32>(loader_data.Indices.size()) - loader_data.Mesh->m_lods.at(0).First_index;
 					}
-					new_mesh->m_storage_type = ResourceStorageTypes::Memory;
+					new_mesh->m_resource_state = EResoruceStates::Loaded;
 					new_mesh->m_transform_offset = ConvertMatrix(aiNode->mTransformation);
 
 					for (size_t material_index = 0; material_index < mesh_data.Materials.size(); ++material_index)
@@ -419,7 +419,6 @@ namespace Insight
 			material->SetProperty(MaterialProperty::Colour_A, opacity.r);
 
 			material->m_resource_state = Runtime::EResoruceStates::Loaded;
-			material->m_storage_type = Runtime::ResourceStorageTypes::Memory;
 
 			mesh_data.Materials.push_back(material);
 			known_data.Materials.push_back(material);
