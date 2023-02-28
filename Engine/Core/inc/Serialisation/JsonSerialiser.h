@@ -189,8 +189,8 @@ namespace Insight
                     {
                         struct
                         {
-                            u32 ArraySize;
-                            u32 ArrayIndex;
+                            u64 ArraySize;
+                            u64 ArrayIndex;
                         };
                     };
                 };
