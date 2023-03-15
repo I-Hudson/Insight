@@ -21,7 +21,7 @@ project "Insight_Editor"
 
     defines
     {
-        ""
+        "IS_EDITOR"
     }
     
     includedirs

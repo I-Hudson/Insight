@@ -9,6 +9,8 @@
 namespace Insight
 {
     Archive::Archive(std::string_view filePath, ArchiveModes mode)
+        : m_filePath(filePath)
+        , m_mode(mode)
     {
         if (filePath.empty())
         {

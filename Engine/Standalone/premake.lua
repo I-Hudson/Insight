@@ -11,6 +11,7 @@ project "InsightStandalone"
     defines
     {
         "IS_MONOLITH",
+        "IS_STANDALONE",
         "_CRT_SECURE_NO_WARNINGS",
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",

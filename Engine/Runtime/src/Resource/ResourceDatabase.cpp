@@ -324,6 +324,8 @@ namespace Insight
             auto iter = m_dependentResources.find(resourceId);
             if (iter != m_dependentResources.end())
             {
+                ASSERT(!iter->second->GetFilePath().empty());
+                iter->second.Reset();
                 m_dependentResources.erase(iter);
             }
         }

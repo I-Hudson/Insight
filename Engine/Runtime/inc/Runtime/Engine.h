@@ -13,6 +13,7 @@
 #include "Input/InputSystem.h"
 #include "Core/ImGuiSystem.h"
 #include "World/WorldSystem.h"
+#include "Runtime/ProjectSystem.h"
 
 #include "Renderpass.h"
 
@@ -57,6 +58,7 @@ namespace Insight
 			Core::ImGuiSystem m_imguiSystem;
 			Input::InputSystem m_inputSystem;
 			Runtime::WorldSystem m_worldSystem;
+			Runtime::ProjectSystem m_projectSystem;
 		};
 	}
 }

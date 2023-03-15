@@ -19,9 +19,6 @@ namespace Insight
 		{
 			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
-			GetSystemRegistry().RegisterSystem(&m_projectSystem);
-			m_projectSystem.Initialise();
-
 			std::string windowTitle = "Insight Editor";
 #ifdef IS_DEBUG
 			windowTitle += " Debug ";
@@ -46,11 +43,6 @@ namespace Insight
 
 		void Editor::OnUpdate()
 		{
-			m_projectSystem.Update();
-			if (!m_projectSystem.IsProjectOpen())
-			{
-				//return;
-			}
 			m_menuBar.Draw();
 			EditorWindowManager::Instance().Update();
 		}
@@ -58,9 +50,6 @@ namespace Insight
 		void Editor::OnDestroy()
 		{
 			EditorWindowManager::Instance().Destroy();
-
-			m_projectSystem.Shutdown();
-			GetSystemRegistry().UnregisterSystem(&m_projectSystem);
 		}
 	}
 }

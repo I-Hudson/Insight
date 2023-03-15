@@ -93,7 +93,6 @@ namespace Insight
 				mesh->OnUnloaded(mesh);
 				RemoveDependentResource(mesh);
 				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
-				//DeleteTracked(mesh);
 			}
 			m_meshes.clear();
 

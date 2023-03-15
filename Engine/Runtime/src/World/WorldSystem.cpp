@@ -86,6 +86,11 @@ namespace Insight
 
 		void WorldSystem::SetActiveWorld(TObjectPtr<World> world)
 		{
+			if (!world)
+			{
+				return;
+			}
+
 			std::vector<TObjectPtr<World>> worldsToRemove;
 			for (size_t worldIdx = 0; worldIdx < m_activeWorlds.size(); ++worldIdx)
 			{
@@ -106,6 +111,11 @@ namespace Insight
 
 		void WorldSystem::AddActiveWorld(TObjectPtr<World> world)
 		{
+			if (!world)
+			{
+				return;
+			}
+
 			if (std::find_if(m_activeWorlds.begin(), m_activeWorlds.end(), [&world](const TObjectPtr<World>& activeWorld)
 				{
 					return activeWorld == world;
@@ -117,6 +127,11 @@ namespace Insight
 
 		void WorldSystem::RemoveWorld(TObjectPtr<World> world)
 		{
+			if (!world)
+			{
+				return;
+			}
+
 			ASSERT(Algorithm::VectorContains(m_worlds, world));
 
 			auto activeWorldIter = Algorithm::VectorFind(m_activeWorlds, world);

@@ -29,8 +29,8 @@ namespace Insight
 
 			ResourceType* operator->() const { return static_cast<ResourceType*>(m_resourcePtr); }
 
-			ResourceLFHandle& operator=(const ResourceLFHandle& other) { UnbindUnLoad(); m_resourcePtr = other.m_resourcePtr; BindUnload(); }
-			ResourceLFHandle& operator=(ResourceLFHandle&& other) { UnbindUnLoad(); m_resourcePtr = other.m_resourcePtr; BindUnload(); }
+			ResourceLFHandle& operator=(const ResourceLFHandle& other) { UnbindUnLoad(); m_resourcePtr = other.m_resourcePtr; BindUnload(); return *this; }
+			ResourceLFHandle& operator=(ResourceLFHandle&& other) { UnbindUnLoad(); m_resourcePtr = other.m_resourcePtr; BindUnload(); return *this; }
 
 			ResourceLFHandle& operator=(std::nullptr_t) { UnbindUnLoad(); m_resourcePtr = nullptr; return *this; }
 			ResourceLFHandle& operator=(ResourceType* other) { UnbindUnLoad(); m_resourcePtr = other; BindUnload(); return *this; }

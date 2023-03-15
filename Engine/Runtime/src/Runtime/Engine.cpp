@@ -38,28 +38,7 @@ namespace Insight
 		SplashScreen splashScreen;
 
 		bool Engine::Init(int argc, char** argv)
-		{
-			Platform::Initialise();
-
-			splashScreen.Init(860, 420);
-			splashScreen.SetBackgroundImage("./Resources/Insight/cover.png");
-			splashScreen.Show();
-
-			Core::CommandLineArgs::ParseCommandLine(argc, argv);
-			Core::CommandLineArgs::ParseCommandLine("./cmdline.txt");
-
-			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_PROFILER)->GetBool())
-			{
-				Core::WaitForProfiler();
-			}
-			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
-			{
-				while (!IsDebuggerPresent())
-				{ }
-			}
-
-#define RETURN_IF_FALSE(x) if (!x) { return false; }
-			
+		{		
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
@@ -68,9 +47,35 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_graphicsSystem);
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
+			m_systemRegistry.RegisterSystem(&m_projectSystem);
+
+			Platform::Initialise();
+			m_projectSystem.Initialise();
+#ifdef IS_STANDALONE
+			m_projectSystem.OpenProject("./StandaloneProject.isproject");
+#endif
+
+			const std::string splashScreenBackGroundPath = m_projectSystem.GetInternalResourcePath() + "/Insight/cover.png";
+			splashScreen.Init(860, 420);
+			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
+			splashScreen.Show();
+
+			const std::string cmdLinePath = m_projectSystem.GetExecutablePath() + "/cmdline.txt";
+			Core::CommandLineArgs::ParseCommandLine(argc, argv);
+			Core::CommandLineArgs::ParseCommandLine(cmdLinePath.c_str());
+
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_PROFILER)->GetBool())
+			{
+				Core::WaitForProfiler();
+			}
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
+			{
+				while (!IsDebuggerPresent()) { }
+			}
 
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
+
 			m_resourceSystem.Initialise();
 			m_imguiSystem.Initialise();
 			ImGui::SetCurrentContext(m_imguiSystem.GetCurrentContext());
@@ -172,15 +177,19 @@ namespace Insight
 			OnDestroy();
 			
 			m_renderpasses.Destroy();
+			m_worldSystem.Shutdown();
 
 			m_resourceSystem.Shutdown();
 
-			m_worldSystem.Shutdown();
-			m_inputSystem.Shutdown();
 			m_graphicsSystem.Shutdown();
+
 			m_imguiSystem.Shutdown();
+
+			m_inputSystem.Shutdown();
 			m_eventSystem.Shutdown();
 			m_taskSystem.Shutdown();
+
+			m_projectSystem.Shutdown();
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
@@ -189,6 +198,7 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_imguiSystem);
 			m_systemRegistry.UnregisterSystem(&m_graphicsSystem);
 			m_systemRegistry.UnregisterSystem(&m_resourceSystem);
+			m_systemRegistry.UnregisterSystem(&m_projectSystem);
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
 

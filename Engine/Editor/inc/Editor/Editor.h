@@ -4,7 +4,6 @@
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
-#include "Editor/ProjectSystem.h"
 
 namespace Insight
 {
@@ -19,7 +18,6 @@ namespace Insight
 			virtual void OnDestroy() override;
 
 		private:
-			ProjectSystem m_projectSystem;
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 		};
