@@ -13,6 +13,8 @@ namespace Insight
         {
         public:
 
+            static void CreateFolder(const std::string& path);
+
             static bool Exists(const std::string& path);
             static bool Exists(std::string_view path);
 

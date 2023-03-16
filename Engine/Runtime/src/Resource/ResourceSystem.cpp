@@ -29,14 +29,19 @@ namespace Insight
 
         void ResourceSystem::Shutdown()
         {
-            Archive archive("./ResouceDataBase", ArchiveModes::Write);
-            //std::string data = m_database.Serialise();
-            //archive.Write(data.data(), data.size());
-            //archive.Close();
-
             m_database.Shutdown();
             ResourceManager::s_database = nullptr;
             m_state = Core::SystemStates::Not_Initialised;
+        }
+
+        ResourceDatabase& ResourceSystem::GetDatabase()
+        {
+            return m_database;
+        }
+
+        const ResourceDatabase& ResourceSystem::GetDatabase() const
+        {
+            return m_database;
         }
     }
 }

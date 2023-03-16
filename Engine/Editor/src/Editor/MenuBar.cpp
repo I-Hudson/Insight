@@ -38,14 +38,12 @@ namespace Insight
                 {
                     if (ImGui::MenuItem("Save Project"))
                     {
-                        //m_fileDialog.Show("./", FileDialogOperations::Save);
                         std::string item;
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowSave(&item);
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {
-                        //m_fileDialog.Show("./", FileDialogOperations::Load);
                         std::string item;
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowLoad(&item,
@@ -58,7 +56,6 @@ namespace Insight
                     }
                     if (ImGui::MenuItem("Save World"))
                     {
-                        //m_fileDialog.Show("./", FileDialogOperations::Load);
                         std::string item;
                         PlatformFileDialog fileDialog;
                         if (fileDialog.ShowSave(&item,
@@ -81,7 +78,6 @@ namespace Insight
                     }
                     if (ImGui::MenuItem("Load World"))
                     {
-                        //m_fileDialog.Show("./", FileDialogOperations::Load);
                         std::string item;
                         PlatformFileDialog fileDialog;
                         if (fileDialog.ShowLoad(&item,

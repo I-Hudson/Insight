@@ -10,6 +10,8 @@
 #include "FileSystem/FileSystem.h"
 #include "Core/Logger.h"
 
+#include "Event/EventSystem.h"
+
 namespace Insight
 {
     namespace Runtime
@@ -27,8 +29,6 @@ namespace Insight
             ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),      []() { return NewTracked(Mesh); });
             ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),     []() { return NewTracked(Model); });
             ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
-
-            ResourceManager::LoadDatabase();
         }
 
         void ResourceDatabase::Shutdown()

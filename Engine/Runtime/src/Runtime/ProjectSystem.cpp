@@ -1,5 +1,8 @@
 ﻿#include "Runtime/ProjectSystem.h"
 
+#include "Resource/ResourceSystem.h"
+#include "Resource/ResourceManager.h"
+
 #include "Core/Logger.h"
 
 #include "FileSystem/FileSystem.h"
@@ -8,12 +11,9 @@
 #include "Serialisation/Archive.h"
 #include "Serialisation/JsonSerialiser.h"
 
+#include "Event/EventSystem.h"
+
 #include <nlohmann/json.hpp>
-
-#include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
-
-#include <IconsFontAwesome5.h>
 
 #include <fstream>
 #include <filesystem>
@@ -39,14 +39,21 @@ namespace Insight
             m_executablePath = std::move(std::filesystem::path{ szPath }.parent_path().string()); // to finish the folder path with (back)slash
             m_executablePath = FileSystem::FileSystem::PathToUnix(m_executablePath);
 #endif
+            ASSERT_MSG(m_resourceSystem, "[ProjectSystem::Initialise] There must be a valid resource system pointer in the project system.");
 
             m_state = Core::SystemStates::Initialised;
         }
 
         void ProjectSystem::Shutdown()
         {
-            CloseProject();
+            m_projectInfo = {};
             m_state = Core::SystemStates::Not_Initialised;
+        }
+
+        void ProjectSystem::SetResourceSystem(ResourceSystem* resourceSystem)
+        {
+            ASSERT(!m_resourceSystem);
+            m_resourceSystem = resourceSystem;
         }
 
         bool ProjectSystem::IsProjectOpen() const
@@ -54,30 +61,63 @@ namespace Insight
             return m_projectInfo.IsOpen;
         }
 
-        void ProjectSystem::CreateProject(std::string_view projectPath)
+        void ProjectSystem::CreateProject(std::string_view projectPath, std::string_view projectName)
         {
-            if (FileSystem::FileSystem::Exists(projectPath))
+            ProjectInfo project;
+            project.ProjectPath = projectPath;
+            project.ProjectName = projectName;
+
+            std::string projectFilePath = project.GetProjectFilePath();
+
+            if (FileSystem::FileSystem::Exists(projectFilePath))
             {
                 IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
                 return;
             }
 
-            ProjectInfo project;
-            project.ProjectPath = projectPath;
-            project.ProjectName = projectPath;
-            project.ProjectVersion = 0;
+            Serialisation::JsonSerialiser serialiser(false);
+            serialiser.SetVersion(1);
+            project.Serialise(&serialiser);
 
-            GenerateProjectSolution();
+            std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
+            serialiser = {};
+
+            Archive archive(projectFilePath, ArchiveModes::Write);
+            archive.Write(serialisedData.data(), serialisedData.size());
+            archive.Close();
+
+            FileSystem::FileSystem::CreateFolder(project.GetContentPath());
+            FileSystem::FileSystem::CreateFolder(project.GetIntermediatePath());
         }
 
         void ProjectSystem::OpenProject(std::string projectPath)
         {
-            /*std::string projectFilePath;
-            PlatformFileDialog fileDialog;
-            if (!fileDialog.ShowLoad(&projectFilePath, { { "Project (*.isproject)",  "*.isproject"} }))
+            bool foundProjectFile = std::filesystem::path(projectPath).extension() == c_ProjectExtension;
+            std::string isProjectPath;
+
+            if (!foundProjectFile)
             {
+                for (const auto& iter : std::filesystem::directory_iterator(projectPath))
+                {
+                    if (iter.path().extension() == c_ProjectExtension)
+                    {
+                        foundProjectFile = true;
+                        projectPath = iter.path().string();
+                        FileSystem::FileSystem::PathToUnix(projectPath);
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                isProjectPath = projectPath;
+            }
+
+            if (!foundProjectFile)
+            {
+                IS_CORE_WARN("[ProjectSystem::OpenProject] '{}' is not a valid project path. Please give the path to the '.isproject' file or folder that file is in.", projectPath);
                 return;
-            }*/
+            }
 
             Archive projectArchive(projectPath, ArchiveModes::Read);
             std::vector<Byte> data = projectArchive.GetData();
@@ -86,22 +126,27 @@ namespace Insight
                 return;
             }
 
-            CloseProject();
+            if (m_projectInfo.IsOpen)
+            {
+                m_resourceSystem->GetDatabase().Shutdown();
+            }
+
+            m_projectInfo = {};
 
             Serialisation::JsonSerialiser jsonSerialiser(true);
             jsonSerialiser.Deserialise(data);
 
             m_projectInfo.Deserialise(&jsonSerialiser);
             m_projectInfo.IsOpen = true;
-        }
 
-        void ProjectSystem::CloseProject()
-        {
-            m_projectInfo = { };
+            ResourceManager::LoadDatabase();
+
+            Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
         }
 
         const ProjectInfo& ProjectSystem::GetProjectInfo() const
         {
+            ASSERT(IsProjectOpen());
             return m_projectInfo;
         }
 
@@ -113,46 +158,6 @@ namespace Insight
         std::string ProjectSystem::GetInternalResourcePath() const
         {
             return m_installLocation + c_InternalResourcePath;
-        }
-
-        bool ProjectSystem::CanCreateProject()
-        {
-            return true;
-        }
-
-        void ProjectSystem::GenerateProjectSolution()
-        {
-            std::string projectFullPath = m_projectInfo.ProjectPath + "/" + m_projectInfo.ProjectName + c_ProjectExtension;
-
-            Serialisation::JsonSerialiser serialiser(false);
-            u64 arraySize = 1;
-            serialiser.StartArray("ProjectInfoStructs", arraySize);
-            serialiser.SetVersion(1);
-            m_projectInfo.Serialise(&serialiser);
-            serialiser.StopArray();
-
-            std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
-            serialiser = {};
-
-            Archive archive(projectFullPath, ArchiveModes::Write);
-            archive.Write(serialisedData.data(), serialisedData.size());
-            archive.Close();
-
-            archive = Archive(projectFullPath, ArchiveModes::Read);
-            serialisedData = archive.GetData();
-            Serialisation::JsonSerialiser deserialiserJson(true);
-            deserialiserJson.Deserialise(serialisedData);
-            ProjectInfo deserialiseInfo;
-
-            u64 unused;
-            deserialiserJson.StartArray("ProjectInfoStructs", unused);
-            deserialiseInfo.Deserialise(&deserialiserJson);
-            deserialiserJson.StopArray();
-        }
-
-        bool ProjectSystem::CanOpenProject()
-        {
-            return true;
         }
     }
 }

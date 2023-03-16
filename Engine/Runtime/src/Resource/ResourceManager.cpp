@@ -1,6 +1,8 @@
 #include "Resource/ResourceManager.h"
 #include "Resource/ResourceDatabase.h"
 
+#include "Runtime/ProjectSystem.h"
+
 #include "Core/Logger.h"
 
 #include "Algorithm/Vector.h"
@@ -68,7 +70,7 @@ namespace Insight
             Serialisation::JsonSerialiser serialiser(false);
             s_database->Serialise(&serialiser);
             
-            Archive archive("./ResourceDatabase.isdatabase", ArchiveModes::Write);
+            Archive archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabase.isdatabase", ArchiveModes::Write);
             archive.Write(serialiser.GetSerialisedData());
             archive.Close();
         }
@@ -79,7 +81,7 @@ namespace Insight
             {
                 return;
             }
-            Archive archive("./ResourceDatabase.isdatabase", ArchiveModes::Read);
+            Archive archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabase.isdatabase", ArchiveModes::Read);
             archive.Close();
 
             if (!archive.GetData().empty())

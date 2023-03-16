@@ -22,6 +22,9 @@ namespace Insight
             virtual void Initialise() override;
             virtual void Shutdown() override;
 
+            ResourceDatabase& GetDatabase();
+            const ResourceDatabase& GetDatabase() const;
+
         private:
             ResourceDatabase m_database;
         };

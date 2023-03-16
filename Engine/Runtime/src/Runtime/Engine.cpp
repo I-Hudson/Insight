@@ -32,9 +32,6 @@ namespace Insight
 	{
 		Core::Timer Engine::s_FrameTimer;
 
-		auto square(int x) -> int { return x * x; }
-		auto divide(int x) -> int { return x / x; }
-
 		SplashScreen splashScreen;
 
 		bool Engine::Init(int argc, char** argv)
@@ -50,6 +47,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
 
 			Platform::Initialise();
+			m_projectSystem.SetResourceSystem(&m_resourceSystem);
 			m_projectSystem.Initialise();
 #ifdef IS_STANDALONE
 			m_projectSystem.OpenProject("./StandaloneProject.isproject");

@@ -6,6 +6,7 @@
 #include "Editor/EditorWindows/EntitiyDescriptionWindow.h"
 #include "Editor/EditorWindows/EntitiesWindow.h"
 #include "Editor/EditorWindows/InputWindow.h"
+#include "Editor/EditorWindows/ProjectWindow.h"
 #include "Editor/EditorWindows/SystemInformationWindow.h"
 
 #include "Core/Memory.h"
@@ -25,12 +26,17 @@ namespace Insight
 
 		void EditorWindowManager::RegisterWindows()
 		{
-			m_windowRegistry[BuildSettingsWindow::WINDOW_NAME]		= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<BuildSettingsWindow>()); }	   , BuildSettingsWindow::WINDOW_CATEGORY);
-			m_windowRegistry[EntitiyDescriptionWindow::WINDOW_NAME]	= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<EntitiyDescriptionWindow>()); } , EntitiyDescriptionWindow::WINDOW_CATEGORY);
-			m_windowRegistry[EntitiesWindow::WINDOW_NAME]			= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<EntitiesWindow>()); }           , EntitiesWindow::WINDOW_CATEGORY);
-			m_windowRegistry[InputWindow::WINDOW_NAME]				= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<InputWindow>()); }              , InputWindow::WINDOW_CATEGORY);
-			m_windowRegistry[ResourceWindow::WINDOW_NAME]			= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<ResourceWindow>()); }           , ResourceWindow::WINDOW_CATEGORY);
-			m_windowRegistry[SystemInformationWindow::WINDOW_NAME]	= RegisterWindow([]() { return static_cast<IEditorWindow*>(New<SystemInformationWindow>()); }  , SystemInformationWindow::WINDOW_CATEGORY);
+#define REGISTER_NEW_WINDOW(window) m_windowRegistry[window::WINDOW_NAME] = RegisterWindow([]() { return static_cast<IEditorWindow*>(New<window>()); }, window::WINDOW_CATEGORY)
+
+			REGISTER_NEW_WINDOW(BuildSettingsWindow);
+			REGISTER_NEW_WINDOW(EntitiyDescriptionWindow);
+			REGISTER_NEW_WINDOW(EntitiesWindow);
+			REGISTER_NEW_WINDOW(InputWindow);
+			REGISTER_NEW_WINDOW(ResourceWindow);
+			REGISTER_NEW_WINDOW(ProjectWindow);
+			REGISTER_NEW_WINDOW(SystemInformationWindow);
+
+#undef REGISTER_NEW_WINDOW
 		}
 
 		void EditorWindowManager::AddWindow(const std::string& windowName)

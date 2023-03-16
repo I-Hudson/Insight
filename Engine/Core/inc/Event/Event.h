@@ -8,6 +8,9 @@ namespace Insight
 		{
 			Graphics_Swapchain_Resize,
 			Graphics_Render_Resolution_Change,
+
+			Project_Open,
+			Project_Save,
 		};
 
 		struct IS_CORE Event
@@ -42,6 +45,19 @@ namespace Insight
 
 			int Width;
 			int Height;
+		};
+
+		struct IS_CORE ProjectOpenEvent : public Event
+		{
+			ProjectOpenEvent() { }
+			ProjectOpenEvent(std::string projectPath)
+				: ProjectPath(std::move(ProjectPath))
+			{ }
+
+			virtual std::string GetName() override { return "ProjectOpenEvent"; }
+			virtual EventType GetEventType() override { return EventType::Project_Open; }
+
+			std::string ProjectPath;
 		};
 	}
 }

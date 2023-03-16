@@ -30,7 +30,7 @@ namespace Insight
 			windowTitle += ")";
 
 			Graphics::Window::Instance().SetTite(windowTitle);
-			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
+			Graphics::Window::Instance().SetIcon(Runtime::ProjectSystem::Instance().GetInternalResourcePath() + "/Insight/default.png");
 			Graphics::Window::Instance().Show();
 
 			EditorWindowManager::Instance().RegisterWindows();

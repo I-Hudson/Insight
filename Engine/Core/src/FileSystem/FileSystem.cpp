@@ -1,11 +1,28 @@
 #include "FileSystem/FileSystem.h"
 
+#include "Core/Logger.h"
+
 #include <filesystem>
 
 namespace Insight
 {
     namespace FileSystem
     {
+        void FileSystem::CreateFolder(const std::string& path)
+        {
+            if (Exists(path))
+            {
+                return;
+            }
+            std::error_code errorCode;
+            std::filesystem::create_directory(path, errorCode);
+            if (errorCode)
+            {
+                IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
+            }
+        }
+
+
         bool FileSystem::Exists(const std::string& path)
         {
             return Exists(std::string_view(path));

@@ -1,7 +1,10 @@
 ﻿#pragma once
 
+#include "Runtime/Defines.h"
+
 #include "Core/GUID.h"
 #include "Core/ISysytem.h"
+#include "Core/Singleton.h"
 
 #include "Serialisation/Serialiser.h"
 #include "Serialisation/ISerialisable.h"
@@ -10,9 +13,11 @@ namespace Insight
 {
     namespace Runtime
     {
+        class ResourceSystem;
+
         constexpr const char* c_ProjectExtension = ".isproject";
 
-        struct ProjectInfo : public Serialisation::ISerialisable
+        struct IS_RUNTIME ProjectInfo : public Serialisation::ISerialisable
         {
             std::string ProjectPath;
             std::string ProjectName;
@@ -20,27 +25,29 @@ namespace Insight
             bool IsOpen = false;
            
             const std::string& GetProjectPath() const { return ProjectPath; }
+            std::string GetProjectFilePath() const { return ProjectPath + "/" + ProjectName + c_ProjectExtension; }
             std::string GetContentPath() const { return ProjectPath + "/Content"; }
             std::string GetIntermediatePath() const { return ProjectPath + "/Intermediate"; }
 
             IS_SERIALISABLE_H(ProjectInfo);
         };
 
-        class ProjectSystem : public Core::ISystem
+        class IS_RUNTIME ProjectSystem : public Core::ISystem, public Core::Singleton<ProjectSystem>
         {
         public:
             virtual ~ProjectSystem() override;
 
-            virtual void Initialise()override;
+            virtual void Initialise() override;
             virtual void Shutdown() override;
 
             IS_SYSTEM(ProjectSystem);
 
+            void SetResourceSystem(ResourceSystem* resourceSystem);
+
             bool IsProjectOpen() const;
 
-            void CreateProject(std::string_view projectPath);
+            void CreateProject(std::string_view projectPath, std::string_view projectName);
             void OpenProject(std::string projectPath);
-            void CloseProject();
 
             const ProjectInfo& GetProjectInfo() const;
 
@@ -48,18 +55,11 @@ namespace Insight
             std::string GetInternalResourcePath() const;
 
         private:
-            /// @brief Verify that a project can be created in the path given.
-            /// @param projectPath 
-            /// @return bool
-            bool CanCreateProject();
-            void GenerateProjectSolution();
-            bool CanOpenProject();
-
-        private:
             ProjectInfo m_projectInfo;
+            ResourceSystem* m_resourceSystem = nullptr;
 
             std::string m_executablePath;
-            std::string m_installLocation = "./";
+            std::string m_installLocation = ".";
         };
     }
 

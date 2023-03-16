@@ -17,9 +17,6 @@
 
 #include "Renderpass.h"
 
-
-///#define TESTING
-
 namespace Insight
 {
 	namespace App
