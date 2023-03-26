@@ -305,6 +305,22 @@ namespace Insight
 #endif
         }
 
+        void ResourceManager::Shutdown()
+        {
+            while (!s_resourcesLoading.empty())
+            {
+                Update(0.16f);
+            }
+
+            std::unique_lock queueLock(s_queuedResoucesToLoadMutex);
+            while (!s_queuedResoucesToLoad.empty())
+            {
+                auto resource = s_queuedResoucesToLoad.front();
+                s_queuedResoucesToLoad.pop();
+                resource->m_resource_state = EResoruceStates::Cancelled;
+            }
+        }
+
         TObjectPtr<IResource> ResourceManager::CreateDependentResource(ResourceId const& resourceId)
         {
             ASSERT(s_database);

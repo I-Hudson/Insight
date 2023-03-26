@@ -24,11 +24,13 @@ namespace Insight
 		void TaskSystem::Shutdown()
 		{
 			m_destroy = true;
-			std::lock_guard lock(m_mutex);
 			for (size_t i = 0; i < m_threads.size(); ++i)
 			{
 				m_threads.at(i).Join();
 			}
+
+			std::lock_guard lock(m_mutex);
+			m_queuedTasks = {};
 			m_threads.clear();
 			m_state = Core::SystemStates::Not_Initialised;
 		}

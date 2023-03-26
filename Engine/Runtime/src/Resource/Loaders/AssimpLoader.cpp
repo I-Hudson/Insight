@@ -82,6 +82,11 @@ namespace Insight
 			bool allTexturesLoaded = false;
 			while (!allTexturesLoaded)
 			{
+				if (model->GetResourceState() == EResoruceStates::Cancelled)
+				{
+					break;
+				}
+
 				allTexturesLoaded = true;
 				for (size_t i = 0; i < model->m_materials.size(); ++i)
 				{
@@ -89,7 +94,8 @@ namespace Insight
 					for (size_t textureTypeIdx = 0; textureTypeIdx < (size_t)TextureTypes::Count; ++textureTypeIdx)
 					{
 						Texture2D* texture = mat->GetTexture((TextureTypes)textureTypeIdx);
-						if (texture != nullptr && texture->GetResourceState() != EResoruceStates::Loaded)
+						if (texture != nullptr 
+							&& (texture->GetResourceState() != EResoruceStates::Loaded && texture->GetResourceState() != EResoruceStates::Cancelled))
 						{
 							allTexturesLoaded = false;
 							break;

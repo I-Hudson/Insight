@@ -19,11 +19,11 @@ namespace Insight
         { }
 
         ProjectWindow::ProjectWindow(u32 minWidth, u32 minHeight)
-            : IEditorWindow(minWidth, minHeight)
+            : IEditorWindow(420, 640)
         { }
 
         ProjectWindow::ProjectWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight)
-            : IEditorWindow(minWidth, minHeight, maxWidth, maxHeight)
+            : IEditorWindow(420, 640, maxWidth, maxHeight)
         { }
 
         ProjectWindow::~ProjectWindow()
@@ -34,7 +34,6 @@ namespace Insight
             static u64 tabIndex = 0;
             constexpr const char* buttonLabels[] = { "Create Project", "Open Project" };
 
-            //ImGui::Begin("Project", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking);
             for (size_t buttonIdx = 0; buttonIdx < ARRAY_COUNT(buttonLabels); ++buttonIdx)
             {
                 if (ImGui::Button(buttonLabels[buttonIdx]))
@@ -86,8 +85,6 @@ namespace Insight
                     projectSystem->OpenProject(projectPath);
                 }
             }
-
-            //ImGui::End();
         }
     }
 }

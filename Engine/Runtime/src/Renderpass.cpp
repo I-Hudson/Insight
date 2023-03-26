@@ -11,6 +11,7 @@
 
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
+#include "Core/EnginePaths.h"
 
 #include "World/WorldSystem.h"
 #include "ECS/Components/TransformComponent.h"
@@ -84,15 +85,15 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			modelsToAddToScene.push_back({ model_sponza, false });
+			//modelsToAddToScene.push_back({ model_sponza, false });
 			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
@@ -183,7 +184,7 @@ namespace Insight
 
 			//if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
 			{
-				//Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load("./Resources/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
+				//Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load(EnginePaths::GetResourcePath() + "/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
 				//Runtime::ResourceManager::Instance().UnloadAll();
 				//auto entities = App::SceneManager::Instance().GetActiveScene().Lock()->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
 				//for (auto entity : entities)
@@ -421,7 +422,7 @@ namespace Insight
 
 					ShaderDesc shader_description = { };
 					shader_description.InputLayout = DefaultShaderInputLayout;
-					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Cascade_Shadow.hlsl";
+					shader_description.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl";
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -1090,8 +1091,8 @@ namespace Insight
 					builder.WriteTexture(composite_handle);
 
 					ShaderDesc shader_description = { };
-					shader_description.VertexFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
-					shader_description.PixelFilePath = "./Resources/Shaders/hlsl/Composite.hlsl";
+					shader_description.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl";
+					shader_description.PixelFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl";
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -1215,8 +1216,8 @@ namespace Insight
 					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc = { };
-					shaderDesc.VertexFilePath = "./Resources/Shaders/hlsl/GFXHelper.hlsl";
-					shaderDesc.PixelFilePath = "./Resources/Shaders/hlsl/GFXHelper.hlsl";
+					shaderDesc.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl";
+					shaderDesc.PixelFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl";
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };

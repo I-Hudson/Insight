@@ -12,6 +12,7 @@
 #include "World/WorldSystem.h"
 
 #include "Resource/ResourceManager.h"
+#include "Runtime/ProjectSystem.h"
 
 #include <imgui.h>
 
@@ -36,11 +37,20 @@ namespace Insight
             {
                 if (ImGui::BeginMenu("File"))
                 {
-                    if (ImGui::MenuItem("Save Project"))
+                    if (ImGui::MenuItem("Create Project"))
                     {
                         std::string item;
                         PlatformFileDialog fileDialog;
-                        fileDialog.ShowSave(&item);
+                        fileDialog.ShowSave(&item,
+                            {
+                                { "Project (*.isproject)",        "*.isproject"},
+                            });
+                        Runtime::ProjectSystem::Instance().CreateProject(item, item);
+                        Runtime::ProjectSystem::Instance().OpenProject(item);
+                    }
+                    if (ImGui::MenuItem("Save Project"))
+                    {
+                        //Runtime::ProjectSystem::Instance().SaveProject();
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {
@@ -48,11 +58,9 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowLoad(&item,
                             { 
-                                { "Model (*.model)",        "*.model"},
-                                { "Mesh (*.mesh)",          "*.mesh"},
-                                { "Texture (*.texture)",    "*.texture"},
-                                { "Material (*.material)",  "*.material"},
+                                { "Project (*.isproject)",        "*.isproject"},
                             });
+                        Runtime::ProjectSystem::Instance().OpenProject(item);
                     }
                     if (ImGui::MenuItem("Save World"))
                     {

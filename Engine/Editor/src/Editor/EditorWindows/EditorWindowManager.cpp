@@ -145,6 +145,15 @@ namespace Insight
 			return nullptr;
 		}
 
+		void EditorWindowManager::RemoveAllWindows()
+		{
+			std::vector<std::string> activeWindows = GetAllActiveWindowNames();
+			for (size_t i = 0; i < activeWindows.size(); ++i)
+			{
+				RemoveWindow(activeWindows.at(i));
+			}
+		}
+
 		void EditorWindowManager::Update()
 		{
 			RemoveQueuedWindows();

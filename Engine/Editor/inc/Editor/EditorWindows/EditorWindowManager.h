@@ -52,6 +52,7 @@ namespace Insight
 			std::vector<std::string> GetAllRegisteredWindowNames() const;
 			std::vector<std::string> GetAllActiveWindowNames() const;
 			IEditorWindow const* GetActiveWindow(std::string_view windowName) const;
+			void RemoveAllWindows();
 
 			void Update();
 			void Destroy();

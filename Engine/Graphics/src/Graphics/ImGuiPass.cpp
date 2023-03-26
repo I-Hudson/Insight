@@ -5,6 +5,7 @@
 #include "Graphics/Window.h"
 
 #include "Core/Profiler.h"
+#include "Core/EnginePaths.h"
 
 namespace Insight
 {
@@ -49,8 +50,8 @@ namespace Insight
 					builder.WriteTexture(-1);
 
 					ShaderDesc shaderDesc = { };
-					shaderDesc.VertexFilePath = "./Resources/Shaders/hlsl/ImGui.hlsl";
-					shaderDesc.PixelFilePath = "./Resources/Shaders/hlsl/ImGui.hlsl";
+					shaderDesc.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/ImGui.hlsl";
+					shaderDesc.PixelFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/ImGui.hlsl";
 					shaderDesc.InputLayout =
 					{
 						ShaderInputLayout(0, PixelFormat::R32G32_Float, offsetof(ImDrawVert, pos), "POSITION"),

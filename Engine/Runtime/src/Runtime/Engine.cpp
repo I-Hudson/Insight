@@ -12,6 +12,7 @@
 #include "Core/Logger.h"
 #include "Core/Timer.h"
 #include "Core/Delegate.h"
+#include "Core/EnginePaths.h"
 
 #include "Core/Collections/Span.h"
 
@@ -47,6 +48,8 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
 
 			Platform::Initialise();
+			EnginePaths::Initialise();
+
 			m_projectSystem.SetResourceSystem(&m_resourceSystem);
 			m_projectSystem.Initialise();
 #ifdef IS_STANDALONE
@@ -185,9 +188,10 @@ namespace Insight
 
 			m_inputSystem.Shutdown();
 			m_eventSystem.Shutdown();
-			m_taskSystem.Shutdown();
 
 			m_projectSystem.Shutdown();
+
+			m_taskSystem.Shutdown();
 
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 

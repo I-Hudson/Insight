@@ -1,6 +1,7 @@
 #include "Editor/Editor.h"
 
 #include "EditorModule.h"
+#include "Editor/EditorWindows/ProjectWindow.h"
 
 #include "Runtime/EntryPoint.h"
 #include "Core/Memory.h"
@@ -35,15 +36,21 @@ namespace Insight
 
 			EditorWindowManager::Instance().RegisterWindows();
 			m_menuBar.Initialise(&m_editorWindowManager);
-
-			EditorWindowManager::Instance().AddWindow("ResourceWindow");
-			EditorWindowManager::Instance().AddWindow("EntitiesWindow");
-			EditorWindowManager::Instance().AddWindow("InputWindow");
 		}
 
 		void Editor::OnUpdate()
 		{
-			m_menuBar.Draw();
+			if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
+			{
+				m_editorWindowManager.AddWindow(ProjectWindow::WINDOW_NAME);
+				const ProjectWindow* projectWindow = static_cast<const ProjectWindow*>(m_editorWindowManager.GetActiveWindow(ProjectWindow::WINDOW_NAME));
+				RemoveConst(projectWindow)->SetFullscreen(true);
+			}
+			else
+			{
+				m_menuBar.Draw();
+			}
+
 			EditorWindowManager::Instance().Update();
 		}
 

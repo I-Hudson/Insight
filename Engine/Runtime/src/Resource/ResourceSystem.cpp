@@ -29,6 +29,8 @@ namespace Insight
 
         void ResourceSystem::Shutdown()
         {
+            ResourceManager::Shutdown();
+
             m_database.Shutdown();
             ResourceManager::s_database = nullptr;
             m_state = Core::SystemStates::Not_Initialised;

@@ -30,19 +30,54 @@ namespace Insight
 		void IEditorWindow::Draw()
 		{
 			const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
-			if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
+			if (m_isFullscreen)
 			{
-				OnDraw();
-				ImVec2 windowSize = ImGui::GetWindowSize();
-				m_width = static_cast<u32>(windowSize.x);
-				m_height = static_cast<u32>(windowSize.y);
-
-				if (!m_isOpen)
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
 				{
-					EditorWindowManager::Instance().RemoveWindow(GetWindowName());
+					const ImGuiIO& io = ImGui::GetIO();
+					ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+					ImGui::SetWindowSize(ImVec2(static_cast<float>(io.DisplaySize.x), static_cast<float>(io.DisplaySize.y)));
+
+					OnDraw();
+					if (!m_isOpen)
+					{
+						EditorWindowManager::Instance().RemoveWindow(GetWindowName());
+					}
+				}
+			}
+			else
+			{
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
+				{
+					ImGui::SetWindowPos(ImVec2(static_cast<float>(m_positionX), static_cast<float>(m_positionY)));
+					ImGui::SetWindowSize(ImVec2(static_cast<float>(m_width), static_cast<float>(m_height)));
+
+					OnDraw();
+
+					ImVec2 windowPosition = ImGui::GetWindowPos();
+					m_positionX = windowPosition.x;
+					m_positionY = windowPosition.y;
+					ImVec2 windowSize = ImGui::GetWindowSize();
+					m_width = static_cast<u32>(windowSize.x);
+					m_height = static_cast<u32>(windowSize.y);
+
+					if (!m_isOpen)
+					{
+						EditorWindowManager::Instance().RemoveWindow(GetWindowName());
+					}
 				}
 			}
 			ImGui::End();
+		}
+
+		void IEditorWindow::SetFullscreen(bool value)
+		{
+			m_isFullscreen = value;
+		}
+
+		bool IEditorWindow::GetFullscreen() const
+		{
+			return m_isFullscreen;
 		}
 	}
 }

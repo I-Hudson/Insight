@@ -49,7 +49,7 @@ namespace Insight
         private:
             static void Update(float const deltaTime);
             static void StartLoading(IResource* resource);
-            
+            static void Shutdown();
 
         private:
             /// @brief Max number of resources which can be loading at a single time is 4. This

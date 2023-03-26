@@ -9,6 +9,7 @@
 
 #include "Core/Memory.h"
 #include "Core/Logger.h"
+#include "Core/EnginePaths.h"
 
 #include "dxc/dxcapi.h"
 #include "spirv_reflect.h"
@@ -239,7 +240,7 @@ namespace Insight
 			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
 
 			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
-			std::string shaderToDisk = "./Shader_CSO/" + std::string(shaderToDiskView) + ".cso";
+			std::string shaderToDisk = EnginePaths::GetExecutablePath() + "/Shader_CSO/" + std::string(shaderToDiskView) + ".cso";
 
 			shaderDisk.open(shaderToDisk.c_str());
 			if (shaderDisk.is_open())

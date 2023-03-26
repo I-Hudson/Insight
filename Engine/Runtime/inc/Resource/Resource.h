@@ -43,6 +43,7 @@ namespace Insight
 			Unloaded,		/// @brief Resource has been unloaded.
 			Unloading,		/// @brief Resource is been unloaded.
 
+			Cancelled,		/// @brief Resource has been cancelled.
 		};
 		IS_RUNTIME const char* ERsourceStatesToString(EResoruceStates state);
 
