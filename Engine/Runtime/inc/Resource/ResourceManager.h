@@ -30,6 +30,7 @@ namespace Insight
             static TObjectPtr<IResource> GetResource(ResourceId const& resourceId);
             static TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid);
 
+            static TObjectPtr<IResource> LoadSync(ResourceId const& resourceId);
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);
@@ -48,7 +49,7 @@ namespace Insight
 
         private:
             static void Update(float const deltaTime);
-            static void StartLoading(IResource* resource);
+            static void StartLoading(IResource* resource, bool threading);
             static void Shutdown();
 
         private:

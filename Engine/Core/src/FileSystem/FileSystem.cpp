@@ -78,27 +78,26 @@ namespace Insight
         {
             std::filesystem::path fsPath = std::filesystem::absolute(std::filesystem::path(path));
             std::string absPath = fsPath.string();
-            return PathToUnix(absPath);
+            PathToUnix(absPath);
+            return absPath;
         }
 
-        std::string FileSystem::PathToUnix(std::string& path)
+        void FileSystem::PathToUnix(std::string& path)
         {
             std::replace(path.begin(), path.end(), '\\', '/');
             if (path.back() == '/')
             {
                 path.pop_back();
             }
-            return path;
         }
 
-        std::string FileSystem::PathToWindow(std::string& path)
+        void FileSystem::PathToWindows(std::string& path)
         {
             std::replace(path.begin(), path.end(), '/', '\\');
             if (path.back() == '\\')
             {
                 path.pop_back();
             }
-            return path;
         }
     }
 }

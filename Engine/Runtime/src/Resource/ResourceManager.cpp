@@ -56,7 +56,7 @@ namespace Insight
                 }
                 IResource* resourceToLoad = s_queuedResoucesToLoad.front();
                 s_queuedResoucesToLoad.pop();
-                StartLoading(resourceToLoad);
+                StartLoading(resourceToLoad, true);
             }
             queueLock.unlock();
         }
@@ -127,6 +127,53 @@ namespace Insight
         {
             ASSERT(s_database);
             return s_database->GetResourceFromGuid(guid);
+        }
+
+        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId const& resourceId)
+        {
+            ASSERT(s_database);
+
+            TObjectPtr<IResource> resource;
+            if (s_database->HasResource(resourceId))
+            {
+                resource = s_database->GetResource(resourceId);
+            }
+            else
+            {
+                resource = s_database->AddResource(resourceId);
+            }
+
+            if (resource)
+            {
+                if (resource->IsLoaded())
+                {
+                    // Item is already loaded, just return it.
+                    return resource;
+                }
+
+                if (resource->IsNotLoaded() || resource->IsUnloaded())
+                {
+                    if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
+                    {
+                        if (!FileSystem::FileSystem::Exists(resource->GetFilePath()))
+                        {
+                            // File does not exists. Set the resource state and return nullptr.
+                            resource->m_resource_state = EResoruceStates::Not_Found;
+                            return resource;
+                        }
+                        else
+                        {
+                            resource->m_resource_state = EResoruceStates::Queued;
+                            StartLoading(resource.Get(), false);
+                        }
+                    }
+                    else
+                    {
+                        FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
+                    }
+                }
+            }
+            return resource;
         }
 
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
@@ -281,28 +328,40 @@ namespace Insight
             return s_database->GetLoadingResourceCount();
         }
 
-        void ResourceManager::StartLoading(IResource* resource)
+        void ResourceManager::StartLoading(IResource* resource, bool threading)
         {
             s_resourcesLoading.push_back(resource);
             resource->m_resource_state = EResoruceStates::Loading;
 
-#ifdef RESOURCE_LOAD_THREAD
-            Threading::TaskSystem::CreateTask([resource]()
+            if (threading)
             {
-#endif
+                Threading::TaskSystem::CreateTask([resource]()
+                    {
+                        resource->StartLoadTimer();
+                        {
+                            //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
+                            resource->Load();
+                        }
+                        resource->StopLoadTimer();
+                        if (resource->IsLoaded())
+                        {
+                            resource->OnLoaded(resource);
+                        }
+                    });
+            }
+            else
+            {
                 resource->StartLoadTimer();
-            {
-                //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                resource->Load();
+                {
+                    //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
+                    resource->Load();
+                }
+                resource->StopLoadTimer();
+                if (resource->IsLoaded())
+                {
+                    resource->OnLoaded(resource);
+                }
             }
-            resource->StopLoadTimer();
-            if (resource->IsLoaded())
-            {
-                resource->OnLoaded(resource);
-            }
-#ifdef RESOURCE_LOAD_THREAD
-            });
-#endif
         }
 
         void ResourceManager::Shutdown()

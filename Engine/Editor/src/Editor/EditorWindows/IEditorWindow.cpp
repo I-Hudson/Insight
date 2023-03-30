@@ -49,9 +49,6 @@ namespace Insight
 			{
 				if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
 				{
-					ImGui::SetWindowPos(ImVec2(static_cast<float>(m_positionX), static_cast<float>(m_positionY)));
-					ImGui::SetWindowSize(ImVec2(static_cast<float>(m_width), static_cast<float>(m_height)));
-
 					OnDraw();
 
 					ImVec2 windowPosition = ImGui::GetWindowPos();

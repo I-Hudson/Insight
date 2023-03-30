@@ -830,7 +830,7 @@ public:
 	{
 		static_assert(std::is_convertible_v<TOther*, Ptr> || std::is_convertible_v<Ptr, TOther*>, "[TObjectPtr::ConstructorCopy] Must be able to convert from 'TOther' to 'T'.");
 		Reset();
-		m_ptr = other.m_ptr;
+		m_ptr = static_cast<Ptr>(other.m_ptr);
 #ifdef TOBJECTPTR_REF_COUNTING
 		m_refCount = other.m_refCount;
 #endif // TOBJECTPTR_REF_COUNTING
@@ -1083,6 +1083,13 @@ public:
 	}
 
 	Ptr Get() const { return m_ptr; }
+
+	template<typename TCastTo>
+	TObjectPtr<TCastTo> CastTo()
+	{
+		TObjectPtr<TCastTo> dObjectPtr(*this);
+		return dObjectPtr;
+	}
 
 #ifdef TEST_ENABLED
 	ReferenceCountObject*		GetReferenceCountObject()	const { return m_refCount; }

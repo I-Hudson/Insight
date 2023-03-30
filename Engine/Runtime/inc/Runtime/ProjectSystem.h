@@ -46,8 +46,8 @@ namespace Insight
 
             bool IsProjectOpen() const;
 
-            void CreateProject(std::string_view projectPath, std::string_view projectName);
-            void OpenProject(std::string projectPath);
+            bool CreateProject(std::string_view projectPath, std::string_view projectName);
+            bool OpenProject(std::string projectPath);
 
             const ProjectInfo& GetProjectInfo() const;
 

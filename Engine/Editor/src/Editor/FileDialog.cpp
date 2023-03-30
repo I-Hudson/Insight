@@ -510,7 +510,9 @@ namespace Insight
             std::filesystem::directory_iterator directoryIter = std::filesystem::directory_iterator(m_navigation.GetPath());
             for (const auto& entry : directoryIter)
             {
-                m_items.emplace_back(FileSystem::FileSystem::PathToUnix(entry.path().u8string()));
+                std::string entryPath = entry.path().u8string();
+                FileSystem::FileSystem::PathToUnix(entryPath);
+                m_items.emplace_back(entryPath);
             }
         }
     }

@@ -1,4 +1,5 @@
 #include "Editor/EditorWindows/ProjectWindow.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "Core/Defines.h"
@@ -67,7 +68,10 @@ namespace Insight
                 if (ImGui::Button("Create"))
                 {
                     projectSystem->CreateProject(projectPath, projectName);
-                    projectSystem->OpenProject(projectPath);
+                    if (projectSystem->OpenProject(projectPath))
+                    {
+                        EditorWindowManager::Instance().RemoveWindow(WINDOW_NAME);
+                    }
                 }
             }
             else if (tabIndex == 1)
@@ -82,7 +86,10 @@ namespace Insight
 
                 if (ImGui::Button("Open"))
                 {
-                    projectSystem->OpenProject(projectPath);
+                    if (projectSystem->OpenProject(projectPath))
+                    {
+                        EditorWindowManager::Instance().RemoveWindow(WINDOW_NAME);
+                    }
                 }
             }
         }

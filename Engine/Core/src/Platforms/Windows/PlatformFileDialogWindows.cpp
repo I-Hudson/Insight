@@ -151,7 +151,7 @@ namespace Insight
             {
                 (*selectedItem).pop_back();
             }
-            (*selectedItem) = FileSystem::FileSystem::PathToUnix(*selectedItem);
+            FileSystem::FileSystem::PathToUnix(*selectedItem);
 
             item->Release();
             openDialogHandle->Release();
@@ -199,7 +199,7 @@ namespace Insight
             {
                 (*selectedItem).pop_back();
             }
-            (*selectedItem) = FileSystem::FileSystem::PathToUnix(*selectedItem);
+            FileSystem::FileSystem::PathToUnix(*selectedItem);
 
             item->Release();
             saveDialogHandle->Release();

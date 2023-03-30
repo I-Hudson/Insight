@@ -25,7 +25,7 @@ namespace Insight
             char path[MAX_PATH];
             GetModuleFileNameA(NULL, path, MAX_PATH);
             std::string sString(path);
-            sString = FileSystem::FileSystem::PathToUnix(sString);
+            FileSystem::FileSystem::PathToUnix(sString);
             sString = sString.substr(0, sString.find_last_of('/'));
             return sString;
         }

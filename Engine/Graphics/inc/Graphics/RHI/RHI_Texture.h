@@ -71,16 +71,16 @@ namespace Insight
 			void LoadFromFile(std::string filePath);
 			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
-			RHI_TextureInfo  GetInfo					(u32 mip = 0)	const { return m_infos.at(mip); }
-			int				 GetWidth                   (u32 mip = 0)	const { return m_infos.at(mip).Width; }
-			int				 GetHeight                  (u32 mip = 0)	const { return m_infos.at(mip).Height; }
+			RHI_TextureInfo  GetInfo					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip); }				return {}; }
+			int				 GetWidth					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Width; }			return -1; }
+			int				 GetHeight                  (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Height; }		return -1; }
 			int				 GetChannels                (u32 mip = 0)	const { return 4; }
-			TextureType		 GetType					(u32 mip = 0)	const { return m_infos.at(mip).TextureType; }
-			PixelFormat		 GetFormat				    (u32 mip = 0)	const { return m_infos.at(mip).Format; }
-			ImageLayout		 GetLayout				    (u32 mip = 0)	const { return m_infos.at(mip).Layout; }
-			glm::vec4 const& GetClearColour			    ()				const { return m_infos.at(0).ClearColour; }
+			TextureType		 GetType					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).TextureType; }	return TextureType::Unknown; }
+			PixelFormat		 GetFormat				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Format; }		return PixelFormat::Unknown; }
+			ImageLayout		 GetLayout				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Layout; }		return ImageLayout::Undefined; }
+			glm::vec4 const& GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return glm::vec4(0, 0, 0, 0); }
 
-			void			SetLayout				(ImageLayout newLayout, u32 mip = 0) { m_infos.at(mip).Layout = newLayout; }
+			void			SetLayout(ImageLayout newLayout, u32 mip = 0) { if (mip < m_infos.size()) { m_infos.at(mip).Layout = newLayout; } }
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
 			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.

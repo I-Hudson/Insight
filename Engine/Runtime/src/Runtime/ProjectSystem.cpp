@@ -37,7 +37,7 @@ namespace Insight
             wchar_t szPath[MAX_PATH];
             GetModuleFileNameW(NULL, szPath, MAX_PATH);
             m_executablePath = std::move(std::filesystem::path{ szPath }.parent_path().string()); // to finish the folder path with (back)slash
-            m_executablePath = FileSystem::FileSystem::PathToUnix(m_executablePath);
+            FileSystem::FileSystem::PathToUnix(m_executablePath);
 #endif
             ASSERT_MSG(m_resourceSystem, "[ProjectSystem::Initialise] There must be a valid resource system pointer in the project system.");
 
@@ -61,7 +61,7 @@ namespace Insight
             return m_projectInfo.IsOpen;
         }
 
-        void ProjectSystem::CreateProject(std::string_view projectPath, std::string_view projectName)
+        bool ProjectSystem::CreateProject(std::string_view projectPath, std::string_view projectName)
         {
             ProjectInfo project;
             project.ProjectPath = projectPath;
@@ -72,7 +72,7 @@ namespace Insight
             if (FileSystem::FileSystem::Exists(projectFilePath))
             {
                 IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
-                return;
+                return false;
             }
 
             Serialisation::JsonSerialiser serialiser(false);
@@ -88,9 +88,11 @@ namespace Insight
 
             FileSystem::FileSystem::CreateFolder(project.GetContentPath());
             FileSystem::FileSystem::CreateFolder(project.GetIntermediatePath());
+
+            return true;
         }
 
-        void ProjectSystem::OpenProject(std::string projectPath)
+        bool ProjectSystem::OpenProject(std::string projectPath)
         {
             bool foundProjectFile = std::filesystem::path(projectPath).extension() == c_ProjectExtension;
             std::string isProjectPath;
@@ -104,7 +106,7 @@ namespace Insight
                         foundProjectFile = true;
                         projectPath = iter.path().string();
                         FileSystem::FileSystem::PathToUnix(projectPath);
-                        return;
+                        break;
                     }
                 }
             }
@@ -116,14 +118,14 @@ namespace Insight
             if (!foundProjectFile)
             {
                 IS_CORE_WARN("[ProjectSystem::OpenProject] '{}' is not a valid project path. Please give the path to the '.isproject' file or folder that file is in.", projectPath);
-                return;
+                return false;
             }
 
             Archive projectArchive(projectPath, ArchiveModes::Read);
             std::vector<Byte> data = projectArchive.GetData();
             if (data.size() == 0)
             {
-                return;
+                return false;
             }
 
             if (m_projectInfo.IsOpen)
@@ -142,6 +144,7 @@ namespace Insight
             ResourceManager::LoadDatabase();
 
             Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
+            return true;
         }
 
         const ProjectInfo& ProjectSystem::GetProjectInfo() const

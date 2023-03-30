@@ -27,9 +27,9 @@ namespace Insight
             static std::string GetAbsolutePath(const std::string& path);
             static std::string GetAbsolutePath(std::string_view path);
 
-            static std::string PathToUnix(std::string& path);
+            static void PathToUnix(std::string& path);
 
-            static std::string PathToWindow(std::string& path);
+            static void PathToWindows(std::string& path);
         };
     }
 }
