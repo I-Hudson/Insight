@@ -27,6 +27,7 @@ namespace Insight
             const ResourceTypeId& GetTypeId() const;
             //u64 GetId() const;
 
+            operator bool() const;
             bool operator==(ResourceId const& other) const;
             bool operator!=(ResourceId const& other) const;
 

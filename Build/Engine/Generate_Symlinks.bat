@@ -15,7 +15,6 @@ CALL :CreateSymlink %output_release% %resource_path%
 CALL :CreateSymlink %output_testing% %resource_path%
 CALL :CreateSymlink %output_standalone_debug% %resource_path%
 CALL :CreateSymlink %output_standalone_release% %resource_path%
-pause
 
 :CreateSymlink
 set ouputDir=%1
@@ -28,11 +27,6 @@ CALL :SymlinkData "%ouputDir%\Resources", "%resourcePath%"
 :SymlinkData
 SET desDir=%~1
 SET linkDir=%~2
-
-echo The value of parameter 1 is %desDir%
-echo The value of parameter 2 is %linkDir%
-
-if exist "%desDir%" (
-    rmdir "%desDir%"
+if not exist "%desDir%" (
+    mklink /D "%desDir%" "%linkDir%"
 )
-mklink /D "%desDir%" "%linkDir%"

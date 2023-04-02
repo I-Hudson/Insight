@@ -6,3 +6,4 @@ constexpr char* CMD_GRAPHICS_API = "graphics_api";
 constexpr char* CMD_WINDOW_SIZE_WIDTH = "window_size_width"; 
 constexpr char* CMD_WINDOW_SIZE_HEIGHT = "window_size_height";
 constexpr char* CMD_GPU_VALIDATION = "gpu_validation";
+constexpr char* CMD_PROJECT_PATH = "project_path";

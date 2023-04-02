@@ -35,6 +35,9 @@ namespace Insight
 			serialiserObject.Deserialise(serialiser, *this);
 		}
 
+		Model::Model()
+		{ }
+
 		Model::~Model()
 		{
 			UnLoad();

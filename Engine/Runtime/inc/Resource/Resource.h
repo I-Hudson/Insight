@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Core/Defines.h"
-#include "Runtime/Defines.h"
 #include "Resource/ResourceId.h"
+#include "Runtime/Defines.h"
 
+#include "Core/Defines.h"
 #include "Core/Delegate.h"
 #include "Core/Memory.h"
 #include "Core/Singleton.h"
@@ -217,7 +217,7 @@ namespace Insight
 	);
 }
 
-#define REGISTER_RESOURCE(type_name) public: \
+#define REGISTER_RESOURCE(type_name, ...) public: \
 static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); }\
 virtual Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); }\
-constexpr const char* GetResourceFileExtension() { return STRINGIZE(PPCAT(.IS, type_name)); }
+static constexpr const char* GetResourceFileExtension() { return STRINGIZE(PPCAT(.is, type_name)); }

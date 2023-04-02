@@ -4,8 +4,10 @@
 #include "Editor/EditorWindows/ProjectWindow.h"
 
 #include "Runtime/EntryPoint.h"
+
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
+#include "Core/EnginePaths.h"
 
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
@@ -31,7 +33,7 @@ namespace Insight
 			windowTitle += ")";
 
 			Graphics::Window::Instance().SetTite(windowTitle);
-			Graphics::Window::Instance().SetIcon(Runtime::ProjectSystem::Instance().GetInternalResourcePath() + "/Insight/default.png");
+			Graphics::Window::Instance().SetIcon(EnginePaths::GetResourcePath() + "/Insight/default.png");
 			Graphics::Window::Instance().Show();
 
 			EditorWindowManager::Instance().RegisterWindows();

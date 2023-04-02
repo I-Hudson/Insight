@@ -51,15 +51,9 @@ namespace Insight
 
             const ProjectInfo& GetProjectInfo() const;
 
-            std::string GetExecutablePath() const;
-            std::string GetInternalResourcePath() const;
-
         private:
             ProjectInfo m_projectInfo;
             ResourceSystem* m_resourceSystem = nullptr;
-
-            std::string m_executablePath;
-            std::string m_installLocation = ".";
         };
     }
 

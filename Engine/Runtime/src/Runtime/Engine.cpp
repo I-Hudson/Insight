@@ -36,7 +36,7 @@ namespace Insight
 		SplashScreen splashScreen;
 
 		bool Engine::Init(int argc, char** argv)
-		{		
+		{
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
@@ -50,18 +50,12 @@ namespace Insight
 			Platform::Initialise();
 			EnginePaths::Initialise();
 
-			m_projectSystem.SetResourceSystem(&m_resourceSystem);
-			m_projectSystem.Initialise();
-#ifdef IS_STANDALONE
-			m_projectSystem.OpenProject("./StandaloneProject.isproject");
-#endif
-
-			const std::string splashScreenBackGroundPath = m_projectSystem.GetInternalResourcePath() + "/Insight/cover.png";
+			const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
 			splashScreen.Init(860, 420);
 			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
 			splashScreen.Show();
 
-			const std::string cmdLinePath = m_projectSystem.GetExecutablePath() + "/cmdline.txt";
+			const std::string cmdLinePath = EnginePaths::GetExecutablePath() + "/cmdline.txt";
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
 			Core::CommandLineArgs::ParseCommandLine(cmdLinePath.c_str());
 
@@ -71,8 +65,20 @@ namespace Insight
 			}
 			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
 			{
-				while (!IsDebuggerPresent()) { }
+				while (!IsDebuggerPresent()) {}
 			}
+
+			m_projectSystem.SetResourceSystem(&m_resourceSystem);
+			m_projectSystem.Initialise();
+			if (std::string projectPath = Core::CommandLineArgs::GetCommandLineValue(CMD_PROJECT_PATH)->GetString();
+				!projectPath.empty())
+			{
+				m_projectSystem.OpenProject(projectPath);
+			}
+
+#ifdef IS_STANDALONE
+			m_projectSystem.OpenProject("./StandaloneProject.isproject");
+#endif
 
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();

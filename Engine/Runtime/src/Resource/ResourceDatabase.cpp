@@ -25,10 +25,10 @@ namespace Insight
         void ResourceDatabase::Initialise()
         {
             ASSERT(Platform::IsMainThread());
-            ResourceTypeIdToResource::RegisterResource(Material::GetStaticResourceTypeId(),  []() { return New<Material>(); });
-            ResourceTypeIdToResource::RegisterResource(Mesh::GetStaticResourceTypeId(),      []() { return NewTracked(Mesh); });
-            ResourceTypeIdToResource::RegisterResource(Model::GetStaticResourceTypeId(),     []() { return NewTracked(Model); });
-            ResourceTypeIdToResource::RegisterResource(Texture2D::GetStaticResourceTypeId(), []() { return NewTracked(Texture2D); });
+            ResourceRegister::RegisterResource<Material>();
+            ResourceRegister::RegisterResource<Mesh>();
+            ResourceRegister::RegisterResource<Model>();
+            ResourceRegister::RegisterResource<Texture2D>();
         }
 
         void ResourceDatabase::Shutdown()
@@ -68,7 +68,7 @@ namespace Insight
                 return resource;
             }
 
-            IResource* rawResource = ResourceTypeIdToResource::CreateResource(resourceId.GetTypeId());
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId());
             ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);
@@ -300,7 +300,7 @@ namespace Insight
             ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
 
             TObjectPtr<IResource> resource = nullptr;
-            IResource* rawResource = ResourceTypeIdToResource::CreateResource(resourceId.GetTypeId());
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId());
             ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);

@@ -78,12 +78,12 @@ namespace Insight
 			TextureType		 GetType					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).TextureType; }	return TextureType::Unknown; }
 			PixelFormat		 GetFormat				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Format; }		return PixelFormat::Unknown; }
 			ImageLayout		 GetLayout				    (u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip).Layout; }		return ImageLayout::Undefined; }
-			glm::vec4 const& GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return glm::vec4(0, 0, 0, 0); }
+			glm::vec4		 GetClearColour				()				const { if (m_infos.size() > 0)   { return m_infos.at(0).ClearColour; }		return glm::vec4(0, 0, 0, 0); }
 
 			void			SetLayout(ImageLayout newLayout, u32 mip = 0) { if (mip < m_infos.size()) { m_infos.at(mip).Layout = newLayout; } }
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
-			//TODO: Look into a ssytem to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
+			//TODO: Look into a system to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
 			virtual void Upload(void* data, int sizeInBytes) = 0;
 			/// <summary>
 			/// Add the upload to the RHI_UploadQueue. This will upload just before all rendering. This doesn't garuntee that the upload will have completed.

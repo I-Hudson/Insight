@@ -1,13 +1,60 @@
 #include "Core/Memory.h"
 
-namespace Insight::Core
+#ifdef IS_MEMORY_OVERRIDES
+void* operator new(size_t size)
 {
-	MemoryNewObject::MemoryNewObject(void* ptr)
+	if (size == 0)
 	{
-		Ptr = ptr;
-		MemoryTracker::Instance().Track(ptr, MemoryTrackAllocationType::Single);
+		return nullptr;
 	}
+
+	if (void* ptr = std::malloc(size))
+	{
+		if (Insight::Core::MemoryTracker::IsValidInstance())
+		{
+			Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Single);
+		}
+		return ptr;
+	}
+	return nullptr;
 }
+
+void* operator new[](size_t size)
+{
+	if (size == 0)
+	{
+		return nullptr;
+	}
+
+	if (void* ptr = std::malloc(size))
+	{
+		if (Insight::Core::MemoryTracker::IsValidInstance())
+		{
+			Insight::Core::MemoryTracker::Instance().Track(ptr, size, Insight::Core::MemoryTrackAllocationType::Array);
+		}
+		return ptr;
+	}
+	return nullptr;
+}
+
+void operator delete(void* ptr)
+{
+	if (Insight::Core::MemoryTracker::IsValidInstance())
+	{
+		Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
+	}
+	std::free(ptr);
+}
+
+void operator delete[](void* ptr)
+{
+	if (Insight::Core::MemoryTracker::IsValidInstance())
+	{
+		Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
+	}
+	std::free(ptr);
+}
+#endif
 
 #ifdef TEST_ENABLED
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL

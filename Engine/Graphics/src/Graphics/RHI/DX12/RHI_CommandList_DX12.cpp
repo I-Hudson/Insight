@@ -341,7 +341,7 @@ namespace Insight
 					AttachmentDescription const& description = renderDescription.Attachments.at(idx);
 					if (description.LoadOp == AttachmentLoadOp::Clear)
 					{
-						glm::vec4 const& clearColour = textureDX12->GetClearColour();
+						glm::vec4 const clearColour = textureDX12->GetClearColour();
 						ClearRenderTargetView(rtvHandle.CPUPtr, glm::value_ptr(clearColour), 0, nullptr);
 					}
 

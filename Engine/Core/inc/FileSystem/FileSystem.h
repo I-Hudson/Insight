@@ -24,6 +24,9 @@ namespace Insight
             static bool IsFile(const std::string& path);
             static bool IsFile(std::string_view path);
 
+            static std::string_view GetFileExtension(const std::string& file);
+            static std::string_view GetFileExtension(std::string_view file);
+
             static std::string GetAbsolutePath(const std::string& path);
             static std::string GetAbsolutePath(std::string_view path);
 

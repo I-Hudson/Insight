@@ -1,12 +1,12 @@
 #include "Resource/ResourceTypeId.h"
 
-#include "Core/Logger.h"
-
 namespace Insight
 {
 	namespace Runtime
 	{
-		std::unordered_map<ResourceTypeId, ResourceTypeIdToResource::CreateFunc> ResourceTypeIdToResource::m_map;
+		std::unordered_map<ResourceTypeId, ResourceRegister::CreateFunc> ResourceRegister::m_map;
+		std::unordered_map<std::string, ResourceTypeId> ResourceRegister::s_resourceExtensionToResourceTypeId;
+
 
 		ResourceTypeId::ResourceTypeId()
 		{ }
@@ -29,6 +29,11 @@ namespace Insight
 		//	return m_hash;
 		//}
 
+		ResourceTypeId::operator bool() const
+		{
+			return !m_type_name.empty();
+		}
+
 		bool ResourceTypeId::operator==(ResourceTypeId const& other) const
 		{
 			//return m_hash == other.m_hash;
@@ -41,17 +46,33 @@ namespace Insight
 		}
 
 
-		void ResourceTypeIdToResource::RegisterResource(ResourceTypeId type_id, CreateFunc func)
+		//void ResourceRegister::RegisterResource(ResourceTypeId type_id, CreateFunc func)
+		//{
+		//	if (auto itr = m_map.find(type_id); itr != m_map.end())
+		//	{
+		//		IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", type_id.GetTypeName());
+		//		return;
+		//	}
+		//	m_map[type_id] = func;
+		//}
+
+		ResourceTypeId ResourceRegister::GetResourceTypeIdFromExtension(std::string_view fileExtension)
 		{
-			if (auto itr = m_map.find(type_id); itr != m_map.end())
-			{
-				IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", type_id.GetTypeName());
-				return;
-			}
-			m_map[type_id] = func;
+			return GetResourceTypeIdFromExtension(std::string(fileExtension));
 		}
 
-		IResource* ResourceTypeIdToResource::CreateResource(ResourceTypeId type_id)
+		ResourceTypeId ResourceRegister::GetResourceTypeIdFromExtension(const std::string& fileExtension)
+		{
+			if (auto extensionItr = s_resourceExtensionToResourceTypeId.find(fileExtension);
+				extensionItr != s_resourceExtensionToResourceTypeId.end())
+			{
+				return extensionItr->second;
+			}
+			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] No resource with extension '{0}' registered.", fileExtension);
+			return ResourceTypeId();
+		}
+
+		IResource* ResourceRegister::CreateResource(ResourceTypeId type_id)
 		{
 			if (auto itr = m_map.find(type_id); itr != m_map.end())
 			{

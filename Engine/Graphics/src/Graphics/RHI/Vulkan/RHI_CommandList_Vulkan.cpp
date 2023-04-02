@@ -249,7 +249,7 @@ namespace Insight
 						auto makeRenderingAttachment =
 							[](const RHI_Texture* texture, const AttachmentDescription& attachment_description) -> VkRenderingAttachmentInfo
 						{
-							glm::vec4 const& textureClearColour = texture->GetClearColour();
+							glm::vec4 const textureClearColour = texture->GetClearColour();
 							std::array<float, 4> clearColourValues = {
 								  textureClearColour.x
 								, textureClearColour.y
@@ -634,7 +634,7 @@ namespace Insight
 							RHI_Texture_Vulkan* textureVulkan = static_cast<RHI_Texture_Vulkan*>(rt);
 							imageViews.push_back(textureVulkan->GetImageView());
 
-							glm::vec4 const& textureClearColour = rt->GetClearColour();
+							glm::vec4 const textureClearColour = rt->GetClearColour();
 
 							VkClearValue clearValue;
 							clearValue.color.float32[0] = textureClearColour.x;

@@ -4,9 +4,12 @@
 
 #include "Platforms/Platform.h"
 
+#include "Core/Profiler.h"
+
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+
 
 #ifdef IS_PLATFORM_WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
@@ -29,9 +32,20 @@ namespace Insight
 			Destroy();
 		}
 
+		void MemoryTracker::Initialise()
+		{
+			m_isReady = true;
+		}
+
 		void MemoryTracker::Destroy()
 		{
 			IS_PROFILE_FUNCTION();
+
+			if (!m_isReady)
+			{
+				return;
+			}
+
 #ifdef IS_MEMORY_TRACKING
 			std::lock_guard lock(m_lock);
 
@@ -66,16 +80,31 @@ namespace Insight
 #endif // IS_MEMORY_TRACKING
 		}
 
-		void MemoryTracker::Track(void* ptr, MemoryTrackAllocationType type)
+		void MemoryTracker::Track(void* ptr, u64 size, MemoryTrackAllocationType type)
 		{
 			IS_PROFILE_FUNCTION();
+
+			if (!m_isReady)
+			{
+				return;
+			}
+
 #ifdef IS_MEMORY_TRACKING
-			std::lock_guard lock(m_lock);
+			std::unique_lock lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
+			ASSERT(itr == m_allocations.end());
 			if (itr == m_allocations.end())
 			{
-				m_allocations[ptr] = MemoryTrackedAlloc(ptr, type, GetCallStack());
+				lock.unlock();
+				MemoryTrackedAlloc memoryTrackedAlloc(ptr, type, GetCallStack());
+
+				lock.lock();
+				m_allocations[ptr] = memoryTrackedAlloc;
+				lock.unlock();
+#ifdef IS_PROFILE_TRACY
+				TracyAlloc(ptr, size);
+#endif
 			}
 #endif // IS_MEMORY_TRACKING
 		}
@@ -84,15 +113,28 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			if (!m_isReady)
+			{
+				return;
+			}
+
 #ifdef IS_MEMORY_TRACKING
 			std::lock_guard lock(m_lock);
 
 			auto itr = m_allocations.find(ptr);
+			ASSERT(itr != m_allocations.end());
 			if (itr != m_allocations.end())
 			{
 				m_allocations.erase(itr);
+#ifdef IS_PROFILE_TRACY
+				TracyFree(ptr);
+#endif
 			}
 #endif
+		}
+
+		void MemoryTracker::NameAllocation(void* ptr, const char* name)
+		{
 		}
 
 #define MEMORY_TRACK_CALLSTACK
@@ -101,6 +143,11 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
 			std::array<std::string, c_CallStackCount> callStack;
+
+			if (!m_isReady)
+			{
+				return callStack;
+			}
 
 #ifdef IS_MEMORY_TRACKING
 			///for (size_t i = 0; i < c_CallStackCount; ++i)

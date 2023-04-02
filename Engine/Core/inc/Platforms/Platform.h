@@ -29,7 +29,7 @@ namespace Insight
 #define ASSERT_MSG(condition, message)																													\
 	if (!(condition))																																	\
 	{																																					\
-		AssetPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message);																																	\
+		AssetPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message);																													\
 	}
 
 #define ASSERT(condition) ASSERT_MSG(condition, "")

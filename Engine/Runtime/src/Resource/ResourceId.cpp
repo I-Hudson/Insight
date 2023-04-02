@@ -61,6 +61,12 @@ namespace Insight
         //    return m_id;
         //}
 
+        ResourceId::operator bool() const
+        {
+            return !m_path.empty() && m_typeId;
+        }
+
+
         bool ResourceId::operator==(ResourceId const& other) const
         {
             return m_path == other.m_path

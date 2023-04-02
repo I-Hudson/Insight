@@ -3,6 +3,7 @@
 #include "Runtime/Defines.h"
 
 #include "Core/TypeAlias.h"
+#include "Core/Logger.h"
 
 #include "Serialisation/ISerialisable.h"
 #include "Serialisation/Serialiser.h"
@@ -30,6 +31,7 @@ namespace Insight
 			std::string GetTypeName() const;
 			//u64 GetHash() const;
 
+			operator bool() const;
 			bool operator==(ResourceTypeId const& other) const;
 			bool operator!=(ResourceTypeId const& other) const;
 
@@ -42,16 +44,31 @@ namespace Insight
 		};
 
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
-		class IS_RUNTIME ResourceTypeIdToResource
+		class IS_RUNTIME ResourceRegister
 		{
 			using CreateFunc = std::function<IResource*()>;
 		public:
-			static void RegisterResource(ResourceTypeId type_id, CreateFunc func);
+			template<typename T>
+			static void RegisterResource()
+			{
+				ResourceTypeId typeId = T::GetStaticResourceTypeId();
+				if (auto itr = m_map.find(typeId); itr != m_map.end())
+				{
+					IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", typeId.GetTypeName());
+					return;
+				}
+				m_map[typeId] = []() { return New<T>(); };
+				s_resourceExtensionToResourceTypeId[T::GetResourceFileExtension()] = typeId;
+			}
+
+			static ResourceTypeId GetResourceTypeIdFromExtension(std::string_view fileExtension);
+			static ResourceTypeId GetResourceTypeIdFromExtension(const std::string& fileExtension);
 
 			static IResource* CreateResource(ResourceTypeId type_id);
 
 		private:
 			static std::unordered_map<ResourceTypeId, CreateFunc> m_map;
+			static std::unordered_map<std::string, ResourceTypeId> s_resourceExtensionToResourceTypeId;
 		};
 	}
 

@@ -22,8 +22,6 @@ namespace Insight
 {
     namespace Runtime
     {
-        constexpr char* c_InternalResourcePath = "/Resources";
-
         IS_SERIALISABLE_CPP(ProjectInfo)
 
         ProjectSystem::~ProjectSystem()
@@ -32,13 +30,6 @@ namespace Insight
 
         void ProjectSystem::Initialise()
         {
-#ifdef IS_PLATFORM_WINDOWS
-            // Windows specific
-            wchar_t szPath[MAX_PATH];
-            GetModuleFileNameW(NULL, szPath, MAX_PATH);
-            m_executablePath = std::move(std::filesystem::path{ szPath }.parent_path().string()); // to finish the folder path with (back)slash
-            FileSystem::FileSystem::PathToUnix(m_executablePath);
-#endif
             ASSERT_MSG(m_resourceSystem, "[ProjectSystem::Initialise] There must be a valid resource system pointer in the project system.");
 
             m_state = Core::SystemStates::Initialised;
@@ -151,16 +142,6 @@ namespace Insight
         {
             ASSERT(IsProjectOpen());
             return m_projectInfo;
-        }
-
-        std::string ProjectSystem::GetExecutablePath() const
-        {
-            return m_executablePath;
-        }
-
-        std::string ProjectSystem::GetInternalResourcePath() const
-        {
-            return m_installLocation + c_InternalResourcePath;
         }
     }
 }

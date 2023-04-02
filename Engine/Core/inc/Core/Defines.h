@@ -159,24 +159,4 @@
 
 #endif
 
-#include <type_traits>
-#include <utility>
-
-namespace detail 
-{
-    // If `*(object of type T)` is valid, this is selected and
-    // the return type is `std::true_type`
-    template<class T>
-    decltype(static_cast<void>(*std::declval<T>()), std::true_type{})
-        can_be_dereferenced_impl(int);
-
-    // Otherwise the less specific function is selected,
-    // and the return type is `std::false_type`
-    template<class>
-    std::false_type can_be_dereferenced_impl(...);
-}
-
-template<class T>
-struct can_be_dereferenced : decltype(detail::can_be_dereferenced_impl<T>(0)) {};
-
 #pragma warning( disable : 4251 )

@@ -88,7 +88,7 @@ namespace Insight
 				}
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::ColourAttachment)
 				{
-					glm::vec4 const& textureClearColour = GetClearColour();
+					glm::vec4 const textureClearColour = GetClearColour();
 					ASSERT(sizeof(clearColour.Color) == sizeof(textureClearColour));
 					Platform::MemCopy(clearColour.Color, &textureClearColour[0], sizeof(clearColour.Color));
 				}

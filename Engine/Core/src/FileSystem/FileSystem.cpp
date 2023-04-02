@@ -1,5 +1,6 @@
 #include "FileSystem/FileSystem.h"
 
+#include "Core/TypeAlias.h"
 #include "Core/Logger.h"
 
 #include <filesystem>
@@ -21,7 +22,6 @@ namespace Insight
                 IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
             }
         }
-
 
         bool FileSystem::Exists(const std::string& path)
         {
@@ -68,6 +68,33 @@ namespace Insight
             std::error_code existsErrorCode = {};
             std::error_code isFileErrorCode = {};
             return std::filesystem::exists(path, existsErrorCode) && std::filesystem::is_regular_file(path, isFileErrorCode);
+        }
+
+        std::string_view FileSystem::GetFileExtension(const std::string& file)
+        {
+            return GetFileExtension(std::string_view(file));
+        }
+        std::string_view FileSystem::GetFileExtension(std::string_view file)
+        {
+            if (file.empty() || !IsFile(file))
+            {
+                return std::string_view();
+            }
+
+            std::filesystem::path path(file);
+            if (!path.has_extension())
+            {
+                return std::string_view();
+            }
+
+            u64 lastDot = file.find_last_of('.');
+            if (lastDot == std::string::npos)
+            {
+                return std::string_view();
+            }
+
+            std::string_view extension = file.substr(lastDot);
+            return extension;
         }
 
         std::string FileSystem::GetAbsolutePath(const std::string& path)

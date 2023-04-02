@@ -8,23 +8,14 @@
 #include <type_traits>
 #include <utility>
 
-namespace Insight::Core
-{
-	struct IS_CORE MemoryNewObject
-	{
-		MemoryNewObject(void* ptr);
-		void* Ptr;
-	};
-}
-
 /// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			::New<Type>()
 /// Helper macro for making a new pointer with args and tracking.
 #define NewArgsTracked(Type, ...)	::New<Type>(__VA_ARGS__)
 /// /// Helper macro for tracking a exists pointer.
-#define TrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().Track(Ptr, Insight::Core::MemoryTrackAllocationType::Single)
+#define TrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().Track(Ptr, sizeof(*Ptr), Insight::Core::MemoryTrackAllocationType::Single)
 
-#define DeleteTracked(Ptr) Delete(Ptr);
+#define DeleteTracked(Ptr)			Delete(Ptr);
 
 #define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
@@ -32,7 +23,7 @@ template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 {
 	T* ptr = new T(std::forward<Params>(params)...);
-	Insight::Core::MemoryTracker::Instance().Track(ptr, Insight::Core::MemoryTrackAllocationType::Single);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, sizeof(T), Insight::Core::MemoryTrackAllocationType::Single);
 	return ptr;
 }
 template<typename T>
@@ -46,49 +37,13 @@ FORCE_INLINE void Delete(T*& pointer)
 	pointer = nullptr;
 }
 
-///#define IS_MEMORY_OVERRIDES
+//#define IS_MEMORY_OVERRIDES
 #ifdef IS_MEMORY_OVERRIDES
-void* operator new(size_t size)
-{
-	if (size == 0)
-	{
-		return nullptr;
-	}
+void* operator new(size_t size);
+void* operator new[](size_t size);
 
-	if (void* ptr = std::malloc(size))
-	{
-		Insight::Core::MemoryTracker::Instance().Track(ptr, Insight::Core::MemoryTrackAllocationType::Single);
-		return ptr;
-	}
-	return nullptr;
-}
-
-void* operator new[](size_t size)
-{
-	if (size == 0)
-	{
-		return nullptr;
-	}
-
-	if (void* ptr = std::malloc(size))
-	{
-		Insight::Core::MemoryTracker::Instance().Track(ptr, Insight::Core::MemoryTrackAllocationType::Array);
-		return ptr;
-	}
-	return nullptr;
-}
-
-void operator delete(void* ptr)
-{
-	Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
-	std::free(ptr);
-}
-
-void operator delete[](void* ptr)
-{
-	Insight::Core::MemoryTracker::Instance().UnTrack(ptr);
-	std::free(ptr);
-}
+void operator delete(void* ptr);
+void operator delete[](void* ptr);
 #endif
 
 template<typename T>

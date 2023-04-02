@@ -2,6 +2,8 @@
 
 #include "Runtime/ProjectSystem.h"
 #include "Resource/ResourceManager.h"
+#include "Resource/Loaders/IResourceLoader.h"
+#include "Resource/Loaders/ResourceLoaderRegister.h"
 
 #include "Resource/Texture2D.h"
 
@@ -62,6 +64,27 @@ namespace Insight
 
         void ContentWindow::TopBar()
         {
+            if (ImGui::Button("Import"))
+            {
+                // Import a new asset.
+                PlatformFileDialog importDialog;
+                std::string file;
+                if (importDialog.ShowLoad(&file))
+                {
+                    // Import file.
+                    std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(file);
+                    const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+                    if (!loader)
+                    {
+                        IS_CORE_WARN("[ContentWindow::TopBar] loader is null for extension '{}'.", fileExtension);
+                        return;
+                    }
+                    Runtime::IResource* resource = loader->LoadFromFile(file);
+                }
+            }
+
+            ImGui::SameLine();
+
             bool contentFolderFound = false;
             std::string currentPath;
             for (size_t i = 0; i < m_currentDirectoryParents.size(); ++i)

@@ -14,7 +14,7 @@ project "Insight_Core"
 
     defines
     {
-        "IS_EXPORT_CORE_DLL"
+        "IS_EXPORT_CORE_DLL",
     }
     
     includedirs
