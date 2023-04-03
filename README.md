@@ -19,6 +19,7 @@ Some features are:
 - [glfw](https://www.glfw.org)
 - [glm](https://github.com/g-truc/glm)
 - [imgui](https://github.com/ocornut/imgui)
+- [implot](https://github.com/epezent/implot)
 - [meshoptimizer](https://github.com/zeux/meshoptimizer)
 - [Nvidia Aftermath](https://developer.nvidia.com/nsight-aftermath)
 - [spdlog](https://github.com/gabime/spdlog)

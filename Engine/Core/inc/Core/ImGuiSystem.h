@@ -4,6 +4,7 @@
 #include "Core/ISysytem.h"
 
 #include <imgui.h>
+#include <implot.h>
 
 namespace Insight
 {
@@ -23,8 +24,20 @@ namespace Insight
 
 			void SetContext(ImGuiContext*& context);
 			// @brief Return the current context.
-			ImGuiContext* GetCurrentContext();
+			ImGuiContext* GetCurrentContext() const;
 			void GetAllocatorFunctions(ImGuiMemAllocFunc& allocFunc, ImGuiMemFreeFunc& freeFunc, void*& pUserData);
+
+			void SetImPlotContext(ImPlotContext*& context);
+			ImPlotContext* GetImPlotContext() const;
 		};
 	}
+
+#define SET_IMGUI_CURRENT_CONTEXT() ImGui::SetCurrentContext(imguiSystem->GetCurrentContext()); \
+	ImGuiMemAllocFunc allocFunc;																\
+	ImGuiMemFreeFunc freeFunc;																	\
+	void* pUsedData;																			\
+	imguiSystem->GetAllocatorFunctions(allocFunc, freeFunc, pUsedData);							\
+	ImGui::SetAllocatorFunctions(allocFunc, freeFunc, pUsedData);								\
+	ImPlot::SetCurrentContext(imguiSystem->GetImPlotContext())
+//#define SET_IMPLOT_CURRENT_CONTEXT() ImPlot::
 }

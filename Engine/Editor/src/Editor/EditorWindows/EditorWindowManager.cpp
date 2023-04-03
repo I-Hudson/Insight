@@ -7,6 +7,7 @@
 #include "Editor/EditorWindows/EntitiyDescriptionWindow.h"
 #include "Editor/EditorWindows/EntitiesWindow.h"
 #include "Editor/EditorWindows/InputWindow.h"
+#include "Editor/EditorWindows/MemoryWindow.h"
 #include "Editor/EditorWindows/ProjectWindow.h"
 #include "Editor/EditorWindows/SystemInformationWindow.h"
 
@@ -27,13 +28,14 @@ namespace Insight
 
 		void EditorWindowManager::RegisterWindows()
 		{
-#define REGISTER_NEW_WINDOW(window) m_windowRegistry[window::WINDOW_NAME] = RegisterWindow([]() { return static_cast<IEditorWindow*>(New<window>()); }, window::WINDOW_CATEGORY)
+#define REGISTER_NEW_WINDOW(window) m_windowRegistry[window::WINDOW_NAME] = RegisterWindow([]() { return static_cast<IEditorWindow*>(New<window, Core::MemoryAllocCategory::Editor>()); }, window::WINDOW_CATEGORY)
 
 			REGISTER_NEW_WINDOW(BuildSettingsWindow);
 			REGISTER_NEW_WINDOW(ContentWindow);
 			REGISTER_NEW_WINDOW(EntitiyDescriptionWindow);
 			REGISTER_NEW_WINDOW(EntitiesWindow);
 			REGISTER_NEW_WINDOW(InputWindow);
+			REGISTER_NEW_WINDOW(MemoryWindow);
 			REGISTER_NEW_WINDOW(ResourceWindow);
 			REGISTER_NEW_WINDOW(ProjectWindow);
 			REGISTER_NEW_WINDOW(SystemInformationWindow);

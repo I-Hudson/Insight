@@ -7,6 +7,8 @@ namespace Insight
 		void ImGuiSystem::Initialise()
 		{
 			ImGui::CreateContext();
+			ImPlot::CreateContext();
+
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
 			io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
 			//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -31,7 +33,9 @@ namespace Insight
 
 		void ImGuiSystem::Shutdown()
 		{
+			ImPlot::DestroyContext();
 			ImGui::DestroyContext();
+
 			m_state = SystemStates::Not_Initialised;
 		}
 
@@ -40,7 +44,7 @@ namespace Insight
 			context = GetCurrentContext();
 		}
 
-		ImGuiContext* ImGuiSystem::GetCurrentContext()
+		ImGuiContext* ImGuiSystem::GetCurrentContext() const
 		{
 			return ImGui::GetCurrentContext();
 		}
@@ -48,6 +52,16 @@ namespace Insight
 		void ImGuiSystem::GetAllocatorFunctions(ImGuiMemAllocFunc& allocFunc, ImGuiMemFreeFunc& freeFunc, void*& pUserData)
 		{
 			return ImGui::GetAllocatorFunctions(&allocFunc, &freeFunc, &pUserData);
+		}
+
+		void ImGuiSystem::SetImPlotContext(ImPlotContext*& context)
+		{
+			context = GetImPlotContext();
+		}
+
+		ImPlotContext* ImGuiSystem::GetImPlotContext() const
+		{
+			return ImPlot::GetCurrentContext();
 		}
 	}
 }

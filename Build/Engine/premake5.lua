@@ -52,6 +52,7 @@ IncludeDirs["doctest"] = "%{wks.location}vendor/doctest/doctest"
 IncludeDirs["glfw"] = "%{wks.location}vendor/glfw/include"
 IncludeDirs["glm"] = "%{wks.location}vendor/glm"
 IncludeDirs["imgui"] = "%{wks.location}vendor/imgui"
+IncludeDirs["implot"] = "%{wks.location}vendor/implot"
 IncludeDirs["spdlog"] = "%{wks.location}vendor/spdlog/include"
 IncludeDirs["vma"] = "%{wks.location}vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
@@ -128,6 +129,7 @@ workspace "Insight"
         "%{IncludeDirs.pix}",
         "%{IncludeDirs.IconFontCppHeaders}",
         "%{IncludeDirs.nlohmann_json}",
+        "%{IncludeDirs.implot}",
     }
 
     if (profileTool == "tracy") then
