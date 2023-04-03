@@ -41,7 +41,7 @@ namespace Insight
 				DescriptorHeapHandle_DX12 handle = m_context->GetDescriptorHeap(DescriptorHeapTypes::Sampler).GetNewHandle();
 				m_context->GetDevice()->CreateSampler(&desc, handle.CPUPtr);
 
-				RHI_Sampler_DX12* new_sampler = NewTracked(RHI_Sampler_DX12);
+				RHI_Sampler_DX12* new_sampler = ::New<RHI_Sampler_DX12, Insight::Core::MemoryAllocCategory::Graphics>();
 				new_sampler->Handle = handle;
 				new_sampler->Create_Info = info;
 

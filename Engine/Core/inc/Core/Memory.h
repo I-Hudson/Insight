@@ -8,6 +8,11 @@
 #include <type_traits>
 #include <utility>
 
+namespace Insight
+{
+
+}
+
 /// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			::New<Type>()
 /// Helper macro for making a new pointer with args and tracking.
@@ -26,6 +31,26 @@ NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 	Insight::Core::MemoryTracker::Instance().Track(ptr, sizeof(T), Insight::Core::MemoryTrackAllocationType::Single);
 	return ptr;
 }
+template<typename T, Insight::Core::MemoryAllocCategory MemoryAllocCategory,typename... Params>
+NO_DISCARD FORCE_INLINE T* New(Params&&... params)
+{
+	T* ptr = new T(std::forward<Params>(params)...);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, sizeof(T), MemoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Single);
+	return ptr;
+}
+
+template<typename... Params>
+NO_DISCARD FORCE_INLINE void* NewNoTrack(u64 size)
+{
+	void* rawPtr = malloc(size);//new T(std::forward<Params>(params)...);
+	return rawPtr;
+}
+
+FORCE_INLINE void DeleteNoTrack(void* ptr)
+{
+	free(ptr);
+}
+
 template<typename T>
 FORCE_INLINE void Delete(T*& pointer)
 {
@@ -37,7 +62,7 @@ FORCE_INLINE void Delete(T*& pointer)
 	pointer = nullptr;
 }
 
-//#define IS_MEMORY_OVERRIDES
+#define IS_MEMORY_OVERRIDES
 #ifdef IS_MEMORY_OVERRIDES
 void* operator new(size_t size);
 void* operator new[](size_t size);
@@ -186,7 +211,7 @@ public:
 	RPtr(TPtr* ptr)
 	{
 		m_ptr = ptr;
-		m_refCount = NewTracked(Insight::RefCount);
+		m_refCount = New<Insight::RefCount, Insight::Core::MemoryAllocCategory::General>();
 		Inc();
 	}
 	RPtr(const RPtr& other)
@@ -207,7 +232,7 @@ public:
 	RPtr(T2* ptr)
 	{
 		m_ptr = ptr;
-		m_refCount = NewTracked(Insight::RefCount);
+		m_refCount = New<Insight::RefCount, Insight::Core::MemoryAllocCategory::General>();
 		Inc();
 	}
 	template<typename T2, std::enable_if_t<std::_SP_pointer_compatible<T2, T>::value, int> = 0>
@@ -526,11 +551,11 @@ UPtr<T> MakeUPtr(Args&&... args)
 {
 	if constexpr (sizeof...(Args) > 0)
 	{
-		return UPtr<T>(NewArgsTracked(T, std::forward<Args>(args)...));
+		return UPtr<T>(New<T, Insight::Core::MemoryAllocCategory::General>(std::forward<Args>(args)...));
 	}
 	else
 	{
-		return UPtr<T>(NewTracked(T));
+		return UPtr<T>(New<T, Insight::Core::MemoryAllocCategory::General>());
 	}
 }
 
@@ -546,11 +571,11 @@ RPtr<T> MakeRPtr(Args&&... args)
 {
 	if constexpr (sizeof...(Args) > 0)
 	{
-		return RPtr<T>(NewArgsTracked(T, std::forward<Args>(args)...));
+		return RPtr<T>(New<T, Insight::Core::MemoryAllocCategory::General>(std::forward<Args>(args)...));
 	}
 	else
 	{
-		return RPtr<T>(NewTracked(T));
+		return RPtr<T>(New<T, Insight::Core::MemoryAllocCategory::General>());
 	}
 }
 
@@ -600,7 +625,7 @@ public:
 		Reset();
 		m_ptr = pointer;
 #ifdef TOBJECTPTR_REF_COUNTING
-		m_refCount = NewTracked(ReferenceCountObject);
+		m_refCount = New<ReferenceCountObject, Insight::Core::MemoryAllocCategory::General>();
 #endif // TOBJECTPTR_REF_COUNTING
 		Incr();
 	}

@@ -15,10 +15,10 @@ namespace Insight
 		RHI_Buffer* RHI_Buffer::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (Renderer::GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_Buffer_Vulkan); }
+			if (Renderer::GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_Buffer_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>();; }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (Renderer::GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_Buffer_DX12); }
+			if (Renderer::GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_Buffer_DX12, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 			assert(false);
 			return nullptr;

@@ -42,7 +42,7 @@ namespace Insight
 
 			m_context = context;
 
-			m_textureCaches = NewTracked(RHI_ResourceCache<RHI_Texture>);
+			m_textureCaches = New<RHI_ResourceCache<RHI_Texture>, Insight::Core::MemoryAllocCategory::Graphics > ();;
 			///m_textureCaches.Setup();
 			m_commandListManager.Setup();
 

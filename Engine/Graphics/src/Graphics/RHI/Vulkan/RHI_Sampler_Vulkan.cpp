@@ -44,7 +44,7 @@ namespace Insight
 				VkSampler sampler = nullptr;
 				ThrowIfFailed(vkCreateSampler(m_context_vulkan->GetDevice(), &create_info, nullptr, &sampler));
 
-				RHI_Sampler* new_sampler = NewTracked(RHI_Sampler);
+				RHI_Sampler* new_sampler = ::New<RHI_Sampler, Insight::Core::MemoryAllocCategory::Graphics>();
 				new_sampler->Resource = sampler;
 				new_sampler->Create_Info = info;
 

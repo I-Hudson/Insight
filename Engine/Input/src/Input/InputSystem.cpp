@@ -226,12 +226,12 @@ namespace Insight
 			{
 			case Insight::Input::InputDeviceTypes::KeyboardMouse:
 			{
-				newInputDevice = New<InputDevice_KeyboardMouse>();
+				newInputDevice = New<InputDevice_KeyboardMouse, Core::MemoryAllocCategory::Input>();
 				break;
 			}
 			case Insight::Input::InputDeviceTypes::Controller:
 			{
-				newInputDevice = New<InputDevice_Controller>();
+				newInputDevice = New<InputDevice_Controller, Core::MemoryAllocCategory::Input>();
 				break;
 			}
 			}

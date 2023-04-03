@@ -25,10 +25,10 @@ namespace Insight
 		RHI_Shader* RHI_Shader::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_Shader_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_Shader_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_Shader_DX12); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_Shader_DX12, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 			return nullptr;
 		}

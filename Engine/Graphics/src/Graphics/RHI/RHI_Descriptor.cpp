@@ -32,10 +32,10 @@ namespace Insight
 		RHI_DescriptorLayout* RHI_DescriptorLayout::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_DescriptorLayout_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_DescriptorLayout_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			//else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_DescriptorLayout_DX12); }
+			//else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_DescriptorLayout_DX12, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif	
 			return nullptr;
 		}

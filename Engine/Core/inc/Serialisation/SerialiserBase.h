@@ -181,7 +181,7 @@ namespace Insight
                 }
                 else if constexpr (is_insight_wrapper_pointer_v<T>)
                 {
-                    return Ptr<ElementType>(New<ElementType>());
+                    return Ptr<ElementType>(New<ElementType, Core::MemoryAllocCategory::Serialiser>());
                 }
                 else
                 {
@@ -262,7 +262,7 @@ namespace Insight
                         if (v == nullptr)
                         {
                             using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(*object.begin())>>;
-                            v = New<TVectorElementType>();
+                            v = New<TVectorElementType, Core::MemoryAllocCategory::Serialiser>();
                         }
 
                         if constexpr (SerialiserType == SerialiserType::Property)

@@ -25,7 +25,7 @@ namespace Insight
         {
             switch (type)
             {
-            case Insight::Serialisation::SerialisationTypes::Json: return New<JsonSerialiser>(isReadMode);
+            case Insight::Serialisation::SerialisationTypes::Json: return New<JsonSerialiser, Core::MemoryAllocCategory::Serialiser>(isReadMode);
             case Insight::Serialisation::SerialisationTypes::Binary:
                 break;
             default:

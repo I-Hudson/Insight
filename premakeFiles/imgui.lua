@@ -8,6 +8,8 @@ project "ImGui"
     debugdir (outputdir_debug .. "/%{prj.name}")
 
 	folderDirImGui = "../vendor/imgui/"
+	folderDirImPlot = "../vendor/implot/"
+
 	location "../Engine/Vendor/imgui"
 
 	dependson
@@ -39,6 +41,11 @@ project "ImGui"
 		folderDirImGui .. "backends/imgui_impl_win32.cpp",
 		folderDirImGui .. "backends/imgui_impl_vulkan.cpp",
 		folderDirImGui .. "backends/imgui_impl_dx12.cpp",
+
+		folderDirImPlot .. "implot.h",
+		folderDirImPlot .. "implot_internal.h",
+		folderDirImPlot .. "implot.cpp",
+		folderDirImPlot .. "implot_items.cpp",
 	}
 
 	includedirs

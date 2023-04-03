@@ -28,12 +28,12 @@ namespace Insight
 			{
 			case Insight::Graphics::GraphicsAPI::Vulkan:
 #ifdef IS_VULKAN_ENABLED
-				context = NewTracked(RHI::Vulkan::RenderContext_Vulkan);
+				context = ::New<RHI::Vulkan::RenderContext_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>();
 #endif
 				break;
 			case Insight::Graphics::GraphicsAPI::DX12:
 #ifdef IS_DX12_ENABLED
-				context = NewTracked(RHI::DX12::RenderContext_DX12);
+				context = ::New<RHI::DX12::RenderContext_DX12, Insight::Core::MemoryAllocCategory::Graphics>();
 #endif
 				break;
 			default:

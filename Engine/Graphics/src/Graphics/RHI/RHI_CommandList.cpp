@@ -22,10 +22,10 @@ namespace Insight
 		RHI_CommandList* RHI_CommandList::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_CommandList_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_CommandList_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_CommandList_DX12); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_CommandList_DX12, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 			return nullptr;
 		}
@@ -155,10 +155,10 @@ namespace Insight
 		RHI_CommandListAllocator* RHI_CommandListAllocator::New()
 		{
 #if defined(IS_VULKAN_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return NewTracked(RHI::Vulkan::RHI_CommandListAllocator_Vulkan); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan) { return ::New<RHI::Vulkan::RHI_CommandListAllocator_Vulkan, Insight::Core::MemoryAllocCategory::Graphics>(); }
 #endif
 #if defined(IS_DX12_ENABLED)
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return NewTracked(RHI::DX12::RHI_CommandListAllocator_DX12); }
+			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12) { return ::New<RHI::DX12::RHI_CommandListAllocator_DX12, Insight::Core::MemoryAllocCategory::Graphics>();}
 #endif
 			return nullptr;
 		}

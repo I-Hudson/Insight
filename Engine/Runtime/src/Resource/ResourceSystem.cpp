@@ -1,6 +1,8 @@
 #include "Resource/ResourceSystem.h"
 #include "Resource/ResourceManager.h"
 
+#include "Resource/Loaders/ResourceLoaderRegister.h"
+
 #include "Serialisation/Archive.h"
 
 namespace Insight
@@ -22,6 +24,8 @@ namespace Insight
 
         void ResourceSystem::Initialise()
         {
+            ResourceLoaderRegister::Initialise();
+
             ResourceManager::s_database = &m_database;
             m_database.Initialise();
             m_state = Core::SystemStates::Initialised;
@@ -33,6 +37,8 @@ namespace Insight
 
             m_database.Shutdown();
             ResourceManager::s_database = nullptr;
+
+            ResourceLoaderRegister::Shutdown();
             m_state = Core::SystemStates::Not_Initialised;
         }
 
