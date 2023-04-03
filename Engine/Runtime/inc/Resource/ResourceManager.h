@@ -31,7 +31,10 @@ namespace Insight
             static TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid);
 
             static TObjectPtr<IResource> LoadSync(ResourceId const& resourceId);
+            static TObjectPtr<IResource> LoadSync(std::string_view filePath);
             static TObjectPtr<IResource> Load(ResourceId const& resourceId);
+            static TObjectPtr<IResource> Load(std::string_view filePath);
+
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);
             static void UnloadAll();

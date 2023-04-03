@@ -37,6 +37,42 @@ namespace Insight
 			);
 		}
 
+		//IResourceLoader - BEGIN
+
+		AssimpLoader::AssimpLoader()
+			: IResourceLoader({ ".gltf", ".fbx", ".obj" })
+		{ }
+
+		AssimpLoader::~AssimpLoader()
+		{ }
+
+		void AssimpLoader::Initialise()
+		{
+		}
+
+		void AssimpLoader::Shutdown()
+		{
+		}
+
+		void AssimpLoader::Load(IResource* resource) const
+		{
+			Model* model = static_cast<Model*>(resource);
+			if (!model)
+			{
+				return;
+			}
+
+			LoadModel(model, model->GetFilePath(), Default_Model_Importer_Flags);
+			model->m_resource_state = EResoruceStates::Loaded;
+		}
+
+		ResourceTypeId AssimpLoader::GetResourceTypeId() const
+		{
+			return Model::GetStaticResourceTypeId();
+		}
+		
+		//IResourceLoader - END
+
 		bool AssimpLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
 			Assimp::Importer importer;
@@ -253,8 +289,8 @@ namespace Insight
 					//submesh_draw_info.Textures.insert(submesh_draw_info.Textures.end(), diffuse_textures.begin(), diffuse_textures.end());
 				}
 
-				///Mesh* mesh = ::New<Mesh, MemoryCategory::Core>(&model, static_cast<u32>(model.m_meshes.size()));
-				///Animation::Skeleton* skeleton = ::New<Animation::Skeleton, MemoryCategory::Core>();;
+				///Mesh* mesh = ::New<Mesh, Core::MemoryAllocCategory::Resources>(&model, static_cast<u32>(model.m_meshes.size()));
+				///Animation::Skeleton* skeleton = ::New<Animation::Skeleton, Core::MemoryAllocCategory::Resources>();;
 				////// process all the node's meshes (if any)
 				///for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
 				///{

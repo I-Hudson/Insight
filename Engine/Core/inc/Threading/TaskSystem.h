@@ -28,7 +28,7 @@ namespace Insight
 			static auto CreateTask(Func func, Args&&... args)
 			{
 				using ResultType = std::invoke_result_t<Func, Args...>;
-				TaskResult<ResultType>* taskResult = NewTracked(TaskResult<ResultType>);
+				TaskResult<ResultType>* taskResult = New<TaskResult<ResultType>, Core::MemoryAllocCategory::Threading>();
 				TaskFuncWrapper<ResultType, Func, Args...>* taskWrapper = new TaskFuncWrapper<ResultType, Func, Args...>(taskResult, std::move(func), std::move(args)...);
 				TrackPtr(taskWrapper);
 

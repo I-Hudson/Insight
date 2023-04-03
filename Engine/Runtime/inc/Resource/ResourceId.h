@@ -17,6 +17,7 @@ namespace Insight
             ResourceId();
             ResourceId(const std::string& path, ResourceTypeId typeId);
             ResourceId(std::string&& path, ResourceTypeId typeId);
+            ResourceId(std::string_view path, ResourceTypeId typeId);
             ResourceId(const ResourceId& other);
             ResourceId(ResourceId&& other);
             ~ResourceId();

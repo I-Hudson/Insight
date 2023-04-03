@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Resource/Loaders/IResourceLoader.h"
 #include "Core/TypeAlias.h"
 
 #include "Graphics/Mesh.h"
@@ -30,7 +31,7 @@ namespace Insight
 		enum class TextureTypes;
 
 		/// @brief Utility class to help with anything related to loading from assimp.
-		class AssimpLoader
+		class AssimpLoader : public IResourceLoader
 		{
 		public:
 			static const uint32_t Default_Model_Importer_Flags =
@@ -95,6 +96,17 @@ namespace Insight
 				Model* Model = nullptr;
 				Mesh* Mesh = nullptr;
 			};
+
+			AssimpLoader();
+			virtual ~AssimpLoader() override;
+
+			//IResourceLoader - BEGIN
+			virtual void Initialise() override;
+			virtual void Shutdown() override;
+
+			virtual void Load(IResource* resource) const override;
+			virtual ResourceTypeId GetResourceTypeId() const override;
+			//IResourceLoader - END
 
 			/// @brief Load a complete model.
 			/// @param model 

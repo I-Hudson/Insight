@@ -25,6 +25,12 @@ namespace Insight
             //m_id = Algorithm::GetHash64(m_path);
         }
 
+        ResourceId::ResourceId(std::string_view path, ResourceTypeId typeId)
+            : m_path(FileSystem::FileSystem::GetAbsolutePath(path))
+            , m_typeId(std::move(typeId))
+        {
+        }
+
         ResourceId::ResourceId(const ResourceId& other)
             : m_path(other.m_path)
             , m_typeId(other.m_typeId)

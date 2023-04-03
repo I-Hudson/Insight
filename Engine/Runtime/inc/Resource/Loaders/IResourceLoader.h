@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Runtime/Defines.h"
+#include "Resource/ResourceTypeId.h"
 
 #include <vector>
+#include <string_view>
 
 namespace Insight
 {
@@ -13,15 +15,17 @@ namespace Insight
         class IResourceLoader
         {
         public:
+            IResourceLoader() = delete;
             IResourceLoader(std::vector<const char*> acceptedFileExtensions);
             virtual ~IResourceLoader();
 
             const std::vector<const char*>& GetAcceptedFileExtensions() const;
 
-            virtual void Initialise() = 0;
-            virtual void Shutdown() = 0;
+            virtual void Initialise() { }
+            virtual void Shutdown() { }
 
-            virtual IResource* LoadFromFile(std::string_view filePath) const = 0;
+            virtual void Load(IResource* resource) const = 0;
+            virtual ResourceTypeId GetResourceTypeId() const = 0;
 
         private:
             std::vector<const char*> m_acceptedFileExtensions;

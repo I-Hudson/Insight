@@ -1,5 +1,7 @@
 #include "Resource/ResourceManager.h"
 #include "Resource/ResourceDatabase.h"
+#include "Resource/Loaders/ResourceLoaderRegister.h"
+#include "Resource/Loaders/IResourceLoader.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -176,6 +178,20 @@ namespace Insight
             return resource;
         }
 
+        TObjectPtr<IResource> ResourceManager::LoadSync(std::string_view filePath)
+        {
+            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filePath);
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+            if (!loader)
+            {
+                IS_CORE_WARN("[ResourceManager::LoadSync] loader is null for extension '{}'.", fileExtension);
+                return nullptr;
+            }
+
+            ResourceId resourceId(filePath, loader->GetResourceTypeId());
+            return LoadSync(resourceId);
+        }
+
         TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
         {
             ASSERT(s_database);
@@ -224,6 +240,20 @@ namespace Insight
                 }
             }
             return resource;
+        }
+
+        TObjectPtr<IResource> ResourceManager::Load(std::string_view filePath)
+        {
+            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filePath);
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+            if (!loader)
+            {
+                IS_CORE_WARN("[ResourceManager::LoadSync] loader is null for extension '{}'.", fileExtension);
+                return nullptr;
+            }
+
+            ResourceId resourceId(filePath, loader->GetResourceTypeId());
+            return Load(resourceId);
         }
 
         void ResourceManager::Unload(ResourceId const& resourceId)
@@ -333,14 +363,28 @@ namespace Insight
             s_resourcesLoading.push_back(resource);
             resource->m_resource_state = EResoruceStates::Loading;
 
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromResource(resource);
+            if (!loader)
+            {
+                IS_CORE_WARN("[ResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
+            }
+
             if (threading)
             {
-                Threading::TaskSystem::CreateTask([resource]()
+                Threading::TaskSystem::CreateTask([resource, loader]()
                     {
                         resource->StartLoadTimer();
                         {
                             //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                            resource->Load();
+                            if (loader)
+                            {
+                                loader->Load(resource);
+                            }
+                            else
+                            {
+                                IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called. This should be replaced by a ResourceLoader.");
+                                resource->Load();
+                            }
                         }
                         resource->StopLoadTimer();
                         if (resource->IsLoaded())
@@ -354,7 +398,15 @@ namespace Insight
                 resource->StartLoadTimer();
                 {
                     //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                    resource->Load();
+                    if (loader)
+                    {
+                        loader->Load(resource);
+                    }
+                    else
+                    {
+                        IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called. This should be replaced by a ResourceLoader.");
+                        resource->Load();
+                    }
                 }
                 resource->StopLoadTimer();
                 if (resource->IsLoaded())

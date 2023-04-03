@@ -57,7 +57,7 @@ namespace Insight
 					IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", typeId.GetTypeName());
 					return;
 				}
-				m_map[typeId] = []() { return New<T>(); };
+				m_map[typeId] = []() { return New<T, Core::MemoryAllocCategory::Resources>(); };
 				s_resourceExtensionToResourceTypeId[T::GetResourceFileExtension()] = typeId;
 			}
 

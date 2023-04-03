@@ -72,14 +72,16 @@ namespace Insight
                 if (importDialog.ShowLoad(&file))
                 {
                     // Import file.
-                    std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(file);
-                    const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
-                    if (!loader)
-                    {
-                        IS_CORE_WARN("[ContentWindow::TopBar] loader is null for extension '{}'.", fileExtension);
-                        return;
-                    }
-                    Runtime::IResource* resource = loader->LoadFromFile(file);
+                    Runtime::ResourceManager::LoadSync(file);
+
+                    //std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(file);
+                    //const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+                    //if (!loader)
+                    //{
+                    //    IS_CORE_WARN("[ContentWindow::TopBar] loader is null for extension '{}'.", fileExtension);
+                    //    return;
+                    //}
+                    //Runtime::IResource* resource = loader->LoadFromFile(file);
                 }
             }
 
