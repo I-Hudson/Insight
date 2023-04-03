@@ -8,11 +8,6 @@
 #include <type_traits>
 #include <utility>
 
-namespace Insight
-{
-
-}
-
 /// Helper macro for making a new pointer with tracking.
 #define NewTracked(Type)			::New<Type>()
 /// Helper macro for making a new pointer with args and tracking.
@@ -61,15 +56,6 @@ FORCE_INLINE void Delete(T*& pointer)
 	}
 	pointer = nullptr;
 }
-
-#define IS_MEMORY_OVERRIDES
-#ifdef IS_MEMORY_OVERRIDES
-void* operator new(size_t size);
-void* operator new[](size_t size);
-
-void operator delete(void* ptr);
-void operator delete[](void* ptr);
-#endif
 
 template<typename T>
 class UPtr;

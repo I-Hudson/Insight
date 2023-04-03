@@ -57,6 +57,9 @@ project "Insight_Graphics"
         "inc/**.h", 
         "src/**.cpp",
 
+        "../Core/inc/Memory/NewDeleteOverload.h", 
+        "../Core/src/Memory/NewDeleteOverload.cpp",
+
         "../../vendor/SPIRV-Reflect/spirv_reflect.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.cpp",
         "../../vendor/stb/stb_image.h",

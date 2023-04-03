@@ -35,6 +35,9 @@ project "Insight_Input"
         "inc/**.hpp", 
         "inc/**.h", 
         "src/**.cpp",
+
+        "../Core/inc/Memory/NewDeleteOverload.h", 
+        "../Core/src/Memory/NewDeleteOverload.cpp",
     }
 
     links

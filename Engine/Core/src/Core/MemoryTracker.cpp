@@ -55,6 +55,8 @@ namespace Insight
                 return;
             }
 
+            m_isReady = false;
+
 #ifdef IS_MEMORY_TRACKING
             std::lock_guard lock(m_lock);
 
@@ -70,7 +72,7 @@ namespace Insight
                     for (int i = c_CallStackCount - 1; i >= 0; --i)
                     {
                         const std::string& str = alloc.CallStack[i];
-                        if (str.empty())
+                        if (str.empty() || str == "\0")
                         {
                             continue;
                         }
@@ -210,6 +212,10 @@ namespace Insight
             IS_PROFILE_FUNCTION();
             ///std::vector<std::string> callStackVector = Platform::GetCallStack(c_CallStackCount);
             std::array<char[c_CallstackStringSize], c_CallStackCount> callStack;
+            for (size_t i = 0; i < c_CallStackCount; ++i)
+            {
+                callStack[i][0] = '\0';
+            }
 
             if (!m_isReady)
             {
@@ -288,6 +294,16 @@ namespace Insight
                     ADVANCE_CHAR(currentChar, lastChar);
 
                     currentChar = std::to_chars(currentChar, lastChar, symbol->Address).ptr;
+
+                    if (currentChar < lastChar)
+                    {
+                        *currentChar = '\0';
+                    }
+                    else
+                    {
+                        lastChar = '\0';
+                    }
+
                     //callStack[i - 1] = (std::to_string(nFrame - i - 1) +
                     //    ": " +
                     //    std::string(symbol->Name) +

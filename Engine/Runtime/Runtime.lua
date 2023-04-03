@@ -49,6 +49,9 @@ project "Insight_Runtime"
         "inc/**.h", 
         "src/**.cpp",
 
+        "../Core/inc/Memory/NewDeleteOverload.h", 
+        "../Core/src/Memory/NewDeleteOverload.cpp",
+
         "../../vendor/stb/stb_image.h",
         "../../vendor/stb/stb_image_write.h",
     }

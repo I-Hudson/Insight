@@ -63,16 +63,16 @@ namespace Insight
             if (ImPlot::BeginPlot("Memory Usage"))
             {
                 ImPlot::SetupAxes("Memory Category", "Memory Usage KB", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
-                ImPlot::SetupAxisTicks(ImAxis_X1, 0, ARRAY_COUNT(Core::MemoryAllocCategoryToString), ARRAY_COUNT(Core::MemoryAllocCategoryToString), Core::MemoryAllocCategoryToString, false);
-                ImPlot::PlotBars("##MemoryCategory", currentMemoryUsageForCategory, ARRAY_COUNT(currentMemoryUsageForCategory), 0.75, 0.0);
+                ImPlot::SetupAxisTicks(ImAxis_X1, 0, ARRAY_COUNT(Core::MemoryAllocCategoryToString) - 1, ARRAY_COUNT(Core::MemoryAllocCategoryToString), Core::MemoryAllocCategoryToString, false);
+                ImPlot::PlotBars("##MemoryCategory", currentMemoryUsageForCategory, ARRAY_COUNT(currentMemoryUsageForCategory), 0.75);
                 ImPlot::EndPlot();
             }
 
             if (ImPlot::BeginPlot("Memory Allocations"))
             {
                 ImPlot::SetupAxes("Memory Category", "Allocation Count", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
-                ImPlot::SetupAxisTicks(ImAxis_X1, 0, ARRAY_COUNT(Core::MemoryAllocCategoryToString), ARRAY_COUNT(Core::MemoryAllocCategoryToString), Core::MemoryAllocCategoryToString, false);
-                ImPlot::PlotBars("##MemoryCategory", currentAllocationsForCategory, ARRAY_COUNT(currentAllocationsForCategory), 0.75, 0.0);
+                ImPlot::SetupAxisTicks(ImAxis_X1, 0, ARRAY_COUNT(Core::MemoryAllocCategoryToString) - 1, ARRAY_COUNT(Core::MemoryAllocCategoryToString), Core::MemoryAllocCategoryToString, false);
+                ImPlot::PlotBars("##MemoryCategory", currentAllocationsForCategory, ARRAY_COUNT(currentAllocationsForCategory), 0.75);
                 ImPlot::EndPlot();
             }
 

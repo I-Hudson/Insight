@@ -47,6 +47,9 @@ project "Insight_Editor"
         "inc/**.hpp", 
         "inc/**.h", 
         "src/**.cpp",
+
+        "../Core/inc/Memory/NewDeleteOverload.h", 
+        "../Core/src/Memory/NewDeleteOverload.cpp",
     }
 
     links
