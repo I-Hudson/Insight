@@ -892,12 +892,9 @@ public:
 		Reset();
 	}
 
-	/// <summary>
-	/// Assign copy operator for TObjectPtr.
-	/// </summary>
-	/// <typeparam name="TOther"></typeparam>
-	/// <param name="other"></param>
-	/// <returns>TObjectPtr&</returns>
+	/// @brief Assign copy operator for TObjectPtr.
+	/// @param other 
+	/// @return TObjectPtr&
 	TObjectPtr& operator=(const TObjectPtr& other)
 	{
 		Reset();
@@ -908,12 +905,10 @@ public:
 		Incr();
 		return *this;
 	}
-	/// <summary>
-	/// Assign copy operator for TObjectPtr tempalte.
-	/// </summary>
-	/// <typeparam name="TOther"></typeparam>
-	/// <param name="other"></param>
-	/// <returns></returns>
+	/// @brief Assign copy operator for TObjectPtr template.
+	/// @tparam TOther 
+	/// @param other 
+	/// @return TObjectPtr&
 	template<typename TOther>
 	TObjectPtr& operator=(const TObjectPtr<TOther>& other)
 	{
@@ -927,11 +922,9 @@ public:
 		return *this;
 	}
 
-	/// <summary>
-	/// Assign move operator for TObjectPtr.
-	/// </summary>
-	/// <param name="other"></param>
-	/// <returns>TObjectPtr&</returns>
+	/// @brief Assign move operator for TObjectPtr.
+	/// @param other 
+	/// @return TObjectPtr&
 	TObjectPtr& operator=(TObjectPtr&& other)
 	{
 		Reset();
@@ -943,12 +936,10 @@ public:
 #endif // TOBJECTPTR_REF_COUNTING
 		return *this;
 	}
-	/// <summary>
-	/// Assign move operator for TObjectPtr tempalte.
-	/// </summary>
-	/// <typeparam name="TOther"></typeparam>
-	/// <param name="other"></param>
-	/// <returns>TObjectPtr&</returns>
+	/// @brief Assign move operator for TObjectPtr template.
+	/// @tparam TOther 
+	/// @param other 
+	/// @return TObjectPtr&
 	template<typename TOther>
 	TObjectPtr& operator=(TObjectPtr&& other)
 	{
@@ -963,12 +954,9 @@ public:
 		return *this;
 	}
 
-	/// <summary>
-	/// Assign copy operator for TObjectOwnPtr.
-	/// </summary>
-	/// <typeparam name="TOther"></typeparam>
-	/// <param name="other"></param>
-	/// <returns>TObjectPtr&</returns>
+	/// @brief Assign copy operator for TObjectOwnPtr.
+	/// @param other 
+	/// @return TObjectPtr&
 	TObjectPtr& operator=(const TObjectOwnPtr<T>& other)
 	{
 		Reset();
@@ -979,12 +967,10 @@ public:
 		Incr();
 		return *this;
 	}
-	/// <summary>
-	/// Assign copy operator for TObjectOwnPtr template.
-	/// </summary>
-	/// <typeparam name="TOther"></typeparam>
-	/// <param name="other"></param>
-	/// <returns>TObjectPtr&</returns>
+	/// @brief Assign copy operator for TObjectOwnPtr template.
+	/// @tparam TOther 
+	/// @param other 
+	/// @return TObjectPtr&
 	template<typename TOther>
 	TObjectPtr& operator=(const TObjectOwnPtr<TOther>& other)
 	{
@@ -996,7 +982,7 @@ public:
 #endif // TOBJECTPTR_REF_COUNTING
 		Incr();
 		return *this;
-	}
+	}	 
 
 	TObjectPtr& operator=(TObjectOwnPtr<T>&& other) = delete;
 	template<typename TOther>
