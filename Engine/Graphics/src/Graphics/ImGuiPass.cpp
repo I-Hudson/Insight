@@ -266,10 +266,12 @@ namespace Insight
 			m_vertex_buffer.ForEach([](RHI_Buffer*& buffer)
 				{
 					Renderer::FreeVertexBuffer(buffer);
+					buffer = nullptr;
 				});
 			m_index_buffer.ForEach([](RHI_Buffer*& buffer)
 				{
 					Renderer::FreeVertexBuffer(buffer);
+					buffer = nullptr;
 				});
 		}
 	}

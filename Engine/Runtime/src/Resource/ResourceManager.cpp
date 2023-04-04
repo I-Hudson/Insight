@@ -382,7 +382,8 @@ namespace Insight
                             }
                             else
                             {
-                                IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called. This should be replaced by a ResourceLoader.");
+                                IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.", 
+                                    resource->GetResourceTypeId().GetTypeName());
                                 resource->Load();
                             }
                         }
@@ -404,7 +405,8 @@ namespace Insight
                     }
                     else
                     {
-                        IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called. This should be replaced by a ResourceLoader.");
+                        IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
+                            resource->GetResourceTypeId().GetTypeName());
                         resource->Load();
                     }
                 }

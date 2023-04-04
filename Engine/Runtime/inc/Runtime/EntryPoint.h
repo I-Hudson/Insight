@@ -16,11 +16,9 @@ extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 706; } //
 extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\"; } // Path to .dll is root of the .exe. 
 #endif
 
-Insight::Core::MemoryTracker globalMemoryTracker;
-
 int main(int argc, char** argv)
 {
-	globalMemoryTracker.Initialise();
+	Insight::Core::MemoryTracker::Instance().Initialise();
 	Insight::Core::Logger::Init();
 
 #ifdef TEST_ENABLED
@@ -35,7 +33,6 @@ int main(int argc, char** argv)
 	app->Destroy();
 	DeleteTracked(app);
 
-	globalMemoryTracker.Destroy();
 	///Insight::Core::MemoryTracker::Instance().Destroy();
 	return 0;
 #endif

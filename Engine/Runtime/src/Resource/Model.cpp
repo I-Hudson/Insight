@@ -110,7 +110,9 @@ namespace Insight
 			m_materials.clear();
 
 			Renderer::FreeVertexBuffer(m_vertex_buffer);
-			Renderer::FreeVertexBuffer(m_index_buffer);
+			Renderer::FreeIndexBuffer(m_index_buffer);
+			m_vertex_buffer = nullptr;
+			m_index_buffer = nullptr;
 
 			m_resource_state = EResoruceStates::Unloaded;
 		}

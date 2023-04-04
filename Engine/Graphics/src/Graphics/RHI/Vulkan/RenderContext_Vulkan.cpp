@@ -335,6 +335,7 @@ namespace Insight
 						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
 						tex->Release();
 						Renderer::FreeTexture(tex);
+						tex = nullptr;
 					}
 					m_swapchainImages.clear();
 					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
@@ -739,6 +740,7 @@ namespace Insight
 						static_cast<RHI_Texture_Vulkan*>(tex)->m_image = VkImage();
 						tex->Release();
 						Renderer::FreeTexture(tex);
+						tex = nullptr;
 					}
 					m_swapchainImages.clear();
 					vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);

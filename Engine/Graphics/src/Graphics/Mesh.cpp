@@ -196,6 +196,7 @@ namespace Insight
 			for (Ptr<RHI_Texture>& texture : m_textures)
 			{
 				Renderer::FreeTexture(texture.Get());
+				texture = nullptr;
 			}
 			m_textures.clear();
 			m_texture_paths.clear();

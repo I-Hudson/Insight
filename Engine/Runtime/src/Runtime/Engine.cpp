@@ -68,18 +68,6 @@ namespace Insight
 				while (!IsDebuggerPresent()) {}
 			}
 
-			m_projectSystem.SetResourceSystem(&m_resourceSystem);
-			m_projectSystem.Initialise();
-			if (std::string projectPath = Core::CommandLineArgs::GetCommandLineValue(CMD_PROJECT_PATH)->GetString();
-				!projectPath.empty())
-			{
-				m_projectSystem.OpenProject(projectPath);
-			}
-
-#ifdef IS_STANDALONE
-			m_projectSystem.OpenProject("./StandaloneProject.isproject");
-#endif
-
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
 
@@ -96,6 +84,18 @@ namespace Insight
 			m_graphicsSystem.Initialise(&m_inputSystem);
 			m_inputSystem.Initialise();
 			m_worldSystem.Initialise();
+
+			m_projectSystem.SetResourceSystem(&m_resourceSystem);
+			m_projectSystem.Initialise();
+			if (std::string projectPath = Core::CommandLineArgs::GetCommandLineValue(CMD_PROJECT_PATH)->GetString();
+				!projectPath.empty())
+			{
+				m_projectSystem.OpenProject(projectPath);
+			}
+
+#ifdef IS_STANDALONE
+			m_projectSystem.OpenProject("./StandaloneProject.isproject");
+#endif
 
 			OnInit();
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);

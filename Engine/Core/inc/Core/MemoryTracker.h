@@ -8,13 +8,19 @@
 #include <array>
 #include <mutex>
 
+//#undef IS_MEMORY_TRACKING
+
 namespace Insight
 {
 	namespace Core
 	{
+#ifdef IS_MEMORY_TRACKING
 		CONSTEXPR int c_CallStackCount = 32;
 		CONSTEXPR u64 c_CallstackStringSize = 512;
-
+#else
+		CONSTEXPR int c_CallStackCount = 1;
+		CONSTEXPR u64 c_CallstackStringSize = 1;
+#endif
 
 		enum class IS_CORE MemoryTrackAllocationType
 		{
@@ -163,10 +169,16 @@ namespace Insight
 			constexpr __declspec(allocator) void* AllocateInternal(u64 align, const size_t _Bytes);
 		};
 
-		class IS_CORE MemoryTracker : public Core::Singleton<MemoryTracker>
+		class IS_CORE MemoryTracker
 		{
 		public:
 			~MemoryTracker();
+
+			static MemoryTracker& Instance()
+			{
+				static MemoryTracker instance;
+				return instance;
+			}
 
 			void Initialise();
 			void Destroy();
@@ -197,16 +209,14 @@ namespace Insight
 			std::array<char[c_CallstackStringSize], c_CallStackCount> GetCallStack();
 
 		private:
-#ifdef IS_MEMORY_TRACKING
 			std::unordered_map<void*, MemoryTrackedAlloc, std::hash<void*>, std::equal_to<void*>, STLNonTrackingAllocator<std::pair<void* const, MemoryTrackedAlloc>>> m_allocations;
 			bool m_symInitialize = false;
 			bool m_isReady = false;
-			mutable std::mutex m_lock;
 
+			mutable std::mutex m_lock;
 			u64 m_totalAllocatedInBytes = 0;
 			std::array<u64, static_cast<u64>(MemoryAllocCategory::Size)> m_categoryAllocationSizeBytes;
 			std::array<u64, static_cast<u64>(MemoryAllocCategory::Size)> m_categoryAllocationCount;
-#endif // IS_MEMORY_TRACKING
 		};
 	}
 }

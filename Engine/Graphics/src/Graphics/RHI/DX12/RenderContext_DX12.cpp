@@ -28,6 +28,15 @@ namespace Insight
 	{
 		namespace RHI::DX12
 		{
+			static void* D3D12Allocate(size_t Size, size_t Alignment, void* pPrivateData)
+			{
+				return ::New(Size, Core::MemoryAllocCategory::Graphics);
+			}
+			static void D3D12Free(void* pMemory, void* pPrivateData)
+			{
+				Delete(pMemory);
+			}
+
 			void FrameSubmitContext_DX12::OnCompleted()
 			{
 				for (const RHI_CommandList* cmdList : CommandLists)
@@ -88,9 +97,13 @@ namespace Insight
 					IID_PPV_ARGS(&m_device)
 				));
 
+				m_d3d12maAllocationCallbacks.pAllocate = D3D12Allocate;
+				m_d3d12maAllocationCallbacks.pFree = D3D12Free;
+
 				D3D12MA::ALLOCATOR_DESC d3d12MA_AllocatorDesc = {};
 				d3d12MA_AllocatorDesc.pDevice = m_device.Get();
 				d3d12MA_AllocatorDesc.pAdapter = m_physicalDevice.GetPhysicalDevice().Get();
+				d3d12MA_AllocatorDesc.pAllocationCallbacks = &m_d3d12maAllocationCallbacks;
 				ThrowIfFailed(D3D12MA::CreateAllocator(&d3d12MA_AllocatorDesc, &m_d3d12MA));
 
 				/// Describe and create the command queue.
@@ -224,12 +237,12 @@ namespace Insight
 				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
 
-
 				m_queues.clear();
 
 				for (auto& image : m_swapchainImages)
 				{
 					Renderer::FreeTexture(image.Colour);
+					image.Colour = nullptr;
 				}
 
 				if (m_swapchain)

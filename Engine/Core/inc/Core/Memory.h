@@ -19,6 +19,17 @@
 
 #define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
+NO_DISCARD FORCE_INLINE void* New(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
+{
+	void* ptr = std::malloc(bytes);
+	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Single);
+	return ptr;
+}
+NO_DISCARD FORCE_INLINE void* New(u64 bytes)
+{
+	return New(bytes, Insight::Core::MemoryAllocCategory::General);
+}
+
 template<typename T, typename... Params>
 NO_DISCARD FORCE_INLINE T* New(Params&&... params)
 {

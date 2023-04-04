@@ -68,5 +68,5 @@ namespace Insight
 
 Insight::App::Engine* CreateApplication()
 {
-	return New < Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
+	return New<Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
 }

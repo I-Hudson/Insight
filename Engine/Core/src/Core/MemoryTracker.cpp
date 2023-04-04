@@ -35,8 +35,8 @@ namespace Insight
 
         void MemoryTracker::Initialise()
         {
-            m_isReady = true;
 #ifdef IS_MEMORY_TRACKING
+            m_isReady = true;
             for (size_t i = 0; i < static_cast<u64>(MemoryAllocCategory::Size); ++i)
             {
                 m_categoryAllocationSizeBytes[i] = 0;
@@ -49,6 +49,7 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+#ifdef IS_MEMORY_TRACKING
             if (!m_isReady)
             {
                 return;
@@ -56,7 +57,6 @@ namespace Insight
 
             m_isReady = false;
 
-#ifdef IS_MEMORY_TRACKING
             std::lock_guard lock(m_lock);
 
             if (m_allocations.size() > 0)
@@ -66,6 +66,7 @@ namespace Insight
                     const MemoryTrackedAlloc& alloc = pair.second;
                     IS_CORE_ERROR("Allocation leak:");
                     IS_CORE_ERROR("\tPtr: {}", alloc.Ptr);
+                    IS_CORE_ERROR("\Size: {}", alloc.Size);
                     IS_CORE_ERROR("\tType: {}", (int)alloc.Type);
                     IS_CORE_ERROR("\tCallstack: ");
                     for (int i = c_CallStackCount - 1; i >= 0; --i)
@@ -111,12 +112,12 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+#ifdef IS_MEMORY_TRACKING
             if (!m_isReady)
             {
                 return;
             }
 
-#ifdef IS_MEMORY_TRACKING
             std::unique_lock lock(m_lock);
 
             auto itr = m_allocations.find(ptr);
@@ -145,12 +146,12 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+#ifdef IS_MEMORY_TRACKING
             if (!m_isReady)
             {
                 return;
             }
 
-#ifdef IS_MEMORY_TRACKING
             std::lock_guard lock(m_lock);
 
             auto itr = m_allocations.find(ptr);
@@ -206,7 +207,7 @@ namespace Insight
             return m_totalAllocatedInBytes;
         }
 
-#define MEMORY_TRACK_CALLSTACK
+//#define MEMORY_TRACK_CALLSTACK
         std::array<char[c_CallstackStringSize], c_CallStackCount> MemoryTracker::GetCallStack()
         {
             IS_PROFILE_FUNCTION();

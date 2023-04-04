@@ -102,6 +102,8 @@ namespace Insight
 			{
 				Renderer::FreeVertexBuffer(m_lods.at(0).Vertex_buffer);
 				Renderer::FreeIndexBuffer(m_lods.at(0).Index_buffer);
+				m_lods.at(0).Vertex_buffer = nullptr;
+				m_lods.at(0).Index_buffer = nullptr;
 			}
 			m_lods.clear();
 		}
