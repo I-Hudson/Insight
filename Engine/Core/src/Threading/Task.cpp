@@ -15,7 +15,7 @@ namespace Insight
 
 		Task::~Task()
 		{
-			DeleteTracked(m_functionWrapper);
+			Delete(m_functionWrapper);
 		}
 
 		void Task::Wait()

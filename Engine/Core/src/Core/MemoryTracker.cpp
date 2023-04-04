@@ -1,5 +1,4 @@
 #include "Core/MemoryTracker.h"
-#include "Core/MemoryTracker.inl"
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
 
@@ -160,6 +159,7 @@ namespace Insight
             {
                 m_categoryAllocationSizeBytes.at(static_cast<u64>(itr->second.Category)) -= itr->second.Size;
                 --m_categoryAllocationCount.at(static_cast<u64>(itr->second.Category));
+                m_totalAllocatedInBytes -= itr->second.Size;
 
                 m_allocations.erase(itr);
 #ifdef IS_PROFILE_TRACY

@@ -35,8 +35,6 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
-            ResourceManager::SaveDatabase();
-
             for (auto& pair : m_resources)
             {
                 if (pair.second->IsLoaded())

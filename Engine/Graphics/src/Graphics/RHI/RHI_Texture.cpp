@@ -45,7 +45,6 @@ namespace Insight
 				return;
 			}
 
-			TrackPtr(data);
 			RHI_TextureInfo createInfo = { };
 			createInfo.TextureType = TextureType::Tex2D;
 			createInfo.Width = width;
@@ -73,7 +72,6 @@ namespace Insight
 			Upload(data, (int)textureSize);
 
 			stbi_image_free(data);
-			UntrackPtr(data);
 #endif
 		}
 
@@ -106,7 +104,6 @@ namespace Insight
 		{
 			request->OnUploadCompleted.Unbind<&RHI_Texture::OnUploadComplete>(this);
 			stbi_image_free(m_uploadData);
-			UntrackPtr(m_uploadData);
 			m_uploadData = nullptr;
 			m_uploadStatus = DeviceUploadStatus::Completed;
 			OnUploadCompleted(this);

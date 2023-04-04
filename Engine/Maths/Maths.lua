@@ -29,7 +29,9 @@ project "Insight_Maths"
     { 
         "inc/**.hpp", 
         "inc/**.h", 
+        "inc/**.inl", 
         "src/**.cpp",
+        "src/**.inl",
     }
 
     links

@@ -4,6 +4,7 @@
 #include "Editor/EditorWindows/ProjectWindow.h"
 
 #include "Runtime/EntryPoint.h"
+#include "Resource/ResourceManager.h"
 
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
@@ -59,6 +60,8 @@ namespace Insight
 		void Editor::OnDestroy()
 		{
 			EditorWindowManager::Instance().Destroy();
+
+			Runtime::ResourceManager::SaveDatabase();
 		}
 	}
 }

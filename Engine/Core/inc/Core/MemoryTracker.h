@@ -121,17 +121,17 @@ namespace Insight
 			constexpr STLNonTrackingAllocator(const STLNonTrackingAllocator&) noexcept = default;
 			template <class _Other>
 			constexpr STLNonTrackingAllocator(const STLNonTrackingAllocator<_Other>&) noexcept {}
-			_CONSTEXPR20_DYNALLOC ~STLNonTrackingAllocator() = default;
-			_CONSTEXPR20_DYNALLOC STLNonTrackingAllocator& operator=(const STLNonTrackingAllocator&) = default;
+			~STLNonTrackingAllocator() = default;
+			STLNonTrackingAllocator& operator=(const STLNonTrackingAllocator&) = default;
 
-			_CONSTEXPR20_DYNALLOC void deallocate(_Ty* const _Ptr, const size_t _Count)
+			void deallocate(_Ty* const _Ptr, const size_t _Count)
 			{
 				// no overflow check on the following multiply; we assume _Allocate did that check
 				destroy(_Ptr);
 				DeallocateInternal(std::_New_alignof<_Ty>, _Ptr, sizeof(_Ty) * _Count);
 			}
 
-			_NODISCARD _CONSTEXPR20_DYNALLOC __declspec(allocator) _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count)
+			_NODISCARD __declspec(allocator) _Ty* allocate(_CRT_GUARDOVERFLOW const size_t _Count)
 			{
 				return static_cast<_Ty*>(AllocateInternal(std::_New_alignof<_Ty>, std::_Get_size_of_n<sizeof(_Ty)>(_Count)));
 			}
@@ -158,9 +158,9 @@ namespace Insight
 				::new (std::_Voidify_iter(_Ptr)) _Objty(_STD forward<_Types>(_Args)...);
 			}
 
-			_CONSTEXPR20_DYNALLOC __declspec(allocator)  void DeallocateInternal(u64 align, void* _Ptr, size_t _Bytes) noexcept;
+			constexpr __declspec(allocator) void DeallocateInternal(u64 align, void* _Ptr, size_t _Bytes) noexcept;
 
-			__declspec(allocator) _CONSTEXPR20_DYNALLOC void* AllocateInternal(u64 align, const size_t _Bytes);
+			constexpr __declspec(allocator) void* AllocateInternal(u64 align, const size_t _Bytes);
 		};
 
 		class IS_CORE MemoryTracker : public Core::Singleton<MemoryTracker>
@@ -210,3 +210,5 @@ namespace Insight
 		};
 	}
 }
+
+#include "Core/MemoryTracker.inl"

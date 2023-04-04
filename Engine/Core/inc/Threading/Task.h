@@ -70,7 +70,7 @@ namespace Insight
 			{ }
 			~TaskWithResult()
 			{
-				DeleteTracked(m_taskResult);
+				Delete(m_taskResult);
 			}
 
 			TaskResult<ResultType>& GetResult() const { return *m_taskResult; }

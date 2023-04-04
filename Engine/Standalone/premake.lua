@@ -38,6 +38,7 @@ project "InsightStandalone"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.doctest}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.implot}",
         "%{IncludeDirs.xxHash}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.glfw}",
@@ -65,28 +66,40 @@ project "InsightStandalone"
     files 
     { 
         "../../Engine/Core/inc/**.hpp", 
-        "../../Engine/Core/inc/**.h", 
+        "../../Engine/Core/inc/**.h",
+        "../../Engine/Core/inc/**.inl",
         "../../Engine/Core/src/**.cpp",
+        "../../Engine/Core/src/**.inl",
 
         "../../Engine/Maths/inc/**.hpp", 
         "../../Engine/Maths/inc/**.h", 
+        "../../Engine/Maths/inc/**.inl",
         "../../Engine/Maths/src/**.cpp", 
+        "../../Engine/Maths/src/**.inl",
 
         "../../Engine/Input/inc/**.hpp", 
         "../../Engine/Input/inc/**.h", 
+        "../../Engine/Input/inc/**.inl",
         "../../Engine/Input/src/**.cpp", 
+        "../../Engine/Input/src/**.inl",
 
         "../../Engine/Graphics//inc/**.hpp", 
         "../../Engine/Graphics/inc/**.h", 
+        "../../Engine/Graphics/inc/**.inl",
         "../../Engine/Graphics/src/**.cpp", 
+        "../../Engine/Graphics/src/**.inl",
 
         "../../Engine/Runtime/inc/**.hpp", 
         "../../Engine/Runtime/inc/**.h", 
+        "../../Engine/Runtime/inc/**.inl",
         "../../Engine/Runtime/src/**.cpp",
+        "../../Engine/Runtime/src/**.inl",
 
         "inc/**.hpp", 
         "inc/**.h", 
+        "inc/**.inl", 
         "src/**.cpp",
+        "src/**.inl",
 
         "../../vendor/stb/stb_image.h",
         "../../vendor/stb/stb_image_write.h",
@@ -238,7 +251,7 @@ project "InsightStandalone"
 
     filter "system:Windows"
     	system "windows"
-    	toolset("msc-v142")
+    	toolset("msc-v143")
         defines
         {
             "IS_PLATFORM_WINDOWS",

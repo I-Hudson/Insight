@@ -31,7 +31,9 @@ project "Insight_Core"
     { 
         "inc/**.hpp", 
         "inc/**.h", 
+        "inc/**.inl", 
         "src/**.cpp",
+        "src/**.inl",
     }
 
     links

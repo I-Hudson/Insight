@@ -29,8 +29,7 @@ namespace Insight
 			{
 				using ResultType = std::invoke_result_t<Func, Args...>;
 				TaskResult<ResultType>* taskResult = New<TaskResult<ResultType>, Core::MemoryAllocCategory::Threading>();
-				TaskFuncWrapper<ResultType, Func, Args...>* taskWrapper = new TaskFuncWrapper<ResultType, Func, Args...>(taskResult, std::move(func), std::move(args)...);
-				TrackPtr(taskWrapper);
+				TaskFuncWrapper<ResultType, Func, Args...>* taskWrapper = New<TaskFuncWrapper<ResultType, Func, Args...>>(taskResult, std::move(func), std::move(args)...);
 
 				TaskWithResultShared<ResultType> taskShared = MakeRPtr<TaskWithResult<ResultType>>(taskResult, taskWrapper);
 				std::unique_lock lock(TaskSystem::Instance().m_mutex);
