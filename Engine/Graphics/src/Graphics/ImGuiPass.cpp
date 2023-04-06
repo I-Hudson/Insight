@@ -236,7 +236,7 @@ namespace Insight
 								int scissor_extent_height = (uint32_t)(clip_max.y - clip_min.y);
 								if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 								{
-									//cmdList->SetScissor(scissor_offset_x, scissor_offset_y, scissor_extent_width, scissor_extent_height);
+									cmdList->SetScissor(scissor_offset_x, scissor_offset_y, scissor_extent_width, scissor_extent_height);
 								}
 								else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
 								{

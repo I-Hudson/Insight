@@ -270,7 +270,11 @@ namespace Insight
 					}
 				}
 
-				if (hash != m_currentDescriptorHash)
+				// TODO: Fix this. With imgui there is an issue where with a 2 frame swapchain the second frame 
+				// does not show imgui correctly as the texture binding is not set. Unsure why this is but with the 
+				// below commented out it works. So something is wrong with the hash/caching and imgui is needing this
+				// to be force update which is bad for performance. 
+				//if (hash != m_currentDescriptorHash)
 				{
 					m_currentDescriptorHash = hash;
 					vkUpdateDescriptorSets(contextVulkan->GetDevice(), writeIndex, &writes[0], 0, nullptr);

@@ -70,6 +70,22 @@ namespace Insight
 				return v;
 			}
 
+			static void* VMAVulkanAllocate(void* pUserData, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+			{
+				return NewBytes(size, Core::MemoryAllocCategory::Graphics);
+			}
+			static void* VMAVulkanReallocate(void* pUserData, void* pOriginal, size_t size, size_t alignment, VkSystemAllocationScope allocationScope)
+			{
+				Core::MemoryTracker::Instance().UnTrack(pOriginal);
+				void* newBlock = std::realloc(pOriginal, size);
+				Core::MemoryTracker::Instance().Track(newBlock, size, Core::MemoryAllocCategory::Graphics, Core::MemoryTrackAllocationType::Single);
+				return newBlock;
+			}
+			static void VMAVulkanFree(void* pUserData, void* pMemory)
+			{
+				DeleteBytes(pMemory);
+			}
+
 			struct LayerExtension
 			{
 				VkLayerProperties Layer;
@@ -259,10 +275,15 @@ namespace Insight
 				m_renderpassManager.SetRenderContext(this);
 
 				/// Initialise vulkan memory allocator
+				m_vmaAllocationCallbacks.pfnAllocation = VMAVulkanAllocate;
+				m_vmaAllocationCallbacks.pfnReallocation = VMAVulkanReallocate;
+				m_vmaAllocationCallbacks.pfnFree = VMAVulkanFree;
+				
 				VmaAllocatorCreateInfo allocatorInfo{};
 				allocatorInfo.instance = m_instnace;
 				allocatorInfo.physicalDevice = m_adapter;
 				allocatorInfo.device = m_device;
+				allocatorInfo.pAllocationCallbacks = &m_vmaAllocationCallbacks;
 
 				ThrowIfFailed(vmaCreateAllocator(&allocatorInfo, &m_vmaAllocator));
 
@@ -455,26 +476,6 @@ namespace Insight
 					}
 				};
 				ImGui_ImplVulkan_Init(&init_info, static_cast<VkRenderPass>(renderpass.Resource));
-
-				RHI_CommandList_Vulkan* cmdListVulkan = static_cast<RHI_CommandList_Vulkan*>(m_commandListManager->GetCommandList());
-
-				ImGui_ImplVulkan_CreateFontsTexture(cmdListVulkan->GetCommandList());
-
-				cmdListVulkan->Close();
-
-				std::array<VkCommandBuffer, 1> commandBuffers = { cmdListVulkan->GetCommandList() };
-				VkSubmitInfo submitInfo = VkSubmitInfo();
-				submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-				submitInfo.pCommandBuffers = commandBuffers.data();
-				submitInfo.commandBufferCount = static_cast<u32>(commandBuffers.size());
-				vkQueueSubmit(m_commandQueues[GPUQueue_Graphics], 1, &submitInfo, VK_NULL_HANDLE);
-
-				GpuWaitForIdle();
-
-				ImGui_ImplVulkan_DestroyFontUploadObjects();
-				m_commandListManager->ReturnCommandList(cmdListVulkan);
-				m_commandListManager->Reset();
-
 				ImGuiBeginFrame();
 			}
 
@@ -532,7 +533,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("acquireNextImageKHR");
 					VkResult acquireNextImageResult = 
-						vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), 0xFFFFFFFF, static_cast<VkSemaphore>(m_submitFrameContexts.Get().SwapchainAcquires)
+						vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(m_swapchain), INFINITE, static_cast<VkSemaphore>(m_submitFrameContexts.Get().SwapchainAcquires)
 						, 0, &m_availableSwapchainImage);
 
 					vkResetFences(m_device, 1, &m_submitFrameContexts.Get().SubmitFences);

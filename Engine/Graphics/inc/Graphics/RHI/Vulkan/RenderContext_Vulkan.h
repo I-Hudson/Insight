@@ -93,6 +93,7 @@ namespace Insight
 				VkPhysicalDevice m_adapter{ nullptr };
 
 				VmaAllocator_T* m_vmaAllocator{ nullptr };
+				VkAllocationCallbacks m_vmaAllocationCallbacks;
 
 				VkSurfaceKHR m_surface{ nullptr };
 				VkSwapchainKHR m_swapchain{ nullptr };

@@ -30,7 +30,7 @@ namespace Insight
 		{
 			static void* D3D12Allocate(size_t Size, size_t Alignment, void* pPrivateData)
 			{
-				return ::NewBytes(Size, Core::MemoryAllocCategory::Graphics);
+				return NewBytes(Size, Core::MemoryAllocCategory::Graphics);
 			}
 			static void D3D12Free(void* pMemory, void* pPrivateData)
 			{

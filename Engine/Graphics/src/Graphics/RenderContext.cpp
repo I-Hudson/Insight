@@ -107,6 +107,7 @@ namespace Insight
 				int width, height;
 
 				ImGuiIO& io = ImGui::GetIO();
+				io.Fonts->AddFontDefault();
 
 				// merge in icons from Font Awesome
 				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
