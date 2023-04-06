@@ -13,7 +13,7 @@ extern Insight::App::Engine* CreateApplication();
 
 #ifdef IS_DX12_ENABLED
 extern "C" { __declspec(dllexport) extern const UINT D3D12SDKVersion = 706; } // https://devblogs.microsoft.com/directx/directx12agility/
-extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = u8".\\"; } // Path to .dll is root of the .exe. 
+extern "C" { __declspec(dllexport) extern const char* D3D12SDKPath = ".\\"; } // Path to .dll is root of the .exe. 
 #endif
 
 int main(int argc, char** argv)

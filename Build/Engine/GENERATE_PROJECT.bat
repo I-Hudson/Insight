@@ -8,8 +8,10 @@ SET option=%2
 IF "%option%" == "" GOTO PrintHelp
 IF "%option%" == "compile" GOTO Compile
 
+set premake=..\..\vendor\premake\premake5.exe
 
-call ..\..\vendor\premake\premake5.exe --file=%prmakeFile% %option%
+call %premake% --version
+call %premake% --file=%prmakeFile% %option%
 call Generate_Symlinks.bat
 GOTO: END
 

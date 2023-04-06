@@ -13,7 +13,7 @@ namespace Insight
                 , Runtime::Material* material) const
         {
             ASSERT(serialiser);
-            constexpr char* c_Textures = "Textures";
+            constexpr const char* c_Textures = "Textures";
             if (serialiser->IsReadMode())
             {
                 Serialisation::PropertyDeserialiser<Core::GUID> guidDeserialiser;

@@ -50,7 +50,7 @@ namespace Insight
 			u32 m_height = 0;
 		};
 #define EDITOR_WINDOW(Name, WindowCategory)													\
-	static constexpr char* WINDOW_NAME = #Name;												\
+	static constexpr const char* WINDOW_NAME = #Name;												\
 	virtual const char* GetWindowName() const override { return WINDOW_NAME; }				\
 	static constexpr EditorWindowCategories WINDOW_CATEGORY = WindowCategory;				\
 	virtual EditorWindowCategories GetCategory() const override { return WindowCategory; }

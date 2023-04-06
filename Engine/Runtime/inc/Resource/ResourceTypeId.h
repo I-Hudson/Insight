@@ -9,9 +9,9 @@
 #include "Serialisation/Serialiser.h"
 
 #include <string>
-#include <xhash>
 #include <unordered_map>
 #include <functional>
+#include <xhash>
 
 namespace Insight
 {
@@ -28,7 +28,7 @@ namespace Insight
 
 			IS_SERIALISABLE_H(ResourceTypeId)
 
-			std::string GetTypeName() const;
+				std::string GetTypeName() const;
 			//u64 GetHash() const;
 
 			operator bool() const;
@@ -42,7 +42,28 @@ namespace Insight
 			template<typename>
 			friend struct ::Insight::Serialisation::SerialiserObject;
 		};
+	}
 
+}
+
+namespace std
+{
+	using ResourceTypeId = Insight::Runtime::ResourceTypeId;
+
+	template<>
+	struct hash<ResourceTypeId>
+	{
+		u64 operator()(ResourceTypeId const& other) const
+		{
+			return std::hash<std::string>()(other.GetTypeName());
+		}
+	};
+}
+
+namespace Insight
+{
+	namespace Runtime
+	{
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
 		class IS_RUNTIME ResourceRegister
 		{
@@ -76,18 +97,4 @@ namespace Insight
 		SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
 		SERIALISE_PROPERTY(u64, m_hash, 1, 2)
 		);
-}
-
-namespace std
-{
-	using ResourceTypeId = Insight::Runtime::ResourceTypeId;
-
-	template<>
-	struct hash<ResourceTypeId>
-	{
-		u64 operator()(ResourceTypeId const& other) const
-		{
-			return std::hash<std::string>()(other.GetTypeName());
-		}
-	};
 }

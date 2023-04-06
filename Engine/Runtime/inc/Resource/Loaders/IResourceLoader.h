@@ -26,6 +26,7 @@ namespace Insight
             /// @return bool 
             bool HasSingleLoadableResourceTypeId() const;
             u32 GetResourceTypeIdSize() const;
+            const std::vector<ResourceTypeId>& GetLoadableResourceTypes() const;
 
             /// @brief Return the first ResourceTypeId.
             /// @return ResourceTypeId

@@ -11,7 +11,7 @@ namespace Insight
             (ISerialiser* serialiser, std::vector<Runtime::Mesh*>& meshes, Runtime::Model* model) const
         {
             ASSERT(serialiser);
-            constexpr char* c_Meshes = "Meshes";
+            constexpr const char* c_Meshes = "Meshes";
             if (serialiser->IsReadMode())
             {
                 u64 arraySize = 0;
@@ -49,7 +49,7 @@ namespace Insight
             (ISerialiser* serialiser, std::vector<Runtime::Material*>& materials, Runtime::Model* model) const
         {
             ASSERT(serialiser);
-            constexpr char* c_Materials = "Materials";
+            constexpr const char* c_Materials = "Materials";
             if (serialiser->IsReadMode())
             {
                 u64 arraySize = 0;

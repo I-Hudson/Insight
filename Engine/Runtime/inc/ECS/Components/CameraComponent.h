@@ -77,8 +77,7 @@ namespace Insight
 		class IS_RUNTIME CameraComponent : public Component
 		{
 		public:
-			static constexpr char* Type_Name = "CameraComponent";
-			virtual const char* GetTypeName() override { return Type_Name; }
+			IS_COMPONENT(CameraComponent);
 
 			CameraComponent();
 			virtual ~CameraComponent() override;

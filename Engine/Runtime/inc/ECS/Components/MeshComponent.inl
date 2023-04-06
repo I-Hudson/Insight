@@ -9,7 +9,7 @@ namespace Insight
         void ComplexSerialiser<MeshToGuid, Runtime::ResourceLFHandle<Runtime::Mesh>, ECS::MeshComponent>::operator()
             (ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Mesh>& mesh, ECS::MeshComponent* meshComponent) const
         {
-			constexpr char* c_MeshGuid = "MeshGuid";
+			constexpr const char* c_MeshGuid = "MeshGuid";
 			if (serialiser->IsReadMode())
 			{
 				PropertyDeserialiser<Core::GUID> guidDeserialiser;
@@ -33,7 +33,7 @@ namespace Insight
 		void ComplexSerialiser<MaterialToGuid, Runtime::ResourceLFHandle<Runtime::Material>, ECS::MeshComponent>::operator()
 			(ISerialiser* serialiser, Runtime::ResourceLFHandle<Runtime::Material>& material, ECS::MeshComponent* meshComponent) const
 		{
-			constexpr char* c_MaterialGuid = "MaterialGuid";
+			constexpr const char* c_MaterialGuid = "MaterialGuid";
 			if (serialiser->IsReadMode())
 			{
 				PropertyDeserialiser<Core::GUID> guidDeserialiser;

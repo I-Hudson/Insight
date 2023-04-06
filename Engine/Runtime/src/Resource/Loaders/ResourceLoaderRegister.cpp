@@ -29,6 +29,8 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
             RegisterResourceLoader(New<AssimpLoader>());
+
+            VerifyLoaders();
         }
 
         void ResourceLoaderRegister::Shutdown()
@@ -81,6 +83,22 @@ namespace Insight
             }
             resourceLoader->Initialise();
             s_resourceLoaders.push_back(resourceLoader);
+        }
+        
+        void ResourceLoaderRegister::VerifyLoaders()
+        {
+            std::unordered_set<ResourceTypeId> resourceTypesLoadable;
+            for (const IResourceLoader* loader : s_resourceLoaders)
+            {
+                const std::vector<ResourceTypeId>& loaderResourceTypeIds = loader->GetLoadableResourceTypes();
+                for (const ResourceTypeId& typeId : loaderResourceTypeIds)
+                {
+                    ASSERT_MSG(resourceTypesLoadable.find(typeId) == resourceTypesLoadable.end(), 
+                        R"([ResourceLoaderRegister::VerifyLoaders] ResourceTypeId '{}' is already loadable from another loader. 
+                            This is not allowed. A ResourceTypeId can only be loaded from a single loader.)");
+                    resourceTypesLoadable.insert(typeId);
+                }
+            }
         }
     }
 }

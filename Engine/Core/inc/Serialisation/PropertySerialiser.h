@@ -37,7 +37,7 @@ namespace Insight
                 {
                     return v;
                 }
-                else constexpr
+                else
                 {
                     assert(false);
                     return 0;

@@ -30,6 +30,8 @@ namespace Insight
 
         private:
             static void RegisterResourceLoader(IResourceLoader* resourceLoader);
+            /// @brief Check that no two loaders can load the same ResourceTypeId.
+            static void VerifyLoaders();
 
         private:
             static std::vector<IResourceLoader*> s_resourceLoaders;

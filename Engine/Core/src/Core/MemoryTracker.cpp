@@ -66,7 +66,7 @@ namespace Insight
                     const MemoryTrackedAlloc& alloc = pair.second;
                     IS_CORE_ERROR("Allocation leak:");
                     IS_CORE_ERROR("\tPtr: {}", alloc.Ptr);
-                    IS_CORE_ERROR("\Size: {}", alloc.Size);
+                    IS_CORE_ERROR("\tSize: {}", alloc.Size);
                     IS_CORE_ERROR("\tType: {}", (int)alloc.Type);
                     IS_CORE_ERROR("\tCallstack: ");
                     for (int i = c_CallStackCount - 1; i >= 0; --i)

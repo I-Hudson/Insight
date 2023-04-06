@@ -30,11 +30,11 @@ namespace Insight
 #define IS_LOGGING_ENABLED
 #if defined(IS_LOGGING_ENABLED)
 #if defined(IS_CORE)
-#define IS_CORE_TRACE(...)	::Insight::Core::Logger::GetCoreFileLogger()->trace(__VA_ARGS__)
-#define IS_CORE_INFO(...)	::Insight::Core::Logger::GetCoreFileLogger()->info(__VA_ARGS__)
-#define IS_CORE_WARN(...)	::Insight::Core::Logger::GetCoreFileLogger()->warn(__VA_ARGS__)
-#define IS_CORE_ERROR(...)	::Insight::Core::Logger::GetCoreFileLogger()->error(__VA_ARGS__)
-#define IS_CORE_FATEL(...)	::Insight::Core::Logger::GetCoreFileLogger()->critical(__VA_ARGS__)
+#define IS_CORE_TRACE(format, ...)	::Insight::Core::Logger::GetCoreFileLogger()->trace(format, __VA_ARGS__)
+#define IS_CORE_INFO(format, ...)	::Insight::Core::Logger::GetCoreFileLogger()->info(format, __VA_ARGS__)
+#define IS_CORE_WARN(format, ...)	::Insight::Core::Logger::GetCoreFileLogger()->warn(format, __VA_ARGS__)
+#define IS_CORE_ERROR(format, ...)	::Insight::Core::Logger::GetCoreFileLogger()->error(format, __VA_ARGS__)
+#define IS_CORE_FATEL(format, ...)	::Insight::Core::Logger::GetCoreFileLogger()->critical(format, __VA_ARGS__)
 #else 
 #define IS_CORE_TRACE(...) IS_UNUSED(0)
 #define IS_CORE_INFO(...) IS_UNUSED(0)

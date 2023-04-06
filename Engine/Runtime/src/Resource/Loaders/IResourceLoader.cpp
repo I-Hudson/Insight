@@ -34,12 +34,19 @@ namespace Insight
             return static_cast<u32>(m_loadableResourceTypeIds.size());
         }
 
+        const std::vector<ResourceTypeId>& IResourceLoader::GetLoadableResourceTypes() const
+        {
+            return m_loadableResourceTypeIds;
+        }
+
         ResourceTypeId IResourceLoader::GetResourceTypeId() const
         {
             if (m_loadableResourceTypeIds.size() > 0)
             {
                 return m_loadableResourceTypeIds.at(0);
             }
+            FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
+            return {};
         }
 
         ResourceTypeId IResourceLoader::GetResourceTypeId(u32 index) const
@@ -48,7 +55,7 @@ namespace Insight
             {
                 return m_loadableResourceTypeIds.at(index);
             }
-           FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds container size '{}' index requested '{}'.", m_loadableResourceTypeIds.size(), index);
+           FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
            return {};
         }
     }

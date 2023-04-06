@@ -10,11 +10,11 @@ namespace Insight
 {
     namespace Serialisation
     {
-        constexpr char* c_ObjectName = "ObjectName";
-        constexpr char* c_ArrayName = "ArrayName";
-        constexpr char* c_SerialiserName = "SerialiserName";
-        constexpr char* c_ChildSerialiser = "ChildSerialiser";
-        constexpr char* c_ArraySize = "ArraySize";
+        constexpr const char* c_ObjectName = "ObjectName";
+        constexpr const char* c_ArrayName = "ArrayName";
+        constexpr const char* c_SerialiserName = "SerialiserName";
+        constexpr const char* c_ChildSerialiser = "ChildSerialiser";
+        constexpr const char* c_ArraySize = "ArraySize";
 
         enum class SerialisationTypes
         {

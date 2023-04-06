@@ -43,7 +43,7 @@ namespace Insight
 
 			Size
 		};
-		constexpr char* MemoryAllocCategoryToString[] =
+		constexpr const char* MemoryAllocCategoryToString[] =
 		{
 			"General",
 			"Threading",

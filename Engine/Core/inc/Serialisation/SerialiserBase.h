@@ -6,6 +6,7 @@
 #include "Core/Memory.h"
 
 #include "Serialisation/Serialisers/ISerialiser.h"
+#include "Serialisation/ISerialisable.h"
 
 #include <vector>
 
@@ -13,7 +14,8 @@ namespace Insight
 {
     namespace Serialisation
     {
-        class ISerialiser;
+        template<typename>
+        struct SerialiserObject;
 
         enum class SerialiserType
         {
@@ -59,7 +61,7 @@ namespace Insight
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
                     using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.Get())>>;
-                    static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                    static_assert(std::is_same_v<TVectorElementType, typename ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v.Get());
                 }
@@ -76,7 +78,7 @@ namespace Insight
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
                     using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v.get())>>;
-                    static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                    static_assert(std::is_same_v<TVectorElementType, typename ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v.get());
                 }
@@ -93,7 +95,7 @@ namespace Insight
                 if constexpr (SerialiserType == SerialiserType::Property)
                 {
                     using TVectorElementType = std::remove_pointer_t<std::decay_t<decltype(v)>>;
-                    static_assert(std::is_same_v<TVectorElementType, ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
+                    static_assert(std::is_same_v<TVectorElementType, typename ::Insight::Serialisation::PropertySerialiser<TypeSerialiser>::InType>,
                         "[VectorSerialiser] TVectorElementType is different from TypeSerialiser::InType.");
                     ::Insight::Serialisation::SerialiseProperty<TypeSerialiser, TVectorElementType>(serialiser, name, *v);
                 }
@@ -122,7 +124,7 @@ namespace Insight
         T DeserialiseProperty(ISerialiser* serialiser, std::string_view propertyName)
         {
             ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
-            ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser>::InType serialisedData;
+            typename ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser>::InType serialisedData;
             serialiser->Read(propertyName, serialisedData);
             auto data = propertyDeserialiser(serialisedData);
             return static_cast<T>(data);
@@ -387,57 +389,5 @@ namespace Insight
         template<typename T>
         struct DeserialiserObject
         { };
-
-        /// @brief Deserialise a vector.
-        /// @tparam T 
-        /// @tparam ObjectDesialiser 
-        /*template<typename T, bool ObjectDesialiser>
-        struct VectorDeserialiser
-        {
-            std::vector<T> operator()(std::vector<nlohmann::json> const& data)
-            {
-                using Type = std::remove_pointer_t<std::remove_reference_t<std::remove_all_extents_t<T>>>;
-                if constexpr (ObjectDesialiser)
-                {
-                    DeserialiserObject<Type> objectDeserialiser;
-                    std::vector<T> vector;
-                    for (auto const& v : data)
-                    {
-                        if constexpr (std::is_pointer_v<T>)
-                        {
-                            Type* typePtr = New<Type>();
-                            objectDeserialiser.DeserialiseToJsonObject(v, typePtr);
-                            vector.push_back(typePtr);
-                        }
-                        else
-                        {
-                            Type obj;
-                            objectDeserialiser.DeserialiseToJsonObject(v, &obj)
-                            vector.push_back(obj);
-                        }
-                    }
-                    return vector;
-                }
-                else
-                {
-                    PropertyDeserialiser<Type> propertyDeserialiser;
-                    std::vector<T> vector;
-                    for (auto const& v : data)
-                    {
-                        if constexpr (std::is_pointer_v<T>)
-                        {
-                            Type* typePtr = New<Type>();
-                            *typePtr = propertyDeserialiser(v);
-                            vector.push_back(typePtr);
-                        }
-                        else
-                        {
-                            vector.push_back(propertyDeserialiser(v));
-                        }
-                    }
-                    return vector;
-                }
-            }
-        };*/
     }
 }

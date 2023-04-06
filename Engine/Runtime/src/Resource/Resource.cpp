@@ -13,7 +13,6 @@
 #include "Algorithm/Vector.h"
 
 #include <filesystem>
-#include <ppltasks.h>
 
 namespace Insight
 {

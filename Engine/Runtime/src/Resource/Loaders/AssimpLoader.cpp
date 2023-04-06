@@ -40,7 +40,7 @@ namespace Insight
 		//IResourceLoader - BEGIN
 
 		AssimpLoader::AssimpLoader()
-			: IResourceLoader({ ".gltf", ".fbx", ".obj", ".png" }, {Model::GetStaticResourceTypeId(), Texture2D::GetStaticResourceTypeId()})
+			: IResourceLoader({ ".gltf", ".fbx", ".obj" }, { Model::GetStaticResourceTypeId() })
 		{ }
 
 		AssimpLoader::~AssimpLoader()

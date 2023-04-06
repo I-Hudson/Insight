@@ -133,8 +133,9 @@ namespace Insight
 			friend class Entity;
 			friend class EntityManager;
 		};
+
 #define IS_COMPONENT(Component) \
-		static constexpr char* Type_Name = #Component; \
+		static constexpr const char* Type_Name = #Component; \
 		virtual const char* GetTypeName() override { return Type_Name; }
 
 		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component* ()>>;

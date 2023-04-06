@@ -10,8 +10,7 @@ namespace Insight
 		class TagComponent : public Component
 		{
 		public:
-			static constexpr char* Type_Name = "TagComponent";
-			virtual const char* GetTypeName() override { return Type_Name; }
+			IS_COMPONENT(TagComponent);
 
 			/// @brief Store a vector of tags.
 			TagComponent();

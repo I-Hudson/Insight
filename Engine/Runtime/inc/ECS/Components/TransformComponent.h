@@ -11,8 +11,7 @@ namespace Insight
 		class TransformComponent : public Component
 		{
 		public:
-			static constexpr char* Type_Name = "TransformComponent";
-			virtual const char* GetTypeName() override { return Type_Name; }
+			IS_COMPONENT(TransformComponent);
 
 			TransformComponent();
 			virtual ~TransformComponent() override;

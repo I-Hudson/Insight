@@ -13,8 +13,7 @@ namespace Insight
 		class MeshComponent : public Component
 		{
 		public:
-			static constexpr char* Type_Name = "MeshComponent";
-			virtual const char* GetTypeName() override { return Type_Name; }
+			IS_COMPONENT(MeshComponent);
 
 			MeshComponent();
 			virtual ~MeshComponent() override;

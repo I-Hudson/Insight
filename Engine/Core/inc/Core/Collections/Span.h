@@ -3,6 +3,8 @@
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
 
+#include "Platforms/Platform.h"
+
 #include <vector>
 #include <array>
 #include <string>
