@@ -16,7 +16,7 @@ namespace Insight
                 serialiser->StartArray("DataSize", dataSize);
 
                 ASSERT(!data);
-                data = static_cast<Byte*>(::New(dataSize, Core::MemoryAllocCategory::Resources));
+                data = static_cast<Byte*>(::NewBytes(dataSize, Core::MemoryAllocCategory::Resources));
 
                 for (size_t i = 0; i < texture->m_dataSize; ++i)
                 {

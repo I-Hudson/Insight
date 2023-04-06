@@ -188,9 +188,9 @@ namespace Insight
 
 			m_resourceSystem.Shutdown();
 
-			m_imguiSystem.Shutdown();
 			m_graphicsSystem.Shutdown();
 
+			m_imguiSystem.Shutdown();
 
 			m_inputSystem.Shutdown();
 			m_eventSystem.Shutdown();

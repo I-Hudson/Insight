@@ -102,8 +102,6 @@ namespace Insight
 			/// @brief Define the info for all mips of the image.
 			std::vector<RHI_TextureInfo> m_infos = { };
 
-			void* m_uploadData = nullptr;
-
 			friend class RHI_CommandList;
 		};
 	}

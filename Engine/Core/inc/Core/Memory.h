@@ -19,15 +19,15 @@
 
 #define UntrackPtr(Ptr)				::Insight::Core::MemoryTracker::Instance().UnTrack(Ptr)
 
-NO_DISCARD FORCE_INLINE void* New(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
+NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes, Insight::Core::MemoryAllocCategory memoryAllocCategory)
 {
 	void* ptr = std::malloc(bytes);
 	Insight::Core::MemoryTracker::Instance().Track(ptr, bytes, memoryAllocCategory, Insight::Core::MemoryTrackAllocationType::Single);
 	return ptr;
 }
-NO_DISCARD FORCE_INLINE void* New(u64 bytes)
+NO_DISCARD FORCE_INLINE void* NewBytes(u64 bytes)
 {
-	return New(bytes, Insight::Core::MemoryAllocCategory::General);
+	return NewBytes(bytes, Insight::Core::MemoryAllocCategory::General);
 }
 
 template<typename T, typename... Params>
@@ -64,6 +64,17 @@ FORCE_INLINE void Delete(T*& pointer)
 	{
 		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
 		delete pointer;
+	}
+	pointer = nullptr;
+}
+
+template<typename T>
+FORCE_INLINE void DeleteBytes(T*& pointer)
+{
+	if (pointer != nullptr)
+	{
+		Insight::Core::MemoryTracker::Instance().UnTrack(pointer);
+		std::free(pointer);
 	}
 	pointer = nullptr;
 }

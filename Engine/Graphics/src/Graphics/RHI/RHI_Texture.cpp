@@ -9,6 +9,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define RHI_TEXTURE_DEFER_ENABLED
+
 namespace Insight
 {
 	namespace Graphics
@@ -54,7 +56,6 @@ namespace Insight
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 			createInfo.Layout = ImageLayout::TransforDst;
 
-#define RHI_TEXTURE_DEFER_ENABLED
 #ifdef RHI_TEXTURE_DEFER_ENABLED
 			RenderContext::Instance().GetDeferredManager().Push([this, createInfo, width, height, data](RHI_CommandList* cmdList)
 				{
@@ -62,9 +63,10 @@ namespace Insight
 					const u64 textureSize = width * height * STBI_rgb_alpha;
 
 					m_uploadStatus = DeviceUploadStatus::Uploading;
-					m_uploadData = data;
 					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)textureSize);
 					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
+
+					stbi_image_free(data);
 				});
 #else
 			Create(&RenderContext::Instance(), createInfo);
@@ -91,7 +93,6 @@ namespace Insight
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
-#define RHI_TEXTURE_DEFER_ENABLED
 #ifdef RHI_TEXTURE_DEFER_ENABLED
 			RenderContext::Instance().GetDeferredManager().Push([this, createInfo, size_in_bytes, data](RHI_CommandList* cmdList)
 				{
@@ -99,7 +100,6 @@ namespace Insight
 					Upload(data, static_cast<int>(size_in_bytes));
 
 					m_uploadStatus = DeviceUploadStatus::Uploading;
-					m_uploadData = data;
 					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)size_in_bytes);
 					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
 				});
@@ -118,8 +118,6 @@ namespace Insight
 		void RHI_Texture::OnUploadComplete(RHI_UploadQueueRequest* request)
 		{
 			request->OnUploadCompleted.Unbind<&RHI_Texture::OnUploadComplete>(this);
-			stbi_image_free(m_uploadData);
-			m_uploadData = nullptr;
 			m_uploadStatus = DeviceUploadStatus::Completed;
 			OnUploadCompleted(this);
 		}

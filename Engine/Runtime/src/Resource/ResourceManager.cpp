@@ -389,7 +389,15 @@ namespace Insight
                             //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
                             if (loader)
                             {
-                                loader->Load(resource);
+                                if (loader->Load(resource))
+                                {
+                                    resource->m_resource_state = EResoruceStates::Loaded;
+                                }
+                                else
+                                {
+                                    // Something has gone wrong when tring to load the resource.
+                                    resource->m_resource_state = EResoruceStates::Failed_To_Load;
+                                }
                             }
                             else
                             {
@@ -442,8 +450,8 @@ namespace Insight
             ASSERT(Platform::IsMainThread());
 
             // Pop all queued resources.
-            std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
             {
+                std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
                 while (!s_queuedResoucesToLoad.empty())
                 {
                     auto resource = s_queuedResoucesToLoad.front();

@@ -42,7 +42,7 @@ namespace Insight
 			m_depth = 1;
 
 			m_dataSize = width * height * channels;
-			m_rawDataPtr = static_cast<Byte*>(::New(m_dataSize, Core::MemoryAllocCategory::Resources));
+			m_rawDataPtr = static_cast<Byte*>(NewBytes(m_dataSize, Core::MemoryAllocCategory::Resources));
 			Platform::MemCopy(m_rawDataPtr, data, m_dataSize);
 
 			stbi_image_free(data);
@@ -62,7 +62,7 @@ namespace Insight
 			Renderer::FreeTexture(m_rhi_texture);
 			m_rhi_texture = nullptr;
 			
-			Delete(m_rawDataPtr);
+			DeleteBytes(m_rawDataPtr);
 
 			m_resource_state = EResoruceStates::Unloaded;
 		}
