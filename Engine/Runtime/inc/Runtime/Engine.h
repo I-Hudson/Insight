@@ -17,11 +17,11 @@
 
 #include "Renderpass.h"
 
-constexpr const uint32_t majoir_bitshift = 12u;
+constexpr const uint32_t major_bitshift = 22u;
 constexpr const uint32_t minor_bitshift = 12u;
-constexpr const uint32_t patch_bitshift = 12u;
+constexpr const uint32_t patch_bitshift = 0u;
 
-#define MAKE_ENGINE_VERSION(majoir, minor, patch) (((uint32_t)majoir) << 22u) | (((uint32_t)minor) << 12u) | (((uint32_t)patch))
+#define MAKE_ENGINE_VERSION(majoir, minor, patch) (((uint32_t)majoir) << major_bitshift) | (((uint32_t)minor) << minor_bitshift) | (((uint32_t)patch) << patch_bitshift)
 #define ENGINE_VERSION MAKE_ENGINE_VERSION(1, 0, 0)
 
 #define ENGINE_VERSION_MAJOIR (((uint32_t)ENGINE_VERSION) >> 22u)
