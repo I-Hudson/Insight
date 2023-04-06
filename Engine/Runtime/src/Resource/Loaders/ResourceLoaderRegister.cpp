@@ -52,6 +52,7 @@ namespace Insight
                     return loader;
                 }
             }
+            IS_CORE_WARN("[ResourceLoaderRegister::GetLoaderFromExtension] No loader was found for extension of '{}'.", fileExtension);
             return nullptr;
         }
 

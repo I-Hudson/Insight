@@ -72,14 +72,22 @@ namespace Insight
     namespace Serialisation
     {
         struct ResourceDatabase1 {};
+        struct ResourceDatabase2 {};
+
         template<>
         struct ComplexSerialiser<ResourceDatabase1, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
         {
             void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
         };
+        template<>
+        struct ComplexSerialiser<ResourceDatabase2, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
+        {
+            void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
+        };
     }
 
-    OBJECT_SERIALISER(Runtime::ResourceDatabase, 1,
-        SERIALISE_COMPLEX(Serialisation::ResourceDatabase1, m_resources, 1, 0)
+    OBJECT_SERIALISER(Runtime::ResourceDatabase, 2,
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabase1, m_resources, 1, 2)
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabase2, m_resources, 2, 0)
         );
 }

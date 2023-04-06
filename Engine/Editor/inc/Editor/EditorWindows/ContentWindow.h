@@ -60,6 +60,10 @@ namespace Insight
             std::vector<std::string> m_currentDirectoryParents;
             std::string m_currentDirectory;
             std::string m_currentItemSelected;
+
+            std::string m_importFilePath;
+            bool m_displayResourceTypeToload = false;
+            int m_resourceTypeToLoadIndex = 0;
         };
     }
 }

@@ -1,4 +1,5 @@
 #include "Resource/Texture.h"
+#include "Resource/Texture.inl"
 
 #include "Graphics/RHI/RHI_Texture.h"
 
@@ -6,6 +7,8 @@ namespace Insight
 {
 	namespace Runtime
 	{
+		IS_SERIALISABLE_CPP(Texture)
+
 		u32 Texture::GetWidth() const
 		{
 			return m_width;

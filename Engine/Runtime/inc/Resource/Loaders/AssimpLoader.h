@@ -104,8 +104,7 @@ namespace Insight
 			virtual void Initialise() override;
 			virtual void Shutdown() override;
 
-			virtual void Load(IResource* resource) const override;
-			virtual ResourceTypeId GetResourceTypeId() const override;
+			virtual bool Load(IResource* resource) const override;
 			//IResourceLoader - END
 
 			/// @brief Load a complete model.

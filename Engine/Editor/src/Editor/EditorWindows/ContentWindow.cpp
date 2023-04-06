@@ -49,6 +49,59 @@ namespace Insight
             CentreArea();
             // Bottom bar
             BottomBar();
+
+            if (m_displayResourceTypeToload)
+            {
+                constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse
+                    | ImGuiWindowFlags_NoDocking
+                    //| ImGuiWindowFlags_NoResize
+                    //| ImGuiWindowFlags_NoMove
+                    //| ImGuiWindowFlags_AlwaysAutoResize
+                    ;
+
+                const ImGuiIO& io = ImGui::GetIO();
+                ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+                ImGui::SetNextWindowFocus();
+
+                if (ImGui::Begin("Resource type", nullptr, windowFlags))
+                {
+                    std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(m_importFilePath);
+                    const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+                    ASSERT(loader);
+
+                    const u32 resourceTypeSize = loader->GetResourceTypeIdSize();
+                    
+                    std::vector<std::string> resourceTypeIds;
+                    resourceTypeIds.reserve(resourceTypeSize);
+                    for (u32 i = 0; i < resourceTypeSize; ++i)
+                    {
+                        resourceTypeIds.push_back(loader->GetResourceTypeId(i).GetTypeName());
+                    }
+
+                    ImGui::ListBox("Resource Type", &m_resourceTypeToLoadIndex, [](void* data, int idx, const char** outText) -> bool
+                        {
+                            if (!data)
+                            {
+                                return false;
+                            }
+                            const std::vector<std::string>* vec = reinterpret_cast<std::vector<std::string>*>(data);
+                            const std::string& str = vec->at(idx);
+                            *outText = str.c_str();
+                            return true;
+                        }, &resourceTypeIds, static_cast<int>(resourceTypeIds.size()));
+
+                    if (ImGui::Button("Import"))
+                    {
+                        m_displayResourceTypeToload = false;
+                        
+                        Runtime::ResourceTypeId resourceTypeIdToLoad = loader->GetResourceTypeId(static_cast<u32>(m_resourceTypeToLoadIndex));
+                        Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, resourceTypeIdToLoad));
+                        m_importFilePath = "";
+                        m_resourceTypeToLoadIndex = 0;
+                    }
+                }
+                ImGui::End();
+            }
         }
 
         void ContentWindow::Setup()
@@ -68,11 +121,26 @@ namespace Insight
             {
                 // Import a new asset.
                 PlatformFileDialog importDialog;
-                std::string file;
-                if (importDialog.ShowLoad(&file))
+                if (importDialog.ShowLoad(&m_importFilePath))
                 {
-                    // Import file.
-                    Runtime::ResourceManager::LoadSync(file);
+                    Runtime::ResourceTypeId typeId;
+                    std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(m_importFilePath);
+                    const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+                    if (!loader)
+                    {
+                        return;
+                    }
+
+                    if (loader->HasSingleLoadableResourceTypeId())
+                    {
+                        // Import file.
+                        Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, loader->GetResourceTypeId()));
+                        m_importFilePath = "";
+                    }
+                    else
+                    {
+                        m_displayResourceTypeToload = true;
+                    }
                 }
             }
 

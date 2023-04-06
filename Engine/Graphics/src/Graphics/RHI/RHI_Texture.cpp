@@ -91,8 +91,23 @@ namespace Insight
 			createInfo.Format = PixelFormat::R8G8B8A8_UNorm;
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
+#define RHI_TEXTURE_DEFER_ENABLED
+#ifdef RHI_TEXTURE_DEFER_ENABLED
+			RenderContext::Instance().GetDeferredManager().Push([this, createInfo, size_in_bytes, data](RHI_CommandList* cmdList)
+				{
+					Create(&RenderContext::Instance(), createInfo);
+					Upload(data, static_cast<int>(size_in_bytes));
+
+					m_uploadStatus = DeviceUploadStatus::Uploading;
+					m_uploadData = data;
+					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)size_in_bytes);
+					request->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
+				});
+#else
 			Create(&RenderContext::Instance(), createInfo);
 			Upload(data, static_cast<int>(size_in_bytes));
+#endif
+
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_Texture::QueueUpload(void* data, int sizeInBytes)

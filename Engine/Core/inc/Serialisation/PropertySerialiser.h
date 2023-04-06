@@ -35,7 +35,7 @@ namespace Insight
             {
                 if constexpr (std::is_enum_v<TypeSerialiser>)
                 {
-                    return static_cast<TypeSerialiser>(v);
+                    return v;
                 }
                 else constexpr
                 {

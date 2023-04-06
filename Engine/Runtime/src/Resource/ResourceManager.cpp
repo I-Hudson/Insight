@@ -28,6 +28,8 @@ namespace Insight
 
         void ResourceManager::Update(float const deltaTime)
         {
+            ASSERT(Platform::IsMainThread());
+
             u32 resourcesToLoad = 0;
             std::vector<IResource*> resourceLoaded;
 
@@ -65,6 +67,8 @@ namespace Insight
 
         void ResourceManager::SaveDatabase()
         {
+            ASSERT(Platform::IsMainThread());
+
             if (!s_database)
             {
                 return;
@@ -79,6 +83,8 @@ namespace Insight
 
         void ResourceManager::LoadDatabase()
         {
+            ASSERT(Platform::IsMainThread());
+
             if (!s_database)
             {
                 return;
@@ -96,6 +102,8 @@ namespace Insight
 
         void ResourceManager::ClearDatabase()
         {
+            ASSERT(Platform::IsMainThread());
+
             s_database->Shutdown();
         }
 
@@ -134,6 +142,7 @@ namespace Insight
         TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId const& resourceId)
         {
             ASSERT(s_database);
+            ASSERT(Platform::IsMainThread());
 
             TObjectPtr<IResource> resource;
             if (s_database->HasResource(resourceId))
@@ -307,7 +316,9 @@ namespace Insight
 
         void ResourceManager::UnloadAll()
         {
+            ASSERT(Platform::IsMainThread());
             ASSERT(s_database);
+
             std::vector<ResourceId> ResourceIds = s_database->GetAllResourceIds();
             for (const ResourceId& id : ResourceIds)
             {
@@ -401,7 +412,15 @@ namespace Insight
                     //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
                     if (loader)
                     {
-                        loader->Load(resource);
+                        if (loader->Load(resource))
+                        {
+                            resource->m_resource_state = EResoruceStates::Loaded;
+                        }
+                        else
+                        {
+                            // Something has gone wrong when tring to load the resource.
+                            resource->m_resource_state = EResoruceStates::Failed_To_Load;
+                        }
                     }
                     else
                     {
@@ -423,12 +442,14 @@ namespace Insight
             ASSERT(Platform::IsMainThread());
 
             // Pop all queued resources.
-            std::unique_lock queueLock(s_queuedResoucesToLoadMutex);
-            while (!s_queuedResoucesToLoad.empty())
+            std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
             {
-                auto resource = s_queuedResoucesToLoad.front();
-                s_queuedResoucesToLoad.pop();
-                resource->m_resource_state = EResoruceStates::Cancelled;
+                while (!s_queuedResoucesToLoad.empty())
+                {
+                    auto resource = s_queuedResoucesToLoad.front();
+                    s_queuedResoucesToLoad.pop();
+                    resource->m_resource_state = EResoruceStates::Cancelled;
+                }
             }
 
             // Finish loading all resources. This allows us to release them correctly.

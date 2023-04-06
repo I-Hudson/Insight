@@ -124,7 +124,8 @@ namespace Insight
             ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
             ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser>::InType serialisedData;
             serialiser->Read(propertyName, serialisedData);
-            return propertyDeserialiser(serialisedData);
+            auto data = propertyDeserialiser(serialisedData);
+            return static_cast<T>(data);
         }
 
         template<typename Type>

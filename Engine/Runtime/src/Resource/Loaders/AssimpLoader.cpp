@@ -40,7 +40,7 @@ namespace Insight
 		//IResourceLoader - BEGIN
 
 		AssimpLoader::AssimpLoader()
-			: IResourceLoader({ ".gltf", ".fbx", ".obj" })
+			: IResourceLoader({ ".gltf", ".fbx", ".obj", ".png" }, {Model::GetStaticResourceTypeId(), Texture2D::GetStaticResourceTypeId()})
 		{ }
 
 		AssimpLoader::~AssimpLoader()
@@ -54,21 +54,17 @@ namespace Insight
 		{
 		}
 
-		void AssimpLoader::Load(IResource* resource) const
+		bool AssimpLoader::Load(IResource* resource) const
 		{
-			Model* model = static_cast<Model*>(resource);
-			if (!model)
+			if (resource == nullptr || resource->GetResourceTypeId() != Model::GetStaticResourceTypeId())
 			{
-				return;
+				return false;
 			}
 
+			Model* model = static_cast<Model*>(resource);
 			LoadModel(model, model->GetFilePath(), Default_Model_Importer_Flags);
 			model->m_resource_state = EResoruceStates::Loaded;
-		}
-
-		ResourceTypeId AssimpLoader::GetResourceTypeId() const
-		{
-			return Model::GetStaticResourceTypeId();
+			return true;
 		}
 		
 		//IResourceLoader - END

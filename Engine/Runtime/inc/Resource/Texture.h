@@ -24,7 +24,7 @@ namespace Insight
 		class IS_RUNTIME Texture : public IResource
 		{
 			REGISTER_RESOURCE(Texture);
-
+			IS_SERIALISABLE_H(Texture);
 		public:
 
 			u32 GetWidth() const;
@@ -40,7 +40,28 @@ namespace Insight
 			u32 m_depth = 0;
 			PixelFormat m_format;
 
+			u64 m_dataSize = 0;
+			Byte* m_rawDataPtr = nullptr;
 			Graphics::RHI_Texture* m_rhi_texture = nullptr;
 		};
 	}
+
+	namespace Serialisation
+	{
+		struct SerialiseTextureData { };
+		template<>
+		struct ComplexSerialiser<SerialiseTextureData, Byte*, Runtime::Texture>
+		{
+			void operator()(ISerialiser* serialiser, Byte*& data, Runtime::Texture* texture) const;
+		};
+	}
+
+	OBJECT_SERIALISER(Runtime::Texture, 1,
+		SERIALISE_BASE(Runtime::IResource, 1, 0)
+		SERIALISE_PROPERTY(u32, m_width, 1, 0)
+		SERIALISE_PROPERTY(u32, m_height, 1, 0)
+		SERIALISE_PROPERTY(u32, m_depth, 1, 0)
+		//SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
+		SERIALISE_COMPLEX(Serialisation::SerialiseTextureData, m_rawDataPtr, 1, 0)
+	);
 }
