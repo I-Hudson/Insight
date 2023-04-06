@@ -17,6 +17,17 @@
 
 #include "Renderpass.h"
 
+constexpr const uint32_t majoir_bitshift = 12u;
+constexpr const uint32_t minor_bitshift = 12u;
+constexpr const uint32_t patch_bitshift = 12u;
+
+#define MAKE_ENGINE_VERSION(majoir, minor, patch) (((uint32_t)majoir) << 22u) | (((uint32_t)minor) << 12u) | (((uint32_t)patch))
+#define ENGINE_VERSION MAKE_ENGINE_VERSION(1, 0, 0)
+
+#define ENGINE_VERSION_MAJOIR (((uint32_t)ENGINE_VERSION) >> 22u)
+#define ENGINE_VERSION_MINOR  (((uint32_t)ENGINE_VERSION) >> 12u) & 0xFF
+#define ENGINE_VERSION_PATCH  (((uint32_t)ENGINE_VERSION)) & 0xFF
+
 namespace Insight
 {
 	namespace App

@@ -37,6 +37,11 @@ namespace Insight
 
 		bool Engine::Init(int argc, char** argv)
 		{
+			IS_CORE_INFO("Runtime Version: '{}'.", ENGINE_VERSION);
+			IS_CORE_INFO("Runtime Major: '{}'.", ENGINE_VERSION_MAJOIR);
+			IS_CORE_INFO("Runtime Minor: '{}'.", ENGINE_VERSION_MINOR);
+			IS_CORE_INFO("Runtime Patch: '{}'.", ENGINE_VERSION_PATCH);
+
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
