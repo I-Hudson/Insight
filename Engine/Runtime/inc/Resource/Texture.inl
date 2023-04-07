@@ -2,6 +2,9 @@
 
 #include "Resource/Texture.h"
 
+#include "Core/Compression.h"
+#include "Core/Profiler.h"
+
 namespace Insight
 {
     namespace Serialisation
@@ -26,17 +29,22 @@ namespace Insight
                 serialiser->StopArray();
             }
             else
-            {
+            {             
+                std::vector<Byte> compressTextureData;
+                u64 dataSize = texture->m_dataSize;
+
+                compressTextureData.resize(dataSize);
+                Platform::MemCopy(compressTextureData.data(), texture->m_rawDataPtr, dataSize);
                 
-                std::vector<Byte> compressTextureData = texture->PNG();
-                u64 dataSize = compressTextureData.size(); //texture->m_dataSize;
-                serialiser->StartArray("DataSize", dataSize);
-                for (size_t i = 0; i < dataSize; ++i)
+                if constexpr (true)
                 {
-                    Byte* data = compressTextureData.data() + i;//texture->m_rawDataPtr + i;
-                    serialiser->Write("", *data);
+                    Core::Compression::Compress(compressTextureData);
                 }
-                serialiser->StopArray();
+
+                {
+                    IS_PROFILE_SCOPE("Write texture data");
+                    serialiser->Write("TextureData", compressTextureData);
+                }
             }
         }
     }

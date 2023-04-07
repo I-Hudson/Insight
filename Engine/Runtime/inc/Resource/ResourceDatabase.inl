@@ -6,7 +6,8 @@
 #include "FileSystem/FileSystem.h"
 #include "Resource/Texture2D.h"
 
-#include <lz4.h>
+#include "Core/Compression.h"
+#include "Core/Profiler.h"
 
 namespace Insight
 {
@@ -61,6 +62,8 @@ namespace Insight
             (ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const
         {
             ASSERT(serialiser);
+            IS_PROFILE_FUNCTION();
+
             if (serialiser->IsReadMode())
             {
                 u64 resourcesToSave = 0;
@@ -84,7 +87,8 @@ namespace Insight
                     }
                 }
 
-                Serialisation::ISerialiser* resourceSerialiser = Serialisation::ISerialiser::Create(SerialisationTypes::Json, false);
+                Serialisation::ISerialiser* resourceSerialiser = Serialisation::ISerialiser::Create(serialiser->GetType(), false);
+                Serialisation::ISerialiser* resourceSubserialiser = Serialisation::ISerialiser::Create(serialiser->GetType(), false);
                 serialiser->StartArray("Resources", resourcesToSave);
                 for (auto const& pair : map)
                 {
@@ -95,49 +99,41 @@ namespace Insight
 
                         if (pair.first.GetTypeId() == Runtime::Texture2D::GetStaticResourceTypeId())
                         {
+                            IS_PROFILE_SCOPE("Resource Serialise");
+
                             resourceSerialiser->Clear();
-                            pair.second->Serialise(resourceSerialiser);
-                            std::vector<Byte> resourceSerialisedData = resourceSerialiser->GetSerialisedData();
-                            std::vector<Byte> compressedData;
+                            resourceSubserialiser->Clear();
 
-                            if constexpr (false)
                             {
-                                // TODO: ALL OF THIS SHOULD BE IN AN COMPRESS CLASS WHICH HANDLES COMPRESSING AND UNCOMPRESSING.
-                                const int src_size = static_cast<int>(resourceSerialisedData.size());
+                                IS_PROFILE_SCOPE("Serialise resource");
+                                pair.second->Serialise(resourceSubserialiser);
+                            }
 
-                                // LZ4 provides a function that will tell you the maximum size of compressed output based on input data via LZ4_compressBound().
-                                const int max_dst_size = LZ4_compressBound(src_size);
-                                // We will use that size for our destination boundary when allocating space.
-                                compressedData.resize(static_cast<u64>(max_dst_size));
+                            std::vector<Byte> resourceSerialisedData = resourceSubserialiser->GetSerialisedData();
+                            {
+                                IS_PROFILE_SCOPE("Write to Serilaise");
 
-                                // That's all the information and preparation LZ4 needs to compress *src into* compressed_data.
-                                // Invoke LZ4_compress_default now with our size values and pointers to our memory locations.
-                                // Save the return value for error checking.
-                                const int compressed_data_size = LZ4_compress_default((char*)resourceSerialisedData.data(), (char*)compressedData.data(), src_size, max_dst_size);
-
-                                // Check return_value to determine what happened.
-                                if (compressed_data_size <= 0)
+                                resourceSerialiser->StartObject("ResourceData");
+                                resourceSerialiser->Write("SourceSize", resourceSerialisedData.size());
+                                if constexpr (true)
                                 {
-                                    FAIL_ASSERT_MSG("A 0 or negative result from LZ4_compress_default() indicates a failure trying to compress the data.");
+                                    Core::Compression::Compress(resourceSerialisedData);
                                 }
-                                if (compressed_data_size > 0)
-                                {
-                                    IS_CORE_INFO("[ComplexSerialiser<ResourceDatabase2>] We successfully compressed some data! Ratio: {0:.2f}",
-                                        (float)compressed_data_size / src_size);
-                                }
-
-                                // Not only does a positive return_value mean success, the value returned == the number of bytes required.
-                                // You can use this to realloc() *compress_data to free up memory, if desired.  We'll do so just to demonstrate the concept.
-                                compressedData.resize(static_cast<u64>(compressed_data_size));
+                                resourceSerialiser->Write("CompressedData", resourceSerialisedData);
+                                resourceSerialiser->StopObject();
                             }
 
                             std::string filePath = pair.second->GetFilePath();
-                            filePath = FileSystem::FileSystem::ReplaceExtension(filePath, pair.second->GetResourceFileExtension());
-                            FileSystem::FileSystem::SaveToFile(compressedData, filePath);
+                            std::string newExtension = pair.second->GetResourceFileExtension();
+                            newExtension += SerialisationTypeToString[(u64)serialiser->GetType()];
+                            newExtension += "_All_Compression";
+                            filePath = FileSystem::FileSystem::ReplaceExtension(filePath, newExtension);
+                            FileSystem::FileSystem::SaveToFile(resourceSerialisedData, filePath, true);
                         }
                     }
                 }
                 serialiser->StopArray();
+                Delete(resourceSubserialiser);
                 Delete(resourceSerialiser);
             }
         }
