@@ -52,5 +52,6 @@ group "Dependices"
         include "../../premakeFiles/doctest.lua"
         include "../../premakeFiles/meshoptimizer.lua"
         include "../../premakeFiles/xxHash.lua"
+        include "../../premakeFiles/lz4.lua"
         include "../../premakeFiles/splash.lua"
 

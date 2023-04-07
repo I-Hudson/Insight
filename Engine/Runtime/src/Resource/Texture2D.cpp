@@ -6,6 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <stb_image_write.h>
 
 namespace Insight
 {
@@ -30,6 +31,7 @@ namespace Insight
 			{
 				IS_PROFILE_SCOPE("stbi_load");
 				data = stbi_load(filePath.data(), &width, &height, &channels, STBI_rgb_alpha);
+				channels = STBI_rgb_alpha;
 			}
 			if (!data)
 			{
@@ -41,13 +43,13 @@ namespace Insight
 			m_height = height;
 			m_depth = 1;
 
-			m_dataSize = width * height * channels;
+			m_dataSize = width * height * STBI_rgb_alpha;
 			m_rawDataPtr = static_cast<Byte*>(NewBytes(m_dataSize, Core::MemoryAllocCategory::Resources));
 			Platform::MemCopy(m_rawDataPtr, data, m_dataSize);
 
 			stbi_image_free(data);
-
-			m_rhi_texture->LoadFromData(m_rawDataPtr, GetWidth(), GetHeight(), GetDepth(), channels);
+			
+			m_rhi_texture->LoadFromData(m_rawDataPtr, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
 
 			m_resource_state = EResoruceStates::Loaded;
 		}

@@ -34,6 +34,9 @@ namespace Insight
 
 			Graphics::RHI_Texture* GetRHITexture() const;
 
+		private:
+			std::vector<Byte> PNG();
+
 		protected:
 			u32 m_width = 0;
 			u32 m_height = 0;

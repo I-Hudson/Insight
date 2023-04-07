@@ -6,8 +6,11 @@
 #include "Core/Profiler.h"
 
 #include <filesystem>
+
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
+#include "stb_image_write.h"
 
 #define RHI_TEXTURE_DEFER_ENABLED
 
@@ -97,7 +100,6 @@ namespace Insight
 			RenderContext::Instance().GetDeferredManager().Push([this, createInfo, size_in_bytes, data](RHI_CommandList* cmdList)
 				{
 					Create(&RenderContext::Instance(), createInfo);
-					Upload(data, static_cast<int>(size_in_bytes));
 
 					m_uploadStatus = DeviceUploadStatus::Uploading;
 					RPtr<RHI_UploadQueueRequest> request = QueueUpload(data, (int)size_in_bytes);

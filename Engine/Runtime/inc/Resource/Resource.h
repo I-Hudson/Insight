@@ -115,8 +115,9 @@ namespace Insight
 			/// @brief Print information about this resource to the output log.
 			void Print() const;
 
-			virtual ResourceTypeId GetResourceTypeId() const;
 			ResourceId GetResourceId() const;
+			virtual ResourceTypeId GetResourceTypeId() const;
+			virtual const char* GetResourceFileExtension() const;
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
@@ -220,4 +221,5 @@ namespace Insight
 #define REGISTER_RESOURCE(type_name, ...) public: \
 static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); }\
 virtual Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); }\
-static constexpr const char* GetResourceFileExtension() { return STRINGIZE(PPCAT(.is, type_name)); }
+static constexpr const char* GetStaticResourceFileExtension() { return STRINGIZE(PPCAT(.is, type_name)); }\
+virtual const char* GetResourceFileExtension() const override { return GetStaticResourceFileExtension(); }

@@ -55,3 +55,6 @@
 [submodule "vendor/implot"]
 	path = vendor/implot
 	url = https://github.com/epezent/implot
+[submodule "vendor/lz4"]
+	path = vendor/lz4
+	url = https://github.com/lz4/lz4.git

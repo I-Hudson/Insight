@@ -27,10 +27,14 @@ namespace Insight
             }
             else
             {
-                serialiser->StartArray("DataSize", texture->m_dataSize);
-                for (size_t i = 0; i < texture->m_dataSize; ++i)
+                
+                std::vector<Byte> compressTextureData = texture->PNG();
+                u64 dataSize = compressTextureData.size(); //texture->m_dataSize;
+                serialiser->StartArray("DataSize", dataSize);
+                for (size_t i = 0; i < dataSize; ++i)
                 {
-                    serialiser->Write("", texture->m_dataSize + i);
+                    Byte* data = compressTextureData.data() + i;//texture->m_rawDataPtr + i;
+                    serialiser->Write("", *data);
                 }
                 serialiser->StopArray();
             }

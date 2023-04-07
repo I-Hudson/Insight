@@ -66,6 +66,9 @@ namespace Insight
             virtual void Deserialise(std::vector<u8> data) = 0;
             virtual std::vector<Byte> GetSerialisedData() const = 0;
 
+            /// @brief Clear any data stored within the serialsier.
+            virtual void Clear() = 0;
+
             virtual void StartObject(std::string_view name) = 0;
             virtual void StopObject() = 0;
 

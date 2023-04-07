@@ -44,6 +44,7 @@ IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompi
 IncludeDirs["D3D12MemoryAllocator"] = "%{wks.location}vendor/D3D12MemoryAllocator/include"
 IncludeDirs["IconFontCppHeaders"] = "%{wks.location}vendor/IconFontCppHeaders"
 IncludeDirs["nlohmann_json"] = "%{wks.location}vendor/nlohmann_json/single_include"
+IncludeDirs["lz4"] = "%{wks.location}vendor/lz4/lib"
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"

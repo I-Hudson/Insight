@@ -128,6 +128,8 @@ namespace Insight
                     const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
                     if (!loader)
                     {
+                        Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, Runtime::Texture2D::GetStaticResourceTypeId()));
+                        m_importFilePath = "";
                         return;
                     }
 

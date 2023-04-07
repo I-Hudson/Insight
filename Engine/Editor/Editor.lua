@@ -40,6 +40,7 @@ project "Insight_Editor"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.imgui_string}",
+        "%{IncludeDirs.lz4}",
     }
 
     files 
@@ -84,6 +85,7 @@ project "Insight_Editor"
         links
         {
             "OptickCore.lib",
+            "lz4d.lib",
         }
         libdirs
         {
@@ -97,6 +99,7 @@ project "Insight_Editor"
         links
         {
             "OptickCore.lib",
+            "lz4.lib",
         }
         libdirs
         {

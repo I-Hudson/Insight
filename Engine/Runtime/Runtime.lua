@@ -37,6 +37,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.splash}",
+        "%{IncludeDirs.lz4}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
@@ -106,6 +107,7 @@ project "Insight_Runtime"
             "OptickCore.lib",
             "assimpd.lib",
             "Splashd.lib",
+            "lz4d.lib",
         }
         libdirs
         {
@@ -120,6 +122,7 @@ project "Insight_Runtime"
             "OptickCore.lib",
             "assimp.lib",
             "Splash.lib",
+            "lz4.lib",
         }
         libdirs
         {

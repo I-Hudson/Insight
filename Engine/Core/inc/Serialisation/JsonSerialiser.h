@@ -19,6 +19,8 @@ namespace Insight
             virtual void Deserialise(std::vector<u8> data) override;
             virtual std::vector<Byte> GetSerialisedData() const override;
 
+            virtual void Clear() override;
+
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
 

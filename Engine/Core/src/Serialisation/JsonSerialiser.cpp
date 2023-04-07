@@ -34,6 +34,12 @@ namespace Insight
             return { jsonData.begin(), jsonData.end() };
         }
 
+        void JsonSerialiser::Clear()
+        {
+            m_reader = {};
+            m_writer = {};
+        }
+
         void JsonSerialiser::StartObject(std::string_view name)
         {
             if (IsReadMode())

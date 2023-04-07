@@ -27,6 +27,7 @@ Some features are:
 - [stb](https://github.com/nothings/stb)
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 - [xxHash](https://github.com/Cyan4973/xxHash)
+- [lz4](https://github.com/lz4/lz4)
 
 ##### Profiles
 - [tracy](https://github.com/wolfpld/tracy)

@@ -79,7 +79,7 @@ namespace Insight
 					return;
 				}
 				m_map[typeId] = []() { return New<T, Core::MemoryAllocCategory::Resources>(); };
-				s_resourceExtensionToResourceTypeId[T::GetResourceFileExtension()] = typeId;
+				s_resourceExtensionToResourceTypeId[T::GetStaticResourceFileExtension()] = typeId;
 			}
 
 			static ResourceTypeId GetResourceTypeIdFromExtension(std::string_view fileExtension);

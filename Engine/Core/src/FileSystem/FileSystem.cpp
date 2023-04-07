@@ -3,6 +3,7 @@
 #include "Core/TypeAlias.h"
 #include "Core/Logger.h"
 
+#include <fstream>
 #include <filesystem>
 
 namespace Insight
@@ -21,6 +22,30 @@ namespace Insight
             {
                 IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
             }
+        }
+
+        bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath)
+        {
+            return SaveToFile(data, filePath, false);
+        }
+        bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite)
+        {
+            if (Exists(filePath) && !overwrite)
+            {
+                return false;
+            }
+
+            std::fstream fileStream;
+            fileStream.open(filePath, std::ios::out);
+            if (!fileStream.is_open())
+            {
+                fileStream.close();
+                return false;
+            }
+
+            fileStream.write((char*)data.data(), data.size());
+            fileStream.close();
+            return true;
         }
 
         bool FileSystem::Exists(const std::string& path)
@@ -95,6 +120,25 @@ namespace Insight
 
             std::string_view extension = file.substr(lastDot);
             return extension;
+        }
+
+        std::string FileSystem::ReplaceExtension(std::string_view file, std::string_view extension)
+        {
+            // New Extension must be as least 2 characters. A '.' and another character.
+            if (extension.size() < 2 || extension.at(0) != '.')
+            {
+                return {};
+            }
+
+            if (GetFileExtension(file).empty())
+            {
+                return {};
+            }
+
+            const u64 lastDot = file.find_last_of('.');
+            std::string newPath = std::string(file.substr(0, lastDot));
+            newPath += extension;
+            return newPath;
         }
 
         std::string FileSystem::GetAbsolutePath(const std::string& path)
