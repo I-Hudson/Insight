@@ -12,7 +12,8 @@
 #include "FileSystem/FileSystem.h"
 #include "Threading/TaskSystem.h"
 
-#include "Serialisation/JsonSerialiser.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
+#include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Archive.h"
 
 namespace Insight
@@ -73,12 +74,19 @@ namespace Insight
             {
                 return;
             }
-            Serialisation::JsonSerialiser serialiser(false);
-            s_database->Serialise(&serialiser);
+            Serialisation::BinarySerialiser binarySerialiser(false);
+           // Serialisation::JsonSerialiser jsonSerialiser(false);
+
+            s_database->Serialise(&binarySerialiser);
+            //s_database->Serialise(&jsonSerialiser);
             
             Archive archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabase.isdatabase", ArchiveModes::Write);
-            archive.Write(serialiser.GetSerialisedData());
+            archive.Write(binarySerialiser.GetSerialisedData());
             archive.Close();
+
+            //archive = Archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabaseJson.isdatabase", ArchiveModes::Write);
+            //archive.Write(jsonSerialiser.GetSerialisedData());
+            //archive.Close();
         }
 
         void ResourceManager::LoadDatabase()
@@ -94,7 +102,7 @@ namespace Insight
 
             if (!archive.GetData().empty())
             {
-                Serialisation::JsonSerialiser serialiser(true);
+                Serialisation::BinarySerialiser serialiser(true);
                 serialiser.Deserialise(archive.GetData());
                 s_database->Deserialise(&serialiser);
             }

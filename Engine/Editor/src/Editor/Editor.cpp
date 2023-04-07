@@ -13,6 +13,8 @@
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
 
+#include "Serialisation/Archive.h"
+
 #include <imgui.h>
 
 namespace Insight
