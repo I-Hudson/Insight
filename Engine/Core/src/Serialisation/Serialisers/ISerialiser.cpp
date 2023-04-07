@@ -1,5 +1,6 @@
 #include "Serialisation/Serialisers/ISerialiser.h"
-#include "Serialisation/JsonSerialiser.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
+#include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Memory.h"
 #include "Platforms/Platform.h"
@@ -26,7 +27,7 @@ namespace Insight
             switch (type)
             {
             case Insight::Serialisation::SerialisationTypes::Json: return New<JsonSerialiser, Core::MemoryAllocCategory::Serialiser>(isReadMode);
-            case Insight::Serialisation::SerialisationTypes::Binary:
+            case Insight::Serialisation::SerialisationTypes::Binary: return New<BinarySerialiser, Core::MemoryAllocCategory::Serialiser>(isReadMode);
                 break;
             default:
                 break;

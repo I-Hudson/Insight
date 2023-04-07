@@ -25,6 +25,7 @@ project "Insight_Core"
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.xxHash}",
         "%{IncludeDirs.glm}",
+        "%{IncludeDirs.lz4}",
     }
 
     files 
@@ -77,6 +78,7 @@ project "Insight_Core"
         {
             "OptickCore.lib",
             "xxHashd.lib",
+            "lz4d.lib",
         }
         libdirs
         {
@@ -90,6 +92,7 @@ project "Insight_Core"
         {
             "OptickCore.lib",
             "xxHash.lib",
+            "lz4.lib",
         }
         libdirs
         {

@@ -42,6 +42,7 @@ namespace Insight
             virtual void Write(std::string_view tag, i64 data) override;
 
             virtual void Write(std::string_view tag, std::string const& string) override;
+            virtual void Write(std::string_view tag, const std::vector<Byte>& vector) override;
 
             virtual void Read(std::string_view tag, bool& data) override;
             virtual void Read(std::string_view tag, char& data) override;
@@ -58,13 +59,14 @@ namespace Insight
             virtual void Read(std::string_view tag, i64& data) override;
 
             virtual void Read(std::string_view tag, std::string& string) override;
+            virtual void Read(std::string_view tag, std::vector<Byte>& vector) override;
 
 
         private:
             template<typename T>
             void Write(std::string_view tag, T const& data)
             {
-                if (m_writer.TopState() == NodeStates::Array)
+                if (m_writer.TopState() == SerialiserNodeStates::Array)
                 {
                     m_writer.TopNode().push_back(data);
                     ++m_writer.Top().ArrayIndex;
@@ -79,7 +81,7 @@ namespace Insight
             void ReadValue(std::string_view tag, T& data)
             {
                 JsonReader::JsonNode& node = m_reader.Top();
-                if (node.NoneStats == NodeStates::Array)
+                if (node.NoneStats == SerialiserNodeStates::Array)
                 {
                     data = node.Node.at(node.ArrayIndex);
                     ++node.ArrayIndex;
@@ -97,13 +99,11 @@ namespace Insight
             bool IsArrayNode() const;
 
         private:
-            enum class NodeStates { None, Object, Array };
-
             struct JsonReader
             {
                 struct JsonNode
                 {
-                    NodeStates NoneStats;
+                    SerialiserNodeStates NoneStats;
                     u32 ArrayIndex = 0;
                     nlohmann::json Node;
                 };
@@ -114,10 +114,10 @@ namespace Insight
                 nlohmann::json& TopNode() { return Nodes.top().Node; }
                 nlohmann::json const& TopNode() const { return Nodes.top().Node; }
 
-                NodeStates& TopState() { return Nodes.top().NoneStats; }
-                NodeStates const& TopState() const { return Nodes.top().NoneStats; }
+                SerialiserNodeStates& TopState() { return Nodes.top().NoneStats; }
+                SerialiserNodeStates const& TopState() const { return Nodes.top().NoneStats; }
 
-                void Push(std::string_view name, NodeStates state)
+                void Push(std::string_view name, SerialiserNodeStates state)
                 {
                     if (Size() == 0)
                     {
@@ -132,7 +132,7 @@ namespace Insight
                     }
                     else
                     {
-                        if (TopState() == NodeStates::Array)
+                        if (TopState() == SerialiserNodeStates::Array)
                         {
                             Nodes.push(
                                 JsonNode
@@ -143,7 +143,7 @@ namespace Insight
                                 }
                             );
                         }
-                        else if (TopState() == NodeStates::Object)
+                        else if (TopState() == SerialiserNodeStates::Object)
                         {
                             Nodes.push(
                                 JsonNode
@@ -168,7 +168,7 @@ namespace Insight
                     }
                     Nodes.pop();
                     
-                    if (TopState() == NodeStates::Array)
+                    if (TopState() == SerialiserNodeStates::Array)
                     {
                         ++Top().ArrayIndex;
                     }
@@ -183,7 +183,7 @@ namespace Insight
             {
                 struct JsonNode
                 {
-                    NodeStates NoneStats;
+                    SerialiserNodeStates NoneStats;
                     std::string NodeName;
                     nlohmann::json Node;
 
@@ -198,13 +198,13 @@ namespace Insight
                 };
                 JsonNode& Top() { return Nodes.top(); }
                 nlohmann::json& TopNode() { return Nodes.top().Node; }
-                NodeStates& TopState() { return Nodes.top().NoneStats; }
+                SerialiserNodeStates& TopState() { return Nodes.top().NoneStats; }
 
                 JsonNode const& Top() const { return Nodes.top(); }
                 nlohmann::json const& TopNode() const { return Nodes.top().Node; }
-                NodeStates const& TopState() const { return Nodes.top().NoneStats; }
+                SerialiserNodeStates const& TopState() const { return Nodes.top().NoneStats; }
 
-                void Push(std::string_view name, NodeStates state)
+                void Push(std::string_view name, SerialiserNodeStates state)
                 {
                     nlohmann::json jsonObject;
 
@@ -227,12 +227,12 @@ namespace Insight
                     JsonNode node = Nodes.top();
                     Nodes.pop();
 
-                    if (TopState() == NodeStates::Array)
+                    if (TopState() == SerialiserNodeStates::Array)
                     {
                         Top().Node.push_back(node.Node);
                         ++Top().ArrayIndex;
                     }
-                    else if (TopState() == NodeStates::Object)
+                    else if (TopState() == SerialiserNodeStates::Object)
                     {
                         Top().Node[node.NodeName] = node.Node;;
                     }

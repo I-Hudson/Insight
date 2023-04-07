@@ -19,8 +19,16 @@ namespace Insight
         enum class SerialisationTypes
         {
             Json,
-            Binary
+            Binary,
+
+            Size
         };
+        constexpr const char* SerialisationTypeToString[]
+        {
+            "Json",
+            "Binary",
+        };
+        static_assert(ARRAY_COUNT(SerialisationTypeToString) == static_cast<u64>(SerialisationTypes::Size));
 
         enum class SerialiserWriteReadTypes
         {
@@ -42,6 +50,13 @@ namespace Insight
             || std::is_same_v<i32, T>
             || std::is_same_v<i64, T>
             || std::is_same_v<std::string, T>;
+
+        enum class SerialiserNodeStates 
+        { 
+            None, 
+            Object, 
+            Array 
+        };
 
         /// @brief Base class for all serialises used. This defines what data can be saved.
         class IS_CORE ISerialiser
@@ -90,6 +105,7 @@ namespace Insight
             virtual void Write(std::string_view tag, i64 data) = 0;
 
             virtual void Write(std::string_view tag, std::string const& string) = 0;
+            virtual void Write(std::string_view tag, const std::vector<Byte>& vector) = 0;
 
             virtual void Read(std::string_view tag, bool& data) = 0;
             virtual void Read(std::string_view tag, char& data) = 0;
@@ -106,6 +122,7 @@ namespace Insight
             virtual void Read(std::string_view tag, i64& data) = 0;
 
             virtual void Read(std::string_view tag, std::string& string) = 0;
+            virtual void Read(std::string_view tag, std::vector<Byte>& vector) = 0;
 
         protected:
             bool m_isReadMode = false;

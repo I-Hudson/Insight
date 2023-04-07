@@ -1,4 +1,4 @@
-#include "Serialisation/JsonSerialiser.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "Platforms/Platform.h"
 
@@ -44,11 +44,11 @@ namespace Insight
         {
             if (IsReadMode())
             {
-                m_reader.Push(name, NodeStates::Object);
+                m_reader.Push(name, SerialiserNodeStates::Object);
             }
             else
             {
-                m_writer.Push(name, NodeStates::Object);
+                m_writer.Push(name, SerialiserNodeStates::Object);
             }
         }
 
@@ -70,12 +70,12 @@ namespace Insight
             if (IsReadMode())
             {
                 Read(std::string(name) + c_ArraySize, size);
-                m_reader.Push(name, NodeStates::Array);
+                m_reader.Push(name, SerialiserNodeStates::Array);
             }
             else
             {
                 Write(std::string(name) + c_ArraySize, size);
-                m_writer.Push(name, NodeStates::Array);
+                m_writer.Push(name, SerialiserNodeStates::Array);
                 m_writer.Top().ArraySize = size;
             }
         }
@@ -146,6 +146,16 @@ namespace Insight
         {
             Write<std::string>(tag, string);
         }
+        void JsonSerialiser::Write(std::string_view tag, const std::vector<Byte>& vector)
+        {
+            u64 arraySize = vector.size();
+            StartArray(tag, arraySize);
+            for (size_t i = 0; i < arraySize; ++i)
+            {
+                Write(tag, vector.at(i));
+            }
+            StopArray();
+        }
 
         void JsonSerialiser::Read(std::string_view tag, bool& data)
         {
@@ -203,16 +213,27 @@ namespace Insight
         {
             ReadValue<std::string>(tag, string);
         }
+        void JsonSerialiser::Read(std::string_view tag, std::vector<Byte>& vector)
+        {
+            u64 arraySize = 0;
+            StartArray(tag, arraySize);
+            vector.resize(arraySize);
+            for (size_t i = 0; i < arraySize; ++i)
+            {
+                Read(tag, vector.at(i));
+            }
+            StopArray();
+        }
 
         bool JsonSerialiser::IsObjectNode() const
         {
             if (m_isReadMode)
             {
-                return m_reader.TopState() == NodeStates::Object;
+                return m_reader.TopState() == SerialiserNodeStates::Object;
             }
             else
             {
-                return m_writer.TopState() == NodeStates::Object;
+                return m_writer.TopState() == SerialiserNodeStates::Object;
             }
         }
 
@@ -220,11 +241,11 @@ namespace Insight
         {
             if (m_isReadMode)
             {
-                return m_reader.TopState() == NodeStates::Array;
+                return m_reader.TopState() == SerialiserNodeStates::Array;
             }
             else
             {
-                return m_writer.TopState() == NodeStates::Array;
+                return m_writer.TopState() == SerialiserNodeStates::Array;
             }
         }
     }
