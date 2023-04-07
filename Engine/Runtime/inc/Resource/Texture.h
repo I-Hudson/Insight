@@ -44,6 +44,10 @@ namespace Insight
 			PixelFormat m_format;
 
 			u64 m_dataSize = 0;
+			/// @brief Store the source file data. This will include the source file format 
+			/// optimisations. Example: If a texture of format .png is loaded this will store the data
+			/// of the .png as a .png. So when using this pointer you need to call 'stbi_load_from_memory'
+			/// to get usable data.
 			Byte* m_rawDataPtr = nullptr;
 			Graphics::RHI_Texture* m_rhi_texture = nullptr;
 		};

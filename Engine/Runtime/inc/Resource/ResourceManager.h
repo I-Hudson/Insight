@@ -63,6 +63,8 @@ namespace Insight
 
             /// @brief Current resources being loaded.
             static std::vector<IResource*> s_resourcesLoading;
+            static std::mutex s_resourcesLoadingMutex;
+
             /// @brief Resources queued to be loaded.
             static std::queue<IResource*> s_queuedResoucesToLoad;
             static std::mutex s_queuedResoucesToLoadMutex;

@@ -20,8 +20,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include "Graphics/BoundingBox.h"
-#include "Graphics/Mesh.h"
-
+#include "Graphics/Vertex.h"
 #include "Core/Profiler.h"
 
 namespace Insight

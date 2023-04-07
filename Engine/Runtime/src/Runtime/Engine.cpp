@@ -21,8 +21,6 @@
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
-#include "Graphics/Mesh.h"
-
 #include "SplashScreen.h"
 
 #include "imgui.h"

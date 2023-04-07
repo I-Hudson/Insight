@@ -126,7 +126,7 @@ namespace Insight
                             std::string filePath = pair.second->GetFilePath();
                             std::string newExtension = pair.second->GetResourceFileExtension();
                             newExtension += SerialisationTypeToString[(u64)serialiser->GetType()];
-                            newExtension += "_All_Compression";
+                            newExtension += "_Texture_Format_As_Data_Compression";
                             filePath = FileSystem::FileSystem::ReplaceExtension(filePath, newExtension);
                             FileSystem::FileSystem::SaveToFile(resourceSerialisedData, filePath, true);
                         }

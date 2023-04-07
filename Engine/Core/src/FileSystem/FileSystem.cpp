@@ -95,6 +95,15 @@ namespace Insight
             return std::filesystem::exists(path, existsErrorCode) && std::filesystem::is_regular_file(path, isFileErrorCode);
         }
 
+        u64 FileSystem::GetFileSize(std::string_view path)
+        {
+            if (!Exists(path) || !IsFile(path))
+            {
+                return 0;
+            }
+            return std::filesystem::file_size(path);
+        }
+
         std::string_view FileSystem::GetFileExtension(const std::string& file)
         {
             return GetFileExtension(std::string_view(file));

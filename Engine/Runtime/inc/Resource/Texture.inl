@@ -36,7 +36,7 @@ namespace Insight
                 compressTextureData.resize(dataSize);
                 Platform::MemCopy(compressTextureData.data(), texture->m_rawDataPtr, dataSize);
                 
-                if constexpr (true)
+                if constexpr (false)
                 {
                     Core::Compression::Compress(compressTextureData);
                 }

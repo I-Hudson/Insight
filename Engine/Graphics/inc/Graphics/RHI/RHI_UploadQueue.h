@@ -57,6 +57,7 @@ namespace Insight
 		/// </summary>
 		class IS_GRAPHICS RHI_UploadQueue
 		{
+			THREAD_SAFE;
 		public:
 
 			RHI_UploadQueue();

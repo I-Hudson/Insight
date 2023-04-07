@@ -3,7 +3,7 @@
 #include "Resource/Loaders/IResourceLoader.h"
 #include "Core/TypeAlias.h"
 
-#include "Graphics/Mesh.h"
+#include "Graphics/Vertex.h"
 #include "Graphics/RHI/RHI_Texture.h"
 
 #include <assimp/postprocess.h>

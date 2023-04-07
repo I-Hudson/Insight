@@ -8,6 +8,8 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#include <fstream>
+
 namespace Insight
 {
 	namespace Runtime
@@ -22,18 +24,37 @@ namespace Insight
 			std::string_view filePath = m_file_path;
 			if (filePath.empty() || !FileSystem::FileSystem::Exists(filePath))
 			{
+				m_resource_state = EResoruceStates::Not_Found;
+				return;
+			}
+
+			std::ifstream fileStream(filePath.data(), std::ios::in | std::ios::binary);
+			if (!fileStream.is_open())
+			{
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
 			}
 
+			const u64 fileSize = FileSystem::FileSystem::GetFileSize(filePath);
+			std::vector<Byte> fileData;
+			fileData.resize(fileSize);
+
+			fileStream.read((char*)fileData.data(), fileSize);
+			fileStream.close();
+
+			m_dataSize = fileSize;
+			m_rawDataPtr = static_cast<Byte*>(NewBytes(m_dataSize, Core::MemoryAllocCategory::Resources));
+			Platform::MemCopy(m_rawDataPtr, fileData.data(), m_dataSize);
+
 			int width, height, channels;
-			Byte* data = nullptr;
+			Byte* stbi_texture_data = nullptr;
 			{
-				IS_PROFILE_SCOPE("stbi_load");
-				data = stbi_load(filePath.data(), &width, &height, &channels, STBI_rgb_alpha);
+				IS_PROFILE_SCOPE("stbi_load_from_memory");
+				int x, y, c;
+				stbi_texture_data = stbi_load_from_memory(fileData.data(), fileData.size(), &width, &height, &channels, STBI_rgb_alpha);
 				channels = STBI_rgb_alpha;
 			}
-			if (!data)
+			if (!stbi_texture_data)
 			{
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
@@ -42,14 +63,9 @@ namespace Insight
 			m_width = width;
 			m_height = height;
 			m_depth = 1;
-
-			m_dataSize = width * height * STBI_rgb_alpha;
-			m_rawDataPtr = static_cast<Byte*>(NewBytes(m_dataSize, Core::MemoryAllocCategory::Resources));
-			Platform::MemCopy(m_rawDataPtr, data, m_dataSize);
-
-			stbi_image_free(data);
 			
-			m_rhi_texture->LoadFromData(m_rawDataPtr, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
+			m_rhi_texture->LoadFromData(stbi_texture_data, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
+			stbi_image_free(stbi_texture_data);
 
 			m_resource_state = EResoruceStates::Loaded;
 		}

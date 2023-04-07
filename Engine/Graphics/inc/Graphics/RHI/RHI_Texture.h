@@ -65,10 +65,8 @@ namespace Insight
 		public:
 			virtual ~RHI_Texture() { }
 
-
 			static RHI_Texture* New();
 
-			void LoadFromFile(std::string filePath);
 			void LoadFromData(Byte* data, u32 width, u32 height, u32 depth, u32 channels);
 
 			RHI_TextureInfo  GetInfo					(u32 mip = 0)	const { if (mip < m_infos.size()) { return m_infos.at(mip); }				return {}; }

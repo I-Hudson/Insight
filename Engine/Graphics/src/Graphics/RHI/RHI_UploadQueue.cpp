@@ -37,6 +37,8 @@ namespace Insight
 
 		void RHI_UploadQueue::Init()
 		{
+			ASSERT(Platform::IsMainThread());
+
 			std::lock_guard lock(m_mutex);
 			if (!m_uploadStagingBuffer)
 			{
@@ -50,6 +52,8 @@ namespace Insight
 
 		void RHI_UploadQueue::Destroy()
 		{
+			ASSERT(Platform::IsMainThread());
+
 			std::lock_guard lock(m_mutex);
 			m_queuedUploads.clear();
 			Renderer::FreeRawBuffer(m_uploadStagingBuffer);
@@ -59,7 +63,6 @@ namespace Insight
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadBuffer(const void* data, u64 sizeInBytes, RHI_Buffer* buffer)
 		{
 			IS_PROFILE_FUNCTION();
-			ASSERT(Platform::IsMainThread());
 
 			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Buffer);
 
@@ -79,7 +82,6 @@ namespace Insight
 		RPtr<RHI_UploadQueueRequest> RHI_UploadQueue::UploadTexture(const void* data, u64 sizeInBytes, RHI_Texture* texture)
 		{
 			IS_PROFILE_FUNCTION();
-			ASSERT(Platform::IsMainThread());
 
 			UploadDataToStagingBuffer(data, sizeInBytes, RHI_UploadTypes::Texture);
 
@@ -131,6 +133,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			ASSERT(Platform::IsMainThread());
 
+			std::lock_guard lock(m_mutex);
 			m_frameUploadOffset = 0;
 
 			// Remove all completed requests from m_runningUploads.
@@ -174,7 +177,6 @@ namespace Insight
 		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType)
 		{
 			IS_PROFILE_FUNCTION();
-			ASSERT(Platform::IsMainThread());
 
 			std::lock_guard lock(m_mutex);
 			// Check we have enough space.

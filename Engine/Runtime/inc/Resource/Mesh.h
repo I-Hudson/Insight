@@ -3,7 +3,6 @@
 #include "Resource/Resource.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
-#include "Graphics/Mesh.h"
 #include "Graphics/BoundingBox.h"
 
 namespace Insight
