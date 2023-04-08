@@ -21,6 +21,26 @@ namespace Insight
 			Count
 		};
 
+		/// @brief Define how a texture's data is stored on disk.
+		enum class TextureDiskPackedType
+		{
+			/// @brief Texture data is stores in its original format. Example:
+			/// If the texture was a .png, then the texture data is of type .png format.
+			Packed,
+			/// @brief Texture data has been loaded from its original format.
+			/// This will cause higher memory use as the texture data won't be 
+			/// in its compressed form from its original format.
+			Unpacked,
+		};
+
+		enum class TextureDiskFormat
+		{
+			/// @brief Any other format. used with stb_iamge.
+			Other,
+			/// @brief Quite OK Image Format used for engine formatted texture files.
+			QOI,
+		};
+
 		class IS_RUNTIME Texture : public IResource
 		{
 			REGISTER_RESOURCE(Texture);
@@ -34,14 +54,13 @@ namespace Insight
 
 			Graphics::RHI_Texture* GetRHITexture() const;
 
-		private:
-			std::vector<Byte> PNG();
-
 		protected:
 			u32 m_width = 0;
 			u32 m_height = 0;
 			u32 m_depth = 0;
 			PixelFormat m_format;
+			TextureDiskPackedType m_diskPackedType = TextureDiskPackedType::Packed;
+			TextureDiskFormat m_diskFormat = TextureDiskFormat::Other;
 
 			u64 m_dataSize = 0;
 			/// @brief Store the source file data. This will include the source file format 
@@ -63,12 +82,14 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::Texture, 1,
+	OBJECT_SERIALISER(Runtime::Texture, 2,
 		SERIALISE_BASE(Runtime::IResource, 1, 0)
 		SERIALISE_PROPERTY(u32, m_width, 1, 0)
 		SERIALISE_PROPERTY(u32, m_height, 1, 0)
 		SERIALISE_PROPERTY(u32, m_depth, 1, 0)
 		//SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
 		SERIALSIE_ENGINE_FORMAT(SERIALISE_COMPLEX(Serialisation::SerialiseTextureData, m_rawDataPtr, 1, 0))
+		SERIALISE_PROPERTY(Runtime::TextureDiskPackedType, m_diskPackedType, 2, 0)
+		SERIALISE_PROPERTY(Runtime::TextureDiskFormat, m_diskFormat, 2, 0)
 	);
 }

@@ -25,13 +25,14 @@ namespace Insight
                 Platform::MemCopy(data, textureData.data(), textureData.size());
             }
             else
-            {             
+            {
+                ASSERT(texture->m_rawDataPtr && texture->m_dataSize > 0);
                 std::vector<Byte> compressTextureData;
                 u64 dataSize = texture->m_dataSize;
 
                 compressTextureData.resize(dataSize);
                 Platform::MemCopy(compressTextureData.data(), texture->m_rawDataPtr, dataSize);
-                
+
                 if constexpr (false)
                 {
                     Core::Compression::Compress(compressTextureData);

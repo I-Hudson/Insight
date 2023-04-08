@@ -55,13 +55,19 @@ namespace Insight
 			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
 
 			int width, height, channels;
-			Byte* stbi_texture_data = nullptr;
+			Byte* textureData = nullptr;
+			if (m_diskFormat == TextureDiskFormat::Other)
 			{
 				IS_PROFILE_SCOPE("stbi_load_from_memory");
-				stbi_texture_data = stbi_load_from_memory(data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
+				textureData = stbi_load_from_memory(data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
 				channels = STBI_rgb_alpha;
 			}
-			if (!stbi_texture_data)
+			else
+			{
+
+			}
+
+			if (!textureData)
 			{
 				m_resource_state = EResoruceStates::Failed_To_Load;
 				return;
@@ -71,8 +77,24 @@ namespace Insight
 			m_height = height;
 			m_depth = 1;
 
-			m_rhi_texture->LoadFromData(stbi_texture_data, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
-			stbi_image_free(stbi_texture_data);
+			m_rhi_texture->LoadFromData(textureData, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
+
+			if (m_diskFormat == TextureDiskFormat::Other)
+			{
+				stbi_image_free(textureData);
+			}
+			else
+			{
+
+			}
+
+			/// Delete the texture data from memory.
+			/// The texture is now loaded so it's not needed.
+			/// TODO: Look into this as if you edit the texture at runtime 
+			/// do I really want to have to download from the GPU. But if kept in
+			/// RAM what is the memory cost.
+			m_dataSize = 0;
+			DeleteBytes(m_rawDataPtr);
 
 			m_resource_state = EResoruceStates::Loaded;
 		}

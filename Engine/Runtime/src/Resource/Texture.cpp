@@ -36,27 +36,5 @@ namespace Insight
         {
             return m_rhi_texture;
         }
-
-        std::vector<Byte> Texture::PNG()
-        {
-            struct Context
-            {
-                std::vector<Byte> compressTextureData;
-                u64 Size = 0;
-            };
-            Context textureContext;
-
-            stbi_write_jpg_to_func([](void* context, void* data, int size)
-            {
-                Context* textureData = reinterpret_cast<Context*>(context);
-                textureData->compressTextureData.resize(textureData->Size + size);
-
-                void* dst = textureData->compressTextureData.data() + textureData->Size;
-                Platform::MemCopy(dst, data, size);
-                textureData->Size += size;
-            },
-            & textureContext, GetWidth(), GetHeight(), 4, m_rawDataPtr, 0);
-            return textureContext.compressTextureData;
-        }
     }
 }
