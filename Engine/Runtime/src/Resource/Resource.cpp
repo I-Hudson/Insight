@@ -6,6 +6,8 @@
 #include "Resource/Material.h"
 #include "Resource/Texture2D.h"
 
+#include "FileSystem/FileSystem.h"
+
 #include "Core/Logger.h"
 
 #include "Threading/TaskSystem.h"
@@ -218,6 +220,15 @@ namespace Insight
 			IS_CORE_INFO("\tState: {}", ERsourceStatesToString(m_resource_state));
 			IS_CORE_INFO("\tStorage type: {}", ResourceStorageTypesToString(m_storage_type));
 			IS_CORE_INFO("\n");
+		}
+
+		bool IResource::IsEngineFormat() const
+		{
+			std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(m_file_path);
+			std::string_view extension = FileSystem::FileSystem::GetExtension(m_file_path);
+			bool isFileExtension = fileExtension == GetResourceFileExtension();
+			bool isExtension = extension == GetResourceFileExtension();
+			return isFileExtension || isExtension;
 		}
 
 		IResource* IResource::AddDependentResourceFromDisk(const std::string& file_path, ResourceTypeId type_id)

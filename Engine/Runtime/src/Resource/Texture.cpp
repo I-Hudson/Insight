@@ -12,7 +12,7 @@ namespace Insight
     {
         IS_SERIALISABLE_CPP(Texture)
 
-            u32 Texture::GetWidth() const
+        u32 Texture::GetWidth() const
         {
             return m_width;
         }

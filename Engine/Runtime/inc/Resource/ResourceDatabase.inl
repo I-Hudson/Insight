@@ -72,7 +72,14 @@ namespace Insight
                 {
                     Runtime::ResourceId resouceId;
                     resouceId.Deserialise(serialiser);
-                    Runtime::ResourceManager::Create(resouceId);
+                    Runtime::IResource* resource = Runtime::ResourceManager::Create(resouceId).Get();
+
+                    // Resource is not an engine format. Load additional data which has been saved 
+                    // to fill in engine fields like GUIDs.
+                    if (!resource->IsEngineFormat())
+                    {
+                        resource->Deserialise(serialiser);
+                    }
                 }
                 serialiser->StopArray();
             }
@@ -87,26 +94,28 @@ namespace Insight
                     }
                 }
 
-                Serialisation::ISerialiser* resourceSerialiser = Serialisation::ISerialiser::Create(serialiser->GetType(), false);
-                Serialisation::ISerialiser* resourceSubserialiser = Serialisation::ISerialiser::Create(serialiser->GetType(), false);
                 serialiser->StartArray("Resources", resourcesToSave);
-                for (auto const& pair : map)
+                for (auto const& [resourceId, resource] : map)
                 {
-                    if (!pair.second->IsDependentOnAnotherResource())
+                    if (!resource->IsDependentOnAnotherResource())
                     {
                         // Serialise the ResourceId.
-                        const_cast<Runtime::ResourceId&>(pair.first).Serialise(serialiser);
+                        const_cast<Runtime::ResourceId&>(resourceId).Serialise(serialiser);
 
-                        if (pair.first.GetTypeId() == Runtime::Texture2D::GetStaticResourceTypeId())
+                        // If the resource is not an engine resource. Then we save additional
+                        // data for help when loading it. An example is GUIDs which have been assigned.
+                        if (!resource->IsEngineFormat())
+                        {
+                            resource->Serialise(serialiser);
+                        }
+
+                        /*if (resourceId.GetTypeId() == Runtime::Texture2D::GetStaticResourceTypeId())
                         {
                             IS_PROFILE_SCOPE("Resource Serialise");
 
-                            resourceSerialiser->Clear();
-                            resourceSubserialiser->Clear();
-
                             {
                                 IS_PROFILE_SCOPE("Serialise resource");
-                                pair.second->Serialise(resourceSubserialiser);
+                                resource->Serialise(resourceSubserialiser);
                             }
 
                             std::vector<Byte> resourceSerialisedData = resourceSubserialiser->GetSerialisedData();
@@ -123,18 +132,16 @@ namespace Insight
                                 resourceSerialiser->StopObject();
                             }
 
-                            std::string filePath = pair.second->GetFilePath();
-                            std::string newExtension = pair.second->GetResourceFileExtension();
+                            std::string filePath = resource->GetFilePath();
+                            std::string newExtension = resource->GetResourceFileExtension();
                             newExtension += SerialisationTypeToString[(u64)serialiser->GetType()];
                             newExtension += "_Texture_Format_As_Data_Compression";
                             filePath = FileSystem::FileSystem::ReplaceExtension(filePath, newExtension);
                             FileSystem::FileSystem::SaveToFile(resourceSerialisedData, filePath, true);
-                        }
+                        }*/
                     }
                 }
                 serialiser->StopArray();
-                Delete(resourceSubserialiser);
-                Delete(resourceSerialiser);
             }
         }
     }

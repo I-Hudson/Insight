@@ -167,6 +167,8 @@ namespace Insight
 
 			void RHI_Texture_DX12::Release()
 			{
+				RHI_Texture::Release();
+
 				if (m_allocation)
 				{
 					m_allocation->Release();
@@ -174,9 +176,18 @@ namespace Insight
 				}
 
 				m_infos.clear();
-				m_context->GetDescriptorHeap(m_allLayerDescriptorHandle.HeapType).FreeHandle(m_allLayerDescriptorHandle);
-				m_context->GetDescriptorHeap(m_allLayerRenderTargetHandle.HeapType).FreeHandle(m_allLayerRenderTargetHandle);
-				m_context->GetDescriptorHeap(m_allLayerDepthStencilHandle.HeapType).FreeHandle(m_allLayerDepthStencilHandle);
+				if (m_allLayerDescriptorHandle.IsValid())
+				{
+					m_context->GetDescriptorHeap(m_allLayerDescriptorHandle.HeapType).FreeHandle(m_allLayerDescriptorHandle);
+				}
+				if (m_allLayerRenderTargetHandle.IsValid())
+				{
+					m_context->GetDescriptorHeap(m_allLayerRenderTargetHandle.HeapType).FreeHandle(m_allLayerRenderTargetHandle);
+				}
+				if (m_allLayerDepthStencilHandle.IsValid())
+				{
+					m_context->GetDescriptorHeap(m_allLayerDepthStencilHandle.HeapType).FreeHandle(m_allLayerDepthStencilHandle);
+				}
 
 				for (size_t i = 0; i < m_singleLayerDescriptorHandle.size(); ++i)
 				{

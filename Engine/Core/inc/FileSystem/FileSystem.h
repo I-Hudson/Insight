@@ -33,6 +33,7 @@ namespace Insight
 
             static std::string_view GetFileExtension(const std::string& file);
             static std::string_view GetFileExtension(std::string_view file);
+            static std::string_view GetExtension(std::string_view file);
 
             static std::string ReplaceExtension(std::string_view file, std::string_view extension);
 

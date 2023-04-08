@@ -46,6 +46,8 @@ namespace Insight
             void CentreArea();
             void BottomBar();
 
+            void ImportResource();
+
             void SplitDirectory();
             void SetDirectoryFromParent(u32 parentIndex);
 
@@ -62,8 +64,9 @@ namespace Insight
             std::string m_currentItemSelected;
 
             std::string m_importFilePath;
-            bool m_displayResourceTypeToload = false;
             int m_resourceTypeToLoadIndex = 0;
+            bool m_showImportWindow = false;
+            bool m_convertResourceToEngineFormat = false;
         };
     }
 }

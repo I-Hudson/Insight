@@ -41,10 +41,12 @@ namespace Insight
 		struct RHI_UploadQueueRequestInternal
 		{
 			RHI_UploadQueueRequestInternal(RHI_UploadQueueFunction function, RHI_Resource* resource, u64 sizeInBytes);
+			
 			RHI_UploadQueueFunction UploadFunction;
 			u64 SizeInBytes;
 			RPtr<RHI_UploadQueueRequest> Request;
 			RHI_CommandList* CommandList;
+			bool Cancelled = false;
 
 		private:
 			void OnWorkComplete();
@@ -80,6 +82,8 @@ namespace Insight
 			/// </summary>
 			/// <param name="cmdList"></param>
 			void UploadToDevice(RHI_CommandList* cmdList);
+
+			void RemoveRequest(RHI_UploadQueueRequest* request);
 
 		private:
 			void UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType);

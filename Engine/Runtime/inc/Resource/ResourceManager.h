@@ -30,10 +30,17 @@ namespace Insight
             static TObjectPtr<IResource> GetResource(ResourceId const& resourceId);
             static TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid);
 
-            static TObjectPtr<IResource> LoadSync(ResourceId const& resourceId);
-            static TObjectPtr<IResource> LoadSync(std::string_view filePath);
-            static TObjectPtr<IResource> Load(ResourceId const& resourceId);
-            static TObjectPtr<IResource> Load(std::string_view filePath);
+            static TObjectPtr<IResource> LoadSync(ResourceId resourceId);
+            static TObjectPtr<IResource> LoadSync(ResourceId resourceId, bool convertToEngineFormat);
+
+            /// @brief Legacy function to be removed in later versions.
+            /// @param filepath 
+            /// @param convertToEngineFormat 
+            /// @return TObjectPtr<IResource>
+            static TObjectPtr<IResource> LoadSync(std::string_view filepath, bool convertToEngineFormat);
+
+            static TObjectPtr<IResource> Load(ResourceId resourceId);
+            static TObjectPtr<IResource> Load(ResourceId resourceId, bool convertToEngineFormat);
 
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);
@@ -54,6 +61,13 @@ namespace Insight
             static void Update(float const deltaTime);
             static void StartLoading(IResource* resource, bool threading);
             static void Shutdown();
+
+            /// @brief Convert a resource from disk to an engine format resource.
+            /// @param resourceId 
+            /// @return ResourceId
+            static ResourceId ConvertResource(ResourceId resourceId);
+
+            static void RemoveResource(ResourceId resourceId);
 
         private:
             /// @brief Max number of resources which can be loading at a single time is 4. This

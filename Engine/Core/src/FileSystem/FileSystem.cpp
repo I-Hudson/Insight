@@ -131,6 +131,18 @@ namespace Insight
             return extension;
         }
 
+        std::string_view FileSystem::GetExtension(std::string_view file)
+        {
+            u64 lastDot = file.find_last_of('.');
+            if (lastDot == std::string::npos)
+            {
+                return std::string_view();
+            }
+
+            std::string_view extension = file.substr(lastDot);
+            return extension;
+        }
+
         std::string FileSystem::ReplaceExtension(std::string_view file, std::string_view extension)
         {
             // New Extension must be as least 2 characters. A '.' and another character.

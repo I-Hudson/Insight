@@ -63,7 +63,7 @@ namespace Insight
 		class IS_GRAPHICS RHI_Texture : public RHI_Resource
 		{
 		public:
-			virtual ~RHI_Texture() { }
+			virtual ~RHI_Texture() override;
 
 			static RHI_Texture* New();
 
@@ -93,12 +93,17 @@ namespace Insight
 
 			Core::Delegate<RHI_Texture*> OnUploadCompleted;
 
+			// RHI_Resource - BEGIN
+			virtual void Release() override;
+			// RHI_Resource - End
+
 		private:
 			void OnUploadComplete(RHI_UploadQueueRequest* request);
 
 		protected:
 			/// @brief Define the info for all mips of the image.
 			std::vector<RHI_TextureInfo> m_infos = { };
+			RHI_UploadQueueRequest* m_uploadRequest = nullptr;
 
 			friend class RHI_CommandList;
 		};

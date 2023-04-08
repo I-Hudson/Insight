@@ -37,6 +37,7 @@ namespace Insight
         /// @brief Return the data size this Archive has in bytes.
         /// @return u64
         u64 GetSize() const;
+        bool IsEmpty() const;
 
         std::vector<Byte> GetData() const;
 

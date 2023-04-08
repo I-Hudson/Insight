@@ -9,6 +9,8 @@
 #include "Core/Singleton.h"
 #include "Core/Timer.h"
 
+#include "Serialisation/Serialisers/BinarySerialiser.h"
+
 #include <string>
 #include <atomic>
 #include <shared_mutex>
@@ -79,6 +81,8 @@ namespace Insight
 		class IS_RUNTIME IResource : public Serialisation::ISerialisable
 		{
 		public:
+			using ResourceSerialiserType = Serialisation::BinarySerialiser;
+
 			IResource();
 			IResource(IResource const& other);
 			virtual ~IResource();
@@ -115,8 +119,12 @@ namespace Insight
 			/// @brief Print information about this resource to the output log.
 			void Print() const;
 
+			bool IsEngineFormat() const;
+
 			ResourceId GetResourceId() const;
 			virtual ResourceTypeId GetResourceTypeId() const;
+			/// @brief Return the engine specific file extension.
+			/// @return const char*
 			virtual const char* GetResourceFileExtension() const;
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
@@ -195,6 +203,7 @@ namespace Insight
 			std::vector<ResourceReferenceLink> m_reference_links;
 
 			ResourceId m_resourceId;
+			bool m_convertToEngineFormat;
 
 			/// @brief Timer for when the resource has been requested to end of life.
 			Core::Timer m_request_timer;
@@ -223,3 +232,8 @@ static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insig
 virtual Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); }\
 static constexpr const char* GetStaticResourceFileExtension() { return STRINGIZE(PPCAT(.is, type_name)); }\
 virtual const char* GetResourceFileExtension() const override { return GetStaticResourceFileExtension(); }
+
+// Run this when the resource is of type engine format.
+#define SERIALSIE_ENGINE_FORMAT(SERIALISE_FUNC) if (object.IsEngineFormat()) { SERIALISE_FUNC }
+// Run this when the resource is not of type engine format.
+#define SERIALSIE_NON_ENGINE_FORMAT(SERIALISE_FUNC) if (object.IsEngineFormat()) { SERIALISE_FUNC }

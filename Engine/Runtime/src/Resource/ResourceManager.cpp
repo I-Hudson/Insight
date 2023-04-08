@@ -82,18 +82,18 @@ namespace Insight
                 return;
             }
             Serialisation::BinarySerialiser binarySerialiser(false);
-           // Serialisation::JsonSerialiser jsonSerialiser(false);
+            Serialisation::JsonSerialiser jsonSerialiser(false);
 
             s_database->Serialise(&binarySerialiser);
-            //s_database->Serialise(&jsonSerialiser);
+            s_database->Serialise(&jsonSerialiser);
             
             Archive archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabase.isdatabase", ArchiveModes::Write);
             archive.Write(binarySerialiser.GetSerialisedData());
             archive.Close();
 
-            //archive = Archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabaseJson.isdatabase", ArchiveModes::Write);
-            //archive.Write(jsonSerialiser.GetSerialisedData());
-            //archive.Close();
+            archive = Archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabaseJson.isdatabase", ArchiveModes::Write);
+            archive.Write(jsonSerialiser.GetSerialisedData());
+            archive.Close();
         }
 
         void ResourceManager::LoadDatabase()
@@ -154,9 +154,19 @@ namespace Insight
             return s_database->GetResourceFromGuid(guid);
         }
 
-        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId const& resourceId)
+        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId resourceId)
+        {
+            return LoadSync(std::move(resourceId), false);
+        }
+
+        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId resourceId, bool convertToEngineFormat)
         {
             ASSERT(s_database);
+
+            if (convertToEngineFormat)
+            {
+                resourceId = ConvertResource(std::move(resourceId));
+            }
 
             TObjectPtr<IResource> resource;
             if (s_database->HasResource(resourceId))
@@ -201,23 +211,30 @@ namespace Insight
             return resource;
         }
 
-        TObjectPtr<IResource> ResourceManager::LoadSync(std::string_view filePath)
+        TObjectPtr<IResource> ResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
         {
-            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filePath);
-            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filepath);
+            const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {
-                IS_CORE_WARN("[ResourceManager::LoadSync] loader is null for extension '{}'.", fileExtension);
                 return nullptr;
             }
-
-            ResourceId resourceId(filePath, loader->GetResourceTypeId());
-            return LoadSync(resourceId);
+            return LoadSync(ResourceId(filepath, loader->GetResourceTypeId()), convertToEngineFormat);
         }
 
-        TObjectPtr<IResource> ResourceManager::Load(ResourceId const& resourceId)
+        TObjectPtr<IResource> ResourceManager::Load(ResourceId resourceId)
+        {
+            return Load(std::move(resourceId), false);
+        }
+
+        TObjectPtr<IResource> ResourceManager::Load(ResourceId resourceId, bool convertToEngineFormat)
         {
             ASSERT(s_database);
+
+            if (convertToEngineFormat)
+            {
+                resourceId = ConvertResource(std::move(resourceId));
+            }
 
             TObjectPtr<IResource> resource;
             if (s_database->HasResource(resourceId))
@@ -263,20 +280,6 @@ namespace Insight
                 }
             }
             return resource;
-        }
-
-        TObjectPtr<IResource> ResourceManager::Load(std::string_view filePath)
-        {
-            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filePath);
-            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
-            if (!loader)
-            {
-                IS_CORE_WARN("[ResourceManager::LoadSync] loader is null for extension '{}'.", fileExtension);
-                return nullptr;
-            }
-
-            ResourceId resourceId(filePath, loader->GetResourceTypeId());
-            return Load(resourceId);
         }
 
         void ResourceManager::Unload(ResourceId const& resourceId)
@@ -397,48 +400,20 @@ namespace Insight
                 IS_CORE_WARN("[ResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
             }
 
-            if (threading)
-            {
-                Threading::TaskSystem::CreateTask([resource, loader]()
-                    {
-                        resource->StartLoadTimer();
-                        {
-                            //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                            if (loader)
-                            {
-                                if (loader->Load(resource))
-                                {
-                                    resource->m_resource_state = EResoruceStates::Loaded;
-                                }
-                                else
-                                {
-                                    // Something has gone wrong when tring to load the resource.
-                                    resource->m_resource_state = EResoruceStates::Failed_To_Load;
-                                }
-                            }
-                            else
-                            {
-                                IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.", 
-                                    resource->GetResourceTypeId().GetTypeName());
-                                resource->Load();
-                            }
-                        }
-                        resource->StopLoadTimer();
-                        if (resource->IsLoaded())
-                        {
-                            resource->OnLoaded(resource);
-                        }
-                    });
-            }
-            else
+            void(*resourceLoadFunc)(IResource* resource, const IResourceLoader* loader) = [](IResource* resource, const IResourceLoader* loader)
             {
                 resource->StartLoadTimer();
                 {
-                    //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
-                    if (loader)
+                    if (resource->IsEngineFormat())
                     {
-                        if (loader->Load(resource))
+                        Archive archive(resource->GetFilePath(), ArchiveModes::Read);
+                        archive.Close();
+                        if (!archive.IsEmpty())
                         {
+                            IResource::ResourceSerialiserType serialiser(true);
+                            serialiser.Deserialise(archive.GetData());
+                            resource->Deserialise(&serialiser);
+                            resource->Load();
                             resource->m_resource_state = EResoruceStates::Loaded;
                         }
                         else
@@ -449,15 +424,48 @@ namespace Insight
                     }
                     else
                     {
-                        IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
-                            resource->GetResourceTypeId().GetTypeName());
-                        resource->Load();
+                        //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
+                        if (loader)
+                        {
+                            if (loader->Load(resource))
+                            {
+                                resource->m_resource_state = EResoruceStates::Loaded;
+                            }
+                            else
+                            {
+                                // Something has gone wrong when tring to load the resource.
+                                resource->m_resource_state = EResoruceStates::Failed_To_Load;
+                            }
+                        }
+                        else
+                        {
+                            IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
+                                resource->GetResourceTypeId().GetTypeName());
+                            resource->Load();
+                        }
                     }
                 }
                 resource->StopLoadTimer();
                 if (resource->IsLoaded())
                 {
                     resource->OnLoaded(resource);
+                }
+            };
+
+
+            if (threading)
+            {
+                Threading::TaskSystem::CreateTask([resource, loader, resourceLoadFunc]()
+                    {
+                        resourceLoadFunc(resource, loader);
+                    });
+            }
+            else
+            {
+                resourceLoadFunc(resource, loader);
+                {
+                    std::lock_guard resourcesLoadingLock(s_resourcesLoadingMutex);
+                    Algorithm::VectorRemove(s_resourcesLoading, resource);
                 }
             }
         }
@@ -482,6 +490,47 @@ namespace Insight
             {
                 Update(0.16f);
             }
+        }
+
+        ResourceId ResourceManager::ConvertResource(ResourceId resourceId)
+        {
+            /// Hack: 
+            /// Load the resource as normal. 
+            /// Then serialise is to disk with the correct extension.
+            /// Then unload and delete the original resource.
+
+            IResource* sourceResource = LoadSync(resourceId).Get();
+            ASSERT(sourceResource);
+
+            std::string sourceFilePath = sourceResource->m_file_path;
+            
+            std::string engineFormatFilePath = FileSystem::FileSystem::ReplaceExtension(sourceResource->m_file_path, sourceResource->GetResourceFileExtension());
+            ResourceId engineFormatResourceId(engineFormatFilePath, sourceResource->GetResourceTypeId());
+
+            sourceResource->m_file_path = engineFormatFilePath;
+
+            IResource::ResourceSerialiserType serialiser;
+            sourceResource->Serialise(&serialiser);
+
+            Archive archive(sourceResource->m_file_path, ArchiveModes::Write);
+            archive.Write(serialiser.GetSerialisedData());
+            archive.Close();
+
+            sourceResource->m_file_path = std::move(sourceFilePath);
+            RemoveResource(resourceId);
+
+            return engineFormatResourceId;
+        }
+
+        void ResourceManager::RemoveResource(ResourceId resourceId)
+        {
+            if (!resourceId)
+            {
+                return;
+            }
+
+            Unload(resourceId);
+            s_database->RemoveResource(resourceId);
         }
 
         TObjectPtr<IResource> ResourceManager::CreateDependentResource(ResourceId const& resourceId)

@@ -292,12 +292,6 @@ namespace Insight
             StartArray(tag, arraySize);
             vector.resize(arraySize);
             ReadBlock(tag, vector.data(), arraySize);
-            //for (size_t i = 0; i < arraySize; ++i)
-            //{
-            //    Byte c;
-            //    Read(tag, c);
-            //    vector.at(i) = c;
-            //}
             StopArray();
         }
 

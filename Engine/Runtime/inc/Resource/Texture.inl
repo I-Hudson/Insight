@@ -15,18 +15,14 @@ namespace Insight
             ASSERT(serialiser);
             if (serialiser->IsReadMode())
             {
-                u64 dataSize = 0;
-                serialiser->StartArray("DataSize", dataSize);
+                std::vector<Byte> textureData;
+                serialiser->Read("DataSize", textureData);
 
                 ASSERT(!data);
-                data = static_cast<Byte*>(::NewBytes(dataSize, Core::MemoryAllocCategory::Resources));
+                data = static_cast<Byte*>(::NewBytes(textureData.size(), Core::MemoryAllocCategory::Resources));
+                texture->m_dataSize = textureData.size();
 
-                for (size_t i = 0; i < texture->m_dataSize; ++i)
-                {
-                    Byte* ptr = data + i;
-                    serialiser->Read("", *ptr);
-                }
-                serialiser->StopArray();
+                Platform::MemCopy(data, textureData.data(), textureData.size());
             }
             else
             {             

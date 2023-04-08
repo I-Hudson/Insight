@@ -3,6 +3,7 @@
 #include "Graphics/RHI/RHI_Resource.h"
 
 #include "Core/Profiler.h"
+#include "Algorithm/Vector.h"
 
 #include <iterator>
 
@@ -71,6 +72,11 @@ namespace Insight
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
+						if (request->Cancelled)
+						{
+							return;
+						}
+
 						request->Request->Status = DeviceUploadStatus::Uploading;
 						cmdList->CopyBufferToBuffer(buffer, 0, m_uploadStagingBuffer, m_frameUploadOffset, request->SizeInBytes);
 						m_frameUploadOffset += request->SizeInBytes;
@@ -90,6 +96,11 @@ namespace Insight
 				RHI_UploadQueueRequestInternal>(
 					[=](const RHI_UploadQueueRequestInternal* request, RHI_CommandList* cmdList)
 					{
+						if (request->Cancelled)
+						{
+							return;
+						}
+
 						PipelineBarrier barreir;
 						barreir.SrcStage = +PipelineStageFlagBits::TopOfPipe;
 						barreir.DstStage = +PipelineStageFlagBits::Transfer;
@@ -172,6 +183,21 @@ namespace Insight
 			m_queuedUploads.clear();
 
 			m_stagingBufferOffset = 0;
+		}
+
+		void RHI_UploadQueue::RemoveRequest(RHI_UploadQueueRequest* request)
+		{
+			IS_PROFILE_FUNCTION();
+			std::lock_guard lock(m_mutex);
+
+			for (const RPtr<RHI_UploadQueueRequestInternal>& internalRequest : m_queuedUploads)
+			{
+				if (request == internalRequest->Request.Get())
+				{
+					internalRequest->Cancelled = true;
+					break;
+				}
+			}
 		}
 
 		void RHI_UploadQueue::UploadDataToStagingBuffer(const void* data, u64 sizeInBytes, RHI_UploadTypes uploadType)

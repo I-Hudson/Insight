@@ -83,6 +83,11 @@ namespace Insight
         return m_streamPos;
     }
 
+    bool Archive::IsEmpty() const
+    {
+        return m_data.empty();
+    }
+
     std::vector<Byte> Archive::GetData() const
     {
         return m_data;

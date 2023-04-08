@@ -107,7 +107,9 @@ namespace Insight
 			void RHI_Texture_Vulkan::Release()
 			{
 				IS_PROFILE_FUNCTION();
+
 				std::lock_guard lock(m_mutex);
+				RHI_Texture::Release();
 
 				for (u32 i = 0; i < m_single_layer_image_views.size(); ++i)
 				{
