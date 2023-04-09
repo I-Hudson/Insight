@@ -72,11 +72,11 @@ namespace Insight
 			return ResourceTypeId();
 		}
 
-		IResource* ResourceRegister::CreateResource(ResourceTypeId type_id)
+		IResource* ResourceRegister::CreateResource(ResourceTypeId type_id, std::string_view filePath)
 		{
 			if (auto itr = m_map.find(type_id); itr != m_map.end())
 			{
-				return itr->second();
+				return itr->second(filePath);
 			}
 			FAIL_ASSERT();
 			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] ");

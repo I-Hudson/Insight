@@ -1,6 +1,7 @@
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "Platforms/Platform.h"
+#include "Core/Logger.h"
 
 #include <functional>
 
@@ -22,16 +23,29 @@ namespace Insight
             m_writer = {};
         }
 
-        void JsonSerialiser::Deserialise(std::vector<u8> data)
+        bool JsonSerialiser::Deserialise(std::vector<u8> data)
         {
             m_reader = {};
+
+            u8 serialiserType = data.front() > 0 ? data.front() - '0' : data.front();
+            data.erase(data.begin());
+            if (serialiserType != static_cast<u8>(m_type))
+            {
+                IS_CORE_ERROR("[JsonSerialiser::Deserialise] 'data' has been serialised with type '{}'. Serialiser type mismatch.", SerialisationTypeToString[(u8)m_type]);
+                return false;
+            }
+
             m_reader.DeserialisedJson = nlohmann::json::parse(data);
+            return true;
         }
 
         std::vector<Byte> JsonSerialiser::GetSerialisedData() const
         {
             std::string jsonData = m_writer.TopNode().dump();
-            return { jsonData.begin(), jsonData.end() };
+            std::vector<Byte> data = { jsonData.begin(), jsonData.end() };
+
+            data.insert(data.begin(), static_cast<u8>(static_cast<int>(m_type)));
+            return data;
         }
 
         void JsonSerialiser::Clear()

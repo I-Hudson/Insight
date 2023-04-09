@@ -11,6 +11,8 @@ namespace Insight
 			REGISTER_RESOURCE(Texture2D);
 		public:
 
+			Texture2D(std::string_view filePath);
+
 		private:
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 

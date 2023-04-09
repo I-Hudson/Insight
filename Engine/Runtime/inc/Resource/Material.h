@@ -31,6 +31,7 @@ namespace Insight
 			REGISTER_RESOURCE(Material);
 		public:
 			Material();
+			Material(std::string_view filePath);
 			virtual ~Material() override;
 
 			IS_SERIALISABLE_H(Material)

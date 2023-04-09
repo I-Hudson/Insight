@@ -6,8 +6,16 @@ namespace Insight
 	namespace Runtime
 	{
 		Material::Material()
-			: m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
-		{ }
+			: IResource("")
+			, m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
+		{
+		}
+
+		Material::Material(std::string_view filePath)
+			: IResource(filePath)
+			, m_properties({ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f })
+		{
+		}
 
 		Material::~Material()
 		{ }

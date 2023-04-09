@@ -69,13 +69,10 @@ namespace Insight
 		//--------------------------------------------------------------------------
 		// IResource
 		//--------------------------------------------------------------------------
-		IResource::IResource()
+		IResource::IResource(std::string_view filePath)
 		{
 			m_resource_state = EResoruceStates::Not_Loaded;
-		}
-
-		IResource::IResource(IResource const& other)
-		{
+			m_file_path = filePath;
 		}
 
 		IResource::~IResource()
@@ -320,6 +317,12 @@ namespace Insight
 						});
 				}
 			}
+		}
+
+		ResourceId IResource::ConvertToEngineFormat()
+		{
+			FAIL_ASSERT_MSG("[IResource::ConvertToEngineFormat] Must be implemented.");
+			return {};
 		}
 
 		IResource* IResource::AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id)

@@ -58,11 +58,12 @@ namespace Insight
             Array 
         };
 
+        constexpr const char* c_SerialiserType = "SerialiserType";
+
         /// @brief Base class for all serialises used. This defines what data can be saved.
         class IS_CORE ISerialiser
         {
         public:
-            ISerialiser(SerialisationTypes type);
             ISerialiser(SerialisationTypes type, bool isReadMode);
             virtual ~ISerialiser();
 
@@ -78,7 +79,7 @@ namespace Insight
 
             void Write(std::string_view tag, const char* string);
 
-            virtual void Deserialise(std::vector<u8> data) = 0;
+            virtual bool Deserialise(std::vector<u8> data) = 0;
             virtual std::vector<Byte> GetSerialisedData() const = 0;
 
             /// @brief Clear any data stored within the serialsier.

@@ -2,6 +2,7 @@
 
 #include "Platforms/Platform.h"
 #include "Core/Memory.h"
+#include "Core/Logger.h"
 
 namespace Insight
 {
@@ -103,16 +104,28 @@ namespace Insight
             m_head.Clear();
         }
 
-        void BinarySerialiser::Deserialise(std::vector<u8> data)
+        bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
+            u8 serialiserType = data.front();
+            data.erase(data.begin());
+            if (serialiserType != static_cast<u8>(m_type))
+            {
+                IS_CORE_ERROR("[BinarySerialiser::Deserialise] 'data' has been serialised with tpye '{}'. Serialiser type mismatch.", SerialisationTypeToString[(u8)m_type]);
+                return false;
+            }
+
             m_head.Deserialise(data);
+            return true;
         }
 
         std::vector<Byte> BinarySerialiser::GetSerialisedData() const
         {
             std::vector<Byte> serialisedData;
-            serialisedData.resize(m_head.Size);
+            serialisedData.resize(m_head.Size + 1);
             Platform::MemCopy(serialisedData.data(), m_head.Data, m_head.Size);
+
+            serialisedData.insert(serialisedData.begin(), static_cast<u8>(static_cast<int>(m_type)));
+
             return serialisedData;
         }
 

@@ -10,6 +10,7 @@
 #include "Core/Timer.h"
 
 #include "Serialisation/Serialisers/BinarySerialiser.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include <string>
 #include <atomic>
@@ -83,8 +84,8 @@ namespace Insight
 		public:
 			using ResourceSerialiserType = Serialisation::BinarySerialiser;
 
-			IResource();
-			IResource(IResource const& other);
+			IResource() = delete;
+			IResource(std::string_view filePath);
 			virtual ~IResource();
 
 			THREAD_SAFE;
@@ -161,6 +162,9 @@ namespace Insight
 
 			void RemoveDependentResource(IResource* resource);
 			void RemoveReferenceResource(IResource* resource);
+
+			/// @brief Convert a resource to the engine format version.
+			virtual ResourceId ConvertToEngineFormat();
 
 		private:
 			IResource* AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id);

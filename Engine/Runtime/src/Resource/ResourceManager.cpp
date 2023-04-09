@@ -499,26 +499,18 @@ namespace Insight
             /// Then serialise is to disk with the correct extension.
             /// Then unload and delete the original resource.
 
+            /// Check if the source resource is loaded. If it is then don't unload it 
+            /// as it has been loaded by something else so might be in use.
+            bool resourceAllreadyLoaded = HasResource(resourceId);
+
             IResource* sourceResource = LoadSync(resourceId).Get();
             ASSERT(sourceResource);
+            ResourceId engineFormatResourceId = sourceResource->ConvertToEngineFormat();
 
-            std::string sourceFilePath = sourceResource->m_file_path;
-            
-            std::string engineFormatFilePath = FileSystem::FileSystem::ReplaceExtension(sourceResource->m_file_path, sourceResource->GetResourceFileExtension());
-            ResourceId engineFormatResourceId(engineFormatFilePath, sourceResource->GetResourceTypeId());
-
-            sourceResource->m_file_path = engineFormatFilePath;
-
-            IResource::ResourceSerialiserType serialiser;
-            sourceResource->Serialise(&serialiser);
-
-            Archive archive(sourceResource->m_file_path, ArchiveModes::Write);
-            archive.Write(serialiser.GetSerialisedData());
-            archive.Close();
-
-            sourceResource->m_file_path = std::move(sourceFilePath);
-            RemoveResource(resourceId);
-
+            if (!resourceAllreadyLoaded)
+            {
+                RemoveResource(resourceId);
+            }
             return engineFormatResourceId;
         }
 

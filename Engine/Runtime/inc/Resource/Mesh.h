@@ -44,6 +44,7 @@ namespace Insight
 			REGISTER_RESOURCE(Mesh);
 		public:
 			Mesh();
+			Mesh(std::string_view filePath);
 			virtual ~Mesh() override;
 
 			IS_SERIALISABLE_H(Mesh)

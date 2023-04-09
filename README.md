@@ -28,6 +28,7 @@ Some features are:
 - [VulkanMemoryAllocator](https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator)
 - [xxHash](https://github.com/Cyan4973/xxHash)
 - [lz4](https://github.com/lz4/lz4)
+- [QOI "Quite OK Image Format"](https://github.com/phoboslab/qoi)
 
 ##### Profiles
 - [tracy](https://github.com/wolfpld/tracy)

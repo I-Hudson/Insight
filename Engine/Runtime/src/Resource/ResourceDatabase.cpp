@@ -66,12 +66,11 @@ namespace Insight
                 return resource;
             }
 
-            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId());
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
             ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);
                 rawResource->m_resourceId = resourceId;
-                rawResource->m_file_path = resourceId.GetPath();
                 rawResource->m_resource_state = EResoruceStates::Not_Loaded;
                 rawResource->m_storage_type = ResourceStorageTypes::Disk;
                 rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
@@ -298,12 +297,11 @@ namespace Insight
             ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
 
             TObjectPtr<IResource> resource = nullptr;
-            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId());
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
             ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);
                 rawResource->m_resourceId = resourceId;
-                rawResource->m_file_path = resourceId.GetPath();
                 rawResource->m_resource_state = EResoruceStates::Not_Loaded;
                 rawResource->m_storage_type = ResourceStorageTypes::Memory;
             }

@@ -35,7 +35,8 @@ namespace Insight
 			serialiserObject.Deserialise(serialiser, *this);
 		}
 
-		Model::Model()
+		Model::Model(std::string_view filePath)
+			: IResource(filePath)
 		{ }
 
 		Model::~Model()

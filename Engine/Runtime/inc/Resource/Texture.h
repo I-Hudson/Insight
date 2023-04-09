@@ -46,6 +46,7 @@ namespace Insight
 			REGISTER_RESOURCE(Texture);
 			IS_SERIALISABLE_H(Texture);
 		public:
+			Texture(std::string_view filePath);
 
 			u32 GetWidth() const;
 			u32 GetHeight() const;
@@ -53,6 +54,9 @@ namespace Insight
 			PixelFormat GetFormat() const;
 
 			Graphics::RHI_Texture* GetRHITexture() const;
+
+		protected:
+			virtual ResourceId ConvertToEngineFormat() override;
 
 		protected:
 			u32 m_width = 0;

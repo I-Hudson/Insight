@@ -28,7 +28,7 @@ namespace Insight
 
 			IS_SERIALISABLE_H(ResourceTypeId)
 
-				std::string GetTypeName() const;
+			std::string GetTypeName() const;
 			//u64 GetHash() const;
 
 			operator bool() const;
@@ -67,7 +67,7 @@ namespace Insight
 		/// @brief Utility class for lookups to create a resource class from a ResourceTypeId.
 		class IS_RUNTIME ResourceRegister
 		{
-			using CreateFunc = std::function<IResource*()>;
+			using CreateFunc = std::function<IResource*(std::string_view filePath)>;
 		public:
 			template<typename T>
 			static void RegisterResource()
@@ -78,14 +78,14 @@ namespace Insight
 					IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", typeId.GetTypeName());
 					return;
 				}
-				m_map[typeId] = []() { return New<T, Core::MemoryAllocCategory::Resources>(); };
+				m_map[typeId] = [](std::string_view filePath) { return New<T, Core::MemoryAllocCategory::Resources>(filePath); };
 				s_resourceExtensionToResourceTypeId[T::GetStaticResourceFileExtension()] = typeId;
 			}
 
 			static ResourceTypeId GetResourceTypeIdFromExtension(std::string_view fileExtension);
 			static ResourceTypeId GetResourceTypeIdFromExtension(const std::string& fileExtension);
 
-			static IResource* CreateResource(ResourceTypeId type_id);
+			static IResource* CreateResource(ResourceTypeId type_id, std::string_view filePath);
 
 		private:
 			static std::unordered_map<ResourceTypeId, CreateFunc> m_map;

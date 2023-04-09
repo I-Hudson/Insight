@@ -9,14 +9,11 @@ namespace Insight
 {
     namespace Serialisation
     {
-        ISerialiser::ISerialiser(SerialisationTypes type)
-            : m_type(type)
-        { }
-
         ISerialiser::ISerialiser(SerialisationTypes type, bool isReadMode)
             : m_type(type)
             , m_isReadMode(isReadMode)
-        { }
+        {
+        }
 
         ISerialiser::~ISerialiser()
         {

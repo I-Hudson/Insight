@@ -17,7 +17,7 @@ namespace Insight
 		{
 			REGISTER_RESOURCE(Model);
 		public:
-			Model();
+			Model(std::string_view filePath);
 			virtual ~Model() override;
 
 			IS_SERIALISABLE_H(Model)

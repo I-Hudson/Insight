@@ -8,14 +8,24 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#define QOI_IMPLEMENTATION
+#include <qoi.h>
+
 #include <fstream>
 
 namespace Insight
 {
 	namespace Runtime
 	{
+		Texture2D::Texture2D(std::string_view filePath)
+			: Texture(filePath)
+		{
+		}
+
 		void Texture2D::Load()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_rawDataPtr == nullptr && m_dataSize == 0)
 			{
 				std::string_view filePath = m_file_path;
@@ -50,21 +60,27 @@ namespace Insight
 		void Texture2D::LoadFromMemory(Byte* data, const u64 dataSize)
 		{
 			ASSERT(!m_rhi_texture && data && dataSize > 0);
+			IS_PROFILE_FUNCTION();
 
 			m_rhi_texture = Renderer::CreateTexture();
 			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
 
 			int width, height, channels;
 			Byte* textureData = nullptr;
-			if (m_diskFormat == TextureDiskFormat::Other)
+			if (m_diskFormat == TextureDiskFormat::QOI)
+			{
+				IS_PROFILE_SCOPE("qoi_decode");
+				qoi_desc qoiDesc;
+				textureData = static_cast<Byte*>(qoi_decode(m_rawDataPtr, m_dataSize, &qoiDesc, 4));
+				width = qoiDesc.width;
+				height = qoiDesc.height;
+				channels = qoiDesc.channels;
+			}
+			else
 			{
 				IS_PROFILE_SCOPE("stbi_load_from_memory");
 				textureData = stbi_load_from_memory(data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
 				channels = STBI_rgb_alpha;
-			}
-			else
-			{
-
 			}
 
 			if (!textureData)
@@ -79,13 +95,13 @@ namespace Insight
 
 			m_rhi_texture->LoadFromData(textureData, GetWidth(), GetHeight(), GetDepth(), STBI_rgb_alpha);
 
-			if (m_diskFormat == TextureDiskFormat::Other)
+			if (m_diskFormat == TextureDiskFormat::QOI)
 			{
-				stbi_image_free(textureData);
+				QOI_FREE(textureData);
 			}
 			else
 			{
-
+				stbi_image_free(textureData);
 			}
 
 			/// Delete the texture data from memory.
@@ -93,8 +109,8 @@ namespace Insight
 			/// TODO: Look into this as if you edit the texture at runtime 
 			/// do I really want to have to download from the GPU. But if kept in
 			/// RAM what is the memory cost.
-			m_dataSize = 0;
-			DeleteBytes(m_rawDataPtr);
+			//m_dataSize = 0;
+			//DeleteBytes(m_rawDataPtr);
 
 			m_resource_state = EResoruceStates::Loaded;
 		}
@@ -104,6 +120,7 @@ namespace Insight
 			Renderer::FreeTexture(m_rhi_texture);
 			m_rhi_texture = nullptr;
 			
+			m_dataSize = 0;
 			DeleteBytes(m_rawDataPtr);
 
 			m_resource_state = EResoruceStates::Unloaded;

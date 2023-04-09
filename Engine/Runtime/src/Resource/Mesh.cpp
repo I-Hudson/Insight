@@ -11,6 +11,13 @@ namespace Insight
 	namespace Runtime
 	{
 		Mesh::Mesh()
+			: IResource("")
+		{
+			m_lods.push_back(MeshLOD());
+		}
+
+		Mesh::Mesh(std::string_view filePath)
+			: IResource(filePath)
 		{
 			m_lods.push_back(MeshLOD());
 		}

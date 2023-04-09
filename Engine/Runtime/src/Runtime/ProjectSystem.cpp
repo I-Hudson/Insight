@@ -127,7 +127,10 @@ namespace Insight
             m_projectInfo = {};
 
             Serialisation::JsonSerialiser jsonSerialiser(true);
-            jsonSerialiser.Deserialise(data);
+            if (!jsonSerialiser.Deserialise(data))
+            {
+                return false;
+            }
 
             m_projectInfo.Deserialise(&jsonSerialiser);
             m_projectInfo.IsOpen = true;
