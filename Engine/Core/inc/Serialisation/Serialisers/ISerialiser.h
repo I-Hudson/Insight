@@ -49,7 +49,8 @@ namespace Insight
             || std::is_same_v<i16, T>
             || std::is_same_v<i32, T>
             || std::is_same_v<i64, T>
-            || std::is_same_v<std::string, T>;
+            || std::is_same_v<std::string, T>
+            || std::is_same_v<std::vector<u8>, T>;
 
         enum class SerialiserNodeStates 
         { 
@@ -80,7 +81,7 @@ namespace Insight
             void Write(std::string_view tag, const char* string);
 
             virtual bool Deserialise(std::vector<u8> data) = 0;
-            virtual std::vector<Byte> GetSerialisedData() const = 0;
+            virtual std::vector<Byte> GetSerialisedData() = 0;
 
             /// @brief Clear any data stored within the serialsier.
             virtual void Clear() = 0;
@@ -124,6 +125,10 @@ namespace Insight
 
             virtual void Read(std::string_view tag, std::string& string) = 0;
             virtual void Read(std::string_view tag, std::vector<Byte>& vector) = 0;
+
+        protected:
+            void WriteType();
+            virtual bool ReadType(std::vector<Byte>& data) = 0;
 
         protected:
             bool m_isReadMode = false;

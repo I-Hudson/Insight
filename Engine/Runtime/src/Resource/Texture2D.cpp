@@ -71,7 +71,7 @@ namespace Insight
 			{
 				IS_PROFILE_SCOPE("qoi_decode");
 				qoi_desc qoiDesc;
-				textureData = static_cast<Byte*>(qoi_decode(m_rawDataPtr, m_dataSize, &qoiDesc, 4));
+				textureData = static_cast<Byte*>(qoi_decode(m_rawDataPtr, static_cast<int>(m_dataSize), &qoiDesc, 4));
 				width = qoiDesc.width;
 				height = qoiDesc.height;
 				channels = qoiDesc.channels;
@@ -79,7 +79,7 @@ namespace Insight
 			else
 			{
 				IS_PROFILE_SCOPE("stbi_load_from_memory");
-				textureData = stbi_load_from_memory(data, dataSize, &width, &height, &channels, STBI_rgb_alpha);
+				textureData = stbi_load_from_memory(data, static_cast<int>(dataSize), &width, &height, &channels, STBI_rgb_alpha);
 				channels = STBI_rgb_alpha;
 			}
 

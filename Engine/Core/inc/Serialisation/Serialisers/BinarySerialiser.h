@@ -40,7 +40,7 @@ namespace Insight
             virtual ~BinarySerialiser() override;
 
             virtual bool Deserialise(std::vector<u8> data) override;
-            virtual std::vector<Byte> GetSerialisedData() const override;
+            virtual std::vector<Byte> GetSerialisedData() override;
 
             virtual void Clear() override;
 
@@ -84,6 +84,8 @@ namespace Insight
             virtual void Read(std::string_view tag, std::string& string) override;
             virtual void Read(std::string_view tag, std::vector<Byte>& vector) override;
 
+        protected:
+            virtual bool ReadType(std::vector<Byte>& data) override;
 
         private:
             template<typename T>

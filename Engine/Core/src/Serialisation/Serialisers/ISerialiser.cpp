@@ -67,5 +67,10 @@ namespace Insight
         {
             Write(tag, std::string(string));
         }
+
+        void ISerialiser::WriteType()
+        {
+            Write(c_SerialiserType, static_cast<u32>(m_type));
+        }
     }
 }

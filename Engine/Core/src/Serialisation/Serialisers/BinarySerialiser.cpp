@@ -106,25 +106,18 @@ namespace Insight
 
         bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
-            u8 serialiserType = data.front();
-            data.erase(data.begin());
-            if (serialiserType != static_cast<u8>(m_type))
-            {
-                IS_CORE_ERROR("[BinarySerialiser::Deserialise] 'data' has been serialised with tpye '{}'. Serialiser type mismatch.", SerialisationTypeToString[(u8)m_type]);
-                return false;
-            }
-
+            ReadType(data);
             m_head.Deserialise(data);
             return true;
         }
 
-        std::vector<Byte> BinarySerialiser::GetSerialisedData() const
+        std::vector<Byte> BinarySerialiser::GetSerialisedData()
         {
-            std::vector<Byte> serialisedData;
-            serialisedData.resize(m_head.Size + 1);
-            Platform::MemCopy(serialisedData.data(), m_head.Data, m_head.Size);
+            WriteType();
 
-            serialisedData.insert(serialisedData.begin(), static_cast<u8>(static_cast<int>(m_type)));
+            std::vector<Byte> serialisedData;
+            serialisedData.resize(m_head.Size);
+            Platform::MemCopy(serialisedData.data(), m_head.Data, m_head.Size);
 
             return serialisedData;
         }
@@ -306,6 +299,21 @@ namespace Insight
             vector.resize(arraySize);
             ReadBlock(tag, vector.data(), arraySize);
             StopArray();
+        }
+
+        bool BinarySerialiser::ReadType(std::vector<Byte>& data)
+        {
+            u32 type = 0;
+            Platform::MemCopy(&type, &(*(data.end() - 4)), sizeof(u32));
+
+            SerialisationTypes serialiserType = static_cast<SerialisationTypes>(type);
+            if (serialiserType != m_type)
+            {
+                IS_CORE_ERROR("[BinarySerialiser::Deserialise] 'data' has been serialised with type '{}' trying to deserialise with '{}'. Serialiser type mismatch.",
+                    SerialisationTypeToString[(u32)type], SerialisationTypeToString[(u32)m_type]);
+                return false;
+            }
+            return true;
         }
 
         void BinarySerialiser::WriteBlock(std::string_view tag, const void* data, u64 sizeBytes)

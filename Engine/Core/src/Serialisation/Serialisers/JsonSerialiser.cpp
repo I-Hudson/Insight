@@ -26,26 +26,19 @@ namespace Insight
         bool JsonSerialiser::Deserialise(std::vector<u8> data)
         {
             m_reader = {};
-
-            u8 serialiserType = data.front() > 0 ? data.front() - '0' : data.front();
-            data.erase(data.begin());
-            if (serialiserType != static_cast<u8>(m_type))
+            if (data.empty())
             {
-                IS_CORE_ERROR("[JsonSerialiser::Deserialise] 'data' has been serialised with type '{}'. Serialiser type mismatch.", SerialisationTypeToString[(u8)m_type]);
                 return false;
             }
-
             m_reader.DeserialisedJson = nlohmann::json::parse(data);
-            return true;
+            return ReadType(data);
         }
 
-        std::vector<Byte> JsonSerialiser::GetSerialisedData() const
+        std::vector<Byte> JsonSerialiser::GetSerialisedData()
         {
+            WriteType();
             std::string jsonData = m_writer.TopNode().dump();
-            std::vector<Byte> data = { jsonData.begin(), jsonData.end() };
-
-            data.insert(data.begin(), static_cast<u8>(static_cast<int>(m_type)));
-            return data;
+            return { jsonData.begin(), jsonData.end() };
         }
 
         void JsonSerialiser::Clear()
@@ -237,6 +230,26 @@ namespace Insight
                 Read(tag, vector.at(i));
             }
             StopArray();
+        }
+
+        bool JsonSerialiser::ReadType(std::vector<Byte>& data)
+        {
+            auto iter = m_reader.DeserialisedJson.find(c_SerialiserType);
+            if (iter == m_reader.DeserialisedJson.end())
+            {
+                return false;
+            }
+
+            u32 type = iter.value();
+            SerialisationTypes serialiserType = static_cast<SerialisationTypes>(type);
+            if (serialiserType != m_type)
+            {
+                IS_CORE_ERROR("[JsonSerialiser::Deserialise] 'data' has been serialised with type '{}' trying to deserialise with '{}'. Serialiser type mismatch.",
+                    SerialisationTypeToString[(u32)type], SerialisationTypeToString[(u32)m_type]);
+                return false;
+            }
+
+            return true;
         }
 
         bool JsonSerialiser::IsObjectNode() const
