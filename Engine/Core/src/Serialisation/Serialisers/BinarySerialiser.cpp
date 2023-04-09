@@ -210,11 +210,7 @@ namespace Insight
         {
             u64 arraySize = string.size();
             StartArray(tag, arraySize);
-            for (size_t i = 0; i < arraySize; ++i)
-            {
-                char c = string.at(i);
-                Write(tag, c);
-            }
+            WriteBlock(tag, string.data(), arraySize);
             StopArray();
         }
         void BinarySerialiser::Write(std::string_view tag, const std::vector<Byte>& vector)
@@ -284,12 +280,7 @@ namespace Insight
             u64 arraySize = 0;
             StartArray(tag, arraySize);
             string.resize(arraySize);
-            for (size_t i = 0; i < arraySize; ++i)
-            {
-                char c;
-                Read(tag, c);
-                string.at(i) = c;
-            }
+            ReadBlock(tag, string.data(), arraySize);
             StopArray();
         }
         void BinarySerialiser::Read(std::string_view tag, std::vector<Byte>& vector)

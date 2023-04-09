@@ -91,7 +91,7 @@ namespace Insight
 		SERIALISE_PROPERTY(u32, m_width, 1, 0)
 		SERIALISE_PROPERTY(u32, m_height, 1, 0)
 		SERIALISE_PROPERTY(u32, m_depth, 1, 0)
-		//SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
+		SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
 		SERIALSIE_ENGINE_FORMAT(SERIALISE_COMPLEX(Serialisation::SerialiseTextureData, m_rawDataPtr, 1, 0))
 		SERIALISE_PROPERTY(Runtime::TextureDiskPackedType, m_diskPackedType, 2, 0)
 		SERIALISE_PROPERTY(Runtime::TextureDiskFormat, m_diskFormat, 2, 0)

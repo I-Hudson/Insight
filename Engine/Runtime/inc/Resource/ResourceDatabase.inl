@@ -108,37 +108,6 @@ namespace Insight
                         {
                             resource->Serialise(serialiser);
                         }
-
-                        /*if (resourceId.GetTypeId() == Runtime::Texture2D::GetStaticResourceTypeId())
-                        {
-                            IS_PROFILE_SCOPE("Resource Serialise");
-
-                            {
-                                IS_PROFILE_SCOPE("Serialise resource");
-                                resource->Serialise(resourceSubserialiser);
-                            }
-
-                            std::vector<Byte> resourceSerialisedData = resourceSubserialiser->GetSerialisedData();
-                            {
-                                IS_PROFILE_SCOPE("Write to Serilaise");
-
-                                resourceSerialiser->StartObject("ResourceData");
-                                resourceSerialiser->Write("SourceSize", resourceSerialisedData.size());
-                                if constexpr (true)
-                                {
-                                    Core::Compression::Compress(resourceSerialisedData);
-                                }
-                                resourceSerialiser->Write("CompressedData", resourceSerialisedData);
-                                resourceSerialiser->StopObject();
-                            }
-
-                            std::string filePath = resource->GetFilePath();
-                            std::string newExtension = resource->GetResourceFileExtension();
-                            newExtension += SerialisationTypeToString[(u64)serialiser->GetType()];
-                            newExtension += "_Texture_Format_As_Data_Compression";
-                            filePath = FileSystem::FileSystem::ReplaceExtension(filePath, newExtension);
-                            FileSystem::FileSystem::SaveToFile(resourceSerialisedData, filePath, true);
-                        }*/
                     }
                 }
                 serialiser->StopArray();

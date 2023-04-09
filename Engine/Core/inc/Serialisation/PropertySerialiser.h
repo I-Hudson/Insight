@@ -13,25 +13,25 @@ namespace Insight
         template<typename T>
         struct PropertySerialiser
         {
-            auto operator()(T const& v)
+            u32 operator()(T const& v)
             {
                 if constexpr (std::is_enum_v<T>)
                 {
-                    return static_cast<int>(const_cast<T&>(v));
+                    return static_cast<u32>(const_cast<T&>(v));
                 }
                 else
                 {
                     assert(false);
                 }
-                return 0;
+                return 0u;
             }
         };
 
         template<typename TypeSerialiser>
         struct PropertyDeserialiser
         {
-            using InType = u8;
-            u8 operator()(InType const v) const
+            using InType = u32;
+            u32 operator()(InType const v) const
             {
                 if constexpr (std::is_enum_v<TypeSerialiser>)
                 {
