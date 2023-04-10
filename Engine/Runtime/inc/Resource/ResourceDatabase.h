@@ -64,7 +64,10 @@ namespace Insight
 
             void LoadMetaFileData(IResource* resource);
             void SaveMetaFileData(IResource* resource, bool overwrite);
-            void VerifyResources();
+            /// @brief Attempt to find any missing resources which couldn't be created
+            /// when deserialising the database file. This shouldn't be lent upon 
+            /// safety net. Resource/files being moved should be done in editor.
+            void FindMissingResources();
 
         private:
             ResourceOwningMap m_resources;

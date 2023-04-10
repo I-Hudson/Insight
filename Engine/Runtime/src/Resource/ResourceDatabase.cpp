@@ -396,15 +396,18 @@ namespace Insight
             metaFile.Close();
         }
 
-        void ResourceDatabase::VerifyResources()
+        void ResourceDatabase::FindMissingResources()
         {
             std::unique_lock lock(m_mutex);
 
             std::vector<ResourceId> resourcesFound;
 
+            // We really don't want to be doing this. This is a last ditch attempt when starting the engine 
+            // to find any files that might have moved through File Explorer. Really files should be moved through the 
+            // editor to allow for correct tracking and updating of data.
             if (!m_missingResources.empty())
             {
-                IS_CORE_WARN("[ResourceDatabase::VerifyResources] There are missing resources. Trying to find them.");
+                IS_CORE_WARN("[ResourceDatabase::FindMissingResources] There are missing resources. Trying to find them.");
             
                 if (ProjectSystem::Instance().IsProjectOpen())
                 {
@@ -418,6 +421,7 @@ namespace Insight
 
                         std::string fileName = pathIter.path().filename().string();
 
+                        // Try and see if the current file iterating over has the same name as a missing file.
                         auto mapIter = m_missingResources.begin();
                         for (; mapIter != m_missingResources.end(); ++mapIter)
                         {
@@ -446,11 +450,14 @@ namespace Insight
 
                             if (serialiser.Deserialise(metaFile.GetData()))
                             {
+                                // Create a temp resources of the missing type and deserialise the meta data.
                                 IResource* metaFileResource = ResourceRegister::CreateResource(oldResourceId.GetTypeId(), filePath);
                                 metaFileResource->Deserialise(&serialiser);
                                 Core::GUID metaFileGuid = metaFileResource->GetGuid();
                                 Delete(metaFileResource);
 
+                                // Compare the known guid from the database file and the serialised one we found.
+                                // If both guids match then we have found our file.
                                 bool foundResource = mapIter->second == metaFileGuid;
                                 if (foundResource)
                                 {
@@ -459,17 +466,17 @@ namespace Insight
                                 }
                                 else
                                 {
-                                    IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Was unable to find resource '{}'.", mapIter->first.GetPath());
+                                    IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Was unable to find resource '{}'.", mapIter->first.GetPath());
                                 }
                             }
                             else
                             {
-                                IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Unable to deserialise meta file.");
+                                IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Unable to deserialise meta file.");
                             }
                         }
                         else
                         {
-                            IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Missing '{}' file.", c_MetaFileExtension);
+                            IS_CORE_ERROR("[ResourceDatabase::FindMissingResources] Missing '{}' file.", c_MetaFileExtension);
                         }
 
                     }
@@ -480,7 +487,7 @@ namespace Insight
 
             if (!resourcesFound.empty())
             {
-                IS_CORE_INFO("[ResourceDatabase::VerifyResources] Resources found:");
+                IS_CORE_INFO("[ResourceDatabase::FindMissingResources] Resources found:");
                 for (const ResourceId& resourceId : resourcesFound)
                 {
                     IS_CORE_INFO("\t'{}'", resourceId.GetPath());
