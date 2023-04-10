@@ -113,5 +113,47 @@ namespace Insight
                 serialiser->StopArray();
             }
         }
+
+        void ComplexSerialiser<ResourceDatabase3, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>::operator()
+            (ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const
+        {
+            ASSERT(serialiser);
+            IS_PROFILE_FUNCTION();
+
+            if (serialiser->IsReadMode())
+            {
+                u64 resourcesToSave = 0;
+                serialiser->StartArray("Resources", resourcesToSave);
+                for (u64 i = 0; i < resourcesToSave; ++i)
+                {
+                    Runtime::ResourceId resouceId;
+                    resouceId.Deserialise(serialiser);
+                    Runtime::IResource* resource = Runtime::ResourceManager::Create(resouceId).Get();
+                }
+                serialiser->StopArray();
+            }
+            else
+            {
+                u64 resourcesToSave = 0;
+                for (auto const& pair : map)
+                {
+                    if (!pair.second->IsDependentOnAnotherResource())
+                    {
+                        ++resourcesToSave;
+                    }
+                }
+
+                serialiser->StartArray("Resources", resourcesToSave);
+                for (auto const& [resourceId, resource] : map)
+                {
+                    if (!resource->IsDependentOnAnotherResource())
+                    {
+                        // Serialise the ResourceId.
+                        const_cast<Runtime::ResourceId&>(resourceId).Serialise(serialiser);
+                    }
+                }
+                serialiser->StopArray();
+            }
+        }
     }
 }

@@ -9,8 +9,11 @@
 
 #include "FileSystem/FileSystem.h"
 #include "Core/Logger.h"
+#include "Serialisation/Archive.h"
 
 #include "Event/EventSystem.h"
+
+#include <fstream>
 
 namespace Insight
 {
@@ -82,6 +85,7 @@ namespace Insight
                 resource = m_resources[resourceId] = std::move(ownerResource);
             }
 
+            LoadMetaFileData(resource);
 
             return resource;
         }
@@ -324,6 +328,64 @@ namespace Insight
                 iter->second.Reset();
                 m_dependentResources.erase(iter);
             }
+        }
+
+        void ResourceDatabase::LoadMetaFileData(IResource* resource)
+        {
+            if (resource->IsEngineFormat())
+            {
+                Archive metaFile(resource->GetFilePath(), ArchiveModes::Read);
+                IResource::ResourceSerialiserType serialiser(true);
+                ASSERT_MSG(serialiser.Deserialise(metaFile.GetData()), 
+                    "[ResourceDatabase::LoadMetaFileData] Engine format resource is corrupted.");
+                resource->Deserialise(&serialiser);
+            }
+            else
+            {
+                std::string metaFilePath = resource->GetFilePath();
+                metaFilePath += ".meta";
+                Archive metaFile(metaFilePath, ArchiveModes::Read);
+                metaFile.Close();
+                if (!metaFile.IsEmpty())
+                {
+                    Serialisation::JsonSerialiser serialiser(true);
+                    if (serialiser.Deserialise(metaFile.GetData()))
+                    {
+                        resource->Deserialise(&serialiser);
+                    }
+                    else
+                    {
+                        // Something went wrong when deserialising, so just save the meta file again.
+                        SaveMetaFileData(resource, true);
+                        LoadMetaFileData(resource);
+                    }
+                }
+                else
+                {
+                    SaveMetaFileData(resource, true);
+                    LoadMetaFileData(resource);
+                }
+            }
+        }
+
+        void ResourceDatabase::SaveMetaFileData(IResource* resource, bool overwrite)
+        {
+            ASSERT(!resource->IsEngineFormat());
+
+            std::string metaFilePath = resource->GetFilePath();
+            metaFilePath += ".meta";
+
+            if (!overwrite && FileSystem::FileSystem::Exists(metaFilePath))
+            {
+                return;
+            }
+
+            Serialisation::JsonSerialiser serialiser(false);
+            resource->Serialise(&serialiser);
+
+            Archive metaFile(metaFilePath, ArchiveModes::Write);
+            metaFile.Write(serialiser.GetSerialisedData());
+            metaFile.Close();
         }
     }
 }

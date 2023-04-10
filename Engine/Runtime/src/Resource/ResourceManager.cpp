@@ -448,6 +448,7 @@ namespace Insight
                 resource->StopLoadTimer();
                 if (resource->IsLoaded())
                 {
+                    s_database->SaveMetaFileData(resource, true);
                     resource->OnLoaded(resource);
                 }
             };

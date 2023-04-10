@@ -59,6 +59,9 @@ namespace Insight
             TObjectPtr<IResource> CreateDependentResource(ResourceId const& resourceId);
             void RemoveDependentResource(ResourceId const& resourceId);
 
+            void LoadMetaFileData(IResource* resource);
+            void SaveMetaFileData(IResource* resource, bool overwrite);
+
         private:
             ResourceOwningMap m_resources;
             ResourceOwningMap m_dependentResources;
@@ -73,6 +76,7 @@ namespace Insight
     {
         struct ResourceDatabase1 {};
         struct ResourceDatabase2 {};
+        struct ResourceDatabase3 {};
 
         template<>
         struct ComplexSerialiser<ResourceDatabase1, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
@@ -84,10 +88,16 @@ namespace Insight
         {
             void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
         };
+        template<>
+        struct ComplexSerialiser<ResourceDatabase3, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>
+        {
+            void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
+        };
     }
 
-    OBJECT_SERIALISER(Runtime::ResourceDatabase, 2,
+    OBJECT_SERIALISER(Runtime::ResourceDatabase, 3,
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase1, m_resources, 1, 2)
-        SERIALISE_COMPLEX(Serialisation::ResourceDatabase2, m_resources, 2, 0)
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabase2, m_resources, 2, 3)
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabase3, m_resources, 3, 0)
         );
 }
