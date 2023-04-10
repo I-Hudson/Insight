@@ -289,6 +289,9 @@ namespace Insight
 
 				char* stats;
 				vmaBuildStatsString(m_vmaAllocator, &stats, true);
+				IS_CORE_INFO("VMA: {}.", stats);
+				Delete(stats);
+				//VmaFree(m_vmaAllocator, stats);
 
 				{
 					std::array<VkDescriptorPoolSize, 2> pool_sizes =

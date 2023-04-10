@@ -61,7 +61,7 @@ namespace Insight
 				ImGui::Text("State: %s, LoadTime: %f.", resourceState.c_str(), loadTime);
 				if (ImGui::Button("Load"))
 				{
-					Runtime::ResourceManager::Load(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
+					Runtime::ResourceManager::LoadSync(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
 				}
 				if (ImGui::Button("Unload"))
 				{
