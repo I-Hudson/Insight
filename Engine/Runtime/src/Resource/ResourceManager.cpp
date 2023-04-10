@@ -112,6 +112,7 @@ namespace Insight
                 Serialisation::BinarySerialiser serialiser(true);
                 serialiser.Deserialise(archive.GetData());
                 s_database->Deserialise(&serialiser);
+                s_database->VerifyResources();
             }
         }
 

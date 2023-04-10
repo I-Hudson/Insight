@@ -19,6 +19,8 @@ namespace Insight
         /// @brief Database to store all currently known resources.
         class ResourceDatabase : public Serialisation::ISerialisable
         {
+            constexpr static const char* c_MetaFileExtension = ".ismeta";
+            using MetaFileSerialiser = Serialisation::JsonSerialiser;
         public:
             using ResourceMap = std::unordered_map<ResourceId, TObjectPtr<IResource>>;
             using ResourceOwningMap = std::unordered_map<ResourceId, TObjectOPtr<IResource>>;
@@ -50,6 +52,7 @@ namespace Insight
             u32 GetLoadingResourceCount() const;
 
         private:
+            TObjectPtr<IResource> AddResource(ResourceId const& resourceId, bool force);
             void DeleteResource(TObjectOPtr<IResource>& resource);
 
             std::vector<ResourceId> GetAllResourceIds() const;
@@ -61,12 +64,16 @@ namespace Insight
 
             void LoadMetaFileData(IResource* resource);
             void SaveMetaFileData(IResource* resource, bool overwrite);
+            void VerifyResources();
 
         private:
             ResourceOwningMap m_resources;
             ResourceOwningMap m_dependentResources;
             u32 m_loadedResourceCount = 0;
             mutable std::mutex m_mutex;
+
+            /// @brief Use this map in the verify process.
+            std::unordered_map<ResourceId, Core::GUID> m_missingResources;
 
             friend class ResourceManager;
         };

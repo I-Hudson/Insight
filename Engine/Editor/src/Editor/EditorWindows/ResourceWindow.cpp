@@ -57,8 +57,10 @@ namespace Insight
 			ImGui::PushStyleColor(ImGuiCol_Header, resourceStateColours[static_cast<int>(resource->GetResourceState())]);
 			if (ImGui::TreeNodeEx(static_cast<const void*>(resource), ImGuiTreeNodeFlags_Framed, "%s", fileName.c_str()))
 			{
+				ImGui::Text("Guid: %s", resource->GetGuid().ToString().c_str());
 				ImGui::Text("Resource Type: %s", resource->GetResourceTypeId().GetTypeName().c_str());
 				ImGui::Text("State: %s, LoadTime: %f.", resourceState.c_str(), loadTime);
+
 				if (ImGui::Button("Load"))
 				{
 					Runtime::ResourceManager::LoadSync(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));

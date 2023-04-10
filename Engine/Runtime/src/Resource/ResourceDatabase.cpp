@@ -7,6 +7,9 @@
 #include "Resource/Model.h"
 #include "Resource/Texture2D.h"
 
+#include "Runtime/ProjectSystem.h"
+#include "Algorithm/Vector.h"
+
 #include "FileSystem/FileSystem.h"
 #include "Core/Logger.h"
 #include "Serialisation/Archive.h"
@@ -53,41 +56,7 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
         {
-            if (!FileSystem::FileSystem::Exists(resourceId.GetPath()))
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
-                return nullptr;
-            }
-
-            TObjectPtr<IResource> resource;
-            if (HasResource(resourceId))
-            {
-                {
-                    std::lock_guard lock(m_mutex);
-                    resource = m_resources.find(resourceId)->second;
-                }
-                return resource;
-            }
-
-            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
-            ASSERT(rawResource);
-            {
-                std::lock_guard resourceLock(rawResource->m_mutex);
-                rawResource->m_resourceId = resourceId;
-                rawResource->m_resource_state = EResoruceStates::Not_Loaded;
-                rawResource->m_storage_type = ResourceStorageTypes::Disk;
-                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
-                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
-            }
-            TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
-            {
-                std::lock_guard lock(m_mutex);
-                resource = m_resources[resourceId] = std::move(ownerResource);
-            }
-
-            LoadMetaFileData(resource);
-
-            return resource;
+            return AddResource(resourceId, false);
         }
 
         void ResourceDatabase::RemoveResource(TObjectPtr<IResource> resource)
@@ -257,6 +226,45 @@ namespace Insight
             return count;
         }
 
+        TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId, bool force)
+        {
+            if (!force && !FileSystem::FileSystem::Exists(resourceId.GetPath()))
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
+                return nullptr;
+            }
+
+            TObjectPtr<IResource> resource;
+            if (HasResource(resourceId))
+            {
+                {
+                    std::lock_guard lock(m_mutex);
+                    resource = m_resources.find(resourceId)->second;
+                }
+                return resource;
+            }
+
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
+            ASSERT(rawResource);
+            {
+                std::lock_guard resourceLock(rawResource->m_mutex);
+                rawResource->m_resourceId = resourceId;
+                rawResource->m_resource_state = EResoruceStates::Not_Loaded;
+                rawResource->m_storage_type = ResourceStorageTypes::Disk;
+                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
+                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
+            }
+            TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
+            {
+                std::lock_guard lock(m_mutex);
+                resource = m_resources[resourceId] = std::move(ownerResource);
+            }
+
+            LoadMetaFileData(resource);
+
+            return resource;
+        }
+
         void ResourceDatabase::DeleteResource(TObjectOPtr<IResource>& resource)
         {
             ASSERT(resource->IsFailedToLoad()
@@ -343,7 +351,7 @@ namespace Insight
             else
             {
                 std::string metaFilePath = resource->GetFilePath();
-                metaFilePath += ".meta";
+                metaFilePath += c_MetaFileExtension;
                 Archive metaFile(metaFilePath, ArchiveModes::Read);
                 metaFile.Close();
                 if (!metaFile.IsEmpty())
@@ -373,7 +381,7 @@ namespace Insight
             ASSERT(!resource->IsEngineFormat());
 
             std::string metaFilePath = resource->GetFilePath();
-            metaFilePath += ".meta";
+            metaFilePath += c_MetaFileExtension;
 
             if (!overwrite && FileSystem::FileSystem::Exists(metaFilePath))
             {
@@ -386,6 +394,99 @@ namespace Insight
             Archive metaFile(metaFilePath, ArchiveModes::Write);
             metaFile.Write(serialiser.GetSerialisedData());
             metaFile.Close();
+        }
+
+        void ResourceDatabase::VerifyResources()
+        {
+            std::unique_lock lock(m_mutex);
+
+            std::vector<ResourceId> resourcesFound;
+
+            if (!m_missingResources.empty())
+            {
+                IS_CORE_WARN("[ResourceDatabase::VerifyResources] There are missing resources. Trying to find them.");
+            
+                if (ProjectSystem::Instance().IsProjectOpen())
+                {
+                    std::string contentPath = ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+                    for (const auto& pathIter : std::filesystem::recursive_directory_iterator(contentPath))
+                    {
+                        if (!pathIter.is_regular_file())
+                        {
+                            continue;
+                        }
+
+                        std::string fileName = pathIter.path().filename().string();
+
+                        auto mapIter = m_missingResources.begin();
+                        for (; mapIter != m_missingResources.end(); ++mapIter)
+                        {
+                            std::string iterPath = mapIter->first.GetPath();
+                            std::string iterFileName = std::filesystem::path(iterPath).filename().string();
+                            if (iterFileName == fileName)
+                            {
+                                break;
+                            }
+                        }
+                        if (mapIter == m_missingResources.end())
+                        {
+                            continue;
+                        }
+
+                        const ResourceId& oldResourceId = mapIter->first;
+                        std::string filePath = pathIter.path().string();
+                        std::string filePathMeta = filePath;
+                        filePathMeta += c_MetaFileExtension;
+
+                        if (FileSystem::FileSystem::Exists(filePathMeta))
+                        {
+                            Archive metaFile(filePathMeta, ArchiveModes::Read);
+                            metaFile.Close();
+                            MetaFileSerialiser serialiser(true);
+
+                            if (serialiser.Deserialise(metaFile.GetData()))
+                            {
+                                IResource* metaFileResource = ResourceRegister::CreateResource(oldResourceId.GetTypeId(), filePath);
+                                metaFileResource->Deserialise(&serialiser);
+                                Core::GUID metaFileGuid = metaFileResource->GetGuid();
+                                Delete(metaFileResource);
+
+                                bool foundResource = mapIter->second == metaFileGuid;
+                                if (foundResource)
+                                {
+                                    ResourceId resourceIdToAdd(filePath, oldResourceId.GetTypeId());
+                                    resourcesFound.push_back(resourceIdToAdd);
+                                }
+                                else
+                                {
+                                    IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Was unable to find resource '{}'.", mapIter->first.GetPath());
+                                }
+                            }
+                            else
+                            {
+                                IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Unable to deserialise meta file.");
+                            }
+                        }
+                        else
+                        {
+                            IS_CORE_ERROR("[ResourceDatabase::VerifyResources] Missing '{}' file.", c_MetaFileExtension);
+                        }
+
+                    }
+                }
+            }
+
+            lock.unlock();
+
+            if (!resourcesFound.empty())
+            {
+                IS_CORE_INFO("[ResourceDatabase::VerifyResources] Resources found:");
+                for (const ResourceId& resourceId : resourcesFound)
+                {
+                    IS_CORE_INFO("\t'{}'", resourceId.GetPath());
+                    AddResource(resourceId);
+                }
+            }
         }
     }
 }

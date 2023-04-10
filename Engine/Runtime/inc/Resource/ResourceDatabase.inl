@@ -120,15 +120,34 @@ namespace Insight
             ASSERT(serialiser);
             IS_PROFILE_FUNCTION();
 
+            constexpr const char* c_Resources = "Resources";
+            constexpr const char* c_Guid = "Guid";
+
             if (serialiser->IsReadMode())
             {
+                Serialisation::PropertyDeserialiser<Core::GUID> guidDeserialiser;
                 u64 resourcesToSave = 0;
-                serialiser->StartArray("Resources", resourcesToSave);
+                serialiser->StartArray(c_Resources, resourcesToSave);
                 for (u64 i = 0; i < resourcesToSave; ++i)
                 {
                     Runtime::ResourceId resouceId;
                     resouceId.Deserialise(serialiser);
-                    Runtime::IResource* resource = Runtime::ResourceManager::Create(resouceId).Get();
+
+                    bool resourceExistsOnDisk = FileSystem::FileSystem::Exists(resouceId.GetPath());
+                    if (resourceExistsOnDisk)
+                    {
+                        resourceDatabase->AddResource(resouceId, true);
+                    }
+
+                    std::string guidString;
+                    serialiser->Read(c_Guid, guidString);
+                    Core::GUID guid = guidDeserialiser(guidString);
+
+                    if (!resourceExistsOnDisk)
+                    {
+                        ASSERT(resourceDatabase->m_missingResources.find(resouceId) == resourceDatabase->m_missingResources.end());
+                        resourceDatabase->m_missingResources[resouceId] = guid;
+                    }
                 }
                 serialiser->StopArray();
             }
@@ -143,13 +162,15 @@ namespace Insight
                     }
                 }
 
-                serialiser->StartArray("Resources", resourcesToSave);
+                Serialisation::PropertySerialiser<Core::GUID> guidSerialiser;
+                serialiser->StartArray(c_Resources, resourcesToSave);
                 for (auto const& [resourceId, resource] : map)
                 {
                     if (!resource->IsDependentOnAnotherResource())
                     {
                         // Serialise the ResourceId.
                         const_cast<Runtime::ResourceId&>(resourceId).Serialise(serialiser);
+                        serialiser->Write(c_Guid, guidSerialiser(resource->GetGuid()));
                     }
                 }
                 serialiser->StopArray();
