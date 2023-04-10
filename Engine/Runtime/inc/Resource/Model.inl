@@ -61,28 +61,15 @@ namespace Insight
                     Runtime::ResourceId resourceId;
                     resourceId.Deserialise(serialiser);
 
-                    if constexpr (false)
-                    {
-                        serialiser->StartObject("");
-                        serialiser->StopObject();
-                    }
-                    else
-                    {
-                        if (!Runtime::ResourceManager::HasResource(resourceId))
-                        {
-                            Runtime::IResource* resource = Runtime::ResourceManager::CreateDependentResource(resourceId).Get();
-                            ASSERT(resource);
-                            model->AddDependentResource(resource);
-                            material = static_cast<Runtime::Material*>(resource);
-                            material->Deserialise(serialiser);
-                        }
-                        else
-                        {
-                            FAIL_ASSERT();
-                        }
-                    }
-                }
+                    ASSERT(!Runtime::ResourceManager::HasResource(resourceId));
 
+                    Runtime::IResource* resource = Runtime::ResourceManager::CreateDependentResource(resourceId).Get();
+                    ASSERT(resource);
+                    model->AddDependentResource(resource);
+                    material = static_cast<Runtime::Material*>(resource);
+                    material->Deserialise(serialiser);
+
+                }
                 serialiser->StopArray();
             }
             else

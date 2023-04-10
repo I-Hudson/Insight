@@ -328,7 +328,7 @@ namespace Insight
                 serialiser->StartArray(name, arraySize);
                 for (size_t i = 0; i < size; ++i)
                 {
-                    T* ptr = object + (sizeof(T) * i);
+                    T* ptr = object + i;
                     if constexpr (SerialiserType == SerialiserType::Property)
                     {
                         *ptr = std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, T>(serialiser, name));
