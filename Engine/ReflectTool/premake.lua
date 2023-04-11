@@ -60,7 +60,7 @@ project "InsightReflectTool"
         }
         links
         {
-            "Refelct.lib",
+            "Reflect.lib",
         }
 
     filter "system:Windows"

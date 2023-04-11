@@ -44,6 +44,9 @@ project "InsightStandalone"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.splash}",
+        "%{IncludeDirs.lz4}",
+        "%{IncludeDirs.qoi}",
+        "%{IncludeDirs.reflect}",
 
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
@@ -170,6 +173,8 @@ project "InsightStandalone"
             "imgui.lib",
             "xxHashd.lib",
             "meshoptimizer.lib",
+            "lz4d.lib",
+            "Reflectd.lib",
 
             "GLFW.lib",
             "vulkan-1.lib",
@@ -198,7 +203,8 @@ project "InsightStandalone"
         }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
-    filter "configurations:Release"  
+    filter "configurations:Release"
+    buildoptions "/MD"
         optimize "On"   
                 defines
         {
@@ -213,8 +219,10 @@ project "InsightStandalone"
             "tracy.lib",
             "glm.lib",
             "imgui.lib",
-            "xxHashd.lib",
+            "xxHash.lib",
             "meshoptimizer.lib",
+            "lz4.lib",
+            "Reflect.lib",
 
             "GLFW.lib",
             "vulkan-1.lib",
