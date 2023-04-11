@@ -40,6 +40,7 @@ project "Insight_Editor"
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.imgui_string}",
+        "%{IncludeDirs.reflect}",
     }
 
     files 
@@ -84,6 +85,7 @@ project "Insight_Editor"
         links
         {
             "OptickCore.lib",
+            "Reflectd.lib",
         }
         libdirs
         {
@@ -97,6 +99,7 @@ project "Insight_Editor"
         links
         {
             "OptickCore.lib",
+            "Reflect.lib",
         }
         libdirs
         {

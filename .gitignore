@@ -435,3 +435,5 @@ vendor/
 /premakeFiles/revision.h
 /premakeFiles/zconf.h
 /PackageBuild
+Generated/
+*.gen.h

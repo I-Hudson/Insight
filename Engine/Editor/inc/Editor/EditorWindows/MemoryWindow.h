@@ -43,6 +43,7 @@ namespace Insight
             }
         };
 
+        REFLECT_CLASS()
         class MemoryWindow : public IEditorWindow
         {
         public:

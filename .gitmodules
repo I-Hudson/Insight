@@ -61,3 +61,6 @@
 [submodule "vendor/qoi"]
 	path = vendor/qoi
 	url = https://github.com/phoboslab/qoi
+[submodule "vendor/Reflect"]
+	path = vendor/Reflect
+	url = https://github.com/I-Hudson/Reflect.git

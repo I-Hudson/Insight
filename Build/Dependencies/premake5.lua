@@ -54,4 +54,5 @@ group "Dependices"
         include "../../premakeFiles/xxHash.lua"
         include "../../premakeFiles/lz4.lua"
         include "../../premakeFiles/splash.lua"
+        include "../../premakeFiles/reflect.lua"
 

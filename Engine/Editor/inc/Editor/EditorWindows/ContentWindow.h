@@ -27,6 +27,7 @@ namespace Insight
             Mesh
         };
 
+        REFLECT_CLASS()
         class ContentWindow : public IEditorWindow
         {
         public:

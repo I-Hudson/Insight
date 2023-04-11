@@ -14,6 +14,7 @@ namespace Insight
 
     namespace Editor
     {
+        REFLECT_CLASS()
         class EntitiyDescriptionWindow : public IEditorWindow
         {
         public:

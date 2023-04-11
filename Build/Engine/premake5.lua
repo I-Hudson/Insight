@@ -75,6 +75,7 @@ IncludeDirs["IconFontCppHeaders"] = "%{wks.location}vendor/IconFontCppHeaders"
 IncludeDirs["nlohmann_json"] = "%{wks.location}vendor/nlohmann_json/single_include"
 IncludeDirs["lz4"] = "%{wks.location}vendor/lz4/lib"
 IncludeDirs["qoi"] = "%{wks.location}vendor/qoi"
+IncludeDirs["reflect"] = "%{wks.location}vendor/reflect/reflect/inc"
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"

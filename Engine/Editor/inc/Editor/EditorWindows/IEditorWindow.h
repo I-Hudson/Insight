@@ -2,6 +2,8 @@
 
 #include "Core/TypeAlias.h"
 
+#include <Reflect.h>
+
 #include <string>
 
 namespace Insight

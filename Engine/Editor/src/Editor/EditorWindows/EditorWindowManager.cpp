@@ -1,6 +1,8 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/EditorWindows/IEditorWindow.h"
 
+#include "EditorWindows.gen.h"
+
 #include "Editor/EditorWindows/BuildSettingsWindow.h"
 #include "Editor/EditorWindows/ContentWindow.h"
 #include "Editor/EditorWindows/ResourceWindow.h"
@@ -10,8 +12,6 @@
 #include "Editor/EditorWindows/MemoryWindow.h"
 #include "Editor/EditorWindows/ProjectWindow.h"
 #include "Editor/EditorWindows/SystemInformationWindow.h"
-
-#include "Core/Memory.h"
 
 namespace Insight
 {
@@ -30,15 +30,17 @@ namespace Insight
 		{
 #define REGISTER_NEW_WINDOW(window) m_windowRegistry[window::WINDOW_NAME] = RegisterWindow([]() { return static_cast<IEditorWindow*>(New<window, Core::MemoryAllocCategory::Editor>()); }, window::WINDOW_CATEGORY)
 
-			REGISTER_NEW_WINDOW(BuildSettingsWindow);
-			REGISTER_NEW_WINDOW(ContentWindow);
-			REGISTER_NEW_WINDOW(EntitiyDescriptionWindow);
-			REGISTER_NEW_WINDOW(EntitiesWindow);
-			REGISTER_NEW_WINDOW(InputWindow);
-			REGISTER_NEW_WINDOW(MemoryWindow);
-			REGISTER_NEW_WINDOW(ResourceWindow);
-			REGISTER_NEW_WINDOW(ProjectWindow);
-			REGISTER_NEW_WINDOW(SystemInformationWindow);
+			//REGISTER_NEW_WINDOW(BuildSettingsWindow);
+			//REGISTER_NEW_WINDOW(ContentWindow);
+			//REGISTER_NEW_WINDOW(EntitiyDescriptionWindow);
+			//REGISTER_NEW_WINDOW(EntitiesWindow);
+			//REGISTER_NEW_WINDOW(InputWindow);
+			//REGISTER_NEW_WINDOW(MemoryWindow);
+			//REGISTER_NEW_WINDOW(ResourceWindow);
+			//REGISTER_NEW_WINDOW(ProjectWindow);
+			//REGISTER_NEW_WINDOW(SystemInformationWindow);
+
+			RegisterAllEditorWindows();
 
 #undef REGISTER_NEW_WINDOW
 		}
