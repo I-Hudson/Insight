@@ -36,6 +36,7 @@ namespace Insight
         void MemoryTracker::Initialise()
         {
 #ifdef IS_MEMORY_TRACKING
+            std::lock_guard lock(m_lock);
             m_isReady = true;
             for (size_t i = 0; i < static_cast<u64>(MemoryAllocCategory::Size); ++i)
             {
@@ -50,14 +51,13 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef IS_MEMORY_TRACKING
+            std::lock_guard lock(m_lock);
+
             if (!m_isReady)
             {
                 return;
             }
-
             m_isReady = false;
-
-            std::lock_guard lock(m_lock);
 
             if (m_allocations.size() > 0)
             {
@@ -113,12 +113,12 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef IS_MEMORY_TRACKING
+            std::unique_lock lock(m_lock);
+
             if (!m_isReady)
             {
                 return;
             }
-
-            std::unique_lock lock(m_lock);
 
             auto itr = m_allocations.find(ptr);
             //ASSERT(itr == m_allocations.end());
@@ -139,6 +139,10 @@ namespace Insight
                 TracyAlloc(ptr, size);
 #endif
             }
+            else
+            {
+                lock.unlock();
+            }
 #endif // IS_MEMORY_TRACKING
         }
 
@@ -147,12 +151,12 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef IS_MEMORY_TRACKING
+            std::lock_guard lock(m_lock);
+
             if (!m_isReady)
             {
                 return;
             }
-
-            std::lock_guard lock(m_lock);
 
             auto itr = m_allocations.find(ptr);
             //ASSERT(itr != m_allocations.end());
@@ -218,10 +222,13 @@ namespace Insight
                 callStack[i][0] = '\0';
             }
 
+            std::unique_lock lock(m_lock);
             if (!m_isReady)
             {
+                lock.unlock();
                 return callStack;
             }
+            lock.unlock();
 
 #ifdef IS_MEMORY_TRACKING
             /// TOOD: Think of a better way to have this supported. Would be nice to have this. Maybe a call stack should only be gotten

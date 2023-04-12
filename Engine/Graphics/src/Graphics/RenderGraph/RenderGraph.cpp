@@ -42,7 +42,7 @@ namespace Insight
 
 			m_context = context;
 
-			m_textureCaches = New<RHI_ResourceCache<RHI_Texture>, Insight::Core::MemoryAllocCategory::Graphics > ();;
+			m_textureCaches = New<RHI_ResourceCache<RHI_Texture>, Insight::Core::MemoryAllocCategory::Graphics>();
 			///m_textureCaches.Setup();
 			m_commandListManager.Setup();
 
@@ -83,7 +83,6 @@ namespace Insight
 				m_render_task->wait();
 			}
 #endif
-
 			m_passes.clear();
 
 			if (m_render_resolution_has_changed)
@@ -161,6 +160,10 @@ namespace Insight
 					{
 						cmdList->m_discard = true;
 					}
+				}
+				else
+				{
+					m_context->ExecuteAsyncJobs(cmdList);
 				}
 				m_context->PostRender(cmdList);
 

@@ -115,7 +115,7 @@ namespace Insight
                     break;
                 }
             }
-            if (path.back() == '/')
+            if (!path.empty() && path.back() == '/')
             {
                 path.pop_back();
             }

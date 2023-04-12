@@ -10,6 +10,7 @@ namespace Insight
 	{
 		void EventSystem::AddEventListener(void* object, EventType eventType, EventFunc func)
 		{
+			std::lock_guard eventListenerLock(m_eventListenersLock);
 			auto& eventFuncItr = m_eventListeners[eventType];
 			if (eventFuncItr.find(object) == eventFuncItr.end())
 			{
@@ -26,6 +27,7 @@ namespace Insight
 
 		void EventSystem::RemoveEventListener(void* object, EventType eventType)
 		{
+			std::lock_guard eventListenerLock(m_eventListenersLock);
 			auto eventFuncItr = m_eventListeners[eventType];
 			if (auto eventItr = eventFuncItr.find(object); eventItr != eventFuncItr.end())
 			{
@@ -35,12 +37,17 @@ namespace Insight
 
 		void EventSystem::DispatchEvent(RPtr<Event> e)
 		{
+			std::lock_guard queuedEventsLock(m_queuedEventsLock);
 			m_queuedEvents.push_back(std::move(e));
 		}
 
 		void EventSystem::Update()
 		{
-			std::vector<RPtr<Event>> eventsToEvaluate = std::move(m_queuedEvents);
+			std::vector<RPtr<Event>> eventsToEvaluate;
+			{
+				std::lock_guard queuedEventsLock(m_queuedEventsLock);
+				eventsToEvaluate = std::move(m_queuedEvents);
+			}
 			DiscardOutOfDateEvente(eventsToEvaluate);
 
 			for (const RPtr<Event>& event : eventsToEvaluate)

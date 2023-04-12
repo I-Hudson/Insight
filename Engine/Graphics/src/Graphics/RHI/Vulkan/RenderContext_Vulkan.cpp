@@ -565,9 +565,7 @@ namespace Insight
 
 			void RenderContext_Vulkan::PreRender(RHI_CommandList* cmdList)
 			{
-				// Go through out defered manager and call all the functions which have been queued up.
-				m_gpu_defered_manager.Update(cmdList);
-				m_uploadQueue.UploadToDevice(cmdList);
+				ExecuteAsyncJobs(cmdList);
 			}
 
 			void RenderContext_Vulkan::PostRender(RHI_CommandList* cmdList)
@@ -863,6 +861,13 @@ namespace Insight
 				ThrowIfFailed(vkWaitForFences(m_device, 1, &waitFence, 1, INFINITE));
 				vkDestroyFence(m_device, waitFence, nullptr);
 				waitFence = nullptr;
+			}
+
+			void RenderContext_Vulkan::ExecuteAsyncJobs(RHI_CommandList* cmdList)
+			{
+				// Go through out defered manager and call all the functions which have been queued up.
+				m_gpu_defered_manager.Update(cmdList);
+				m_uploadQueue.UploadToDevice(cmdList);
 			}
 
 			void RenderContext_Vulkan::SetObjectName(std::string_view name, u64 handle, VkObjectType objectType)

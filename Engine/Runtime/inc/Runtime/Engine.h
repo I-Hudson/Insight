@@ -51,11 +51,15 @@ namespace Insight
 
 			Core::SystemRegistry& GetSystemRegistry() { return m_systemRegistry; }
 
+			static bool IsUpdateThread();
+
 			static Core::Timer s_FrameTimer;
 		private:
 			Graphics::Renderpass m_renderpasses;
 
 			bool m_shouldClose = false;
+
+			std::thread::id m_updateThread;
 
 			// Systems
 			Core::SystemRegistry m_systemRegistry;

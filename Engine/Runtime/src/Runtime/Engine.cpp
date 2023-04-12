@@ -38,6 +38,8 @@ namespace Insight
 			IS_CORE_INFO("Runtime Version {}.{}.{}.", 
 				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 
+			m_updateThread = std::this_thread::get_id();
+
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
@@ -122,6 +124,8 @@ namespace Insight
 			{
 				IS_PROFILE_FRAME("MainThread");
 				IS_PROFILE_SCOPE("Frame");
+
+				ASSERT(IsUpdateThread());
 
 				s_FrameTimer.Stop();
 				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
@@ -214,6 +218,11 @@ namespace Insight
 			ASSERT(m_systemRegistry.IsEmpty());
 
 			Platform::Shutdown();
+		}
+
+		bool Engine::IsUpdateThread()
+		{
+			return Engine::Instance().m_updateThread == std::this_thread::get_id();
 		}
 	}
 }

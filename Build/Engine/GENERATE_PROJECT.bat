@@ -5,15 +5,18 @@
 SET prmakeFile=%1
 SET option=%2
 
-IF "%option%" == "" GOTO PrintHelp
-IF "%option%" == "compile" GOTO Compile
+IF "%option%" == "" GOTO PrintHelp exit
+IF "%option%" == "compile" GOTO Compile exit
 
-set premake=..\..\vendor\premake\premake5.exe
+set premake=%cd%\..\..\vendor\premake\premake5.exe
 
 call %premake% --version
+echo Generating solution for premake file: '%prmakeFile%' with options '%option%'
 call %premake% --file=%prmakeFile% %option%
+echo:
 call Generate_Symlinks.bat
-GOTO: END
+
+exit /b
 
 :PrintHelp
 echo.
@@ -32,7 +35,4 @@ echo   vs2015            Generate Visual Studio 2015 project files
 echo   vs2017            Generate Visual Studio 2017 project files
 echo   vs2019            Generate Visual Studio 2019 project files
 echo   xcode4            Generate Apple Xcode 4 project files
-
-GOTO: END
-
-:END
+echo:

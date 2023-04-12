@@ -18,6 +18,7 @@ namespace Insight
 
 		class IS_CORE EventSystem : public Singleton<EventSystem>, public Core::ISystem
 		{
+			THREAD_SAFE;
 		public:
 			IS_SYSTEM(EventSystem);
 
@@ -35,7 +36,9 @@ namespace Insight
 			void DiscardOutOfDateEvente(std::vector<RPtr<Event>>& events);
 
 		private:
+			std::mutex m_eventListenersLock;
 			std::unordered_map<EventType, std::unordered_map<void*, EventFunc>> m_eventListeners;
+			std::mutex m_queuedEventsLock;
 			std::vector<RPtr<Event>> m_queuedEvents;
 		};
 	}

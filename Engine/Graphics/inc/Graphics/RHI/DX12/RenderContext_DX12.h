@@ -64,6 +64,9 @@ namespace Insight
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
+				/// @brief Execute anything that is not directly graphics related like uploading data to the GPU.
+				virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) override;
+
 				void SetObjectName(std::string_view name, ID3D12Object* handle);
 
 				virtual RHI_Texture* GetSwaphchainIamge() const override;
@@ -89,6 +92,7 @@ namespace Insight
 				void ResizeSwapchainBuffers();
 
 				void WaitForNextFrame();
+				void RendererThreadUpdate();
 
 			private:
 				RHI_PhysicalDevice_DX12 m_physicalDevice;
@@ -118,6 +122,8 @@ namespace Insight
 				int m_currentFrame = 0;
 				u32 m_availableSwapchainImage = 0;
 
+				std::thread m_rendererThread;
+				std::atomic<bool> m_rendererThreadShutdown = false;
 				FrameResource<FrameSubmitContext_DX12> m_submitFrameContexts;
 			};
 		}

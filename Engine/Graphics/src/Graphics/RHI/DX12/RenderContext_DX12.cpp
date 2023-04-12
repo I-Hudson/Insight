@@ -209,12 +209,23 @@ namespace Insight
 
 				WaitForGpu();
 
+				m_rendererThread = std::thread([&]()
+					{
+						while (!m_rendererThreadShutdown)
+						{
+							RendererThreadUpdate();
+						}
+					});
+
 				return true;
 			}
 
 			void RenderContext_DX12::Destroy()
 			{
 				WaitForGpu();
+
+				m_rendererThreadShutdown = true;
+				m_rendererThread.join();
 
 				DestroyImGui();
 
@@ -354,9 +365,7 @@ namespace Insight
 
 			void RenderContext_DX12::PreRender(RHI_CommandList* cmdList)
 			{
-				// Go through out defered manager and call all the functions which have been queued up.
-				m_gpu_defered_manager.Update(cmdList);
-				m_uploadQueue.UploadToDevice(cmdList);
+				ExecuteAsyncJobs(cmdList);
 
 				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
 
@@ -566,14 +575,17 @@ namespace Insight
 
 			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
 			{
-				WaitForGpu();
+				m_gpu_defered_manager.Instance().Push(this, [this, resolution](RHI_CommandList* cmdList)
+					{
+						WaitForGpu();
 
-				SwapchainDesc desc = m_swapchainDesc;
-				desc.Width = resolution.x;
-				desc.Height = resolution.y;
+						SwapchainDesc desc = m_swapchainDesc;
+						desc.Width = resolution.x;
+						desc.Height = resolution.y;
 
-				CreateSwapchain(desc);
-				Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+						CreateSwapchain(desc);
+						Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::GraphcisSwapchainResize>(m_swapchainBufferSize.x, m_swapchainBufferSize.y));
+					});
 			}
 
 			glm::ivec2 RenderContext_DX12::GetSwaphchainResolution() const
@@ -598,6 +610,13 @@ namespace Insight
 				ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				GpuWaitForIdle();
+			}
+
+			void RenderContext_DX12::ExecuteAsyncJobs(RHI_CommandList* cmdList)
+			{
+				// Go through out deferred manager and call all the functions which have been queued up.
+				m_gpu_defered_manager.Update(cmdList);
+				m_uploadQueue.UploadToDevice(cmdList);
 			}
 
 			void RenderContext_DX12::SetObjectName(std::string_view name, ID3D12Object* handle)
@@ -732,6 +751,11 @@ namespace Insight
 				//m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 				///// Set the fence value for the next frame.
 				//m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
+			}
+
+			void RenderContext_DX12::RendererThreadUpdate()
+			{
+				IS_CORE_INFO("Renderer thread update");
 			}
 
 			DescriptorHeap_DX12& RenderContext_DX12::GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType)

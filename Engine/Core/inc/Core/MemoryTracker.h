@@ -171,6 +171,7 @@ namespace Insight
 
 		class IS_CORE MemoryTracker
 		{
+			THREAD_SAFE;
 		public:
 			~MemoryTracker();
 

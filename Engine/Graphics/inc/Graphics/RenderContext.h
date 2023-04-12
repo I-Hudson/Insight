@@ -126,6 +126,9 @@ namespace Insight
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 
+			/// @brief Execute anything that is not directly graphics related like uploading data to the GPU.
+			virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) = 0;
+
 			virtual RHI_Texture* GetSwaphchainIamge() const = 0;
 
 			virtual void SetFullScreen() { }
