@@ -92,21 +92,34 @@ namespace Insight
 					if (obj)
 					{
 						obj->Release();
-						DeleteTracked(obj);
+						Delete(obj);
 					}
 				}
 				m_objects.clear();
 			}
 
 			int GetSize() const { return static_cast<int>(m_objects.size()); }
+			bool IsEmpty() const { return m_objects.size() == 0ull; }
 
 		protected:
 			std::unordered_set<TypePtr> m_objects;
 			std::mutex m_lock;
 		};
 
+		/// @brief Empty base class used for tracking elsewhere.
+		class IRHI_ResourceCache
+		{
+		public:
+			virtual ~IRHI_ResourceCache() { }
+
+			virtual void Release() = 0;
+		};
+
+		/// @brief Setup a small cache object which allows for fast access to a given resource type.
+		/// This is like a map.
+		/// @tparam TValue 
 		template<typename TValue>
-		class RHI_ResourceCache : public RHI_ResourceManager<TValue>
+		class RHI_ResourceCache : public IRHI_ResourceCache
 		{
 			THREAD_SAFE;
 			static_assert(std::is_base_of_v<RHI_Resource, TValue>);
@@ -121,6 +134,9 @@ namespace Insight
 			};
 
 		public:
+			RHI_ResourceCache(RHI_ResourceManager<TValue>& manager)
+				: m_manager(manager)
+			{ }
 
 			int AddOrReturn(std::string str)
 			{
@@ -131,7 +147,7 @@ namespace Insight
 					return itr->second.Id;
 				}
 
-				TypePtr ptr = RHI_ResourceManager<TValue>::CreateResource();
+				TypePtr ptr = m_manager.CreateResource();
 				ptr->SetName(str);
 				int id = GetFreeId();
 
@@ -139,6 +155,29 @@ namespace Insight
 				m_idToStrLookup[id] = str;
 
 				return id;
+			}
+
+			void ReleaseResource(int id)
+			{
+				std::lock_guard lock(m_lock);
+
+				auto idToStrItr = m_idToStrLookup.find(id);
+				if (idToStrItr == m_idToStrLookup.end())
+				{
+					return;
+				}
+
+				auto strToResourceItr = m_itemLookup.find(idToStrItr->second);
+				if (strToResourceItr == m_itemLookup.end())
+				{
+					return;
+				}
+				TypePtr resource = strToResourceItr->second.ItemPtr;
+				m_manager.FreeResource(resource);
+				ReturnId(id);
+
+				m_idToStrLookup.erase(idToStrItr);
+				m_itemLookup.erase(strToResourceItr);
 			}
 
 			TypePtr Get(std::string key)
@@ -171,13 +210,16 @@ namespace Insight
 				return -1;
 			}
 
-			void Reset()
+			virtual void Release() override
 			{
 				std::lock_guard lock(m_lock);
+				for (const auto& [str, item] : m_itemLookup)
+				{
+					m_manager.FreeResource(item.ItemPtr);
+				}
 				m_itemLookup.clear();
 				m_idToStrLookup.clear();
 				m_currentMaxId = 0;
-				RHI_ResourceManager<TValue>::ReleaseAll();
 			}
 
 		private:
@@ -201,10 +243,12 @@ namespace Insight
 
 		private:
 			std::mutex m_lock;
-			std::unordered_map<std::string, Item> m_itemLookup;
+
+			RHI_ResourceManager<TValue>& m_manager;
 
 			int m_currentMaxId = 0;
 			std::queue<int> m_freeIds;
+			std::unordered_map<std::string, Item> m_itemLookup;
 			std::unordered_map<int, std::string> m_idToStrLookup;
 		};
 	}

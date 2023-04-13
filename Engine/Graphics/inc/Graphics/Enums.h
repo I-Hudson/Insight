@@ -433,8 +433,19 @@ namespace Insight
 			CBV,
 			SRV,
 			UAV,
-			Unknown
+			Unknown,
+
+			Size
 		};
+		constexpr const char* DescriptorResourceTypeToString[] =
+		{
+			"Sampler",
+			"CBV",
+			"SRV",
+			"UAV",
+			"Unknown",
+		};
+		static_assert(ARRAY_COUNT(DescriptorResourceTypeToString) == static_cast<u64>(DescriptorResourceType::Size));
 
 		enum class BufferType
 		{
@@ -444,8 +455,21 @@ namespace Insight
 			Storage,
 			Raw,
 			Staging,
-			Readback
+			Readback,
+
+			Size
 		};
+		constexpr const char* BufferTypeToString[] =
+		{
+			"Vertex",
+			"Index",
+			"Uniform",
+			"Storage",
+			"Raw",
+			"Staging",
+			"Readback",
+		};
+		static_assert(ARRAY_COUNT(BufferTypeToString) == static_cast<u64>(BufferType::Size));
 
 		enum class TextureType
 		{
@@ -458,7 +482,20 @@ namespace Insight
 
 			Tex2DArray,
 			Tex3DArray,
+
+			Size,
 		};
+		constexpr const char* TextureTypeToString[] =
+		{
+			"Unknown",
+			"Tex1D",
+			"Tex2D",
+			"Tex3D",
+			"TexCube",
+			"Tex2DArray",
+			"Tex3DArray",
+		};
+		static_assert(ARRAY_COUNT(TextureTypeToString) == static_cast<u64>(TextureType::Size));
 
 		enum class IndexType
 		{

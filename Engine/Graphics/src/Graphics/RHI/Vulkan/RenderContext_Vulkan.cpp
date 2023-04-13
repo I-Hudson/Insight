@@ -339,6 +339,7 @@ namespace Insight
 				std::lock_guard lock(m_lock);
 
 				GpuWaitForIdle();
+				m_resource_tracker.Release();
 
 				DestroyImGui();
 
@@ -486,6 +487,7 @@ namespace Insight
 			{
 				IS_PROFILE_FUNCTION();
 
+				ImGuiRelease();
 				ImGui_ImplVulkan_Shutdown();
 
 				for (VkFramebuffer& frameBuffer : m_imguiFramebuffers)

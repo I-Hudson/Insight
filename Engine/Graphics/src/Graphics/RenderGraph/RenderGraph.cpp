@@ -31,7 +31,7 @@ namespace Insight
 					m_passes.clear();
 					
 					// Release all textures as the size they need to be has changed.
-					m_textureCaches->Reset();
+					m_textureCaches->Release();
 
 					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
 					if (m_set_render_resolution_to_window_resolution_auto)
@@ -42,7 +42,7 @@ namespace Insight
 
 			m_context = context;
 
-			m_textureCaches = New<RHI_ResourceCache<RHI_Texture>, Insight::Core::MemoryAllocCategory::Graphics>();
+			m_textureCaches = Renderer::CreateTextureResourceCache();
 			///m_textureCaches.Setup();
 			m_commandListManager.Setup();
 
@@ -93,7 +93,7 @@ namespace Insight
 				m_passes.clear();
 
 				// Release all current textures.
-				m_textureCaches->Reset();
+				m_textureCaches->Release();
 			}
 
 			m_passes = std::move(m_pending_passes);
@@ -136,6 +136,8 @@ namespace Insight
 
 					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
 					cmdList->m_descriptorAllocator->Reset();
+
+					//cmdList = m_context->GetFrameCommandList();
 
 					Build();
 					PlaceBarriers();
@@ -233,8 +235,7 @@ namespace Insight
 
 			m_passes.clear();
 
-			m_textureCaches->Reset();
-			DeleteTracked(m_textureCaches);
+			Renderer::FreeResourceCache(m_textureCaches);
 
 			m_commandListManager.ForEach([](CommandListManager& manager)
 				{
@@ -348,6 +349,7 @@ namespace Insight
 					for (auto const& rt : pass.Get()->m_textureWrites)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+						
 						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
 
 						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);

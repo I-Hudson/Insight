@@ -40,9 +40,14 @@ namespace Insight
 			bool IsResourceInUse(const RHI_Resource* resource) const;
 			void AddDeferedRelase(DeferedReleaseFunc release_func);
 
+			/// @brief Release all resources. This should only be called once at the end of the execution.
+			void Release();
+
 		private:
 			TrackedResourceMap m_tracked_resources;
 			DeferedResourceReleaseMap m_defered_resources_to_release;
+
+			bool m_releaseAllResources = false;
 		};
 	}
 }

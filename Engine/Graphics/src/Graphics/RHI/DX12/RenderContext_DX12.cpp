@@ -223,13 +223,12 @@ namespace Insight
 			void RenderContext_DX12::Destroy()
 			{
 				WaitForGpu();
+				m_resource_tracker.Release();
 
 				m_rendererThreadShutdown = true;
 				m_rendererThread.join();
 
 				DestroyImGui();
-
-				BaseDestroy();
 
 				m_pipelineManager.Destroy();
 				m_pipelineLayoutManager.Destroy();
@@ -243,11 +242,6 @@ namespace Insight
 						context.DescriptorHeapSampler.Destroy();
 					});
 
-				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
-				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
-				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
-				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
-
 				m_queues.clear();
 
 				for (auto& image : m_swapchainImages)
@@ -255,6 +249,15 @@ namespace Insight
 					Renderer::FreeTexture(image.Colour);
 					image.Colour = nullptr;
 				}
+
+				m_samplerManager->ReleaseAll();
+
+				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
+				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
+
+				BaseDestroy();
 
 				if (m_swapchain)
 				{
@@ -314,6 +317,7 @@ namespace Insight
 
 			void RenderContext_DX12::DestroyImGui()
 			{
+				ImGuiRelease();
 				ImGui_ImplDX12_Shutdown();
 			}
 

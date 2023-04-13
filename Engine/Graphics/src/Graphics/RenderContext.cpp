@@ -1,6 +1,5 @@
 #include "Graphics/RenderContext.h"
 
-
 #include "Graphics/RHI/Vulkan/RenderContext_Vulkan.h"
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
@@ -9,6 +8,8 @@
 #include "Core/Memory.h"
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
+
+#include "Algorithm/Vector.h"
 
 #include "backends/imgui_impl_glfw.h"
 #include <IconsFontAwesome5.h>
@@ -135,9 +136,17 @@ namespace Insight
 			ImGui::UpdatePlatformWindows();
 		}
 
+		void RenderContext::ImGuiRelease()
+		{
+			if (m_font_texture)
+			{
+				Renderer::FreeTexture(m_font_texture);
+				m_font_texture = nullptr;
+			}
+		}
+
 		void RenderContext::BaseDestroy()
 		{
-			m_textures.ReleaseAll();
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
 			m_descriptorLayoutManager.ReleaseAll();
@@ -153,17 +162,33 @@ namespace Insight
 			m_samplerManager->ReleaseAll();
 			DeleteTracked(m_samplerManager);
 
-			if (m_font_texture)
-			{
-				Renderer::FreeTexture(m_font_texture);
-				m_font_texture = nullptr;
-			}
-
 			m_uploadQueue.Destroy();
 
-			for (auto& buffer : m_buffers)
+			if (!m_resourceCaches.empty())
 			{
-				buffer.second.ReleaseAll();
+				IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_ResourceCache's have been release with 'FreeResourceCache'. Please do this.");
+				for (auto& cache : m_resourceCaches)
+				{
+					cache->Release();
+					Delete(cache);
+				}
+				m_resourceCaches.clear();
+			}
+
+			if (!m_textures.IsEmpty())
+			{
+				IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_Texture's have been release with 'FreeTexture'. Please do this.");
+				//m_textures.ReleaseAll();
+			}
+
+			for (auto& [bufferType, buffer] : m_buffers)
+			{
+				if (!buffer.IsEmpty())
+				{
+					IS_CORE_WARN("[RenderContext::BaseDestroy] Not all RHI_Buffer of type '{0}' have been release with the appropriate 'Free{0}Buffer'. Please do this.",
+						BufferTypeToString[(int)bufferType]);
+					buffer.ReleaseAll();
+				}
 			}
 		}
 
@@ -326,5 +351,34 @@ namespace Insight
 	Graphics::GraphicsAPI Renderer::GetGraphicsAPI()
 	{
 		return s_context->GetGraphicsAPI();
+	}
+
+	Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* Renderer::CreateBufferResourceCache(const Graphics::BufferType bufferType)
+	{
+		ASSERT(s_context);
+		Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* resourceCache =
+			New<Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>, Core::MemoryAllocCategory::Graphics>(s_context->m_buffers.at(bufferType));
+		s_context->m_resourceCaches.push_back(resourceCache);
+		return resourceCache;
+	}
+	Graphics::RHI_ResourceCache<Graphics::RHI_Texture>* Renderer::CreateTextureResourceCache()
+	{
+		ASSERT(s_context);
+		Graphics::RHI_ResourceCache<Graphics::RHI_Texture>* resourceCache = 
+			New<Graphics::RHI_ResourceCache<Graphics::RHI_Texture>, Core::MemoryAllocCategory::Graphics>(s_context->m_textures);
+		s_context->m_resourceCaches.push_back(resourceCache);
+		return resourceCache;
+	}
+
+	void Renderer::FreeResourceCache(Graphics::IRHI_ResourceCache* resourceCache)
+	{
+		if (resourceCache == nullptr)
+		{
+			return;
+		}
+		ASSERT(s_context);
+		Algorithm::VectorRemove(s_context->m_resourceCaches, resourceCache);
+		resourceCache->Release();
+		Delete(resourceCache);
 	}
 }

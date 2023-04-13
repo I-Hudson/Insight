@@ -56,6 +56,12 @@ namespace Insight
 
 		bool RHI_ResourceRenderTracker::IsResourceInUse(const RHI_Resource* resource) const
 		{
+			if (m_releaseAllResources)
+			{
+				// All resources should be released no matter what.
+				return false;
+			}
+
 			const u64 current_frame = RenderGraph::Instance().GetFrameCount();
 			// Get the latest frame this resource was used in.
 			if (current_frame <= RenderGraph::s_MaxFarmeCount)
@@ -76,6 +82,11 @@ namespace Insight
 		{
 			const u64 current_frame = RenderGraph::Instance().GetFrameCount();
 			m_defered_resources_to_release[current_frame].push_back(release_func);
+		}
+
+		void RHI_ResourceRenderTracker::Release()
+		{
+			m_releaseAllResources = true;
 		}
 	}
 }

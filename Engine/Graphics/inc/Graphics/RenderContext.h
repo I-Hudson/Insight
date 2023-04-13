@@ -160,6 +160,7 @@ namespace Insight
 		protected:
 			void ImGuiBeginFrame();
 			void ImGuiRender();
+			void ImGuiRelease();
 
 			virtual void WaitForGpu() = 0;
 
@@ -188,8 +189,10 @@ namespace Insight
 
 			SwapchainDesc m_swapchainDesc;
 
-			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
+			std::vector<IRHI_ResourceCache*> m_resourceCaches;
 			RHI_ResourceManager<RHI_Texture> m_textures;
+			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
+
 			RHI_ResourceRenderTracker m_resource_tracker;
 
 			RHI_ShaderManager m_shaderManager;
@@ -240,6 +243,11 @@ namespace Insight
 		static void FreeTexture(Graphics::RHI_Texture* texture);
 
 		static Graphics::GraphicsAPI GetGraphicsAPI();
+
+		static Graphics::RHI_ResourceCache<Graphics::RHI_Buffer>* CreateBufferResourceCache(const Graphics::BufferType bufferType);
+		static Graphics::RHI_ResourceCache<Graphics::RHI_Texture>* CreateTextureResourceCache();
+
+		static void FreeResourceCache(Graphics::IRHI_ResourceCache* resourceCache);
 
 	private:
 		static Graphics::RenderContext* s_context;
