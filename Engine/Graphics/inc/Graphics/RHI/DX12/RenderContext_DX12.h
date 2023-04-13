@@ -6,6 +6,7 @@
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Descriptor_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Queue_DX12.h"
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/RHI/RHI_GPUCrashTracker.h"
@@ -106,6 +107,7 @@ namespace Insight
 
 				RHI_GPUCrashTracker* m_gpuCrashTracker = nullptr;
 
+				RHI_Queue_DX12 m_graphicsQueue;
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			
 				std::array<DescriptorHeap_DX12, static_cast<u64>(DescriptorHeapTypes::NumDescriptors)> m_descriptorHeaps;

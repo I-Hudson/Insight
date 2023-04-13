@@ -16,8 +16,6 @@
 #include "Graphics/RHI/RHI_UploadQueue.h"
 #include "Graphics/RHI/RHI_PipelineManager.h"
 
-#include "Graphics/RenderGraph/RenderGraph.h"
-
 #include "Graphics/RenderStats.h"
 
 #include "Core/Collections/FactoryMap.h"
@@ -82,6 +80,44 @@ namespace Insight
 					break;
 				}
 			}
+		};
+
+		template<typename TValue>
+		class FrameResource
+		{
+		public:
+			void Setup()
+			{
+				m_values.clear();
+				m_values.resize(RenderContext::Instance().GetFramesInFligtCount());
+			}
+
+			TValue* operator->() const
+			{
+				return const_cast<TValue*>(&m_values.at(RenderContext::Instance().GetFrameIndex()));
+			}
+
+			TValue& Get()
+			{
+				ASSERT(!m_values.empty());
+				return m_values.at(RenderContext::Instance().GetFrameIndex());
+			}
+
+			u64 Size() const
+			{
+				return m_values.size();
+			}
+
+			void ForEach(std::function<void(TValue& value)> func)
+			{
+				for (TValue& v : m_values)
+				{
+					func(v);
+				}
+			}
+
+		private:
+			std::vector<TValue> m_values;
 		};
 
 		/// @brief Define values for the swapchain.

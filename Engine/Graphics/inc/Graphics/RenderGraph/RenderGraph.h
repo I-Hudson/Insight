@@ -7,6 +7,8 @@
 #include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 
+#include "Graphics/RenderContext.h"
+
 #include <type_traits>
 #include <unordered_map>
 #include <functional>
@@ -20,44 +22,6 @@ namespace Insight
 	{
 		class RHI_Texture;
 		class RenderContext;
-
-		template<typename TValue>
-		class FrameResource
-		{
-		public:
-			void Setup()
-			{
-				m_values.clear();
-				m_values.resize(RenderContext::Instance().GetFramesInFligtCount());
-			}
-
-			TValue* operator->() const
-			{
-				return const_cast<TValue*>(&m_values.at(RenderContext::Instance().GetFrameIndex()));
-			}
-
-			TValue& Get()
-			{
-				ASSERT(!m_values.empty());
-				return m_values.at(RenderContext::Instance().GetFrameIndex());
-			}
-
-			u64 Size() const
-			{
-				return m_values.size();
-			}
-
-			void ForEach(std::function<void(TValue& value)> func)
-			{
-				for (TValue& v : m_values)
-				{
-					func(v);
-				}
-			}
-
-		private:
-			std::vector<TValue> m_values;
-		};
 
 		class IS_GRAPHICS RenderGraph : public Core::Singleton<RenderGraph>
 		{

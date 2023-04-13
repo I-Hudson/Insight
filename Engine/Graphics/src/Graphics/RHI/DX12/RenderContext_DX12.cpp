@@ -111,13 +111,9 @@ namespace Insight
 				queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 				queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
-				HRESULT createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Graphics]));
-				if (createCommandQueueResult != S_OK)
-				{
-					IS_CORE_WARN("[GPUDevice_DX12::Init] Queue not supproted: {}, HR: {}",
-						(int)D3D12_COMMAND_LIST_TYPE_DIRECT, HrToString(createCommandQueueResult));
-				}
+				m_graphicsQueue.Initialise(m_device.Get(), GPUQueue_Graphics);
 
+				HRESULT createCommandQueueResult;
 				queueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
 				createCommandQueueResult = m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_queues[GPUQueue_Compute]));
 				if (createCommandQueueResult != S_OK)
@@ -242,6 +238,7 @@ namespace Insight
 						context.DescriptorHeapSampler.Destroy();
 					});
 
+				m_graphicsQueue.Release();
 				m_queues.clear();
 
 				for (auto& image : m_swapchainImages)
@@ -348,12 +345,13 @@ namespace Insight
 					// First get the status of the fence. Then if it has not finished, wait on it.
 
 					// If the next frame is not ready to be rendered yet, wait until it is ready.
-					u64 fenceCompletedValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
-					if (fenceCompletedValue < m_submitFrameContexts.Get().SubmitFenceValue)
-					{
-						ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
-						WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
-					}
+					//u64 fenceCompletedValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+					//if (fenceCompletedValue < m_submitFrameContexts.Get().SubmitFenceValue)
+					//{
+					//	ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
+					//	WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
+					//}
+					m_graphicsQueue.Wait();
 					m_submitFrameContexts->OnCompleted();
 
 					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
@@ -406,8 +404,16 @@ namespace Insight
 
 						{
 							IS_PROFILE_SCOPE("ExecuteCommandLists");
-							ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-							m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+							//ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
+							//m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+							//
+							//// Schedule a Signal command in the queue.
+							//++m_submitFrameContexts.Get().SubmitFenceValue;
+							//const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
+							//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
+
+							m_graphicsQueue.Submit(cmdListDX12);
+
 							++m_frameCount;
 						}
 
@@ -426,11 +432,6 @@ namespace Insight
 									IS_CORE_ERROR("[RenderContext_DX12::PostRender] Device has been removed. Reason: '{}'.", deviceRemovedReason);
 								}
 							}
-
-							// Schedule a Signal command in the queue.
-							++m_submitFrameContexts.Get().SubmitFenceValue;
-							const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
-							ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
 							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
 						}
@@ -513,7 +514,7 @@ namespace Insight
 
 				ComPtr<IDXGISwapChain1> swapchain;
 				ThrowIfFailed(factory->CreateSwapChainForHwnd(
-					m_queues[GPUQueue_Graphics].Get(),
+					m_graphicsQueue.GetQueue(),
 					hwmd,
 					&swapChainDesc,
 					nullptr,
@@ -613,9 +614,10 @@ namespace Insight
 			void RenderContext_DX12::SubmitCommandListAndWait(RHI_CommandList* cmdList)
 			{
 				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
-				ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-				m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-				GpuWaitForIdle();
+				//ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
+				//m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+				//GpuWaitForIdle();
+				m_graphicsQueue.SubmitAndWait(cmdListDX12);
 			}
 
 			void RenderContext_DX12::ExecuteAsyncJobs(RHI_CommandList* cmdList)
@@ -802,17 +804,18 @@ namespace Insight
 			void RenderContext_DX12::WaitForGpu()
 			{
 				// Increment the fence value for the current frame.
-				++m_submitFrameContexts.Get().SubmitFenceValue;
-				u64 currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
-
-				// Schedule a Signal command in the queue.
-				ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), m_submitFrameContexts.Get().SubmitFenceValue));
-
-				// Wait until the fence has been processed.
-				ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
-				WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
-
-				currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+				//++m_submitFrameContexts.Get().SubmitFenceValue;
+				//u64 currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+				//
+				//// Schedule a Signal command in the queue.
+				//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), m_submitFrameContexts.Get().SubmitFenceValue));
+				//
+				//// Wait until the fence has been processed.
+				//ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
+				//WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
+				//
+				//currentFenceValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
+				m_graphicsQueue.SignalAndWait();
 			}
 		}
 	}
