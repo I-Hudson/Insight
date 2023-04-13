@@ -15,8 +15,6 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		u32 RenderGraph::s_MaxFarmeCount = 2;
-
 		RenderGraph::RenderGraph()
 		{ }
 
@@ -44,13 +42,13 @@ namespace Insight
 
 			m_textureCaches = Renderer::CreateTextureResourceCache();
 			///m_textureCaches.Setup();
-			m_commandListManager.Setup();
+			//m_commandListManager.Setup();
 
-			m_commandListManager.Setup();
-			m_commandListManager.ForEach([this](CommandListManager& manager)
-			{
-				manager.Create(m_context);
-			});
+			//m_commandListManager.Setup();
+			//m_commandListManager.ForEach([this](CommandListManager& manager)
+			//{
+			//	manager.Create(m_context);
+			//});
 
 			m_descriptorManagers.Setup();
 			m_descriptorManagers.ForEach([this](DescriptorAllocator& alloc)
@@ -131,8 +129,9 @@ namespace Insight
 				RHI_CommandList* cmdList = nullptr;
 				if (m_context->PrepareRender())
 				{
-					m_commandListManager.Get().Reset();
-					cmdList = m_commandListManager.Get().GetCommandList();
+					cmdList = m_context->GetCommandListManager().GetCommandList();
+					//m_commandListManager.Get().Reset();
+					//cmdList = m_commandListManager.Get().GetCommandList();
 
 					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
 					cmdList->m_descriptorAllocator->Reset();
@@ -156,8 +155,6 @@ namespace Insight
 						m_post_render_func(*this, cmdList);
 					}
 
-					//Clear();
-					++m_frame_count;
 					if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
 					{
 						cmdList->m_discard = true;
@@ -168,8 +165,6 @@ namespace Insight
 					m_context->ExecuteAsyncJobs(cmdList);
 				}
 				m_context->PostRender(cmdList);
-
-				m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
 			}
 		}
 
@@ -237,10 +232,10 @@ namespace Insight
 
 			Renderer::FreeResourceCache(m_textureCaches);
 
-			m_commandListManager.ForEach([](CommandListManager& manager)
-				{
-					manager.Destroy();
-				});
+			//m_commandListManager.ForEach([](CommandListManager& manager)
+			//	{
+			//		manager.Destroy();
+			//	});
 
 			m_descriptorManagers.ForEach([](DescriptorAllocator& allocator)
 				{

@@ -174,8 +174,8 @@ namespace Insight
 				sampler_desc.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 				m_device->CreateSampler(&sampler_desc, m_samNullHandle.CPUPtr);
 
-				m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
-				for (size_t i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
+				m_swapchainImages.resize(RenderContext::Instance().GetFramesInFligtCount());
+				for (size_t i = 0; i < RenderContext::Instance().GetFramesInFligtCount(); ++i)
 				{
 					m_swapchainImages[i].ColourHandle = m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).GetNewHandle();
 				}
@@ -305,7 +305,7 @@ namespace Insight
 				DescriptorHeapHandle_DX12 handle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
 
 				ImGui_ImplDX12_Init(m_device.Get(),
-					RenderGraph::s_MaxFarmeCount,
+					RenderContext::Instance().GetFramesInFligtCount(),
 					DXGI_FORMAT_R8G8B8A8_UNORM,
 					m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetHeap(handle.HeapId),
 					handle.CPUPtr,
@@ -408,6 +408,7 @@ namespace Insight
 							IS_PROFILE_SCOPE("ExecuteCommandLists");
 							ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
 							m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+							++m_frameCount;
 						}
 
 						{
@@ -431,10 +432,11 @@ namespace Insight
 							const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
 							ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
-							m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
+							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
 						}
 					}
 				}
+				m_frameIndex = (m_frameIndex + 1) % GetFramesInFligtCount();
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
@@ -495,7 +497,7 @@ namespace Insight
 				}
 
 				DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-				swapChainDesc.BufferCount = RenderGraph::s_MaxFarmeCount;
+				swapChainDesc.BufferCount = RenderContext::Instance().GetFramesInFligtCount();
 				swapChainDesc.Width = static_cast<UINT>(m_swapchainBufferSize.x);
 				swapChainDesc.Height = static_cast<UINT>(m_swapchainBufferSize.y);
 				swapChainDesc.Format = PixelFormatToDX12(desc.Format);
@@ -543,8 +545,8 @@ namespace Insight
 
 				swapchain.As(&m_swapchain);
 
-				//m_swapchainImages.resize(RenderGraph::s_MaxFarmeCount);
-				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
+				//m_swapchainImages.resize(RenderContext::Instance().GetFramesInFligtCount());
+				for (u32 i = 0; i < RenderContext::Instance().GetFramesInFligtCount(); ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
 
@@ -723,11 +725,11 @@ namespace Insight
 				}
 
 				/// Resize our swap chain buffers.
-				m_swapchain->ResizeBuffers(RenderGraph::s_MaxFarmeCount, m_swapchainBufferSize.x, m_swapchainBufferSize.y, DXGI_FORMAT_UNKNOWN, 0);
+				m_swapchain->ResizeBuffers(RenderContext::Instance().GetFramesInFligtCount(), m_swapchainBufferSize.x, m_swapchainBufferSize.y, DXGI_FORMAT_UNKNOWN, 0);
 				const UINT frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 
 				/// Create new render targets for the swapchain.
-				for (u32 i = 0; i < RenderGraph::s_MaxFarmeCount; ++i)
+				for (u32 i = 0; i < RenderContext::Instance().GetFramesInFligtCount(); ++i)
 				{
 					SwapchainImage& swapchainImage = m_swapchainImages[i];
 					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_swapchainImage)));

@@ -1,7 +1,7 @@
 #include "Graphics/RHI/RHI_ResourceRenderTracker.h"
 #include "Graphics/RHI/RHI_Resource.h"
 
-#include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderContext.h"
 
 namespace Insight
 {
@@ -14,14 +14,14 @@ namespace Insight
 
 		void RHI_ResourceRenderTracker::EndFrame()
 		{
-			const u64 current_frame = RenderGraph::Instance().GetFrameCount();
-			if (current_frame <= RenderGraph::s_MaxFarmeCount)
+			const u64 current_frame = RenderContext::Instance().GetFrameCount();
+			if (current_frame <= RenderContext::Instance().GetFramesInFligtCount())
 			{
 				// Not enough frames have passed.
 				return;
 			}
 
-			const u64 out_of_date_frame = current_frame - RenderGraph::s_MaxFarmeCount - 6;
+			const u64 out_of_date_frame = current_frame - RenderContext::Instance().GetFramesInFligtCount() - 6;
 			std::vector<u64> frams_to_remove;
 
 			for (auto pair : m_defered_resources_to_release)
@@ -51,7 +51,7 @@ namespace Insight
 			{
 				return;
 			}
-			m_tracked_resources[resource] = RenderGraph::Instance().GetFrameCount();
+			m_tracked_resources[resource] = RenderContext::Instance().GetFrameCount();
 		}
 
 		bool RHI_ResourceRenderTracker::IsResourceInUse(const RHI_Resource* resource) const
@@ -62,9 +62,9 @@ namespace Insight
 				return false;
 			}
 
-			const u64 current_frame = RenderGraph::Instance().GetFrameCount();
+			const u64 current_frame = RenderContext::Instance().GetFrameCount();
 			// Get the latest frame this resource was used in.
-			if (current_frame <= RenderGraph::s_MaxFarmeCount)
+			if (current_frame <= RenderContext::Instance().GetFramesInFligtCount())
 			{
 				// Not enough frames have passed.
 				return true;
@@ -73,14 +73,14 @@ namespace Insight
 			if (TrackedResourceMap::const_iterator itr = m_tracked_resources.find(resource); itr != m_tracked_resources.end())
 			{
 				const u64 frame_resource_offset = current_frame - itr->second;
-				return frame_resource_offset > RenderGraph::s_MaxFarmeCount ? false : true;
+				return frame_resource_offset > RenderContext::Instance().GetFramesInFligtCount() ? false : true;
 			}
 			return false;
 		}
 
 		void RHI_ResourceRenderTracker::AddDeferedRelase(const DeferedReleaseFunc release_func)
 		{
-			const u64 current_frame = RenderGraph::Instance().GetFrameCount();
+			const u64 current_frame = RenderContext::Instance().GetFrameCount();
 			m_defered_resources_to_release[current_frame].push_back(release_func);
 		}
 

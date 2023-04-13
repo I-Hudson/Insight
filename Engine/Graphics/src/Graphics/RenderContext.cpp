@@ -63,6 +63,21 @@ namespace Insight
 			return context;
 		}
 
+		u32 RenderContext::GetFrameIndex() const
+		{
+			return m_frameIndex.load();
+		}
+
+		u64 RenderContext::GetFrameCount() const
+		{
+			return m_frameCount.load();
+		}
+
+		u32 RenderContext::GetFramesInFligtCount() const
+		{
+			return m_framesInFlightCount.load();
+		}
+
 		bool RenderContext::HasExtension(DeviceExtension extension) const
 		{
 			return m_deviceExtensions[(u32)extension] == 1;

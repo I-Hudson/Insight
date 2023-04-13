@@ -28,18 +28,18 @@ namespace Insight
 			void Setup()
 			{
 				m_values.clear();
-				m_values.resize(RenderGraph::s_MaxFarmeCount);
+				m_values.resize(RenderContext::Instance().GetFramesInFligtCount());
 			}
 
 			TValue* operator->() const
 			{
-				return const_cast<TValue*>(&m_values.at(RenderGraph::Instance().GetFrameIndex()));
+				return const_cast<TValue*>(&m_values.at(RenderContext::Instance().GetFrameIndex()));
 			}
 
 			TValue& Get()
 			{
 				ASSERT(!m_values.empty());
-				return m_values.at(RenderGraph::Instance().GetFrameIndex());
+				return m_values.at(RenderContext::Instance().GetFrameIndex());
 			}
 
 			u64 Size() const
@@ -81,9 +81,6 @@ namespace Insight
 
 			void Release();
 
-			u32 GetFrameIndex() const { return m_frameIndex; }
-			u64 GetFrameCount() const { return m_frame_count; }
-
 			void SetPreRender(RenderGraphSetPreRenderFunc func) { m_pre_render_func = std::move(func); }
 			void SetPostRender(RenderGraphSetPreRenderFunc func) { m_post_render_func = std::move(func); }
 
@@ -107,8 +104,6 @@ namespace Insight
 			/// @brief Return then output size.
 			/// @return glm::ivec2
 			glm::ivec2 GetOutputResolution() const { return m_output_resolution; }
-
-			static u32 s_MaxFarmeCount;
 
 		private:
 			void Build();
@@ -148,14 +143,10 @@ namespace Insight
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
 
-			u32 m_frameIndex = 0;
-			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).
-			u64 m_frame_count = 0;
-
 			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
 			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> m_texture_barrier_history;
 
-			FrameResource<CommandListManager> m_commandListManager;
+			//FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};
 	}

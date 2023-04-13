@@ -21,6 +21,7 @@
 #include "Graphics/RenderStats.h"
 
 #include "Core/Collections/FactoryMap.h"
+#include "Threading/ThreadScopeLock.h"
 
 #include <mutex>
 
@@ -133,6 +134,10 @@ namespace Insight
 
 			virtual void SetFullScreen() { }
 
+			u32 GetFrameIndex() const;
+			u64 GetFrameCount() const;
+			u32 GetFramesInFligtCount() const;
+
 			bool HasExtension(DeviceExtension extension) const;
 			bool IsExtensionEnabled(DeviceExtension extension) const;
 			void EnableExtension(DeviceExtension extension);
@@ -177,24 +182,27 @@ namespace Insight
 		protected:
 			///const static int c_FrameCount = 3;
 
-			RenderContextDesc m_desc;
-
 			std::mutex m_lock;
+			RenderContextDesc m_desc;
+			SwapchainDesc m_swapchainDesc;
+
 			GraphicsAPI m_graphicsAPI = GraphicsAPI::None;
 
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;
-
 			std::array<u8, static_cast<u64>(RenderOptions::NumOfRenderOptions)> m_renderOptions;
 
-			SwapchainDesc m_swapchainDesc;
+			std::atomic<u32> m_framesInFlightCount = 2;
+			/// @brief The current frame from 0 to c_FrameCount.
+			std::atomic<u32> m_frameIndex = 0;
+			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).
+			std::atomic<u64> m_frameCount = 0;
 
 			std::vector<IRHI_ResourceCache*> m_resourceCaches;
 			RHI_ResourceManager<RHI_Texture> m_textures;
 			std::map<BufferType, RHI_ResourceManager<RHI_Buffer>> m_buffers;
 
 			RHI_ResourceRenderTracker m_resource_tracker;
-
 			RHI_ShaderManager m_shaderManager;
 			RHI_RenderpassManager m_renderpassManager;
 			RHI_SamplerManager* m_samplerManager;

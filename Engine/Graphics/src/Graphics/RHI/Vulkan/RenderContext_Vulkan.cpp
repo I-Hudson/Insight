@@ -468,8 +468,8 @@ namespace Insight
 				init_info.PipelineCache = nullptr;
 				init_info.DescriptorPool = m_imguiDescriptorPool;
 				init_info.Subpass = 0;
-				init_info.MinImageCount = RenderGraph::s_MaxFarmeCount;
-				init_info.ImageCount = RenderGraph::s_MaxFarmeCount;
+				init_info.MinImageCount = RenderContext::Instance().GetFramesInFligtCount();
+				init_info.ImageCount = RenderContext::Instance().GetFramesInFligtCount();
 				init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 				init_info.Allocator = nullptr;
 				init_info.CheckVkResultFn = [](VkResult error)
@@ -622,7 +622,7 @@ namespace Insight
 							{
 								SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
 							}
-							m_currentFrame = (m_currentFrame + 1) % RenderGraph::s_MaxFarmeCount;
+							m_currentFrame = (m_currentFrame + 1) % RenderContext::Instance().GetFramesInFligtCount();
 						}
 					}
 				}
@@ -642,7 +642,7 @@ namespace Insight
 
 				VkSurfaceCapabilitiesKHR surfaceCapabilites = { };
 				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_adapter, m_surface, &surfaceCapabilites);
-				const int imageCount = (int)std::max(RenderGraph::s_MaxFarmeCount, surfaceCapabilites.minImageCount);
+				const int imageCount = (int)std::max(RenderContext::Instance().GetFramesInFligtCount(), surfaceCapabilites.minImageCount);
 
 				VkExtent2D swapchainExtent = { };
 				// If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
