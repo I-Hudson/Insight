@@ -101,14 +101,11 @@ namespace Insight
 				VkCommandPool GetAllocator() const { return m_allocator; }
 
 				/// RHI_CommandListAllocator
-				virtual void Create(RenderContext* context) override;
+				virtual void Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc) override;
 				
 				virtual void Reset() override;
 
 				virtual RHI_CommandList* GetCommandList() override;
-				virtual RHI_CommandList* GetSingleSubmitCommandList() override;
-
-				virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) override;
 
 				/// RHI_Resource
 				virtual void Release() override;

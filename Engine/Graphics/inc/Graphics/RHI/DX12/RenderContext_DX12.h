@@ -107,6 +107,8 @@ namespace Insight
 
 				RHI_GPUCrashTracker* m_gpuCrashTracker = nullptr;
 
+				D3D_FEATURE_LEVEL m_d3dFeatureLevel = D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_1_0_CORE;
+
 				RHI_Queue_DX12 m_graphicsQueue;
 				std::map<GPUQueue, ComPtr<ID3D12CommandQueue>> m_queues;
 			

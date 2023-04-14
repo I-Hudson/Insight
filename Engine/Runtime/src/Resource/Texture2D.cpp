@@ -62,6 +62,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			m_rhi_texture = Renderer::CreateTexture();
+			m_rhi_texture->SetName(std::string(FileSystem::FileSystem::GetFileName(m_file_path)));
 			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
 
 			int width, height, channels;

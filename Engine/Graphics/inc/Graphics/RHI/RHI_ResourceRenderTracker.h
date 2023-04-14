@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Core/Defines.h"
 
 #include <unordered_map>
 #include <vector>
 #include <set>
 #include <functional>
+#include <mutex>
 
 namespace Insight
 {
@@ -23,6 +25,8 @@ namespace Insight
 		/// to release them when needed.
 		class RHI_ResourceRenderTracker
 		{
+			THREAD_SAFE
+
 			using TrackedResourceMap = std::unordered_map<const RHI_Resource*, u64>;
 			using DeferedReleaseFunc = std::function<void()>;
 			using DeferedResourceReleaseMap = std::unordered_map<u64, std::vector<DeferedReleaseFunc>>;
@@ -44,6 +48,7 @@ namespace Insight
 			void Release();
 
 		private:
+			mutable std::mutex m_lock;
 			TrackedResourceMap m_tracked_resources;
 			DeferedResourceReleaseMap m_defered_resources_to_release;
 

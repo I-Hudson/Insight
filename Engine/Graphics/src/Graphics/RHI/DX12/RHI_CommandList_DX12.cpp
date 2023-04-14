@@ -747,10 +747,20 @@ namespace Insight
 			//// RHI_CommandListAllocator_DX12
 			//// </summary>
 			//// <param name="context"></param>
-			void RHI_CommandListAllocator_DX12::Create(RenderContext* context)
+			void RHI_CommandListAllocator_DX12::Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc)
 			{
 				m_context = static_cast<RenderContext_DX12*>(context);
 				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_allocator)));
+
+				std::vector<RHI_CommandList*> cmdLists;
+				for (size_t i = 0; i < desc.CommandListSize; ++i)
+				{
+					cmdLists.push_back(GetCommandList());
+				}
+				for (size_t i = 0; i < cmdLists.size(); ++i)
+				{
+					ReturnCommandList(cmdLists.at(i));
+				}
 			}
 
 			RHI_CommandList* RHI_CommandListAllocator_DX12::GetCommandList()
@@ -773,33 +783,6 @@ namespace Insight
 
 				m_allocLists.insert(list);
 				return list;
-			}
-
-			RHI_CommandList* RHI_CommandListAllocator_DX12::GetSingleSubmitCommandList()
-			{
-				ComPtr<ID3D12CommandAllocator> allocator;
-				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)));
-				
-				RHI_CommandList_DX12* list = static_cast<RHI_CommandList_DX12*>(RHI_CommandList::New());
-				ThrowIfFailed(m_context->GetDevice()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list->m_commandList)));
-				
-				m_singleUseCommandLists[list] = std::make_pair(list, allocator);
-
-				return list;
-			}
-
-			void RHI_CommandListAllocator_DX12::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
-			{
-				auto itr = m_singleUseCommandLists.find(cmdList);
-				if (itr == m_singleUseCommandLists.end())
-				{
-					IS_CORE_ERROR("[RHI_CommandListAllocator_DX12::ReturnSingleSubmitCommandList]");
-					return;
-				}
-
-				cmdList->Release();
-				DeleteTracked(cmdList);
-				m_singleUseCommandLists.erase(itr);
 			}
 
 			void RHI_CommandListAllocator_DX12::Reset()

@@ -107,7 +107,7 @@ namespace Insight
 					optimiseClearColourEnabled ? &clearColour : nullptr,
 					&m_allocation,
 					IID_NULL, NULL));
-
+				SetName(m_name);
 
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)
 				{
@@ -216,6 +216,8 @@ namespace Insight
 				if (m_allocation && m_allocation->GetResource())
 				{
 					m_context->SetObjectName(name, m_allocation->GetResource());
+					std::wstring wStr = Platform::WStringFromString(name);
+					m_allocation->SetName(wStr.c_str());
 				}
 				m_name = std::move(name);
 			}

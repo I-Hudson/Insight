@@ -93,7 +93,7 @@ namespace Insight
 
 				ThrowIfFailed(D3D12CreateDevice(
 					m_physicalDevice.GetPhysicalDevice().Get(),
-					D3D_FEATURE_LEVEL_11_0,
+					m_d3dFeatureLevel,
 					IID_PPV_ARGS(&m_device)
 				));
 
@@ -572,6 +572,7 @@ namespace Insight
 						textureInfo.InitalStatus = DeviceUploadStatus::Completed;
 						textureDX12->m_infos.push_back(textureInfo);
 					}
+					swapchainImage.Colour->SetName("Swapchain_" + std::to_string(i));
 
 					/// Get the back buffer from the swapchain.
 					ThrowIfFailed(swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_swapchainImage)));
@@ -665,19 +666,32 @@ namespace Insight
 						if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 						{
 							/// Don't select the Basic Render Driver adapter.
-							/// If you want a software adapter, pass in "/warp" on the command line.
 							continue;
 						}
 
 						/// Check to see whether the adapter supports Direct3D 12, but don't create the
 						/// actual device yet.
-						if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+						if (SUCCEEDED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_12_0, __uuidof(ID3D12Device), nullptr)))
 						{
+							m_d3dFeatureLevel = D3D_FEATURE_LEVEL_12_0;
 							break;
+						}
+
+						if (SUCCEEDED(D3D12CreateDevice(nullptr, D3D_FEATURE_LEVEL_11_0, __uuidof(ID3D12Device), nullptr)))
+						{
+							m_d3dFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+							break;
+						}
+
+						if (m_d3dFeatureLevel == D3D_FEATURE_LEVEL_1_0_CORE)
+						{
+							FAIL_ASSERT();
 						}
 					}
 				}
 
+				ASSERT(m_d3dFeatureLevel != D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_1_0_CORE);
+#if false
 				if (adapter == nullptr)
 				{
 					for (UINT adapterIndex = 0; SUCCEEDED(factory->EnumAdapters1(adapterIndex, &adapter)); ++adapterIndex)
@@ -688,18 +702,18 @@ namespace Insight
 						if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 						{
 							/// Don't select the Basic Render Driver adapter.
-							/// If you want a software adapter, pass in "/warp" on the command line.
 							continue;
 						}
 
 						/// Check to see whether the adapter supports Direct3D 12, but don't create the
 						/// actual device yet.
-						if (SUCCEEDED(D3D12CreateDevice(adapter.Get(), D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), nullptr)))
+						if (SUCCEEDED(D3D12CreateDevice(nullptr, m_d3dFeatureLevel, __uuidof(ID3D12Device), nullptr)))
 						{
 							break;
 						}
 					}
 				}
+#endif
 
 				if (adapter)
 				{

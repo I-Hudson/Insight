@@ -10,6 +10,9 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		constexpr static const char* c_CrashFolder = "gpuCrashDumps/";
+		constexpr static const char* c_shaderFolder = "gpuShaders/";
+
 		RHI_GPUCrashTracker* RHI_GPUCrashTracker::Create()
 		{
 #ifdef IS_NVIDIA_AFTERMATH_ENABLED
@@ -150,7 +153,7 @@ namespace Insight
 
 			// Write the crash dump data to a file using the .nv-gpudmp extension
 			// registered with Nsight Graphics.
-			const std::string crashDumpFileName = baseFileName + ".nv-gpudmp";
+			const std::string crashDumpFileName = c_CrashFolder + baseFileName + ".nv-gpudmp";
 			std::ofstream dumpFile(crashDumpFileName, std::ios::out | std::ios::binary);
 			if (dumpFile)
 			{
@@ -178,7 +181,7 @@ namespace Insight
 				json.data()));
 
 			// Write the crash dump data as JSON to a file.
-			const std::string jsonFileName = crashDumpFileName + ".json";
+			const std::string jsonFileName = c_CrashFolder + crashDumpFileName + ".json";
 			std::ofstream jsonFile(jsonFileName, std::ios::out | std::ios::binary);
 			if (jsonFile)
 			{
@@ -196,10 +199,11 @@ namespace Insight
 			// Create a unique file name.
 			const std::string filePath = "shader-" + std::to_string(identifier) + ".nvdbg";
 
-			std::ofstream f(filePath, std::ios::out | std::ios::binary);
+			std::ofstream f(c_shaderFolder + filePath, std::ios::out | std::ios::binary);
 			if (f)
 			{
 				f.write((const char*)pShaderDebugInfo, shaderDebugInfoSize);
+				f.close();
 			}
 		}
 

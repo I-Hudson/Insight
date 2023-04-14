@@ -118,6 +118,7 @@ namespace Insight
 			if (m_font_texture == nullptr)
 			{
 				m_font_texture = Renderer::CreateTexture();
+				m_font_texture->SetName("ImguiFontsTexture");
 
 				unsigned char* pixels;
 				int width, height;
@@ -162,6 +163,7 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
+
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
 			m_descriptorLayoutManager.ReleaseAll();
@@ -211,6 +213,7 @@ namespace Insight
 		{
 			RHI_Buffer* buffer = m_buffers[bufferType].CreateResource();
 			buffer->Create(this, bufferType, sizeBytes, stride, buffer_overrides);
+			buffer->SetName("Buffer");
 			return buffer;
 		}
 
@@ -246,7 +249,9 @@ namespace Insight
 
 		RHI_Texture* RenderContext::CreateTextre()
 		{
-			return m_textures.CreateResource();
+			RHI_Texture* texture =  m_textures.CreateResource();
+			texture->SetName("Texture");
+			return texture;
 		}
 
 		void RenderContext::FreeTexture(RHI_Texture* texture)

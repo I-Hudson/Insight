@@ -9,11 +9,13 @@ namespace Insight
 	{
 		void RHI_ResourceRenderTracker::BeginFrame()
 		{
-
+			std::lock_guard lock(m_lock);
 		}
 
 		void RHI_ResourceRenderTracker::EndFrame()
 		{
+			std::lock_guard lock(m_lock);
+
 			const u64 current_frame = RenderContext::Instance().GetFrameCount();
 			if (current_frame <= RenderContext::Instance().GetFramesInFligtCount())
 			{
@@ -51,11 +53,14 @@ namespace Insight
 			{
 				return;
 			}
+			std::lock_guard lock(m_lock);
 			m_tracked_resources[resource] = RenderContext::Instance().GetFrameCount();
 		}
 
 		bool RHI_ResourceRenderTracker::IsResourceInUse(const RHI_Resource* resource) const
 		{
+			std::lock_guard lock(m_lock);
+
 			if (m_releaseAllResources)
 			{
 				// All resources should be released no matter what.
@@ -81,12 +86,23 @@ namespace Insight
 		void RHI_ResourceRenderTracker::AddDeferedRelase(const DeferedReleaseFunc release_func)
 		{
 			const u64 current_frame = RenderContext::Instance().GetFrameCount();
+			std::lock_guard lock(m_lock);
 			m_defered_resources_to_release[current_frame].push_back(release_func);
 		}
 
 		void RHI_ResourceRenderTracker::Release()
 		{
+			std::lock_guard lock(m_lock);
+
 			m_releaseAllResources = true;
+			for (auto& [frame, releaseFuncs] : m_defered_resources_to_release)
+			{
+				for (auto& func : releaseFuncs)
+				{
+					func();
+				}
+			}
+			m_defered_resources_to_release.clear();
 		}
 	}
 }
