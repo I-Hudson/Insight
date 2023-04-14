@@ -476,6 +476,12 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
+            // Finish loading all resources. This allows us to release them correctly.
+            while (!s_resourcesLoading.empty())
+            {
+                Update(0.16f);
+            }
+
             // Pop all queued resources.
             {
                 std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
@@ -485,12 +491,6 @@ namespace Insight
                     s_queuedResoucesToLoad.pop();
                     resource->m_resource_state = EResoruceStates::Cancelled;
                 }
-            }
-
-            // Finish loading all resources. This allows us to release them correctly.
-            while (!s_resourcesLoading.empty())
-            {
-                Update(0.16f);
             }
         }
 

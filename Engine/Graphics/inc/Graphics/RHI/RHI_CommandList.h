@@ -145,32 +145,35 @@ namespace Insight
 			friend class RenderGraph;
 		};
 
+		struct RHI_CommandListAllocatorDesc
+		{
+			u32 CommandListSize = 1;
+		};
 		class RHI_CommandListAllocator : public RHI_Resource
 		{
 		public:
 
 			static RHI_CommandListAllocator* New();
 
-			virtual void Create(RenderContext* context) = 0;
-			
+			u32 FreeSize() const;
+			bool ReturnCommandList(RHI_CommandList* cmdList);
+
+			virtual void Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc) = 0;
 			virtual void Reset() = 0;
-
 			virtual RHI_CommandList* GetCommandList() = 0;
-			virtual RHI_CommandList* GetSingleSubmitCommandList() = 0;
-
-			void ReturnCommandList(RHI_CommandList* cmdList);
-			virtual void ReturnSingleSubmitCommandList(RHI_CommandList* cmdList) = 0;
 
 		protected:
-			std::mutex m_lock;
+			mutable std::mutex m_mutex;
 			std::unordered_set<RHI_CommandList*> m_allocLists;
 			std::unordered_set<RHI_CommandList*> m_freeLists;
 		};
 
 		class CommandListManager
 		{
+			THREAD_SAFE
 		public:
 			CommandListManager();
+			CommandListManager(CommandListManager&& other);
 			~CommandListManager();
 
 			void Create(RenderContext* context);
@@ -178,15 +181,19 @@ namespace Insight
 			void Destroy();
 
 			RHI_CommandList* GetCommandList();
-			RHI_CommandList* GetSingleUseCommandList();
 			void ReturnCommandList(RHI_CommandList* cmdList);
-			void ReturnSingleUseCommandList(RHI_CommandList* cmdList);
 
 			void Reset();
 
 		private:
+			void AddNewAllocator();
+
+		private:
+			mutable std::mutex m_mutex;
 			RenderContext* m_context = nullptr;
-			RHI_CommandListAllocator* m_allocator = nullptr;
+			RHI_CommandListAllocatorDesc m_commandListAllocatorDesc;
+			RHI_CommandListAllocator* m_currentAllocator = nullptr;
+			std::vector<RHI_CommandListAllocator*> m_allocators;
 		};
 	}
 }

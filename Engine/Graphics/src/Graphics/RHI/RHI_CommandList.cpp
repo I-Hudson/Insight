@@ -163,22 +163,32 @@ namespace Insight
 			return nullptr;
 		}
 
-		void RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)
+		u32 RHI_CommandListAllocator::FreeSize() const
 		{
-			std::lock_guard lock(m_lock);
+			std::lock_guard lock(m_mutex);
+			return m_freeLists.size();
+		}
+
+		bool RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)
+		{
+			std::lock_guard lock(m_mutex);
 
 			if (m_allocLists.find(cmdList) == m_allocLists.end())
 			{
-				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
+				//IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is not in the allocated list. Command lists should be obtained by 'GetCommandList'.");
+				return false;
 			}
-			m_allocLists.erase(cmdList);
 
+			m_allocLists.erase(cmdList);
 			if (m_freeLists.find(cmdList) != m_freeLists.end())
 			{
-				IS_CORE_ERROR("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
-				return;
+				FAIL_ASSERT_MSG("[RHI_CommandListAllocator::ReturnCommandList] CommandList is in the free list. Command should not be returned more than once.");
 			}
-			m_freeLists.insert(cmdList);
+			else
+			{
+				m_freeLists.insert(cmdList);
+			}
+			return true;
 		}
 
 		//// <summary>
@@ -188,66 +198,99 @@ namespace Insight
 		{
 		}
 
+		CommandListManager::CommandListManager(CommandListManager&& other)
+			: m_context(std::move(other.m_context))
+			, m_commandListAllocatorDesc(std::move(other.m_commandListAllocatorDesc))
+			, m_currentAllocator(std::move(other.m_currentAllocator))
+			, m_allocators(std::move(other.m_allocators))
+		{
+			other.m_context = nullptr;
+			other.m_commandListAllocatorDesc = {};
+			other.m_currentAllocator = {};
+			m_allocators = {};
+		}
+
 		CommandListManager::~CommandListManager()
 		{
 		}
 
 		void CommandListManager::Create(RenderContext* context)
 		{
-			m_context = context;
-
-			if (m_allocator)
 			{
-				IS_CORE_WARN("[CommandListManager::Init] CommandListManager already has 'Init' called.");
-				return;
+				std::lock_guard lock(m_mutex);
+				m_context = context;
 			}
-
-			m_allocator = RHI_CommandListAllocator::New();
-			m_allocator->Create(m_context);
+			AddNewAllocator();
 		}
 
 		void CommandListManager::Update()
 		{
-			m_allocator->Reset();
+			std::lock_guard lock(m_mutex);
+			for (RHI_CommandListAllocator* allocator : m_allocators)
+			{
+				allocator->Reset();
+			}
 		}
 
 		void CommandListManager::Destroy()
 		{
-			if (m_allocator)
+			std::lock_guard lock(m_mutex);
+			for (RHI_CommandListAllocator*& allocator : m_allocators)
 			{
-				m_allocator->Release();
-				DeleteTracked(m_allocator);
+				allocator->Release();
+				Delete(allocator);
 			}
+			m_allocators.clear();
 		}
 
 		RHI_CommandList* CommandListManager::GetCommandList()
 		{
-			ASSERT(m_allocator);
-			return m_allocator->GetCommandList();
-		}
-
-		RHI_CommandList* CommandListManager::GetSingleUseCommandList()
-		{
-			ASSERT(m_allocator);
-			return m_allocator->GetSingleSubmitCommandList();
+			{
+				std::lock_guard lock(m_mutex);
+				for (RHI_CommandListAllocator* allocator : m_allocators)
+				{
+					if (allocator->FreeSize() > 0)
+					{
+						return allocator->GetCommandList();
+					}
+				}
+			}
+			AddNewAllocator();
+			{
+				std::lock_guard lock(m_mutex);
+				return m_allocators.back()->GetCommandList();
+			}
 		}
 
 		void CommandListManager::ReturnCommandList(RHI_CommandList* cmdList)
 		{
-			ASSERT(m_allocator);
-			m_allocator->ReturnCommandList(cmdList);
-		}
-
-		void CommandListManager::ReturnSingleUseCommandList(RHI_CommandList* cmdList)
-		{
-			ASSERT(m_allocator);
-			m_allocator->ReturnSingleSubmitCommandList(cmdList);
+			std::lock_guard lock(m_mutex);
+			for (RHI_CommandListAllocator* allocator : m_allocators)
+			{
+				if (allocator->ReturnCommandList(cmdList))
+				{
+					return;
+				}
+			}
 		}
 
 		void CommandListManager::Reset()
 		{
-			ASSERT(m_allocator);
-			m_allocator->Reset();
+			std::lock_guard lock(m_mutex);
+			for (RHI_CommandListAllocator* allocator : m_allocators)
+			{
+				allocator->Reset();
+			}
+		}
+
+		void CommandListManager::AddNewAllocator()
+		{
+			RHI_CommandListAllocator* newAllocator = RHI_CommandListAllocator::New();
+			newAllocator->Create(m_context, m_commandListAllocatorDesc);
+			{
+				std::lock_guard lock(m_mutex);
+				m_allocators.push_back(newAllocator);
+			}
 		}
 	}
 }

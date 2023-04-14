@@ -678,20 +678,29 @@ namespace Insight
 			//// RHI_CommandListAllocator_Vulkan
 			//// </summary>
 			//// <param name="context"></param>
-			void RHI_CommandListAllocator_Vulkan::Create(RenderContext* context)
+			void RHI_CommandListAllocator_Vulkan::Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc)
 			{
-				std::lock_guard lock(m_lock);
-				m_context = static_cast<RenderContext_Vulkan*>(context);
+				{
+					std::lock_guard lock(m_mutex);
+					m_context = static_cast<RenderContext_Vulkan*>(context);
 
-				VkCommandPoolCreateInfo poolCreateInfo = {};
-				poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-				poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-				ThrowIfFailed(vkCreateCommandPool(m_context->GetDevice(), &poolCreateInfo, nullptr, &m_allocator));
+					VkCommandPoolCreateInfo poolCreateInfo = {};
+					poolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+					poolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+					ThrowIfFailed(vkCreateCommandPool(m_context->GetDevice(), &poolCreateInfo, nullptr, &m_allocator));
+				}
+
+				std::vector<RHI_CommandList*> cmdLists;
+				for (size_t i = 0; i < desc.CommandListSize; ++i)
+				{
+					cmdLists.push_back(GetCommandList());
+				}
+				Reset();
 			}
 
 			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetCommandList()
 			{
-				std::lock_guard lock(m_lock);
+				std::lock_guard lock(m_mutex);
 				if (m_freeLists.size() > 0)
 				{
 					RHI_CommandList* list = *m_freeLists.begin();
@@ -729,18 +738,9 @@ namespace Insight
 				return list;
 			}
 
-			RHI_CommandList* RHI_CommandListAllocator_Vulkan::GetSingleSubmitCommandList()
-			{
-				return GetCommandList();
-			}
-
-			void RHI_CommandListAllocator_Vulkan::ReturnSingleSubmitCommandList(RHI_CommandList* cmdList)
-			{
-				return ReturnCommandList(cmdList);
-			}
-
 			void RHI_CommandListAllocator_Vulkan::Reset()
 			{
+				std::lock_guard lock(m_mutex);
 				vkResetCommandPool(m_context->GetDevice(), m_allocator, 0);
 				while (m_allocLists.size() > 0)
 				{
@@ -754,12 +754,11 @@ namespace Insight
 
 			void RHI_CommandListAllocator_Vulkan::Release()
 			{
-				std::lock_guard lock(m_lock);
-
 				if (m_allocator)
 				{
 					Reset();
 
+					std::lock_guard lock(m_mutex);
 					for (auto list : m_allocLists)
 					{
 						list->Release();
@@ -780,12 +779,17 @@ namespace Insight
 
 			bool RHI_CommandListAllocator_Vulkan::ValidResource()
 			{
+				std::lock_guard lock(m_mutex);
 				return m_allocator;
 			}
 
 			void RHI_CommandListAllocator_Vulkan::SetName(std::string name)
 			{
-				m_context->SetObjectName(name, (u64)m_allocator, VK_OBJECT_TYPE_COMMAND_POOL);
+				std::lock_guard lock(m_mutex);
+				if (m_allocator)
+				{
+					m_context->SetObjectName(name, (u64)m_allocator, VK_OBJECT_TYPE_COMMAND_POOL);
+				}
 			}
 		}
 	}

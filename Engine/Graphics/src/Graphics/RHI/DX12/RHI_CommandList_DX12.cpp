@@ -743,14 +743,22 @@ namespace Insight
 				PipelineBarrier(pipeline_barrier);
 			}
 
+			ID3D12CommandAllocator* RHI_CommandListAllocator_DX12::GetAllocator() const
+			{
+				return m_allocator.Get();
+			}
+
 			//// <summary>
 			//// RHI_CommandListAllocator_DX12
 			//// </summary>
 			//// <param name="context"></param>
 			void RHI_CommandListAllocator_DX12::Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc)
 			{
-				m_context = static_cast<RenderContext_DX12*>(context);
-				ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_allocator)));
+				{
+					std::lock_guard lock(m_mutex);
+					m_context = static_cast<RenderContext_DX12*>(context);
+					ThrowIfFailed(m_context->GetDevice()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_allocator)));
+				}
 
 				std::vector<RHI_CommandList*> cmdLists;
 				for (size_t i = 0; i < desc.CommandListSize; ++i)
@@ -759,12 +767,14 @@ namespace Insight
 				}
 				for (size_t i = 0; i < cmdLists.size(); ++i)
 				{
-					ReturnCommandList(cmdLists.at(i));
+					cmdLists.at(i)->Close();
 				}
+				Reset();
 			}
 
 			RHI_CommandList* RHI_CommandListAllocator_DX12::GetCommandList()
 			{
+				std::lock_guard lock(m_mutex);
 				if (m_freeLists.size() > 0)
 				{
 					RHI_CommandList* list = *m_freeLists.begin();
@@ -787,6 +797,7 @@ namespace Insight
 
 			void RHI_CommandListAllocator_DX12::Reset()
 			{
+				std::lock_guard lock(m_mutex);
 				m_allocator->Reset();
 				while (m_allocLists.size() > 0)
 				{
@@ -804,6 +815,7 @@ namespace Insight
 				{
 					Reset();
 
+					std::lock_guard lock(m_mutex);
 					for (auto list : m_allocLists)
 					{
 						list->Release();
@@ -824,11 +836,13 @@ namespace Insight
 
 			bool RHI_CommandListAllocator_DX12::ValidResource()
 			{
+				std::lock_guard lock(m_mutex);
 				return m_allocator;
 			}
 
 			void RHI_CommandListAllocator_DX12::SetName(std::string name)
 			{
+				std::lock_guard lock(m_mutex);
 				if (m_allocator)
 				{
 					m_context->SetObjectName(name, m_allocator.Get());

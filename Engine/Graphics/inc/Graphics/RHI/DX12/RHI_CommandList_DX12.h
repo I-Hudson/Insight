@@ -114,9 +114,10 @@ namespace Insight
 
 			class RHI_CommandListAllocator_DX12 : public RHI_CommandListAllocator
 			{
+				THREAD_SAFE
 			public:
 
-				ID3D12CommandAllocator* GetAllocator() const { return m_allocator.Get(); }
+				ID3D12CommandAllocator* GetAllocator() const;
 
 				/// RHI_CommandListAllocator
 				virtual void Create(RenderContext* context, const RHI_CommandListAllocatorDesc desc) override;
@@ -133,7 +134,6 @@ namespace Insight
 			private:
 				RenderContext_DX12* m_context{ nullptr };
 				ComPtr<ID3D12CommandAllocator> m_allocator{ nullptr };
-
 				std::unordered_map<RHI_CommandList*, std::pair<RHI_CommandList*, ComPtr<ID3D12CommandAllocator>>> m_singleUseCommandLists;
 			};
 		}

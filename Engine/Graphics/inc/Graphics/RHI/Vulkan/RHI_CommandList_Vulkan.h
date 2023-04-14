@@ -96,6 +96,7 @@ namespace Insight
 
 			class RHI_CommandListAllocator_Vulkan : public RHI_CommandListAllocator
 			{
+				THREAD_SAFE
 			public:
 				THREAD_SAFE;
 				VkCommandPool GetAllocator() const { return m_allocator; }
