@@ -4,7 +4,6 @@
 #include "Core/Singleton.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
-#include "Graphics/RenderGraph/RenderGraph.h"
 
 namespace Insight
 {
@@ -39,7 +38,6 @@ namespace Insight
 		private:
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
-			Graphics::RenderGraph m_renderGraph;
 
 			Input::InputSystem* m_inputSystem = nullptr;
 		};

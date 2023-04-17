@@ -2,6 +2,9 @@
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderContext.h"
 
+#include "Graphics/RenderContext.h"
+#include "Graphics/RHI/RHI_CommandList.h"
+
 #include "Graphics/PixelFormatExtensions.h"
 #include "Graphics/Window.h"
 
@@ -26,7 +29,7 @@ namespace Insight
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 
 					m_context->GpuWaitForIdle();
-					m_passes.clear();
+					//GetRenderPasses().clear();
 					
 					// Release all textures as the size they need to be has changed.
 					m_textureCaches->Release();
@@ -39,27 +42,28 @@ namespace Insight
 				});
 
 			m_context = context;
+			for (size_t i = 0; i < m_context->GetFramesInFligtCount(); ++i)
+			{
+				m_pre_render_func.push_back(nullptr);
+				m_post_render_func.push_back(nullptr);
+				m_passes.push_back({});
+			}
 
 			m_textureCaches = Renderer::CreateTextureResourceCache();
-			///m_textureCaches.Setup();
-			//m_commandListManager.Setup();
-
-			//m_commandListManager.Setup();
-			//m_commandListManager.ForEach([this](CommandListManager& manager)
-			//{
-			//	manager.Create(m_context);
-			//});
-
-			m_descriptorManagers.Setup();
-			m_descriptorManagers.ForEach([this](DescriptorAllocator& alloc)
-				{
-					alloc.SetRenderContext(m_context);
-				});
 		}
 
-		void RenderGraph::Execute()
+		void RenderGraph::Swap()
+		{
+			std::lock_guard lock(m_mutex);
+			std::swap(m_passesUpdateIndex, m_passesRenderIndex);
+			GetUpdatePasses().clear();
+		}
+
+		void RenderGraph::Execute(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
+			ASSERT(m_context->IsRenderThread());
+
 			/*
 			* BUILD
 			* Build each path. This should first create and make all textures on the GPU.
@@ -75,126 +79,67 @@ namespace Insight
 			* EXECUTE ALL PASSES
 			*/
 
-#ifdef RENDER_GRAPH_RENDER_THREAD
-			if (m_render_thread_enabled && m_render_task)
-			{
-				m_render_task->wait();
-			}
-#endif
-			m_passes.clear();
-
 			if (m_render_resolution_has_changed)
 			{
 				m_render_resolution_has_changed = false;
 
 				m_context->GpuWaitForIdle();
-				m_passes.clear();
+				GetRenderPasses().clear();
 
 				// Release all current textures.
 				m_textureCaches->Release();
 			}
 
-			m_passes = std::move(m_pending_passes);
-			m_pending_passes.clear();
+			Build();
+			PlaceBarriers();
 
-#ifdef RENDER_GRAPH_RENDER_THREAD
-			if (m_render_thread_enabled)
+			RenderGraphSetPreRenderFunc preRenderFunc = m_pre_render_func.at(m_passesRenderIndex);
+			if (preRenderFunc)
 			{
-				m_render_task = &concurrency::create_task([this]()
-					{
-						if (m_context->PrepareRender())
-						{
-							Build();
-							PlaceBarriers();
-							m_commandListManager.Get().Reset();
-							RHI_CommandList* cmdList = m_commandListManager.Get().GetCommandList();
-
-							m_context->PreRender(cmdList);
-
-							cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
-							cmdList->m_descriptorAllocator->Reset();
-							Render(cmdList);
-
-							m_context->PostRender(cmdList);
-							//Clear();
-							++m_frame_count;
-						}
-
-						m_frameIndex = (m_frameIndex + 1) % s_MaxFarmeCount;
-					});
+				preRenderFunc(*this, cmdList);
 			}
-			else
-#endif
+
+			Render(cmdList);
+
+			RenderGraphSetPostRenderFunc postRenderFunc = m_post_render_func.at(m_passesRenderIndex);
+			if (postRenderFunc)
 			{
-				RHI_CommandList* cmdList = nullptr;
-				if (m_context->PrepareRender())
-				{
-					cmdList = m_context->GetCommandListManager().GetCommandList();
-					//m_commandListManager.Get().Reset();
-					//cmdList = m_commandListManager.Get().GetCommandList();
-
-					cmdList->m_descriptorAllocator = &m_descriptorManagers.Get();
-					cmdList->m_descriptorAllocator->Reset();
-
-					//cmdList = m_context->GetFrameCommandList();
-
-					Build();
-					PlaceBarriers();
-
-					m_context->PreRender(cmdList);
-
-					if (m_pre_render_func)
-					{
-						m_pre_render_func(*this, cmdList);
-					}
-
-					Render(cmdList);
-
-					if (m_post_render_func)
-					{
-						m_post_render_func(*this, cmdList);
-					}
-
-					if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
-					{
-						cmdList->m_discard = true;
-					}
-				}
-				else
-				{
-					m_context->ExecuteAsyncJobs(cmdList);
-				}
-				m_context->PostRender(cmdList);
+				postRenderFunc(*this, cmdList);
 			}
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)
 		{
+			ASSERT(m_context->IsRenderThread());
 			return m_textureCaches->AddOrReturn(textureName);
 		}
 
 		RGTextureHandle RenderGraph::GetTexture(std::string textureName) const
 		{
+			ASSERT(m_context->IsRenderThread());
 			return m_textureCaches->GetId(textureName);
 		}
 
 		RHI_Texture* RenderGraph::GetRHITexture(std::string textureName) const
 		{
+			ASSERT(m_context->IsRenderThread());
 			return GetRHITexture(GetTexture(textureName));
 		}
 
 		RHI_Texture* RenderGraph::GetRHITexture(RGTextureHandle handle) const
 		{
+			ASSERT(m_context->IsRenderThread());
 			return m_textureCaches->Get(handle);
 		}
 
 		RenderpassDescription RenderGraph::GetRenderpassDescription(std::string_view passName) const
 		{
-			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
+			ASSERT(m_context->IsRenderThread());
+			auto itr = std::find_if(GetRenderPasses().begin(), GetRenderPasses().end(), [passName](const UPtr<RenderGraphPassBase>& pass)
 				{
 					return pass->m_passName == passName;
 				});
-			if (itr != m_passes.end())
+			if (itr != GetRenderPasses().end())
 			{
 				return (*itr)->m_renderpassDescription;
 			}
@@ -203,11 +148,12 @@ namespace Insight
 
 		PipelineStateObject RenderGraph::GetPipelineStateObject(std::string_view passName) const
 		{
-			auto itr = std::find_if(m_passes.begin(), m_passes.end(), [passName](const UPtr<RenderGraphPassBase>& pass)
+			ASSERT(m_context->IsRenderThread());
+			auto itr = std::find_if(GetRenderPasses().begin(), GetRenderPasses().end(), [passName](const UPtr<RenderGraphPassBase>& pass)
 				{
 					return pass->m_passName == passName;
 				});
-			if (itr != m_passes.end())
+			if (itr != GetRenderPasses().end())
 			{
 				return (*itr)->m_pso;
 			}
@@ -217,38 +163,23 @@ namespace Insight
 		void RenderGraph::Release()
 		{
 			IS_PROFILE_FUNCTION();
-
-#ifdef RENDER_GRAPH_RENDER_THREAD
-			if (m_render_thread_enabled)
-			{
-				m_shutdown_render_thread = true;
-				m_render_thread.join();
-			}
-#endif
+			std::lock_guard lock(m_mutex);
 
 			m_context->GpuWaitForIdle();
 
 			m_passes.clear();
 
 			Renderer::FreeResourceCache(m_textureCaches);
-
-			//m_commandListManager.ForEach([](CommandListManager& manager)
-			//	{
-			//		manager.Destroy();
-			//	});
-
-			m_descriptorManagers.ForEach([](DescriptorAllocator& allocator)
-				{
-					allocator.Destroy();
-				});
 		}
 
 		void RenderGraph::Build()
 		{
 			IS_PROFILE_FUNCTION();
+			ASSERT(m_context->IsRenderThread());
+
 			RenderGraphBuilder builder(this);
 			/// TODO This should be threaded. Leave as single thread for now.
-			for (UPtr<RenderGraphPassBase>& pass : m_passes)
+			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				builder.SetPass(pass.Get());
 				pass->Setup(builder);
@@ -296,6 +227,7 @@ namespace Insight
 		void RenderGraph::PlaceBarriers()
 		{
 			IS_PROFILE_FUNCTION();
+			ASSERT(m_context->IsRenderThread());
 
 			struct FindImageBarrier
 			{
@@ -330,7 +262,7 @@ namespace Insight
 
 			int passIndex = 0;
 			/// This should be threaded. Leave as single thread for now.
-			for (UPtr<RenderGraphPassBase>& pass : m_passes)
+			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				PipelineBarrier colorPipelineBarrier;
 				PipelineBarrier depthPipelineBarrier;
@@ -347,7 +279,7 @@ namespace Insight
 						
 						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
 
-						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
 
 						ImageBarrier barrier;
 						barrier.TextureHandle = rt;
@@ -374,7 +306,7 @@ namespace Insight
 					RHI_Texture* texture = m_textureCaches->Get(pass->m_depthStencilWrite);
 					PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
 
-					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, pass->m_depthStencilWrite);
+					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, pass->m_depthStencilWrite);
 
 					ImageBarrier barrier;
 					barrier.TextureHandle = pass->m_depthStencilWrite;
@@ -417,7 +349,7 @@ namespace Insight
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
 						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
 
-						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(m_passes, passIndex, rt);
+						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
 
 						ImageBarrier barrier;
 						barrier.Image = texture;
@@ -467,9 +399,10 @@ namespace Insight
 		void RenderGraph::Render(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
+			ASSERT(m_context->IsRenderThread());
 
 			/// TODO: Could be threaded? Leave as it is for now as it works.
-			for (UPtr<RenderGraphPassBase>& pass : m_passes)
+			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
 				PlaceBarriersInToPipeline(pass.Get(), cmdList);
@@ -517,10 +450,34 @@ namespace Insight
 
 		void RenderGraph::PlaceBarriersInToPipeline(RenderGraphPassBase* pass, RHI_CommandList* cmdList)
 		{
+			ASSERT(m_context->IsRenderThread());
+
 			for (auto& barrier : pass->m_textureIncomingBarriers)
 			{
 				cmdList->PipelineBarrier(barrier);
 			}
+		}
+
+		std::vector<UPtr<RenderGraphPassBase>>& RenderGraph::GetUpdatePasses()
+		{
+			return m_passes.at(m_passesUpdateIndex);
+		}
+
+		std::vector<UPtr<RenderGraphPassBase>>& RenderGraph::GetRenderPasses()
+		{
+			ASSERT(m_context->IsRenderThread());
+			return m_passes.at(m_passesRenderIndex);
+		}
+
+		const std::vector<UPtr<RenderGraphPassBase>>& RenderGraph::GetUpdatePasses() const
+		{
+			return m_passes.at(m_passesUpdateIndex);
+		}
+
+		const std::vector<UPtr<RenderGraphPassBase>>& RenderGraph::GetRenderPasses() const
+		{
+			ASSERT(m_context->IsRenderThread());
+			return m_passes.at(m_passesRenderIndex);
 		}
 
 		void RenderGraph::SetRenderResolution(glm::ivec2 render_resolution)

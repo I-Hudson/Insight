@@ -93,7 +93,6 @@ namespace Insight
 				void ResizeSwapchainBuffers();
 
 				void WaitForNextFrame();
-				void RendererThreadUpdate();
 
 			private:
 				RHI_PhysicalDevice_DX12 m_physicalDevice;

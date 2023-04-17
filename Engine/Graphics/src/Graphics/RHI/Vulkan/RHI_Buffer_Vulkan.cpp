@@ -108,7 +108,7 @@ namespace Insight
 			std::vector<Byte> RHI_Buffer_Vulkan::Download()
 			{
 				IS_PROFILE_FUNCTION();
-				ASSERT(Platform::IsMainThread());
+				//ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_mutex);
 
 				const u64 current_buffer_size = GetSize();

@@ -43,8 +43,6 @@ namespace Insight
 
 			InitialiseRenderContext(graphcisAPI);
 
-			m_renderGraph.Init(m_context);
-
 			m_state = Core::SystemStates::Initialised;
 		}
 
@@ -53,7 +51,7 @@ namespace Insight
 			if (m_context)
 			{
 				m_context->GpuWaitForIdle();
-				m_renderGraph.Release();
+
 				m_context->Destroy();
 				Delete(m_context);
 
@@ -70,7 +68,7 @@ namespace Insight
 
 		void GraphicsSystem::Render()
 		{
-			m_renderGraph.Execute();
+			m_context->Render();
 		}
 
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)

@@ -106,13 +106,6 @@ namespace Insight
 			m_renderpasses.Create();
 			splashScreen.Destroy();
 
-			std::string str = "Test string for slice.";
-			std::string_view view(str);
-			Span<char> span(str);
-
-			char c = span[12];
-			char& cRef = span[12];
-
 			return true;
 		}
 

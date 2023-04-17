@@ -205,14 +205,6 @@ namespace Insight
 
 				WaitForGpu();
 
-				m_rendererThread = std::thread([&]()
-					{
-						while (!m_rendererThreadShutdown)
-						{
-							RendererThreadUpdate();
-						}
-					});
-
 				return true;
 			}
 
@@ -238,7 +230,6 @@ namespace Insight
 						context.DescriptorHeapSampler.Destroy();
 					});
 
-				m_graphicsQueue.Release();
 				m_queues.clear();
 
 				for (auto& image : m_swapchainImages)
@@ -249,12 +240,12 @@ namespace Insight
 
 				m_samplerManager->ReleaseAll();
 
+				BaseDestroy();
+
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::RenderTargetView).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Destroy();
-
-				BaseDestroy();
 
 				if (m_swapchain)
 				{
@@ -268,6 +259,8 @@ namespace Insight
 					m_d3d12MA->Release();
 					m_d3d12MA = nullptr;
 				}
+
+				m_graphicsQueue.Release();
 
 				if (m_device)
 				{
@@ -773,11 +766,6 @@ namespace Insight
 				//m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 				///// Set the fence value for the next frame.
 				//m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
-			}
-
-			void RenderContext_DX12::RendererThreadUpdate()
-			{
-				IS_CORE_INFO("Renderer thread update");
 			}
 
 			DescriptorHeap_DX12& RenderContext_DX12::GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType)

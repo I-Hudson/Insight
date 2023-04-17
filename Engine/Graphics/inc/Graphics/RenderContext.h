@@ -17,9 +17,11 @@
 #include "Graphics/RHI/RHI_PipelineManager.h"
 
 #include "Graphics/RenderStats.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Core/Collections/FactoryMap.h"
 #include "Threading/ThreadScopeLock.h"
+#include "Threading/Semaphore.h"
 
 #include <mutex>
 
@@ -137,14 +139,19 @@ namespace Insight
 		struct RenderContextDesc
 		{
 			bool GPUValidation = true;
+			bool MultithreadContext = false;
 		};
 
 		class IS_GRAPHICS RenderContext : public Core::Singleton<RenderContext>
 		{
 		public:
+			RenderContext();
 			virtual ~RenderContext() = default;
 
 			static RenderContext* New(GraphicsAPI graphicsAPI);
+
+			void Render();
+			bool IsRenderThread() const;
 
 			virtual bool Init(RenderContextDesc desc) = 0;
 			virtual void Destroy() = 0;
@@ -215,6 +222,10 @@ namespace Insight
 			RHI_Texture* CreateTextre();
 			void FreeTexture(RHI_Texture* texture);
 
+			void RenderUpdateLoop();
+			void StartRenderThread();
+			void StopRenderThread();
+
 		protected:
 			///const static int c_FrameCount = 3;
 
@@ -223,6 +234,13 @@ namespace Insight
 			SwapchainDesc m_swapchainDesc;
 
 			GraphicsAPI m_graphicsAPI = GraphicsAPI::None;
+			
+			std::thread::id m_renderThreadId;
+			std::thread m_renderThread;
+			std::atomic<bool> m_stopRenderThread;
+			Semaphore m_renderSemaphore;
+
+			RenderGraph m_renderGraph;
 
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;
@@ -247,6 +265,8 @@ namespace Insight
 
 			RHI_PipelineManager m_pipelineManager;
 			RHI_PipelineLayoutManager m_pipelineLayoutManager;
+
+			FrameResource<DescriptorAllocator> m_frameDescriptorAllocator;
 
 			FrameResource<CommandListManager> m_commandListManager;
 			FrameResource<RHI_DescriptorSetManager> m_descriptorSetManager;

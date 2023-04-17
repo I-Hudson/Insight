@@ -4,10 +4,7 @@
 #include "Core/Singleton.h"
 #include "Graphics/RenderGraph/RenderGraphPass.h"
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
-#include "Graphics/RHI/RHI_CommandList.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
-
-#include "Graphics/RenderContext.h"
 
 #include <type_traits>
 #include <unordered_map>
@@ -21,6 +18,7 @@ namespace Insight
 	namespace Graphics
 	{
 		class RHI_Texture;
+		class RHI_CommandList;
 		class RenderContext;
 
 		class IS_GRAPHICS RenderGraph : public Core::Singleton<RenderGraph>
@@ -32,7 +30,8 @@ namespace Insight
 			RenderGraph();
 
 			void Init(RenderContext* context);
-			void Execute();
+			void Swap();
+			void Execute(RHI_CommandList* cmdList);
 
 			RGTextureHandle CreateTexture(std::string textureName, RHI_TextureInfo info);
 
@@ -45,14 +44,15 @@ namespace Insight
 
 			void Release();
 
-			void SetPreRender(RenderGraphSetPreRenderFunc func) { m_pre_render_func = std::move(func); }
-			void SetPostRender(RenderGraphSetPreRenderFunc func) { m_post_render_func = std::move(func); }
+			void SetPreRender(RenderGraphSetPreRenderFunc func) { std::lock_guard lock(m_mutex); m_pre_render_func.at(m_passesUpdateIndex) = std::move(func); }
+			void SetPostRender(RenderGraphSetPreRenderFunc func) { std::lock_guard lock(m_mutex); m_post_render_func.at(m_passesUpdateIndex) = std::move(func); }
 
 			template<typename TData>
 			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
-				m_pending_passes.emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
+				std::lock_guard lock(m_mutex);
+				GetUpdatePasses().emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
 			}
 
 			/// @brief Set the render resolution size.
@@ -77,28 +77,23 @@ namespace Insight
 
 			void PlaceBarriersInToPipeline(RenderGraphPassBase* pass, RHI_CommandList* cmdList);
 
+			std::vector<UPtr<RenderGraphPassBase>>& GetUpdatePasses();
+			std::vector<UPtr<RenderGraphPassBase>>& GetRenderPasses();
+
+			const std::vector<UPtr<RenderGraphPassBase>>& GetUpdatePasses() const;
+			const std::vector<UPtr<RenderGraphPassBase>>& GetRenderPasses() const;
+
 		private:
 			RenderContext* m_context = nullptr;
-			RenderGraphSetPreRenderFunc m_pre_render_func = nullptr;
-			RenderGraphSetPostRenderFunc m_post_render_func = nullptr;
-			std::vector<UPtr<RenderGraphPassBase>> m_pending_passes;
-			std::vector<UPtr<RenderGraphPassBase>> m_passes;
+			std::mutex m_mutex;
 
-#ifdef RENDER_GRAPH_RENDER_THREAD
-			concurrency::task<void>* m_render_task = nullptr;
+			u32 m_passesUpdateIndex = 0;
+			u32 m_passesRenderIndex = 1;
 
-			std::mutex m_trigger_render_thread_lock;
-			std::condition_variable m_trigger_render_thread_cv;
-			bool m_trigger_render_thread_ready = false;
+			std::vector<RenderGraphSetPreRenderFunc> m_pre_render_func;
+			std::vector<RenderGraphSetPostRenderFunc> m_post_render_func;
+			std::vector<std::vector<UPtr<RenderGraphPassBase>>> m_passes;
 
-			std::mutex m_render_thread_finished_lock;
-			std::condition_variable m_render_thread_finished_cv;
-			bool m_render_thread_finished_ready = false;
-
-			std::thread m_render_thread;
-			std::atomic<bool> m_shutdown_render_thread = false;
-			const bool m_render_thread_enabled = false;
-#endif
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_render_resolution = {};
 			bool m_render_resolution_has_changed = false;
@@ -109,9 +104,6 @@ namespace Insight
 
 			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
 			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> m_texture_barrier_history;
-
-			//FrameResource<CommandListManager> m_commandListManager;
-			FrameResource<DescriptorAllocator> m_descriptorManagers;
 		};
 	}
 }

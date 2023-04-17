@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Graphics/Defines.h"
-#include "Graphics/RenderGraph/RenderGraph.h"
+#include "Graphics/RenderContext.h"
 
 namespace Insight
 {

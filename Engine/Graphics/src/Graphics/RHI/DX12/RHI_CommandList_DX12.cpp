@@ -802,7 +802,7 @@ namespace Insight
 				while (m_allocLists.size() > 0)
 				{
 					RHI_CommandList* list = *m_allocLists.begin();
-					list->Reset();
+					//list->Reset();
 
 					m_freeLists.insert(list);
 					m_allocLists.erase(list);

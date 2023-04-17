@@ -141,8 +141,7 @@ namespace Insight
 			RHI_Buffer* m_bound_vertex_buffer = nullptr;
 			RHI_Buffer* m_bound_index_buffer = nullptr;
 
-
-			friend class RenderGraph;
+			friend class RenderContext;
 		};
 
 		struct RHI_CommandListAllocatorDesc

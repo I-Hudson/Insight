@@ -8,6 +8,7 @@
 #include "Core/Memory.h"
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
+#include "Core/Profiler.h"
 
 #include "Algorithm/Vector.h"
 
@@ -22,6 +23,10 @@ namespace Insight
 
 	namespace Graphics
 	{
+		RenderContext::RenderContext()
+			: m_renderSemaphore(0)
+		{ }
+
 		RenderContext* RenderContext::New(GraphicsAPI graphicsAPI)
 		{
 			RenderContext* context = nullptr;
@@ -60,7 +65,30 @@ namespace Insight
 			context->m_renderpassManager.SetRenderContext(context);
 			context->m_samplerManager->SetRenderContext(context);
 
+			context->m_renderGraph.Init(context);
+			context->m_frameDescriptorAllocator.Setup();
+
+			context->m_renderThreadId = std::this_thread::get_id();
+
 			return context;
+		}
+
+		void RenderContext::Render()
+		{
+			m_renderGraph.Swap();
+			if (m_desc.MultithreadContext)
+			{
+				m_renderSemaphore.Signal();
+			}
+			else
+			{
+				RenderUpdateLoop();
+			}
+		}
+
+		bool RenderContext::IsRenderThread() const
+		{
+			return std::this_thread::get_id() == m_renderThreadId;
 		}
 
 		u32 RenderContext::GetFrameIndex() const
@@ -163,6 +191,14 @@ namespace Insight
 
 		void RenderContext::BaseDestroy()
 		{
+			StopRenderThread();
+
+			m_frameDescriptorAllocator.ForEach([](DescriptorAllocator& allocator)
+				{
+					allocator.Destroy();
+				});
+
+			m_renderGraph.Release();
 
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
@@ -267,6 +303,52 @@ namespace Insight
 						m_textures.FreeResource(texture);
 					});
 			}
+		}
+
+		void RenderContext::RenderUpdateLoop()
+		{
+			IS_PROFILE_FUNCTION();
+
+			RHI_CommandList* cmdList = nullptr;
+			if (PrepareRender())
+			{
+				cmdList = GetCommandListManager().GetCommandList();
+
+				cmdList->m_descriptorAllocator = &m_frameDescriptorAllocator.Get();
+				cmdList->m_descriptorAllocator->Reset();
+
+				PreRender(cmdList);
+
+				m_renderGraph.Execute(cmdList);
+
+				if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
+				{
+					cmdList->m_discard = true;
+				}
+			}
+			else
+			{
+				ExecuteAsyncJobs(cmdList);
+			}
+			PostRender(cmdList);
+		}
+
+		void RenderContext::StartRenderThread()
+		{
+			m_renderThread = std::thread([this]()
+			{
+				while (!m_stopRenderThread)
+				{
+					m_renderSemaphore.Wait();
+					RenderUpdateLoop();
+				}
+			});
+			m_renderThreadId = m_renderThread.get_id();
+		}
+
+		void RenderContext::StopRenderThread()
+		{
+			m_stopRenderThread = true;
 		}
 	}
 
