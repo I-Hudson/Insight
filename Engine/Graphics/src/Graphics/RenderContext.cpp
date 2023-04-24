@@ -24,7 +24,8 @@ namespace Insight
 	namespace Graphics
 	{
 		RenderContext::RenderContext()
-			: m_renderSemaphore(0)
+			: m_renderTriggerSemaphore(0)
+			, m_renderCompletedSemaphore(1)
 		{ }
 
 		RenderContext* RenderContext::New(GraphicsAPI graphicsAPI)
@@ -75,13 +76,15 @@ namespace Insight
 
 		void RenderContext::Render()
 		{
-			m_renderGraph.Swap();
 			if (m_desc.MultithreadContext)
 			{
-				m_renderSemaphore.Signal();
+				m_renderCompletedSemaphore.Wait();
+				m_renderGraph.Swap();
+				m_renderTriggerSemaphore.Signal();
 			}
 			else
 			{
+				m_renderGraph.Swap();
 				RenderUpdateLoop();
 			}
 		}
@@ -339,8 +342,9 @@ namespace Insight
 			{
 				while (!m_stopRenderThread)
 				{
-					m_renderSemaphore.Wait();
+					m_renderTriggerSemaphore.Wait();
 					RenderUpdateLoop();
+					m_renderCompletedSemaphore.Signal();
 				}
 			});
 			m_renderThreadId = m_renderThread.get_id();

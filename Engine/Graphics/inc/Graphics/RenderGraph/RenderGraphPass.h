@@ -38,6 +38,7 @@ namespace Insight
 		protected:
 			virtual void Setup(RenderGraphBuilder& builder) = 0;
 			virtual void Execute(RenderGraph& renderGraph, RHI_CommandList* cmdList) = 0;
+			virtual void Post(RenderGraph& renderGraph, RHI_CommandList* cmdList) = 0;
 
 		public:
 			std::string m_passName;
@@ -74,10 +75,12 @@ namespace Insight
 		public:
 			using SetupFunc = std::function<void(TPassData&, RenderGraphBuilder&)>;
 			using ExecuteFunc = std::function<void(TPassData&, RenderGraph&, RHI_CommandList*)>;
+			using PostFunc = std::function<void(TPassData&, RenderGraph&, RHI_CommandList*)>;
 
-			RenderGraphPass(std::string passName, SetupFunc setupFunc, ExecuteFunc executeFunc, TPassData initalData)
+			RenderGraphPass(std::string passName, SetupFunc setupFunc, ExecuteFunc executeFunc, PostFunc postFunc, TPassData initalData)
 				: m_setupFunc(std::move(setupFunc))
 				, m_executeFunc(std::move(executeFunc))
+				, m_postFunc(std::move(postFunc))
 				, m_passData(std::move(initalData))
 			{
 				m_passName = std::move(passName);
@@ -94,12 +97,17 @@ namespace Insight
 			{
 				m_executeFunc(m_passData, renderGraph, cmdList);
 			}
+			virtual void Post(RenderGraph& renderGraph, RHI_CommandList* cmdList) override
+			{
+				m_postFunc(m_passData, renderGraph, cmdList);
+			}
 
 		private:
 			TPassData m_passData;
 
 			SetupFunc m_setupFunc;
 			ExecuteFunc m_executeFunc;
+			ExecuteFunc m_postFunc;
 		};
 	}
 }

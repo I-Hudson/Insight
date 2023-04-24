@@ -205,9 +205,9 @@ namespace Insight
 			GPUDeferedManager& GetDeferredManager()                   { return m_gpu_defered_manager; }
 			RHI_UploadQueue& GetUploadQueue()                         { return m_uploadQueue; }
 
-		protected:
 			void ImGuiBeginFrame();
 			void ImGuiRender();
+		protected:
 			void ImGuiRelease();
 
 			virtual void WaitForGpu() = 0;
@@ -238,7 +238,9 @@ namespace Insight
 			std::thread::id m_renderThreadId;
 			std::thread m_renderThread;
 			std::atomic<bool> m_stopRenderThread;
-			Semaphore m_renderSemaphore;
+
+			Semaphore m_renderTriggerSemaphore;
+			Semaphore m_renderCompletedSemaphore;
 
 			RenderGraph m_renderGraph;
 

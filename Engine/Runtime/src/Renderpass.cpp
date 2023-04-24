@@ -49,9 +49,6 @@ namespace Insight
 
 	glm::vec3 dir_light_direction = glm::vec3(0.5f, -0.7f, 0.5f);
 
-	std::vector<Ptr<ECS::Entity>> opaque_entities_to_render;
-	std::vector<Ptr<ECS::Entity>> transparent_entities_to_render;
-
 	int pendingRenderResolution[2] = { 0, 0 };
 
 	Graphics::Frustum MainCameraFrustum = {};
@@ -87,14 +84,14 @@ namespace Insight
 		{
 			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
 			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			//modelsToAddToScene.push_back({ model_sponza, false });
-			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			modelsToAddToScene.push_back({ model_sponza, false });
+			modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -166,7 +163,7 @@ namespace Insight
 						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
 						glm::mat4 transform(1.0f);
-						transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
+						//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
 						entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
 					}
 
@@ -228,51 +225,6 @@ namespace Insight
 			g_global_resources = { };
 			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 
-			opaque_entities_to_render.clear();
-			transparent_entities_to_render.clear();
-
-			TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().GetActiveWorld();
-			if (world)
-			{
-				IS_PROFILE_SCOPE("Separate opaque and transparent entities");
-				std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
-				for (Ptr<ECS::Entity> entity : entities)
-				{
-					if (!entity->IsEnabled())
-					{
-						continue;
-					}
-
-					ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name));
-					Runtime::Material* material = meshComponent->GetMaterial();
-					if (material)
-					{
-						if (material->GetProperty(Runtime::MaterialProperty::Colour_A) < 1.0f)
-						{
-							transparent_entities_to_render.push_back(entity);
-						}
-						else
-						{
-							opaque_entities_to_render.push_back(entity);
-						}
-					}
-				}
-				{
-					IS_PROFILE_SCOPE("Sort transparent entities");
-					std::sort(transparent_entities_to_render.begin(), transparent_entities_to_render.end(), [this](const Ptr<ECS::Entity>& entity1, const Ptr<ECS::Entity>& entity2)
-						{
-							ECS::TransformComponent* transformComponent1 = static_cast<ECS::TransformComponent*>(entity1->GetComponentByName(ECS::TransformComponent::Type_Name));
-							ECS::TransformComponent* transformComponent2 = static_cast<ECS::TransformComponent*>(entity2->GetComponentByName(ECS::TransformComponent::Type_Name));
-
-							glm::vec3 position1 = transformComponent1->GetPosition();
-							glm::vec3 position2 = transformComponent2->GetPosition();
-							glm::vec3 cameraPositon = m_buffer_frame.View[3].xyz;
-
-							return glm::distance(position1, cameraPositon) < glm::distance(position2, cameraPositon) ? 1 : 0;
-						});
-				}
-			}
-
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
@@ -284,14 +236,12 @@ namespace Insight
 				});
 
 			{
-#ifndef SHADOW_PASS_SCENE_OBEJCTS
 				renderFrame = CreateRenderFrameFromWorldSystem(&Runtime::WorldSystem::Instance());
 				for (RenderWorld& world : renderFrame.RenderWorlds)
 				{
 					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
 				}
 				renderFrame.SortTransparentMeshes();
-#endif
 			}
 
 			ShadowPass();
@@ -379,13 +329,11 @@ namespace Insight
 			struct PassData
 			{
 				RGTextureHandle Depth_Tex;
-				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
 				RenderFrame const& RenderFrame;
 			};
 			PassData data
 			{
 				-1,
-				opaque_entities_to_render,
 				renderFrame
 			};
 
@@ -464,43 +412,6 @@ namespace Insight
 						renderpass_description.DepthStencilAttachment.Layer_Array_Index = static_cast<u32>(i);
 						cmdList->BeginRenderpass(renderpass_description);
 
-#ifdef SHADOW_PASS_SCENE_OBEJCTS
-						for (const Ptr<ECS::Entity>& e : data.OpaqueEntities)
-						{
-							ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-							glm::mat4 transform = transform_component->GetTransform();
-
-							ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-							if (!mesh_component
-								|| !mesh_component->GetMesh())
-							{
-								continue;
-							}
-							Runtime::Mesh* mesh = mesh_component->GetMesh();
-
-							Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-							boundingBox = boundingBox.Transform(transform);
-							// Transform bounding box to world space from local space.
-							if (!camera_frustum.IsVisible(boundingBox))
-							{
-								//continue;
-							}
-
-							struct alignas(16) Object
-							{
-								glm::mat4 Transform;
-								int CascadeIndex;
-							};
-							Object object =
-							{
-								transform,
-								static_cast<int>(i)
-							};
-							cmdList->SetUniform(4, 0, object);
-
-							mesh->Draw(cmdList);
-						}
-#else
 						const float CasacdeMinRaius[s_Cascade_Count] = { 0.0f, 2.5f, 5.0f, 8.5f };
 						for (RenderWorld const& world : data.RenderFrame.RenderWorlds)
 						{
@@ -528,24 +439,9 @@ namespace Insight
 								cmdList->DrawIndexed(mesh.MeshLods.at(0).Index_count, 1, mesh.MeshLods.at(0).First_index, mesh.MeshLods.at(0).Vertex_offset, 0);
 							}
 						}
-#endif
 						cmdList->EndRenderpass();
 					}
 				}, std::move(data));
-		}
-
-		void Renderpass::ShadowCullingPass()
-		{
-			struct TData
-			{ };
-			RenderGraph::Instance().AddPass<TData>("Shadow_Culling", [](TData& data, RenderGraphBuilder& builder)
-				{
-
-				},
-				[](TData& data, RenderGraph& rg, RHI_CommandList* cmd_list)
-				{
-
-				});
 		}
 
 		void Renderpass::DepthPrepass()
@@ -611,7 +507,7 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, 1000.0f);
 
-					for (const Ptr<ECS::Entity> e : opaque_entities_to_render)
+					/*for (const Ptr<ECS::Entity> e : opaque_entities_to_render)
 					{
 						ECS::MeshComponent* mesh_component = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
 						if (!mesh_component
@@ -629,7 +525,7 @@ namespace Insight
 						cmdList->SetUniform(1, 1, object);
 
 						mesh_component->GetMesh()->Draw(cmdList);
-					}
+					}*/
 
 					cmdList->EndRenderpass();
 				}, std::move(pass_data));
@@ -644,41 +540,10 @@ namespace Insight
 				RenderFrame const& RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
-				std::vector<Ptr<ECS::Entity>> OpaqueEntities;
-				int Mesh_Lod = 0;
 			};
 			TestPassData Pass_Data = { renderFrame };
 			Pass_Data.Buffer_Frame = m_buffer_frame;
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
-			Pass_Data.OpaqueEntities = opaque_entities_to_render;
-
-			static int camera_index = 0;
-			static int mesh_lod_index = 0;
-			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
-
-			std::array<std::string, Runtime::Mesh::s_LOD_Count> mesh_lods;
-			std::array<const char*, Runtime::Mesh::s_LOD_Count> mesh_lods_const_char;
-			for (size_t i = 0; i < Runtime::Mesh::s_LOD_Count; ++i)
-			{
-				mesh_lods[i] = "LOD_" + std::to_string(i);
-				mesh_lods_const_char[i] = mesh_lods[i].c_str();
-			}
-
-			ImGui::Begin("GBuffer");
-			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
-			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), static_cast<u32>(mesh_lods_const_char.size()));
-			//if (ImGui::Button("Set Visual Frustum"))
-			{
-				MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
-			}
-			ImGui::Checkbox("Use Custum frustum", &UseCustomFrustum);
-			ImGui::End();
-
-			if (camera_index > 0)
-			{
-				Pass_Data.Buffer_Frame.Proj_View = m_directional_light.ProjView[camera_index - 1];
-			}
-			Pass_Data.Mesh_Lod = mesh_lod_index;
 
 			RenderGraph::Instance().AddPass<TestPassData>("GBuffer", 
 				[](TestPassData& data, RenderGraphBuilder& builder)
@@ -785,64 +650,52 @@ namespace Insight
 						camera_frustum = Frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 					}
 
-					for (const Ptr<ECS::Entity> e : data.OpaqueEntities)
+					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 					{
-						IS_PROFILE_SCOPE("Draw Entity");
-
-						ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-						if (!meshComponent
-							|| !meshComponent->GetMesh())
+						for (const RenderMesh& mesh : world.Meshes)
 						{
-							continue;
-						}
-						Runtime::Mesh* mesh = meshComponent->GetMesh();
+							IS_PROFILE_SCOPE("Draw Entity");
 
-
-						Runtime::Material* material = meshComponent->GetMaterial();
-						if (!material)
-						{
-							continue;
-						}
-
-
-						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-						Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-						{
-							IS_PROFILE_SCOPE("Visible check");
-							boundingBox = boundingBox.Transform(transform_component->GetTransform());
-							// Transform bounding box to world space from local space.
-							if (!camera_frustum.IsVisible(boundingBox))
 							{
-								//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
-								continue;
+								IS_PROFILE_SCOPE("Visible check");
+								// Transform bounding box to world space from local space.
+								if (!camera_frustum.IsVisible(mesh.BoudingBox))
+								{
+									//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
+									continue;
+								}
 							}
-						}
 
-						BufferPerObject object = {};
-						object.Transform = transform_component->GetTransform();
-						object.Previous_Transform = transform_component->GetPreviousTransform();
+							BufferPerObject object = {};
+							object.Transform = mesh.Transform;
+							object.Previous_Transform = mesh.Transform;
 
-						{
-							IS_PROFILE_SCOPE("Set textures");
-
-							// Theses sets and bindings shouldn't chagne.
-							Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
-							if (diffuseTexture)
 							{
-								cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
-								object.Textures_Set[0] = 1;
+								IS_PROFILE_SCOPE("Set textures");
+
+								const RenderMaterial& renderMaterial = mesh.Material;
+								// Theses sets and bindings shouldn't chagne.
+								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+								if (diffuseTexture)
+								{
+									cmdList->SetTexture(2, 0, diffuseTexture);
+									object.Textures_Set[0] = 1;
+								}
+								//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
+								//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 							}
-							//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
-							//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
+
+							cmdList->SetUniform(2, 0, object);
+							//{
+							//	IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+							//	BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+							//}
+
+							const Runtime::MeshLOD& meshLod = mesh.MeshLods.at(0);
+							cmdList->SetVertexBuffer(meshLod.Vertex_buffer);
+							cmdList->SetIndexBuffer(meshLod.Index_buffer, Graphics::IndexType::Uint32);
+							cmdList->DrawIndexed(meshLod.Index_count, 1, meshLod.First_index, meshLod.Vertex_offset, 0);
 						}
-
-						cmdList->SetUniform(2, 0, object);
-						//{
-						//	IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-						//	BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-						//}
-
-						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
 					
 					cmdList->EndRenderpass();
@@ -858,36 +711,10 @@ namespace Insight
 				RenderFrame const& RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
-				std::vector<Ptr<ECS::Entity>> TransparentEntities;
-				int Mesh_Lod = 0;
 			};
 			TestPassData Pass_Data = { renderFrame };
 			Pass_Data.Buffer_Frame = m_buffer_frame;
 			Pass_Data.Buffer_Samplers = m_buffer_samplers;
-			Pass_Data.TransparentEntities = transparent_entities_to_render;
-
-			static int camera_index = 0;
-			static int mesh_lod_index = 0;
-			const char* cameras[] = { "Default", "Shadow0", "Shadow1", "Shadow2", "Shadow3" };
-
-			std::array<std::string, Runtime::Mesh::s_LOD_Count> mesh_lods;
-			std::array<const char*, Runtime::Mesh::s_LOD_Count> mesh_lods_const_char;
-			for (size_t i = 0; i < Runtime::Mesh::s_LOD_Count; ++i)
-			{
-				mesh_lods[i] = "LOD_" + std::to_string(i);
-				mesh_lods_const_char[i] = mesh_lods[i].c_str();
-			}
-
-			ImGui::Begin("GBuffer");
-			ImGui::ListBox("Availible cameras", &camera_index, cameras, ARRAYSIZE(cameras));
-			ImGui::ListBox("Mesh LODs", &mesh_lod_index, mesh_lods_const_char.data(), static_cast<int>(mesh_lods_const_char.size()));
-			ImGui::End();
-
-			if (camera_index > 0)
-			{
-				Pass_Data.Buffer_Frame.Proj_View = m_directional_light.ProjView[camera_index - 1];
-			}
-			Pass_Data.Mesh_Lod = mesh_lod_index;
 
 			RenderGraph::Instance().AddPass<TestPassData>("Transparent_GBuffer",
 				[](TestPassData& data, RenderGraphBuilder& builder)
@@ -980,51 +807,44 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
-					for (const Ptr<ECS::Entity> e : data.TransparentEntities)
+					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 					{
-						ECS::MeshComponent* meshComponent = static_cast<ECS::MeshComponent*>(e->GetComponentByName(ECS::MeshComponent::Type_Name));
-						if (!meshComponent
-							|| !meshComponent->GetMesh())
+						for (const RenderMesh& mesh : world.Meshes)
 						{
-							continue;
+							if (mesh.MeshLods.size() == 0)
+							{
+								continue;
+							}
+
+							if (!camera_frustum.IsVisible(mesh.BoudingBox))
+							{
+								continue;
+							}
+
+							BufferPerObject object = {};
+							object.Transform = mesh.Transform;
+							object.Previous_Transform = mesh.Transform;
+
+							const RenderMaterial& renderMaterial = mesh.Material;
+							// Theses sets and bindings shouldn't chagne.
+							RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+							if (diffuseTexture)
+							{
+								cmdList->SetTexture(2, 0, diffuseTexture);
+								object.Textures_Set[0] = 1;
+							}
+
+							cmdList->SetUniform(2, 0, object);
+							{
+								IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+								BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+							}
+
+							const Runtime::MeshLOD& meshLod = mesh.MeshLods.at(0);
+							cmdList->SetVertexBuffer(meshLod.Vertex_buffer);
+							cmdList->SetIndexBuffer(meshLod.Index_buffer, Graphics::IndexType::Uint32);
+							cmdList->DrawIndexed(meshLod.Index_count, 1, meshLod.First_index, meshLod.Vertex_offset, 0);
 						}
-						Runtime::Mesh* mesh = meshComponent->GetMesh();
-
-						Runtime::Material* material = meshComponent->GetMaterial();
-						if (!material)
-						{
-							continue;
-						}
-
-						ECS::TransformComponent* transform_component = static_cast<ECS::TransformComponent*>(e->GetComponentByName(ECS::TransformComponent::Type_Name));
-
-						Graphics::BoundingBox boundingBox = mesh->GetBoundingBox();
-						boundingBox = boundingBox.Transform(transform_component->GetTransform());
-						// Transform bounding box to world space from local space.
-						if (!camera_frustum.IsVisible(boundingBox))
-						{
-							continue;
-						}
-
-						BufferPerObject object = {};
-						object.Transform = transform_component->GetTransform();
-						object.Previous_Transform = transform_component->GetPreviousTransform();
-
-						// Theses sets and bindings shouldn't chagne.
-						Runtime::Texture2D* diffuseTexture = static_cast<Runtime::Texture2D*>(material->GetTexture(Runtime::TextureTypes::Diffuse));
-						if (diffuseTexture)
-						{
-							cmdList->SetTexture(2, 0, diffuseTexture->GetRHITexture());
-							object.Textures_Set[0] = 1;
-						}
-
-						cmdList->SetUniform(2, 0, object);
-						{
-							IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-							BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-						}
-
-						meshComponent->GetMesh()->Draw(cmdList, data.Mesh_Lod);
 					}
 
 					cmdList->EndRenderpass();
@@ -1041,31 +861,6 @@ namespace Insight
 			PassData pass_data = {};
 			pass_data.Buffer_Frame = m_buffer_frame;
 			pass_data.Buffer_Samplers = m_buffer_samplers;
-
-			static int output_texture;
-			static int cascade_override;
-			const char* items[] = { "Colour", "World Normal", "World Position", "Shadow", "Colour + Shadow", "View Position", "Cascade splits", "Shadow NDC Z" };
-			const char* cascade_override_items[] = { "0", "1", "2", "3" };
-
-			ImGui::Begin("Composite pass");
-			ImGui::ListBox("Display shadow", &output_texture, items, ARRAY_COUNT(items));
-			ImGui::ListBox("Cascde Index shadow", &cascade_override, cascade_override_items, ARRAY_COUNT(cascade_override_items));
-			ImGui::End();
-
-			ImGui::Begin("Directional light colour");
-			float light_colour[3] =
-			{
-				m_directional_light.Light_Colour.x,
-				m_directional_light.Light_Colour.y,
-				m_directional_light.Light_Colour.z
-			};
-			if (ImGui::ColorPicker3("Light Colour", light_colour))
-			{
-				m_directional_light.Light_Colour.x = light_colour[0];
-				m_directional_light.Light_Colour.y = light_colour[1];
-				m_directional_light.Light_Colour.z = light_colour[2];
-			}
-			ImGui::End();
 
 			RenderGraph::Instance().AddPass<PassData>("Composite_Pass",
 				[](PassData& data, RenderGraphBuilder& builder)

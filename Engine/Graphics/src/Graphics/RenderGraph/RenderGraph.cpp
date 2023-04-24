@@ -84,7 +84,7 @@ namespace Insight
 				m_render_resolution_has_changed = false;
 
 				m_context->GpuWaitForIdle();
-				GetRenderPasses().clear();
+				//GetRenderPasses().clear();
 
 				// Release all current textures.
 				m_textureCaches->Release();
@@ -417,6 +417,11 @@ namespace Insight
 				pass->Execute(*this, cmdList);
 				cmdList->EndTimeBlock();
 				///cmdList->EndRenderpass();
+			}
+
+			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
+			{
+				pass->Post(*this, cmdList);
 			}
 
 			// If our swap chain image is not in the 'PresentSrc' layout then transition it.

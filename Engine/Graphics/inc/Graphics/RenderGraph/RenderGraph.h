@@ -52,7 +52,30 @@ namespace Insight
 				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc, TData initalData = { })
 			{
 				std::lock_guard lock(m_mutex);
-				GetUpdatePasses().emplace_back(MakeUPtr<RenderGraphPass<TData>>(std::move(passName), std::move(setupFunc), std::move(executeFunc), std::move(initalData)));
+				GetUpdatePasses().emplace_back(
+					MakeUPtr<RenderGraphPass<TData>>(
+						std::move(passName)
+						, std::move(setupFunc)
+						, std::move(executeFunc)
+						, std::move([](TData&, RenderGraph&, RHI_CommandList*) {})
+						, std::move(initalData)));
+			}
+
+			template<typename TData>
+			void AddPass(std::string passName
+				, typename RenderGraphPass<TData>::SetupFunc setupFunc
+				, typename RenderGraphPass<TData>::ExecuteFunc executeFunc
+				, typename RenderGraphPass<TData>::PostFunc postFunc
+				, TData initalData = { })
+			{
+				std::lock_guard lock(m_mutex);
+				GetUpdatePasses().emplace_back(
+					MakeUPtr<RenderGraphPass<TData>>(
+						std::move(passName)
+						, std::move(setupFunc)
+						, std::move(executeFunc)
+						, std::move(postFunc)
+						, std::move(initalData)));
 			}
 
 			/// @brief Set the render resolution size.

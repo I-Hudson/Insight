@@ -27,8 +27,6 @@ namespace Insight
 			glm::mat4 View_Inverted = { };
 			glm::mat4 Projection_View_Inverted = { };
 
-
-
 			glm::vec2 Render_Resolution = {};
 			float pad0 = 0.0f;
 			float pad1 = 0.0f;
@@ -84,7 +82,6 @@ namespace Insight
 
 		private:
 			void ShadowPass();
-			void ShadowCullingPass();
 			void DepthPrepass();
 			void GBuffer();
 			void TransparentGBuffer();

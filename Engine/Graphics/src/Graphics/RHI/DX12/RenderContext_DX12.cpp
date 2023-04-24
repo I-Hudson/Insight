@@ -214,7 +214,10 @@ namespace Insight
 				m_resource_tracker.Release();
 
 				m_rendererThreadShutdown = true;
-				m_rendererThread.join();
+				if (m_rendererThread.joinable())
+				{
+					m_rendererThread.join();
+				}
 
 				DestroyImGui();
 
@@ -318,7 +321,7 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("ImGui Render");
-					ImGuiRender();
+					//ImGuiRender();
 				}
 
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
@@ -434,8 +437,8 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
-					ImGui_ImplDX12_NewFrame();
-					ImGuiBeginFrame();
+					//ImGui_ImplDX12_NewFrame();
+					//ImGuiBeginFrame();
 				}
 
 				m_resource_tracker.EndFrame();

@@ -35,11 +35,27 @@ namespace Insight
 
 		void ImGuiPass::Render()
 		{
-			struct TestPassData
+			RenderContext::Instance().ImGuiRender();
+
+			struct ImGuiPassData
 			{
 				PipelineStateObject Pso;
+				ImDrawData ImDrawData;
+				std::vector<ImDrawList*> CmdList;
 			};
-			RenderGraph::Instance().AddPass<TestPassData>("ImGuiPass", [this](TestPassData& data, RenderGraphBuilder& builder)
+
+			ImGuiPassData passData;
+			passData.ImDrawData = *ImGui::GetDrawData();
+			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
+			{
+				ImDrawList* drawList = passData.ImDrawData.CmdLists[i]->CloneOutput();
+				passData.CmdList.push_back(std::move(drawList));
+			}
+			passData.ImDrawData.CmdLists = passData.CmdList.data();
+
+			RenderContext::Instance().ImGuiBeginFrame();
+
+			RenderGraph::Instance().AddPass<ImGuiPassData>("ImGuiPass", [this](ImGuiPassData& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("ImGui pass setup");
 
@@ -90,7 +106,7 @@ namespace Insight
 
 					builder.SetRenderpass(renderpassDescription);
 				},
-				[&](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[&](ImGuiPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("ImGui pass execute");
 
@@ -108,7 +124,8 @@ namespace Insight
 
 					cmdList->SetSampler(2, 0, bilinearSampler);
 
-					ImDrawData* draw_data = ImGui::GetDrawData();
+					ImDrawData* imguiDrawData = ImGui::GetDrawData();
+					ImDrawData* draw_data = &data.ImDrawData;
 
 					/// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 					int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
@@ -257,7 +274,15 @@ namespace Insight
 						global_vtx_offset += cmd_list->VtxBuffer.Size;
 					}
 					cmdList->EndRenderpass();
-				});
+				}
+				, [](ImGuiPassData& passData, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				{
+					for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
+					{
+						IM_FREE(passData.CmdList.at(i));
+					}
+				}
+				, std::move(passData));
 
 		}
 
