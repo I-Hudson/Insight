@@ -33,7 +33,6 @@ namespace Insight
             ASSERT(Platform::IsMainThread());
 
             u32 resourcesToLoad = 0;
-            std::vector<IResource*> resourceLoaded;
 
             u32 resourcesCurrentlyLoading = 0;
             {
@@ -43,16 +42,15 @@ namespace Insight
                 {
                     if (s_resourcesLoading.at(i)->IsLoaded())
                     {
-                        resourceLoaded.push_back(s_resourcesLoading.at(i));
                         ++resourcesToLoad;
                     }
                 }
 
-                // Remove all loaded resources from s_resourcesLoading.
-                for (IResource* const resource : resourceLoaded)
-                {
-                    Algorithm::VectorRemove(s_resourcesLoading, resource);
-                }
+            //    // Remove all loaded resources from s_resourcesLoading.
+            //    for (IResource* const resource : resourceLoaded)
+            //    {
+            //        Algorithm::VectorRemove(s_resourcesLoading, resource);
+            //    }
                 resourcesCurrentlyLoading = s_resourcesLoading.size();
             }
 
@@ -401,7 +399,7 @@ namespace Insight
                 IS_CORE_WARN("[ResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
             }
 
-            void(*resourceLoadFunc)(IResource* resource, const IResourceLoader* loader) = [](IResource* resource, const IResourceLoader* loader)
+            void(*resourceLoadFunc)(IResource* resource, const IResourceLoader* loader, const bool threaded) = [](IResource* resource, const IResourceLoader* loader, const bool threaded)
             {
                 resource->StartLoadTimer();
                 {
@@ -449,9 +447,15 @@ namespace Insight
                 resource->StopLoadTimer();
                 if (resource->IsLoaded())
                 {
+                    if (threaded == true)
+                    {
+                        ASSERT(0 == 0);
+                    }
                     s_database->SaveMetaFileData(resource, true);
                     resource->OnLoaded(resource);
                 }
+                std::lock_guard resourceLoadingGuard(s_resourcesLoadingMutex);
+                Algorithm::VectorRemove(s_resourcesLoading, resource);
             };
 
 
@@ -459,12 +463,12 @@ namespace Insight
             {
                 Threading::TaskSystem::CreateTask([resource, loader, resourceLoadFunc]()
                     {
-                        resourceLoadFunc(resource, loader);
+                        resourceLoadFunc(resource, loader, true);
                     });
             }
             else
             {
-                resourceLoadFunc(resource, loader);
+                resourceLoadFunc(resource, loader, false);
                 {
                     std::lock_guard resourcesLoadingLock(s_resourcesLoadingMutex);
                     Algorithm::VectorRemove(s_resourcesLoading, resource);
