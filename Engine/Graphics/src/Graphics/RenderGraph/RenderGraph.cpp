@@ -191,8 +191,8 @@ namespace Insight
 					if (!tex->ValidResource())
 					{
 						pair.second.InitalStatus = DeviceUploadStatus::Completed;
-						tex->Create(m_context, pair.second);
 						tex->SetName(tex->m_name);
+						tex->Create(m_context, pair.second);
 					}
 				}
 

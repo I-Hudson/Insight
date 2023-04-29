@@ -2,7 +2,7 @@
 #include "Graphics/RHI/DX12/RHI_CommandList_DX12.h"
 
 #include "Core/Logger.h"
-
+#pragma optimize("", off)
 namespace Insight
 {
     namespace Graphics
