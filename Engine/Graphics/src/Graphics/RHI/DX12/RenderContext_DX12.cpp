@@ -205,6 +205,11 @@ namespace Insight
 
 				WaitForGpu();
 
+				if (desc.MultithreadContext)
+				{
+					StartRenderThread();
+				}
+
 				return true;
 			}
 
@@ -213,11 +218,7 @@ namespace Insight
 				WaitForGpu();
 				m_resource_tracker.Release();
 
-				m_rendererThreadShutdown = true;
-				if (m_rendererThread.joinable())
-				{
-					m_rendererThread.join();
-				}
+				StopRenderThread();
 
 				DestroyImGui();
 
@@ -320,23 +321,6 @@ namespace Insight
 				std::lock_guard lock(m_lock);
 
 				{
-					IS_PROFILE_SCOPE("ImGui Render");
-					//ImGuiRender();
-				}
-
-				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
-				{
-					return false;
-				}
-
-				if (Window::Instance().GetSize() != m_swapchainBufferSize)
-				{
-					IS_PROFILE_SCOPE("Swapchain resize");
-					SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
-					return false;
-				}
-
-				{
 					IS_PROFILE_SCOPE("Fence wait");
 					// First get the status of the fence. Then if it has not finished, wait on it.
 
@@ -355,8 +339,19 @@ namespace Insight
 
 				m_descriptorSetManager->Reset();
 				m_commandListManager->Reset();
-
 				m_resource_tracker.BeginFrame();
+
+				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
+				{
+					return false;
+				}
+
+				if (Window::Instance().GetSize() != m_swapchainBufferSize)
+				{
+					IS_PROFILE_SCOPE("Swapchain resize");
+					SetSwaphchainResolution({ Window::Instance().GetWidth(), Window::Instance().GetHeight() });
+					return false;
+				}
 
 				return true;
 			}
@@ -619,6 +614,11 @@ namespace Insight
 
 			void RenderContext_DX12::ExecuteAsyncJobs(RHI_CommandList* cmdList)
 			{
+				if (cmdList == nullptr)
+				{
+					return;
+				}
+
 				// Go through out deferred manager and call all the functions which have been queued up.
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);

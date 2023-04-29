@@ -70,7 +70,7 @@ namespace Insight
 
 			void FreeResource(TypePtr object)
 			{
-				ASSERT(Platform::IsMainThread());
+				//ASSERT(Platform::IsMainThread());
 				std::lock_guard lock(m_lock);
 				auto itr = m_objects.find(object);
 				if (itr != m_objects.end())

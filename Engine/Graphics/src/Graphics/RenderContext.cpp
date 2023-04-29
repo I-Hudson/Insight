@@ -78,12 +78,22 @@ namespace Insight
 		{
 			if (m_desc.MultithreadContext)
 			{
-				m_renderCompletedSemaphore.Wait();
+				{
+					IS_PROFILE_SCOPE("Wait for Render Thread");
+					m_renderCompletedSemaphore.Wait();
+				}
+
+				RenderStats::Instance().Draw();
 				m_renderGraph.Swap();
-				m_renderTriggerSemaphore.Signal();
+
+				{
+					IS_PROFILE_SCOPE("Signal Render Thread");
+					m_renderTriggerSemaphore.Signal();
+				}
 			}
 			else
 			{
+				RenderStats::Instance().Draw();
 				m_renderGraph.Swap();
 				RenderUpdateLoop();
 			}
@@ -173,8 +183,6 @@ namespace Insight
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
-
-			RenderStats::Instance().Draw();
 		}
 
 		void RenderContext::ImGuiRender()
@@ -312,11 +320,13 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			RHI_CommandList* cmdList = nullptr;
-			if (PrepareRender())
-			{
-				cmdList = GetCommandListManager().GetCommandList();
+			RenderStats::Instance().Reset();
+			bool prepareRenderer = PrepareRender();
 
+			RHI_CommandList* cmdList = nullptr;
+			cmdList = GetCommandListManager().GetCommandList();
+			if (prepareRenderer)
+			{
 				cmdList->m_descriptorAllocator = &m_frameDescriptorAllocator.Get();
 				cmdList->m_descriptorAllocator->Reset();
 
@@ -333,6 +343,7 @@ namespace Insight
 			{
 				ExecuteAsyncJobs(cmdList);
 			}
+			cmdList->Close();
 			PostRender(cmdList);
 		}
 
@@ -340,11 +351,25 @@ namespace Insight
 		{
 			m_renderThread = std::thread([this]()
 			{
+				IS_PROFILE_THREAD("Render Thread");
 				while (!m_stopRenderThread)
 				{
-					m_renderTriggerSemaphore.Wait();
+					IS_PROFILE_SCOPE("Render Update");
+					{
+						IS_PROFILE_SCOPE("Wait for Main Thread");
+						m_renderTriggerSemaphore.Wait();
+					}
+
+					if (m_stopRenderThread)
+					{
+						break;
+					}
+
 					RenderUpdateLoop();
-					m_renderCompletedSemaphore.Signal();
+					{
+						IS_PROFILE_SCOPE("Signal render complete");
+						m_renderCompletedSemaphore.Signal();
+					}
 				}
 			});
 			m_renderThreadId = m_renderThread.get_id();
@@ -352,7 +377,14 @@ namespace Insight
 
 		void RenderContext::StopRenderThread()
 		{
-			m_stopRenderThread = true;
+			if (m_desc.MultithreadContext
+				&& m_renderThreadId != std::thread::id())
+			{
+				m_stopRenderThread = true;
+				m_renderTriggerSemaphore.Signal();
+				m_renderThread.join();
+				m_renderThreadId = m_renderThread.get_id();
+			}
 		}
 	}
 

@@ -443,8 +443,6 @@ namespace Insight
 				cmdList->PipelineBarrier(barrier);
 				//cmdList->SetImageLayout(m_context->GetSwaphchainIamge(), ImageLayout::PresentSrc);
 			}
-
-			cmdList->Close();
 		}
 
 		void RenderGraph::Clear()

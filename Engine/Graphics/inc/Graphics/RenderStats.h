@@ -6,6 +6,8 @@
 #include "Core/Singleton.h"
 #include "Core/Timer.h"
 
+#include "Core/Collections/DoubleBufferVector.h"
+
 #include <string>
 #include <sstream>
 
@@ -27,14 +29,14 @@ protected:
 	}
 };
 
-IS_GRAPHICS std::string FormatU64ToCommaString(u64 value);
+IS_GRAPHICS std::string FormatU64ToCommaString(const Insight::DoubleBufferVector<u64>& value);
 
 namespace Insight
 {
 	namespace Graphics
 	{
 #define FORMAT_STAT(Stat, StatDisplayText) \
-std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(Stat); }
+std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(Stat.GetCurrent()); }
 
 #define FORMAT_STAT_VALUE(Stat, Value, StatDisplayText) \
 std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(Value); }
@@ -48,29 +50,29 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 
 			static constexpr u8 AverageRenderTimeCount = 128;
 			float AverageRenderTime[AverageRenderTimeCount];
-			u8 AverageRenderTimeIndex = 0;
+			u8 AverageRenderTimeIndex;
 
-			u64 DrawCalls = 0;
-			u64 DrawIndexedCalls = 0;
-			u64 DispatchCalls = 0;
+			DoubleBufferVector<u64> DrawCalls;
+			DoubleBufferVector<u64> DrawIndexedCalls;
+			DoubleBufferVector<u64> DispatchCalls;
 
-			u64 IndexBufferBindings = 0;
-			u64 VertexBufferBindings = 0;
+			DoubleBufferVector<u64> IndexBufferBindings;
+			DoubleBufferVector<u64> VertexBufferBindings;
 
-			u64 DrawIndexedIndicesCount = 0;
+			DoubleBufferVector<u64> DrawIndexedIndicesCount;
 
-			u64 FrameUniformBufferSize = 0;
+			DoubleBufferVector<u64> FrameUniformBufferSize;
 
-			u64 DescriptorSetBindings = 0;
-			u64 DescriptorSetUpdates = 0;
-			u64 DescriptorSetUsedCount = 0;
-			u64 PipelineBarriers = 0;
+			DoubleBufferVector<u64> DescriptorSetBindings;
+			DoubleBufferVector<u64> DescriptorSetUpdates;
+			DoubleBufferVector<u64> DescriptorSetUsedCount;
+			DoubleBufferVector<u64> PipelineBarriers;
 
 			// DX12 Info
-			u64 DescriptorTableResourceCreations = 0;
-			u64 DescriptorTableResourceReuse = 0;
-			u64 DescriptorTableSamplerCreations = 0;
-			u64 DescriptorTableSamplerReuse = 0;
+			DoubleBufferVector<u64> DescriptorTableResourceCreations;
+			DoubleBufferVector<u64> DescriptorTableResourceReuse;
+			DoubleBufferVector<u64> DescriptorTableSamplerCreations;
+			DoubleBufferVector<u64> DescriptorTableSamplerReuse;
 
 			FORMAT_STAT(DrawCalls, "Draw Calls: ");
 			FORMAT_STAT(DrawIndexedCalls, "Draw Indexed Calls: ");
@@ -78,7 +80,7 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 			FORMAT_STAT(IndexBufferBindings, "Index Buffer Bindings Calls: ");
 			FORMAT_STAT(VertexBufferBindings, "Vertex Buffer Bindings Calls: ");
 			FORMAT_STAT_FUNC(DrawIndexedIndicesCount, FormatU64ToCommaString(DrawIndexedIndicesCount), "Draw indcies count: ");
-			FORMAT_STAT_VALUE(FrameUniformBufferSize, FrameUniformBufferSize / 1024, "Frame Uniform Buffer Size (KB): ");
+			FORMAT_STAT_VALUE(FrameUniformBufferSize, FrameUniformBufferSize.GetCurrent() / 1024, "Frame Uniform Buffer Size (KB): ");
 			FORMAT_STAT(DescriptorSetBindings, "Descriptor Set Bindings Calls: ");
 			FORMAT_STAT(DescriptorSetUpdates, "Descriptor Set Update Calls: ");
 			FORMAT_STAT(DescriptorSetUsedCount, "Descriptor Set Used Count: ");

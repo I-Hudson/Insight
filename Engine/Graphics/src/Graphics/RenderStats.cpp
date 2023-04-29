@@ -3,11 +3,11 @@
 
 #include <imgui.h>
 
-std::string FormatU64ToCommaString(u64 value)
+std::string FormatU64ToCommaString(const Insight::DoubleBufferVector<u64>& value)
 {
 	std::stringstream ss;
 	ss.imbue(std::locale(std::locale(), new comma_numpunct()));
-	ss << std::fixed << value;
+	ss << std::fixed << value.GetCurrent();
 	return ss.str();
 };
 
@@ -71,27 +71,54 @@ namespace Insight
 			}
 
 			ImGui::End();
-			Reset();
 		}
 
 		void RenderStats::Reset()
 		{
 			RenderTime.Reset();
+			DrawCalls.Swap();
 			DrawCalls = 0;
+
+			DrawIndexedCalls.Swap();
 			DrawIndexedCalls = 0;
+
+			DispatchCalls.Swap();
 			DispatchCalls = 0;
+
+			IndexBufferBindings.Swap();
 			IndexBufferBindings = 0;
+
+			VertexBufferBindings.Swap();
 			VertexBufferBindings = 0;
+
+			DrawIndexedIndicesCount.Swap();
 			DrawIndexedIndicesCount = 0;
+
+			FrameUniformBufferSize.Swap();
 			FrameUniformBufferSize = 0;
+
+			DescriptorSetBindings.Swap();
 			DescriptorSetBindings = 0;
+
+			DescriptorSetUpdates.Swap();
 			DescriptorSetUpdates = 0;
+
+			DescriptorSetUsedCount.Swap();
 			DescriptorSetUsedCount = 0;
+
+			PipelineBarriers.Swap();
 			PipelineBarriers = 0;
 
+			DescriptorTableResourceCreations.Swap();
 			DescriptorTableResourceCreations = 0;
+
+			DescriptorTableResourceReuse.Swap();
 			DescriptorTableResourceReuse = 0;
+
+			DescriptorTableSamplerCreations.Swap();
 			DescriptorTableSamplerCreations = 0;
+
+			DescriptorTableSamplerReuse.Swap();
 			DescriptorTableSamplerReuse = 0;
 		}
 	}

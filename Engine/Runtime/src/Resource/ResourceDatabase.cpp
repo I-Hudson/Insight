@@ -306,6 +306,11 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::CreateDependentResource(ResourceId const& resourceId)
         {
+            std::string path = resourceId.GetPath();
+            if (path == "F:/Users/Documents/SourceControl/Github/C++Porjects/Insight/Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf/arch_stones_01-0")
+            {
+                IS_CORE_INFO("");
+            }
             ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
 
             TObjectPtr<IResource> resource = nullptr;

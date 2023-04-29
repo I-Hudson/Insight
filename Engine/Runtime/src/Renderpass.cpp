@@ -82,16 +82,16 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			//modelsToAddToScene.push_back({ model_backpack, false });
+			modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			modelsToAddToScene.push_back({ model_sponza, false });
-			modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			//modelsToAddToScene.push_back({ model_sponza, false });
+			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -248,12 +248,12 @@ namespace Insight
 			//ShadowCullingPass();
 			if (Depth_Prepass)
 			{
-				DepthPrepass();
+				//DepthPrepass();
 			}
-			GBuffer();
-			TransparentGBuffer();
-			Composite();
-			FSR2();
+			//GBuffer();
+			//TransparentGBuffer();
+			//Composite();
+			//FSR2();
 			Swapchain();
 
 			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
@@ -329,7 +329,7 @@ namespace Insight
 			struct PassData
 			{
 				RGTextureHandle Depth_Tex;
-				RenderFrame const& RenderFrame;
+				RenderFrame const RenderFrame;
 			};
 			PassData data
 			{
@@ -1142,7 +1142,11 @@ namespace Insight
 					{
 						rt = builder.GetTexture("Composite_Tex");
 					}
-					builder.ReadTexture(rt);
+
+					if (rt != -1)
+					{
+						builder.ReadTexture(rt);
+					}
 					data.RenderTarget = rt;
 
 					builder.WriteTexture(-1);
@@ -1172,8 +1176,16 @@ namespace Insight
 					cmdList->BindPipeline(pso, nullptr);
 					cmdList->BeginRenderpass(renderGraph.GetRenderpassDescription("SwapchainPass"));
 
-					cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
-					cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
+					if (data.RenderTarget != -1)
+					{
+						cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
+						cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
+					}
+					else
+					{
+						cmdList->SetTexture(0, 0, nullptr);
+						cmdList->SetSampler(1, 0, nullptr);
+					}
 					cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();

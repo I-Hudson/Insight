@@ -214,6 +214,10 @@ namespace Insight
 
 			void BaseDestroy();
 
+			void RenderUpdateLoop();
+			void StartRenderThread();
+			void StopRenderThread();
+
 		private:
 			RHI_Buffer* CreateBuffer(BufferType bufferType, u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides);
 			void FreeBuffer(RHI_Buffer* buffer);
@@ -221,10 +225,6 @@ namespace Insight
 
 			RHI_Texture* CreateTextre();
 			void FreeTexture(RHI_Texture* texture);
-
-			void RenderUpdateLoop();
-			void StartRenderThread();
-			void StopRenderThread();
 
 		protected:
 			///const static int c_FrameCount = 3;

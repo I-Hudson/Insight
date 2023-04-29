@@ -38,7 +38,7 @@ namespace Insight
 
 		void RHI_UploadQueue::Init()
 		{
-			ASSERT(Platform::IsMainThread());
+			//ASSERT(RenderContext::Instance().IsRenderThread());
 
 			std::lock_guard lock(m_mutex);
 			if (!m_uploadStagingBuffer)
@@ -53,7 +53,7 @@ namespace Insight
 
 		void RHI_UploadQueue::Destroy()
 		{
-			ASSERT(Platform::IsMainThread());
+			//ASSERT(RenderContext::Instance().());
 
 			std::lock_guard lock(m_mutex);
 			m_queuedUploads.clear();
@@ -142,7 +142,7 @@ namespace Insight
 		void RHI_UploadQueue::UploadToDevice(RHI_CommandList* cmdList)
 		{
 			IS_PROFILE_FUNCTION();
-			ASSERT(Platform::IsMainThread());
+			ASSERT(RenderContext::Instance().IsRenderThread());
 
 			std::lock_guard lock(m_mutex);
 			m_frameUploadOffset = 0;
