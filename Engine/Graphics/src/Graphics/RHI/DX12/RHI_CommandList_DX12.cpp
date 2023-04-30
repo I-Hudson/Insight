@@ -119,13 +119,15 @@ namespace Insight
 					// Only transition a texture if the layout is different. If the new layout
 					// is the same as the current layout then don't place a barrier for the texture
 					// as no transition is needed.
-					if (textureDX12->GetLayout() != imageBarrier.NewLayout)
+					D3D12_RESOURCE_STATES oldState = ImageLayoutToDX12ResouceState(imageBarrier.OldLayout);
+					D3D12_RESOURCE_STATES newState = ImageLayoutToDX12ResouceState(imageBarrier.NewLayout);
+					if (oldState != newState)
 					{
 						resouceBarriers.push_back(
 							CD3DX12_RESOURCE_BARRIER::Transition(
 								textureDX12->GetResource(),
-								ImageLayoutToDX12ResouceState(imageBarrier.OldLayout),
-								ImageLayoutToDX12ResouceState(imageBarrier.NewLayout)));
+								oldState,
+								newState));
 						textureDX12->SetLayout(imageBarrier.NewLayout);
 					}
 				}

@@ -26,6 +26,9 @@ project "Insight_Graphics"
     includedirs
     {
         "inc",
+        "inc/FSR2",
+        "inc/FSR2/DX12",
+
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightInput}",

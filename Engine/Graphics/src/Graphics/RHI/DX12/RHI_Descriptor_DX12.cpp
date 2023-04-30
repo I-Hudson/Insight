@@ -236,7 +236,7 @@ namespace Insight
 				Destroy();
 			}
 
-			void DescriptorHeapGPU_DX12::Create(DescriptorHeapTypes heapType, u32 handleCount)
+			void DescriptorHeapGPU_DX12::Create(DescriptorHeapTypes heapType, u32 handleCount, std::string name)
 			{
 				Destroy();
 				m_heapType = heapType;
@@ -249,6 +249,7 @@ namespace Insight
 
 				ThrowIfFailed(m_context->GetDevice()->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&m_heap)));
 				m_descriptorSize = m_context->GetDevice()->GetDescriptorHandleIncrementSize(heapDesc.Type);
+				m_context->SetObjectName(name, m_heap);
 
 				m_descriptorHeapCPUStart = m_heap->GetCPUDescriptorHandleForHeapStart();
 				m_descriptorHeapGPUStart = m_heap->GetGPUDescriptorHandleForHeapStart();

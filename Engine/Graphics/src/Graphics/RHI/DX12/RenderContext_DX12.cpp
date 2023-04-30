@@ -63,8 +63,8 @@ namespace Insight
 				if (m_desc.GPUValidation)
 				{
 					//#if defined(_DEBUG)
-									/// Enable the debug layer (requires the Graphics Tools "optional feature").
-									/// NOTE: Enabling the debug layer after device creation will invalidate the active device.
+					// Enable the debug layer (requires the Graphics Tools "optional feature").
+					// NOTE: Enabling the debug layer after device creation will invalidate the active device.
 					{
 						if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_debugController))))
 						{
@@ -196,9 +196,9 @@ namespace Insight
 						}
 
 						context.DescriptorHeapGPURes.SetRenderContext(this);
-						context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000);
+						context.DescriptorHeapGPURes.Create(DescriptorHeapTypes::CBV_SRV_UAV, 100000, "CBV_SRV_UAV_HEAP");
 						context.DescriptorHeapSampler.SetRenderContext(this);
-						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048);
+						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048, "SAMPLER_HEAP");
 					});
 
 				m_uploadQueue.Init();

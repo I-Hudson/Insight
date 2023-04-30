@@ -110,6 +110,7 @@ namespace Insight
 #endif // IS_DESCRIPTOR_MULTITHREAD_DX12
 
 				friend class RHI_CommandListAllocator_DX12;
+				friend class RHI_FSR;
 			};
 
 			class RHI_CommandListAllocator_DX12 : public RHI_CommandListAllocator

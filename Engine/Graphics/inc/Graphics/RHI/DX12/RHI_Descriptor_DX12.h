@@ -195,7 +195,7 @@ namespace Insight
 				~DescriptorHeapGPU_DX12();
 
 				void SetRenderContext(RenderContext_DX12* context) { m_context = context; }
-				void Create(DescriptorHeapTypes heapType, u32 handleCount);
+				void Create(DescriptorHeapTypes heapType, u32 handleCount, std::string name);
 
 				DescriptorHeapHandle_DX12 GetNextHandle();
 

@@ -35,33 +35,37 @@ namespace Insight
             glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
             CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
 
-            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
-                {
-                    if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
-                    {
-                        ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-                        free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
-                        m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
-                    }
+            //Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Swapchain_Resize, [this](const Core::Event& event)
+            //    {
+            //        if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
+            //        {
+            //            ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+            //            free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
+            //            m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
+            //        }
 
-                    RenderContext* render_context = &RenderContext::Instance();
-                    glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-                    glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-                    CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
-                });
+            //        RenderContext* render_context = &RenderContext::Instance();
+            //        glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+            //        glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+            //        CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+            //    });
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
                 {
-                    if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
-                    {
-                        ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
-                        free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
-                        m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
-                    }
+                    GPUDeferedManager::Instance().Push(this, [this](RHI_CommandList* cmdList)
+                        {
+                            RenderContext::Instance().GpuWaitForIdle();
+                            if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)
+                            {
+                                ASSERT(ffxFsr2ContextDestroy(&m_ffx_fsr2_context) == FFX_OK);
+                                free(m_ffx_fsr2_context_description.callbacks.scratchBuffer);
+                                m_ffx_fsr2_context_description.callbacks.scratchBuffer = nullptr;
+                            }
 
-                    RenderContext* render_context = &RenderContext::Instance();
-                    glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
-                    glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
-                    CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+                            RenderContext* render_context = &RenderContext::Instance();
+                            glm::ivec2 render_resolution = RenderGraph::Instance().GetRenderResolution();
+                            glm::ivec2 output_resolution = RenderGraph::Instance().GetOutputResolution();
+                            CreateContext(render_resolution.x, render_resolution.y, output_resolution.x, output_resolution.y);
+                        });
                 });
         }
 
@@ -150,18 +154,20 @@ namespace Insight
             else if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
             {
 #ifdef IS_DX12_ENABLED
-                m_ffx_fsr2_dispatch_description.commandList = ffxGetCommandListDX12(static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmd_list)->GetCommandList());
+                RHI::DX12::RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI::DX12::RHI_CommandList_DX12*>(cmd_list);
+                cmdListDX12->m_boundResourceHeap = nullptr;
+                m_ffx_fsr2_dispatch_description.commandList = ffxGetCommandListDX12(cmdListDX12->GetCommandList());
 
                 m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_input)->GetResource()
                     , name_input, FFX_RESOURCE_STATE_COMPUTE_READ);
 
-                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_depth)->GetResource()
+                m_ffx_fsr2_dispatch_description.depth = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_depth)->GetResource()
                     , name_depth, FFX_RESOURCE_STATE_COMPUTE_READ);
 
-                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_velocity)->GetResource()
+                m_ffx_fsr2_dispatch_description.motionVectors = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_velocity)->GetResource()
                     , name_velocity, FFX_RESOURCE_STATE_COMPUTE_READ);
 
-                m_ffx_fsr2_dispatch_description.color = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_output)->GetResource()
+                m_ffx_fsr2_dispatch_description.output = ffxGetResourceDX12(&m_ffx_fsr2_context, static_cast<RHI::DX12::RHI_Texture_DX12*>(tex_output)->GetResource()
                     , name_output, FFX_RESOURCE_STATE_UNORDERED_ACCESS);
 
                 m_ffx_fsr2_dispatch_description.exposure = ffxGetResourceDX12(&m_ffx_fsr2_context, nullptr, L"FSR2_InputExposure", FFX_RESOURCE_STATE_GENERIC_READ);

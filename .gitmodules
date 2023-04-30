@@ -31,9 +31,6 @@
 [submodule "vendor/meshoptimizer"]
 	path = vendor/meshoptimizer
 	url = https://github.com/zeux/meshoptimizer
-[submodule "vendor/FidelityFX-FSR2"]
-	path = vendor/FidelityFX-FSR2
-	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2.git
 [submodule "vendor/xxHash"]
 	path = vendor/xxHash
 	url = https://github.com/Cyan4973/xxHash.git
@@ -64,3 +61,6 @@
 [submodule "vendor/Reflect"]
 	path = vendor/Reflect
 	url = https://github.com/I-Hudson/Reflect.git
+[submodule "vendor/FidelityFX-FSR2"]
+	path = vendor/FidelityFX-FSR2
+	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2.git
