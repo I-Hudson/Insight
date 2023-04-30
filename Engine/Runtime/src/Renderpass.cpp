@@ -659,16 +659,6 @@ namespace Insight
 						{
 							IS_PROFILE_SCOPE("Draw Entity");
 
-							{
-								IS_PROFILE_SCOPE("Visible check");
-								// Transform bounding box to world space from local space.
-								if (!camera_frustum.IsVisible(mesh.BoudingBox))
-								{
-									//GFXHelper::AddCube(boundingBox.GetCenter(), boundingBox.GetExtents(), glm::vec4(1, 0, 0, 1));
-									continue;
-								}
-							}
-
 							BufferPerObject object = {};
 							object.Transform = mesh.Transform;
 							object.Previous_Transform = mesh.Transform;
