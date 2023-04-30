@@ -1,7 +1,7 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
-#include "imgui/imgui.h"
+#include <imgui.h>
 
 namespace Insight
 {

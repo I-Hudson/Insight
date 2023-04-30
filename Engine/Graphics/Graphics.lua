@@ -90,7 +90,7 @@ project "Insight_Graphics"
         "dxguid.lib",
         "dxcompiler.lib",
         "Optickcore.lib",
-        "tracy.lib",
+        --"tracy.lib",
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }

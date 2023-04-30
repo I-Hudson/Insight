@@ -40,7 +40,7 @@ project "Insight_Core"
     links
     {
         "imgui.lib",
-        "tracy.lib",
+        --"tracy.lib",
         "OptickCore.lib",
         "glm.lib",
     }

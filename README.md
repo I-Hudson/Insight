@@ -6,6 +6,7 @@ This is a small project used for video game engine (runtime) development. This p
 ## Feature
 Some features are:
 - Render graph
+- Seperate Update and Render thread
 - Memory tracking
 - Multiple graphics API support (Vulkan/DX12)
 - Runtime shader creation (with descriptor reflection)

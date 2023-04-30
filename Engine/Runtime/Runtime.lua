@@ -68,7 +68,7 @@ project "Insight_Runtime"
         
         "glm.lib",
         "imgui.lib",
-        "tracy.lib",
+        --"tracy.lib",
         "OptickCore.lib",
         "meshoptimizer.lib",
     }

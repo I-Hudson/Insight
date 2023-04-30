@@ -27,7 +27,6 @@ project "tracy"
 		"TRACY_ENABLE",
 		"TRACY_EXPORTS",
 		"TRACY_ON_DEMAND",
-		"TRACY_CALLSTACK",
 	}
 	
 	postbuildcommands

@@ -122,6 +122,8 @@ workspace "Insight"
         "IS_MEMORY_TRACKING",
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
+
+        "TRACY_NO_CALLSTACK",
     }
 
     includedirs
@@ -134,17 +136,6 @@ workspace "Insight"
         "%{IncludeDirs.nlohmann_json}",
         "%{IncludeDirs.implot}",
     }
-
-    if (profileTool == "tracy") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
-        editandcontinue "off"
-    end
-    if (profileTool == "optick") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
-    end
-    if (profileTool == "pix") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }
-    end
 
     libdirs
     {
@@ -164,6 +155,21 @@ workspace "Insight"
         kind "StaticLib"
         output_project_subfix = "_monolith"
         table.insert(post_build_commands, "{COPYFILE} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"")
+    end
+
+    if (profileTool == "tracy") then
+        editandcontinue "off"
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
+        filter {"configurations:Debug", "configurations:Testing" }
+            links { "tracy.lib", }
+        filter { "configurations:Debug" }
+            links { "tracy.lib", }
+    end
+    if (profileTool == "optick") then
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
+    end
+    if (profileTool == "pix") then
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }
     end
 
     filter "configurations:Debug"

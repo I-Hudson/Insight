@@ -37,7 +37,7 @@ project "Insight_Maths"
     links
     {
         "imgui.lib",
-        "tracy.lib",
+        --"tracy.lib",
         "OptickCore.lib",
     }
     if (profileTool == "pix") then
