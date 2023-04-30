@@ -1,8 +1,11 @@
 #include "Editor/EditorWindows/SystemInformationWindow.h"
 
 #include "Platforms/Platform.h"
+#include "Runtime/Engine.h"
 
 #include <imgui.h>
+
+#include <string>
 
 namespace Insight
 {
@@ -58,6 +61,20 @@ namespace Insight
             ImGui::Text("Total Free RAM MB '%u'."       , Core::MemoryInformation::ToMB(memoryInfo.TotalPhyscialMemoryFreeBytes));
             ImGui::Text("Total Used RAM MB '%u'."       , Core::MemoryInformation::ToMB(memoryInfo.TotalPhyscialMemoryUsedBytes));
             ImGui::Unindent();
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Text("Engine Information");
+            ImGui::Separator();
+            {
+                ImGui::Indent();
+                ImGui::Text("Engine Frame: %u", App::Engine::Instance().FrameCount);
+                ImGui::Text("Render Frame: %u", Graphics::RenderContext::Instance().GetFrameCount());
+                ImGui::Text("Engine Version: %s", App::Engine::EngineVersionToString().c_str());
+                ImGui::Unindent();
+            }
         }
     }
 }

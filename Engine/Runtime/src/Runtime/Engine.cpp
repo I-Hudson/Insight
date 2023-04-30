@@ -118,7 +118,7 @@ namespace Insight
 				IS_PROFILE_FRAME("MainThread");
 				IS_PROFILE_SCOPE("Frame");
 
-				ASSERT(IsUpdateThread());
+				ASSERT(Platform::IsMainThread());
 
 				s_FrameTimer.Stop();
 				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
@@ -174,6 +174,7 @@ namespace Insight
 				}
 
 				m_inputSystem.ClearFrame();
+				++FrameCount;
 			}
 		}
 
@@ -211,6 +212,22 @@ namespace Insight
 			ASSERT(m_systemRegistry.IsEmpty());
 
 			Platform::Shutdown();
+		}
+
+		std::string Engine::EngineVersionToString()
+		{
+			static std::string versionString;
+			if (!versionString.empty())
+			{
+				return versionString;
+			}
+
+			versionString += std::to_string(ENGINE_VERSION_MAJOIR);
+			versionString += ".";
+			versionString += std::to_string(ENGINE_VERSION_MINOR);
+			versionString += ".";
+			versionString += std::to_string(ENGINE_VERSION_PATCH);
+			return versionString;
 		}
 
 		bool Engine::IsUpdateThread()

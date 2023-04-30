@@ -222,7 +222,6 @@ namespace Insight
 			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
 
-			g_global_resources = { };
 			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
@@ -250,9 +249,9 @@ namespace Insight
 			{
 				//DepthPrepass();
 			}
-			//GBuffer();
-			//TransparentGBuffer();
-			//Composite();
+			GBuffer();
+			TransparentGBuffer();
+			Composite();
 			//FSR2();
 			Swapchain();
 
@@ -537,7 +536,7 @@ namespace Insight
 
 			struct TestPassData
 			{
-				RenderFrame const& RenderFrame;
+				RenderFrame const RenderFrame;
 				BufferFrame Buffer_Frame = { };
 				BufferSamplers Buffer_Samplers = { };
 			};
@@ -809,7 +808,7 @@ namespace Insight
 
 					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 					{
-						for (const RenderMesh& mesh : world.Meshes)
+						for (const RenderMesh& mesh : world.TransparentMeshes)
 						{
 							if (mesh.MeshLods.size() == 0)
 							{

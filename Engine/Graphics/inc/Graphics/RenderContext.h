@@ -251,7 +251,7 @@ namespace Insight
 			std::atomic<u32> m_framesInFlightCount = 2;
 			/// @brief The current frame from 0 to c_FrameCount.
 			std::atomic<u32> m_frameIndex = 0;
-			/// @brief Current frame count for the whole life time of the app (Only incremented when a render frame has happened).
+			/// @brief Current frame count for the whole life time of the app.
 			std::atomic<u64> m_frameCount = 0;
 
 			std::vector<IRHI_ResourceCache*> m_resourceCaches;

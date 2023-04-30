@@ -345,6 +345,8 @@ namespace Insight
 			}
 			cmdList->Close();
 			PostRender(cmdList);
+
+			++m_frameCount;
 		}
 
 		void RenderContext::StartRenderThread()

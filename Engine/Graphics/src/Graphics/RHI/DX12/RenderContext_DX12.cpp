@@ -404,8 +404,6 @@ namespace Insight
 							//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
 							m_graphicsQueue.Submit(cmdListDX12);
-
-							++m_frameCount;
 						}
 
 						{
