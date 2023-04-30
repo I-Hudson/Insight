@@ -36,7 +36,7 @@ namespace Insight
 			}
 			else
 			{
-				graphcisAPI = Graphics::GraphicsAPI::Vulkan;
+				graphcisAPI = Graphics::GraphicsAPI::DX12;
 			}
 
 			m_window.Init(m_inputSystem, true);
@@ -77,13 +77,12 @@ namespace Insight
 			ASSERT(m_context);
 
 			Graphics::RenderContextDesc renderContextDesc = {};
-			renderContextDesc.GPUValidation = false;
 			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))
 			{
 				renderContextDesc.GPUValidation = Core::CommandLineArgs::GetCommandLineValue(CMD_GPU_VALIDATION)->GetBool();
 			}
 
-			renderContextDesc.MultithreadContext = true;
+			renderContextDesc.MultithreadContext = false;
 			if (!m_context->Init(renderContextDesc))
 			{
 				m_context->Destroy();

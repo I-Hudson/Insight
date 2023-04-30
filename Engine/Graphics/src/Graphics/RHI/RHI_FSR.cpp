@@ -235,7 +235,8 @@ namespace Insight
                 m_ffx_fsr2_context_description.displaySize.height = displayHeight;
                 m_ffx_fsr2_context_description.flags = FFX_FSR2_ENABLE_AUTO_EXPOSURE;
 
-                ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
+                 FfxErrorCode createErrorCode = ffxFsr2ContextCreate(&m_ffx_fsr2_context, &m_ffx_fsr2_context_description);
+                 ASSERT(createErrorCode == FFX_OK);
 #endif
             }
         }
