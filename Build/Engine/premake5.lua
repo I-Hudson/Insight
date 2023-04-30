@@ -158,7 +158,7 @@ workspace "Insight"
     if (profileTool == "tracy") then
         editandcontinue "off"
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
-        filter {"configurations:Debug", "configurations:Testing" }
+        filter "configurations:Debug or configurations:Testing"
             links { "tracy.lib", }
         filter { "configurations:Release" }
             links { "tracy.lib", }
