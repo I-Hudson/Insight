@@ -122,8 +122,6 @@ workspace "Insight"
         "IS_MEMORY_TRACKING",
         "RENDER_GRAPH_ENABLED",
         "TOBJECTPTR_REF_COUNTING",
-
-        "TRACY_NO_CALLSTACK",
     }
 
     includedirs
