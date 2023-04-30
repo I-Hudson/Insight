@@ -94,13 +94,3 @@ project "Insight_Input"
         links
         {
         }
-
-    filter "configurations:Testing" 
-        links
-        {
-            "doctest.lib",
-        }
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }

@@ -126,9 +126,3 @@ project "Insight_Runtime"
         {
             "%{wks.location}/deps/lib/release",
         }
-
-    filter "configurations:Testing" 
-        links
-        {
-            "doctest.lib",
-        }

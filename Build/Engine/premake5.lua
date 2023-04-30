@@ -160,7 +160,7 @@ workspace "Insight"
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
         filter {"configurations:Debug", "configurations:Testing" }
             links { "tracy.lib", }
-        filter { "configurations:Debug" }
+        filter { "configurations:Release" }
             links { "tracy.lib", }
     end
     if (profileTool == "optick") then

@@ -156,13 +156,3 @@ project "Insight_Graphics"
             "ffx_fsr2_api_vk_x64.lib",
             "ffx_fsr2_api_dx12_x64.lib",
         }
-
-    filter "configurations:Testing" 
-        links
-        {
-            "doctest.lib",
-        }
-        libdirs
-        {
-            "%{LibDirs.deps_testing_lib}",
-        }

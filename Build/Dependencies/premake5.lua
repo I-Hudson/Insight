@@ -10,8 +10,7 @@ workspace "Dependencies"
     }
     platforms 
     { 
-        "Win64", 
-        "Linux" 
+        "Win64",
     }
 
     flags
@@ -49,7 +48,7 @@ group "Dependices"
         include "../../premakeFiles/optick.lua"
         include "../../premakeFiles/tracy.lua"
         include "../../premakeFiles/tracyProfiler.lua"
-        include "../../premakeFiles/doctest.lua"
+        --include "../../premakeFiles/doctest.lua"
         include "../../premakeFiles/meshoptimizer.lua"
         include "../../premakeFiles/xxHash.lua"
         include "../../premakeFiles/lz4.lua"

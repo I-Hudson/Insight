@@ -13,7 +13,7 @@ project "doctest"
 
 	files 
 	{
-		folderDirDoctest.. "main.cpp",
+		--folderDirDoctest.. "main.cpp",
         folderDirDoctest.. "doctest/doctest.h", 
 	}
 

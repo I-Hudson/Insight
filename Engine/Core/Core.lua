@@ -40,8 +40,6 @@ project "Insight_Core"
     links
     {
         "imgui.lib",
-        --"tracy.lib",
-        "OptickCore.lib",
         "glm.lib",
     }
     if (profileTool == "pix") then
@@ -110,5 +108,4 @@ project "Insight_Core"
     filter "configurations:Testing" 
         links
         {
-            "doctest.lib",
         }

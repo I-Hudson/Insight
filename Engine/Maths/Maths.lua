@@ -98,10 +98,4 @@ project "Insight_Maths"
             "dbghelp.lib",
             "Rpcrt4.lib",
         }
-
-    filter "configurations:Testing" 
-        links
-        {
-            "doctest.lib",
-        }
          
