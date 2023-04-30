@@ -53,7 +53,7 @@ namespace Insight
 			Platform::Initialise();
 			EnginePaths::Initialise();
 
-			const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
+			static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
 			splashScreen.Init(860, 420);
 			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
 			splashScreen.Show();
@@ -68,7 +68,7 @@ namespace Insight
 			}
 			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
 			{
-				while (!IsDebuggerPresent()) {}
+				while (!Platform::IsDebuggerPresent());
 			}
 
 			m_taskSystem.Initialise();

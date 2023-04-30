@@ -308,6 +308,11 @@ namespace Insight
 			return GetCurrentThreadId() == s_mainThreadId;
 		}
 
+		bool PlatformWindows::IsDebuggerPresent()
+		{
+			return IsDebuggerPresent();
+		}
+
 		Core::CPUInformation PlatformWindows::GetCPUInformation()
 		{
 			if (!s_cpuInformation.Initialised)
