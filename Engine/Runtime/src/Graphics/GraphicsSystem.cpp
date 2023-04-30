@@ -82,7 +82,7 @@ namespace Insight
 				renderContextDesc.GPUValidation = Core::CommandLineArgs::GetCommandLineValue(CMD_GPU_VALIDATION)->GetBool();
 			}
 
-			renderContextDesc.MultithreadContext = false;
+			renderContextDesc.MultithreadContext = true;
 			if (!m_context->Init(renderContextDesc))
 			{
 				m_context->Destroy();
