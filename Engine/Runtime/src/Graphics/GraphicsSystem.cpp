@@ -77,11 +77,12 @@ namespace Insight
 			ASSERT(m_context);
 
 			Graphics::RenderContextDesc renderContextDesc = {};
+			renderContextDesc.GPUValidation = false;
 			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))
 			{
 				renderContextDesc.GPUValidation = Core::CommandLineArgs::GetCommandLineValue(CMD_GPU_VALIDATION)->GetBool();
 			}
-			
+
 			renderContextDesc.MultithreadContext = true;
 			if (!m_context->Init(renderContextDesc))
 			{
