@@ -59,6 +59,9 @@ namespace Insight
 	static bool enableFSR = false;
 	static float fsrSharpness = 1.0f;
 
+	static int MeshLod = 0;
+	static bool OrderGBufferByDepth = false;
+
 	RenderFrame renderFrame;
 
 	namespace Graphics
@@ -152,6 +155,11 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
+			ImGui::Begin("Renderpass options:");
+			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_LOD_Count - 1);
+			ImGui::Checkbox("Order GBuffer object by depth (close to far)", &OrderGBufferByDepth);
+			ImGui::End();
+
 			for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
 			{
 				if (modelsToAddToScene.at(i).first
@@ -236,12 +244,17 @@ namespace Insight
 				});
 
 			{
+				IS_PROFILE_SCOPE("Create render frame");
 				renderFrame = CreateRenderFrameFromWorldSystem(&Runtime::WorldSystem::Instance());
 				for (RenderWorld& world : renderFrame.RenderWorlds)
 				{
 					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
 				}
-				renderFrame.SortTransparentMeshes();
+				if (OrderGBufferByDepth)
+				{
+					renderFrame.SortOpaqueMeshes();
+				}
+				//renderFrame.SortTransparentMeshes();
 			}
 
 			ShadowPass();
@@ -434,9 +447,10 @@ namespace Insight
 								};
 								cmdList->SetUniform(4, 0, object);
 
-								cmdList->SetVertexBuffer(mesh.MeshLods.at(0).Vertex_buffer);
-								cmdList->SetIndexBuffer(mesh.MeshLods.at(0).Index_buffer, Graphics::IndexType::Uint32);
-								cmdList->DrawIndexed(mesh.MeshLods.at(0).Index_count, 1, mesh.MeshLods.at(0).First_index, mesh.MeshLods.at(0).Vertex_offset, 0);
+								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 							}
 						}
 						cmdList->EndRenderpass();
@@ -685,10 +699,11 @@ namespace Insight
 							//	BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
 							//}
 
-							const Runtime::MeshLOD& meshLod = mesh.MeshLods.at(0);
-							cmdList->SetVertexBuffer(meshLod.Vertex_buffer);
-							cmdList->SetIndexBuffer(meshLod.Index_buffer, Graphics::IndexType::Uint32);
-							cmdList->DrawIndexed(meshLod.Index_count, 1, meshLod.First_index, meshLod.Vertex_offset, 0);
+							const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+							cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+							cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+							cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+							++RenderStats::Instance().MeshCount;
 						}
 					}
 					
@@ -805,43 +820,46 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
-					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+					if constexpr (false)
 					{
-						for (const RenderMesh& mesh : world.TransparentMeshes)
+						for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 						{
-							if (mesh.MeshLods.size() == 0)
+							for (const RenderMesh& mesh : world.TransparentMeshes)
 							{
-								continue;
+								if (mesh.MeshLods.size() == 0)
+								{
+									//continue;
+								}
+
+								//if (!camera_frustum.IsVisible(mesh.BoudingBox))
+								{
+									//continue;
+								}
+
+								BufferPerObject object = {};
+								object.Transform = mesh.Transform;
+								object.Previous_Transform = mesh.Transform;
+
+								const RenderMaterial& renderMaterial = mesh.Material;
+								// Theses sets and bindings shouldn't chagne.
+								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+								if (diffuseTexture)
+								{
+									cmdList->SetTexture(2, 0, diffuseTexture);
+									object.Textures_Set[0] = 1;
+								}
+
+								cmdList->SetUniform(2, 0, object);
+								{
+									IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+									BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
+								}
+
+								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
 							}
-
-							if (!camera_frustum.IsVisible(mesh.BoudingBox))
-							{
-								continue;
-							}
-
-							BufferPerObject object = {};
-							object.Transform = mesh.Transform;
-							object.Previous_Transform = mesh.Transform;
-
-							const RenderMaterial& renderMaterial = mesh.Material;
-							// Theses sets and bindings shouldn't chagne.
-							RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
-							if (diffuseTexture)
-							{
-								cmdList->SetTexture(2, 0, diffuseTexture);
-								object.Textures_Set[0] = 1;
-							}
-
-							cmdList->SetUniform(2, 0, object);
-							{
-								IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-								BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-							}
-
-							const Runtime::MeshLOD& meshLod = mesh.MeshLods.at(0);
-							cmdList->SetVertexBuffer(meshLod.Vertex_buffer);
-							cmdList->SetIndexBuffer(meshLod.Index_buffer, Graphics::IndexType::Uint32);
-							cmdList->DrawIndexed(meshLod.Index_count, 1, meshLod.First_index, meshLod.Vertex_offset, 0);
 						}
 					}
 

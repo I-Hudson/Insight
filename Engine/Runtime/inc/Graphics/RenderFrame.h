@@ -77,6 +77,7 @@ namespace Insight
     {
         std::vector<RenderWorld> RenderWorlds;
 
+        void SortOpaqueMeshes();
         void SortTransparentMeshes();
     };
 

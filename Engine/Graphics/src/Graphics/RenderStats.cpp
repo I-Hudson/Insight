@@ -46,6 +46,7 @@ namespace Insight
 			ImGui::Text("Average Render Timer: %f", averageRenderTimer);
 			ImGui::Text("Render Fps: %f", fps);
 
+			ImGui::Text(MeshCountFormated().c_str());
 			ImGui::Text(DrawCallsFormated().c_str());
 			ImGui::Text(DrawIndexedCallsFormated().c_str());
 			ImGui::Text(DispatchCallsFormated().c_str());
@@ -76,6 +77,10 @@ namespace Insight
 		void RenderStats::Reset()
 		{
 			RenderTime.Reset();
+			
+			MeshCount.Swap();
+			MeshCount = 0;
+			
 			DrawCalls.Swap();
 			DrawCalls = 0;
 

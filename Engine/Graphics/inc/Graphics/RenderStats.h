@@ -44,13 +44,15 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(
 #define FORMAT_STAT_FUNC(Stat, Func, StatDisplayText) \
 std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 
-		struct RenderStats : public Core::Singleton<RenderStats>
+		struct IS_GRAPHICS RenderStats : public Core::Singleton<RenderStats>
 		{
 			Core::Timer RenderTime;
 
 			static constexpr u8 AverageRenderTimeCount = 128;
 			float AverageRenderTime[AverageRenderTimeCount];
 			u8 AverageRenderTimeIndex;
+
+			DoubleBufferVector<u64> MeshCount;
 
 			DoubleBufferVector<u64> DrawCalls;
 			DoubleBufferVector<u64> DrawIndexedCalls;
@@ -74,6 +76,7 @@ std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 			DoubleBufferVector<u64> DescriptorTableSamplerCreations;
 			DoubleBufferVector<u64> DescriptorTableSamplerReuse;
 
+			FORMAT_STAT(MeshCount, "Mesh Count: ");
 			FORMAT_STAT(DrawCalls, "Draw Calls: ");
 			FORMAT_STAT(DrawIndexedCalls, "Draw Indexed Calls: ");
 			FORMAT_STAT(DispatchCalls, "Dispatch Calls: ");
