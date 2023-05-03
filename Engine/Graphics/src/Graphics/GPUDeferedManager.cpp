@@ -1,5 +1,7 @@
 #include "Graphics/GPUDeferedManager.h"
 
+#include "Graphics/RHI/RHI_CommandList.h"
+
 #include "Core/Profiler.h"
 #include "Algorithm/Vector.h"
 
@@ -17,11 +19,13 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
+			cmd_list->BeginTimeBlock("GPUDeferedManager::Update");
 			for (auto const& [pointer, func] : m_queue)
 			{
 				func(cmd_list);
 			}
 			m_queue.clear();
+			cmd_list->EndTimeBlock();
 		}
 		void GPUDeferedManager::Remove(void* pointer)
 		{

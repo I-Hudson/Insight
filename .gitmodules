@@ -64,3 +64,6 @@
 [submodule "vendor/FidelityFX-FSR2"]
 	path = vendor/FidelityFX-FSR2
 	url = https://github.com/GPUOpen-Effects/FidelityFX-FSR2.git
+[submodule "vendor/NVTX"]
+	path = vendor/NVTX
+	url = https://github.com/NVIDIA/NVTX

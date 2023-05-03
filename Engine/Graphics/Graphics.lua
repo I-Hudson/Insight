@@ -48,6 +48,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.FFR2}",
         "%{IncludeDirs.Aftermath}",
+        "%{IncludeDirs.nvtx}",
         "%{IncludeDirs.DirectXHeaders}",
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",

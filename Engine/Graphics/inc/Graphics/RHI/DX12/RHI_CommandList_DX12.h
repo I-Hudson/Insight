@@ -6,6 +6,8 @@
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/RHI/DX12/RHI_PhysicalDevice_DX12.h"
 
+#include <nvtx3/nvtx3.hpp>
+
 // Allow the RHI_CommandList_DX12 to reuse descriptor tables which have already been create
 // within the gpu descriptor heap.
 #define DX12_REUSE_DESCRIPTOR_TABLES
@@ -108,6 +110,8 @@ namespace Insight
 				DescriptorSubHeapGPU_DX12 m_subHeapRes;
 				DescriptorSubHeapGPU_DX12 m_subHeapSampler;
 #endif // IS_DESCRIPTOR_MULTITHREAD_DX12
+
+				nvtx3::range_handle m_nvtxRangehandle;
 
 				friend class RHI_CommandListAllocator_DX12;
 				friend class RHI_FSR;

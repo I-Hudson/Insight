@@ -57,6 +57,7 @@ project "InsightStandalone"
         "%{IncludeDirs.spirv_reflect}",
         "%{IncludeDirs.FFR2}",
         "%{IncludeDirs.Aftermath}",
+        "%{IncludeDirs.nvtx}",
         "%{IncludeDirs.DirectXHeaders}",
         "%{IncludeDirs.DirectXAgilityHeaders}",
         "%{IncludeDirs.DirectXShaderCompiler}",

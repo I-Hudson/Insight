@@ -176,7 +176,9 @@ namespace Insight
 				m_queuedUploads.at(i)->CommandList = cmdList;
 				m_queuedUploads.at(i)->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads.at(i).Get());
 				// Call the upload functions.
+				cmdList->BeginTimeBlock("UploadFunction");
 				m_queuedUploads.at(i)->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
+				cmdList->EndTimeBlock();
 			}
 			// Move all  our requests to the running vector.
 			std::move(m_queuedUploads.begin(), m_queuedUploads.end(), std::back_inserter(m_runningUploads));

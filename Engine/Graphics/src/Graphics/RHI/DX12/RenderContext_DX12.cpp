@@ -331,15 +331,20 @@ namespace Insight
 					//	ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
 					//	WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
 					//}
+
+					nvtx3::scoped_range fenceWaitRange{"FenceWait"};
 					m_graphicsQueue.Wait();
 					m_submitFrameContexts->OnCompleted();
 
 					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
 				}
 
-				m_descriptorSetManager->Reset();
-				m_commandListManager->Reset();
-				m_resource_tracker.BeginFrame();
+				{
+					nvtx3::scoped_range fenceWaitRange{"PrepareRender Reset"};
+					m_descriptorSetManager->Reset();
+					m_commandListManager->Reset();
+					m_resource_tracker.BeginFrame();
+				}
 
 				if (Window::Instance().GetWidth() == 0 || Window::Instance().GetHeight() == 0)
 				{
@@ -362,6 +367,7 @@ namespace Insight
 
 				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
 
+				cmdListDX12->BeginTimeBlock("Transition swapchain");
 #ifdef DX12_ENHANCED_BARRIERS
 				// Transition back-buffer to a writable state for rendering.
 				CD3DX12_TEXTURE_BARRIER barrier = {};
@@ -380,6 +386,7 @@ namespace Insight
 					D3D12_RESOURCE_STATE_RENDER_TARGET) });
 #endif
 				m_swapchainImages[m_availableSwapchainImage].Colour->SetLayout(ImageLayout::ColourAttachment);
+				cmdListDX12->EndTimeBlock();
 			}
 
 			void RenderContext_DX12::PostRender(RHI_CommandList* cmdList)
@@ -618,6 +625,7 @@ namespace Insight
 				}
 
 				// Go through out deferred manager and call all the functions which have been queued up.
+				NVTX3_FUNC_RANGE();
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);
 			}

@@ -12,6 +12,8 @@
 
 #include "Core/Profiler.h"
 
+#include <nvtx3/nvtx3.hpp>
+
 #include <set>
 
 namespace Insight
@@ -401,11 +403,12 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			ASSERT(m_context->IsRenderThread());
 
+			NVTX3_FUNC_RANGE();
 			/// TODO: Could be threaded? Leave as it is for now as it works.
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
-				PlaceBarriersInToPipeline(pass.Get(), cmdList);
+				//PlaceBarriersInToPipeline(pass.Get(), cmdList);
 				cmdList->EndTimeBlock();
 
 				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
@@ -441,6 +444,8 @@ namespace Insight
 
 				barrier.ImageBarriers.push_back(std::move(imageBarrier));
 				cmdList->PipelineBarrier(barrier);
+				cmdList->BeginTimeBlock("Transition swapchain image, common");
+				cmdList->EndTimeBlock();
 				//cmdList->SetImageLayout(m_context->GetSwaphchainIamge(), ImageLayout::PresentSrc);
 			}
 		}

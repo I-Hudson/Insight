@@ -163,6 +163,7 @@ namespace Insight
 			{
 				if (resourceBarriers.size() > 0ull)
 				{
+					nvtx3::mark("PipelineResourceBarriers");
 					m_commandList->ResourceBarrier(static_cast<UINT>(resourceBarriers.size()), resourceBarriers.data());
 					++RenderStats::Instance().PipelineBarriers;
 				}
@@ -506,11 +507,15 @@ namespace Insight
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
 				PIXBeginEvent(m_commandList, PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255)), blockName.c_str());
+
+				m_nvtxRangehandle = nvtx3::start_range(blockName.c_str());
 			}
 
 			void RHI_CommandList_DX12::EndTimeBlock()
 			{
 				PIXEndEvent(m_commandList);
+				nvtx3::end_range(m_nvtxRangehandle);
+				m_nvtxRangehandle = {};
 			}
 
 			bool RHI_CommandList_DX12::BindDescriptorSets()
