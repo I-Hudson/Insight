@@ -201,6 +201,12 @@ namespace Insight
 						context.DescriptorHeapSampler.Create(DescriptorHeapTypes::Sampler, 2048, "SAMPLER_HEAP");
 					});
 
+				m_submitFenceValues.Setup();
+				m_submitFenceValues.ForEach([](u64& fenceValue)
+					{
+						fenceValue = 0;
+					});
+
 				m_uploadQueue.Init();
 
 				WaitForGpu();
@@ -333,7 +339,7 @@ namespace Insight
 					//}
 
 					nvtx3::scoped_range fenceWaitRange{"FenceWait"};
-					m_graphicsQueue.Wait();
+					m_graphicsQueue.Wait(m_submitFenceValues.Get());
 					m_submitFrameContexts->OnCompleted();
 
 					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
@@ -410,7 +416,7 @@ namespace Insight
 							//const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
 							//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
-							m_graphicsQueue.Submit(cmdListDX12);
+							m_submitFenceValues.Get() = m_graphicsQueue.Submit(cmdListDX12);
 						}
 
 						{
@@ -625,9 +631,10 @@ namespace Insight
 				}
 
 				// Go through out deferred manager and call all the functions which have been queued up.
-				NVTX3_FUNC_RANGE();
+				cmdList->BeginTimeBlock("ExecuteAsyncJobs");
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);
+				cmdList->EndTimeBlock();
 			}
 
 			void RenderContext_DX12::SetObjectName(std::string_view name, ID3D12Object* handle)

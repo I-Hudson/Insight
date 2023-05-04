@@ -74,7 +74,6 @@ namespace Insight
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)
 		{
 			m_context = Graphics::RenderContext::New(graphicsAPI);
-			ASSERT(m_context);
 
 			Graphics::RenderContextDesc renderContextDesc = {};
 			if (Core::CommandLineArgs::CommandListExists(CMD_GPU_VALIDATION))

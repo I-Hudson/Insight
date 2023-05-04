@@ -24,13 +24,13 @@ namespace Insight
 				ID3D12CommandQueue* GetQueue() const;
 
 				/// @brief Wait for the queue to finish any work.
-				void Wait();
+				void Wait(u64 fenceValueToWait);
 
 				void SignalAndWait();
 
 				/// @brief Submit work to the queue.
 				/// @param cmdlist
-				void Submit(const RHI_CommandList_DX12* cmdlist);
+				const u64 Submit(const RHI_CommandList_DX12* cmdlist);
 
 				/// @brief Submit work to the queue and wait for it to be completed.
 				/// @param cmdlist
@@ -38,7 +38,7 @@ namespace Insight
 
 			private:
 				/// @brief Add a signal to the queue. 
-				void Signal();
+				const u64 Signal();
 
 			private:
 				ID3D12Device* m_dxDevice = nullptr;

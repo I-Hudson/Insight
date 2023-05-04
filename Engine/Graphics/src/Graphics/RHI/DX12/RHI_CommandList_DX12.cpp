@@ -245,6 +245,8 @@ namespace Insight
 
 			void RHI_CommandList_DX12::CopyBufferToBuffer(RHI_Buffer* dst, u64 dstOffset, RHI_Buffer* src, u64 srcOffset, u64 sizeInBytes)
 			{
+				BeginTimeBlock("CopyBufferToBuffer");
+
 				RHI_Buffer_DX12* dstDX12 = static_cast<RHI_Buffer_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 
@@ -275,10 +277,12 @@ namespace Insight
 					srcDX12->SetResourceState(BufferTypeToDX12ResourceState(srcDX12->GetType()));
 				}
 				PipelineResourceBarriers(barriers);
+				EndTimeBlock();
 			}
 
 			void RHI_CommandList_DX12::CopyBufferToImage(RHI_Texture* dst, RHI_Buffer* src, u64 offset)
 			{
+				BeginTimeBlock("CopyBufferToImage");
 				RHI_Texture_DX12* dstDX12 = static_cast<RHI_Texture_DX12*>(dst);
 				RHI_Buffer_DX12* srcDX12 = static_cast<RHI_Buffer_DX12*>(src);
 
@@ -302,6 +306,7 @@ namespace Insight
 				CD3DX12_TEXTURE_COPY_LOCATION Dst(dstDX12->GetResource(), 0);
 				CD3DX12_TEXTURE_COPY_LOCATION Src(srcDX12->GetResource(), layouts[0]);
 				m_commandList->CopyTextureRegion(&Dst, 0, 0, 0, & Src, nullptr);
+				EndTimeBlock();
 			}
 
 			void RHI_CommandList_DX12::Release()
@@ -506,8 +511,9 @@ namespace Insight
 				colour.x = std::max(0.0f, std::min(1.0f, colour.x));
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
-				PIXBeginEvent(m_commandList, PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255)), blockName.c_str());
-
+				UINT pixColour = PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255));
+				PIXSetMarker(pixColour, blockName.c_str());
+				PIXBeginEvent(m_commandList, pixColour, blockName.c_str());
 				m_nvtxRangehandle = nvtx3::start_range(blockName.c_str());
 			}
 
@@ -609,7 +615,7 @@ namespace Insight
 						{
 							firstHandle = iter->second;
 							set.Bindings.at(0).Type == DescriptorType::Sampler ?
-								++RenderStats::Instance().DescriptorTableSamplerReuse : ++RenderStats::Instance().DescriptorTableResourceReuse;
+							++RenderStats::Instance().DescriptorTableSamplerReuse : ++RenderStats::Instance().DescriptorTableResourceReuse;
 						}
 						else
 #endif // DX12_REUSE_DESCRIPTOR_TABLES

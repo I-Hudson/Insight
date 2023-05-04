@@ -143,7 +143,7 @@ namespace Insight
 					}
 
 					{
-						IS_PROFILE_SCOPE("InputSsytem Update");
+						IS_PROFILE_SCOPE("InputSystem Update");
 						m_resourceSystem.Update(delta_time);
 					}
 

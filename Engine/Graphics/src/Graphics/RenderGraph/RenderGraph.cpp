@@ -89,25 +89,36 @@ namespace Insight
 				//GetRenderPasses().clear();
 
 				// Release all current textures.
+				cmdList->BeginTimeBlock("RG::TextureCache->Release");
 				m_textureCaches->Release();
+				cmdList->EndTimeBlock();
 			}
 
+			cmdList->BeginTimeBlock("RG::PreRenderFunc");
 			Build();
+			cmdList->EndTimeBlock();
+
+			cmdList->BeginTimeBlock("RG::PlaceBarriers");
 			PlaceBarriers();
+			cmdList->EndTimeBlock();
 
 			RenderGraphSetPreRenderFunc preRenderFunc = m_pre_render_func.at(m_passesRenderIndex);
+			cmdList->BeginTimeBlock("RG::PreRenderFunc");
 			if (preRenderFunc)
 			{
 				preRenderFunc(*this, cmdList);
 			}
+			cmdList->EndTimeBlock();
 
 			Render(cmdList);
 
 			RenderGraphSetPostRenderFunc postRenderFunc = m_post_render_func.at(m_passesRenderIndex);
+			cmdList->BeginTimeBlock("RG::PostRenderFunc");
 			if (postRenderFunc)
 			{
 				postRenderFunc(*this, cmdList);
 			}
+			cmdList->EndTimeBlock();
 		}
 
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)
@@ -408,18 +419,16 @@ namespace Insight
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));
-				//PlaceBarriersInToPipeline(pass.Get(), cmdList);
+				PlaceBarriersInToPipeline(pass.Get(), cmdList);
 				cmdList->EndTimeBlock();
 
 				cmdList->SetViewport(0.0f, 0.0f, (float)pass->m_viewport.x, (float)pass->m_viewport.y, 0.0f, 1.0f, false);
 				cmdList->SetScissor(0, 0, pass->m_viewport.x, pass->m_viewport.y);
 
 				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
-				///cmdList->BeginRenderpass(pass->m_renderpassDescription);
 				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
 				pass->Execute(*this, cmdList);
 				cmdList->EndTimeBlock();
-				///cmdList->EndRenderpass();
 			}
 
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())

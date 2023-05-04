@@ -128,6 +128,7 @@ namespace Insight
 				std::thread m_rendererThread;
 				std::atomic<bool> m_rendererThreadShutdown = false;
 				FrameResource<FrameSubmitContext_DX12> m_submitFrameContexts;
+				FrameResource<u64> m_submitFenceValues;
 			};
 		}
 	}

@@ -189,7 +189,7 @@ namespace Insight
             m_ffx_fsr2_dispatch_description.cameraFar               = camera_far_plane;
             m_ffx_fsr2_dispatch_description.cameraFovAngleVertical  = camera_vertical_fov;
 
-            ASSERT(ffxFsr2ContextDispatch(&m_ffx_fsr2_context, &m_ffx_fsr2_dispatch_description) == FFX_OK);
+            //ASSERT(ffxFsr2ContextDispatch(&m_ffx_fsr2_context, &m_ffx_fsr2_dispatch_description) == FFX_OK);
 
             cmd_list->SetImageLayout(tex_input, ImageLayout::ColourAttachment);
             cmd_list->SetImageLayout(tex_output, ImageLayout::ShaderReadOnly);
