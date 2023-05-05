@@ -83,8 +83,11 @@ namespace Insight
 					m_renderCompletedSemaphore.Wait();
 				}
 
-				RenderStats::Instance().Draw();
-				m_renderGraph.Swap();
+				{
+					IS_PROFILE_SCOPE("Swap");
+					RenderStats::Instance().Draw();
+					m_renderGraph.Swap();
+				}
 
 				{
 					IS_PROFILE_SCOPE("Signal Render Thread");
@@ -320,7 +323,6 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			RenderStats::Instance().Reset();
 			bool prepareRenderer = PrepareRender();
 
 			RHI_CommandList* cmdList = nullptr;

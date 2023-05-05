@@ -35,6 +35,8 @@ namespace Insight
 		{
 		public:
 
+			virtual ~RenderGraphPassBase() { }
+
 		protected:
 			virtual void Setup(RenderGraphBuilder& builder) = 0;
 			virtual void Execute(RenderGraph& renderGraph, RHI_CommandList* cmdList) = 0;
@@ -84,6 +86,13 @@ namespace Insight
 				, m_passData(std::move(initalData))
 			{
 				m_passName = std::move(passName);
+			}
+
+			virtual ~RenderGraphPass() override
+			{
+				m_setupFunc = {};
+				m_executeFunc = {};
+				m_postFunc = {};
 			}
 
 			TPassData& GetData() const { return m_passData; }

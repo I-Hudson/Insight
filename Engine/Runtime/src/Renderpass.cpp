@@ -85,13 +85,13 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/PKG_A_Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
 			//modelsToAddToScene.push_back({ model_sponza, false });
 			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
@@ -148,7 +148,7 @@ namespace Insight
 
 			m_imgui_pass.Create();
 
-			Graphics::RHI_FSR::Instance().Init();
+			//Graphics::RHI_FSR::Instance().Init();
 		}
 
 		void Renderpass::Render()
@@ -160,33 +160,39 @@ namespace Insight
 			ImGui::Checkbox("Order GBuffer object by depth (close to far)", &OrderGBufferByDepth);
 			ImGui::End();
 
-			for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
 			{
-				if (modelsToAddToScene.at(i).first
-					&& !modelsToAddToScene.at(i).second
-					&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
+				IS_PROFILE_SCOPE("Add models to scene");
+				for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
 				{
-					modelsToAddToScene.at(i).second = true;
-					for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
+					if (modelsToAddToScene.at(i).first
+						&& !modelsToAddToScene.at(i).second
+						&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
 					{
-						ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
+						modelsToAddToScene.at(i).second = true;
+						for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
+						{
+							ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
 
-						glm::mat4 transform(1.0f);
-						//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
-						entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
+							glm::mat4 transform(1.0f);
+							//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
+							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
+						}
+
+						IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 					}
-
-					IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
 				}
 			}
 
-			ImGui::Begin("Render");
-			ImGui::DragInt2("Render Resolution", pendingRenderResolution);
-			if (ImGui::Button("Apply Render Resolution"))
 			{
-				RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+				IS_PROFILE_SCOPE("Render Resolution");
+				ImGui::Begin("Render");
+				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
+				if (ImGui::Button("Apply Render Resolution"))
+				{
+					RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+				}
+				ImGui::End();
 			}
-			ImGui::End();
 
 			//if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
 			{
@@ -199,39 +205,51 @@ namespace Insight
 				//}
 			}
 
-			m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
-			m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
-			m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
-
-			if (enableFSR)
 			{
-				glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
-				RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
-				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
-				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
+				IS_PROFILE_SCOPE("BufferFrame cameras");
+				m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
+				m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
+				m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
+			}
 
-				glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
-				m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
+			{
+				IS_PROFILE_SCOPE("FSR2");
+				if (enableFSR)
+				{
+					glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+					RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
+					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
+					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
 
-				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
-				{
-					glm::mat4 proj = m_buffer_frame.Projection;
-					proj[1][1] *= -1;
-					m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
-				}
-				else
-				{
-					m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+					glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
+
+					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+					{
+						glm::mat4 proj = m_buffer_frame.Projection;
+						proj[1][1] *= -1;
+						m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+					}
+					else
+					{
+						m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+					}
 				}
 			}
 
-			m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
-			m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
+			{
+				IS_PROFILE_SCOPE("BufferFrame resolutions");
+				m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
+				m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
 
-			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
-			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+			}
 
-			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+			{
+				IS_PROFILE_SCOPE("GetCascades");
+				BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+			}
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
@@ -257,21 +275,24 @@ namespace Insight
 				//renderFrame.SortTransparentMeshes();
 			}
 
-			ShadowPass();
-			//ShadowCullingPass();
-			if (Depth_Prepass)
+			if constexpr (true)
 			{
-				//DepthPrepass();
-			}
-			GBuffer();
-			TransparentGBuffer();
-			Composite();
-			FSR2();
-			Swapchain();
+				ShadowPass();
+				//ShadowCullingPass();
+				if (Depth_Prepass)
+				{
+					//DepthPrepass();
+				}
+				GBuffer();
+				TransparentGBuffer();
+				Composite();
+				FSR2();
+				Swapchain();
 
-			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
-			GFXHelper();
-			ImGuiPass();
+				// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
+				GFXHelper();
+			}
+				ImGuiPass();
 		}
 
 		void Renderpass::Destroy()
@@ -339,31 +360,37 @@ namespace Insight
 
 		void Renderpass::ShadowPass()
 		{
+			IS_PROFILE_FUNCTION();
+
 			struct PassData
 			{
 				RGTextureHandle Depth_Tex;
-				RenderFrame const RenderFrame;
+				RenderFrame RenderFrame;
 			};
-			PassData data
+			PassData data;
 			{
-				-1,
-				renderFrame
-			};
-
-			ImGui::Begin("Directional Light Direction");
-			float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
-			if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
-			{
-				dir_light_direction = glm::vec3(dir[0], dir[1], dir[2]);
+				IS_PROFILE_SCOPE("pass data setup");
+				data.Depth_Tex = -1;
+				data.RenderFrame = renderFrame;
 			}
 
 			static float depth_constant_factor = 4.0f;
 			static float depth_slope_factor = 1.5f;
-			ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
-			ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
-			ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f);
+			{
+				IS_PROFILE_SCOPE("imgui drawing");
+				ImGui::Begin("Directional Light Direction");
+				float dir[3] = { dir_light_direction.x, dir_light_direction.y, dir_light_direction.z };
+				if (ImGui::DragFloat3("Direction", dir, 0.001f, -1.0f, 1.0f))
+				{
+					dir_light_direction = glm::vec3(dir[0], dir[1], dir[2]);
+				}
 
-			ImGui::End();
+				ImGui::DragFloat("Dpeth bias constant factor", &depth_constant_factor, 0.01f);
+				ImGui::DragFloat("Dpeth bias slope factor", &depth_slope_factor, 0.01f);
+				ImGui::DragFloat("Cascade Split Lambda", &cascade_split_lambda, 0.001f, 0.0f, 1.0f);
+
+				ImGui::End();
+			}
 
 			/// Look into "panking" for dir light https:///www.gamedev.net/forums/topic/639036-shadow-mapping-and-high-up-objects/
 			RenderGraph::Instance().AddPass<PassData>("Cascade shadow pass",
@@ -869,6 +896,7 @@ namespace Insight
 
 		void Renderpass::Composite()
 		{
+			IS_PROFILE_FUNCTION();
 			struct PassData
 			{
 				BufferFrame Buffer_Frame;
@@ -947,6 +975,8 @@ namespace Insight
 
 		void Renderpass::FSR2()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (RenderGraph::Instance().GetRenderResolution() == RenderGraph::Instance().GetOutputResolution())
 			{
 				return;
@@ -1007,6 +1037,8 @@ namespace Insight
 
 		void Renderpass::GFXHelper()
 		{
+			IS_PROFILE_FUNCTION();
+
 			struct TestPassData
 			{
 				BufferFrame Buffer_Frame;
@@ -1139,6 +1171,8 @@ namespace Insight
 
 		void Renderpass::Swapchain()
 		{
+			IS_PROFILE_FUNCTION();
+
 			struct TestPassData
 			{
 				RGTextureHandle RenderTarget;
@@ -1210,6 +1244,8 @@ namespace Insight
 
 		void Renderpass::ImGuiPass()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_imgui_pass.Render();
 		}
 

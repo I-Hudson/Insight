@@ -3,13 +3,48 @@
 
 #include <imgui.h>
 
-std::string FormatU64ToCommaString(const Insight::DoubleBufferVector<u64>& value)
+std::string FormatU64ToCommaString(u64 value)
 {
-	std::stringstream ss;
-	ss.imbue(std::locale(std::locale(), new comma_numpunct()));
-	ss << std::fixed << value.GetCurrent();
-	return ss.str();
-};
+	if constexpr (false)
+	{
+		std::stringstream ss;
+		ss.imbue(std::locale(std::locale(), new comma_numpunct()));
+		ss << std::fixed << value;
+		return ss.str();
+	}
+	else
+	{
+		if (value == 0)
+		{
+			return "";
+		}
+
+		std::function<void(std::string& str, u64 digitSize, u64 value)> placeDigitInToString = 
+			[](std::string& str, u64 digitSize, u64 value)
+		{
+			if (digitSize > 0 && digitSize % 3 == 0)
+			{
+				str.push_back(',');
+			}
+			const char c = '0' + static_cast<char>(value);
+			str.push_back(c);
+		};
+
+		std::string str;
+		u64 strDigitSize = 0;
+		while (value > 10)
+		{
+			const u64 lastDigit = value % 10;
+			value /= 10;
+			placeDigitInToString(str, strDigitSize, lastDigit);
+			++strDigitSize;
+		}
+		u64 lastDigit = value % 10;
+		placeDigitInToString(str, strDigitSize, lastDigit);
+		std::reverse(str.begin(), str.end());
+		return str;
+	}
+}
 
 namespace Insight
 {
@@ -17,7 +52,7 @@ namespace Insight
 	{
 		void RenderStats::Draw()
 		{
-			ImGui::Begin("Render Stats");
+			IS_PROFILE_FUNCTION();
 
 			RenderTime.Stop();
 
@@ -38,92 +73,103 @@ namespace Insight
 
 			std::string vendor_name = PhysicalDeviceInformation::Instance().Vendor;
 			std::string device_name = PhysicalDeviceInformation::Instance().Device_Name;
-			ImGui::Text("Vendor: %s", vendor_name.data());
-			ImGui::Text("Device: %s", device_name.data());
-			ImGui::Text("VRAM: %u MB", PhysicalDeviceInformation::Instance().VRam_Size / 1024 / 1024);
 
-			ImGui::Text("Render Timer: %f", renderTime);
-			ImGui::Text("Average Render Timer: %f", averageRenderTimer);
-			ImGui::Text("Render Fps: %f", fps);
-
-			ImGui::Text(MeshCountFormated().c_str());
-			ImGui::Text(DrawCallsFormated().c_str());
-			ImGui::Text(DrawIndexedCallsFormated().c_str());
-			ImGui::Text(DispatchCallsFormated().c_str());
-			ImGui::Text(IndexBufferBindingsFormated().c_str());
-			ImGui::Text(VertexBufferBindingsFormated().c_str());
-			ImGui::Text(DrawIndexedIndicesCountFormated().c_str());
-			ImGui::Text(FrameUniformBufferSizeFormated().c_str());
-			ImGui::Text(DescriptorSetBindingsFormated().c_str());
-			ImGui::Text(DescriptorSetUpdatesFormated().c_str());
-			ImGui::Text(DescriptorSetUsedCountFormated().c_str());
-			ImGui::Text(PipelineBarriersFormated().c_str());
-
-			if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
 			{
-				ImGui::Spacing();
-				ImGui::Spacing();
-				ImGui::Text("DX12");
-				ImGui::Separator();
-				ImGui::Text(DescriptorTableResourceCreationsFormated().c_str());
-				ImGui::Text(DescriptorTableResourceReuseFormated().c_str());
-				ImGui::Text(DescriptorTableSamplerCreationsFormated().c_str());
-				ImGui::Text(DescriptorTableSamplerReuseFormated().c_str());
-			}
+				IS_PROFILE_SCOPE("IMGUI");
+				ImGui::Begin("Render Stats");
 
-			ImGui::End();
+				ImGui::Text("Vendor: %s", vendor_name.data());
+				ImGui::Text("Device: %s", device_name.data());
+				ImGui::Text("VRAM: %u MB", PhysicalDeviceInformation::Instance().VRam_Size / 1024 / 1024);
+
+				ImGui::Text("Render Timer: %f", renderTime);
+				ImGui::Text("Average Render Timer: %f", averageRenderTimer);
+				ImGui::Text("Render Fps: %f", fps);
+
+				{
+					ImGui::Text(MeshCountFormated().c_str());
+					ImGui::Text(DrawCallsFormated().c_str());
+					ImGui::Text(DrawIndexedCallsFormated().c_str());
+					ImGui::Text(DispatchCallsFormated().c_str());
+					ImGui::Text(IndexBufferBindingsFormated().c_str());
+					ImGui::Text(VertexBufferBindingsFormated().c_str());
+					ImGui::Text(DrawIndexedIndicesCountFormated().c_str());
+					ImGui::Text(FrameUniformBufferSizeFormated().c_str());
+					ImGui::Text(DescriptorSetBindingsFormated().c_str());
+					ImGui::Text(DescriptorSetUpdatesFormated().c_str());
+					ImGui::Text(DescriptorSetUsedCountFormated().c_str());
+					ImGui::Text(PipelineBarriersFormated().c_str());
+				}
+
+				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::DX12)
+				{
+					ImGui::Spacing();
+					ImGui::Spacing();
+					ImGui::Text("DX12");
+					ImGui::Separator();
+					{
+						ImGui::Text(DescriptorTableResourceCreationsFormated().c_str());
+						ImGui::Text(DescriptorTableResourceReuseFormated().c_str());
+						ImGui::Text(DescriptorTableSamplerCreationsFormated().c_str());
+						ImGui::Text(DescriptorTableSamplerReuseFormated().c_str());
+					}
+				}
+
+				ImGui::End();
+			}
+			Reset();
 		}
 
 		void RenderStats::Reset()
 		{
 			RenderTime.Reset();
 			
-			MeshCount.Swap();
+			//MeshCount.Swap();
 			MeshCount = 0;
 			
-			DrawCalls.Swap();
+			//DrawCalls.Swap();
 			DrawCalls = 0;
 
-			DrawIndexedCalls.Swap();
+			//DrawIndexedCalls.Swap();
 			DrawIndexedCalls = 0;
 
-			DispatchCalls.Swap();
+			//DispatchCalls.Swap();
 			DispatchCalls = 0;
 
-			IndexBufferBindings.Swap();
+			//IndexBufferBindings.Swap();
 			IndexBufferBindings = 0;
 
-			VertexBufferBindings.Swap();
+			//VertexBufferBindings.Swap();
 			VertexBufferBindings = 0;
 
-			DrawIndexedIndicesCount.Swap();
+			//DrawIndexedIndicesCount.Swap();
 			DrawIndexedIndicesCount = 0;
 
-			FrameUniformBufferSize.Swap();
+			//FrameUniformBufferSize.Swap();
 			FrameUniformBufferSize = 0;
 
-			DescriptorSetBindings.Swap();
+			//DescriptorSetBindings.Swap();
 			DescriptorSetBindings = 0;
 
-			DescriptorSetUpdates.Swap();
+			//DescriptorSetUpdates.Swap();
 			DescriptorSetUpdates = 0;
 
-			DescriptorSetUsedCount.Swap();
+			//DescriptorSetUsedCount.Swap();
 			DescriptorSetUsedCount = 0;
 
-			PipelineBarriers.Swap();
+			//PipelineBarriers.Swap();
 			PipelineBarriers = 0;
 
-			DescriptorTableResourceCreations.Swap();
+			//DescriptorTableResourceCreations.Swap();
 			DescriptorTableResourceCreations = 0;
 
-			DescriptorTableResourceReuse.Swap();
+			//DescriptorTableResourceReuse.Swap();
 			DescriptorTableResourceReuse = 0;
 
-			DescriptorTableSamplerCreations.Swap();
+			//DescriptorTableSamplerCreations.Swap();
 			DescriptorTableSamplerCreations = 0;
 
-			DescriptorTableSamplerReuse.Swap();
+			//DescriptorTableSamplerReuse.Swap();
 			DescriptorTableSamplerReuse = 0;
 		}
 	}

@@ -56,6 +56,7 @@ namespace Insight
 
 		void RenderGraph::Swap()
 		{
+			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
 			std::swap(m_passesUpdateIndex, m_passesRenderIndex);
 			GetUpdatePasses().clear();
