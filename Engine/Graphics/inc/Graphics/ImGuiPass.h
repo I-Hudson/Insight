@@ -12,6 +12,16 @@ namespace Insight
 
 		class IS_GRAPHICS ImGuiPass
 		{
+			struct ImGuiPassData
+			{
+				PipelineStateObject Pso;
+				ImDrawData ImDrawData;
+				std::vector<ImDrawList> CmdList;
+				std::vector<ImDrawList*> CmdListPtrs;
+
+				void Reset();
+			};
+
 		public:
 
 			void Create();
@@ -21,6 +31,7 @@ namespace Insight
 		private:
 			FrameResource<RHI_Buffer*> m_vertex_buffer;
 			FrameResource<RHI_Buffer*> m_index_buffer;
+			DoubleBufferVector<ImGuiPassData> m_passData;
 		};
 	}
 }

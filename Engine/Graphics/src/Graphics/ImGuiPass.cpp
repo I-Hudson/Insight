@@ -11,6 +11,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		void ImGuiPass::ImGuiPassData::Reset()
+		{
+			for (ImDrawList& drawList : CmdList)
+			{
+				drawList._ResetForNewFrame();
+			}
+		}
+
 		void ImGuiPass::Create()
 		{
 			RHI_Buffer_Overrides buffer_overrides = {};
@@ -37,25 +45,45 @@ namespace Insight
 		{
 			RenderContext::Instance().ImGuiRender();
 
-			struct ImGuiPassData
-			{
-				PipelineStateObject Pso;
-				ImDrawData ImDrawData;
-				std::vector<ImDrawList*> CmdList;
-			};
+			ImGuiPassData& passData = RemoveConst(m_passData.GetCurrent());
+			passData.Reset();
+			passData.ImDrawData = std::move(*ImGui::GetDrawData());
 
-			ImGuiPassData passData;
-			passData.ImDrawData = *ImGui::GetDrawData();
 			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
 			{
-				ImDrawList* drawList = passData.ImDrawData.CmdLists[i]->CloneOutput();
-				passData.CmdList.push_back(std::move(drawList));
+				ImDrawList* imguiDrawList = passData.ImDrawData.CmdLists[i];
+				ImDrawList* drawList = nullptr; 
+				if (i < passData.CmdList.size())
+				{
+					drawList = &passData.CmdList.at(i);
+				}
+				else
+				{
+					passData.CmdList.push_back((ImGui::GetDrawListSharedData()));
+					drawList = &passData.CmdList.back();
+
+					passData.CmdListPtrs.resize(passData.CmdList.size());
+					for (size_t drawListIdx = 0; drawListIdx < passData.CmdList.size(); ++drawListIdx)
+					{
+						passData.CmdListPtrs[drawListIdx] = &passData.CmdList[drawListIdx];
+					}
+				}
+				
+				drawList->CmdBuffer = imguiDrawList->CmdBuffer;
+				drawList->VtxBuffer = imguiDrawList->VtxBuffer;
+				drawList->IdxBuffer = imguiDrawList->IdxBuffer;
 			}
-			passData.ImDrawData.CmdLists = passData.CmdList.data();
+			ImDrawList** drawListPtr = passData.CmdListPtrs.data();
+			passData.ImDrawData.CmdLists = drawListPtr;
 
 			RenderContext::Instance().ImGuiBeginFrame();
 
-			RenderGraph::Instance().AddPass<ImGuiPassData>("ImGuiPass", [this](ImGuiPassData& data, RenderGraphBuilder& builder)
+			struct ImguiPass
+			{
+				ImDrawData* ImDrawData;
+			};
+
+			RenderGraph::Instance().AddPass<ImguiPass>("ImGuiPass", [this](ImguiPass& data, RenderGraphBuilder& builder)
 				{
 					IS_PROFILE_SCOPE("ImGui pass setup");
 
@@ -106,7 +134,7 @@ namespace Insight
 
 					builder.SetRenderpass(renderpassDescription);
 				},
-				[&](ImGuiPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[&](ImguiPass& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("ImGui pass execute");
 
@@ -125,7 +153,7 @@ namespace Insight
 					cmdList->SetSampler(2, 0, bilinearSampler);
 
 					ImDrawData* imguiDrawData = ImGui::GetDrawData();
-					ImDrawData* draw_data = &data.ImDrawData;
+					ImDrawData* draw_data = data.ImDrawData;
 
 					/// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 					int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
@@ -275,15 +303,9 @@ namespace Insight
 					}
 					cmdList->EndRenderpass();
 				}
-				, [](ImGuiPassData& passData, RenderGraph& renderGraph, RHI_CommandList* cmdList)
-				{
-					for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
-					{
-						IM_FREE(passData.CmdList.at(i));
-					}
-				}
-				, std::move(passData));
+			, std::move(ImguiPass{ &passData.ImDrawData }));
 
+			m_passData.Swap();
 		}
 
 		void ImGuiPass::Release()

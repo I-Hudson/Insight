@@ -37,13 +37,13 @@ namespace Insight
 	namespace Graphics
 	{
 #define FORMAT_STAT(Stat, StatDisplayText) \
-std::string _CONCAT(Stat, Formated)() { IS_PROFILE_FUNCTION(); return StatDisplayText + std::to_string(Stat); }
+std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(Stat); }
 
 #define FORMAT_STAT_VALUE(Stat, Value, StatDisplayText) \
-std::string _CONCAT(Stat, Formated)() { IS_PROFILE_FUNCTION(); return StatDisplayText + std::to_string(Value); }
+std::string _CONCAT(Stat, Formated)() { return StatDisplayText + std::to_string(Value); }
 
 #define FORMAT_STAT_FUNC(Stat, Func, StatDisplayText) \
-std::string _CONCAT(Stat, Formated)() { IS_PROFILE_FUNCTION(); return StatDisplayText + Func; }
+std::string _CONCAT(Stat, Formated)() { return StatDisplayText + Func; }
 
 		struct IS_GRAPHICS RenderStats : public Core::Singleton<RenderStats>
 		{

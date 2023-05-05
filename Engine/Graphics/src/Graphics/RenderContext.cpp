@@ -159,6 +159,8 @@ namespace Insight
 
 		void RenderContext::ImGuiBeginFrame()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (m_font_texture == nullptr)
 			{
 				m_font_texture = Renderer::CreateTexture();
@@ -190,6 +192,7 @@ namespace Insight
 
 		void RenderContext::ImGuiRender()
 		{
+			IS_PROFILE_FUNCTION();
 			ImGui::Render();
 			ImGui::UpdatePlatformWindows();
 		}
