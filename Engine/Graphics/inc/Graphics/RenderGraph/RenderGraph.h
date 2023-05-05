@@ -126,7 +126,6 @@ namespace Insight
 			glm::ivec2 m_output_resolution = {};
 
 			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
-			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> m_texture_barrier_history;
 		};
 	}
 }

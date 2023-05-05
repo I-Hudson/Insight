@@ -52,7 +52,7 @@ namespace Insight
 			for (size_t i = 0; i < passData.ImDrawData.CmdListsCount; ++i)
 			{
 				ImDrawList* imguiDrawList = passData.ImDrawData.CmdLists[i];
-				ImDrawList* drawList = nullptr; 
+				ImDrawList* drawList = nullptr;
 				if (i < passData.CmdList.size())
 				{
 					drawList = &passData.CmdList.at(i);
@@ -68,10 +68,13 @@ namespace Insight
 						passData.CmdListPtrs[drawListIdx] = &passData.CmdList[drawListIdx];
 					}
 				}
-				
-				drawList->CmdBuffer = imguiDrawList->CmdBuffer;
-				drawList->VtxBuffer = imguiDrawList->VtxBuffer;
-				drawList->IdxBuffer = imguiDrawList->IdxBuffer;
+
+				{
+					IS_PROFILE_SCOPE("Set pass imgui draw data");
+					drawList->CmdBuffer = imguiDrawList->CmdBuffer;
+					drawList->VtxBuffer = imguiDrawList->VtxBuffer;
+					drawList->IdxBuffer = imguiDrawList->IdxBuffer;
+				}
 			}
 			ImDrawList** drawListPtr = passData.CmdListPtrs.data();
 			passData.ImDrawData.CmdLists = drawListPtr;

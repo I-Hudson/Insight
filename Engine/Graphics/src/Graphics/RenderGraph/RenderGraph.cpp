@@ -274,6 +274,7 @@ namespace Insight
 				}
 			};
 
+			std::unordered_map<RHI_Texture*, std::vector<ImageBarrier>> texture_barrier_history;
 			int passIndex = 0;
 			/// This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
@@ -291,7 +292,7 @@ namespace Insight
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
 						
-						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
+						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
 
@@ -306,7 +307,7 @@ namespace Insight
 						barrier.NewLayout = ImageLayout::ColourAttachment;
 						barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
 
-						m_texture_barrier_history[texture].push_back(barrier);
+						texture_barrier_history[texture].push_back(barrier);
 						colorImageBarriers.push_back(std::move(barrier));
 					}
 				}
@@ -318,7 +319,7 @@ namespace Insight
 				if (pass->m_depthStencilWrite != -1)
 				{
 					RHI_Texture* texture = m_textureCaches->Get(pass->m_depthStencilWrite);
-					PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
+					PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, pass->m_depthStencilWrite);
 
@@ -333,7 +334,7 @@ namespace Insight
 					barrier.NewLayout = ImageLayout::DepthStencilAttachment;
 					barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Depth);
 					
-					m_texture_barrier_history[texture].push_back(barrier);
+					texture_barrier_history[texture].push_back(barrier);
 					depthImageBarriers.push_back(std::move(barrier));
 				}
 
@@ -361,7 +362,7 @@ namespace Insight
 					for (auto const& rt : pass.Get()->m_textureReads)
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
-						PlaceInitalBarrier::PlaceBarrier(texture, m_texture_barrier_history[texture]);
+						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
 
@@ -378,7 +379,7 @@ namespace Insight
 						barrier.NewLayout = ImageLayout::ShaderReadOnly;
 						barrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(isDepth ? ImageAspectFlagBits::Depth : ImageAspectFlagBits::Colour);
 
-						m_texture_barrier_history[texture].push_back(barrier);
+						texture_barrier_history[texture].push_back(barrier);
 						if (isDepth)
 						{
 							depthImageBarriers.push_back(std::move(barrier));
