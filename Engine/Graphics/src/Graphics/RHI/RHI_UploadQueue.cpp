@@ -143,6 +143,7 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 			ASSERT(RenderContext::Instance().IsRenderThread());
+			cmdList->BeginTimeBlock("UploadToDevice");
 
 			std::lock_guard lock(m_mutex);
 			m_frameUploadOffset = 0;
@@ -176,15 +177,14 @@ namespace Insight
 				m_queuedUploads.at(i)->CommandList = cmdList;
 				m_queuedUploads.at(i)->CommandList->OnWorkCompleted.Bind<&RHI_UploadQueueRequestInternal::OnWorkComplete>(m_queuedUploads.at(i).Get());
 				// Call the upload functions.
-				cmdList->BeginTimeBlock("UploadFunction");
 				m_queuedUploads.at(i)->UploadFunction(m_queuedUploads.at(i).Get(), cmdList);
-				cmdList->EndTimeBlock();
 			}
 			// Move all  our requests to the running vector.
 			std::move(m_queuedUploads.begin(), m_queuedUploads.end(), std::back_inserter(m_runningUploads));
 			m_queuedUploads.clear();
 
 			m_stagingBufferOffset = 0;
+			cmdList->EndTimeBlock();
 		}
 
 		void RHI_UploadQueue::RemoveRequest(RHI_UploadQueueRequest* request)

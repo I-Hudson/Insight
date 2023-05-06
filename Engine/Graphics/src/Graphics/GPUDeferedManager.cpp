@@ -24,8 +24,8 @@ namespace Insight
 			{
 				func(cmd_list);
 			}
-			m_queue.clear();
 			cmd_list->EndTimeBlock();
+			m_queue.clear();
 		}
 		void GPUDeferedManager::Remove(void* pointer)
 		{

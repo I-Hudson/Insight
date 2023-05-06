@@ -132,7 +132,7 @@ namespace Insight
                 return newFenceValue;
             }
 
-            const u64 RHI_Queue_DX12::Submit(const RHI_CommandList_DX12* cmdlist)
+            const u64 RHI_Queue_DX12::SubmitAndSignal(const RHI_CommandList_DX12* cmdlist)
             {
                 nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };
                 ID3D12CommandList* ppCommandLists[] = { cmdlist->GetCommandList() };
@@ -143,7 +143,7 @@ namespace Insight
             void RHI_Queue_DX12::SubmitAndWait(const RHI_CommandList_DX12* cmdlist)
             {
                 nvtx3::scoped_range range{ "RHI_Queue_DX12::SubmitAndWait" };
-                const u64 fenceValue = Submit(cmdlist);
+                const u64 fenceValue = SubmitAndSignal(cmdlist);
                 Wait(fenceValue);
             }
         }

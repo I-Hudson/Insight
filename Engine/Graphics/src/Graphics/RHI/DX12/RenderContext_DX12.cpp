@@ -370,29 +370,6 @@ namespace Insight
 			void RenderContext_DX12::PreRender(RHI_CommandList* cmdList)
 			{
 				ExecuteAsyncJobs(cmdList);
-
-				RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
-
-				cmdListDX12->BeginTimeBlock("Transition swapchain");
-#ifdef DX12_ENHANCED_BARRIERS
-				// Transition back-buffer to a writable state for rendering.
-				CD3DX12_TEXTURE_BARRIER barrier = {};
-				barrier.SyncBefore = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_NONE;
-				barrier.SyncAfter = D3D12_BARRIER_SYNC::D3D12_BARRIER_SYNC_ALL;
-				barrier.AccessBefore = D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_NO_ACCESS;
-				barrier.AccessAfter = D3D12_BARRIER_ACCESS::D3D12_BARRIER_ACCESS_RENDER_TARGET;
-				barrier.LayoutBefore = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_PRESENT;
-				barrier.LayoutAfter = D3D12_BARRIER_LAYOUT::D3D12_BARRIER_LAYOUT_RENDER_TARGET;
-				barrier.pResource = m_swapchainImages[m_availableSwapchainImage].Colour->m_swapchainImage.Get();
-				cmdListDX12->PipelineBarrierImage({ barrier });
-#else
-				cmdListDX12->PipelineResourceBarriers({ CD3DX12_RESOURCE_BARRIER::Transition(
-					m_swapchainImages[m_availableSwapchainImage].Colour->m_swapchainImage.Get(),
-					D3D12_RESOURCE_STATE_COMMON,
-					D3D12_RESOURCE_STATE_RENDER_TARGET) });
-#endif
-				m_swapchainImages[m_availableSwapchainImage].Colour->SetLayout(ImageLayout::ColourAttachment);
-				cmdListDX12->EndTimeBlock();
 			}
 
 			void RenderContext_DX12::PostRender(RHI_CommandList* cmdList)
@@ -416,7 +393,7 @@ namespace Insight
 							//const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
 							//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
 
-							m_submitFenceValues.Get() = m_graphicsQueue.Submit(cmdListDX12);
+							m_submitFenceValues.Get() = m_graphicsQueue.SubmitAndSignal(cmdListDX12);
 						}
 
 						{
@@ -440,12 +417,6 @@ namespace Insight
 					}
 				}
 				m_frameIndex = (m_frameIndex + 1) % GetFramesInFligtCount();
-
-				{
-					IS_PROFILE_SCOPE("ImGui NewFrame");
-					//ImGui_ImplDX12_NewFrame();
-					//ImGuiBeginFrame();
-				}
 
 				m_resource_tracker.EndFrame();
 			}
@@ -631,10 +602,8 @@ namespace Insight
 				}
 
 				// Go through out deferred manager and call all the functions which have been queued up.
-				cmdList->BeginTimeBlock("ExecuteAsyncJobs");
 				m_gpu_defered_manager.Update(cmdList);
 				m_uploadQueue.UploadToDevice(cmdList);
-				cmdList->EndTimeBlock();
 			}
 
 			void RenderContext_DX12::SetObjectName(std::string_view name, ID3D12Object* handle)

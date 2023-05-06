@@ -30,12 +30,6 @@ namespace Insight
 				{
 					const Core::GraphcisSwapchainResize& resizeEvent = static_cast<const Core::GraphcisSwapchainResize&>(event);
 
-					m_context->GpuWaitForIdle();
-					//GetRenderPasses().clear();
-					
-					// Release all textures as the size they need to be has changed.
-					m_textureCaches->Release();
-
 					m_output_resolution = { resizeEvent.Width, resizeEvent.Height };
 					if (m_set_render_resolution_to_window_resolution_auto)
 					{
@@ -87,7 +81,6 @@ namespace Insight
 				m_render_resolution_has_changed = false;
 
 				m_context->GpuWaitForIdle();
-				//GetRenderPasses().clear();
 
 				// Release all current textures.
 				cmdList->BeginTimeBlock("RG::TextureCache->Release");
@@ -292,6 +285,7 @@ namespace Insight
 					{
 						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
 						
+
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);
@@ -457,7 +451,6 @@ namespace Insight
 				cmdList->PipelineBarrier(barrier);
 				cmdList->BeginTimeBlock("Transition swapchain image, common");
 				cmdList->EndTimeBlock();
-				//cmdList->SetImageLayout(m_context->GetSwaphchainIamge(), ImageLayout::PresentSrc);
 			}
 		}
 

@@ -30,7 +30,7 @@ namespace Insight
 
 				/// @brief Submit work to the queue.
 				/// @param cmdlist
-				const u64 Submit(const RHI_CommandList_DX12* cmdlist);
+				const u64 SubmitAndSignal(const RHI_CommandList_DX12* cmdlist);
 
 				/// @brief Submit work to the queue and wait for it to be completed.
 				/// @param cmdlist
