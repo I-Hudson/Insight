@@ -193,7 +193,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("Mesh evaluated");
 					aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
 
-					AssimpLoaderData mesh_data;					
+					AssimpLoaderData mesh_data;
 					ProcessMesh(aiMesh, aiScene, mesh_data);
 					//Optimize(mesh_data);
 					if (aiScene->HasMaterials() && aiMesh->mMaterialIndex < aiScene->mNumMaterials)
@@ -265,44 +265,7 @@ namespace Insight
 					{
 						new_mesh->SetMaterial(mesh_data.Materials.at(material_index));
 					}
-
-					//BoundingBox bounding_box = BoundingBox(vertices_optomized.data(), static_cast<u32>(vertices_optomized.size()));
-					//SubmeshDrawInfo submesh_draw_info = { };
-					//submesh_draw_info.Vertex_Offset = static_cast<u32>(vertices.size());
-					//submesh_draw_info.First_Index = static_cast<u32>(indices.size());
-
-					//submesh_draw_info.Transform = ConvertMatrix(aiNode->mTransformation);
-					//submesh_draw_info.Vertex_Count = static_cast<u32>(vertices.size()) - submesh_draw_info.Vertex_Offset;
-					//submesh_draw_info.Index_Count = static_cast<u32>(indices.size()) - submesh_draw_info.First_Index;
-
-					/// we assume a convention for sampler names in the shaders. Each diffuse texture should be named
-					/// as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
-					/// Same applies to other texture as the following list summarizes:
-					/// diffuse: texture_diffuseN
-					/// specular: texture_specularN
-					/// normal: texture_normalN
-					//std::vector<Ptr<RHI_Texture>> diffuse_textures = LoadMaterialTextures(aiScene->mMaterials[aiMesh->mMaterialIndex], aiTextureType_DIFFUSE, "texture_diffuse");
-					//submesh_draw_info.Textures.insert(submesh_draw_info.Textures.end(), diffuse_textures.begin(), diffuse_textures.end());
 				}
-
-				///Mesh* mesh = ::New<Mesh, Core::MemoryAllocCategory::Resources>(&model, static_cast<u32>(model.m_meshes.size()));
-				///Animation::Skeleton* skeleton = ::New<Animation::Skeleton, Core::MemoryAllocCategory::Resources>();;
-				////// process all the node's meshes (if any)
-				///for (u32 i = 0; i < aiNode->mNumMeshes; ++i)
-				///{
-				///	aiMesh* aiMesh = aiScene->mMeshes[aiNode->mMeshes[i]];
-				///	mesh->m_subMeshes.push_back(ProcessMesh(*mesh, aiMesh, aiNode, aiScene, directory));
-
-				///	ExtractSkeleton(*skeleton, mesh->m_vertices, aiMesh, aiScene, mesh);
-				///}
-				///model.m_meshes.push_back(mesh);
-				///model.m_skeletons.push_back(skeleton);
-
-				///if (skeleton->GetBoneCount() > 0)
-				///{
-				///	model.m_meshToSkeleton.emplace((u32)model.m_meshes.size() - 1, (u32)model.m_skeletons.size() - 1);
-				///	model.m_skeletonToMesh.emplace((u32)model.m_skeletons.size() - 1, (u32)model.m_meshes.size() - 1);
-				///}
 			}
 
 			// Then do the same for each of its children
@@ -340,17 +303,18 @@ namespace Insight
 				vector.w = 1.0f;
 				vertex.Position = vector;
 
-				/// normals
+				vector = { };
+				/// Normals
 				if (mesh->HasNormals())
 				{
-					vector = { };
 					vector.x = mesh->mNormals[i].x;
 					vector.y = mesh->mNormals[i].y;
 					vector.z = mesh->mNormals[i].z;
 					vector.w = 1.0f;
 					vector = glm::normalize(vector);
-					vertex.Normal = vector;
 				}
+				vertex.Normal = vector;
+
 				vector = { };
 				if (mesh->mColors[0])
 				{
@@ -358,7 +322,6 @@ namespace Insight
 					vector.y = mesh->mColors[0]->g;
 					vector.z = mesh->mColors[0]->b;
 					vector.w = mesh->mColors[0]->a;
-					vertex.Normal = vector;
 				}
 				else
 				{
@@ -366,8 +329,9 @@ namespace Insight
 					vector.y = (rand() % 100 + 1) * 0.01f;
 					vector.z = (rand() % 100 + 1) * 0.01f;
 					vector.w = 1.0f;
-					vertex.Colour = vertexColour;
 				}
+				vertex.Colour = vector;
+
 				vector = { };
 				/// texture coordinates
 				if (mesh->mTextureCoords[0]) /// does the mesh contain texture coordinates?
@@ -398,6 +362,7 @@ namespace Insight
 				}
 				else
 				{
+					FAIL_ASSERT();
 					///vertex.UV = glm::vec2(0.0f, 0.0f);
 				}
 
@@ -411,7 +376,6 @@ namespace Insight
 				/// retrieve all indices of the face and store them in the indices vector
 				for (unsigned int j = 0; j < face.mNumIndices; j++)
 				{
-					IS_PROFILE_SCOPE("Add index");
 					loader_data.Indices.push_back(face.mIndices[j]);
 				}
 			}
@@ -590,7 +554,9 @@ namespace Insight
 					std::vector<u32> indcies_to_lod;
 
 					const float error_rate = 1.0f;
-					const u32 target_index_count = static_cast<u32>(static_cast<float>(mesh->m_lods.at(0).Index_count) * (1.0f - (0.4f * lod_index)));
+					const float lodSplitPercentage = 1.0f / Mesh::s_LOD_Count;
+					const float lodSplit = 1.0f - (lodSplitPercentage * lod_index);
+					const u32 target_index_count = static_cast<u32>(static_cast<float>(mesh->m_lods.at(0).Index_count) * lodSplit);
 
 					const u64 indices_start = mesh->m_lods.at(0).First_index;
 					const u64 indices_count = mesh->m_lods.at(0).Index_count;

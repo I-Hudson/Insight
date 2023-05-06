@@ -49,6 +49,7 @@ struct PixelOutput
 	float2 Velocity 		: SV_TARGET2;
 };
 
+[earlydepthstencil]
 PixelOutput PSMain(VertexOutput input)
 {	
     float2 position_uv_current  = ndc_to_uv(input.position_ss_current.xy / input.position_ss_current.w);

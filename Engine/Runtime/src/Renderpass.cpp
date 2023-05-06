@@ -399,7 +399,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("Cascade shadow pass setup");
 
 					RHI_TextureInfo tex_create_info = RHI_TextureInfo::Tex2DArray(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size,
-						PixelFormat::D32_Float, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled, 4);
+						PixelFormat::D16_UNorm, ImageUsageFlagsBits::DepthStencilAttachment | ImageUsageFlagsBits::Sampled, 4);
 
 					RGTextureHandle depth_tex = builder.CreateTexture("Cascade_Shadow_Tex", tex_create_info);
 					builder.WriteDepthStencil(depth_tex);
@@ -478,6 +478,7 @@ namespace Insight
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								++RenderStats::Instance().MeshCount;
 							}
 						}
 						cmdList->EndRenderpass();
@@ -649,6 +650,7 @@ namespace Insight
 						gbufferPso.CullMode = CullMode::None;
 						gbufferPso.FrontFace = FrontFace::CounterClockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
+						gbufferPso.DepthCompareOp = CompareOp::LessOrEqual;
 						
 						if (Reverse_Z_For_Depth)
 						{
@@ -716,15 +718,9 @@ namespace Insight
 									cmdList->SetTexture(2, 0, diffuseTexture);
 									object.Textures_Set[0] = 1;
 								}
-								//cmdList->SetTexture(1, 3, material->GetTexture(Runtime::TextureTypes::Normal)->GetRHITexture());
-								//cmdList->SetTexture(1, 4, material->GetTexture(Runtime::TextureTypes::Specular)->GetRHITexture());
 							}
 
 							cmdList->SetUniform(2, 0, object);
-							//{
-							//	IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-							//	BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-							//}
 
 							const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
 							cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
@@ -853,16 +849,6 @@ namespace Insight
 						{
 							for (const RenderMesh& mesh : world.TransparentMeshes)
 							{
-								if (mesh.MeshLods.size() == 0)
-								{
-									//continue;
-								}
-
-								//if (!camera_frustum.IsVisible(mesh.BoudingBox))
-								{
-									//continue;
-								}
-
 								BufferPerObject object = {};
 								object.Transform = mesh.Transform;
 								object.Previous_Transform = mesh.Transform;
@@ -877,15 +863,12 @@ namespace Insight
 								}
 
 								cmdList->SetUniform(2, 0, object);
-								{
-									IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-									BindCommonResources(cmdList, data.Buffer_Frame, data.Buffer_Samplers);
-								}
 
 								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
 								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
 								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								++RenderStats::Instance().MeshCount;
 							}
 						}
 					}

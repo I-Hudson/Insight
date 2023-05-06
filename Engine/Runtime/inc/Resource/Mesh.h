@@ -59,7 +59,7 @@ namespace Insight
 			Material* GetMaterial() const;
 			Graphics::BoundingBox GetBoundingBox() const;
 
-			static const u32 s_LOD_Count = 3;
+			static const u32 s_LOD_Count = 4;
 
 		private:
 			/// @brief Handle loading the resource from disk.

@@ -233,6 +233,10 @@ namespace Insight
 					{
 						format = PixelFormat::R32_Float;
 					}
+					else if (format == PixelFormat::D16_UNorm)
+					{
+						format = PixelFormat::R16_UNorm;
+					}
 
 					D3D12_SHADER_RESOURCE_VIEW_DESC shaderResouceViewDesc = {};
 					shaderResouceViewDesc.Format = PixelFormatToDX12(format);
