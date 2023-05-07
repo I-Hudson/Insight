@@ -51,14 +51,13 @@ namespace Insight
         Cameras.push_back(RenderCamrea{ std::move(camera), std::move(transform), true });
     }
 
-    RenderFrame CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem)
+    void RenderFrame::CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem)
     {
         IS_PROFILE_FUNCTION();
         ASSERT(Platform::IsMainThread());
+        Clear();
 
-        RenderFrame renderFrame;
         std::vector<TObjectPtr<Runtime::World>> worlds = worldSystem->GetAllWorlds();
-
         for (TObjectPtr<Runtime::World> const& world : worlds)
         {
             IS_PROFILE_SCOPE("RenderWorld");
@@ -138,11 +137,16 @@ namespace Insight
                     }
                 }
             }
-            renderFrame.RenderWorlds.push_back(std::move(renderWorld));
+            RenderWorlds.push_back(std::move(renderWorld));
         }
-        renderFrame.SortOpaqueMeshes();
-        renderFrame.SortTransparentMeshes();
-        return renderFrame;
+
+        SortOpaqueMeshes();
+        SortTransparentMeshes();
+    }
+
+    void RenderFrame::Clear()
+    {
+        RenderWorlds.clear();
     }
 
     void RenderFrame::SortOpaqueMeshes()

@@ -126,11 +126,15 @@ namespace Insight
 					for (size_t textureTypeIdx = 0; textureTypeIdx < (size_t)TextureTypes::Count; ++textureTypeIdx)
 					{
 						Texture2D* texture = mat->GetTexture((TextureTypes)textureTypeIdx);
-						if (texture != nullptr 
-							&& (texture->GetResourceState() != EResoruceStates::Loaded && texture->GetResourceState() != EResoruceStates::Cancelled))
+						if (texture != nullptr)
 						{
-							allTexturesLoaded = false;
-							break;
+							bool resourceIsQueued = texture->GetResourceState() == EResoruceStates::Queued;
+							bool resourceIsLoading = texture->GetResourceState() == EResoruceStates::Loading;
+							if (resourceIsQueued || resourceIsLoading)
+							{
+								allTexturesLoaded = false;
+								break;
+							}
 						}
 					}
 				}
@@ -342,23 +346,6 @@ namespace Insight
 					vec.x = mesh->mTextureCoords[0][i].x;
 					vec.y = mesh->mTextureCoords[0][i].y;
 					vertex.UV = glm::vec4(vec, 0, 0);
-
-					// tangent
-					if (mesh->mTangents)
-					{
-						vector.x = mesh->mTangents[i].x;
-						vector.y = mesh->mTangents[i].y;
-						vector.z = mesh->mTangents[i].z;
-					}
-					///vertex.Tangent = vector;
-					/// bitangent
-					if (mesh->mBitangents)
-					{
-						vector.x = mesh->mBitangents[i].x;
-						vector.y = mesh->mBitangents[i].y;
-						vector.z = mesh->mBitangents[i].z;
-					}
-					//vertex.Bitangent = vector;
 				}
 				else
 				{

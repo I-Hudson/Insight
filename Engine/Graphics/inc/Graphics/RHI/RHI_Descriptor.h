@@ -80,7 +80,7 @@ namespace Insight
 			friend class RHI_DescriptorSetManager;
 		};
 
-#define DESCRIPTOR_CACHE_UNIFOM_DATA
+//#define DESCRIPTOR_CACHE_UNIFOM_DATA
 #ifdef DESCRIPTOR_CACHE_UNIFOM_DATA
 #define DESCRIPTOR_CACHE_UNIFOM_DATA_4_BYTE
 #endif // DESCRIPTOR_CACHE_UNIFOM_DATA

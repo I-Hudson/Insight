@@ -77,12 +77,14 @@ namespace Insight
     {
         std::vector<RenderWorld> RenderWorlds;
 
+        /// @brief Create our render frame from the world system.
+        /// @param world 
+        /// @return RenderWorld
+        void CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
+
+    private:
+        void Clear();
         void SortOpaqueMeshes();
         void SortTransparentMeshes();
     };
-
-    /// @brief Create our render frame from the world system.
-    /// @param world 
-    /// @return RenderWorld
-    RenderFrame CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
 }
