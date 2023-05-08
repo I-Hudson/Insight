@@ -54,6 +54,12 @@ call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\lib\x64\dxcompile
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxcompiler.dll"           "dll"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\DirectXShaderCompiler\bin\x64\dxil.dll"                 "dll"
 
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\Simplygon.dll"                  "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\SimplygonCWrapper.dll"          "dll"
+
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\Simplygon.dll"                "dll"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\SimplygonCWrapper.dll"        "dll"
+
 pause
 
 :COPY_TO_DEBUG_DEPS

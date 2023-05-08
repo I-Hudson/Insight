@@ -11,6 +11,7 @@
 #include "Platforms/Platform.h"
 
 #include "Graphics/RenderContext.h"
+#include "Graphics/SimplygonWrapper.h"
 
 #include <assimp/Importer.hpp>
 //#include <assimp/Exporter.hpp>
@@ -534,6 +535,8 @@ namespace Insight
 
 		void AssimpLoader::GenerateLODs(AssimpLoaderData& loader_data)
 		{
+			SimplygonWrapper::Initialise();
+
 			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
 			{
 				for (auto& mesh : loader_data.Model->m_meshes)

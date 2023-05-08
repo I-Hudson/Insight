@@ -51,6 +51,7 @@ project "InsightStandalone"
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
         "%{IncludeDirs.meshoptimizer}",
+        "%{IncludeDirs.simplygon}",
 
         "%{IncludeDirs.vma}",
         "%{IncludeDirs.vulkan}",
@@ -109,6 +110,8 @@ project "InsightStandalone"
         "../../vendor/stb/stb_image_write.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.cpp",
+
+        "../../vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
 
     filter "system:Windows"

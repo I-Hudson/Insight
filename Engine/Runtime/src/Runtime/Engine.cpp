@@ -21,6 +21,8 @@
 #include "ECS/ECSWorld.h"
 #include "ECS/Components/TagComponent.h"
 
+#include "Graphics/SimplygonWrapper.h"
+
 #include "SplashScreen.h"
 
 #include "imgui.h"
@@ -210,6 +212,8 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
 
 			ASSERT(m_systemRegistry.IsEmpty());
+
+			SimplygonWrapper::Shutdown();
 
 			Platform::Shutdown();
 		}
