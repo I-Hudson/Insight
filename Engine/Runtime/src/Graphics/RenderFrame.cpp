@@ -144,6 +144,12 @@ namespace Insight
         SortTransparentMeshes();
     }
 
+    void RenderFrame::Sort()
+    {
+        SortOpaqueMeshes();
+        SortTransparentMeshes();
+    }
+
     void RenderFrame::Clear()
     {
         RenderWorlds.clear();

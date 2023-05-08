@@ -261,6 +261,7 @@ namespace Insight
 				{
 					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
 				}
+				renderFrame.Sort();
 			}
 
 			if constexpr (true)

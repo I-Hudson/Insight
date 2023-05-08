@@ -81,6 +81,7 @@ namespace Insight
         /// @param world 
         /// @return RenderWorld
         void CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
+        void Sort();
 
     private:
         void Clear();
