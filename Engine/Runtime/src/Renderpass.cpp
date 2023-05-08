@@ -60,7 +60,7 @@ namespace Insight
 	static float fsrSharpness = 1.0f;
 
 	static int MeshLod = 0;
-	static bool OrderGBufferByDepth = false;
+	static bool RenderMaterialBatching = false;
 
 	RenderFrame renderFrame;
 
@@ -85,22 +85,20 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(
-				Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj"
-					, Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			modelsToAddToScene.push_back({ model_backpack, false });
+			//modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			//modelsToAddToScene.push_back({ model_sponza, false });
-			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
-			//modelsToAddToScene.push_back({ model_sponza_ivy, false });
-			//modelsToAddToScene.push_back({ model_sponza_trees, false });
+			modelsToAddToScene.push_back({ model_sponza, false });
+			modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			modelsToAddToScene.push_back({ model_sponza_ivy, false });
+			modelsToAddToScene.push_back({ model_sponza_trees, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
@@ -163,7 +161,7 @@ namespace Insight
 
 			ImGui::Begin("Renderpass options:");
 			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_LOD_Count - 1);
-			ImGui::Checkbox("Order GBuffer object by depth (close to far)", &OrderGBufferByDepth);
+			ImGui::Checkbox("Use Material Batching", &RenderMaterialBatching);
 			ImGui::End();
 
 			{
@@ -446,8 +444,9 @@ namespace Insight
 						const float CasacdeMinRaius[s_Cascade_Count] = { 0.0f, 2.5f, 5.0f, 8.5f };
 						for (RenderWorld const& world : data.RenderFrame.RenderWorlds)
 						{
-							for (RenderMesh const& mesh : world.Meshes)
+							for (const u64 meshIndex : world.OpaqueMeshIndexs)
 							{
+								const RenderMesh& mesh = world.Meshes.at(meshIndex);
 								if (mesh.BoudingBox.GetRadius() < CasacdeMinRaius[i])
 								{
 									continue;
@@ -690,34 +689,73 @@ namespace Insight
 
 					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 					{
-						for (const RenderMesh& mesh : world.Meshes)
+						if (RenderMaterialBatching)
 						{
-							IS_PROFILE_SCOPE("Draw Entity");
-
-							BufferPerObject object = {};
-							object.Transform = mesh.Transform;
-							object.Previous_Transform = mesh.Transform;
-
+							for (const RenderMaterailBatch materialBatch : world.MaterialBatch)
 							{
-								IS_PROFILE_SCOPE("Set textures");
-
-								const RenderMaterial& renderMaterial = mesh.Material;
-								// Theses sets and bindings shouldn't chagne.
-								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
-								if (diffuseTexture)
+								BufferPerObject object = {};
 								{
-									cmdList->SetTexture(2, 0, diffuseTexture);
-									object.Textures_Set[0] = 1;
+									IS_PROFILE_SCOPE("Set textures");
+
+									const RenderMaterial& renderMaterial = materialBatch.Material;
+									// Theses sets and bindings shouldn't chagne.
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									if (diffuseTexture)
+									{
+										cmdList->SetTexture(3, 0, diffuseTexture);
+										object.Textures_Set[0] = 1;
+									}
+								}
+
+								for (const u64 meshIndex : materialBatch.OpaqueMeshIndex)
+								{
+									IS_PROFILE_SCOPE("Draw Entity");
+									const RenderMesh& mesh = world.Meshes.at(meshIndex);
+
+									object.Transform = mesh.Transform;
+									object.Previous_Transform = mesh.Transform;
+									cmdList->SetUniform(2, 0, object);
+
+									const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+									cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+									cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									++RenderStats::Instance().MeshCount;
 								}
 							}
+						}
+						else
+						{
+							for (const u64 meshIndex : world.OpaqueMeshIndexs)
+							{
+								IS_PROFILE_SCOPE("Draw Entity");
+								const RenderMesh& mesh = world.Meshes.at(meshIndex);
 
-							cmdList->SetUniform(2, 0, object);
+								BufferPerObject object = {};
+								object.Transform = mesh.Transform;
+								object.Previous_Transform = mesh.Transform;
 
-							const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
-							cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
-							cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
-							cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
-							++RenderStats::Instance().MeshCount;
+								{
+									IS_PROFILE_SCOPE("Set textures");
+
+									const RenderMaterial& renderMaterial = mesh.Material;
+									// Theses sets and bindings shouldn't chagne.
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									if (diffuseTexture)
+									{
+										cmdList->SetTexture(3, 0, diffuseTexture);
+										object.Textures_Set[0] = 1;
+									}
+								}
+
+								cmdList->SetUniform(2, 0, object);
+
+								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+								cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+								cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+								++RenderStats::Instance().MeshCount;
+							}
 						}
 					}
 					
@@ -834,12 +872,50 @@ namespace Insight
 
 					Frustum camera_frustum(data.Buffer_Frame.View, data.Buffer_Frame.Projection, Main_Camera_Far_Plane);
 
-					if constexpr (false)
+					for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
 					{
-						for (const RenderWorld& world : data.RenderFrame.RenderWorlds)
+						if (RenderMaterialBatching)
 						{
-							for (const RenderMesh& mesh : world.TransparentMeshes)
+							for (const RenderMaterailBatch materialBatch : world.MaterialBatch)
 							{
+								BufferPerObject object = {};
+								{
+									IS_PROFILE_SCOPE("Set textures");
+
+									const RenderMaterial& renderMaterial = materialBatch.Material;
+									// Theses sets and bindings shouldn't chagne.
+									RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+									if (diffuseTexture)
+									{
+										cmdList->SetTexture(3, 0, diffuseTexture);
+										object.Textures_Set[0] = 1;
+									}
+								}
+
+								for (const u64 meshIndex : materialBatch.TransparentMeshIndex)
+								{
+									IS_PROFILE_SCOPE("Draw Entity");
+									const RenderMesh& mesh = world.Meshes.at(meshIndex);
+
+									object.Transform = mesh.Transform;
+									object.Previous_Transform = mesh.Transform;
+									cmdList->SetUniform(2, 0, object);
+
+									const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
+									cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+									cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+									cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+									++RenderStats::Instance().MeshCount;
+								}
+							}
+						}
+						else
+						{
+							for (const u64 meshIndex : world.TransparentMeshIndexs)
+							{
+								IS_PROFILE_SCOPE("Draw Entity");
+								const RenderMesh& mesh = world.Meshes.at(meshIndex);
+
 								BufferPerObject object = {};
 								object.Transform = mesh.Transform;
 								object.Previous_Transform = mesh.Transform;
@@ -849,7 +925,7 @@ namespace Insight
 								RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
 								if (diffuseTexture)
 								{
-									cmdList->SetTexture(2, 0, diffuseTexture);
+									cmdList->SetTexture(3, 0, diffuseTexture);
 									object.Textures_Set[0] = 1;
 								}
 
@@ -863,6 +939,7 @@ namespace Insight
 							}
 						}
 					}
+					
 
 					cmdList->EndRenderpass();
 				}, std::move(Pass_Data));
@@ -930,8 +1007,8 @@ namespace Insight
 					cmd_list->SetUniform(1, 0, g_global_resources.Buffer_Directional_Light_View);
 
 					const u8 texture_offset = 0;
-					cmd_list->SetTexture(2, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
-					cmd_list->SetTexture(2, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
+					cmd_list->SetTexture(3, texture_offset, render_graph.GetRHITexture(render_graph.GetTexture("ColourRT")));
+					cmd_list->SetTexture(3, texture_offset + 1, render_graph.GetRHITexture(render_graph.GetTexture("NormalRT")));
 					if (Depth_Prepass)
 					{
 						cmd_list->SetTexture(1, 1, render_graph.GetRHITexture(render_graph.GetTexture("Depth_Prepass_DepthStencil")));
@@ -1228,10 +1305,10 @@ namespace Insight
 		{
 			cmd_list->SetUniform(0, 0, g_global_resources.Buffer_Frame_View);
 
-			cmd_list->SetSampler(3, 0, buffer_samplers.Shadow_Sampler);
-			cmd_list->SetSampler(3, 1, buffer_samplers.Repeat_Sampler);
-			cmd_list->SetSampler(3, 2, buffer_samplers.Clamp_Sampler);
-			cmd_list->SetSampler(3, 3, buffer_samplers.MirroredRepeat_Sampler);
+			cmd_list->SetSampler(4, 0, buffer_samplers.Shadow_Sampler);
+			cmd_list->SetSampler(4, 1, buffer_samplers.Repeat_Sampler);
+			cmd_list->SetSampler(4, 2, buffer_samplers.Clamp_Sampler);
+			cmd_list->SetSampler(4, 3, buffer_samplers.MirroredRepeat_Sampler);
 		}
 
 		BufferLight BufferLight::GetCascades(const BufferFrame& buffer_frame, u32 cascade_count, float split_lambda)

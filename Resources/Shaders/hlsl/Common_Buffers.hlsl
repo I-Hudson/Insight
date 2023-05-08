@@ -29,7 +29,7 @@ cbuffer BufferLight : register(b0, PassSpace)
     float2 bl_Shadow_Resolution;
 }
 
-cbuffer BufferPerObject : register(b0, PerObjectSpace)
+cbuffer BufferPerObject : register(b0, PerObjectUniform)
 {
     float4x4 bpo_Transform;
     float4x4 bpo_Previous_Transform;

@@ -10,6 +10,24 @@
 
 namespace Insight
 {
+    void RenderMaterial::SetMaterial(const Runtime::Material* material)
+    {
+        if (!material)
+        {
+            return;
+        }
+
+        for (size_t i = 0; i < static_cast<u64>(Runtime::TextureTypes::Count); ++i)
+        {
+            Runtime::Texture* texture = material->GetTexture(static_cast<Runtime::TextureTypes>(i));
+            if (texture)
+            {
+                Textures.at(i) = texture->GetRHITexture();
+            }
+        }
+        Properties = material->GetProperties();
+    }
+
     //=====================================================
     // RenderMesh
     //=====================================================
@@ -22,20 +40,7 @@ namespace Insight
     void RenderMesh::SetMaterial(Runtime::Material* material)
     {
         Material = {};
-        if (!material)
-        {
-            return;
-        }
-
-        for (size_t i = 0; i < static_cast<u64>(Runtime::TextureTypes::Count); ++i)
-        {
-            Runtime::Texture* texture = material->GetTexture(static_cast<Runtime::TextureTypes>(i));
-            if (texture)
-            {
-                Material.Textures.at(i) = texture->GetRHITexture();
-            }
-        }
-        Material.Properties = material->GetProperties();
+        Material.SetMaterial(material);
     }
 
     //=====================================================
@@ -64,7 +69,6 @@ namespace Insight
             RenderWorld renderWorld;
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
             renderWorld.Meshes.reserve(entities.size());
-            renderWorld.TransparentMeshes.reserve(entities.size());
 
             std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
             for (Ptr<ECS::Entity>& entity : cameraEntities)
@@ -121,18 +125,45 @@ namespace Insight
                             //continue;
                         }
 
-                        renderMesh.SetMesh(mesh);
-                        renderMesh.SetMaterial(meshComponent->GetMaterial());
+                        Runtime::Material* material = meshComponent->GetMaterial();
+                        if (!material)
+                        {
+                            continue;
+                        }
 
-                        if (renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f)
+                        renderMesh.SetMesh(mesh);
+                        renderMesh.SetMaterial(material);
+
+                        u64 meshIndex = renderWorld.Meshes.size();
+                        renderWorld.Meshes.push_back(std::move(renderMesh));
+                        bool meshIsTransparent = renderMesh.Material.Properties.at(static_cast<u64>(Runtime::MaterialProperty::Colour_A)) < 1.0f;
+
+                        if (auto materialBatchIter = renderWorld.MaterialBatchLookup.find(material);
+                            materialBatchIter != renderWorld.MaterialBatchLookup.end())
+                        {
+                            RenderMaterailBatch& batch = renderWorld.MaterialBatch.at(materialBatchIter->second);
+                            meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
+                        }
+                        else
+                        {
+                            RenderMaterailBatch batch;
+                            batch.Material.SetMaterial(material);
+                            meshIsTransparent ? batch.TransparentMeshIndex.push_back(meshIndex) : batch.OpaqueMeshIndex.push_back(meshIndex);
+
+                            const u64 batchIndex = renderWorld.MaterialBatch.size();
+                            renderWorld.MaterialBatch.push_back(batch);
+                            renderWorld.MaterialBatchLookup[material] = batchIndex;
+                        }
+
+                        if (meshIsTransparent)
                         {
                             IS_PROFILE_SCOPE("TransparentMeshes.push_back");
-                            renderWorld.TransparentMeshes.push_back(std::move(renderMesh));
+                            renderWorld.TransparentMeshIndexs.push_back(meshIndex);
                         }
                         else
                         {
                             IS_PROFILE_SCOPE("Meshes.push_back");
-                            renderWorld.Meshes.push_back(std::move(renderMesh));
+                            renderWorld.OpaqueMeshIndexs.push_back(meshIndex);
                         }
                     }
                 }
@@ -162,8 +193,11 @@ namespace Insight
         {
             if (world.MainCamera.IsSet)
             {
-                std::sort(world.Meshes.begin(), world.Meshes.end(), [&world](RenderMesh const& meshA, RenderMesh const& meshB)
+                std::sort(world.OpaqueMeshIndexs.begin(), world.OpaqueMeshIndexs.end(), [&world](u64 a, u64 b)
                     {
+                        const RenderMesh& meshA = world.Meshes.at(a);
+                        const RenderMesh& meshB = world.Meshes.at(b);
+
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;
                         glm::vec3 const& cameraPositon = world.MainCamera.Transform[3].xyz;
@@ -181,8 +215,11 @@ namespace Insight
             if (world.MainCamera.IsSet)
             {
                 IS_PROFILE_SCOPE("Sort transparent meshes");
-                std::sort(world.TransparentMeshes.begin(), world.TransparentMeshes.end(), [&world](RenderMesh const& meshA, RenderMesh const& meshB)
+                std::sort(world.TransparentMeshIndexs.begin(), world.TransparentMeshIndexs.end(), [&world](u64 a, u64 b)
                     {
+                        const RenderMesh& meshA = world.Meshes.at(a);
+                        const RenderMesh& meshB = world.Meshes.at(b);
+
                         glm::vec3 const& positionA = meshA.Transform[3].xyz;
                         glm::vec3 const& positionB = meshB.Transform[3].xyz;
                         glm::vec3 const& cameraPositon = world.MainCamera.Transform[3].xyz;

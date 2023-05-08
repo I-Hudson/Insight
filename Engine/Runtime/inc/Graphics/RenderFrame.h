@@ -29,6 +29,7 @@ namespace Insight
 
     struct RenderMaterial
     {
+        void SetMaterial(const Runtime::Material* material);
         std::array<Graphics::RHI_Texture*, static_cast<u64>(Runtime::TextureTypes::Count)> Textures;
         std::array<float, static_cast<u32>(Runtime::MaterialProperty::Count)> Properties;
     };
@@ -43,6 +44,13 @@ namespace Insight
 
         void SetMesh(Runtime::Mesh* mesh);
         void SetMaterial(Runtime::Material* material);
+    };
+
+    struct RenderMaterailBatch
+    {
+        RenderMaterial Material;
+        std::vector<u64> OpaqueMeshIndex;
+        std::vector<u64> TransparentMeshIndex;
     };
 
     struct RenderCamrea
@@ -67,7 +75,12 @@ namespace Insight
 
         /// @brief All meshes within the world.
         std::vector<RenderMesh> Meshes;
-        std::vector<RenderMesh> TransparentMeshes;
+
+        std::vector<u64> OpaqueMeshIndexs;
+        std::vector<u64> TransparentMeshIndexs;
+
+        std::vector<RenderMaterailBatch> MaterialBatch;
+        std::unordered_map<Runtime::Material*, u64> MaterialBatchLookup;
 
         glm::vec3 DirectionalLight = glm::vec3(0, 0, 0);
     };
