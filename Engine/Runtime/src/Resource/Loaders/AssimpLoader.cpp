@@ -72,6 +72,16 @@ namespace Insight
 
 		bool AssimpLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
+			if (c_SimplygonEnabled)
+			{
+				SimplygonWrapper::Initialise();
+				std::string optimisedPath = SimplygonWrapper::Run(file_path, SimplygonStages::Reduction);
+				if (!optimisedPath.empty())
+				{
+					file_path = optimisedPath;
+				}
+			}
+
 			Assimp::Importer importer;
 			// Remove points and lines.
 			importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_LINE | aiPrimitiveType_POINT);
@@ -535,8 +545,6 @@ namespace Insight
 
 		void AssimpLoader::GenerateLODs(AssimpLoaderData& loader_data)
 		{
-			SimplygonWrapper::Initialise();
-
 			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
 			{
 				for (auto& mesh : loader_data.Model->m_meshes)

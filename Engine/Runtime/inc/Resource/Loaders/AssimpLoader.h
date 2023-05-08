@@ -33,6 +33,7 @@ namespace Insight
 		/// @brief Utility class to help with anything related to loading from assimp.
 		class AssimpLoader : public IResourceLoader
 		{
+			constexpr static bool c_SimplygonEnabled = false;
 		public:
 			static const uint32_t Default_Model_Importer_Flags =
 				// Switch to engine conventions
@@ -42,8 +43,8 @@ namespace Insight
 				aiProcess_SortByPType				|	/// Splits meshes with more than one primitive type in homogeneous sub-meshes.
 
 				aiProcess_MakeLeftHanded			|	/// DirectX style.
-				aiProcess_FlipUVs					|	/// DirectX style.
-				aiProcess_FlipWindingOrder			|	/// DirectX style.
+				//aiProcess_FlipUVs					|	/// DirectX style.
+				aiProcess_FlipWindingOrder		|	/// DirectX style.
 
 				aiProcess_CalcTangentSpace			|	/// Calculates the tangents and bitangents for the imported meshes.
 				aiProcess_GenSmoothNormals			|	/// Ignored if the mesh already has normal.

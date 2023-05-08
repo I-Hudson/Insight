@@ -85,20 +85,22 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(
+				Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj"
+					, Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-			TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+			//TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			//modelsToAddToScene.push_back({ model_backpack, false });
+			modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
-			modelsToAddToScene.push_back({ model_sponza, false });
-			modelsToAddToScene.push_back({ model_sponza_curtains, false });
-			modelsToAddToScene.push_back({ model_sponza_ivy, false });
-			modelsToAddToScene.push_back({ model_sponza_trees, false });
+			//modelsToAddToScene.push_back({ model_sponza, false });
+			//modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			//modelsToAddToScene.push_back({ model_sponza_ivy, false });
+			//modelsToAddToScene.push_back({ model_sponza_trees, false });
 
 			m_buffer_frame = {};
 			aspect = (float)Window::Instance().GetWidth() / (float)Window::Instance().GetHeight();
