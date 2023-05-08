@@ -119,6 +119,15 @@ namespace Insight
                 Wait(Signal());
             }
 
+            void RHI_Queue_DX12::Submit(const RHI_CommandList_DX12* cmdlist)
+            {
+                nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };
+                RemoveConst(cmdlist)->BeginTimeBlock("ExecuteCommandLists");
+                ID3D12CommandList* ppCommandLists[] = { cmdlist->GetCommandList() };
+                m_dxQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+                RemoveConst(cmdlist)->EndTimeBlock();
+            }
+
             const u64 RHI_Queue_DX12::Signal()
             {
                 nvtx3::scoped_range range{ "RHI_Queue_DX12::Signal" };
@@ -134,9 +143,7 @@ namespace Insight
 
             const u64 RHI_Queue_DX12::SubmitAndSignal(const RHI_CommandList_DX12* cmdlist)
             {
-                nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };
-                ID3D12CommandList* ppCommandLists[] = { cmdlist->GetCommandList() };
-                m_dxQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+                Submit(cmdlist);
                 return Signal();
             }
 

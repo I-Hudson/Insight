@@ -92,8 +92,6 @@ namespace Insight
 				void FindPhysicalDevice(IDXGIAdapter1** ppAdapter);
 				void ResizeSwapchainBuffers();
 
-				void WaitForNextFrame();
-
 			private:
 				RHI_PhysicalDevice_DX12 m_physicalDevice;
 				ComPtr<IDXGIFactory4> m_factory{ nullptr };
@@ -128,6 +126,7 @@ namespace Insight
 				std::thread m_rendererThread;
 				std::atomic<bool> m_rendererThreadShutdown = false;
 				FrameResource<FrameSubmitContext_DX12> m_submitFrameContexts;
+
 				FrameResource<u64> m_submitFenceValues;
 			};
 		}

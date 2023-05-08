@@ -28,6 +28,8 @@ namespace Insight
 
 				void SignalAndWait();
 
+				void Submit(const RHI_CommandList_DX12* cmdlist);
+
 				/// @brief Submit work to the queue.
 				/// @param cmdlist
 				const u64 SubmitAndSignal(const RHI_CommandList_DX12* cmdlist);
@@ -36,7 +38,6 @@ namespace Insight
 				/// @param cmdlist
 				void SubmitAndWait(const RHI_CommandList_DX12* cmdlist);
 
-			private:
 				/// @brief Add a signal to the queue. 
 				const u64 Signal();
 

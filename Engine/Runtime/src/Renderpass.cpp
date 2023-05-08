@@ -198,17 +198,6 @@ namespace Insight
 				ImGui::End();
 			}
 
-			//if (Input::InputManager::IsKeyPressed(IS_KEY_ENTER))
-			{
-				//Runtime::ResourceManager::Instance().Unload(Runtime::ResourceManager::Instance().Load(EnginePaths::GetResourcePath() + "/models/sponza_old/sponza.obj", Runtime::Model::GetStaticResourceTypeId()));
-				//Runtime::ResourceManager::Instance().UnloadAll();
-				//auto entities = App::SceneManager::Instance().GetActiveScene().Lock()->GetAllEntitiesWithComponentByName(ECS::MeshComponent::Type_Name);
-				//for (auto entity : entities)
-				//{
-				//	static_cast<ECS::MeshComponent*>(entity->GetComponentByName(ECS::MeshComponent::Type_Name))->SetMesh(nullptr);
-				//}
-			}
-
 			{
 				IS_PROFILE_SCOPE("BufferFrame cameras");
 				m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();

@@ -11,6 +11,8 @@
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
 
+#include "FileSystem/FileSystem.h"
+
 #include "dxc/dxcapi.h"
 #include "spirv_reflect.h"
 
@@ -163,7 +165,7 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(L"Resources/Shaders/hlsl");
 
-			//arguments.push_back(DXC_ARG_DEBUG);
+			arguments.push_back(DXC_ARG_DEBUG);
 			//arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 			
 			// Tell the compiler to output SPIR-V
@@ -184,7 +186,6 @@ namespace Insight
 				arguments.push_back(L"-D");
 				arguments.push_back(L"DX12");
 			}
-
 
 			// Compile shader
 			ASSERT(SUCCEEDED(DXCompiler->Compile(
@@ -240,8 +241,11 @@ namespace Insight
 			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
 
 			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
-			std::string shaderToDisk = EnginePaths::GetExecutablePath() + "/Shader_CSO/" + std::string(shaderToDiskView) + ".cso";
+			
+			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader_CSO/";
+			FileSystem::FileSystem::CreateFolder(shaderCSOFolderPath);
 
+			std::string shaderToDisk = shaderCSOFolderPath + std::string(shaderToDiskView) + ".cso";
 			shaderDisk.open(shaderToDisk.c_str());
 			if (shaderDisk.is_open())
 			{

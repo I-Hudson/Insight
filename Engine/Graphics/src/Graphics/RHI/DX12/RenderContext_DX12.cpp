@@ -328,21 +328,8 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Fence wait");
-					// First get the status of the fence. Then if it has not finished, wait on it.
-
-					// If the next frame is not ready to be rendered yet, wait until it is ready.
-					//u64 fenceCompletedValue = m_submitFrameContexts.Get().SubmitFence->GetCompletedValue();
-					//if (fenceCompletedValue < m_submitFrameContexts.Get().SubmitFenceValue)
-					//{
-					//	ThrowIfFailed(m_submitFrameContexts.Get().SubmitFence->SetEventOnCompletion(m_submitFrameContexts.Get().SubmitFenceValue, m_submitFrameContexts.Get().SubmitFenceEvent));
-					//	WaitForSingleObjectEx(m_submitFrameContexts.Get().SubmitFenceEvent, INFINITE, FALSE);
-					//}
-
-					nvtx3::scoped_range fenceWaitRange{"FenceWait"};
 					m_graphicsQueue.Wait(m_submitFenceValues.Get());
 					m_submitFrameContexts->OnCompleted();
-
-					m_availableSwapchainImage = m_swapchain->GetCurrentBackBufferIndex();
 				}
 
 				{
@@ -385,15 +372,7 @@ namespace Insight
 
 						{
 							IS_PROFILE_SCOPE("ExecuteCommandLists");
-							//ID3D12CommandList* ppCommandLists[] = { cmdListDX12->GetCommandList() };
-							//m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-							//
-							//// Schedule a Signal command in the queue.
-							//++m_submitFrameContexts.Get().SubmitFenceValue;
-							//const UINT64 currentFenceValue = m_submitFrameContexts.Get().SubmitFenceValue;
-							//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_submitFrameContexts.Get().SubmitFence.Get(), currentFenceValue));
-
-							m_submitFenceValues.Get() = m_graphicsQueue.SubmitAndSignal(cmdListDX12);
+							m_graphicsQueue.Submit(cmdListDX12);
 						}
 
 						{
@@ -416,9 +395,10 @@ namespace Insight
 						}
 					}
 				}
-				m_frameIndex = (m_frameIndex + 1) % GetFramesInFligtCount();
-
 				m_resource_tracker.EndFrame();
+				
+				m_submitFenceValues.Get() = m_graphicsQueue.Signal();
+				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 			}
 
 			void RenderContext_DX12::CreateSwapchain(SwapchainDesc desc)
@@ -552,6 +532,7 @@ namespace Insight
 					device->CreateRenderTargetView(swapchainImage.Colour->m_swapchainImage.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
 				m_swapchainDesc = desc;
+				m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
 			}
 
 			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
@@ -729,28 +710,6 @@ namespace Insight
 					ThrowIfFailed(m_swapchain->GetBuffer(i, IID_PPV_ARGS(&swapchainImage.Colour->m_swapchainImage)));
 					m_device->CreateRenderTargetView(swapchainImage.Colour->m_swapchainImage.Get(), nullptr, swapchainImage.ColourHandle.GetCPUHandle());
 				}
-			}
-
-			void RenderContext_DX12::WaitForNextFrame()
-			{
-				IS_PROFILE_FUNCTION();
-
-				/// Schedule a Signal command in the queue.
-				//const UINT64 currentFenceValue = m_swapchainFenceValues[m_frameIndex];
-				//ThrowIfFailed(m_queues[GPUQueue_Graphics]->Signal(m_swapchainFence.Get(), currentFenceValue));
-				//
-				//
-				///// If the next frame is not ready to be rendered yet, wait until it is ready.
-				//if (m_swapchainFence->GetCompletedValue() < currentFenceValue)
-				//{
-				//	ThrowIfFailed(m_swapchainFence->SetEventOnCompletion(currentFenceValue, m_fenceEvent));
-				//	WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-				//}
-				//
-				///// Update the frame index.
-				//m_frameIndex = m_swapchain->GetCurrentBackBufferIndex();
-				///// Set the fence value for the next frame.
-				//m_swapchainFenceValues[m_frameIndex] = currentFenceValue + 1;
 			}
 
 			DescriptorHeap_DX12& RenderContext_DX12::GetDescriptorHeap(DescriptorHeapTypes descriptorHeapType)
