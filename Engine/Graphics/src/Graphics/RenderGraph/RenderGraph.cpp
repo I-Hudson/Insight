@@ -45,7 +45,11 @@ namespace Insight
 				m_passes.push_back({});
 			}
 
-			m_textureCaches = Renderer::CreateTextureResourceCache();
+			m_textureCaches.Setup();
+			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>*& textureCache)
+				{
+					textureCache = Renderer::CreateTextureResourceCache();
+				}); 
 		}
 
 		void RenderGraph::Swap()
@@ -84,7 +88,10 @@ namespace Insight
 
 				// Release all current textures.
 				cmdList->BeginTimeBlock("RG::TextureCache->Release");
-				m_textureCaches->Release();
+				m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>* textureCache)
+				{
+					textureCache->Release();
+				});
 				cmdList->EndTimeBlock();
 			}
 
@@ -118,13 +125,13 @@ namespace Insight
 		RGTextureHandle RenderGraph::CreateTexture(std::string textureName, RHI_TextureInfo info)
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_textureCaches->AddOrReturn(textureName);
+			return m_textureCaches.Get()->AddOrReturn(textureName);
 		}
 
 		RGTextureHandle RenderGraph::GetTexture(std::string textureName) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_textureCaches->GetId(textureName);
+			return m_textureCaches.Get()->GetId(textureName);
 		}
 
 		RHI_Texture* RenderGraph::GetRHITexture(std::string textureName) const
@@ -136,7 +143,7 @@ namespace Insight
 		RHI_Texture* RenderGraph::GetRHITexture(RGTextureHandle handle) const
 		{
 			ASSERT(m_context->IsRenderThread());
-			return m_textureCaches->Get(handle);
+			return m_textureCaches.Get()->Get(handle);
 		}
 
 		RenderpassDescription RenderGraph::GetRenderpassDescription(std::string_view passName) const
@@ -176,7 +183,11 @@ namespace Insight
 
 			m_passes.clear();
 
-			Renderer::FreeResourceCache(m_textureCaches);
+			m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>*& textureCache)
+			{
+				Renderer::FreeResourceCache(textureCache);
+				textureCache = nullptr;
+			});
 		}
 
 		void RenderGraph::Build()
@@ -194,7 +205,7 @@ namespace Insight
 				/// Build all our textures.
 				for (auto& pair : pass.Get()->m_textureCreates)
 				{
-					RHI_Texture* tex = m_textureCaches->Get(pair.first);
+					RHI_Texture* tex = m_textureCaches.Get()->Get(pair.first);
 					if (!tex->ValidResource())
 					{
 						pair.second.InitalStatus = DeviceUploadStatus::Completed;
@@ -216,12 +227,12 @@ namespace Insight
 				{
 					if (rt != -1)
 					{
-						pso.RenderTargets[rtIndex] = m_textureCaches->Get(rt);
+						pso.RenderTargets[rtIndex] = m_textureCaches.Get()->Get(rt);
 						++rtIndex;
-						pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches->Get(rt));
+						pass->m_renderpassDescription.ColourAttachments.push_back(m_textureCaches.Get()->Get(rt));
 					}
 				}
-				pso.DepthStencil = m_textureCaches->Get(pass.Get()->m_depthStencilWrite);
+				pso.DepthStencil = m_textureCaches.Get()->Get(pass.Get()->m_depthStencilWrite);
 				pass->m_renderpassDescription.DepthStencil = pso.DepthStencil;
 
 				pass->m_renderpassDescription.SwapchainPass = pass->m_swapchainPass;
@@ -283,7 +294,7 @@ namespace Insight
 				{
 					for (auto const& rt : pass.Get()->m_textureWrites)
 					{
-						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						
 
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
@@ -312,7 +323,7 @@ namespace Insight
 				/// Depth write
 				if (pass->m_depthStencilWrite != -1)
 				{
-					RHI_Texture* texture = m_textureCaches->Get(pass->m_depthStencilWrite);
+					RHI_Texture* texture = m_textureCaches.Get()->Get(pass->m_depthStencilWrite);
 					PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 					ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, pass->m_depthStencilWrite);
@@ -355,7 +366,7 @@ namespace Insight
 				{
 					for (auto const& rt : pass.Get()->m_textureReads)
 					{
-						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches->Get(rt);
+						RHI_Texture* texture = rt == -1 ? m_context->GetSwaphchainIamge() : m_textureCaches.Get()->Get(rt);
 						PlaceInitalBarrier::PlaceBarrier(texture, texture_barrier_history[texture]);
 
 						ImageBarrier previousBarrier = FindImageBarrier::FindPrevious(GetRenderPasses(), passIndex, rt);

@@ -17,7 +17,6 @@
 #include "Graphics/RHI/RHI_PipelineManager.h"
 
 #include "Graphics/RenderStats.h"
-#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Core/Collections/FactoryMap.h"
 #include "Threading/ThreadScopeLock.h"
@@ -34,6 +33,7 @@ namespace Insight
 		class RenderContext;
 		class RHI_Texture;
 		class RenderTarget;
+		class RenderGraph;
 
 		enum class GraphicsAPI
 		{
@@ -100,6 +100,11 @@ namespace Insight
 			}
 
 			TValue& Get()
+			{
+				ASSERT(!m_values.empty());
+				return m_values.at(RenderContext::Instance().GetFrameIndex());
+			}
+			const TValue& Get() const
 			{
 				ASSERT(!m_values.empty());
 				return m_values.at(RenderContext::Instance().GetFrameIndex());
@@ -181,6 +186,8 @@ namespace Insight
 			u64 GetFrameCount() const;
 			u32 GetFramesInFligtCount() const;
 
+			void WaitForRenderThread();
+
 			bool HasExtension(DeviceExtension extension) const;
 			bool IsExtensionEnabled(DeviceExtension extension) const;
 			void EnableExtension(DeviceExtension extension);
@@ -242,7 +249,7 @@ namespace Insight
 			Semaphore m_renderTriggerSemaphore;
 			Semaphore m_renderCompletedSemaphore;
 
-			RenderGraph m_renderGraph;
+			RenderGraph* m_renderGraph;
 
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_enabledDeviceExtensions;

@@ -4,6 +4,7 @@
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 
 #include "Graphics/RenderTarget.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 
 #include "Core/Memory.h"
 #include "Core/Logger.h"
@@ -66,7 +67,8 @@ namespace Insight
 			context->m_renderpassManager.SetRenderContext(context);
 			context->m_samplerManager->SetRenderContext(context);
 
-			context->m_renderGraph.Init(context);
+			context->m_renderGraph = ::New<RenderGraph>();
+			context->m_renderGraph->Init(context);
 			context->m_frameDescriptorAllocator.Setup();
 
 			context->m_renderThreadId = std::this_thread::get_id();
@@ -86,7 +88,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Swap");
 					RenderStats::Instance().Draw();
-					m_renderGraph.Swap();
+					m_renderGraph->Swap();
 				}
 
 				{
@@ -97,7 +99,7 @@ namespace Insight
 			else
 			{
 				RenderStats::Instance().Draw();
-				m_renderGraph.Swap();
+				m_renderGraph->Swap();
 				RenderUpdateLoop();
 			}
 		}
@@ -120,6 +122,11 @@ namespace Insight
 		u32 RenderContext::GetFramesInFligtCount() const
 		{
 			return m_framesInFlightCount.load();
+		}
+
+		void RenderContext::WaitForRenderThread()
+		{
+			m_renderCompletedSemaphore.Wait();
 		}
 
 		bool RenderContext::HasExtension(DeviceExtension extension) const
@@ -215,7 +222,8 @@ namespace Insight
 					allocator.Destroy();
 				});
 
-			m_renderGraph.Release();
+			m_renderGraph->Release();
+			Delete(m_renderGraph);
 
 			m_shaderManager.Destroy();
 			m_renderpassManager.ReleaseAll();
@@ -337,7 +345,7 @@ namespace Insight
 
 				PreRender(cmdList);
 
-				m_renderGraph.Execute(cmdList);
+				m_renderGraph->Execute(cmdList);
 
 				if (cmdList->m_descriptorAllocator->WasUniformBufferResized())
 				{

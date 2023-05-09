@@ -6,6 +6,8 @@
 #include "Graphics/RenderGraph/RenderGraphBuilder.h"
 #include "Graphics/RHI/RHI_Descriptor.h"
 
+#include "Graphics/RenderContext.h"
+
 #include <type_traits>
 #include <unordered_map>
 #include <functional>
@@ -125,7 +127,7 @@ namespace Insight
 			/// @brief General ouput resolution to be used for all render passes. Can be overwritten.
 			glm::ivec2 m_output_resolution = {};
 
-			RHI_ResourceCache<RHI_Texture>* m_textureCaches;
+			FrameResource<RHI_ResourceCache<RHI_Texture>*> m_textureCaches;
 		};
 	}
 }
