@@ -434,7 +434,9 @@ namespace Insight
 
 				std::string passName = std::string(pass->m_passName.begin(), pass->m_passName.end());
 				cmdList->BeginTimeBlock(passName + "_Execute", glm::vec4(0, 1, 0, 1));
+				GPUProfiler::Instance().StartProfile(cmdList, passName);
 				pass->Execute(*this, cmdList);
+				GPUProfiler::Instance().EndProfile(cmdList);
 				cmdList->EndTimeBlock();
 			}
 

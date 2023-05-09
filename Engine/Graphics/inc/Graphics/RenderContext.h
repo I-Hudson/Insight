@@ -17,6 +17,7 @@
 #include "Graphics/RHI/RHI_PipelineManager.h"
 
 #include "Graphics/RenderStats.h"
+#include "Graphics/GPUProfiler.h"
 
 #include "Core/Collections/FactoryMap.h"
 #include "Threading/ThreadScopeLock.h"
@@ -175,6 +176,10 @@ namespace Insight
 			virtual void GpuWaitForIdle() = 0;
 			virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) = 0;
 
+			virtual void MarkTimeStamp(RHI_CommandList* cmdList) = 0;
+			virtual std::vector<u64> ResolveTimeStamps(RHI_CommandList* cmdList) = 0;
+			virtual u64 GetTimeStampFrequency() = 0;
+
 			/// @brief Execute anything that is not directly graphics related like uploading data to the GPU.
 			virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) = 0;
 
@@ -249,6 +254,8 @@ namespace Insight
 			Semaphore m_renderTriggerSemaphore;
 			Semaphore m_renderCompletedSemaphore;
 
+			GPUProfiler m_gpuProfiler;
+
 			RenderGraph* m_renderGraph;
 
 			std::array<u8, static_cast<u64>(DeviceExtension::DeviceExtensionCount)> m_deviceExtensions;
@@ -300,11 +307,13 @@ namespace Insight
 		static Graphics::RHI_Buffer* CreateVertexBuffer(u64 sizeBytes, int stride, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateIndexBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateUniformBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
+		static Graphics::RHI_Buffer* CreateReadbackBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 		static Graphics::RHI_Buffer* CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides = { });
 
 		static void FreeVertexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeIndexBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeUniformBuffer(Graphics::RHI_Buffer* buffer);
+		static void FreeReadbackBuffer(Graphics::RHI_Buffer* buffer);
 		static void FreeRawBuffer(Graphics::RHI_Buffer* buffer);
 
 		static int GetVertexBufferCount();

@@ -71,6 +71,8 @@ namespace Insight
 			context->m_renderGraph->Init(context);
 			context->m_frameDescriptorAllocator.Setup();
 
+			context->m_gpuProfiler.Initialise(context);
+
 			context->m_renderThreadId = std::this_thread::get_id();
 
 			return context;
@@ -102,6 +104,8 @@ namespace Insight
 				m_renderGraph->Swap();
 				RenderUpdateLoop();
 			}
+
+			GPUProfiler::Instance().GetFrameData().Draw();
 		}
 
 		bool RenderContext::IsRenderThread() const
@@ -338,6 +342,8 @@ namespace Insight
 
 			RHI_CommandList* cmdList = nullptr;
 			cmdList = GetCommandListManager().GetCommandList();
+			m_gpuProfiler.BeginFrame(cmdList);
+
 			if (prepareRenderer)
 			{
 				cmdList->m_descriptorAllocator = &m_frameDescriptorAllocator.Get();
@@ -356,6 +362,8 @@ namespace Insight
 			{
 				ExecuteAsyncJobs(cmdList);
 			}
+
+			m_gpuProfiler.EndFrame(cmdList);
 			cmdList->Close();
 			PostRender(cmdList);
 
@@ -423,6 +431,12 @@ namespace Insight
 		return s_context->CreateBuffer(Graphics::BufferType::Uniform, sizeBytes, 0, buffer_overrides);
 	}
 
+	Graphics::RHI_Buffer* Renderer::CreateReadbackBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
+	{
+		ASSERT(s_context);
+		return s_context->CreateBuffer(Graphics::BufferType::Readback, sizeBytes, 0, buffer_overrides);
+	}
+
 	Graphics::RHI_Buffer* Renderer::CreateRawBuffer(u64 sizeBytes, Graphics::RHI_Buffer_Overrides buffer_overrides)
 	{
 		return s_context->CreateBuffer(Graphics::BufferType::Raw, sizeBytes, 0, buffer_overrides);
@@ -457,6 +471,17 @@ namespace Insight
 		}
 		ASSERT(s_context);
 		ASSERT(buffer->GetType() == Graphics::BufferType::Uniform);
+		s_context->FreeBuffer(buffer);
+	}
+
+	void Renderer::FreeReadbackBuffer(Graphics::RHI_Buffer* buffer)
+	{
+		if (!buffer)
+		{
+			return;
+		}
+		ASSERT(s_context);
+		ASSERT(buffer->GetType() == Graphics::BufferType::Readback);
 		s_context->FreeBuffer(buffer);
 	}
 

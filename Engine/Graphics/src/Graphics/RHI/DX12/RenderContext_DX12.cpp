@@ -4,6 +4,7 @@
 
 #include "Graphics/RHI/DX12/RenderContext_DX12.h"
 #include "Graphics/RHI/DX12/RHI_Texture_DX12.h"
+#include "Graphics/RHI/DX12/RHI_Buffer_DX12.h"
 #include "Graphics/RHI/DX12/DX12Utils.h"
 #include "Graphics/Window.h"
 
@@ -142,6 +143,13 @@ namespace Insight
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).SetRenderContext(this);
 				m_descriptorHeaps.at(DescriptorHeapTypes::DepthStencilView).Create(DescriptorHeapTypes::DepthStencilView);
 
+				D3D12_QUERY_HEAP_DESC timeStampDesc = {};
+				timeStampDesc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
+				timeStampDesc.NodeMask = 0;
+				timeStampDesc.Count = m_timeStampQueryMaxCountPerFrame * 2;
+				ThrowIfFailed(m_device->CreateQueryHeap(&timeStampDesc, IID_PPV_ARGS(&m_timeStampQueryHeap)));
+
+				m_timeStampReadbackBuffer = Renderer::CreateReadbackBuffer(timeStampDesc.Count * sizeof(u64));
 
 				// Create all our null handles for descriptors.
 				m_cbvNullHandle = m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).GetNewHandle();
@@ -249,6 +257,12 @@ namespace Insight
 				}
 
 				m_samplerManager->ReleaseAll();
+
+				m_timeStampQueryHeap->Release();
+				m_timeStampQueryHeap = nullptr;
+
+				Renderer::FreeReadbackBuffer(m_timeStampReadbackBuffer);
+				m_timeStampReadbackBuffer = nullptr;
 
 				BaseDestroy();
 
@@ -573,6 +587,57 @@ namespace Insight
 				//m_queues[GPUQueue_Graphics]->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 				//GpuWaitForIdle();
 				m_graphicsQueue.SubmitAndWait(cmdListDX12);
+			}
+
+			void RenderContext_DX12::MarkTimeStamp(RHI_CommandList* cmdList)
+			{
+				if (m_timeStampCurrentCount == m_timeStampQueryMaxCountPerFrame)
+				{
+					return;
+				}
+
+				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
+				cmdListDX12->GetCommandList()->EndQuery(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, m_timeStampCurrentIndex + m_timeStampCurrentCount);
+				m_timeStampCurrentCount++;
+			}
+
+			std::vector<u64> RenderContext_DX12::ResolveTimeStamps(RHI_CommandList* cmdList)
+			{
+				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
+				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(m_timeStampReadbackBuffer);
+				// Resolve the data
+				const u64 dstOffset = (m_timeStampCurrentIndex * 8);
+				cmdListDX12->GetCommandList()->ResolveQueryData(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, m_timeStampCurrentIndex, m_timeStampPreviousCount, bufferDX12->GetResource(), dstOffset);
+
+				if (!m_timeStampEnoughFrames)
+				{
+					// We need to wait until we have more than a single frame.
+					m_timeStampEnoughFrames = true;
+					m_timeStampPreviousCount = m_timeStampCurrentCount;
+					m_timeStampCurrentCount = 0;
+
+					m_timeStampCurrentIndex = (m_timeStampCurrentIndex + m_timeStampQueryMaxCountPerFrame) % (m_timeStampQueryMaxCountPerFrame * 2);
+					return {};
+				}
+
+				m_timeStampCurrentIndex = (m_timeStampCurrentIndex + m_timeStampQueryMaxCountPerFrame) % (m_timeStampQueryMaxCountPerFrame * 2);
+
+				std::vector<u8> bufferData = RemoveConst(bufferDX12)->Download();
+				std::vector<u64> queryData;
+				queryData.resize(m_timeStampPreviousCount);
+				Platform::MemCopy(queryData.data(), bufferData.data() + (m_timeStampCurrentIndex * 8), queryData.size() * sizeof(u64));
+
+				m_timeStampPreviousCount = m_timeStampCurrentCount;
+				m_timeStampCurrentCount = 0;
+
+				return queryData;
+			}
+
+			u64 RenderContext_DX12::GetTimeStampFrequency()
+			{
+				u64 frequency = 0;
+				ThrowIfFailed(m_graphicsQueue.GetQueue()->GetTimestampFrequency(&frequency));
+				return frequency;
 			}
 
 			void RenderContext_DX12::ExecuteAsyncJobs(RHI_CommandList* cmdList)

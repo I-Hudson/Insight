@@ -65,6 +65,10 @@ namespace Insight
 				virtual void GpuWaitForIdle() override;
 				virtual void SubmitCommandListAndWait(RHI_CommandList* cmdList) override;
 
+				virtual void MarkTimeStamp(RHI_CommandList* cmdList) override;
+				virtual std::vector<u64> ResolveTimeStamps(RHI_CommandList* cmdList) override;
+				virtual u64 GetTimeStampFrequency();
+
 				/// @brief Execute anything that is not directly graphics related like uploading data to the GPU.
 				virtual void ExecuteAsyncJobs(RHI_CommandList* cmdList) override;
 
@@ -98,6 +102,14 @@ namespace Insight
 				ComPtr<ID3D12Device> m_device{ nullptr };
 				ComPtr<ID3D12Debug> m_debugController{ nullptr };
 				D3D12MA::ALLOCATION_CALLBACKS m_d3d12maAllocationCallbacks;
+
+				ID3D12QueryHeap* m_timeStampQueryHeap = nullptr;
+				u64 m_timeStampCurrentIndex = 0;
+				u64 m_timeStampCurrentCount = 0;
+				u64 m_timeStampPreviousCount = 0;
+				bool m_timeStampEnoughFrames = false;
+				u64 m_timeStampQueryMaxCountPerFrame = 64;
+				RHI_Buffer* m_timeStampReadbackBuffer = nullptr;
 
 				/// @brief D3D12 memory allocator used for all resource (buffer/textures) allocations.
 				D3D12MA::Allocator* m_d3d12MA = nullptr;

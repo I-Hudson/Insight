@@ -15,6 +15,8 @@ namespace Insight
             m_data.resize(c_MaxCapcity);
         }
 
+        u64 Size() const { return static_cast<u64>(c_MaxCapcity); }
+
         const T& operator=(const T& value)
         {
             std::lock_guard lock(m_mutex);
@@ -65,8 +67,7 @@ namespace Insight
             std::lock_guard lock(m_mutex);
             return m_data.at(m_currentIndex);
         }
-
-        const T& GetPrevious() const
+        T& GetCurrent()
         {
             std::lock_guard lock(m_mutex);
             return m_data.at(m_currentIndex);
