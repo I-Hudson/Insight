@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Runtime/Defines.h"
 #include "Graphics/ImGuiPass.h"
 #include "Graphics/RHI/RHI_FSR.h"
 #include "Graphics/RenderFrame.h"
@@ -72,10 +73,9 @@ namespace Insight
 			glm::vec4 Textures_Set;
 		};
 
-		class Renderpass
+		class IS_RUNTIME Renderpass
 		{
 		public:
-
 			void Create();
 			void Render();
 			void Destroy();

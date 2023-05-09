@@ -14,6 +14,8 @@ namespace Insight
 		{
 			struct ImGuiPassData
 			{
+				~ImGuiPassData();
+
 				PipelineStateObject Pso;
 				ImDrawData ImDrawData;
 				std::vector<ImDrawList> CmdList;

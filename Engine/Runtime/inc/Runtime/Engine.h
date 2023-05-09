@@ -15,8 +15,6 @@
 #include "World/WorldSystem.h"
 #include "Runtime/ProjectSystem.h"
 
-#include "Renderpass.h"
-
 #include <string>
 
 constexpr const uint32_t major_bitshift = 22u;
@@ -49,6 +47,7 @@ namespace Insight
 
 			virtual void OnInit() { }
 			virtual void OnUpdate() { }
+			virtual void OnRender() { }
 			virtual void OnDestroy() { }
 
 			Core::SystemRegistry& GetSystemRegistry() { return m_systemRegistry; }
@@ -59,8 +58,6 @@ namespace Insight
 			static Core::Timer s_FrameTimer;
 			u64 FrameCount = 0;
 		private:
-			Graphics::Renderpass m_renderpasses;
-
 			bool m_shouldClose = false;
 
 			std::thread::id m_updateThread;

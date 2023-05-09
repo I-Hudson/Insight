@@ -93,6 +93,7 @@ namespace Insight
 				m_setupFunc = {};
 				m_executeFunc = {};
 				m_postFunc = {};
+				m_passData = {};
 			}
 
 			TPassData& GetData() const { return m_passData; }

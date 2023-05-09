@@ -105,7 +105,6 @@ namespace Insight
 			OnInit();
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
 
-			m_renderpasses.Create();
 			splashScreen.Destroy();
 
 			return true;
@@ -167,8 +166,7 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Render Update");
-
-					m_renderpasses.Render();
+					OnRender();
 					{
 						IS_PROFILE_SCOPE("GraphicsSystem Render");
 						m_graphicsSystem.Render();
@@ -182,9 +180,11 @@ namespace Insight
 
 		void Engine::Destroy()
 		{
+			Graphics::RenderContext::Instance().WaitForRenderThread();
+			Graphics::RenderContext::Instance().GpuWaitForIdle();
+
 			OnDestroy();
 			
-			m_renderpasses.Destroy();
 			m_worldSystem.Shutdown();
 
 			m_resourceSystem.Shutdown();

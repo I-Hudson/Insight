@@ -5,6 +5,8 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
 
+#include "Renderpass.h"
+
 namespace Insight
 {
 	namespace Editor
@@ -15,9 +17,11 @@ namespace Insight
 
 			virtual void OnInit() override;
 			virtual void OnUpdate() override;
+			virtual void OnRender() override;
 			virtual void OnDestroy() override;
 
 		private:
+			Graphics::Renderpass* m_gameRenderpass;
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 		};

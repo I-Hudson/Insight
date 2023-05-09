@@ -11,6 +11,11 @@ namespace Insight
 {
 	namespace Graphics
 	{
+		ImGuiPass::ImGuiPassData::~ImGuiPassData()
+		{
+			ASSERT(ImGui::GetCurrentContext());
+		}
+
 		void ImGuiPass::ImGuiPassData::Reset()
 		{
 			for (ImDrawList& drawList : CmdList)

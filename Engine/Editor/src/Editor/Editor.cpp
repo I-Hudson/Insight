@@ -41,6 +41,9 @@ namespace Insight
 
 			EditorWindowManager::Instance().RegisterWindows();
 			m_menuBar.Initialise(&m_editorWindowManager);
+
+			m_gameRenderpass = New<Graphics::Renderpass>();
+			m_gameRenderpass->Create();
 		}
 
 		void Editor::OnUpdate()
@@ -59,8 +62,16 @@ namespace Insight
 			EditorWindowManager::Instance().Update();
 		}
 
+		void Editor::OnRender()
+		{
+			m_gameRenderpass->Render();
+		}
+
 		void Editor::OnDestroy()
 		{
+			m_gameRenderpass->Destroy();
+			Delete(m_gameRenderpass);
+
 			EditorWindowManager::Instance().Destroy();
 
 			Runtime::ResourceManager::SaveDatabase();
