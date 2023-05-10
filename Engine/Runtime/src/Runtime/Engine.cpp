@@ -123,6 +123,7 @@ namespace Insight
 
 				s_FrameTimer.Stop();
 				float delta_time = s_FrameTimer.GetElapsedTimeMillFloat();
+				delta_time = std::max(delta_time, 1.0f / 1000.0f);
 				s_FrameTimer.Start();
 
 				{

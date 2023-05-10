@@ -48,7 +48,7 @@ namespace Insight
             m_editorCameraComponent->CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
             m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
         }
-        bool enabled = false;
+
         void WorldViewWindow::OnDraw()
         {
             SetupRenderGraphPasses();
@@ -58,18 +58,15 @@ namespace Insight
             {
                 return;
             }
-            ImGui::Checkbox("Enable window", &enabled);
+
             ImVec2 windowSize = ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
             ImGui::Image(worldViewTexture, windowSize);
 
             TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName);
-            if (world && !enabled)
+            if (world)
             {
-                world->SetWorldState(Runtime::WorldStates::Paused);
-            }
-            else
-            {
-                world->SetWorldState(Runtime::WorldStates::Running);
+                ImGui::IsWindowFocused() ? 
+                    world->SetWorldState(Runtime::WorldStates::Running) : world->SetWorldState(Runtime::WorldStates::Paused);
             }
         }
 

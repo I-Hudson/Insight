@@ -3,6 +3,7 @@
 #include "EditorModule.h"
 #include "Editor/EditorWindows/ProjectWindow.h"
 #include "Editor/EditorWindows/GameViewWindow.h"
+#include "Editor/EditorWindows/WorldViewWindow.h"
 
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
@@ -40,7 +41,9 @@ namespace Insight
 			Graphics::Window::Instance().SetIcon(EnginePaths::GetResourcePath() + "/Insight/default.png");
 			Graphics::Window::Instance().Show();
 
-			EditorWindowManager::Instance().RegisterWindows();
+			m_editorWindowManager.RegisterWindows();
+			m_editorWindowManager.AddWindow(WorldViewWindow::WINDOW_NAME);
+
 			m_menuBar.Initialise(&m_editorWindowManager);
 
 			m_gameRenderpass = New<Graphics::Renderpass>();
