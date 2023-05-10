@@ -38,8 +38,7 @@ namespace Insight
 		void World::EarlyUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldType == WorldTypes::Game
-				&& m_worldState == WorldStates::Paused)
+			if (m_worldState == WorldStates::Paused)
 			{
 				return;
 			}
@@ -49,8 +48,7 @@ namespace Insight
 		void World::Update(const float deltaTime)
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldType == WorldTypes::Game 
-				&& m_worldState == WorldStates::Paused)
+			if (m_worldState == WorldStates::Paused)
 			{
 				return;
 			}
@@ -60,8 +58,7 @@ namespace Insight
 		void World::LateUpdate()
 		{
 			IS_PROFILE_FUNCTION();
-			if (m_worldType == WorldTypes::Game
-				&& m_worldState == WorldStates::Paused)
+			if (m_worldState == WorldStates::Paused)
 			{
 				return;
 			}
@@ -72,6 +69,16 @@ namespace Insight
 		{
 			ASSERT(!worldName.empty()); 
 			m_worldName = worldName;
+		}
+
+		void World::SetWorldState(WorldStates state)
+		{
+			m_worldState = state;
+		}
+
+		WorldStates World::GetWorldState() const
+		{
+			return m_worldState;
 		}
 
 		void World::SetOnlySearchable(bool onlySearchable)

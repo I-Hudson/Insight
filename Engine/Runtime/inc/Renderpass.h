@@ -20,6 +20,8 @@ namespace Insight
 		class RHI_Sampler;
 		class RenderTarget;
 
+		IS_RUNTIME std::vector<ShaderInputLayout> GetDefaultShaderInputLayout();
+
 		struct BufferFrame
 		{
 			glm::mat4 Proj_View = { };

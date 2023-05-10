@@ -26,6 +26,10 @@ namespace Insight
 		private:
 			CameraComponent* m_cameraComponent = nullptr;
 			TransformComponent* m_transformComponent = nullptr;
+
+			bool m_lookMoveEnabled = false;
+			float m_previousLookX = 0.0f;
+			float m_previousLookY = 0.0f;
 		};
 	}
 }

@@ -4,6 +4,7 @@
 #include "Graphics/PixelFormatExtensions.h"
 
 #include "Runtime/CommandLineDefines.h"
+#include "Runtime/Engine.h"
 
 #include "Core/CommandLineArgs.h"
 
@@ -69,6 +70,20 @@ namespace Insight
 		void GraphicsSystem::Render()
 		{
 			m_context->Render();
+		}
+
+		void GraphicsSystem::CreateRenderFrame()
+		{
+			WorldSystem* worldSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<WorldSystem>();
+			if (worldSystem)
+			{
+				m_renderFrame.CreateRenderFrameFromWorldSystem(worldSystem);
+			}
+		}
+
+		const RenderFrame& GraphicsSystem::GetRenderFrame() const
+		{
+			return m_renderFrame;
 		}
 
 		void GraphicsSystem::InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI)

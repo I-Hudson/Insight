@@ -4,6 +4,7 @@
 #include "Core/Singleton.h"
 #include "Graphics/RenderContext.h"
 #include "Graphics/Window.h"
+#include "Graphics/RenderFrame.h"
 
 namespace Insight
 {
@@ -18,7 +19,7 @@ namespace Insight
 		/// System in charge of all things graphics.
 		/// This system should init a graphics device/context and window ready for rendering.
 		/// </summary>
-		class GraphicsSystem : public Core::ISystem
+		class IS_RUNTIME GraphicsSystem : public Core::ISystem
 		{
 		public:
 			GraphicsSystem();
@@ -32,6 +33,9 @@ namespace Insight
 			void Update();
 			void Render();
 
+			void CreateRenderFrame();
+			const RenderFrame& GetRenderFrame() const;
+
 		private:
 			void InitialiseRenderContext(Graphics::GraphicsAPI graphicsAPI);
 
@@ -39,6 +43,7 @@ namespace Insight
 			Graphics::RenderContext* m_context = nullptr;
 			Graphics::Window m_window;
 
+			RenderFrame m_renderFrame;
 			Input::InputSystem* m_inputSystem = nullptr;
 		};
 	}

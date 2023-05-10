@@ -51,6 +51,9 @@ namespace Insight
 			void SetWorldName(std::string worldName);
 			std::string_view GetWorldName() const { return m_worldName; }
 
+			void SetWorldState(WorldStates state);
+			WorldStates GetWorldState() const;
+
 			bool IsPersistentScene() const { return m_persistentScene; }
 
 			void SetOnlySearchable(bool onlySearchable);
@@ -79,7 +82,7 @@ namespace Insight
 		private:
 			/// Store all entites 
 			std::string m_worldName = "";
-			WorldStates m_worldState = WorldStates::Paused;
+			WorldStates m_worldState = WorldStates::Running;
 			WorldTypes m_worldType = WorldTypes::Game;
 
 			std::vector<Core::GUID> m_root_entities_guids;

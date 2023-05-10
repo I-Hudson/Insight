@@ -74,14 +74,6 @@ namespace Insight
 		};
 		GlobalResources g_global_resources = {};
 
-		std::vector<ShaderInputLayout> DefaultShaderInputLayout =
-		{
-			ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-			ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "NORMAL0"),
-			ShaderInputLayout(2, PixelFormat::R32G32B32A32_Float, 32, "COLOR0"),
-			ShaderInputLayout(3, PixelFormat::R32G32B32A32_Float, 48, "TEXCOORD0"),
-		};
-
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
@@ -261,7 +253,7 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("Create render frame");
-				renderFrame.CreateRenderFrameFromWorldSystem(&Runtime::WorldSystem::Instance());
+				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 				for (RenderWorld& world : renderFrame.RenderWorlds)
 				{
 					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
@@ -402,7 +394,7 @@ namespace Insight
 					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 
 					ShaderDesc shader_description = { };
-					shader_description.InputLayout = DefaultShaderInputLayout;
+					shader_description.InputLayout = GetDefaultShaderInputLayout();
 					shader_description.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl";
 					builder.SetShader(shader_description);
 
@@ -633,7 +625,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("GBuffer-GetShader");
 						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.InputLayout = DefaultShaderInputLayout;
+						shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 					}
 					builder.SetShader(shaderDesc);
 
@@ -828,7 +820,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("GetShader");
 						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
 						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.InputLayout = DefaultShaderInputLayout;
+						shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 					}
 					builder.SetShader(shaderDesc);
 
@@ -1443,5 +1435,17 @@ namespace Insight
 				buffer_light.SplitDepth[i] = light.SplitDepth[i];
 			}
 		}
-	}
+
+		std::vector<ShaderInputLayout> GetDefaultShaderInputLayout()
+		{
+			std::vector<ShaderInputLayout> DefaultShaderInputLayout =
+			{
+				ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
+				ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "NORMAL0"),
+				ShaderInputLayout(2, PixelFormat::R32G32B32A32_Float, 32, "COLOR0"),
+				ShaderInputLayout(3, PixelFormat::R32G32B32A32_Float, 48, "TEXCOORD0"),
+			};
+			return DefaultShaderInputLayout;
+		}
+}
 }

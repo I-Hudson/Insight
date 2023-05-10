@@ -86,31 +86,27 @@ namespace Insight
 			}
 
 			/// check for camera rotation
-			static bool sbMouseButtonDown = false;
 			bool mouseDown = device->WasHeld(Input::MouseButtons::Right);
 			if (mouseDown)
 			{
 				viewMatrix[3] = vTranslation;
 
-				static float siPrevMouseX = 0;
-				static float siPrevMouseY = 0;
-
-				if (sbMouseButtonDown == false)
+				if (m_lookMoveEnabled == false)
 				{
-					sbMouseButtonDown = true;
-					siPrevMouseX = device->GetMouseXPosition();
-					siPrevMouseY = device->GetMouseYPosition();
+					m_lookMoveEnabled = true;
+					m_previousLookX = device->GetMouseXPosition();
+					m_previousLookY = device->GetMouseYPosition();
 				}
 
 				float mouseX = 0, mouseY = 0;
 				mouseX = device->GetMouseXPosition();
 				mouseY = device->GetMouseYPosition();
 
-				float iDeltaX = mouseX - siPrevMouseX;
-				float iDeltaY = mouseY - siPrevMouseY;
+				float iDeltaX = mouseX - m_previousLookX;
+				float iDeltaY = mouseY - m_previousLookY;
 
-				siPrevMouseX = mouseX;
-				siPrevMouseY = mouseY;
+				m_previousLookX = mouseX;
+				m_previousLookY = mouseY;
 
 				glm::mat4 mMat;
 
@@ -145,7 +141,7 @@ namespace Insight
 			}
 			else
 			{
-				sbMouseButtonDown = false;
+				m_lookMoveEnabled = false;
 			}
 
 			m_transformComponent->SetTransform(viewMatrix);

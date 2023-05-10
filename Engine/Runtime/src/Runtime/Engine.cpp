@@ -166,6 +166,7 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Render Update");
+					m_graphicsSystem.CreateRenderFrame();
 					OnRender();
 					{
 						IS_PROFILE_SCOPE("GraphicsSystem Render");

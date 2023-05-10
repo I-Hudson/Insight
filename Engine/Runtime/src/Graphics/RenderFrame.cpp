@@ -228,4 +228,12 @@ namespace Insight
             }
         }
     }
+
+    void RenderFrame::SetCameraForAllWorlds(ECS::Camera mainCamera, glm::mat4 transform)
+    {
+        for (RenderWorld& world : RenderWorlds)
+        {
+            world.SetMainCamera(mainCamera, transform);
+        }
+    }
 }

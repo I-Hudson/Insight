@@ -27,14 +27,14 @@ namespace Insight
         class Mesh;
     }
 
-    struct RenderMaterial
+    struct IS_RUNTIME RenderMaterial
     {
         void SetMaterial(const Runtime::Material* material);
         std::array<Graphics::RHI_Texture*, static_cast<u64>(Runtime::TextureTypes::Count)> Textures;
         std::array<float, static_cast<u32>(Runtime::MaterialProperty::Count)> Properties;
     };
 
-    struct RenderMesh
+    struct IS_RUNTIME RenderMesh
     {
         glm::mat4 Transform;
         Graphics::BoundingBox BoudingBox;
@@ -46,14 +46,14 @@ namespace Insight
         void SetMaterial(Runtime::Material* material);
     };
 
-    struct RenderMaterailBatch
+    struct IS_RUNTIME RenderMaterailBatch
     {
         RenderMaterial Material;
         std::vector<u64> OpaqueMeshIndex;
         std::vector<u64> TransparentMeshIndex;
     };
 
-    struct RenderCamrea
+    struct IS_RUNTIME RenderCamrea
     {
         ECS::Camera Camra; 
         glm::mat4 Transform;
@@ -61,7 +61,7 @@ namespace Insight
     };
 
     /// @brief Represent the world for rendering.
-    struct RenderWorld
+    struct IS_RUNTIME RenderWorld
     {
         RenderWorld() = default;
         
@@ -86,7 +86,7 @@ namespace Insight
     };
 
     /// @brief Contain a vector of worlds for rendering.
-    struct RenderFrame
+    struct IS_RUNTIME RenderFrame
     {
         std::vector<RenderWorld> RenderWorlds;
 
@@ -95,6 +95,7 @@ namespace Insight
         /// @return RenderWorld
         void CreateRenderFrameFromWorldSystem(Runtime::WorldSystem* worldSystem);
         void Sort();
+        void SetCameraForAllWorlds(ECS::Camera mainCamera, glm::mat4 transform);
 
     private:
         void Clear();
