@@ -2,6 +2,7 @@
 
 #include "EditorModule.h"
 #include "Editor/EditorWindows/ProjectWindow.h"
+#include "Editor/EditorWindows/GameViewWindow.h"
 
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
@@ -64,7 +65,8 @@ namespace Insight
 
 		void Editor::OnRender()
 		{
-			m_gameRenderpass->Render();
+			const bool gameViewWindowActive = m_editorWindowManager.GetActiveWindow(GameViewWindow::WINDOW_NAME) != nullptr;
+			m_gameRenderpass->Render(gameViewWindowActive);
 		}
 
 		void Editor::OnDestroy()

@@ -118,6 +118,11 @@ namespace Insight
 			return m_frameIndex.load();
 		}
 
+		u32 RenderContext::GetFrameIndexCompleted() const
+		{
+			return m_frameIndexCompleted.load();
+		}
+
 		u64 RenderContext::GetFrameCount() const
 		{
 			return m_frameCount.load();
@@ -286,19 +291,8 @@ namespace Insight
 		{
 			if (buffer)
 			{
-				if (!m_resource_tracker.IsResourceInUse(buffer))
-				{
-					BufferType bufferType = buffer->GetType();
-					m_buffers[bufferType].FreeResource(buffer);
-				}
-				else
-				{
-					BufferType bufferType = buffer->GetType();
-					m_resource_tracker.AddDeferedRelase([this, buffer, bufferType]()
-						{
-							m_buffers[bufferType].FreeResource(buffer);
-						});
-				}
+				BufferType bufferType = buffer->GetType();
+				m_buffers[bufferType].FreeResource(buffer);
 			}
 		}
 
@@ -321,17 +315,7 @@ namespace Insight
 
 		void RenderContext::FreeTexture(RHI_Texture* texture)
 		{
-			if (!m_resource_tracker.IsResourceInUse(texture))
-			{
-				m_textures.FreeResource(texture);
-			}
-			else
-			{
-				m_resource_tracker.AddDeferedRelase([this, texture]()
-					{
-						m_textures.FreeResource(texture);
-					});
-			}
+			m_textures.FreeResource(texture);
 		}
 
 		void RenderContext::RenderUpdateLoop()

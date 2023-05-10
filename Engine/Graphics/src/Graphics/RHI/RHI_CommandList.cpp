@@ -166,7 +166,7 @@ namespace Insight
 		u32 RHI_CommandListAllocator::FreeSize() const
 		{
 			std::lock_guard lock(m_mutex);
-			return m_freeLists.size();
+			return static_cast<u32>(m_freeLists.size());
 		}
 
 		bool RHI_CommandListAllocator::ReturnCommandList(RHI_CommandList* cmdList)

@@ -29,10 +29,15 @@ namespace Insight
 
 		void IEditorWindow::Draw()
 		{
-			const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
+			if (!m_initialiseCalled)
+			{
+				Initialise();
+				m_initialiseCalled = true;
+			}
+
 			if (m_isFullscreen)
 			{
-				if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, m_imguiWindowFlags))
 				{
 					const ImGuiIO& io = ImGui::GetIO();
 					ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
@@ -47,7 +52,7 @@ namespace Insight
 			}
 			else
 			{
-				if (ImGui::Begin(GetWindowName(), &m_isOpen, windowFlags))
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, m_imguiWindowFlags))
 				{
 					OnDraw();
 

@@ -146,7 +146,7 @@ namespace Insight
 				D3D12_QUERY_HEAP_DESC timeStampDesc = {};
 				timeStampDesc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
 				timeStampDesc.NodeMask = 0;
-				timeStampDesc.Count = m_timeStampQueryMaxCountPerFrame * 2;
+				timeStampDesc.Count = static_cast<u32>(m_timeStampQueryMaxCountPerFrame * 2);
 				ThrowIfFailed(m_device->CreateQueryHeap(&timeStampDesc, IID_PPV_ARGS(&m_timeStampQueryHeap)));
 
 				m_timeStampReadbackBuffer = Renderer::CreateReadbackBuffer(timeStampDesc.Count * sizeof(u64));
@@ -229,10 +229,8 @@ namespace Insight
 
 			void RenderContext_DX12::Destroy()
 			{
-				WaitForGpu();
-				m_resource_tracker.Release();
-
 				StopRenderThread();
+				WaitForGpu();
 
 				DestroyImGui();
 
@@ -265,6 +263,7 @@ namespace Insight
 				m_timeStampReadbackBuffer = nullptr;
 
 				BaseDestroy();
+				m_resource_tracker.Release();
 
 				m_descriptorHeaps.at(DescriptorHeapTypes::CBV_SRV_UAV).Destroy();
 				m_descriptorHeaps.at(DescriptorHeapTypes::Sampler).Destroy();
@@ -344,6 +343,7 @@ namespace Insight
 					IS_PROFILE_SCOPE("Fence wait");
 					m_graphicsQueue.Wait(m_submitFenceValues.Get());
 					m_submitFrameContexts->OnCompleted();
+					m_frameIndexCompleted.store(m_frameIndex.load());
 				}
 
 				{
@@ -597,8 +597,9 @@ namespace Insight
 				}
 
 				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
-				cmdListDX12->GetCommandList()->EndQuery(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, m_timeStampCurrentIndex + m_timeStampCurrentCount);
-				m_timeStampCurrentCount++;
+				const u32 timeStampIndex = static_cast<u32>(m_timeStampCurrentIndex + m_timeStampCurrentCount);
+				cmdListDX12->GetCommandList()->EndQuery(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, timeStampIndex);
+				++m_timeStampCurrentCount;
 			}
 
 			std::vector<u64> RenderContext_DX12::ResolveTimeStamps(RHI_CommandList* cmdList)
@@ -607,7 +608,9 @@ namespace Insight
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(m_timeStampReadbackBuffer);
 				// Resolve the data
 				const u64 dstOffset = (m_timeStampCurrentIndex * 8);
-				cmdListDX12->GetCommandList()->ResolveQueryData(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, m_timeStampCurrentIndex, m_timeStampPreviousCount, bufferDX12->GetResource(), dstOffset);
+				const u32 timeStampIndex = static_cast<u32>(m_timeStampCurrentIndex);
+				const u32 timeStampCount = static_cast<u32>(m_timeStampPreviousCount);
+				cmdListDX12->GetCommandList()->ResolveQueryData(m_timeStampQueryHeap, D3D12_QUERY_TYPE_TIMESTAMP, timeStampIndex, timeStampCount, bufferDX12->GetResource(), dstOffset);
 
 				if (!m_timeStampEnoughFrames)
 				{

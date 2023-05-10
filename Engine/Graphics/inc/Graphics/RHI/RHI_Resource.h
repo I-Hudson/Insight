@@ -5,6 +5,8 @@
 #include "Graphics/Enums.h"
 #include "Graphics/Defines.h"
 
+#include "Graphics/RHI/RHI_ResourceRenderTracker.h"
+
 #include <mutex>
 #include <type_traits>
 #include <queue>
@@ -39,6 +41,8 @@ namespace Insight
 
 			friend struct RHI_UploadQueueRequestInternal;
 		};
+
+		//void FreeResourceFromResourceManager(RHI_Resource* resource);
 
 		template<typename T>
 		class RHI_ResourceManager
@@ -75,12 +79,22 @@ namespace Insight
 				auto itr = m_objects.find(object);
 				if (itr != m_objects.end())
 				{
-					m_objects.erase(itr);
-					if (object)
+					RHI_Resource* resource = static_cast<RHI_Resource*>(object);
+					if (!RHI_ResourceRenderTracker::Instance().IsResourceInUse(resource))
 					{
-						object->Release();
-						Delete(object);
+						resource->Release();
+						Delete(resource);
 					}
+					else
+					{
+						RHI_ResourceRenderTracker::Instance().AddDeferedRelase([resource]()
+							{
+								RHI_Resource* res = resource;
+								res->Release();
+								Delete(res);
+							});
+					}
+					m_objects.erase(itr);
 				}
 			}
 

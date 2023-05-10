@@ -485,8 +485,13 @@ namespace Insight
 
 			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout)
 			{
+				BindPipeline(pso, true);
+			}
+
+			void RHI_CommandList_DX12::BindPipeline(PipelineStateObject pso, bool clearDescriptors)
+			{
 				IS_PROFILE_FUNCTION();
-				
+
 				RHI_Pipeline_DX12* pipeline = static_cast<RHI_Pipeline_DX12*>(m_contextDX12->GetPipelineManager().GetOrCreatePSO(pso));
 				m_commandList->SetPipelineState(pipeline->GetPipeline());
 
@@ -494,11 +499,14 @@ namespace Insight
 				m_commandList->SetGraphicsRootSignature(pipelineLayout->GetRootSignature());
 				m_commandList->IASetPrimitiveTopology(PrimitiveTopologyToDX12(m_activePSO.PrimitiveTopologyType));
 
-				m_descriptorAllocator->SetPipeline(pso);
+				if (clearDescriptors)
+				{
+					m_descriptorAllocator->SetPipeline(pso);
 #ifdef DX12_REUSE_DESCRIPTOR_TABLES
-				m_boundDescriptorSets.clear();
-				m_boundDescriptorSets.resize(m_descriptorAllocator->GetAllocatorDescriptorSets().size());
+					m_boundDescriptorSets.clear();
+					m_boundDescriptorSets.resize(m_descriptorAllocator->GetAllocatorDescriptorSets().size());
 #endif // DX12_REUSE_DESCRIPTOR_TABLES
+				}
 			}
 
 			void RHI_CommandList_DX12::BeginTimeBlock(const std::string& blockName)

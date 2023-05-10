@@ -33,13 +33,18 @@ namespace Insight
 			void SetFullscreen(bool value);
 			bool GetFullscreen() const;
 
+			virtual void Initialise() { }
 			virtual void OnDraw() = 0;
+
 			virtual const char* GetWindowName() const = 0;
 			virtual EditorWindowCategories GetCategory() const = 0;
 
 		protected:
 			bool m_isOpen = true;
 			bool m_isFullscreen = false;
+			bool m_initialiseCalled = false;
+
+			u64 m_imguiWindowFlags = 0;
 
 			u32 m_minWidth = 0;
 			u32 m_minHeight = 0;

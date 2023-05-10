@@ -85,11 +85,11 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			//TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
 			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
-			//modelsToAddToScene.push_back({ model_backpack, false });
+			modelsToAddToScene.push_back({ model_backpack, false });
 			//modelsToAddToScene.push_back(model_diana);
 
 			if constexpr (false)
@@ -160,7 +160,7 @@ namespace Insight
 			//Graphics::RHI_FSR::Instance().Init();
 		}
 
-		void Renderpass::Render()
+		void Renderpass::Render(bool render)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -269,7 +269,7 @@ namespace Insight
 				renderFrame.Sort();
 			}
 
-			if constexpr (true)
+			if (render)
 			{
 				ShadowPass();
 				//ShadowCullingPass();
@@ -281,12 +281,11 @@ namespace Insight
 				TransparentGBuffer();
 				Composite();
 				FSR2();
-				Swapchain();
-
-				// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
-				GFXHelper();
 			}
-				ImGuiPass();
+			Swapchain();
+			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
+			GFXHelper();
+			ImGuiPass();
 		}
 
 		void Renderpass::Destroy()
@@ -1251,7 +1250,7 @@ namespace Insight
 
 					if (rt != -1)
 					{
-						builder.ReadTexture(rt);
+						//builder.ReadTexture(rt);
 					}
 					data.RenderTarget = rt;
 
@@ -1284,15 +1283,15 @@ namespace Insight
 
 					if (data.RenderTarget != -1)
 					{
-						cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
-						cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
+						//cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
+						//cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
 					}
 					else
 					{
-						cmdList->SetTexture(0, 0, nullptr);
-						cmdList->SetSampler(1, 0, nullptr);
+						//cmdList->SetTexture(0, 0, nullptr);
+						//cmdList->SetSampler(1, 0, nullptr);
 					}
-					cmdList->Draw(3, 1, 0, 0);
+					//cmdList->Draw(3, 1, 0, 0);
 
 					cmdList->EndRenderpass();
 				});

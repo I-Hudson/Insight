@@ -2,6 +2,7 @@
 
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
+#include "Core/Singleton.h"
 
 #include <unordered_map>
 #include <vector>
@@ -23,7 +24,7 @@ namespace Insight
 
 		/// @brief Class to track which RHI_Resources are being used for rendering and 
 		/// to release them when needed.
-		class RHI_ResourceRenderTracker
+		class RHI_ResourceRenderTracker : public Core::Singleton<RHI_ResourceRenderTracker>
 		{
 			THREAD_SAFE
 

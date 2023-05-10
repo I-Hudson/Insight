@@ -106,6 +106,7 @@ namespace Insight
 			virtual void DrawIndexed(u32 indexCount, u32 instanceCount, u32 firstIndex, u32 vertexOffset, u32 firstInstance) = 0;
 
 			virtual void BindPipeline(PipelineStateObject pso, RHI_DescriptorLayout* layout) = 0;
+			virtual void BindPipeline(PipelineStateObject pso, bool clearDescriptors) = 0;
 
 			virtual void BeginTimeBlock(const std::string& blockName);
 			virtual void BeginTimeBlock(const std::string& blockName, glm::vec4 colour);

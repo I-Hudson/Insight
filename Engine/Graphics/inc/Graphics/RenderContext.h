@@ -111,6 +111,17 @@ namespace Insight
 				return m_values.at(RenderContext::Instance().GetFrameIndex());
 			}
 
+			TValue& GetRenderCompeted()
+			{
+				ASSERT(!m_values.empty());
+				return m_values.at(RenderContext::Instance().GetFrameIndexCompleted());
+			}
+			const TValue& GetRenderCompeted() const
+			{
+				ASSERT(!m_values.empty());
+				return m_values.at(RenderContext::Instance().GetFrameIndexCompleted());
+			}
+
 			u64 Size() const
 			{
 				return m_values.size();
@@ -188,6 +199,7 @@ namespace Insight
 			virtual void SetFullScreen() { }
 
 			u32 GetFrameIndex() const;
+			u32 GetFrameIndexCompleted() const;
 			u64 GetFrameCount() const;
 			u32 GetFramesInFligtCount() const;
 
@@ -265,6 +277,7 @@ namespace Insight
 			std::atomic<u32> m_framesInFlightCount = 2;
 			/// @brief The current frame from 0 to c_FrameCount.
 			std::atomic<u32> m_frameIndex = 0;
+			std::atomic<u32> m_frameIndexCompleted = 0;
 			/// @brief Current frame count for the whole life time of the app.
 			std::atomic<u64> m_frameCount = 0;
 

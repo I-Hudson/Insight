@@ -146,6 +146,12 @@ namespace Insight
 			return m_textureCaches.Get()->Get(handle);
 		}
 
+		RHI_Texture* RenderGraph::GetRenderCompletedRHITexture(std::string textureName) const
+		{
+			RGTextureHandle handle =  m_textureCaches.Get()->GetId(textureName);
+			return m_textureCaches.Get()->Get(handle);
+		}
+
 		RenderpassDescription RenderGraph::GetRenderpassDescription(std::string_view passName) const
 		{
 			ASSERT(m_context->IsRenderThread());

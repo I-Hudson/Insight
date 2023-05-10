@@ -41,6 +41,8 @@ namespace Insight
 			RHI_Texture* GetRHITexture(std::string textureName) const;
 			RHI_Texture* GetRHITexture(RGTextureHandle handle) const;
 
+			RHI_Texture* GetRenderCompletedRHITexture(std::string textureName) const;
+
 			RenderpassDescription GetRenderpassDescription(std::string_view passName) const;
 			PipelineStateObject GetPipelineStateObject(std::string_view passName) const;
 

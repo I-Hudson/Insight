@@ -77,8 +77,9 @@ namespace Insight
 		{
 		public:
 			void Create();
-			void Render();
+			void Render(bool render = true);
 			void Destroy();
+
 
 		private:
 			void ShadowPass();
