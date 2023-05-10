@@ -79,7 +79,6 @@ namespace Insight
 
 				if (m_freeHandles.empty())
 				{
-					IS_CORE_ERROR("[DescriptorHeapPage_DX12::GetNewHandle] Heap is full.");
 					return false;
 				}
 

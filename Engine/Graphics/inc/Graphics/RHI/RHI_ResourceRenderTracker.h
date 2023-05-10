@@ -53,6 +53,7 @@ namespace Insight
 			TrackedResourceMap m_tracked_resources;
 			DeferedResourceReleaseMap m_defered_resources_to_release;
 
+			constexpr static u8 c_FrameDelay = 4;
 			bool m_releaseAllResources = false;
 		};
 	}

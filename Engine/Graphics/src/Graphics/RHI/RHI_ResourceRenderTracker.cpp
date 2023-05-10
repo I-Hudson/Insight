@@ -78,7 +78,7 @@ namespace Insight
 			if (TrackedResourceMap::const_iterator itr = m_tracked_resources.find(resource); itr != m_tracked_resources.end())
 			{
 				const u64 frame_resource_offset = current_frame - itr->second;
-				return frame_resource_offset > RenderContext::Instance().GetFramesInFligtCount() ? false : true;
+				return frame_resource_offset > c_FrameDelay ? false : true;
 			}
 			return false;
 		}
