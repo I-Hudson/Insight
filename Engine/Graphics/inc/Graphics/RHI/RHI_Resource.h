@@ -58,6 +58,7 @@ namespace Insight
 			RHI_ResourceManager()
 			{
 				static_assert(!std::is_pointer_v<T>, "[RHI_ResourceManager] 'T' must not be a pointer.");
+				static_assert(std::is_base_of_v<RHI_Resource, T>, "[RHI_ResourceManager] 'T' must derived from RHI_Resource.");
 			}
 
 			~RHI_ResourceManager()
