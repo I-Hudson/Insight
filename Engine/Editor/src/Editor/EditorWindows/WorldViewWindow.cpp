@@ -86,26 +86,34 @@ namespace Insight
                 GetBufferSamplers()
             };
 
-            GBufferPass(renderData);
-            TransparentGBufferPass(renderData);
+            Graphics::RenderGraph::Instance().AddSyncPoint([this, renderData]()
+                {
+                    m_renderingData = renderData;
+                });
+
+            Graphics::RenderGraph::Instance().AddPreRender([this](Graphics::RenderGraph& renderGraph, Graphics::RHI_CommandList* cmdList)
+                {
+                    m_renderingData.FrameView = cmdList->UploadUniform(m_renderingData.BufferFrame);
+                });
+
+            GBufferPass();
+            TransparentGBufferPass();
         }
 
-        void WorldViewWindow::GBufferPass(const RenderData& renderData)
+        void WorldViewWindow::GBufferPass()
         {
             struct WorldGBufferData
             {
-                RenderData RenderData;
                 glm::ivec2 RenderResolution;
             };
 
             WorldGBufferData passData =
             {
-                renderData,
                 glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
             };
 
             Graphics::RenderGraph::Instance().AddPass<WorldGBufferData>("EditorWorldGBuffer",
-                [](WorldGBufferData& data, Graphics::RenderGraphBuilder& builder)
+                [this](WorldGBufferData& data, Graphics::RenderGraphBuilder& builder)
                 {
                     IS_PROFILE_SCOPE("GBuffer pass setup");
 
@@ -178,10 +186,10 @@ namespace Insight
 
                     {
                         IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, data.RenderData);
+                        BindCommonResources(cmdList, m_renderingData);
                     }
 
-                    for (const RenderWorld& world : data.RenderData.RenderFrame.RenderWorlds)
+                    for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
                     {
 
                         for (const u64 meshIndex : world.OpaqueMeshIndexs)
@@ -219,16 +227,14 @@ namespace Insight
                 }, std::move(passData));
         }
 
-        void WorldViewWindow::TransparentGBufferPass(const RenderData& renderData)
+        void WorldViewWindow::TransparentGBufferPass()
         {
             struct WorldTransparentGBufferData
             {
-                RenderData RenderData;
                 glm::ivec2 RenderResolution;
             };
 
             WorldTransparentGBufferData passData;
-            passData.RenderData = renderData;
             passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldTransparentGBuffer",
@@ -304,10 +310,10 @@ namespace Insight
 
                     {
                         IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
-                        BindCommonResources(cmdList, data.RenderData);
+                        BindCommonResources(cmdList, m_renderingData);
                     }
 
-                    for (const RenderWorld& world : data.RenderData.RenderFrame.RenderWorlds)
+                    for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
                     {
                         for (const u64 meshIndex : world.TransparentMeshIndexs)
                         {
@@ -347,10 +353,6 @@ namespace Insight
 
         void WorldViewWindow::BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData)
         {
-            if (!renderData.FrameView.IsValid())
-            {
-                renderData.FrameView = cmd_list->UploadUniform(renderData.BufferFrame);
-            }
             cmd_list->SetUniform(0, 0, renderData.FrameView);
 
             cmd_list->SetSampler(4, 0, renderData.BufferSamplers.Shadow_Sampler);

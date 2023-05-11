@@ -41,8 +41,6 @@ namespace Insight
 			m_context = context;
 			for (size_t i = 0; i < m_context->GetFramesInFligtCount(); ++i)
 			{
-				m_pre_render_func.push_back(nullptr);
-				m_post_render_func.push_back(nullptr);
 				m_passes.push_back({});
 			}
 
@@ -59,6 +57,17 @@ namespace Insight
 			std::lock_guard lock(m_mutex);
 			std::swap(m_passesUpdateIndex, m_passesRenderIndex);
 			GetUpdatePasses().clear();
+
+			for (RenderGraphSyncFunc& func : m_syncFuncs)
+			{
+				func();
+			}
+			m_syncFuncs.clear();
+
+			m_renderPreRenderFunc = m_preRenderFunc;
+			m_renderPostRenderFunc = m_postRenderFunc;
+			m_preRenderFunc.clear();
+			m_postRenderFunc.clear();
 		}
 
 		void RenderGraph::Execute(RHI_CommandList* cmdList)
@@ -104,21 +113,26 @@ namespace Insight
 			PlaceBarriers();
 			cmdList->EndTimeBlock();
 
-			RenderGraphSetPreRenderFunc preRenderFunc = m_pre_render_func.at(m_passesRenderIndex);
-			cmdList->BeginTimeBlock("RG::PreRenderFunc");
-			if (preRenderFunc)
+			for (RenderGraphSetPreRenderFunc& preRenderFunc : m_renderPreRenderFunc)
 			{
-				preRenderFunc(*this, cmdList);
+				cmdList->BeginTimeBlock("RG::PreRenderFunc");
+				if (preRenderFunc)
+				{
+					preRenderFunc(*this, cmdList);
+				}
+				cmdList->EndTimeBlock();
 			}
-			cmdList->EndTimeBlock();
 
 			Render(cmdList);
 
-			RenderGraphSetPostRenderFunc postRenderFunc = m_post_render_func.at(m_passesRenderIndex);
-			cmdList->BeginTimeBlock("RG::PostRenderFunc");
-			if (postRenderFunc)
+			for (RenderGraphSetPostRenderFunc& postRenderFunc : m_renderPostRenderFunc)
 			{
-				postRenderFunc(*this, cmdList);
+				cmdList->BeginTimeBlock("RG::PostRenderFunc");
+				if (postRenderFunc)
+				{
+					postRenderFunc(*this, cmdList);
+				}
+				cmdList->EndTimeBlock();
 			}
 			cmdList->EndTimeBlock();
 		}
@@ -195,6 +209,23 @@ namespace Insight
 				Renderer::FreeResourceCache(textureCache);
 				textureCache = nullptr;
 			});
+		}
+
+		void RenderGraph::AddSyncPoint(RenderGraphSyncFunc func)
+		{
+			m_syncFuncs.push_back(std::move(func));
+		}
+
+		void RenderGraph::AddPreRender(RenderGraphSetPreRenderFunc func)
+		{
+			std::lock_guard lock(m_mutex);
+			m_preRenderFunc.push_back(std::move(func));
+		}
+		
+		void RenderGraph::AddPostRender(RenderGraphSetPreRenderFunc func)
+		{
+			std::lock_guard lock(m_mutex);
+			m_postRenderFunc.push_back(std::move(func));
 		}
 
 		void RenderGraph::Build()

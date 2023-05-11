@@ -254,12 +254,12 @@ namespace Insight
 				BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 			}
 
-			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+			RenderGraph::Instance().AddPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
 					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 				});
-			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+			RenderGraph::Instance().AddPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					GFXHelper::Reset();
 				});
@@ -371,12 +371,12 @@ namespace Insight
 
 			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 
-			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+			RenderGraph::Instance().AddPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
 					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 				});
-			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+			RenderGraph::Instance().AddPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
 					GFXHelper::Reset();
 				});

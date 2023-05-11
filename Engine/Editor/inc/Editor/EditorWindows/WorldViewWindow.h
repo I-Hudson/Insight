@@ -32,8 +32,8 @@ namespace Insight
 
         private:
             void SetupRenderGraphPasses();
-            void GBufferPass(const RenderData& renderData);
-            void TransparentGBufferPass(const RenderData& renderData);
+            void GBufferPass();
+            void TransparentGBufferPass();
 
             void BindCommonResources(Graphics::RHI_CommandList* cmd_list, RenderData& renderData);
 
@@ -44,6 +44,8 @@ namespace Insight
             constexpr static const char* c_WorldName = "EditorWorldView";
             ECS::Entity* m_editorCameraEntity;
             ECS::CameraComponent* m_editorCameraComponent;
+
+            RenderData m_renderingData;
         };
     }
 }

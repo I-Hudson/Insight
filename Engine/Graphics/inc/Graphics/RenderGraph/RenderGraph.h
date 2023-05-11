@@ -27,6 +27,7 @@ namespace Insight
 		{
 			using RenderGraphSetPreRenderFunc = std::function<void(RenderGraph&, RHI_CommandList*)>;
 			using RenderGraphSetPostRenderFunc = std::function<void(RenderGraph&, RHI_CommandList*)>;
+			using RenderGraphSyncFunc = std::function<void()>;
 
 		public:
 			RenderGraph();
@@ -48,8 +49,12 @@ namespace Insight
 
 			void Release();
 
-			void SetPreRender(RenderGraphSetPreRenderFunc func) { std::lock_guard lock(m_mutex); m_pre_render_func.at(m_passesUpdateIndex) = std::move(func); }
-			void SetPostRender(RenderGraphSetPreRenderFunc func) { std::lock_guard lock(m_mutex); m_post_render_func.at(m_passesUpdateIndex) = std::move(func); }
+			/// @brief Add a lambda which will be called when the render graph is synced between the update and render.
+			/// @param func 
+			void AddSyncPoint(RenderGraphSyncFunc func);
+
+			void AddPreRender(RenderGraphSetPreRenderFunc func);
+			void AddPostRender(RenderGraphSetPreRenderFunc func);
 
 			template<typename TData>
 			void AddPass(std::string passName, typename RenderGraphPass<TData>::SetupFunc setupFunc
@@ -117,8 +122,15 @@ namespace Insight
 			u32 m_passesUpdateIndex = 0;
 			u32 m_passesRenderIndex = 1;
 
-			std::vector<RenderGraphSetPreRenderFunc> m_pre_render_func;
-			std::vector<RenderGraphSetPostRenderFunc> m_post_render_func;
+			std::vector<RenderGraphSyncFunc> m_syncFuncs;
+			std::vector<RenderGraphSyncFunc> m_renderSyncFuncs;
+
+			std::vector<RenderGraphSetPreRenderFunc> m_preRenderFunc;
+			std::vector<RenderGraphSetPostRenderFunc> m_postRenderFunc;
+
+			std::vector<RenderGraphSetPreRenderFunc> m_renderPreRenderFunc;
+			std::vector<RenderGraphSetPostRenderFunc> m_renderPostRenderFunc;
+
 			std::vector<std::vector<UPtr<RenderGraphPassBase>>> m_passes;
 
 			/// @brief General render resolution to be used for all render passes. Can be overwritten.
