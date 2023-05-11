@@ -37,11 +37,15 @@ namespace Insight
 
 			if (m_isFullscreen)
 			{
-				if (ImGui::Begin(GetWindowName(), &m_isOpen, m_imguiWindowFlags))
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, static_cast<ImGuiWindowFlags>(m_imguiWindowFlags)))
 				{
 					const ImGuiIO& io = ImGui::GetIO();
 					ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
 					ImGui::SetWindowSize(ImVec2(static_cast<float>(io.DisplaySize.x), static_cast<float>(io.DisplaySize.y)));
+
+					ImVec2 windowSize = ImGui::GetWindowSize();
+					m_width = static_cast<u32>(windowSize.x);
+					m_height = static_cast<u32>(windowSize.y);
 
 					OnDraw();
 					if (!m_isOpen)
@@ -52,13 +56,13 @@ namespace Insight
 			}
 			else
 			{
-				if (ImGui::Begin(GetWindowName(), &m_isOpen, m_imguiWindowFlags))
+				if (ImGui::Begin(GetWindowName(), &m_isOpen, static_cast<ImGuiWindowFlags>(m_imguiWindowFlags)))
 				{
 					OnDraw();
 
 					ImVec2 windowPosition = ImGui::GetWindowPos();
-					m_positionX = windowPosition.x;
-					m_positionY = windowPosition.y;
+					m_positionX = static_cast<u32>(windowPosition.x);
+					m_positionY = static_cast<u32>(windowPosition.y);
 					ImVec2 windowSize = ImGui::GetWindowSize();
 					m_width = static_cast<u32>(windowSize.x);
 					m_height = static_cast<u32>(windowSize.y);

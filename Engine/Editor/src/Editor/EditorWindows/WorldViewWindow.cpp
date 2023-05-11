@@ -51,6 +51,8 @@ namespace Insight
 
         void WorldViewWindow::OnDraw()
         {
+            //const float windowAspect = ImGui::GetWindowSize().x / ImGui::GetWindowSize().y;
+            //m_editorCameraComponent->SetAspect(windowAspect);
             SetupRenderGraphPasses();
 
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture("EditorWorldColourRT");
@@ -95,11 +97,13 @@ namespace Insight
             struct WorldGBufferData
             {
                 RenderData RenderData;
+                glm::ivec2 RenderResolution;
             };
 
             WorldGBufferData passData =
             {
-                renderData
+                renderData,
+                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
             };
 
             Graphics::RenderGraph::Instance().AddPass<WorldGBufferData>("EditorWorldGBuffer",
@@ -107,25 +111,28 @@ namespace Insight
                 {
                     IS_PROFILE_SCOPE("GBuffer pass setup");
 
+                    const u32 renderResolutionX = builder.GetRenderResolution().x;
+                    const u32 renderResolutionY = builder.GetRenderResolution().y;
+
                     Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
-                          builder.GetRenderResolution().x
-                        , builder.GetRenderResolution().y
+                          renderResolutionX
+                        , renderResolutionY
                         , PixelFormat::R8G8B8A8_UNorm
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
                     Graphics::RGTextureHandle colourRT = builder.CreateTexture("EditorWorldColourRT", textureCreateInfo);
                     builder.WriteTexture(colourRT);
 
                     textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
-                          builder.GetRenderResolution().x
-                        , builder.GetRenderResolution().y
+                          renderResolutionX
+                        , renderResolutionY
                         , PixelFormat::R16G16B16A16_Float
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
                     Graphics::RGTextureHandle normal_rt = builder.CreateTexture("EditorWorldNormalRT", textureCreateInfo);
                     builder.WriteTexture(normal_rt);
 
                     textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
-                          builder.GetRenderResolution().x
-                        , builder.GetRenderResolution().y
+                          renderResolutionX
+                        , renderResolutionY
                         , PixelFormat::R16G16_Float
                         , Graphics::ImageUsageFlagsBits::ColourAttachment | Graphics::ImageUsageFlagsBits::Sampled);
                     Graphics::RGTextureHandle velocity_rt = builder.CreateTexture("EditorWorldVelocityRT", textureCreateInfo);
@@ -160,8 +167,8 @@ namespace Insight
                     }
                     builder.SetPipeline(gbufferPso);
 
-                    builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
-                    builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+                    builder.SetViewport(renderResolutionX, renderResolutionY);
+                    builder.SetScissor(renderResolutionX, renderResolutionY);
                 },
                 [this](WorldGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
                 {

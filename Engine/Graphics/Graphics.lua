@@ -43,7 +43,6 @@ project "Insight_Graphics"
         "%{IncludeDirs.spirv_reflect}",
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",
-        "%{IncludeDirs.optick}",
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.FFR2}",
@@ -93,8 +92,6 @@ project "Insight_Graphics"
         "DXGI.lib",
         "dxguid.lib",
         "dxcompiler.lib",
-        "Optickcore.lib",
-        --"tracy.lib",
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }
@@ -152,7 +149,6 @@ project "Insight_Graphics"
             "GenericCodeGen.lib",
             "OGLCompiler.lib",
             "OSDependent.lib",
-            "Optickcore.lib",
             "tracy.lib",
             "assimp.lib",
 

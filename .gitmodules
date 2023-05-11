@@ -19,9 +19,6 @@
 [submodule "vendor/assimp"]
 	path = vendor/assimp
 	url = https://github.com/assimp/assimp
-[submodule "vendor/optick"]
-	path = vendor/optick
-	url = https://github.com/bombomby/optick
 [submodule "vendor/doctest"]
 	path = vendor/doctest
 	url = https://github.com/doctest/doctest

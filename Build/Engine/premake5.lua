@@ -58,7 +58,6 @@ IncludeDirs["vma"] = "%{wks.location}vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
 IncludeDirs["spirv_reflect"] = "%{wks.location}vendor/SPIRV-Reflect"
 IncludeDirs["assimp"] = "%{wks.location}vendor/assimp/include"
-IncludeDirs["optick"] = "%{wks.location}vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
 IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"
 IncludeDirs["stb_image"] = "%{wks.location}vendor/stb"
@@ -128,7 +127,6 @@ workspace "Insight"
 
     includedirs
     {
-        "%{IncludeDirs.optick}",
         "%{IncludeDirs.tracy}",
         "%{IncludeDirs.doctest}",
         "%{IncludeDirs.pix}",
@@ -164,9 +162,6 @@ workspace "Insight"
             links { "tracy.lib", }
         filter { "configurations:Release" }
             links { "tracy.lib", }
-    end
-    if (profileTool == "optick") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
     end
     if (profileTool == "pix") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }

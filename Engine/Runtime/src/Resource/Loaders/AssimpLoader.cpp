@@ -14,7 +14,6 @@
 #include "Graphics/SimplygonWrapper.h"
 
 #include <assimp/Importer.hpp>
-//#include <assimp/Exporter.hpp>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
 #include <meshoptimizer.h>
@@ -297,12 +296,6 @@ namespace Insight
 		{
 			IS_PROFILE_FUNCTION();
 
-			glm::vec4 vertexColour;
-			vertexColour.x = (rand() % 100 + 1) * 0.01f;
-			vertexColour.y = (rand() % 100 + 1) * 0.01f;
-			vertexColour.z = (rand() % 100 + 1) * 0.01f;
-			vertexColour.w = 1.0f;
-
 			/// walk through each of the mesh's vertices
 			for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 			{
@@ -367,7 +360,7 @@ namespace Insight
 				loader_data.Vertices.push_back(vertex);
 			}
 
-			/// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+			/// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 			for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 			{
 				aiFace face = mesh->mFaces[i];

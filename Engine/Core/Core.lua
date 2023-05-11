@@ -21,7 +21,6 @@ project "Insight_Core"
     {
         "inc",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.optick}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.xxHash}",
         "%{IncludeDirs.glm}",
@@ -74,7 +73,6 @@ project "Insight_Core"
         symbols "On" 
         links
         {
-            "OptickCore.lib",
             "xxHashd.lib",
             "lz4d.lib",
         }
@@ -88,7 +86,6 @@ project "Insight_Core"
         optimize "On" 
         links
         {
-            "OptickCore.lib",
             "xxHash.lib",
             "lz4.lib",
         }

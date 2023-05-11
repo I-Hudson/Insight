@@ -33,7 +33,6 @@ project "InsightReflectTool"
 
     links
     {
-        "Optickcore.lib",
         "tracy.lib",
     }
 

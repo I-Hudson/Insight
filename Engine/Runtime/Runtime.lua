@@ -31,7 +31,6 @@ project "Insight_Runtime"
         "%{IncludeDirs.InsightInput}",
 
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.optick}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.glfw}",
@@ -71,8 +70,6 @@ project "Insight_Runtime"
         
         "glm.lib",
         "imgui.lib",
-        --"tracy.lib",
-        "OptickCore.lib",
         "meshoptimizer.lib",
     }
     if (profileTool == "pix") then
@@ -107,7 +104,6 @@ project "Insight_Runtime"
         symbols "On" 
         links
         {
-            "OptickCore.lib",
             "assimpd.lib",
             "Splashd.lib",
         }
@@ -121,7 +117,6 @@ project "Insight_Runtime"
         optimize "On" 
         links
         {
-            "OptickCore.lib",
             "assimp.lib",
             "Splash.lib",
         }

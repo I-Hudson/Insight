@@ -135,7 +135,6 @@ project "InsightStandalone"
         "DXGI.lib",
         "dxguid.lib",
         "dxcompiler.lib",
-        "Optickcore.lib",
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }
@@ -171,7 +170,6 @@ project "InsightStandalone"
         links
         {
             "Splashd.lib",
-            "OptickCore.lib",
             "glm.lib",
             "imgui.lib",
             "xxHashd.lib",
@@ -218,7 +216,6 @@ project "InsightStandalone"
         links
         {
             "Splash.lib",
-            "OptickCore.lib",
             "glm.lib",
             "imgui.lib",
             "xxHash.lib",
@@ -239,7 +236,6 @@ project "InsightStandalone"
             "GenericCodeGen.lib",
             "OGLCompiler.lib",
             "OSDependent.lib",
-            "Optickcore.lib",
             "assimp.lib",
 
             "ffx_fsr2_api_x64.lib",

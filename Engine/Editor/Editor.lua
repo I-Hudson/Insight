@@ -84,7 +84,6 @@ project "Insight_Editor"
         symbols "On"
         links
         {
-            "OptickCore.lib",
             "Reflectd.lib",
         }
         libdirs
@@ -98,7 +97,6 @@ project "Insight_Editor"
         optimize "On" 
         links
         {
-            "OptickCore.lib",
             "Reflect.lib",
         }
         libdirs
@@ -119,7 +117,6 @@ project "Insight_Editor"
         symbols "On"
         links
         {
-            "OptickCore.lib",
         }
         libdirs
         {

@@ -21,7 +21,6 @@ project "Insight_Maths"
     {
         "inc",
         "%{IncludeDirs.spdlog}",
-        "%{IncludeDirs.optick}",
         "%{IncludeDirs.imgui}",
     }
 
@@ -37,8 +36,6 @@ project "Insight_Maths"
     links
     {
         "imgui.lib",
-        --"tracy.lib",
-        "OptickCore.lib",
     }
     if (profileTool == "pix") then
         links
@@ -72,7 +69,6 @@ project "Insight_Maths"
         symbols "On" 
         links
         {
-            "OptickCore.lib",
         }
         libdirs
         {
@@ -84,7 +80,6 @@ project "Insight_Maths"
         optimize "On" 
         links
         {
-            "OptickCore.lib",
         }
         libdirs
         {

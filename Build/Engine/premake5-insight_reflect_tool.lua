@@ -13,7 +13,6 @@ VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
 IncludeDirs["reflect"] = "%{wks.location}vendor/Reflect/Reflect/inc"
-IncludeDirs["optick"] = "%{wks.location}vendor/optick/src"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
 IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"
 
@@ -54,10 +53,6 @@ workspace "InsightReflectTool"
     if (profileTool == "tracy") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
         includedirs { "%{IncludeDirs.tracy}", }
-    end
-    if (profileTool == "optick") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }
-        includedirs { "%{IncludeDirs.optick}", }
     end
     if (profileTool == "pix") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_PIX", "USE_PIX" }

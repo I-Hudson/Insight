@@ -63,6 +63,9 @@ namespace Insight
 				m_context = static_cast<RenderContext_DX12*>(context);
 				for (size_t i = 0; i < createInfo.Mip_Count; ++i)
 				{
+					// Clamp textures to 1x1.
+					createInfo.Width = std::max(createInfo.Width, 1);
+					createInfo.Height = std::max(createInfo.Height, 1);
 					m_infos.push_back(createInfo);
 				}
 
