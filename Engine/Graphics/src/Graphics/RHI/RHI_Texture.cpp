@@ -13,7 +13,7 @@
 #include "stb_image_write.h"
 
 #define RHI_TEXTURE_DEFER_ENABLED
-
+#pragma optimize("", off)
 namespace Insight
 {
 	namespace Graphics
@@ -51,7 +51,7 @@ namespace Insight
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
 #ifdef RHI_TEXTURE_DEFER_ENABLED
-			RenderContext::Instance().GetDeferredManager().Push(this, [this, createInfo, width, height, size_in_bytes, data](RHI_CommandList* cmdList)
+			m_deferedRequest = RenderContext::Instance().GetDeferredManager().Push([this, createInfo, width, height, size_in_bytes, data](RHI_CommandList* cmdList)
 				{
 					Create(&RenderContext::Instance(), createInfo);
 					m_uploadStatus = DeviceUploadStatus::Uploading;
@@ -72,7 +72,7 @@ namespace Insight
 		void RHI_Texture::Release()
 		{
 #ifdef RHI_TEXTURE_DEFER_ENABLED
-			RenderContext::Instance().GetDeferredManager().Remove(this);
+			RenderContext::Instance().GetDeferredManager().Remove(m_deferedRequest);
 #endif
 			RenderContext::Instance().GetUploadQueue().RemoveRequest(m_uploadRequest);
 		}

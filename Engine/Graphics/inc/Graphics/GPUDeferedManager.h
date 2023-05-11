@@ -13,17 +13,27 @@ namespace Insight
 	namespace Graphics
 	{
 		class RHI_CommandList;
+		using GPUDeferedFunc = std::function<void(RHI_CommandList*)>;
+
+		struct GPUDeferedRequest
+		{
+			u64 Id = 0;
+			bool Cancelled = false;
+			GPUDeferedFunc Func;
+		};
+
 		/// @brief Manage anything which is defered for GPU items.
 		class IS_GRAPHICS GPUDeferedManager : public Core::Singleton<GPUDeferedManager>
 		{
 			THREAD_SAFE;
-			using GPUDeferedFunc = std::function<void(RHI_CommandList*)>;
 		public:
-			void Push(void* pointer, GPUDeferedFunc func);
+			GPUDeferedRequest Push(GPUDeferedFunc func);
 			void Update(RHI_CommandList* cmd_list);
-			void Remove(void* pointer);
+			void Remove(GPUDeferedRequest request);
+
 		private:
-			std::vector<std::pair<void*, GPUDeferedFunc>> m_queue;
+			std::vector<GPUDeferedRequest> m_requests;
+			u64 m_requestId = 0;
 			std::mutex m_mutex;
 		};
 	}

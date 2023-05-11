@@ -9,10 +9,14 @@ namespace Insight
 {
 	namespace Graphics
 	{
-		void GPUDeferedManager::Push(void* pointer, GPUDeferedFunc func)
+		GPUDeferedRequest GPUDeferedManager::Push(GPUDeferedFunc func)
 		{
 			std::lock_guard lock(m_mutex);
-			m_queue.push_back(std::make_pair(pointer, func));
+			GPUDeferedRequest request;
+			request.Id = m_requestId++;
+			request.Func = std::move(func);
+			m_requests.push_back(request);
+			return request;
 		}
 
 		void GPUDeferedManager::Update(RHI_CommandList* cmd_list)
@@ -20,30 +24,31 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
 			cmd_list->BeginTimeBlock("GPUDeferedManager::Update");
-			for (auto const& [pointer, func] : m_queue)
+			for (auto const& request : m_requests)
 			{
-				func(cmd_list);
+				request.Func(cmd_list);
 			}
 			cmd_list->EndTimeBlock();
-			m_queue.clear();
+			m_requests.clear();
 		}
-		void GPUDeferedManager::Remove(void* pointer)
+
+		void GPUDeferedManager::Remove(GPUDeferedRequest request)
 		{
 			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
 			while (true)
 			{
-				auto iter = Algorithm::VectorFindIf(m_queue, [pointer](const std::pair<void*, GPUDeferedFunc>& pair)
+				auto iter = Algorithm::VectorFindIf(m_requests, [request](const GPUDeferedRequest& item)
 				{
-					return pointer == pair.first;
+					return request.Id == item.Id;
 				});
-				if (iter == m_queue.end())
+				if (iter == m_requests.end())
 				{
 					break;
 				}
 				else
 				{
-					m_queue.erase(iter);
+					m_requests.erase(iter);
 				}
 			}
 		}

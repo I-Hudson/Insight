@@ -51,7 +51,7 @@ namespace Insight
             //    });
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Graphics_Render_Resolution_Change, [this](const Core::Event& event)
                 {
-                    GPUDeferedManager::Instance().Push(this, [this](RHI_CommandList* cmdList)
+                    GPUDeferedManager::Instance().Push([this](RHI_CommandList* cmdList)
                         {
                             RenderContext::Instance().GpuWaitForIdle();
                             if (m_ffx_fsr2_context_description.callbacks.scratchBuffer != nullptr)

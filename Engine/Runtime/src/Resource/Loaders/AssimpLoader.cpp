@@ -107,7 +107,7 @@ namespace Insight
 			GenerateLODs(loader_data);
 			std::move(loader_data.Materials.begin(), loader_data.Materials.end(), std::back_inserter(loader_data.Model->m_materials));
 
-			Graphics::RenderContext::Instance().GetDeferredManager().Instance().Push(model, [model, loader_data](Graphics::RHI_CommandList* cmdList)
+			Graphics::RenderContext::Instance().GetDeferredManager().Instance().Push([model, loader_data](Graphics::RHI_CommandList* cmdList)
 				{
 					UploadGPUData(const_cast<AssimpLoaderData&>(loader_data));
 

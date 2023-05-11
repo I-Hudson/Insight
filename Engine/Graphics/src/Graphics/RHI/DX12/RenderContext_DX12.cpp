@@ -551,7 +551,7 @@ namespace Insight
 
 			void RenderContext_DX12::SetSwaphchainResolution(glm::ivec2 resolution)
 			{
-				m_gpu_defered_manager.Instance().Push(this, [this, resolution](RHI_CommandList* cmdList)
+				m_gpu_defered_manager.Instance().Push([this, resolution](RHI_CommandList* cmdList)
 					{
 						WaitForGpu();
 

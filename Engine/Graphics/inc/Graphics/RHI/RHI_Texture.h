@@ -4,6 +4,7 @@
 #include "Graphics/PixelFormat.h"
 #include "Graphics/RHI/RHI_Resource.h"
 #include "Graphics/RHI/RHI_UploadQueue.h"
+#include "Graphics/GPUDeferedManager.h"
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -103,6 +104,7 @@ namespace Insight
 		protected:
 			/// @brief Define the info for all mips of the image.
 			std::vector<RHI_TextureInfo> m_infos = { };
+			GPUDeferedRequest m_deferedRequest;
 			RHI_UploadQueueRequest* m_uploadRequest = nullptr;
 
 			friend class RHI_CommandList;
