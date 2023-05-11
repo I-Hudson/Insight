@@ -25,6 +25,8 @@ namespace Insight
 	{
 		void Editor::OnInit()
 		{
+			IS_PROFILE_FUNCTION();
+
 			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
 			std::string windowTitle = "Insight Editor";
@@ -52,6 +54,8 @@ namespace Insight
 
 		void Editor::OnUpdate()
 		{
+			IS_PROFILE_FUNCTION();
+
 			if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
 			{
 				m_editorWindowManager.AddWindow(ProjectWindow::WINDOW_NAME);
@@ -68,6 +72,8 @@ namespace Insight
 
 		void Editor::OnRender()
 		{
+			IS_PROFILE_FUNCTION();
+
 			const bool gameViewWindowActive = m_editorWindowManager.GetActiveWindow(GameViewWindow::WINDOW_NAME) != nullptr;
 			m_gameRenderpass->FrameSetup();
 			m_gameRenderpass->RenderMainPasses(gameViewWindowActive);
@@ -77,6 +83,8 @@ namespace Insight
 
 		void Editor::OnDestroy()
 		{
+			IS_PROFILE_FUNCTION();
+
 			m_gameRenderpass->Destroy();
 			Delete(m_gameRenderpass);
 

@@ -60,7 +60,7 @@ namespace Insight
             }
 
             ImVec2 windowSize = ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-            ImGui::Image(worldViewTexture, windowSize, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+            ImGui::Image(worldViewTexture, windowSize);
 
             TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName);
             if (world)
@@ -153,7 +153,7 @@ namespace Insight
                     Graphics::PipelineStateObject gbufferPso = { };
                     {
                         gbufferPso.Name = "EditorWorldGBuffer_PSO";
-                        gbufferPso.CullMode = Graphics::CullMode::None;
+                        gbufferPso.CullMode = Graphics::CullMode::Front;
                         gbufferPso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         gbufferPso.ShaderDescription = shaderDesc;
                         gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
@@ -274,7 +274,7 @@ namespace Insight
                         IS_PROFILE_SCOPE("SetPipelineStateObject");
                         pso.ShaderDescription = shaderDesc;
                         pso.Name = "EditorTransparent_GBuffer";
-                        pso.CullMode = Graphics::CullMode::None;
+                        pso.CullMode = Graphics::CullMode::Front;
                         pso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         pso.BlendEnable = true;
                         pso.SrcColourBlendFactor = Graphics::BlendFactor::SrcAlpha;

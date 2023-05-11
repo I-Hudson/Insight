@@ -64,6 +64,15 @@ namespace Insight
 
 	RenderFrame renderFrame;
 
+	enum class DefaultModels
+	{
+		Backpack,
+		SponzaMain,
+		SponzaMain_Curtains,
+		SponzaFull,
+	};
+	constexpr DefaultModels DefaultModelToLoad = DefaultModels::SponzaFull;
+
 	namespace Graphics
 	{
 
@@ -77,14 +86,24 @@ namespace Insight
 		float aspect = 0.0f;
 		void Renderpass::Create()
 		{
-			TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_diana = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/diana/source/Diana_C.obj", Runtime::Model::GetStaticResourceTypeId()));
-			//TObjectPtr<Runtime::Model> model_vulklan_scene = Runtime::ResourceManager::Load(Runtime::ResourceId("./Resources/models/vulkanscene_shadow_20.gltf", Runtime::Model::GetStaticResourceTypeId()));
-
-			modelsToAddToScene.push_back({ model_backpack, false });
-			//modelsToAddToScene.push_back(model_diana);
-
-			if constexpr (false)
+			if constexpr (DefaultModelToLoad == DefaultModels::Backpack)
+			{
+				TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+				modelsToAddToScene.push_back({ model_backpack, false });
+			}
+			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain)
+			{
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				modelsToAddToScene.push_back({ model_sponza, false });
+			}
+			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain_Curtains)
+			{
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				modelsToAddToScene.push_back({ model_sponza, false });
+				modelsToAddToScene.push_back({ model_sponza_curtains, false });
+			}
+			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaFull)
 			{
 				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
@@ -504,7 +523,7 @@ namespace Insight
 					PipelineStateObject pso = { };
 					pso.Name = "Cascade_Shadow_PSO";
 					pso.ShaderDescription = shader_description;
-					//pso.CullMode = CullMode::Front;
+					pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.DepthClampEnabled = false;
 					pso.DepthBaisEnabled = true;
@@ -548,7 +567,7 @@ namespace Insight
 								const RenderMesh& mesh = world.Meshes.at(meshIndex);
 								if (mesh.BoudingBox.GetRadius() < CasacdeMinRaius[i])
 								{
-									continue;
+									//continue;
 								}
 
 								struct alignas(16) Object
@@ -610,7 +629,7 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("Depth_Prepass_SetPipelineStateObject");
 						depth_Prepass_pso.Name = "Depth_Prepass_PSO";
-						depth_Prepass_pso.CullMode = CullMode::Back;
+						depth_Prepass_pso.CullMode = CullMode::Front;
 						depth_Prepass_pso.FrontFace = FrontFace::CounterClockwise;
 						depth_Prepass_pso.ShaderDescription = shaderDesc;
 
@@ -736,7 +755,7 @@ namespace Insight
 					{
 						IS_PROFILE_SCOPE("GBuffer-SetPipelineStateObject");
 						gbufferPso.Name = "GBuffer_PSO";
-						gbufferPso.CullMode = CullMode::None;
+						gbufferPso.CullMode = CullMode::Front;
 						gbufferPso.FrontFace = FrontFace::CounterClockwise;
 						gbufferPso.ShaderDescription = shaderDesc;
 						gbufferPso.DepthCompareOp = CompareOp::LessOrEqual;
@@ -932,7 +951,7 @@ namespace Insight
 						IS_PROFILE_SCOPE("SetPipelineStateObject");
 						pso.ShaderDescription = shaderDesc;
 						pso.Name = "Transparent_GBuffer";
-						pso.CullMode = CullMode::None;
+						pso.CullMode = CullMode::Front;
 						pso.FrontFace = FrontFace::CounterClockwise;
 						pso.BlendEnable = true;
 						pso.SrcColourBlendFactor = BlendFactor::SrcAlpha;
@@ -1219,7 +1238,7 @@ namespace Insight
 
 					pso.PrimitiveTopologyType = PrimitiveTopologyType::LineList;
 					pso.PolygonMode = PolygonMode::Line;
-					pso.CullMode = CullMode::None;
+					pso.CullMode = CullMode::Front;
 					pso.FrontFace = FrontFace::CounterClockwise;
 					pso.Dynamic_States.push_back(DynamicState::LineWidth);
 
@@ -1358,7 +1377,7 @@ namespace Insight
 
 					PipelineStateObject swapchainPso = { };
 					swapchainPso.Name = "Swapchain_PSO";
-					swapchainPso.CullMode = CullMode::None;
+					swapchainPso.CullMode = CullMode::Front;
 					swapchainPso.ShaderDescription = shaderDesc;
 					builder.SetPipeline(swapchainPso);
 
