@@ -22,6 +22,10 @@ namespace Insight
 		World::~World()
 		{ }
 
+		void World::Initialise()
+		{
+		}
+
 		void World::Destroy()
 		{
 			m_worldName = "Default";
@@ -79,6 +83,11 @@ namespace Insight
 		WorldStates World::GetWorldState() const
 		{
 			return m_worldState;
+		}
+
+		WorldTypes World::GetWorldType() const
+		{
+			return m_worldType;
 		}
 
 		void World::SetOnlySearchable(bool onlySearchable)

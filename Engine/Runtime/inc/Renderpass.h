@@ -107,9 +107,6 @@ namespace Insight
 			BufferLight m_directional_light;
 			BufferSamplers m_buffer_samplers;
 
-			ECS::Entity* m_editorCameraEntity;
-			ECS::CameraComponent* m_editorCameraComponent;
-
 			float m_taaJitterX;
 			float m_taaJitterY;
 		};

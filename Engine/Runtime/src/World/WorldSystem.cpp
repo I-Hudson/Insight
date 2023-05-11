@@ -1,5 +1,8 @@
 #include "World/WorldSystem.h"
 
+#include "ECS/Components/CameraComponent.h"
+#include "ECS/Components/FreeCameraControllerComponent.h"
+
 #include "Algorithm/Vector.h"
 
 #include "Core/Profiler.h"
@@ -18,7 +21,12 @@ namespace Insight
 
 		void WorldSystem::Initialise()
 		{
-			AddActiveWorld(CreateWorld("DefaultWorld"));
+			TObjectPtr<World> defaultWorld = CreateWorld("DefaultWorld");
+			Ptr<ECS::Entity> e = defaultWorld->AddEntity("MainCamera");
+			e->AddComponentByName(ECS::CameraComponent::Type_Name);
+			e->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
+
+			AddActiveWorld(defaultWorld);
 			m_state = Core::SystemStates::Initialised;
 		}
 
@@ -72,6 +80,7 @@ namespace Insight
 		{
 			TObjectOPtr<World> world = TObjectOPtr<World>(New<World, Core::MemoryAllocCategory::World>(std::move(worldName)));
 			world->m_worldType = worldType;
+			world->Initialise();
 			m_worlds.push_back(std::move(world));
 			return m_worlds.back();
 		}

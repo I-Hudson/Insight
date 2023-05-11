@@ -66,6 +66,11 @@ namespace Insight
         for (TObjectPtr<Runtime::World> const& world : worlds)
         {
             IS_PROFILE_SCOPE("RenderWorld");
+            if (world->GetWorldType() == Runtime::WorldTypes::Tools)
+            {
+                continue;
+            }
+
             RenderWorld renderWorld;
             std::vector<Ptr<ECS::Entity>> entities = world->GetAllEntitiesFlatten();
             renderWorld.Meshes.reserve(entities.size());
@@ -73,16 +78,21 @@ namespace Insight
             std::vector<Ptr<ECS::Entity>> cameraEntities = world->GetAllEntitiesWithComponentByName(ECS::CameraComponent::Type_Name);
             for (Ptr<ECS::Entity>& entity : cameraEntities)
             {
-                ECS::TransformComponent* transformComponent = entity->GetComponentByName<ECS::TransformComponent>
-                (ECS::TransformComponent::Type_Name);
                 ECS::CameraComponent* cameraComponent = entity->GetComponent<ECS::CameraComponent>();
                 if (renderWorld.MainCamera.IsSet)
                 {
-                    renderWorld.AddCamrea(cameraComponent->GetCamera(), transformComponent->GetTransform());
+                    renderWorld.AddCamrea(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
                 }
                 else
                 {
-                    renderWorld.SetMainCamera(cameraComponent->GetCamera(), transformComponent->GetTransform());
+                    renderWorld.SetMainCamera(cameraComponent->GetCamera(), cameraComponent->GetViewMatrix());
+                }
+
+                if (!MainCamera.IsSet)
+                {
+                    MainCamera.Camra = cameraComponent->GetCamera();
+                    MainCamera.Transform = cameraComponent->GetViewMatrix();
+                    MainCamera.IsSet = true;
                 }
             }
 
@@ -184,6 +194,8 @@ namespace Insight
     void RenderFrame::Clear()
     {
         RenderWorlds.clear();
+        MainCamera = {};
+        MainCamera.Transform = glm::mat4(0);
     }
 
     void RenderFrame::SortOpaqueMeshes()

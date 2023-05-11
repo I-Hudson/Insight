@@ -42,6 +42,7 @@ namespace Insight
 			World(World&& other);
 			~World();
 
+			void Initialise();
 			void Destroy();
 
 			void EarlyUpdate();
@@ -53,6 +54,8 @@ namespace Insight
 
 			void SetWorldState(WorldStates state);
 			WorldStates GetWorldState() const;
+
+			WorldTypes GetWorldType() const;
 
 			bool IsPersistentScene() const { return m_persistentScene; }
 

@@ -89,6 +89,8 @@ namespace Insight
     struct IS_RUNTIME RenderFrame
     {
         std::vector<RenderWorld> RenderWorlds;
+        /// @brief The main rendering camera for all render worlds.
+        RenderCamrea MainCamera;
 
         /// @brief Create our render frame from the world system.
         /// @param world 

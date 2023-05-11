@@ -103,17 +103,6 @@ namespace Insight
 			m_buffer_frame.View = glm::mat4(1.0f);
 			MainCameraFrustum = Graphics::Frustum(m_buffer_frame.View, m_buffer_frame.Projection, Main_Camera_Far_Plane);
 
-			// TODO: Moved into the Editor project.
-#if true//IS_EDITOR
-			TObjectPtr<Runtime::World> editorWorld = Runtime::WorldSystem::Instance().CreatePersistentWorld("EditorWorld", Runtime::WorldTypes::Tools);
-			editorWorld->SetOnlySearchable(true);
-			m_editorCameraEntity = editorWorld->AddEntity("EditorCamera").Get();
-
-			m_editorCameraEntity->AddComponentByName(ECS::TransformComponent::Type_Name);
-			m_editorCameraComponent = static_cast<ECS::CameraComponent*>(m_editorCameraEntity->AddComponentByName(ECS::CameraComponent::Type_Name));
-			m_editorCameraComponent->CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
-			m_editorCameraEntity->AddComponentByName(ECS::FreeCameraControllerComponent::Type_Name);
-#endif
 			RenderContext* render_context = &RenderContext::Instance();
 			RHI_SamplerManager& sampler_manager = render_context->GetSamplerManager();
 
@@ -196,10 +185,15 @@ namespace Insight
 			}
 
 			{
+				IS_PROFILE_SCOPE("Create render frame");
+				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+			}
+
+			{
 				IS_PROFILE_SCOPE("BufferFrame cameras");
-				m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
-				m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
-				m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
+				m_buffer_frame.Proj_View = renderFrame.MainCamera.Camra.GetProjectionViewMatrix();
+				m_buffer_frame.Projection = renderFrame.MainCamera.Camra.GetProjectionMatrix();
+				m_buffer_frame.View = renderFrame.MainCamera.Transform;
 			}
 
 			{
@@ -229,8 +223,8 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("BufferFrame resolutions");
-				m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
-				m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
+				m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camra.GetInvertedViewMatrix();
+				m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camra.GetInvertedProjectionViewMatrix();
 
 				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
 				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
@@ -250,16 +244,6 @@ namespace Insight
 				{
 					GFXHelper::Reset();
 				});
-
-			{
-				IS_PROFILE_SCOPE("Create render frame");
-				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
-				for (RenderWorld& world : renderFrame.RenderWorlds)
-				{
-					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
-				}
-				renderFrame.Sort();
-			}
 
 			if (render)
 			{
@@ -332,71 +316,51 @@ namespace Insight
 				ImGui::End();
 			}
 
-			{
-				IS_PROFILE_SCOPE("BufferFrame cameras");
-				m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
-				m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
-				m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
-			}
+			renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
 
+			m_buffer_frame.Proj_View = renderFrame.MainCamera.Camra.GetProjectionViewMatrix();
+			m_buffer_frame.Projection = renderFrame.MainCamera.Camra.GetProjectionMatrix();
+			m_buffer_frame.View = renderFrame.MainCamera.Camra.GetViewMatrix();
+
+			if (enableFSR)
 			{
-				IS_PROFILE_SCOPE("FSR2");
-				if (enableFSR)
+				glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+				RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
+				m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
+				m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
+
+				glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+				m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
+
+				if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
 				{
-					glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
-					RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
-					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
-					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
-
-					glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
-					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
-
-					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
-					{
-						glm::mat4 proj = m_buffer_frame.Projection;
-						proj[1][1] *= -1;
-						m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
-					}
-					else
-					{
-						m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
-					}
+					glm::mat4 proj = m_buffer_frame.Projection;
+					proj[1][1] *= -1;
+					m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+				}
+				else
+				{
+					m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
 				}
 			}
 
-			{
-				IS_PROFILE_SCOPE("BufferFrame resolutions");
-				m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
-				m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
+			m_buffer_frame.View_Inverted = renderFrame.MainCamera.Camra.GetInvertedViewMatrix();
+			m_buffer_frame.Projection_View_Inverted = renderFrame.MainCamera.Camra.GetInvertedProjectionViewMatrix();
 
-				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
-				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
-			}
+			m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+			m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
 
-			{
-				IS_PROFILE_SCOPE("GetCascades");
-				BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
-			}
+			BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
 
 			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
-								g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
-								g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
+					g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
+					g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
 				});
 			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
 				{
-								GFXHelper::Reset();
+					GFXHelper::Reset();
 				});
-
-			{
-				IS_PROFILE_SCOPE("Create render frame");
-				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
-				for (RenderWorld& world : renderFrame.RenderWorlds)
-				{
-					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
-				}
-				renderFrame.Sort();
-			}
 		}
 
 		void Renderpass::RenderMainPasses(bool render)
@@ -1185,9 +1149,9 @@ namespace Insight
 			PassData passData = {};
 			passData.BufferFrame = m_buffer_frame;
 
-			passData.NearPlane = m_editorCameraComponent->GetNearPlane();
-			passData.FarPlane = m_editorCameraComponent->GetFarPlane();
-			passData.FOVY = m_editorCameraComponent->GetFovY();
+			passData.NearPlane = renderFrame.MainCamera.Camra.GetNearPlane();
+			passData.FarPlane = renderFrame.MainCamera.Camra.GetFarPlane();
+			passData.FOVY = renderFrame.MainCamera.Camra.GetFovY();
 
 			RenderGraph::Instance().AddPass<PassData>("FSR2",
 				[](PassData& data, RenderGraphBuilder& builder)
