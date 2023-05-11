@@ -2,6 +2,7 @@
 #include "ECS/Components/TransformComponent.h"
 
 #include "Graphics/RenderContext.h"
+#include "Graphics/Window.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -139,6 +140,12 @@ namespace Insight
 		}
 
 		IS_SERIALISABLE_CPP(CameraComponent)
+
+		void CameraComponent::OnCreate()
+		{
+			const float aspect = (float)Graphics::Window::Instance().GetWidth() / (float)Graphics::Window::Instance().GetHeight();
+			CreatePerspective(glm::radians(90.0f), aspect, 0.1f, 1024.0f);
+		}
 
 		void CameraComponent::CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane)
 		{

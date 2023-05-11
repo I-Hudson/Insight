@@ -51,8 +51,6 @@ namespace Insight
 
         void WorldViewWindow::OnDraw()
         {
-            //const float windowAspect = ImGui::GetWindowSize().x / ImGui::GetWindowSize().y;
-            //m_editorCameraComponent->SetAspect(windowAspect);
             SetupRenderGraphPasses();
 
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture("EditorWorldColourRT");
@@ -62,7 +60,7 @@ namespace Insight
             }
 
             ImVec2 windowSize = ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
-            ImGui::Image(worldViewTexture, windowSize);
+            ImGui::Image(worldViewTexture, windowSize, ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
             TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName);
             if (world)
@@ -226,16 +224,20 @@ namespace Insight
             struct WorldTransparentGBufferData
             {
                 RenderData RenderData;
+                glm::ivec2 RenderResolution;
             };
 
             WorldTransparentGBufferData passData;
             passData.RenderData = renderData;
-
+            passData.RenderResolution = glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
 
             Graphics::RenderGraph::Instance().AddPass<WorldTransparentGBufferData>("EditorWorldTransparentGBuffer",
                 [](WorldTransparentGBufferData& data, Graphics::RenderGraphBuilder& builder)
                 {
                     IS_PROFILE_SCOPE("TransparentGBuffer pass setup");
+
+                    const u32 renderResolutionX = builder.GetRenderResolution().x;
+                    const u32 renderResolutionY = builder.GetRenderResolution().y;
 
                     Graphics::RGTextureHandle colourRT = builder.GetTexture("EditorWorldColourRT");
                     builder.WriteTexture(colourRT);
@@ -271,7 +273,7 @@ namespace Insight
                     {
                         IS_PROFILE_SCOPE("SetPipelineStateObject");
                         pso.ShaderDescription = shaderDesc;
-                        pso.Name = "Transparent_GBuffer";
+                        pso.Name = "EditorTransparent_GBuffer";
                         pso.CullMode = Graphics::CullMode::None;
                         pso.FrontFace = Graphics::FrontFace::CounterClockwise;
                         pso.BlendEnable = true;
@@ -289,8 +291,8 @@ namespace Insight
                     }
                     builder.SetPipeline(pso);
 
-                    builder.SetViewport(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
-                    builder.SetScissor(builder.GetRenderResolution().x, builder.GetRenderResolution().y);
+                    builder.SetViewport(renderResolutionX, renderResolutionY);
+                    builder.SetScissor(renderResolutionX, renderResolutionY);
                 },
                 [this](WorldTransparentGBufferData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
                 {

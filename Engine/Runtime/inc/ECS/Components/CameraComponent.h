@@ -84,6 +84,8 @@ namespace Insight
 
 			IS_SERIALISABLE_H(CameraComponent)
 
+			virtual void OnCreate() override;
+
 			void CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane);
 			void CreateOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
 
