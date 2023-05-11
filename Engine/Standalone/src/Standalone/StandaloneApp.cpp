@@ -8,6 +8,7 @@
 
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
+#include "Renderpass.h"
 
 #include <imgui.h>
 
@@ -32,6 +33,9 @@ namespace Insight
 			Graphics::Window::Instance().SetTite(windowTitle);
 			Graphics::Window::Instance().SetIcon("./Resources/Insight/default.png");
 			Graphics::Window::Instance().Show();
+
+			m_gameRenderpass = New<Graphics::Renderpass>();
+			m_gameRenderpass->Create();
 		}
 
 		void StandaloneApp::OnUpdate()
@@ -40,6 +44,16 @@ namespace Insight
 
 		void StandaloneApp::OnDestroy()
 		{
+			m_gameRenderpass->Destroy();
+			Delete(m_gameRenderpass);
+		}
+	
+		void StandaloneApp::OnRender()
+		{
+			m_gameRenderpass->FrameSetup();
+			m_gameRenderpass->RenderMainPasses(true);
+			m_gameRenderpass->RenderSwapchain(true);
+			m_gameRenderpass->RenderPostprocessing();
 		}
 	}
 }

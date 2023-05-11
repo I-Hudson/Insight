@@ -69,7 +69,10 @@ namespace Insight
 		void Editor::OnRender()
 		{
 			const bool gameViewWindowActive = m_editorWindowManager.GetActiveWindow(GameViewWindow::WINDOW_NAME) != nullptr;
-			m_gameRenderpass->Render(gameViewWindowActive);
+			m_gameRenderpass->FrameSetup();
+			m_gameRenderpass->RenderMainPasses(gameViewWindowActive);
+			m_gameRenderpass->RenderSwapchain(false);
+			m_gameRenderpass->RenderPostprocessing();
 		}
 
 		void Editor::OnDestroy()

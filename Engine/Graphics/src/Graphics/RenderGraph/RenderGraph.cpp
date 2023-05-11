@@ -91,7 +91,6 @@ namespace Insight
 				cmdList->BeginTimeBlock("RG::TextureCache->Release");
 				m_textureCaches.ForEach([](RHI_ResourceCache<RHI_Texture>* textureCache)
 				{
-					IS_CORE_INFO("RT: {}", (void*)textureCache->Get(textureCache->GetId("EditorWorldColourRT")));
 					textureCache->Release();
 				});
 				cmdList->EndTimeBlock();

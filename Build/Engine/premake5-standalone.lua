@@ -84,12 +84,16 @@ workspace "InsightStandalone"
 
     includedirs
     {
-
+        "%{IncludeDirs.tracy}",
     }
 
     if (profileTool == "tracy") then
-        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", "TRACY_CALLSTACK", }
-        includedirs { "%{IncludeDirs.tracy}", }
+        editandcontinue "off"
+        defines { "IS_PROFILE_ENABLED", "IS_PROFILE_TRACY", "TRACY_IMPORTS", "TRACY_ON_DEMAND", }
+        filter "configurations:Debug or configurations:Testing"
+            links { "tracy.lib", }
+        filter { "configurations:Release" }
+            links { "tracy.lib", }
     end
     if (profileTool == "optick") then
         defines { "IS_PROFILE_ENABLED", "IS_PROFILE_OPTICK" }

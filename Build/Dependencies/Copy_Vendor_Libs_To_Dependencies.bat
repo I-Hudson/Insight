@@ -19,9 +19,9 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRun
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.lib"                                 "lib"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\winpixeventruntime\bin\x64\WinPixEventRuntime.dll"		                            "dll"
 
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                         "dll"
-call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\d3d12SDKLayers.dll"                    "dll"
-call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                       "dll"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                         "dll\D3D12"
+call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\d3d12SDKLayers.dll"                    "dll\D3D12"
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\Microsoft.Direct3D.D3D12\build\native\bin\x64\D3D12Core.dll"                       "dll\D3D12"
 
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\concrt140d_app.dll"      "dll"
 call :COPY_TO_DEBUG_DEPS "..\..\vendor\Microsoft.VCRTForwarders.140\runtimes\win10-x64\native\debug\msvcp140_1d_app.dll"     "dll"
@@ -60,14 +60,21 @@ call :COPY_TO_DEBUG_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\SimplygonCWrapp
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\Simplygon.dll"                "dll"
 call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\SimplygonCWrapper.dll"        "dll"
 
+call :COPY_TO_RELEASE_DEPS "..\..\vendor\SimplygonSDK_10.1.11000.0\Simplygon.dll"                "dll"
 pause
 
 :COPY_TO_DEBUG_DEPS
 set lib_file="%cd%\%~1"
 set output="%cd%\..\..\deps\Debug-windows-x86_64\%~2\"
+if not exist %output% (
+    mkdir %output%
+)
 xcopy /Y /B %lib_file% %output%
 
 :COPY_TO_RELEASE_DEPS
 set output="%cd%\..\..\deps\Release-windows-x86_64\%~2\"
 set lib_file="%cd%\%~1"
+if not exist %output% (
+    mkdir %output%
+)
 xcopy /Y /B %lib_file% %output%

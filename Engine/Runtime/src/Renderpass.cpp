@@ -274,7 +274,7 @@ namespace Insight
 				Composite();
 				FSR2();
 			}
-			Swapchain();
+			Swapchain(true);
 			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
 			GFXHelper();
 			ImGuiPass();
@@ -287,6 +287,145 @@ namespace Insight
 			Graphics::RHI_FSR::Instance().Destroy();
 
 			Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().FindWorldByName("EditorWorld"));
+		}
+
+		void Renderpass::FrameSetup()
+		{
+			IS_PROFILE_FUNCTION();
+
+			ImGui::Begin("Renderpass options:");
+			ImGui::SliderInt("Mesh Lods", &MeshLod, 0, Runtime::Mesh::s_LOD_Count - 1);
+			ImGui::Checkbox("Use Material Batching", &RenderMaterialBatching);
+			ImGui::End();
+
+			{
+				IS_PROFILE_SCOPE("Add models to scene");
+				for (size_t i = 0; i < modelsToAddToScene.size(); ++i)
+				{
+					if (modelsToAddToScene.at(i).first
+						&& !modelsToAddToScene.at(i).second
+						&& modelsToAddToScene.at(i).first->GetResourceState() == Runtime::EResoruceStates::Loaded)
+					{
+						modelsToAddToScene.at(i).second = true;
+						for (size_t modelCreateIdx = 0; modelCreateIdx < 1; ++modelCreateIdx)
+						{
+							ECS::Entity* entity = modelsToAddToScene.at(i).first->CreateEntityHierarchy();
+
+							glm::mat4 transform(1.0f);
+							//transform[3] = glm::vec4(10.0f, 0.0f, 25.0f, 1.0f);
+							entity->GetComponent<ECS::TransformComponent>()->SetTransform(transform);
+						}
+
+						IS_CORE_INFO("Model '{}' added to scene.", modelsToAddToScene.at(i).first->GetFileName());
+					}
+				}
+			}
+
+			{
+				IS_PROFILE_SCOPE("Render Resolution");
+				ImGui::Begin("Render");
+				ImGui::DragInt2("Render Resolution", pendingRenderResolution);
+				if (ImGui::Button("Apply Render Resolution"))
+				{
+					RenderGraph::Instance().SetRenderResolution({ pendingRenderResolution[0], pendingRenderResolution[1] });
+				}
+				ImGui::End();
+			}
+
+			{
+				IS_PROFILE_SCOPE("BufferFrame cameras");
+				m_buffer_frame.Proj_View = m_editorCameraComponent->GetProjectionViewMatrix();
+				m_buffer_frame.Projection = m_editorCameraComponent->GetProjectionMatrix();
+				m_buffer_frame.View = m_editorCameraComponent->GetViewMatrix();
+			}
+
+			{
+				IS_PROFILE_SCOPE("FSR2");
+				if (enableFSR)
+				{
+					glm::ivec2 const renderResolution = RenderGraph::Instance().GetRenderResolution();
+					RHI_FSR::Instance().GenerateJitterSample(&m_taaJitterX, &m_taaJitterY);
+					m_taaJitterX = (m_taaJitterX / static_cast<float>(renderResolution.x));
+					m_taaJitterY = (m_taaJitterY / static_cast<float>(renderResolution.y));
+
+					glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(m_taaJitterX, m_taaJitterY, 0.0f));
+					m_buffer_frame.Projection = m_buffer_frame.Projection * translation;
+
+					if (RenderContext::Instance().GetGraphicsAPI() == GraphicsAPI::Vulkan)
+					{
+						glm::mat4 proj = m_buffer_frame.Projection;
+						proj[1][1] *= -1;
+						m_buffer_frame.Proj_View = proj * glm::inverse(m_buffer_frame.View);
+					}
+					else
+					{
+						m_buffer_frame.Proj_View = m_buffer_frame.Projection * glm::inverse(m_buffer_frame.View);
+					}
+				}
+			}
+
+			{
+				IS_PROFILE_SCOPE("BufferFrame resolutions");
+				m_buffer_frame.View_Inverted = m_editorCameraComponent->GetInvertedViewMatrix();
+				m_buffer_frame.Projection_View_Inverted = m_editorCameraComponent->GetInvertedProjectionViewMatrix();
+
+				m_buffer_frame.Render_Resolution = RenderGraph::Instance().GetRenderResolution();
+				m_buffer_frame.Ouput_Resolution = RenderGraph::Instance().GetOutputResolution();
+			}
+
+			{
+				IS_PROFILE_SCOPE("GetCascades");
+				BufferLight::GetCascades(m_directional_light, m_buffer_frame, 4, 0.95f);
+			}
+
+			RenderGraph::Instance().SetPreRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+								g_global_resources.Buffer_Frame_View = cmd_list->UploadUniform(m_buffer_frame);
+								g_global_resources.Buffer_Directional_Light_View = cmd_list->UploadUniform(m_directional_light);
+				});
+			RenderGraph::Instance().SetPostRender([this](RenderGraph& render_graph, RHI_CommandList* cmd_list)
+				{
+								GFXHelper::Reset();
+				});
+
+			{
+				IS_PROFILE_SCOPE("Create render frame");
+				renderFrame = App::Engine::Instance().GetSystemRegistry().GetSystem<Runtime::GraphicsSystem>()->GetRenderFrame();
+				for (RenderWorld& world : renderFrame.RenderWorlds)
+				{
+					world.SetMainCamera(m_editorCameraComponent->GetCamera(), m_editorCameraComponent->GetViewMatrix());
+				}
+				renderFrame.Sort();
+			}
+		}
+
+		void Renderpass::RenderMainPasses(bool render)
+		{
+			if (render)
+			{
+				ShadowPass();
+				//ShadowCullingPass();
+				if (Depth_Prepass)
+				{
+					//DepthPrepass();
+				}
+				GBuffer();
+				TransparentGBuffer();
+				Composite();
+				FSR2();
+			}
+		}
+
+		void Renderpass::RenderSwapchain(bool renderResultImage)
+		{
+			Swapchain(renderResultImage);
+		}
+
+		void Renderpass::RenderPostprocessing()
+		{
+			// Post processing. Happens after the main scene has finished rendering and the image has been supplied to the swapchain.
+			GFXHelper();
+			ImGuiPass();
 		}
 
 		glm::vec2 swapchainColour = { 0,0 };
@@ -1216,7 +1355,7 @@ namespace Insight
 				}, std::move(passData));
 		}
 
-		void Renderpass::Swapchain()
+		void Renderpass::Swapchain(bool renderResultImage)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -1265,7 +1404,7 @@ namespace Insight
 
 					builder.SetAsRenderToSwapchain();
 				},
-				[this](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
+				[this, renderResultImage](TestPassData& data, RenderGraph& renderGraph, RHI_CommandList* cmdList)
 				{
 					IS_PROFILE_SCOPE("Swapchain pass execute");
 
@@ -1275,15 +1414,19 @@ namespace Insight
 
 					if (data.RenderTarget != -1)
 					{
-						//cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
-						//cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
+						cmdList->SetTexture(0, 0, renderGraph.GetRHITexture(data.RenderTarget));
+						cmdList->SetSampler(1, 0, m_buffer_samplers.Clamp_Sampler);
 					}
 					else
 					{
-						//cmdList->SetTexture(0, 0, nullptr);
-						//cmdList->SetSampler(1, 0, nullptr);
+						cmdList->SetTexture(0, 0, nullptr);
+						cmdList->SetSampler(1, 0, nullptr);
 					}
-					//cmdList->Draw(3, 1, 0, 0);
+
+					if (renderResultImage)
+					{
+						cmdList->Draw(3, 1, 0, 0);
+					}
 
 					cmdList->EndRenderpass();
 				});

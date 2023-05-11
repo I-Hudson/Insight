@@ -82,6 +82,10 @@ namespace Insight
 			void Render(bool render = true);
 			void Destroy();
 
+			void FrameSetup();
+			void RenderMainPasses(bool render);
+			void RenderSwapchain(bool renderResultImage);
+			void RenderPostprocessing();
 
 		private:
 			void ShadowPass();
@@ -91,7 +95,7 @@ namespace Insight
 			void Composite();
 			void FSR2();
 			void GFXHelper();
-			void Swapchain();
+			void Swapchain(bool renderResultImage);
 			void ImGuiPass();
 
 			void BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers);

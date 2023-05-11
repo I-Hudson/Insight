@@ -136,7 +136,6 @@ project "InsightStandalone"
         "dxguid.lib",
         "dxcompiler.lib",
         "Optickcore.lib",
-        "tracy.lib",
         "meshoptimizer.lib",
         "GFSDK_Aftermath_Lib.x64.lib",
     }
@@ -144,6 +143,7 @@ project "InsightStandalone"
     libdirs
     {
         "%{LibDirs.vulkan}",
+        "%{LibDirs.deps_lib}",
     }
 
     filter { "kind:SharedLib or SharedLib" }
@@ -172,7 +172,6 @@ project "InsightStandalone"
         {
             "Splashd.lib",
             "OptickCore.lib",
-            "tracy.lib",
             "glm.lib",
             "imgui.lib",
             "xxHashd.lib",
@@ -220,7 +219,6 @@ project "InsightStandalone"
         {
             "Splash.lib",
             "OptickCore.lib",
-            "tracy.lib",
             "glm.lib",
             "imgui.lib",
             "xxHash.lib",
@@ -242,7 +240,6 @@ project "InsightStandalone"
             "OGLCompiler.lib",
             "OSDependent.lib",
             "Optickcore.lib",
-            "tracy.lib",
             "assimp.lib",
 
             "ffx_fsr2_api_x64.lib",
