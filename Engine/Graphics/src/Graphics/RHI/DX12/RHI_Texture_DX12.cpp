@@ -111,6 +111,7 @@ namespace Insight
 					&m_allocation,
 					IID_NULL, NULL));
 				SetName(m_name);
+				ASSERT(m_allocation);
 
 				if (m_infos.at(0).ImageUsage & ImageUsageFlagsBits::Sampled)
 				{

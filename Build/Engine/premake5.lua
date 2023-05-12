@@ -201,7 +201,8 @@ workspace "Insight"
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
-
+            
+            "USE_PIX",
             "NOMINMAX",
 
             "SPLASH_PLATFORM_WINDOWS",

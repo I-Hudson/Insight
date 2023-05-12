@@ -520,15 +520,12 @@ namespace Insight
 				colour.y = std::max(0.0f, std::min(1.0f, colour.y));
 				colour.z = std::max(0.0f, std::min(1.0f, colour.z));
 				UINT pixColour = PIX_COLOR(static_cast<BYTE>(colour.x * 255), static_cast<BYTE>(colour.y * 255), static_cast<BYTE>(colour.z * 255));
-				PIXSetMarker(pixColour, blockName.c_str());
 				PIXBeginEvent(m_commandList, pixColour, blockName.c_str());
-				m_nvtxRangehandle = nvtx3::start_range(blockName.c_str());
 			}
 
 			void RHI_CommandList_DX12::EndTimeBlock()
 			{
 				PIXEndEvent(m_commandList);
-				nvtx3::end_range(m_nvtxRangehandle);
 				m_nvtxRangehandle = {};
 			}
 

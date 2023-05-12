@@ -51,17 +51,21 @@ namespace Insight
 			createInfo.ImageUsage = ImageUsageFlagsBits::Sampled | ImageUsageFlagsBits::TransferDst;
 
 #ifdef RHI_TEXTURE_DEFER_ENABLED
-			m_deferedRequest = RenderContext::Instance().GetDeferredManager().Push([this, createInfo, width, height, size_in_bytes, data](RHI_CommandList* cmdList)
+			std::vector<Byte> imageData;
+			imageData.resize(size_in_bytes);
+			Platform::MemCopy(imageData.data(), data, size_in_bytes);
+			m_deferedRequest = RenderContext::Instance().GetDeferredManager().Push([this, createInfo, size_in_bytes, imageData](RHI_CommandList* cmdList)
 				{
 					Create(&RenderContext::Instance(), createInfo);
 					m_uploadStatus = DeviceUploadStatus::Uploading;
+
+					m_uploadRequest = QueueUpload((void*)imageData.data(), (int)size_in_bytes).Get();
+					m_uploadRequest->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
 				});
 #else
 			Create(&RenderContext::Instance(), createInfo);
 			Upload(data, static_cast<int>(size_in_bytes));
 #endif
-			m_uploadRequest = QueueUpload(data, (int)size_in_bytes).Get();
-			m_uploadRequest->OnUploadCompleted.Bind<&RHI_Texture::OnUploadComplete>(this);
 		}
 
 		RPtr<RHI_UploadQueueRequest> RHI_Texture::QueueUpload(void* data, int sizeInBytes)

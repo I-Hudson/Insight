@@ -567,7 +567,7 @@ namespace Insight
 								const RenderMesh& mesh = world.Meshes.at(meshIndex);
 								if (mesh.BoudingBox.GetRadius() < CasacdeMinRaius[i])
 								{
-									//continue;
+									continue;
 								}
 
 								struct alignas(16) Object

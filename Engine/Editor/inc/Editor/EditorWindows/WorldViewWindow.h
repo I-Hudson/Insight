@@ -32,6 +32,7 @@ namespace Insight
 
         private:
             void SetupRenderGraphPasses();
+            void GBufferDepthPrepass();
             void GBufferPass();
             void TransparentGBufferPass();
 
@@ -45,6 +46,7 @@ namespace Insight
             ECS::Entity* m_editorCameraEntity;
             ECS::CameraComponent* m_editorCameraComponent;
 
+            bool m_enableDepthPrepass = false;
             RenderData m_renderingData;
         };
     }

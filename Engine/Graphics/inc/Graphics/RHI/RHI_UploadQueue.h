@@ -33,7 +33,7 @@ namespace Insight
 		/// </summary>
 		struct IS_GRAPHICS RHI_UploadQueueRequest
 		{
-			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::Unknown;
+			std::atomic<DeviceUploadStatus> Status = DeviceUploadStatus::NotUploaded;
 			RHI_Resource* Resource = nullptr;
 			Core::Delegate<RHI_UploadQueueRequest*> OnUploadCompleted;
 		};

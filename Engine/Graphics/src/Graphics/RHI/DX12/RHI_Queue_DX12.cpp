@@ -104,7 +104,7 @@ namespace Insight
 
             void RHI_Queue_DX12::Wait(const u64 fenceValueToWait)
             {
-                nvtx3::scoped_range range{ "RHI_Queue_DX12::Wait" };
+                //nvtx3::scoped_range range{ "RHI_Queue_DX12::Wait" };
                 u64 fenceCompletedValue = m_dxSubmitFence.Get()->GetCompletedValue();
                 if (fenceCompletedValue < fenceValueToWait)
                 {
@@ -121,14 +121,14 @@ namespace Insight
 
             void RHI_Queue_DX12::Submit(const RHI_CommandList_DX12* cmdlist)
             {
-                nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };          
+                //nvtx3::scoped_range range{ "RHI_Queue_DX12::Submit" };          
                 ID3D12CommandList* ppCommandLists[] = { cmdlist->GetCommandList() };
                 m_dxQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
             }
 
             const u64 RHI_Queue_DX12::Signal()
             {
-                nvtx3::scoped_range range{ "RHI_Queue_DX12::Signal" };
+                //nvtx3::scoped_range range{ "RHI_Queue_DX12::Signal" };
 
                 // Increment the fence value for the current frame.
                 u64 newFenceValue = ++m_submitFenceValue.Get();
@@ -147,7 +147,7 @@ namespace Insight
 
             void RHI_Queue_DX12::SubmitAndWait(const RHI_CommandList_DX12* cmdlist)
             {
-                nvtx3::scoped_range range{ "RHI_Queue_DX12::SubmitAndWait" };
+                //nvtx3::scoped_range range{ "RHI_Queue_DX12::SubmitAndWait" };
                 const u64 fenceValue = SubmitAndSignal(cmdlist);
                 Wait(fenceValue);
             }

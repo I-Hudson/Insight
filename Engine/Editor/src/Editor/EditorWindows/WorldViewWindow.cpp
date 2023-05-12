@@ -65,7 +65,7 @@ namespace Insight
             TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName);
             if (world)
             {
-                ImGui::IsWindowFocused() ? 
+                ImGui::IsWindowFocused() ?
                     world->SetWorldState(Runtime::WorldStates::Running) : world->SetWorldState(Runtime::WorldStates::Paused);
             }
         }
@@ -96,8 +96,116 @@ namespace Insight
                     m_renderingData.FrameView = cmdList->UploadUniform(m_renderingData.BufferFrame);
                 });
 
+            if (m_enableDepthPrepass)
+            {
+                GBufferDepthPrepass();
+            }
             GBufferPass();
             TransparentGBufferPass();
+        }
+
+        void WorldViewWindow::GBufferDepthPrepass()
+        {
+            struct WorldDepthPrepassData
+            {
+                glm::ivec2 RenderResolution;
+            };
+
+            WorldDepthPrepassData passData =
+            {
+                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
+            };
+
+            Graphics::RenderGraph::Instance().AddPass<WorldDepthPrepassData>("EditorWorldDepthPrepass",
+            [this](WorldDepthPrepassData& data, Graphics::RenderGraphBuilder& builder)
+            {
+                IS_PROFILE_SCOPE("Depth Prepass setup");
+
+                const u32 renderResolutionX = builder.GetRenderResolution().x;
+                const u32 renderResolutionY = builder.GetRenderResolution().y;
+
+                Graphics::RHI_TextureInfo textureCreateInfo = Graphics::RHI_TextureInfo::Tex2D(
+                      renderResolutionX
+                    , renderResolutionY
+                    , PixelFormat::D32_Float
+                    , Graphics::ImageUsageFlagsBits::DepthStencilAttachment | Graphics::ImageUsageFlagsBits::Sampled);
+                Graphics::RGTextureHandle depthStencil = builder.CreateTexture("EditorWorldDepthStencilRT_Prepass", textureCreateInfo);
+                builder.WriteDepthStencil(depthStencil);
+
+                Graphics::ShaderDesc shaderDesc;
+                {
+                    shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
+                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
+                }
+                builder.SetShader(shaderDesc);
+
+                Graphics::PipelineStateObject gbufferPso = { };
+                {
+                    gbufferPso.Name = "EditorWorldPrepass_PSO";
+                    gbufferPso.CullMode = Graphics::CullMode::Front;
+                    gbufferPso.FrontFace = Graphics::FrontFace::CounterClockwise;
+                    gbufferPso.ShaderDescription = shaderDesc;
+                    gbufferPso.DepthCompareOp = Graphics::CompareOp::LessOrEqual;
+
+                    if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
+                    {
+                        gbufferPso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                    }
+                }
+                builder.SetPipeline(gbufferPso);
+
+                builder.SetViewport(renderResolutionX, renderResolutionY);
+                builder.SetScissor(renderResolutionX, renderResolutionY);
+            },
+            [this](WorldDepthPrepassData& data, Graphics::RenderGraph& render_graph, Graphics::RHI_CommandList* cmdList)
+            {
+                IS_PROFILE_SCOPE("EditorWorldDepthPrepass pass execute");
+
+                Graphics::PipelineStateObject pso = render_graph.GetPipelineStateObject("EditorWorldDepthPrepass");
+                cmdList->BindPipeline(pso, nullptr);
+                cmdList->BeginRenderpass(render_graph.GetRenderpassDescription("EditorWorldDepthPrepass"));
+
+                {
+                    IS_PROFILE_SCOPE("Set Buffer Frame Uniform");
+                    BindCommonResources(cmdList, m_renderingData);
+                }
+
+                for (const RenderWorld& world : m_renderingData.RenderFrame.RenderWorlds)
+                {
+
+                    for (const u64 meshIndex : world.OpaqueMeshIndexs)
+                    {
+                        IS_PROFILE_SCOPE("Draw Entity");
+                        const RenderMesh& mesh = world.Meshes.at(meshIndex);
+
+                        Graphics::BufferPerObject object = {};
+                        object.Transform = mesh.Transform;
+                        object.Previous_Transform = mesh.Transform;
+
+                        {
+                            IS_PROFILE_SCOPE("Set textures");
+
+                            const RenderMaterial& renderMaterial = mesh.Material;
+                            // Theses sets and bindings shouldn't chagne.
+                            Graphics::RHI_Texture* diffuseTexture = renderMaterial.Textures[(u64)Runtime::TextureTypes::Diffuse];
+                            if (diffuseTexture)
+                            {
+                                cmdList->SetTexture(3, 0, diffuseTexture);
+                                object.Textures_Set[0] = 1;
+                            }
+                        }
+
+                        cmdList->SetUniform(2, 0, object);
+
+                        const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(0);
+                        cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);
+                        cmdList->SetIndexBuffer(renderMeshLod.Index_buffer, Graphics::IndexType::Uint32);
+                        cmdList->DrawIndexed(renderMeshLod.Index_count, 1, renderMeshLod.First_index, renderMeshLod.Vertex_offset, 0);
+                        ++Graphics::RenderStats::Instance().MeshCount;
+                    }
+                }
+                cmdList->EndRenderpass();
+            }, std::move(passData));
         }
 
         void WorldViewWindow::GBufferPass()
@@ -105,11 +213,13 @@ namespace Insight
             struct WorldGBufferData
             {
                 glm::ivec2 RenderResolution;
+                bool DepthPrepassEnabled;
             };
 
             WorldGBufferData passData =
             {
-                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y)
+                glm::ivec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y),
+                m_enableDepthPrepass
             };
 
             Graphics::RenderGraph::Instance().AddPass<WorldGBufferData>("EditorWorldGBuffer",
@@ -169,6 +279,12 @@ namespace Insight
                         if (Graphics::RenderContext::Instance().IsRenderOptionsEnabled(Graphics::RenderOptions::ReverseZ))
                         {
                             gbufferPso.DepthCompareOp = Graphics::CompareOp::GreaterOrEqual;
+                        }
+
+                        if (data.DepthPrepassEnabled)
+                        {
+                            gbufferPso.DepthWrite = false;
+                            gbufferPso.DepthCompareOp = Graphics::CompareOp::Equal;
                         }
                     }
                     builder.SetPipeline(gbufferPso);
@@ -253,7 +369,7 @@ namespace Insight
                     builder.WriteTexture(velocity_rt);
                     Graphics::RGTextureHandle depth = builder.GetTexture("EditorWorldDepthStencilRT");
                     builder.WriteDepthStencil(depth);
-                    
+
                     Graphics::RenderpassDescription renderpassDescription = {};
                     renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Load(builder.GetRHITexture(colourRT)->GetFormat(), Graphics::ImageLayout::ColourAttachment));
                     renderpassDescription.AddAttachment(Graphics::AttachmentDescription::Load(builder.GetRHITexture(normal_rt)->GetFormat(), Graphics::ImageLayout::ColourAttachment));

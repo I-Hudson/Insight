@@ -34,7 +34,7 @@ namespace Insight
 			glm::vec4 ClearColour = glm::vec4(0, 0, 0, 1);
 
 			ImageLayout Layout = ImageLayout::Undefined;
-			DeviceUploadStatus InitalStatus = DeviceUploadStatus::Unknown;
+			DeviceUploadStatus InitalStatus = DeviceUploadStatus::NotUploaded;
 
 			static RHI_TextureInfo Tex2D(int width, int height, PixelFormat format, ImageUsageFlags usage)
 			{

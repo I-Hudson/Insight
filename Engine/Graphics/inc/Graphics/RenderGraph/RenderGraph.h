@@ -50,6 +50,7 @@ namespace Insight
 			void Release();
 
 			/// @brief Add a lambda which will be called when the render graph is synced between the update and render.
+			/// Before the render thread is signalled for execution.
 			/// @param func 
 			void AddSyncPoint(RenderGraphSyncFunc func);
 

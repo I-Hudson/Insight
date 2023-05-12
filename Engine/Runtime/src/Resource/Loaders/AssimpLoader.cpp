@@ -446,7 +446,7 @@ namespace Insight
 
 			{
 				IS_PROFILE_SCOPE("Create new texture");
-				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::LoadSync(ResourceId(material_file_path, Texture2D::GetStaticResourceTypeId())).operator Insight::Runtime::IResource *());
+				Texture2D* texture = static_cast<Texture2D*>(ResourceManager::LoadSync(ResourceId(material_file_path, Texture2D::GetStaticResourceTypeId())).Get());
 				material->SetTexture(textureType, texture);
 				material->AddReferenceResource(texture);
 			}

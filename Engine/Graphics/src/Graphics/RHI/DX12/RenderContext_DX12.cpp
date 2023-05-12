@@ -604,6 +604,7 @@ namespace Insight
 
 			std::vector<u64> RenderContext_DX12::ResolveTimeStamps(RHI_CommandList* cmdList)
 			{
+				cmdList->BeginTimeBlock("ResolveTimestamp queries");
 				const RHI_CommandList_DX12* cmdListDX12 = static_cast<RHI_CommandList_DX12*>(cmdList);
 				const RHI_Buffer_DX12* bufferDX12 = static_cast<RHI_Buffer_DX12*>(m_timeStampReadbackBuffer);
 				// Resolve the data
@@ -620,6 +621,7 @@ namespace Insight
 					m_timeStampCurrentCount = 0;
 
 					m_timeStampCurrentIndex = (m_timeStampCurrentIndex + m_timeStampQueryMaxCountPerFrame) % (m_timeStampQueryMaxCountPerFrame * 2);
+					cmdList->EndTimeBlock();
 					return {};
 				}
 
@@ -633,6 +635,7 @@ namespace Insight
 				m_timeStampPreviousCount = m_timeStampCurrentCount;
 				m_timeStampCurrentCount = 0;
 
+				cmdList->EndTimeBlock();
 				return queryData;
 			}
 

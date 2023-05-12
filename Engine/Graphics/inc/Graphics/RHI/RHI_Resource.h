@@ -36,7 +36,7 @@ namespace Insight
 			std::string m_name;
 
 		protected:
-			DeviceUploadStatus m_uploadStatus = DeviceUploadStatus::Unknown;
+			DeviceUploadStatus m_uploadStatus = DeviceUploadStatus::NotUploaded;
 			mutable std::mutex m_mutex;
 
 			friend struct RHI_UploadQueueRequestInternal;

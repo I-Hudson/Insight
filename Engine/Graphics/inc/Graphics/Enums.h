@@ -547,7 +547,7 @@ namespace Insight
 
 		enum class DeviceUploadStatus
 		{
-			Unknown,
+			NotUploaded,
 			Queued,
 			Uploading,
 			Completed
