@@ -33,7 +33,6 @@ Some features are:
 
 ##### Profiles
 - [tracy](https://github.com/wolfpld/tracy)
-- [optick](https://optick.dev)
 
 ##### Other
 - [doctest](https://github.com/doctest/doctest)
