@@ -1,5 +1,7 @@
 #include "Maths/MathsUtils.h"
 
+#include <cassert>
+
 namespace Insight
 {
 	namespace Maths
@@ -92,7 +94,7 @@ namespace Insight
         {
 #ifdef IS_MATHS_DIRECTX_MATHS
             return Matrix4(DirectX::XMMatrixRotationAxis(vec.xmvector, angle));
-//#else
+#else
             Vector4 normal = vec.Normalised();;
             return Matrix4RotationNormal(normal, angle);
 #endif
@@ -102,7 +104,7 @@ namespace Insight
         {
 #ifdef IS_MATHS_DIRECTX_MATHS
             return Matrix4(DirectX::XMMatrixRotationNormal(normalAxis.xmvector, Angle));
-//#else
+#else
             float    fSinAngle;
             float    fCosAngle;
             ScalerSinCos(&fSinAngle, &fCosAngle, Angle);
@@ -136,7 +138,6 @@ namespace Insight
             M[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
             return M;
 #endif
-
         }
 
         void ScalerSinCos(float* pSin, float* pCos, float  Value)

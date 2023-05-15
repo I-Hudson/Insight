@@ -50,6 +50,16 @@ namespace Insight
 
 			m_gameRenderpass = New<Graphics::Renderpass>();
 			m_gameRenderpass->Create();
+
+			glm::vec4 vec4A;
+			glm::vec4 vec4B;
+
+			auto vecC = vec4A * vec4B;
+
+			glm::mat4 mat4A;
+			glm::mat4 mat4B;
+			auto mat4C = mat4A * mat4B;
+
 		}
 
 		void Editor::OnUpdate()

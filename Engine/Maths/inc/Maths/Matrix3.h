@@ -18,7 +18,7 @@ namespace Insight
 		{
 		public:
 			Matrix3();
-			Matrix3(float m00, float m01, float m02, 
+			Matrix3(float m00, float m01, float m02,
 				float m10, float m11, float m12,
 				float m20, float m21, float m22);
 			Matrix3(const Matrix3& other);
@@ -81,6 +81,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 				// Vector3 is off size XMVECTOR which is a vector 4.
 				struct { DirectX::XMMATRIX xmmatrix; };
+#endif
 				struct 
 				{ 
 					Vector3 v0; float e0;
@@ -96,16 +97,6 @@ namespace Insight
 						m_20, m_21, m_22, m_23,
 						m_30, m_31, m_32, m_33;
 				};
-#else
-				struct { Vector3 data[3]; };
-				struct
-				{
-					float
-						m_00, m_01, m_02,
-						m_10, m_11, m_12,
-						m_20, m_21, m_22;
-				};
-#endif
 			};
 
 			static const Matrix3 Zero;

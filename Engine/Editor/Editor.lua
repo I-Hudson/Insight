@@ -109,7 +109,6 @@ project "Insight_Editor"
     filter "configurations:Testing" 
         links
         {
-            "doctest.lib",
         }
 
     filter "configurations:Testing"

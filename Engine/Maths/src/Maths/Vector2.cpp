@@ -284,11 +284,10 @@ namespace Insight
 	}
 }
 
-#if 0
-//#ifdef TEST_ENABLED
+#ifdef IS_TESTING
 #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
 #define DOCTEST_CONFIG_IMPLEMENT
-#include "doctest.h"
+#include <doctest.h>
 namespace test
 {
 	using namespace Insight::Maths;
@@ -309,36 +308,44 @@ namespace test
 			CHECK(vec.y == 117.117f);
 		}
 
-		TEST_CASE("Multiplcation")
+		TEST_CASE("Multiplication")
 		{
 			Vector2 one = Vector2(10.0f, 50.0f);
 			Vector2 two = Vector2(5.0f, 2.5f);
-			Vector2 result = one * two;
-			CHECK(result.x == 50.0f);
-			CHECK(result.y == 125.0f);
 
-			result = one *= Vector2(0.15f, 75.0f);
+			Vector2 resultA = one * two;
+			Vector2 resultB = two * one;
+			CHECK(resultA.x == 50.0f);
+			CHECK(resultA.y == 125.0f);
+			CHECK(resultB.x == 50.0f);
+			CHECK(resultB.y == 125.0f);
+
+			resultA = one *= Vector2(0.15f, 75.0f);
 			CHECK(one.x == 1.5f);
 			CHECK(one.y == 3750.0f);
-
-			CHECK(result.x == one.x);
-			CHECK(result.y == one.y);
+			CHECK(resultA.x == one.x);
+			CHECK(resultA.y == one.y);
 		}
 
 		TEST_CASE("Divide")
 		{
 			Vector2 one = Vector2(10.0f, 50.0f);
 			Vector2 two = Vector2(5.0f, 2.5f);
-			Vector2 result = one / two;
-			CHECK(result.x == 2.0f);
-			CHECK(result.y == 20.0f);
 
-			result = one /= Vector2(50.0f, 5.0f);
+			Vector2 resultA = one / two;
+			Vector2 resultB = two / one;
+
+			CHECK(resultA.x == 2.0f);
+			CHECK(resultA.y == 20.0f);
+			CHECK(resultB.x == 0.5f);
+			CHECK(resultB.y == 0.05f);
+
+			resultA = one /= Vector2(50.0f, 5.0f);
+
 			CHECK(one.x == 0.2f);
 			CHECK(one.y == 10.0f);
-
-			CHECK(result.x == one.x);
-			CHECK(result.y == one.y);
+			CHECK(resultA.x == one.x);
+			CHECK(resultA.y == one.y);
 		}
 
 		TEST_CASE("Length")
@@ -356,6 +363,11 @@ namespace test
 
 			two = Vector2(-1.0f, 0.0f);
 			CHECK(one.Dot(two) == -1.0f);
+
+			one = Vector2(-6, 8);
+			two = Vector2(5, 12);
+			float result = one.Dot(two);
+			CHECK(result == 66.0f);
 		}
 
 		TEST_CASE("Equal")

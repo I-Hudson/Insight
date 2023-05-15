@@ -197,7 +197,7 @@ workspace "Insight"
         {
             "IS_PLATFORM_WINDOWS",
             "IS_PLATFORM_WIN32",
-            "IS_MATHS_DIRECTX_MATHS",
+            --"IS_MATHS_DIRECTX_MATHS",
             "IS_DX12_ENABLED",
             "IS_VULKAN_ENABLED",
             "IS_CPP_WINRT",
@@ -233,9 +233,8 @@ workspace "Insight"
     filter "configurations:Testing"
         defines
         {
-            --"TESTING",
+            "IS_TESTING",
             "TEST_ENABLED",
-            --"DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL",
         }
         files 
         { 

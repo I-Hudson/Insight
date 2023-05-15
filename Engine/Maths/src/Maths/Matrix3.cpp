@@ -207,9 +207,9 @@ namespace Insight
 			const Vector3 vec_x = Vector3(other.x);
 
 			Vector3 result;
-			result = vec_z * Vector3(data[2].x, data[2].y, data[2].z);
-			result = vec_y * Vector3(data[1].x, data[1].y, data[1].z) + result;
-			result = vec_x * Vector3(data[0].x, data[0].y, data[0].z) + result;
+			result = vec_z * Vector3(v2.x, v2.y, v2.z);
+			result = vec_y * Vector3(v1.x, v1.y, v1.z) + result;
+			result = vec_x * Vector3(v0.x, v0.y, v0.z) + result;
 			return result;
 #endif
 		}
@@ -220,23 +220,23 @@ namespace Insight
 #else
 			Matrix3 m;
 
-			float x = data[0][0];
-			float y = data[0][1];
-			float z = data[0][2];
+			float x = v0[0];
+			float y = v0[1];
+			float z = v0[2];
 			m[0][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z);
 			m[0][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z);
 			m[0][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z);
 
-			x = data[1][0];
-			y = data[1][1];
-			z = data[1][2];
+			x = v1[0];
+			y = v1[1];
+			z = v1[2];
 			m[1][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z);
 			m[1][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z);
 			m[1][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z);
 
-			x = data[2][0];
-			y = data[2][1];
-			z = data[2][2];
+			x = v2[0];
+			y = v2[1];
+			z = v2[2];
 			m[2][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z);
 			m[2][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z);
 			m[2][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z);
@@ -329,8 +329,7 @@ namespace Insight
 	}
 }
 
-#if 0
-//#ifdef TEST_ENABLED
+#ifdef IS_TESTING
 #include "doctest.h"
 namespace test
 {
@@ -349,7 +348,7 @@ namespace test
 		TEST_CASE("Inverse")
 		{
 			Matrix3 one = Matrix3(
-				12,75,0.45,
+				12,75,0.45f,
 				65,15,8,
 				125,40,5);
 			Matrix3 inv = one.Inversed();

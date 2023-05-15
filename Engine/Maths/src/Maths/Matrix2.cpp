@@ -3,6 +3,8 @@
 
 #include "Maths/MathsUtils.h"
 
+#include <cassert>
+
 namespace Insight
 {
 	namespace Maths
@@ -87,6 +89,12 @@ namespace Insight
 #endif
 			return *this;
 		}
+
+		Matrix2 Matrix2::Inversed() const
+		{
+			return Matrix2(*this).Inverse();
+		}
+
 		Matrix2 Matrix2::Transpose()
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -98,6 +106,11 @@ namespace Insight
 			*this = tran;
 #endif
 			return *this;
+		}
+
+		Matrix2 Matrix2::Transposed() const
+		{
+			return Matrix2(*this).Transpose();
 		}
 
 		Vector2& Matrix2::operator[](int i)
@@ -169,8 +182,8 @@ namespace Insight
 			const Vector2 vec_x = Vector2(other.x);
 
 			Vector2 result;
-			result = vec_y * Vector2(data[1].x, data[1].y) + result;
-			result = vec_x * Vector2(data[0].x, data[0].y) + result;
+			result = vec_y * Vector2(v1.x, v1.y) + result;
+			result = vec_x * Vector2(v0.x, v0.y) + result;
 			return result;
 #endif
 		}
@@ -263,8 +276,7 @@ namespace Insight
 	}
 }
 
-#if 0
-//#ifdef TEST_ENABLED
+#ifdef IS_TESTING
 #include "doctest.h"
 namespace test
 {
@@ -318,7 +330,7 @@ namespace test
 			CHECK(result == Matrix2::Identity);
 		}
 
-		TEST_CASE("Multiplcation")
+		TEST_CASE("Multiplication")
 		{
 			Matrix2 one = Matrix2(5, 10,
 								  25,9);
@@ -331,16 +343,27 @@ namespace test
 			CHECK(Equals(result.m_10, 77.0f, 0.0001f));
 			CHECK(Equals(result.m_11, 161.0f, 0.0001f));
 
+			CHECK(Equals(result.v0[0], 40.0f, 0.0001f));
+			CHECK(Equals(result.v0[1], 65.0f, 0.0001f));
+			CHECK(Equals(result.v1[0], 77.0f, 0.0001f));
+			CHECK(Equals(result.v1[1], 161.0f, 0.0001f));
+
 			Vector2 vec = Vector2(5, 7);
 			result = one *= vec;
 			CHECK(Equals(result.m_00, 25.0f, 0.0001f));
 			CHECK(Equals(result.m_01, 50.0f, 0.0001f));
 			CHECK(Equals(result.m_10, 175.0f, 0.0001f));
 			CHECK(Equals(result.m_11, 63.0f, 0.0001f));
+
+			CHECK(Equals(result.v0[0], 25.0f, 0.0001f));
+			CHECK(Equals(result.v0[1], 50.0f, 0.0001f));
+			CHECK(Equals(result.v1[0], 175.0f, 0.0001f));
+			CHECK(Equals(result.v1[1], 63.0f, 0.0001f));
+
 			CHECK(result == one);
 		}
 
-		TEST_CASE("Divition")
+		TEST_CASE("Division")
 		{
 			Matrix2 one = Matrix_Test;
 			Matrix2 two = Matrix2(2, 5,

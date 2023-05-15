@@ -32,13 +32,13 @@ namespace Insight
 			Matrix2 Inverse();
 			/// @brief Return the inverse of this matrix.
 			/// @return Matrix2
-			Matrix2 Inversed() const { return Matrix2(*this).Inverse(); }
+			Matrix2 Inversed() const;
 			/// @brief Transpose this matrix and return a copy (Modifies this matrix).
 			/// @return Matrix2
 			Matrix2 Transpose();
 			/// @brief Return the Transpose of this matrix.
 			/// @return Matrix2
-			Matrix2 Transposed() const { return Matrix2(*this).Transpose(); }
+			Matrix2 Transposed() const;
 
 			Vector2& operator[](int i);
 			Vector2& operator[](unsigned int i);
@@ -79,6 +79,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 				// Vector2 is off size XMVECTOR which is a vector 4.
 				struct { DirectX::XMMATRIX xmmatrix; };
+#endif
 				struct 
 				{ 
 					Vector2 v0; float e02;  float e03;
@@ -94,15 +95,6 @@ namespace Insight
 						m_20, m_21, m_22, m_23,
 						m_30, m_31, m_32, m_33;
 				};
-#else
-				struct { Vector2 data[2]; };
-				struct
-				{
-					float
-						m_00, m_01,
-						m_10, m_11;
-				};
-#endif
 			};
 
 			static const Matrix2 Zero;

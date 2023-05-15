@@ -3,6 +3,8 @@
 
 #include "Maths/MathsUtils.h"
 
+#include <cassert>
+
 namespace Insight
 {
 	namespace Maths
@@ -33,10 +35,10 @@ namespace Insight
 			, m_30(0.0f), m_31(0.0f), m_32(0.0f), m_33(0.0f)
 #endif
 		{
-			data[0] = Vector4::Zero;
-			data[1] = Vector4::Zero;
-			data[2] = Vector4::Zero;
-			data[3] = Vector4::Zero;
+			v0 = Vector4::Zero;
+			v1 = Vector4::Zero;
+			v2 = Vector4::Zero;
+			v3 = Vector4::Zero;
 		}
 		Matrix4::Matrix4(	float m00, float m01, float m02, float m03,
 							float m10, float m11, float m12, float m13,
@@ -55,10 +57,10 @@ namespace Insight
 			, m_30(m30), m_31(m31), m_32(m32), m_33(m33)
 #endif
 		{
-			data[0] = Vector4(m00, m01, m02, m03);
-			data[1] = Vector4(m10, m11, m12, m13);
-			data[2] = Vector4(m20, m21, m22, m23);
-			data[3] = Vector4(m30, m31, m32, m33);
+			v0 = Vector4(m00, m01, m02, m03);
+			v1 = Vector4(m10, m11, m12, m13);
+			v2 = Vector4(m20, m21, m22, m23);
+			v3 = Vector4(m30, m31, m32, m33);
 		}
 		Matrix4::Matrix4(const Matrix4& other)
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -222,19 +224,75 @@ namespace Insight
 
 		Vector4& Matrix4::operator[](int i)
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			case 3:
+				return v3;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		Vector4& Matrix4::operator[](unsigned int i)
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			case 3:
+				return v3;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		const Vector4& Matrix4::operator[](int i) const
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			case 3:
+				return v3;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 		const Vector4& Matrix4::operator[](unsigned int i) const
 		{
-			return data[i];
+			switch (i)
+			{
+			case 0:
+				return v0;
+			case 1:
+				return v1;
+			case 2:
+				return v2;
+			case 3:
+				return v3;
+			default:
+				break;
+			}
+			assert(false);
+			return v0;
 		}
 
 		bool Matrix4::operator==(const Matrix4& other) const
@@ -262,6 +320,52 @@ namespace Insight
 			return *this;
 		}
 
+		Matrix4 Matrix4::operator*(const Matrix4& other)
+		{
+#ifdef IS_MATHS_DIRECTX_MATHS
+			return Matrix4(DirectX::XMMatrixMultiply(xmmatrix, other.xmmatrix));
+#else
+			Matrix4 m;
+
+			float x = v0[0];
+			float y = v0[1];
+			float z = v0[2];
+			float w = v0[3];
+			m[0][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
+			m[0][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
+			m[0][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
+			m[0][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+
+			x = v1[0];
+			y = v1[1];
+			z = v1[2];
+			w = v1[3];
+			m[1][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
+			m[1][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
+			m[1][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
+			m[1][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+
+			x = v2[0];
+			y = v2[1];
+			z = v2[2];
+			w = v2[3];
+			m[2][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
+			m[2][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
+			m[2][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
+			m[2][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+
+			x = v3[0];
+			y = v3[1];
+			z = v3[2];
+			w = v3[3];
+			m[3][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
+			m[3][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
+			m[3][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
+			m[3][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
+
+			return m;
+#endif
+		}
 		Vector4 Matrix4::operator*(const Vector4& other)
 		{
 #ifdef IS_MATHS_DIRECTX_MATHS
@@ -274,60 +378,14 @@ namespace Insight
 			return Vector4(x, y, z, w);
 #endif
 		}
-		Matrix4 Matrix4::operator*(const Matrix4& other)
-		{
-#ifdef IS_MATHS_DIRECTX_MATHS
-			return Matrix4(DirectX::XMMatrixMultiply(xmmatrix, other.xmmatrix));
-#else
-			Matrix4 m;
 
-			float x = data[0][0];
-			float y = data[0][1];
-			float z = data[0][2];
-			float w = data[0][3];
-			m[0][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[0][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[0][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[0][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
-
-			x = data[1][0];
-			y = data[1][1];
-			z = data[1][2];
-			w = data[1][3];
-			m[1][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[1][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[1][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[1][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
-
-			x = data[2][0];
-			y = data[2][1];
-			z = data[2][2];
-			w = data[2][3];
-			m[2][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[2][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[2][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[2][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
-
-			x = data[3][0];
-			y = data[3][1];
-			z = data[3][2];
-			w = data[3][3];
-			m[3][0] = (other.m_00 * x) + (other.m_10 * y) + (other.m_20 * z) + (other.m_30 * w);
-			m[3][1] = (other.m_01 * x) + (other.m_11 * y) + (other.m_21 * z) + (other.m_31 * w);
-			m[3][2] = (other.m_02 * x) + (other.m_12 * y) + (other.m_22 * z) + (other.m_32 * w);
-			m[3][3] = (other.m_03 * x) + (other.m_13 * y) + (other.m_23 * z) + (other.m_33 * w);
-
-			return m;
-#endif
-		}
-
-		Vector4 Matrix4::operator/(const Vector4& other)
-		{
-			return Inversed() * other;
-		}
 		Matrix4 Matrix4::operator/(const Matrix4& other)
 		{
 			return *this * other.Inversed();
+		}
+		Vector4 Matrix4::operator/(const Vector4& other)
+		{
+			return Inversed() * other;
 		}
 
 		Matrix4 Matrix4::operator-(const Matrix4& other)
@@ -348,71 +406,70 @@ namespace Insight
 				, m_30 + other.m_30, m_31 + other.m_31, m_32 + other.m_32, m_33 + other.m_33);
 		}
 
-		Matrix4 Matrix4::operator*=(const Vector4& other)
-		{
-			data[0] *= other.x;
-			data[1] *= other.y;
-			data[2] *= other.z;
-			data[3] *= other.w;
-			return *this;
-		}
 		Matrix4 Matrix4::operator*=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) * other;
 			return *this;
 		}
-
-		Matrix4 Matrix4::operator/=(const Vector4& other)
+		Matrix4 Matrix4::operator*=(const Vector4& other)
 		{
-			data[0] /= other.x;
-			data[1] /= other.y;
-			data[2] /= other.z;
-			data[3] /= other.w;
+			v0 *= other.x;
+			v1 *= other.y;
+			v2 *= other.z;
+			v3 *= other.w;
 			return *this;
 		}
+
 		Matrix4 Matrix4::operator/=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) / other;
 			return *this;
 		}
-
-		Matrix4 Matrix4::operator-=(const Vector4& other)
+		Matrix4 Matrix4::operator/=(const Vector4& other)
 		{
-			data[0] -= other.x;
-			data[1] -= other.y;
-			data[2] -= other.z;
-			data[3] -= other.w;
+			v0 /= other.x;
+			v1 /= other.y;
+			v2 /= other.z;
+			v3 /= other.w;
 			return *this;
 		}
+
 		Matrix4 Matrix4::operator-=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) - other;
 			return *this;
 		}
-
-		Matrix4 Matrix4::operator+=(const Vector4& other)
+		Matrix4 Matrix4::operator-=(const Vector4& other)
 		{
-			data[0] += other.x;
-			data[1] += other.y;
-			data[2] += other.z;
-			data[3] += other.w;
+			v0 -= other.x;
+			v1 -= other.y;
+			v2 -= other.z;
+			v3 -= other.w;
 			return *this;
 		}
+
 		Matrix4 Matrix4::operator+=(const Matrix4& other)
 		{
 			*this = Matrix4(*this) + other;
 			return *this;
 		}
+		Matrix4 Matrix4::operator+=(const Vector4& other)
+		{
+			v0 += other.x;
+			v1 += other.y;
+			v2 += other.z;
+			v3 += other.w;
+			return *this;
+		}
 
 		const float* Matrix4::Data() const
 		{
-			return data[0].Data();
+			return v0.Data();
 		}
 	}
 }
 
-#if 0
-//#ifdef TEST_ENABLED
+#ifdef IS_TESTING
 #include "doctest.h"
 namespace test
 {
@@ -485,7 +542,7 @@ namespace test
 			CHECK(result == Matrix4::Identity);
 		}
 
-		TEST_CASE("Multiplcation")
+		TEST_CASE("Multiplication")
 		{
 			Matrix4 one(
 				4, 5, 3, 7,
@@ -555,45 +612,67 @@ namespace test
 			CHECK(Equals(result_vec.w, 109.000f, 0.001f));
 		}
 
-		/*TEST_CASE("Divition")
+		TEST_CASE("Division")
 		{
 			Matrix4 one(
-				2, 3, 1,
-				7, 4, 1,
-				9, -2, 1);
+				4, 5, 3, 7,
+				5, 2, 4, 9,
+				10, 2, 3, 1,
+				27, 3, -85, 5);
 			Matrix4 two(
-				9, -2, -1,
-				5, 7, 3,
-				8, 1, 0);
+				1, 2, 8, 3,
+				2, 4, 34, 1,
+				20, 1, 10, 89,
+				1, 5, 7, 5.8f);
 
 			Matrix4 result = one / two;
-			CHECK(Equals(result.m_00, -0.625f, 0.001f));
-			CHECK(Equals(result.m_01,  0.125f, 0.001f));
-			CHECK(Equals(result.m_02,  0.875f, 0.001f));
+			CHECK(Equals(result.m_00, 35.088f, 0.001f));
+			CHECK(Equals(result.m_01, -6.406f, 0.001f));
+			CHECK(Equals(result.m_02, -0.523f, 0.001f));
+			CHECK(Equals(result.m_03, -7.805f, 0.001f));
 
-			CHECK(Equals(result.m_10, -1.000f, 0.001f));
-			CHECK(Equals(result.m_11,  0.000f, 0.001f));
-			CHECK(Equals(result.m_12,  2.000f, 0.001f));
+			CHECK(Equals(result.m_10, 35.519f, 0.001f));
+			CHECK(Equals(result.m_11, -6.321f, 0.001f));
+			CHECK(Equals(result.m_12, -0.460f, 0.001f));
+			CHECK(Equals(result.m_13, -8.658f, 0.001f));
 
-			CHECK(Equals(result.m_20,  5.250f, 0.001f));
-			CHECK(Equals(result.m_21,  2.083f, 0.001f));
-			CHECK(Equals(result.m_22, -6.083f, 0.001f));
+			CHECK(Equals(result.m_20, 114.772f, 0.001f));
+			CHECK(Equals(result.m_21, -20.477f, 0.001f));
+			CHECK(Equals(result.m_22, -1.752f, 0.001f));
+			CHECK(Equals(result.m_23, -28.776f, 0.001f));
 
-			Vector4 vec = Vector4(5, 7, 10);
-			result = one /= vec;
-			CHECK(Equals(result.m_00, 0.400f, 0.001f));
-			CHECK(Equals(result.m_01, 0.600f, 0.001f));
-			CHECK(Equals(result.m_02, 0.200f, 0.001f));
+			CHECK(Equals(result.m_30, 375.839f, 0.001f));
+			CHECK(Equals(result.m_31, -70.199f, 0.001f));
+			CHECK(Equals(result.m_32, -5.801f, 0.001f));
+			CHECK(Equals(result.m_33, -92.415f, 0.001f));
 
-			CHECK(Equals(result.m_10, 1.0f, 0.001f));
+			one /= two;
+			CHECK(one == result);
+
+			Vector4 vec = Vector4(5, 7, 10, 4);
+			result = two /= vec;
+			CHECK(Equals(result.m_00, 0.2f, 0.001f));
+			CHECK(Equals(result.m_01, 0.4f, 0.001f));
+			CHECK(Equals(result.m_02, 1.6f, 0.001f));
+			CHECK(Equals(result.m_03, 0.6f, 0.001f));
+
+			CHECK(Equals(result.m_10, 0.285f, 0.001f));
 			CHECK(Equals(result.m_11, 0.571f, 0.001f));
-			CHECK(Equals(result.m_12, 0.142f, 0.001f));
+			CHECK(Equals(result.m_12, 4.857f, 0.001f));
+			CHECK(Equals(result.m_13, 0.142f, 0.001f));
 
-			CHECK(Equals(result.m_20,  0.900f, 0.001f));
-			CHECK(Equals(result.m_21, -0.200f, 0.001f));
-			CHECK(Equals(result.m_22,  0.100f, 0.001f));
-			CHECK(result == one);
-		}*/
+			CHECK(Equals(result.m_20, 2.f, 0.001f));
+			CHECK(Equals(result.m_21, 0.1f, 0.001f));
+			CHECK(Equals(result.m_22, 1.f, 0.001f));
+			CHECK(Equals(result.m_23, 8.9f, 0.001f));
+
+			CHECK(Equals(result.m_30, 0.25f, 0.001f));
+			CHECK(Equals(result.m_31, 1.25f, 0.001f));
+			CHECK(Equals(result.m_32, 1.75f, 0.001f));
+			CHECK(Equals(result.m_33, 1.45f, 0.001f));
+
+			CHECK(result == two);
+		}
 
 		/*TEST_CASE("Subtraction")
 		{
