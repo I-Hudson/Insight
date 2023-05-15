@@ -33,7 +33,6 @@ namespace Insight
 			m_worldType = WorldTypes::Game;
 			m_root_entities_guids.clear();
 			m_entityManager.Destroy();
-			m_cameraEntity = {};
 
 			m_persistentScene = false;
 			m_onlySearchable = false;
@@ -160,6 +159,7 @@ namespace Insight
 
 		void World::Deserialise(Serialisation::ISerialiser* serialiser)
 		{
+			Destroy();
 			Serialisation::SerialiserObject<World> serialiserObject;
 			serialiserObject.Deserialise(serialiser, *this);
 			m_entityManager.SetWorld(this);

@@ -66,12 +66,13 @@ namespace Insight
 
 	enum class DefaultModels
 	{
+		None,
 		Backpack,
 		SponzaMain,
 		SponzaMain_Curtains,
 		SponzaFull,
 	};
-	constexpr DefaultModels DefaultModelToLoad = DefaultModels::SponzaFull;
+	constexpr DefaultModels DefaultModelToLoad = DefaultModels::None;
 
 	namespace Graphics
 	{

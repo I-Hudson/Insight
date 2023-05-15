@@ -3,8 +3,6 @@
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
 
-#include "Serialisation/PropertySerialiser.h"
-
 #include <string>
 #include <array>
 #include <xhash>
@@ -46,38 +44,6 @@ namespace Insight
 
 			template<typename>
 			friend struct std::hash;
-			template<typename>
-			friend struct Serialisation::PropertySerialiser;
-			template<typename>
-			friend struct Serialisation::PropertyDeserialiser;
-		};
-	}
-
-	namespace Serialisation
-	{
-		template<>
-		struct PropertySerialiser<Core::GUID>
-		{
-			using InType = Core::GUID;
-			std::string operator()(Core::GUID const& object)
-			{
-				std::string guidString = object.ToString();
-				Core::GUID stringToGuid;
-				stringToGuid.StringToGuid(guidString);
-				assert(stringToGuid == object);
-				return object.ToString();
-			}
-		};
-		template<>
-		struct PropertyDeserialiser<Core::GUID>
-		{
-			using InType = std::string;
-			Core::GUID operator()(InType const& data)
-			{
-				Core::GUID result;
-				result.StringToGuid(data);
-				return result;
-			}
 		};
 	}
 }

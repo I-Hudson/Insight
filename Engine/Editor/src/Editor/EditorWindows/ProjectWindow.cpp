@@ -81,7 +81,7 @@ namespace Insight
                 if (ImGui::Button(ICON_FA_FOLDER))
                 {
                     PlatformFileDialog fileDialog;
-                    fileDialog.Show(PlatformFileDialogOperations::SelectFile, &projectPath, { { "isproject", " * .isproject"}});
+                    fileDialog.Show(PlatformFileDialogOperations::SelectFile, &projectPath, { FileDialogFilter{ L"isproject", L"*.isproject"}});
                 }
 
                 if (ImGui::Button("Open"))

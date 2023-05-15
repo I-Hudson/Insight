@@ -27,12 +27,12 @@ namespace Insight
             return ShowLoad(selectedItem, {});
         }
 
-        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
         {
             return Show(PlatformFileDialogOperations::SaveFile, selectedItem, fileFilters);
         }
 
-        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
         {
             return Show(PlatformFileDialogOperations::LoadFile, selectedItem, fileFilters);
         }
@@ -42,28 +42,8 @@ namespace Insight
             return Show(operation, selectedItem, {});
         }
 
-        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
         {
-            std::string filter;
-            // Place '!' instead of '\0' as when appending to the string some '\0' characters are overwritten.
-            // This is down to '\0' being the null terminate char so when appending to the string 
-            // '\0' is seen as the end on the string, when it's not. So use '!' then just replace '!' with '\0' later.
-            filter = "All ()!*.*!";
-            for (size_t i = 0; i < fileFilters.size(); ++i)
-            {
-                std::string displayText = fileFilters.at(i).first;
-                RemoveWhilteSpaces(displayText);
-                std::string extensionText = fileFilters.at(i).second;
-                RemoveWhilteSpaces(extensionText);
-
-                filter += displayText;
-                filter += "!";
-                filter += extensionText;
-                filter += "!";
-            }
-            filter += "!";
-            std::replace(filter.begin(), filter.end(), '!', '\0');
-
             if (operation == PlatformFileDialogOperations::LoadFile 
                 || operation == PlatformFileDialogOperations::SelectFile 
                 || operation == PlatformFileDialogOperations::SelectFolder
@@ -111,13 +91,28 @@ namespace Insight
             return 0;
         }
 
-        bool PlatformFileDialogWindows::OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        bool PlatformFileDialogWindows::OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
         {
             IFileOpenDialog* openDialogHandle;
             HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&openDialogHandle));
             ASSERT(SUCCEEDED(hr));
 
             openDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+
+            std::vector<COMDLG_FILTERSPEC> fileTypes;
+            fileTypes.resize(fileFilters.size());
+            for (size_t i = 0; i < fileTypes.size(); ++i)
+            {
+                fileTypes.at(i).pszName = fileFilters.at(i).Name;
+                fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
+            }
+
+            hr = openDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
+            if (hr != S_OK)
+            {
+                openDialogHandle->Release();
+                return false;
+            }
 
             hr = openDialogHandle->Show(NULL);
             if (hr != S_OK)
@@ -159,13 +154,33 @@ namespace Insight
             return true;
         }
 
-        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters)
+        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
         {
             IFileSaveDialog* saveDialogHandle;
             HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
             ASSERT(SUCCEEDED(hr));
 
-            saveDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+            hr = saveDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
+            if (hr != S_OK)
+            {
+                saveDialogHandle->Release();
+                return false;
+            }
+
+            std::vector<COMDLG_FILTERSPEC> fileTypes;
+            fileTypes.resize(fileFilters.size());
+            for (size_t i = 0; i < fileTypes.size(); ++i)
+            {
+                fileTypes.at(i).pszName = fileFilters.at(i).Name;
+                fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
+            }
+
+            hr = saveDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
+            if (hr != S_OK)
+            {
+                saveDialogHandle->Release();
+                return false;
+            }
 
             hr = saveDialogHandle->Show(NULL);
             if (hr != S_OK)

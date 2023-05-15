@@ -2,6 +2,8 @@
 
 #include "Platforms/Platform.h"
 
+#include <stdexcept>
+
 namespace Insight
 {
 	namespace Core

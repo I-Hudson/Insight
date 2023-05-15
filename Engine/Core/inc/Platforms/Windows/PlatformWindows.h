@@ -40,7 +40,7 @@ namespace Insight
 			static void AssignGUID(Core::GUID& guid);
 
 			static bool IsMainThread();
-			static bool IsDebuggerPresent();
+			static bool IsDebuggerAttached();
 
 			static Core::CPUInformation GetCPUInformation();
 			static Core::MemoryInformation GetMemoryInformation();

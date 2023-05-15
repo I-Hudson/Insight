@@ -7,6 +7,8 @@
 
 #include "Platforms/Platform.h"
 
+#include "Core/GUID.h"
+
 #include <glm/ext/vector_float2.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/vector_float4.hpp>
@@ -22,6 +24,20 @@ namespace Insight
 {
     namespace Serialisation
     {
+        template<>
+        struct PropertySerialiser<Core::GUID>
+        {
+            using InType = Core::GUID;
+            std::string operator()(Core::GUID const& object)
+            {
+                std::string guidString = object.ToString();
+                Core::GUID stringToGuid;
+                stringToGuid.StringToGuid(guidString);
+                assert(stringToGuid == object);
+                return object.ToString();
+            }
+        };
+
         template<>
         struct PropertySerialiser<bool>
         {

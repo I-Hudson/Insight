@@ -90,7 +90,6 @@ namespace Insight
 
 			std::vector<Core::GUID> m_root_entities_guids;
 			ECS::EntityManager m_entityManager;
-			Core::GUID m_cameraEntity;
 
 			// Is this scene persistent. If 'true' then the scene can not be unloaded even if asked. The scene must be deleted to be removed. 
 			bool m_persistentScene = false;
@@ -101,14 +100,14 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::World, 1, 
+	OBJECT_SERIALISER(Runtime::World, 2, 
 		SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
-		//SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 1, 0)
-		//SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 1, 0)
+		SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 2, 0)
+		SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 2, 0)
 
 		SERIALISE_VECTOR_PROPERTY(Core::GUID, m_root_entities_guids, 1, 0)
 		SERIALISE_OBJECT(ECS::EntityManager, m_entityManager, 1, 0)
-		SERIALISE_PROPERTY(Core::GUID, m_cameraEntity, 1, 0)
+		SERIALISE_PROPERTY_REMOVED(Core::GUID, m_cameraEntity, 1, 2)
 
 		SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
 		SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)

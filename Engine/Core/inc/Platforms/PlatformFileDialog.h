@@ -6,7 +6,6 @@
 
 namespace Insight
 {
-#define PlatformDialogFileFilter(displayText, extensionText) { #displayText, #extensionText }
     enum class PlatformFileDialogOperations
     {
         LoadFile, 
@@ -16,5 +15,12 @@ namespace Insight
         SelectFile,
         SelectAll,
     };
+
+    struct FileDialogFilter
+    {
+        const wchar_t* Name;
+        const wchar_t* Extension;
+    };
+
     IS_CORE CONSTEXPR const char* PlatformFileDialogOperationToString(PlatformFileDialogOperations operation);
 }

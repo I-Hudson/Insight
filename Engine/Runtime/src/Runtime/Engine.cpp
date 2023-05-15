@@ -70,7 +70,7 @@ namespace Insight
 			}
 			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
 			{
-				while (!Platform::IsDebuggerPresent());
+				while (!Platform::IsDebuggerAttached());
 			}
 
 			m_taskSystem.Initialise();
@@ -86,8 +86,8 @@ namespace Insight
 			GraphicsModule::Initialise(&m_imguiSystem);
 			InputModule::Initialise(&m_imguiSystem);
 
-			m_graphicsSystem.Initialise(&m_inputSystem);
 			m_inputSystem.Initialise();
+			m_graphicsSystem.Initialise(&m_inputSystem);
 			m_worldSystem.Initialise();
 
 			m_projectSystem.SetResourceSystem(&m_resourceSystem);
@@ -97,10 +97,6 @@ namespace Insight
 			{
 				m_projectSystem.OpenProject(projectPath);
 			}
-
-#ifdef IS_STANDALONE
-			m_projectSystem.OpenProject("./StandaloneProject.isproject");
-#endif
 
 			OnInit();
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);

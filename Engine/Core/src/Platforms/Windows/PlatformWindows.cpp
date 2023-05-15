@@ -308,7 +308,7 @@ namespace Insight
 			return GetCurrentThreadId() == s_mainThreadId;
 		}
 
-		bool PlatformWindows::IsDebuggerPresent()
+		bool PlatformWindows::IsDebuggerAttached()
 		{
 			return IsDebuggerPresent();
 		}

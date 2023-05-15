@@ -36,13 +36,13 @@ namespace Insight
             /// @param selectedItem 
             /// @param fileFilters 
             /// @return bool
-            bool ShowSave(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters);
+            bool ShowSave(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters);
             /// @brief Show a windows platform common dialog for load operations.
             /// 'fileFilters' first entry is the display text and second entry is the extension is the format of ".extension". The '.' is not added and must be provided.
             /// @param selectedItem 
             /// @param fileFilters 
             /// @return bool
-            bool ShowLoad(std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters);
+            bool ShowLoad(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters);
 
             /// @brief Show a windows platform common dialog for Save/Load use.
             /// @param operation 
@@ -55,12 +55,12 @@ namespace Insight
             /// @param selectedItem 
             /// @param fileFilters 
             /// @return bool
-            bool Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters);
+            bool Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters);
 
         private:
             u32 PlatformFileDialogOperationsToFileDialogOptions(PlatformFileDialogOperations operation);
-            bool OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters);
-            bool SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<std::pair<const char*, const char*>>& fileFilters);
+            bool OpenDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters);
+            bool SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters);
         };
     }
 }

@@ -43,7 +43,7 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowSave(&item,
                             {
-                                { "Project (*.isproject)",        "*.isproject"},
+                                FileDialogFilter{ L"Project (*.isproject)", L"*.isproject"},
                             });
                         Runtime::ProjectSystem::Instance().CreateProject(item, item);
                         Runtime::ProjectSystem::Instance().OpenProject(item);
@@ -58,7 +58,7 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowLoad(&item,
                             { 
-                                { "Project (*.isproject)",        "*.isproject"},
+                                FileDialogFilter{ L"Project (*.isproject)", L"*.isproject"},
                             });
                         Runtime::ProjectSystem::Instance().OpenProject(item);
                     }
@@ -66,9 +66,9 @@ namespace Insight
                     {
                         std::string item;
                         PlatformFileDialog fileDialog;
-                        if (fileDialog.ShowSave(&item,
+                        if (fileDialog.ShowSave(&item, 
                             {
-                                { "World", "*.isworld"},
+                                FileDialogFilter { L"World", L"*.isworld"},
                             }))
                         {
                             TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
@@ -90,7 +90,7 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         if (fileDialog.ShowLoad(&item,
                             {
-                                { "World", "*.isworld"},
+                                FileDialogFilter{ L"World", L"*.isworld"},
                             }))
                         {
                             TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
