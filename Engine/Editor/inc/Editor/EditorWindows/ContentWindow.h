@@ -6,6 +6,8 @@
 
 #include "Core/Timer.h"
 
+#include "Editor/EditorWindows/Generated/ContentWindow_reflect_generated.h"
+
 #include <vector>
 #include <string>
 
@@ -30,6 +32,8 @@ namespace Insight
         REFLECT_CLASS()
         class ContentWindow : public IEditorWindow
         {
+            REFLECT_GENERATED_BODY()
+
         public:
             ContentWindow();
             ContentWindow(u32 minWidth, u32 minHeight);

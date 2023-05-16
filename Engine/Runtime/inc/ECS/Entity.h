@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Generated/Entity_reflect_generated.h"
-
 #include "Core/TypeAlias.h"
 #include "Platforms/Platform.h"
 #include "Runtime/Defines.h"
@@ -11,6 +9,8 @@
 
 #include "Serialisation/Serialiser.h"
 #include "Serialisation/ISerialisable.h"
+
+#include "Generated/Entity_reflect_generated.h"
 
 #include <Reflect.h>
 

@@ -4,6 +4,8 @@
 
 #include "Core/GUID.h"
 
+#include "Editor/EditorWindows/Generated/EntitiyDescriptionWindow_reflect_generated.h"
+
 namespace Insight
 {
     namespace ECS
@@ -17,6 +19,9 @@ namespace Insight
         REFLECT_CLASS()
         class EntitiyDescriptionWindow : public IEditorWindow
         {
+
+            REFLECT_GENERATED_BODY()
+
         public:
             EntitiyDescriptionWindow();
             EntitiyDescriptionWindow(u32 minWidth, u32 minHeight);

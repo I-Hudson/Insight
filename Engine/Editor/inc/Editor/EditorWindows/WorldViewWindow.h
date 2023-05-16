@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Editor/EditorWindows/IEditorWindow.h"
+
 #include "Graphics/RenderFrame.h"
 #include "Renderpass.h"
+
+#include "Editor/EditorWindows/Generated/WorldViewWindow_reflect_generated.h"
 
 namespace Insight
 {
@@ -20,6 +23,8 @@ namespace Insight
         REFLECT_CLASS()
         class WorldViewWindow : public IEditorWindow
         {
+            REFLECT_GENERATED_BODY()
+
         public:
             WorldViewWindow();
             WorldViewWindow(u32 minWidth, u32 minHeight);

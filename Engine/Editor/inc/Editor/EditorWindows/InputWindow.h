@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Editor/EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/Generated/InputWindow_reflect_generated.h"
 
 namespace Insight
 {
@@ -14,6 +15,8 @@ namespace Insight
 		REFLECT_CLASS()
 		class InputWindow : public IEditorWindow
 		{
+			REFLECT_GENERATED_BODY()
+
 		public:
 			InputWindow();
 			InputWindow(u32 minWidth, u32 minHeight);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Editor/EditorWindows/IEditorWindow.h"
+#include "Editor/EditorWindows/Generated/GameViewWindow_reflect_generated.h"
 
 namespace Insight
 {
@@ -9,6 +10,8 @@ namespace Insight
         REFLECT_CLASS()
         class GameViewWindow : public IEditorWindow
         {
+            REFLECT_GENERATED_BODY()
+
         public:
             GameViewWindow();
             GameViewWindow(u32 minWidth, u32 minHeight);

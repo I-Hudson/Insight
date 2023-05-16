@@ -53,6 +53,8 @@ project "Insight_Runtime"
         "src/**.cpp",
         "src/**.inl",
 
+        "inc/**.cpp", 
+
         "../Core/inc/Memory/NewDeleteOverload.h", 
         "../Core/src/Memory/NewDeleteOverload.cpp",
 
@@ -107,6 +109,7 @@ project "Insight_Runtime"
         {
             "assimpd.lib",
             "Splashd.lib",
+            "Reflectd.lib",
         }
         libdirs
         {
@@ -120,6 +123,7 @@ project "Insight_Runtime"
         {
             "assimp.lib",
             "Splash.lib",
+            "Reflect.lib",
         }
         libdirs
         {

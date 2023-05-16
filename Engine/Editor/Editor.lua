@@ -51,6 +51,8 @@ project "Insight_Editor"
         "src/**.cpp",
         "src/**.inl",
 
+        "inc/**.cpp",
+
         "../Core/inc/Memory/NewDeleteOverload.h", 
         "../Core/src/Memory/NewDeleteOverload.cpp",
     }
@@ -80,7 +82,7 @@ project "Insight_Editor"
 
     prebuildcommands 
     {
-        "call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
+        --"call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
     }
 
     filter "configurations:Debug"

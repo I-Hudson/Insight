@@ -3,6 +3,8 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 #include "Core/GUID.h"
 
+#include "Editor/EditorWindows/Generated/WorldEntitiesWindow_reflect_generated.h"
+
 #include <unordered_set>
 
 namespace Insight
@@ -17,6 +19,8 @@ namespace Insight
 		REFLECT_CLASS()
 		class WorldEntitiesWindow : public IEditorWindow
 		{
+			REFLECT_GENERATED_BODY()
+
 		public:
 			WorldEntitiesWindow();
 			WorldEntitiesWindow(u32 minWidth, u32 minHeight);

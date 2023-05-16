@@ -2,14 +2,18 @@
 
 #include "ECS/Entity.h"
 
+#include "ECS/Components/Generated/TransformComponent_reflect_generated.h"
+
 #include <glm/glm.hpp>
 
 namespace Insight
 {
 	namespace ECS
 	{
+		REFLECT_CLASS()
 		class TransformComponent : public Component
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			IS_COMPONENT(TransformComponent);
 
@@ -42,6 +46,7 @@ namespace Insight
 			IS_SERIALISABLE_H(TransformComponent)
 
 		private:
+			REFLECT_PROPERTY()
 			glm::mat4 m_transform = glm::mat4(1.0f);
 			glm::mat4 m_previous_transform = glm::mat4(1.0f);
 		};

@@ -5,6 +5,8 @@
 #include "Core/TypeAlias.h"
 #include "Core/MemoryTracker.h"
 
+#include "Editor/EditorWindows/Generated/MemoryWindow_reflect_generated.h"
+
 #include <array>
 
 namespace Insight
@@ -46,6 +48,8 @@ namespace Insight
         REFLECT_CLASS()
         class MemoryWindow : public IEditorWindow
         {
+            REFLECT_GENERATED_BODY()
+
         public:
             MemoryWindow();
             MemoryWindow(u32 minWidth, u32 minHeight);
