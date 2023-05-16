@@ -42,6 +42,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.assimp}/../build/include",
         "%{IncludeDirs.meshoptimizer}",
         "%{IncludeDirs.simplygon}",
+        "%{IncludeDirs.reflect}",
     }
 
     files 
