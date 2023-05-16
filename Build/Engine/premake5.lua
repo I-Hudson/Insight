@@ -133,6 +133,7 @@ workspace "Insight"
         "%{IncludeDirs.IconFontCppHeaders}",
         "%{IncludeDirs.nlohmann_json}",
         "%{IncludeDirs.implot}",
+        "%{IncludeDirs.reflect}",
     }
 
     libdirs

@@ -1,4 +1,4 @@
-#include "Editor/EditorWindows/EntitiesWindow.h"
+#include "Editor/EditorWindows/WorldEntitiesWindow.h"
 #include "World/WorldSystem.h"
 
 #include "Input/InputSystem.h"
@@ -10,22 +10,22 @@ namespace Insight
 {
 	namespace Editor
 	{
-		EntitiesWindow::EntitiesWindow()
+		WorldEntitiesWindow::WorldEntitiesWindow()
 			: IEditorWindow()
 		{ }
 
-		EntitiesWindow::EntitiesWindow(u32 minWidth, u32 minHeight)
+		WorldEntitiesWindow::WorldEntitiesWindow(u32 minWidth, u32 minHeight)
 			: IEditorWindow(minWidth, minHeight)
 		{ }
 
-		EntitiesWindow::EntitiesWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight)
+		WorldEntitiesWindow::WorldEntitiesWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight)
 			: IEditorWindow(minWidth, minHeight, maxWidth, maxHeight)
 		{ }
 
-		EntitiesWindow::~EntitiesWindow()
+		WorldEntitiesWindow::~WorldEntitiesWindow()
 		{ }
 
-		void EntitiesWindow::OnDraw()
+		void WorldEntitiesWindow::OnDraw()
 		{
 			std::vector<TObjectPtr<Runtime::World>> worlds = Runtime::WorldSystem::Instance().GetAllWorlds();
 			for (size_t i = 0; i < worlds.size(); ++i)
@@ -49,12 +49,12 @@ namespace Insight
 			}
 		}
 
-		std::unordered_set<Core::GUID> const& EntitiesWindow::GetSelectedEntities() const
+		std::unordered_set<Core::GUID> const& WorldEntitiesWindow::GetSelectedEntities() const
 		{
 			return m_selectedEntities;
 		}
 
-		void EntitiesWindow::DrawSingleEntity(ECS::Entity* entity)
+		void WorldEntitiesWindow::DrawSingleEntity(ECS::Entity* entity)
 		{
 			bool isLeaf = entity->GetChildCount() == 0;
 			bool isSelected = m_selectedEntities.find(entity->GetGUID()) != m_selectedEntities.end();
@@ -87,7 +87,7 @@ namespace Insight
 			}
 		}
 
-		void EntitiesWindow::IsEntitySelected(ECS::Entity* entity, bool isSelected)
+		void WorldEntitiesWindow::IsEntitySelected(ECS::Entity* entity, bool isSelected)
 		{
 			if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
 			{

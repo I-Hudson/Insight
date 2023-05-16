@@ -12,9 +12,9 @@ class GenerateEditorWindowRegister
 {
 public:
 
-    bool Generate(std::string_view folderPath, std::string_view outFilePath)
+    bool Generate(std::string_view folderPath, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options)
     {
-        Reflect::FileParser parser = ParseFilesInDirectory(folderPath);
+        Reflect::FileParser parser = ParseFilesInDirectory(folderPath, options);
 
         std::vector<std::string> editorWindowClasses;
         for (const auto& fileParsed : parser.GetAllFileParsedData())

@@ -1,7 +1,7 @@
 #include "Editor/MenuBar.h"
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
-#include "Editor/EditorWindows/EntitiesWindow.h"
+#include "Editor/EditorWindows/WorldEntitiesWindow.h"
 #include "Editor/EditorWindows/InputWindow.h"
 #include "Editor/EditorWindows/ResourceWindow.h"
 

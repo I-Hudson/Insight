@@ -78,6 +78,10 @@ project "Insight_Editor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
+    prebuildcommands 
+    {
+        "call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
+    }
 
     filter "configurations:Debug"
         defines { "DEBUG" }  

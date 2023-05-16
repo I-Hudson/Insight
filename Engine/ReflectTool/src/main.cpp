@@ -15,8 +15,11 @@ int main(int argc, char** agc)
 {
     bool result = 0;
 
+    Reflect::ReflectAddtionalOptions options;
+    Reflect::FileParser fileParser = ParseFilesInDirectory(engineRootDir, options);
+
     GenerateEditorWindowRegister generateEditorWindowsRegister;
-    result |= generateEditorWindowsRegister.Generate(engineRootDir + "/Editor", engineRootDir + "/Editor/inc/EditorWindows.gen.h");
+    result |= generateEditorWindowsRegister.Generate(engineRootDir + "/Editor", engineRootDir + "/Editor/inc/EditorWindows.gen.h", options);
 
     return result;
 }

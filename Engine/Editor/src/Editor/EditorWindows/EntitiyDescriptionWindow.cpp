@@ -1,5 +1,5 @@
 #include "Editor/EditorWindows/EntitiyDescriptionWindow.h"
-#include "Editor/EditorWindows/EntitiesWindow.h"
+#include "Editor/EditorWindows/WorldEntitiesWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "World/WorldSystem.h"
@@ -29,9 +29,9 @@ namespace Insight
 
         void EntitiyDescriptionWindow::OnDraw()
         {
-            if (EditorWindowManager::Instance().IsWindowVisable(EntitiesWindow::WINDOW_NAME))
+            if (EditorWindowManager::Instance().IsWindowVisable(WorldEntitiesWindow::WINDOW_NAME))
             {
-                EntitiesWindow const* entitiesWindow = static_cast<EntitiesWindow const*>(EditorWindowManager::Instance().GetActiveWindow(EntitiesWindow::WINDOW_NAME));
+                WorldEntitiesWindow const* entitiesWindow = static_cast<WorldEntitiesWindow const*>(EditorWindowManager::Instance().GetActiveWindow(WorldEntitiesWindow::WINDOW_NAME));
                 std::unordered_set<Core::GUID> const& selectedEntities = entitiesWindow->GetSelectedEntities();
                 if (selectedEntities.size() == 0)
                 {
@@ -72,7 +72,7 @@ namespace Insight
             ImGui::Text("Entity GUID: %s", entity->GetGUID().ToString().c_str());
             ImGui::Text("Entity Name: %s", entity->GetName().c_str());
             bool isEnabled = entity->IsEnabled();
-            if (ImGui::Checkbox("Entity Enabled: %s", &isEnabled)) { entity->SetEnabled(isEnabled); }
+            if (ImGui::Checkbox("Entity Enabled", &isEnabled)) { entity->SetEnabled(isEnabled); }
 
             for (u32 i = 0; i < entity->GetComponentCount(); ++i)
             {
@@ -86,6 +86,8 @@ namespace Insight
         {
             ImGui::Text("%s", component->GetTypeName());
             ImGui::Separator();
+            Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
+
         }
     }
 }

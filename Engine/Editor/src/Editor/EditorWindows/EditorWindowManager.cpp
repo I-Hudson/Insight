@@ -3,16 +3,6 @@
 
 #include "EditorWindows.gen.h"
 
-#include "Editor/EditorWindows/BuildSettingsWindow.h"
-#include "Editor/EditorWindows/ContentWindow.h"
-#include "Editor/EditorWindows/ResourceWindow.h"
-#include "Editor/EditorWindows/EntitiyDescriptionWindow.h"
-#include "Editor/EditorWindows/EntitiesWindow.h"
-#include "Editor/EditorWindows/InputWindow.h"
-#include "Editor/EditorWindows/MemoryWindow.h"
-#include "Editor/EditorWindows/ProjectWindow.h"
-#include "Editor/EditorWindows/SystemInformationWindow.h"
-
 namespace Insight
 {
 	namespace Editor

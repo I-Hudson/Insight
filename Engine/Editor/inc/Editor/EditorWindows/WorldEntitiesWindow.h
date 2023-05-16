@@ -15,16 +15,16 @@ namespace Insight
 	namespace Editor
 	{
 		REFLECT_CLASS()
-		class EntitiesWindow : public IEditorWindow
+		class WorldEntitiesWindow : public IEditorWindow
 		{
 		public:
-			EntitiesWindow();
-			EntitiesWindow(u32 minWidth, u32 minHeight);
-			EntitiesWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);
-			~EntitiesWindow();
+			WorldEntitiesWindow();
+			WorldEntitiesWindow(u32 minWidth, u32 minHeight);
+			WorldEntitiesWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);
+			~WorldEntitiesWindow();
 
 			virtual void OnDraw() override;
-			EDITOR_WINDOW(EntitiesWindow, EditorWindowCategories::Windows);
+			EDITOR_WINDOW(WorldEntitiesWindow, EditorWindowCategories::Windows);
 
 			std::unordered_set<Core::GUID> const& GetSelectedEntities() const;
 
