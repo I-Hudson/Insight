@@ -41,6 +41,16 @@ namespace Insight
 			m_queuedEvents.push_back(std::move(e));
 		}
 
+		void EventSystem::DispatchEventNow(RPtr<Event> e)
+		{
+			std::lock_guard eventListenerLock(m_eventListenersLock);
+			auto const& eventFuncItr = m_eventListeners[e->GetEventType()];
+			for (auto const& func : eventFuncItr)
+			{
+				func.second(*e.Get());
+			}
+		}
+
 		void EventSystem::Update()
 		{
 			std::vector<RPtr<Event>> eventsToEvaluate;

@@ -4,6 +4,11 @@
 #include "Input/InputSystem.h"
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
 
+#include "Algorithm/Vector.h"
+
+#include "Event/EventSystem.h"
+#include "Runtime/RuntimeEvents.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -24,6 +29,28 @@ namespace Insight
 
 		WorldEntitiesWindow::~WorldEntitiesWindow()
 		{ }
+
+		void WorldEntitiesWindow::Initialise()
+		{
+			Core::EventSystem::Instance().AddEventListener(this, Core::EventType::WorldDestroy, [this](const Core::Event& e)
+			{
+				const WorldDestroyEvent& worldDestroyEvent = static_cast<const WorldDestroyEvent&>(e);
+
+				std::vector<Core::GUID> removeEntities;
+				for (const Core::GUID& guid : m_selectedEntities)
+				{
+					if (worldDestroyEvent.World->GetEntityByGUID(guid))
+					{
+						removeEntities.push_back(guid);
+					}
+				}
+
+				for (const Core::GUID& guid : removeEntities)
+				{
+					m_selectedEntities.erase(guid);
+				}
+			});
+		}
 
 		void WorldEntitiesWindow::OnDraw()
 		{

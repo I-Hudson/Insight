@@ -3,6 +3,9 @@
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
 
+#include "Event/EventSystem.h"
+#include "Runtime/RuntimeEvents.h"
+
 namespace Insight
 {
 	namespace Runtime
@@ -28,6 +31,8 @@ namespace Insight
 
 		void World::Destroy()
 		{
+			Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<WorldDestroyEvent>(this));
+
 			m_worldName = "Default";
 			m_worldState = WorldStates::Paused;
 			m_worldType = WorldTypes::Game;
@@ -153,6 +158,8 @@ namespace Insight
 
 		void World::Serialise(Serialisation::ISerialiser* serialiser)
 		{
+			Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<WorldSaveEvent>(this));
+
 			Serialisation::SerialiserObject<World> serialiserObject;
 			serialiserObject.Serialise(serialiser, *this);
 		}
@@ -160,6 +167,8 @@ namespace Insight
 		void World::Deserialise(Serialisation::ISerialiser* serialiser)
 		{
 			Destroy();
+
+			Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<WorldLoadEvent>(this));
 			Serialisation::SerialiserObject<World> serialiserObject;
 			serialiserObject.Deserialise(serialiser, *this);
 			m_entityManager.SetWorld(this);

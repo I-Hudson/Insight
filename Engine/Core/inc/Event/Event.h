@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Defines.h"
+
 namespace Insight
 {
 	namespace Core
@@ -11,6 +13,10 @@ namespace Insight
 
 			Project_Open,
 			Project_Save,
+
+			WorldSave,
+			WorldLoad,
+			WorldDestroy,
 		};
 
 		struct IS_CORE Event
