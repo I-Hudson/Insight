@@ -4,6 +4,7 @@
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
+#include "Editor/TypeDrawers/TypeDrawerRegister.h"
 
 #include "Renderpass.h"
 
@@ -24,6 +25,7 @@ namespace Insight
 			Graphics::Renderpass* m_gameRenderpass;
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
+			TypeDrawerRegister m_typeDrawerRegister;
 		};
 	}
 }

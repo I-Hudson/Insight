@@ -2,6 +2,9 @@
 #include "Editor/EditorWindows/WorldEntitiesWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
+#include "Editor/TypeDrawers/TypeDrawerRegister.h"
+#include "Editor/TypeDrawers/ITypeDrawer.h"
+
 #include "World/WorldSystem.h"
 
 #include "Core/Memory.h"
@@ -86,8 +89,29 @@ namespace Insight
         {
             ImGui::Text("%s", component->GetTypeName());
             ImGui::Separator();
-            Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
 
+            const ITypeDrawer* componentTypeDrawer = TypeDrawerRegister::Instance().GetDrawer(component->GetTypeName());
+            if (componentTypeDrawer)
+            {
+                componentTypeDrawer->Draw(component);
+            }
+            else
+            {
+                Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
+                for (Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
+                {
+                    if (!member->IsValid())
+                    {
+                        continue;
+                    }
+
+                    const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member->GetType()->GetTypeName().c_str());
+                    if (typeDrawer)
+                    {
+                        typeDrawer->Draw(member->GetData());
+                    }
+                }
+            }
         }
     }
 }
