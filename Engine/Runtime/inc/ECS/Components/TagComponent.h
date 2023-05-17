@@ -31,7 +31,8 @@ namespace Insight
 
 			/// @brief Return all tags.
 			/// @return std::vector<std::string>
-			std::vector<std::string> GetAllTags() const		{ return m_tags; }
+			std::vector<std::string>& GetAllTags()					{ return m_tags; }
+			const std::vector<std::string>& GetAllTags() const		{ return m_tags; }
 
 			IS_SERIALISABLE_H(TagComponent)
 
