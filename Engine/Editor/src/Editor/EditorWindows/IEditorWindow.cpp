@@ -25,16 +25,12 @@ namespace Insight
 		{ }
 
 		IEditorWindow::~IEditorWindow()
-		{ }
+		{ 
+			Shutdown();
+		}
 
 		void IEditorWindow::Draw()
 		{
-			if (!m_initialiseCalled)
-			{
-				Initialise();
-				m_initialiseCalled = true;
-			}
-
 			if (m_isFullscreen)
 			{
 				if (ImGui::Begin(GetWindowName(), &m_isOpen, static_cast<ImGuiWindowFlags>(m_imguiWindowFlags)))

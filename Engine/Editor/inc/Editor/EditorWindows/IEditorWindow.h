@@ -34,6 +34,8 @@ namespace Insight
 			bool GetFullscreen() const;
 
 			virtual void Initialise() { }
+			virtual void Shutdown() { }
+
 			virtual void OnDraw() = 0;
 
 			virtual const char* GetWindowName() const = 0;
@@ -42,7 +44,6 @@ namespace Insight
 		protected:
 			bool m_isOpen = true;
 			bool m_isFullscreen = false;
-			bool m_initialiseCalled = false;
 
 			u64 m_imguiWindowFlags = 0;
 

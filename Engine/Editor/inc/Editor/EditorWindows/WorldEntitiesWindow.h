@@ -25,9 +25,10 @@ namespace Insight
 			WorldEntitiesWindow();
 			WorldEntitiesWindow(u32 minWidth, u32 minHeight);
 			WorldEntitiesWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);
-			~WorldEntitiesWindow();
+			virtual ~WorldEntitiesWindow() override;
 
 			virtual void Initialise() override;
+			virtual void Shutdown() override;
 
 			virtual void OnDraw() override;
 			EDITOR_WINDOW(WorldEntitiesWindow, EditorWindowCategories::Windows);

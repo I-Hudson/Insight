@@ -52,6 +52,11 @@ namespace Insight
 			});
 		}
 
+		void WorldEntitiesWindow::Shutdown()
+		{
+			Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::WorldDestroy);
+		}
+
 		void WorldEntitiesWindow::OnDraw()
 		{
 			std::vector<TObjectPtr<Runtime::World>> worlds = Runtime::WorldSystem::Instance().GetAllWorlds();

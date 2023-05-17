@@ -45,14 +45,17 @@ namespace Insight
 			template<typename T>
 			void RegsiterEditorWindow()
 			{
-				//m_windowRegistry[window::WINDOW_NAME] = RegisterWindow([]() { return static_cast<IEditorWindow*>(New<window, Core::MemoryAllocCategory::Editor>()); }, window::WINDOW_CATEGORY)
 				if (m_windowRegistry.find(T::WINDOW_NAME) != m_windowRegistry.end())
 				{
 					return;
 				}
 				m_windowRegistry[T::WINDOW_NAME] =
-					RegisterWindow([]() { return static_cast<IEditorWindow*>(New<T, Core::MemoryAllocCategory::Editor>()); }, 
-						T::WINDOW_CATEGORY);
+					RegisterWindow([]() 
+						{ 
+							IEditorWindow* window = static_cast<IEditorWindow*>(New<T, Core::MemoryAllocCategory::Editor>());
+							window->Initialise();
+							return window;
+						}, T::WINDOW_CATEGORY);
 			}
 
 			void AddWindow(const std::string& windowName);

@@ -28,8 +28,9 @@ namespace Insight
 		void EventSystem::RemoveEventListener(void* object, EventType eventType)
 		{
 			std::lock_guard eventListenerLock(m_eventListenersLock);
-			auto eventFuncItr = m_eventListeners[eventType];
-			if (auto eventItr = eventFuncItr.find(object); eventItr != eventFuncItr.end())
+			auto& eventFuncItr = m_eventListeners[eventType];
+			if (auto& eventItr = eventFuncItr.find(object); 
+				eventItr != eventFuncItr.end())
 			{
 				eventFuncItr.erase(object);
 			}

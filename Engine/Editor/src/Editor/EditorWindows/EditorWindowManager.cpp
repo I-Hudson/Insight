@@ -150,6 +150,7 @@ namespace Insight
 			m_windowRegistry.clear();
 			for (size_t i = 0; i < m_activeWindows.size(); ++i)
 			{
+				m_activeWindows.at(i)->Shutdown();
 				DeleteTracked(m_activeWindows.at(i));
 			}
 			m_activeWindows.resize(0);
