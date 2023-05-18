@@ -1,32 +1,26 @@
-#pragma once
+#include "GenerateFiles/GenerateComponentRegister.h"
 
-#include "WriteFileHeader.h"
-#include "FileParser.h"
+#include "Utils.h"
 
 #include <CodeGenerate/CodeGenerate.h>
 
-#include <string>
 #include <filesystem>
 
-class GenerateEditorWindowRegister
+namespace InsightReflectTool
 {
-public:
-
-    bool Generate(std::string_view folderPath, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options)
+    bool GenerateComponentRegister::Generate(const Reflect::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
-        Reflect::FileParser parser = ParseFilesInDirectory(folderPath, options);
-
-        std::vector<std::string> editorWindowClasses;
-        for (const auto& fileParsed : parser.GetAllFileParsedData())
+        std::vector<std::string> componentClasses;
+        for (const auto& fileParsed : fileParser.GetAllFileParsedData())
         {
             for (const auto& reflectData : fileParsed.ReflectData)
             {
                 if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::ReflectInheritanceData& data)
                     {
-                        return "IEditorWindow" == data.Name;
+                        return "Component" == data.Name;
                     }) != reflectData.Inheritance.end())
                 {
-                    editorWindowClasses.push_back(reflectData.Name);
+                    componentClasses.push_back(reflectData.Name);
                 }
             }
         }
@@ -36,28 +30,28 @@ public:
         file.open(absPath, std::ios::out | std::ios::trunc);
         if (file.is_open())
         {
-            WriteFileHeader(file);
+            Utils::WriteGeneratedFileHeader(file);
 
-            file << "#include \"Editor/EditorWindows/EditorWindowManager.h\"" << NEW_LINE;
-            for (const std::string& str : editorWindowClasses)
+            file << "#include \"ECS/Entity.h\"" << NEW_LINE;
+            for (const std::string& str : componentClasses)
             {
-                file << "#include \"Editor/EditorWindows/" + str + ".h\"" << NEW_LINE;
+                file << "#include \"ECS/Components/" + str + ".h\"" << NEW_LINE;
             }
             file << NEW_LINE;
 
             file << "namespace Insight {\n";
             TAB_N(1);
-            file << "namespace Editor {\n";
+            file << "namespace ECS {\n";
 
             TAB_N(2);
-            file << "void RegisterAllEditorWindows()" << NEW_LINE;
+            file << "void RegisterComponents()" << NEW_LINE;
             TAB_N(2);
             file << "{" << NEW_LINE;
 
-            for (const std::string& str : editorWindowClasses)
+            for (const std::string& str : componentClasses)
             {
                 TAB_N(3);
-                file << "EditorWindowManager::Instance().RegsiterEditorWindow<" + str + ">();" << NEW_LINE;
+                file << "ComponentRegistry::RegisterComponent(" + str + "::TYPE_NAME, []() { return ::New<" + str + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
             }
 
             TAB_N(2);
@@ -74,4 +68,4 @@ public:
             return false;
         }
     }
-};
+}
