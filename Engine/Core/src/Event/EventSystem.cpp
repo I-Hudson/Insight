@@ -76,8 +76,11 @@ namespace Insight
 			std::unordered_map<EventType, std::vector<RPtr<Event>>> eventsToRemove;
 			for (int i = static_cast<int>(events.size()) - 1; i >= 0; --i)
 			{
-				// Sort all events into their types. Newest to oldest.
-				eventsToRemove[events.at(i)->GetEventType()].push_back(events.at(i));
+				if (!EventTypeMultiplePerFrame[static_cast<u64>(events.at(i)->GetEventType())])
+				{
+					// Sort all events into their types. Newest to oldest.
+					eventsToRemove[events.at(i)->GetEventType()].push_back(events.at(i));
+				}
 			}
 
 			for (auto const& pair : eventsToRemove)

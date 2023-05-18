@@ -17,7 +17,23 @@ namespace Insight
 			WorldSave,
 			WorldLoad,
 			WorldDestroy,
+
+			Size
 		};
+
+		bool EventTypeMultiplePerFrame[] =
+		{
+			false,	// Graphics_Swapchain_Resize
+			false,  // Graphics_Render_Resolution_Change
+
+			true,	// Project_Open
+			true,	// Project_Save
+			
+			true,	// WorldSave
+			true,	// WorldLoad
+			true,	// WorldDestroy
+		};
+		static_assert(ARRAY_COUNT(EventTypeMultiplePerFrame) == static_cast<u64>(EventType::Size));
 
 		struct IS_CORE Event
 		{
