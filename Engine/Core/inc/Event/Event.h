@@ -21,7 +21,7 @@ namespace Insight
 			Size
 		};
 
-		bool EventTypeMultiplePerFrame[] =
+		constexpr static bool EventTypeMultiplePerFrame[] =
 		{
 			false,	// Graphics_Swapchain_Resize
 			false,  // Graphics_Render_Resolution_Change
