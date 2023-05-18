@@ -10,7 +10,7 @@
 #include <filesystem>
 
 
-std::string engineRootDir = "../../../Engine";
+std::string engineRootDir = "../../../Engine/";
 
 namespace InsightReflectTool
 {
@@ -41,10 +41,10 @@ int main(int argc, char** agc)
     Reflect::FileParser fileParser = ParseFilesInDirectory(engineRootDir, options);
 
     GenerateEditorWindowRegister generateEditorWindowsRegister;
-    result |= generateEditorWindowsRegister.Generate(fileParser, engineRootDir + "/Editor/inc/EditorWindows.gen.h", options);
+    result |= generateEditorWindowsRegister.Generate(fileParser, engineRootDir + "Editor/inc/EditorWindows.gen.h", options);
 
     GenerateComponentRegister generateComponentRegister;
-    result |= generateComponentRegister.Generate(fileParser, engineRootDir + "Runtime/inc/Components.gen.h", options);
+    result |= generateComponentRegister.Generate(fileParser, engineRootDir + "Runtime/inc/ECS/RegisterComponents.gen.h", options);
 
     return result;
 }

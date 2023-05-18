@@ -152,8 +152,6 @@ namespace Insight
 			static void RegisterComponent(std::string_view component_type, std::function<Component* ()> func);
 			static Component* CreateComponent(std::string_view component_type);
 
-			static void RegisterInternalComponents();
-
 		private:
 			static ComponentRegistryMap m_register_funcs;
 		};

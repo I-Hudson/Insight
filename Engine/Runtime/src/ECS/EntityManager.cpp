@@ -5,6 +5,7 @@
 
 #include "ECS/Components/TransformComponent.h"
 #include "ECS/Components/TagComponent.h"
+#include "ECS/RegisterComponents.gen.h"
 
 namespace Insight
 {
@@ -148,7 +149,7 @@ namespace Insight
 #else
 		EntityManager::EntityManager()
 		{
-			ComponentRegistry::RegisterInternalComponents();
+			RegisterAllComponents();
 		}
 
 		EntityManager::EntityManager(EntityManager&& other)
@@ -158,7 +159,7 @@ namespace Insight
 
 		EntityManager& EntityManager::operator=(EntityManager&& other)
 		{
-			ComponentRegistry::RegisterInternalComponents();
+			RegisterAllComponents();
 
 #ifdef ECS_ENABLED
 			m_ecsWorld = other.m_ecsWorld;

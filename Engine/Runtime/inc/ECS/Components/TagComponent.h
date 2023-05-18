@@ -3,12 +3,16 @@
 #include "ECS/Entity.h"
 #include <algorithm>
 
+#include "Generated/TagComponent_reflect_generated.h"
+
 namespace Insight
 {
 	namespace ECS
 	{
-		class TagComponent : public Component
+		REFLECT_CLASS()
+		class IS_RUNTIME TagComponent : public Component
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			IS_COMPONENT(TagComponent);
 

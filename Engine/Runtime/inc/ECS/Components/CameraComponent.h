@@ -6,6 +6,8 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 
+#include "Generated/CameraComponent_reflect_generated.h"
+
 namespace Insight
 {
 	namespace ECS
@@ -74,8 +76,10 @@ namespace Insight
 			bool m_invertView = false;
 		};
 
+		REFLECT_CLASS()
 		class IS_RUNTIME CameraComponent : public Component
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			IS_COMPONENT(CameraComponent);
 

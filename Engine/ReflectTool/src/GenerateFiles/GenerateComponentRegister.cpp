@@ -44,14 +44,14 @@ namespace InsightReflectTool
             file << "namespace ECS {\n";
 
             TAB_N(2);
-            file << "void RegisterComponents()" << NEW_LINE;
+            file << "void RegisterAllComponents()" << NEW_LINE;
             TAB_N(2);
             file << "{" << NEW_LINE;
 
             for (const std::string& str : componentClasses)
             {
                 TAB_N(3);
-                file << "ComponentRegistry::RegisterComponent(" + str + "::TYPE_NAME, []() { return ::New<" + str + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
+                file << "ComponentRegistry::RegisterComponent(" + str + "::Type_Name, []() { return ::New<" + str + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
             }
 
             TAB_N(2);

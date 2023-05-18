@@ -5,6 +5,8 @@
 
 #include <glm/ext/matrix_float4x4.hpp>
 
+#include "Generated/FreeCameraControllerComponent_reflect_generated.h"
+
 namespace Insight
 {
 	namespace ECS
@@ -12,8 +14,10 @@ namespace Insight
 		class CameraComponent;
 		class TransformComponent;
 
+		REFLECT_CLASS()
 		class IS_RUNTIME FreeCameraControllerComponent : public Component
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			IS_COMPONENT(FreeCameraControllerComponent);
 

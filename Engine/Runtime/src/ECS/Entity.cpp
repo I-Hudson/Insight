@@ -104,15 +104,6 @@ namespace Insight
 			return nullptr;
 		}
 
-		void ComponentRegistry::RegisterInternalComponents()
-		{
-			ComponentRegistry::RegisterComponent(CameraComponent::Type_Name,                []() { return ::New<CameraComponent, Insight::Core::MemoryAllocCategory::ECS>(); });
-			ComponentRegistry::RegisterComponent(FreeCameraControllerComponent::Type_Name,	[]() { return ::New<FreeCameraControllerComponent, Insight::Core::MemoryAllocCategory::ECS>(); });
-			ComponentRegistry::RegisterComponent(MeshComponent::Type_Name,		            []() { return ::New<MeshComponent, Insight::Core::MemoryAllocCategory::ECS>(); });
-			ComponentRegistry::RegisterComponent(TagComponent::Type_Name,		            []() { return ::New<TagComponent, Insight::Core::MemoryAllocCategory::ECS>(); });
-			ComponentRegistry::RegisterComponent(TransformComponent::Type_Name,             []() { return ::New<TransformComponent, Insight::Core::MemoryAllocCategory::ECS>(); });
-		}
-
 #ifdef ECS_ENABLED
 		Entity::Entity(ECSWorld* ecs_world)
 			: m_ecs_world(ecs_world)

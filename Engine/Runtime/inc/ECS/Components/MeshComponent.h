@@ -6,12 +6,16 @@
 #include "Resource/Material.h"
 #include "Resource/ResourceLifeTimeHandle.h"
 
+#include "Generated/MeshComponent_reflect_generated.h"
+
 namespace Insight
 {
 	namespace ECS
 	{
-		class MeshComponent : public Component
+		REFLECT_CLASS()
+		class IS_RUNTIME MeshComponent : public Component
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			IS_COMPONENT(MeshComponent);
 

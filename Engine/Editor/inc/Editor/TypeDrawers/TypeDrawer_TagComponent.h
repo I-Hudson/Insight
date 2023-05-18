@@ -2,6 +2,8 @@
 
 #include "Editor/TypeDrawers/ITypeDrawer.h"
 
+#include "Editor/TypeDrawers/Generated/TypeDrawer_TagComponent_reflect_generated.h"
+
 namespace Insight
 {
     namespace Editor
@@ -9,6 +11,7 @@ namespace Insight
         REFLECT_CLASS()
         class TypeDrawer_TagComponent : public ITypeDrawer
         {
+            REFLECT_GENERATED_BODY()
         public:
             virtual void Draw(void* data) const override;
 
