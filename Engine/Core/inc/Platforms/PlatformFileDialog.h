@@ -18,8 +18,12 @@ namespace Insight
 
     struct FileDialogFilter
     {
-        const wchar_t* Name;
-        const wchar_t* Extension;
+        FileDialogFilter() { }
+        FileDialogFilter(const wchar_t* name, const wchar_t* extension)
+            : Name(name), Extension(extension)
+        { }
+        const wchar_t* Name = L"";
+        const wchar_t* Extension = L"";
     };
 
     IS_CORE CONSTEXPR const char* PlatformFileDialogOperationToString(PlatformFileDialogOperations operation);

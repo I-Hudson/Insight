@@ -99,19 +99,22 @@ namespace Insight
 
             openDialogHandle->SetOptions(PlatformFileDialogOperationsToFileDialogOptions(operation));
 
-            std::vector<COMDLG_FILTERSPEC> fileTypes;
-            fileTypes.resize(fileFilters.size());
-            for (size_t i = 0; i < fileTypes.size(); ++i)
+            if (!fileFilters.empty())
             {
-                fileTypes.at(i).pszName = fileFilters.at(i).Name;
-                fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
-            }
+                std::vector<COMDLG_FILTERSPEC> fileTypes;
+                fileTypes.resize(fileFilters.size());
+                for (size_t i = 0; i < fileTypes.size(); ++i)
+                {
+                    fileTypes.at(i).pszName = fileFilters.at(i).Name;
+                    fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
+                }
 
-            hr = openDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
-            if (hr != S_OK)
-            {
-                openDialogHandle->Release();
-                return false;
+                hr = openDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
+                if (hr != S_OK)
+                {
+                    openDialogHandle->Release();
+                    return false;
+                }
             }
 
             hr = openDialogHandle->Show(NULL);
@@ -167,19 +170,22 @@ namespace Insight
                 return false;
             }
 
-            std::vector<COMDLG_FILTERSPEC> fileTypes;
-            fileTypes.resize(fileFilters.size());
-            for (size_t i = 0; i < fileTypes.size(); ++i)
+            if (!fileFilters.empty())
             {
-                fileTypes.at(i).pszName = fileFilters.at(i).Name;
-                fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
-            }
+                std::vector<COMDLG_FILTERSPEC> fileTypes;
+                fileTypes.resize(fileFilters.size());
+                for (size_t i = 0; i < fileTypes.size(); ++i)
+                {
+                    fileTypes.at(i).pszName = fileFilters.at(i).Name;
+                    fileTypes.at(i).pszSpec = fileFilters.at(i).Extension;
+                }
 
-            hr = saveDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
-            if (hr != S_OK)
-            {
-                saveDialogHandle->Release();
-                return false;
+                hr = saveDialogHandle->SetFileTypes(static_cast<unsigned int>(fileTypes.size()), fileTypes.data());
+                if (hr != S_OK)
+                {
+                    saveDialogHandle->Release();
+                    return false;
+                }
             }
 
             hr = saveDialogHandle->Show(NULL);

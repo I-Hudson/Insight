@@ -235,6 +235,7 @@ namespace Insight
 static Insight::Runtime::ResourceTypeId GetStaticResourceTypeId() { return Insight::Runtime::ResourceTypeId(#type_name); }\
 virtual Insight::Runtime::ResourceTypeId GetResourceTypeId() const override { return GetStaticResourceTypeId(); }\
 static constexpr const char* GetStaticResourceFileExtension() { return STRINGIZE(PPCAT(.is, type_name)); }\
+static constexpr const wchar_t* GetStaticResourceWFileExtension() { return PPCAT(L, STRINGIZE(PPCAT(.is, type_name))); }\
 virtual const char* GetResourceFileExtension() const override { return GetStaticResourceFileExtension(); }
 
 // Run this when the resource is of type engine format.
