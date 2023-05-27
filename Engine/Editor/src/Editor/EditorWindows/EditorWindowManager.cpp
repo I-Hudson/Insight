@@ -16,6 +16,8 @@ namespace Insight
 			Destroy();
 		}
 
+		IS_SERIALISABLE_CPP(EditorWindowManager)
+
 		void EditorWindowManager::RegisterWindows()
 		{
 			RegisterAllEditorWindows();
@@ -23,12 +25,9 @@ namespace Insight
 
 		void EditorWindowManager::AddWindow(const std::string& windowName)
 		{
-			for (size_t i = 0; i < m_activeWindows.size(); ++i)
+			if (IsWindowVisable(windowName))
 			{
-				if (m_activeWindows.at(i)->GetWindowName() == windowName)
-				{
-					return;
-				}
+				return;
 			}
 
 			auto itr = m_windowRegistry.find(windowName);

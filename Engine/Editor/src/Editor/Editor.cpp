@@ -23,6 +23,8 @@ namespace Insight
 {
 	namespace Editor
 	{
+		IS_SERIALISABLE_CPP(Editor);
+
 		void Editor::OnInit()
 		{
 			IS_PROFILE_FUNCTION();
@@ -60,6 +62,13 @@ namespace Insight
 			glm::mat4 mat4B;
 			auto mat4C = mat4A * mat4B;
 
+			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
+			if (!editorSettings.IsEmpty())
+			{
+				EditorSettingsSerialiser serialiser(true);
+				serialiser.Deserialise(editorSettings.GetData());
+				Deserialise(&serialiser);
+			}
 		}
 
 		void Editor::OnUpdate()
@@ -94,6 +103,13 @@ namespace Insight
 		void Editor::OnDestroy()
 		{
 			IS_PROFILE_FUNCTION();
+
+			EditorSettingsSerialiser serialiser(false);
+			Serialise(&serialiser);
+
+			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Write);
+			editorSettings.Write(serialiser.GetSerialisedData());
+			editorSettings.Close();
 
 			m_gameRenderpass->Destroy();
 			Delete(m_gameRenderpass);

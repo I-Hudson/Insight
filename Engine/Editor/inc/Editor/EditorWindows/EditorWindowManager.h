@@ -6,6 +6,7 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 
 #include "Core/Memory.h"
+#include "Serialisation/Serialiser.h"
 
 #include <string>
 #include <unordered_map>
@@ -34,14 +35,16 @@ namespace Insight
 			EditorWindowCategories Category;
 		};
 
-		class EditorWindowManager : public Core::Singleton<EditorWindowManager>
+		class EditorWindowManager : public Core::Singleton<EditorWindowManager>, public Serialisation::ISerialisable
 		{
-
 		public:
+			IS_SERIALISABLE_H(EditorWindowManager);
+
 			EditorWindowManager();
 			~EditorWindowManager();
 
 			void RegisterWindows();
+
 			template<typename T>
 			void RegsiterEditorWindow()
 			{
@@ -84,4 +87,44 @@ namespace Insight
 			std::vector<std::string> m_windowsToRemove;
 		};
 	}
+
+	namespace Serialisation
+	{
+		struct EditorWindowManager1 { };
+		template<>
+		struct ComplexSerialiser<EditorWindowManager1, std::vector<Editor::IEditorWindow*>, Editor::EditorWindowManager>
+		{
+			void operator()(ISerialiser* serialiser, std::vector<Editor::IEditorWindow*>& activeWindows, Editor::EditorWindowManager* windowManager) const
+			{
+				constexpr const char* c_ActiveWindows = "ActiveWindows";
+				if (serialiser->IsReadMode())
+				{
+					u64 arraySize = 0;
+					serialiser->StartArray(c_ActiveWindows, arraySize);
+					for (u32 i = 0; i < arraySize; ++i)
+					{
+						std::string windowName;
+						serialiser->Read("", windowName);
+
+						windowManager->AddWindow(windowName);
+					}
+					serialiser->StopArray();
+				}
+				else
+				{
+					u64 arraySize = activeWindows.size();
+					serialiser->StartArray(c_ActiveWindows, arraySize);
+					for (const Editor::IEditorWindow* window : activeWindows)
+					{
+						serialiser->Write("", window->GetWindowName());
+					}
+					serialiser->StopArray();
+				}
+			}
+		};
+	}
+
+	OBJECT_SERIALISER(Editor::EditorWindowManager, 1,
+		SERIALISE_COMPLEX(Serialisation::EditorWindowManager1, m_activeWindows, 1, 0)
+	)
 }

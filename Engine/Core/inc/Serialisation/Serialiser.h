@@ -18,8 +18,8 @@
 #define IS_SERIALISABLE_H(TYPE)\
         IS_SERIALISABLE_FRIEND\
         public:\
-        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser) override;\
-        virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser) override;
+        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser);\
+        virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser);
 
 #define IS_SERIALISABLE_CPP(TYPE)\
         void TYPE::Serialise(::Insight::Serialisation::ISerialiser* serialiser)\

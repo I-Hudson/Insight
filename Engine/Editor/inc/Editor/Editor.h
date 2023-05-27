@@ -12,9 +12,10 @@ namespace Insight
 {
 	namespace Editor
 	{
-		class Editor : public Insight::App::Engine
+		class Editor : public Insight::App::Engine, public Serialisation::ISerialisable
 		{
 		public:
+			IS_SERIALISABLE_H(Editor)
 
 			virtual void OnInit() override;
 			virtual void OnUpdate() override;
@@ -26,6 +27,13 @@ namespace Insight
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 			TypeDrawerRegister m_typeDrawerRegister;
+
+			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
+			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";
 		};
 	}
+
+	OBJECT_SERIALISER(Editor::Editor, 1, 
+		SERIALISE_OBJECT(Editor::EditorWindowManager, m_editorWindowManager, 1, 0)
+	)
 }
