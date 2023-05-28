@@ -28,6 +28,8 @@ namespace InsightReflectTool
 
         std::fstream file;
         std::string absPath = std::filesystem::absolute(outFilePath).string();
+        Utils::ValidateOutputPath(absPath);
+
         file.open(absPath, std::ios::out | std::ios::trunc);
         if (file.is_open())
         {
