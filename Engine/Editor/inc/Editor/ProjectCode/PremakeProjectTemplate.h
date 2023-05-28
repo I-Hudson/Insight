@@ -1,24 +1,26 @@
 #include <string>
+#include <vector>
 
 namespace Insight::Editor
 {
     constexpr static const char* c_PremakeProjectTag_ProjectName = "--PROJECT_NAME";
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
+    constexpr static const char* c_PremakeProjectTag_AdditionalFiles = "--ADDITIONAL_FILES";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
 
     constexpr static const char* c_PremakeProjectTemplate = R"(
+    local insightPath = "--INSIGHT_PATH"
+    includePath = "../../Content"
+
     project "--PROJECT_NAME"
     kind "SharedLib"
     location "./"
 
-    includePath = "../../Content"
-    insightPath = "--INSIGHT_PATH"
-
     targetname ("%{prj.name}" .. output_project_subfix)
-    targetdir ("%{insightPath}/bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("%{insightPath}/bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("%{insightPath}/bin/" .. outputdir .. "/%{prj.name}")
+    targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("../bin/" .. outputdir .. "/%{prj.name}")
 
     dependson 
     {
@@ -26,6 +28,7 @@ namespace Insight::Editor
 
     defines
     {
+        "IS_EXPORT_PROJECT_DLL",
     }
 
     includedirs
@@ -52,7 +55,9 @@ namespace Insight::Editor
         "%{includePath}" .. "/**.h", 
         "%{includePath}" .. "/**.inl", 
         "%{includePath}" .. "/**.cpp",
-        "%{includePath}" .. "/**.inl",
+        "%{includePath}" .. "/**.c",
+
+        --ADDITIONAL_FILES
     }
 
     links
@@ -76,7 +81,7 @@ namespace Insight::Editor
 
     libdirs
     {
-        "%{insightPath}/deps/lib",
+        insightPath .. "/deps/lib",
     }
 
     filter "configurations:Debug or configurations:Testing"
@@ -89,7 +94,7 @@ namespace Insight::Editor
         }
         libdirs
         {
-            "%{insightPath}/deps/lib/debug",
+            insightPath .. "/deps/lib/debug",
         }
 
     filter "configurations:Release"  
@@ -118,6 +123,8 @@ namespace Insight::Editor
     {
         const char* ProjectName;
         const char* InsightRootPath;
+
+        std::vector<std::string> AdditionalFiles;
     };
     std::string CreatePremakeProjectTemplateFile(const char* outFolder, const PremakeProjectTemplateData& templateData);
 }

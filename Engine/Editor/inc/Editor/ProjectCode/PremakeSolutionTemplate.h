@@ -14,90 +14,59 @@ namespace Insight::Editor
 
 local profileTool="tracy"
 local monolith_build="false"
+local insightPath = "--INSIGHT_PATH"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_target = "%{insightPath}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_obj = "%{insightPath}bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_debug = "%{insightPath}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-output_executable = "Insight_Editor"
+outputdir_target = "../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+outputdir_obj = "../bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+outputdir_debug = "../bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 output_project_subfix = ""
 
-post_build_commands = {}
-function concat_table(table_to_concat)
-    return table.concat(table_to_concat, " ")
-end
-
-function tprint (tbl, indent)
-    if not indent then indent = 0 end
-    local toprint = string.rep(" ", indent) .. "{\r\n"
-    indent = indent + 2 
-    for k, v in pairs(tbl) do
-      toprint = toprint .. string.rep(" ", indent)
-      if (type(k) == "number") then
-        toprint = toprint .. "[" .. k .. "] = "
-      elseif (type(k) == "string") then
-        toprint = toprint  .. k ..  "= "   
-      end
-      if (type(v) == "number") then
-        toprint = toprint .. v .. ",\r\n"
-      elseif (type(v) == "string") then
-        toprint = toprint .. "\"" .. v .. "\",\r\n"
-      elseif (type(v) == "table") then
-        toprint = toprint .. tprint(v, indent + 2) .. ",\r\n"
-      else
-        toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
-      end
-    end
-    toprint = toprint .. string.rep(" ", indent-2) .. "}"
-    return toprint
-  end
-
 VULKAN_SDK = os.getenv("VULKAN_SDK")
-insightPath = "--INSIGHT_PATH"
 
 IncludeDirs = {}
-IncludeDirs["InsightCore"] = "%{insightPath}Engine/Core/inc"
-IncludeDirs["InsightMaths"] = "%{insightPath}Engine/Maths/inc"
-IncludeDirs["InsightGraphics"] = "%{insightPath}Engine/Graphics/inc"
-IncludeDirs["InsightInput"] = "%{insightPath}Engine/Input/inc"
-IncludeDirs["InsightRuntime"] = "%{insightPath}Engine/Runtime/inc"
-IncludeDirs["InsightEditor"] = "%{insightPath}Engine/Editor/inc"
+IncludeDirs["InsightCore"] = insightPath .. "/Engine/Core/inc"
+IncludeDirs["InsightMaths"] = insightPath .. "/Engine/Maths/inc"
+IncludeDirs["InsightGraphics"] = insightPath .. "/Engine/Graphics/inc"
+IncludeDirs["InsightInput"] = insightPath .. "/Engine/Input/inc"
+IncludeDirs["InsightRuntime"] = insightPath .. "/Engine/Runtime/inc"
+IncludeDirs["InsightEditor"] = insightPath .. "/Engine/Editor/inc"
 
-IncludeDirs["doctest"] = "%{insightPath}vendor/doctest/doctest"
-IncludeDirs["glfw"] = "%{insightPath}vendor/glfw/include"
-IncludeDirs["glm"] = "%{insightPath}vendor/glm"
-IncludeDirs["imgui"] = "%{insightPath}vendor/imgui"
-IncludeDirs["implot"] = "%{insightPath}vendor/implot"
-IncludeDirs["spdlog"] = "%{insightPath}vendor/spdlog/include"
-IncludeDirs["vma"] = "%{insightPath}vendor/VulkanMemoryAllocator/src"
+IncludeDirs["doctest"] = insightPath .. "/vendor/doctest/doctest"
+IncludeDirs["glfw"] = insightPath .. "/vendor/glfw/include"
+IncludeDirs["glm"] = insightPath .. "/vendor/glm"
+IncludeDirs["imgui"] = insightPath .. "/vendor/imgui"
+IncludeDirs["implot"] = insightPath .. "/vendor/implot"
+IncludeDirs["spdlog"] = insightPath .. "/vendor/spdlog/include"
+IncludeDirs["vma"] = insightPath .. "/vendor/VulkanMemoryAllocator/src"
 IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
-IncludeDirs["spirv_reflect"] = "%{insightPath}vendor/SPIRV-Reflect"
-IncludeDirs["assimp"] = "%{insightPath}vendor/assimp/include"
-IncludeDirs["tracy"] = "%{insightPath}vendor/tracy"
-IncludeDirs["pix"] = "%{insightPath}vendor/winpixeventruntime/Include"
-IncludeDirs["stb_image"] = "%{insightPath}vendor/stb"
-IncludeDirs["meshoptimizer"] = "%{insightPath}vendor/meshoptimizer/src"
-IncludeDirs["FFR2"] = "%{insightPath}vendor/FidelityFX-FSR2/src"
-IncludeDirs["Aftermath"] = "%{insightPath}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
-IncludeDirs["nvtx"] = "%{insightPath}vendor/NVTX/c/include"
-IncludeDirs["xxHash"] = "%{insightPath}vendor/xxHash"
-IncludeDirs["splash"] = "%{insightPath}vendor/Splash/Splash/inc"
-IncludeDirs["DirectXHeaders"] = "%{insightPath}vendor/DirectX-Headers/include/directx"
-IncludeDirs["DirectXAgilityHeaders"] = "%{insightPath}vendor/Microsoft.Direct3D.D3D12/build/native/include"
-IncludeDirs["DirectXShaderCompiler"] = "%{insightPath}vendor/DirectXShaderCompiler/inc"
-IncludeDirs["D3D12MemoryAllocator"] = "%{insightPath}vendor/D3D12MemoryAllocator/include"
-IncludeDirs["IconFontCppHeaders"] = "%{insightPath}vendor/IconFontCppHeaders"
-IncludeDirs["nlohmann_json"] = "%{insightPath}vendor/nlohmann_json/single_include"
-IncludeDirs["lz4"] = "%{insightPath}vendor/lz4/lib"
-IncludeDirs["qoi"] = "%{insightPath}vendor/qoi"
-IncludeDirs["reflect"] = "%{insightPath}vendor/reflect/reflect/inc"
-IncludeDirs["simplygon"] = "%{insightPath}vendor/SimplygonSDK_10.1.11000.0"
+IncludeDirs["spirv_reflect"] = insightPath .. "/vendor/SPIRV-Reflect"
+IncludeDirs["assimp"] = insightPath .. "/vendor/assimp/include"
+IncludeDirs["tracy"] = insightPath .. "/vendor/tracy"
+IncludeDirs["pix"] = insightPath .. "/vendor/winpixeventruntime/Include"
+IncludeDirs["stb_image"] = insightPath .. "/vendor/stb"
+IncludeDirs["meshoptimizer"] = insightPath .. "/vendor/meshoptimizer/src"
+IncludeDirs["FFR2"] = insightPath .. "/vendor/FidelityFX-FSR2/src"
+IncludeDirs["Aftermath"] = insightPath .. "/vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
+IncludeDirs["nvtx"] = insightPath .. "/vendor/NVTX/c/include"
+IncludeDirs["xxHash"] = insightPath .. "/vendor/xxHash"
+IncludeDirs["splash"] = insightPath .. "/vendor/Splash/Splash/inc"
+IncludeDirs["DirectXHeaders"] = insightPath .. "/vendor/DirectX-Headers/include/directx"
+IncludeDirs["DirectXAgilityHeaders"] = insightPath .. "/vendor/Microsoft.Direct3D.D3D12/build/native/include"
+IncludeDirs["DirectXShaderCompiler"] = insightPath .. "/vendor/DirectXShaderCompiler/inc"
+IncludeDirs["D3D12MemoryAllocator"] = insightPath .. "/vendor/D3D12MemoryAllocator/include"
+IncludeDirs["IconFontCppHeaders"] = insightPath .. "/vendor/IconFontCppHeaders"
+IncludeDirs["nlohmann_json"] = insightPath .. "/vendor/nlohmann_json/single_include"
+IncludeDirs["lz4"] = insightPath .. "/vendor/lz4/lib"
+IncludeDirs["qoi"] = insightPath .. "/vendor/qoi"
+IncludeDirs["reflect"] = insightPath .. "/vendor/reflect/reflect/inc"
+IncludeDirs["simplygon"] = insightPath .. "/vendor/SimplygonSDK_10.1.11000.0"
 
 LibDirs = {}
-LibDirs["deps_lib"] = "%{insightPath}deps/" .. outputdir .. "/lib/"
-LibDirs["deps_testing_lib"] = "%{insightPath}deps/Debug-windows-x86_64/lib/"
+LibDirs["deps_lib"] = insightPath .. "/deps/" .. outputdir .. "/lib/"
+LibDirs["deps_testing_lib"] = insightPath .. "/deps/Debug-windows-x86_64/lib/"
 
-LibDirs["imgui"] = "%{insightPath}vendor/imgui/" .. outputdir .. "ImGui/"
+LibDirs["imgui"] = insightPath .. "/vendor/imgui/" .. outputdir .. "ImGui/"
 LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 
 workspace "--SOLUTION_NAME"

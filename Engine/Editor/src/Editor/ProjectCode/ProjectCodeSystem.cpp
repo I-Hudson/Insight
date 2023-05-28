@@ -3,9 +3,14 @@
 #include "Editor/ProjectCode/PremakeSolutionTemplate.h"
 
 #include "Core/EnginePaths.h"
+#include "Core/ImGuiSystem.h"
+
+#include "Runtime/Engine.h"
 
 #include "Event/EventSystem.h"
 #include "FileSystem/FileSystem.h"
+
+#include <Windows.h>
 
 namespace Insight::Editor
 {
@@ -53,9 +58,16 @@ namespace Insight::Editor
     {
         std::string insightRootPath = EnginePaths::GetRootPath();
 
+        std::string reflectProjectCommand = "" + insightRootPath + "/bin/Release-windows-x86_64/InsightReflectTool/InsightReflectTool.exe";
+        reflectProjectCommand += " Type=Project";
+        reflectProjectCommand += " ParsePath=" + m_projectInfo.GetContentPath();
+        reflectProjectCommand += " GenerateProjectFileOutputPath=" + m_projectCodeInfo.ProjectFolder + "/Generated";
+        std::system(reflectProjectCommand.c_str());
+
         PremakeProjectTemplateData projectTemplateData;
         projectTemplateData.ProjectName = m_projectInfo.ProjectName.c_str();
         projectTemplateData.InsightRootPath = insightRootPath.c_str();
+        projectTemplateData.AdditionalFiles.push_back(m_projectCodeInfo.ProjectFolder + "/Generated");
 
         CreatePremakeProjectTemplateFile(m_projectCodeInfo.ProjectFolder.c_str(), projectTemplateData);
 
@@ -72,5 +84,28 @@ namespace Insight::Editor
         std::string generateProjectsBatch = insightRootPath + "/Build/Engine/GENERATE_PROJECT.bat";
         std::string cmdCommend = generateProjectsBatch + " " + premakeSolutionFile + " vs2019";
         std::system(cmdCommend.c_str());
+
+//#define PROJECT_LOAD_TESTING
+#ifdef PROJECT_LOAD_TESTING
+        HMODULE projectLibrary = LoadLibrary(L"E:\\User\\Documents\\SourceControl\\Github\\C++Porjects\\Insight\\DemoProject\\Intermediate\\bin\\Debug-windows-x86_64\\DemoProject\\DemoProject.dll");
+        if (projectLibrary)
+        {
+            FARPROC func = GetProcAddress(projectLibrary, "ProjectModuleInitialise");
+            if (!func)
+            {
+                return;
+            }
+
+            using ProjectInitaliseFunc = void(*)(Core::ImGuiSystem*);
+            ProjectInitaliseFunc initialiseFunc = reinterpret_cast<ProjectInitaliseFunc>(func);
+            if (!initialiseFunc)
+            {
+                return;
+            }
+
+            Core::ImGuiSystem* imguiSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
+            initialiseFunc(imguiSystem);
+        }
+#endif
     }
 }
