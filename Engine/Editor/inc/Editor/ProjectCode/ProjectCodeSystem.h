@@ -11,6 +11,16 @@ namespace Insight
 {
     namespace Editor
     {
+        struct ProjectCodeInfo
+        {
+            constexpr static const char* c_CodeFolder = "/CodeFiles";
+
+            std::string ProjectFile;
+            std::string SolutionFile;
+
+            std::string ProjectFolder;
+        };
+
         class ProjectCodeSystem : public Core::ISystem
         {
         public:
@@ -29,9 +39,7 @@ namespace Insight
             void GenerateProjectFiles();
 
         private:
-            constexpr static const char* c_CodeFolder = "CodeFiles/";
-            std::string m_codeProjectFile;
-            std::string m_codeSolutionFile;
+            ProjectCodeInfo m_projectCodeInfo;
             Runtime::ProjectInfo m_projectInfo;
         };
     }

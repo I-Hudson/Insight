@@ -1,0 +1,123 @@
+#include <string>
+
+namespace Insight::Editor
+{
+    constexpr static const char* c_PremakeProjectTag_ProjectName = "--PROJECT_NAME";
+    constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
+
+    constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
+
+    constexpr static const char* c_PremakeProjectTemplate = R"(
+    project "--PROJECT_NAME"
+    kind "SharedLib"
+    location "./"
+
+    includePath = "../../Content"
+    insightPath = "--INSIGHT_PATH"
+
+    targetname ("%{prj.name}" .. output_project_subfix)
+    targetdir ("%{insightPath}/bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("%{insightPath}/bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("%{insightPath}/bin/" .. outputdir .. "/%{prj.name}")
+
+    dependson 
+    {
+    }
+
+    defines
+    {
+    }
+
+    includedirs
+    {
+        "%{includePath}",
+        "%{IncludeDirs.InsightCore}",
+        "%{IncludeDirs.InsightMaths}",
+        "%{IncludeDirs.InsightInput}",
+        "%{IncludeDirs.InsightGraphics}",
+        "%{IncludeDirs.InsightRuntime}",
+        "%{IncludeDirs.InsightEditor}",
+
+        "%{IncludeDirs.glfw}",
+        "%{IncludeDirs.glm}",
+        "%{IncludeDirs.spdlog}",
+        "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.imgui_string}",
+        "%{IncludeDirs.reflect}",
+    }
+
+    files 
+    { 
+        "%{includePath}" .. "/**.hpp", 
+        "%{includePath}" .. "/**.h", 
+        "%{includePath}" .. "/**.inl", 
+        "%{includePath}" .. "/**.cpp",
+        "%{includePath}" .. "/**.inl",
+    }
+
+    links
+    {
+        "Insight_Core" .. output_project_subfix .. ".lib",
+        "Insight_Maths" .. output_project_subfix .. ".lib",
+        "Insight_Input" .. output_project_subfix .. ".lib",
+        "Insight_Graphics" .. output_project_subfix .. ".lib",
+        "Insight_Runtime" .. output_project_subfix .. ".lib",
+
+        "imgui.lib",
+        "glm.lib",
+    }
+
+    if (profileTool == "pix") then
+        links
+        {
+            "WinPixEventRuntime.lib"
+        }
+    end
+
+    libdirs
+    {
+        "%{insightPath}/deps/lib",
+    }
+
+    filter "configurations:Debug or configurations:Testing"
+        defines { "DEBUG" }  
+        symbols "On" 
+        links
+        {
+            "xxHashd.lib",
+            "lz4d.lib",
+        }
+        libdirs
+        {
+            "%{insightPath}/deps/lib/debug",
+        }
+
+    filter "configurations:Release"  
+        defines { "NDEBUG" }    
+        optimize "On" 
+        links
+        {
+            "xxHash.lib",
+            "lz4.lib",
+        }
+        libdirs
+        {
+            "%{wks.location}/deps/lib/release",
+        }
+
+    filter "platforms:Win64"
+        links
+        {
+            "Ole32.lib",
+            "dbghelp.lib",
+            "Rpcrt4.lib",
+        }
+    )";
+
+    struct PremakeProjectTemplateData
+    {
+        const char* ProjectName;
+        const char* InsightRootPath;
+    };
+    std::string CreatePremakeProjectTemplateFile(const char* outFolder, const PremakeProjectTemplateData& templateData);
+}

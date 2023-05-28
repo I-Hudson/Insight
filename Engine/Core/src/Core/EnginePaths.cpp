@@ -37,6 +37,12 @@ namespace Insight
         m_initialise = true;
     }
 
+    std::string EnginePaths::GetRootPath()
+    {
+        ASSERT(m_initialise);
+        return m_rootPath;
+    }
+
     std::string EnginePaths::GetExecutablePath()
     {
         ASSERT(m_initialise);

@@ -33,6 +33,12 @@ namespace Insight
             return false;
         }
 
+        std::string folderPath = std::filesystem::path(filePath).parent_path().string();
+        if (!Exists(folderPath))
+        {
+            CreateFolder(folderPath);
+        }
+
         std::fstream fileStream;
         fileStream.open(filePath, std::ios::out);
         if (!fileStream.is_open())
@@ -44,6 +50,15 @@ namespace Insight
         fileStream.write((char*)data.data(), data.size());
         fileStream.close();
         return true;
+    }
+
+    bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath)
+    {
+        return SaveToFile(data, filePath, false);
+    }
+    bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath, bool overwrite)
+    {
+        return SaveToFile(std::vector<u8>{data.begin(), data.end()}, filePath, overwrite);
     }
 
     bool FileSystem::Exists(const std::string& path)
