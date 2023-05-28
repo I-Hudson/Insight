@@ -92,14 +92,15 @@ namespace Insight
 
 			m_projectSystem.SetResourceSystem(&m_resourceSystem);
 			m_projectSystem.Initialise();
+
+			OnInit();
+			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
+
 			if (std::string projectPath = Core::CommandLineArgs::GetCommandLineValue(CMD_PROJECT_PATH)->GetString();
 				!projectPath.empty())
 			{
 				m_projectSystem.OpenProject(projectPath);
 			}
-
-			OnInit();
-			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Initialised);
 
 			splashScreen.Destroy();
 

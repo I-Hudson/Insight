@@ -59,7 +59,7 @@ namespace Insight
             std::lock_guard lock(m_mutex);
 
             std::string sourceFilePath = m_file_path;
-            std::string engineFormatFilePath = FileSystem::FileSystem::ReplaceExtension(m_file_path, GetResourceFileExtension());
+            std::string engineFormatFilePath = FileSystem::ReplaceExtension(m_file_path, GetResourceFileExtension());
 
             Byte* sourceData = m_rawDataPtr;
             u64 sourceDataSize = m_dataSize;

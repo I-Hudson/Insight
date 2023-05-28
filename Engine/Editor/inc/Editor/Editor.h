@@ -5,6 +5,7 @@
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
+#include "Editor/ProjectCodeSystem.h"
 
 #include "Renderpass.h"
 
@@ -27,6 +28,7 @@ namespace Insight
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 			TypeDrawerRegister m_typeDrawerRegister;
+			ProjectCodeSystem m_projectCodeSystem;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
 			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";

@@ -221,8 +221,8 @@ namespace Insight
 
 		bool IResource::IsEngineFormat() const
 		{
-			std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(m_file_path);
-			std::string_view extension = FileSystem::FileSystem::GetExtension(m_file_path);
+			std::string_view fileExtension = FileSystem::GetFileExtension(m_file_path);
+			std::string_view extension = FileSystem::GetExtension(m_file_path);
 			bool isFileExtension = fileExtension == GetResourceFileExtension();
 			bool isExtension = extension == GetResourceFileExtension();
 			return isFileExtension || isExtension;

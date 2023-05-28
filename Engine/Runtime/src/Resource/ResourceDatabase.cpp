@@ -228,7 +228,7 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId, bool force)
         {
-            if (!force && !FileSystem::FileSystem::Exists(resourceId.GetPath()))
+            if (!force && !FileSystem::Exists(resourceId.GetPath()))
             {
                 IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
                 return nullptr;
@@ -388,7 +388,7 @@ namespace Insight
             std::string metaFilePath = resource->GetFilePath();
             metaFilePath += c_MetaFileExtension;
 
-            if (!overwrite && FileSystem::FileSystem::Exists(metaFilePath))
+            if (!overwrite && FileSystem::Exists(metaFilePath))
             {
                 return;
             }
@@ -447,7 +447,7 @@ namespace Insight
                         std::string filePathMeta = filePath;
                         filePathMeta += c_MetaFileExtension;
 
-                        if (FileSystem::FileSystem::Exists(filePathMeta))
+                        if (FileSystem::Exists(filePathMeta))
                         {
                             Archive metaFile(filePathMeta, ArchiveModes::Read);
                             metaFile.Close();

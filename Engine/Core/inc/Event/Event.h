@@ -11,7 +11,9 @@ namespace Insight
 			Graphics_Swapchain_Resize,
 			Graphics_Render_Resolution_Change,
 
+			Project_Create,
 			Project_Open,
+			Project_Close,
 			Project_Save,
 
 			WorldSave,
@@ -26,7 +28,9 @@ namespace Insight
 			false,	// Graphics_Swapchain_Resize
 			false,  // Graphics_Render_Resolution_Change
 
+			true,	// Project_Create
 			true,	// Project_Open
+			true,	// Project_Close
 			true,	// Project_Save
 			
 			true,	// WorldSave
@@ -69,6 +73,19 @@ namespace Insight
 			int Height;
 		};
 
+		struct IS_CORE ProjectCreateEvent : public Event
+		{
+			ProjectCreateEvent() { }
+			ProjectCreateEvent(std::string projectPath)
+				: ProjectPath(std::move(ProjectPath))
+			{ }
+
+			virtual std::string GetName() override { return "ProjectCreateEvent"; }
+			virtual EventType GetEventType() override { return EventType::Project_Create; }
+
+			std::string ProjectPath;
+		};
+
 		struct IS_CORE ProjectOpenEvent : public Event
 		{
 			ProjectOpenEvent() { }
@@ -78,6 +95,32 @@ namespace Insight
 
 			virtual std::string GetName() override { return "ProjectOpenEvent"; }
 			virtual EventType GetEventType() override { return EventType::Project_Open; }
+
+			std::string ProjectPath;
+		};
+
+		struct IS_CORE ProjectSaveEvent : public Event
+		{
+			ProjectSaveEvent() { }
+			ProjectSaveEvent(std::string projectPath)
+				: ProjectPath(std::move(ProjectPath))
+			{ }
+
+			virtual std::string GetName() override { return "ProjectSaveEvent"; }
+			virtual EventType GetEventType() override { return EventType::Project_Save; }
+
+			std::string ProjectPath;
+		};
+
+		struct IS_CORE ProjectCloseEvent : public Event
+		{
+			ProjectCloseEvent() { }
+			ProjectCloseEvent(std::string projectPath)
+				: ProjectPath(std::move(ProjectPath))
+			{ }
+
+			virtual std::string GetName() override { return "ProjectCloseEvent"; }
+			virtual EventType GetEventType() override { return EventType::Project_Close; }
 
 			std::string ProjectPath;
 		};

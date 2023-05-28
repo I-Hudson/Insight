@@ -133,7 +133,7 @@ namespace Insight
                     Runtime::ResourceId resouceId;
                     resouceId.Deserialise(serialiser);
 
-                    bool resourceExistsOnDisk = FileSystem::FileSystem::Exists(resouceId.GetPath());
+                    bool resourceExistsOnDisk = FileSystem::Exists(resouceId.GetPath());
                     if (resourceExistsOnDisk)
                     {
                         resourceDatabase->AddResource(resouceId, true);

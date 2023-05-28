@@ -28,7 +28,7 @@ namespace Insight
 			if (m_rawDataPtr == nullptr && m_dataSize == 0)
 			{
 				std::string_view filePath = m_file_path;
-				if (filePath.empty() || !FileSystem::FileSystem::Exists(filePath))
+				if (filePath.empty() || !FileSystem::Exists(filePath))
 				{
 					m_resource_state = EResoruceStates::Not_Found;
 					return;
@@ -41,7 +41,7 @@ namespace Insight
 					return;
 				}
 
-				const u64 fileSize = FileSystem::FileSystem::GetFileSize(filePath);
+				const u64 fileSize = FileSystem::GetFileSize(filePath);
 				std::vector<Byte> fileData;
 				fileData.resize(fileSize);
 
@@ -62,7 +62,7 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 
 			m_rhi_texture = Renderer::CreateTexture();
-			m_rhi_texture->SetName(std::string(FileSystem::FileSystem::GetFileName(m_file_path)));
+			m_rhi_texture->SetName(std::string(FileSystem::GetFileName(m_file_path)));
 			m_rhi_texture->OnUploadCompleted.Bind<&Texture2D::OnRHITextureUploadCompleted>(this);
 
 			int width, height, channels;

@@ -31,12 +31,12 @@ namespace Insight
         void ProjectSystem::Initialise()
         {
             ASSERT_MSG(m_resourceSystem, "[ProjectSystem::Initialise] There must be a valid resource system pointer in the project system.");
-
             m_state = Core::SystemStates::Initialised;
         }
 
         void ProjectSystem::Shutdown()
         {
+            Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
             m_projectInfo = {};
             m_state = Core::SystemStates::Not_Initialised;
         }
@@ -60,7 +60,7 @@ namespace Insight
 
             std::string projectFilePath = project.GetProjectFilePath();
 
-            if (FileSystem::FileSystem::Exists(projectFilePath))
+            if (FileSystem::Exists(projectFilePath))
             {
                 IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
                 return false;
@@ -77,8 +77,10 @@ namespace Insight
             archive.Write(serialisedData.data(), serialisedData.size());
             archive.Close();
 
-            FileSystem::FileSystem::CreateFolder(project.GetContentPath());
-            FileSystem::FileSystem::CreateFolder(project.GetIntermediatePath());
+            FileSystem::CreateFolder(project.GetContentPath());
+            FileSystem::CreateFolder(project.GetIntermediatePath());
+
+            Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCreateEvent>(m_projectInfo.ProjectPath));
 
             return true;
         }
@@ -96,7 +98,7 @@ namespace Insight
                     {
                         foundProjectFile = true;
                         projectPath = iter.path().string();
-                        FileSystem::FileSystem::PathToUnix(projectPath);
+                        FileSystem::PathToUnix(projectPath);
                         break;
                     }
                 }
@@ -122,8 +124,8 @@ namespace Insight
             if (m_projectInfo.IsOpen)
             {
                 m_resourceSystem->GetDatabase().Shutdown();
+                Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
             }
-
             m_projectInfo = {};
 
             Serialisation::JsonSerialiser jsonSerialiser(true);
@@ -137,7 +139,7 @@ namespace Insight
 
             ResourceManager::LoadDatabase();
 
-            Core::EventSystem::Instance().DispatchEvent(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
+            Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
             return true;
         }
 

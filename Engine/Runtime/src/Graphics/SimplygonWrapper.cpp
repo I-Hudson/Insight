@@ -127,7 +127,7 @@ namespace Insight
 
     std::string SimplygonWrapper::GetOptimisedFilePath(std::string_view path)
     {
-        std::string extension = std::string(FileSystem::FileSystem::GetFileExtension(path));
+        std::string extension = std::string(FileSystem::GetFileExtension(path));
         std::string optimisedPath = std::string(path.substr(0, path.find_last_of('.')));
         optimisedPath += "_optimised";
         optimisedPath += extension;
@@ -136,7 +136,7 @@ namespace Insight
 
     bool SimplygonWrapper::CheckForOptimisedFile(std::string_view path)
     {
-        return FileSystem::FileSystem::Exists(GetOptimisedFilePath(path));
+        return FileSystem::Exists(GetOptimisedFilePath(path));
     }
 
     void SimplygonWrapper::CheckLog(Simplygon::ISimplygon* sg)

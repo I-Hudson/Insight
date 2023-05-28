@@ -189,7 +189,7 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        if (!FileSystem::FileSystem::Exists(resource->GetFilePath()))
+                        if (!FileSystem::Exists(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
                             resource->m_resource_state = EResoruceStates::Not_Found;
@@ -212,7 +212,7 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
         {
-            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(filepath);
+            std::string_view fileExtension = FileSystem::GetFileExtension(filepath);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {
@@ -257,7 +257,7 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        if (!FileSystem::FileSystem::Exists(resource->GetFilePath()))
+                        if (!FileSystem::Exists(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
                             resource->m_resource_state = EResoruceStates::Not_Found;

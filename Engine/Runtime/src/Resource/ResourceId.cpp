@@ -12,21 +12,21 @@ namespace Insight
         { }
 
         ResourceId::ResourceId(const std::string& path, ResourceTypeId typeId)
-            : m_path(FileSystem::FileSystem::GetAbsolutePath(path))
+            : m_path(FileSystem::GetAbsolutePath(path))
             , m_typeId(std::move(typeId))
         {
             //m_id = Algorithm::GetHash64(m_path);
         }
 
         ResourceId::ResourceId(std::string&& path, ResourceTypeId typeId)
-            : m_path(FileSystem::FileSystem::GetAbsolutePath(path))
+            : m_path(FileSystem::GetAbsolutePath(path))
             , m_typeId(std::move(typeId))
         { 
             //m_id = Algorithm::GetHash64(m_path);
         }
 
         ResourceId::ResourceId(std::string_view path, ResourceTypeId typeId)
-            : m_path(FileSystem::FileSystem::GetAbsolutePath(path))
+            : m_path(FileSystem::GetAbsolutePath(path))
             , m_typeId(std::move(typeId))
         {
         }

@@ -17,7 +17,7 @@ namespace Insight
             return;
         }
 
-        std::string absFilePath = FileSystem::FileSystem::GetAbsolutePath(filePath);
+        std::string absFilePath = FileSystem::GetAbsolutePath(filePath);
         if (mode == ArchiveModes::Read)
         {
             std::ifstream inStream;

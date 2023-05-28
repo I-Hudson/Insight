@@ -46,7 +46,7 @@ namespace Insight
             m_pathName = m_path.substr(lastSlashChar);
 
             m_icon = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
-            m_isDirectory = FileSystem::FileSystem::IsDirectory(m_path);
+            m_isDirectory = FileSystem::IsDirectory(m_path);
             m_clickedTimer.Start();
         }
 
@@ -186,7 +186,7 @@ namespace Insight
             m_isVisable = true;
 
             m_title = "File Dialog " + std::string(FileDialogOperationToString(m_operation));
-            m_navigation.SetPath(FileSystem::FileSystem::GetAbsolutePath(path));
+            m_navigation.SetPath(FileSystem::GetAbsolutePath(path));
 
             m_inputBox.clear();
             m_selectionMade = false;
@@ -233,7 +233,7 @@ namespace Insight
                 && result != nullptr)
             {
                 std::string possiableResult = m_navigation.GetPath() + "/" + m_inputBox;
-                if (FileSystem::FileSystem::Exists(possiableResult))
+                if (FileSystem::Exists(possiableResult))
                 {
                     *result = m_inputBox;
                 }
@@ -501,7 +501,7 @@ namespace Insight
 
         void FileDialog::UpdateItems()
         {
-            if (!FileSystem::FileSystem::IsDirectory(m_navigation.GetPath()))
+            if (!FileSystem::IsDirectory(m_navigation.GetPath()))
             {
                 return;
             }
@@ -511,7 +511,7 @@ namespace Insight
             for (const auto& entry : directoryIter)
             {
                 std::string entryPath = entry.path().string();
-                FileSystem::FileSystem::PathToUnix(entryPath);
+                FileSystem::PathToUnix(entryPath);
                 m_items.emplace_back(entryPath);
             }
         }

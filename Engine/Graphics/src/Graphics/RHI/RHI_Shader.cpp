@@ -243,7 +243,7 @@ namespace Insight
 			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
 			
 			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader_CSO/";
-			FileSystem::FileSystem::CreateFolder(shaderCSOFolderPath);
+			FileSystem::CreateFolder(shaderCSOFolderPath);
 
 			std::string shaderToDisk = shaderCSOFolderPath + std::string(shaderToDiskView) + ".cso";
 			shaderDisk.open(shaderToDisk.c_str());

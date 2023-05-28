@@ -230,7 +230,7 @@ namespace Insight::Editor
                                     if (iter.is_directory())
                                     {
                                         m_currentDirectory = path;
-                                        FileSystem::FileSystem::PathToUnix(m_currentDirectory);
+                                        FileSystem::PathToUnix(m_currentDirectory);
                                         SplitDirectory();
                                     }
                                     else
@@ -372,7 +372,7 @@ namespace Insight::Editor
 
         if (ImGui::Begin("Resource type", nullptr, windowFlags))
         {
-            std::string_view fileExtension = FileSystem::FileSystem::GetFileExtension(m_importFilePath);
+            std::string_view fileExtension = FileSystem::GetFileExtension(m_importFilePath);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (loader)
             {

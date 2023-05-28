@@ -53,6 +53,9 @@ namespace Insight
 			m_gameRenderpass = New<Graphics::Renderpass>();
 			m_gameRenderpass->Create();
 
+			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_projectCodeSystem);
+			m_projectCodeSystem.Initialise();
+
 			glm::vec4 vec4A;
 			glm::vec4 vec4B;
 
@@ -110,6 +113,9 @@ namespace Insight
 			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Write);
 			editorSettings.Write(serialiser.GetSerialisedData());
 			editorSettings.Close();
+
+			m_projectCodeSystem.Shutdown();
+			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_projectCodeSystem);
 
 			m_gameRenderpass->Destroy();
 			Delete(m_gameRenderpass);
