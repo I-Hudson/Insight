@@ -23,7 +23,8 @@ project "Insight_Editor"
 
     defines
     {
-        "IS_EDITOR"
+        "IS_EDITOR_ENABLED",
+        "IS_EXPORT_EDITOR_DLL",
     }
     
     includedirs

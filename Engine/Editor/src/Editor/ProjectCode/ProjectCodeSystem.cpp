@@ -33,6 +33,7 @@ namespace Insight::Editor
     {
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Close);
+        UnlinkProject();
         m_state = Core::SystemStates::Not_Initialised;
     }
 

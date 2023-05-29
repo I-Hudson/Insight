@@ -1,9 +1,13 @@
 #pragma once
 
+#include "Editor/Defines.h"
+
 #include "Core/Defines.h"
 #include "Core/TypeAlias.h"
 #include "Core/Timer.h"
 #include "Core/Memory.h"
+
+#include "Resource/Texture2D.h"
 
 #include <imgui.h>
 
@@ -13,11 +17,6 @@
 
 namespace Insight
 {
-    namespace Runtime
-    {
-        class Texture2D;
-    }
-
     namespace Editor
     {
         enum class FileDialogOperations
@@ -30,7 +29,7 @@ namespace Insight
         /// <summary>
         /// Single item within a folder on the file system (this includes directories and files).
         /// </summary>
-        class FileDialogItem
+        class IS_EDITOR FileDialogItem
         {
         public:
             FileDialogItem() = default;

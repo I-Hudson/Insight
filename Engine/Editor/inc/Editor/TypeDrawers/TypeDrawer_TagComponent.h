@@ -9,7 +9,7 @@ namespace Insight
     namespace Editor
     {
         REFLECT_CLASS()
-        class TypeDrawer_TagComponent : public ITypeDrawer
+        class IS_EDITOR TypeDrawer_TagComponent : public ITypeDrawer
         {
             REFLECT_GENERATED_BODY()
         public:

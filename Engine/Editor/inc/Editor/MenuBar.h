@@ -9,7 +9,7 @@ namespace Insight
     {
         class EditorWindowManager;
 
-        class MenuBar
+        class IS_EDITOR MenuBar
         {
         public:
             MenuBar();

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Editor/Defines.h"
+
 #include "Runtime/Engine.h"
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
@@ -13,7 +15,7 @@ namespace Insight
 {
 	namespace Editor
 	{
-		class Editor : public Insight::App::Engine, public Serialisation::ISerialisable
+		class IS_EDITOR Editor : public Insight::App::Engine, public Serialisation::ISerialisable
 		{
 		public:
 			IS_SERIALISABLE_H(Editor)

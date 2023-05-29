@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/TypeAlias.h"
+#include "Editor/Defines.h"
 
 #include <Reflect.h>
 
@@ -20,7 +21,7 @@ namespace Insight
 		/// <summary>
 		/// Base class for all editor windows.
 		/// </summary>
-		class IEditorWindow
+		class IS_EDITOR IEditorWindow
 		{
 		public:
 			IEditorWindow();

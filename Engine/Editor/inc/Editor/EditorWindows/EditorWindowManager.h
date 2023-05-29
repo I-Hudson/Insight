@@ -18,7 +18,7 @@ namespace Insight
 	{
 		class IEditorWindow;
 
-		struct RegisterWindow
+		struct IS_EDITOR RegisterWindow
 		{
 			using RegisterWindowFunc = Core::Action<IEditorWindow*()>;
 
@@ -35,7 +35,7 @@ namespace Insight
 			EditorWindowCategories Category;
 		};
 
-		class EditorWindowManager : public Core::Singleton<EditorWindowManager>, public Serialisation::ISerialisable
+		class IS_EDITOR EditorWindowManager : public Core::Singleton<EditorWindowManager>, public Serialisation::ISerialisable
 		{
 		public:
 			IS_SERIALISABLE_H(EditorWindowManager);

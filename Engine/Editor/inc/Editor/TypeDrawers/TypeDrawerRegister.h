@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Editor/Defines.h"
 #include "Core/Singleton.h"
 
 #include <unordered_map>
@@ -9,7 +10,7 @@ namespace Insight
     namespace Editor
     {
         class ITypeDrawer;
-        class TypeDrawerRegister : public Core::Singleton<TypeDrawerRegister>
+        class IS_EDITOR TypeDrawerRegister : public Core::Singleton<TypeDrawerRegister>
         {
         public:
             TypeDrawerRegister();

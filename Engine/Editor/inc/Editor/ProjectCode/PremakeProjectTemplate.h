@@ -28,8 +28,8 @@ namespace Insight::Editor
 
     defines
     {
+        "IS_EDITOR_ENABLED",
         "IS_EXPORT_PROJECT_DLL",
-        "IS_EDITOR",
     }
 
     includedirs
@@ -93,6 +93,7 @@ namespace Insight::Editor
         {
             "xxHashd.lib",
             "lz4d.lib",
+            "Reflectd.lib",
         }
         libdirs
         {
@@ -106,6 +107,7 @@ namespace Insight::Editor
         {
             "xxHash.lib",
             "lz4.lib",
+            "Reflect.lib",
         }
         libdirs
         {
