@@ -10,6 +10,7 @@
 #include "FileSystem/FileSystem.h"
 
 #include "Core/EnginePaths.h"
+#include "Event/EventSystem.h"
 
 #include <filesystem>
 #include <imgui.h>
@@ -20,19 +21,16 @@ namespace Insight::Editor
     ContentWindow::ContentWindow()
         : IEditorWindow()
     {
-        Setup();
     }
 
     ContentWindow::ContentWindow(u32 minWidth, u32 minHeight)
         : IEditorWindow(minWidth, minHeight)
     {
-        Setup();
     }
 
     ContentWindow::ContentWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight)
         : IEditorWindow(minWidth, minHeight, maxWidth, maxHeight)
     {
-        Setup();
     }
 
     ContentWindow::~ContentWindow()
@@ -54,15 +52,24 @@ namespace Insight::Editor
         }
     }
 
-    void ContentWindow::Setup()
+    void ContentWindow::Initialise()
     {
-        m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
-        SplitDirectory();
+        Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, 
+            [this](Core::Event& e)
+            {
+                m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+                SplitDirectory();
+            });
 
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
             Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
         m_thumbnailToTexture[ContentWindowThumbnailType::File] =
             Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+    }
+
+    void ContentWindow::Shutdown()
+    {
+        Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
     }
 
     void ContentWindow::TopBar()

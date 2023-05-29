@@ -20,7 +20,7 @@ namespace Insight
 			public:
 				virtual ~RHI_Texture_DX12() override;
 
-				ID3D12Resource* GetResource() const { if (m_swapchainImage) { return m_swapchainImage.Get(); } return m_allocation->GetResource(); }
+				ID3D12Resource* GetResource() const { if (m_swapchainImage) { return m_swapchainImage.Get(); } return m_allocation ? m_allocation->GetResource() : nullptr; }
 				DescriptorHeapHandle_DX12 GetDescriptorHandle() const;
 				DescriptorHeapHandle_DX12 GetRenderTargetHandle() const;
 				DescriptorHeapHandle_DX12 GetDepthStencilHandle() const;

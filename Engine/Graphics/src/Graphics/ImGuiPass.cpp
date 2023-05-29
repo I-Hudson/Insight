@@ -303,34 +303,38 @@ namespace Insight
 								}
 								RHI_Texture* texture = static_cast<RHI_Texture*>(pcmd->TextureId);
 
-								// TODO: HACK REALLY BAD. There needs to be a system where you can predefine multiple pipelines before rendering.
-								// This would allow for at runtime pipelines to already be created.
-								PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
-								if (texture->m_name == "ImguiFontsTexture")
+								if (texture)
 								{
-									cmdList->BindPipeline(pso, false);
-								}
-								else
-								{
-									pso.Name = "ImGuiPass_NoBlend";
-									pso.BlendEnable = false;
-									cmdList->BindPipeline(pso, false);
-								}
-								PipelineBarrier pipelineBarrier;
-								pipelineBarrier.SrcStage = (u32)PipelineStageFlagBits::ColourAttachmentOutput;
-								pipelineBarrier.DstStage = (u32)PipelineStageFlagBits::FragmentShader;
+									// TODO: HACK REALLY BAD. There needs to be a system where you can predefine multiple pipelines before rendering.
+									// This would allow for at runtime pipelines to already be created.
+									PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
+									if (texture->m_name == "ImguiFontsTexture")
+									{
+										cmdList->BindPipeline(pso, false);
+									}
+									else
+									{
+										pso.Name = "ImGuiPass_NoBlend";
+										pso.BlendEnable = false;
+										cmdList->BindPipeline(pso, false);
+									}
+									PipelineBarrier pipelineBarrier;
+									pipelineBarrier.SrcStage = (u32)PipelineStageFlagBits::ColourAttachmentOutput;
+									pipelineBarrier.DstStage = (u32)PipelineStageFlagBits::FragmentShader;
 
-								ImageBarrier imageBarrier;
-								imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
-								imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;
-								imageBarrier.OldLayout = texture->GetLayout();
-								imageBarrier.NewLayout = ImageLayout::ShaderReadOnly;
-								imageBarrier.Image = texture;
-								imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
-								pipelineBarrier.ImageBarriers.push_back(imageBarrier);
+									ImageBarrier imageBarrier;
+									imageBarrier.SrcAccessFlags = AccessFlagBits::ColorAttachmentWrite;
+									imageBarrier.DstAccessFlags = AccessFlagBits::ShaderRead;
+									imageBarrier.OldLayout = texture->GetLayout();
+									imageBarrier.NewLayout = ImageLayout::ShaderReadOnly;
+									imageBarrier.Image = texture;
+									imageBarrier.SubresourceRange = ImageSubresourceRange::SingleMipAndLayer(ImageAspectFlagBits::Colour);
+									pipelineBarrier.ImageBarriers.push_back(imageBarrier);
 
-								cmdList->PipelineBarrier(pipelineBarrier);
-								cmdList->SetTexture(1, 0, texture);
+									cmdList->PipelineBarrier(pipelineBarrier);
+									cmdList->SetTexture(1, 0, texture);
+								}
+
 								cmdList->DrawIndexed(pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
 							}
 						}

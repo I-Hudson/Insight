@@ -42,11 +42,12 @@ namespace Insight
 
             EDITOR_WINDOW(ContentWindow, EditorWindowCategories::Windows);
 
+            virtual void Initialise() override;
+            virtual void Shutdown() override;
+
             virtual void OnDraw() override;
 
         private:
-            void Setup();
-
             void TopBar();
             void CentreArea();
             void BottomBar();

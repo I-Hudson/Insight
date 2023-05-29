@@ -121,7 +121,8 @@ namespace Insight
 					// as no transition is needed.
 					D3D12_RESOURCE_STATES oldState = ImageLayoutToDX12ResouceState(imageBarrier.OldLayout);
 					D3D12_RESOURCE_STATES newState = ImageLayoutToDX12ResouceState(imageBarrier.NewLayout);
-					if (oldState != newState)
+					if (oldState != newState
+						&& textureDX12->GetResource() != nullptr)
 					{
 						resouceBarriers.push_back(
 							CD3DX12_RESOURCE_BARRIER::Transition(
@@ -598,8 +599,11 @@ namespace Insight
 							if (binding.RHI_Texture)
 							{
 								RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-								m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
-								++RenderStats::Instance().DescriptorSetBindings;
+								if (textureDX12->GetResource())
+								{
+									m_commandList->SetGraphicsRootUnorderedAccessView(rootParameterIdx, textureDX12->GetResource()->GetGPUVirtualAddress());
+									++RenderStats::Instance().DescriptorSetBindings;
+								}
 							}
 							break;
 						}
@@ -667,9 +671,12 @@ namespace Insight
 									if (binding.RHI_Texture)
 									{
 										RHI_Texture_DX12 const* textureDX12 = static_cast<RHI_Texture_DX12 const*>(binding.RHI_Texture);
-										DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
-										m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-										++RenderStats::Instance().DescriptorSetUpdates;
+										if (textureDX12->GetResource())
+										{
+											DescriptorHeapHandle_DX12 srvHandle = textureDX12->GetDescriptorHandle();
+											m_contextDX12->GetDevice()->CopyDescriptorsSimple(1, dstHandle.CPUPtr, srvHandle.CPUPtr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+											++RenderStats::Instance().DescriptorSetUpdates;
+										}
 									}
 									else
 									{
