@@ -35,13 +35,15 @@ namespace Insight
             void GenerateProjectFiles();
             void BuildProject();
             void LinkProject();
+            void UnlinkProject();
 
         private:
             void ProjectOpened(Core::Event& e);
             void ProjectClosed(Core::Event& e);
 
             void GenerateProjectSolution(std::string_view solutionPath);
-            void UnlinkProject();
+
+            std::string FindNewestProjectDynamicLibrary(std::string_view folderPath);
 
         private:
             ProjectCodeInfo m_projectCodeInfo;

@@ -86,7 +86,9 @@ namespace Insight::Editor
 #endif
         dynamicLibraryPath += "x86_64";
 #endif
-        dynamicLibraryPath += "/" + m_projectInfo.ProjectName + "/" + m_projectInfo.ProjectName + ".dll";
+        dynamicLibraryPath += "/" + m_projectInfo.ProjectName;
+
+        dynamicLibraryPath = FindNewestProjectDynamicLibrary(dynamicLibraryPath);
 
         m_projectDll = Platform::LoadDynamicLibrary(dynamicLibraryPath);
         if (m_projectDll)
@@ -142,11 +144,34 @@ namespace Insight::Editor
         std::system(cmdCommend.c_str());
     }
 
+    std::string ProjectCodeSystem::FindNewestProjectDynamicLibrary(std::string_view folderPath)
+    {   
+        u64 newestWriteTime = _UI64_MAX;
+        std::string filePath;
+
+        for (auto path : std::filesystem::directory_iterator(folderPath))
+        {
+            u64 timeSinceWrite = path.last_write_time().time_since_epoch().count();
+            if (FileSystem::GetFileExtension(path.path().generic_string()) == ".dll"
+                && timeSinceWrite < newestWriteTime)
+            {
+                filePath = path.path().generic_string();
+            }
+            
+        }
+        return filePath;
+    }
 
     void ProjectCodeSystem::UnlinkProject()
     {
         if (m_projectDll)
         {
+            auto uninitialiseFunc = Platform::GetDynamicFunction<void>(m_projectDll, "ProjectModuleUninitialise");
+            if (uninitialiseFunc)
+            {
+                uninitialiseFunc();
+            }
+
             Platform::FreeDynamicLibrary(m_projectDll);
             m_projectDll = nullptr;
         }

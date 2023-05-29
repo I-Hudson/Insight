@@ -5,6 +5,7 @@ namespace Insight::Editor
 {
     constexpr static const char* c_PremakeProjectTag_ProjectName = "--PROJECT_NAME";
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
+    constexpr static const char* c_PremakeProjectTag_Targetname = "--TARGET_NAME";
     constexpr static const char* c_PremakeProjectTag_AdditionalFiles = "--ADDITIONAL_FILES";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
@@ -12,12 +13,13 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeProjectTemplate = R"(
     local insightPath = "--INSIGHT_PATH"
     includePath = "../../Content"
+    local targetName="--TARGET_NAME"
 
     project "--PROJECT_NAME"
     kind "SharedLib"
     location "./"
 
-    targetname ("%{prj.name}" .. output_project_subfix)
+    targetname (targetName .. output_project_subfix)
     targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
     objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
     debugdir ("../bin/" .. outputdir .. "/%{prj.name}")
@@ -30,6 +32,7 @@ namespace Insight::Editor
     {
         "IS_EDITOR_ENABLED",
         "IS_EXPORT_PROJECT_DLL",
+        "IS_EXPORT_DLL",
     }
 
     includedirs
