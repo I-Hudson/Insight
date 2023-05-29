@@ -45,6 +45,13 @@ namespace InsightReflectTool
             file << "\t\tIS_INFO(\"Project DLL module initialised\");\n";
             file << "\t}\n";
 
+            file << "\textern \"C\" IS_PROJECT void ProjectModuleUninitialise()\n";
+            file << "\t{\n";
+            file << "\t\tEditor::UnregisterAllEditorWindows();\n";
+            file << "\t\tECS::UnregisterAllComponents();\n";
+            file << "\t\tIS_INFO(\"Project DLL module uninitialised\");\n";
+            file << "\t}\n";
+
             file << "}\n";
 
             return true;

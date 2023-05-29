@@ -11,7 +11,8 @@ namespace InsightReflectTool
 {
     bool GenerateEditorWindowRegister::Generate(const Reflect::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
-        std::vector<std::pair<std::string, Reflect::ReflectContainerData>> editorWindowClasses;
+        std::vector<std::string> editorWindowFiles;
+        std::vector<Reflect::ReflectContainerData> editorWindowClasses;
         for (const auto& fileParsed : fileParser.GetAllFileParsedData())
         {
             for (const auto& reflectData : fileParsed.ReflectData)
@@ -21,7 +22,8 @@ namespace InsightReflectTool
                         return "IEditorWindow" == data.Name;
                     }) != reflectData.Inheritance.end())
                 {
-                    editorWindowClasses.push_back(std::make_pair(fileParsed.FilePath, reflectData));
+                    editorWindowFiles.push_back(fileParsed.FilePath + "/" + fileParsed.FileName + ".h");
+                    editorWindowClasses.push_back(reflectData);
                 }
             }
         }
@@ -37,15 +39,8 @@ namespace InsightReflectTool
             std::string fileOutputAbsPath = std::filesystem::canonical(outFilePath).parent_path().generic_string();
 
             file << "#include \"Editor/EditorWindows/EditorWindowManager.h\"" << NEW_LINE;
-            for (const auto [filePath, reflectData] : editorWindowClasses)
-            {
-                std::string includePath = filePath + "/" + reflectData.Name + ".h";
-                includePath = std::filesystem::canonical(includePath).generic_string();
+            Utils::WriteIncludeFiles(file, fileOutputAbsPath, editorWindowFiles);
 
-                std::string relativeIncludePath = std::filesystem::relative(includePath, fileOutputAbsPath).generic_string();
-
-                file << "#include \"" + relativeIncludePath + "\"" << NEW_LINE;
-            }
             file << NEW_LINE;
 
             file << "namespace Insight {\n";
@@ -57,14 +52,29 @@ namespace InsightReflectTool
             TAB_N(2);
             file << "{" << NEW_LINE;
 
-            for (const auto [filePath, reflectData] : editorWindowClasses)
+            for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
             {
                 TAB_N(3);
-                file << "EditorWindowManager::Instance().RegsiterEditorWindow<" + reflectData.Name + ">();" << NEW_LINE;
+                file << "EditorWindowManager::Instance().RegisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+            }
+
+            TAB_N(2);
+            file << "}" << NEW_LINE << NEW_LINE;
+
+            TAB_N(2);
+            file << "void UnregisterAllEditorWindows()" << NEW_LINE;
+            TAB_N(2);
+            file << "{" << NEW_LINE;
+
+            for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+            {
+                TAB_N(3);
+                file << "EditorWindowManager::Instance().UnregisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
             }
 
             TAB_N(2);
             file << "}" << NEW_LINE;
+
             TAB_N(1);
             file << "}" << NEW_LINE;
             file << "}" << NEW_LINE;

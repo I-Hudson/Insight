@@ -46,7 +46,7 @@ namespace Insight
 			void RegisterWindows();
 
 			template<typename T>
-			void RegsiterEditorWindow()
+			void RegisterEditorWindow()
 			{
 				if (m_windowRegistry.find(T::WINDOW_NAME) != m_windowRegistry.end())
 				{
@@ -59,6 +59,18 @@ namespace Insight
 							window->Initialise();
 							return window;
 						}, T::WINDOW_CATEGORY);
+			}
+
+
+			template<typename T>
+			void UnregisterEditorWindow()
+			{
+				if (auto iter = m_windowRegistry.find(T::WINDOW_NAME); 
+					iter != m_windowRegistry.end())
+				{
+					m_windowRegistry.erase(iter);
+					return;
+				}
 			}
 
 			void AddWindow(const std::string& windowName);

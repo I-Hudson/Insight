@@ -15,6 +15,17 @@ namespace InsightReflectTool
             }
         }
 
+        void WriteIncludeFiles(std::fstream& file, std::string_view fileOutputAbsPath, const std::vector<std::string>& filesToInclude)
+        {
+            for (const std::string& filePath : filesToInclude)
+            {
+                std::string includePath = std::filesystem::canonical(filePath).generic_string();
+                std::string relativeIncludePath = std::filesystem::relative(includePath, fileOutputAbsPath).generic_string();
+
+                file << "#include \"" + relativeIncludePath + "\"\n";
+            }
+        }
+
         void ValidateOutputPath(std::string_view path)
         {
             std::string folderPath = std::filesystem::path(path).parent_path().string();

@@ -92,6 +92,15 @@ namespace Insight
 			}
 		}
 
+		void ComponentRegistry::UnregisterComponent(std::string_view component_type)
+		{
+			if (auto itr = m_register_funcs.find(std::string(component_type));
+				itr != m_register_funcs.end())
+			{
+				m_register_funcs.erase(itr);
+			}
+		}
+
 		Component* ComponentRegistry::CreateComponent(std::string_view component_type)
 		{
 			if (auto itr = m_register_funcs.find(std::string(component_type)); 

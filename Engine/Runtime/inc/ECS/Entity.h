@@ -146,10 +146,11 @@ namespace Insight
 		virtual const char* GetTypeName() override { return Type_Name; }
 
 		using ComponentRegistryMap = std::unordered_map<std::string, std::function<Component* ()>>;
-		class ComponentRegistry
+		class IS_RUNTIME ComponentRegistry
 		{
 		public:
 			static void RegisterComponent(std::string_view component_type, std::function<Component* ()> func);
+			static void UnregisterComponent(std::string_view component_type);
 			static Component* CreateComponent(std::string_view component_type);
 
 		private:
