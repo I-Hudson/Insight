@@ -21,7 +21,7 @@ namespace Insight
             std::string ProjectFolder;
         };
 
-        class ProjectCodeSystem : public Core::ISystem
+        class ProjectCodeSystem : public Core::ISystem, public Core::Singleton<ProjectCodeSystem>
         {
         public:
             ProjectCodeSystem();
@@ -32,15 +32,22 @@ namespace Insight
 
             IS_SYSTEM(ProjectCodeSystem)
 
+            void GenerateProjectFiles();
+            void BuildProject();
+            void LinkProject();
+
         private:
             void ProjectOpened(Core::Event& e);
             void ProjectClosed(Core::Event& e);
 
-            void GenerateProjectFiles();
+            void GenerateProjectSolution(std::string_view solutionPath);
+            void UnlinkProject();
 
         private:
             ProjectCodeInfo m_projectCodeInfo;
             Runtime::ProjectInfo m_projectInfo;
+
+            void* m_projectDll = nullptr;
         };
     }
 }

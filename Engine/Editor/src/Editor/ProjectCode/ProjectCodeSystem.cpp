@@ -36,24 +36,6 @@ namespace Insight::Editor
         m_state = Core::SystemStates::Not_Initialised;
     }
 
-    void ProjectCodeSystem::ProjectOpened(Core::Event& e)
-    {
-        m_projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-        m_projectCodeInfo.ProjectFolder = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder;
-        m_projectCodeInfo.ProjectFile = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder + "/" + m_projectInfo.ProjectName + ".vcxproj";
-        m_projectCodeInfo.SolutionFile = m_projectInfo.GetProjectPath() + "/" + m_projectInfo.ProjectName + ".sln";
-
-        if (!FileSystem::Exists(m_projectCodeInfo.ProjectFile) || !FileSystem::Exists(m_projectCodeInfo.SolutionFile))
-        {
-            GenerateProjectFiles();
-        }
-    }
-
-    void ProjectCodeSystem::ProjectClosed(Core::Event& e)
-    {
-
-    }
-
     void ProjectCodeSystem::GenerateProjectFiles()
     {
         std::string insightRootPath = EnginePaths::GetRootPath();
@@ -80,17 +62,24 @@ namespace Insight::Editor
         solutionTemplateData.InsightRootPath = insightRootPath.c_str();
 
         std::string premakeSolutionFile = CreatePremakeSolutionTemplateFile(m_projectCodeInfo.ProjectFolder.c_str(), solutionTemplateData);
+        GenerateProjectSolution(premakeSolutionFile);
+    }
 
-        std::string generateProjectsBatch = insightRootPath + "/Build/Engine/GENERATE_PROJECT.bat";
-        std::string cmdCommend = generateProjectsBatch + " " + premakeSolutionFile + " vs2019";
-        std::system(cmdCommend.c_str());
+    void ProjectCodeSystem::BuildProject()
+    {
+        IS_CORE_WARN("[ProjectCodeSystem::BuildProject] To be implemented.");
+    }
 
-//#define PROJECT_LOAD_TESTING
+    void ProjectCodeSystem::LinkProject()
+    {
+        UnlinkProject();
+
+#define PROJECT_LOAD_TESTING
 #ifdef PROJECT_LOAD_TESTING
-        HMODULE projectLibrary = LoadLibrary(L"E:\\User\\Documents\\SourceControl\\Github\\C++Porjects\\Insight\\DemoProject\\Intermediate\\bin\\Debug-windows-x86_64\\DemoProject\\DemoProject.dll");
-        if (projectLibrary)
+        m_projectDll = LoadLibrary(L"E:\\User\\Documents\\SourceControl\\Github\\C++Porjects\\Insight\\DemoProject\\Intermediate\\bin\\Debug-windows-x86_64\\DemoProject\\DemoProject.dll");
+        if (m_projectDll)
         {
-            FARPROC func = GetProcAddress(projectLibrary, "ProjectModuleInitialise");
+            FARPROC func = GetProcAddress((HMODULE)m_projectDll, "ProjectModuleInitialise");
             if (!func)
             {
                 return;
@@ -105,7 +94,50 @@ namespace Insight::Editor
 
             Core::ImGuiSystem* imguiSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
             initialiseFunc(imguiSystem);
-        }
+    }
 #endif
+    }
+
+    void ProjectCodeSystem::ProjectOpened(Core::Event& e)
+    {
+        m_projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+        m_projectCodeInfo.ProjectFolder = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder;
+        m_projectCodeInfo.ProjectFile = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder + "/" + m_projectInfo.ProjectName + ".vcxproj";
+        m_projectCodeInfo.SolutionFile = m_projectInfo.GetProjectPath() + "/" + m_projectInfo.ProjectName + ".sln";
+
+        if (!FileSystem::Exists(m_projectCodeInfo.ProjectFile) || !FileSystem::Exists(m_projectCodeInfo.SolutionFile))
+        {
+            GenerateProjectFiles();
+        }
+    }
+
+    void ProjectCodeSystem::ProjectClosed(Core::Event& e)
+    {
+        UnlinkProject();
+    }
+
+    void ProjectCodeSystem::GenerateProjectSolution(std::string_view solutionPath)
+    {
+        if (solutionPath.empty() || !FileSystem::Exists(solutionPath))
+        {
+            IS_CORE_ERROR("[ProjectCodeSystem::GenerateProjectSolution] Unable to generate solution as required premake file '{}' does not exist.", solutionPath);
+            return;
+        }
+
+        std::string insightRootPath = EnginePaths::GetRootPath();
+
+        std::string generateProjectsBatch = insightRootPath + "/Build/Engine/GENERATE_PROJECT.bat";
+        std::string cmdCommend = generateProjectsBatch + " " + std::string(solutionPath) + " vs2019";
+        std::system(cmdCommend.c_str());
+    }
+
+
+    void ProjectCodeSystem::UnlinkProject()
+    {
+        if (m_projectDll)
+        {
+            FreeLibrary((HMODULE)m_projectDll);
+            m_projectDll = nullptr;
+        }
     }
 }

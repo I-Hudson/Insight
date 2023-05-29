@@ -5,6 +5,8 @@
 #include "Editor/EditorWindows/InputWindow.h"
 #include "Editor/EditorWindows/ResourceWindow.h"
 
+#include "Editor/ProjectCode/ProjectCodeSystem.h"
+
 #include "Platforms/Platform.h"
 
 #include "Serialisation/Archive.h"
@@ -137,6 +139,18 @@ namespace Insight
                 if (ImGui::BeginMenu("Windows"))
                 {
                     DrawAllRegisteredWindow(EditorWindowCategories::Windows);
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Code"))
+                {
+                    if (ImGui::MenuItem("Generate Project Solution"))
+                    {
+                        ProjectCodeSystem::Instance().GenerateProjectFiles();
+                    }
+                    if (ImGui::MenuItem("Link Project DLL"))
+                    {
+                        ProjectCodeSystem::Instance().LinkProject();
+                    }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();

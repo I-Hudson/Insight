@@ -60,7 +60,7 @@ namespace Insight
 #define EDITOR_WINDOW(Name, WindowCategory)													\
 	static constexpr const char* WINDOW_NAME = #Name;										\
 	virtual const char* GetWindowName() const override { return WINDOW_NAME; }				\
-	static constexpr EditorWindowCategories WINDOW_CATEGORY = WindowCategory;				\
-	virtual EditorWindowCategories GetCategory() const override { return WindowCategory; }
+	static constexpr ::Insight::Editor::EditorWindowCategories WINDOW_CATEGORY = WindowCategory;				\
+	virtual ::Insight::Editor::EditorWindowCategories GetCategory() const override { return WindowCategory; }
 	}
 }
