@@ -45,6 +45,33 @@ namespace Insight
 			static Core::CPUInformation GetCPUInformation();
 			static Core::MemoryInformation GetMemoryInformation();
 
+			static void* LoadDynamicLibrary(std::string_view path);
+			static void FreeDynamicLibrary(void*& library);
+
+			/// @brief Load an exported function from a dynamic shared library and reinterpret cast to the given template arguments.
+			/// @tparam ReturnT 
+			/// @tparam ...Args 
+			/// @param library 
+			/// @param functionName 
+			/// @return 
+			template<typename ReturnT, typename... Args>
+			static ReturnT(*GetDynamicFunction(void* library, std::string_view functionName))(Args...)
+			{
+				if (library == nullptr || functionName.empty())
+				{
+					return nullptr;
+				}
+
+				using ReturnFuncSig = ReturnT(*)(Args...);
+				void* procAddress = GetProcAddress((HMODULE)library, functionName.data());
+				ReturnFuncSig func = reinterpret_cast<ReturnFuncSig>(procAddress);
+				if (func == nullptr)
+				{
+					return nullptr;
+				}
+				return func;
+			}
+
 		private:
 			static Core::MemoryInformation s_memoryInformation;
 			static Core::CPUInformation s_cpuInformation;

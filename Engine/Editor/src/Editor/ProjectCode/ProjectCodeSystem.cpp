@@ -10,7 +10,7 @@
 #include "Event/EventSystem.h"
 #include "FileSystem/FileSystem.h"
 
-#include <Windows.h>
+#include "Platforms/Platform.h"
 
 namespace Insight::Editor
 {
@@ -77,7 +77,18 @@ namespace Insight::Editor
 
 #define PROJECT_LOAD_TESTING
 #ifdef PROJECT_LOAD_TESTING
-        m_projectDll = LoadLibrary(L"E:\\User\\Documents\\SourceControl\\Github\\C++Porjects\\Insight\\DemoProject\\Intermediate\\bin\\Debug-windows-x86_64\\DemoProject\\DemoProject.dll");
+        std::string dynamicLibraryPath = m_projectInfo.GetIntermediatePath() + "/bin";
+#if IS_PLATFORM_WINDOWS
+#if IS_DEBUG
+        dynamicLibraryPath += "/Debug-windows-";
+#elif IS_RELEASE
+        dyanmicLibraryPath += "Release-windows-";
+#endif
+        dynamicLibraryPath += "x86_64";
+#endif
+        dynamicLibraryPath += "/" + m_projectInfo.ProjectName + "/" + m_projectInfo.ProjectName + ".dll";
+
+        m_projectDll = Platform::LoadDynamicLibrary(dynamicLibraryPath);
         if (m_projectDll)
         {
             FARPROC func = GetProcAddress((HMODULE)m_projectDll, "ProjectModuleInitialise");
@@ -86,8 +97,7 @@ namespace Insight::Editor
                 return;
             }
 
-            using ProjectInitaliseFunc = void(*)(Core::ImGuiSystem*);
-            ProjectInitaliseFunc initialiseFunc = reinterpret_cast<ProjectInitaliseFunc>(func);
+            auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(m_projectDll, "ProjectModuleInitialise");
             if (!initialiseFunc)
             {
                 return;
@@ -137,7 +147,7 @@ namespace Insight::Editor
     {
         if (m_projectDll)
         {
-            FreeLibrary((HMODULE)m_projectDll);
+            Platform::FreeDynamicLibrary(m_projectDll);
             m_projectDll = nullptr;
         }
     }

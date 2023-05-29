@@ -548,6 +548,20 @@ namespace Insight
 			s_memoryInformation.Initialised = true;
 			return s_memoryInformation;
 		}
+
+		void* PlatformWindows::LoadDynamicLibrary(std::string_view path)
+		{
+			return ::LoadLibraryA(path.data());
+		}
+
+		void PlatformWindows::FreeDynamicLibrary(void*& library)
+		{
+			if (library)
+			{
+				::FreeLibrary((HMODULE)library);
+				library = nullptr;
+			}
+		}
 	}
 }
 #endif /// IS_PLATFORM_WINDOWS

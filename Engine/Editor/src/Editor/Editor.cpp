@@ -114,13 +114,13 @@ namespace Insight
 			editorSettings.Write(serialiser.GetSerialisedData());
 			editorSettings.Close();
 
-			m_projectCodeSystem.Shutdown();
-			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_projectCodeSystem);
-
 			m_gameRenderpass->Destroy();
 			Delete(m_gameRenderpass);
 
 			EditorWindowManager::Instance().Destroy();
+
+			m_projectCodeSystem.Shutdown();
+			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_projectCodeSystem);
 
 			Runtime::ResourceManager::SaveDatabase();
 		}
