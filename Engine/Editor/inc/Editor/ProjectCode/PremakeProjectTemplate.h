@@ -29,6 +29,7 @@ namespace Insight::Editor
     defines
     {
         "IS_EXPORT_PROJECT_DLL",
+        "IS_EDITOR",
     }
 
     includedirs
@@ -67,6 +68,7 @@ namespace Insight::Editor
         "Insight_Input" .. output_project_subfix .. ".lib",
         "Insight_Graphics" .. output_project_subfix .. ".lib",
         "Insight_Runtime" .. output_project_subfix .. ".lib",
+        "Insight_Editor" .. output_project_subfix .. ".lib",
 
         "imgui.lib",
         "glm.lib",

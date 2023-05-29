@@ -80,6 +80,12 @@ project "Insight_Editor"
         "%{wks.location}/vendor/glfw/lib",
     }
 
+    postbuildcommands
+    {
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".lib\" \"%{wks.location}deps/".. outputdir..  "/lib/\"\n",
+        "{COPY} \"%{cfg.targetdir}/%{prj.name}" .. output_project_subfix .. ".pdb\" \"%{wks.location}deps/".. outputdir..  "/pdb/\"\n",
+    }
+
     prebuildcommands 
     {
         --"call $(SolutionDir)Build/Engine/RunInsightReflectTool.bat"
