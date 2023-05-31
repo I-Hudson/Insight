@@ -37,20 +37,45 @@ namespace InsightReflectTool
             file << "namespace Insight\n";
             file << "{\n";
 
-            file << "\textern \"C\" IS_PROJECT void ProjectModuleInitialise(Core::ImGuiSystem* imguiSystem)\n";
-            file << "\t{\n";
-            file << "\t\tSET_IMGUI_CURRENT_CONTEXT();\n";
-            file << "\t\tEditor::RegisterAllEditorWindows();\n";
-            file << "\t\tECS::RegisterAllComponents();\n";
-            file << "\t\tIS_INFO(\"Project DLL module initialised\");\n";
-            file << "\t}\n";
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void ", "ProjectModuleInitialise", 
+                { "Core::ImGuiSystem* imguiSystem" }, [&](std::fstream& file)
+                {
+                    const int indent = 2;
+                    TAB_N(indent);
+                    file << "SET_IMGUI_CURRENT_CONTEXT();" << NEW_LINE;
+                    TAB_N(indent);
+                    file << "Editor::RegisterAllEditorWindows();" << NEW_LINE;                    
+                    TAB_N(indent);
+                    file << "ECS::RegisterAllComponents();" << NEW_LINE;
+                    TAB_N(indent);
+                    file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
+                }, 1);
 
-            file << "\textern \"C\" IS_PROJECT void ProjectModuleUninitialise()\n";
-            file << "\t{\n";
-            file << "\t\tEditor::UnregisterAllEditorWindows();\n";
-            file << "\t\tECS::UnregisterAllComponents();\n";
-            file << "\t\tIS_INFO(\"Project DLL module uninitialised\");\n";
-            file << "\t}\n";
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void", "ProjectModuleUninitialise", { }, [&](std::fstream& file)
+                {
+                    const int indent = 2;
+                    TAB_N(indent);
+                    file << "Editor::UnregisterAllEditorWindows();" << NEW_LINE;
+                    TAB_N(indent);
+                    file << "ECS::UnregisterAllComponents();" << NEW_LINE;
+                    TAB_N(indent);
+                    file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
+                }, 1);
+
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", "ProjectModuleGetEditorWindowNames", { }, [&](std::fstream& file)
+                {
+                    const int indent = 2;
+                    TAB_N(indent);
+                    file << "return Editor::GetAllEditorWindowNames();" << NEW_LINE;
+                }, 1);
+
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", "ProjectModuleGetComponentNames", { }, [&](std::fstream& file)
+                {
+                    const int indent = 2;
+                    TAB_N(indent);
+                    file << "return ECS::GetAllComponentNames();" << NEW_LINE;
+                }, 1);
+
 
             file << "}\n";
 

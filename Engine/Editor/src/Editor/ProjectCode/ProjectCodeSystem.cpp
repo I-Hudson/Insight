@@ -100,14 +100,16 @@ namespace Insight::Editor
             }
 
             auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(m_projectDll, "ProjectModuleInitialise");
-            if (!initialiseFunc)
-            {
-                return;
-            }
+            if (!initialiseFunc) { return; }
 
             Core::ImGuiSystem* imguiSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
             initialiseFunc(imguiSystem);
-    }
+
+            auto getAllEditorWindowsNames = Platform::GetDynamicFunction<std::vector<std::string>>(m_projectDll, "ProjectModuleGetEditorWindowNames");
+            if (!getAllEditorWindowsNames) { return; }
+            m_dllMetaData.RegisteredEditorWindows = getAllEditorWindowsNames();
+            IS_CORE_INFO("[ProjectCodeSystem::LinkProject] Number of Project editor windows '{}'.", m_dllMetaData.RegisteredEditorWindows.size());
+        }
 #endif
     }
 
@@ -164,6 +166,8 @@ namespace Insight::Editor
 
     void ProjectCodeSystem::UnlinkProject()
     {
+        m_dllMetaData = {};
+
         if (m_projectDll)
         {
             auto uninitialiseFunc = Platform::GetDynamicFunction<void>(m_projectDll, "ProjectModuleUninitialise");

@@ -21,6 +21,13 @@ namespace Insight
             std::string ProjectFolder;
         };
 
+        /// @brief Store general meta data about the loaded DLL which can be used by the engine.
+        struct ProjectDLLMetaData
+        {
+            std::vector<std::string> RegisteredEditorWindows;
+            std::vector<std::string> RegisteredComponents;
+        };
+
         class ProjectCodeSystem : public Core::ISystem, public Core::Singleton<ProjectCodeSystem>
         {
         public:
@@ -48,6 +55,7 @@ namespace Insight
         private:
             ProjectCodeInfo m_projectCodeInfo;
             Runtime::ProjectInfo m_projectInfo;
+            ProjectDLLMetaData m_dllMetaData;
 
             void* m_projectDll = nullptr;
         };

@@ -61,8 +61,7 @@ int main(int argc, char** agc)
     if (!requiredArgsFound)
     {
         std::cerr << "One of the required arguments was not found. Either 'Engine' or 'Project' must be given.";
-        std::cin;
-        return 0;
+        return -1;
     }
 
     auto typeIter = arguments.find(c_ArgType);
@@ -90,8 +89,7 @@ int main(int argc, char** agc)
         if (iter == arguments.end())
         {
             std::cerr << "'Project' type must have a 'GenerateProjectFileOutputPath' argument.";
-            std::cin;
-            return 0;
+            return -1;
         }
 
         std::string genOutputPath = iter->second;
@@ -102,8 +100,7 @@ int main(int argc, char** agc)
     else
     {
         std::cerr << "Type argument is not valid. Value must be 'Engine' or 'Project'.";
-        std::cin;
-        return 0;
+        return -1;
     }
 
     Reflect::ReflectAddtionalOptions options;
@@ -120,8 +117,5 @@ int main(int argc, char** agc)
         GenerateProjectInitialise generateProjectInitialise;
         result |= generateProjectInitialise.Generate(fileParser, projectInitialiseFile, options);
     }
-
-    std::cin;
-
     return result;
 }

@@ -47,33 +47,36 @@ namespace InsightReflectTool
             TAB_N(1);
             file << "namespace Editor {\n";
 
-            TAB_N(2);
-            file << "void RegisterAllEditorWindows()" << NEW_LINE;
-            TAB_N(2);
-            file << "{" << NEW_LINE;
+            Utils::WriteSourceFunctionDefinition(file, "void", "RegisterAllEditorWindows", {}, [&](std::fstream& file)
+                {
+                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    {
+                        TAB_N(3);
+                        file << "EditorWindowManager::Instance().RegisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+                    }
+                }, 2);
 
-            for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
-            {
-                TAB_N(3);
-                file << "EditorWindowManager::Instance().RegisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
-            }
+            Utils::WriteSourceFunctionDefinition(file, "void", "UnregisterAllEditorWindows", {}, [&](std::fstream& file)
+                {
+                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    {
+                        TAB_N(3);
+                        file << "EditorWindowManager::Instance().UnregisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
+                    }
+                }, 2);
 
-            TAB_N(2);
-            file << "}" << NEW_LINE << NEW_LINE;
-
-            TAB_N(2);
-            file << "void UnregisterAllEditorWindows()" << NEW_LINE;
-            TAB_N(2);
-            file << "{" << NEW_LINE;
-
-            for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
-            {
-                TAB_N(3);
-                file << "EditorWindowManager::Instance().UnregisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
-            }
-
-            TAB_N(2);
-            file << "}" << NEW_LINE;
+            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", "GetAllEditorWindowNames", {}, [&](std::fstream& file)
+                {
+                    TAB_N(3);
+                    file << "std::vector<std::string> editorWindowNames;" << NEW_LINE;
+                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    {
+                        TAB_N(3);
+                        file << "editorWindowNames.push_back(::" + reflectData.NameWithNamespace + "::WINDOW_NAME);" << NEW_LINE;
+                    }
+                    TAB_N(3);
+                    file << "return editorWindowNames;" << NEW_LINE;
+                }, 2);
 
             TAB_N(1);
             file << "}" << NEW_LINE;

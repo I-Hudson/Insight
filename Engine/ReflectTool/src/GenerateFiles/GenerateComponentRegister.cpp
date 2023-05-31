@@ -46,33 +46,36 @@ namespace InsightReflectTool
             TAB_N(1);
             file << "namespace ECS {\n";
 
-            TAB_N(2);
-            file << "void RegisterAllComponents()" << NEW_LINE;
-            TAB_N(2);
-            file << "{" << NEW_LINE;
-
-            for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+            Utils::WriteSourceFunctionDefinition(file, "void", "RegisterAllComponents", {}, [&](std::fstream& file)
             {
-                TAB_N(3);
-                file << "ComponentRegistry::RegisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name, []() { return ::New<::" + reflectData.NameWithNamespace + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
-            }
+                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                {
+                    TAB_N(3);
+                    file << "ComponentRegistry::RegisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name, []() { return ::New<::" + reflectData.NameWithNamespace + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
+                }
+            }, 2);
 
-            TAB_N(2);
-            file << "}" << NEW_LINE << NEW_LINE;
-
-            TAB_N(2);
-            file << "void UnregisterAllComponents()" << NEW_LINE;
-            TAB_N(2);
-            file << "{" << NEW_LINE;
-
-            for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+            Utils::WriteSourceFunctionDefinition(file, "void", "UnregisterAllComponents", {}, [&](std::fstream& file)
             {
-                TAB_N(3);
-                file << "ComponentRegistry::UnregisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name);" << NEW_LINE;
-            }
+                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                {
+                    TAB_N(3);
+                    file << "ComponentRegistry::UnregisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name);" << NEW_LINE;
+                }
+            }, 2);
 
-            TAB_N(2);
-            file << "}" << NEW_LINE;
+            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", "GetAllComponentNames", {}, [&](std::fstream& file)
+                {
+                    TAB_N(3);
+                    file << "std::vector<std::string> componentNames;" << NEW_LINE;
+                    for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                    {
+                        TAB_N(3);
+                        file << "componentNames.push_back(::" + reflectData.NameWithNamespace + "::Type_Name);" << NEW_LINE;
+                    }
+                    TAB_N(3);
+                    file << "return componentNames;" << NEW_LINE;
+                }, 2);
 
             TAB_N(1);
             file << "}" << NEW_LINE;

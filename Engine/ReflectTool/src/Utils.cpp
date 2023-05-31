@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 #include <filesystem>
+#include <Reflect.h>
 
 namespace InsightReflectTool
 {
@@ -24,6 +25,33 @@ namespace InsightReflectTool
 
                 file << "#include \"" + relativeIncludePath + "\"\n";
             }
+        }
+
+        void WriteHeaderFunctionDeclaration(std::fstream& file, std::string_view returnValue, std::string_view functionName, std::vector<std::string_view> arguments, int indent)
+        {
+        }
+
+        void WriteSourceFunctionDefinition(std::fstream& file, std::string_view returnValue, std::string_view functionName, std::vector<std::string_view> arguments, WriteSourceFunctionBodyFunc func, int indent)
+        {
+            TAB_N(indent);
+            file << returnValue << " " << functionName << "(";
+            for (const std::string_view& view : arguments)
+            {
+                file << view;
+                if (view != arguments.back())
+                {
+                    file << ", ";
+                }
+            }
+            file << ")" << NEW_LINE;
+
+            TAB_N(indent);
+            file << "{" << NEW_LINE;
+
+            func(file);
+
+            TAB_N(indent);
+            file << "}" << NEW_LINE << NEW_LINE;
         }
 
         void ValidateOutputPath(std::string_view path)
