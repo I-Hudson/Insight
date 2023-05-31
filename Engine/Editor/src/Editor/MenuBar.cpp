@@ -155,6 +155,10 @@ namespace Insight
                     {
                         ProjectCodeSystem::Instance().UnlinkProject();
                     }
+                    if (ImGui::MenuItem("Reload Project DLL"))
+                    {
+                        ProjectCodeSystem::Instance().Reload();
+                    }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();

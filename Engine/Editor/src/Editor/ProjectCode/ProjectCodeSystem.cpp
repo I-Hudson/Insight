@@ -2,6 +2,8 @@
 #include "Editor/ProjectCode/PremakeProjectTemplate.h"
 #include "Editor/ProjectCode/PremakeSolutionTemplate.h"
 
+#include "Editor/EditorWindows/EditorWindowManager.h"
+
 #include "Core/EnginePaths.h"
 #include "Core/ImGuiSystem.h"
 
@@ -64,6 +66,7 @@ namespace Insight::Editor
 
         std::string premakeSolutionFile = CreatePremakeSolutionTemplateFile(m_projectCodeInfo.ProjectFolder.c_str(), solutionTemplateData);
         GenerateProjectSolution(premakeSolutionFile);
+        m_projectCodeInfo.PremakeSolutionFile = premakeSolutionFile;
     }
 
     void ProjectCodeSystem::BuildProject()
@@ -82,7 +85,7 @@ namespace Insight::Editor
 #if IS_DEBUG
         dynamicLibraryPath += "/Debug-windows-";
 #elif IS_RELEASE
-        dyanmicLibraryPath += "Release-windows-";
+        dynamicLibraryPath += "/Release-windows-";
 #endif
         dynamicLibraryPath += "x86_64";
 #endif
@@ -113,17 +116,28 @@ namespace Insight::Editor
 #endif
     }
 
+    void ProjectCodeSystem::Reload()
+    {
+        ProjectReloadData reloadData;
+        PreReload(reloadData);
+
+        UnlinkProject();
+        GenerateProjectFiles();
+#if IS_PLATFORM_WINDOWS
+        MSBuildProject(m_projectCodeInfo.SolutionFile);
+#endif
+        LinkProject();
+
+        PostReload(reloadData);
+    }
+
     void ProjectCodeSystem::ProjectOpened(Core::Event& e)
     {
         m_projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
         m_projectCodeInfo.ProjectFolder = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder;
         m_projectCodeInfo.ProjectFile = m_projectInfo.GetIntermediatePath() + ProjectCodeInfo::c_CodeFolder + "/" + m_projectInfo.ProjectName + ".vcxproj";
-        m_projectCodeInfo.SolutionFile = m_projectInfo.GetProjectPath() + "/" + m_projectInfo.ProjectName + ".sln";
-
-        if (!FileSystem::Exists(m_projectCodeInfo.ProjectFile) || !FileSystem::Exists(m_projectCodeInfo.SolutionFile))
-        {
-            GenerateProjectFiles();
-        }
+        m_projectCodeInfo.SolutionFile = m_projectInfo.GetProjectPath() + "/" + m_projectInfo.ProjectName + "_Solution.sln";
+        GenerateProjectFiles();
     }
 
     void ProjectCodeSystem::ProjectClosed(Core::Event& e)
@@ -146,7 +160,41 @@ namespace Insight::Editor
         std::system(cmdCommend.c_str());
     }
 
-    std::string ProjectCodeSystem::FindNewestProjectDynamicLibrary(std::string_view folderPath)
+    void ProjectCodeSystem::PreReload(ProjectReloadData& reloadData) const
+    {
+        for (std::string_view view : m_dllMetaData.RegisteredEditorWindows)
+        {
+            bool windowIsActive = EditorWindowManager::Instance().GetActiveWindow(view) != nullptr;
+            reloadData.EditorWindows.push_back(ProjectReloadData::EditorWindowReload(std::string(view), windowIsActive));
+            EditorWindowManager::Instance().RemoveWindowNow(view);
+        }
+    }
+
+    void ProjectCodeSystem::PostReload(const ProjectReloadData& reloadData) const
+    {
+        for (const ProjectReloadData::EditorWindowReload& window : reloadData.EditorWindows)
+        {
+            if (window.IsActive)
+            {
+                EditorWindowManager::Instance().AddWindow(window.Name);
+            }
+        }
+    }
+
+#if IS_PLATFORM_WINDOWS
+    void ProjectCodeSystem::MSBuildProject(std::string_view solutionPath) const
+    {
+        std::string buildSolutionBatch = EnginePaths::GetRootPath() + "/Build/Engine/Build_Solution.bat";
+
+        std::string cmdCommendDebug = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Debug win64";
+        std::string cmdCommendRelase = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Release win64";
+
+        int debugBuildErrorCode = std::system(cmdCommendDebug.c_str());
+        int releaseBuildErrorCode = std::system(cmdCommendRelase.c_str());
+    }
+#endif
+
+    std::string ProjectCodeSystem::FindNewestProjectDynamicLibrary(std::string_view folderPath) const
     {   
         u64 newestWriteTime = _UI64_MAX;
         std::string filePath;
@@ -166,10 +214,12 @@ namespace Insight::Editor
 
     void ProjectCodeSystem::UnlinkProject()
     {
-        m_dllMetaData = {};
-
         if (m_projectDll)
         {
+            // Just do some clean up before unloading the dll.
+            ProjectReloadData reloadData;
+            PreReload(reloadData);
+
             auto uninitialiseFunc = Platform::GetDynamicFunction<void>(m_projectDll, "ProjectModuleUninitialise");
             if (uninitialiseFunc)
             {
@@ -179,5 +229,6 @@ namespace Insight::Editor
             Platform::FreeDynamicLibrary(m_projectDll);
             m_projectDll = nullptr;
         }
+        m_dllMetaData = {};
     }
 }
