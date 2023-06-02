@@ -72,7 +72,7 @@ namespace InsightReflectTool
             std::string folderPath = std::filesystem::path(path).parent_path().string();
             if (!std::filesystem::exists(folderPath))
             {
-                std::filesystem::create_directory(folderPath);
+                std::filesystem::create_directories(folderPath);
             }
         }
     }

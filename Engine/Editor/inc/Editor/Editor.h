@@ -8,6 +8,7 @@
 #include "Editor/MenuBar.h"
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
 #include "Editor/ProjectCode/ProjectCodeSystem.h"
+#include "Editor/HotReload/HotReloadSystem.h"
 
 #include "Renderpass.h"
 
@@ -30,7 +31,8 @@ namespace Insight
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 			TypeDrawerRegister m_typeDrawerRegister;
-			ProjectCodeSystem m_projectCodeSystem;
+			//ProjectCodeSystem m_projectCodeSystem;
+			HotReloadSystem m_hotReloadSystem;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
 			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";

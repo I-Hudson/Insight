@@ -5,7 +5,7 @@
 #include "Editor/EditorWindows/InputWindow.h"
 #include "Editor/EditorWindows/ResourceWindow.h"
 
-#include "Editor/ProjectCode/ProjectCodeSystem.h"
+#include "Editor/HotReload/HotReloadSystem.h"
 
 #include "Platforms/Platform.h"
 
@@ -145,19 +145,11 @@ namespace Insight
                 {
                     if (ImGui::MenuItem("Generate Project Solution"))
                     {
-                        ProjectCodeSystem::Instance().GenerateProjectFiles();
-                    }
-                    if (ImGui::MenuItem("Link Project DLL"))
-                    {
-                        ProjectCodeSystem::Instance().LinkProject();
-                    }
-                    if (ImGui::MenuItem("Unlink Project DLL"))
-                    {
-                        ProjectCodeSystem::Instance().UnlinkProject();
+                        HotReloadSystem::Instance().GenerateProjectSolution();
                     }
                     if (ImGui::MenuItem("Reload Project DLL"))
                     {
-                        ProjectCodeSystem::Instance().Reload();
+                        HotReloadSystem::Instance().Reload();
                     }
                     ImGui::EndMenu();
                 }

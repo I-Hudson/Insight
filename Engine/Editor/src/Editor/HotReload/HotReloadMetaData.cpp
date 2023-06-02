@@ -17,11 +17,18 @@ namespace Insight::Editor
 
     HotReloadMetaData& HotReloadMetaData::operator=(HotReloadMetaData&& other) NO_EXPECT
     {
-        EditorWindowClasses = std::move(other.EditorWindowClasses);
-        ComponentsClasses = std::move(other.ComponentsClasses);
+        EditorWindowNames = std::move(other.EditorWindowNames);
+        ComponentNames = std::move(other.ComponentNames);
 
-        other.EditorWindowClasses.clear();
-        other.ComponentsClasses.clear();
+        EditorWindowTypeInfos = std::move(other.EditorWindowTypeInfos);
+        ComponentTypeInfos = std::move(other.ComponentTypeInfos);
+
+
+        other.EditorWindowNames.clear();
+        other.EditorWindowNames.clear();
+
+        other.EditorWindowTypeInfos.clear();
+        other.ComponentTypeInfos.clear();
 
         return *this;
     }
