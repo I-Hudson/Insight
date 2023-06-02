@@ -1,4 +1,4 @@
-#include "Editor/ProjectCode/PremakeProjectTemplate.h"
+#include "Editor/HotReload/HotReloadPremakeProjectTemplate.h"
 
 #include "FileSystem/FileSystem.h"
 

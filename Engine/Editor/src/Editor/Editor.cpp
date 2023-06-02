@@ -53,8 +53,6 @@ namespace Insight
 			m_gameRenderpass = New<Graphics::Renderpass>();
 			m_gameRenderpass->Create();
 
-			//App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_projectCodeSystem);
-			//m_projectCodeSystem.Initialise();
 			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
 			m_hotReloadSystem.Initialise();
 			
@@ -123,8 +121,6 @@ namespace Insight
 
 			m_hotReloadSystem.Shutdown();
 			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
-			//m_projectCodeSystem.Shutdown();
-			//App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_projectCodeSystem);
 
 			Runtime::ResourceManager::SaveDatabase();
 		}

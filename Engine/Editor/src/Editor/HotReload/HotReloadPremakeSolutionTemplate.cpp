@@ -1,5 +1,5 @@
-#include "Editor/ProjectCode/PremakeSolutionTemplate.h"
-#include "Editor/ProjectCode/PremakeProjectTemplate.h"
+#include "Editor/HotReload/HotReloadPremakeSolutionTemplate.h"
+#include "Editor/HotReload/HotReloadPremakeProjectTemplate.h"
 
 #include "FileSystem/FileSystem.h"
 
