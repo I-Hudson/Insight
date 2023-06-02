@@ -51,7 +51,7 @@ namespace Insight
             //    {
             //        Algorithm::VectorRemove(s_resourcesLoading, resource);
             //    }
-                resourcesCurrentlyLoading = s_resourcesLoading.size();
+                resourcesCurrentlyLoading = static_cast<u32>(s_resourcesLoading.size());
             }
 
             {

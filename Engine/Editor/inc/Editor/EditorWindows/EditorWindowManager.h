@@ -17,7 +17,6 @@ namespace Insight
 	namespace Editor
 	{
 		class IEditorWindow;
-		class ProjectCodeSystem;
 
 		struct IS_EDITOR RegisterWindow
 		{
@@ -76,6 +75,8 @@ namespace Insight
 
 			void AddWindow(const std::string& windowName);
 			void RemoveWindow(const std::string& windowName);
+			/// @brief Remove a window straight away, should be used with caution.
+			void RemoveWindowNow(std::string_view windowName);
 
 			bool IsWindowVisable(const std::string& windowName) const;
 
@@ -94,15 +95,10 @@ namespace Insight
 		private:
 			void RemoveQueuedWindows();
 
-			/// @brief Remove a window straight away, should be used with caution.
-			void RemoveWindowNow(std::string_view windowName);
-
 		private:
 			std::unordered_map<std::string, RegisterWindow> m_windowRegistry;
 			std::vector<IEditorWindow*> m_activeWindows;
 			std::vector<std::string> m_windowsToRemove;
-
-			friend ProjectCodeSystem;
 		};
 	}
 

@@ -620,7 +620,7 @@ namespace Insight
 
 			if (m_uniformBufferResized)
 			{
-				u64 newSize = m_uniformBufferOffset * 1.8f;
+				u64 newSize = static_cast<u64>(m_uniformBufferOffset * 1.8f);
 				m_uniformBuffer->Resize(newSize);
 			}
 

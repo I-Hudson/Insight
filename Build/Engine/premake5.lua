@@ -99,12 +99,10 @@ workspace "Insight"
     {
         "Debug",
         "Release",
-        "Testing",
     }
     platforms 
     { 
         "Win64", 
-        "Linux" 
     }
 
     flags

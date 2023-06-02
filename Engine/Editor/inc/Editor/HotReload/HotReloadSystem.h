@@ -26,6 +26,8 @@ namespace Insight::Editor
         virtual void Initialise() override;
         virtual void Shutdown() override;
 
+        const HotReloadLibrary& GetLibrary() const;
+
         void GenerateProjectSolution();
         /// @brief Initial a dll reload.
         void Reload();
@@ -33,8 +35,8 @@ namespace Insight::Editor
     private:
         void BuildProjectSolution();
 
-        void PreUnloadOperations() const;
-        void PostLoadOperations() const;
+        void PreUnloadOperations();
+        void PostLoadOperations();
 
         void LoadLibrary(std::string_view libraryPath);
         void UnloadLibrary();
@@ -42,11 +44,13 @@ namespace Insight::Editor
         void OnProjectOpened(Core::Event& e);
         void OnProjectClosed(Core::Event& e);
 
+        void RegisterAllHotReloadOperations();
+
         std::string GetLibraryPathFromProjectInfo(const Runtime::ProjectInfo& projectInfo) const;
         std::string FindNewestProjectDynamicLibrary(std::string_view folderPath) const;
 
     private:
         HotReloadLibrary m_library;
-        std::vector<HotReloadOperation> m_operations;
+        std::vector<HotReloadOperation*> m_operations;
     };
 }

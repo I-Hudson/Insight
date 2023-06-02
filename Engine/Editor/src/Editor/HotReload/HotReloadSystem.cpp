@@ -1,6 +1,8 @@
 #include "Editor/HotReload/HotReloadSystem.h"
 #include "Editor/HotReload/HotReloadSolutionGenerator.h"
 
+#include "Editor/HotReload/Operations/EditorWindowsOperation.h"
+
 #include "Core/Logger.h"
 
 #include "Event/EventSystem.h"
@@ -26,6 +28,9 @@ namespace Insight::Editor
     {
         Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, std::bind(&HotReloadSystem::OnProjectOpened, this, std::placeholders::_1));
         Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Close, std::bind(&HotReloadSystem::OnProjectClosed, this, std::placeholders::_1));
+        
+        RegisterAllHotReloadOperations();
+
         m_state = Core::SystemStates::Initialised;
     }
 
@@ -33,8 +38,20 @@ namespace Insight::Editor
     {
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Close);
+
+        for (size_t i = 0; i < m_operations.size(); ++i)
+        {
+            Delete(m_operations.at(i));
+        }
+        m_operations.clear();
+
         UnloadLibrary();
         m_state = Core::SystemStates::Not_Initialised;
+    }
+
+    const HotReloadLibrary& HotReloadSystem::GetLibrary() const
+    {
+        return m_library;
     }
 
     void HotReloadSystem::GenerateProjectSolution()
@@ -48,7 +65,7 @@ namespace Insight::Editor
     {
         UnloadLibrary();
 
-        GenerateProjectSolution();
+        BuildProjectSolution();
 
         LoadLibrary(GetLibraryPathFromProjectInfo(Runtime::ProjectSystem::Instance().GetProjectInfo()));
     }
@@ -61,12 +78,23 @@ namespace Insight::Editor
         solutionGenerator.BuildSolution(projectInfo);
     }
 
-    void HotReloadSystem::PreUnloadOperations() const
+    void HotReloadSystem::PreUnloadOperations()
     {
+        for (size_t i = 0; i < m_operations.size(); ++i)
+        {
+            HotReloadOperation* operation = m_operations.at(i);
+            operation->Reset();
+            operation->PreUnloadOperation();
+        }
     }
 
-    void HotReloadSystem::PostLoadOperations() const
+    void HotReloadSystem::PostLoadOperations()
     {
+        for (size_t i = 0; i < m_operations.size(); ++i)
+        {
+            HotReloadOperation* operation = m_operations.at(i);
+            operation->PostLoadOperation();
+        }
     }
 
     void HotReloadSystem::LoadLibrary(std::string_view libraryPath)
@@ -97,6 +125,11 @@ namespace Insight::Editor
     void HotReloadSystem::OnProjectClosed(Core::Event& e)
     {
         UnloadLibrary();
+    }
+
+    void HotReloadSystem::RegisterAllHotReloadOperations()
+    {
+        m_operations.push_back(::New<EditorWindowsOperation>());
     }
 
     std::string HotReloadSystem::GetLibraryPathFromProjectInfo(const Runtime::ProjectInfo& projectInfo) const

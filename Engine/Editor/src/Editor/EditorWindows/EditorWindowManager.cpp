@@ -43,6 +43,18 @@ namespace Insight
 			m_windowsToRemove.push_back(windowName);
 		}
 
+		void EditorWindowManager::RemoveWindowNow(std::string_view windowName)
+		{
+			if (auto itr = std::find_if(m_activeWindows.begin(), m_activeWindows.end(), [windowName](const IEditorWindow* window)
+				{
+					return window->GetWindowName() == windowName;
+				}); itr != m_activeWindows.end())
+			{
+				::Delete(*itr);
+				m_activeWindows.erase(itr);
+			}
+		}
+
 		bool EditorWindowManager::IsWindowVisable(const std::string& windowName) const
 		{
 			for (size_t i = 0; i < m_activeWindows.size(); ++i)
@@ -170,18 +182,6 @@ namespace Insight
 				}
 			}
 			m_windowsToRemove.clear();
-		}
-
-		void EditorWindowManager::RemoveWindowNow(std::string_view windowName)
-		{
-			if (auto itr = std::find_if(m_activeWindows.begin(), m_activeWindows.end(), [windowName](const IEditorWindow* window)
-				{
-					return window->GetWindowName() == windowName;
-				}); itr != m_activeWindows.end())
-			{
-				::Delete(*itr);
-				m_activeWindows.erase(itr);
-			}
 		}
 	}
 }
