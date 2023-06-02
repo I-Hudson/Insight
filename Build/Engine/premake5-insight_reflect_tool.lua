@@ -12,6 +12,7 @@ output_executable = "Insight_Standalone"
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
+IncludeDirs["insight_editor"] = "%{wks.location}Engine/Editor/inc"
 IncludeDirs["reflect"] = "%{wks.location}vendor/Reflect/Reflect/inc"
 IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
 IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"

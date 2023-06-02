@@ -1,6 +1,8 @@
 #include "GenerateFiles/GenerateProjectInitialise.h"
 #include "Utils.h"
 
+#include "Editor/HotReload/HotReloadExportFunctions.h"
+
 #include <filesystem>
 
 namespace InsightReflectTool
@@ -18,9 +20,11 @@ namespace InsightReflectTool
 
             file << "#include \"Core/ImGuiSystem.h\"\n";
 
-            file << "#include \"EditorWindows.gen.h\"\n";
-            file << "#include \"RegisterComponents.gen.h\"\n";
-            file << "#include \"Core/Logger.h\"\n";
+            Utils::WriteIncludeFile(file, "EditorWindows.gen.h");
+            Utils::WriteIncludeFile(file, "RegisterComponents.gen.h");
+
+            Utils::WriteIncludeFile(file, "Core/Logger.h");
+            Utils::WriteIncludeFile(file, "Editor/HotReload/HotReloadMetaData.h");
 
             file << "\n";
 
@@ -37,7 +41,7 @@ namespace InsightReflectTool
             file << "namespace Insight\n";
             file << "{\n";
 
-            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void ", "ProjectModuleInitialise", 
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void ", ProjectModule::c_Initialise,
                 { "Core::ImGuiSystem* imguiSystem" }, [&](std::fstream& file)
                 {
                     const int indent = 2;
@@ -51,7 +55,7 @@ namespace InsightReflectTool
                     file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
                 }, 1);
 
-            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void", "ProjectModuleUninitialise", { }, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT void", ProjectModule::c_Uninitialise, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
                     TAB_N(indent);
@@ -62,19 +66,36 @@ namespace InsightReflectTool
                     file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
                 }, 1);
 
-            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", "ProjectModuleGetEditorWindowNames", { }, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetEditorWindowNames, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
                     TAB_N(indent);
                     file << "return Editor::GetAllEditorWindowNames();" << NEW_LINE;
                 }, 1);
 
-            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", "ProjectModuleGetComponentNames", { }, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetComponentNames, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
                     TAB_N(indent);
                     file << "return ECS::GetAllComponentNames();" << NEW_LINE;
                 }, 1);
+
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT ::Insight::Editor::HotReloadMetaData", ProjectModule::c_GetMetaData, { }, [&](std::fstream& file)
+            {
+                const int indent = 2;
+                TAB_N(indent); file << "::Insight::Editor::HotReloadMetaData metaData;" << NEW_LINE;
+                file << NEW_LINE;
+
+                TAB_N(indent); file << "metaData.EditorWindowNames = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "()); " << NEW_LINE;
+                TAB_N(indent); file << "metaData.ComponentNames = std::move(ECS::" << ComponentRegister::c_GetAllComponentNames << "()); " << NEW_LINE;
+                file << NEW_LINE;
+
+                TAB_N(indent); file << "metaData.EditorWindowTypeInfos = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowsTypeInfos << "());" << NEW_LINE;
+                TAB_N(indent); file << "metaData.ComponentTypeInfos = std::move(ECS::" << ComponentRegister::c_GetAllComponentTypeInfos << "());" << NEW_LINE;
+                file << NEW_LINE;
+
+                TAB_N(indent); file << "return metaData;" << NEW_LINE;
+            }, 1);
 
 
             file << "}\n";

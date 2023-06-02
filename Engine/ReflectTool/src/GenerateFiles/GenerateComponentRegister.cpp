@@ -2,6 +2,8 @@
 
 #include "Utils.h"
 
+#include "Editor/HotReload/HotReloadExportFunctions.h"
+
 #include <CodeGenerate/CodeGenerate.h>
 
 #include <filesystem>
@@ -46,7 +48,7 @@ namespace InsightReflectTool
             TAB_N(1);
             file << "namespace ECS {\n";
 
-            Utils::WriteSourceFunctionDefinition(file, "void", "RegisterAllComponents", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "void", ComponentRegister::c_RegisterAllComponents, {}, [&](std::fstream& file)
             {
                 for (const Reflect::ReflectContainerData& reflectData : componentClasses)
                 {
@@ -55,7 +57,7 @@ namespace InsightReflectTool
                 }
             }, 2);
 
-            Utils::WriteSourceFunctionDefinition(file, "void", "UnregisterAllComponents", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "void", ComponentRegister::c_UnregisterAllComponents, {}, [&](std::fstream& file)
             {
                 for (const Reflect::ReflectContainerData& reflectData : componentClasses)
                 {
@@ -64,7 +66,7 @@ namespace InsightReflectTool
                 }
             }, 2);
 
-            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", "GetAllComponentNames", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", ComponentRegister::c_GetAllComponentNames, {}, [&](std::fstream& file)
                 {
                     TAB_N(3);
                     file << "std::vector<std::string> componentNames;" << NEW_LINE;
@@ -77,6 +79,8 @@ namespace InsightReflectTool
                     file << "return componentNames;" << NEW_LINE;
                 }, 2);
 
+            WriteGetTypeInfos(file, componentClasses);
+
             TAB_N(1);
             file << "}" << NEW_LINE;
             file << "}" << NEW_LINE;
@@ -88,5 +92,23 @@ namespace InsightReflectTool
         {
             return false;
         }
+    }
+
+    void GenerateComponentRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::ReflectContainerData>& componentClasses) const
+    {
+        Utils::WriteIncludeLibraryFile(file, "Reflect.h");
+
+        Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::ReflectTypeInfo>", ComponentRegister::c_GetAllComponentTypeInfos, {}, [&](std::fstream& file)
+            {
+                TAB_N(3);
+                file << "std::vector<Reflect::ReflectTypeInfo> typeInfos;" << NEW_LINE;
+                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                {
+                    TAB_N(3);
+                    file << "typeInfos.push_back(::" + reflectData.NameWithNamespace + "::GetStaticTypeInfo());" << NEW_LINE;
+                }
+                TAB_N(3);
+                file << "return typeInfos;" << NEW_LINE;
+            }, 2);
     }
 }

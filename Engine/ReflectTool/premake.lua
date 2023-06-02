@@ -10,13 +10,14 @@ project "InsightReflectTool"
 
     defines
     {
-        "REFLECT_TYPE_INFO_ENABLED"
+        "REFLECT_TYPE_INFO_ENABLED",
     }
 
     includedirs
     {
         "inc",
-        "%{IncludeDirs.reflect}"
+        "%{IncludeDirs.insight_editor}",
+        "%{IncludeDirs.reflect}",
     }
 
     files 
@@ -27,6 +28,8 @@ project "InsightReflectTool"
         "inc/**.inl", 
         "src/**.cpp",
         "src/**.inl",
+
+        "../Editor/inc/Editor/HotReload/HotReloadExportFunctions.h.h", 
     }
 
     filter "system:Windows"

@@ -16,15 +16,28 @@ namespace InsightReflectTool
             }
         }
 
+        void WriteIncludeFile(std::fstream& file, std::string_view includeFile)
+        {
+            file << "#include \"";
+            file << includeFile;
+            file << "\"\n";
+        }
+
         void WriteIncludeFiles(std::fstream& file, std::string_view fileOutputAbsPath, const std::vector<std::string>& filesToInclude)
         {
             for (const std::string& filePath : filesToInclude)
             {
                 std::string includePath = std::filesystem::canonical(filePath).generic_string();
                 std::string relativeIncludePath = std::filesystem::relative(includePath, fileOutputAbsPath).generic_string();
-
-                file << "#include \"" + relativeIncludePath + "\"\n";
+                WriteIncludeFile(file, relativeIncludePath);
             }
+        }
+
+        void WriteIncludeLibraryFile(std::fstream& file, std::string_view includeFile)
+        {
+            file << "#include <";
+            file << includeFile;
+            file << ">\n";
         }
 
         void WriteHeaderFunctionDeclaration(std::fstream& file, std::string_view returnValue, std::string_view functionName, std::vector<std::string_view> arguments, int indent)

@@ -4,6 +4,9 @@
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
+#include "Editor/HotReload/HotReloadMetaData.h"
+#include "Editor/HotReload/HotReloadExportFunctions.h"
+
 #include "Core/EnginePaths.h"
 #include "Core/ImGuiSystem.h"
 
@@ -102,16 +105,21 @@ namespace Insight::Editor
                 return;
             }
 
-            auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(m_projectDll, "ProjectModuleInitialise");
+            auto initialiseFunc = Platform::GetDynamicFunction<void, Core::ImGuiSystem*>(m_projectDll, ProjectModule::c_Initialise);
             if (!initialiseFunc) { return; }
 
             Core::ImGuiSystem* imguiSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<Core::ImGuiSystem>();
             initialiseFunc(imguiSystem);
 
-            auto getAllEditorWindowsNames = Platform::GetDynamicFunction<std::vector<std::string>>(m_projectDll, "ProjectModuleGetEditorWindowNames");
+            auto getAllEditorWindowsNames = Platform::GetDynamicFunction<std::vector<std::string>>(m_projectDll, ProjectModule::c_GetEditorWindowNames);
             if (!getAllEditorWindowsNames) { return; }
             m_dllMetaData.RegisteredEditorWindows = getAllEditorWindowsNames();
             IS_CORE_INFO("[ProjectCodeSystem::LinkProject] Number of Project editor windows '{}'.", m_dllMetaData.RegisteredEditorWindows.size());
+
+            auto getMetaData = Platform::GetDynamicFunction<HotReloadMetaData>(m_projectDll, ProjectModule::c_GetMetaData);
+            if (!getMetaData) { return; }
+            auto metaData = getMetaData();
+            IS_CORE_INFO("[ProjectCodeSystem::LinkProject] Meta data loaded.");
         }
 #endif
     }
@@ -186,11 +194,16 @@ namespace Insight::Editor
     {
         std::string buildSolutionBatch = EnginePaths::GetRootPath() + "/Build/Engine/Build_Solution.bat";
 
-        std::string cmdCommendDebug = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Debug win64";
-        std::string cmdCommendRelase = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Release win64";
-
-        int debugBuildErrorCode = std::system(cmdCommendDebug.c_str());
-        int releaseBuildErrorCode = std::system(cmdCommendRelase.c_str());
+#if IS_DEBUG
+        std::string cmdCommend = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Debug win64";
+#elif IS_RELEASE
+        std::string cmdCommend = buildSolutionBatch + " " + std::string(solutionPath) + " vs2022 Build Release win64";
+#endif
+        if (!cmdCommend.empty())
+        {
+            int buildErrorCode = std::system(cmdCommend.c_str());
+            IS_CORE_INFO("[ProjectCodeSystem::MSBuildProject] Build error code: '{buildErrorCode}'.", );
+        }
     }
 #endif
 

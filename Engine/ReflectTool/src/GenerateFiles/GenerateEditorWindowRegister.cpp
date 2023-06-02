@@ -2,6 +2,8 @@
 
 #include "Utils.h"
 
+#include "Editor/HotReload/HotReloadExportFunctions.h"
+
 #include <CodeGenerate/CodeGenerate.h>
 
 #include <string>
@@ -47,7 +49,7 @@ namespace InsightReflectTool
             TAB_N(1);
             file << "namespace Editor {\n";
 
-            Utils::WriteSourceFunctionDefinition(file, "void", "RegisterAllEditorWindows", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "void", EditorWindowRegister::c_RegisterAllEditorWindows, {}, [&](std::fstream& file)
                 {
                     for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
                     {
@@ -56,7 +58,7 @@ namespace InsightReflectTool
                     }
                 }, 2);
 
-            Utils::WriteSourceFunctionDefinition(file, "void", "UnregisterAllEditorWindows", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "void", EditorWindowRegister::c_UnregisterAllEditorWindows, {}, [&](std::fstream& file)
                 {
                     for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
                     {
@@ -65,7 +67,7 @@ namespace InsightReflectTool
                     }
                 }, 2);
 
-            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", "GetAllEditorWindowNames", {}, [&](std::fstream& file)
+            Utils::WriteSourceFunctionDefinition(file, "std::vector<std::string>", EditorWindowRegister::c_GetAllEditorWindowNames, {}, [&](std::fstream& file)
                 {
                     TAB_N(3);
                     file << "std::vector<std::string> editorWindowNames;" << NEW_LINE;
@@ -78,6 +80,8 @@ namespace InsightReflectTool
                     file << "return editorWindowNames;" << NEW_LINE;
                 }, 2);
 
+            WriteGetTypeInfos(file, editorWindowClasses);
+
             TAB_N(1);
             file << "}" << NEW_LINE;
             file << "}" << NEW_LINE;
@@ -89,5 +93,23 @@ namespace InsightReflectTool
         {
             return false;
         }
+    }
+
+    void GenerateEditorWindowRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::ReflectContainerData>& editorWindowClasses) const
+    {
+        Utils::WriteIncludeLibraryFile(file, "Reflect.h");
+
+        Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::ReflectTypeInfo>", EditorWindowRegister::c_GetAllEditorWindowsTypeInfos, {}, [&](std::fstream& file)
+            {
+                TAB_N(3);
+                file << "std::vector<Reflect::ReflectTypeInfo> typeInfos;" << NEW_LINE;
+                for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                {
+                    TAB_N(3);
+                    file << "typeInfos.push_back(::" + reflectData.NameWithNamespace + "::GetStaticTypeInfo());" << NEW_LINE;
+                }
+                TAB_N(3);
+                file << "return typeInfos;" << NEW_LINE;
+            }, 2);
     }
 }
