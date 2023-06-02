@@ -39,13 +39,14 @@ namespace Insight::Editor
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
         Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Close);
 
+        UnloadLibrary();
+
         for (size_t i = 0; i < m_operations.size(); ++i)
         {
             Delete(m_operations.at(i));
         }
         m_operations.clear();
 
-        UnloadLibrary();
         m_state = Core::SystemStates::Not_Initialised;
     }
 
