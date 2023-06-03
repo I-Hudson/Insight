@@ -7,7 +7,7 @@
 
 namespace InsightReflectTool
 {
-    bool GenerateProjectInitialise::Generate(const Reflect::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
+    bool GenerateProjectInitialise::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
         std::fstream file;
         std::string absPath = std::filesystem::absolute(outFilePath).string();

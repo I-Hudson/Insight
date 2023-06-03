@@ -12,9 +12,9 @@
 
 namespace InsightReflectTool
 {
-    Reflect::FileParser ParseFilesInDirectory(std::string_view directory, const Reflect::ReflectAddtionalOptions& options)
+    Reflect::Parser::FileParser ParseFilesInDirectory(std::string_view directory, const Reflect::ReflectAddtionalOptions& options)
     {
-        Reflect::FileParser parser;
+        Reflect::Parser::FileParser parser;
         parser.SetIgnoreStrings(
             {
                 "IS_CORE",
@@ -24,7 +24,7 @@ namespace InsightReflectTool
                 "IS_EDITOR",
             });
         parser.ParseDirectory(directory.data(), &options);
-        Reflect::CodeGenerate codeGenerate;
+        Reflect::CodeGeneration::CodeGenerate codeGenerate;
         codeGenerate.Reflect(parser, &options);
         return parser;
     }
@@ -104,7 +104,7 @@ int main(int argc, char** agc)
     }
 
     Reflect::ReflectAddtionalOptions options;
-    Reflect::FileParser fileParser = ParseFilesInDirectory(rootPath, options);
+    Reflect::Parser::FileParser fileParser = ParseFilesInDirectory(rootPath, options);
 
     GenerateEditorWindowRegister generateEditorWindowsRegister;
     result |= generateEditorWindowsRegister.Generate(fileParser, genEditorWindowsFile, options);

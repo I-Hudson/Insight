@@ -109,6 +109,13 @@ namespace Insight::Editor
                         if (Algorithm::VectorContains(metaData.ComponentNames, member->GetType()->GetTypeName())
                             && member->HasFlag("EditorVisible"))
                         {
+                            if (member->GetType()->GetValueType() != Reflect::EReflectValueType::Pointer)
+                            {
+                                IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linked only works with pointers."
+                                    , typeInfo.GetInfo()->GetTypeName(), member->GetName(), member->GetType()->GetValueType());
+                                continue;
+                            }
+
                             ComponentsOperation::EntityReference& entityReference = AddEntityReference(world.Get(), entity->GetGUID());
                             ComponentsOperation::ComponentReference& componentReference = entityReference.AddComponentToRelink(component);
 

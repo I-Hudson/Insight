@@ -10,15 +10,15 @@
 
 namespace InsightReflectTool
 {
-    bool GenerateComponentRegister::Generate(const Reflect::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
+    bool GenerateComponentRegister::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
         std::vector<std::string> componentFiles;
-        std::vector<Reflect::ReflectContainerData> componentClasses;
+        std::vector<Reflect::Parser::ReflectContainerData> componentClasses;
         for (const auto& fileParsed : fileParser.GetAllFileParsedData())
         {
             for (const auto& reflectData : fileParsed.ReflectData)
             {
-                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::ReflectInheritanceData& data)
+                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::Parser::ReflectInheritanceData& data)
                     {
                         return "Component" == data.Name;
                     }) != reflectData.Inheritance.end())
@@ -50,7 +50,7 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", ComponentRegister::c_RegisterAllComponents, {}, [&](std::fstream& file)
             {
-                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                for (const Reflect::Parser::ReflectContainerData& reflectData : componentClasses)
                 {
                     TAB_N(3);
                     file << "ComponentRegistry::RegisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name, []() { return ::New<::" + reflectData.NameWithNamespace + ", Insight::Core::MemoryAllocCategory::ECS>(); });" << NEW_LINE;
@@ -59,7 +59,7 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", ComponentRegister::c_UnregisterAllComponents, {}, [&](std::fstream& file)
             {
-                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                for (const Reflect::Parser::ReflectContainerData& reflectData : componentClasses)
                 {
                     TAB_N(3);
                     file << "ComponentRegistry::UnregisterComponent(::" + reflectData.NameWithNamespace + "::Type_Name);" << NEW_LINE;
@@ -70,7 +70,7 @@ namespace InsightReflectTool
                 {
                     TAB_N(3);
                     file << "std::vector<std::string> componentNames;" << NEW_LINE;
-                    for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                    for (const Reflect::Parser::ReflectContainerData& reflectData : componentClasses)
                     {
                         TAB_N(3);
                         file << "componentNames.push_back(::" + reflectData.NameWithNamespace + "::Type_Name);" << NEW_LINE;
@@ -94,7 +94,7 @@ namespace InsightReflectTool
         }
     }
 
-    void GenerateComponentRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::ReflectContainerData>& componentClasses) const
+    void GenerateComponentRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::Parser::ReflectContainerData>& componentClasses) const
     {
         Utils::WriteIncludeLibraryFile(file, "Reflect.h");
 
@@ -102,7 +102,7 @@ namespace InsightReflectTool
             {
                 TAB_N(3);
                 file << "std::vector<Reflect::ReflectTypeInfo> typeInfos;" << NEW_LINE;
-                for (const Reflect::ReflectContainerData& reflectData : componentClasses)
+                for (const Reflect::Parser::ReflectContainerData& reflectData : componentClasses)
                 {
                     TAB_N(3);
                     file << "typeInfos.push_back(::" + reflectData.NameWithNamespace + "::GetStaticTypeInfo());" << NEW_LINE;

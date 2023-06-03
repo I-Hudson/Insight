@@ -11,15 +11,15 @@
 
 namespace InsightReflectTool
 {
-    bool GenerateEditorWindowRegister::Generate(const Reflect::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
+    bool GenerateEditorWindowRegister::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
         std::vector<std::string> editorWindowFiles;
-        std::vector<Reflect::ReflectContainerData> editorWindowClasses;
+        std::vector<Reflect::Parser::ReflectContainerData> editorWindowClasses;
         for (const auto& fileParsed : fileParser.GetAllFileParsedData())
         {
             for (const auto& reflectData : fileParsed.ReflectData)
             {
-                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::ReflectInheritanceData& data)
+                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::Parser::ReflectInheritanceData& data)
                     {
                         return "IEditorWindow" == data.Name;
                     }) != reflectData.Inheritance.end())
@@ -51,7 +51,7 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", EditorWindowRegister::c_RegisterAllEditorWindows, {}, [&](std::fstream& file)
                 {
-                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    for (const Reflect::Parser::ReflectContainerData& reflectData : editorWindowClasses)
                     {
                         TAB_N(3);
                         file << "EditorWindowManager::Instance().RegisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
@@ -60,7 +60,7 @@ namespace InsightReflectTool
 
             Utils::WriteSourceFunctionDefinition(file, "void", EditorWindowRegister::c_UnregisterAllEditorWindows, {}, [&](std::fstream& file)
                 {
-                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    for (const Reflect::Parser::ReflectContainerData& reflectData : editorWindowClasses)
                     {
                         TAB_N(3);
                         file << "EditorWindowManager::Instance().UnregisterEditorWindow<::" + reflectData.NameWithNamespace + ">();" << NEW_LINE;
@@ -71,7 +71,7 @@ namespace InsightReflectTool
                 {
                     TAB_N(3);
                     file << "std::vector<std::string> editorWindowNames;" << NEW_LINE;
-                    for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                    for (const Reflect::Parser::ReflectContainerData& reflectData : editorWindowClasses)
                     {
                         TAB_N(3);
                         file << "editorWindowNames.push_back(::" + reflectData.NameWithNamespace + "::WINDOW_NAME);" << NEW_LINE;
@@ -95,7 +95,7 @@ namespace InsightReflectTool
         }
     }
 
-    void GenerateEditorWindowRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::ReflectContainerData>& editorWindowClasses) const
+    void GenerateEditorWindowRegister::WriteGetTypeInfos(std::fstream& file, const std::vector<Reflect::Parser::ReflectContainerData>& editorWindowClasses) const
     {
         Utils::WriteIncludeLibraryFile(file, "Reflect.h");
 
@@ -103,7 +103,7 @@ namespace InsightReflectTool
             {
                 TAB_N(3);
                 file << "std::vector<Reflect::ReflectTypeInfo> typeInfos;" << NEW_LINE;
-                for (const Reflect::ReflectContainerData& reflectData : editorWindowClasses)
+                for (const Reflect::Parser::ReflectContainerData& reflectData : editorWindowClasses)
                 {
                     TAB_N(3);
                     file << "typeInfos.push_back(::" + reflectData.NameWithNamespace + "::GetStaticTypeInfo());" << NEW_LINE;
