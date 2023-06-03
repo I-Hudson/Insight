@@ -2,6 +2,7 @@
 #include "Editor/HotReload/HotReloadSolutionGenerator.h"
 
 #include "Editor/HotReload/Operations/EditorWindowsOperation.h"
+#include "Editor/HotReload/Operations/ComponentsOperation.h"
 
 #include "Core/Logger.h"
 
@@ -131,6 +132,7 @@ namespace Insight::Editor
     void HotReloadSystem::RegisterAllHotReloadOperations()
     {
         m_operations.push_back(::New<EditorWindowsOperation>());
+        m_operations.push_back(::New<ComponentsOperation>());
     }
 
     std::string HotReloadSystem::GetLibraryPathFromProjectInfo(const Runtime::ProjectInfo& projectInfo) const

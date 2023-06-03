@@ -246,6 +246,7 @@ namespace Insight
 			}
 			if (index < m_components.size())
 			{
+				(*(m_components.begin() + index))->OnDestroy();
 				m_components.erase(m_components.begin() + index);
 			}
 			else
