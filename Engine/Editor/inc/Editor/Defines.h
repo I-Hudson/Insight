@@ -14,4 +14,6 @@
 #define IS_EDITOR
 #endif
 
+#define EditorVisible EditorVisible
+
 #pragma warning( disable : 4251 )
