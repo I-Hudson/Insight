@@ -77,6 +77,21 @@ workspace "InsightStandalone"
         "Linux" 
     }
 
+    defines
+    {
+        "_CRT_SECURE_NO_WARNINGS",
+        "GLM_FORCE_SWIZZLE",
+        "GLM_FORCE_LEFT_HANDED",
+        "GLM_FORCE_DEPTH_ZERO_TO_ONE",
+
+        "REFLECT_TYPE_INFO_ENABLED",
+
+        "IS_PLATFORM_X64",
+        "IS_MEMORY_TRACKING",
+        "RENDER_GRAPH_ENABLED",
+        "TOBJECTPTR_REF_COUNTING",
+    }
+
     flags
     {
     	"MultiProcessorCompile"

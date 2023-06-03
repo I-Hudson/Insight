@@ -101,7 +101,7 @@ namespace Insight::Editor
                         ComponentsOperation::ComponentReference& componentReference = entityReference.AddComponentToRemove(component);
                     }
 
-                    auto typeInfo = component->GetTypeInfo();
+                    Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
                     for (const Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
                     {
                         // Check if this member is of a project dll type, if it is and is visible to the editor then it could being set 
