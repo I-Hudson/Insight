@@ -83,6 +83,29 @@ namespace Insight
                 ImGui::Spacing();
                 DrawComponent(entity->GetComponentByIndex(i));
             }
+
+            if (!m_showAddComponentMenu && ImGui::Button("Add Component"))
+            {
+                m_showAddComponentMenu = true;
+            }
+
+            if (m_showAddComponentMenu)
+            {
+                if (ImGui::BeginPopupContextItem("Add Component", ImGuiPopupFlags_MouseButtonLeft))
+                {
+                    std::vector<std::string> componentTypeNames = ECS::ComponentRegistry::GetComponentNames();
+                    for (const std::string& componentTypeName : componentTypeNames)
+                    {
+                        if (ImGui::MenuItem(componentTypeName.c_str()))
+                        {
+                            entity->AddComponentByName(componentTypeName);
+                            m_showAddComponentMenu = false;
+                            break;
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
+            }
         }
 
         void EntitiyDescriptionWindow::DrawComponent(ECS::Component* component)

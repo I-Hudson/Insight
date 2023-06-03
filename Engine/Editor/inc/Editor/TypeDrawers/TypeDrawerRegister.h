@@ -36,11 +36,22 @@ namespace Insight
                     }
                 }
 
-                if (s_staticDrawersRegistered.find(typeNameMod) != s_staticDrawersRegistered.end())
+                if (IsValidInstance())
                 {
-                    return;
+                    if (Instance().m_drawers.find(typeNameMod) != Instance().m_drawers.end())
+                    {
+                        return;
+                    }
+                    Instance().m_drawers[typeNameMod] = ::New<T>();
                 }
-                s_staticDrawersRegistered[typeNameMod] = ::New<T>();
+                else
+                {
+                    if (s_staticDrawersRegistered.find(typeNameMod) != s_staticDrawersRegistered.end())
+                    {
+                        return;
+                    }
+                    s_staticDrawersRegistered[typeNameMod] = ::New<T>();
+                }
             }
 
             const ITypeDrawer* GetDrawer(const char* typeName) const;

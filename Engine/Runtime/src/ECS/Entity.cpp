@@ -113,6 +113,18 @@ namespace Insight
 			return nullptr;
 		}
 
+		std::vector<std::string> ComponentRegistry::GetComponentNames()
+		{
+			std::vector<std::string> componentTypeNames;
+			componentTypeNames.reserve(m_register_funcs.size());
+			for (auto& [TypeName, CreateFunc] : m_register_funcs)
+			{
+				componentTypeNames.push_back(TypeName);
+			}
+			return componentTypeNames;
+		}
+
+
 #ifdef ECS_ENABLED
 		Entity::Entity(ECSWorld* ecs_world)
 			: m_ecs_world(ecs_world)

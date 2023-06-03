@@ -24,7 +24,8 @@ namespace Insight
                 TypeDrawerRegister::RegisterStaticDrawer<T>(typeName);
             }
         };
-#define IS_REGISTER_TYPE_DRAWER_DEC(TypeDrawer) static RegisterTypeDrawer<TypeDrawer> s_registerTypeDrawer
-#define IS_REGISTER_TYPE_DRAWER_DEF(TypeName, TypeDrawer) RegisterTypeDrawer<TypeDrawer> TypeDrawer::s_registerTypeDrawer = RegisterTypeDrawer<TypeDrawer>(TypeName)
     }
 }
+
+#define IS_REGISTER_TYPE_DRAWER_DEC(TypeDrawer) static Insight::Editor::RegisterTypeDrawer<TypeDrawer> s_registerTypeDrawer
+#define IS_REGISTER_TYPE_DRAWER_DEF(TypeName, TypeDrawer) Insight::Editor::RegisterTypeDrawer<TypeDrawer> TypeDrawer::s_registerTypeDrawer = Insight::Editor::RegisterTypeDrawer<TypeDrawer>(TypeName)

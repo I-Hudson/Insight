@@ -35,6 +35,9 @@ namespace Insight
             ECS::Entity* FindEntity(const Core::GUID& guid);
             void DrawEntity(ECS::Entity* entity);
             void DrawComponent(ECS::Component* component);
+
+        private:
+            bool m_showAddComponentMenu = false;
         };
     }
 }
