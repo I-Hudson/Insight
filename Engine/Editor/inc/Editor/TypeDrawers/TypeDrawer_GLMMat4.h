@@ -10,6 +10,8 @@ namespace Insight
         {
         public:
             virtual void Draw(void* data) const override;
+
+            IS_REGISTER_TYPE_DRAWER_DEC(TypeDrawer_GLMMat4);
         };
     }
 }

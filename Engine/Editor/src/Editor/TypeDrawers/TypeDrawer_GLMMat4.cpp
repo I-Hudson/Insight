@@ -7,9 +7,12 @@ namespace Insight
 {
     namespace Editor
     {
-#define ARRAY_TO_GLM(row, array) mat4[row][0] = array[0]; mat4[row][1] = array[1]; mat4[row][2] = array[2]; mat4[row][3] = array[3];
+        IS_REGISTER_TYPE_DRAWER_DEF(typeid(glm::mat4).name(), TypeDrawer_GLMMat4);
+
         void TypeDrawer_GLMMat4::Draw(void* data) const
         {
+#define ARRAY_TO_GLM(row, array) mat4[row][0] = array[0]; mat4[row][1] = array[1]; mat4[row][2] = array[2]; mat4[row][3] = array[3];
+
             glm::mat4* mat4Ptr = static_cast<glm::mat4*>(data);
             glm::mat4& mat4 = *mat4Ptr;
 
@@ -29,6 +32,7 @@ namespace Insight
             ARRAY_TO_GLM(1, y);
             ARRAY_TO_GLM(2, z);
             ARRAY_TO_GLM(3, w);
+#undef ARRAY_TO_GLM
         }
     }
 }

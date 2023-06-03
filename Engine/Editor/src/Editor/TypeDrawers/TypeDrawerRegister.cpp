@@ -15,10 +15,11 @@ namespace Insight
 {
     namespace Editor
     {
+        std::unordered_map<std::string, ITypeDrawer*> TypeDrawerRegister::s_staticDrawersRegistered;
+
         TypeDrawerRegister::TypeDrawerRegister()
         {
-            m_drawers[Reflect::Util::GetTypeName<glm::mat4>()] = New<TypeDrawer_GLMMat4>();
-            m_drawers[ECS::TagComponent::Type_Name] = New<TypeDrawer_TagComponent>();
+            MoveStaticDrawersToDrawers();
         }
 
         TypeDrawerRegister::~TypeDrawerRegister()
@@ -38,6 +39,20 @@ namespace Insight
                 return iter->second;
             }
             return nullptr;
+        }
+
+        void TypeDrawerRegister::MoveStaticDrawersToDrawers()
+        {
+            for (auto& [TypeName, Drawer] : s_staticDrawersRegistered)
+            {
+                if (m_drawers.find(TypeName) != m_drawers.end())
+                {
+                    IS_CORE_WARN("[TypeDrawerRegister::MoveStaticDrawersToDrawers] Type name: '{}' already has a drawer registered.", TypeName);
+                    return;
+                }
+                m_drawers[TypeName] = std::move(Drawer);
+            }
+            s_staticDrawersRegistered.clear();
         }
     }
 }
