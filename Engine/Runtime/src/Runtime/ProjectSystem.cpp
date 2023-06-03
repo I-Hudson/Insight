@@ -87,6 +87,11 @@ namespace Insight
 
         bool ProjectSystem::OpenProject(std::string projectPath)
         {
+            if (!FileSystem::Exists(projectPath))
+            {
+                return false;
+            }
+
             bool foundProjectFile = std::filesystem::path(projectPath).extension() == c_ProjectExtension;
             std::string isProjectPath;
 

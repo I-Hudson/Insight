@@ -121,17 +121,19 @@ namespace Insight
             else
             {
                 Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
-                for (Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
+                for (const Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
                 {
                     if (!member->IsValid())
                     {
                         continue;
                     }
 
+                    
+
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member->GetType()->GetTypeName().c_str());
                     if (typeDrawer)
                     {
-                        typeDrawer->Draw(member->GetData());
+                        //typeDrawer->Draw(member->GetData());
                     }
                 }
             }

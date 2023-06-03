@@ -111,8 +111,8 @@ namespace Insight::Editor
                         {
                             if (member->GetType()->GetValueType() != Reflect::EReflectValueType::Pointer)
                             {
-                                IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linked only works with pointers."
-                                    , typeInfo.GetInfo()->GetTypeName(), member->GetName(), member->GetType()->GetValueType());
+                                IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
+                                    , typeInfo.GetInfo()->GetTypeName(), member->GetName().data(), (int)member->GetType()->GetValueType());
                                 continue;
                             }
 
@@ -120,8 +120,8 @@ namespace Insight::Editor
                             ComponentsOperation::ComponentReference& componentReference = entityReference.AddComponentToRelink(component);
 
                             /* 
-                            As the GetData func only returns a void*, if the member is a pointer it self
-                            then GetData will return a pointer to the member pointer not to the member's pointer it self.
+                            As the GetData func only returns a void*, if the member is a pointer itself
+                            then GetData will return a pointer to the member pointer's.
                             Because of this we need to do a hack to cast the member pointer to a pointer pointer.
                             Then we can get the value of the member's pointer. This needs looking at in the Reflect library.
                             The Reflect library needs some kind of GetPointer function to handle this.
