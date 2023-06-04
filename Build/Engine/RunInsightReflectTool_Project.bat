@@ -15,7 +15,7 @@ if not exist "%projectPath%" (
 )
 
 set generatedpath="%projectPath%/Intermediate/CodeFiles/Generated"
-set enginePath="%cd%\..\..\..\Engine\"
+set enginePath="%cd%\..\..\Engine"
 
 echo Engine path %enginePath%
 
