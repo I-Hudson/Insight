@@ -15,12 +15,14 @@ if not exist "%projectPath%" (
 )
 
 set generatedpath="%projectPath%/Intermediate/CodeFiles/Generated"
+set enginePath="%cd%\..\..\..\Engine\"
+
+echo Engine path %enginePath%
 
 echo Running Insight Reflect Tool to generate files...
 cd "%cd%\..\..\bin\Release-windows-x86_64\InsightReflectTool" 
-InsightReflectTool.exe Type=Project ParsePath="%projectPath%" GenerateProjectFileOutputPath="%generatedpath%"
+InsightReflectTool.exe Type=Project ReflectPath="%projectPath%" GenerateProjectFileOutputPath="%generatedpath%" ParsePath="%enginePath%"
 echo:
-pause
 
 :EOF
 pause

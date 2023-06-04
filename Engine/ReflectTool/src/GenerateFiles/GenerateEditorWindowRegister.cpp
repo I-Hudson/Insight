@@ -17,6 +17,11 @@ namespace InsightReflectTool
         std::vector<Reflect::Parser::ReflectContainerData> editorWindowClasses;
         for (const auto& fileParsed : fileParser.GetAllFileParsedData())
         {
+            if (fileParsed.parserOptions.DoNotReflect)
+            {
+                continue;
+            }
+
             for (const auto& reflectData : fileParsed.ReflectData)
             {
                 if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::Parser::ReflectInheritanceData& data)

@@ -54,7 +54,8 @@ namespace Insight::Editor
 
         std::string reflectProjectCommand = "" + insightRootPath + "/bin/Release-windows-x86_64/InsightReflectTool/InsightReflectTool.exe";
         reflectProjectCommand += " Type=Project";
-        reflectProjectCommand += " ParsePath=" + projectInfo.GetContentPath();
+        reflectProjectCommand += " ParsePath=" + insightRootPath + "/Engine";
+        reflectProjectCommand += " ReflectPath=" + projectInfo.GetContentPath();
         reflectProjectCommand += " GenerateProjectFileOutputPath=" + GetIntermediateCodePath(projectInfo) + "/Generated";
         std::system(reflectProjectCommand.c_str());
     }
