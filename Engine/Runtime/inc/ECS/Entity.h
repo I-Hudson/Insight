@@ -270,20 +270,34 @@ namespace Insight
 
 	namespace Serialisation
 	{
-		struct EntityToGuid {};
+		struct IS_RUNTIME EntityToGuid {};
 		template<>
-		struct PropertySerialiser<EntityToGuid>
+		struct IS_RUNTIME PropertySerialiser<EntityToGuid>
 		{
 			using InType = ECS::Entity;
 			std::string operator()(Ptr<InType> const& v) const;
 			std::string operator()(InType const& v) const;
 		};
-
 		template<>
-		struct PropertyDeserialiser<EntityToGuid>
+		struct IS_RUNTIME PropertyDeserialiser<EntityToGuid>
 		{
 			using InType = std::string;
 			ECS::Entity* operator()(InType const& v) const;
+		};
+
+		struct IS_RUNTIME ComponentToGuid {};
+		template<>
+		struct IS_RUNTIME PropertySerialiser<ComponentToGuid>
+		{
+			using InType = ECS::Component;
+			std::string operator()(Ptr<InType> const& v) const;
+			std::string operator()(InType const& v) const;
+		};
+		template<>
+		struct IS_RUNTIME PropertyDeserialiser<ComponentToGuid>
+		{
+			using InType = std::string;
+			ECS::Component* operator()(InType const& v) const;
 		};
 
 		struct EntityComponent1 {};
