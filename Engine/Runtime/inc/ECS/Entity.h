@@ -91,6 +91,9 @@ namespace Insight
 				static constexpr char* Type_Name = "ComponentClass";
 				virtual const char* GetTypeName() override { return Type_Name; }
 			*/
+			static constexpr char* Type_Name = "Component";
+			/// @brief  Return the component's type name.
+			virtual const char* GetTypeName() { return "Component"; };
 
 			/// @brief Called on creation (When the object is newed).
 			virtual void OnCreate() { }
@@ -108,8 +111,6 @@ namespace Insight
 			virtual void OnUpdate(const float delta_time) { }
 			/// @brief  Called after every udpate.
 			virtual void OnLateUpdate() { }
-			/// @brief  Return the component's type name.
-			virtual const char* GetTypeName() { return "Component"; };
 
 			Core::GUID GetGuid() const { return m_guid; }
 
