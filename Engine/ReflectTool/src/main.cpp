@@ -9,7 +9,7 @@
 #include <ostream>
 #include <string>
 #include <filesystem>
-#pragma optimize("", off)
+
 namespace InsightReflectTool
 {
     Reflect::Parser::FileParser ParseFilesInDirectory(const std::vector<std::string>& reflectDirectoies, 
@@ -46,15 +46,10 @@ constexpr static const char* c_ArgParsePath = "ParsePath";
 constexpr static const char* c_ArgReflectPath = "ReflectPath";
 constexpr static const char* c_ArgGenerateProjectFileOutputPath = "GenerateProjectFileOutputPath";
 
-#include <Windows.h>
-
 int main(int argc, char** agc)
 {
     using namespace InsightReflectTool;
     bool result = 0;
-
-    while(!IsDebuggerPresent())
-    { }
 
     std::unordered_map<std::string, std::vector<std::string>> arguments;
     for (size_t i = 0; i < argc; ++i)
