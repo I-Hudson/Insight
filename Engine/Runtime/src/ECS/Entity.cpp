@@ -267,6 +267,18 @@ namespace Insight
 			return false;
 		}
 
+		Component* Entity::GetComponentByGuid(const Core::GUID& guid) const
+		{
+			for (const RPtr<Component>& component : m_components)
+			{
+				if (component->GetGuid() == guid)
+				{
+					return component.Get();
+				}
+			}
+			return nullptr;
+		}
+
 
 		Component* Entity::GetComponentByName(std::string_view component_type) const
 		{

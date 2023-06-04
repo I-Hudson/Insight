@@ -11,6 +11,7 @@
 #include "Algorithm/Vector.h"
 
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 namespace Insight
 {
@@ -112,6 +113,14 @@ namespace Insight
         void EntitiyDescriptionWindow::DrawComponent(ECS::Component* component)
         {
             ImGui::Text("%s", component->GetTypeName());
+            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+            {
+                std::string entityGuid = component->GetOwnerEntity()->GetGUID().ToString();
+                std::string componentGuid = component->GetGuid().ToString();
+                std::string payloadData = entityGuid + "::" + componentGuid;
+                ImGui::SetDragDropPayload("EDW_COMPONENT", payloadData.c_str(), payloadData.size());
+                ImGui::EndDragDropSource();
+            }
             ImGui::Separator();
 
             const ITypeDrawer* componentTypeDrawer = TypeDrawerRegister::Instance().GetDrawer(component->GetTypeName());
@@ -128,12 +137,48 @@ namespace Insight
                     {
                         continue;
                     }
-
+#define IS_EDW_DRAG_DROP 1
+#if IS_EDW_DRAG_DROP
                     Reflect::ReflectType* memberType = member->GetType();
-                    if (memberType->IsDerivedFrom<ECS::Component>())
+                    if (memberType->IsDerivedFrom<ECS::Component>()
+                        && memberType->GetValueType() == Reflect::EReflectValueType::Pointer)
                     {
-                        IS_CORE_INFO("Found a componet");
+                        void* memberPointer = member->GetData();
+                        ECS::Component** memberComponentPointer = reinterpret_cast<ECS::Component**>(memberPointer);
+                        ECS::Component*& memberComponent = *memberComponentPointer;
+                        std::string text = "None";
+                        if (memberComponent)
+                        {
+                            text = memberComponent->GetTypeName();
+                        }
+
+                        ImGui::InputText("Component", &text);
+                        if (ImGui::BeginDragDropTarget())
+                        {
+                            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EDW_COMPONENT");
+                            if (payload)
+                            {
+                                std::string payloadDataString = static_cast<const char*>(payload->Data);
+                                payloadDataString.resize(payload->DataSize);
+
+                                std::string entityGuidString = payloadDataString.substr(0, payloadDataString.find("::"));
+                                std::string componentGuidString = payloadDataString.substr(payloadDataString.find("::") + 2);
+
+                                Core::GUID entityGuid;
+                                entityGuid.StringToGuid(entityGuidString);
+
+                                Core::GUID componentGuid;
+                                componentGuid.StringToGuid(componentGuidString);
+
+                                ECS::Entity* entity = Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(entityGuid);
+                                ECS::Component* component = entity->GetComponentByGuid(componentGuid);
+
+                                memberComponent = component;
+                            }
+                            ImGui::EndDragDropTarget();
+                        }
                     }
+#endif
 
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member->GetType()->GetTypeName().c_str());
                     if (typeDrawer)

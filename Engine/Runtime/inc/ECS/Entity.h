@@ -200,6 +200,7 @@ namespace Insight
 				return false;
 			}
 
+			Component* GetComponentByGuid(const Core::GUID& guid) const;
 			Component* GetComponentByName(std::string_view component_type) const;
 			template<typename T>
 			T* GetComponentByName(std::string_view component_type) const
