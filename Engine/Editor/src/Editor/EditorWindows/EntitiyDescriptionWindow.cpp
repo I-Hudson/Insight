@@ -130,14 +130,9 @@ namespace Insight
                     }
 
                     Reflect::ReflectType* memberType = member->GetType();
-                    std::vector<Reflect::ReflectType*> memberInheritanceTypes = memberType->GetInheritances();
-                    if (Algorithm::VectorFindIf(memberInheritanceTypes, [](const Reflect::ReflectType* type)
-                        {
-                            return type->GetValueTypeName() == ECS::Component::Type_Name;
-                        }) != memberInheritanceTypes.end())
+                    if (memberType->IsDerivedFrom<ECS::Component>())
                     {
-                        // We have a component.
-                        IS_CORE_INFO("");
+                        IS_CORE_INFO("Found a componet");
                     }
 
                     const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member->GetType()->GetTypeName().c_str());
