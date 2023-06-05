@@ -1,5 +1,6 @@
 #include "GenerateFiles/GenerateEditorWindowRegister.h"
 #include "GenerateFiles/GenerateComponentRegister.h"
+#include "GenerateFiles/GenerateTypeDrawerReigster.h"
 #include "GenerateFiles/GenerateProjectInitialise.h"
 
 #include <Reflect.h>
@@ -90,6 +91,7 @@ int main(int argc, char** agc)
 
     std::string genEditorWindowsFile;
     std::string genComponentRegisterFile;
+    std::string genTypeDrawerRegisterFile;
 
     std::string projectInitialiseFile;
 
@@ -102,11 +104,14 @@ int main(int argc, char** agc)
     {
         genEditorWindowsFile = genOutputPath + "/Editor/inc/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/Runtime/inc/ECS/RegisterComponents.gen.h";
+        genTypeDrawerRegisterFile = genOutputPath + "/Editor/inc/TypeDrawers.gen.h";
+
     }
     else if (typeValue == "Project")
     {
         genEditorWindowsFile = genOutputPath + "/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/RegisterComponents.gen.h";
+        genTypeDrawerRegisterFile = genOutputPath + "/TypeDrawers.gen.h";
         projectInitialiseFile = genOutputPath + "/ProjectInitialise.gen.cpp";
     }
     else
@@ -126,6 +131,9 @@ int main(int argc, char** agc)
 
     GenerateComponentRegister generateComponentRegister;
     result |= generateComponentRegister.Generate(fileParser, genComponentRegisterFile, options);
+
+    GenerateTypeDrawerReigster generateTypeDrawerReigster;
+    generateTypeDrawerReigster.Generate(fileParser, genTypeDrawerRegisterFile, options);
 
     if (typeValue == "Project")
     {

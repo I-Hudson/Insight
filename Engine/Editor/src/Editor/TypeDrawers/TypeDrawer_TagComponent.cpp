@@ -10,7 +10,10 @@ namespace Insight
 {
     namespace Editor
     {
-        IS_REGISTER_TYPE_DRAWER_DEF(ECS::TagComponent::Type_Name, TypeDrawer_TagComponent);
+        std::string TypeDrawer_TagComponent::GetTypeName()
+        {
+            return ECS::TagComponent::Type_Name;
+        }
 
         void TypeDrawer_TagComponent::Draw(void* data) const
         {

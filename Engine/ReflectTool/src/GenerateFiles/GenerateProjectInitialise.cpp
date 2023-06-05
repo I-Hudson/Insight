@@ -22,6 +22,7 @@ namespace InsightReflectTool
 
             Utils::WriteIncludeFile(file, "EditorWindows.gen.h");
             Utils::WriteIncludeFile(file, "RegisterComponents.gen.h");
+            Utils::WriteIncludeFile(file, "TypeDrawers.gen.h");
 
             Utils::WriteIncludeFile(file, "Core/Logger.h");
             Utils::WriteIncludeFile(file, "Editor/HotReload/HotReloadMetaData.h");
@@ -48,9 +49,11 @@ namespace InsightReflectTool
                     TAB_N(indent);
                     file << "SET_IMGUI_CURRENT_CONTEXT();" << NEW_LINE;
                     TAB_N(indent);
-                    file << "Editor::RegisterAllEditorWindows();" << NEW_LINE;                    
+                    file << "Editor::" << EditorWindowRegister::c_RegisterAllEditorWindows << "();" << NEW_LINE;                    
                     TAB_N(indent);
-                    file << "ECS::RegisterAllComponents();" << NEW_LINE;
+                    file << "ECS::"<< ComponentRegister::c_RegisterAllComponents << "(); " << NEW_LINE;
+                    TAB_N(indent);
+                    file << "Editor::" << TypeDrawerRegister::c_RegisterAllTypeDrawers << "(); " << NEW_LINE;
                     TAB_N(indent);
                     file << "IS_INFO(\"Project DLL module initialised\");" << NEW_LINE;
                 }, 1);
@@ -59,9 +62,11 @@ namespace InsightReflectTool
                 {
                     const int indent = 2;
                     TAB_N(indent);
-                    file << "Editor::UnregisterAllEditorWindows();" << NEW_LINE;
+                    file << "Editor::" << EditorWindowRegister::c_UnregisterAllEditorWindows <<"();" << NEW_LINE;
                     TAB_N(indent);
-                    file << "ECS::UnregisterAllComponents();" << NEW_LINE;
+                    file << "ECS::" << ComponentRegister::c_UnregisterAllComponents << "();" << NEW_LINE;
+                    TAB_N(indent);
+                    file << "Editor::" << TypeDrawerRegister::c_UnregisterAllTypeDrawers << "();" << NEW_LINE;
                     TAB_N(indent);
                     file << "IS_INFO(\"Project DLL module uninitialised\");" << NEW_LINE;
                 }, 1);
@@ -70,15 +75,22 @@ namespace InsightReflectTool
                 {
                     const int indent = 2;
                     TAB_N(indent);
-                    file << "return Editor::GetAllEditorWindowNames();" << NEW_LINE;
+                    file << "return Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "();" << NEW_LINE;
                 }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetComponentNames, { }, [&](std::fstream& file)
                 {
                     const int indent = 2;
                     TAB_N(indent);
-                    file << "return ECS::GetAllComponentNames();" << NEW_LINE;
+                    file << "return ECS::" << ComponentRegister::c_GetAllComponentNames << "();" << NEW_LINE;
                 }, 1);
+
+            Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT std::vector<std::string>", ProjectModule::c_GetTypeDrawerNames, { }, [&](std::fstream& file)
+            {
+                const int indent = 2;
+                TAB_N(indent);
+                file << "return Editor::" << TypeDrawerRegister::c_GetAllTypeDrawerNames << "();" << NEW_LINE;
+            }, 1);
 
             Utils::WriteSourceFunctionDefinition(file, "extern \"C\" IS_PROJECT ::Insight::Editor::HotReloadMetaData", ProjectModule::c_GetMetaData, { }, [&](std::fstream& file)
             {
@@ -88,6 +100,7 @@ namespace InsightReflectTool
 
                 TAB_N(indent); file << "metaData.EditorWindowNames = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowNames << "()); " << NEW_LINE;
                 TAB_N(indent); file << "metaData.ComponentNames = std::move(ECS::" << ComponentRegister::c_GetAllComponentNames << "()); " << NEW_LINE;
+                TAB_N(indent); file << "metaData.TypeDrawerNames = std::move(Editor::" << TypeDrawerRegister::c_GetAllTypeDrawerNames << "()); " << NEW_LINE;
                 file << NEW_LINE;
 
                 TAB_N(indent); file << "metaData.EditorWindowTypeInfos = std::move(Editor::" << EditorWindowRegister::c_GetAllEditorWindowsTypeInfos << "());" << NEW_LINE;

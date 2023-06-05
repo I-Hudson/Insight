@@ -23,3 +23,12 @@ void ToUpper(std::string& str)
 			return std::toupper(c);
 		});
 }
+
+IS_CORE std::string RemoveString(const std::string& str, std::string_view strToRemove)
+{
+	if (uint64_t index = str.find(strToRemove); index != std::string::npos)
+	{
+	    return str.substr(strToRemove.size() + 1);
+	}
+	return str;
+}

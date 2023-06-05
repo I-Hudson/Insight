@@ -7,7 +7,13 @@ namespace Insight
 {
     namespace Editor
     {
-        IS_REGISTER_TYPE_DRAWER_DEF(typeid(glm::mat4).name(), TypeDrawer_GLMMat4);
+        std::string TypeDrawer_GLMMat4::GetTypeName()
+        {
+            std::string typeName = typeid(glm::mat4).name();
+            typeName = RemoveString(typeName, "class");
+            typeName = RemoveString(typeName, "struct");
+            return typeName;
+        }
 
         void TypeDrawer_GLMMat4::Draw(void* data) const
         {

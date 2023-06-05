@@ -88,6 +88,11 @@ namespace Insight
 
 		void WorldEntitiesWindow::DrawSingleEntity(ECS::Entity* entity)
 		{
+			if (!entity)
+			{
+				return;
+			}
+
 			bool isLeaf = entity->GetChildCount() == 0;
 			bool isSelected = m_selectedEntities.find(entity->GetGUID()) != m_selectedEntities.end();
 

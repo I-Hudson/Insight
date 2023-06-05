@@ -4,6 +4,7 @@
 #include "Core/Singleton.h"
 #include "Core/Memory.h"
 #include "Core/Logger.h"
+#include "Core/StringUtils.h"
 
 #include <unordered_map>
 
@@ -19,48 +20,36 @@ namespace Insight
             ~TypeDrawerRegister();
 
             template<typename T>
-            static void RegisterStaticDrawer(const char* typeName)
+            void RegisterTypeDrawer()
             {
-                std::string typeNameMod = typeName;
-                std::string_view stringsToRemove[] =
+                static_assert(std::is_base_of_v<ITypeDrawer, T>);
+                std::string typeDrawerTypeName = T::GetTypeName();
+                if (m_drawers.find(typeDrawerTypeName) != m_drawers.end())
                 {
-                    "struct",
-                    "class"
-                };
-                for (std::string_view view : stringsToRemove)
-                {
-                    if (u64 index = typeNameMod.find(view); index != std::string::npos)
-                    {
-                        typeNameMod = typeNameMod.substr(view.size() + 1);
-                        break;
-                    }
+                    IS_CORE_WARN("[TypeDrawerRegister::RegisterDrawer] TypeDrawer already registed for '{}'.", typeDrawerTypeName);
+                    return;
                 }
+                m_drawers[typeDrawerTypeName] = ::New<T>();
+            }
 
-                if (IsValidInstance())
+            template<typename T>
+            void UnregisterTypeDrawer()
+            {
+                static_assert(std::is_base_of_v<ITypeDrawer, T>);
+                if (auto iter = m_drawers.find(T::GetTypeName());
+                    iter != m_drawers.end())
                 {
-                    if (Instance().m_drawers.find(typeNameMod) != Instance().m_drawers.end())
-                    {
-                        return;
-                    }
-                    Instance().m_drawers[typeNameMod] = ::New<T>();
-                }
-                else
-                {
-                    if (s_staticDrawersRegistered.find(typeNameMod) != s_staticDrawersRegistered.end())
-                    {
-                        return;
-                    }
-                    s_staticDrawersRegistered[typeNameMod] = ::New<T>();
+                    ::Delete(iter->second);
+                    m_drawers.erase(iter);
                 }
             }
 
             const ITypeDrawer* GetDrawer(const char* typeName) const;
 
         private:
-            void MoveStaticDrawersToDrawers();
+            std::string GetTypeDrawerTypeName(const std::string& typeName) const;
 
         private:
-            static std::unordered_map<std::string, ITypeDrawer*> s_staticDrawersRegistered;
             std::unordered_map<std::string, ITypeDrawer*> m_drawers;
         };
     }

@@ -58,8 +58,6 @@ namespace Insight
 			{
 				return nullptr;
 			}
-			Insight::Serialisation::PropertyDeserialiser<Core::GUID> guidDeserialiser;
-			
 			std::string entityGuidString = v.substr(0, v.find("::"));
 			std::string componentGuidString = v.substr(v.find("::") + 2);
 
