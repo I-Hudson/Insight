@@ -31,6 +31,11 @@ namespace Insight
 		class Scene;
 	}
 
+	namespace Editor
+	{
+		class ComponentsOperation;
+	}
+
 	namespace ECS
 	{
 #ifdef IS_ECS_ENABLED
@@ -140,6 +145,7 @@ namespace Insight
 
 			friend class Entity;
 			friend class EntityManager;
+			friend class Editor::ComponentsOperation;
 		};
 
 #define IS_COMPONENT(Component) \

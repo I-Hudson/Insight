@@ -172,7 +172,11 @@ namespace Insight::Editor
 
             for (const auto& [componentGuid, component] : entity.ComponentsToRemove)
             {
-                ecsEntity->AddComponentByName(component.TypeName);
+                ECS::Component* addedComponent = ecsEntity->AddComponentByName(component.TypeName);
+                if (addedComponent)
+                {
+                    addedComponent->m_guid = componentGuid;
+                }
             }
         }
     }

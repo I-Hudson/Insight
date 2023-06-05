@@ -121,6 +121,7 @@ namespace Insight
                 ImGui::SetDragDropPayload("EDW_COMPONENT", payloadData.c_str(), payloadData.size());
                 ImGui::EndDragDropSource();
             }
+            ImGui::Text("%s", component->GetGuid().ToString().c_str());
             ImGui::Separator();
 
             const ITypeDrawer* componentTypeDrawer = TypeDrawerRegister::Instance().GetDrawer(component->GetTypeName());
