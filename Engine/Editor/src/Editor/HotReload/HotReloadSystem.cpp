@@ -115,12 +115,9 @@ namespace Insight::Editor
     {
         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
-        // Generate project and solution,
-        HotReloadSolutionGenerator solutionGenerator;
-        solutionGenerator.GenerateSolution(projectInfo);
-        // Build project and solution,
-        solutionGenerator.BuildSolution(projectInfo);
-
+#if IS_RELEASE
+        BuildProjectSolution();
+#endif
         LoadLibrary(GetLibraryPathFromProjectInfo(projectInfo));
     }
 

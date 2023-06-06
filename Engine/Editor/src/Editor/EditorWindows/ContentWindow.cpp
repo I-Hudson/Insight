@@ -61,6 +61,9 @@ namespace Insight::Editor
                 SplitDirectory();
             });
 
+        m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+        SplitDirectory();
+
         m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
             Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
         m_thumbnailToTexture[ContentWindowThumbnailType::File] =
