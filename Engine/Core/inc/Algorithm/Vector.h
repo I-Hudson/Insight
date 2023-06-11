@@ -113,6 +113,12 @@ namespace Insight
 			}
 			return vector.end();
 		}
+		template<typename T, typename Predicate>
+		INLINE void VectorRemoveAllIf(std::vector<T>& vector, Predicate predicate)
+		{
+			auto iter = std::remove_if(vector.begin(), vector.end(), predicate);
+			vector.erase(iter, vector.end());
+		}
 
 		template<typename T>
 		INLINE typename std::vector<T>::iterator VectorRemove(std::vector<T>& vector, typename std::vector<T>::const_iterator const& iterator)

@@ -108,6 +108,7 @@ namespace Insight
 
             virtual void Write(std::string_view tag, std::string const& string) = 0;
             virtual void Write(std::string_view tag, const std::vector<Byte>& vector) = 0;
+            virtual void Write(std::string_view tag, const void* data, const u64 size) = 0;
 
             virtual void Read(std::string_view tag, bool& data) = 0;
             virtual void Read(std::string_view tag, char& data) = 0;

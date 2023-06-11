@@ -226,6 +226,14 @@ namespace Insight
             StopArray();
         }
 
+        void BinarySerialiser::Write(std::string_view tag, const void* data, const u64 size)
+        {
+            std::vector<Byte> rawData;
+            rawData.resize(size);
+            Platform::MemCopy(rawData.data(), data, size);
+            Write(tag, rawData);
+        }
+
         void BinarySerialiser::Read(std::string_view tag, bool& data)
         {
             ReadValue<bool>(tag, data);

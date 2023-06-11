@@ -43,6 +43,7 @@ namespace Insight
 
             virtual void Write(std::string_view tag, std::string const& string) override;
             virtual void Write(std::string_view tag, const std::vector<Byte>& vector) override;
+            virtual void Write(std::string_view tag, const void* data, const u64 size) override;
 
             virtual void Read(std::string_view tag, bool& data) override;
             virtual void Read(std::string_view tag, char& data) override;

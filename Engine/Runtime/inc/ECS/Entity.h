@@ -4,6 +4,7 @@
 #include "Platforms/Platform.h"
 #include "Runtime/Defines.h"
 #include "Core/GUID.h"
+#include "Algorithm/Vector.h"
 
 #include "Core/Memory.h"
 
@@ -318,13 +319,35 @@ namespace Insight
 					serialiser->StartArray("Components", componentArraySize);
 					for (auto const& c : components)
 					{
-						Core::GUID guidBefore = c->GetGuid();
 						c->Deserialise(serialiser);
-						Core::GUID guidAfter = c->GetGuid();
-						std::string guid1 = guidBefore.ToString();
-						std::string guid2 = guidAfter.ToString();
-						std::string owner = c->GetOwnerEntity()->GetGUID().ToString();
-						assert(guidBefore == guidAfter);
+
+						u64 dynamicPropertiesSize = 0;
+						serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
+						for (int i = 0; i < dynamicPropertiesSize; ++i)
+						{
+							std::string propertyName;
+							serialiser->Read("Name", propertyName);
+
+							std::vector<Byte> data;
+							serialiser->Read("Data", data);
+
+							Reflect::ReflectTypeInfo typeInfo = c->GetTypeInfo();
+							std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
+							Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
+							{
+								return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
+							});
+							auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::ReflectTypeMember* member)
+								{
+									return member->GetName() == propertyName;
+								});
+							if (memberIter != members.end())
+							{
+								assert((*memberIter)->GetType()->GetTypeSize() == data.size());
+								Platform::MemCopy((*memberIter)->GetData(), data.data(), data.size());
+							}
+						}
+						serialiser->StopArray();
 					}
 					serialiser->StopArray();
 				}
@@ -335,6 +358,22 @@ namespace Insight
 					for (auto const& c : components)
 					{
 						c->Serialise(serialiser);
+
+						Reflect::ReflectTypeInfo typeInfo = c->GetTypeInfo();
+						std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
+						Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
+						{
+							return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
+						});
+
+						u64 dynamicPropertiesSize = members.size();
+						serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
+						for (const Reflect::ReflectTypeMember* const& member : members)
+						{
+							serialiser->Write("Name", std::string(member->GetName()));
+							serialiser->Write("Data", member->GetData(), member->GetType()->GetTypeSize());
+						}
+						serialiser->StopArray();
 					}
 					serialiser->StopArray();
 				}

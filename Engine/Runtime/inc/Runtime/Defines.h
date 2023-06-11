@@ -10,4 +10,6 @@
 #define IS_RUNTIME
 #endif
 
+#define EditorVisible EditorVisible
+
 #pragma warning( disable : 4251 )
