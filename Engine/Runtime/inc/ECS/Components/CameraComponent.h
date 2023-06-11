@@ -19,11 +19,13 @@ namespace Insight
 			Orthographic
 		};
 
-		class IS_RUNTIME Camera
+		class IS_RUNTIME Camera : public Serialisation::ISerialisable
 		{
 		public:
 			Camera() = default;
 			~Camera() = default;
+
+			IS_SERIALISABLE_H(Camera);
 
 			void CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane);
 			void CreateOrthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
@@ -118,7 +120,17 @@ namespace Insight
 			Camera m_camera;
 		};
 	}
-	OBJECT_SERIALISER(ECS::CameraComponent, 2,
+	OBJECT_SERIALISER(ECS::Camera, 1,
+		SERIALISE_PROPERTY(ECS::CameraType, m_cameraType, 1, 0)
+		SERIALISE_PROPERTY(float, m_nearPlane, 1, 0)
+		SERIALISE_PROPERTY(float, m_farPlane, 1, 0)
+		SERIALISE_PROPERTY(float, m_aspect, 1, 0)
+		SERIALISE_PROPERTY(float, m_fovY, 1, 0)
+		SERIALISE_PROPERTY(bool, m_invertView, 1, 0)
+	);
+
+	OBJECT_SERIALISER(ECS::CameraComponent, 3,
 		SERIALISE_BASE(ECS::Component, 2, 0)
+		SERIALISE_OBJECT(ECS::Camera, m_camera, 1, 0)
 	);
 }

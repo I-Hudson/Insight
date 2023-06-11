@@ -26,10 +26,10 @@ namespace Insight
 
 	void IS_CORE AssetPrintError(const char* format, ...);
 
-#define ASSERT_MSG(condition, message)																													\
+#define ASSERT_MSG(condition, message, ...)																												\
 	if (!(condition))																																	\
 	{																																					\
-		AssetPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message);																													\
+		AssetPrintError("ASSERT:\nFILE: '%s', \nLINE: '%i', \nCondition: '%s', \nMessage: '%s'", __FILE__, __LINE__, #condition, message, __VA_ARGS__);																													\
 	}
 
 #define ASSERT(condition) ASSERT_MSG(condition, "")

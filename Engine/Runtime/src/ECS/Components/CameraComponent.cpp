@@ -13,6 +13,8 @@ namespace Insight
 		//----------------------------------------------------
 		// Camera
 		//----------------------------------------------------
+		IS_SERIALISABLE_CPP(Camera)
+
 		void Camera::CreatePerspective(float fovy, float aspect, float nearPlane, float farPlane)
 		{
 			m_cameraType = CameraType::Perspective;

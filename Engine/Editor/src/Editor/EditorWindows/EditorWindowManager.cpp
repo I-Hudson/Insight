@@ -50,6 +50,7 @@ namespace Insight
 					return window->GetWindowName() == windowName;
 				}); itr != m_activeWindows.end())
 			{
+				(*itr)->Shutdown();
 				::Delete(*itr);
 				m_activeWindows.erase(itr);
 			}
@@ -177,6 +178,7 @@ namespace Insight
 						return window->GetWindowName() == windowToRemove;
 					}); itr != m_activeWindows.end())
 				{
+					(*itr)->Shutdown();
 					DeleteTracked(*itr);
 					m_activeWindows.erase(itr);
 				}

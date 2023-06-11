@@ -1,4 +1,5 @@
 #include "Editor/EditorWindows/ContentWindow.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "Resource/ResourceManager.h"
@@ -61,13 +62,20 @@ namespace Insight::Editor
                 SplitDirectory();
             });
 
-        m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
-        SplitDirectory();
+        if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
+        {
+            EditorWindowManager::Instance().RemoveWindow(WINDOW_NAME);
+        }
+        else
+        {
+            m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
+            SplitDirectory();
 
-        m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
-            Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-        m_thumbnailToTexture[ContentWindowThumbnailType::File] =
-            Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+            m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
+                Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+            m_thumbnailToTexture[ContentWindowThumbnailType::File] =
+                Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        }
     }
 
     void ContentWindow::Shutdown()

@@ -42,7 +42,7 @@ constexpr bool VersionCheck(const u32 serialisedVersion, const u32 versionAdded,
 
 constexpr bool ObjectSerialiserCheck(std::string_view currentObjectSerialiser, std::string_view serialisedObjectSerialiser)
 {
-    return currentObjectSerialiser == serialisedObjectSerialiser;
+    return true;//currentObjectSerialiser == serialisedObjectSerialiser;
 }
 
 // Serialise a single property. This would be things which only contain data for them self. 
@@ -285,9 +285,10 @@ namespace Insight::Serialisation::Keys
 \
             serialisedObjectSerilaiser = objectSerialiserType;\
 \
-            serialiser->StartObject(Insight::Serialisation::Keys::c_ObjectSerialiser);\
+/*           serialiser->StartObject(Insight::Serialisation::Keys::c_ObjectSerialiser);\
             serialiser->Write(Insight::Serialisation::Keys::c_ObjectSerialiser, objectSerialiserType); \
             serialiser->StopObject();\
+*/\
 \
             serialiser->StartObject(#OBJECT_TYPE);\
             if (!serialiser->IsReadMode())\
@@ -316,6 +317,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
         serialisedObject = diskObjectSerialiser;
     }
     bool correctObject = serialisedObject == currentObjectSerialiser;
+    assert(correctObject);
     return correctObject;
 }
 
@@ -327,7 +329,10 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\
             objectSerialiserType = RemoveString(objectSerialiserType, "struct");\
 \
+/*
             bool correctObject = DeserialiseCheckForObjectSerialiser(serialiser, serialisedObjectSerilaiser, objectSerialiserType);\
+            */\
+            bool correctObject = true;\
 \
             if (correctObject)\
             {\
