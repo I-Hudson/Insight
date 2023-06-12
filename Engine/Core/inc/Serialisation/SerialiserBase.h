@@ -137,6 +137,36 @@ namespace Insight
             v.Deserialise(serialiser);
         }
 
+        /// @brief Store all known object serialisers with their typenames for look ups with out a type.
+        class ObjectSerialiserRegister
+        {
+            using SerialiserObjectFunc = void(*)(void* objectPtr);
+        public:
+            static void RegisterObjectSerialiser(const char* typeName, SerialiserObjectFunc serialiserObjectFunc)
+            {
+                m_serialsierObjectFunc[typeName] = serialiserObjectFunc;
+            }
+            static void UnregisterObjectSerialiser(const char* typeName)    
+            {
+
+            }
+
+            static void SerialsierObjectFromTypeName(std::string_view typeName, void* object);
+
+        private:
+            static std::unordered_map<std::string, SerialiserObjectFunc> m_serialsierObjectFunc;
+        };
+
+        template<typename T>
+        class ObjectSerialiserReg
+        {
+            ObjectSerialiserReg(const char* typeName)
+            {
+                ObjectSerialiserRegister::RegisterObjectSerialiser()
+            }
+            ~ObjectSerialiserReg();
+        };
+
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 
         template<typename T>
@@ -378,7 +408,14 @@ namespace Insight
         template<typename TypeSerialiser, typename T, typename TObjectType>
         struct ComplexSerialiser
         {
+            template<std::enable_if_t<!std::is_same_v<T, void>>>
             void operator()(ISerialiser* serialiser, T& v, TObjectType* object) const
+            {
+                assert(false);
+            }
+
+            template<std::enable_if_t<std::is_same_v<T, void>>>
+            void operator()(ISerialiser* serialiser, TObjectType* object) const
             {
                 assert(false);
             }

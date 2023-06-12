@@ -236,7 +236,16 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
                 ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
                 complexSerialiser(serialiser, PPCAT(object., PROPERTY), &object);\
             }\
-        }                              
+        }                          
+#define SERIALISE_NAMED_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)\
+        {\
+            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
+            {\
+                using ObjectType = typename std::decay<decltype(object)>::type;\
+                ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, void, ObjectType> complexSerialiser;\
+                complexSerialiser(serialiser, &object);\
+            }\
+        }   
 
 // Serialise a single property with a ProertySerialiser.
 #define SERIALISE_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                   SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
@@ -267,6 +276,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 // Serialise anything. This should be used when there is a certain requirement needed. 
 // An example could be loading entities.
 #define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                     SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
+#define SERIALISE_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)                          SERIALISE_NAMED_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)
 
 namespace Insight::Serialisation::Keys
 {

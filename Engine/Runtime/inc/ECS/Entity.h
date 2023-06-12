@@ -320,34 +320,6 @@ namespace Insight
 					for (auto const& c : components)
 					{
 						c->Deserialise(serialiser);
-
-						u64 dynamicPropertiesSize = 0;
-						serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
-						for (int i = 0; i < dynamicPropertiesSize; ++i)
-						{
-							std::string propertyName;
-							serialiser->Read("Name", propertyName);
-
-							std::vector<Byte> data;
-							serialiser->Read("Data", data);
-
-							Reflect::ReflectTypeInfo typeInfo = c->GetTypeInfo();
-							std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
-							Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
-							{
-								return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
-							});
-							auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::ReflectTypeMember* member)
-								{
-									return member->GetName() == propertyName;
-								});
-							if (memberIter != members.end())
-							{
-								assert((*memberIter)->GetType()->GetTypeSize() == data.size());
-								Platform::MemCopy((*memberIter)->GetData(), data.data(), data.size());
-							}
-						}
-						serialiser->StopArray();
 					}
 					serialiser->StopArray();
 				}
@@ -358,22 +330,65 @@ namespace Insight
 					for (auto const& c : components)
 					{
 						c->Serialise(serialiser);
+					}
+					serialiser->StopArray();
+				}
+			}
+		};
 
-						Reflect::ReflectTypeInfo typeInfo = c->GetTypeInfo();
+		struct ComponentProperties1 {};
+		template<>
+		struct ComplexSerialiser<ComponentProperties1, void, ECS::Component>
+		{
+			void operator()(ISerialiser* serialiser, ECS::Component* component) const
+			{
+				Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
+				std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
+				Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
+				{
+					return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
+				});
+
+				if (serialiser->IsReadMode())
+				{
+					u64 dynamicPropertiesSize = 0;
+					serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
+					for (int i = 0; i < dynamicPropertiesSize; ++i)
+					{
+						std::string propertyName;
+						serialiser->Read("Name", propertyName);
+
+						std::vector<Byte> data;
+						serialiser->Read("Data", data);
+
+						Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
 						std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
 						Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
 						{
 							return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
 						});
 
-						u64 dynamicPropertiesSize = members.size();
-						serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
-						for (const Reflect::ReflectTypeMember* const& member : members)
+						auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::ReflectTypeMember* member)
+							{
+								return member->GetName() == propertyName;
+							});
+
+						if (memberIter != members.end())
 						{
-							serialiser->Write("Name", std::string(member->GetName()));
-							serialiser->Write("Data", member->GetData(), member->GetType()->GetTypeSize());
+							assert((*memberIter)->GetType()->GetTypeSize() == data.size());
+							Platform::MemCopy((*memberIter)->GetData(), data.data(), data.size());
 						}
-						serialiser->StopArray();
+					}
+					serialiser->StopArray();
+				}
+				else
+				{
+					u64 dynamicPropertiesSize = members.size();
+					serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
+					for (const Reflect::ReflectTypeMember* const& member : members)
+					{
+						serialiser->Write("Name", std::string(member->GetName()));
+						serialiser->Write("Data", member->GetData(), member->GetType()->GetTypeSize());
 					}
 					serialiser->StopArray();
 				}
@@ -381,10 +396,11 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(ECS::Component, 2,
+	OBJECT_SERIALISER(ECS::Component, 3,
 		SERIALISE_PROPERTY(Core::GUID, m_guid, 1, 0)
 		SERIALISE_PROPERTY(Serialisation::EntityToGuid, m_ownerEntity, 1, 0)
 		SERIALISE_PROPERTY(bool, m_isEnabled, 1, 0)
+		SERIALISE_COMPLEX_THIS(Serialisation::ComponentProperties1, 3, 0)
 	);
 
 	OBJECT_SERIALISER(ECS::Entity, 3,
