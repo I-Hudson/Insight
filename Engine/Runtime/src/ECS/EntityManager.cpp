@@ -216,17 +216,21 @@ namespace Insight
 			std::lock_guard lock(m_lock);
 
 			u32 index = 0;
+			UPtr<Entity> entityToDelete;
 			for (UPtr<Entity>& e : m_entities)
 			{
 				if (e == entity)
 				{
-					e.Reset();
+					entityToDelete = std::move(e);
 					break;
 				}
 				++index;
 			}
-			ASSERT(entity == nullptr);
+			ASSERT(entityToDelete.IsValid());
 			m_entities.erase(m_entities.begin() + index);
+
+			entityToDelete->Destroy();
+			entityToDelete.Reset();
 		}
 
 		void EntityManager::EarlyUpdate()

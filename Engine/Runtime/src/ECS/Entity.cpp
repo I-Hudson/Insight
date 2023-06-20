@@ -151,6 +151,11 @@ namespace Insight
 			: m_entity_manager(entity_manager)
 			, m_name(std::move(name))
 		{ }
+
+		Entity::~Entity()
+		{
+			Destroy();
+		}
 #endif
 		Ptr<Entity> Entity::AddChild()
 		{

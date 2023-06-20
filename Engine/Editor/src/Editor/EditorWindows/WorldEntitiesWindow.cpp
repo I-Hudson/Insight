@@ -108,7 +108,10 @@ namespace Insight
 						for (const Core::GUID& entityGuid : m_selectedEntities)
 						{
 							Ptr<ECS::Entity> entityToRemove = activeWorld->GetEntityByGUID(entityGuid);
-							activeWorld->RemoveEntity(entityToRemove);
+							if (entityToRemove)
+							{
+								activeWorld->RemoveEntity(entityToRemove);
+							}
 						}
 						m_selectedEntities.clear();
 					}

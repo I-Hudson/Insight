@@ -177,6 +177,7 @@ namespace Insight
 			Entity() = default;
 			Entity(EntityManager* entity_manager);
 			Entity(EntityManager* entity_manager, std::string name);
+			~Entity();
 #endif
 			Entity* GetParent() const { return m_parent.Get(); }
 
