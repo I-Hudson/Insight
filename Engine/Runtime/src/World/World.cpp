@@ -101,7 +101,7 @@ namespace Insight
 
 		Ptr<ECS::Entity> World::AddEntity()
 		{
-			return AddEntity("");
+			return AddEntity("Entity");
 		}
 
 		Ptr<ECS::Entity> World::AddEntity(std::string entity_name)

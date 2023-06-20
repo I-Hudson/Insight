@@ -239,7 +239,7 @@ namespace Insight
 			Core::GUID GetGUID() const { return m_guid; }
 
 			std::string GetName() const { return m_name; }
-			void SetName(std::string entity_name) { m_name = std::move(m_name); }
+			void SetName(std::string newName) { m_name = std::move(newName); }
 
 			bool IsEnabled() const;
 			void SetEnabled(bool enabled) { m_isEnabled = enabled; }
