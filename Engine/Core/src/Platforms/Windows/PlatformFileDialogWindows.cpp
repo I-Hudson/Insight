@@ -17,9 +17,9 @@ namespace Insight
 {
     namespace Platforms::Windows
     {
-        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem)
+        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, bool appendExtension)
         {
-            return ShowSave(selectedItem, {});
+            return ShowSave(selectedItem, {}, appendExtension);
         }
 
         bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem)
@@ -27,9 +27,9 @@ namespace Insight
             return ShowLoad(selectedItem, {});
         }
 
-        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
+        bool PlatformFileDialogWindows::ShowSave(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
-            return Show(PlatformFileDialogOperations::SaveFile, selectedItem, fileFilters);
+            return Show(PlatformFileDialogOperations::SaveFile, selectedItem, fileFilters, appendExtension);
         }
 
         bool PlatformFileDialogWindows::ShowLoad(std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
@@ -37,12 +37,12 @@ namespace Insight
             return Show(PlatformFileDialogOperations::LoadFile, selectedItem, fileFilters);
         }
 
-        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem)
+        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, bool appendExtension)
         {
-            return Show(operation, selectedItem, {});
+            return Show(operation, selectedItem, {}, appendExtension);
         }
 
-        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
+        bool PlatformFileDialogWindows::Show(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
             if (operation == PlatformFileDialogOperations::LoadFile 
                 || operation == PlatformFileDialogOperations::SelectFile 
@@ -56,7 +56,7 @@ namespace Insight
             }
             else if (operation == PlatformFileDialogOperations::SaveFile)
             {
-                if (SaveDialog(operation, selectedItem, fileFilters))
+                if (SaveDialog(operation, selectedItem, fileFilters, appendExtension))
                 {
                     return true;
                 }
@@ -157,7 +157,7 @@ namespace Insight
             return true;
         }
 
-        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters)
+        bool PlatformFileDialogWindows::SaveDialog(PlatformFileDialogOperations operation, std::string* selectedItem, const std::vector<FileDialogFilter>& fileFilters, bool appendExtension)
         {
             IFileSaveDialog* saveDialogHandle;
             HRESULT hr = CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileDialog, reinterpret_cast<void**>(&saveDialogHandle));
@@ -221,6 +221,22 @@ namespace Insight
                 (*selectedItem).pop_back();
             }
             FileSystem::PathToUnix(*selectedItem);
+
+            if (appendExtension)
+            {
+                ASSERT(fileFilters.size() > 0);
+                std::string extension = Platform::StringFromWString(fileFilters.at(0).Extension);
+                if (extension.front() == '*')
+                {
+                    extension = extension.substr(1);
+                }
+
+                std::string newPath =FileSystem::ReplaceExtension(*selectedItem, extension);
+                if (!newPath.empty())
+                {
+                    *selectedItem = std::move(newPath);
+                }
+            }
 
             item->Release();
             saveDialogHandle->Release();

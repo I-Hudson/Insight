@@ -168,16 +168,24 @@ namespace Insight
         {
             return {};
         }
-
-        if (GetFileExtension(file).empty())
+        std::string_view fileExtension = GetFileExtension(file);
+        if (fileExtension == extension)
         {
-            return {};
+            return std::string(file);
         }
-
-        const u64 lastDot = file.find_last_of('.');
-        std::string newPath = std::string(file.substr(0, lastDot));
-        newPath += extension;
-        return newPath;
+        else if (!fileExtension.empty())
+        {
+            const u64 lastDot = file.find_last_of('.');
+            std::string newPath = std::string(file.substr(0, lastDot));
+            newPath += extension;
+            return newPath;
+        }
+        else
+        {
+            std::string newPath = std::string(file);
+            newPath += extension;
+            return newPath;
+        }
     }
 
     std::string FileSystem::GetAbsolutePath(const std::string& path)
