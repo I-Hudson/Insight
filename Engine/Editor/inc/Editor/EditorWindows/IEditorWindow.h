@@ -42,6 +42,8 @@ namespace Insight
 			virtual const char* GetWindowName() const = 0;
 			virtual EditorWindowCategories GetCategory() const = 0;
 
+			bool IsCursorWithinWindow() const;
+
 		protected:
 			bool m_isOpen = true;
 			bool m_isFullscreen = false;

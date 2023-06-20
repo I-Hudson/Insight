@@ -36,11 +36,12 @@ namespace Insight
 			std::unordered_set<Core::GUID> const& GetSelectedEntities() const;
 
 		private:
-			void DrawSingleEntity(ECS::Entity* entity);
+			void DrawSingleEntity(ECS::Entity* entity, u32 entityIndex);
 			void IsEntitySelected(ECS::Entity* entity, bool isSelected);
 
 		private:
 			std::unordered_set<Core::GUID> m_selectedEntities;
+			bool m_showContextMenu = false;
 		};
 	}
 }

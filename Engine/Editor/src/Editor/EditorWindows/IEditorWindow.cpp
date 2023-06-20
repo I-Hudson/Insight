@@ -81,5 +81,16 @@ namespace Insight
 		{
 			return m_isFullscreen;
 		}
+
+		bool IEditorWindow::IsCursorWithinWindow() const
+		{
+			ImVec2 minRect = ImGui::GetWindowPos();
+			ImVec2 maxRect = ImGui::GetWindowPos();
+
+			maxRect.x += ImGui::GetWindowSize().x;
+			maxRect.y += ImGui::GetWindowSize().y;
+
+			return ImGui::IsMouseHoveringRect(minRect, maxRect);
+		}
 	}
 }

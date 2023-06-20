@@ -76,7 +76,11 @@ namespace Insight
             ImGui::Separator();
 
             ImGui::Text("Entity GUID: %s", entity->GetGUID().ToString().c_str());
-            ImGui::Text("Entity Name: %s", entity->GetName().c_str());
+
+            std::string entityName = entity->GetName();
+            ImGui::InputText("Entity Name:", &entityName);
+            entity->SetName(entityName);
+
             bool isEnabled = entity->IsEnabled();
             if (ImGui::Checkbox("Entity Enabled", &isEnabled)) { entity->SetEnabled(isEnabled); }
 

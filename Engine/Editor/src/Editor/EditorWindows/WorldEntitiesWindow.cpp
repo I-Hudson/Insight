@@ -74,9 +74,60 @@ namespace Insight
 						auto entities = world->GetAllEntities();
 						for (size_t i = 0; i < entities.size(); ++i)
 						{
-							DrawSingleEntity(entities.at(i).Get());
+							DrawSingleEntity(entities.at(i).Get(), i);
 						}
 					}
+				}
+			}
+
+			TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+			if (worlds.size() > 0)
+			{
+				const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+				if (inputDevice->WasReleased(Input::MouseButtons::Right)
+					&& IsCursorWithinWindow())
+				{
+					m_showContextMenu = true;
+				}
+				
+				if (m_showContextMenu == true)
+				{
+					ImGui::OpenPopup("##WEW_CONTEXT_MENU");
+				}
+
+				if (ImGui::BeginPopup("##WEW_CONTEXT_MENU"))
+				{
+					if (ImGui::MenuItem("Add Entity"))
+					{
+						activeWorld->AddEntity();
+					}
+					
+					ImGui::BeginDisabled(m_selectedEntities.size() == 0);
+					if (ImGui::MenuItem("Remove Entities"))
+					{
+						for (const Core::GUID& entityGuid : m_selectedEntities)
+						{
+							Ptr<ECS::Entity> entityToRemove = activeWorld->GetEntityByGUID(entityGuid);
+							activeWorld->RemoveEntity(entityToRemove);
+						}
+						m_selectedEntities.clear();
+					}
+					ImGui::EndDisabled();
+
+					if (inputDevice->WasReleased(Input::MouseButtons::Left)
+						&& !ImGui::IsItemHovered())
+					{
+						m_showContextMenu = false;
+					}
+
+					ImGui::EndPopup();
+				}
+
+
+				if (inputDevice->WasReleased(Input::MouseButtons::Left)
+					&& !IsCursorWithinWindow())
+				{
+					m_showContextMenu = false;
 				}
 			}
 		}
@@ -86,7 +137,7 @@ namespace Insight
 			return m_selectedEntities;
 		}
 
-		void WorldEntitiesWindow::DrawSingleEntity(ECS::Entity* entity)
+		void WorldEntitiesWindow::DrawSingleEntity(ECS::Entity* entity, u32 entityIndex)
 		{
 			if (!entity)
 			{
@@ -103,18 +154,22 @@ namespace Insight
 				| (isSelected ? ImGuiTreeNodeFlags_Selected : 0);
 
 			bool isEnabled = entity->IsEnabled();
-			if (ImGui::Checkbox(std::string("##" + entity->GetGUID().ToString()).c_str(), &isEnabled))
+			if (ImGui::Checkbox(std::string("##EntityEnabled" + entity->GetGUID().ToString()).c_str(), &isEnabled))
 			{
 				entity->SetEnabled(isEnabled);
 			}
 			ImGui::SameLine();
-			if (ImGui::TreeNodeEx(entity->GetName().c_str(), treeNodeFlags))
+
+			ImGui::PushID(entityIndex);
+
+			std::string entityName = entity->GetName();
+			if (ImGui::TreeNodeEx(entityName.c_str(), treeNodeFlags))
 			{
 				IsEntitySelected(entity, isSelected);
 
 				for (u32 i = 0; i < entity->GetChildCount(); ++i)
 				{
-					DrawSingleEntity(entity->GetChild(i).Get());
+					DrawSingleEntity(entity->GetChild(i).Get(), entityIndex + i);
 				}
 				ImGui::TreePop();
 			}
@@ -122,6 +177,8 @@ namespace Insight
 			{
 				IsEntitySelected(entity, isSelected);
 			}
+
+			ImGui::PopID();
 		}
 
 		void WorldEntitiesWindow::IsEntitySelected(ECS::Entity* entity, bool isSelected)
