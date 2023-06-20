@@ -8,6 +8,7 @@
 #include "World/WorldSystem.h"
 
 #include "Core/Memory.h"
+#include "Core/StringUtils.h"
 #include "Algorithm/Vector.h"
 
 #include <imgui.h>
@@ -96,7 +97,20 @@ namespace Insight
                 if (ImGui::BeginPopupContextItem("Add Component", ImGuiPopupFlags_MouseButtonLeft))
                 {
                     std::vector<std::string> componentTypeNames = ECS::ComponentRegistry::GetComponentNames();
+                    std::vector<const char*> componentTypeNamesCStr;
                     for (const std::string& componentTypeName : componentTypeNames)
+                    {
+                        componentTypeNamesCStr.push_back(componentTypeName.c_str());
+                    }
+
+                    if (ImGui::ListBox("##", &m_addComponentListBoxIndex, componentTypeNamesCStr.data(), componentTypeNamesCStr.size()))
+                    {
+                        entity->AddComponentByName(componentTypeNamesCStr[m_addComponentListBoxIndex]);
+                        m_showAddComponentMenu = false;
+                        m_addComponentListBoxIndex = 0;
+                    }
+
+                    /*for (const std::string& componentTypeName : componentTypeNames)
                     {
                         if (ImGui::MenuItem(componentTypeName.c_str()))
                         {
@@ -104,7 +118,7 @@ namespace Insight
                             m_showAddComponentMenu = false;
                             break;
                         }
-                    }
+                    }*/
                     ImGui::EndPopup();
                 }
             }
@@ -131,20 +145,20 @@ namespace Insight
             }
             else
             {
-                Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
-                for (const Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
+                Reflect::TypeInfo typeInfo = component->GetTypeInfo();
+                for (const Reflect::MemberInfo& member : typeInfo.GetMemberInfos())
                 {
-                    if (!member->IsValid())
+                    Reflect::TypeInfo memberTypeInfo = Reflect::TypeInfoRegistry::GetTypeInfo(member.GetTypeId());
+                    if (!member.IsValid() || !memberTypeInfo.IsValid())
                     {
                         continue;
                     }
 #define IS_EDW_DRAG_DROP 1
 #if IS_EDW_DRAG_DROP
-                    Reflect::ReflectType* memberType = member->GetType();
-                    if (memberType->IsDerivedFrom<ECS::Component>()
-                        && memberType->GetValueType() == Reflect::EReflectValueType::Pointer)
+                    if (memberTypeInfo.IsDerivedFrom<ECS::Component>()
+                        && member.GetValueType() == Reflect::EReflectValueType::Pointer)
                     {
-                        void* memberPointer = member->GetData();
+                        void* memberPointer = member.GetMemberPointer();
                         ECS::Component** memberComponentPointer = reinterpret_cast<ECS::Component**>(memberPointer);
                         ECS::Component*& memberComponent = *memberComponentPointer;
                         std::string text = "None";
@@ -181,10 +195,10 @@ namespace Insight
                     }
 #endif
 
-                    const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member->GetType()->GetTypeNameWithNamespace().c_str());
+                    const ITypeDrawer* typeDrawer = TypeDrawerRegister::Instance().GetDrawer(member.GetType().GetTypeName().data());
                     if (typeDrawer)
                     {
-                        typeDrawer->Draw(member->GetData());
+                        typeDrawer->Draw(member.GetMemberPointer());
                     }
                 }
             }

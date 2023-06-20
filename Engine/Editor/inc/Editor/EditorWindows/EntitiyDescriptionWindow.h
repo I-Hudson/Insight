@@ -38,6 +38,7 @@ namespace Insight
 
         private:
             bool m_showAddComponentMenu = false;
+            int m_addComponentListBoxIndex = 0;
         };
     }
 }

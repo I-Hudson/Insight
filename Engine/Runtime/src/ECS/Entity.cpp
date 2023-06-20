@@ -108,8 +108,7 @@ namespace Insight
 			{
 				return itr->second();
 			}
-			IS_CORE_ERROR("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
-			FAIL_ASSERT();
+			IS_CORE_WARN("[ComponentRegistry::CreateComponent] ComponentType: '{0}', is unregistered.", component_type);
 			return nullptr;
 		}
 
@@ -121,6 +120,15 @@ namespace Insight
 			{
 				componentTypeNames.push_back(TypeName);
 			}
+
+			// Sort the string in ascending order. Make strings all lower case to not worry about ASCII uppercase vs lowercase.
+			std::sort(componentTypeNames.begin(), componentTypeNames.end(), [](std::string a, std::string b)
+				{
+					ToLowwer(a);
+					ToLowwer(b);
+					return a < b;
+				});
+
 			return componentTypeNames;
 		}
 
@@ -225,9 +233,12 @@ namespace Insight
 			if (component == nullptr)
 			{
 				component = ComponentRegistry::CreateComponent(component_type);
-				component->m_ownerEntity = this;
-				component->OnCreate();
-				m_components.push_back(component);
+				if (component)
+				{
+					component->m_ownerEntity = this;
+					component->OnCreate();
+					m_components.push_back(component);
+				}
 			}
 			return component;
 		}

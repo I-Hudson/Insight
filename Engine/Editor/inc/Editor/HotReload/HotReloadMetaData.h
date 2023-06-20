@@ -22,7 +22,7 @@ namespace Insight::Editor
         std::vector<std::string> ComponentNames = { };
         std::vector<std::string> TypeDrawerNames = { };
 
-        std::vector<Reflect::ReflectTypeInfo> EditorWindowTypeInfos = { };
-        std::vector<Reflect::ReflectTypeInfo> ComponentTypeInfos = { };
+        std::vector<Reflect::TypeInfo> EditorWindowTypeInfos = { };
+        std::vector<Reflect::TypeInfo> ComponentTypeInfos = { };
     };
 }

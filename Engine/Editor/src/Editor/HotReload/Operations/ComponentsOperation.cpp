@@ -101,18 +101,18 @@ namespace Insight::Editor
                         ComponentsOperation::ComponentReference& componentReference = entityReference.AddComponentToRemove(component);
                     }
 
-                    Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
-                    for (const Reflect::ReflectTypeMember* member : typeInfo.GetAllMembers())
+                    Reflect::TypeInfo typeInfo = component->GetTypeInfo();
+                    for (const Reflect::MemberInfo& member : typeInfo.GetMemberInfos())
                     {
                         // Check if this member is of a project dll type, if it is and is visible to the editor then it could being set 
                         // in the editor so will need relinking after the dll has been reloaded.
-                        if (Algorithm::VectorContains(metaData.ComponentNames, member->GetType()->GetTypeName())
-                            && member->HasFlag("EditorVisible"))
+                        if (Algorithm::VectorContains(metaData.ComponentNames, member.GetTypeId().GetTypeName())
+                            && member.HasFlag("EditorVisible"))
                         {
-                            if (member->GetType()->GetValueType() != Reflect::EReflectValueType::Pointer)
+                            if (member.GetValueType() != Reflect::EReflectValueType::Pointer)
                             {
                                 IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
-                                    , typeInfo.GetInfo()->GetTypeName(), member->GetName().data(), (int)member->GetType()->GetValueType());
+                                    , typeInfo.GetTypeId().GetTypeName().data(), member.GetMemberName().data(), (int)member.GetType().GetTypeName().data());
                                 continue;
                             }
 
@@ -126,7 +126,7 @@ namespace Insight::Editor
                             Then we can get the value of the member's pointer. This needs looking at in the Reflect library.
                             The Reflect library needs some kind of GetPointer function to handle this.
                             */
-                            void* memberPointer = member->GetData();
+                            void* memberPointer = member.GetMemberPointer();
                             ECS::Component** memberComponentPointer = reinterpret_cast<ECS::Component**>(memberPointer);
                             ECS::Component*& memberComponent = *memberComponentPointer;
 

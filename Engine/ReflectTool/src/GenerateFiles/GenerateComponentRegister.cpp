@@ -103,10 +103,10 @@ namespace InsightReflectTool
     {
         Utils::WriteIncludeLibraryFile(file, "Reflect.h");
 
-        Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::ReflectTypeInfo>", ComponentRegister::c_GetAllComponentTypeInfos, {}, [&](std::fstream& file)
+        Utils::WriteSourceFunctionDefinition(file, "std::vector<Reflect::TypeInfo>", ComponentRegister::c_GetAllComponentTypeInfos, {}, [&](std::fstream& file)
             {
                 TAB_N(3);
-                file << "std::vector<Reflect::ReflectTypeInfo> typeInfos;" << NEW_LINE;
+                file << "std::vector<Reflect::TypeInfo> typeInfos;" << NEW_LINE;
                 for (const Reflect::Parser::ReflectContainerData& reflectData : componentClasses)
                 {
                     TAB_N(3);

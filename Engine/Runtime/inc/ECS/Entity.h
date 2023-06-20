@@ -342,11 +342,11 @@ namespace Insight
 		{
 			void operator()(ISerialiser* serialiser, ECS::Component* component) const
 			{
-				Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
-				std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
-				Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
+				Reflect::TypeInfo typeInfo = component->GetTypeInfo();
+				std::vector<Reflect::MemberInfo> members = typeInfo.GetMemberInfosWithFlag("EditorVisible");
+				Algorithm::VectorRemoveAllIf(members, [](const Reflect::MemberInfo& member)
 				{
-					return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
+					return member.GetValueType() != Reflect::EReflectValueType::Value;
 				});
 
 				if (serialiser->IsReadMode())
@@ -361,22 +361,16 @@ namespace Insight
 						std::vector<Byte> data;
 						serialiser->Read("Data", data);
 
-						Reflect::ReflectTypeInfo typeInfo = component->GetTypeInfo();
-						std::vector<Reflect::ReflectTypeMember*> members = typeInfo.GetAllMembersWithFlags({ "EditorVisible" });
-						Algorithm::VectorRemoveAllIf(members, [](const Reflect::ReflectTypeMember* member)
-						{
-							return member->GetType()->GetValueType() != Reflect::EReflectValueType::Value;
-						});
-
-						auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::ReflectTypeMember* member)
+						auto memberIter = Algorithm::VectorFindIf(members, [&propertyName](const Reflect::MemberInfo& member)
 							{
-								return member->GetName() == propertyName;
+								return member.GetMemberName() == propertyName;
 							});
 
 						if (memberIter != members.end())
 						{
-							assert((*memberIter)->GetType()->GetTypeSize() == data.size());
-							Platform::MemCopy((*memberIter)->GetData(), data.data(), data.size());
+							Reflect::MemberInfo& member = (*memberIter);
+							assert(member.GetType().GetTypeSize() == data.size());
+							Platform::MemCopy(member.GetMemberPointer(), data.data(), data.size());
 						}
 					}
 					serialiser->StopArray();
@@ -385,10 +379,10 @@ namespace Insight
 				{
 					u64 dynamicPropertiesSize = members.size();
 					serialiser->StartArray("DynamicProperties", dynamicPropertiesSize);
-					for (const Reflect::ReflectTypeMember* const& member : members)
+					for (const Reflect::MemberInfo& member : members)
 					{
-						serialiser->Write("Name", std::string(member->GetName()));
-						serialiser->Write("Data", member->GetData(), member->GetType()->GetTypeSize());
+						serialiser->Write("Name", std::string(member.GetMemberName()));
+						serialiser->Write("Data", member.GetMemberPointer(), member.GetType().GetTypeSize());
 					}
 					serialiser->StopArray();
 				}
