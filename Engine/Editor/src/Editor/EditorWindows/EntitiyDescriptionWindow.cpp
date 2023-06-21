@@ -119,12 +119,13 @@ namespace Insight
 
                     ImGui::EndPopup();
                 }
-            }
 
-            const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
-            if (inputDevice->WasReleased(Input::MouseButtons::Left))
-            {
-                m_showAddComponentMenu = false;
+                const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+                if (inputDevice->WasReleased(Input::MouseButtons::Left)
+                    && !ImGui::IsItemHovered())
+                {
+                    m_showAddComponentMenu = false;
+                }
             }
 
             if (m_componentContextMenuComponent)
@@ -161,7 +162,7 @@ namespace Insight
                 for (const Reflect::MemberInfo& member : typeInfo.GetMemberInfos())
                 {
                     Reflect::TypeInfo memberTypeInfo = Reflect::TypeInfoRegistry::GetTypeInfo(member.GetTypeId());
-                    if (!member.IsValid() || !memberTypeInfo.IsValid())
+                    if (!member.IsValid())
                     {
                         continue;
                     }

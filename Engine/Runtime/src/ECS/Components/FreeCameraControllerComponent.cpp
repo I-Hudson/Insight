@@ -24,6 +24,8 @@ namespace Insight
 		void FreeCameraControllerComponent::OnBegin()
 		{
 			Entity* ownerEntity = GetOwnerEntity();
+			m_transformComponent = static_cast<TransformComponent*>(ownerEntity->GetComponentByName(TransformComponent::Type_Name));
+			
 			Component* component = ownerEntity->GetComponentByName(CameraComponent::Type_Name);
 			if (!component)
 			{
@@ -38,8 +40,6 @@ namespace Insight
 				return;
 			}
 			m_cameraComponent = cameraComponent;
-
-			m_transformComponent = static_cast<TransformComponent*>(ownerEntity->GetComponentByName(TransformComponent::Type_Name));
 		}
 
 		void FreeCameraControllerComponent::OnUpdate(const float delta_time)
@@ -147,8 +147,12 @@ namespace Insight
 			m_transformComponent->SetTransform(viewMatrix);
 
 			float aspect = (float)Graphics::Window::Instance().GetWidth() / (float)Graphics::Window::Instance().GetHeight();
-			m_cameraComponent->SetAspect(std::max(0.1f, aspect));
-			m_cameraComponent->CreatePerspective(m_cameraComponent->GetFovY(), aspect, m_cameraComponent->GetNearPlane(), m_cameraComponent->GetFarPlane());
+
+			if (m_cameraComponent)
+			{
+				m_cameraComponent->SetAspect(std::max(0.1f, aspect));
+				m_cameraComponent->CreatePerspective(m_cameraComponent->GetFovY(), aspect, m_cameraComponent->GetNearPlane(), m_cameraComponent->GetFarPlane());
+			}
 		}
 	}
 }

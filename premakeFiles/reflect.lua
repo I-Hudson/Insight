@@ -1,5 +1,5 @@
 project "Reflect"  
-    kind "StaticLib"   
+    kind "SharedLib"   
     language "C++"
     cppdialect "C++17"
     configurations { "Debug", "Release" }
@@ -14,6 +14,7 @@ project "Reflect"
     defines
     {
         "REFLECT_TYPE_INFO_ENABLED",
+        "REFLECT_DLL_EXPORT",
     }
 
     files 
@@ -38,6 +39,7 @@ project "Reflect"
          postbuildcommands
          {
              "{COPY} \"%{cfg.targetdir}/Reflectd.lib\" \"" .. output_deps .. "/lib/\"",
+             "{COPY} \"%{cfg.targetdir}/Reflectd.dll\" \"" .. output_deps .. "/dll/\"",
              "{COPY} \"%{cfg.targetdir}/Reflectd.pdb\" \"" .. output_deps .. "/lib/\"",
          }
 
@@ -49,5 +51,6 @@ project "Reflect"
         postbuildcommands
         {
             "{COPY} \"%{cfg.targetdir}/Reflect.lib\" \"" .. output_deps .. "/lib/\"",
+            "{COPY} \"%{cfg.targetdir}/Reflect.dll\" \"" .. output_deps .. "/dll/\"",
             "{COPY} \"%{cfg.targetdir}/Reflect.pdb\" \"" .. output_deps .. "/lib/\"",
         }

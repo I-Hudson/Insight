@@ -50,6 +50,8 @@ project "InsightReflectTool"
         {
             "Reflectd.lib",
         }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflectd.dll\" \"%{cfg.targetdir}\"" }
+
 
     filter "configurations:Release"
     buildoptions "/MD"
@@ -64,6 +66,8 @@ project "InsightReflectTool"
         {
             "Reflect.lib",
         }
+        prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflect.dll\" \"%{cfg.targetdir}\"" }
+
 
     filter "system:Windows"
     	system "windows"

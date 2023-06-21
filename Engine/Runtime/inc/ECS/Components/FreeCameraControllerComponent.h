@@ -3,6 +3,8 @@
 #include "Runtime/Defines.h"
 #include "ECS/Entity.h"
 
+#include "ECS/Components/CameraComponent.h"
+
 #include <glm/ext/matrix_float4x4.hpp>
 
 #include "Generated/FreeCameraControllerComponent_reflect_generated.h"
@@ -11,7 +13,6 @@ namespace Insight
 {
 	namespace ECS
 	{
-		class CameraComponent;
 		class TransformComponent;
 
 		REFLECT_CLASS()
@@ -28,6 +29,7 @@ namespace Insight
 			virtual void OnUpdate(const float delta_time) override;
 
 		private:
+			REFLECT_PROPERTY(EditorVisible)
 			CameraComponent* m_cameraComponent = nullptr;
 			TransformComponent* m_transformComponent = nullptr;
 
