@@ -201,7 +201,28 @@ namespace Insight
                                 ECS::Entity* entity = Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(entityGuid);
                                 ECS::Component* component = entity->GetComponentByGuid(componentGuid);
 
-                                memberComponent = component;
+                                Reflect::TypeInfo componentTypeInfo;
+                                bool compatibleWithTarget = false;
+
+                                if (component)
+                                {
+                                    componentTypeInfo = component->GetTypeInfo();
+                                    compatibleWithTarget = componentTypeInfo.GetType() == memberTypeInfo.GetType();
+                                }
+
+                                if (compatibleWithTarget)
+                                {
+                                    memberComponent = component;
+                                }
+                                else if (component)
+                                {
+                                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Target type is '{}', drag object type is '{}'.", 
+                                        memberTypeInfo.GetTypeId().GetTypeName(), componentTypeInfo.GetTypeId().GetTypeName());
+                                }
+                                else
+                                {
+                                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Component from GUID '{}' is null.", componentGuid.ToString());
+                                }
                             }
                             ImGui::EndDragDropTarget();
                         }
