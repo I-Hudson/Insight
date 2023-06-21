@@ -89,7 +89,6 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Swap");
-					RenderStats::Instance().Draw();
 					m_renderGraph->Swap();
 				}
 
@@ -100,12 +99,9 @@ namespace Insight
 			}
 			else
 			{
-				RenderStats::Instance().Draw();
 				m_renderGraph->Swap();
 				RenderUpdateLoop();
 			}
-
-			GPUProfiler::Instance().GetFrameData().Draw();
 		}
 
 		bool RenderContext::IsRenderThread() const
@@ -201,14 +197,19 @@ namespace Insight
 				io.Fonts->SetTexID(texture_id);
 			}
 
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
-			ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+			if (m_imguiStartNewFrame)
+			{
+				m_imguiStartNewFrame = false;
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
+				ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+			}
 		}
 
 		void RenderContext::ImGuiRender()
 		{
 			IS_PROFILE_FUNCTION();
+			m_imguiStartNewFrame = true;
 			ImGui::Render();
 			ImGui::UpdatePlatformWindows();
 		}

@@ -64,7 +64,7 @@ namespace Insight
 
 		void GraphicsSystem::Update()
 		{
-			m_window.Update();
+			//m_window.Update();
 		}
 
 		void GraphicsSystem::Render()

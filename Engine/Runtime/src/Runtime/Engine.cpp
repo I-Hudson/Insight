@@ -104,6 +104,8 @@ namespace Insight
 
 			splashScreen.Destroy();
 
+			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
+
 			return true;
 		}
 
@@ -125,6 +127,11 @@ namespace Insight
 
 				{
 					IS_PROFILE_SCOPE("Game Update");
+
+					Graphics::Window::Instance().Update();
+					Graphics::RenderContext::Instance().ImGuiBeginFrame();
+					GPUProfiler::Instance().GetFrameData().Draw();
+
 
 					{
 						IS_PROFILE_SCOPE("EventSystem");
@@ -165,6 +172,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("Render Update");
 					m_graphicsSystem.CreateRenderFrame();
+					Graphics::RenderStats::Instance().Draw();
 					OnRender();
 					{
 						IS_PROFILE_SCOPE("GraphicsSystem Render");

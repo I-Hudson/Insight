@@ -84,7 +84,7 @@ namespace Insight
 			ImDrawList** drawListPtr = passData.CmdListPtrs.data();
 			passData.ImDrawData.CmdLists = drawListPtr;
 
-			RenderContext::Instance().ImGuiBeginFrame();
+			//RenderContext::Instance().ImGuiBeginFrame();
 
 			struct ImguiPass
 			{

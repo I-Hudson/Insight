@@ -630,7 +630,7 @@ namespace Insight
 				{
 					IS_PROFILE_SCOPE("ImGui NewFrame");
 					ImGui_ImplVulkan_NewFrame();
-					ImGuiBeginFrame();
+					//ImGuiBeginFrame();
 				}
 
 				m_resource_tracker.EndFrame();

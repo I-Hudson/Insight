@@ -309,6 +309,8 @@ namespace Insight
 
 			RHI_Texture* m_font_texture = nullptr;
 
+			bool m_imguiStartNewFrame = true;
+
 			friend class Renderer;
 		};
 	}
