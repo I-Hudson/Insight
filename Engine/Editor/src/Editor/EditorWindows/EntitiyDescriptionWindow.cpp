@@ -7,6 +7,9 @@
 
 #include "World/WorldSystem.h"
 
+#include "Input/InputSystem.h"
+#include "Input/InputDevices/InputDevice_KeyboardMouse.h"
+
 #include "Core/Memory.h"
 #include "Core/StringUtils.h"
 #include "Algorithm/Vector.h"
@@ -114,22 +117,27 @@ namespace Insight
                         m_addComponentListBoxIndex = 0;
                     }
 
-                    /*for (const std::string& componentTypeName : componentTypeNames)
-                    {
-                        if (ImGui::MenuItem(componentTypeName.c_str()))
-                        {
-                            entity->AddComponentByName(componentTypeName);
-                            m_showAddComponentMenu = false;
-                            break;
-                        }
-                    }*/
                     ImGui::EndPopup();
                 }
+            }
+
+            const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+            if (inputDevice->WasReleased(Input::MouseButtons::Left))
+            {
+                m_showAddComponentMenu = false;
+            }
+
+            if (m_componentContextMenuComponent)
+            {
+                entity->RemoveComponent(m_componentContextMenuComponent);
+                m_componentContextMenuComponent = nullptr;
             }
         }
 
         void EntitiyDescriptionWindow::DrawComponent(ECS::Component* component)
         {
+            ImGui::BeginGroup();
+
             ImGui::Text("%s", component->GetTypeName());
             if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
             {
@@ -204,6 +212,46 @@ namespace Insight
                     {
                         typeDrawer->Draw(member.GetMemberPointer());
                     }
+                }
+            }
+
+            ImGui::EndGroup();
+
+            const Input::InputDevice_KeyboardMouse* inputDevice = Input::InputSystem::Instance().GetKeyboardMouseDevice();
+
+            if (inputDevice->WasReleased(Input::MouseButtons::Right)
+                && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+            {
+                    m_componentContextMenuGuid = component->GetGuid();
+            }
+
+            std::string componentContextMenuId = "##ComponentContextMenu";
+            if (m_componentContextMenuGuid.IsValid()
+                && m_componentContextMenuGuid == component->GetGuid())
+            {
+                if (inputDevice->WasReleased(Input::MouseButtons::Left)
+                    && !ImGui::IsItemHovered())
+                {
+                    m_componentContextMenuGuid = Core::GUID::s_InvalidGUID;
+                }
+
+                ImGui::OpenPopup(componentContextMenuId.c_str());
+
+                if (ImGui::BeginPopup(componentContextMenuId.c_str()))
+                {
+                    ImGui::Text(component->GetTypeName());
+                    if (ImGui::MenuItem("Remove Component"))
+                    {
+                        m_componentContextMenuComponent = component;
+                    }
+
+                    if (inputDevice->WasReleased(Input::MouseButtons::Left)
+                        && !ImGui::IsItemHovered())
+                    {
+                        m_componentContextMenuGuid = Core::GUID::s_InvalidGUID;
+                    }
+
+                    ImGui::EndPopup();
                 }
             }
         }

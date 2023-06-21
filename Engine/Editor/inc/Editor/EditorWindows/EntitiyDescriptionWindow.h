@@ -39,6 +39,9 @@ namespace Insight
         private:
             bool m_showAddComponentMenu = false;
             int m_addComponentListBoxIndex = 0;
+
+            Core::GUID m_componentContextMenuGuid = Core::GUID::s_InvalidGUID;
+            ECS::Component* m_componentContextMenuComponent = nullptr;
         };
     }
 }

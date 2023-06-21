@@ -248,7 +248,42 @@ namespace Insight
 			return component;
 		}
 
-		void Entity::RemoveComponentByName(std::string_view component_type)
+		void Entity::RemoveComponent(const Component* component)
+		{
+			if (!component)
+			{
+				return;
+			}
+			RemoveComponent(component->GetGuid());
+		}
+
+		void Entity::RemoveComponent(const Core::GUID& guid)
+		{
+			RPtr<Component> componentToRemove;
+			u32 index = 0;
+			for (RPtr<Component>& component : m_components)
+			{
+				if (component->m_removeable
+					&& component->GetGuid() == guid)
+				{
+					componentToRemove = std::move(component);
+					m_components.erase(m_components.begin() + index);
+					break;
+				}
+				++index;
+			}
+
+			if (!componentToRemove.IsValid())
+			{
+				IS_CORE_WARN("[Entity::RemoveComponentByGuid] Trying to remove a component which doesn't exists.");
+				return;
+			}
+
+			componentToRemove->OnDestroy();
+			componentToRemove.Reset();
+		}
+
+		void Entity::RemoveComponent(std::string_view component_type)
 		{
 			u32 index = 0;
 			for (const RPtr<Component>& component : m_components)

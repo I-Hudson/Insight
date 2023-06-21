@@ -192,7 +192,10 @@ namespace Insight
 			Ptr<Entity> GetChild(u32 index) const;
 
 			Component* AddComponentByName(std::string_view component_type);
-			void RemoveComponentByName(std::string_view component_type);
+
+			void RemoveComponent(const Component* component);
+			void RemoveComponent(const Core::GUID& guid);
+			void RemoveComponent(std::string_view component_type);
 
 			bool HasComponentByName(std::string_view component_type) const;
 			template<typename T>

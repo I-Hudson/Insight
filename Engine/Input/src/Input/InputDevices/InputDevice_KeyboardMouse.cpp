@@ -249,7 +249,7 @@ namespace Insight
 
 		bool InputDevice_KeyboardMouse::WasReleased(MouseButtons buttonIdx) const
 		{
-			return m_mouse.WasPressed(static_cast<u32>(buttonIdx));
+			return m_mouse.WasReleased(static_cast<u32>(buttonIdx));
 		}
 
 		bool InputDevice_KeyboardMouse::WasHeld(MouseButtons buttonIdx) const

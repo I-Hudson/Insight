@@ -154,7 +154,7 @@ namespace Insight::Editor
 
             for (const auto& [componentGuid, component] : entity.ComponentsToRemove)
             {
-                ecsEntity->RemoveComponentByName(component.TypeName);
+                ecsEntity->RemoveComponent(component.TypeName);
             }
         }
     }
