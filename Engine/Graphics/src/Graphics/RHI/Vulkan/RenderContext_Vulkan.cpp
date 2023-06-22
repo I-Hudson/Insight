@@ -474,9 +474,9 @@ namespace Insight
 				init_info.Allocator = nullptr;
 				init_info.CheckVkResultFn = [](VkResult error)
 				{
-					if (error != 0)
+					if (error != VK_SUCCESS)
 					{
-						IS_CORE_ERROR("[IMGUI] Error: {}", error);
+						IS_CORE_ERROR("[IMGUI] Error: {}", static_cast<u32>(error));
 					}
 				};
 				ImGui_ImplVulkan_Init(&init_info, static_cast<VkRenderPass>(renderpass.Resource));

@@ -1,3 +1,8 @@
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image.h>
+#include <stb_image_write.h>
+
 #include "Graphics/RHI/RHI_Texture.h"
 
 #include "Graphics/RHI/Vulkan/RHI_Texture_Vulkan.h"
@@ -7,13 +12,9 @@
 
 #include <filesystem>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image.h"
-#include "stb_image_write.h"
 
 #define RHI_TEXTURE_DEFER_ENABLED
-#pragma optimize("", off)
+
 namespace Insight
 {
 	namespace Graphics
