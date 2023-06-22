@@ -4,6 +4,7 @@
 
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
 #include "Editor/TypeDrawers/ITypeDrawer.h"
+#include "Editor/EditorGUI.h"
 
 #include "World/WorldSystem.h"
 
@@ -140,14 +141,11 @@ namespace Insight
             ImGui::BeginGroup();
 
             ImGui::Text("%s", component->GetTypeName());
-            if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-            {
-                std::string entityGuid = component->GetOwnerEntity()->GetGUID().ToString();
-                std::string componentGuid = component->GetGuid().ToString();
-                std::string payloadData = entityGuid + "::" + componentGuid;
-                ImGui::SetDragDropPayload("EDW_COMPONENT", payloadData.c_str(), payloadData.size());
-                ImGui::EndDragDropSource();
-            }
+            std::string entityGuid = component->GetOwnerEntity()->GetGUID().ToString();
+            std::string componentGuid = component->GetGuid().ToString();
+            std::string payloadData = entityGuid + "::" + componentGuid;
+            EditorGUI::ObjectFieldSource("EDW_COMPONENT_DRAG_DROP", payloadData.c_str());
+
             ImGui::Text("%s", component->GetGuid().ToString().c_str());
             ImGui::Separator();
 
@@ -180,52 +178,13 @@ namespace Insight
                             text = memberComponent->GetTypeName();
                         }
 
-                        ImGui::InputText("Component", &text);
-                        if (ImGui::BeginDragDropTarget())
+                        std::string inputText;
+                        if (memberComponent)
                         {
-                            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EDW_COMPONENT");
-                            if (payload)
-                            {
-                                std::string payloadDataString = static_cast<const char*>(payload->Data);
-                                payloadDataString.resize(payload->DataSize);
-
-                                std::string entityGuidString = payloadDataString.substr(0, payloadDataString.find("::"));
-                                std::string componentGuidString = payloadDataString.substr(payloadDataString.find("::") + 2);
-
-                                Core::GUID entityGuid;
-                                entityGuid.StringToGuid(entityGuidString);
-
-                                Core::GUID componentGuid;
-                                componentGuid.StringToGuid(componentGuidString);
-
-                                ECS::Entity* entity = Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(entityGuid);
-                                ECS::Component* component = entity->GetComponentByGuid(componentGuid);
-
-                                Reflect::TypeInfo componentTypeInfo;
-                                bool compatibleWithTarget = false;
-
-                                if (component)
-                                {
-                                    componentTypeInfo = component->GetTypeInfo();
-                                    compatibleWithTarget = componentTypeInfo.GetType() == memberTypeInfo.GetType();
-                                }
-
-                                if (compatibleWithTarget)
-                                {
-                                    memberComponent = component;
-                                }
-                                else if (component)
-                                {
-                                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Target type is '{}', drag object type is '{}'.", 
-                                        memberTypeInfo.GetTypeId().GetTypeName(), componentTypeInfo.GetTypeId().GetTypeName());
-                                }
-                                else
-                                {
-                                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Component from GUID '{}' is null.", componentGuid.ToString());
-                                }
-                            }
-                            ImGui::EndDragDropTarget();
+                            inputText = member.GetType().GetPrettyTypeName();
                         }
+                        ImGui::InputText(member.GetMemberName().data(), &inputText, ImGuiInputTextFlags_ReadOnly);
+                        EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", member.GetMemberName().data(), member.GetType(), memberComponent);
                     }
 #endif
 
