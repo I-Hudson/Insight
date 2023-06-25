@@ -64,3 +64,6 @@
 [submodule "vendor/NVTX"]
 	path = vendor/NVTX
 	url = https://github.com/NVIDIA/NVTX
+[submodule "vendor/zip"]
+	path = vendor/zip
+	url = https://github.com/kuba--/zip.git

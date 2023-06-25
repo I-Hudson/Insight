@@ -24,6 +24,10 @@ workspace "Dependencies"
         "GLM_FORCE_SWIZZLE",
     }
 
+    filter "system:Windows"
+        system "windows"
+        toolset("msc-v143")
+
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 outputdir_target = "../bin/" .. outputdir
 outputdir_obj = "../bin-int/" .. outputdir
@@ -53,4 +57,5 @@ group "Dependices"
         include "../../premakeFiles/lz4.lua"
         include "../../premakeFiles/splash.lua"
         include "../../premakeFiles/reflect.lua"
+        include "../../premakeFiles/zip.lua"
 
