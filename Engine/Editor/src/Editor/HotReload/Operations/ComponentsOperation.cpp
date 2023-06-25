@@ -107,12 +107,12 @@ namespace Insight::Editor
                         // Check if this member is of a project dll type, if it is and is visible to the editor then it could being set 
                         // in the editor so will need relinking after the dll has been reloaded.
                         if (Algorithm::VectorContains(metaData.ComponentNames, member.GetTypeId().GetTypeName())
-                            && member.HasFlag("EditorVisible"))
+                            && member.HasFlag(EditorVisible))
                         {
                             if (member.GetValueType() != Reflect::EReflectValueType::Pointer)
                             {
                                 IS_CORE_WARN("[ComponentsOperation::FindAllComponents] Member '{0}::{1}' is value type '{2}'. Linking only works with pointers."
-                                    , typeInfo.GetTypeId().GetTypeName().data(), member.GetMemberName().data(), (int)member.GetType().GetTypeName().data());
+                                    , typeInfo.GetTypeId().GetTypeName().data(), member.GetMemberName().data(), member.GetType().GetTypeName().data());
                                 continue;
                             }
 
