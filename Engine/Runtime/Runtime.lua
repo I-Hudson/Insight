@@ -37,6 +37,7 @@ project "Insight_Runtime"
         "%{IncludeDirs.stb_image}",
         "%{IncludeDirs.splash}",
         "%{IncludeDirs.qoi}",
+        "%{IncludeDirs.zip}",
         
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",

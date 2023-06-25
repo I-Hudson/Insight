@@ -47,6 +47,7 @@ project "InsightStandalone"
         "%{IncludeDirs.lz4}",
         "%{IncludeDirs.qoi}",
         "%{IncludeDirs.reflect}",
+        "%{IncludeDirs.zip}",
 
         "%{IncludeDirs.assimp}",
         "%{IncludeDirs.assimp}/../build/include",

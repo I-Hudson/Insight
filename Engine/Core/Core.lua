@@ -25,6 +25,7 @@ project "Insight_Core"
         "%{IncludeDirs.xxHash}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.lz4}",
+        "%{IncludeDirs.zip}",
     }
 
     files 

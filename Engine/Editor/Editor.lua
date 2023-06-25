@@ -42,6 +42,7 @@ project "Insight_Editor"
         "%{IncludeDirs.imgui}",
         "%{IncludeDirs.imgui_string}",
         "%{IncludeDirs.reflect}",
+        "%{IncludeDirs.zip}",
     }
 
     files 

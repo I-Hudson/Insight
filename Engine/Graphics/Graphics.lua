@@ -36,6 +36,7 @@ project "Insight_Graphics"
         "%{IncludeDirs.glfw}",
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.zip}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.vma}",
         "%{IncludeDirs.glslang}win_debug/inc",
