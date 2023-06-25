@@ -9,6 +9,7 @@
 #include "Serialisation/ISerialisable.h"
 
 #include <vector>
+#include <assert.h>
 
 namespace Insight
 {
@@ -173,6 +174,11 @@ namespace Insight
         struct SerialiserObject
         {
             void Serialise(ISerialiser* serialiser, T& object)
+            {
+                assert(false);
+            }
+
+            void Deserialise(ISerialiser* serialiser, T& object)
             {
                 assert(false);
             }

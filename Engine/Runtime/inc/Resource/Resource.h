@@ -166,9 +166,6 @@ namespace Insight
 			/// @brief Convert a resource to the engine format version.
 			virtual ResourceId ConvertToEngineFormat();
 
-		private:
-			IResource* AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id);
-			
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
 			virtual void Load();
@@ -181,6 +178,9 @@ namespace Insight
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();
 
+		private:
+			IResource* AddDependentResource(const std::string& file_path, IResource* resource, ResourceStorageTypes storage_type, ResourceTypeId type_id);
+			
 			/// @brief Save resrouce to disk.
 			virtual void Save(const std::string& file_path);
 
