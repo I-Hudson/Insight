@@ -15,11 +15,11 @@ namespace Insight
     namespace Runtime
     {
         /// @brief A resource pack is an object which is serialised to disk and contains a list of resources from the project.
-        class ResourcePack : public IResource
+        class IS_RUNTIME ResourcePack : public IResource
         {
             REGISTER_RESOURCE(ResourcePack)
         public:
-            ResourcePack(std::string path);
+            ResourcePack(std::string_view path);
             virtual ~ResourcePack() override;
 
             /// @brief Load all resources within this pack.
@@ -64,19 +64,15 @@ namespace Insight
 
     namespace Serialisation
     {
-        struct ResroucePackResources1 { };
+        struct ResroucePack1 { };
         template<>
-        struct ComplexSerialiser<ResroucePackResources1, std::vector<Runtime::IResource*>, Runtime::ResourcePack>
+        struct ComplexSerialiser<ResroucePack1, void, Runtime::ResourcePack>
         {
-            void operator()(ISerialiser* serialiser, std::vector<Runtime::IResource*>& resources, Runtime::ResourcePack* resourcePack)
-            {
-
-            }
+            void operator()(ISerialiser* serialiser, Runtime::ResourcePack* resourcePack) const;
         };
     }
 
     OBJECT_SERIALISER(Runtime::ResourcePack, 1,
-        SERIALISE_BASE(Runtime::IResource, 1, 0)
-        SERIALISE_COMPLEX(Serialisation::ResroucePackResources1, m_resources, 1, 0)
+        SERIALISE_COMPLEX_THIS(Serialisation::ResroucePack1, 1, 0)
     );
 }

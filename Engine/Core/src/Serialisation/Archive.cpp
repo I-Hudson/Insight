@@ -54,13 +54,7 @@ namespace Insight
         if (!IsRead() && !m_filePath.empty())
         {
             // Write to file.
-            std::fstream stream{};
-            stream.open(m_filePath, std::ios::out | std::ios::trunc);
-            if (stream.is_open())
-            {
-                stream.write((const char*)m_data.data(), static_cast<std::streamsize>(m_streamPos));
-                stream.close();
-            }
+            FileSystem::SaveToFile(m_data, m_filePath);
             m_data.clear();
         }
         m_filePath = {};

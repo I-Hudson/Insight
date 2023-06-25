@@ -22,6 +22,8 @@
 #include "ECS/Components/TagComponent.h"
 
 #include "Graphics/SimplygonWrapper.h"
+#include "Resource/ResourcePack.h"
+#include "Resource/ResourceManager.h"
 
 #include "SplashScreen.h"
 
@@ -105,6 +107,15 @@ namespace Insight
 			splashScreen.Destroy();
 
 			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
+
+			Runtime::ResourcePack resoucePack("TestPack");
+
+			auto resrouceId = Runtime::ResourceId("E://User//Documents//SourceControl//Github//C++Porjects//Insight//DemoProject//Content//Textures//Christmas_Cute_Roadhog.png"
+				, Runtime::Texture2D::GetStaticResourceTypeId());
+			resoucePack.AddResource(Runtime::ResourceManager::LoadSync(resrouceId).Get());
+
+			Serialisation::JsonSerialiser packSerialiser(false);
+			resoucePack.Serialise(&packSerialiser);
 
 			return true;
 		}

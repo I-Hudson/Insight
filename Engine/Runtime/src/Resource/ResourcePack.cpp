@@ -1,11 +1,13 @@
 #include "Resource/ResourcePack.h"
+#include "Resource/ResourcePack.inl"
+
 #include "Resource/ResourceManager.h"
 
 #include "Algorithm/Vector.h"
 
 namespace Insight::Runtime
 {
-    ResourcePack::ResourcePack(std::string path)
+    ResourcePack::ResourcePack(std::string_view path)
         : IResource(std::move(path))
     {
     }

@@ -6,6 +6,7 @@
 #include "Resource/Mesh.h"
 #include "Resource/Model.h"
 #include "Resource/Texture2D.h"
+#include "Resource/ResourcePack.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "Algorithm/Vector.h"
@@ -35,6 +36,7 @@ namespace Insight
             ResourceRegister::RegisterResource<Mesh>();
             ResourceRegister::RegisterResource<Model>();
             ResourceRegister::RegisterResource<Texture2D>();
+            ResourceRegister::RegisterResource<ResourcePack>();
         }
 
         void ResourceDatabase::Shutdown()

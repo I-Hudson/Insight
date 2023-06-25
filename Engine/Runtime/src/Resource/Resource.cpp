@@ -89,7 +89,11 @@ namespace Insight
 		std::string IResource::GetFileName() const
 		{
 			//std::lock_guard lock(m_mutex);
-			return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
+			if (m_file_path.find_last_of('/') != std::string::npos)
+			{
+				return m_file_path.substr(m_file_path.find_last_of('/'), m_file_path.find('.') - m_file_path.find_last_of('/'));
+			}
+			return m_file_path;
 		}
 
 		EResoruceStates IResource::GetResourceState() const
