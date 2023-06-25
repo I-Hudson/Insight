@@ -87,6 +87,8 @@ project "Insight_Graphics"
         "GLFW.lib",
         "glm.lib",
         "imgui.lib",
+        "zip.lib",
+
         "vulkan-1.lib",
         "D3d12.lib",
         "DXGI.lib",

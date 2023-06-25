@@ -40,6 +40,7 @@ project "Insight_Core"
     {
         "imgui.lib",
         "glm.lib",
+        "zip.lib",
     }
     if (profileTool == "pix") then
         links

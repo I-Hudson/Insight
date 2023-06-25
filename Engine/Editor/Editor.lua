@@ -68,7 +68,9 @@ project "Insight_Editor"
 
         "glm.lib",
         "imgui.lib",
+        "zip.lib",
     }
+    
     if (profileTool == "pix") then
         links
         {

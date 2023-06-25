@@ -73,6 +73,7 @@ project "Insight_Runtime"
         
         "glm.lib",
         "imgui.lib",
+        "zip.lib",
         "meshoptimizer.lib",
     }
     if (profileTool == "pix") then
