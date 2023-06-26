@@ -76,7 +76,9 @@ namespace Insight
             void SetVersion(u32 currentVersion);
             u32 GetVersion() const;
             SerialisationTypes GetType() const;
+            
             bool IsReadMode() const;
+            virtual bool IsEmpty() const = 0;
 
             void Write(std::string_view tag, const char* string);
 

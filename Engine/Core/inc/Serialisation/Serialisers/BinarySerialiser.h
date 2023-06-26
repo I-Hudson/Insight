@@ -39,6 +39,8 @@ namespace Insight
             BinarySerialiser(bool isReadMode);
             virtual ~BinarySerialiser() override;
 
+            virtual bool IsEmpty() const override;
+
             virtual bool Deserialise(std::vector<u8> data) override;
             virtual std::vector<Byte> GetSerialisedData() override;
 

@@ -23,6 +23,11 @@ namespace Insight
             m_writer = {};
         }
 
+        bool JsonSerialiser::IsEmpty() const
+        {
+            return m_reader.Size() <= 1 || m_writer.Size() <= 1;
+        }
+
         bool JsonSerialiser::Deserialise(std::vector<u8> data)
         {
             m_reader = {};

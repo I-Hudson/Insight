@@ -19,8 +19,9 @@ namespace Insight::Serialisation
         }
         else
         {
+            Serialisation::JsonSerialiser jsonSerialiser(false);
             SerialiserObject<Runtime::IResource> iResrouceObjectSerialiser;
-            iResrouceObjectSerialiser.Serialise(serialiser, *resourcePack);
+            iResrouceObjectSerialiser.Serialise(&jsonSerialiser, *resourcePack);
 
             const std::vector<Runtime::IResource*> resources = resourcePack->m_resources;
 
@@ -31,7 +32,7 @@ namespace Insight::Serialisation
             std::string metaFilePath = projectInfo.GetIntermediatePath() + "/ResourcePacks/" + resourcePack->GetFileName() + ".meta";
             
             Archive metaFile(metaFilePath, ArchiveModes::Write);
-            metaFile.Write(serialiser->GetSerialisedData());
+            metaFile.Write(jsonSerialiser.GetSerialisedData());
             metaFile.Close();
 
             filePaths.push_back(metaFilePath);

@@ -104,6 +104,11 @@ namespace Insight
             m_head.Clear();
         }
 
+        bool BinarySerialiser::IsEmpty() const
+        {
+            return m_head.Size <= 8;
+        }
+
         bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
             if (!ReadType(data))
