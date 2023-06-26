@@ -197,7 +197,7 @@ namespace Insight
 		ResourceTypeId IResource::GetResourceTypeId() const
 		{
 			FAIL_ASSERT_MSG("[Resource::GetResourceType] Resource is missing 'REGISTER_RESOURCE' marco.");
-			return ResourceTypeId("Unknown");
+			return ResourceTypeId();
 		}
 
 		const char* IResource::GetResourceFileExtension() const

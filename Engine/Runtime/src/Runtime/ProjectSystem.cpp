@@ -148,6 +148,11 @@ namespace Insight
             return true;
         }
 
+        void ProjectSystem::SaveProject()
+        {
+            Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectSaveEvent>(m_projectInfo.ProjectPath));
+        }
+
         const ProjectInfo& ProjectSystem::GetProjectInfo() const
         {
             ASSERT(IsProjectOpen());

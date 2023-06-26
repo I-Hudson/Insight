@@ -8,7 +8,7 @@ namespace Insight
     namespace Runtime
     {
         ResourceId::ResourceId()
-            : m_typeId("")
+            : m_typeId(ResourceTypeId("", ""))
         { }
 
         ResourceId::ResourceId(std::string_view path, ResourceTypeId typeId)
@@ -29,7 +29,7 @@ namespace Insight
             //, m_id(other.m_id)
         {
             other.m_path = "";
-            other.m_typeId = "";
+            other.m_typeId = {};
             //other.m_id = 0;
         }
 
@@ -86,7 +86,7 @@ namespace Insight
             //m_id = other.m_id;
 
             other.m_path = "";
-            other.m_typeId = "";
+            other.m_typeId = {};
             //other.m_id = 0;
             return *this;
         }

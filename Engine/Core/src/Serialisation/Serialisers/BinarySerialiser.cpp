@@ -106,7 +106,10 @@ namespace Insight
 
         bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
-            ReadType(data);
+            if (!ReadType(data))
+            {
+                return false;
+            }
             m_head.Deserialise(data);
             return true;
         }

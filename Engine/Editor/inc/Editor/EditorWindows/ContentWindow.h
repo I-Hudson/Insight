@@ -3,6 +3,7 @@
 #include "Editor/EditorWindows/IEditorWindow.h"
 
 #include "Graphics/RHI/RHI_Texture.h"
+#include "Resource/ResourceTypeId.h"
 
 #include "Core/Timer.h"
 
@@ -53,6 +54,7 @@ namespace Insight
             void BottomBar();
 
             void ImportResource();
+            void CreateNewResourceWindow();
 
             void SplitDirectory();
             void SetDirectoryFromParent(u32 parentIndex);
@@ -73,6 +75,9 @@ namespace Insight
             int m_resourceTypeToLoadIndex = 0;
             bool m_showImportWindow = false;
             bool m_convertResourceToEngineFormat = false;
+
+            Runtime::ResourceTypeId m_createResourceSelectedTypeId;
+            bool m_showCreateResourceWindow = false;
         };
     }
 }

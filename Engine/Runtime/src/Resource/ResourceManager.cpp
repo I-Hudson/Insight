@@ -132,7 +132,7 @@ namespace Insight
             }
             else
             {
-                resource = s_database->AddResource(resourceId);
+                resource = s_database->AddResource(resourceId, true);
             }
             return resource;
         }

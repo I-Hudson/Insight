@@ -349,37 +349,31 @@ namespace Insight
         {
             if (resource->IsEngineFormat())
             {
-                Archive metaFile(resource->GetFilePath(), ArchiveModes::Read);
-                IResource::ResourceSerialiserType serialiser(true);
-                ASSERT_MSG(serialiser.Deserialise(metaFile.GetData()), 
-                    "[ResourceDatabase::LoadMetaFileData] Engine format resource is corrupted.");
-                resource->Deserialise(&serialiser);
+                return;
             }
-            else
+
+            std::string metaFilePath = resource->GetFilePath();
+            metaFilePath += c_MetaFileExtension;
+            Archive metaFile(metaFilePath, ArchiveModes::Read);
+            metaFile.Close();
+            if (!metaFile.IsEmpty())
             {
-                std::string metaFilePath = resource->GetFilePath();
-                metaFilePath += c_MetaFileExtension;
-                Archive metaFile(metaFilePath, ArchiveModes::Read);
-                metaFile.Close();
-                if (!metaFile.IsEmpty())
+                Serialisation::JsonSerialiser serialiser(true);
+                if (serialiser.Deserialise(metaFile.GetData()))
                 {
-                    Serialisation::JsonSerialiser serialiser(true);
-                    if (serialiser.Deserialise(metaFile.GetData()))
-                    {
-                        resource->Deserialise(&serialiser);
-                    }
-                    else
-                    {
-                        // Something went wrong when deserialising, so just save the meta file again.
-                        SaveMetaFileData(resource, true);
-                        LoadMetaFileData(resource);
-                    }
+                    resource->Deserialise(&serialiser);
                 }
                 else
                 {
+                    // Something went wrong when deserialising, so just save the meta file again.
                     SaveMetaFileData(resource, true);
                     LoadMetaFileData(resource);
                 }
+            }
+            else
+            {
+                SaveMetaFileData(resource, true);
+                LoadMetaFileData(resource);
             }
         }
 

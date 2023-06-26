@@ -52,7 +52,7 @@ namespace Insight
                     }
                     if (ImGui::MenuItem("Save Project"))
                     {
-                        //Runtime::ProjectSystem::Instance().SaveProject();
+                        Runtime::ProjectSystem::Instance().SaveProject();
                     }
                     if (ImGui::MenuItem("Load Project"))
                     {

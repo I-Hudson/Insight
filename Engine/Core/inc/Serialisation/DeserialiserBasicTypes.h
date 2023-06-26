@@ -28,7 +28,14 @@ namespace Insight
             Core::GUID operator()(InType const& data)
             {
                 Core::GUID result;
-                result.StringToGuid(data);
+                if (!data.empty())
+                {
+                    result.StringToGuid(data);
+                }
+                else
+                {
+                    result.GetNewGUID();
+                }
                 return result;
             }
         };

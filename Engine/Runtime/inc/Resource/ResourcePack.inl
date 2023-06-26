@@ -45,7 +45,8 @@ namespace Insight::Serialisation
                 filePathsCStr.push_back(str.c_str());
             }
 
-            int result = zip_create(resourcePack->GetFileName().c_str(), filePathsCStr.data(), filePathsCStr.size());
+
+            int result = zip_create(resourcePack->GetFilePath().c_str(), filePathsCStr.data(), filePathsCStr.size());
             ASSERT(result == 0);
         }
     }

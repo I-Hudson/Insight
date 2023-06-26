@@ -51,6 +51,11 @@ namespace Insight::Editor
         {
             ImportResource();
         }
+
+        if (m_showCreateResourceWindow)
+        {
+            CreateNewResourceWindow();
+        }
     }
 
     void ContentWindow::Initialise()
@@ -96,6 +101,12 @@ namespace Insight::Editor
         }
 
         ImGui::SameLine();
+
+        if (ImGui::Button("Create Resource"))
+        {
+            m_createResourceSelectedTypeId = {};
+            m_showCreateResourceWindow = true;
+        }
 
         bool contentFolderFound = false;
         std::string currentPath;
@@ -436,6 +447,185 @@ namespace Insight::Editor
             }
         }
         ImGui::End();
+    }
+
+    void ContentWindow::CreateNewResourceWindow()
+    {
+        constexpr ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse
+            | ImGuiWindowFlags_NoDocking
+            | ImGuiWindowFlags_NoResize
+            ;
+
+        const ImGuiIO& io = ImGui::GetIO();
+        ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        ImGui::SetNextWindowFocus();
+
+
+        // Compute some useful stuff
+        const auto window = ImGui::GetCurrentWindowRead();
+        const auto content_width = ImGui::GetContentRegionAvail().x;
+        const auto content_height = ImGui::GetContentRegionAvail().y - 20.0f;
+        ImGuiContext& g = *GImGui;
+        ImGuiStyle& style = ImGui::GetStyle();
+        const float font_height = g.FontSize;
+        const float label_height = font_height;
+        const float text_offset = 3.0f;
+        ImRect rect_button;
+        ImRect rect_label;
+
+        const ImVec2 rowSize = ImVec2(content_width, 128.0f);
+        const ImVec2 thumbnailSize = ImVec2(128.0f, rowSize.y);
+        const ImVec2 labelSize = ImVec2(rowSize.x - thumbnailSize.x, rowSize.y);
+
+        std::vector<Runtime::ResourceTypeId> resourceTypeIds = Runtime::ResourceRegister::GetAllResourceTypeIds();
+        
+        bool windowOpen = true;
+        if (ImGui::Begin("Create new resource", &windowOpen, windowFlags))
+        {
+            for (const Runtime::ResourceTypeId& resourceTypeId : resourceTypeIds)
+            {
+                ImGui::BeginGroup();
+                {
+                    // Compute rectangles for elements that make up an item
+                    {
+                        rect_button = ImRect
+                        (
+                            ImGui::GetCursorScreenPos().x,
+                            ImGui::GetCursorScreenPos().y,
+                            ImGui::GetCursorScreenPos().x + thumbnailSize.x,
+                            ImGui::GetCursorScreenPos().y + thumbnailSize.y
+                        );
+
+                        rect_label = ImRect
+                        (
+                            rect_button.Max.x,
+                            rect_button.Min.y,
+                            rect_button.Max.x + labelSize.x,
+                            rect_button.Max.y
+                        );
+                    }
+
+                    // Drop shadow effect
+                    if (false)
+                    {
+                        static const float shadow_thickness = 2.0f;
+                        ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_BorderShadow];
+                        ImGui::GetWindowDrawList()->AddRectFilled(rect_button.Min, ImVec2(rect_label.Max.x + shadow_thickness, rect_label.Max.y + shadow_thickness), IM_COL32(color.x * 255, color.y * 255, color.z * 255, color.w * 255));
+                    }
+
+                    // THUMBNAIL
+                    {
+                        ImGui::PushID(resourceTypeId.GetTypeName().c_str());
+                        //ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+                        //ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
+
+                        bool pushSelectedStyle = m_createResourceSelectedTypeId == resourceTypeId;
+                        if (pushSelectedStyle)
+                        {
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.35f, 0.0f, 1.0f));
+                        }
+
+                        if (ImGui::Button("##dummy", rowSize))
+                        {
+                            m_createResourceSelectedTypeId = resourceTypeId;
+                        }
+
+                        if (pushSelectedStyle)
+                        {
+                            ImGui::PopStyleColor();
+                        }
+
+                        // Image
+                        {
+                            // Compute thumbnail size
+                            Graphics::RHI_Texture* texture = nullptr;
+                            Runtime::ResourceId textureResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId());
+                            texture = Runtime::ResourceManager::LoadSync(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
+                            ASSERT(texture);
+
+                            ImVec2 image_size_max = thumbnailSize;
+                            ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
+                            ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
+
+                            // Scale the image size to fit the max available size while respecting it's aspect ratio
+                            {
+                                // Clamp width
+                                if (image_size.x != image_size_max.x)
+                                {
+                                    float scale = image_size_max.x / image_size.x;
+                                    image_size.x = image_size_max.x;
+                                    image_size.y = image_size.y * scale;
+                                }
+                                // Clamp height
+                                if (image_size.y != image_size_max.y)
+                                {
+                                    float scale = image_size_max.y / image_size.y;
+                                    image_size.x = image_size.x * scale;
+                                    image_size.y = image_size_max.y;
+                                }
+
+                                image_size_delta.x = image_size_max.x - image_size.x;
+                                image_size_delta.y = image_size_max.y - image_size.y;
+                            }
+
+                            // Position the image within the square border
+                            ImGui::SetCursorScreenPos(ImVec2(rect_button.Min.x + image_size_delta.x * 0.5f, rect_button.Min.y + image_size_delta.y * 0.5f));
+
+                            // Draw the image
+                            ImGui::Image(texture, image_size);
+                        }
+
+                        //ImGui::PopStyleColor(2);
+                        ImGui::PopID();
+                    }
+
+                    // LABEL
+                    {
+                        const std::string label_text = resourceTypeId.GetTypeName();
+                        const ImVec2 label_size = ImGui::CalcTextSize(label_text.c_str(), nullptr, true);
+
+                        // Draw text background
+                        ImGui::GetWindowDrawList()->AddRectFilled(rect_label.Min, rect_label.Max, IM_COL32(51, 51, 51, 190));
+
+                        // Draw text
+                        ImGui::SetCursorScreenPos(ImVec2(rect_label.Min.x + text_offset, rect_label.Min.y + text_offset));
+                        if (label_size.x <= labelSize.x && label_size.y <= labelSize.y)
+                        {
+                            ImGui::TextUnformatted(label_text.c_str());
+                        }
+                        else
+                        {
+                            ImGui::RenderTextClipped(rect_label.Min, rect_label.Max, label_text.c_str(), nullptr, &label_size, ImVec2(0, 0), &rect_label);
+                        }
+                    }
+
+                    ImGui::EndGroup();
+                }
+            }
+
+            if (m_createResourceSelectedTypeId)
+            {
+                if (ImGui::Button("Create"))
+                {
+                    std::string filePath;
+                    PlatformFileDialog fileDialog;
+
+                    std::wstring resourceTypename = Platform::WStringFromString(m_createResourceSelectedTypeId.GetTypeName());
+                    std::wstring extension = Platform::WStringFromString(m_createResourceSelectedTypeId.GetExtension());
+
+                    if (fileDialog.ShowSave(&filePath, { FileDialogFilter(resourceTypename.c_str(), extension.c_str())}))
+                    {
+                        Runtime::ResourceManager::Create(Runtime::ResourceId(filePath, m_createResourceSelectedTypeId));
+                    }
+                }
+            }
+        }
+        ImGui::End();
+
+        if (!windowOpen)
+        {
+            m_showCreateResourceWindow = false;
+        }
     }
 
     void ContentWindow::SplitDirectory()

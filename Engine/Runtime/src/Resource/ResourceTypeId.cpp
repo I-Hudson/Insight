@@ -11,9 +11,9 @@ namespace Insight
 		ResourceTypeId::ResourceTypeId()
 		{ }
 
-		ResourceTypeId::ResourceTypeId(const char* type_name)
+		ResourceTypeId::ResourceTypeId(const char* type_name, const char* extension)
 			: m_type_name(type_name)
-			//, m_hash(std::hash<ResourceTypeId>()(*this))
+			, m_extension(extension)
 		{
 		}
 
@@ -24,10 +24,10 @@ namespace Insight
 			return m_type_name;
 		}
 
-		//u64 ResourceTypeId::GetHash() const
-		//{
-		//	return m_hash;
-		//}
+		std::string ResourceTypeId::GetExtension() const
+		{
+			return m_extension;
+		}
 
 		ResourceTypeId::operator bool() const
 		{
@@ -36,7 +36,6 @@ namespace Insight
 
 		bool ResourceTypeId::operator==(ResourceTypeId const& other) const
 		{
-			//return m_hash == other.m_hash;
 			return m_type_name == other.m_type_name;
 		}
 
@@ -44,17 +43,6 @@ namespace Insight
 		{
 			return !(*this == other);
 		}
-
-
-		//void ResourceRegister::RegisterResource(ResourceTypeId type_id, CreateFunc func)
-		//{
-		//	if (auto itr = m_map.find(type_id); itr != m_map.end())
-		//	{
-		//		IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", type_id.GetTypeName());
-		//		return;
-		//	}
-		//	m_map[type_id] = func;
-		//}
 
 		ResourceTypeId ResourceRegister::GetResourceTypeIdFromExtension(std::string_view fileExtension)
 		{
@@ -70,6 +58,16 @@ namespace Insight
 			}
 			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] No resource with extension '{0}' registered.", fileExtension);
 			return ResourceTypeId();
+		}
+
+		std::vector<ResourceTypeId> ResourceRegister::GetAllResourceTypeIds()
+		{
+			std::vector<ResourceTypeId> typeIds;
+			for (const auto& [typeId, createFunc] : m_map)
+			{
+				typeIds.push_back(typeId);
+			}
+			return typeIds;
 		}
 
 		IResource* ResourceRegister::CreateResource(ResourceTypeId type_id, std::string_view filePath)

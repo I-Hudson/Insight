@@ -24,12 +24,12 @@ namespace Insight
 		{
 		public:
 			ResourceTypeId();
-			ResourceTypeId(const char* type_name);
+			ResourceTypeId(const char* type_name, const char* extension);
 
-			IS_SERIALISABLE_H(ResourceTypeId)
+			IS_SERIALISABLE_H(ResourceTypeId);
 
 			std::string GetTypeName() const;
-			//u64 GetHash() const;
+			std::string GetExtension() const;
 
 			operator bool() const;
 			bool operator==(ResourceTypeId const& other) const;
@@ -37,7 +37,7 @@ namespace Insight
 
 		private:
 			std::string m_type_name;
-			u64 m_hash = 0;
+			std::string m_extension;
 
 			template<typename>
 			friend struct ::Insight::Serialisation::SerialiserObject;
@@ -85,6 +85,8 @@ namespace Insight
 			static ResourceTypeId GetResourceTypeIdFromExtension(std::string_view fileExtension);
 			static ResourceTypeId GetResourceTypeIdFromExtension(const std::string& fileExtension);
 
+			static std::vector<ResourceTypeId> GetAllResourceTypeIds();
+				 
 			static IResource* CreateResource(ResourceTypeId type_id, std::string_view filePath);
 
 		private:
@@ -95,6 +97,6 @@ namespace Insight
 
 	OBJECT_SERIALISER(Runtime::ResourceTypeId, 2,
 		SERIALISE_PROPERTY(std::string, m_type_name, 1, 0)
-		SERIALISE_PROPERTY(u64, m_hash, 1, 2)
+		SERIALISE_PROPERTY_REMOVED(u64, m_hash, 1, 2)
 		);
 }
