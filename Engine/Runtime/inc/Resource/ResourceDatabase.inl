@@ -173,21 +173,6 @@ namespace Insight
                         // Serialise the ResourceId.
                         const_cast<Runtime::ResourceId&>(resourceId).Serialise(serialiser);
                         serialiser->Write(c_Guid, guidSerialiser(resource->GetGuid()));
-
-                        // If the resource is an engine format then save it to disk.
-                        if (resource->IsEngineFormat())
-                        {
-                            Runtime::IResource::ResourceSerialiserType resourceSerialiser(false);
-                            resource->Serialise(&resourceSerialiser);
-
-                            std::vector<Byte> resourceSerialisedData = resourceSerialiser.GetSerialisedData();
-                            if (!resourceSerialiser.IsEmpty())
-                            {
-                                Archive archive(resource->GetFilePath(), ArchiveModes::Write);
-                                archive.Write(resourceSerialisedData);
-                                archive.Close();
-                            }
-                        }
                     }
                 }
                 serialiser->StopArray();

@@ -25,6 +25,8 @@
 #include "Resource/ResourcePack.h"
 #include "Resource/ResourceManager.h"
 
+#include "Serialisation/Archive.h"
+
 #include "SplashScreen.h"
 
 #include "imgui.h"
@@ -114,8 +116,7 @@ namespace Insight
 				, Runtime::Texture2D::GetStaticResourceTypeId());
 			resoucePack.AddResource(Runtime::ResourceManager::LoadSync(resrouceId).Get());
 
-			Serialisation::JsonSerialiser packSerialiser(false);
-			resoucePack.Serialise(&packSerialiser);
+			resoucePack.Save();
 
 			return true;
 		}

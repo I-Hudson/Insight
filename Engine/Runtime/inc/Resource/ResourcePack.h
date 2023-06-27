@@ -22,6 +22,8 @@ namespace Insight
             ResourcePack(std::string_view path);
             virtual ~ResourcePack() override;
 
+            void Save();
+
             /// @brief Load all resources within this pack.
             /// @return bool
             void LoadAllResources();
@@ -73,6 +75,7 @@ namespace Insight
     }
 
     OBJECT_SERIALISER(Runtime::ResourcePack, 1,
+        SERIALISE_BASE(Runtime::IResource, 1, 0)
         SERIALISE_COMPLEX_THIS(Serialisation::ResroucePack1, 1, 0)
     );
 }

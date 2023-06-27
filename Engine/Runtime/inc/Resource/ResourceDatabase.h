@@ -51,6 +51,8 @@ namespace Insight
             u32 GetLoadedResourceCount() const;
             u32 GetLoadingResourceCount() const;
 
+            std::string GetMetaFileForResource(const IResource* resource) const;
+
         private:
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId, bool force);
             void DeleteResource(TObjectOPtr<IResource>& resource);

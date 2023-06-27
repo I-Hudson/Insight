@@ -11,6 +11,8 @@
 #include "Runtime/ProjectSystem.h"
 #include "Algorithm/Vector.h"
 
+#include "Runtime/RuntimeEvents.h"
+
 #include "FileSystem/FileSystem.h"
 #include "Core/Logger.h"
 #include "Serialisation/Archive.h"
@@ -37,6 +39,27 @@ namespace Insight
             ResourceRegister::RegisterResource<Model>();
             ResourceRegister::RegisterResource<Texture2D>();
             ResourceRegister::RegisterResource<ResourcePack>();
+
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Save, [this](const Core::Event& eve)
+                {
+                    ASSERT(Platform::IsMainThread());
+                    std::lock_guard lock(m_mutex);
+                    for (auto& [id, resource] : m_resources)
+                    {
+                        if (resource->IsEngineFormat()
+                            && resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
+                        {
+                            IResource::ResourceSerialiserType serialiser(false);
+                            resource->Serialise(&serialiser);
+                            if (!serialiser.IsEmpty())
+                            {
+                                Archive archive(resource->GetFilePath(), ArchiveModes::Write);
+                                archive.Write(serialiser.GetSerialisedData());
+                                archive.Close();
+                            }
+                        }
+                    }
+                });
         }
 
         void ResourceDatabase::Shutdown()
@@ -54,6 +77,8 @@ namespace Insight
 
             m_resources.clear();
             m_dependentResources.clear();
+
+            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Save);
         }
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
@@ -226,6 +251,13 @@ namespace Insight
                 }
             }
             return count;
+        }
+
+        std::string ResourceDatabase::GetMetaFileForResource(const IResource* resource) const
+        {
+            std::string metaFilePath = resource->GetFilePath();
+            metaFilePath += c_MetaFileExtension;
+            return metaFilePath;
         }
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId, bool force)

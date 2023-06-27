@@ -16,6 +16,11 @@ namespace Insight::Runtime
     {
     }
 
+    void ResourcePack::Save()
+    {
+        Serialise(nullptr);
+    }
+
     void ResourcePack::LoadAllResources()
     {
         for (const IResource* resource : m_resources)

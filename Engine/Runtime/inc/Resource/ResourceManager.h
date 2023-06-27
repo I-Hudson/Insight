@@ -57,6 +57,8 @@ namespace Insight
             static TObjectPtr<IResource> CreateDependentResource(ResourceId const& resourceId);
             static void RemoveDependentResource(ResourceId const& resourceId);
 
+            static std::string GetMetaPath(const IResource* resource);
+
         private:
             static void Update(float const deltaTime);
             static void StartLoading(IResource* resource, bool threading);

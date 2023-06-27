@@ -6,19 +6,34 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <fstream>
 
 namespace Insight
 {
+    enum class FileType
+    {
+        Binary,
+        Text
+    };
+    constexpr const int c_FileTypeToStdIos[] =
+    {
+        std::ios::binary,
+        0
+    };
+
     class IS_CORE FileSystem
     {
     public:
 
         static void CreateFolder(const std::string& path);
 
+        static bool SaveToFile(const Byte* data, u64 dataSize, std::string_view filePath, bool overwrite = false);
         static bool SaveToFile(const std::vector<Byte>& data, std::string_view filePath);
         static bool SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite);
         static bool SaveToFile(const std::string& data, std::string_view filePath);
         static bool SaveToFile(const std::string& data, std::string_view filePath, bool overwrite);
+
+        static std::vector<Byte> ReadFromFile(std::string_view filePath, FileType fileType);
 
         static bool Exists(const std::string& path);
         static bool Exists(std::string_view path);

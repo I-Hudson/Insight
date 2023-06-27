@@ -440,7 +440,7 @@ namespace Insight::Editor
                 }
                 else
                 {
-                    Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, Runtime::Texture2D::GetStaticResourceTypeId()), m_convertResourceToEngineFormat);
+                    Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, Runtime::ResourceTypeId()), m_convertResourceToEngineFormat);
                 }
                 m_importFilePath = "";
                 m_resourceTypeToLoadIndex = 0;

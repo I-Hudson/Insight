@@ -54,7 +54,7 @@ namespace Insight
         if (!IsRead() && !m_filePath.empty())
         {
             // Write to file.
-            FileSystem::SaveToFile(m_data, m_filePath);
+            FileSystem::SaveToFile(m_data, m_filePath, true);
             m_data.clear();
         }
         m_filePath = {};

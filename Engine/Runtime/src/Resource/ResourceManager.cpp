@@ -162,6 +162,18 @@ namespace Insight
         {
             ASSERT(s_database);
 
+            if (!resourceId)
+            {
+                std::string_view extension = FileSystem::GetFileExtension(resourceId.GetPath());
+                resourceId = ResourceId(resourceId.GetPath(), ResourceRegister::GetResourceTypeIdFromExtension(extension));
+            }
+
+            if (!resourceId)
+            {
+                IS_CORE_ERROR("[ResourceManager::LoadSync] Invalid 'ResourceId' was given and no resource Id could be found the file '{}'.", resourceId.GetPath());
+                return nullptr;
+            }
+
             if (convertToEngineFormat)
             {
                 resourceId = ConvertResource(std::move(resourceId));
@@ -541,6 +553,12 @@ namespace Insight
         {
             ASSERT(s_database);
             return s_database->RemoveDependentResource(resourceId);
+        }
+
+        std::string ResourceManager::GetMetaPath(const IResource* resource)
+        {
+            ASSERT(s_database);
+            return s_database->GetMetaFileForResource(resource);
         }
     }
 }

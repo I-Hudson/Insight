@@ -30,7 +30,10 @@ namespace Insight
         {
             ::Insight::Serialisation::PropertySerialiser<TypeSerialiser> propertySerialiser;
             auto SerialisedData = propertySerialiser(data);
-            serialiser->Write(propertyName, SerialisedData);
+            if (serialiser)
+            {
+                serialiser->Write(propertyName, SerialisedData);
+            }
         }
 
         template<typename Type>
@@ -126,7 +129,10 @@ namespace Insight
         {
             ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
             typename ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser>::InType serialisedData;
-            serialiser->Read(propertyName, serialisedData);
+            if (serialiser)
+            {
+                serialiser->Read(propertyName, serialisedData);
+            }
             auto data = propertyDeserialiser(serialisedData);
             return static_cast<T>(data);
         }

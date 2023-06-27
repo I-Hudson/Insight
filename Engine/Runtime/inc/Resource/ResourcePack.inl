@@ -1,7 +1,7 @@
 #include "Resource/ResourcePack.h"
+#include "Resource/ResourceManager.h"
 
-#include "Runtime/ProjectSystem.h"
-#include "Serialisation/Archive.h"
+#include "FileSystem/FileSystem.h"
 
 #include <zip.h>
 
@@ -14,41 +14,57 @@ namespace Insight::Serialisation
         operator()(ISerialiser* serialiser
             , Runtime::ResourcePack* resourcePack) const
     {
-        if (serialiser->IsReadMode())
+        if (serialiser != nullptr)
+        {
+            ASSERT(serialiser->GetType() == SerialisationTypes::Binary);
+        }
+
+        if (serialiser && serialiser->IsReadMode())
         {
         }
         else
         {
-            Serialisation::JsonSerialiser jsonSerialiser(false);
-            SerialiserObject<Runtime::IResource> iResrouceObjectSerialiser;
-            iResrouceObjectSerialiser.Serialise(&jsonSerialiser, *resourcePack);
+            const std::vector<Runtime::IResource*>& resources = resourcePack->m_resources;
 
-            const std::vector<Runtime::IResource*> resources = resourcePack->m_resources;
-
-            std::vector<std::string> filePaths;
-            std::vector<const char*> filePathsCStr;
-
-            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-            std::string metaFilePath = projectInfo.GetIntermediatePath() + "/ResourcePacks/" + resourcePack->GetFileName() + ".meta";
-            
-            Archive metaFile(metaFilePath, ArchiveModes::Write);
-            metaFile.Write(jsonSerialiser.GetSerialisedData());
-            metaFile.Close();
-
-            filePaths.push_back(metaFilePath);
-            for (const Runtime::IResource* res : resources)
+            zip_t* zip = zip_stream_open(NULL, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+            for (Runtime::IResource* resource : resources)
             {
-                filePaths.push_back(res->GetFilePath());
+                if (resource->IsEngineFormat())
+                {
+                    zip_entry_open(zip, resource->GetFilePath().c_str());
+                    ASSERT(zip_entry_fwrite(zip, resource->GetFilePath().c_str()) == 0);
+                    zip_entry_close(zip);
+                }
+                else
+                {
+                    zip_entry_open(zip, resource->GetFilePath().c_str());
+                    ASSERT(zip_entry_fwrite(zip, resource->GetFilePath().c_str()) == 0);
+                    zip_entry_close(zip);
+
+                    zip_entry_open(zip, Runtime::ResourceManager::GetMetaPath(resource).c_str());
+                    ASSERT(zip_entry_fwrite(zip, Runtime::ResourceManager::GetMetaPath(resource).c_str()) == 0);
+                    zip_entry_close(zip);
+                }
             }
 
-            for (const std::string& str : filePaths)
+            char* zipData;
+            size_t zipSize;
+            zip_stream_copy(zip, (void**)&zipData, &zipSize);
+
+            zip_stream_close(zip);
+
+            // Serialise the zip file into the serialiser. If you want/need a resource pack to be saved on
+            // it's own then you need to call the Save function.
+            if (serialiser != nullptr)
             {
-                filePathsCStr.push_back(str.c_str());
+                serialiser->Write("zip", zipData, zipSize);
+            }
+            else
+            {
+                FileSystem::SaveToFile((Byte*)zipData, zipSize, resourcePack->GetFilePath(), true);
             }
 
-
-            int result = zip_create(resourcePack->GetFilePath().c_str(), filePathsCStr.data(), filePathsCStr.size());
-            ASSERT(result == 0);
+            free(zipData);
         }
     }
 }

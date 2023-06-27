@@ -22,11 +22,7 @@ namespace Insight
         }
     }
 
-    bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath)
-    {
-        return SaveToFile(data, filePath, false);
-    }
-    bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite)
+    bool FileSystem::SaveToFile(const Byte* data, u64 dataSize, std::string_view filePath, bool overwrite)
     {
         if (Exists(filePath) && !overwrite)
         {
@@ -47,9 +43,17 @@ namespace Insight
             return false;
         }
 
-        fileStream.write((char*)data.data(), data.size());
+        fileStream.write((char*)data, dataSize);
         fileStream.close();
         return true;
+    }
+    bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath)
+    {
+        return SaveToFile(data, filePath, false);
+    }
+    bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite)
+    {
+        return SaveToFile(data.data(), data.size(), filePath, false);
     }
 
     bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath)
@@ -59,6 +63,31 @@ namespace Insight
     bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath, bool overwrite)
     {
         return SaveToFile(std::vector<u8>{data.begin(), data.end()}, filePath, overwrite);
+    }
+
+    std::vector<Byte> FileSystem::ReadFromFile(std::string_view filePath, FileType fileType)
+    {
+        std::vector<Byte> fileData;
+        if (!Exists(filePath))
+        {
+            return fileData;
+        }
+
+        std::fstream fileStream;
+        fileStream.open(filePath, std::ios::in | c_FileTypeToStdIos[(int)fileType]);
+        if (!fileStream.is_open())
+        {
+            fileStream.close();
+            return fileData;
+        }
+
+        const u64 fileSize = GetFileSize(filePath);
+        fileData.resize(fileSize);
+
+        fileStream.read((char*)fileData.data(), fileSize);
+
+        fileStream.close();
+        return fileData;
     }
 
     bool FileSystem::Exists(const std::string& path)
