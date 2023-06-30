@@ -110,13 +110,17 @@ namespace Insight
 
 			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
 
-			Runtime::ResourcePack resoucePack("TestPack");
+			Runtime::ResourcePack resoucePack("TestPack.isResourcePack");
 
 			auto resrouceId = Runtime::ResourceId("E://User//Documents//SourceControl//Github//C++Porjects//Insight//DemoProject//Content//Textures//Christmas_Cute_Roadhog.png"
 				, Runtime::Texture2D::GetStaticResourceTypeId());
 			resoucePack.AddResource(Runtime::ResourceManager::LoadSync(resrouceId).Get());
 
 			resoucePack.Save();
+
+			Runtime::ResourcePack* loadResoucePack = (Runtime::ResourcePack*)Runtime::ResourceManager::LoadSync(
+				Runtime::ResourceId("TestPack.isResourcePack", Runtime::ResourcePack::GetStaticResourceTypeId())).Get();
+
 
 			return true;
 		}

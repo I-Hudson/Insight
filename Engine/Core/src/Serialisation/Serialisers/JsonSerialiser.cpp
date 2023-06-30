@@ -77,16 +77,22 @@ namespace Insight
             }
         }
 
-        void JsonSerialiser::StartArray(std::string_view name, u64& size)
+        void JsonSerialiser::StartArray(std::string_view name, u64& size, bool encodeSize)
         {
             if (IsReadMode())
             {
-                Read(std::string(name) + c_ArraySize, size);
+                if (encodeSize)
+                {
+                    Read(std::string(name) + c_ArraySize, size);
+                }
                 m_reader.Push(name, SerialiserNodeStates::Array);
             }
             else
             {
-                Write(std::string(name) + c_ArraySize, size);
+                if (encodeSize)
+                {
+                    Write(std::string(name) + c_ArraySize, size);
+                }
                 m_writer.Push(name, SerialiserNodeStates::Array);
                 m_writer.Top().ArraySize = size;
             }
@@ -158,23 +164,15 @@ namespace Insight
         {
             Write<std::string>(tag, string);
         }
-        void JsonSerialiser::Write(std::string_view tag, const std::vector<Byte>& vector)
+        void JsonSerialiser::Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize)
         {
             u64 arraySize = vector.size();
-            StartArray(tag, arraySize);
+            StartArray(tag, arraySize, encodeSize);
             for (size_t i = 0; i < arraySize; ++i)
             {
                 Write(tag, vector.at(i));
             }
             StopArray();
-        }
-
-        void JsonSerialiser::Write(std::string_view tag, const void* data, const u64 size)
-        {
-            std::vector<Byte> rawData;
-            rawData.resize(size);
-            Platform::MemCopy(rawData.data(), data, size);
-            Write(tag, rawData);
         }
 
         void JsonSerialiser::Read(std::string_view tag, bool& data)
@@ -233,10 +231,10 @@ namespace Insight
         {
             ReadValue<std::string>(tag, string);
         }
-        void JsonSerialiser::Read(std::string_view tag, std::vector<Byte>& vector)
+        void JsonSerialiser::Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
         {
             u64 arraySize = 0;
-            StartArray(tag, arraySize);
+            StartArray(tag, arraySize, decodeSize);
             vector.resize(arraySize);
             for (size_t i = 0; i < arraySize; ++i)
             {

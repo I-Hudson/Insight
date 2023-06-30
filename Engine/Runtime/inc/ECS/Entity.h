@@ -386,7 +386,12 @@ namespace Insight
 					for (const Reflect::MemberInfo& member : members)
 					{
 						serialiser->Write("Name", std::string(member.GetMemberName()));
-						serialiser->Write("Data", member.GetMemberPointer(), member.GetType().GetTypeSize());
+
+						std::vector<Byte> memberData;
+						memberData.resize(member.GetType().GetTypeSize());
+						Platform::MemCopy(memberData.data(), member.GetMemberPointer(), memberData.size());
+
+						serialiser->Write("Data", memberData);
 					}
 					serialiser->StopArray();
 				}

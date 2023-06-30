@@ -9,6 +9,12 @@
 namespace Insight
 {
     Archive::Archive(std::string_view filePath, ArchiveModes mode)
+        : Archive(filePath, mode, FileType::Binary)
+    {
+
+    }
+
+    Archive::Archive(std::string_view filePath, ArchiveModes mode, FileType fileType)
         : m_filePath(filePath)
         , m_mode(mode)
     {
@@ -21,7 +27,7 @@ namespace Insight
         if (mode == ArchiveModes::Read)
         {
             std::ifstream inStream;
-            inStream.open(absFilePath, std::ios::in);
+            inStream.open(absFilePath, std::ios::in | c_FileTypeToStdIos[static_cast<int>(fileType)]);
             if (inStream.is_open())
             {
                 inStream.seekg(0, std::ios::end);

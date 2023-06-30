@@ -53,7 +53,7 @@ namespace Insight
     }
     bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite)
     {
-        return SaveToFile(data.data(), data.size(), filePath, false);
+        return SaveToFile(data.data(), data.size(), filePath, overwrite);
     }
 
     bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath)

@@ -91,7 +91,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) = 0;
             virtual void StopObject() = 0;
 
-            virtual void StartArray(std::string_view name, u64& size) = 0;
+            virtual void StartArray(std::string_view name, u64& size, bool encodeSize = true) = 0;
             virtual void StopArray() = 0;
 
             virtual void Write(std::string_view tag, bool data) = 0;
@@ -109,8 +109,8 @@ namespace Insight
             virtual void Write(std::string_view tag, i64 data) = 0;
 
             virtual void Write(std::string_view tag, std::string const& string) = 0;
-            virtual void Write(std::string_view tag, const std::vector<Byte>& vector) = 0;
-            virtual void Write(std::string_view tag, const void* data, const u64 size) = 0;
+
+            virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) = 0;
 
             virtual void Read(std::string_view tag, bool& data) = 0;
             virtual void Read(std::string_view tag, char& data) = 0;
@@ -127,7 +127,8 @@ namespace Insight
             virtual void Read(std::string_view tag, i64& data) = 0;
 
             virtual void Read(std::string_view tag, std::string& string) = 0;
-            virtual void Read(std::string_view tag, std::vector<Byte>& vector) = 0;
+
+            virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool dcodeSize = true) = 0;
 
         protected:
             void WriteType();

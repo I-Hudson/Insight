@@ -111,10 +111,6 @@ namespace Insight
 
         bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
-            if (!ReadType(data))
-            {
-                return false;
-            }
             m_head.Deserialise(data);
             return true;
         }
@@ -146,16 +142,22 @@ namespace Insight
             m_head.PopState();
         }
 
-        void BinarySerialiser::StartArray(std::string_view name, u64& size)
+        void BinarySerialiser::StartArray(std::string_view name, u64& size, bool encodeSize)
         {
             m_head.PushState(SerialiserNodeStates::Array);
             if (IsReadMode())
             {
-                Read(name, size);
+                if (encodeSize)
+                {
+                    Read(name, size);
+                }
             }
             else
             {
-                Write(name, size);
+                if (encodeSize)
+                {
+                    Write(name, size);
+                }
             }
         }
 
@@ -221,25 +223,13 @@ namespace Insight
             WriteBlock(tag, string.data(), arraySize);
             StopArray();
         }
-        void BinarySerialiser::Write(std::string_view tag, const std::vector<Byte>& vector)
+
+        void BinarySerialiser::Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize)
         {
             u64 arraySize = vector.size();
-            StartArray(tag, arraySize);
-            WriteBlock(tag, vector.data(), arraySize);
-            /*for (size_t i = 0; i < arraySize; ++i)
-            {
-                Byte c = vector.at(i);
-                Write(tag, c);
-            }*/
+            StartArray(tag, arraySize, encodeSize);
+            WriteBlock(tag, vector.data(), vector.size());
             StopArray();
-        }
-
-        void BinarySerialiser::Write(std::string_view tag, const void* data, const u64 size)
-        {
-            std::vector<Byte> rawData;
-            rawData.resize(size);
-            Platform::MemCopy(rawData.data(), data, size);
-            Write(tag, rawData);
         }
 
         void BinarySerialiser::Read(std::string_view tag, bool& data)
@@ -299,12 +289,16 @@ namespace Insight
             ReadBlock(tag, string.data(), arraySize);
             StopArray();
         }
-        void BinarySerialiser::Read(std::string_view tag, std::vector<Byte>& vector)
+
+        void BinarySerialiser::Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize)
         {
             u64 arraySize = 0;
-            StartArray(tag, arraySize);
-            vector.resize(arraySize);
-            ReadBlock(tag, vector.data(), arraySize);
+            StartArray(tag, arraySize, decodeSize);
+            if (decodeSize)
+            {
+                vector.resize(arraySize);
+            }
+            ReadBlock(tag, vector.data(), vector.size());
             StopArray();
         }
 

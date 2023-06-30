@@ -26,7 +26,7 @@ namespace Insight
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
 
-            virtual void StartArray(std::string_view name, u64& size) override;
+            virtual void StartArray(std::string_view name, u64& size, bool encodeSize = true) override;
             virtual void StopArray() override;
 
             virtual void Write(std::string_view tag, bool data) override;
@@ -44,8 +44,8 @@ namespace Insight
             virtual void Write(std::string_view tag, i64 data) override;
 
             virtual void Write(std::string_view tag, std::string const& string) override;
-            virtual void Write(std::string_view tag, const std::vector<Byte>& vector) override;
-            virtual void Write(std::string_view tag, const void* data, const u64 size) override;
+
+            virtual void Write(std::string_view tag, const std::vector<Byte>& vector, bool encodeSize = true) override;
 
             virtual void Read(std::string_view tag, bool& data) override;
             virtual void Read(std::string_view tag, char& data) override;
@@ -62,7 +62,8 @@ namespace Insight
             virtual void Read(std::string_view tag, i64& data) override;
 
             virtual void Read(std::string_view tag, std::string& string) override;
-            virtual void Read(std::string_view tag, std::vector<Byte>& vector) override;
+
+            virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize = true) override;
 
         protected:
             virtual bool ReadType(std::vector<Byte>& data) override;

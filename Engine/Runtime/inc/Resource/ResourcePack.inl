@@ -2,8 +2,10 @@
 #include "Resource/ResourceManager.h"
 
 #include "FileSystem/FileSystem.h"
+#include "Core/Compression.h"
 
 #include <zip.h>
+#include <miniz.h>
 
 namespace Insight::Serialisation
 {
@@ -14,57 +16,60 @@ namespace Insight::Serialisation
         operator()(ISerialiser* serialiser
             , Runtime::ResourcePack* resourcePack) const
     {
-        if (serialiser != nullptr)
-        {
-            ASSERT(serialiser->GetType() == SerialisationTypes::Binary);
-        }
+        ASSERT(serialiser->GetType() == Serialisation::SerialisationTypes::Binary);
+
+        constexpr const char* c_Resources = "Resources";
+        std::vector<Runtime::IResource*>& resources = resourcePack->m_resources;
 
         if (serialiser && serialiser->IsReadMode())
         {
+            u64 resourceSize = 0;
+            serialiser->StartArray(c_Resources, resourceSize);
+
+            for (u32 i = 0; i < resourceSize; ++i)
+            {
+                Runtime::ResourceId resourceId;
+                resourceId.Deserialise(serialiser);
+
+                Runtime::IResource* resource = Runtime::ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
+                resource->Deserialise(serialiser);
+
+                if (!resource->IsEngineFormat())
+                {
+                    u64 dataSize = 0;
+                    serialiser->Read("DataSize", dataSize);
+
+                    std::vector<Byte> data;
+                    data.resize(dataSize);
+                    serialiser->Read("Data", data, false);
+                }
+
+                resources.push_back(resource);
+            }
+
+            serialiser->StopArray();
         }
         else
         {
-            const std::vector<Runtime::IResource*>& resources = resourcePack->m_resources;
-
-            zip_t* zip = zip_stream_open(NULL, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
+            u64 resourceSize = resources.size();
+            serialiser->StartArray(c_Resources, resourceSize);
+            
             for (Runtime::IResource* resource : resources)
             {
-                if (resource->IsEngineFormat())
+                Runtime::ResourceId resourceId = resource->GetResourceId();
+                resourceId.Serialise(serialiser);
+                resource->Serialise(serialiser);
+                
+                if(!resource->IsEngineFormat())
                 {
-                    zip_entry_open(zip, resource->GetFilePath().c_str());
-                    ASSERT(zip_entry_fwrite(zip, resource->GetFilePath().c_str()) == 0);
-                    zip_entry_close(zip);
-                }
-                else
-                {
-                    zip_entry_open(zip, resource->GetFilePath().c_str());
-                    ASSERT(zip_entry_fwrite(zip, resource->GetFilePath().c_str()) == 0);
-                    zip_entry_close(zip);
+                    std::vector<Byte> fileData = FileSystem::ReadFromFile(resource->GetFilePath(), FileType::Binary);
 
-                    zip_entry_open(zip, Runtime::ResourceManager::GetMetaPath(resource).c_str());
-                    ASSERT(zip_entry_fwrite(zip, Runtime::ResourceManager::GetMetaPath(resource).c_str()) == 0);
-                    zip_entry_close(zip);
+                    serialiser->Write("DataSize", fileData.size());
+                    serialiser->Write("Data", fileData, false);
                 }
             }
-
-            char* zipData;
-            size_t zipSize;
-            zip_stream_copy(zip, (void**)&zipData, &zipSize);
-
-            zip_stream_close(zip);
-
-            // Serialise the zip file into the serialiser. If you want/need a resource pack to be saved on
-            // it's own then you need to call the Save function.
-            if (serialiser != nullptr)
-            {
-                serialiser->Write("zip", zipData, zipSize);
-            }
-            else
-            {
-                FileSystem::SaveToFile((Byte*)zipData, zipSize, resourcePack->GetFilePath(), true);
-            }
-
-            free(zipData);
+            
+            serialiser->StopArray();
         }
     }
 }

@@ -3,6 +3,8 @@
 #include "Core/TypeAlias.h"
 #include "Core/Defines.h"
 
+#include "FileSystem/FileSystem.h"
+
 #include <string_view>
 #include <vector>
 
@@ -25,6 +27,7 @@ namespace Insight
         Archive(const Archive& other) = default;
         Archive(Archive&& other) = default;
         Archive(std::string_view filePath, ArchiveModes mode);
+        Archive(std::string_view filePath, ArchiveModes mode, FileType fileType);
         ~Archive();
 
         Archive& operator=(const Archive&) = default;

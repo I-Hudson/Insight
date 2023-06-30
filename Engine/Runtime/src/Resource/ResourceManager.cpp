@@ -417,7 +417,7 @@ namespace Insight
                 {
                     if (resource->IsEngineFormat())
                     {
-                        Archive archive(resource->GetFilePath(), ArchiveModes::Read);
+                        Archive archive(resource->GetFilePath(), ArchiveModes::Read, FileType::Binary);
                         archive.Close();
                         if (!archive.IsEmpty())
                         {

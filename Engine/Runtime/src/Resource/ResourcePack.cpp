@@ -3,6 +3,8 @@
 
 #include "Resource/ResourceManager.h"
 
+#include "Serialisation/Archive.h"
+
 #include "Algorithm/Vector.h"
 
 namespace Insight::Runtime
@@ -18,7 +20,12 @@ namespace Insight::Runtime
 
     void ResourcePack::Save()
     {
-        Serialise(nullptr);
+        IResource::ResourceSerialiserType serialiser(false);
+        Serialise(&serialiser);
+
+        Archive archive(GetFilePath(), ArchiveModes::Write, FileType::Binary);
+        archive.Write(serialiser.GetSerialisedData());
+        archive.Close();
     }
 
     void ResourcePack::LoadAllResources()
