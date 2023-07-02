@@ -39,6 +39,12 @@ namespace Insight
             BinarySerialiser(bool isReadMode);
             virtual ~BinarySerialiser() override;
 
+            // Get the binary write/read head position.
+            u64 GetHeadPosition() const;
+            // Skip number of bytes.
+            void Skip(u64 size);
+
+            // -- Begin ISerialiser --
             virtual bool IsEmpty() const override;
 
             virtual bool Deserialise(std::vector<u8> data) override;
@@ -90,6 +96,7 @@ namespace Insight
 
         protected:
             virtual bool ReadType(std::vector<Byte>& data) override;
+            // -- End ISerialiser --
 
         private:
             template<typename T>

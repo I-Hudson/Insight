@@ -104,6 +104,18 @@ namespace Insight
             m_head.Clear();
         }
 
+        u64 BinarySerialiser::GetHeadPosition() const
+        {
+            return m_head.Size;
+        }
+
+        void BinarySerialiser::Skip(u64 size)
+        {
+            ASSERT((m_head.Size + size) < m_head.Capacity);
+            m_head.Size += size;
+        }
+
+        // -- Begin ISerialiser --
         bool BinarySerialiser::IsEmpty() const
         {
             return m_head.Size <= 8;
@@ -316,6 +328,7 @@ namespace Insight
             }
             return true;
         }
+        // -- End ISerialiser --
 
         void BinarySerialiser::WriteBlock(std::string_view tag, const void* data, u64 sizeBytes)
         {

@@ -18,6 +18,14 @@ namespace Insight
         class IS_RUNTIME ResourcePack : public IResource
         {
             REGISTER_RESOURCE(ResourcePack)
+
+            struct PackedResource
+            {
+                IResource* Resource;
+                u64 DataPosition;   // Start position of the resource data on disk.
+                u64 DataSize;       // Size of the resource data on disk.
+            };
+
         public:
             ResourcePack(std::string_view path);
             virtual ~ResourcePack() override;
@@ -58,7 +66,7 @@ namespace Insight
             // -- End IResource --
 
         private:
-            std::vector<IResource*> m_resources;
+            std::unordered_map<std::string, PackedResource> m_resources;
 
             IS_SERIALISABLE_FRIEND;
         };
