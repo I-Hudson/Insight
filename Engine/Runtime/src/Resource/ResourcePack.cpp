@@ -86,16 +86,37 @@ namespace Insight::Runtime
     
     void ResourcePack::AddResource(IResource* resource)
     { 
+        if (!resource)
+        {
+            IS_CORE_WARN("[ResourcePack::AddResource] 'Resource' is null.");
+            return;
+        }
+
+        if (resource->m_resourcePackInfo.IsWithinPack)
+        {
+            IS_CORE_WARN("[ResourcePack::AddResource] Unable to add resource '{}', to resource pack '{}' as the resource is already within pack '{}'.", 
+                resource->GetFilePath(), m_filePath, resource->m_resourcePackInfo.ResourcePack ? resource->m_resourcePackInfo.ResourcePack->GetFilePath() : "Unknown");
+            return;
+        }
+
         bool contains = m_resources.find(resource->GetResourceId()) != m_resources.end();
         if (!contains)
         {
             m_resources[resource->GetResourceId()] = PackedResource{ resource, 0, 0 };
+            resource->m_resourcePackInfo.IsWithinPack = true;
+            resource->m_resourcePackInfo.ResourcePack = this;
         }
     }
     
-    void ResourcePack::RemoveResource(const IResource* resource)
+    void ResourcePack::RemoveResource(IResource* resource)
     {
-
+        if (auto iter = m_resources.find(resource->GetResourceId());
+            iter != m_resources.end())
+        {
+            m_resources.erase(iter);
+            resource->m_resourcePackInfo.IsWithinPack = false;
+            resource->m_resourcePackInfo.ResourcePack = nullptr;
+        }
     }
     
     // -- Begin ISerialisable --

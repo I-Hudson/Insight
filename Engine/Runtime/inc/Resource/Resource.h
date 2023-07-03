@@ -23,6 +23,7 @@ namespace Insight
 		class IResource;
 		class ResourceManager;
 		class ResourceDatabase;
+		class ResourcePack;
 
 		enum class ResourceStorageTypes
 		{
@@ -76,6 +77,16 @@ namespace Insight
 			IResource* m_this_resource;
 			/// @brief Point to the resource which this link is tied to.
 			IResource* m_link_resource;
+		};
+
+		/// @brief Store data about the resource pack a resource is in, if it is in one.
+		class ResourcePackInfo : public Serialisation::ISerialisable
+		{
+		public:
+			bool IsWithinPack = false; /// Is the resource within a resource pack. By default all resources are loose.
+			ResourcePack* ResourcePack = nullptr;
+
+			IS_SERIALISABLE_H(ResourcePackInfo)
 		};
 
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
@@ -218,16 +229,24 @@ namespace Insight
 
 			mutable std::mutex m_mutex;
 
+			ResourcePackInfo m_resourcePackInfo;
+
 			friend class ResourceManager;
 			friend class ResourceDatabase;
+			friend class ResourcePack;
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::IResource, 2,
+	OBJECT_SERIALISER(Runtime::ResourcePackInfo, 1,
+		SERIALISE_PROPERTY(bool, IsWithinPack, 1, 0)
+		);
+
+	OBJECT_SERIALISER(Runtime::IResource, 3,
 		SERIALISE_PROPERTY(std::string, m_source_file_path, 1, 2)
 		SERIALISE_PROPERTY(std::string, m_file_path, 1, 2)
 		SERIALISE_OBJECT(Runtime::ResourceId, m_resourceId, 1, 2)
 		SERIALISE_PROPERTY(Core::GUID, m_guid, 2, 0)
+		SERIALISE_OBJECT(Runtime::ResourcePackInfo, m_resourcePackInfo, 3, 0)
 	);
 }
 

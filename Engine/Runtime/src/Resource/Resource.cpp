@@ -65,7 +65,19 @@ namespace Insight
 			, m_link_resource(link_resource)
 		{ }
 
-
+		//--------------------------------------------------------------------------
+		// ResourcePackInfo
+		//--------------------------------------------------------------------------
+		void ResourcePackInfo::Serialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			::Insight::Serialisation::SerialiserObject<ResourcePackInfo> serialiserObject;
+			serialiserObject.Serialise(serialiser, *this);
+		}
+		void ResourcePackInfo::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)
+		{
+			::Insight::Serialisation::SerialiserObject<ResourcePackInfo> serialiserObject;
+			serialiserObject.Deserialise(serialiser, *this);
+		}
 		//--------------------------------------------------------------------------
 		// IResource
 		//--------------------------------------------------------------------------

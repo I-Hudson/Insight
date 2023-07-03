@@ -20,7 +20,7 @@ namespace Insight::Serialisation
         BinarySerialiser* binarySerialiser = static_cast<BinarySerialiser*>(serialiser);
 
         constexpr const char* c_Resources = "Resources";
-        std::unordered_map<std::string, Runtime::ResourcePack::PackedResource>& resources = resourcePack->m_resources;
+        std::unordered_map<Runtime::ResourceId, Runtime::ResourcePack::PackedResource>& resources = resourcePack->m_resources;
 
         if (serialiser && serialiser->IsReadMode())
         {
@@ -34,7 +34,9 @@ namespace Insight::Serialisation
                 Runtime::ResourceId resourceId;
                 resourceId.Deserialise(serialiser);
 
-                Runtime::IResource* resource = Runtime::ResourceManager::Create(resourceId);
+                Runtime::IResource* resource = Runtime::ResourceManager::GetResource(resourceId);
+                ASSERT(resource);
+
                 resource->Deserialise(serialiser);
                 packedResource.Resource = resource;
 
@@ -53,7 +55,7 @@ namespace Insight::Serialisation
                     packedResource.DataPosition = bytePosition;
                     packedResource.DataSize = dataSize;
                 }
-                resources[resourceId.GetPath()] = packedResource;
+                resources[resourceId] = packedResource;
             }
 
             serialiser->StopArray();

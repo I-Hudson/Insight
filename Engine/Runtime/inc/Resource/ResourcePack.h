@@ -51,7 +51,7 @@ namespace Insight
 
             void AddResource(IResource* resource);
 
-            void RemoveResource(const IResource* resource);
+            void RemoveResource(IResource* resource);
 
             // -- Begin ISerialisable --
             virtual void Serialise(Serialisation::ISerialiser* serialiser) override;

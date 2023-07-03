@@ -89,7 +89,7 @@ namespace Insight
             archive.Write(binarySerialiser.GetSerialisedData());
             archive.Close();
 
-            archive = Archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabaseJson.isdatabase", ArchiveModes::Write);
+            archive = Archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabaseJson.isdatabase", ArchiveModes::Write, FileType::Text);
             archive.Write(jsonSerialiser.GetSerialisedData());
             archive.Close();
         }

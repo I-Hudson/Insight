@@ -38,7 +38,6 @@ namespace Insight
             ResourceRegister::RegisterResource<Mesh>();
             ResourceRegister::RegisterResource<Model>();
             ResourceRegister::RegisterResource<Texture2D>();
-            ResourceRegister::RegisterResource<ResourcePack>();
 
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Save, [this](const Core::Event& eve)
                 {
@@ -66,6 +65,12 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
+            for (auto& pack : m_resourcePacks)
+            {
+                pack->UnloadAllResources();
+                ::Delete(pack);
+            }
+
             for (auto& pair : m_resources)
             {
                 if (pair.second->IsLoaded())
@@ -75,6 +80,7 @@ namespace Insight
                 DeleteResource(pair.second);
             }
 
+            m_resourcePacks.clear();
             m_resources.clear();
             m_dependentResources.clear();
 
@@ -93,8 +99,9 @@ namespace Insight
             if (archive.IsEmpty())
             {
                 IS_CORE_WARN("[ResourceDatabase::LoadResourcePack] Unable to load resource pack at '{}'.", filepath.data());
-                return;
+                return nullptr;
             }
+
             ResourcePack* resourcePack = ::New<ResourcePack>(filepath);
             m_resourcePacks.push_back(resourcePack);
 
@@ -102,12 +109,13 @@ namespace Insight
             serialiser.Deserialise(archive.GetData());
 
             resourcePack->Deserialise(&serialiser);
-
+            
             return resourcePack;
         }
 
         void ResourceDatabase::UnloadResourcePack(ResourcePack* resourcePack)
         {
+            FAIL_ASSERT();
         }
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
@@ -377,7 +385,7 @@ namespace Insight
 
             std::string metaFilePath = resource->GetFilePath();
             metaFilePath += c_MetaFileExtension;
-            Archive metaFile(metaFilePath, ArchiveModes::Read);
+            Archive metaFile(metaFilePath, ArchiveModes::Read, FileType::Text);
             metaFile.Close();
             if (!metaFile.IsEmpty())
             {
@@ -415,7 +423,7 @@ namespace Insight
             Serialisation::JsonSerialiser serialiser(false);
             resource->Serialise(&serialiser);
 
-            Archive metaFile(metaFilePath, ArchiveModes::Write);
+            Archive metaFile(metaFilePath, ArchiveModes::Write, FileType::Text);
             metaFile.Write(serialiser.GetSerialisedData());
             metaFile.Close();
         }

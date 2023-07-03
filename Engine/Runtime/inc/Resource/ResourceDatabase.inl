@@ -178,5 +178,64 @@ namespace Insight
                 serialiser->StopArray();
             }
         }
+
+        void ComplexSerialiser<ResourceDatabase4, Runtime::ResourceDatabase::ResourceOwningMap, Runtime::ResourceDatabase>::operator()
+            (ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const
+        {
+            ASSERT(serialiser);
+            IS_PROFILE_FUNCTION();
+
+            constexpr const char* c_Resources = "Resources";
+
+            if (serialiser->IsReadMode())
+            {
+                Serialisation::SerialiserObject<Runtime::IResource> IResourceDeserialiser;
+
+                u64 resourcesToSave = 0;
+                serialiser->StartArray(c_Resources, resourcesToSave);
+                for (u64 i = 0; i < resourcesToSave; ++i)
+                {
+                    Runtime::ResourceId resouceId;
+                    resouceId.Deserialise(serialiser);
+
+                    Runtime::IResource* createdResource = resourceDatabase->AddResource(resouceId).Get();
+                    if (createdResource == nullptr)
+                    {
+                        Runtime::IResource dummy("dummy");
+                        IResourceDeserialiser.Deserialise(serialiser, dummy);
+                        continue;
+                    }
+
+                    IResourceDeserialiser.Deserialise(serialiser, *createdResource);
+                }
+                serialiser->StopArray();
+            }
+            else
+            {
+                u64 resourcesToSave = 0;
+                for (auto const& pair : map)
+                {
+                    if (!pair.second->IsDependentOnAnotherResource())
+                    {
+                        ++resourcesToSave;
+                    }
+                }
+
+                Serialisation::SerialiserObject<Runtime::IResource> IResourceSerialiser;
+
+                serialiser->StartArray(c_Resources, resourcesToSave);
+                for (auto const& [resourceId, resource] : map)
+                {
+                    if (!resource->IsDependentOnAnotherResource())
+                    {
+                        // Serialise the ResourceId.
+                        const_cast<Runtime::ResourceId&>(resourceId).Serialise(serialiser);
+                        IResourceSerialiser.Serialise(serialiser, *resource.Get());
+                    }
+                }
+                serialiser->StopArray();
+            }
+        }
+
     }
 }
