@@ -293,6 +293,18 @@ namespace Insight
             return resource;
         }
 
+        ResourcePack* ResourceManager::LoadResourcePack(std::string_view filepath)
+        {
+            ASSERT(s_database);
+            return s_database->LoadResourcePack(filepath);
+        }
+
+        void ResourceManager::UnloadResourcePack(ResourcePack* resourcePack)
+        {
+            ASSERT(s_database);
+            s_database->UnloadResourcePack(resourcePack);
+        }
+
         void ResourceManager::Unload(ResourceId const& resourceId)
         {
             ASSERT(s_database);

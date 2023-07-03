@@ -12,6 +12,7 @@ namespace Insight
     {
         class ResourceSystem;
         class AssimpLoader;
+        class ResourcePack;
 
         /// @brief Static class used to interact with resources.
         class IS_RUNTIME ResourceManager
@@ -41,6 +42,9 @@ namespace Insight
 
             static TObjectPtr<IResource> Load(ResourceId resourceId);
             static TObjectPtr<IResource> Load(ResourceId resourceId, bool convertToEngineFormat);
+
+            static ResourcePack* LoadResourcePack(std::string_view filepath);
+            static void UnloadResourcePack(ResourcePack* resourcePack);
 
             static void Unload(ResourceId const& resourceId);
             static void Unload(TObjectPtr<IResource> Resource);

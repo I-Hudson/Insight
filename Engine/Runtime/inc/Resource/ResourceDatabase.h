@@ -15,6 +15,7 @@ namespace Insight
     namespace Runtime
     {
         class ResourceManager;
+        class ResourcePack;
 
         /// @brief Database to store all currently known resources.
         class ResourceDatabase : public Serialisation::ISerialisable
@@ -34,6 +35,9 @@ namespace Insight
 
             void Initialise();
             void Shutdown();
+
+            ResourcePack* LoadResourcePack(std::string_view filepath);
+            void UnloadResourcePack(ResourcePack* resourcePack);
 
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
@@ -71,6 +75,9 @@ namespace Insight
             /// safety net. Resource/files being moved should be done in editor.
             void FindMissingResources();
 
+            bool HasResourcePack(std::string_view filePath) const;
+            ResourcePack* GetResourcePack(std::string_view filePath) const;
+
         private:
             ResourceOwningMap m_resources;
             ResourceOwningMap m_dependentResources;
@@ -79,6 +86,9 @@ namespace Insight
 
             /// @brief Use this map in the verify process.
             std::unordered_map<ResourceId, Core::GUID> m_missingResources;
+
+            mutable std::mutex m_resourcePacksMutex;
+            std::vector<ResourcePack*> m_resourcePacks;
 
             friend class ResourceManager;
         };

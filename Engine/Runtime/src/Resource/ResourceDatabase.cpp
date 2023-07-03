@@ -81,6 +81,35 @@ namespace Insight
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Save);
         }
 
+        ResourcePack* ResourceDatabase::LoadResourcePack(std::string_view filepath)
+        {
+            if (HasResourcePack(filepath))
+            {
+                return GetResourcePack(filepath);
+            }
+
+            Archive archive(filepath, ArchiveModes::Read);
+
+            if (archive.IsEmpty())
+            {
+                IS_CORE_WARN("[ResourceDatabase::LoadResourcePack] Unable to load resource pack at '{}'.", filepath.data());
+                return;
+            }
+            ResourcePack* resourcePack = ::New<ResourcePack>(filepath);
+            m_resourcePacks.push_back(resourcePack);
+
+            Serialisation::BinarySerialiser serialiser(true);
+            serialiser.Deserialise(archive.GetData());
+
+            resourcePack->Deserialise(&serialiser);
+
+            return resourcePack;
+        }
+
+        void ResourceDatabase::UnloadResourcePack(ResourcePack* resourcePack)
+        {
+        }
+
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
         {
             return AddResource(resourceId, false);
@@ -88,25 +117,7 @@ namespace Insight
 
         void ResourceDatabase::RemoveResource(TObjectPtr<IResource> resource)
         {
-            if (HasResource(resource))
-            {
-                TObjectOPtr<IResource> resourceOPtr;
-                ResourceId resourceId;
-                {
-                    std::lock_guard lock(m_mutex);
-                    for (auto& pair : m_resources)
-                    {
-                        if (pair.second == resource)
-                        {
-                            resourceOPtr = std::move(pair.second);
-                            resourceId = pair.first;
-                            break;
-                        }
-                    }
-                    m_resources.erase(resourceId);
-                }
-                DeleteResource(resourceOPtr);
-            }
+            RemoveResource(resource->GetResourceId());
         }
 
         void ResourceDatabase::RemoveResource(ResourceId const& resourceId)
@@ -194,27 +205,7 @@ namespace Insight
 
         bool ResourceDatabase::HasResource(TObjectPtr<IResource> resource) const
         {
-            bool result = false;
-            {
-                std::lock_guard lock(m_mutex);
-                for (const auto& pair : m_resources)
-                {
-                    if (pair.second == resource)
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-                for (const auto& pair : m_dependentResources)
-                {
-                    if (pair.second == resource)
-                    {
-                        result = true;
-                        break;
-                    }
-                }
-            }
-            return result;
+            return HasResource(resource->GetResourceId());
         }
 
         u32 ResourceDatabase::GetResourceCount() const
@@ -527,6 +518,32 @@ namespace Insight
                     AddResource(resourceId);
                 }
             }
+        }
+
+        bool ResourceDatabase::HasResourcePack(std::string_view filePath) const
+        {
+            std::lock_guard packLock(m_resourcePacksMutex);
+            for (const ResourcePack* const& pack : m_resourcePacks)
+            {
+                if (pack->GetFilePath() == filePath) 
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        ResourcePack* ResourceDatabase::GetResourcePack(std::string_view filePath) const
+        {
+            std::lock_guard packLock(m_resourcePacksMutex);
+            for (ResourcePack* pack : m_resourcePacks)
+            {
+                if (pack->GetFilePath() == filePath)
+                {
+                    return pack;
+                }
+            }
+            return nullptr;
         }
     }
 }

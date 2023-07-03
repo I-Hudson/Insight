@@ -10,7 +10,7 @@
 namespace Insight::Runtime
 {
     ResourcePack::ResourcePack(std::string_view path)
-        : IResource(std::move(path))
+        : m_filePath(path)
     {
     }
 
@@ -23,17 +23,22 @@ namespace Insight::Runtime
         IResource::ResourceSerialiserType serialiser(false);
         Serialise(&serialiser);
 
-        Archive archive(GetFilePath(), ArchiveModes::Write, FileType::Binary);
+        Archive archive(m_filePath, ArchiveModes::Write, FileType::Binary);
         archive.Write(serialiser.GetSerialisedData());
         archive.Close();
     }
 
+    std::string_view ResourcePack::GetFilePath() const
+    {
+        return m_filePath;
+    }
+
     void ResourcePack::LoadAllResources()
     {
-        for (const IResource* resource : m_resources)
+        for (const auto& [path, packedResource] : m_resources)
         {
-            TObjectPtr<IResource> resrouce = ResourceManager::Load(resource->GetResourceId());
-            if (!resource)
+            TObjectPtr<IResource> resrouce = ResourceManager::Load(packedResource.Resource->GetResourceId());
+            if (!packedResource.Resource)
             {
                 IS_CORE_WARN("[ResourcePack::Load] Something went wrong with '{}'.", resrouce->GetResourceId().GetPath());
             }
@@ -42,9 +47,9 @@ namespace Insight::Runtime
 
     void ResourcePack::UnloadAllResources()
     {
-        for (const IResource* resource : m_resources)
+        for (const auto& [path, packedResource] : m_resources)
         {
-            ResourceManager::Unload(resource->GetResourceId());
+            ResourceManager::Unload(packedResource.Resource->GetResourceId());
         }
     }
 
@@ -56,9 +61,9 @@ namespace Insight::Runtime
     u64 ResourcePack::GetLoadedResourceCount() const
     {
         u64 count = 0;
-        for (const IResource* resource : m_resources)
+        for (const auto& [path, packedResource] : m_resources)
         {
-            if (resource->IsLoaded()) 
+            if (packedResource.Resource->IsLoaded())
             {
                 ++count;
             }
@@ -69,9 +74,9 @@ namespace Insight::Runtime
     u64 ResourcePack::GetUnloadedResourceCount() const
     {
         u64 count = 0;
-        for (const IResource* resource : m_resources)
+        for (const auto& [path, packedResource] : m_resources)
         {
-            if (resource->IsUnloaded() || resource->IsNotLoaded())
+            if (packedResource.Resource->IsUnloaded() || packedResource.Resource->IsNotLoaded())
             {
                 ++count;
             }
@@ -81,18 +86,16 @@ namespace Insight::Runtime
     
     void ResourcePack::AddResource(IResource* resource)
     { 
-        bool contains = Algorithm::VectorContainsIf(m_resources, [&resource](const IResource* res)
-            {
-                return resource->GetResourceId() == res->GetResourceId();
-            });
+        bool contains = m_resources.find(resource->GetResourceId()) != m_resources.end();
         if (!contains)
         {
-            m_resources.push_back(resource);
+            m_resources[resource->GetResourceId()] = PackedResource{ resource, 0, 0 };
         }
     }
     
     void ResourcePack::RemoveResource(const IResource* resource)
     {
+
     }
     
     // -- Begin ISerialisable --
@@ -108,29 +111,4 @@ namespace Insight::Runtime
         serialiserObject.Deserialise(serialiser, *this);
     }
     // -- End ISerialisable --
-
-    // -- Begin IResource --
-    void ResourcePack::Load()
-    {
-        if (m_resource_state == EResoruceStates::Loaded)
-        {
-            return;
-        }
-
-        Serialisation::JsonSerialiser serialiser;
-        Deserialise(&serialiser);
-
-        m_resource_state = EResoruceStates::Loaded;
-    }
-    
-    void ResourcePack::LoadFromMemory(const void* data, u64 size_in_bytes)
-    {
-    }
-    
-    void ResourcePack::UnLoad()
-    {
-        UnloadAllResources();
-        m_resource_state = EResoruceStates::Unloaded;
-    }
-    // -- End IResource --
 }
