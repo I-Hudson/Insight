@@ -116,7 +116,7 @@ namespace Insight
         const u64 newStreamPosition = m_streamPos + size;
         if (newStreamPosition > m_data.size())
         {
-            m_data.resize(newStreamPosition * 2);
+            m_data.reserve(newStreamPosition * 2);
             m_dataPtr = m_data.data();
         }
         Platform::MemCopy(m_dataPtr + m_streamPos, data, size);

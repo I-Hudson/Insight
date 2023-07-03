@@ -36,12 +36,12 @@ namespace Insight
                 return false;
             }
             m_reader.DeserialisedJson = nlohmann::json::parse(data);
-            return ReadType(data);
+            return true;
         }
 
         std::vector<Byte> JsonSerialiser::GetSerialisedData()
         {
-            WriteType();
+            //WriteType();
             std::string jsonData = m_writer.TopNode().dump();
             return { jsonData.begin(), jsonData.end() };
         }

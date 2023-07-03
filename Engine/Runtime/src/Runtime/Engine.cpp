@@ -118,9 +118,7 @@ namespace Insight
 
 			resoucePack.Save();
 
-			Runtime::ResourcePack* loadResoucePack = (Runtime::ResourcePack*)Runtime::ResourceManager::LoadSync(
-				Runtime::ResourceId("TestPack.isResourcePack", Runtime::ResourcePack::GetStaticResourceTypeId())).Get();
-
+			Runtime::ResourcePack* loadResoucePack = Runtime::ResourceManager::LoadResourcePack("TestPack.isResourcePack");
 
 			return true;
 		}
