@@ -145,6 +145,11 @@ namespace Insight
 			return m_storage_type;
 		}
 
+		const ResourcePackInfo& IResource::GetResourcePackInfo() const
+		{
+			return m_resourcePackInfo;
+		}
+
 		bool IResource::IsNotFound() const
 		{
 			return m_resource_state.load() == EResoruceStates::Not_Found;

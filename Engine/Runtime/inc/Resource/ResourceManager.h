@@ -23,6 +23,8 @@ namespace Insight
             static void LoadDatabase();
             static void ClearDatabase();
 
+            static ResourcePack* CreateResourcePack(std::string_view filePath);
+
             /// @brief Create a resource reference, but don't load it.
             /// @param resourceId 
             /// @return TObjectPtr<IResource>

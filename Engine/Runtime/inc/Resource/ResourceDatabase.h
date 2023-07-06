@@ -36,6 +36,7 @@ namespace Insight
             void Initialise();
             void Shutdown();
 
+            ResourcePack* CreateResourcePack(std::string_view filePath);
             ResourcePack* LoadResourcePack(std::string_view filepath);
             void UnloadResourcePack(ResourcePack* resourcePack);
 
@@ -77,6 +78,8 @@ namespace Insight
 
             bool HasResourcePack(std::string_view filePath) const;
             ResourcePack* GetResourcePack(std::string_view filePath) const;
+
+            ResourcePack* GetResourcePackFromResourceId(ResourceId resourceId) const;
 
         private:
             ResourceOwningMap m_resources;
@@ -121,12 +124,22 @@ namespace Insight
         {
             void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
         };
+
+        struct ResourceDatabasePacks1 { };
+
+        template<>
+        struct ComplexSerialiser<ResourceDatabasePacks1, std::vector<Runtime::ResourcePack*>, Runtime::ResourceDatabase>
+        {
+            void operator()(ISerialiser* serialiser, std::vector<Runtime::ResourcePack*>& packs, Runtime::ResourceDatabase* resourceDatabase) const;
+        };
     }
 
-    OBJECT_SERIALISER(Runtime::ResourceDatabase, 4,
+    OBJECT_SERIALISER(Runtime::ResourceDatabase, 5,
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase1, m_resources, 1, 2)
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase2, m_resources, 2, 3)
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase3, m_resources, 3, 4)
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase4, m_resources, 4, 0)
+
+        SERIALISE_COMPLEX(Serialisation::ResourceDatabasePacks1, m_resourcePacks, 5, 0)
         );
 }

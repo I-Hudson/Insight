@@ -2,6 +2,7 @@
 
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourceManager.h"
+#include "Resource/ResourcePack.h"
 
 #include "Serialisation/Archive.h"
 
@@ -237,5 +238,49 @@ namespace Insight
             }
         }
 
+
+        void ComplexSerialiser<ResourceDatabasePacks1, std::vector<Runtime::ResourcePack*>, Runtime::ResourceDatabase>::operator()
+            (ISerialiser* serialiser, std::vector<Runtime::ResourcePack*>& packs, Runtime::ResourceDatabase* resourceDatabase) const
+        {
+            ASSERT(serialiser);
+            IS_PROFILE_FUNCTION();
+
+            constexpr const char* c_ResourcePacks = "ResourcePacks";
+            constexpr const char* c_PackFilePath = "PackFilePath";
+            constexpr const char* c_Pack = "Pack";
+            constexpr const char* c_ResourceGuids = "ResourceGuids";
+            constexpr const char* c_Guid = "Guid";
+
+            if (serialiser->IsReadMode())
+            {
+
+            }
+            else
+            {
+                u64 packsSize = packs.size();
+                serialiser->StartArray(c_ResourcePacks, packsSize);
+
+                for (Runtime::ResourcePack*& pack : packs)
+                {
+                    serialiser->StartObject(c_Pack);
+                    serialiser->Write(c_PackFilePath, pack->GetFilePath().data());
+
+                    const std::unordered_map<Runtime::ResourceId, Runtime::ResourcePack::PackedResource>& packResources 
+                        = pack->m_resources;
+
+                    u64 resourceGuidsSize = packResources.size();
+                    serialiser->StartArray(c_ResourceGuids, resourceGuidsSize);
+                    for (const auto& [resourceId, packedResource] : packResources)
+                    {
+                        serialiser->Write(c_Guid, packedResource.Resource->GetGuid().ToString());
+                    }
+                    serialiser->StopArray();
+
+                    serialiser->StopObject();
+                }
+
+                serialiser->StopArray();
+            }
+        }
     }
 }

@@ -68,6 +68,7 @@ namespace Insight
             for (auto& pack : m_resourcePacks)
             {
                 pack->UnloadAllResources();
+                pack->Close();
                 ::Delete(pack);
             }
 
@@ -85,6 +86,19 @@ namespace Insight
             m_dependentResources.clear();
 
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Save);
+        }
+
+        ResourcePack* ResourceDatabase::CreateResourcePack(std::string_view filePath)
+        {
+            if (HasResourcePack(filePath))
+            {
+                IS_CORE_WARN("[ResourceDatabase::CreateResourcePack] Resource pack already at location '{filePath}'.");
+                return GetResourcePack(filePath);
+            }
+
+            ResourcePack* resourcePack = ::New<ResourcePack>(filePath);
+            m_resourcePacks.push_back(resourcePack);
+            return resourcePack;
         }
 
         ResourcePack* ResourceDatabase::LoadResourcePack(std::string_view filepath)
@@ -109,12 +123,14 @@ namespace Insight
             serialiser.Deserialise(archive.GetData());
 
             resourcePack->Deserialise(&serialiser);
-            
+            resourcePack->Open();
+
             return resourcePack;
         }
 
         void ResourceDatabase::UnloadResourcePack(ResourcePack* resourcePack)
         {
+            resourcePack->Close();
             FAIL_ASSERT();
         }
 
@@ -547,6 +563,19 @@ namespace Insight
             for (ResourcePack* pack : m_resourcePacks)
             {
                 if (pack->GetFilePath() == filePath)
+                {
+                    return pack;
+                }
+            }
+            return nullptr;
+        }
+
+        ResourcePack* ResourceDatabase::GetResourcePackFromResourceId(ResourceId resourceId) const
+        {
+            std::lock_guard packLock(m_resourcePacksMutex);
+            for (ResourcePack* pack : m_resourcePacks)
+            {
+                if (pack->HasResourceId(resourceId))
                 {
                     return pack;
                 }

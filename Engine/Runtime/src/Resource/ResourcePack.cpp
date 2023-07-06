@@ -118,6 +118,68 @@ namespace Insight::Runtime
             resource->m_resourcePackInfo.ResourcePack = nullptr;
         }
     }
+
+    bool ResourcePack::HasResourceId(ResourceId resourceId) const
+    {
+        return m_resources.find(resourceId) != m_resources.end();
+    }
+
+    ResourcePack::PackedResource ResourcePack::GetEntry(ResourceId resourceId) const
+    {
+        if (auto iter = m_resources.find(resourceId);
+            iter != m_resources.end())
+        {
+            return iter->second;
+        }
+        return {};
+    }
+
+    bool ResourcePack::Open()
+    {
+        if (!FileSystem::Exists(m_filePath))
+        {
+            IS_CORE_WARN("[ResourcePack::Open] Pack does not exists at '{}'.", m_filePath);
+            return false;
+        }
+
+        m_fileHandle = std::fstream(m_filePath);
+        if (!m_fileHandle.is_open())
+        {
+            IS_CORE_WARN("[ResourcePack::Open] Unable to open pack at '{}'.", m_filePath);
+            return false;
+        }
+        return true;
+    }
+
+    void ResourcePack::Close()
+    {
+        if (m_fileHandle.is_open())
+        {
+            m_fileHandle.close();
+        }
+    }
+
+    bool ResourcePack::LoadResource(const PackedResource& packedResource)
+    {
+        ASSERT(packedResource.Resource);
+        ASSERT(packedResource.IsSerialised);
+
+        if (!m_fileHandle.is_open())
+        {
+            IS_CORE_WARN("[ResourcePack::LoadResource] File handle was not open for pack at '{}'.", m_filePath);
+            return false;
+        }
+
+        std::vector<Byte> resourceData;
+        resourceData.resize(packedResource.DataSize);
+
+        m_fileHandle.seekg(packedResource.DataPosition);
+        m_fileHandle.read((char*)resourceData.data(), packedResource.DataSize);
+
+        packedResource.Resource->LoadFromMemory(resourceData.data(), resourceData.size());
+
+        return true;
+    }
     
     // -- Begin ISerialisable --
     void ResourcePack::Serialise(Serialisation::ISerialiser* serialiser)

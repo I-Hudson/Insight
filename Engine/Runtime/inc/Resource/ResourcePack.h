@@ -9,22 +9,27 @@
 #include "Serialisation/Serialiser.h"
 
 #include <string>
+#include <fstream>
 
 namespace Insight
 {
     namespace Runtime
     {
+        class ResourceDatabase;
+        class ResourceManager;
+
         /// @brief A resource pack is an object which is serialised to disk and contains a list of resources from the project.
         class IS_RUNTIME ResourcePack : public Serialisation::ISerialisable
         {
+        public:
             struct PackedResource
             {
                 IResource* Resource;
+                bool IsSerialised = false;
                 u64 DataPosition;   // Start position of the resource data on disk.
                 u64 DataSize;       // Size of the resource data on disk.
             };
 
-        public:
             ResourcePack(std::string_view path);
             ~ResourcePack();
 
@@ -50,8 +55,11 @@ namespace Insight
             u64 GetUnloadedResourceCount() const;
 
             void AddResource(IResource* resource);
-
             void RemoveResource(IResource* resource);
+
+            bool HasResourceId(ResourceId resourceId) const;
+            PackedResource GetEntry(ResourceId resourceId) const;
+
 
             // -- Begin ISerialisable --
             virtual void Serialise(Serialisation::ISerialiser* serialiser) override;
@@ -59,8 +67,21 @@ namespace Insight
             // -- End ISerialisable --
 
         private:
+            /// @brief Open a file handle to the resource pack file on disk.
+            /// @return 
+            bool Open();
+            void Close();
+
+            bool LoadResource(const PackedResource& packedResource);
+
+        private:
             std::unordered_map<ResourceId, PackedResource> m_resources;
             std::string m_filePath;
+
+            std::fstream m_fileHandle;
+
+            friend class ResourceDatabase;
+            friend class ResourceManager;
 
             IS_SERIALISABLE_FRIEND;
         };

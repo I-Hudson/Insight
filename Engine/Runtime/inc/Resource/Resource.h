@@ -115,6 +115,8 @@ namespace Insight
 			const ResourceReferenceLink* GetReferenceLink(u32 index) const;
 			ResourceStorageTypes GetResourceStorageType() const;
 
+			const ResourcePackInfo& GetResourcePackInfo() const;
+
 			/// @brief Check if this resource is dependent on another resource (owned).
 			/// @return bool 
 			bool IsDependentOnAnotherResource() const;
@@ -241,12 +243,12 @@ namespace Insight
 		SERIALISE_PROPERTY(bool, IsWithinPack, 1, 0)
 		);
 
-	OBJECT_SERIALISER(Runtime::IResource, 3,
+	OBJECT_SERIALISER(Runtime::IResource, 4,
 		SERIALISE_PROPERTY(std::string, m_source_file_path, 1, 2)
 		SERIALISE_PROPERTY(std::string, m_file_path, 1, 2)
 		SERIALISE_OBJECT(Runtime::ResourceId, m_resourceId, 1, 2)
 		SERIALISE_PROPERTY(Core::GUID, m_guid, 2, 0)
-		SERIALISE_OBJECT(Runtime::ResourcePackInfo, m_resourcePackInfo, 3, 0)
+		SERIALISE_OBJECT(Runtime::ResourcePackInfo, m_resourcePackInfo, 3, 4)
 	);
 }
 

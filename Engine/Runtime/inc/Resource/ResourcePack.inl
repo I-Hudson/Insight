@@ -30,6 +30,7 @@ namespace Insight::Serialisation
             for (u32 i = 0; i < resourceSize; ++i)
             {
                 Runtime::ResourcePack::PackedResource packedResource;
+                packedResource.IsSerialised = true;
 
                 Runtime::ResourceId resourceId;
                 resourceId.Deserialise(serialiser);

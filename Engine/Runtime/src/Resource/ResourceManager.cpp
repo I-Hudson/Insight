@@ -1,5 +1,6 @@
 #include "Resource/ResourceManager.h"
 #include "Resource/ResourceDatabase.h"
+#include "Resource/ResourcePack.h"
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/Loaders/IResourceLoader.h"
 
@@ -117,8 +118,13 @@ namespace Insight
         void ResourceManager::ClearDatabase()
         {
             ASSERT(Platform::IsMainThread());
-
             s_database->Shutdown();
+        }
+
+        ResourcePack* ResourceManager::CreateResourcePack(std::string_view filePath)
+        {
+            ASSERT(s_database);
+            return s_database->CreateResourcePack(filePath);
         }
 
         TObjectPtr<IResource> ResourceManager::Create(ResourceId const& resourceId)
@@ -425,9 +431,27 @@ namespace Insight
 
             void(*resourceLoadFunc)(IResource* resource, const IResourceLoader* loader, const bool threaded) = [](IResource* resource, const IResourceLoader* loader, const bool threaded)
             {
+                bool resourceLoaded = false;
                 resource->StartLoadTimer();
                 {
-                    if (resource->IsEngineFormat())
+                    if (resource->GetResourcePackInfo().IsWithinPack)
+                    {
+                        // Resource is within a pack. Check if that resource is currently serialised, if so then load from the pack
+                        // otherwise try and load it from loose files.
+                        ResourcePack* resourcePack = s_database->GetResourcePackFromResourceId(resource->GetResourceId());
+
+                        if (resourcePack)
+                        {
+                            ResourcePack::PackedResource entry = resourcePack->GetEntry(resource->GetResourceId());
+                            if (entry.IsSerialised)
+                            {
+                                resourcePack->LoadResource(entry);
+                                resourceLoaded = true;
+                            }
+                        }
+                    }
+
+                    if (!resourceLoaded && resource->IsEngineFormat())
                     {
                         Archive archive(resource->GetFilePath(), ArchiveModes::Read, FileType::Binary);
                         archive.Close();
@@ -445,7 +469,7 @@ namespace Insight
                             resource->m_resource_state = EResoruceStates::Failed_To_Load;
                         }
                     }
-                    else
+                    else if (!resourceLoaded)
                     {
                         //std::lock_guard resourceLock(resource->m_mutex); // FIXME Maybe don't do this?
                         if (loader)
@@ -469,6 +493,7 @@ namespace Insight
                     }
                 }
                 resource->StopLoadTimer();
+
                 if (resource->IsLoaded())
                 {
                     if (threaded == true)
@@ -478,6 +503,7 @@ namespace Insight
                     s_database->SaveMetaFileData(resource, true);
                     resource->OnLoaded(resource);
                 }
+
                 std::lock_guard resourceLoadingGuard(s_resourcesLoadingMutex);
                 Algorithm::VectorRemove(s_resourcesLoading, resource);
             };
