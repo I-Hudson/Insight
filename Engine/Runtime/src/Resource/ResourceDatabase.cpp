@@ -98,6 +98,12 @@ namespace Insight
                 return GetResourcePack(packFilePath);
             }
 
+            if (FileSystem::Exists(filePath))
+            {
+                IS_CORE_WARN("[ResourceDatabase::CreateResourcePack] Resource pack already at location '{filePath}'.");
+                return LoadResourcePack(packFilePath);
+            }
+
             ResourcePack* resourcePack = ::New<ResourcePack>(packFilePath);
             m_resourcePacks.push_back(resourcePack);
             return resourcePack;
@@ -105,20 +111,22 @@ namespace Insight
 
         ResourcePack* ResourceDatabase::LoadResourcePack(std::string_view filepath)
         {
-            if (HasResourcePack(filepath))
+            std::string packFilePath = FileSystem::ReplaceExtension(filepath, ResourcePack::c_Extension);
+
+            if (HasResourcePack(packFilePath))
             {
-                return GetResourcePack(filepath);
+                return GetResourcePack(packFilePath);
             }
 
-            Archive archive(filepath, ArchiveModes::Read);
+            Archive archive(packFilePath, ArchiveModes::Read);
 
             if (archive.IsEmpty())
             {
-                IS_CORE_WARN("[ResourceDatabase::LoadResourcePack] Unable to load resource pack at '{}'.", filepath.data());
+                IS_CORE_WARN("[ResourceDatabase::LoadResourcePack] Unable to load resource pack at '{}'.", packFilePath.data());
                 return nullptr;
             }
 
-            ResourcePack* resourcePack = ::New<ResourcePack>(filepath);
+            ResourcePack* resourcePack = ::New<ResourcePack>(packFilePath);
             m_resourcePacks.push_back(resourcePack);
 
             Serialisation::BinarySerialiser serialiser(true);

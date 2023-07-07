@@ -8,6 +8,13 @@ namespace Insight
 {
     namespace Serialisation
     {
+        struct BinaryNode
+        {
+            SerialiserNodeStates State;
+            u64 StartPosition;
+            u64 Size;
+        };
+
         class BinaryHead
         {
         public:
@@ -22,6 +29,8 @@ namespace Insight
             void PopState();
             SerialiserNodeStates GetCurrentState() const;
 
+            BinaryNode& Top();
+
             void Clear();
             void Deserialise(const std::vector<Byte>& data);
 
@@ -29,7 +38,7 @@ namespace Insight
             Byte* Data = nullptr;
             u64 Capacity = 0;
             u64 Size = 0;
-            std::stack<SerialiserNodeStates> NodeStates;
+            std::stack<BinaryNode> Nodes;
         };
 
         class IS_CORE BinarySerialiser : public ISerialiser
@@ -54,6 +63,7 @@ namespace Insight
 
             virtual void StartObject(std::string_view name) override;
             virtual void StopObject() override;
+            virtual void SkipObject() override;
 
             virtual void StartArray(std::string_view name, u64& size, bool encodeSize = true) override;
             virtual void StopArray() override;

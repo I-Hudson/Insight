@@ -200,14 +200,15 @@ namespace Insight
                     resouceId.Deserialise(serialiser);
 
                     Runtime::IResource* createdResource = resourceDatabase->AddResource(resouceId).Get();
-                    if (createdResource == nullptr)
+                    if (createdResource != nullptr)
+                    {
+                        IResourceDeserialiser.Deserialise(serialiser, *createdResource);
+                    }
+                    else
                     {
                         Runtime::IResource dummy("dummy");
                         IResourceDeserialiser.Deserialise(serialiser, dummy);
-                        continue;
                     }
-
-                    IResourceDeserialiser.Deserialise(serialiser, *createdResource);
                 }
                 serialiser->StopArray();
             }

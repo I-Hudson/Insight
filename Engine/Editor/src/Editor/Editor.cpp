@@ -81,7 +81,7 @@ namespace Insight
 				Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
 
 			Runtime::IResource* resource = Runtime::ResourceManager::LoadSync(
-				Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/lb5596h3v2i91.png"
+				Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
 				, Runtime::Texture2D::GetStaticResourceTypeId())).Get();
 
 			pack->AddResource(resource);

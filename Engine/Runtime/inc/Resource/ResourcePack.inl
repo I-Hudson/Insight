@@ -36,13 +36,23 @@ namespace Insight::Serialisation
                 resourceId.Deserialise(serialiser);
 
                 Runtime::IResource* resource = Runtime::ResourceManager::GetResource(resourceId);
-                ASSERT(resource);
 
-                resource->Deserialise(serialiser);
-                packedResource.Resource = resource;
-
-                if (!resource->IsEngineFormat())
+                if (resource)
                 {
+                    resource->Deserialise(serialiser);
+                    packedResource.Resource = resource;
+                }
+                else
+                {
+                    serialiser->SkipObject();
+                }
+
+                bool isEngineFormat = false;
+                serialiser->Read("IsEngineFormat", isEngineFormat);
+                if (!isEngineFormat)
+                {
+                    serialiser->StartObject("DataObject");
+
                     u64 dataSize = 0;
                     serialiser->Read("DataSize", dataSize);
 
@@ -53,10 +63,16 @@ namespace Insight::Serialisation
                     //serialiser->Read("Data", data, false);
                     binarySerialiser->Skip(dataSize);
 
+                    serialiser->StopObject();
+
                     packedResource.DataPosition = bytePosition;
                     packedResource.DataSize = dataSize;
                 }
-                resources[resourceId] = packedResource;
+
+                if (resource)
+                {
+                    resources[resourceId] = packedResource;
+                }
             }
 
             serialiser->StopArray();
@@ -72,12 +88,15 @@ namespace Insight::Serialisation
                 resourceId.Serialise(serialiser);
                 resource.Resource->Serialise(serialiser);
                 
+                serialiser->Write("IsEngineFormat", resource.Resource->IsEngineFormat());
                 if(!resource.Resource->IsEngineFormat())
                 {
                     std::vector<Byte> fileData = FileSystem::ReadFromFile(resource.Resource->GetFilePath(), FileType::Binary);
 
+                    serialiser->StartObject("DataObject");
                     serialiser->Write("DataSize", fileData.size());
                     serialiser->Write("Data", fileData, false);
+                    serialiser->StopObject();
                 }
             }
             

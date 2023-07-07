@@ -90,6 +90,8 @@ namespace Insight
 
             virtual void StartObject(std::string_view name) = 0;
             virtual void StopObject() = 0;
+            /// @brief Skip the next object in the stream.
+            virtual void SkipObject() { }
 
             virtual void StartArray(std::string_view name, u64& size, bool encodeSize = true) = 0;
             virtual void StopArray() = 0;

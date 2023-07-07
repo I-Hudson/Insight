@@ -61,17 +61,24 @@ namespace Insight
 
         void BinaryHead::PushState(SerialiserNodeStates state)
         {
-            NodeStates.push(state);
+            BinaryNode node;
+            node.State = state;
+            Nodes.push(node);
         }
 
         void BinaryHead::PopState()
         {
-            NodeStates.pop();
+            Nodes.pop();
         }
 
         SerialiserNodeStates BinaryHead::GetCurrentState() const
         {
-            return NodeStates.top();
+            return Nodes.top().State;
+        }
+
+        BinaryNode& BinaryHead::Top()
+        {
+            return Nodes.top();
         }
 
         void BinaryHead::Clear()
@@ -146,12 +153,38 @@ namespace Insight
         void BinarySerialiser::StartObject(std::string_view name)
         {
             m_head.PushState(SerialiserNodeStates::Object);
+            if (IsReadMode())
+            {
+                Read(std::string(name) + "ObjectSize", m_head.Top().Size);
+            }
+            else
+            {
+                Write(std::string(name) + "ObjectSize", 0ull);
+            }
+
+            m_head.Top().StartPosition = GetHeadPosition();
         }
 
         void BinarySerialiser::StopObject()
         {
             ASSERT(IsObjectNode());
+
+            if (!IsReadMode())
+            {
+                m_head.Top().Size = GetHeadPosition() - m_head.Top().StartPosition;
+                void* dst = (m_head.Data + m_head.Top().StartPosition) - sizeof(u64);
+                void* src = &m_head.Top().Size;
+                Platform::MemCopy(dst, src, sizeof(u64));
+            }
             m_head.PopState();
+        }
+
+        void BinarySerialiser::SkipObject()
+        {
+            ASSERT(IsReadMode());
+            StartObject("SKIP");
+            Skip(m_head.Top().Size);
+            StopObject();
         }
 
         void BinarySerialiser::StartArray(std::string_view name, u64& size, bool encodeSize)
