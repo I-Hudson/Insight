@@ -146,7 +146,7 @@ namespace Insight
         return std::filesystem::file_size(path);
     }
 
-    std::string_view FileSystem::GetFileName(std::string_view filePath)
+    std::string FileSystem::GetFileName(std::string_view filePath)
     {
         return std::filesystem::path(filePath).filename().string();
     }

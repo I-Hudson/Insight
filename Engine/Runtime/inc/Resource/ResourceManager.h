@@ -56,6 +56,8 @@ namespace Insight
             static bool HasResource(TObjectPtr<IResource> Resource);
 
             static ResourceDatabase::ResourceMap GetResourceMap();
+            static std::vector<ResourcePack*> GetResourcePacks();
+
             static u32 GetQueuedToLoadCount();
             static u32 GetLoadedResourcesCount();
             static u32 GetLoadingCount();

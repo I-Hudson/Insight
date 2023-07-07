@@ -46,6 +46,8 @@ namespace Insight
 			void ForceClose() { m_shouldClose = true; }
 
 			virtual void OnInit() { }
+			virtual void OnPostInit() { }
+
 			virtual void OnUpdate() { }
 			virtual void OnRender() { }
 			virtual void OnDestroy() { }

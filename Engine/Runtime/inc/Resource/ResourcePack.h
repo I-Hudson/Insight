@@ -29,6 +29,7 @@ namespace Insight
                 u64 DataPosition;   // Start position of the resource data on disk.
                 u64 DataSize;       // Size of the resource data on disk.
             };
+            constexpr static const char* c_Extension = ".isResourcePack";
 
             ResourcePack(std::string_view path);
             ~ResourcePack();
@@ -36,6 +37,8 @@ namespace Insight
             void Save();
 
             std::string_view GetFilePath() const;
+            bool IsLoaded() const;
+            bool IsUnloaded() const;
 
             /// @brief Load all resources within this pack.
             /// @return bool
@@ -44,6 +47,7 @@ namespace Insight
             /// @return bool
             void UnloadAllResources();
 
+            std::vector<IResource*> GetAllResources() const;
             /// @brief Return the total amount of resource within the pack.
             /// @return u64
             u64 GetResourceCount() const;
@@ -56,6 +60,7 @@ namespace Insight
 
             void AddResource(IResource* resource);
             void RemoveResource(IResource* resource);
+            void RemoveAllResources();
 
             bool HasResourceId(ResourceId resourceId) const;
             PackedResource GetEntry(ResourceId resourceId) const;

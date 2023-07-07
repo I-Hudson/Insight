@@ -90,13 +90,15 @@ namespace Insight
 
         ResourcePack* ResourceDatabase::CreateResourcePack(std::string_view filePath)
         {
-            if (HasResourcePack(filePath))
+            std::string packFilePath = FileSystem::ReplaceExtension(filePath, ResourcePack::c_Extension);
+            
+            if (HasResourcePack(packFilePath))
             {
                 IS_CORE_WARN("[ResourceDatabase::CreateResourcePack] Resource pack already at location '{filePath}'.");
-                return GetResourcePack(filePath);
+                return GetResourcePack(packFilePath);
             }
 
-            ResourcePack* resourcePack = ::New<ResourcePack>(filePath);
+            ResourcePack* resourcePack = ::New<ResourcePack>(packFilePath);
             m_resourcePacks.push_back(resourcePack);
             return resourcePack;
         }
@@ -214,6 +216,11 @@ namespace Insight
                 }
             }
             return ResourceMap;
+        }
+
+        std::vector<ResourcePack*> ResourceDatabase::GetResourcePacks() const
+        {
+            return m_resourcePacks;
         }
 
         bool ResourceDatabase::HasResource(ResourceId const& resourceId) const

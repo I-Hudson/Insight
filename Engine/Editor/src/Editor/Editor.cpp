@@ -7,6 +7,7 @@
 
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
+#include "Resource/ResourcePack.h"
 
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
@@ -72,6 +73,18 @@ namespace Insight
 				serialiser.Deserialise(editorSettings.GetData());
 				Deserialise(&serialiser);
 			}
+		}
+
+		void Editor::OnPostInit()
+		{
+			Runtime::ResourcePack* pack = Runtime::ResourceManager::CreateResourcePack(
+				Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
+
+			Runtime::IResource* resource = Runtime::ResourceManager::LoadSync(
+				Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/lb5596h3v2i91.png"
+				, Runtime::Texture2D::GetStaticResourceTypeId())).Get();
+
+			pack->AddResource(resource);
 		}
 
 		void Editor::OnUpdate()

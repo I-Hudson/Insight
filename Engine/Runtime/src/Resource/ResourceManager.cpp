@@ -393,6 +393,12 @@ namespace Insight
             return s_database->GetResourceMap();
         }
 
+        std::vector<ResourcePack*> ResourceManager::GetResourcePacks()
+        {
+            ASSERT(s_database);
+            return s_database->GetResourcePacks();
+        }
+
         u32 ResourceManager::GetQueuedToLoadCount()
         {
             u32 count = 0;
@@ -447,6 +453,11 @@ namespace Insight
                             {
                                 resourcePack->LoadResource(entry);
                                 resourceLoaded = true;
+                            }
+                            else
+                            {
+                                IS_CORE_WARN("[ResourceManager::StartLoading] Trying to load resource '{}' from a resource pack '{}'. Resource is not serialised in pack falling back to trying to load from disk."
+                                , resource->GetFilePath(), resourcePack->GetFilePath());
                             }
                         }
                     }

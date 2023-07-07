@@ -33,6 +33,16 @@ namespace Insight::Runtime
         return m_filePath;
     }
 
+    bool ResourcePack::IsLoaded() const
+    {
+        return m_fileHandle.is_open();
+    }
+
+    bool ResourcePack::IsUnloaded() const
+    {
+        return !m_fileHandle.is_open();
+    }
+
     void ResourcePack::LoadAllResources()
     {
         for (const auto& [path, packedResource] : m_resources)
@@ -51,6 +61,17 @@ namespace Insight::Runtime
         {
             ResourceManager::Unload(packedResource.Resource->GetResourceId());
         }
+    }
+
+    std::vector<IResource*> ResourcePack::GetAllResources() const
+    {
+        std::vector<IResource*> resources;
+        resources.reserve(m_resources.size());
+        for (const auto& [resourceId, packedResource] : m_resources)
+        {
+            resources.push_back(packedResource.Resource);
+        }
+        return resources;
     }
 
     u64 ResourcePack::GetResourceCount() const
@@ -116,6 +137,20 @@ namespace Insight::Runtime
             m_resources.erase(iter);
             resource->m_resourcePackInfo.IsWithinPack = false;
             resource->m_resourcePackInfo.ResourcePack = nullptr;
+        }
+    }
+
+    void ResourcePack::RemoveAllResources()
+    {
+        std::vector<IResource*> resources;
+        for (const auto& [resourceId, packedResource] : m_resources)
+        {
+            resources.push_back(packedResource.Resource);
+        }
+
+        for (IResource* resource : resources)
+        {
+            RemoveResource(resource);
         }
     }
 

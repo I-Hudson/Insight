@@ -253,7 +253,53 @@ namespace Insight
 
             if (serialiser->IsReadMode())
             {
+                u64 packsSize = 0;
+                serialiser->StartArray(c_ResourcePacks, packsSize);
 
+                for (size_t packIdx = 0; packIdx < packsSize; ++packIdx)
+                {
+                    serialiser->StartObject(c_Pack);
+                    std::string packFilePath;
+                    serialiser->Read(c_PackFilePath, packFilePath);
+
+
+                    Runtime::ResourcePack* pack = nullptr;
+                    if (FileSystem::Exists(packFilePath))
+                    {
+                        //If we don't have a resource pack at the loction know then don't create one.
+                        pack = Runtime::ResourceManager::CreateResourcePack(packFilePath);
+                    }
+
+                    u64 resourceGuidsSize = 0;
+                    serialiser->StartArray(c_ResourceGuids, resourceGuidsSize);
+                    for (size_t resourceGuidIdx = 0; resourceGuidIdx < resourceGuidsSize; ++resourceGuidIdx)
+                    {
+                        std::string resourceGuidStr;
+                        serialiser->Read(c_Guid, resourceGuidStr);
+
+                        Core::GUID resourceGuid;
+                        resourceGuid.StringToGuid(resourceGuidStr);
+
+                        if (pack)
+                        {
+                            Runtime::IResource* resourceToAdd = Runtime::ResourceManager::GetResourceFromGuid(resourceGuid);
+                            if (resourceToAdd)
+                            {
+                                pack->AddResource(resourceToAdd);
+                            }
+                            else
+                            {
+                                IS_CORE_WARN("[ComplexSerialiser::ResourceDatabasePacks1] Resource guid '{}' is null. Resource has not been added to pack '{}'."
+                                    , resourceGuidStr, pack->GetFilePath().data());
+                            }
+                        }
+                    }
+                    serialiser->StopArray();
+
+                    serialiser->StopObject();
+                }
+
+                serialiser->StopArray();
             }
             else
             {

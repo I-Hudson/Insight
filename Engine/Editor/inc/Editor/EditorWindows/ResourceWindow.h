@@ -8,7 +8,9 @@ namespace Insight
 	namespace Runtime
 	{
 		class IResource;
+		class ResourcePack;
 	}
+
 	namespace Editor
 	{
 		REFLECT_CLASS()
@@ -27,6 +29,7 @@ namespace Insight
 
 		private:
 			void DrawSingleResource(Runtime::IResource* resource);
+			void DrawSingleResourcePack(Runtime::ResourcePack* resourcePack);
 
 		};
 	}

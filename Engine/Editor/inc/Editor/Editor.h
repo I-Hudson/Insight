@@ -21,6 +21,8 @@ namespace Insight
 			IS_SERIALISABLE_H(Editor)
 
 			virtual void OnInit() override;
+			virtual void OnPostInit() override;
+
 			virtual void OnUpdate() override;
 			virtual void OnRender() override;
 			virtual void OnDestroy() override;

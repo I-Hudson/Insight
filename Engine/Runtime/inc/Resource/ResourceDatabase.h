@@ -48,6 +48,8 @@ namespace Insight
             TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid) const;
             
             ResourceMap GetResourceMap() const;
+            std::vector<ResourcePack*> GetResourcePacks() const;
+
             
             bool HasResource(ResourceId const& resourceId) const;
             bool HasResource(TObjectPtr<IResource> resource) const;
