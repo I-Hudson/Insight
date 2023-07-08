@@ -19,12 +19,23 @@
 #include "Serialisation/Archive.h"
 
 #include <imgui.h>
+#include <SplashScreen.h>
 
 namespace Insight
 {
 	namespace Editor
 	{
 		IS_SERIALISABLE_CPP(Editor);
+
+		SplashScreen splashScreen;
+
+		void Editor::OnPreInit()
+		{
+			static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
+			splashScreen.Init(860, 420);
+			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
+			splashScreen.Show();
+		}
 
 		void Editor::OnInit()
 		{
@@ -55,17 +66,11 @@ namespace Insight
 			m_gameRenderpass->Create();
 
 			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
+			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
+
+			m_buildSystem.Initialise();
 			m_hotReloadSystem.Initialise();
 			
-			glm::vec4 vec4A;
-			glm::vec4 vec4B;
-
-			auto vecC = vec4A * vec4B;
-
-			glm::mat4 mat4A;
-			glm::mat4 mat4B;
-			auto mat4C = mat4A * mat4B;
-
 			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
 			if (!editorSettings.IsEmpty())
 			{
@@ -85,6 +90,8 @@ namespace Insight
 				, Runtime::Texture2D::GetStaticResourceTypeId())).Get();
 
 			pack->AddResource(resource);
+
+			splashScreen.Destroy();
 		}
 
 		void Editor::OnUpdate()
@@ -133,7 +140,10 @@ namespace Insight
 			EditorWindowManager::Instance().Destroy();
 
 			m_hotReloadSystem.Shutdown();
+			m_buildSystem.Shutdown();
+
 			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
+			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
 
 			Runtime::ResourceManager::SaveDatabase();
 		}

@@ -8,6 +8,7 @@
 #include "Editor/MenuBar.h"
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
 #include "Editor/HotReload/HotReloadSystem.h"
+#include "Editor/Build/BuildSystem.h"
 
 #include "Renderpass.h"
 
@@ -20,6 +21,7 @@ namespace Insight
 		public:
 			IS_SERIALISABLE_H(Editor)
 
+			virtual void OnPreInit() override;
 			virtual void OnInit() override;
 			virtual void OnPostInit() override;
 
@@ -32,14 +34,17 @@ namespace Insight
 			MenuBar m_menuBar;
 			EditorWindowManager m_editorWindowManager;
 			TypeDrawerRegister m_typeDrawerRegister;
+
 			HotReloadSystem m_hotReloadSystem;
+			BuildSystem m_buildSystem;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
 			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";
 		};
 	}
 
-	OBJECT_SERIALISER(Editor::Editor, 1, 
+	OBJECT_SERIALISER(Editor::Editor, 2, 
 		SERIALISE_OBJECT(Editor::EditorWindowManager, m_editorWindowManager, 1, 0)
+		SERIALISE_OBJECT(Editor::BuildSystem, m_buildSystem, 2, 0)
 	)
 }

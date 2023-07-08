@@ -43,6 +43,7 @@ project "Insight_Editor"
         "%{IncludeDirs.imgui_string}",
         "%{IncludeDirs.reflect}",
         "%{IncludeDirs.zip}",
+        "%{IncludeDirs.splash}",
     }
 
     files 
@@ -101,6 +102,7 @@ project "Insight_Editor"
         links
         {
             "Reflectd.lib",
+            "Splashd.lib",
         }
         libdirs
         {
@@ -114,6 +116,7 @@ project "Insight_Editor"
         links
         {
             "Reflect.lib",
+            "Splash.lib",
         }
         libdirs
         {

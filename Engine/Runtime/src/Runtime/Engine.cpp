@@ -27,8 +27,6 @@
 
 #include "Serialisation/Archive.h"
 
-#include "SplashScreen.h"
-
 #include "imgui.h"
 
 namespace Insight
@@ -37,14 +35,16 @@ namespace Insight
 	{
 		Core::Timer Engine::s_FrameTimer;
 
-		SplashScreen splashScreen;
-
 		bool Engine::Init(int argc, char** argv)
 		{
 			IS_CORE_INFO("Runtime Version {}.{}.{}.", 
 				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 
 			m_updateThread = std::this_thread::get_id();
+			Platform::Initialise();
+			EnginePaths::Initialise();
+
+			OnPreInit();
 
 			// Systems
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
@@ -55,14 +55,6 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
-
-			Platform::Initialise();
-			EnginePaths::Initialise();
-
-			static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
-			splashScreen.Init(860, 420);
-			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
-			splashScreen.Show();
 
 			const std::string cmdLinePath = EnginePaths::GetExecutablePath() + "/cmdline.txt";
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
@@ -105,8 +97,6 @@ namespace Insight
 			{
 				m_projectSystem.OpenProject(projectPath);
 			}
-
-			splashScreen.Destroy();
 
 			ImGui::GetIO().ConfigInputTrickleEventQueue = false;
 

@@ -8,33 +8,6 @@
 
 #include <string>
 
-#define IS_SERIALISABLE_FRIEND\
-        private:\
-        template<typename>\
-        friend struct ::Insight::Serialisation::SerialiserObject;\
-        template<typename, typename, typename>\
-        friend struct ::Insight::Serialisation::ComplexSerialiser;\
-        template<typename>\
-        friend struct ::Insight::Serialisation::PropertySerialiser;\
-
-#define IS_SERIALISABLE_H(TYPE)\
-        IS_SERIALISABLE_FRIEND\
-        public:\
-        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser);\
-        virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser);
-
-#define IS_SERIALISABLE_CPP(TYPE)\
-        void TYPE::Serialise(::Insight::Serialisation::ISerialiser* serialiser)\
-        {\
-            ::Insight::Serialisation::SerialiserObject<TYPE> serialiserObject;\
-            serialiserObject.Serialise(serialiser, *this);\
-        }\
-        void TYPE::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)\
-        {\
-            ::Insight::Serialisation::SerialiserObject<TYPE> serialiserObject;\
-            serialiserObject.Deserialise(serialiser, *this);\
-        }
-
 constexpr bool VersionCheck(const u32 serialisedVersion, const u32 versionAdded, const u32 versionRemoved)
 {
     return versionRemoved == 0 || serialisedVersion >= versionAdded && serialisedVersion < versionRemoved;
