@@ -27,7 +27,7 @@ namespace Insight
 				return nullptr;
 			}
 			Insight::Serialisation::PropertyDeserialiser<Core::GUID> guidDeserialiser;
-			return Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(guidDeserialiser(v));
+			return Runtime::WorldSystem::Instance().GetEntityByGUID(guidDeserialiser(v));
 		}
 
 		std::string PropertySerialiser<ComponentToGuid>::operator()(Ptr<InType> const& v) const
@@ -66,7 +66,7 @@ namespace Insight
 			Core::GUID componentGuid;
 			componentGuid.StringToGuid(componentGuidString);
 			
-			ECS::Entity* entity = Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(entityGuid);
+			ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
 			if (entity == nullptr)
 			{
 				return nullptr;

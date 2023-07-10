@@ -45,7 +45,7 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowSave(&item,
                             {
-                                FileDialogFilter{ L"Project (*.isproject)", L"*.isproject"},
+                                FileDialogFilter{ L"Project", L"*.isproject"},
                             });
                         Runtime::ProjectSystem::Instance().CreateProject(item, item);
                         Runtime::ProjectSystem::Instance().OpenProject(item);
@@ -60,7 +60,7 @@ namespace Insight
                         PlatformFileDialog fileDialog;
                         fileDialog.ShowLoad(&item,
                             { 
-                                FileDialogFilter{ L"Project (*.isproject)", L"*.isproject"},
+                                FileDialogFilter{ L"Project", L"*.isproject"},
                             });
                         Runtime::ProjectSystem::Instance().OpenProject(item);
                     }
