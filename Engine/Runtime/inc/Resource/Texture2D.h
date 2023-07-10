@@ -6,6 +6,8 @@ namespace Insight
 {
 	namespace Runtime
 	{
+		class TextureLoader;
+
 		class IS_RUNTIME Texture2D : public Texture
 		{
 			REGISTER_RESOURCE(Texture2D);
@@ -31,6 +33,8 @@ namespace Insight
 
 		private:
 			void OnRHITextureUploadCompleted(Graphics::RHI_Texture* rhiTexture);
+
+			friend TextureLoader;
 		};
 	}
 }

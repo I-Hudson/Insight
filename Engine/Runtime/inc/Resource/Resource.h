@@ -143,6 +143,11 @@ namespace Insight
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
+			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
+			/// and exists inside another resource's disk file.
+			/// @param file_path 
+			virtual void LoadFromMemory(const void* data, u64 size_in_bytes);
+
 			Core::Delegate<IResource*> OnLoaded;
 			Core::Delegate<IResource*> OnUnloaded;
 
@@ -182,11 +187,6 @@ namespace Insight
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
 			virtual void Load();
-
-			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
-			/// and exists inside another resource's disk file.
-			/// @param file_path 
-			virtual void LoadFromMemory(const void* data, u64 size_in_bytes);
 
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();

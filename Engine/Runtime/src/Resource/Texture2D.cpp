@@ -27,30 +27,7 @@ namespace Insight
 
 			if (m_rawDataPtr == nullptr && m_dataSize == 0)
 			{
-				std::string_view filePath = m_file_path;
-				if (filePath.empty() || !FileSystem::Exists(filePath))
-				{
-					m_resource_state = EResoruceStates::Not_Found;
-					return;
-				}
 
-				std::ifstream fileStream(filePath.data(), std::ios::in | std::ios::binary);
-				if (!fileStream.is_open())
-				{
-					m_resource_state = EResoruceStates::Failed_To_Load;
-					return;
-				}
-
-				const u64 fileSize = FileSystem::GetFileSize(filePath);
-				std::vector<Byte> fileData;
-				fileData.resize(fileSize);
-
-				fileStream.read((char*)fileData.data(), fileSize);
-				fileStream.close();
-
-				m_dataSize = fileSize;
-				m_rawDataPtr = static_cast<Byte*>(NewBytes(m_dataSize, Core::MemoryAllocCategory::Resources));
-				Platform::MemCopy(m_rawDataPtr, fileData.data(), m_dataSize);
 			}
 
 			LoadFromMemory(m_rawDataPtr, m_dataSize);
