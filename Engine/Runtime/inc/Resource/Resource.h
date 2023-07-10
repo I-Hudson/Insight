@@ -101,7 +101,7 @@ namespace Insight
 
 			THREAD_SAFE;
 
-			IS_SERIALISABLE_H(IResource)
+			IS_SERIALISABLE_H(IResource);
 
 			/// @brief Return thr full file path (From drive letter C:\\).
 			std::string GetFilePath() const;

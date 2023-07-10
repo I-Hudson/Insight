@@ -1,5 +1,7 @@
 #include "Editor/Build/BuildSystem.h"
 
+#include "Resource/ResourceManager.h"
+
 namespace Insight::Editor
 {
     BuildSystem::BuildSystem()
@@ -21,4 +23,10 @@ namespace Insight::Editor
     {
         return false;
     }
+
+    bool BuildSystem::BuildLooseResourcePack()
+    {
+        return false;
+    }
+
 }

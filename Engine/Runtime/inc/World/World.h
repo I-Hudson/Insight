@@ -6,8 +6,9 @@
 #include "ECS/Entity.h"
 #include "ECS/EntityManager.h"
 
-#include "Serialisation/Serialiser.h"
-#include "Serialisation/ISerialisable.h"
+#include "World/Generated/World_reflect_generated.h"
+
+#include <Reflect.h>
 
 #include <string>
 
@@ -33,8 +34,10 @@ namespace Insight
 		/// Describes a single "world" within the engine.
 		/// A World contains all entities and requried date for it self to be processed.
 		/// </summary>
+		REFLECT_CLASS();
 		class IS_RUNTIME World : public IObject, public Serialisation::ISerialisable
 		{
+			REFLECT_GENERATED_BODY();
 		public:
 			World();
 			World(std::string worldName);
@@ -100,7 +103,7 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::World, 2, 
+	OBJECT_SERIALISER(Runtime::World, 3, 
 		SERIALISE_PROPERTY(std::string, m_worldName, 1, 0)
 		SERIALISE_PROPERTY(Runtime::WorldStates, m_worldState, 2, 0)
 		SERIALISE_PROPERTY(Runtime::WorldTypes, m_worldType, 2, 0)
@@ -111,5 +114,7 @@ namespace Insight
 
 		SERIALISE_PROPERTY(bool, m_persistentScene, 1, 0)
 		SERIALISE_PROPERTY(bool, m_onlySearchable, 1, 0)
+
+		SERIALISE_BASE(IObject, 3, 0)
 	);
 }

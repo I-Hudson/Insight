@@ -11,11 +11,11 @@
 
 namespace Insight::Editor::EditorGUI
 {
-    void IS_EDITOR Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload)
+    void Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            ImGui::SetDragDropPayload("EDW_COMPONENT_DRAG_DROP", payload, strlen(payload));
+            ImGui::SetDragDropPayload(id, payload, strlen(payload));
             ImGui::EndDragDropSource();
         }
     }
@@ -39,7 +39,7 @@ namespace Insight::Editor::EditorGUI
                 Core::GUID componentGuid;
                 componentGuid.StringToGuid(componentGuidString);
 
-                ECS::Entity* entity = Runtime::WorldSystem::Instance().GetActiveWorld()->GetEntityByGUID(entityGuid);
+                ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
                 ECS::Component* component = entity->GetComponentByGuid(componentGuid);
 
                 Reflect::TypeInfo componentTypeInfo;
@@ -57,12 +57,12 @@ namespace Insight::Editor::EditorGUI
                 }
                 else if (component)
                 {
-                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Target type is '{}', drag object type is '{}'.",
+                    IS_CORE_INFO("[EditorGUI::ObjectFieldTarget] Target type is '{}', drag object type is '{}'.",
                         type.GetTypeName(), componentTypeInfo.GetTypeId().GetTypeName());
                 }
                 else
                 {
-                    IS_CORE_INFO("[EntitiyDescriptionWindow::DrawComponent] Component from GUID '{}' is null.", componentGuid.ToString());
+                    IS_CORE_INFO("[EditorGUI::ObjectFieldTarget] Component from GUID '{}' is null.", componentGuid.ToString());
                 }
             }
             ImGui::EndDragDropTarget();

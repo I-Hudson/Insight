@@ -3,6 +3,9 @@
 #include "ECS/Components/CameraComponent.h"
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
+#include "Serialisation/Archive.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
+
 #include "Algorithm/Vector.h"
 
 #include "Core/Profiler.h"
@@ -93,6 +96,23 @@ namespace Insight
 			return world;
 		}
 
+		World* WorldSystem::LoadWorld(std::string_view filePath)
+		{
+			Archive archive(filePath, ArchiveModes::Read);
+			archive.Close();
+
+			Serialisation::JsonSerialiser serialiser(true);
+			if (!serialiser.Deserialise(archive.GetData()))
+			{
+				return nullptr;
+			}
+
+			TObjectPtr<World> world = CreateWorld();
+			SetActiveWorld(world);
+			world->Deserialise(&serialiser);
+			return world.Get();
+		}
+
 		void WorldSystem::SetActiveWorld(TObjectPtr<World> world)
 		{
 			if (!world)
@@ -141,7 +161,11 @@ namespace Insight
 				return;
 			}
 
-			ASSERT(Algorithm::VectorContains(m_worlds, world));
+			bool foundWorld = Algorithm::VectorContains(m_worlds, world);
+			if (!foundWorld)
+			{
+				return;
+			}
 
 			auto activeWorldIter = Algorithm::VectorFind(m_activeWorlds, world);
 			if (activeWorldIter != m_activeWorlds.end())
@@ -188,6 +212,18 @@ namespace Insight
 			return TObjectPtr<World>();
 		}
 
+		TObjectPtr<World> WorldSystem::GetWorldFromGuid(const Core::GUID& guid) const
+		{
+			for (const TObjectOwnPtr<World>& world : m_worlds)
+			{
+				if (world->GetGuid() == guid) 
+				{
+					return world;
+				}
+			}
+			return nullptr;
+		}
+
 		std::vector<TObjectPtr<World>> WorldSystem::GetAllWorlds() const
 		{
 			std::vector<TObjectPtr<World>> worlds;
@@ -196,6 +232,19 @@ namespace Insight
 				worlds.push_back(m_activeWorlds.at(i));
 			}
 			return worlds;
+		}
+
+		ECS::Entity* WorldSystem::GetEntityByGUID(const Core::GUID& guid) const
+		{
+			for (const TObjectOPtr<World>& world : m_worlds)
+			{
+				ECS::Entity* entity = world->GetEntityByGUID(guid);
+				if (entity != nullptr) 
+				{
+					return entity;
+				}
+			}
+			return nullptr;
 		}
 	}
 }

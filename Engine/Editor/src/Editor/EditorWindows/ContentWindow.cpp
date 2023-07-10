@@ -1,5 +1,6 @@
 #include "Editor/EditorWindows/ContentWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
+#include "Editor/EditorGUI.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "Resource/ResourceManager.h"
@@ -368,6 +369,9 @@ namespace Insight::Editor
                     {
                         ImGui::SameLine();
                     }
+
+
+                    EditorGUI::ObjectFieldSource("DragDropTarget", "");
                 }
 
                 if (!new_line)

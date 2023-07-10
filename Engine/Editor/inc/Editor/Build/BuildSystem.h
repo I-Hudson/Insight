@@ -24,6 +24,10 @@ namespace Insight
             bool BuildProject();
 
         private:
+            /// @brief Build a resource pack with all loose files.
+            bool BuildLooseResourcePack();
+
+        private:
             BuildTarget m_currentBuildTarget;
         };
     }

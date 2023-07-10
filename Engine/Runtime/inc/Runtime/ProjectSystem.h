@@ -23,7 +23,8 @@ namespace Insight
             std::string ProjectName;
             u32 ProjectVersion = 0;
             bool IsOpen = false;
-           
+            Core::GUID DefaultWorld;
+
             const std::string& GetProjectPath() const { return ProjectPath; }
             std::string GetProjectFilePath() const { return ProjectPath + "/" + ProjectName + c_ProjectExtension; }
             std::string GetContentPath() const { return ProjectPath + "/Content"; }
@@ -59,10 +60,11 @@ namespace Insight
         };
     }
 
-    OBJECT_SERIALISER(Runtime::ProjectInfo, 2,
+    OBJECT_SERIALISER(Runtime::ProjectInfo, 3,
         SERIALISE_PROPERTY(std::string, ProjectPath, 1, 0)
         SERIALISE_PROPERTY(std::string, ProjectName, 1, 0)
         SERIALISE_PROPERTY(u32, ProjectVersion, 1, 2)
         SERIALISE_PROPERTY(bool, IsOpen, 1, 2)
+        SERIALISE_PROPERTY(Core::GUID, DefaultWorld, 3, 0)
     );
 }

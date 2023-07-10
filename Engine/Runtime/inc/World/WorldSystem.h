@@ -30,6 +30,8 @@ namespace Insight
 			// Create a new world which can not be unloaded. This world will alway be loaded.
 			TObjectPtr<World> CreatePersistentWorld(std::string worldName = "", WorldTypes worldType = WorldTypes::Game);
 
+			World* LoadWorld(std::string_view filePath);
+
 			// Set a single scene as active.
 			void SetActiveWorld(TObjectPtr<World> world);
 			// Add a scene to be active.
@@ -40,7 +42,11 @@ namespace Insight
 			TObjectPtr<World> GetActiveWorld() const;
 			TObjectPtr<World> FindWorldByName(std::string_view sceneName);
 			TObjectPtr<World> GetWorldFromIndex(u32 index) const;
+			TObjectPtr<World> GetWorldFromGuid(const Core::GUID& guid) const;
+
 			std::vector<TObjectPtr<World>> GetAllWorlds() const;
+
+			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
 		private:
 			std::vector<TObjectPtr<World>> m_activeWorlds;

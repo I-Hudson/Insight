@@ -95,17 +95,8 @@ namespace Insight
                                 FileDialogFilter{ L"World", L"*.isworld"},
                             }))
                         {
-                            TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
-                            if (activeWorld)
-                            {
-                                Archive archive(item, ArchiveModes::Read);
-                                archive.Close();
-
-                                Serialisation::JsonSerialiser serialiser(true);
-                                serialiser.Deserialise(archive.GetData());
-
-                                activeWorld->Deserialise(&serialiser);
-                            }
+                            Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().GetActiveWorld());
+                            Runtime::WorldSystem::Instance().LoadWorld(item);
                         }
                     }
                     if (ImGui::MenuItem("Clear World"))
