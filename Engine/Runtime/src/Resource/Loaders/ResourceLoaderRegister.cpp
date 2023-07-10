@@ -1,6 +1,10 @@
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/Loaders/IResourceLoader.h"
+
 #include "Resource/Loaders/AssimpLoader.h"
+#include "Resource/Loaders/BinaryLoader.h"
+#include "Resource/Loaders/TextLoader.h"
+#include "Resource/Loaders/TextureLoader.h"
 
 #include "Resource/Resource.h"
 
@@ -28,7 +32,11 @@ namespace Insight
         void ResourceLoaderRegister::Initialise()
         {
             ASSERT(Platform::IsMainThread());
+
             RegisterResourceLoader(New<AssimpLoader>());
+            RegisterResourceLoader(New<BinaryLoader>());
+            RegisterResourceLoader(New<TextLoader>());
+            RegisterResourceLoader(New<TextureLoader>());
 
             VerifyLoaders();
         }
@@ -72,7 +80,7 @@ namespace Insight
 
         void ResourceLoaderRegister::RegisterResourceLoader(IResourceLoader* resourceLoader)
         {
-            if (Algorithm::VectorContainsIf(s_resourceLoaders, [resourceLoader](const IResourceLoader* loader)
+            if (!resourceLoader->GetLoadableResourceTypes().empty() && Algorithm::VectorContainsIf(s_resourceLoaders, [resourceLoader](const IResourceLoader* loader)
                 {
                     return resourceLoader->GetResourceTypeId() == loader->GetResourceTypeId();
                 }))

@@ -491,7 +491,7 @@ namespace Insight
                             }
                             else
                             {
-                                // Something has gone wrong when tring to load the resource.
+                                // Something has gone wrong when trying to load the resource.
                                 resource->m_resource_state = EResoruceStates::Failed_To_Load;
                             }
                         }

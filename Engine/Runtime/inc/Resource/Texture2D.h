@@ -12,18 +12,18 @@ namespace Insight
 		{
 			REGISTER_RESOURCE(Texture2D);
 		public:
-
 			Texture2D(std::string_view filePath);
+			virtual ~Texture2D() override;
+
+			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
+			/// and exists inside another resource's disk file.
+			/// @param file_path 
+			virtual void LoadFromMemory(const void* data, u64 size_in_bytes) override;
 
 		private:
 			/// @brief Handle loading the resource from disk.
 			/// @param file_path 
 			virtual void Load() override;
-
-			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
-			/// and exists inside another resource's disk file.
-			/// @param file_path 
-			virtual void LoadFromMemory(Byte* data, const u64 dataSize);
 
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();

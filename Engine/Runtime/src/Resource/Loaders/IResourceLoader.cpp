@@ -11,8 +11,6 @@ namespace Insight
             : m_acceptedFileExtensions(std::move(acceptedFileExtensions))
             , m_loadableResourceTypeIds(std::move(loadableResourceTypeIds))
         {
-            ASSERT(m_acceptedFileExtensions.size() > 0);
-            ASSERT(m_loadableResourceTypeIds.size() > 0);
         }
 
         IResourceLoader::~IResourceLoader()
@@ -45,7 +43,7 @@ namespace Insight
             {
                 return m_loadableResourceTypeIds.at(0);
             }
-            FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
+            //FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
             return {};
         }
 
@@ -55,7 +53,7 @@ namespace Insight
             {
                 return m_loadableResourceTypeIds.at(index);
             }
-           FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
+           //FAIL_ASSERT_MSG("[IResourceLoader::GetResourceTypeId] Out of bounds.");
            return {};
         }
     }

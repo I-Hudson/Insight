@@ -21,21 +21,20 @@ namespace Insight
 		{
 		}
 
+		Texture2D::~Texture2D()
+		{
+		}
+
 		void Texture2D::Load()
 		{
 			IS_PROFILE_FUNCTION();
-
-			if (m_rawDataPtr == nullptr && m_dataSize == 0)
-			{
-
-			}
-
+			FAIL_ASSERT();
 			LoadFromMemory(m_rawDataPtr, m_dataSize);
 		}
 
-		void Texture2D::LoadFromMemory(Byte* data, const u64 dataSize)
+		void Texture2D::LoadFromMemory(const void* data, u64 size_in_bytes)
 		{
-			ASSERT(!m_rhi_texture && data && dataSize > 0);
+			ASSERT(!m_rhi_texture && data && size_in_bytes > 0);
 			IS_PROFILE_FUNCTION();
 
 			m_rhi_texture = Renderer::CreateTexture();
@@ -56,7 +55,7 @@ namespace Insight
 			else
 			{
 				IS_PROFILE_SCOPE("stbi_load_from_memory");
-				textureData = stbi_load_from_memory(data, static_cast<int>(dataSize), &width, &height, &channels, STBI_rgb_alpha);
+				textureData = stbi_load_from_memory((stbi_uc*)data, static_cast<int>(size_in_bytes), &width, &height, &channels, STBI_rgb_alpha);
 				channels = STBI_rgb_alpha;
 			}
 
