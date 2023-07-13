@@ -5,6 +5,8 @@
 #include "Graphics/RHI/RHI_Buffer.h"
 #include "Graphics/BoundingBox.h"
 
+#include "Generated/Mesh_reflect_generated.h"
+
 namespace Insight
 {
 	struct RenderMesh;
@@ -39,14 +41,17 @@ namespace Insight
 
 		/// @brief Contain vertex and index buffers for use when rendering this mesh.
 		/// This class stores only geometry data.
+		REFLECT_CLASS()
 		class IS_RUNTIME Mesh : public IResource
 		{
-			REGISTER_RESOURCE(Mesh);
+			REFLECT_GENERATED_BODY()
+		
 		public:
 			Mesh();
 			Mesh(std::string_view filePath);
 			virtual ~Mesh() override;
 
+			REGISTER_RESOURCE(Mesh);
 			IS_SERIALISABLE_H(Mesh)
 
 			void Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index = 0);

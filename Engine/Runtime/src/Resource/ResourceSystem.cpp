@@ -2,6 +2,7 @@
 #include "Resource/ResourceManager.h"
 
 #include "Resource/Loaders/ResourceLoaderRegister.h"
+#include "ResourceRegister.gen.h"
 
 #include "Serialisation/Archive.h"
 
@@ -25,6 +26,8 @@ namespace Insight
         void ResourceSystem::Initialise()
         {
             ResourceLoaderRegister::Initialise();
+
+            RegisterAllResources();
 
             ResourceManager::s_database = &m_database;
             m_database.Initialise();

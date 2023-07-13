@@ -2,18 +2,25 @@
 
 #include "Resource/Texture.h"
 
+#include "Generated/Texture2D_reflect_generated.h"
+
+#include <Reflect.h>
+
 namespace Insight
 {
 	namespace Runtime
 	{
 		class TextureLoader;
 
+		REFLECT_CLASS()
 		class IS_RUNTIME Texture2D : public Texture
 		{
-			REGISTER_RESOURCE(Texture2D);
+			REFLECT_GENERATED_BODY()
 		public:
 			Texture2D(std::string_view filePath);
 			virtual ~Texture2D() override;
+
+			REGISTER_RESOURCE(Texture2D);
 
 			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
 			/// and exists inside another resource's disk file.

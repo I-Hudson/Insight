@@ -3,6 +3,8 @@
 #include "Resource/Resource.h"
 #include "Graphics/PixelFormat.h"
 
+#include "Generated/Texture_reflect_generated.h"
+
 namespace Insight
 {
 	namespace Graphics
@@ -41,12 +43,15 @@ namespace Insight
 			QOI,
 		};
 
+		REFLECT_CLASS()
 		class IS_RUNTIME Texture : public IResource
 		{
-			REGISTER_RESOURCE(Texture);
-			IS_SERIALISABLE_H(Texture);
+			REFLECT_GENERATED_BODY()
 		public:
 			Texture(std::string_view filePath);
+
+			REGISTER_RESOURCE(Texture);
+			IS_SERIALISABLE_H(Texture);
 
 			u32 GetWidth() const;
 			u32 GetHeight() const;

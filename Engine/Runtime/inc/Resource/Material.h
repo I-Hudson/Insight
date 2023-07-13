@@ -4,6 +4,8 @@
 #include "Resource/Texture2D.h"
 #include "Resource/ResourceLifeTimeHandle.h"
 
+#include "Generated/Material_reflect_generated.h"
+
 #include <array>
 
 namespace Insight
@@ -26,14 +28,17 @@ namespace Insight
 			Count
 		};
 
+		REFLECT_CLASS()
 		class IS_RUNTIME Material : public IResource
 		{
-			REGISTER_RESOURCE(Material);
+			REFLECT_GENERATED_BODY()
+		
 		public:
 			Material();
 			Material(std::string_view filePath);
 			virtual ~Material() override;
 
+			REGISTER_RESOURCE(Material);
 			IS_SERIALISABLE_H(Material)
 
 			void SetTexture(TextureTypes texture_type, Texture2D* texture);

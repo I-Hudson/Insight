@@ -1,25 +1,31 @@
 #pragma once
 
 #include "Resource/Resource.h"
+#include "Resource/Material.h"
+#include "Resource/Mesh.h"
+
 #include "ECS/ICreateEntityHierarchy.h"
 
 #include "Graphics/RHI/RHI_Buffer.h"
+
+#include "Generated/Model_reflect_generated.h"
 
 namespace Insight
 {
 	namespace Runtime
 	{
-		class Mesh;
-		class Material;
 		class AssimpLoader;
 
+		REFLECT_CLASS()
 		class IS_RUNTIME Model : public IResource, public ECS::ICreateEntityHierarchy
 		{
-			REGISTER_RESOURCE(Model);
+			REFLECT_GENERATED_BODY()
+		
 		public:
 			Model(std::string_view filePath);
 			virtual ~Model() override;
 
+			REGISTER_RESOURCE(Model);
 			IS_SERIALISABLE_H(Model)
 
 			Mesh* GetMesh() const;

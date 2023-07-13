@@ -96,6 +96,18 @@ constexpr bool ObjectSerialiserCheck(std::string_view currentObjectSerialiser, s
                 objectSerialiser.Deserialise(serialiser, baseTypeRef, serialisedObjectSerilaiser);\
             }\
         }
+// Replace SERIALISE_NAMED_BASE with SERIALISE_NAMED_OBJECT_REMOVED when an object is removed.
+#define SERIALISE_NAMED_BASE_REMOVED(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
+        if (isReadMode)\
+        {\
+            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
+            {\
+                ::Insight::Serialisation::SerialiserObject<BASE_TYPE> objectSerialiser; \
+                BASE_TYPE* baseTypePtr = static_cast<BASE_TYPE*>(&object);\
+                BASE_TYPE& baseTypeRef = *baseTypePtr;\
+                objectSerialiser.Deserialise(serialiser, baseTypeRef, serialisedObjectSerilaiser);\
+            }\
+        }
 
 
 // Serialise a single property. This would be thiings which only contain data for them self. 
@@ -231,6 +243,8 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_PROPERTY_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)      SERIALISE_NAMED_PROPERTY_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)
 // Replace SERIALISE_OBJECT with this when an object is removed.
 #define SERIALISE_OBJECT_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)        SERIALISE_NAMED_OBJECT_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)
+// Replace SERIALISE_BASE with this when an base object is removed.
+#define SERIALISE_BASE_REMOVED(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)                               SERIALISE_NAMED_BASE_REMOVED(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)
 
 // Serialise a vector property with a ProertySerialiser.
 #define SERIALISE_VECTOR_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)            SERIALISE_VECTOR_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)

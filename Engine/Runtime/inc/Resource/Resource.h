@@ -12,6 +12,10 @@
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
+#include "Generated/Resource_reflect_generated.h"
+
+#include <Reflect.h>
+
 #include <string>
 #include <atomic>
 #include <shared_mutex>
@@ -90,8 +94,10 @@ namespace Insight
 		};
 
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
-		class IS_RUNTIME IResource : public Serialisation::ISerialisable
+		REFLECT_CLASS()
+		class IS_RUNTIME IResource : public Reflect::IReflect, public Serialisation::ISerialisable
 		{
+			REFLECT_GENERATED_BODY()
 		public:
 			using ResourceSerialiserType = Serialisation::BinarySerialiser;
 

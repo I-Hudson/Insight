@@ -11,13 +11,15 @@ namespace Insight
 	namespace Runtime
 	{
 		World::World()
-			: m_worldName("Default")
+			: IResource("Default")
+			, m_worldName("Default")
 		{
 			m_entityManager.SetWorld(this);
 		}
 
-		World::World(std::string worldName)
-			: m_worldName(std::move(worldName))
+		World::World(std::string_view filePath, std::string worldName)
+			: IResource(filePath)
+			, m_worldName(std::move(worldName))
 		{
 			m_entityManager.SetWorld(this);
 		}
