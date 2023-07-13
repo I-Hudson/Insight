@@ -33,3 +33,10 @@ namespace TypeDrawerRegister
     constexpr const char* c_GetAllTypeDrawerNames = "GetAllTypeDrawerNames";
     //constexpr const char* c_GetAllComponentTypeInfos = "GetAllComponentTypeInfos";
 }
+
+namespace ResourceRegister
+{
+    constexpr const char* c_RegisterAllResources = "RegisterAllResources";
+    //constexpr const char* c_UnregisterResources = "UnregisterResources";
+    //constexpr const char* c_GetAllResourceNames = "GetAllResourceNames";
+}

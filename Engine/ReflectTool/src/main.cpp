@@ -1,6 +1,7 @@
 #include "GenerateFiles/GenerateEditorWindowRegister.h"
 #include "GenerateFiles/GenerateComponentRegister.h"
 #include "GenerateFiles/GenerateTypeDrawerReigster.h"
+#include "GenerateFiles/GenerateResourceRegister.h"
 #include "GenerateFiles/GenerateProjectInitialise.h"
 
 #include <Reflect.h>
@@ -93,8 +94,6 @@ int main(int argc, char** agc)
     std::string genComponentRegisterFile;
     std::string genTypeDrawerRegisterFile;
 
-    std::string projectInitialiseFile;
-
     if (genOutputPath.back() == '/' || genOutputPath.back() == '\\')
     {
         genOutputPath.pop_back();
@@ -105,14 +104,12 @@ int main(int argc, char** agc)
         genEditorWindowsFile = genOutputPath + "/Editor/inc/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/Runtime/inc/ECS/RegisterComponents.gen.h";
         genTypeDrawerRegisterFile = genOutputPath + "/Editor/inc/TypeDrawers.gen.h";
-
     }
     else if (typeValue == "Project")
     {
         genEditorWindowsFile = genOutputPath + "/EditorWindows.gen.h";
         genComponentRegisterFile = genOutputPath + "/RegisterComponents.gen.h";
         genTypeDrawerRegisterFile = genOutputPath + "/TypeDrawers.gen.h";
-        projectInitialiseFile = genOutputPath + "/ProjectInitialise.gen.cpp";
     }
     else
     {
@@ -133,12 +130,24 @@ int main(int argc, char** agc)
     result |= generateComponentRegister.Generate(fileParser, genComponentRegisterFile, options);
 
     GenerateTypeDrawerReigster generateTypeDrawerReigster;
-    generateTypeDrawerReigster.Generate(fileParser, genTypeDrawerRegisterFile, options);
+    result |= generateTypeDrawerReigster.Generate(fileParser, genTypeDrawerRegisterFile, options);
 
-    if (typeValue == "Project")
+    if (typeValue == "Engine")
     {
+        std::string genResourceRegisterFile;
+        genResourceRegisterFile = genOutputPath + "/Runtime/inc/ResourceRegister.gen.h";
+
+        GenerateResourceRegister generateResourceRegister;
+        result |= generateResourceRegister.Generate(fileParser, genResourceRegisterFile, options);
+    }
+    else if (typeValue == "Project")
+    {
+        std::string projectInitialiseFile;
+        projectInitialiseFile = genOutputPath + "/ProjectInitialise.gen.cpp";
+
         GenerateProjectInitialise generateProjectInitialise;
         result |= generateProjectInitialise.Generate(fileParser, projectInitialiseFile, options);
     }
+
     return result;
 }

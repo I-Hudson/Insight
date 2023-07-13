@@ -13,27 +13,8 @@ namespace InsightReflectTool
 {
     bool GenerateEditorWindowRegister::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
-        std::vector<std::string> editorWindowFiles;
-        std::vector<Reflect::Parser::ReflectContainerData> editorWindowClasses;
-        for (const auto& fileParsed : fileParser.GetAllFileParsedData())
-        {
-            if (fileParsed.parserOptions.DoNotReflect)
-            {
-                continue;
-            }
-
-            for (const auto& reflectData : fileParsed.ReflectData)
-            {
-                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::Parser::ReflectInheritanceData& data)
-                    {
-                        return "IEditorWindow" == data.Name;
-                    }) != reflectData.Inheritance.end())
-                {
-                    editorWindowFiles.push_back(fileParsed.FilePath + "/" + fileParsed.FileName + ".h");
-                    editorWindowClasses.push_back(reflectData);
-                }
-            }
-        }
+        std::vector<std::string> editorWindowFiles = Utils::GetAllFilesWithType("IEditorWindow", fileParser);
+        std::vector<Reflect::Parser::ReflectContainerData> editorWindowClasses = Utils::GetAllDerivedTypesFromBaseType("IEditorWindow", fileParser);
 
         std::fstream file;
         std::string absPath = std::filesystem::absolute(outFilePath).string();

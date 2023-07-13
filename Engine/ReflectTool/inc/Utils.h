@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Reflect.h>
+
 #include <fstream>
 #include <vector>
 #include <string>
@@ -22,5 +24,8 @@ namespace InsightReflectTool
         void WriteSourceFunctionDefinition(std::fstream& file, std::string_view returnValue, std::string_view functionName, std::vector<std::string_view> arguments, WriteSourceFunctionBodyFunc func, int indent = 0);
 
         void ValidateOutputPath(std::string_view path);
+
+        std::vector<std::string> GetAllFilesWithType(std::string_view type, const Reflect::Parser::FileParser& fileParser);
+        std::vector<Reflect::Parser::ReflectContainerData> GetAllDerivedTypesFromBaseType(std::string_view baseType, const Reflect::Parser::FileParser& fileParser);
     }
 }

@@ -12,27 +12,8 @@ namespace InsightReflectTool
 {
     bool GenerateComponentRegister::Generate(const Reflect::Parser::FileParser& fileParser, std::string_view outFilePath, const Reflect::ReflectAddtionalOptions& options) const
     {
-        std::vector<std::string> componentFiles;
-        std::vector<Reflect::Parser::ReflectContainerData> componentClasses;
-        for (const auto& fileParsed : fileParser.GetAllFileParsedData())
-        {
-            if (fileParsed.parserOptions.DoNotReflect)
-            {
-                continue;
-            }
-
-            for (const auto& reflectData : fileParsed.ReflectData)
-            {
-                if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [](const Reflect::Parser::ReflectInheritanceData& data)
-                    {
-                        return "Component" == data.Name;
-                    }) != reflectData.Inheritance.end())
-                {
-                    componentFiles.push_back(fileParsed.FilePath + "/" + fileParsed.FileName + ".h");
-                    componentClasses.push_back(reflectData);
-                }
-            }
-        }
+        std::vector<std::string> componentFiles = Utils::GetAllFilesWithType("Component", fileParser);
+        std::vector<Reflect::Parser::ReflectContainerData> componentClasses = Utils::GetAllDerivedTypesFromBaseType("Component", fileParser);
 
         std::fstream file;
         std::string absPath = std::filesystem::absolute(outFilePath).string();

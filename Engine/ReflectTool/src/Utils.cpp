@@ -75,5 +75,59 @@ namespace InsightReflectTool
                 std::filesystem::create_directories(folderPath);
             }
         }
+
+        std::vector<std::string> GetAllFilesWithType(std::string_view type, const Reflect::Parser::FileParser& fileParser)
+        {
+            std::vector<std::string> files;
+            for (const auto& fileParsed : fileParser.GetAllFileParsedData())
+            {
+                if (fileParsed.parserOptions.DoNotReflect)
+                {
+                    continue;
+                }
+
+                for (const auto& reflectData : fileParsed.ReflectData)
+                {
+                    if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [&type](const Reflect::Parser::ReflectInheritanceData& data)
+                        {
+                            return type == data.Name;
+                        }) != reflectData.Inheritance.end())
+                    {
+                        files.push_back(fileParsed.FilePath + "/" + fileParsed.FileName + ".h");
+                    }
+                }
+            }
+            return files;
+        }
+
+        std::vector<Reflect::Parser::ReflectContainerData> GetAllDerivedTypesFromBaseType(std::string_view baseType, const Reflect::Parser::FileParser& fileParser)
+        {
+            std::vector<Reflect::Parser::ReflectContainerData> classes;
+            for (const auto& fileParsed : fileParser.GetAllFileParsedData())
+            {
+                if (fileParsed.parserOptions.DoNotReflect)
+                {
+                    continue;
+                }
+                assert(fileParsed.FileName != "Texture2d");
+
+                for (const auto& reflectData : fileParsed.ReflectData)
+                {
+                    if (std::find_if(reflectData.Inheritance.begin(), reflectData.Inheritance.end(), [&baseType, &fileParser](const Reflect::Parser::ReflectInheritanceData& data)
+                        {
+                            if (data.Name == baseType)
+                            {
+                                return true;
+                            }
+
+                            return data.InheritsFromType(baseType);
+                        }) != reflectData.Inheritance.end())
+                    {
+                        classes.push_back(reflectData);
+                    }
+                }
+            }
+            return classes;
+        }
     }
 }
