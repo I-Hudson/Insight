@@ -13,6 +13,7 @@
 
 #include "Maths/Matrix4.h"
 
+#include <cmath>
 #include <limits>
 
 namespace Insight

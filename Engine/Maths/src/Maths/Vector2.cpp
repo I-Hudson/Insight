@@ -3,6 +3,7 @@
 
 #include "Maths/MathsUtils.h"
 
+#include <cmath>
 #include <limits>
 
 namespace Insight

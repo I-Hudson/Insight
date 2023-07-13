@@ -3,6 +3,7 @@
 
 #include "Maths/MathsUtils.h"
 
+#include <cmath>
 #include <limits>
 
 namespace Insight
@@ -90,7 +91,7 @@ namespace Insight
 #ifdef IS_MATHS_DIRECTX_MATHS
 			return DirectX::XMVectorGetX(DirectX::XMVector4Length(xmvector));
 #else
-			return static_cast<float>(sqrt(LengthSquared()));
+			return static_cast<float>(std::sqrt(LengthSquared()));
 #endif
 		}
 		float Vector4::LengthSquared() const
