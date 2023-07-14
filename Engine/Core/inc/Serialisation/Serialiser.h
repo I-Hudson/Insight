@@ -357,7 +357,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             using ObjectType = OBJECT_TYPE;\
             SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
             DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
-\
+        \
         private:\
             std::string objectSerialiserType;\
         };

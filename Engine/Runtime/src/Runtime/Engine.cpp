@@ -47,6 +47,9 @@ namespace Insight
 			OnPreInit();
 
 			// Systems
+			m_systemRegistry.RegisterSystem(&m_assetRegistry);
+			m_assetRegistry.Initialise();
+
 			m_systemRegistry.RegisterSystem(&m_taskSystem);
 			m_systemRegistry.RegisterSystem(&m_eventSystem);
 			m_systemRegistry.RegisterSystem(&m_resourceSystem);
@@ -55,6 +58,7 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
+
 
 			const std::string cmdLinePath = EnginePaths::GetExecutablePath() + "/cmdline.txt";
 			Core::CommandLineArgs::ParseCommandLine(argc, argv);
@@ -203,6 +207,8 @@ namespace Insight
 
 			m_taskSystem.Shutdown();
 
+			m_assetRegistry.Shutdown();
+
 			m_systemRegistry.VerifyAllSystemsStates(Core::SystemStates::Not_Initialised);
 
 			m_systemRegistry.UnregisterSystem(&m_worldSystem);
@@ -213,6 +219,7 @@ namespace Insight
 			m_systemRegistry.UnregisterSystem(&m_projectSystem);
 			m_systemRegistry.UnregisterSystem(&m_eventSystem);
 			m_systemRegistry.UnregisterSystem(&m_taskSystem);
+			m_systemRegistry.UnregisterSystem(&m_assetRegistry);
 
 			ASSERT(m_systemRegistry.IsEmpty());
 

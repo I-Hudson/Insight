@@ -2,6 +2,7 @@
 
 #include "Resource/ResourceId.h"
 #include "Runtime/Defines.h"
+#include "Asset/AssetUser.h"
 
 #include "Core/Defines.h"
 #include "Core/Delegate.h"
@@ -95,7 +96,7 @@ namespace Insight
 
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
 		REFLECT_CLASS()
-		class IS_RUNTIME IResource : public Reflect::IReflect, public Serialisation::ISerialisable
+		class IS_RUNTIME IResource : public Reflect::IReflect, public AssetUser
 		{
 			REFLECT_GENERATED_BODY()
 		public:
