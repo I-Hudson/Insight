@@ -50,13 +50,25 @@ namespace Insight::Runtime
         LoadMetaData(assetInfo);
 
         m_guidToAssetInfoLookup[assetInfo->MetaData.AssetGuid] = assetInfo;
-        m_pathToGuidLookup[path.data()] = assetInfo->MetaData.AssetGuid;
+        m_pathToGuidLookup[assetInfo->GetFullFilePath()] = assetInfo->MetaData.AssetGuid;
 
         return assetInfo;
     }
 
     void AssetRegistry::RemoveAsset(std::string_view path)
     {
+        if (!HasAssetFromPath(path))
+        {
+            return;
+        }
+
+        AssetInfo* assetInfo = RemoveConst(GetAsset(path));
+        ASSERT(assetInfo);
+        ASSERT(assetInfo->GetCount() == 0);
+
+        m_guidToAssetInfoLookup.erase(assetInfo->MetaData.AssetGuid);
+        m_pathToGuidLookup.erase(assetInfo->GetFullFilePath());
+        ::Delete(assetInfo);
     }
 
     void AssetRegistry::UpdateMetaData(AssetInfo* assetInfo, AssetUser* object)
