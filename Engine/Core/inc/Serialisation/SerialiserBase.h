@@ -9,6 +9,8 @@
 #include "Serialisation/ISerialisable.h"
 
 #include <vector>
+#include <set>
+#include <unordered_set>
 #include <assert.h>
 
 namespace Insight
@@ -380,6 +382,69 @@ namespace Insight
                         ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, *ptr);
                     }
                 }
+                serialiser->StopArray();
+            }
+        };
+
+        template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>
+        struct SetSerialiser
+        {
+            void operator()(ISerialiser* serialiser, std::string_view name, std::set<T>& set)
+            {
+                if (!serialiser)
+                {
+                    return;
+                }
+
+                u64 arraySize = set.size();
+                serialiser->StartArray(name, arraySize);
+                for (const T& v : set)
+                {
+                    ::Insight::Serialisation::Serialise<TypeSerialiser, T, SerialiserType>(serialiser, "", RemoveConst(v));
+                }
+                serialiser->StopArray();
+            }
+            void operator()(ISerialiser* serialiser, std::string_view name, std::unordered_set<T>& set)
+            {
+                if (!serialiser)
+                {
+                    return;
+                }
+
+                u64 arraySize = set.size();
+                serialiser->StartArray(name, arraySize);
+                for (const T& v : set)
+                {
+                    ::Insight::Serialisation::Serialise<TypeSerialiser, T, SerialiserType>(serialiser, "", RemoveConst(v));
+                }
+                serialiser->StopArray();
+            }
+        };
+
+        template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>
+        struct SetDeserialiser
+        {
+            void operator()(ISerialiser* serialiser, std::string_view name, T* object, u64 const size)
+            {
+                if (!serialiser)
+                {
+                    return;
+                }
+
+                u64 arraySize = size;
+                serialiser->StartArray(name, arraySize);
+                //for (size_t i = 0; i < size; ++i)
+                //{
+                //    T* ptr = object + i;
+                //    if constexpr (SerialiserType == SerialiserType::Property)
+                //    {
+                //        *ptr = std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, T>(serialiser, name));
+                //    }
+                //    else if (SerialiserType == SerialiserType::Object)
+                //    {
+                //        ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, *ptr);
+                //    }
+                //}
                 serialiser->StopArray();
             }
         };

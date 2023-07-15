@@ -58,6 +58,8 @@ namespace Insight
         static std::string GetAbsolutePath(const std::string& path);
         static std::string GetAbsolutePath(std::string_view path);
 
+        static std::string GetRelativePath(std::string_view path, std::string_view basePath);
+
         static void PathToUnix(std::string& path);
 
         static void PathToWindows(std::string& path);

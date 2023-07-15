@@ -29,7 +29,8 @@ namespace Insight::Runtime
         const AssetInfo* AddAsset(std::string_view path);
         void RemoveAsset(std::string_view path);
 
-        void UpdateMetaData(AssetUser* object);
+        void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
+        void DeserialiseAssetUser(AssetUser* object) const;
 
         const AssetInfo* GetAsset(const Core::GUID& guid) const;
         const AssetInfo* GetAsset(std::string_view path) const;

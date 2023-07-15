@@ -7,6 +7,7 @@
 #include "Serialisation/Serialiser.h"
 
 #include <string>
+#include <unordered_set>
 
 namespace Insight
 {
@@ -28,14 +29,14 @@ namespace Insight
             /// @brief Store a vector of Guids which are dependent on this asset.
             /// Example: A single mesh within a model. If the mesh is needed then the model
             /// must be loaded.
-            std::vector<Core::GUID> DependentGuids;
+            std::unordered_set<Core::GUID> DependentGuids;
             /// @brief Source file path is there is one
             std::string SourcePath;
         };
 
         /// @brief Store relevant information about a asset. The asset could be on disk or
         /// within a Package. This should never be serialised to disk
-        class IS_RUNTIME AssetInfo
+        class IS_RUNTIME AssetInfo : public ReferenceCountObject
         {
         public:
             AssetInfo() = default;
@@ -49,9 +50,8 @@ namespace Insight
             bool operator==(const AssetInfo& other)const;
             bool operator!=(const AssetInfo& other)const;
 
-            void SetFile(std::string fullFilePath);
+            void SetFile(std::string fileName, std::string filePath);
             void SetPackage(std::string fullPackagePath);
-            void SetSource(std::string fullSourcePath);
 
             /// @brief Return the full path to the asset, relative from either the content folder
             /// or package if it is stored in one
@@ -73,11 +73,6 @@ namespace Insight
             /// @brief Path to the package without the package name or extension
             std::string PackagePath;
 
-            /// @brief Filename of the source asset is there is one
-            std::string SourceAssetName;
-            /// @brief Path to the source asset is there is one
-            std::string SourceAssetPath;
-
             /// @brief Is the asset in an engine format
             bool IsEngineFormat = false;
         };
@@ -85,7 +80,7 @@ namespace Insight
  
     OBJECT_SERIALISER(Runtime::AssetMetaData, 1,
         SERIALISE_PROPERTY(Core::GUID, AssetGuid, 1, 0)
-        SERIALISE_ARRAY_PROPERTY(Core::GUID, DependentGuids, 1, 0)
+        SERIALISE_SET_PROPERTY(Core::GUID, DependentGuids, 1, 0)
         SERIALISE_PROPERTY(std::string, SourcePath, 1, 0)
     )
 }

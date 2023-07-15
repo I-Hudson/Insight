@@ -122,6 +122,11 @@ namespace Insight
             m_head.Size += size;
         }
 
+        bool BinarySerialiser::AtEnd() const
+        {
+            return m_head.Size == m_head.Capacity;
+        }
+
         // -- Begin ISerialiser --
         bool BinarySerialiser::IsEmpty() const
         {

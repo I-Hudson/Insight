@@ -8,6 +8,8 @@
 #include "Resource/Texture2D.h"
 #include "Resource/ResourcePack.h"
 
+#include "Asset/AssetRegistry.h"
+
 #include "Runtime/ProjectSystem.h"
 #include "Algorithm/Vector.h"
 
@@ -308,6 +310,13 @@ namespace Insight
                 return resource;
             }
 
+            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
+            if (assetInfo == nullptr)
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] No asset info at path '{}'.", resourceId.GetPath());
+                return nullptr;
+            }
+
             IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
             ASSERT(rawResource);
             {
@@ -323,6 +332,9 @@ namespace Insight
                 std::lock_guard lock(m_mutex);
                 resource = m_resources[resourceId] = std::move(ownerResource);
             }
+
+            AssetRegistry::Instance().DeserialiseAssetUser(resource);
+            rawResource->SetAssetInfo(assetInfo);
 
             LoadMetaFileData(resource);
 

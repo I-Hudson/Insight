@@ -93,12 +93,14 @@ namespace Insight
 	class RefCount
 	{
 	public:
-		int Inc() { return m_strongRefs++; }
-		int Dec() { return m_strongRefs--; }
-		int IncW() { return m_weakRefs++; }
-		int DecW() { return m_weakRefs--; }
+		int Inc() { return ++m_strongRefs; }
+		int Dec() { return --m_strongRefs; }
+		int IncW() { return ++m_weakRefs; }
+		int DecW() { return --m_weakRefs; }
 
-		bool HasRefs() const { return m_strongRefs > 0; }
+		bool HasRefs() const { return m_strongRefs.load() > 0; }
+		int GetCount() const { return m_strongRefs.load() + m_weakRefs.load(); }
+		void Reset() { m_strongRefs = 0; m_weakRefs = 0; }
 
 	private:
 		std::atomic<int> m_strongRefs = 0;
@@ -597,14 +599,14 @@ using TObjectOPtr = TObjectOwnPtr<T>;
 template<typename T>
 class TObjectPtr;
 
-class ReferenceCountObject
+class IS_CORE ReferenceCountObject
 {
 public:
-	void Incr() { ++m_strongRef; }
-	void Decr() { --m_strongRef; }
+	int Incr() { return ++m_strongRef; }
+	int Decr() { return --m_strongRef; }
 
-	void IncrW() { ++m_weakRef; }
-	void DecrW() { --m_weakRef; }
+	int IncrW() { return ++m_weakRef; }
+	int DecrW() { return --m_weakRef; }
 
 	bool IsValid() const { return m_strongRef.load() > 0; }
 	int GetCount() const { return m_strongRef.load() + m_weakRef.load(); }

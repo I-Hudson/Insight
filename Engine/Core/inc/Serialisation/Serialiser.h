@@ -198,6 +198,27 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
             }\
         }
 
+// Serialise a single property. This would be thiings which only contain data for them self. 
+#define SERIALISE_SET_NAMED(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED, SERIALISER_TYPE)\
+        if (!isReadMode)\
+        {\
+            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::SetSerialiser<TVectorType, TYPE_SERIALISER, SERIALISER_TYPE> setSerialiser;\
+                setSerialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
+        }\
+        else\
+        {\
+            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
+            {\
+                using TVectorType = typename std::decay<decltype(*PPCAT(object., PROPERTY).begin())>::type;\
+                ::Insight::Serialisation::SetSerialiser<TVectorType, TYPE_SERIALISER, SERIALISER_TYPE> setDeserialiser;\
+                setDeserialiser(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
+            }\
+        }
+
 #define SERIALISE_MAP_NAMED_OBJECT(KEY_SERIALISER, VALUE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
         if (!isReadMode)\
         {\
@@ -255,6 +276,11 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 #define SERIALISE_ARRAY_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)             SERIALISE_ARRAY_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 // Serialise an array property with a SerialiserObject.
 #define SERIALISE_ARRAY_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)               SERIALISE_ARRAY_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+
+// Serialise a vector property with a ProertySerialiser.
+#define SERIALISE_SET_PROPERTY(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)               SERIALISE_SET_NAMED(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED, ::Insight::Serialisation::SerialiserType::Property)
+// Serialise a vector property with a SerialiserObject.
+#define SERIALISE_SET_OBJECT(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                 SERIALISE_SET_NAMED(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED, ::Insight::Serialisation::SerialiserType::Object)
 
 
 //

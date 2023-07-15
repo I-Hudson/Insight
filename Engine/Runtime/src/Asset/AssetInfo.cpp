@@ -40,22 +40,16 @@ namespace Insight::Runtime
         return !(*this == other);
     }
 
-    void AssetInfo::SetFile(std::string fullFilePath)
+    void AssetInfo::SetFile(std::string fileName, std::string filePath)
     {
-        FileName = FileSystem::GetFileName(fullFilePath);
-        FilePath = FileSystem::GetParentPath(fullFilePath);
+        FileName = std::move(fileName);
+        FilePath = std::move(filePath);
     }
 
     void AssetInfo::SetPackage(std::string fullPackagePath)
     {
         PackageName = FileSystem::GetFileName(fullPackagePath);
         PackagePath = FileSystem::GetParentPath(fullPackagePath);
-    }
-
-    void AssetInfo::SetSource(std::string fullSourcePath)
-    {
-        SourceAssetName = FileSystem::GetFileName(fullSourcePath);
-        SourceAssetPath = FileSystem::GetParentPath(fullSourcePath);
     }
 
     std::string AssetInfo::GetFullFilePath() const

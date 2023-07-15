@@ -53,6 +53,10 @@ namespace Insight
             // Skip number of bytes.
             void Skip(u64 size);
 
+            /// @brief Is the binary serialiser at the end of the stream
+            /// @return bool 
+            bool AtEnd() const;
+
             // -- Begin ISerialiser --
             virtual bool IsEmpty() const override;
 

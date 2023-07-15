@@ -82,6 +82,10 @@ namespace Insight
 
 		void Editor::OnPostInit()
 		{
+			const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+			const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
+			assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
+
 			Runtime::ResourcePack* pack = Runtime::ResourceManager::CreateResourcePack(
 				Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
 

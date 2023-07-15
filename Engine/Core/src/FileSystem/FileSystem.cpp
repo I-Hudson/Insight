@@ -15,7 +15,7 @@ namespace Insight
             return;
         }
         std::error_code errorCode;
-        std::filesystem::create_directory(path, errorCode);
+        std::filesystem::create_directory(GetAbsolutePath(path), errorCode);
         if (errorCode)
         {
             IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
@@ -102,7 +102,7 @@ namespace Insight
         }
 
         std::error_code errorCode = {};
-        return std::filesystem::exists(path, errorCode);
+        return std::filesystem::exists(GetAbsolutePath(path), errorCode);
     }
 
     bool FileSystem::IsDirectory(const std::string& path)
@@ -237,6 +237,19 @@ namespace Insight
     std::string FileSystem::GetAbsolutePath(std::string_view path)
     {
         std::filesystem::path fsPath = std::filesystem::absolute(std::filesystem::path(path));
+        std::string absPath = fsPath.string();
+        PathToUnix(absPath);
+        return absPath;
+    }
+
+    std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
+    {
+        std::error_code errorCode;
+        std::filesystem::path fsPath = std::filesystem::relative(path, basePath, errorCode);
+        if (errorCode)
+        {
+            IS_CORE_ERROR("[FileSystem::GetRelativePath] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
+        }
         std::string absPath = fsPath.string();
         PathToUnix(absPath);
         return absPath;
