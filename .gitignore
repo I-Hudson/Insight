@@ -6,6 +6,9 @@
 /deps
 /Resources/models
 /Resources/meta/models
+/Resources/**/*.is_meta
+/Resources/**/*.ismeta
+/Resources/**/*.meta
 /Documentation/Doxygen/gen_docs
 /Documentation/Doxygen/themes
 *.sln
