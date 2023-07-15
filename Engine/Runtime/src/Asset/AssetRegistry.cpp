@@ -3,11 +3,15 @@
 
 #include "Runtime/ProjectSystem.h"
 
+#include "Resource/Loaders/ResourceLoaderRegister.h"
+#include "Resource/ResourceDatabase.h"
+
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include "FileSystem/FileSystem.h"
 
+#include "Core/EnginePaths.h"
 #include "Core/Logger.h"
 
 namespace Insight::Runtime
@@ -36,13 +40,27 @@ namespace Insight::Runtime
             return GetAsset(path);
         }
 
+        std::string_view fileExtension = FileSystem::GetFileExtension(path);
         if (!FileSystem::Exists(path))
         {
             IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't exist.", path.data());
             return nullptr;
         }
-
-        const ProjectInfo& projectInfo = ProjectSystem::Instance().GetProjectInfo();
+        else if (!FileSystem::IsFile(path))
+        {
+            return nullptr;
+        }
+        else if (FileSystem::GetFileExtension(path) == AssetMetaData::c_FileExtension
+            || FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
+            || FileSystem::GetFileExtension(path) == ".meta")
+        {
+            return nullptr;
+        }
+        else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
+        {
+            IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
+            return nullptr;
+        }
 
         AssetInfo* assetInfo = New<AssetInfo>();
         assetInfo->SetFile(FileSystem::GetFileName(path), FileSystem::GetParentPath(path));
@@ -98,18 +116,32 @@ namespace Insight::Runtime
             object->Serialise(&jsonSerialiser);
         }
 
-        const ProjectInfo& projectInfo = ProjectSystem::Instance().GetProjectInfo();
         ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension, true));
 
-        std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), projectInfo.GetContentPath());
-        ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), projectInfo.GetIntermediatePath() + "/meta/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
+        if (FileSystem::PathIsSubPathOf(assetInfo->GetFullFilePath(), EnginePaths::GetResourcePath()))
+        {
+            std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), EnginePaths::GetResourcePath());
+            ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), EnginePaths::GetResourcePath() + "/meta/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
+        }
+        else
+        {
+            const ProjectInfo& projectInfo = ProjectSystem::Instance().GetProjectInfo();
+            if (FileSystem::PathIsSubPathOf(assetInfo->GetFullFilePath(), projectInfo.GetContentPath()))
+            {
+                std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), projectInfo.GetContentPath());
+                ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), projectInfo.GetIntermediatePath() + "/meta/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
+            }
+            else
+            {
+                FAIL_ASSERT();
+            }
+        }
     }
 
-    void AssetRegistry::DeserialiseAssetUser(AssetUser* object) const
+    void AssetRegistry::DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const
     {
         ASSERT(object);
 
-        const AssetInfo* assetInfo = object->GetAssetInfo();
         if (!assetInfo
             || (assetInfo && !assetInfo->IsValid())
             || (assetInfo && assetInfo->IsEngineFormat))
@@ -136,6 +168,7 @@ namespace Insight::Runtime
         {
             object->Deserialise(&binarySerialiser);
         }
+        object->SetAssetInfo(assetInfo);
     }
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const
@@ -165,7 +198,25 @@ namespace Insight::Runtime
 
     void AssetRegistry::AddAssetsInFolder(std::string_view path, bool recursive)
     {
-
+        std::string absFolderPath = FileSystem::GetAbsolutePath(path);
+        if (recursive)
+        {
+            for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(absFolderPath))
+            {
+                std::string path = entry.path().string();
+                FileSystem::PathToUnix(path);
+                AddAsset(path);
+            }
+        }
+        else
+        {
+            for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(absFolderPath))
+            {
+                std::string path = entry.path().string();
+                FileSystem::PathToUnix(path);
+                AddAsset(path);
+            }
+        }
     }
 
     bool AssetRegistry::HasAssetFromGuid(const Core::GUID& guid) const

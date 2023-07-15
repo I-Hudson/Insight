@@ -333,8 +333,7 @@ namespace Insight
                 resource = m_resources[resourceId] = std::move(ownerResource);
             }
 
-            AssetRegistry::Instance().DeserialiseAssetUser(resource);
-            rawResource->SetAssetInfo(assetInfo);
+            AssetRegistry::Instance().DeserialiseAssetUser(RemoveConst(assetInfo), resource);
 
             LoadMetaFileData(resource);
 

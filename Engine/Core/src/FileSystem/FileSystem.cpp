@@ -15,7 +15,7 @@ namespace Insight
             return;
         }
         std::error_code errorCode;
-        std::filesystem::create_directory(GetAbsolutePath(path), errorCode);
+        std::filesystem::create_directories(GetAbsolutePath(path), errorCode);
         if (errorCode)
         {
             IS_CORE_ERROR("[FileSystem::CreateFolder] Error code: '{}', Message: '{}'.", errorCode.value(), errorCode.message());
@@ -253,6 +253,15 @@ namespace Insight
         std::string absPath = fsPath.string();
         PathToUnix(absPath);
         return absPath;
+    }
+
+    bool FileSystem::PathIsSubPathOf(std::string_view path, std::string_view basePath)
+    {
+        std::filesystem::path fsPath(path);
+        std::filesystem::path fsBasePath(basePath);
+
+        const auto mismatch_pair = std::mismatch(fsPath.begin(), fsPath.end(), fsBasePath.begin(), fsBasePath.end());
+        return mismatch_pair.second == fsBasePath.end();
     }
 
     void FileSystem::PathToUnix(std::string& path)

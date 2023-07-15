@@ -5,6 +5,7 @@
 /CompileScoreData
 /deps
 /Resources/models
+/Resources/meta/models
 /Documentation/Doxygen/gen_docs
 /Documentation/Doxygen/themes
 *.sln

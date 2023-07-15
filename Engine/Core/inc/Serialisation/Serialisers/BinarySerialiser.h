@@ -38,6 +38,7 @@ namespace Insight
             Byte* Data = nullptr;
             u64 Capacity = 0;
             u64 Size = 0;
+            u64 ReadSize = 0;
             std::stack<BinaryNode> Nodes;
         };
 

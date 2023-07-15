@@ -60,6 +60,8 @@ namespace Insight
 
         static std::string GetRelativePath(std::string_view path, std::string_view basePath);
 
+        static bool PathIsSubPathOf(std::string_view path, std::string_view basePath);
+
         static void PathToUnix(std::string& path);
 
         static void PathToWindows(std::string& path);

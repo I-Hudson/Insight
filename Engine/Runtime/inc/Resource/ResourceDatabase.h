@@ -20,9 +20,9 @@ namespace Insight
         /// @brief Database to store all currently known resources.
         class ResourceDatabase : public Serialisation::ISerialisable
         {
-            constexpr static const char* c_MetaFileExtension = ".ismeta";
             using MetaFileSerialiser = Serialisation::JsonSerialiser;
         public:
+            constexpr static const char* c_MetaFileExtension = ".ismeta";
             using ResourceMap = std::unordered_map<ResourceId, TObjectPtr<IResource>>;
             using ResourceOwningMap = std::unordered_map<ResourceId, TObjectOPtr<IResource>>;
 

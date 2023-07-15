@@ -295,7 +295,11 @@ namespace Insight::Editor
                                 }
                                 else
                                 {
-                                    texture = PathToThumbnail(path)->GetRHITexture();
+                                    Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
+                                    if (thumbnailTexture)
+                                    {
+                                        texture = PathToThumbnail(path)->GetRHITexture();
+                                    }
                                 }
                                 ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
                                 ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;

@@ -81,7 +81,8 @@ namespace Insight
 
 		TObjectPtr<World> WorldSystem::CreateWorld(std::string worldName, WorldTypes worldType)
 		{
-			TObjectOPtr<World> world = TObjectOPtr<World>(New<World, Core::MemoryAllocCategory::World>(std::move(worldName)));
+			TObjectOPtr<World> world = TObjectOPtr<World>(New<World, Core::MemoryAllocCategory::World>(worldName));
+			world->m_worldName = worldName;
 			world->m_worldType = worldType;
 			world->Initialise();
 			m_worlds.push_back(std::move(world));

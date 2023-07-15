@@ -90,6 +90,7 @@ namespace Insight
         {
             Resize(data.size());
             Platform::MemCopy(Data, data.data(), data.size());
+            ReadSize = data.size();
             Clear();
         }
 
@@ -124,7 +125,14 @@ namespace Insight
 
         bool BinarySerialiser::AtEnd() const
         {
-            return m_head.Size == m_head.Capacity;
+            if (IsReadMode())
+            {
+                return m_head.Size == m_head.ReadSize;
+            }
+            else
+            {
+                return m_head.Size == m_head.Capacity;
+            }
         }
 
         // -- Begin ISerialiser --
@@ -141,7 +149,7 @@ namespace Insight
 
         std::vector<Byte> BinarySerialiser::GetSerialisedData()
         {
-            WriteType();
+            //WriteType();
 
             std::vector<Byte> serialisedData;
             serialisedData.resize(m_head.Size);

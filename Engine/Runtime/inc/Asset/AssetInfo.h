@@ -18,7 +18,7 @@ namespace Insight
         class IS_RUNTIME AssetMetaData : public Serialisation::ISerialisable
         {
         public:
-            constexpr static const char* c_FileExtension = ".meta";
+            constexpr static const char* c_FileExtension = ".is_meta";
             IS_SERIALISABLE_H(AssetMetaData);
 
             operator bool() const;

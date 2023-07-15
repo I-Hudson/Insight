@@ -9,7 +9,7 @@
 namespace Insight::Runtime
 {
     TextureLoader::TextureLoader()
-        : IResourceLoader({ ".png", ".jpeg", ".qoi" }, { Texture2D::GetStaticResourceTypeId() })
+        : IResourceLoader({ ".png", ".jpeg", ".jpg", ".qoi" }, { Texture2D::GetStaticResourceTypeId() })
     {
     }
 

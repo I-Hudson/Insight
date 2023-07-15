@@ -9,6 +9,9 @@
 #include "Resource/ResourceManager.h"
 #include "Resource/ResourcePack.h"
 
+#include "Runtime/RuntimeEvents.h"
+#include "Runtime/ProjectSystem.h"
+
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
 #include "Core/EnginePaths.h"
@@ -23,138 +26,148 @@
 
 namespace Insight
 {
-	namespace Editor
-	{
-		IS_SERIALISABLE_CPP(Editor);
+    namespace Editor
+    {
+        IS_SERIALISABLE_CPP(Editor);
 
-		SplashScreen splashScreen;
+        SplashScreen splashScreen;
 
-		void Editor::OnPreInit()
-		{
-			static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
-			splashScreen.Init(860, 420);
-			splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
-			splashScreen.Show();
-		}
+        void Editor::OnPreInit()
+        {
+            static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
+            splashScreen.Init(860, 420);
+            splashScreen.SetBackgroundImage(splashScreenBackGroundPath.c_str());
+            splashScreen.Show();
+        }
 
-		void Editor::OnInit()
-		{
-			IS_PROFILE_FUNCTION();
+        void Editor::OnInit()
+        {
+            IS_PROFILE_FUNCTION();
 
-			EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [](const Core::Event& e)
+                {
+                    const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                    Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath());
+                });
+            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true);
 
-			std::string windowTitle = "Insight Editor";
+
+            EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
+            std::string windowTitle = "Insight Editor";
 #ifdef IS_DEBUG
-			windowTitle += " Debug ";
+            windowTitle += " Debug ";
 #elif IS_RELEASE
-			windowTitle += " Release ";
+            windowTitle += " Release ";
 #endif
-			windowTitle += "(";
-			windowTitle += Graphics::GraphicsAPIToString(Graphics::RenderContext::Instance().GetGraphicsAPI());
-			windowTitle += ")";
+            windowTitle += "(";
+            windowTitle += Graphics::GraphicsAPIToString(Graphics::RenderContext::Instance().GetGraphicsAPI());
+            windowTitle += ")";
 
-			Graphics::Window::Instance().SetTite(windowTitle);
-			Graphics::Window::Instance().SetIcon(EnginePaths::GetResourcePath() + "/Insight/default.png");
-			Graphics::Window::Instance().Show();
+            Graphics::Window::Instance().SetTite(windowTitle);
+            Graphics::Window::Instance().SetIcon(EnginePaths::GetResourcePath() + "/Insight/default.png");
+            Graphics::Window::Instance().Show();
 
-			m_editorWindowManager.RegisterWindows();
-			m_editorWindowManager.AddWindow(WorldViewWindow::WINDOW_NAME);
+            m_editorWindowManager.RegisterWindows();
+            m_editorWindowManager.AddWindow(WorldViewWindow::WINDOW_NAME);
 
-			m_menuBar.Initialise(&m_editorWindowManager);
+            m_menuBar.Initialise(&m_editorWindowManager);
 
-			m_gameRenderpass = New<Graphics::Renderpass>();
-			m_gameRenderpass->Create();
+            m_gameRenderpass = New<Graphics::Renderpass>();
+            m_gameRenderpass->Create();
 
-			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
-			App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
+            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
+            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
 
-			m_buildSystem.Initialise();
-			m_hotReloadSystem.Initialise();
-			
-			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
-			if (!editorSettings.IsEmpty())
-			{
-				EditorSettingsSerialiser serialiser(true);
-				serialiser.Deserialise(editorSettings.GetData());
-				Deserialise(&serialiser);
-			}
-		}
+            m_buildSystem.Initialise();
+            m_hotReloadSystem.Initialise();
 
-		void Editor::OnPostInit()
-		{
-			const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-			const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
-			assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
+            Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
+            if (!editorSettings.IsEmpty())
+            {
+                EditorSettingsSerialiser serialiser(true);
+                serialiser.Deserialise(editorSettings.GetData());
+                Deserialise(&serialiser);
+            }
+        }
 
-			Runtime::ResourcePack* pack = Runtime::ResourceManager::CreateResourcePack(
-				Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
+        void Editor::OnPostInit()
+        {
+            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+            const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
+            assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
 
-			Runtime::IResource* resource = Runtime::ResourceManager::LoadSync(
-				Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
-				, Runtime::Texture2D::GetStaticResourceTypeId())).Get();
+            Runtime::ResourcePack* pack = Runtime::ResourceManager::CreateResourcePack(
+                Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
 
-			pack->AddResource(resource);
+            Runtime::IResource* resource = Runtime::ResourceManager::LoadSync(
+                Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
+                    , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
 
-			splashScreen.Destroy();
-		}
+            pack->AddResource(resource);
 
-		void Editor::OnUpdate()
-		{
-			IS_PROFILE_FUNCTION();
+            splashScreen.Destroy();
+        }
 
-			if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
-			{
-				m_editorWindowManager.AddWindow(ProjectWindow::WINDOW_NAME);
-				const ProjectWindow* projectWindow = static_cast<const ProjectWindow*>(m_editorWindowManager.GetActiveWindow(ProjectWindow::WINDOW_NAME));
-				RemoveConst(projectWindow)->SetFullscreen(true);
-			}
-			else
-			{
-				m_menuBar.Draw();
-			}
+        void Editor::OnUpdate()
+        {
+            IS_PROFILE_FUNCTION();
 
-			EditorWindowManager::Instance().Update();
-		}
+            if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
+            {
+                m_editorWindowManager.AddWindow(ProjectWindow::WINDOW_NAME);
+                const ProjectWindow* projectWindow = static_cast<const ProjectWindow*>(m_editorWindowManager.GetActiveWindow(ProjectWindow::WINDOW_NAME));
+                RemoveConst(projectWindow)->SetFullscreen(true);
+            }
+            else
+            {
+                m_menuBar.Draw();
+            }
 
-		void Editor::OnRender()
-		{
-			IS_PROFILE_FUNCTION();
+            EditorWindowManager::Instance().Update();
+        }
 
-			const bool gameViewWindowActive = m_editorWindowManager.GetActiveWindow(GameViewWindow::WINDOW_NAME) != nullptr;
-			m_gameRenderpass->FrameSetup();
-			m_gameRenderpass->RenderMainPasses(gameViewWindowActive);
-			m_gameRenderpass->RenderSwapchain(false);
-			m_gameRenderpass->RenderPostprocessing();
-		}
+        void Editor::OnRender()
+        {
+            IS_PROFILE_FUNCTION();
 
-		void Editor::OnDestroy()
-		{
-			IS_PROFILE_FUNCTION();
+            const bool gameViewWindowActive = m_editorWindowManager.GetActiveWindow(GameViewWindow::WINDOW_NAME) != nullptr;
+            m_gameRenderpass->FrameSetup();
+            m_gameRenderpass->RenderMainPasses(gameViewWindowActive);
+            m_gameRenderpass->RenderSwapchain(false);
+            m_gameRenderpass->RenderPostprocessing();
+        }
 
-			EditorSettingsSerialiser serialiser(false);
-			Serialise(&serialiser);
+        void Editor::OnDestroy()
+        {
+            IS_PROFILE_FUNCTION();
 
-			Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Write);
-			editorSettings.Write(serialiser.GetSerialisedData());
-			editorSettings.Close();
+            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
 
-			m_gameRenderpass->Destroy();
-			Delete(m_gameRenderpass);
+            EditorSettingsSerialiser serialiser(false);
+            Serialise(&serialiser);
 
-			EditorWindowManager::Instance().Destroy();
+            Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Write);
+            editorSettings.Write(serialiser.GetSerialisedData());
+            editorSettings.Close();
 
-			m_hotReloadSystem.Shutdown();
-			m_buildSystem.Shutdown();
+            m_gameRenderpass->Destroy();
+            Delete(m_gameRenderpass);
 
-			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
-			App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
+            EditorWindowManager::Instance().Destroy();
 
-			Runtime::ResourceManager::SaveDatabase();
-		}
-	}
+            m_hotReloadSystem.Shutdown();
+            m_buildSystem.Shutdown();
+
+            App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
+            App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
+
+            Runtime::ResourceManager::SaveDatabase();
+        }
+    }
 }
 
 Insight::App::Engine* CreateApplication()
 {
-	return New<Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
+    return New<Insight::Editor::Editor, Insight::Core::MemoryAllocCategory::Editor>();
 }
