@@ -27,6 +27,7 @@ namespace Insight::Runtime
         // End - ISystem -
 
         const AssetInfo* AddAsset(std::string_view path);
+        const AssetInfo* AddAsset(std::string_view path, bool enableMetaFile);
         void RemoveAsset(std::string_view path);
 
         void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
@@ -37,14 +38,18 @@ namespace Insight::Runtime
 
         /// @brief Add all asset within a folder. 
         void AddAssetsInFolder(std::string_view path);
-        /// @brief Add all asset within a folder, recursive. 
+        /// @brief Add all asset within a folder, recursive.
         void AddAssetsInFolder(std::string_view path, bool recursive);
+        /// @brief Add all asset within a folder, recursive, with the option of disabling meta files (should be false for engine/editor folders).
+        void AddAssetsInFolder(std::string_view path, bool recursive, bool enableMetaFiles);
 
     private:
         bool HasAssetFromGuid(const Core::GUID& guid) const;
         bool HasAssetFromPath(std::string_view path) const;
 
         void LoadMetaData(AssetInfo* assetInfo);
+
+        bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
     private:
         std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;

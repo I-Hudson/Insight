@@ -35,6 +35,11 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::AddAsset(std::string_view path)
     {
+        return AddAsset(path, true);
+    }
+
+    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, bool enableMetaFile)
+    {
         if (HasAssetFromPath(path))
         {
             return GetAsset(path);
@@ -64,6 +69,7 @@ namespace Insight::Runtime
 
         AssetInfo* assetInfo = New<AssetInfo>();
         assetInfo->SetFile(FileSystem::GetFileName(path), FileSystem::GetParentPath(path));
+        assetInfo->EnableMetaData = enableMetaFile;
 
         LoadMetaData(assetInfo);
 
@@ -91,11 +97,8 @@ namespace Insight::Runtime
 
     void AssetRegistry::UpdateMetaData(AssetInfo* assetInfo, AssetUser* object)
     {
-        if (!assetInfo 
-            || (assetInfo && !assetInfo->IsValid())
-            || (assetInfo && assetInfo->IsEngineFormat))
+        if (!AssetInfoValidate(assetInfo))
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo was either null, not valid or the asset is an engine format.");
             return;
         }
 
@@ -142,11 +145,8 @@ namespace Insight::Runtime
     {
         ASSERT(object);
 
-        if (!assetInfo
-            || (assetInfo && !assetInfo->IsValid())
-            || (assetInfo && assetInfo->IsEngineFormat))
+        if (!AssetInfoValidate(assetInfo))
         {
-            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo was either null, not valid or the asset is an engine format.");
             return;
         }
 
@@ -193,10 +193,15 @@ namespace Insight::Runtime
 
     void AssetRegistry::AddAssetsInFolder(std::string_view path)
     {
-        AddAssetsInFolder(path, false);
+        AddAssetsInFolder(path, false, true);
     }
 
     void AssetRegistry::AddAssetsInFolder(std::string_view path, bool recursive)
+    {
+        AddAssetsInFolder(path, recursive, true);
+    }
+
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, bool recursive, bool enableMetaFiles)
     {
         std::string absFolderPath = FileSystem::GetAbsolutePath(path);
         if (recursive)
@@ -205,7 +210,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path);
+                AddAsset(path, enableMetaFiles);
             }
         }
         else
@@ -214,7 +219,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path);
+                AddAsset(path, enableMetaFiles);
             }
         }
     }
@@ -231,9 +236,7 @@ namespace Insight::Runtime
 
     void AssetRegistry::LoadMetaData(AssetInfo* assetInfo)
     {
-        if (!assetInfo
-            || (assetInfo && !assetInfo->IsValid())
-            || (assetInfo && assetInfo->IsEngineFormat))
+        if (!AssetInfoValidate(assetInfo))
         {
             return;
         }
@@ -255,5 +258,30 @@ namespace Insight::Runtime
 
         AssetMetaData& metaData = RemoveConst(assetInfo)->MetaData;
         metaData.Deserialise(&binarySerialiser);
+    }
+
+    bool AssetRegistry::AssetInfoValidate(const AssetInfo* assetInfo) const
+    {
+        if (!assetInfo)
+        {
+            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is null.");
+            return false;
+        }
+        else if (!assetInfo->EnableMetaData)
+        {
+            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo has MetaData disabled. No data is stored on disk for this asset.");
+            return false;
+        }
+        else if (!assetInfo->IsValid())
+        {
+            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is not valid.");
+            return false;
+        }
+        else if (assetInfo->IsEngineFormat)
+        {
+            IS_CORE_WARN("[AssetRegistry::UpdateMetaData] AssetInfo is an engine format.");
+            return false;
+        }
+        return true;
     }
 }

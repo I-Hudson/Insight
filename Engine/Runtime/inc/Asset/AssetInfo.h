@@ -61,7 +61,11 @@ namespace Insight
             /// @return std::string
             std::string GetFullPackagePath() const;
 
+            /// @brief MetaData stored on disk for this resource.
             AssetMetaData MetaData;
+            /// @brief Should the asset care about meta data. If false no meta data file with be created.
+            /// False should be used for engine/editor assets.
+            bool EnableMetaData;
 
             /// @brief Filename of the asset with extension but no path
             std::string FileName;

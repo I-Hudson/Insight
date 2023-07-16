@@ -47,9 +47,9 @@ namespace Insight
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [](const Core::Event& e)
                 {
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-                    Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath());
+                    Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), true);
                 });
-            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true);
+            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true, false);
 
 
             EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
