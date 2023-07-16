@@ -109,15 +109,15 @@ namespace Insight
                     }
                     if (ImGui::MenuItem("Save Resource Database"))
                     {
-                        Runtime::ResourceManager::SaveDatabase();
+                        Runtime::ResourceManager::Instance().SaveDatabase();
                     }
                     if (ImGui::MenuItem("Load Resource Database"))
                     {
-                        Runtime::ResourceManager::LoadDatabase();
+                        Runtime::ResourceManager::Instance().LoadDatabase();
                     }
                     if (ImGui::MenuItem("Clear Resource Database"))
                     {
-                        Runtime::ResourceManager::ClearDatabase();
+                        Runtime::ResourceManager::Instance().ClearDatabase();
                     }
                     DrawAllRegisteredWindow(EditorWindowCategories::File);
                     ImGui::EndMenu();

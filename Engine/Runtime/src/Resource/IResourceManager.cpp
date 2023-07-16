@@ -1,4 +1,4 @@
-#include "Resource/ResourceManager.h"
+#include "Resource/IResourceManager.h"
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourcePack.h"
 #include "Resource/Loaders/ResourceLoaderRegister.h"
@@ -22,14 +22,15 @@ namespace Insight
     namespace Runtime
     {
 #define RESOURCE_LOAD_THREAD
+        IResourceManager::IResourceManager()
+        {
+        }
 
-        ResourceDatabase* ResourceManager::s_database;
-        std::vector<IResource*> ResourceManager::s_resourcesLoading;
-        std::mutex ResourceManager::s_resourcesLoadingMutex;
-        std::queue<IResource*> ResourceManager::s_queuedResoucesToLoad;
-        std::mutex ResourceManager::s_queuedResoucesToLoadMutex;
+        IResourceManager::~IResourceManager()
+        {
+        }
 
-        void ResourceManager::Update(float const deltaTime)
+        void IResourceManager::Update(float const deltaTime)
         {
             ASSERT(Platform::IsMainThread());
 
@@ -37,54 +38,54 @@ namespace Insight
 
             u32 resourcesCurrentlyLoading = 0;
             {
-                std::lock_guard resourcesLoadingLock(s_resourcesLoadingMutex);
+                std::lock_guard resourcesLoadingLock(m_resourcesLoadingMutex);
                 // Check for all loaded resources.
-                for (size_t i = 0; i < s_resourcesLoading.size(); ++i)
+                for (size_t i = 0; i < m_resourcesLoading.size(); ++i)
                 {
-                    if (s_resourcesLoading.at(i)->IsLoaded())
+                    if (m_resourcesLoading.at(i)->IsLoaded())
                     {
                         ++resourcesToLoad;
                     }
                 }
 
-            //    // Remove all loaded resources from s_resourcesLoading.
+            //    // Remove all loaded resources from m_resourcesLoading.
             //    for (IResource* const resource : resourceLoaded)
             //    {
-            //        Algorithm::VectorRemove(s_resourcesLoading, resource);
+            //        Algorithm::VectorRemove(m_resourcesLoading, resource);
             //    }
-                resourcesCurrentlyLoading = static_cast<u32>(s_resourcesLoading.size());
+                resourcesCurrentlyLoading = static_cast<u32>(m_resourcesLoading.size());
             }
 
             {
-                std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
+                std::lock_guard queueLock(m_queuedResoucesToLoadMutex);
                 // Start loading more resources.
                 for (int i = resourcesToLoad; i >= 0; --i)
                 {
                     if (resourcesCurrentlyLoading >= c_MaxLoadingResources
-                        || s_queuedResoucesToLoad.empty())
+                        || m_queuedResoucesToLoad.empty())
                     {
                         break;
                     }
-                    IResource* resourceToLoad = s_queuedResoucesToLoad.front();
-                    s_queuedResoucesToLoad.pop();
+                    IResource* resourceToLoad = m_queuedResoucesToLoad.front();
+                    m_queuedResoucesToLoad.pop();
                     StartLoading(resourceToLoad, true);
                 }
             }
         }
 
-        void ResourceManager::SaveDatabase()
+        void IResourceManager::SaveDatabase()
         {
             ASSERT(Platform::IsMainThread());
 
-            if (!s_database)
+            if (!m_database)
             {
                 return;
             }
             Serialisation::BinarySerialiser binarySerialiser(false);
             Serialisation::JsonSerialiser jsonSerialiser(false);
 
-            s_database->Serialise(&binarySerialiser);
-            s_database->Serialise(&jsonSerialiser);
+            m_database->Serialise(&binarySerialiser);
+            m_database->Serialise(&jsonSerialiser);
             
             Archive archive(Runtime::ProjectSystem::Instance().GetProjectInfo().GetIntermediatePath() + "/ResourceDatabase.isdatabase", ArchiveModes::Write);
             archive.Write(binarySerialiser.GetSerialisedData());
@@ -95,11 +96,11 @@ namespace Insight
             archive.Close();
         }
 
-        void ResourceManager::LoadDatabase()
+        void IResourceManager::LoadDatabase()
         {
             ASSERT(Platform::IsMainThread());
 
-            if (!s_database)
+            if (!m_database)
             {
                 return;
             }
@@ -110,63 +111,96 @@ namespace Insight
             {
                 Serialisation::BinarySerialiser serialiser(true);
                 serialiser.Deserialise(archive.GetData());
-                s_database->Deserialise(&serialiser);
-                s_database->FindMissingResources();
+                m_database->Deserialise(&serialiser);
+                m_database->FindMissingResources();
             }
         }
 
-        void ResourceManager::ClearDatabase()
+        void IResourceManager::ClearDatabase()
         {
             ASSERT(Platform::IsMainThread());
-            s_database->Shutdown();
+            m_database->Shutdown();
         }
 
-        ResourcePack* ResourceManager::CreateResourcePack(std::string_view filePath)
+        void IResourceManager::Initialise()
         {
-            ASSERT(s_database);
-            return s_database->CreateResourcePack(filePath);
+            ASSERT(m_database == nullptr);
+            m_database = New<ResourceDatabase>();
+            m_database->Initialise();
         }
 
-        TObjectPtr<IResource> ResourceManager::Create(ResourceId const& resourceId)
+        void IResourceManager::Shutdown()
         {
-            ASSERT(s_database);
+            ASSERT(Platform::IsMainThread());
+
+            // Finish loading all resources. This allows us to release them correctly.
+            while (!m_resourcesLoading.empty())
+            {
+                Update(0.16f);
+            }
+
+            // Pop all queued resources.
+            {
+                std::lock_guard queueLock(m_queuedResoucesToLoadMutex);
+                while (!m_queuedResoucesToLoad.empty())
+                {
+                    auto resource = m_queuedResoucesToLoad.front();
+                    m_queuedResoucesToLoad.pop();
+                    resource->m_resource_state = EResoruceStates::Cancelled;
+                }
+            }
+
+            m_database->Shutdown();
+            Delete(m_database);
+            ASSERT(m_database == nullptr);
+        }
+
+        ResourcePack* IResourceManager::CreateResourcePack(std::string_view filePath)
+        {
+            ASSERT(m_database);
+            return m_database->CreateResourcePack(filePath);
+        }
+
+        TObjectPtr<IResource> IResourceManager::Create(ResourceId const& resourceId)
+        {
+            ASSERT(m_database);
 
             TObjectPtr<IResource> resource;
-            if (s_database->HasResource(resourceId))
+            if (m_database->HasResource(resourceId))
             {
-                resource = s_database->GetResource(resourceId);
+                resource = m_database->GetResource(resourceId);
             }
             else
             {
-                resource = s_database->AddResource(resourceId, true);
+                resource = m_database->AddResource(resourceId, true);
             }
             return resource;
         }
 
-        TObjectPtr<IResource> ResourceManager::GetResource(ResourceId const& resourceId)
+        TObjectPtr<IResource> IResourceManager::GetResource(ResourceId const& resourceId) const
         {
-            ASSERT(s_database);
-            if (s_database->HasResource(resourceId))
+            ASSERT(m_database);
+            if (m_database->HasResource(resourceId))
             {
-                return s_database->GetResource(resourceId);
+                return m_database->GetResource(resourceId);
             }
             return nullptr;
         }
 
-        TObjectPtr<IResource> ResourceManager::GetResourceFromGuid(Core::GUID const& guid)
+        TObjectPtr<IResource> IResourceManager::GetResourceFromGuid(Core::GUID const& guid) const
         {
-            ASSERT(s_database);
-            return s_database->GetResourceFromGuid(guid);
+            ASSERT(m_database);
+            return m_database->GetResourceFromGuid(guid);
         }
 
-        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId resourceId)
+        TObjectPtr<IResource> IResourceManager::LoadSync(ResourceId resourceId)
         {
             return LoadSync(std::move(resourceId), false);
         }
 
-        TObjectPtr<IResource> ResourceManager::LoadSync(ResourceId resourceId, bool convertToEngineFormat)
+        TObjectPtr<IResource> IResourceManager::LoadSync(ResourceId resourceId, bool convertToEngineFormat)
         {
-            ASSERT(s_database);
+            ASSERT(m_database);
 
             if (!resourceId)
             {
@@ -176,7 +210,7 @@ namespace Insight
 
             if (!resourceId)
             {
-                IS_CORE_ERROR("[ResourceManager::LoadSync] Invalid 'ResourceId' was given and no resource Id could be found the file '{}'.", resourceId.GetPath());
+                IS_CORE_ERROR("[IResourceManager::LoadSync] Invalid 'ResourceId' was given and no resource Id could be found the file '{}'.", resourceId.GetPath());
                 return nullptr;
             }
 
@@ -186,13 +220,13 @@ namespace Insight
             }
 
             TObjectPtr<IResource> resource;
-            if (s_database->HasResource(resourceId))
+            if (m_database->HasResource(resourceId))
             {
-                resource = s_database->GetResource(resourceId);
+                resource = m_database->GetResource(resourceId);
             }
             else
             {
-                resource = s_database->AddResource(resourceId);
+                resource = m_database->AddResource(resourceId);
             }
 
             if (resource)
@@ -221,14 +255,14 @@ namespace Insight
                     }
                     else
                     {
-                        FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
+                        FAIL_ASSERT_MSG("[IResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
                     }
                 }
             }
             return resource;
         }
 
-        TObjectPtr<IResource> ResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
+        TObjectPtr<IResource> IResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
         {
             std::string_view fileExtension = FileSystem::GetFileExtension(filepath);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
@@ -239,14 +273,14 @@ namespace Insight
             return LoadSync(ResourceId(filepath, loader->GetResourceTypeId()), convertToEngineFormat);
         }
 
-        TObjectPtr<IResource> ResourceManager::Load(ResourceId resourceId)
+        TObjectPtr<IResource> IResourceManager::Load(ResourceId resourceId)
         {
             return Load(std::move(resourceId), false);
         }
 
-        TObjectPtr<IResource> ResourceManager::Load(ResourceId resourceId, bool convertToEngineFormat)
+        TObjectPtr<IResource> IResourceManager::Load(ResourceId resourceId, bool convertToEngineFormat)
         {
-            ASSERT(s_database);
+            ASSERT(m_database);
 
             if (convertToEngineFormat)
             {
@@ -254,13 +288,13 @@ namespace Insight
             }
 
             TObjectPtr<IResource> resource;
-            if (s_database->HasResource(resourceId))
+            if (m_database->HasResource(resourceId))
             {
-                resource = s_database->GetResource(resourceId);
+                resource = m_database->GetResource(resourceId);
             }
             else
             {
-                resource = s_database->AddResource(resourceId);
+                resource = m_database->AddResource(resourceId);
             }
 
             if (resource)
@@ -285,40 +319,40 @@ namespace Insight
                         {
                             resource->m_resource_state = EResoruceStates::Queued;
                             // Try and load the resource as it exists.
-                            std::unique_lock queueLock(s_queuedResoucesToLoadMutex);
-                            s_queuedResoucesToLoad.push(resource);
+                            std::unique_lock queueLock(m_queuedResoucesToLoadMutex);
+                            m_queuedResoucesToLoad.push(resource);
                             queueLock.unlock();
                         }
                     }
                     else
                     {
-                        FAIL_ASSERT_MSG("[ResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
+                        FAIL_ASSERT_MSG("[IResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
                     }
                 }
             }
             return resource;
         }
 
-        ResourcePack* ResourceManager::LoadResourcePack(std::string_view filepath)
+        ResourcePack* IResourceManager::LoadResourcePack(std::string_view filepath)
         {
-            ASSERT(s_database);
-            return s_database->LoadResourcePack(filepath);
+            ASSERT(m_database);
+            return m_database->LoadResourcePack(filepath);
         }
 
-        void ResourceManager::UnloadResourcePack(ResourcePack* resourcePack)
+        void IResourceManager::UnloadResourcePack(ResourcePack* resourcePack)
         {
-            ASSERT(s_database);
-            s_database->UnloadResourcePack(resourcePack);
+            ASSERT(m_database);
+            m_database->UnloadResourcePack(resourcePack);
         }
 
-        void ResourceManager::Unload(ResourceId const& resourceId)
+        void IResourceManager::Unload(ResourceId const& resourceId)
         {
-            ASSERT(s_database);
+            ASSERT(m_database);
 
             TObjectPtr<IResource> resource = nullptr;
-            if (s_database->HasResource(resourceId))
+            if (m_database->HasResource(resourceId))
             {
-                resource = s_database->GetResource(resourceId);
+                resource = m_database->GetResource(resourceId);
             }
 
             if (resource->IsDependentOnAnotherResource())
@@ -329,13 +363,13 @@ namespace Insight
 
             if (!resource)
             {
-                IS_CORE_WARN("[ResourceManager::UnloadResource] The resource '{0}' is not valid (null). The Resource isn't tracked by the ResourceDatabase.", resourceId.GetPath());
+                IS_CORE_WARN("[IResourceManager::UnloadResource] The resource '{0}' is not valid (null). The Resource isn't tracked by the ResourceDatabase.", resourceId.GetPath());
                 return;
             }
 
             if (resource->GetResourceState() != EResoruceStates::Loaded)
             {
-                IS_CORE_WARN("[ResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
+                IS_CORE_WARN("[IResourceManager::Unload] 'resource' current state is '{0}'. Resource must be loaded to be unloaded."
                     , ERsourceStatesToString(resource->GetResourceState()));
                 return;
             }
@@ -352,7 +386,7 @@ namespace Insight
             resource->OnUnloaded(resource);
         }
 
-        void ResourceManager::Unload(TObjectPtr<IResource> Resource)
+        void IResourceManager::Unload(TObjectPtr<IResource> Resource)
         {
             if (Resource)
             {
@@ -360,25 +394,25 @@ namespace Insight
             }
         }
 
-        void ResourceManager::UnloadAll()
+        void IResourceManager::UnloadAll()
         {
             ASSERT(Platform::IsMainThread());
-            ASSERT(s_database);
+            ASSERT(m_database);
 
-            std::vector<ResourceId> ResourceIds = s_database->GetAllResourceIds();
+            std::vector<ResourceId> ResourceIds = m_database->GetAllResourceIds();
             for (const ResourceId& id : ResourceIds)
             {
                 Unload(id);
             }
         }
 
-        bool ResourceManager::HasResource(ResourceId const& resourceId)
+        bool IResourceManager::HasResource(ResourceId const& resourceId) const
         {
-            ASSERT(s_database);
-            return s_database->HasResource(resourceId);
+            ASSERT(m_database);
+            return m_database->HasResource(resourceId);
         }
 
-        bool ResourceManager::HasResource(TObjectPtr<IResource> Resource)
+        bool IResourceManager::HasResource(TObjectPtr<IResource> Resource) const
         {
             if (Resource)
             {
@@ -387,55 +421,56 @@ namespace Insight
             return false;
         }
 
-        ResourceDatabase::ResourceMap ResourceManager::GetResourceMap()
+        ResourceDatabase::ResourceMap IResourceManager::GetResourceMap() const
         {
-            ASSERT(s_database);
-            return s_database->GetResourceMap();
+            ASSERT(m_database);
+            return m_database->GetResourceMap();
         }
 
-        std::vector<ResourcePack*> ResourceManager::GetResourcePacks()
+        std::vector<ResourcePack*> IResourceManager::GetResourcePacks() const
         {
-            ASSERT(s_database);
-            return s_database->GetResourcePacks();
+            ASSERT(m_database);
+            return m_database->GetResourcePacks();
         }
 
-        u32 ResourceManager::GetQueuedToLoadCount()
+        u32 IResourceManager::GetQueuedToLoadCount() const
         {
             u32 count = 0;
             {
-                std::lock_guard lock(s_queuedResoucesToLoadMutex);
-                count = static_cast<u32>(s_queuedResoucesToLoad.size());
+                std::lock_guard lock(m_queuedResoucesToLoadMutex);
+                count = static_cast<u32>(m_queuedResoucesToLoad.size());
             }
             return count;
         }
 
-        u32 ResourceManager::GetLoadedResourcesCount()
+        u32 IResourceManager::GetLoadedResourcesCount() const
         {
-            ASSERT(s_database);
-            return s_database->GetLoadedResourceCount();
+            ASSERT(m_database);
+            return m_database->GetLoadedResourceCount();
         }
 
-        u32 ResourceManager::GetLoadingCount()
+        u32 IResourceManager::GetLoadingCount() const
         {
-            ASSERT(s_database);
-            return s_database->GetLoadingResourceCount();
+            ASSERT(m_database);
+            return m_database->GetLoadingResourceCount();
         }
 
-        void ResourceManager::StartLoading(IResource* resource, bool threading)
+        void IResourceManager::StartLoading(IResource* resource, bool threading)
         {
             {
-                std::lock_guard resourcesLoadingLock(s_resourcesLoadingMutex);
-                s_resourcesLoading.push_back(resource);
+                std::lock_guard resourcesLoadingLock(m_resourcesLoadingMutex);
+                m_resourcesLoading.push_back(resource);
             }
             resource->m_resource_state = EResoruceStates::Loading;
 
             const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromResource(resource);
             if (!loader)
             {
-                IS_CORE_WARN("[ResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
+                IS_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resource->GetFileName());
             }
 
-            void(*resourceLoadFunc)(IResource* resource, const IResourceLoader* loader, const bool threaded) = [](IResource* resource, const IResourceLoader* loader, const bool threaded)
+            std::function<void(IResource* resource, const IResourceLoader* loader, const bool threaded)> resourceLoadFunc = 
+                [this](IResource* resource, const IResourceLoader* loader, const bool threaded)
             {
                 bool resourceLoaded = false;
                 resource->StartLoadTimer();
@@ -444,7 +479,7 @@ namespace Insight
                     {
                         // Resource is within a pack. Check if that resource is currently serialised, if so then load from the pack
                         // otherwise try and load it from loose files.
-                        ResourcePack* resourcePack = s_database->GetResourcePackFromResourceId(resource->GetResourceId());
+                        ResourcePack* resourcePack = m_database->GetResourcePackFromResourceId(resource->GetResourceId());
 
                         if (resourcePack)
                         {
@@ -456,7 +491,7 @@ namespace Insight
                             }
                             else
                             {
-                                IS_CORE_WARN("[ResourceManager::StartLoading] Trying to load resource '{}' from a resource pack '{}'. Resource is not serialised in pack falling back to trying to load from disk."
+                                IS_CORE_WARN("[IResourceManager::StartLoading] Trying to load resource '{}' from a resource pack '{}'. Resource is not serialised in pack falling back to trying to load from disk."
                                 , resource->GetFilePath(), resourcePack->GetFilePath());
                             }
                         }
@@ -497,7 +532,7 @@ namespace Insight
                         }
                         else
                         {
-                            IS_CORE_WARN("[ResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
+                            IS_CORE_WARN("[IResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
                                 resource->GetResourceTypeId().GetTypeName());
                             resource->Load();
                         }
@@ -511,12 +546,12 @@ namespace Insight
                     {
                         ASSERT(0 == 0);
                     }
-                    s_database->SaveMetaFileData(resource, true);
+                    m_database->SaveMetaFileData(resource, true);
                     resource->OnLoaded(resource);
                 }
 
-                std::lock_guard resourceLoadingGuard(s_resourcesLoadingMutex);
-                Algorithm::VectorRemove(s_resourcesLoading, resource);
+                std::lock_guard resourceLoadingGuard(m_resourcesLoadingMutex);
+                Algorithm::VectorRemove(m_resourcesLoading, resource);
             };
 
 
@@ -531,35 +566,13 @@ namespace Insight
             {
                 resourceLoadFunc(resource, loader, false);
                 {
-                    std::lock_guard resourcesLoadingLock(s_resourcesLoadingMutex);
-                    Algorithm::VectorRemove(s_resourcesLoading, resource);
+                    std::lock_guard resourcesLoadingLock(m_resourcesLoadingMutex);
+                    Algorithm::VectorRemove(m_resourcesLoading, resource);
                 }
             }
         }
 
-        void ResourceManager::Shutdown()
-        {
-            ASSERT(Platform::IsMainThread());
-
-            // Finish loading all resources. This allows us to release them correctly.
-            while (!s_resourcesLoading.empty())
-            {
-                Update(0.16f);
-            }
-
-            // Pop all queued resources.
-            {
-                std::lock_guard queueLock(s_queuedResoucesToLoadMutex);
-                while (!s_queuedResoucesToLoad.empty())
-                {
-                    auto resource = s_queuedResoucesToLoad.front();
-                    s_queuedResoucesToLoad.pop();
-                    resource->m_resource_state = EResoruceStates::Cancelled;
-                }
-            }
-        }
-
-        ResourceId ResourceManager::ConvertResource(ResourceId resourceId)
+        ResourceId IResourceManager::ConvertResource(ResourceId resourceId)
         {
             /// Hack: 
             /// Load the resource as normal. 
@@ -581,7 +594,7 @@ namespace Insight
             return engineFormatResourceId;
         }
 
-        void ResourceManager::RemoveResource(ResourceId resourceId)
+        void IResourceManager::RemoveResource(ResourceId resourceId)
         {
             if (!resourceId)
             {
@@ -589,25 +602,25 @@ namespace Insight
             }
 
             Unload(resourceId);
-            s_database->RemoveResource(resourceId);
+            m_database->RemoveResource(resourceId);
         }
 
-        TObjectPtr<IResource> ResourceManager::CreateDependentResource(ResourceId const& resourceId)
+        TObjectPtr<IResource> IResourceManager::CreateDependentResource(ResourceId const& resourceId)
         {
-            ASSERT(s_database);
-            return s_database->CreateDependentResource(resourceId);
+            ASSERT(m_database);
+            return m_database->CreateDependentResource(resourceId);
         }
 
-        void ResourceManager::RemoveDependentResource(ResourceId const& resourceId)
+        void IResourceManager::RemoveDependentResource(ResourceId const& resourceId)
         {
-            ASSERT(s_database);
-            return s_database->RemoveDependentResource(resourceId);
+            ASSERT(m_database);
+            return m_database->RemoveDependentResource(resourceId);
         }
 
-        std::string ResourceManager::GetMetaPath(const IResource* resource)
+        std::string IResourceManager::GetMetaPath(const IResource* resource) const
         {
-            ASSERT(s_database);
-            return s_database->GetMetaFileForResource(resource);
+            ASSERT(m_database);
+            return m_database->GetMetaFileForResource(resource);
         }
     }
 }

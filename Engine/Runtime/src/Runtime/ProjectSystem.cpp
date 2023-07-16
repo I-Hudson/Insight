@@ -128,7 +128,7 @@ namespace Insight
 
             if (m_projectInfo.IsOpen)
             {
-                m_resourceSystem->GetDatabase().Shutdown();
+                m_resourceSystem->Shutdown();
                 Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectCloseEvent>(m_projectInfo.ProjectPath));
             }
             m_projectInfo = {};
@@ -142,7 +142,7 @@ namespace Insight
             m_projectInfo.Deserialise(&jsonSerialiser);
             m_projectInfo.IsOpen = true;
 
-            ResourceManager::LoadDatabase();
+            m_resourceSystem->Initialise();
 
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectOpenEvent>(m_projectInfo.ProjectPath));
             return true;

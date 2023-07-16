@@ -3,6 +3,7 @@
 #include "Core/ISysytem.h"
 
 #include "Resource/ResourceDatabase.h"
+#include "Resource/ResourceManager.h"
 
 namespace Insight
 {
@@ -18,15 +19,13 @@ namespace Insight
 
             void Update(float const deltaTime);
 
-            // Core::ISystem
+            // Begin - ISystem -
             virtual void Initialise() override;
             virtual void Shutdown() override;
-
-            ResourceDatabase& GetDatabase();
-            const ResourceDatabase& GetDatabase() const;
+            // End - ISystem -
 
         private:
-            ResourceDatabase m_database;
+            ResourceManager m_resourceMangaer;
         };
     }
 }

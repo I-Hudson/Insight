@@ -29,7 +29,7 @@ namespace Insight
                     Runtime::ResourceId resouceId;
                     resouceId.Deserialise(serialiser);
 
-                    TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Create(resouceId);
+                    TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().Create(resouceId);
                     if (resource)
                     {
                         resource->Deserialise(serialiser);
@@ -75,7 +75,7 @@ namespace Insight
                 {
                     Runtime::ResourceId resouceId;
                     resouceId.Deserialise(serialiser);
-                    Runtime::IResource* resource = Runtime::ResourceManager::Create(resouceId).Get();
+                    Runtime::IResource* resource = Runtime::ResourceManager::Instance().Create(resouceId).Get();
 
                     // Resource is not an engine format. Load additional data which has been saved 
                     // to fill in engine fields like GUIDs.
@@ -268,7 +268,7 @@ namespace Insight
                     if (FileSystem::Exists(packFilePath))
                     {
                         //If we don't have a resource pack at the loction know then don't create one.
-                        pack = Runtime::ResourceManager::CreateResourcePack(packFilePath);
+                        pack = Runtime::ResourceManager::Instance().CreateResourcePack(packFilePath);
                     }
 
                     u64 resourceGuidsSize = 0;
@@ -283,7 +283,7 @@ namespace Insight
 
                         if (pack)
                         {
-                            Runtime::IResource* resourceToAdd = Runtime::ResourceManager::GetResourceFromGuid(resourceGuid);
+                            Runtime::IResource* resourceToAdd = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
                             if (resourceToAdd)
                             {
                                 pack->AddResource(resourceToAdd);

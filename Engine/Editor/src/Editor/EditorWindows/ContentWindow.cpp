@@ -1,6 +1,8 @@
 #include "Editor/EditorWindows/ContentWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
+
 #include "Editor/EditorGUI.h"
+#include "Editor/EditorResourceManager.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "Resource/ResourceManager.h"
@@ -78,9 +80,9 @@ namespace Insight::Editor
             SplitDirectory();
 
             m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
-                Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+                EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
             m_thumbnailToTexture[ContentWindowThumbnailType::File] =
-                Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+                EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
         }
     }
 
@@ -289,9 +291,9 @@ namespace Insight::Editor
                                 // Compute thumbnail size
                                 Graphics::RHI_Texture* texture = nullptr;
                                 Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
-                                if (Runtime::ResourceManager::HasResource(textureResourceId))
+                                if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
                                 {
-                                    texture = Runtime::ResourceManager::Load(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
+                                    texture = Runtime::ResourceManager::Instance().Load(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
                                 }
                                 else
                                 {
@@ -444,11 +446,11 @@ namespace Insight::Editor
                 if (loader)
                 {
                     Runtime::ResourceTypeId resourceTypeIdToLoad = loader->GetResourceTypeId(static_cast<u32>(m_resourceTypeToLoadIndex));
-                    Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, resourceTypeIdToLoad), m_convertResourceToEngineFormat);
+                    Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(m_importFilePath, resourceTypeIdToLoad), m_convertResourceToEngineFormat);
                 }
                 else
                 {
-                    Runtime::ResourceManager::LoadSync(Runtime::ResourceId(m_importFilePath, Runtime::ResourceTypeId()), m_convertResourceToEngineFormat);
+                    Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(m_importFilePath, Runtime::ResourceTypeId()), m_convertResourceToEngineFormat);
                 }
                 m_importFilePath = "";
                 m_resourceTypeToLoadIndex = 0;
@@ -548,7 +550,7 @@ namespace Insight::Editor
                             // Compute thumbnail size
                             Graphics::RHI_Texture* texture = nullptr;
                             Runtime::ResourceId textureResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId());
-                            texture = Runtime::ResourceManager::LoadSync(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
+                            texture = Runtime::ResourceManager::Instance().LoadSync(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
                             ASSERT(texture);
 
                             ImVec2 image_size_max = thumbnailSize;
@@ -623,7 +625,7 @@ namespace Insight::Editor
 
                     if (fileDialog.ShowSave(&filePath, { FileDialogFilter(resourceTypename.c_str(), extension.c_str())}))
                     {
-                        Runtime::ResourceManager::Create(Runtime::ResourceId(filePath, m_createResourceSelectedTypeId));
+                        Runtime::ResourceManager::Instance().Create(Runtime::ResourceId(filePath, m_createResourceSelectedTypeId));
                     }
                 }
             }

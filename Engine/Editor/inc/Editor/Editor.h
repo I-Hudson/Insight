@@ -6,6 +6,7 @@
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
 #include "Editor/MenuBar.h"
+#include "Editor/EditorResourceManager.h"
 #include "Editor/TypeDrawers/TypeDrawerRegister.h"
 #include "Editor/HotReload/HotReloadSystem.h"
 #include "Editor/Build/BuildSystem.h"
@@ -19,6 +20,9 @@ namespace Insight
 		class IS_EDITOR Editor : public Insight::App::Engine, public Serialisation::ISerialisable
 		{
 		public:
+			Editor();
+			virtual ~Editor() override;
+
 			IS_SERIALISABLE_H(Editor)
 
 			virtual void OnPreInit() override;
@@ -37,6 +41,8 @@ namespace Insight
 
 			HotReloadSystem m_hotReloadSystem;
 			BuildSystem m_buildSystem;
+
+			EditorResourceManager m_editorResourceManager;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
 			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";

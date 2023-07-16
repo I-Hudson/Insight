@@ -89,27 +89,27 @@ namespace Insight
 		{
 			if constexpr (DefaultModelToLoad == DefaultModels::Backpack)
 			{
-				TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_backpack = Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Survival_BackPack_2/obj/backpack.obj", Runtime::Model::GetStaticResourceTypeId()));
 				modelsToAddToScene.push_back({ model_backpack, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 				modelsToAddToScene.push_back({ model_sponza, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain_Curtains)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaFull)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
-				TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza_curtains = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Curtains/NewSponza_Curtains_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza_ivy = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Ivy/NewSponza_IvyGrowth_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza_trees = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Trees/NewSponza_CypressTree_glTF.gltf", Runtime::Model::GetStaticResourceTypeId()));
 
 				modelsToAddToScene.push_back({ model_sponza, false });
 				modelsToAddToScene.push_back({ model_sponza_curtains, false });

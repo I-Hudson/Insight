@@ -96,7 +96,7 @@ namespace Insight
 			{
 				mesh->OnUnloaded(mesh);
 				RemoveDependentResource(mesh);
-				ResourceManager::RemoveDependentResource(mesh->GetResourceId());
+				ResourceManager::Instance().RemoveDependentResource(mesh->GetResourceId());
 			}
 			m_meshes.clear();
 
@@ -105,7 +105,7 @@ namespace Insight
 			{
 				material->OnUnloaded(material);
 				RemoveDependentResource(material);
-				ResourceManager::RemoveDependentResource(material->GetResourceId());
+				ResourceManager::Instance().RemoveDependentResource(material->GetResourceId());
 				++materialIdx;
 			}
 			m_materials.clear();

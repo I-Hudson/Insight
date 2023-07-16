@@ -29,7 +29,7 @@ namespace Insight
                     }
 
                     Core::GUID textureGuid = guidDeserialiser(serialisedGuid);
-                    TObjectPtr<Runtime::IResource> texture = Runtime::ResourceManager::GetResourceFromGuid(textureGuid);
+                    TObjectPtr<Runtime::IResource> texture = Runtime::ResourceManager::Instance().Instance().GetResourceFromGuid(textureGuid);
                     if (texture)
                     {
                         textures[i] = static_cast<Runtime::Texture2D*>(texture.Get());

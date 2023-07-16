@@ -2,12 +2,6 @@
 #include "Resource/ResourceDatabase.inl"
 #include "Resource/ResourceManager.h"
 
-#include "Resource/Material.h"
-#include "Resource/Mesh.h"
-#include "Resource/Model.h"
-#include "Resource/Texture2D.h"
-#include "Resource/ResourcePack.h"
-
 #include "Asset/AssetRegistry.h"
 
 #include "Runtime/ProjectSystem.h"
@@ -36,11 +30,6 @@ namespace Insight
         void ResourceDatabase::Initialise()
         {
             ASSERT(Platform::IsMainThread());
-            ResourceRegister::RegisterResource<Material>();
-            ResourceRegister::RegisterResource<Mesh>();
-            ResourceRegister::RegisterResource<Model>();
-            ResourceRegister::RegisterResource<Texture2D>();
-
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Save, [this](const Core::Event& eve)
                 {
                     ASSERT(Platform::IsMainThread());

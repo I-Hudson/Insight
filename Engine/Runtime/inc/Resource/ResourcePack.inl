@@ -35,7 +35,7 @@ namespace Insight::Serialisation
                 Runtime::ResourceId resourceId;
                 resourceId.Deserialise(serialiser);
 
-                Runtime::IResource* resource = Runtime::ResourceManager::GetResource(resourceId);
+                Runtime::IResource* resource = Runtime::ResourceManager::Instance().GetResource(resourceId);
 
                 if (resource)
                 {

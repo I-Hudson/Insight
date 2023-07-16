@@ -35,6 +35,15 @@ namespace Insight
 	{
 		Core::Timer Engine::s_FrameTimer;
 
+		Engine::Engine()
+		{
+		}
+
+		Engine::~Engine()
+		{
+
+		}
+
 		bool Engine::Init(int argc, char** argv)
 		{
 			IS_CORE_INFO("Runtime Version {}.{}.{}.", 

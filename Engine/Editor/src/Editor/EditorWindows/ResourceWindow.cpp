@@ -28,19 +28,19 @@ namespace Insight
 
 		void ResourceWindow::OnDraw()
 		{
-			ImGui::Text("Resources queued to loading: %i.", Runtime::ResourceManager::GetQueuedToLoadCount());
-			ImGui::Text("Total resources loading: %i.", Runtime::ResourceManager::GetLoadingCount());
-			ImGui::Text("Total resources loaded: %i.", Runtime::ResourceManager::GetLoadedResourcesCount());
+			ImGui::Text("Resources queued to loading: %i.", Runtime::ResourceManager::Instance().GetQueuedToLoadCount());
+			ImGui::Text("Total resources loading: %i.", Runtime::ResourceManager::Instance().GetLoadingCount());
+			ImGui::Text("Total resources loaded: %i.", Runtime::ResourceManager::Instance().GetLoadedResourcesCount());
 
 			ImGui::Text("Resources:");
-			Runtime::ResourceDatabase::ResourceMap resources = Runtime::ResourceManager::GetResourceMap();
+			Runtime::ResourceDatabase::ResourceMap resources = Runtime::ResourceManager::Instance().GetResourceMap();
 			for (const auto& [resourceId, resource] : resources)
 			{
 				DrawSingleResource(resource);
 			}
 
 			ImGui::Text("Resource Packs:");
-			std::vector<Runtime::ResourcePack*> resourcePacks = Runtime::ResourceManager::GetResourcePacks();
+			std::vector<Runtime::ResourcePack*> resourcePacks = Runtime::ResourceManager::Instance().GetResourcePacks();
 			for (Runtime::ResourcePack* const& pack : resourcePacks)
 			{
 				DrawSingleResourcePack(pack);
@@ -73,11 +73,11 @@ namespace Insight
 
 				if (ImGui::Button("Load"))
 				{
-					Runtime::ResourceManager::LoadSync(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
+					Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(resource->GetFilePath(), resource->GetResourceTypeId()));
 				}
 				if (ImGui::Button("Unload"))
 				{
-					Runtime::ResourceManager::Unload(resource->GetResourceId());
+					Runtime::ResourceManager::Instance().Unload(resource->GetResourceId());
 				}
 				ImGui::TreePop();
 			}

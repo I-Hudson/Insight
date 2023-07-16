@@ -14,7 +14,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class ResourceManager;
+        class IResourceManager;
         class ResourcePack;
 
         /// @brief Database to store all currently known resources.
@@ -95,7 +95,7 @@ namespace Insight
             mutable std::mutex m_resourcePacksMutex;
             std::vector<ResourcePack*> m_resourcePacks;
 
-            friend class ResourceManager;
+            friend class IResourceManager;
         };
     }
 

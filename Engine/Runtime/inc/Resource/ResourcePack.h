@@ -16,7 +16,7 @@ namespace Insight
     namespace Runtime
     {
         class ResourceDatabase;
-        class ResourceManager;
+        class IResourceManager;
 
         /// @brief A resource pack is an object which is serialised to disk and contains a list of resources from the project.
         class IS_RUNTIME ResourcePack : public Serialisation::ISerialisable
@@ -86,7 +86,7 @@ namespace Insight
             std::fstream m_fileHandle;
 
             friend class ResourceDatabase;
-            friend class ResourceManager;
+            friend class IResourceManager;
 
             IS_SERIALISABLE_FRIEND;
         };

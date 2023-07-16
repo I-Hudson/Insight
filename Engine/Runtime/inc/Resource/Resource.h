@@ -26,7 +26,7 @@ namespace Insight
 	namespace Runtime
 	{
 		class IResource;
-		class ResourceManager;
+		class IResourceManager;
 		class ResourceDatabase;
 		class ResourcePack;
 
@@ -240,7 +240,7 @@ namespace Insight
 
 			ResourcePackInfo m_resourcePackInfo;
 
-			friend class ResourceManager;
+			friend class IResourceManager;
 			friend class ResourceDatabase;
 			friend class ResourcePack;
 		};

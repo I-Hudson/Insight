@@ -39,6 +39,8 @@ namespace Insight
 		class IS_RUNTIME Engine : public Core::Singleton<Engine>
 		{
 		public:
+			Engine();
+			virtual ~Engine();
 
 			bool Init(int argc, char** argv);
 			void Update();

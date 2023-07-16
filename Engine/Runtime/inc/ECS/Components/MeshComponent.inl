@@ -19,7 +19,7 @@ namespace Insight
 				{
 					Core::GUID guid = guidDeserialiser(serialisedGuid);
 					// Load resource.
-					Runtime::IResource* meshResource = Runtime::ResourceManager::GetResourceFromGuid(guid);
+					Runtime::IResource* meshResource = Runtime::ResourceManager::Instance().Instance().GetResourceFromGuid(guid);
 					mesh = static_cast<Runtime::Mesh*>(meshResource);
 				}
 			}
@@ -43,7 +43,7 @@ namespace Insight
 				{
 					Core::GUID guid = guidDeserialiser(serialisedGuid);
 					// Load resource.
-					Runtime::IResource* meshResource = Runtime::ResourceManager::GetResourceFromGuid(guid);
+					Runtime::IResource* meshResource = Runtime::ResourceManager::Instance().Instance().GetResourceFromGuid(guid);
 					material = static_cast<Runtime::Material*>(meshResource);
 				}
 			}

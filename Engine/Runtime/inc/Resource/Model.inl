@@ -23,7 +23,7 @@ namespace Insight
                     Runtime::ResourceId resourceId;
                     resourceId.Deserialise(serialiser);
 
-                    Runtime::IResource* resource = Runtime::ResourceManager::CreateDependentResource(resourceId).Get();
+                    Runtime::IResource* resource = Runtime::ResourceManager::Instance().Instance().CreateDependentResource(resourceId).Get();
                     ASSERT(resource);
                     model->AddDependentResource(resource);
                     mesh = static_cast<Runtime::Mesh*>(resource);
@@ -61,9 +61,9 @@ namespace Insight
                     Runtime::ResourceId resourceId;
                     resourceId.Deserialise(serialiser);
 
-                    ASSERT(!Runtime::ResourceManager::HasResource(resourceId));
+                    ASSERT(!Runtime::ResourceManager::Instance().HasResource(resourceId));
 
-                    Runtime::IResource* resource = Runtime::ResourceManager::CreateDependentResource(resourceId).Get();
+                    Runtime::IResource* resource = Runtime::ResourceManager::Instance().Instance().CreateDependentResource(resourceId).Get();
                     ASSERT(resource);
                     model->AddDependentResource(resource);
                     material = static_cast<Runtime::Material*>(resource);

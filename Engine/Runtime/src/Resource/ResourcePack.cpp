@@ -47,7 +47,7 @@ namespace Insight::Runtime
     {
         for (const auto& [path, packedResource] : m_resources)
         {
-            TObjectPtr<IResource> resrouce = ResourceManager::Load(packedResource.Resource->GetResourceId());
+            TObjectPtr<IResource> resrouce = ResourceManager::Instance().Load(packedResource.Resource->GetResourceId());
             if (!packedResource.Resource)
             {
                 IS_CORE_WARN("[ResourcePack::Load] Something went wrong with '{}'.", resrouce->GetResourceId().GetPath());
@@ -59,7 +59,7 @@ namespace Insight::Runtime
     {
         for (const auto& [path, packedResource] : m_resources)
         {
-            ResourceManager::Unload(packedResource.Resource->GetResourceId());
+            ResourceManager::Instance().Unload(packedResource.Resource->GetResourceId());
         }
     }
 

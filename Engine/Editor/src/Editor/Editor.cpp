@@ -32,6 +32,14 @@ namespace Insight
 
         SplashScreen splashScreen;
 
+        Editor::Editor()
+        {
+        }
+
+        Editor::~Editor()
+        {
+        }
+
         void Editor::OnPreInit()
         {
             static const std::string splashScreenBackGroundPath = EnginePaths::GetResourcePath() + "/Insight/cover.png";
@@ -51,6 +59,7 @@ namespace Insight
                 });
             Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true, false);
 
+            m_editorResourceManager.Initialise();
 
             EditorModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
 
@@ -97,10 +106,10 @@ namespace Insight
             const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
             assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
 
-            Runtime::ResourcePack* pack = Runtime::ResourceManager::CreateResourcePack(
+            Runtime::ResourcePack* pack = Runtime::ResourceManager::Instance().CreateResourcePack(
                 Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
 
-            Runtime::IResource* resource = Runtime::ResourceManager::LoadSync(
+            Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
                 Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
                     , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
 
@@ -162,7 +171,7 @@ namespace Insight
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
 
-            Runtime::ResourceManager::SaveDatabase();
+            m_editorResourceManager.Shutdown();
         }
     }
 }
