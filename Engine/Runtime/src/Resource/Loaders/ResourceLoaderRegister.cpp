@@ -33,10 +33,10 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
-            RegisterResourceLoader(New<AssimpLoader>());
-            RegisterResourceLoader(New<BinaryLoader>());
-            RegisterResourceLoader(New<TextLoader>());
-            RegisterResourceLoader(New<TextureLoader>());
+            RegisterResourceLoader<AssimpLoader>();
+            RegisterResourceLoader<BinaryLoader>();
+            RegisterResourceLoader<TextLoader>();
+            RegisterResourceLoader<TextureLoader>();
 
             VerifyLoaders();
         }
@@ -78,21 +78,6 @@ namespace Insight
             return GetLoaderFromExtension(fileExtension);
         }
 
-        void ResourceLoaderRegister::RegisterResourceLoader(IResourceLoader* resourceLoader)
-        {
-            if (!resourceLoader->GetLoadableResourceTypes().empty() && Algorithm::VectorContainsIf(s_resourceLoaders, [resourceLoader](const IResourceLoader* loader)
-                {
-                    return resourceLoader->GetResourceTypeId() == loader->GetResourceTypeId();
-                }))
-            {
-                IS_CORE_ERROR("[ResourceLoaderRegister::RegisterResourceLoader] Trying to add a new loader for ResourceTypeId '{}' when one already exists.", 
-                    resourceLoader->GetResourceTypeId().GetTypeName());
-                Delete(resourceLoader);
-            }
-            resourceLoader->Initialise();
-            s_resourceLoaders.push_back(resourceLoader);
-        }
-        
         void ResourceLoaderRegister::VerifyLoaders()
         {
             std::unordered_set<ResourceTypeId> resourceTypesLoadable;

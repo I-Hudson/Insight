@@ -4,7 +4,7 @@
 
 namespace Insight::Runtime
 {
-    class ResourceManager : public IResourceManager, public Core::Singleton<ResourceManager>
+    class IS_RUNTIME ResourceManager : public IResourceManager, public Core::Singleton<ResourceManager>
     {
     public:
         ResourceManager() = default;

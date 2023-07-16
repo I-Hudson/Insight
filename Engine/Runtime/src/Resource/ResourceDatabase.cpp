@@ -56,6 +56,15 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
+            Clear();
+
+            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Save);
+        }
+
+        void ResourceDatabase::Clear()
+        {
+            ASSERT(Platform::IsMainThread());
+
             for (auto& pack : m_resourcePacks)
             {
                 pack->UnloadAllResources();
@@ -75,8 +84,6 @@ namespace Insight
             m_resourcePacks.clear();
             m_resources.clear();
             m_dependentResources.clear();
-
-            Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Save);
         }
 
         ResourcePack* ResourceDatabase::CreateResourcePack(std::string_view filePath)

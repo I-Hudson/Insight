@@ -19,6 +19,8 @@ namespace Insight
 
             void Update(float const deltaTime);
 
+            void ClearDatabase();
+
             // Begin - ISystem -
             virtual void Initialise() override;
             virtual void Shutdown() override;

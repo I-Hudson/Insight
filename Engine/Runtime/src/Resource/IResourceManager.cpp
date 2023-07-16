@@ -119,19 +119,6 @@ namespace Insight
         void IResourceManager::ClearDatabase()
         {
             ASSERT(Platform::IsMainThread());
-            m_database->Shutdown();
-        }
-
-        void IResourceManager::Initialise()
-        {
-            ASSERT(m_database == nullptr);
-            m_database = New<ResourceDatabase>();
-            m_database->Initialise();
-        }
-
-        void IResourceManager::Shutdown()
-        {
-            ASSERT(Platform::IsMainThread());
 
             // Finish loading all resources. This allows us to release them correctly.
             while (!m_resourcesLoading.empty())
@@ -149,6 +136,22 @@ namespace Insight
                     resource->m_resource_state = EResoruceStates::Cancelled;
                 }
             }
+
+            m_database->Clear();
+        }
+
+        void IResourceManager::Initialise()
+        {
+            ASSERT(m_database == nullptr);
+            m_database = New<ResourceDatabase>();
+            m_database->Initialise();
+        }
+
+        void IResourceManager::Shutdown()
+        {
+            ASSERT(Platform::IsMainThread());
+
+            ClearDatabase();
 
             m_database->Shutdown();
             Delete(m_database);

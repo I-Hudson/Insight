@@ -23,6 +23,11 @@ namespace Insight
             m_resourceMangaer.Update(deltaTime);
         }
 
+        void ResourceSystem::ClearDatabase()
+        {
+            m_resourceMangaer.ClearDatabase();
+        }
+
         void ResourceSystem::Initialise()
         {
             ResourceLoaderRegister::Initialise();

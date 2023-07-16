@@ -35,6 +35,7 @@ namespace Insight
 
             void Initialise();
             void Shutdown();
+            void Clear();
 
             ResourcePack* CreateResourcePack(std::string_view filePath);
             ResourcePack* LoadResourcePack(std::string_view filepath);

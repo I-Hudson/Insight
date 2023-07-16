@@ -107,7 +107,6 @@ namespace Insight
 			//IResourceLoader - BEGIN
 			virtual void Initialise() override;
 			virtual void Shutdown() override;
-
 			virtual bool Load(IResource* resource) const override;
 			//IResourceLoader - END
 

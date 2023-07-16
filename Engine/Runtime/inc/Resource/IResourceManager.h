@@ -87,7 +87,7 @@ namespace Insight
             /// @brief Max number of resources which can be loading at a single time is 4. This
             // is to not fill up the task system.
             const static u32 c_MaxLoadingResources = -1;
-            ResourceDatabase* m_database;
+            ResourceDatabase* m_database = nullptr;
 
             /// @brief Current resources being loaded.
             std::vector<IResource*> m_resourcesLoading;
