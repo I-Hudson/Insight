@@ -78,6 +78,7 @@ IncludeDirs["qoi"] = "%{wks.location}vendor/qoi"
 IncludeDirs["reflect"] = "%{wks.location}vendor/reflect/reflect/inc"
 IncludeDirs["simplygon"] = "%{wks.location}vendor/SimplygonSDK_10.1.11000.0"
 IncludeDirs["zip"] = "%{wks.location}vendor/zip/src"
+IncludeDirs["efsw"] = "%{wks.location}vendor/efsw/include"
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"

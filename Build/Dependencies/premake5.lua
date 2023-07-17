@@ -58,4 +58,5 @@ group "Dependices"
         include "../../premakeFiles/splash.lua"
         include "../../premakeFiles/reflect.lua"
         include "../../premakeFiles/zip.lua"
+        include "../../premakeFiles/efsw.lua"
 

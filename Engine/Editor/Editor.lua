@@ -44,6 +44,7 @@ project "Insight_Editor"
         "%{IncludeDirs.reflect}",
         "%{IncludeDirs.zip}",
         "%{IncludeDirs.splash}",
+        "%{IncludeDirs.efsw}",
     }
 
     files 
@@ -103,6 +104,7 @@ project "Insight_Editor"
         {
             "Reflectd.lib",
             "Splashd.lib",
+            "efswd.lib",
         }
         libdirs
         {
@@ -111,12 +113,13 @@ project "Insight_Editor"
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"",  }
 
     filter "configurations:Release"  
-        defines { "NDEBUG" }    
+        defines { "NDEBUG" }
         optimize "On" 
         links
         {
             "Reflect.lib",
             "Splash.lib",
+            "efsw.lib",
         }
         libdirs
         {

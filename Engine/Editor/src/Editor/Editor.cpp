@@ -52,11 +52,15 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [](const Core::Event& e)
+            Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
                 {
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), true);
+
+                    m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
+                    m_fileWatcher.watch();
                 });
+
             Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true, false);
 
             m_editorResourceManager.Initialise();
@@ -152,6 +156,7 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
             Core::EventSystem::Instance().RemoveEventListener(this, Core::EventType::Project_Open);
+            m_fileWatcher.removeWatch(m_contentListener.WatchId);
 
             EditorSettingsSerialiser serialiser(false);
             Serialise(&serialiser);
