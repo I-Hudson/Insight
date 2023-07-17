@@ -3,7 +3,6 @@
 #include "Runtime/Defines.h"
 
 #include "Core/TypeAlias.h"
-#include "Core/Logger.h"
 
 #include "Serialisation/ISerialisable.h"
 #include "Serialisation/Serialiser.h"
@@ -75,7 +74,7 @@ namespace Insight
 				ResourceTypeId typeId = T::GetStaticResourceTypeId();
 				if (auto itr = m_map.find(typeId); itr != m_map.end())
 				{
-					IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is aleady registered '{}'.", typeId.GetTypeName());
+					RegisterResourceAlreadyRegsiteredLog(typeId.GetTypeName().data());
 					return;
 				}
 				m_map[typeId] = [](std::string_view filePath) { return New<T, Core::MemoryAllocCategory::Resources>(filePath); };
@@ -88,6 +87,9 @@ namespace Insight
 			static std::vector<ResourceTypeId> GetAllResourceTypeIds();
 				 
 			static IResource* CreateResource(ResourceTypeId type_id, std::string_view filePath);
+
+		private:
+			static void RegisterResourceAlreadyRegsiteredLog(const char* type);
 
 		private:
 			static std::unordered_map<ResourceTypeId, CreateFunc> m_map;

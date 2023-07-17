@@ -6,6 +6,7 @@
 #include "Serialisation/Archive.h"
 
 #include "Algorithm/Vector.h"
+#include "Core/Logger.h"
 
 namespace Insight::Runtime
 {

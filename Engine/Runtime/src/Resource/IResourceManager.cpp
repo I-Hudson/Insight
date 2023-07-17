@@ -336,6 +336,80 @@ namespace Insight
             return resource;
         }
 
+        TObjectPtr<IResource> IResourceManager::LoadSync(const Core::GUID& guid)
+        {
+            return Load(guid, false, false);
+        }
+
+        TObjectPtr<IResource> IResourceManager::LoadSync(const Core::GUID& guid, bool convertToEngineFormat)
+        {
+            return Load(guid, convertToEngineFormat, false);
+        }
+
+        TObjectPtr<IResource> IResourceManager::Load(const Core::GUID& guid)
+        {
+            return Load(guid, true, false);
+        }
+
+        TObjectPtr<IResource> IResourceManager::Load(const Core::GUID& guid, bool loadAsyncs, bool convertToEngineFormat)
+        {
+            ASSERT(m_database);
+
+            if (!guid.IsValid())
+            {
+                IS_CORE_WARN("[IResourceManager::Load] Invalid Guid.");
+                return nullptr;
+            }
+
+            if (convertToEngineFormat)
+            {
+                FAIL_ASSERT();
+                //resourceId = ConvertResource(std::move(resourceId));
+            }
+
+            TObjectPtr<IResource> resource;
+            if (m_database->HasResource(guid))
+            {
+                resource = m_database->GetResourceFromGuid(guid);
+            }
+            else
+            {
+                resource = m_database->AddResource(guid);
+            }
+
+            if (resource)
+            {
+                if (resource->IsLoaded())
+                {
+                    // Item is already loaded, just return it.
+                    return resource;
+                }
+
+                if (resource->IsNotLoaded() || resource->IsUnloaded())
+                {
+                    if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
+                    {
+                        if (!FileSystem::Exists(resource->GetFilePath()))
+                        {
+                            // File does not exists. Set the resource state and return nullptr.
+                            resource->m_resource_state = EResoruceStates::Not_Found;
+                            return resource;
+                        }
+                        else
+                        {
+                            resource->m_resource_state = EResoruceStates::Queued;
+                            StartLoading(resource.Get(), false);
+                        }
+                    }
+                    else
+                    {
+                        FAIL_ASSERT_MSG("[IResourceManager::Load] Maybe this should be done. Maybe when an resource is being loaded from disk it should handle loading memory resources.");
+                    }
+                }
+            }
+            return resource;
+        }
+
         ResourcePack* IResourceManager::LoadResourcePack(std::string_view filepath)
         {
             ASSERT(m_database);

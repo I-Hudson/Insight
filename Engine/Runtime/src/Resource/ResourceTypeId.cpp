@@ -1,4 +1,5 @@
 #include "Resource/ResourceTypeId.h"
+#include "Core/Logger.h"
 
 namespace Insight
 {
@@ -79,6 +80,11 @@ namespace Insight
 			FAIL_ASSERT();
 			IS_CORE_WARN("[ResourceTypeIdToResource::CreateResource] ");
 			return nullptr;
+		}
+
+		void ResourceRegister::RegisterResourceAlreadyRegsiteredLog(const char* type)
+		{
+			IS_CORE_WARN("[ResourceTypeIdToResource::RegisterResource] Resource type is already registered '{}'.", type);
 		}
 	}
 }

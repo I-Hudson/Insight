@@ -74,6 +74,10 @@ namespace Insight::Runtime
         LoadMetaData(assetInfo);
 
         m_guidToAssetInfoLookup[assetInfo->MetaData.AssetGuid] = assetInfo;
+        for (const Core::GUID& guid : assetInfo->MetaData.DependentGuids)
+        {
+            m_guidToAssetInfoLookup[guid] = assetInfo;
+        }
         m_pathToGuidLookup[assetInfo->GetFullFilePath()] = assetInfo->MetaData.AssetGuid;
 
         return assetInfo;
@@ -90,6 +94,10 @@ namespace Insight::Runtime
         ASSERT(assetInfo);
         ASSERT(assetInfo->GetCount() == 0);
 
+        for (const Core::GUID& guid : assetInfo->MetaData.DependentGuids)
+        {
+            m_guidToAssetInfoLookup.erase(guid);
+        }
         m_guidToAssetInfoLookup.erase(assetInfo->MetaData.AssetGuid);
         m_pathToGuidLookup.erase(assetInfo->GetFullFilePath());
         ::Delete(assetInfo);
@@ -119,7 +127,7 @@ namespace Insight::Runtime
             object->Serialise(&jsonSerialiser);
         }
 
-        ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension, true));
+        ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension,FileType::Binary, true));
 
         if (FileSystem::PathIsSubPathOf(assetInfo->GetFullFilePath(), EnginePaths::GetResourcePath()))
         {

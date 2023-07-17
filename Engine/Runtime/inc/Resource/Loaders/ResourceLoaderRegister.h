@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Runtime/Defines.h"
+#include "Resource/Loaders/IResourceLoader.h"
+
 #include "Core/Defines.h"
 #include "Core/Logger.h"
 
@@ -11,7 +13,6 @@ namespace Insight
 {
     namespace Runtime
     {
-        class IResourceLoader;
         class IResource;
 
         /// @brief 

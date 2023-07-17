@@ -51,9 +51,9 @@ namespace Insight
             ResourceMap GetResourceMap() const;
             std::vector<ResourcePack*> GetResourcePacks() const;
 
-            
             bool HasResource(ResourceId const& resourceId) const;
             bool HasResource(TObjectPtr<IResource> resource) const;
+            bool HasResource(const Core::GUID& guid) const;
 
             u32 GetResourceCount() const;
             u32 GetLoadedResourceCount() const;
@@ -63,6 +63,8 @@ namespace Insight
 
         private:
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId, bool force);
+            TObjectPtr<IResource> AddResource(const Core::GUID& guid);
+
             void DeleteResource(TObjectOPtr<IResource>& resource);
 
             std::vector<ResourceId> GetAllResourceIds() const;

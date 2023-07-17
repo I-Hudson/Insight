@@ -22,7 +22,7 @@ namespace Insight
         }
     }
 
-    bool FileSystem::SaveToFile(const Byte* data, u64 dataSize, std::string_view filePath, bool overwrite)
+    bool FileSystem::SaveToFile(const Byte* data, u64 dataSize, std::string_view filePath, FileType fileType, bool overwrite)
     {
         if (Exists(filePath) && !overwrite)
         {
@@ -36,7 +36,7 @@ namespace Insight
         }
 
         std::fstream fileStream;
-        fileStream.open(filePath, std::ios::out);
+        fileStream.open(filePath, std::ios::out | c_FileTypeToStdIos[(int)fileType]);
         if (!fileStream.is_open())
         {
             fileStream.close();
@@ -53,16 +53,12 @@ namespace Insight
     }
     bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite)
     {
-        return SaveToFile(data.data(), data.size(), filePath, overwrite);
+        return SaveToFile(data.data(), data.size(), filePath, FileType::Text, overwrite);
     }
 
-    bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath)
+    bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath, FileType fileType, bool overwrite)
     {
-        return SaveToFile(data, filePath, false);
-    }
-    bool FileSystem::SaveToFile(const std::string& data, std::string_view filePath, bool overwrite)
-    {
-        return SaveToFile(std::vector<u8>{data.begin(), data.end()}, filePath, overwrite);
+        return SaveToFile(data.data(), data.size(), filePath, fileType, overwrite);
     }
 
     std::vector<Byte> FileSystem::ReadFromFile(std::string_view filePath, FileType fileType)

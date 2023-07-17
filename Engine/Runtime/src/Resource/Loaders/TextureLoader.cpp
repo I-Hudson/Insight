@@ -3,6 +3,8 @@
 
 #include "FileSystem/FileSystem.h"
 
+#include "Core/Logger.h"
+
 #include <stb_image.h>
 #include <stb_image_write.h>
 

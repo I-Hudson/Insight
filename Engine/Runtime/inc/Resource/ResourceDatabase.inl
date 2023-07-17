@@ -11,6 +11,7 @@
 
 #include "Core/Compression.h"
 #include "Core/Profiler.h"
+#include "Core/Logger.h"
 
 namespace Insight
 {

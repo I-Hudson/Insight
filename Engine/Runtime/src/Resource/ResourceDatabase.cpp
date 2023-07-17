@@ -1,6 +1,7 @@
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourceDatabase.inl"
 #include "Resource/ResourceManager.h"
+#include "Resource/Loaders/ResourceLoaderRegister.h"
 
 #include "Asset/AssetRegistry.h"
 
@@ -245,6 +246,27 @@ namespace Insight
             return HasResource(resource->GetResourceId());
         }
 
+        bool ResourceDatabase::HasResource(const Core::GUID& guid) const
+        {
+            bool result = false;
+            {
+                std::lock_guard lock(m_mutex);
+                for (const auto& [resourceId, resource] : m_resources)
+                {
+                    if (resource->GetGuid() == guid) {
+                        return true;
+                    }
+                }
+                for (const auto& [resourceId, resource] : m_dependentResources)
+                {
+                    if (resource->GetGuid() == guid) {
+                        return true;
+                    }
+                }
+            }
+            return result;
+        }
+
         u32 ResourceDatabase::GetResourceCount() const
         {
             u32 result;
@@ -336,6 +358,58 @@ namespace Insight
             return resource;
         }
 
+        TObjectPtr<IResource> ResourceDatabase::AddResource(const Core::GUID& guid)
+        {
+            if (!guid.IsValid())
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] Guid '{}' is not valid.", guid.ToString());
+                return nullptr;
+            }
+
+            TObjectPtr<IResource> resource;
+            if (HasResource(guid))
+            {
+                return GetResourceFromGuid(guid);
+            }
+
+            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(guid);
+            if (assetInfo == nullptr)
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] No asset info related to guid '{}'.", guid.ToString());
+                return nullptr;
+            }
+
+            std::string assetExtention = std::string(FileSystem::GetFileExtension(assetInfo->GetFullFilePath()));
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(assetExtention);
+            if (!loader)
+            {
+                IS_CORE_WARN("[ResourceDatabase::AddResource] Didn't find a loader compatible with asset '{}'.", 
+                    assetInfo->GetFullFilePath());
+                return nullptr;
+            }
+
+            ResourceId resourceId(assetInfo->GetFullFilePath(), loader->GetResourceTypeId());
+            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
+            ASSERT(rawResource);
+            {
+                std::lock_guard resourceLock(rawResource->m_mutex);
+                rawResource->m_resourceId = resourceId;
+                rawResource->m_resource_state = EResoruceStates::Not_Loaded;
+                rawResource->m_storage_type = ResourceStorageTypes::Disk;
+                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
+                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
+            }
+            TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
+            {
+                std::lock_guard lock(m_mutex);
+                resource = m_resources[resourceId] = std::move(ownerResource);
+            }
+
+            AssetRegistry::Instance().DeserialiseAssetUser(RemoveConst(assetInfo), resource);
+
+            return resource;
+        }
+
         void ResourceDatabase::DeleteResource(TObjectOPtr<IResource>& resource)
         {
             ASSERT(resource->IsFailedToLoad()
@@ -416,6 +490,7 @@ namespace Insight
 
         void ResourceDatabase::LoadMetaFileData(IResource* resource)
         {
+            return;
             if (resource->IsEngineFormat())
             {
                 return;
@@ -448,6 +523,7 @@ namespace Insight
 
         void ResourceDatabase::SaveMetaFileData(IResource* resource, bool overwrite)
         {
+            return;
             ASSERT(!resource->IsEngineFormat());
 
             std::string metaFilePath = resource->GetFilePath();

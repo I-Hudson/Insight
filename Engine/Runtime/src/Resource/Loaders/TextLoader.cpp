@@ -3,6 +3,8 @@
 
 #include "FileSystem/FileSystem.h"
 
+#include "Core/Logger.h"
+
 namespace Insight::Runtime
 {
     TextLoader::TextLoader()

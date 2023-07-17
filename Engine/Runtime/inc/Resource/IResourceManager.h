@@ -53,6 +53,28 @@ namespace Insight
             TObjectPtr<IResource> Load(ResourceId resourceId);
             TObjectPtr<IResource> Load(ResourceId resourceId, bool convertToEngineFormat);
 
+            /// @brief Load Resource synchronously from Guid 
+            /// @param guid 
+            /// @return TObjectPtr<IResource>
+            TObjectPtr<IResource> LoadSync(const Core::GUID& guid);
+            /// @brief Load Resource synchronously from Guid, with option to convert to engine format
+            /// @param guid 
+            /// @param convertToEngineFormat 
+            /// @return TObjectPtr<IResource>
+            TObjectPtr<IResource> LoadSync(const Core::GUID& guid, bool convertToEngineFormat);
+
+            /// @brief Load Resource asynchronously from Guid
+            /// @param guid 
+            /// @return TObjectPtr<IResource>
+            TObjectPtr<IResource> Load(const Core::GUID& guid);
+            /// @brief Load Resource synchronously from Guid 
+            /// @param guid 
+            /// @param loadAsyncs 
+            /// @param convertToEngineFormat 
+            /// @return TObjectPtr<IResource>
+            TObjectPtr<IResource> Load(const Core::GUID& guid, bool loadAsyncs, bool convertToEngineFormat);
+
+
             void Unload(ResourceId const& resourceId);
             void Unload(TObjectPtr<IResource> Resource);
             void UnloadAll();

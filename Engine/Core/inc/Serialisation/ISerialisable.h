@@ -14,6 +14,8 @@ namespace Insight
         template<typename>
         struct PropertySerialiser;
 
+        class ISerialiser;
+
         class IS_CORE ISerialisable
         {
         public:
