@@ -194,7 +194,9 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::GetAsset(std::string_view path) const
     {
-        const auto iter = m_pathToGuidLookup.find(std::string(path));
+        std::string unixPath = std::string(path);
+        FileSystem::PathToUnix(unixPath);
+        const auto iter = m_pathToGuidLookup.find(unixPath);
         if (iter == m_pathToGuidLookup.end())
         {
             return nullptr;

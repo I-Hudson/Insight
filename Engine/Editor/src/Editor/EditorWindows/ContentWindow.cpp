@@ -4,6 +4,8 @@
 #include "Editor/EditorGUI.h"
 #include "Editor/EditorResourceManager.h"
 
+#include "Asset/AssetRegistry.h"
+
 #include "Runtime/ProjectSystem.h"
 #include "Resource/ResourceManager.h"
 #include "Resource/Loaders/IResourceLoader.h"
@@ -291,11 +293,16 @@ namespace Insight::Editor
                                 // Compute thumbnail size
                                 Graphics::RHI_Texture* texture = nullptr;
                                 Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
-                                if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
+                                if (Runtime::AssetRegistry::Instance().GetAsset(path) != nullptr)
                                 {
-                                    texture = Runtime::ResourceManager::Instance().Load(textureResourceId).CastTo<Runtime::Texture2D>().Get()->GetRHITexture();
+                                    TObjectPtr<Runtime::IResource> loadedResource = Runtime::ResourceManager::Instance().LoadSync(textureResourceId);
+                                    if (loadedResource)
+                                    {
+                                        texture = loadedResource.CastTo<Runtime::Texture2D>()->GetRHITexture();
+                                    }
                                 }
-                                else
+                                
+                                if (texture == nullptr)
                                 {
                                     Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
                                     if (thumbnailTexture)

@@ -217,6 +217,17 @@ namespace Insight
                 return nullptr;
             }
 
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(FileSystem::GetFileExtension(resourceId.GetPath()));
+            if (!loader)
+            {
+                IS_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resourceId.GetPath());
+                return nullptr;
+            }
+            else if (loader->GetResourceTypeId() != resourceId)
+            {
+                return  nullptr;
+            }
+
             if (convertToEngineFormat)
             {
                 resourceId = ConvertResource(std::move(resourceId));
