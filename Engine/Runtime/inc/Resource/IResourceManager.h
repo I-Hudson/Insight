@@ -74,7 +74,7 @@ namespace Insight
             /// @return TObjectPtr<IResource>
             TObjectPtr<IResource> Load(const Core::GUID& guid, bool loadAsyncs, bool convertToEngineFormat);
 
-
+            void Unload(std::string_view filePath);
             void Unload(ResourceId const& resourceId);
             void Unload(TObjectPtr<IResource> Resource);
             void UnloadAll();

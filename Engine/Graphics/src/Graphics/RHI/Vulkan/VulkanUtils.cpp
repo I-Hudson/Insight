@@ -37,12 +37,12 @@ VkFormat PixelFormatToVkFormat[static_cast<uint32_t>(PixelFormat::MAX)] = {
     VK_FORMAT_R32G32_SINT,
     VK_FORMAT_UNDEFINED,
 
-    // TODO: R32G8X24_Typeless
+    // TODO Low: R32G8X24_Typeless
     VK_FORMAT_D32_SFLOAT_S8_UINT,
     VK_FORMAT_UNDEFINED,
-    // TODO: R32_Float_X8X24_Typeless
+    // TODO Low: R32_Float_X8X24_Typeless
     VK_FORMAT_UNDEFINED,
-    // TODO: X32_Typeless_G8X24_UInt
+    // TODO Low: X32_Typeless_G8X24_UInt
     VK_FORMAT_A2B10G10R10_UNORM_PACK32,
     VK_FORMAT_A2B10G10R10_UNORM_PACK32,
     VK_FORMAT_A2B10G10R10_UINT_PACK32,
@@ -90,14 +90,14 @@ VkFormat PixelFormatToVkFormat[static_cast<uint32_t>(PixelFormat::MAX)] = {
     VK_FORMAT_R8_SNORM,
     VK_FORMAT_R8_SINT,
     VK_FORMAT_UNDEFINED,
-    // TODO: A8_UNorm
+    // TODO Low: A8_UNorm
     VK_FORMAT_UNDEFINED,
-    // TODO: R1_UNorm
+    // TODO Low: R1_UNorm
     VK_FORMAT_E5B9G9R9_UFLOAT_PACK32,
     VK_FORMAT_UNDEFINED,
-    // TODO: R8G8_B8G8_UNorm
+    // TODO Low: R8G8_B8G8_UNorm
     VK_FORMAT_UNDEFINED,
-    // TODO: G8R8_G8B8_UNorm
+    // TODO Low: G8R8_G8B8_UNorm
     VK_FORMAT_BC1_RGBA_UNORM_BLOCK,
     VK_FORMAT_BC1_RGBA_UNORM_BLOCK,
     VK_FORMAT_BC1_RGBA_SRGB_BLOCK,
@@ -118,7 +118,7 @@ VkFormat PixelFormatToVkFormat[static_cast<uint32_t>(PixelFormat::MAX)] = {
     VK_FORMAT_B8G8R8A8_UNORM,
     VK_FORMAT_B8G8R8A8_UNORM,
     VK_FORMAT_UNDEFINED,
-    // TODO: R10G10B10_Xr_Bias_A2_UNorm
+    // TODO Low: R10G10B10_Xr_Bias_A2_UNorm
     VK_FORMAT_B8G8R8A8_UNORM,
     VK_FORMAT_B8G8R8A8_SRGB,
     VK_FORMAT_B8G8R8A8_UNORM,

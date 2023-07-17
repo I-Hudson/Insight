@@ -17,6 +17,7 @@ namespace Insight
 
         constexpr const char* c_ProjectExtension = ".isproject";
 
+        //TODO High: Move this into the editor project and out of the Runtime one.
         struct IS_RUNTIME ProjectInfo : public Serialisation::ISerialisable
         {
             std::string ProjectPath;

@@ -26,11 +26,17 @@ namespace Insight::Runtime
         virtual void Shutdown() override;
         // End - ISystem -
 
+        /// @brief 
+        /// @param metaFileDirectory 
+        /// @param assetReativeBaseDirectory 
+        void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
+
         const AssetInfo* AddAsset(std::string_view path);
         const AssetInfo* AddAsset(std::string_view path, bool enableMetaFile);
         void RemoveAsset(std::string_view path);
 
         void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
+        void UpdateMetaData(AssetUser* object);
         void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
         const AssetInfo* GetAsset(const Core::GUID& guid) const;
@@ -54,5 +60,8 @@ namespace Insight::Runtime
     private:
         std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
         std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
+
+        std::string m_debugMetaFileDirectory;
+        std::string m_assetReativeBaseDirectory;
     };
 }

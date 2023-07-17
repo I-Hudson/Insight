@@ -33,6 +33,16 @@ namespace Insight::Runtime
         m_state = Core::SystemStates::Not_Initialised;
     }
 
+    void AssetRegistry::SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory)
+    {
+        if (!FileSystem::Exists(metaFileDirectory))
+        {
+            FileSystem::CreateFolder(metaFileDirectory);
+        }
+        m_debugMetaFileDirectory = std::move(metaFileDirectory);
+        m_assetReativeBaseDirectory = std::move(assetReativeBaseDirectory);
+    }
+
     const AssetInfo* AssetRegistry::AddAsset(std::string_view path)
     {
         return AddAsset(path, true);
@@ -129,24 +139,17 @@ namespace Insight::Runtime
 
         ASSERT(FileSystem::SaveToFile(binarySerialiser.GetSerialisedData(), assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension,FileType::Binary, true));
 
-        if (FileSystem::PathIsSubPathOf(assetInfo->GetFullFilePath(), EnginePaths::GetResourcePath()))
+        if (!m_debugMetaFileDirectory.empty())
         {
-            std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), EnginePaths::GetResourcePath());
-            ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), EnginePaths::GetResourcePath() + "/meta/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
+            std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), m_assetReativeBaseDirectory);
+            ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), m_debugMetaFileDirectory + "/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
+
         }
-        else
-        {
-            const ProjectInfo& projectInfo = ProjectSystem::Instance().GetProjectInfo();
-            if (FileSystem::PathIsSubPathOf(assetInfo->GetFullFilePath(), projectInfo.GetContentPath()))
-            {
-                std::string assetPathRelativeToContent = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), projectInfo.GetContentPath());
-                ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), projectInfo.GetIntermediatePath() + "/meta/" + assetPathRelativeToContent + AssetMetaData::c_FileExtension, true));
-            }
-            else
-            {
-                FAIL_ASSERT();
-            }
-        }
+    }
+
+    void AssetRegistry::UpdateMetaData(AssetUser* object)
+    {
+        UpdateMetaData(RemoveConst(object->GetAssetInfo()), object);
     }
 
     void AssetRegistry::DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const

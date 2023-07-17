@@ -69,7 +69,7 @@ namespace Insight
 			Hlsl
 		};
 
-		// TODO: Replace IDxc* with a ref counter object. (This needs to be custom due to compile time)
+		// TODO Low: Replace IDxc* with a ref counter object. (This needs to be custom due to compile time)
 		struct ShaderCompiler
 		{
 			ShaderCompiler();

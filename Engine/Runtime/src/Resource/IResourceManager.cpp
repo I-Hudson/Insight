@@ -422,6 +422,17 @@ namespace Insight
             m_database->UnloadResourcePack(resourcePack);
         }
 
+        void IResourceManager::Unload(std::string_view filePath)
+        {
+            std::string_view fileExtension = FileSystem::GetFileExtension(filePath);
+            const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+            if (!loader)
+            {
+                return;
+            }
+            return Unload(ResourceId(filePath, loader->GetResourceTypeId()));
+        }
+
         void IResourceManager::Unload(ResourceId const& resourceId)
         {
             ASSERT(m_database);

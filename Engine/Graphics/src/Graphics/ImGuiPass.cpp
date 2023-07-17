@@ -305,7 +305,7 @@ namespace Insight
 
 								if (texture)
 								{
-									// TODO: HACK REALLY BAD. There needs to be a system where you can predefine multiple pipelines before rendering.
+									// TODO High: HACK REALLY BAD. There needs to be a system where you can predefine multiple pipelines before rendering.
 									// This would allow for at runtime pipelines to already be created.
 									PipelineStateObject pso = renderGraph.GetPipelineStateObject("ImGuiPass");
 									if (texture->m_name == "ImguiFontsTexture")

@@ -82,7 +82,7 @@ namespace Insight
 			void			SetLayout(ImageLayout newLayout, u32 mip = 0) { if (mip < m_infos.size()) { m_infos.at(mip).Layout = newLayout; } }
 
 			virtual void Create(RenderContext* context, RHI_TextureInfo createInfo) = 0;
-			//TODO: Look into a system to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
+			//TODO Mid: Look into a system to batch upload textures. Maybe submit a batch upload struct with a list of textures and data.
 			virtual void Upload(void* data, int sizeInBytes) = 0;
 			/// <summary>
 			/// Add the upload to the RHI_UploadQueue. This will upload just before all rendering. This doesn't garuntee that the upload will have completed.

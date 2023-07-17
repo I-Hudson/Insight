@@ -218,7 +218,7 @@ namespace Insight
 					Mesh* new_mesh = nullptr;
 					if (loader_data.Model)
 					{
-						//TODO Link the mesh as a resource and link all the textures as resources.
+						//TODO Low: Link the mesh as a resource and link all the textures as resources.
 						// We are in the process of loading a model, add a new mesh to the model.
 						if (loader_data.Model->m_meshes.size() <= loader_data.MeshIndex)
 						{
@@ -441,7 +441,7 @@ namespace Insight
 			}
 
 			// Use absolute paths.
-			// TODO: Should probably change this to be relative. Paths lengths are getting very long.
+			// TODO Low: Should probably change this to be relative. Paths lengths are getting very long.
 			material_file_path = directory + '/' + material_file_path;
 
 			{
@@ -462,9 +462,9 @@ namespace Insight
 			//		file_path = file_path.substr(2);
 			//	}
 
-			//	// Use absolute paths.
-			//	// TODO: Should probably change this to be relative. Paths lengths are getting very long.
-			//	file_path = known_data.Directoy + '/' + file_path;
+			// Use absolute paths.
+			// TODO Low: Should probably change this to be relative. Paths lengths are getting very long.
+			// file_path = known_data.Directoy + '/' + file_path;
 
 			//	bool skip = false;
 			//	// Check if mesh_data knows about the texture.
@@ -516,7 +516,7 @@ namespace Insight
 		void AssimpLoader::LoadMaterialTextures(AssimpLoaderData& loader_data)
 		{
 			/// EXPERIMENTAL: Trying to load textures in parallel.
-			// TODO: Texture loading is one of the main issues of performance. (The uploading takes a lot of time)
+			// TODO Low: Texture loading is one of the main issues of performance. (The uploading takes a lot of time)
 			/// Maybe add a new system to defer GPU resource uploads, this would require something on CPU/Host
 			/// side to track the current state of a resource. Or the GPU resource could track this it self??? Thoughts?
 			//concurrency::task_group task_group;

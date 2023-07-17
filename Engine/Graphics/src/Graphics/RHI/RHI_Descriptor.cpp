@@ -270,7 +270,7 @@ namespace Insight
 					}
 				}
 
-				// TODO: Fix this. With imgui there is an issue where with a 2 frame swapchain the second frame 
+				// TODO Low: Fix this. With imgui there is an issue where with a 2 frame swapchain the second frame 
 				// does not show imgui correctly as the texture binding is not set. Unsure why this is but with the 
 				// below commented out it works. So something is wrong with the hash/caching and imgui is needing this
 				// to be force update which is bad for performance. 

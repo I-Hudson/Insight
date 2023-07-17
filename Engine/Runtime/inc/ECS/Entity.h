@@ -138,7 +138,7 @@ namespace Insight
 			bool m_on_end_called : 1;
 
 		private:
-			// TODO Must add type information.
+			// TODO Low: Must add type information.
 			/// @brief Store the unique ID for the component.
 			Core::GUID m_guid;
 			Entity* m_ownerEntity = nullptr;
@@ -270,8 +270,8 @@ namespace Insight
 			bool m_isEnabled = true;
 
 			std::vector<Ptr<Entity>> m_children;
-			// TODO: Currently the Entity owns its components. Maybe a component manager should own all components
-			// TODO: and the entity should just hold a view/pointer to it. (Need to think about lifetime, RPtr?)
+			// TODO Low: Currently the Entity owns its components. Maybe a component manager should own all components
+			// and the entity should just hold a view/pointer to it. (Need to think about lifetime, RPtr?)
 			std::vector<RPtr<Component>> m_components;
 
 			friend class EntityManager;

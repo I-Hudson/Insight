@@ -55,6 +55,8 @@ namespace Insight
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
                 {
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                    Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
+
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), true);
 
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);

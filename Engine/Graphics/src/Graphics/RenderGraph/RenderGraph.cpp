@@ -234,7 +234,7 @@ namespace Insight
 			ASSERT(m_context->IsRenderThread());
 
 			RenderGraphBuilder builder(this);
-			/// TODO This should be threaded. Leave as single thread for now.
+			//TODO Low: This should be threaded. Leave as single thread for now.
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				builder.SetPass(pass.Get());
@@ -460,7 +460,7 @@ namespace Insight
 			ASSERT(m_context->IsRenderThread());
 
 			NVTX3_FUNC_RANGE();
-			/// TODO: Could be threaded? Leave as it is for now as it works.
+			/// TODO Low: Could be threaded? Leave as it is for now as it works.
 			for (UPtr<RenderGraphPassBase>& pass : GetRenderPasses())
 			{
 				cmdList->BeginTimeBlock("PlaceBarriersInToPipeline", glm::vec4(1, 0, 0, 1));

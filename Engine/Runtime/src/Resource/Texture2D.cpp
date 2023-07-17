@@ -80,11 +80,11 @@ namespace Insight
 				stbi_image_free(textureData);
 			}
 
-			/// Delete the texture data from memory.
-			/// The texture is now loaded so it's not needed.
-			/// TODO: Look into this as if you edit the texture at runtime 
-			/// do I really want to have to download from the GPU. But if kept in
-			/// RAM what is the memory cost.
+			// Delete the texture data from memory.
+			// The texture is now loaded so it's not needed.
+			// TODO Mid: Look into this as if you edit the texture at runtime 
+			// do I really want to have to download from the GPU. But if kept in
+			// RAM what is the memory cost.
 			//m_dataSize = 0;
 			//DeleteBytes(m_rawDataPtr);
 

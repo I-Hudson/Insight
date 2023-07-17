@@ -129,7 +129,7 @@ namespace Insight
                         }
                         if (!renderWorld.MainCamera.IsSet || !isVisible)
                         {
-                            // TODO: Setup seperate scene and game worlds and then re-enable this.
+                            // TODO Mid: Setup seperate scene and game worlds and then re-enable this.
                             // The "EditorWorld" should be it's own world then when play is pressed a runtime world 
                             // should be created.
                             //continue;
