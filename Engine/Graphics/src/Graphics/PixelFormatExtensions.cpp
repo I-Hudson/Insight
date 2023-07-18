@@ -87,7 +87,7 @@ void PixelFormatExtensions::Init()
         PixelFormat::R8G8B8A8_Typeless,
         PixelFormat::R8G8B8A8_UInt,
         PixelFormat::R8G8B8A8_UNorm,
-        PixelFormat::R8G8B8A8_UNorm_sRGB,
+        PixelFormat::R8G8B8A8_UNorm_SRGB,
         PixelFormat::B8G8R8A8_Typeless,
         PixelFormat::B8G8R8A8_UNorm,
         PixelFormat::B8G8R8A8_UNorm_sRGB,
@@ -186,7 +186,7 @@ u32 PixelFormatExtensions::AlphaSizeInBits(const PixelFormat format)
         return 2;
     case PixelFormat::R8G8B8A8_Typeless:
     case PixelFormat::R8G8B8A8_UNorm:
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::R8G8B8A8_UInt:
     case PixelFormat::R8G8B8A8_SNorm:
     case PixelFormat::R8G8B8A8_SInt:
@@ -384,7 +384,7 @@ bool PixelFormatExtensions::IsSRGB(const PixelFormat format)
 {
     switch (format)
     {
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::BC1_UNorm_sRGB:
     case PixelFormat::BC2_UNorm_sRGB:
     case PixelFormat::BC3_UNorm_sRGB:
@@ -443,7 +443,7 @@ bool PixelFormatExtensions::IsRgbAOrder(const PixelFormat format)
     case PixelFormat::R11G11B10_Float:
     case PixelFormat::R8G8B8A8_Typeless:
     case PixelFormat::R8G8B8A8_UNorm:
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::R8G8B8A8_UInt:
     case PixelFormat::R8G8B8A8_SNorm:
     case PixelFormat::R8G8B8A8_SInt:
@@ -477,7 +477,7 @@ bool PixelFormatExtensions::IsNormalized(const PixelFormat format)
     case PixelFormat::R16G16B16A16_SNorm:
     case PixelFormat::R10G10B10A2_UNorm:
     case PixelFormat::R8G8B8A8_UNorm:
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::R8G8B8A8_SNorm:
     case PixelFormat::R8G8_B8G8_UNorm:
     case PixelFormat::G8R8_G8B8_UNorm:
@@ -585,7 +585,7 @@ u32 PixelFormatExtensions::ComputeComponentsCount(const PixelFormat format)
     case PixelFormat::R10G10B10A2_UInt:
     case PixelFormat::R8G8B8A8_Typeless:
     case PixelFormat::R8G8B8A8_UNorm:
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::R8G8B8A8_UInt:
     case PixelFormat::R8G8B8A8_SNorm:
     case PixelFormat::R8G8B8A8_SInt:
@@ -674,7 +674,7 @@ PixelFormat PixelFormatExtensions::TosRGB(const PixelFormat format)
     switch (format)
     {
     case PixelFormat::R8G8B8A8_UNorm:
-        return PixelFormat::R8G8B8A8_UNorm_sRGB;
+        return PixelFormat::R8G8B8A8_UNorm_SRGB;
     case PixelFormat::BC1_UNorm:
         return PixelFormat::BC1_UNorm_sRGB;
     case PixelFormat::BC2_UNorm:
@@ -696,7 +696,7 @@ PixelFormat PixelFormatExtensions::ToNonsRGB(const PixelFormat format)
 {
     switch (format)
     {
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
         return PixelFormat::R8G8B8A8_UNorm;
     case PixelFormat::BC1_UNorm_sRGB:
         return PixelFormat::BC1_UNorm;
@@ -741,7 +741,7 @@ PixelFormat PixelFormatExtensions::MakeTypeless(const PixelFormat format)
     case PixelFormat::R10G10B10A2_UInt:
         return PixelFormat::R10G10B10A2_Typeless;
     case PixelFormat::R8G8B8A8_UNorm:
-    case PixelFormat::R8G8B8A8_UNorm_sRGB:
+    case PixelFormat::R8G8B8A8_UNorm_SRGB:
     case PixelFormat::R8G8B8A8_UInt:
     case PixelFormat::R8G8B8A8_SNorm:
     case PixelFormat::R8G8B8A8_SInt:
@@ -877,7 +877,7 @@ PixelFormat PixelFormatExtensions::FindShaderResourceFormat(const PixelFormat fo
         case PixelFormat::B8G8R8A8_Typeless:
             return PixelFormat::B8G8R8A8_UNorm_sRGB;
         case PixelFormat::R8G8B8A8_Typeless:
-            return PixelFormat::R8G8B8A8_UNorm_sRGB;
+            return PixelFormat::R8G8B8A8_UNorm_SRGB;
         case PixelFormat::BC1_Typeless:
             return PixelFormat::BC1_UNorm_sRGB;
         case PixelFormat::BC2_Typeless:

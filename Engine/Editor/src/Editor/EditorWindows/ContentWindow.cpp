@@ -204,6 +204,11 @@ namespace Insight::Editor
                     std::string fileName = iter.path().filename().string();
                     std::string fileExtension = iter.path().extension().string();
 
+                    if (FileSystem::GetFileExtension(path) == Runtime::AssetMetaData::c_FileExtension)
+                    {
+                        continue;
+                    }
+
                     ++displayed_item_count;
                     // Start new line ?
                     if (new_line)

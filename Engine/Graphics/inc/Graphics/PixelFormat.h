@@ -158,7 +158,7 @@ enum class PixelFormat : u32
     /// <summary>
     /// A four-component, 32-bit unsigned-normalized integer sRGB format that supports 8 bits per channel including alpha.
     /// </summary>
-    R8G8B8A8_UNorm_sRGB = 29,
+    R8G8B8A8_UNorm_SRGB = 29,
 
     /// <summary>
     /// A four-component, 32-bit unsigned-integer format that supports 8 bits per channel including alpha.
