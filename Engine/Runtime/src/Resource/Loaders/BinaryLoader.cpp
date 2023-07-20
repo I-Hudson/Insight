@@ -25,7 +25,7 @@ namespace Insight::Runtime
         }
 
         std::vector<Byte> fileData = FileSystem::ReadFromFile(resource->GetFilePath(), FileType::Binary);
-        resource->LoadFromMemory(fileData.data(), fileData.size());
+        //resource->LoadFromMemory(fileData.data(), fileData.size());
         return true;
     }
 }

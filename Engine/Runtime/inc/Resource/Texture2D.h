@@ -22,18 +22,17 @@ namespace Insight
 
 			REGISTER_RESOURCE(Texture2D);
 
-			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
-			/// and exists inside another resource's disk file.
-			/// @param file_path 
-			virtual void LoadFromMemory(const void* data, u64 size_in_bytes) override;
+			virtual void UpdateRHITexture(void* textureData, u64 textureSize) override;
+
+			/// @brief Load all the pixels from disk and return the data.
+			/// @return std::vector<Byte>
+			std::vector<Byte> GetPixels() const;
 
 		private:
-			/// @brief Handle loading the resource from disk.
-			/// @param file_path 
-			virtual void Load() override;
-
+			// Begin -- IResource--
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();
+			// End -- IResource--
 
 			/// @brief Save resrouce to disk.
 			virtual void Save(const std::string& file_path);

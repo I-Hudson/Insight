@@ -212,7 +212,7 @@ namespace Insight::Runtime
         m_fileHandle.seekg(packedResource.DataPosition);
         m_fileHandle.read((char*)resourceData.data(), packedResource.DataSize);
 
-        packedResource.Resource->LoadFromMemory(resourceData.data(), resourceData.size());
+        //packedResource.Resource->LoadFromMemory(resourceData.data(), resourceData.size());
 
         return true;
     }

@@ -190,6 +190,15 @@ namespace Insight
             {
                 assert(false);
             }
+
+            /// @brief Return data for a specific member on a serialised object.
+            /// @param name 
+            /// @return T
+            template<typename T>
+            T GetData(ISerialiser* serialiser, const char* name)
+            {
+                assert(false);
+            }
         };
 
         template<typename T, typename TypeSerialiser, SerialiserType SerialiserType>

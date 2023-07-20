@@ -110,17 +110,17 @@ namespace Insight
 
 		EResoruceStates IResource::GetResourceState() const
 		{
-			std::lock_guard lock(m_mutex);
+			//std::lock_guard lock(m_referenceLinksMutex);
 			// If this resource is dependent on another then return that resource's current state.
-			auto iter = Algorithm::VectorFindIf(m_reference_links, [](ResourceReferenceLink const& link)
-				{
-					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
-				});
+			//auto iter = Algorithm::VectorFindIf(m_reference_links, [](ResourceReferenceLink const& link)
+			//	{
+			//		return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
+			//	});
 
-			if (iter != m_reference_links.end())
-			{
-				return iter->GetLinkResource()->GetResourceState();
-			}
+			//if (iter != m_reference_links.end())
+			//{
+			//	return iter->GetLinkResource()->GetResourceState();
+			//}
 			return m_resource_state;
 		}
 
@@ -131,7 +131,7 @@ namespace Insight
 
 		const ResourceReferenceLink* IResource::GetReferenceLink(u32 index) const
 		{
-			std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_referenceLinksMutex);
 			if (index < m_reference_links.size())
 			{
 				return &m_reference_links.at(index);
@@ -177,7 +177,7 @@ namespace Insight
 
 		bool IResource::IsDependentOnAnotherResource() const
 		{
-			std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_referenceLinksMutex);
 			return Algorithm::VectorFindIf(m_reference_links, [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent;
@@ -186,7 +186,7 @@ namespace Insight
 
 		bool IResource::IsDependentOnAnotherResource(IResource* resource) const
 		{
-			std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_referenceLinksMutex);
 			return Algorithm::VectorFindIf(m_reference_links, [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent && link.GetLinkResource() == resource;
@@ -195,7 +195,7 @@ namespace Insight
 
 		bool IResource::IsDependentOwnerOnAnotherResource() const
 		{
-			std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_referenceLinksMutex);
 			return Algorithm::VectorFindIf(m_reference_links, [](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner;
@@ -204,7 +204,7 @@ namespace Insight
 
 		bool IResource::IsDependentOwnerOnAnotherResource(IResource* resource) const
 		{
-			std::lock_guard lock(m_mutex);
+			std::lock_guard lock(m_referenceLinksMutex);
 			return Algorithm::VectorFindIf(m_reference_links, [resource](const ResourceReferenceLink& link)
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner && link.GetLinkResource() == resource;
@@ -265,8 +265,8 @@ namespace Insight
 
 			if (resource)
 			{
-				std::lock_guard lock(m_mutex);
-				std::lock_guard resourceLock(resource->m_mutex);
+				std::lock_guard lock(m_referenceLinksMutex);
+				std::lock_guard resourceLock(resource->m_referenceLinksMutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
 			}
@@ -283,8 +283,8 @@ namespace Insight
 		{
 			if (resource)
 			{
-				std::lock_guard lock(m_mutex);
-				std::lock_guard resourceLock(resource->m_mutex);
+				std::lock_guard lock(m_referenceLinksMutex);
+				std::lock_guard resourceLock(resource->m_referenceLinksMutex);
 				resource->m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, resource, this));
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Reference, this, resource));
 			}
@@ -296,7 +296,7 @@ namespace Insight
 			{
 				{
 					// Remove the link from the other resource to this resource.
-					std::lock_guard resourceLock(resource->m_mutex);
+					std::lock_guard resourceLock(resource->m_referenceLinksMutex);
 					Algorithm::VectorRemoveIf(resource->m_reference_links, [&](ResourceReferenceLink const& link)
 						{
 							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent 
@@ -305,7 +305,7 @@ namespace Insight
 				}
 				{
 					// Remove the link from this resource to the other resource.
-					std::lock_guard lock(m_mutex);
+					std::lock_guard lock(m_referenceLinksMutex);
 					Algorithm::VectorRemoveIf(m_reference_links, [&](ResourceReferenceLink const& link)
 						{
 							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner
@@ -321,7 +321,7 @@ namespace Insight
 			{
 				{
 					// Remove the link from the other resource to this resource.
-					std::lock_guard resourceLock(resource->m_mutex);
+					std::lock_guard resourceLock(resource->m_referenceLinksMutex);
 					Algorithm::VectorRemoveIf(resource->m_reference_links, [&](ResourceReferenceLink const& link)
 						{
 							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Reference
@@ -330,7 +330,7 @@ namespace Insight
 				}
 				{
 					// Remove the link from this resource to the other resource.
-					std::lock_guard lock(m_mutex);
+					std::lock_guard lock(m_referenceLinksMutex);
 					Algorithm::VectorRemoveIf(m_reference_links, [&](ResourceReferenceLink const& link)
 						{
 							return link.GetReferenceLinkType() == ResourceReferenceLinkType::Reference
@@ -361,16 +361,6 @@ namespace Insight
 				m_reference_links.push_back(ResourceReferenceLink(ResourceReferenceLinkType::Dependent_Owner, this, resource));
 			}
 			return resource;
-		}
-
-		void IResource::Load()
-		{
-			FAIL_ASSERT_MSG("[Resource::Load] Must be implemented.");
-		}
-
-		void IResource::LoadFromMemory(const void* data, u64 size_in_bytes)
-		{
-			FAIL_ASSERT_MSG("[Resource::LoadFromMemory] Must be implemented.");
 		}
 
 		void IResource::UnLoad()

@@ -14,7 +14,7 @@ namespace Insight
 {
 	namespace Runtime
 	{
-		class AssimpLoader;
+		class ModelLoader;
 
 		REFLECT_CLASS()
 		class IS_RUNTIME Model : public IResource, public ECS::ICreateEntityHierarchy
@@ -36,25 +36,21 @@ namespace Insight
 			//--ECS::ICreateEntityHierarchy
 
 		private:
-			//--IResource 
-			/// @brief Handle loading the resource from disk.
-			/// @param file_path 
-			virtual void Load() override;
+			// Begin --IResource-- 
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad() override;
 			/// @brief Handle saving a Model to disk.
 			/// @param file_path 
 			virtual void Save(const std::string& file_path) override;
-			//--IResource 
+			// End --IResource-- 
 
 		private:
 			std::vector<Mesh*> m_meshes;
 			std::vector<Material*> m_materials;
 			Graphics::RHI_Buffer* m_vertex_buffer = nullptr;
 			Graphics::RHI_Buffer* m_index_buffer = nullptr;
-			// std::vector<Materials> m_materials
 
-			friend class AssimpLoader;
+			friend class ModelLoader;
 		};
 	}
 

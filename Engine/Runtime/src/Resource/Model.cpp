@@ -6,7 +6,7 @@
 #include "Resource/Material.h"
 #include "Resource/ResourceManager.h"
 
-#include "Resource/Loaders/AssimpLoader.h"
+#include "Resource/Loaders/ModelLoader.h"
 
 #include "Graphics/RenderContext.h"
 
@@ -73,21 +73,21 @@ namespace Insight
 			return nullptr;
 		}
 
-		void Model::Load()
-		{
-			if (m_resource_state == EResoruceStates::Loaded)
-			{
-				return;
-			}
+		//void Model::Load()
+		//{
+		//	if (m_resource_state == EResoruceStates::Loaded)
+		//	{
+		//		return;
+		//	}
 
-			if (!AssimpLoader::LoadModel(this, m_file_path, AssimpLoader::Default_Model_Importer_Flags))
-			{
-				m_resource_state = EResoruceStates::Failed_To_Load;
-				return;
-			}
+		//	if (!ModelLoader::LoadModel(this, m_file_path, ModelLoader::Default_Model_Importer_Flags))
+		//	{
+		//		m_resource_state = EResoruceStates::Failed_To_Load;
+		//		return;
+		//	}
 
-			m_resource_state = EResoruceStates::Loaded;
-		}
+		//	m_resource_state = EResoruceStates::Loaded;
+		//}
 
 		void Model::UnLoad()
 		{
@@ -120,7 +120,7 @@ namespace Insight
 
 		void Model::Save(const std::string& file_path)
 		{
-			if (!AssimpLoader::ExportModel(this, file_path))
+			if (!ModelLoader::ExportModel(this, file_path))
 			{
 				IS_CORE_ERROR("[Model::Save] Model failed to save to disk. Filepath '{}'.", file_path);
 			}

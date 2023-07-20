@@ -1,7 +1,7 @@
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 #include "Resource/Loaders/IResourceLoader.h"
 
-#include "Resource/Loaders/AssimpLoader.h"
+#include "Resource/Loaders/ModelLoader.h"
 #include "Resource/Loaders/BinaryLoader.h"
 #include "Resource/Loaders/TextLoader.h"
 #include "Resource/Loaders/TextureLoader.h"
@@ -33,7 +33,7 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
-            RegisterResourceLoader<AssimpLoader>();
+            RegisterResourceLoader<ModelLoader>();
             RegisterResourceLoader<BinaryLoader>();
             RegisterResourceLoader<TextLoader>();
             RegisterResourceLoader<TextureLoader>();

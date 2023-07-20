@@ -11,7 +11,7 @@ namespace Insight
     namespace Runtime
     {
         class ResourceSystem;
-        class AssimpLoader;
+        class ResourceLoaderRegister;
         class ResourcePack;
 
         /// @brief Static class used to interact with resources.
@@ -119,8 +119,10 @@ namespace Insight
             std::queue<IResource*> m_queuedResoucesToLoad;
             mutable std::mutex m_queuedResoucesToLoadMutex;
 
+			ResourceLoaderRegister* m_loaderRegistry;
+
             friend class ResourceSystem;
-            friend class AssimpLoader;
+            friend class ModelLoader;
         };
     }
 }

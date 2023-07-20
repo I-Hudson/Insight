@@ -72,7 +72,7 @@ namespace Insight
 		SponzaMain_Curtains,
 		SponzaFull,
 	};
-	constexpr DefaultModels DefaultModelToLoad = DefaultModels::None;
+	constexpr DefaultModels DefaultModelToLoad = DefaultModels::Backpack;
 
 	namespace Graphics
 	{

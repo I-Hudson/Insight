@@ -53,6 +53,8 @@ namespace Insight
 			REGISTER_RESOURCE(Texture);
 			IS_SERIALISABLE_H(Texture);
 
+			virtual void UpdateRHITexture(void* textureData, u64 textureSize) { }
+
 			u32 GetWidth() const;
 			u32 GetHeight() const;
 			u32 GetDepth() const;

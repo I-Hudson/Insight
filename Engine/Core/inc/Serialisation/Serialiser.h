@@ -7,6 +7,7 @@
 #include "Core/StringUtils.h"
 
 #include <string>
+#include <optional>
 
 constexpr bool VersionCheck(const u32 serialisedVersion, const u32 versionAdded, const u32 versionRemoved)
 {
@@ -18,64 +19,131 @@ constexpr bool ObjectSerialiserCheck(std::string_view currentObjectSerialiser, s
     return true;//currentObjectSerialiser == serialisedObjectSerialiser;
 }
 
+namespace Insight::Serialisation::Internal
+{
+    enum class SerialiseAction
+    {
+        Serialise,
+        Deserialise,
+        GetData
+    };
+
+    struct Options
+    {
+        SerialiseAction Action;
+        const char* GetDataName;
+    };
+
+
+
+    template<typename TypeSerialiser, typename TData>
+    TData SerialiseNamedProperty(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const char* propertyName, TData& data, Options options)
+    {
+        if (options.Action == SerialiseAction::Serialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                ::Insight::Serialisation::SerialiseProperty<TypeSerialiser>(serialiser, propertyName, data);
+            }
+        }
+        else if (options.Action == SerialiseAction::Deserialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                using PropertyType = typename std::decay<decltype(data)>::type;
+                data = std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName));
+            }
+        }
+        else if (options.Action == SerialiseAction::GetData)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved) && 
+                options.GetDataName == propertyName)
+            {
+                using PropertyType = typename std::decay<decltype(data)>::type;
+                return std::move(::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName));
+            }
+        }
+        return TData();
+    }
+    
+    template<typename TypeSerialiser>
+    void SerialiseNamedPropertyRemoved(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const char* propertyName, Options options)
+    {
+        if (options.Action == SerialiseAction::Deserialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser> propertyDeserialiser;
+                typename ::Insight::Serialisation::PropertyDeserialiser<TypeSerialiser>::InType blankData;
+                using PropertyType = typename std::decay<decltype(propertyDeserialiser(blankData))>::type;
+                ::Insight::Serialisation::DeserialiseProperty<TypeSerialiser, PropertyType>(serialiser, propertyName);
+            }
+        }
+    }
+
+    template<typename TypeSerialiser, typename TData>
+    std::optional<TData> SerialiseNamedObject(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const char* propertyName, TData& data, Options options)
+    {
+        if (options.Action == SerialiseAction::Serialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                ::Insight::Serialisation::SerialiseObject<TypeSerialiser>(serialiser, data);
+            }
+        }
+        else if (options.Action == SerialiseAction::Deserialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, data);
+            }
+        }
+        else if (options.Action == SerialiseAction::GetData)
+        {
+            if constexpr (std::is_copy_constructible_v<TData>)
+            {
+                if (VersionCheck(version, versionAdded, versionRemoved))
+                {
+                    using ObjectType = typename std::decay<decltype(data)>::type;
+                    ObjectType objectData;
+                    ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, objectData);
+                    return objectData;
+                }
+            }
+        }
+        return std::optional<TData>();
+    }
+
+    template<typename TypeSerialiser, typename TData>
+    void SerialiseNamedObjectRemoved(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, const char* propertyName, Options options)
+    {
+        if (options.Action == SerialiseAction::Deserialise)
+        {
+            if (VersionCheck(version, versionAdded, versionRemoved))
+            {
+                using ObjectType = typename std::decay<decltype(data)>::type;
+                ObjectType objectData;
+                ::Insight::Serialisation::DeserialiseObject<TypeSerialiser>(serialiser, objectData);
+            }
+        }
+    }
+}
+
 // Serialise a single property. This would be things which only contain data for them self. 
 #define SERIALISE_NAMED_PROPERTY(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        if (!isReadMode)\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
-            {\
-                ::Insight::Serialisation::SerialiseProperty<TYPE_SERIALISER>(serialiser, #PROPERTY_NAME, PPCAT(object., PROPERTY));\
-            }\
-        }\
-        else\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
-            {\
-                using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
-                PPCAT(object., PROPERTY) = std::move(::Insight::Serialisation::DeserialiseProperty<TYPE_SERIALISER, PropertyType>(serialiser, #PROPERTY_NAME));\
-            }\
-        }
+::Insight::Serialisation::Internal::SerialiseNamedProperty<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, PPCAT(object., PROPERTY), m_options);
 
 
 // Replace SERIALISE_NAMED_PROPERTY with SERIALISE_NAMED_PROPERTY_REMOVED when a property has been removed.
 #define SERIALISE_NAMED_PROPERTY_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)\
-        if (isReadMode)\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
-            {\
-                ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER> propertyDeserialiser;\
-                typename ::Insight::Serialisation::PropertyDeserialiser<TYPE_SERIALISER>::InType blankData;\
-                using PropertyType = typename std::decay<decltype(propertyDeserialiser(blankData))>::type;\
-                ::Insight::Serialisation::DeserialiseProperty<TYPE_SERIALISER, PropertyType>(serialiser, #PROPERTY_NAME);\
-            }\
-        }\
+::Insight::Serialisation::Internal::SerialiseNamedPropertyRemoved<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, m_options);
 
 #define SERIALISE_NAMED_OBJECT(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        if (!isReadMode)\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
-            {\
-                ::Insight::Serialisation::SerialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
-            }\
-        }\
-        else\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
-            {\
-                ::Insight::Serialisation::DeserialiseObject<TYPE_SERIALISER>(serialiser, PPCAT(object., PROPERTY));\
-            }\
-        }
+::Insight::Serialisation::Internal::SerialiseNamedObject<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, PPCAT(object., PROPERTY), m_options);
 
 // Replace SERIALISE_NAMED_OBJECT with SERIALISE_NAMED_OBJECT_REMOVED when an object is removed.
 #define SERIALISE_NAMED_OBJECT_REMOVED(TYPE_SERIALISER, PROPERTY_NAME, VERSION_ADDED, VERSION_REMOVED)\
-        if (isReadMode)\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED) && ObjectSerialiserCheck(objectSerialiserType, serialisedObjectSerilaiser))\
-            {\
-                TYPE_SERIALISER blankData;\
-                ::Insight::Serialisation::DeserialiseObject<TYPE_SERIALISER>(serialiser, blankData);\
-            }\
-        }\
+::Insight::Serialisation::Internal::SerialiseNamedObjectRemoved<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, #PROPERTY_NAME, m_options);
 
 #define SERIALISE_NAMED_BASE(BASE_TYPE, VERSION_ADDED, VERSION_REMOVED)\
         if (!isReadMode)\
@@ -306,6 +374,10 @@ namespace Insight::Serialisation::Keys
             std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\
             objectSerialiserType = RemoveString(objectSerialiserType, "struct");\
+\
+            m_options = {};\
+            m_options.Action = ::Insight::Serialisation::Internal::SerialiseAction::Serialise;\
+\
             bool isReadMode = false;\
 \
             serialisedObjectSerilaiser = objectSerialiserType;\
@@ -353,11 +425,11 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\
             objectSerialiserType = RemoveString(objectSerialiserType, "struct");\
-            bool isReadMode = true;\
 \
-/*
-            bool correctObject = DeserialiseCheckForObjectSerialiser(serialiser, serialisedObjectSerilaiser, objectSerialiserType);\
-            */\
+            m_options = {};\
+            m_options.Action = ::Insight::Serialisation::Internal::SerialiseAction::Deserialise;\
+\
+            bool isReadMode = true;\
             bool correctObject = true;\
 \
             if (correctObject)\
@@ -375,6 +447,35 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             }\
         }
 
+#define GET_DATA_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
+    public:\
+        template<typename T>\
+        T GetData(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object, const char* name)\
+        {\
+            const u32 version = CURRENT_VERSION;\
+            std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
+            objectSerialiserType = RemoveString(objectSerialiserType, "class");\
+            objectSerialiserType = RemoveString(objectSerialiserType, "struct");\
+\
+            m_options = {};\
+            m_options.Action = ::Insight::Serialisation::Internal::SerialiseAction::GetData;\
+            m_options.GetDataName = name;\
+\
+            bool isReadMode = true;\
+\
+            std::string serialisedObjectSerilaiser = objectSerialiserType;\
+\
+            if (serialiser) { serialiser->StartObject(#OBJECT_TYPE); }\
+            if (serialiser&& !serialiser->IsReadMode())\
+            {\
+                serialiser->SetName(#OBJECT_TYPE); \
+                serialiser->Write(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+            }\
+            __VA_ARGS__\
+            if (serialiser) { serialiser->StopObject();} \
+            return T();\
+        }\
+
 #define OBJECT_SERIALISER(OBJECT_TYPE, CURRENT_VERSION, ...)\
         static_assert(CURRENT_VERSION >= 1);\
         template<>\
@@ -383,9 +484,11 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             using ObjectType = OBJECT_TYPE;\
             SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
             DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
+            GET_DATA_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\
         \
         private:\
             std::string objectSerialiserType;\
+            ::Insight::Serialisation::Internal::Options m_options;\
         };
 
 /*

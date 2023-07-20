@@ -2,7 +2,12 @@
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourcePack.h"
 #include "Resource/Loaders/ResourceLoaderRegister.h"
-#include "Resource/Loaders/IResourceLoader.h"
+
+#include "Resource/Loaders/BinaryLoader.h"
+#include "Resource/Loaders/TextLoader.h"
+#include "Resource/Loaders/ModelLoader.h"
+#include "Resource/Loaders/TextureLoader.h"
+
 
 #include "Runtime/ProjectSystem.h"
 
@@ -145,6 +150,12 @@ namespace Insight
             ASSERT(m_database == nullptr);
             m_database = New<ResourceDatabase>();
             m_database->Initialise();
+
+            m_loaderRegistry = New<ResourceLoaderRegister>();
+			m_loaderRegistry->RegisterResourceLoader<BinaryLoader>();
+			m_loaderRegistry->RegisterResourceLoader<TextureLoader>();
+			m_loaderRegistry->RegisterResourceLoader<ModelLoader>();
+			m_loaderRegistry->RegisterResourceLoader<TextureLoader>();
         }
 
         void IResourceManager::Shutdown()
@@ -156,6 +167,9 @@ namespace Insight
             m_database->Shutdown();
             Delete(m_database);
             ASSERT(m_database == nullptr);
+
+			m_loaderRegistry->Shutdown();
+            Delete(m_loaderRegistry);
         }
 
         ResourcePack* IResourceManager::CreateResourcePack(std::string_view filePath)
@@ -604,8 +618,7 @@ namespace Insight
                         {
                             IResource::ResourceSerialiserType serialiser(true);
                             serialiser.Deserialise(archive.GetData());
-                            resource->Deserialise(&serialiser);
-                            resource->Load();
+                            resource->Deserialise(&serialiser);                   
                             resource->m_resource_state = EResoruceStates::Loaded;
                         }
                         else
@@ -628,12 +641,6 @@ namespace Insight
                                 // Something has gone wrong when trying to load the resource.
                                 resource->m_resource_state = EResoruceStates::Failed_To_Load;
                             }
-                        }
-                        else
-                        {
-                            IS_CORE_WARN("[IResourceManager::StartLoading] Resource has 'Load' called for type '{}'. This should be replaced by a ResourceLoader.",
-                                resource->GetResourceTypeId().GetTypeName());
-                            resource->Load();
                         }
                     }
                 }

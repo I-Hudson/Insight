@@ -61,7 +61,6 @@ namespace Insight
 						}, T::WINDOW_CATEGORY);
 			}
 
-
 			template<typename T>
 			void UnregisterEditorWindow()
 			{

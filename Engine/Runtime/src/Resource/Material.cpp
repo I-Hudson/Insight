@@ -71,14 +71,6 @@ namespace Insight
 			return !(*this == other);
 		}
 
-		void Material::Load()
-		{
-		}
-
-		void Material::LoadFromMemory(const void* data, u64 size_in_bytes)
-		{
-		}
-
 		void Material::UnLoad()
 		{
 		}

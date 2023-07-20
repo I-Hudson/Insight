@@ -1,12 +1,15 @@
 #include "Resource/Loaders/TextureLoader.h"
-#include "Resource/Texture2D.h"
 
 #include "FileSystem/FileSystem.h"
 
 #include "Core/Logger.h"
+#include "Core/Profiler.h"
 
 #include <stb_image.h>
 #include <stb_image_write.h>
+
+#define QOI_IMPLEMENTATION
+#include <qoi.h>
 
 namespace Insight::Runtime
 {
@@ -21,6 +24,8 @@ namespace Insight::Runtime
 
     bool TextureLoader::Load(IResource* resource) const
     {
+		ASSERT(!resource->IsEngineFormat());
+
         if (resource == nullptr || !FileSystem::Exists(resource->GetFilePath()))
         {
             IS_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource != nullptr ? resource->GetFilePath() : "NULL");
@@ -33,10 +38,68 @@ namespace Insight::Runtime
 			return false;
 		}
 
-		std::vector<Byte> fileData = FileSystem::ReadFromFile(texture->GetFilePath(), FileType::Binary);
-        resource->LoadFromMemory(fileData.data(), fileData.size());
+		LoadPixelData pixelsData = LoadPixels(resource->GetFilePath(), texture->m_diskFormat);
+
+		if (pixelsData.Data.empty())
+		{
+			texture->m_resource_state = EResoruceStates::Failed_To_Load;
+			return false;
+		}
+		
+		texture->m_width = pixelsData.Width;
+		texture->m_height = pixelsData.Height;
+		texture->m_depth = 1;
+		texture->UpdateRHITexture(pixelsData.Data.data(), pixelsData.Data.size());
 
         return true;
     }
 
+	LoadPixelData TextureLoader::LoadPixels(std::string_view filePath, TextureDiskFormat diskFormat) const
+	{
+		std::vector<Byte> fileData = FileSystem::ReadFromFile(filePath, FileType::Binary);
+
+		int width = 0, height = 0, channels = 0, textureSize = 0;
+		Byte* textureData = nullptr;
+		if (diskFormat == TextureDiskFormat::QOI)
+		{
+			IS_PROFILE_SCOPE("qoi_decode");
+			qoi_desc qoiDesc;
+			textureData = static_cast<Byte*>(qoi_decode(fileData.data(), static_cast<int>(fileData.size()), &qoiDesc, 4));
+			width = qoiDesc.width;
+			height = qoiDesc.height;
+			channels = qoiDesc.channels;
+		}
+		else
+		{
+			IS_PROFILE_SCOPE("stbi_load_from_memory");
+			textureData = stbi_load_from_memory(fileData.data(), static_cast<int>(fileData.size()), &width, &height, &channels, STBI_rgb_alpha);
+			channels = STBI_rgb_alpha;
+		}
+
+		LoadPixelData loadPixelData;
+		if (!textureData)
+		{
+			return loadPixelData;
+		}
+
+		textureSize = width * height * 4;
+		loadPixelData.Width = width;
+		loadPixelData.Height = height;
+		loadPixelData.Depth = 1;
+		loadPixelData.Channels = 4;
+
+		loadPixelData.Data.resize(textureSize);
+		Platform::MemCopy(loadPixelData.Data.data(), textureData, textureSize);
+
+		if (diskFormat == TextureDiskFormat::QOI)
+		{
+			QOI_FREE(textureData);
+		}
+		else
+		{
+			stbi_image_free(textureData);
+		}
+
+		return loadPixelData;
+	}
 }

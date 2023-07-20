@@ -31,7 +31,7 @@ namespace Insight
 		enum class TextureTypes;
 
 		/// @brief Utility class to help with anything related to loading from assimp.
-		class AssimpLoader : public IResourceLoader
+		class ModelLoader : public IResourceLoader
 		{
 			constexpr static bool c_SimplygonEnabled = false;
 		public:
@@ -101,8 +101,8 @@ namespace Insight
 				Mesh* Mesh = nullptr;
 			};
 
-			AssimpLoader();
-			virtual ~AssimpLoader() override;
+			ModelLoader();
+			virtual ~ModelLoader() override;
 
 			//IResourceLoader - BEGIN
 			virtual void Initialise() override;

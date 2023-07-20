@@ -150,11 +150,6 @@ namespace Insight
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
-			/// @brief Handle loading a resource from memory. This is called for a resource which is a "sub resource" of another one
-			/// and exists inside another resource's disk file.
-			/// @param file_path 
-			virtual void LoadFromMemory(const void* data, u64 size_in_bytes);
-
 			Core::Delegate<IResource*> OnLoaded;
 			Core::Delegate<IResource*> OnUnloaded;
 
@@ -191,10 +186,6 @@ namespace Insight
 			/// @brief Convert a resource to the engine format version.
 			virtual ResourceId ConvertToEngineFormat();
 
-			/// @brief Handle loading the resource from disk.
-			/// @param file_path 
-			virtual void Load();
-
 			/// @brief Handle unloading the resource from memory.
 			virtual void UnLoad();
 
@@ -225,6 +216,7 @@ namespace Insight
 			ResourceStorageTypes m_storage_type = ResourceStorageTypes::Unknown;
 			/// @brief Vector of all the reference links this resource has to other ones.
 			std::vector<ResourceReferenceLink> m_reference_links;
+			mutable std::mutex m_referenceLinksMutex;
 
 			ResourceId m_resourceId;
 			bool m_convertToEngineFormat;

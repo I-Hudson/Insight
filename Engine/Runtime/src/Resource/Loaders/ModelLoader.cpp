@@ -1,4 +1,4 @@
-#include "Resource/Loaders/AssimpLoader.h"
+#include "Resource/Loaders/ModelLoader.h"
 #include "Resource/Model.h"
 #include "Resource/Mesh.h"
 #include "Resource/Texture2D.h"
@@ -39,22 +39,22 @@ namespace Insight
 
 		//IResourceLoader - BEGIN
 
-		AssimpLoader::AssimpLoader()
+		ModelLoader::ModelLoader()
 			: IResourceLoader({ ".gltf", ".fbx", ".obj" }, { Model::GetStaticResourceTypeId() })
 		{ }
 
-		AssimpLoader::~AssimpLoader()
+		ModelLoader::~ModelLoader()
 		{ }
 
-		void AssimpLoader::Initialise()
+		void ModelLoader::Initialise()
 		{
 		}
 
-		void AssimpLoader::Shutdown()
+		void ModelLoader::Shutdown()
 		{
 		}
 
-		bool AssimpLoader::Load(IResource* resource) const
+		bool ModelLoader::Load(IResource* resource) const
 		{
 			if (resource == nullptr || resource->GetResourceTypeId() != Model::GetStaticResourceTypeId())
 			{
@@ -69,7 +69,7 @@ namespace Insight
 		
 		//IResourceLoader - END
 
-		bool AssimpLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
+		bool ModelLoader::LoadModel(Model* model, std::string file_path, u32 importer_flags)
 		{
 			if (c_SimplygonEnabled)
 			{
@@ -155,7 +155,7 @@ namespace Insight
 			return true;
 		}
 
-		bool AssimpLoader::LoadMesh(Mesh* mesh, std::string file_path, u32 importer_flags)
+		bool ModelLoader::LoadMesh(Mesh* mesh, std::string file_path, u32 importer_flags)
 		{
 			Assimp::Importer importer;
 			// Remove points and lines.
@@ -186,18 +186,18 @@ namespace Insight
 			return true;
 		}
 
-		bool AssimpLoader::ExportModel(Model* model, const std::string& file_path)
+		bool ModelLoader::ExportModel(Model* model, const std::string& file_path)
 		{
 			//Assimp::Exporter exporter;
 			//if (exporter.Export(nullptr, "", file_path) != aiReturn_SUCCESS)
 			//{
-			//	IS_CORE_ERROR("[AssimpLoader::ExportModel] Assimp error code '{}'.", exporter.GetErrorString());
+			//	IS_CORE_ERROR("[ModelLoader::ExportModel] Assimp error code '{}'.", exporter.GetErrorString());
 				return false;
 			//}
 			//return true;
 		}
 
-		void AssimpLoader::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, AssimpLoaderData& loader_data, bool recursive)
+		void ModelLoader::ProcessNode(aiNode* aiNode, const aiScene* aiScene, const std::string& directory, AssimpLoaderData& loader_data, bool recursive)
 		{
 			IS_PROFILE_FUNCTION();
 			if (aiNode->mNumMeshes > 0)
@@ -292,7 +292,7 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, AssimpLoaderData& loader_data)
+		void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* aiScene, AssimpLoaderData& loader_data)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -372,7 +372,7 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
+		void ModelLoader::ExtractMaterialTextures(aiMaterial* ai_material, AssimpLoaderData& known_data, AssimpLoaderData& mesh_data)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -413,7 +413,7 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type_pbr, aiTextureType ai_texture_type_legcy, const char* material_id, 
+		void ModelLoader::ExtractMaterialType(aiMaterial* ai_material, aiTextureType ai_texture_type_pbr, aiTextureType ai_texture_type_legcy, const char* material_id, 
 			const std::string& directory, TextureTypes textureType, Material* material)
 		{
 			// Determine if this is a pbr material or not
@@ -513,7 +513,7 @@ namespace Insight
 			return path.substr(file_name_start, file_name_end - file_name_start);
 		}
 
-		void AssimpLoader::LoadMaterialTextures(AssimpLoaderData& loader_data)
+		void ModelLoader::LoadMaterialTextures(AssimpLoaderData& loader_data)
 		{
 			/// EXPERIMENTAL: Trying to load textures in parallel.
 			// TODO Low: Texture loading is one of the main issues of performance. (The uploading takes a lot of time)
@@ -536,7 +536,7 @@ namespace Insight
 			//task_group.wait();
 		}
 
-		void AssimpLoader::GenerateLODs(AssimpLoaderData& loader_data)
+		void ModelLoader::GenerateLODs(AssimpLoaderData& loader_data)
 		{
 			for (u32 lod_index = 1; lod_index < Mesh::s_LOD_Count; ++lod_index)
 			{
@@ -594,7 +594,7 @@ namespace Insight
 			}
 		}
 
-		void AssimpLoader::Optimize(AssimpLoaderData& loader_data)
+		void ModelLoader::Optimize(AssimpLoaderData& loader_data)
 		{
 			IS_PROFILE_FUNCTION();
 
@@ -629,7 +629,7 @@ namespace Insight
 			//loader_data.Indices = dst_indices;
 		}
 
-		void AssimpLoader::UploadGPUData(AssimpLoaderData& loader_data)
+		void ModelLoader::UploadGPUData(AssimpLoaderData& loader_data)
 		{
 			Graphics::RHI_Buffer** vertex_buffer = nullptr;
 			Graphics::RHI_Buffer** index_buffer = nullptr;

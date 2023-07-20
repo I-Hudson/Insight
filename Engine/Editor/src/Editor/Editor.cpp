@@ -88,9 +88,6 @@ namespace Insight
 
             m_menuBar.Initialise(&m_editorWindowManager);
 
-            m_gameRenderpass = New<Graphics::Renderpass>();
-            m_gameRenderpass->Create();
-
             App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
 
@@ -108,6 +105,9 @@ namespace Insight
 
         void Editor::OnPostInit()
         {
+            m_gameRenderpass = New<Graphics::Renderpass>();
+            m_gameRenderpass->Create();
+
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
             const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
             assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
@@ -118,6 +118,9 @@ namespace Insight
             Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
                 Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
                     , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
+
+            Runtime::Texture2D* texture2D = static_cast<Runtime::Texture2D*>(resource);
+            std::vector<Byte> pixels = texture2D->GetPixels();
 
             pack->AddResource(resource);
 
