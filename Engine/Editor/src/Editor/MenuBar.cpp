@@ -83,6 +83,10 @@ namespace Insight
                                 Archive archive(item, ArchiveModes::Write);
                                 archive.Write(serialisedData.data(), serialisedData.size());
                                 archive.Close();
+                            
+                                const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                                std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
+                                activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
                             }
                         }
                     }

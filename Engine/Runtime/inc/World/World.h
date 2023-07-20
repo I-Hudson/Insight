@@ -83,6 +83,10 @@ namespace Insight
 
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
+			/// @brief Save the world to a file in a debug format (json) for readability.
+			/// @param filePath 
+			void SaveDebugWorld(std::string_view filePath) const;
+
 		private:
 			void AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const;
 
