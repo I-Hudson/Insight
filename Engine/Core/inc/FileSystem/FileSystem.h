@@ -32,6 +32,7 @@ namespace Insight
         static bool SaveToFile(const std::vector<Byte>& data, std::string_view filePath, bool overwrite);
         static bool SaveToFile(const std::vector<Byte>& data, std::string_view filePath, FileType fileType, bool overwrite);
 
+        static std::vector<Byte> ReadFromFile(std::string_view filePath);
         static std::vector<Byte> ReadFromFile(std::string_view filePath, FileType fileType);
 
         static bool Exists(const std::string& path);

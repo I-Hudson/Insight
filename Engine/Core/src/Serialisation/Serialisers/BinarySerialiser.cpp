@@ -1,4 +1,5 @@
 #include "Serialisation/Serialisers/BinarySerialiser.h"
+#include "Serialisation/Serialisers/ISerialiserHeader.h"
 
 #include "Platforms/Platform.h"
 #include "Core/Memory.h"
@@ -143,17 +144,24 @@ namespace Insight
 
         bool BinarySerialiser::Deserialise(std::vector<u8> data)
         {
+            if (!ValidateHeader(data))
+            {
+                m_head.Clear();
+                return false;
+            }
+
             m_head.Deserialise(data);
+
             return true;
         }
 
         std::vector<Byte> BinarySerialiser::GetSerialisedData()
         {
-            //WriteType();
-
             std::vector<Byte> serialisedData;
             serialisedData.resize(m_head.Size);
             Platform::MemCopy(serialisedData.data(), m_head.Data, m_head.Size);
+
+            WriteHeader(serialisedData);
 
             return serialisedData;
         }
@@ -359,21 +367,6 @@ namespace Insight
             ReadBlock(tag, vector.data(), vector.size());
             StopArray();
         }
-
-        bool BinarySerialiser::ReadType(std::vector<Byte>& data)
-        {
-            u32 type = 0;
-            Platform::MemCopy(&type, &(*(data.end() - 4)), sizeof(u32));
-
-            SerialisationTypes serialiserType = static_cast<SerialisationTypes>(type);
-            if (serialiserType != m_type)
-            {
-                IS_CORE_ERROR("[BinarySerialiser::Deserialise] 'data' has been serialised with type '{}' trying to deserialise with '{}'. Serialiser type mismatch.",
-                    SerialisationTypeToString[(u32)type], SerialisationTypeToString[(u32)m_type]);
-                return false;
-            }
-            return true;
-        }
         // -- End ISerialiser --
 
         void BinarySerialiser::WriteBlock(std::string_view tag, const void* data, u64 sizeBytes)
@@ -394,6 +387,11 @@ namespace Insight
         bool BinarySerialiser::IsArrayNode() const
         {
             return m_head.GetCurrentState() == SerialiserNodeStates::Array;
+        }
+
+        void BinarySerialiser::DeserialiseNoValidate(const std::vector<Byte>& data)
+        {
+            m_head.Deserialise(data);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Insight::Editor
         premake.replace(premake.find(c_PremakeSolutionTag_PremakeProjectFileName), strlen(c_PremakeSolutionTag_PremakeProjectFileName), c_PremakeProjectFileName);
 
         std::string premakeOutFile = std::string(outFolder) + "/" + c_PremakeSolutionFileName;
-        std::vector<uint8_t> vec(premakeOutFile.begin(), premakeOutFile.end());
+        std::vector<uint8_t> vec(premake.begin(), premake.end());
         FileSystem::SaveToFile(vec, premakeOutFile, FileType::Text, true);
         return premakeOutFile;
     }

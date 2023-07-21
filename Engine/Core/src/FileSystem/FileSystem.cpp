@@ -61,6 +61,11 @@ namespace Insight
         return SaveToFile(data.data(), data.size(), filePath, fileType, overwrite);
     }
 
+    std::vector<Byte> FileSystem::ReadFromFile(std::string_view filePath)
+    {
+        return ReadFromFile(filePath, FileType::Text);
+    }
+
     std::vector<Byte> FileSystem::ReadFromFile(std::string_view filePath, FileType fileType)
     {
         std::vector<Byte> fileData;
@@ -206,7 +211,7 @@ namespace Insight
         {
             return {};
         }
-        std::string_view fileExtension = GetFileExtension(file);
+        std::string_view fileExtension = GetExtension(file);
         if (fileExtension == extension)
         {
             return std::string(file);

@@ -1,4 +1,6 @@
 #include "Serialisation/Serialisers/ISerialiser.h"
+#include "Serialisation/Serialisers/ISerialiserHeader.h"
+
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
@@ -68,9 +70,47 @@ namespace Insight
             Write(tag, std::string(string));
         }
 
-        void ISerialiser::WriteType()
+        void ISerialiser::WriteHeader(std::vector<Byte>& data) const
         {
-            Write(c_SerialiserType, static_cast<u32>(m_type));
+            BinarySerialiser serialiser(false);
+            ISerialiserHeader header;
+            header.Type = static_cast<u8>(m_type);
+
+            header.Serialise(&serialiser);
+            
+            const u64 headerSize = serialiser.m_head.Size;
+            const u64 dataSize = data.size();
+            const u64 newDataSize = dataSize + headerSize;
+
+            data.resize(newDataSize);
+
+            // Move the data to the right by 'headerSize' to allow for 'headerSize' in the front of the data vector.
+            Platform::MemCopy(data.data() + headerSize, data.data(), dataSize);
+            // Copy the header data from the binary serialiser to the front of the data vector.
+            Platform::MemCopy(data.data(), serialiser.m_head.Data, headerSize);
+        }
+
+        bool ISerialiser::ValidateHeader(std::vector<Byte>& data) const
+        {
+            if (data.empty())
+            {
+                return false;
+            }
+
+            /// Deserialise the data vector with no validation. With validation and this would be a 
+            /// circle of the binary serialiser always going Deserialise->ValidateHeader->Deserialise->ValidateHeader...
+            /// We don't care about any data after the header and as the header should always be in binary format this should
+            /// be ok.
+            BinarySerialiser serialiser(true);
+            serialiser.DeserialiseNoValidate(data);
+
+            ISerialiserHeader header;
+            header.Deserialise(&serialiser);
+
+            const u64 headerSize = serialiser.m_head.Size;
+            data.erase(data.begin(), data.begin() + headerSize);
+
+            return header.Type == static_cast<u8>(m_type);
         }
     }
 }

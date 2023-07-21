@@ -24,6 +24,8 @@ namespace Insight
 
 		void WorldSystem::Initialise()
 		{
+			IS_PROFILE_FUNCTION();
+
 			TObjectPtr<World> defaultWorld = CreateWorld("DefaultWorld");
 			Ptr<ECS::Entity> e = defaultWorld->AddEntity("MainCamera");
 			e->AddComponentByName(ECS::CameraComponent::Type_Name);
@@ -35,6 +37,8 @@ namespace Insight
 
 		void WorldSystem::Shutdown()
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (auto& ptr : m_worlds)
 			{
 				ptr->Destroy();
@@ -99,11 +103,12 @@ namespace Insight
 
 		World* WorldSystem::LoadWorld(std::string_view filePath)
 		{
-			Archive archive(filePath, ArchiveModes::Read);
-			archive.Close();
+			IS_PROFILE_FUNCTION();
 
-			Serialisation::JsonSerialiser serialiser(true);
-			if (!serialiser.Deserialise(archive.GetData()))
+			std::vector<Byte> worldData = FileSystem::ReadFromFile(filePath);
+
+			Runtime::World::ResourceSerialiserType serialiser(true);
+			if (!serialiser.Deserialise(worldData))
 			{
 				return nullptr;
 			}
@@ -215,6 +220,8 @@ namespace Insight
 
 		TObjectPtr<World> WorldSystem::GetWorldFromGuid(const Core::GUID& guid) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (const TObjectOwnPtr<World>& world : m_worlds)
 			{
 				if (world->GetGuid() == guid) 
@@ -227,6 +234,8 @@ namespace Insight
 
 		std::vector<TObjectPtr<World>> WorldSystem::GetAllWorlds() const
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::vector<TObjectPtr<World>> worlds;
 			for (size_t i = 0; i < m_activeWorlds.size(); ++i)
 			{
@@ -237,6 +246,8 @@ namespace Insight
 
 		ECS::Entity* WorldSystem::GetEntityByGUID(const Core::GUID& guid) const
 		{
+			IS_PROFILE_FUNCTION();
+
 			for (const TObjectOPtr<World>& world : m_worlds)
 			{
 				ECS::Entity* entity = world->GetEntityByGUID(guid);

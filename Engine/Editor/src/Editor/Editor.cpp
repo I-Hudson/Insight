@@ -101,6 +101,11 @@ namespace Insight
                 serialiser.Deserialise(editorSettings.GetData());
                 Deserialise(&serialiser);
             }
+
+            for (auto& world : Runtime::WorldSystem::Instance().GetAllWorlds())
+            {
+                world->SetWorldState(Runtime::WorldStates::Paused);
+            }
         }
 
         void Editor::OnPostInit()
@@ -108,21 +113,24 @@ namespace Insight
             m_gameRenderpass = New<Graphics::Renderpass>();
             m_gameRenderpass->Create();
 
-            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-            const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
-            assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
+            if (Runtime::ProjectSystem::Instance().IsProjectOpen())
+            {
+                const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
+                assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
 
-            Runtime::ResourcePack* pack = Runtime::ResourceManager::Instance().CreateResourcePack(
-                Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
+                Runtime::ResourcePack* pack = Runtime::ResourceManager::Instance().CreateResourcePack(
+                    Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
 
-            Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
-                Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
-                    , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
+                Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
+                    Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
+                        , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
 
-            Runtime::Texture2D* texture2D = static_cast<Runtime::Texture2D*>(resource);
-            std::vector<Byte> pixels = texture2D->GetPixels();
+                Runtime::Texture2D* texture2D = static_cast<Runtime::Texture2D*>(resource);
+                std::vector<Byte> pixels = texture2D->GetPixels();
 
-            pack->AddResource(resource);
+                pack->AddResource(resource);
+            }
 
             splashScreen.Destroy();
         }

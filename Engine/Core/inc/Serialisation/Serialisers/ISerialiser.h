@@ -133,8 +133,12 @@ namespace Insight
             virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool dcodeSize = true) = 0;
 
         protected:
-            void WriteType();
-            virtual bool ReadType(std::vector<Byte>& data) = 0;
+            virtual void WriteHeader(std::vector<Byte>& data) const;
+
+            /// @brief Validate that the serialised data deserialised is valid
+            /// for the serialiser being used.
+            /// @return bool
+            bool ValidateHeader(std::vector<Byte>& data) const;
 
         protected:
             bool m_isReadMode = false;

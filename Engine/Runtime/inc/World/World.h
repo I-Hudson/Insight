@@ -83,6 +83,7 @@ namespace Insight
 
 			ECS::Entity* GetEntityByGUID(const Core::GUID& guid) const;
 
+			void SaveWorld(std::string_view filePath) const;
 			/// @brief Save the world to a file in a debug format (json) for readability.
 			/// @param filePath 
 			void SaveDebugWorld(std::string_view filePath) const;

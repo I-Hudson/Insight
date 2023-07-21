@@ -65,9 +65,6 @@ namespace Insight
 
             virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize = true) override;
 
-        protected:
-            virtual bool ReadType(std::vector<Byte>& data) override;
-
         private:
             template<typename T>
             void Write(std::string_view tag, T const& data)
@@ -187,6 +184,14 @@ namespace Insight
             };
             struct JsonWriter
             {
+                JsonWriter()
+                {
+                    Push("ROOT", SerialiserNodeStates::Object);
+                }
+                ~JsonWriter()
+                {
+                }
+
                 struct JsonNode
                 {
                     SerialiserNodeStates NoneStats;
@@ -225,11 +230,6 @@ namespace Insight
                 }
                 void Pop()
                 {
-                    if (Nodes.size() == 1)
-                    {
-                        return;
-                    }
-
                     JsonNode node = Nodes.top();
                     Nodes.pop();
 

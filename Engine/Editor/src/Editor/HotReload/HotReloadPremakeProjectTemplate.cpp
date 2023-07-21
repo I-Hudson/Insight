@@ -39,7 +39,7 @@ namespace Insight::Editor
         premake.replace(premake.find(c_PremakeProjectTag_AdditionalFiles), strlen(c_PremakeProjectTag_AdditionalFiles), additionalFiles);
 
         std::string premakeOutFile = std::string(outFolder) + "/" + c_PremakeProjectFileName;
-        std::vector<uint8_t> vec(premakeOutFile.begin(), premakeOutFile.end());
+        std::vector<uint8_t> vec(premake.begin(), premake.end());
         FileSystem::SaveToFile(vec, premakeOutFile, FileType::Text, true);
         return premakeOutFile;
     }

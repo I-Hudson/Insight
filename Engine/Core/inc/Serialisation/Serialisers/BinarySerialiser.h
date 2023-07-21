@@ -108,9 +108,6 @@ namespace Insight
             virtual void Read(std::string_view tag, std::string& string) override;
 
             virtual void Read(std::string_view tag, std::vector<Byte>& vector, bool decodeSize = true) override;
-
-        protected:
-            virtual bool ReadType(std::vector<Byte>& data) override;
             // -- End ISerialiser --
 
         private:
@@ -140,8 +137,14 @@ namespace Insight
             bool IsObjectNode() const;
             bool IsArrayNode() const;
 
+            /// @brief Used for internal reading of the ISerialiserHeader.
+            /// @param data 
+            void DeserialiseNoValidate(const std::vector<Byte>& data);
+
         private:
             BinaryHead m_head;
+
+            friend ISerialiser;
         };
     }
 }

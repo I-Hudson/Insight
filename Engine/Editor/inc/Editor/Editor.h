@@ -50,7 +50,7 @@ namespace Insight
 			ContentFolderListener m_contentListener;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
-			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings";
+			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings.isEditorSettings";
 		};
 	}
 

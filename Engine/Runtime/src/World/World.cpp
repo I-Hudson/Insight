@@ -6,6 +6,7 @@
 #include "Event/EventSystem.h"
 #include "Runtime/RuntimeEvents.h"
 #include "Serialisation/Archive.h"
+#include "Core/Compression.h"
 
 namespace Insight
 {
@@ -159,6 +160,24 @@ namespace Insight
 			return m_entityManager.GetEntityByGUID(guid);
 		}
 
+		void World::SaveWorld(std::string_view filePath) const
+		{
+			Runtime::World::ResourceSerialiserType serialiser(false);
+			RemoveConst(this)->Serialise(&serialiser);
+
+			std::vector<Byte> worldData = serialiser.GetSerialisedData();
+			FileSystem::SaveToFile(worldData, filePath, FileType::Binary, true);
+		}
+
+		void World::SaveDebugWorld(std::string_view filePath) const
+		{
+			Serialisation::JsonSerialiser serialiser(false);
+			RemoveConst(this)->Serialise(&serialiser);
+
+			std::vector<Byte> worldData = serialiser.GetSerialisedData();
+			FileSystem::SaveToFile(worldData, filePath, FileType::Text, true);
+		}
+
 		void World::Serialise(Serialisation::ISerialiser* serialiser)
 		{
 			Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<WorldSaveEvent>(this));
@@ -175,17 +194,6 @@ namespace Insight
 			Serialisation::SerialiserObject<World> serialiserObject;
 			serialiserObject.Deserialise(serialiser, *this);
 			m_entityManager.SetWorld(this);
-		}
-
-		void World::SaveDebugWorld(std::string_view filePath) const
-		{
-			Serialisation::JsonSerialiser serialiser(false);
-			RemoveConst(this)->Serialise(&serialiser);
-
-			std::vector<u8> serialisedData = serialiser.GetSerialisedData();
-			Archive archive(filePath, ArchiveModes::Write);
-			archive.Write(serialisedData.data(), serialisedData.size());
-			archive.Close();
 		}
 
 		void World::AddEntityAndChildrenToVector(Ptr<ECS::Entity> const& entity, std::vector<Ptr<ECS::Entity>>& vector) const

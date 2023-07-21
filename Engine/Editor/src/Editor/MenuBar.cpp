@@ -76,14 +76,8 @@ namespace Insight
                             TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
                             if (activeWorld)
                             {
-                                Serialisation::JsonSerialiser serialiser(false);
-                                activeWorld->Serialise(&serialiser);
+                                activeWorld->SaveWorld(item);
 
-                                std::vector<u8> serialisedData = serialiser.GetSerialisedData();
-                                Archive archive(item, ArchiveModes::Write);
-                                archive.Write(serialisedData.data(), serialisedData.size());
-                                archive.Close();
-                            
                                 const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
                                 std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
                                 activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);

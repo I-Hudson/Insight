@@ -30,14 +30,16 @@ namespace Insight
 
         bool JsonSerialiser::Deserialise(std::vector<u8> data)
         {
-            m_reader = {};
-            if (data.empty())
+            m_reader = { };
+            if (!ValidateHeader(data))
             {
                 return false;
             }
+
             try
             {
                 m_reader.DeserialisedJson = nlohmann::json::parse(data);
+                m_reader.Push("ROOT", SerialiserNodeStates::Object);
             }
             catch (...)
             {
@@ -49,9 +51,12 @@ namespace Insight
 
         std::vector<Byte> JsonSerialiser::GetSerialisedData()
         {
-            //WriteType();
             std::string jsonData = m_writer.TopNode().dump(4);
-            return { jsonData.begin(), jsonData.end() };
+            std::vector<Byte> data(jsonData.begin(), jsonData.end());
+
+            WriteHeader(data);
+
+            return data;
         }
 
         void JsonSerialiser::Clear()
@@ -249,26 +254,6 @@ namespace Insight
                 Read(tag, vector.at(i));
             }
             StopArray();
-        }
-
-        bool JsonSerialiser::ReadType(std::vector<Byte>& data)
-        {
-            auto iter = m_reader.DeserialisedJson.find(c_SerialiserType);
-            if (iter == m_reader.DeserialisedJson.end())
-            {
-                return false;
-            }
-
-            u32 type = iter.value();
-            SerialisationTypes serialiserType = static_cast<SerialisationTypes>(type);
-            if (serialiserType != m_type)
-            {
-                IS_CORE_ERROR("[JsonSerialiser::Deserialise] 'data' has been serialised with type '{}' trying to deserialise with '{}'. Serialiser type mismatch.",
-                    SerialisationTypeToString[(u32)type], SerialisationTypeToString[(u32)m_type]);
-                return false;
-            }
-
-            return true;
         }
 
         bool JsonSerialiser::IsObjectNode() const

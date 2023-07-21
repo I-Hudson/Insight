@@ -62,8 +62,8 @@ namespace Insight
 
             if (FileSystem::Exists(projectFilePath))
             {
-                IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
-                return false;
+                //IS_CORE_WARN("[ProjectSystem::CreateProject] Unable to create project at '{}'.", projectPath);
+                //return false;
             }
 
             Serialisation::JsonSerialiser serialiser(false);

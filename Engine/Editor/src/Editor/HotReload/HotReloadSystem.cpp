@@ -114,10 +114,6 @@ namespace Insight::Editor
     void HotReloadSystem::OnProjectOpened(Core::Event& e)
     {
         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-
-#if IS_RELEASE
-        BuildProjectSolution();
-#endif
         LoadLibrary(GetLibraryPathFromProjectInfo(projectInfo));
     }
 
