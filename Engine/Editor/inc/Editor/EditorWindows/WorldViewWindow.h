@@ -36,6 +36,8 @@ namespace Insight
             EDITOR_WINDOW(WorldViewWindow, EditorWindowCategories::Windows);
 
         private:
+            void ContentWindowDragTarget();
+            
             void SetupRenderGraphPasses();
             void GBufferDepthPrepass();
             void GBufferPass();

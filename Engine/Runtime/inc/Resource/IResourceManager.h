@@ -86,6 +86,7 @@ namespace Insight
 
             bool HasResource(ResourceId const& resourceId) const;
             bool HasResource(TObjectPtr<IResource> Resource) const;
+            bool HasResource(std::string_view filepath) const;
 
             ResourceDatabase::ResourceMap GetResourceMap() const;
             std::vector<ResourcePack*> GetResourcePacks() const;

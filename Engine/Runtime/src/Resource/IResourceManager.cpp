@@ -566,6 +566,20 @@ namespace Insight
             }
             return false;
         }
+        
+        bool IResourceManager::HasResource(std::string_view filepath) const
+        {
+            std::string path = filepath.data();
+            FileSystem::PathToUnix(path);
+
+            std::string_view fileExtension = FileSystem::GetFileExtension(path);
+            const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+            if (!loader)
+            {
+                return nullptr;
+            }
+            return m_database->HasResource(ResourceId(path, loader->GetResourceTypeId()));
+        }
 
         ResourceDatabase::ResourceMap IResourceManager::GetResourceMap() const
         {

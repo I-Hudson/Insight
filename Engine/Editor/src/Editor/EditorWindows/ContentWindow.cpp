@@ -204,9 +204,19 @@ namespace Insight::Editor
                     std::string fileName = iter.path().filename().string();
                     std::string fileExtension = iter.path().extension().string();
 
-                    if (FileSystem::GetFileExtension(path) == Runtime::IResourceManager::c_FileExtension)
+                    Runtime::IResource* contentResource = nullptr;
+
+                    if (iter.is_regular_file())
                     {
-                        continue;
+                        if (FileSystem::GetFileExtension(path) == Runtime::IResourceManager::c_FileExtension
+                            || !Runtime::ResourceManager::Instance().HasResource(path))
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
+                        }
                     }
 
                     ++displayed_item_count;
@@ -306,7 +316,7 @@ namespace Insight::Editor
                                         texture = loadedResource.CastTo<Runtime::Texture2D>()->GetRHITexture();
                                     }
                                 }
-                                
+
                                 if (texture == nullptr)
                                 {
                                     Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
@@ -374,6 +384,13 @@ namespace Insight::Editor
                         ImGui::EndGroup();
                     }
 
+                    if (contentResource)
+                    {
+                        EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
+                            , contentResource->GetGuid().ToString().data()
+                            , Runtime::IResource::GetStaticTypeInfo().GetType());
+                    }
+
                     // Decide whether we should switch to the next column or switch row
                     pen_x += itemSize.x + ImGui::GetStyle().ItemSpacing.x;
                     if (pen_x >= content_width - itemSize.x)
@@ -387,9 +404,6 @@ namespace Insight::Editor
                     {
                         ImGui::SameLine();
                     }
-
-
-                    EditorGUI::ObjectFieldSource("DragDropTarget", "");
                 }
 
                 if (!new_line)

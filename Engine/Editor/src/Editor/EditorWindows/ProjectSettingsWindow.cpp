@@ -55,7 +55,7 @@ namespace Insight
             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1));
             ImGui::InputText("##DefaultWorld", (char*)worldName.data(), worldName.size(), ImGuiInputTextFlags_ReadOnly);
             ImGui::PopStyleColor();
-            EditorGUI::ObjectFieldTarget("DragDropTarget", "Default World", worldTypeInfo.GetType(), defaultWorld);
+            //EditorGUI::ObjectFieldTarget("DragDropTarget", "Default World", defaultWorld, worldTypeInfo.GetType());
         }
     }
 }

@@ -184,7 +184,27 @@ namespace Insight
                             inputText = member.GetType().GetPrettyTypeName();
                         }
                         ImGui::InputText(member.GetMemberName().data(), &inputText, ImGuiInputTextFlags_ReadOnly);
-                        EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", member.GetMemberName().data(), member.GetType(), memberComponent);
+
+                        std::string payloadData;
+                        EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", payloadData, member.GetType());
+
+                        std::vector<std::string> splitPayloadData = SplitString(payloadData, '::');
+
+                        Core::GUID entityGuid;
+                        entityGuid.StringToGuid(splitPayloadData.at(0));
+                        Core::GUID componentGuid;
+                        componentGuid.StringToGuid(splitPayloadData.at(1));
+
+                        ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
+                        if (entity)
+                        {
+                            ECS::Component* component = entity->GetComponentByGuid(componentGuid);
+                            if (component)
+                            {
+
+                                memberComponent = component;
+                            }
+                        }
                     }
 #endif
 

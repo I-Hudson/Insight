@@ -36,6 +36,8 @@ namespace Insight
             REFLECT_GENERATED_BODY()
 
         public:
+            constexpr static const char* c_ContentWindowResourceDragSource = "ConentWindowResourceDragSource";
+
             ContentWindow();
             ContentWindow(u32 minWidth, u32 minHeight);
             ContentWindow(u32 minWidth, u32 minHeight, u32 maxWidth, u32 maxHeight);

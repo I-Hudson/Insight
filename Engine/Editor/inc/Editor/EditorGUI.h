@@ -10,7 +10,7 @@ namespace Insight::Editor::EditorGUI
     /// @param id 
     /// @param payload 
     /// @return void
-    void IS_EDITOR ObjectFieldSource(const char* id, const char* payload);
+    void IS_EDITOR ObjectFieldSource(const char* id, const char* payload, Reflect::Type type = Reflect::Type());
 
     /// @brief Call after any ImGui call to set that rect as a drag/drop target element.
     /// @param id 
@@ -18,7 +18,8 @@ namespace Insight::Editor::EditorGUI
     /// @param type 
     /// @param dataToSet 
     /// @return void
-    void IS_EDITOR ObjectFieldTarget(const char* id, const char* label, Reflect::Type type, void*& dataToSet);
+    bool IS_EDITOR ObjectFieldTarget(const char* id, std::string& data, Reflect::Type type = Reflect::Type());
+#if 0
     /// @brief Call after any ImGui call to set that rect as a drag/drop target element.
     /// @tparam T 
     /// @param id 
@@ -27,9 +28,10 @@ namespace Insight::Editor::EditorGUI
     /// @param dataToSet 
     /// @return void
     template<typename T>
-    void IS_EDITOR ObjectFieldTarget(const char* id, const char* label, Reflect::Type type, T*& dataToSet)
+    void IS_EDITOR ObjectFieldTarget(const char* id, const char* label, T*& dataToSet, Reflect::Type type = Reflect::Type())
     {
         void*& voidData = reinterpret_cast<void*&>(dataToSet);
-        ObjectFieldTarget(id, label, type, voidData);
+        ObjectFieldTarget(id, label, voidData, type);
     }
+#endif
 }

@@ -32,3 +32,29 @@ IS_CORE std::string RemoveString(const std::string& str, std::string_view strToR
 	}
 	return str;
 }
+
+IS_CORE std::vector<std::string> SplitString(const std::string& str, const char splitCharacter)
+{
+	std::vector<std::string> strings;
+	std::string s;
+	for (const char& c : str)
+	{
+		if (c == splitCharacter
+			&& !s.empty())
+		{
+			strings.push_back(s);
+			s.clear();
+		}
+		else
+		{
+			s += c;
+		}
+	}
+
+	if (!s.empty())
+	{
+		strings.push_back(s);
+	}
+
+	return strings;
+}

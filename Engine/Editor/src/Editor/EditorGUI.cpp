@@ -2,6 +2,7 @@
 
 #include "Core/GUID.h"
 #include "Core/Logger.h"
+#include "Core/StringUtils.h"
 
 #include "ECS/Entity.h"
 #include "World/WorldSystem.h"
@@ -11,17 +12,24 @@
 
 namespace Insight::Editor::EditorGUI
 {
-    void Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload)
+    void Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload, Reflect::Type type)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            ImGui::SetDragDropPayload(id, payload, strlen(payload));
+            std::string payloadData = payload;
+            payloadData += ",";
+            payloadData += type.GetTypeName();
+            payloadData += ",";
+            payloadData += std::to_string(type.GetTypeSize());
+            ImGui::SetDragDropPayload(id, payloadData.c_str(), payloadData.size());
             ImGui::EndDragDropSource();
         }
     }
 
-    void ObjectFieldTarget(const char* id, const char* label, Reflect::Type type, void*& dataToSet)
+    bool ObjectFieldTarget(const char* id, std::string& data, Reflect::Type type)
     {
+        data.clear();
+
         if (ImGui::BeginDragDropTarget())
         {
             const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(id);
@@ -30,42 +38,43 @@ namespace Insight::Editor::EditorGUI
                 std::string payloadDataString = static_cast<const char*>(payload->Data);
                 payloadDataString.resize(payload->DataSize);
 
-                std::string entityGuidString = payloadDataString.substr(0, payloadDataString.find("::"));
-                std::string componentGuidString = payloadDataString.substr(payloadDataString.find("::") + 2);
+                std::vector<std::string> splitStrings = SplitString(payloadDataString, ',');
+                std::string& payloadData = splitStrings.at(0);
+                std::string& typeName = splitStrings.at(1);
+                std::string& typeSize = splitStrings.at(2);
 
-                Core::GUID entityGuid;
-                entityGuid.StringToGuid(entityGuidString);
-
-                Core::GUID componentGuid;
-                componentGuid.StringToGuid(componentGuidString);
-
-                ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
-                ECS::Component* component = entity->GetComponentByGuid(componentGuid);
-
-                Reflect::TypeInfo componentTypeInfo;
-                bool compatibleWithTarget = false;
-
-                if (component)
+                if (payloadData.empty())
                 {
-                    componentTypeInfo = component->GetTypeInfo();
-                    compatibleWithTarget = componentTypeInfo.GetType() == type;
+                    // Payload data is empty, we should always be sending something.
+                    IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] No payload data was given. Returning.");
+                    data.clear();
+                    return false;
                 }
 
-                if (compatibleWithTarget)
+                if (type.IsValid())
                 {
-                    dataToSet = component;
+                    Reflect::Type payloadType(typeName, std::stoull(typeSize));
+                    if (!payloadType.IsValid())
+                    {
+                        IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] Type given '{}' is valid, payload type is not valid, no type checking will be performed. Returning.",
+                            type.GetTypeName().data());
+                        data.clear();
+                        return false;
+                    }
+
+                    if (type != payloadType)
+                    {
+                        IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] Type given '{}' is not compatible with payload type '{}'. Returning.",
+                            type.GetTypeName().data(), payloadType.GetTypeName().data());
+                        data.clear();
+                        return false;
+                    }
                 }
-                else if (component)
-                {
-                    IS_CORE_INFO("[EditorGUI::ObjectFieldTarget] Target type is '{}', drag object type is '{}'.",
-                        type.GetTypeName(), componentTypeInfo.GetTypeId().GetTypeName());
-                }
-                else
-                {
-                    IS_CORE_INFO("[EditorGUI::ObjectFieldTarget] Component from GUID '{}' is null.", componentGuid.ToString());
-                }
+
+                data = payloadData;
             }
             ImGui::EndDragDropTarget();
         }
+        return !data.empty();
     }
 }

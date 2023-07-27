@@ -1,6 +1,9 @@
 #include "Editor/EditorWindows/WorldViewWindow.h"
+#include "Editor/EditorWindows/ContentWindow.h"
+#include "Editor/EditorGUI.h"
 
 #include "Runtime/Engine.h"
+#include "Resource/Model.h"
 
 #include "Graphics/GraphicsSystem.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
@@ -62,11 +65,33 @@ namespace Insight
             ImVec2 windowSize = ImVec2(ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
             ImGui::Image(worldViewTexture, windowSize);
 
+            ContentWindowDragTarget();
+
             TObjectPtr<Runtime::World> world = Runtime::WorldSystem::Instance().FindWorldByName(c_WorldName);
             if (world)
             {
                 ImGui::IsWindowFocused() ?
                     world->SetWorldState(Runtime::WorldStates::Running) : world->SetWorldState(Runtime::WorldStates::Paused);
+            }
+        }
+
+        void WorldViewWindow::ContentWindowDragTarget()
+        {
+            std::string resourceGuidString;
+            if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowResourceDragSource, resourceGuidString, Runtime::IResource::GetStaticTypeInfo().GetType()))
+            {
+                Core::GUID resourceGuid;
+                resourceGuid.StringToGuid(resourceGuidString);
+
+                Runtime::IResource* resource = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
+                if (resource)
+                {
+                    if (resource->GetTypeInfo().GetType() == Runtime::Model::GetStaticTypeInfo().GetType())
+                    {
+                        Runtime::Model* model = static_cast<Runtime::Model*>(resource);
+                        model->CreateEntityHierarchy();
+                    }
+                }
             }
         }
 
