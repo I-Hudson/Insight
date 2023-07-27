@@ -23,13 +23,7 @@ namespace Insight::Editor
             std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Added"
                 << std::endl;
 
-            Runtime::AssetRegistry::Instance().AddAsset(fullPath);
             TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
-
-            if (resource)
-            {
-                Runtime::AssetRegistry::Instance().UpdateMetaData(resource);
-            }
         }
             break;
 
@@ -39,7 +33,6 @@ namespace Insight::Editor
                 << std::endl;
 
             Runtime::ResourceManager::Instance().Unload(fullPath);
-            Runtime::AssetRegistry::Instance().RemoveAsset(fullPath);
         }
             break;
 

@@ -34,7 +34,8 @@ namespace Insight
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Save, [this](const Core::Event& eve)
                 {
                     ASSERT(Platform::IsMainThread());
-                    std::lock_guard lock(m_mutex);
+
+                    std::lock_guard resourceLock(m_resourcesMutex);
                     for (auto& [id, resource] : m_resources)
                     {
                         if (resource->IsEngineFormat()
@@ -83,7 +84,9 @@ namespace Insight
             }
 
             m_resourcePacks.clear();
+            std::lock_guard resourceLock(m_resourcesMutex);
             m_resources.clear();
+            std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
             m_dependentResources.clear();
         }
 
@@ -159,7 +162,7 @@ namespace Insight
             {
                 TObjectOPtr<IResource> resourceOPtr;
                 {
-                    std::lock_guard lock(m_mutex);
+                    std::lock_guard resourceLock(m_resourcesMutex);
                     auto iter = m_resources.find(resourceId);
                     resourceOPtr = std::move(iter->second);
                     m_resources.erase(iter);
@@ -168,11 +171,26 @@ namespace Insight
             }
         }
 
+        void ResourceDatabase::UpdateGuidToResource(TObjectPtr<IResource>& resource)
+        {
+            std::lock_guard guidToResourceLock(m_guidToResourceMutex);
+            m_guidToResources[resource->GetGuid()] = resource;
+            for (auto& referenceLink : resource->GetReferenceLinks())
+            {
+                if (referenceLink.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner)
+                {
+                    IS_CORE_INFO("");
+                }
+            }
+        }
+
         TObjectPtr<IResource> ResourceDatabase::GetResource(ResourceId const& resourceId) const
         {
             TObjectPtr<IResource> resource;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
+
                 if (auto iter = m_resources.find(resourceId);
                     iter != m_resources.end())
                 {
@@ -191,7 +209,7 @@ namespace Insight
         {
             TObjectPtr<IResource> resource;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 for (auto& pair : m_resources)
                 {
                     if (pair.second->GetGuid() == guid) 
@@ -200,6 +218,8 @@ namespace Insight
                         break;
                     }
                 }
+
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
                 for (auto& pair : m_dependentResources)
                 {
                     if (pair.second->GetGuid() == guid)
@@ -216,7 +236,7 @@ namespace Insight
         {
             std::unordered_map<ResourceId, TObjectPtr<IResource>> ResourceMap;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 for (const auto& pair : m_resources)
                 {
                     ResourceMap[pair.first] = pair.second;
@@ -234,7 +254,8 @@ namespace Insight
         {
             bool result = false;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
                 result |= m_resources.find(resourceId) != m_resources.end();
                 result |= m_dependentResources.find(resourceId) != m_dependentResources.end();
             }
@@ -250,13 +271,14 @@ namespace Insight
         {
             bool result = false;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 for (const auto& [resourceId, resource] : m_resources)
                 {
                     if (resource->GetGuid() == guid) {
                         return true;
                     }
                 }
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
                 for (const auto& [resourceId, resource] : m_dependentResources)
                 {
                     if (resource->GetGuid() == guid) {
@@ -271,7 +293,7 @@ namespace Insight
         {
             u32 result;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 result = static_cast<u32>(m_resources.size());
             }
             return result;
@@ -281,7 +303,6 @@ namespace Insight
         {
             u32 result;
             {
-                std::lock_guard lock(m_mutex);
                 result = m_loadedResourceCount;
             }
             return result;
@@ -291,7 +312,7 @@ namespace Insight
         {
             u32 count = 0;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 for (const auto& pair : m_resources)
                 {
                     if (pair.second->GetResourceState() == EResoruceStates::Loading)
@@ -322,19 +343,12 @@ namespace Insight
             if (HasResource(resourceId))
             {
                 {
-                    std::lock_guard lock(m_mutex);
+                    std::lock_guard lock(m_resourcesMutex);
                     resource = m_resources.find(resourceId)->second;
                 }
                 return resource;
             }
 
-            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
-            if (assetInfo == nullptr)
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] No asset info at path '{}'.", resourceId.GetPath());
-                return nullptr;
-            }
-
             IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
             ASSERT(rawResource);
             {
@@ -347,65 +361,12 @@ namespace Insight
             }
             TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 resource = m_resources[resourceId] = std::move(ownerResource);
             }
-
-            AssetRegistry::Instance().DeserialiseAssetUser(RemoveConst(assetInfo), resource);
 
             LoadMetaFileData(resource);
-
-            return resource;
-        }
-
-        TObjectPtr<IResource> ResourceDatabase::AddResource(const Core::GUID& guid)
-        {
-            if (!guid.IsValid())
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] Guid '{}' is not valid.", guid.ToString());
-                return nullptr;
-            }
-
-            TObjectPtr<IResource> resource;
-            if (HasResource(guid))
-            {
-                return GetResourceFromGuid(guid);
-            }
-
-            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(guid);
-            if (assetInfo == nullptr)
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] No asset info related to guid '{}'.", guid.ToString());
-                return nullptr;
-            }
-
-            std::string assetExtention = std::string(FileSystem::GetFileExtension(assetInfo->GetFullFilePath()));
-            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(assetExtention);
-            if (!loader)
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] Didn't find a loader compatible with asset '{}'.", 
-                    assetInfo->GetFullFilePath());
-                return nullptr;
-            }
-
-            ResourceId resourceId(assetInfo->GetFullFilePath(), loader->GetResourceTypeId());
-            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
-            ASSERT(rawResource);
-            {
-                std::lock_guard resourceLock(rawResource->m_mutex);
-                rawResource->m_resourceId = resourceId;
-                rawResource->m_resource_state = EResoruceStates::Not_Loaded;
-                rawResource->m_storage_type = ResourceStorageTypes::Disk;
-                rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
-                rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
-            }
-            TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
-            {
-                std::lock_guard lock(m_mutex);
-                resource = m_resources[resourceId] = std::move(ownerResource);
-            }
-
-            AssetRegistry::Instance().DeserialiseAssetUser(RemoveConst(assetInfo), resource);
+            UpdateGuidToResource(resource);
 
             return resource;
         }
@@ -428,7 +389,7 @@ namespace Insight
         {
             std::vector<ResourceId> result;
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard resourceLock(m_resourcesMutex);
                 for (const auto& pair : m_resources)
                 {
                     result.push_back(pair.first);
@@ -439,13 +400,11 @@ namespace Insight
 
         void ResourceDatabase::OnResourceLoaded(IResource* Resource)
         {
-            std::lock_guard lock(m_mutex);
             ++m_loadedResourceCount;
         }
 
         void ResourceDatabase::OnResourceUnloaded(IResource* Resource)
         {
-            std::lock_guard lock(m_mutex);
             --m_loadedResourceCount;
         }
 
@@ -456,7 +415,11 @@ namespace Insight
             {
                 IS_CORE_INFO("");
             }
-            ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
+
+            {
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
+                ASSERT(m_dependentResources.find(resourceId) == m_dependentResources.end());
+            }
 
             TObjectPtr<IResource> resource = nullptr;
             IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
@@ -469,7 +432,7 @@ namespace Insight
             }
             TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
             {
-                std::lock_guard lock(m_mutex);
+                std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
                 resource = m_dependentResources[resourceId] = std::move(ownerResource);
             }
 
@@ -478,7 +441,8 @@ namespace Insight
 
         void ResourceDatabase::RemoveDependentResource(ResourceId const& resourceId)
         {
-            std::lock_guard lock(m_mutex);
+            std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
+
             auto iter = m_dependentResources.find(resourceId);
             if (iter != m_dependentResources.end())
             {
@@ -544,10 +508,7 @@ namespace Insight
 
         void ResourceDatabase::FindMissingResources()
         {
-            std::unique_lock lock(m_mutex);
-
             std::vector<ResourceId> resourcesFound;
-
             // We really don't want to be doing this. This is a last ditch attempt when starting the engine 
             // to find any files that might have moved through File Explorer. Really files should be moved through the 
             // editor to allow for correct tracking and updating of data.
@@ -628,8 +589,6 @@ namespace Insight
                     }
                 }
             }
-
-            lock.unlock();
 
             if (!resourcesFound.empty())
             {

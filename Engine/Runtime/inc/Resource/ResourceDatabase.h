@@ -45,6 +45,8 @@ namespace Insight
             void RemoveResource(TObjectPtr<IResource> resource);
             void RemoveResource(ResourceId const& resourceId);
 
+            void UpdateGuidToResource(TObjectPtr<IResource>& resource);
+
             TObjectPtr<IResource> GetResource(ResourceId const& resourceId) const;
             TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid) const;
             
@@ -63,7 +65,6 @@ namespace Insight
 
         private:
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId, bool force);
-            TObjectPtr<IResource> AddResource(const Core::GUID& guid);
 
             void DeleteResource(TObjectOPtr<IResource>& resource);
 
@@ -87,10 +88,16 @@ namespace Insight
             ResourcePack* GetResourcePackFromResourceId(ResourceId resourceId) const;
 
         private:
+            mutable std::mutex m_resourcesMutex;
             ResourceOwningMap m_resources;
+
+            mutable std::mutex m_dependentResourcesMutex;
             ResourceOwningMap m_dependentResources;
+
+            mutable std::mutex m_guidToResourceMutex;
+            std::unordered_map<Core::GUID, TObjectPtr<IResource>> m_guidToResources;
+
             u32 m_loadedResourceCount = 0;
-            mutable std::mutex m_mutex;
 
             /// @brief Use this map in the verify process.
             std::unordered_map<ResourceId, Core::GUID> m_missingResources;

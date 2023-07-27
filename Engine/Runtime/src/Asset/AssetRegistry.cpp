@@ -1,4 +1,5 @@
 #include "Asset/AssetRegistry.h"
+#if 0
 #include "Asset/AssetUser.h"
 
 #include "Runtime/ProjectSystem.h"
@@ -298,3 +299,4 @@ namespace Insight::Runtime
         return true;
     }
 }
+#endif

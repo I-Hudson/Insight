@@ -1,5 +1,6 @@
 #include "Asset/AssetInfo.h"
 
+#if 0
 #include "FileSystem/FileSystem.h"
 
 namespace Insight::Runtime
@@ -62,3 +63,4 @@ namespace Insight::Runtime
         return PackagePath + "/" + PackageName;
     }
 }
+#endif

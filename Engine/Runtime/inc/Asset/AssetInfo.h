@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include "Runtime/Defines.h"
 
 #include "Core/TypeAlias.h"
@@ -88,3 +88,4 @@ namespace Insight
         SERIALISE_PROPERTY(std::string, SourcePath, 1, 0)
     )
 }
+#endif

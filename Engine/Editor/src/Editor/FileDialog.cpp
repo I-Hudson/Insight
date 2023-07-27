@@ -3,7 +3,7 @@
 #include "Core/EnginePaths.h"
 
 #include "Resource/Texture2D.h"
-#include "Resource/ResourceManager.h"
+#include "Editor/EditorResourceManager.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -45,7 +45,7 @@ namespace Insight
             }
             m_pathName = m_path.substr(lastSlashChar);
 
-            m_icon = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
+            m_icon = EditorResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Icons/Default.png", Runtime::Texture2D::GetStaticResourceTypeId()));
             m_isDirectory = FileSystem::IsDirectory(m_path);
             m_clickedTimer.Start();
         }

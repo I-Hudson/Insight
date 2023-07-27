@@ -28,6 +28,8 @@ namespace Insight
                     model->AddDependentResource(resource);
                     mesh = static_cast<Runtime::Mesh*>(resource);
                     mesh->Deserialise(serialiser);
+
+                    //Runtime::ResourceManager::Instance().UpdateGuidToResource(mesh);
                 }
 
                 serialiser->StopArray();
@@ -69,6 +71,7 @@ namespace Insight
                     material = static_cast<Runtime::Material*>(resource);
                     material->Deserialise(serialiser);
 
+                    //Runtime::ResourceManager::Instance().UpdateGuidToResource(material);
                 }
                 serialiser->StopArray();
             }

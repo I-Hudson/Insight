@@ -55,15 +55,13 @@ namespace Insight
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
                 {
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-                    Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
 
-                    Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), true);
+                    Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
+                    Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
                     m_fileWatcher.watch();
                 });
-
-            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), true, false);
 
             m_editorResourceManager.Initialise();
 
@@ -116,8 +114,6 @@ namespace Insight
             if (Runtime::ProjectSystem::Instance().IsProjectOpen())
             {
                 const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-                const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Txt.txt");
-                assetInfo = Runtime::AssetRegistry::Instance().AddAsset(projectInfo.GetContentPath() + "/Textures/Christmas_Cute_Roadhog.png");
 
                 Runtime::ResourcePack* pack = Runtime::ResourceManager::Instance().CreateResourcePack(
                     Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");

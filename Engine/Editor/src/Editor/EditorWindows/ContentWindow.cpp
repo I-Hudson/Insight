@@ -204,7 +204,7 @@ namespace Insight::Editor
                     std::string fileName = iter.path().filename().string();
                     std::string fileExtension = iter.path().extension().string();
 
-                    if (FileSystem::GetFileExtension(path) == Runtime::AssetMetaData::c_FileExtension)
+                    if (FileSystem::GetFileExtension(path) == Runtime::IResourceManager::c_FileExtension)
                     {
                         continue;
                     }
@@ -298,7 +298,7 @@ namespace Insight::Editor
                                 // Compute thumbnail size
                                 Graphics::RHI_Texture* texture = nullptr;
                                 Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
-                                if (Runtime::AssetRegistry::Instance().GetAsset(path) != nullptr)
+                                if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
                                 {
                                     TObjectPtr<Runtime::IResource> loadedResource = Runtime::ResourceManager::Instance().LoadSync(textureResourceId);
                                     if (loadedResource)

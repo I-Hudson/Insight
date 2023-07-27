@@ -1,5 +1,5 @@
 #pragma once
-
+#if 0
 #include "Runtime/Defines.h"
 #include "Core/IObject.h"
 #include "Asset/AssetInfo.h"
@@ -43,3 +43,4 @@ namespace Insight::Runtime
         const AssetInfo* m_assetInfo = nullptr;
     };
 }
+#endif

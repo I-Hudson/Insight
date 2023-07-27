@@ -1,5 +1,7 @@
 #pragma once
 
+#if 0
+
 #include "Runtime/Defines.h"
 #include "Core/Singleton.h"
 #include "Core/ISysytem.h"
@@ -65,3 +67,4 @@ namespace Insight::Runtime
         std::string m_assetReativeBaseDirectory;
     };
 }
+#endif

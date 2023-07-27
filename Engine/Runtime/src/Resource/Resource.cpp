@@ -124,11 +124,6 @@ namespace Insight
 			return m_resource_state;
 		}
 
-		Core::GUID IResource::GetGuid() const
-		{
-			return m_guid;
-		}
-
 		const ResourceReferenceLink* IResource::GetReferenceLink(u32 index) const
 		{
 			std::lock_guard lock(m_referenceLinksMutex);
@@ -209,6 +204,11 @@ namespace Insight
 				{
 					return link.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner && link.GetLinkResource() == resource;
 				}) != m_reference_links.end();
+		}
+
+		std::vector<ResourceReferenceLink> IResource::GetReferenceLinks() const
+		{
+			return m_reference_links;
 		}
 
 		ResourceTypeId IResource::GetResourceTypeId() const

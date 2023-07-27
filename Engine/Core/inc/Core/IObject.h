@@ -13,7 +13,7 @@ namespace Insight
 	/// IObject contains some base level information like type name, type hash.
 	/// IObjects are also used with TObjectOPtr and TObjectPtr.
 	/// </summary>
-	class IS_CORE IObject
+	class IS_CORE IObject : public Serialisation::ISerialisable
 	{
 	public:
 		IObject();

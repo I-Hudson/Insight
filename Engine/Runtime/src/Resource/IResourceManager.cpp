@@ -172,6 +172,39 @@ namespace Insight
             Delete(m_loaderRegistry);
         }
 
+        void IResourceManager::SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory)
+        {
+            if (!FileSystem::Exists(metaFileDirectory))
+            {
+                FileSystem::CreateFolder(metaFileDirectory);
+            }
+            m_debugMetaFileDirectory = std::move(metaFileDirectory);
+            m_assetReativeBaseDirectory = std::move(assetReativeBaseDirectory);
+        }
+
+        void IResourceManager::LoadResourcesInFolder(std::string_view path, bool recursive)
+        {
+            std::string absFolderPath = FileSystem::GetAbsolutePath(path);
+            if (recursive)
+            {
+                for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(absFolderPath))
+                {
+                    std::string path = entry.path().string();
+                    FileSystem::PathToUnix(path);
+                    LoadSync(path, false);
+                }
+            }
+            else
+            {
+                for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(absFolderPath))
+                {
+                    std::string path = entry.path().string();
+                    FileSystem::PathToUnix(path);
+                    LoadSync(path, false);
+                }
+            }
+        }
+
         ResourcePack* IResourceManager::CreateResourcePack(std::string_view filePath)
         {
             ASSERT(m_database);
@@ -399,7 +432,7 @@ namespace Insight
             }
             else
             {
-                resource = m_database->AddResource(guid);
+                FAIL_ASSERT();
             }
 
             if (resource)

@@ -18,6 +18,8 @@ namespace Insight
         class IS_RUNTIME IResourceManager
         {
         public:
+            constexpr static const char* c_FileExtension = ".is_meta";
+
             IResourceManager();
             virtual ~IResourceManager();
 
@@ -27,6 +29,9 @@ namespace Insight
 
             void Initialise();
             void Shutdown();
+
+            void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
+            void LoadResourcesInFolder(std::string_view path, bool recursive);
 
             ResourcePack* CreateResourcePack(std::string_view filePath);
 
@@ -120,6 +125,9 @@ namespace Insight
             mutable std::mutex m_queuedResoucesToLoadMutex;
 
 			ResourceLoaderRegister* m_loaderRegistry;
+
+            std::string m_debugMetaFileDirectory;
+            std::string m_assetReativeBaseDirectory;
 
             friend class ResourceSystem;
             friend class ModelLoader;

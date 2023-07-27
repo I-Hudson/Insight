@@ -4,6 +4,7 @@
 #include "Runtime/Defines.h"
 #include "Asset/AssetUser.h"
 
+#include "Core/IObject.h"
 #include "Core/Defines.h"
 #include "Core/Delegate.h"
 #include "Core/Memory.h"
@@ -96,7 +97,7 @@ namespace Insight
 
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
 		REFLECT_CLASS()
-		class IS_RUNTIME IResource : public Reflect::IReflect, public AssetUser
+		class IS_RUNTIME IResource : public Reflect::IReflect, public IObject
 		{
 			REFLECT_GENERATED_BODY()
 		public:
@@ -117,8 +118,6 @@ namespace Insight
 			/// @brief Return the current state of this resource.
 			EResoruceStates GetResourceState() const;
 
-			Core::GUID GetGuid() const;
-
 			const ResourceReferenceLink* GetReferenceLink(u32 index) const;
 			ResourceStorageTypes GetResourceStorageType() const;
 
@@ -130,6 +129,8 @@ namespace Insight
 			bool IsDependentOnAnotherResource(IResource* resource) const;
 			bool IsDependentOwnerOnAnotherResource() const;
 			bool IsDependentOwnerOnAnotherResource(IResource* resource) const;
+
+			std::vector<ResourceReferenceLink> GetReferenceLinks() const;
 
 			bool IsNotFound() const;
 			bool IsLoaded() const;
@@ -205,7 +206,6 @@ namespace Insight
 			void StopUnloadTimer();
 
 		protected:
-			Core::GUID m_guid;
 			/// @brief On disk file path. (In most cases this will be the same as 'm_file_path')
 			std::string m_source_file_path;
 			/// @brief Full file path.
@@ -242,11 +242,13 @@ namespace Insight
 		SERIALISE_PROPERTY(bool, IsWithinPack, 1, 0)
 		);
 
-	OBJECT_SERIALISER(Runtime::IResource, 4,
+	OBJECT_SERIALISER(Runtime::IResource, 5,
+		SERIALISE_BASE(IObject, 5, 0)
+
 		SERIALISE_PROPERTY(std::string, m_source_file_path, 1, 2)
 		SERIALISE_PROPERTY(std::string, m_file_path, 1, 2)
 		SERIALISE_OBJECT(Runtime::ResourceId, m_resourceId, 1, 2)
-		SERIALISE_PROPERTY(Core::GUID, m_guid, 2, 0)
+		SERIALISE_PROPERTY_REMOVED(Core::GUID, m_guid, 2, 5)
 		SERIALISE_OBJECT(Runtime::ResourcePackInfo, m_resourcePackInfo, 3, 4)
 	);
 }

@@ -6,7 +6,6 @@
 #include "Core/CommandLineArgs.h"
 
 #include "Core/SystemRegistry.h"
-#include "Asset/AssetRegistry.h"
 #include "Threading/TaskSystem.h"
 #include "Event/EventSystem.h"
 #include "Resource/ResourceSystem.h"
@@ -70,7 +69,6 @@ namespace Insight
 
 			// Systems
 			Core::SystemRegistry m_systemRegistry;
-			Runtime::AssetRegistry m_assetRegistry;
 			Threading::TaskSystem m_taskSystem;
 			Core::EventSystem m_eventSystem;
 			Runtime::ResourceSystem m_resourceSystem;
