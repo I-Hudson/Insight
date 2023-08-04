@@ -1,10 +1,24 @@
 #include "Asset/AssetInfo.h"
 
-#if 0
 #include "FileSystem/FileSystem.h"
 
 namespace Insight::Runtime
 {
+    AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath)
+    {
+        std::string absFilePath = FileSystem::GetAbsolutePath(filePath);
+        FileSystem::PathToUnix(absFilePath);
+
+        std::string absPackagePath = FileSystem::GetAbsolutePath(packagePath);
+        FileSystem::PathToUnix(absPackagePath);
+
+        FileName = FileSystem::GetFileName(absFilePath);
+        FilePath = FileSystem::GetParentPath(absFilePath);
+
+        PackageName = FileSystem::GetFileName(absPackagePath);
+        PackagePath = FileSystem::GetParentPath(absPackagePath);
+    }
+
     IS_SERIALISABLE_CPP(AssetMetaData);
 
     AssetMetaData::operator bool() const
@@ -63,4 +77,3 @@ namespace Insight::Runtime
         return PackagePath + "/" + PackageName;
     }
 }
-#endif

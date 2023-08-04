@@ -1,5 +1,5 @@
 #pragma once
-#if 0
+
 #include "Runtime/Defines.h"
 #include "Core/IObject.h"
 #include "Asset/AssetInfo.h"
@@ -9,7 +9,7 @@
 namespace Insight::Runtime
 {
     /// @brief 
-    class IS_RUNTIME AssetUser : public IObject, public Serialisation::ISerialisable
+    class IS_RUNTIME AssetUser : public IObject
     {
     public:
         virtual ~AssetUser() override
@@ -43,4 +43,3 @@ namespace Insight::Runtime
         const AssetInfo* m_assetInfo = nullptr;
     };
 }
-#endif

@@ -111,7 +111,7 @@ namespace Insight
                         componentTypeNamesCStr.push_back(componentTypeName.c_str());
                     }
 
-                    if (ImGui::ListBox("##", &m_addComponentListBoxIndex, componentTypeNamesCStr.data(), componentTypeNamesCStr.size()))
+                    if (ImGui::ListBox("##", &m_addComponentListBoxIndex, componentTypeNamesCStr.data(), static_cast<int>(componentTypeNamesCStr.size())))
                     {
                         entity->AddComponentByName(componentTypeNamesCStr[m_addComponentListBoxIndex]);
                         m_showAddComponentMenu = false;

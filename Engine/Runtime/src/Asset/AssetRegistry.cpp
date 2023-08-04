@@ -1,6 +1,7 @@
 #include "Asset/AssetRegistry.h"
-#if 0
+
 #include "Asset/AssetUser.h"
+#include "Asset/AssetPackage.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -24,12 +25,10 @@ namespace Insight::Runtime
 
     void AssetRegistry::Shutdown()
     {
-        for (auto& [guid, assetInfo] : m_guidToAssetInfoLookup)
+        for (AssetPackage*& package : m_assetPackages)
         {
-            ::Delete(assetInfo);
+            Delete(package);
         }
-        m_guidToAssetInfoLookup = {};
-        m_pathToGuidLookup = {};
 
         m_state = Core::SystemStates::Not_Initialised;
     }
@@ -44,18 +43,13 @@ namespace Insight::Runtime
         m_assetReativeBaseDirectory = std::move(assetReativeBaseDirectory);
     }
 
-    const AssetInfo* AssetRegistry::AddAsset(std::string_view path)
+    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package)
     {
-        return AddAsset(path, true);
+        return AddAsset(path, package, true);
     }
 
-    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, bool enableMetaFile)
+    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile)
     {
-        if (HasAssetFromPath(path))
-        {
-            return GetAsset(path);
-        }
-
         std::string_view fileExtension = FileSystem::GetFileExtension(path);
         if (!FileSystem::Exists(path))
         {
@@ -78,40 +72,12 @@ namespace Insight::Runtime
             return nullptr;
         }
 
-        AssetInfo* assetInfo = New<AssetInfo>();
-        assetInfo->SetFile(FileSystem::GetFileName(path), FileSystem::GetParentPath(path));
-        assetInfo->EnableMetaData = enableMetaFile;
-
-        LoadMetaData(assetInfo);
-
-        m_guidToAssetInfoLookup[assetInfo->MetaData.AssetGuid] = assetInfo;
-        for (const Core::GUID& guid : assetInfo->MetaData.DependentGuids)
-        {
-            m_guidToAssetInfoLookup[guid] = assetInfo;
-        }
-        m_pathToGuidLookup[assetInfo->GetFullFilePath()] = assetInfo->MetaData.AssetGuid;
-
-        return assetInfo;
+        return package->AddAsset(path);
     }
 
-    void AssetRegistry::RemoveAsset(std::string_view path)
+    void AssetRegistry::RemoveAsset(std::string_view path, AssetPackage* package)
     {
-        if (!HasAssetFromPath(path))
-        {
-            return;
-        }
-
-        AssetInfo* assetInfo = RemoveConst(GetAsset(path));
-        ASSERT(assetInfo);
-        ASSERT(assetInfo->GetCount() == 0);
-
-        for (const Core::GUID& guid : assetInfo->MetaData.DependentGuids)
-        {
-            m_guidToAssetInfoLookup.erase(guid);
-        }
-        m_guidToAssetInfoLookup.erase(assetInfo->MetaData.AssetGuid);
-        m_pathToGuidLookup.erase(assetInfo->GetFullFilePath());
-        ::Delete(assetInfo);
+        package->RemoveAsset(path);
     }
 
     void AssetRegistry::UpdateMetaData(AssetInfo* assetInfo, AssetUser* object)
@@ -126,13 +92,13 @@ namespace Insight::Runtime
 
         AssetMetaData& metaData = assetInfo->MetaData;
 
-        metaData.Serialise(&binarySerialiser);
+        //metaData.Serialise(&binarySerialiser);
         if (object)
         {
             object->Serialise(&binarySerialiser);
         }
 
-        metaData.Serialise(&jsonSerialiser);
+        //metaData.Serialise(&jsonSerialiser);
         if (object)
         {
             object->Serialise(&jsonSerialiser);
@@ -185,37 +151,41 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const
     {
-        const auto iter = m_guidToAssetInfoLookup.find(guid);
-        if (iter == m_guidToAssetInfoLookup.end())
+        for (const AssetPackage* package : m_assetPackages)
         {
-            return nullptr;
+            const AssetInfo* assetInfo = package->GetAsset(guid);
+            if (assetInfo)
+            {
+                return assetInfo;
+            }
         }
-        return iter->second;
+        return nullptr;
     }
 
     const AssetInfo* AssetRegistry::GetAsset(std::string_view path) const
     {
-        std::string unixPath = std::string(path);
-        FileSystem::PathToUnix(unixPath);
-        const auto iter = m_pathToGuidLookup.find(unixPath);
-        if (iter == m_pathToGuidLookup.end())
+        for (const AssetPackage* package : m_assetPackages)
         {
-            return nullptr;
+            const AssetInfo* assetInfo = package->GetAsset(path);
+            if (assetInfo)
+            {
+                return assetInfo;
+            }
         }
-        return GetAsset(iter->second);
+        return nullptr;
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package)
     {
-        AddAssetsInFolder(path, false, true);
+        AddAssetsInFolder(path, package, false, true);
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path, bool recursive)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive)
     {
-        AddAssetsInFolder(path, recursive, true);
+        AddAssetsInFolder(path, package, recursive, true);
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path, bool recursive, bool enableMetaFiles)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles)
     {
         std::string absFolderPath = FileSystem::GetAbsolutePath(path);
         if (recursive)
@@ -224,7 +194,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, enableMetaFiles);
+                AddAsset(path, package, enableMetaFiles);
             }
         }
         else
@@ -233,7 +203,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, enableMetaFiles);
+                AddAsset(path, package, enableMetaFiles);
             }
         }
     }
@@ -246,32 +216,6 @@ namespace Insight::Runtime
     bool AssetRegistry::HasAssetFromPath(std::string_view path) const
     {
         return GetAsset(path) != nullptr;
-    }
-
-    void AssetRegistry::LoadMetaData(AssetInfo* assetInfo)
-    {
-        if (!AssetInfoValidate(assetInfo))
-        {
-            return;
-        }
-
-        Serialisation::BinarySerialiser binarySerialiser(true);
-
-        std::string metaFilePath = assetInfo->GetFullFilePath() + AssetMetaData::c_FileExtension;
-        if (!FileSystem::Exists(metaFilePath))
-        {
-            UpdateMetaData(assetInfo, nullptr);
-        }
-
-        std::vector<Byte> fileData = FileSystem::ReadFromFile(metaFilePath, FileType::Binary);
-
-        if (!binarySerialiser.Deserialise(fileData))
-        {
-            return;
-        }
-
-        AssetMetaData& metaData = RemoveConst(assetInfo)->MetaData;
-        metaData.Deserialise(&binarySerialiser);
     }
 
     bool AssetRegistry::AssetInfoValidate(const AssetInfo* assetInfo) const
@@ -299,4 +243,3 @@ namespace Insight::Runtime
         return true;
     }
 }
-#endif

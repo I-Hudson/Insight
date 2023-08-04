@@ -74,7 +74,7 @@ namespace Insight
 						auto entities = world->GetAllEntities();
 						for (size_t i = 0; i < entities.size(); ++i)
 						{
-							DrawSingleEntity(entities.at(i).Get(), i);
+							DrawSingleEntity(entities.at(i).Get(), static_cast<u32>(i));
 						}
 					}
 				}

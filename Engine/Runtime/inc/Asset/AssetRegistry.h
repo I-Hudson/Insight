@@ -1,7 +1,5 @@
 #pragma once
 
-#if 0
-
 #include "Runtime/Defines.h"
 #include "Core/Singleton.h"
 #include "Core/ISysytem.h"
@@ -14,6 +12,7 @@
 namespace Insight::Runtime
 {
     class AssetUser;
+    class AssetPackage;
 
     /// @brief Manage all references to known assets on disk.
     class IS_RUNTIME AssetRegistry : public Core::Singleton<AssetRegistry>, public Core::ISystem
@@ -33,9 +32,9 @@ namespace Insight::Runtime
         /// @param assetReativeBaseDirectory 
         void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
 
-        const AssetInfo* AddAsset(std::string_view path);
-        const AssetInfo* AddAsset(std::string_view path, bool enableMetaFile);
-        void RemoveAsset(std::string_view path);
+        const AssetInfo* AddAsset(std::string_view path, AssetPackage* package);
+        const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile);
+        void RemoveAsset(std::string_view path, AssetPackage* package);
 
         void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
         void UpdateMetaData(AssetUser* object);
@@ -45,11 +44,11 @@ namespace Insight::Runtime
         const AssetInfo* GetAsset(std::string_view path) const;
 
         /// @brief Add all asset within a folder. 
-        void AddAssetsInFolder(std::string_view path);
+        void AddAssetsInFolder(std::string_view path, AssetPackage* package);
         /// @brief Add all asset within a folder, recursive.
-        void AddAssetsInFolder(std::string_view path, bool recursive);
+        void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive);
         /// @brief Add all asset within a folder, recursive, with the option of disabling meta files (should be false for engine/editor folders).
-        void AddAssetsInFolder(std::string_view path, bool recursive, bool enableMetaFiles);
+        void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles);
 
     private:
         bool HasAssetFromGuid(const Core::GUID& guid) const;
@@ -60,11 +59,11 @@ namespace Insight::Runtime
         bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
     private:
-        std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
-        std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
+        std::vector<AssetPackage*> m_assetPackages;
+        //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
+        //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
 
         std::string m_debugMetaFileDirectory;
         std::string m_assetReativeBaseDirectory;
     };
 }
-#endif

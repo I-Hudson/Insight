@@ -1,5 +1,5 @@
 #pragma once
-#if 0
+
 #include "Runtime/Defines.h"
 
 #include "Core/TypeAlias.h"
@@ -40,6 +40,7 @@ namespace Insight
         {
         public:
             AssetInfo() = default;
+            AssetInfo(std::string_view filePath, std::string_view packagePath);
             AssetInfo(const AssetInfo& other) = default;
             AssetInfo(AssetInfo&& other) = default;
             ~AssetInfo() = default;
@@ -88,4 +89,3 @@ namespace Insight
         SERIALISE_PROPERTY(std::string, SourcePath, 1, 0)
     )
 }
-#endif
