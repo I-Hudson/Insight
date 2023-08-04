@@ -454,7 +454,6 @@ namespace Insight
 
         void ResourceDatabase::LoadMetaFileData(IResource* resource)
         {
-            return;
             if (resource->IsEngineFormat())
             {
                 return;
@@ -487,7 +486,6 @@ namespace Insight
 
         void ResourceDatabase::SaveMetaFileData(IResource* resource, bool overwrite)
         {
-            return;
             ASSERT(!resource->IsEngineFormat());
 
             std::string metaFilePath = resource->GetFilePath();

@@ -114,7 +114,7 @@ namespace Insight
                         Runtime::Mesh* mesh = meshComponent->GetMesh();
                         if (!mesh)
                         {
-                            //continue;
+                            continue;
                         }
 
                         RenderMesh renderMesh;

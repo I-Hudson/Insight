@@ -16,6 +16,7 @@
 #include "FileSystem/FileSystem.h"
 
 #include "Core/EnginePaths.h"
+#include "Core/Profiler.h"
 #include "Event/EventSystem.h"
 
 #include <filesystem>
@@ -145,6 +146,8 @@ namespace Insight::Editor
 
     void ContentWindow::CentreArea()
     {
+        IS_PROFILE_FUNCTION();
+
         const ImVec2 itemSize = ImVec2(128.0f, 128.0f);
         const ImGuiTableFlags tableFlags = ImGuiTableFlags_Resizable;
 
@@ -200,6 +203,8 @@ namespace Insight::Editor
 
                 for (auto iter : std::filesystem::directory_iterator(m_currentDirectory))
                 {
+                    IS_PROFILE_SCOPE("Entry");
+
                     std::string path = iter.path().string();
                     std::string fileName = iter.path().filename().string();
                     std::string fileExtension = iter.path().extension().string();
