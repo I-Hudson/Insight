@@ -2,78 +2,84 @@
 
 #include "FileSystem/FileSystem.h"
 
-namespace Insight::Runtime
+namespace Insight
 {
-    AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath)
+    namespace Runtime
     {
-        std::string absFilePath = FileSystem::GetAbsolutePath(filePath);
-        FileSystem::PathToUnix(absFilePath);
+        AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath, Insight::Runtime::AssetPackage* assetPackage)
+        {
+            std::string absFilePath = FileSystem::GetAbsolutePath(filePath);
+            FileSystem::PathToUnix(absFilePath);
 
-        std::string absPackagePath = FileSystem::GetAbsolutePath(packagePath);
-        FileSystem::PathToUnix(absPackagePath);
+            std::string absPackagePath = FileSystem::GetAbsolutePath(packagePath);
+            FileSystem::PathToUnix(absPackagePath);
 
-        FileName = FileSystem::GetFileName(absFilePath);
-        FilePath = FileSystem::GetParentPath(absFilePath);
+            FileName = FileSystem::GetFileName(absFilePath);
+            FilePath = FileSystem::GetParentPath(absFilePath);
 
-        PackageName = FileSystem::GetFileName(absPackagePath);
-        PackagePath = FileSystem::GetParentPath(absPackagePath);
-    }
+            PackageName = FileSystem::GetFileName(absPackagePath);
+            PackagePath = FileSystem::GetParentPath(absPackagePath);
 
-    IS_SERIALISABLE_CPP(AssetMetaData);
+            ASSERT(assetPackage);
+            AssetPackage = assetPackage;
+        }
 
-    AssetMetaData::operator bool() const
-    {
-        return IsValid();
-    }
+        IS_SERIALISABLE_CPP(AssetMetaData);
 
-    bool AssetMetaData::IsValid() const
-    {
-        return AssetGuid.IsValid();
-    }
+        AssetMetaData::operator bool() const
+        {
+            return IsValid();
+        }
 
-    AssetInfo::operator bool() const
-    {
-        return IsValid();
-    }
+        bool AssetMetaData::IsValid() const
+        {
+            return AssetGuid.IsValid();
+        }
 
-    bool AssetInfo::IsValid() const
-    {
-        return !FileName.empty()
-            && !FilePath.empty();
-    }
+        AssetInfo::operator bool() const
+        {
+            return IsValid();
+        }
 
-    bool AssetInfo::operator==(const AssetInfo& other) const
-    {
-        return FileName == other.FileName
-            && FilePath == other.FilePath
-            && PackageName == other.PackageName
-            && PackagePath == other.PackagePath;
-    }
+        bool AssetInfo::IsValid() const
+        {
+            return !FileName.empty()
+                && !FilePath.empty();
+        }
 
-    bool AssetInfo::operator!=(const AssetInfo& other) const
-    {
-        return !(*this == other);
-    }
+        bool AssetInfo::operator==(const AssetInfo& other) const
+        {
+            return FileName == other.FileName
+                && FilePath == other.FilePath
+                && PackageName == other.PackageName
+                && PackagePath == other.PackagePath;
+        }
 
-    void AssetInfo::SetFile(std::string fileName, std::string filePath)
-    {
-        FileName = std::move(fileName);
-        FilePath = std::move(filePath);
-    }
+        bool AssetInfo::operator!=(const AssetInfo& other) const
+        {
+            return !(*this == other);
+        }
 
-    void AssetInfo::SetPackage(std::string fullPackagePath)
-    {
-        PackageName = FileSystem::GetFileName(fullPackagePath);
-        PackagePath = FileSystem::GetParentPath(fullPackagePath);
-    }
+        void AssetInfo::SetFile(std::string fileName, std::string filePath)
+        {
+            FileName = std::move(fileName);
+            FilePath = std::move(filePath);
+        }
 
-    std::string AssetInfo::GetFullFilePath() const
-    {
-        return FilePath + "/" + FileName;
-    }
+        void AssetInfo::SetPackage(std::string fullPackagePath)
+        {
+            PackageName = FileSystem::GetFileName(fullPackagePath);
+            PackagePath = FileSystem::GetParentPath(fullPackagePath);
+        }
 
-    std::string AssetInfo::GetFullPackagePath() const
-    {
-        return PackagePath + "/" + PackageName;
+        std::string AssetInfo::GetFullFilePath() const
+        {
+            return FilePath + "/" + FileName;
+        }
+
+        std::string AssetInfo::GetFullPackagePath() const
+        {
+            return PackagePath + "/" + PackageName;
+        }
     }
 }

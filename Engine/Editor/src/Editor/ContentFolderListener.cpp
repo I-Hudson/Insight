@@ -23,6 +23,7 @@ namespace Insight::Editor
             std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Added"
                 << std::endl;
 
+            Runtime::AssetRegistry::Instance().AddAsset(fullPath, m_assetPackage);
             TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
         }
             break;
@@ -33,6 +34,7 @@ namespace Insight::Editor
                 << std::endl;
 
             Runtime::ResourceManager::Instance().Unload(fullPath);
+            Runtime::AssetRegistry::Instance().RemoveAsset(fullPath, m_assetPackage);
         }
             break;
 
@@ -49,5 +51,10 @@ namespace Insight::Editor
         default:
             std::cout << "Should never happen!" << std::endl;
         }
+    }
+
+    void ContentFolderListener::SetAssetPackage(Runtime::AssetPackage* assetPackage)
+    {
+        m_assetPackage = assetPackage;
     }
 }

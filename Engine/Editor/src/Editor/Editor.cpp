@@ -5,6 +5,9 @@
 #include "Editor/EditorWindows/GameViewWindow.h"
 #include "Editor/EditorWindows/WorldViewWindow.h"
 
+#include "Asset/AssetRegistry.h"
+#include "Asset/AssetPackage.h"
+
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
 #include "Resource/ResourcePack.h"
@@ -52,9 +55,18 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+            m_engineAssetPackage = New<Runtime::AssetPackage>("", "EngineAssets");
+            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), m_engineAssetPackage, true, false);
+
+            m_projectAssetPackage = New<Runtime::AssetPackage>("", "ProjectAssets");
+            m_contentListener.SetAssetPackage(m_projectAssetPackage);
+
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
                 {
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+
+                    Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, false);
+                    Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
 
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
                     Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
@@ -184,6 +196,10 @@ namespace Insight
 
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
+
+            Runtime::AssetRegistry::Instance().Shutdown();
+            Delete(m_projectAssetPackage);
+            Delete(m_engineAssetPackage);
 
             m_editorResourceManager.Shutdown();
         }

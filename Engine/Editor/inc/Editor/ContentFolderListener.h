@@ -2,15 +2,28 @@
 
 #include <efsw/efsw.hpp>
 
-namespace Insight::Editor
+namespace Insight
 {
-    class ContentFolderListener : public efsw::FileWatchListener 
+    namespace Runtime
     {
-    public:
-        efsw::WatchID WatchId;
+        class AssetPackage;
+    }
 
-        void handleFileAction(efsw::WatchID watchid, const std::string& dir,
-                               const std::string& filename, efsw::Action action,
-                               std::string oldFilename) override;
-    };
+    namespace Editor
+    {
+        class ContentFolderListener : public efsw::FileWatchListener
+        {
+        public:
+            efsw::WatchID WatchId;
+
+            void handleFileAction(efsw::WatchID watchid, const std::string& dir,
+                                   const std::string& filename, efsw::Action action,
+                                   std::string oldFilename) override;
+
+            void SetAssetPackage(Runtime::AssetPackage* assetPackage);
+
+        private:
+            Runtime::AssetPackage* m_assetPackage;
+        };
+    }
 }

@@ -13,6 +13,8 @@ namespace Insight
 {
     namespace Runtime
     {
+        class AssetPackage;
+
         /// @brief Asset data which is stored to disk for each asset. This should only contain required meta data
         /// like a unique id for other systems like resources to reference
         class IS_RUNTIME AssetMetaData : public Serialisation::ISerialisable
@@ -40,7 +42,7 @@ namespace Insight
         {
         public:
             AssetInfo() = default;
-            AssetInfo(std::string_view filePath, std::string_view packagePath);
+            AssetInfo(std::string_view filePath, std::string_view packagePath, AssetPackage* assetPackage);
             AssetInfo(const AssetInfo& other) = default;
             AssetInfo(AssetInfo&& other) = default;
             ~AssetInfo() = default;
@@ -77,6 +79,8 @@ namespace Insight
             std::string PackageName;
             /// @brief Path to the package without the package name or extension
             std::string PackagePath;
+            /// @brief Pointer to the asset package this asset is in.
+            AssetPackage* AssetPackage = nullptr;
 
             /// @brief Is the asset in an engine format
             bool IsEngineFormat = false;

@@ -38,7 +38,7 @@ namespace Insight
                 return GetAsset(path);
             }
 
-            AssetInfo* assetInfo = New<AssetInfo>(path, m_packagePath);
+            AssetInfo* assetInfo = New<AssetInfo>(path, m_packagePath, this);
             m_pathToAssetInfo[assetInfo->GetFullFilePath()] = assetInfo;
 
             LoadMetaData(assetInfo);

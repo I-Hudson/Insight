@@ -237,6 +237,10 @@ namespace Insight
     }
     std::string FileSystem::GetAbsolutePath(std::string_view path)
     {
+        if (path.empty())
+        {
+            return std::string(path);
+        }
         std::filesystem::path fsPath = std::filesystem::absolute(std::filesystem::path(path));
         std::string absPath = fsPath.string();
         PathToUnix(absPath);
@@ -268,7 +272,7 @@ namespace Insight
     void FileSystem::PathToUnix(std::string& path)
     {
         std::replace(path.begin(), path.end(), '\\', '/');
-        if (path.back() == '/')
+        if (!path.empty() && path.back() == '/')
         {
             path.pop_back();
         }
@@ -277,7 +281,7 @@ namespace Insight
     void FileSystem::PathToWindows(std::string& path)
     {
         std::replace(path.begin(), path.end(), '/', '\\');
-        if (path.back() == '\\')
+        if (!path.empty() && path.back() == '\\')
         {
             path.pop_back();
         }

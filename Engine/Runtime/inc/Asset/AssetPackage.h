@@ -10,7 +10,7 @@ namespace Insight
     namespace Runtime
     {
         /// @brief Contain information about all assets with this package and how to load them.
-        class AssetPackage : public IObject
+        class IS_RUNTIME AssetPackage : public IObject
         {
         public:
             AssetPackage();

@@ -21,11 +21,6 @@ namespace Insight::Runtime
             }
         }
 
-        // Begin - ISerialisable -
-        virtual void Serialise(::Insight::Serialisation::ISerialiser* serialiser) override { }
-        virtual void Deserialise(::Insight::Serialisation::ISerialiser* serialiser) override { }
-        // End - ISerialisable -
-
         void SetAssetInfo(const AssetInfo* assetInfo) 
         {
             if (m_assetInfo)

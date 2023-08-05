@@ -17,6 +17,11 @@
 
 namespace Insight
 {
+	namespace Runtime
+	{
+		class AssetPackage;
+	}
+
 	namespace Editor
 	{
 		class IS_EDITOR Editor : public Insight::App::Engine, public Serialisation::ISerialisable
@@ -48,6 +53,9 @@ namespace Insight
 
 			efsw::FileWatcher m_fileWatcher;
 			ContentFolderListener m_contentListener;
+
+			Runtime::AssetPackage* m_engineAssetPackage;
+			Runtime::AssetPackage* m_projectAssetPackage;
 
 			using EditorSettingsSerialiser = Serialisation::JsonSerialiser;
 			constexpr static const char* c_EditorSettingsFileName = "InsightEditorSettings.isEditorSettings";
