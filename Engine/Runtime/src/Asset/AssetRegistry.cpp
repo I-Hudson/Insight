@@ -29,8 +29,45 @@ namespace Insight::Runtime
         {
             Delete(package);
         }
+        m_assetPackages.clear();
 
         m_state = Core::SystemStates::Not_Initialised;
+    }
+
+    AssetPackage* AssetRegistry::CreateAssetPackage(std::string_view path, std::string_view name)
+    {
+        AssetPackage* pathPackage = GetAssetPackageFromPath(path);
+        AssetPackage* namePackage = GetAssetPackageFromName(name);
+        if (pathPackage
+            && namePackage
+            && pathPackage == namePackage)
+        {
+            return pathPackage;
+        }
+        ASSERT(pathPackage == nullptr && namePackage == nullptr);
+
+        AssetPackage* newPackage = New<AssetPackage>(path, name);
+        m_assetPackages.push_back(newPackage);
+        return newPackage;
+    }
+
+    AssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
+    {
+        AssetPackage* pathPackage = GetAssetPackageFromPath(path);
+        if (pathPackage != nullptr)
+        {
+            return pathPackage;
+        }
+
+        // TODO: Load a asset package from disk into the asset registry. This should not load the assets 
+        // which are contained within the package, but should make the assets 'loadable' so the engine can 
+        // continue as normal and load them.
+
+        return pathPackage;
+    }
+
+    void AssetRegistry::UnloadAssetPackage(std::string_view path)
+    {
     }
 
     void AssetRegistry::SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory)
@@ -173,6 +210,51 @@ namespace Insight::Runtime
             }
         }
         return nullptr;
+    }
+
+    std::vector<const AssetInfo*> AssetRegistry::GetAllAssetInfos() const
+    {
+        std::vector<const AssetInfo*> assetInfos;
+        for (const AssetPackage* package : m_assetPackages)
+        {
+            std::vector<const AssetInfo*> packageAssetInfos = package->GetAllAssetInfos();
+            std::move(packageAssetInfos.begin(), packageAssetInfos.end(), std::back_inserter(assetInfos));
+        }
+        return assetInfos;
+    }
+
+    AssetPackage* AssetRegistry::GetAssetPackageFromPath(std::string_view path) const
+    {
+        if (path.empty())
+        {
+            return nullptr;
+        }
+
+        for (AssetPackage* package : m_assetPackages)
+        {
+            if (package->GetPath() == path)
+            {
+                return package;
+            }
+        }
+        return nullptr;
+    }
+
+    AssetPackage* AssetRegistry::GetAssetPackageFromName(std::string_view name) const
+    {
+        for (AssetPackage* package : m_assetPackages)
+        {
+            if (package->GetName() == name)
+            {
+                return package;
+            }
+        }
+        return nullptr;
+    }
+
+    std::vector<AssetPackage*> AssetRegistry::GetAllAssetPackages() const
+    {
+        return m_assetPackages;
     }
 
     void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package)

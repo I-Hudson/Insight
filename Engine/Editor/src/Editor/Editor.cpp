@@ -55,10 +55,10 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            m_engineAssetPackage = New<Runtime::AssetPackage>("", "EngineAssets");
+            m_engineAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EngineAssets");
             Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), m_engineAssetPackage, true, false);
 
-            m_projectAssetPackage = New<Runtime::AssetPackage>("", "ProjectAssets");
+            m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "ProjectAssets");
             m_contentListener.SetAssetPackage(m_projectAssetPackage);
 
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
@@ -197,11 +197,9 @@ namespace Insight
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);
 
-            Runtime::AssetRegistry::Instance().Shutdown();
-            Delete(m_projectAssetPackage);
-            Delete(m_engineAssetPackage);
-
             m_editorResourceManager.Shutdown();
+
+            Runtime::AssetRegistry::Instance().Shutdown();
         }
     }
 }

@@ -13,12 +13,15 @@ namespace Insight
         class IS_RUNTIME AssetPackage : public IObject
         {
         public:
-            AssetPackage();
+            AssetPackage() = delete;
             AssetPackage(std::string_view packagePath, std::string_view packageName);
             AssetPackage(const AssetPackage& other) = delete;
             ~AssetPackage();
 
             constexpr static const char* c_FileExtension = ".isassetpackage";
+
+            std::string_view GetPath() const;
+            std::string_view GetName() const;
 
             const AssetInfo* AddAsset(std::string_view path);
 
@@ -30,6 +33,8 @@ namespace Insight
 
             const AssetInfo* GetAsset(std::string_view path) const;
             const AssetInfo* GetAsset(const Core::GUID& guid) const;
+
+            std::vector<const AssetInfo*> GetAllAssetInfos() const;
 
             std::vector<Byte> LoadAsset(std::string_view path) const;
             std::vector<Byte> LoadAsset(Core::GUID guid) const;

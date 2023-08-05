@@ -10,10 +10,6 @@ namespace Insight
 {
     namespace Runtime
     {
-        AssetPackage::AssetPackage()
-        {
-        }
-
         AssetPackage::AssetPackage(std::string_view packagePath, std::string_view packageName)
         {
             m_packagePath = FileSystem::GetAbsolutePath(packagePath);
@@ -28,6 +24,16 @@ namespace Insight
             }
             m_pathToAssetInfo.clear();
             m_guidToAssetInfo.clear();
+        }
+
+        std::string_view AssetPackage::GetPath() const
+        {
+            return m_packagePath;
+        }
+
+        std::string_view AssetPackage::GetName() const
+        {
+            return m_packageName;
         }
 
         const AssetInfo* AssetPackage::AddAsset(std::string_view path)
@@ -110,6 +116,16 @@ namespace Insight
                 return iter->second;
             }
             return nullptr;
+        }
+
+        std::vector<const AssetInfo*> AssetPackage::GetAllAssetInfos() const
+        {
+            std::vector<const AssetInfo*> assetInfos;
+            for (const auto& [path, info] : m_pathToAssetInfo)
+            {
+                assetInfos.push_back(info);
+            }
+            return assetInfos;
         }
 
         std::vector<Byte> AssetPackage::LoadAsset(std::string_view path) const

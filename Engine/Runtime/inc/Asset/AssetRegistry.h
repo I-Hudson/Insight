@@ -27,6 +27,11 @@ namespace Insight::Runtime
         virtual void Shutdown() override;
         // End - ISystem -
 
+        AssetPackage* CreateAssetPackage(std::string_view path, std::string_view name);
+
+        AssetPackage* LoadAssetPackage(std::string_view path);
+        void UnloadAssetPackage(std::string_view path);
+
         /// @brief 
         /// @param metaFileDirectory 
         /// @param assetReativeBaseDirectory 
@@ -42,6 +47,12 @@ namespace Insight::Runtime
 
         const AssetInfo* GetAsset(const Core::GUID& guid) const;
         const AssetInfo* GetAsset(std::string_view path) const;
+
+        std::vector<const AssetInfo*> GetAllAssetInfos() const;
+
+        AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
+        AssetPackage* GetAssetPackageFromName(std::string_view name) const;
+        std::vector<AssetPackage*> GetAllAssetPackages() const;
 
         /// @brief Add all asset within a folder. 
         void AddAssetsInFolder(std::string_view path, AssetPackage* package);
