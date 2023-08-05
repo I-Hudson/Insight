@@ -55,45 +55,50 @@ namespace Insight
             if (m_selectedAssetPackage 
                 && ImGui::BeginTable("Asset Audit", 3, tableFlags))
             {
-                {
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Folder Path");
-                }
-                {
-                    ImGui::TableNextColumn();
-                    ImGui::Text("File Name");
-                }
-                {
-                    ImGui::TableNextColumn();
-                    ImGui::Text("Resource Type Id");
-                }
+                IS_PROFILE_SCOPE("Table");
+                ImGui::TableSetupColumn("Folder Path", ImGuiTableColumnFlags_None);
+                ImGui::TableSetupColumn("File Name", ImGuiTableColumnFlags_None);
+                ImGui::TableSetupColumn("Resource Type Id", ImGuiTableColumnFlags_None);
+                ImGui::TableHeadersRow();
 
                 std::vector<const Runtime::AssetInfo*> assetInfos = m_selectedAssetPackage->GetAllAssetInfos();
-                for (const Runtime::AssetInfo* info : assetInfos)
-                {
-                    {
-                        ImGui::TableNextColumn();
-                        ImGui::Text("%s", info->FilePath.c_str());
-                    }
-                    {
-                        ImGui::TableNextColumn();
-                        ImGui::Text("%s", info->FileName.c_str());
-                    }
-                    {
-                        ImGui::TableNextColumn();
 
-                        std::string_view fileExtension = FileSystem::GetExtension(info->FileName);
-                        const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
-                        if (loader != nullptr)
+                ImGuiListClipper clipper;
+                clipper.Begin(assetInfos.size());
+                
+                while (clipper.Step())
+                {
+                    
+                    for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
+                    {
+                        IS_PROFILE_SCOPE("AssetInfo entry");
+                        const Runtime::AssetInfo* info = assetInfos.at(row);
+
                         {
-                            Runtime::ResourceTypeId typeId = loader->GetResourceTypeId();
-                            ImGui::Text("%s", typeId.GetTypeName().c_str());
+                            ImGui::TableNextColumn();
+                            ImGui::Text("%s", info->FilePath.c_str());
                         }
-                        else
                         {
-                            ImGui::Text("Unknown");
+                            ImGui::TableNextColumn();
+                            ImGui::Text("%s", info->FileName.c_str());
                         }
-                    }
+                        {
+                            IS_PROFILE_SCOPE("Find Resource Type Id");
+                            ImGui::TableNextColumn();
+
+                            std::string_view fileExtension = FileSystem::GetExtension(info->FileName);
+                            const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
+                            if (loader != nullptr)
+                            {
+                                Runtime::ResourceTypeId typeId = loader->GetResourceTypeId();
+                                ImGui::Text("%s", typeId.GetTypeName().c_str());
+                            }
+                            else
+                            {
+                                ImGui::Text("Unknown");
+                            }
+                        }
+                    }  
                 }
                 ImGui::EndTable();
             }
