@@ -58,6 +58,8 @@ namespace Insight
             /// @return bool 
             bool AtEnd() const;
 
+            std::vector<Byte> GetRawData() const;
+
             // -- Begin ISerialiser --
             virtual bool IsEmpty() const override;
 

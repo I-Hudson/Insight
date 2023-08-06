@@ -4,9 +4,6 @@
 #include "FileSystem/FileSystem.h"
 #include "Core/Compression.h"
 
-#include <zip.h>
-#include <miniz.h>
-
 namespace Insight::Serialisation
 {
     void ComplexSerialiser<

@@ -7,6 +7,8 @@
 
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 
+#include "Serialisation/Serialisers/BinarySerialiser.h"
+
 #include "Core/Profiler.h"
 
 #include <imgui.h>
@@ -101,6 +103,19 @@ namespace Insight
                     }  
                 }
                 ImGui::EndTable();
+
+                if (ImGui::Button("Build Selected Asset Package"))
+                {
+                    PlatformFileDialog dialog;
+                    std::string path;
+                    if (dialog.ShowSave(&path, { FileDialogFilter(L"AssetPackage", L"*.isassetpackage") }))
+                    {
+                        Serialisation::BinarySerialiser serialiser(false);
+                        m_selectedAssetPackage->Serialise(&serialiser);
+                        std::vector<Byte> data = serialiser.GetRawData();
+                        FileSystem::SaveToFile(data, path, FileType::Binary, true);
+                    }
+                }
             }
             else
             {

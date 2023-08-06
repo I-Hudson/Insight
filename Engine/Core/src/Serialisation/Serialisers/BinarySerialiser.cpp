@@ -136,6 +136,14 @@ namespace Insight
             }
         }
 
+        std::vector<Byte> BinarySerialiser::GetRawData() const
+        {
+            std::vector<Byte> data;
+            data.resize(m_head.Size);
+            Platform::MemCopy(data.data(), m_head.Data, m_head.Size);
+            return data;
+        }
+
         // -- Begin ISerialiser --
         bool BinarySerialiser::IsEmpty() const
         {
