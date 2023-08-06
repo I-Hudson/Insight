@@ -8,7 +8,6 @@
 #include "Resource/Loaders/ModelLoader.h"
 #include "Resource/Loaders/TextureLoader.h"
 
-
 #include "Runtime/ProjectSystem.h"
 
 #include "Core/Logger.h"
@@ -170,6 +169,15 @@ namespace Insight
 
 			m_loaderRegistry->Shutdown();
             Delete(m_loaderRegistry);
+        }
+
+        void IResourceManager::SetRootDirectory(std::string_view path)
+        {
+            if (!FileSystem::Exists(path))
+            {
+                FAIL_ASSERT_MSG("[IResourceManager::SetRootDirectory] Directory '{}' does not exist.", path.data());
+            }
+            m_rootDirectory = path;
         }
 
         void IResourceManager::SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory)

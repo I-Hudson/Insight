@@ -144,6 +144,12 @@ namespace Insight
             return data;
         }
 
+        bool BinarySerialiser::DeserialiseNoHeader(const std::vector<u8>& data)
+        {
+            m_head.Deserialise(data);
+            return true;
+        }
+
         // -- Begin ISerialiser --
         bool BinarySerialiser::IsEmpty() const
         {

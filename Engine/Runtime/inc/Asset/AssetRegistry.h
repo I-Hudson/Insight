@@ -45,6 +45,8 @@ namespace Insight::Runtime
         void UpdateMetaData(AssetUser* object);
         void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
+        std::vector<Byte> LoadAsset(std::string_view path) const;
+
         const AssetInfo* GetAsset(const Core::GUID& guid) const;
         const AssetInfo* GetAsset(std::string_view path) const;
 

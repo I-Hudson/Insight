@@ -30,6 +30,10 @@ namespace Insight
             void Initialise();
             void Shutdown();
 
+            /// @brief Set the root directory of all resources which will be loaded.
+            /// @param path 
+            /// @param recursive 
+            void SetRootDirectory(std::string_view path);
             void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
             void LoadResourcesInFolder(std::string_view path, bool recursive);
 
@@ -127,6 +131,7 @@ namespace Insight
 
 			ResourceLoaderRegister* m_loaderRegistry;
 
+            std::string m_rootDirectory;
             std::string m_debugMetaFileDirectory;
             std::string m_assetReativeBaseDirectory;
 

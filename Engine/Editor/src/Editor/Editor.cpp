@@ -55,8 +55,12 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            m_engineAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EngineAssets");
-            Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), m_engineAssetPackage, true, false);
+            //Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EditorIcons");
+            //Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath() + "/Editor", editorIconsAssetPackage, true, false);
+            Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetResourcePath() + "/Editor/EditorIconsPackage.isassetpackage");
+
+            //m_engineAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EngineAssets");
+            //Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), m_engineAssetPackage, true, false);
 
             m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "ProjectAssets");
             m_contentListener.SetAssetPackage(m_projectAssetPackage);

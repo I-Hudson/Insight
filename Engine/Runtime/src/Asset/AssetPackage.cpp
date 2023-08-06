@@ -24,6 +24,11 @@ namespace Insight
             }
             m_pathToAssetInfo.clear();
             m_guidToAssetInfo.clear();
+
+            if (m_zipHandle != nullptr)
+            {
+                zip_close(m_zipHandle);
+            }
         }
 
         std::string_view AssetPackage::GetPath() const
@@ -100,7 +105,9 @@ namespace Insight
 
         const AssetInfo* AssetPackage::GetAsset(std::string_view path) const
         {
-            if (auto iter = m_pathToAssetInfo.find(std::string(path));
+            std::string formattedPath = std::string(path);
+            FileSystem::PathToUnix(formattedPath);
+            if (auto iter = m_pathToAssetInfo.find(formattedPath);
                 iter != m_pathToAssetInfo.end())
             {
                 return iter->second;
@@ -150,7 +157,29 @@ namespace Insight
 
         std::vector<Byte> AssetPackage::LoadInteral(AssetInfo* assetInfo) const
         {
-            return FileSystem::ReadFromFile(assetInfo->GetFullFilePath());
+            if (m_zipHandle)
+            {
+                std::string packageParent = FileSystem::GetParentPath(m_packagePath);
+                std::string relativePath = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), packageParent);
+
+                ASSERT(zip_entry_open(m_zipHandle, relativePath.c_str()) == 0);
+                u64 dataUncompSize = zip_entry_uncomp_size(m_zipHandle);
+
+                std::vector<Byte> data;
+                data.resize(dataUncompSize);
+
+                int readSize = zip_entry_noallocread(m_zipHandle, data.data(), data.size());
+                ASSERT(readSize == dataUncompSize);
+
+                ASSERT(zip_entry_close(m_zipHandle) == 0);
+
+                return data;
+            }
+            else
+            {
+                // We have no zip handle, we must be indexing loose files on disk.
+                return FileSystem::ReadFromFile(assetInfo->GetFullFilePath());
+            }
         }
 
         void AssetPackage::LoadMetaData(AssetInfo* assetInfo)

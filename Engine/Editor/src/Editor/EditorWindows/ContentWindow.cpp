@@ -213,8 +213,7 @@ namespace Insight::Editor
 
                     if (iter.is_regular_file())
                     {
-                        if (FileSystem::GetFileExtension(path) == Runtime::IResourceManager::c_FileExtension
-                            || !Runtime::ResourceManager::Instance().HasResource(path))
+                        if (Runtime::AssetRegistry::Instance().GetAsset(path) == nullptr)
                         {
                             continue;
                         }

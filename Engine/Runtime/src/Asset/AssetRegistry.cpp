@@ -59,11 +59,29 @@ namespace Insight::Runtime
             return pathPackage;
         }
 
+        if (!FileSystem::Exists(path))
+        {
+            IS_CORE_ERROR("[AssetRegistry::LoadAssetPackage] No asset package was at path '{}'.", path.data());
+            return nullptr;
+        }
+
+        Serialisation::BinarySerialiser serialiser(true);
+        std::vector<Byte> fileData = FileSystem::ReadFromFile(path, FileType::Binary);
+        if (!serialiser.DeserialiseNoHeader(fileData))
+        {
+            return nullptr;
+        }
+
         // TODO: Load a asset package from disk into the asset registry. This should not load the assets 
         // which are contained within the package, but should make the assets 'loadable' so the engine can 
         // continue as normal and load them.
-
-        return pathPackage;
+        std::string packageName = FileSystem::GetFileName(path, true);
+        AssetPackage* newPackage = CreateAssetPackage(path, packageName);
+        if (newPackage)
+        {
+            newPackage->Deserialise(&serialiser);
+        }
+        return newPackage;
     }
 
     void AssetRegistry::UnloadAssetPackage(std::string_view path)
@@ -184,6 +202,17 @@ namespace Insight::Runtime
             object->Deserialise(&binarySerialiser);
         }
         object->SetAssetInfo(assetInfo);
+    }
+
+    std::vector<Byte> AssetRegistry::LoadAsset(std::string_view path) const
+    {
+        const AssetInfo* info = GetAsset(path);
+        if (info && info->AssetPackage)
+        {
+            return info->AssetPackage->LoadAsset(path);
+        }
+        IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", path.data());
+        return {};
     }
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const

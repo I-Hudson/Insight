@@ -1,6 +1,7 @@
 #include "Resource/Loaders/TextureLoader.h"
 
 #include "FileSystem/FileSystem.h"
+#include "Asset/AssetRegistry.h"
 
 #include "Core/Logger.h"
 #include "Core/Profiler.h"
@@ -56,7 +57,13 @@ namespace Insight::Runtime
 
 	LoadPixelData TextureLoader::LoadPixels(std::string_view filePath, TextureDiskFormat diskFormat) const
 	{
-		std::vector<Byte> fileData = FileSystem::ReadFromFile(filePath, FileType::Binary);
+		
+
+		std::vector<Byte> fileData = AssetRegistry::Instance().LoadAsset(filePath);
+		if (fileData.empty())
+		{
+			fileData = FileSystem::ReadFromFile(filePath, FileType::Binary);
+		}
 
 		int width = 0, height = 0, channels = 0, textureSize = 0;
 		Byte* textureData = nullptr;

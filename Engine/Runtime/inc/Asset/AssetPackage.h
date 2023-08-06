@@ -5,6 +5,9 @@
 
 #include "Serialisation/Serialisers/ISerialiser.h"
 
+#include "FileSystem/FileSystem.h"
+#include "Core/Logger.h"
+
 #include <zip.h>
 
 namespace Insight
@@ -59,6 +62,8 @@ namespace Insight
             std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
             std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
 
+            zip_t* m_zipHandle = nullptr;
+
             IS_SERIALISABLE_FRIEND;
         };
     }
@@ -73,7 +78,27 @@ namespace Insight
             {
                 if (serialiser->IsReadMode())
                 {
+                    assetPackage->m_zipHandle = zip_open(assetPackage->m_packagePath.c_str(), ZIP_DEFAULT_COMPRESSION_LEVEL, 'r');
+                    if (!assetPackage->m_zipHandle)
+                    {
+                        IS_CORE_ERROR("[AssetPackageSerialiser] Failed to open zip at '{}'.", assetPackage->m_packagePath.c_str());
+                        return;
+                    }
 
+                    u32 entrySize = zip_entries_total(assetPackage->m_zipHandle);
+                    for (size_t i = 0; i < entrySize; ++i)
+                    {
+                        ASSERT(zip_entry_openbyindex(assetPackage->m_zipHandle, i) == 0);
+                        const char* path = zip_entry_name(assetPackage->m_zipHandle);
+
+                        std::string assetPath = FileSystem::GetParentPath(assetPackage->m_packagePath) + "/" + path;
+                        if (!FileSystem::GetExtension(assetPath).empty())
+                        {
+                            assetPackage->AddAsset(assetPath);
+                        }
+
+                        ASSERT(zip_entry_close(assetPackage->m_zipHandle) == 0);
+                    }
                 }
                 else
                 {
@@ -105,7 +130,6 @@ namespace Insight
     }
 
     OBJECT_SERIALISER(Runtime::AssetPackage, 1,
-        SERIALISE_BASE(IObject, 1, 0)
         SERIALISE_COMPLEX_THIS(Serialisation::AssetPackageSerialiser, 1, 0)
     )
 

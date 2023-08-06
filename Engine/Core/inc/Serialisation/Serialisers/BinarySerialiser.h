@@ -59,6 +59,7 @@ namespace Insight
             bool AtEnd() const;
 
             std::vector<Byte> GetRawData() const;
+            bool DeserialiseNoHeader(const std::vector<u8>& data);
 
             // -- Begin ISerialiser --
             virtual bool IsEmpty() const override;

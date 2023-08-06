@@ -147,13 +147,18 @@ namespace Insight
         return std::filesystem::file_size(path);
     }
 
-    std::string FileSystem::GetFileName(std::string_view filePath)
+    std::string FileSystem::GetFileName(std::string_view filePath, bool removeExtension)
     {
         if (!Exists(filePath))
         { 
             return ""; 
         }
-        return std::filesystem::path(filePath).filename().string();
+        std::string fileName = std::filesystem::path(filePath).filename().string();
+        if (removeExtension)
+        {
+            fileName = ReplaceExtension(fileName, "");
+        }
+        return fileName;
     }
 
     std::string FileSystem::GetParentPath(std::string_view path)
@@ -195,7 +200,12 @@ namespace Insight
     std::string_view FileSystem::GetExtension(std::string_view file)
     {
         u64 lastDot = file.find_last_of('.');
+        u64 lastSlash = file.find_last_of('/');
         if (lastDot == std::string::npos)
+        {
+            return std::string_view();
+        }
+        else if (lastSlash > lastDot)
         {
             return std::string_view();
         }
@@ -207,10 +217,11 @@ namespace Insight
     std::string FileSystem::ReplaceExtension(std::string_view file, std::string_view extension)
     {
         // New Extension must be as least 2 characters. A '.' and another character.
-        if (extension.size() < 2 || extension.at(0) != '.')
-        {
-            return {};
-        }
+        //if (extension.size() < 2 || extension.at(0) != '.')
+        //{
+        //    return {};
+        //}
+
         std::string_view fileExtension = GetExtension(file);
         if (fileExtension == extension)
         {
