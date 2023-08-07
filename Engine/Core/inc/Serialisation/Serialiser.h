@@ -11,7 +11,8 @@
 
 constexpr bool VersionCheck(const u32 serialisedVersion, const u32 versionAdded, const u32 versionRemoved)
 {
-    return versionRemoved == 0 || serialisedVersion >= versionAdded && serialisedVersion < versionRemoved;
+    return (versionRemoved == 0 && serialisedVersion >= versionAdded) ||
+        (serialisedVersion >= versionAdded && serialisedVersion < versionRemoved);
 }
 
 constexpr bool ObjectSerialiserCheck(std::string_view currentObjectSerialiser, std::string_view serialisedObjectSerialiser)
@@ -127,6 +128,27 @@ namespace Insight::Serialisation::Internal
             }
         }
     }
+
+    template<typename TypeSerialiser, typename TData, typename TObject>
+    void SerialiseNamedComplex(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, TData& data, TObject& object)
+    {
+        if (VersionCheck(version, versionAdded, versionRemoved))
+        {
+            ::Insight::Serialisation::ComplexSerialiser<TypeSerialiser, TData, TObject> complexSerialiser;
+            complexSerialiser(serialiser, data, &object);
+        }
+    }
+
+    template<typename TypeSerialiser, typename TData, typename TObject>
+    void SerialiseNamedComplexRemoved(ISerialiser* serialiser, u32 version, u32 versionAdded, u32 versionRemoved, TObject& object)
+    {
+        if (VersionCheck(version, versionAdded, versionRemoved))
+        {
+            TData blankData;
+            ::Insight::Serialisation::ComplexSerialiser<TypeSerialiser, TData, TObject> complexSerialiser;
+            complexSerialiser(serialiser, blankData, &object);
+        }
+    }   
 }
 
 // Serialise a single property. This would be things which only contain data for them self. 
@@ -302,15 +324,11 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
         }
 
 #define SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY_NAME, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
-        {\
-            if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
-            {\
-                using PropertyType = typename std::decay<decltype(PPCAT(object., PROPERTY))>::type;\
-                using ObjectType = typename std::decay<decltype(object)>::type;\
-                ::Insight::Serialisation::ComplexSerialiser<TYPE_SERIALISER, PropertyType, ObjectType> complexSerialiser;\
-                complexSerialiser(serialiser, PPCAT(object., PROPERTY), &object);\
-            }\
-        }                          
+::Insight::Serialisation::Internal::SerialiseNamedComplex<TYPE_SERIALISER>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, PPCAT(object., PROPERTY), object);
+
+#define SERIALISE_NAMED_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY_TYPE, PROPERTY, VERSION_ADDED, VERSION_REMOVED)\
+::Insight::Serialisation::Internal::SerialiseNamedComplexRemoved<TYPE_SERIALISER, PROPERTY_TYPE>(serialiser, version, VERSION_ADDED, VERSION_REMOVED, object);
+
 #define SERIALISE_NAMED_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)\
         {\
             if(VersionCheck(version, VERSION_ADDED, VERSION_REMOVED))\
@@ -357,8 +375,10 @@ using TVectorElementType = typename std::remove_pointer_t<std::remove_reference_
 // Serialise anything. This should be used when there is a certain requirement needed. 
 // An example could be loading entities.
 #define SERIALISE_COMPLEX(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)                     SERIALISE_NAMED_COMPLEX(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
+#define SERIALISE_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY, VERSION_ADDED, VERSION_REMOVED)             SERIALISE_NAMED_COMPLEX_REMOVED(TYPE_SERIALISER, PROPERTY, PROPERTY, VERSION_ADDED, VERSION_REMOVED)
 
 #define SERIALISE_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)                          SERIALISE_NAMED_COMPLEX_THIS(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)
+#define SERIALISE_COMPLEX_THIS_REMOVED(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)                  SERIALISE_NAMED_COMPLEX_THIS_REMOVED(TYPE_SERIALISER, VERSION_ADDED, VERSION_REMOVED)
 
 namespace Insight::Serialisation::Keys
 {

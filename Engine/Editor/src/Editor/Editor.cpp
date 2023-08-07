@@ -63,8 +63,9 @@ namespace Insight
             }
             else
             {
+                const std::string editorIconsPath = EnginePaths::GetResourcePath() + "/Editor";
                 Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EditorIcons");
-                Runtime::AssetRegistry::Instance().AddAssetsInFolder(editorAssetPackagePath, editorIconsAssetPackage, true, false);
+                Runtime::AssetRegistry::Instance().AddAssetsInFolder(editorIconsPath, editorIconsAssetPackage, true, false);
             }
 
             m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("ProjectAssets");

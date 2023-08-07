@@ -43,6 +43,20 @@ namespace Insight
 			QOI,
 		};
 
+		/// @brief Struct which is serialised to disk containing all the meta data for a texture.
+		struct TextureMetaData : public Serialisation::ISerialisable
+		{
+			IS_SERIALISABLE_H(TextureMetaData);
+			TextureDiskFormat DiskFormat;
+			PixelFormat PixelFormat;
+		};
+		/// @brief Struct to store the texture soruce data.
+		struct TextureSourceData : public Serialisation::ISerialisable
+		{
+			IS_SERIALISABLE_H(TextureSourceData);
+			std::vector<Byte> SourceData;
+		};
+
 		REFLECT_CLASS()
 		class IS_RUNTIME Texture : public IResource
 		{
@@ -66,12 +80,13 @@ namespace Insight
 			virtual ResourceId ConvertToEngineFormat() override;
 
 		protected:
+			TextureMetaData m_metaData;
+			TextureSourceData m_sourceData;
+
 			u32 m_width = 0;
 			u32 m_height = 0;
 			u32 m_depth = 0;
-			PixelFormat m_format;
 			TextureDiskPackedType m_diskPackedType = TextureDiskPackedType::Packed;
-			TextureDiskFormat m_diskFormat = TextureDiskFormat::Other;
 
 			u64 m_dataSize = 0;
 			/// @brief Store the source file data. This will include the source file format 
@@ -93,14 +108,33 @@ namespace Insight
 		};
 	}
 
-	OBJECT_SERIALISER(Runtime::Texture, 2,
-		SERIALISE_BASE(Runtime::IResource, 1, 0)
-		SERIALISE_PROPERTY(u32, m_width, 1, 0)
-		SERIALISE_PROPERTY(u32, m_height, 1, 0)
-		SERIALISE_PROPERTY(u32, m_depth, 1, 0)
-		SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
-		SERIALSIE_ENGINE_FORMAT(SERIALISE_COMPLEX(Serialisation::SerialiseTextureData, m_rawDataPtr, 1, 0))
-		SERIALISE_PROPERTY(Runtime::TextureDiskPackedType, m_diskPackedType, 2, 0)
-		SERIALISE_PROPERTY(Runtime::TextureDiskFormat, m_diskFormat, 2, 0)
+	OBJECT_SERIALISER(Runtime::TextureMetaData, 1,
+		SERIALISE_PROPERTY(Runtime::TextureDiskFormat, DiskFormat, 1, 0)
+		SERIALISE_PROPERTY(PixelFormat, PixelFormat, 1, 0)
 	);
+
+	OBJECT_SERIALISER(Runtime::Texture, 3,
+		SERIALISE_BASE(Runtime::IResource, 1, 0)
+		SERIALISE_PROPERTY_REMOVED(u32, m_width, 1, 3)
+		SERIALISE_PROPERTY_REMOVED(u32, m_height, 1, 3)
+		SERIALISE_PROPERTY_REMOVED(u32, m_depth, 1, 3)
+		SERIALISE_PROPERTY_REMOVED(PixelFormat, m_format, 1, 3)
+		SERIALSIE_ENGINE_FORMAT(SERIALISE_COMPLEX_REMOVED(Serialisation::SerialiseTextureData, Byte*, 1, 3))
+		SERIALISE_PROPERTY_REMOVED(Runtime::TextureDiskPackedType, m_diskPackedType, 2, 3)
+		SERIALISE_PROPERTY_REMOVED(Runtime::TextureDiskFormat, m_diskFormat, 2, 3)
+
+		SERIALISE_OBJECT(Runtime::TextureMetaData, m_metaData, 3, 0)
+		SERIALISE_OBJECT(Runtime::TextureSourceData, m_sourceData, 3, 0)
+	);
+
+	//OBJECT_SERIALISER(Runtime::Texture, 2,
+	//	SERIALISE_BASE(Runtime::IResource, 1, 0)
+	//	SERIALISE_PROPERTY(u32, m_width, 1, 0)
+	//	SERIALISE_PROPERTY(u32, m_height, 1, 0)
+	//	SERIALISE_PROPERTY(u32, m_depth, 1, 0)
+	//	SERIALISE_PROPERTY(PixelFormat, m_format, 1, 0)
+	//	SERIALSIE_ENGINE_FORMAT(SERIALISE_COMPLEX(Serialisation::SerialiseTextureData, m_rawDataPtr, 1, 0))
+	//	SERIALISE_PROPERTY(Runtime::TextureDiskPackedType, m_diskPackedType, 2, 0)
+	//	SERIALISE_PROPERTY(Runtime::TextureDiskFormat, m_diskFormat, 2, 0)
+	//);
 }

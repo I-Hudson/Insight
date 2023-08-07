@@ -175,7 +175,7 @@ namespace Insight
         {
             if (!FileSystem::Exists(path))
             {
-                FAIL_ASSERT_MSG("[IResourceManager::SetRootDirectory] Directory '{}' does not exist.", path.data());
+                FAIL_ASSERT_MSG("[IResourceManager::SetRootDirectory] Directory '%s' does not exist.", path.data());
             }
             m_rootDirectory = path;
         }

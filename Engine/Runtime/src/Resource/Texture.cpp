@@ -20,12 +20,14 @@ namespace Insight
 {
     namespace Runtime
     {
-        IS_SERIALISABLE_CPP(Texture)
+        IS_SERIALISABLE_CPP(TextureMetaData);
+        IS_SERIALISABLE_CPP(TextureSourceData);
+        IS_SERIALISABLE_CPP(Texture);
 
         Texture::Texture(std::string_view filePath)
             : IResource(filePath)
         {
-            m_diskFormat = IsEngineFormat() ? TextureDiskFormat::QOI : TextureDiskFormat::Other;
+            m_metaData.DiskFormat = IsEngineFormat() ? TextureDiskFormat::QOI : TextureDiskFormat::Other;
         }
 
         u32 Texture::GetWidth() const
@@ -45,7 +47,7 @@ namespace Insight
 
         PixelFormat Texture::GetFormat() const
         {
-            return m_format;
+            return m_metaData.PixelFormat;
         }
 
         Graphics::RHI_Texture* Texture::GetRHITexture() const
@@ -55,7 +57,7 @@ namespace Insight
 
         ResourceId Texture::ConvertToEngineFormat()
         {
-            ASSERT(!IsEngineFormat() && m_diskFormat == TextureDiskFormat::Other);
+            ASSERT(!IsEngineFormat() && m_metaData.DiskFormat == TextureDiskFormat::Other);
             std::lock_guard lock(m_mutex);
 
             std::string sourceFilePath = m_file_path;
@@ -63,7 +65,7 @@ namespace Insight
 
             Byte* sourceData = m_rawDataPtr;
             u64 sourceDataSize = m_dataSize;
-            TextureDiskFormat sourceDiskFormat = m_diskFormat;
+            TextureDiskFormat sourceDiskFormat = m_metaData.DiskFormat;
 
             // Image data as raw bytes ready to use.
             void* rawImageData = m_rawDataPtr;
@@ -99,7 +101,7 @@ namespace Insight
             m_file_path = engineFormatFilePath;
             m_rawDataPtr = static_cast<Byte*>(qoiImageData);
             m_dataSize = static_cast<u64>(qoiLength);
-            m_diskFormat = TextureDiskFormat::QOI;
+            m_metaData.DiskFormat = TextureDiskFormat::QOI;
 
             IResource::ResourceSerialiserType serialiser;
             Serialise(&serialiser);
@@ -107,7 +109,7 @@ namespace Insight
             std::free(qoiImageData);
             m_rawDataPtr = sourceData;
             m_dataSize = sourceDataSize;
-            m_diskFormat = sourceDiskFormat;
+            m_metaData.DiskFormat = sourceDiskFormat;
 
             Archive archive(m_file_path, ArchiveModes::Write);
             archive.Write(serialiser.GetSerialisedData());

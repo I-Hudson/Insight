@@ -106,11 +106,11 @@ namespace Insight::Runtime
         {
             return nullptr;
         }
-        else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
+        /*else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
         {
             IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
             return nullptr;
-        }
+        }*/
 
         return package->AddAsset(path);
     }
@@ -132,13 +132,13 @@ namespace Insight::Runtime
 
         AssetMetaData& metaData = assetInfo->MetaData;
 
-        //metaData.Serialise(&binarySerialiser);
+        metaData.Serialise(&binarySerialiser);
         if (object)
         {
             object->Serialise(&binarySerialiser);
         }
 
-        //metaData.Serialise(&jsonSerialiser);
+        metaData.Serialise(&jsonSerialiser);
         if (object)
         {
             object->Serialise(&jsonSerialiser);
@@ -284,6 +284,13 @@ namespace Insight::Runtime
     void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles)
     {
         std::string absFolderPath = FileSystem::GetAbsolutePath(path);
+
+        if (!FileSystem::IsDirectory(absFolderPath))
+        {
+            IS_CORE_ERROR("[AssetRegistry::AddAssetsInFolder] Path '{}' is not a directory.", absFolderPath);
+            return;
+        }
+
         if (recursive)
         {
             for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(absFolderPath))

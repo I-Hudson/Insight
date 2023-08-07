@@ -46,6 +46,8 @@ namespace Insight
 			~World();
 
 			IS_SERIALISABLE_H(World);
+
+			constexpr static const char* c_FileExtension = ".isworld";
 			REGISTER_RESOURCE(World);
 
 			void Initialise();

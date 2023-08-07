@@ -349,6 +349,13 @@ namespace Insight
                 return resource;
             }
 
+            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
+            if (!assetInfo)
+            {
+                FAIL_ASSERT();
+                return nullptr;
+            }
+
             IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
             ASSERT(rawResource);
             {
@@ -367,6 +374,8 @@ namespace Insight
 
             LoadMetaFileData(resource);
             UpdateGuidToResource(resource);
+
+            //AssetRegistry::Instance().LoadMeta();
 
             return resource;
         }

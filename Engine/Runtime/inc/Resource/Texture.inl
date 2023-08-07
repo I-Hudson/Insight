@@ -29,7 +29,7 @@ namespace Insight
             else
             {
                 ASSERT(texture->m_rawDataPtr && texture->m_dataSize > 0);
-                ASSERT(texture->IsEngineFormat() && texture->m_diskFormat == Runtime::TextureDiskFormat::QOI);
+                ASSERT(texture->IsEngineFormat() && texture->m_metaData.DiskFormat == Runtime::TextureDiskFormat::QOI);
 
                 std::vector<Byte> compressTextureData;
                 u64 dataSize = texture->m_dataSize;

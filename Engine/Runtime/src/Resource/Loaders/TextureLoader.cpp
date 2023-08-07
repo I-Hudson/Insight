@@ -39,7 +39,7 @@ namespace Insight::Runtime
 			return false;
 		}
 
-		LoadPixelData pixelsData = LoadPixels(resource->GetFilePath(), texture->m_diskFormat);
+		LoadPixelData pixelsData = LoadPixels(resource->GetFilePath(), texture->m_metaData.DiskFormat);
 
 		if (pixelsData.Data.empty())
 		{

@@ -61,7 +61,7 @@ namespace Insight
 					return {};
 				}
 				const TextureLoader* textureLoader = static_cast<const TextureLoader*>(resourceLoader);
-				LoadPixelData pixelsData = textureLoader->LoadPixels(this->GetFilePath(), m_diskFormat);
+				LoadPixelData pixelsData = textureLoader->LoadPixels(this->GetFilePath(), m_metaData.DiskFormat);
 				return pixelsData.Data;
 			}
 		}
@@ -87,7 +87,7 @@ namespace Insight
 			m_width = rhiTexture->GetWidth(0);
 			m_height = rhiTexture->GetHeight(0);
 			m_depth = rhiTexture->GetInfo(0).Depth;
-			m_format = rhiTexture->GetFormat();
+			m_metaData.PixelFormat = rhiTexture->GetFormat();
 		}
 	}
 }

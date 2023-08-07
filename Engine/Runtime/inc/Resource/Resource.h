@@ -263,4 +263,4 @@ virtual const char* GetResourceFileExtension() const override { return GetStatic
 // Run this when the resource is of type engine format.
 #define SERIALSIE_ENGINE_FORMAT(SERIALISE_FUNC) if (object.IsEngineFormat()) { SERIALISE_FUNC }
 // Run this when the resource is not of type engine format.
-#define SERIALSIE_NON_ENGINE_FORMAT(SERIALISE_FUNC) if (object.IsEngineFormat()) { SERIALISE_FUNC }
+#define SERIALSIE_NON_ENGINE_FORMAT(SERIALISE_FUNC) if (!object.IsEngineFormat()) { SERIALISE_FUNC }

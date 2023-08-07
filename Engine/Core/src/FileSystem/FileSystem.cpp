@@ -205,7 +205,8 @@ namespace Insight
         {
             return std::string_view();
         }
-        else if (lastSlash > lastDot)
+        else if (lastSlash != std::string::npos 
+            && lastSlash > lastDot)
         {
             return std::string_view();
         }
