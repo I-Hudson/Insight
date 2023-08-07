@@ -34,21 +34,9 @@ namespace Insight::Runtime
         m_state = Core::SystemStates::Not_Initialised;
     }
 
-    AssetPackage* AssetRegistry::CreateAssetPackage(std::string_view path, std::string_view name)
+    AssetPackage* AssetRegistry::CreateAssetPackage(std::string_view name)
     {
-        AssetPackage* pathPackage = GetAssetPackageFromPath(path);
-        AssetPackage* namePackage = GetAssetPackageFromName(name);
-        if (pathPackage
-            && namePackage
-            && pathPackage == namePackage)
-        {
-            return pathPackage;
-        }
-        ASSERT(pathPackage == nullptr && namePackage == nullptr);
-
-        AssetPackage* newPackage = New<AssetPackage>(path, name);
-        m_assetPackages.push_back(newPackage);
-        return newPackage;
+        return CreateAssetPackageInternal(name, "");
     }
 
     AssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
@@ -72,11 +60,8 @@ namespace Insight::Runtime
             return nullptr;
         }
 
-        // TODO: Load a asset package from disk into the asset registry. This should not load the assets 
-        // which are contained within the package, but should make the assets 'loadable' so the engine can 
-        // continue as normal and load them.
         std::string packageName = FileSystem::GetFileName(path, true);
-        AssetPackage* newPackage = CreateAssetPackage(path, packageName);
+        AssetPackage* newPackage = CreateAssetPackageInternal(packageName, path);
         if (newPackage)
         {
             newPackage->Deserialise(&serialiser);
@@ -317,6 +302,29 @@ namespace Insight::Runtime
                 AddAsset(path, package, enableMetaFiles);
             }
         }
+    }
+
+    AssetPackage* AssetRegistry::CreateAssetPackageInternal(std::string_view name, std::string_view path)
+    {
+        AssetPackage* pathPackage = GetAssetPackageFromPath(name);
+        AssetPackage* namePackage = GetAssetPackageFromName(name);
+        if (pathPackage && namePackage
+            && pathPackage == namePackage)
+        {
+            // Package is on disk.
+            return pathPackage;
+        }
+        else if (namePackage)
+        {
+            // Package is not on disk.
+            ASSERT(pathPackage == nullptr);
+            return namePackage;
+        }
+        ASSERT(pathPackage == nullptr && namePackage == nullptr);
+
+        AssetPackage* newPackage = New<AssetPackage>(path, name);
+        m_assetPackages.push_back(newPackage);
+        return newPackage;
     }
 
     bool AssetRegistry::HasAssetFromGuid(const Core::GUID& guid) const

@@ -27,7 +27,7 @@ namespace Insight::Runtime
         virtual void Shutdown() override;
         // End - ISystem -
 
-        AssetPackage* CreateAssetPackage(std::string_view path, std::string_view name);
+        AssetPackage* CreateAssetPackage(std::string_view name);
 
         AssetPackage* LoadAssetPackage(std::string_view path);
         void UnloadAssetPackage(std::string_view path);
@@ -64,6 +64,9 @@ namespace Insight::Runtime
         void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles);
 
     private:
+        AssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path);
+
+
         bool HasAssetFromGuid(const Core::GUID& guid) const;
         bool HasAssetFromPath(std::string_view path) const;
 

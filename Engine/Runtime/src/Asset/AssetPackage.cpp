@@ -168,7 +168,7 @@ namespace Insight
                 std::vector<Byte> data;
                 data.resize(dataUncompSize);
 
-                int readSize = zip_entry_noallocread(m_zipHandle, data.data(), data.size());
+                i64 readSize = zip_entry_noallocread(m_zipHandle, data.data(), data.size());
                 ASSERT(readSize == dataUncompSize);
 
                 ASSERT(zip_entry_close(m_zipHandle) == 0);

@@ -5,6 +5,8 @@
 
 #include "Serialisation/Serialisers/ISerialiser.h"
 
+#include "Resource/IResourceManager.h"
+
 #include "FileSystem/FileSystem.h"
 #include "Core/Logger.h"
 
@@ -85,8 +87,8 @@ namespace Insight
                         return;
                     }
 
-                    u32 entrySize = zip_entries_total(assetPackage->m_zipHandle);
-                    for (size_t i = 0; i < entrySize; ++i)
+                    i64 entrySize = zip_entries_total(assetPackage->m_zipHandle);
+                    for (i64 i = 0; i < entrySize; ++i)
                     {
                         ASSERT(zip_entry_openbyindex(assetPackage->m_zipHandle, i) == 0);
                         const char* path = zip_entry_name(assetPackage->m_zipHandle);
@@ -106,7 +108,14 @@ namespace Insight
                     for (auto& [path, info] : assetPackage->m_pathToAssetInfo)
                     {
                         ASSERT(zip_entry_open(zip, path.c_str()) == 0);
+                        
+                        // Write data file to zip.
                         ASSERT(zip_entry_fwrite(zip, path.c_str()) == 0);
+
+                        // Write meta file to zip.
+                        std::string metaFile = FileSystem::ReplaceExtension(path, Runtime::IResourceManager::c_FileExtension);
+                        zip_entry_fwrite(zip, metaFile.c_str());
+
                         ASSERT(zip_entry_close(zip) == 0);
                     }
 

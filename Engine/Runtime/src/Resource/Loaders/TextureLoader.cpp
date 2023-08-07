@@ -57,8 +57,6 @@ namespace Insight::Runtime
 
 	LoadPixelData TextureLoader::LoadPixels(std::string_view filePath, TextureDiskFormat diskFormat) const
 	{
-		
-
 		std::vector<Byte> fileData = AssetRegistry::Instance().LoadAsset(filePath);
 		if (fileData.empty())
 		{

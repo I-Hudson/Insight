@@ -55,14 +55,19 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            //Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EditorIcons");
-            //Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath() + "/Editor", editorIconsAssetPackage, true, false);
-            Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetResourcePath() + "/Editor/EditorIconsPackage.isassetpackage");
+            const std::string editorAssetPackagePath = EnginePaths::GetResourcePath() + "/Editor/EditorIcons.isassetpackage";
+            if (FileSystem::Exists(editorAssetPackagePath))
+            {
+                Runtime::AssetPackage* editorIconsAssetPackage = 
+                    Runtime::AssetRegistry::Instance().LoadAssetPackage(editorAssetPackagePath);
+            }
+            else
+            {
+                Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EditorIcons");
+                Runtime::AssetRegistry::Instance().AddAssetsInFolder(editorAssetPackagePath, editorIconsAssetPackage, true, false);
+            }
 
-            //m_engineAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "EngineAssets");
-            //Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetResourcePath(), m_engineAssetPackage, true, false);
-
-            m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("", "ProjectAssets");
+            m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("ProjectAssets");
             m_contentListener.SetAssetPackage(m_projectAssetPackage);
 
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
