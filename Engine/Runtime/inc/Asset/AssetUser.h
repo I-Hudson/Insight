@@ -17,7 +17,7 @@ namespace Insight::Runtime
             if (m_assetInfo)
             {
                 RemoveConst(m_assetInfo)->Decr();
-                RemoveConst(m_assetInfo)->MetaData.DependentGuids.erase(GetGuid());
+                //RemoveConst(m_assetInfo)->MetaData.DependentGuids.erase(GetGuid());
             }
         }
 
@@ -26,11 +26,11 @@ namespace Insight::Runtime
             if (m_assetInfo)
             {
                 RemoveConst(m_assetInfo)->Decr();
-                RemoveConst(m_assetInfo)->MetaData.DependentGuids.erase(GetGuid());
+                //RemoveConst(m_assetInfo)->MetaData.DependentGuids.erase(GetGuid());
             }
             m_assetInfo = assetInfo; 
             RemoveConst(m_assetInfo)->Incr();
-            RemoveConst(m_assetInfo)->MetaData.DependentGuids.insert(GetGuid());
+            //RemoveConst(m_assetInfo)->MetaData.DependentGuids.insert(GetGuid());
         }
         const AssetInfo* GetAssetInfo() const { return m_assetInfo; }
 

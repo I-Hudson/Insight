@@ -48,28 +48,24 @@ namespace Insight
 			template<typename T>
 			void RegisterEditorWindow()
 			{
-				if (m_windowRegistry.find(T::WINDOW_NAME) != m_windowRegistry.end())
+				if (m_windows.find(T::WINDOW_NAME) != m_windows.end())
 				{
 					return;
 				}
-				m_windowRegistry[T::WINDOW_NAME] =
-					RegisterWindow([]() 
-						{ 
-							IEditorWindow* window = static_cast<IEditorWindow*>(New<T, Core::MemoryAllocCategory::Editor>());
-							window->Initialise();
-							return window;
-						}, T::WINDOW_CATEGORY);
+				m_windows[T::WINDOW_NAME] = static_cast<IEditorWindow*>(New<T, Core::MemoryAllocCategory::Editor>());
+				m_windows[T::WINDOW_NAME]->Initialise();
 			}
 
 			template<typename T>
 			void UnregisterEditorWindow()
 			{
-				if (auto iter = m_windowRegistry.find(T::WINDOW_NAME); 
-					iter != m_windowRegistry.end())
+				FAIL_ASSERT();
+				/*if (auto iter = m_windows.find(T::WINDOW_NAME);
+					iter != m_windows.end())
 				{
-					m_windowRegistry.erase(iter);
+					m_windows.erase(iter);
 					return;
-				}
+				}*/
 			}
 
 			void AddWindow(const std::string& windowName);
@@ -85,7 +81,7 @@ namespace Insight
 
 			std::vector<std::string> GetAllRegisteredWindowNames() const;
 			std::vector<std::string> GetAllActiveWindowNames() const;
-			IEditorWindow const* GetActiveWindow(std::string_view windowName) const;
+			IEditorWindow* GetActiveWindow(std::string_view windowName);
 			void RemoveAllWindows();
 
 			void Update();
@@ -95,7 +91,7 @@ namespace Insight
 			void RemoveQueuedWindows();
 
 		private:
-			std::unordered_map<std::string, RegisterWindow> m_windowRegistry;
+			std::unordered_map<std::string, IEditorWindow*> m_windows;
 			std::vector<IEditorWindow*> m_activeWindows;
 			std::vector<std::string> m_windowsToRemove;
 		};

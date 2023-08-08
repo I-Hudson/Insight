@@ -30,10 +30,11 @@ namespace Insight
 				return;
 			}
 
-			auto itr = m_windowRegistry.find(windowName);
-			if (itr != m_windowRegistry.end())
+			auto itr = m_windows.find(windowName);
+			if (itr != m_windows.end())
 			{
-				IEditorWindow* newWindow = itr->second.RegisterFunc();
+				IEditorWindow* newWindow = itr->second;
+				newWindow->Show();
 				m_activeWindows.push_back(newWindow);
 			}
 		}
@@ -50,8 +51,7 @@ namespace Insight
 					return window->GetWindowName() == windowName;
 				}); itr != m_activeWindows.end())
 			{
-				(*itr)->Shutdown();
-				::Delete(*itr);
+				(*itr)->Hide();
 				m_activeWindows.erase(itr);
 			}
 		}
@@ -71,11 +71,11 @@ namespace Insight
 		std::vector<std::string> EditorWindowManager::GetAllRegisteredWindowNames(EditorWindowCategories category) const
 		{
 			std::vector<std::string> result;
-			for (auto const& pair : m_windowRegistry)
+			for (auto& [name, window] : m_windows)
 			{
-				if (pair.second.Category == category)
+				if (window->GetCategory() == category)
 				{
-					result.push_back(pair.first);
+					result.push_back(name);
 				}
 			}
 			return result;
@@ -110,9 +110,9 @@ namespace Insight
 		std::vector<std::string> EditorWindowManager::GetAllRegisteredWindowNames() const
 		{
 			std::vector<std::string> result;
-			for (auto const& pair : m_windowRegistry)
+			for (auto& [name, window] : m_windows)
 			{
-				result.push_back(pair.first);
+				result.push_back(name);
 			}
 			return result;
 		}
@@ -127,9 +127,9 @@ namespace Insight
 			return result;
 		}
 
-		IEditorWindow const* EditorWindowManager::GetActiveWindow(std::string_view windowName) const
+		IEditorWindow* EditorWindowManager::GetActiveWindow(std::string_view windowName)
 		{
-			for (IEditorWindow const* window : m_activeWindows)
+			for (IEditorWindow* window : m_activeWindows)
 			{
 				if (window->GetWindowName() == windowName)
 				{
@@ -159,13 +159,14 @@ namespace Insight
 
 		void EditorWindowManager::Destroy()
 		{
-			m_windowRegistry.clear();
-			for (size_t i = 0; i < m_activeWindows.size(); ++i)
+			for (auto& [name, window] : m_windows)
 			{
-				m_activeWindows.at(i)->Shutdown();
-				DeleteTracked(m_activeWindows.at(i));
+				window->Shutdown();
+				Delete(window);
 			}
-			m_activeWindows.resize(0);
+			m_windows.clear();
+			m_activeWindows.clear();
+			m_windowsToRemove.clear();
 		}
 
 		void EditorWindowManager::RemoveQueuedWindows()
@@ -178,8 +179,7 @@ namespace Insight
 						return window->GetWindowName() == windowToRemove;
 					}); itr != m_activeWindows.end())
 				{
-					(*itr)->Shutdown();
-					DeleteTracked(*itr);
+					(*itr)->Hide();
 					m_activeWindows.erase(itr);
 				}
 			}

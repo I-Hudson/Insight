@@ -34,6 +34,9 @@ namespace Insight
 			void SetFullscreen(bool value);
 			bool GetFullscreen() const;
 
+			void Show();
+			void Hide();
+
 			virtual void Initialise() { }
 			virtual void Shutdown() { }
 

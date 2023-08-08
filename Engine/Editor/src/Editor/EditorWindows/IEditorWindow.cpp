@@ -82,6 +82,16 @@ namespace Insight
 			return m_isFullscreen;
 		}
 
+		void IEditorWindow::Show()
+		{
+			m_isOpen = true;
+		}
+
+		void IEditorWindow::Hide()
+		{
+			m_isOpen = false;
+		}
+
 		bool IEditorWindow::IsCursorWithinWindow() const
 		{
 			ImVec2 minRect = ImGui::GetWindowPos();

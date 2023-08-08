@@ -17,6 +17,14 @@ namespace Insight
 			int Channels;
 		};
 
+		constexpr static const char* c_TextureLoaderFileExtensions[] =
+		{
+			".png"
+			, ".jpeg"
+			, ".jpg"
+			, ".qoi"
+		};
+
 		class TextureLoader : public IResourceLoader
 		{
 		public:

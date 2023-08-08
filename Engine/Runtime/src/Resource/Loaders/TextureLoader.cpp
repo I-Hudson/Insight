@@ -15,7 +15,7 @@
 namespace Insight::Runtime
 {
     TextureLoader::TextureLoader()
-        : IResourceLoader({ ".png", ".jpeg", ".jpg", ".qoi" }, { Texture2D::GetStaticResourceTypeId() })
+        : IResourceLoader(std::vector(std::begin(c_TextureLoaderFileExtensions), std::end(c_TextureLoaderFileExtensions)), { Texture2D::GetStaticResourceTypeId() })
     {
     }
 

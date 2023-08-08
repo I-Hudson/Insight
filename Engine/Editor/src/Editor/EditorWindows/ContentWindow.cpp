@@ -1,6 +1,8 @@
 #include "Editor/EditorWindows/ContentWindow.h"
 #include "Editor/EditorWindows/EditorWindowManager.h"
 
+#include "Editor/Asset/AssetInspectorWindow.h"
+
 #include "Editor/EditorGUI.h"
 #include "Editor/EditorResourceManager.h"
 
@@ -73,6 +75,12 @@ namespace Insight::Editor
                 SplitDirectory();
             });
 
+        m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+        m_thumbnailToTexture[ContentWindowThumbnailType::File] =
+            EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
+
+
         if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
         {
             EditorWindowManager::Instance().RemoveWindow(WINDOW_NAME);
@@ -81,11 +89,6 @@ namespace Insight::Editor
         {
             m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
             SplitDirectory();
-
-            m_thumbnailToTexture[ContentWindowThumbnailType::Folder] =
-                EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/Folder.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
-            m_thumbnailToTexture[ContentWindowThumbnailType::File] =
-                EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
         }
     }
 
@@ -289,6 +292,11 @@ namespace Insight::Editor
                                     else
                                     {
                                         const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAsset(path);
+                                        ASSERT(info);
+
+                                        AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
+                                        assetInspectorWindow->SetSelectedAssetInfo(info);
+
                                         IObject* object = Runtime::AssetRegistry::Instance().GetObjectFromAsset(info->Guid);
                                         if (object)
                                         {

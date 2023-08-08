@@ -4,10 +4,9 @@
 
 namespace Insight::Editor
 {
-    class EditorResourceManager : public Runtime::IResourceManager, public Core::Singleton<EditorResourceManager>
+    class IS_EDITOR EditorResourceManager : public Runtime::IResourceManager, public Core::Singleton<EditorResourceManager>
     {
     public:
-
         EditorResourceManager() = default;
         virtual ~EditorResourceManager() override = default;
     };

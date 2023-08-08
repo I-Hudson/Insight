@@ -53,7 +53,7 @@ namespace Insight
             m_pathToAssetInfo[assetInfo->GetFullFilePath()] = assetInfo;
 
             LoadMetaData(assetInfo);
-            m_guidToAssetInfo[assetInfo->MetaData.AssetGuid] = assetInfo;
+            m_guidToAssetInfo[assetInfo->Guid] = assetInfo;
 
             return assetInfo;
         }
@@ -70,7 +70,7 @@ namespace Insight
                 iter != m_pathToAssetInfo.end())
             {
                 AssetInfo* assetInfo = iter->second;
-                m_guidToAssetInfo.erase(assetInfo->MetaData.AssetGuid);
+                m_guidToAssetInfo.erase(assetInfo->Guid);
                 m_pathToAssetInfo.erase(stringPath);
                 Delete(assetInfo);
             }
