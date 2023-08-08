@@ -37,7 +37,16 @@ namespace Insight
         };
 
         /// @brief Store relevant information about a asset. The asset could be on disk or
-        /// within a Package. This should never be serialised to disk
+        /// within a Package. This should never be serialised to disk.
+        /// AssetInfo's are created for disk resource which can either be loader as a resource via a IResourceLoader
+        /// or if an object has specified an extension to be a valid Asset.
+        /// Example is *.isworld should not be a resource as it shouldn't be loaded via ResourceManager but is loaded via 
+        /// WorldSystem. As it is not loaded from a IResourceLoader any file with the extension *.isworld is not tracked as a AssetInfo
+        /// meaning we need to manually tell the AssetRegistry to track *.isworld files. 
+        /// 
+        /// NOTE: Maybe all files should be tracked via AssetRegistry? Do we really want to know about files which can't be natively loaded
+        /// by the engine? Or if an asset doesn't have a loader which can load it, should the asset be loadable by a default loader and result in a 
+        /// default asset which just stores the file data? (This one seems like the best for now)
         class IS_RUNTIME AssetInfo : public ReferenceCountObject
         {
         public:
