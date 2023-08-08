@@ -56,6 +56,8 @@ namespace Insight::Runtime
             return nullptr;
         }
 
+        const AssetInfo* info = GetAsset(pathWithExtension);
+
         Serialisation::BinarySerialiser serialiser(true);
         std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
         if (!serialiser.DeserialiseNoHeader(fileData))
@@ -69,6 +71,12 @@ namespace Insight::Runtime
         {
             newPackage->Deserialise(&serialiser);
         }
+
+        if (info)
+        {
+            RegisterObjectToAsset(info, newPackage);
+        }
+
         return newPackage;
     }
 
@@ -337,6 +345,28 @@ namespace Insight::Runtime
                 AddAsset(path, package, enableMetaFiles);
             }
         }
+    }
+
+    void AssetRegistry::RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object)
+    {
+        ASSERT(m_assetToObject.find(assetInfo->Guid) == m_assetToObject.end());
+        m_assetToObject[assetInfo->Guid] = object;
+    }
+
+    void AssetRegistry::UnregisterObjectToAsset(const AssetInfo* assetInfo)
+    {
+        ASSERT(m_assetToObject.find(assetInfo->Guid) != m_assetToObject.end());
+        m_assetToObject.erase(assetInfo->Guid);
+    }
+
+    IObject* AssetRegistry::GetObjectFromAsset(const Core::GUID& guid)
+    {
+        if (auto iter = m_assetToObject.find(guid);
+            iter != m_assetToObject.end())
+        {
+            return iter->second;
+        }
+        return nullptr;
     }
 
     AssetPackage* AssetRegistry::CreateAssetPackageInternal(std::string_view name, std::string_view path)

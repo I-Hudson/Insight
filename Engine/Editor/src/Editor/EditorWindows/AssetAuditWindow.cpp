@@ -77,7 +77,7 @@ namespace Insight
                 }
 
                 ImGuiListClipper clipper;
-                clipper.Begin(assetInfos.size());
+                clipper.Begin(static_cast<int>(assetInfos.size()));
                 
                 while (clipper.Step())
                 {

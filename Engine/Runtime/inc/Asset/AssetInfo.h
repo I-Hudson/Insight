@@ -93,6 +93,8 @@ namespace Insight
 
             /// @brief Is the asset in an engine format
             bool IsEngineFormat = false;
+
+            Core::GUID Guid;
         };
     }
  

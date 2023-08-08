@@ -5,6 +5,8 @@
 
 #include "Core/CommandLineArgs.h"
 
+#include "Core/ObjectManager.h"
+
 #include "Asset/AssetRegistry.h"
 #include "Core/SystemRegistry.h"
 #include "Threading/TaskSystem.h"
@@ -67,6 +69,8 @@ namespace Insight
 			bool m_shouldClose = false;
 
 			std::thread::id m_updateThread;
+
+			ObjectManager m_objectManager;
 
 			// Systems
 			Core::SystemRegistry m_systemRegistry;

@@ -288,7 +288,12 @@ namespace Insight::Editor
                                     }
                                     else
                                     {
+                                        const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAsset(path);
+                                        IObject* object = Runtime::AssetRegistry::Instance().GetObjectFromAsset(info->Guid);
+                                        if (object)
+                                        {
 
+                                        }
                                     }
                                 }
                             }

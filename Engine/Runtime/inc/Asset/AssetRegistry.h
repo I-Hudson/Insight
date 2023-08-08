@@ -9,79 +9,91 @@
 
 #include <unordered_map>
 
-namespace Insight::Runtime
+namespace Insight
 {
-    class AssetUser;
-    class AssetPackage;
+    class IObject;
 
-    /// @brief Manage all references to known assets on disk.
-    class IS_RUNTIME AssetRegistry : public Core::Singleton<AssetRegistry>, public Core::ISystem
+    namespace Runtime
     {
-    public:
-        AssetRegistry() = default;
-        virtual ~AssetRegistry() override = default;
+        class AssetUser;
+        class AssetPackage;
 
-        // Begin - ISystem -
-        IS_SYSTEM(AssetRegistry);
-        virtual void Initialise() override;
-        virtual void Shutdown() override;
-        // End - ISystem -
+        /// @brief Manage all references to known assets on disk.
+        class IS_RUNTIME AssetRegistry : public Core::Singleton<AssetRegistry>, public Core::ISystem
+        {
+        public:
+            AssetRegistry() = default;
+            virtual ~AssetRegistry() override = default;
 
-        AssetPackage* CreateAssetPackage(std::string_view name);
+            // Begin - ISystem -
+            IS_SYSTEM(AssetRegistry);
+            virtual void Initialise() override;
+            virtual void Shutdown() override;
+            // End - ISystem -
 
-        AssetPackage* LoadAssetPackage(std::string_view path);
-        void UnloadAssetPackage(std::string_view path);
+            AssetPackage* CreateAssetPackage(std::string_view name);
 
-        /// @brief 
-        /// @param metaFileDirectory 
-        /// @param assetReativeBaseDirectory 
-        void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
+            AssetPackage* LoadAssetPackage(std::string_view path);
+            void UnloadAssetPackage(std::string_view path);
 
-        const AssetInfo* AddAsset(std::string_view path, AssetPackage* package);
-        const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile);
-        void RemoveAsset(std::string_view path, AssetPackage* package);
+            /// @brief 
+            /// @param metaFileDirectory 
+            /// @param assetReativeBaseDirectory 
+            void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
 
-        void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
-        void UpdateMetaData(AssetUser* object);
-        void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
+            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package);
+            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile);
+            void RemoveAsset(std::string_view path, AssetPackage* package);
 
-        std::vector<Byte> LoadAsset(std::string_view path) const;
+            void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
+            void UpdateMetaData(AssetUser* object);
+            void DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const;
 
-        const AssetInfo* GetAsset(const Core::GUID& guid) const;
-        const AssetInfo* GetAsset(std::string_view path) const;
+            std::vector<Byte> LoadAsset(std::string_view path) const;
 
-        std::vector<const AssetInfo*> GetAllAssetInfos() const;
-        std::vector<const AssetInfo*> GetAllAssetsWithExtension(std::string_view extension) const;
-        std::vector<const AssetInfo*> GetAllAssetsWithExtensions(std::vector<std::string_view> extensions) const;
-        
-        AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
-        AssetPackage* GetAssetPackageFromName(std::string_view name) const;
-        std::vector<AssetPackage*> GetAllAssetPackages() const;
+            const AssetInfo* GetAsset(const Core::GUID& guid) const;
+            const AssetInfo* GetAsset(std::string_view path) const;
 
-        /// @brief Add all asset within a folder. 
-        void AddAssetsInFolder(std::string_view path, AssetPackage* package);
-        /// @brief Add all asset within a folder, recursive.
-        void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive);
-        /// @brief Add all asset within a folder, recursive, with the option of disabling meta files (should be false for engine/editor folders).
-        void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles);
+            std::vector<const AssetInfo*> GetAllAssetInfos() const;
+            std::vector<const AssetInfo*> GetAllAssetsWithExtension(std::string_view extension) const;
+            std::vector<const AssetInfo*> GetAllAssetsWithExtensions(std::vector<std::string_view> extensions) const;
 
-    private:
-        AssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path);
+            AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
+            AssetPackage* GetAssetPackageFromName(std::string_view name) const;
+            std::vector<AssetPackage*> GetAllAssetPackages() const;
 
+            /// @brief Add all asset within a folder. 
+            void AddAssetsInFolder(std::string_view path, AssetPackage* package);
+            /// @brief Add all asset within a folder, recursive.
+            void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive);
+            /// @brief Add all asset within a folder, recursive, with the option of disabling meta files (should be false for engine/editor folders).
+            void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles);
 
-        bool HasAssetFromGuid(const Core::GUID& guid) const;
-        bool HasAssetFromPath(std::string_view path) const;
+            /// @brief Register an IObject to an AssetInfo allowing for the object to be retevied later 
+            /// from the AssetInfo pointer.
+            void RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object);
+            void UnregisterObjectToAsset(const AssetInfo* assetInfo);
 
-        void LoadMetaData(AssetInfo* assetInfo);
+            IObject* GetObjectFromAsset(const Core::GUID& guid);
 
-        bool AssetInfoValidate(const AssetInfo* assetInfo) const;
+        private:
+            AssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path);
 
-    private:
-        std::vector<AssetPackage*> m_assetPackages;
-        //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
-        //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
+            bool HasAssetFromGuid(const Core::GUID& guid) const;
+            bool HasAssetFromPath(std::string_view path) const;
 
-        std::string m_debugMetaFileDirectory;
-        std::string m_assetReativeBaseDirectory;
-    };
+            void LoadMetaData(AssetInfo* assetInfo);
+
+            bool AssetInfoValidate(const AssetInfo* assetInfo) const;
+
+        private:
+            std::vector<AssetPackage*> m_assetPackages;
+            std::unordered_map<Core::GUID, IObject*> m_assetToObject;
+            //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
+            //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
+
+            std::string m_debugMetaFileDirectory;
+            std::string m_assetReativeBaseDirectory;
+        };
+    }
 }
