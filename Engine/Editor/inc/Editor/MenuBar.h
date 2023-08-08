@@ -22,6 +22,8 @@ namespace Insight
         private:
             void DrawAllRegisteredWindow(EditorWindowCategories category) const;
 
+            void WorldItems();
+
         private:
             EditorWindowManager* m_editorWindowManager;
             FileDialog m_fileDialog;

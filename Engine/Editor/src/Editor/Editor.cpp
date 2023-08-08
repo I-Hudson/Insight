@@ -81,6 +81,15 @@ namespace Insight
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
                     Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
+                    std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::AssetPackage::c_FileExtension);
+                    for (const Runtime::AssetInfo* info : allAssetPackages)
+                    {
+                        if (!Runtime::AssetRegistry::Instance().LoadAssetPackage(info->GetFullFilePath()))
+                        {
+                            FAIL_ASSERT();
+                        }
+                    }
+
                     m_contentListener.WatchId = m_fileWatcher.addWatch(projectInfo.GetContentPath(), &m_contentListener, true);
                     m_fileWatcher.watch();
                 });

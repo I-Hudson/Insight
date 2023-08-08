@@ -64,13 +64,23 @@ namespace Insight
                 ImGui::TableHeadersRow();
 
                 std::vector<const Runtime::AssetInfo*> assetInfos = m_selectedAssetPackage->GetAllAssetInfos();
+                {
+                    IS_PROFILE_SCOPE("Sort asset infos");
+                    std::sort(assetInfos.begin(), assetInfos.end(), [](const Runtime::AssetInfo* a, const Runtime::AssetInfo* b)
+                        {
+                                if (a->GetFullFilePath().size() != b->GetFullFilePath().size())
+                                {
+                                    return a->GetFullFilePath().size() < b->GetFullFilePath().size();
+                                }
+                                return a->GetFullFilePath() < b->GetFullFilePath();
+                        });
+                }
 
                 ImGuiListClipper clipper;
                 clipper.Begin(assetInfos.size());
                 
                 while (clipper.Step())
                 {
-                    
                     for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
                     {
                         IS_PROFILE_SCOPE("AssetInfo entry");

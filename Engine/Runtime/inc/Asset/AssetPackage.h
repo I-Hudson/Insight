@@ -46,6 +46,8 @@ namespace Insight
             std::vector<Byte> LoadAsset(std::string_view path) const;
             std::vector<Byte> LoadAsset(Core::GUID guid) const;
 
+            void BuildPackage(std::string_view path);
+
             // Begin - ISerialisable -
             virtual void Serialise(Insight::Serialisation::ISerialiser* serialiser) override;
             virtual void Deserialise(Insight::Serialisation::ISerialiser* serialiser) override;
@@ -107,16 +109,17 @@ namespace Insight
                     zip_t* zip = zip_stream_open(nullptr, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
                     for (auto& [path, info] : assetPackage->m_pathToAssetInfo)
                     {
-                        ASSERT(zip_entry_open(zip, path.c_str()) == 0);
+                        std::string entryPath = FileSystem::GetRelativePath(path, FileSystem::GetParentPath(assetPackage->m_packagePath));
+                        ASSERT(zip_entry_open(zip, entryPath.c_str()) == 0);
                         
                         // Write data file to zip.
                         ASSERT(zip_entry_fwrite(zip, path.c_str()) == 0);
+                        ASSERT(zip_entry_close(zip) == 0);
 
                         // Write meta file to zip.
                         std::string metaFile = FileSystem::ReplaceExtension(path, Runtime::IResourceManager::c_FileExtension);
-                        zip_entry_fwrite(zip, metaFile.c_str());
+                        //zip_entry_fwrite(zip, metaFile.c_str());
 
-                        ASSERT(zip_entry_close(zip) == 0);
                     }
 
                     char* outbuf = NULL;

@@ -51,7 +51,9 @@ namespace Insight::Runtime
         const AssetInfo* GetAsset(std::string_view path) const;
 
         std::vector<const AssetInfo*> GetAllAssetInfos() const;
-
+        std::vector<const AssetInfo*> GetAllAssetsWithExtension(std::string_view extension) const;
+        std::vector<const AssetInfo*> GetAllAssetsWithExtensions(std::vector<std::string_view> extensions) const;
+        
         AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
         AssetPackage* GetAssetPackageFromName(std::string_view name) const;
         std::vector<AssetPackage*> GetAllAssetPackages() const;

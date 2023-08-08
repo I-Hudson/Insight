@@ -155,6 +155,14 @@ namespace Insight
             return LoadInteral(iter->second);
         }
 
+        void AssetPackage::BuildPackage(std::string_view path)
+        {
+            m_packagePath = path;
+            Serialisation::BinarySerialiser serialiser(false);
+            Serialise(&serialiser);
+            FileSystem::SaveToFile(serialiser.GetRawData(), path, FileType::Binary, true);
+        }
+
         std::vector<Byte> AssetPackage::LoadInteral(AssetInfo* assetInfo) const
         {
             if (m_zipHandle)
@@ -178,7 +186,7 @@ namespace Insight
             else
             {
                 // We have no zip handle, we must be indexing loose files on disk.
-                return FileSystem::ReadFromFile(assetInfo->GetFullFilePath());
+                return FileSystem::ReadFromFile(assetInfo->GetFullFilePath(), FileType::Binary);
             }
         }
 

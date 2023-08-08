@@ -16,6 +16,9 @@
 #include "Resource/ResourceManager.h"
 #include "Runtime/ProjectSystem.h"
 
+#include "Asset/AssetRegistry.h"
+#include "Asset/AssetPackage.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -64,47 +67,9 @@ namespace Insight
                             });
                         Runtime::ProjectSystem::Instance().OpenProject(item);
                     }
-                    if (ImGui::MenuItem("Save World"))
-                    {
-                        std::string item;
-                        PlatformFileDialog fileDialog;
-                        if (fileDialog.ShowSave(&item, 
-                            {
-                                FileDialogFilter { L"World", L"*.isworld"},
-                            }))
-                        {
-                            TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
-                            if (activeWorld)
-                            {
-                                activeWorld->SaveWorld(item);
 
-                                const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-                                std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
-                                activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
-                            }
-                        }
-                    }
-                    if (ImGui::MenuItem("Load World"))
-                    {
-                        std::string item;
-                        PlatformFileDialog fileDialog;
-                        if (fileDialog.ShowLoad(&item,
-                            {
-                                FileDialogFilter{ L"World", L"*.isworld"},
-                            }))
-                        {
-                            Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().GetActiveWorld());
-                            Runtime::WorldSystem::Instance().LoadWorld(item);
-                        }
-                    }
-                    if (ImGui::MenuItem("Clear World"))
-                    {
-                        TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
-                        if (activeWorld)
-                        {
-                            activeWorld->Destroy();
-                        }
-                    }
+                    WorldItems();
+                    
                     if (ImGui::MenuItem("Save Resource Database"))
                     {
                         Runtime::ResourceManager::Instance().SaveDatabase();
@@ -158,6 +123,51 @@ namespace Insight
                 if (ImGui::MenuItem(label.c_str()))
                 {
                     m_editorWindowManager->AddWindow(windowName);
+                }
+            }
+        }
+
+        void MenuBar::WorldItems()
+        {
+            if (ImGui::MenuItem("Save World"))
+            {
+                std::string item;
+                PlatformFileDialog fileDialog;
+                if (fileDialog.ShowSave(&item,
+                    {
+                        FileDialogFilter { L"World", L"*.isworld"},
+                    }))
+                {
+                    TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+                    if (activeWorld)
+                    {
+                        activeWorld->SaveWorld(item);
+
+                        const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+                        std::string relative = FileSystem::GetRelativePath(item, projectInfo.GetContentPath());
+                        activeWorld->SaveDebugWorld(projectInfo.GetIntermediatePath() + "/World/" + relative);
+                    }
+                }
+            }
+            if (ImGui::MenuItem("Load World"))
+            {
+                std::string item;
+                PlatformFileDialog fileDialog;
+                if (fileDialog.ShowLoad(&item,
+                    {
+                        FileDialogFilter{ L"World", L"*.isworld"},
+                    }))
+                {
+                    Runtime::WorldSystem::Instance().RemoveWorld(Runtime::WorldSystem::Instance().GetActiveWorld());
+                    Runtime::WorldSystem::Instance().LoadWorld(item);
+                }
+            }
+            if (ImGui::MenuItem("Clear World"))
+            {
+                TObjectPtr<Runtime::World> activeWorld = Runtime::WorldSystem::Instance().GetActiveWorld();
+                if (activeWorld)
+                {
+                    activeWorld->Destroy();
                 }
             }
         }

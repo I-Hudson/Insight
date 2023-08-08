@@ -16,6 +16,8 @@
 #include "Core/EnginePaths.h"
 #include "Core/Logger.h"
 
+#include "Algorithm/Vector.h"
+
 namespace Insight::Runtime
 {
     void AssetRegistry::Initialise()
@@ -41,27 +43,28 @@ namespace Insight::Runtime
 
     AssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
     {
-        AssetPackage* pathPackage = GetAssetPackageFromPath(path);
+        std::string pathWithExtension = FileSystem::ReplaceExtension(path, AssetPackage::c_FileExtension);
+        AssetPackage* pathPackage = GetAssetPackageFromPath(pathWithExtension);
         if (pathPackage != nullptr)
         {
             return pathPackage;
         }
 
-        if (!FileSystem::Exists(path))
+        if (!FileSystem::Exists(pathWithExtension))
         {
-            IS_CORE_ERROR("[AssetRegistry::LoadAssetPackage] No asset package was at path '{}'.", path.data());
+            IS_CORE_ERROR("[AssetRegistry::LoadAssetPackage] No asset package was at path '{}'.", pathWithExtension.data());
             return nullptr;
         }
 
         Serialisation::BinarySerialiser serialiser(true);
-        std::vector<Byte> fileData = FileSystem::ReadFromFile(path, FileType::Binary);
+        std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
         if (!serialiser.DeserialiseNoHeader(fileData))
         {
             return nullptr;
         }
 
-        std::string packageName = FileSystem::GetFileName(path, true);
-        AssetPackage* newPackage = CreateAssetPackageInternal(packageName, path);
+        std::string packageName = FileSystem::GetFileName(pathWithExtension, true);
+        AssetPackage* newPackage = CreateAssetPackageInternal(packageName, pathWithExtension);
         if (newPackage)
         {
             newPackage->Deserialise(&serialiser);
@@ -235,6 +238,31 @@ namespace Insight::Runtime
             std::move(packageAssetInfos.begin(), packageAssetInfos.end(), std::back_inserter(assetInfos));
         }
         return assetInfos;
+    }
+
+    std::vector<const AssetInfo*> AssetRegistry::GetAllAssetsWithExtension(std::string_view extension) const
+    {
+        return GetAllAssetsWithExtensions({ extension });
+    }
+
+    std::vector<const AssetInfo*> AssetRegistry::GetAllAssetsWithExtensions(std::vector<std::string_view> extensions) const
+    {
+        std::vector<const AssetInfo*> assets;
+
+        for (AssetPackage* package : m_assetPackages)
+        {
+            for (const AssetInfo* info : package->GetAllAssetInfos())
+            {
+                std::string_view assetExtension = FileSystem::GetExtension(info->FileName);
+                if (!assetExtension.empty()
+                    && Algorithm::VectorContains(extensions, assetExtension))
+                {
+                    assets.push_back(info);
+                }
+            }
+        }
+
+        return assets;
     }
 
     AssetPackage* AssetRegistry::GetAssetPackageFromPath(std::string_view path) const

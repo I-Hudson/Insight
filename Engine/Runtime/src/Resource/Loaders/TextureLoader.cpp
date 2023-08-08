@@ -43,6 +43,7 @@ namespace Insight::Runtime
 
 		if (pixelsData.Data.empty())
 		{
+			IS_CORE_ERROR("stbi errro: '%s'.", stbi_failure_reason());
 			texture->m_resource_state = EResoruceStates::Failed_To_Load;
 			return false;
 		}
@@ -51,6 +52,7 @@ namespace Insight::Runtime
 		texture->m_height = pixelsData.Height;
 		texture->m_depth = 1;
 		texture->UpdateRHITexture(pixelsData.Data.data(), pixelsData.Data.size());
+		texture->m_resource_state = EResoruceStates::Loaded;
 
         return true;
     }

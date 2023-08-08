@@ -29,7 +29,7 @@ namespace Insight
             const u64 requiredSize = Size + sizeBytes;
             if (requiredSize > Capacity)
             {
-                Resize(AlignUp(requiredSize, 4));
+                Resize(requiredSize);
             }
             Platform::MemCopy(Data + Size, data, sizeBytes);
             Size += sizeBytes;

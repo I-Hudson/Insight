@@ -112,6 +112,9 @@ namespace Insight
 		SERIALISE_PROPERTY(Runtime::TextureDiskFormat, DiskFormat, 1, 0)
 		SERIALISE_PROPERTY(PixelFormat, PixelFormat, 1, 0)
 	);
+	OBJECT_SERIALISER(Runtime::TextureSourceData, 1,
+		SERIALISE_ARRAY_PROPERTY(Byte, SourceData, 1, 0)
+	);
 
 	OBJECT_SERIALISER(Runtime::Texture, 3,
 		SERIALISE_BASE(Runtime::IResource, 1, 0)
