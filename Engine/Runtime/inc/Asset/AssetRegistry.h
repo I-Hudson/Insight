@@ -8,6 +8,7 @@
 #include "Core/GUID.h"
 
 #include <unordered_map>
+#include <mutex>
 
 namespace Insight
 {
@@ -72,7 +73,7 @@ namespace Insight
             /// @brief Register an IObject to an AssetInfo allowing for the object to be retevied later 
             /// from the AssetInfo pointer.
             void RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object);
-            void UnregisterObjectToAsset(const AssetInfo* assetInfo);
+            void UnregisterObjectToAsset(const IObject* object);
 
             IObject* GetObjectFromAsset(const Core::GUID& guid);
 
@@ -88,7 +89,10 @@ namespace Insight
 
         private:
             std::vector<AssetPackage*> m_assetPackages;
+
             std::unordered_map<Core::GUID, IObject*> m_assetToObject;
+            mutable std::mutex m_assetToObjectGuid;
+
             //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;
             //std::unordered_map<std::string, Core::GUID> m_pathToGuidLookup;
 

@@ -375,7 +375,11 @@ namespace Insight
             LoadMetaFileData(resource);
             UpdateGuidToResource(resource);
 
-            //AssetRegistry::Instance().LoadMeta();
+            const AssetInfo* info = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
+            if (info)
+            {
+                AssetRegistry::Instance().RegisterObjectToAsset(info, resource);
+            }
 
             return resource;
         }

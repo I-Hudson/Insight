@@ -349,18 +349,29 @@ namespace Insight::Runtime
 
     void AssetRegistry::RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object)
     {
+        std::lock_guard assetToObjectLock(m_assetToObjectGuid);
         ASSERT(m_assetToObject.find(assetInfo->Guid) == m_assetToObject.end());
         m_assetToObject[assetInfo->Guid] = object;
     }
 
-    void AssetRegistry::UnregisterObjectToAsset(const AssetInfo* assetInfo)
+    void AssetRegistry::UnregisterObjectToAsset(const IObject* object)
     {
-        ASSERT(m_assetToObject.find(assetInfo->Guid) != m_assetToObject.end());
-        m_assetToObject.erase(assetInfo->Guid);
+        std::lock_guard assetToObjectLock(m_assetToObjectGuid);
+        for (auto& [guid, obj] : m_assetToObject)
+        {
+            if (obj == object) 
+            {
+                m_assetToObject.erase(guid);
+                return;
+            }
+        }
+        FAIL_ASSERT_MSG("[AssetRegistry::UnregisterObjectToAsset] Unable to unregister object '%s' from asset.", object->GetGuid().ToString().c_str());
     }
 
     IObject* AssetRegistry::GetObjectFromAsset(const Core::GUID& guid)
     {
+        std::lock_guard assetToObjectLock(m_assetToObjectGuid);
+
         if (auto iter = m_assetToObject.find(guid);
             iter != m_assetToObject.end())
         {
