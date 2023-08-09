@@ -4,8 +4,15 @@
 
 #include <Reflect.h>
 
+#include <imgui_internal.h>
+
 namespace Insight::Editor::EditorGUI
 {
+    namespace Internal
+    {
+        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type type);
+    }
+
     /// @brief Call after any ImGui call to set that rect as a drag/drop source element.
     /// @param id 
     /// @param payload 
@@ -17,8 +24,16 @@ namespace Insight::Editor::EditorGUI
     /// @param label 
     /// @param type 
     /// @param dataToSet 
-    /// @return void
+    /// @return bool
     bool IS_EDITOR ObjectFieldTarget(const char* id, std::string& data, Reflect::Type type = Reflect::Type());
+    
+    /// @brief 
+    /// @param id 
+    /// @param data 
+    /// @param type 
+    /// @return 
+    bool IS_EDITOR ObjectFieldTargetCustomRect(const char* id, const ImRect& rect, std::string& data, Reflect::Type type = Reflect::Type());
+
 #if 0
     /// @brief Call after any ImGui call to set that rect as a drag/drop target element.
     /// @tparam T 

@@ -39,8 +39,7 @@ IS_CORE std::vector<std::string> SplitString(const std::string& str, const char 
 	std::string s;
 	for (const char& c : str)
 	{
-		if (c == splitCharacter
-			&& !s.empty())
+		if (c == splitCharacter)
 		{
 			strings.push_back(s);
 			s.clear();

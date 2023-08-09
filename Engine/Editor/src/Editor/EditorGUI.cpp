@@ -12,6 +12,46 @@
 
 namespace Insight::Editor::EditorGUI
 {
+    namespace Internal
+    {
+        bool VerifyObjectFieldPayload(std::string& payload, Reflect::Type type)
+        {
+            std::vector<std::string> splitStrings = SplitString(payload, ',');
+            std::string& payloadData = splitStrings.at(0);
+            std::string& typeName = splitStrings.at(1);
+            std::string& typeSize = splitStrings.at(2);
+
+            payload.clear();
+            if (payloadData.empty())
+            {
+                // Payload data is empty, we should always be sending something.
+                IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] No payload data was given. Returning.");
+                return false;
+            }
+
+            if (type.IsValid())
+            {
+                Reflect::Type payloadType(typeName, std::stoull(typeSize));
+                if (!payloadType.IsValid())
+                {
+                    IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is valid, payload type is not valid, no type checking will be performed. Returning.",
+                        type.GetTypeName().data());
+                    return false;
+                }
+
+                if (type != payloadType)
+                {
+                    IS_CORE_WARN("[EditorGUI::VerifyObjectFieldPayload] Type given '{}' is not compatible with payload type '{}'. Returning.",
+                        type.GetTypeName().data(), payloadType.GetTypeName().data());
+                    return false;
+                }
+            }
+            payload = std::move(payloadData);
+            return true;
+        }
+    }
+
+
     void Editor::EditorGUI::ObjectFieldSource(const char* id, const char* payload, Reflect::Type type)
     {
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
@@ -38,40 +78,32 @@ namespace Insight::Editor::EditorGUI
                 std::string payloadDataString = static_cast<const char*>(payload->Data);
                 payloadDataString.resize(payload->DataSize);
 
-                std::vector<std::string> splitStrings = SplitString(payloadDataString, ',');
-                std::string& payloadData = splitStrings.at(0);
-                std::string& typeName = splitStrings.at(1);
-                std::string& typeSize = splitStrings.at(2);
-
-                if (payloadData.empty())
+                if (Internal::VerifyObjectFieldPayload(payloadDataString, type))
                 {
-                    // Payload data is empty, we should always be sending something.
-                    IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] No payload data was given. Returning.");
-                    data.clear();
-                    return false;
+                    data = std::move(payloadDataString);
                 }
+            }
+            ImGui::EndDragDropTarget();
+        }
+        return !data.empty();
+    }
 
-                if (type.IsValid())
+    bool IS_EDITOR ObjectFieldTargetCustomRect(const char* id, const ImRect& rect, std::string& data, Reflect::Type type)
+    {
+        data.clear();
+
+        if (ImGui::BeginDragDropTargetCustom(rect, ImGuiID(id)))
+        {
+            const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(id);
+            if (payload)
+            {
+                std::string payloadDataString = static_cast<const char*>(payload->Data);
+                payloadDataString.resize(payload->DataSize);
+
+                if (Internal::VerifyObjectFieldPayload(payloadDataString, type))
                 {
-                    Reflect::Type payloadType(typeName, std::stoull(typeSize));
-                    if (!payloadType.IsValid())
-                    {
-                        IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] Type given '{}' is valid, payload type is not valid, no type checking will be performed. Returning.",
-                            type.GetTypeName().data());
-                        data.clear();
-                        return false;
-                    }
-
-                    if (type != payloadType)
-                    {
-                        IS_CORE_WARN("[EditorGUI::ObjectFieldTarget] Type given '{}' is not compatible with payload type '{}'. Returning.",
-                            type.GetTypeName().data(), payloadType.GetTypeName().data());
-                        data.clear();
-                        return false;
-                    }
+                    data = std::move(payloadDataString);
                 }
-
-                data = payloadData;
             }
             ImGui::EndDragDropTarget();
         }

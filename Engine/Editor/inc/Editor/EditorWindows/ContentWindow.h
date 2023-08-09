@@ -37,6 +37,7 @@ namespace Insight
 
         public:
             constexpr static const char* c_ContentWindowResourceDragSource = "ConentWindowResourceDragSource";
+            constexpr static const char* c_ContentWindowAssetDragSource = "ConentWindowAssetDragSource";
 
             ContentWindow();
             ContentWindow(u32 minWidth, u32 minHeight);

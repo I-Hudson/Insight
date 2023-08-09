@@ -1,4 +1,5 @@
 #include "Editor/Asset/IAssetInspector.h"
+#include "Editor/Asset/Inspector/AssetPackageAssetInspector.h"
 #include "Editor/Asset/Inspector/TextureAssetInspector.h"
 
 #include "Algorithm/Vector.h"
@@ -61,6 +62,7 @@ namespace Insight
 		void AssetInspectorRegistry::Initialise()
 		{
 			RegisterInspector<TextureAssetInspector>();
+			RegisterInspector<AssetPackageAssetInspector>();
 		}
 
 		void AssetInspectorRegistry::Shutdown()

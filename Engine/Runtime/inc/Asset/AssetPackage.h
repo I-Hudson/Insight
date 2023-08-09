@@ -41,6 +41,11 @@ namespace Insight
             const AssetInfo* GetAsset(std::string_view path) const;
             const AssetInfo* GetAsset(const Core::GUID& guid) const;
 
+            /// @brief Replace an asset within the package with another asset,
+            /// @param oldAsset 
+            /// @param newAsset 
+            void ReplaceAsset(const AssetInfo* oldAsset, const AssetInfo* newAsset) const;
+
             std::vector<const AssetInfo*> GetAllAssetInfos() const;
 
             std::vector<Byte> LoadAsset(std::string_view path) const;
@@ -54,7 +59,9 @@ namespace Insight
             // End - ISerialisable -
 
         private:
-            std::vector<Byte> LoadInteral(AssetInfo* assetInfo) const;
+            std::vector<Byte> LoadInteral(const AssetInfo* assetInfo) const;
+
+            Core::GUID GetGuidFromPath(std::string_view path) const;
 
             void LoadMetaData(AssetInfo* assetInfo);
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
@@ -63,8 +70,8 @@ namespace Insight
             std::string m_packagePath;
             std::string m_packageName;
 
-            std::unordered_map<std::string, AssetInfo*> m_pathToAssetInfo;
             std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
+            std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
 
             zip_t* m_zipHandle = nullptr;
 
@@ -107,17 +114,17 @@ namespace Insight
                 else
                 {
                     zip_t* zip = zip_stream_open(nullptr, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
-                    for (auto& [path, info] : assetPackage->m_pathToAssetInfo)
+                    for (auto& [guid, info] : assetPackage->m_guidToAssetInfo)
                     {
-                        std::string entryPath = FileSystem::GetRelativePath(path, FileSystem::GetParentPath(assetPackage->m_packagePath));
+                        std::string entryPath = FileSystem::GetRelativePath(info->GetFullFilePath(), FileSystem::GetParentPath(assetPackage->m_packagePath));
                         ASSERT(zip_entry_open(zip, entryPath.c_str()) == 0);
                         
                         // Write data file to zip.
-                        ASSERT(zip_entry_fwrite(zip, path.c_str()) == 0);
+                        ASSERT(zip_entry_fwrite(zip, info->GetFullFilePath().c_str()) == 0);
                         ASSERT(zip_entry_close(zip) == 0);
 
                         // Write meta file to zip.
-                        std::string metaFile = FileSystem::ReplaceExtension(path, Runtime::IResourceManager::c_FileExtension);
+                        std::string metaFile = FileSystem::ReplaceExtension(info->GetFullFilePath(), Runtime::IResourceManager::c_FileExtension);
                         //zip_entry_fwrite(zip, metaFile.c_str());
 
                     }

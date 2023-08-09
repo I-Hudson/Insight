@@ -213,10 +213,11 @@ namespace Insight::Editor
                     std::string fileExtension = iter.path().extension().string();
 
                     Runtime::IResource* contentResource = nullptr;
+                    const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(path);
 
                     if (iter.is_regular_file())
                     {
-                        if (Runtime::AssetRegistry::Instance().GetAsset(path) == nullptr)
+                        if (assetInfo == nullptr)
                         {
                             continue;
                         }
@@ -406,6 +407,10 @@ namespace Insight::Editor
                         EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
                             , contentResource->GetGuid().ToString().data()
                             , Runtime::IResource::GetStaticTypeInfo().GetType());
+                    }
+                    if (assetInfo)
+                    {
+                        EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource, assetInfo->Guid.ToString().c_str());
                     }
 
                     // Decide whether we should switch to the next column or switch row
