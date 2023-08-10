@@ -124,6 +124,11 @@ namespace Insight
             m_head.Size += size;
         }
 
+        void BinarySerialiser::SetObjectTracking(bool value)
+        {
+            m_objectTracking = value;
+        }
+
         bool BinarySerialiser::AtEnd() const
         {
             if (IsReadMode())
@@ -190,11 +195,17 @@ namespace Insight
             m_head.PushState(SerialiserNodeStates::Object);
             if (IsReadMode())
             {
-                Read(std::string(name) + "ObjectSize", m_head.Top().Size);
+                if (m_objectTracking)
+                {
+                    Read(std::string(name) + "ObjectSize", m_head.Top().Size);
+                }
             }
             else
             {
-                Write(std::string(name) + "ObjectSize", 0ull);
+                if (m_objectTracking)
+                {
+                    Write(std::string(name) + "ObjectSize", 0ull);
+                }
             }
 
             m_head.Top().StartPosition = GetHeadPosition();
@@ -204,7 +215,7 @@ namespace Insight
         {
             ASSERT(IsObjectNode());
 
-            if (!IsReadMode())
+            if (!IsReadMode() && m_objectTracking)
             {
                 m_head.Top().Size = GetHeadPosition() - m_head.Top().StartPosition;
                 void* dst = (m_head.Data + m_head.Top().StartPosition) - sizeof(u64);
@@ -216,6 +227,7 @@ namespace Insight
 
         void BinarySerialiser::SkipObject()
         {
+            ASSERT(m_objectTracking);
             ASSERT(IsReadMode());
             StartObject("SKIP");
             Skip(m_head.Top().Size);

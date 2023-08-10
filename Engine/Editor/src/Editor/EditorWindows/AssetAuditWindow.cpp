@@ -63,10 +63,10 @@ namespace Insight
                 ImGui::TableSetupColumn("Resource Type Id", ImGuiTableColumnFlags_None);
                 ImGui::TableHeadersRow();
 
-                std::vector<const Runtime::AssetInfo*> assetInfos = m_selectedAssetPackage->GetAllAssetInfos();
+                std::vector<Runtime::AssetInfo*> assetInfos = m_selectedAssetPackage->GetAllAssetInfos();
                 {
                     IS_PROFILE_SCOPE("Sort asset infos");
-                    std::sort(assetInfos.begin(), assetInfos.end(), [](const Runtime::AssetInfo* a, const Runtime::AssetInfo* b)
+                    std::sort(assetInfos.begin(), assetInfos.end(), [](Runtime::AssetInfo* a, Runtime::AssetInfo* b)
                         {
                                 if (a->GetFullFilePath().size() != b->GetFullFilePath().size())
                                 {

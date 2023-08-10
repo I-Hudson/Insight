@@ -37,7 +37,7 @@ namespace Insight
 			}
 
 			ImGui::Text("Asset package name: %s", assetPackage->GetName().data());
-			std::vector<const Runtime::AssetInfo*> packageAssetInfos = assetPackage->GetAllAssetInfos();
+			const std::vector<Runtime::AssetInfo*>& packageAssetInfos = assetPackage->GetAllAssetInfos();
 
 			if (ImGui::BeginTable("##AssetPackageAssetInspectorTable", 2), ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersInner)
 			{
@@ -52,16 +52,16 @@ namespace Insight
 				{
 					for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 					{
-						const Runtime::AssetInfo*& info = packageAssetInfos.at(row);
+						const Runtime::AssetInfo* info = packageAssetInfos.at(row);
 
 						ImGui::BeginGroup();
 						{
 							ImGui::TableNextColumn();
-							ImGui::Text("%s", info->FileName.c_str());
+							ImGui::Text("%s", info ? info->FileName.c_str() : "");
 						}
 						{
 							ImGui::TableNextColumn();
-							ImGui::Text("%s", info->FilePath.c_str());
+							ImGui::Text("%s", info ? info->FilePath.c_str() : "");
 						}
 						ImGui::EndGroup();
 
@@ -73,7 +73,7 @@ namespace Insight
 							const Runtime::AssetInfo* dragGuid = Runtime::AssetRegistry::Instance().GetAsset(assetGuid);
 							if (dragGuid)
 							{
-
+								assetPackage->ReplaceAsset(RemoveConst(info), RemoveConst(dragGuid));
 							}
 						}
 					}
@@ -81,14 +81,7 @@ namespace Insight
 				ImGui::EndTable();
 			}
 
-			if (ImGui::Button("+"))
-			{
-				assetPackage->AddAsset("");
-			}
-			if (packageAssetInfos.size() > 0 && ImGui::Button("-"))
-			{
-				assetPackage->RemoveAsset(packageAssetInfos.at(packageAssetInfos.size() - 1)->GetFullFilePath());
-			}
+			ImGui::BeginGroup();
 
 			ImGuiListClipper clipper;
 			clipper.Begin(static_cast<int>(packageAssetInfos.size()));
@@ -97,9 +90,9 @@ namespace Insight
 			{
 				for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++)
 				{
-					const Runtime::AssetInfo* info = packageAssetInfos.at(row);
+					Runtime::AssetInfo*& info = RemoveConst(packageAssetInfos.at(row));
 
-					const std::string textLabel = "Asset Name: " + info->FileName;
+					const std::string textLabel = "Asset Name: " + (info ? info->FileName : "");
 					const ImVec4 bgColour(0.5f, 0.5f, 1.0f, 1.0f);
 
 					ImVec2 textSize = ImGui::CalcTextSize(textLabel.c_str());
@@ -108,18 +101,28 @@ namespace Insight
 
 					ImGui::GetWindowDrawList()->AddRectFilled(rectMin, rectMax, IM_COL32(bgColour.x * 255, bgColour.y * 255, bgColour.z * 255, bgColour.w * 255));
 					ImGui::Text(textLabel.c_str());
+				}
+			}
+			ImGui::EndGroup();
+			std::string assetDragGuid;
+			if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource, assetDragGuid))
+			{
+				Core::GUID assetGuid;
+				assetGuid.StringToGuid(assetDragGuid);
+				const Runtime::AssetInfo* dargAssetInfo = Runtime::AssetRegistry::Instance().GetAsset(assetGuid);
+				if (dargAssetInfo)
+				{
+					assetPackage->AddAsset(RemoveConst(dargAssetInfo));
+				}
+			}
 
-					std::string assetDragGuid;
-					if (EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource, assetDragGuid))
-					{
-						Core::GUID assetGuid;
-						assetGuid.StringToGuid(assetDragGuid);
-						const Runtime::AssetInfo* dragGuid = Runtime::AssetRegistry::Instance().GetAsset(assetGuid);
-						if (dragGuid)
-						{
-
-						}
-					}
+			if (ImGui::Button("Build Package"))
+			{
+				PlatformFileDialog dialog;
+				std::string buildPath;
+				if (dialog.ShowSave(&buildPath, { FileDialogFilter(L"AssetPackage", L".isassetpackage") }))
+				{
+					assetPackage->BuildPackage(buildPath);
 				}
 			}
 		}

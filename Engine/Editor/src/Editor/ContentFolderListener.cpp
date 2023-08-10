@@ -34,7 +34,7 @@ namespace Insight::Editor
                 << std::endl;
 
             Runtime::ResourceManager::Instance().Unload(fullPath);
-            Runtime::AssetRegistry::Instance().RemoveAsset(fullPath, m_assetPackage);
+            Runtime::AssetRegistry::Instance().RemoveAsset(fullPath);
         }
             break;
 

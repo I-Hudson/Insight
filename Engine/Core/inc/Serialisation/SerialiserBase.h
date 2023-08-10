@@ -176,10 +176,15 @@ namespace Insight
             ~ObjectSerialiserReg();
         };
 
+        struct SerialiserObjectBase
+        {
+            bool MetaDataEnabled = true;
+        };
+
         /// @brief Empty template struct for the serialiser macros to be used to define SerialiserObjects for different types.
         /// @tparam T 
         template<typename T>
-        struct SerialiserObject
+        struct SerialiserObject : public SerialiserObjectBase
         {
             void Serialise(ISerialiser* serialiser, T& object)
             {

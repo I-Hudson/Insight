@@ -2,6 +2,7 @@
 
 #include "Asset/AssetInfo.h"
 #include "Core/IObject.h"
+#include "Asset/AssetRegistry.h"
 
 #include "Serialisation/Serialisers/ISerialiser.h"
 
@@ -30,23 +31,31 @@ namespace Insight
             std::string_view GetPath() const;
             std::string_view GetName() const;
 
+            DEPRECATED_MSG("Use AddAsset with AssetInfo augment")
             const AssetInfo* AddAsset(std::string_view path);
+            const AssetInfo* AddAsset(AssetInfo* assetInfo);
 
+            DEPRECATED_MSG("Use RemoveAsset with AssetInfo augment")
             void RemoveAsset(std::string_view path);
+            DEPRECATED_MSG("Use RemoveAsset with AssetInfo augment")
             void RemoveAsset(const Core::GUID& guid);
+            void RemoveAsset(AssetInfo* assetInfo);
 
             bool HasAsset(std::string_view path) const;
             bool HasAsset(const Core::GUID& guid) const;
+            bool HasAsset(const AssetInfo* assetInfo) const;
+
 
             const AssetInfo* GetAsset(std::string_view path) const;
             const AssetInfo* GetAsset(const Core::GUID& guid) const;
+            const AssetInfo* GetAsset(const AssetInfo* assetInfo) const;
 
             /// @brief Replace an asset within the package with another asset,
             /// @param oldAsset 
             /// @param newAsset 
-            void ReplaceAsset(const AssetInfo* oldAsset, const AssetInfo* newAsset) const;
+            void ReplaceAsset(AssetInfo* oldAsset, AssetInfo* newAsset);
 
-            std::vector<const AssetInfo*> GetAllAssetInfos() const;
+            const std::vector<AssetInfo*>& GetAllAssetInfos() const;
 
             std::vector<Byte> LoadAsset(std::string_view path) const;
             std::vector<Byte> LoadAsset(Core::GUID guid) const;
@@ -70,8 +79,9 @@ namespace Insight
             std::string m_packagePath;
             std::string m_packageName;
 
-            std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
-            std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
+            std::vector<AssetInfo*> m_assetInfos;
+            //std::unordered_map<Core::GUID, u32> m_guidToAssetInfo;
+            //std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
 
             zip_t* m_zipHandle = nullptr;
 
@@ -105,7 +115,8 @@ namespace Insight
                         std::string assetPath = FileSystem::GetParentPath(assetPackage->m_packagePath) + "/" + path;
                         if (!FileSystem::GetExtension(assetPath).empty())
                         {
-                            assetPackage->AddAsset(assetPath);
+                            Runtime::AssetRegistry::Instance().AddAsset(assetPath, assetPackage);
+
                         }
 
                         ASSERT(zip_entry_close(assetPackage->m_zipHandle) == 0);
@@ -114,17 +125,17 @@ namespace Insight
                 else
                 {
                     zip_t* zip = zip_stream_open(nullptr, 0, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w');
-                    for (auto& [guid, info] : assetPackage->m_guidToAssetInfo)
+                    for (Runtime::AssetInfo* assetInfo : assetPackage->m_assetInfos)
                     {
-                        std::string entryPath = FileSystem::GetRelativePath(info->GetFullFilePath(), FileSystem::GetParentPath(assetPackage->m_packagePath));
+                        std::string entryPath = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), FileSystem::GetParentPath(assetPackage->m_packagePath));
                         ASSERT(zip_entry_open(zip, entryPath.c_str()) == 0);
                         
                         // Write data file to zip.
-                        ASSERT(zip_entry_fwrite(zip, info->GetFullFilePath().c_str()) == 0);
+                        ASSERT(zip_entry_fwrite(zip, assetInfo->GetFullFilePath().c_str()) == 0);
                         ASSERT(zip_entry_close(zip) == 0);
 
                         // Write meta file to zip.
-                        std::string metaFile = FileSystem::ReplaceExtension(info->GetFullFilePath(), Runtime::IResourceManager::c_FileExtension);
+                        std::string metaFile = FileSystem::ReplaceExtension(assetInfo->GetFullFilePath(), Runtime::IResourceManager::c_FileExtension);
                         //zip_entry_fwrite(zip, metaFile.c_str());
 
                     }

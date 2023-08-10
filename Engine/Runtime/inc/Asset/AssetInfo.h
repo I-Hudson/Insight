@@ -20,6 +20,11 @@ namespace Insight
         class IS_RUNTIME AssetMetaData : public Serialisation::ISerialisable
         {
         public:
+            AssetMetaData() = default;
+            AssetMetaData(const AssetMetaData& other) = default;
+            AssetMetaData(AssetMetaData&& other) = default;
+            ~AssetMetaData() = default;
+
             constexpr static const char* c_FileExtension = ".is_meta";
             IS_SERIALISABLE_H(AssetMetaData);
 

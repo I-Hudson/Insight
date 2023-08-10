@@ -411,7 +411,10 @@ namespace Insight::Serialisation::Keys
             if (serialiser&& !serialiser->IsReadMode())\
             {\
                 serialiser->SetName(#OBJECT_TYPE); \
-                serialiser->Write(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                if (MetaDataEnabled)\
+                {\
+                    serialiser->Write(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                }\
             }\
             __VA_ARGS__\
             if (serialiser) { serialiser->StopObject();} \
@@ -457,7 +460,10 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
                 if (serialiser) { serialiser->StartObject(#OBJECT_TYPE); }\
                     if (isReadMode)\
                     {\
-                        serialiser->Read(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                        if (MetaDataEnabled)\
+                        {\
+                            serialiser->Read(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                        }\
                     }\
             }\
             __VA_ARGS__\
@@ -489,7 +495,10 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
             if (serialiser&& !serialiser->IsReadMode())\
             {\
                 serialiser->SetName(#OBJECT_TYPE); \
-                serialiser->Write(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                if (MetaDataEnabled)\
+                {\
+                    serialiser->Write(Insight::Serialisation::Keys::c_SerialisedVersion, version); \
+                }\
             }\
             __VA_ARGS__\
             if (serialiser) { serialiser->StopObject();} \
@@ -499,7 +508,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
 #define OBJECT_SERIALISER(OBJECT_TYPE, CURRENT_VERSION, ...)\
         static_assert(CURRENT_VERSION >= 1);\
         template<>\
-        struct ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE>\
+        struct ::Insight::Serialisation::SerialiserObject<OBJECT_TYPE> : public SerialiserObjectBase\
         {\
             using ObjectType = OBJECT_TYPE;\
             SERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, __VA_ARGS__);\

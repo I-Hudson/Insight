@@ -165,6 +165,11 @@ namespace Insight
     {
         if (!Exists(path))
         {
+            u64 lastSlash = path.find_last_of('/');
+            if (lastSlash != std::string::npos)
+            {
+                return std::string(path.substr(0, lastSlash));
+            }
             return "";
         }
         return std::filesystem::path(path).parent_path().string();

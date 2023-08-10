@@ -54,6 +54,8 @@ namespace Insight
             // Skip number of bytes.
             void Skip(u64 size);
 
+            void SetObjectTracking(bool value);
+
             /// @brief Is the binary serialiser at the end of the stream
             /// @return bool 
             bool AtEnd() const;
@@ -146,6 +148,7 @@ namespace Insight
 
         private:
             BinaryHead m_head;
+            bool m_objectTracking = true;
 
             friend ISerialiser;
         };

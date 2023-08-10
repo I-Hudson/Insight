@@ -1,10 +1,12 @@
 #include "Asset/AssetPackage.h"
-#include "Asset/AssetRegistry.h"
+//#include "Asset/AssetRegistry.h"
 
 #include "Serialisation/Serialisers/BinarySerialiser.h"
 
 #include "Core/Logger.h"
 #include "FileSystem/FileSystem.h"
+
+#include "Algorithm/Vector.h"
 
 namespace Insight
 {
@@ -18,13 +20,7 @@ namespace Insight
 
         AssetPackage::~AssetPackage()
         {
-            for (auto& [guid, assetInfo] : m_guidToAssetInfo)
-            {
-                Delete(assetInfo);
-            }
-            m_guidToAssetInfo.clear();
-            m_pathToAssetGuid.clear();
-
+            m_assetInfos.clear();
             if (m_zipHandle != nullptr)
             {
                 zip_close(m_zipHandle);
@@ -49,49 +45,46 @@ namespace Insight
                 return GetAsset(path);
             }
 
-            AssetInfo* assetInfo = New<AssetInfo>(path, m_packagePath, this);
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(path));
+            return AddAsset(assetInfo);
+        }
 
-            LoadMetaData(assetInfo);
-            m_guidToAssetInfo[assetInfo->Guid] = assetInfo;
-            m_pathToAssetGuid[assetInfo->GetFullFilePath()] = assetInfo->Guid;
+        const AssetInfo* AssetPackage::AddAsset(AssetInfo* assetInfo)
+        {
+            if (assetInfo && !HasAsset(assetInfo))
+            {
+                assetInfo->AssetPackage->RemoveAsset(assetInfo);
+                assetInfo->AssetPackage = this;
+                assetInfo->PackageName = m_packageName;
+                assetInfo->PackagePath = m_packagePath;
 
+                m_assetInfos.push_back(assetInfo);
+            }
             return assetInfo;
         }
 
         void AssetPackage::RemoveAsset(std::string_view path)
         {
-            if (!HasAsset(path))
-            {
-                return;
-            }
-
-            Core::GUID assetGuid = GetGuidFromPath(path);
-
-            if (auto iter = m_guidToAssetInfo.find(assetGuid);
-                iter != m_guidToAssetInfo.end())
-            {
-                AssetInfo* assetInfo = iter->second;
-                m_guidToAssetInfo.erase(assetInfo->Guid);
-                m_pathToAssetGuid.erase(assetInfo->GetFullFilePath());
-                Delete(assetInfo);
-            }
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(path));
+            RemoveAsset(assetInfo);
         }
 
         void AssetPackage::RemoveAsset(const Core::GUID& guid)
         {
-            if (!HasAsset(guid))
+            AssetInfo* assetInfo = RemoveConst(AssetRegistry::Instance().GetAsset(guid));
+            RemoveAsset(assetInfo);
+        }
+
+        void AssetPackage::RemoveAsset(AssetInfo* assetInfo)
+        {
+            if (!assetInfo || !HasAsset(assetInfo->Guid))
             {
                 return;
             }
-
-            if (auto iter = m_guidToAssetInfo.find(guid);
-                iter != m_guidToAssetInfo.end())
-            {
-                AssetInfo* assetInfo = iter->second;
-                m_guidToAssetInfo.erase(assetInfo->Guid);
-                m_pathToAssetGuid.erase(assetInfo->GetFullFilePath());
-                Delete(assetInfo);
-            }
+            assetInfo->AssetPackage = nullptr;
+            assetInfo->PackageName.clear();
+            assetInfo->PackagePath.clear();
+            ASSERT(Algorithm::VectorRemove(m_assetInfos, assetInfo));
         }
 
         bool AssetPackage::HasAsset(std::string_view path) const
@@ -101,7 +94,23 @@ namespace Insight
 
         bool AssetPackage::HasAsset(const Core::GUID& guid) const
         {
-            return m_guidToAssetInfo.find(guid) != m_guidToAssetInfo.end();
+            return Algorithm::VectorContainsIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
+                {
+                    if (!assetInfo)
+                    {
+                        return false;
+                    }
+                    return guid == assetInfo->Guid;
+                });
+        }
+
+        bool AssetPackage::HasAsset(const AssetInfo* assetInfo) const
+        {
+            if (!assetInfo)
+            {
+                return nullptr;
+            }
+            return HasAsset(assetInfo->Guid);
         }
 
         const AssetInfo* AssetPackage::GetAsset(std::string_view path) const
@@ -110,79 +119,89 @@ namespace Insight
             FileSystem::PathToUnix(formattedPath);
 
             Core::GUID assetGuid = GetGuidFromPath(formattedPath);
-
-            if (auto iter = m_guidToAssetInfo.find(assetGuid);
-                iter != m_guidToAssetInfo.end())
-            {
-                return iter->second;
-            }
-            return nullptr;
+            return GetAsset(assetGuid);
         }
 
         const AssetInfo* AssetPackage::GetAsset(const Core::GUID& guid) const
         {
-            if (auto iter = m_guidToAssetInfo.find(guid);
-                iter != m_guidToAssetInfo.end())
+            if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&guid](const AssetInfo* assetInfo)
+                {
+                    return guid == assetInfo->Guid;
+                });
+                iter != m_assetInfos.end())
             {
-                return iter->second;
+                return *iter;
             }
             return nullptr;
         }
 
-        void AssetPackage::ReplaceAsset(const AssetInfo* oldAsset, const AssetInfo* newAsset) const
+        const AssetInfo* AssetPackage::GetAsset(const AssetInfo* assetInfo) const
         {
-            auto oldIter = m_guidToAssetInfo.find(oldAsset->Guid);
-            auto newIter = m_guidToAssetInfo.find(oldAsset->Guid);
+            if (!assetInfo)
+            {
+                return nullptr;
+            }
+            return GetAsset(assetInfo->Guid);
+        }
 
-            if (oldIter == m_guidToAssetInfo.end()
-                || newIter != m_guidToAssetInfo.end())
+        void AssetPackage::ReplaceAsset(AssetInfo* oldAsset, AssetInfo* newAsset)
+        {
+            auto iter = Algorithm::VectorFind(m_assetInfos, oldAsset);
+            if (iter == m_assetInfos.end())
             {
                 return;
             }
-
-            AssetInfo*& oldAssetInfo = RemoveConst(oldIter->second);
-            oldAssetInfo = RemoveConst(newAsset);
+            RemoveAsset(oldAsset);
+            AddAsset(newAsset);
+            //AssetInfo*& info = *iter;
+            //info = RemoveConst(newAsset);
         }
 
-        std::vector<const AssetInfo*> AssetPackage::GetAllAssetInfos() const
+        const std::vector<AssetInfo*>&AssetPackage::GetAllAssetInfos() const
         {
-            std::vector<const AssetInfo*> assetInfos;
-            for (const auto& [guid, info] : m_guidToAssetInfo)
-            {
-                assetInfos.push_back(info);
-            }
-            return assetInfos;
+            return m_assetInfos;
         }
 
         std::vector<Byte> AssetPackage::LoadAsset(std::string_view path) const
         {
-            if (!HasAsset(path))
+            const AssetInfo* assetInfo = GetAsset(GetGuidFromPath(path));
+            if (!assetInfo)
             {
                 return {};
             }
-            return LoadInteral(GetAsset(GetGuidFromPath(path)));
+            return LoadInteral(assetInfo);
         }
 
         std::vector<Byte> AssetPackage::LoadAsset(Core::GUID guid) const
         {
-            if (!HasAsset(guid))
+            const AssetInfo* assetInfo = GetAsset(guid);
+            if (!assetInfo)
             {
                 return {};
             }
-            auto iter = m_guidToAssetInfo.find(guid);
-            return LoadInteral(iter->second);
+            return LoadInteral(assetInfo);
         }
 
         void AssetPackage::BuildPackage(std::string_view path)
         {
             m_packagePath = path;
             Serialisation::BinarySerialiser serialiser(false);
-            Serialise(&serialiser);
+            serialiser.SetObjectTracking(false);
+
+            ::Insight::Serialisation::SerialiserObject<AssetPackage> serialiserObject;
+            serialiserObject.MetaDataEnabled = false;
+            serialiserObject.Serialise(&serialiser, *this);
+
             FileSystem::SaveToFile(serialiser.GetRawData(), path, FileType::Binary, true);
         }
 
         std::vector<Byte> AssetPackage::LoadInteral(const AssetInfo* assetInfo) const
         {
+            if (!assetInfo)
+            {
+                return { };
+            }
+
             if (m_zipHandle)
             {
                 std::string packageParent = FileSystem::GetParentPath(m_packagePath);
@@ -210,10 +229,13 @@ namespace Insight
 
         Core::GUID AssetPackage::GetGuidFromPath(std::string_view path) const
         {
-            if (auto iter = m_pathToAssetGuid.find(std::string(path));
-                iter != m_pathToAssetGuid.end())
+            if (auto iter = Algorithm::VectorFindIf(m_assetInfos, [&path](const AssetInfo* assetInfo)
+                {
+                    return path == assetInfo->GetFullFilePath();
+                });
+                iter != m_assetInfos.end())
             {
-                return iter->second;
+                return (*iter)->Guid;
             }
             return { };
         }

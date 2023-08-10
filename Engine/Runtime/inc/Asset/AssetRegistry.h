@@ -44,7 +44,7 @@ namespace Insight
 
             const AssetInfo* AddAsset(std::string_view path, AssetPackage* package);
             const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile);
-            void RemoveAsset(std::string_view path, AssetPackage* package);
+            void RemoveAsset(std::string_view path);
 
             void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
             void UpdateMetaData(AssetUser* object);
@@ -62,6 +62,8 @@ namespace Insight
             AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
             AssetPackage* GetAssetPackageFromName(std::string_view name) const;
             std::vector<AssetPackage*> GetAllAssetPackages() const;
+
+            AssetPackage* GetAssetPackageFromAsset(const AssetInfo* assetInfo) const;
 
             /// @brief Add all asset within a folder. 
             void AddAssetsInFolder(std::string_view path, AssetPackage* package);
@@ -88,6 +90,11 @@ namespace Insight
             bool AssetInfoValidate(const AssetInfo* assetInfo) const;
 
         private:
+            /// @brief Store all asset infos here, then give pointers to the packages which they are included in.
+            /// This unordered_map acts as the owner all of the pointers.
+            std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
+            std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
+
             std::vector<AssetPackage*> m_assetPackages;
 
             std::unordered_map<Core::GUID, IObject*> m_assetToObject;

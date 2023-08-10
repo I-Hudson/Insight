@@ -8,6 +8,8 @@
 #include "Core/Memory.h"
 #include "Serialisation/Serialiser.h"
 
+#include "Algorithm/Vector.h"
+
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -59,13 +61,17 @@ namespace Insight
 			template<typename T>
 			void UnregisterEditorWindow()
 			{
-				FAIL_ASSERT();
-				/*if (auto iter = m_windows.find(T::WINDOW_NAME);
+				static_assert(std::is_base_of_v<IEditorWindow, T>);
+				RemoveWindowNow(T::WINDOW_NAME); 
+				
+				if (auto iter = m_windows.find(T::WINDOW_NAME); 
 					iter != m_windows.end())
 				{
+					IEditorWindow* window = iter->second;
+					window->Shutdown();
+					Delete(window);
 					m_windows.erase(iter);
-					return;
-				}*/
+				}
 			}
 
 			void AddWindow(const std::string& windowName);

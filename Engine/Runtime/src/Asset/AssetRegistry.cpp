@@ -33,6 +33,13 @@ namespace Insight::Runtime
         }
         m_assetPackages.clear();
 
+        for (auto& [guid, assetInfo] : m_guidToAssetInfo)
+        {
+            Delete(assetInfo);
+        }
+        m_guidToAssetInfo.clear();
+        m_pathToAssetGuid.clear();
+
         m_state = Core::SystemStates::Not_Initialised;
     }
 
@@ -56,8 +63,6 @@ namespace Insight::Runtime
             return nullptr;
         }
 
-        const AssetInfo* info = GetAsset(pathWithExtension);
-
         Serialisation::BinarySerialiser serialiser(true);
         std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
         if (!serialiser.DeserialiseNoHeader(fileData))
@@ -72,6 +77,7 @@ namespace Insight::Runtime
             newPackage->Deserialise(&serialiser);
         }
 
+        const AssetInfo* info = GetAsset(pathWithExtension);
         if (info)
         {
             RegisterObjectToAsset(info, newPackage);
@@ -101,6 +107,8 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile)
     {
+        ASSERT(package);
+
         std::string_view fileExtension = FileSystem::GetFileExtension(path);
         if (!FileSystem::Exists(path))
         {
@@ -123,16 +131,46 @@ namespace Insight::Runtime
             return nullptr;
         }*/
 
-        return package->AddAsset(path);
+        const AssetInfo* info = GetAsset(path);
+        if (info)
+        {
+            package->AddAsset(RemoveConst(info));
+            return info;
+        }
+
+        AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package);
+        m_guidToAssetInfo[newInfo->Guid] = newInfo;
+        m_pathToAssetGuid[newInfo->GetFullFilePath()] = newInfo->Guid;
+        package->AddAsset(newInfo);
+        return newInfo;
     }
 
-    void AssetRegistry::RemoveAsset(std::string_view path, AssetPackage* package)
+    void AssetRegistry::RemoveAsset(std::string_view path)
     {
-        package->RemoveAsset(path);
+        AssetInfo* info = RemoveConst(GetAsset(path));
+        if (!info)
+        {
+            return;
+        }
+
+        AssetPackage* package = GetAssetPackageFromAsset(info);
+        ASSERT(package);
+        package->RemoveAsset(info);
+
+        Core::GUID assetGuid = m_pathToAssetGuid.find(std::string(path))->second;
+        m_pathToAssetGuid.erase(std::string(path));
+        ASSERT(assetGuid.IsValid());
+
+        AssetInfo*& assetInfo = m_guidToAssetInfo.find(assetGuid)->second;
+        m_guidToAssetInfo.erase(assetGuid);
+
+        ASSERT(assetInfo);
+        Delete(assetInfo);
     }
 
     void AssetRegistry::UpdateMetaData(AssetInfo* assetInfo, AssetUser* object)
     {
+        FAIL_ASSERT();
         if (!AssetInfoValidate(assetInfo))
         {
             return;
@@ -172,6 +210,7 @@ namespace Insight::Runtime
 
     void AssetRegistry::DeserialiseAssetUser(AssetInfo* assetInfo, AssetUser* object) const
     {
+        FAIL_ASSERT();
         ASSERT(object);
 
         if (!AssetInfoValidate(assetInfo))
@@ -213,26 +252,20 @@ namespace Insight::Runtime
 
     const AssetInfo* AssetRegistry::GetAsset(const Core::GUID& guid) const
     {
-        for (const AssetPackage* package : m_assetPackages)
+        if (auto iter = m_guidToAssetInfo.find(guid);
+            iter != m_guidToAssetInfo.end())
         {
-            const AssetInfo* assetInfo = package->GetAsset(guid);
-            if (assetInfo)
-            {
-                return assetInfo;
-            }
+            return iter->second;
         }
         return nullptr;
     }
 
     const AssetInfo* AssetRegistry::GetAsset(std::string_view path) const
     {
-        for (const AssetPackage* package : m_assetPackages)
+        if (auto iter = m_pathToAssetGuid.find(std::string(path));
+            iter != m_pathToAssetGuid.end())
         {
-            const AssetInfo* assetInfo = package->GetAsset(path);
-            if (assetInfo)
-            {
-                return assetInfo;
-            }
+            return GetAsset(iter->second);
         }
         return nullptr;
     }
@@ -240,10 +273,9 @@ namespace Insight::Runtime
     std::vector<const AssetInfo*> AssetRegistry::GetAllAssetInfos() const
     {
         std::vector<const AssetInfo*> assetInfos;
-        for (const AssetPackage* package : m_assetPackages)
+        for (const auto& [guid, assetInfo] : m_guidToAssetInfo)
         {
-            std::vector<const AssetInfo*> packageAssetInfos = package->GetAllAssetInfos();
-            std::move(packageAssetInfos.begin(), packageAssetInfos.end(), std::back_inserter(assetInfos));
+            assetInfos.push_back(assetInfo);
         }
         return assetInfos;
     }
@@ -257,16 +289,13 @@ namespace Insight::Runtime
     {
         std::vector<const AssetInfo*> assets;
 
-        for (AssetPackage* package : m_assetPackages)
+        for (const auto& [guid, assetInfo] : m_guidToAssetInfo)
         {
-            for (const AssetInfo* info : package->GetAllAssetInfos())
+            std::string_view assetExtension = FileSystem::GetExtension(assetInfo->FileName);
+            if (!assetExtension.empty()
+                && Algorithm::VectorContains(extensions, assetExtension))
             {
-                std::string_view assetExtension = FileSystem::GetExtension(info->FileName);
-                if (!assetExtension.empty()
-                    && Algorithm::VectorContains(extensions, assetExtension))
-                {
-                    assets.push_back(info);
-                }
+                assets.push_back(assetInfo);
             }
         }
 
@@ -345,6 +374,18 @@ namespace Insight::Runtime
                 AddAsset(path, package, enableMetaFiles);
             }
         }
+    }
+
+    AssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
+    {
+        for (AssetPackage* package: m_assetPackages)
+        {
+            if (package->HasAsset(assetInfo)) 
+            {
+                return package;
+            }
+        }
+        return nullptr;
     }
 
     void AssetRegistry::RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object)
