@@ -68,7 +68,7 @@ namespace Insight
                 Runtime::AssetRegistry::Instance().AddAssetsInFolder(editorIconsPath, editorIconsAssetPackage, true, false);
             }
 
-            m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("ProjectAssets");
+            m_projectAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage(c_ProjectAssetPackageName);
             m_contentListener.SetAssetPackage(m_projectAssetPackage);
 
             Core::EventSystem::Instance().AddEventListener(this, Core::EventType::Project_Open, [this](const Core::Event& e)
@@ -205,13 +205,14 @@ namespace Insight
             editorSettings.Write(serialiser.GetSerialisedData());
             editorSettings.Close();
 
+            m_hotReloadSystem.Shutdown();
+            m_buildSystem.Shutdown();
+
             m_gameRenderpass->Destroy();
             Delete(m_gameRenderpass);
 
-            EditorWindowManager::Instance().Destroy();
 
-            m_hotReloadSystem.Shutdown();
-            m_buildSystem.Shutdown();
+            EditorWindowManager::Instance().Destroy();
 
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_hotReloadSystem);
             App::Engine::Instance().GetSystemRegistry().UnregisterSystem(&m_buildSystem);

@@ -30,6 +30,8 @@ namespace Insight
 			Editor();
 			virtual ~Editor() override;
 
+			constexpr static const char* c_ProjectAssetPackageName = "ProjectAssets";
+
 			IS_SERIALISABLE_H(Editor)
 
 			virtual void OnPreInit() override;

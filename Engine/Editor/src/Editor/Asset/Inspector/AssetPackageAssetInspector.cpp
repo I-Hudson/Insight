@@ -6,6 +6,7 @@
 #include "Asset/AssetPackage.h"
 
 #include "Editor/EditorGUI.h"
+#include "Editor/Editor.h"
 
 #include <IconsFontAwesome5.h>
 
@@ -74,6 +75,11 @@ namespace Insight
 							if (dragGuid)
 							{
 								assetPackage->ReplaceAsset(RemoveConst(info), RemoveConst(dragGuid));
+								Runtime::AssetPackage* projectAssetPackage = Runtime::AssetRegistry::Instance().GetAssetPackageFromName(Editor::Editor::c_ProjectAssetPackageName);
+								if (projectAssetPackage)
+								{
+									projectAssetPackage->AddAsset(RemoveConst(info));
+								}
 							}
 						}
 					}
