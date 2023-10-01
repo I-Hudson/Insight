@@ -1,3 +1,6 @@
+local InsightEngineIncludes = require "lua/InsightEngineIncludes"
+local InsightVendorIncludes = require "lua/InsightVendorIncludes"
+
 local profileTool="tracy"
 local monolith_build="false"
 
@@ -41,44 +44,8 @@ function tprint (tbl, indent)
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
-IncludeDirs["InsightCore"] = "%{wks.location}Engine/Core/inc"
-IncludeDirs["InsightMaths"] = "%{wks.location}Engine/Maths/inc"
-IncludeDirs["InsightGraphics"] = "%{wks.location}Engine/Graphics/inc"
-IncludeDirs["InsightInput"] = "%{wks.location}Engine/Input/inc"
-IncludeDirs["InsightRuntime"] = "%{wks.location}Engine/Runtime/inc"
-IncludeDirs["InsightEditor"] = "%{wks.location}Engine/Editor/inc"
-
-IncludeDirs["doctest"] = "%{wks.location}vendor/doctest/doctest"
-IncludeDirs["glfw"] = "%{wks.location}vendor/glfw/include"
-IncludeDirs["glm"] = "%{wks.location}vendor/glm"
-IncludeDirs["imgui"] = "%{wks.location}vendor/imgui"
-IncludeDirs["implot"] = "%{wks.location}vendor/implot"
-IncludeDirs["spdlog"] = "%{wks.location}vendor/spdlog/include"
-IncludeDirs["vma"] = "%{wks.location}vendor/VulkanMemoryAllocator/src"
-IncludeDirs["vulkan"] = VULKAN_SDK .. "/include/"
-IncludeDirs["spirv_reflect"] = "%{wks.location}vendor/SPIRV-Reflect"
-IncludeDirs["assimp"] = "%{wks.location}vendor/assimp/include"
-IncludeDirs["tracy"] = "%{wks.location}vendor/tracy"
-IncludeDirs["pix"] = "%{wks.location}vendor/winpixeventruntime/Include"
-IncludeDirs["stb_image"] = "%{wks.location}vendor/stb"
-IncludeDirs["meshoptimizer"] = "%{wks.location}vendor/meshoptimizer/src"
-IncludeDirs["FFR2"] = "%{wks.location}vendor/FidelityFX-FSR2/src"
-IncludeDirs["Aftermath"] = "%{wks.location}vendor/NVIDIA_Nsight_Aftermath_SDK_2022.1.0.22080/include"
-IncludeDirs["nvtx"] = "%{wks.location}vendor/NVTX/c/include"
-IncludeDirs["xxHash"] = "%{wks.location}vendor/xxHash"
-IncludeDirs["splash"] = "%{wks.location}vendor/Splash/Splash/inc"
-IncludeDirs["DirectXHeaders"] = "%{wks.location}vendor/DirectX-Headers/include/directx"
-IncludeDirs["DirectXAgilityHeaders"] = "%{wks.location}vendor/Microsoft.Direct3D.D3D12/build/native/include"
-IncludeDirs["DirectXShaderCompiler"] = "%{wks.location}vendor/DirectXShaderCompiler/inc"
-IncludeDirs["D3D12MemoryAllocator"] = "%{wks.location}vendor/D3D12MemoryAllocator/include"
-IncludeDirs["IconFontCppHeaders"] = "%{wks.location}vendor/IconFontCppHeaders"
-IncludeDirs["nlohmann_json"] = "%{wks.location}vendor/nlohmann_json/single_include"
-IncludeDirs["lz4"] = "%{wks.location}vendor/lz4/lib"
-IncludeDirs["qoi"] = "%{wks.location}vendor/qoi"
-IncludeDirs["reflect"] = "%{wks.location}vendor/reflect/reflect/inc"
-IncludeDirs["simplygon"] = "%{wks.location}vendor/SimplygonSDK_10.1.11000.0"
-IncludeDirs["zip"] = "%{wks.location}vendor/zip/src"
-IncludeDirs["efsw"] = "%{wks.location}vendor/efsw/include"
+InsightEngineIncludes.AddIncludes(IncludeDirs)
+InsightVendorIncludes.AddIncludes(IncludeDirs)
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"

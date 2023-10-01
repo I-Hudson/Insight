@@ -37,7 +37,9 @@ namespace Insight
 			void Show();
 			void Hide();
 
+			/// @brief Called once when the window is created on start up.
 			virtual void Initialise() { }
+			/// @brief Call once when the window is destroyed at editor termination.
 			virtual void Shutdown() { }
 
 			virtual void OnDraw() = 0;

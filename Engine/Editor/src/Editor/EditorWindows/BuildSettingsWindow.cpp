@@ -2,7 +2,8 @@
 #include "Editor/PackageBuild.h"
 
 #include "Platforms/Platform.h"
-
+#include "Editor/Build/BuildSystem.h"
+#include "Runtime/Engine.h"
 #include <imgui.h>
 
 namespace Insight
@@ -24,8 +25,21 @@ namespace Insight
 		BuildSettingsWindow::~BuildSettingsWindow()
 		{ }
 
+		void BuildSettingsWindow::Initialise()
+		{
+			m_buildSystem = App::Engine::Instance().GetSystemRegistry().GetSystem<BuildSystem>();
+			ASSERT(m_buildSystem);
+		}
+
+		void BuildSettingsWindow::Shutdown()
+		{
+			m_buildSystem = nullptr;
+		}
+
 		void BuildSettingsWindow::OnDraw()
 		{
+			BuildTarget
+
 			if (ImGui::Button("Package Build"))
 			{
 				std::string folderSelcted;
