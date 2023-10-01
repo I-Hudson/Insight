@@ -126,6 +126,7 @@ workspace "InsightTools"
         }
         links
         {
+            "Reflect.lib",
         }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/Reflect.dll\" \"%{cfg.targetdir}\"" }
         prebuildcommands { "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/pdb/\" \"%{cfg.targetdir}\"", }

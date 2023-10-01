@@ -82,6 +82,8 @@ workspace "Insight"
     defines
     {
         "_CRT_SECURE_NO_WARNINGS",
+        "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
+        
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
