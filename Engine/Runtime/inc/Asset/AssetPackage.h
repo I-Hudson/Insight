@@ -128,16 +128,34 @@ namespace Insight
                     for (Runtime::AssetInfo* assetInfo : assetPackage->m_assetInfos)
                     {
                         std::string entryPath = FileSystem::GetRelativePath(assetInfo->GetFullFilePath(), FileSystem::GetParentPath(assetPackage->m_packagePath));
-                        ASSERT(zip_entry_open(zip, entryPath.c_str()) == 0);
+                        int errorCode = zip_entry_open(zip, entryPath.c_str());
+                        if (errorCode != 0)
+                        {
+                            continue;
+                        }
                         
                         // Write data file to zip.
-                        ASSERT(zip_entry_fwrite(zip, assetInfo->GetFullFilePath().c_str()) == 0);
-                        ASSERT(zip_entry_close(zip) == 0);
+                        errorCode = zip_entry_fwrite(zip, assetInfo->GetFullFilePath().c_str());
+                        if (errorCode != 0)
+                        {
+                            errorCode = zip_entry_close(zip);
+                        }
+                        else
+                        {
+                            errorCode = zip_entry_close(zip);
+                        }
 
                         // Write meta file to zip.
-                        std::string metaFile = FileSystem::ReplaceExtension(assetInfo->GetFullFilePath(), Runtime::IResourceManager::c_FileExtension);
-                        //zip_entry_fwrite(zip, metaFile.c_str());
+                        std::string metaFileFullPath = FileSystem::ReplaceExtension(assetInfo->GetFullFilePath(), Runtime::IResourceManager::c_FileExtension);
+                        if (FileSystem::Exists(metaFileFullPath))
+                        {
+                            std::string metaFileRelative = FileSystem::ReplaceExtension(entryPath, Runtime::IResourceManager::c_FileExtension);
+                            ASSERT(zip_entry_open(zip, metaFileRelative.c_str()) == 0);
 
+                            // Write data file to zip.
+                            ASSERT(zip_entry_fwrite(zip, metaFileFullPath.c_str()) == 0);
+                            ASSERT(zip_entry_close(zip) == 0);
+                        }
                     }
 
                     char* outbuf = NULL;

@@ -13,6 +13,8 @@
 #include "Graphics/RenderContext.h"
 #include "Graphics/SimplygonWrapper.h"
 
+#include "Asset/AssetRegistry.h"
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
@@ -87,7 +89,8 @@ namespace Insight
 			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 
-			const aiScene* scene = importer.ReadFile(file_path,
+			std::vector<Byte> fileData = AssetRegistry::Instance().LoadAsset(file_path);
+			const aiScene* scene = importer.ReadFileFromMemory(fileData.data(), fileData.size(),
 				importer_flags
 			);
 

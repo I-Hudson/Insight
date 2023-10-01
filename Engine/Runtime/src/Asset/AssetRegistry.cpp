@@ -64,17 +64,20 @@ namespace Insight::Runtime
         }
 
         Serialisation::BinarySerialiser serialiser(true);
-        std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
-        if (!serialiser.DeserialiseNoHeader(fileData))
-        {
-            return nullptr;
-        }
+        serialiser.SetObjectTracking(false);
+        //std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
+        //if (!serialiser.DeserialiseNoHeader(fileData))
+        //{
+        //    return nullptr;
+        //}
 
         std::string packageName = FileSystem::GetFileName(pathWithExtension, true);
         AssetPackage* newPackage = CreateAssetPackageInternal(packageName, pathWithExtension);
         if (newPackage)
         {
-            newPackage->Deserialise(&serialiser);
+            ::Insight::Serialisation::SerialiserObject<AssetPackage> serialiserObject;
+            serialiserObject.MetaDataEnabled = false;
+            serialiserObject.Deserialise(&serialiser, *newPackage);
         }
 
         const AssetInfo* info = GetAsset(pathWithExtension);

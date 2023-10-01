@@ -38,8 +38,6 @@ namespace Insight
 
 		void BuildSettingsWindow::OnDraw()
 		{
-			BuildTarget
-
 			if (ImGui::Button("Package Build"))
 			{
 				std::string folderSelcted;

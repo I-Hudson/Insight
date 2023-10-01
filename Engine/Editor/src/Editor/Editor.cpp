@@ -55,6 +55,8 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
+            Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetRootPath() + "/Resources.zip");
+
             const std::string editorAssetPackagePath = EnginePaths::GetResourcePath() + "/Editor/EditorIcons.isassetpackage";
             if (FileSystem::Exists(editorAssetPackagePath))
             {
@@ -79,7 +81,7 @@ namespace Insight
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
 
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
-                    Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
+                    //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::AssetPackage::c_FileExtension);
                     for (const Runtime::AssetInfo* info : allAssetPackages)
@@ -112,16 +114,17 @@ namespace Insight
             Graphics::Window::Instance().SetIcon(EnginePaths::GetResourcePath() + "/Insight/default.png");
             Graphics::Window::Instance().Show();
 
+            m_buildSystem.Initialise();
+            m_hotReloadSystem.Initialise();
+            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
+            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
+
             m_editorWindowManager.RegisterWindows();
             m_editorWindowManager.AddWindow(WorldViewWindow::WINDOW_NAME);
 
             m_menuBar.Initialise(&m_editorWindowManager);
 
-            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_hotReloadSystem);
-            App::Engine::Instance().GetSystemRegistry().RegisterSystem(&m_buildSystem);
 
-            m_buildSystem.Initialise();
-            m_hotReloadSystem.Initialise();
 
             Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
             if (!editorSettings.IsEmpty())
@@ -210,7 +213,6 @@ namespace Insight
 
             m_gameRenderpass->Destroy();
             Delete(m_gameRenderpass);
-
 
             EditorWindowManager::Instance().Destroy();
 
