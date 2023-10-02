@@ -18,16 +18,118 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/mesh.h>
+#include <assimp/IOSystem.hpp>
+#include <assimp/IOStream.hpp>
+
 #include <meshoptimizer.h>
-
 #include <glm/gtc/type_ptr.hpp>
-
-#include <ppl.h>
 
 namespace Insight
 {
 	namespace Runtime
 	{
+		class CustomAssimpIOStrean : public Assimp::IOStream
+		{
+		public:
+			CustomAssimpIOStrean(const AssetInfo* assetInfo)
+				: m_assetInfo(assetInfo)
+			{
+				m_fileData = AssetRegistry::Instance().LoadAsset(m_assetInfo->GetFullFilePath());
+				ASSERT(!m_fileData.empty());
+			}
+
+			virtual size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override
+			{
+				const size_t cnt = std::min(pCount, (m_fileData.size() - m_cursor) / pSize);
+				const size_t ofs = pSize * cnt;
+
+				Platform::MemCopy(pvBuffer, m_fileData.data() + m_cursor, ofs);
+				m_cursor += ofs;
+				return cnt;
+			}
+
+			virtual size_t Write(const void* pvBuffer, size_t pSize, size_t pCount)  override
+			{
+				FAIL_ASSERT();
+				return 0;
+			}
+
+			virtual aiReturn Seek(size_t pOffset, aiOrigin pOrigin)  override
+			{
+				if (aiOrigin_SET == pOrigin) 
+				{
+					if (pOffset > m_fileData.size()) 
+					{
+						return AI_FAILURE;
+					}
+					m_cursor = pOffset;
+				}
+				else if (aiOrigin_END == pOrigin) 
+				{
+					if (pOffset > m_fileData.size())
+					{
+						return AI_FAILURE;
+					}
+					m_cursor = m_fileData.size() - pOffset;
+				}
+				else 
+				{
+					if (pOffset + m_cursor > m_fileData.size())
+					{
+						return AI_FAILURE;
+					}
+					m_cursor += pOffset;
+				}
+				return aiReturn_SUCCESS;
+			}
+
+			virtual size_t Tell() const override
+			{
+				return m_cursor;
+			}
+
+			virtual size_t FileSize() const override
+			{
+				return m_fileData.size();
+			}
+
+			virtual void Flush() override
+			{
+			}
+
+		private:
+			const AssetInfo* m_assetInfo = nullptr;
+			std::vector<Byte> m_fileData;
+			u64 m_cursor = 0;
+		};
+
+		class CustomAssimpIOSystem : public Assimp::IOSystem
+		{
+		public:
+			virtual bool Exists(const char* pFile) const override
+			{
+				return AssetRegistry::Instance().GetAsset(pFile) != nullptr;
+			}
+
+			virtual char getOsSeparator() const override
+			{
+				return '\\';
+			}
+
+			virtual Assimp::IOStream* Open(const char* pFile,
+				const char* pMode = "rb")  override
+			{
+				const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(pFile);
+				return ::New<CustomAssimpIOStrean>(assetInfo);
+			}
+
+			virtual void Close(Assimp::IOStream* pFile)  override
+			{
+				::Delete(pFile);
+			}
+
+		};
+
 		static glm::mat4 ConvertMatrix(const aiMatrix4x4& transform)
 		{
 			return glm::mat4
@@ -89,10 +191,14 @@ namespace Insight
 			// Remove cameras and lights
 			importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS, aiComponent_CAMERAS | aiComponent_LIGHTS);
 
-			std::vector<Byte> fileData = AssetRegistry::Instance().LoadAsset(file_path);
-			const aiScene* scene = importer.ReadFileFromMemory(fileData.data(), fileData.size(),
+			CustomAssimpIOSystem ioSystem;
+			importer.SetIOHandler(&ioSystem);
+
+			//std::vector<Byte> fileData = AssetRegistry::Instance().LoadAsset(file_path);
+			const aiScene* scene = importer.ReadFile(file_path,
 				importer_flags
 			);
+			importer.SetIOHandler(nullptr);
 
 			if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 			{
