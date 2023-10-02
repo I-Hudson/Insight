@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/Defines.h"
+#include "Runtime/Defines.h"
 #include "Graphics/RenderContext.h"
 
 namespace Insight
@@ -10,7 +10,7 @@ namespace Insight
 		class RHI_Buffer;
 		class RHI_Texture;
 
-		class IS_GRAPHICS ImGuiPass
+		class IS_RUNTIME ImGuiPass
 		{
 			struct ImGuiPassData
 			{

@@ -118,6 +118,25 @@ namespace Insight
 
 		IDxcBlob* ShaderCompiler::Compile(ShaderStageFlagBits stage, std::string_view filePath, ShaderCompilerLanguage languageToCompileTo)
 		{
+			/// Load the HLSL text shader from disk
+			uint32_t codePage = CP_UTF8;
+			IDxcBlobEncoding* sourceBlob;
+			std::wstring filePathW = Platform::WStringFromStringView(filePath);
+			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePathW.c_str(), nullptr, &sourceBlob)));
+
+			std::vector<Byte> shaderData;
+			shaderData.resize(sourceBlob->GetBufferSize());
+			Platform::MemCopy(shaderData.data(), sourceBlob->GetBufferPointer(), shaderData.size());
+			sourceBlob->Release();
+
+			IDxcBlob* compiledShaderBlob = Compile(stage, std::string(filePath), shaderData, languageToCompileTo);
+
+			return compiledShaderBlob;
+		}
+
+		IDxcBlob* ShaderCompiler::Compile(ShaderStageFlagBits stage, std::string name, const std::vector<Byte>& shaderData, ShaderCompilerLanguage languageToCompileTo)
+		{
+			ASSERT(shaderData.size() > 0);
 			m_languageToCompileTo = languageToCompileTo;
 
 			if (ShaderCompileResults)
@@ -133,22 +152,16 @@ namespace Insight
 			IDxcIncludeHandler* pIncludeHandler;
 			ASSERT(SUCCEEDED(DXUtils->CreateDefaultIncludeHandler(&pIncludeHandler)));
 
-			/// Load the HLSL text shader from disk
-			uint32_t codePage = CP_UTF8;
-			IDxcBlobEncoding* sourceBlob;
-			std::wstring filePathW = Platform::WStringFromStringView(filePath);
-			ASSERT(SUCCEEDED(DXUtils->LoadFile(filePathW.c_str(), nullptr, &sourceBlob)));
+
 
 			DxcBuffer Source;
-			Source.Ptr = sourceBlob->GetBufferPointer();
-			Source.Size = sourceBlob->GetBufferSize();
+			Source.Ptr = shaderData.data();
+			Source.Size = shaderData.size();
 			Source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
 			// Set up arguments to be passed to the shader compiler
 
 			std::vector<LPCWCHAR> arguments;
-			std::wstring filename = Platform::WStringFromStringView(filePath);
-			arguments.push_back(filename.c_str());
 
 			std::wstring mainFunc = Platform::WStringFromString(StageToFuncName(stage));
 			std::wstring targetProfile = Platform::WStringFromString(StageToProfileTarget(stage));
@@ -167,7 +180,7 @@ namespace Insight
 
 			arguments.push_back(DXC_ARG_DEBUG);
 			//arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
-			
+
 			// Tell the compiler to output SPIR-V
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
 			{
@@ -237,11 +250,11 @@ namespace Insight
 			// Write shader to disk.
 			std::ofstream shaderDisk;
 
-			int startShaderFile = (int)filePath.find_last_of('/') + 1;
-			int offsetShaderFile = (int)filePath.find_last_of('.') - startShaderFile;
+			int startShaderFile = (int)name.find_last_of('/') + 1;
+			int offsetShaderFile = (int)name.find_last_of('.') - startShaderFile;
 
-			std::string_view shaderToDiskView = filePath.substr(startShaderFile, offsetShaderFile);
-			
+			std::string_view shaderToDiskView = name.substr(startShaderFile, offsetShaderFile);
+
 			std::string shaderCSOFolderPath = EnginePaths::GetExecutablePath() + "/Shader_CSO/";
 			FileSystem::CreateFolder(shaderCSOFolderPath);
 
@@ -254,7 +267,6 @@ namespace Insight
 			}
 
 			pIncludeHandler->Release();
-			sourceBlob->Release();
 
 			return code;
 		}

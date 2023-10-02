@@ -39,19 +39,18 @@ namespace Insight
 			ShaderDesc()
 			{ }
 
-			ShaderDesc(std::string vertex, std::string pixel)
-				: VertexFilePath(vertex), PixelFilePath(pixel)
+			ShaderDesc(std::string shaderName, std::vector<Byte> shaderData, ShaderStageFlags stages)
+				: ShaderName(shaderName), ShaderData(shaderData), Stages(stages)
 			{ }
 
 			~ShaderDesc()
 			{
 			}
 
-			std::string VertexFilePath = "";
-			std::string TesselationControlFilePath = "";
-			std::string TesselationEvaluationVertexFilePath = "";
-			std::string GeoemtyFilePath = "";
-			std::string PixelFilePath = "";
+			std::string ShaderName = "";
+			std::vector<Byte> ShaderData;
+			ShaderStageFlags Stages;
+
 			std::string MainFunc = "Main";
 			std::vector<ShaderInputLayout> InputLayout; /// Optioanl, if left empty reflection will happen on the shader code.
 
@@ -59,25 +58,9 @@ namespace Insight
 			{
 				u64 hash = 0;
 				
-				if (!VertexFilePath.empty())
+				if (!ShaderName.empty())
 				{
-					HashCombine(hash, VertexFilePath);
-				}
-				if (!TesselationControlFilePath.empty())
-				{
-					HashCombine(hash, TesselationControlFilePath);
-				}
-				if (!TesselationEvaluationVertexFilePath.empty())
-				{
-					HashCombine(hash, TesselationEvaluationVertexFilePath);
-				} 
-				if (!GeoemtyFilePath.empty())
-				{
-					HashCombine(hash, GeoemtyFilePath);
-				}
-				if (!PixelFilePath.empty())
-				{
-					HashCombine(hash, PixelFilePath);
+					HashCombine(hash, ShaderName);
 				}
 				if (!MainFunc.empty())
 				{
@@ -94,7 +77,7 @@ namespace Insight
 
 			bool IsValid() const
 			{
-				return !VertexFilePath.empty();
+				return !ShaderName.empty();
 			}
 		};
 	}

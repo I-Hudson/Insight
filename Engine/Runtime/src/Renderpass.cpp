@@ -158,6 +158,8 @@ namespace Insight
 
 			m_imgui_pass.Create();
 
+			CreateAllCommonShaders();
+
 			//Graphics::RHI_FSR::Instance().Init();
 		}
 
@@ -516,9 +518,8 @@ namespace Insight
 					builder.SetViewport(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 					builder.SetScissor(Shadow_Depth_Tex_Size, Shadow_Depth_Tex_Size);
 
-					ShaderDesc shader_description = { };
+					ShaderDesc shader_description("CascadeShaderMap", {}, ShaderStageFlagBits::ShaderStage_Vertex);
 					shader_description.InputLayout = GetDefaultShaderInputLayout();
-					shader_description.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl";
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -619,11 +620,7 @@ namespace Insight
 					RGTextureHandle depthStencil = builder.CreateTexture("Depth_Prepass_DepthStencil", textureCreateInfo);
 					builder.WriteDepthStencil(depthStencil);
 
-					ShaderDesc shaderDesc;
-					{
-						IS_PROFILE_SCOPE("Depth_Prepass_GetShader");
-						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Depth_Prepass.hlsl";
-					}
+					ShaderDesc shaderDesc("DepthPrepass", {}, ShaderStageFlagBits::ShaderStage_Vertex);
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject depth_Prepass_pso = { };
@@ -743,13 +740,8 @@ namespace Insight
 					}
 					builder.ReadTexture(builder.GetTexture("Cascade_Shadow_Tex"));
 
-					ShaderDesc shaderDesc;
-					{
-						IS_PROFILE_SCOPE("GBuffer-GetShader");
-						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.InputLayout = GetDefaultShaderInputLayout();
-					}
+					ShaderDesc shaderDesc("GBuffer", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+					shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject gbufferPso = { };
@@ -938,13 +930,8 @@ namespace Insight
 					renderpassDescription.DepthStencilAttachment.InitalLayout = ImageLayout::DepthStencilAttachment;
 					builder.SetRenderpass(renderpassDescription);
 
-					ShaderDesc shaderDesc;
-					{
-						IS_PROFILE_SCOPE("GetShader");
-						shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-						shaderDesc.InputLayout = GetDefaultShaderInputLayout();
-					}
+					ShaderDesc shaderDesc("GBuffer", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+					shaderDesc.InputLayout = GetDefaultShaderInputLayout();
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
@@ -1099,9 +1086,7 @@ namespace Insight
 					RGTextureHandle composite_handle = builder.CreateTexture("Composite_Tex", create_info);
 					builder.WriteTexture(composite_handle);
 
-					ShaderDesc shader_description = { };
-					shader_description.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl";
-					shader_description.PixelFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl";
+					ShaderDesc shader_description("Composite", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 					builder.SetShader(shader_description);
 
 					PipelineStateObject pso = { };
@@ -1228,9 +1213,7 @@ namespace Insight
 
 					builder.WriteTexture(-1);
 
-					ShaderDesc shaderDesc = { };
-					shaderDesc.VertexFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl";
-					shaderDesc.PixelFilePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl";
+					ShaderDesc shaderDesc("GFXHelper", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject pso = { };
@@ -1371,9 +1354,7 @@ namespace Insight
 
 					builder.WriteTexture(-1);
 
-					ShaderDesc shaderDesc;
-					shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
-					shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/Swapchain.hlsl";
+					ShaderDesc shaderDesc("Swapchain", {}, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
 					builder.SetShader(shaderDesc);
 
 					PipelineStateObject swapchainPso = { };
@@ -1423,6 +1404,35 @@ namespace Insight
 			m_imgui_pass.Render();
 		}
 
+		void Renderpass::CreateAllCommonShaders()
+		{
+			std::vector<Byte> shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Cascade_Shadow.hlsl");
+			ShaderDesc shaderDesc("CascadeShaderMap", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Depth_Prepass.hlsl");
+			shaderDesc = ShaderDesc("DepthPrepass", shaderData, ShaderStageFlagBits::ShaderStage_Vertex);
+			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			//RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GBuffer.hlsl");
+			shaderDesc = ShaderDesc("GBuffer", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			shaderDesc.InputLayout = GetDefaultShaderInputLayout();
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Composite.hlsl");
+			shaderDesc = ShaderDesc("Composite", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/GFXHelper.hlsl");
+			shaderDesc = ShaderDesc("GFXHelper", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+
+			shaderData = Runtime::AssetRegistry::Instance().LoadAsset(EnginePaths::GetResourcePath() + "/Shaders/hlsl/Swapchain.hlsl");
+			shaderDesc = ShaderDesc("Swapchain", shaderData, ShaderStageFlagBits::ShaderStage_Vertex | ShaderStageFlagBits::ShaderStage_Pixel);
+			RenderContext::Instance().GetShaderManager().GetOrCreateShader(shaderDesc);
+		}
 
 		void Renderpass::BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers)
 		{

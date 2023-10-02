@@ -34,7 +34,10 @@ namespace Insight
 				virtual void Destroy() override;
 
 				void CompileStage(ShaderStageFlagBits stage, std::string_view path, int moduleIndex);
+				void CompileStage(ShaderStageFlagBits stage, std::string_view name, const std::vector<Byte>& shaderData, int moduleIndex);
+
 				void CreateVertexInputLayout(const ShaderDesc& desc);
+				void CreateShaderModule(IDxcBlob* code, int moduleIndex, ShaderCompiler& compiler, ShaderStageFlagBits stage);
 
 			private:
 				VertexInputLayout_Vulkan m_vertexInputLayout;

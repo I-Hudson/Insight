@@ -48,7 +48,7 @@ namespace Insight
 			friend RHI_ShaderManager;
 		};
 
-		class RHI_ShaderManager
+		class IS_GRAPHICS RHI_ShaderManager
 		{
 		public:
 			RHI_ShaderManager();
@@ -81,6 +81,8 @@ namespace Insight
 			std::string StageToProfileTarget(ShaderStageFlagBits stage);
 
 			IDxcBlob* Compile(ShaderStageFlagBits stage, std::string_view filePath, ShaderCompilerLanguage languageToCompileTo);
+			IDxcBlob* Compile(ShaderStageFlagBits stage, std::string name, const std::vector<Byte>& shaderData, ShaderCompilerLanguage languageToCompileTo);
+
 			void GetDescriptorSets(ShaderStageFlagBits stage, std::vector<DescriptorSet>& descriptor_sets, PushConstant& push_constant);
 			std::vector<ShaderInputLayout> GetInputLayout();
 

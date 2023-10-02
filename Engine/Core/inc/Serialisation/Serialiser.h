@@ -11,8 +11,9 @@
 
 constexpr bool VersionCheck(const u32 serialisedVersion, const u32 versionAdded, const u32 versionRemoved)
 {
-    return (versionRemoved == 0 && serialisedVersion >= versionAdded) ||
-        (serialisedVersion >= versionAdded && serialisedVersion < versionRemoved);
+    return (serialisedVersion == -1)
+        || (versionRemoved == 0 && serialisedVersion >= versionAdded) 
+        || (serialisedVersion >= versionAdded && serialisedVersion < versionRemoved);
 }
 
 constexpr bool ObjectSerialiserCheck(std::string_view currentObjectSerialiser, std::string_view serialisedObjectSerialiser)
@@ -444,7 +445,7 @@ static bool DeserialiseCheckForObjectSerialiser(::Insight::Serialisation::ISeria
 #define DESERIALISE_FUNC(OBJECT_TYPE, CURRENT_VERSION, ...)\
         void Deserialise(::Insight::Serialisation::ISerialiser* serialiser, OBJECT_TYPE& object, std::string serialisedObjectSerilaiser = "")\
         {\
-            u32 version = 0;\
+            u32 version = -1;\
             std::string objectSerialiserType = typeid(OBJECT_TYPE).name();\
             objectSerialiserType = RemoveString(objectSerialiserType, "class");\
             objectSerialiserType = RemoveString(objectSerialiserType, "struct");\

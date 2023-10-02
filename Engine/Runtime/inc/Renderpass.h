@@ -98,6 +98,7 @@ namespace Insight
 			void Swapchain(bool renderResultImage);
 			void ImGuiPass();
 
+			void CreateAllCommonShaders();
 			void BindCommonResources(RHI_CommandList* cmd_list, BufferFrame& buffer_frame, BufferSamplers& buffer_samplers);
 
 			Graphics::ImGuiPass m_imgui_pass;

@@ -157,11 +157,8 @@ namespace Insight
                 Graphics::RGTextureHandle depthStencil = builder.CreateTexture("EditorWorldDepthStencilRT_Prepass", textureCreateInfo);
                 builder.WriteDepthStencil(depthStencil);
 
-                Graphics::ShaderDesc shaderDesc;
-                {
-                    shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
-                }
+                Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
                 builder.SetShader(shaderDesc);
 
                 Graphics::PipelineStateObject gbufferPso = { };
@@ -285,12 +282,8 @@ namespace Insight
                     Graphics::RGTextureHandle depthStencil = builder.CreateTexture("EditorWorldDepthStencilRT", textureCreateInfo);
                     builder.WriteDepthStencil(depthStencil);
 
-                    Graphics::ShaderDesc shaderDesc;
-                    {
-                        shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-                        shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-                        shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
-                    }
+                    Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
                     builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject gbufferPso = { };
@@ -408,12 +401,8 @@ namespace Insight
                     renderpassDescription.DepthStencilAttachment.InitalLayout = Graphics::ImageLayout::DepthStencilAttachment;
                     builder.SetRenderpass(renderpassDescription);
 
-                    Graphics::ShaderDesc shaderDesc;
-                    {
-                        shaderDesc.VertexFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-                        shaderDesc.PixelFilePath = "Resources/Shaders/hlsl/GBuffer.hlsl";
-                        shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
-                    }
+                    Graphics::ShaderDesc shaderDesc("GBuffer", {}, Graphics::ShaderStageFlagBits::ShaderStage_Vertex | Graphics::ShaderStageFlagBits::ShaderStage_Pixel);
+                    shaderDesc.InputLayout = Graphics::GetDefaultShaderInputLayout();
                     builder.SetShader(shaderDesc);
 
                     Graphics::PipelineStateObject pso = { };
