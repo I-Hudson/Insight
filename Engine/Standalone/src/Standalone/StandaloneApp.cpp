@@ -5,10 +5,13 @@
 #include "Runtime/EntryPoint.h"
 #include "Core/Memory.h"
 #include "Core/ImGuiSystem.h"
+#include "Core/EnginePaths.h"
 
 #include "Graphics/Window.h"
 #include "Graphics/RenderContext.h"
 #include "Renderpass.h"
+
+#include "Asset/AssetRegistry.h"
 
 #include <imgui.h>
 
@@ -19,6 +22,8 @@ namespace Insight
 		void StandaloneApp::OnInit()
 		{
 			StandaloneModule::Initialise(GetSystemRegistry().GetSystem<Core::ImGuiSystem>());
+
+			Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetRootPath() + "/Resources.isassetpackage");
 
 			std::string windowTitle = "Insight Standalone";
 #ifdef IS_DEBUG

@@ -249,6 +249,13 @@ namespace Insight::Runtime
         {
             return info->AssetPackage->LoadAsset(path);
         }
+        else
+        {
+            if (FileSystem::Exists(path))
+            {
+                return FileSystem::ReadFromFile(path);
+            }
+        }
         IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", path.data());
         return {};
     }
@@ -259,6 +266,13 @@ namespace Insight::Runtime
             iter != m_guidToAssetInfo.end())
         {
             return iter->second;
+        }
+        for (const auto& [assetGuid, assetInfo] : m_guidToAssetInfo)
+        {
+            if (assetGuid == guid)
+            {
+                return assetInfo;
+            }
         }
         return nullptr;
     }
