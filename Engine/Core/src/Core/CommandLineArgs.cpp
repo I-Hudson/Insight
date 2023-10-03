@@ -134,6 +134,21 @@ namespace Insight
 			ParseCommandLine(static_cast<int>(args.size()), c_args.data());
 		}
 
+		void CommandLineArgs::AddCommandLine(const char* key, const char* value)
+		{
+			m_args[key] = CommandLineValue(key, value);
+		}
+
+		std::string CommandLineArgs::GetAllCommandLine()
+		{
+			std::string commandLine;
+			for (auto& [key, value] : m_args)
+			{
+				commandLine += key + "=" + value.Value + " ";
+			}
+			return commandLine;
+		}
+
 		Ptr<CommandLineValue> CommandLineArgs::GetCommandLineValue(std::string key)
 		{
 			ToLowwer(key);

@@ -46,7 +46,9 @@ namespace Insight
 
 		void RHI_GPUCrashTrackerNvidiaAftermath::Destroy()
 		{
+			AFTERMATH_CHECK_ERROR(GFSDK_Aftermath_DisableGpuCrashDumps());
 		}
+
 		void RHI_GPUCrashTrackerNvidiaAftermath::OnCrashDump(const void* pGpuCrashDump, const uint32_t gpuCrashDumpSize)
 		{
 			// Make sure only one thread at a time...

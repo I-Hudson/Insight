@@ -40,7 +40,9 @@ namespace Insight
 		public:
 			static void ParseCommandLine(int argc, char** argv);
 			static void ParseCommandLine(const char* file_path);
-			
+			static void AddCommandLine(const char* key, const char* value);
+
+			static std::string GetAllCommandLine();
 			static Ptr<CommandLineValue> GetCommandLineValue(std::string key);
 			static bool CommandListExists(std::string const& key);
 

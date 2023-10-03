@@ -162,13 +162,6 @@ namespace Insight
                 pack->AddResource(resource);
             }
 
-            splashScreen.Destroy();
-        }
-
-        void Editor::OnUpdate()
-        {
-            IS_PROFILE_FUNCTION();
-
             if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
             {
                 m_editorWindowManager.AddWindow(ProjectWindow::WINDOW_NAME);
@@ -177,9 +170,17 @@ namespace Insight
             }
             else
             {
-                m_menuBar.Draw();
+                m_editorWindowManager.RemoveWindow(ProjectWindow::WINDOW_NAME);
             }
 
+            splashScreen.Destroy();
+        }
+
+        void Editor::OnUpdate()
+        {
+            IS_PROFILE_FUNCTION();
+            
+            m_menuBar.Draw();
             EditorWindowManager::Instance().Update();
         }
 

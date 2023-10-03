@@ -16,7 +16,7 @@
 #include "dxc/dxcapi.h"
 #include "spirv_reflect.h"
 
-#include <fstream>
+#include <string>
 
 namespace Insight
 {
@@ -174,12 +174,14 @@ namespace Insight
 			arguments.push_back(L"-T");
 			arguments.push_back(targetProfile.c_str());
 
+			std::string resourcePath = EnginePaths::GetResourcePath() + "/Shaders/hlsl";
+			std::wstring wResourcePath = Platform::WStringFromString(resourcePath);
 			const wchar_t* c_Include_Directory = L"-I";
 			arguments.push_back(c_Include_Directory);
-			arguments.push_back(L"Resources/Shaders/hlsl");
+			arguments.push_back(wResourcePath.c_str());
 
 			arguments.push_back(DXC_ARG_DEBUG);
-			//arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 
 			// Tell the compiler to output SPIR-V
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)
