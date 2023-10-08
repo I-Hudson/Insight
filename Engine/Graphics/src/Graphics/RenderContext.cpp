@@ -6,6 +6,8 @@
 #include "Graphics/RenderTarget.h"
 #include "Graphics/RenderGraph/RenderGraph.h"
 
+#include "Graphics/Fonts/fa_solid_900.ttf.h"
+
 #include "Core/Memory.h"
 #include "Core/Logger.h"
 #include "Core/EnginePaths.h"
@@ -187,8 +189,12 @@ namespace Insight
 				// merge in icons from Font Awesome
 				static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
 				ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-				io.Fonts->AddFontFromFileTTF((std::string(EnginePaths::GetResourcePath() + "/fonts/") + FONT_ICON_FILE_NAME_FAS).c_str(), 16.0f, &icons_config, icons_ranges);
-				// use FONT_ICON_FILE_NAME_FAR if you want regular instead of solid
+
+				const u64 fontDataSize = ARRAY_COUNT(fa_solid_900_ttf);
+				unsigned char* fontData = new unsigned char[fontDataSize];
+				Platform::MemCopy(fontData, fa_solid_900_ttf, fontDataSize);
+
+				io.Fonts->AddFontFromMemoryTTF(fontData, fontDataSize, 16.0f, &icons_config, icons_ranges);
 
 				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
 				m_font_texture->LoadFromData(pixels, width, height, 1, 4);
