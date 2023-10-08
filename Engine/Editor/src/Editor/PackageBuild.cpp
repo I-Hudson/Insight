@@ -1,8 +1,13 @@
 #include "Editor/PackageBuild.h"
+#include "Editor/Premake/PremakeSolutionGenerator.h"
+
+#include "Editor/Build/PackageBuildPremakeSolutionTemplate.h"
+#include "Editor/Build/PakcageBuildPremakeProjectTemplate.h"
 
 #include "Core/Logger.h"
 #include "FileSystem/FileSystem.h"
-#include "Threading/TaskSystem.h"
+
+#include "Runtime/ProjectSystem.h"
 
 #include <processthreadsapi.h>
 #include <shellapi.h>
@@ -12,10 +17,26 @@ namespace Insight
     namespace Editor
     {
         constexpr const char* c_generateProjectBach = "/../../../Build/Engine/GENERATE_PROJECT.bat";
-        constexpr const char* c_packageBuildPremakeScript = "/../../../Build/Engine/premake5-standalone.lua";
 
         void PackageBuild::Build(std::string_view outputFolder)
         {
+            PremakeHeaderToolData headerToolData;
+            headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
+            headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
+
+            PremakeTemplateData templateData;
+            templateData.HeaderToolData = std::move(headerToolData);
+            templateData.SolutionData = PremakeSolutionTemplateData::CreateFromProjectInfo(PremakeSolutionGenerator::GetProjectIDESolutionName().c_str());
+
+            templateData.ProjectData = PremakeProjectTemplateData::CreateFromProjectInfo();
+            templateData.ProjectData.AdditionalFiles.push_back(templateData.HeaderToolData.GeneratedFilesOutputPath);
+
+            //templateData.CreateFuncs.CreateSolutionFunc = CreatePremakeSolutionTemplateFile;
+            //templateData.CreateFuncs.CreateProjectFunc = CreatePremakeProjectTemplateFile;
+
+            PremakeSolutionGenerator solutionGenerator;
+            solutionGenerator.GenerateSolution(templateData);
+
             BuildSolution();
             BuildPackageBuild(outputFolder);
         }
@@ -34,7 +55,7 @@ namespace Insight
         {
             std::string exeFillPath = GetExecuteablepath();
             std::string premakePath = exeFillPath + "/../../../vendor/premake/premake5.exe";
-            std::string solutionLuaPath = exeFillPath + c_packageBuildPremakeScript;
+            std::string solutionLuaPath = exeFillPath + GenerateBuildFile();
 
             std::string command = "/c ";
             command += premakePath;
@@ -76,6 +97,25 @@ namespace Insight
             WaitForSingleObject(processInfo.hProcess, INFINITE);
             CloseHandle(processInfo.hProcess);
             CloseHandle(processInfo.hThread);
+        }
+
+        std::string PackageBuild::GenerateBuildFile()
+        {
+            std::vector<Byte> fileData = FileSystem::ReadFromFile("");
+            std::string fileString{ fileData.begin(), fileData.end() };
+            fileData.resize(0);
+
+            const char* c_ProjectFilesToeken = "--PROJECT_FILES";
+            u64 projectFilesToken = fileString.find(c_ProjectFilesToeken);
+            if (projectFilesToken == std::string::npos)
+            {
+                return "";
+            }
+
+            std::string projectFiles = "";
+            fileString.replace(projectFilesToken, strlen(c_ProjectFilesToeken), projectFiles);
+
+            return fileString;
         }
     }
 }

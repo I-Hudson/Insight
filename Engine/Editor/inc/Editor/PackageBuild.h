@@ -18,6 +18,8 @@ namespace Insight
             std::string GetExecuteablepath();
             void BuildSolution();
             void BuildPackageBuild(std::string_view outputFolder);
+
+            std::string GenerateBuildFile();
         };
     }
 }
