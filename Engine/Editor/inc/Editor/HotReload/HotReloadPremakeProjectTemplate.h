@@ -1,5 +1,4 @@
-#include <string>
-#include <vector>
+#include "Editor/Premake/PremakeProjectTemplateData.h"
 
 namespace Insight::Editor
 {
@@ -126,12 +125,5 @@ namespace Insight::Editor
         }
     )";
 
-    struct PremakeProjectTemplateData
-    {
-        const char* ProjectName;
-        const char* InsightRootPath;
-
-        std::vector<std::string> AdditionalFiles;
-    };
-    std::string CreatePremakeProjectTemplateFile(const char* outFolder, const PremakeProjectTemplateData& templateData);
+    std::string CreatePremakeProjectTemplateFile(const PremakeProjectTemplateData& templateData);
 }

@@ -9,7 +9,7 @@
 
 namespace Insight::Editor
 {
-    std::string CreatePremakeProjectTemplateFile(const char* outFolder, const PremakeProjectTemplateData& templateData)
+    std::string CreatePremakeProjectTemplateFile(const PremakeProjectTemplateData& templateData)
     {
         std::string premake = c_PremakeProjectTemplate;
 
@@ -38,7 +38,7 @@ namespace Insight::Editor
         }
         premake.replace(premake.find(c_PremakeProjectTag_AdditionalFiles), strlen(c_PremakeProjectTag_AdditionalFiles), additionalFiles);
 
-        std::string premakeOutFile = std::string(outFolder) + "/" + c_PremakeProjectFileName;
+        std::string premakeOutFile = std::string(templateData.PremakeOutputPath) + "/" + c_PremakeProjectFileName;
         std::vector<uint8_t> vec(premake.begin(), premake.end());
         FileSystem::SaveToFile(vec, premakeOutFile, FileType::Text, true);
         return premakeOutFile;

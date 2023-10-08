@@ -1,8 +1,11 @@
 #include "Editor/HotReload/HotReloadSystem.h"
-#include "Editor/HotReload/HotReloadSolutionGenerator.h"
+#include "Editor/HotReload/HotReloadPremakeSolutionTemplate.h"
+#include "Editor/HotReload/HotReloadPremakeProjectTemplate.h"
 
 #include "Editor/HotReload/Operations/EditorWindowsOperation.h"
 #include "Editor/HotReload/Operations/ComponentsOperation.h"
+
+#include "Editor/Premake/PremakeSolutionGenerator.h"
 
 #include "Core/Logger.h"
 
@@ -59,8 +62,25 @@ namespace Insight::Editor
     void HotReloadSystem::GenerateProjectSolution()
     {
         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-        HotReloadSolutionGenerator solutionGenerator;
-        solutionGenerator.GenerateSolution(projectInfo);
+        PremakeSolutionGenerator solutionGenerator;
+
+        PremakeHeaderToolData headerToolData;
+        headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
+        headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
+
+        PremakeTemplateData templateData;
+        templateData.HeaderToolData = std::move(headerToolData);
+        templateData.SolutionData = PremakeSolutionTemplateData::CreateFromProjectInfo(PremakeSolutionGenerator::GetProjectIDESolutionName().c_str());
+        templateData.SolutionData.PremakeOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath();
+
+        templateData.ProjectData = PremakeProjectTemplateData::CreateFromProjectInfo();
+        templateData.ProjectData.PremakeOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath();
+        templateData.ProjectData.AdditionalFiles.push_back(templateData.HeaderToolData.GeneratedFilesOutputPath);
+
+        templateData.CreateFuncs.CreateSolutionFunc = CreatePremakeSolutionTemplateFile;
+        templateData.CreateFuncs.CreateProjectFunc = CreatePremakeProjectTemplateFile;
+
+        solutionGenerator.GenerateSolution(templateData);
     }
 
     void HotReloadSystem::Reload()
@@ -76,8 +96,8 @@ namespace Insight::Editor
     {
         GenerateProjectSolution();
         const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
-        HotReloadSolutionGenerator solutionGenerator;
-        solutionGenerator.BuildSolution(projectInfo);
+        PremakeSolutionGenerator solutionGenerator;
+        solutionGenerator.BuildSolution(PremakeSolutionGenerator::GetProjectIDESolutionPath().c_str());
     }
 
     void HotReloadSystem::PreUnloadOperations()

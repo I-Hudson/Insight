@@ -1,4 +1,4 @@
-#include <string>
+#include "Editor/Premake/PremakeSolutionTemplateData.h"
 
 namespace Insight::Editor
 {
@@ -97,6 +97,8 @@ workspace "--SOLUTION_NAME"
     defines
     {
         "_CRT_SECURE_NO_WARNINGS",
+        "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
+
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
@@ -217,11 +219,5 @@ workspace "--SOLUTION_NAME"
     include "--PREMAKE_PROJECT_FILE_NAME"
     )";
 
-    struct PremakeSolutionTemplateData
-    {
-        const char* SolutionName;
-        const char* ProjectName;
-        const char* InsightRootPath;
-    };
-    std::string CreatePremakeSolutionTemplateFile(const char* outFolder, const PremakeSolutionTemplateData& templateData);
+    std::string CreatePremakeSolutionTemplateFile(const PremakeSolutionTemplateData& templateData);
 }
