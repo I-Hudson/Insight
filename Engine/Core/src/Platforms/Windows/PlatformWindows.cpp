@@ -108,6 +108,24 @@ namespace Insight
 			return wcscmp(wstr1, wstr1);
 		}
 
+		bool PlatformWindows::RunProcessAndWait(const char* command)
+		{
+			bool success = true;
+			STARTUPINFOA info = { sizeof(info) };
+			PROCESS_INFORMATION processInfo;
+
+			if (!CreateProcessA("C:\\Windows\\System32\\cmd.exe", (char*)command, NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
+			{
+				IS_CORE_ERROR("[PackageBuild::BuildSolution] Unable to compile solution: '{0}'.", GetLastError());
+				success = false;
+			}
+			WaitForSingleObject(processInfo.hProcess, INFINITE);
+			CloseHandle(processInfo.hProcess);
+			CloseHandle(processInfo.hThread);
+
+			return success;
+		}
+
 		/// https:///gist.github.com/rioki/85ca8295d51a5e0b7c56e5005b0ba8b4	
 		inline std::string basename(const std::string& file)
 		{

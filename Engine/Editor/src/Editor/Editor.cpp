@@ -182,6 +182,7 @@ namespace Insight
             
             m_menuBar.Draw();
             EditorWindowManager::Instance().Update();
+            m_contentListener.Update();
         }
 
         void Editor::OnRender()

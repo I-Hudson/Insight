@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <functional>
+#include <mutex>
+
 #include <efsw/efsw.hpp>
 
 namespace Insight
@@ -21,9 +25,12 @@ namespace Insight
                                    std::string oldFilename) override;
 
             void SetAssetPackage(Runtime::AssetPackage* assetPackage);
+            void Update();
 
         private:
             Runtime::AssetPackage* m_assetPackage;
+            std::vector<std::function<void()>> m_queuedActions;
+            std::mutex m_queuedActionsMuetx;
         };
     }
 }

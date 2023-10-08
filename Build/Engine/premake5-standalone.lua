@@ -72,6 +72,12 @@ workspace "InsightStandalone"
     {
         "%{IncludeDirs.tracy}",
     }
+     
+    prebuildcommands
+     { 
+        "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
+    }
+
 
     if (profileTool == "tracy") then
         editandcontinue "off"

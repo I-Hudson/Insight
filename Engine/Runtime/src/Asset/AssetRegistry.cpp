@@ -164,7 +164,7 @@ namespace Insight::Runtime
         m_pathToAssetGuid.erase(std::string(path));
         ASSERT(assetGuid.IsValid());
 
-        AssetInfo*& assetInfo = m_guidToAssetInfo.find(assetGuid)->second;
+        AssetInfo* assetInfo = m_guidToAssetInfo.find(assetGuid)->second;
         m_guidToAssetInfo.erase(assetGuid);
 
         ASSERT(assetInfo);

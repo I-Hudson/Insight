@@ -30,6 +30,8 @@ namespace Insight
 			static bool StrCompare(const char* str1, const char* str2);
 			static bool WStrCompare(const wchar_t* wstr1, const wchar_t* wstr2);
 
+			static bool RunProcessAndWait(const char* command);
+
 			static std::vector<std::string> GetCallStack(int frameCount = 32);
 
 			static std::string StringFromWString(const std::wstring& wstring);

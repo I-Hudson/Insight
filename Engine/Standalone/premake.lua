@@ -113,6 +113,8 @@ project "InsightStandalone"
         "src/**.cpp",
         "src/**.inl",
 
+        --PROJECT_FILES
+
         "../../vendor/stb/stb_image.h",
         "../../vendor/stb/stb_image_write.h",
         "../../vendor/SPIRV-Reflect/spirv_reflect.h",
@@ -130,9 +132,9 @@ project "InsightStandalone"
 
     links
     {
-        "Insight_Core" .. output_project_subfix .. ".lib",
-        "Insight_Maths" .. output_project_subfix .. ".lib",
-        "Insight_Input" .. output_project_subfix .. ".lib",
+        --"Insight_Core" .. output_project_subfix .. ".lib",
+        --"Insight_Maths" .. output_project_subfix .. ".lib",
+        --"Insight_Input" .. output_project_subfix .. ".lib",
         
         "GLFW.lib",
         "glm.lib",

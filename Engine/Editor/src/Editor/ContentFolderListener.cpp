@@ -15,6 +15,8 @@ namespace Insight::Editor
         std::string fullPath = dir + filename;
         FileSystem::PathToUnix(fullPath);
 
+        std::lock_guard queueedActionsLock(m_queuedActionsMuetx);
+
         switch (action)
         {
         case efsw::Actions::Add:
@@ -23,8 +25,11 @@ namespace Insight::Editor
             std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Added"
                 << std::endl;
 
-            Runtime::AssetRegistry::Instance().AddAsset(fullPath, m_assetPackage);
-            TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
+            m_queuedActions.push_back([this, fullPath]()
+                {
+                    Runtime::AssetRegistry::Instance().AddAsset(fullPath, m_assetPackage);
+                    TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
+                });
         }
             break;
 
@@ -33,8 +38,11 @@ namespace Insight::Editor
             std::cout << "DIR (" << dir << ") FILE (" << filename << ") has event Delete"
                 << std::endl;
 
-            Runtime::ResourceManager::Instance().Unload(fullPath);
-            Runtime::AssetRegistry::Instance().RemoveAsset(fullPath);
+            m_queuedActions.push_back([this, fullPath]()
+                {
+                    Runtime::ResourceManager::Instance().Unload(fullPath);
+                    Runtime::AssetRegistry::Instance().RemoveAsset(fullPath);
+                });
         }
             break;
 
@@ -56,5 +64,15 @@ namespace Insight::Editor
     void ContentFolderListener::SetAssetPackage(Runtime::AssetPackage* assetPackage)
     {
         m_assetPackage = assetPackage;
+    }
+
+    void ContentFolderListener::Update()
+    {
+        std::lock_guard queueedActionsLock(m_queuedActionsMuetx);
+        for (const auto& action : m_queuedActions)
+        {
+            action();
+        }
+        m_queuedActions.clear();
     }
 }
