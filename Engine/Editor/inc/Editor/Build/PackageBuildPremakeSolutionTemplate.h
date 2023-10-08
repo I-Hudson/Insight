@@ -6,36 +6,30 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeSolutionTag_ProjectName = "--PROJECT_NAME";
     constexpr static const char* c_PremakeSolutionTag_InsightPath = "--INSIGHT_PATH";
     constexpr static const char* c_PremakeSolutionTag_SolutionLocation = "--SOLUTION_LOCATION";
-    constexpr static const char* c_PremakeSolutionTag_PremakeProjectFileName = "--PREMAKE_PROJECT_FILE_NAME";
 
     constexpr static const char* c_PremakeSolutionFileName = "premake5_solution.lua";
 
     constexpr static const char* c_PremakeSolutionTemplate = R"(
-local InsightEngineIncludes = require "../../../Build/Engine/lua/InsightEngineIncludes"
-local InsightVendorIncludes = require "../../../Build/Engine/lua/InsightVendorIncludes"
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+local insightPath = "--INSIGHT_PATH"
+
+local InsightEngineIncludes = require(insightPath .. "/Build/Engine/lua/InsightEngineIncludes")
+local InsightVendorIncludes = require(insightPath .. "/Build/Engine/lua/InsightVendorIncludes")
 
 local profileTool="tracy"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_target = "%{wks.location}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_obj = "%{wks.location}bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-outputdir_debug = "%{wks.location}bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 output_project_subfix = ""
-output_executable = ""
-output_executable = "Insight_Standalone"
-
-
-VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
-InsightEngineIncludes.AddIncludes(IncludeDirs)
-InsightVendorIncludes.AddIncludes(IncludeDirs)
+InsightEngineIncludes.AddIncludes(IncludeDirs, insightPath .. "/")
+InsightVendorIncludes.AddIncludes(IncludeDirs, insightPath .. "/")
 
 LibDirs = {}
-LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"
-LibDirs["deps_testing_lib"] = "%{wks.location}deps/Debug-windows-x86_64/lib/"
+LibDirs["deps_lib"] = insightPath .. "/deps/" .. outputdir .. "/lib/"
+LibDirs["deps_testing_lib"] = insightPath .. "/deps/Debug-windows-x86_64/lib/"
 
-LibDirs["imgui"] = "%{wks.location}vendor/imgui/" .. outputdir .. "ImGui/"
+LibDirs["imgui"] = insightPath .. "/vendor/imgui/" .. outputdir .. "ImGui/"
 LibDirs["vulkan"] = VULKAN_SDK .. "/lib/"
 
 workspace "--SOLUTION_NAME"
@@ -67,6 +61,7 @@ workspace "--SOLUTION_NAME"
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
 
         "REFLECT_TYPE_INFO_ENABLED",
+        "REFLECT_DLL_IMPORT",
 
         "IS_PLATFORM_X64",
         "IS_MEMORY_TRACKING",
@@ -86,7 +81,7 @@ workspace "--SOLUTION_NAME"
      
     prebuildcommands
      { 
-        "{COPYDIR} \"%{wks.location}deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
+        "{COPYDIR} \"" .. insightPath .. "/deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
     }
 
 
@@ -115,9 +110,8 @@ workspace "--SOLUTION_NAME"
         }
     end
 
-    include "--PREMAKE_PROJECT_FILE_NAME"
-} 
+    include "premake5_project.lua"
     )";
 
-    std::string CreatePremakeSolutionTemplateFile(const char* outFolder, const PremakeSolutionTemplateData& templateData);
+    std::string CreatePackageBuildSolutionFile(const PremakeSolutionTemplateData& templateData);
 }

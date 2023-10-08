@@ -5,7 +5,6 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeProjectTag_ProjectName = "--PROJECT_NAME";
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
     constexpr static const char* c_PremakeProjectTag_Targetname = "--TARGET_NAME";
-    constexpr static const char* c_PremakeProjectTag_AdditionalFiles = "--ADDITIONAL_FILES";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
 
@@ -20,9 +19,9 @@ namespace Insight::Editor
     configurations { "Debug", "Release" } 
 
     targetname (targetName .. output_project_subfix)
-    targetdir ("../bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("../bin-int/" .. outputdir .. "/%{prj.name}")
-    debugdir ("../bin/" .. outputdir .. "/%{prj.name}")
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    debugdir ("bin/" .. outputdir .. "/%{prj.name}")
 
     dependson 
     {
@@ -50,12 +49,14 @@ namespace Insight::Editor
 
     includedirs
     {
-        "inc",
+        "../../Content/",
+
         "%{IncludeDirs.InsightCore}",
         "%{IncludeDirs.InsightMaths}",
         "%{IncludeDirs.InsightInput}",
         "%{IncludeDirs.InsightGraphics}",
         "%{IncludeDirs.InsightRuntime}",
+        insightPath .. "/Engine/Standalone/inc",
 
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.doctest}",
@@ -93,56 +94,62 @@ namespace Insight::Editor
 
     files 
     { 
-        "../../../Engine/Core/inc/**.hpp", 
-        "../../../Engine/Core/inc/**.h",
-        "../../../Engine/Core/inc/**.inl",
-        "../../../Engine/Core/inc/**.cpp",
-        "../../../Engine/Core/src/**.cpp",
-        "../../../Engine/Core/src/**.inl",
+        insightPath .. "/Engine/Core/inc/**.hpp", 
+        insightPath .. "/Engine/Core/inc/**.h",
+        insightPath .. "/Engine/Core/inc/**.inl",
+        insightPath .. "/Engine/Core/inc/**.cpp",
+        insightPath .. "/Engine/Core/src/**.cpp",
+        insightPath .. "/Engine/Core/src/**.inl",
 
-        "../../../Engine/Maths/inc/**.hpp", 
-        "../../../Engine/Maths/inc/**.h", 
-        "../../../Engine/Maths/inc/**.inl",
-        "../../../Engine/Maths/inc/**.cpp", 
-        "../../../Engine/Maths/src/**.cpp", 
-        "../../../Engine/Maths/src/**.inl",
+        insightPath .. "/Engine/Maths/inc/**.hpp", 
+        insightPath .. "/Engine/Maths/inc/**.h", 
+        insightPath .. "/Engine/Maths/inc/**.inl",
+        insightPath .. "/Engine/Maths/inc/**.cpp", 
+        insightPath .. "/Engine/Maths/src/**.cpp", 
+        insightPath .. "/Engine/Maths/src/**.inl",
 
-        "../../../Engine/Input/inc/**.hpp", 
-        "../../../Engine/Input/inc/**.h", 
-        "../../../Engine/Input/inc/**.inl",
-        "../../../Engine/Input/inc/**.cpp", 
-        "../../../Engine/Input/src/**.cpp", 
-        "../../../Engine/Input/src/**.inl",
+        insightPath .. "/Engine/Input/inc/**.hpp", 
+        insightPath .. "/Engine/Input/inc/**.h", 
+        insightPath .. "/Engine/Input/inc/**.inl",
+        insightPath .. "/Engine/Input/inc/**.cpp", 
+        insightPath .. "/Engine/Input/src/**.cpp", 
+        insightPath .. "/Engine/Input/src/**.inl",
 
-        "../../../Engine/Graphics//inc/**.hpp", 
-        "../../../Engine/Graphics/inc/**.h", 
-        "../../../Engine/Graphics/inc/**.inl",
-        "../../../Engine/Graphics/inc/**.cpp", 
-        "../../../Engine/Graphics/src/**.cpp", 
-        "../../../Engine/Graphics/src/**.inl",
+        insightPath .. "/Engine/Graphics//inc/**.hpp", 
+        insightPath .. "/Engine/Graphics/inc/**.h", 
+        insightPath .. "/Engine/Graphics/inc/**.inl",
+        insightPath .. "/Engine/Graphics/inc/**.cpp", 
+        insightPath .. "/Engine/Graphics/src/**.cpp", 
+        insightPath .. "/Engine/Graphics/src/**.inl",
 
-        "../../../Engine/Runtime/inc/**.hpp", 
-        "../../../Engine/Runtime/inc/**.h", 
-        "../../../Engine/Runtime/inc/**.inl",
-        "../../../Engine/Runtime/inc/**.cpp",
-        "../../../Engine/Runtime/src/**.cpp",
-        "../../../Engine/Runtime/src/**.inl",
+        insightPath .. "/Engine/Runtime/inc/**.hpp", 
+        insightPath .. "/Engine/Runtime/inc/**.h", 
+        insightPath .. "/Engine/Runtime/inc/**.inl",
+        insightPath .. "/Engine/Runtime/inc/**.cpp",
+        insightPath .. "/Engine/Runtime/src/**.cpp",
+        insightPath .. "/Engine/Runtime/src/**.inl",
 
-        "../../Content/inc/**.hpp", 
-        "../../Content/inc/**.h", 
-        "../../Content/inc/**.inl", 
-        "../../Content/inc/**.cpp",
-        "../../Content/src/**.cpp",
-        "../../Content/src/**.inl",
+        insightPath .. "/Engine/Standalone/inc/**.hpp", 
+        insightPath .. "/Engine/Standalone/inc/**.h", 
+        insightPath .. "/Engine/Standalone/inc/**.inl",
+        insightPath .. "/Engine/Standalone/inc/**.cpp",
+        insightPath .. "/Engine/Standalone/src/**.cpp",
+        insightPath .. "/Engine/Standalone/src/**.inl",
+
+        "../../Content/**.h", 
+        "../../Content/**.c",
+        "../../Content/**.hpp", 
+        "../../Content/**.cpp",
+        "../../Content/**.inl", 
 
         --PROJECT_FILES
 
-        "../../../vendor/stb/stb_image.h",
-        "../../../vendor/stb/stb_image_write.h",
-        "../../../vendor/SPIRV-Reflect/spirv_reflect.h",
-        "../../../vendor/SPIRV-Reflect/spirv_reflect.cpp",
+        insightPath .. "/vendor/stb/stb_image.h",
+        insightPath .. "/vendor/stb/stb_image_write.h",
+        insightPath .. "/vendor/SPIRV-Reflect/spirv_reflect.h",
+        insightPath .. "/vendor/SPIRV-Reflect/spirv_reflect.cpp",
 
-        "../../../vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
+        insightPath .. "/vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
 
     links
@@ -279,8 +286,8 @@ namespace Insight::Editor
         }
         files
         {
-            "../../../vendor/D3D12MemoryAllocator/src/D3D12MemAlloc.cpp",
-            "../../../vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
+            insightPath .. "/vendor/D3D12MemoryAllocator/src/D3D12MemAlloc.cpp",
+            insightPath .. "/vendor/D3D12MemoryAllocator/include/D3D12MemAlloc.h",
         }
 
     filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
@@ -308,5 +315,5 @@ namespace Insight::Editor
         }
     )";
 
-    std::string CreatePremakeProjectTemplateFile(const char* outFolder, const PremakeProjectTemplateData& templateData);
+    std::string CreatePackageBuildProjectFile(const PremakeProjectTemplateData& templateData);
 }

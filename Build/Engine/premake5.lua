@@ -44,8 +44,8 @@ function tprint (tbl, indent)
 VULKAN_SDK = os.getenv("VULKAN_SDK")
 
 IncludeDirs = {}
-InsightEngineIncludes.AddIncludes(IncludeDirs)
-InsightVendorIncludes.AddIncludes(IncludeDirs)
+InsightEngineIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
+InsightVendorIncludes.AddIncludes(IncludeDirs, "%{wks.location}")
 
 LibDirs = {}
 LibDirs["deps_lib"] = "%{wks.location}deps/" .. outputdir .. "/lib/"

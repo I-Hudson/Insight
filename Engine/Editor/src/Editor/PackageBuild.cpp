@@ -20,6 +20,8 @@ namespace Insight
 
         void PackageBuild::Build(std::string_view outputFolder)
         {
+            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+
             PremakeHeaderToolData headerToolData;
             headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
             headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
@@ -27,18 +29,20 @@ namespace Insight
             PremakeTemplateData templateData;
             templateData.HeaderToolData = std::move(headerToolData);
             templateData.SolutionData = PremakeSolutionTemplateData::CreateFromProjectInfo(PremakeSolutionGenerator::GetProjectIDESolutionName().c_str());
+            templateData.SolutionData.PremakeOutputPath = projectInfo.GetIntermediatePath() + "/PackageBuild";
 
             templateData.ProjectData = PremakeProjectTemplateData::CreateFromProjectInfo();
             templateData.ProjectData.AdditionalFiles.push_back(templateData.HeaderToolData.GeneratedFilesOutputPath);
+            templateData.ProjectData.PremakeOutputPath = projectInfo.GetIntermediatePath() + "/PackageBuild";
 
-            //templateData.CreateFuncs.CreateSolutionFunc = CreatePremakeSolutionTemplateFile;
-            //templateData.CreateFuncs.CreateProjectFunc = CreatePremakeProjectTemplateFile;
+            templateData.CreateFuncs.CreateSolutionFunc = CreatePackageBuildSolutionFile;
+            templateData.CreateFuncs.CreateProjectFunc = CreatePackageBuildProjectFile;
 
             PremakeSolutionGenerator solutionGenerator;
             solutionGenerator.GenerateSolution(templateData);
 
-            BuildSolution();
-            BuildPackageBuild(outputFolder);
+            //BuildSolution();
+            //BuildPackageBuild(outputFolder);
         }
 
         std::string PackageBuild::GetExecuteablepath()
