@@ -22,7 +22,6 @@
 #include "ECS/Components/TagComponent.h"
 
 #include "Graphics/SimplygonWrapper.h"
-#include "Resource/ResourcePack.h"
 #include "Resource/ResourceManager.h"
 
 #include "Serialisation/Archive.h"

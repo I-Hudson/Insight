@@ -67,13 +67,6 @@ namespace Insight
         {
             ASSERT(Platform::IsMainThread());
 
-            for (auto& pack : m_resourcePacks)
-            {
-                pack->UnloadAllResources();
-                pack->Close();
-                ::Delete(pack);
-            }
-
             for (auto& pair : m_resources)
             {
                 if (pair.second->IsLoaded())
@@ -83,67 +76,10 @@ namespace Insight
                 DeleteResource(pair.second);
             }
 
-            m_resourcePacks.clear();
             std::lock_guard resourceLock(m_resourcesMutex);
             m_resources.clear();
             std::lock_guard dependentResourceLock(m_dependentResourcesMutex);
             m_dependentResources.clear();
-        }
-
-        ResourcePack* ResourceDatabase::CreateResourcePack(std::string_view filePath)
-        {
-            std::string packFilePath = FileSystem::ReplaceExtension(filePath, ResourcePack::c_Extension);
-            
-            if (HasResourcePack(packFilePath))
-            {
-                IS_CORE_WARN("[ResourceDatabase::CreateResourcePack] Resource pack already at location '{filePath}'.");
-                return GetResourcePack(packFilePath);
-            }
-
-            if (FileSystem::Exists(filePath))
-            {
-                IS_CORE_WARN("[ResourceDatabase::CreateResourcePack] Resource pack already at location '{filePath}'.");
-                return LoadResourcePack(packFilePath);
-            }
-
-            ResourcePack* resourcePack = ::New<ResourcePack>(packFilePath);
-            m_resourcePacks.push_back(resourcePack);
-            return resourcePack;
-        }
-
-        ResourcePack* ResourceDatabase::LoadResourcePack(std::string_view filepath)
-        {
-            std::string packFilePath = FileSystem::ReplaceExtension(filepath, ResourcePack::c_Extension);
-
-            if (HasResourcePack(packFilePath))
-            {
-                return GetResourcePack(packFilePath);
-            }
-
-            Archive archive(packFilePath, ArchiveModes::Read);
-
-            if (archive.IsEmpty())
-            {
-                IS_CORE_WARN("[ResourceDatabase::LoadResourcePack] Unable to load resource pack at '{}'.", packFilePath.data());
-                return nullptr;
-            }
-
-            ResourcePack* resourcePack = ::New<ResourcePack>(packFilePath);
-            m_resourcePacks.push_back(resourcePack);
-
-            Serialisation::BinarySerialiser serialiser(true);
-            serialiser.Deserialise(archive.GetData());
-
-            resourcePack->Deserialise(&serialiser);
-            resourcePack->Open();
-
-            return resourcePack;
-        }
-
-        void ResourceDatabase::UnloadResourcePack(ResourcePack* resourcePack)
-        {
-            resourcePack->Close();
-            FAIL_ASSERT();
         }
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId)
@@ -243,11 +179,6 @@ namespace Insight
                 }
             }
             return ResourceMap;
-        }
-
-        std::vector<ResourcePack*> ResourceDatabase::GetResourcePacks() const
-        {
-            return m_resourcePacks;
         }
 
         bool ResourceDatabase::HasResource(ResourceId const& resourceId) const
@@ -610,45 +541,6 @@ namespace Insight
                     AddResource(resourceId);
                 }
             }
-        }
-
-        bool ResourceDatabase::HasResourcePack(std::string_view filePath) const
-        {
-            std::lock_guard packLock(m_resourcePacksMutex);
-            for (const ResourcePack* const& pack : m_resourcePacks)
-            {
-                if (pack->GetFilePath() == filePath) 
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        ResourcePack* ResourceDatabase::GetResourcePack(std::string_view filePath) const
-        {
-            std::lock_guard packLock(m_resourcePacksMutex);
-            for (ResourcePack* pack : m_resourcePacks)
-            {
-                if (pack->GetFilePath() == filePath)
-                {
-                    return pack;
-                }
-            }
-            return nullptr;
-        }
-
-        ResourcePack* ResourceDatabase::GetResourcePackFromResourceId(ResourceId resourceId) const
-        {
-            std::lock_guard packLock(m_resourcePacksMutex);
-            for (ResourcePack* pack : m_resourcePacks)
-            {
-                if (pack->HasResourceId(resourceId))
-                {
-                    return pack;
-                }
-            }
-            return nullptr;
         }
     }
 }

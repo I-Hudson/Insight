@@ -2,14 +2,9 @@
 
 #include "Resource/ResourceDatabase.h"
 #include "Resource/ResourceManager.h"
-#include "Resource/ResourcePack.h"
-
-#include "Serialisation/Archive.h"
 
 #include "FileSystem/FileSystem.h"
-#include "Resource/Texture2D.h"
 
-#include "Core/Compression.h"
 #include "Core/Profiler.h"
 #include "Core/Logger.h"
 
@@ -236,97 +231,6 @@ namespace Insight
                         IResourceSerialiser.Serialise(serialiser, *resource.Get());
                     }
                 }
-                serialiser->StopArray();
-            }
-        }
-
-
-        void ComplexSerialiser<ResourceDatabasePacks1, std::vector<Runtime::ResourcePack*>, Runtime::ResourceDatabase>::operator()
-            (ISerialiser* serialiser, std::vector<Runtime::ResourcePack*>& packs, Runtime::ResourceDatabase* resourceDatabase) const
-        {
-            ASSERT(serialiser);
-            IS_PROFILE_FUNCTION();
-
-            constexpr const char* c_ResourcePacks = "ResourcePacks";
-            constexpr const char* c_PackFilePath = "PackFilePath";
-            constexpr const char* c_Pack = "Pack";
-            constexpr const char* c_ResourceGuids = "ResourceGuids";
-            constexpr const char* c_Guid = "Guid";
-
-            if (serialiser->IsReadMode())
-            {
-                u64 packsSize = 0;
-                serialiser->StartArray(c_ResourcePacks, packsSize);
-
-                for (size_t packIdx = 0; packIdx < packsSize; ++packIdx)
-                {
-                    serialiser->StartObject(c_Pack);
-                    std::string packFilePath;
-                    serialiser->Read(c_PackFilePath, packFilePath);
-
-
-                    Runtime::ResourcePack* pack = nullptr;
-                    if (FileSystem::Exists(packFilePath))
-                    {
-                        //If we don't have a resource pack at the loction know then don't create one.
-                        pack = Runtime::ResourceManager::Instance().CreateResourcePack(packFilePath);
-                    }
-
-                    u64 resourceGuidsSize = 0;
-                    serialiser->StartArray(c_ResourceGuids, resourceGuidsSize);
-                    for (size_t resourceGuidIdx = 0; resourceGuidIdx < resourceGuidsSize; ++resourceGuidIdx)
-                    {
-                        std::string resourceGuidStr;
-                        serialiser->Read(c_Guid, resourceGuidStr);
-
-                        Core::GUID resourceGuid;
-                        resourceGuid.StringToGuid(resourceGuidStr);
-
-                        if (pack)
-                        {
-                            Runtime::IResource* resourceToAdd = Runtime::ResourceManager::Instance().GetResourceFromGuid(resourceGuid);
-                            if (resourceToAdd)
-                            {
-                                pack->AddResource(resourceToAdd);
-                            }
-                            else
-                            {
-                                IS_CORE_WARN("[ComplexSerialiser::ResourceDatabasePacks1] Resource guid '{}' is null. Resource has not been added to pack '{}'."
-                                    , resourceGuidStr, pack->GetFilePath().data());
-                            }
-                        }
-                    }
-                    serialiser->StopArray();
-
-                    serialiser->StopObject();
-                }
-
-                serialiser->StopArray();
-            }
-            else
-            {
-                u64 packsSize = packs.size();
-                serialiser->StartArray(c_ResourcePacks, packsSize);
-
-                for (Runtime::ResourcePack*& pack : packs)
-                {
-                    serialiser->StartObject(c_Pack);
-                    serialiser->Write(c_PackFilePath, pack->GetFilePath().data());
-
-                    const std::unordered_map<Runtime::ResourceId, Runtime::ResourcePack::PackedResource>& packResources 
-                        = pack->m_resources;
-
-                    u64 resourceGuidsSize = packResources.size();
-                    serialiser->StartArray(c_ResourceGuids, resourceGuidsSize);
-                    for (const auto& [resourceId, packedResource] : packResources)
-                    {
-                        serialiser->Write(c_Guid, packedResource.Resource->GetGuid().ToString());
-                    }
-                    serialiser->StopArray();
-
-                    serialiser->StopObject();
-                }
-
                 serialiser->StopArray();
             }
         }

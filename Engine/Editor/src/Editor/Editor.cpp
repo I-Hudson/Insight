@@ -10,7 +10,6 @@
 
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
-#include "Resource/ResourcePack.h"
 
 #include "Runtime/RuntimeEvents.h"
 #include "Runtime/ProjectSystem.h"
@@ -149,17 +148,9 @@ namespace Insight
             {
                 const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
-                Runtime::ResourcePack* pack = Runtime::ResourceManager::Instance().CreateResourcePack(
-                    Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Pack");
-
                 Runtime::IResource* resource = Runtime::ResourceManager::Instance().LoadSync(
                     Runtime::ResourceId(Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath() + "/Textures/Background.png"
                         , Runtime::Texture2D::GetStaticResourceTypeId())).Get();
-
-                Runtime::Texture2D* texture2D = static_cast<Runtime::Texture2D*>(resource);
-                std::vector<Byte> pixels = texture2D->GetPixels();
-
-                pack->AddResource(resource);
             }
 
             if (!Runtime::ProjectSystem::Instance().IsProjectOpen())

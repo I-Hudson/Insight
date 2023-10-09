@@ -1,6 +1,5 @@
 #include "Resource/IResourceManager.h"
 #include "Resource/ResourceDatabase.h"
-#include "Resource/ResourcePack.h"
 #include "Resource/Loaders/ResourceLoaderRegister.h"
 
 #include "Resource/Loaders/BinaryLoader.h"
@@ -14,7 +13,7 @@
 
 #include "Algorithm/Vector.h"
 
-#include "FileSystem/FileSystem.h"
+#include "Asset/AssetRegistry.h"
 #include "Threading/TaskSystem.h"
 
 #include "Serialisation/Serialisers/JsonSerialiser.h"
@@ -213,12 +212,6 @@ namespace Insight
             }
         }
 
-        ResourcePack* IResourceManager::CreateResourcePack(std::string_view filePath)
-        {
-            ASSERT(m_database);
-            return m_database->CreateResourcePack(filePath);
-        }
-
         TObjectPtr<IResource> IResourceManager::Create(ResourceId const& resourceId)
         {
             ASSERT(m_database);
@@ -262,7 +255,7 @@ namespace Insight
 
             if (!resourceId)
             {
-                std::string_view extension = FileSystem::GetFileExtension(resourceId.GetPath());
+                std::string_view extension = FileSystem::GetExtension(resourceId.GetPath());
                 resourceId = ResourceId(resourceId.GetPath(), ResourceRegister::GetResourceTypeIdFromExtension(extension));
             }
 
@@ -310,13 +303,13 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        //if (!FileSystem::Exists(resource->GetFilePath()))
+                        if (!AssetRegistry::Instance().GetAsset(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
-                            //resource->m_resource_state = EResoruceStates::Not_Found;
-                            //return resource;
+                            resource->m_resource_state = EResoruceStates::Not_Found;
+                            return resource;
                         }
-                        //else
+                        else
                         {
                             resource->m_resource_state = EResoruceStates::Queued;
                             StartLoading(resource.Get(), false);
@@ -333,7 +326,7 @@ namespace Insight
 
         TObjectPtr<IResource> IResourceManager::LoadSync(std::string_view filepath, bool convertToEngineFormat)
         {
-            std::string_view fileExtension = FileSystem::GetFileExtension(filepath);
+            std::string_view fileExtension = FileSystem::GetExtension(filepath);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {
@@ -378,7 +371,7 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        if (!FileSystem::Exists(resource->GetFilePath()))
+                        if (!AssetRegistry::Instance().GetAsset(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
                             resource->m_resource_state = EResoruceStates::Not_Found;
@@ -455,7 +448,7 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        if (!FileSystem::Exists(resource->GetFilePath()))
+                        if (!AssetRegistry::Instance().GetAsset(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
                             resource->m_resource_state = EResoruceStates::Not_Found;
@@ -476,21 +469,9 @@ namespace Insight
             return resource;
         }
 
-        ResourcePack* IResourceManager::LoadResourcePack(std::string_view filepath)
-        {
-            ASSERT(m_database);
-            return m_database->LoadResourcePack(filepath);
-        }
-
-        void IResourceManager::UnloadResourcePack(ResourcePack* resourcePack)
-        {
-            ASSERT(m_database);
-            m_database->UnloadResourcePack(resourcePack);
-        }
-
         void IResourceManager::Unload(std::string_view filePath)
         {
-            std::string_view fileExtension = FileSystem::GetFileExtension(filePath);
+            std::string_view fileExtension = FileSystem::GetExtension(filePath);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {
@@ -580,7 +561,7 @@ namespace Insight
             std::string path = filepath.data();
             FileSystem::PathToUnix(path);
 
-            std::string_view fileExtension = FileSystem::GetFileExtension(path);
+            std::string_view fileExtension = FileSystem::GetExtension(path);
             const Runtime::IResourceLoader* loader = Runtime::ResourceLoaderRegister::GetLoaderFromExtension(fileExtension);
             if (!loader)
             {
@@ -593,12 +574,6 @@ namespace Insight
         {
             ASSERT(m_database);
             return m_database->GetResourceMap();
-        }
-
-        std::vector<ResourcePack*> IResourceManager::GetResourcePacks() const
-        {
-            ASSERT(m_database);
-            return m_database->GetResourcePacks();
         }
 
         u32 IResourceManager::GetQueuedToLoadCount() const
@@ -643,28 +618,6 @@ namespace Insight
                 bool resourceLoaded = false;
                 resource->StartLoadTimer();
                 {
-                    if (resource->GetResourcePackInfo().IsWithinPack)
-                    {
-                        // Resource is within a pack. Check if that resource is currently serialised, if so then load from the pack
-                        // otherwise try and load it from loose files.
-                        ResourcePack* resourcePack = m_database->GetResourcePackFromResourceId(resource->GetResourceId());
-
-                        if (resourcePack)
-                        {
-                            ResourcePack::PackedResource entry = resourcePack->GetEntry(resource->GetResourceId());
-                            if (entry.IsSerialised)
-                            {
-                                resourcePack->LoadResource(entry);
-                                resourceLoaded = true;
-                            }
-                            else
-                            {
-                                IS_CORE_WARN("[IResourceManager::StartLoading] Trying to load resource '{}' from a resource pack '{}'. Resource is not serialised in pack falling back to trying to load from disk."
-                                , resource->GetFilePath(), resourcePack->GetFilePath());
-                            }
-                        }
-                    }
-
                     if (!resourceLoaded && resource->IsEngineFormat())
                     {
                         Archive archive(resource->GetFilePath(), ArchiveModes::Read, FileType::Binary);

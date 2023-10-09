@@ -29,7 +29,6 @@ namespace Insight
 
 		private:
 			void DrawSingleResource(Runtime::IResource* resource);
-			void DrawSingleResourcePack(Runtime::ResourcePack* resourcePack);
 
 		};
 	}

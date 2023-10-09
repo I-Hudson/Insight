@@ -1,7 +1,6 @@
 #include "Editor/EditorWindows/ResourceWindow.h"
 #include "Resource/ResourceManager.h"
 #include "Resource/Resource.h"
-#include "Resource/ResourcePack.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -37,13 +36,6 @@ namespace Insight
 			for (const auto& [resourceId, resource] : resources)
 			{
 				DrawSingleResource(resource);
-			}
-
-			ImGui::Text("Resource Packs:");
-			std::vector<Runtime::ResourcePack*> resourcePacks = Runtime::ResourceManager::Instance().GetResourcePacks();
-			for (Runtime::ResourcePack* const& pack : resourcePacks)
-			{
-				DrawSingleResourcePack(pack);
 			}
 		}
 
@@ -82,59 +74,6 @@ namespace Insight
 				ImGui::TreePop();
 			}
 			ImGui::PopStyleColor();
-		}
-
-		void ResourceWindow::DrawSingleResourcePack(Runtime::ResourcePack* resourcePack)
-		{
-			static constexpr ImVec4 stateColours[] =
-			{
-				ImVec4(0, 1, 0, 1),			// Open
-				ImVec4(0, 0, 1, 1),			// Closed
-			};
-
-			std::string_view filePath = resourcePack->GetFilePath();
-			std::string fileName = FileSystem::GetFileName(filePath);
-			bool packLoaded = resourcePack->IsLoaded();
-
-			bool popColourStyle = true;
-			ImGui::PushStyleColor(ImGuiCol_Header, stateColours[static_cast<int>(packLoaded == true ? 0 : 1)]);
-
-			if (ImGui::TreeNodeEx(static_cast<const void*>(resourcePack), ImGuiTreeNodeFlags_Framed, "%s", fileName.data()))
-			{
-				ImGui::PopStyleColor();
-				popColourStyle = false;
-
-				ImGui::Text("File Path: %s", filePath.data());
-				ImGui::Text("Is Loaded: %s", packLoaded ? "Loaded" : "Unloaded");
-				ImGui::Text("On Disk: %s", FileSystem::Exists(filePath) ? "True" : "False");
-
-				if (ImGui::TreeNodeEx("Resources", ImGuiTreeNodeFlags_Framed))
-				{
-					std::vector<Runtime::IResource*> resources = resourcePack->GetAllResources();
-					for (Runtime::IResource* resource : resources)
-					{
-						if (ImGui::TreeNodeEx((void*)resource, ImGuiTreeNodeFlags_Framed, "%s", resource->GetFileName().c_str()))
-						{
-							ImGui::Text("Guid: %s", resource->GetGuid().ToString().c_str());
-							ImGui::Text("Resource Type: %s", resource->GetResourceTypeId().GetTypeName().c_str());
-							ImGui::TreePop();
-						}
-					}
-					ImGui::TreePop();
-				}
-
-				if (ImGui::Button("Save"))
-				{
-					resourcePack->Save();
-				}
-
-				ImGui::TreePop();
-			}
-
-			if (popColourStyle)
-			{
-				ImGui::PopStyleColor();
-			}
 		}
 	}
 }

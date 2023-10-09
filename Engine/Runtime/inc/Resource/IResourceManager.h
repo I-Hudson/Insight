@@ -12,7 +12,6 @@ namespace Insight
     {
         class ResourceSystem;
         class ResourceLoaderRegister;
-        class ResourcePack;
 
         /// @brief Static class used to interact with resources.
         class IS_RUNTIME IResourceManager
@@ -37,8 +36,6 @@ namespace Insight
             void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
             void LoadResourcesInFolder(std::string_view path, bool recursive);
 
-            ResourcePack* CreateResourcePack(std::string_view filePath);
-
             /// @brief Create a resource reference, but don't load it.
             /// @param resourceId 
             /// @return TObjectPtr<IResource>
@@ -46,9 +43,6 @@ namespace Insight
 
             TObjectPtr<IResource> GetResource(ResourceId const& resourceId) const;
             TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid) const;
-
-            ResourcePack* LoadResourcePack(std::string_view filepath);
-            void UnloadResourcePack(ResourcePack* resourcePack);
 
             TObjectPtr<IResource> LoadSync(ResourceId resourceId);
             TObjectPtr<IResource> LoadSync(ResourceId resourceId, bool convertToEngineFormat);
@@ -93,7 +87,6 @@ namespace Insight
             bool HasResource(std::string_view filepath) const;
 
             ResourceDatabase::ResourceMap GetResourceMap() const;
-            std::vector<ResourcePack*> GetResourcePacks() const;
 
             u32 GetQueuedToLoadCount() const;
             u32 GetLoadedResourcesCount() const;

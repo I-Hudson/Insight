@@ -82,11 +82,6 @@ namespace Insight
             /// safety net. Resource/files being moved should be done in editor.
             void FindMissingResources();
 
-            bool HasResourcePack(std::string_view filePath) const;
-            ResourcePack* GetResourcePack(std::string_view filePath) const;
-
-            ResourcePack* GetResourcePackFromResourceId(ResourceId resourceId) const;
-
         private:
             mutable std::mutex m_resourcesMutex;
             ResourceOwningMap m_resources;
@@ -101,9 +96,6 @@ namespace Insight
 
             /// @brief Use this map in the verify process.
             std::unordered_map<ResourceId, Core::GUID> m_missingResources;
-
-            mutable std::mutex m_resourcePacksMutex;
-            std::vector<ResourcePack*> m_resourcePacks;
 
             friend class IResourceManager;
         };
@@ -136,14 +128,6 @@ namespace Insight
         {
             void operator()(ISerialiser* serialiser, Runtime::ResourceDatabase::ResourceOwningMap& map, Runtime::ResourceDatabase* resourceDatabase) const;
         };
-
-        struct ResourceDatabasePacks1 { };
-
-        template<>
-        struct ComplexSerialiser<ResourceDatabasePacks1, std::vector<Runtime::ResourcePack*>, Runtime::ResourceDatabase>
-        {
-            void operator()(ISerialiser* serialiser, std::vector<Runtime::ResourcePack*>& packs, Runtime::ResourceDatabase* resourceDatabase) const;
-        };
     }
 
     OBJECT_SERIALISER(Runtime::ResourceDatabase, 5,
@@ -151,7 +135,5 @@ namespace Insight
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase2, m_resources, 2, 3)
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase3, m_resources, 3, 4)
         SERIALISE_COMPLEX(Serialisation::ResourceDatabase4, m_resources, 4, 0)
-
-        SERIALISE_COMPLEX(Serialisation::ResourceDatabasePacks1, m_resourcePacks, 5, 0)
         );
 }
