@@ -272,7 +272,7 @@ namespace Insight
                 return nullptr;
             }
 
-            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(FileSystem::GetFileExtension(resourceId.GetPath()));
+            const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(FileSystem::GetExtension(resourceId.GetPath()));
             if (!loader)
             {
                 IS_CORE_WARN("[IResourceManager::StartLoading] Resource '{}' failed to load as no loader could be found.", resourceId.GetPath());
@@ -310,13 +310,13 @@ namespace Insight
                 {
                     if (resource->GetResourceStorageType() == ResourceStorageTypes::Disk)
                     {
-                        if (!FileSystem::Exists(resource->GetFilePath()))
+                        //if (!FileSystem::Exists(resource->GetFilePath()))
                         {
                             // File does not exists. Set the resource state and return nullptr.
-                            resource->m_resource_state = EResoruceStates::Not_Found;
-                            return resource;
+                            //resource->m_resource_state = EResoruceStates::Not_Found;
+                            //return resource;
                         }
-                        else
+                        //else
                         {
                             resource->m_resource_state = EResoruceStates::Queued;
                             StartLoading(resource.Get(), false);

@@ -73,7 +73,7 @@ namespace Insight
             }
 
             std::string filePath = resource->GetFilePath();
-            std::string_view fileExtension = FileSystem::GetFileExtension(filePath);
+            std::string_view fileExtension = FileSystem::GetExtension(filePath);
             return GetLoaderFromExtension(fileExtension);
         }
 

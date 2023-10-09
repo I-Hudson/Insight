@@ -149,11 +149,7 @@ namespace Insight
 
     std::string FileSystem::GetFileName(std::string_view filePath, bool removeExtension)
     {
-        if (!Exists(filePath))
-        { 
-            return ""; 
-        }
-        std::string fileName = std::filesystem::path(filePath).filename().string();
+        std::string fileName = std::string(filePath.substr(filePath.find_last_of('/') + 1));
         if (removeExtension)
         {
             fileName = ReplaceExtension(fileName, "");
@@ -163,6 +159,19 @@ namespace Insight
 
     std::string FileSystem::GetParentPath(std::string_view path)
     {
+        u64 index = path.find_last_of('/');
+        if (index == std::string::npos)
+        {
+            index = path.find_last_of('\\');
+        }
+
+        if (index == std::string::npos)
+        {
+            return "";
+        }
+
+        return std::string(path.substr(0, index));
+
         if (!Exists(path))
         {
             u64 lastSlash = path.find_last_of('/');

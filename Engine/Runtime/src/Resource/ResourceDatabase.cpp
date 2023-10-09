@@ -333,7 +333,7 @@ namespace Insight
 
         TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId, bool force)
         {
-            if (!force && !FileSystem::Exists(resourceId.GetPath()))
+            if (!force && !AssetRegistry::Instance().GetAsset(resourceId.GetPath()))
             {
                 IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
                 return nullptr;

@@ -42,8 +42,9 @@ namespace Insight
             /// @param assetReativeBaseDirectory 
             void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
 
-            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package);
-            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile);
+            const AssetInfo* AddAssetFromPackage(std::string_view path, AssetPackage* package);
+            const AssetInfo* AddAssetFromDisk(std::string_view path, AssetPackage* package);
+            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile, bool checkOnDisk);
             void RemoveAsset(std::string_view path);
 
             void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);

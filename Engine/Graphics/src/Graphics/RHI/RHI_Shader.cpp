@@ -180,7 +180,7 @@ namespace Insight
 			arguments.push_back(c_Include_Directory);
 			arguments.push_back(wResourcePath.c_str());
 
-			arguments.push_back(DXC_ARG_DEBUG);
+			//arguments.push_back(DXC_ARG_DEBUG);
 			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
 
 			// Tell the compiler to output SPIR-V
@@ -337,7 +337,7 @@ namespace Insight
 				DescriptorSet* descriptor_set = get_descriptor_set(descriptorSet.set, descriptor_sets);
 				if (descriptor_set == nullptr)
 				{
-					descriptor_sets.push_back(DescriptorSet("", descriptorSet.set, {}));
+					descriptor_sets.push_back(DescriptorSet(std::to_string(descriptorSet.set), descriptorSet.set, {}));
 					descriptor_set = &descriptor_sets.back();
 				}
 

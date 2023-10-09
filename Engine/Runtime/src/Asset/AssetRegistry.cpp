@@ -103,36 +103,44 @@ namespace Insight::Runtime
         m_assetReativeBaseDirectory = std::move(assetReativeBaseDirectory);
     }
 
-    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package)
+    const AssetInfo* AssetRegistry::AddAssetFromPackage(std::string_view path, AssetPackage* package)
     {
-        return AddAsset(path, package, true);
+        return AddAsset(path, package, true, false);
     }
 
-    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile)
+    const AssetInfo* AssetRegistry::AddAssetFromDisk(std::string_view path, AssetPackage* package)
+    {
+        return AddAsset(path, package, true, true);
+    }
+
+    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile, bool checkOnDisk)
     {
         ASSERT(package);
 
         std::string_view fileExtension = FileSystem::GetFileExtension(path);
-        if (!FileSystem::Exists(path))
+        if (checkOnDisk)
         {
-            IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't exist.", path.data());
-            return nullptr;
+            if (!FileSystem::Exists(path))
+            {
+                IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't exist.", path.data());
+                return nullptr;
+            }
+            else if (!FileSystem::IsFile(path))
+            {
+                return nullptr;
+            }
+            else if (FileSystem::GetFileExtension(path) == AssetMetaData::c_FileExtension
+                || FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
+                || FileSystem::GetFileExtension(path) == ".meta")
+            {
+                return nullptr;
+            }
+            /*else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
+            {
+                IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
+                return nullptr;
+            }*/
         }
-        else if (!FileSystem::IsFile(path))
-        {
-            return nullptr;
-        }
-        else if (FileSystem::GetFileExtension(path) == AssetMetaData::c_FileExtension
-            || FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
-            || FileSystem::GetFileExtension(path) == ".meta")
-        {
-            return nullptr;
-        }
-        /*else if (!ResourceLoaderRegister::GetLoaderFromExtension(fileExtension))
-        {
-            IS_CORE_ERROR("[AssetRegistry::AddAsset] Path '{}' doesn't have a compatible loader.", path.data());
-            return nullptr;
-        }*/
 
         const AssetInfo* info = GetAsset(path);
         if (info)
@@ -379,7 +387,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, package, enableMetaFiles);
+                AddAsset(path, package, enableMetaFiles, true);
             }
         }
         else
@@ -388,7 +396,7 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, package, enableMetaFiles);
+                AddAsset(path, package, enableMetaFiles, true);
             }
         }
     }

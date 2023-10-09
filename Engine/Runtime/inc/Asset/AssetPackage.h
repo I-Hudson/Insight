@@ -115,8 +115,7 @@ namespace Insight
                         std::string assetPath = FileSystem::GetParentPath(assetPackage->m_packagePath) + "/" + path;
                         if (!FileSystem::GetExtension(assetPath).empty())
                         {
-                            Runtime::AssetRegistry::Instance().AddAsset(assetPath, assetPackage);
-
+                            Runtime::AssetRegistry::Instance().AddAssetFromPackage(assetPath, assetPackage);
                         }
 
                         ASSERT(zip_entry_close(assetPackage->m_zipHandle) == 0);

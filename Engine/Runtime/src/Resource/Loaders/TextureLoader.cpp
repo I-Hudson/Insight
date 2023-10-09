@@ -27,7 +27,7 @@ namespace Insight::Runtime
     {
 		ASSERT(!resource->IsEngineFormat());
 
-        if (resource == nullptr || !FileSystem::Exists(resource->GetFilePath()))
+        if (resource == nullptr || !AssetRegistry::Instance().GetAsset(resource->GetFilePath()))
         {
             IS_CORE_WARN("[TextLoader::Load] resource is null or file path '{}' does not exist.", resource != nullptr ? resource->GetFilePath() : "NULL");
             return false;

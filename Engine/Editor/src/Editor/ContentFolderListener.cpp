@@ -27,7 +27,7 @@ namespace Insight::Editor
 
             m_queuedActions.push_back([this, fullPath]()
                 {
-                    Runtime::AssetRegistry::Instance().AddAsset(fullPath, m_assetPackage);
+                    Runtime::AssetRegistry::Instance().AddAssetFromDisk(fullPath, m_assetPackage);
                     TObjectPtr<Runtime::IResource> resource = Runtime::ResourceManager::Instance().LoadSync(fullPath, false);
                 });
         }

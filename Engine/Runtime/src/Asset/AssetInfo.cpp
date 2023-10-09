@@ -8,10 +8,10 @@ namespace Insight
     {
         AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath, Insight::Runtime::AssetPackage* assetPackage)
         {
-            std::string absFilePath = FileSystem::GetAbsolutePath(filePath);
+            std::string absFilePath = std::string(filePath);
             FileSystem::PathToUnix(absFilePath);
 
-            std::string absPackagePath = FileSystem::GetAbsolutePath(packagePath);
+            std::string absPackagePath = std::string(packagePath);
             FileSystem::PathToUnix(absPackagePath);
 
             FileName = FileSystem::GetFileName(absFilePath);
