@@ -19,6 +19,7 @@ namespace Insight::Editor
 #if IS_PLATFORM_WINDOWS
 #define BUILD_IDE "vs2022"
 #define BUILD_PLATFORM "win64"
+#define BUILD_SOULTION ".sln"
 #else
 #error BUILD_IDE and BUILD_PLATFORM must have a valid value.
 #endif
@@ -38,11 +39,11 @@ namespace Insight::Editor
         return true;
     }
 
-    bool PremakeSolutionGenerator::BuildSolution(const char* solutionPath) const
+    bool PremakeSolutionGenerator::BuildSolution(const char* solutionPath, const char* outputDirectory) const
     {
        std::string buildSolutionBatch = EnginePaths::GetRootPath() + "/Build/Engine/Build_Solution.bat";
 
-       std::string cmdCommend = "/c" + buildSolutionBatch + " " + solutionPath + " " + BUILD_IDE + " Build " + BUILD_CONFIGURAION + " " + BUILD_PLATFORM;
+       std::string cmdCommend = "/c" + buildSolutionBatch + " " + solutionPath + BUILD_SOULTION + " " + BUILD_IDE + " Build " + BUILD_CONFIGURAION + " " + BUILD_PLATFORM + " " + outputDirectory;
        return Platform::RunProcessAndWait(cmdCommend.c_str());
     }
 

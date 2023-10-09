@@ -38,7 +38,7 @@ namespace Insight::Editor
     {
     public:
         bool GenerateSolution(const PremakeTemplateData& templateData) const;
-        bool BuildSolution(const char* solutionPath) const;
+        bool BuildSolution(const char* solutionPath, const char* outputDirectory = "") const;
 
         static std::string GetProjectIntermediateCodePath();
         static std::string GetProjectIDESolutionName();

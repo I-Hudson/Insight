@@ -41,6 +41,9 @@ namespace Insight
             PremakeSolutionGenerator solutionGenerator;
             solutionGenerator.GenerateSolution(templateData);
 
+            std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
+            solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
+
             //BuildSolution();
             //BuildPackageBuild(outputFolder);
         }
