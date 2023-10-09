@@ -59,7 +59,7 @@ namespace Insight::Editor
 
     std::string PremakeSolutionGenerator::GetProjectIDESolutionPath()
     {
-        return Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath() + "/" + GetProjectIDESolutionName() + ".sln";
+        return Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath() + "/" + GetProjectIDESolutionName();
     }
 
     void PremakeSolutionGenerator::RunInsightHeaderTool(const PremakeHeaderToolData& headerToolData) const
