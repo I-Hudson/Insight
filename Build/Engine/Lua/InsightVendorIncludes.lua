@@ -39,7 +39,6 @@ VendorIncludes["efsw"] = "vendor/efsw/include"
 function InsightVendorIncludes.AddIncludes(includeTable, prefix)
     for k,v in pairs(VendorIncludes) 
         do 
-            print(prefix .. v)
             includeTable[k] = prefix .. v 
     end
     includeTable["vulkan"] = os.getenv("VULKAN_SDK") .. "/include/"
