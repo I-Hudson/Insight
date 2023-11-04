@@ -11,7 +11,7 @@ namespace Insight
 	namespace ECS
 	{
 		REFLECT_CLASS()
-		class TransformComponent : public Component
+		class IS_RUNTIME TransformComponent : public Component
 		{
 			REFLECT_GENERATED_BODY()
 		public:

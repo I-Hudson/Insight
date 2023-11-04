@@ -582,7 +582,7 @@ namespace Insight
 									mesh.Transform,
 									static_cast<int>(i)
 								};
-								cmdList->SetUniform(4, 0, object);
+								cmdList->SetUniform(2, 1, object);
 
 								const Runtime::MeshLOD& renderMeshLod = mesh.MeshLods.at(MeshLod);
 								cmdList->SetVertexBuffer(renderMeshLod.Vertex_buffer);

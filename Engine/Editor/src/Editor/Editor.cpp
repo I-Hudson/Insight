@@ -54,7 +54,16 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            Runtime::AssetRegistry::Instance().LoadAssetPackage(EnginePaths::GetRootPath() + "/Resources.zip");
+            const std::string engineResources = EnginePaths::GetRootPath() + "/EngineResources.zip";
+            if (FileSystem::Exists(engineResources))
+            {
+                Runtime::AssetRegistry::Instance().LoadAssetPackage(engineResources);
+            }
+            else
+            {
+                Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EngineResources");
+                Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetRootPath() + "/Resources", editorIconsAssetPackage, true, false);
+            }
 
             const std::string editorAssetPackagePath = EnginePaths::GetResourcePath() + "/Editor/EditorIcons.isassetpackage";
             if (FileSystem::Exists(editorAssetPackagePath))

@@ -126,7 +126,7 @@ namespace Insight
                 return false;
             }
 
-            m_resourceSystem->ClearDatabase();
+            //m_resourceSystem->ClearDatabase();
 
             if (m_projectInfo.IsOpen)
             {

@@ -28,7 +28,7 @@ namespace Insight
             float y[4] = { mat4[1][0], mat4[1][1], mat4[1][2], mat4[1][3] };
             ImGui::DragFloat4("Y", y);
 
-            float z[4] = { mat4[2][0], mat4[2][1], mat4[2][2], mat4[3][3] };
+            float z[4] = { mat4[2][0], mat4[2][1], mat4[2][2], mat4[2][3] };
             ImGui::DragFloat4("Z", z);
 
             float w[4] = { mat4[3][0], mat4[3][1], mat4[3][2], mat4[3][3] };

@@ -186,23 +186,24 @@ namespace Insight
                         ImGui::InputText(member.GetMemberName().data(), &inputText, ImGuiInputTextFlags_ReadOnly);
 
                         std::string payloadData;
-                        EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", payloadData, member.GetType());
-
-                        std::vector<std::string> splitPayloadData = SplitString(payloadData, '::');
-
-                        Core::GUID entityGuid;
-                        entityGuid.StringToGuid(splitPayloadData.at(0));
-                        Core::GUID componentGuid;
-                        componentGuid.StringToGuid(splitPayloadData.at(1));
-
-                        ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
-                        if (entity)
+                        if (EditorGUI::ObjectFieldTarget("EDW_COMPONENT_DRAG_DROP", payloadData, member.GetType()))
                         {
-                            ECS::Component* component = entity->GetComponentByGuid(componentGuid);
-                            if (component)
-                            {
+                            std::vector<std::string> splitPayloadData = SplitString(payloadData, '::');
 
-                                memberComponent = component;
+                            Core::GUID entityGuid;
+                            entityGuid.StringToGuid(splitPayloadData.at(0));
+                            Core::GUID componentGuid;
+                            componentGuid.StringToGuid(splitPayloadData.at(1));
+
+                            ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(entityGuid);
+                            if (entity)
+                            {
+                                ECS::Component* component = entity->GetComponentByGuid(componentGuid);
+                                if (component)
+                                {
+
+                                    memberComponent = component;
+                                }
                             }
                         }
                     }

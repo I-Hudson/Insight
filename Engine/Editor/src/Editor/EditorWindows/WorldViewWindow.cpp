@@ -1,5 +1,7 @@
 #include "Editor/EditorWindows/WorldViewWindow.h"
 #include "Editor/EditorWindows/ContentWindow.h"
+#include "Editor/EditorWindows/EditorWindowManager.h"
+#include "Editor/EditorWindows/WorldEntitiesWindow.h"
 #include "Editor/EditorGUI.h"
 
 #include "Runtime/Engine.h"
@@ -13,6 +15,7 @@
 #include "ECS/Components/FreeCameraControllerComponent.h"
 
 #include <imgui.h>
+#include <ImGuizmo.h>
 
 namespace Insight
 {
@@ -54,6 +57,9 @@ namespace Insight
 
         void WorldViewWindow::OnDraw()
         {
+            ImGuizmo::BeginFrame();
+            ImGuizmo::SetDrawlist();
+
             SetupRenderGraphPasses();
 
             Graphics::RHI_Texture* worldViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture("EditorWorldColourRT");
@@ -72,6 +78,30 @@ namespace Insight
             {
                 ImGui::IsWindowFocused() ?
                     world->SetWorldState(Runtime::WorldStates::Running) : world->SetWorldState(Runtime::WorldStates::Paused);
+            }
+
+            IEditorWindow* worldEntitiesWindowBase = EditorWindowManager::Instance().GetActiveWindow(WorldEntitiesWindow::WINDOW_NAME);
+
+            if (worldEntitiesWindowBase != nullptr)
+            {
+                WorldEntitiesWindow* worldEntitiesWindow = static_cast<WorldEntitiesWindow*>(worldEntitiesWindowBase);
+                std::unordered_set<Core::GUID> selectedEntites = worldEntitiesWindow->GetSelectedEntities();
+                if (!selectedEntites.empty())
+                {
+                    glm::mat4 viewMatrix = m_editorCameraComponent->GetCamera().GetInvertedViewMatrix();
+                    glm::mat4 projectionMatrix = m_editorCameraComponent->GetProjectionMatrix();
+
+                    ECS::Entity* entity = Runtime::WorldSystem::Instance().GetEntityByGUID(*selectedEntites.begin());
+                    ECS::TransformComponent* transformComponent = entity->GetComponent<ECS::TransformComponent>();
+                    glm::mat4 entityMatrix = transformComponent->GetLocalTransform();
+
+                    ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, ImGui::GetWindowSize().x, ImGui::GetWindowSize().y);
+                    ImGuizmo::Manipulate(&viewMatrix[0][0], &projectionMatrix[0][0], ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, &entityMatrix[0][0]);
+                    if (ImGuizmo::IsUsing())
+                    {
+                        transformComponent->SetTransform(entityMatrix);
+                    }
+                }
             }
         }
 

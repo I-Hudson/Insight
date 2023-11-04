@@ -40,6 +40,7 @@ project "Insight_Editor"
         "%{IncludeDirs.glm}",
         "%{IncludeDirs.spdlog}",
         "%{IncludeDirs.imgui}",
+        "%{IncludeDirs.ImGuizmo}",
         "%{IncludeDirs.imgui_string}",
         "%{IncludeDirs.reflect}",
         "%{IncludeDirs.zip}",
@@ -59,6 +60,18 @@ project "Insight_Editor"
 
         "../Core/inc/Memory/NewDeleteOverload.h", 
         "../Core/src/Memory/NewDeleteOverload.cpp",
+
+        "../../vendor/ImGuizmo/GraphEditor.cpp",
+        "../../vendor/ImGuizmo/GraphEditor.h",
+        "../../vendor/ImGuizmo/ImCurveEdit.cpp",
+        "../../vendor/ImGuizmo/ImCurveEdit.h",
+        "../../vendor/ImGuizmo/ImGradient.cpp",
+        "../../vendor/ImGuizmo/ImGradient.h",
+        "../../vendor/ImGuizmo/ImGuizmo.cpp",
+        "../../vendor/ImGuizmo/ImGuizmo.h",
+        "../../vendor/ImGuizmo/ImSequencer.cpp",
+        "../../vendor/ImGuizmo/ImSequencer.h",
+        "../../vendor/ImGuizmo/ImZoomSlider.h",
     }
 
     links

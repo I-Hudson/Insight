@@ -13,7 +13,7 @@ struct VertexOutput
 	float4 Pos : SV_POSITION;
 };
 
-cbuffer UBO : register(b0, space4)
+cbuffer UBO : register(b1, PerObjectUniform)
 {
 	float4x4 ubo_Transform;
 	int ubo_Buffer_Light_Camera_Index;
