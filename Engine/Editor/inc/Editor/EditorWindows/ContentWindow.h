@@ -64,6 +64,8 @@ namespace Insight
 
             Runtime::Texture2D* PathToThumbnail(std::string const& path);
 
+            void DrawGeneralMenu();
+
         private:
             std::unordered_map<ContentWindowThumbnailType, Runtime::Texture2D*> m_thumbnailToTexture;
 
@@ -81,6 +83,8 @@ namespace Insight
 
             Runtime::ResourceTypeId m_createResourceSelectedTypeId;
             bool m_showCreateResourceWindow = false;
+
+            bool m_showGeneralMenu = false;
         };
     }
 }

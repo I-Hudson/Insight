@@ -132,8 +132,6 @@ namespace Insight
 
             m_menuBar.Initialise(&m_editorWindowManager);
 
-
-
             Archive editorSettings(c_EditorSettingsFileName, ArchiveModes::Read);
             if (!editorSettings.IsEmpty())
             {

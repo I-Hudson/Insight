@@ -81,11 +81,7 @@ namespace Insight::Editor
             EditorResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/Editor/Icons/File.png", Runtime::Texture2D::GetStaticResourceTypeId())).CastTo<Runtime::Texture2D>().Get();
 
 
-        if (!Runtime::ProjectSystem::Instance().IsProjectOpen())
-        {
-            EditorWindowManager::Instance().RemoveWindow(WINDOW_NAME);
-        }
-        else
+        if (Runtime::ProjectSystem::Instance().IsProjectOpen())
         {
             m_currentDirectory = Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath();
             SplitDirectory();
@@ -195,6 +191,8 @@ namespace Insight::Editor
                 static_cast<int>(contentBackgroundColour[2]),
                 static_cast<int>(contentBackgroundColour[3])));
 
+            bool itemSelectedThisFrame = false;
+
             if (ImGui::BeginChild("##ContentWindow"))
             {
                 // Set starting position
@@ -204,232 +202,244 @@ namespace Insight::Editor
                     ImGui::SetCursorPosX(pen_x_min);
                 }
 
-                for (auto iter : std::filesystem::directory_iterator(m_currentDirectory))
+                if (!m_currentDirectory.empty())
                 {
-                    IS_PROFILE_SCOPE("Entry");
-
-                    std::string path = iter.path().string();
-                    std::string fileName = iter.path().filename().string();
-                    std::string fileExtension = iter.path().extension().string();
-
-                    Runtime::IResource* contentResource = nullptr;
-                    const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(path);
-
-                    if (iter.is_regular_file())
+                    for (auto iter : std::filesystem::directory_iterator(m_currentDirectory))
                     {
-                        if (assetInfo == nullptr)
+                        IS_PROFILE_SCOPE("Entry");
+
+                        std::string path = iter.path().string();
+                        std::string fileName = iter.path().filename().string();
+                        std::string fileExtension = iter.path().extension().string();
+
+                        Runtime::IResource* contentResource = nullptr;
+                        const Runtime::AssetInfo* assetInfo = Runtime::AssetRegistry::Instance().GetAsset(path);
+
+                        if (iter.is_regular_file())
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
-                        }
-                    }
-
-                    ++displayed_item_count;
-                    // Start new line ?
-                    if (new_line)
-                    {
-                        ImGui::BeginGroup();
-                        new_line = false;
-                    }
-
-                    ImGui::BeginGroup();
-                    {
-
-                        // Compute rectangles for elements that make up an item
-                        {
-                            rect_button = ImRect
-                            (
-                                ImGui::GetCursorScreenPos().x,
-                                ImGui::GetCursorScreenPos().y,
-                                ImGui::GetCursorScreenPos().x + itemSize.x,
-                                ImGui::GetCursorScreenPos().y + itemSize.y
-                            );
-
-                            rect_label = ImRect
-                            (
-                                rect_button.Min.x,
-                                rect_button.Max.y - label_height - style.FramePadding.y,
-                                rect_button.Max.x,
-                                rect_button.Max.y
-                            );
-                        }
-
-                        // Drop shadow effect
-                        if (true)
-                        {
-                            static const float shadow_thickness = 2.0f;
-                            ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_BorderShadow];
-                            ImGui::GetWindowDrawList()->AddRectFilled(rect_button.Min, ImVec2(rect_label.Max.x + shadow_thickness, rect_label.Max.y + shadow_thickness), IM_COL32(color.x * 255, color.y * 255, color.z * 255, color.w * 255));
-                        }
-
-                        // THUMBNAIL
-                        {
-                            ImGui::PushID(fileName.c_str());
-                            ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
-                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
-
-                            if (ImGui::Button("##dummy", itemSize))
+                            if (assetInfo == nullptr)
                             {
-                                m_lastClickTimer.Stop();
-                                float elapsedTime = m_lastClickTimer.GetElapsedTimeMillFloat();
-                                m_lastClickTimer.Start();
-                                const bool isSingleClick = elapsedTime > 0.5f;
-
-                                if (isSingleClick)
-                                {
-                                    m_currentItemSelected = path;
-                                }
-                                else
-                                {
-                                    if (iter.is_directory())
-                                    {
-                                        m_currentDirectory = path;
-                                        FileSystem::PathToUnix(m_currentDirectory);
-                                        SplitDirectory();
-                                    }
-                                    else
-                                    {
-                                        const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAsset(path);
-                                        ASSERT(info);
-
-                                        AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
-                                        assetInspectorWindow->SetSelectedAssetInfo(info);
-
-                                        IObject* object = Runtime::AssetRegistry::Instance().GetObjectFromAsset(info->Guid);
-                                        if (object)
-                                        {
-
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Item functionality
-                            {
-                                // Manually detect some useful states
-                                if (ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly))
-                                {
-                                    //m_is_hovering_item = true;
-                                    //m_hovered_item_path = item.GetPath();
-                                }
-
-                                //ItemClick(&item);
-                                //ItemContextMenu(&item);
-                                //ItemDrag(&item);
-                            }
-
-                            // Image
-                            {
-                                // Compute thumbnail size
-                                Graphics::RHI_Texture* texture = nullptr;
-                                Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
-                                if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
-                                {
-                                    TObjectPtr<Runtime::IResource> loadedResource = Runtime::ResourceManager::Instance().LoadSync(textureResourceId);
-                                    if (loadedResource)
-                                    {
-                                        texture = loadedResource.CastTo<Runtime::Texture2D>()->GetRHITexture();
-                                    }
-                                }
-
-                                if (texture == nullptr)
-                                {
-                                    Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
-                                    if (thumbnailTexture)
-                                    {
-                                        texture = PathToThumbnail(path)->GetRHITexture();
-                                    }
-                                }
-                                ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
-                                ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
-                                ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
-
-                                // Scale the image size to fit the max available size while respecting it's aspect ratio
-                                {
-                                    // Clamp width
-                                    if (image_size.x != image_size_max.x)
-                                    {
-                                        float scale = image_size_max.x / image_size.x;
-                                        image_size.x = image_size_max.x;
-                                        image_size.y = image_size.y * scale;
-                                    }
-                                    // Clamp height
-                                    if (image_size.y != image_size_max.y)
-                                    {
-                                        float scale = image_size_max.y / image_size.y;
-                                        image_size.x = image_size.x * scale;
-                                        image_size.y = image_size_max.y;
-                                    }
-
-                                    image_size_delta.x = image_size_max.x - image_size.x;
-                                    image_size_delta.y = image_size_max.y - image_size.y;
-                                }
-
-                                // Position the image within the square border
-                                ImGui::SetCursorScreenPos(ImVec2(rect_button.Min.x + style.FramePadding.x + image_size_delta.x * 0.5f, rect_button.Min.y + style.FramePadding.y + image_size_delta.y * 0.5f));
-
-                                // Draw the image
-                                ImGui::Image(texture, image_size);
-                            }
-
-                            ImGui::PopStyleColor(2);
-                            ImGui::PopID();
-                        }
-
-                        // LABEL
-                        {
-                            const char* label_text = fileName.c_str();
-                            const ImVec2 label_size = ImGui::CalcTextSize(label_text, nullptr, true);
-
-                            // Draw text background
-                            ImGui::GetWindowDrawList()->AddRectFilled(rect_label.Min, rect_label.Max, IM_COL32(51, 51, 51, 190));
-
-                            // Draw text
-                            ImGui::SetCursorScreenPos(ImVec2(rect_label.Min.x + text_offset, rect_label.Min.y + text_offset));
-                            if (label_size.x <= itemSize.x && label_size.y <= itemSize.y)
-                            {
-                                ImGui::TextUnformatted(label_text);
+                                continue;
                             }
                             else
                             {
-                                ImGui::RenderTextClipped(rect_label.Min, rect_label.Max, label_text, nullptr, &label_size, ImVec2(0, 0), &rect_label);
+                                contentResource = Runtime::ResourceManager::Instance().LoadSync(path, false);
                             }
                         }
 
-                        ImGui::EndGroup();
+                        ++displayed_item_count;
+                        // Start new line ?
+                        if (new_line)
+                        {
+                            ImGui::BeginGroup();
+                            new_line = false;
+                        }
+
+                        ImGui::BeginGroup();
+                        {
+
+                            // Compute rectangles for elements that make up an item
+                            {
+                                rect_button = ImRect
+                                (
+                                    ImGui::GetCursorScreenPos().x,
+                                    ImGui::GetCursorScreenPos().y,
+                                    ImGui::GetCursorScreenPos().x + itemSize.x,
+                                    ImGui::GetCursorScreenPos().y + itemSize.y
+                                );
+
+                                rect_label = ImRect
+                                (
+                                    rect_button.Min.x,
+                                    rect_button.Max.y - label_height - style.FramePadding.y,
+                                    rect_button.Max.x,
+                                    rect_button.Max.y
+                                );
+                            }
+
+                            // Drop shadow effect
+                            if (true)
+                            {
+                                static const float shadow_thickness = 2.0f;
+                                ImVec4 color = ImGui::GetStyle().Colors[ImGuiCol_BorderShadow];
+                                ImGui::GetWindowDrawList()->AddRectFilled(rect_button.Min, ImVec2(rect_label.Max.x + shadow_thickness, rect_label.Max.y + shadow_thickness), IM_COL32(color.x * 255, color.y * 255, color.z * 255, color.w * 255));
+                            }
+
+                            // THUMBNAIL
+                            {
+                                ImGui::PushID(fileName.c_str());
+                                ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+                                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.25f));
+
+                                if (ImGui::Button("##dummy", itemSize))
+                                {
+                                    m_lastClickTimer.Stop();
+                                    float elapsedTime = m_lastClickTimer.GetElapsedTimeMillFloat();
+                                    m_lastClickTimer.Start();
+                                    const bool isSingleClick = elapsedTime > 0.5f;
+
+                                    if (isSingleClick)
+                                    {
+                                        m_currentItemSelected = path;
+                                        itemSelectedThisFrame = true;
+                                    }
+                                    else
+                                    {
+                                        if (iter.is_directory())
+                                        {
+                                            m_currentDirectory = path;
+                                            FileSystem::PathToUnix(m_currentDirectory);
+                                            SplitDirectory();
+                                        }
+                                        else
+                                        {
+                                            const Runtime::AssetInfo* info = Runtime::AssetRegistry::Instance().GetAsset(path);
+                                            ASSERT(info);
+
+                                            AssetInspectorWindow* assetInspectorWindow = static_cast<AssetInspectorWindow*>(EditorWindowManager::Instance().GetActiveWindow(AssetInspectorWindow::WINDOW_NAME));
+                                            if (assetInspectorWindow)
+                                            {
+                                                assetInspectorWindow->SetSelectedAssetInfo(info);
+                                            }
+
+                                            IObject* object = Runtime::AssetRegistry::Instance().GetObjectFromAsset(info->Guid);
+                                            if (object)
+                                            {
+
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Image
+                                {
+                                    // Compute thumbnail size
+                                    Graphics::RHI_Texture* texture = nullptr;
+                                    Runtime::ResourceId textureResourceId(path, Runtime::Texture2D::GetStaticResourceTypeId());
+                                    if (Runtime::ResourceManager::Instance().HasResource(textureResourceId))
+                                    {
+                                        TObjectPtr<Runtime::IResource> loadedResource = Runtime::ResourceManager::Instance().LoadSync(textureResourceId);
+                                        if (loadedResource)
+                                        {
+                                            texture = loadedResource.CastTo<Runtime::Texture2D>()->GetRHITexture();
+                                        }
+                                    }
+
+                                    if (texture == nullptr)
+                                    {
+                                        Runtime::Texture2D* thumbnailTexture = PathToThumbnail(path);
+                                        if (thumbnailTexture)
+                                        {
+                                            texture = PathToThumbnail(path)->GetRHITexture();
+                                        }
+                                    }
+                                    ImVec2 image_size_max = ImVec2(rect_button.Max.x - rect_button.Min.x - style.FramePadding.x * 2.0f, rect_button.Max.y - rect_button.Min.y - style.FramePadding.y - label_height - 5.0f);
+                                    ImVec2 image_size = texture ? ImVec2(static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight())) : image_size_max;
+                                    ImVec2 image_size_delta = ImVec2(0.0f, 0.0f);
+
+                                    // Scale the image size to fit the max available size while respecting it's aspect ratio
+                                    {
+                                        // Clamp width
+                                        if (image_size.x != image_size_max.x)
+                                        {
+                                            float scale = image_size_max.x / image_size.x;
+                                            image_size.x = image_size_max.x;
+                                            image_size.y = image_size.y * scale;
+                                        }
+                                        // Clamp height
+                                        if (image_size.y != image_size_max.y)
+                                        {
+                                            float scale = image_size_max.y / image_size.y;
+                                            image_size.x = image_size.x * scale;
+                                            image_size.y = image_size_max.y;
+                                        }
+
+                                        image_size_delta.x = image_size_max.x - image_size.x;
+                                        image_size_delta.y = image_size_max.y - image_size.y;
+                                    }
+
+                                    // Position the image within the square border
+                                    ImGui::SetCursorScreenPos(ImVec2(rect_button.Min.x + style.FramePadding.x + image_size_delta.x * 0.5f, rect_button.Min.y + style.FramePadding.y + image_size_delta.y * 0.5f));
+
+                                    // Draw the image
+                                    ImGui::Image(texture, image_size);
+                                }
+
+                                ImGui::PopStyleColor(2);
+                                ImGui::PopID();
+                            }
+
+                            // LABEL
+                            {
+                                const char* label_text = fileName.c_str();
+                                const ImVec2 label_size = ImGui::CalcTextSize(label_text, nullptr, true);
+
+                                // Draw text background
+                                ImGui::GetWindowDrawList()->AddRectFilled(rect_label.Min, rect_label.Max, IM_COL32(51, 51, 51, 190));
+
+                                // Draw text
+                                ImGui::SetCursorScreenPos(ImVec2(rect_label.Min.x + text_offset, rect_label.Min.y + text_offset));
+                                if (label_size.x <= itemSize.x && label_size.y <= itemSize.y)
+                                {
+                                    ImGui::TextUnformatted(label_text);
+                                }
+                                else
+                                {
+                                    ImGui::RenderTextClipped(rect_label.Min, rect_label.Max, label_text, nullptr, &label_size, ImVec2(0, 0), &rect_label);
+                                }
+                            }
+
+                            ImGui::EndGroup();
+                        }
+
+                        if (contentResource)
+                        {
+                            EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
+                                , contentResource->GetGuid().ToString().data()
+                                , Runtime::IResource::GetStaticTypeInfo().GetType());
+                        }
+                        if (assetInfo)
+                        {
+                            EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource, assetInfo->Guid.ToString().c_str());
+                        }
+
+                        // Item functionality
+                        {
+                            // Manually detect some useful states
+                            if (m_currentItemSelected.empty()
+                                && ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly)
+                                && ImGui::IsMouseClicked(ImGuiMouseButton_Right))
+                            {
+                                //m_is_hovering_item = true;
+                                //m_hovered_item_path = item.GetPath();
+                                IS_CORE_INFO("Item right click: {}", assetInfo->FileName);
+                            }
+
+                            //ItemClick(&item);
+                            //ItemContextMenu(&item);
+                            //ItemDrag(&item);
+                        }
+
+                        // Decide whether we should switch to the next column or switch row
+                        pen_x += itemSize.x + ImGui::GetStyle().ItemSpacing.x;
+                        if (pen_x >= content_width - itemSize.x)
+                        {
+                            ImGui::EndGroup();
+                            pen_x = pen_x_min;
+                            ImGui::SetCursorPosX(pen_x);
+                            new_line = true;
+                        }
+                        else
+                        {
+                            ImGui::SameLine();
+                        }
                     }
 
-                    if (contentResource)
-                    {
-                        EditorGUI::ObjectFieldSource(c_ContentWindowResourceDragSource
-                            , contentResource->GetGuid().ToString().data()
-                            , Runtime::IResource::GetStaticTypeInfo().GetType());
-                    }
-                    if (assetInfo)
-                    {
-                        EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource, assetInfo->Guid.ToString().c_str());
-                    }
-
-                    // Decide whether we should switch to the next column or switch row
-                    pen_x += itemSize.x + ImGui::GetStyle().ItemSpacing.x;
-                    if (pen_x >= content_width - itemSize.x)
+                    if (!new_line)
                     {
                         ImGui::EndGroup();
-                        pen_x = pen_x_min;
-                        ImGui::SetCursorPosX(pen_x);
-                        new_line = true;
-                    }
-                    else
-                    {
-                        ImGui::SameLine();
                     }
                 }
-
-                if (!new_line)
-                    ImGui::EndGroup();
             }
             ImGui::EndChild();
 
@@ -437,6 +447,24 @@ namespace Insight::Editor
             ImGui::PopStyleVar();
 
             ImGui::EndTable();
+
+            if (m_showGeneralMenu)
+            {
+                DrawGeneralMenu();
+            }
+
+            if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)
+                && IsCursorWithinWindow()
+                && !itemSelectedThisFrame)
+            {
+                m_showGeneralMenu = false;
+            }
+            else if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)
+                && IsCursorWithinWindow()
+                && !itemSelectedThisFrame)
+            {
+                m_showGeneralMenu = true;
+            }
         }
     }
 
@@ -724,5 +752,23 @@ namespace Insight::Editor
             return m_thumbnailToTexture[ContentWindowThumbnailType::Folder];
         }
         return m_thumbnailToTexture[ContentWindowThumbnailType::File];
+    }
+
+    void ContentWindow::DrawGeneralMenu()
+    {
+        ImGui::OpenPopup("##ContentWindowGeneralMenu");
+        if (ImGui::BeginPopupContextItem("##ContentWindowGeneralMenu"))
+        {
+            if (ImGui::MenuItem("Create New C++ Class"))
+            {
+                IS_INFO("Create new C++ Class");
+                m_showGeneralMenu = false;
+            }
+            else if (ImGui::MenuItem("Dummy"))
+            {
+                m_showGeneralMenu = false;
+            }
+            ImGui::EndPopup();
+        }
     }
 }
