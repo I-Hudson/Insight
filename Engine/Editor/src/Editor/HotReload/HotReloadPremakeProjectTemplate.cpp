@@ -38,6 +38,19 @@ namespace Insight::Editor
         }
         premake.replace(premake.find(c_PremakeProjectTag_AdditionalFiles), strlen(c_PremakeProjectTag_AdditionalFiles), additionalFiles);
 
+        std::string virtualPaths;
+        for (const auto& [tag, paths] : templateData.VirtualFilePaths)
+        {
+            virtualPaths += "[\"" + tag + "\"] = { ";
+            for (const std::string& path : paths)
+            {
+                virtualPaths += "\"" + path + "\",\n";
+
+            }
+            virtualPaths += "},\n";
+        }
+        premake.replace(premake.find(c_PremakeProjectTag_VirtualPaths), strlen(c_PremakeProjectTag_VirtualPaths), virtualPaths);
+
         std::string premakeOutFile = std::string(templateData.PremakeOutputPath) + "/" + c_PremakeProjectFileName;
         std::vector<uint8_t> vec(premake.begin(), premake.end());
         FileSystem::SaveToFile(vec, premakeOutFile, FileType::Text, true);

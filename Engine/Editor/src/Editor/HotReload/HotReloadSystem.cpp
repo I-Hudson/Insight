@@ -75,7 +75,13 @@ namespace Insight::Editor
 
         templateData.ProjectData = PremakeProjectTemplateData::CreateFromProjectInfo();
         templateData.ProjectData.PremakeOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath();
-        templateData.ProjectData.AdditionalFiles.push_back(templateData.HeaderToolData.GeneratedFilesOutputPath);
+        templateData.ProjectData.AdditionalFiles.push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated");
+
+        templateData.ProjectData.VirtualFilePaths["Generated/inc/*"].push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated/**.h");
+        templateData.ProjectData.VirtualFilePaths["Generated/inc/*"].push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated/**.hpp");
+        templateData.ProjectData.VirtualFilePaths["Generated/inc/*"].push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated/**.inl");
+        templateData.ProjectData.VirtualFilePaths["Generated/src/*"].push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated/**.c");
+        templateData.ProjectData.VirtualFilePaths["Generated/src/*"].push_back(PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated/**.cpp");
 
         templateData.CreateFuncs.CreateSolutionFunc = CreatePremakeSolutionTemplateFile;
         templateData.CreateFuncs.CreateProjectFunc = CreatePremakeProjectTemplateFile;

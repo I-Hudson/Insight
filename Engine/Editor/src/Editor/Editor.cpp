@@ -86,10 +86,10 @@ namespace Insight
                     const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
                     Runtime::AssetRegistry::Instance().AddAssetsInFolder(projectInfo.GetContentPath(), m_projectAssetPackage, true, false);
-                    Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
+                    Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
+                    Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
-                    //Runtime::ResourceManager::Instance().LoadResourcesInFolder(projectInfo.GetContentPath(), true);
 
                     std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::AssetPackage::c_FileExtension);
                     for (const Runtime::AssetInfo* info : allAssetPackages)

@@ -6,6 +6,7 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
     constexpr static const char* c_PremakeProjectTag_Targetname = "--TARGET_NAME";
     constexpr static const char* c_PremakeProjectTag_AdditionalFiles = "--ADDITIONAL_FILES";
+    constexpr static const char* c_PremakeProjectTag_VirtualPaths = "--VIRTUAL_PATHS";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
 
@@ -61,6 +62,11 @@ namespace Insight::Editor
         "%{includePath}" .. "/**.c",
 
         --ADDITIONAL_FILES
+    }
+
+    vpaths
+    {
+        --VIRTUAL_PATHS
     }
 
     links

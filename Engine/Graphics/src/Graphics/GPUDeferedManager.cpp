@@ -24,12 +24,22 @@ namespace Insight
 			IS_PROFILE_FUNCTION();
 			std::lock_guard lock(m_mutex);
 			cmd_list->BeginTimeBlock("GPUDeferedManager::Update");
+
+			u32 count = 0;
+			const u32 maxCallsInSingleFrame = 16;
+
 			for (auto const& request : m_requests)
 			{
 				request.Func(cmd_list);
+				++count;
+
+				if (count == maxCallsInSingleFrame)
+				{
+					break;
+				}
 			}
 			cmd_list->EndTimeBlock();
-			m_requests.clear();
+			m_requests.erase(m_requests.begin(), m_requests.begin() + count);
 		}
 
 		void GPUDeferedManager::Remove(GPUDeferedRequest request)
