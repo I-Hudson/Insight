@@ -38,6 +38,8 @@ namespace Insight
 
 		void BuildSettingsWindow::OnDraw()
 		{
+			IS_PROFILE_FUNCTION();
+		
 			if (ImGui::Button("Package Build"))
 			{
 				std::string folderSelcted;

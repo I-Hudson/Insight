@@ -2,6 +2,8 @@
 
 #include "Core/TypeAlias.h"
 #include "Core/Logger.h"
+#include "Core/StringUtils.h"
+#include "Core/Profiler.h"
 
 #include <fstream>
 #include <filesystem>
@@ -257,6 +259,17 @@ namespace Insight
         }
     }
 
+    bool FileSystem::IsAbsolutePath(std::string_view path)
+    {
+        // Just check the first three charactes.
+        if (path.find(":/") == 1
+            || path.find(":\\") == 1)
+        {
+            return true;
+        }
+        return false;
+    }
+
     std::string FileSystem::GetAbsolutePath(const std::string& path)
     {
         return GetAbsolutePath(std::string_view(path));
@@ -275,6 +288,61 @@ namespace Insight
 
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
+#if 1
+        std::string fullPath;
+        {
+            IS_PROFILE_SCOPE("fullPath");
+            fullPath = IsAbsolutePath(path) ? std::string(path) : GetAbsolutePath(path);
+        }
+        std::string fullBasePath; 
+        {
+            IS_PROFILE_SCOPE("fullBasePath");
+            fullBasePath = IsAbsolutePath(basePath) ? std::string(basePath) : GetAbsolutePath(basePath);
+        }
+
+        std::vector<std::string> fullPathSplit;
+        {
+            IS_PROFILE_SCOPE("fullPath split");
+
+            fullPathSplit = SplitString(fullPath, '/');
+        }
+        std::vector<std::string> fullBasePathSplit; 
+        {
+            IS_PROFILE_SCOPE("fullBasePath split");
+            fullBasePathSplit = SplitString(fullBasePath, '/');
+        }
+        
+        std::string result;
+        {
+            IS_PROFILE_SCOPE("../");
+            if (fullPathSplit.size() < fullBasePathSplit.size())
+            {
+                u32 parentOffset = fullBasePathSplit.size() - fullPathSplit.size();
+                for (size_t parentOffsetIdx = 0; parentOffsetIdx < parentOffset; ++parentOffsetIdx)
+                {
+                    result += "../";
+                }
+            }
+        }
+
+        {
+            IS_PROFILE_SCOPE("add relative path to result");
+            const u32 shortestPath = std::min(fullPathSplit.size(), fullBasePathSplit.size());
+            for (int i = 0; i < shortestPath; ++i)
+            {
+                if (fullPathSplit[i] != fullBasePathSplit[i])
+                {
+                    for (size_t pathIdx = 0; pathIdx < shortestPath; ++pathIdx)
+                    {
+                        result += fullPathSplit[pathIdx];
+                    }
+                    break;
+                }
+            }
+        }
+        result += ".";
+        return result;
+#else
         std::error_code errorCode;
         std::filesystem::path fsPath = std::filesystem::relative(path, basePath, errorCode);
         if (errorCode)
@@ -284,6 +352,7 @@ namespace Insight
         std::string absPath = fsPath.string();
         PathToUnix(absPath);
         return absPath;
+#endif
     }
 
     bool FileSystem::PathIsSubPathOf(std::string_view path, std::string_view basePath)

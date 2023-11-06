@@ -13,6 +13,7 @@
 
 #include "Core/Memory.h"
 #include "Core/StringUtils.h"
+#include "Core/Profiler.h"
 #include "Algorithm/Vector.h"
 
 #include <imgui.h>
@@ -39,6 +40,8 @@ namespace Insight
 
         void EntitiyDescriptionWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+         
             if (EditorWindowManager::Instance().IsWindowVisable(WorldEntitiesWindow::WINDOW_NAME))
             {
                 WorldEntitiesWindow const* entitiesWindow = static_cast<WorldEntitiesWindow const*>(EditorWindowManager::Instance().GetActiveWindow(WorldEntitiesWindow::WINDOW_NAME));

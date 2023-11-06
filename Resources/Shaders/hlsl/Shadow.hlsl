@@ -1,11 +1,4 @@
-
-struct VertexInput
-{
-	float4 Pos : POSITION;
-	float4 Normal : NORMAL;
-	float4 Colour : COLOR;
-	float4 UV : TEXCOORD;
-};
+#include "Common.hlsl"
 
 struct VertexOutput
 {
@@ -19,7 +12,7 @@ cbuffer ubo_camera : register(b0)
 	float4x4 View;
 }
 
-VertexOutput VSMain(const VertexInput input)
+VertexOutput VSMain(const GeoVertexInput input)
 {
 	VertexOutput vsOut;
 	vsOut.Pos = mul(ProjView, float4(input.Pos.xyz, 1));

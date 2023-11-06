@@ -4,6 +4,8 @@
 
 #include "FileSystem/FileSystem.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -27,6 +29,8 @@ namespace Insight
 
 		void ResourceWindow::OnDraw()
 		{
+			IS_PROFILE_FUNCTION();
+
 			ImGui::Text("Resources queued to loading: %i.", Runtime::ResourceManager::Instance().GetQueuedToLoadCount());
 			ImGui::Text("Total resources loading: %i.", Runtime::ResourceManager::Instance().GetLoadingCount());
 			ImGui::Text("Total resources loaded: %i.", Runtime::ResourceManager::Instance().GetLoadedResourcesCount());

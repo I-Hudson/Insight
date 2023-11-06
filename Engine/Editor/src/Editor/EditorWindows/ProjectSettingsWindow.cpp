@@ -1,8 +1,10 @@
 #include "Editor/EditorWindows/ProjectSettingsWindow.h"
-#include"Editor/EditorGUI.h"
+#include "Editor/EditorGUI.h"
 
 #include "Runtime/ProjectSystem.h"
 #include "World/WorldSystem.h"
+
+#include "Core/Profiler.h"
 
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
@@ -28,6 +30,8 @@ namespace Insight
 
         void ProjectSettingsWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
             if (!projectInfo.IsOpen)
             {

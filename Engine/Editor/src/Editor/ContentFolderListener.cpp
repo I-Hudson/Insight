@@ -4,6 +4,8 @@
 
 #include "FileSystem/FileSystem.h"
 
+#include "Core/Profiler.h"
+
 #include <iostream>
 
 namespace Insight::Editor
@@ -68,6 +70,8 @@ namespace Insight::Editor
 
     void ContentFolderListener::Update()
     {
+        IS_PROFILE_FUNCTION();
+
         std::lock_guard queueedActionsLock(m_queuedActionsMuetx);
         for (const auto& action : m_queuedActions)
         {

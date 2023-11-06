@@ -9,7 +9,7 @@ namespace Insight
 		u64 PipelineStateObject::GetHash() const
 		{
 			u64 hash = 0;
-
+			IS_PROFILE_SCOPE("GetHash");
 			{
 				IS_PROFILE_SCOPE("shader");
 				HashCombine(hash, Shader);

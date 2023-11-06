@@ -1,3 +1,5 @@
+#include "Common.hlsl"
+
 cbuffer BufferFrame : register(b0, space0)
 {
 	float4x4 bf_Camera_Proj_View;
@@ -19,23 +21,7 @@ cbuffer BufferPerObject : register(b0, space1)
 Texture2D Texture : register(t0, space1);
 SamplerState Sampler : register(s0, space2);
 
-struct VertexInput
-{
-	float4 Position : POSITION;
-	float4 Normal : NORMAL0;
-	float4 Colour : COLOR0;
-	float4 UV : TEXCOORD0;
-};
-
-struct PixelInput
-{
-	float4 Position : SV_POSITION;
-	float4 Normal : NORMAL0;
-	float4 Colour : COLOR0;
-	float2 UV : TEXCOORD0;
-};
-
-PixelInput VSMain(VertexInput input)
+GeoPixelInput VSMain(GeoVertexInput input)
 {
 	PixelInput o;
 
@@ -51,7 +37,7 @@ PixelInput VSMain(VertexInput input)
 	return o;
 }
 
-float4 PSMain(PixelInput input) : SV_TARGET
+float4 PSMain(GeoPixelInput input) : SV_TARGET
 {
-	return input.Colour;
+	return float4(input.Colour, 1.0);
 }

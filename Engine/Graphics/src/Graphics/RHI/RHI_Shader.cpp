@@ -241,7 +241,7 @@ namespace Insight
 			// IDxcCompiler3::Compile will always return an error buffer, but its length will be zero if there are no warnings or errors.
 			if (pErrors != nullptr && pErrors->GetStringLength() != 0)
 			{
-				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\n{}", pErrors->GetStringPointer()));
+				IS_CORE_ERROR(fmt::format("Shader compilation failed : \n\nName: {} \n\n Error:", name, pErrors->GetStringPointer()));
 			}
 			pErrors->Release();
 

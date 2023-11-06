@@ -19,6 +19,8 @@
 #include "Asset/AssetRegistry.h"
 #include "Asset/AssetPackage.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -38,6 +40,8 @@ namespace Insight
 
         void MenuBar::Draw()
         {
+            IS_PROFILE_FUNCTION();
+
             if (ImGui::BeginMainMenuBar())
             {
                 if (ImGui::BeginMenu("File"))

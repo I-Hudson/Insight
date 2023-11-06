@@ -26,6 +26,8 @@ namespace Insight
 
 		void InputWindow::OnDraw()
 		{
+			IS_PROFILE_FUNCTION();
+
 			App::Engine* engine = &App::Engine::Instance();
 			Input::InputSystem* inputSystem = engine->GetSystemRegistry().GetSystem<Input::InputSystem>();
 

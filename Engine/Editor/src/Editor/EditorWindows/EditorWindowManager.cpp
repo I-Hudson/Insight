@@ -150,6 +150,8 @@ namespace Insight
 
 		void EditorWindowManager::Update()
 		{
+			IS_PROFILE_FUNCTION();
+
 			RemoveQueuedWindows();
 			for (size_t i = 0; i < m_activeWindows.size(); ++i)
 			{

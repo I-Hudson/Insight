@@ -48,6 +48,8 @@ namespace Insight::Editor
 
     void ContentWindow::OnDraw()
     {
+        IS_PROFILE_FUNCTION();
+
         // Top bar
         TopBar();
         // Centre thumbnails
@@ -95,6 +97,8 @@ namespace Insight::Editor
 
     void ContentWindow::TopBar()
     {
+        IS_PROFILE_FUNCTION();
+
         if (ImGui::Button("Import"))
         {
             // Import a new asset.
@@ -120,7 +124,12 @@ namespace Insight::Editor
             if (!contentFolderFound)
             {
                 currentPath += m_currentDirectoryParents[i] + "/";
-                std::filesystem::path contentRelativePath = std::filesystem::relative(currentPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
+                std::filesystem::path contentRelativePath = "";
+                {
+                    IS_PROFILE_SCOPE("relative");
+                    contentRelativePath = FileSystem::GetRelativePath(currentPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
+                    //std::filesystem::relative(currentPath, Runtime::ProjectSystem::Instance().GetProjectInfo().GetContentPath());
+                }
                 if (contentRelativePath == ".")
                 {
                     contentFolderFound = true;

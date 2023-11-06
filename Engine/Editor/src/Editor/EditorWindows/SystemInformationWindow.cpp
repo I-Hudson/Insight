@@ -28,6 +28,8 @@ namespace Insight
 
         void SystemInformationWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+
             Core::CPUInformation cpuInfo = Platform::GetCPUInformation();
             float speedInGHz = static_cast<float>(cpuInfo.SpeedInMHz) / 1000;
 

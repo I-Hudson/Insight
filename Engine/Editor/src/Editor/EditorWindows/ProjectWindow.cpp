@@ -32,6 +32,8 @@ namespace Insight
 
         void ProjectWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+
             static u64 tabIndex = 0;
             constexpr const char* buttonLabels[] = { "Create Project", "Open Project" };
 

@@ -94,7 +94,7 @@ namespace Insight
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain)
 			{
-				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().Load(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
+				TObjectPtr<Runtime::Model> model_sponza = Runtime::ResourceManager::Instance().LoadSync(Runtime::ResourceId(EnginePaths::GetResourcePath() + "/models/Sponza/Sponza/NewSponza_Main_glTF_002.gltf", Runtime::Model::GetStaticResourceTypeId()));
 				modelsToAddToScene.push_back({ model_sponza, false });
 			}
 			else if constexpr (DefaultModelToLoad == DefaultModels::SponzaMain_Curtains)
@@ -1577,10 +1577,10 @@ namespace Insight
 		{
 			std::vector<ShaderInputLayout> DefaultShaderInputLayout =
 			{
-				ShaderInputLayout(0, PixelFormat::R32G32B32A32_Float, 0, "POSITION"),
-				ShaderInputLayout(1, PixelFormat::R32G32B32A32_Float, 16, "NORMAL0"),
-				ShaderInputLayout(2, PixelFormat::R32G32B32A32_Float, 32, "COLOR0"),
-				ShaderInputLayout(3, PixelFormat::R32G32B32A32_Float, 48, "TEXCOORD0"),
+				ShaderInputLayout(0, PixelFormat::R32G32B32_Float, 0, "POSITION"),
+				ShaderInputLayout(1, PixelFormat::R32G32B32_Float, 12, "NORMAL0"),
+				ShaderInputLayout(2, PixelFormat::R32G32B32_Float, 24, "COLOR0"),
+				ShaderInputLayout(3, PixelFormat::R32G32_Float, 36, "TEXCOORD0"),
 			};
 			return DefaultShaderInputLayout;
 		}

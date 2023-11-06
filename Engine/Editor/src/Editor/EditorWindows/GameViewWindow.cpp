@@ -2,6 +2,8 @@
 
 #include "Graphics/RenderGraph/RenderGraph.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -32,6 +34,8 @@ namespace Insight
 
 		void GameViewWindow::OnDraw()
 		{
+			IS_PROFILE_FUNCTION();
+
 			Graphics::RHI_Texture* gameViewTexture = Graphics::RenderGraph::Instance().GetRenderCompletedRHITexture("Composite_Tex");
 			if (gameViewTexture == nullptr)
 			{

@@ -9,6 +9,8 @@
 #include "Event/EventSystem.h"
 #include "Runtime/RuntimeEvents.h"
 
+#include "Core/Profiler.h"
+
 #include <imgui.h>
 
 namespace Insight
@@ -59,6 +61,8 @@ namespace Insight
 
 		void WorldEntitiesWindow::OnDraw()
 		{
+			IS_PROFILE_FUNCTION();
+
 			std::vector<TObjectPtr<Runtime::World>> worlds = Runtime::WorldSystem::Instance().GetAllWorlds();
 			for (size_t i = 0; i < worlds.size(); ++i)
 			{

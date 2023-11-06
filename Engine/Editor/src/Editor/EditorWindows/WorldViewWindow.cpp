@@ -57,6 +57,8 @@ namespace Insight
 
         void WorldViewWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+
             ImGuizmo::BeginFrame();
             ImGuizmo::SetDrawlist();
 

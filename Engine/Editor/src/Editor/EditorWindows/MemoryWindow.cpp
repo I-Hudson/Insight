@@ -2,6 +2,7 @@
 
 #include "Core/Defines.h"
 #include "Core/Memory.h"
+#include "Core/Profiler.h"
 
 #include "Input/InputSystem.h"
 #include "Input/InputDevices/InputDevice_KeyboardMouse.h"
@@ -29,6 +30,8 @@ namespace Insight
 
         void MemoryWindow::OnDraw()
         {
+            IS_PROFILE_FUNCTION();
+
             static const char* memoryUnits[] = { "8192 KB", "4096 KB", "2048 KB", "1024 KB", "512 KB", 
                                                  "256 KB", "128 KB", "64 KB", "32 KB", "16 KB", "8 KB", "4 KB", "2 KB", "0 KB" };
             struct OneMB

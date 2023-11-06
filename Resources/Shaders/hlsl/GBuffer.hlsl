@@ -1,13 +1,5 @@
 #include "Common.hlsl"
 
-struct VertexInput
-{
-	float4 Pos : POSITION;
-	float4 Normal : NORMAL0;
-	float4 Colour : COLOR0;
-	float4 UV : TEXCOORD0;
-};
-
 struct VertexOutput
 {
 	float4 Pos 						: SV_POSITION;
@@ -22,17 +14,17 @@ struct VertexOutput
 	float2 UV 						: TEXCOORD0;
 };
 
-VertexOutput VSMain(const VertexInput input)
+VertexOutput VSMain(const GeoVertexInput input)
 {
 	VertexOutput vsOut;
-	vsOut.Pos = float4(input.Pos.xyz, 1);
-	vsOut.Colour = input.Colour;
+	vsOut.Pos = float4(input.Pos, 1);
+	vsOut.Colour = float4(input.Colour, 1.0);
 
 	vsOut.WorldPos = mul(bpo_Transform, vsOut.Pos);
 	vsOut.Pos = mul(bf_Camera_Proj_View, vsOut.WorldPos);
 	
 	vsOut.WorldNormal = normalize(mul(bpo_Transform, float4(input.Normal.xyz, 0.0)));
-	vsOut.UV = input.UV.xy;
+	vsOut.UV = input.UV;
 
 	vsOut.position_ss_current = mul(bf_Camera_View, vsOut.WorldPos);
 
