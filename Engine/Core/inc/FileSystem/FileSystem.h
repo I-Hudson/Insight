@@ -55,6 +55,7 @@ namespace Insight
 
         static std::string ReplaceExtension(std::string_view file, std::string_view extension);
 
+        static bool IsAbsolutePath(std::string_view path);
         static std::string GetAbsolutePath(const std::string& path);
         static std::string GetAbsolutePath(std::string_view path);
 

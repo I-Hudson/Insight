@@ -16,6 +16,7 @@
 
 #include <rpc.h>
 #include <Objbase.h>
+#include <CommCtrl.h>
 
 namespace Insight
 {
@@ -63,6 +64,11 @@ namespace Insight
 		void PlatformWindows::Initialise()
 		{
 			ASSERT(SUCCEEDED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)));
+
+			INITCOMMONCONTROLSEX iccex;
+			iccex.dwSize = sizeof(iccex);
+			iccex.dwICC = ICC_PROGRESS_CLASS;
+			ASSERT(InitCommonControlsEx(&iccex));
 
 			s_memoryInformation = GetMemoryInformation();
 			s_cpuInformation = GetCPUInformation();

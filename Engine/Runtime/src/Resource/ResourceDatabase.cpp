@@ -115,7 +115,7 @@ namespace Insight
             {
                 if (referenceLink.GetReferenceLinkType() == ResourceReferenceLinkType::Dependent_Owner)
                 {
-                    IS_CORE_INFO("");
+                    //IS_CORE_INFO("");
                 }
             }
         }
@@ -357,7 +357,7 @@ namespace Insight
             std::string path = resourceId.GetPath();
             if (path == "F:/Users/Documents/SourceControl/Github/C++Porjects/Insight/Resources/models/Main.1_Sponza/NewSponza_Main_glTF_002.gltf/arch_stones_01-0")
             {
-                IS_CORE_INFO("");
+                //IS_CORE_INFO("");
             }
 
             {

@@ -12,6 +12,8 @@
 #include <processthreadsapi.h>
 #include <shellapi.h>
 
+#include <Graphics/Window.h>
+
 namespace Insight
 {
     namespace Editor
@@ -20,11 +22,16 @@ namespace Insight
 
         void PackageBuild::Build(std::string_view outputFolder)
         {
+            PlatformProgress progressBar;
+            progressBar.Show("Build Progress");
+
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
 
             PremakeHeaderToolData headerToolData;
             headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
             headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
+
+            progressBar.UpdateProgress(33);
 
             PremakeTemplateData templateData;
             templateData.HeaderToolData = std::move(headerToolData);
@@ -40,9 +47,13 @@ namespace Insight
 
             PremakeSolutionGenerator solutionGenerator;
             solutionGenerator.GenerateSolution(templateData);
+            progressBar.UpdateProgress(66);
+
 
             std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
             solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
+            progressBar.UpdateProgress(100);
+
 
             //BuildSolution();
             //BuildPackageBuild(outputFolder);

@@ -283,6 +283,7 @@ namespace Insight::Editor
             "WinPixEventRuntime.lib",
             "cppwinrt_fast_forwarder.lib",
             "Xinput.lib",
+            "Comctl32.lib",
         }
         files
         {

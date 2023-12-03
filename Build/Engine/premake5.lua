@@ -83,7 +83,9 @@ workspace "Insight"
     {
         "_CRT_SECURE_NO_WARNINGS",
         "_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS",
-        
+        "_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING",
+        "_SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS",
+
         "GLM_FORCE_SWIZZLE",
         "GLM_FORCE_LEFT_HANDED",
         "GLM_FORCE_DEPTH_ZERO_TO_ONE",
@@ -185,6 +187,7 @@ workspace "Insight"
         {
             "WinPixEventRuntime.lib",
             "cppwinrt_fast_forwarder.lib",
+            "Comctl32.lib",
         }
 
     filter { "system:Windows", "configurations:Debug" or "configurations:Testing" }
