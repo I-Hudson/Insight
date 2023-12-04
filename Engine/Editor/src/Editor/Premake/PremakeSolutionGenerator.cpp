@@ -43,7 +43,7 @@ namespace Insight::Editor
     {
        std::string buildSolutionBatch = EnginePaths::GetRootPath() + "/Build/Engine/Build_Solution.bat";
 
-       std::string cmdCommend = "/c" + buildSolutionBatch + " " + solutionPath + BUILD_SOULTION_EXTENSION + " " + BUILD_IDE + " Build " + BUILD_CONFIGURAION + " " + BUILD_PLATFORM + " " + outputDirectory;
+       std::string cmdCommend = "/c" + buildSolutionBatch + " " + solutionPath + BUILD_SOULTION_EXTENSION + " " + BUILD_IDE + " Build " + BUILD_CONFIGURAION + " " + BUILD_PLATFORM;
        return Platform::RunProcessAndWait(cmdCommend.c_str());
     }
 

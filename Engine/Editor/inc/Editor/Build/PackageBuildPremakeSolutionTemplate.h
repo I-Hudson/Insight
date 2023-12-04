@@ -79,8 +79,8 @@ workspace "--SOLUTION_NAME"
         "%{IncludeDirs.tracy}",
     }
      
-    prebuildcommands
-     { 
+    postbuildcommands
+    { 
         "{COPYDIR} \"" .. insightPath .. "/deps/" .. outputdir .. "/dll/\" \"%{cfg.targetdir}\"", 
     }
 

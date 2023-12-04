@@ -68,7 +68,7 @@ namespace Insight
 
                 // Create the window.
                 m_windowHandle = CreateWindowEx(
-                    WS_EX_TOPMOST,
+                    0,
                     m_windowClassName,
                     windowTitle.c_str(),
                     WS_OVERLAPPEDWINDOW,

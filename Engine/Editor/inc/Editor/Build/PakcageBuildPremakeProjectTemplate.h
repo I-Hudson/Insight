@@ -5,6 +5,7 @@ namespace Insight::Editor
     constexpr static const char* c_PremakeProjectTag_ProjectName = "--PROJECT_NAME";
     constexpr static const char* c_PremakeProjectTag_InsightPath = "--INSIGHT_PATH";
     constexpr static const char* c_PremakeProjectTag_Targetname = "--TARGET_NAME";
+    constexpr static const char* c_PremakeProjectTag_PrebuildCommands = "--PREBUILD_COMMANDS";
 
     constexpr static const char* c_PremakeProjectFileName = "premake5_project.lua";
 
@@ -151,6 +152,11 @@ namespace Insight::Editor
 
         insightPath .. "/vendor/SimplygonSDK_10.1.11000.0/SimplygonLoader.cpp",
     }
+
+    postbuildcommands
+    {
+        --PREBUILD_COMMANDS
+    }    
 
     links
     {

@@ -9,10 +9,11 @@
 
 #include "Runtime/ProjectSystem.h"
 
+#include <Graphics/Window.h>
+
+#include <filesystem>
 #include <processthreadsapi.h>
 #include <shellapi.h>
-
-#include <Graphics/Window.h>
 
 namespace Insight
 {
@@ -51,6 +52,14 @@ namespace Insight
             std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
             solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
 
+            for (const auto& entry : std::filesystem::directory_iterator(outputFolder))
+            {
+                std::filesystem::remove_all(entry.path());
+            }
+
+            const std::string buildExeFolder = projectInfo.GetIntermediatePath() + "/PackageBuild/bin/" +
+                (IS_DEBUG ? "Debug" : "Release") + "-windows-x86_64/" + projectInfo.ProjectName;
+            std::filesystem::copy(buildExeFolder, outputFolder, std::filesystem::copy_options::recursive);
 
             //BuildSolution();
             //BuildPackageBuild(outputFolder);
