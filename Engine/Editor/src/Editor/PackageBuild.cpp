@@ -31,8 +31,6 @@ namespace Insight
             headerToolData.ReflectDirectories.push_back(Runtime::ProjectSystem::Instance().GetProjectInfo().GetProjectPath());
             headerToolData.GeneratedFilesOutputPath = PremakeSolutionGenerator::GetProjectIntermediateCodePath() + "/Generated";
 
-            progressBar.UpdateProgress(33);
-
             PremakeTemplateData templateData;
             templateData.HeaderToolData = std::move(headerToolData);
             templateData.SolutionData = PremakeSolutionTemplateData::CreateFromProjectInfo(PremakeSolutionGenerator::GetProjectIDESolutionName().c_str());
@@ -45,14 +43,13 @@ namespace Insight
             templateData.CreateFuncs.CreateSolutionFunc = CreatePackageBuildSolutionFile;
             templateData.CreateFuncs.CreateProjectFunc = CreatePackageBuildProjectFile;
 
+            progressBar.UpdateProgress(50, "Solution being generated");
             PremakeSolutionGenerator solutionGenerator;
             solutionGenerator.GenerateSolution(templateData);
-            progressBar.UpdateProgress(66);
 
-
+            progressBar.UpdateProgress(99, "Building solution");
             std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
             solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
-            progressBar.UpdateProgress(100);
 
 
             //BuildSolution();

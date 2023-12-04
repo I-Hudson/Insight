@@ -22,6 +22,7 @@ namespace Insight
         private:
             void* m_windowHandle = nullptr;
             void* m_progressBarHandle = nullptr;
+            void* m_textHandle = nullptr;
             const wchar_t* m_windowClassName = L"ProgressBar";
         };
     }

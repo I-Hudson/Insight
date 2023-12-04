@@ -11,6 +11,7 @@ namespace Insight
 #define ID_DEFAULTPROGRESSCTRL	401
 #define ID_SMOOTHPROGRESSCTRL	402
 #define ID_VERTICALPROGRESSCTRL	403
+#define ID_EDITCHILD 100
 
         LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
@@ -51,8 +52,11 @@ namespace Insight
                 wcex.hCursor = LoadCursor(GetModuleHandle(nullptr), IDC_ARROW);
                 wcex.lpfnWndProc = WndProc;
                 wcex.hInstance = GetModuleHandle(nullptr);
-
-                RegisterClassEx(&wcex);
+                if (RegisterClassEx(&wcex) == 0)
+                {
+                    Close();
+                    return;
+                }
 
                 HWND monitor = GetDesktopWindow();
                 RECT monitorRect;
@@ -60,11 +64,7 @@ namespace Insight
 
                 const std::wstring windowTitle = std::wstring(title.begin(), title.end());
                 const int windowWidth = 480;
-                const int windowHeight = 480;
-
-                const int progressBarPadding = 20;
-                const int progressBarWith = windowWidth - (progressBarPadding * 3);
-                const int progressBarHeight = 40;
+                const int windowHeight = 220;
 
                 // Create the window.
                 m_windowHandle = CreateWindowEx(
@@ -80,6 +80,15 @@ namespace Insight
                     NULL,
                     GetModuleHandle(nullptr),
                     NULL);
+                if (!m_windowHandle)
+                {
+                    Close();
+                    return;
+                }
+
+                const int progressBarPadding = 20;
+                const int progressBarWith = windowWidth - (progressBarPadding * 3);
+                const int progressBarHeight = 40;
 
                 // Create default progress bar.
                 m_progressBarHandle = CreateWindowExA(
@@ -95,12 +104,41 @@ namespace Insight
                     (HMENU)ID_DEFAULTPROGRESSCTRL,
                     GetModuleHandle(nullptr),
                     NULL);
+                if (!m_progressBarHandle)
+                {
+                    Close();
+                    return;
+                }
+
+                const int textAreaYPos = progressBarPadding + progressBarHeight + 10;
+                const int textAreaWidth = progressBarWith;
+                const int textAreaHeight = 24;
+
+                m_textHandle = CreateWindowExA(
+                    NULL,
+                    "EDIT",
+                    NULL,
+                    WS_CHILD | WS_VISIBLE | ES_LEFT,
+                    progressBarPadding,
+                    textAreaYPos,
+                    textAreaWidth,
+                    textAreaHeight,
+                    (HWND)m_windowHandle,
+                    (HMENU)ID_EDITCHILD,
+                    GetModuleHandle(nullptr),
+                    NULL);
+                if (!m_textHandle)
+                {
+                    Close();
+                    return;
+                }
+
+                UpdateProgress(0, "Empty");
 
                 // Display the window.
                 ::ShowWindow((HWND)m_windowHandle, SW_SHOWDEFAULT);
                 ::UpdateWindow((HWND)m_windowHandle);
 
-                UpdateProgress(0);
             }
         }
 
@@ -108,9 +146,21 @@ namespace Insight
         {
             if (m_windowHandle)
             {
-                DestroyWindow((HWND)m_progressBarHandle);
-                DestroyWindow((HWND)m_windowHandle);
+                if (m_progressBarHandle)
+                { 
+                    DestroyWindow((HWND)m_progressBarHandle);
+                }
+                if (m_textHandle)
+                {
+                    DestroyWindow((HWND)m_textHandle);
+                }
+                if (m_windowHandle)
+                {
+                    DestroyWindow((HWND)m_windowHandle);
+                }
+
                 m_progressBarHandle = nullptr;
+                m_textHandle = nullptr;
                 m_windowHandle = nullptr;
 
                 // Unregister window class, freeing the memory that was
@@ -122,6 +172,11 @@ namespace Insight
         void PlatformProgressWindows::UpdateProgress(const float progress, std::string message)
         {
             SendMessage((HWND)m_progressBarHandle, PBM_SETPOS, progress, 0);
+            if (!message.empty())
+            {
+                SendMessageA((HWND)m_textHandle, WM_SETTEXT, 0, (LPARAM)message.c_str());
+                ::UpdateWindow((HWND)m_windowHandle);
+            }
         }
     }
 }
