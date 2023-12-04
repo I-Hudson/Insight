@@ -325,6 +325,7 @@ namespace Insight
             }
         }
 
+        bool foundRelative = false;
         {
             IS_PROFILE_SCOPE("add relative path to result");
             const u32 shortestPath = std::min(fullPathSplit.size(), fullBasePathSplit.size());
@@ -332,15 +333,29 @@ namespace Insight
             {
                 if (fullPathSplit[i] != fullBasePathSplit[i])
                 {
+                    foundRelative = true;
                     for (size_t pathIdx = 0; pathIdx < shortestPath; ++pathIdx)
                     {
-                        result += fullPathSplit[pathIdx];
+                        result += fullPathSplit[pathIdx] + "/";
                     }
                     break;
                 }
             }
         }
-        result += ".";
+
+        if (!foundRelative && fullPathSplit.size() > fullBasePathSplit.size())
+        {
+            for (size_t i = fullBasePathSplit.size(); i < fullPathSplit.size(); ++i)
+            {
+                result += fullPathSplit[i] + "/";
+            }
+        }
+
+        if (result.back() == '/')
+        {
+            result.pop_back();
+        }
+
         return result;
 #else
         std::error_code errorCode;

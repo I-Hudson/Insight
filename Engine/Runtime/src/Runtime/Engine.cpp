@@ -48,6 +48,19 @@ namespace Insight
 			IS_CORE_INFO("Runtime Version {}.{}.{}.", 
 				ENGINE_VERSION_MAJOIR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH);
 
+			const std::string cmdLinePath = "./cmdline.txt";
+			Core::CommandLineArgs::ParseCommandLine(argc, argv);
+			Core::CommandLineArgs::ParseCommandLine(cmdLinePath.c_str());
+
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_PROFILER)->GetBool())
+			{
+				Core::WaitForProfiler();
+			}
+			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
+			{
+				while (!Platform::IsDebuggerAttached());
+			}
+
 			m_updateThread = std::this_thread::get_id();
 			Platform::Initialise();
 			EnginePaths::Initialise();
@@ -66,20 +79,6 @@ namespace Insight
 			m_systemRegistry.RegisterSystem(&m_imguiSystem);
 			m_systemRegistry.RegisterSystem(&m_worldSystem);
 			m_systemRegistry.RegisterSystem(&m_projectSystem);
-
-
-			const std::string cmdLinePath = EnginePaths::GetExecutablePath() + "/cmdline.txt";
-			Core::CommandLineArgs::ParseCommandLine(argc, argv);
-			Core::CommandLineArgs::ParseCommandLine(cmdLinePath.c_str());
-
-			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_PROFILER)->GetBool())
-			{
-				Core::WaitForProfiler();
-			}
-			if (Core::CommandLineArgs::GetCommandLineValue(CMD_WAIT_FOR_DEBUGGER)->GetBool())
-			{
-				while (!Platform::IsDebuggerAttached());
-			}
 
 			m_taskSystem.Initialise();
 			m_eventSystem.Initialise();
