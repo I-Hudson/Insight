@@ -6,6 +6,7 @@
 
 #include "Core/Logger.h"
 #include "FileSystem/FileSystem.h"
+#include "Core/EnginePaths.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -44,23 +45,27 @@ namespace Insight
             templateData.CreateFuncs.CreateSolutionFunc = CreatePackageBuildSolutionFile;
             templateData.CreateFuncs.CreateProjectFunc = CreatePackageBuildProjectFile;
 
-            progressBar.UpdateProgress(50, "Solution being generated");
+            progressBar.UpdateProgress(33, "Solution being generated");
             PremakeSolutionGenerator solutionGenerator;
             solutionGenerator.GenerateSolution(templateData);
 
-            progressBar.UpdateProgress(99, "Building solution");
+            progressBar.UpdateProgress(60, "Building solution");
             std::string solutionPath = projectInfo.GetIntermediatePath() + "/PackageBuild/" + PremakeSolutionGenerator::GetProjectIDESolutionName();
             solutionGenerator.BuildSolution(solutionPath.c_str(), outputFolder.data());
 
+            progressBar.UpdateProgress(75, "Removing all old files");
             for (const auto& entry : std::filesystem::directory_iterator(outputFolder))
             {
                 std::filesystem::remove_all(entry.path());
             }
 
+            progressBar.UpdateProgress(85, "Copying built exe to output folder");
             const std::string buildExeFolder = projectInfo.GetIntermediatePath() + "/PackageBuild/bin/" +
                 (IS_DEBUG ? "Debug" : "Release") + "-windows-x86_64/" + projectInfo.ProjectName;
             std::filesystem::copy(buildExeFolder, outputFolder, std::filesystem::copy_options::recursive);
 
+            progressBar.UpdateProgress(99, "Copying engine resources to output folder");
+            CopyEngineResourceFiles(outputFolder);
             //BuildSolution();
             //BuildPackageBuild(outputFolder);
         }
@@ -140,6 +145,12 @@ namespace Insight
             fileString.replace(projectFilesToken, strlen(c_ProjectFilesToeken), projectFiles);
 
             return fileString;
+        }
+
+        void PackageBuild::CopyEngineResourceFiles(std::string_view outputFolder) const
+        {
+            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+            std::filesystem::copy(EnginePaths::GetResourcePath(), std::string(outputFolder) + "/Resources", std::filesystem::copy_options::recursive);
         }
     }
 }

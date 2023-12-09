@@ -18,7 +18,8 @@ namespace Insight
             switch (uMsg)
             {
             case WM_DESTROY:
-                ::PostQuitMessage(0);
+                // Don't post the quit message as this is called when the progress window is closed. We don't want this affecting our editor window.
+                //::PostQuitMessage(0);
                 break;
 
             default:

@@ -148,12 +148,6 @@ namespace Insight
             ASSERT(m_database == nullptr);
             m_database = New<ResourceDatabase>();
             m_database->Initialise();
-
-            m_loaderRegistry = New<ResourceLoaderRegister>();
-			m_loaderRegistry->RegisterResourceLoader<BinaryLoader>();
-			m_loaderRegistry->RegisterResourceLoader<TextureLoader>();
-			m_loaderRegistry->RegisterResourceLoader<ModelLoader>();
-			m_loaderRegistry->RegisterResourceLoader<TextureLoader>();
         }
 
         void IResourceManager::Shutdown()
@@ -165,9 +159,6 @@ namespace Insight
             m_database->Shutdown();
             Delete(m_database);
             ASSERT(m_database == nullptr);
-
-			m_loaderRegistry->Shutdown();
-            Delete(m_loaderRegistry);
         }
 
         void IResourceManager::SetRootDirectory(std::string_view path)

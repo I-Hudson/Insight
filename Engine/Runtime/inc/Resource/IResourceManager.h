@@ -11,7 +11,6 @@ namespace Insight
     namespace Runtime
     {
         class ResourceSystem;
-        class ResourceLoaderRegister;
 
         /// @brief Static class used to interact with resources.
         class IS_RUNTIME IResourceManager
@@ -121,8 +120,6 @@ namespace Insight
             /// @brief Resources queued to be loaded.
             std::queue<IResource*> m_queuedResoucesToLoad;
             mutable std::mutex m_queuedResoucesToLoadMutex;
-
-			ResourceLoaderRegister* m_loaderRegistry;
 
             std::string m_rootDirectory;
             std::string m_debugMetaFileDirectory;

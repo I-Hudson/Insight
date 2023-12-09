@@ -157,7 +157,7 @@ namespace Insight
 			DxcBuffer Source;
 			Source.Ptr = shaderData.data();
 			Source.Size = shaderData.size();
-			Source.Encoding = DXC_CP_ACP; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
+			Source.Encoding = DXC_CP_UTF8; // Assume BOM says UTF8 or UTF16 or this is ANSI text.
 
 			// Set up arguments to be passed to the shader compiler
 
@@ -182,6 +182,9 @@ namespace Insight
 
 			//arguments.push_back(DXC_ARG_DEBUG);
 			arguments.push_back(DXC_ARG_SKIP_OPTIMIZATIONS);
+
+			arguments.push_back(L"-Wnull-character");
+
 
 			// Tell the compiler to output SPIR-V
 			if (languageToCompileTo == ShaderCompilerLanguage::Spirv)

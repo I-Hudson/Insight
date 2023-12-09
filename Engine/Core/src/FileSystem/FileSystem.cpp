@@ -351,7 +351,7 @@ namespace Insight
             }
         }
 
-        if (result.back() == '/')
+        if (!result.empty() && result.back() == '/')
         {
             result.pop_back();
         }
