@@ -73,8 +73,8 @@ namespace Insight
                     m_windowClassName,
                     windowTitle.c_str(),
                     WS_OVERLAPPEDWINDOW,
-                    (monitorRect.right * 0.5f) - (windowWidth * 0.5f),
-                    (monitorRect.bottom * 0.5f) - (windowHeight * 0.5f),
+                    (int)((float)monitorRect.right * 0.5f) - (int)((float)windowWidth * 0.5f),
+                    (int)((float)monitorRect.bottom * 0.5f) - (int)((float)windowHeight * 0.5f),
                     windowWidth,
                     windowHeight,
                     NULL,
@@ -170,7 +170,7 @@ namespace Insight
             }
         }
 
-        void PlatformProgressWindows::UpdateProgress(const float progress, std::string message)
+        void PlatformProgressWindows::UpdateProgress(const int progress, std::string message)
         {
             SendMessage((HWND)m_progressBarHandle, PBM_SETPOS, progress, 0);
             if (!message.empty())

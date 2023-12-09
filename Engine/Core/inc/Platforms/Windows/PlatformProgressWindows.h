@@ -17,7 +17,7 @@ namespace Insight
 
             void Show(std::string title);
             void Close();
-            void UpdateProgress(const float progress, std::string message = "");
+            void UpdateProgress(const int progress, std::string message = "");
 
         private:
             void* m_windowHandle = nullptr;

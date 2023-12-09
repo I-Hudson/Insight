@@ -218,6 +218,7 @@ namespace Insight::Editor
                         IS_PROFILE_SCOPE("Entry");
 
                         std::string path = iter.path().string();
+                        FileSystem::PathToUnix(path);
                         std::string fileName = iter.path().filename().string();
                         std::string fileExtension = iter.path().extension().string();
 
@@ -407,7 +408,7 @@ namespace Insight::Editor
                                 , contentResource->GetGuid().ToString().data()
                                 , Runtime::IResource::GetStaticTypeInfo().GetType());
                         }
-                        if (assetInfo)
+                        else if (assetInfo)
                         {
                             EditorGUI::ObjectFieldSource(c_ContentWindowAssetDragSource, assetInfo->Guid.ToString().c_str());
                         }

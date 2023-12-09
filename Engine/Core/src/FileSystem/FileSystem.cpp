@@ -356,6 +356,8 @@ namespace Insight
             result.pop_back();
         }
 
+        result += ".";
+
         return result;
 #else
         std::error_code errorCode;
