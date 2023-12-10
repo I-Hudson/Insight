@@ -150,6 +150,17 @@ namespace Insight
         void ProjectSystem::SaveProject()
         {
             Core::EventSystem::Instance().DispatchEventNow(MakeRPtr<Core::ProjectSaveEvent>(m_projectInfo.ProjectPath));
+
+            Serialisation::JsonSerialiser serialiser(false);
+            serialiser.SetVersion(1);
+            m_projectInfo.Serialise(&serialiser);
+
+            std::vector<Byte> serialisedData = serialiser.GetSerialisedData();
+            serialiser = {};
+
+            Archive archive(m_projectInfo.GetProjectFilePath(), ArchiveModes::Write);
+            archive.Write(serialisedData.data(), serialisedData.size());
+            archive.Close();
         }
 
         const ProjectInfo& ProjectSystem::GetProjectInfo() const

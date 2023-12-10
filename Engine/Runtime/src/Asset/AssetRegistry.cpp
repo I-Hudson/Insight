@@ -152,7 +152,9 @@ namespace Insight::Runtime
         AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package);
         m_guidToAssetInfo[newInfo->Guid] = newInfo;
         m_pathToAssetGuid[newInfo->GetFullFilePath()] = newInfo->Guid;
-        package->AddAsset(newInfo);
+        const AssetInfo* addedInfo = package->AddAsset(newInfo);
+        ASSERT(newInfo == addedInfo);
+
         return newInfo;
     }
 
@@ -190,15 +192,16 @@ namespace Insight::Runtime
         Serialisation::BinarySerialiser binarySerialiser(false);
         Serialisation::JsonSerialiser jsonSerialiser(false);
 
-        AssetMetaData& metaData = assetInfo->MetaData;
+        AssetMetaData* metaData = assetInfo->MetaData;
+        ASSERT(metaData)
 
-        metaData.Serialise(&binarySerialiser);
+        metaData->Serialise(&binarySerialiser);
         if (object)
         {
             object->Serialise(&binarySerialiser);
         }
 
-        metaData.Serialise(&jsonSerialiser);
+        metaData->Serialise(&jsonSerialiser);
         if (object)
         {
             object->Serialise(&jsonSerialiser);

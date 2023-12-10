@@ -6,6 +6,8 @@
 #include "Core/GUID.h"
 #include "Serialisation/Serialiser.h"
 
+#include "Reflect.h"
+
 #include <string>
 #include <unordered_set>
 
@@ -25,20 +27,13 @@ namespace Insight
             AssetMetaData(AssetMetaData&& other) = default;
             ~AssetMetaData() = default;
 
-            constexpr static const char* c_FileExtension = ".is_meta";
+            constexpr static const char* c_FileExtension = ".assetmeta";
             IS_SERIALISABLE_H(AssetMetaData);
 
             operator bool() const;
             bool IsValid() const;
 
-            /// @brief Unique guid for the asset
             Core::GUID AssetGuid;
-            /// @brief Store a vector of Guids which are dependent on this asset.
-            /// Example: A single mesh within a model. If the mesh is needed then the model
-            /// must be loaded.
-            std::unordered_set<Core::GUID> DependentGuids;
-            /// @brief Source file path is there is one
-            std::string SourcePath;
         };
 
         /// @brief Store relevant information about a asset. The asset could be on disk or
@@ -55,11 +50,11 @@ namespace Insight
         class IS_RUNTIME AssetInfo : public ReferenceCountObject
         {
         public:
-            AssetInfo() = default;
+            AssetInfo() = delete;
             AssetInfo(std::string_view filePath, std::string_view packagePath, AssetPackage* assetPackage);
             AssetInfo(const AssetInfo& other) = default;
             AssetInfo(AssetInfo&& other) = default;
-            ~AssetInfo() = default;
+            ~AssetInfo();
 
             operator bool() const;
             bool IsValid() const;
@@ -79,7 +74,7 @@ namespace Insight
             std::string GetFullPackagePath() const;
 
             /// @brief MetaData stored on disk for this resource.
-            AssetMetaData MetaData;
+            AssetMetaData* MetaData = nullptr;
             /// @brief Should the asset care about meta data. If false no meta data file with be created.
             /// False should be used for engine/editor assets.
             bool EnableMetaData;
@@ -100,12 +95,13 @@ namespace Insight
             bool IsEngineFormat = false;
 
             Core::GUID Guid;
+
+        private:
+            void LoadMetaData() const;
         };
     }
  
     OBJECT_SERIALISER(Runtime::AssetMetaData, 1,
         SERIALISE_PROPERTY(Core::GUID, AssetGuid, 1, 0)
-        SERIALISE_SET_PROPERTY(Core::GUID, DependentGuids, 1, 0)
-        SERIALISE_PROPERTY(std::string, SourcePath, 1, 0)
     )
 }

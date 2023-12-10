@@ -7,6 +7,8 @@
 
 #include "Core/ObjectManager.h"
 
+#include "Runtime/RuntimeSettings.h"
+
 #include "Asset/AssetRegistry.h"
 #include "Core/SystemRegistry.h"
 #include "Threading/TaskSystem.h"
@@ -71,6 +73,8 @@ namespace Insight
 			std::thread::id m_updateThread;
 
 			ObjectManager m_objectManager;
+
+			Runtime::RuntimeSettings m_runtimeSettings;
 
 			// Systems
 			Core::SystemRegistry m_systemRegistry;

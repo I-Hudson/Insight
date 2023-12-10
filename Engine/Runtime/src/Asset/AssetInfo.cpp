@@ -1,6 +1,7 @@
 #include "Asset/AssetInfo.h"
 
 #include "FileSystem/FileSystem.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 namespace Insight
 {
@@ -22,6 +23,15 @@ namespace Insight
 
             ASSERT(assetPackage);
             AssetPackage = assetPackage;
+
+            MetaData = ::New<AssetMetaData>();
+            LoadMetaData();
+            Guid = MetaData->AssetGuid;
+        }
+
+        AssetInfo::~AssetInfo()
+        {
+            ::Delete(MetaData);
         }
 
         IS_SERIALISABLE_CPP(AssetMetaData);
@@ -80,6 +90,25 @@ namespace Insight
         std::string AssetInfo::GetFullPackagePath() const
         {
             return PackagePath + "/" + PackageName;
+        }
+
+        void AssetInfo::LoadMetaData() const
+        {
+            const std::string metaDataPath = GetFullFilePath() + AssetMetaData::c_FileExtension;
+            if (FileSystem::Exists(metaDataPath))
+            {
+                std::vector<u8> data = FileSystem::ReadFromFile(metaDataPath);
+
+                Serialisation::JsonSerialiser jsonSerialiser(true);
+                jsonSerialiser.Deserialise(data);
+                MetaData->Deserialise(&jsonSerialiser);
+            }
+            else
+            {
+                Serialisation::JsonSerialiser jsonSerialiser(false);
+                MetaData->Serialise(&jsonSerialiser);
+                ASSERT(FileSystem::SaveToFile(jsonSerialiser.GetSerialisedData(), metaDataPath, FileType::Text, true));
+            }
         }
     }
 }

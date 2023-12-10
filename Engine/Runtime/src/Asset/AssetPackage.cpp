@@ -59,8 +59,12 @@ namespace Insight
                 assetInfo->PackagePath = m_packagePath;
 
                 m_assetInfos.push_back(assetInfo);
+                return assetInfo;
             }
-            return assetInfo;
+            else
+            {
+                return GetAsset(assetInfo->Guid);
+            }
         }
 
         void AssetPackage::RemoveAsset(std::string_view path)
@@ -263,8 +267,8 @@ namespace Insight
                 return;
             }
 
-            AssetMetaData& metaData = RemoveConst(assetInfo)->MetaData;
-            metaData.Deserialise(&binarySerialiser);
+            AssetMetaData* metaData = RemoveConst(assetInfo)->MetaData;
+            metaData->Deserialise(&binarySerialiser);
         }
 
         bool AssetPackage::AssetInfoValidate(const AssetInfo* assetInfo) const

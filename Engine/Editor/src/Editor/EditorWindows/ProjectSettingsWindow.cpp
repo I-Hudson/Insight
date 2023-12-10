@@ -1,8 +1,11 @@
 #include "Editor/EditorWindows/ProjectSettingsWindow.h"
 #include "Editor/EditorGUI.h"
 
+#include "Editor/EditorWindows/ContentWindow.h"
+
 #include "Runtime/ProjectSystem.h"
 #include "World/WorldSystem.h"
+#include "Asset/AssetRegistry.h"
 
 #include "Core/Profiler.h"
 
@@ -51,15 +54,41 @@ namespace Insight
             ImGui::Text("%u", projectInfo.ProjectVersion);
 
             Reflect::TypeInfo worldTypeInfo = Runtime::World::GetStaticTypeInfo();
-            Runtime::World* defaultWorld = Runtime::WorldSystem::Instance().GetWorldFromGuid(projectInfo.DefaultWorld).Get();
+            const Runtime::AssetInfo* initialWorld = Runtime::AssetRegistry::Instance().GetAsset(projectInfo.DefaultWorld);
 
-            std::string_view worldName = defaultWorld != nullptr ? defaultWorld->GetWorldName() : "";
-            ImGui::Text("Default World");
-            ImGui::SameLine();
-            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1));
-            ImGui::InputText("##DefaultWorld", (char*)worldName.data(), worldName.size(), ImGuiInputTextFlags_ReadOnly);
-            ImGui::PopStyleColor();
-            //EditorGUI::ObjectFieldTarget("DragDropTarget", "Default World", defaultWorld, worldTypeInfo.GetType());
+            {
+                ImGui::BeginGroup();
+
+                std::string_view worldName = "";
+                if (initialWorld)
+                {
+                    worldName = initialWorld->FileName;
+                }
+
+                ImGui::Text("Initial World");
+                ImGui::SameLine();
+                //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1));
+                ImGui::InputText("##PorjectSettingsInitalWorld", (char*)worldName.data(), worldName.size(), ImGuiInputTextFlags_ReadOnly);
+                //ImGui::PopStyleColor();
+
+                ImGui::EndGroup();
+
+                std::string worldDropTargetData;
+                EditorGUI::ObjectFieldTarget(ContentWindow::c_ContentWindowAssetDragSource,
+                    worldDropTargetData);
+
+                if (!worldDropTargetData.empty())
+                {
+                    Core::GUID newInitialWorldGuid;
+                    newInitialWorldGuid.StringToGuid(worldDropTargetData);
+
+                    const Runtime::AssetInfo* newInitialworldAssetInfo = Runtime::AssetRegistry::Instance().GetAsset(newInitialWorldGuid);
+                    if (newInitialworldAssetInfo)
+                    {
+                        RemoveConst(projectInfo.DefaultWorld) = newInitialworldAssetInfo->Guid;
+                    }
+                }
+            }
         }
     }
 }
