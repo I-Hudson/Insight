@@ -65,22 +65,6 @@ namespace Insight
 			, m_link_resource(link_resource)
 		{ }
 
-		//--------------------------------------------------------------------------
-		// ResourcePackInfo
-		//--------------------------------------------------------------------------
-		void ResourcePackInfo::Serialise(::Insight::Serialisation::ISerialiser* serialiser)
-		{
-			::Insight::Serialisation::SerialiserObject<ResourcePackInfo> serialiserObject;
-			serialiserObject.Serialise(serialiser, *this);
-		}
-		void ResourcePackInfo::Deserialise(::Insight::Serialisation::ISerialiser* serialiser)
-		{
-			::Insight::Serialisation::SerialiserObject<ResourcePackInfo> serialiserObject;
-			serialiserObject.Deserialise(serialiser, *this);
-		}
-		//--------------------------------------------------------------------------
-		// IResource
-		//--------------------------------------------------------------------------
 		IResource::IResource(std::string_view filePath)
 		{
 			m_resource_state = EResoruceStates::Not_Loaded;
@@ -138,11 +122,6 @@ namespace Insight
 		{
 			std::lock_guard lock(m_mutex);
 			return m_storage_type;
-		}
-
-		const ResourcePackInfo& IResource::GetResourcePackInfo() const
-		{
-			return m_resourcePackInfo;
 		}
 
 		bool IResource::IsNotFound() const

@@ -15,7 +15,7 @@ namespace Insight
     namespace Runtime
     {
         class IResourceManager;
-        class ResourcePack;
+        
 
         /// @brief Database to store all currently known resources.
         class ResourceDatabase : public Serialisation::ISerialisable
@@ -37,10 +37,6 @@ namespace Insight
             void Shutdown();
             void Clear();
 
-            ResourcePack* CreateResourcePack(std::string_view filePath);
-            ResourcePack* LoadResourcePack(std::string_view filepath);
-            void UnloadResourcePack(ResourcePack* resourcePack);
-
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
             void RemoveResource(TObjectPtr<IResource> resource);
             void RemoveResource(ResourceId const& resourceId);
@@ -51,7 +47,6 @@ namespace Insight
             TObjectPtr<IResource> GetResourceFromGuid(Core::GUID const& guid) const;
             
             ResourceMap GetResourceMap() const;
-            std::vector<ResourcePack*> GetResourcePacks() const;
 
             bool HasResource(ResourceId const& resourceId) const;
             bool HasResource(TObjectPtr<IResource> resource) const;

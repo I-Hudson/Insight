@@ -29,7 +29,6 @@ namespace Insight
 		class IResource;
 		class IResourceManager;
 		class ResourceDatabase;
-		class ResourcePack;
 
 		enum class ResourceStorageTypes
 		{
@@ -85,16 +84,6 @@ namespace Insight
 			IResource* m_link_resource;
 		};
 
-		/// @brief Store data about the resource pack a resource is in, if it is in one.
-		class ResourcePackInfo : public Serialisation::ISerialisable
-		{
-		public:
-			bool IsWithinPack = false; /// Is the resource within a resource pack. By default all resources are loose.
-			ResourcePack* ResourcePack = nullptr;
-
-			IS_SERIALISABLE_H(ResourcePackInfo)
-		};
-
 		/// @brief Interface for any resource class. A resource is any item which can be saved/loaded from disk.
 		REFLECT_CLASS()
 		class IS_RUNTIME IResource : public Reflect::IReflect, public IObject
@@ -120,8 +109,6 @@ namespace Insight
 
 			const ResourceReferenceLink* GetReferenceLink(u32 index) const;
 			ResourceStorageTypes GetResourceStorageType() const;
-
-			const ResourcePackInfo& GetResourcePackInfo() const;
 
 			/// @brief Check if this resource is dependent on another resource (owned).
 			/// @return bool 
@@ -230,17 +217,12 @@ namespace Insight
 
 			mutable std::mutex m_mutex;
 
-			ResourcePackInfo m_resourcePackInfo;
+			Runtime::AssetInfo* m_assetInfo = nullptr;
 
 			friend class IResourceManager;
 			friend class ResourceDatabase;
-			friend class ResourcePack;
 		};
 	}
-
-	OBJECT_SERIALISER(Runtime::ResourcePackInfo, 1,
-		SERIALISE_PROPERTY(bool, IsWithinPack, 1, 0)
-		);
 
 	OBJECT_SERIALISER(Runtime::IResource, 5,
 		SERIALISE_BASE(IObject, 5, 0)
@@ -249,7 +231,6 @@ namespace Insight
 		SERIALISE_PROPERTY(std::string, m_file_path, 1, 2)
 		SERIALISE_OBJECT(Runtime::ResourceId, m_resourceId, 1, 2)
 		SERIALISE_PROPERTY_REMOVED(Core::GUID, m_guid, 2, 5)
-		SERIALISE_OBJECT(Runtime::ResourcePackInfo, m_resourcePackInfo, 3, 4)
 	);
 }
 

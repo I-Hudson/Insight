@@ -8,7 +8,6 @@ namespace Insight
 	namespace Runtime
 	{
 		class IResource;
-		class ResourcePack;
 	}
 
 	namespace Editor
