@@ -54,6 +54,26 @@ namespace Insight
 			return m_meshes.at(index);
 		}
 
+		u32 Model::GetMeshCount() const
+		{
+			return static_cast<u32>(m_meshes.size());
+		}
+
+		Material* Model::GetMaterial() const
+		{
+			return m_materials.empty() ? nullptr : m_materials.at(0);
+		}
+
+		Material* Model::GetMaterialByIndex(u32 index) const
+		{
+			return m_materials.at(index);
+		}
+
+		u32 Model::GetMaterialCount() const
+		{
+			return static_cast<u32>(m_materials.size());
+		}
+
 		ECS::Entity* Model::CreateEntityHierarchy()
 		{
 			TObjectPtr<World> world = Runtime::WorldSystem::Instance().GetActiveWorld();

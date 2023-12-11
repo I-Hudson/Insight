@@ -5,7 +5,6 @@
 
 #include <string>
 #include <array>
-#include <xhash>
 
 namespace Insight
 {

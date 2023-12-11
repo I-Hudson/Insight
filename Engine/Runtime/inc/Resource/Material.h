@@ -41,6 +41,8 @@ namespace Insight
 			REGISTER_RESOURCE(Material);
 			IS_SERIALISABLE_H(Material)
 
+			std::string_view GetName() const;
+
 			void SetTexture(TextureTypes texture_type, Texture2D* texture);
 			Texture2D* GetTexture(TextureTypes texture_type) const;
 
@@ -59,6 +61,7 @@ namespace Insight
 			virtual void Save(const std::string& file_path);
 
 		private:
+			std::string m_name;
 			std::array<ResourceLFHandle<Texture2D>, static_cast<u32>(TextureTypes::Count)> m_textures;
 			std::array<float, static_cast<u32>(MaterialProperty::Count)> m_properties;
 

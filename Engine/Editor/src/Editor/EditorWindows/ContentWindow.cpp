@@ -312,8 +312,8 @@ namespace Insight::Editor
                                                 assetInspectorWindow->SetSelectedAssetInfo(info);
                                             }
 
-                                            IObject* object = Runtime::AssetRegistry::Instance().GetObjectFromAsset(info->Guid);
-                                            if (object)
+                                            std::vector<IObject*> objects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(info->Guid);
+                                            if (!objects.empty())
                                             {
 
                                             }

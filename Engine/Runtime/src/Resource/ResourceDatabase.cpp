@@ -86,6 +86,10 @@ namespace Insight
         {
             return AddResource(resourceId, false);
         }
+        TObjectPtr<IResource> ResourceDatabase::AddResource(const Core::GUID assetGuid)
+        {
+            return AddResource(assetGuid, ResourceTypeId(), false);
+        }
 
         void ResourceDatabase::RemoveResource(TObjectPtr<IResource> resource)
         {
@@ -262,55 +266,67 @@ namespace Insight
             return metaFilePath;
         }
 
-        TObjectPtr<IResource> ResourceDatabase::AddResource(ResourceId const& resourceId, bool force)
+        TObjectPtr<IResource> ResourceDatabase::AddResource(const ResourceId resourceId, bool force)
         {
-            if (!force && !AssetRegistry::Instance().GetAsset(resourceId.GetPath()))
-            {
-                IS_CORE_WARN("[ResourceDatabase::AddResource] Path '{}' doesn't exist.", resourceId.GetPath());
-                return nullptr;
-            }
-
-            TObjectPtr<IResource> resource;
-            if (HasResource(resourceId))
-            {
-                {
-                    std::lock_guard lock(m_resourcesMutex);
-                    resource = m_resources.find(resourceId)->second;
-                }
-                return resource;
-            }
-
             const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
             if (!assetInfo)
             {
-                FAIL_ASSERT();
+                IS_CORE_WARN("[ResourceDatabase::AddResource] Unable to find asset with path '{}'.", resourceId.GetPath());
                 return nullptr;
             }
 
-            IResource* rawResource = ResourceRegister::CreateResource(resourceId.GetTypeId(), resourceId.GetPath());
+            return AddResource(assetInfo->Guid, resourceId.GetTypeId(), force);
+        }
+
+        TObjectPtr<IResource> ResourceDatabase::AddResource(const Core::GUID assetGuid, ResourceTypeId typeId, bool force)
+        {
+            ASSERT(assetGuid != Core::GUID::s_InvalidGUID);
+            const AssetInfo* assetInfo = AssetRegistry::Instance().GetAsset(assetGuid);
+
+            TObjectPtr<IResource> resource = GetResourceFromGuid(assetGuid);
+            if (resource)
+            {
+                return resource;
+            }
+
+            if (!typeId)
+            {
+                const IResourceLoader* loader = ResourceLoaderRegister::GetLoaderFromExtension(FileSystem::GetExtension(assetInfo->FileName));
+                if (loader)
+                {
+                    typeId = loader->GetResourceTypeId();
+                }
+            }
+
+            if (!typeId)
+            {
+                FAIL_ASSERT_MSG("Resource typeId is invalid.");
+                return nullptr;
+            }
+
+            IResource* rawResource = ResourceRegister::CreateResource(typeId, assetInfo->GetFullFilePath());
             ASSERT(rawResource);
             {
                 std::lock_guard resourceLock(rawResource->m_mutex);
-                rawResource->m_resourceId = resourceId;
+                rawResource->m_resourceId = ResourceId(assetInfo->GetFullFilePath(), typeId);
                 rawResource->m_resource_state = EResoruceStates::Not_Loaded;
                 rawResource->m_storage_type = ResourceStorageTypes::Disk;
                 rawResource->OnLoaded.Bind<&ResourceDatabase::OnResourceLoaded>(this);
                 rawResource->OnUnloaded.Bind<&ResourceDatabase::OnResourceUnloaded>(this);
+                rawResource->m_assetInfo = assetInfo;
+                rawResource->SetGuid(assetInfo->Guid);
+                ASSERT(rawResource->GetGuid() == assetInfo->Guid);
             }
             TObjectOPtr<IResource> ownerResource = TObjectOPtr<IResource>(rawResource);
             {
                 std::lock_guard resourceLock(m_resourcesMutex);
-                resource = m_resources[resourceId] = std::move(ownerResource);
+                resource = m_resources[rawResource->m_resourceId] = std::move(ownerResource);
             }
 
             LoadMetaFileData(resource);
             UpdateGuidToResource(resource);
 
-            const AssetInfo* info = AssetRegistry::Instance().GetAsset(resourceId.GetPath());
-            if (info)
-            {
-                AssetRegistry::Instance().RegisterObjectToAsset(info, resource);
-            }
+            AssetRegistry::Instance().RegisterObjectToAsset(assetInfo, resource);
 
             return resource;
         }
@@ -398,6 +414,7 @@ namespace Insight
 
         void ResourceDatabase::LoadMetaFileData(IResource* resource)
         {
+            return;
             if (resource->IsEngineFormat())
             {
                 return;

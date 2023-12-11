@@ -30,6 +30,11 @@ namespace Insight
 
 			Mesh* GetMesh() const;
 			Mesh* GetMeshByIndex(u32 index) const;
+			u32 GetMeshCount() const;
+
+			Material* GetMaterial() const;
+			Material* GetMaterialByIndex(u32 index) const;
+			u32 GetMaterialCount() const;
 
 			//--ECS::ICreateEntityHierarchy
 			virtual ECS::Entity* CreateEntityHierarchy() override;

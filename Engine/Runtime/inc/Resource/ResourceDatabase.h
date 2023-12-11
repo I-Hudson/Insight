@@ -38,6 +38,8 @@ namespace Insight
             void Clear();
 
             TObjectPtr<IResource> AddResource(ResourceId const& resourceId);
+            TObjectPtr<IResource> AddResource(const Core::GUID assetGuid);
+
             void RemoveResource(TObjectPtr<IResource> resource);
             void RemoveResource(ResourceId const& resourceId);
 
@@ -59,7 +61,8 @@ namespace Insight
             std::string GetMetaFileForResource(const IResource* resource) const;
 
         private:
-            TObjectPtr<IResource> AddResource(ResourceId const& resourceId, bool force);
+            TObjectPtr<IResource> AddResource(const ResourceId resourceId, bool force);
+            TObjectPtr<IResource> AddResource(const Core::GUID assetGuid, ResourceTypeId typeId, bool force);
 
             void DeleteResource(TObjectOPtr<IResource>& resource);
 

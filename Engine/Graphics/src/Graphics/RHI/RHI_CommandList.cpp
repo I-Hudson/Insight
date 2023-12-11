@@ -287,6 +287,7 @@ namespace Insight
 		{
 			RHI_CommandListAllocator* newAllocator = RHI_CommandListAllocator::New();
 			newAllocator->Create(m_context, m_commandListAllocatorDesc);
+			newAllocator->SetName("Command Allocator_" + std::to_string(m_allocators.size()));
 			{
 				std::lock_guard lock(m_mutex);
 				m_allocators.push_back(newAllocator);

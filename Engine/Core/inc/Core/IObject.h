@@ -21,7 +21,7 @@ namespace Insight
 
 		IS_SERIALISABLE_H(IObject);
 
-		void SetGuid(Core::GUID guid);
+		void SetGuid(const Core::GUID& guid);
 		Core::GUID GetGuid() const;
 
 	private:

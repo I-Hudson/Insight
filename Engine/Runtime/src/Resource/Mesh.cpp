@@ -37,6 +37,11 @@ namespace Insight
 			cmd_list->DrawIndexed(m_lods.at(lod_index).Index_count, 1, m_lods.at(lod_index).First_index, m_lods.at(lod_index).Vertex_offset, 0);
 		}
 
+		const std::string_view Mesh::GetName() const
+		{
+			return m_mesh_name;
+		}
+
 		glm::mat4 Mesh::GetTransform() const
 		{
 			return m_transform_offset;

@@ -202,6 +202,11 @@ namespace Insight
 			return nullptr;
 		}
 
+		const AssetInfo* IResource::GetAssetInfo() const
+		{
+			return m_assetInfo;
+		}
+
 		ResourceId IResource::GetResourceId() const
 		{
 			return m_resourceId;

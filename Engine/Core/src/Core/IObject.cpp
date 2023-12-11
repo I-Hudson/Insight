@@ -15,10 +15,10 @@ namespace Insight
 
     IS_SERIALISABLE_CPP(IObject);
 
-    void IObject::SetGuid(Core::GUID guid)
+    void IObject::SetGuid(const Core::GUID& guid)
     {
         ObjectManager::Instance().UpdateGuidForObject(this, m_guid, guid);
-        m_guid = std::move(guid);
+        m_guid = guid;
     }
 
     Core::GUID IObject::GetGuid() const

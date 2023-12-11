@@ -22,6 +22,11 @@ namespace Insight
 
 		IS_SERIALISABLE_CPP(Material)
 
+		std::string_view Material::GetName() const
+		{
+			return m_name;
+		}
+
 		void Material::SetTexture(TextureTypes texture_type, Texture2D* texture)
 		{
 			m_textures.at(static_cast<u32>(texture_type)) = texture;

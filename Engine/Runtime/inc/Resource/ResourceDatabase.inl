@@ -135,7 +135,7 @@ namespace Insight
                     bool resourceExistsOnDisk = FileSystem::Exists(resouceId.GetPath());
                     if (resourceExistsOnDisk)
                     {
-                        resourceDatabase->AddResource(resouceId, true);
+                        //resourceDatabase->AddResource(resouceId, true);
                     }
 
                     std::string guidString;

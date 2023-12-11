@@ -78,7 +78,7 @@ namespace Insight
             void RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object);
             void UnregisterObjectToAsset(const IObject* object);
 
-            IObject* GetObjectFromAsset(const Core::GUID& guid);
+            std::vector<IObject*> GetObjectsFromAsset(const Core::GUID& guid) const;
 
         private:
             AssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path);
@@ -98,7 +98,7 @@ namespace Insight
 
             std::vector<AssetPackage*> m_assetPackages;
 
-            std::unordered_map<Core::GUID, IObject*> m_assetToObject;
+            std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
             mutable std::mutex m_assetToObjectGuid;
 
             //std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfoLookup;

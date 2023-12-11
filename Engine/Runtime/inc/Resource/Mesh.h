@@ -56,6 +56,8 @@ namespace Insight
 
 			void Draw(Graphics::RHI_CommandList* cmd_list, u32 lod_index = 0);
 
+			const std::string_view GetName() const;
+
 			/// @brief Return the transform from orgin from the model file.
 			/// @return glm::mat4
 			glm::mat4 GetTransform() const;

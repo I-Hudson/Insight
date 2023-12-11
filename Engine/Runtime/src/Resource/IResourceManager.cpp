@@ -214,7 +214,7 @@ namespace Insight
             }
             else
             {
-                resource = m_database->AddResource(resourceId, true);
+                //resource = m_database->AddResource(resourceId, true);
             }
             return resource;
         }
@@ -424,7 +424,7 @@ namespace Insight
             }
             else
             {
-                FAIL_ASSERT();
+                resource = m_database->AddResource(guid);
             }
 
             if (resource)

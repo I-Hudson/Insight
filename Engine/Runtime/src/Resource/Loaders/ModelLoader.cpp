@@ -348,6 +348,7 @@ namespace Insight
 						}
 						++loader_data.MeshIndex;
 
+						new_mesh->m_assetInfo = loader_data.Model->m_assetInfo;
 						new_mesh->m_mesh_name = aiMesh->mName.C_Str();
 						new_mesh->m_source_file_path = loader_data.Model->m_source_file_path;
 						new_mesh->m_file_path = loader_data.Directoy + '/' + new_mesh->m_mesh_name;
@@ -502,6 +503,8 @@ namespace Insight
 			mesh_data.Materials.push_back(material);
 
 			ASSERT(material);
+			material->m_name = ai_material->GetName().C_Str();
+			material->m_assetInfo = known_data.Model->m_assetInfo;
 			//if (!material->IsLoaded())
 			{
 				ExtractMaterialType(ai_material, aiTextureType_BASE_COLOR, aiTextureType_DIFFUSE, "texture_diffuse", known_data.Directoy, TextureTypes::Diffuse, material);

@@ -419,34 +419,40 @@ namespace Insight::Runtime
     void AssetRegistry::RegisterObjectToAsset(const AssetInfo* assetInfo, IObject* object)
     {
         std::lock_guard assetToObjectLock(m_assetToObjectGuid);
-        ASSERT(m_assetToObject.find(assetInfo->Guid) == m_assetToObject.end());
-        m_assetToObject[assetInfo->Guid] = object;
+        std::unordered_set<const IObject*>& objects = m_assetToObjects[assetInfo->Guid];
+        ASSERT(objects.find(object) == objects.end());
+        m_assetToObjects[assetInfo->Guid].insert(object);
     }
 
     void AssetRegistry::UnregisterObjectToAsset(const IObject* object)
     {
         std::lock_guard assetToObjectLock(m_assetToObjectGuid);
-        for (auto& [guid, obj] : m_assetToObject)
+        for (auto& [guid, set] : m_assetToObjects)
         {
-            if (obj == object) 
+            if (auto iter = set.find(object);
+                iter != set.end())
             {
-                m_assetToObject.erase(guid);
+                set.erase(object);
                 return;
             }
         }
         FAIL_ASSERT_MSG("[AssetRegistry::UnregisterObjectToAsset] Unable to unregister object '%s' from asset.", object->GetGuid().ToString().c_str());
     }
 
-    IObject* AssetRegistry::GetObjectFromAsset(const Core::GUID& guid)
+    std::vector<IObject*> AssetRegistry::GetObjectsFromAsset(const Core::GUID& guid) const
     {
         std::lock_guard assetToObjectLock(m_assetToObjectGuid);
 
-        if (auto iter = m_assetToObject.find(guid);
-            iter != m_assetToObject.end())
+        std::vector<IObject*> objects;
+        if (auto iter = m_assetToObjects.find(guid);
+            iter != m_assetToObjects.end())
         {
-            return iter->second;
+            std::transform(iter->second.begin(), iter->second.end(), std::back_inserter(objects), [](const IObject* obj)
+                {
+                    return RemoveConst(obj);
+                });
         }
-        return nullptr;
+        return objects;
     }
 
     AssetPackage* AssetRegistry::CreateAssetPackageInternal(std::string_view name, std::string_view path)

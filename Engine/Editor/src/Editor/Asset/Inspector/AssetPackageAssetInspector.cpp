@@ -25,13 +25,13 @@ namespace Insight
 
 		void AssetPackageAssetInspector::Draw(const Runtime::AssetInfo* assetInfo)
 		{
-			IObject* assetObject = Runtime::AssetRegistry::Instance().GetObjectFromAsset(assetInfo->Guid);
-			if (!assetObject)
+			std::vector<IObject*> assetObjects = Runtime::AssetRegistry::Instance().GetObjectsFromAsset(assetInfo->Guid);
+			if (assetObjects.empty())
 			{
 				return;
 			}
 
-			Runtime::AssetPackage* assetPackage = static_cast<Runtime::AssetPackage*>(assetObject);
+			Runtime::AssetPackage* assetPackage = static_cast<Runtime::AssetPackage*>(assetObjects.at(0));
 			if (!assetPackage)
 			{
 				return;

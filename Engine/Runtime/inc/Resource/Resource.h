@@ -138,6 +138,8 @@ namespace Insight
 
 			Core::Timer GetLoadTimer() const { return m_load_timer; }
 
+			const AssetInfo* GetAssetInfo() const;
+
 			Core::Delegate<IResource*> OnLoaded;
 			Core::Delegate<IResource*> OnUnloaded;
 
@@ -217,7 +219,7 @@ namespace Insight
 
 			mutable std::mutex m_mutex;
 
-			Runtime::AssetInfo* m_assetInfo = nullptr;
+			const Runtime::AssetInfo* m_assetInfo = nullptr;
 
 			friend class IResourceManager;
 			friend class ResourceDatabase;
