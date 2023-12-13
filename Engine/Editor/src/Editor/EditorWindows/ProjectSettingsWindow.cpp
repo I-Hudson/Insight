@@ -4,6 +4,8 @@
 #include "Editor/EditorWindows/ContentWindow.h"
 
 #include "Runtime/ProjectSystem.h"
+#include "Runtime/RuntimeSettings.h"
+
 #include "World/WorldSystem.h"
 #include "Asset/AssetRegistry.h"
 
@@ -63,6 +65,8 @@ namespace Insight
                 if (initialWorld)
                 {
                     worldName = initialWorld->FileName;
+                    Runtime::RuntimeSettings::Instance().InitialWorldPath = initialWorld->GetFullFilePath();
+
                 }
 
                 ImGui::Text("Initial World");

@@ -288,7 +288,7 @@ namespace Insight
 
     std::string FileSystem::GetRelativePath(std::string_view path, std::string_view basePath)
     {
-#if 1
+#if 0
         std::string fullPath;
         {
             IS_PROFILE_SCOPE("fullPath");

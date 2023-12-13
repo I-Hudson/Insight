@@ -22,6 +22,8 @@ namespace Insight
             std::string GenerateBuildFile();
 
             void CopyEngineResourceFiles(std::string_view outputFolder) const;
+            void BuildRuntimeSettings(std::string_view outputFolder) const;
+            void BuildContentFiles(std::string_view outputFolder) const;
         };
     }
 }

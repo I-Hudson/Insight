@@ -27,8 +27,10 @@ namespace Insight::Runtime
 
     void AssetRegistry::Shutdown()
     {
-        for (AssetPackage*& package : m_assetPackages)
+        std::vector<AssetPackage*> packages = m_assetPackages;
+        for (AssetPackage*& package : packages)
         {
+            Algorithm::VectorRemove(m_assetPackages, package);
             Delete(package);
         }
         m_assetPackages.clear();
@@ -129,8 +131,7 @@ namespace Insight::Runtime
             {
                 return nullptr;
             }
-            else if (FileSystem::GetFileExtension(path) == AssetMetaData::c_FileExtension
-                || FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
+            else if (FileSystem::GetFileExtension(path) == ResourceDatabase::c_MetaFileExtension
                 || FileSystem::GetFileExtension(path) == ".meta")
             {
                 return nullptr;
@@ -150,6 +151,8 @@ namespace Insight::Runtime
         }
 
         AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package);
+        Core::MemoryTracker::Instance().NameAllocation(newInfo, path.data());
+
         m_guidToAssetInfo[newInfo->Guid] = newInfo;
         m_pathToAssetGuid[newInfo->GetFullFilePath()] = newInfo->Guid;
         const AssetInfo* addedInfo = package->AddAsset(newInfo);
@@ -167,8 +170,10 @@ namespace Insight::Runtime
         }
 
         AssetPackage* package = GetAssetPackageFromAsset(info);
-        ASSERT(package);
-        package->RemoveAsset(info);
+        if (package)
+        { 
+            package->RemoveAsset(info);
+        }
 
         Core::GUID assetGuid = m_pathToAssetGuid.find(std::string(path))->second;
         m_pathToAssetGuid.erase(std::string(path));
@@ -384,13 +389,14 @@ namespace Insight::Runtime
             return;
         }
 
+        std::vector<std::string> assetPaths;
         if (recursive)
         {
             for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(absFolderPath))
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, package, enableMetaFiles, true);
+                assetPaths.push_back(path);
             }
         }
         else
@@ -399,8 +405,19 @@ namespace Insight::Runtime
             {
                 std::string path = entry.path().string();
                 FileSystem::PathToUnix(path);
-                AddAsset(path, package, enableMetaFiles, true);
+                assetPaths.push_back(path);
             }
+        }
+
+        std::sort(assetPaths.begin(), assetPaths.end(), [](const std::string& strA, const std::string& strB)
+            {
+                return FileSystem::GetExtension(strA) == Runtime::AssetMetaData::c_FileExtension
+                    && FileSystem::GetExtension(strB) != Runtime::AssetMetaData::c_FileExtension;
+            });
+
+        for (const std::string& path : assetPaths)
+        {
+            AddAsset(path, package, enableMetaFiles, true);
         }
     }
 

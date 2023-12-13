@@ -20,11 +20,17 @@ namespace Insight
 
         AssetPackage::~AssetPackage()
         {
-            m_assetInfos.clear();
             if (m_zipHandle != nullptr)
             {
                 zip_close(m_zipHandle);
             }
+
+            std::vector<AssetInfo*> infos = m_assetInfos;
+            for (int infoIdx = 0; infoIdx < infos.size(); ++infoIdx)
+            {
+                AssetRegistry::Instance().RemoveAsset(infos.at(infoIdx)->GetFullFilePath());
+            }
+            m_assetInfos.clear();
         }
 
         std::string_view AssetPackage::GetPath() const

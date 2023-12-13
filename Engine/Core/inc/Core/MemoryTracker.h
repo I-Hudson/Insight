@@ -58,25 +58,6 @@ namespace Insight
 		};
 		static_assert(ARRAY_COUNT(MemoryAllocCategoryToString) == static_cast<u64>(MemoryAllocCategory::Size));
 
-		struct IS_CORE MemoryTrackedAlloc
-		{
-			MemoryTrackedAlloc()
-				: Ptr(nullptr), Size(0), Category(MemoryAllocCategory::General), Type(MemoryTrackAllocationType::Array)
-			{ }
-			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type)
-				: Ptr(ptr), Size(size), Category(category), Type(type)
-			{ }
-			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type, std::array<char[c_CallstackStringSize], c_CallStackCount> callStack)
-				: Ptr(ptr), Size(size), Category(category), Type(type), CallStack(std::move(callStack))
-			{ }
-
-			void* Ptr;
-			u64 Size;
-			MemoryTrackAllocationType Type;
-			MemoryAllocCategory Category;
-			std::array<char[c_CallstackStringSize], c_CallStackCount> CallStack;
-		};
-
 		/// @brief Copy of STL allocator but doesn't track memory allocations.
 		/// Currently used for the internal map within MemoryTracker as if the map tracks it's own allocations
 		/// then we get a circle dependency.
@@ -169,6 +150,25 @@ namespace Insight
 			constexpr __declspec(allocator) void* AllocateInternal(u64 align, const size_t _Bytes);
 		};
 
+		struct IS_CORE MemoryTrackedAlloc
+		{
+			MemoryTrackedAlloc()
+				: Ptr(nullptr), Size(0), Category(MemoryAllocCategory::General), Type(MemoryTrackAllocationType::Array)
+			{ }
+			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type)
+				: Ptr(ptr), Size(size), Category(category), Type(type)
+			{ }
+			MemoryTrackedAlloc(void* ptr, u64 size, MemoryAllocCategory category, MemoryTrackAllocationType type, std::array<char[c_CallstackStringSize], c_CallStackCount> callStack)
+				: Ptr(ptr), Size(size), Category(category), Type(type), CallStack(std::move(callStack))
+			{ }
+
+			void* Ptr;
+			u64 Size;
+			MemoryTrackAllocationType Type;
+			MemoryAllocCategory Category;
+			std::array<char[c_CallstackStringSize], c_CallStackCount> CallStack;
+		};
+
 		class IS_CORE MemoryTracker
 		{
 			THREAD_SAFE;
@@ -211,6 +211,9 @@ namespace Insight
 
 		private:
 			std::unordered_map<void*, MemoryTrackedAlloc, std::hash<void*>, std::equal_to<void*>, STLNonTrackingAllocator<std::pair<void* const, MemoryTrackedAlloc>>> m_allocations;
+			std::unordered_map<void*, std::string> m_allocationToName;
+			mutable std::mutex m_allocationToNameLock;
+
 			bool m_symInitialize = false;
 			bool m_isReady = false;
 

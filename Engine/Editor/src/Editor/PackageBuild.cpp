@@ -9,12 +9,15 @@
 #include "Core/EnginePaths.h"
 
 #include "Runtime/ProjectSystem.h"
+#include "Runtime/RuntimeSettings.h"
+
+#include "Asset/AssetPackage.h"
+#include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include <Graphics/Window.h>
+#include "Editor/Editor.h"
 
 #include <filesystem>
-#include <processthreadsapi.h>
-#include <shellapi.h>
 
 namespace Insight
 {
@@ -64,8 +67,14 @@ namespace Insight
                 (IS_DEBUG ? "Debug" : "Release") + "-windows-x86_64/" + projectInfo.ProjectName;
             std::filesystem::copy(buildExeFolder, outputFolder, std::filesystem::copy_options::recursive);
 
-            progressBar.UpdateProgress(99, "Copying engine resources to output folder");
+            progressBar.UpdateProgress(90, "Copying engine resources to output folder");
             CopyEngineResourceFiles(outputFolder);
+
+            progressBar.UpdateProgress(95, "Building runtime settings");
+            BuildRuntimeSettings(outputFolder);
+            progressBar.UpdateProgress(97, "Building project assets");
+            BuildContentFiles(outputFolder);
+
             //BuildSolution();
             //BuildPackageBuild(outputFolder);
         }
@@ -92,16 +101,7 @@ namespace Insight
             command += solutionLuaPath;
             command += " vs2019";
 
-            STARTUPINFOA info = { sizeof(info) };
-            PROCESS_INFORMATION processInfo;
-            IS_CORE_INFO("Command line: '{}'.", command);
-            if (!CreateProcessA("C:\\Windows\\System32\\cmd.exe", (char*)command.c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
-            {
-                IS_CORE_ERROR("[PackageBuild::BuildSolution] Unable to compile solution: '{0}'.", GetLastError());
-            }
-            WaitForSingleObject(processInfo.hProcess, INFINITE);
-            CloseHandle(processInfo.hProcess);
-            CloseHandle(processInfo.hThread);
+            Platform::RunProcessAndWait(command.c_str());
         }
 
         void PackageBuild::BuildPackageBuild(std::string_view outputFolder)
@@ -117,15 +117,7 @@ namespace Insight
             command += " vs2019 Build Debug win64 ";
             command += outputFolder;
 
-            STARTUPINFOA info = { sizeof(info) };
-            PROCESS_INFORMATION processInfo;
-            if (!CreateProcessA("C:\\Windows\\System32\\cmd.exe", (char*)command.c_str(), NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo))
-            {
-                IS_CORE_ERROR("[PackageBuild::BuildPackageBuild] Unable to compile solution: '{0}'.", GetLastError());
-            }
-            WaitForSingleObject(processInfo.hProcess, INFINITE);
-            CloseHandle(processInfo.hProcess);
-            CloseHandle(processInfo.hThread);
+            Platform::RunProcessAndWait(command.c_str());
         }
 
         std::string PackageBuild::GenerateBuildFile()
@@ -151,6 +143,33 @@ namespace Insight
         {
             const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
             std::filesystem::copy(EnginePaths::GetResourcePath(), std::string(outputFolder) + "/Resources", std::filesystem::copy_options::recursive);
+        }
+
+        void PackageBuild::BuildRuntimeSettings(std::string_view outputFolder) const
+        {
+            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+
+            const std::string runtimeSettingsPath = projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent/RuntimeSettings.json";
+
+            Serialisation::JsonSerialiser serialsier(false);
+            Runtime::RuntimeSettings::Instance().Serialise(&serialsier);
+            FileSystem::SaveToFile(serialsier.GetSerialisedData(), runtimeSettingsPath);
+
+            Runtime::AssetPackage builtContent(projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent", "BuiltContent");
+            Runtime::AssetRegistry::Instance().AddAsset(runtimeSettingsPath, &builtContent, false, false);
+
+            const std::string biultContentPath = projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent/BuiltContent.zip";
+            builtContent.BuildPackage(biultContentPath);
+
+            std::filesystem::copy(biultContentPath, outputFolder, std::filesystem::copy_options::update_existing);
+        }
+
+        void PackageBuild::BuildContentFiles(std::string_view outputFolder) const
+        {
+            const Runtime::ProjectInfo& projectInfo = Runtime::ProjectSystem::Instance().GetProjectInfo();
+            const std::string projectAssetsPath = projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent/ProjectAssets.zip";
+            Runtime::AssetRegistry::Instance().GetAssetPackageFromName(Editor::Editor::c_ProjectAssetPackageName)->BuildPackage(projectAssetsPath);
+            std::filesystem::copy(projectAssetsPath, outputFolder, std::filesystem::copy_options::update_existing);
         }
     }
 }

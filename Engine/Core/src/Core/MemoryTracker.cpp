@@ -51,7 +51,8 @@ namespace Insight
             IS_PROFILE_FUNCTION();
 
 #ifdef IS_MEMORY_TRACKING
-            std::lock_guard lock(m_lock);
+            std::lock_guard allocationLock(m_lock);
+            std::lock_guard allocationToNameLock(m_allocationToNameLock);
 
             if (!m_isReady)
             {
@@ -66,6 +67,7 @@ namespace Insight
                     const MemoryTrackedAlloc& alloc = pair.second;
                     IS_CORE_ERROR("Allocation leak:");
                     IS_CORE_ERROR("\tPtr: {}", alloc.Ptr);
+                    IS_CORE_ERROR("\tName: {}", m_allocationToName[alloc.Ptr]);
                     IS_CORE_ERROR("\tSize: {}", alloc.Size);
                     IS_CORE_ERROR("\tType: {}", (int)alloc.Type);
                     IS_CORE_ERROR("\tCallstack: ");
@@ -81,6 +83,7 @@ namespace Insight
                     }
                 }
             }
+            m_allocations = {};
 
             if (m_totalAllocatedInBytes > 0)
             {
@@ -176,6 +179,13 @@ namespace Insight
 
         void MemoryTracker::NameAllocation(void* ptr, const char* name)
         {
+            std::lock_guard allocationLock(m_lock);
+            std::lock_guard allocationToNameLock(m_allocationToNameLock);
+            if (auto iter = m_allocations.find(ptr);
+                iter != m_allocations.end())
+            {
+                m_allocationToName[ptr] = name;
+            }
         }
 
         u64 MemoryTracker::GetUsage(MemoryAllocCategory category) const
@@ -211,7 +221,7 @@ namespace Insight
             return m_totalAllocatedInBytes;
         }
 
-//#define MEMORY_TRACK_CALLSTACK
+#define MEMORY_TRACK_CALLSTACK
         std::array<char[c_CallstackStringSize], c_CallStackCount> MemoryTracker::GetCallStack()
         {
             IS_PROFILE_FUNCTION();

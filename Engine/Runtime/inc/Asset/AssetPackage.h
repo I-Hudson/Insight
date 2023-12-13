@@ -106,6 +106,7 @@ namespace Insight
                         return;
                     }
 
+                    std::vector<std::string> assetPaths;
                     i64 entrySize = zip_entries_total(assetPackage->m_zipHandle);
                     for (i64 i = 0; i < entrySize; ++i)
                     {
@@ -115,10 +116,20 @@ namespace Insight
                         std::string assetPath = FileSystem::GetParentPath(assetPackage->m_packagePath) + "/" + path;
                         if (!FileSystem::GetExtension(assetPath).empty())
                         {
-                            Runtime::AssetRegistry::Instance().AddAssetFromPackage(assetPath, assetPackage);
+                            assetPaths.push_back(assetPath);
                         }
 
                         ASSERT(zip_entry_close(assetPackage->m_zipHandle) == 0);
+                    }
+
+                    std::sort(assetPaths.begin(), assetPaths.end(), [](const std::string& strA, const std::string& strB)
+                        {
+                            return FileSystem::GetExtension(strA) == Runtime::AssetMetaData::c_FileExtension
+                            && FileSystem::GetExtension(strB) != Runtime::AssetMetaData::c_FileExtension;
+                        });
+                    for (const std::string& path : assetPaths)
+                    {
+                        Runtime::AssetRegistry::Instance().AddAssetFromPackage(path, assetPackage);
                     }
                 }
                 else
