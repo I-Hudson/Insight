@@ -51,7 +51,7 @@ namespace Insight
         {
         public:
             AssetInfo() = delete;
-            AssetInfo(std::string_view filePath, std::string_view packagePath, IAssetPackage* assetPackage);
+            AssetInfo(std::string_view filePath, std::string_view packagePath, IAssetPackage* assetPackage, const bool enableMetaFiles);
             AssetInfo(const AssetInfo& other) = default;
             AssetInfo(AssetInfo&& other) = default;
             ~AssetInfo();

@@ -18,7 +18,13 @@ namespace Insight::Editor
         premake.replace(premake.find(c_PremakeProjectTag_Targetname), strlen(c_PremakeProjectTag_Targetname), targetName);
 
         std::string dllPaths;
-        const std::string srcDLLFolder = EnginePaths::GetRootPath() + "/deps/" + (IS_DEBUG ? "Debug" : "Release") + "-windows-x86_64/dll";
+#ifdef IS_DEBUG
+        const char* buildConfiguration = "Debug";
+#elif defined(IS_RELEASE)
+        const char* buildConfiguration = "Release";
+#endif
+        const std::string srcDLLFolder = EnginePaths::GetRootPath() + "/deps/" + buildConfiguration + "-windows-x86_64/dll";
+
         for (const auto& path : std::filesystem::recursive_directory_iterator(srcDLLFolder))
         {
             std::string formatedPath = path.path().string();

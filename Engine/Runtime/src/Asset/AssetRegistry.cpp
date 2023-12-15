@@ -141,7 +141,7 @@ namespace Insight::Runtime
             return info;
         }
 
-        AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package);
+        AssetInfo* newInfo = ::New<AssetInfo>(path, package->GetPath(), package, enableMetaFile);
         Core::MemoryTracker::Instance().NameAllocation(newInfo, path.data());
 
         m_guidToAssetInfo[newInfo->Guid] = newInfo;

@@ -63,8 +63,12 @@ namespace Insight
             }
 
             progressBar.UpdateProgress(85, "Copying built exe to output folder");
-            const std::string buildExeFolder = projectInfo.GetIntermediatePath() + "/PackageBuild/bin/" +
-                (IS_DEBUG ? "Debug" : "Release") + "-windows-x86_64/" + projectInfo.ProjectName;
+#ifdef IS_DEBUG
+            const char* buildConfiguration = "Debug";
+#elif defined(IS_RELEASE)
+            const char* buildConfiguration = "Release";
+#endif
+            const std::string buildExeFolder = projectInfo.GetIntermediatePath() + "/PackageBuild/bin/" + buildConfiguration + "-windows-x86_64/" + projectInfo.ProjectName;
             std::filesystem::copy(buildExeFolder, outputFolder, std::filesystem::copy_options::recursive);
 
             progressBar.UpdateProgress(90, "Copying engine resources to output folder");

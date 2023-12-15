@@ -8,7 +8,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath, Insight::Runtime::IAssetPackage* assetPackage)
+        AssetInfo::AssetInfo(std::string_view filePath, std::string_view packagePath, Insight::Runtime::IAssetPackage* assetPackage, const bool enableMetaFiles)
         {
             std::string absFilePath = std::string(filePath);
             FileSystem::PathToUnix(absFilePath);
@@ -25,7 +25,7 @@ namespace Insight
             ASSERT(assetPackage);
             AssetPackage = assetPackage;
 
-            if (FileSystem::GetExtension(FileName) != AssetMetaData::c_FileExtension)
+            if (enableMetaFiles && FileSystem::GetExtension(FileName) != AssetMetaData::c_FileExtension)
             { 
                 MetaData = ::New<AssetMetaData>();
                 LoadMetaData();
