@@ -63,7 +63,7 @@ namespace Insight::Editor
         }
     }
 
-    void ContentFolderListener::SetAssetPackage(Runtime::AssetPackage* assetPackage)
+    void ContentFolderListener::SetAssetPackage(Runtime::IAssetPackage* assetPackage)
     {
         m_assetPackage = assetPackage;
     }

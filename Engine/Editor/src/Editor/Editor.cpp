@@ -6,7 +6,7 @@
 #include "Editor/EditorWindows/WorldViewWindow.h"
 
 #include "Asset/AssetRegistry.h"
-#include "Asset/AssetPackage.h"
+#include "Asset/AssetPackage/IAssetPackage.h"
 
 #include "Runtime/EntryPoint.h"
 #include "Resource/ResourceManager.h"
@@ -61,20 +61,20 @@ namespace Insight
             }
             else
             {
-                Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EngineResources");
+                Runtime::IAssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EngineResources");
                 Runtime::AssetRegistry::Instance().AddAssetsInFolder(EnginePaths::GetRootPath() + "/Resources", editorIconsAssetPackage, true, false);
             }
 
             const std::string editorAssetPackagePath = EnginePaths::GetResourcePath() + "/Editor/EditorIcons.isassetpackage";
             if (FileSystem::Exists(editorAssetPackagePath))
             {
-                Runtime::AssetPackage* editorIconsAssetPackage = 
+                Runtime::IAssetPackage* editorIconsAssetPackage =
                     Runtime::AssetRegistry::Instance().LoadAssetPackage(editorAssetPackagePath);
             }
             else
             {
                 const std::string editorIconsPath = EnginePaths::GetResourcePath() + "/Editor";
-                Runtime::AssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EditorIcons");
+                Runtime::IAssetPackage* editorIconsAssetPackage = Runtime::AssetRegistry::Instance().CreateAssetPackage("EditorIcons");
                 Runtime::AssetRegistry::Instance().AddAssetsInFolder(editorIconsPath, editorIconsAssetPackage, true, false);
             }
 
@@ -91,7 +91,7 @@ namespace Insight
                     Runtime::AssetRegistry::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/AssetMeta", projectInfo.GetContentPath());
                     Runtime::ResourceManager::Instance().SetDebugDirectories(projectInfo.GetIntermediatePath() + "/Meta", projectInfo.GetContentPath());
 
-                    std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::AssetPackage::c_FileExtension);
+                    std::vector<const Runtime::AssetInfo*> allAssetPackages = Runtime::AssetRegistry::Instance().GetAllAssetsWithExtension(Runtime::IAssetPackage::c_FileExtension);
                     for (const Runtime::AssetInfo* info : allAssetPackages)
                     {
                         if (!Runtime::AssetRegistry::Instance().LoadAssetPackage(info->GetFullFilePath()))

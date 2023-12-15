@@ -10,7 +10,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class AssetPackage;
+        class IAssetPackage;
     }
 
     namespace Editor
@@ -24,11 +24,11 @@ namespace Insight
                                    const std::string& filename, efsw::Action action,
                                    std::string oldFilename) override;
 
-            void SetAssetPackage(Runtime::AssetPackage* assetPackage);
+            void SetAssetPackage(Runtime::IAssetPackage* assetPackage);
             void Update();
 
         private:
-            Runtime::AssetPackage* m_assetPackage;
+            Runtime::IAssetPackage* m_assetPackage;
             std::vector<std::function<void()>> m_queuedActions;
             std::mutex m_queuedActionsMuetx;
         };

@@ -11,7 +11,7 @@
 #include "Runtime/ProjectSystem.h"
 #include "Runtime/RuntimeSettings.h"
 
-#include "Asset/AssetPackage.h"
+#include "Asset/AssetPackage/AssetPackageZip.h"
 #include "Serialisation/Serialisers/JsonSerialiser.h"
 
 #include <Graphics/Window.h>
@@ -155,7 +155,7 @@ namespace Insight
             Runtime::RuntimeSettings::Instance().Serialise(&serialsier);
             FileSystem::SaveToFile(serialsier.GetSerialisedData(), runtimeSettingsPath);
 
-            Runtime::AssetPackage builtContent(projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent", "BuiltContent");
+            Runtime::AssetPackageZip builtContent(projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent", "BuiltContent");
             Runtime::AssetRegistry::Instance().AddAsset(runtimeSettingsPath, &builtContent, false, false);
 
             const std::string biultContentPath = projectInfo.GetIntermediatePath() + "/PackageBuild/BuiltContent/BuiltContent.zip";

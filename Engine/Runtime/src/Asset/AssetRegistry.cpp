@@ -1,7 +1,9 @@
 #include "Asset/AssetRegistry.h"
 
 #include "Asset/AssetUser.h"
-#include "Asset/AssetPackage.h"
+#include "Asset/AssetPackage/IAssetPackage.h"
+#include "Asset/AssetPackage/AssetPackageFileSystem.h"
+#include "Asset/AssetPackage/AssetPackageZip.h"
 
 #include "Runtime/ProjectSystem.h"
 
@@ -27,8 +29,8 @@ namespace Insight::Runtime
 
     void AssetRegistry::Shutdown()
     {
-        std::vector<AssetPackage*> packages = m_assetPackages;
-        for (AssetPackage*& package : packages)
+        std::vector<IAssetPackage*> packages = m_assetPackages;
+        for (IAssetPackage*& package : packages)
         {
             Algorithm::VectorRemove(m_assetPackages, package);
             Delete(package);
@@ -45,15 +47,15 @@ namespace Insight::Runtime
         m_state = Core::SystemStates::Not_Initialised;
     }
 
-    AssetPackage* AssetRegistry::CreateAssetPackage(std::string_view name)
+    IAssetPackage* AssetRegistry::CreateAssetPackage(std::string_view name)
     {
-        return CreateAssetPackageInternal(name, "");
+        return CreateAssetPackageInternal(name, "", AssetPackageType::FileSystem);
     }
 
-    AssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
+    IAssetPackage* AssetRegistry::LoadAssetPackage(std::string_view path)
     {
-        std::string pathWithExtension = FileSystem::ReplaceExtension(path, AssetPackage::c_FileExtension);
-        AssetPackage* pathPackage = GetAssetPackageFromPath(pathWithExtension);
+        std::string pathWithExtension = FileSystem::ReplaceExtension(path, IAssetPackage::c_FileExtension);
+        IAssetPackage* pathPackage = GetAssetPackageFromPath(pathWithExtension);
         if (pathPackage != nullptr)
         {
             return pathPackage;
@@ -65,22 +67,11 @@ namespace Insight::Runtime
             return nullptr;
         }
 
-        Serialisation::BinarySerialiser serialiser(true);
-        serialiser.SetObjectTracking(false);
-        //std::vector<Byte> fileData = FileSystem::ReadFromFile(pathWithExtension, FileType::Binary);
-        //if (!serialiser.DeserialiseNoHeader(fileData))
-        //{
-        //    return nullptr;
-        //}
+        AssetPackageType packageType = FileSystem::GetExtension(pathWithExtension) == IAssetPackage::c_FileExtension
+            || FileSystem::GetExtension(pathWithExtension) == ".zip" ? AssetPackageType::Zip : AssetPackageType::FileSystem;
 
         std::string packageName = FileSystem::GetFileName(pathWithExtension, true);
-        AssetPackage* newPackage = CreateAssetPackageInternal(packageName, pathWithExtension);
-        if (newPackage)
-        {
-            ::Insight::Serialisation::SerialiserObject<AssetPackage> serialiserObject;
-            serialiserObject.MetaDataEnabled = false;
-            serialiserObject.Deserialise(&serialiser, *newPackage);
-        }
+        IAssetPackage* newPackage = CreateAssetPackageInternal(packageName, pathWithExtension, packageType);
 
         const AssetInfo* info = GetAsset(pathWithExtension);
         if (info)
@@ -105,17 +96,17 @@ namespace Insight::Runtime
         m_assetReativeBaseDirectory = std::move(assetReativeBaseDirectory);
     }
 
-    const AssetInfo* AssetRegistry::AddAssetFromPackage(std::string_view path, AssetPackage* package)
+    const AssetInfo* AssetRegistry::AddAssetFromPackage(std::string_view path, IAssetPackage* package)
     {
         return AddAsset(path, package, true, false);
     }
 
-    const AssetInfo* AssetRegistry::AddAssetFromDisk(std::string_view path, AssetPackage* package)
+    const AssetInfo* AssetRegistry::AddAssetFromDisk(std::string_view path, IAssetPackage* package)
     {
         return AddAsset(path, package, true, true);
     }
 
-    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile, bool checkOnDisk)
+    const AssetInfo* AssetRegistry::AddAsset(std::string_view path, IAssetPackage* package, bool enableMetaFile, bool checkOnDisk)
     {
         ASSERT(package);
 
@@ -169,7 +160,7 @@ namespace Insight::Runtime
             return;
         }
 
-        AssetPackage* package = GetAssetPackageFromAsset(info);
+        IAssetPackage* package = GetAssetPackageFromAsset(info);
         if (package)
         { 
             package->RemoveAsset(info);
@@ -269,7 +260,7 @@ namespace Insight::Runtime
         {
             if (FileSystem::Exists(path))
             {
-                return FileSystem::ReadFromFile(path);
+               return FileSystem::ReadFromFile(path);
             }
         }
         IS_CORE_ERROR("[AssetRegistry::LoadAsset] Unable to load asset from path '{}'.", path.data());
@@ -335,14 +326,14 @@ namespace Insight::Runtime
         return assets;
     }
 
-    AssetPackage* AssetRegistry::GetAssetPackageFromPath(std::string_view path) const
+    IAssetPackage* AssetRegistry::GetAssetPackageFromPath(std::string_view path) const
     {
         if (path.empty())
         {
             return nullptr;
         }
 
-        for (AssetPackage* package : m_assetPackages)
+        for (IAssetPackage* package : m_assetPackages)
         {
             if (package->GetPath() == path)
             {
@@ -352,9 +343,9 @@ namespace Insight::Runtime
         return nullptr;
     }
 
-    AssetPackage* AssetRegistry::GetAssetPackageFromName(std::string_view name) const
+    IAssetPackage* AssetRegistry::GetAssetPackageFromName(std::string_view name) const
     {
-        for (AssetPackage* package : m_assetPackages)
+        for (IAssetPackage* package : m_assetPackages)
         {
             if (package->GetName() == name)
             {
@@ -364,22 +355,22 @@ namespace Insight::Runtime
         return nullptr;
     }
 
-    std::vector<AssetPackage*> AssetRegistry::GetAllAssetPackages() const
+    std::vector<IAssetPackage*> AssetRegistry::GetAllAssetPackages() const
     {
         return m_assetPackages;
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, IAssetPackage* package)
     {
         AddAssetsInFolder(path, package, false, true);
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, IAssetPackage* package, bool recursive)
     {
         AddAssetsInFolder(path, package, recursive, true);
     }
 
-    void AssetRegistry::AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles)
+    void AssetRegistry::AddAssetsInFolder(std::string_view path, IAssetPackage* package, bool recursive, bool enableMetaFiles)
     {
         std::string absFolderPath = FileSystem::GetAbsolutePath(path);
 
@@ -421,9 +412,9 @@ namespace Insight::Runtime
         }
     }
 
-    AssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
+    IAssetPackage* AssetRegistry::GetAssetPackageFromAsset(const AssetInfo* assetInfo) const
     {
-        for (AssetPackage* package: m_assetPackages)
+        for (IAssetPackage* package: m_assetPackages)
         {
             if (package->HasAsset(assetInfo)) 
             {
@@ -472,10 +463,10 @@ namespace Insight::Runtime
         return objects;
     }
 
-    AssetPackage* AssetRegistry::CreateAssetPackageInternal(std::string_view name, std::string_view path)
+    IAssetPackage* AssetRegistry::CreateAssetPackageInternal(std::string_view name, std::string_view path, AssetPackageType packageType)
     {
-        AssetPackage* pathPackage = GetAssetPackageFromPath(name);
-        AssetPackage* namePackage = GetAssetPackageFromName(name);
+        IAssetPackage* pathPackage = GetAssetPackageFromPath(name);
+        IAssetPackage* namePackage = GetAssetPackageFromName(name);
         if (pathPackage && namePackage
             && pathPackage == namePackage)
         {
@@ -490,7 +481,28 @@ namespace Insight::Runtime
         }
         ASSERT(pathPackage == nullptr && namePackage == nullptr);
 
-        AssetPackage* newPackage = New<AssetPackage>(path, name);
+        IAssetPackage* newPackage = nullptr;
+
+        switch(packageType)
+        {
+        case AssetPackageType::FileSystem:
+            newPackage = New<AssetPackageFileSystem>(path, name);
+            break;
+        case AssetPackageType::Zip:
+            newPackage = New<AssetPackageZip>(path, name);
+
+            Serialisation::BinarySerialiser serialiser(true);
+            serialiser.SetObjectTracking(false);
+            std::vector<Byte> fileData = FileSystem::ReadFromFile(path, FileType::Binary);
+            //ASSERT_MSG(serialiser.DeserialiseNoHeader(fileData), "Unable to load asset package zip.");
+
+            ::Insight::Serialisation::SerialiserObject<AssetPackageZip> serialiserObject;
+            serialiserObject.MetaDataEnabled = false;
+            serialiserObject.Deserialise(&serialiser, *static_cast<AssetPackageZip*>(newPackage));
+
+            break;   
+        }
+        
         m_assetPackages.push_back(newPackage);
         return newPackage;
     }

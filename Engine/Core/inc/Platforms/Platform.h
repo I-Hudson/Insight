@@ -38,6 +38,14 @@ namespace Insight
 
 #define FAIL_ASSERT() ASSERT(false)
 #define FAIL_ASSERT_MSG(message, ...) ASSERT_MSG(false, message, __VA_ARGS__)
-		
+#else
+	#define ASSERT_MSG(condition, message, ...)
+	if (!(condition)) { }
+
+#define ASSERT(condition) ASSERT_MSG(condition, "")
+
+#define FAIL_ASSERT() ASSERT(false)
+#define FAIL_ASSERT_MSG(message, ...) ASSERT_MSG(false, message, __VA_ARGS__)
+
 #endif
 }

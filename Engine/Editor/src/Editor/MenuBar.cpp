@@ -1,9 +1,6 @@
 #include "Editor/MenuBar.h"
 
 #include "Editor/EditorWindows/EditorWindowManager.h"
-#include "Editor/EditorWindows/WorldEntitiesWindow.h"
-#include "Editor/EditorWindows/InputWindow.h"
-#include "Editor/EditorWindows/ResourceWindow.h"
 
 #include "Editor/HotReload/HotReloadSystem.h"
 
@@ -17,7 +14,6 @@
 #include "Runtime/ProjectSystem.h"
 
 #include "Asset/AssetRegistry.h"
-#include "Asset/AssetPackage.h"
 
 #include "Core/Profiler.h"
 

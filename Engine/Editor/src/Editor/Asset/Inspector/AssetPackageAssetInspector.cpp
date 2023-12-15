@@ -3,7 +3,7 @@
 #include "Editor/EditorWindows/ContentWindow.h"
 
 #include "Asset/AssetRegistry.h"
-#include "Asset/AssetPackage.h"
+#include "Asset/AssetPackage/IAssetPackage.h"
 
 #include "Editor/EditorGUI.h"
 #include "Editor/Editor.h"
@@ -17,7 +17,7 @@ namespace Insight
 	namespace Editor
 	{
 		AssetPackageAssetInspector::AssetPackageAssetInspector()
-			: IAssetInspector({ Runtime::AssetPackage::c_FileExtension })
+			: IAssetInspector({ Runtime::IAssetPackage::c_FileExtension })
 		{ }
 
 		AssetPackageAssetInspector::~AssetPackageAssetInspector()
@@ -31,7 +31,7 @@ namespace Insight
 				return;
 			}
 
-			Runtime::AssetPackage* assetPackage = static_cast<Runtime::AssetPackage*>(assetObjects.at(0));
+			Runtime::IAssetPackage* assetPackage = static_cast<Runtime::IAssetPackage*>(assetObjects.at(0));
 			if (!assetPackage)
 			{
 				return;
@@ -75,7 +75,7 @@ namespace Insight
 							if (dragGuid)
 							{
 								assetPackage->ReplaceAsset(RemoveConst(info), RemoveConst(dragGuid));
-								Runtime::AssetPackage* projectAssetPackage = Runtime::AssetRegistry::Instance().GetAssetPackageFromName(Editor::Editor::c_ProjectAssetPackageName);
+								Runtime::IAssetPackage* projectAssetPackage = Runtime::AssetRegistry::Instance().GetAssetPackageFromName(Editor::Editor::c_ProjectAssetPackageName);
 								if (projectAssetPackage)
 								{
 									projectAssetPackage->AddAsset(RemoveConst(info));

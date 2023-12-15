@@ -5,6 +5,7 @@
 #include "Core/ISysytem.h"
 
 #include "Asset/AssetInfo.h"
+#include "Asset/AssetPackage/IAssetPackage.h"
 #include "Core/GUID.h"
 
 #include <unordered_map>
@@ -17,7 +18,7 @@ namespace Insight
     namespace Runtime
     {
         class AssetUser;
-        class AssetPackage;
+        class IAssetPackage;
 
         /// @brief Manage all references to known assets on disk.
         class IS_RUNTIME AssetRegistry : public Core::Singleton<AssetRegistry>, public Core::ISystem
@@ -32,9 +33,9 @@ namespace Insight
             virtual void Shutdown() override;
             // End - ISystem -
 
-            AssetPackage* CreateAssetPackage(std::string_view name);
+            IAssetPackage* CreateAssetPackage(std::string_view name);
 
-            AssetPackage* LoadAssetPackage(std::string_view path);
+            IAssetPackage* LoadAssetPackage(std::string_view path);
             void UnloadAssetPackage(std::string_view path);
 
             /// @brief 
@@ -42,9 +43,9 @@ namespace Insight
             /// @param assetReativeBaseDirectory 
             void SetDebugDirectories(std::string metaFileDirectory, std::string assetReativeBaseDirectory);
 
-            const AssetInfo* AddAssetFromPackage(std::string_view path, AssetPackage* package);
-            const AssetInfo* AddAssetFromDisk(std::string_view path, AssetPackage* package);
-            const AssetInfo* AddAsset(std::string_view path, AssetPackage* package, bool enableMetaFile, bool checkOnDisk);
+            const AssetInfo* AddAssetFromPackage(std::string_view path, IAssetPackage* package);
+            const AssetInfo* AddAssetFromDisk(std::string_view path, IAssetPackage* package);
+            const AssetInfo* AddAsset(std::string_view path, IAssetPackage* package, bool enableMetaFile, bool checkOnDisk);
             void RemoveAsset(std::string_view path);
 
             void UpdateMetaData(AssetInfo* assetInfo, AssetUser* object);
@@ -60,18 +61,18 @@ namespace Insight
             std::vector<const AssetInfo*> GetAllAssetsWithExtension(std::string_view extension) const;
             std::vector<const AssetInfo*> GetAllAssetsWithExtensions(std::vector<std::string_view> extensions) const;
 
-            AssetPackage* GetAssetPackageFromPath(std::string_view path) const;
-            AssetPackage* GetAssetPackageFromName(std::string_view name) const;
-            std::vector<AssetPackage*> GetAllAssetPackages() const;
+            IAssetPackage* GetAssetPackageFromPath(std::string_view path) const;
+            IAssetPackage* GetAssetPackageFromName(std::string_view name) const;
+            std::vector<IAssetPackage*> GetAllAssetPackages() const;
 
-            AssetPackage* GetAssetPackageFromAsset(const AssetInfo* assetInfo) const;
+            IAssetPackage* GetAssetPackageFromAsset(const AssetInfo* assetInfo) const;
 
             /// @brief Add all asset within a folder. 
-            void AddAssetsInFolder(std::string_view path, AssetPackage* package);
+            void AddAssetsInFolder(std::string_view path, IAssetPackage* package);
             /// @brief Add all asset within a folder, recursive.
-            void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive);
+            void AddAssetsInFolder(std::string_view path, IAssetPackage* package, bool recursive);
             /// @brief Add all asset within a folder, recursive, with the option of disabling meta files (should be false for engine/editor folders).
-            void AddAssetsInFolder(std::string_view path, AssetPackage* package, bool recursive, bool enableMetaFiles);
+            void AddAssetsInFolder(std::string_view path, IAssetPackage* package, bool recursive, bool enableMetaFiles);
 
             /// @brief Register an IObject to an AssetInfo allowing for the object to be retevied later 
             /// from the AssetInfo pointer.
@@ -81,7 +82,7 @@ namespace Insight
             std::vector<IObject*> GetObjectsFromAsset(const Core::GUID& guid) const;
 
         private:
-            AssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path);
+            IAssetPackage* CreateAssetPackageInternal(std::string_view name, std::string_view path, AssetPackageType packageType);
 
             bool HasAssetFromGuid(const Core::GUID& guid) const;
             bool HasAssetFromPath(std::string_view path) const;
@@ -96,7 +97,7 @@ namespace Insight
             std::unordered_map<Core::GUID, AssetInfo*> m_guidToAssetInfo;
             std::unordered_map<std::string, Core::GUID> m_pathToAssetGuid;
 
-            std::vector<AssetPackage*> m_assetPackages;
+            std::vector<IAssetPackage*> m_assetPackages;
 
             std::unordered_map<Core::GUID, std::unordered_set<const IObject*>> m_assetToObjects;
             mutable std::mutex m_assetToObjectGuid;

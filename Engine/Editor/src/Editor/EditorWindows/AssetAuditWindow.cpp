@@ -1,7 +1,7 @@
 #include "Editor/EditorWindows/AssetAuditWindow.h"
 
 #include "Asset/AssetRegistry.h"
-#include "Asset/AssetPackage.h"
+#include "Asset/AssetPackage/IAssetPackage.h"
 
 #include "FileSystem/FileSystem.h"
 
@@ -33,11 +33,11 @@ namespace Insight
         {
             IS_PROFILE_FUNCTION();
 
-            std::vector<Runtime::AssetPackage*> assetPackages = Runtime::AssetRegistry::Instance().GetAllAssetPackages();
+            std::vector<Runtime::IAssetPackage*> assetPackages = Runtime::AssetRegistry::Instance().GetAllAssetPackages();
 
             for (int i = 0; i < assetPackages.size(); ++i)
             {
-                Runtime::AssetPackage* package = assetPackages.at(i);
+                Runtime::IAssetPackage* package = assetPackages.at(i);
                 if (ImGui::Button(package->GetName().data()))
                 {
                     m_selectedAssetPackage = package;

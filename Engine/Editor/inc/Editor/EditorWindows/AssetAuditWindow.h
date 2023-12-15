@@ -8,7 +8,7 @@ namespace Insight
 {
     namespace Runtime
     {
-        class AssetPackage;
+        class IAssetPackage;
     }
 
     namespace Editor
@@ -27,7 +27,7 @@ namespace Insight
             virtual void OnDraw() override final;
 
         private:
-            Runtime::AssetPackage* m_selectedAssetPackage = nullptr;
+            Runtime::IAssetPackage* m_selectedAssetPackage = nullptr;
         };
     }
 }

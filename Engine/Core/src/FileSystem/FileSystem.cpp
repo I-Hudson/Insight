@@ -38,15 +38,34 @@ namespace Insight
         }
 
         std::fstream fileStream;
-        fileStream.open(filePath, std::ios::out | c_FileTypeToStdIos[(int)fileType]);
+        fileStream.exceptions(std::fstream::failbit | std::fstream::badbit);
+
+        try
+        {
+            fileStream.open(filePath, std::ios::out | std::ios::trunc | c_FileTypeToStdIos[(int)fileType]);
+
+        }
+        catch (std::system_error& error)
+        {
+            IS_CORE_ERROR("[FileSystem::SaveToFile] Exceptions '{}'.", error.what());
+        }
+
         if (!fileStream.is_open())
         {
             fileStream.close();
             return false;
         }
 
-        fileStream.write((char*)data, dataSize);
-        fileStream.close();
+        try
+        {
+            fileStream.write((char*)data, dataSize);
+            fileStream.close();
+        }
+        catch (std::system_error& error)
+        {
+            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+        }
+
         return true;
     }
     bool FileSystem::SaveToFile(const std::vector<Byte>& data, std::string_view filePath)
@@ -77,7 +96,17 @@ namespace Insight
         }
 
         std::fstream fileStream;
-        fileStream.open(filePath, std::ios::in | c_FileTypeToStdIos[(int)fileType]);
+        fileStream.exceptions(std::fstream::failbit | std::fstream::badbit);
+
+        try
+        {
+            fileStream.open(filePath, std::ios::in | c_FileTypeToStdIos[(int)fileType]);
+        }
+        catch (std::system_error& error)
+        {
+            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+        }
+
         if (!fileStream.is_open())
         {
             fileStream.close();
@@ -87,9 +116,16 @@ namespace Insight
         const u64 fileSize = GetFileSize(filePath);
         fileData.resize(fileSize);
 
-        fileStream.read((char*)fileData.data(), fileSize);
+        try
+        {
+            fileStream.read((char*)fileData.data(), fileSize);
+            fileStream.close();
+        }
+        catch (std::system_error& error)
+        {
+            IS_CORE_ERROR("[FileSystem::ReadFromFile] Exceptions '{}'.", error.what());
+        }
 
-        fileStream.close();
         return fileData;
     }
 
